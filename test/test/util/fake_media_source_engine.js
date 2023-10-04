@@ -341,6 +341,12 @@ shaka.test.FakeMediaSourceEngine = class {
     return Promise.resolve();
   }
 
+
+  /** @override */
+  isResetMediaSourceNecessary() {
+    return false;
+  }
+
   /**
    * @param {string} type
    * @return {!Promise}

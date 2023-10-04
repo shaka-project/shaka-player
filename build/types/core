@@ -6,6 +6,7 @@
 +../../lib/abr/simple_abr_manager.js
 
 +../../lib/config/auto_show_text.js
++../../lib/config/codec_switching_strategy.js
 
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
