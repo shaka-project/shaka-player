@@ -41,7 +41,13 @@ describe('DashParser SegmentBase', () => {
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
+      getBandwidthEstimate: () => 1e6,
     };
+  });
+
+  afterEach(() => {
+    // Dash parser stop is synchronous.
+    parser.stop();
   });
 
   it('requests init data for WebM', async () => {

@@ -50,7 +50,13 @@ describe('DashParser SegmentTemplate', () => {
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
+      getBandwidthEstimate: () => 1e6,
     };
+  });
+
+  afterEach(() => {
+    // Dash parser stop is synchronous.
+    parser.stop();
   });
 
   shaka.test.Dash.makeTimelineTests(
@@ -671,6 +677,48 @@ describe('DashParser SegmentTemplate', () => {
         expect(pos).toBe(1);
       });
 
+      it('finds correct position in multiperiod content', async () => {
+        const source = [
+          '<MPD type="static" availabilityStartTime="1970-01-01T00:00:00Z">',
+          '  <Period duration="PT30S">',
+          '    <AdaptationSet mimeType="video/mp4">',
+          '      <Representation bandwidth="500">',
+          '        <BaseURL>http://example.com</BaseURL>',
+          '          <SegmentTemplate startNumber="0"',
+          '            media="$Number$-$Time$-$Bandwidth$.mp4">',
+          '            <SegmentTimeline>',
+          '              <S t="0" d="5" r="6" />',
+          '            </SegmentTimeline>',
+          '          </SegmentTemplate>',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '  </Period>',
+          '  <Period duration="PT30S">',
+          '    <AdaptationSet mimeType="video/mp4">',
+          '      <Representation bandwidth="500">',
+          '        <BaseURL>http://example.com</BaseURL>',
+          '          <SegmentTemplate startNumber="6"',
+          '            media="$Number$-$Time$-$Bandwidth$.mp4">',
+          '            <SegmentTimeline>',
+          '              <S t="0" d="5" r="6" />',
+          '            </SegmentTimeline>',
+          '          </SegmentTemplate>',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n');
+
+        fakeNetEngine.setResponseText('dummy://foo', source);
+        const manifest = await parser.start('dummy://foo', playerInterface);
+        const stream = manifest.variants[0].video;
+        await stream.createSegmentIndex();
+
+        // simulate a seek into the second period
+        const segmentIterator = stream.segmentIndex.getIteratorForTime(42);
+        const ref = segmentIterator.next().value;
+        expect(ref.startTime).toBe(40);
+      });
 
       it('returns null if time === last end time', async () => {
         const info = makeTemplateInfo(makeRanges(0, 2.0, 2));

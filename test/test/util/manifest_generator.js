@@ -459,9 +459,11 @@ shaka.test.ManifestGenerator.Stream = class {
    * @param {string=} label
    */
   constructor(manifest, isPartial, id, type, lang, label) {
-    goog.asserts.assert(
-        !manifest || !manifest.isIdUsed_(id),
-        'Streams should have unique ids!');
+    // variants can be made up of different combinations of video
+    // and audio streams
+    // goog.asserts.assert(
+    //     !manifest || !manifest.isIdUsed_(id),
+    //     'Streams should have unique ids!');
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
     /** @const {shaka.test.ManifestGenerator.Manifest} */

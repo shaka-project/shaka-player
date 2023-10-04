@@ -1,25 +1,27 @@
 /**
-* @fileoverview Externs for LcevcDil
+* @fileoverview Externs for LcevcDec
 * compiler.
 *
 * @externs
 */
 
-// This empty namespace is declared to check if LcevcDil libraries are loaded.
+// This empty namespace is declared to check if LcevcDec libraries are loaded.
+/** @const */
 var libDPIModule = {};
-var LcevcDil = {};
+/** @const */
+var LCEVCdec = {};
 
 /**
-* LCEVC DIL constructor
+* LCEVC Dec constructor
 * @constructor
 */
-LcevcDil.LcevcDIL = class {
+LCEVCdec.LCEVCdec = class {
   /**
    * @param {HTMLVideoElement} media
    * @param {HTMLCanvasElement} canvas
-   * @param {shaka.extern.LcevcConfiguration} dilConfig
+   * @param {shaka.extern.LcevcConfiguration} lcevcConfig
    */
-  constructor(media, canvas, dilConfig) {
+  constructor(media, canvas, lcevcConfig) {
   }
 
   /**
@@ -30,13 +32,14 @@ LcevcDil.LcevcDIL = class {
    * @param {!BufferSource} data Video Buffer Data.
    * @param {string} type Type of Video Buffer Data.
    * @param {number} variantId Variant that the fragment belongs to.
+   * @param {number} timestampOffset Timestamp offset for appended segments
    */
-  appendBuffer(data, type, variantId) {}
+  appendBuffer(data, type, variantId, timestampOffset) {}
 
   /**
    * Set current variant as variantId to the LCEVC decoder
    * @param {!number} variantId
-   * @param {!boolean} autoBufferSwitch is lcevcDil mode that switches variant
+   * @param {!boolean} autoBufferSwitch is lcevcDec mode that switches variant
    * when the downloaded buffer from last variant has finished playing and
    * buffers from the new variant starts to play.
    */
@@ -49,15 +52,28 @@ LcevcDil.LcevcDIL = class {
   setContainerFormat(containerFormat) {}
 
   /**
-   * Close LCEVC DIL
+   * Set streaming Format for LCEVC Data Parsing.
+   * @param {!number} streamingFormat container type of the stream.
+   */
+  setStreamingFormat(streamingFormat) {}
+
+  /**
+   * Close LCEVC DEC
    */
   close() {}
 };
 
 /**
+ * The older module interface, for backward compatibility.
+ * Typed to the same interface, but under a different name.
+ * @type {typeof LCEVCdec.LCEVCdec}
+ */
+LCEVCdec.LcevcDil;
+
+/**
  * LCEVC Support Check
  */
-LcevcDil.SupportObject = {
+LCEVCdec.SupportObject = {
 
   /**
    * Check if canvas has WebGL support
@@ -72,10 +88,18 @@ LcevcDil.SupportObject = {
  * LCEVC Support Checklist Result
  * @type {boolean}
  */
-LcevcDil.SupportObject.SupportStatus;
+LCEVCdec.SupportObject.SupportStatus;
 
 /**
  * LCEVC Support CheckList Error if any.
  * @type {string}
  */
-LcevcDil.SupportObject.SupportError;
+LCEVCdec.SupportObject.SupportError;
+
+/**
+ * Typedef for the module interface.  Both LCEVCdec (new module) and LcevcDil
+ * (old module) implement roughly the same interface.
+ *
+ * @typedef {typeof LCEVCdec}
+ */
+var LCEVCmodule;
