@@ -9,22 +9,32 @@ The goals of future milestones are fluid until we begin that development cycle,
 so the exact milestone for future features is not pre-determined.
 
 Candidate features for future release cycles:
- - Preload API
-   https://github.com/shaka-project/shaka-player/issues/880
  - Official TypeScript defs, generated from source
    https://github.com/shaka-project/shaka-player/issues/1030
  - Background fetch for offline storage
    https://github.com/shaka-project/shaka-player/issues/879
  - Smaller, more modular binary
 
-v4.5 - 2023 Q4 or 2024 Q1
+v4.6 - 2024 Q1
+ - Content Steering
+   https://github.com/shaka-project/shaka-player/issues/5704
+ - Preload API
+   https://github.com/shaka-project/shaka-player/issues/880
+ - New DASH protocol for Low Latency.
+ - ManagedMediaSource
+   https://github.com/shaka-project/shaka-player/issues/5271
+
+=====
+
+v4.5 - 2023 Q4
  - Built-in transmuxer support for muxed content streams (audio+video)
  - Built-in transmuxer support for H265 streams
  - Remove optional mux.js dependency
  - Codec switching
    https://github.com/shaka-project/shaka-player/issues/1528
-
-=====
+ - AES-128 in DASH.
+   https://github.com/shaka-project/shaka-player/issues/5622
+ - AWS Elemental MediaTailor
 
 v4.4 - 2023 Q3
  - Built-in transmuxer for common cases, no mux.js required:
