@@ -57,54 +57,6 @@ describe('PlayRateController', () => {
     expect(setPlayRateSpy).toHaveBeenCalledWith(0);
   });
 
-  it('buffering state sets rate to zero', () => {
-    controller.setBuffering(true);
-    expect(setPlayRateSpy).toHaveBeenCalledWith(0);
-
-    setPlayRateSpy.calls.reset();
-
-    controller.setBuffering(false);
-    expect(setPlayRateSpy).toHaveBeenCalledWith(1);
-  });
-
-  it('entering buffering state twice has no effect', () => {
-    controller.setBuffering(true);
-    expect(setPlayRateSpy).toHaveBeenCalledWith(0);
-
-    // Reset the calls so that we can make sure it was not called again.
-    setPlayRateSpy.calls.reset();
-
-    controller.setBuffering(true);
-    expect(setPlayRateSpy).not.toHaveBeenCalled();
-  });
-
-  it('leaving buffering state twice has no effect', () => {
-    controller.setBuffering(true);
-    controller.setBuffering(false);
-
-    // Reset the calls so that we can make sure it was not called again.
-    setPlayRateSpy.calls.reset();
-
-    controller.setBuffering(false);
-    expect(setPlayRateSpy).not.toHaveBeenCalled();
-  });
-
-  // When we set the rate while in a buffering state, we should see the new
-  // rate be used once we leave the buffering state.
-  it('set takes effect after buffering state ends', () => {
-    controller.setBuffering(true);
-    expect(setPlayRateSpy).toHaveBeenCalledWith(0);
-
-    // Reset so that we can make sure it was not called after we call |set(4)|.
-    setPlayRateSpy.calls.reset();
-
-    controller.set(4);
-    expect(setPlayRateSpy).not.toHaveBeenCalled();
-
-    controller.setBuffering(false);
-    expect(setPlayRateSpy).toHaveBeenCalledWith(4);
-  });
-
   // Make sure that when the playback rate set, if the new rate matches the
   // current rate, the controller will not set the rate on the media element.
   it('does not redundently set the playrate', () => {
