@@ -115,7 +115,6 @@ DASH features **not** supported:
  - Xlink with actuate=onRequest
  - Manifests without any segment info:
    https://github.com/shaka-project/shaka-player/issues/1088
- - Changing codecs during a presentation (unsupported by MSE)
  - Multiple trick mode tracks for the same resolution at varying framerates or
    bitrates
  - Timescales so large that timestamps cannot be represented as integers in

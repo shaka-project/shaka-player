@@ -165,10 +165,6 @@ describe('Player Src Equals', () => {
   it('can control trick play rate', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
 
-    // Let playback run for a little.
-    await video.play();
-    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
-
     let videoRateChange = false;
     let playerRateChange = false;
     eventManager.listen(video, 'ratechange', () => {
@@ -177,6 +173,10 @@ describe('Player Src Equals', () => {
     eventManager.listen(player, 'ratechange', () => {
       playerRateChange = true;
     });
+
+    // Let playback run for a little.
+    await video.play();
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     // Enabling trick play should change our playback rate to the same rate.
     player.trickPlay(2);
