@@ -52,10 +52,6 @@
 
 +../../lib/polyfill/all.js
 
-+../../lib/routing/node.js
-+../../lib/routing/payload.js
-+../../lib/routing/walker.js
-
 +../../lib/cea/dummy_cea_parser.js
 +../../lib/cea/dummy_caption_decoder.js
 
