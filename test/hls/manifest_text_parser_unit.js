@@ -307,7 +307,7 @@ describe('ManifestTextParser', () => {
               new shaka.hls.Tag(/* id= */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
             ],
             segments: [
-              new shaka.hls.Segment('https://test/manifest.m3u8', 'https://test/test.mp4',
+              new shaka.hls.Segment('https://test/test.mp4',
                   [
                     new shaka.hls.Tag(/* id= */ 2, 'EXTINF', [], '5.99467'),
                   ]),
@@ -332,7 +332,7 @@ describe('ManifestTextParser', () => {
               new shaka.hls.Tag(/* id= */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
             ],
             segments: [
-              new shaka.hls.Segment('https://test/manifest.m3u8', 'https://test/test.mp4', [
+              new shaka.hls.Segment('https://test/test.mp4', [
                 new shaka.hls.Tag(
                     /* id= */ 2,
                     'EXTINF',
@@ -360,7 +360,7 @@ describe('ManifestTextParser', () => {
               new shaka.hls.Tag(/* id= */ 2, 'EXT-X-TARGETDURATION', [], '6'),
             ],
             segments: [
-              new shaka.hls.Segment('https://test/manifest.m3u8', 'https://test/test.mp4',
+              new shaka.hls.Segment('https://test/test.mp4',
                   [
                     new shaka.hls.Tag(/* id= */ 1, 'EXT-X-KEY',
                         [
@@ -393,7 +393,7 @@ describe('ManifestTextParser', () => {
               new shaka.hls.Tag(/* id= */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
             ],
             segments: [
-              new shaka.hls.Segment('https://test/manifest.m3u8', 'test.mp4',
+              new shaka.hls.Segment('test.mp4',
                   [
                     new shaka.hls.Tag(/* id= */ 2, 'EXTINF', [], '5.99467'),
                   ]),
@@ -427,9 +427,9 @@ describe('ManifestTextParser', () => {
               new shaka.hls.Tag(/* id= */ 0, 'EXT-X-TARGETDURATION', [], '6'),
             ],
             segments: [
-              new shaka.hls.Segment('https://test/manifest.m3u8', 'uri',
+              new shaka.hls.Segment('uri',
                   [new shaka.hls.Tag(2, 'EXTINF', [], '5')]),
-              new shaka.hls.Segment('https://test/manifest.m3u8', 'uri2',
+              new shaka.hls.Segment('uri2',
                   [new shaka.hls.Tag(3, 'EXTINF', [], '4')]),
             ],
           },
@@ -449,9 +449,9 @@ describe('ManifestTextParser', () => {
               new shaka.hls.Tag(/* id= */ 4, 'EXT-X-ENDLIST', []),
             ],
             segments: [
-              new shaka.hls.Segment('https://test/manifest.m3u8', 'uri',
+              new shaka.hls.Segment('uri',
                   [new shaka.hls.Tag(2, 'EXTINF', [], '5')]),
-              new shaka.hls.Segment('https://test/manifest.m3u8', 'uri2',
+              new shaka.hls.Segment('uri2',
                   [new shaka.hls.Tag(3, 'EXTINF', [], '4')]),
             ],
           },
@@ -508,14 +508,12 @@ describe('ManifestTextParser', () => {
             ],
             segments: [
               new shaka.hls.Segment(
-                  /* absoluteMediaPlaylistUri= */ 'https://test/manifest.m3u8',
                   /* verbatimSegmentUri= */ 'uri',
                   /* tags= */ [
                     new shaka.hls.Tag(3, 'EXTINF', [], '5'),
                     mapTag,
                   ]),
               new shaka.hls.Segment(
-                  /* absoluteMediaPlaylistUri= */ 'https://test/manifest.m3u8',
                   /* verbatimSegmentUri= */ 'uri2',
                   /* tags= */ [
                     new shaka.hls.Tag(6, 'EXTINF', [], '2'),
@@ -523,7 +521,6 @@ describe('ManifestTextParser', () => {
                   ],
                   /* partialSegments= */ partialSegments1),
               new shaka.hls.Segment(
-                  /* absoluteMediaPlaylistUri= */ '',
                   /* verbatimSegmentUri= */ '',
                   /* tags= */ [mapTag],
                   /* partialSegments= */ partialSegments2),
@@ -577,14 +574,12 @@ describe('ManifestTextParser', () => {
             ],
             segments: [
               new shaka.hls.Segment(
-                  /* absoluteMediaPlaylistUri= */ 'https://test/manifest.m3u8',
                   /* verbatimSegmentUri= */ 'uri',
                   /* tags= */ [
                     new shaka.hls.Tag(3, 'EXTINF', [], '5'),
                     mapTag,
                   ]),
               new shaka.hls.Segment(
-                  /* absoluteMediaPlaylistUri= */ '',
                   /* verbatimSegmentUri= */ '',
                   /* tags= */ [preloadMapTag],
                   /* partialSegments= */ preloadSegment),
