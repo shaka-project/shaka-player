@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.5.1](https://github.com/shaka-project/shaka-player/compare/v4.5.0...v4.5.1) (2023-10-06)
+
+
+### Bug Fixes
+
+* For text content is not necessary codec switching ([#5731](https://github.com/shaka-project/shaka-player/issues/5731)) ([f243586](https://github.com/shaka-project/shaka-player/commit/f243586ed96b99fb746228d96aa1ef81e1bb06fd))
+* **HLS:** Fix init segment when EXT-X-MAP is preceded by EXT-X-BYTERANGE ([#5732](https://github.com/shaka-project/shaka-player/issues/5732)) ([90507af](https://github.com/shaka-project/shaka-player/commit/90507af6bb38c9b39ef846626c4437e10935201a))
+* **HLS:** Fix url management in HLS ([#5722](https://github.com/shaka-project/shaka-player/issues/5722)) ([d5dc63c](https://github.com/shaka-project/shaka-player/commit/d5dc63c12635635df958a1221ff4fd94796cf162))
+
 ## [4.5.0](https://github.com/shaka-project/shaka-player/compare/v4.4.0...v4.5.0) (2023-10-04)
 
 
