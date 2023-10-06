@@ -8,7 +8,7 @@
  *
  * Use new goog.Uri(string) to parse a URI string.
  *
- * e.g: <code>var myUri = new goog.Uri(window.location);</code>
+ * e.g.: <code>var myUri = new goog.Uri(window.location);</code>
  *
  * Implements RFC 3986 for parsing/formatting URIs.
  * http://www.ietf.org/rfc/rfc3986.txt

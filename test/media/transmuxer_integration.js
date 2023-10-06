@@ -102,8 +102,8 @@ describe('Transmuxer', () => {
     });
   });
 
-  it('getOrginalMimeType returns the correct mimeType', () => {
-    expect(transmuxer.getOrginalMimeType()).toBe(transmuxerMimeType);
+  it('getOriginalMimeType returns the correct mimeType', () => {
+    expect(transmuxer.getOriginalMimeType()).toBe(transmuxerMimeType);
   });
 
   describe('transmuxing', () => {

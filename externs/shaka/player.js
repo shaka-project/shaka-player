@@ -561,7 +561,7 @@ shaka.extern.TimelineRegionInfo;
  * @property {?number} channelsCount
  *   The number of audio channels, or null if unknown.
  * @property {?string} pixelAspectRatio
- *   The pixel aspect ratio value; e.g "1:1".
+ *   The pixel aspect ratio value; e.g. "1:1".
  * @property {?number} width
  *   The video width in pixels.
  * @exportDoc

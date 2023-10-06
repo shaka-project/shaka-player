@@ -520,7 +520,7 @@ shaka.test.FakeTransmuxer = class {
         jasmine.createSpy('transmux').and.returnValue(Promise.resolve(output));
 
     /** @type {!jasmine.Spy} */
-    this.getOrginalMimeType =
-        jasmine.createSpy('getOrginalMimeType').and.returnValue('mimeType');
+    this.getOriginalMimeType =
+        jasmine.createSpy('getOriginalMimeType').and.returnValue('mimeType');
   }
 };
