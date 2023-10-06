@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.4.4](https://github.com/shaka-project/shaka-player/compare/v4.4.3...v4.4.4) (2023-10-06)
+
+
+### Bug Fixes
+
+* **HLS:** Fix init segment when EXT-X-MAP is preceded by EXT-X-BYTERANGE ([#5732](https://github.com/shaka-project/shaka-player/issues/5732)) ([3255f62](https://github.com/shaka-project/shaka-player/commit/3255f62e5ec17e4d9779070094bb989741a6bdd6))
+* **HLS:** Fix url management in HLS ([#5722](https://github.com/shaka-project/shaka-player/issues/5722)) ([a55ebab](https://github.com/shaka-project/shaka-player/commit/a55ebab24846e2b603dad9438642e46cacc92a3c))
+
 ## [4.4.3](https://github.com/shaka-project/shaka-player/compare/v4.4.2...v4.4.3) (2023-10-04)
 
 
