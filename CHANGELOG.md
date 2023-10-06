@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.14](https://github.com/shaka-project/shaka-player/compare/v4.3.13...v4.3.14) (2023-10-06)
+
+
+### Bug Fixes
+
+* **HLS:** Fix init segment when EXT-X-MAP is preceded by EXT-X-BYTERANGE ([#5732](https://github.com/shaka-project/shaka-player/issues/5732)) ([931b2f8](https://github.com/shaka-project/shaka-player/commit/931b2f80c4578ea8d2bd32232d8c602f800e81ea))
+
 ## [4.3.13](https://github.com/shaka-project/shaka-player/compare/v4.3.12...v4.3.13) (2023-10-04)
 
 
