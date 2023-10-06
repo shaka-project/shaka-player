@@ -44,7 +44,7 @@ assignees: ''
 
 **What are the manifest and license server URIs?**
 <!-- NOTE:
-  You can send the URIs to <shaka-player-issues@google.com> instead,
+  You can send the URIs to <shaka-player-maintainers@googlegroups.com> instead,
   but please use GitHub and the template for the rest.
   A copy of the manifest text or an attached manifest will **not** be
   enough to reproduce your issue, and we **will** ask you to send a
