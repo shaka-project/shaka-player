@@ -93,7 +93,7 @@ shaka.extern.UIVolumeBarColors;
  *   keyboardSeekDistance: number,
  *   keyboardLargeSeekDistance: number,
  *   fullScreenElement: HTMLElement,
- *   preferDocumentPictureInPicture: boolean
+ *   preferDocumentPictureInPicture: boolean,
  *   displayChapterMarkers: boolean
  * }}
  *
