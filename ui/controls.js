@@ -648,7 +648,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isPiPAllowed() {
-    if ('documentPictureInPicture' in window) {
+    if ('documentPictureInPicture' in window &&
+        this.config_.preferDocumentPictureInPicture) {
       return true;
     }
     if (document.pictureInPictureEnabled) {
@@ -663,7 +664,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isPiPEnabled() {
-    if ('documentPictureInPicture' in window) {
+    if ('documentPictureInPicture' in window &&
+        this.config_.preferDocumentPictureInPicture) {
       return !!window.documentPictureInPicture.window;
     } else {
       return !!document.pictureInPictureElement;
@@ -673,7 +675,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   async togglePiP() {
     try {
-      if ('documentPictureInPicture' in window) {
+      if ('documentPictureInPicture' in window &&
+        this.config_.preferDocumentPictureInPicture) {
         await this.toggleDocumentPictureInPicture_();
       } else if (!document.pictureInPictureElement) {
         // If you were fullscreen, leave fullscreen first.

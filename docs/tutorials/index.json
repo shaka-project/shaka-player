@@ -24,5 +24,6 @@
   { "selenium-grid-config": { "title": "Selenium Grid Config" } },
   { "faq": { "title": "Frequently Asked Questions" } },
   { "upgrade": { "title": "Upgrade Guide" } },
-  { "upgrade-manifest": { "title": "ManifestParser Upgrade Guide" } }
+  { "upgrade-manifest": { "title": "ManifestParser Upgrade Guide" } },
+  { "lcevc": { "title": "LCEVC Quick Start" } }
 ]

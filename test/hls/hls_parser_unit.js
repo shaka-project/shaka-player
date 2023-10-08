@@ -91,6 +91,7 @@ describe('HlsParser', () => {
       updateDuration: () => {},
       newDrmInfo: shaka.test.Util.spyFunc(newDrmInfoSpy),
       onManifestUpdated: () => {},
+      getBandwidthEstimate: () => 1e6,
     };
 
     parser = new shaka.hls.HlsParser();
@@ -2975,7 +2976,8 @@ describe('HlsParser', () => {
     const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
-      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-BYTERANGE:616@0\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
       '#EXTINF:5,\n',
       'main.mp4\n',
       '#EXT-X-MAP:URI="init2.mp4",BYTERANGE="616@0"\n',
@@ -3003,8 +3005,15 @@ describe('HlsParser', () => {
     // uri.
     const initSegments = Array.from(actualVideo.segmentIndex).map(
         (seg) => seg.initSegmentReference);
-    expect(initSegments[0].getUris()[0]).toBe('test:/init.mp4');
-    expect(initSegments[1].getUris()[0]).toBe('test:/init2.mp4');
+    expect(initSegments.length).toBe(2);
+    const firstInitSegment = initSegments[0];
+    expect(firstInitSegment.getUris()[0]).toBe('test:/init.mp4');
+    expect(firstInitSegment.startByte).toBe(0);
+    expect(firstInitSegment.endByte).toBe(615);
+    const secondInitSegment = initSegments[1];
+    expect(secondInitSegment.getUris()[0]).toBe('test:/init2.mp4');
+    expect(secondInitSegment.startByte).toBe(0);
+    expect(secondInitSegment.endByte).toBe(615);
   });
 
   it('parses variants encrypted with AES-128', async () => {
@@ -3126,8 +3135,10 @@ describe('HlsParser', () => {
 
     const firstMp4Segment = mp4AesEncryptionVideo.segmentIndex.get(0);
     expect(firstMp4Segment.aes128Key).toBeDefined();
+    expect(firstMp4Segment.initSegmentReference.aes128Key).toBeDefined();
     const secondMp4Segment = mp4AesEncryptionVideo.segmentIndex.get(1);
     expect(secondMp4Segment.aes128Key).toBeNull();
+    expect(secondMp4Segment.initSegmentReference.aes128Key).toBeDefined();
 
     const tsAesEncryptionVideo = actual.variants[2].video;
     await tsAesEncryptionVideo.createSegmentIndex();

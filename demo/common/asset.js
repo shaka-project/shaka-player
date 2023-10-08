@@ -12,8 +12,6 @@
 
 goog.provide('ShakaDemoAssetInfo');
 
-goog.require('shakaDemo.MessageIds');
-
 
 /**
  * An object that contains information about an asset.
@@ -80,6 +78,10 @@ const ShakaDemoAssetInfo = class {
     /** @type {?string} */
     this.imaManifestType = null;
     /** @type {?string} */
+    this.mediaTailorUrl = null;
+    /** @type {?Object} */
+    this.mediaTailorAdsParams = null;
+    /** @type {?string} */
     this.mimeType = null;
     /** @type {?string} */
     this.mediaPlaylistFullMimeType = null;
@@ -115,9 +117,9 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * A sort comparator for comparing two message Ids, ignoring case.
-   * @param {shakaDemo.MessageIds} a
-   * @param {shakaDemo.MessageIds} b
+   * A sort comparator for comparing two messages, ignoring case.
+   * @param {string} a
+   * @param {string} b
    * @return {number}
    * @private
    */
@@ -282,6 +284,21 @@ const ShakaDemoAssetInfo = class {
    */
   setIMAManifestType(type) {
     this.imaManifestType = type;
+    if (!this.features.includes(shakaAssets.Feature.ADS)) {
+      this.addFeature(shakaAssets.Feature.ADS);
+    }
+
+    return this;
+  }
+
+  /**
+   * @param {string} url
+   * @param {?Object=} adsParams
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setMediaTailor(url, adsParams=null) {
+    this.mediaTailorUrl = url;
+    this.mediaTailorAdsParams = adsParams;
     if (!this.features.includes(shakaAssets.Feature.ADS)) {
       this.addFeature(shakaAssets.Feature.ADS);
     }

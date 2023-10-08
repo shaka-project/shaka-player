@@ -11,7 +11,6 @@
  */
 
 goog.require('ShakaDemoAssetInfo');
-goog.require('shakaDemo.MessageIds');
 
 goog.provide('shakaAssets');
 
@@ -24,34 +23,35 @@ goog.provide('shakaAssets');
 const shakaAssets = {};
 
 
-/** @enum {shakaDemo.MessageIds} */
+/** @enum {string} */
 shakaAssets.Source = {
-  CUSTOM: shakaDemo.MessageIds.CUSTOM,
-  SHAKA: shakaDemo.MessageIds.SHAKA,
-  AXINOM: shakaDemo.MessageIds.AXINOM,
-  UNIFIED_STREAMING: shakaDemo.MessageIds.UNIFIED_STREAMING,
-  DASH_IF: shakaDemo.MessageIds.DASH_IF,
-  BITCODIN: shakaDemo.MessageIds.BITCODIN,
-  METACDN: shakaDemo.MessageIds.METACDN,
-  NIMBLE_STREAMER: shakaDemo.MessageIds.NIMBLE_STREAMER,
-  AZURE_MEDIA_SERVICES: shakaDemo.MessageIds.AZURE_MEDIA_SERVICES,
-  GPAC: shakaDemo.MessageIds.GPAC,
-  UPLYNK: shakaDemo.MessageIds.UPLYNK,
-  APPLE: shakaDemo.MessageIds.APPLE,
-  IRT: shakaDemo.MessageIds.IRT,
-  MICROSOFT: shakaDemo.MessageIds.MICROSOFT,
-  VNOVA: shakaDemo.MessageIds.VNOVA,
+  CUSTOM: 'Custom',
+  SHAKA: 'Shaka',
+  AXINOM: 'Axinom',
+  UNIFIED_STREAMING: 'Unified Streaming',
+  DASH_IF: 'DASH-IF',
+  BITCODIN: 'Bitcodin',
+  METACDN: 'MetaCDN',
+  NIMBLE_STREAMER: 'Nimble Streamer',
+  AZURE_MEDIA_SERVICES: 'Azure Media Services',
+  GPAC: 'GPAC',
+  UPLYNK: 'Verizon Digital Media Services',
+  APPLE: 'Apple',
+  IRT: 'IRT',
+  MICROSOFT: 'Microsoft',
+  VNOVA: 'V-Nova',
+  AWS: 'AWS',
 };
 
 
-/** @enum {shakaDemo.MessageIds} */
+/** @enum {string} */
 shakaAssets.KeySystem = {
-  CLEAR_KEY: shakaDemo.MessageIds.CLEAR_KEY,
-  FAIRPLAY: shakaDemo.MessageIds.FAIRPLAY,
-  PLAYREADY: shakaDemo.MessageIds.PLAYREADY,
-  WIDEVINE: shakaDemo.MessageIds.WIDEVINE,
-  AES128: shakaDemo.MessageIds.AES128,
-  CLEAR: shakaDemo.MessageIds.CLEAR,
+  CLEAR_KEY: 'Clear Key DRM',
+  FAIRPLAY: 'Fairplay DRM',
+  PLAYREADY: 'PlayReady DRM',
+  WIDEVINE: 'Widevine DRM',
+  AES128: 'AES-128 protection',
+  CLEAR: 'No DRM protection',
 };
 
 
@@ -95,65 +95,65 @@ shakaAssets.identifierForKeySystem = (keySystem) => {
 };
 
 
-/** @enum {shakaDemo.MessageIds} */
+/** @enum {string} */
 shakaAssets.Feature = {
   // Set if the asset has a special trick mode track, for rewinding effects.
-  TRICK_MODE: shakaDemo.MessageIds.TRICK_MODE,
-  XLINK: shakaDemo.MessageIds.XLINK,
+  TRICK_MODE: 'Special trick mode track',
+  XLINK: 'XLink',
 
   // Set if the asset has any subtitle tracks.
-  SUBTITLES: shakaDemo.MessageIds.SUBTITLES,
+  SUBTITLES: 'Subtitles',
   // Set if the asset has any closed caption tracks.
-  CAPTIONS: shakaDemo.MessageIds.CAPTIONS,
+  CAPTIONS: 'Captions',
   // Set if the asset has multiple audio languages.
-  MULTIPLE_LANGUAGES: shakaDemo.MessageIds.MULTIPLE_LANGUAGES,
+  MULTIPLE_LANGUAGES: 'Multiple languages',
   // Set if the asset is audio-only.
-  AUDIO_ONLY: shakaDemo.MessageIds.AUDIO_ONLY,
+  AUDIO_ONLY: 'Audio only',
   // Set if the asset can be stored offline.
-  OFFLINE: shakaDemo.MessageIds.OFFLINE,
+  OFFLINE: 'Downloadable',
   // A synthetic property used in the "all content" tab. Should not be given to
   // assets.
-  STORED: shakaDemo.MessageIds.STORED,
+  STORED: 'Downloaded',
   // Set if the asset has ads. Autoset by calling setAdTagUri() on an asset.
   // Does not need to be set manually.
-  ADS: shakaDemo.MessageIds.ADS,
+  ADS: 'Ads',
 
   // Set if the asset is a livestream.
-  LIVE: shakaDemo.MessageIds.LIVE,
+  LIVE: 'Live',
   // A synthetic property used if the asset is VOD (not-livestream).
-  VOD: shakaDemo.MessageIds.VOD,
+  VOD: 'VOD',
   // Set if the asset has at least one WebM stream.
-  WEBM: shakaDemo.MessageIds.WEBM,
+  WEBM: 'WebM',
   // Set if the asset has at least one mp4 stream.
-  MP4: shakaDemo.MessageIds.MP4,
+  MP4: 'MP4',
   // Set if the asset has at least one MPEG-2 TS stream.
-  MP2TS: shakaDemo.MessageIds.MP2TS,
+  MP2TS: 'MPEG-2 TS',
   // Set if the asset has at least one containerless stream (AAC, etc).
-  CONTAINERLESS: shakaDemo.MessageIds.CONTAINERLESS,
+  CONTAINERLESS: 'Containerless',
 
   // Set if the asset has at least one stream that is at least 720p.
-  HIGH_DEFINITION: shakaDemo.MessageIds.HIGH_DEFINITION,
+  HIGH_DEFINITION: 'High definition',
   // Set if the asset has at least one stream that is at least 4k.
-  ULTRA_HIGH_DEFINITION: shakaDemo.MessageIds.ULTRA_HIGH_DEFINITION,
+  ULTRA_HIGH_DEFINITION: 'Ultra-high definition',
 
   // Set if the asset has at least one stream that is surround sound.
-  SURROUND: shakaDemo.MessageIds.SURROUND,
+  SURROUND: 'Surround sound',
 
   // Set if the asset is a MPEG-DASH manifest.
-  DASH: shakaDemo.MessageIds.DASH,
+  DASH: 'DASH',
   // Set if the asset is an HLS manifest.
-  HLS: shakaDemo.MessageIds.HLS,
+  HLS: 'HLS',
   // Set if the asset is an MSS manifest.
-  MSS: shakaDemo.MessageIds.MSS,
+  MSS: 'MSS',
 
   // Set if the asset has at least one image stream.
-  THUMBNAILS: shakaDemo.MessageIds.THUMBNAILS,
+  THUMBNAILS: 'Thumbnails',
 
   // Set if the asset has LCEVC.
-  LCEVC: shakaDemo.MessageIds.LCEVC,
+  LCEVC: 'LCEVC',
 
   // Set if the asset has Low Latency mode.
-  LOW_LATENCY_STREAM: shakaDemo.MessageIds.LOW_LATENCY_STREAM,
+  LOW_LATENCY: 'Low Latency',
 };
 
 
@@ -837,7 +837,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .setExtraConfig({
         streaming: {
           lowLatencyMode: true,
@@ -868,7 +868,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .setExtraConfig({
         streaming: {
           lowLatencyMode: true,
@@ -1269,12 +1269,12 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'Low Latency HLS Live',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
-      /* manifestUri= */ 'https://ll-hls-test.apple.com/cmaf/master.m3u8',
+      /* manifestUri= */ 'https://ll-hls-test.cdn-apple.com/llhls4/ll-hls-test-04/multi.m3u8',
       /* source= */ shakaAssets.Source.APPLE)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .setExtraConfig({
         streaming: {
           lowLatencyMode: true,
@@ -1364,6 +1364,31 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.VNOVA)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addFeature(shakaAssets.Feature.LCEVC)
+      .addDescription('LCEVC Enhanced eSports content selection.')
+      .setExtraConfig({
+        streaming: {
+          useNativeHlsOnSafari: false,
+        },
+        mediaSource: {
+          forceTransmux: true,
+        },
+        lcevc: {
+          enabled: true,
+          dynamicPerformanceScaling: true,
+          logLevel: 0,
+          drawLogo: false,
+        },
+      }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Tears of Steel LCEVC H264 (HLS, MP4)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+      /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vn2LvEps745ShGtQ/master.m3u8',
+      /* source= */ shakaAssets.Source.VNOVA)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
@@ -1441,6 +1466,64 @@ shakaAssets.testAssets = [
           drawLogo: false,
         },
       }),
+  // }}}
+
+  // AWS assets {{{
+  /* MediaTailor Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor HLS',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sing.png',
+      /* manifestUri= */ 'https://ad391cc0d55b44c6a86d232548adc225.mediatailor.us-east-1.amazonaws.com/v1/session/d02fedbbc5a68596164208dd24e9b48aa60dadc7/singssai/master.m3u8',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .setMediaTailor('https://ad391cc0d55b44c6a86d232548adc225.mediatailor.us-east-1.amazonaws.com/v1/session/d02fedbbc5a68596164208dd24e9b48aa60dadc7/singssai/master.m3u8'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor Live HLS',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-DASH/channel/sfp-channel1/hls.m3u8',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .setMediaTailor('https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-DASH/channel/sfp-channel1/hls.m3u8'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor DASH',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-VOD-HLS-DASH/out/v1/b94f3611978f419985a18335bac9d9cb/ddb73bf548a44551a0059c346226445a/eaa5485198bf497284559efb8172425e/index.mpd',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .setMediaTailor('https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-VOD-HLS-DASH/out/v1/b94f3611978f419985a18335bac9d9cb/ddb73bf548a44551a0059c346226445a/eaa5485198bf497284559efb8172425e/index.mpd',
+          {
+            adsParams: {
+              assetid: 'test2',
+              podduration: '15',
+            },
+          }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor Live DASH',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-DASH/channel/sfp-channel1/dash.mpd',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .setMediaTailor('https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-DASH/channel/sfp-channel1/dash.mpd'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor Live HLS with overlays',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/re_mars.png',
+      /* manifestUri= */ 'https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-Overlays/channel/sfp-channel2/hls.m3u8',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .setMediaTailor('https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-Overlays/channel/sfp-channel2/hls.m3u8'),
   // }}}
 ];
 /* eslint-enable max-len */

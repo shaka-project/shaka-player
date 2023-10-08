@@ -95,17 +95,6 @@ you see JSON, you will need to [unwrap the response][wrapping].
 
 <hr>
 
-**Q:** Why doesn't getStats() work in Safari?
-
-**A:** To play HLS content on Safari, we default to using Apple's native src=
-playback.  Since the browser handles playback, we don't get much information.
-
-If you want to disable native playback and use MediaSource playback instead,
-configure {@link shaka.extern.StreamingConfiguration|
-`.streaming.useNativeHlsOnSafari`} to false.
-
-<hr>
-
 **Q:** Why does it take so long to switch to HD?
 
 **A:** When Shaka Player's `AbrManager` makes a decision to adapt, we don't
@@ -144,26 +133,18 @@ shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpXHRPlugin.parse)
 
 <hr>
 
-**Q:** Why are my CEA-708 captions not showing on Edge or Chromecast?
-
-**A:** Our support for CEA-708 captions requires transmuxing the TS files that
-contain said captions.  Edge and Chromecast, however, have native TS support and
-thus are not required to transmux.
-In order to force those platforms to transmux, set the
-{@link shaka.extern.StreamingConfiguration|`.streaming.forceTransmux`}
-configuration to true.
-
-<hr>
-
 **Q:** Why do I get 404 errors with very large timescales?
 
-**A:** We can't handle content that creates timestamps too large to be
-represented as Numbers in JavaScript (2^53).  Very large timescales require very
-large timestamps (in timescale units), which means we are unable to substitute
-the correct values for `$Time$` in a `<SegmentTemplate>`.  [BigInteger.js][] is
-too large to become a required dependency for Shaka Player.
+**A:** Some content creates timestamps too large to be represented as Numbers
+in JavaScript (2^53).  Very large timescales require very large timestamps (in
+timescale units), which means we are unable to substitute the correct values
+for `$Time$` in a `<SegmentTemplate>`.
 
-We recommend reducing your timescale or avoiding `$Time` in `<SegmentTemplate>`.
+We can work around this for platforms that support [`BigInt`][], or in cases
+where we can live with a rounding error (not `$Time$` in `<SegmentTemplate>`).
+
+If you must use `$Time` in `<SegmentTemplate>` and you must play on devices
+that do not support [`BigInt`][], we recommend reducing your timescale.
 See discussion in [#1667][1667] for details.
 
 <hr>
@@ -188,20 +169,23 @@ you can use the same top-level APIs; but we are dependent on the browser
 handling the streaming.  So we won't support DASH on iOS since the browser
 doesn't support it.
 
-We have another project called [Shaka Player Embedded][] that offers the same
-features and similar APIs for native apps on iOS.  This project uses its own
-media stack, which allows it to play content that would otherwise not be
-supported.  This supports both DASH and HLS manifests.
+In a future version, we plan to support `ManagedMediaSource` on iOS to achieve
+control over both DASH and HLS playback on iOS.  See [#5271][] and the
+[`ManagedMediaSource` W3C spec proposal][]
 
 <hr>
 
 **Q:** The Nightly Demo isn't loading for me!
 
 **A:** Are you looking at the uncompiled build with an AdBlocker enabled?
-We're rolling out ad support which is triggering some ad blockers to block
-requests for some of our source files. This only affects the uncompiled build.
+
+Some ad blockers decide to block requests for some of our source files simply
+because they have `ad` in the file name. This only affects the uncompiled
+build.
+
 Switch to the compiled build (add "build=compiled" to the url) or temporarily
-disable your ad blocker to see the nightly uncompiled mode.
+disable your ad blocker to see the nightly in uncompiled mode.
+
 Please note that if you want to test our ad logic, you might have to disable
 the ad blocker in compiled mode as well.
 
@@ -229,11 +213,11 @@ an HLS manifest, we do our best to guess what the codecs might be, but those
 guesses might not always be accurate.  If an HLS manifest has no codec
 information provided, we default to guessing that the video codec is
 `avc1.42E01E` and the audio codec is `mp4a.40.2`, which can cause problems if
-the stream is actually video-only or audio-only.  In this case, you can enable
-the {@link shaka.extern.ManifestConfiguration|`.manifest.disableVideo`} or 
-{@link shaka.extern.ManifestConfiguration|`.manifest.disableAudio`} 
-configurations to signal that your content does not have a video or audio 
-stream.
+the stream is actually video-only or audio-only.
+
+To change our default assumptions about codecs in HLS, please see
+{@link shaka.extern.HlsManifestConfiguration|`.manifest.hls`} in the player
+config.
 
 <hr>
 
@@ -255,8 +239,10 @@ proxy them.
 [887]: https://github.com/shaka-project/shaka-player/issues/887
 [999]: https://github.com/shaka-project/shaka-player/issues/999
 [1667]: https://github.com/shaka-project/shaka-player/issues/1667
-[BigInteger.js]: https://github.com/peterolson/BigInteger.js
+[#5271]: https://github.com/shaka-project/shaka-player/issues/5271
+[BigInt]: https://caniuse.com/bigint
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
+[`ManagedMediaSource` W3C spec proposal]: https://github.com/w3c/media-source/issues/320
 [Shaka Player Embedded]: https://github.com/shaka-project/shaka-player-embedded
 [auth]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-server-auth.html
 [buffering]: https://shaka-player-demo.appspot.com/docs/api/tutorial-network-and-buffering-config.html

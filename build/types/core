@@ -6,6 +6,7 @@
 +../../lib/abr/simple_abr_manager.js
 
 +../../lib/config/auto_show_text.js
++../../lib/config/codec_switching_strategy.js
 
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
@@ -105,6 +106,7 @@
 +../../lib/util/player_configuration.js
 +../../lib/util/pssh.js
 +../../lib/util/public_promise.js
++../../lib/util/segment_utils.js
 +../../lib/util/state_history.js
 +../../lib/util/stats.js
 +../../lib/util/stream_utils.js

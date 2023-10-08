@@ -9,7 +9,6 @@ goog.provide('shakaDemo.Front');
 
 
 goog.require('shakaDemo.AssetCard');
-goog.require('shakaDemo.MessageIds');
 goog.requireType('ShakaDemoAssetInfo');
 
 /** @type {?shakaDemo.Front} */
@@ -50,9 +49,6 @@ shakaDemo.Front = class {
     document.addEventListener('shaka-main-offline-progress', () => {
       this.updateOfflineProgress_();
     });
-    document.addEventListener('shaka-main-locale-changed', () => {
-      this.remakeAssetCards_();
-    });
     document.addEventListener('shaka-main-page-changed', () => {
       if (!this.assetCardDiv_.childNodes.length &&
           !container.classList.contains('hidden')) {
@@ -74,19 +70,20 @@ shakaDemo.Front = class {
     const makeMessage = (textClass, text) => {
       const textElement = document.createElement('h2');
       textElement.classList.add('mdl-typography--' + textClass);
-      textElement.textContent = shakaDemoMain.getLocalizedString(text);
+      textElement.textContent = text;
       this.messageDiv_.appendChild(textElement);
     };
-    makeMessage('body-2', shakaDemo.MessageIds.FRONT_INTRO_ONE);
-    makeMessage('body-1', shakaDemo.MessageIds.FRONT_INTRO_TWO);
+    makeMessage('body-2', 'This is a demo of Google\'s Shaka Player, a ' +
+        'JavaScript library for adaptive video streaming.');
+    makeMessage('body-1', 'Choose a video to playback; more assets are ' +
+        'available via the "all content" tab.');
 
     const hideButton = document.createElement('button');
     hideButton.classList.add('mdl-button');
     hideButton.classList.add('mdl-button--colored');
     hideButton.classList.add('mdl-js-button');
     hideButton.classList.add('mdl-js-ripple-effect');
-    hideButton.textContent = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.FRONT_INTRO_DISMISS);
+    hideButton.textContent = 'Dismiss';
     hideButton.addEventListener('click', () => {
       shaka.util.Dom.removeAllChildren(this.messageDiv_);
       window.localStorage.setItem(hideName, 'true');
@@ -122,7 +119,7 @@ shakaDemo.Front = class {
       if (unsupportedReason) {
         c.markAsUnsupported(unsupportedReason);
       } else {
-        c.addButton(shakaDemo.MessageIds.PLAY, () => {
+        c.addButton('Play', () => {
           shakaDemoMain.loadAsset(asset);
           this.updateSelected_();
         });

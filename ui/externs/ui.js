@@ -93,6 +93,7 @@ shaka.extern.UIVolumeBarColors;
  *   keyboardSeekDistance: number,
  *   keyboardLargeSeekDistance: number,
  *   fullScreenElement: HTMLElement,
+ *   preferDocumentPictureInPicture: boolean
  *   displayChapterMarkers: boolean
  * }}
  *
@@ -199,6 +200,12 @@ shaka.extern.UIVolumeBarColors;
  * @property {HTMLElement} fullScreenElement
  *   DOM element on which fullscreen will be done.
  *   Defaults to Shaka Player Container.
+ * @property {boolean} preferDocumentPictureInPicture
+ *   Indicates whether the Document Picture in Picture API is preferred or the
+ *   Video Element Picture in Picture API is preferred.
+ *   Changing this property in mid-playback may produce undesired behavior if
+ *   you are already in PiP.
+ *   Defaults to true.
  * @property {boolean} displayChapterMarkers
  *   Whether or not chapter markers are shown on the seek bar.
  *   Defaults to false;

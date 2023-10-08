@@ -72,6 +72,6 @@ describe('TsParser', () => {
     const codecs = new shaka.util.TsParser().parse(tsSegment)
         .getCodecs();
     expect(codecs.audio).toBe('aac');
-    expect(codecs.video).toBe('');
+    expect(codecs.video).toBe(null);
   });
 });
