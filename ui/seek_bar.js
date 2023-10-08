@@ -78,7 +78,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.markAdBreaks_();
     });
 
-    if (this.config_.displayChapterMarkers) {
+    if (this.config_.displayChapters) {
       const chaptersContainer = this.buildChapters_();
       this.container.insertBefore(
           chaptersContainer, this.container.childNodes[0]);
@@ -473,6 +473,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       /** @type {!HTMLElement} */
       const chapterLabel = shaka.util.Dom.createHTMLElement('p');
       chapterLabel.classList.add('chapter-label');
+      chapterLabel.style.color = 
+        this.config_.seekBarColors.chapterLabels;
       chapterLabel.innerText = c.title;
       chapterEl.appendChild(chapterLabel);
 

@@ -41,6 +41,9 @@ shaka.extern = {};
  *   The CSS border color applied to sections of the seek bar showing
  *   when the chapters start and end on the timeline.
  *   Defaults to dark grey rgb(27, 27, 27).
+ * @property {string} chapterLabels
+ *   The CSS text color applied to the chapter labels that appear above the
+ *   seek bar on hover. Defaults to white rgb(255, 255, 255).
  * @exportDoc
  */
 shaka.extern.UISeekBarColors;
@@ -94,7 +97,7 @@ shaka.extern.UIVolumeBarColors;
  *   keyboardLargeSeekDistance: number,
  *   fullScreenElement: HTMLElement,
  *   preferDocumentPictureInPicture: boolean,
- *   displayChapterMarkers: boolean
+ *   displayChapters: boolean
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -206,8 +209,9 @@ shaka.extern.UIVolumeBarColors;
  *   Changing this property in mid-playback may produce undesired behavior if
  *   you are already in PiP.
  *   Defaults to true.
- * @property {boolean} displayChapterMarkers
- *   Whether or not chapter markers are shown on the seek bar.
+ * @property {boolean} displayChapters
+ *   Indicates whether or not to show chapter markers on the seek bar and 
+ *   chapter labels that appear on hover.
  *   Defaults to false;
  * @exportDoc
  */
