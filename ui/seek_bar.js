@@ -79,7 +79,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     });
 
     if (this.config_.displayChapterMarkers) {
-      this.addChapterMarks(this.container);
+      const chaptersContainer = this.buildChapters_();
+      this.container.insertBefore(
+          chaptersContainer, this.container.childNodes[0]);
     }
 
     /**
@@ -411,87 +413,101 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   }
 
   /**
-   * @param {?HTMLElement} container
+   * @return {!HTMLElement}
+   * @private
    */
-  addChapterMarks(container) {
-    /** @type {Array.<shaka.extern.Chapter>}*/
+  buildChapters_() {
+    /** @type {!HTMLElement} */
+    const chaptersContainer = shaka.util.Dom.createHTMLElement('div');
+    chaptersContainer.classList.add('shaka-chapters');
+
+    /** @type {Array<shaka.extern.Chapter>} */
     const chapters = this.player.getChapters('und');
 
     if (chapters.length < 2) {
-      return;
+      return chaptersContainer;
     }
-
-    /** @type {?HTMLElement} */
-    const chaptersContainer = shaka.util.Dom.createHTMLElement('div');
-    chaptersContainer.classList.add('shaka-chapters');
-    container.appendChild(chaptersContainer);
 
     /** @type {{start: number, end: number}} */
     const seekRange = this.player.seekRange();
-    const seekRangeSize = seekRange.end - seekRange.start;
 
-    /** @type {Array<{chapterEl: HTMLElement, labelEl: HTMLElement}>} */
-    const chapterElements = [];
+    const hiddenTitleAttr = 'hidden-title';
+    let totalSize = 0;
+
+    /** @type {!Array<shaka.ui.CleanedChapter>} */
+    const cleaned = [];
 
     for (const c of chapters) {
-      /** @type {shaka.extern.Chapter}*/
-      const chapter = c;
-      if (chapter.startTime < seekRange.start ||
-        chapter.startTime >= seekRange.end) {
+      if (c.startTime >= seekRange.end) {
         continue;
       }
 
-      const end = chapter.endTime < seekRange.end ?
-        chapter.endTime :
-        seekRange.end;
-      const chapterSizePrct = (end - chapter.startTime) * 100 / seekRangeSize;
+      const start = c.startTime > seekRange.start ?
+        c.startTime : seekRange.start;
+      const end = c.endTime < seekRange.end ?
+        c.endTime : seekRange.end;
+      const size = (end-start);
+      totalSize += size;
+      cleaned.push({start, end, size, title: c.title, id: c.id});
+    }
 
+
+    /** @type {!Array<{start: number, end: number, el: HTMLElement}>} */
+    const chapterElMap = [];
+
+    for (const c of cleaned) {
       /** @type {!HTMLElement} */
       const chapterEl = shaka.util.Dom.createHTMLElement('div');
       chapterEl.classList.add('shaka-chapter');
-      chapterEl.style.width = `${chapterSizePrct}%`;
+      chapterEl.setAttribute(hiddenTitleAttr, '');
+      chapterEl.style.width = `${c.size * 100 / totalSize}%`;
 
       chaptersContainer.appendChild(chapterEl);
 
       /** @type {!HTMLElement} */
       const chapterIndicator = shaka.util.Dom.createHTMLElement('div');
-      const borderColor = this.config_.seekBarColors.chapterMarks;
-      chapterIndicator.style.borderColor = borderColor;
+      chapterIndicator.style.borderColor =
+          this.config_.seekBarColors.chapterMarks;
       chapterEl.appendChild(chapterIndicator);
 
       /** @type {!HTMLElement} */
       const chapterLabel = shaka.util.Dom.createHTMLElement('p');
       chapterLabel.classList.add('chapter-label');
-      chapterLabel.innerText = chapter.title;
+      chapterLabel.innerText = c.title;
       chapterEl.appendChild(chapterLabel);
 
-      chapterElements.push({chapterEl: chapterEl, labelEl: chapterLabel});
+      chapterElMap.push({start: c.start, end: c.end, el: chapterEl});
     }
 
-    /**
-     * @param {!MouseEvent} e
-     * @return {?{chapterEl: HTMLElement, labelEl: HTMLElement}}
-     */
-    function getChapterFromEvent(e) {
-      const elements = Array.from(document.elementsFromPoint(e.pageX, e.pageY));
-      const match = chapterElements.find((ch) =>
-        elements.some((el) => el === ch.chapterEl));
-      return match ? match : null;
-    }
-
-    container.onmouseover = (e) => {
-      const ch = getChapterFromEvent(e);
-      if (ch) {
-        ch.labelEl.style.display = 'block';
+    this.bar.addEventListener('pointermove', (e) => {
+      if (!e.target) {
+        return;
       }
-    };
 
-    container.onmouseout = (e) => {
-      const ch = getChapterFromEvent(e);
-      if (ch) {
-        ch.labelEl.style.display = 'none';
+      const target = /** @type {HTMLElement} */(e.target);
+
+      const screenXDiff = e.offsetX / target.clientWidth;
+      const rangeMax = parseInt(target.getAttribute('max'), 10);
+      const hoverVal = screenXDiff * rangeMax;
+
+      for (const c of chapterElMap) {
+        const hidden = c.el.hasAttribute(hiddenTitleAttr);
+        const inChapter = c.start <= hoverVal && hoverVal < c.end;
+        if ((inChapter && hidden) || (!inChapter && !hidden)) {
+          c.el.toggleAttribute(hiddenTitleAttr);
+        }
       }
-    };
+    });
+
+    this.bar.addEventListener('pointerout', () => {
+      for (const c of chapterElMap) {
+        if (!c.el.hasAttribute(hiddenTitleAttr)) {
+          c.el.setAttribute(hiddenTitleAttr, '');
+        }
+      }
+    });
+
+    return chaptersContainer;
   }
 
   /**
@@ -710,3 +726,15 @@ shaka.ui.SeekBar.Factory = class {
     return new shaka.ui.SeekBar(rootElement, controls);
   }
 };
+
+/**
+ * @typedef {{
+ *  start: number,
+ *  end: number, size:
+ *  number,
+ *  title: string,
+ *  id: string
+ * }}
+ * @protected
+ */
+shaka.ui.CleanedChapter;

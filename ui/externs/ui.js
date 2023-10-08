@@ -200,7 +200,7 @@ shaka.extern.UIVolumeBarColors;
  *   DOM element on which fullscreen will be done.
  *   Defaults to Shaka Player Container.
  * @property {boolean} displayChapterMarkers
- *   Whether or not chapter markers are shown on the seek bar. 
+ *   Whether or not chapter markers are shown on the seek bar.
  *   Defaults to false;
  * @exportDoc
  */

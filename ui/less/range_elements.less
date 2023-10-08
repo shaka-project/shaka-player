@@ -168,7 +168,7 @@
   position: relative;
 }
 
-.shaka-chapter .chapter-label {
+.chapter-label {
   position: absolute;
   top: -2.5em;
   width: 100%;
@@ -176,11 +176,10 @@
   font-size: large;
   font-weight: bold;
   color: @track-default-color;
-  display: none;
 }
 
-.shaka-chapter div:hover + .chapter-label {
-  display: block;
+[hidden-title] .chapter-label {
+  display: none;
 }
 
 .shaka-chapter > div:first-child {
