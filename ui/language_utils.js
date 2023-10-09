@@ -55,7 +55,11 @@ shaka.ui.LanguageUtils = class {
       }
     };
 
-    const getCombination = (language, rolesString) => {
+    const getCombination = (language, rolesString, label) => {
+      if (label &&
+          trackLabelFormat == shaka.ui.Overlay.TrackLabelFormat.LABEL) {
+        return language + ': ' + label + ': ' + rolesString;
+      }
       return language + ': ' + rolesString;
     };
 
@@ -72,7 +76,8 @@ shaka.ui.LanguageUtils = class {
     /** @type {!Set.<string>} */
     const combinationsMade = new Set();
     const selectedCombination = selectedTrack ? getCombination(
-        selectedTrack.language, getRolesString(selectedTrack)) : '';
+        selectedTrack.language, getRolesString(selectedTrack),
+        selectedTrack.label) : '';
 
     for (const track of tracks) {
       const language = track.language;
@@ -80,7 +85,8 @@ shaka.ui.LanguageUtils = class {
       const LocIds = shaka.ui.Locales.Ids;
       const forcedString = localization.resolve(LocIds.SUBTITLE_FORCED);
       const rolesString = getRolesString(track);
-      const combinationName = getCombination(language, rolesString);
+      const label = track.label;
+      const combinationName = getCombination(language, rolesString, label);
       if (combinationsMade.has(combinationName)) {
         continue;
       }
@@ -124,8 +130,8 @@ shaka.ui.LanguageUtils = class {
           }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.LABEL:
-          if (track.label) {
-            span.textContent = track.label;
+          if (label) {
+            span.textContent = label;
           } else {
             // Fallback behavior. This probably shouldn't happen.
             shaka.log.alwaysWarn('Track #' + track.id + ' does not have a ' +
