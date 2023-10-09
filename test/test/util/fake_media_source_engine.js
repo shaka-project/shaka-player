@@ -49,6 +49,9 @@ shaka.test.FakeMediaSourceEngine = class {
     }
 
     /** @type {!jasmine.Spy} */
+    this.attach = jasmine.createSpy('attach').and.stub();
+
+    /** @type {!jasmine.Spy} */
     this.init = jasmine.createSpy('init').and.returnValue(Promise.resolve());
 
     /** @type {!jasmine.Spy} */
