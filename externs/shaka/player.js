@@ -573,7 +573,7 @@ shaka.extern.TimelineRegionInfo;
  * @property {?number} channelsCount
  *   The number of audio channels, or null if unknown.
  * @property {?string} pixelAspectRatio
- *   The pixel aspect ratio value; e.g "1:1".
+ *   The pixel aspect ratio value; e.g. "1:1".
  * @property {?number} width
  *   The video width in pixels.
  * @exportDoc
@@ -1055,7 +1055,7 @@ shaka.extern.MssManifestConfiguration;
  * @property {shaka.extern.MssManifestConfiguration} mss
  *   Advanced parameters used by the MSS manifest parser.
  * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
- *   If true, manifest update request failures will cause a fatal errror.
+ *   If true, manifest update request failures will cause a fatal error.
  *   Defaults to <code>false</code> if not provided.
  *
  * @exportDoc

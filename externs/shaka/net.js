@@ -226,7 +226,7 @@ shaka.extern.RequestContext;
  * it before it is sent to the scheme plugin.
  * The RequestType describes the basic type of the request (manifest, segment,
  * etc). The optional RequestContext will be provided where applicable to
- * provide additional infomation about the request. A request filter can run
+ * provide additional information about the request. A request filter can run
  * asynchronously by returning a promise; in this case, the request will not be
  * sent until the promise is resolved.
  *
@@ -244,7 +244,7 @@ shaka.extern.RequestFilter;
  * it before it is returned.
  * The RequestType describes the basic type of the request (manifest, segment,
  * etc). The optional RequestContext will be provided where applicable to
- * provide additional infomation about the request. A response filter can run
+ * provide additional information about the request. A response filter can run
  * asynchronously by returning a promise.
  *
  * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
