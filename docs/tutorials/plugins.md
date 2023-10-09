@@ -38,6 +38,10 @@ __Subtitle/caption parsers__
       {@linksource shaka.text.Mp4VttParser}
     - TTML: {@linksource shaka.text.TtmlTextParser} and
       {@linksource shaka.text.Mp4TtmlParser}
+    - SubRip (SRT): {@linksource shaka.text.SrtTextParser}
+    - LyRiCs (LRC): {@linksource shaka.text.LrcTextParser}
+    - SubStation Alpha (SSA, ASS): {@linksource shaka.text.SsaTextParser}
+    - SubViewer (SBV): {@linksource shaka.text.SbvTextParser}
 
 __Subtitle/caption displayers__
   - Configured at runtime on a Player instance
