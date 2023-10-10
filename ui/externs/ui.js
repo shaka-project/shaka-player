@@ -22,7 +22,8 @@ shaka.extern = {};
  *   buffered: string,
  *   played: string,
  *   adBreaks: string,
- *   chapterMarks: string
+ *   chapterMarks: string,
+ *   chapterLabels: string
  * }}
  *
  * @property {string} base
@@ -210,7 +211,7 @@ shaka.extern.UIVolumeBarColors;
  *   you are already in PiP.
  *   Defaults to true.
  * @property {boolean} displayChapters
- *   Indicates whether or not to show chapter markers on the seek bar and 
+ *   Indicates whether or not to show chapter markers on the seek bar and
  *   chapter labels that appear on hover.
  *   Defaults to false;
  * @exportDoc

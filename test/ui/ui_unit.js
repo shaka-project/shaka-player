@@ -878,8 +878,64 @@ describe('UI', () => {
         expect(bufferingTime).toBe(lastBufferingTime);
       });
     });
-  });
 
+    describe('chapter marks', () => {
+      /** @type {!HTMLElement} */
+      let seekBar;
+      /** @type {!HTMLElement} */
+      let chaptersContainer;
+      /** @type {shaka.Player} */
+      let player;
+      /** @type {!Array<shaka.extern.Chapter>} */
+      let chapters;
+
+      beforeEach(async () => {
+        const config = {
+          displayChapterMarks: true,
+        };
+
+        const ui = UiUtils.createUIThroughAPI(videoContainer, video, config);
+
+        player = ui.getControls().getLocalPlayer();
+
+        const chaptersVttUri = new goog.Uri(
+            location.href + '/base/test/test/assets/chapters.vtt');
+
+        await player.addChaptersTrack(
+            chaptersVttUri.toString(), 'en', 'text/vtt');
+
+        chapters = player.getChapters('en');
+
+        seekBar = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-seek-bar-container');
+
+        UiUtils.confirmElementFound(seekBar, 'shaka-chapters');
+        chaptersContainer = UiUtils.getElementByClassName(
+            seekBar, 'shaka-chapters');
+      });
+
+      afterEach(async () => {
+        await UiUtils.cleanupUI();
+      });
+
+      it('shows after init', () => {
+        const elements = [...chaptersContainer.getElementsByClassName(
+            'shaka-chapter')];
+
+        for (const chapter of chapters) {
+          const chapterEl = elements.find((el) => !!el.lastChild &&
+            el.lastChild.textContent === chapter.title);
+
+          expect(chapterEl).not.toBeNull();
+          expect(chapterEl.hasAttribute('hidden-title')).toBeTruthy();
+
+          const chapterLabel = chapterEl.getElementByClassName(
+              'shaka-chapter-label');
+          UiUtils.confirmElementHidden(chapterLabel);
+        }
+      });
+    });
+  });
 
   /**
    * @param {!HTMLElement} container
