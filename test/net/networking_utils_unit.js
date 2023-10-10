@@ -7,13 +7,13 @@
 const testGetMimeType = async (expertedMimeType, contentType) => {
   const netEngine = new shaka.test.FakeNetworkingEngine()
       .setHeaders('dummy://foo', {'content-type': contentType});
-  const mimeType = await shaka.media.ManifestParser
+  const mimeType = await shaka.net.NetworkingUtils
       .getMimeType('dummy://foo', netEngine,
           shaka.net.NetworkingEngine.defaultRetryParameters());
   expect(mimeType).toBe(expertedMimeType);
 };
 
-describe('ManifestParser', () => {
+describe('NetworkingUtils', () => {
   describe('getMimeType', () => {
     it('test correct mimeType', () => {
       testGetMimeType('application/dash+xml', 'application/dash+xml');
