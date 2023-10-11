@@ -1232,6 +1232,25 @@ describe('Player', () => {
       expect(chapter3.startTime).toBe(10);
       expect(chapter3.endTime).toBe(20);
 
+      const chapterHtml = UiUtils.getElementsByClassName(
+        videoContainer, 'shaka-chapter');
+
+      console.error(JSON.stringify(chapterHtml));
+
+      console.log(JSON.stringify(chapters))
+
+      for (const chapter of chapters) {
+        const chapterEl = elements.find((el) => !!el.lastChild &&
+          el.lastChild.textContent === chapter.title);
+        
+        expect(chapterEl).not.toBeNull();
+        expect(chapterEl.hasAttribute('hidden-title')).toBeTruthy();
+        
+        const chapterLabel = chapterEl.getElementByClassName(
+            'shaka-chapter-label');
+        UiUtils.confirmElementHidden(chapterLabel);
+      }
+
       const partialUri2 = new goog.Uri('/base/test/test/assets/chapters2.vtt');
       const absoluteUri2 = locationUri.resolve(partialUri2);
       await player.addChaptersTrack(absoluteUri2.toString(), 'en');
