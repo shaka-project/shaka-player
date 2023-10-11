@@ -46,6 +46,7 @@
 
 +../../lib/net/backoff.js
 +../../lib/net/networking_engine.js
++../../lib/net/networking_utils.js
 
 +../../lib/player.js
 
