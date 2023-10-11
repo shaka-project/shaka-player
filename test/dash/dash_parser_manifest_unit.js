@@ -2626,4 +2626,97 @@ describe('DashParser Manifest', () => {
       expect(manifest.serviceDescription.maxPlaybackRate).toBe(1.1);
     });
   });
+
+  it('parses partial segments correctly', async () => {
+    const source = Dash.makeSimpleManifestText([
+      '<SegmentTemplate startNumber="1" media="l-$Number$-p$SubNumber$.mp4"',
+      '    initialization="init.mp4" timescale="50" duration="100">',
+      '  <SegmentTimeline>',
+      '    <S t="0" d="100" k="4"/>',
+      '    <S d="100" k="4"/>',
+      '  </SegmentTimeline>',
+      '</SegmentTemplate>',
+    ]);
+
+    fakeNetEngine.setResponseText('dummy://foo', source);
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const stream = manifest.variants[0].video;
+    await stream.createSegmentIndex();
+    goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+
+    const firstReference = stream.segmentIndex.get(0);
+    expect(firstReference.startTime).toBe(0);
+    expect(firstReference.endTime).toBe(2);
+    expect(firstReference.getUris()).toEqual([]);
+    expect(firstReference.partialReferences.length).toBe(4);
+    const firstPartialReference = firstReference.partialReferences[0];
+    expect(firstPartialReference.startTime).toBe(0);
+    expect(firstPartialReference.endTime).toBe(0.5);
+    expect(firstPartialReference.getUris())
+        .toEqual(['http://example.com/l-1-p1.mp4']);
+    const secondPartialReference = firstReference.partialReferences[1];
+    expect(secondPartialReference.startTime).toBe(0.5);
+    expect(secondPartialReference.endTime).toBe(1);
+    expect(secondPartialReference.getUris())
+        .toEqual(['http://example.com/l-1-p2.mp4']);
+    const thirdPartialReference = firstReference.partialReferences[2];
+    expect(thirdPartialReference.startTime).toBe(1);
+    expect(thirdPartialReference.endTime).toBe(1.5);
+    expect(thirdPartialReference.getUris())
+        .toEqual(['http://example.com/l-1-p3.mp4']);
+    const fourthPartialReference = firstReference.partialReferences[3];
+    expect(fourthPartialReference.startTime).toBe(1.5);
+    expect(fourthPartialReference.endTime).toBe(2);
+    expect(fourthPartialReference.getUris())
+        .toEqual(['http://example.com/l-1-p4.mp4']);
+  });
+
+  describe('parses urn:mpeg:dash:ssr:2023', () => {
+    it('prioritize over normal AdaptationSet when has the same number of streams', async () => { // eslint-disable-line max-len
+      const manifestText = [
+        '<MPD minBufferTime="PT75S">',
+        '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet id="1" mimeType="video/mp4">',
+        '      <Representation bandwidth="1" codecs="avc1.4d401f">',
+        '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4"',
+        '          initialization="init.mp4" timescale="50" duration="100">',
+        '          <SegmentTimeline>',
+        '            <S t="0" d="100"/>',
+        '            <S d="100"/>',
+        '          </SegmentTimeline>',
+        '        </SegmentTemplate>',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '    <AdaptationSet id="2" mimeType="video/mp4">',
+        '      <EssentialProperty value="video_primary" ',
+        '        schemeIdUri="urn:mpeg:dash:ssr:2023" />',
+        '      <Representation bandwidth="1" codecs="avc1.4d401f">',
+        '        <SegmentTemplate startNumber="1"',
+        '          media="l-$Number$-p$SubNumber$.mp4"',
+        '          initialization="init.mp4" timescale="50" duration="100">',
+        '            <SegmentTimeline>',
+        '              <S t="0" d="100" k="4"/>',
+        '              <S d="100" k="4"/>',
+        '            </SegmentTimeline>',
+        '        </SegmentTemplate>',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      /** @type {shaka.extern.Manifest} */
+      const manifest = await parser.start('dummy://foo', playerInterface);
+      expect(manifest.variants.length).toBe(1);
+
+      const stream = manifest.variants[0].video;
+      await stream.createSegmentIndex();
+      goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+
+      const firstReference = stream.segmentIndex.get(0);
+      expect(firstReference.partialReferences.length).toBe(4);
+    });
+  });
 });
