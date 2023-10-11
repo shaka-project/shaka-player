@@ -697,6 +697,7 @@ describe('HlsParser live', () => {
           'test:/main.mp4', 0, 4, /* syncTime= */ null,
           /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
           /* timestampOffset= */ 0, [partialRef, partialRef2]);
+      ref.allPartialSegments = true;
 
       const partialRef3 = makeReference(
           'test:/partial.mp4', 4, 6, /* syncTime= */ null,
@@ -774,6 +775,7 @@ describe('HlsParser live', () => {
             'test:/ref1.mp4', 0, 4, /* syncTime= */ null,
             /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 429,
             /* timestampOffset= */ 0, [partialRef, partialRef2]);
+        ref.allPartialSegments = true;
 
         const partialRef3 = makeReference(
             'test:/ref2.mp4', 4, 6, /* syncTime= */ null,
