@@ -2757,6 +2757,7 @@ describe('HlsParser', () => {
             makeReference(10, 12.5, syncTimeBase + 15),
             makeReference(12.5, 15, syncTimeBase + 17.5),
           ];
+          reference.allPartialSegments = true;
         }
       });
     });
