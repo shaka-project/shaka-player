@@ -65,7 +65,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     support = await shaka.media.DrmEngine.probeSupport();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockReceiverApi = createMockReceiverApi();
 
     const mockCanDisplayType = jasmine.createSpy('canDisplayType');
@@ -87,7 +87,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
 
     document.body.appendChild(video);
 
-    player = new shaka.Player(video);
+    player = new shaka.Player();
+    await player.attach(video);
     receiver = new CastReceiver(video, player);
 
     toRestore = [];

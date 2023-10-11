@@ -32,11 +32,8 @@ describe('Player Load Graph', () => {
     stateIdleSpy = jasmine.createSpy('stateIdle');
   });
 
-  /**
-   * @param {HTMLMediaElement} attachedTo
-   */
-  function createPlayer(attachedTo) {
-    player = new shaka.Player(attachedTo);
+  function createPlayer() {
+    player = new shaka.Player();
     player.addEventListener(
         'onstatechange',
         shaka.test.Util.spyFunc(stateChangeSpy));
@@ -51,35 +48,9 @@ describe('Player Load Graph', () => {
     await player.destroy();
   });
 
-  it('attach and initialize media source when constructed with media element',
-      async () => {
-        expect(video.src).toBeFalsy();
-
-        createPlayer(/* attachedTo= */ video);
-
-        // Wait until we enter the media source state.
-        await new Promise((resolve) => {
-          whenEnteringState('media-source', resolve);
-        });
-
-        expect(video.src).toBeTruthy();
-      });
-
-  it('does not set video.src when no video is provided', async () => {
-    expect(video.src).toBeFalsy();
-
-    createPlayer(/* attachedTo= */ null);
-
-    // Wait until the player has hit an idle state (no more internal loading
-    // actions).
-    await spyIsCalled(stateIdleSpy);
-
-    expect(video.src).toBeFalsy();
-  });
-
   it('attach + initializeMediaSource=true will initialize media source',
       async () => {
-        createPlayer(/* attachedTo= */ null);
+        createPlayer();
 
         expect(video.src).toBeFalsy();
         await player.attach(video, /* initializeMediaSource= */ true);
@@ -88,7 +59,7 @@ describe('Player Load Graph', () => {
 
   it('attach + initializeMediaSource=false will not intialize media source',
       async () => {
-        createPlayer(/* attachedTo= */ null);
+        createPlayer();
 
         expect(video.src).toBeFalsy();
         await player.attach(video, /* initializeMediaSource= */ false);
@@ -97,7 +68,7 @@ describe('Player Load Graph', () => {
 
   it('unload + initializeMediaSource=false does not initialize media source',
       async () => {
-        createPlayer(/* attachedTo= */ null);
+        createPlayer();
 
         await player.attach(video);
         await player.load('test:sintel');
@@ -108,7 +79,7 @@ describe('Player Load Graph', () => {
 
   it('unload + initializeMediaSource=true initializes media source',
       async () => {
-        createPlayer(/* attachedTo= */ null);
+        createPlayer();
 
         await player.attach(video);
         await player.load('test:sintel');
@@ -121,7 +92,7 @@ describe('Player Load Graph', () => {
   // the load to continue before the (first) unload was complete.
   // https://github.com/shaka-project/shaka-player/issues/612
   it('load will wait for unload to finish', async () => {
-    createPlayer(/* attachedTo= */ null);
+    createPlayer();
 
     await player.attach(video);
     await player.load('test:sintel');
@@ -150,7 +121,7 @@ describe('Player Load Graph', () => {
       // "unloaded", but since we called |load| right away, the transition
       // to "unloaded" was most likely done by the call to |load|.
       'unload',
-      'attach',
+      'unload', // The call to load will also start the unload process.
       'media-source',
       'manifest-parser',
       'manifest',
@@ -160,7 +131,7 @@ describe('Player Load Graph', () => {
   });
 
   it('load and unload can be called multiple times', async () => {
-    createPlayer(/* attachedTo= */ null);
+    createPlayer();
 
     await player.attach(video);
 
@@ -180,7 +151,6 @@ describe('Player Load Graph', () => {
       'drm-engine',
       'load',
       'unload',
-      'attach',
       'media-source',
 
       // Load and unload 2
@@ -189,13 +159,12 @@ describe('Player Load Graph', () => {
       'drm-engine',
       'load',
       'unload',
-      'attach',
       'media-source',
     ]);
   });
 
   it('load can be called multiple times', async () => {
-    createPlayer(/* attachedTo= */ null);
+    createPlayer();
 
     await player.attach(video);
 
@@ -234,7 +203,7 @@ describe('Player Load Graph', () => {
   });
 
   it('load will interrupt load', async () => {
-    createPlayer(/* attachedTo= */ null);
+    createPlayer();
 
     await player.attach(video);
 
@@ -248,7 +217,7 @@ describe('Player Load Graph', () => {
   });
 
   it('unload will interrupt load', async () => {
-    createPlayer(/* attachedTo= */ null);
+    createPlayer();
 
     await player.attach(video);
 
@@ -263,7 +232,7 @@ describe('Player Load Graph', () => {
   });
 
   it('destroy will interrupt load', async () => {
-    createPlayer(/* attachedTo= */ null);
+    createPlayer();
 
     await player.attach(video);
 
@@ -280,7 +249,7 @@ describe('Player Load Graph', () => {
   // When |destroy| is called, the player should move through the unload state
   // on its way to the detached state.
   it('destroy will unload and then detach', async () => {
-    createPlayer(/* attachedTo= */ null);
+    createPlayer();
 
     await player.attach(video);
 
@@ -305,7 +274,7 @@ describe('Player Load Graph', () => {
   // |unload| after another |unload| call should just have the player re-enter
   // the state it was waiting in.
   it('unloading multiple times is okay', async () => {
-    createPlayer(/* attachedTo= */ null);
+    createPlayer();
 
     await player.attach(video);
 
@@ -339,7 +308,7 @@ describe('Player Load Graph', () => {
   // When we destroy, it will allow a current unload operation to occur even
   // though we are going to unload and detach as part of |destroy|.
   it('destroy will not interrupt unload', async () => {
-    createPlayer(/* attachedTo= */ null);
+    createPlayer();
 
     await player.attach(video);
     await player.load('test:sintel');
@@ -355,7 +324,7 @@ describe('Player Load Graph', () => {
   // afterEach), this test will explicitly express our intentions to support
   // the use-case of calling |destroy| multiple times on a player instance.
   it('destroying multiple times is okay', async () => {
-    createPlayer(/* attachedTo= */ null);
+    createPlayer();
 
     await player.attach(video);
     await player.load('test:sintel');
@@ -369,7 +338,7 @@ describe('Player Load Graph', () => {
   // instance when loading.
   it('pre-initialized media source is used when player continues loading',
       async () => {
-        createPlayer(/* attachedTo= */ null);
+        createPlayer();
 
         // After we attach and initialize media source, we should just see
         // two states in our history.
@@ -409,7 +378,7 @@ describe('Player Load Graph', () => {
      * @return {!Promise}
      */
     async function testInterruptAfter(state) {
-      createPlayer(/* attachedTo= */ null);
+      createPlayer();
 
       let pendingUnload;
       whenEnteringState(state, () => {
@@ -446,7 +415,7 @@ describe('Player Load Graph', () => {
 
   describe('error handling', () => {
     beforeEach(() => {
-      createPlayer(/* attachedTo= */ null);
+      createPlayer();
     });
 
     it('returns to attach after load error', async () => {
@@ -492,7 +461,7 @@ describe('Player Load Graph', () => {
       mediaSource = window.MediaSource;
       window['MediaSource'] = undefined;
 
-      createPlayer(/* attachTo= */ null);
+      createPlayer();
       await spyIsCalled(stateIdleSpy);
     });
 
@@ -544,7 +513,7 @@ describe('Player Load Graph', () => {
   // load with media source, load with src=).
   describe('routing', () => {
     beforeEach(async () => {
-      createPlayer(/* attachedTo= */ null);
+      createPlayer();
       await spyIsCalled(stateIdleSpy);
     });
 

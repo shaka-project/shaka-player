@@ -48,7 +48,7 @@ describe('Player', () => {
   /** @type {!shaka.test.FakeVideo} */
   let video;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // By default, errors are a failure.
     logErrorSpy = jasmine.createSpy('shaka.log.error');
     logErrorSpy.calls.reset();
@@ -151,7 +151,8 @@ describe('Player', () => {
     }
 
     video = new shaka.test.FakeVideo(20);
-    player = new shaka.Player(video, dependencyInjector);
+    player = new shaka.Player(null, dependencyInjector);
+    await player.attach(video);
     player.configure({
       // Ensures we don't get a warning about missing preference.
       preferredAudioLanguage: 'en',

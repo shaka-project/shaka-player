@@ -73,7 +73,8 @@ describe('Transmuxer Player', () => {
 
   beforeEach(async () => {
     await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
-    player = new compiledShaka.Player(video);
+    player = new compiledShaka.Player();
+    await player.attach(video);
 
     player.configure('mediaSource.forceTransmux', true);
     player.configure('streaming.useNativeHlsOnSafari', false);
