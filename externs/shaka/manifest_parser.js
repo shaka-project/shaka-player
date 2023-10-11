@@ -94,6 +94,14 @@ shaka.extern.ManifestParser = class {
    * @exportDoc
    */
   onExpirationUpdated(sessionId, expiration) {}
+
+  /**
+   * Tell the parser that the initial variant has been chosen.
+   *
+   * @param {shaka.extern.Variant} variant
+   * @exportDoc
+   */
+  onInitialVariantChosen(variant) {}
 };
 
 

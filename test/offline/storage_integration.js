@@ -1741,6 +1741,9 @@ filterDescribe('Storage', storageSupport, () => {
 
     /** @override */
     onExpirationUpdated(session, number) {}
+
+    /** @override */
+    onInitialVariantChosen(variant) {}
   };
 
   /**
