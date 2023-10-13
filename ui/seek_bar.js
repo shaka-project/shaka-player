@@ -80,7 +80,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     if (this.config_.displayChapters) {
       const abortController = new AbortController();
-      let language = this.player.currentTextLanguage();
+      let language = this.player.getCurrentTextLanguage();
 
       this.createChapterElements_(
           this.container, language, abortController.signal);
@@ -89,7 +89,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           this.player,
           'textchanged',
           () => {
-            const nextLanguage = this.player.currentTextLanguage();
+            const nextLanguage = this.player.getCurrentTextLanguage();
             // Dispose and rebuild chapters if language changed
             if (language !== nextLanguage) {
               language = nextLanguage;
