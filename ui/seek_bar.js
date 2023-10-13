@@ -80,7 +80,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     if (this.config_.displayChapters) {
       const abortController = new AbortController();
-      let language = this.getActiveLanguage_();
+      let language = this.player.currentTextLanguage();
 
       this.createChapterElements_(
           this.container, language, abortController.signal);
@@ -89,7 +89,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           this.player,
           'textchanged',
           () => {
-            const nextLanguage = this.getActiveLanguage_();
+            const nextLanguage = this.player.currentTextLanguage();
             // Dispose and rebuild chapters if language changed
             if (language !== nextLanguage) {
               language = nextLanguage;
@@ -596,21 +596,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   hideThumbnail_() {
     this.thumbnailContainer_.style.visibility = 'hidden';
     this.thumbnailTime_.textContent = '';
-  }
-
-  /**
-   * @return {string}
-   * @private
-   */
-  getActiveLanguage_() {
-    /** @type {!Array.<shaka.extern.Track>} */
-    const tracks = this.player.getTextTracks();
-    const activeTrack = tracks.find((t) => t.active);
-
-    /** @type {!string} */
-    const language = activeTrack ? activeTrack.language : 'und';
-
-    return language;
   }
 
   /**

@@ -878,47 +878,6 @@ describe('UI', () => {
         expect(bufferingTime).toBe(lastBufferingTime);
       });
     });
-
-    describe('chapter marks', () => {
-      /** @type {!HTMLElement} */
-      let seekBar;
-      /** @type {!HTMLElement} */
-      let chaptersContainer;
-      /** @type {shaka.Player} */
-      let player;
-      /** @type {!Array<shaka.extern.Chapter>} */
-      let chapters;
-
-      beforeEach(async () => {
-
-        const config = {
-          displayChapters: true,
-        };
-
-        const ui = UiUtils.createUIThroughAPI(videoContainer, video, config);
-
-        player = ui.getControls().getLocalPlayer();
-
-        await player.load('test:sintel_no_text_compiled');
-        const locationUri = new goog.Uri(location.href);
-        const partialUri1 = new goog.Uri('/base/test/test/assets/chapters.vtt');
-        const absoluteUri1 = locationUri.resolve(partialUri1);
-
-        await player.addChaptersTrack(absoluteUri1, 'und', 'text/vtt');
-
-        const chaptersContainer = UiUtils.getElementByClassName(
-            videoContainer, 'shaka-chapters');
-        
-        expect(Array.from(chaptersContainer.children).length).toBeGreaterThan(1)
-
-        chapters = player.getChapters('und');
-
-        console.log("chapters container", chaptersContainer);
-      });
-
-      it('shows after init', async () => {
-      });
-    });
   });
 
   /**

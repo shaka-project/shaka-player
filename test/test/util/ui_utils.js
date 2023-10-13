@@ -80,19 +80,6 @@ shaka.test.UiUtils = class {
   }
 
   /**
-   * @param {!HTMLElement} parent
-   * @param {string} className
-   * @return {!Array<HTMLElement>}
-   */
-  static getElementsByClassName(parent, className) {
-    const elements = parent.getElementsByClassName(className);
-    expect(elements)
-      .toBeDefined(`Could not find element with class ${className}`);
-      // Jasmine.Matchers.withContext() is undefined 
-    return /** @type {!Array<HTMLElement>} */ (elements);
-  }
-
-  /**
    * @param {!HTMLElement} element
    */
   static confirmElementHidden(element) {
