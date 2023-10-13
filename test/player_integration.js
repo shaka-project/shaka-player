@@ -1286,7 +1286,7 @@ describe('Player', () => {
       expect(chapter3.startTime).toBe(30);
       expect(chapter3.endTime).toBe(61.349);
     });
-  });  // describe('addChaptersTrack')
+  });
 
   it('requires a license server for HLS ClearKey content', async () => {
     const expectedError = Util.jasmineError(new shaka.util.Error(

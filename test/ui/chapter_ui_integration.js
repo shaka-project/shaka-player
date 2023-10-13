@@ -29,7 +29,7 @@ describe('UI', () => {
     await UiUtils.setupCSS(cssLink);
 
     compiledShaka =
-          await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
+        await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
     await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
   });
 
@@ -41,8 +41,30 @@ describe('UI', () => {
     document.body.appendChild(videoContainer);
     player = new compiledShaka.Player(video);
 
+    // Create UI
+    // Add all of the buttons we have
+    const config = {
+      controlPanelElements: [
+        'time_and_duration',
+        'mute',
+        'volume',
+        'fullscreen',
+        'overflow_menu',
+        'fast_forward',
+        'rewind',
+      ],
+      overflowMenuButtons: [
+        'captions',
+        'quality',
+        'language',
+        'picture_in_picture',
+        'cast',
+      ],
+      // TODO: Cast receiver id to test chromecast integration
+    };
+
     ui = new compiledShaka.ui.Overlay(player, videoContainer, video);
-    ui.configure({displayChapters: true});
+    ui.configure(config);
 
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
@@ -62,12 +84,16 @@ describe('UI', () => {
     // These tests expect text to be streaming upfront, so always stream text.
     player.configure('streaming.alwaysStreamText', true);
 
-    await player.load('test:sintel_multi_lingual_multi_res_compiled');
+    await player.load('test:sintel_no_text_compiled');
     // For this event, we ignore a timeout, since we sometimes miss this event
     // on Tizen.  But expect that the video is ready anyway.
     await waiter.failOnTimeout(false).waitForEvent(video, 'canplay');
     expect(video.readyState).not.toBe(0);
 
+    const locationUri = new goog.Uri(location.href);
+    const partialUri1 = new goog.Uri('/base/test/test/assets/chapters.vtt');
+    const absoluteUri1 = locationUri.resolve(partialUri1);
+    await player.addChaptersTrack(absoluteUri1.toString(), 'und');
     // All other events after this should fail on timeout (the default).
     await waiter.failOnTimeout(true);
   });
@@ -81,59 +107,33 @@ describe('UI', () => {
   afterAll(() => {
     document.head.removeChild(cssLink);
   });
-  describe('addChaptersTrack', () => {
-    it('adds chapter elements', async () => {
-      const locationUri = new goog.Uri(location.href);
-      const partialUri1 = new goog.Uri('/base/test/test/assets/chapters.vtt');
-      const absoluteUri1 = locationUri.resolve(partialUri1);
-      await player.addChaptersTrack(absoluteUri1.toString(), 'en');
 
-      // Data should be available as soon as addChaptersTrack resolves.
-      // See https://github.com/shaka-project/shaka-player/issues/4186
-      const chapters = player.getChapters('en');
-      expect(chapters.length).toBe(3);
-      const chapter1 = chapters[0];
-      expect(chapter1.title).toBe('Chapter 1');
-      expect(chapter1.startTime).toBe(0);
-      expect(chapter1.endTime).toBe(5);
-      const chapter2 = chapters[1];
-      expect(chapter2.title).toBe('Chapter 2');
-      expect(chapter2.startTime).toBe(5);
-      expect(chapter2.endTime).toBe(10);
-      const chapter3 = chapters[2];
-      expect(chapter3.title).toBe('Chapter 3');
-      expect(chapter3.startTime).toBe(10);
-      expect(chapter3.endTime).toBe(20);
+  describe('createChapterElements', () => {
+    it('adds chapter elements', () => {
+      const seekbarContainer = UiUtils.getElementByClassName(
+          videoContainer, 'shaka-seek-bar-container');
+      console.log(JSON.stringify(seekbarContainer));
 
+      const chapterElements = /** @type {!Array<HTMLElement>}*/
+        ([...seekbarContainer.getElementsByClassName('shaka-chapter')]);
 
-      /*
-          const chapterHtml = videoContainer.getElementsByClassName('shaka-chapter');
-          const chapterElements = Array.from(chapterHtml);
+      console.log(JSON.stringify(chapterElements));
+      console.log(JSON.stringify(chapterElements));
 
-          console.log("ChaptersElements: ",JSON.stringify(chapterElements));
-          console.log("Chapter tracks: ", JSON.stringify(chapters))
+      for (const chapter of player.getChapters('und')) {
+        const chapterEl = chapterElements.find((el) => !!el.lastChild &&
+            el.lastChild.textContent === chapter.title);
 
-          for (const chapter of chapters) {
-            const chapterEl = chapterElements.find((el) => !!el.lastChild &&
-              el.lastChild.textContent === chapter.title);
+        expect(chapterEl).toBeDefined();
+        expect(chapterEl.classList).toContain('hidden-title');
 
-            expect(chapterEl).toBeDefined();
-            expect(chapterEl.hasAttribute('hidden-title')).toBeTruthy();
-
-            const chapterLabel = chapterEl.getElementByClassName(
-                'shaka-chapter-label');
-            UiUtils.confirmElementHidden(chapterLabel);
-          }
-          */
+        const chapterLabel = /** @type {!HTMLElement}*/
+          (chapterEl.getElementsByClassName('shaka-chapter-label')[0]);
+        UiUtils.confirmElementHidden(chapterLabel);
+      }
     });
 
-    it('adds external chapters in srt format', async () => {
-      await player.load('test:sintel_no_text_compiled');
-      const locationUri = new goog.Uri(location.href);
-      const partialUri = new goog.Uri('/base/test/test/assets/chapters.srt');
-      const absoluteUri = locationUri.resolve(partialUri);
-      await player.addChaptersTrack(absoluteUri.toString(), 'es');
-
+    it('adds external chapters in srt format', () => {
       const chapters = player.getChapters('es');
       expect(chapters.length).toBe(3);
       const chapter1 = chapters[0];
