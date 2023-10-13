@@ -920,7 +920,8 @@ shaka.extern.DashManifestConfiguration;
  *   useSafariBehaviorForLive: boolean,
  *   liveSegmentsDelay: number,
  *   sequenceMode: boolean,
- *   ignoreManifestTimestampsInSegmentsMode: boolean
+ *   ignoreManifestTimestampsInSegmentsMode: boolean,
+ *   disableCodecGuessing: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -972,6 +973,13 @@ shaka.extern.DashManifestConfiguration;
  *   words, assume that there are no gaps in the segments when appending
  *   to the SourceBuffer, even if the manifest and segment times disagree.
  *   Only applies when sequenceMode is <code>false</code>.
+ *   <i>Defaults to <code>false</code>.</i>
+ * @property {boolean} disableCodecGuessing
+ *   If set to true, the HLS parser won't automatically guess or assume default
+ *   codec for variants with no "CODECS" attribute. Instead, it will attempt to
+ *   extract the missing information from the media segment.
+ *   As a consequence, lazy-loading media playlists won't be possible for this
+ *   use case, which may result in longer video startup times.
  *   <i>Defaults to <code>false</code>.</i>
  * @exportDoc
  */
