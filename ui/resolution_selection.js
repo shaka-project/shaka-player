@@ -89,10 +89,17 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     // Remove duplicate entries with the same resolution or quality depending
     // on content type.  Pick an arbitrary one.
     tracks = tracks.filter((track, idx) => {
-      // Keep the first one with the same height or bandwidth.
-      const otherIdx = this.player.isAudioOnly() ?
-          tracks.findIndex((t) => t.bandwidth == track.bandwidth) :
-          tracks.findIndex((t) => t.height == track.height);
+      // Keep the first one with the same height and framrate or bandwidth.
+      let otherIdx = -1;
+      if (this.player.isAudioOnly()) {
+        otherIdx = tracks.findIndex((t) => t.bandwidth == track.bandwidth);
+      } else {
+        otherIdx = tracks.findIndex((t) => {
+          return t.height == track.height &&
+              t.frameRate == track.frameRate &&
+              t.hdr == track.hdr;
+        });
+      }
       return otherIdx == idx;
     });
 
@@ -135,11 +142,15 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       if (this.player.isAudioOnly()) {
         span.textContent = Math.round(track.bandwidth / 1000) + ' kbits/s';
       } else {
-        if (track.hdr == 'PQ' || track.hdr == 'HLG') {
-          span.textContent = track.height + 'p (HDR)';
-        } else {
-          span.textContent = track.height + 'p';
+        let text = track.height + 'p';
+        const frameRate = track.frameRate;
+        if (frameRate && (frameRate >= 50 || frameRate <= 20)) {
+          text += Math.round(track.frameRate);
         }
+        if (track.hdr == 'PQ' || track.hdr == 'HLG') {
+          text += ' (HDR)';
+        }
+        span.textContent = text;
       }
       button.appendChild(span);
 

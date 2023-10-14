@@ -147,6 +147,11 @@ shaka.test.FakeMediaSourceEngine = class {
     return Promise.resolve();
   }
 
+  /** @override */
+  isStreamingAllowed() {
+    return true;
+  }
+
   /**
    * @param {string} type
    * @return {?number}
