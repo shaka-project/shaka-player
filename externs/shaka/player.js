@@ -976,7 +976,7 @@ shaka.extern.DashManifestConfiguration;
  *   <i>Defaults to <code>false</code>.</i>
  * @property {boolean} disableCodecGuessing
  *   If set to true, the HLS parser won't automatically guess or assume default
- *   codec for variants with no "CODECS" attribute. Instead, it will attempt to
+ *   codec for playlists with no "CODECS" attribute. Instead, it will attempt to
  *   extract the missing information from the media segment.
  *   As a consequence, lazy-loading media playlists won't be possible for this
  *   use case, which may result in longer video startup times.
