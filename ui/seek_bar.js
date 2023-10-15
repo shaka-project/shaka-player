@@ -79,26 +79,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     });
 
     if (this.config_.displayChapters) {
-      const abortController = new AbortController();
-      let language = this.player.getCurrentTextLanguage() || 'und';
-
-      this.createChapterElements_(
-          this.container, language, abortController.signal);
-
-      this.eventManager.listen(
-          this.player,
-          'textchanged',
-          () => {
-            const nextLanguage =
-              this.player.getCurrentTextLanguage() || 'und';
-            // Dispose and rebuild chapters if language changed
-            if (language !== nextLanguage) {
-              language = nextLanguage;
-              abortController.abort();
-              this.createChapterElements_(
-                  this.container, language, abortController.signal);
-            }
-          });
+      this.setupChapters_();
     }
 
     /**
@@ -600,18 +581,71 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   }
 
   /**
+   * Sets up the chapter element creator and change handling.
+   * @private
+   */
+  setupChapters_() {
+    /** @type {!AbortController} */
+    let abortController = new AbortController();
+    let language = 'und';
+    /** @type {!Array<shaka.extern.Chapter>} */
+    let chapters = [];
+
+    /**
+    * Does a value compare on chapters.
+    * @param {shaka.extern.Chapter} a
+    * @param {shaka.extern.Chapter} b
+    * @return {!boolean}
+    */
+    const chaptersEqual = (a, b) => {
+      return !(a && b) ||
+     (a.id === b.id && a.title === b.title &&
+     a.startTime === b.startTime && a.endTime === b.endTime);
+    };
+
+    /** @type {function(): void} */
+    const handleChapterTrackChange = () => {
+      const nextLanguage = this.player.getCurrentTextLanguage() || 'und';
+      /** @type {!Array<shaka.extern.Chapter>} */
+      const nextChapters = this.player.getChapters(nextLanguage) || [];
+
+      const languageChanged = nextLanguage !== language;
+      const chaptersChanged = chapters.length !== nextChapters.length ||
+        !chapters.some((c, idx) => {
+          const n = nextChapters.at(idx);
+          return chaptersEqual(c, n) ||
+            nextChapters.some((n) => chaptersEqual(c, n));
+        });
+
+      // If chapters exist and changed, then dispose of and rebuild them.
+      if (nextChapters.length && (languageChanged || chaptersChanged)) {
+        language = nextLanguage;
+        chapters = nextChapters;
+        abortController.abort();
+        abortController = new AbortController();
+        this.createChapterElements_(
+            this.container, chapters, abortController.signal);
+      }
+    };
+
+    handleChapterTrackChange();
+
+    this.eventManager.listen(
+        this.player, 'textchanged', handleChapterTrackChange);
+
+    this.eventManager.listen(
+        this.player, 'trackschanged', handleChapterTrackChange);
+  }
+
+  /**
    * Builds and inserts ChaptersElement into dom container.
    * @param {!HTMLElement} container
-   * @param {!string} language
+   * @param {!Array<shaka.extern.Chapter>} chapterTracks
    * @param {!AbortSignal} abortSignal
    * @private
    */
-  createChapterElements_(container, language, abortSignal) {
+  createChapterElements_(container, chapterTracks, abortSignal) {
     const hiddenClass = 'shaka-hidden';
-
-    // Get chapter tracks and clamp time values
-    /** @type {!Array<shaka.extern.Chapter>} */
-    const chapterTracks = this.player.getChapters(language) || [];
 
     /** @type {{start: number, end: number}} */
     const seekRange = this.player.seekRange();

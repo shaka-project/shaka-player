@@ -44,7 +44,7 @@ describe('UI', () => {
     // Create UI
     // Add all of the buttons we have
     const config = {
-      controlPanelElements: [
+      'controlPanelElements': [
         'time_and_duration',
         'mute',
         'volume',
@@ -53,13 +53,14 @@ describe('UI', () => {
         'fast_forward',
         'rewind',
       ],
-      overflowMenuButtons: [
+      'overflowMenuButtons': [
         'captions',
         'quality',
         'language',
         'picture_in_picture',
         'cast',
       ],
+      'displayChapters': true,
       // TODO: Cast receiver id to test chromecast integration
     };
 
@@ -85,6 +86,7 @@ describe('UI', () => {
     player.configure('streaming.alwaysStreamText', true);
 
     await player.load('test:sintel_no_text_compiled');
+
     // For this event, we ignore a timeout, since we sometimes miss this event
     // on Tizen.  But expect that the video is ready anyway.
     await waiter.failOnTimeout(false).waitForEvent(video, 'canplay');
@@ -121,8 +123,9 @@ describe('UI', () => {
       console.log(JSON.stringify(chapterElements));
 
       for (const chapter of player.getChapters('und')) {
-        const chapterEl = chapterElements.find((el) => !!el.lastChild &&
-            el.lastChild.textContent === chapter.title);
+        const chapterEl = chapterElements.find((el) =>
+          !!el.lastChild && el.lastChild.textContent === chapter.title,
+        );
 
         expect(chapterEl).toBeDefined();
         expect(chapterEl.classList).toContain('hidden-title');
@@ -132,22 +135,5 @@ describe('UI', () => {
         UiUtils.confirmElementHidden(chapterLabel);
       }
     });
-
-    it('adds external chapters in srt format', () => {
-      const chapters = player.getChapters('es');
-      expect(chapters.length).toBe(3);
-      const chapter1 = chapters[0];
-      expect(chapter1.title).toBe('Chapter 1');
-      expect(chapter1.startTime).toBe(0);
-      expect(chapter1.endTime).toBe(5);
-      const chapter2 = chapters[1];
-      expect(chapter2.title).toBe('Chapter 2');
-      expect(chapter2.startTime).toBe(5);
-      expect(chapter2.endTime).toBe(30);
-      const chapter3 = chapters[2];
-      expect(chapter3.title).toBe('Chapter 3');
-      expect(chapter3.startTime).toBe(30);
-      expect(chapter3.endTime).toBe(61.349);
-    });
-  });  // describe('addChaptersTrack')
+  });
 });

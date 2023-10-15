@@ -1264,6 +1264,27 @@ describe('Player', () => {
       expect(chapterUpdated6.endTime).toBe(61.349);
     });
 
+    it('does not throw when getChapters is called before addChaptersTrack',
+        async () => {
+          // Does not throw before player loaded
+          expect(() => player.getChapters('en')).not.toThrow();
+
+          // Does not throw after player loaded but before tracks added
+          await player.load('test:sintel_no_text_compiled');
+          expect(() => player.getChapters('en')).not.toThrow();
+
+          const locationUri = new goog.Uri(location.href);
+          const partialUri1 =
+          new goog.Uri('/base/test/test/assets/chapters.vtt');
+          const absoluteUri1 = locationUri.resolve(partialUri1);
+          await player.addChaptersTrack(absoluteUri1.toString(), 'en');
+
+          // Data should be available as soon as addChaptersTrack resolves.
+          // See https://github.com/shaka-project/shaka-player/issues/4186
+          const chapters = player.getChapters('en');
+          expect(chapters.length).toBe(3);
+        });
+
     it('adds external chapters in srt format', async () => {
       await player.load('test:sintel_no_text_compiled');
       const locationUri = new goog.Uri(location.href);
