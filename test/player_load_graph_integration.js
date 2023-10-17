@@ -89,47 +89,6 @@ describe('Player Load Graph', () => {
         expect(video.src).toBeTruthy();
       });
 
-  // There was a bug when calling unload before calling load would cause
-  // the load to continue before the (first) unload was complete.
-  // https://github.com/shaka-project/shaka-player/issues/612
-  it('load will wait for unload to finish', async () => {
-    createPlayer();
-
-    await player.attach(video);
-    await player.load('test:sintel');
-
-    // We are going to call |unload| and |load| right after each other. What
-    // we expect to see is that the player is fully unloaded before the load
-    // occurs.
-
-    const unload = player.unload();
-    const load = player.load('test:sintel');
-
-    await unload;
-    await load;
-
-    expect(getVisitedStates()).toEqual([
-      'attach',
-
-      // First call to |load|.
-      'media-source',
-      'manifest-parser',
-      'manifest',
-      'drm-engine',
-      'load',
-
-      // Our call to |unload| would have started the transition to
-      // "unloaded", but since we called |load| right away, the transition
-      // to "unloaded" was most likely done by the call to |load|.
-      'unload',
-      'media-source',
-      'manifest-parser',
-      'manifest',
-      'drm-engine',
-      'load',
-    ]);
-  });
-
   it('load and unload can be called multiple times', async () => {
     createPlayer();
 
@@ -212,21 +171,6 @@ describe('Player Load Graph', () => {
     await expectAsync(load1).toBeRejected();
     // Load 2 should finish with no issues.
     await load2;
-  });
-
-  it('unload will interrupt load', async () => {
-    createPlayer();
-
-    await player.attach(video);
-
-    const load = player.load('test:sintel');
-    const unload = player.unload();
-
-    await expectAsync(load).toBeRejected();
-    await unload;
-
-    // We should never have gotten into the loaded state.
-    expect(getVisitedStates()).not.toContain('load');
   });
 
   it('destroy will interrupt load', async () => {
@@ -442,7 +386,7 @@ describe('Player Load Graph', () => {
       // Since attached and loaded in the same interrupter cycle, there won't be
       // any idle time until we finish failing to load. We expect to idle in
       // attach.
-      expect(lastStateChange).toBe('attach');
+      expect(lastStateChange).toBe('unload');
     });
   });
 
@@ -499,7 +443,7 @@ describe('Player Load Graph', () => {
       player.unload(/* initMediaSource= */ true);
 
       await shaka.test.Util.delay(/* seconds= */ 0.25);
-      expect(lastStateChange).toBe('attach');
+      expect(lastStateChange).toBe('unload');
     });
   });
 

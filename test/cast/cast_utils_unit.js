@@ -26,6 +26,7 @@ describe('CastUtils', () => {
       'getManifestParserFactory',  // Would not serialize.
       'setVideoContainer',
       'getActiveSessionsMetadata',
+      "releaseAllMutexes", // Very specific to the inner workings of the player.
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
