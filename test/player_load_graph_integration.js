@@ -38,7 +38,7 @@ describe('Player Load Graph', () => {
         'onstatechange',
         shaka.test.Util.spyFunc(stateChangeSpy));
     player.addEventListener('onstatechange', (event) => {
-      lastStateChange = event.state;
+      lastStateChange = event['state'];
     });
   }
 
