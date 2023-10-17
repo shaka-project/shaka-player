@@ -37,6 +37,7 @@ describe('Player Src Equals', () => {
 
   afterEach(async () => {
     await player.destroy();
+    player.releaseAllMutexes();
 
     eventManager.release();
   });

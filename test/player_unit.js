@@ -172,6 +172,7 @@ describe('Player', () => {
     try {
       await player.destroy();
     } finally {
+      player.releaseAllMutexes();
       shaka.log.error = originalLogError;
       shaka.log.alwaysError = originalLogError;
       shaka.log.warning = originalLogWarn;

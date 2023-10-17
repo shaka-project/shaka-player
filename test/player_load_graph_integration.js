@@ -46,6 +46,7 @@ describe('Player Load Graph', () => {
   // we don't allow the player to stay attached to the video element.
   afterEach(async () => {
     await player.destroy();
+    player.releaseAllMutexes();
   });
 
   it('attach + initializeMediaSource=true will initialize media source',

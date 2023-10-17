@@ -54,6 +54,7 @@ describe('Player', () => {
     eventManager.release();
 
     await player.destroy();
+    player.releaseAllMutexes();
   });
 
   afterAll(() => {
