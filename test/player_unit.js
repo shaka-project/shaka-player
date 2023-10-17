@@ -124,6 +124,7 @@ describe('Player', () => {
         open: jasmine.createSpy('open').and.returnValue(Promise.resolve()),
         destroy:
             jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
+        setTextDisplayer: jasmine.createSpy('setTextDisplayer'),
         setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
         getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
         setSegmentRelativeVttTiming:

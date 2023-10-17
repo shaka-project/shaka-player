@@ -322,8 +322,6 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     // at each stage, the cast receiver can form an update message without
     // causing an error.
     waitForUpdateMessageWrapper(
-        shaka.media.ManifestParser, 'ManifestParser', 'getFactory');
-    waitForUpdateMessageWrapper(
         // eslint-disable-next-line no-restricted-syntax
         shaka.test.TestScheme.ManifestParser.prototype, 'ManifestParser',
         'start');

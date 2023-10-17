@@ -15,8 +15,8 @@ describe('Player Load Graph', () => {
   /** @type {!jasmine.Spy} */
   let stateChangeSpy;
 
-  /** @type {!jasmine.Spy} */
-  let stateIdleSpy;
+  /** @type {?string} */
+  let lastStateChange = null;
 
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
@@ -29,7 +29,7 @@ describe('Player Load Graph', () => {
 
   beforeEach(() => {
     stateChangeSpy = jasmine.createSpy('stateChange');
-    stateIdleSpy = jasmine.createSpy('stateIdle');
+    lastStateChange = null;
   });
 
   function createPlayer() {
@@ -37,9 +37,9 @@ describe('Player Load Graph', () => {
     player.addEventListener(
         'onstatechange',
         shaka.test.Util.spyFunc(stateChangeSpy));
-    player.addEventListener(
-        'onstateidle',
-        shaka.test.Util.spyFunc(stateIdleSpy));
+    player.addEventListener('onstatechange', (event) => {
+      lastStateChange = event.state;
+    });
   }
 
   // Even though some test will destroy the player, we want to make sure that
@@ -121,7 +121,6 @@ describe('Player Load Graph', () => {
       // "unloaded", but since we called |load| right away, the transition
       // to "unloaded" was most likely done by the call to |load|.
       'unload',
-      'unload', // The call to load will also start the unload process.
       'media-source',
       'manifest-parser',
       'manifest',
@@ -184,7 +183,6 @@ describe('Player Load Graph', () => {
 
       // Load 2
       'unload',
-      'attach',
       'media-source',
       'manifest-parser',
       'manifest',
@@ -193,7 +191,6 @@ describe('Player Load Graph', () => {
 
       // Load 3
       'unload',
-      'attach',
       'media-source',
       'manifest-parser',
       'manifest',
@@ -295,12 +292,10 @@ describe('Player Load Graph', () => {
 
       // |player.unload| (first call)
       'unload',
-      'attach',
       'media-source',
 
       // |player.unload| (second call)
       'unload',
-      'attach',
       'media-source',
     ]);
   });
@@ -441,12 +436,12 @@ describe('Player Load Graph', () => {
 
       // Wait a couple interrupter cycles to allow the player to enter idle
       // state.
-      const event = await spyIsCalled(stateIdleSpy);
+      await shaka.test.Util.delay(/* seconds= */ 0.25);
 
       // Since attached and loaded in the same interrupter cycle, there won't be
       // any idle time until we finish failing to load. We expect to idle in
       // attach.
-      expect(event.state).toBe('attach');
+      expect(lastStateChange).toBe('attach');
     });
   });
 
@@ -462,7 +457,7 @@ describe('Player Load Graph', () => {
       window['MediaSource'] = undefined;
 
       createPlayer();
-      await spyIsCalled(stateIdleSpy);
+      await shaka.test.Util.delay(/* seconds= */ 0.25);
     });
 
     afterEach(() => {
@@ -477,8 +472,8 @@ describe('Player Load Graph', () => {
       // should stop at the attach state.
       player.attach(video, /* initMediaSource= */ true);
 
-      const event = await spyIsCalled(stateIdleSpy);
-      expect(event.state).toBe('attach');
+      await shaka.test.Util.delay(/* seconds= */ 0.25);
+      expect(lastStateChange).toBe('attach');
     });
 
     it('loading ignores media source path', async () => {
@@ -489,8 +484,8 @@ describe('Player Load Graph', () => {
       // src= path.
       player.load(SMALL_MP4_CONTENT_URI);
 
-      const event = await spyIsCalled(stateIdleSpy);
-      expect(event.state).toBe('src-equals');
+      await shaka.test.Util.delay(/* seconds= */ 0.25);
+      expect(lastStateChange).toBe('src-equals');
     });
 
     it('unloading ignores init media source flag', async () => {
@@ -502,8 +497,8 @@ describe('Player Load Graph', () => {
       // don't have media source, it should stop at the attach state.
       player.unload(/* initMediaSource= */ true);
 
-      const event = await spyIsCalled(stateIdleSpy);
-      expect(event.state).toBe('attach');
+      await shaka.test.Util.delay(/* seconds= */ 0.25);
+      expect(lastStateChange).toBe('attach');
     });
   });
 
@@ -512,9 +507,8 @@ describe('Player Load Graph', () => {
   // and then telling it to go to one of our destination states (e.g. attach,
   // load with media source, load with src=).
   describe('routing', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       createPlayer();
-      await spyIsCalled(stateIdleSpy);
     });
 
     it('goes from detach to detach', async () => {
@@ -569,7 +563,7 @@ describe('Player Load Graph', () => {
 
     it('goes from media source to media source', async () => {
       await startIn('media-source');
-      await goTo('media-source');
+      await goTo('media-source', 'attach'); // doesn't remake media source
     });
 
     it('goes from media source to load', async () => {
@@ -594,7 +588,7 @@ describe('Player Load Graph', () => {
 
     it('goes from load to media source', async () => {
       await startIn('load');
-      await goTo('media-source');
+      await goTo('media-source', 'attach'); // doesn't remake media source
     });
 
     it('goes from load to load', async () => {
@@ -646,7 +640,7 @@ describe('Player Load Graph', () => {
 
     it('goes from manifest parser to media source', async () => {
       await passingThrough('manifest-parser', () => {
-        return goTo('media-source');
+        return goTo('media-source', 'attach'); // doesn't remake media source
       });
     });
 
@@ -676,7 +670,7 @@ describe('Player Load Graph', () => {
 
     it('goes from manifest to media source', async () => {
       await passingThrough('manifest', () => {
-        return goTo('media-source');
+        return goTo('media-source', 'attach'); // doesn't remake media source
       });
     });
 
@@ -706,7 +700,7 @@ describe('Player Load Graph', () => {
 
     it('goes from drm engine to media source', async () => {
       await passingThrough('drm-engine', () => {
-        return goTo('media-source');
+        return goTo('media-source', 'attach'); // doesn't remake media source
       });
     });
 
@@ -794,8 +788,8 @@ describe('Player Load Graph', () => {
       action();
 
       // Make sure that the player stops in the state that we asked it go to.
-      const event = await spyIsCalled(stateIdleSpy);
-      expect(event.state).toBe(state);
+      await shaka.test.Util.delay(/* seconds= */ 0.25);
+      expect(lastStateChange).toBe(state);
     }
 
     /**
@@ -860,9 +854,10 @@ describe('Player Load Graph', () => {
      * starting the state change.
      *
      * @param {string} state
+     * @param {string=} expectedState
      * @return {!Promise}
      */
-    async function goTo(state) {
+    async function goTo(state, expectedState) {
       /** @type {!Map.<string, function():!Promise>} */
       const actions = new Map()
           .set('detach', () => {
@@ -889,8 +884,8 @@ describe('Player Load Graph', () => {
       // this situation.
       action();
 
-      const event = await spyIsCalled(stateIdleSpy);
-      expect(event.state).toBe(state);
+      await shaka.test.Util.delay(/* seconds= */ 0.25);
+      expect(lastStateChange).toBe(expectedState || state);
     }
   });
 

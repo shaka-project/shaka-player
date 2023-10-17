@@ -20,7 +20,7 @@ describe('Ad manager', () => {
     window['google'] = null;
     mockVideo = new shaka.test.FakeVideo();
     player = new shaka.Player();
-    await player.attach(mockVideo);
+    await player.attach(mockVideo, /* initializeMediaSource= */ false);
     adManager = player.getAdManager();
     expect(adManager instanceof shaka.ads.AdManager).toBe(true);
 
