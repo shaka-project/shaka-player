@@ -2587,7 +2587,7 @@ describe('HlsParser', () => {
     expect(actual).toEqual(manifest);
   });
 
-  describe('When config.hls.disbaleCodecGuessing is set to true', () => {
+  describe('When config.hls.disableCodecGuessing is set to true', () => {
     beforeEach(() => {
       const config = shaka.util.PlayerConfiguration.createDefault().manifest;
       config.hls.disableCodecGuessing = true;
