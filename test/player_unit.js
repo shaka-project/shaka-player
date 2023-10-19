@@ -4179,6 +4179,69 @@ describe('Player', () => {
         expect(thumbnail8.duration).toBe(10);
       });
     });
+
+    describe('getAllThumbnails', () => {
+      it('returns all thumbnails', async () => {
+        const uris = () => ['thumbnail'];
+        const ref = new shaka.media.SegmentReference(
+            0, 60, uris, 0, null, null, 0, 0, Infinity, [],
+        );
+        const index = new shaka.media.SegmentIndex([ref]);
+
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1);
+          });
+          manifest.addImageStream(5, (stream) => {
+            stream.originalId = 'thumbnail';
+            stream.width = 200;
+            stream.height = 150;
+            stream.mimeType = 'image/jpeg';
+            stream.tilesLayout = '2x3';
+            stream.segmentIndex = index;
+          });
+        });
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        expect(player.getImageTracks()[0].width).toBe(100);
+        expect(player.getImageTracks()[0].height).toBe(50);
+        const thumbnails = await player.getAllThumbnails(5);
+        expect(thumbnails.length).toBe(6);
+        expect(thumbnails[0]).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
+          positionX: 0,
+          positionY: 0,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnails[1]).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
+          positionX: 100,
+          positionY: 0,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnails[2]).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
+          positionX: 0,
+          positionY: 50,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnails[5]).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
+          positionX: 100,
+          positionY: 100,
+          width: 100,
+          height: 50,
+        }));
+      });
+    });
   });
 
   describe('config streaming.startAtSegmentBoundary', () => {

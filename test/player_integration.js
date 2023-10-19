@@ -1332,6 +1332,9 @@ describe('Player', () => {
           expect(thumbnail3.positionX).toBe(160);
           expect(thumbnail3.positionY).toBe(90);
           expect(thumbnail3.width).toBe(160);
+
+          const thumbnails = await player.getAllThumbnails(newTrack.id);
+          expect(thumbnails.length).toBe(3);
         });
 
     it('appends thumbnails for external thumbnails without sprites',
@@ -1355,6 +1358,9 @@ describe('Player', () => {
           const thumbnail3 = await player.getThumbnails(newTrack.id, 40);
           expect(thumbnail3.startTime).toBe(30);
           expect(thumbnail3.duration).toBe(30);
+
+          const thumbnails = await player.getAllThumbnails(newTrack.id);
+          expect(thumbnails.length).toBe(3);
         });
   });  // describe('addThumbnailsTrack')
 });
