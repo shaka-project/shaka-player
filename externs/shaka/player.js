@@ -573,7 +573,7 @@ shaka.extern.TimelineRegionInfo;
  * @property {?number} channelsCount
  *   The number of audio channels, or null if unknown.
  * @property {?string} pixelAspectRatio
- *   The pixel aspect ratio value; e.g "1:1".
+ *   The pixel aspect ratio value; e.g. "1:1".
  * @property {?number} width
  *   The video width in pixels.
  * @exportDoc
@@ -1060,7 +1060,7 @@ shaka.extern.MssManifestConfiguration;
  * @property {shaka.extern.MssManifestConfiguration} mss
  *   Advanced parameters used by the MSS manifest parser.
  * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
- *   If true, manifest update request failures will cause a fatal errror.
+ *   If true, manifest update request failures will cause a fatal error.
  *   Defaults to <code>false</code> if not provided.
  *
  * @exportDoc
@@ -1235,6 +1235,7 @@ shaka.extern.StreamingConfiguration;
 
 /**
  * @typedef {{
+ *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   sourceBufferExtraFeatures: string,
  *   forceTransmux: boolean,
 *    insertFakeEncryptionInInit: boolean
@@ -1243,6 +1244,11 @@ shaka.extern.StreamingConfiguration;
  * @description
  *   Media source configuration.
  *
+ * @property {shaka.config.CodecSwitchingStrategy} codecSwitchingStrategy
+ *   Allow codec switching strategy. SMOOTH loading uses
+ *   SourceBuffer.changeType. RELOAD uses cycling of MediaSource.
+ *   Defaults to SMOOTH if SMOOTH codec switching is supported, RELOAD
+ *   overwise.
  * @property {string} sourceBufferExtraFeatures
  *   Some platforms may need to pass features when initializing the
  *   sourceBuffer.

@@ -351,25 +351,30 @@ describe('DashParser SegmentList', () => {
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
+      getBandwidthEstimate: () => 1e6,
     };
-    const manifest = await dashParser.start('dummy://foo', playerInterface);
-    const stream = manifest.variants[0].video;
-    await stream.createSegmentIndex();
-    goog.asserts.assert(stream.segmentIndex, 'Expected index to be created');
+    try {
+      const manifest = await dashParser.start('dummy://foo', playerInterface);
+      const stream = manifest.variants[0].video;
+      await stream.createSegmentIndex();
+      goog.asserts.assert(stream.segmentIndex, 'Expected index to be created');
 
-    // Don't use Dash.testSegmentIndex since it uses SegmentIndex.find, which
-    // doesn't reproduce this issue.  We want to use Array.from which uses the
-    // iterator.
-    const expected = [
-      ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
-      ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
-      ManifestParser.makeReference('s3.mp4', 20, 30, baseUri),
+      // Don't use Dash.testSegmentIndex since it uses SegmentIndex.find, which
+      // doesn't reproduce this issue.  We want to use Array.from which uses
+      // the iterator.
+      const expected = [
+        ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+        ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
+        ManifestParser.makeReference('s3.mp4', 20, 30, baseUri),
 
-      ManifestParser.makeReference('s3.mp4', 30, 40, baseUri),
-      ManifestParser.makeReference('s4.mp4', 40, 50, baseUri),
-      ManifestParser.makeReference('s5.mp4', 50, 60, baseUri),
-    ];
-    const actual = Array.from(stream.segmentIndex);
-    expect(actual).toEqual(expected);
+        ManifestParser.makeReference('s3.mp4', 30, 40, baseUri),
+        ManifestParser.makeReference('s4.mp4', 40, 50, baseUri),
+        ManifestParser.makeReference('s5.mp4', 50, 60, baseUri),
+      ];
+      const actual = Array.from(stream.segmentIndex);
+      expect(actual).toEqual(expected);
+    } finally {
+      dashParser.stop();
+    }
   });
 });

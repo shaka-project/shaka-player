@@ -233,6 +233,7 @@ module.exports = (config) => {
       {pattern: 'third_party/**/*.js', included: false},
       {pattern: 'test/**/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
+      {pattern: 'test/test/assets/dash-multi-codec/*', included: false},
       {pattern: 'test/test/assets/3675/*', included: false},
       {pattern: 'test/test/assets/dash-aes-128/*', included: false},
       {pattern: 'test/test/assets/hls-raw-aac/*', included: false},

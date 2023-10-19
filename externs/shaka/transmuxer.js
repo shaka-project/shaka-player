@@ -37,7 +37,7 @@ shaka.extern.Transmuxer = class {
    * Returns the original mimetype of the transmuxer.
    * @return {string}
    */
-  getOrginalMimeType() {}
+  getOriginalMimeType() {}
 
   /**
    * Transmux a input data to MP4.
