@@ -207,6 +207,8 @@ shakaDemo.Config = class {
         .addBoolInput_('Enable HLS sequence mode', 'manifest.hls.sequenceMode')
         .addBoolInput_('Ignore Manifest Timestamps in Segments Mode',
             'manifest.hls.ignoreManifestTimestampsInSegmentsMode')
+        .addBoolInput_('Disable codec guessing',
+            'manifest.hls.disableCodecGuessing')
         .addNumberInput_('Availability Window Override',
             'manifest.availabilityWindowOverride',
             /* canBeDecimal= */ true,
