@@ -2587,6 +2587,106 @@ describe('HlsParser', () => {
     expect(actual).toEqual(manifest);
   });
 
+  describe('When config.hls.disableCodecGuessing is set to true', () => {
+    beforeEach(() => {
+      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+      config.hls.disableCodecGuessing = true;
+      parser.configure(config);
+    });
+
+    it('gets codec info from media if omitted in playlist', async () => {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-VERSION:3\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=2000000\n',
+        'video\n',
+      ].join('');
+
+      const media = [
+        '#EXTM3U\n',
+        '#EXT-X-VERSION:3\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-MEDIA-SEQUENCE:0\n',
+        '#EXTINF:5,\n',
+        'video-0.ts\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media)
+          .setResponseValue('test:/video-0.ts', tsSegmentData);
+
+      const actual = await parser.start('test:/master', playerInterface);
+      const variant = actual.variants[0];
+
+      expect(variant.audio).toBe(null);
+      expect(variant.video).toBeDefined();
+      expect(variant.video.codecs).toBe('avc1.42C01E');
+    });
+
+    it('gets codecs from playlist if CODECS attribute present', async () => {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-VERSION:3\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=2000000,CODECS="foo"\n',
+        'video\n',
+      ].join('');
+
+      const media = [
+        '#EXTM3U\n',
+        '#EXT-X-VERSION:3\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-MEDIA-SEQUENCE:0\n',
+        '#EXTINF:5,\n',
+        'video-0.ts\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media)
+          .setResponseValue('test:/video-0.ts', tsSegmentData);
+
+      const actual = await parser.start('test:/master', playerInterface);
+      const variant = actual.variants[0];
+
+      expect(variant.audio).toBe(null);
+      expect(variant.video).toBeDefined();
+      expect(variant.video.codecs).toBe('foo');
+    });
+
+    it('falls back to default codecs if it could not find codec', async () => {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-VERSION:3\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=2000000\n',
+        'video\n',
+      ].join('');
+
+      const media = [
+        '#EXTM3U\n',
+        '#EXT-X-VERSION:3\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-MEDIA-SEQUENCE:0\n',
+        '#EXTINF:5,\n',
+        'video-0.ts\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media)
+          .setResponseValue('test:/video-0.ts', new Uint8Array([]));
+
+      const actual = await parser.start('test:/master', playerInterface);
+      const variant = actual.variants[0];
+
+      expect(variant.video).toBeDefined();
+
+      const codecs = variant.video.codecs.split(',').map((c) => c.trim());
+
+      expect(codecs).toEqual(['avc1.42E01E', 'mp4a.40.2']);
+    });
+  });
+
   describe('produces syncTime', () => {
     // Corresponds to "2000-01-01T00:00:00.00Z".
     // All the PROGRAM-DATE-TIME values in the tests below are at or after this.
