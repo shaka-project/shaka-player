@@ -314,8 +314,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.SHAKA)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.OFFLINE)
-      .setMediaPlaylistFullMimeType('video/mp4; codecs="avc1.4d401f"'),
+      .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Angel One (HLS, MP4, multilingual, Widevine)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',

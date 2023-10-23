@@ -83,8 +83,6 @@ const ShakaDemoAssetInfo = class {
     this.mediaTailorAdsParams = null;
     /** @type {?string} */
     this.mimeType = null;
-    /** @type {?string} */
-    this.mediaPlaylistFullMimeType = null;
 
 
     // Offline storage values.
@@ -172,15 +170,6 @@ const ShakaDemoAssetInfo = class {
   /** @return {boolean} */
   isAes128() {
     return this.drm.length == 1 && this.drm[0] == shakaAssets.KeySystem.AES128;
-  }
-
-  /**
-   * @param {string} mediaPlaylistFullMimeType
-   * @return {!ShakaDemoAssetInfo}
-   */
-  setMediaPlaylistFullMimeType(mediaPlaylistFullMimeType) {
-    this.mediaPlaylistFullMimeType = mediaPlaylistFullMimeType;
-    return this;
   }
 
   /**
@@ -434,11 +423,6 @@ const ShakaDemoAssetInfo = class {
       for (const key in this.extraConfig) {
         config[key] = this.extraConfig[key];
       }
-    }
-
-    if (this.mediaPlaylistFullMimeType) {
-      config.manifest.hls.mediaPlaylistFullMimeType =
-          this.mediaPlaylistFullMimeType;
     }
 
     if (this.licenseServers.size) {
