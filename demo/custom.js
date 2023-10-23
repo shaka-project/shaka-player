@@ -363,6 +363,21 @@ shakaDemo.Custom = class {
     this.makeField_(
         container, manifestTypeName, manifestTypeSetup, manifestTypeChange);
 
+    // Make the MediaTailor URL field.
+    const mediaTailorSetup = (input, container) => {
+      if (assetInProgress.mediaTailorUrl) {
+        input.value = assetInProgress.mediaTailorUrl;
+      }
+    };
+    const mediaTailorOnChange = (input) => {
+      assetInProgress.setMediaTailor(input.value);
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const mediaTailorName = 'Media Tailor URL';
+    this.makeField_(
+        container, mediaTailorName, mediaTailorSetup, mediaTailorOnChange);
+
     return adsDiv;
   }
 
@@ -625,7 +640,10 @@ shakaDemo.Custom = class {
     // from the Google Ad Manager using IMA ids.
     const isDaiAdManifest = (assetInProgress.imaContentSrcId &&
         assetInProgress.imaVideoId) || assetInProgress.imaAssetKey != null;
-    return !isDaiAdManifest;
+    // The manifest field is required unless we're getting the manifest
+    // from AWS Elemental MediaTailor.
+    const isMediaTailor = !!assetInProgress.mediaTailorUrl;
+    return !isDaiAdManifest && !isMediaTailor;
   }
 
   /**
