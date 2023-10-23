@@ -56,5 +56,14 @@ describe('TransmuxerEngine', () => {
           ContentType.VIDEO, 'video/MP2T; codecs="avc1.420001"'))
           .toBe('video/mp4; codecs="avc1.420001"');
     });
+
+    it('converts legacy avc1 codec strings', () => {
+      expect(convertCodecs(
+          ContentType.VIDEO, 'video/mp2t; codecs="avc1.100.42"'))
+          .toBe('video/mp4; codecs="avc1.64002a"');
+      expect(convertCodecs(
+          ContentType.VIDEO, 'video/mp2t; codecs="avc1.66.1"'))
+          .toBe('video/mp4; codecs="avc1.420001"');
+    });
   });
 });
