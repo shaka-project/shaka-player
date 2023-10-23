@@ -425,6 +425,37 @@ shakaDemo.Custom = class {
    * @return {!Element} div
    * @private
    */
+  makeAssetDialogContentsExtraTracks_(assetInProgress, inputsToCheck) {
+    const extraTracksDiv = document.createElement('div');
+    const containerStyle = shakaDemo.InputContainer.Style.FLEX;
+    const container = new shakaDemo.InputContainer(
+        extraTracksDiv, /* headerText= */ null, containerStyle,
+        /* docLink= */ null);
+    container.getClassList().add('wide-input');
+    container.setDefaultRowClass('wide-input');
+
+    const thumbnailsUrlSetup = (input, container) => {
+      if (assetInProgress.extraThumbnail.length) {
+        input.value = assetInProgress.extraThumbnail[0];
+      }
+    };
+    const thumbnailsUrlOnChange = (input) => {
+      assetInProgress.extraThumbnail = [];
+      assetInProgress.addExtraThumbnail(input.value);
+    };
+
+    this.makeField_(
+        container, 'Thumbnails URL', thumbnailsUrlSetup, thumbnailsUrlOnChange);
+
+    return extraTracksDiv;
+  }
+
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @return {!Element} div
+   * @private
+   */
   makeAssetDialogContentsExtra_(assetInProgress, inputsToCheck) {
     const extraConfigDiv = document.createElement('div');
     const containerStyle = shakaDemo.InputContainer.Style.FLEX;
@@ -645,6 +676,8 @@ shakaDemo.Custom = class {
         assetInProgress, inputsToCheck);
     const adsDiv = this.makeAssetDialogContentsAds_(
         assetInProgress, inputsToCheck);
+    const extraTracksDiv = this.makeAssetDialogContentsExtraTracks_(
+        assetInProgress, inputsToCheck);
     const extraConfigDiv = this.makeAssetDialogContentsExtra_(
         assetInProgress, inputsToCheck);
     const finishDiv = this.makeAssetDialogContentsFinish_(
@@ -679,6 +712,7 @@ shakaDemo.Custom = class {
     addTabButton('Drm', drmDiv, /* startOn= */ false);
     addTabButton('Headers', headersDiv, /* startOn= */ false);
     addTabButton('Ads', adsDiv, /* startOn= */ false);
+    addTabButton('Extra Tracks', extraTracksDiv, /* startOn= */ false);
     addTabButton('Extra Config', extraConfigDiv, /* startOn= */ false);
 
     // Append the divs in the desired order.
@@ -687,6 +721,7 @@ shakaDemo.Custom = class {
     this.dialog_.appendChild(drmDiv);
     this.dialog_.appendChild(headersDiv);
     this.dialog_.appendChild(adsDiv);
+    this.dialog_.appendChild(extraTracksDiv);
     this.dialog_.appendChild(extraConfigDiv);
     this.dialog_.appendChild(finishDiv);
     this.dialog_.appendChild(iconDiv);
