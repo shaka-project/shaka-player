@@ -139,7 +139,8 @@ shaka.extern.ManifestDB;
  *   spatialAudio: boolean,
  *   closedCaptions: Map.<string, string>,
  *   tilesLayout: (string|undefined),
- *   external: boolean
+ *   external: boolean,
+ *   fastSwitching: boolean
  * }}
  *
  * @property {number} id
@@ -208,6 +209,8 @@ shaka.extern.ManifestDB;
  * @property {boolean} external
  *   Indicate if the stream was added externally.
  *   Eg: external text tracks.
+ * @property {boolean} fastSwitching
+ *   Indicate if the stream should be used for fast switching.
  */
 shaka.extern.StreamDB;
 

@@ -2765,51 +2765,76 @@ describe('DashParser Manifest', () => {
     });
   });
 
-  describe('parses urn:mpeg:dash:ssr:2023', () => {
-    it('prioritize over normal AdaptationSet when has the same number of streams', async () => { // eslint-disable-line max-len
-      const manifestText = [
-        '<MPD minBufferTime="PT75S">',
-        '  <Period id="1" duration="PT30S">',
-        '    <AdaptationSet id="1" mimeType="video/mp4">',
-        '      <Representation bandwidth="1" codecs="avc1.4d401f">',
-        '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4"',
-        '          initialization="init.mp4" timescale="50" duration="100">',
-        '          <SegmentTimeline>',
-        '            <S t="0" d="100"/>',
-        '            <S d="100"/>',
-        '          </SegmentTimeline>',
-        '        </SegmentTemplate>',
-        '      </Representation>',
-        '    </AdaptationSet>',
-        '    <AdaptationSet id="2" mimeType="video/mp4">',
-        '      <EssentialProperty value="video_primary" ',
-        '        schemeIdUri="urn:mpeg:dash:ssr:2023" />',
-        '      <Representation bandwidth="1" codecs="avc1.4d401f">',
-        '        <SegmentTemplate startNumber="1"',
-        '          media="l-$Number$-p$SubNumber$.mp4"',
-        '          initialization="init.mp4" timescale="50" duration="100">',
-        '            <SegmentTimeline>',
-        '              <S t="0" d="100" k="4"/>',
-        '              <S d="100" k="4"/>',
-        '            </SegmentTimeline>',
-        '        </SegmentTemplate>',
-        '      </Representation>',
-        '    </AdaptationSet>',
-        '  </Period>',
-        '</MPD>',
-      ].join('\n');
+  it('prioritize stream with urn:mpeg:dash:ssr:2023 over normal stream', async () => { // eslint-disable-line max-len
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f"',
+      '          height="720" width="1280">',
+      '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4"',
+      '          initialization="init.mp4" timescale="50" duration="100">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="100"/>',
+      '            <S d="100"/>',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '      <Representation bandwidth="2" codecs="avc1.4d401f"',
+      '          height="1080" width="1920">',
+      '        <SegmentTemplate startNumber="1" media="l2-$Number$.mp4"',
+      '          initialization="init.mp4" timescale="50" duration="100">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="100"/>',
+      '            <S d="100"/>',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <EssentialProperty value="video_primary" ',
+      '        schemeIdUri="urn:mpeg:dash:ssr:2023" />',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f"',
+      '          height="720" width="1280">',
+      '        <SegmentTemplate startNumber="1"',
+      '          media="l-$Number$-p$SubNumber$.mp4"',
+      '          initialization="init.mp4" timescale="50" duration="100">',
+      '            <SegmentTimeline>',
+      '              <S t="0" d="100" k="4"/>',
+      '              <S d="100" k="4"/>',
+      '            </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
-      /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
-      expect(manifest.variants.length).toBe(1);
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    expect(manifest.variants.length).toBe(2);
 
-      const stream = manifest.variants[0].video;
-      await stream.createSegmentIndex();
-      goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+    const normalStream = manifest.variants[0].video;
+    expect(normalStream.width).toBe(1920);
+    expect(normalStream.height).toBe(1080);
+    expect(normalStream.fastSwitching).toBe(false);
+    await normalStream.createSegmentIndex();
+    goog.asserts.assert(normalStream.segmentIndex != null,
+        'Null segmentIndex!');
 
-      const firstReference = stream.segmentIndex.get(0);
-      expect(firstReference.partialReferences.length).toBe(4);
-    });
+    const firstNormalReference = normalStream.segmentIndex.get(0);
+    expect(firstNormalReference.partialReferences.length).toBe(0);
+
+    const stream = manifest.variants[1].video;
+    expect(stream.width).toBe(1280);
+    expect(stream.height).toBe(720);
+    expect(stream.fastSwitching).toBe(true);
+    await stream.createSegmentIndex();
+    goog.asserts.assert(stream.segmentIndex != null,
+        'Null segmentIndex!');
+
+    const firstReference = stream.segmentIndex.get(0);
+    expect(firstReference.partialReferences.length).toBe(4);
   });
 });

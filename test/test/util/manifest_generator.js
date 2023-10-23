@@ -561,6 +561,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.accessibilityPurpose;
       /** @type {boolean} */
       this.external = false;
+      /** @type {boolean} */
+      this.fastSwitching = false;
     }
 
     /** @type {shaka.extern.Stream} */
