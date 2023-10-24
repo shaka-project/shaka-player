@@ -609,7 +609,7 @@ describe('AdaptationSetCriteria', () => {
       ]);
     });
 
-    it('filters by audio group if present', () => {
+    it('filters by audio group if enabled', () => {
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(1, (variant) => {
           variant.language = 'en';
@@ -634,7 +634,8 @@ describe('AdaptationSetCriteria', () => {
         });
       });
 
-      const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0, '');
+      const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0, '',
+          '', shaka.config.CodecSwitchingStrategy.RELOAD, true);
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
