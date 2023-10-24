@@ -831,6 +831,18 @@ goog.Uri.QueryData.prototype.add = function(key, value) {
 
 
 /**
+ * Get the values from a key.
+ *
+ * @param {string} key Name.
+ * @return {Array.<string>}
+ */
+ goog.Uri.QueryData.prototype.get = function(key) {
+  this.ensureKeyMapInitialized_();
+  return this.keyMap_[key] || [];
+};
+
+
+/**
  * @return {string} Encoded query string.
  * @override
  */
