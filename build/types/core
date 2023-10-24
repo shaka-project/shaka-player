@@ -61,6 +61,7 @@
 
 +../../lib/text/cue.js
 +../../lib/text/simple_text_displayer.js
++../../lib/text/stub_text_displayer.js
 +../../lib/text/text_engine.js
 +../../lib/text/text_utils.js
 +../../lib/text/ui_text_displayer.js
