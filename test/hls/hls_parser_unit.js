@@ -4292,11 +4292,14 @@ describe('HlsParser', () => {
     it('parse variables master playlist', async () => {
       const master = [
         '#EXTM3U\n',
-        '#EXT-X-DEFINE:NAME="auth",VALUE="?token=1"\n',
+        '#EXT-X-DEFINE:NAME="auth",VALUE="token=1"\n',
+        '#EXT-X-DEFINE:QUERYPARAM="a"\n',
+        '#EXT-X-DEFINE:QUERYPARAM="b"\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
         'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
-        'audio.m3u8{$auth}\n',
-        '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="video.m3u8{$auth}"',
+        'audio.m3u8?{$auth}&a={$a}&b={$b}\n',
+        '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",',
+        'URI="video.m3u8?{$auth}&a={$a}&b={$b}"',
       ].join('');
 
       const media = [
@@ -4308,14 +4311,14 @@ describe('HlsParser', () => {
       ].join('');
 
       fakeNetEngine
-          .setResponseText('test:/host/master.m3u8', master)
-          .setResponseText('test:/host/audio.m3u8?token=1', media)
-          .setResponseText('test:/host/video.m3u8?token=1', media)
+          .setResponseText('test:/host/master.m3u8?a=1&b=2', master)
+          .setResponseText('test:/host/audio.m3u8?token=1&a=1&b=2', media)
+          .setResponseText('test:/host/video.m3u8?token=1&a=1&b=2', media)
           .setResponseValue('test:/host/init.mp4', initSegmentData)
           .setResponseValue('test:/host/segment.mp4', segmentData);
 
-      const actual =
-          await parser.start('test:/host/master.m3u8', playerInterface);
+      const actual = await parser.start(
+          'test:/host/master.m3u8?a=1&b=2', playerInterface);
       await loadAllStreamsFor(actual);
       const video = actual.variants[0].video;
       const audio = actual.variants[0].audio;
@@ -4341,26 +4344,28 @@ describe('HlsParser', () => {
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
         'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
-        'audio.m3u8\n',
-        '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="video.m3u8"',
+        'audio.m3u8?fooParam=1\n',
+        '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="video.m3u8?fooParam=1"',
       ].join('');
 
       const media = [
         '#EXTM3U\n',
-        '#EXT-X-DEFINE:NAME="auth",VALUE="?token=1"\n',
+        '#EXT-X-DEFINE:NAME="auth",VALUE="token=1"\n',
         '#EXT-X-DEFINE:NAME="path",VALUE="test/"\n',
+        '#EXT-X-DEFINE:QUERYPARAM="fooParam"\n',
         '#EXT-X-PLAYLIST-TYPE:VOD\n',
         '#EXT-X-MAP:URI="{$path}init.mp4"\n',
         '#EXTINF:5,\n',
-        '{$path}segment.mp4{$auth}',
+        '{$path}segment.mp4?{$auth}&fooParam={$fooParam}',
       ].join('');
 
       fakeNetEngine
           .setResponseText('test:/host/master.m3u8', master)
-          .setResponseText('test:/host/audio.m3u8', media)
-          .setResponseText('test:/host/video.m3u8', media)
+          .setResponseText('test:/host/audio.m3u8?fooParam=1', media)
+          .setResponseText('test:/host/video.m3u8?fooParam=1', media)
           .setResponseValue('test:/host/test/init.mp4', initSegmentData)
-          .setResponseValue('test:/host/test/segment.mp4?token=1', segmentData);
+          .setResponseValue('test:/host/test/segment.mp4?token=1&fooParam=1',
+              segmentData);
 
       const actual =
           await parser.start('test:/host/master.m3u8', playerInterface);
@@ -4377,11 +4382,11 @@ describe('HlsParser', () => {
       // flow has gone well.
       const videoReference = Array.from(video.segmentIndex)[0];
       expect(videoReference.getUris())
-          .toEqual(['test:/host/test/segment.mp4?token=1']);
+          .toEqual(['test:/host/test/segment.mp4?token=1&fooParam=1']);
 
       const audioReference = Array.from(audio.segmentIndex)[0];
       expect(audioReference.getUris())
-          .toEqual(['test:/host/test/segment.mp4?token=1']);
+          .toEqual(['test:/host/test/segment.mp4?token=1&fooParam=1']);
     });
 
     it('import variables in media from master playlist', async () => {
