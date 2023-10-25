@@ -40,6 +40,7 @@
 +../../lib/media/stall_detector.js
 +../../lib/media/streaming_engine.js
 +../../lib/media/segment_prefetch.js
++../../lib/media/segment_utils.js
 +../../lib/media/time_ranges_utils.js
 +../../lib/media/video_wrapper.js
 +../../lib/media/webm_segment_index_parser.js
@@ -107,7 +108,6 @@
 +../../lib/util/player_configuration.js
 +../../lib/util/pssh.js
 +../../lib/util/public_promise.js
-+../../lib/util/segment_utils.js
 +../../lib/util/state_history.js
 +../../lib/util/stats.js
 +../../lib/util/stream_utils.js
