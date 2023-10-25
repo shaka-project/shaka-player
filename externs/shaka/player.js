@@ -216,6 +216,7 @@ shaka.extern.BufferedInfo;
  *   frameRate: ?number,
  *   pixelAspectRatio: ?string,
  *   hdr: ?string,
+ *   videoLayout: ?string,
  *   mimeType: ?string,
  *   audioMimeType: ?string,
  *   videoMimeType: ?string,
@@ -280,6 +281,8 @@ shaka.extern.BufferedInfo;
  *   The video pixel aspect ratio provided in the manifest, if present.
  * @property {?string} hdr
  *   The video HDR provided in the manifest, if present.
+ * @property {?string} videoLayout
+ *   The video layout provided in the manifest, if present.
  * @property {?string} mimeType
  *   The MIME type of the content provided in the manifest.
  * @property {?string} audioMimeType
@@ -1537,6 +1540,7 @@ shaka.extern.OfflineConfiguration;
  *   preferredAudioCodecs: !Array.<string>,
  *   preferredAudioChannelCount: number,
  *   preferredVideoHdrLevel: string,
+ *   preferredVideoLayout: string,
  *   preferredDecodingAttributes: !Array.<string>,
  *   preferForcedSubs: boolean,
  *   restrictions: shaka.extern.Restrictions,
@@ -1597,6 +1601,12 @@ shaka.extern.OfflineConfiguration;
  *   Defaults to 'AUTO'.
  *   Note that one some platforms, such as Chrome, attempting to play PQ content
  *   may cause problems.
+ * @property {string} preferredVideoLayout
+ *   The preferred video layout of the video.
+ *   Can be 'CH-STEREO', 'CH-MONO', or '' for no preference.
+ *   If the content is predominantly stereoscopic you should use 'CH-STEREO'.
+ *   If the content is predominantly monoscopic you should use 'CH-MONO'.
+ *   Defaults to ''.
  * @property {!Array.<string>} preferredDecodingAttributes
  *   The list of preferred attributes of decodingInfo, in the order of their
  *   priorities.

@@ -364,6 +364,7 @@ shaka.extern.FetchCryptoKeysFunction;
  *   frameRate: (number|undefined),
  *   pixelAspectRatio: (string|undefined),
  *   hdr: (string|undefined),
+ *   videoLayout: (string|undefined),
  *   bandwidth: (number|undefined),
  *   width: (number|undefined),
  *   height: (number|undefined),
@@ -434,6 +435,9 @@ shaka.extern.FetchCryptoKeysFunction;
  * @property {(string|undefined)} hdr
  *   <i>Video streams only.</i> <br>
  *   The Stream's HDR info
+ * @property {(string|undefined)} videoLayout
+ *   <i>Video streams only.</i> <br>
+ *   The Stream's video layout info.
  * @property {(number|undefined)} bandwidth
  *   <i>Audio and video streams only.</i> <br>
  *   The stream's required bandwidth in bits per second.
