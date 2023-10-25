@@ -7,7 +7,7 @@
 describe('ContentWorkarounds', () => {
   const encryptionBoxes = {
     'encv': ['hev1', 'hvc1', 'avc1', 'avc3'],
-    'enca': ['ac-3', 'ec-3', 'mp4a'],
+    'enca': ['ac-3', 'ec-3', 'ac-4', 'mp4a'],
   };
   for (const encryptionBox of Object.keys(encryptionBoxes)) {
     for (const box of encryptionBoxes[encryptionBox]) {
