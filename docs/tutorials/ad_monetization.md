@@ -7,6 +7,60 @@ other ad providers in v3.1+.
 Please note that the current API is likely to undergo significant
 changes as our support extends.
 
+#### AWS Elemental MediaTailor Integration
+
+Shaka Player provides an integration with the [AWS Elemental MediaTailor][].
+We support Client Side, Server Side and overlays ad insertion.
+
+[AWS Elemental MediaTailor]: https://aws.amazon.com/mediatailor/
+
+All ad insertion experiences are available through the
+{@linksource shaka.extern.IAdManager} object on the Player.
+
+If you're not using Shaka's UI library, you will
+also need to create a `<div>` over your video element to serve as an ad
+container.
+
+Start by initializing the server side logic.
+With Shaka UI:
+
+```js
+const video = document.getElementById('video');
+const ui = video['ui'];
+const controls = video.ui.getControls();
+// If you're using a non-UI build, this is the div you'll need to create
+// for your layout.
+const container = controls.getServerSideAdContainer();
+const player = controls.getPlayer();
+const netEngine = player.getNetworkingEngine();
+const adManager = player.getAdManager();
+adManager.initMediaTailor(container, netEngine, video);
+```
+
+Requesting a Client Side stream:
+
+```js
+const mediaTailorUrl = 'https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-VOD-HLS-DASH/out/v1/b94f3611978f419985a18335bac9d9cb/ddb73bf548a44551a0059c346226445a/eaa5485198bf497284559efb8172425e/index.mpd';
+const mediaTailorAdsParams = {
+  adsParams: {
+    assetid: 'test2',
+    podduration: '15',
+  },
+};
+const uri = await adManager.requestMediaTailorStream(mediaTailorUrl, mediaTailorAdsParams);
+player.load(uri);
+```
+
+Requesting a Server Side stream:
+
+```js
+const mediaTailorUrl = 'https://ad391cc0d55b44c6a86d232548adc225.mediatailor.us-east-1.amazonaws.com/v1/session/d02fedbbc5a68596164208dd24e9b48aa60dadc7/singssai/master.m3u8';
+const uri = await adManager.requestMediaTailorStream(mediaTailorUrl);
+player.load(uri);
+```
+
+Note: overlays ad insertions is the same as server side.
+
 #### IMA SDK Integration
 
 Shaka Player provides an integration with the [Interactive Media Ads][] SDKs.
