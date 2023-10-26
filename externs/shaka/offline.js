@@ -122,6 +122,7 @@ shaka.extern.ManifestDB;
  *   frameRate: (number|undefined),
  *   pixelAspectRatio: (string|undefined),
  *   hdr: (string|undefined),
+ *   videoLayout: (string|undefined),
  *   kind: (string|undefined),
  *   language: string,
  *   originalLanguage: (?string|undefined),
@@ -165,6 +166,8 @@ shaka.extern.ManifestDB;
  *   The Stream's pixel aspect ratio
  * @property {(string|undefined)} hdr
  *   The Stream's HDR info
+ * @property {(string|undefined)} videoLayout
+ *   The Stream's video layout info.
  * @property {(string|undefined)} kind
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language
@@ -200,7 +203,8 @@ shaka.extern.ManifestDB;
  *   A map containing the description of closed captions, with the caption
  *   channel number (CC1 | CC2 | CC3 | CC4) as the key and the language code
  *   as the value. If the channel number is not provided by the description,
- *   we'll set an 0-based index as the key.
+ *   we'll set a 0-based index as the key. If the language code is not
+ *   provided by the description we'll set the same value as channel number.
  *   Example: {'CC1': 'eng'; 'CC3': 'swe'}, or {'1', 'eng'; '2': 'swe'}, etc.
  * @property {(string|undefined)} tilesLayout
  *   The value is a grid-item-dimension consisting of two positive decimal
