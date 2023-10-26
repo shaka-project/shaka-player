@@ -1074,6 +1074,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
         /* tileDuration= */ undefined,
         /* syncTime= */ undefined,
         /* status= */ undefined,
-        /* aes128Key= */ aes128Key);
+        /* aes128Key= */ aes128Key,
+        /* allPartialSegments= */ partialReferences.length > 0);
   }
 });

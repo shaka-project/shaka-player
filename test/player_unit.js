@@ -1506,6 +1506,7 @@ describe('Player', () => {
           frameRate: 1000000 / 42000,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1544,6 +1545,7 @@ describe('Player', () => {
           frameRate: 24,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1582,6 +1584,7 @@ describe('Player', () => {
           frameRate: 1000000 / 42000,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1620,6 +1623,7 @@ describe('Player', () => {
           frameRate: 24,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1658,6 +1662,7 @@ describe('Player', () => {
           frameRate: 1000000 / 42000,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1696,6 +1701,7 @@ describe('Player', () => {
           frameRate: 24,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1734,6 +1740,7 @@ describe('Player', () => {
           frameRate: 1000000 / 42000,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1772,6 +1779,7 @@ describe('Player', () => {
           frameRate: 24,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1829,6 +1837,7 @@ describe('Player', () => {
           frameRate: null,
           pixelAspectRatio: null,
           hdr: null,
+          videoLayout: null,
           videoId: null,
           audioId: null,
           originalAudioId: null,
@@ -1867,6 +1876,7 @@ describe('Player', () => {
           frameRate: null,
           pixelAspectRatio: null,
           hdr: null,
+          videoLayout: null,
           videoId: null,
           audioId: null,
           originalAudioId: null,
@@ -1905,6 +1915,7 @@ describe('Player', () => {
           frameRate: null,
           pixelAspectRatio: null,
           hdr: null,
+          videoLayout: null,
           videoId: null,
           audioId: null,
           originalAudioId: null,
@@ -1946,6 +1957,7 @@ describe('Player', () => {
           frameRate: null,
           pixelAspectRatio: null,
           hdr: null,
+          videoLayout: null,
           videoId: null,
           audioId: null,
           originalAudioId: null,
@@ -4180,6 +4192,69 @@ describe('Player', () => {
         const thumbnail8 = await player.getThumbnails(5, 80);
         expect(thumbnail8.startTime).toBe(80);
         expect(thumbnail8.duration).toBe(10);
+      });
+    });
+
+    describe('getAllThumbnails', () => {
+      it('returns all thumbnails', async () => {
+        const uris = () => ['thumbnail'];
+        const ref = new shaka.media.SegmentReference(
+            0, 60, uris, 0, null, null, 0, 0, Infinity, [],
+        );
+        const index = new shaka.media.SegmentIndex([ref]);
+
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1);
+          });
+          manifest.addImageStream(5, (stream) => {
+            stream.originalId = 'thumbnail';
+            stream.width = 200;
+            stream.height = 150;
+            stream.mimeType = 'image/jpeg';
+            stream.tilesLayout = '2x3';
+            stream.segmentIndex = index;
+          });
+        });
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        expect(player.getImageTracks()[0].width).toBe(100);
+        expect(player.getImageTracks()[0].height).toBe(50);
+        const thumbnails = await player.getAllThumbnails(5);
+        expect(thumbnails.length).toBe(6);
+        expect(thumbnails[0]).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
+          positionX: 0,
+          positionY: 0,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnails[1]).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
+          positionX: 100,
+          positionY: 0,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnails[2]).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
+          positionX: 0,
+          positionY: 50,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnails[5]).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
+          positionX: 100,
+          positionY: 100,
+          width: 100,
+          height: 50,
+        }));
       });
     });
   });

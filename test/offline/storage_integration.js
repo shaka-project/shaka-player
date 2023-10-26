@@ -1383,6 +1383,7 @@ filterDescribe('Storage', storageSupport, () => {
       frameRate: 30,
       pixelAspectRatio: '59:54',
       hdr: null,
+      videoLayout: null,
       mimeType: 'video/mp4,audio/mp4',
       audioMimeType: 'audio/mp4',
       videoMimeType: 'video/mp4',
@@ -1429,6 +1430,7 @@ filterDescribe('Storage', storageSupport, () => {
       frameRate: null,
       pixelAspectRatio: null,
       hdr: null,
+      videoLayout: null,
       mimeType: 'text/vtt',
       audioMimeType: null,
       videoMimeType: null,
@@ -1743,6 +1745,9 @@ filterDescribe('Storage', storageSupport, () => {
 
     /** @override */
     onExpirationUpdated(session, number) {}
+
+    /** @override */
+    onInitialVariantChosen(variant) {}
   };
 
   /**

@@ -19,7 +19,12 @@ describe('AdaptationSetCriteria', () => {
         });
       });
 
-      const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0, '');
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ 'en',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -40,7 +45,12 @@ describe('AdaptationSetCriteria', () => {
         });
       });
 
-      const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0, '');
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ 'en',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -86,8 +96,14 @@ describe('AdaptationSetCriteria', () => {
           return true;
         };
 
-        const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0, '',
-            undefined, shaka.config.CodecSwitchingStrategy.SMOOTH);
+        const builder = new shaka.media.PreferenceBasedCriteria(
+            /* language= */ 'en',
+            /* role= */ '',
+            /* channelCount= */ 0,
+            /* hdrLevel= */ '',
+            /* videoLayout= */ '',
+            /* label= */ '',
+            shaka.config.CodecSwitchingStrategy.SMOOTH);
         const set = builder.create(manifest.variants);
 
         expect(Array.from(set.values()).length).toBe(3);
@@ -126,8 +142,14 @@ describe('AdaptationSetCriteria', () => {
         });
       });
 
-      const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0, '',
-          undefined, shaka.config.CodecSwitchingStrategy.RELOAD);
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ 'en',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ '',
+          /* label= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD);
       const set = builder.create(manifest.variants);
 
       expect(Array.from(set.values()).length).toBe(1);
@@ -156,7 +178,11 @@ describe('AdaptationSetCriteria', () => {
       });
 
       const builder = new shaka.media.PreferenceBasedCriteria(
-          'en', 'main', 0, '');
+          /* language= */ 'en',
+          /* role= */ 'main',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -205,7 +231,12 @@ describe('AdaptationSetCriteria', () => {
         });
       });
 
-      const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0, '');
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ 'en',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
       // Which role is chosen is an implementation detail.
@@ -263,7 +294,12 @@ describe('AdaptationSetCriteria', () => {
         });
       });
 
-      const builder = new shaka.media.PreferenceBasedCriteria('zh', '', 0, '');
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ 'zh',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
       // Which role is chosen is an implementation detail.
@@ -299,7 +335,12 @@ describe('AdaptationSetCriteria', () => {
         });
       });
 
-      const builder = new shaka.media.PreferenceBasedCriteria('zh', '', 0, '');
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ 'zh',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
       // Which language is chosen is an implementation detail.
@@ -356,7 +397,11 @@ describe('AdaptationSetCriteria', () => {
           });
 
           const builder = new shaka.media.PreferenceBasedCriteria(
-              'zh', '', 0, '');
+              /* language= */ 'zh',
+              /* role= */ '',
+              /* channelCount= */ 0,
+              /* hdrLevel= */ '',
+              /* videoLayout= */ '');
           const set = builder.create(manifest.variants);
 
           // Which role is chosen is an implementation detail. Each role is
@@ -414,7 +459,11 @@ describe('AdaptationSetCriteria', () => {
           });
 
           const builder = new shaka.media.PreferenceBasedCriteria(
-              'zh', '', 0, '');
+              /* language= */ 'zh',
+              /* role= */ '',
+              /* channelCount= */ 0,
+              /* hdrLevel= */ '',
+              /* videoLayout= */ '');
           const set = builder.create(manifest.variants);
 
           checkSet(set, [
@@ -442,12 +491,82 @@ describe('AdaptationSetCriteria', () => {
         });
       });
 
-      const builder = new shaka.media.PreferenceBasedCriteria('', '', 0, 'PQ');
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ '',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ 'PQ',
+          /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[0],
         manifest.variants[2],
+      ]);
+    });
+
+    it('chooses variants with preferred video layout (CH-STEREO)', () => {
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(10, (stream) => {
+            stream.videoLayout = 'CH-STEREO';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(20, (stream) => {
+            stream.videoLayout = 'CH-MONO';
+          });
+        });
+        manifest.addVariant(3, (variant) => {
+          variant.addVideo(30, (stream) => {
+            stream.videoLayout = '';
+          });
+        });
+      });
+
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ '',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ 'CH-STEREO');
+      const set = builder.create(manifest.variants);
+
+      checkSet(set, [
+        manifest.variants[0],
+        manifest.variants[2],
+      ]);
+    });
+
+    it('chooses variants with preferred video layout (CH-MONO)', () => {
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(10, (stream) => {
+            stream.videoLayout = 'CH-STEREO';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(20, (stream) => {
+            stream.videoLayout = 'CH-MONO';
+          });
+        });
+        manifest.addVariant(3, (variant) => {
+          variant.addVideo(30, (stream) => {
+            stream.videoLayout = 'CH-STEREO';
+          });
+        });
+      });
+
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ '',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ 'CH-MONO');
+      const set = builder.create(manifest.variants);
+
+      checkSet(set, [
+        manifest.variants[1],
       ]);
     });
 
@@ -470,7 +589,12 @@ describe('AdaptationSetCriteria', () => {
         });
       });
 
-      const builder = new shaka.media.PreferenceBasedCriteria('', '', 2, '');
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ '',
+          /* role= */ '',
+          /* channelCount= */ 2,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -499,8 +623,12 @@ describe('AdaptationSetCriteria', () => {
         });
       });
 
-      const builder =
-          new shaka.media.PreferenceBasedCriteria('', '', 6, '');
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ '',
+          /* role= */ '',
+          /* channelCount= */ 6,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -529,7 +657,12 @@ describe('AdaptationSetCriteria', () => {
         });
       });
 
-      const builder = new shaka.media.PreferenceBasedCriteria('', '', 2, '');
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ '',
+          /* role= */ '',
+          /* channelCount= */ 2,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -558,7 +691,12 @@ describe('AdaptationSetCriteria', () => {
       });
 
       const builder = new shaka.media.PreferenceBasedCriteria(
-          '', '', 0, '', 'preferredLabel');
+          /* language= */ '',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ '',
+          /* label= */ 'preferredLabel');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -600,7 +738,12 @@ describe('AdaptationSetCriteria', () => {
       });
 
       const builder = new shaka.media.PreferenceBasedCriteria(
-          'zh', '', 0, '', 'preferredLabel');
+          /* language= */ 'zh',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ '',
+          /* label= */ 'preferredLabel');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -609,7 +752,7 @@ describe('AdaptationSetCriteria', () => {
       ]);
     });
 
-    it('filters by audio group if present', () => {
+    it('filters by audio group if enabled', () => {
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(1, (variant) => {
           variant.language = 'en';
@@ -634,7 +777,15 @@ describe('AdaptationSetCriteria', () => {
         });
       });
 
-      const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0, '');
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ 'en',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ '',
+          /* label= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ true);
       const set = builder.create(manifest.variants);
 
       checkSet(set, [

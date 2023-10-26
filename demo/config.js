@@ -207,6 +207,8 @@ shakaDemo.Config = class {
         .addBoolInput_('Enable HLS sequence mode', 'manifest.hls.sequenceMode')
         .addBoolInput_('Ignore Manifest Timestamps in Segments Mode',
             'manifest.hls.ignoreManifestTimestampsInSegmentsMode')
+        .addBoolInput_('Disable codec guessing',
+            'manifest.hls.disableCodecGuessing')
         .addNumberInput_('Availability Window Override',
             'manifest.availabilityWindowOverride',
             /* canBeDecimal= */ true,
@@ -435,6 +437,19 @@ shakaDemo.Config = class {
     };
     this.addSelectInput_('Preferred HDR Level', 'preferredVideoHdrLevel',
         hdrLevels, hdrLevelNames);
+
+    const videoLayouts = {
+      '': '',
+      'CH-STEREO': 'CH-STEREO',
+      'CH-MONO': 'CH-MONO',
+    };
+    const videoLayoutsNames = {
+      'CH-STEREO': 'Stereoscopic',
+      'CH-MONO': 'Monoscopic',
+      '': 'No Preference',
+    };
+    this.addSelectInput_('Preferred video layout', 'preferredVideoLayout',
+        videoLayouts, videoLayoutsNames);
 
     this.addBoolInput_('Start At Segment Boundary',
         'streaming.startAtSegmentBoundary')
