@@ -503,8 +503,8 @@ shaka.extern.FetchCryptoKeysFunction;
  *   A map containing the description of closed captions, with the caption
  *   channel number (CC1 | CC2 | CC3 | CC4) as the key and the language code
  *   as the value. If the channel number is not provided by the description,
- *   we'll set an 0-based index as the key. If the language code is not
- *   provided by the description we'll set the same vale as channel number.
+ *   we'll set a 0-based index as the key. If the language code is not
+ *   provided by the description we'll set the same value as channel number.
  *   Example: {'CC1': 'eng'; 'CC3': 'swe'}, or {'1', 'eng'; '2': 'swe'}, etc.
  * @property {(string|undefined)} tilesLayout
  *   <i>Image streams only.</i> <br>
