@@ -640,8 +640,7 @@ shakaDemo.Custom = class {
     // from the Google Ad Manager using IMA ids.
     const isDaiAdManifest = (assetInProgress.imaContentSrcId &&
         assetInProgress.imaVideoId) || assetInProgress.imaAssetKey != null;
-    // The manifest field is required unless we're getting the manifest
-    // from AWS Elemental MediaTailor.
+    // Or if we are getting it from AWS Elemental MediaTailor.
     const isMediaTailor = !!assetInProgress.mediaTailorUrl;
     return !isDaiAdManifest && !isMediaTailor;
   }
