@@ -84,6 +84,13 @@ shaka.extern.ICaptionDecoder = class {
    * @exportDoc
    */
   clear() {}
+
+  /**
+   * Returns the streams that the CEA decoder found.
+   * @return {!Array.<string>}
+   * @exportDoc
+   */
+  getStreams() {}
 };
 
 /**
