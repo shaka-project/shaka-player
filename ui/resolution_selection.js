@@ -97,7 +97,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
         otherIdx = tracks.findIndex((t) => {
           return t.height == track.height &&
               t.frameRate == track.frameRate &&
-              t.hdr == track.hdr;
+              t.hdr == track.hdr &&
+              t.videoLayout == track.videoLayout;
         });
       }
       return otherIdx == idx;
@@ -149,6 +150,9 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
         }
         if (track.hdr == 'PQ' || track.hdr == 'HLG') {
           text += ' (HDR)';
+        }
+        if (track.videoLayout == 'CH-STEREO') {
+          text += ' (3D)';
         }
         span.textContent = text;
       }
