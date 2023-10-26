@@ -122,6 +122,7 @@ shaka.extern.ManifestDB;
  *   frameRate: (number|undefined),
  *   pixelAspectRatio: (string|undefined),
  *   hdr: (string|undefined),
+ *   videoLayout: (string|undefined),
  *   kind: (string|undefined),
  *   language: string,
  *   originalLanguage: (?string|undefined),
@@ -164,6 +165,8 @@ shaka.extern.ManifestDB;
  *   The Stream's pixel aspect ratio
  * @property {(string|undefined)} hdr
  *   The Stream's HDR info
+ * @property {(string|undefined)} videoLayout
+ *   The Stream's video layout info.
  * @property {(string|undefined)} kind
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language
