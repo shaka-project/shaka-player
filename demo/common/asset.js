@@ -45,6 +45,8 @@ const ShakaDemoAssetInfo = class {
     this.extraText = [];
     /** @type {!Array.<string>} */
     this.extraThumbnail = [];
+    /** @type {!Array.<!shakaAssets.ExtraChapter>} */
+    this.extraChapter = [];
     /** @type {?string} */
     this.certificateUri = null;
     /** @type {?string} */
@@ -321,7 +323,6 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   addExtraText(extraText) {
-    // TODO: At no point do we actually use the extraText... why does it exist?
     this.extraText.push(extraText);
     return this;
   }
@@ -332,6 +333,15 @@ const ShakaDemoAssetInfo = class {
    */
   addExtraThumbnail(uri) {
     this.extraThumbnail.push(uri);
+    return this;
+  }
+
+  /**
+   * @param {shakaAssets.ExtraChapter} extraChapter
+   * @return {!ShakaDemoAssetInfo}
+   */
+  addExtraChapter(extraChapter) {
+    this.extraChapter.push(extraChapter);
     return this;
   }
 
