@@ -186,8 +186,6 @@ describe('Player', () => {
 
   describe('destroy', () => {
     it('cleans up all dependencies', async () => {
-      // TODO: yeah it's because of useNativeHlsOnSafari...
-      // we are now detecting this as HLS?
       goog.asserts.assert(manifest, 'Manifest should be non-null');
       await player.load(fakeManifestUri, 0, fakeMimeType);
       const segmentIndexes = [];

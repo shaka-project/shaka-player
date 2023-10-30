@@ -726,14 +726,7 @@ describe('Player Load Graph', () => {
 
       const action = actions.get(state);
       expect(action).toBeTruthy();
-
-      // Do not wait for the action to complete, our idle spy makes us wait. We
-      // want to know where we stop, so using the idle spy is more accurate in
-      // this situation.
-      action();
-
-      // Make sure that the player stops in the state that we asked it go to.
-      await shaka.test.Util.delay(/* seconds= */ 0.25);
+      await action();
       expect(lastStateChange).toBe(state);
     }
 
@@ -823,13 +816,7 @@ describe('Player Load Graph', () => {
 
       const action = actions.get(state);
       expect(action).toBeTruthy();
-
-      // Do not wait for the action to complete, our idle spy make us wait. We
-      // want to know where we stop, so using the idle spy is more accurate in
-      // this situation.
-      action();
-
-      await shaka.test.Util.delay(/* seconds= */ 0.25);
+      await action();
       expect(lastStateChange).toBe(expectedState || state);
     }
   });
