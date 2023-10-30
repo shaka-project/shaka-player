@@ -178,6 +178,23 @@ shakaAssets.Feature = {
  *   (optional) The codecs string, if needed to refine the MIME type.
  */
 shakaAssets.ExtraText;
+
+
+/**
+ * @typedef {{
+ *   uri: string,
+ *   language: string,
+ *   mime: string
+ * }}
+ *
+ * @property {string} uri
+ *   The URI of the chapter.
+ * @property {string} language
+ *   The language of the chapter (e.g. 'en').
+ * @property {string} mime
+ *   The MIME type of the chapter (e.g. 'text/vtt')
+ */
+shakaAssets.ExtraChapter;
 // End types and enums }}}
 
 
@@ -314,8 +331,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.SHAKA)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.OFFLINE)
-      .setMediaPlaylistFullMimeType('video/mp4; codecs="avc1.4d401f"'),
+      .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Angel One (HLS, MP4, multilingual, Widevine)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
