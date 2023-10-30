@@ -2919,10 +2919,13 @@ describe('HlsParser', () => {
         'main.mp4',
       ].join(''), [0, 5, 10, 15, 20, 25], syncTimeBase + 5, (reference) => {
         if (reference.startTime == 10) {
-          reference.partialReferences = [
-            makeReference(10, 12.5, syncTimeBase + 15),
-            makeReference(12.5, 15, syncTimeBase + 17.5),
-          ];
+          const partialRef = makeReference(10, 12.5, syncTimeBase + 15);
+          partialRef.partial = true;
+          const partialRef2 = makeReference(12.5, 15, syncTimeBase + 17.5);
+          partialRef2.partial = true;
+          partialRef2.lastPartial = true;
+
+          reference.partialReferences = [partialRef, partialRef2];
           reference.allPartialSegments = true;
         }
       });
