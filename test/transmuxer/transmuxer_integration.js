@@ -102,7 +102,7 @@ describe('Transmuxer Player', () => {
   });
 
   describe('for audio', () => {
-    it('raw AAC', async () => {
+    it('raw AAC', async () => { // TODO: broken
       await player.load('/base/test/test/assets/hls-raw-aac/manifest.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
@@ -162,7 +162,7 @@ describe('Transmuxer Player', () => {
         pending('Codec EC-3 is not supported by the platform.');
       }
 
-      await player.load('/base/test/test/assets/hls-raw-ac3/prog_index.m3u8');
+      await player.load('/base/test/test/assets/hls-raw-ec3/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
 
@@ -177,7 +177,7 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
-    it('AAC in TS', async () => {
+    it('AAC in TS', async () => { // TODO: broken
       await player.load('/base/test/test/assets/hls-ts-aac/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
@@ -193,7 +193,7 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
-    it('MP3 in TS', async () => {
+    it('MP3 in TS', async () => { // TODO: broken
       if (!MediaSource.isTypeSupported('audio/mp4; codecs="mp3"') &&
         !MediaSource.isTypeSupported('audio/mpeg')) {
         pending('Codec MP3 is not supported by the platform.');
@@ -259,7 +259,7 @@ describe('Transmuxer Player', () => {
   });
 
   describe('for video', () => {
-    it('H.264 in TS', async () => {
+    it('H.264 in TS', async () => { // TODO: broken
       await player.load('/base/test/test/assets/hls-ts-h264/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
@@ -304,7 +304,7 @@ describe('Transmuxer Player', () => {
   });
 
   describe('for muxed content', () => {
-    it('H.264+AAC in TS', async () => {
+    it('H.264+AAC in TS', async () => { // TODO: broken
       // eslint-disable-next-line max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264/playlist.m3u8');
       await video.play();
