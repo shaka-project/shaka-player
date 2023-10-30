@@ -102,7 +102,7 @@ describe('Transmuxer Player', () => {
   });
 
   describe('for audio', () => {
-    it('raw AAC', async () => { // TODO: broken
+    it('raw AAC', async () => {
       await player.load('/base/test/test/assets/hls-raw-aac/manifest.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
@@ -177,7 +177,7 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
-    it('AAC in TS', async () => { // TODO: broken
+    it('AAC in TS', async () => {
       await player.load('/base/test/test/assets/hls-ts-aac/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
@@ -193,7 +193,7 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
-    it('MP3 in TS', async () => { // TODO: broken
+    it('MP3 in TS', async () => {
       if (!MediaSource.isTypeSupported('audio/mp4; codecs="mp3"') &&
         !MediaSource.isTypeSupported('audio/mpeg')) {
         pending('Codec MP3 is not supported by the platform.');
@@ -259,7 +259,7 @@ describe('Transmuxer Player', () => {
   });
 
   describe('for video', () => {
-    it('H.264 in TS', async () => { // TODO: broken
+    it('H.264 in TS', async () => {
       await player.load('/base/test/test/assets/hls-ts-h264/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
@@ -304,7 +304,7 @@ describe('Transmuxer Player', () => {
   });
 
   describe('for muxed content', () => {
-    it('H.264+AAC in TS', async () => { // TODO: broken
+    it('H.264+AAC in TS', async () => {
       // eslint-disable-next-line max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264/playlist.m3u8');
       await video.play();
