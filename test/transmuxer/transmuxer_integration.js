@@ -161,7 +161,7 @@ describe('Transmuxer Player', () => {
         pending('Codec EC-3 is not supported by the platform.');
       }
 
-      await player.load('/base/test/test/assets/hls-raw-ac3/prog_index.m3u8');
+      await player.load('/base/test/test/assets/hls-raw-ec3/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
 
