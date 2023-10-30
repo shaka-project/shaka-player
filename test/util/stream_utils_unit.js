@@ -634,10 +634,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      const noVariant = null;
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, noVariant, manifest,
-          shaka.config.CodecSwitchingStrategy.RELOAD);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       // Covers a regression in which we would remove streams with codecs.
       // The last two streams should be removed because their full MIME types
@@ -672,10 +669,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      const noVariant = null;
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, noVariant, manifest,
-          shaka.config.CodecSwitchingStrategy.RELOAD);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       // Covers a regression in which we would remove streams with codecs.
       // The first 4 streams should be there because they are always supported.
@@ -714,9 +708,7 @@ describe('StreamUtils', () => {
         shaka.util.StreamUtils.filterManifestByCurrentVariant =
           shaka.test.Util.spyFunc(filterManifestByCurrentVariantSpy);
 
-        await shaka.util.StreamUtils.filterManifest(
-            fakeDrmEngine, /* currentVariant= */ null, manifest,
-            shaka.config.CodecSwitchingStrategy.RELOAD);
+        await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
         expect(filterManifestByCurrentVariantSpy).not.toHaveBeenCalled();
       } finally {
@@ -738,9 +730,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest,
-          shaka.config.CodecSwitchingStrategy.RELOAD);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       // Covers a regression in which we would remove streams with codecs.
       // The last two streams should be removed because their full MIME types
@@ -766,9 +756,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest,
-          shaka.config.CodecSwitchingStrategy.RELOAD);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
       expect(manifest.variants.length).toBe(1);
     });
 
@@ -784,9 +772,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest,
-          shaka.config.CodecSwitchingStrategy.RELOAD);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       expect(manifest.variants.length).toBe(1);
     });
@@ -808,8 +794,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       expect(manifest.variants.length).toBe(2);
     });
@@ -831,8 +816,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       expect(manifest.variants.length).toBe(2);
     });
@@ -849,9 +833,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest,
-          shaka.config.CodecSwitchingStrategy.RELOAD);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       expect(manifest.variants.length).toBe(1);
     });
