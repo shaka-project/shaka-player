@@ -241,40 +241,6 @@ shakaDemo.Custom = class {
    * @return {!Element} div
    * @private
    */
-  makeAssetDialogContentsHLS_(assetInProgress, inputsToCheck) {
-    const mediaPlaylistDiv = document.createElement('div');
-    const containerStyle = shakaDemo.InputContainer.Style.FLEX;
-    const container = new shakaDemo.InputContainer(
-        mediaPlaylistDiv, /* headerText= */ null, containerStyle,
-        /* docLink= */ null);
-    container.getClassList().add('wide-input');
-    container.setDefaultRowClass('wide-input');
-
-    const fullMimeTypeSetup = (input, container) => {
-      if (assetInProgress.mediaPlaylistFullMimeType) {
-        input.value = assetInProgress.mediaPlaylistFullMimeType;
-      }
-      const defaultConfig = shaka.util.PlayerConfiguration.createDefault();
-      input.placeholder = defaultConfig.manifest.hls.mediaPlaylistFullMimeType;
-    };
-    const fullMimeTypeOnChange = (input) => {
-      assetInProgress.setMediaPlaylistFullMimeType(input.value);
-    };
-    const fullMimeTypeName =
-        'Full Mime Type for Playing Media Playlists Directly';
-    this.makeField_(
-        container, fullMimeTypeName, fullMimeTypeSetup, fullMimeTypeOnChange);
-
-    return mediaPlaylistDiv;
-  }
-
-
-  /**
-   * @param {!ShakaDemoAssetInfo} assetInProgress
-   * @param {!Array.<!HTMLInputElement>} inputsToCheck
-   * @return {!Element} div
-   * @private
-   */
   makeAssetDialogContentsAds_(assetInProgress, inputsToCheck) {
     const adsDiv = document.createElement('div');
     const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
@@ -466,6 +432,37 @@ shakaDemo.Custom = class {
     this.makeField_(container, 'Custom DRM System', drmSetup, drmOnChange);
 
     return drmDiv;
+  }
+
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @return {!Element} div
+   * @private
+   */
+  makeAssetDialogContentsExtraTracks_(assetInProgress, inputsToCheck) {
+    const extraTracksDiv = document.createElement('div');
+    const containerStyle = shakaDemo.InputContainer.Style.FLEX;
+    const container = new shakaDemo.InputContainer(
+        extraTracksDiv, /* headerText= */ null, containerStyle,
+        /* docLink= */ null);
+    container.getClassList().add('wide-input');
+    container.setDefaultRowClass('wide-input');
+
+    const thumbnailsUrlSetup = (input, container) => {
+      if (assetInProgress.extraThumbnail.length) {
+        input.value = assetInProgress.extraThumbnail[0];
+      }
+    };
+    const thumbnailsUrlOnChange = (input) => {
+      assetInProgress.extraThumbnail = [];
+      assetInProgress.addExtraThumbnail(input.value);
+    };
+
+    this.makeField_(
+        container, 'Thumbnails URL', thumbnailsUrlSetup, thumbnailsUrlOnChange);
+
+    return extraTracksDiv;
   }
 
   /**
@@ -696,7 +693,7 @@ shakaDemo.Custom = class {
         assetInProgress, inputsToCheck);
     const adsDiv = this.makeAssetDialogContentsAds_(
         assetInProgress, inputsToCheck);
-    const hlsDiv = this.makeAssetDialogContentsHLS_(
+    const extraTracksDiv = this.makeAssetDialogContentsExtraTracks_(
         assetInProgress, inputsToCheck);
     const extraConfigDiv = this.makeAssetDialogContentsExtra_(
         assetInProgress, inputsToCheck);
@@ -732,7 +729,7 @@ shakaDemo.Custom = class {
     addTabButton('Drm', drmDiv, /* startOn= */ false);
     addTabButton('Headers', headersDiv, /* startOn= */ false);
     addTabButton('Ads', adsDiv, /* startOn= */ false);
-    addTabButton('HLS', hlsDiv, /* startOn= */ false);
+    addTabButton('Extra Tracks', extraTracksDiv, /* startOn= */ false);
     addTabButton('Extra Config', extraConfigDiv, /* startOn= */ false);
 
     // Append the divs in the desired order.
@@ -741,7 +738,7 @@ shakaDemo.Custom = class {
     this.dialog_.appendChild(drmDiv);
     this.dialog_.appendChild(headersDiv);
     this.dialog_.appendChild(adsDiv);
-    this.dialog_.appendChild(hlsDiv);
+    this.dialog_.appendChild(extraTracksDiv);
     this.dialog_.appendChild(extraConfigDiv);
     this.dialog_.appendChild(finishDiv);
     this.dialog_.appendChild(iconDiv);

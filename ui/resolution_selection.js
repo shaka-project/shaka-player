@@ -140,21 +140,12 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           () => this.onTrackSelected_(track));
 
       const span = shaka.util.Dom.createHTMLElement('span');
-      if (this.player.isAudioOnly()) {
+      if (this.player.isAudioOnly() && track.bandwidth) {
         span.textContent = Math.round(track.bandwidth / 1000) + ' kbits/s';
+      } else if (track.height && track.width) {
+        span.textContent = this.getResolutionLabel_(track);
       } else {
-        let text = track.height + 'p';
-        const frameRate = track.frameRate;
-        if (frameRate && (frameRate >= 50 || frameRate <= 20)) {
-          text += Math.round(track.frameRate);
-        }
-        if (track.hdr == 'PQ' || track.hdr == 'HLG') {
-          text += ' (HDR)';
-        }
-        if (track.videoLayout == 'CH-STEREO') {
-          text += ' (3D)';
-        }
-        span.textContent = text;
+        span.textContent = 'Unknown';
       }
       button.appendChild(span);
 
@@ -203,6 +194,37 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
         new shaka.util.FakeEvent('resolutionselectionupdated'));
 
     this.updateLocalizedStrings_();
+  }
+
+
+  /**
+   * @param {!shaka.extern.Track} track
+   * @return {string}
+   * @private
+   */
+  getResolutionLabel_(track) {
+    const trackHeight = track.height || 0;
+    const trackWidth = track.width || 0;
+    let height = trackHeight;
+    const aspectRatio = trackWidth / trackHeight;
+    if (aspectRatio > (16 / 9)) {
+      height = Math.round(trackWidth * 9 / 16);
+    }
+    let text = height + 'p';
+    if (height == 2160) {
+      text = '4K';
+    }
+    const frameRate = track.frameRate;
+    if (frameRate && (frameRate >= 50 || frameRate <= 20)) {
+      text += Math.round(track.frameRate);
+    }
+    if (track.hdr == 'PQ' || track.hdr == 'HLG') {
+      text += ' (HDR)';
+    }
+    if (track.videoLayout == 'CH-STEREO') {
+      text += ' (3D)';
+    }
+    return text;
   }
 
 

@@ -1268,6 +1268,11 @@ shakaDemo.Main = class {
         this.player_.addThumbnailsTrack(extraThumbnail);
       }
 
+      for (const extraChapter of asset.extraChapter) {
+        this.player_.addChaptersTrack(extraChapter.uri, extraChapter.language,
+            extraChapter.mime);
+      }
+
       // If the asset has an ad tag attached to it, load the ads
       const adManager = this.player_.getAdManager();
       if (adManager && asset.adTagUri) {

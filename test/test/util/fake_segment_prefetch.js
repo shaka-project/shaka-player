@@ -78,4 +78,7 @@ shaka.test.FakeSegmentPrefetch = class {
     }
     return null;
   }
+
+  /** @override */
+  prefetchInitSegment(reference) {}
 };
