@@ -13,6 +13,7 @@
  * @return {boolean}
  */
 function checkNoBrokenEdge() {
+  const chromeVersion = shaka.util.Platform.chromeVersion();
   if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
       chromeVersion && chromeVersion <= 118) {
     // When the tests fail, it's due to the manifest parser failing to find a
@@ -20,12 +21,14 @@ function checkNoBrokenEdge() {
     // when running in a non-broken Edge environment.
     const uri = 'fakeuri.m3u8';
     const mimeType = 'application/x-mpegurl';
+    /* eslint-disable no-restricted-syntax */
     try {
-      const factory = shaka.media.ManifestParser.getFactory(uri, mimeType);
+      shaka.media.ManifestParser.getFactory(uri, mimeType);
       return true;
     } catch (error) {
       return false;
     }
+    /* eslint-enable no-restricted-syntax */
   }
   return true;
 }
