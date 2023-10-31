@@ -399,4 +399,29 @@ describe('ContentSteeringManager', () => {
       expect(locations[0]).toBe('http://default');
     });
   });
+
+  describe('allow ban locations', () => {
+    it('with PATHWAY-PRIORITY', async () => {
+      const manifest = JSON.stringify({
+        'VERSION': 1,
+        'TTL': 10,
+        'RELOAD-URI': 'http://foo.bar/update',
+        'PATHWAY-PRIORITY': [
+          'cdn-b',
+          'cdn-a',
+          'cdn-c',
+        ],
+      });
+      fakeNetEngine.setResponseText('http://foo.bar/manifest', manifest);
+
+      await manager.requestInfo('http://foo.bar/manifest');
+
+      manager.banLocation('http://cdn-b');
+
+      const locations = manager.getLocations('foo');
+      expect(locations.length).toBe(2);
+      expect(locations[0]).toBe('http://cdn-a');
+      expect(locations[1]).toBe('http://cdn-c');
+    });
+  });
 });
