@@ -42,7 +42,7 @@ describe('BufferUtils', () => {
 
     it('compares with same buffer', () => {
       const a = new Uint8Array([0, 1, 2, 3]);
-      const b = new Uint16Array(a.buffer);
+      const b = BufferUtils.toUint16(a);
       expect(BufferUtils.equal(a, b)).toBe(true);
     });
 
