@@ -65,7 +65,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     support = await shaka.media.DrmEngine.probeSupport();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockReceiverApi = createMockReceiverApi();
 
     const mockCanDisplayType = jasmine.createSpy('canDisplayType');
@@ -87,7 +87,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
 
     document.body.appendChild(video);
 
-    player = new shaka.Player(video);
+    player = new shaka.Player();
+    await player.attach(video);
     receiver = new CastReceiver(video, player);
 
     toRestore = [];
@@ -320,8 +321,6 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     // Add wrappers to various methods along player.load to make sure that,
     // at each stage, the cast receiver can form an update message without
     // causing an error.
-    waitForUpdateMessageWrapper(
-        shaka.media.ManifestParser, 'ManifestParser', 'getFactory');
     waitForUpdateMessageWrapper(
         // eslint-disable-next-line no-restricted-syntax
         shaka.test.TestScheme.ManifestParser.prototype, 'ManifestParser',

@@ -37,7 +37,7 @@ filterDescribe('Cue layout', shaka.test.TextLayoutTests.supported, () => {
         // Set up UI controls.  The video element is in a paused state by
         // default, so the controls should be shown.  The video is not in the
         // DOM and is purely temporary.
-        const player = new shaka.Player(null);
+        const player = new shaka.Player();
         ui = new shaka.ui.Overlay(
             player, /** @type {!HTMLElement} */(helper.videoContainer),
             shaka.test.UiUtils.createVideoElement());
