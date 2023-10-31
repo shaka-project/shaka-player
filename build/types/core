@@ -53,10 +53,6 @@
 
 +../../lib/polyfill/all.js
 
-+../../lib/routing/node.js
-+../../lib/routing/payload.js
-+../../lib/routing/walker.js
-
 +../../lib/cea/dummy_cea_parser.js
 +../../lib/cea/dummy_caption_decoder.js
 
@@ -101,6 +97,7 @@
 +../../lib/util/mp4_generator.js
 +../../lib/util/mp4_parser.js
 +../../lib/util/multi_map.js
++../../lib/util/mutex.js
 +../../lib/util/networking.js
 +../../lib/util/object_utils.js
 +../../lib/util/operation_manager.js

@@ -25,14 +25,14 @@ describe('Ad UI', () => {
     shaka.Player.setAdManagerFactory(() => new shaka.test.FakeAdManager());
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     container =
       /** @type {!HTMLElement} */ (document.createElement('div'));
     document.body.appendChild(container);
 
     video = shaka.test.UiUtils.createVideoElement();
     container.appendChild(video);
-    UiUtils.createUIThroughAPI(container, video);
+    await UiUtils.createUIThroughAPI(container, video);
     adManager = video['ui'].getControls().getPlayer().getAdManager();
   });
 

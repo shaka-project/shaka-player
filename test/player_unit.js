@@ -48,7 +48,7 @@ describe('Player', () => {
   /** @type {!shaka.test.FakeVideo} */
   let video;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // By default, errors are a failure.
     logErrorSpy = jasmine.createSpy('shaka.log.error');
     logErrorSpy.calls.reset();
@@ -124,6 +124,7 @@ describe('Player', () => {
         open: jasmine.createSpy('open').and.returnValue(Promise.resolve()),
         destroy:
             jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
+        setTextDisplayer: jasmine.createSpy('setTextDisplayer'),
         setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
         getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
         setSegmentRelativeVttTiming:
@@ -151,7 +152,8 @@ describe('Player', () => {
     }
 
     video = new shaka.test.FakeVideo(20);
-    player = new shaka.Player(video, dependencyInjector);
+    player = new shaka.Player(null, dependencyInjector);
+    await player.attach(video);
     player.configure({
       // Ensures we don't get a warning about missing preference.
       preferredAudioLanguage: 'en',
@@ -170,6 +172,7 @@ describe('Player', () => {
     try {
       await player.destroy();
     } finally {
+      player.releaseAllMutexes();
       shaka.log.error = originalLogError;
       shaka.log.alwaysError = originalLogError;
       shaka.log.warning = originalLogWarn;
@@ -233,31 +236,6 @@ describe('Player', () => {
 
       expect(mediaSourceEngine.destroy).toHaveBeenCalled();
       expect(drmEngine.destroy).toHaveBeenCalled();
-    });
-
-    // TODO(vaage): Re-enable once the parser is integrated into the load graph
-    //              better.
-    xit('destroys parser first when interrupting load', async () => {
-      const p = shaka.test.Util.shortDelay();
-      /** @type {!shaka.test.FakeManifestParser} */
-      const parser = new shaka.test.FakeManifestParser(manifest);
-      parser.start.and.returnValue(p);
-      parser.stop.and.callFake(() => {
-        expect(abrManager.stop).not.toHaveBeenCalled();
-        expect(abrManager.release).not.toHaveBeenCalled();
-        expect(networkingEngine.destroy).not.toHaveBeenCalled();
-      });
-      shaka.media.ManifestParser.registerParserByMime(
-          fakeMimeType, () => parser);
-
-      const load = player.load(fakeManifestUri, 0, fakeMimeType);
-      await shaka.test.Util.shortDelay();
-      await player.destroy();
-      expect(abrManager.stop).toHaveBeenCalled();
-      expect(abrManager.release).toHaveBeenCalled();
-      expect(networkingEngine.destroy).toHaveBeenCalled();
-      expect(parser.stop).toHaveBeenCalled();
-      await expectAsync(load).toBeRejected();
     });
   });
 

@@ -26,7 +26,8 @@ describe('Codec Switching', () => {
 
   beforeEach(async () => {
     await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
-    player = new compiledShaka.Player(video);
+    player = new compiledShaka.Player();
+    await player.attach(video);
 
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
