@@ -22,7 +22,7 @@ function checkNoBrokenEdge() {
     try {
       const factory = shaka.media.ManifestParser.getFactory(uri, mimeType);
       return true;
-    } catch {
+    } catch (error) {
       return false;
     }
   }
