@@ -45,7 +45,8 @@ describe('UI', () => {
     videoContainer = shaka.util.Dom.createHTMLElement('div');
     videoContainer.appendChild(video);
     document.body.appendChild(videoContainer);
-    player = new compiledShaka.Player(video);
+    player = new compiledShaka.Player();
+    await player.attach(video);
 
     // Create UI
     // Add all of the buttons we have

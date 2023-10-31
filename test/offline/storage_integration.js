@@ -736,15 +736,16 @@ filterDescribe('Storage', storageSupport, () => {
     const videoElement = /** @type {!HTMLVideoElement} */(
       document.createElement('video'));
 
-    beforeEach(() => {
+    beforeEach(async () => {
       netEngine = makeNetworkEngine();
 
       // Use a real Player since Storage only uses the configuration and
       // networking engine.  This allows us to use Player.configure in these
       // tests.
-      player = new shaka.Player(videoElement, ((player) => {
+      player = new shaka.Player(null, ((player) => {
         player.createNetworkingEngine = () => netEngine;
       }));
+      await player.attach(videoElement);
 
       storage = new shaka.offline.Storage(player);
 
