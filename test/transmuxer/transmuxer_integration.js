@@ -9,7 +9,7 @@
  * in ways that do not seem to be unrelated to transmuxers.
  * Practical testing has not found any sign that playback is actually broken in
  * Edge, so these tests are disabled on Edge for the time being.
- * TODO: make issue label for this
+ * TODO(#5834): Remove this filter once the tests are fixed.
  * @return {boolean}
  */
 function checkNoBrokenEdge() {
