@@ -1748,6 +1748,9 @@ filterDescribe('Storage', storageSupport, () => {
 
     /** @override */
     onInitialVariantChosen(variant) {}
+
+    /** @override */
+    banLocation(uri) {}
   };
 
   /**
