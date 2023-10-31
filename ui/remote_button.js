@@ -116,7 +116,9 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
   /** @override */
   release() {
     if (this.video.remote && this.callbackId_ != -1) {
-      this.video.remote.cancelWatchAvailability(this.callbackId_);
+      this.video.remote.cancelWatchAvailability(this.callbackId_).catch(() => {
+        // Ignore this error.
+      });
     }
 
     super.release();

@@ -16,10 +16,11 @@ describe('Ad manager', () => {
   /** @type {google.ima.AdsRenderingSettings} */
   let adsRenderingSettings;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     window['google'] = null;
     mockVideo = new shaka.test.FakeVideo();
-    player = new shaka.Player(mockVideo);
+    player = new shaka.Player();
+    await player.attach(mockVideo, /* initializeMediaSource= */ false);
     adManager = player.getAdManager();
     expect(adManager instanceof shaka.ads.AdManager).toBe(true);
 

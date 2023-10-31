@@ -45,6 +45,8 @@ const ShakaDemoAssetInfo = class {
     this.extraText = [];
     /** @type {!Array.<string>} */
     this.extraThumbnail = [];
+    /** @type {!Array.<!shakaAssets.ExtraChapter>} */
+    this.extraChapter = [];
     /** @type {?string} */
     this.certificateUri = null;
     /** @type {?string} */
@@ -83,8 +85,6 @@ const ShakaDemoAssetInfo = class {
     this.mediaTailorAdsParams = null;
     /** @type {?string} */
     this.mimeType = null;
-    /** @type {?string} */
-    this.mediaPlaylistFullMimeType = null;
 
 
     // Offline storage values.
@@ -172,15 +172,6 @@ const ShakaDemoAssetInfo = class {
   /** @return {boolean} */
   isAes128() {
     return this.drm.length == 1 && this.drm[0] == shakaAssets.KeySystem.AES128;
-  }
-
-  /**
-   * @param {string} mediaPlaylistFullMimeType
-   * @return {!ShakaDemoAssetInfo}
-   */
-  setMediaPlaylistFullMimeType(mediaPlaylistFullMimeType) {
-    this.mediaPlaylistFullMimeType = mediaPlaylistFullMimeType;
-    return this;
   }
 
   /**
@@ -321,7 +312,6 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   addExtraText(extraText) {
-    // TODO: At no point do we actually use the extraText... why does it exist?
     this.extraText.push(extraText);
     return this;
   }
@@ -332,6 +322,15 @@ const ShakaDemoAssetInfo = class {
    */
   addExtraThumbnail(uri) {
     this.extraThumbnail.push(uri);
+    return this;
+  }
+
+  /**
+   * @param {shakaAssets.ExtraChapter} extraChapter
+   * @return {!ShakaDemoAssetInfo}
+   */
+  addExtraChapter(extraChapter) {
+    this.extraChapter.push(extraChapter);
     return this;
   }
 
@@ -434,11 +433,6 @@ const ShakaDemoAssetInfo = class {
       for (const key in this.extraConfig) {
         config[key] = this.extraConfig[key];
       }
-    }
-
-    if (this.mediaPlaylistFullMimeType) {
-      config.manifest.hls.mediaPlaylistFullMimeType =
-          this.mediaPlaylistFullMimeType;
     }
 
     if (this.licenseServers.size) {

@@ -438,6 +438,19 @@ shakaDemo.Config = class {
     this.addSelectInput_('Preferred HDR Level', 'preferredVideoHdrLevel',
         hdrLevels, hdrLevelNames);
 
+    const videoLayouts = {
+      '': '',
+      'CH-STEREO': 'CH-STEREO',
+      'CH-MONO': 'CH-MONO',
+    };
+    const videoLayoutsNames = {
+      'CH-STEREO': 'Stereoscopic',
+      'CH-MONO': 'Monoscopic',
+      '': 'No Preference',
+    };
+    this.addSelectInput_('Preferred video layout', 'preferredVideoLayout',
+        videoLayouts, videoLayoutsNames);
+
     this.addBoolInput_('Start At Segment Boundary',
         'streaming.startAtSegmentBoundary')
         .addBoolInput_('Ignore Text Stream Failures',

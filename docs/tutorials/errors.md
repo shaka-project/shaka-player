@@ -17,7 +17,8 @@ const handleError = (error) => {
   }
 };
 
-const player = new shaka.Player(video);
+const player = new shaka.Player();
+await player.attach(video);
 
 // handle errors that occur after load
 player.addEventListener('error', handleError);

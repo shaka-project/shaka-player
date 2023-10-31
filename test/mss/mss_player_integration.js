@@ -38,8 +38,9 @@ describe('MSS Player', () => {
         await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
   });
 
-  beforeEach(() => {
-    player = new compiledShaka.Player(video);
+  beforeEach(async () => {
+    player = new compiledShaka.Player();
+    await player.attach(video);
 
     // Make sure we are playing the lowest res available to avoid test flake
     // based on network issues.  Note that disabling ABR and setting a low

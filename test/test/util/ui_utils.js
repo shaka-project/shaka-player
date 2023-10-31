@@ -9,10 +9,11 @@ shaka.test.UiUtils = class {
    * @param {!HTMLElement} videoContainer
    * @param {!HTMLMediaElement} video
    * @param {!Object=} config
-   * @return {!shaka.ui.Overlay}
+   * @return {!Promise.<!shaka.ui.Overlay>}
    */
-  static createUIThroughAPI(videoContainer, video, config) {
-    const player = new shaka.Player(video);
+  static async createUIThroughAPI(videoContainer, video, config) {
+    const player = new shaka.Player();
+    await player.attach(video);
     // Create UI
     config = config || {};
     const ui = new shaka.ui.Overlay(player, videoContainer, video);

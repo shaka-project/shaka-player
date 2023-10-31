@@ -425,8 +425,7 @@ shaka.ui.Overlay = class {
    */
   static async setupUIandAutoLoad_(container, video, canvas) {
     // Create the UI
-    const player = new shaka.Player(
-        shaka.util.Dom.asHTMLMediaElement(video));
+    const player = new shaka.Player();
     const ui = new shaka.ui.Overlay(player,
         shaka.util.Dom.asHTMLElement(container),
         shaka.util.Dom.asHTMLMediaElement(video));
@@ -489,6 +488,8 @@ shaka.ui.Overlay = class {
         shaka.log.error('Error auto-loading asset', e);
       }
     }
+
+    await player.attach(shaka.util.Dom.asHTMLMediaElement(video));
   }
 };
 

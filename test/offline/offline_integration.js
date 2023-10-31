@@ -30,7 +30,8 @@ filterDescribe('Offline', supportsStorage, () => {
   });
 
   beforeEach(async () => {
-    player = new shaka.Player(video);
+    player = new shaka.Player();
+    await player.attach(video);
     player.addEventListener('error', fail);
 
     // Disable stall detection, which can interfere with playback tests.
