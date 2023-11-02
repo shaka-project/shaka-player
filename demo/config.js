@@ -407,6 +407,14 @@ shakaDemo.Config = class {
         .addNumberInput_('Playback rate for live sync',
             'streaming.liveSyncPlaybackRate',
             /* canBeDecimal= */ true,
+            /* canBeZero= */ false)
+        .addNumberInput_('Min latency for live sync',
+            'streaming.liveSyncMinLatency',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Min playback rate for live sync',
+            'streaming.liveSyncMinPlaybackRate',
+            /* canBeDecimal= */ true,
             /* canBeZero= */ false);
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {

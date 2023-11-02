@@ -2611,8 +2611,8 @@ describe('DashParser Manifest', () => {
         '<MPD minBufferTime="PT75S" type="dynamic"',
         '     availabilityStartTime="1970-01-01T00:00:00Z">',
         '  <ServiceDescription id="0">',
-        '    <Latency max="2000" min="2000" referenceId="0" target="4000" />',
-        '    <PlaybackRate max="1.10" min="0.96" />',
+        '    <Latency max="2000" min="1000" referenceId="0" target="4000" />',
+        '    <PlaybackRate max="1.10" min="0.95" />',
         '  </ServiceDescription>',
         '</MPD>',
       ].join('\n');
@@ -2624,6 +2624,8 @@ describe('DashParser Manifest', () => {
 
       expect(manifest.serviceDescription.maxLatency).toBe(2);
       expect(manifest.serviceDescription.maxPlaybackRate).toBe(1.1);
+      expect(manifest.serviceDescription.minLatency).toBe(1);
+      expect(manifest.serviceDescription.minPlaybackRate).toBe(0.95);
     });
   });
 });
