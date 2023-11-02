@@ -1105,7 +1105,9 @@ shaka.extern.ManifestConfiguration;
  *   segmentPrefetchLimit: number,
  *   liveSync: boolean,
  *   liveSyncMaxLatency: number,
- *   liveSyncPlaybackRate: number
+ *   liveSyncPlaybackRate: number,
+ *   liveSyncMinLatency: number,
+ *   liveSyncMinPlaybackRate: number
  * }}
  *
  * @description
@@ -1234,6 +1236,13 @@ shaka.extern.ManifestConfiguration;
  *   Playback rate used for latency chasing. It is recommended to use a value
  *   between 1 and 2. Effective only if liveSync is true. Defaults to
  *   <code>1.1</code>.
+ * @property {number} liveSyncMinLatency
+ *   Minimun acceptable latency, in seconds. Effective only if liveSync is
+ *   true. Defaults to <code>0</code>.
+ * @property {number} liveSyncMinPlaybackRate
+ *   Minimun playback rate used for latency chasing. It is recommended to use a
+ *   value between 0 and 1. Effective only if liveSync is true. Defaults to
+ *   <code>1</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
