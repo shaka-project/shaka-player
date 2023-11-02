@@ -89,8 +89,8 @@ shaka.extern.AbrManager = class {
    * @param {number} deltaTimeMs The duration, in milliseconds, that the request
    *     took to complete.
    * @param {number} numBytes The total number of bytes transferred.
-   * @param {boolean} allowSwitch Indicate if the segment allowSwitch to another
-   *     stream.
+   * @param {boolean} allowSwitch Indicate if the segment is allowed to switch
+   *     to another stream.
    * @exportDoc
    */
   segmentDownloaded(deltaTimeMs, numBytes, allowSwitch) {}
