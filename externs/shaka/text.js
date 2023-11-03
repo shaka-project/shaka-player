@@ -36,11 +36,13 @@ shaka.extern.TextParser = class {
    * @param {shaka.extern.TextParser.TimeContext} timeContext
    *    The time information that should be used to adjust the times values
    *    for each cue.
+   * @param {?string} uri
+   *    The media uri.
    * @return {!Array.<!shaka.text.Cue>}
    *
    * @exportDoc
    */
-  parseMedia(data, timeContext) {}
+  parseMedia(data, timeContext, uri) {}
 
   /**
    * Notifies the stream if the manifest is in sequence mode or not.
