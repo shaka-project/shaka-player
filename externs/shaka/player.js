@@ -1670,6 +1670,7 @@ shaka.extern.LanguageRole;
 
 /**
  * @typedef {{
+ *   segment: shaka.media.SegmentReference,
  *   imageHeight: number,
  *   imageWidth: number,
  *   height: number,
@@ -1682,6 +1683,8 @@ shaka.extern.LanguageRole;
  *   sprite: boolean
  * }}
  *
+ * @property {shaka.media.SegmentReference} segment
+ *    The segment of this thumbnail.
  * @property {number} imageHeight
  *    The image height in px. The image height could be different to height if
  *    the layout is different to 1x1.
