@@ -12,18 +12,20 @@ describe('MpdUtils', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$RepresentationID$.mp4',
-              '100', null, null, null).toString()).toBe('/example/100.mp4');
+              '100', null, null, null, null).toString())
+          .toBe('/example/100.mp4');
 
       // RepresentationID cannot use a width specifier.
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$RepresentationID%01d$.mp4',
-              '100', null, null, null).toString()).toBe('/example/100.mp4');
+              '100', null, null, null, null).toString())
+          .toBe('/example/100.mp4');
 
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$RepresentationID$.mp4',
-              null, null, null, null).toString())
+              null, null, null, null, null).toString())
           .toBe('/example/$RepresentationID$.mp4');
     });
 
@@ -31,35 +33,59 @@ describe('MpdUtils', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Number$.mp4',
-              null, 100, null, null).toString()).toBe('/example/100.mp4');
+              null, 100, null, null, null).toString())
+          .toBe('/example/100.mp4');
 
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Number%05d$.mp4',
-              null, 100, null, null).toString()).toBe('/example/00100.mp4');
+              null, 100, null, null, null).toString())
+          .toBe('/example/00100.mp4');
 
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Number$.mp4',
-              null, null, null, null).toString())
+              null, null, null, null, null).toString())
           .toBe('/example/$Number$.mp4');
+    });
+
+    it('handles a single SubNumber identifier', () => {
+      expect(
+          MpdUtils.fillUriTemplate(
+              '/example/$SubNumber$.mp4',
+              null, null, 100, null, null).toString())
+          .toBe('/example/100.mp4');
+
+      expect(
+          MpdUtils.fillUriTemplate(
+              '/example/$SubNumber%05d$.mp4',
+              null, null, 100, null, null).toString())
+          .toBe('/example/00100.mp4');
+
+      expect(
+          MpdUtils.fillUriTemplate(
+              '/example/$SubNumber$.mp4',
+              null, null, null, null, null).toString())
+          .toBe('/example/$SubNumber$.mp4');
     });
 
     it('handles a single Bandwidth identifier', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Bandwidth$.mp4',
-              null, null, 100, null).toString()).toBe('/example/100.mp4');
+              null, null, null, 100, null).toString())
+          .toBe('/example/100.mp4');
 
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Bandwidth%05d$.mp4',
-              null, null, 100, null).toString()).toBe('/example/00100.mp4');
+              null, null, null, 100, null).toString())
+          .toBe('/example/00100.mp4');
 
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Bandwidth$.mp4',
-              null, null, null, null).toString())
+              null, null, null, null, null).toString())
           .toBe('/example/$Bandwidth$.mp4');
     });
 
@@ -67,17 +93,19 @@ describe('MpdUtils', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Time$.mp4',
-              null, null, null, 100).toString()).toBe('/example/100.mp4');
+              null, null, null, null, 100).toString())
+          .toBe('/example/100.mp4');
 
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Time%05d$.mp4',
-              null, null, null, 100).toString()).toBe('/example/00100.mp4');
+              null, null, null, null, 100).toString())
+          .toBe('/example/00100.mp4');
 
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Time$.mp4',
-              null, null, null, null).toString())
+              null, null, null, null, null).toString())
           .toBe('/example/$Time$.mp4');
     });
 
@@ -85,68 +113,70 @@ describe('MpdUtils', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Time$.mp4',
-              null, null, null, 100.0001).toString()).toBe('/example/100.mp4');
+              null, null, null, null, 100.0001).toString())
+          .toBe('/example/100.mp4');
 
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Time%05d$.mp4',
-              null, null, null, 99.9999).toString()).toBe('/example/00100.mp4');
+              null, null, null, null, 99.9999).toString())
+          .toBe('/example/00100.mp4');
     });
 
     it('handles multiple identifiers', () => {
       expect(
           MpdUtils.fillUriTemplate(
-              '/example/$RepresentationID$_$Number$_$Bandwidth$_$Time$.mp4',
-              '1', 2, 3, 4).toString()).toBe('/example/1_2_3_4.mp4');
+              '/example/$RepresentationID$_$Number$_$SubNumber$_$Bandwidth$_$Time$.mp4', // eslint-disable-line max-len
+              '1', 2, 3, 4, 5).toString()).toBe('/example/1_2_3_4_5.mp4');
 
       // No spaces.
       expect(
           MpdUtils.fillUriTemplate(
-              '/example/$RepresentationID$$Number$$Bandwidth$$Time$.mp4',
-              '1', 2, 3, 4).toString()).toBe('/example/1234.mp4');
+              '/example/$RepresentationID$$Number$$SubNumber$$Bandwidth$$Time$.mp4', // eslint-disable-line max-len
+              '1', 2, 3, 4, 5).toString()).toBe('/example/12345.mp4');
 
       // Different order.
       expect(
           MpdUtils.fillUriTemplate(
-              '/example/$Bandwidth$_$Time$_$RepresentationID$_$Number$.mp4',
-              '1', 2, 3, 4).toString()).toBe('/example/3_4_1_2.mp4');
+              '/example/$SubNumber$_$Bandwidth$_$Time$_$RepresentationID$_$Number$.mp4', // eslint-disable-line max-len
+              '1', 2, 3, 4, 5).toString()).toBe('/example/3_4_5_1_2.mp4');
 
       // Single width.
       expect(
           MpdUtils.fillUriTemplate(
-              '$RepresentationID$_$Number%01d$_$Bandwidth%01d$_$Time%01d$',
-              '1', 2, 3, 400).toString()).toBe('1_2_3_400');
+              '$RepresentationID$_$Number%01d$_$SubNumber%01d$_$Bandwidth%01d$_$Time%01d$', // eslint-disable-line max-len
+              '1', 2, 3, 4, 500).toString()).toBe('1_2_3_4_500');
 
       // Different widths.
       expect(
           MpdUtils.fillUriTemplate(
-              '$RepresentationID$_$Number%02d$_$Bandwidth%02d$_$Time%02d$',
-              '1', 2, 3, 4).toString()).toBe('1_02_03_04');
+              '$RepresentationID$_$Number%02d$_$SubNumber%02d$_$Bandwidth%02d$_$Time%02d$', // eslint-disable-line max-len
+              '1', 2, 3, 4, 5).toString()).toBe('1_02_03_04_05');
 
       // Double $$.
       expect(
           MpdUtils.fillUriTemplate(
-              '$$/$RepresentationID$$$$Number$$$$Bandwidth$$$$Time$$$.$$',
-              '1', 2, 3, 4).toString()).toBe('$/1$2$3$4$.$');
+              '$$/$RepresentationID$$$$Number$$$$SubNumber$$$$Bandwidth$$$$Time$$$.$$', // eslint-disable-line max-len
+              '1', 2, 3, 4, 5).toString()).toBe('$/1$2$3$4$5$.$');
     });
 
     it('handles invalid identifiers', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Garbage$.mp4',
-              '1', 2, 3, 4).toString()).toBe('/example/$Garbage$.mp4');
+              '1', 2, 3, 4, 5).toString()).toBe('/example/$Garbage$.mp4');
 
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Time.mp4',
-              '1', 2, 3, 4).toString()).toBe('/example/$Time.mp4');
+              '1', 2, 3, 4, 5).toString()).toBe('/example/$Time.mp4');
     });
 
     it('handles non-decimal format specifiers', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/$Number%05x$_$Number%01X$_$Number%01u$_$Number%01o$.mp4',
-              '', 180, 0, 0).toString()).toBe('/000b4_B4_180_264.mp4');
+              '', 180, 0, 0, 0).toString()).toBe('/000b4_B4_180_264.mp4');
     });
   });
 

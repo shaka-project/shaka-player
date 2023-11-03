@@ -399,7 +399,8 @@ shaka.extern.FetchCryptoKeysFunction;
  *      (!Array.<shaka.extern.Stream>|!Array.<shaka.extern.StreamDB>|
  *      undefined),
  *   mssPrivateData: (shaka.extern.MssPrivateData|undefined),
- *   external: boolean
+ *   external: boolean,
+ *   fastSwitching: boolean
  * }}
  *
  * @description
@@ -532,6 +533,8 @@ shaka.extern.FetchCryptoKeysFunction;
  * @property {boolean} external
  *   Indicate if the stream was added externally.
  *   Eg: external text tracks.
+ * @property {boolean} fastSwitching
+ *   Indicate if the stream should be used for fast switching.
  *
  * @exportDoc
  */
