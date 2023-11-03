@@ -757,7 +757,8 @@ shaka.extern.PersistentSessionMetadata;
  *   preferredKeySystems: !Array.<string>,
  *   keySystemsMapping: !Object.<string, string>,
  *   parseInbandPsshEnabled: boolean,
- *   minHdcpVersion: string
+ *   minHdcpVersion: string,
+ *   ignoreDuplicateInitData: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -813,7 +814,12 @@ shaka.extern.PersistentSessionMetadata;
  *   <i>By default (''), do not check the HDCP version.</i><br>
  *   Indicates the minimum version of HDCP to start the playback of encrypted
  *   streams. <b>May be ignored if not supported by the device.</b>
- *
+ * @property {boolean} ignoreDuplicateInitData
+ *   <i>Defaults to false on Tizen 2, and true for all other browsers.</i><br>
+ *   When true indicate that the player doesn't ignore duplicate init data.
+ *   Note: Tizen 2015 and 2016 models will send multiple webkitneedkey events
+ *   with the same init data. If the duplicates are supressed, playback
+ *   will stall without errors.
  * @exportDoc
  */
 shaka.extern.DrmConfiguration;
