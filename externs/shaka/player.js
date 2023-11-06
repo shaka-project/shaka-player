@@ -498,13 +498,17 @@ shaka.extern.MetadataRawFrame;
  * @typedef {{
  *   key: string,
  *   data: (ArrayBuffer|string|number),
- *   description: string
+ *   description: string,
+ *   mimeType: ?string,
+ *   pictureType: ?number
  * }}
  *
  * @description metadata frame parsed.
  * @property {string} key
  * @property {ArrayBuffer|string|number} data
  * @property {string} description
+ * @property {?string} mimeType
+ * @property {?number} pictureType
  * @exportDoc
  */
 shaka.extern.MetadataFrame;
