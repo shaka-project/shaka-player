@@ -919,7 +919,6 @@ describe('StreamUtils', () => {
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
           /* preferredVideoCodecs= */[],
           /* preferredAudioCodecs= */[],
-          /* preferredAudioChannelCount= */2,
           /* preferredDecodingAttributes= */[]);
 
       expect(manifest.variants.length).toBe(2);
@@ -961,7 +960,6 @@ describe('StreamUtils', () => {
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
       /* preferredVideoCodecs= */[],
           /* preferredAudioCodecs= */[],
-          /* preferredAudioChannelCount= */2,
           /* preferredDecodingAttributes= */[]);
 
       expect(manifest.variants.length).toBe(2);
@@ -991,7 +989,6 @@ describe('StreamUtils', () => {
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
           /* preferredVideoCodecs= */[],
           /* preferredAudioCodecs= */[],
-          /* preferredAudioChannelCount= */2,
           /* preferredDecodingAttributes= */[]);
 
       expect(manifest.variants.length).toBe(2);
@@ -1110,7 +1107,6 @@ describe('StreamUtils', () => {
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
           /* preferredVideoCodecs= */[],
           /* preferredAudioCodecs= */[],
-          /* preferredAudioChannelCount= */2,
           /* preferredDecodingAttributes= */
           [shaka.util.StreamUtils.DecodingAttributes.SMOOTH]);
       // 2 video codecs are smooth. Choose the one with the lowest bandwidth.
