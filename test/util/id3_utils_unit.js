@@ -60,6 +60,8 @@ describe('Id3Utils', () => {
         key: 'TXXX',
         description: 'A',
         data: 'Shaka',
+        mimeType: null,
+        pictureType: null,
       },
     ];
     expect(Id3Utils.getID3Frames(txxxID3)).toEqual(expectedID3);
@@ -74,6 +76,8 @@ describe('Id3Utils', () => {
         key: 'TXXX',
         description: 'A',
         data: 'Shaka',
+        mimeType: null,
+        pictureType: null,
       },
     ];
     expect(Id3Utils.getID3Frames(txxxID3)).toEqual(expectedID3);
@@ -89,6 +93,8 @@ describe('Id3Utils', () => {
         key: 'TCOP',
         description: '',
         data: 'Shaka 2016',
+        mimeType: null,
+        pictureType: null,
       },
     ];
     expect(Id3Utils.getID3Frames(tcopID3)).toEqual(expectedID3);
@@ -104,6 +110,8 @@ describe('Id3Utils', () => {
         key: 'WXXX',
         description: 'A',
         data: 'google.com',
+        mimeType: null,
+        pictureType: null,
       },
     ];
     expect(Id3Utils.getID3Frames(wxxxID3)).toEqual(expectedID3);
@@ -119,6 +127,8 @@ describe('Id3Utils', () => {
         key: 'WCOP',
         description: '',
         data: 'google.com',
+        mimeType: null,
+        pictureType: null,
       },
     ];
     expect(Id3Utils.getID3Frames(wcopID3)).toEqual(expectedID3);
@@ -133,6 +143,8 @@ describe('Id3Utils', () => {
         key: 'PRIV',
         description: 'A',
         data: BufferUtils.toArrayBuffer(new Uint8Array([83, 104, 97, 107])),
+        mimeType: null,
+        pictureType: null,
       },
     ];
     expect(Id3Utils.getID3Frames(privID3)).toEqual(expectedID3);
@@ -147,6 +159,8 @@ describe('Id3Utils', () => {
         key: 'XXXX',
         description: '',
         data: BufferUtils.toArrayBuffer(new Uint8Array([83, 104, 97, 107])),
+        mimeType: null,
+        pictureType: null,
       },
     ];
     expect(Id3Utils.getID3Frames(unknownID3)).toEqual(expectedID3);
