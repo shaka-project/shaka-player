@@ -560,7 +560,7 @@ describe('MediaSourceEngine', () => {
       await mediaSourceEngine.appendBuffer(
           ContentType.TEXT, data, reference, /* hasClosedCaptions= */ false);
       expect(mockTextEngine.appendBuffer).toHaveBeenCalledWith(
-          data, 0, 10);
+          data, 0, 10, 'foo://bar');
     });
 
     it('appends transmuxed data and captions', async () => {
