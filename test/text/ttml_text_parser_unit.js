@@ -1263,6 +1263,35 @@ describe('TtmlTextParser', () => {
         });
   });
 
+  it('supports smpte:backgroundImage attribute with url', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: '',
+          },
+        ],
+        '<tt ' +
+        'xmlns:ttm="http://www.w3.org/ns/ttml#metadata" ' +
+        'xmlns:smpte="http://www.smpte-ra.org/schemas/2052-1/2010/smpte-tt">' +
+        '<metadata>' +
+        '<smpte:image imageType="PNG" encoding="Base64" xml:id="img_0">' +
+        'base64EncodedImage</smpte:image>' +
+        '</metadata>' +
+        '<body><div smpte:backgroundImage="img_0.png">' +
+        '<p begin="01:02.05" end="01:02:03.200"></p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 60, segmentEnd: 3730, vttOffset: 0},
+        {startTime: 62.05, endTime: 3723.2},
+        {
+          startTime: 62.05,
+          endTime: 3723.2,
+          backgroundImage: 'foo://bar/img_0.png',
+          isContainer: false,
+        });
+  });
+
   it('supports smpte:backgroundImage attribute in div element', () => {
     verifyHelper(
         [],
@@ -2112,7 +2141,8 @@ describe('TtmlTextParser', () => {
   function verifyHelper(cues, text, time, bodyProperties, divProperties) {
     const data =
         shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
-    const result = new shaka.text.TtmlTextParser().parseMedia(data, time);
+    const result = new shaka.text.TtmlTextParser()
+        .parseMedia(data, time, 'foo://bar');
     shaka.test.TtmlUtils.verifyHelper(
         cues, result, bodyProperties, divProperties);
   }
@@ -2139,7 +2169,8 @@ describe('TtmlTextParser', () => {
     expect(() => {
       new shaka.text.TtmlTextParser().parseMedia(
           shaka.util.BufferUtils.toUint8(data),
-          {periodStart: 0, segmentStart: 0, segmentEnd: 10, vttOffset: 0});
+          {periodStart: 0, segmentStart: 0, segmentEnd: 10, vttOffset: 0},
+          'foo://bar');
     }).toThrow(error);
   }
 });
