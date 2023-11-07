@@ -149,6 +149,9 @@ shakaAssets.Feature = {
   // Set if the asset has at least one image stream.
   THUMBNAILS: 'Thumbnails',
 
+  // Set if the asset has at least one chapter stream.
+  CHAPTERS: 'Chapters',
+
   // Set if the asset has LCEVC.
   LCEVC: 'LCEVC',
 
@@ -401,7 +404,13 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addFeature(shakaAssets.Feature.CHAPTERS)
+      .addExtraChapter({
+        uri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-chapters.vtt',
+        language: 'en',
+        mime: 'text/vtt',
+      }),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel w/ trick mode (MP4 only, 720p)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
