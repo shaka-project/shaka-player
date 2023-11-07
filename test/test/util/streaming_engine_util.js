@@ -417,6 +417,7 @@ shaka.test.StreamingEngineUtil = class {
       spatialAudio: false,
       accessibilityPurpose: null,
       external: false,
+      fastSwitching: false,
     };
   }
 
@@ -459,6 +460,7 @@ shaka.test.StreamingEngineUtil = class {
       spatialAudio: false,
       accessibilityPurpose: null,
       external: false,
+      fastSwitching: false,
     };
   }
 
@@ -498,6 +500,7 @@ shaka.test.StreamingEngineUtil = class {
       spatialAudio: false,
       accessibilityPurpose: null,
       external: false,
+      fastSwitching: false,
     };
   }
 };

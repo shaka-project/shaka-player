@@ -222,6 +222,7 @@ describe('AdaptationSet', () => {
       accessibilityPurpose: null,
       external: false,
       groupId: null,
+      fastSwitching: false,
     };
   }
 });

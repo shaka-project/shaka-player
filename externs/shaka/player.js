@@ -498,13 +498,17 @@ shaka.extern.MetadataRawFrame;
  * @typedef {{
  *   key: string,
  *   data: (ArrayBuffer|string|number),
- *   description: string
+ *   description: string,
+ *   mimeType: ?string,
+ *   pictureType: ?number
  * }}
  *
  * @description metadata frame parsed.
  * @property {string} key
  * @property {ArrayBuffer|string|number} data
  * @property {string} description
+ * @property {?string} mimeType
+ * @property {?number} pictureType
  * @exportDoc
  */
 shaka.extern.MetadataFrame;
@@ -757,7 +761,8 @@ shaka.extern.PersistentSessionMetadata;
  *   preferredKeySystems: !Array.<string>,
  *   keySystemsMapping: !Object.<string, string>,
  *   parseInbandPsshEnabled: boolean,
- *   minHdcpVersion: string
+ *   minHdcpVersion: string,
+ *   ignoreDuplicateInitData: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -813,7 +818,12 @@ shaka.extern.PersistentSessionMetadata;
  *   <i>By default (''), do not check the HDCP version.</i><br>
  *   Indicates the minimum version of HDCP to start the playback of encrypted
  *   streams. <b>May be ignored if not supported by the device.</b>
- *
+ * @property {boolean} ignoreDuplicateInitData
+ *   <i>Defaults to false on Tizen 2, and true for all other browsers.</i><br>
+ *   When true indicate that the player doesn't ignore duplicate init data.
+ *   Note: Tizen 2015 and 2016 models will send multiple webkitneedkey events
+ *   with the same init data. If the duplicates are supressed, playback
+ *   will stall without errors.
  * @exportDoc
  */
 shaka.extern.DrmConfiguration;
@@ -1105,7 +1115,9 @@ shaka.extern.ManifestConfiguration;
  *   segmentPrefetchLimit: number,
  *   liveSync: boolean,
  *   liveSyncMaxLatency: number,
- *   liveSyncPlaybackRate: number
+ *   liveSyncPlaybackRate: number,
+ *   liveSyncMinLatency: number,
+ *   liveSyncMinPlaybackRate: number
  * }}
  *
  * @description
@@ -1234,6 +1246,13 @@ shaka.extern.ManifestConfiguration;
  *   Playback rate used for latency chasing. It is recommended to use a value
  *   between 1 and 2. Effective only if liveSync is true. Defaults to
  *   <code>1.1</code>.
+ * @property {number} liveSyncMinLatency
+ *   Minimun acceptable latency, in seconds. Effective only if liveSync is
+ *   true. Defaults to <code>0</code>.
+ * @property {number} liveSyncMinPlaybackRate
+ *   Minimun playback rate used for latency chasing. It is recommended to use a
+ *   value between 0 and 1. Effective only if liveSync is true. Defaults to
+ *   <code>1</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

@@ -149,7 +149,7 @@ describe('SrtTextParser', () => {
     const data = BufferUtils.toUint8(StringUtils.toUTF8(text));
 
     const parser = new shaka.text.SrtTextParser();
-    const result = parser.parseMedia(data, time);
+    const result = parser.parseMedia(data, time, null);
 
     const expected = cues.map((cue) => {
       if (cue.nestedCues) {

@@ -152,18 +152,26 @@ shaka.extern.InitDataOverride;
 /**
  * @typedef {{
  *   maxLatency: ?number,
- *   maxPlaybackRate: ?number
+ *   maxPlaybackRate: ?number,
+ *   minLatency: ?number,
+ *   minPlaybackRate: ?number
  * }}
  *
  * @description
- * Maximum latency and playback rate for a manifest. When max latency is reached
- * playbackrate is updated to maxPlaybackRate to decrease latency.
+ * Maximum and minimun latency and playback rate for a manifest. When max
+ * latency is reached playbackrate is updated to maxPlaybackRate to decrease
+ * latency. When min  latency is reached playbackrate is updated to
+ * minPlaybackRate to increase  latency.
  * More information {@link https://dashif.org/docs/CR-Low-Latency-Live-r8.pdf here}.
  *
  * @property {?number} maxLatency
  *  Maximum latency in seconds.
  * @property {?number} maxPlaybackRate
  *  Maximum playback rate.
+ * @property {?number} minLatency
+ *  Minimun latency in seconds.
+ * @property {?number} minPlaybackRate
+ *  Minimun playback rate.
  *
  * @exportDoc
  */
@@ -391,7 +399,8 @@ shaka.extern.FetchCryptoKeysFunction;
  *      (!Array.<shaka.extern.Stream>|!Array.<shaka.extern.StreamDB>|
  *      undefined),
  *   mssPrivateData: (shaka.extern.MssPrivateData|undefined),
- *   external: boolean
+ *   external: boolean,
+ *   fastSwitching: boolean
  * }}
  *
  * @description
@@ -524,6 +533,8 @@ shaka.extern.FetchCryptoKeysFunction;
  * @property {boolean} external
  *   Indicate if the stream was added externally.
  *   Eg: external text tracks.
+ * @property {boolean} fastSwitching
+ *   Indicate if the stream should be used for fast switching.
  *
  * @exportDoc
  */

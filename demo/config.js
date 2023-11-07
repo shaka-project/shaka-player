@@ -128,7 +128,9 @@ shakaDemo.Config = class {
             /* canBeUnset= */ true)
         .addBoolInput_('Parse inband "pssh" from media segments',
             'drm.parseInbandPsshEnabled')
-        .addTextInput_('Min HDCP version', 'drm.minHdcpVersion');
+        .addTextInput_('Min HDCP version', 'drm.minHdcpVersion')
+        .addBoolInput_('Ignore duplicate init data',
+            'drm.ignoreDuplicateInitData');
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const addDRMAdvancedField = (name, valueName, suggestions) => {
       // All advanced fields of a given type are set at once.
@@ -406,6 +408,14 @@ shakaDemo.Config = class {
             /* canBeZero= */ true)
         .addNumberInput_('Playback rate for live sync',
             'streaming.liveSyncPlaybackRate',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ false)
+        .addNumberInput_('Min latency for live sync',
+            'streaming.liveSyncMinLatency',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Min playback rate for live sync',
+            'streaming.liveSyncMinPlaybackRate',
             /* canBeDecimal= */ true,
             /* canBeZero= */ false);
 

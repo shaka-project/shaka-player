@@ -1,16 +1,18 @@
 /**
  * @typedef {{
- *   data: Uint8Array,
+ *   data: !Uint8Array,
  *   packetLength: number,
  *   pts: ?number,
- *   dts: ?number
+ *   dts: ?number,
+ *   nalus: !Array.<!shaka.extern.VideoNalu>
  * }}
  *
  * @summary MPEG_PES.
- * @property {Uint8Array} data
+ * @property {!Uint8Array} data
  * @property {number} packetLength
  * @property {?number} pts
  * @property {?number} dts
+ * @property {!Array.<!shaka.extern.VideoNalu>} nalus
  */
 shaka.extern.MPEG_PES;
 
