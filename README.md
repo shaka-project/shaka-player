@@ -287,6 +287,7 @@ Shaka Player supports:
 Shaka Player supports:
   - Internal DASH thumbnails. Using DASH-IF IOP Image Adaptation Set
   - Internal HLS thumbnails. Using HLS Image Media Playlist
+  - Internal HLS thumbnails. Using I-frame-only playlists with mjpg codec
   - External WebVTT with images/sprites (only for VoD)
 
 
