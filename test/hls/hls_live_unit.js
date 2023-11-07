@@ -974,9 +974,11 @@ describe('HlsParser live', () => {
             'test:/main.mp4', 0, 2, /* syncTime= */ null);
 
         const newRef1 = makeReference(
-            'test:/redirected/main.mp4', 0, 2, /* syncTime= */ null);
+            ['test:/redirected/main.mp4', 'test:/main.mp4'],
+            0, 2, /* syncTime= */ null);
         const newRef2 = makeReference(
-            'test:/redirected/main2.mp4', 2, 4, /* syncTime= */ null);
+            ['test:/redirected/main2.mp4', 'test:/main2.mp4'],
+            2, 4, /* syncTime= */ null);
 
         let playlistFetchCount = 0;
 
@@ -1308,7 +1310,7 @@ describe('HlsParser live', () => {
   });  // describe('playlist type LIVE')
 
   /**
-   * @param {string} uri A relative URI to http://example.com
+   * @param {string|Array.<string>} uri A relative URI to http://example.com
    * @param {number} start
    * @param {number} end
    * @param {?number} syncTime

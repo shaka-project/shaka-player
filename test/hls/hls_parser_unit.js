@@ -1567,7 +1567,7 @@ describe('HlsParser', () => {
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
       'video\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
-      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub2"\n',
+      'RESOLUTION=960x540,FRAME-RATE=90,AUDIO="aud1",SUBTITLES="sub2"\n',
       'video\n',
     ].join('');
 
@@ -3193,7 +3193,7 @@ describe('HlsParser', () => {
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
       'video\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1,mp4a",',
-      'RESOLUTION=960x540,FRAME-RATE=120,AUDIO="aud2"\n',
+      'RESOLUTION=960x540,FRAME-RATE=90,AUDIO="aud2"\n',
       'video2\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1,mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=120,AUDIO="aud3"\n',
