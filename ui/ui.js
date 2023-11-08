@@ -229,6 +229,8 @@ shaka.ui.Overlay = class {
         buffered: 'rgba(255, 255, 255, 0.54)',
         played: 'rgb(255, 255, 255)',
         adBreaks: 'rgb(255, 204, 0)',
+        chapterMarks: 'rgb(27, 27, 27)',
+        chapterLabels: 'rgb(255, 255, 255)',
       },
       volumeBarColors: {
         base: 'rgba(255, 255, 255, 0.54)',
