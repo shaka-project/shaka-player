@@ -21,7 +21,9 @@ shaka.extern = {};
  *   base: string,
  *   buffered: string,
  *   played: string,
- *   adBreaks: string
+ *   adBreaks: string,
+ *   chapterMarks: string,
+ *   chapterLabels: string
  * }}
  *
  * @property {string} base
@@ -36,6 +38,13 @@ shaka.extern = {};
  * @property {string} adBreaks
  *   The CSS background color applied to the portion of the seek bar showing
  *   when the ad breaks are scheduled to occur on the timeline.
+ * @property {string} chapterMarks
+ *   The CSS border color applied to sections of the seek bar showing
+ *   when the chapters start and end on the timeline.
+ *   Defaults to dark grey rgb(27, 27, 27).
+ * @property {string} chapterLabels
+ *   The CSS text color applied to the chapter labels that appear above the
+ *   seek bar on hover. Defaults to white rgb(255, 255, 255).
  * @exportDoc
  */
 shaka.extern.UISeekBarColors;

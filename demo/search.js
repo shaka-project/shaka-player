@@ -391,6 +391,8 @@ shakaDemo.Search = class {
         'Filters for assets that do not have video streams.');
     this.makeBooleanInput_(specialContainer, Feature.THUMBNAILS, FEATURE,
         'Filters for assets that have a thumbnail track.');
+    this.makeBooleanInput_(specialContainer, Feature.CHAPTERS, FEATURE,
+        'Filters for assets that have a chapters track.');
     this.makeBooleanInput_(specialContainer, Feature.LCEVC, FEATURE,
         'Filters for assets that have an LCEVC enhancement layer.');
 
