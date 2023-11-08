@@ -1987,6 +1987,100 @@ describe('HlsParser', () => {
     }
   });
 
+  it('supports EXT-X-I-FRAME-STREAM-INF with mjpg codec', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
+      'URI="text"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="2",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
+      'video\n',
+      '#EXT-X-I-FRAME-STREAM-INF:RESOLUTION=240×135,CODECS="mjpg",',
+      'URI="iframe"\n',
+      '#EXT-X-I-FRAME-STREAM-INF:RESOLUTION=240×135,CODECS="avc",',
+      'URI="iframeAvc"\n',
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const text = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.vtt',
+    ].join('');
+
+    const iframe = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/video', video)
+        .setResponseText('test:/text', text)
+        .setResponseText('test:/iframe', iframe)
+        .setResponseText('test:/main.vtt', vttText)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
+
+    expect(actual.imageStreams.length).toBe(1);
+    expect(actual.textStreams.length).toBe(1);
+    expect(actual.variants.length).toBe(1);
+
+    const thumbnails = actual.imageStreams[0];
+
+    expect(thumbnails.mimeType).toBe('application/mp4');
+    expect(thumbnails.codecs).toBe('mjpg');
+
+    await thumbnails.createSegmentIndex();
+    goog.asserts.assert(thumbnails.segmentIndex != null, 'Null segmentIndex!');
+
+    const firstThumbnailReference = thumbnails.segmentIndex.get(0);
+    const secondThumbnailReference = thumbnails.segmentIndex.get(1);
+    const thirdThumbnailReference = thumbnails.segmentIndex.get(2);
+
+    expect(firstThumbnailReference).not.toBe(null);
+    expect(secondThumbnailReference).not.toBe(null);
+    expect(thirdThumbnailReference).not.toBe(null);
+  });
+
   it('parse EXT-X-GAP', async () => {
     const master = [
       '#EXTM3U\n',
