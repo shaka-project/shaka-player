@@ -710,7 +710,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     * @return {boolean}
     */
     const chaptersEqual = (a, b) => {
-      return !a || !b || (a.id === b.id && a.title === b.title &&
+      return (!a && !b) || (a.id === b.id && a.title === b.title &&
           a.startTime === b.startTime && a.endTime === b.endTime);
     };
 
@@ -741,14 +741,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
             nextChapters.some((n) => chaptersEqual(c, n));
         });
 
-      // If chapters exist and changed, then dispose of and rebuild them.
-      if (nextChapters.length && (languageChanged || chaptersChanged)) {
-        language = nextLanguage;
-        chapters = nextChapters;
-
-        this.createChapterElements_(this.container, chapters);
-      } else if (!nextChapters.length) {
+      language = nextLanguage;
+      chapters = nextChapters;
+      if (!nextChapters.length) {
         this.deletePreviousChapters_();
+      } else if (languageChanged || chaptersChanged) {
+        this.createChapterElements_(this.container, chapters);
       }
     };
 
@@ -757,8 +755,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.eventManager.listen(
         this.player, 'unloading', () => {
           this.deletePreviousChapters_();
-          language = 'und';
-          chapters = [];
         });
 
     this.eventManager.listen(
@@ -890,9 +886,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    */
   deletePreviousChapters_() {
     this.chaptersEventManager_.removeAll();
-    while (this.chaptersContainer_.lastChild) {
-      this.chaptersContainer_.removeChild(this.chaptersContainer_.firstChild);
-    }
+    shaka.util.Dom.removeAllChildren(this.chaptersContainer_);
   }
 };
 
