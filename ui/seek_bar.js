@@ -755,6 +755,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.eventManager.listen(
         this.player, 'unloading', () => {
           this.deletePreviousChapters_();
+          language = 'und';
+          chapters = [];
         });
 
     this.eventManager.listen(
