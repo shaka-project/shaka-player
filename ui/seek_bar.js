@@ -14,6 +14,7 @@ goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.RangeElement');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.EventManager');
 goog.require('shaka.util.Timer');
 goog.requireType('shaka.ui.Controls');
 
@@ -78,6 +79,17 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.adBreaksTimer_ = new shaka.util.Timer(() => {
       this.markAdBreaks_();
     });
+
+    /**
+     * @private {shaka.util.EventManager}
+     */
+    this.chaptersEventManager_ = new shaka.util.EventManager();
+
+
+    /** @private {!HTMLElement} */
+    this.chaptersContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.chaptersContainer_.id = 'shaka-player-ui-chapters-container';
+    this.container.appendChild(this.chaptersContainer_);
 
     this.setupChapters_();
 
@@ -205,6 +217,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.adBreaksTimer_.stop();
       this.adBreaksTimer_ = null;
     }
+
+    this.chaptersEventManager_.release();
 
     super.release();
   }
@@ -613,8 +627,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @private
    */
   setupChapters_() {
-    /** @type {?AbortController} */
-    let abortController = null;
     let language = 'und';
     /** @type {!Array<shaka.extern.Chapter>} */
     let chapters = [];
@@ -623,10 +635,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     * Does a value compare on chapters.
     * @param {shaka.extern.Chapter} a
     * @param {shaka.extern.Chapter} b
-    * @return {!boolean}
+    * @return {boolean}
     */
     const chaptersEqual = (a, b) => {
-      return !(a && b) || (a.id === b.id && a.title === b.title &&
+      return !a || !b || (a.id === b.id && a.title === b.title &&
           a.startTime === b.startTime && a.endTime === b.endTime);
     };
 
@@ -661,21 +673,24 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       if (nextChapters.length && (languageChanged || chaptersChanged)) {
         language = nextLanguage;
         chapters = nextChapters;
-        if (abortController) {
-          abortController.abort();
-        }
-        abortController = new AbortController();
-        this.createChapterElements_(
-            this.container, chapters, abortController.signal);
+
+        this.createChapterElements_(this.container, chapters);
+      } else if (!nextChapters.length) {
+        this.deletePreviousChapters_();
       }
     };
 
     handleChapterTrackChange();
 
     this.eventManager.listen(
-        this.player, 'trackschanged', () => {
-          handleChapterTrackChange();
+        this.player, 'unloading', () => {
+          this.deletePreviousChapters_();
+          language = 'und';
+          chapters = [];
         });
+
+    this.eventManager.listen(
+        this.player, 'trackschanged', handleChapterTrackChange);
 
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
@@ -692,10 +707,11 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * Builds and inserts ChaptersElement into dom container.
    * @param {!HTMLElement} container
    * @param {!Array<shaka.extern.Chapter>} chapterTracks
-   * @param {!AbortSignal} abortSignal
    * @private
    */
-  createChapterElements_(container, chapterTracks, abortSignal) {
+  createChapterElements_(container, chapterTracks) {
+    this.deletePreviousChapters_();
+
     const hiddenClass = 'shaka-hidden';
 
     /** @type {{start: number, end: number}} */
@@ -728,10 +744,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       return;
     }
 
-    // Create chapter elements
-    const chaptersContainer = shaka.util.Dom.createHTMLElement('div');
-    chaptersContainer.classList.add('shaka-chapters');
-
     const totalSize = chapters.reduce((t, c) => {
       t += c.size;
       return t;
@@ -752,7 +764,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       chapterEl.classList.add('shaka-chapter');
       chapterEl.style.width = `${c.size * 100 / totalSize}%`;
 
-      chaptersContainer.appendChild(chapterEl);
+      this.chaptersContainer_.appendChild(chapterEl);
 
       /** @type {!HTMLElement} */
       const chapterMarker = shaka.util.Dom.createHTMLElement('div');
@@ -772,17 +784,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           {start: c.start, end: c.end, el: chapterLabel});
     }
 
-    // Remove chapter elements on abort
-    this.eventManager.listenOnce(abortSignal, 'abort',
-        () => {
-          this.recursivelyRemove_(chaptersContainer);
-        }, {passive: true});
-
     // Add chapter event listeners
-    /** @type {!AddEventListenerOptions} */
-    const chapterEventOptions = {passive: true, signal: abortSignal};
-
-    this.eventManager.listen(this.bar, 'pointermove', (e) => {
+    this.chaptersEventManager_.listen(this.bar, 'pointermove', (e) => {
       if (!e.target) {
         return;
       }
@@ -799,32 +802,25 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           c.el.classList.toggle(hiddenClass);
         }
       }
-    }, chapterEventOptions);
+    }, {passive: true});
 
-    this.eventManager.listen(this.bar, 'pointerout', () => {
+    this.chaptersEventManager_.listen(this.bar, 'pointerout', () => {
       for (const c of chapterElMap) {
         if (!c.el.classList.contains(hiddenClass)) {
           c.el.classList.add(hiddenClass);
         }
       }
-    }, chapterEventOptions);
-
-    container.insertBefore(
-        chaptersContainer, this.container.childNodes[0]);
+    }, {passive: true});
   }
 
   /**
-   * @param {Element} parent
    * @private
    */
-  recursivelyRemove_(parent) {
-    if (!parent) {
-      return;
+  deletePreviousChapters_() {
+    this.chaptersEventManager_.removeAll();
+    while (this.chaptersContainer_.lastChild) {
+      this.chaptersContainer_.removeChild(this.chaptersContainer_.firstChild);
     }
-    while (parent.lastChild) {
-      this.recursivelyRemove_(parent.lastElementChild);
-    }
-    parent.remove();
   }
 };
 
