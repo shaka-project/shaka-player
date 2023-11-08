@@ -371,6 +371,9 @@ shakaDemo.Search = class {
         /* docLink= */ null);
     this.makeBooleanInput_(specialContainer, Feature.HIGH_DEFINITION, FEATURE,
         'Filters for assets with at least one high-definition video stream.');
+    this.makeBooleanInput_(specialContainer, Feature.ULTRA_HIGH_DEFINITION,
+        FEATURE, 'Filters for assets with at least one ultra-high-definition' +
+        ' video stream.');
     this.makeBooleanInput_(specialContainer, Feature.XLINK, FEATURE,
         'Filters for assets that have XLINK tags in their manifests, so that ' +
         'they can be broken into multiple files.');
