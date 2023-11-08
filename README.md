@@ -132,9 +132,8 @@ HLS features supported:
  - Encrypted content with FairPlay (Safari on macOS and iOS 9+ only)
  - Key rotation
  - Raw AAC, MP3, AC-3 and EC-3 (without an MP4 container)
-
-HLS features **not** supported:
- - I-frame-only playlists: https://github.com/shaka-project/shaka-player/issues/742
+ - I-frame-only playlists with mjpg codec for thumbnails
+ - #EXT-X-IMAGE-STREAM-INF for thumbnails
 
 
 ## MPEG-5 Part2 LCEVC Support
@@ -288,6 +287,7 @@ Shaka Player supports:
 Shaka Player supports:
   - Internal DASH thumbnails. Using DASH-IF IOP Image Adaptation Set
   - Internal HLS thumbnails. Using HLS Image Media Playlist
+  - Internal HLS thumbnails. Using I-frame-only playlists with mjpg codec
   - External WebVTT with images/sprites (only for VoD)
 
 

@@ -8,12 +8,16 @@
 goog.provide('shaka.ui.SeekBar');
 
 goog.require('shaka.ads.AdManager');
+goog.require('shaka.net.NetworkingEngine');
 goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.RangeElement');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.Mp4Parser');
+goog.require('shaka.util.Networking');
 goog.require('shaka.util.Timer');
 goog.requireType('shaka.ui.Controls');
 
@@ -109,6 +113,16 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.container.appendChild(this.thumbnailContainer_);
 
     /**
+     * @private {?shaka.extern.Thumbnail}
+     */
+    this.lastThumbnail_ = null;
+
+    /**
+     * @private {?shaka.net.NetworkingEngine.PendingRequest}
+     */
+    this.lastThumbnailPendingRequest_ = null;
+
+    /**
      * True if the bar is moving due to touchscreen or keyboard events.
      *
      * @private {boolean}
@@ -159,6 +173,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         this.player, 'unloading', () => {
           this.adCuePoints_ = [];
           this.onAdCuePointsChanged_();
+          if (this.lastThumbnailPendingRequest_) {
+            this.lastThumbnailPendingRequest_.abort();
+            this.lastThumbnailPendingRequest_ = null;
+          }
+          this.lastThumbnail_ = null;
+          this.hideThumbnail_();
         });
 
     this.eventManager.listen(this.bar, 'mousemove', (event) => {
@@ -504,8 +524,52 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         Math.max(0, pixelPosition - (width / 2)));
     this.thumbnailContainer_.style.left = leftPosition + 'px';
     this.thumbnailContainer_.style.visibility = 'visible';
-    const uri = thumbnail.uris[0].split('#xywh=')[0];
-    if (uri !== this.thumbnailImage_.src) {
+    let uri = thumbnail.uris[0].split('#xywh=')[0];
+    if (!this.lastThumbnail_ ||
+        uri !== this.lastThumbnail_.uris[0].split('#xywh=')[0] ||
+        thumbnail.segment.getStartByte() !=
+            this.lastThumbnail_.segment.getStartByte() ||
+        thumbnail.segment.getEndByte() !=
+            this.lastThumbnail_.segment.getEndByte()) {
+      this.lastThumbnail_ = thumbnail;
+      if (this.lastThumbnailPendingRequest_) {
+        this.lastThumbnailPendingRequest_.abort();
+        this.lastThumbnailPendingRequest_ = null;
+      }
+      if (thumbnailTrack.codecs == 'mjpg' || uri.startsWith('offline:')) {
+        this.thumbnailImage_.src = shaka.ui.SeekBar.Transparent_Image_;
+        try {
+          const requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+          const type =
+              shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT;
+          const request = shaka.util.Networking.createSegmentRequest(
+              thumbnail.segment.getUris(),
+              thumbnail.segment.getStartByte(),
+              thumbnail.segment.getEndByte(),
+              this.player.getConfiguration().streaming.retryParameters);
+          this.lastThumbnailPendingRequest_ = this.player.getNetworkingEngine()
+              .request(requestType, request, {type});
+          const response = await this.lastThumbnailPendingRequest_.promise;
+          this.lastThumbnailPendingRequest_ = null;
+          if (thumbnailTrack.codecs == 'mjpg') {
+            const parser = new shaka.util.Mp4Parser()
+                .box('mdat', shaka.util.Mp4Parser.allData((data) => {
+                  const blob = new Blob([data], {type: 'image/jpeg'});
+                  uri = URL.createObjectURL(blob);
+                }));
+            parser.parse(response.data, /* partialOkay= */ false);
+          } else {
+            const mimeType = thumbnailTrack.mimeType || 'image/jpeg';
+            const blob = new Blob([response.data], {type: mimeType});
+            uri = URL.createObjectURL(blob);
+          }
+        } catch (error) {
+          if (error.code == shaka.util.Error.Code.OPERATION_ABORTED) {
+            return;
+          }
+          throw error;
+        }
+      }
       try {
         this.thumbnailContainer_.removeChild(this.thumbnailImage_);
       } catch (e) {
@@ -516,6 +580,11 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.thumbnailImage_.id = 'shaka-player-ui-thumbnail-image';
       this.thumbnailImage_.draggable = false;
       this.thumbnailImage_.src = uri;
+      this.thumbnailImage_.onload = () => {
+        if (uri.startsWith('blob:')) {
+          URL.revokeObjectURL(uri);
+        }
+      };
       this.thumbnailContainer_.insertBefore(this.thumbnailImage_,
           this.thumbnailContainer_.firstChild);
     }
@@ -571,7 +640,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         return bestOptions[0];
       }
     }
-    return imageTracks[0];
+    const mjpgTrack = imageTracks.find((track) => {
+      return track.mimeType == 'application/mp4' && track.codecs == 'mjpg';
+    });
+    return mjpgTrack || imageTracks[0];
   }
 
 
@@ -606,6 +678,14 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     }
   }
 };
+
+
+/**
+ * @const {string}
+ * @private
+ */
+shaka.ui.SeekBar.Transparent_Image_ =
+    'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>';
 
 
 /**
