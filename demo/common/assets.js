@@ -1350,7 +1350,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Advanced stream HLS Stream (UHD/4K/HDR/ATMOS)',
-      /* iconUri= */ '',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/becoming_you.png',
       /* manifestUri= */ 'https://devstreaming-cdn.apple.com/videos/streaming/examples/adv_dv_atmos/main.m3u8',
       /* source= */ shakaAssets.Source.APPLE)
       .addFeature(shakaAssets.Feature.HLS)
