@@ -104,7 +104,8 @@ shaka.extern.ManifestParser = class {
   onInitialVariantChosen(variant) {}
 
   /**
-   * Tells the parser that a location should be banned.
+   * Tells the parser that a location should be banned. This is called on
+   * retry.
    *
    * @param {string} uri
    * @exportDoc
