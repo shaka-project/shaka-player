@@ -96,12 +96,21 @@ shaka.extern.ManifestParser = class {
   onExpirationUpdated(sessionId, expiration) {}
 
   /**
-   * Tell the parser that the initial variant has been chosen.
+   * Tells the parser that the initial variant has been chosen.
    *
    * @param {shaka.extern.Variant} variant
    * @exportDoc
    */
   onInitialVariantChosen(variant) {}
+
+  /**
+   * Tells the parser that a location should be banned. This is called on
+   * retry.
+   *
+   * @param {string} uri
+   * @exportDoc
+   */
+  banLocation(uri) {}
 };
 
 
