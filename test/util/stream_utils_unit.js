@@ -928,12 +928,17 @@ describe('StreamUtils', () => {
 
     it('should filter variants by the best available bandwidth' +
     ' for audio language', () => {
+      // This test is flaky in some Tizen devices, due to codec restrictions.
+      if (shaka.util.Platform.isTizen()) {
+        pending('Skip flaky test in Tizen');
+      }
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.bandwidth = 4058558;
           variant.addAudio(1, (stream) => {
             stream.bandwidth = 100000;
             stream.language = 'en';
+            stream.mime('audio/mp4', 'mp4a.40.2');
           });
         });
         manifest.addVariant(2, (variant) => {
@@ -941,18 +946,21 @@ describe('StreamUtils', () => {
           variant.addAudio(3, (stream) => {
             stream.bandwidth = 200000;
             stream.language = 'en';
+            stream.mime('audio/mp4', 'flac');
           });
         });
         manifest.addVariant(4, (variant) => {
           variant.addAudio(5, (stream) => {
             stream.bandwidth = 100000;
             stream.language = 'es';
+            stream.mime('audio/mp4', 'mp4a.40.2');
           });
         });
         manifest.addVariant(6, (variant) => {
           variant.addAudio(7, (stream) => {
             stream.bandwidth = 500000;
             stream.language = 'es';
+            stream.mime('audio/mp4', 'flac');
           });
         });
       });
