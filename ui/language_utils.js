@@ -77,7 +77,7 @@ shaka.ui.LanguageUtils = class {
     const getChannelsCountName = (channelsCount) => {
       let name = '';
       if (channelsCount >= 5) {
-        name = ' ' +localization.resolve(LocIds.SURROUND);
+        name = ' ' + localization.resolve(LocIds.SURROUND);
       }
       return name;
     };

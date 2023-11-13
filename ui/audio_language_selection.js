@@ -90,11 +90,12 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
    * @private
    */
   onAudioTrackSelected_(track) {
-    if (track.channelsCount) {
+    if (track.channelsCount &&
+        this.controls.getConfig().showAudioChannelCountVariants) {
       this.player.selectAudioLanguage(
           track.language, track.roles[0], track.channelsCount);
     } else {
-      this.player.selectAudioLanguage( track.language, track.roles[0]);
+      this.player.selectAudioLanguage(track.language, track.roles[0]);
     }
   }
 
