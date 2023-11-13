@@ -97,7 +97,8 @@ shaka.extern.UIVolumeBarColors;
  *   keyboardSeekDistance: number,
  *   keyboardLargeSeekDistance: number,
  *   fullScreenElement: HTMLElement,
- *   preferDocumentPictureInPicture: boolean
+ *   preferDocumentPictureInPicture: boolean,
+ *   showAudioChannelCountVariants: boolean
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -208,6 +209,11 @@ shaka.extern.UIVolumeBarColors;
  *   Video Element Picture in Picture API is preferred.
  *   Changing this property in mid-playback may produce undesired behavior if
  *   you are already in PiP.
+ *   Defaults to true.
+ * @property {boolean} showAudioChannelCountVariants
+ *   Indicates whether the combination of language and channel count should be
+ *   displayed or if, on the contrary, only the language should be displayed
+ *   regardless of the channel count.
  *   Defaults to true.
  * @exportDoc
  */

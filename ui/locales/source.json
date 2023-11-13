@@ -151,6 +151,10 @@
     "description": "Label used to identify a subtitle track that is forced to be shown.",
     "message": "Forced"
   },
+  "SURROUND": {
+    "description": "Label used to identify a audio track that has surround audio.",
+    "message": "Surround"
+  },
   "UNDETERMINED_LANGUAGE": {
     "description": "Label for a button used to select an audio track whose language is undetermined or unknown.",
     "message": "Undetermined"
