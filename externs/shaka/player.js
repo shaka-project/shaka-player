@@ -934,7 +934,8 @@ shaka.extern.DashManifestConfiguration;
  *   liveSegmentsDelay: number,
  *   sequenceMode: boolean,
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
- *   disableCodecGuessing: boolean
+ *   disableCodecGuessing: boolean,
+ *   allowLowLatencyByteRangeOptimization: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -994,6 +995,11 @@ shaka.extern.DashManifestConfiguration;
  *   As a consequence, lazy-loading media playlists won't be possible for this
  *   use case, which may result in longer video startup times.
  *   <i>Defaults to <code>false</code>.</i>
+ * @property {boolean} allowLowLatencyByteRangeOptimization
+ *   If set to true, the HLS parser will optimize operation with LL and partial
+ *   byte range segments. More info in
+ *   https://www.akamai.com/blog/performance/-using-ll-hls-with-byte-range-addressing-to-achieve-interoperabi
+ *   <i>Defaults to <code>true</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;

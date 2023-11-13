@@ -211,6 +211,8 @@ shakaDemo.Config = class {
             'manifest.hls.ignoreManifestTimestampsInSegmentsMode')
         .addBoolInput_('Disable codec guessing',
             'manifest.hls.disableCodecGuessing')
+        .addBoolInput_('Allow LL-HLS byterange optimization',
+            'manifest.hls.allowLowLatencyByteRangeOptimization')
         .addNumberInput_('Availability Window Override',
             'manifest.availabilityWindowOverride',
             /* canBeDecimal= */ true,
