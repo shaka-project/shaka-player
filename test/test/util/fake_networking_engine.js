@@ -49,6 +49,9 @@ shaka.test.FakeNetworkingEngine = class {
     /** @type {!jasmine.Spy} */
     this.setForceHTTPS = jasmine.createSpy('setForceHTTPS').and.stub();
 
+    /** @private {number} */
+    this.maxUris_ = 1;
+
     // The prototype has already been applied; create spies for the
     // methods but still call it by default.
     spyOn(this, 'destroy').and.callThrough();
@@ -67,7 +70,7 @@ shaka.test.FakeNetworkingEngine = class {
    */
   requestImpl_(type, request) {
     expect(request).toBeTruthy();
-    expect(request.uris.length).toBe(1);
+    expect(request.uris.length).toBeLessThanOrEqual(this.maxUris_);
 
     const requestedUri = request.uris[0];
 
@@ -285,6 +288,11 @@ shaka.test.FakeNetworkingEngine = class {
    */
   setDefaultAsError() {
     this.defaultResponse_ = null;
+    return this;
+  }
+
+  setMaxUris(maxUris) {
+    this.maxUris_ = maxUris;
     return this;
   }
 
