@@ -825,6 +825,12 @@ shakaDemo.Custom = class {
         shakaDemoMain.loadAsset(asset);
         this.updateSelected_();
       });
+      c.addButton('Preload', () => {
+        shakaDemoMain.preloadAsset(asset);
+        this.updateSelected_();
+        // TODO: Make it visually obvious that this has begun preloading.
+        // TODO: Cancel when changing page or loading an asset.
+      });
       c.addButton('Edit', async () => {
         if (asset.unstoreCallback) {
           await asset.unstoreCallback();

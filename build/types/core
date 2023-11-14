@@ -31,6 +31,7 @@
 +../../lib/media/play_rate_controller.js
 +../../lib/media/playhead.js
 +../../lib/media/playhead_observer.js
++../../lib/media/preload_manager.js
 +../../lib/media/presentation_timeline.js
 +../../lib/media/quality_observer.js
 +../../lib/media/region_observer.js

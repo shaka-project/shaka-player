@@ -87,6 +87,11 @@ const ShakaDemoAssetInfo = class {
     this.mimeType = null;
 
 
+    // Preload values.
+    /** @type {?shaka.media.PreloadManager} */
+    this.preloadManager;
+
+
     // Offline storage values.
     /** @type {?function()} */
     this.storeCallback;
