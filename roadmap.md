@@ -13,18 +13,26 @@ Candidate features for future release cycles:
    https://github.com/shaka-project/shaka-player/issues/1030
  - Background fetch for offline storage
    https://github.com/shaka-project/shaka-player/issues/879
+ - A method to stitch together clips
+   https://github.com/shaka-project/shaka-player/issues/764
+ - Predict next segment in DASH SegmentTimeline
+   https://github.com/shaka-project/shaka-player/issues/898
  - Smaller, more modular binary
 
-v4.6 - 2024 Q1
- - Content Steering
-   https://github.com/shaka-project/shaka-player/issues/5704
+v5.0 - 2024 Q1
  - Preload API
    https://github.com/shaka-project/shaka-player/issues/880
+
+=====
+
+v4.6 - 2023 Q4
+ - Content Steering
+   https://github.com/shaka-project/shaka-player/issues/5704
  - New DASH protocol for Low Latency.
  - ManagedMediaSource
    https://github.com/shaka-project/shaka-player/issues/5271
-
-=====
+ - Add thumbnails support in src=
+ - Remove state engine
 
 v4.5 - 2023 Q4
  - Built-in transmuxer support for muxed content streams (audio+video)
