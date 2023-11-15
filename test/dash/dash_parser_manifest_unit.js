@@ -3014,8 +3014,8 @@ describe('DashParser Manifest', () => {
     it('without serviceLocation in BaseURL', async () => {
       const manifestText = [
         '<MPD type="static">',
-        '  <BaseURL serviceLocation="a">http://example.com/r0/</BaseURL>',
-        '  <BaseURL serviceLocation="b">http://example.com/r1/</BaseURL>',
+        '  <BaseURL>http://example.com/r0/</BaseURL>',
+        '  <BaseURL>http://example.com/r1/</BaseURL>',
         '  <ContentSteering',
         'queryBeforeStart="true">http://contentsteering</ContentSteering>',
         '  <Period id="1" duration="PT30S">',
@@ -3048,6 +3048,74 @@ describe('DashParser Manifest', () => {
 
       expect(uri0).toBe('http://example.com/r0/1.mp4');
       expect(uri1).toBe('http://example.com/r1/1.mp4');
+    });
+
+    it('specify MPD BaseURL and AdaptationSet BaseURL', async () => {
+      const manifestText = [
+        '<MPD type="static">',
+        '  <BaseURL serviceLocation="a">http://example.com/r0/</BaseURL>',
+        '  <BaseURL serviceLocation="b">http://example.com/r1/</BaseURL>',
+        '  <ContentSteering defaultServiceLocation="a,b" ',
+        'queryBeforeStart="true">http://contentsteering</ContentSteering>',
+        '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet id="2" mimeType="video/mp4">',
+        '      <SegmentTemplate media="$Number$.mp4" startNumber="1">',
+        '        <SegmentTimeline>',
+        '          <S t="0" d="30" />',
+        '        </SegmentTimeline>',
+        '      </SegmentTemplate>',
+        '      <Representation id="video-sd" width="640" height="480">',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '    <AdaptationSet id="3" mimeType="audio/mp4">',
+        '      <BaseURL serviceLocation="c">http://example.foo/r0/</BaseURL>',
+        '      <BaseURL serviceLocation="d">http://example.foo/r1/</BaseURL>',
+        '      <SegmentTemplate media="$Number$.mp4" startNumber="1">',
+        '        <SegmentTimeline>',
+        '          <S t="0" d="30" />',
+        '        </SegmentTimeline>',
+        '      </SegmentTemplate>',
+        '      <Representation id="audio">',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+      const contentSteering = JSON.stringify({
+        'VERSION': 1,
+        'TTL': 1,
+        'RELOAD-URI': 'http://contentsteering/update',
+        'PATHWAY-PRIORITY': [
+          'a',
+          'c',
+        ],
+      });
+
+      fakeNetEngine.setResponseText('http://contentsteering', contentSteering);
+
+      /** @type {shaka.extern.Manifest} */
+      const manifest = await parser.start('dummy://foo', playerInterface);
+
+      const video0 = manifest.variants[0].video;
+      await video0.createSegmentIndex();
+      goog.asserts.assert(video0.segmentIndex, 'Null segmentIndex!');
+      const videoSegment0 = Array.from(video0.segmentIndex)[0];
+      expect(videoSegment0.getUris().length).toBe(1);
+      const videoUri0 = videoSegment0.getUris()[0];
+
+      expect(videoUri0).toBe('http://example.com/r0/1.mp4');
+
+      const audio0 = manifest.variants[0].audio;
+      await audio0.createSegmentIndex();
+      goog.asserts.assert(audio0.segmentIndex, 'Null segmentIndex!');
+      const audioSegment0 = Array.from(audio0.segmentIndex)[0];
+      expect(audioSegment0.getUris().length).toBe(1);
+      const audioUri0 = audioSegment0.getUris()[0];
+
+      expect(audioUri0).toBe('http://example.foo/r0/1.mp4');
     });
   });
 });
