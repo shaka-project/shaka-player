@@ -22,7 +22,7 @@ Candidate features for future release cycles:
 v5.0 - 2024 Q1
  - Preload API
    https://github.com/shaka-project/shaka-player/issues/880
- - Common Media Server Data (CMCD)
+ - Common Media Server Data (CMSD)
    https://github.com/shaka-project/shaka-player/issues/5890
 
 =====
