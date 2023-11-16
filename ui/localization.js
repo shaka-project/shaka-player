@@ -231,6 +231,16 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * The locales currently used. An empty set means "no preference".
+   *
+   * @return {!Set.<string>}
+   * @export
+   */
+  getCurrentLocales() {
+    return this.currentLocales_;
+  }
+
+  /**
    * @private
    */
   updateCurrentMap_() {

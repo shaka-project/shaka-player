@@ -319,6 +319,7 @@ describe('ManifestConverter', () => {
       spatialAudio: false,
       closedCaptions: null,
       external: false,
+      fastSwitching: false,
     };
 
     return streamDB;
@@ -364,6 +365,7 @@ describe('ManifestConverter', () => {
       frameRate: 22,
       pixelAspectRatio: '59:54',
       hdr: undefined,
+      videoLayout: undefined,
       kind: undefined,
       language: '',
       originalLanguage: null,
@@ -396,6 +398,7 @@ describe('ManifestConverter', () => {
       tilesLayout: undefined,
       accessibilityPurpose: null,
       external: false,
+      fastSwitching: false,
     };
   }
 
@@ -417,6 +420,7 @@ describe('ManifestConverter', () => {
       frameRate: undefined,
       pixelAspectRatio: undefined,
       hdr: undefined,
+      videoLayout: undefined,
       kind: undefined,
       language: 'en',
       originalLanguage: 'en',
@@ -449,6 +453,7 @@ describe('ManifestConverter', () => {
       tilesLayout: undefined,
       accessibilityPurpose: null,
       external: false,
+      fastSwitching: false,
     };
   }
 
@@ -469,6 +474,7 @@ describe('ManifestConverter', () => {
       frameRate: undefined,
       pixelAspectRatio: undefined,
       hdr: undefined,
+      videoLayout: undefined,
       kind: undefined,
       language: 'en',
       originalLanguage: 'en',
@@ -501,6 +507,7 @@ describe('ManifestConverter', () => {
       tilesLayout: undefined,
       accessibilityPurpose: null,
       external: false,
+      fastSwitching: false,
     };
   }
 
@@ -528,6 +535,7 @@ describe('ManifestConverter', () => {
       frameRate: streamDb.frameRate,
       pixelAspectRatio: streamDb.pixelAspectRatio,
       hdr: streamDb.hdr,
+      videoLayout: streamDb.videoLayout,
       width: streamDb.width || undefined,
       height: streamDb.height || undefined,
       kind: streamDb.kind,
@@ -550,6 +558,7 @@ describe('ManifestConverter', () => {
       tilesLayout: streamDb.tilesLayout,
       accessibilityPurpose: null,
       external: streamDb.external,
+      fastSwitching: streamDb.fastSwitching,
     };
 
     expect(stream).toEqual(expectedStream);

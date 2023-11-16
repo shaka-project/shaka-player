@@ -556,11 +556,15 @@ shaka.test.ManifestGenerator.Stream = class {
       /** @type {(string|undefined)} */
       this.hdr = undefined;
       /** @type {(string|undefined)} */
+      this.videoLayout = undefined;
+      /** @type {(string|undefined)} */
       this.tilesLayout = undefined;
       /** @type {?shaka.media.ManifestParser.AccessibilityPurpose} */
       this.accessibilityPurpose;
       /** @type {boolean} */
       this.external = false;
+      /** @type {boolean} */
+      this.fastSwitching = false;
     }
 
     /** @type {shaka.extern.Stream} */

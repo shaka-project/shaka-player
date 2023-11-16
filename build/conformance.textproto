@@ -120,7 +120,7 @@ requirement: {
     "function template(a) { new Uint8ClampedArray(a) }"
   value:
     "/** @param {BufferSource} a */"
-    "function template(a) { new Unt16Array(a) }"
+    "function template(a) { new Uint16Array(a) }"
   value:
     "/** @param {BufferSource} a */"
     "function template(a) { new Int16Array(a) }"

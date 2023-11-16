@@ -188,6 +188,19 @@ const config = {
 ui.configure(config);
 ```
 
+If you've chosen to display chapters, you can specify the color for the chapter markers on
+the timeline and the text color of the chapter titles that popup on hover:
+ ```js
+const config = {
+  displayChapters: true,
+  seekBarColors: {
+    chapterMarks: 'rgb(27, 27, 27)',
+    chapterLabels: 'rgb(255, 255, 255)'
+  }
+}
+ui.configure(config);
+```
+
 #### Configuring playback, fast forward and rewind rates
 The rate in which the player can play, fast forward and rewind content can be configured using the `playbackRates`, `fastForwardRates` and `rewindRates` options.
 

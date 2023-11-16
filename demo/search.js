@@ -371,6 +371,9 @@ shakaDemo.Search = class {
         /* docLink= */ null);
     this.makeBooleanInput_(specialContainer, Feature.HIGH_DEFINITION, FEATURE,
         'Filters for assets with at least one high-definition video stream.');
+    this.makeBooleanInput_(specialContainer, Feature.ULTRA_HIGH_DEFINITION,
+        FEATURE, 'Filters for assets with at least one ultra-high-definition' +
+        ' video stream.');
     this.makeBooleanInput_(specialContainer, Feature.XLINK, FEATURE,
         'Filters for assets that have XLINK tags in their manifests, so that ' +
         'they can be broken into multiple files.');
@@ -391,8 +394,12 @@ shakaDemo.Search = class {
         'Filters for assets that do not have video streams.');
     this.makeBooleanInput_(specialContainer, Feature.THUMBNAILS, FEATURE,
         'Filters for assets that have a thumbnail track.');
+    this.makeBooleanInput_(specialContainer, Feature.CHAPTERS, FEATURE,
+        'Filters for assets that have a chapters track.');
     this.makeBooleanInput_(specialContainer, Feature.LCEVC, FEATURE,
         'Filters for assets that have an LCEVC enhancement layer.');
+    this.makeBooleanInput_(specialContainer, Feature.CONTENT_STEERING, FEATURE,
+        'Filters for assets that use Content Steering.');
 
     container.appendChild(this.resultsDiv_);
   }

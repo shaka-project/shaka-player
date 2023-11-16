@@ -21,11 +21,13 @@ describe('CastUtils', () => {
       'getMediaElement',  // Handled specially
       'setMaxHardwareResolution',
       'destroy',  // Should use CastProxy.destroy instead
+      'getAllThumbnails', // Too large to proxy.
       'drmInfo',  // Too large to proxy
       'getManifest', // Too large to proxy
       'getManifestParserFactory',  // Would not serialize.
       'setVideoContainer',
       'getActiveSessionsMetadata',
+      'releaseAllMutexes', // Very specific to the inner workings of the player.
 
       // Test helper methods (not @export'd)
       'createDrmEngine',

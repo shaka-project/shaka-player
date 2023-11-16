@@ -48,7 +48,7 @@ describe('Player', () => {
   /** @type {!shaka.test.FakeVideo} */
   let video;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // By default, errors are a failure.
     logErrorSpy = jasmine.createSpy('shaka.log.error');
     logErrorSpy.calls.reset();
@@ -124,6 +124,7 @@ describe('Player', () => {
         open: jasmine.createSpy('open').and.returnValue(Promise.resolve()),
         destroy:
             jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
+        setTextDisplayer: jasmine.createSpy('setTextDisplayer'),
         setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
         getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
         setSegmentRelativeVttTiming:
@@ -151,7 +152,8 @@ describe('Player', () => {
     }
 
     video = new shaka.test.FakeVideo(20);
-    player = new shaka.Player(video, dependencyInjector);
+    player = new shaka.Player(null, dependencyInjector);
+    await player.attach(video);
     player.configure({
       // Ensures we don't get a warning about missing preference.
       preferredAudioLanguage: 'en',
@@ -170,6 +172,7 @@ describe('Player', () => {
     try {
       await player.destroy();
     } finally {
+      player.releaseAllMutexes();
       shaka.log.error = originalLogError;
       shaka.log.alwaysError = originalLogError;
       shaka.log.warning = originalLogWarn;
@@ -233,31 +236,6 @@ describe('Player', () => {
 
       expect(mediaSourceEngine.destroy).toHaveBeenCalled();
       expect(drmEngine.destroy).toHaveBeenCalled();
-    });
-
-    // TODO(vaage): Re-enable once the parser is integrated into the load graph
-    //              better.
-    xit('destroys parser first when interrupting load', async () => {
-      const p = shaka.test.Util.shortDelay();
-      /** @type {!shaka.test.FakeManifestParser} */
-      const parser = new shaka.test.FakeManifestParser(manifest);
-      parser.start.and.returnValue(p);
-      parser.stop.and.callFake(() => {
-        expect(abrManager.stop).not.toHaveBeenCalled();
-        expect(abrManager.release).not.toHaveBeenCalled();
-        expect(networkingEngine.destroy).not.toHaveBeenCalled();
-      });
-      shaka.media.ManifestParser.registerParserByMime(
-          fakeMimeType, () => parser);
-
-      const load = player.load(fakeManifestUri, 0, fakeMimeType);
-      await shaka.test.Util.shortDelay();
-      await player.destroy();
-      expect(abrManager.stop).toHaveBeenCalled();
-      expect(abrManager.release).toHaveBeenCalled();
-      expect(networkingEngine.destroy).toHaveBeenCalled();
-      expect(parser.stop).toHaveBeenCalled();
-      await expectAsync(load).toBeRejected();
     });
   });
 
@@ -1503,6 +1481,7 @@ describe('Player', () => {
           frameRate: 1000000 / 42000,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1541,6 +1520,7 @@ describe('Player', () => {
           frameRate: 24,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1579,6 +1559,7 @@ describe('Player', () => {
           frameRate: 1000000 / 42000,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1617,6 +1598,7 @@ describe('Player', () => {
           frameRate: 24,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1655,6 +1637,7 @@ describe('Player', () => {
           frameRate: 1000000 / 42000,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1693,6 +1676,7 @@ describe('Player', () => {
           frameRate: 24,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1731,6 +1715,7 @@ describe('Player', () => {
           frameRate: 1000000 / 42000,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1769,6 +1754,7 @@ describe('Player', () => {
           frameRate: 24,
           pixelAspectRatio: '59:54',
           hdr: null,
+          videoLayout: null,
           mimeType: 'video/mp4',
           audioMimeType: 'audio/mp4',
           videoMimeType: 'video/mp4',
@@ -1826,6 +1812,7 @@ describe('Player', () => {
           frameRate: null,
           pixelAspectRatio: null,
           hdr: null,
+          videoLayout: null,
           videoId: null,
           audioId: null,
           originalAudioId: null,
@@ -1864,6 +1851,7 @@ describe('Player', () => {
           frameRate: null,
           pixelAspectRatio: null,
           hdr: null,
+          videoLayout: null,
           videoId: null,
           audioId: null,
           originalAudioId: null,
@@ -1902,6 +1890,7 @@ describe('Player', () => {
           frameRate: null,
           pixelAspectRatio: null,
           hdr: null,
+          videoLayout: null,
           videoId: null,
           audioId: null,
           originalAudioId: null,
@@ -1943,6 +1932,7 @@ describe('Player', () => {
           frameRate: null,
           pixelAspectRatio: null,
           hdr: null,
+          videoLayout: null,
           videoId: null,
           audioId: null,
           originalAudioId: null,
@@ -4177,6 +4167,69 @@ describe('Player', () => {
         const thumbnail8 = await player.getThumbnails(5, 80);
         expect(thumbnail8.startTime).toBe(80);
         expect(thumbnail8.duration).toBe(10);
+      });
+    });
+
+    describe('getAllThumbnails', () => {
+      it('returns all thumbnails', async () => {
+        const uris = () => ['thumbnail'];
+        const ref = new shaka.media.SegmentReference(
+            0, 60, uris, 0, null, null, 0, 0, Infinity, [],
+        );
+        const index = new shaka.media.SegmentIndex([ref]);
+
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1);
+          });
+          manifest.addImageStream(5, (stream) => {
+            stream.originalId = 'thumbnail';
+            stream.width = 200;
+            stream.height = 150;
+            stream.mimeType = 'image/jpeg';
+            stream.tilesLayout = '2x3';
+            stream.segmentIndex = index;
+          });
+        });
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        expect(player.getImageTracks()[0].width).toBe(100);
+        expect(player.getImageTracks()[0].height).toBe(50);
+        const thumbnails = await player.getAllThumbnails(5);
+        expect(thumbnails.length).toBe(6);
+        expect(thumbnails[0]).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
+          positionX: 0,
+          positionY: 0,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnails[1]).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
+          positionX: 100,
+          positionY: 0,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnails[2]).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
+          positionX: 0,
+          positionY: 50,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnails[5]).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
+          positionX: 100,
+          positionY: 100,
+          width: 100,
+          height: 50,
+        }));
       });
     });
   });

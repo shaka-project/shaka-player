@@ -390,88 +390,6 @@ describe('StreamUtils', () => {
         });
   });
 
-  describe('filterVariantsByAudioChannelCount', () => {
-    it('chooses variants with preferred audio channels count', () => {
-      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        manifest.addVariant(0, (variant) => {
-          variant.addAudio(0, (stream) => {
-            stream.channelsCount = 2;
-          });
-        });
-        manifest.addVariant(1, (variant) => {
-          variant.addAudio(1, (stream) => {
-            stream.channelsCount = 6;
-          });
-        });
-        manifest.addVariant(2, (variant) => {
-          variant.addAudio(2, (stream) => {
-            stream.channelsCount = 2;
-          });
-        });
-      });
-
-      const chosen = StreamUtils.filterVariantsByAudioChannelCount(
-          manifest.variants, 2);
-      expect(chosen.length).toBe(2);
-      expect(chosen[0]).toBe(manifest.variants[0]);
-      expect(chosen[1]).toBe(manifest.variants[2]);
-    });
-
-    it('chooses variants with largest audio channel count less than config' +
-        ' when no exact audio channel count match is possible', () => {
-      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        manifest.addVariant(0, (variant) => {
-          variant.addAudio(0, (stream) => {
-            stream.channelsCount = 2;
-          });
-        });
-        manifest.addVariant(1, (variant) => {
-          variant.addAudio(1, (stream) => {
-            stream.channelsCount = 8;
-          });
-        });
-        manifest.addVariant(2, (variant) => {
-          variant.addAudio(2, (stream) => {
-            stream.channelsCount = 2;
-          });
-        });
-      });
-
-      const chosen = StreamUtils.filterVariantsByAudioChannelCount(
-          manifest.variants, 6);
-      expect(chosen.length).toBe(2);
-      expect(chosen[0]).toBe(manifest.variants[0]);
-      expect(chosen[1]).toBe(manifest.variants[2]);
-    });
-
-    it('chooses variants with fewest audio channels when none fit in the ' +
-        'config', () => {
-      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        manifest.addVariant(0, (variant) => {
-          variant.addAudio(0, (stream) => {
-            stream.channelsCount = 6;
-          });
-        });
-        manifest.addVariant(1, (variant) => {
-          variant.addAudio(1, (stream) => {
-            stream.channelsCount = 8;
-          });
-        });
-        manifest.addVariant(2, (variant) => {
-          variant.addAudio(2, (stream) => {
-            stream.channelsCount = 6;
-          });
-        });
-      });
-
-      const chosen = StreamUtils.filterVariantsByAudioChannelCount(
-          manifest.variants, 2);
-      expect(chosen.length).toBe(2);
-      expect(chosen[0]).toBe(manifest.variants[0]);
-      expect(chosen[1]).toBe(manifest.variants[2]);
-    });
-  });
-
   describe('getDecodingInfosForVariants', () => {
     it('for multiplexd content', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -634,10 +552,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      const noVariant = null;
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, noVariant, manifest,
-          shaka.config.CodecSwitchingStrategy.RELOAD);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       // Covers a regression in which we would remove streams with codecs.
       // The last two streams should be removed because their full MIME types
@@ -672,10 +587,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      const noVariant = null;
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, noVariant, manifest,
-          shaka.config.CodecSwitchingStrategy.RELOAD);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       // Covers a regression in which we would remove streams with codecs.
       // The first 4 streams should be there because they are always supported.
@@ -714,9 +626,7 @@ describe('StreamUtils', () => {
         shaka.util.StreamUtils.filterManifestByCurrentVariant =
           shaka.test.Util.spyFunc(filterManifestByCurrentVariantSpy);
 
-        await shaka.util.StreamUtils.filterManifest(
-            fakeDrmEngine, /* currentVariant= */ null, manifest,
-            shaka.config.CodecSwitchingStrategy.RELOAD);
+        await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
         expect(filterManifestByCurrentVariantSpy).not.toHaveBeenCalled();
       } finally {
@@ -738,9 +648,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest,
-          shaka.config.CodecSwitchingStrategy.RELOAD);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       // Covers a regression in which we would remove streams with codecs.
       // The last two streams should be removed because their full MIME types
@@ -766,9 +674,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest,
-          shaka.config.CodecSwitchingStrategy.RELOAD);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
       expect(manifest.variants.length).toBe(1);
     });
 
@@ -784,9 +690,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest,
-          shaka.config.CodecSwitchingStrategy.RELOAD);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       expect(manifest.variants.length).toBe(1);
     });
@@ -808,8 +712,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       expect(manifest.variants.length).toBe(2);
     });
@@ -831,8 +734,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       expect(manifest.variants.length).toBe(2);
     });
@@ -849,9 +751,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest,
-          shaka.config.CodecSwitchingStrategy.RELOAD);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       expect(manifest.variants.length).toBe(1);
     });
@@ -937,7 +837,6 @@ describe('StreamUtils', () => {
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
           /* preferredVideoCodecs= */[],
           /* preferredAudioCodecs= */[],
-          /* preferredAudioChannelCount= */2,
           /* preferredDecodingAttributes= */[]);
 
       expect(manifest.variants.length).toBe(2);
@@ -947,12 +846,17 @@ describe('StreamUtils', () => {
 
     it('should filter variants by the best available bandwidth' +
     ' for audio language', () => {
+      // This test is flaky in some Tizen devices, due to codec restrictions.
+      if (shaka.util.Platform.isTizen()) {
+        pending('Skip flaky test in Tizen');
+      }
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.bandwidth = 4058558;
           variant.addAudio(1, (stream) => {
             stream.bandwidth = 100000;
             stream.language = 'en';
+            stream.mime('audio/mp4', 'mp4a.40.2');
           });
         });
         manifest.addVariant(2, (variant) => {
@@ -960,18 +864,21 @@ describe('StreamUtils', () => {
           variant.addAudio(3, (stream) => {
             stream.bandwidth = 200000;
             stream.language = 'en';
+            stream.mime('audio/mp4', 'flac');
           });
         });
         manifest.addVariant(4, (variant) => {
           variant.addAudio(5, (stream) => {
             stream.bandwidth = 100000;
             stream.language = 'es';
+            stream.mime('audio/mp4', 'mp4a.40.2');
           });
         });
         manifest.addVariant(6, (variant) => {
           variant.addAudio(7, (stream) => {
             stream.bandwidth = 500000;
             stream.language = 'es';
+            stream.mime('audio/mp4', 'flac');
           });
         });
       });
@@ -979,7 +886,6 @@ describe('StreamUtils', () => {
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
       /* preferredVideoCodecs= */[],
           /* preferredAudioCodecs= */[],
-          /* preferredAudioChannelCount= */2,
           /* preferredDecodingAttributes= */[]);
 
       expect(manifest.variants.length).toBe(2);
@@ -1009,7 +915,6 @@ describe('StreamUtils', () => {
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
           /* preferredVideoCodecs= */[],
           /* preferredAudioCodecs= */[],
-          /* preferredAudioChannelCount= */2,
           /* preferredDecodingAttributes= */[]);
 
       expect(manifest.variants.length).toBe(2);
@@ -1128,7 +1033,6 @@ describe('StreamUtils', () => {
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
           /* preferredVideoCodecs= */[],
           /* preferredAudioCodecs= */[],
-          /* preferredAudioChannelCount= */2,
           /* preferredDecodingAttributes= */
           [shaka.util.StreamUtils.DecodingAttributes.SMOOTH]);
       // 2 video codecs are smooth. Choose the one with the lowest bandwidth.

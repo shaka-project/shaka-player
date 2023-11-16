@@ -40,6 +40,7 @@
 +../../lib/media/stall_detector.js
 +../../lib/media/streaming_engine.js
 +../../lib/media/segment_prefetch.js
++../../lib/media/segment_utils.js
 +../../lib/media/time_ranges_utils.js
 +../../lib/media/video_wrapper.js
 +../../lib/media/webm_segment_index_parser.js
@@ -52,15 +53,12 @@
 
 +../../lib/polyfill/all.js
 
-+../../lib/routing/node.js
-+../../lib/routing/payload.js
-+../../lib/routing/walker.js
-
 +../../lib/cea/dummy_cea_parser.js
 +../../lib/cea/dummy_caption_decoder.js
 
 +../../lib/text/cue.js
 +../../lib/text/simple_text_displayer.js
++../../lib/text/stub_text_displayer.js
 +../../lib/text/text_engine.js
 +../../lib/text/text_utils.js
 +../../lib/text/ui_text_displayer.js
@@ -73,6 +71,7 @@
 +../../lib/util/buffer_utils.js
 +../../lib/util/cmcd_manager.js
 +../../lib/util/config_utils.js
++../../lib/util/content_steering_manager.js
 +../../lib/util/data_view_reader.js
 +../../lib/util/delayed_tick.js
 +../../lib/util/destroyer.js
@@ -99,6 +98,7 @@
 +../../lib/util/mp4_generator.js
 +../../lib/util/mp4_parser.js
 +../../lib/util/multi_map.js
++../../lib/util/mutex.js
 +../../lib/util/networking.js
 +../../lib/util/object_utils.js
 +../../lib/util/operation_manager.js
@@ -107,7 +107,6 @@
 +../../lib/util/player_configuration.js
 +../../lib/util/pssh.js
 +../../lib/util/public_promise.js
-+../../lib/util/segment_utils.js
 +../../lib/util/state_history.js
 +../../lib/util/stats.js
 +../../lib/util/stream_utils.js

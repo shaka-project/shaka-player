@@ -1166,14 +1166,14 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
           requestType, createRequest('resolve://'));
       await Util.shortDelay();  // Allow Promises to resolve.
       expect(onProgress).toHaveBeenCalledTimes(2);
-      expect(onProgress).toHaveBeenCalledWith(1, 2);
-      expect(onProgress).toHaveBeenCalledWith(4, 5);
+      expect(onProgress).toHaveBeenCalledWith(1, 2, true);
+      expect(onProgress).toHaveBeenCalledWith(4, 5, true);
       onProgress.calls.reset();
 
       delay.resolve();
       await resp.promise;
       expect(onProgress).toHaveBeenCalledTimes(1);
-      expect(onProgress).toHaveBeenCalledWith(7, 8);
+      expect(onProgress).toHaveBeenCalledWith(7, 8, true);
     });
 
     it('doesn\'t forward progress events for non-SEGMENT', async () => {

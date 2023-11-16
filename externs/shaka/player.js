@@ -216,6 +216,7 @@ shaka.extern.BufferedInfo;
  *   frameRate: ?number,
  *   pixelAspectRatio: ?string,
  *   hdr: ?string,
+ *   videoLayout: ?string,
  *   mimeType: ?string,
  *   audioMimeType: ?string,
  *   videoMimeType: ?string,
@@ -280,6 +281,8 @@ shaka.extern.BufferedInfo;
  *   The video pixel aspect ratio provided in the manifest, if present.
  * @property {?string} hdr
  *   The video HDR provided in the manifest, if present.
+ * @property {?string} videoLayout
+ *   The video layout provided in the manifest, if present.
  * @property {?string} mimeType
  *   The MIME type of the content provided in the manifest.
  * @property {?string} audioMimeType
@@ -495,13 +498,17 @@ shaka.extern.MetadataRawFrame;
  * @typedef {{
  *   key: string,
  *   data: (ArrayBuffer|string|number),
- *   description: string
+ *   description: string,
+ *   mimeType: ?string,
+ *   pictureType: ?number
  * }}
  *
  * @description metadata frame parsed.
  * @property {string} key
  * @property {ArrayBuffer|string|number} data
  * @property {string} description
+ * @property {?string} mimeType
+ * @property {?number} pictureType
  * @exportDoc
  */
 shaka.extern.MetadataFrame;
@@ -754,7 +761,8 @@ shaka.extern.PersistentSessionMetadata;
  *   preferredKeySystems: !Array.<string>,
  *   keySystemsMapping: !Object.<string, string>,
  *   parseInbandPsshEnabled: boolean,
- *   minHdcpVersion: string
+ *   minHdcpVersion: string,
+ *   ignoreDuplicateInitData: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -810,7 +818,12 @@ shaka.extern.PersistentSessionMetadata;
  *   <i>By default (''), do not check the HDCP version.</i><br>
  *   Indicates the minimum version of HDCP to start the playback of encrypted
  *   streams. <b>May be ignored if not supported by the device.</b>
- *
+ * @property {boolean} ignoreDuplicateInitData
+ *   <i>Defaults to false on Tizen 2, and true for all other browsers.</i><br>
+ *   When true indicate that the player doesn't ignore duplicate init data.
+ *   Note: Tizen 2015 and 2016 models will send multiple webkitneedkey events
+ *   with the same init data. If the duplicates are supressed, playback
+ *   will stall without errors.
  * @exportDoc
  */
 shaka.extern.DrmConfiguration;
@@ -925,7 +938,9 @@ shaka.extern.DashManifestConfiguration;
  *   useSafariBehaviorForLive: boolean,
  *   liveSegmentsDelay: number,
  *   sequenceMode: boolean,
- *   ignoreManifestTimestampsInSegmentsMode: boolean
+ *   ignoreManifestTimestampsInSegmentsMode: boolean,
+ *   disableCodecGuessing: boolean,
+ *   allowLowLatencyByteRangeOptimization: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -978,6 +993,18 @@ shaka.extern.DashManifestConfiguration;
  *   to the SourceBuffer, even if the manifest and segment times disagree.
  *   Only applies when sequenceMode is <code>false</code>.
  *   <i>Defaults to <code>false</code>.</i>
+ * @property {boolean} disableCodecGuessing
+ *   If set to true, the HLS parser won't automatically guess or assume default
+ *   codec for playlists with no "CODECS" attribute. Instead, it will attempt to
+ *   extract the missing information from the media segment.
+ *   As a consequence, lazy-loading media playlists won't be possible for this
+ *   use case, which may result in longer video startup times.
+ *   <i>Defaults to <code>false</code>.</i>
+ * @property {boolean} allowLowLatencyByteRangeOptimization
+ *   If set to true, the HLS parser will optimize operation with LL and partial
+ *   byte range segments. More info in
+ *   https://www.akamai.com/blog/performance/-using-ll-hls-with-byte-range-addressing-to-achieve-interoperabi
+ *   <i>Defaults to <code>true</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
@@ -1099,7 +1126,9 @@ shaka.extern.ManifestConfiguration;
  *   segmentPrefetchLimit: number,
  *   liveSync: boolean,
  *   liveSyncMaxLatency: number,
- *   liveSyncPlaybackRate: number
+ *   liveSyncPlaybackRate: number,
+ *   liveSyncMinLatency: number,
+ *   liveSyncMinPlaybackRate: number
  * }}
  *
  * @description
@@ -1228,6 +1257,13 @@ shaka.extern.ManifestConfiguration;
  *   Playback rate used for latency chasing. It is recommended to use a value
  *   between 1 and 2. Effective only if liveSync is true. Defaults to
  *   <code>1.1</code>.
+ * @property {number} liveSyncMinLatency
+ *   Minimun acceptable latency, in seconds. Effective only if liveSync is
+ *   true. Defaults to <code>0</code>.
+ * @property {number} liveSyncMinPlaybackRate
+ *   Minimun playback rate used for latency chasing. It is recommended to use a
+ *   value between 0 and 1. Effective only if liveSync is true. Defaults to
+ *   <code>1</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -1534,6 +1570,7 @@ shaka.extern.OfflineConfiguration;
  *   preferredAudioCodecs: !Array.<string>,
  *   preferredAudioChannelCount: number,
  *   preferredVideoHdrLevel: string,
+ *   preferredVideoLayout: string,
  *   preferredDecodingAttributes: !Array.<string>,
  *   preferForcedSubs: boolean,
  *   restrictions: shaka.extern.Restrictions,
@@ -1594,6 +1631,12 @@ shaka.extern.OfflineConfiguration;
  *   Defaults to 'AUTO'.
  *   Note that one some platforms, such as Chrome, attempting to play PQ content
  *   may cause problems.
+ * @property {string} preferredVideoLayout
+ *   The preferred video layout of the video.
+ *   Can be 'CH-STEREO', 'CH-MONO', or '' for no preference.
+ *   If the content is predominantly stereoscopic you should use 'CH-STEREO'.
+ *   If the content is predominantly monoscopic you should use 'CH-MONO'.
+ *   Defaults to ''.
  * @property {!Array.<string>} preferredDecodingAttributes
  *   The list of preferred attributes of decodingInfo, in the order of their
  *   priorities.
@@ -1642,6 +1685,7 @@ shaka.extern.LanguageRole;
 
 /**
  * @typedef {{
+ *   segment: shaka.media.SegmentReference,
  *   imageHeight: number,
  *   imageWidth: number,
  *   height: number,
@@ -1654,6 +1698,8 @@ shaka.extern.LanguageRole;
  *   sprite: boolean
  * }}
  *
+ * @property {shaka.media.SegmentReference} segment
+ *    The segment of this thumbnail.
  * @property {number} imageHeight
  *    The image height in px. The image height could be different to height if
  *    the layout is different to 1x1.

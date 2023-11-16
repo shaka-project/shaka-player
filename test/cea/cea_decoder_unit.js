@@ -519,6 +519,13 @@ describe('CeaDecoder', () => {
 
       expect(decoder.reset).toHaveBeenCalledTimes(1);
     });
+
+    it('does not attempt to extract SEI packet that is too short', () => {
+      const badData = new Uint8Array([0xb5]);
+      decoder.extract(badData, 0);
+      const captions = decoder.decode();
+      expect(captions.length).toBe(0);
+    });
   });
 
   describe('decodes CEA-708', () => {

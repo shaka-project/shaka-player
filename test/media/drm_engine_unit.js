@@ -2313,7 +2313,7 @@ describe('DrmEngine', () => {
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: serverCert,
         serverCertificateUri: '',
-        initData: ['blah'],
+        initData: [{keyId: 'a'}],
         keyIds: new Set(['deadbeefdeadbeefdeadbeefdeadbeef']),
       };
       const drmInfoAudio = {
@@ -2324,7 +2324,7 @@ describe('DrmEngine', () => {
         audioRobustness: 'good',
         serverCertificate: undefined,
         serverCertificateUri: '',
-        initData: ['init data'],
+        initData: [{keyId: 'b'}],
         keyIds: new Set(['eadbeefdeadbeefdeadbeefdeadbeefd']),
       };
       const drmInfoDesired = {
@@ -2336,7 +2336,7 @@ describe('DrmEngine', () => {
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: serverCert,
         serverCertificateUri: '',
-        initData: ['blah', 'init data'],
+        initData: [{keyId: 'a'}, {keyId: 'b'}],
         keyIds: new Set([
           'deadbeefdeadbeefdeadbeefdeadbeef',
           'eadbeefdeadbeefdeadbeefdeadbeefd',

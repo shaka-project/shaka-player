@@ -709,15 +709,15 @@ shakaDemo.Main = class {
 
     // Does the browser support the asset's manifest type?
     if (asset.features.includes(shakaAssets.Feature.DASH) &&
-        !this.support_.manifest['mpd']) {
+        !this.support_.manifest['application/dash+xml']) {
       return 'Your browser does not support MPEG-DASH manifests.';
     }
     if (asset.features.includes(shakaAssets.Feature.HLS) &&
-        !this.support_.manifest['m3u8']) {
+        !this.support_.manifest['application/x-mpegurl']) {
       return 'Your browser does not support HLS manifests.';
     }
     if (asset.features.includes(shakaAssets.Feature.MSS) &&
-        !this.support_.manifest['ism']) {
+        !this.support_.manifest['application/vnd.ms-sstr+xml']) {
       return 'Your browser does not support MSS manifests.';
     }
 
@@ -734,6 +734,9 @@ shakaDemo.Main = class {
     }
     if (asset.features.includes(shakaAssets.Feature.CONTAINERLESS)) {
       mimeTypes.push('audio/aac');
+    }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_3D)) {
+      mimeTypes.push('video/mp4; codecs="dvh1.20.01"');
     }
     const hasSupportedMimeType = mimeTypes.some((type) => {
       return this.support_.media[type];
@@ -1266,6 +1269,11 @@ shakaDemo.Main = class {
 
       for (const extraThumbnail of asset.extraThumbnail) {
         this.player_.addThumbnailsTrack(extraThumbnail);
+      }
+
+      for (const extraChapter of asset.extraChapter) {
+        this.player_.addChaptersTrack(extraChapter.uri, extraChapter.language,
+            extraChapter.mime);
       }
 
       // If the asset has an ad tag attached to it, load the ads

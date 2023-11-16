@@ -688,10 +688,13 @@ describe('HlsParser live', () => {
       const partialRef = makeReference(
           'test:/partial.mp4', 0, 2, /* syncTime= */ null,
           /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null);
+      partialRef.partial = true;
 
       const partialRef2 = makeReference(
           'test:/partial2.mp4', 2, 4, /* syncTime= */ null,
           /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null);
+      partialRef2.partial = true;
+      partialRef2.lastPartial = true;
 
       const ref = makeReference(
           'test:/main.mp4', 0, 4, /* syncTime= */ null,
@@ -702,10 +705,12 @@ describe('HlsParser live', () => {
       const partialRef3 = makeReference(
           'test:/partial.mp4', 4, 6, /* syncTime= */ null,
           /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null);
+      partialRef3.partial = true;
 
       const preloadRef = makeReference(
           'test:/partial.mp4', 6, 7.5, /* syncTime= */ null,
           /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null);
+      preloadRef.partial = true;
       preloadRef.markAsPreload();
       preloadRef.markAsNonIndependent();
 
@@ -969,9 +974,11 @@ describe('HlsParser live', () => {
             'test:/main.mp4', 0, 2, /* syncTime= */ null);
 
         const newRef1 = makeReference(
-            'test:/redirected/main.mp4', 0, 2, /* syncTime= */ null);
+            ['test:/redirected/main.mp4', 'test:/main.mp4'],
+            0, 2, /* syncTime= */ null);
         const newRef2 = makeReference(
-            'test:/redirected/main2.mp4', 2, 4, /* syncTime= */ null);
+            ['test:/redirected/main2.mp4', 'test:/main2.mp4'],
+            2, 4, /* syncTime= */ null);
 
         let playlistFetchCount = 0;
 
@@ -1303,7 +1310,7 @@ describe('HlsParser live', () => {
   });  // describe('playlist type LIVE')
 
   /**
-   * @param {string} uri A relative URI to http://example.com
+   * @param {string|Array.<string>} uri A relative URI to http://example.com
    * @param {number} start
    * @param {number} end
    * @param {?number} syncTime

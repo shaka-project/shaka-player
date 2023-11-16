@@ -52,7 +52,8 @@ function initApp() {
 async function initPlayer() {
   // Create a Player instance.
   const video = document.getElementById('video');
-  const player = new shaka.Player(video);
+  const player = new shaka.Player();
+  await player.attach(video);
 
   // Attach player to the window to make it easy to access in the JS console.
   window.player = player;

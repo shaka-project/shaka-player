@@ -269,7 +269,7 @@ filterDescribe('Storage', storageSupport, () => {
       ];
 
       const selected =
-          PlayerConfiguration.defaultTrackSelect(tracks, englishUS);
+          PlayerConfiguration.defaultTrackSelect(tracks, englishUS, 'SDR');
       expect(selected).toBeTruthy();
       expect(selected.length).toBe(1);
       expect(selected[0]).toBeTruthy();
@@ -285,7 +285,7 @@ filterDescribe('Storage', storageSupport, () => {
       ];
 
       const selected =
-          PlayerConfiguration.defaultTrackSelect(tracks, englishUS);
+          PlayerConfiguration.defaultTrackSelect(tracks, englishUS, 'SDR');
       expect(selected).toBeTruthy();
       expect(selected.length).toBe(2);
       for (const track of tracks) {
@@ -302,7 +302,7 @@ filterDescribe('Storage', storageSupport, () => {
         ];
 
         const selected =
-            PlayerConfiguration.defaultTrackSelect(tracks, 'eng-us');
+            PlayerConfiguration.defaultTrackSelect(tracks, 'eng-us', 'SDR');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -317,7 +317,8 @@ filterDescribe('Storage', storageSupport, () => {
           variantTrack(3, 480, 'eng', kbps(1)),
         ];
 
-        const selected = PlayerConfiguration.defaultTrackSelect(tracks, 'eng');
+        const selected =
+            PlayerConfiguration.defaultTrackSelect(tracks, 'eng', 'SDR');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -331,7 +332,8 @@ filterDescribe('Storage', storageSupport, () => {
           variantTrack(2, 480, 'eng-ca', kbps(1)),
         ];
 
-        const selected = PlayerConfiguration.defaultTrackSelect(tracks, 'fr');
+        const selected =
+            PlayerConfiguration.defaultTrackSelect(tracks, 'fr', 'SDR');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -346,7 +348,7 @@ filterDescribe('Storage', storageSupport, () => {
         ];
 
         const selected =
-            PlayerConfiguration.defaultTrackSelect(tracks, 'fr-uk');
+            PlayerConfiguration.defaultTrackSelect(tracks, 'fr-uk', 'SDR');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -362,7 +364,8 @@ filterDescribe('Storage', storageSupport, () => {
 
         tracks[0].primary = true;
 
-        const selected = PlayerConfiguration.defaultTrackSelect(tracks, 'de');
+        const selected =
+            PlayerConfiguration.defaultTrackSelect(tracks, 'de', 'SDR');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -736,15 +739,16 @@ filterDescribe('Storage', storageSupport, () => {
     const videoElement = /** @type {!HTMLVideoElement} */(
       document.createElement('video'));
 
-    beforeEach(() => {
+    beforeEach(async () => {
       netEngine = makeNetworkEngine();
 
       // Use a real Player since Storage only uses the configuration and
       // networking engine.  This allows us to use Player.configure in these
       // tests.
-      player = new shaka.Player(videoElement, ((player) => {
+      player = new shaka.Player(null, ((player) => {
         player.createNetworkingEngine = () => netEngine;
       }));
+      await player.attach(videoElement);
 
       storage = new shaka.offline.Storage(player);
 
@@ -1382,6 +1386,7 @@ filterDescribe('Storage', storageSupport, () => {
       frameRate: 30,
       pixelAspectRatio: '59:54',
       hdr: null,
+      videoLayout: null,
       mimeType: 'video/mp4,audio/mp4',
       audioMimeType: 'audio/mp4',
       videoMimeType: 'video/mp4',
@@ -1428,6 +1433,7 @@ filterDescribe('Storage', storageSupport, () => {
       frameRate: null,
       pixelAspectRatio: null,
       hdr: null,
+      videoLayout: null,
       mimeType: 'text/vtt',
       audioMimeType: null,
       videoMimeType: null,
@@ -1745,6 +1751,9 @@ filterDescribe('Storage', storageSupport, () => {
 
     /** @override */
     onInitialVariantChosen(variant) {}
+
+    /** @override */
+    banLocation(uri) {}
   };
 
   /**

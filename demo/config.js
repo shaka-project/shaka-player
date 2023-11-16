@@ -128,7 +128,9 @@ shakaDemo.Config = class {
             /* canBeUnset= */ true)
         .addBoolInput_('Parse inband "pssh" from media segments',
             'drm.parseInbandPsshEnabled')
-        .addTextInput_('Min HDCP version', 'drm.minHdcpVersion');
+        .addTextInput_('Min HDCP version', 'drm.minHdcpVersion')
+        .addBoolInput_('Ignore duplicate init data',
+            'drm.ignoreDuplicateInitData');
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const addDRMAdvancedField = (name, valueName, suggestions) => {
       // All advanced fields of a given type are set at once.
@@ -207,6 +209,10 @@ shakaDemo.Config = class {
         .addBoolInput_('Enable HLS sequence mode', 'manifest.hls.sequenceMode')
         .addBoolInput_('Ignore Manifest Timestamps in Segments Mode',
             'manifest.hls.ignoreManifestTimestampsInSegmentsMode')
+        .addBoolInput_('Disable codec guessing',
+            'manifest.hls.disableCodecGuessing')
+        .addBoolInput_('Allow LL-HLS byterange optimization',
+            'manifest.hls.allowLowLatencyByteRangeOptimization')
         .addNumberInput_('Availability Window Override',
             'manifest.availabilityWindowOverride',
             /* canBeDecimal= */ true,
@@ -405,6 +411,14 @@ shakaDemo.Config = class {
         .addNumberInput_('Playback rate for live sync',
             'streaming.liveSyncPlaybackRate',
             /* canBeDecimal= */ true,
+            /* canBeZero= */ false)
+        .addNumberInput_('Min latency for live sync',
+            'streaming.liveSyncMinLatency',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Min playback rate for live sync',
+            'streaming.liveSyncMinPlaybackRate',
+            /* canBeDecimal= */ true,
             /* canBeZero= */ false);
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
@@ -435,6 +449,19 @@ shakaDemo.Config = class {
     };
     this.addSelectInput_('Preferred HDR Level', 'preferredVideoHdrLevel',
         hdrLevels, hdrLevelNames);
+
+    const videoLayouts = {
+      '': '',
+      'CH-STEREO': 'CH-STEREO',
+      'CH-MONO': 'CH-MONO',
+    };
+    const videoLayoutsNames = {
+      'CH-STEREO': 'Stereoscopic',
+      'CH-MONO': 'Monoscopic',
+      '': 'No Preference',
+    };
+    this.addSelectInput_('Preferred video layout', 'preferredVideoLayout',
+        videoLayouts, videoLayoutsNames);
 
     this.addBoolInput_('Start At Segment Boundary',
         'streaming.startAtSegmentBoundary')
