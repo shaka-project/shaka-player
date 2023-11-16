@@ -924,7 +924,7 @@ describe('HlsParser', () => {
       '#EXT-X-STREAM-INF:BANDWIDTH=200,',
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
       'video\n',
-      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",NAME="audio"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",NAME="audio"\n',
     ].join('');
 
     const media = [
@@ -941,6 +941,9 @@ describe('HlsParser', () => {
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
           stream.mime('video/mp4', /** @type {?} */ (jasmine.any(String)));
+          stream.language = 'en';
+          stream.originalLanguage = 'eng';
+          stream.label = 'audio';
         });
       });
       manifest.sequenceMode = sequenceMode;
