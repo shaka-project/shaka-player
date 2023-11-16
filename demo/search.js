@@ -398,6 +398,8 @@ shakaDemo.Search = class {
         'Filters for assets that have a chapters track.');
     this.makeBooleanInput_(specialContainer, Feature.LCEVC, FEATURE,
         'Filters for assets that have an LCEVC enhancement layer.');
+    this.makeBooleanInput_(specialContainer, Feature.CONTENT_STEERING, FEATURE,
+        'Filters for assets that use Content Steering.');
 
     container.appendChild(this.resultsDiv_);
   }
