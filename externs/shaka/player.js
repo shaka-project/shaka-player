@@ -1459,6 +1459,28 @@ shaka.extern.AdvancedAbrConfiguration;
  */
 shaka.extern.CmcdConfiguration;
 
+
+/**
+ * @typedef {{
+ *   enabled: boolean,
+ *   applyMaximumSuggestedBitrate: boolean,
+ *   estimatedThroughputWeightRatio: number
+ * }}
+ *
+ * @description
+ *   Common Media Server Data (CMSD) configuration.
+ *
+ * @property {boolean} enabled
+ *   If <code>true</code>, enables reading CMSD data in media requests.
+ *   Defaults to <code>true</code>.
+ * @property {boolean} applyMaximumSuggestedBitrate
+ *   Defaults to <code>true</code>.
+ * @property {number} estimatedThroughputWeightRatio
+ *   Defaults to <code>0.5</code>.
+ * @exportDoc
+ */
+shaka.extern.CmsdConfiguration;
+
 /**
  * @typedef {{
  *   enabled: boolean,
@@ -1554,6 +1576,7 @@ shaka.extern.OfflineConfiguration;
  *   abrFactory: shaka.extern.AbrManager.Factory,
  *   abr: shaka.extern.AbrConfiguration,
  *   cmcd: shaka.extern.CmcdConfiguration,
+ *   cmsd: shaka.extern.CmsdConfiguration,
  *   lcevc: shaka.extern.LcevcConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
  *   preferredAudioLanguage: string,
@@ -1592,6 +1615,8 @@ shaka.extern.OfflineConfiguration;
  *   ABR configuration and settings.
  * @property {shaka.extern.CmcdConfiguration} cmcd
  *   CMCD configuration and settings. (Common Media Client Data)
+ * @property {shaka.extern.CmsdConfiguration} cmcd
+ *   CMSD configuration and settings. (Common Media Server Data)
  * @property {shaka.extern.LcevcConfiguration} lcevc
  *   MPEG-5 LCEVC configuration and settings.
  *   (Low Complexity Enhancement Video Codec)
