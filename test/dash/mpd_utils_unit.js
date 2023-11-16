@@ -459,7 +459,8 @@ describe('MpdUtils', () => {
       console.assert(segmentTimeline);
 
       const timeline = MpdUtils.createTimeline(
-          segmentTimeline, timescale, presentationTimeOffset, periodDuration);
+          segmentTimeline, timescale, presentationTimeOffset,
+          periodDuration, 0);
       expect(timeline).toEqual(
           expected.map((c) => jasmine.objectContaining(c)));
     }
