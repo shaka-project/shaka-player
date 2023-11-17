@@ -1212,6 +1212,7 @@ shakaDemo.Main = class {
    * @param {ShakaDemoAssetInfo} asset
    */
   async preloadAsset(asset) {
+    await this.drmConfiguration_(asset);
     const manifestUri = await this.getManifestUri_(asset);
     asset.preloadManager = await this.player_.preload(manifestUri);
   }
