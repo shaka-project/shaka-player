@@ -90,6 +90,7 @@ shakaDemo.Config = class {
     this.addManifestSection_();
     this.addRetrictionsSection_('', 'Restrictions');
     this.addCmcdSection_();
+    this.addCmsdSection_();
     this.addLcevcSection_();
     this.addAdsSection_();
   }
@@ -285,6 +286,19 @@ shakaDemo.Config = class {
         .addTextInput_('Session ID', 'cmcd.sessionId')
         .addTextInput_('Content ID', 'cmcd.contentId')
         .addBoolInput_('Use Headers', 'cmcd.useHeaders');
+  }
+
+  /** @private */
+  addCmsdSection_() {
+    const docLink = this.resolveExternLink_('.CmsdConfiguration');
+    this.addSection_('CMSD', docLink)
+        .addBoolInput_('Enabled', 'cmsd.enabled')
+        .addBoolInput_('Apply maximum suggested bitrate',
+            'cmsd.applyMaximumSuggestedBitrate')
+        .addNumberInput_('Estimated throughput weight ratio',
+            'cmsd.estimatedThroughputWeightRatio',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true);
   }
 
   /** @private */
