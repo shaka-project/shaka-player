@@ -42,6 +42,7 @@ shakaAssets.Source = {
   VNOVA: 'V-Nova',
   AWS: 'AWS',
   BRIGHTCOVE: 'Brightcove',
+  BROADPEAK: 'Broadpeak',
 };
 
 
@@ -1630,6 +1631,19 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.CONTENT_STEERING),
+  // }}}
+
+  // Broadpeak assets {{{
+  /* Broadpeak Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live low latency (SegmentTemplate, CMSD)',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://explo.broadpeak.tv:8343/bpk-tv/spring/lowlat/index.mpd',
+      /* source= */ shakaAssets.Source.BROADPEAK)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE),
   // }}}
 ];
 /* eslint-enable max-len */
