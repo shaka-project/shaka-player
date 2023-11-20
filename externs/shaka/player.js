@@ -1474,8 +1474,12 @@ shaka.extern.CmcdConfiguration;
  *   If <code>true</code>, enables reading CMSD data in media requests.
  *   Defaults to <code>true</code>.
  * @property {boolean} applyMaximumSuggestedBitrate
+ *   If true, we must apply the maximum suggested bitrate. If false, we ignore
+ *   this.
  *   Defaults to <code>true</code>.
  * @property {number} estimatedThroughputWeightRatio
+ *   How much the estimatedThroughput of the CMSD data should be weighted
+ *   against the default estimate, between 0 and 1.
  *   Defaults to <code>0.5</code>.
  * @exportDoc
  */
@@ -1615,7 +1619,7 @@ shaka.extern.OfflineConfiguration;
  *   ABR configuration and settings.
  * @property {shaka.extern.CmcdConfiguration} cmcd
  *   CMCD configuration and settings. (Common Media Client Data)
- * @property {shaka.extern.CmsdConfiguration} cmcd
+ * @property {shaka.extern.CmsdConfiguration} cmsd
  *   CMSD configuration and settings. (Common Media Server Data)
  * @property {shaka.extern.LcevcConfiguration} lcevc
  *   MPEG-5 LCEVC configuration and settings.
