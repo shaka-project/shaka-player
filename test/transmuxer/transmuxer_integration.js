@@ -4,36 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/**
- * For unknown reasons, these tests fail in the test labs for Edge on Windows,
- * in ways that do not seem to be unrelated to transmuxers.
- * Practical testing has not found any sign that playback is actually broken in
- * Edge, so these tests are disabled on Edge for the time being.
- * TODO(#5834): Remove this filter once the tests are fixed.
- * @return {boolean}
- */
-function checkNoBrokenEdge() {
-  const chromeVersion = shaka.util.Platform.chromeVersion();
-  if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
-      chromeVersion && chromeVersion <= 118) {
-    // When the tests fail, it's due to the manifest parser failing to find a
-    // factory. Attempt to find a factory first, to avoid filtering the tests
-    // when running in a non-broken Edge environment.
-    const uri = 'fakeuri.m3u8';
-    const mimeType = 'application/x-mpegurl';
-    /* eslint-disable no-restricted-syntax */
-    try {
-      shaka.media.ManifestParser.getFactory(uri, mimeType);
-      return true;
-    } catch (error) {
-      return false;
-    }
-    /* eslint-enable no-restricted-syntax */
-  }
-  return true;
-}
-
-filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
+describe('Transmuxer Player', () => {
   const Util = shaka.test.Util;
 
   /** @type {!jasmine.Spy} */
