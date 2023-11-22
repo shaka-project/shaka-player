@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.6.1](https://github.com/shaka-project/shaka-player/compare/v4.6.0...v4.6.1) (2023-11-22)
+
+
+### Bug Fixes
+
+* **DASH:** Fix false redirect detection ([#5910](https://github.com/shaka-project/shaka-player/issues/5910)) ([eca7bfb](https://github.com/shaka-project/shaka-player/commit/eca7bfb4bf2d89fbcabc4ba9b9325896db584237))
+* **DASH:** SegmentTemplate@media not updated after change in manifest ([#5899](https://github.com/shaka-project/shaka-player/issues/5899)) ([a61538a](https://github.com/shaka-project/shaka-player/commit/a61538aef0409822c424cf843c5c1a337b936902))
+* Fix language comparison in addTextTrackAsync ([#5904](https://github.com/shaka-project/shaka-player/issues/5904)) ([686a083](https://github.com/shaka-project/shaka-player/commit/686a083ec358323c9e7eca1b30fec8f88bd076ff))
+* **HLS:** Recognize CEA subtitles when CLOSED-CAPTIONS attribute is missing ([#5916](https://github.com/shaka-project/shaka-player/issues/5916)) ([8560842](https://github.com/shaka-project/shaka-player/commit/85608424c25a0825eddcc41d86d4b6b8660bd251))
+* Unmask errors on LL ([#5908](https://github.com/shaka-project/shaka-player/issues/5908)) ([7a7e83b](https://github.com/shaka-project/shaka-player/commit/7a7e83b206dbe81adcc2c0e19e342c8690f2917f))
+
 ## [4.6.0](https://github.com/shaka-project/shaka-player/compare/v4.5.0...v4.6.0) (2023-11-16)
 
 
