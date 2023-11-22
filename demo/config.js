@@ -200,6 +200,8 @@ shakaDemo.Config = class {
             'manifest.hls.ignoreImageStreamFailures')
         .addTextInput_('Default Audio Codec', 'manifest.hls.defaultAudioCodec')
         .addTextInput_('Default Video Codec', 'manifest.hls.defaultVideoCodec')
+        .addTextInput_('Default media playlist full mime type',
+            'manifest.hls.mediaPlaylistFullMimeType')
         .addBoolInput_('Ignore Program Date Time from manifest',
             'manifest.hls.ignoreManifestProgramDateTime')
         .addBoolInput_('Use Safari behavior for live',
@@ -401,6 +403,8 @@ shakaDemo.Config = class {
             'streaming.observeQualityChanges')
         .addNumberInput_('Max Variant Disabled Time',
             'streaming.maxDisabledTime')
+        .addBoolInput_('Parse PRFT box',
+            'streaming.parsePrftBox')
         .addNumberInput_('Segment Prefetch Limit',
             'streaming.segmentPrefetchLimit')
         .addBoolInput_('Live Sync', 'streaming.liveSync')
@@ -510,6 +514,7 @@ shakaDemo.Config = class {
     this.addSection_('Language', docLink)
         .addTextInput_('Preferred Audio Language', 'preferredAudioLanguage')
         .addTextInput_('Preferred Audio Label', 'preferredAudioLabel')
+        .addTextInput_('Preferred Variant Role', 'preferredVariantRole')
         .addTextInput_('Preferred Text Language', 'preferredTextLanguage')
         .addTextInput_('Preferred Text Role', 'preferredTextRole')
         .addSelectInput_('Auto-Show Text',
