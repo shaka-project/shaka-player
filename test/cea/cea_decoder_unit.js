@@ -565,7 +565,8 @@ describe('CeaDecoder', () => {
       decoder.extract(hideWindow, endTime);
 
       const text = 'test';
-      const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+      const topLevelCue = CeaUtils.createWindowedCue(startTime, endTime, '',
+          serviceNumber, 0, 11, 11);
       topLevelCue.nestedCues = [
         CeaUtils.createDefaultCue(startTime, endTime, /* payload= */ text),
       ];
