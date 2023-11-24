@@ -32,6 +32,13 @@ const MediaSession = class {
     /** @type {?MediaMetadata} */
     this.metadata;
   }
+
+  setActionHandler(type, callback) {
+    /** @type {string} */
+    this.type = type;
+    /** @type {!function(!{action: string, seekOffset: ?number})} */
+    this.callback = callback;
+  }
 };
 
 
