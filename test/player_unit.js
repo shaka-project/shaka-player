@@ -1178,12 +1178,31 @@ describe('Player', () => {
           rebufferingGoal: 1,
           inaccurateManifestTolerance: 1,
           segmentPrefetchLimit: 1,
+          retryParameters: {
+            baseDelay: 2000,
+          },
+        },
+        manifest: {
+          retryParameters: {
+            baseDelay: 2000,
+          },
+        },
+        drm: {
+          retryParameters: {
+            baseDelay: 2000,
+          },
         },
       });
       expect(player.getConfiguration().streaming.rebufferingGoal).toBe(1);
       expect(player.getConfiguration().streaming.inaccurateManifestTolerance)
           .toBe(1);
       expect(player.getConfiguration().streaming.segmentPrefetchLimit).toBe(1);
+      expect(player.getConfiguration().streaming.retryParameters.baseDelay)
+          .toBe(2000);
+      expect(player.getConfiguration().manifest.retryParameters.baseDelay)
+          .toBe(2000);
+      expect(player.getConfiguration().drm.retryParameters.baseDelay)
+          .toBe(2000);
 
       // When low latency streaming gets enabled, rebufferingGoal will default
       // to 0.01 if unless specified, inaccurateManifestTolerance will
@@ -1194,6 +1213,12 @@ describe('Player', () => {
       expect(player.getConfiguration().streaming.inaccurateManifestTolerance)
           .toBe(0);
       expect(player.getConfiguration().streaming.segmentPrefetchLimit).toBe(2);
+      expect(player.getConfiguration().streaming.retryParameters.baseDelay)
+          .toBe(100);
+      expect(player.getConfiguration().manifest.retryParameters.baseDelay)
+          .toBe(100);
+      expect(player.getConfiguration().drm.retryParameters.baseDelay)
+          .toBe(100);
     });
   });
 
