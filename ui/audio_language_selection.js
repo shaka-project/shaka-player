@@ -76,6 +76,9 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
         new shaka.util.FakeEvent('languageselectionupdated'));
 
     this.button.setAttribute('shaka-status', this.currentSelection.innerText);
+
+    const numberOfItems = this.menu.getElementsByTagName('button').length;
+    shaka.ui.Utils.setDisplay(this.button, numberOfItems > 2);
   }
 
   /** @private */
