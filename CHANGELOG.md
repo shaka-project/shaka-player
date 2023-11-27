@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.6.2](https://github.com/shaka-project/shaka-player/compare/v4.6.1...v4.6.2) (2023-11-27)
+
+
+### Bug Fixes
+
+* **CEA:** Fix positioning in CEA-608 ([#5925](https://github.com/shaka-project/shaka-player/issues/5925)) ([bc2f542](https://github.com/shaka-project/shaka-player/commit/bc2f542e3adf36f0e828c95e20fec9043fe50cc2))
+* **Demo:** Allow configure some missing configs ([#5918](https://github.com/shaka-project/shaka-player/issues/5918)) ([8144dd3](https://github.com/shaka-project/shaka-player/commit/8144dd390928013fe3081732ff4638414e4eafc2))
+* Fix init segment comparison ([#5920](https://github.com/shaka-project/shaka-player/issues/5920)) ([ebd20b6](https://github.com/shaka-project/shaka-player/commit/ebd20b6b3529bd672040f42e3ce8957342faf02e))
+* Fix transmuxer when sample has no video data ([#5933](https://github.com/shaka-project/shaka-player/issues/5933)) ([8070f0f](https://github.com/shaka-project/shaka-player/commit/8070f0fe1d4eb8d893e2f1a52ccbfe6306f0118f))
+* Only append to the buffer init segments when the segment is independent ([#5921](https://github.com/shaka-project/shaka-player/issues/5921)) ([3db2b2d](https://github.com/shaka-project/shaka-player/commit/3db2b2d68331432533119517892198d6927376e0))
+* **UI:** Correctly display video time and duration for VOD ([#5929](https://github.com/shaka-project/shaka-player/issues/5929)) ([d51f18a](https://github.com/shaka-project/shaka-player/commit/d51f18ad9e097b43939c61b979a3399dd2a1bf1f))
+
 ## [4.6.1](https://github.com/shaka-project/shaka-player/compare/v4.6.0...v4.6.1) (2023-11-22)
 
 
