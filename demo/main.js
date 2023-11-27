@@ -1272,8 +1272,13 @@ shakaDemo.Main = class {
       }
 
       for (const extraChapter of asset.extraChapter) {
-        this.player_.addChaptersTrack(extraChapter.uri, extraChapter.language,
-            extraChapter.mime);
+        if (extraChapter.mime) {
+          this.player_.addChaptersTrack(
+              extraChapter.uri, extraChapter.language, extraChapter.mime);
+        } else {
+          this.player_.addChaptersTrack(
+              extraChapter.uri, extraChapter.language);
+        }
       }
 
       // If the asset has an ad tag attached to it, load the ads
