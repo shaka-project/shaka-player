@@ -1123,7 +1123,9 @@ shaka.extern.ManifestConfiguration;
  *   liveSyncMaxLatency: number,
  *   liveSyncPlaybackRate: number,
  *   liveSyncMinLatency: number,
- *   liveSyncMinPlaybackRate: number
+ *   liveSyncMinPlaybackRate: number,
+ *   allowMediaSourceRecoveries: boolean,
+ *   minTimeBetweenRecoveries: number
  * }}
  *
  * @description
@@ -1259,6 +1261,13 @@ shaka.extern.ManifestConfiguration;
  *   Minimun playback rate used for latency chasing. It is recommended to use a
  *   value between 0 and 1. Effective only if liveSync is true. Defaults to
  *   <code>1</code>.
+ * @property {boolean} allowMediaSourceRecoveries
+ *   Indicate if we should recover from VIDEO_ERROR resetting Media Source.
+ *   Defaults to <code>true</code>.
+ * @property {number} minTimeBetweenRecoveries
+ *   The minimum time between recoveries when VIDEO_ERROR is reached, in
+ *   seconds.
+ *   Defaults to <code>5</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
