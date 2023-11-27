@@ -64,7 +64,6 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
   updateTime_() {
     const isSeeking = this.controls.isSeeking();
     let displayTime = this.controls.getDisplayTime();
-    const duration = this.video.duration;
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
     const Utils = shaka.ui.Utils;
@@ -89,11 +88,12 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
         this.currentTime_.disabled = true;
       }
     } else {
-      const showHour = duration >= 3600;
+      const showHour = seekRangeSize >= 3600;
 
-      let value = Utils.buildTimeString(displayTime, showHour);
-      if (duration) {
-        value += ' / ' + Utils.buildTimeString(duration, showHour);
+      const currentTime = Math.max(0, displayTime - seekRange.start);
+      let value = Utils.buildTimeString(currentTime, showHour);
+      if (seekRangeSize) {
+        value += ' / ' + Utils.buildTimeString(seekRangeSize, showHour);
       }
       this.setValue_(value);
       this.currentTime_.disabled = true;
