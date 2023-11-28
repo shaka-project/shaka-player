@@ -1602,6 +1602,7 @@ shaka.extern.OfflineConfiguration;
  *   preferredAudioChannelCount: number,
  *   preferredVideoHdrLevel: string,
  *   preferredVideoLayout: string,
+ *   preferredVideoLabel: string,
  *   preferredDecodingAttributes: !Array.<string>,
  *   preferForcedSubs: boolean,
  *   restrictions: shaka.extern.Restrictions,
@@ -1641,6 +1642,8 @@ shaka.extern.OfflineConfiguration;
  *   Changing this during playback will not affect the current playback.
  * @property {string} preferredAudioLabel
  *   The preferred label to use for audio tracks
+ * @property {string} preferredVideoLabel
+ *   The preferred label to use for video tracks
  * @property {string} preferredTextLanguage
  *   The preferred language to use for text tracks.  If a matching text track
  *   is found, and the selected audio and text tracks have different languages,
