@@ -868,6 +868,8 @@ shakaDemo.Custom = class {
       c.addButton(shakaDemo.MessageIds.EDIT_CUSTOM, async () => {
         if (asset.unstoreCallback) {
           await asset.unstoreCallback();
+          this.saveAssetInfos_(this.assets_);
+          this.remakeSavedList_();
         }
         this.showAssetDialog_(asset);
       });
