@@ -158,7 +158,7 @@ shaka.extern.InitDataOverride;
  * }}
  *
  * @description
- * Maximum and minimun latency and playback rate for a manifest. When max
+ * Maximum and minimum latency and playback rate for a manifest. When max
  * latency is reached playbackrate is updated to maxPlaybackRate to decrease
  * latency. When min  latency is reached playbackrate is updated to
  * minPlaybackRate to increase  latency.
@@ -169,9 +169,9 @@ shaka.extern.InitDataOverride;
  * @property {?number} maxPlaybackRate
  *  Maximum playback rate.
  * @property {?number} minLatency
- *  Minimun latency in seconds.
+ *  Minimum latency in seconds.
  * @property {?number} minPlaybackRate
- *  Minimun playback rate.
+ *  Minimum playback rate.
  *
  * @exportDoc
  */

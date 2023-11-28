@@ -440,7 +440,7 @@ shakaDemo.Config = class {
             /* canBeZero= */ false)
         .addBoolInput_('Allow Media Source recoveries',
             'streaming.allowMediaSourceRecoveries')
-        .addNumberInput_('Minimun time between recoveries',
+        .addNumberInput_('Minimum time between recoveries',
             'streaming.minTimeBetweenRecoveries');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
