@@ -1443,6 +1443,23 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.seek_(this.player_.seekRange().end);
         }
         break;
+      case 'f':
+        if (this.isFullScreenSupported()) {
+          this.toggleFullScreen();
+        }
+        break;
+      case 'm':
+        if (this.ad_ && this.ad_.isLinear()) {
+          this.ad_.setMuted(!this.ad_.isMuted());
+        } else {
+          this.localVideo_.muted = !this.localVideo_.muted;
+        }
+        break;
+      case 'p':
+        if (this.isPiPAllowed()) {
+          this.togglePiP();
+        }
+        break;
       // Pause or play by pressing space on the seek bar.
       case ' ':
         if (isSeekBar) {
