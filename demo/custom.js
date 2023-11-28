@@ -828,6 +828,8 @@ shakaDemo.Custom = class {
       c.addButton('Edit', async () => {
         if (asset.unstoreCallback) {
           await asset.unstoreCallback();
+          this.saveAssetInfos_(this.assets_);
+          this.remakeSavedList_();
         }
         this.showAssetDialog_(asset);
       });
