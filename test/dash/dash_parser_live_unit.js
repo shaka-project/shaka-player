@@ -1539,6 +1539,68 @@ describe('DashParser Live', () => {
       shaka.test.ManifestParser.makeReference('s5.mp4', 8, 10, originalUri),
     ]);
   });
+
+  it('supports ContentSteering with location change', async () => {
+    const manifestText = [
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '    suggestedPresentationDelay="PT5S"',
+      '    minimumUpdatePeriod="PT' + updateTime + 'S">',
+      '  <Location serviceLocation="a">http://foobar</Location>',
+      '  <Location serviceLocation="b">http://foobar2</Location>',
+      '  <Location serviceLocation="c">foobar3</Location>',
+      '  <ContentSteering defaultServiceLocation="b" ',
+      'queryBeforeStart="true">http://contentsteering</ContentSteering>',
+      '  <Period id="1" duration="PT10S">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="3" bandwidth="500">',
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    const contentSteering = JSON.stringify({
+      'VERSION': 1,
+      'TTL': 100,
+      'RELOAD-URI': 'http://contentsteering/update',
+      'PATHWAY-PRIORITY': [
+        'a',
+        'c',
+        'b',
+      ],
+    });
+
+    fakeNetEngine
+        .setResponseText('dummy://foo', manifestText)
+        .setResponseText('http://contentsteering', contentSteering)
+        .setMaxUris(3);
+
+    const manifestRequest = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+    const manifestContext = {
+      type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD,
+    };
+
+    await parser.start('dummy://foo', playerInterface);
+
+    fakeNetEngine.request.calls.reset();
+
+    // Create a mock so we can verify it gives two URIs.
+    // The third location is a relative url, and should be resolved as an
+    // absolute url.
+    fakeNetEngine.request.and.callFake((type, request, context) => {
+      expect(type).toBe(manifestRequest);
+      expect(context).toEqual(manifestContext);
+      expect(request.uris).toEqual(
+          ['http://foobar', 'dummy://foo/foobar3', 'http://foobar2']);
+      const data = shaka.util.StringUtils.toUTF8(manifestText);
+      return shaka.util.AbortableOperation.completed(
+          {uri: request.uris[0], data: data, headers: {}});
+    });
+
+    await updateManifest();
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+  });
   describe('Patch MPD', () => {
     const manifestRequest = shaka.net.NetworkingEngine.RequestType.MANIFEST;
     const manifestContext = {

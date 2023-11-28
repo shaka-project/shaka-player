@@ -65,7 +65,7 @@ describe('CeaDecoder', () => {
 
       const topLevelCue = new shaka.text.Cue(
           startTimeCaption1, startTimeCaption2, '');
-      topLevelCue.line = 81.25;
+      topLevelCue.line = 74;
       topLevelCue.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue.nestedCues = [
@@ -113,7 +113,7 @@ describe('CeaDecoder', () => {
       // Since there are three style changes, there should be three nested cues.
       const topLevelCue = new shaka.text.Cue(
           startTimeCaption1, startTimeCaption2, '');
-      topLevelCue.line = 6.25;
+      topLevelCue.line = 10;
       topLevelCue.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
 
@@ -166,7 +166,7 @@ describe('CeaDecoder', () => {
       // A single nested cue containing yellow, italicized text.
       const topLevelCue = new shaka.text.Cue(startTimeCaption1,
           startTimeCaption2, '');
-      topLevelCue.line = 12.5;
+      topLevelCue.line = 15.33;
       topLevelCue.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue.nestedCues = [
@@ -208,7 +208,7 @@ describe('CeaDecoder', () => {
 
       const topLevelCue = new shaka.text.Cue(startTimeCaption1,
           startTimeCaption2, '');
-      topLevelCue.line = 6.25;
+      topLevelCue.line = 10;
       topLevelCue.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue.nestedCues = [
@@ -243,7 +243,7 @@ describe('CeaDecoder', () => {
 
       const topLevelCue = new shaka.text.Cue(startTimeCaption1,
           startTimeCaption2, '');
-      topLevelCue.line = 6.25;
+      topLevelCue.line = 10;
       topLevelCue.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue.nestedCues = [
@@ -315,7 +315,7 @@ describe('CeaDecoder', () => {
       // Top level cue corresponding to the first closed caption.
       const topLevelCue1 = new shaka.text.Cue(
           /* startTime= */ time1, /* endTime= */ time2, '');
-      topLevelCue1.line = 93.75;
+      topLevelCue1.line = 84.66;
       topLevelCue1.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue1.nestedCues = [
@@ -326,7 +326,7 @@ describe('CeaDecoder', () => {
       // Top level cue corresponding to the second closed caption.
       const topLevelCue2 = new shaka.text.Cue(
           /* startTime= */ time2, /* endTime= */ time3, '');
-      topLevelCue2.line = 93.75;
+      topLevelCue2.line = 84.66;
       topLevelCue2.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue2.nestedCues = [
@@ -343,7 +343,7 @@ describe('CeaDecoder', () => {
       // Top level cue corresponding to the third closed caption.
       const topLevelCue3 = new shaka.text.Cue(
           /* startTime= */ time3, /* endTime= */ time4, '');
-      topLevelCue3.line = 93.75;
+      topLevelCue3.line = 84.66;
       topLevelCue3.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue3.nestedCues = [
@@ -360,7 +360,7 @@ describe('CeaDecoder', () => {
       // Top level cue corresponding to the fourth closed caption.
       const topLevelCue4 = new shaka.text.Cue(
           /* startTime= */ time4, /* endTime= */ time5, '');
-      topLevelCue4.line = 93.75;
+      topLevelCue4.line = 84.66;
       topLevelCue4.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue4.nestedCues = [
@@ -433,7 +433,7 @@ describe('CeaDecoder', () => {
       // Top level cue corresponding to the first closed caption.
       const topLevelCue1 = new shaka.text.Cue(/* startTime= */ 1,
           /* endTime= */ 2, '');
-      topLevelCue1.line = 93.75;
+      topLevelCue1.line = 84.66;
       topLevelCue1.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue1.nestedCues = [
@@ -444,7 +444,7 @@ describe('CeaDecoder', () => {
       // Top level cue corresponding to the second closed caption.
       const topLevelCue2 = new shaka.text.Cue(/* startTime= */ 2,
           /* endTime= */ 3, '');
-      topLevelCue2.line = 25;
+      topLevelCue2.line = 26;
       topLevelCue2.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue2.nestedCues = [
@@ -565,7 +565,8 @@ describe('CeaDecoder', () => {
       decoder.extract(hideWindow, endTime);
 
       const text = 'test';
-      const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+      const topLevelCue = CeaUtils.createWindowedCue(startTime, endTime, '',
+          serviceNumber, 0, 11, 11);
       topLevelCue.nestedCues = [
         CeaUtils.createDefaultCue(startTime, endTime, /* payload= */ text),
       ];

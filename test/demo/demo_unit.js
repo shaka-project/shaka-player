@@ -74,14 +74,11 @@ describe('Demo', () => {
     function checkConfig(checkValueNameFn) {
       const configPrimitives = new Set(['number', 'string', 'boolean']);
       const exceptions = new Set()
-          .add('preferredVariantRole')
           .add('playRangeStart')
           .add('playRangeEnd')
           .add('manifest.dash.keySystemsByURI')
-          .add('manifest.hls.mediaPlaylistFullMimeType')
           .add('manifest.mss.keySystemsBySystemId')
           .add('drm.keySystemsMapping')
-          .add('streaming.parsePrftBox')
           .add('manifest.raiseFatalErrorOnManifestUpdateRequestFailure')
           .add('drm.persistentSessionOnlinePlayback')
           .add('drm.persistentSessionsMetadata')

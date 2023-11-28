@@ -462,6 +462,119 @@ shakaDemo.Custom = class {
     this.makeField_(
         container, 'Thumbnails URL', thumbnailsUrlSetup, thumbnailsUrlOnChange);
 
+    // Because this field can theoretically contain an unlimited number of
+    // values, it has to take up an entire section by itself.
+    const makeEmptyRow = () => {
+      makePreFilledRow(/* chapterUrl= */ null, /* chapterLanguage= */ null);
+    };
+    /**
+     * @type {!Array.<{
+     *   chapterUrl: ?string,
+     *   div: !Element,
+     * }>}
+     */
+    const collisionCheckEntries = [];
+    /** @type {function(?string, ?string)} */
+    const makePreFilledRow = (chapterUrl, chapterLanguage) => {
+      const div = document.createElement('div');
+      extraTracksDiv.appendChild(div);
+      const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
+      const container = new shakaDemo.InputContainer(
+          div, 'Chapter', containerStyle,
+          /* docLink= */ null);
+
+      const collisionCheckEntry = {
+        chapterUrl,
+        div,
+      };
+      collisionCheckEntries.push(collisionCheckEntry);
+
+      // Don't add a new row for a row that was pre-filled.
+      let firstTime = !chapterUrl;
+      const onChange = (newChapterUrl, newChapterLanguage) => {
+        if (chapterUrl) {
+          // In case the chapter url changed, remove the old chapter.
+          assetInProgress.removeExtraChapter(chapterUrl);
+        }
+        // Set the new values.
+        chapterUrl = newChapterUrl;
+        collisionCheckEntry.chapterUrl = newChapterUrl;
+        chapterLanguage = newChapterLanguage;
+        if (!chapterUrl || !chapterLanguage) {
+          if (!firstTime) {
+            // The user has set a field that used to be filled to empty.
+            // This signals that they probably want to remove this chapter.
+            extraTracksDiv.removeChild(div);
+          }
+          return;
+        }
+        if (firstTime) {
+          firstTime = false;
+          // You have filled out this row for the first time; add a new row, in
+          // case the user wants to add more chapters.
+          makeEmptyRow();
+          // Update the componentHandler, to account for the new MDL elements.
+          componentHandler.upgradeDom();
+        }
+        assetInProgress.extraChapter.push({
+          uri: String(chapterUrl),
+          language: String(chapterLanguage),
+          mime: '',
+        });
+        // Eliminate any OTHER chapters with the same name. Assume this newly
+        // added/modified one is the "correct" one.
+        for (const entry of collisionCheckEntries) {
+          if (entry == collisionCheckEntry) {
+            // You can't "collide" with yourself.
+            continue;
+          }
+          if (chapterUrl != entry.chapterUrl) {
+            // It's not a collision.
+            continue;
+          }
+          // Remove the entry for the old field from the array.
+          const idx = collisionCheckEntries.indexOf(entry);
+          collisionCheckEntries.splice(idx, 1);
+          // Remove the div for the old field from the overall extra tracks div.
+          extraTracksDiv.removeChild(entry.div);
+          break;
+        }
+      };
+
+      const nameSetup = (input, container) => {
+        if (chapterUrl) {
+          input.value = chapterUrl;
+        }
+      };
+      const nameOnChange = (input) => {
+        onChange(input.value, chapterLanguage);
+      };
+      this.makeField_(container, 'Chapter URL', nameSetup, nameOnChange);
+
+      const valueSetup = (input, container) => {
+        if (chapterLanguage) {
+          input.value = chapterLanguage;
+        }
+      };
+      const valueOnChange = (input) => {
+        onChange(chapterUrl, input.value);
+      };
+      this.makeField_(container, 'Chapter Language', valueSetup, valueOnChange);
+    };
+    if (!assetInProgress.extraChapter.length) {
+      // It starts out with a single empty row, but each time you start filling
+      // out one for the first time it adds a new one. Empty rows are ignored in
+      // the actual data.
+      makeEmptyRow();
+    } else {
+      // Make a row for each chapter.
+      for (const extraChapter of assetInProgress.extraChapter) {
+        makePreFilledRow(extraChapter.uri, extraChapter.language);
+      }
+      // ...and also an empty one at the end.
+      makeEmptyRow();
+    }
+
     return extraTracksDiv;
   }
 
@@ -828,6 +941,8 @@ shakaDemo.Custom = class {
       c.addButton('Edit', async () => {
         if (asset.unstoreCallback) {
           await asset.unstoreCallback();
+          this.saveAssetInfos_(this.assets_);
+          this.remakeSavedList_();
         }
         this.showAssetDialog_(asset);
       });

@@ -44,4 +44,5 @@
     r'(?i)deafult': 'default',
     r'(?i)evication': 'eviction',
     r'(?i)immidiately': 'immediately',
+    r'(?i)minimun': 'minimum',
 }

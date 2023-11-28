@@ -335,6 +335,17 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
+   * @param {string} chapterUri
+   * @return {!ShakaDemoAssetInfo}
+   */
+  removeExtraChapter(chapterUri) {
+    this.extraChapter = this.extraChapter.filter((extraChapter) => {
+      return extraChapter.uri != chapterUri;
+    });
+    return this;
+  }
+
+  /**
    * If this is called, the asset will be focused on by the integration tests.
    * @return {!ShakaDemoAssetInfo}
    */
