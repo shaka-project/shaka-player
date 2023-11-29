@@ -365,3 +365,21 @@
   on a black background. */
   filter: drop-shadow(0 0 2px rgba(255 255 255 / 50%));
 }
+
+.shaka-hidden-fast-forward-container,
+.shaka-hidden-rewind-container {
+  height: 100%;
+  width: 40%;
+  .shrinkable();
+}
+
+.shaka-hidden-fast-forward-container {
+  /* Keep the fast forward button to the right of this container. */
+  .absolute-position();
+  left: 60%;
+}
+
+.shaka-hidden-rewind-container {
+  /* keep the rewind button to the left */
+  .absolute-position();
+}
