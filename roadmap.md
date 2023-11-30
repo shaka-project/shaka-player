@@ -22,10 +22,19 @@ Candidate features for future release cycles:
 v5.0 - 2024 Q1
  - Preload API
    https://github.com/shaka-project/shaka-player/issues/880
- - Common Media Server Data (CMSD)
-   https://github.com/shaka-project/shaka-player/issues/5890
 
 =====
+
+v4.7 - 2023 Q4
+ - Common Media Server Data (CMSD)
+   https://github.com/shaka-project/shaka-player/issues/5890
+ - DASH: Handle mixed-codec variants
+   https://github.com/shaka-project/shaka-player/issues/5961
+ - Allow Media Source Recoveries
+ - UI: Add double tap to forward/rewind in the video
+   https://github.com/shaka-project/shaka-player/issues/3357
+ - Improve npm package size
+   https://github.com/shaka-project/shaka-player/issues/2172
 
 v4.6 - 2023 Q4
  - Content Steering
