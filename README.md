@@ -104,7 +104,7 @@ DASH features supported:
  - Trick mode tracks
  - WebVTT and TTML
  - CEA-608/708 captions
- - Multi-codec variants
+ - Multi-codec variants (on platforms with changeType support)
 
 DASH features **not** supported:
  - Xlink with actuate=onRequest
