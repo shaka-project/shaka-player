@@ -1,3 +1,9 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2023 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /**
  * @fileoverview Externs for Transmuxer.
  *
