@@ -317,6 +317,17 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
+   * @param {string} textUri
+   * @return {!ShakaDemoAssetInfo}
+   */
+  removeExtraText(textUri) {
+    this.extraText = this.extraText.filter((extraText) => {
+      return extraText.uri != textUri;
+    });
+    return this;
+  }
+
+  /**
    * @param {string} uri
    * @return {!ShakaDemoAssetInfo}
    */
