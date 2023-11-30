@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.6.3](https://github.com/shaka-project/shaka-player/compare/v4.6.2...v4.6.3) (2023-11-30)
+
+
+### Bug Fixes
+
+* **DASH:** Fix bad url when specify using a full WebVTT with BaseURL ([#5954](https://github.com/shaka-project/shaka-player/issues/5954)) ([b77d73a](https://github.com/shaka-project/shaka-player/commit/b77d73aaf46f44bded11505c1bafbc01708afd12))
+* **Demo:** Pressing "Edit" button unstores custom asset, but does not update "stored" button ([#5936](https://github.com/shaka-project/shaka-player/issues/5936)) ([7e2e543](https://github.com/shaka-project/shaka-player/commit/7e2e5439658220e221645f4089b472cf7bc5cdce))
+* Fix ESDS box parser ([#5952](https://github.com/shaka-project/shaka-player/issues/5952)) ([ceff4e7](https://github.com/shaka-project/shaka-player/commit/ceff4e79442aba858d332df6ae894e4b5f4284d4))
+* Fix reset Media Source when using mixed codecs in different containers ([#5949](https://github.com/shaka-project/shaka-player/issues/5949)) ([2a2df18](https://github.com/shaka-project/shaka-player/commit/2a2df182fd98aaee9afe6ad456c740745e67b0b9))
+* **HLS:** Fix m4s extension detection ([#5951](https://github.com/shaka-project/shaka-player/issues/5951)) ([aa1c361](https://github.com/shaka-project/shaka-player/commit/aa1c361a8ac50688893d96be6981d90859c2b526))
+* Properly size region anchor from LINE units ([#5941](https://github.com/shaka-project/shaka-player/issues/5941)) ([35ecd06](https://github.com/shaka-project/shaka-player/commit/35ecd060650a2db5a4d494440510d4f605998e8e))
+
 ## [4.6.2](https://github.com/shaka-project/shaka-player/compare/v4.6.1...v4.6.2) (2023-11-27)
 
 
