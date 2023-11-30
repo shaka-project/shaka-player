@@ -462,20 +462,131 @@ shakaDemo.Custom = class {
     this.makeField_(
         container, 'Thumbnails URL', thumbnailsUrlSetup, thumbnailsUrlOnChange);
 
-    // Because this field can theoretically contain an unlimited number of
-    // values, it has to take up an entire section by itself.
-    const makeEmptyRow = () => {
-      makePreFilledRow(/* chapterUrl= */ null, /* chapterLanguage= */ null);
-    };
     /**
      * @type {!Array.<{
-     *   chapterUrl: ?string,
+     *   uri: ?string,
      *   div: !Element,
      * }>}
      */
     const collisionCheckEntries = [];
+
+    // Because this field can theoretically contain an unlimited number of
+    // values, it has to take up an entire section by itself.
+    const makeEmptyRowForText = () => {
+      makePreFilledRowForText(
+          /* textUrl= */ null, /* textLanguage= */ null);
+    };
     /** @type {function(?string, ?string)} */
-    const makePreFilledRow = (chapterUrl, chapterLanguage) => {
+    const makePreFilledRowForText = (textUrl, textLanguage) => {
+      const div = document.createElement('div');
+      extraTracksDiv.appendChild(div);
+      const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
+      const container = new shakaDemo.InputContainer(
+          div, 'Subtitle', containerStyle,
+          /* docLink= */ null);
+
+      const collisionCheckEntry = {
+        uri: textUrl,
+        div,
+      };
+      collisionCheckEntries.push(collisionCheckEntry);
+
+      // Don't add a new row for a row that was pre-filled.
+      let firstTime = !textUrl;
+      const onChange = (newTextUrl, newTextLanguage) => {
+        if (textUrl) {
+          // In case the subtitle url changed, remove the old subtitle.
+          assetInProgress.removeExtraText(textUrl);
+        }
+        // Set the new values.
+        textUrl = newTextUrl;
+        collisionCheckEntry.uri = newTextUrl;
+        textLanguage = newTextLanguage;
+        if (!textUrl || !textLanguage) {
+          if (!firstTime) {
+            // The user has set a field that used to be filled to empty.
+            // This signals that they probably want to remove this subtitle.
+            extraTracksDiv.removeChild(div);
+          }
+          return;
+        }
+        if (firstTime) {
+          firstTime = false;
+          // You have filled out this row for the first time; add a new row, in
+          // case the user wants to add more subtitles.
+          makeEmptyRowForText();
+          // Update the componentHandler, to account for the new MDL elements.
+          componentHandler.upgradeDom();
+        }
+        assetInProgress.extraText.push({
+          uri: String(textUrl),
+          language: String(textLanguage),
+          kind: 'subtitle',
+          mime: '',
+        });
+        // Eliminate any OTHER subtitles with the same name. Assume this newly
+        // added/modified one is the "correct" one.
+        for (const entry of collisionCheckEntries) {
+          if (entry == collisionCheckEntry) {
+            // You can't "collide" with yourself.
+            continue;
+          }
+          if (textUrl != entry.uri) {
+            // It's not a collision.
+            continue;
+          }
+          // Remove the entry for the old field from the array.
+          const idx = collisionCheckEntries.indexOf(entry);
+          collisionCheckEntries.splice(idx, 1);
+          // Remove the div for the old field from the overall extra tracks div.
+          extraTracksDiv.removeChild(entry.div);
+          break;
+        }
+      };
+
+      const nameSetup = (input, container) => {
+        if (textUrl) {
+          input.value = textUrl;
+        }
+      };
+      const nameOnChange = (input) => {
+        onChange(input.value, textLanguage);
+      };
+      this.makeField_(container, 'Subtitle URL', nameSetup, nameOnChange);
+
+      const valueSetup = (input, container) => {
+        if (textLanguage) {
+          input.value = textLanguage;
+        }
+      };
+      const valueOnChange = (input) => {
+        onChange(textUrl, input.value);
+      };
+      this.makeField_(
+          container, 'Subtitle Language', valueSetup, valueOnChange);
+    };
+    if (!assetInProgress.extraText.length) {
+      // It starts out with a single empty row, but each time you start filling
+      // out one for the first time it adds a new one. Empty rows are ignored in
+      // the actual data.
+      makeEmptyRowForText();
+    } else {
+      // Make a row for each subtitles.
+      for (const extraText of assetInProgress.extraText) {
+        makePreFilledRowForText(extraText.uri, extraText.language);
+      }
+      // ...and also an empty one at the end.
+      makeEmptyRowForText();
+    }
+
+    // Because this field can theoretically contain an unlimited number of
+    // values, it has to take up an entire section by itself.
+    const makeEmptyRowForChapter = () => {
+      makePreFilledRowForChapter(
+          /* chapterUrl= */ null, /* chapterLanguage= */ null);
+    };
+    /** @type {function(?string, ?string)} */
+    const makePreFilledRowForChapter = (chapterUrl, chapterLanguage) => {
       const div = document.createElement('div');
       extraTracksDiv.appendChild(div);
       const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
@@ -484,7 +595,7 @@ shakaDemo.Custom = class {
           /* docLink= */ null);
 
       const collisionCheckEntry = {
-        chapterUrl,
+        url: chapterUrl,
         div,
       };
       collisionCheckEntries.push(collisionCheckEntry);
@@ -498,7 +609,7 @@ shakaDemo.Custom = class {
         }
         // Set the new values.
         chapterUrl = newChapterUrl;
-        collisionCheckEntry.chapterUrl = newChapterUrl;
+        collisionCheckEntry.uri = newChapterUrl;
         chapterLanguage = newChapterLanguage;
         if (!chapterUrl || !chapterLanguage) {
           if (!firstTime) {
@@ -512,7 +623,7 @@ shakaDemo.Custom = class {
           firstTime = false;
           // You have filled out this row for the first time; add a new row, in
           // case the user wants to add more chapters.
-          makeEmptyRow();
+          makeEmptyRowForChapter();
           // Update the componentHandler, to account for the new MDL elements.
           componentHandler.upgradeDom();
         }
@@ -528,7 +639,7 @@ shakaDemo.Custom = class {
             // You can't "collide" with yourself.
             continue;
           }
-          if (chapterUrl != entry.chapterUrl) {
+          if (chapterUrl != entry.uri) {
             // It's not a collision.
             continue;
           }
@@ -565,14 +676,14 @@ shakaDemo.Custom = class {
       // It starts out with a single empty row, but each time you start filling
       // out one for the first time it adds a new one. Empty rows are ignored in
       // the actual data.
-      makeEmptyRow();
+      makeEmptyRowForChapter();
     } else {
       // Make a row for each chapter.
       for (const extraChapter of assetInProgress.extraChapter) {
-        makePreFilledRow(extraChapter.uri, extraChapter.language);
+        makePreFilledRowForChapter(extraChapter.uri, extraChapter.language);
       }
       // ...and also an empty one at the end.
-      makeEmptyRow();
+      makeEmptyRowForChapter();
     }
 
     return extraTracksDiv;

@@ -1263,8 +1263,13 @@ shakaDemo.Main = class {
       }
 
       for (const extraText of asset.extraText) {
-        this.player_.addTextTrackAsync(extraText.uri, extraText.language,
-            extraText.kind, extraText.mime, extraText.codecs);
+        if (extraText.mime) {
+          this.player_.addTextTrackAsync(extraText.uri, extraText.language,
+              extraText.kind, extraText.mime, extraText.codecs);
+        } else {
+          this.player_.addTextTrackAsync(extraText.uri, extraText.language,
+              extraText.kind);
+        }
       }
 
       for (const extraThumbnail of asset.extraThumbnail) {
