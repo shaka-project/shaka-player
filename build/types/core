@@ -118,6 +118,7 @@
 +../../lib/util/ts_parser.js
 +../../lib/util/uint8array_utils.js
 +../../lib/util/xml_utils.js
++../../lib/util/tXml.js
 
 +../../third_party/closure-uri/uri.js
 +../../third_party/closure-uri/utils.js

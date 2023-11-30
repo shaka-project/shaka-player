@@ -521,7 +521,7 @@ shaka.extern.MetadataFrame;
  *   startTime: number,
  *   endTime: number,
  *   id: string,
- *   eventElement: Element
+ *   eventElement: ?shaka.extern.xml.Node
  * }}
  *
  * @description
@@ -539,7 +539,7 @@ shaka.extern.MetadataFrame;
  *   The presentation time (in seconds) that the region should end.
  * @property {string} id
  *   Specifies an identifier for this instance of the region.
- * @property {Element} eventElement
+ * @property {?shaka.extern.xml.Node} eventElement
  *   The XML element that defines the Event.
  * @exportDoc
  */
@@ -842,6 +842,28 @@ shaka.extern.InitDataTransform;
 
 /**
  * @typedef {{
+ *   tagName: !string,
+ *   attributes: !Object<string, string>,
+ *   children: !Array.<shaka.extern.xml.Node>,
+ *   innerText: (string | null)
+ * }}
+ *
+ * @description
+ *   Data structure for node
+ *
+ * @property {!string} tagName
+ *   The name of the element
+ * @property {!object} attributes
+ *   The attributes of the element
+ * @property {!Array.<shaka.extern.xml.Node>} children
+ *   The child nodes or string body of the element
+ * @property {string | null} innerText
+ *   The inner text of the xml node
+ */
+shaka.extern.xml.Node;
+
+/**
+ * @typedef {{
  *   clockSyncUri: string,
  *   ignoreDrmInfo: boolean,
  *   disableXlinkProcessing: boolean,
@@ -853,7 +875,7 @@ shaka.extern.InitDataTransform;
  *   ignoreEmptyAdaptationSet: boolean,
  *   ignoreMaxSegmentDuration: boolean,
  *   keySystemsByURI: !Object.<string, string>,
- *   manifestPreprocessor: function(!Element),
+ *   manifestPreprocessor: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
  *   enableAudioGroups: boolean
  * }}
@@ -905,7 +927,7 @@ shaka.extern.InitDataTransform;
  * @property {Object.<string, string>} keySystemsByURI
  *   A map of scheme URI to key system name. Defaults to default key systems
  *   mapping handled by Shaka.
- * @property {function(!Element)} manifestPreprocessor
+ * @property {function(!shaka.extern.xml.Node)} manifestPreprocessor
  *   Called immediately after the DASH manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
