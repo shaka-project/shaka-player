@@ -1605,6 +1605,7 @@ shaka.extern.OfflineConfiguration;
  *   preferredVideoLabel: string,
  *   preferredDecodingAttributes: !Array.<string>,
  *   preferForcedSubs: boolean,
+ *   preferSpatialAudio: boolean,
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
@@ -1681,6 +1682,8 @@ shaka.extern.OfflineConfiguration;
  *   If the content has no forced captions and the value is true,
  *   no text track is chosen.
  *   Changing this during playback will not affect the current playback.
+ * @property {boolean} preferSpatialAudio
+ *   If true, a spatial audio track is preferred.  Defaults to false.
  * @property {shaka.extern.Restrictions} restrictions
  *   The application restrictions to apply to the tracks.  These are "hard"
  *   restrictions.  Any track that fails to meet these restrictions will not

@@ -548,6 +548,7 @@ shakaDemo.Config = class {
     this.latestInput_.input().value = shakaDemoMain.getUILocale();
     this.addNumberInput_('Preferred Audio Channel Count',
         'preferredAudioChannelCount');
+    this.addBoolInput_('Prefer Spatial Audio', 'preferSpatialAudio');
     this.addBoolInput_('Prefer Forced Subs', 'preferForcedSubs');
   }
 
