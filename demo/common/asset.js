@@ -317,6 +317,17 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
+   * @param {string} textUri
+   * @return {!ShakaDemoAssetInfo}
+   */
+  removeExtraText(textUri) {
+    this.extraText = this.extraText.filter((extraText) => {
+      return extraText.uri != textUri;
+    });
+    return this;
+  }
+
+  /**
    * @param {string} uri
    * @return {!ShakaDemoAssetInfo}
    */
@@ -331,6 +342,17 @@ const ShakaDemoAssetInfo = class {
    */
   addExtraChapter(extraChapter) {
     this.extraChapter.push(extraChapter);
+    return this;
+  }
+
+  /**
+   * @param {string} chapterUri
+   * @return {!ShakaDemoAssetInfo}
+   */
+  removeExtraChapter(chapterUri) {
+    this.extraChapter = this.extraChapter.filter((extraChapter) => {
+      return extraChapter.uri != chapterUri;
+    });
     return this;
   }
 

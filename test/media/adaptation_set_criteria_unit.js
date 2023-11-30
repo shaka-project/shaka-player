@@ -102,7 +102,8 @@ describe('AdaptationSetCriteria', () => {
             /* channelCount= */ 0,
             /* hdrLevel= */ '',
             /* videoLayout= */ '',
-            /* label= */ '',
+            /* audioLabel= */ '',
+            /* videoLabel= */ '',
             shaka.config.CodecSwitchingStrategy.SMOOTH);
         const set = builder.create(manifest.variants);
 
@@ -113,7 +114,7 @@ describe('AdaptationSetCriteria', () => {
       }
     });
 
-    it('should filter varaints when codec switching startegy'+
+    it('should filter varaints when codec switching strategy'+
         'is not SMOOTH', () => {
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(1, (variant) => {
@@ -148,7 +149,8 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
           /* videoLayout= */ '',
-          /* label= */ '',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD);
       const set = builder.create(manifest.variants);
 
@@ -671,7 +673,7 @@ describe('AdaptationSetCriteria', () => {
       ]);
     });
 
-    it('chooses variants with preferred label', () => {
+    it('chooses variants with preferred audio label', () => {
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(1, (variant) => {
           variant.addAudio(10, (stream) => {
@@ -696,7 +698,7 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
           /* videoLayout= */ '',
-          /* label= */ 'preferredLabel');
+          /* audioLabel= */ 'preferredLabel');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -705,7 +707,7 @@ describe('AdaptationSetCriteria', () => {
       ]);
     });
 
-    it('chooses variants with preferred label and language', () => {
+    it('chooses variants with preferred audio label and language', () => {
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         // Preferred language and label
         manifest.addVariant(1, (variant) => {
@@ -743,7 +745,42 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
           /* videoLayout= */ '',
-          /* label= */ 'preferredLabel');
+          /* audioLabel= */ 'preferredLabel');
+      const set = builder.create(manifest.variants);
+
+      checkSet(set, [
+        manifest.variants[0],
+        manifest.variants[2],
+      ]);
+    });
+
+    it('chooses variants with preferred video label', () => {
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(10, (stream) => {
+            stream.label = 'preferredLabel';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(20, (stream) => {
+            stream.label = 'otherLabel';
+          });
+        });
+        manifest.addVariant(3, (variant) => {
+          variant.addVideo(30, (stream) => {
+            stream.label = 'preferredLabel';
+          });
+        });
+      });
+
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ '',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* videoLayout= */ '',
+          /* audioLabel= */ '',
+          /* videoLabel= */ 'preferredLabel');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -783,7 +820,8 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
           /* videoLayout= */ '',
-          /* label= */ '',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
           /* enableAudioGroups= */ true);
       const set = builder.create(manifest.variants);

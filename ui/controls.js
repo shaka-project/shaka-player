@@ -16,6 +16,8 @@ goog.require('shaka.ui.AdCounter');
 goog.require('shaka.ui.AdPosition');
 goog.require('shaka.ui.BigPlayButton');
 goog.require('shaka.ui.ContextMenu');
+goog.require('shaka.ui.HiddenFastForwardButton');
+goog.require('shaka.ui.HiddenRewindButton');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.SeekBar');
@@ -847,6 +849,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.addBufferingSpinner_();
     }
 
+    if (this.config_.seekOnTaps) {
+      this.addFastForwardButtonOnControlsContainer_();
+      this.addRewindButtonOnControlsContainer_();
+    }
+
     this.addDaiAdContainer_();
 
     this.addControlsButtonPanel_();
@@ -968,6 +975,42 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     spinnerCircle.setAttribute('stroke-width', '1');
     spinnerCircle.setAttribute('stroke-miterlimit', '10');
     svg.appendChild(spinnerCircle);
+  }
+
+  /**
+   * Add fast-forward button on Controls container for moving video some
+   * seconds ahead when the video is tapped more than once, video seeks ahead
+   * some seconds for every extra tap.
+   * @private
+   */
+  addFastForwardButtonOnControlsContainer_() {
+    const hiddenFastForwardContainer = shaka.util.Dom.createHTMLElement('div');
+    hiddenFastForwardContainer.classList.add(
+        'shaka-hidden-fast-forward-container');
+    this.controlsContainer_.appendChild(hiddenFastForwardContainer);
+
+    /** @private {shaka.ui.HiddenFastForwardButton} */
+    this.hiddenFastForwardButton_ =
+        new shaka.ui.HiddenFastForwardButton(hiddenFastForwardContainer, this);
+    this.elements_.push(this.hiddenFastForwardButton_);
+  }
+
+  /**
+   * Add Rewind button on Controls container for moving video some seconds
+   * behind when the video is tapped more than once, video seeks behind some
+   * seconds for every extra tap.
+   * @private
+   */
+  addRewindButtonOnControlsContainer_() {
+    const hiddenRewindContainer = shaka.util.Dom.createHTMLElement('div');
+    hiddenRewindContainer.classList.add(
+        'shaka-hidden-rewind-container');
+    this.controlsContainer_.appendChild(hiddenRewindContainer);
+
+    /** @private {shaka.ui.HiddenRewindButton} */
+    this.hiddenRewindButton_ =
+        new shaka.ui.HiddenRewindButton(hiddenRewindContainer, this);
+    this.elements_.push(this.hiddenRewindButton_);
   }
 
   /** @private */
@@ -1441,6 +1484,23 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case 'End':
         if (this.seekBar_) {
           this.seek_(this.player_.seekRange().end);
+        }
+        break;
+      case 'f':
+        if (this.isFullScreenSupported()) {
+          this.toggleFullScreen();
+        }
+        break;
+      case 'm':
+        if (this.ad_ && this.ad_.isLinear()) {
+          this.ad_.setMuted(!this.ad_.isMuted());
+        } else {
+          this.localVideo_.muted = !this.localVideo_.muted;
+        }
+        break;
+      case 'p':
+        if (this.isPiPAllowed()) {
+          this.togglePiP();
         }
         break;
       // Pause or play by pressing space on the seek bar.

@@ -98,7 +98,9 @@ shaka.extern.UIVolumeBarColors;
  *   keyboardLargeSeekDistance: number,
  *   fullScreenElement: HTMLElement,
  *   preferDocumentPictureInPicture: boolean,
- *   showAudioChannelCountVariants: boolean
+ *   showAudioChannelCountVariants: boolean,
+ *   seekOnTaps: boolean,
+ *   tapSeekDistance: number
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -215,6 +217,15 @@ shaka.extern.UIVolumeBarColors;
  *   displayed or if, on the contrary, only the language should be displayed
  *   regardless of the channel count.
  *   Defaults to true.
+ * @property {boolean} seekOnTaps
+ *   Indicates whether or not a fast-forward and rewind tap button that seeks
+ *   video some seconds.
+ *   Defaults to true.
+ * @property {number} tapSeekDistance
+ *   The time interval, in seconds, to seek when the user presses the left or
+ *   right part of the video. If less than or equal to 0,
+ *   no seeking will occur.
+ *   Defaults to 10 seconds.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

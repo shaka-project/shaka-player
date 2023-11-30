@@ -437,7 +437,11 @@ shakaDemo.Config = class {
         .addNumberInput_('Min playback rate for live sync',
             'streaming.liveSyncMinPlaybackRate',
             /* canBeDecimal= */ true,
-            /* canBeZero= */ false);
+            /* canBeZero= */ false)
+        .addBoolInput_('Allow Media Source recoveries',
+            'streaming.allowMediaSourceRecoveries')
+        .addNumberInput_('Minimum time between recoveries',
+            'streaming.minTimeBetweenRecoveries');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_('Always Stream Text', 'streaming.alwaysStreamText');
@@ -528,6 +532,7 @@ shakaDemo.Config = class {
     this.addSection_('Language', docLink)
         .addTextInput_('Preferred Audio Language', 'preferredAudioLanguage')
         .addTextInput_('Preferred Audio Label', 'preferredAudioLabel')
+        .addTextInput_('Preferred Video Label', 'preferredVideoLabel')
         .addTextInput_('Preferred Variant Role', 'preferredVariantRole')
         .addTextInput_('Preferred Text Language', 'preferredTextLanguage')
         .addTextInput_('Preferred Text Role', 'preferredTextRole')
