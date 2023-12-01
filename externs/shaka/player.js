@@ -927,6 +927,8 @@ shaka.extern.InitDataTransform;
  *   not match the main content.
  *   Might result in undesirable behavior if mediaSource.codecSwitchingStrategy
  *   is not set to SMOOTH.
+ *   Does not work with muxed content (e.g. content with video+audio in the same
+ *   segments).
  *   Defaults to true if SMOOTH codec switching is supported, RELOAD overwise.
  * @exportDoc
  */
