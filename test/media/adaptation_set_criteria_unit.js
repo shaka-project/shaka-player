@@ -24,6 +24,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
@@ -50,6 +51,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
@@ -101,6 +103,7 @@ describe('AdaptationSetCriteria', () => {
             /* role= */ '',
             /* channelCount= */ 0,
             /* hdrLevel= */ '',
+            /* spatialAudio= */ false,
             /* videoLayout= */ '',
             /* audioLabel= */ '',
             /* videoLabel= */ '',
@@ -148,6 +151,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '',
           /* audioLabel= */ '',
           /* videoLabel= */ '',
@@ -184,6 +188,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ 'main',
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
@@ -238,6 +243,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
@@ -301,6 +307,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
@@ -342,6 +349,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
@@ -403,6 +411,7 @@ describe('AdaptationSetCriteria', () => {
               /* role= */ '',
               /* channelCount= */ 0,
               /* hdrLevel= */ '',
+              /* spatialAudio= */ false,
               /* videoLayout= */ '');
           const set = builder.create(manifest.variants);
 
@@ -465,6 +474,7 @@ describe('AdaptationSetCriteria', () => {
               /* role= */ '',
               /* channelCount= */ 0,
               /* hdrLevel= */ '',
+              /* spatialAudio= */ false,
               /* videoLayout= */ '');
           const set = builder.create(manifest.variants);
 
@@ -498,6 +508,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 0,
           /* hdrLevel= */ 'PQ',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
@@ -531,6 +542,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ 'CH-STEREO');
       const set = builder.create(manifest.variants);
 
@@ -564,6 +576,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ 'CH-MONO');
       const set = builder.create(manifest.variants);
 
@@ -596,6 +609,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 2,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
@@ -630,6 +644,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 6,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
@@ -664,6 +679,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 2,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '');
       const set = builder.create(manifest.variants);
 
@@ -697,6 +713,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '',
           /* audioLabel= */ 'preferredLabel');
       const set = builder.create(manifest.variants);
@@ -704,6 +721,64 @@ describe('AdaptationSetCriteria', () => {
       checkSet(set, [
         manifest.variants[0],
         manifest.variants[2],
+      ]);
+    });
+
+    it('chooses variants with prefer spatial audio', () => {
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(10, (stream) => {
+            stream.spatialAudio = false;
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addAudio(20, (stream) => {
+            stream.spatialAudio = true;
+          });
+        });
+      });
+
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ '',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* spatialAudio= */ true,
+          /* videoLayout= */ '',
+          /* audioLabel= */ '');
+      const set = builder.create(manifest.variants);
+
+      checkSet(set, [
+        manifest.variants[1],
+      ]);
+    });
+
+    it('chooses variants with not prefer spatial audio', () => {
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(10, (stream) => {
+            stream.spatialAudio = false;
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addAudio(20, (stream) => {
+            stream.spatialAudio = true;
+          });
+        });
+      });
+
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ '',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
+          /* videoLayout= */ '',
+          /* audioLabel= */ '');
+      const set = builder.create(manifest.variants);
+
+      checkSet(set, [
+        manifest.variants[0],
       ]);
     });
 
@@ -744,6 +819,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '',
           /* audioLabel= */ 'preferredLabel');
       const set = builder.create(manifest.variants);
@@ -778,6 +854,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '',
           /* audioLabel= */ '',
           /* videoLabel= */ 'preferredLabel');
@@ -819,6 +896,7 @@ describe('AdaptationSetCriteria', () => {
           /* role= */ '',
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
           /* videoLayout= */ '',
           /* audioLabel= */ '',
           /* videoLabel= */ '',
