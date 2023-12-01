@@ -532,6 +532,7 @@ shakaDemo.Config = class {
     this.addSection_('Language', docLink)
         .addTextInput_('Preferred Audio Language', 'preferredAudioLanguage')
         .addTextInput_('Preferred Audio Label', 'preferredAudioLabel')
+        .addTextInput_('Preferred Video Label', 'preferredVideoLabel')
         .addTextInput_('Preferred Variant Role', 'preferredVariantRole')
         .addTextInput_('Preferred Text Language', 'preferredTextLanguage')
         .addTextInput_('Preferred Text Role', 'preferredTextRole')

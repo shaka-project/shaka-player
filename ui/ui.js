@@ -249,6 +249,8 @@ shaka.ui.Overlay = class {
       fullScreenElement: this.videoContainer_,
       preferDocumentPictureInPicture: true,
       showAudioChannelCountVariants: true,
+      seekOnTaps: true,
+      tapSeekDistance: 10,
     };
 
     // eslint-disable-next-line no-restricted-syntax
