@@ -1272,7 +1272,9 @@ shakaDemo.Main = class {
 
       // Finally, the asset can be loaded.
       if (asset.preloadManager) {
-        await this.player_.load(asset.preloadManager);
+        const preloadManager = asset.preloadManager;
+        asset.preloadManager = null;
+        await this.player_.load(preloadManager);
       } else {
         const manifestUri = await this.getManifestUri_(asset);
         await this.player_.load(

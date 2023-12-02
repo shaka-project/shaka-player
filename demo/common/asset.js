@@ -90,6 +90,7 @@ const ShakaDemoAssetInfo = class {
     // Preload values.
     /** @type {?shaka.media.PreloadManager} */
     this.preloadManager;
+    this.preloaded = false;
 
 
     // Offline storage values.

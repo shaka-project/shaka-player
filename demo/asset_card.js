@@ -241,6 +241,43 @@ shakaDemo.AssetCard = class {
     this.remakeButtonsFn_(this);
   }
 
+  /** Adds basic buttons to the card ("play" and "preload"). */
+  addBaseButtons() {
+    let disableButtons = false;
+    this.addButton('Play', async () => {
+      if (disableButtons) {
+        return;
+      }
+      disableButtons = true;
+      await shakaDemoMain.loadAsset(this.asset_);
+      this.remakeButtons();
+    });
+    let preloadName = 'Start Preload';
+    if (this.asset_.preloadManager) {
+      preloadName = this.asset_.preloaded ? 'Preloaded!' : 'Preloading...';
+    }
+    this.addButton(preloadName, async () => {
+      if (disableButtons) {
+        return;
+      }
+      disableButtons = true;
+      this.asset_.preloaded = false;
+      if (this.asset_.preloadManager) {
+        await this.asset_.preloadManager.destroy();
+        this.asset_.preloadManager = null;
+      } else {
+        await shakaDemoMain.preloadAsset(this.asset_);
+      }
+      const preloadManager = this.asset_.preloadManager;
+      this.remakeButtons();
+      await this.asset_.preloadManager.waitForChooseInitialVariant();
+      if (preloadManager == this.asset_.preloadManager) {
+        this.asset_.preloaded = true;
+        this.remakeButtons();
+      }
+    });
+  }
+
   /**
    * Adds a button to the bottom of the card that controls storage behavior.
    * This is a separate function because it involves a significant amount of

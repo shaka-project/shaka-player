@@ -1045,16 +1045,7 @@ shakaDemo.Custom = class {
     const savedList = this.savedList_;
     const isFeatured = false;
     return new shakaDemo.AssetCard(savedList, asset, isFeatured, (c) => {
-      c.addButton('Play', () => {
-        shakaDemoMain.loadAsset(asset);
-        this.updateSelected_();
-      });
-      c.addButton('Preload', () => {
-        shakaDemoMain.preloadAsset(asset);
-        this.updateSelected_();
-        // TODO: Make it visually obvious that this has begun preloading.
-        // TODO: Cancel when changing page or loading an asset.
-      });
+      c.addBaseButtons();
       c.addButton('Edit', async () => {
         if (asset.unstoreCallback) {
           await asset.unstoreCallback();
