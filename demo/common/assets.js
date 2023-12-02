@@ -7,7 +7,6 @@
 
 /**
  * @fileoverview
- * @suppress {missingRequire}
  */
 
 goog.require('ShakaDemoAssetInfo');
