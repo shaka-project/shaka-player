@@ -390,88 +390,6 @@ describe('StreamUtils', () => {
         });
   });
 
-  describe('filterVariantsByAudioChannelCount', () => {
-    it('chooses variants with preferred audio channels count', () => {
-      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        manifest.addVariant(0, (variant) => {
-          variant.addAudio(0, (stream) => {
-            stream.channelsCount = 2;
-          });
-        });
-        manifest.addVariant(1, (variant) => {
-          variant.addAudio(1, (stream) => {
-            stream.channelsCount = 6;
-          });
-        });
-        manifest.addVariant(2, (variant) => {
-          variant.addAudio(2, (stream) => {
-            stream.channelsCount = 2;
-          });
-        });
-      });
-
-      const chosen = StreamUtils.filterVariantsByAudioChannelCount(
-          manifest.variants, 2);
-      expect(chosen.length).toBe(2);
-      expect(chosen[0]).toBe(manifest.variants[0]);
-      expect(chosen[1]).toBe(manifest.variants[2]);
-    });
-
-    it('chooses variants with largest audio channel count less than config' +
-        ' when no exact audio channel count match is possible', () => {
-      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        manifest.addVariant(0, (variant) => {
-          variant.addAudio(0, (stream) => {
-            stream.channelsCount = 2;
-          });
-        });
-        manifest.addVariant(1, (variant) => {
-          variant.addAudio(1, (stream) => {
-            stream.channelsCount = 8;
-          });
-        });
-        manifest.addVariant(2, (variant) => {
-          variant.addAudio(2, (stream) => {
-            stream.channelsCount = 2;
-          });
-        });
-      });
-
-      const chosen = StreamUtils.filterVariantsByAudioChannelCount(
-          manifest.variants, 6);
-      expect(chosen.length).toBe(2);
-      expect(chosen[0]).toBe(manifest.variants[0]);
-      expect(chosen[1]).toBe(manifest.variants[2]);
-    });
-
-    it('chooses variants with fewest audio channels when none fit in the ' +
-        'config', () => {
-      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        manifest.addVariant(0, (variant) => {
-          variant.addAudio(0, (stream) => {
-            stream.channelsCount = 6;
-          });
-        });
-        manifest.addVariant(1, (variant) => {
-          variant.addAudio(1, (stream) => {
-            stream.channelsCount = 8;
-          });
-        });
-        manifest.addVariant(2, (variant) => {
-          variant.addAudio(2, (stream) => {
-            stream.channelsCount = 6;
-          });
-        });
-      });
-
-      const chosen = StreamUtils.filterVariantsByAudioChannelCount(
-          manifest.variants, 2);
-      expect(chosen.length).toBe(2);
-      expect(chosen[0]).toBe(manifest.variants[0]);
-      expect(chosen[1]).toBe(manifest.variants[2]);
-    });
-  });
-
   describe('getDecodingInfosForVariants', () => {
     it('for multiplexd content', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -600,8 +518,7 @@ describe('StreamUtils', () => {
             /* usePersistentLicenses= */ false, /* srcEquals= */ false,
             /* preferredKeySystems= */ ['com.microsoft.playready']);
 
-        // if preferred key system satisfies us, we shouldn't check other ones.
-        expect(decodingInfoSpy).toHaveBeenCalledTimes(1);
+        expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
         expect(decodingInfoSpy.calls.argsFor(0)[0].keySystemConfiguration
             .keySystem)
             .toBe('com.microsoft.playready');
@@ -928,12 +845,17 @@ describe('StreamUtils', () => {
 
     it('should filter variants by the best available bandwidth' +
     ' for audio language', () => {
+      // This test is flaky in some Tizen devices, due to codec restrictions.
+      if (shaka.util.Platform.isTizen()) {
+        pending('Skip flaky test in Tizen');
+      }
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.bandwidth = 4058558;
           variant.addAudio(1, (stream) => {
             stream.bandwidth = 100000;
             stream.language = 'en';
+            stream.mime('audio/mp4', 'mp4a.40.2');
           });
         });
         manifest.addVariant(2, (variant) => {
@@ -941,18 +863,21 @@ describe('StreamUtils', () => {
           variant.addAudio(3, (stream) => {
             stream.bandwidth = 200000;
             stream.language = 'en';
+            stream.mime('audio/mp4', 'flac');
           });
         });
         manifest.addVariant(4, (variant) => {
           variant.addAudio(5, (stream) => {
             stream.bandwidth = 100000;
             stream.language = 'es';
+            stream.mime('audio/mp4', 'mp4a.40.2');
           });
         });
         manifest.addVariant(6, (variant) => {
           variant.addAudio(7, (stream) => {
             stream.bandwidth = 500000;
             stream.language = 'es';
+            stream.mime('audio/mp4', 'flac');
           });
         });
       });

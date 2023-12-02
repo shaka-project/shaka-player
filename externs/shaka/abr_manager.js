@@ -122,6 +122,14 @@ shaka.extern.AbrManager = class {
   setMediaElement(mediaElement) {}
 
   /**
+   * Set CMSD manager.
+   *
+   * @param {shaka.util.CmsdManager} cmsdManager
+   * @exportDoc
+   */
+  setCmsdManager(cmsdManager) {}
+
+  /**
    * Sets the ABR configuration.
    *
    * It is the responsibility of the AbrManager implementation to implement the

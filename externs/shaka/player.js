@@ -855,7 +855,8 @@ shaka.extern.InitDataTransform;
  *   keySystemsByURI: !Object.<string, string>,
  *   manifestPreprocessor: function(!Element),
  *   sequenceMode: boolean,
- *   enableAudioGroups: boolean
+ *   enableAudioGroups: boolean,
+ *   multiTypeVariantsAllowed: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -917,6 +918,16 @@ shaka.extern.InitDataTransform;
  *   If set, audio streams will be grouped and filtered by their parent
  *   adaptation set ID.
  *   <i>Defaults to <code>false</code>.</i>
+ * @property {boolean} multiTypeVariantsAllowed
+ *   If true, the manifest parser will create variants that have multiple
+ *   mimeTypes or codecs for video or for audio if there is no other choice.
+ *   Meant for content where some periods are only available in one mimeType or
+ *   codec, and other periods are only available in a different mimeType or
+ *   codec. For example, a stream with baked-in ads where the audio codec does
+ *   not match the main content.
+ *   Might result in undesirable behavior if mediaSource.codecSwitchingStrategy
+ *   is not set to SMOOTH.
+ *   Defaults to true if SMOOTH codec switching is supported, RELOAD overwise.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -934,7 +945,8 @@ shaka.extern.DashManifestConfiguration;
  *   liveSegmentsDelay: number,
  *   sequenceMode: boolean,
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
- *   disableCodecGuessing: boolean
+ *   disableCodecGuessing: boolean,
+ *   allowLowLatencyByteRangeOptimization: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -994,6 +1006,11 @@ shaka.extern.DashManifestConfiguration;
  *   As a consequence, lazy-loading media playlists won't be possible for this
  *   use case, which may result in longer video startup times.
  *   <i>Defaults to <code>false</code>.</i>
+ * @property {boolean} allowLowLatencyByteRangeOptimization
+ *   If set to true, the HLS parser will optimize operation with LL and partial
+ *   byte range segments. More info in
+ *   https://www.akamai.com/blog/performance/-using-ll-hls-with-byte-range-addressing-to-achieve-interoperabi
+ *   <i>Defaults to <code>true</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
@@ -1117,7 +1134,9 @@ shaka.extern.ManifestConfiguration;
  *   liveSyncMaxLatency: number,
  *   liveSyncPlaybackRate: number,
  *   liveSyncMinLatency: number,
- *   liveSyncMinPlaybackRate: number
+ *   liveSyncMinPlaybackRate: number,
+ *   allowMediaSourceRecoveries: boolean,
+ *   minTimeBetweenRecoveries: number
  * }}
  *
  * @description
@@ -1247,12 +1266,19 @@ shaka.extern.ManifestConfiguration;
  *   between 1 and 2. Effective only if liveSync is true. Defaults to
  *   <code>1.1</code>.
  * @property {number} liveSyncMinLatency
- *   Minimun acceptable latency, in seconds. Effective only if liveSync is
+ *   Minimum acceptable latency, in seconds. Effective only if liveSync is
  *   true. Defaults to <code>0</code>.
  * @property {number} liveSyncMinPlaybackRate
- *   Minimun playback rate used for latency chasing. It is recommended to use a
+ *   Minimum playback rate used for latency chasing. It is recommended to use a
  *   value between 0 and 1. Effective only if liveSync is true. Defaults to
  *   <code>1</code>.
+ * @property {boolean} allowMediaSourceRecoveries
+ *   Indicate if we should recover from VIDEO_ERROR resetting Media Source.
+ *   Defaults to <code>true</code>.
+ * @property {number} minTimeBetweenRecoveries
+ *   The minimum time between recoveries when VIDEO_ERROR is reached, in
+ *   seconds.
+ *   Defaults to <code>5</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -1453,6 +1479,32 @@ shaka.extern.AdvancedAbrConfiguration;
  */
 shaka.extern.CmcdConfiguration;
 
+
+/**
+ * @typedef {{
+ *   enabled: boolean,
+ *   applyMaximumSuggestedBitrate: boolean,
+ *   estimatedThroughputWeightRatio: number
+ * }}
+ *
+ * @description
+ *   Common Media Server Data (CMSD) configuration.
+ *
+ * @property {boolean} enabled
+ *   If <code>true</code>, enables reading CMSD data in media requests.
+ *   Defaults to <code>true</code>.
+ * @property {boolean} applyMaximumSuggestedBitrate
+ *   If true, we must apply the maximum suggested bitrate. If false, we ignore
+ *   this.
+ *   Defaults to <code>true</code>.
+ * @property {number} estimatedThroughputWeightRatio
+ *   How much the estimatedThroughput of the CMSD data should be weighted
+ *   against the default estimate, between 0 and 1.
+ *   Defaults to <code>0.5</code>.
+ * @exportDoc
+ */
+shaka.extern.CmsdConfiguration;
+
 /**
  * @typedef {{
  *   enabled: boolean,
@@ -1548,6 +1600,7 @@ shaka.extern.OfflineConfiguration;
  *   abrFactory: shaka.extern.AbrManager.Factory,
  *   abr: shaka.extern.AbrConfiguration,
  *   cmcd: shaka.extern.CmcdConfiguration,
+ *   cmsd: shaka.extern.CmsdConfiguration,
  *   lcevc: shaka.extern.LcevcConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
  *   preferredAudioLanguage: string,
@@ -1560,8 +1613,10 @@ shaka.extern.OfflineConfiguration;
  *   preferredAudioChannelCount: number,
  *   preferredVideoHdrLevel: string,
  *   preferredVideoLayout: string,
+ *   preferredVideoLabel: string,
  *   preferredDecodingAttributes: !Array.<string>,
  *   preferForcedSubs: boolean,
+ *   preferSpatialAudio: boolean,
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
@@ -1586,6 +1641,8 @@ shaka.extern.OfflineConfiguration;
  *   ABR configuration and settings.
  * @property {shaka.extern.CmcdConfiguration} cmcd
  *   CMCD configuration and settings. (Common Media Client Data)
+ * @property {shaka.extern.CmsdConfiguration} cmsd
+ *   CMSD configuration and settings. (Common Media Server Data)
  * @property {shaka.extern.LcevcConfiguration} lcevc
  *   MPEG-5 LCEVC configuration and settings.
  *   (Low Complexity Enhancement Video Codec)
@@ -1597,6 +1654,8 @@ shaka.extern.OfflineConfiguration;
  *   Changing this during playback will not affect the current playback.
  * @property {string} preferredAudioLabel
  *   The preferred label to use for audio tracks
+ * @property {string} preferredVideoLabel
+ *   The preferred label to use for video tracks
  * @property {string} preferredTextLanguage
  *   The preferred language to use for text tracks.  If a matching text track
  *   is found, and the selected audio and text tracks have different languages,
@@ -1634,6 +1693,8 @@ shaka.extern.OfflineConfiguration;
  *   If the content has no forced captions and the value is true,
  *   no text track is chosen.
  *   Changing this during playback will not affect the current playback.
+ * @property {boolean} preferSpatialAudio
+ *   If true, a spatial audio track is preferred.  Defaults to false.
  * @property {shaka.extern.Restrictions} restrictions
  *   The application restrictions to apply to the tracks.  These are "hard"
  *   restrictions.  Any track that fails to meet these restrictions will not

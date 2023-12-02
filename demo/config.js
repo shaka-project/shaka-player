@@ -90,6 +90,7 @@ shakaDemo.Config = class {
     this.addManifestSection_();
     this.addRetrictionsSection_('', 'Restrictions');
     this.addCmcdSection_();
+    this.addCmsdSection_();
     this.addLcevcSection_();
     this.addAdsSection_();
   }
@@ -194,12 +195,16 @@ shakaDemo.Config = class {
             'manifest.dash.ignoreEmptyAdaptationSet')
         .addBoolInput_('Ignore DASH maxSegmentDuration',
             'manifest.dash.ignoreMaxSegmentDuration')
+        .addBoolInput_('Allow DASH multi type variants',
+            'manifest.dash.multiTypeVariantsAllowed')
         .addBoolInput_('Ignore HLS Text Stream Failures',
             'manifest.hls.ignoreTextStreamFailures')
         .addBoolInput_('Ignore HLS Image Stream Failures',
             'manifest.hls.ignoreImageStreamFailures')
         .addTextInput_('Default Audio Codec', 'manifest.hls.defaultAudioCodec')
         .addTextInput_('Default Video Codec', 'manifest.hls.defaultVideoCodec')
+        .addTextInput_('Default media playlist full mime type',
+            'manifest.hls.mediaPlaylistFullMimeType')
         .addBoolInput_('Ignore Program Date Time from manifest',
             'manifest.hls.ignoreManifestProgramDateTime')
         .addBoolInput_('Use Safari behavior for live',
@@ -211,6 +216,8 @@ shakaDemo.Config = class {
             'manifest.hls.ignoreManifestTimestampsInSegmentsMode')
         .addBoolInput_('Disable codec guessing',
             'manifest.hls.disableCodecGuessing')
+        .addBoolInput_('Allow LL-HLS byterange optimization',
+            'manifest.hls.allowLowLatencyByteRangeOptimization')
         .addNumberInput_('Availability Window Override',
             'manifest.availabilityWindowOverride',
             /* canBeDecimal= */ true,
@@ -283,6 +290,19 @@ shakaDemo.Config = class {
         .addTextInput_('Session ID', 'cmcd.sessionId')
         .addTextInput_('Content ID', 'cmcd.contentId')
         .addBoolInput_('Use Headers', 'cmcd.useHeaders');
+  }
+
+  /** @private */
+  addCmsdSection_() {
+    const docLink = this.resolveExternLink_('.CmsdConfiguration');
+    this.addSection_('CMSD', docLink)
+        .addBoolInput_('Enabled', 'cmsd.enabled')
+        .addBoolInput_('Apply maximum suggested bitrate',
+            'cmsd.applyMaximumSuggestedBitrate')
+        .addNumberInput_('Estimated throughput weight ratio',
+            'cmsd.estimatedThroughputWeightRatio',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true);
   }
 
   /** @private */
@@ -399,6 +419,8 @@ shakaDemo.Config = class {
             'streaming.observeQualityChanges')
         .addNumberInput_('Max Variant Disabled Time',
             'streaming.maxDisabledTime')
+        .addBoolInput_('Parse PRFT box',
+            'streaming.parsePrftBox')
         .addNumberInput_('Segment Prefetch Limit',
             'streaming.segmentPrefetchLimit')
         .addBoolInput_('Live Sync', 'streaming.liveSync')
@@ -417,7 +439,11 @@ shakaDemo.Config = class {
         .addNumberInput_('Min playback rate for live sync',
             'streaming.liveSyncMinPlaybackRate',
             /* canBeDecimal= */ true,
-            /* canBeZero= */ false);
+            /* canBeZero= */ false)
+        .addBoolInput_('Allow Media Source recoveries',
+            'streaming.allowMediaSourceRecoveries')
+        .addNumberInput_('Minimum time between recoveries',
+            'streaming.minTimeBetweenRecoveries');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_('Always Stream Text', 'streaming.alwaysStreamText');
@@ -508,6 +534,8 @@ shakaDemo.Config = class {
     this.addSection_('Language', docLink)
         .addTextInput_('Preferred Audio Language', 'preferredAudioLanguage')
         .addTextInput_('Preferred Audio Label', 'preferredAudioLabel')
+        .addTextInput_('Preferred Video Label', 'preferredVideoLabel')
+        .addTextInput_('Preferred Variant Role', 'preferredVariantRole')
         .addTextInput_('Preferred Text Language', 'preferredTextLanguage')
         .addTextInput_('Preferred Text Role', 'preferredTextRole')
         .addSelectInput_('Auto-Show Text',
@@ -522,6 +550,7 @@ shakaDemo.Config = class {
     this.latestInput_.input().value = shakaDemoMain.getUILocale();
     this.addNumberInput_('Preferred Audio Channel Count',
         'preferredAudioChannelCount');
+    this.addBoolInput_('Prefer Spatial Audio', 'preferSpatialAudio');
     this.addBoolInput_('Prefer Forced Subs', 'preferForcedSubs');
   }
 

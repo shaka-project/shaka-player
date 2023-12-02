@@ -41,6 +41,8 @@ shakaAssets.Source = {
   MICROSOFT: 'Microsoft',
   VNOVA: 'V-Nova',
   AWS: 'AWS',
+  BRIGHTCOVE: 'Brightcove',
+  BROADPEAK: 'Broadpeak',
 };
 
 
@@ -160,6 +162,9 @@ shakaAssets.Feature = {
 
   // Set if the asset has Low Latency mode.
   LOW_LATENCY: 'Low Latency',
+
+  // Set if the asset has Content Steering.
+  CONTENT_STEERING: 'Content Steering',
 };
 
 
@@ -1604,6 +1609,41 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.LIVE)
       .setMediaTailor('https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-Overlays/channel/sfp-channel2/hls.m3u8'),
+  // }}}
+
+  // Brightcove assets {{{
+  /* Brightcove Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Content Steering HLS',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://fastly.content-steering.com/bbb_hls/master_steering_fastly_https.m3u8',
+      /* source= */ shakaAssets.Source.BRIGHTCOVE)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.CONTENT_STEERING),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Content Steering DASH',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://fastly.content-steering.com/bbb/playlist_steering_fastly_https_cdn-a_cdn-c_cdn-b.mpd',
+      /* source= */ shakaAssets.Source.BRIGHTCOVE)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.CONTENT_STEERING),
+  // }}}
+
+  // Broadpeak assets {{{
+  /* Broadpeak Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live low latency (SegmentTemplate, CMSD)',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://explo.broadpeak.tv:8343/bpk-tv/spring/lowlat/index.mpd',
+      /* source= */ shakaAssets.Source.BROADPEAK)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE),
   // }}}
 ];
 /* eslint-enable max-len */

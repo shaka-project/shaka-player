@@ -230,12 +230,17 @@ shaka.test.Util = class {
       }
 
       // Make shallow copies of each, without their getUris fields.
+      // Also remove mimeType and codecs.
       const trimmedFirst = Object.assign({}, /** @type {Object} */(firstRef));
       delete trimmedFirst['getUris'];
       delete trimmedFirst['getUrisInner'];
+      delete trimmedFirst['mimeType'];
+      delete trimmedFirst['codecs'];
       const trimmedSecond = Object.assign({}, /** @type {Object} */(secondRef));
       delete trimmedSecond['getUris'];
       delete trimmedSecond['getUrisInner'];
+      delete trimmedSecond['mimeType'];
+      delete trimmedSecond['codecs'];
 
       // Compare those using Jasmine's utility, which will compare the fields of
       // an object and the items of an array.

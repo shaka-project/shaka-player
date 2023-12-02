@@ -31,7 +31,7 @@ describe('Cea608Memory', () => {
     const caption = memory.forceEmit(startTime, endTime);
 
     const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-    topLevelCue.line = 6.25;
+    topLevelCue.line = 10;
     topLevelCue.lineInterpretation =
         shaka.text.Cue.lineInterpretation.PERCENTAGE;
     topLevelCue.nestedCues = [
@@ -82,7 +82,7 @@ describe('Cea608Memory', () => {
     }
 
     const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-    topLevelCue.line = 6.25;
+    topLevelCue.line = 10;
     topLevelCue.lineInterpretation =
         shaka.text.Cue.lineInterpretation.PERCENTAGE;
     topLevelCue.nestedCues = [
@@ -119,7 +119,7 @@ describe('Cea608Memory', () => {
     }
 
     const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-    topLevelCue.line = 6.25;
+    topLevelCue.line = 10;
     topLevelCue.lineInterpretation =
         shaka.text.Cue.lineInterpretation.PERCENTAGE;
     topLevelCue.nestedCues = [
@@ -173,7 +173,7 @@ describe('Cea608Memory', () => {
     // ...
     // So we expect that test\n\ntest is emitted
     const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-    topLevelCue.line = 37.5;
+    topLevelCue.line = 36.66;
     topLevelCue.lineInterpretation =
         shaka.text.Cue.lineInterpretation.PERCENTAGE;
     topLevelCue.nestedCues = [
@@ -217,7 +217,7 @@ describe('Cea608Memory', () => {
     memory.eraseChar(); // Erase the last 't' from 'testt'
 
     const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-    topLevelCue.line = 6.25;
+    topLevelCue.line = 10;
     topLevelCue.lineInterpretation =
         shaka.text.Cue.lineInterpretation.PERCENTAGE;
     topLevelCue.nestedCues = [
@@ -291,7 +291,7 @@ describe('Cea608Memory', () => {
 
       // Expected text is 's\nt\nt\ne'
       const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-      topLevelCue.line = 31.25;
+      topLevelCue.line = 31.33;
       topLevelCue.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue.nestedCues = [
@@ -338,7 +338,7 @@ describe('Cea608Memory', () => {
 
       // Expected text is 't\ne\ns\nt'
       const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-      topLevelCue.line = 31.25;
+      topLevelCue.line = 31.33;
       topLevelCue.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue.nestedCues = [
@@ -385,7 +385,7 @@ describe('Cea608Memory', () => {
 
       // Expected text is 't\ne\ns\nt'
       const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-      topLevelCue.line = 31.25;
+      topLevelCue.line = 31.33;
       topLevelCue.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue.nestedCues = [

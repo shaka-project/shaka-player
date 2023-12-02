@@ -26,9 +26,13 @@ shaka.ui.LanguageUtils = class {
    * @param {!HTMLElement} currentSelectionElement
    * @param {shaka.ui.Localization} localization
    * @param {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
+   * @param {boolean} showAudioChannelCountVariants
    */
   static updateTracks(tracks, langMenu, onTrackSelected, updateChosen,
-      currentSelectionElement, localization, trackLabelFormat) {
+      currentSelectionElement, localization, trackLabelFormat,
+      showAudioChannelCountVariants) {
+    const LocIds = shaka.ui.Locales.Ids;
+
     // TODO: Do the benefits of having this common code in a method still
     // outweigh the complexity of the parameter list?
     const selectedTrack = tracks.find((track) => {
@@ -55,12 +59,27 @@ shaka.ui.LanguageUtils = class {
       }
     };
 
-    const getCombination = (language, rolesString, label) => {
+    const getCombination = (language, rolesString, label, channelsCount) => {
+      const keys = [
+        language,
+        rolesString,
+      ];
+      if (showAudioChannelCountVariants && channelsCount != null) {
+        keys.push(channelsCount);
+      }
       if (label &&
           trackLabelFormat == shaka.ui.Overlay.TrackLabelFormat.LABEL) {
-        return language + ': ' + label + ': ' + rolesString;
+        keys.push(label);
       }
-      return language + ': ' + rolesString;
+      return keys.join(': ');
+    };
+
+    const getChannelsCountName = (channelsCount) => {
+      let name = '';
+      if (channelsCount >= 5) {
+        name = ' ' + localization.resolve(LocIds.SURROUND);
+      }
+      return name;
     };
 
     /** @type {!Map.<string, !Set.<string>>} */
@@ -77,16 +96,17 @@ shaka.ui.LanguageUtils = class {
     const combinationsMade = new Set();
     const selectedCombination = selectedTrack ? getCombination(
         selectedTrack.language, getRolesString(selectedTrack),
-        selectedTrack.label) : '';
+        selectedTrack.label, selectedTrack.channelsCount) : '';
 
     for (const track of tracks) {
       const language = track.language;
       const forced = track.forced;
-      const LocIds = shaka.ui.Locales.Ids;
       const forcedString = localization.resolve(LocIds.SUBTITLE_FORCED);
       const rolesString = getRolesString(track);
       const label = track.label;
-      const combinationName = getCombination(language, rolesString, label);
+      const channelsCount = track.channelsCount;
+      const combinationName =
+          getCombination(language, rolesString, label, channelsCount);
       if (combinationsMade.has(combinationName)) {
         continue;
       }
@@ -104,11 +124,17 @@ shaka.ui.LanguageUtils = class {
           shaka.ui.LanguageUtils.getLanguageName(language, localization);
       switch (trackLabelFormat) {
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
+          if (showAudioChannelCountVariants) {
+            span.textContent += getChannelsCountName(channelsCount);
+          }
           if (forced) {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.ROLE:
+          if (showAudioChannelCountVariants) {
+            span.textContent += getChannelsCountName(channelsCount);
+          }
           if (!rolesString) {
             // Fallback behavior. This probably shouldn't happen.
             shaka.log.alwaysWarn('Track #' + track.id + ' does not have a ' +
@@ -122,6 +148,9 @@ shaka.ui.LanguageUtils = class {
           }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE_ROLE:
+          if (showAudioChannelCountVariants) {
+            span.textContent += getChannelsCountName(channelsCount);
+          }
           if (rolesString) {
             span.textContent += ': ' + rolesString;
           }

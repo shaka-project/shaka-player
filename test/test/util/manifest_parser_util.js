@@ -42,7 +42,7 @@ shaka.test.ManifestParser = class {
   /**
    * Creates a segment reference using a relative URI.
    *
-   * @param {string} uri A relative URI to http://example.com
+   * @param {string|Array.<string>} uri A relative URI to http://example.com
    * @param {number} start
    * @param {number} end
    * @param {string=} baseUri
@@ -57,7 +57,19 @@ shaka.test.ManifestParser = class {
   static makeReference(uri, start, end, baseUri = '',
       startByte = 0, endByte = null, timestampOffset = 0,
       partialReferences = [], tilesLayout = '', syncTime = null) {
-    const getUris = () => uri.length ? [baseUri + uri] : [];
+    const getUris = () => {
+      const uris = [];
+      if (uri instanceof Array) {
+        for (const url of uri) {
+          if (url.length) {
+            uris.push(baseUri + url);
+          }
+        }
+      } else if (uri.length) {
+        uris.push(baseUri + uri);
+      }
+      return uris;
+    };
 
     // If a test wants to verify these, they can be set explicitly after
     // makeReference is called.
