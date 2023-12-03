@@ -73,8 +73,6 @@ NOTES for iOS and iPadOS:
  - Since iPadOS 17 and iOS 17.1 [ManagedMediaSource Extensions][] is supported
 
 
-TO REVERT
-
 ## Manifest format support matrix
 
 |Format|Video On-Demand|Live |Event|In-Progress Recording|
