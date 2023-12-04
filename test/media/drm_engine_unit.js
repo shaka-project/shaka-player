@@ -2390,6 +2390,34 @@ describe('DrmEngine', () => {
           [drmInfoAudio]);
       expect(returned).toEqual([drmInfoDesired]);
     });
+
+    it('does not match incompatible drmInfos', () => {
+      const ContentType = shaka.util.ManifestParserUtils.ContentType;
+      // Different key systems do not match.
+      const drmInfo1 = {
+        keySystem: 'drm.abc',
+        licenseServerUri: undefined,
+        distinctiveIdentifierRequired: false,
+        persistentStateRequired: false,
+        serverCertificate: undefined,
+        serverCertificateUri: '',
+        initData: [],
+        keyIds: new Set(),
+      };
+      const drmInfo2 = {
+        keySystem: 'drm.foobar',
+        licenseServerUri: undefined,
+        distinctiveIdentifierRequired: false,
+        persistentStateRequired: false,
+        serverCertificate: undefined,
+        serverCertificateUri: '',
+        initData: [],
+        keyIds: new Set(),
+      };
+      const returned1 = shaka.media.DrmEngine.getCommonDrmInfos(
+          [drmInfo1], [drmInfo2]);
+      expect(returned1).toEqual([]);
+    });
   }); // describe('getCommonDrmInfos')
 
   describe('configure', () => {
