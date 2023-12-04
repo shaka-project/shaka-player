@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.6.4](https://github.com/shaka-project/shaka-player/compare/v4.6.3...v4.6.4) (2023-12-04)
+
+
+### Bug Fixes
+
+* Fix color detection in text utils ([#5970](https://github.com/shaka-project/shaka-player/issues/5970)) ([decea81](https://github.com/shaka-project/shaka-player/commit/decea818095f079d73aed8b7998654697b7f0ec1))
+* Fix trackschanged event not fired after a license request is denied for some tracks ([#5962](https://github.com/shaka-project/shaka-player/issues/5962)) ([63c836c](https://github.com/shaka-project/shaka-player/commit/63c836c18823221e97b77dc8746c0bd0f13f7a4f))
+* **HLS:** Provide a fallback to GET request when HEAD request fails ([#5964](https://github.com/shaka-project/shaka-player/issues/5964)) ([04188c7](https://github.com/shaka-project/shaka-player/commit/04188c76a51aa4ce790193350c80e77ec5251a93))
+* **WebVTT:** Fix support for line vertical alignment ([#5945](https://github.com/shaka-project/shaka-player/issues/5945)) ([ce3a2f7](https://github.com/shaka-project/shaka-player/commit/ce3a2f78dc44d4c5cd7918b4d564dc7ab6daef71))
+
 ## [4.6.3](https://github.com/shaka-project/shaka-player/compare/v4.6.2...v4.6.3) (2023-11-30)
 
 
