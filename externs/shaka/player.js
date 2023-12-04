@@ -855,7 +855,8 @@ shaka.extern.InitDataTransform;
  *   keySystemsByURI: !Object.<string, string>,
  *   manifestPreprocessor: function(!Element),
  *   sequenceMode: boolean,
- *   enableAudioGroups: boolean
+ *   enableAudioGroups: boolean,
+ *   multiTypeVariantsAllowed: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -917,6 +918,16 @@ shaka.extern.InitDataTransform;
  *   If set, audio streams will be grouped and filtered by their parent
  *   adaptation set ID.
  *   <i>Defaults to <code>false</code>.</i>
+ * @property {boolean} multiTypeVariantsAllowed
+ *   If true, the manifest parser will create variants that have multiple
+ *   mimeTypes or codecs for video or for audio if there is no other choice.
+ *   Meant for content where some periods are only available in one mimeType or
+ *   codec, and other periods are only available in a different mimeType or
+ *   codec. For example, a stream with baked-in ads where the audio codec does
+ *   not match the main content.
+ *   Might result in undesirable behavior if mediaSource.codecSwitchingStrategy
+ *   is not set to SMOOTH.
+ *   Defaults to true if SMOOTH codec switching is supported, RELOAD overwise.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -1605,6 +1616,7 @@ shaka.extern.OfflineConfiguration;
  *   preferredVideoLabel: string,
  *   preferredDecodingAttributes: !Array.<string>,
  *   preferForcedSubs: boolean,
+ *   preferSpatialAudio: boolean,
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
@@ -1681,6 +1693,8 @@ shaka.extern.OfflineConfiguration;
  *   If the content has no forced captions and the value is true,
  *   no text track is chosen.
  *   Changing this during playback will not affect the current playback.
+ * @property {boolean} preferSpatialAudio
+ *   If true, a spatial audio track is preferred.  Defaults to false.
  * @property {shaka.extern.Restrictions} restrictions
  *   The application restrictions to apply to the tracks.  These are "hard"
  *   restrictions.  Any track that fails to meet these restrictions will not

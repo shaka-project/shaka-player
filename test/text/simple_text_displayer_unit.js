@@ -18,7 +18,7 @@ describe('SimpleTextDisplayer', () => {
 
   beforeEach(() => {
     video = new shaka.test.FakeVideo();
-    displayer = new SimpleTextDisplayer(video);
+    displayer = new SimpleTextDisplayer(video, shaka.Player.TextTrackLabel);
 
     expect(video.textTracks.length).toBe(1);
     mockTrack = /** @type {!shaka.test.FakeTextTrack} */ (video.textTracks[0]);
