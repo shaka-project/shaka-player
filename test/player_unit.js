@@ -3509,6 +3509,37 @@ describe('Player', () => {
       expect(tracks[0].id).toBe(2);
     });
 
+    it('removes based on frameRate', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.frameRate = 15;
+          });
+        });
+
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(2, (stream) => {
+            stream.frameRate = 30;
+          });
+        });
+
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3, (stream) => {
+            stream.frameRate = 60;
+          });
+        });
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(player.getVariantTracks().length).toBe(3);
+
+      player.configure({restrictions: {minFrameRate: 20, maxFrameRate: 40}});
+
+      const tracks = player.getVariantTracks();
+      expect(tracks.length).toBe(1);
+      expect(tracks[0].id).toBe(1);
+    });
+
     it('removes the whole variant if one stream is restricted', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
