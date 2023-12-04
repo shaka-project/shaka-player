@@ -2392,7 +2392,6 @@ describe('DrmEngine', () => {
     });
 
     it('does not match incompatible drmInfos', () => {
-      const ContentType = shaka.util.ManifestParserUtils.ContentType;
       // Different key systems do not match.
       const drmInfo1 = {
         keySystem: 'drm.abc',
