@@ -650,7 +650,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   isPiPAllowed() {
     if ('documentPictureInPicture' in window &&
         this.config_.preferDocumentPictureInPicture) {
-      return true;
+      const video = /** @type {HTMLVideoElement} */(this.localVideo_);
+      return !video.disablePictureInPicture;
     }
     if (document.pictureInPictureEnabled) {
       const video = /** @type {HTMLVideoElement} */(this.localVideo_);
