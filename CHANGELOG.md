@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.7.1](https://github.com/shaka-project/shaka-player/compare/v4.7.0...v4.7.1) (2023-12-05)
+
+
+### Bug Fixes
+
+* Fix liveLatency in stats ([#5982](https://github.com/shaka-project/shaka-player/issues/5982)) ([ffe1277](https://github.com/shaka-project/shaka-player/commit/ffe12774095251261636fa6eb73736836066e8cd))
+* Fix transmuxer when some PES has the same pts and dts value ([#5985](https://github.com/shaka-project/shaka-player/issues/5985)) ([aaa0688](https://github.com/shaka-project/shaka-player/commit/aaa0688524bb6ba5cce84a39329cc77bdcc08b86))
+* **HLS:** Fix variant synchronization in HLS after selectVariantTrack ([#5984](https://github.com/shaka-project/shaka-player/issues/5984)) ([2e30668](https://github.com/shaka-project/shaka-player/commit/2e30668dd4cdf960199d662ae5e681a8e6743975))
+* Provide a fallback to GET request when HEAD request fails ([#5986](https://github.com/shaka-project/shaka-player/issues/5986)) ([84a5398](https://github.com/shaka-project/shaka-player/commit/84a53985d6128b584251decd1a3e8b3778d4b89e))
+* **UI:** Fix keyboard navigation of volume bar on Firefox ([#5981](https://github.com/shaka-project/shaka-player/issues/5981)) ([4989803](https://github.com/shaka-project/shaka-player/commit/4989803d02b8f7053f6b86fe39c88385b6073083))
+
 ## [4.7.0](https://github.com/shaka-project/shaka-player/compare/v4.6.0...v4.7.0) (2023-12-04)
 
 
