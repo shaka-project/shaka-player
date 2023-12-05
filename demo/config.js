@@ -195,6 +195,8 @@ shakaDemo.Config = class {
             'manifest.dash.ignoreEmptyAdaptationSet')
         .addBoolInput_('Ignore DASH maxSegmentDuration',
             'manifest.dash.ignoreMaxSegmentDuration')
+        .addBoolInput_('Allow DASH multi type variants',
+            'manifest.dash.multiTypeVariantsAllowed')
         .addBoolInput_('Ignore HLS Text Stream Failures',
             'manifest.hls.ignoreTextStreamFailures')
         .addBoolInput_('Ignore HLS Image Stream Failures',
