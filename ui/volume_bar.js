@@ -32,6 +32,10 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.controls.getConfig();
 
+    // We use a range of 100 to avoid problems with Firefox.
+    // See https://github.com/shaka-project/shaka-player/issues/3987
+    this.setRange(0, 100);
+
     this.eventManager.listen(this.video,
         'volumechange',
         () => this.onPresentationVolumeChange_());
@@ -74,9 +78,9 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
    */
   onChange() {
     if (this.ad && this.ad.isLinear()) {
-      this.ad.setVolume(this.getValue());
+      this.ad.setVolume(this.getValue() / 100);
     } else {
-      this.video.volume = this.getValue();
+      this.video.volume = this.getValue() / 100;
       if (this.video.volume == 0) {
         this.video.muted = true;
       } else {
@@ -90,7 +94,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     if (this.video.muted) {
       this.setValue(0);
     } else {
-      this.setValue(this.video.volume);
+      this.setValue(this.video.volume * 100);
     }
 
     this.updateColors_();
@@ -102,7 +106,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
         'This.ad should exist at this point!');
 
     const volume = this.ad.getVolume();
-    this.setValue(volume);
+    this.setValue(volume * 100);
     this.updateColors_();
   }
 
@@ -110,8 +114,8 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
   updateColors_() {
     const colors = this.config_.volumeBarColors;
     const gradient = ['to right'];
-    gradient.push(colors.level + (this.getValue() * 100) + '%');
-    gradient.push(colors.base + (this.getValue() * 100) + '%');
+    gradient.push(colors.level + this.getValue() + '%');
+    gradient.push(colors.base + this.getValue() + '%');
     gradient.push(colors.base + '100%');
 
     this.container.style.background =
