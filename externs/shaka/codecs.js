@@ -5,6 +5,10 @@
  */
 
 /**
+ * @externs
+ */
+
+/**
  * @typedef {{
  *   data: !Uint8Array,
  *   packetLength: number,
