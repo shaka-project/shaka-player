@@ -572,34 +572,34 @@ describe('PeriodCombiner', () => {
     const variants = combiner.getVariants();
     expect(variants.length).toBe(8);
 
-    // v3 should've been filtered out
+    // v1 should've been filtered out
     const videoIds = variants.map((v) => v.video.originalId);
     for (const id of videoIds) {
-      expect(id).not.toBe('v3');
+      expect(id).not.toBe('v1');
     }
 
-    // a2 should've been filtered out
+    // a1 should've been filtered out
     const audioIds = variants.map((v) => v.audio.originalId);
     for (const id of audioIds) {
-      expect(id).not.toBe('a2');
+      expect(id).not.toBe('a1');
     }
 
     const textStreams = combiner.getTextStreams();
     expect(textStreams.length).toBe(3);
 
-    // t3 should've been filtered out
+    // t1 should've been filtered out
     const textIds = textStreams.map((t) => t.originalId);
     for (const id of textIds) {
-      expect(id).not.toBe('t3');
+      expect(id).not.toBe('t1');
     }
 
     const imageStreams = combiner.getImageStreams();
     expect(imageStreams.length).toBe(2);
 
-    // i3 should've been filtered out
+    // i1 should've been filtered out
     const imageIds = imageStreams.map((i) => i.originalId);
     for (const id of imageIds) {
-      expect(id).not.toBe('i3');
+      expect(id).not.toBe('i1');
     }
   });
 
