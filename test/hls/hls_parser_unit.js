@@ -42,7 +42,7 @@ describe('HlsParser', () => {
   /** @type {!Uint8Array} */
   let selfInitializingSegmentData;
   /** @type {!Uint8Array} */
-  let aes128Key;
+  let aesKey;
   /** @type {!boolean} */
   let sequenceMode;
 
@@ -65,7 +65,7 @@ describe('HlsParser', () => {
 
     tsSegmentData = responses[2];
 
-    aes128Key = new Uint8Array([
+    aesKey = new Uint8Array([
       0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
       0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
     ]);
@@ -3428,7 +3428,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData)
         .setResponseValue('test:/main.test', segmentData)
-        .setResponseValue('test:/800k.key', aes128Key)
+        .setResponseValue('test:/800k.key', aesKey)
         .setResponseValue('test:/selfInit.mp4', selfInitializingSegmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
@@ -3441,11 +3441,11 @@ describe('HlsParser', () => {
         'Null segmentIndex!');
 
     const firstMp4Segment = mp4AesEncryptionVideo.segmentIndex.get(0);
-    expect(firstMp4Segment.aes128Key).toBeDefined();
-    expect(firstMp4Segment.initSegmentReference.aes128Key).toBeDefined();
+    expect(firstMp4Segment.aesKey).toBeDefined();
+    expect(firstMp4Segment.initSegmentReference.aesKey).toBeDefined();
     const secondMp4Segment = mp4AesEncryptionVideo.segmentIndex.get(1);
-    expect(secondMp4Segment.aes128Key).toBeNull();
-    expect(secondMp4Segment.initSegmentReference.aes128Key).toBeDefined();
+    expect(secondMp4Segment.aesKey).toBeNull();
+    expect(secondMp4Segment.initSegmentReference.aesKey).toBeDefined();
 
     const tsAesEncryptionVideo = actual.variants[2].video;
     await tsAesEncryptionVideo.createSegmentIndex();
@@ -3453,9 +3453,9 @@ describe('HlsParser', () => {
         'Null segmentIndex!');
 
     const firstTsSegment = tsAesEncryptionVideo.segmentIndex.get(0);
-    expect(firstTsSegment.aes128Key).toBeDefined();
+    expect(firstTsSegment.aesKey).toBeDefined();
     const secondTsSegment = tsAesEncryptionVideo.segmentIndex.get(1);
-    expect(secondTsSegment.aes128Key).toBeNull();
+    expect(secondTsSegment.aesKey).toBeNull();
   });
 
   it('fails on AES-128 if WebCrypto APIs are not available', async () => {
@@ -3485,7 +3485,7 @@ describe('HlsParser', () => {
         .setResponseText('test:/video', mediaWithMp4AesEncryption)
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData)
-        .setResponseValue('test:/800k.key', aes128Key);
+        .setResponseValue('test:/800k.key', aesKey);
 
     let originalWebCrypto = null;
     try {
@@ -3925,7 +3925,7 @@ describe('HlsParser', () => {
           .setResponseValue('test:/init.mp4', initSegmentData)
           .setResponseValue('test:/main.mp4', segmentData)
           .setResponseValue('data:text/plain;base64,AAECAwQFBgcICQoLDA0ODw==',
-              aes128Key);
+              aesKey);
 
       if (onCreateSegmentIndex) {
         const actual = await parser.start('test:/master', playerInterface);
