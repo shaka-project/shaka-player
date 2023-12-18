@@ -6,4 +6,3 @@ dist/
 docs/api/
 coverage/
 .DS_Store
-.npmrc
