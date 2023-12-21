@@ -1029,12 +1029,12 @@ shaka.extern.HlsManifestConfiguration;
 
 /**
  * @typedef {{
- *   manifestPreprocessor: function(!Element),
+ *   manifestPreprocessor: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
  *   keySystemsBySystemId: !Object.<string, string>
  * }}
  *
- * @property {function(!Element)} manifestPreprocessor
+ * @property {function(!shaka.extern.xml.Node)} manifestPreprocessor
  *   Called immediately after the MSS manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
