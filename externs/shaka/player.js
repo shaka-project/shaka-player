@@ -845,7 +845,8 @@ shaka.extern.InitDataTransform;
  *   tagName: !string,
  *   attributes: !Object<string, string>,
  *   children: !Array.<shaka.extern.xml.Node>,
- *   innerText: (string | null)
+ *   innerText: (string | null),
+ *   parent: (shaka.extern.xml.Node | null)
  * }}
  *
  * @description
@@ -859,6 +860,8 @@ shaka.extern.InitDataTransform;
  *   The child nodes or string body of the element
  * @property {string | null} innerText
  *   The inner text of the xml node
+ * @property {shaka.extern.xml.Node | null} parent
+ *   The reference to the parent node
  */
 shaka.extern.xml.Node;
 
