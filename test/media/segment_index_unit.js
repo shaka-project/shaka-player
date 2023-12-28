@@ -209,22 +209,24 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     });
 
     it('preserves hls key of the last reference', () => {
+      const aesKey = {
+        bitsKey: 128,
+        blockCipherMode: 'CBC',
+        firstMediaSequenceNumber: 0,
+      };
       // The hls key of the last segment should be preserved.
       const references = [
-        makeReference(uri(0), 0, 5, [],
-            {method: 'AES-128', firstMediaSequenceNumber: 0}),
-        makeReference(uri(1), 5, 10, [],
-            {method: 'AES-128', firstMediaSequenceNumber: 0}),
-        makeReference(uri(2), 10, 15, [],
-            {method: 'AES-128', firstMediaSequenceNumber: 0}),
+        makeReference(uri(0), 0, 5, [], aesKey),
+        makeReference(uri(1), 5, 10, [], aesKey),
+        makeReference(uri(2), 10, 15, [], aesKey),
       ];
       const index = new shaka.media.SegmentIndex(references);
       expect(index.references).toEqual(references);
 
       index.fit(/* windowStart= */ 0, /* windowEnd= */ 10);
       expect(
-          index.references[index.references.length - 1].aes128Key,
-      ).toEqual({method: 'AES-128', firstMediaSequenceNumber: 0});
+          index.references[index.references.length - 1].aesKey,
+      ).toEqual(aesKey);
     });
   });
 
@@ -1054,11 +1056,11 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
    * @param {number} startTime
    * @param {number} endTime
    * @param {!Array.<!shaka.media.SegmentReference>=} partialReferences
-   * @param {?shaka.extern.aes128Key=} aes128Key
+   * @param {?shaka.extern.aesKey=} aesKey
    * @return {shaka.media.SegmentReference}
    */
   function makeReference(uri, startTime, endTime, partialReferences = [],
-      aes128Key = null) {
+      aesKey = null) {
     return new shaka.media.SegmentReference(
         startTime,
         endTime,
@@ -1074,7 +1076,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
         /* tileDuration= */ undefined,
         /* syncTime= */ undefined,
         /* status= */ undefined,
-        /* aes128Key= */ aes128Key,
+        /* aesKey= */ aesKey,
         /* allPartialSegments= */ partialReferences.length > 0);
   }
 });

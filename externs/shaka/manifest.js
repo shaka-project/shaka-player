@@ -318,7 +318,8 @@ shaka.extern.CreateSegmentIndexFunction;
 
 /**
  * @typedef {{
- *   method: string,
+ *   bitsKey: number,
+ *   blockCipherMode: string,
  *   cryptoKey: (webCrypto.CryptoKey|undefined),
  *   fetchKey: (shaka.extern.CreateSegmentIndexFunction|undefined),
  *   iv: (!Uint8Array|undefined),
@@ -326,12 +327,14 @@ shaka.extern.CreateSegmentIndexFunction;
  * }}
  *
  * @description
- * AES-128 key and iv info from the manifest.
+ * AES key and iv info from the manifest.
  *
- * @property {string} method
- *   The key method defined in the manifest.
+ * @property {number} bitsKey
+ *   The number of the bit key (eg: 128, 256).
+ * @property {string} blockCipherMode
+ *   The block cipher mode of operation. Possible values: 'CTR' or 'CBC'.
  * @property {webCrypto.CryptoKey|undefined} cryptoKey
- *   Web crypto key object of the AES-128 CBC key. If unset, the "fetchKey"
+ *   Web crypto key object of the AES key. If unset, the "fetchKey"
  *   property should be provided.
  * @property {shaka.extern.FetchCryptoKeysFunction|undefined} fetchKey
  *   A function that fetches the key.
@@ -346,7 +349,7 @@ shaka.extern.CreateSegmentIndexFunction;
  *
  * @exportDoc
  */
-shaka.extern.aes128Key;
+shaka.extern.aesKey;
 
 
 /**

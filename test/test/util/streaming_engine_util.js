@@ -149,13 +149,13 @@ shaka.test.StreamingEngineUtil = class {
    *   ranges for each type of init segment.
    * @param {!Object.<string,number>=} timestampOffsets The timestamp offset
    *  for each type of segment
-   * @param {shaka.extern.aes128Key=} aes128Key The AES-128 key to provide
+   * @param {shaka.extern.aesKey=} aesKey The AES-128 key to provide
    *  to streams, if desired.
    * @return {shaka.extern.Manifest}
    */
   static createManifest(
       presentationTimeline, periodStartTimes, presentationDuration,
-      segmentDurations, initSegmentRanges, timestampOffsets, aes128Key) {
+      segmentDurations, initSegmentRanges, timestampOffsets, aesKey) {
     const Util = shaka.test.Util;
 
     /**
@@ -268,9 +268,9 @@ shaka.test.StreamingEngineUtil = class {
           appendWindowStart,
           appendWindowEnd);
       const ContentType = shaka.util.ManifestParserUtils.ContentType;
-      if (aes128Key &&
+      if (aesKey &&
           (type == ContentType.AUDIO || type == ContentType.VIDEO)) {
-        ref.aes128Key = aes128Key;
+        ref.aesKey = aesKey;
       }
       return ref;
     };

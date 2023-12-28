@@ -106,3 +106,53 @@
     outline: none;
   }
 }
+
+.shaka-fast-foward-container,
+.shaka-rewind-container {
+  height: 100%;
+  width: 100%;
+  .shrinkable();
+  .absolute-position();
+
+  /* Keep all the elements inside button div in center and in row */
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  /* To be properly positioned, this should have no margin. */
+  margin: 0;
+
+  /* No border. */
+  border: none;
+
+  /* Setting text color to white */
+  color: rgb(255 255 255);
+
+  /* Setting background color to black so white text can be seen clearly */
+  background-color: rgb(0 0 0 / 50%);
+
+  cursor: default;
+  font-size: 20px;
+
+  /* Hidding the container by setting opacity */
+  opacity: 0;
+
+  /* Make the text inside this button unselectable */
+  .unselectable();
+}
+
+.shaka-fast-foward-container {
+  border-radius: 40% 0  0 40%;
+}
+
+.shaka-rewind-container {
+  border-radius: 0 40% 40% 0;
+}
+
+/* This class is instead of material-icon-round
+ * because the font-size of 24 doesn't look good */
+.shaka-forward-rewind-container-icon {
+  font-family: "Material Icons Round";
+  font-size: 34px;
+}

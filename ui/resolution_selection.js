@@ -195,7 +195,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     this.updateLocalizedStrings_();
 
-    shaka.ui.Utils.setDisplay(this.button, tracks.length > 0);
+    shaka.ui.Utils.setDisplay(this.button, tracks.length > 1);
   }
 
 

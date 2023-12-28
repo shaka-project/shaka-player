@@ -917,7 +917,8 @@ describe('MediaSourceEngine', () => {
           /* appendWindowStart= */ 0,
           /* appendWindowEnd= */ 20,
           /* sequenceMode= */ false,
-          fakeStream,
+          fakeStream.mimeType,
+          fakeStream.codecs,
           /* streamsByType= */ new Map());
       expect(mockTextEngine.setTimestampOffset).toHaveBeenCalledWith(10);
       expect(mockTextEngine.setAppendWindow).toHaveBeenCalledWith(0, 20);

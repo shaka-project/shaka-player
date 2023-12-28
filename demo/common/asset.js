@@ -7,7 +7,6 @@
 
 /**
  * @fileoverview
- * @suppress {missingRequire}
  */
 
 goog.provide('ShakaDemoAssetInfo');
@@ -313,6 +312,17 @@ const ShakaDemoAssetInfo = class {
    */
   addExtraText(extraText) {
     this.extraText.push(extraText);
+    return this;
+  }
+
+  /**
+   * @param {string} textUri
+   * @return {!ShakaDemoAssetInfo}
+   */
+  removeExtraText(textUri) {
+    this.extraText = this.extraText.filter((extraText) => {
+      return extraText.uri != textUri;
+    });
     return this;
   }
 

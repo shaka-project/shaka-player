@@ -518,8 +518,7 @@ describe('StreamUtils', () => {
             /* usePersistentLicenses= */ false, /* srcEquals= */ false,
             /* preferredKeySystems= */ ['com.microsoft.playready']);
 
-        // if preferred key system satisfies us, we shouldn't check other ones.
-        expect(decodingInfoSpy).toHaveBeenCalledTimes(1);
+        expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
         expect(decodingInfoSpy.calls.argsFor(0)[0].keySystemConfiguration
             .keySystem)
             .toBe('com.microsoft.playready');

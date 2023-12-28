@@ -195,6 +195,8 @@ shakaDemo.Config = class {
             'manifest.dash.ignoreEmptyAdaptationSet')
         .addBoolInput_('Ignore DASH maxSegmentDuration',
             'manifest.dash.ignoreMaxSegmentDuration')
+        .addBoolInput_('Allow DASH multi type variants',
+            'manifest.dash.multiTypeVariantsAllowed')
         .addBoolInput_('Ignore HLS Text Stream Failures',
             'manifest.hls.ignoreTextStreamFailures')
         .addBoolInput_('Ignore HLS Image Stream Failures',
@@ -532,6 +534,7 @@ shakaDemo.Config = class {
     this.addSection_('Language', docLink)
         .addTextInput_('Preferred Audio Language', 'preferredAudioLanguage')
         .addTextInput_('Preferred Audio Label', 'preferredAudioLabel')
+        .addTextInput_('Preferred Video Label', 'preferredVideoLabel')
         .addTextInput_('Preferred Variant Role', 'preferredVariantRole')
         .addTextInput_('Preferred Text Language', 'preferredTextLanguage')
         .addTextInput_('Preferred Text Role', 'preferredTextRole')
@@ -547,6 +550,7 @@ shakaDemo.Config = class {
     this.latestInput_.input().value = shakaDemoMain.getUILocale();
     this.addNumberInput_('Preferred Audio Channel Count',
         'preferredAudioChannelCount');
+    this.addBoolInput_('Prefer Spatial Audio', 'preferSpatialAudio');
     this.addBoolInput_('Prefer Forced Subs', 'preferForcedSubs');
   }
 

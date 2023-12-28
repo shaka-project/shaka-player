@@ -1,3 +1,13 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2023 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * @externs
+ */
+
 /**
  * @typedef {{
  *   data: !Uint8Array,
