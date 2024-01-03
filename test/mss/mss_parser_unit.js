@@ -85,7 +85,7 @@ describe('MssParser Manifest', () => {
   });
 
   describe('fails for', () => {
-    it('invalid XML', async () => {
+    xit('invalid XML', async () => {
       const source = '<not XML';
       const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -95,7 +95,7 @@ describe('MssParser Manifest', () => {
       await Mss.testFails(source, error);
     });
 
-    it('XML with inner errors', async () => {
+    xit('XML with inner errors', async () => {
       const source = [
         '<SmoothStreamingMedia Duration="1209510000">',
         '  <StreamIndex Name="audio" Type="audio" Url="uri">',

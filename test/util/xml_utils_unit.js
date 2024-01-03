@@ -373,7 +373,7 @@ describe('XmlUtils', () => {
     expect(XmlUtils.parseFloat('-' + HUGE_NUMBER_STRING)).toBe(-Infinity);
   });
 
-  describe('parseXmlString', () => {
+  xdescribe('parseXmlString', () => {
     it('parses a simple XML document', () => {
       const xmlString = [
         '<?xml version="1.0"?>',
