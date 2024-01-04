@@ -265,7 +265,7 @@ describe('TtmlTextParser', () => {
                     payload: 'Second cue',
                     startTime: 62.05,
                     endTime: 3723.2,
-                    color: '',
+                    color: 'blue',
                   },
                   {
                     payload: 'Third cue',
