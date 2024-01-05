@@ -827,6 +827,12 @@ describe('VttTextParser', () => {
               },
             ],
           },
+          // NOTE: This is isn't going to work with tXml currently
+          // {
+          //   startTime: 90,
+          //   endTime: 100,
+          //   payload: '<b>Test<i>8</b>',
+          // },
         ],
         'WEBVTT\n\n' +
         '00:00:10.000 --> 00:00:20.000\n' +
@@ -843,6 +849,8 @@ describe('VttTextParser', () => {
         'Test<b>6</b>\n\n' +
         '00:01:20.000 --> 00:01:30.000\n' +
         '<b>Test <i>7</i></b>',
+        // '00:01:30.000 --> 00:01:40.000\n' +
+        // '<b>Test<i>8</b>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
