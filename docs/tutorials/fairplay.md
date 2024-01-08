@@ -98,9 +98,9 @@ player.getNetworkingEngine().registerRequestFilter((type, request, context) => {
   const originalPayload = new Uint8Array(request.body);
   const base64Payload =
       shaka.util.Uint8ArrayUtils.toStandardBase64(originalPayload);
-  const params = 'spc=' + base64Payload;
+  const params = 'spc=' + encodeURIComponent(base64Payload);
   request.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-  request.body = shaka.util.StringUtils.toUTF8(encodeURIComponent(params));
+  request.body = shaka.util.StringUtils.toUTF8(params);
 });
 
 player.getNetworkingEngine().registerResponseFilter((type, response, context) => {
