@@ -738,9 +738,19 @@ shakaDemo.Main = class {
     if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_3D)) {
       mimeTypes.push('video/mp4; codecs="dvh1.20.01"');
     }
-    const hasSupportedMimeType = mimeTypes.some((type) => {
+    let hasSupportedMimeType = mimeTypes.some((type) => {
       return this.support_.media[type];
     });
+    if (!hasSupportedMimeType &&
+        !(window.ManagedMediaSource || window.MediaSource) &&
+        !!navigator.vendor && navigator.vendor.includes('Apple')) {
+      if (mimeTypes.includes('video/mp4')) {
+        hasSupportedMimeType = true;
+      }
+      if (mimeTypes.includes('video/mp2t')) {
+        hasSupportedMimeType = true;
+      }
+    }
     if (!hasSupportedMimeType) {
       return 'Your browser does not support the required video format.';
     }
