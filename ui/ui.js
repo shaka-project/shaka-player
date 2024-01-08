@@ -237,6 +237,7 @@ shaka.ui.Overlay = class {
         level: 'rgb(255, 255, 255)',
       },
       trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
+      textTrackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
       fadeDelay: 0,
       doubleClickForFullscreen: true,
       singleClickForPlayAndPause: true,
