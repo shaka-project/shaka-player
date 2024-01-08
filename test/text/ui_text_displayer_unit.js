@@ -605,4 +605,13 @@ describe('UITextDisplayer', () => {
         (e) => e.nodeType == Node.ELEMENT_NODE);
     expect(childrenOfTwo.length).toBe(3);
   });
+
+  it('textDisplayer does not crash if destroy is called more than once', () => {
+    expect(videoContainer.childNodes.length).toBe(1);
+
+    textDisplayer.destroy();
+    textDisplayer.destroy();
+
+    expect(videoContainer.childNodes.length).toBe(0);
+  });
 });
