@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.7.2](https://github.com/shaka-project/shaka-player/compare/v4.7.1...v4.7.2) (2024-01-08)
+
+
+### Bug Fixes
+
+* APL set-top box wrongly identifies as an Apple device. ([#6026](https://github.com/shaka-project/shaka-player/issues/6026)) ([9df8253](https://github.com/shaka-project/shaka-player/commit/9df8253012829a9e8a6663512ee8281ca415336d))
+* avoid uiTextDisplayer.destroy crashing if called more than once ([#6022](https://github.com/shaka-project/shaka-player/issues/6022)) ([ebd2043](https://github.com/shaka-project/shaka-player/commit/ebd2043dec97b7da69c3fb89a12e7a2444ecf7a8))
+* **DASH:** Check if periodCombiner_ exists before configuring ([#5998](https://github.com/shaka-project/shaka-player/issues/5998)) ([2fa803e](https://github.com/shaka-project/shaka-player/commit/2fa803e30bb1981b3ca95fc60a8c8fcdfb8c4f5e))
+* ENCRYPTED CONTENT WITHOUT DRM INFO on comcast X1 due to safari blocklist ([#6034](https://github.com/shaka-project/shaka-player/issues/6034)) ([47ae494](https://github.com/shaka-project/shaka-player/commit/47ae4940e77186b10a57c7df594505a3d0f266a8))
+* Fix untrusted types in MediaTailorAdManager ([#5996](https://github.com/shaka-project/shaka-player/issues/5996)) ([13416b7](https://github.com/shaka-project/shaka-player/commit/13416b79e02dd2a26c03b85c806b9985d2f348be))
+* **HLS:** Fix clear init segment mapping ([#6000](https://github.com/shaka-project/shaka-player/issues/6000)) ([b24a421](https://github.com/shaka-project/shaka-player/commit/b24a4215b1b65168cb406847a9889c6b5cb5cb6e))
+* log prefetch miss for missing segments ([#6012](https://github.com/shaka-project/shaka-player/issues/6012)) ([ec59d3b](https://github.com/shaka-project/shaka-player/commit/ec59d3b8553cb0206100a0bf3e6e94a3c427e36d))
+* **UI:** Fix disable PiP when using documentPictureInPicture ([#5992](https://github.com/shaka-project/shaka-player/issues/5992)) ([74b0ad4](https://github.com/shaka-project/shaka-player/commit/74b0ad481e460e3ff07f6d3bc5103b7fa68660e0))
+
+
+### Performance Improvements
+
+* **mp4generator:** stop nesting concat in methods ([#6041](https://github.com/shaka-project/shaka-player/issues/6041)) ([f007f8f](https://github.com/shaka-project/shaka-player/commit/f007f8feada2520dfe9b01c4bfda51246602474e))
+* **transmuxer:** various performance improvements ([#6003](https://github.com/shaka-project/shaka-player/issues/6003)) ([7573f64](https://github.com/shaka-project/shaka-player/commit/7573f64fd262793eb33690d6f524ca9dc3198bf0))
+* ts parser O(n^2) performance bug. ([#6035](https://github.com/shaka-project/shaka-player/issues/6035)) ([ad56b60](https://github.com/shaka-project/shaka-player/commit/ad56b6083f715cc5e4bcaecb63c5f1fb302f4a99))
+
 ## [4.7.1](https://github.com/shaka-project/shaka-player/compare/v4.7.0...v4.7.1) (2023-12-05)
 
 
