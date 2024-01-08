@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.6.6](https://github.com/shaka-project/shaka-player/compare/v4.6.5...v4.6.6) (2024-01-08)
+
+
+### Bug Fixes
+
+* APL set-top box wrongly identifies as an Apple device. ([#6026](https://github.com/shaka-project/shaka-player/issues/6026)) ([ca751a1](https://github.com/shaka-project/shaka-player/commit/ca751a100126aaff49af03b8171d355d3268a711))
+* avoid uiTextDisplayer.destroy crashing if called more than once ([#6022](https://github.com/shaka-project/shaka-player/issues/6022)) ([bb4f88b](https://github.com/shaka-project/shaka-player/commit/bb4f88b41652988b8397c86d22282db7530df54b))
+* ENCRYPTED CONTENT WITHOUT DRM INFO on comcast X1 due to safari blocklist ([#6034](https://github.com/shaka-project/shaka-player/issues/6034)) ([a75f6bc](https://github.com/shaka-project/shaka-player/commit/a75f6bc90e3be4045a4586667eb0720d753d3ff5))
+* Fix untrusted types in MediaTailorAdManager ([#5996](https://github.com/shaka-project/shaka-player/issues/5996)) ([18891ea](https://github.com/shaka-project/shaka-player/commit/18891ea0c1f8f16531faeb1b766f5f78697df498))
+* **HLS:** Fix clear init segment mapping ([#6000](https://github.com/shaka-project/shaka-player/issues/6000)) ([61d5298](https://github.com/shaka-project/shaka-player/commit/61d52984637c4327c33e44ee74c2b9728df0f8f0))
+* log prefetch miss for missing segments ([#6012](https://github.com/shaka-project/shaka-player/issues/6012)) ([1528eef](https://github.com/shaka-project/shaka-player/commit/1528eefd9b9320190b1dabfb5edf1735a22c2084))
+* **UI:** Fix disable PiP when using documentPictureInPicture ([#5992](https://github.com/shaka-project/shaka-player/issues/5992)) ([521bbe2](https://github.com/shaka-project/shaka-player/commit/521bbe25f0cf5503d9e7f2fb09416cc45741941d))
+
+
+### Performance Improvements
+
+* **mp4generator:** stop nesting concat in methods ([#6041](https://github.com/shaka-project/shaka-player/issues/6041)) ([2bc303b](https://github.com/shaka-project/shaka-player/commit/2bc303b325c7ed005df7a9176b988e9e3601176f))
+* **transmuxer:** various performance improvements ([#6003](https://github.com/shaka-project/shaka-player/issues/6003)) ([dd8e507](https://github.com/shaka-project/shaka-player/commit/dd8e50710905790987ae1dcb0516250218a338f9))
+* ts parser O(n^2) performance bug. ([#6035](https://github.com/shaka-project/shaka-player/issues/6035)) ([d3081f6](https://github.com/shaka-project/shaka-player/commit/d3081f656bda6be274a1f465d9fbde7126034d06))
+
 ## [4.6.5](https://github.com/shaka-project/shaka-player/compare/v4.6.4...v4.6.5) (2023-12-05)
 
 
