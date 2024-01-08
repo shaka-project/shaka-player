@@ -6,6 +6,5 @@ docs/api/
 coverage/
 .DS_Store
 .vscode
-.idea
 .babel-cache
 /_mytest/
