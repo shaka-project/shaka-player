@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.7.3](https://github.com/shaka-project/shaka-player/compare/v4.7.2...v4.7.3) (2024-01-09)
+
+
+### Bug Fixes
+
+* **Ads:** Fix VMAP won't play in muted autoplay ([#6046](https://github.com/shaka-project/shaka-player/issues/6046)) ([50d9640](https://github.com/shaka-project/shaka-player/commit/50d96403ec80b9c0ef7bb43daf624e2105a55274))
+* **DASH:** Fix bad error on DASH DAI ([#6047](https://github.com/shaka-project/shaka-player/issues/6047)) ([ce8792d](https://github.com/shaka-project/shaka-player/commit/ce8792dc819e4b0419b2839d91df654b001d2a5d))
+* **Demo:** Allow play MP4 and TS in legacy iOS devices ([#6051](https://github.com/shaka-project/shaka-player/issues/6051)) ([ea8f3fc](https://github.com/shaka-project/shaka-player/commit/ea8f3fc020b85d2eddc789691334f0d40d5f5ce4))
+* **HLS:** Fix playback of muxed TS content in Safari ([#6045](https://github.com/shaka-project/shaka-player/issues/6045)) ([baa31d2](https://github.com/shaka-project/shaka-player/commit/baa31d21ae01afd0fe44d61a913c90ba26e12768))
+* **HLS:** Live recovery after disconnects ([#6048](https://github.com/shaka-project/shaka-player/issues/6048)) ([0a5d42b](https://github.com/shaka-project/shaka-player/commit/0a5d42b4000c3bd5e7f383f072e56210a758f590))
+* Improved HEAD request fail test when fallback-ing to GET request ([#6044](https://github.com/shaka-project/shaka-player/issues/6044)) ([4e2ca68](https://github.com/shaka-project/shaka-player/commit/4e2ca68a67800afe6623c5531da3a0d9350de242))
+* Install by default shaka.polyfill.PatchedMediaKeysApple when there is no unprefixed EME support ([#6053](https://github.com/shaka-project/shaka-player/issues/6053)) ([b1e5063](https://github.com/shaka-project/shaka-player/commit/b1e5063cb8f17747bad40836c3c612224e2811a5))
+* text roles being combined incorrectly in some multiperiod cases ([#6055](https://github.com/shaka-project/shaka-player/issues/6055)) ([ee42570](https://github.com/shaka-project/shaka-player/commit/ee4257099f0adf48a0437df1783f518b90b4e145)), closes [#6054](https://github.com/shaka-project/shaka-player/issues/6054)
+* **UI:** Fix the scrolling when scrolling from the laterals when seekOnTaps is enabled ([#6050](https://github.com/shaka-project/shaka-player/issues/6050)) ([4564233](https://github.com/shaka-project/shaka-player/commit/456423383c8c8c718a4c2916f4610340c390b56b))
+
+
+### Performance Improvements
+
+* PeriodCombiner improvements ([#6005](https://github.com/shaka-project/shaka-player/issues/6005)) ([ffd60f1](https://github.com/shaka-project/shaka-player/commit/ffd60f12c64b5768532aa1a368cad57bf934de4e))
+
 ## [4.7.2](https://github.com/shaka-project/shaka-player/compare/v4.7.1...v4.7.2) (2024-01-08)
 
 
