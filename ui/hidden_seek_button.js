@@ -44,7 +44,11 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     this.seekContainer = shaka.util.Dom.createHTMLElement('div');
     this.parent.appendChild(this.seekContainer);
 
-    this.eventManager.listen(this.seekContainer, 'touchstart', (event) => {
+    this.eventManager.listen(this.seekContainer, 'touchend', (event) => {
+      // Do nothing if the controls are not visible
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       // In case any settings menu are open this assigns the first touch
       // to close the menu.
       if (this.controls.anySettingsMenusAreOpen()) {
