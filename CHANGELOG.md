@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.6.7](https://github.com/shaka-project/shaka-player/compare/v4.6.6...v4.6.7) (2024-01-09)
+
+
+### Bug Fixes
+
+* **Ads:** Fix VMAP won't play in muted autoplay ([#6046](https://github.com/shaka-project/shaka-player/issues/6046)) ([2ee7389](https://github.com/shaka-project/shaka-player/commit/2ee73894c8f685167c519d0d9c666647bd6d5a8a))
+* **Demo:** Allow play MP4 and TS in legacy iOS devices ([#6051](https://github.com/shaka-project/shaka-player/issues/6051)) ([daf667a](https://github.com/shaka-project/shaka-player/commit/daf667a1cbba2c0b0dfcbb0192254912ab9b92ca))
+* **HLS:** Live recovery after disconnects ([#6048](https://github.com/shaka-project/shaka-player/issues/6048)) ([44fdb64](https://github.com/shaka-project/shaka-player/commit/44fdb648726f57ba474ca02b257fa94c8891c7a1))
+* Improved HEAD request fail test when fallback-ing to GET request ([#6044](https://github.com/shaka-project/shaka-player/issues/6044)) ([141d3ea](https://github.com/shaka-project/shaka-player/commit/141d3ea4c7f02cc0d22e99da582c20aff78a179a))
+* Install by default shaka.polyfill.PatchedMediaKeysApple when there is no unprefixed EME support ([#6053](https://github.com/shaka-project/shaka-player/issues/6053)) ([7832f1b](https://github.com/shaka-project/shaka-player/commit/7832f1ba4ffd3bccf478113dfad6955603b0ed82))
+* text roles being combined incorrectly in some multiperiod cases ([#6055](https://github.com/shaka-project/shaka-player/issues/6055)) ([f32a769](https://github.com/shaka-project/shaka-player/commit/f32a769bbb5bbcbf3ac65b3fe4802227b2c41274)), closes [#6054](https://github.com/shaka-project/shaka-player/issues/6054)
+
 ## [4.6.6](https://github.com/shaka-project/shaka-player/compare/v4.6.5...v4.6.6) (2024-01-08)
 
 
