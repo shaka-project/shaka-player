@@ -844,12 +844,11 @@ shaka.extern.InitDataTransform;
  * @typedef {{
  *   tagName: !string,
  *   attributes: !Object<string, string>,
- *   children: !Array.<shaka.extern.xml.Node | string>,
- *   parent: (shaka.extern.xml.Node | null)
+ *   children: !Array.<shaka.extern.xml.Node | string>
  * }}
  *
  * @description
- *   Data structure for node
+ *   Data structure for xml nodes as simple objects
  *
  * @property {!string} tagName
  *   The name of the element
@@ -857,8 +856,6 @@ shaka.extern.InitDataTransform;
  *   The attributes of the element
  * @property {!Array.<shaka.extern.xml.Node | string>} children
  *   The child nodes or string body of the element
- * @property {shaka.extern.xml.Node | null} parent
- *   The reference to the parent node
  */
 shaka.extern.xml.Node;
 

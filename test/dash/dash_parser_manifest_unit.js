@@ -910,6 +910,8 @@ describe('DashParser Manifest', () => {
   });
 
   describe('fails for', () => {
+    // The cost of performance with the tXml library means that we don't
+    // get validation.
     xit('invalid XML', async () => {
       const source = '<not XML';
       const error = new shaka.util.Error(
@@ -920,6 +922,8 @@ describe('DashParser Manifest', () => {
       await Dash.testFails(source, error);
     });
 
+    // The cost of performance with the tXml library means that we don't
+    // get validation.
     xit('XML with inner errors', async () => {
       const source = [
         '<MPD minBufferTime="PT75S">',

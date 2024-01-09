@@ -85,6 +85,8 @@ describe('MssParser Manifest', () => {
   });
 
   describe('fails for', () => {
+    // The cost of performance with the tXml library means that we don't
+    // get validation.
     xit('invalid XML', async () => {
       const source = '<not XML';
       const error = new shaka.util.Error(
@@ -95,6 +97,8 @@ describe('MssParser Manifest', () => {
       await Mss.testFails(source, error);
     });
 
+    // The cost of performance with the tXml library means that we don't
+    // get validation.
     xit('XML with inner errors', async () => {
       const source = [
         '<SmoothStreamingMedia Duration="1209510000">',
@@ -273,11 +277,7 @@ describe('MssParser Manifest', () => {
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.mss.manifestPreprocessor = (mss) => {
-      const selector = 'StreamIndex[Name="text"';
-      const vttElements = mss.querySelectorAll(selector);
-      for (const element of vttElements) {
-        element.parentNode.removeChild(element);
-      }
+      /** @type{shaka.extern.xml.Node} */ (mss).children.pop();
     };
     parser.configure(config);
 

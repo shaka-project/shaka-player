@@ -57,33 +57,32 @@ describe('TtmlTextParser', () => {
         '<tt xml:space="default">' + ttBody + '</tt>',
         {periodStart: 0, segmentStart: 60, segmentEnd: 70, vttOffset: 0},
         {startTime: 62.03, endTime: 62.05});
-    // NOTE: This cannot be supported (easily) using the tXml parser.
     // When xml:space="preserve", take them into account.
-    // verifyHelper(
-    //     [
-    //       {
-    //         startTime: 62.03,
-    //         endTime: 62.05,
-    //         nestedCues: [{
-    //           // anonymous span
-    //           payload: '\n    ',
-    //           startTime: 62.03,
-    //           endTime: 62.05,
-    //         }, {
-    //           payload: ' A    B   C  ',
-    //           startTime: 62.03,
-    //           endTime: 62.05,
-    //         }, {
-    //           // anonymous span
-    //           payload: '\n  ',
-    //           startTime: 62.03,
-    //           endTime: 62.05,
-    //         }],
-    //       },
-    //     ],
-    //     '<tt xml:space="preserve">' + ttBody + '</tt>',
-    //     {periodStart: 0, segmentStart: 60, segmentEnd: 70, vttOffset: 0},
-    //     {startTime: 62.03, endTime: 62.05});
+    verifyHelper(
+        [
+          {
+            startTime: 62.03,
+            endTime: 62.05,
+            nestedCues: [{
+              // anonymous span
+              payload: '\n    ',
+              startTime: 62.03,
+              endTime: 62.05,
+            }, {
+              payload: ' A    B   C  ',
+              startTime: 62.03,
+              endTime: 62.05,
+            }, {
+              // anonymous span
+              payload: '\n  ',
+              startTime: 62.03,
+              endTime: 62.05,
+            }],
+          },
+        ],
+        '<tt xml:space="preserve">' + ttBody + '</tt>',
+        {periodStart: 0, segmentStart: 60, segmentEnd: 70, vttOffset: 0},
+        {startTime: 62.03, endTime: 62.05});
     // The default value for xml:space is "default".
     verifyHelper(
         [
@@ -266,7 +265,7 @@ describe('TtmlTextParser', () => {
                     payload: 'Second cue',
                     startTime: 62.05,
                     endTime: 3723.2,
-                    color: 'blue',
+                    color: '',
                   },
                   {
                     payload: 'Third cue',

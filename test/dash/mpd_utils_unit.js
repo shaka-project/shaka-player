@@ -536,6 +536,8 @@ describe('MpdUtils', () => {
       await testSucceeds(baseXMLString, desiredXMLString, 3);
     });
 
+    // The cost of performance with the tXml library means that we don't
+    // get validation.
     xit('fails if loaded file is invalid xml', async () => {
       const baseXMLString = inBaseContainer(
           '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');

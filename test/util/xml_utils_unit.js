@@ -9,7 +9,6 @@ describe('XmlUtils', () => {
   const HUGE_NUMBER_STRING = new Array(500).join('7');
 
   const XmlUtils = shaka.util.XmlUtils;
-  const TXml = shaka.util.TXml;
 
   describe('findChild', () => {
     it('finds a child node', () => {
@@ -373,7 +372,7 @@ describe('XmlUtils', () => {
     expect(XmlUtils.parseFloat('-' + HUGE_NUMBER_STRING)).toBe(-Infinity);
   });
 
-  xdescribe('parseXmlString', () => {
+  describe('parseXmlString', () => {
     it('parses a simple XML document', () => {
       const xmlString = [
         '<?xml version="1.0"?>',
@@ -381,14 +380,14 @@ describe('XmlUtils', () => {
         '  <Child></Child>',
         '</Root>',
       ].join('\n');
-      const doc = TXml.parseXmlString(xmlString, 'Root');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
       expect(doc).not.toBeNull();
       expect(doc.tagName).toBe('Root');
     });
 
     it('returns null on an empty XML document', () => {
       const xmlString = '';
-      const doc = TXml.parseXmlString(xmlString, 'Root');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
       expect(doc).toBeNull();
     });
 
@@ -399,7 +398,7 @@ describe('XmlUtils', () => {
         '  <Child</Child>',
         '</Root>',
       ].join('\n');
-      const doc = TXml.parseXmlString(xmlString, 'Root');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
       expect(doc).toBeNull();
     });
 
@@ -410,7 +409,7 @@ describe('XmlUtils', () => {
         '  <Child></Child>',
         '</Root>',
       ].join('\n');
-      const doc = TXml.parseXmlString(xmlString, 'Document');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Document');
       expect(doc).toBeNull();
     });
 
@@ -421,7 +420,7 @@ describe('XmlUtils', () => {
         '  <Child xmlns="http://www.w3.org/1999/xhtml"></Child>',
         '</Root>',
       ].join('\n');
-      const doc = TXml.parseXmlString(xmlString, 'Root');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
       expect(doc).toBeNull();
     });
 
@@ -437,7 +436,7 @@ describe('XmlUtils', () => {
         '  </svg>',
         '</Root>',
       ].join('\n');
-      const doc = TXml.parseXmlString(xmlString, 'Root');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
       expect(doc).toBeNull();
     });
   });
