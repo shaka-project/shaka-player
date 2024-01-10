@@ -303,7 +303,7 @@ Shaka Player supports:
 
 
 ## Content Steering support
-Shaka Player supports Content Steering (v1) in DASH.
+Shaka Player supports Content Steering (v1) in DASH and HLS.
 
 Content Steering features supported:
 - TTL, if missing, the default value is 300 seconds.
@@ -317,6 +317,8 @@ Content Steering features **not** supported:
 ## Documentation & Important Links ##
 
  * [Demo](https://shaka-player-demo.appspot.com)([sources](demo/))
+ * [Nightly Demo](https://nightly-dot-shaka-player-demo.appspot.com)
+ * [Demo index](https://index-dot-shaka-player-demo.appspot.com)
  * [API documentation](https://shaka-player-demo.appspot.com/docs/api/index.html)
  * [Tutorials](https://shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html)
  * [Hosted builds on Google Hosted Libraries](https://developers.google.com/speed/libraries/#shaka-player)
