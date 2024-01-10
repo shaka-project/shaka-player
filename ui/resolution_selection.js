@@ -80,10 +80,16 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     // available resolutions.
     const selectedTrack = tracks.find((track) => track.active);
     if (selectedTrack) {
-      // Filter by current audio language and channel count.
-      tracks = tracks.filter(
-          (track) => track.language == selectedTrack.language &&
-              track.channelsCount == selectedTrack.channelsCount);
+      if (this.controls.getConfig().showAudioChannelCountVariants) {
+        // Filter by current audio language and channel count.
+        tracks = tracks.filter(
+            (track) => track.language == selectedTrack.language &&
+                track.channelsCount == selectedTrack.channelsCount);
+      } else {
+        // Filter by current audio language.
+        tracks = tracks.filter(
+            (track) => track.language == selectedTrack.language);
+      }
     }
 
     // Remove duplicate entries with the same resolution or quality depending
