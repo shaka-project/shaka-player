@@ -3764,6 +3764,32 @@ describe('Player', () => {
     });
   });
 
+  describe('getSegmentAvailabilityDuration()', () => {
+    beforeEach(async () => {
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(false);
+      timeline.setSegmentAvailabilityDuration(1000);
+
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1);
+        });
+      });
+
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+    });
+
+    it('gets current segment availability duration', () => {
+      playhead.getTime.and.returnValue(20);
+
+      const segmentAvailabiltyDuration =
+          player.getSegmentAvailabilityDuration();
+      expect(segmentAvailabiltyDuration).toBe(1000);
+    });
+  });
+
   it('rejects empty manifests', async () => {
     manifest = shaka.test.ManifestGenerator.generate();
 
