@@ -38,7 +38,7 @@ shaka.ui.SmallPlayButton = class extends shaka.ui.PlayButton {
   /** @override */
   updateIcon() {
     const Icons = shaka.ui.Enums.MaterialDesignIcons;
-    if (this.video.ended) {
+    if (this.isEnded()) {
       this.button.textContent = Icons.REPLAY;
     } else {
       this.button.textContent = this.isPaused() ? Icons.PLAY : Icons.PAUSE;
@@ -48,7 +48,7 @@ shaka.ui.SmallPlayButton = class extends shaka.ui.PlayButton {
   /** @override */
   updateAriaLabel() {
     const LocIds = shaka.ui.Locales.Ids;
-    if (this.video.ended) {
+    if (this.isEnded()) {
       this.button.ariaLabel = this.localization.resolve(LocIds.REPLAY);
     } else {
       const label = this.isPaused() ? LocIds.PLAY : LocIds.PAUSE;
