@@ -44,6 +44,42 @@ describe('CeaDecoder', () => {
       decoder.clear();
     });
 
+    it('painton captions on CC4', () => {
+      const controlCount = 0x03;
+      const captionData = 0xc0 | controlCount;
+      const paintonCaptionCC4Packet = new Uint8Array([
+        ...atscCaptionInitBytes, captionData, /* padding= */ 0xff,
+        0xfd, 0x9d, 0x29, // Paint-on mode (RDC control code).
+        0xfd, 0xf4, 0xe5, // t, e
+        0xfd, 0x73, 0xf4, // s, t
+      ]);
+
+      const startTimeCaption1 = 1;
+      const startTimeCaption2 = 2;
+      const expectedText = 'test';
+
+      const topLevelCue = new shaka.text.Cue(startTimeCaption1,
+          startTimeCaption2, '');
+      topLevelCue.line = 10;
+      topLevelCue.lineInterpretation =
+          shaka.text.Cue.lineInterpretation.PERCENTAGE;
+      topLevelCue.nestedCues = [
+        CeaUtils.createDefaultCue(
+            startTimeCaption1, startTimeCaption2, expectedText),
+      ];
+
+      const expectedCaptions = [{
+        stream: 'CC4',
+        cue: topLevelCue,
+      }];
+
+      decoder.extract(paintonCaptionCC4Packet, startTimeCaption1);
+      decoder.extract(eraseDisplayedMemory, startTimeCaption2);
+      const captions = decoder.decode();
+
+      expect(captions).toEqual(expectedCaptions);
+    });
+
     it('green and underlined popon caption data on CC3', () => {
       const controlCount = 0x08;
       const captionData = 0xc0 | controlCount;
