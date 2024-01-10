@@ -72,6 +72,11 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
       this.updateIcon();
     });
 
+    this.eventManager.listen(this.adManager, AdManager.AD_STOPPED, () => {
+      this.updateAriaLabel();
+      this.updateIcon();
+    });
+
     this.eventManager.listen(this.button, 'click', () => {
       if (this.ad && this.ad.isLinear()) {
         this.controls.playPauseAd();
@@ -97,6 +102,18 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     }
 
     return this.controls.presentationIsPaused();
+  }
+
+  /**
+   * @return {boolean}
+   * @protected
+   */
+  isEnded() {
+    if (this.ad && this.ad.isLinear()) {
+      return false;
+    }
+
+    return this.video.ended;
   }
 
   /**
