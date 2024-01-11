@@ -691,7 +691,7 @@ describe('MpdUtils', () => {
       const xml = /** @type {shaka.extern.xml.Node} */ (
         shaka.util.TXml.parseXmlString(baseXMLString));
       /** @type {!shaka.extern.IAbortableOperation} */
-      const operation = MpdUtils.processXlinks(
+      const operation = MpdUtils.processXlinks(null,
           xml, retry, failGracefully, 'https://base', fakeNetEngine);
 
       const abort = async () => {
@@ -784,7 +784,7 @@ describe('MpdUtils', () => {
     function testRequest(baseXMLString) {
       const xml = /** @type {shaka.extern.xml.Node} */ (
         shaka.util.TXml.parseXmlString(baseXMLString));
-      return MpdUtils.processXlinks(xml, retry, failGracefully, 'https://base',
+      return MpdUtils.processXlinks(null, xml, retry, failGracefully, 'https://base',
           fakeNetEngine).promise;
     }
   });
