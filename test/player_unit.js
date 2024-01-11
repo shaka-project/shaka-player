@@ -12,6 +12,10 @@ describe('Player', () => {
   const originalLogWarn = shaka.log.warning;
   const originalLogAlwaysWarn = shaka.log.alwaysWarn;
   const originalIsTypeSupported = window.MediaSource.isTypeSupported;
+  let originalIsTypeSupportedManaged;
+  if (window.ManagedMediaSource) {
+    originalIsTypeSupportedManaged = window.ManagedMediaSource.isTypeSupported;
+  }
   const originalDecodingInfo = navigator.mediaCapabilities.decodingInfo;
 
   const fakeManifestUri = 'fake-manifest-uri';
@@ -67,6 +71,12 @@ describe('Player', () => {
       const type = mimeType.split('/')[0];
       return type == 'video' || type == 'audio';
     };
+    if (window.ManagedMediaSource) {
+      window.ManagedMediaSource.isTypeSupported = (mimeType) => {
+        const type = mimeType.split('/')[0];
+        return type == 'video' || type == 'audio';
+      };
+    }
 
     // Since this is not an integration test, we don't want MediaCapabilities to
     // fail assertions based on browser support for types.  Pretend that all
@@ -178,6 +188,10 @@ describe('Player', () => {
       shaka.log.warning = originalLogWarn;
       shaka.log.alwaysWarn = originalLogAlwaysWarn;
       window.MediaSource.isTypeSupported = originalIsTypeSupported;
+      if (window.ManagedMediaSource) {
+        window.ManagedMediaSource.isTypeSupported =
+            originalIsTypeSupportedManaged;
+      }
       shaka.media.ManifestParser.unregisterParserByMime(fakeMimeType);
       navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
       onError.calls.reset();
@@ -2925,6 +2939,9 @@ describe('Player', () => {
   describe('unplayable content', () => {
     it('throws CONTENT_UNSUPPORTED_BY_BROWSER', async () => {
       window.MediaSource.isTypeSupported = (mimeType) => false;
+      if (window.ManagedMediaSource) {
+        window.ManagedMediaSource.isTypeSupported = (mimeType) => false;
+      }
 
       navigator.mediaCapabilities.decodingInfo = async (config) => {
         await Promise.resolve();
@@ -3761,6 +3778,32 @@ describe('Player', () => {
       const liveTimeUtc = player.getPlayheadTimeAsDate();
       // (300 (presentation start time) + 20 (playhead time)) * 1000 (ms/sec)
       expect(liveTimeUtc).toEqual(new Date(320 * 1000));
+    });
+  });
+
+  describe('getSegmentAvailabilityDuration()', () => {
+    beforeEach(async () => {
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(false);
+      timeline.setSegmentAvailabilityDuration(1000);
+
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1);
+        });
+      });
+
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+    });
+
+    it('gets current segment availability duration', () => {
+      playhead.getTime.and.returnValue(20);
+
+      const segmentAvailabiltyDuration =
+          player.getSegmentAvailabilityDuration();
+      expect(segmentAvailabiltyDuration).toBe(1000);
     });
   });
 
