@@ -1,5 +1,27 @@
 # Changelog
 
+## [4.7.4](https://github.com/shaka-project/shaka-player/compare/v4.7.3...v4.7.4) (2024-01-11)
+
+
+### Bug Fixes
+
+* **Ads:** Fix muting/unmuting ads won't affect video and vice versa ([#6073](https://github.com/shaka-project/shaka-player/issues/6073)) ([baf53ec](https://github.com/shaka-project/shaka-player/commit/baf53ec5dbae98c23e748a0955903361f181b5eb))
+* fix handling of multiple CC tracks ([#6076](https://github.com/shaka-project/shaka-player/issues/6076)) ([e657960](https://github.com/shaka-project/shaka-player/commit/e657960475df69c9a92aa8bea71256e8db991377))
+* **HLS:** getPlayheadTimeAsDate() differs from X-EXT-PROGRAM-DATE-TIME ([#6059](https://github.com/shaka-project/shaka-player/issues/6059)) ([cc1f3df](https://github.com/shaka-project/shaka-player/commit/cc1f3dfed75e16ac89f59c3f0e2799262477ac73))
+* **offline:** Fix server certificate error when trying to delete stored content ([#6080](https://github.com/shaka-project/shaka-player/issues/6080)) ([8473301](https://github.com/shaka-project/shaka-player/commit/8473301d78501eaef31bf2eac5d2a8a43ff36b61))
+* **UI:** Fix replay button when the post-roll is running using CS ([#6072](https://github.com/shaka-project/shaka-player/issues/6072)) ([c809573](https://github.com/shaka-project/shaka-player/commit/c8095735cca9557827c8f2d3d0a4643d6e2cf4b7))
+
+
+### Performance Improvements
+
+* Improve performance of addThumbnailsTrack ([#6067](https://github.com/shaka-project/shaka-player/issues/6067)) ([80fcc21](https://github.com/shaka-project/shaka-player/commit/80fcc215368f637f1889eeca8e0f4df754db3967))
+* **WebVTT:** Improve parsing time for unstyled payloads ([#6066](https://github.com/shaka-project/shaka-player/issues/6066)) ([e32c4bb](https://github.com/shaka-project/shaka-player/commit/e32c4bba054e66176a08e6b0af4eefb6d7a8bbee))
+
+
+### Reverts
+
+* Install by default shaka.polyfill.PatchedMediaKeysApple when there is no unprefixed EME support ([#6068](https://github.com/shaka-project/shaka-player/issues/6068)) ([2c4b000](https://github.com/shaka-project/shaka-player/commit/2c4b000431d3be77fae680377d695fc423a67a2a))
+
 ## [4.7.3](https://github.com/shaka-project/shaka-player/compare/v4.7.2...v4.7.3) (2024-01-09)
 
 
