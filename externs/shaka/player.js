@@ -856,7 +856,8 @@ shaka.extern.InitDataTransform;
  *   manifestPreprocessor: function(!Element),
  *   sequenceMode: boolean,
  *   enableAudioGroups: boolean,
- *   multiTypeVariantsAllowed: boolean
+ *   multiTypeVariantsAllowed: boolean,
+ *   useStreamOnceInPeriodFlattening: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -928,6 +929,12 @@ shaka.extern.InitDataTransform;
  *   Might result in undesirable behavior if mediaSource.codecSwitchingStrategy
  *   is not set to SMOOTH.
  *   Defaults to true if SMOOTH codec switching is supported, RELOAD overwise.
+ * @property {boolean} useStreamOnceInPeriodFlattening
+ *   If period combiner is used, this option ensures every stream is used
+ *   only once in period flattening. It speeds up underlying algorithm
+ *   but may raise issues if manifest does not have stream consistency
+ *   between periods.
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -1095,7 +1102,6 @@ shaka.extern.MssManifestConfiguration;
  * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
  *   If true, manifest update request failures will cause a fatal error.
  *   Defaults to <code>false</code> if not provided.
- *
  * @exportDoc
  */
 shaka.extern.ManifestConfiguration;
