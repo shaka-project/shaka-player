@@ -85,39 +85,6 @@ describe('MssParser Manifest', () => {
   });
 
   describe('fails for', () => {
-    // The cost of performance with the tXml library means that we don't
-    // get validation.
-    xit('invalid XML', async () => {
-      const source = '<not XML';
-      const error = new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.MSS_INVALID_XML,
-          'dummy://foo');
-      await Mss.testFails(source, error);
-    });
-
-    // The cost of performance with the tXml library means that we don't
-    // get validation.
-    xit('XML with inner errors', async () => {
-      const source = [
-        '<SmoothStreamingMedia Duration="1209510000">',
-        '  <StreamIndex Name="audio" Type="audio" Url="uri">',
-        '    <QualityLevel Bitrate="128000" Channels="2" CodecPrivateData="',
-        aacCodecPrivateData,
-        '" FourCC="AACL"/>',
-        '    <c d="20201360"/>',
-        '  </StreamIndex', // Missing a close bracket.
-        '</SmoothStreamingMedia>',
-      ].join('\n');
-      const error = new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.MSS_INVALID_XML,
-          'dummy://foo');
-      await Mss.testFails(source, error);
-    });
-
     it('failed network requests', async () => {
       const expectedError = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,

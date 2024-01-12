@@ -536,20 +536,6 @@ describe('MpdUtils', () => {
       await testSucceeds(baseXMLString, desiredXMLString, 3);
     });
 
-    // The cost of performance with the tXml library means that we don't
-    // get validation.
-    xit('fails if loaded file is invalid xml', async () => {
-      const baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
-      // Note this does not have a close angle bracket.
-      const xlinkXMLString = '<ToReplace></ToReplace';
-      const expectedError = new shaka.util.Error(
-          Error.Severity.CRITICAL, Error.Category.MANIFEST,
-          Error.Code.DASH_INVALID_XML, 'https://xlink1');
-
-      fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
-      await testFails(baseXMLString, expectedError, 1);
-    });
 
     it('fails if it recurses too many times', async () => {
       const baseXMLString = inBaseContainer(
@@ -691,7 +677,7 @@ describe('MpdUtils', () => {
       const xml = /** @type {shaka.extern.xml.Node} */ (
         shaka.util.TXml.parseXmlString(baseXMLString));
       /** @type {!shaka.extern.IAbortableOperation} */
-      const operation = MpdUtils.processXlinks(null,
+      const operation = MpdUtils.processXlinks(
           xml, retry, failGracefully, 'https://base', fakeNetEngine);
 
       const abort = async () => {
@@ -784,7 +770,7 @@ describe('MpdUtils', () => {
     function testRequest(baseXMLString) {
       const xml = /** @type {shaka.extern.xml.Node} */ (
         shaka.util.TXml.parseXmlString(baseXMLString));
-      return MpdUtils.processXlinks(null, xml, retry, failGracefully, 'https://base',
+      return MpdUtils.processXlinks(xml, retry, failGracefully, 'https://base',
           fakeNetEngine).promise;
     }
   });

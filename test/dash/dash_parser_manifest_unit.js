@@ -910,40 +910,6 @@ describe('DashParser Manifest', () => {
   });
 
   describe('fails for', () => {
-    // The cost of performance with the tXml library means that we don't
-    // get validation.
-    xit('invalid XML', async () => {
-      const source = '<not XML';
-      const error = new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.DASH_INVALID_XML,
-          'dummy://foo');
-      await Dash.testFails(source, error);
-    });
-
-    // The cost of performance with the tXml library means that we don't
-    // get validation.
-    xit('XML with inner errors', async () => {
-      const source = [
-        '<MPD minBufferTime="PT75S">',
-        '  <Period id="1" duration="PT30S">',
-        '    <AdaptationSet mimeType="video/mp4">',
-        '      <Representation bandwidth="1">',
-        '        <SegmentBase indexRange="100-200" />',
-        '      </Representation', // Missing a close bracket.
-        '    </AdaptationSet>',
-        '  </Period>',
-        '</MPD>',
-      ].join('\n');
-      const error = new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.DASH_INVALID_XML,
-          'dummy://foo');
-      await Dash.testFails(source, error);
-    });
-
     it('xlink problems when xlinkFailGracefully is false', async () => {
       const source = [
         '<MPD minBufferTime="PT75S" xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
