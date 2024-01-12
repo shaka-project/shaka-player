@@ -14,6 +14,7 @@ goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
+goog.require('shaka.ui.Overlay.TrackLabelFormat');
 goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -67,6 +68,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
   /** @private */
   updateResolutionSelection_() {
+    const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat;
     /** @type {!Array.<shaka.extern.Track>} */
     let tracks = [];
     // When played with src=, the variant tracks available from
@@ -80,16 +82,28 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     // available resolutions.
     const selectedTrack = tracks.find((track) => track.active);
     if (selectedTrack) {
-      if (this.controls.getConfig().showAudioChannelCountVariants) {
-        // Filter by current audio language and channel count.
-        tracks = tracks.filter(
-            (track) => track.language == selectedTrack.language &&
-                track.channelsCount == selectedTrack.channelsCount);
-      } else {
-        // Filter by current audio language.
-        tracks = tracks.filter(
-            (track) => track.language == selectedTrack.language);
-      }
+      tracks = tracks.filter((track) => {
+        if (track.language != selectedTrack.language) {
+          return false;
+        }
+        if (this.controls.getConfig().showAudioChannelCountVariants &&
+            track.channelsCount != selectedTrack.channelsCount) {
+          return false;
+        }
+        const trackLabelFormat = this.controls.getConfig().trackLabelFormat;
+        if ((trackLabelFormat == TrackLabelFormat.ROLE ||
+            trackLabelFormat == TrackLabelFormat.LANGUAGE_ROLE)) {
+          if (JSON.stringify(track.audioRoles) !=
+              JSON.stringify(selectedTrack.audioRoles)) {
+            return false;
+          }
+        }
+        if (trackLabelFormat == TrackLabelFormat.LABEL &&
+            track.label != selectedTrack.label) {
+          return false;
+        }
+        return true;
+      });
     }
 
     // Remove duplicate entries with the same resolution or quality depending
