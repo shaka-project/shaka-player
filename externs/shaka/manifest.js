@@ -363,6 +363,51 @@ shaka.extern.FetchCryptoKeysFunction;
 
 
 /**
+ * SegmentIndex minimal API.
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.SegmentIndex = class {
+  /**
+   * Get number of references.
+   * @return {number}
+   * @exportDoc
+   */
+  getNumReferences() {}
+
+  /**
+   * Finds the position of the segment for the given time, in seconds, relative
+   * to the start of the presentation.  Returns the position of the segment
+   * with the largest end time if more than one segment is known for the given
+   * time.
+   *
+   * @param {number} time
+   * @return {?number} The position of the segment, or null if the position of
+   *   the segment could not be determined.
+   * @exportDoc
+   */
+  find(time) {}
+
+  /**
+   * Gets the SegmentReference for the segment at the given position.
+   *
+   * @param {number} position The position of the segment as returned by find().
+   * @return {shaka.media.SegmentReference} The SegmentReference, or null if
+   *   no such SegmentReference exists.
+   * @exportDoc
+   */
+  get(position) {}
+
+  /**
+   * Gets number of already evicted segments.
+   * @return {number}
+   * @exportDoc
+   */
+  getNumEvicted() {}
+};
+
+
+/**
  * @typedef {{
  *   id: number,
  *   originalId: ?string,
