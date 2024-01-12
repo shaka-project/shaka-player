@@ -1102,6 +1102,7 @@ shaka.extern.MssManifestConfiguration;
  * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
  *   If true, manifest update request failures will cause a fatal error.
  *   Defaults to <code>false</code> if not provided.
+ *
  * @exportDoc
  */
 shaka.extern.ManifestConfiguration;
