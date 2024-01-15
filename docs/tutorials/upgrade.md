@@ -96,9 +96,11 @@ application:
   - Configuration changes:
     - `streaming.forceTransmuxTS` has been renamed to `streaming.forceTransmux`
       (deprecated in v4.3.0)
+    - `manifest.dash.manifestPreprocessor` callback now receives a type of `shaka.externs.xml.Node` instead of `Element`.
 
   - Plugin changes:
     - `Transmuxer` plugins now has three new parameters in `transmux()` method.
 
   - Player API Changes:
     - The constructor no longer takes `mediaElement` as a parameter; use the `attach` method to attach to a media element instead. (Deprecated in v4.6)
+    - The `TimelineRegionInfo.eventElement` property is now a type of `shaka.externs.xml.Node` instead of `Element`
