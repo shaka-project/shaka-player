@@ -57,7 +57,6 @@ describe('TtmlTextParser', () => {
         '<tt xml:space="default">' + ttBody + '</tt>',
         {periodStart: 0, segmentStart: 60, segmentEnd: 70, vttOffset: 0},
         {startTime: 62.03, endTime: 62.05});
-
     // When xml:space="preserve", take them into account.
     verifyHelper(
         [
@@ -84,7 +83,6 @@ describe('TtmlTextParser', () => {
         '<tt xml:space="preserve">' + ttBody + '</tt>',
         {periodStart: 0, segmentStart: 60, segmentEnd: 70, vttOffset: 0},
         {startTime: 62.03, endTime: 62.05});
-
     // The default value for xml:space is "default".
     verifyHelper(
         [
