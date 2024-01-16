@@ -97,6 +97,7 @@ application:
     - `streaming.forceTransmuxTS` has been renamed to `streaming.forceTransmux`
       (deprecated in v4.3.0)
     - `manifest.dash.manifestPreprocessor` callback now receives a type of `shaka.externs.xml.Node` instead of `Element`.
+    - `manifest.mss.manifestPreprocessor` callback now receives a type of `shaka.externs.xml.Node` instead of `Element`.
 
   - Plugin changes:
     - `Transmuxer` plugins now has three new parameters in `transmux()` method.
