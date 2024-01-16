@@ -265,15 +265,18 @@ shakaDemo.AssetCard = class {
       if (this.asset_.preloadManager) {
         await this.asset_.preloadManager.destroy();
         this.asset_.preloadManager = null;
-      } else {
-        await shakaDemoMain.preloadAsset(this.asset_);
-      }
-      const preloadManager = this.asset_.preloadManager;
-      this.remakeButtons();
-      await this.asset_.preloadManager.waitForChooseInitialVariant();
-      if (preloadManager == this.asset_.preloadManager) {
-        this.asset_.preloaded = true;
         this.remakeButtons();
+      } else {
+        try {
+          await shakaDemoMain.preloadAsset(this.asset_);
+          this.remakeButtons();
+          await this.asset_.preloadManager.waitForChooseInitialVariant();
+          this.asset_.preloaded = true;
+        } catch (e) {
+          // Ignore error
+        } finally {
+          this.remakeButtons();
+        }
       }
     });
   }
