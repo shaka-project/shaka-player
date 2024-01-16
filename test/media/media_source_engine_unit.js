@@ -1246,7 +1246,7 @@ describe('MediaSourceEngine', () => {
             const callback = addListenOnceSpy.calls.argsFor(0)[2];
             callback();
             expect(initSourceBufferSpy).toHaveBeenCalled();
-            expect(addListenOnceSpy.calls.argsFor(0)[1]).toBe('canplay');
+            expect(addListenOnceSpy.calls.argsFor(0)[1]).toBe('canplaythrough');
             expect(video.autoplay).toBe(true);
             expect(playSpy).not.toHaveBeenCalled();
           } finally {
@@ -1313,7 +1313,7 @@ describe('MediaSourceEngine', () => {
             const callback = addListenOnceSpy.calls.argsFor(0)[2];
             callback();
             expect(initSourceBufferSpy).toHaveBeenCalled();
-            expect(addListenOnceSpy.calls.argsFor(0)[1]).toBe('canplay');
+            expect(addListenOnceSpy.calls.argsFor(0)[1]).toBe('canplaythrough');
             expect(video.autoplay).toBe(false);
             expect(playSpy).toHaveBeenCalled();
           } finally {
