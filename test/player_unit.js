@@ -2658,6 +2658,9 @@ describe('Player', () => {
           variant.addExistingStream(1);  // audio
           variant.addExistingStream(2);  // video
         });
+        manifest.addTextStream(4, (stream) => {
+          stream.bandwidth = 10;
+        });
       });
 
       await player.load(fakeManifestUri, 0, fakeMimeType);
@@ -2673,12 +2676,16 @@ describe('Player', () => {
       expect(stats.estimatedBandwidth).toBe(25);
     });
 
-    it('tracks info about current stream', () => {
-      const stats = player.getStats();
+    it('tracks info about current stream', async () => {
+      let stats = player.getStats();
       // Should have chosen the first of each type of stream.
       expect(stats.width).toBe(100);
       expect(stats.height).toBe(200);
       expect(stats.streamBandwidth).toBe(200);
+      const textTracks = player.getTextTracks();
+      player.selectTextTrack(textTracks[0]);
+      stats = player.getStats();
+      expect(stats.streamBandwidth).toBe(210);
     });
 
     it('tracks frame info', () => {
@@ -2793,7 +2800,7 @@ describe('Player', () => {
        * @param {!Array.<shaka.extern.TrackChoice>} additional
        */
       function checkHistory(additional) {
-        const prefix = {
+        const variantPrefix = {
           timestamp: jasmine.any(Number),
           id: 0,
           type: 'variant',
@@ -2801,10 +2808,18 @@ describe('Player', () => {
           bandwidth: 200,
         };
 
+        const textPrefix = {
+          timestamp: jasmine.any(Number),
+          id: 4,
+          type: 'text',
+          fromAdaptation: true,
+          bandwidth: null,
+        }
         const switchHistory = player.getStats().switchHistory;
 
-        expect(switchHistory[0]).toEqual(prefix);
-        expect(switchHistory.slice(1)).toEqual(additional);
+        expect(switchHistory[0]).toEqual(variantPrefix);
+        expect(switchHistory[1]).toEqual(textPrefix);
+        expect(switchHistory.slice(2)).toEqual(additional);
       }
 
       /**
