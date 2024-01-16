@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.7.5](https://github.com/shaka-project/shaka-player/compare/v4.7.4...v4.7.5) (2024-01-16)
+
+
+### Bug Fixes
+
+* auto cancel trickPlay on live as specified ([#6100](https://github.com/shaka-project/shaka-player/issues/6100)) ([d4f3b1f](https://github.com/shaka-project/shaka-player/commit/d4f3b1f71bdeae2a04d774d8963d7b1d97337811))
+* do not append blank codec strings ([#6093](https://github.com/shaka-project/shaka-player/issues/6093)) ([ffafe5a](https://github.com/shaka-project/shaka-player/commit/ffafe5a0d22997d5baf5ab129350c95173681261)), closes [#6092](https://github.com/shaka-project/shaka-player/issues/6092)
+* Reset to default playback rate on release playback rate controller ([#6089](https://github.com/shaka-project/shaka-player/issues/6089)) ([c2e31f1](https://github.com/shaka-project/shaka-player/commit/c2e31f1c6a707354e2d2b75dc03d003c3b9faee2))
+* stay paused after codec switch ([#6108](https://github.com/shaka-project/shaka-player/issues/6108)) ([d7748c4](https://github.com/shaka-project/shaka-player/commit/d7748c44c9d665a524ff6d19b84722f6e05763e6))
+* **TTML:** Clip to video when extent is not present ([#6086](https://github.com/shaka-project/shaka-player/issues/6086)) ([4506f13](https://github.com/shaka-project/shaka-player/commit/4506f13d463d5be2554f28a9aff410d0dde71062))
+* **UI:** Update the playbackrate on loaded event ([#6090](https://github.com/shaka-project/shaka-player/issues/6090)) ([fdc03b9](https://github.com/shaka-project/shaka-player/commit/fdc03b99fa371a04374b0054798cc90e32df30f0))
+* When disconnecting from chromecast, subtitles are turned off ([#6103](https://github.com/shaka-project/shaka-player/issues/6103)) ([96cc25a](https://github.com/shaka-project/shaka-player/commit/96cc25a87d44dc1258b04d3158b45354a6b0671d))
+
+
+### Performance Improvements
+
+* **HLS:** do not filter all tags to get the first tag ([#6088](https://github.com/shaka-project/shaka-player/issues/6088)) ([0d8a45a](https://github.com/shaka-project/shaka-player/commit/0d8a45a2ebec376995e5381192e67f7bf9aa907a))
+
 ## [4.7.4](https://github.com/shaka-project/shaka-player/compare/v4.7.3...v4.7.4) (2024-01-11)
 
 
