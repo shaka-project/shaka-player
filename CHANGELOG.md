@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.6.9](https://github.com/shaka-project/shaka-player/compare/v4.6.8...v4.6.9) (2024-01-16)
+
+
+### Bug Fixes
+
+* auto cancel trickPlay on live as specified ([#6100](https://github.com/shaka-project/shaka-player/issues/6100)) ([60c78f7](https://github.com/shaka-project/shaka-player/commit/60c78f7cab559afbef871aa447290266e52dadc1))
+* Reset to default playback rate on release playback rate controller ([#6089](https://github.com/shaka-project/shaka-player/issues/6089)) ([e9c11cd](https://github.com/shaka-project/shaka-player/commit/e9c11cdb34800226666703b56b4fe5af0e4fcac0))
+* stay paused after codec switch ([#6108](https://github.com/shaka-project/shaka-player/issues/6108)) ([2499947](https://github.com/shaka-project/shaka-player/commit/2499947275d8d10217068d0a1babf244538dfab5))
+* **TTML:** Clip to video when extent is not present ([#6086](https://github.com/shaka-project/shaka-player/issues/6086)) ([17f8bb6](https://github.com/shaka-project/shaka-player/commit/17f8bb6711babaca0fc7437d7f4f7bc7d72050bf))
+* **UI:** Update the playbackrate on loaded event ([#6090](https://github.com/shaka-project/shaka-player/issues/6090)) ([243c113](https://github.com/shaka-project/shaka-player/commit/243c113101299def0b3ba0a525581b707d90aab3))
+* When disconnecting from chromecast, subtitles are turned off ([#6103](https://github.com/shaka-project/shaka-player/issues/6103)) ([f0b506b](https://github.com/shaka-project/shaka-player/commit/f0b506b8d77bc4da62466d8817d0241a079229d8))
+
+
+### Performance Improvements
+
+* **HLS:** do not filter all tags to get the first tag ([#6088](https://github.com/shaka-project/shaka-player/issues/6088)) ([4704577](https://github.com/shaka-project/shaka-player/commit/4704577add1acb3435a052295cc8b2ec12c8cde7))
+
 ## [4.6.8](https://github.com/shaka-project/shaka-player/compare/v4.6.7...v4.6.8) (2024-01-11)
 
 
