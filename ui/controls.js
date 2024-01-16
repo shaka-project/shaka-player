@@ -650,6 +650,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isPiPAllowed() {
+    if (this.castProxy_.isCasting()) {
+      return false;
+    }
     if ('documentPictureInPicture' in window &&
         this.config_.preferDocumentPictureInPicture) {
       const video = /** @type {HTMLVideoElement} */(this.localVideo_);
