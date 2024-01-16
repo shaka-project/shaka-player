@@ -190,7 +190,8 @@ class Launcher:
         type=int)
     running_commands.add_argument(
         '--filter',
-        help='Specify a regular expression to limit which tests run.',
+        help='Specify a regular expression to limit which tests run. Or, use'
+             '`--filter offline` to filter to all offline playback tests.',
         type=str,
         dest='filter')
     running_commands.add_argument(
