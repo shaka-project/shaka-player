@@ -236,6 +236,8 @@ shakaDemo.Config = class {
             /* canBeUnset= */ true)
         .addBoolInput_('Enable DASH sequence mode',
             'manifest.dash.sequenceMode')
+        .addBoolInput_('Use stream once in period flattening',
+            'manifest.dash.useStreamOnceInPeriodFlattening')
         .addBoolInput_('Disable Audio', 'manifest.disableAudio')
         .addBoolInput_('Disable Video', 'manifest.disableVideo')
         .addBoolInput_('Disable Text', 'manifest.disableText')

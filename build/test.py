@@ -190,7 +190,8 @@ class Launcher:
         type=int)
     running_commands.add_argument(
         '--filter',
-        help='Specify a regular expression to limit which tests run.',
+        help='Specify a regular expression to limit which tests run. Or, use'
+             '`--filter offline` to filter to all offline playback tests.',
         type=str,
         dest='filter')
     running_commands.add_argument(
@@ -397,7 +398,6 @@ class Launcher:
       'drm',
       'exclude_browsers',
       'external',
-      'filter',
       'grid_address',
       'grid_config',
       'hostname',
@@ -427,6 +427,13 @@ class Launcher:
       value = getattr(self.parsed_args, name, None)
       if value is not None:
         self.karma_config[name] = value
+
+    filterValue = getattr(self.parsed_args, 'filter', None)
+    if filterValue is not None:
+      if str(filterValue) == 'offline':
+        self.karma_config['filter'] = '(Offline|Storage|DownloadProgress|ManifestConverter|Indexeddb)'
+      else:
+        self.karma_config['filter'] = filterValue
 
     if not self.parsed_args.capture_timeout:
       # The default for capture_timeout depends on whether or not we are using

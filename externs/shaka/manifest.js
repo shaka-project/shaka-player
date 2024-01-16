@@ -318,7 +318,8 @@ shaka.extern.CreateSegmentIndexFunction;
 
 /**
  * @typedef {{
- *   method: string,
+ *   bitsKey: number,
+ *   blockCipherMode: string,
  *   cryptoKey: (webCrypto.CryptoKey|undefined),
  *   fetchKey: (shaka.extern.CreateSegmentIndexFunction|undefined),
  *   iv: (!Uint8Array|undefined),
@@ -326,12 +327,14 @@ shaka.extern.CreateSegmentIndexFunction;
  * }}
  *
  * @description
- * AES-128 key and iv info from the manifest.
+ * AES key and iv info from the manifest.
  *
- * @property {string} method
- *   The key method defined in the manifest.
+ * @property {number} bitsKey
+ *   The number of the bit key (eg: 128, 256).
+ * @property {string} blockCipherMode
+ *   The block cipher mode of operation. Possible values: 'CTR' or 'CBC'.
  * @property {webCrypto.CryptoKey|undefined} cryptoKey
- *   Web crypto key object of the AES-128 CBC key. If unset, the "fetchKey"
+ *   Web crypto key object of the AES key. If unset, the "fetchKey"
  *   property should be provided.
  * @property {shaka.extern.FetchCryptoKeysFunction|undefined} fetchKey
  *   A function that fetches the key.
@@ -346,7 +349,7 @@ shaka.extern.CreateSegmentIndexFunction;
  *
  * @exportDoc
  */
-shaka.extern.aes128Key;
+shaka.extern.aesKey;
 
 
 /**
@@ -357,6 +360,51 @@ shaka.extern.aes128Key;
  * @exportDoc
  */
 shaka.extern.FetchCryptoKeysFunction;
+
+
+/**
+ * SegmentIndex minimal API.
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.SegmentIndex = class {
+  /**
+   * Get number of references.
+   * @return {number}
+   * @exportDoc
+   */
+  getNumReferences() {}
+
+  /**
+   * Finds the position of the segment for the given time, in seconds, relative
+   * to the start of the presentation.  Returns the position of the segment
+   * with the largest end time if more than one segment is known for the given
+   * time.
+   *
+   * @param {number} time
+   * @return {?number} The position of the segment, or null if the position of
+   *   the segment could not be determined.
+   * @exportDoc
+   */
+  find(time) {}
+
+  /**
+   * Gets the SegmentReference for the segment at the given position.
+   *
+   * @param {number} position The position of the segment as returned by find().
+   * @return {shaka.media.SegmentReference} The SegmentReference, or null if
+   *   no such SegmentReference exists.
+   * @exportDoc
+   */
+  get(position) {}
+
+  /**
+   * Gets number of already evicted segments.
+   * @return {number}
+   * @exportDoc
+   */
+  getNumEvicted() {}
+};
 
 
 /**

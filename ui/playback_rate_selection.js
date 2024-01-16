@@ -44,6 +44,10 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
           this.updateLocalizedStrings_();
         });
 
+    this.eventManager.listen(this.player, 'loaded', () => {
+      this.updatePlaybackRateSelection_(this.player.getPlaybackRate());
+    });
+
     this.eventManager.listen(this.player, 'ratechange', () => {
       this.updatePlaybackRateSelection_(this.player.getPlaybackRate());
     });

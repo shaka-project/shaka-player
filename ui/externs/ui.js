@@ -87,6 +87,7 @@ shaka.extern.UIVolumeBarColors;
  *   seekBarColors: shaka.extern.UISeekBarColors,
  *   volumeBarColors: shaka.extern.UIVolumeBarColors,
  *   trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat,
+ *   textTrackLabelFormat: shaka.ui.Overlay.TrackLabelFormat,
  *   fadeDelay: number,
  *   doubleClickForFullscreen: boolean,
  *   singleClickForPlayAndPause: boolean,
@@ -156,8 +157,18 @@ shaka.extern.UIVolumeBarColors;
  *   colors used in the linear gradient constructed in JavaScript, since you
  *   cannot do this in pure CSS.
  * @property {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
- *   An enum that determines what is shown in the labels for text track and
- *   audio variant selection.
+ *   An enum that determines what is shown in the labels for audio variant
+ *   selection.
+ *   LANGUAGE means that only the language of the item is shown.
+ *   ROLE means that only the role of the item is shown.
+ *   LANGUAGE_ROLE means both language and role are shown, or just language if
+ *   there is no role.
+ *   LABEL means the non-standard DASH "label" attribute or the standard DASH
+ *   "Label" element or the HLS "NAME" attribute are shown.
+ *   Defaults to LANGUAGE.
+ * @property {shaka.ui.Overlay.TrackLabelFormat} textTrackLabelFormat
+ *   An enum that determines what is shown in the labels for text track
+ *   selection.
  *   LANGUAGE means that only the language of the item is shown.
  *   ROLE means that only the role of the item is shown.
  *   LANGUAGE_ROLE means both language and role are shown, or just language if
