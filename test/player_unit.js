@@ -2676,7 +2676,7 @@ describe('Player', () => {
       expect(stats.estimatedBandwidth).toBe(25);
     });
 
-    it('tracks info about current stream', async () => {
+    it('tracks info about current stream', () => {
       let stats = player.getStats();
       // Should have chosen the first of each type of stream.
       expect(stats.width).toBe(100);
@@ -2814,7 +2814,7 @@ describe('Player', () => {
           type: 'text',
           fromAdaptation: true,
           bandwidth: null,
-        }
+        };
         const switchHistory = player.getStats().switchHistory;
 
         expect(switchHistory[0]).toEqual(variantPrefix);
