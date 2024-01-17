@@ -98,8 +98,8 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
       this.onLeavePictureInPicture_();
     });
 
-    this.eventManager.listen(this.controls, 'caststatuschanged', (e) => {
-      this.onCastStatusChange_(e);
+    this.eventManager.listen(this.controls, 'caststatuschanged', () => {
+      this.onTracksChanged_();
     });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
@@ -164,25 +164,6 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
         this.localization.resolve(currentPipState);
   }
 
-  /**
-   * @param {Event} e
-   * @private
-   */
-  onCastStatusChange_(e) {
-    const isCasting = e['newStatus'];
-
-    if (isCasting) {
-      // Picture-in-picture is not applicable if we're casting
-      if (this.controls.isPiPAllowed()) {
-        shaka.ui.Utils.setDisplay(this.pipButton_, false);
-      }
-    } else {
-      if (this.controls.isPiPAllowed()) {
-        shaka.ui.Utils.setDisplay(this.pipButton_, true);
-      }
-    }
-  }
-
 
   /**
    * Display the picture-in-picture button only when the content contains video.
@@ -194,6 +175,9 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
   async onTracksChanged_() {
     if (!this.controls.isPiPAllowed()) {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
+      if (this.controls.isPiPEnabled()) {
+        await this.controls.togglePiP();
+      }
     } else if (this.player && this.player.isAudioOnly()) {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
       if (this.controls.isPiPEnabled()) {
