@@ -97,6 +97,15 @@ shaka.extern.AbrManager = class {
   segmentDownloaded(deltaTimeMs, numBytes, allowSwitch) {}
 
   /**
+   * Notifies the ABR that it is a time to suggest new streams. This is used by
+   * the Player when it finishes adding the last partial segment of a fast
+   * switching stream.
+   *
+   * @exportDoc
+   */
+  allowSuggestStreams() {}
+
+  /**
    * Gets an estimate of the current bandwidth in bit/sec.  This is used by the
    * Player to generate stats.
    *
