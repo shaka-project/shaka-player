@@ -1703,6 +1703,21 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @export
+   */
+  showUI() {
+    const event = new Event('mousemove', {bubbles: false, cancelable: false});
+    this.onMouseMove_(event);
+  }
+
+  /**
+   * @export
+   */
+  hideUI() {
+    this.onMouseLeave_();
+  }
+
+  /**
    * Create a localization instance already pre-loaded with all the locales that
    * we support.
    *
