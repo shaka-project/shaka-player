@@ -103,7 +103,7 @@ shaka.extern.AbrManager = class {
    *
    * @exportDoc
    */
-  allowSuggestStreams() {}
+  trySuggestStreams() {}
 
   /**
    * Gets an estimate of the current bandwidth in bit/sec.  This is used by the
