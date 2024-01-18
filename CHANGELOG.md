@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.7.6](https://github.com/shaka-project/shaka-player/compare/v4.7.5...v4.7.6) (2024-01-18)
+
+
+### Bug Fixes
+
+* Change quality only when adding the last partial segment and it is fast switching ([#6114](https://github.com/shaka-project/shaka-player/issues/6114)) ([f1937da](https://github.com/shaka-project/shaka-player/commit/f1937daa0a06f2ad7c4c54479eec8a15f98d3891))
+* **DASH:** Fix PERIOD_FLATTENING_FAILED on fastswitching streams ([#6113](https://github.com/shaka-project/shaka-player/issues/6113)) ([216a13d](https://github.com/shaka-project/shaka-player/commit/216a13d90eeaae4c05fbc371c3c57b40014e4e11))
+* Don't retry MSE errors on startup ([#6112](https://github.com/shaka-project/shaka-player/issues/6112)) ([28479ef](https://github.com/shaka-project/shaka-player/commit/28479ef6bd5fa429969cf978cb7afe319e7acc2d))
+* Include text bandwidth in stats ([#6109](https://github.com/shaka-project/shaka-player/issues/6109)) ([1f49e81](https://github.com/shaka-project/shaka-player/commit/1f49e81a2b6e4c4bce2958510afd2ef1d18bffce))
+* Reject Opus encrypted on Firefox Android ([#6115](https://github.com/shaka-project/shaka-player/issues/6115)) ([2115142](https://github.com/shaka-project/shaka-player/commit/2115142a1b453e99fdb375b06e34eb0f0003fb65))
+* **UI:** Disable PiP on casting ([#6110](https://github.com/shaka-project/shaka-player/issues/6110)) ([171c182](https://github.com/shaka-project/shaka-player/commit/171c182eed086eb32563df5c7b4667320debd4f9))
+
 ## [4.7.5](https://github.com/shaka-project/shaka-player/compare/v4.7.4...v4.7.5) (2024-01-16)
 
 
