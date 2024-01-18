@@ -20,7 +20,14 @@ assignees: ''
 **Have you read the [FAQ](https://bit.ly/ShakaFAQ) and checked for duplicate open issues?**
 
 
+**If the question is related to FairPlay, have you read the tutorial?**
+<!-- NOTE: https://shaka-player-demo.appspot.com/docs/api/tutorial-fairplay.html -->
+
+
 **What version of Shaka Player are you using?**
+
+
+**What browser and OS are you using?**
 
 
 **Please ask your question**
