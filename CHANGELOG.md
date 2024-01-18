@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.6.10](https://github.com/shaka-project/shaka-player/compare/v4.6.9...v4.6.10) (2024-01-18)
+
+
+### Bug Fixes
+
+* Include text bandwidth in stats ([#6109](https://github.com/shaka-project/shaka-player/issues/6109)) ([34d75b1](https://github.com/shaka-project/shaka-player/commit/34d75b137c2ccd8fbff4acc1eb44766cbbefab2d))
+* Reject Opus encrypted on Firefox Android ([#6115](https://github.com/shaka-project/shaka-player/issues/6115)) ([02689f8](https://github.com/shaka-project/shaka-player/commit/02689f8a85b2150a282bd8cce5d420e255df2320))
+* **UI:** Disable PiP on casting ([#6110](https://github.com/shaka-project/shaka-player/issues/6110)) ([3167736](https://github.com/shaka-project/shaka-player/commit/3167736e61657b1560a82bed2d7ca4a43da7e30d))
+
 ## [4.6.9](https://github.com/shaka-project/shaka-player/compare/v4.6.8...v4.6.9) (2024-01-16)
 
 
