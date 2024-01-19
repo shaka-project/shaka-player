@@ -378,8 +378,8 @@ requirement: {
   value: "DOMParser.prototype.parseFromString"
   error_message:
     "Using \"DOMParser.parseFromString\" directly is not allowed; "
-    "use shaka.util.XmlUtils.parseXmlString instead."
-  whitelist_regexp: "lib/util/xml_utils.js"
+    "use shaka.util.TXml.parseXmlString instead."
+  whitelist_regexp: "lib/util/tXml.js"
   whitelist_regexp: "test/"
 }
 
