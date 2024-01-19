@@ -13,8 +13,16 @@
  * @extends {shaka.media.SegmentPrefetch}
  */
 shaka.test.FakeSegmentPrefetch = class {
-  constructor(stream, segmentData) {
-    /** @private {(Set.<!shaka.media.SegmentReference>)} */
+  /**
+   * Suppress the JSC_PRIVATE_OVERRIDE error for overriding prefetchPosTime_
+   * @suppress {visibility}
+   */
+  constructor(prefetchLimit, stream, segmentData) {
+    /** @private {number} */
+    this.prefetchLimit_ = prefetchLimit;
+
+    /** @private {(Set.<!shaka.media.SegmentReference|
+     *      !shaka.media.InitSegmentReference>)} */
     this.requestedReferences_ = new Set();
 
     /** @private {shaka.extern.Stream} */
@@ -24,14 +32,51 @@ shaka.test.FakeSegmentPrefetch = class {
      * @private {!Object.<string, shaka.test.FakeMediaSourceEngine.SegmentData>}
      */
     this.segmentData_ = segmentData;
+
+    /** @private {Array<number>} */
+    this.evictions_ = [];
+
+    /** @private {number} */
+    this.prefetchPosTime_ = 0;
+
+    /** @private {boolean} */
+    this.deleteOnGet_ = true;
+
+    /** @private {number} */
+    this.segmentNum_ = 0;
   }
 
   /** @override */
-  prefetchSegments(reference) {
-    if (!(reference instanceof shaka.media.SegmentReference)) {
+  getLastKnownPosition() {
+    return this.prefetchPosTime_;
+  }
+
+  /** @override */
+  prefetchSegments(startReference) {
+    if (!(startReference instanceof shaka.media.SegmentReference) &&
+        !(startReference instanceof shaka.media.InitSegmentReference)) {
       return;
     }
-    this.requestedReferences_.add(reference);
+
+    const currTime = startReference.startTime;
+    this.prefetchSegmentsByTime(currTime);
+  }
+
+  /** @override */
+  prefetchSegmentsByTime(currTime) {
+    const maxTime = Math.max(currTime, this.prefetchPosTime_);
+    const iterator = this.streamObj_.segmentIndex.getIteratorForTime(maxTime);
+    let reference = iterator.next().value;
+    while (this.segmentNum_ < this.prefetchLimit_ && reference != null) {
+      if (!this.requestedReferences_.has(reference)) {
+        if (reference instanceof shaka.media.SegmentReference) {
+          this.segmentNum_++;
+        }
+        this.requestedReferences_.add(reference);
+      }
+      this.prefetchPosTime_ = reference.startTime;
+      reference = iterator.next().value;
+    }
   }
 
   /** @override */
@@ -49,9 +94,25 @@ shaka.test.FakeSegmentPrefetch = class {
   /** @override */
   clearAll() {
     this.requestedReferences_.clear();
+    this.segmentNum_ = 0;
+    this.prefetchPosTime_ = 0;
   }
 
   /** @override */
+  evict(time) {
+    this.evictions_.push(time);
+  }
+
+  /** @override */
+  deleteOnGet(newDeleteOnGet) {
+    this.deleteOnGet_ = newDeleteOnGet;
+  }
+
+  /**
+    * @override
+    * @param {shaka.media.InitSegmentReference|
+    *     shaka.media.SegmentReference} reference
+    * */
   getPrefetchedSegment(reference) {
     if (!(reference instanceof shaka.media.SegmentReference)) {
       return null;

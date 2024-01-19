@@ -33,7 +33,11 @@ shaka.test.StreamingEngineUtil = class {
       expect(request.uris.length).toBe(1);
 
       const parts = request.uris[0].split('_');
-      expect(parts.length).toBeGreaterThanOrEqual(3);
+      if (parts[3] === 'alt') {
+        expect(parts.length).toBe(4);
+      } else {
+        expect(parts.length).toBeGreaterThanOrEqual(3);
+      }
 
       const periodIndex = Number(parts[0]);
       expect(periodIndex).not.toBeNaN();
@@ -151,11 +155,13 @@ shaka.test.StreamingEngineUtil = class {
    *  for each type of segment
    * @param {shaka.extern.aesKey=} aesKey The AES-128 key to provide
    *  to streams, if desired.
+   * @param {boolean} [secondaryAudioVariant]
    * @return {shaka.extern.Manifest}
    */
   static createManifest(
       presentationTimeline, periodStartTimes, presentationDuration,
-      segmentDurations, initSegmentRanges, timestampOffsets, aesKey) {
+      segmentDurations, initSegmentRanges, timestampOffsets, aesKey,
+      secondaryAudioVariant = false) {
     const Util = shaka.test.Util;
 
     /**
@@ -197,12 +203,14 @@ shaka.test.StreamingEngineUtil = class {
       return position;
     };
 
+    const getMap = new Map();
+
     /**
      * @param {string} type
      * @param {number} position
      * @return {shaka.media.SegmentReference} A SegmentReference.
      */
-    const get = (type, position) => {
+    const get = (type, position, secondaryAudioVariant = false) => {
       // Note that we don't just directly compute the segment position because
       // a period start time could be in the middle of the previous period's
       // last segment.
@@ -234,7 +242,8 @@ shaka.test.StreamingEngineUtil = class {
       const periodIndex = i;  // 0-based
       const positionWithinPeriod = position - periodFirstPosition;
 
-      const initSegmentUri = periodIndex + '_' + type + '_init';
+      const initSegmentUri = periodIndex + '_' + type + '_init' +
+          (secondaryAudioVariant ? '_alt' : '');
 
       // The type can be 'text', 'audio', 'video', or 'trickvideo',
       // but we pull video init segment metadata from the 'video' part of the
@@ -250,28 +259,41 @@ shaka.test.StreamingEngineUtil = class {
       }
 
       const d = segmentDurations[type];
-      const getUris = () => [periodIndex + '_' + type + '_' + position];
+      const getUris = () => [periodIndex + '_' + type + '_' + position +
+          (secondaryAudioVariant ? '_alt' : '')];
       const periodStart = periodStartTimes[periodIndex];
       const timestampOffset = (timestampOffsets && timestampOffsets[type]) || 0;
       const appendWindowStart = periodStartTimes[periodIndex];
       const appendWindowEnd = periodIndex == periodStartTimes.length - 1?
           presentationDuration : periodStartTimes[periodIndex + 1];
 
-      const ref = new shaka.media.SegmentReference(
-          /* startTime= */ periodStart + positionWithinPeriod * d,
-          /* endTime= */ periodStart + (positionWithinPeriod + 1) * d,
-          getUris,
-          /* startByte= */ 0,
-          /* endByte= */ null,
-          initSegmentReference,
-          timestampOffset,
-          appendWindowStart,
-          appendWindowEnd);
-      const ContentType = shaka.util.ManifestParserUtils.ContentType;
-      if (aesKey &&
-          (type == ContentType.AUDIO || type == ContentType.VIDEO)) {
-        ref.aesKey = aesKey;
+      const refKey = [periodStart,
+        getUris()[0],
+        timestampOffset,
+        appendWindowStart,
+        appendWindowEnd].join();
+
+      let ref = getMap.get(refKey);
+
+      if (!ref) {
+        ref = new shaka.media.SegmentReference(
+            /* startTime= */ periodStart + positionWithinPeriod * d,
+            /* endTime= */ periodStart + (positionWithinPeriod + 1) * d,
+            getUris,
+            /* startByte= */ 0,
+            /* endByte= */ null,
+            initSegmentReference,
+            timestampOffset,
+            appendWindowStart,
+            appendWindowEnd);
+        const ContentType = shaka.util.ManifestParserUtils.ContentType;
+        if (aesKey &&
+            (type == ContentType.AUDIO || type == ContentType.VIDEO)) {
+          ref.aesKey = aesKey;
+        }
+        getMap.set(refKey, ref);
       }
+
       return ref;
     };
 
@@ -302,15 +324,51 @@ shaka.test.StreamingEngineUtil = class {
       primary: false,
       decodingInfos: [],
     };
+    let variant2;
+
+    if (secondaryAudioVariant) {
+      variant2 = {
+        video: null,
+        audio: null,
+        allowedByApplication: true,
+        allowedByKeySystem: true,
+        bandwidth: 0,
+        id: 10,
+        language: 'und',
+        primary: false,
+        decodingInfos: [],
+      };
+    }
 
     if ('video' in segmentDurations) {
       variant.video = /** @type {shaka.extern.Stream} */(
         shaka.test.StreamingEngineUtil.createMockStream('video', 0));
+
+      if (secondaryAudioVariant) {
+        variant2.video = variant.video;
+      }
     }
 
     if ('audio' in segmentDurations) {
       variant.audio = /** @type {shaka.extern.Stream} */(
         shaka.test.StreamingEngineUtil.createMockStream('audio', 1));
+      if (secondaryAudioVariant) {
+        variant2.audio = /** @type {shaka.extern.Stream} */(
+          shaka.test.StreamingEngineUtil.createMockStream('audio', 11));
+
+        const ContentType = shaka.util.ManifestParserUtils.ContentType;
+        const segmentIndex = new shaka.test.FakeSegmentIndex();
+        segmentIndex.find.and.callFake((time) => find(ContentType.AUDIO, time));
+        segmentIndex.get.and.callFake((pos) =>
+          get(ContentType.AUDIO, pos, true));
+
+        const createSegmentIndexSpy = Util.funcSpy(
+            variant2.audio.createSegmentIndex);
+        createSegmentIndexSpy.and.callFake(() => {
+          variant2.audio.segmentIndex = segmentIndex;
+          return Promise.resolve();
+        });
+      }
     }
 
     /** @type {?shaka.extern.Stream} */
@@ -361,6 +419,10 @@ shaka.test.StreamingEngineUtil = class {
       manifest.textStreams = [textStream];
     }
     manifest.variants = [variant];
+
+    if (secondaryAudioVariant) {
+      manifest.variants.push(variant2);
+    }
 
     return manifest;
   }

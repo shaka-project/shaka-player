@@ -112,7 +112,8 @@ describe('StreamingEngine', () => {
    * @param {shaka.extern.aesKey=} aesKey The AES-128 key to put in
    *   the manifest, if one should exist
    */
-  function setupVod(trickMode, mediaOffset, aesKey) {
+  function setupVod(trickMode, mediaOffset, aesKey,
+      secondaryAudioVariant = false) {
     // For VOD, we fake a presentation that has 2 Periods of equal duration
     // (20 seconds), where each Period has 1 Variant and 1 text stream.
     //
@@ -219,7 +220,8 @@ describe('StreamingEngine', () => {
         /* firstPeriodStartTime= */ 0,
         /* secondPeriodStartTime= */ 20,
         /* presentationDuration= */ 40,
-        aesKey);
+        aesKey,
+        secondaryAudioVariant);
   }
 
   function setupLive() {
@@ -374,7 +376,7 @@ describe('StreamingEngine', () => {
    */
   function setupManifest(
       firstPeriodStartTime, secondPeriodStartTime, presentationDuration,
-      aesKey) {
+      aesKey, secondaryAudioVariant = false) {
     const segmentDurations = {
       audio: segmentData[ContentType.AUDIO].segmentDuration,
       video: segmentData[ContentType.VIDEO].segmentDuration,
@@ -397,7 +399,7 @@ describe('StreamingEngine', () => {
         /** @type {!shaka.media.PresentationTimeline} */(timeline),
         [firstPeriodStartTime, secondPeriodStartTime],
         presentationDuration, segmentDurations, initSegmentRanges,
-        timestampOffsets, aesKey);
+        timestampOffsets, aesKey, secondaryAudioVariant);
 
     audioStream = manifest.variants[0].audio;
     videoStream = manifest.variants[0].video;
@@ -3937,16 +3939,68 @@ describe('StreamingEngine', () => {
     });
   });
 
-  describe('prefetch segments', () => {
+  /**
+   * Expect no buffer has been added to MSE.
+   */
+  function expectNoBuffer() {
+    expect(mediaSourceEngine.initSegments).toEqual({
+      audio: [false, false],
+      video: [false, false],
+      text: [],
+    });
+    expect(mediaSourceEngine.segments).toEqual({
+      audio: [false, false, false, false],
+      video: [false, false, false, false],
+      text: [false, false, false, false],
+    });
+  }
+
+  /**
+   * Expect buffers have been added to MSE.
+   */
+  function expectHasBuffer(secondaryAudioVariant = false) {
+    expect(mediaSourceEngine.initSegments).toEqual({
+      audio: [false, true],
+      video: [false, true],
+      text: [],
+    });
+    expect(mediaSourceEngine.segments).toEqual({
+      audio: [true, true, true, true],
+      video: [true, true, true, true],
+      text: [false, false, false, false],
+    });
+  }
+
+  /**
+   * @param {?boolean} hasRequest
+   */
+  function expectSegmentRequest(hasRequest) {
     const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
 
+    const requests = [
+      '0_audio_0', '0_video_0', '0_audio_1',
+      '0_video_1', '1_audio_2', '1_video_2',
+      '1_audio_3', '1_video_3',
+    ];
+
+    for (const request of requests) {
+      if (hasRequest) {
+        netEngine.expectRequest(request, segmentType);
+      } else {
+        netEngine.expectNoRequest(request, segmentType);
+      }
+    }
+  }
+
+  describe('prefetch segments', () => {
     let OriginalSegmentPrefetch;
 
     beforeEach(() => {
       OriginalSegmentPrefetch = shaka.media.SegmentPrefetch;
       // eslint-disable-next-line no-restricted-syntax
-      shaka.media.SegmentPrefetch = function(config, stream) {
-        const fake = new shaka.test.FakeSegmentPrefetch(stream, segmentData);
+      shaka.media.SegmentPrefetch = function(prefetchLimit, stream) {
+        const fake = new shaka.test.FakeSegmentPrefetch(prefetchLimit,
+            stream, segmentData);
         return /** @type {?} */(fake);
       };
 
@@ -3954,7 +4008,7 @@ describe('StreamingEngine', () => {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine();
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
-      config.segmentPrefetchLimit = 3;
+      config.segmentPrefetchLimit = 5;
       streamingEngine.configure(config);
     });
 
@@ -4023,61 +4077,261 @@ describe('StreamingEngine', () => {
       expectHasBuffer();
       expectSegmentRequest(true);
     });
+  });
 
-    /**
-     * Expect no buffer has been added to MSE.
-     */
-    function expectNoBuffer() {
-      expect(mediaSourceEngine.initSegments).toEqual({
-        audio: [false, false],
-        video: [false, false],
-        text: [],
-      });
-      expect(mediaSourceEngine.segments).toEqual({
-        audio: [false, false, false, false],
-        video: [false, false, false, false],
-        text: [false, false, false, false],
-      });
-    }
+  describe('prefetch segments', () => {
+    beforeEach(() => {
+      shaka.media.SegmentPrefetch = Util.spyFunc(
+          jasmine.createSpy('SegmentPrefetch')
+              // eslint-disable-next-line
+              .and.callFake(function(prefetchLimit, stream) {
+                return new shaka.test.FakeSegmentPrefetch(prefetchLimit,
+                    stream, segmentData);
+              }),
+      );
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 5;
+      streamingEngine.configure(config);
+    });
 
-    /**
-     * Expect buffers have been added to MSE.
-     */
-    function expectHasBuffer() {
-      expect(mediaSourceEngine.initSegments).toEqual({
-        audio: [false, true],
-        video: [false, true],
-        text: [],
-      });
-      expect(mediaSourceEngine.segments).toEqual({
-        audio: [true, true, true, true],
-        video: [true, true, true, true],
-        text: [false, false, false, false],
-      });
-    }
+    it('should use prefetched segment without fetching again', async () => {
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      playing = true;
+      expectNoBuffer();
 
-    /**
-     * @param {?boolean} hasRequest
-     */
-    function expectSegmentRequest(hasRequest) {
-      const requests = [
-        '0_audio_0', '0_video_0', '0_audio_1',
-        '0_video_1', '1_audio_2', '1_video_2',
-        '1_audio_3', '1_video_3',
-      ];
+      await runTest();
 
-      const context = {
-        type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
-      };
+      expectHasBuffer();
+      expectSegmentRequest(false);
+    });
 
-      for (const request of requests) {
-        if (hasRequest) {
-          netEngine.expectRequest(request, segmentType, context);
-        } else {
-          netEngine.expectNoRequest(request, segmentType, context);
-        }
-      }
-    }
+    it('should re-use prefetch segment when force clear buffer', async () => {
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+
+      playing = true;
+      expectNoBuffer();
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(false);
+
+      streamingEngine.switchVariant(variant, true, 0, true);
+      presentationTimeInSeconds = 0;
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(false);
+    });
+
+    it('should disable prefetch if reset config in middle', async () => {
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+
+      playing = true;
+      expectNoBuffer();
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(false);
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 0;
+      streamingEngine.configure(config);
+      streamingEngine.switchVariant(variant, true, 0, true);
+      presentationTimeInSeconds = 0;
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(true);
+    });
+
+    it('should disable prefetch when reset config at begining', async () => {
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 0;
+      streamingEngine.configure(config);
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      playing = true;
+      expectNoBuffer();
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(true);
+    });
+  });
+
+  describe('prefetch audio variant segments', () => {
+    let altVariant;
+    let segmentPrefetchesCreated;
+
+    beforeEach(() => {
+      segmentPrefetchesCreated = 0;
+      shaka.media.SegmentPrefetch = Util.spyFunc(
+          jasmine.createSpy('SegmentPrefetch')
+              // eslint-disable-next-line
+              .and.callFake(function(prefetchLimit, stream) {
+                segmentPrefetchesCreated++;
+                return new shaka.test.FakeSegmentPrefetch(prefetchLimit,
+                    stream, segmentData);
+              }),
+      );
+      setupVod(undefined, undefined, undefined, true);
+      altVariant = manifest.variants[1];
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 5;
+      config.prefetchAudioLanguages = ['und'];
+      streamingEngine.configure(config);
+    });
+
+    it('should prefetch all audio variants for the language', async () => {
+      const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+      expect(segmentPrefetchesCreated).toBe(2);
+
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      playing = true;
+      expectNoBuffer();
+
+      await runTest();
+
+      streamingEngine.switchVariant(altVariant);
+      await runTest();
+
+      expectHasBuffer();
+      expectSegmentRequest(false);
+      netEngine.expectNoRequest('alt_11_audio_0', segmentType);
+      netEngine.expectNoRequest('alt_11_audio_1', segmentType);
+      expect(segmentPrefetchesCreated).toBe(3);
+    });
+
+    it('should not prefetch video if disabled', async () => {
+      const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 5;
+      config.prefetchAudioLanguages = ['und'];
+      config.disableVideoPrefetch = true;
+      streamingEngine.configure(config);
+
+      expect(segmentPrefetchesCreated).toBe(2);
+
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      playing = true;
+      expectNoBuffer();
+
+      await runTest();
+
+      streamingEngine.switchVariant(altVariant);
+      await runTest();
+
+      expectHasBuffer();
+      netEngine.expectNoRequest('alt_11_audio_0', segmentType);
+      netEngine.expectNoRequest('alt_11_audio_1', segmentType);
+      netEngine.expectRequest('0_video_0', segmentType);
+      netEngine.expectRequest('0_video_1', segmentType);
+      netEngine.expectRequest('1_video_2', segmentType);
+      netEngine.expectRequest('1_video_3', segmentType);
+      expect(segmentPrefetchesCreated).toBe(2);
+    });
+
+    it('should use prefetched segment without fetching again', async () => {
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      playing = true;
+      expectNoBuffer();
+
+      await runTest();
+
+      expectHasBuffer();
+      expectSegmentRequest(false);
+    });
+
+    it('should re-use prefetch segment when force clear buffer', async () => {
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+
+      playing = true;
+      expectNoBuffer();
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(false);
+
+      streamingEngine.switchVariant(altVariant, true, 0, true);
+      presentationTimeInSeconds = 0;
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(false);
+
+      streamingEngine.switchVariant(variant, true, 0, true);
+      presentationTimeInSeconds = 0;
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(false);
+    });
+
+    it('should disable prefetch if limit is reset in middle', async () => {
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+
+      playing = true;
+      expectNoBuffer();
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(false);
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 0;
+      streamingEngine.configure(config);
+      streamingEngine.switchVariant(variant, true, 0, true);
+      presentationTimeInSeconds = 0;
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(true);
+    });
+
+    it('should disable prefetch when limit is reset at begining', async () => {
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 0;
+      streamingEngine.configure(config);
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      playing = true;
+      expectNoBuffer();
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(true);
+    });
+
+    it('should switch to regular prefetch if config is reset in middle',
+        /** @suppress {accessControls} */
+        async () => {
+          expect(segmentPrefetchesCreated).toBe(2);
+
+          streamingEngine.switchVariant(variant);
+          await streamingEngine.start();
+
+          playing = true;
+          expectNoBuffer();
+          await runTest();
+          expectHasBuffer();
+          expectSegmentRequest(false);
+
+          const config =
+              shaka.util.PlayerConfiguration.createDefault().streaming;
+          config.segmentPrefetchLimit = 5;
+          config.prefetchAudioLanguages = [];
+          streamingEngine.configure(config);
+          streamingEngine.switchVariant(variant, true, 0, true);
+          presentationTimeInSeconds = 0;
+          await runTest();
+          expectHasBuffer();
+          expectSegmentRequest(false);
+          expect(streamingEngine.audioPrefetchMap_.size).toBe(0);
+        });
   });
 
   /**

@@ -424,7 +424,17 @@ shakaDemo.Config = class {
         .addBoolInput_('Parse PRFT box',
             'streaming.parsePrftBox')
         .addNumberInput_('Segment Prefetch Limit',
-            'streaming.segmentPrefetchLimit')
+            'streaming.segmentPrefetchLimit',
+            /* canBeDecimal= */ false,
+            /* canBeZero= */ true,
+            /* canBeUnset= */ true)
+        .addCustomTextInput_('Prefetch audio languages', (input) => {
+          shakaDemoMain.configure(
+              'streaming.prefetchAudioLanguages',
+              input.value.split(',').filter(Boolean));
+        })
+        .addBoolInput_('Disable Video Prefetch',
+            'streaming.disableVideoPrefetch')
         .addBoolInput_('Live Sync', 'streaming.liveSync')
         .addNumberInput_('Max latency for live sync',
             'streaming.liveSyncMaxLatency',
@@ -752,7 +762,9 @@ shakaDemo.Config = class {
   addNumberInput_(name, valueName, canBeDecimal = false, canBeZero = true,
       canBeUnset = false, tooltipMessage) {
     const onChange = (input) => {
-      shakaDemoMain.resetConfiguration(valueName);
+      if (valueName !== 'streaming.segmentPrefetchLimit') {
+        shakaDemoMain.resetConfiguration(valueName);
+      }
       shakaDemoMain.remakeHash();
       if (input.value == 'Infinity') {
         shakaDemoMain.configure(valueName, Infinity);
