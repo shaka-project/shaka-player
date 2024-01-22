@@ -88,6 +88,10 @@ shakaDemo.Config = class {
     this.addStreamingSection_();
     this.addMediaSourceSection_();
     this.addManifestSection_();
+    this.addDashManifestSection_();
+    this.addHlsManifestSection_();
+    this.addMssManifestSection_();
+    this.addRetrySection_('manifest', 'Manifest Retry Parameters');
     this.addRetrictionsSection_('', 'Restrictions');
     this.addCmcdSection_();
     this.addCmsdSection_();
@@ -182,6 +186,25 @@ shakaDemo.Config = class {
   addManifestSection_() {
     const docLink = this.resolveExternLink_('.ManifestConfiguration');
     this.addSection_('Manifest', docLink)
+        .addNumberInput_('Availability Window Override',
+            'manifest.availabilityWindowOverride',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ false,
+            /* canBeUnset= */ true)
+        .addNumberInput_('Default Presentation Delay',
+            'manifest.defaultPresentationDelay')
+        .addBoolInput_('Disable Audio', 'manifest.disableAudio')
+        .addBoolInput_('Disable Video', 'manifest.disableVideo')
+        .addBoolInput_('Disable Text', 'manifest.disableText')
+        .addBoolInput_('Disable Thumbnails', 'manifest.disableThumbnails')
+        .addBoolInput_('Enable segment-relative VTT Timing',
+            'manifest.segmentRelativeVttTiming');
+  }
+
+  /** @private */
+  addDashManifestSection_() {
+    const docLink = this.resolveExternLink_('.ManifestConfiguration');
+    this.addSection_('DASH Manifest', docLink)
         .addBoolInput_('Ignore DASH DRM Info', 'manifest.dash.ignoreDrmInfo')
         .addBoolInput_('Auto-Correct DASH Drift',
             'manifest.dash.autoCorrectDrift')
@@ -197,6 +220,25 @@ shakaDemo.Config = class {
             'manifest.dash.ignoreMaxSegmentDuration')
         .addBoolInput_('Allow DASH multi type variants',
             'manifest.dash.multiTypeVariantsAllowed')
+        .addTextInput_('Clock Sync URI', 'manifest.dash.clockSyncUri')
+        .addBoolInput_('Enable Audio Groups', 'manifest.dash.enableAudioGroups')
+        .addBoolInput_('Ignore Min Buffer Time',
+            'manifest.dash.ignoreMinBufferTime')
+        .addNumberInput_('Initial Segment Limit',
+            'manifest.dash.initialSegmentLimit',
+            /* canBeDecimal= */ false,
+            /* canBeZero= */ false,
+            /* canBeUnset= */ true)
+        .addBoolInput_('Enable DASH sequence mode',
+            'manifest.dash.sequenceMode')
+        .addBoolInput_('Use stream once in period flattening',
+            'manifest.dash.useStreamOnceInPeriodFlattening');
+  }
+
+  /** @private */
+  addHlsManifestSection_() {
+    const docLink = this.resolveExternLink_('.ManifestConfiguration');
+    this.addSection_('HLS Manifest', docLink)
         .addBoolInput_('Ignore HLS Text Stream Failures',
             'manifest.hls.ignoreTextStreamFailures')
         .addBoolInput_('Ignore HLS Image Stream Failures',
@@ -217,36 +259,14 @@ shakaDemo.Config = class {
         .addBoolInput_('Disable codec guessing',
             'manifest.hls.disableCodecGuessing')
         .addBoolInput_('Allow LL-HLS byterange optimization',
-            'manifest.hls.allowLowLatencyByteRangeOptimization')
-        .addNumberInput_('Availability Window Override',
-            'manifest.availabilityWindowOverride',
-            /* canBeDecimal= */ true,
-            /* canBeZero= */ false,
-            /* canBeUnset= */ true)
-        .addTextInput_('Clock Sync URI', 'manifest.dash.clockSyncUri')
-        .addNumberInput_('Default Presentation Delay',
-            'manifest.defaultPresentationDelay')
-        .addBoolInput_('Enable Audio Groups', 'manifest.dash.enableAudioGroups')
-        .addBoolInput_('Ignore Min Buffer Time',
-            'manifest.dash.ignoreMinBufferTime')
-        .addNumberInput_('Initial Segment Limit',
-            'manifest.dash.initialSegmentLimit',
-            /* canBeDecimal= */ false,
-            /* canBeZero= */ false,
-            /* canBeUnset= */ true)
-        .addBoolInput_('Enable DASH sequence mode',
-            'manifest.dash.sequenceMode')
-        .addBoolInput_('Use stream once in period flattening',
-            'manifest.dash.useStreamOnceInPeriodFlattening')
-        .addBoolInput_('Disable Audio', 'manifest.disableAudio')
-        .addBoolInput_('Disable Video', 'manifest.disableVideo')
-        .addBoolInput_('Disable Text', 'manifest.disableText')
-        .addBoolInput_('Disable Thumbnails', 'manifest.disableThumbnails')
-        .addBoolInput_('Enable segment-relative VTT Timing',
-            'manifest.segmentRelativeVttTiming')
-        .addBoolInput_('Enable MSS sequence mode', 'manifest.mss.sequenceMode');
+            'manifest.hls.allowLowLatencyByteRangeOptimization');
+  }
 
-    this.addRetrySection_('manifest', 'Manifest Retry Parameters');
+  /** @private */
+  addMssManifestSection_() {
+    const docLink = this.resolveExternLink_('.ManifestConfiguration');
+    this.addSection_('MSS Manifest', docLink)
+        .addBoolInput_('Enable MSS sequence mode', 'manifest.mss.sequenceMode');
   }
 
   /** @private */
