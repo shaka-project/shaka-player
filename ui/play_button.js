@@ -16,6 +16,7 @@ goog.requireType('shaka.ui.Controls');
 
 /**
  * @extends {shaka.ui.Element}
+ * @implements {shaka.extern.IUIPlayButton}
  * @export
  */
 shaka.ui.PlayButton = class extends shaka.ui.Element {
@@ -95,6 +96,7 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
   /**
    * @return {boolean}
    * @protected
+   * @override
    */
   isPaused() {
     if (this.ad && this.ad.isLinear()) {
@@ -107,6 +109,7 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
   /**
    * @return {boolean}
    * @protected
+   * @override
    */
   isEnded() {
     if (this.ad && this.ad.isLinear()) {
