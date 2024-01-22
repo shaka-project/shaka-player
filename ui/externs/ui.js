@@ -443,3 +443,27 @@ shaka.extern.IUISeekBar.Factory = class {
    */
   create(rootElement, controls) {}
 };
+
+/**
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.IUIPlayButton = class {
+  /**
+   * @param {!HTMLElement} parent
+   * @param {!shaka.ui.Controls} controls
+   */
+  constructor(parent, controls) {
+    /**
+     * @protected {!HTMLButtonElement}
+     * @exportDoc
+     */
+    this.button;
+  }
+
+  /** @return {boolean} */
+  isPaused() {}
+
+  /** @return {boolean} */
+  isEnded() {}
+};
