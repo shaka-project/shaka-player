@@ -255,8 +255,10 @@ shakaDemo.AssetCard = class {
     let preloadName = 'Start Preload';
     if (this.asset_.preloadManager) {
       preloadName = this.asset_.preloaded ? 'Preloaded!' : 'Preloading...';
+    } else if (this.asset_.preloadFailed) {
+      preloadName = 'Failed to Preload!';
     }
-    this.addButton(preloadName, async () => {
+    const preloadButton = this.addButton(preloadName, async () => {
       if (disableButtons) {
         return;
       }
@@ -270,15 +272,20 @@ shakaDemo.AssetCard = class {
         try {
           await shakaDemoMain.preloadAsset(this.asset_);
           this.remakeButtons();
-          await this.asset_.preloadManager.waitForChooseInitialVariant();
+          await this.asset_.preloadManager.waitForFinish();
           this.asset_.preloaded = true;
-        } catch (e) {
-          // Ignore error
+        } catch (error) {
+          this.asset_.preloadManager = null;
+          this.asset_.preloadFailed = true;
+          throw error;
         } finally {
           this.remakeButtons();
         }
       }
     });
+    if (this.asset_.preloadFailed) {
+      preloadButton.disabled = true;
+    }
   }
 
   /**
