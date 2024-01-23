@@ -3977,6 +3977,11 @@ describe('StreamingEngine', () => {
   function expectSegmentRequest(hasRequest) {
     const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
 
+    const context = {
+      type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
+    };
+
+
     const requests = [
       '0_audio_0', '0_video_0', '0_audio_1',
       '0_video_1', '1_audio_2', '1_video_2',
@@ -3985,99 +3990,12 @@ describe('StreamingEngine', () => {
 
     for (const request of requests) {
       if (hasRequest) {
-        netEngine.expectRequest(request, segmentType);
+        netEngine.expectRequest(request, segmentType, context);
       } else {
-        netEngine.expectNoRequest(request, segmentType);
+        netEngine.expectNoRequest(request, segmentType, context);
       }
     }
   }
-
-  describe('prefetch segments', () => {
-    let OriginalSegmentPrefetch;
-
-    beforeEach(() => {
-      OriginalSegmentPrefetch = shaka.media.SegmentPrefetch;
-      // eslint-disable-next-line no-restricted-syntax
-      shaka.media.SegmentPrefetch = function(prefetchLimit, stream) {
-        const fake = new shaka.test.FakeSegmentPrefetch(prefetchLimit,
-            stream, segmentData);
-        return /** @type {?} */(fake);
-      };
-
-      setupVod();
-      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      createStreamingEngine();
-      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
-      config.segmentPrefetchLimit = 5;
-      streamingEngine.configure(config);
-    });
-
-    afterEach(() => {
-      shaka.media.SegmentPrefetch = OriginalSegmentPrefetch;
-    });
-
-    it('should use prefetched segment without fetching again', async () => {
-      streamingEngine.switchVariant(variant);
-      await streamingEngine.start();
-      playing = true;
-      expectNoBuffer();
-
-      await runTest();
-
-      expectHasBuffer();
-      expectSegmentRequest(false);
-    });
-
-    it('should re-use prefetch segment when force clear buffer', async () => {
-      streamingEngine.switchVariant(variant);
-      await streamingEngine.start();
-
-      playing = true;
-      expectNoBuffer();
-      await runTest();
-      expectHasBuffer();
-      expectSegmentRequest(false);
-
-      streamingEngine.switchVariant(variant, true, 0, true);
-      presentationTimeInSeconds = 0;
-      await runTest();
-      expectHasBuffer();
-      expectSegmentRequest(false);
-    });
-
-    it('should disable prefetch if reset config in middle', async () => {
-      streamingEngine.switchVariant(variant);
-      await streamingEngine.start();
-
-      playing = true;
-      expectNoBuffer();
-      await runTest();
-      expectHasBuffer();
-      expectSegmentRequest(false);
-
-      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
-      config.segmentPrefetchLimit = 0;
-      streamingEngine.configure(config);
-      streamingEngine.switchVariant(variant, true, 0, true);
-      presentationTimeInSeconds = 0;
-      await runTest();
-      expectHasBuffer();
-      expectSegmentRequest(true);
-    });
-
-    it('should disable prefetch when reset config at begining', async () => {
-      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
-      config.segmentPrefetchLimit = 0;
-      streamingEngine.configure(config);
-      streamingEngine.switchVariant(variant);
-      await streamingEngine.start();
-      playing = true;
-      expectNoBuffer();
-      await runTest();
-      expectHasBuffer();
-      expectSegmentRequest(true);
-    });
-  });
 
   describe('prefetch segments', () => {
     beforeEach(() => {
