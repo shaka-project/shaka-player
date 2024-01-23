@@ -33,7 +33,7 @@ shaka.test.StreamingEngineUtil = class {
       expect(request.uris.length).toBe(1);
 
       const parts = request.uris[0].split('_');
-      if (parts[3] === 'alt') {
+      if (parts[3] === 'secondaryAudioVariant') {
         expect(parts.length).toBe(4);
       } else {
         expect(parts.length).toBeGreaterThanOrEqual(3);
@@ -243,7 +243,7 @@ shaka.test.StreamingEngineUtil = class {
       const positionWithinPeriod = position - periodFirstPosition;
 
       const initSegmentUri = periodIndex + '_' + type + '_init' +
-          (secondaryAudioVariant ? '_alt' : '');
+          (secondaryAudioVariant ? '_secondaryAudioVariant' : '');
 
       // The type can be 'text', 'audio', 'video', or 'trickvideo',
       // but we pull video init segment metadata from the 'video' part of the
@@ -260,7 +260,7 @@ shaka.test.StreamingEngineUtil = class {
 
       const d = segmentDurations[type];
       const getUris = () => [periodIndex + '_' + type + '_' + position +
-          (secondaryAudioVariant ? '_alt' : '')];
+          (secondaryAudioVariant ? '_secondaryAudioVariant' : '')];
       const periodStart = periodStartTimes[periodIndex];
       const timestampOffset = (timestampOffsets && timestampOffsets[type]) || 0;
       const appendWindowStart = periodStartTimes[periodIndex];
