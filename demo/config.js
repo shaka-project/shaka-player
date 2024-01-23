@@ -462,6 +462,9 @@ shakaDemo.Config = class {
             'streaming.liveSyncMinPlaybackRate',
             /* canBeDecimal= */ true,
             /* canBeZero= */ false)
+        .addBoolInput_('Live Sync Panic Mode', 'streaming.liveSyncPanicMode')
+        .addNumberInput_('Live Sync Panic Mode Threshold',
+            'streaming.liveSyncPanicThreshold')
         .addBoolInput_('Allow Media Source recoveries',
             'streaming.allowMediaSourceRecoveries')
         .addNumberInput_('Minimum time between recoveries',
