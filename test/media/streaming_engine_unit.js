@@ -3976,11 +3976,9 @@ describe('StreamingEngine', () => {
    */
   function expectSegmentRequest(hasRequest) {
     const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-
     const context = {
       type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
     };
-
 
     const requests = [
       '0_audio_0', '0_video_0', '0_audio_1',
@@ -4105,6 +4103,9 @@ describe('StreamingEngine', () => {
 
     it('should prefetch all audio variants for the language', async () => {
       const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+      const context = {
+        type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
+      };
 
       expect(segmentPrefetchesCreated).toBe(2);
 
@@ -4120,13 +4121,16 @@ describe('StreamingEngine', () => {
 
       expectHasBuffer();
       expectSegmentRequest(false);
-      netEngine.expectNoRequest('alt_11_audio_0', segmentType);
-      netEngine.expectNoRequest('alt_11_audio_1', segmentType);
+      netEngine.expectNoRequest('alt_11_audio_0', segmentType, context);
+      netEngine.expectNoRequest('alt_11_audio_1', segmentType, context);
       expect(segmentPrefetchesCreated).toBe(3);
     });
 
     it('should not prefetch video if disabled', async () => {
       const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+      const context = {
+        type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
+      };
 
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
       config.segmentPrefetchLimit = 5;
@@ -4147,12 +4151,12 @@ describe('StreamingEngine', () => {
       await runTest();
 
       expectHasBuffer();
-      netEngine.expectNoRequest('alt_11_audio_0', segmentType);
-      netEngine.expectNoRequest('alt_11_audio_1', segmentType);
-      netEngine.expectRequest('0_video_0', segmentType);
-      netEngine.expectRequest('0_video_1', segmentType);
-      netEngine.expectRequest('1_video_2', segmentType);
-      netEngine.expectRequest('1_video_3', segmentType);
+      netEngine.expectNoRequest('alt_11_audio_0', segmentType, context);
+      netEngine.expectNoRequest('alt_11_audio_1', segmentType, context);
+      netEngine.expectRequest('0_video_0', segmentType, context);
+      netEngine.expectRequest('0_video_1', segmentType, context);
+      netEngine.expectRequest('1_video_2', segmentType, context);
+      netEngine.expectRequest('1_video_3', segmentType, context);
       expect(segmentPrefetchesCreated).toBe(2);
     });
 
