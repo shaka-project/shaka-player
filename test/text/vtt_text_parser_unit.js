@@ -1100,8 +1100,29 @@ describe('VttTextParser', () => {
           {
             startTime: 110,
             endTime: 120,
-            payload: '<c.lime>less or more < > in text</c.lime>',
-            nestedCues: [],
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 110,
+                endTime: 120,
+                payload: '',
+                color: 'lime',
+                nestedCues: [
+                  {
+                    startTime: 110,
+                    endTime: 120,
+                    payload: 'less or more ',
+                    color: 'lime',
+                  },
+                  {
+                    startTime: 110,
+                    endTime: 120,
+                    payload: '  in text',
+                    color: 'lime',
+                  },
+                ],
+              },
+            ],
           },
         ],
         'WEBVTT\n\n' +
