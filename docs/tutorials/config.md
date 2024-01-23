@@ -65,6 +65,7 @@ player.getConfiguration();
      playRangeStart: 0
      preferredAudioLanguage: ""
      preferredAudioLabel: ""
+     preferredVideoLabel: ""
      preferredTextLanguage: ""
      restrictions: Object
      streaming: Object

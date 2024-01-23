@@ -16,6 +16,9 @@
 +../../ui/element.js
 +../../ui/fast_forward_button.js
 +../../ui/fullscreen_button.js
++../../ui/hidden_fast_forward_button.js
++../../ui/hidden_rewind_button.js
++../../ui/hidden_seek_button.js
 +../../ui/language_utils.js
 +../../ui/localization.js
 +../../ui/loop_button.js

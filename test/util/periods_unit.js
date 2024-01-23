@@ -572,35 +572,84 @@ describe('PeriodCombiner', () => {
     const variants = combiner.getVariants();
     expect(variants.length).toBe(8);
 
-    // v3 should've been filtered out
+    // v1 should've been filtered out
     const videoIds = variants.map((v) => v.video.originalId);
     for (const id of videoIds) {
-      expect(id).not.toBe('v3');
+      expect(id).not.toBe('v1');
     }
 
-    // a2 should've been filtered out
+    // a1 should've been filtered out
     const audioIds = variants.map((v) => v.audio.originalId);
     for (const id of audioIds) {
-      expect(id).not.toBe('a2');
+      expect(id).not.toBe('a1');
     }
 
     const textStreams = combiner.getTextStreams();
     expect(textStreams.length).toBe(3);
 
-    // t3 should've been filtered out
+    // t1 should've been filtered out
     const textIds = textStreams.map((t) => t.originalId);
     for (const id of textIds) {
-      expect(id).not.toBe('t3');
+      expect(id).not.toBe('t1');
     }
 
     const imageStreams = combiner.getImageStreams();
     expect(imageStreams.length).toBe(2);
 
-    // i3 should've been filtered out
+    // i1 should've been filtered out
     const imageIds = imageStreams.map((i) => i.originalId);
     for (const id of imageIds) {
-      expect(id).not.toBe('i3');
+      expect(id).not.toBe('i1');
     }
+  });
+
+  // Regression test for #6054, where we failed on multi-period content with
+  // different numbers of forced-subtitle streams per period.
+  it('Does not combine subtitle and forced-subtitle tracks', async () => {
+    const videoStreams = [makeVideoStream(1280)];
+    const audioStreams = [makeAudioStream('en', /* channels= */ 2)];
+    const imageStreams = [];
+
+    const forcedSubtitle = makeTextStream('de');
+    forcedSubtitle.roles = ['forced-subtitle'];
+    forcedSubtitle.forced = true;
+
+    const subtitle = makeTextStream('de');
+    subtitle.roles = ['subtitle'];
+
+    /** @type {!Array.<shaka.extern.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams,
+        audioStreams,
+        textStreams: [
+          forcedSubtitle,
+          subtitle,
+        ],
+        imageStreams,
+      },
+      {
+        id: '2',
+        videoStreams,
+        audioStreams,
+        textStreams: [
+          subtitle,
+        ],
+        imageStreams,
+      },
+      {
+        id: '3',
+        videoStreams,
+        audioStreams,
+        textStreams: [],
+        imageStreams,
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ true);
+    const textStreams = combiner.getTextStreams();
+    expect(textStreams.every((s) => s.roles.length === 1)).toBe(true);
   });
 
   // Regression test for #3383, where we failed on multi-period content with

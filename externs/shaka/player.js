@@ -521,7 +521,7 @@ shaka.extern.MetadataFrame;
  *   startTime: number,
  *   endTime: number,
  *   id: string,
- *   eventElement: Element
+ *   eventElement: ?shaka.extern.xml.Node
  * }}
  *
  * @description
@@ -539,7 +539,7 @@ shaka.extern.MetadataFrame;
  *   The presentation time (in seconds) that the region should end.
  * @property {string} id
  *   Specifies an identifier for this instance of the region.
- * @property {Element} eventElement
+ * @property {?shaka.extern.xml.Node} eventElement
  *   The XML element that defines the Event.
  * @exportDoc
  */
@@ -842,6 +842,28 @@ shaka.extern.InitDataTransform;
 
 /**
  * @typedef {{
+ *   tagName: !string,
+ *   attributes: !Object<string, string>,
+ *   children: !Array.<shaka.extern.xml.Node | string>,
+ *   parent: ?shaka.extern.xml.Node
+ * }}
+ *
+ * @description
+ *   Data structure for xml nodes as simple objects
+ *
+ * @property {!string} tagName
+ *   The name of the element
+ * @property {!object} attributes
+ *   The attributes of the element
+ * @property {!Array.<shaka.extern.xml.Node | string>} children
+ *   The child nodes or string body of the element
+ * @property {?shaka.extern.xml.Node} parent
+ *   The parent of the current element
+ */
+shaka.extern.xml.Node;
+
+/**
+ * @typedef {{
  *   clockSyncUri: string,
  *   ignoreDrmInfo: boolean,
  *   disableXlinkProcessing: boolean,
@@ -853,10 +875,12 @@ shaka.extern.InitDataTransform;
  *   ignoreEmptyAdaptationSet: boolean,
  *   ignoreMaxSegmentDuration: boolean,
  *   keySystemsByURI: !Object.<string, string>,
- *   manifestPreprocessor: function(!Element),
+ *   manifestPreprocessor: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
  *   enablePatchMPDSupport: boolean,
- *   enableAudioGroups: boolean
+ *   enableAudioGroups: boolean,
+ *   multiTypeVariantsAllowed: boolean,
+ *   useStreamOnceInPeriodFlattening: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -906,7 +930,7 @@ shaka.extern.InitDataTransform;
  * @property {Object.<string, string>} keySystemsByURI
  *   A map of scheme URI to key system name. Defaults to default key systems
  *   mapping handled by Shaka.
- * @property {function(!Element)} manifestPreprocessor
+ * @property {function(!shaka.extern.xml.Node)} manifestPreprocessor
  *   Called immediately after the DASH manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
@@ -922,6 +946,22 @@ shaka.extern.InitDataTransform;
  *   If set, audio streams will be grouped and filtered by their parent
  *   adaptation set ID.
  *   <i>Defaults to <code>false</code>.</i>
+ * @property {boolean} multiTypeVariantsAllowed
+ *   If true, the manifest parser will create variants that have multiple
+ *   mimeTypes or codecs for video or for audio if there is no other choice.
+ *   Meant for content where some periods are only available in one mimeType or
+ *   codec, and other periods are only available in a different mimeType or
+ *   codec. For example, a stream with baked-in ads where the audio codec does
+ *   not match the main content.
+ *   Might result in undesirable behavior if mediaSource.codecSwitchingStrategy
+ *   is not set to SMOOTH.
+ *   Defaults to true if SMOOTH codec switching is supported, RELOAD overwise.
+ * @property {boolean} useStreamOnceInPeriodFlattening
+ *   If period combiner is used, this option ensures every stream is used
+ *   only once in period flattening. It speeds up underlying algorithm
+ *   but may raise issues if manifest does not have stream consistency
+ *   between periods.
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -1012,12 +1052,12 @@ shaka.extern.HlsManifestConfiguration;
 
 /**
  * @typedef {{
- *   manifestPreprocessor: function(!Element),
+ *   manifestPreprocessor: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
  *   keySystemsBySystemId: !Object.<string, string>
  * }}
  *
- * @property {function(!Element)} manifestPreprocessor
+ * @property {function(!shaka.extern.xml.Node)} manifestPreprocessor
  *   Called immediately after the MSS manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
@@ -1607,8 +1647,10 @@ shaka.extern.OfflineConfiguration;
  *   preferredAudioChannelCount: number,
  *   preferredVideoHdrLevel: string,
  *   preferredVideoLayout: string,
+ *   preferredVideoLabel: string,
  *   preferredDecodingAttributes: !Array.<string>,
  *   preferForcedSubs: boolean,
+ *   preferSpatialAudio: boolean,
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
@@ -1646,6 +1688,8 @@ shaka.extern.OfflineConfiguration;
  *   Changing this during playback will not affect the current playback.
  * @property {string} preferredAudioLabel
  *   The preferred label to use for audio tracks
+ * @property {string} preferredVideoLabel
+ *   The preferred label to use for video tracks
  * @property {string} preferredTextLanguage
  *   The preferred language to use for text tracks.  If a matching text track
  *   is found, and the selected audio and text tracks have different languages,
@@ -1683,6 +1727,8 @@ shaka.extern.OfflineConfiguration;
  *   If the content has no forced captions and the value is true,
  *   no text track is chosen.
  *   Changing this during playback will not affect the current playback.
+ * @property {boolean} preferSpatialAudio
+ *   If true, a spatial audio track is preferred.  Defaults to false.
  * @property {shaka.extern.Restrictions} restrictions
  *   The application restrictions to apply to the tracks.  These are "hard"
  *   restrictions.  Any track that fails to meet these restrictions will not

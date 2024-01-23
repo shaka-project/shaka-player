@@ -450,7 +450,8 @@ describe('MediaSourceEngine', () => {
         /* appendWindowStart= */ 5,
         /* appendWindowEnd= */ 18,
         /* sequenceMode= */ false,
-        fakeStream,
+        fakeStream.mimeType,
+        fakeStream.codecs,
         /* streamsByType= */ new Map());
     expect(buffered(ContentType.VIDEO, 0)).toBe(0);
     await append(ContentType.VIDEO, 0);
@@ -471,7 +472,8 @@ describe('MediaSourceEngine', () => {
         /* appendWindowStart= */ 5,
         /* appendWindowEnd= */ 18,
         /* sequenceMode= */ true,
-        fakeStream,
+        fakeStream.mimeType,
+        fakeStream.codecs,
         /* streamsByType= */ new Map());
     expect(buffered(ContentType.VIDEO, 0)).toBe(0);
     await append(ContentType.VIDEO, 0);
@@ -493,7 +495,8 @@ describe('MediaSourceEngine', () => {
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ 20,
         /* sequenceMode= */ false,
-        fakeStream,
+        fakeStream.mimeType,
+        fakeStream.codecs,
         /* streamsByType= */ new Map());
     await append(ContentType.VIDEO, 0);
     await append(ContentType.VIDEO, 1);
@@ -508,7 +511,8 @@ describe('MediaSourceEngine', () => {
         /* appendWindowStart= */ 20,
         /* appendWindowEnd= */ 35,
         /* sequenceMode= */ false,
-        fakeStream,
+        fakeStream.mimeType,
+        fakeStream.codecs,
         /* streamsByType= */ new Map());
     await append(ContentType.VIDEO, 0);
     await append(ContentType.VIDEO, 1);
@@ -584,7 +588,8 @@ describe('MediaSourceEngine', () => {
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ Infinity,
         /* sequenceMode= */ true,
-        fakeTsStream,
+        fakeTsStream.mimeType,
+        fakeTsStream.codecs,
         /* streamsByType= */ new Map());
 
     const segment = generators[videoType].getSegment(0, Date.now() / 1000);

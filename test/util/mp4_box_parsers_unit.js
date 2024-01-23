@@ -8,18 +8,24 @@ describe('Mp4BoxParsers', () => {
   const videoInitSegmentUri = '/base/test/test/assets/sintel-video-init.mp4';
   const videoSegmentUri = '/base/test/test/assets/sintel-video-segment.mp4';
 
+  const audioInitSegmentXheAacUri = '/base/test/test/assets/audio-xhe-aac.mp4';
+
   /** @type {!ArrayBuffer} */
   let videoInitSegment;
   /** @type {!ArrayBuffer} */
   let videoSegment;
+  /** @type {!ArrayBuffer} */
+  let audioInitSegmentXheAac;
 
   beforeAll(async () => {
     const responses = await Promise.all([
       shaka.test.Util.fetch(videoInitSegmentUri),
       shaka.test.Util.fetch(videoSegmentUri),
+      shaka.test.Util.fetch(audioInitSegmentXheAacUri),
     ]);
     videoInitSegment = responses[0];
     videoSegment = responses[1];
+    audioInitSegmentXheAac = responses[2];
   });
 
   it('parses init segment', () => {
@@ -155,6 +161,36 @@ describe('Mp4BoxParsers', () => {
     expect(Array.isArray(sampleData)).toBe(true);
     expect(defaultSampleDuration).toBe(expectedDefaultSampleDuration);
     expect(baseMediaDecodeTime).toBe(expectedBaseMediaDecodeTime);
+  });
+
+  it('parses ESDS box for xHE-AAC segment', () => {
+    let channelCount;
+    let sampleRate;
+    let codec;
+
+    const Mp4Parser = shaka.util.Mp4Parser;
+    new Mp4Parser()
+        .box('moov', Mp4Parser.children)
+        .box('trak', Mp4Parser.children)
+        .box('mdia', Mp4Parser.children)
+        .box('minf', Mp4Parser.children)
+        .box('stbl', Mp4Parser.children)
+        .fullBox('stsd', Mp4Parser.sampleDescription)
+        .box('mp4a', (box) => {
+          const parsedMP4ABox = shaka.util.Mp4BoxParsers.parseMP4A(box.reader);
+          channelCount = parsedMP4ABox.channelCount;
+          sampleRate = parsedMP4ABox.sampleRate;
+          if (box.reader.hasMoreData()) {
+            Mp4Parser.children(box);
+          }
+        })
+        .box('esds', (box) => {
+          const parsedESDSBox = shaka.util.Mp4BoxParsers.parseESDS(box.reader);
+          codec = parsedESDSBox.codec;
+        }).parse(audioInitSegmentXheAac, /* partialOkay= */ false);
+    expect(channelCount).toBe(2);
+    expect(sampleRate).toBe(48000);
+    expect(codec).toBe('mp4a.40.42');
   });
 
   /**

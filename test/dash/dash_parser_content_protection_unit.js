@@ -9,8 +9,7 @@ describe('DashParser ContentProtection', () => {
   const Dash = shaka.test.Dash;
   const ContentProtection = shaka.dash.ContentProtection;
   const strToXml = (str) => {
-    const parser = new DOMParser();
-    return parser.parseFromString(str, 'application/xml').documentElement;
+    return shaka.util.TXml.parseXmlString(str);
   };
 
   /**

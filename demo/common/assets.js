@@ -7,7 +7,6 @@
 
 /**
  * @fileoverview
- * @suppress {missingRequire}
  */
 
 goog.require('ShakaDemoAssetInfo');
@@ -43,6 +42,7 @@ shakaAssets.Source = {
   AWS: 'AWS',
   BRIGHTCOVE: 'Brightcove',
   BROADPEAK: 'Broadpeak',
+  EZDRM: 'EZDRM',
 };
 
 
@@ -1644,6 +1644,29 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.LIVE),
+  // }}}
+
+  // EZDRM assets {{{
+  /* EZDRM Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Big Buck Bunny (FairPlay)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://na-fps.ezdrm.com/demo/ezdrm/master.m3u8',
+      /* source= */ shakaAssets.Source.EZDRM)
+      .addKeySystem(shakaAssets.KeySystem.FAIRPLAY)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addLicenseServer('com.apple.fps', 'https://fps.ezdrm.com/api/licenses/b99ed9e5-c641-49d1-bfa8-43692b686ddb')
+      .setExtraConfig({
+        drm: {
+          advanced: {
+            'com.apple.fps': {
+              serverCertificateUri: 'https://fps.ezdrm.com/demo/video/eleisure.cer',
+            },
+          },
+        },
+      }),
   // }}}
 ];
 /* eslint-enable max-len */

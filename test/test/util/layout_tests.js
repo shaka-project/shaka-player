@@ -377,7 +377,8 @@ shaka.test.NativeTextLayoutTests = class extends shaka.test.TextLayoutTests {
 
   /** @override */
   recreateTextDisplayer() {
-    this.textDisplayer = new shaka.text.SimpleTextDisplayer(this.video);
+    this.textDisplayer = new shaka.text.SimpleTextDisplayer(
+        this.video, shaka.Player.TextTrackLabel);
     this.textDisplayer.setTextVisibility(true);
   }
 

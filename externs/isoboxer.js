@@ -13,25 +13,33 @@
 /**
  * @typedef {{
  *   Utils: !ISOBoxerUtils,
- *   parseBuffer: function(!(ArrayBuffer|ArrayBufferView)):!ISOBoxer,
+ *   parseBuffer: function(!(ArrayBuffer|ArrayBufferView)):!ISOFile,
  *   createBox: function(string, !ISOBoxer, boolean=):!ISOBoxer,
  *   createFullBox: function(string, !ISOBoxer, ?ISOBoxer=):!ISOBoxer,
  *   addBoxProcessor: function(string, function()):!ISOBoxer,
- *   createFile: function():!ISOBoxer,
- *   write: function():!ArrayBuffer,
- *   fetch: function(!ArrayBuffer):!ISOBoxer
+ *   createFile: function():!ISOFile,
  * }}
  * @property {!ISOBoxerUtils} Utils
- * @property {function(!(ArrayBuffer|ArrayBufferView)):!ISOBoxer} parseBuffer
+ * @property {function(!(ArrayBuffer|ArrayBufferView)):!ISOFile} parseBuffer
  * @property {function(string, !ISOBoxer, boolean=):!ISOBoxer} createBox
  * @property {function(string, !ISOBoxer, ?ISOBoxer=):!ISOBoxer} createFullBox
  * @property {function(string, function()):!ISOBoxer} addBoxProcessor
- * @property {function():!ISOBoxer} createFile
- * @property {function():!ArrayBuffer} write
- * @property {function(!ArrayBuffer):!ISOBoxer} fetch
+ * @property {function():!ISOFile} createFile
  * @const
  */
 var ISOBoxer;
+
+
+/**
+ * @typedef {{
+ *   write: function():!ArrayBuffer,
+ *   fetch: function(string):!ISOBox
+ * }}
+ * @property {function():!ArrayBuffer} write
+ * @property {function(string):!ISOBox} fetch
+ * @const
+ */
+var ISOFile;
 
 
 /**
@@ -91,7 +99,7 @@ var ISOBoxerUtils;
  *   graphicsmode: number,
  *   opcolor: Array.<number>,
  *   balance: number,
- *   entries: Array.<!ISOBox>,
+ *   entries: Array.<!ISOEntry>,
  *   location: string,
  *   data_reference_index: number,
  *   pre_defined1: number,
@@ -119,7 +127,7 @@ var ISOBoxerUtils;
  *   default_sample_size: number,
  *   default_sample_flags: number,
  *   baseMediaDecodeTime: number,
- *   usertype: ?string,
+ *   usertype: (string|null|undefined),
  *   offset: Array.<number>,
  *   sample_info_size: Array.<number>,
  *   data_offset: number
@@ -170,7 +178,7 @@ var ISOBoxerUtils;
  * @property {number} graphicsmode
  * @property {Array.<number>} opcolor
  * @property {number} balance
- * @property {Array.<!ISOBox} entries
+ * @property {Array.<!ISOEntry>} entries
  * @property {string} location
  * @property {number} data_reference_index
  * @property {number} pre_defined1
@@ -198,7 +206,7 @@ var ISOBoxerUtils;
  * @property {number} default_sample_size
  * @property {number} default_sample_flags
  * @property {number} baseMediaDecodeTime
- * @property {?string} usertype
+ * @property {string|null|undefined} usertype
  * @property {Array.<number} offset
  * @property {Array.<number} sample_info_size
  * @property {number} data_offset

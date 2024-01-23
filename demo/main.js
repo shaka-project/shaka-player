@@ -390,6 +390,21 @@ shakaDemo.Main = class {
     const ui = video['ui'];
     this.player_ = ui.getControls().getPlayer();
 
+    // Change the poster by the APIC ID3 if the stream is audio only.
+    this.player_.addEventListener('metadata', (event) => {
+      if (!this.player_.isAudioOnly()) {
+        return;
+      }
+      const payload = event['payload'];
+      if (payload &&
+          payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
+        const url = payload['data'];
+        if (url && url != video.poster) {
+          video.poster = url;
+        }
+      }
+    });
+
     if (!this.noInput_) {
       // Don't add the close button if in noInput mode; it doesn't make much
       // sense to stop playing a video if you can't start playing other videos.
@@ -738,9 +753,19 @@ shakaDemo.Main = class {
     if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_3D)) {
       mimeTypes.push('video/mp4; codecs="dvh1.20.01"');
     }
-    const hasSupportedMimeType = mimeTypes.some((type) => {
+    let hasSupportedMimeType = mimeTypes.some((type) => {
       return this.support_.media[type];
     });
+    if (!hasSupportedMimeType &&
+        !(window.ManagedMediaSource || window.MediaSource) &&
+        !!navigator.vendor && navigator.vendor.includes('Apple')) {
+      if (mimeTypes.includes('video/mp4')) {
+        hasSupportedMimeType = true;
+      }
+      if (mimeTypes.includes('video/mp2t')) {
+        hasSupportedMimeType = true;
+      }
+    }
     if (!hasSupportedMimeType) {
       return 'Your browser does not support the required video format.';
     }
@@ -1258,13 +1283,19 @@ shakaDemo.Main = class {
           /* startTime= */ null,
           asset.mimeType || undefined);
 
-      if (this.player_.isAudioOnly()) {
+      if (this.player_.isAudioOnly() &&
+          this.video_.poster == shakaDemo.Main.mainPoster_) {
         this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
       }
 
       for (const extraText of asset.extraText) {
-        this.player_.addTextTrackAsync(extraText.uri, extraText.language,
-            extraText.kind, extraText.mime, extraText.codecs);
+        if (extraText.mime) {
+          this.player_.addTextTrackAsync(extraText.uri, extraText.language,
+              extraText.kind, extraText.mime, extraText.codecs);
+        } else {
+          this.player_.addTextTrackAsync(extraText.uri, extraText.language,
+              extraText.kind);
+        }
       }
 
       for (const extraThumbnail of asset.extraThumbnail) {

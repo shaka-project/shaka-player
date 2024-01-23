@@ -1,12 +1,32 @@
+# exclude core
 !core
+
+# github
 .git
 .gitattributes
 .gitignore
+.github
 .release-please*
 *.backup
+
+# python
 *.pyc
+
+# directories
 app-engine/
 build/
-docs/api/
 coverage/
-test/test/assets/screenshots/
+demo/
+docs/
+
+# tests
+test/
+karma.conf.js
+
+# dist
+dist/demo.*
+dist/receiver.*
+
+# markdown
+*.md
+!README.md

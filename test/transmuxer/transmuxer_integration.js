@@ -15,7 +15,7 @@
 function checkNoBrokenEdge() {
   const chromeVersion = shaka.util.Platform.chromeVersion();
   if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
-      chromeVersion && chromeVersion <= 118) {
+      chromeVersion && chromeVersion <= 122) {
     // When the tests fail, it's due to the manifest parser failing to find a
     // factory. Attempt to find a factory first, to avoid filtering the tests
     // when running in a non-broken Edge environment.
@@ -66,7 +66,7 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
     const chromeVersion = shaka.util.Platform.chromeVersion();
     if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
-        chromeVersion && chromeVersion <= 118) {
+        chromeVersion && chromeVersion <= 122) {
       return false;
     }
     return true;
@@ -87,7 +87,7 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
     const chromeVersion = shaka.util.Platform.chromeVersion();
     if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
-        chromeVersion && chromeVersion <= 118) {
+        chromeVersion && chromeVersion <= 122) {
       return false;
     }
     return true;

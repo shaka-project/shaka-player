@@ -85,35 +85,6 @@ describe('MssParser Manifest', () => {
   });
 
   describe('fails for', () => {
-    it('invalid XML', async () => {
-      const source = '<not XML';
-      const error = new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.MSS_INVALID_XML,
-          'dummy://foo');
-      await Mss.testFails(source, error);
-    });
-
-    it('XML with inner errors', async () => {
-      const source = [
-        '<SmoothStreamingMedia Duration="1209510000">',
-        '  <StreamIndex Name="audio" Type="audio" Url="uri">',
-        '    <QualityLevel Bitrate="128000" Channels="2" CodecPrivateData="',
-        aacCodecPrivateData,
-        '" FourCC="AACL"/>',
-        '    <c d="20201360"/>',
-        '  </StreamIndex', // Missing a close bracket.
-        '</SmoothStreamingMedia>',
-      ].join('\n');
-      const error = new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.MSS_INVALID_XML,
-          'dummy://foo');
-      await Mss.testFails(source, error);
-    });
-
     it('failed network requests', async () => {
       const expectedError = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -273,11 +244,7 @@ describe('MssParser Manifest', () => {
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.mss.manifestPreprocessor = (mss) => {
-      const selector = 'StreamIndex[Name="text"';
-      const vttElements = mss.querySelectorAll(selector);
-      for (const element of vttElements) {
-        element.parentNode.removeChild(element);
-      }
+      /** @type{shaka.extern.xml.Node} */ (mss).children.pop();
     };
     parser.configure(config);
 

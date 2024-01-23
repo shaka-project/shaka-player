@@ -16,6 +16,7 @@ goog.requireType('shaka.ui.Controls');
 
 /**
  * @extends {shaka.ui.Element}
+ * @implements {shaka.extern.IUIPlayButton}
  * @export
  */
 shaka.ui.PlayButton = class extends shaka.ui.Element {
@@ -72,6 +73,11 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
       this.updateIcon();
     });
 
+    this.eventManager.listen(this.adManager, AdManager.AD_STOPPED, () => {
+      this.updateAriaLabel();
+      this.updateIcon();
+    });
+
     this.eventManager.listen(this.button, 'click', () => {
       if (this.ad && this.ad.isLinear()) {
         this.controls.playPauseAd();
@@ -90,6 +96,7 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
   /**
    * @return {boolean}
    * @protected
+   * @override
    */
   isPaused() {
     if (this.ad && this.ad.isLinear()) {
@@ -97,6 +104,19 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     }
 
     return this.controls.presentationIsPaused();
+  }
+
+  /**
+   * @return {boolean}
+   * @protected
+   * @override
+   */
+  isEnded() {
+    if (this.ad && this.ad.isLinear()) {
+      return false;
+    }
+
+    return this.video.ended;
   }
 
   /**

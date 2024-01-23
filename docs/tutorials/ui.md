@@ -204,11 +204,13 @@ constructor.
 // "local" because it is for local playback only, as opposed to the player proxy
 // object, which will route your calls to the ChromeCast receiver as necessary.
 const localPlayer = new shaka.Player();
-await localPlayer.attach(videoElement);
 // "Overlay" because the UI will add DOM elements inside the container,
 // to visually overlay the video element
 const ui = new shaka.ui.Overlay(localPlayer, videoContainerElement,
   videoElement);
+// Now that the player has been configured to be part of a UI, attach it to the
+// video.
+await localPlayer.attach(videoElement);
 
 // As with DOM-based setup, get access to the UI controls and player from the
 // UI.

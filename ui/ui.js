@@ -237,6 +237,7 @@ shaka.ui.Overlay = class {
         level: 'rgb(255, 255, 255)',
       },
       trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
+      textTrackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
       fadeDelay: 0,
       doubleClickForFullscreen: true,
       singleClickForPlayAndPause: true,
@@ -249,6 +250,8 @@ shaka.ui.Overlay = class {
       fullScreenElement: this.videoContainer_,
       preferDocumentPictureInPicture: true,
       showAudioChannelCountVariants: true,
+      seekOnTaps: true,
+      tapSeekDistance: 10,
     };
 
     // eslint-disable-next-line no-restricted-syntax

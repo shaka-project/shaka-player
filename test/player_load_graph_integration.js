@@ -394,12 +394,16 @@ describe('Player Load Graph', () => {
   // that the player will behave as expected when media source is missing.
   describe('without media source', () => {
     let mediaSource;
+    let managedMediaSource;
 
     beforeEach(async () => {
       // Remove our media source support. In order to remove it, we need to set
       // it via [] notation or else closure will stop us.
       mediaSource = window.MediaSource;
       window['MediaSource'] = undefined;
+      managedMediaSource = window.ManagedMediaSource;
+      window['ManagedMediaSource'] = undefined;
+
 
       createPlayer();
       await shaka.test.Util.delay(/* seconds= */ 0.25);
@@ -409,6 +413,7 @@ describe('Player Load Graph', () => {
       // Restore our media source support to what it was before. If we did not
       // have support before, this will do nothing.
       window['MediaSource'] = mediaSource;
+      window['ManagedMediaSource'] = managedMediaSource;
     });
 
     it('attaching ignores init media source flag', async () => {

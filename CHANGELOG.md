@@ -1,5 +1,53 @@
 # Changelog
 
+## [4.7.0](https://github.com/shaka-project/shaka-player/compare/v4.6.0...v4.7.0) (2023-12-04)
+
+
+### Features
+
+* Add config to allow Media Source recoveries ([#5938](https://github.com/shaka-project/shaka-player/issues/5938)) ([0deb25b](https://github.com/shaka-project/shaka-player/commit/0deb25b57f0612a802ad8fbc8e3e379dff54a57c))
+* Add config to prefer spatial audio ([#5963](https://github.com/shaka-project/shaka-player/issues/5963)) ([90bc6a7](https://github.com/shaka-project/shaka-player/commit/90bc6a7c783103aaa4fca1a6284be338f9ec7301))
+* add preferred video label ([#5948](https://github.com/shaka-project/shaka-player/issues/5948)) ([503327a](https://github.com/shaka-project/shaka-player/commit/503327a0e3570372d85e5cf4af62230ede35b1bf))
+* Add support for Common Media Server Data (CMSD) ([#5900](https://github.com/shaka-project/shaka-player/issues/5900)) ([966b910](https://github.com/shaka-project/shaka-player/commit/966b910edcd3fea03e0276bee1f36ad859a453f6))
+* Avoid streams which cannot fit into the browser's MediaSource quota ([#5937](https://github.com/shaka-project/shaka-player/issues/5937)) ([c496aaf](https://github.com/shaka-project/shaka-player/commit/c496aafaeb505851b6606f6a9567fcaae1930ac7))
+* **DASH:** Add support for location in Content Steering ([#5914](https://github.com/shaka-project/shaka-player/issues/5914)) ([8f453c2](https://github.com/shaka-project/shaka-player/commit/8f453c245fd21c907109f2982c25514869ffb2e3))
+* **DASH:** Handle mixed-codec variants. ([#5950](https://github.com/shaka-project/shaka-player/issues/5950)) ([24e3255](https://github.com/shaka-project/shaka-player/commit/24e32559bff6457aa8a1b356f26d83b6a320b9b2)), closes [#5961](https://github.com/shaka-project/shaka-player/issues/5961)
+* **Demo:** Add field for chapters URL when adding custom content ([#5934](https://github.com/shaka-project/shaka-player/issues/5934)) ([d1bc83d](https://github.com/shaka-project/shaka-player/commit/d1bc83dd53fb596a8ff22a111c26d2331860e303))
+* **Demo:** Add field for text URL when adding custom content ([#5953](https://github.com/shaka-project/shaka-player/issues/5953)) ([5c4a3a2](https://github.com/shaka-project/shaka-player/commit/5c4a3a24558c5b443f78fb4cf234a4f3a60674f1))
+* **Demo:** Use MediaSession action handler in the demo ([#5927](https://github.com/shaka-project/shaka-player/issues/5927)) ([078ab36](https://github.com/shaka-project/shaka-player/commit/078ab36201946ce3f854197e7985dbdc56c6e9dc))
+* expose CEA708 window position in the cue's region ([#5924](https://github.com/shaka-project/shaka-player/issues/5924)) ([2a524bf](https://github.com/shaka-project/shaka-player/commit/2a524bf51fc613b8ebddb5794524cbb3f6366d4b))
+* Fix Media Source recoveries in some cases ([#5966](https://github.com/shaka-project/shaka-player/issues/5966)) ([b2a880b](https://github.com/shaka-project/shaka-player/commit/b2a880b402dd1eeef418383f7bed1a709369d8b4))
+* Improve npm package size ([#5955](https://github.com/shaka-project/shaka-player/issues/5955)) ([ca28063](https://github.com/shaka-project/shaka-player/commit/ca28063427167933fc2ef198a5622610332eefbd))
+* Set baseDelay to 100 by default for low latency streaming ([#5926](https://github.com/shaka-project/shaka-player/issues/5926)) ([515a4ab](https://github.com/shaka-project/shaka-player/commit/515a4ab02b15b11ee5e6873d6eaa80cfaa472482))
+* **UI:** Add double tap to forward/rewind in the video ([#5943](https://github.com/shaka-project/shaka-player/issues/5943)) ([918c30b](https://github.com/shaka-project/shaka-player/commit/918c30b25ae7d193bef82de95d6e0e807426cea9))
+* **UI:** Add more keyboard shortcuts ([#5942](https://github.com/shaka-project/shaka-player/issues/5942)) ([2fcc2f8](https://github.com/shaka-project/shaka-player/commit/2fcc2f8f123a5fe4c43bdebdef7c97edd7b83cb1))
+* **UI:** Hide language and resolution overflow menu button if there's only one choice ([#5928](https://github.com/shaka-project/shaka-player/issues/5928)) ([628bb63](https://github.com/shaka-project/shaka-player/commit/628bb63c4c082b44f749876cf1cb8b3f06887d0b))
+
+
+### Bug Fixes
+
+* **CEA:** Fix positioning in CEA-608 ([#5925](https://github.com/shaka-project/shaka-player/issues/5925)) ([83f6f53](https://github.com/shaka-project/shaka-player/commit/83f6f5379bfaffac0166c08c0a5e038b6b5d439f))
+* **DASH:** Fix bad url when specify using a full WebVTT with BaseURL ([#5954](https://github.com/shaka-project/shaka-player/issues/5954)) ([ba85ece](https://github.com/shaka-project/shaka-player/commit/ba85ece3ac4dd8d2df788f29b8a0530ba110d234))
+* **DASH:** Fix false redirect detection ([#5910](https://github.com/shaka-project/shaka-player/issues/5910)) ([3a68623](https://github.com/shaka-project/shaka-player/commit/3a686239461cd2389ebb11615cd01886421a6fdd))
+* **DASH:** SegmentTemplate@media not updated after change in manifest ([#5899](https://github.com/shaka-project/shaka-player/issues/5899)) ([30de177](https://github.com/shaka-project/shaka-player/commit/30de1771cf598068f5e0b446b36f07eb12676f4d))
+* **Demo:** Allow configure some missing configs ([#5918](https://github.com/shaka-project/shaka-player/issues/5918)) ([c62e38c](https://github.com/shaka-project/shaka-player/commit/c62e38c6e35bdeb2b5c6ecc68c85e9b28d13e39d))
+* **Demo:** Pressing "Edit" button unstores custom asset, but does not update "stored" button ([#5936](https://github.com/shaka-project/shaka-player/issues/5936)) ([82b958f](https://github.com/shaka-project/shaka-player/commit/82b958f3e4e34d2d6952f7f425d9f47a944a1e3b))
+* Fix color detection in text utils ([#5970](https://github.com/shaka-project/shaka-player/issues/5970)) ([68903e1](https://github.com/shaka-project/shaka-player/commit/68903e130ec85585211d5b89ee92d6610aa6e4b3))
+* Fix ESDS box parser ([#5952](https://github.com/shaka-project/shaka-player/issues/5952)) ([7683892](https://github.com/shaka-project/shaka-player/commit/76838921065d71bf31183f5a4b7ac775f24e800b))
+* Fix init segment comparison ([#5920](https://github.com/shaka-project/shaka-player/issues/5920)) ([82ab893](https://github.com/shaka-project/shaka-player/commit/82ab8937e68e2a46002794d86fea1527cbba213e))
+* Fix language comparison in addTextTrackAsync ([#5904](https://github.com/shaka-project/shaka-player/issues/5904)) ([f708318](https://github.com/shaka-project/shaka-player/commit/f7083183c30339e7074d7501a94fabb4ea3166df))
+* Fix reset Media Source when using mixed codecs in different containers ([#5949](https://github.com/shaka-project/shaka-player/issues/5949)) ([419b1c3](https://github.com/shaka-project/shaka-player/commit/419b1c35d8c72c77fe17cb65d43d8f1c0f24f298))
+* Fix trackschanged event not fired after a license request is denied for some tracks ([#5962](https://github.com/shaka-project/shaka-player/issues/5962)) ([4eba182](https://github.com/shaka-project/shaka-player/commit/4eba182826e71040dd2ed55072ecc1a4704ce536))
+* Fix transmuxer when sample has no video data ([#5933](https://github.com/shaka-project/shaka-player/issues/5933)) ([6102060](https://github.com/shaka-project/shaka-player/commit/610206002838157658bdadb608588c4430cf075d))
+* **HLS:** Fix m4s extension detection ([#5951](https://github.com/shaka-project/shaka-player/issues/5951)) ([d89945f](https://github.com/shaka-project/shaka-player/commit/d89945fc78ed671caabb6d8a5a8134630d5f89b4))
+* **HLS:** Provide a fallback to GET request when HEAD request fails ([#5964](https://github.com/shaka-project/shaka-player/issues/5964)) ([fb5a833](https://github.com/shaka-project/shaka-player/commit/fb5a833df86a03d9f282f37fb2a3a61e61fa9c84))
+* **HLS:** Recognize CEA subtitles when CLOSED-CAPTIONS attribute is missing ([#5916](https://github.com/shaka-project/shaka-player/issues/5916)) ([58d4597](https://github.com/shaka-project/shaka-player/commit/58d45976d83d5a2b63bf1c1a2defa018fc5c5d8c))
+* Only append to the buffer init segments when the segment is independent ([#5921](https://github.com/shaka-project/shaka-player/issues/5921)) ([09f2a2e](https://github.com/shaka-project/shaka-player/commit/09f2a2e887459a534d13a7b0a9c3d65c77c4a403))
+* Properly size region anchor from LINE units ([#5941](https://github.com/shaka-project/shaka-player/issues/5941)) ([8b6602e](https://github.com/shaka-project/shaka-player/commit/8b6602ec7c82717a56b672e5c2697856eab44ad2))
+* **UI:** Correctly display video time and duration for VOD ([#5929](https://github.com/shaka-project/shaka-player/issues/5929)) ([00ff864](https://github.com/shaka-project/shaka-player/commit/00ff864c2c948de611ab8959e35194e5d356a751))
+* Unmask errors on LL ([#5908](https://github.com/shaka-project/shaka-player/issues/5908)) ([c898364](https://github.com/shaka-project/shaka-player/commit/c8983646c1d3d1721ed86a5d8376dea84835ad63))
+* **WebVTT:** Fix support for line vertical alignment ([#5945](https://github.com/shaka-project/shaka-player/issues/5945)) ([9f5e461](https://github.com/shaka-project/shaka-player/commit/9f5e46190ca00b1df36d5210852962bb52aac0c4))
+
 ## [4.6.0](https://github.com/shaka-project/shaka-player/compare/v4.5.0...v4.6.0) (2023-11-16)
 
 

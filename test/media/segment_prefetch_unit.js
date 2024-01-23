@@ -201,7 +201,7 @@ describe('SegmentPrefetch', () => {
         /* tileDuration= */ undefined,
         /* syncTime= */ undefined,
         /* status= */ undefined,
-        /* aes128Key= */ null);
+        /* aesKey= */ null);
   }
 
   /**
