@@ -1075,13 +1075,13 @@ describe('VttTextParser', () => {
           {
             startTime: 80,
             endTime: 90,
-            payload: '<b><c.lime>Parse fail 1</b></c.lime>',
+            payload: '<b><c.lime>Parse fail 1</b></c>',
             nestedCues: [],
           },
           {
             startTime: 90,
             endTime: 100,
-            payload: '<c.lime><b>Parse fail 2</c.lime></b>',
+            payload: '<c.lime><b>Parse fail 2</c></b>',
             nestedCues: [],
           },
           {
