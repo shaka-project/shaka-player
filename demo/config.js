@@ -762,29 +762,25 @@ shakaDemo.Config = class {
   addNumberInput_(name, valueName, canBeDecimal = false, canBeZero = true,
       canBeUnset = false, tooltipMessage) {
     const onChange = (input) => {
-      if (valueName !== 'streaming.segmentPrefetchLimit') {
-        shakaDemoMain.resetConfiguration(valueName);
-      }
-      shakaDemoMain.remakeHash();
       if (input.value == 'Infinity') {
         shakaDemoMain.configure(valueName, Infinity);
-        shakaDemoMain.remakeHash();
-        return;
-      }
-      if (input.value == '' && canBeUnset) {
-        return;
-      }
-      const valueAsNumber = Number(input.value);
-      if (valueAsNumber == 0 && !canBeZero) {
-        return;
-      }
-      if (!isNaN(valueAsNumber)) {
-        if (Math.floor(valueAsNumber) != valueAsNumber && !canBeDecimal) {
-          return;
+      } else if (input.value == '' && canBeUnset) {
+        shakaDemoMain.resetConfiguration(valueName);
+      } else {
+        const valueAsNumber = Number(input.value);
+        if (valueAsNumber == 0 && !canBeZero) {
+          shakaDemoMain.resetConfiguration(valueName);
+        } else if (isNaN(valueAsNumber)) {
+          shakaDemoMain.resetConfiguration(valueName);
+        } else {
+          if (Math.floor(valueAsNumber) != valueAsNumber && !canBeDecimal) {
+            shakaDemoMain.resetConfiguration(valueName);
+          } else {
+            shakaDemoMain.configure(valueName, valueAsNumber);
+          }
         }
-        shakaDemoMain.configure(valueName, valueAsNumber);
-        shakaDemoMain.remakeHash();
       }
+      shakaDemoMain.remakeHash();
     };
     this.createRow_(name, tooltipMessage);
     this.latestInput_ = new shakaDemo.NumberInput(
