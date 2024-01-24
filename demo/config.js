@@ -433,6 +433,8 @@ shakaDemo.Config = class {
               'streaming.prefetchAudioLanguages',
               input.value.split(',').filter(Boolean));
         })
+        .addBoolInput_('Disable Audio Prefetch',
+            'streaming.disableAudioPrefetch')
         .addBoolInput_('Disable Video Prefetch',
             'streaming.disableVideoPrefetch')
         .addBoolInput_('Live Sync', 'streaming.liveSync')
