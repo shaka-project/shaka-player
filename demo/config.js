@@ -251,7 +251,7 @@ shakaDemo.Config = class {
         .addBoolInput_('Enabled', 'abr.enabled')
         .addBoolInput_('Use Network Information API',
             'abr.useNetworkInformation')
-        .addNumberInput_('Default Bandwidth EstimatZ',
+        .addNumberInput_('Default Bandwidth Estimate',
             'abr.defaultBandwidthEstimate')
         .addNumberInput_('Bandwidth Downgrade Target',
             'abr.bandwidthDowngradeTarget',
