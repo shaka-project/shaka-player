@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.7.7](https://github.com/shaka-project/shaka-player/compare/v4.7.6...v4.7.7) (2024-01-24)
+
+
+### Bug Fixes
+
+* add missing properties to PlayButton type ([#6130](https://github.com/shaka-project/shaka-player/issues/6130)) ([dcea386](https://github.com/shaka-project/shaka-player/commit/dcea3865e9db5399c6acab3449b62b8e4b38f945))
+* Allow by default variants without pssh in the manifest ([#6144](https://github.com/shaka-project/shaka-player/issues/6144)) ([dad7669](https://github.com/shaka-project/shaka-player/commit/dad766907ff99da29e5e496a05907dc28a319863))
+* Fix detection of spatial rendering support in Cast ([#6138](https://github.com/shaka-project/shaka-player/issues/6138)) ([272751c](https://github.com/shaka-project/shaka-player/commit/272751c52200b46e8545df1f1289e5b40655a550))
+* Fix nalu parsing in TS ([#6137](https://github.com/shaka-project/shaka-player/issues/6137)) ([ec5882f](https://github.com/shaka-project/shaka-player/commit/ec5882fcc319b16193418b3a2831dfdd42aba732))
+* **offline:** Fix store persistent licenses with drm info in the pssh ([#6143](https://github.com/shaka-project/shaka-player/issues/6143)) ([5dc441d](https://github.com/shaka-project/shaka-player/commit/5dc441d5092fb4f53356d433815ccdd882186041))
+
 ## [4.7.6](https://github.com/shaka-project/shaka-player/compare/v4.7.5...v4.7.6) (2024-01-18)
 
 
