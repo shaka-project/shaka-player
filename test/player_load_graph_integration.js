@@ -812,10 +812,12 @@ describe('Player Load Graph', () => {
             return player.detach();
           })
           .set('attach', () => {
-            return player.attach(videoToUse, /* initMediaSource= */ false);
+            return player.attach(
+                videoToUse || video, /* initMediaSource= */ false);
           })
           .set('media-source', () => {
-            return player.attach(videoToUse, /* initMediaSource= */ true);
+            return player.attach(
+                videoToUse || video, /* initMediaSource= */ true);
           })
           .set('load', () => {
             return player.load('test:sintel');
