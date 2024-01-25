@@ -198,7 +198,8 @@ shakaDemo.Config = class {
         .addBoolInput_('Disable Text', 'manifest.disableText')
         .addBoolInput_('Disable Thumbnails', 'manifest.disableThumbnails')
         .addBoolInput_('Enable segment-relative VTT Timing',
-            'manifest.segmentRelativeVttTiming');
+            'manifest.segmentRelativeVttTiming')
+        .addBoolInput_('Low Latency Mode', 'manifest.lowLatencyMode');
   }
 
   /** @private */
@@ -427,8 +428,6 @@ shakaDemo.Config = class {
         .addNumberInput_('Inaccurate Manifest Tolerance',
             'streaming.inaccurateManifestTolerance',
             /* canBeDecimal= */ true)
-        .addBoolInput_('Low Latency Mode', 'streaming.lowLatencyMode')
-        .addBoolInput_('Auto Low Latency Mode', 'streaming.autoLowLatencyMode')
         .addBoolInput_('Force HTTPS', 'streaming.forceHTTPS')
         .addBoolInput_('Prefer native HLS playback when available',
             'streaming.preferNativeHls')

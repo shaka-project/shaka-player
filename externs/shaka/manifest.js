@@ -21,7 +21,8 @@
  *   sequenceMode: boolean,
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   type: string,
- *   serviceDescription: ?shaka.extern.ServiceDescription
+ *   serviceDescription: ?shaka.extern.ServiceDescription,
+ *   lowLatency: boolean
  * }}
  *
  * @description
@@ -93,6 +94,8 @@
  * @property {?shaka.extern.ServiceDescription} serviceDescription
  *   The service description for the manifest. Used to adapt playbackRate to
  *   decrease latency.
+ * @property {boolean} lowLatency
+ *   Indicate if the manifest must be treated as low latency.
  *
  * @exportDoc
  */

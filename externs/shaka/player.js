@@ -1081,7 +1081,8 @@ shaka.extern.MssManifestConfiguration;
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration,
  *   mss: shaka.extern.MssManifestConfiguration,
- *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean
+ *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean,
+ *   lowLatencyMode: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1124,6 +1125,11 @@ shaka.extern.MssManifestConfiguration;
  * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
  *   If true, manifest update request failures will cause a fatal error.
  *   Defaults to <code>false</code> if not provided.
+ * @property {boolean} lowLatencyMode
+ *   If <code>true</code>, low latency mode is enabled. If
+ *   lowLatencyMode is set to true and the manifest is low latency,
+ *   inaccurateManifestTolerance is set to 0, and rebufferingGoal to 0.01.
+ *   Defaults to <code>true</code>.
  *
  * @exportDoc
  */
@@ -1149,8 +1155,6 @@ shaka.extern.ManifestConfiguration;
  *   stallSkip: number,
  *   useNativeHlsOnSafari: boolean,
  *   inaccurateManifestTolerance: number,
- *   lowLatencyMode: boolean,
- *   autoLowLatencyMode: boolean,
  *   forceHTTPS: boolean,
  *   preferNativeHls: boolean,
  *   updateIntervalSeconds: number,
@@ -1247,16 +1251,6 @@ shaka.extern.ManifestConfiguration;
  *   the times in the segments.  Larger values allow us to compensate for more
  *   drift (up to one segment duration).  Smaller values reduce the incidence of
  *   extra segment requests necessary to compensate for drift.
- * @property {boolean} lowLatencyMode
- *   If <code>true</code>, low latency streaming mode is enabled. If
- *   lowLatencyMode is set to true, inaccurateManifestTolerance is set to 0
- *   unless specified, and rebufferingGoal to 0.01 unless specified at the same
- *   time.
- * @property {boolean} autoLowLatencyMode
- *   If the stream is low latency and the user has not configured the
- *   lowLatencyMode, but if it has been configured to activate the
- *   lowLatencyMode if a stream of this type is detected, we automatically
- *   activate the lowLatencyMode. Defaults to false.
  * @property {boolean} forceHTTPS
  *   If true, if the protocol is HTTP change it to HTTPs.
  * @property {boolean} preferNativeHls

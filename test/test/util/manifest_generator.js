@@ -103,6 +103,8 @@ shaka.test.ManifestGenerator.Manifest = class {
     this.type = 'UNKNOWN';
     /** @type {?shaka.extern.ServiceDescription} */
     this.serviceDescription = null;
+    /** @type {boolean} */
+    this.lowLatency = false;
 
 
     /** @type {shaka.extern.Manifest} */

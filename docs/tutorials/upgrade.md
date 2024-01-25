@@ -98,6 +98,8 @@ application:
       (deprecated in v4.3.0)
     - `manifest.dash.manifestPreprocessor` callback now receives a type of `shaka.externs.xml.Node` instead of `Element`.
     - `manifest.mss.manifestPreprocessor` callback now receives a type of `shaka.externs.xml.Node` instead of `Element`.
+    - `streaming.lowLatencyMode` has been renamed to `manifest.lowLatencyMode`
+    - `streaming.autoLowLatencyMode` has been removed
 
   - Plugin changes:
     - `Transmuxer` plugins now has three new parameters in `transmux()` method.

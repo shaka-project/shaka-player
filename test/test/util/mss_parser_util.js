@@ -40,13 +40,11 @@ shaka.test.Mss = class {
       onTimelineRegionAdded: fail,
       onEvent: fail,
       onError: fail,
-      isLowLatencyMode: () => false,
-      isAutoLowLatencyMode: () => false,
-      enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
+      configureLowLatency: () => {},
     };
     const manifest = await mssParser.start('dummy://foo', playerInterface);
     const stream = manifest.variants[0].audio;
@@ -78,13 +76,11 @@ shaka.test.Mss = class {
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
-      isLowLatencyMode: () => false,
-      isAutoLowLatencyMode: () => false,
-      enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
+      configureLowLatency: () => {},
     };
     const p = mssParser.start('dummy://foo', playerInterface);
     await expectAsync(p).toBeRejectedWith(

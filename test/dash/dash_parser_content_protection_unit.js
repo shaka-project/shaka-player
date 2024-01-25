@@ -39,13 +39,11 @@ describe('DashParser ContentProtection', () => {
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
-      isLowLatencyMode: () => false,
-      isAutoLowLatencyMode: () => false,
-      enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
+      configureLowLatency: () => {},
     };
 
     const actual = await dashParser.start(

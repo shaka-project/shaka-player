@@ -49,13 +49,11 @@ describe('DashParser Manifest', () => {
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onError: fail,
-      isLowLatencyMode: () => false,
-      isAutoLowLatencyMode: () => false,
-      enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
+      configureLowLatency: () => {},
     };
   });
 

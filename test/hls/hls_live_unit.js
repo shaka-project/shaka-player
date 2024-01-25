@@ -72,13 +72,11 @@ describe('HlsParser live', () => {
       onError: fail,
       onEvent: fail,
       onTimelineRegionAdded: fail,
-      isLowLatencyMode: () => false,
-      isAutoLowLatencyMode: () => false,
-      enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
+      configureLowLatency: () => {},
     };
 
     parser = new shaka.hls.HlsParser();
@@ -609,8 +607,6 @@ describe('HlsParser live', () => {
         'main.mp4\n',
       ].join('');
 
-      playerInterface.isLowLatencyMode = () => true;
-
       const manifest = await testInitialManifest(master, mediaWithLowLatency);
       // Presentation delay should be the value of 'PART-HOLD-BACK' if not
       // configured.
@@ -664,7 +660,6 @@ describe('HlsParser live', () => {
 
     // Test for https://github.com/shaka-project/shaka-player/issues/4223
     it('parses streams with partial and preload hinted segments', async () => {
-      playerInterface.isLowLatencyMode = () => true;
       const mediaWithPartialSegments = [
         '#EXTM3U\n',
         '#EXT-X-TARGETDURATION:5\n',
@@ -724,7 +719,6 @@ describe('HlsParser live', () => {
     });
 
     it('parses streams with partial and preload hinted segments and BYTERANGE', async () => { // eslint-disable-line max-len
-      playerInterface.isLowLatencyMode = () => true;
       const mediaWithPartialSegments = [
         '#EXTM3U\n',
         '#EXT-X-TARGETDURATION:5\n',
@@ -805,8 +799,6 @@ describe('HlsParser live', () => {
 
     // Test for https://github.com/shaka-project/shaka-player/issues/4223
     it('ignores preload hinted segments without target duration', async () => {
-      playerInterface.isLowLatencyMode = () => true;
-
       // Missing PART-TARGET, so preload hints are skipped.
       const mediaWithPartialSegments = [
         '#EXTM3U\n',
@@ -843,9 +835,6 @@ describe('HlsParser live', () => {
 
     // Test for https://github.com/shaka-project/shaka-player/issues/4185
     it('does not fail on preload hints with LL mode off', async () => {
-      // LL mode must be off for this test!
-      playerInterface.isLowLatencyMode = () => false;
-
       const mediaWithPartialSegments = [
         '#EXTM3U\n',
         '#EXT-X-TARGETDURATION:5\n',
@@ -1073,8 +1062,6 @@ describe('HlsParser live', () => {
         fakeNetEngine.setResponseText(
             'test:/video?_HLS_msn=3&_HLS_skip=YES', mediaWithSkippedSegments2);
 
-        playerInterface.isLowLatencyMode = () => true;
-
         await testInitialManifest(master, mediaWithDeltaUpdates);
 
         fakeNetEngine.request.calls.reset();
@@ -1107,7 +1094,6 @@ describe('HlsParser live', () => {
           'main3.mp4\n',
         ].join('');
 
-        playerInterface.isLowLatencyMode = () => true;
         const ref1 = makeReference(
             'test:/main.mp4', 0, 2, /* syncTime= */ null);
         const ref2 = makeReference(
@@ -1153,8 +1139,6 @@ describe('HlsParser live', () => {
           '#EXTINF:2,\n',
           'main4.mp4\n',
         ].join('');
-
-        playerInterface.isLowLatencyMode = () => true;
 
         const ref1 = makeReference(
             'test:/main.mp4', 0, 2, /* syncTime= */ null,

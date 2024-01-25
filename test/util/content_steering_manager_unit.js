@@ -22,13 +22,11 @@ describe('ContentSteeringManager', () => {
       onTimelineRegionAdded: fail,
       onEvent: fail,
       onError: fail,
-      isLowLatencyMode: fail,
-      isAutoLowLatencyMode: fail,
-      enableLowLatencyMode: fail,
       updateDuration: fail,
       newDrmInfo: fail,
       onManifestUpdated: fail,
       getBandwidthEstimate: () => 1e6,
+      configureLowLatency: () => {},
     };
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     manager = new shaka.util.ContentSteeringManager(playerInterface);

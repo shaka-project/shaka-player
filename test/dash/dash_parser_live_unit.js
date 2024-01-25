@@ -31,13 +31,11 @@ describe('DashParser Live', () => {
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
-      isLowLatencyMode: () => false,
-      isAutoLowLatencyMode: () => false,
-      enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
+      configureLowLatency: () => {},
     };
   });
 
@@ -805,7 +803,6 @@ describe('DashParser Live', () => {
       '</MPD>',
     ].join('\n');
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    playerInterface.isLowLatencyMode = () => true;
 
     Date.now = () => 600000; /* 10 minutes */
     const manifest = await parser.start('dummy://foo', playerInterface);

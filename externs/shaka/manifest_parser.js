@@ -122,13 +122,11 @@ shaka.extern.ManifestParser = class {
  *   onTimelineRegionAdded: function(shaka.extern.TimelineRegionInfo),
  *   onEvent: function(!Event),
  *   onError: function(!shaka.util.Error),
- *   isLowLatencyMode: function():boolean,
- *   isAutoLowLatencyMode: function():boolean,
- *   enableLowLatencyMode: function(),
  *   updateDuration: function(),
  *   newDrmInfo: function(shaka.extern.Stream),
  *   onManifestUpdated: function(),
- *   getBandwidthEstimate: function():number
+ *   getBandwidthEstimate: function():number,
+ *   configureLowLatency: function()
  * }}
  *
  * @description
@@ -152,12 +150,6 @@ shaka.extern.ManifestParser = class {
  *   Should be called to raise events.
  * @property {function(!shaka.util.Error)} onError
  *   Should be called when an error occurs.
- * @property {function():boolean} isLowLatencyMode
- *   Return true if low latency streaming mode is enabled.
- * @property {function():boolean} isAutoLowLatencyMode
- *   Return true if auto low latency streaming mode is enabled.
- * @property {function()} enableLowLatencyMode
- *   Enable low latency streaming mode.
  * @property {function()} updateDuration
  *   Update the presentation duration based on PresentationTimeline.
  * @property {function(shaka.extern.Stream)} newDrmInfo
@@ -167,6 +159,8 @@ shaka.extern.ManifestParser = class {
  *   Should be called when the manifest is updated.
  * @property {function():number} getBandwidthEstimate
  *   Get the estimated bandwidth in bits per second.
+ * @property {function()} configureLowLatency
+ *   Configure low latency streaming mode.
  * @exportDoc
  */
 shaka.extern.ManifestParser.PlayerInterface;

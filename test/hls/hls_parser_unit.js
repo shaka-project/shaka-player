@@ -45,6 +45,8 @@ describe('HlsParser', () => {
   let aesKey;
   /** @type {!boolean} */
   let sequenceMode;
+  /** @type {!boolean} */
+  let lowLatency;
 
   afterEach(() => {
     shaka.log.alwaysWarn = originalAlwaysWarn;
@@ -74,6 +76,7 @@ describe('HlsParser', () => {
 
     config = shaka.util.PlayerConfiguration.createDefault().manifest;
     sequenceMode = config.hls.sequenceMode;
+    lowLatency = false;
     onEventSpy = jasmine.createSpy('onEvent');
     newDrmInfoSpy = jasmine.createSpy('newDrmInfo');
     playerInterface = {
@@ -85,13 +88,11 @@ describe('HlsParser', () => {
       onError: fail,
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onTimelineRegionAdded: fail,
-      isLowLatencyMode: () => false,
-      isAutoLowLatencyMode: () => false,
-      enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: shaka.test.Util.spyFunc(newDrmInfoSpy),
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
+      configureLowLatency: () => {},
     };
 
     parser = new shaka.hls.HlsParser();
@@ -2945,6 +2946,7 @@ describe('HlsParser', () => {
         });
         manifest.sequenceMode = sequenceMode;
         manifest.type = shaka.media.ManifestParser.HLS;
+        manifest.lowLatency = lowLatency;
       });
 
       fakeNetEngine
@@ -3032,7 +3034,7 @@ describe('HlsParser', () => {
     });
 
     it('when there are partial segments', async () => {
-      playerInterface.isLowLatencyMode = () => true;
+      lowLatency = true;
       await test([
         '#EXTM3U\n',
         '#EXT-X-PLAYLIST-TYPE:VOD\n',
