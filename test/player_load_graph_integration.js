@@ -9,6 +9,8 @@ describe('Player Load Graph', () => {
 
   /** @type {!HTMLVideoElement} */
   let video;
+  /** @type {!HTMLVideoElement} */
+  let video2;
   /** @type {shaka.Player} */
   let player;
 
@@ -21,10 +23,13 @@ describe('Player Load Graph', () => {
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
+    video2 = shaka.test.UiUtils.createVideoElement();
+    document.body.appendChild(video2);
   });
 
   afterAll(() => {
     document.body.removeChild(video);
+    document.body.removeChild(video2);
   });
 
   beforeEach(() => {
@@ -508,12 +513,12 @@ describe('Player Load Graph', () => {
 
     it('goes from media source to attach', async () => {
       await startIn('media-source');
-      await goTo('attach');
+      await goTo('attach', video2);
     });
 
     it('goes from media source to media source', async () => {
       await startIn('media-source');
-      await goTo('media-source', 'attach'); // doesn't remake media source
+      await goTo('media-source', video2);
     });
 
     it('goes from media source to load', async () => {
@@ -533,12 +538,12 @@ describe('Player Load Graph', () => {
 
     it('goes from load to attach', async () => {
       await startIn('load');
-      await goTo('attach');
+      await goTo('attach', video2);
     });
 
     it('goes from load to media source', async () => {
       await startIn('load');
-      await goTo('media-source', 'attach'); // doesn't remake media source
+      await goTo('media-source', video2);
     });
 
     it('goes from load to load', async () => {
@@ -558,7 +563,7 @@ describe('Player Load Graph', () => {
 
     it('goes from src equals to attach', async () => {
       await startIn('src-equals');
-      await goTo('attach');
+      await goTo('attach', video2);
     });
 
     it('goes from src equals to media source', async () => {
@@ -584,13 +589,13 @@ describe('Player Load Graph', () => {
 
     it('goes from manifest parser to attach', async () => {
       await passingThrough('manifest-parser', () => {
-        return goTo('attach');
+        return goTo('attach', video2);
       });
     });
 
     it('goes from manifest parser to media source', async () => {
       await passingThrough('manifest-parser', () => {
-        return goTo('media-source', 'attach'); // doesn't remake media source
+        return goTo('media-source', video2);
       });
     });
 
@@ -614,13 +619,13 @@ describe('Player Load Graph', () => {
 
     it('goes from manifest to attach', async () => {
       await passingThrough('manifest', () => {
-        return goTo('attach');
+        return goTo('attach', video2);
       });
     });
 
     it('goes from manifest to media source', async () => {
       await passingThrough('manifest', () => {
-        return goTo('media-source', 'attach'); // doesn't remake media source
+        return goTo('media-source', video2);
       });
     });
 
@@ -644,13 +649,13 @@ describe('Player Load Graph', () => {
 
     it('goes from drm engine to attach', async () => {
       await passingThrough('drm-engine', () => {
-        return goTo('attach');
+        return goTo('attach', video2);
       });
     });
 
     it('goes from drm engine to media source', async () => {
       await passingThrough('drm-engine', () => {
-        return goTo('media-source', 'attach'); // doesn't remake media source
+        return goTo('media-source', video2);
       });
     });
 
@@ -674,7 +679,7 @@ describe('Player Load Graph', () => {
 
     it('goes from unload to attach', async () => {
       await passingThrough('unload', () => {
-        return goTo('attach');
+        return goTo('attach', video2);
       });
     });
 
@@ -797,20 +802,20 @@ describe('Player Load Graph', () => {
      * starting the state change.
      *
      * @param {string} state
-     * @param {string=} expectedState
+     * @param {HTMLVideoElement=} videoToUse
      * @return {!Promise}
      */
-    async function goTo(state, expectedState) {
+    async function goTo(state, videoToUse = video) {
       /** @type {!Map.<string, function():!Promise>} */
       const actions = new Map()
           .set('detach', () => {
             return player.detach();
           })
           .set('attach', () => {
-            return player.attach(video, /* initMediaSource= */ false);
+            return player.attach(videoToUse, /* initMediaSource= */ false);
           })
           .set('media-source', () => {
-            return player.attach(video, /* initMediaSource= */ true);
+            return player.attach(videoToUse, /* initMediaSource= */ true);
           })
           .set('load', () => {
             return player.load('test:sintel');
@@ -822,7 +827,7 @@ describe('Player Load Graph', () => {
       const action = actions.get(state);
       expect(action).toBeTruthy();
       await action();
-      expect(lastStateChange).toBe(expectedState || state);
+      expect(lastStateChange).toBe(state);
     }
   });
 
