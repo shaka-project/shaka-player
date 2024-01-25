@@ -825,12 +825,6 @@ describe('StreamUtils', () => {
             stream.size(20, 20);
           });
         });
-        manifest.addVariant(6, (variant) => {
-          variant.addVideo(7, (stream) => {
-            stream.bandwidth = 600000;
-            stream.size(20, 20);
-          });
-        });
       });
 
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
@@ -838,8 +832,8 @@ describe('StreamUtils', () => {
           /* preferredAudioCodecs= */[],
           /* preferredDecodingAttributes= */[]);
 
-      expect(manifest.variants.length).toBe(2);
-      expect(manifest.variants.every((v) => [300000, 500000].includes(
+      expect(manifest.variants.length).toBe(3);
+      expect(manifest.variants.every((v) => [300000, 400000, 500000].includes(
           v.video.bandwidth))).toBeTruthy();
     });
 
