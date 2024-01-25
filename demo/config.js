@@ -276,7 +276,7 @@ shakaDemo.Config = class {
         .addBoolInput_('Enabled', 'abr.enabled')
         .addBoolInput_('Use Network Information API',
             'abr.useNetworkInformation')
-        .addNumberInput_('Default Bandwidth EstimatZ',
+        .addNumberInput_('Default Bandwidth Estimate',
             'abr.defaultBandwidthEstimate')
         .addNumberInput_('Bandwidth Downgrade Target',
             'abr.bandwidthDowngradeTarget',
@@ -462,6 +462,9 @@ shakaDemo.Config = class {
             'streaming.liveSyncMinPlaybackRate',
             /* canBeDecimal= */ true,
             /* canBeZero= */ false)
+        .addBoolInput_('Live Sync Panic Mode', 'streaming.liveSyncPanicMode')
+        .addNumberInput_('Live Sync Panic Mode Threshold',
+            'streaming.liveSyncPanicThreshold')
         .addBoolInput_('Allow Media Source recoveries',
             'streaming.allowMediaSourceRecoveries')
         .addNumberInput_('Minimum time between recoveries',

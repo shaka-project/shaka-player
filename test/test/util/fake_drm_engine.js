@@ -100,4 +100,11 @@ shaka.test.FakeDrmEngine = class {
     // Copy the values to break the reference to the input value.
     this.offlineSessions_ = sessions.map((s) => s);
   }
+
+  /**
+   * @override
+   */
+  hasManifestInitData() {
+    return true;
+  }
 };
