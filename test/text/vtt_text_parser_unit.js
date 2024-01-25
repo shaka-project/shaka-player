@@ -1105,22 +1105,8 @@ describe('VttTextParser', () => {
               {
                 startTime: 110,
                 endTime: 120,
-                payload: '',
+                payload: 'less or more < > > < in text',
                 color: 'lime',
-                nestedCues: [
-                  {
-                    startTime: 110,
-                    endTime: 120,
-                    payload: 'less or more ',
-                    color: 'lime',
-                  },
-                  {
-                    startTime: 110,
-                    endTime: 120,
-                    payload: '  in text',
-                    color: 'lime',
-                  },
-                ],
               },
             ],
           },
@@ -1143,7 +1129,7 @@ describe('VttTextParser', () => {
         '00:01:40.000 --> 00:01:50.000\n' +
         '<c.lime>forward slash 1/2 in text</c>\n\n' +
         '00:01:50.000 --> 00:02:00.000\n' +
-        '<c.lime>less or more < > in text</c>',
+        '<c.lime>less or more < > > < in text</c>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
