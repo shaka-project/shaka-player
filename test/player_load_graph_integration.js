@@ -143,18 +143,18 @@ describe('Player Load Graph', () => {
 
       // Load 2
       'unload',
-      'media-source',
       'manifest-parser',
       'manifest',
       'drm-engine',
+      'media-source',
       'load',
 
       // Load 3
       'unload',
-      'media-source',
       'manifest-parser',
       'manifest',
       'drm-engine',
+      'media-source',
       'load',
     ]);
   });
