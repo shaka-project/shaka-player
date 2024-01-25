@@ -650,6 +650,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isPiPAllowed() {
+    if (this.castProxy_.isCasting()) {
+      return false;
+    }
     if ('documentPictureInPicture' in window &&
         this.config_.preferDocumentPictureInPicture) {
       const video = /** @type {HTMLVideoElement} */(this.localVideo_);
@@ -1697,6 +1700,21 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   onMouseDown_() {
     this.eventManager_.unlisten(window, 'mousedown');
+  }
+
+  /**
+   * @export
+   */
+  showUI() {
+    const event = new Event('mousemove', {bubbles: false, cancelable: false});
+    this.onMouseMove_(event);
+  }
+
+  /**
+   * @export
+   */
+  hideUI() {
+    this.onMouseLeave_();
   }
 
   /**

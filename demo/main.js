@@ -390,6 +390,21 @@ shakaDemo.Main = class {
     const ui = video['ui'];
     this.player_ = ui.getControls().getPlayer();
 
+    // Change the poster by the APIC ID3 if the stream is audio only.
+    this.player_.addEventListener('metadata', (event) => {
+      if (!this.player_.isAudioOnly()) {
+        return;
+      }
+      const payload = event['payload'];
+      if (payload &&
+          payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
+        const url = payload['data'];
+        if (url && url != video.poster) {
+          video.poster = url;
+        }
+      }
+    });
+
     if (!this.noInput_) {
       // Don't add the close button if in noInput mode; it doesn't make much
       // sense to stop playing a video if you can't start playing other videos.
@@ -1293,7 +1308,8 @@ shakaDemo.Main = class {
             asset.mimeType || undefined);
       }
 
-      if (this.player_.isAudioOnly()) {
+      if (this.player_.isAudioOnly() &&
+          this.video_.poster == shakaDemo.Main.mainPoster_) {
         this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
       }
 

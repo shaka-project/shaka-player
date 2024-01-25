@@ -154,7 +154,7 @@ shaka.test.Util = class {
         (expected['outerHTML'] || expected.textContent) + ': ';
     const getAttr = (obj, attr) => {
       if (attr.namespaceURI) {
-        return shaka.util.XmlUtils.getAttributeNS(
+        return shaka.util.TXml.getAttributeNS(
             obj, attr.namespaceURI, attr.localName);
       } else {
         return obj.getAttribute(attr.localName);
