@@ -1169,6 +1169,8 @@ shaka.extern.ManifestConfiguration;
  *   liveSyncPlaybackRate: number,
  *   liveSyncMinLatency: number,
  *   liveSyncMinPlaybackRate: number,
+ *   liveSyncPanicMode: boolean,
+ *   liveSyncPanicThreshold: number,
  *   allowMediaSourceRecoveries: boolean,
  *   minTimeBetweenRecoveries: number
  * }}
@@ -1270,7 +1272,7 @@ shaka.extern.ManifestConfiguration;
  *   If true, all emsg boxes are parsed and dispatched.
  * @property {boolean} observeQualityChanges
  *   If true, monitor media quality changes and emit
- *   <code.shaka.Player.MediaQualityChangedEvent</code>.
+ *   <code>shaka.Player.MediaQualityChangedEvent</code>.
  * @property {number} maxDisabledTime
  *   The maximum time a variant can be disabled when NETWORK HTTP_ERROR
  *   is reached, in seconds.
@@ -1306,6 +1308,14 @@ shaka.extern.ManifestConfiguration;
  *   Minimum playback rate used for latency chasing. It is recommended to use a
  *   value between 0 and 1. Effective only if liveSync is true. Defaults to
  *   <code>1</code>.
+ * @property {boolean} liveSyncPanicMode
+ *   If <code>true</code>, panic mode for live sync is enabled. When enabled,
+ *   will set the playback rate to the <code>liveSyncMinPlaybackRate</code>
+ *   until playback has continued past a rebuffering for longer than the
+ *   <code>liveSyncPanicThreshold</code>. Defaults to <code>false</code>.
+ * @property {number} liveSyncPanicThreshold
+ *   Number of seconds that playback stays in panic mode after a rebuffering.
+ *   Defaults to <code>60</code>
  * @property {boolean} allowMediaSourceRecoveries
  *   Indicate if we should recover from VIDEO_ERROR resetting Media Source.
  *   Defaults to <code>true</code>.
@@ -1323,7 +1333,8 @@ shaka.extern.StreamingConfiguration;
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   sourceBufferExtraFeatures: string,
  *   forceTransmux: boolean,
-*    insertFakeEncryptionInInit: boolean
+ *   insertFakeEncryptionInInit: boolean,
+ *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback
  * }}
  *
  * @description
@@ -1353,6 +1364,10 @@ shaka.extern.StreamingConfiguration;
  *   time.
  *   <br><br>
  *   This value defaults to <code>true</code>.
+ * @property {shaka.extern.TextParser.ModifyCueCallback} modifyCueCallback
+ *    A callback called for each cue after it is parsed, but right before it
+ *    is appended to the presentation.
+ *    Gives a chance for client-side editing of cue text, cue timing, etc.
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;
