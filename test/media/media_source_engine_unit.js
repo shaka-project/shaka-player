@@ -1496,7 +1496,7 @@ describe('MediaSourceEngine', () => {
       mockTextEngine = jasmine.createSpyObj('TextEngine', [
         'initParser', 'destroy', 'appendBuffer', 'remove', 'setTimestampOffset',
         'setAppendWindow', 'bufferStart', 'bufferEnd', 'bufferedAheadOf',
-        'storeAndAppendClosedCaptions','setModifyCueCallback',
+        'storeAndAppendClosedCaptions', 'setModifyCueCallback',
       ]);
 
       const resolve = () => Promise.resolve();
