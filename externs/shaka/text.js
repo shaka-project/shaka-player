@@ -86,6 +86,16 @@ shaka.extern.TextParser.TimeContext;
 
 
 /**
+ * A callback used for editing cues before appending.
+ * Provides the cue, and the URI of the captions file the cue was parsed from.
+ * You can edit the cue object passed in.
+ * @typedef {function(!shaka.text.Cue, ?string)}
+ * @exportDoc
+ */
+shaka.extern.TextParser.ModifyCueCallback;
+
+
+/**
  * @typedef {function():!shaka.extern.TextParser}
  * @exportDoc
  */

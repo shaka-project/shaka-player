@@ -1328,7 +1328,8 @@ shaka.extern.StreamingConfiguration;
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   sourceBufferExtraFeatures: string,
  *   forceTransmux: boolean,
-*    insertFakeEncryptionInInit: boolean
+ *   insertFakeEncryptionInInit: boolean,
+ *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback
  * }}
  *
  * @description
@@ -1358,6 +1359,10 @@ shaka.extern.StreamingConfiguration;
  *   time.
  *   <br><br>
  *   This value defaults to <code>true</code>.
+ * @property {shaka.extern.TextParser.ModifyCueCallback} modifyCueCallback
+ *    A callback called for each cue after it is parsed, but right before it
+ *    is appended to the presentation.
+ *    Gives a chance for client-side editing of cue text, cue timing, etc.
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;
