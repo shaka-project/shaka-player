@@ -1110,6 +1110,19 @@ describe('VttTextParser', () => {
               },
             ],
           },
+          {
+            startTime: 120,
+            endTime: 130,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 120,
+                endTime: 130,
+                payload: 'arrow in --> text',
+                color: 'lime',
+              },
+            ],
+          },
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
@@ -1129,7 +1142,9 @@ describe('VttTextParser', () => {
         '00:01:40.000 --> 00:01:50.000\n' +
         '<c.lime>forward slash 1/2 in text</c>\n\n' +
         '00:01:50.000 --> 00:02:00.000\n' +
-        '<c.lime>less or more <     >     > <        > >in text ></c>',
+        '<c.lime>less or more <     >     > <        > >in text ></c>\n\n' +
+        '00:02:00.000 --> 00:02:10.000\n' +
+        '<c.lime>arrow in --> text</c>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
