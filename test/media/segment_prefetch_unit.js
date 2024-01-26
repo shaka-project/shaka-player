@@ -51,41 +51,6 @@ describe('SegmentPrefetch', () => {
     );
   });
 
-  describe('prefetchSegments', () => {
-    it('should prefetch next 3 segments', async () => {
-      segmentPrefetch.prefetchSegments(references[0]);
-      await expectSegmentsPrefetched(0);
-      const op = segmentPrefetch.getPrefetchedSegment(references[3]);
-      expect(op).toBeNull();
-      expect(fetchDispatcher).toHaveBeenCalledTimes(3);
-    });
-
-    it('prefetch last segment if position is at the end', async () => {
-      segmentPrefetch.prefetchSegments(references[3]);
-      const op = segmentPrefetch.getPrefetchedSegment(references[3]);
-      expect(op).toBeDefined();
-      const response = await op.promise;
-      const startTime = (3 * 10);
-      expect(response.uri).toBe(uri(startTime + '.' + (startTime + 10)));
-
-      for (let i = 0; i < 3; i++) {
-        const op = segmentPrefetch.getPrefetchedSegment(references[i]);
-        expect(op).toBeNull();
-      }
-      expect(fetchDispatcher).toHaveBeenCalledTimes(1);
-    });
-
-    it('do not prefetch already fetched segment', async () => {
-      segmentPrefetch.prefetchSegments(references[1]);
-      // since 2 was alreay pre-fetched when prefetch 1, expect
-      // no extra fetch is made.
-      segmentPrefetch.prefetchSegments(references[2]);
-
-      expect(fetchDispatcher).toHaveBeenCalledTimes(3);
-      await expectSegmentsPrefetched(1);
-    });
-  });
-
   describe('prefetchSegmentsByTime', () => {
     it('should prefetch next 3 segments', async () => {
       segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
@@ -171,7 +136,7 @@ describe('SegmentPrefetch', () => {
 
   describe('clearAll', () => {
     it('clears all prefetched segments', () => {
-      segmentPrefetch.prefetchSegments(references[0]);
+      segmentPrefetch.prefetchSegmentsByTime(references[0]);
       segmentPrefetch.clearAll();
       for (let i = 0; i < 3; i++) {
         const op = segmentPrefetch.getPrefetchedSegment(references[i]);
@@ -181,14 +146,14 @@ describe('SegmentPrefetch', () => {
     });
 
     it('resets time pos so prefetch can happen again', () => {
-      segmentPrefetch.prefetchSegments(references[3]);
+      segmentPrefetch.prefetchSegmentsByTime(references[3]);
       segmentPrefetch.clearAll();
       for (let i = 0; i < 3; i++) {
         const op = segmentPrefetch.getPrefetchedSegment(references[i]);
         expect(op).toBeNull();
       }
 
-      segmentPrefetch.prefetchSegments(references[3]);
+      segmentPrefetch.prefetchSegmentsByTime(references[3]);
       for (let i = 0; i < 3; i++) {
         const op = segmentPrefetch.getPrefetchedSegment(references[i]);
         expect(op).toBeNull();
@@ -201,7 +166,7 @@ describe('SegmentPrefetch', () => {
   describe('evict', () => {
     it('does not evict a segment that straddles the given time', async () => {
       segmentPrefetch.deleteOnGet(false);
-      segmentPrefetch.prefetchSegments(references[0]);
+      segmentPrefetch.prefetchSegmentsByTime(references[0]);
       segmentPrefetch.evict(5);
       await expectSegmentsPrefetched(0);
       for (let i = 0; i < 3; i++) {
@@ -218,7 +183,7 @@ describe('SegmentPrefetch', () => {
 
     it('segments that end before the provided time', async () => {
       segmentPrefetch.deleteOnGet(false);
-      segmentPrefetch.prefetchSegments(references[0]);
+      segmentPrefetch.prefetchSegmentsByTime(references[0]);
       segmentPrefetch.evict(21);
       for (let i = 0; i < 2; i++) {
         const op = segmentPrefetch.getPrefetchedSegment(references[i]);
@@ -234,7 +199,7 @@ describe('SegmentPrefetch', () => {
     });
 
     it('all prefetched segments, if all before given time', () => {
-      segmentPrefetch.prefetchSegments(references[0]);
+      segmentPrefetch.prefetchSegmentsByTime(references[0]);
       segmentPrefetch.evict(40);
       for (let i = 0; i < 3; i++) {
         const op = segmentPrefetch.getPrefetchedSegment(references[i]);
@@ -246,7 +211,7 @@ describe('SegmentPrefetch', () => {
 
   describe('switchStream', () => {
     it('clears all prefetched segments', () => {
-      segmentPrefetch.prefetchSegments(references[0]);
+      segmentPrefetch.prefetchSegmentsByTime(references[0]);
       segmentPrefetch.switchStream(createStream());
       for (let i = 0; i < 3; i++) {
         const op = segmentPrefetch.getPrefetchedSegment(references[i]);
@@ -256,7 +221,7 @@ describe('SegmentPrefetch', () => {
     });
 
     it('do nothing if its same stream', async () => {
-      segmentPrefetch.prefetchSegments(references[0]);
+      segmentPrefetch.prefetchSegmentsByTime(references[0]);
       segmentPrefetch.switchStream(stream);
       await expectSegmentsPrefetched(0);
     });
@@ -264,19 +229,19 @@ describe('SegmentPrefetch', () => {
 
   describe('resetLimit', () => {
     it('do nothing if the new limit is larger', async () => {
-      segmentPrefetch.prefetchSegments(references[0]);
+      segmentPrefetch.prefetchSegmentsByTime(references[0]);
       segmentPrefetch.resetLimit(4);
       await expectSegmentsPrefetched(0);
     });
 
     it('do nothing if the new limit is the same', async () => {
-      segmentPrefetch.prefetchSegments(references[0]);
+      segmentPrefetch.prefetchSegmentsByTime(references[0]);
       segmentPrefetch.resetLimit(3);
       await expectSegmentsPrefetched(0);
     });
 
     it('clears all prefetched segments beyond new limit', async () => {
-      segmentPrefetch.prefetchSegments(references[0]);
+      segmentPrefetch.prefetchSegmentsByTime(references[0]);
       segmentPrefetch.resetLimit(1);
       // expecting prefetched reference 0 is kept
       await expectSegmentsPrefetched(0, 1);
@@ -289,7 +254,7 @@ describe('SegmentPrefetch', () => {
       // clear all to test the new limit by re-fetching.
       segmentPrefetch.clearAll();
       // prefetch again.
-      segmentPrefetch.prefetchSegments(references[0]);
+      segmentPrefetch.prefetchSegmentsByTime(references[0]);
       // expect only one is prefetched
       await expectSegmentsPrefetched(0, 1);
       // only dispatched fetch one more time.

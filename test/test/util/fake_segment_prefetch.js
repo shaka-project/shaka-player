@@ -52,17 +52,6 @@ shaka.test.FakeSegmentPrefetch = class {
   }
 
   /** @override */
-  prefetchSegments(startReference) {
-    if (!(startReference instanceof shaka.media.SegmentReference) &&
-        !(startReference instanceof shaka.media.InitSegmentReference)) {
-      return;
-    }
-
-    const currTime = startReference.startTime;
-    this.prefetchSegmentsByTime(currTime);
-  }
-
-  /** @override */
   prefetchSegmentsByTime(currTime) {
     const maxTime = Math.max(currTime, this.prefetchPosTime_);
     const iterator = this.streamObj_.segmentIndex.getIteratorForTime(maxTime);
@@ -119,7 +108,7 @@ shaka.test.FakeSegmentPrefetch = class {
     }
     /**
      * The unit tests assume a segment is already prefetched
-     * if it was ever passed to prefetchSegments() as param.
+     * if it was ever passed to prefetchSegmentsByTime() as param.
      * Otherwise return null so the streaming engine being tested
      * will do actual fetch.
      */
@@ -139,7 +128,4 @@ shaka.test.FakeSegmentPrefetch = class {
     }
     return null;
   }
-
-  /** @override */
-  prefetchInitSegment(reference) {}
 };
