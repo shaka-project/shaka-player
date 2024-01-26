@@ -135,6 +135,18 @@ describe('TextEngine', () => {
       textEngine.destroy();
       await p;
     });
+
+    it('calls modifyCueCallback', async () => {
+      const cue1 = createFakeCue(0, 1);
+      const cue2 = createFakeCue(1, 2);
+      const modifyCueCallback = jasmine.createSpy('modifyCueCallback');
+      textEngine.setModifyCueCallback(
+          shaka.test.Util.spyFunc(modifyCueCallback));
+      mockParseMedia.and.returnValue([cue1, cue2]);
+      await textEngine.appendBuffer(dummyData, 0, 3, 'uri');
+      expect(modifyCueCallback).toHaveBeenCalledWith(cue1, 'uri');
+      expect(modifyCueCallback).toHaveBeenCalledWith(cue2, 'uri');
+    });
   });
 
   describe('storeAndAppendClosedCaptions', () => {
