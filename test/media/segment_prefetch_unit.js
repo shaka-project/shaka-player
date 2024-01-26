@@ -85,7 +85,7 @@ describe('SegmentPrefetch', () => {
       await expectSegmentsPrefetched(1);
     });
 
-    it('does prefetch init segment if asked', async () => {
+    it('does prefetch init segment', async () => {
       const references = [
         makeReference(uri('0.10'), 0, 10),
         makeReference(uri('10.20'), 10, 20),
@@ -107,8 +107,7 @@ describe('SegmentPrefetch', () => {
           3, stream, Util.spyFunc(fetchDispatcher),
       );
 
-      segmentPrefetch.prefetchSegmentsByTime(references[0].startTime,
-          /* fetchInit= */ true);
+      segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
 
       for (let i = 0; i < 3; i++) {
         const op = segmentPrefetch.getPrefetchedSegment(references[i]);
@@ -119,18 +118,14 @@ describe('SegmentPrefetch', () => {
         expect(response.uri).toBe(uri(startTime + '.' + (startTime + 10)));
       }
 
-      const op = segmentPrefetch.getPrefetchedSegment(
-          references[0].initSegmentReference);
-      expect(op).not.toBeNull();
-
-      for (let i = 1; i < 3; i++) {
+      for (let i = 0; i < 3; i++) {
         const op = segmentPrefetch.getPrefetchedSegment(
             references[i].initSegmentReference);
-        expect(op).toBeNull();
+        expect(op).not.toBeNull();
       }
-      // this is 4 to account for the init segment,
+      // this is 6 to account for the init segments,
       // which is not part of the prefetch limit
-      expect(fetchDispatcher).toHaveBeenCalledTimes(4);
+      expect(fetchDispatcher).toHaveBeenCalledTimes(6);
     });
   });
 
