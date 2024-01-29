@@ -1159,6 +1159,9 @@ shaka.extern.ManifestConfiguration;
  *   maxDisabledTime: number,
  *   parsePrftBox: boolean,
  *   segmentPrefetchLimit: number,
+ *   prefetchAudioLanguages: !Array<string>,
+ *   disableAudioPrefetch: boolean,
+ *   disableVideoPrefetch: boolean,
  *   liveSync: boolean,
  *   liveSyncMaxLatency: number,
  *   liveSyncPlaybackRate: number,
@@ -1279,11 +1282,22 @@ shaka.extern.ManifestConfiguration;
  *   start date will not change, and would save parsing the segment multiple
  *   times needlessly.
  *   Defaults to <code>false</code>.
- * @property {boolean} segmentPrefetchLimit
+ * @property {number} segmentPrefetchLimit
  *   The maximum number of segments for each active stream to be prefetched
  *   ahead of playhead in parallel.
  *   If <code>0</code>, the segments will be fetched sequentially.
  *   Defaults to <code>0</code>.
+ * @property {!Array<string>} prefetchAudioLanguages
+ *   The audio languages to prefetch.
+ *   Defaults to an empty array.
+ * @property {boolean} disableAudioPrefetch
+ *   If set and prefetch limit is defined, it will prevent from prefetching data
+ *   for audio.
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disableVideoPrefetch
+ *   If set and prefetch limit is defined, it will prevent from prefetching data
+ *   for video.
+ *   Defaults to <code>false</code>.
  * @property {boolean} liveSync
  *   Enable the live stream sync against the live edge by changing the playback
  *   rate. Defaults to <code>false</code>.
