@@ -209,10 +209,10 @@ describe('CmcdManager', () => {
       it('modifies segment request uris', () => {
         const r = ObjectUtils.cloneObject(request);
         cmcdManager.applySegmentData(r, segmentInfo);
-        const uri = 'https://test.com/test.mpd?CMCD=bl%3D21200%2Cbr%3D5234%2Ccid%3D%22' +
-          'testing%22%2Cd%3D3330%2Cmtp%3D10000%2Cot%3Dv%2Csf%3Dd%2C' +
-          'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Cst%3Dv%2Csu%2C' +
-          'tb%3D4000';
+        const uri = 'https://test.com/test.mpd?CMCD=bl%3D21200%2Cbr%3D5234%' +
+          '2Ccid%3D%22testing%22%2Cd%3D3330%2Cdl%3D21200%2Cmtp%3D10000%2Cot%' +
+          '3Dv%2Csf%3Dd%2Csid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2' +
+          'Cst%3Dv%2Csu%2Ctb%3D4000';
         expect(r.uris[0]).toBe(uri);
       });
 
@@ -250,7 +250,7 @@ describe('CmcdManager', () => {
         expect(r.headers).toEqual({
           'testing': '1234',
           'CMCD-Object': 'br=5234,d=3330,ot=v,tb=4000',
-          'CMCD-Request': 'bl=21200,mtp=10000,su',
+          'CMCD-Request': 'bl=21200,dl=21200,mtp=10000,su',
           'CMCD-Session': 'cid="testing",sf=d,' +
                           'sid="2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3",st=v',
         });
