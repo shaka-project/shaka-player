@@ -1164,12 +1164,17 @@ shaka.extern.ManifestConfiguration;
  *   disableTextPrefetch: boolean,
  *   disableVideoPrefetch: boolean,
  *   liveSync: boolean,
+ *   liveSyncTargetLatency: number,
+ *   liveSyncTargetLatencyTolerance: number,
  *   liveSyncMaxLatency: number,
  *   liveSyncPlaybackRate: number,
  *   liveSyncMinLatency: number,
  *   liveSyncMinPlaybackRate: number,
  *   liveSyncPanicMode: boolean,
  *   liveSyncPanicThreshold: number,
+ *   liveSyncDynamicTargetLatency: boolean,
+ *   liveSyncDynamicTargetLatencyStabilityThreshold: number,
+ *   liveSyncDynamicTargetLatencyRebufferIncrement: number,
  *   allowMediaSourceRecoveries: boolean,
  *   minTimeBetweenRecoveries: number,
  *   vodDynamicPlaybackRate: boolean,
@@ -1312,6 +1317,12 @@ shaka.extern.ManifestConfiguration;
  *   rate. Defaults to <code>false</code>.
  *   Note: on some SmartTVs, if this is activated, it may not work or the sound
  *   may be lost when activated.
+ * @property {number} liveSyncTargetLatency
+ *   Preferred latency, in seconds. Effective only if liveSync is true.
+ *   Defaults to <code>0.5</code>.
+ * @property {number} liveSyncTargetLatencyTolerance
+ *   Latency tolerance for target latency, in seconds. Effective only if
+ *   liveSync is true. Defaults to <code>0.5</code>.
  * @property {number} liveSyncMaxLatency
  *   Maximum acceptable latency, in seconds. Effective only if liveSync is
  *   true. Defaults to <code>1</code>.
@@ -1334,6 +1345,23 @@ shaka.extern.ManifestConfiguration;
  * @property {number} liveSyncPanicThreshold
  *   Number of seconds that playback stays in panic mode after a rebuffering.
  *   Defaults to <code>60</code>
+ * @property {boolean} liveSyncDynamicTargetLatency
+ *   If <code>true</code>, dynamic latency for live sync is enabled. When
+ *   enabled, the target latency will be adjusted closer to the min latency
+ *   when playback is stable
+ *   (see <code>liveSyncDynamicTargetLatencyStabilityThreshold</code>). If
+ *   there are rebuffering events, then the target latency will move towards
+ *   the max latency value in increments of
+ *   <code>liveSyncDynamicTargetLatencyRebufferIncrement</code>. Defaults to
+ *   <code>false</code>.
+ * @property {number} liveSyncDynamicTargetLatencyRebufferIncrement
+ *   The value, in seconds, to increment the target latency towards
+ *   <code>liveSyncMaxLatency</code> after a rebuffering event. Defaults to
+ *   <code>0.5</code>.
+ * @property {number} liveSyncDynamicTargetLatencyStabilityThreshold
+ *   Number of seconds after a rebuffering before we are considered stable and
+ *   will move the target latency towards <code>liveSyncMinLatency</code>
+ *   value. Defaults to <code>60</code>
  * @property {boolean} allowMediaSourceRecoveries
  *   Indicate if we should recover from VIDEO_ERROR resetting Media Source.
  *   Defaults to <code>true</code>.
