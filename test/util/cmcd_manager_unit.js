@@ -9,8 +9,9 @@ describe('CmcdManager', () => {
   const uuidRegex =
     '[A-F\\d]{8}-[A-F\\d]{4}-4[A-F\\d]{3}-[89AB][A-F\\d]{3}-[A-F\\d]{12}';
   const sidRegex = new RegExp(`sid%3D%22${uuidRegex}%22`, 'i');
+  const sessionId = 'c936730c-031e-4a73-976f-92bc34039c60';
   const data = {
-    'sid': 'c936730c-031e-4a73-976f-92bc34039c60',
+    'sid': sessionId,
     'cid': 'xyz',
     'su': false,
     'nor': '../testing/3.m4v',
@@ -199,17 +200,17 @@ describe('CmcdManager', () => {
         cmcdManager.applyManifestData(r, manifestInfo);
         expect(r.uris[0].includes(sid)).toBe(true);
 
-        config.sessionId = data.sid;
+        config.sessionId = sessionId;
         cmcdManager.configure(config);
         cmcdManager.applyManifestData(r, manifestInfo);
         expect(r.uris[0].includes(sid)).toBe(false);
-        expect(r.uris[0].includes(data.sid)).toBe(true);
+        expect(r.uris[0].includes(sessionId)).toBe(true);
 
         config.sessionId = '';
         cmcdManager.configure(config);
         cmcdManager.applyManifestData(r, manifestInfo);
         expect(r.uris[0].includes(sid)).toBe(false);
-        expect(r.uris[0].includes(data.sid)).toBe(false);
+        expect(r.uris[0].includes(sessionId)).toBe(false);
         expect(sidRegex.test(r.uris[0])).toBe(true);
       });
     });
