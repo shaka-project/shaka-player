@@ -45,6 +45,7 @@ for the up-to-date list of maintained branches of Shaka Player.
 |Chromecast².  | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Tizen TV³     | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |WebOS⁶        | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
+|Hisense⁷      | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Xbox One      | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Playstation 4⁷| -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Playstation 5⁷| -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
@@ -168,18 +169,19 @@ MSS features **not** supported:
 
 ## DRM support matrix
 
-|Browser   |Widevine  |PlayReady|FairPlay |ClearKey⁶ |
-|:--------:|:--------:|:-------:|:-------:|:--------:|
-|Chrome¹   |**Y**     | -       | -       |**Y**     |
-|Firefox²  |**Y**     | -       | -       |**Y**     |
-|Edge³     | -        |**Y**    | -       | -        |
-|Edge Chromium|**Y**     |**Y**    | -       |**Y**     |
-|Safari    | -        | -       |**Y**    | -        |
-|Opera     |untested⁵ | -       | -       |untested⁵ |
-|Chromecast|**Y**     |**Y**    | -       |untested⁵ |
-|Tizen TV  |**Y**     |**Y**    | -       |untested⁵ |
-|WebOS⁷    |untested⁷ |untested⁷| -       |untested⁷ |
-|Xbox One  | -        |**Y**    | -       | -        |
+|Browser       |Widevine  |PlayReady|FairPlay |ClearKey⁶ |
+|:------------:|:--------:|:-------:|:-------:|:--------:|
+|Chrome¹       |**Y**     | -       | -       |**Y**     |
+|Firefox²      |**Y**     | -       | -       |**Y**     |
+|Edge³         | -        |**Y**    | -       | -        |
+|Edge Chromium |**Y**     |**Y**    | -       |**Y**     |
+|Safari        | -        | -       |**Y**    | -        |
+|Opera         |untested⁵ | -       | -       |untested⁵ |
+|Chromecast    |**Y**     |**Y**    | -       |untested⁵ |
+|Tizen TV      |**Y**     |**Y**    | -       |untested⁵ |
+|WebOS⁷        |untested⁷ |untested⁷| -       |untested⁷ |
+|Hisense⁷      |untested⁷ |untested⁷| -       |untested⁷ |
+|Xbox One      | -        |**Y**    | -       | -        |
 |Playstation 4⁷| -        |untested⁷| -       |untested⁷ |
 |Playstation 5⁷| -        |untested⁷| -       |untested⁷ |
 
