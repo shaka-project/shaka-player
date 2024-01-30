@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.7.8](https://github.com/shaka-project/shaka-player/compare/v4.7.7...v4.7.8) (2024-01-30)
+
+
+### Bug Fixes
+
+* AC-3 audio codec support on Tizen ([#6166](https://github.com/shaka-project/shaka-player/issues/6166)) ([5cf7192](https://github.com/shaka-project/shaka-player/commit/5cf7192dbe34ca9b72d354dda1101b32af6bda35))
+* **Ads:** Fix initial ads configuration ([#6176](https://github.com/shaka-project/shaka-player/issues/6176)) ([2a471e3](https://github.com/shaka-project/shaka-player/commit/2a471e3409f4b8ecabbbffd4d85a86b99dde19dd))
+* **CMCD:** Allow reconfigure session ID ([#6177](https://github.com/shaka-project/shaka-player/issues/6177)) ([a9b4dac](https://github.com/shaka-project/shaka-player/commit/a9b4dacea04de71feefca101665af241ffc6ecb1))
+* **CMCD:** Fix CMCD for some mimetypes in src= ([#6178](https://github.com/shaka-project/shaka-player/issues/6178)) ([82526b4](https://github.com/shaka-project/shaka-player/commit/82526b4fb4ac54a88a3078545a8896c33a90800a))
+* Fix wrong aspect ratio in transmuxed videos ([#6170](https://github.com/shaka-project/shaka-player/issues/6170)) ([0b646aa](https://github.com/shaka-project/shaka-player/commit/0b646aa3353939814bf0586dae73fe7ebb55a1ed))
+* **HLS:** Fix VVC codec selection in HLS ([#6156](https://github.com/shaka-project/shaka-player/issues/6156)) ([245dd5a](https://github.com/shaka-project/shaka-player/commit/245dd5abde01c3cbb1b27e0b7f3a4b3584960eb8))
+* **HLS:** Set the bandwidth correctly for audio/video-only variants ([#6165](https://github.com/shaka-project/shaka-player/issues/6165)) ([21c1c56](https://github.com/shaka-project/shaka-player/commit/21c1c56c0fc4c8bff371871b840a25d18616668f))
+* player Dropping Variant (better codec available) when it should not ([#6163](https://github.com/shaka-project/shaka-player/issues/6163)) ([65cafab](https://github.com/shaka-project/shaka-player/commit/65cafab4fb1d60d4d7db7896d9827bf20ad85f6f))
+
 ## [4.7.7](https://github.com/shaka-project/shaka-player/compare/v4.7.6...v4.7.7) (2024-01-24)
 
 
