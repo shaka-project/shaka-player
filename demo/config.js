@@ -444,7 +444,19 @@ shakaDemo.Config = class {
         .addBoolInput_('Parse PRFT box',
             'streaming.parsePrftBox')
         .addNumberInput_('Segment Prefetch Limit',
-            'streaming.segmentPrefetchLimit')
+            'streaming.segmentPrefetchLimit',
+            /* canBeDecimal= */ false,
+            /* canBeZero= */ true,
+            /* canBeUnset= */ true)
+        .addCustomTextInput_('Prefetch audio languages', (input) => {
+          shakaDemoMain.configure(
+              'streaming.prefetchAudioLanguages',
+              input.value.split(',').filter(Boolean));
+        })
+        .addBoolInput_('Disable Audio Prefetch',
+            'streaming.disableAudioPrefetch')
+        .addBoolInput_('Disable Video Prefetch',
+            'streaming.disableVideoPrefetch')
         .addBoolInput_('Live Sync', 'streaming.liveSync')
         .addNumberInput_('Max latency for live sync',
             'streaming.liveSyncMaxLatency',
@@ -775,27 +787,25 @@ shakaDemo.Config = class {
   addNumberInput_(name, valueName, canBeDecimal = false, canBeZero = true,
       canBeUnset = false, tooltipMessage) {
     const onChange = (input) => {
-      shakaDemoMain.resetConfiguration(valueName);
-      shakaDemoMain.remakeHash();
       if (input.value == 'Infinity') {
         shakaDemoMain.configure(valueName, Infinity);
-        shakaDemoMain.remakeHash();
-        return;
-      }
-      if (input.value == '' && canBeUnset) {
-        return;
-      }
-      const valueAsNumber = Number(input.value);
-      if (valueAsNumber == 0 && !canBeZero) {
-        return;
-      }
-      if (!isNaN(valueAsNumber)) {
-        if (Math.floor(valueAsNumber) != valueAsNumber && !canBeDecimal) {
-          return;
+      } else if (input.value == '' && canBeUnset) {
+        shakaDemoMain.resetConfiguration(valueName);
+      } else {
+        const valueAsNumber = Number(input.value);
+        if (valueAsNumber == 0 && !canBeZero) {
+          shakaDemoMain.resetConfiguration(valueName);
+        } else if (isNaN(valueAsNumber)) {
+          shakaDemoMain.resetConfiguration(valueName);
+        } else {
+          if (Math.floor(valueAsNumber) != valueAsNumber && !canBeDecimal) {
+            shakaDemoMain.resetConfiguration(valueName);
+          } else {
+            shakaDemoMain.configure(valueName, valueAsNumber);
+          }
         }
-        shakaDemoMain.configure(valueName, valueAsNumber);
-        shakaDemoMain.remakeHash();
       }
+      shakaDemoMain.remakeHash();
     };
     this.createRow_(name, tooltipMessage);
     this.latestInput_ = new shakaDemo.NumberInput(

@@ -81,7 +81,8 @@ describe('Demo', () => {
           .add('drm.keySystemsMapping')
           .add('manifest.raiseFatalErrorOnManifestUpdateRequestFailure')
           .add('drm.persistentSessionOnlinePlayback')
-          .add('drm.persistentSessionsMetadata');
+          .add('drm.persistentSessionsMetadata')
+          .add('mediaSource.modifyCueCallback');
 
       /**
        * @param {!Object} section
