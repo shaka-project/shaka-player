@@ -1236,6 +1236,16 @@ describe('Player', () => {
     });
   });
 
+  describe('preload', () => {
+    it('performs tasks during preload and not load', async () => {
+      const preloadManager = await player.preload(
+          fakeManifestUri, 0, fakeMimeType);
+      await preloadManager.waitForFinish();
+      shaka.media.ManifestParser.registerParserByMime(fakeMimeType, fail);
+      await player.load(preloadManager);
+    });
+  });
+
   describe('resetConfiguration', () => {
     it('resets configurations to default', () => {
       const default_ = player.getConfiguration().streaming.bufferingGoal;

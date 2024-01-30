@@ -1369,6 +1369,14 @@ describe('Player', () => {
         });
   });  // describe('addThumbnailsTrack')
 
+  it('preload', async () => {
+    const preloadManager = await player.preload('test:sintel_compiled');
+    await preloadManager.waitForFinish();
+    await player.load(preloadManager);
+    await video.play();
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+  });
+
   it('unloadAndSavePreload', async () => {
     await player.load('test:sintel_compiled');
     await video.play();
