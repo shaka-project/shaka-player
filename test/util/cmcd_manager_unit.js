@@ -125,6 +125,7 @@ describe('CmcdManager', () => {
       enabled: false,
       sessionId: '',
       contentId: 'testing',
+      rtpSafetyFactor: 5,
       useHeaders: false,
     };
 

@@ -1510,7 +1510,8 @@ shaka.extern.AdvancedAbrConfiguration;
  *   enabled: boolean,
  *   useHeaders: boolean,
  *   sessionId: string,
- *   contentId: string
+ *   contentId: string,
+ *   rtpSafetyFactor: number
  * }}
  *
  * @description
@@ -1533,6 +1534,9 @@ shaka.extern.AdvancedAbrConfiguration;
  *   characters. This value is consistent across multiple different sessions and
  *   devices and is defined and updated at the discretion of the service
  *   provider.
+ * @property {number} rtpSafetyFactor
+ *   RTP safety factor.
+ *   Defaults to <code>5</code>.
  * @exportDoc
  */
 shaka.extern.CmcdConfiguration;
