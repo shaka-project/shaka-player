@@ -607,6 +607,23 @@ describe('DashParser Live', () => {
     expect(onError).toHaveBeenCalledTimes(1);
   });
 
+  it('still updates when @minimumUpdatePeriod is zero', async () => {
+    const lines = [
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
+    ];
+    // updateTime parameter sets @minimumUpdatePeriod in the manifest.
+    const manifestText = makeSimpleLiveManifestText(lines, /* updateTime= */ 0);
+
+    /** @type {!jasmine.Spy} */
+    const tickAfter = updateTickSpy();
+    Date.now = () => 0;
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    await parser.start('dummy://foo', playerInterface);
+
+    expect(tickAfter).toHaveBeenCalledTimes(1);
+  });
+
   it('uses @minimumUpdatePeriod', async () => {
     const lines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
