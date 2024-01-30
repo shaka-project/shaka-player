@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.6.12](https://github.com/shaka-project/shaka-player/compare/v4.6.11...v4.6.12) (2024-01-30)
+
+
+### Bug Fixes
+
+* AC-3 audio codec support on Tizen ([#6166](https://github.com/shaka-project/shaka-player/issues/6166)) ([77121fa](https://github.com/shaka-project/shaka-player/commit/77121fa033ced17a4e627bd22363c2d4701c2cc3))
+* **Ads:** Fix initial ads configuration ([#6176](https://github.com/shaka-project/shaka-player/issues/6176)) ([4b997a9](https://github.com/shaka-project/shaka-player/commit/4b997a95691a5cd61417f488d155aca32b071c89))
+* **CMCD:** Allow reconfigure session ID ([#6177](https://github.com/shaka-project/shaka-player/issues/6177)) ([a9e7fa5](https://github.com/shaka-project/shaka-player/commit/a9e7fa59f84f3036f4a530ccdf28ee158aa7b029))
+* **CMCD:** Fix CMCD for some mimetypes in src= ([#6178](https://github.com/shaka-project/shaka-player/issues/6178)) ([bbb1ebb](https://github.com/shaka-project/shaka-player/commit/bbb1ebb9e5007820b9a60e5835369150bd5ac369))
+* Fix wrong aspect ratio in transmuxed videos ([#6170](https://github.com/shaka-project/shaka-player/issues/6170)) ([d8e08fb](https://github.com/shaka-project/shaka-player/commit/d8e08fb05e7f796d8180f7999a5d86c5def25eba))
+* **HLS:** Fix VVC codec selection in HLS ([#6156](https://github.com/shaka-project/shaka-player/issues/6156)) ([00b73c8](https://github.com/shaka-project/shaka-player/commit/00b73c8ea2d02d8b29ce9a16cff982e0d19a6bc4))
+* player Dropping Variant (better codec available) when it should not ([#6163](https://github.com/shaka-project/shaka-player/issues/6163)) ([fb1214d](https://github.com/shaka-project/shaka-player/commit/fb1214d50f117a2e6c57674b6d5b368de368b520))
+
 ## [4.6.11](https://github.com/shaka-project/shaka-player/compare/v4.6.10...v4.6.11) (2024-01-24)
 
 
