@@ -1877,7 +1877,6 @@ shakaDemo.Main.commonDrmSystems = [
   'com.widevine.alpha',
   'com.microsoft.playready',
   'com.apple.fps',
-  'com.adobe.primetime',
   'org.w3.clearkey',
 ];
 
