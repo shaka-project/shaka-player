@@ -1454,9 +1454,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.LCEVC)
       .addDescription('LCEVC Enhanced eSports content selection.')
       .setExtraConfig({
-        streaming: {
-          useNativeHlsOnSafari: false,
-        },
         mediaSource: {
           forceTransmux: true,
         },
@@ -1496,9 +1493,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
       .setExtraConfig({
-        streaming: {
-          useNativeHlsOnSafari: false,
-        },
         mediaSource: {
           forceTransmux: true,
         },
@@ -1520,9 +1514,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
       .setExtraConfig({
-        streaming: {
-          useNativeHlsOnSafari: false,
-        },
         mediaSource: {
           forceTransmux: true,
         },

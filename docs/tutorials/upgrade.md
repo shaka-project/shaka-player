@@ -98,6 +98,7 @@ application:
       (deprecated in v4.3.0)
     - `manifest.dash.manifestPreprocessor` callback now receives a type of `shaka.externs.xml.Node` instead of `Element`.
     - `manifest.mss.manifestPreprocessor` callback now receives a type of `shaka.externs.xml.Node` instead of `Element`.
+    - `streaming.useNativeHlsOnSafari` has removed. Now we have another config to do the same for FairPlay `streaming.useNativeHlsForFairPlay` or for HLS (any browser) `streaming.preferNativeHls`.
 
   - Plugin changes:
     - `Transmuxer` plugins now has three new parameters in `transmux()` method.
