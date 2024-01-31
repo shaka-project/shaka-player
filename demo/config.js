@@ -477,14 +477,15 @@ shakaDemo.Config = class {
         .addNumberInput_('Playback rate for live sync',
             'streaming.liveSyncPlaybackRate',
             /* canBeDecimal= */ true,
-            /* canBeZero= */ false)
+            /* canBeZero= */ true)
         .addNumberInput_('Min latency for live sync',
             'streaming.liveSyncMinLatency',
             /* canBeDecimal= */ true,
             /* canBeZero= */ true)
         .addNumberInput_('Min playback rate for live sync',
             'streaming.liveSyncMinPlaybackRate',
-            /* canBeDecimal= */ true)
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
         .addBoolInput_('Live Sync Panic Mode', 'streaming.liveSyncPanicMode')
         .addNumberInput_('Live Sync Panic Mode Threshold',
             'streaming.liveSyncPanicThreshold')
@@ -493,7 +494,9 @@ shakaDemo.Config = class {
         .addNumberInput_('Dynamic Target Latency Stability Threshold',
             'streaming.liveSyncDynamicTargetLatencyStabilityThreshold')
         .addNumberInput_('Dynamic Target Latency Rebuffer Increment',
-            'streaming.liveSyncDynamicTargetLatencyRebufferIncrement')
+            'streaming.liveSyncDynamicTargetLatencyRebufferIncrement',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
         .addBoolInput_('Allow Media Source recoveries',
             'streaming.allowMediaSourceRecoveries')
         .addNumberInput_('Minimum time between recoveries',
