@@ -1012,6 +1012,9 @@ describe('Player', () => {
     });
 
     it('buffers ahead of the playhead', async () => {
+      if (window.ManagedMediaSource) {
+        pending('ManagedMediaSource has buffer control signals.');
+      }
       player.configure('streaming.bufferingGoal', 10);
 
       await player.load('test:sintel_long_compiled');
@@ -1036,6 +1039,9 @@ describe('Player', () => {
     });
 
     it('clears buffer behind playhead', async () => {
+      if (window.ManagedMediaSource) {
+        pending('ManagedMediaSource has buffer control signals.');
+      }
       player.configure('streaming.bufferingGoal', 30);
       player.configure('streaming.bufferBehind', 30);
 

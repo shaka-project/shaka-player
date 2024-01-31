@@ -1434,10 +1434,12 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://reference.dashif.org/dash.js/latest/samples/lib/img/mss-1.jpg',
       /* manifestUri= */ 'https://test.playready.microsoft.com/smoothstreaming/SSWSS720H264PR/SuperSpeedway_720.ism/Manifest',
       /* source= */ shakaAssets.Source.MICROSOFT)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
       .addFeature(shakaAssets.Feature.MSS)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
-      .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)'),
+      .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)')
+      .setMimeType('application/vnd.ms-sstr+xml'),
   // }}}
 
   // MPEG-5 LCEVC assets {{{
