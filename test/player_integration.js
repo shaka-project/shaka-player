@@ -59,6 +59,46 @@ describe('Player', () => {
     document.body.removeChild(video);
   });
 
+  describe('seek range', () => {
+    // Regression test for Issue #3675.
+    it('has a reasonable seek range after going from live to VOD', async () => {
+      const netEngine = player.getNetworkingEngine();
+      const startTime = Date.now();
+      netEngine.registerRequestFilter((type, request) => {
+        if (type != shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+          return;
+        }
+        // Simulate a live stream by providing different manifests over time.
+        const time = (Date.now() - startTime) / 1000;
+        const manifestNumber = Math.min(5, Math.floor(0.5 + time / 2));
+        request.uris = [
+          '/base/test/test/assets/3675/dash_' + manifestNumber + '.mpd',
+        ];
+        console.log('getting manifest', request.uris);
+      });
+
+      // Play the stream.
+      await player.load('/base/test/test/assets/3675/dash_0.mpd');
+      await video.play();
+
+      // Wait for the stream to be over.
+      eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
+      /** @type {shaka.test.Waiter} */
+      const waiter = new shaka.test.Waiter(eventManager)
+          .setPlayer(player)
+          .timeoutAfter(40)
+          .failOnTimeout(true);
+      await waiter.waitForEnd(video);
+
+      // The stream should have transitioned to VOD by now.
+      expect(player.isLive()).toBe(false);
+
+      // Check that the final seek range is as expected.
+      const seekRange = player.seekRange();
+      expect(seekRange.end).toBeCloseTo(14);
+    });
+  });
+
   describe('attach', () => {
     beforeEach(async () => {
       // To test attach, we want to construct a player without a video element
@@ -900,46 +940,6 @@ describe('Player', () => {
       // seconds, fail the test.
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
       expect(onQualityChange).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('seek range', () => {
-    // Regression test for Issue #3675.
-    it('has a reasonable seek range after going from live to VOD', async () => {
-      const netEngine = player.getNetworkingEngine();
-      const startTime = Date.now();
-      netEngine.registerRequestFilter((type, request) => {
-        if (type != shaka.net.NetworkingEngine.RequestType.MANIFEST) {
-          return;
-        }
-        // Simulate a live stream by providing different manifests over time.
-        const time = (Date.now() - startTime) / 1000;
-        const manifestNumber = Math.min(5, Math.floor(0.5 + time / 2));
-        request.uris = [
-          '/base/test/test/assets/3675/dash_' + manifestNumber + '.mpd',
-        ];
-        console.log('getting manifest', request.uris);
-      });
-
-      // Play the stream.
-      await player.load('/base/test/test/assets/3675/dash_0.mpd');
-      await video.play();
-
-      // Wait for the stream to be over.
-      eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
-      /** @type {shaka.test.Waiter} */
-      const waiter = new shaka.test.Waiter(eventManager)
-          .setPlayer(player)
-          .timeoutAfter(40)
-          .failOnTimeout(true);
-      await waiter.waitForEnd(video);
-
-      // The stream should have transitioned to VOD by now.
-      expect(player.isLive()).toBe(false);
-
-      // Check that the final seek range is as expected.
-      const seekRange = player.seekRange();
-      expect(seekRange.end).toBeCloseTo(14);
     });
   });
 
