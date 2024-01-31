@@ -8,8 +8,10 @@ describe('CmcdManager', () => {
   const CmcdManager = shaka.util.CmcdManager;
   const uuidRegex =
     '[A-F\\d]{8}-[A-F\\d]{4}-4[A-F\\d]{3}-[89AB][A-F\\d]{3}-[A-F\\d]{12}';
+  const sidRegex = new RegExp(`sid%3D%22${uuidRegex}%22`, 'i');
+  const sessionId = 'c936730c-031e-4a73-976f-92bc34039c60';
   const data = {
-    'sid': 'c936730c-031e-4a73-976f-92bc34039c60',
+    'sid': sessionId,
     'cid': 'xyz',
     'su': false,
     'nor': '../testing/3.m4v',
@@ -186,8 +188,30 @@ describe('CmcdManager', () => {
         const r = ObjectUtils.cloneObject(request);
 
         cmcdManager.applyManifestData(r, manifestInfo);
-        const regex = new RegExp(`sid%3D%22${uuidRegex}%22`, 'i');
-        expect(regex.test(r.uris[0])).toBe(true);
+
+        expect(sidRegex.test(r.uris[0])).toBe(true);
+      });
+
+      it('generates a session id via configure', () => {
+        config.sessionId = sid;
+        cmcdManager = new CmcdManager(playerInterface, config);
+
+        const r = ObjectUtils.cloneObject(request);
+        cmcdManager.applyManifestData(r, manifestInfo);
+        expect(r.uris[0].includes(sid)).toBe(true);
+
+        config.sessionId = sessionId;
+        cmcdManager.configure(config);
+        cmcdManager.applyManifestData(r, manifestInfo);
+        expect(r.uris[0].includes(sid)).toBe(false);
+        expect(r.uris[0].includes(sessionId)).toBe(true);
+
+        config.sessionId = '';
+        cmcdManager.configure(config);
+        cmcdManager.applyManifestData(r, manifestInfo);
+        expect(r.uris[0].includes(sid)).toBe(false);
+        expect(r.uris[0].includes(sessionId)).toBe(false);
+        expect(sidRegex.test(r.uris[0])).toBe(true);
       });
     });
 
