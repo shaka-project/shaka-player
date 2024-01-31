@@ -462,6 +462,14 @@ shakaDemo.Config = class {
         .addBoolInput_('Disable Video Prefetch',
             'streaming.disableVideoPrefetch')
         .addBoolInput_('Live Sync', 'streaming.liveSync')
+        .addNumberInput_('Target latency for live sync',
+            'streaming.liveSyncTargetLatency',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Target latency tolerance',
+            'streaming.liveSyncTargetLatencyTolerance',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
         .addNumberInput_('Max latency for live sync',
             'streaming.liveSyncMaxLatency',
             /* canBeDecimal= */ true,
@@ -480,6 +488,12 @@ shakaDemo.Config = class {
         .addBoolInput_('Live Sync Panic Mode', 'streaming.liveSyncPanicMode')
         .addNumberInput_('Live Sync Panic Mode Threshold',
             'streaming.liveSyncPanicThreshold')
+        .addBoolInput_('Dynamic Target Latency',
+            'streaming.liveSyncDynamicTargetLatency')
+        .addNumberInput_('Dynamic Target Latency Stability Threshold',
+            'streaming.liveSyncDynamicTargetLatencyStabilityThreshold')
+        .addNumberInput_('Dynamic Target Latency Rebuffer Increment',
+            'streaming.liveSyncDynamicTargetLatencyRebufferIncrement')
         .addBoolInput_('Allow Media Source recoveries',
             'streaming.allowMediaSourceRecoveries')
         .addNumberInput_('Minimum time between recoveries',
