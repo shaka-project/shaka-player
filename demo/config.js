@@ -473,8 +473,8 @@ shakaDemo.Config = class {
         .addNumberInput_('VOD Dynamic Playback Rate Low Buffer Rate',
             'streaming.vodDynamicPlaybackRateLowBufferRate',
             /* canBeDecimal= */ true)
-        .addNumberInput_('VOD Dynamic Playback Rate Buffer Percentage',
-            'streaming.vodDynamicPlaybackRateBufferPercentage',
+        .addNumberInput_('VOD Dynamic Playback Rate Buffer Ratio',
+            'streaming.vodDynamicPlaybackRateBufferRatio',
             /* canBeDecimal= */ true);
 
 
