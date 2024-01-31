@@ -470,8 +470,8 @@ shakaDemo.Config = class {
             'streaming.minTimeBetweenRecoveries')
         .addBoolInput_('VOD Dynamic Playback Rate Buffer Control',
             'streaming.vodDynamicPlaybackRate')
-        .addNumberInput_('VOD Dynamic Playback Rate Minimum Value',
-            'streaming.vodDynamicPlaybackRateMin',
+        .addNumberInput_('VOD Dynamic Playback Rate Low Buffer Rate',
+            'streaming.vodDynamicPlaybackRateLowBufferRate',
             /* canBeDecimal= */ true)
         .addNumberInput_('VOD Dynamic Playback Rate Buffer Percentage',
             'streaming.vodDynamicPlaybackRateBufferPercentage',

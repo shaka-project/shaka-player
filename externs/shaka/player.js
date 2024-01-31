@@ -1169,7 +1169,7 @@ shaka.extern.ManifestConfiguration;
  *   allowMediaSourceRecoveries: boolean,
  *   minTimeBetweenRecoveries: number,
  *   vodDynamicPlaybackRate: boolean,
- *   vodDynamicPlaybackRateMin: number,
+ *   vodDynamicPlaybackRateLowBufferRate: number,
  *   vodDynamicPlaybackRateBufferPercentage: number
  * }}
  *
@@ -1324,12 +1324,13 @@ shaka.extern.ManifestConfiguration;
  * @property {boolean} vodDynamicPlaybackRate
  *   Adapt the playback rate of the player to keep the buffer full. Defaults to
  *   <code>false</code>.
- * @property {number} vodDynamicPlaybackRateMin
+ * @property {number} vodDynamicPlaybackRateLowBufferRate
  *   Playback rate to use if the buffer is too small. Defaults to
  *   <code>0.95</code>.
  * @property {number} vodDynamicPlaybackRateBufferPercentage
  *   Percentage of the <code>bufferingGoal</code> as the low threshold for
- *   setting the playback rate to <code>vodDynamicPlaybackRateMin</code>.
+ *   setting the playback rate to
+ *   <code>vodDynamicPlaybackRateLowBufferRate</code>.
  *   Defaults to <code>0.5</code>.
  * @exportDoc
  */
