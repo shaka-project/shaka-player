@@ -1161,6 +1161,7 @@ shaka.extern.ManifestConfiguration;
  *   segmentPrefetchLimit: number,
  *   prefetchAudioLanguages: !Array<string>,
  *   disableAudioPrefetch: boolean,
+ *   disableTextPrefetch: boolean,
  *   disableVideoPrefetch: boolean,
  *   liveSync: boolean,
  *   liveSyncMaxLatency: number,
@@ -1293,6 +1294,10 @@ shaka.extern.ManifestConfiguration;
  * @property {boolean} disableAudioPrefetch
  *   If set and prefetch limit is defined, it will prevent from prefetching data
  *   for audio.
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disableTextPrefetch
+ *   If set and prefetch limit is defined, it will prevent from prefetching data
+ *   for text.
  *   Defaults to <code>false</code>.
  * @property {boolean} disableVideoPrefetch
  *   If set and prefetch limit is defined, it will prevent from prefetching data
