@@ -265,3 +265,32 @@ PR contributions to [the gallery repo][] are welcome.
 [@lucksy]: https://github.com/lucksy
 [pre-packaged Shaka UI themes]: https://lucksy.github.io/shaka-player-themes/
 [the gallery repo]: https://github.com/lucksy/shaka-player-themes
+
+#### Add custom localization
+
+Load specific locale data at runtime (adjust the URL and language as needed):
+```js
+const locale = 'el';
+const controls = ui.getControls();
+const localization = controls.getLocalization();
+const response = await fetch('ui/locales/' + locale + '.json');     // <----- JSON translation URL here
+const translations = await response.json();
+const translation_map = new Map(Object.entries(translations));
+localization.insert(locale, translation_map);
+```
+
+Lazy-load any requested locale data at runtime (adjust the URL as needed):
+```js
+const controls = ui.getControls();
+const localization = controls.getLocalization();
+
+localization.addEventListener('unknown-locales', async (e) => {
+  for (const locale of e.locales) {
+    const response = await fetch('ui/locales/' + locale + '.json');     // <----- JSON translation URL here
+    const translations = await response.json();
+    const translation_map = new Map(Object.entries(translations));
+    localization.insert(locale, translation_map);
+  }
+});
+```
+
