@@ -210,7 +210,7 @@ NOTES:
 NOTES:
  - ¹: By default, FairPlay is handled using Apple's native HLS player, when on
    Safari. We do support FairPlay through MSE/EME, however. See the
-   `streaming.useNativeHlsOnSafari` configuration value.
+   `streaming.useNativeHlsForFairPlay` configuration value.
 
 
 ## Media container and subtitle support
