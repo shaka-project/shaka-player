@@ -3516,7 +3516,7 @@ describe('Player', () => {
 
         manifest.addVariant(1, (variant) => {
           variant.addVideo(2, (stream) => {
-            stream.size(200, 1024);
+            stream.size(1024, 1024);
           });
         });
 
