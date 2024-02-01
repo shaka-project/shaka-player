@@ -8,8 +8,10 @@ describe('CmcdManager', () => {
   const CmcdManager = shaka.util.CmcdManager;
   const uuidRegex =
     '[A-F\\d]{8}-[A-F\\d]{4}-4[A-F\\d]{3}-[89AB][A-F\\d]{3}-[A-F\\d]{12}';
+  const sidRegex = new RegExp(`sid%3D%22${uuidRegex}%22`, 'i');
+  const sessionId = 'c936730c-031e-4a73-976f-92bc34039c60';
   const data = {
-    'sid': 'c936730c-031e-4a73-976f-92bc34039c60',
+    'sid': sessionId,
     'cid': 'xyz',
     'su': false,
     'nor': '../testing/3.m4v',
@@ -125,6 +127,7 @@ describe('CmcdManager', () => {
       enabled: false,
       sessionId: '',
       contentId: 'testing',
+      rtpSafetyFactor: 5,
       useHeaders: false,
     };
 
@@ -186,8 +189,30 @@ describe('CmcdManager', () => {
         const r = ObjectUtils.cloneObject(request);
 
         cmcdManager.applyManifestData(r, manifestInfo);
-        const regex = new RegExp(`sid%3D%22${uuidRegex}%22`, 'i');
-        expect(regex.test(r.uris[0])).toBe(true);
+
+        expect(sidRegex.test(r.uris[0])).toBe(true);
+      });
+
+      it('generates a session id via configure', () => {
+        config.sessionId = sid;
+        cmcdManager = new CmcdManager(playerInterface, config);
+
+        const r = ObjectUtils.cloneObject(request);
+        cmcdManager.applyManifestData(r, manifestInfo);
+        expect(r.uris[0].includes(sid)).toBe(true);
+
+        config.sessionId = sessionId;
+        cmcdManager.configure(config);
+        cmcdManager.applyManifestData(r, manifestInfo);
+        expect(r.uris[0].includes(sid)).toBe(false);
+        expect(r.uris[0].includes(sessionId)).toBe(true);
+
+        config.sessionId = '';
+        cmcdManager.configure(config);
+        cmcdManager.applyManifestData(r, manifestInfo);
+        expect(r.uris[0].includes(sid)).toBe(false);
+        expect(r.uris[0].includes(sessionId)).toBe(false);
+        expect(sidRegex.test(r.uris[0])).toBe(true);
       });
     });
 
@@ -209,10 +234,10 @@ describe('CmcdManager', () => {
       it('modifies segment request uris', () => {
         const r = ObjectUtils.cloneObject(request);
         cmcdManager.applySegmentData(r, segmentInfo);
-        const uri = 'https://test.com/test.mpd?CMCD=bl%3D21200%2Cbr%3D5234%2Ccid%3D%22' +
-          'testing%22%2Cd%3D3330%2Cmtp%3D10000%2Cot%3Dv%2Csf%3Dd%2C' +
-          'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Cst%3Dv%2Csu%2C' +
-          'tb%3D4000';
+        const uri = 'https://test.com/test.mpd?CMCD=bl%3D21200%2Cbr%3D5234%' +
+          '2Ccid%3D%22testing%22%2Cd%3D3330%2Cdl%3D21200%2Cmtp%3D10000%2Cot%' +
+          '3Dv%2Csf%3Dd%2Csid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2' +
+          'Cst%3Dv%2Csu%2Ctb%3D4000';
         expect(r.uris[0]).toBe(uri);
       });
 
@@ -250,7 +275,7 @@ describe('CmcdManager', () => {
         expect(r.headers).toEqual({
           'testing': '1234',
           'CMCD-Object': 'br=5234,d=3330,ot=v,tb=4000',
-          'CMCD-Request': 'bl=21200,mtp=10000,su',
+          'CMCD-Request': 'bl=21200,dl=21200,mtp=10000,su',
           'CMCD-Session': 'cid="testing",sf=d,' +
                           'sid="2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3",st=v',
         });

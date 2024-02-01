@@ -222,8 +222,6 @@ describe('DashParser ContentProtection', () => {
         ['9a04f079-9840-4286-ab92-e65be0885f95'], ['com.microsoft.playready']);
     testKeySystemMappings('for old PlayReady',
         ['79f0049a-4098-8642-ab92-e65be0885f95'], ['com.microsoft.playready']);
-    testKeySystemMappings('for Adobe Primetime',
-        ['f239e769-efa3-4850-9c16-a903c6932efb'], ['com.adobe.primetime']);
 
     testKeySystemMappings('for multiple DRMs in the specified order',
         [
@@ -238,11 +236,9 @@ describe('DashParser ContentProtection', () => {
         [
           'EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED',
           '9A04F079-9840-4286-AB92-E65BE0885F95',
-          'F239E769-EFA3-4850-9C16-A903C6932EFB',
         ], [
           'com.widevine.alpha',
           'com.microsoft.playready',
-          'com.adobe.primetime',
         ]);
   });
 
@@ -393,7 +389,6 @@ describe('DashParser ContentProtection', () => {
     const drmInfos = jasmine.arrayContaining([
       buildDrmInfo('com.widevine.alpha'),
       buildDrmInfo('com.microsoft.playready'),
-      buildDrmInfo('com.adobe.primetime'),
     ]);
     const expected = buildExpectedManifest(
         /** @type {!Array.<shaka.extern.DrmInfo>} */(drmInfos),
@@ -420,7 +415,6 @@ describe('DashParser ContentProtection', () => {
     const drmInfos = jasmine.arrayContaining([
       buildDrmInfo('com.widevine.alpha'),
       buildDrmInfo('com.microsoft.playready'),
-      buildDrmInfo('com.adobe.primetime'),
     ]);
     const expected = buildExpectedManifest(
         /** @type {!Array.<shaka.extern.DrmInfo>} */(drmInfos),
@@ -454,7 +448,6 @@ describe('DashParser ContentProtection', () => {
       // PlayReady has two associated UUIDs, so it appears twice.
       buildDrmInfo('com.microsoft.playready', keyIds),
       buildDrmInfo('com.microsoft.playready', keyIds),
-      buildDrmInfo('com.adobe.primetime', keyIds),
     ], variantKeyIds);
     await testDashParser(source, expected, /* ignoreDrmInfo= */ true);
   });

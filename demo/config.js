@@ -311,6 +311,8 @@ shakaDemo.Config = class {
         .addBoolInput_('Enabled', 'cmcd.enabled')
         .addTextInput_('Session ID', 'cmcd.sessionId')
         .addTextInput_('Content ID', 'cmcd.contentId')
+        .addNumberInput_('RTP safety Factor', 'cmcd.rtpSafetyFactor',
+            /* canBeDecimal= */ true)
         .addBoolInput_('Use Headers', 'cmcd.useHeaders');
   }
 
@@ -455,6 +457,8 @@ shakaDemo.Config = class {
         })
         .addBoolInput_('Disable Audio Prefetch',
             'streaming.disableAudioPrefetch')
+        .addBoolInput_('Disable Text Prefetch',
+            'streaming.disableTextPrefetch')
         .addBoolInput_('Disable Video Prefetch',
             'streaming.disableVideoPrefetch')
         .addBoolInput_('Live Sync', 'streaming.liveSync')
@@ -529,8 +533,8 @@ shakaDemo.Config = class {
         .addBoolInput_('Ignore Text Stream Failures',
             'streaming.ignoreTextStreamFailures')
         .addBoolInput_('Stall Detector Enabled', 'streaming.stallEnabled')
-        .addBoolInput_('Use native HLS on Safari',
-            'streaming.useNativeHlsOnSafari');
+        .addBoolInput_('Use native HLS for FairPlay',
+            'streaming.useNativeHlsForFairPlay');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
   }
 
