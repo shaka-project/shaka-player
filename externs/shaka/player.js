@@ -1147,7 +1147,7 @@ shaka.extern.ManifestConfiguration;
  *   stallEnabled: boolean,
  *   stallThreshold: number,
  *   stallSkip: number,
- *   useNativeHlsOnSafari: boolean,
+ *   useNativeHlsForFairPlay: boolean,
  *   inaccurateManifestTolerance: number,
  *   lowLatencyMode: boolean,
  *   autoLowLatencyMode: boolean,
@@ -1240,12 +1240,13 @@ shaka.extern.ManifestConfiguration;
  *   been detected.  If 0, the player will pause and immediately play instead of
  *   seeking.  A value of 0 is recommended and provided as default on TV
  *   platforms (WebOS, Tizen, Chromecast, etc).
- * @property {boolean} useNativeHlsOnSafari
+ * @property {boolean} useNativeHlsForFairPlay
  *   Desktop Safari has both MediaSource and their native HLS implementation.
  *   Depending on the application's needs, it may prefer one over the other.
  *   Warning when disabled: Where single-key DRM streams work fine, multi-keys
  *   streams is showing unexpected behaviours (stall, audio playing with video
  *   freezes, ...). Use with care.
+ *   Defaults to <code>true</code>.
  * @property {number} inaccurateManifestTolerance
  *   The maximum difference, in seconds, between the times in the manifest and
  *   the times in the segments.  Larger values allow us to compensate for more
