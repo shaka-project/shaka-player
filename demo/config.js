@@ -476,15 +476,23 @@ shakaDemo.Config = class {
             /* canBeZero= */ true)
         .addNumberInput_('Min playback rate for live sync',
             'streaming.liveSyncMinPlaybackRate',
-            /* canBeDecimal= */ true,
-            /* canBeZero= */ false)
+            /* canBeDecimal= */ true)
         .addBoolInput_('Live Sync Panic Mode', 'streaming.liveSyncPanicMode')
         .addNumberInput_('Live Sync Panic Mode Threshold',
             'streaming.liveSyncPanicThreshold')
         .addBoolInput_('Allow Media Source recoveries',
             'streaming.allowMediaSourceRecoveries')
         .addNumberInput_('Minimum time between recoveries',
-            'streaming.minTimeBetweenRecoveries');
+            'streaming.minTimeBetweenRecoveries')
+        .addBoolInput_('VOD Dynamic Playback Rate Buffer Control',
+            'streaming.vodDynamicPlaybackRate')
+        .addNumberInput_('VOD Dynamic Playback Rate Low Buffer Rate',
+            'streaming.vodDynamicPlaybackRateLowBufferRate',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('VOD Dynamic Playback Rate Buffer Ratio',
+            'streaming.vodDynamicPlaybackRateBufferRatio',
+            /* canBeDecimal= */ true);
+
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_('Always Stream Text', 'streaming.alwaysStreamText');

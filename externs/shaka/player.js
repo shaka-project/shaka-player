@@ -1171,7 +1171,10 @@ shaka.extern.ManifestConfiguration;
  *   liveSyncPanicMode: boolean,
  *   liveSyncPanicThreshold: number,
  *   allowMediaSourceRecoveries: boolean,
- *   minTimeBetweenRecoveries: number
+ *   minTimeBetweenRecoveries: number,
+ *   vodDynamicPlaybackRate: boolean,
+ *   vodDynamicPlaybackRateLowBufferRate: number,
+ *   vodDynamicPlaybackRateBufferRatio: number
  * }}
  *
  * @description
@@ -1338,6 +1341,17 @@ shaka.extern.ManifestConfiguration;
  *   The minimum time between recoveries when VIDEO_ERROR is reached, in
  *   seconds.
  *   Defaults to <code>5</code>.
+ * @property {boolean} vodDynamicPlaybackRate
+ *   Adapt the playback rate of the player to keep the buffer full. Defaults to
+ *   <code>false</code>.
+ * @property {number} vodDynamicPlaybackRateLowBufferRate
+ *   Playback rate to use if the buffer is too small. Defaults to
+ *   <code>0.95</code>.
+ * @property {number} vodDynamicPlaybackRateBufferRatio
+ *   Ratio of the <code>bufferingGoal</code> as the low threshold for
+ *   setting the playback rate to
+ *   <code>vodDynamicPlaybackRateLowBufferRate</code>.
+ *   Defaults to <code>0.5</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
