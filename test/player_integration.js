@@ -1382,4 +1382,13 @@ describe('Player', () => {
     await video.play();
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
   });
+
+  it('unloadAndSavePreload', async () => {
+    await player.load('test:sintel_compiled');
+    await video.play();
+    const preloadManager = await player.unloadAndSavePreload();
+    await player.load(preloadManager);
+    await video.play();
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+  });
 });
