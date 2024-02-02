@@ -1176,7 +1176,7 @@ shaka.extern.ManifestConfiguration;
  *   vodDynamicPlaybackRate: boolean,
  *   vodDynamicPlaybackRateLowBufferRate: number,
  *   vodDynamicPlaybackRateBufferRatio: number,
- *   useActualLiveStreamDuration: boolean
+ *   infiniteLiveStreamDuration: boolean
  * }}
  *
  * @description
@@ -1358,7 +1358,7 @@ shaka.extern.ManifestConfiguration;
  *   setting the playback rate to
  *   <code>vodDynamicPlaybackRateLowBufferRate</code>.
  *   Defaults to <code>0.5</code>.
- * @property {boolean} useActualLiveStreamDuration
+ * @property {boolean} infiniteLiveStreamDuration
  *   If <code>true</code>, the media source live duration
  *   set as a<code>Infinity</code>
  *   Defaults to <code> false </code>.
