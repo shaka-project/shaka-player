@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.6.13](https://github.com/shaka-project/shaka-player/compare/v4.6.12...v4.6.13) (2024-02-02)
+
+
+### Bug Fixes
+
+* **DASH:** Update dash manifest when minimumUpdatePeriod = 0 ([#6187](https://github.com/shaka-project/shaka-player/issues/6187)) ([aa8f36c](https://github.com/shaka-project/shaka-player/commit/aa8f36c34a65527ac959135fb6b26e52529c525f))
+* **Demo:** Fix MSS assets ([#6194](https://github.com/shaka-project/shaka-player/issues/6194)) ([7076b7a](https://github.com/shaka-project/shaka-player/commit/7076b7ac7a3ffb41b130a51ff3dd31593a3cec79))
+* Fix DRM workaround for Xbox with Dolby Vision boxes ([#6201](https://github.com/shaka-project/shaka-player/issues/6201)) ([2497b91](https://github.com/shaka-project/shaka-player/commit/2497b911947debf4dfa2ebf957fa7dffb2b3a5ce))
+* Fix gitpkg.now.sh dependencies ([#6211](https://github.com/shaka-project/shaka-player/issues/6211)) ([dc1e2d1](https://github.com/shaka-project/shaka-player/commit/dc1e2d1181b66f17765198113bcd220ce12e8d79))
+* Prevent license requests for unplayable variants ([#6204](https://github.com/shaka-project/shaka-player/issues/6204)) ([7f72634](https://github.com/shaka-project/shaka-player/commit/7f72634322bae4cdb66b0b42e8a9e3895f3306f6))
+
+
+### Reverts
+
+* Add chapter titles and dividers on the seek bar ([#6208](https://github.com/shaka-project/shaka-player/issues/6208)) ([78fba77](https://github.com/shaka-project/shaka-player/commit/78fba7733883b31e6579e72abde0b195755ca249))
+
 ## [4.6.12](https://github.com/shaka-project/shaka-player/compare/v4.6.11...v4.6.12) (2024-01-30)
 
 
