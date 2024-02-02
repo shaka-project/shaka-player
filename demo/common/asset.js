@@ -86,6 +86,13 @@ const ShakaDemoAssetInfo = class {
     this.mimeType = null;
 
 
+    // Preload values.
+    /** @type {?shaka.media.PreloadManager} */
+    this.preloadManager;
+    this.preloaded = false;
+    this.preloadFailed = false;
+
+
     // Offline storage values.
     /** @type {?function()} */
     this.storeCallback;
@@ -399,6 +406,11 @@ const ShakaDemoAssetInfo = class {
     // proper formatting.
     const raw = {};
     for (const key in this) {
+      if (key.startsWith('preload') || key.startsWith('store') ||
+          key.endsWith('Callback')) {
+        // These values shouldn't be saved, as they are dynamic.
+        continue;
+      }
       const value = this[key];
       if (value instanceof Map) {
         // The built-in JSON functions cannot convert Maps; this converts Maps

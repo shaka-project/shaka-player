@@ -119,10 +119,7 @@ shakaDemo.Front = class {
       if (unsupportedReason) {
         c.markAsUnsupported(unsupportedReason);
       } else {
-        c.addButton('Play', () => {
-          shakaDemoMain.loadAsset(asset);
-          this.updateSelected_();
-        });
+        c.addBaseButtons();
         c.addStoreButton();
       }
     });

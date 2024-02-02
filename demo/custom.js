@@ -1045,10 +1045,7 @@ shakaDemo.Custom = class {
     const savedList = this.savedList_;
     const isFeatured = false;
     return new shakaDemo.AssetCard(savedList, asset, isFeatured, (c) => {
-      c.addButton('Play', () => {
-        shakaDemoMain.loadAsset(asset);
-        this.updateSelected_();
-      });
+      c.addBaseButtons();
       c.addButton('Edit', async () => {
         if (asset.unstoreCallback) {
           await asset.unstoreCallback();
