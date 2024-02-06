@@ -161,6 +161,8 @@ FirefoxWindows:
     - *basic_firefox_config
 
 Edge:
+  # TODO(b/323916397): Edge on Windows not working currently
+  disabled: true
   browser: msedge
   os: Windows
   extra_configs:
