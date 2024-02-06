@@ -272,8 +272,12 @@ shakaDemo.AssetCard = class {
         try {
           await shakaDemoMain.preloadAsset(this.asset_);
           this.remakeButtons();
-          await this.asset_.preloadManager.waitForFinish();
-          this.asset_.preloaded = true;
+          if (this.asset_.preloadManager) {
+            await this.asset_.preloadManager.waitForFinish();
+            this.asset_.preloaded = true;
+          } else {
+            this.asset_.preloadFailed = true;
+          }
         } catch (error) {
           this.asset_.preloadManager = null;
           this.asset_.preloadFailed = true;
