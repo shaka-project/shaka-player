@@ -68,6 +68,18 @@ vars:
     ms:edgeOptions:
       binary: /usr/bin/microsoft-edge
 
+  # Work around https://github.com/MicrosoftEdge/EdgeWebDriver/issues/102#issuecomment-1710724173
+  # by specifying the binary path on Mac.
+  edge_mac_config: &edge_mac_config
+    ms:edgeOptions:
+      binary: /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge
+
+  # Work around https://github.com/MicrosoftEdge/EdgeWebDriver/issues/102#issuecomment-1710724173
+  # by specifying the binary path on Mac.
+  edge_windows_config: &edge_windows_config
+    ms:edgeOptions:
+      binary: "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+
   android_chrome_config: &android_chrome_config
     goog:chromeOptions:
       args:
@@ -132,6 +144,7 @@ EdgeMac:
   os: Mac
   extra_configs:
     - *basic_edge_config
+    - *edge_mac_config
 
 Safari:
   browser: safari
@@ -161,12 +174,11 @@ FirefoxWindows:
     - *basic_firefox_config
 
 Edge:
-  # TODO(b/323916397): Edge on Windows not working currently
-  disabled: true
   browser: msedge
   os: Windows
   extra_configs:
     - *basic_edge_config
+    - *edge_windows_config
 
 
 ### Linux ###
