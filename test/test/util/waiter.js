@@ -184,6 +184,7 @@ shaka.test.Waiter = class {
       }
       this.eventManager_.unlisten(mediaElement, 'timeupdate');
       this.eventManager_.unlisten(mediaElement, 'ended');
+      this.eventManager_.unlisten(mediaElement, 'durationchange');
     };
 
     const p = new Promise((resolve) => {
@@ -202,6 +203,10 @@ shaka.test.Waiter = class {
       timer.tickEvery(/* seconds= */ 1);
       this.eventManager_.listen(mediaElement, 'timeupdate', check);
       this.eventManager_.listen(mediaElement, 'ended', check);
+      // Some tests on Safari expose a condition where the ended flag can be
+      // found in the desired state in a brief window during a durationchange
+      // event.
+      this.eventManager_.listen(mediaElement, 'durationchange', check);
     });
 
     return this.waitUntilGeneric_(goalName, p, cleanup, mediaElement);
