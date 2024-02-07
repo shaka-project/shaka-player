@@ -420,6 +420,7 @@ module.exports = (config) => {
       clientArgs.testFiles.push('test/**/*_external.js');
     }
   }
+  clientArgs.testFiles = ['test/player_integration.js'];
 
   // These are the test files that will be dynamically loaded by boot.js.
   clientArgs.testFiles = resolveGlobs(clientArgs.testFiles);

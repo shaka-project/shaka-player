@@ -167,6 +167,23 @@ shaka.test.Waiter = class {
     // fire.  We also see flake on Firefox (currently 99), where test playbacks
     // sometimes stop right before duration is reached.  (Duration 60.01, audio
     // buffered to 60.01, video buffered to exactly 60.)
+    const startTime = Date.now();
+    const debugState = (event) => {
+      const buffered = shaka.media.TimeRangesUtils.getBufferedInfo(
+          mediaElement.buffered);
+      const elapsed = Date.now() - startTime;
+      const log = `check(${event.type}):\n` +
+        `  elapsed: ${elapsed} ms\n` +
+        `  current time: ${mediaElement.currentTime}\n` +
+        `  duration: ${mediaElement.duration}\n` +
+        `  ready state: ${mediaElement.readyState}\n` +
+        `  playback rate: ${mediaElement.playbackRate}\n` +
+        `  paused: ${mediaElement.paused}\n` +
+        `  ended: ${mediaElement.ended}\n` +
+        `  buffered: ${JSON.stringify(buffered)}`;
+      console.log(log);
+    };
+
     const hasEnded = () => {
       return mediaElement.currentTime >= mediaElement.duration - 0.1 ||
           mediaElement.ended;
@@ -184,6 +201,14 @@ shaka.test.Waiter = class {
       }
       this.eventManager_.unlisten(mediaElement, 'timeupdate');
       this.eventManager_.unlisten(mediaElement, 'ended');
+      this.eventManager_.unlisten(mediaElement, 'loadedmetadata');
+      this.eventManager_.unlisten(mediaElement, 'loadeddata');
+      this.eventManager_.unlisten(mediaElement, 'canplay');
+      this.eventManager_.unlisten(mediaElement, 'canplaythrough');
+      this.eventManager_.unlisten(mediaElement, 'waiting');
+      this.eventManager_.unlisten(mediaElement, 'ended');
+      this.eventManager_.unlisten(mediaElement, 'stalled');
+      this.eventManager_.unlisten(mediaElement, 'durationchange');
     };
 
     const p = new Promise((resolve) => {
@@ -193,6 +218,15 @@ shaka.test.Waiter = class {
           resolve();
         }
       };
+
+      this.eventManager_.listen(mediaElement, 'loadedmetadata', debugState);
+      this.eventManager_.listen(mediaElement, 'loadeddata', debugState);
+      this.eventManager_.listen(mediaElement, 'canplay', debugState);
+      this.eventManager_.listen(mediaElement, 'canplaythrough', debugState);
+      this.eventManager_.listen(mediaElement, 'waiting', debugState);
+      this.eventManager_.listen(mediaElement, 'ended', debugState);
+      this.eventManager_.listen(mediaElement, 'stalled', debugState);
+      this.eventManager_.listen(mediaElement, 'durationchange', debugState);
 
       // In Firefox 99, there appears to be some bug in the browser preventing
       // events from being triggered at the end of the presentation.  So we

@@ -68,6 +68,7 @@ describe('Player', () => {
       const startTime = Date.now();
       netEngine.registerRequestFilter((type, request) => {
         if (type != shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+          console.log('getting', request.uris[0]);
           return;
         }
         // Simulate a live stream by providing different manifests over time.
@@ -76,7 +77,7 @@ describe('Player', () => {
         request.uris = [
           '/base/test/test/assets/3675/dash_' + manifestNumber + '.mpd',
         ];
-        console.log('getting manifest', request.uris);
+        console.log('getting manifest', request.uris[0]);
       });
 
       // Play the stream.
