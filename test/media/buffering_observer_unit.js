@@ -11,13 +11,26 @@ describe('BufferingObserver', () => {
   const thresholdAfterStarving = 5;
   const thresholdAfterSatisfied = 2;
 
+  const originalDateNow = Date.now;
+
+  /** @type {!Date} */
+  let baseTime;
+
   /** @type {!shaka.media.BufferingObserver} */
   let controller;
 
   beforeEach(() => {
+    // Any test using Date needs to have Date mocked to avoid flake.
+    baseTime = new Date(2015, 11, 30);
+    Date.now = () => baseTime.getTime();
+
     controller = new BufferingObserver(
         thresholdAfterStarving,
         thresholdAfterSatisfied);
+  });
+
+  afterEach(() => {
+    Date.now = originalDateNow;
   });
 
   describe('when satisfied', () => {
