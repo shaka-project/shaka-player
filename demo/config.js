@@ -420,6 +420,8 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_('Buffer Behind', 'streaming.bufferBehind',
             /* canBeDecimal= */ true)
+        .addNumberInput_('Eviction Goal', 'streaming.evictionGoal',
+            /* canBeDecimal= */ true)
         .addNumberInput_('Safe Seek Offset', 'streaming.safeSeekOffset',
             /* canBeDecimal= */ true)
         .addNumberInput_('Stall Threshold', 'streaming.stallThreshold',
