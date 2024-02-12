@@ -1137,6 +1137,7 @@ shaka.extern.ManifestConfiguration;
  *   rebufferingGoal: number,
  *   bufferingGoal: number,
  *   bufferBehind: number,
+ *   evictionGoal: number,
  *   ignoreTextStreamFailures: boolean,
  *   alwaysStreamText: boolean,
  *   startAtSegmentBoundary: boolean,
@@ -1198,6 +1199,10 @@ shaka.extern.ManifestConfiguration;
  *   The maximum number of seconds of content that the StreamingEngine will keep
  *   in buffer behind the playhead when it appends a new media segment.
  *   The StreamingEngine will evict content to meet this limit.
+ * @property {number} evictionGoal
+ *   The minimum duration in seconds of buffer overflow the StreamingEngine
+ *   requires to start removing content from the buffer.
+ *   Values less than <code>1.0</code> are not recommended.
  * @property {boolean} ignoreTextStreamFailures
  *   If <code>true</code>, the player will ignore text stream failures and
  *   continue playing other streams.
