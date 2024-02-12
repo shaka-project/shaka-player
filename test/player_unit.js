@@ -715,6 +715,22 @@ describe('Player', () => {
         expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.MEDIA_SOURCE);
       });
     });
+
+    it('fires keystatuschanged events', async () => {
+      const keyStatusChanged = jasmine.createSpy('keyStatusChanged');
+      player.addEventListener(
+          'keystatuschanged', Util.spyFunc(keyStatusChanged));
+      player.createDrmEngine = (playerInterface) => {
+        // Call the onKeyStatus on the playerInterface, before load is finished.
+        playerInterface.onKeyStatus({
+          'aaa': 'usable',
+          'bbb': 'output-restricted',
+        });
+        return drmEngine;
+      };
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(keyStatusChanged).toHaveBeenCalled();
+    });
   });  // describe('load/unload')
 
   describe('getConfiguration', () => {
