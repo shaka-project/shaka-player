@@ -1536,7 +1536,8 @@ shaka.extern.AdvancedAbrConfiguration;
  *   useHeaders: boolean,
  *   sessionId: string,
  *   contentId: string,
- *   rtpSafetyFactor: number
+ *   rtpSafetyFactor: number,
+ *   includeKeys: !Array<string>
  * }}
  *
  * @description
@@ -1562,6 +1563,9 @@ shaka.extern.AdvancedAbrConfiguration;
  * @property {number} rtpSafetyFactor
  *   RTP safety factor.
  *   Defaults to <code>5</code>.
+ * @property {Array<string>} includeKeys
+ *   An array of keys to include in the CMCD data. If not provided, all keys
+ *   will be included.
  * @exportDoc
  */
 shaka.extern.CmcdConfiguration;
