@@ -67,6 +67,40 @@ LCEVCdec.LCEVCdec = class {
    * Close LCEVC DEC
    */
   close() {}
+
+  /**
+   * Returns a boolean indicating if LCEVCdec supports fullscreen
+   * for the provided element in webkit (iOS) browsers.
+   * @param {HTMLDivElement} fullScreenElement element to be checked
+   * @return {boolean} true if fullscreen is supported
+   */
+  webkitSupportsFullscreen(fullScreenElement) {}
+
+  /**
+   * Enter fullscreen on a webkit (iOS) browser for a div tag.
+   * @param {HTMLDivElement} fullScreenElement element to display in fullscreen
+   */
+  webkitEnterFullscreen(fullScreenElement) {}
+
+  /**
+   * Exit fullscreen on a webkit (iOS) browser for a div tag.
+   * @param {HTMLDivElement} fullScreenElement exit fullscreen for this element
+   */
+  webkitExitFullscreen(fullScreenElement) {}
+
+  /**
+   * Returns a boolean indicating if LCEVCdec is currently displaying
+   * in fullscreen on webkit (iOS) browsers.
+   * @return {boolean} true if currently displaying in fullscreen
+   */
+  webkitDisplayingFullscreen() {}
+
+  /**
+   * Returns a boolean indicating if LCEVCdec will handle device rotation
+   * events on webkit (iOS) browsers for entering and exiting fullscreen.
+   * @return {boolean} true if LCEVCdec will handle device rotation events
+   */
+  webkitHandlesOnRotationEvents() {}
 };
 
 /**
