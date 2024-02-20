@@ -493,9 +493,9 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_('VOD Dynamic Playback Rate Buffer Ratio',
             'streaming.vodDynamicPlaybackRateBufferRatio',
-            /* canBeDecimal= */ true);
-
-
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Infinite Live Stream Duration',
+            'streaming.infiniteLiveStreamDuration');
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_('Always Stream Text', 'streaming.alwaysStreamText');
     } else {
