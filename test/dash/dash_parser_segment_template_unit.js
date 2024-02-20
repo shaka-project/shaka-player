@@ -786,7 +786,7 @@ describe('DashParser SegmentTemplate', () => {
         const newTemplateInfo = makeTemplateInfo(newRanges);
 
         const newEnd = newRanges[newRanges.length - 1].end;
-        index.appendTemplateInfo(newTemplateInfo, newEnd);
+        index.appendTemplateInfo(newTemplateInfo, /* periodStart= */ 0, newEnd);
         expect(index.find(newStart)).toBe(10);
         expect(index.find(newEnd - 1.0)).toBe(19);
       });
