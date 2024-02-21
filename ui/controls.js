@@ -584,6 +584,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
     const video = /** @type {HTMLVideoElement} */(this.localVideo_);
     if (video.webkitSupportsFullscreen) {
+      const lcevcDec = this.player_.getLcevcDec();
+      if (lcevcDec) {
+        return lcevcDec.webkitDisplayingFullscreen();
+      }
       return video.webkitDisplayingFullscreen;
     }
     return false;
@@ -608,6 +612,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
             await screen.orientation.lock('landscape');
           } catch (error) {}
         }
+      } else if (this.player_.getLcevcDec()) {
+        const fullScreenElement = /** @type {HTMLDivElement} */(
+          this.config_.fullScreenElement);
+
+        const lcevcDec = this.player_.getLcevcDec();
+        if (lcevcDec.webkitSupportsFullscreen(fullScreenElement)) {
+          lcevcDec.webkitEnterFullscreen(fullScreenElement);
+        }
       } else {
         const video = /** @type {HTMLVideoElement} */(this.localVideo_);
         if (video.webkitSupportsFullscreen) {
@@ -628,6 +640,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         screen.orientation.unlock();
       }
       await document.exitFullscreen();
+    } else if (this.player_.getLcevcDec()) {
+      const fullScreenElement = /** @type {HTMLDivElement} */(
+        this.config_.fullScreenElement);
+
+      const lcevcDec = this.player_.getLcevcDec();
+      if (lcevcDec.webkitSupportsFullscreen(fullScreenElement)) {
+        lcevcDec.webkitExitFullscreen(fullScreenElement);
+      }
     } else {
       const video = /** @type {HTMLVideoElement} */(this.localVideo_);
       if (video.webkitSupportsFullscreen) {
@@ -1212,6 +1232,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.castProxy_.isCasting() ||
         !this.config_.enableFullscreenOnRotation ||
         !this.isFullScreenSupported()) {
+      return;
+    }
+
+    const video = /** @type {HTMLVideoElement} */(this.video_);
+    if (video.webkitSupportsFullscreen &&
+        this.player_.getLcevcDec() &&
+        this.player_.getLcevcDec().webkitHandlesOnRotationEvents()) {
       return;
     }
 
