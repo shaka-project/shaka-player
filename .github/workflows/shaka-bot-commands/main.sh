@@ -42,10 +42,12 @@ if [[ "$SHAKA_BOT_COMMAND" == "" ]]; then
   exit 0
 fi
 
-echo "PR $PR_NUMBER, detected command $SHAKA_BOT_COMMAND"
+echo "PR $PR_NUMBER"
+echo "Detected command \"$SHAKA_BOT_COMMAND\""
+echo "Detected arguments \"$SHAKA_BOT_ARGUMENTS\""
 
 case "$SHAKA_BOT_COMMAND" in
   help) . command-help.sh ;;
   test) . command-test.sh ;;
-  *) echo "Unknown command!" ;;
+  *) echo "Unknown command" ;;
 esac
