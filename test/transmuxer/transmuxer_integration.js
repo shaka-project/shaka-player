@@ -306,10 +306,10 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
 
     it('H.265 in TS', async () => {
       const chromeVersion = shaka.util.Platform.chromeVersion();
-      if (shaka.util.Platform.isWindows() &&
-          chromeVersion && chromeVersion === 117) {
-        // It appears that Chrome 117 beta in Windows is incorrectly reporting
-        // H.265 in MediaCapabilities
+      if (shaka.util.Platform.isWindows() && chromeVersion) {
+        // It appears that Chrome 122 in Windows is still incorrectly reporting
+        // H.265 in MediaSource.  Revisit this with a maximum chromeVersion if
+        // Chrome ever fixes it.
         pending('Codec H.265 is not supported by the platform.');
       }
       const mimeType = 'video/mp4; codecs="hvc1.2.4.L123.B0"';
