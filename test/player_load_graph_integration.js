@@ -756,6 +756,7 @@ describe('Player Load Graph', () => {
         'manifest-parser',
         'manifest',
         'drm-engine',
+        // Excludes 'unload'.
       ]);
 
       /** @type {!Set.<string>} */
@@ -774,6 +775,7 @@ describe('Player Load Graph', () => {
         await player.attach(video);
         player.load('test:sintel').catch(() => {});
       } else {
+        goog.asserts.assert(state == 'unload', 'Unrecognized testing state!');
         await player.attach(video);
         await player.load('test:sintel');
         player.unload().catch(() => {});
