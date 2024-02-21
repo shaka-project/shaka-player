@@ -51,6 +51,23 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
   /** @type {!shaka.test.Waiter} */
   let waiter;
 
+  function isH265Supported() {
+    if (!MediaSource.isTypeSupported('video/mp4; codecs="hvc1.2.4.L123.B0"')) {
+      return false;
+    }
+    // As of Chrome 122, Chrome on Windows is still incorrectly reporting H.265
+    // support.  Revisit this exclusion with a maximum chromeVersion if Chrome
+    // ever fixes it.
+    // We don't have a solid bug link for this issue.  It's unclear if this is
+    // specific to GitHub CI systems, which may be missing some codecs.
+    const chromeVersion = shaka.util.Platform.chromeVersion();
+    if (shaka.util.Platform.isWindows() && chromeVersion) {
+      return false;
+    }
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
+    return true;
+  }
+
   function isAc3Supported() {
     if (!MediaSource.isTypeSupported('audio/mp4; codecs="ac-3"')) {
       return false;
@@ -64,9 +81,7 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
     // to true, which leads to a failure in GitHub's environment.
     // We must enable this, once it is resolved:
     // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
-    const chromeVersion = shaka.util.Platform.chromeVersion();
-    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
-        chromeVersion && chromeVersion <= 122) {
+    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge()) {
       return false;
     }
     return true;
@@ -85,9 +100,7 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
     // to true, which leads to a failure in GitHub's environment.
     // We must enable this, once it is resolved:
     // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
-    const chromeVersion = shaka.util.Platform.chromeVersion();
-    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
-        chromeVersion && chromeVersion <= 122) {
+    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge()) {
       return false;
     }
     return true;
@@ -305,15 +318,7 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
     });
 
     it('H.265 in TS', async () => {
-      const chromeVersion = shaka.util.Platform.chromeVersion();
-      if (shaka.util.Platform.isWindows() && chromeVersion) {
-        // It appears that Chrome 122 in Windows is still incorrectly reporting
-        // H.265 in MediaSource.  Revisit this with a maximum chromeVersion if
-        // Chrome ever fixes it.
-        pending('Codec H.265 is not supported by the platform.');
-      }
-      const mimeType = 'video/mp4; codecs="hvc1.2.4.L123.B0"';
-      if (!MediaSource.isTypeSupported(mimeType)) {
+      if (!isH265Supported()) {
         pending('Codec H.265 is not supported by the platform.');
       }
       await player.load('/base/test/test/assets/hls-ts-h265/hevc.m3u8');
@@ -351,14 +356,7 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
     });
 
     it('H.265+AAC in TS', async () => {
-      const chromeVersion = shaka.util.Platform.chromeVersion();
-      if (shaka.util.Platform.isWindows() &&
-          chromeVersion && chromeVersion === 117) {
-        // It appears that Chrome 117 beta in Windows is incorrectly reporting
-        // H.265 in MediaCapabilities
-        pending('Codec H.265 is not supported by the platform.');
-      }
-      if (!MediaSource.isTypeSupported('video/mp4; codecs="hvc1.1.6.L93.90"')) {
+      if (!isH265Supported()) {
         pending('Codec H.265 is not supported by the platform.');
       }
       // eslint-disable-next-line max-len
