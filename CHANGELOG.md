@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.7.10](https://github.com/shaka-project/shaka-player/compare/v4.7.9...v4.7.10) (2024-02-21)
+
+
+### Bug Fixes
+
+* **DASH:** Fix precision issue on some platforms ([#6258](https://github.com/shaka-project/shaka-player/issues/6258)) ([a2a56cf](https://github.com/shaka-project/shaka-player/commit/a2a56cf16da6636f6ef6fa8a6baf2d0916aa7ee6))
+* **DASH:** Use labels to stitch streams across periods ([#6121](https://github.com/shaka-project/shaka-player/issues/6121)) ([75c8dce](https://github.com/shaka-project/shaka-player/commit/75c8dce0f7d8e1fb8cf64ed947355c20185aae20))
+* do not remove sub-second amounts from source buffer ([08c92c5](https://github.com/shaka-project/shaka-player/commit/08c92c53b9964c31d6e358a02eba679081a37521)), closes [#6240](https://github.com/shaka-project/shaka-player/issues/6240)
+* don't double wrap URIs for HLS key requests ([#6246](https://github.com/shaka-project/shaka-player/issues/6246)) ([5c8bd2e](https://github.com/shaka-project/shaka-player/commit/5c8bd2e4141d5bea749e92fd45cf1ee84a96598c))
+* Fix detection of flac support on Safari ([#6250](https://github.com/shaka-project/shaka-player/issues/6250)) ([5b9c494](https://github.com/shaka-project/shaka-player/commit/5b9c4949e6f202da45c1b997de1ebe1697b9c329)), closes [#6249](https://github.com/shaka-project/shaka-player/issues/6249)
+
+
+### Performance Improvements
+
+* Optimize init segment reference comparison for common case ([#6014](https://github.com/shaka-project/shaka-player/issues/6014)) ([0ffb401](https://github.com/shaka-project/shaka-player/commit/0ffb401dae98f3a73d940227f28dc010092b54b5))
+
 ## [4.7.9](https://github.com/shaka-project/shaka-player/compare/v4.7.8...v4.7.9) (2024-02-02)
 
 
