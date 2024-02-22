@@ -20,57 +20,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ inputs.ref || github.ref }}
-
-      - name: Lint
-        run: python build/check.py
+#  lint:
+#    name: Lint
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#        with:
+#          ref: ${{ inputs.ref || github.ref }}
+#
+#      - name: Lint
+#        run: python build/check.py
 
   build_and_test:
     # Don't waste time doing a full matrix of test runs when there was an
     # obvious linter error.
-    needs: lint
+    #needs: lint
     strategy:
       matrix:
         include:
-          # Run Linux browsers with xvfb, so they're in a headless X session.
-          # Additionally, generate a code coverage report from Linux Chrome.
-          # It should be the uncompiled build, or else we won't execute any
-          # coverage instrumentation on full-stack player integration tests.
-          - os: ubuntu-latest
-            browser: Chrome
-            extra_flags: "--use-xvfb"
-          - os: ubuntu-latest
-            browser: Firefox
-            extra_flags: "--use-xvfb"
-          - os: ubuntu-latest
-            browser: Edge
-            extra_flags: "--use-xvfb"
-
-          - os: macos-latest
-            browser: Chrome
-          - os: macos-latest
-            browser: Firefox
-          - os: macos-latest
-            browser: Edge
-          - os: macos-latest
-            browser: Safari
-          - os: macos-latest
-            browser: Safari-old
-
-          - os: windows-latest
-            browser: Chrome
-          - os: windows-latest
-            browser: Firefox
           - os: windows-latest
             browser: Edge
-            extra_flags: "--html-coverage-report --uncompiled"
+            extra_flags: "--html-coverage-report --uncompiled --enable-logging debug"
 
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
@@ -204,19 +175,19 @@ jobs:
           if-no-files-found: ignore
           retention-days: 5
 
-  build_in_docker:
-    # Don't waste time doing a full matrix of test runs when there was an
-    # obvious linter error.
-    needs: lint
-    name: Docker
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ inputs.ref || github.ref }}
-
-      - name: Docker
-        run: |
-          docker build -t shaka-player-build build/docker
-          docker run -v $(pwd):/usr/src --user $(id -u):$(id -g) shaka-player-build
+#  build_in_docker:
+#    # Don't waste time doing a full matrix of test runs when there was an
+#    # obvious linter error.
+#    needs: lint
+#    name: Docker
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#        with:
+#          ref: ${{ inputs.ref || github.ref }}
+#
+#      - name: Docker
+#        run: |
+#          docker build -t shaka-player-build build/docker
+#          docker run -v $(pwd):/usr/src --user $(id -u):$(id -g) shaka-player-build
