@@ -98,6 +98,12 @@ vars:
         # --unsafely-allow... does not work.
         - "--user-data-dir=/data/data/com.android.chrome/cache"
 
+      excludeSwitches:
+        # On Android, we must override the --disable-gpu set in the general
+        # Chrome settings.  This flag is not supported on Android, where GPU is
+        # required.
+        - "disable-gpu"
+
       # Once the new session request reaches chromedriver, it will take
       # the androidPackage option as a request to start Chrome through
       # adb on the tethered device.
