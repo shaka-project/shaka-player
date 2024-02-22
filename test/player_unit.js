@@ -667,15 +667,21 @@ describe('Player', () => {
     });
 
     describe('when config.streaming.preferNativeHls is set to true', () => {
-      beforeEach(() => {
+      beforeAll(() => {
         shaka.media.ManifestParser.registerParserByMime(
             'application/x-mpegurl',
             () => new shaka.test.FakeManifestParser(manifest));
       });
 
+      afterAll(() => {
+        // IMPORTANT: restore the ORIGINAL parser.  DO NOT just unregister the
+        // fake!
+        shaka.media.ManifestParser.registerParserByMime(
+            'application/x-mpegurl',
+            () => new shaka.hls.HlsParser());
+      });
+
       afterEach(() => {
-        shaka.media.ManifestParser.unregisterParserByMime(
-            'application/x-mpegurl');
         video.canPlayType.calls.reset();
       });
 
