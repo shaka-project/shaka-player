@@ -19,6 +19,10 @@ vars:
         media.gmp-manager.updateEnabled: true
         # Overrides Firefox's Linux-specific default setting to disable DRM.
         media.eme.enabled: true
+        # Disable GPU acceleration to avoid contention for hardware resources
+        # during parallel testing and to create more stability for screenshots.
+        media.hardware-video-decoding.enabled: false
+        media.hardware-video-decoding.force-enabled: false
 
   basic_chrome_config: &basic_chrome_config
     goog:chromeOptions:
@@ -37,6 +41,9 @@ vars:
         - "--disable-background-media-suspend"
         - "--disable-background-timer-throttling"
         - "--disable-backgrounding-occluded-windows"
+        # Disable GPU acceleration to avoid contention for hardware resources
+        # during parallel testing and to create more stability for screenshots.
+        - "--disable-gpu"
 
       # Instruct chromedriver not to disable component updater. The component
       # updater must run in order for the Widevine CDM to be available when
@@ -55,6 +62,9 @@ vars:
         - "--disable-background-media-suspend"
         - "--disable-background-timer-throttling"
         - "--disable-backgrounding-occluded-windows"
+        # Disable GPU acceleration to avoid contention for hardware resources
+        # during parallel testing and to create more stability for screenshots.
+        - "--disable-gpu"
 
       # Instruct edgedriver not to disable component updater. The component
       # updater must run in order for the Widevine CDM to be available when
@@ -119,6 +129,9 @@ vars:
       - "--disable-background-media-suspend"
       - "--disable-background-timer-throttling"
       - "--disable-backgrounding-occluded-windows"
+      # Disable GPU acceleration to avoid contention for hardware resources
+      # during parallel testing and to create more stability for screenshots.
+      - "--disable-gpu"
 
   safari_tp_config: &safari_tp_config
     safari.options:
