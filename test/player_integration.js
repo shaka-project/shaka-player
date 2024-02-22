@@ -1384,10 +1384,20 @@ describe('Player', () => {
   });  // describe('addThumbnailsTrack')
 
   it('preload', async () => {
-    const preloadManager = await player.preload('test:sintel_compiled');
-    await preloadManager.waitForFinish();
-    await player.load(preloadManager);
-    await video.play();
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+    try {
+      console.log('PRELOAD TEST STARTS');
+      const preloadManager = await player.preload('test:sintel_compiled');
+      console.log('PRELOAD COMPLETE');
+      await preloadManager.waitForFinish();
+      console.log('FINISH COMPLETE');
+      await player.load(preloadManager);
+      console.log('LOAD COMPLETE');
+      await video.play();
+      console.log('PLAY COMPLETE');
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+      console.log('GOAL REACHED');
+    } finally {
+      console.log('PRELOAD TEST ENDS');
+    }
   });
 });
