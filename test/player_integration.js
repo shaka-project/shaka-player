@@ -1208,13 +1208,21 @@ describe('Player', () => {
         'com.widevine.alpha': bogusUrl,
         'com.microsoft.playready': bogusUrl,
       });
-      await player.load('test:sintel-enc_compiled');
+
+      // This load may be interrupted, so ignore errors and don't wait.
+      const loadPromise =
+          player.load('test:sintel-enc_compiled').catch(() => {});
 
       await errorPromise;
       expect(unloadPromise).not.toBeNull();
+
       if (unloadPromise) {
         await unloadPromise;
       }
+
+      // This should be done, and errors ignored.  But don't leave any Promise
+      // unresolved.
+      await loadPromise;
     });
   });  // describe('unloading')
 
