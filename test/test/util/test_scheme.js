@@ -74,6 +74,7 @@ shaka.test.TestScheme = class {
    * @return {!shaka.extern.IAbortableOperation.<shaka.extern.Response>}
    */
   static plugin(uri, request, requestType) {
+    console.debug('TEST SCHEME REQUEST FOR', uri);
     const manifestParts = /^test:([^/]+)$/.exec(uri);
     if (manifestParts) {
       /** @type {shaka.extern.Response} */
