@@ -3641,6 +3641,8 @@ describe('HlsParser', () => {
           stream.addDrmInfo('com.apple.fps', (drmInfo) => {
             drmInfo.addInitData('sinf', new Uint8Array(0));
             drmInfo.encryptionScheme = 'cenc';
+            drmInfo.addKeySystemUris(new Set(
+                ['skd://f93d4e700d7ddde90529a27735d9e7cb']));
           });
         });
       });
