@@ -1047,25 +1047,28 @@ filterDescribe('Storage', storageSupport, () => {
      */
     it('throws an error if indexedDB open times out', async () => {
       const oldOpen = window.indexedDB.open;
-      window.indexedDB.open = () => {
-        // Just return a dummy object.
-        return /** @type {!IDBOpenDBRequest} */ ({
-          onsuccess: (event) => {},
-          onerror: (error) => {},
-        });
-      };
 
-      /** @type {!shaka.offline.StorageMuxer} */
-      const muxer = new shaka.offline.StorageMuxer();
-      const expectedError = shaka.test.Util.jasmineError(new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.STORAGE,
-          shaka.util.Error.Code.INDEXED_DB_INIT_TIMED_OUT));
+      try {
+        window.indexedDB.open = () => {
+          // Just return a dummy object.
+          return /** @type {!IDBOpenDBRequest} */ ({
+            onsuccess: (event) => {},
+            onerror: (error) => {},
+          });
+        };
 
-      await expectAsync(muxer.init())
-          .toBeRejectedWith(expectedError);
+        /** @type {!shaka.offline.StorageMuxer} */
+        const muxer = new shaka.offline.StorageMuxer();
+        const expectedError = shaka.test.Util.jasmineError(new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.STORAGE,
+            shaka.util.Error.Code.INDEXED_DB_INIT_TIMED_OUT));
 
-      window.indexedDB.open = oldOpen;
+        await expectAsync(muxer.init())
+            .toBeRejectedWith(expectedError);
+      } finally {
+        window.indexedDB.open = oldOpen;
+      }
     });
 
     it('throws an error if the content is a live stream', async () => {
