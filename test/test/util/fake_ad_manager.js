@@ -61,13 +61,6 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   /**
    * @override
    */
-  getServerSideCuePoints() {
-    return [];
-  }
-
-  /**
-   * @override
-   */
   getCuePoints() {
     return [];
   }

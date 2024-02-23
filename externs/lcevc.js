@@ -70,13 +70,6 @@ LCEVCdec.LCEVCdec = class {
 };
 
 /**
- * The older module interface, for backward compatibility.
- * Typed to the same interface, but under a different name.
- * @type {typeof LCEVCdec.LCEVCdec}
- */
-LCEVCdec.LcevcDil;
-
-/**
  * LCEVC Support Check
  */
 LCEVCdec.SupportObject = {
@@ -103,8 +96,7 @@ LCEVCdec.SupportObject.SupportStatus;
 LCEVCdec.SupportObject.SupportError;
 
 /**
- * Typedef for the module interface.  Both LCEVCdec (new module) and LcevcDil
- * (old module) implement roughly the same interface.
+ * Typedef for the module interface.
  *
  * @typedef {typeof LCEVCdec}
  */

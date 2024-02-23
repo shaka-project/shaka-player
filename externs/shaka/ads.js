@@ -130,11 +130,6 @@ shaka.extern.IAdManager = class extends EventTarget {
   /**
    * @return {!Array.<!shaka.extern.AdCuePoint>}
    */
-  getServerSideCuePoints() {}
-
-  /**
-   * @return {!Array.<!shaka.extern.AdCuePoint>}
-   */
   getCuePoints() {}
 
   /**
