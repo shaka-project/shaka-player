@@ -149,8 +149,7 @@ jobs:
 
           python build/test.py \
             --browsers "$browser" \
-            --reporters spec --spec-hide-passed \
-            --enable-logging v2 \
+            --reporters spec --enable-logging v2 \
             ${{ matrix.extra_flags }}
 
       - name: Find coverage reports
