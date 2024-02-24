@@ -1168,10 +1168,10 @@ describe('VttTextParser', () => {
         ],
         'WEBVTT\n\n' +
         'STYLE\n' +
-        '::cue(.shadow)\n' +
+        '::cue(.shadow) {\n' +
         '  text-shadow: black 5%;\n' +
         '}\n' +
-        '::cue(.italic)\n' +
+        '::cue(.italic) {\n' +
         '  font-style: italic;\n' +
         '}\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
