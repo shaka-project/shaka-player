@@ -4074,6 +4074,34 @@ describe('HlsParser', () => {
       await verifyError(master, media, error, /* onCreateSegmentIndex= */ true);
     });
 
+    it('if SAMPLE-AES encryption with MSE and mp2t content', async () => {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'video\n',
+      ].join('');
+
+      const media = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:6\n',
+        '#EXT-X-PLAYLIST-TYPE:VOD\n',
+        '#EXT-X-KEY:METHOD=SAMPLE-AES,',
+        'URI="fake",\n',
+        '#EXTINF:5,\n',
+        '#EXT-X-BYTERANGE:121090@616\n',
+        'main.ts',
+      ].join('');
+
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          Code.HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED);
+
+      await verifyError(master, media, error, /* onCreateSegmentIndex= */ true);
+    });
+
+
     describe('if required tags are missing', () => {
       /**
        * @param {string} master
