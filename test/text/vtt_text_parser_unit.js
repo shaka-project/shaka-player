@@ -1126,6 +1126,37 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
+  it('passes text-shadow when multiple classes included', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 20,
+            endTime: 40,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 20,
+                endTime: 40,
+                payload: 'Test',
+                fontStyle: Cue.fontStyle.ITALIC,
+                textShadow: 'black 5%',
+              },
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        'STYLE\n' +
+        '::cue(.shadow) {\n' +
+        '  text-shadow: black 5%;\n' +
+        '}\n' +
+        '::cue(.italic) {\n' +
+        '  font-style: italic;\n' +
+        '}\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        '<c.shadow.italic>Test</c>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
   it('supports karaoke style text', () => {
     verifyHelper(
         [
