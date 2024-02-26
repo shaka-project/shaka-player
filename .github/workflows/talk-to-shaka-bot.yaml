@@ -8,6 +8,7 @@ on:
 
 jobs:
   handle_command:
+    name: Handle Command
     # Only runs on PRs that contain '@shaka-bot' comments, but not comments
     # made by shaka-bot itself, who will sometimes use its own name.
     # Note that contains() is not case sensitive.

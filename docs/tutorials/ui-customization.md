@@ -188,19 +188,6 @@ const config = {
 ui.configure(config);
 ```
 
-If you've chosen to display chapters, you can specify the color for the chapter markers on
-the timeline and the text color of the chapter titles that popup on hover:
- ```js
-const config = {
-  displayChapters: true,
-  seekBarColors: {
-    chapterMarks: 'rgb(27, 27, 27)',
-    chapterLabels: 'rgb(255, 255, 255)'
-  }
-}
-ui.configure(config);
-```
-
 #### Configuring playback, fast forward and rewind rates
 The rate in which the player can play, fast forward and rewind content can be configured using the `playbackRates`, `fastForwardRates` and `rewindRates` options.
 
@@ -286,3 +273,32 @@ PR contributions to [the gallery repo][] are welcome.
 [@lucksy]: https://github.com/lucksy
 [pre-packaged Shaka UI themes]: https://lucksy.github.io/shaka-player-themes/
 [the gallery repo]: https://github.com/lucksy/shaka-player-themes
+
+#### Add custom localization
+
+Load specific locale data at runtime (adjust the URL and language as needed):
+```js
+const locale = 'el';
+const controls = ui.getControls();
+const localization = controls.getLocalization();
+const response = await fetch('ui/locales/' + locale + '.json');     // <----- JSON translation URL here
+const translations = await response.json();
+const translation_map = new Map(Object.entries(translations));
+localization.insert(locale, translation_map);
+```
+
+Lazy-load any requested locale data at runtime (adjust the URL as needed):
+```js
+const controls = ui.getControls();
+const localization = controls.getLocalization();
+
+localization.addEventListener('unknown-locales', async (e) => {
+  for (const locale of e.locales) {
+    const response = await fetch('ui/locales/' + locale + '.json');     // <----- JSON translation URL here
+    const translations = await response.json();
+    const translation_map = new Map(Object.entries(translations));
+    localization.insert(locale, translation_map);
+  }
+});
+```
+

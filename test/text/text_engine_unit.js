@@ -144,8 +144,10 @@ describe('TextEngine', () => {
           shaka.test.Util.spyFunc(modifyCueCallback));
       mockParseMedia.and.returnValue([cue1, cue2]);
       await textEngine.appendBuffer(dummyData, 0, 3, 'uri');
-      expect(modifyCueCallback).toHaveBeenCalledWith(cue1, 'uri');
-      expect(modifyCueCallback).toHaveBeenCalledWith(cue2, 'uri');
+      expect(modifyCueCallback).toHaveBeenCalledWith(
+          cue1, 'uri', jasmine.objectContaining({periodStart: 0}));
+      expect(modifyCueCallback).toHaveBeenCalledWith(
+          cue2, 'uri', jasmine.objectContaining({periodStart: 0}));
     });
   });
 

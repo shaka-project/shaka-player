@@ -1100,8 +1100,28 @@ describe('VttTextParser', () => {
           {
             startTime: 110,
             endTime: 120,
-            payload: '<c.lime>less or more < > in text</c>',
-            nestedCues: [],
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 110,
+                endTime: 120,
+                payload: 'less or more      >  >in text >',
+                color: 'lime',
+              },
+            ],
+          },
+          {
+            startTime: 120,
+            endTime: 130,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 120,
+                endTime: 130,
+                payload: 'arrow in --> text',
+                color: 'lime',
+              },
+            ],
           },
         ],
         'WEBVTT\n\n' +
@@ -1122,7 +1142,40 @@ describe('VttTextParser', () => {
         '00:01:40.000 --> 00:01:50.000\n' +
         '<c.lime>forward slash 1/2 in text</c>\n\n' +
         '00:01:50.000 --> 00:02:00.000\n' +
-        '<c.lime>less or more < > in text</c>',
+        '<c.lime>less or more <     >     > <        > >in text ></c>\n\n' +
+        '00:02:00.000 --> 00:02:10.000\n' +
+        '<c.lime>arrow in --> text</c>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
+  it('passes text-shadow when multiple classes included', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 20,
+            endTime: 40,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 20,
+                endTime: 40,
+                payload: 'Test',
+                fontStyle: Cue.fontStyle.ITALIC,
+                textShadow: 'black 5%',
+              },
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        'STYLE\n' +
+        '::cue(.shadow) {\n' +
+        '  text-shadow: black 5%;\n' +
+        '}\n' +
+        '::cue(.italic) {\n' +
+        '  font-style: italic;\n' +
+        '}\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        '<c.shadow.italic>Test</c>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 

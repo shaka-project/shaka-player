@@ -110,6 +110,34 @@ describe('tXml', () => {
 
       expect(TXml.getContents(root)).toBe('<Foo> Bar');
     });
+
+    it('unescapes html codes', () => {
+      const xmlString = [
+        '<?xml version="1.0"?>',
+        '<Root>',
+        '  &amp;&gt;&lt;',
+        '</Root>',
+      ].join('\n');
+      const root = TXml.parseXmlString(xmlString, 'Root');
+      goog.asserts.assert(root, 'parseFromString should succeed');
+
+      expect(TXml.getContents(root)).toBe('&><');
+    });
+  });
+
+  describe('getTextContents', () => {
+    it('unescapes html codes', () => {
+      const xmlString = [
+        '<?xml version="1.0"?>',
+        '<Root>',
+        '  &amp;&gt;&lt;',
+        '</Root>',
+      ].join('\n');
+      const root = TXml.parseXmlString(xmlString, 'Root');
+      goog.asserts.assert(root, 'parseFromString should succeed');
+
+      expect(TXml.getTextContents(root)).toBe('\n  &><\n');
+    });
   });
 
   describe('parseAttr', () => {

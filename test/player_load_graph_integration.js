@@ -9,6 +9,8 @@ describe('Player Load Graph', () => {
 
   /** @type {!HTMLVideoElement} */
   let video;
+  /** @type {!HTMLVideoElement} */
+  let video2;
   /** @type {shaka.Player} */
   let player;
 
@@ -21,10 +23,13 @@ describe('Player Load Graph', () => {
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
+    video2 = shaka.test.UiUtils.createVideoElement();
+    document.body.appendChild(video2);
   });
 
   afterAll(() => {
     document.body.removeChild(video);
+    document.body.removeChild(video2);
   });
 
   beforeEach(() => {
@@ -143,18 +148,18 @@ describe('Player Load Graph', () => {
 
       // Load 2
       'unload',
-      'media-source',
       'manifest-parser',
       'manifest',
       'drm-engine',
+      'media-source',
       'load',
 
       // Load 3
       'unload',
-      'media-source',
       'manifest-parser',
       'manifest',
       'drm-engine',
+      'media-source',
       'load',
     ]);
   });
@@ -373,11 +378,11 @@ describe('Player Load Graph', () => {
 
       // Make the two requests one-after-another so that we don't have any idle
       // time between them.
-      const attachRequest = player.attach(video);
-      const loadRequest = player.load('test:sintel');
+      const attach = player.attach(video);
+      const load = player.load('test:sintel');
 
-      await attachRequest;
-      await expectAsync(loadRequest).toBeRejected();
+      await attach;
+      await expectAsync(load).toBeRejected();
 
       // Wait a couple interrupter cycles to allow the player to enter idle
       // state.
@@ -420,22 +425,23 @@ describe('Player Load Graph', () => {
       // Normally the player would initialize media source after attaching to
       // the media element, however since we don't support media source, it
       // should stop at the attach state.
-      player.attach(video, /* initMediaSource= */ true);
+      const attach = player.attach(video, /* initMediaSource= */ true);
 
       await shaka.test.Util.delay(/* seconds= */ 0.25);
       expect(lastStateChange).toBe('attach');
+
+      await attach;
     });
 
     it('loading ignores media source path', async () => {
       await player.attach(video, /* initMediaSource= */ false);
 
-      // Normally the player would load content like this with the media source
-      // path, but since we don't have media source support, it should use the
-      // src= path.
-      player.load(SMALL_MP4_CONTENT_URI);
+      const load = player.load(SMALL_MP4_CONTENT_URI);
 
       await shaka.test.Util.delay(/* seconds= */ 0.25);
       expect(lastStateChange).toBe('src-equals');
+
+      await load;
     });
 
     it('unloading ignores init media source flag', async () => {
@@ -445,10 +451,12 @@ describe('Player Load Graph', () => {
       // Normally the player would try to go to the media source state because
       // we are saying to initialize media source after unloading, but since we
       // don't have media source, it should stop at the attach state.
-      player.unload(/* initMediaSource= */ true);
+      const unload = player.unload(/* initMediaSource= */ true);
 
       await shaka.test.Util.delay(/* seconds= */ 0.25);
       expect(lastStateChange).toBe('unload');
+
+      await unload;
     });
   });
 
@@ -508,12 +516,12 @@ describe('Player Load Graph', () => {
 
     it('goes from media source to attach', async () => {
       await startIn('media-source');
-      await goTo('attach');
+      await goTo('attach', video2);
     });
 
     it('goes from media source to media source', async () => {
       await startIn('media-source');
-      await goTo('media-source', 'attach'); // doesn't remake media source
+      await goTo('media-source', video2);
     });
 
     it('goes from media source to load', async () => {
@@ -533,12 +541,12 @@ describe('Player Load Graph', () => {
 
     it('goes from load to attach', async () => {
       await startIn('load');
-      await goTo('attach');
+      await goTo('attach', video2);
     });
 
     it('goes from load to media source', async () => {
       await startIn('load');
-      await goTo('media-source', 'attach'); // doesn't remake media source
+      await goTo('media-source', video2);
     });
 
     it('goes from load to load', async () => {
@@ -558,7 +566,7 @@ describe('Player Load Graph', () => {
 
     it('goes from src equals to attach', async () => {
       await startIn('src-equals');
-      await goTo('attach');
+      await goTo('attach', video2);
     });
 
     it('goes from src equals to media source', async () => {
@@ -584,13 +592,13 @@ describe('Player Load Graph', () => {
 
     it('goes from manifest parser to attach', async () => {
       await passingThrough('manifest-parser', () => {
-        return goTo('attach');
+        return goTo('attach', video2);
       });
     });
 
     it('goes from manifest parser to media source', async () => {
       await passingThrough('manifest-parser', () => {
-        return goTo('media-source', 'attach'); // doesn't remake media source
+        return goTo('media-source', video2);
       });
     });
 
@@ -614,13 +622,13 @@ describe('Player Load Graph', () => {
 
     it('goes from manifest to attach', async () => {
       await passingThrough('manifest', () => {
-        return goTo('attach');
+        return goTo('attach', video2);
       });
     });
 
     it('goes from manifest to media source', async () => {
       await passingThrough('manifest', () => {
-        return goTo('media-source', 'attach'); // doesn't remake media source
+        return goTo('media-source', video2);
       });
     });
 
@@ -644,13 +652,13 @@ describe('Player Load Graph', () => {
 
     it('goes from drm engine to attach', async () => {
       await passingThrough('drm-engine', () => {
-        return goTo('attach');
+        return goTo('attach', video2);
       });
     });
 
     it('goes from drm engine to media source', async () => {
       await passingThrough('drm-engine', () => {
-        return goTo('media-source', 'attach'); // doesn't remake media source
+        return goTo('media-source', video2);
       });
     });
 
@@ -674,7 +682,7 @@ describe('Player Load Graph', () => {
 
     it('goes from unload to attach', async () => {
       await passingThrough('unload', () => {
-        return goTo('attach');
+        return goTo('attach', video2);
       });
     });
 
@@ -751,6 +759,7 @@ describe('Player Load Graph', () => {
         'manifest-parser',
         'manifest',
         'drm-engine',
+        // Excludes 'unload'.
       ]);
 
       /** @type {!Set.<string>} */
@@ -769,6 +778,7 @@ describe('Player Load Graph', () => {
         await player.attach(video);
         player.load('test:sintel').catch(() => {});
       } else {
+        goog.asserts.assert(state == 'unload', 'Unrecognized testing state!');
         await player.attach(video);
         await player.load('test:sintel');
         player.unload().catch(() => {});
@@ -797,20 +807,22 @@ describe('Player Load Graph', () => {
      * starting the state change.
      *
      * @param {string} state
-     * @param {string=} expectedState
+     * @param {HTMLVideoElement=} videoToUse
      * @return {!Promise}
      */
-    async function goTo(state, expectedState) {
+    async function goTo(state, videoToUse = video) {
       /** @type {!Map.<string, function():!Promise>} */
       const actions = new Map()
           .set('detach', () => {
             return player.detach();
           })
           .set('attach', () => {
-            return player.attach(video, /* initMediaSource= */ false);
+            return player.attach(
+                videoToUse || video, /* initMediaSource= */ false);
           })
           .set('media-source', () => {
-            return player.attach(video, /* initMediaSource= */ true);
+            return player.attach(
+                videoToUse || video, /* initMediaSource= */ true);
           })
           .set('load', () => {
             return player.load('test:sintel');
@@ -822,7 +834,7 @@ describe('Player Load Graph', () => {
       const action = actions.get(state);
       expect(action).toBeTruthy();
       await action();
-      expect(lastStateChange).toBe(expectedState || state);
+      expect(lastStateChange).toBe(state);
     }
   });
 

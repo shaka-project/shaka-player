@@ -101,40 +101,6 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       expect(Object.keys(mockPlayer.listeners).length).toBeGreaterThan(0);
     });
 
-    it('limits streams to 1080p on Chromecast v1 and v2', () => {
-      // Simulate the canDisplayType reponse of Chromecast v1 or v2
-      mockCanDisplayType.and.callFake((type) => {
-        const matches = /height=(\d+)/.exec(type);
-        const height = parseInt(matches[1], 10);
-        if (height && height > 1080) {
-          return false;
-        }
-        return true;
-      });
-      receiver = new CastReceiver(
-          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
-      expect(mockCanDisplayType).toHaveBeenCalled();
-      expect(mockPlayer.setMaxHardwareResolution)
-          .toHaveBeenCalledWith(1920, 1080);
-    });
-
-    it('limits streams to 4k on Chromecast Ultra', () => {
-      // Simulate the canDisplayType reponse of Chromecast Ultra
-      mockCanDisplayType.and.callFake((type) => {
-        const matches = /height=(\d+)/.exec(type);
-        const height = parseInt(matches[1], 10);
-        if (height && height > 2160) {
-          return false;
-        }
-        return true;
-      });
-      receiver = new CastReceiver(
-          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
-      expect(mockCanDisplayType).toHaveBeenCalled();
-      expect(mockPlayer.setMaxHardwareResolution)
-          .toHaveBeenCalledWith(3840, 2160);
-    });
-
     it('does not start polling', () => {
       receiver = new CastReceiver(
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));

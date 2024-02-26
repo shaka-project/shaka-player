@@ -96,8 +96,11 @@ application:
   - Configuration changes:
     - `streaming.forceTransmuxTS` has been renamed to `streaming.forceTransmux`
       (deprecated in v4.3.0)
-    - `manifest.dash.manifestPreprocessor` callback now receives a type of `shaka.externs.xml.Node` instead of `Element`.
-    - `manifest.mss.manifestPreprocessor` callback now receives a type of `shaka.externs.xml.Node` instead of `Element`.
+    - Callbacks that used to accept `Element` now accept `shaka.externs.xml.Node`:
+      (`manifest.dash.manifestPreprocessor` and `manifest.mss.manifestPreprocessor`).
+      `getAttribute()` and `textContent` results must now be decoded if they might contain
+      escape sequences. You can use `shaka.util.StringUtils.htmlUnescape` for this purpose.
+    - `streaming.useNativeHlsOnSafari` has removed. Now we have another config to do the same for FairPlay `streaming.useNativeHlsForFairPlay` or for HLS (any browser) `streaming.preferNativeHls`.
 
   - Plugin changes:
     - `Transmuxer` plugins now has three new parameters in `transmux()` method.

@@ -24,6 +24,7 @@
 +../../lib/media/content_workarounds.js
 +../../lib/media/drm_engine.js
 +../../lib/media/gap_jumping_controller.js
++../../lib/media/manifest_filterer.js
 +../../lib/media/manifest_parser.js
 +../../lib/media/media_source_capabilities.js
 +../../lib/media/media_source_engine.js
@@ -31,6 +32,7 @@
 +../../lib/media/play_rate_controller.js
 +../../lib/media/playhead.js
 +../../lib/media/playhead_observer.js
++../../lib/media/preload_manager.js
 +../../lib/media/presentation_timeline.js
 +../../lib/media/quality_observer.js
 +../../lib/media/region_observer.js
