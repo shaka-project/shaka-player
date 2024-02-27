@@ -102,17 +102,23 @@ jobs:
       - name: Compute final status
         id: compute
         run: |
-          LAB_TEST_STATUS="${{ needs.run-lab-tests.status }}"
-          UPDATE_PR_STATUS="${{ needs.update-pr.status }}"
+          # The final status must be one of: success, failure, error, pending.
+          # However, the status from "result" from an earlier job is one of:
+          # success, failure, cancelled, skipped.
+          # We start by mapping those.
+          LAB_TEST_RESULT=$(echo "${{ needs.run-lab-tests.result }}" \
+              | sed -Ee 's/(cancelled|skipped)/error/')
+          UPDATE_PR_RESULT=$(echo "${{ needs.update-pr.result }}" \
+              | sed -Ee 's/(cancelled|skipped)/error/')
 
-          if [[ "$LAB_TEST_STATUS" == "success" ]]; then
-            # If run-lab-tests succeeded, use the status of update-pr.
-            # If that is blank, default to "error".
-            echo "status=${UPDATE_PR_STATUS:-error}" >> $GITHUB_OUTPUT
+          if [[ "$LAB_TEST_RESULT" == "success" ]]; then
+            # If run-lab-tests succeeded, use the status of update-pr, which
+            # comes after that.  If that is blank, default to "error".
+            echo "status=${UPDATE_PR_RESULT:-error}" >> $GITHUB_OUTPUT
           else
-            # If lab status is not success, use that status.
-            # If that is blank, default to "error".
-            echo "status=${LAB_TEST_STATUS:-error}" >> $GITHUB_OUTPUT
+            # If run-lab-tests failed, use that.  If that is blank, default to
+            # "error".
+            echo "status=${LAB_TEST_RESULT:-error}" >> $GITHUB_OUTPUT
           fi
 
       - name: Report final status
