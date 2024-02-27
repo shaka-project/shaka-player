@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.3.15](https://github.com/shaka-project/shaka-player/compare/v4.3.14...v4.3.15) (2024-02-27)
+
+
+### Bug Fixes
+
+* **Cast:** Force TS content to be transmuxed on Chromecast ([#6262](https://github.com/shaka-project/shaka-player/issues/6262)) ([d007f6f](https://github.com/shaka-project/shaka-player/commit/d007f6fe76fc8fcf04745d848f4d4b9a72ccf59b)), closes [#5278](https://github.com/shaka-project/shaka-player/issues/5278)
+* **HLS:** Ban unsupported combinations of SAMPLE-AES encryption ([#6295](https://github.com/shaka-project/shaka-player/issues/6295)) ([3b60303](https://github.com/shaka-project/shaka-player/commit/3b60303449956f775696ca1e9096c9adb9af4a17))
+* **VTT:** fix setting textShadow when multiple CSS classes provided ([#6287](https://github.com/shaka-project/shaka-player/issues/6287)) ([f96895b](https://github.com/shaka-project/shaka-player/commit/f96895b123b5aa6fcd2e7d43974609b65cce04e0))
+
 ## [4.3.14](https://github.com/shaka-project/shaka-player/compare/v4.3.13...v4.3.14) (2024-02-20)
 
 
