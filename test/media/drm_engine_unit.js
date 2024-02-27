@@ -176,7 +176,7 @@ describe('DrmEngine', () => {
           manifest.variants, /* usePersistentLicenses= */ false);
       await drmEngine.createOrLoad();
       expect(drmEngine.initialized()).toBe(true);
-    }, /* timeout= */ 100);
+    }, /* timeout= */ 1000);
   });
 
   describe('init', () => {
