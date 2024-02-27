@@ -3996,6 +3996,12 @@ describe('StreamingEngine', () => {
   }
 
   describe('prefetch segments', () => {
+    let originalPrefetch;
+
+    beforeAll(() => {
+      originalPrefetch = shaka.media.SegmentPrefetch;
+    });
+
     beforeEach(() => {
       shaka.media.SegmentPrefetch = Util.spyFunc(
           jasmine.createSpy('SegmentPrefetch')
@@ -4011,6 +4017,10 @@ describe('StreamingEngine', () => {
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
       config.segmentPrefetchLimit = 5;
       streamingEngine.configure(config);
+    });
+
+    afterAll(() => {
+      shaka.media.SegmentPrefetch = originalPrefetch;
     });
 
     it('should use prefetched segment without fetching again', async () => {
@@ -4080,6 +4090,12 @@ describe('StreamingEngine', () => {
     let altVariant;
     let segmentPrefetchesCreated;
 
+    let originalPrefetch;
+
+    beforeAll(() => {
+      originalPrefetch = shaka.media.SegmentPrefetch;
+    });
+
     beforeEach(() => {
       segmentPrefetchesCreated = 0;
       shaka.media.SegmentPrefetch = Util.spyFunc(
@@ -4099,6 +4115,10 @@ describe('StreamingEngine', () => {
       config.segmentPrefetchLimit = 5;
       config.prefetchAudioLanguages = ['und'];
       streamingEngine.configure(config);
+    });
+
+    afterAll(() => {
+      shaka.media.SegmentPrefetch = originalPrefetch;
     });
 
     it('should prefetch all audio variants for the language', async () => {
