@@ -16,7 +16,7 @@ jobs:
     name: Set Pending Status
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: refs/pull/${{ inputs.pr }}/head
 
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [run-lab-tests]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: refs/pull/${{ inputs.pr }}/head
 
@@ -53,26 +53,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          path: new-screenshots
-
-      - name: Move screenshots
-        run: |
-          # The download-artifact action puts zip file contents into folders by
-          # the name of the artifact, so we can't have them downloaded directly
-          # to the screenshots folder.  Here we move them into the correct
-          # locations.
-          cd new-screenshots
-
-          # "$i" is a folder for an artifact (eg "screenshots-ChromeAndroid"),
-          # and it contains a single folder with the name we use in our
-          # screenshots (eg "chrome-Android").  We want the contents of that
-          # inner folder to be copied to test/test/assets/screenshots/, where a
-          # folder with the same name (eg "chrome-Android") already exists.
-          for i in screenshots*; do
-            cp -a $i/* ../test/test/assets/screenshots/
-          done
+          path: test/test/assets/screenshots/
+          pattern: screenshots-*
+          merge-multiple: true
 
       - name: Update screenshots
         run: |
@@ -116,7 +101,7 @@ jobs:
     # Will run on success or failure, but not if the workflow is cancelled.
     if: ${{ success() || failure() }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: refs/pull/${{ inputs.pr }}/head
 

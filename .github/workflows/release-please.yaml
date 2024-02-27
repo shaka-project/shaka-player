@@ -34,7 +34,7 @@ jobs:
     needs: release
     if: needs.release.outputs.release_created && endsWith(needs.release.outputs.tag_name, '.0') == false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # Check out the origin repo, and do it at main, not the PR branch.
           ref: main
@@ -55,12 +55,12 @@ jobs:
     needs: release
     if: needs.release.outputs.release_created
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
           registry-url: 'https://registry.npmjs.org'
@@ -126,12 +126,12 @@ jobs:
     needs: release
     if: needs.release.outputs.release_created
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
           registry-url: 'https://registry.npmjs.org'
@@ -180,7 +180,7 @@ jobs:
     needs: release
     if: needs.release.outputs.release_created && endsWith(needs.release.outputs.tag_name, '.0')
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           # Use a special shaka-bot access token for releases.
