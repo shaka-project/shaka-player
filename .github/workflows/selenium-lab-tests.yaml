@@ -31,9 +31,17 @@ on:
         required: false
         type: string
       ignore_test_status:
-        description: "If true, ignore test success or failure, never set the commit status, and always upload screenshots."
+        description: "If true, ignore test success or failure, and always upload screenshots."
         required: false
         type: boolean
+      skip_commit_status:
+        description: "If true, skip the commit status."
+        required: false
+        type: boolean
+      job_name_prefix:
+        description: "A prefix added to the job name when setting commit status, needed to correctly link to each job.  Use when skip_commit_status is false, and set to the name of the parent job, plus space-slash-space."
+        required: false
+        type: string
   schedule:
     # Runs every night at 2am PST / 10am UTC, testing against the main branch.
     - cron: '0 10 * * *'
@@ -138,10 +146,11 @@ jobs:
           ref: ${{ needs.compute-ref.outputs.REF }}
 
       - name: Set commit status to pending
-        if: ${{ inputs.ignore_test_status == false }}
+        if: ${{ inputs.skip_test_status == false }}
         uses: ./.github/workflows/custom-actions/set-commit-status
         with:
           context: Selenium / Build
+          job_name: "${{ inputs.job_name_prefix }}Pre-build Player"
           state: pending
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -182,10 +191,11 @@ jobs:
       - name: Report final commit status
         # Will run on success or failure, but not if the workflow is cancelled
         # or if we were asked to ignore the test status.
-        if: ${{ (success() || failure()) && inputs.ignore_test_status == false }}
+        if: ${{ (success() || failure()) && inputs.skip_commit_status == false }}
         uses: ./.github/workflows/custom-actions/set-commit-status
         with:
           context: Selenium / Build
+          job_name: "${{ inputs.job_name_prefix }}Pre-build Player"
           state: ${{ job.status }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -206,10 +216,11 @@ jobs:
           ref: ${{ needs.compute-ref.outputs.REF }}
 
       - name: Set commit status to pending
-        if: ${{ inputs.ignore_test_status == false }}
+        if: ${{ inputs.skip_commit_status == false }}
         uses: ./.github/workflows/custom-actions/set-commit-status
         with:
           context: Selenium / ${{ matrix.browser }}
+          job_name: "${{ inputs.job_name_prefix }}${{ matrix.browser }}"
           state: pending
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -362,9 +373,10 @@ jobs:
       - name: Report final commit status
         # Will run on success or failure, but not if the workflow is cancelled
         # or if we were asked to ignore the test status.
-        if: ${{ (success() || failure()) && inputs.ignore_test_status == false }}
+        if: ${{ (success() || failure()) && inputs.skip_commit_status == false }}
         uses: ./.github/workflows/custom-actions/set-commit-status
         with:
           context: Selenium / ${{ matrix.browser }}
+          job_name: "${{ inputs.job_name_prefix }}${{ matrix.browser }}"
           state: ${{ job.status }}
           token: ${{ secrets.GITHUB_TOKEN }}
