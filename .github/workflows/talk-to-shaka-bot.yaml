@@ -23,7 +23,7 @@ jobs:
       COMMENT_BODY: ${{ github.event.comment.body }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Handle command
         shell: bash
