@@ -35,6 +35,7 @@ jobs:
       pr: ${{ inputs.pr }}
       test_filter: layout
       ignore_test_status: true
+      job_name_prefix: "Get Selenium Lab Screenshots / "
 
   update-pr:
     name: Update PR
@@ -44,13 +45,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: refs/pull/${{ inputs.pr }}/head
-
-      - name: Set commit status to pending
-        uses: ./.github/workflows/custom-actions/set-commit-status
-        with:
-          context: Update All Screenshots
-          state: pending
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get artifacts
         uses: actions/download-artifact@v4
@@ -108,15 +102,23 @@ jobs:
       - name: Compute final status
         id: compute
         run: |
-          LAB_TEST_STATUS="${{ needs.run-lab-tests.status }}"
-          UPDATE_PR_STATUS="${{ needs.update-pr.status }}"
+          # The final status must be one of: success, failure, error, pending.
+          # However, the status from "result" from an earlier job is one of:
+          # success, failure, cancelled, skipped.
+          # We start by mapping those.
+          LAB_TEST_RESULT=$(echo "${{ needs.run-lab-tests.result }}" \
+              | sed -Ee 's/(cancelled|skipped)/error/')
+          UPDATE_PR_RESULT=$(echo "${{ needs.update-pr.result }}" \
+              | sed -Ee 's/(cancelled|skipped)/error/')
 
-          # If run-lab-tests succeeded, use the status of update-pr, otherwise
-          # use run-lab-tests (which is "failed" or "error").
-          if [ "$LAB_TEST_STATUS" == "success" ]; then
-            echo "status=$UPDATE_PR_STATUS" >> $GITHUB_OUTPUT
+          if [[ "$LAB_TEST_RESULT" == "success" ]]; then
+            # If run-lab-tests succeeded, use the status of update-pr, which
+            # comes after that.  If that is blank, default to "error".
+            echo "status=${UPDATE_PR_RESULT:-error}" >> $GITHUB_OUTPUT
           else
-            echo "status=$LAST_TEST_STATUS" >> $GITHUB_OUTPUT
+            # If run-lab-tests failed, use that.  If that is blank, default to
+            # "error".
+            echo "status=${LAB_TEST_RESULT:-error}" >> $GITHUB_OUTPUT
           fi
 
       - name: Report final status
