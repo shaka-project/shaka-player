@@ -163,6 +163,22 @@ describe('DrmEngine', () => {
     });
   });
 
+
+  describe('createOrLoad', () => {
+    it('does not hang when given empty init data for offline', async () => {
+      tweakDrmInfos((drmInfos) => {
+        // An empty uint8array, like we make for fairplay content.
+        drmInfos[0].initData = [
+          {initData: new Uint8Array(0), initDataType: 'cenc', keyId: null},
+        ];
+      });
+      await drmEngine.initForStorage(
+          manifest.variants, /* usePersistentLicenses= */ false);
+      await drmEngine.createOrLoad();
+      expect(drmEngine.initialized()).toBe(true);
+    }, /* timeout= */ 100);
+  });
+
   describe('init', () => {
     it('stops on first available key system', async () => {
       // Accept both drm.abc and drm.def.  Only one can be chosen.
