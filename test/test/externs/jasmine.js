@@ -467,8 +467,9 @@ var xdescribe = function(name, callback) {};
 /**
  * @param {string} name
  * @param {jasmine.Callback} callback
+ * @param {number=} timeout
  */
-var it = function(name, callback) {};
+var it = function(name, callback, timeout) {};
 
 
 /**
