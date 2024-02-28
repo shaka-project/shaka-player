@@ -71,4 +71,20 @@ describe('HlsParser', () => {
 
     await player.unload();
   });
+
+  it('supports SAMPLE-AES identity streaming', async () => {
+    await player.load('/base/test/test/assets/hls-sample-aes/index.m3u8');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 10 seconds, but stop early if the video ends.  If it takes
+    // longer than 30 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+
+    await player.unload();
+  });
 });
