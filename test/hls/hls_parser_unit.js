@@ -3658,9 +3658,8 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    const initDataBase64 =
-        'eyJraWRzIjpbIjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIl19';
-    const keyId = '00000000000000000000000000000000';
+    const initDataBase64 = 'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
+    const keyId = 'AAAAAAAAAAAAAAAAAAAAAA';
 
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.anyTimeline();
@@ -3705,9 +3704,8 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    const initDataBase64 =
-        'eyJraWRzIjpbIjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIl19';
-    const keyId = '00000000000000000000000000000000';
+    const initDataBase64 = 'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
+    const keyId = 'AAAAAAAAAAAAAAAAAAAAAA';
 
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.anyTimeline();
@@ -3847,8 +3845,8 @@ describe('HlsParser', () => {
       ].join('');
 
       const initDataBase64 =
-          'eyJraWRzIjpbIjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIl19';
-      const keyId = '00000000000000000000000000000000';
+          'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
+      const keyId = 'AAAAAAAAAAAAAAAAAAAAAA';
 
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.anyTimeline();
@@ -3887,8 +3885,8 @@ describe('HlsParser', () => {
       ].join('');
 
       const initDataBase64 =
-          'eyJraWRzIjpbIjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIl19';
-      const keyId = '00000000000000000000000000000000';
+          'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
+      const keyId = 'AAAAAAAAAAAAAAAAAAAAAA';
 
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.anyTimeline();
