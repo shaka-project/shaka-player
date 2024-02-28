@@ -7,6 +7,9 @@
 describe('HlsParser', () => {
   const Util = shaka.test.Util;
 
+  /** @type {!Object.<string, ?shaka.extern.DrmSupportType>} */
+  let support = {};
+
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
 
@@ -22,11 +25,19 @@ describe('HlsParser', () => {
   /** @type {!shaka.test.Waiter} */
   let waiter;
 
+  function checkClearKeySupport() {
+    return support['org.w3.clearkey'];
+  }
+
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
     compiledShaka =
         await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
+    const responses = await Promise.all([
+      shaka.media.DrmEngine.probeSupport(),
+    ]);
+    support = responses[0];
   });
 
   beforeEach(async () => {
@@ -73,6 +84,10 @@ describe('HlsParser', () => {
   });
 
   it('supports SAMPLE-AES identity streaming', async () => {
+    if (!checkClearKeySupport()) {
+      pending('ClearKey is not supported');
+    }
+
     await player.load('/base/test/test/assets/hls-sample-aes/index.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);
