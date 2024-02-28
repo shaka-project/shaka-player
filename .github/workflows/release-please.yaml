@@ -113,13 +113,14 @@ jobs:
           fi
 
       - run: npm pack
-      - uses: svenstaro/upload-release-action@483c1e56f95e88835747b1c7c60581215016cbf2
+      - uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # 2.9.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.tag_name }}
           file: shaka-player-*.tgz
           file_glob: true
           overwrite: true
+          make_latest: false
 
   appspot:
     runs-on: ubuntu-latest
@@ -165,11 +166,11 @@ jobs:
 
       - uses: ./.github/workflows/custom-actions/prep-for-appspot
 
-      - uses: google-github-actions/auth@v0
+      - uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
 
-      - uses: google-github-actions/deploy-appengine@v0
+      - uses: google-github-actions/deploy-appengine@v2
         with:
           project_id: shaka-player-demo
           version: ${{ env.APPSPOT_SUBDOMAIN }}
