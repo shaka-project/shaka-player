@@ -28,11 +28,11 @@ jobs:
 
       - uses: ./.github/workflows/custom-actions/prep-for-appspot
 
-      - uses: google-github-actions/auth@v0
+      - uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
 
-      - uses: google-github-actions/deploy-appengine@v0
+      - uses: google-github-actions/deploy-appengine@v2
         with:
           project_id: shaka-player-demo
           version: ${{ inputs.subdomain }}
