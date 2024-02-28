@@ -12,19 +12,17 @@ jobs:
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
+      patch: ${{ steps.release.outputs.patch }}
     steps:
       # Create/update release PR
-      - uses: google-github-actions/release-please-action@v3
+      # See also settings in .release-please-manifest.json
+      - uses: google-github-actions/release-please-action@v4
         id: release
         with:
-          # Required input to specify the release type (node package).
-          release-type: node
           # Make sure we create the PR against the correct branch.
-          default-branch: ${{ github.ref_name }}
+          target-branch: ${{ github.ref_name }}
           # Use a special shaka-bot access token for releases.
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-          # Update these additional files containing version numbers.
-          extra-files: lib/player.js
 
   # The jobs below are all conditional on a release having been created by
   # someone merging the release PR.  They all run in parallel.
@@ -32,7 +30,7 @@ jobs:
   tag-main:
     runs-on: ubuntu-latest
     needs: release
-    if: needs.release.outputs.release_created && endsWith(needs.release.outputs.tag_name, '.0') == false
+    if: needs.release.outputs.release_created && needs.release.outputs.patch == '0'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -113,14 +111,14 @@ jobs:
           fi
 
       - run: npm pack
-      - uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # 2.9.0
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.release.outputs.tag_name }}
-          file: shaka-player-*.tgz
-          file_glob: true
-          overwrite: true
-          make_latest: false
+
+      - name: Attach to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          gh release upload \
+              ${{ needs.release.outputs.tag_name }} shaka-player-*.tgz \
+              --clobber
 
   appspot:
     runs-on: ubuntu-latest
@@ -179,7 +177,7 @@ jobs:
   auto-branch:
     runs-on: ubuntu-latest
     needs: release
-    if: needs.release.outputs.release_created && endsWith(needs.release.outputs.tag_name, '.0')
+    if: needs.release.outputs.release_created && needs.release.outputs.patch == '0'
     steps:
       - uses: actions/checkout@v4
         with:

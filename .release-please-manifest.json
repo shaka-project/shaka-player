@@ -1,0 +1,4 @@
+{
+  "release-type": "node",
+  "extra-files": "lib/player.js"
+}

@@ -83,7 +83,7 @@ jobs:
           git push "$REMOTE" HEAD:"$BRANCH"
 
       - name: Debug
-        uses: mxschmitt/action-tmate@v3.6
+        uses: mxschmitt/action-tmate@v3.17
         with:
           limit-access-to-actor: true
         if: failure()
