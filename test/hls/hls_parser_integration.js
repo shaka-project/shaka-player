@@ -39,10 +39,7 @@ describe('HlsParser', () => {
     document.body.appendChild(video);
     compiledShaka =
         await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
-    const responses = await Promise.all([
-      shaka.media.DrmEngine.probeSupport(),
-    ]);
-    support = responses[0];
+    support = await shaka.media.DrmEngine.probeSupport();
   });
 
   beforeEach(async () => {
