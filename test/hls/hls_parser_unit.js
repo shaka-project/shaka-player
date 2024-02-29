@@ -3659,7 +3659,7 @@ describe('HlsParser', () => {
     ].join('');
 
     const initDataBase64 = 'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
-    const keyId = 'AAAAAAAAAAAAAAAAAAAAAA';
+    const keyId = '00000000000000000000000000000000';
 
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.anyTimeline();
@@ -3705,7 +3705,7 @@ describe('HlsParser', () => {
     ].join('');
 
     const initDataBase64 = 'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
-    const keyId = 'AAAAAAAAAAAAAAAAAAAAAA';
+    const keyId = '00000000000000000000000000000000';
 
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.anyTimeline();
@@ -3846,7 +3846,7 @@ describe('HlsParser', () => {
 
       const initDataBase64 =
           'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
-      const keyId = 'AAAAAAAAAAAAAAAAAAAAAA';
+      const keyId = '00000000000000000000000000000000';
 
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.anyTimeline();
@@ -3886,7 +3886,7 @@ describe('HlsParser', () => {
 
       const initDataBase64 =
           'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
-      const keyId = 'AAAAAAAAAAAAAAAAAAAAAA';
+      const keyId = '00000000000000000000000000000000';
 
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.anyTimeline();
