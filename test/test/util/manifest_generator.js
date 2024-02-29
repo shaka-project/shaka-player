@@ -447,6 +447,20 @@ shaka.test.ManifestGenerator.DrmInfo = class {
     const buffer = shaka.util.Uint8ArrayUtils.fromBase64(base64);
     this.initData.push({initData: buffer, initDataType: 'cenc'});
   }
+
+  /**
+   * Adds a new 'keyids' init data to the current DRM info.
+   *
+   * @param {string} base64
+   */
+  addKeyIdsData(base64) {
+    if (!this.initData) {
+      this.initData = [];
+    }
+
+    const buffer = shaka.util.Uint8ArrayUtils.fromBase64(base64);
+    this.initData.push({initData: buffer, initDataType: 'keyids'});
+  }
 };
 
 shaka.test.ManifestGenerator.Stream = class {
