@@ -1,6 +1,9 @@
 {
   "packages": {
     ".": {
+      "include-component-in-tag": false,
+      "include-v-in-tag": true,
+      "component": "",
       "release-type": "node",
       "extra-files": [
         "lib/player.js"
