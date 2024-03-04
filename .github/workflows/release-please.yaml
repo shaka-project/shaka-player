@@ -15,7 +15,6 @@ jobs:
       patch: ${{ steps.release.outputs.patch }}
     steps:
       # Create/update release PR
-      # See also settings in .release-please-manifest.json
       - uses: google-github-actions/release-please-action@v4
         id: release
         with:
@@ -23,6 +22,9 @@ jobs:
           target-branch: ${{ github.ref_name }}
           # Use a special shaka-bot access token for releases.
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          # See also settings in these files:
+          manifest-file: .release-please-manifest.json
+          config-file: .release-please-config.json
 
   # The jobs below are all conditional on a release having been created by
   # someone merging the release PR.  They all run in parallel.
