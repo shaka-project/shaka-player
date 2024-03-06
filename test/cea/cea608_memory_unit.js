@@ -53,7 +53,7 @@ describe('Cea608Memory', () => {
     const charGroups = [
       {
         set: CharSet.SPECIAL_NORTH_AMERICAN,
-        // Note TS is not at either end of avoid side effect of trim()
+        // Note TS is not at either end to avoid side effect of trim()
         chars: [0x32, 0x33, 0x39, 0x3a, 0x3e], // ½, ¿, TS, è, ô
       },
 
