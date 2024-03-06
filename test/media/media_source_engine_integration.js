@@ -28,7 +28,7 @@ describe('MediaSourceEngine', () => {
       jasmine.objectContaining({
         startTime: Util.closeTo(0.067, 0.001),
         endTime: Util.closeTo(1, 0.001),
-        payload: 'eng:⠀00:00:00:00',
+        payload: 'eng: 00:00:00:00',
         textAlign: Cue.textAlign.CENTER,
       }),
     ],
