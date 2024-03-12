@@ -232,6 +232,7 @@ describe('CmcdManager', () => {
 
     describe('query mode', () => {
       beforeAll(() => {
+        config.enabled = true;
         config.sessionId = sid;
         config.includeKeys = [];
         cmcdManager = new CmcdManager(playerInterface, config);
@@ -269,6 +270,7 @@ describe('CmcdManager', () => {
     describe('header mode', () => {
       beforeAll(() => {
         config.useHeaders = true;
+        config.enabled = true;
         cmcdManager = new CmcdManager(playerInterface, config);
       });
 
@@ -363,6 +365,7 @@ describe('CmcdManager', () => {
 
         beforeAll(() => {
           config.useHeaders = false;
+          config.enabled = true;
           cmcdManager = new CmcdManager(playerInterface, config);
           networkingEngine = createNetworkingEngine(cmcdManager);
         });
