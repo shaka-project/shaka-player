@@ -195,6 +195,7 @@ describe('CmcdManager', () => {
       });
 
       it('generates a session id via configure', () => {
+        config.enabled = true;
         config.sessionId = sid;
         cmcdManager = new CmcdManager(playerInterface, config);
 
@@ -217,6 +218,7 @@ describe('CmcdManager', () => {
       });
 
       it('filters keys if includeKeys is provided', () => {
+        config.enabled = true;
         config.sessionId = sid;
         config.includeKeys = ['sid', 'cid'];
         cmcdManager = new CmcdManager(playerInterface, config);
@@ -271,7 +273,6 @@ describe('CmcdManager', () => {
       beforeAll(() => {
         config.enabled = true;
         config.useHeaders = true;
-        config.enabled = true;
         cmcdManager = new CmcdManager(playerInterface, config);
       });
 
@@ -367,7 +368,6 @@ describe('CmcdManager', () => {
         beforeAll(() => {
           config.enabled = true;
           config.useHeaders = false;
-          config.enabled = true;
           cmcdManager = new CmcdManager(playerInterface, config);
           networkingEngine = createNetworkingEngine(cmcdManager);
         });
