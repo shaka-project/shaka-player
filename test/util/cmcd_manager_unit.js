@@ -271,6 +271,7 @@ describe('CmcdManager', () => {
       beforeAll(() => {
         config.enabled = true;
         config.useHeaders = true;
+        config.enabled = true;
         cmcdManager = new CmcdManager(playerInterface, config);
       });
 
@@ -366,6 +367,7 @@ describe('CmcdManager', () => {
         beforeAll(() => {
           config.enabled = true;
           config.useHeaders = false;
+          config.enabled = true;
           cmcdManager = new CmcdManager(playerInterface, config);
           networkingEngine = createNetworkingEngine(cmcdManager);
         });
