@@ -1390,4 +1390,17 @@ describe('Player', () => {
     await video.play();
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
   });
+
+  describe('buffer gap', () => {
+    // Regression test for issue #6339.
+    it('skip initial buffer gap', async () => {
+      if (window.ManagedMediaSource) {
+        pending('Skipping test, only runs on MSE');
+      }
+      // Ensure the video has loaded.
+      await player.load('/base/test/test/assets/6339/master.mpd');
+      await waiter.timeoutAfter(10).waitForEvent(video, 'loadeddata');
+      expect(video.currentTime).toBeGreaterThanOrEqual(0);
+    });
+  });
 });
