@@ -1395,9 +1395,9 @@ describe('Player', () => {
     // Regression test for issue #6339.
     it('skip initial buffer gap', async () => {
       // Ensure the video has loaded.
-      const waiter = waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
+      const loadWait = waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
       await player.load('/base/test/test/assets/6339/master.mpd');
-      await waiter;
+      await loadWait;
       expect(video.currentTime).toBeGreaterThan(0);
     });
   });
