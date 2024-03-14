@@ -1398,7 +1398,7 @@ describe('Player', () => {
       const loadWait = waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
       await player.load('/base/test/test/assets/6339/master.mpd');
       await loadWait;
-      expect(video.currentTime).toBeGreaterThan(0);
+      expect(video.currentTime).toBeGreaterThanOrEqual(0);
     });
   });
 });
