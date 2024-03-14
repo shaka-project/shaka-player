@@ -1382,4 +1382,17 @@ describe('Player', () => {
           expect(thumbnails.length).toBe(3);
         });
   });  // describe('addThumbnailsTrack')
+
+  describe('buffer gap', () => {
+    // Regression test for issue #6339.
+    it('skip initial buffer gap', async () => {
+      if (window.ManagedMediaSource) {
+        pending('Skipping test, only runs on MSE');
+      }
+      // Ensure the video has loaded.
+      await player.load('/base/test/test/assets/6339/master.mpd');
+      await waiter.timeoutAfter(10).waitForEvent(video, 'loadeddata');
+      expect(video.currentTime).toBeGreaterThanOrEqual(0);
+    });
+  });
 });
