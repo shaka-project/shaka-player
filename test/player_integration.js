@@ -1390,4 +1390,15 @@ describe('Player', () => {
     await video.play();
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
   });
+
+  describe('buffer gap', () => {
+    // Regression test for issue #6339.
+    it('skip initial buffer gap', async () => {
+      // Ensure the video has loaded.
+      const waiter = waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
+      await player.load('/base/test/test/assets/6339/master.mpd');
+      await waiter;
+      expect(video.currentTime).toBeGreaterThan(0);
+    });
+  });
 });
