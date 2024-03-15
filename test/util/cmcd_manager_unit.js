@@ -117,7 +117,6 @@ describe('CmcdManager', () => {
         onRequest);
   }
 
-
   describe('Query serialization', () => {
     it('produces correctly serialized data', () => {
       const query = CmcdManager.toQuery(data);
