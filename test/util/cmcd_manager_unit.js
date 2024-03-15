@@ -70,7 +70,7 @@ describe('CmcdManager', () => {
     return Object.assign({}, config, cfg);
   }
 
-  function createCmcdManager(cfg) {
+  function createCmcdManager(cfg = {}) {
     return new CmcdManager(playerInterface, createCmcdConfig(cfg));
   }
 
