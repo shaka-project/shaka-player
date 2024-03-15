@@ -12,7 +12,6 @@
 +../../lib/polyfill/patchedmediakeys_webkit.js
 +../../lib/polyfill/pip_webkit.js
 +../../lib/polyfill/random_uuid.js
-+../../lib/polyfill/storage_estimate.js
 +../../lib/polyfill/symbol.js
 +../../lib/polyfill/video_play_promise.js
 +../../lib/polyfill/videoplaybackquality.js
