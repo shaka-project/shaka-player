@@ -315,7 +315,7 @@ describe('CmcdManager', () => {
           'CMCD-Object': 'br=5234,d=3330,ot=v,tb=4000',
           'CMCD-Request': 'bl=21200,dl=21200,mtp=10000,su',
           'CMCD-Session': 'cid="testing",sf=d,' +
-            `sid="${sessionId}",st=v`,
+                          `sid="${sessionId}",st=v`,
         });
       });
     });
