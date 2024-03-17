@@ -263,6 +263,14 @@ describe('MediaSourceEngine', () => {
       mimeType: streamMetadata.mimeType,
       codecs: streamMetadata.codecs,
       drmInfos: [],
+      segmentIndex: [
+        {
+          mimeType: streamMetadata.mimeType,
+          codecs: streamMetadata.codecs,
+        },
+      ],
+      fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
+          streamMetadata.mimeType, streamMetadata.codecs)]),
     };
   }
 

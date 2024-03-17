@@ -579,6 +579,9 @@ shaka.test.ManifestGenerator.Stream = class {
       this.external = false;
       /** @type {boolean} */
       this.fastSwitching = false;
+      /** @type {!Set.<string>} */
+      this.fullMimeTypes = new Set([shaka.util.MimeUtils.getFullType(
+          defaultMimeType, defaultCodecs)]);
     }
 
     /** @type {shaka.extern.Stream} */
@@ -706,6 +709,8 @@ shaka.test.ManifestGenerator.Stream = class {
   mime(mime, codecs) {
     this.mimeType = mime;
     this.codecs = codecs || '';
+    this.fullMimeTypes = new Set([shaka.util.MimeUtils.getFullType(
+        this.mimeType, this.codecs)]);
   }
 
   /**

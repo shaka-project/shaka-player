@@ -453,14 +453,16 @@ shaka.test.StreamingEngineUtil = class {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     const Util = shaka.test.Util;
 
+    const mimeType = 'audio/mp4';
+    const codecs = 'mp4a.40.2';
     return {
       id: id,
       originalId: id.toString(),
       groupId: null,
       createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
       segmentIndex: null,
-      mimeType: 'audio/mp4',
-      codecs: 'mp4a.40.2',
+      mimeType,
+      codecs,
       bandwidth: 192000,
       type: ContentType.AUDIO,
       label: '',
@@ -480,6 +482,8 @@ shaka.test.StreamingEngineUtil = class {
       accessibilityPurpose: null,
       external: false,
       fastSwitching: false,
+      fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
+          mimeType, codecs)]),
     };
   }
 
@@ -494,14 +498,15 @@ shaka.test.StreamingEngineUtil = class {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     const Util = shaka.test.Util;
 
+    const codecs = 'avc1.42c01e';
     return {
       id: id,
       originalId: id.toString(),
       groupId: null,
       createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
       segmentIndex: null,
-      mimeType: mimeType,
-      codecs: 'avc1.42c01e',
+      mimeType,
+      codecs,
       bandwidth: 5000000,
       width: 600,
       height: 400,
@@ -523,6 +528,8 @@ shaka.test.StreamingEngineUtil = class {
       accessibilityPurpose: null,
       external: false,
       fastSwitching: false,
+      fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
+          mimeType, codecs)]),
     };
   }
 
@@ -536,14 +543,16 @@ shaka.test.StreamingEngineUtil = class {
     const ManifestParserUtils = shaka.util.ManifestParserUtils;
     const Util = shaka.test.Util;
 
+    const mimeType = 'text/vtt';
+    const codecs = '';
     return {
       id: id,
       originalId: id.toString(),
       groupId: null,
       createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
       segmentIndex: null,
-      mimeType: 'text/vtt',
-      codecs: '',
+      mimeType,
+      codecs,
       kind: ManifestParserUtils.TextStreamKind.SUBTITLE,
       type: ManifestParserUtils.ContentType.TEXT,
       label: '',
@@ -563,6 +572,8 @@ shaka.test.StreamingEngineUtil = class {
       accessibilityPurpose: null,
       external: false,
       fastSwitching: false,
+      fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
+          mimeType, codecs)]),
     };
   }
 };

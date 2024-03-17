@@ -912,7 +912,7 @@ describe('HlsParser', () => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
-          stream.mime('video/mp4', /** @type {?} */ (jasmine.any(String)));
+          stream.mime('video/mp4', 'avc1.42E01E,mp4a.40.2');
         });
       });
       manifest.sequenceMode = sequenceMode;
@@ -945,10 +945,10 @@ describe('HlsParser', () => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
-          stream.mime('video/mp4', /** @type {?} */ (jasmine.any(String)));
+          stream.mime('video/mp4', 'avc1.42E01E');
         });
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
-          stream.mime('audio/mp4', /** @type {?} */ (jasmine.any(String)));
+          stream.mime('audio/mp4', 'mp4a.40.2');
         });
       });
       manifest.sequenceMode = sequenceMode;
@@ -980,7 +980,7 @@ describe('HlsParser', () => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
-          stream.mime('video/mp4', /** @type {?} */ (jasmine.any(String)));
+          stream.mime('video/mp4', 'avc1.42E01E,mp4a.40.2');
           stream.language = 'en';
           stream.originalLanguage = 'eng';
           stream.label = 'audio';
@@ -1015,7 +1015,7 @@ describe('HlsParser', () => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
-          stream.mime('audio/mp4', /** @type {?} */ (jasmine.any(String)));
+          stream.mime('audio/mp4', 'mp4a');
         });
       });
       manifest.sequenceMode = sequenceMode;
