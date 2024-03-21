@@ -493,19 +493,19 @@ shaka.test.ManifestGenerator.Stream = class {
       this.id = id;
     }
 
-    if (!isPartial) {
-      let defaultMimeType = 'text/plain';
-      let defaultCodecs = '';
-      if (type == ContentType.AUDIO) {
-        defaultMimeType = 'audio/mp4';
-        defaultCodecs = 'mp4a.40.2';
-      } else if (type == ContentType.VIDEO) {
-        defaultMimeType = 'video/mp4';
-        defaultCodecs = 'avc1.4d401f';
-      } else if (type == ContentType.TEXT) {
-        defaultMimeType = 'text/vtt';
-      }
+    let defaultMimeType = 'text/plain';
+    let defaultCodecs = '';
+    if (type == ContentType.AUDIO) {
+      defaultMimeType = 'audio/mp4';
+      defaultCodecs = 'mp4a.40.2';
+    } else if (type == ContentType.VIDEO) {
+      defaultMimeType = 'video/mp4';
+      defaultCodecs = 'avc1.4d401f';
+    } else if (type == ContentType.TEXT) {
+      defaultMimeType = 'text/vtt';
+    }
 
+    if (!isPartial) {
       const create =
           jasmine.createSpy('createSegmentIndex').and.callFake(() => {
             return Promise.resolve();
@@ -579,10 +579,12 @@ shaka.test.ManifestGenerator.Stream = class {
       this.external = false;
       /** @type {boolean} */
       this.fastSwitching = false;
-      /** @type {!Set.<string>} */
-      this.fullMimeTypes = new Set([shaka.util.MimeUtils.getFullType(
-          defaultMimeType, defaultCodecs)]);
     }
+    /** @type {!Set.<string>} */
+    this.fullMimeTypes = new Set([shaka.util.MimeUtils.getFullType(
+        defaultMimeType, defaultCodecs)]);
+    // TODO: this didn't help? WHY WHAT ELSE IS MAKING A CUSTOM STREAM THAT
+    // DOESN't HAVE fullMimeTypes
 
     /** @type {shaka.extern.Stream} */
     const foo = this;
