@@ -208,9 +208,12 @@ shaka.test.StreamingEngineUtil = class {
     /**
      * @param {string} type
      * @param {number} position
+     * @param {string} mimeType
+     * @param {string} codecs
+     * @param {bool} altAudioVariant
      * @return {shaka.media.SegmentReference} A SegmentReference.
      */
-    const get = (type, position, secondaryAudioVariant = false) => {
+    const get = (type, position, mimeType, codecs, altAudioVariant = false) => {
       // Note that we don't just directly compute the segment position because
       // a period start time could be in the middle of the previous period's
       // last segment.
@@ -243,7 +246,7 @@ shaka.test.StreamingEngineUtil = class {
       const positionWithinPeriod = position - periodFirstPosition;
 
       const initSegmentUri = periodIndex + '_' + type + '_init' +
-          (secondaryAudioVariant ? '_secondaryAudioVariant' : '');
+          (altAudioVariant ? '_secondaryAudioVariant' : '');
 
       // The type can be 'text', 'audio', 'video', or 'trickvideo',
       // but we pull video init segment metadata from the 'video' part of the
@@ -260,7 +263,7 @@ shaka.test.StreamingEngineUtil = class {
 
       const d = segmentDurations[type];
       const getUris = () => [periodIndex + '_' + type + '_' + position +
-          (secondaryAudioVariant ? '_secondaryAudioVariant' : '')];
+          (altAudioVariant ? '_secondaryAudioVariant' : '')];
       const periodStart = periodStartTimes[periodIndex];
       const timestampOffset = (timestampOffsets && timestampOffsets[type]) || 0;
       const appendWindowStart = periodStartTimes[periodIndex];
@@ -286,6 +289,8 @@ shaka.test.StreamingEngineUtil = class {
             timestampOffset,
             appendWindowStart,
             appendWindowEnd);
+        ref.mimeType = mimeType;
+        ref.codecs = codecs;
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
         if (aesKey &&
             (type == ContentType.AUDIO || type == ContentType.VIDEO)) {
@@ -359,8 +364,10 @@ shaka.test.StreamingEngineUtil = class {
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
         const segmentIndex = new shaka.test.FakeSegmentIndex();
         segmentIndex.find.and.callFake((time) => find(ContentType.AUDIO, time));
-        segmentIndex.get.and.callFake((pos) =>
-          get(ContentType.AUDIO, pos, true));
+        segmentIndex.get.and.callFake((pos) => {
+          return get(ContentType.AUDIO, pos,
+              variant.audio.mimeType, variant.audio.codecs, true);
+        });
 
         const createSegmentIndexSpy = Util.funcSpy(
             variant2.audio.createSegmentIndex);
@@ -403,7 +410,9 @@ shaka.test.StreamingEngineUtil = class {
 
       const segmentIndex = new shaka.test.FakeSegmentIndex();
       segmentIndex.find.and.callFake((time) => find(type, time));
-      segmentIndex.get.and.callFake((pos) => get(type, pos));
+      segmentIndex.get.and.callFake((pos) => {
+        return get(type, pos, stream.mimeType, stream.codecs);
+      });
 
       const createSegmentIndexSpy = Util.funcSpy(stream.createSegmentIndex);
       createSegmentIndexSpy.and.callFake(() => {
