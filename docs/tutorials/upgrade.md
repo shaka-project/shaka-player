@@ -101,6 +101,7 @@ application:
       `getAttribute()` and `textContent` results must now be decoded if they might contain
       escape sequences. You can use `shaka.util.StringUtils.htmlUnescape` for this purpose.
     - `streaming.useNativeHlsOnSafari` has removed. Now we have another config to do the same for FairPlay `streaming.useNativeHlsForFairPlay` or for HLS (any browser) `streaming.preferNativeHls`.
+    - `mediaSource.sourceBufferExtraFeatures` has been replaced with `mediaSource.addExtraFeaturesToSourceBuffer` callback.
 
   - Plugin changes:
     - `Transmuxer` plugins now has three new parameters in `transmux()` method.
