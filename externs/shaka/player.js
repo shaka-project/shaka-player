@@ -1383,6 +1383,7 @@ shaka.extern.StreamingConfiguration;
 /**
  * @typedef {{
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
+ *   addExtraFeaturesToSourceBuffer: function(string): string,
  *   sourceBufferExtraFeatures: string,
  *   forceTransmux: boolean,
  *   insertFakeEncryptionInInit: boolean,
@@ -1397,7 +1398,14 @@ shaka.extern.StreamingConfiguration;
  *   SourceBuffer.changeType. RELOAD uses cycling of MediaSource.
  *   Defaults to SMOOTH if SMOOTH codec switching is supported, RELOAD
  *   overwise.
+ * @property {function(string): string} addExtraFeaturesToSourceBuffer
+ *   Callback to generate extra features striug based on used MIME type.
+ *   Some platforms may need to pass features when initializing the
+ *   sourceBuffer.
+ *   This string is ultimately appended to a MIME type in addSourceBuffer() &
+ *   changeType().
  * @property {string} sourceBufferExtraFeatures
+ *   <i>Deprecated, use `addExtraFeaturesToSourceBuffer` instead!</i>
  *   Some platforms may need to pass features when initializing the
  *   sourceBuffer.
  *   This string is ultimately appended to MIME types in addSourceBuffer().
