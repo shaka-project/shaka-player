@@ -210,7 +210,7 @@ shaka.test.StreamingEngineUtil = class {
      * @param {number} position
      * @param {string} mimeType
      * @param {string} codecs
-     * @param {bool} altAudioVariant
+     * @param {boolean} altAudioVariant
      * @return {shaka.media.SegmentReference} A SegmentReference.
      */
     const get = (type, position, mimeType, codecs, altAudioVariant = false) => {

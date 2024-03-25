@@ -512,7 +512,7 @@ shaka.test.ManifestGenerator.Stream = class {
           });
       const shaka_ = manifest ? manifest.shaka_ : shaka;
       const segmentIndex = shaka_.media.SegmentIndex.forSingleSegment(
-            /* startTime= */ 0, /* duration= */ 10, ['testUri'])
+          /* startTime= */ 0, /* duration= */ 10, ['testUri']);
 
       /** @type {?string} */
       this.originalId = null;
