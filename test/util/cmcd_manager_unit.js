@@ -129,6 +129,7 @@ describe('CmcdManager', () => {
       contentId: 'testing',
       rtpSafetyFactor: 5,
       useHeaders: false,
+      includeKeys: [],
     };
 
     /** @type shaka.util.CmcdManager */
@@ -214,11 +215,25 @@ describe('CmcdManager', () => {
         expect(r.uris[0].includes(sessionId)).toBe(false);
         expect(sidRegex.test(r.uris[0])).toBe(true);
       });
+
+      it('filters keys if includeKeys is provided', () => {
+        config.sessionId = sid;
+        config.includeKeys = ['sid', 'cid'];
+        cmcdManager = new CmcdManager(playerInterface, config);
+
+        const r = ObjectUtils.cloneObject(request);
+        cmcdManager.applyManifestData(r, manifestInfo);
+
+        const uri = 'https://test.com/test.mpd?CMCD=cid%3D%22testing%22' +
+          '%2Csid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22';
+        expect(r.uris[0]).toBe(uri);
+      });
     });
 
     describe('query mode', () => {
       beforeAll(() => {
         config.sessionId = sid;
+        config.includeKeys = [];
         cmcdManager = new CmcdManager(playerInterface, config);
       });
 

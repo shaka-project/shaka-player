@@ -667,15 +667,21 @@ describe('Player', () => {
     });
 
     describe('when config.streaming.preferNativeHls is set to true', () => {
-      beforeEach(() => {
+      beforeAll(() => {
         shaka.media.ManifestParser.registerParserByMime(
             'application/x-mpegurl',
             () => new shaka.test.FakeManifestParser(manifest));
       });
 
+      afterAll(() => {
+        // IMPORTANT: restore the ORIGINAL parser.  DO NOT just unregister the
+        // fake!
+        shaka.media.ManifestParser.registerParserByMime(
+            'application/x-mpegurl',
+            () => new shaka.hls.HlsParser());
+      });
+
       afterEach(() => {
-        shaka.media.ManifestParser.unregisterParserByMime(
-            'application/x-mpegurl');
         video.canPlayType.calls.reset();
       });
 
@@ -714,6 +720,22 @@ describe('Player', () => {
 
         expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.MEDIA_SOURCE);
       });
+    });
+
+    it('fires keystatuschanged events', async () => {
+      const keyStatusChanged = jasmine.createSpy('keyStatusChanged');
+      player.addEventListener(
+          'keystatuschanged', Util.spyFunc(keyStatusChanged));
+      player.createDrmEngine = (playerInterface) => {
+        // Call the onKeyStatus on the playerInterface, before load is finished.
+        playerInterface.onKeyStatus({
+          'aaa': 'usable',
+          'bbb': 'output-restricted',
+        });
+        return drmEngine;
+      };
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(keyStatusChanged).toHaveBeenCalled();
     });
   });  // describe('load/unload')
 

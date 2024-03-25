@@ -378,11 +378,11 @@ describe('Player Load Graph', () => {
 
       // Make the two requests one-after-another so that we don't have any idle
       // time between them.
-      const attachRequest = player.attach(video);
-      const loadRequest = player.load('test:sintel');
+      const attach = player.attach(video);
+      const load = player.load('test:sintel');
 
-      await attachRequest;
-      await expectAsync(loadRequest).toBeRejected();
+      await attach;
+      await expectAsync(load).toBeRejected();
 
       // Wait a couple interrupter cycles to allow the player to enter idle
       // state.
@@ -425,22 +425,23 @@ describe('Player Load Graph', () => {
       // Normally the player would initialize media source after attaching to
       // the media element, however since we don't support media source, it
       // should stop at the attach state.
-      player.attach(video, /* initMediaSource= */ true);
+      const attach = player.attach(video, /* initMediaSource= */ true);
 
       await shaka.test.Util.delay(/* seconds= */ 0.25);
       expect(lastStateChange).toBe('attach');
+
+      await attach;
     });
 
     it('loading ignores media source path', async () => {
       await player.attach(video, /* initMediaSource= */ false);
 
-      // Normally the player would load content like this with the media source
-      // path, but since we don't have media source support, it should use the
-      // src= path.
-      player.load(SMALL_MP4_CONTENT_URI);
+      const load = player.load(SMALL_MP4_CONTENT_URI);
 
       await shaka.test.Util.delay(/* seconds= */ 0.25);
       expect(lastStateChange).toBe('src-equals');
+
+      await load;
     });
 
     it('unloading ignores init media source flag', async () => {
@@ -450,10 +451,12 @@ describe('Player Load Graph', () => {
       // Normally the player would try to go to the media source state because
       // we are saying to initialize media source after unloading, but since we
       // don't have media source, it should stop at the attach state.
-      player.unload(/* initMediaSource= */ true);
+      const unload = player.unload(/* initMediaSource= */ true);
 
       await shaka.test.Util.delay(/* seconds= */ 0.25);
       expect(lastStateChange).toBe('unload');
+
+      await unload;
     });
   });
 
@@ -756,6 +759,7 @@ describe('Player Load Graph', () => {
         'manifest-parser',
         'manifest',
         'drm-engine',
+        // Excludes 'unload'.
       ]);
 
       /** @type {!Set.<string>} */
@@ -774,6 +778,7 @@ describe('Player Load Graph', () => {
         await player.attach(video);
         player.load('test:sintel').catch(() => {});
       } else {
+        goog.asserts.assert(state == 'unload', 'Unrecognized testing state!');
         await player.attach(video);
         await player.load('test:sintel');
         player.unload().catch(() => {});

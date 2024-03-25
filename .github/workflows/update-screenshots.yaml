@@ -16,7 +16,7 @@ jobs:
     name: Set Pending Status
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: refs/pull/${{ inputs.pr }}/head
 
@@ -35,44 +35,23 @@ jobs:
       pr: ${{ inputs.pr }}
       test_filter: layout
       ignore_test_status: true
+      job_name_prefix: "Get Selenium Lab Screenshots / "
 
   update-pr:
     name: Update PR
     runs-on: ubuntu-latest
     needs: [run-lab-tests]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: refs/pull/${{ inputs.pr }}/head
 
-      - name: Set commit status to pending
-        uses: ./.github/workflows/custom-actions/set-commit-status
-        with:
-          context: Update All Screenshots
-          state: pending
-          token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Get artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          path: new-screenshots
-
-      - name: Move screenshots
-        run: |
-          # The download-artifact action puts zip file contents into folders by
-          # the name of the artifact, so we can't have them downloaded directly
-          # to the screenshots folder.  Here we move them into the correct
-          # locations.
-          cd new-screenshots
-
-          # "$i" is a folder for an artifact (eg "screenshots-ChromeAndroid"),
-          # and it contains a single folder with the name we use in our
-          # screenshots (eg "chrome-Android").  We want the contents of that
-          # inner folder to be copied to test/test/assets/screenshots/, where a
-          # folder with the same name (eg "chrome-Android") already exists.
-          for i in screenshots*; do
-            cp -a $i/* ../test/test/assets/screenshots/
-          done
+          path: test/test/assets/screenshots/
+          pattern: screenshots-*
+          merge-multiple: true
 
       - name: Update screenshots
         run: |
@@ -104,7 +83,7 @@ jobs:
           git push "$REMOTE" HEAD:"$BRANCH"
 
       - name: Debug
-        uses: mxschmitt/action-tmate@v3.6
+        uses: mxschmitt/action-tmate@v3.17
         with:
           limit-access-to-actor: true
         if: failure()
@@ -116,22 +95,30 @@ jobs:
     # Will run on success or failure, but not if the workflow is cancelled.
     if: ${{ success() || failure() }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: refs/pull/${{ inputs.pr }}/head
 
       - name: Compute final status
         id: compute
         run: |
-          LAB_TEST_STATUS="${{ needs.run-lab-tests.status }}"
-          UPDATE_PR_STATUS="${{ needs.update-pr.status }}"
+          # The final status must be one of: success, failure, error, pending.
+          # However, the status from "result" from an earlier job is one of:
+          # success, failure, cancelled, skipped.
+          # We start by mapping those.
+          LAB_TEST_RESULT=$(echo "${{ needs.run-lab-tests.result }}" \
+              | sed -Ee 's/(cancelled|skipped)/error/')
+          UPDATE_PR_RESULT=$(echo "${{ needs.update-pr.result }}" \
+              | sed -Ee 's/(cancelled|skipped)/error/')
 
-          # If run-lab-tests succeeded, use the status of update-pr, otherwise
-          # use run-lab-tests (which is "failed" or "error").
-          if [ "$LAB_TEST_STATUS" == "success" ]; then
-            echo "status=$UPDATE_PR_STATUS" >> $GITHUB_OUTPUT
+          if [[ "$LAB_TEST_RESULT" == "success" ]]; then
+            # If run-lab-tests succeeded, use the status of update-pr, which
+            # comes after that.  If that is blank, default to "error".
+            echo "status=${UPDATE_PR_RESULT:-error}" >> $GITHUB_OUTPUT
           else
-            echo "status=$LAST_TEST_STATUS" >> $GITHUB_OUTPUT
+            # If run-lab-tests failed, use that.  If that is blank, default to
+            # "error".
+            echo "status=${LAB_TEST_RESULT:-error}" >> $GITHUB_OUTPUT
           fi
 
       - name: Report final status

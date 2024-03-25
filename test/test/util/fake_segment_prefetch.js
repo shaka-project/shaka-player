@@ -47,6 +47,11 @@ shaka.test.FakeSegmentPrefetch = class {
   }
 
   /** @override */
+  replaceFetchDispatcher(fetchDispatcher) {
+    // empty fake for now
+  }
+
+  /** @override */
   getLastKnownPosition() {
     return this.prefetchPosTime_;
   }
@@ -98,10 +103,10 @@ shaka.test.FakeSegmentPrefetch = class {
   }
 
   /**
-    * @override
-    * @param {shaka.media.InitSegmentReference|
-    *     shaka.media.SegmentReference} reference
-    * */
+   * @override
+   * @param {shaka.media.InitSegmentReference|
+   *     shaka.media.SegmentReference} reference
+   */
   getPrefetchedSegment(reference) {
     if (!(reference instanceof shaka.media.SegmentReference)) {
       return null;

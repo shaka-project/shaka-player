@@ -420,6 +420,8 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_('Buffer Behind', 'streaming.bufferBehind',
             /* canBeDecimal= */ true)
+        .addNumberInput_('Eviction Goal', 'streaming.evictionGoal',
+            /* canBeDecimal= */ true)
         .addNumberInput_('Safe Seek Offset', 'streaming.safeSeekOffset',
             /* canBeDecimal= */ true)
         .addNumberInput_('Stall Threshold', 'streaming.stallThreshold',
@@ -491,9 +493,9 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_('VOD Dynamic Playback Rate Buffer Ratio',
             'streaming.vodDynamicPlaybackRateBufferRatio',
-            /* canBeDecimal= */ true);
-
-
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Infinite Live Stream Duration',
+            'streaming.infiniteLiveStreamDuration');
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_('Always Stream Text', 'streaming.alwaysStreamText');
     } else {

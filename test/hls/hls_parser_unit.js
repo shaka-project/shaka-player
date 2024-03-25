@@ -3658,17 +3658,28 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    const initDataBase64 = 'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
+    const keyId = '00000000000000000000000000000000';
+
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
           stream.encrypted = true;
-          stream.addDrmInfo('org.w3.clearkey');
+          stream.addDrmInfo('org.w3.clearkey', (drmInfo) => {
+            drmInfo.licenseServerUri = 'data:application/json;base64,eyJrZXl' +
+              'zIjpbeyJrdHkiOiJvY3QiLCJraWQiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFB' +
+              'IiwiayI6IlVHbzJhRVpuZERWcFJscDBaa0pNVGpadmNUaEZaejA5In1dfQ==';
+            drmInfo.keyIds.add(keyId);
+            drmInfo.addKeyIdsData(initDataBase64);
+          });
         });
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
     });
+
+    fakeNetEngine.setResponseText('test:/key.bin', 'Pj6hFgt5iFZtfBLN6oq8Eg==');
 
     await testHlsParser(master, media, manifest);
     expect(newDrmInfoSpy).toHaveBeenCalled();
@@ -3693,17 +3704,28 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    const initDataBase64 = 'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
+    const keyId = '00000000000000000000000000000000';
+
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
           stream.encrypted = true;
-          stream.addDrmInfo('org.w3.clearkey');
+          stream.addDrmInfo('org.w3.clearkey', (drmInfo) => {
+            drmInfo.licenseServerUri = 'data:application/json;base64,eyJrZXl' +
+              'zIjpbeyJrdHkiOiJvY3QiLCJraWQiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFB' +
+              'IiwiayI6IlVHbzJhRVpuZERWcFJscDBaa0pNVGpadmNUaEZaejA5In1dfQ==';
+            drmInfo.keyIds.add(keyId);
+            drmInfo.addKeyIdsData(initDataBase64);
+          });
         });
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
     });
+
+    fakeNetEngine.setResponseText('test:/key.bin', 'Pj6hFgt5iFZtfBLN6oq8Eg==');
 
     await testHlsParser(master, media, manifest);
     expect(newDrmInfoSpy).toHaveBeenCalled();
@@ -3822,11 +3844,22 @@ describe('HlsParser', () => {
         'URI="key.bin",\n',
       ].join('');
 
+      const initDataBase64 =
+          'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
+      const keyId = '00000000000000000000000000000000';
+
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.anyTimeline();
         manifest.addPartialVariant((variant) => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
-            stream.addDrmInfo('org.w3.clearkey');
+            stream.addDrmInfo('org.w3.clearkey', (drmInfo) => {
+              drmInfo.licenseServerUri = 'data:application/json;base64,eyJrZ' +
+                  'XlzIjpbeyJrdHkiOiJvY3QiLCJraWQiOiJBQUFBQUFBQUFBQUFBQUFBQU' +
+                  'FBQUFBIiwiayI6IlVHbzJhRVpuZERWcFJscDBaa0pNVGpadmNUaEZaejA' +
+                  '5In1dfQ==';
+              drmInfo.keyIds.add(keyId);
+              drmInfo.addKeyIdsData(initDataBase64);
+            });
           });
         });
         manifest.sequenceMode = sequenceMode;
@@ -3834,6 +3867,8 @@ describe('HlsParser', () => {
       });
 
       fakeNetEngine.setResponseText('test:/master', master);
+      fakeNetEngine.setResponseText('test:/key.bin',
+          'Pj6hFgt5iFZtfBLN6oq8Eg==');
 
       const actual = await parser.start('test:/master', playerInterface);
       expect(actual).toEqual(manifest);
@@ -3849,11 +3884,22 @@ describe('HlsParser', () => {
         'URI="key.bin",\n',
       ].join('');
 
+      const initDataBase64 =
+          'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
+      const keyId = '00000000000000000000000000000000';
+
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.anyTimeline();
         manifest.addPartialVariant((variant) => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
-            stream.addDrmInfo('org.w3.clearkey');
+            stream.addDrmInfo('org.w3.clearkey', (drmInfo) => {
+              drmInfo.licenseServerUri = 'data:application/json;base64,eyJrZ' +
+                  'XlzIjpbeyJrdHkiOiJvY3QiLCJraWQiOiJBQUFBQUFBQUFBQUFBQUFBQU' +
+                  'FBQUFBIiwiayI6IlVHbzJhRVpuZERWcFJscDBaa0pNVGpadmNUaEZaejA' +
+                  '5In1dfQ==';
+              drmInfo.keyIds.add(keyId);
+              drmInfo.addKeyIdsData(initDataBase64);
+            });
           });
         });
         manifest.sequenceMode = sequenceMode;
@@ -3861,6 +3907,8 @@ describe('HlsParser', () => {
       });
 
       fakeNetEngine.setResponseText('test:/master', master);
+      fakeNetEngine.setResponseText('test:/key.bin',
+          'Pj6hFgt5iFZtfBLN6oq8Eg==');
 
       const actual = await parser.start('test:/master', playerInterface);
       expect(actual).toEqual(manifest);
@@ -4073,6 +4121,34 @@ describe('HlsParser', () => {
 
       await verifyError(master, media, error, /* onCreateSegmentIndex= */ true);
     });
+
+    it('if SAMPLE-AES encryption with MSE and mp2t content', async () => {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'video\n',
+      ].join('');
+
+      const media = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:6\n',
+        '#EXT-X-PLAYLIST-TYPE:VOD\n',
+        '#EXT-X-KEY:METHOD=SAMPLE-AES,',
+        'URI="fake",\n',
+        '#EXTINF:5,\n',
+        '#EXT-X-BYTERANGE:121090@616\n',
+        'main.ts',
+      ].join('');
+
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          Code.HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED);
+
+      await verifyError(master, media, error, /* onCreateSegmentIndex= */ true);
+    });
+
 
     describe('if required tags are missing', () => {
       /**

@@ -96,57 +96,70 @@ shaka.extern.StateChange;
  * again.
  *
  * @property {number} width
- *   The width of the current video track.
+ *   The width of the current video track. If nothing is loaded or the content
+ *   is audio-only, NaN.
  * @property {number} height
- *   The height of the current video track.
+ *   The height of the current video track. If nothing is loaded or the content
+ *   is audio-only, NaN.
  * @property {number} streamBandwidth
  *   The bandwidth required for the current streams (total, in bit/sec).
- *   It takes into account the playbackrate.
+ *   It takes into account the playbackrate. If nothing is loaded, NaN.
  *
  * @property {number} decodedFrames
- *   The total number of frames decoded by the Player.  This may be
- *   <code>NaN</code> if this is not supported by the browser.
+ *   The total number of frames decoded by the Player. If not reported by the
+ *   browser, NaN.
  * @property {number} droppedFrames
- *   The total number of frames dropped by the Player.  This may be
- *   <code>NaN</code> if this is not supported by the browser.
+ *   The total number of frames dropped by the Player. If not reported by the
+ *   browser, NaN.
  * @property {number} corruptedFrames
- *   The total number of corrupted frames dropped by the browser.  This may be
- *   <code>NaN</code> if this is not supported by the browser.
+ *   The total number of corrupted frames dropped by the browser. If not
+ *   reported by the browser, NaN.
  * @property {number} estimatedBandwidth
- *   The current estimated network bandwidth (in bit/sec).
+ *   The current estimated network bandwidth (in bit/sec). If no estimate
+ *   available, NaN.
  *
  * @property {number} gapsJumped
  *   The total number of playback gaps jumped by the GapJumpingController.
+ *   If nothing is loaded, NaN.
  * @property {number} stallsDetected
  *   The total number of playback stalls detected by the StallDetector.
+ *   If nothing is loaded, NaN.
  *
  * @property {number} completionPercent
  *   This is the greatest completion percent that the user has experienced in
- *   playback.  Also known as the "high water mark".  Is NaN when there is no
- *   known duration, such as for livestreams.
+ *   playback. Also known as the "high water mark". If nothing is loaded, or
+ *   the stream is live (and therefore indefinite), NaN.
  * @property {number} loadLatency
  *   This is the number of seconds it took for the video element to have enough
  *   data to begin playback.  This is measured from the time load() is called to
  *   the time the <code>'loadeddata'</code> event is fired by the media element.
+ *   If nothing is loaded, NaN.
  * @property {number} manifestTimeSeconds
  *   The amount of time it took to download and parse the manifest.
+ *   If nothing is loaded, NaN.
  * @property {number} drmTimeSeconds
  *   The amount of time it took to download the first drm key, and load that key
- *   into the drm system.
+ *   into the drm system. If nothing is loaded or DRM is not in use, NaN.
  * @property {number} playTime
- *   The total time spent in a playing state in seconds.
+ *   The total time spent in a playing state in seconds. If nothing is loaded,
+ *   NaN.
  * @property {number} pauseTime
- *   The total time spent in a paused state in seconds.
+ *   The total time spent in a paused state in seconds. If nothing is loaded,
+ *   NaN.
  * @property {number} bufferingTime
- *   The total time spent in a buffering state in seconds.
+ *   The total time spent in a buffering state in seconds. If nothing is
+ *   loaded, NaN.
  * @property {number} licenseTime
- *   The time spent on license requests during this session in seconds, or NaN.
+ *   The time spent on license requests during this session in seconds. If DRM
+ *   is not in use, NaN.
  * @property {number} liveLatency
  *   The time between the capturing of a frame and the end user having it
- *   displayed on their screen.
+ *   displayed on their screen. If nothing is loaded or the content is VOD,
+ *   NaN.
  *
  * @property {number} maxSegmentDuration
- *   The presentation's max segment duration in seconds, or NaN.
+ *   The presentation's max segment duration in seconds. If nothing is loaded,
+ *   NaN.
  *
  * @property {!Array.<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.
@@ -1137,6 +1150,7 @@ shaka.extern.ManifestConfiguration;
  *   rebufferingGoal: number,
  *   bufferingGoal: number,
  *   bufferBehind: number,
+ *   evictionGoal: number,
  *   ignoreTextStreamFailures: boolean,
  *   alwaysStreamText: boolean,
  *   startAtSegmentBoundary: boolean,
@@ -1174,7 +1188,8 @@ shaka.extern.ManifestConfiguration;
  *   minTimeBetweenRecoveries: number,
  *   vodDynamicPlaybackRate: boolean,
  *   vodDynamicPlaybackRateLowBufferRate: number,
- *   vodDynamicPlaybackRateBufferRatio: number
+ *   vodDynamicPlaybackRateBufferRatio: number,
+ *   infiniteLiveStreamDuration: boolean
  * }}
  *
  * @description
@@ -1198,6 +1213,10 @@ shaka.extern.ManifestConfiguration;
  *   The maximum number of seconds of content that the StreamingEngine will keep
  *   in buffer behind the playhead when it appends a new media segment.
  *   The StreamingEngine will evict content to meet this limit.
+ * @property {number} evictionGoal
+ *   The minimum duration in seconds of buffer overflow the StreamingEngine
+ *   requires to start removing content from the buffer.
+ *   Values less than <code>1.0</code> are not recommended.
  * @property {boolean} ignoreTextStreamFailures
  *   If <code>true</code>, the player will ignore text stream failures and
  *   continue playing other streams.
@@ -1352,6 +1371,10 @@ shaka.extern.ManifestConfiguration;
  *   setting the playback rate to
  *   <code>vodDynamicPlaybackRateLowBufferRate</code>.
  *   Defaults to <code>0.5</code>.
+ * @property {boolean} infiniteLiveStreamDuration
+ *   If <code>true</code>, the media source live duration
+ *   set as a<code>Infinity</code>
+ *   Defaults to <code> false </code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -1531,7 +1554,8 @@ shaka.extern.AdvancedAbrConfiguration;
  *   useHeaders: boolean,
  *   sessionId: string,
  *   contentId: string,
- *   rtpSafetyFactor: number
+ *   rtpSafetyFactor: number,
+ *   includeKeys: !Array<string>
  * }}
  *
  * @description
@@ -1557,6 +1581,9 @@ shaka.extern.AdvancedAbrConfiguration;
  * @property {number} rtpSafetyFactor
  *   RTP safety factor.
  *   Defaults to <code>5</code>.
+ * @property {!Array<string>} includeKeys
+ *   An array of keys to include in the CMCD data. If not provided, all keys
+ *   will be included.
  * @exportDoc
  */
 shaka.extern.CmcdConfiguration;

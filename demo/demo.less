@@ -568,16 +568,12 @@ footer .mdl-mega-footer__link-list {
   text-align: left;
   opacity: 0;
   max-height: 0;
-  transition: 0.3s ease-in-out;
 }
 
 .input-container-style-accordion.show {
   opacity: 1;
 
-  /* If the max-height is too high (e.g. set to 100%), the "sliding out"
-   * animation is too fast to make out with the eye.
-   * So give it a fixed maximum instead. */
-  max-height: 1000px;
+  max-height: fit-content;
 }
 
 .input-header {
