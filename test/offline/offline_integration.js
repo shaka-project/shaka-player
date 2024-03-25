@@ -50,11 +50,15 @@ filterDescribe('Offline', supportsStorage, () => {
     eventManager.release();
 
     if (storage) {
+      console.log('After each (offline) destroying storage...');
       await storage.destroy();
+      console.log('After each (offline) destroyed.');
     }
 
     // Make sure we don't leave anything in storage after the test.
+    console.log('After each (offline) deleting storage...');
     await shaka.offline.Storage.deleteAll();
+    console.log('After each (offline) deleted.');
 
     if (player) {
       await player.destroy();
@@ -141,19 +145,31 @@ filterDescribe('Offline', supportsStorage, () => {
         shaka.test.TestScheme.setupPlayer(player, 'multidrm_no_init_data');
 
         storage.configure('offline.usePersistentLicense', false);
+        console.log('Storing content...');
         const content =
             await storage.store('test:multidrm_no_init_data').promise;
+        console.log('Stored.');
 
         const contentUri = content.offlineUri;
         goog.asserts.assert(
             contentUri, 'Stored content should have an offline uri.');
 
+        console.log('Loading content...');
         await player.load(contentUri);
+        console.log('Loaded.');
 
+        console.log('Playing...');
         await video.play();
+        console.log('Played.');
+        console.log('Playing to 3...');
         await playTo(/* end= */ 3, /* timeout= */ 20);
+        console.log('Played.');
+        console.log('Unloading...');
         await player.unload();
+        console.log('Unloaded.');
+        console.log('Removing content...');
         await storage.remove(contentUri);
+        console.log('Removed.');
       });
 
   /**

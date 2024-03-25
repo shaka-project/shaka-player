@@ -54,8 +54,10 @@ filterDescribe('Storage', storageSupport, () => {
   const kbps = (k) => k * 1000;
 
   beforeEach(async () => {
+    console.log('Before each, erasing...');
     // Make sure we start with a clean slate between each run.
     await eraseStorage();
+    console.log('Before each, erased.');
 
     shaka.media.ManifestParser.registerParserByMime(
         fakeMimeType, () => new FakeManifestParser());
@@ -63,8 +65,10 @@ filterDescribe('Storage', storageSupport, () => {
 
   afterEach(async () => {
     shaka.media.ManifestParser.unregisterParserByMime(fakeMimeType);
+    console.log('After each, erasing...');
     // Make sure we don't leave anything behind.
     await eraseStorage();
+    console.log('After each, erased.');
   });
 
   describe('storage delete all', () => {
@@ -85,29 +89,42 @@ filterDescribe('Storage', storageSupport, () => {
     it('removes all content from storage', async () => {
       const testSchemeMimeType = 'application/x-test-manifest';
       const manifestUri = 'test:sintel';
+      console.log('Check 1.');
 
       // Store a piece of content.
-      await withStorage((storage) => {
-        return storage.store(
+      await withStorage(async (storage) => {
+        console.log('Storing...');
+        await storage.store(
             manifestUri, noMetadata, testSchemeMimeType).promise;
+        console.log('Stored.');
       });
+      console.log('Check 2.');
 
       // Make sure that the content can be found.
       await withStorage(async (storage) => {
+        console.log('Listing...');
         const content = await storage.list();
         expect(content).toBeTruthy();
         expect(content.length).toBe(1);
+        console.log('Listed.');
       });
+      console.log('Check 3.');
 
       // Ask storage to erase everything.
+      console.log('Deleting...');
       await shaka.offline.Storage.deleteAll();
+      console.log('Deleted.');
+      console.log('Check 4.');
 
       // Make sure that all content that was previously found is no gone.
       await withStorage(async (storage) => {
+        console.log('Listing...');
         const content = await storage.list();
         expect(content).toBeTruthy();
         expect(content.length).toBe(0);
+        console.log('Listed.');
       });
+      console.log('Check 5.');
     });
 
     /**
@@ -1047,25 +1064,28 @@ filterDescribe('Storage', storageSupport, () => {
      */
     it('throws an error if indexedDB open times out', async () => {
       const oldOpen = window.indexedDB.open;
-      window.indexedDB.open = () => {
-        // Just return a dummy object.
-        return /** @type {!IDBOpenDBRequest} */ ({
-          onsuccess: (event) => {},
-          onerror: (error) => {},
-        });
-      };
 
-      /** @type {!shaka.offline.StorageMuxer} */
-      const muxer = new shaka.offline.StorageMuxer();
-      const expectedError = shaka.test.Util.jasmineError(new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.STORAGE,
-          shaka.util.Error.Code.INDEXED_DB_INIT_TIMED_OUT));
+      try {
+        window.indexedDB.open = () => {
+          // Just return a dummy object.
+          return /** @type {!IDBOpenDBRequest} */ ({
+            onsuccess: (event) => {},
+            onerror: (error) => {},
+          });
+        };
 
-      await expectAsync(muxer.init())
-          .toBeRejectedWith(expectedError);
+        /** @type {!shaka.offline.StorageMuxer} */
+        const muxer = new shaka.offline.StorageMuxer();
+        const expectedError = shaka.test.Util.jasmineError(new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.STORAGE,
+            shaka.util.Error.Code.INDEXED_DB_INIT_TIMED_OUT));
 
-      window.indexedDB.open = oldOpen;
+        await expectAsync(muxer.init())
+            .toBeRejectedWith(expectedError);
+      } finally {
+        window.indexedDB.open = oldOpen;
+      }
     });
 
     it('throws an error if the content is a live stream', async () => {
