@@ -233,6 +233,18 @@ so don't declare it using a ref(), and if you put your player instance into a
 data() object, you can prefix the property name with "$" or "_" to make Vue not
 proxy them.
 
+<hr>
+
+**Q:** My player keeps buffering after each chunk when streaming HLS live.
+
+**A:** It is reccomended to have more than 3 chunks in your chunklist. If this
+is not possible, then you have to change the presentationDelay value. We offer
+the following configuration:
+
+```js
+player.configure('manifest.hls.liveSegmentsDelay', 1);
+```
+
 [386]: https://github.com/shaka-project/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/shaka-project/shaka-player/issues/489#issuecomment-240466224
 [743]: https://github.com/shaka-project/shaka-player/issues/743
