@@ -558,8 +558,6 @@ shakaDemo.Config = class {
 
     const docLink = this.resolveExternLink_('.MediaSourceConfiguration');
     this.addSection_('Media source', docLink)
-        .addTextInput_('Source buffer extra features',
-            'mediaSource.sourceBufferExtraFeatures')
         .addBoolInput_('Force Transmux', 'mediaSource.forceTransmux')
         .addBoolInput_('Insert fake encryption in init segments when needed ' +
             'by the platform.', 'mediaSource.insertFakeEncryptionInInit')
