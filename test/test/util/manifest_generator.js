@@ -511,7 +511,8 @@ shaka.test.ManifestGenerator.Stream = class {
             return Promise.resolve();
           });
       const shaka_ = manifest ? manifest.shaka_ : shaka;
-      const segmentIndex = new shaka_.media.SegmentIndex([]);
+      const segmentIndex = shaka_.media.SegmentIndex.forSingleSegment(
+            /* startTime= */ 0, /* duration= */ 10, ['testUri'])
 
       /** @type {?string} */
       this.originalId = null;

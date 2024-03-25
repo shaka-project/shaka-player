@@ -767,6 +767,19 @@ describe('DrmEngine', () => {
 
         setDecodingInfoSpy(['drm.abc']);
 
+        for (const variant of manifest.variants) {
+          for (const stream of [variant.video, variant.audio]) {
+            if (stream) {
+              stream.mimeType = stream.mimeType.replace('/foo', '/mp4');
+              var newFullMimeTypes = new Set();
+              for (const fullMimeType of stream.fullMimeTypes) {
+                newFullMimeTypes.add(fullMimeType.replace('/foo', '/mp4'));
+              }
+              stream.fullMimeTypes = newFullMimeTypes;
+            }
+          }
+        }
+
         const variants = manifest.variants;
         variants[0].video.mimeType = 'video/mp2t';
         variants[0].audio.mimeType = 'video/mp2t';
