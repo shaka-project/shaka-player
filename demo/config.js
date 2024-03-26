@@ -464,6 +464,14 @@ shakaDemo.Config = class {
         .addBoolInput_('Disable Video Prefetch',
             'streaming.disableVideoPrefetch')
         .addBoolInput_('Live Sync', 'streaming.liveSync')
+        .addNumberInput_('Target latency for live sync',
+            'streaming.liveSyncTargetLatency',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Target latency tolerance',
+            'streaming.liveSyncTargetLatencyTolerance',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
         .addNumberInput_('Max latency for live sync',
             'streaming.liveSyncMaxLatency',
             /* canBeDecimal= */ true,
@@ -471,17 +479,26 @@ shakaDemo.Config = class {
         .addNumberInput_('Playback rate for live sync',
             'streaming.liveSyncPlaybackRate',
             /* canBeDecimal= */ true,
-            /* canBeZero= */ false)
+            /* canBeZero= */ true)
         .addNumberInput_('Min latency for live sync',
             'streaming.liveSyncMinLatency',
             /* canBeDecimal= */ true,
             /* canBeZero= */ true)
         .addNumberInput_('Min playback rate for live sync',
             'streaming.liveSyncMinPlaybackRate',
-            /* canBeDecimal= */ true)
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
         .addBoolInput_('Live Sync Panic Mode', 'streaming.liveSyncPanicMode')
         .addNumberInput_('Live Sync Panic Mode Threshold',
             'streaming.liveSyncPanicThreshold')
+        .addBoolInput_('Dynamic Target Latency',
+            'streaming.liveSyncDynamicTargetLatency')
+        .addNumberInput_('Dynamic Target Latency Stability Threshold',
+            'streaming.liveSyncDynamicTargetLatencyStabilityThreshold')
+        .addNumberInput_('Dynamic Target Latency Rebuffer Increment',
+            'streaming.liveSyncDynamicTargetLatencyRebufferIncrement',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
         .addBoolInput_('Allow Media Source recoveries',
             'streaming.allowMediaSourceRecoveries')
         .addNumberInput_('Minimum time between recoveries',

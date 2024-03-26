@@ -151,6 +151,7 @@ shaka.extern.InitDataOverride;
 
 /**
  * @typedef {{
+ *   targetLatency:?number,
  *   maxLatency: ?number,
  *   maxPlaybackRate: ?number,
  *   minLatency: ?number,
@@ -164,6 +165,8 @@ shaka.extern.InitDataOverride;
  * minPlaybackRate to increase  latency.
  * More information {@link https://dashif.org/docs/CR-Low-Latency-Live-r8.pdf here}.
  *
+ * @property {?number} targetLatency
+ *  The target latency to aim for.
  * @property {?number} maxLatency
  *  Maximum latency in seconds.
  * @property {?number} maxPlaybackRate
