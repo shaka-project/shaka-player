@@ -325,6 +325,23 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
+    it('H.264+AAC in TS with rollover', async () => {
+      // eslint-disable-next-line max-len
+      await player.load('/base/test/test/assets/hls-ts-rollover/playlist.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
     it('H.265+AAC in TS', async () => {
       if (!isH265Supported()) {
         pending('Codec H.265 is not supported by the platform.');
