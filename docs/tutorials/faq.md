@@ -237,7 +237,7 @@ proxy them.
 
 **Q:** My player keeps buffering after each chunk when streaming HLS live.
 
-**A:** It is reccomended to have more than 3 chunks in your chunklist. If this
+**A:** It is recommended to have more than 3 chunks in your chunklist. If this
 is not possible, then you have to change the presentationDelay value. We offer
 the following configuration:
 
