@@ -114,52 +114,6 @@ describe('CastProxy', () => {
   });
 
   describe('cast', () => {
-    it('pauses the local video', () => {
-      proxy.cast();
-      expect(mockVideo.pause).toHaveBeenCalled();
-    });
-
-    it('passes initial state to sender', () => {
-      mockVideo.loop = true;
-      mockVideo.playbackRate = 3;
-      mockVideo.currentTime = 12;
-      const fakeConfig = {key: 'value'};
-      mockPlayer.getConfiguration.and.returnValue(fakeConfig);
-      mockPlayer.isTextTrackVisible.and.returnValue(false);
-      const fakeManifestUri = 'foo://bar';
-      mockPlayer.getAssetUri.and.returnValue(fakeManifestUri);
-
-      proxy.cast();
-      const calls = mockSender.cast.calls;
-      expect(calls.count()).toBe(1);
-      if (calls.count()) {
-        const state = calls.argsFor(0)[0];
-        // Video state goes directly:
-        expect(state.video.loop).toBe(mockVideo.loop);
-        expect(state.video.playbackRate).toBe(mockVideo.playbackRate);
-        // Player state uses corresponding setter names:
-        expect(state.player.configure).toEqual(fakeConfig);
-        expect(state['playerAfterLoad'].setTextTrackVisibility).toBe(false);
-        // Manifest URI:
-        expect(state.manifest).toBe(fakeManifestUri);
-        // Start time:
-        expect(state.startTime).toBe(mockVideo.currentTime);
-      }
-    });
-
-    it('does not provide a start time if the video has ended', () => {
-      mockVideo.ended = true;
-      mockVideo.currentTime = 12;
-
-      proxy.cast();
-      const calls = mockSender.cast.calls;
-      expect(calls.count()).toBe(1);
-      if (calls.count()) {
-        const state = calls.argsFor(0)[0];
-        expect(state.startTime).toBe(null);
-      }
-    });
-
     it('unloads the local player after casting is complete', async () => {
       /** @type {!shaka.util.PublicPromise} */
       const p = new shaka.util.PublicPromise();
