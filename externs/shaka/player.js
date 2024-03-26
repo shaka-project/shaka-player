@@ -890,6 +890,7 @@ shaka.extern.xml.Node;
  *   keySystemsByURI: !Object.<string, string>,
  *   manifestPreprocessor: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
+ *   enablePatchMPDSupport: boolean,
  *   enableAudioGroups: boolean,
  *   multiTypeVariantsAllowed: boolean,
  *   useStreamOnceInPeriodFlattening: boolean
@@ -950,6 +951,10 @@ shaka.extern.xml.Node;
  *   If true, the media segments are appended to the SourceBuffer in
  *   "sequence mode" (ignoring their internal timestamps).
  *   <i>Defaults to <code>false</code>.</i>
+ * @property {boolean} enablePatchMPDSupport
+ *   Enables DASH Patch manifest support.
+ *   This feature is experimental.
+ *   This value defaults to <code>false</code>.
  * @property {boolean} enableAudioGroups
  *   If set, audio streams will be grouped and filtered by their parent
  *   adaptation set ID.
