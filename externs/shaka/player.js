@@ -1383,7 +1383,7 @@ shaka.extern.StreamingConfiguration;
 /**
  * @typedef {{
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
- *   sourceBufferExtraFeatures: string,
+ *   addExtraFeaturesToSourceBuffer: function(string): string,
  *   forceTransmux: boolean,
  *   insertFakeEncryptionInInit: boolean,
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback
@@ -1397,10 +1397,12 @@ shaka.extern.StreamingConfiguration;
  *   SourceBuffer.changeType. RELOAD uses cycling of MediaSource.
  *   Defaults to SMOOTH if SMOOTH codec switching is supported, RELOAD
  *   overwise.
- * @property {string} sourceBufferExtraFeatures
+ * @property {function(string): string} addExtraFeaturesToSourceBuffer
+ *   Callback to generate extra features striug based on used MIME type.
  *   Some platforms may need to pass features when initializing the
  *   sourceBuffer.
- *   This string is ultimately appended to MIME types in addSourceBuffer().
+ *   This string is ultimately appended to a MIME type in addSourceBuffer() &
+ *   changeType().
  * @property {boolean} forceTransmux
  *   If this is <code>true</code>, we will transmux AAC and TS content even if
  *   not strictly necessary for the assets to be played.
