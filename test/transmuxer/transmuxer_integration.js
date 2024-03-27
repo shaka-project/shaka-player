@@ -189,6 +189,22 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
+    it('raw AAC with ts extension', async () => {
+      await player.load('/base/test/test/assets/hls-ts-raw-aac/index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
     it('AAC in TS', async () => {
       await player.load('/base/test/test/assets/hls-ts-aac/playlist.m3u8');
       await video.play();
