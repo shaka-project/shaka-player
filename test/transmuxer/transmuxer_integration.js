@@ -335,6 +335,11 @@ describe('Transmuxer Player', () => {
       // seconds, fail the test.
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
+      // The rollover occurs around the 9th second, without the rollover, the
+      // media source times are wrong and the stream freezes. The purpose is to
+      // play at least 15 seconds to see that the rollover passes and the
+      // stream continues without problems.
+
       // Play for 15 seconds, but stop early if the video ends.  If it takes
       // longer than 45 seconds, fail the test.
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
