@@ -110,6 +110,11 @@ shaka.extern.IAdManager = class extends EventTarget {
   requestMediaTailorStream(url, adsParams, backupUrl) {}
 
   /**
+   * @param {string} url
+   */
+  addMediaTailorTrackingUrl(url) {}
+
+  /**
    * @param {!HTMLElement} adContainer
    * @param {!HTMLMediaElement} video
    */
