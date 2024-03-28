@@ -982,6 +982,7 @@ shaka.extern.DashManifestConfiguration;
  *   defaultAudioCodec: string,
  *   defaultVideoCodec: string,
  *   ignoreManifestProgramDateTime: boolean,
+ *   ignoreManifestProgramDateTimeForTypes: !Array<string>,
  *   mediaPlaylistFullMimeType: string,
  *   useSafariBehaviorForLive: boolean,
  *   liveSegmentsDelay: number,
@@ -1010,6 +1011,14 @@ shaka.extern.DashManifestConfiguration;
  *   Meant for streams where <code>EXT-X-PROGRAM-DATE-TIME</code> is incorrect
  *   or malformed.
  *   <i>Defaults to <code>false</code>.</i>
+ * @property {!Array.<string>} ignoreManifestProgramDateTimeForTypes
+ *   An array of strings representing types for which
+ *   <code>EXT-X-PROGRAM-DATE-TIME</code> should be ignored. Only used if the
+ *   the main ignoreManifestProgramDateTime is set to false.
+ *   For example, setting this to ['text', 'video'] will cause the PDT values
+ *   text and video streams to be ignored, while still using the PDT values for
+ *   audio.
+ *   <i>Defaults to an empty array.</i>
  * @property {string} mediaPlaylistFullMimeType
  *   A string containing a full mime type, including both the basic mime type
  *   and also the codecs. Used when the HLS parser parses a media playlist
