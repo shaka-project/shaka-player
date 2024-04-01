@@ -157,7 +157,7 @@ describe('CastSender', () => {
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.CAST,
           shaka.util.Error.Code.CAST_API_UNAVAILABLE));
-      await expectAsync(sender.cast(fakeInitState)).toBeRejectedWith(expected);
+      await expectAsync(sender.cast()).toBeRejectedWith(expected);
     });
 
     it('fails when there are no receivers', async () => {
@@ -168,7 +168,7 @@ describe('CastSender', () => {
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.CAST,
           shaka.util.Error.Code.NO_CAST_RECEIVERS));
-      await expectAsync(sender.cast(fakeInitState)).toBeRejectedWith(expected);
+      await expectAsync(sender.cast()).toBeRejectedWith(expected);
     });
 
     it('creates a session and sends an "init" message', async () => {
@@ -177,7 +177,7 @@ describe('CastSender', () => {
       fakeReceiverAvailability(true);
       expect(sender.hasReceivers()).toBe(true);
 
-      const p = sender.cast(fakeInitState);
+      const p = sender.cast();
       fakeSessionConnection();
 
       await p;
@@ -220,7 +220,7 @@ describe('CastSender', () => {
         sender.init();
         fakeReceiverAvailability(true);
 
-        const p = sender.cast(fakeInitState);
+        const p = sender.cast();
         fakeSessionConnectionFailure(metadata.castErrorCode);
 
         const expected = Util.jasmineError(new shaka.util.Error(
@@ -236,7 +236,7 @@ describe('CastSender', () => {
       sender.init();
       fakeReceiverAvailability(true);
 
-      const p = sender.cast(fakeInitState);
+      const p = sender.cast();
       fakeSessionConnection();
 
       await p;
@@ -244,14 +244,14 @@ describe('CastSender', () => {
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.CAST,
           shaka.util.Error.Code.ALREADY_CASTING));
-      await expectAsync(sender.cast(fakeInitState)).toBeRejectedWith(expected);
+      await expectAsync(sender.cast()).toBeRejectedWith(expected);
     });
   });
 
   it('re-uses old sessions', async () => {
     sender.init();
     fakeReceiverAvailability(true);
-    const p = sender.cast(fakeInitState);
+    const p = sender.cast();
     fakeSessionConnection();
     const oldMockSession = mockSession;
     await p;
@@ -289,7 +289,7 @@ describe('CastSender', () => {
   it('doesn\'t re-use stopped sessions', async () => {
     sender.init();
     fakeReceiverAvailability(true);
-    const p = sender.cast(fakeInitState);
+    const p = sender.cast();
     fakeSessionConnection();
     await p;
     await sender.destroy();
@@ -334,7 +334,7 @@ describe('CastSender', () => {
       sender.init();
       fakeReceiverAvailability(true);
       sender.setAppData(fakeAppData);
-      const p = sender.cast(fakeInitState);
+      const p = sender.cast();
       fakeSessionConnection();
 
       await p;
@@ -347,7 +347,7 @@ describe('CastSender', () => {
     it('sends a special "appData" message if casting', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const p = sender.cast(fakeInitState);
+      const p = sender.cast();
       fakeSessionConnection();
       await p;
 
@@ -390,7 +390,7 @@ describe('CastSender', () => {
     it('is not triggered if making a new session', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const p = sender.cast(fakeInitState);
+      const p = sender.cast();
       fakeSessionConnection();
       await p;
 
@@ -437,7 +437,7 @@ describe('CastSender', () => {
     it('is triggered by an "event" message', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const p = sender.cast(fakeInitState);
+      const p = sender.cast();
       fakeSessionConnection();
       await p;
 
@@ -460,7 +460,7 @@ describe('CastSender', () => {
     it('is triggered when casting ends', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const p = sender.cast(fakeInitState);
+      const p = sender.cast();
       fakeSessionConnection();
       await p;
 
@@ -477,7 +477,7 @@ describe('CastSender', () => {
     it('opens the dialog if we are casting', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const p = sender.cast(fakeInitState);
+      const p = sender.cast();
       fakeSessionConnection();
       await p;
 
@@ -502,7 +502,7 @@ describe('CastSender', () => {
     it('returns most recent properties from "update" messages', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const p = sender.cast(fakeInitState);
+      const p = sender.cast();
       fakeSessionConnection();
       await p;
 
@@ -545,7 +545,7 @@ describe('CastSender', () => {
     it('simple methods trigger "call" messages', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const p = sender.cast(fakeInitState);
+      const p = sender.cast();
       fakeSessionConnection();
       await p;
 
@@ -568,7 +568,7 @@ describe('CastSender', () => {
         method = null;
         sender.init();
         fakeReceiverAvailability(true);
-        const p = sender.cast(fakeInitState);
+        const p = sender.cast();
         fakeSessionConnection();
         await p;
 
@@ -655,7 +655,7 @@ describe('CastSender', () => {
     it('overrides any cached properties', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const p = sender.cast(fakeInitState);
+      const p = sender.cast();
       fakeSessionConnection();
       await p;
 
@@ -675,7 +675,7 @@ describe('CastSender', () => {
     it('causes a "set" message to be sent', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const p = sender.cast(fakeInitState);
+      const p = sender.cast();
       fakeSessionConnection();
       await p;
 
@@ -691,7 +691,7 @@ describe('CastSender', () => {
     it('can be used before we have an "update" message', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const p = sender.cast(fakeInitState);
+      const p = sender.cast();
       fakeSessionConnection();
       await p;
 
@@ -705,7 +705,7 @@ describe('CastSender', () => {
     it('is true only after we have an "update" message', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const p = sender.cast(fakeInitState);
+      const p = sender.cast();
       fakeSessionConnection();
       await p;
 
@@ -723,7 +723,7 @@ describe('CastSender', () => {
     it('disconnects and cancels all async operations', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const cast = sender.cast(fakeInitState);
+      const cast = sender.cast();
       fakeSessionConnection();
       await cast;
 
@@ -756,7 +756,7 @@ describe('CastSender', () => {
     it('transfers playback to local device', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const cast = sender.cast(fakeInitState);
+      const cast = sender.cast();
       fakeSessionConnection();
       await cast;
 
@@ -772,7 +772,7 @@ describe('CastSender', () => {
     it('succeeds even if session.stop() throws', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const cast = sender.cast(fakeInitState);
+      const cast = sender.cast();
       fakeSessionConnection();
       await cast;
 
@@ -792,7 +792,7 @@ describe('CastSender', () => {
     beforeEach(async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const cast = sender.cast(fakeInitState);
+      const cast = sender.cast();
       fakeSessionConnection();
       await cast;
 
@@ -837,7 +837,7 @@ describe('CastSender', () => {
     it('cancels all async operations', async () => {
       sender.init();
       fakeReceiverAvailability(true);
-      const cast = sender.cast(fakeInitState);
+      const cast = sender.cast();
       fakeSessionConnection();
       await cast;
 
