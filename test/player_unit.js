@@ -3778,11 +3778,14 @@ describe('Player', () => {
   });
 
   describe('getPlayheadTimeAsDate()', () => {
+    /** @type {?shaka.media.PresentationTimeline} */
+    let timeline;
     beforeEach(async () => {
-      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(false);
 
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        goog.asserts.assert(timeline, 'timeline must be non-null');
         manifest.presentationTimeline = timeline;
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1);
@@ -3799,6 +3802,15 @@ describe('Player', () => {
       const liveTimeUtc = player.getPlayheadTimeAsDate();
       // (300 (presentation start time) + 20 (playhead time)) * 1000 (ms/sec)
       expect(liveTimeUtc).toEqual(new Date(320 * 1000));
+    });
+
+    it('uses program date time', () => {
+      timeline.setInitialProgramDateTime(100);
+      playhead.getTime.and.returnValue(20);
+
+      const liveTimeUtc = player.getPlayheadTimeAsDate();
+      // (100 (program date time) + 20 (playhead time)) * 1000 (ms/sec)
+      expect(liveTimeUtc).toEqual(new Date(120 * 1000));
     });
   });
 
