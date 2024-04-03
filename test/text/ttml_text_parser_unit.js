@@ -47,7 +47,7 @@ describe('TtmlTextParser', () => {
             startTime: 62.03,
             endTime: 62.05,
             nestedCues: [{
-              payload: 'A B C',
+              payload: ' A B C ',
               startTime: 62.03,
               endTime: 62.05,
             }],
@@ -90,7 +90,7 @@ describe('TtmlTextParser', () => {
             startTime: 62.03,
             endTime: 62.05,
             nestedCues: [{
-              payload: 'A B C',
+              payload: ' A B C ',
               startTime: 62.03,
               endTime: 62.05,
             }],
@@ -2055,7 +2055,7 @@ describe('TtmlTextParser', () => {
               {
                 startTime: 0,
                 endTime: 60,
-                payload: 'A',
+                payload: ' A',
                 fontSize: '16px',
               },
               {
@@ -2067,7 +2067,7 @@ describe('TtmlTextParser', () => {
               {
                 startTime: 0,
                 endTime: 60,
-                payload: 'B',
+                payload: 'B ',
                 fontSize: '16px',
               },
             ],
