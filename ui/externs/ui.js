@@ -92,7 +92,8 @@ shaka.extern.UIVolumeBarColors;
  *   preferDocumentPictureInPicture: boolean,
  *   showAudioChannelCountVariants: boolean,
  *   seekOnTaps: boolean,
- *   tapSeekDistance: number
+ *   tapSeekDistance: number,
+ *   refreshTickInSeconds: number
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -228,6 +229,9 @@ shaka.extern.UIVolumeBarColors;
  *   right part of the video. If less than or equal to 0,
  *   no seeking will occur.
  *   Defaults to 10 seconds.
+ * @property {number} refreshTickInSeconds
+ *   The time interval, in seconds, to update the seek bar.
+ *   Defaults to 0.125 seconds.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;
