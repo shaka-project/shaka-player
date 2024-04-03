@@ -110,9 +110,10 @@ describe('HlsParser', () => {
 
     await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
 
-    player.setTextTrackVisibility(true);
     const onCueChange = jasmine.createSpy('listener');
-    video.textTracks[0].addEventListener('cuechange', onCueChange);
+    const textTrack = video.textTracks[0];
+    player.setTextTrackVisibility(true);
+    textTrack.addEventListener('cuechange', Util.spyFunc(onCueChange));
 
     await video.play();
 
