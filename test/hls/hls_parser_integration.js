@@ -104,4 +104,23 @@ describe('HlsParser', () => {
 
     await player.unload();
   });
+
+  it('supports text discontinuity', async () => {
+    player.configure('manifest.hls.ignoreManifestProgramDateTime', true);
+
+    await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
+
+    player.setTextTrackVisibility(true);
+    const onCueChange = jasmine.createSpy('listener');
+    video.textTracks[0].addEventListener('cuechange', onCueChange);
+
+    await video.play();
+
+    // Wait for last cue
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 7, 30);
+
+    expect(onCueChange).toHaveBeenCalledTimes(4);
+
+    await player.unload();
+  });
 });
