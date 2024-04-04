@@ -118,8 +118,6 @@ DASH features **not** supported:
 
 ## HLS features
 
-**Only supported on browsers with SourceBuffer.mode=sequence support**
-
 HLS features supported:
  - VOD, Live, and Event types
  - Low-latency streaming with partial segments, preload hints, delta updates and
@@ -176,8 +174,8 @@ MSS features **not** supported:
 |Edge Chromium |**Y**     |**Y**    | -       |**Y**     |
 |Safari        | -        | -       |**Y**    | -        |
 |Opera         |untested⁵ | -       | -       |untested⁵ |
-|Chromecast    |**Y**     |**Y**    | -       |untested⁵ |
-|Tizen TV      |**Y**     |**Y**    | -       |untested⁵ |
+|Chromecast    |**Y**     |**Y**    | -       |**Y**     |
+|Tizen TV      |**Y**     |**Y**    | -       |**Y**     |
 |WebOS⁷        |untested⁷ |untested⁷| -       |untested⁷ |
 |Hisense⁷      |untested⁷ |untested⁷| -       |untested⁷ |
 |Xbox One      | -        |**Y**    | -       | -        |
