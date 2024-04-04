@@ -1095,6 +1095,50 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
+  it('supports multiline colored', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 10, endTime: 20,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: '1',
+                color: 'magenta',
+              },
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: '',
+                lineBreak: true,
+              },
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: '',
+                color: 'magenta',
+                nestedCues: [
+                  {
+                    startTime: 10,
+                    endTime: 20,
+                    payload: '2',
+                    color: 'magenta',
+                    fontStyle: Cue.fontStyle.ITALIC,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        '00:00:10.000 --> 00:00:20.000\n' +
+        '<c.magenta>1</c>\n' +
+        '<c.magenta><i>2</i></c>\n\n',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
   it('passes text-shadow when multiple classes included', () => {
     verifyHelper(
         [
