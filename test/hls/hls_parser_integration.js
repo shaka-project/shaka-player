@@ -104,4 +104,30 @@ describe('HlsParser', () => {
 
     await player.unload();
   });
+
+  it('supports text discontinuity', async () => {
+    if (!shaka.util.Platform.supportsSequenceMode()) {
+      pending('Sequence mode is not supported by the platform.');
+    }
+
+    player.configure('manifest.hls.ignoreManifestProgramDateTime', true);
+    player.setTextTrackVisibility(true);
+
+    await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
+    await video.play();
+
+    // Wait for last cue
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 7, 30);
+
+    const cues = video.textTracks[0].cues;
+    expect(cues.length).toBe(3);
+    expect(cues[0].startTime).toBeCloseTo(0, 0);
+    expect(cues[0].endTime).toBeCloseTo(2, 0);
+    expect(cues[1].startTime).toBeCloseTo(2, 0);
+    expect(cues[1].endTime).toBeCloseTo(4, 0);
+    expect(cues[2].startTime).toBeCloseTo(6, 0);
+    expect(cues[2].endTime).toBeCloseTo(8, 0);
+
+    await player.unload();
+  });
 });
