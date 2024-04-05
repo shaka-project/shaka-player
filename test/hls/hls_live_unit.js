@@ -948,17 +948,18 @@ describe('HlsParser live', () => {
               manifest.variants[0].video, [ref1, ref2]);
           expect(manifest.variants[1].video.segmentIndex).toBeNull();
 
+          // In the initial playlist, we know the earliest start time is 0, at
+          // EXT-X-MEDIA-SEQUENCE of 0.
+          expect(
+              manifest.variants[0].video.segmentIndex.earliestReference()
+                  .getStartTime())
+              .toBe(0);
+
           // Update.
           fakeNetEngine
               .setResponseText('test:/video', mediaWithRemovedSegment)
               .setResponseText('test:/video2', mediaWithRemovedSegment2);
           await delayForUpdatePeriod();
-
-          // Before the switch, we know the earliest start time is 0, at
-          // EXT-X-MEDIA-SEQUENCE of 0.
-          expect(0).toBe(
-              manifest.variants[0].video.segmentIndex.earliestReference()
-                  .getStartTime());
 
           // Switch. The new variant starts at EXT-X-MEDIA-SEQUENCE of 1.
           await manifest.variants[0].video.closeSegmentIndex();
@@ -968,7 +969,7 @@ describe('HlsParser live', () => {
           // 2.
           expect(manifest.variants[0].video.segmentIndex).toBeNull();
           const segIdx = manifest.variants[1].video.segmentIndex;
-          expect(2).toBe(segIdx.earliestReference().getStartTime());
+          expect(segIdx.earliestReference().getStartTime()).toBe(2);
         });
       });
 
