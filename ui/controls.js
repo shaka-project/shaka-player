@@ -187,7 +187,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.onCastStatusChange_();
 
     // Start this timer after we are finished initializing everything,
-    this.timeAndSeekRangeTimer_.tickEvery(/* seconds= */ 0.125);
+    this.timeAndSeekRangeTimer_.tickEvery(this.config_.refreshTickInSeconds);
 
     this.eventManager_.listen(this.localization_,
         shaka.ui.Localization.LOCALE_CHANGED, (e) => {

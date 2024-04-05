@@ -70,6 +70,13 @@ describe('HlsParser', () => {
   });
 
   it('supports AES-256 streaming', async () => {
+    let keyRequests = 0;
+    const netEngine = player.getNetworkingEngine();
+    netEngine.registerRequestFilter((type, request, context) => {
+      if (type == shaka.net.NetworkingEngine.RequestType.KEY) {
+        keyRequests++;
+      }
+    });
     await player.load('/base/test/test/assets/hls-aes-256/index.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);
@@ -83,6 +90,9 @@ describe('HlsParser', () => {
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
 
     await player.unload();
+
+    // The stream has 6 #EXT-X-KEY but only 5 different keys.
+    expect(keyRequests).toBe(5);
   });
 
   it('supports SAMPLE-AES identity streaming', async () => {
@@ -101,6 +111,32 @@ describe('HlsParser', () => {
     // Play for 10 seconds, but stop early if the video ends.  If it takes
     // longer than 30 seconds, fail the test.
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+
+    await player.unload();
+  });
+
+  it('supports text discontinuity', async () => {
+    if (!shaka.util.Platform.supportsSequenceMode()) {
+      pending('Sequence mode is not supported by the platform.');
+    }
+
+    player.configure('manifest.hls.ignoreManifestProgramDateTime', true);
+    player.setTextTrackVisibility(true);
+
+    await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
+    await video.play();
+
+    // Wait for last cue
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 7, 30);
+
+    const cues = video.textTracks[0].cues;
+    expect(cues.length).toBe(3);
+    expect(cues[0].startTime).toBeCloseTo(0, 0);
+    expect(cues[0].endTime).toBeCloseTo(2, 0);
+    expect(cues[1].startTime).toBeCloseTo(2, 0);
+    expect(cues[1].endTime).toBeCloseTo(4, 0);
+    expect(cues[2].startTime).toBeCloseTo(6, 0);
+    expect(cues[2].endTime).toBeCloseTo(8, 0);
 
     await player.unload();
   });

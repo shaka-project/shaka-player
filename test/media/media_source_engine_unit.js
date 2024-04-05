@@ -327,6 +327,29 @@ describe('MediaSourceEngine', () => {
       expect(shaka.text.TextEngine).not.toHaveBeenCalled();
     });
 
+    it('creates SourceBuffers with extra features', async () => {
+      const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+      config.addExtraFeaturesToSourceBuffer = (mimeType) => {
+        if (mimeType.includes('audio')) {
+          return '; extra_audio_param';
+        }
+        if (mimeType.includes('video')) {
+          return '; extra_video_param';
+        }
+        return '';
+      };
+      mediaSourceEngine.configure(config);
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO, fakeAudioStream);
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+      await mediaSourceEngine.init(initObject, false);
+      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith(
+          'audio/mp4; extra_audio_param');
+      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith(
+          'video/mp4; extra_video_param');
+      expect(shaka.text.TextEngine).not.toHaveBeenCalled();
+    });
+
     it('creates TextEngines for text types', async () => {
       const initObject = new Map();
       initObject.set(ContentType.TEXT, fakeTextStream);

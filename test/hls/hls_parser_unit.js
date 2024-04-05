@@ -3501,8 +3501,7 @@ describe('HlsParser', () => {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.NO_WEB_CRYPTO_API));
-      const actual = await parser.start('test:/master', playerInterface);
-      await expectAsync(loadAllStreamsFor(actual))
+      await expectAsync(parser.start('test:/master', playerInterface))
           .toBeRejectedWith(expectedError);
     } finally {
       Object.defineProperty(window, 'crypto', {
@@ -3742,9 +3741,12 @@ describe('HlsParser', () => {
 
       const master = [
         '#EXTM3U\n',
-        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
         'RESOLUTION=960x540,FRAME-RATE=60\n',
         'video\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
+        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'video2\n',
         '#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES-CTR,',
         'KEYID=0X' + keyId + ',',
         'KEYFORMAT="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",',
@@ -3754,6 +3756,14 @@ describe('HlsParser', () => {
 
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.anyTimeline();
+        manifest.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.addDrmInfo('com.widevine.alpha', (drmInfo) => {
+              drmInfo.addCencInitData(initDataBase64);
+              drmInfo.keyIds.add(keyId);
+            });
+          });
+        });
         manifest.addPartialVariant((variant) => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
             stream.addDrmInfo('com.widevine.alpha', (drmInfo) => {
@@ -3778,9 +3788,17 @@ describe('HlsParser', () => {
 
       const master = [
         '#EXTM3U\n',
+<<<<<<< HEAD
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
         'RESOLUTION=960x540,FRAME-RATE=60\n',
+=======
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+        'RESOLUTION=960x540,FRAME-RATE=30\n',
+>>>>>>> ea740ba2468f3b035d463ea9933aa7eeccf5c748
         'video\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
+        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'video2\n',
         '#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES-CTR,',
         'KEYFORMAT="com.microsoft.playready",',
         'URI="data:text/plain;base64,UGxheXJlYWR5",\n',
@@ -3788,6 +3806,13 @@ describe('HlsParser', () => {
 
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.anyTimeline();
+        manifest.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.addDrmInfo('com.microsoft.playready', (drmInfo) => {
+              drmInfo.addCencInitData(initDataBase64);
+            });
+          });
+        });
         manifest.addPartialVariant((variant) => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
             stream.addDrmInfo('com.microsoft.playready', (drmInfo) => {
@@ -3808,9 +3833,17 @@ describe('HlsParser', () => {
     it('for FairPlay', async () => {
       const master = [
         '#EXTM3U\n',
+<<<<<<< HEAD
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
         'RESOLUTION=960x540,FRAME-RATE=60\n',
+=======
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+        'RESOLUTION=960x540,FRAME-RATE=30\n',
+>>>>>>> ea740ba2468f3b035d463ea9933aa7eeccf5c748
         'video\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
+        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'video2\n',
         '#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES-CTR,',
         'KEYFORMAT="com.apple.streamingkeydelivery",',
         'URI="skd://f93d4e700d7ddde90529a27735d9e7cb",\n',
@@ -3818,6 +3851,13 @@ describe('HlsParser', () => {
 
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.anyTimeline();
+        manifest.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.addDrmInfo('com.apple.fps', (drmInfo) => {
+              drmInfo.addInitData('sinf', new Uint8Array(0));
+            });
+          });
+        });
         manifest.addPartialVariant((variant) => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
             stream.addDrmInfo('com.apple.fps', (drmInfo) => {
@@ -3838,14 +3878,25 @@ describe('HlsParser', () => {
     it('for ClearKey with explicit KEYFORMAT', async () => {
       const master = [
         '#EXTM3U\n',
+<<<<<<< HEAD
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
         'RESOLUTION=960x540,FRAME-RATE=60\n',
+=======
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+        'RESOLUTION=960x540,FRAME-RATE=30\n',
+>>>>>>> ea740ba2468f3b035d463ea9933aa7eeccf5c748
         'video\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
+        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'video2\n',
         '#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES-CTR,',
         'KEYFORMAT="identity",',
         'URI="key.bin",\n',
       ].join('');
 
+      const licenseServerUri ='data:application/json;base64,eyJrZXlzIjpbeyJr' +
+          'dHkiOiJvY3QiLCJraWQiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFBIiwiayI6IlVHb' +
+          'zJhRVpuZERWcFJscDBaa0pNVGpadmNUaEZaejA5In1dfQ==';
       const initDataBase64 =
           'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
       const keyId = '00000000000000000000000000000000';
@@ -3855,10 +3906,16 @@ describe('HlsParser', () => {
         manifest.addPartialVariant((variant) => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
             stream.addDrmInfo('org.w3.clearkey', (drmInfo) => {
-              drmInfo.licenseServerUri = 'data:application/json;base64,eyJrZ' +
-                  'XlzIjpbeyJrdHkiOiJvY3QiLCJraWQiOiJBQUFBQUFBQUFBQUFBQUFBQU' +
-                  'FBQUFBIiwiayI6IlVHbzJhRVpuZERWcFJscDBaa0pNVGpadmNUaEZaejA' +
-                  '5In1dfQ==';
+              drmInfo.licenseServerUri = licenseServerUri;
+              drmInfo.keyIds.add(keyId);
+              drmInfo.addKeyIdsData(initDataBase64);
+            });
+          });
+        });
+        manifest.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.addDrmInfo('org.w3.clearkey', (drmInfo) => {
+              drmInfo.licenseServerUri = licenseServerUri;
               drmInfo.keyIds.add(keyId);
               drmInfo.addKeyIdsData(initDataBase64);
             });
@@ -3879,13 +3936,24 @@ describe('HlsParser', () => {
     it('for ClearKey without explicit KEYFORMAT', async () => {
       const master = [
         '#EXTM3U\n',
+<<<<<<< HEAD
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
         'RESOLUTION=960x540,FRAME-RATE=60\n',
+=======
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+        'RESOLUTION=960x540,FRAME-RATE=30\n',
+>>>>>>> ea740ba2468f3b035d463ea9933aa7eeccf5c748
         'video\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
+        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'video2\n',
         '#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES-CTR,',
         'URI="key.bin",\n',
       ].join('');
 
+      const licenseServerUri ='data:application/json;base64,eyJrZXlzIjpbeyJr' +
+          'dHkiOiJvY3QiLCJraWQiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFBIiwiayI6IlVHb' +
+          'zJhRVpuZERWcFJscDBaa0pNVGpadmNUaEZaejA5In1dfQ==';
       const initDataBase64 =
           'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
       const keyId = '00000000000000000000000000000000';
@@ -3895,10 +3963,16 @@ describe('HlsParser', () => {
         manifest.addPartialVariant((variant) => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
             stream.addDrmInfo('org.w3.clearkey', (drmInfo) => {
-              drmInfo.licenseServerUri = 'data:application/json;base64,eyJrZ' +
-                  'XlzIjpbeyJrdHkiOiJvY3QiLCJraWQiOiJBQUFBQUFBQUFBQUFBQUFBQU' +
-                  'FBQUFBIiwiayI6IlVHbzJhRVpuZERWcFJscDBaa0pNVGpadmNUaEZaejA' +
-                  '5In1dfQ==';
+              drmInfo.licenseServerUri = licenseServerUri;
+              drmInfo.keyIds.add(keyId);
+              drmInfo.addKeyIdsData(initDataBase64);
+            });
+          });
+        });
+        manifest.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.addDrmInfo('org.w3.clearkey', (drmInfo) => {
+              drmInfo.licenseServerUri = licenseServerUri;
               drmInfo.keyIds.add(keyId);
               drmInfo.addKeyIdsData(initDataBase64);
             });
@@ -4121,7 +4195,7 @@ describe('HlsParser', () => {
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED);
 
-      await verifyError(master, media, error, /* onCreateSegmentIndex= */ true);
+      await verifyError(master, media, error);
     });
 
     it('if SAMPLE-AES encryption with MSE and mp2t content', async () => {
@@ -4148,7 +4222,7 @@ describe('HlsParser', () => {
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED);
 
-      await verifyError(master, media, error, /* onCreateSegmentIndex= */ true);
+      await verifyError(master, media, error);
     });
 
 
@@ -4165,8 +4239,7 @@ describe('HlsParser', () => {
             Code.HLS_REQUIRED_TAG_MISSING,
             tagName);
 
-        await verifyError(
-            master, media, error, /* onCreateSegmentIndex= */ true);
+        await verifyError(master, media, error);
       }
 
       it('EXTINF', async () => {

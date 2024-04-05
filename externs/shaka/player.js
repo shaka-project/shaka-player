@@ -982,6 +982,7 @@ shaka.extern.DashManifestConfiguration;
  *   defaultAudioCodec: string,
  *   defaultVideoCodec: string,
  *   ignoreManifestProgramDateTime: boolean,
+ *   ignoreManifestProgramDateTimeForTypes: !Array<string>,
  *   mediaPlaylistFullMimeType: string,
  *   useSafariBehaviorForLive: boolean,
  *   liveSegmentsDelay: number,
@@ -1010,6 +1011,14 @@ shaka.extern.DashManifestConfiguration;
  *   Meant for streams where <code>EXT-X-PROGRAM-DATE-TIME</code> is incorrect
  *   or malformed.
  *   <i>Defaults to <code>false</code>.</i>
+ * @property {!Array.<string>} ignoreManifestProgramDateTimeForTypes
+ *   An array of strings representing types for which
+ *   <code>EXT-X-PROGRAM-DATE-TIME</code> should be ignored. Only used if the
+ *   the main ignoreManifestProgramDateTime is set to false.
+ *   For example, setting this to ['text', 'video'] will cause the PDT values
+ *   text and video streams to be ignored, while still using the PDT values for
+ *   audio.
+ *   <i>Defaults to an empty array.</i>
  * @property {string} mediaPlaylistFullMimeType
  *   A string containing a full mime type, including both the basic mime type
  *   and also the codecs. Used when the HLS parser parses a media playlist
@@ -1383,7 +1392,7 @@ shaka.extern.StreamingConfiguration;
 /**
  * @typedef {{
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
- *   sourceBufferExtraFeatures: string,
+ *   addExtraFeaturesToSourceBuffer: function(string): string,
  *   forceTransmux: boolean,
  *   insertFakeEncryptionInInit: boolean,
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback
@@ -1397,10 +1406,12 @@ shaka.extern.StreamingConfiguration;
  *   SourceBuffer.changeType. RELOAD uses cycling of MediaSource.
  *   Defaults to SMOOTH if SMOOTH codec switching is supported, RELOAD
  *   overwise.
- * @property {string} sourceBufferExtraFeatures
+ * @property {function(string): string} addExtraFeaturesToSourceBuffer
+ *   Callback to generate extra features striug based on used MIME type.
  *   Some platforms may need to pass features when initializing the
  *   sourceBuffer.
- *   This string is ultimately appended to MIME types in addSourceBuffer().
+ *   This string is ultimately appended to a MIME type in addSourceBuffer() &
+ *   changeType().
  * @property {boolean} forceTransmux
  *   If this is <code>true</code>, we will transmux AAC and TS content even if
  *   not strictly necessary for the assets to be played.

@@ -28,6 +28,7 @@ describe('CastUtils', () => {
       'setVideoContainer',
       'getActiveSessionsMetadata',
       'releaseAllMutexes', // Very specific to the inner workings of the player.
+      'unloadAndSavePreload',
       'preload',
 
       // Test helper methods (not @export'd)

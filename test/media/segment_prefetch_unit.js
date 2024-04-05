@@ -160,7 +160,6 @@ describe('SegmentPrefetch', () => {
 
   describe('evict', () => {
     it('does not evict a segment that straddles the given time', async () => {
-      segmentPrefetch.deleteOnGet(false);
       segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
       segmentPrefetch.evict(5);
       await expectSegmentsPrefetched(0);
@@ -177,7 +176,6 @@ describe('SegmentPrefetch', () => {
     });
 
     it('segments that end before the provided time', async () => {
-      segmentPrefetch.deleteOnGet(false);
       segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
       segmentPrefetch.evict(21);
       for (let i = 0; i < 2; i++) {

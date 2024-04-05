@@ -583,59 +583,6 @@ describe('VttTextParser', () => {
         /* hls= */ true, /* sequenceMode= */ true);
   });
 
-  it('handles timestamp rollover with X-TIMESTAMP-MAP header', () => {
-    verifyHelper(
-        [
-          {startTime: 95443, endTime: 95445, payload: 'Test'},
-        ],
-        // 8589870000/90000 = 95443 sec, so expect every timestamp to be 95443
-        // seconds ahead of what is specified.
-        'WEBVTT\n' +
-        'X-TIMESTAMP-MAP=MPEGTS:8589870000,LOCAL:00:00:00.000\n\n' +
-        '00:00:00.000 --> 00:00:02.000 line:0\n' +
-        'Test',
-        // Non-null segmentStart takes precedence over X-TIMESTAMP-MAP.
-        // This protects us from rollover in the MPEGTS field.
-        {periodStart: 0, segmentStart: 95440, segmentEnd: 95550, vttOffset: 0},
-        /* hls= */ true, /* sequenceMode= */ true);
-
-    verifyHelper(
-        [
-          {startTime: 95552, endTime: 95554, payload: 'Test2'},
-        ],
-        // 95550 is larger than the roll over timestamp, so the timestamp offset
-        // gets rolled over.
-        // (9745408 + 0x200000000) / 90000 = 95552 sec
-        'WEBVTT\n' +
-        'X-TIMESTAMP-MAP=MPEGTS:9745408,LOCAL:00:00:00.000\n\n' +
-        '00:00:00.000 --> 00:00:02.000 line:0\n' +
-        'Test2',
-        {periodStart: 0, segmentStart: 95550, segmentEnd: 95560, vttOffset: 0},
-        /* hls= */ true, /* sequenceMode= */ true);
-  });
-
-  // A mock-up of HLS live subs as seen in b/253104251.
-  it('handles timestamp rollover and negative offset in HLS live', () => {
-    // Similar to values seen in b/253104251, for a realistic regression test.
-    // When using sequence mode on live HLS, we get negative offsets that
-    // represent the timestamp of our first append in sequence mode.
-    verifyHelper(
-        [
-          {startTime: 3600, endTime: 3602, payload: 'Test'},
-        ],
-        'WEBVTT\n' +
-        'X-TIMESTAMP-MAP=MPEGTS:8355814896,LOCAL:00:00:00.000\n\n' +
-        '00:00:00.000 --> 00:00:02.000 line:0\n' +
-        'Test',
-        {
-          periodStart: -1234567,
-          segmentStart: 3600,
-          segmentEnd: 3610,
-          vttOffset: -1234567,
-        },
-        /* hls= */ true, /* sequenceMode= */ true);
-  });
-
   it('supports global style blocks', () => {
     const textShadow = '-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black';
     verifyHelper(
@@ -1145,6 +1092,50 @@ describe('VttTextParser', () => {
         '<c.lime>less or more <     >     > <        > >in text ></c>\n\n' +
         '00:02:00.000 --> 00:02:10.000\n' +
         '<c.lime>arrow in --> text</c>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
+  it('supports multiline colored', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 10, endTime: 20,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: '1',
+                color: 'magenta',
+              },
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: '',
+                lineBreak: true,
+              },
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: '',
+                color: 'magenta',
+                nestedCues: [
+                  {
+                    startTime: 10,
+                    endTime: 20,
+                    payload: '2',
+                    color: 'magenta',
+                    fontStyle: Cue.fontStyle.ITALIC,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        '00:00:10.000 --> 00:00:20.000\n' +
+        '<c.magenta>1</c>\n' +
+        '<c.magenta><i>2</i></c>\n\n',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 

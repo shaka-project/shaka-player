@@ -48,6 +48,9 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   }
 
   /** @override */
+  addMediaTailorTrackingUrl(url) {}
+
+  /** @override */
   initServerSide(adContainer, video) {}
 
   /** @override */

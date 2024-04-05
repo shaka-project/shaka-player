@@ -1210,6 +1210,7 @@ describe('Player', () => {
           rebufferingGoal: 1,
           inaccurateManifestTolerance: 1,
           segmentPrefetchLimit: 1,
+          updateIntervalSeconds: 10,
           retryParameters: {
             baseDelay: 2000,
           },
@@ -1229,6 +1230,8 @@ describe('Player', () => {
       expect(player.getConfiguration().streaming.inaccurateManifestTolerance)
           .toBe(1);
       expect(player.getConfiguration().streaming.segmentPrefetchLimit).toBe(1);
+      expect(player.getConfiguration().streaming.updateIntervalSeconds)
+          .toBe(10);
       expect(player.getConfiguration().streaming.retryParameters.baseDelay)
           .toBe(2000);
       expect(player.getConfiguration().manifest.retryParameters.baseDelay)
@@ -1245,6 +1248,8 @@ describe('Player', () => {
       expect(player.getConfiguration().streaming.inaccurateManifestTolerance)
           .toBe(0);
       expect(player.getConfiguration().streaming.segmentPrefetchLimit).toBe(2);
+      expect(player.getConfiguration().streaming.updateIntervalSeconds)
+          .toBe(0.1);
       expect(player.getConfiguration().streaming.retryParameters.baseDelay)
           .toBe(100);
       expect(player.getConfiguration().manifest.retryParameters.baseDelay)
@@ -3800,11 +3805,14 @@ describe('Player', () => {
   });
 
   describe('getPlayheadTimeAsDate()', () => {
+    /** @type {?shaka.media.PresentationTimeline} */
+    let timeline;
     beforeEach(async () => {
-      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(false);
 
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        goog.asserts.assert(timeline, 'timeline must be non-null');
         manifest.presentationTimeline = timeline;
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1);
@@ -3821,6 +3829,15 @@ describe('Player', () => {
       const liveTimeUtc = player.getPlayheadTimeAsDate();
       // (300 (presentation start time) + 20 (playhead time)) * 1000 (ms/sec)
       expect(liveTimeUtc).toEqual(new Date(320 * 1000));
+    });
+
+    it('uses program date time', () => {
+      timeline.setInitialProgramDateTime(100);
+      playhead.getTime.and.returnValue(20);
+
+      const liveTimeUtc = player.getPlayheadTimeAsDate();
+      // (100 (program date time) + 20 (playhead time)) * 1000 (ms/sec)
+      expect(liveTimeUtc).toEqual(new Date(120 * 1000));
     });
   });
 
