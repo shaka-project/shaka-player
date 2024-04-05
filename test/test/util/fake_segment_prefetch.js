@@ -39,9 +39,6 @@ shaka.test.FakeSegmentPrefetch = class {
     /** @private {number} */
     this.prefetchPosTime_ = 0;
 
-    /** @private {boolean} */
-    this.deleteOnGet_ = true;
-
     /** @private {number} */
     this.segmentNum_ = 0;
   }
@@ -95,11 +92,6 @@ shaka.test.FakeSegmentPrefetch = class {
   /** @override */
   evict(time) {
     this.evictions_.push(time);
-  }
-
-  /** @override */
-  deleteOnGet(newDeleteOnGet) {
-    this.deleteOnGet_ = newDeleteOnGet;
   }
 
   /**
