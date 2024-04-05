@@ -932,8 +932,6 @@ describe('HlsParser live', () => {
               'test:/main.mp4', 0, 2, /* syncTime= */ null);
           const ref2 = makeReference(
               'test:/main2.mp4', 2, 4, /* syncTime= */ null);
-          const ref4 = makeReference(
-              'test:/main4.mp4', 2, 4, /* syncTime= */ null);
 
           const secondVariant = [
             '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
@@ -958,7 +956,7 @@ describe('HlsParser live', () => {
 
           // Before the switch, we know the earliest start time is 0, at
           // EXT-X-MEDIA-SEQUENCE of 0.
-          expect(0).toEqual(
+          expect(0).toBe(
               manifest.variants[0].video.segmentIndex.earliestReference()
                   .getStartTime());
 
@@ -970,7 +968,7 @@ describe('HlsParser live', () => {
           // 2.
           expect(manifest.variants[0].video.segmentIndex).toBeNull();
           const segIdx = manifest.variants[1].video.segmentIndex;
-          expect(2).toEqual(segIdx.earliestReference().getStartTime());
+          expect(2).toBe(segIdx.earliestReference().getStartTime());
         });
       });
 
