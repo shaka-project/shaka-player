@@ -3741,10 +3741,10 @@ describe('HlsParser', () => {
 
       const master = [
         '#EXTM3U\n',
-        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
-        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
+        'RESOLUTION=960x540,FRAME-RATE=30\n',
         'video\n',
-        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
+        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1.4d401f",',
         'RESOLUTION=960x540,FRAME-RATE=60\n',
         'video2\n',
         '#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES-CTR,',
@@ -3788,15 +3788,10 @@ describe('HlsParser', () => {
 
       const master = [
         '#EXTM3U\n',
-<<<<<<< HEAD
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
-        'RESOLUTION=960x540,FRAME-RATE=60\n',
-=======
-        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
         'RESOLUTION=960x540,FRAME-RATE=30\n',
->>>>>>> ea740ba2468f3b035d463ea9933aa7eeccf5c748
         'video\n',
-        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
+        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1.4d401f",',
         'RESOLUTION=960x540,FRAME-RATE=60\n',
         'video2\n',
         '#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES-CTR,',
@@ -3833,15 +3828,10 @@ describe('HlsParser', () => {
     it('for FairPlay', async () => {
       const master = [
         '#EXTM3U\n',
-<<<<<<< HEAD
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
-        'RESOLUTION=960x540,FRAME-RATE=60\n',
-=======
-        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
         'RESOLUTION=960x540,FRAME-RATE=30\n',
->>>>>>> ea740ba2468f3b035d463ea9933aa7eeccf5c748
         'video\n',
-        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
+        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1.4d401f",',
         'RESOLUTION=960x540,FRAME-RATE=60\n',
         'video2\n',
         '#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES-CTR,',
@@ -3878,15 +3868,10 @@ describe('HlsParser', () => {
     it('for ClearKey with explicit KEYFORMAT', async () => {
       const master = [
         '#EXTM3U\n',
-<<<<<<< HEAD
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
-        'RESOLUTION=960x540,FRAME-RATE=60\n',
-=======
-        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
         'RESOLUTION=960x540,FRAME-RATE=30\n',
->>>>>>> ea740ba2468f3b035d463ea9933aa7eeccf5c748
         'video\n',
-        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
+        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1.4d401f",',
         'RESOLUTION=960x540,FRAME-RATE=60\n',
         'video2\n',
         '#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES-CTR,',
@@ -3936,15 +3921,10 @@ describe('HlsParser', () => {
     it('for ClearKey without explicit KEYFORMAT', async () => {
       const master = [
         '#EXTM3U\n',
-<<<<<<< HEAD
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
-        'RESOLUTION=960x540,FRAME-RATE=60\n',
-=======
-        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
         'RESOLUTION=960x540,FRAME-RATE=30\n',
->>>>>>> ea740ba2468f3b035d463ea9933aa7eeccf5c748
         'video\n',
-        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
+        '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1.4d401f",',
         'RESOLUTION=960x540,FRAME-RATE=60\n',
         'video2\n',
         '#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES-CTR,',
