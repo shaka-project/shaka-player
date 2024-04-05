@@ -70,6 +70,13 @@ describe('HlsParser', () => {
   });
 
   it('supports AES-256 streaming', async () => {
+    let keyRequests = 0;
+    const netEngine = player.getNetworkingEngine();
+    netEngine.registerRequestFilter((type, request, context) => {
+      if (type == shaka.net.NetworkingEngine.RequestType.KEY) {
+        keyRequests++;
+      }
+    });
     await player.load('/base/test/test/assets/hls-aes-256/index.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);
@@ -83,6 +90,9 @@ describe('HlsParser', () => {
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
 
     await player.unload();
+
+    // The stream has 6 #EXT-X-KEY but only 5 different keys.
+    expect(keyRequests).toBe(5);
   });
 
   it('supports SAMPLE-AES identity streaming', async () => {
