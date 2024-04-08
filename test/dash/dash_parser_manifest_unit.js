@@ -2279,6 +2279,35 @@ describe('DashParser Manifest', () => {
     }
   });
 
+  it('signaling last segment number via SupplementalProperty', async () => {
+    // (DASH-IF IOP v4.3 4.4.3.6.)
+    const scheme = 'http://dashif.org/guidelines/last-segment-number';
+    const value = 368;
+    const manifestText = [
+      '<MPD minBufferTime="PT75S" type="static">',
+      '  <Period id="1" duration="PT0H12M14.167S">',
+      '    <AdaptationSet id="2">',
+      `      <SupplementalProperty schemeIdUri="${scheme}" value="${value}" />`,
+      '      <Representation codecs="avc1.640028" mimeType="video/mp4">',
+      '        <SegmentTemplate startNumber="1" media="m-$Number$.mp4"',
+      '          initialization="i.mp4" timescale="12288" duration="24576"/>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    expect(manifest.variants.length).toBe(1);
+    const stream = manifest.variants[0].video;
+    await stream.createSegmentIndex();
+    goog.asserts.assert(stream.segmentIndex, 'Null segmentIndex!');
+    expect(Array.from(stream.segmentIndex).length).toBe(367);
+  });
+
   it('Does not error when image adaptation sets are present', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
