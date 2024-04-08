@@ -584,8 +584,6 @@ shaka.test.ManifestGenerator.Stream = class {
     /** @type {!Set.<string>} */
     this.fullMimeTypes = new Set([shaka.util.MimeUtils.getFullType(
         defaultMimeType, defaultCodecs)]);
-    // TODO: this didn't help? WHY WHAT ELSE IS MAKING A CUSTOM STREAM THAT
-    // DOESN't HAVE fullMimeTypes
 
     /** @type {shaka.extern.Stream} */
     const foo = this;

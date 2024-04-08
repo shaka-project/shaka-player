@@ -214,6 +214,12 @@ shaka.test.StreamingEngineUtil = class {
      * @return {shaka.media.SegmentReference} A SegmentReference.
      */
     const get = (type, position, mimeType, codecs, altAudioVariant = false) => {
+      if (position > 50) {
+        // Terminate so it doesn't go on forever when iterating over the
+        // references.
+        return null;
+      }
+
       // Note that we don't just directly compute the segment position because
       // a period start time could be in the middle of the previous period's
       // last segment.
