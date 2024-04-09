@@ -1,5 +1,42 @@
 # Changelog
 
+## [4.7.12](https://github.com/shaka-project/shaka-player/compare/v4.7.11...v4.7.12) (2024-04-09)
+
+
+### Bug Fixes
+
+* Add LOAS-AAC detection in TS ([#6390](https://github.com/shaka-project/shaka-player/issues/6390)) ([a370627](https://github.com/shaka-project/shaka-player/commit/a370627ddedee7134742e841ca84c20f88332b5d))
+* Add ManagedMediaSource support in MediaSource polyfill ([#6361](https://github.com/shaka-project/shaka-player/issues/6361)) ([a134917](https://github.com/shaka-project/shaka-player/commit/a13491799cd31f6604f057c991fc479c7e1557c6))
+* Add Opus and AV1 detection in TS ([#6385](https://github.com/shaka-project/shaka-player/issues/6385)) ([1ed0c24](https://github.com/shaka-project/shaka-player/commit/1ed0c2417c3c87bcf3114ca40b9559ca0f6ed04b))
+* **Cast:** Don't pause local video until the cast connection is established ([#6359](https://github.com/shaka-project/shaka-player/issues/6359)) ([30cf6f2](https://github.com/shaka-project/shaka-player/commit/30cf6f2205463af3668157c30aeb6ea7e2448e06))
+* **DASH:** Set delay to 0 for LL streams ([#6406](https://github.com/shaka-project/shaka-player/issues/6406)) ([1ccf611](https://github.com/shaka-project/shaka-player/commit/1ccf61103edc0b2e5a00e6e1668f7270996558c1))
+* **demo:** Remove max height of demo config tabs ([#6324](https://github.com/shaka-project/shaka-player/issues/6324)) ([f18e818](https://github.com/shaka-project/shaka-player/commit/f18e818b410ffe749c069c53dc96c790e2b1cf7a))
+* Disable smooth codec switching in Edge Windows ([#6384](https://github.com/shaka-project/shaka-player/issues/6384)) ([b6a9ab3](https://github.com/shaka-project/shaka-player/commit/b6a9ab3cc55d91780af9f1f1099f3c36bd0da5e7))
+* Fix cea608 whitespace rendering ([#6329](https://github.com/shaka-project/shaka-player/issues/6329)) ([4cedaf9](https://github.com/shaka-project/shaka-player/commit/4cedaf9bd29368f1f42d6986bdb88fe4fced12d7)), closes [#6328](https://github.com/shaka-project/shaka-player/issues/6328)
+* Fix ENCA box parsing ([#6298](https://github.com/shaka-project/shaka-player/issues/6298)) ([5d0e418](https://github.com/shaka-project/shaka-player/commit/5d0e418c5115f69c5d0bc20354c2397f31ed6237))
+* Fix PES rollover in TS ([#6363](https://github.com/shaka-project/shaka-player/issues/6363)) ([4ec646b](https://github.com/shaka-project/shaka-player/commit/4ec646b316ec46da061067030e21a64d927f2338))
+* Fix playback stuck on initial gap ([#6340](https://github.com/shaka-project/shaka-player/issues/6340)) ([1eac68f](https://github.com/shaka-project/shaka-player/commit/1eac68f7c558d0b5fc8e1e150598f5b775e750ff)), closes [#6339](https://github.com/shaka-project/shaka-player/issues/6339)
+* Fix SAR when transmuxing ([#6309](https://github.com/shaka-project/shaka-player/issues/6309)) ([ad111e6](https://github.com/shaka-project/shaka-player/commit/ad111e6b86ab5ce61663977265d268cb3919b7ec))
+* Fix waiting for empty init datas ([#6292](https://github.com/shaka-project/shaka-player/issues/6292)) ([4fa32b0](https://github.com/shaka-project/shaka-player/commit/4fa32b04b57eddd2b57dbecf18542f3ac5af0444)), closes [#6228](https://github.com/shaka-project/shaka-player/issues/6228)
+* **HLS:** Fix IAMF codec selection in HLS ([#6389](https://github.com/shaka-project/shaka-player/issues/6389)) ([dad2e81](https://github.com/shaka-project/shaka-player/commit/dad2e81a4403c02e3b4d750d1b0a0256ff45db1e))
+* **HLS:** getPlayheadTimeAsDate() differs from X-EXT-PROGRAM-DATE-TIME ([#6371](https://github.com/shaka-project/shaka-player/issues/6371)) ([4aa8caa](https://github.com/shaka-project/shaka-player/commit/4aa8caac062af09416a4ec0d29e809518322e72d))
+* **HLS:** Only offset segment ref times when needed w/ EXT-X-MEDIA-SEQUENCE ([#6378](https://github.com/shaka-project/shaka-player/issues/6378)) ([7825d62](https://github.com/shaka-project/shaka-player/commit/7825d6204d877aee0d176da54b5813dc0e235ba4))
+* **HLS:** Reset textSequenceModeOffset on discontinuity ([#6388](https://github.com/shaka-project/shaka-player/issues/6388)) ([f889315](https://github.com/shaka-project/shaka-player/commit/f88931587ab434c661ca1d1222514591ff964d39))
+* Reject TS content on all platforms and transmux always ([#6382](https://github.com/shaka-project/shaka-player/issues/6382)) ([ccf42c2](https://github.com/shaka-project/shaka-player/commit/ccf42c2285a7996afb1aa52154e8d322efd170be))
+* **transmuxer:** Support raw AAC with TS extension ([#6360](https://github.com/shaka-project/shaka-player/issues/6360)) ([3cf68c1](https://github.com/shaka-project/shaka-player/commit/3cf68c1d9c1fd81de1845221f3f17dcdbfed1550))
+* **WebVTT:** Remove rollover logic because we always transmux TS ([#6397](https://github.com/shaka-project/shaka-player/issues/6397)) ([9ab54d1](https://github.com/shaka-project/shaka-player/commit/9ab54d1485564065e02136b538b080186a0161e9))
+
+
+### Performance Improvements
+
+* **Cast:** memoize/cache canDisplayType results to reduce startup latency ([#6367](https://github.com/shaka-project/shaka-player/issues/6367)) ([9870b48](https://github.com/shaka-project/shaka-player/commit/9870b487c975a885758f248c5ca151d00f432e3e))
+* **transmuxer:** Improve performance on video transmuxing ([#6364](https://github.com/shaka-project/shaka-player/issues/6364)) ([cc8fcfe](https://github.com/shaka-project/shaka-player/commit/cc8fcfec1e5da547a73d3531cc63cafc49660794))
+
+
+### Reverts
+
+* getPlayheadTimeAsDate() differs from X-EXT-PROGRAM-DATE-TIME ([#6330](https://github.com/shaka-project/shaka-player/issues/6330)) ([07be922](https://github.com/shaka-project/shaka-player/commit/07be922d5095d50634512750f0b8f0142ba5b27f))
+
 ## [4.7.11](https://github.com/shaka-project/shaka-player/compare/v4.7.10...v4.7.11) (2024-02-26)
 
 
