@@ -87,9 +87,6 @@ describe('MediaSourceEngine', () => {
         },
       };
     };
-    // [
-    //   {mimeType},
-    // ];
     return {mimeType, drmInfos: [{}], segmentIndex};
   };
 
