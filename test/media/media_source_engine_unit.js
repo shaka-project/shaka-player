@@ -61,9 +61,35 @@ describe('MediaSourceEngine', () => {
   const buffer3 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (3));
 
   const makeFakeStream = (mimeType) => {
-    const segmentIndex = [
-      {mimeType},
-    ];
+    const segmentIndex = {
+      isEmpty: () => false,
+    };
+    segmentIndex[Symbol.iterator] = () => {
+      let nextPosition = 0;
+
+      return {
+        next: () => {
+          if (nextPosition == 0) {
+            nextPosition += 1;
+            return {
+              value: {mimeType},
+              done: false,
+            };
+          } else {
+            return {
+              value: null,
+              done: true,
+            };
+          }
+        },
+        current: () => {
+          return {mimeType};
+        },
+      };
+    };
+    // [
+    //   {mimeType},
+    // ];
     return {mimeType, drmInfos: [{}], segmentIndex};
   };
 
