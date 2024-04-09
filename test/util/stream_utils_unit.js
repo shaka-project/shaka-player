@@ -702,11 +702,13 @@ describe('StreamUtils', () => {
         manifest.addVariant(0, (variant) => {
           variant.addAudio(1, (stream) => {
             stream.mime('audio/mp4', 'fLaC');
+            stream.language = 'en';
           });
         });
         manifest.addVariant(2, (variant) => {
           variant.addAudio(3, (stream) => {
             stream.mime('audio/mp4', 'flac');
+            stream.language = 'es';
           });
         });
       });
@@ -714,6 +716,8 @@ describe('StreamUtils', () => {
       await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       expect(manifest.variants.length).toBe(2);
+      expect(manifest.variants[0].audio.language).toBe('en');
+      expect(manifest.variants[1].audio.language).toBe('es');
     });
 
     it('supports Opus codec', async () => {
@@ -724,11 +728,13 @@ describe('StreamUtils', () => {
         manifest.addVariant(0, (variant) => {
           variant.addAudio(1, (stream) => {
             stream.mime('audio/mp4', 'Opus');
+            stream.language = 'en';
           });
         });
         manifest.addVariant(2, (variant) => {
           variant.addAudio(3, (stream) => {
             stream.mime('audio/mp4', 'opus');
+            stream.language = 'es';
           });
         });
       });
@@ -736,6 +742,8 @@ describe('StreamUtils', () => {
       await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       expect(manifest.variants.length).toBe(2);
+      expect(manifest.variants[0].audio.language).toBe('en');
+      expect(manifest.variants[1].audio.language).toBe('es');
     });
 
     it('supports legacy AVC1 codec', async () => {
