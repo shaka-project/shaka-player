@@ -892,7 +892,8 @@ shaka.extern.xml.Node;
  *   sequenceMode: boolean,
  *   enableAudioGroups: boolean,
  *   multiTypeVariantsAllowed: boolean,
- *   useStreamOnceInPeriodFlattening: boolean
+ *   useStreamOnceInPeriodFlattening: boolean,
+ *   updatePeriod: number
  * }}
  *
  * @property {string} clockSyncUri
@@ -970,6 +971,8 @@ shaka.extern.xml.Node;
  *   but may raise issues if manifest does not have stream consistency
  *   between periods.
  *   Defaults to <code>false</code>.
+ * @property {number} updatePeriod
+ *   Override the update time for the manifest
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
