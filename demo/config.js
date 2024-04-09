@@ -232,7 +232,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Enable DASH sequence mode',
             'manifest.dash.sequenceMode')
         .addBoolInput_('Use stream once in period flattening',
-            'manifest.dash.useStreamOnceInPeriodFlattening');
+            'manifest.dash.useStreamOnceInPeriodFlattening')
+        .addNumberInput_('override the Update period of dash manifest',
+            'manifest.dash.updatePeriod');
   }
 
   /** @private */
