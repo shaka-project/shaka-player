@@ -562,7 +562,6 @@ describe('StreamingEngine', () => {
             }
             return ['0_' + type + '_' + cur];
           };
-          const ref = 
           refs.push(new shaka.media.SegmentReference(
               /* startTime= */ time,
               /* endTime= */ end,
