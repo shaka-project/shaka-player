@@ -562,6 +562,7 @@ describe('StreamingEngine', () => {
             }
             return ['0_' + type + '_' + cur];
           };
+          const ref = 
           refs.push(new shaka.media.SegmentReference(
               /* startTime= */ time,
               /* endTime= */ end,
@@ -572,7 +573,6 @@ describe('StreamingEngine', () => {
               /* timestampOffset= */ gapAtStart,
               /* appendWindowStart= */ 0,
               /* appendWindowEnd= */ Infinity));
-
           i++;
           time = end;
         }
