@@ -469,6 +469,9 @@ shaka.test.FakeSegmentIndex = class {
     this.updateEvery = jasmine.createSpy('updateEvery');
 
     /** @type {!jasmine.Spy} */
+    this.isEmpty = jasmine.createSpy('updateEvery').and.returnValue(false);
+
+    /** @type {!jasmine.Spy} */
     this[Symbol.iterator] = jasmine.createSpy('Symbol.iterator')
         .and.callFake(() => this.getIteratorForTime(0));
 
