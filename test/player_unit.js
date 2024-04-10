@@ -2709,7 +2709,7 @@ describe('Player', () => {
       expect(stats.estimatedBandwidth).toBe(25);
     });
 
-    it('tracks info about current stream', async () => {
+    it('tracks info about current stream', () => {
       forceBufferingTo(false);
       let stats = player.getStats();
       // Should have chosen the first of each type of stream.
