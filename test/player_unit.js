@@ -4372,6 +4372,13 @@ describe('Player', () => {
 
     it('does not fail with no segments', async () => {
       player.configure('streaming.startAtSegmentBoundary', true);
+      for (const variant of manifest.variants) {
+        for (const stream of [variant.video, variant.audio]) {
+          if (stream) {
+            stream.segmentIndex.references = [];
+          }
+        }
+      }
 
       // Without useSegmentTemplate in the fake manifest, the call to
       // getIteratorForTime() in Player produces a null iterator.  Using the

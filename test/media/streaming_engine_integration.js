@@ -572,7 +572,6 @@ describe('StreamingEngine', () => {
               /* timestampOffset= */ gapAtStart,
               /* appendWindowStart= */ 0,
               /* appendWindowEnd= */ Infinity));
-
           i++;
           time = end;
         }

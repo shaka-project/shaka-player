@@ -400,7 +400,8 @@ shaka.extern.FetchCryptoKeysFunction;
  *      undefined),
  *   mssPrivateData: (shaka.extern.MssPrivateData|undefined),
  *   external: boolean,
- *   fastSwitching: boolean
+ *   fastSwitching: boolean,
+ *   fullMimeTypes: !Set.<string>
  * }}
  *
  * @description
@@ -430,10 +431,14 @@ shaka.extern.FetchCryptoKeysFunction;
  * @property {string} mimeType
  *   <i>Required.</i> <br>
  *   The Stream's MIME type, e.g., 'audio/mp4', 'video/webm', or 'text/vtt'.
+ *   In the case of a stream that adapts between different periods with
+ *   different MIME types, this represents only the first period.
  * @property {string} codecs
  *   <i>Defaults to '' (i.e., unknown / not needed).</i> <br>
  *   The Stream's codecs, e.g., 'avc1.4d4015' or 'vp9', which must be
  *   compatible with the Stream's MIME type. <br>
+ *   In the case of a stream that adapts between different periods with
+ *   different codecs, this represents only the first period.
  *   See {@link https://tools.ietf.org/html/rfc6381}
  * @property {(number|undefined)} frameRate
  *   <i>Video streams only.</i> <br>
@@ -535,6 +540,11 @@ shaka.extern.FetchCryptoKeysFunction;
  *   Eg: external text tracks.
  * @property {boolean} fastSwitching
  *   Indicate if the stream should be used for fast switching.
+ * @property {!Set.<string>} fullMimeTypes
+ *   A set of full MIME types (e.g. MIME types plus codecs information), that
+ *   represents the types used in each period of the original manifest.
+ *   Meant for being used by compatibility checking, such as with
+ *   MediaSource.isTypeSupported.
  *
  * @exportDoc
  */

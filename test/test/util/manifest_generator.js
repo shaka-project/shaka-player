@@ -479,25 +479,26 @@ shaka.test.ManifestGenerator.Stream = class {
       this.id = id;
     }
 
-    if (!isPartial) {
-      let defaultMimeType = 'text/plain';
-      let defaultCodecs = '';
-      if (type == ContentType.AUDIO) {
-        defaultMimeType = 'audio/mp4';
-        defaultCodecs = 'mp4a.40.2';
-      } else if (type == ContentType.VIDEO) {
-        defaultMimeType = 'video/mp4';
-        defaultCodecs = 'avc1.4d401f';
-      } else if (type == ContentType.TEXT) {
-        defaultMimeType = 'text/vtt';
-      }
+    let defaultMimeType = 'text/plain';
+    let defaultCodecs = '';
+    if (type == ContentType.AUDIO) {
+      defaultMimeType = 'audio/mp4';
+      defaultCodecs = 'mp4a.40.2';
+    } else if (type == ContentType.VIDEO) {
+      defaultMimeType = 'video/mp4';
+      defaultCodecs = 'avc1.4d401f';
+    } else if (type == ContentType.TEXT) {
+      defaultMimeType = 'text/vtt';
+    }
 
+    if (!isPartial) {
       const create =
           jasmine.createSpy('createSegmentIndex').and.callFake(() => {
             return Promise.resolve();
           });
       const shaka_ = manifest ? manifest.shaka_ : shaka;
-      const segmentIndex = new shaka_.media.SegmentIndex([]);
+      const segmentIndex = shaka_.media.SegmentIndex.forSingleSegment(
+          /* startTime= */ 0, /* duration= */ 10, ['testUri']);
 
       /** @type {?string} */
       this.originalId = null;
@@ -566,6 +567,9 @@ shaka.test.ManifestGenerator.Stream = class {
       /** @type {boolean} */
       this.fastSwitching = false;
     }
+    /** @type {!Set.<string>} */
+    this.fullMimeTypes = new Set([shaka.util.MimeUtils.getFullType(
+        defaultMimeType, defaultCodecs)]);
 
     /** @type {shaka.extern.Stream} */
     const foo = this;
@@ -692,6 +696,8 @@ shaka.test.ManifestGenerator.Stream = class {
   mime(mime, codecs) {
     this.mimeType = mime;
     this.codecs = codecs || '';
+    this.fullMimeTypes = new Set([shaka.util.MimeUtils.getFullType(
+        this.mimeType, this.codecs)]);
   }
 
   /**

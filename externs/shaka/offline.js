@@ -230,7 +230,9 @@ shaka.extern.StreamDB;
  *   tilesLayout: ?string,
  *   pendingSegmentRefId: (string|undefined),
  *   pendingInitSegmentRefId: (string|undefined),
- *   dataKey: number
+ *   dataKey: number,
+ *   mimeType: ?string,
+ *   codecs: ?string
  * }}
  *
  * @property {?number} initSegmentKey
@@ -263,6 +265,10 @@ shaka.extern.StreamDB;
  *   downloaded.
  * @property {number} dataKey
  *   The key to the data in storage.
+ * @property {?string} mimeType
+ *   The mimeType of the segment.
+ * @property {?string} codecs
+ *   The codecs of the segment.
  */
 shaka.extern.SegmentDB;
 

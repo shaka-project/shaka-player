@@ -223,6 +223,8 @@ describe('AdaptationSet', () => {
       external: false,
       groupId: null,
       fastSwitching: false,
+      fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
+          mimeType, codecs.join(','))]),
     };
   }
 });
