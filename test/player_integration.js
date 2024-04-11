@@ -974,8 +974,8 @@ describe('Player', () => {
           .failOnTimeout(true);
     });
 
-    it('state orchestration and buffer lenght', async () => {
-      // the expected player behaviour should be the folowing one
+    it('state orchestration and buffer length', async () => {
+      // the expected player behaviours should be the following one
       // buffering event start
       // playing event but player is not playing
       // because of the rebufferingGoal > to the buffer )
@@ -991,6 +991,8 @@ describe('Player', () => {
 
       player.configure('streaming.rebufferingGoal', 25);
       player.configure('streaming.bufferingGoal', 60);
+      player.configure('streaming.stallEnabled', true);
+      player.configure('streaming.stallThreshold', 0.1);
       player.configure('manifest.dash.ignoreMinBufferTime', true);
       video.autoplay = true;
       await player.load('test:sintel_long_compiled');
@@ -1004,6 +1006,7 @@ describe('Player', () => {
 
       await waiter.waitForEvent(video, 'playing');
       expect(getBufferedAhead()).toBeLessThanOrEqual(25);
+      expect(video.currentTime).toBe(0);
 
       await waiter.waitForEvent(player, 'buffering');
       await shaka.test.Util.delay(1);
