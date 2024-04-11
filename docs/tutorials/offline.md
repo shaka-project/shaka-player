@@ -340,6 +340,9 @@ you want.
 At this point, the content is now stored offline and it's ready to be played.
 Next we will add functionality to play offline content.
 
+Note: If you call `storage.store` twice with the same manifestUri as input,
+you'll download the same manifestUri twice.
+
 ## Playing Offline Content
 
 Now that we have stored some content, we want to play it. To do this, resolve

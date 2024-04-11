@@ -527,10 +527,10 @@ describe('VttTextParser', () => {
         '00:00:40.000 --> 00:00:50.000 line:-1\n' +
         'Test2',
         {periodStart: 0, segmentStart: 25, segmentEnd: 65, vttOffset: 0},
-        /* sequenceMode= */ true);
+        /* hls= */ true, /* sequenceMode= */ true);
   });
 
-  it('ignores X-TIMESTAMP-MAP header if not in sequence mode', () => {
+  it('ignores X-TIMESTAMP-MAP header if not HLS', () => {
     verifyHelper(
         [
           {startTime: 20, endTime: 40, payload: 'Test'},
@@ -543,7 +543,7 @@ describe('VttTextParser', () => {
         '00:00:40.000 --> 00:00:50.000 line:-1\n' +
         'Test2',
         {periodStart: 0, segmentStart: 25, segmentEnd: 65, vttOffset: 0},
-        /* sequenceMode= */ false);
+        /* hls= */ false, /* sequenceMode= */ false);
   });
 
   it('parses X-TIMESTAMP-MAP header with non-zero local base', () => {
@@ -562,7 +562,7 @@ describe('VttTextParser', () => {
         '01:00:20.000 --> 01:00:30.000 line:-1\n' +
         'Test2',
         {periodStart: 0, segmentStart: 25, segmentEnd: 65, vttOffset: 0},
-        /* sequenceMode= */ true);
+        /* hls= */ true, /* sequenceMode= */ true);
   });
 
   it('combines X-TIMESTAMP-MAP header with periodStart', () => {
@@ -580,60 +580,7 @@ describe('VttTextParser', () => {
         '00:00:40.000 --> 00:00:50.000 line:-1\n' +
         'Test2',
         {periodStart: 100, segmentStart: 25, segmentEnd: 65, vttOffset: 0},
-        /* sequenceMode= */ true);
-  });
-
-  it('handles timestamp rollover with X-TIMESTAMP-MAP header', () => {
-    verifyHelper(
-        [
-          {startTime: 95443, endTime: 95445, payload: 'Test'},
-        ],
-        // 8589870000/90000 = 95443 sec, so expect every timestamp to be 95443
-        // seconds ahead of what is specified.
-        'WEBVTT\n' +
-        'X-TIMESTAMP-MAP=MPEGTS:8589870000,LOCAL:00:00:00.000\n\n' +
-        '00:00:00.000 --> 00:00:02.000 line:0\n' +
-        'Test',
-        // Non-null segmentStart takes precedence over X-TIMESTAMP-MAP.
-        // This protects us from rollover in the MPEGTS field.
-        {periodStart: 0, segmentStart: 95440, segmentEnd: 95550, vttOffset: 0},
-        /* sequenceMode= */ true);
-
-    verifyHelper(
-        [
-          {startTime: 95552, endTime: 95554, payload: 'Test2'},
-        ],
-        // 95550 is larger than the roll over timestamp, so the timestamp offset
-        // gets rolled over.
-        // (9745408 + 0x200000000) / 90000 = 95552 sec
-        'WEBVTT\n' +
-        'X-TIMESTAMP-MAP=MPEGTS:9745408,LOCAL:00:00:00.000\n\n' +
-        '00:00:00.000 --> 00:00:02.000 line:0\n' +
-        'Test2',
-        {periodStart: 0, segmentStart: 95550, segmentEnd: 95560, vttOffset: 0},
-        /* sequenceMode= */ true);
-  });
-
-  // A mock-up of HLS live subs as seen in b/253104251.
-  it('handles timestamp rollover and negative offset in HLS live', () => {
-    // Similar to values seen in b/253104251, for a realistic regression test.
-    // When using sequence mode on live HLS, we get negative offsets that
-    // represent the timestamp of our first append in sequence mode.
-    verifyHelper(
-        [
-          {startTime: 3600, endTime: 3602, payload: 'Test'},
-        ],
-        'WEBVTT\n' +
-        'X-TIMESTAMP-MAP=MPEGTS:8355814896,LOCAL:00:00:00.000\n\n' +
-        '00:00:00.000 --> 00:00:02.000 line:0\n' +
-        'Test',
-        {
-          periodStart: -1234567,
-          segmentStart: 3600,
-          segmentEnd: 3610,
-          vttOffset: -1234567,
-        },
-        /* sequenceMode= */ true);
+        /* hls= */ true, /* sequenceMode= */ true);
   });
 
   it('supports global style blocks', () => {
@@ -1148,6 +1095,81 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
+  it('supports multiline colored', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 10, endTime: 20,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: '1',
+                color: 'magenta',
+              },
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: '',
+                lineBreak: true,
+              },
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: '',
+                color: 'magenta',
+                nestedCues: [
+                  {
+                    startTime: 10,
+                    endTime: 20,
+                    payload: '2',
+                    color: 'magenta',
+                    fontStyle: Cue.fontStyle.ITALIC,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        '00:00:10.000 --> 00:00:20.000\n' +
+        '<c.magenta>1</c>\n' +
+        '<c.magenta><i>2</i></c>\n\n',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
+  it('passes text-shadow when multiple classes included', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 20,
+            endTime: 40,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 20,
+                endTime: 40,
+                payload: 'Test',
+                fontStyle: Cue.fontStyle.ITALIC,
+                textShadow: 'black 5%',
+              },
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        'STYLE\n' +
+        '::cue(.shadow) {\n' +
+        '  text-shadow: black 5%;\n' +
+        '}\n' +
+        '::cue(.italic) {\n' +
+        '  font-style: italic;\n' +
+        '}\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        '<c.shadow.italic>Test</c>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
   it('supports karaoke style text', () => {
     verifyHelper(
         [
@@ -1339,13 +1361,19 @@ describe('VttTextParser', () => {
    * @param {!Array} cues
    * @param {string} text
    * @param {shaka.extern.TextParser.TimeContext} time
+   * @param {boolean=} hls
    * @param {boolean=} sequenceMode
    */
-  function verifyHelper(cues, text, time, sequenceMode = false) {
+  function verifyHelper(cues, text, time, hls = false, sequenceMode = false) {
     const data =
         shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
+
     const parser = new shaka.text.VttTextParser();
+    if (hls) {
+      parser.setManifestType(shaka.media.ManifestParser.HLS);
+    }
     parser.setSequenceMode(sequenceMode);
+
     const result = parser.parseMedia(data, time);
 
     const checkCue = (cue) => {

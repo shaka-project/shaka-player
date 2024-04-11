@@ -63,7 +63,11 @@ shaka.extern.RetryParameters;
  *   drmInfo: ?shaka.extern.DrmInfo,
  *   initData: ?Uint8Array,
  *   initDataType: ?string,
- *   streamDataCallback: ?function(BufferSource):!Promise
+ *   streamDataCallback: ?function(BufferSource):!Promise,
+ *   requestStartTime: (?number|undefined),
+ *   timeToFirstByte: (?number|undefined),
+ *   packetNumber: (?number|undefined),
+ *   contentType: (?string|undefined)
  * }}
  *
  * @description
@@ -104,6 +108,14 @@ shaka.extern.RetryParameters;
  *   used to initialize EME.
  * @property {?function(BufferSource):!Promise} streamDataCallback
  *   A callback function to handle the chunked data of the ReadableStream.
+ * @property {(?number|undefined)} requestStartTime
+ *   The time that the request started.
+ * @property {(?number|undefined)} timeToFirstByte
+ *   The time taken to the first byte.
+ * @property {(?number|undefined)} packetNumber
+ *   A number representing the order the packet within the request.
+ * @property {(?string|undefined)} contentType
+ *   Content type (e.g. 'video', 'audio' or 'text', 'image')
  * @exportDoc
  */
 shaka.extern.Request;

@@ -786,7 +786,7 @@ describe('DashParser SegmentTemplate', () => {
         const newTemplateInfo = makeTemplateInfo(newRanges);
 
         const newEnd = newRanges[newRanges.length - 1].end;
-        index.appendTemplateInfo(newTemplateInfo, newEnd);
+        index.appendTemplateInfo(newTemplateInfo, /* periodStart= */ 0, newEnd);
         expect(index.find(newStart)).toBe(10);
         expect(index.find(newEnd - 1.0)).toBe(19);
       });
@@ -906,5 +906,7 @@ function makeTemplateInfo(timeline) {
     'timeline': timeline,
     'mediaTemplate': 'master_540_2997_$Number%09d$.cmfv',
     'indexTemplate': null,
+    'mimeType': 'video/mp4',
+    'codecs': 'avc1.42E01E',
   };
 }

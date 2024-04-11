@@ -375,6 +375,23 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       expect(resolveScheme.calls.argsFor(0)[0]).toBe('resolve://foo');
     });
 
+    it('sets the time to 1st byte of the request when headers are available',
+        async () => {
+          const request = createRequest('resolve://foo');
+          request.method = 'POST';
+
+          resolveScheme.and.callFake(
+              (uri, requestPassed, requestTypePassed, progressCallback,
+                  headersCallback) => {
+                requestPassed.requestStartTime = 1;
+                headersCallback();
+                expect(requestPassed.timeToFirstByte).toBeGreaterThan(0);
+                return shaka.util.AbortableOperation
+                    .completed(createResponse());
+              });
+          await networkingEngine.request(requestType, request).promise;
+        });
+
     it('fills in defaults for partial request objects', async () => {
       const originalRequest = /** @type {shaka.extern.Request} */ ({
         uris: ['resolve://foo'],
@@ -1147,6 +1164,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
   describe('progress events', () => {
     it('forwards progress events to caller', async () => {
+      const requestLikeObject = jasmine.objectContaining({method: 'GET'});
       /** @const {!shaka.util.PublicPromise} */
       const delay = new shaka.util.PublicPromise();
       resolveScheme.and.callFake((uri, req, type, progress) => {
@@ -1166,14 +1184,40 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
           requestType, createRequest('resolve://'));
       await Util.shortDelay();  // Allow Promises to resolve.
       expect(onProgress).toHaveBeenCalledTimes(2);
-      expect(onProgress).toHaveBeenCalledWith(1, 2, true);
-      expect(onProgress).toHaveBeenCalledWith(4, 5, true);
+      expect(onProgress).toHaveBeenCalledWith(1, 2, true, requestLikeObject);
+      expect(onProgress).toHaveBeenCalledWith(4, 5, true, requestLikeObject);
       onProgress.calls.reset();
 
       delay.resolve();
       await resp.promise;
       expect(onProgress).toHaveBeenCalledTimes(1);
-      expect(onProgress).toHaveBeenCalledWith(7, 8, true);
+      expect(onProgress).toHaveBeenCalledWith(7, 8, true, requestLikeObject);
+    });
+
+    it('appends request packet number', async () => {
+      /** @const {!shaka.util.PublicPromise} */
+      const delay = new shaka.util.PublicPromise();
+      resolveScheme.and.callFake((uri, req, type, progress) => {
+        progress(1, 2, 3);
+
+        const p = (async () => {
+          await delay;
+          progress(4, 5, 6);
+          return createResponse();
+        })();
+        return new shaka.util.AbortableOperation(p, () => {});
+      });
+
+      /** @const {shaka.net.NetworkingEngine.PendingRequest} */
+      const resp = networkingEngine.request(
+          requestType, createRequest('resolve://'));
+      await Util.shortDelay();  // Allow Promises to resolve.
+      expect(onProgress).toHaveBeenCalledWith(1, 2, true,
+          jasmine.objectContaining({packetNumber: 1}));
+      delay.resolve();
+      await resp.promise;
+      expect(onProgress).toHaveBeenCalledWith(4, 5, true,
+          jasmine.objectContaining({packetNumber: 2}));
     });
 
     it('doesn\'t forward progress events for non-SEGMENT', async () => {

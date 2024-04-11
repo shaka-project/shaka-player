@@ -39,11 +39,13 @@ shaka.test.FakeSegmentPrefetch = class {
     /** @private {number} */
     this.prefetchPosTime_ = 0;
 
-    /** @private {boolean} */
-    this.deleteOnGet_ = true;
-
     /** @private {number} */
     this.segmentNum_ = 0;
+  }
+
+  /** @override */
+  replaceFetchDispatcher(fetchDispatcher) {
+    // empty fake for now
   }
 
   /** @override */
@@ -92,16 +94,11 @@ shaka.test.FakeSegmentPrefetch = class {
     this.evictions_.push(time);
   }
 
-  /** @override */
-  deleteOnGet(newDeleteOnGet) {
-    this.deleteOnGet_ = newDeleteOnGet;
-  }
-
   /**
-    * @override
-    * @param {shaka.media.InitSegmentReference|
-    *     shaka.media.SegmentReference} reference
-    * */
+   * @override
+   * @param {shaka.media.InitSegmentReference|
+   *     shaka.media.SegmentReference} reference
+   */
   getPrefetchedSegment(reference) {
     if (!(reference instanceof shaka.media.SegmentReference)) {
       return null;

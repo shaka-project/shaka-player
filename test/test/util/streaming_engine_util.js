@@ -208,9 +208,18 @@ shaka.test.StreamingEngineUtil = class {
     /**
      * @param {string} type
      * @param {number} position
+     * @param {string} mimeType
+     * @param {string} codecs
+     * @param {boolean} altAudioVariant
      * @return {shaka.media.SegmentReference} A SegmentReference.
      */
-    const get = (type, position, secondaryAudioVariant = false) => {
+    const get = (type, position, mimeType, codecs, altAudioVariant = false) => {
+      if (position > 50) {
+        // Terminate so it doesn't go on forever when iterating over the
+        // references.
+        return null;
+      }
+
       // Note that we don't just directly compute the segment position because
       // a period start time could be in the middle of the previous period's
       // last segment.
@@ -243,7 +252,7 @@ shaka.test.StreamingEngineUtil = class {
       const positionWithinPeriod = position - periodFirstPosition;
 
       const initSegmentUri = periodIndex + '_' + type + '_init' +
-          (secondaryAudioVariant ? '_secondaryAudioVariant' : '');
+          (altAudioVariant ? '_secondaryAudioVariant' : '');
 
       // The type can be 'text', 'audio', 'video', or 'trickvideo',
       // but we pull video init segment metadata from the 'video' part of the
@@ -260,7 +269,7 @@ shaka.test.StreamingEngineUtil = class {
 
       const d = segmentDurations[type];
       const getUris = () => [periodIndex + '_' + type + '_' + position +
-          (secondaryAudioVariant ? '_secondaryAudioVariant' : '')];
+          (altAudioVariant ? '_secondaryAudioVariant' : '')];
       const periodStart = periodStartTimes[periodIndex];
       const timestampOffset = (timestampOffsets && timestampOffsets[type]) || 0;
       const appendWindowStart = periodStartTimes[periodIndex];
@@ -286,6 +295,8 @@ shaka.test.StreamingEngineUtil = class {
             timestampOffset,
             appendWindowStart,
             appendWindowEnd);
+        ref.mimeType = mimeType;
+        ref.codecs = codecs;
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
         if (aesKey &&
             (type == ContentType.AUDIO || type == ContentType.VIDEO)) {
@@ -359,8 +370,10 @@ shaka.test.StreamingEngineUtil = class {
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
         const segmentIndex = new shaka.test.FakeSegmentIndex();
         segmentIndex.find.and.callFake((time) => find(ContentType.AUDIO, time));
-        segmentIndex.get.and.callFake((pos) =>
-          get(ContentType.AUDIO, pos, true));
+        segmentIndex.get.and.callFake((pos) => {
+          return get(ContentType.AUDIO, pos,
+              variant.audio.mimeType, variant.audio.codecs, true);
+        });
 
         const createSegmentIndexSpy = Util.funcSpy(
             variant2.audio.createSegmentIndex);
@@ -403,7 +416,9 @@ shaka.test.StreamingEngineUtil = class {
 
       const segmentIndex = new shaka.test.FakeSegmentIndex();
       segmentIndex.find.and.callFake((time) => find(type, time));
-      segmentIndex.get.and.callFake((pos) => get(type, pos));
+      segmentIndex.get.and.callFake((pos) => {
+        return get(type, pos, stream.mimeType, stream.codecs);
+      });
 
       const createSegmentIndexSpy = Util.funcSpy(stream.createSegmentIndex);
       createSegmentIndexSpy.and.callFake(() => {
@@ -453,14 +468,16 @@ shaka.test.StreamingEngineUtil = class {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     const Util = shaka.test.Util;
 
+    const mimeType = 'audio/mp4';
+    const codecs = 'mp4a.40.2';
     return {
       id: id,
       originalId: id.toString(),
       groupId: null,
       createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
       segmentIndex: null,
-      mimeType: 'audio/mp4',
-      codecs: 'mp4a.40.2',
+      mimeType,
+      codecs,
       bandwidth: 192000,
       type: ContentType.AUDIO,
       label: '',
@@ -480,6 +497,8 @@ shaka.test.StreamingEngineUtil = class {
       accessibilityPurpose: null,
       external: false,
       fastSwitching: false,
+      fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
+          mimeType, codecs)]),
     };
   }
 
@@ -494,14 +513,15 @@ shaka.test.StreamingEngineUtil = class {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     const Util = shaka.test.Util;
 
+    const codecs = 'avc1.42c01e';
     return {
       id: id,
       originalId: id.toString(),
       groupId: null,
       createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
       segmentIndex: null,
-      mimeType: mimeType,
-      codecs: 'avc1.42c01e',
+      mimeType,
+      codecs,
       bandwidth: 5000000,
       width: 600,
       height: 400,
@@ -523,6 +543,8 @@ shaka.test.StreamingEngineUtil = class {
       accessibilityPurpose: null,
       external: false,
       fastSwitching: false,
+      fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
+          mimeType, codecs)]),
     };
   }
 
@@ -536,14 +558,16 @@ shaka.test.StreamingEngineUtil = class {
     const ManifestParserUtils = shaka.util.ManifestParserUtils;
     const Util = shaka.test.Util;
 
+    const mimeType = 'text/vtt';
+    const codecs = '';
     return {
       id: id,
       originalId: id.toString(),
       groupId: null,
       createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
       segmentIndex: null,
-      mimeType: 'text/vtt',
-      codecs: '',
+      mimeType,
+      codecs,
       kind: ManifestParserUtils.TextStreamKind.SUBTITLE,
       type: ManifestParserUtils.ContentType.TEXT,
       label: '',
@@ -563,6 +587,8 @@ shaka.test.StreamingEngineUtil = class {
       accessibilityPurpose: null,
       external: false,
       fastSwitching: false,
+      fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
+          mimeType, codecs)]),
     };
   }
 };

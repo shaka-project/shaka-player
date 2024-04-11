@@ -4,36 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/**
- * For unknown reasons, these tests fail in the test labs for Edge on Windows,
- * in ways that do not seem to be unrelated to transmuxers.
- * Practical testing has not found any sign that playback is actually broken in
- * Edge, so these tests are disabled on Edge for the time being.
- * TODO(#5834): Remove this filter once the tests are fixed.
- * @return {boolean}
- */
-function checkNoBrokenEdge() {
-  const chromeVersion = shaka.util.Platform.chromeVersion();
-  if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
-      chromeVersion && chromeVersion <= 122) {
-    // When the tests fail, it's due to the manifest parser failing to find a
-    // factory. Attempt to find a factory first, to avoid filtering the tests
-    // when running in a non-broken Edge environment.
-    const uri = 'fakeuri.m3u8';
-    const mimeType = 'application/x-mpegurl';
-    /* eslint-disable no-restricted-syntax */
-    try {
-      shaka.media.ManifestParser.getFactory(uri, mimeType);
-      return true;
-    } catch (error) {
-      return false;
-    }
-    /* eslint-enable no-restricted-syntax */
-  }
-  return true;
-}
-
-filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
+describe('Transmuxer Player', () => {
   const Util = shaka.test.Util;
 
   /** @type {!jasmine.Spy} */
@@ -51,6 +22,23 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
   /** @type {!shaka.test.Waiter} */
   let waiter;
 
+  function isH265Supported() {
+    if (!MediaSource.isTypeSupported('video/mp4; codecs="hvc1.2.4.L123.B0"')) {
+      return false;
+    }
+    // As of Chrome 122, Chrome on Windows is still incorrectly reporting H.265
+    // support.  Revisit this exclusion with a maximum chromeVersion if Chrome
+    // ever fixes it.
+    // We don't have a solid bug link for this issue.  It's unclear if this is
+    // specific to GitHub CI systems, which may be missing some codecs.
+    const chromeVersion = shaka.util.Platform.chromeVersion();
+    if (shaka.util.Platform.isWindows() && chromeVersion) {
+      return false;
+    }
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
+    return true;
+  }
+
   function isAc3Supported() {
     if (!MediaSource.isTypeSupported('audio/mp4; codecs="ac-3"')) {
       return false;
@@ -64,9 +52,7 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
     // to true, which leads to a failure in GitHub's environment.
     // We must enable this, once it is resolved:
     // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
-    const chromeVersion = shaka.util.Platform.chromeVersion();
-    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
-        chromeVersion && chromeVersion <= 122) {
+    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge()) {
       return false;
     }
     return true;
@@ -85,9 +71,7 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
     // to true, which leads to a failure in GitHub's environment.
     // We must enable this, once it is resolved:
     // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
-    const chromeVersion = shaka.util.Platform.chromeVersion();
-    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
-        chromeVersion && chromeVersion <= 122) {
+    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge()) {
       return false;
     }
     return true;
@@ -205,6 +189,22 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
       await player.unload();
     });
 
+    it('raw AAC with ts extension', async () => {
+      await player.load('/base/test/test/assets/hls-ts-raw-aac/index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
     it('AAC in TS', async () => {
       await player.load('/base/test/test/assets/hls-ts-aac/playlist.m3u8');
       await video.play();
@@ -304,15 +304,7 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
     });
 
     it('H.265 in TS', async () => {
-      const chromeVersion = shaka.util.Platform.chromeVersion();
-      if (shaka.util.Platform.isWindows() &&
-          chromeVersion && chromeVersion === 117) {
-        // It appears that Chrome 117 beta in Windows is incorrectly reporting
-        // H.265 in MediaCapabilities
-        pending('Codec H.265 is not supported by the platform.');
-      }
-      const mimeType = 'video/mp4; codecs="hvc1.2.4.L123.B0"';
-      if (!MediaSource.isTypeSupported(mimeType)) {
+      if (!isH265Supported()) {
         pending('Codec H.265 is not supported by the platform.');
       }
       await player.load('/base/test/test/assets/hls-ts-h265/hevc.m3u8');
@@ -349,15 +341,30 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
       await player.unload();
     });
 
+    it('H.264+AAC in TS with rollover', async () => {
+      // eslint-disable-next-line max-len
+      await player.load('/base/test/test/assets/hls-ts-rollover/playlist.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // The rollover occurs around the 9th second, without the rollover, the
+      // media source times are wrong and the stream freezes. The purpose is to
+      // play at least 15 seconds to see that the rollover passes and the
+      // stream continues without problems.
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
     it('H.265+AAC in TS', async () => {
-      const chromeVersion = shaka.util.Platform.chromeVersion();
-      if (shaka.util.Platform.isWindows() &&
-          chromeVersion && chromeVersion === 117) {
-        // It appears that Chrome 117 beta in Windows is incorrectly reporting
-        // H.265 in MediaCapabilities
-        pending('Codec H.265 is not supported by the platform.');
-      }
-      if (!MediaSource.isTypeSupported('video/mp4; codecs="hvc1.1.6.L93.90"')) {
+      if (!isH265Supported()) {
         pending('Codec H.265 is not supported by the platform.');
       }
       // eslint-disable-next-line max-len
@@ -425,6 +432,27 @@ filterDescribe('Transmuxer Player', checkNoBrokenEdge, () => {
 
       // eslint-disable-next-line max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-ec3-h264/prog_index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
+    it('H.264+Opus in TS', async () => {
+      if (!MediaSource.isTypeSupported('audio/mp4; codecs="opus"')) {
+        pending('Codec opus is not supported by the platform.');
+      }
+
+      // eslint-disable-next-line max-len
+      await player.load('/base/test/test/assets/hls-ts-muxed-opus-h264/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
 

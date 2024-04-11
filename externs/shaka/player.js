@@ -96,57 +96,70 @@ shaka.extern.StateChange;
  * again.
  *
  * @property {number} width
- *   The width of the current video track.
+ *   The width of the current video track. If nothing is loaded or the content
+ *   is audio-only, NaN.
  * @property {number} height
- *   The height of the current video track.
+ *   The height of the current video track. If nothing is loaded or the content
+ *   is audio-only, NaN.
  * @property {number} streamBandwidth
  *   The bandwidth required for the current streams (total, in bit/sec).
- *   It takes into account the playbackrate.
+ *   It takes into account the playbackrate. If nothing is loaded, NaN.
  *
  * @property {number} decodedFrames
- *   The total number of frames decoded by the Player.  This may be
- *   <code>NaN</code> if this is not supported by the browser.
+ *   The total number of frames decoded by the Player. If not reported by the
+ *   browser, NaN.
  * @property {number} droppedFrames
- *   The total number of frames dropped by the Player.  This may be
- *   <code>NaN</code> if this is not supported by the browser.
+ *   The total number of frames dropped by the Player. If not reported by the
+ *   browser, NaN.
  * @property {number} corruptedFrames
- *   The total number of corrupted frames dropped by the browser.  This may be
- *   <code>NaN</code> if this is not supported by the browser.
+ *   The total number of corrupted frames dropped by the browser. If not
+ *   reported by the browser, NaN.
  * @property {number} estimatedBandwidth
- *   The current estimated network bandwidth (in bit/sec).
+ *   The current estimated network bandwidth (in bit/sec). If no estimate
+ *   available, NaN.
  *
  * @property {number} gapsJumped
  *   The total number of playback gaps jumped by the GapJumpingController.
+ *   If nothing is loaded, NaN.
  * @property {number} stallsDetected
  *   The total number of playback stalls detected by the StallDetector.
+ *   If nothing is loaded, NaN.
  *
  * @property {number} completionPercent
  *   This is the greatest completion percent that the user has experienced in
- *   playback.  Also known as the "high water mark".  Is NaN when there is no
- *   known duration, such as for livestreams.
+ *   playback. Also known as the "high water mark". If nothing is loaded, or
+ *   the stream is live (and therefore indefinite), NaN.
  * @property {number} loadLatency
  *   This is the number of seconds it took for the video element to have enough
  *   data to begin playback.  This is measured from the time load() is called to
  *   the time the <code>'loadeddata'</code> event is fired by the media element.
+ *   If nothing is loaded, NaN.
  * @property {number} manifestTimeSeconds
  *   The amount of time it took to download and parse the manifest.
+ *   If nothing is loaded, NaN.
  * @property {number} drmTimeSeconds
  *   The amount of time it took to download the first drm key, and load that key
- *   into the drm system.
+ *   into the drm system. If nothing is loaded or DRM is not in use, NaN.
  * @property {number} playTime
- *   The total time spent in a playing state in seconds.
+ *   The total time spent in a playing state in seconds. If nothing is loaded,
+ *   NaN.
  * @property {number} pauseTime
- *   The total time spent in a paused state in seconds.
+ *   The total time spent in a paused state in seconds. If nothing is loaded,
+ *   NaN.
  * @property {number} bufferingTime
- *   The total time spent in a buffering state in seconds.
+ *   The total time spent in a buffering state in seconds. If nothing is
+ *   loaded, NaN.
  * @property {number} licenseTime
- *   The time spent on license requests during this session in seconds, or NaN.
+ *   The time spent on license requests during this session in seconds. If DRM
+ *   is not in use, NaN.
  * @property {number} liveLatency
  *   The time between the capturing of a frame and the end user having it
- *   displayed on their screen.
+ *   displayed on their screen. If nothing is loaded or the content is VOD,
+ *   NaN.
  *
  * @property {number} maxSegmentDuration
- *   The presentation's max segment duration in seconds, or NaN.
+ *   The presentation's max segment duration in seconds. If nothing is loaded,
+ *   NaN.
  *
  * @property {!Array.<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.
@@ -879,7 +892,8 @@ shaka.extern.xml.Node;
  *   sequenceMode: boolean,
  *   enableAudioGroups: boolean,
  *   multiTypeVariantsAllowed: boolean,
- *   useStreamOnceInPeriodFlattening: boolean
+ *   useStreamOnceInPeriodFlattening: boolean,
+ *   updatePeriod: number
  * }}
  *
  * @property {string} clockSyncUri
@@ -957,6 +971,12 @@ shaka.extern.xml.Node;
  *   but may raise issues if manifest does not have stream consistency
  *   between periods.
  *   Defaults to <code>false</code>.
+ * @property {number} updatePeriod
+ *   Override the minimumUpdatePeriod of the manifest. The value is in second
+ *   if the value is greater than the minimumUpdatePeriod, it will update the
+ *   manifest less frequently. if you update the value during for a dynamic
+ *   manifest, it will directly trigger a new download of the manifest
+ *   Defaults to <code>-1</code>.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -969,6 +989,7 @@ shaka.extern.DashManifestConfiguration;
  *   defaultAudioCodec: string,
  *   defaultVideoCodec: string,
  *   ignoreManifestProgramDateTime: boolean,
+ *   ignoreManifestProgramDateTimeForTypes: !Array<string>,
  *   mediaPlaylistFullMimeType: string,
  *   useSafariBehaviorForLive: boolean,
  *   liveSegmentsDelay: number,
@@ -997,6 +1018,14 @@ shaka.extern.DashManifestConfiguration;
  *   Meant for streams where <code>EXT-X-PROGRAM-DATE-TIME</code> is incorrect
  *   or malformed.
  *   <i>Defaults to <code>false</code>.</i>
+ * @property {!Array.<string>} ignoreManifestProgramDateTimeForTypes
+ *   An array of strings representing types for which
+ *   <code>EXT-X-PROGRAM-DATE-TIME</code> should be ignored. Only used if the
+ *   the main ignoreManifestProgramDateTime is set to false.
+ *   For example, setting this to ['text', 'video'] will cause the PDT values
+ *   text and video streams to be ignored, while still using the PDT values for
+ *   audio.
+ *   <i>Defaults to an empty array.</i>
  * @property {string} mediaPlaylistFullMimeType
  *   A string containing a full mime type, including both the basic mime type
  *   and also the codecs. Used when the HLS parser parses a media playlist
@@ -1175,7 +1204,8 @@ shaka.extern.ManifestConfiguration;
  *   minTimeBetweenRecoveries: number,
  *   vodDynamicPlaybackRate: boolean,
  *   vodDynamicPlaybackRateLowBufferRate: number,
- *   vodDynamicPlaybackRateBufferRatio: number
+ *   vodDynamicPlaybackRateBufferRatio: number,
+ *   infiniteLiveStreamDuration: boolean
  * }}
  *
  * @description
@@ -1357,6 +1387,10 @@ shaka.extern.ManifestConfiguration;
  *   setting the playback rate to
  *   <code>vodDynamicPlaybackRateLowBufferRate</code>.
  *   Defaults to <code>0.5</code>.
+ * @property {boolean} infiniteLiveStreamDuration
+ *   If <code>true</code>, the media source live duration
+ *   set as a<code>Infinity</code>
+ *   Defaults to <code> false </code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -1365,7 +1399,7 @@ shaka.extern.StreamingConfiguration;
 /**
  * @typedef {{
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
- *   sourceBufferExtraFeatures: string,
+ *   addExtraFeaturesToSourceBuffer: function(string): string,
  *   forceTransmux: boolean,
  *   insertFakeEncryptionInInit: boolean,
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback
@@ -1379,10 +1413,12 @@ shaka.extern.StreamingConfiguration;
  *   SourceBuffer.changeType. RELOAD uses cycling of MediaSource.
  *   Defaults to SMOOTH if SMOOTH codec switching is supported, RELOAD
  *   overwise.
- * @property {string} sourceBufferExtraFeatures
+ * @property {function(string): string} addExtraFeaturesToSourceBuffer
+ *   Callback to generate extra features striug based on used MIME type.
  *   Some platforms may need to pass features when initializing the
  *   sourceBuffer.
- *   This string is ultimately appended to MIME types in addSourceBuffer().
+ *   This string is ultimately appended to a MIME type in addSourceBuffer() &
+ *   changeType().
  * @property {boolean} forceTransmux
  *   If this is <code>true</code>, we will transmux AAC and TS content even if
  *   not strictly necessary for the assets to be played.

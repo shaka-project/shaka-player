@@ -163,6 +163,22 @@ describe('DrmEngine', () => {
     });
   });
 
+
+  describe('createOrLoad', () => {
+    it('does not hang when given empty init data for offline', async () => {
+      tweakDrmInfos((drmInfos) => {
+        // An empty uint8array, like we make for fairplay content.
+        drmInfos[0].initData = [
+          {initData: new Uint8Array(0), initDataType: 'cenc', keyId: null},
+        ];
+      });
+      await drmEngine.initForStorage(
+          manifest.variants, /* usePersistentLicenses= */ false);
+      await drmEngine.createOrLoad();
+      expect(drmEngine.initialized()).toBe(true);
+    }, /* timeout= */ 1000);
+  });
+
   describe('init', () => {
     it('stops on first available key system', async () => {
       // Accept both drm.abc and drm.def.  Only one can be chosen.
@@ -750,6 +766,19 @@ describe('DrmEngine', () => {
         });
 
         setDecodingInfoSpy(['drm.abc']);
+
+        for (const variant of manifest.variants) {
+          for (const stream of [variant.video, variant.audio]) {
+            if (stream) {
+              stream.mimeType = stream.mimeType.replace('/foo', '/mp4');
+              const newFullMimeTypes = new Set();
+              for (const fullMimeType of stream.fullMimeTypes) {
+                newFullMimeTypes.add(fullMimeType.replace('/foo', '/mp4'));
+              }
+              stream.fullMimeTypes = newFullMimeTypes;
+            }
+          }
+        }
 
         const variants = manifest.variants;
         variants[0].video.mimeType = 'video/mp2t';

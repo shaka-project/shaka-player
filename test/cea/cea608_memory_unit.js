@@ -49,11 +49,12 @@ describe('Cea608Memory', () => {
   it('adds and emits a series of special characters from the buffer', () => {
     const startTime = 1;
     const endTime = 2;
-    const expectedText = '½¿èôÇ©ë»ö{ß│';
+    const expectedText = '½¿ èôÇ©ë»ö{ß│';
     const charGroups = [
       {
         set: CharSet.SPECIAL_NORTH_AMERICAN,
-        chars: [0x32, 0x33, 0x3a, 0x3e], // ½, ¿, è, ô
+        // Note TS is not at either end to avoid side effect of trim()
+        chars: [0x32, 0x33, 0x39, 0x3a, 0x3e], // ½, ¿, TS, è, ô
       },
 
       {
