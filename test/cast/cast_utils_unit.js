@@ -37,8 +37,6 @@ describe('CastUtils', () => {
       'createMediaSourceEngine',
       'createStreamingEngine',
       'disableStream',
-
-      'getLcevcDec', // Lcevc Decoder getter method
     ];
 
     const castMembers = CastUtils.PlayerVoidMethods
