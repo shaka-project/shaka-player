@@ -3732,6 +3732,51 @@ describe('HlsParser', () => {
     expect(newDrmInfoSpy).toHaveBeenCalled();
   });
 
+  it('constructs DrmInfo for ClearKey with raw key', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:6\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-KEY:METHOD=SAMPLE-AES-CTR,',
+      'KEYFORMAT="identity",',
+      'URI="data:text/plain;base64,Pj6hFgt5iFZtfBLN6oq8Eg==",\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXTINF:5,\n',
+      'main.mp4',
+    ].join('');
+
+    const initDataBase64 = 'eyJraWRzIjpbIkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiXX0=';
+    const keyId = '00000000000000000000000000000000';
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.encrypted = true;
+          stream.addDrmInfo('org.w3.clearkey', (drmInfo) => {
+            drmInfo.licenseServerUri = 'data:application/json;base64,eyJrZXl' +
+              'zIjpbeyJrdHkiOiJvY3QiLCJraWQiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFB' +
+              'IiwiayI6IlBqNmhGZ3Q1aUZadGZCTE42b3E4RWcifV19';
+            drmInfo.keyIds.add(keyId);
+            drmInfo.addKeyIdsData(initDataBase64);
+          });
+        });
+      });
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+    });
+
+    await testHlsParser(master, media, manifest);
+    expect(newDrmInfoSpy).toHaveBeenCalled();
+  });
+
   describe('constructs DrmInfo with EXT-X-SESSION-KEY', () => {
     it('for Widevine', async () => {
       const initDataBase64 =
