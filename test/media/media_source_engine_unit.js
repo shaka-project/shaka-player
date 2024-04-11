@@ -60,10 +60,45 @@ describe('MediaSourceEngine', () => {
   const buffer2 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (2));
   const buffer3 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (3));
 
-  const fakeVideoStream = {mimeType: 'video/mp4', drmInfos: [{}]};
-  const fakeAudioStream = {mimeType: 'audio/mp4', drmInfos: []};
-  const fakeTextStream = {mimeType: 'text/mp4', drmInfos: []};
-  const fakeTransportStream = {mimeType: 'tsMimetype', drmInfos: []};
+  const makeFakeStream = (mimeType) => {
+    const segmentIndex = {
+      isEmpty: () => false,
+    };
+    segmentIndex[Symbol.iterator] = () => {
+      let nextPosition = 0;
+
+      return {
+        next: () => {
+          if (nextPosition == 0) {
+            nextPosition += 1;
+            return {
+              value: {mimeType},
+              done: false,
+            };
+          } else {
+            return {
+              value: null,
+              done: true,
+            };
+          }
+        },
+        current: () => {
+          return {mimeType};
+        },
+      };
+    };
+    return {mimeType, drmInfos: [{}], segmentIndex};
+  };
+
+  const fakeVideoStream = makeFakeStream('video/mp4');
+  const fakeAudioStream = makeFakeStream('audio/mp4');
+  const fakeTextStream = makeFakeStream('text/mp4');
+  const fakeTransportStream = makeFakeStream('tsMimetype');
+  const fakeStreams =
+      [fakeVideoStream, fakeAudioStream, fakeTextStream, fakeTransportStream];
+  for (const fakeStream of fakeStreams) {
+    fakeStream.fullMimeTypes = new Set([fakeStream.mimeType]);
+  }
 
   /** @type {shaka.extern.Stream} */
   const fakeStream = shaka.test.StreamingEngineUtil.createMockVideoStream(1);

@@ -906,5 +906,7 @@ function makeTemplateInfo(timeline) {
     'timeline': timeline,
     'mediaTemplate': 'master_540_2997_$Number%09d$.cmfv',
     'indexTemplate': null,
+    'mimeType': 'video/mp4',
+    'codecs': 'avc1.42E01E',
   };
 }

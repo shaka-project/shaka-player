@@ -280,6 +280,7 @@ Shaka Player supports:
   - EC-3 in MPEG-2 TS to EC-3 in MP4
   - MP3 in MPEG-2 TS to MP3 in MP4
   - MP3 in MPEG-2 TS to raw MP3
+  - Opus in MPEG-2 TS to MP3 in MP4
   - H.264 in MPEG-2 TS to H.264 in MP4
   - H.265 in MPEG-2 TS to H.265 in MP4
   - Muxed content in MPEG-2 TS with the previous codecs
