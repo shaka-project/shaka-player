@@ -683,7 +683,7 @@ describe('Playhead', () => {
 
     // It should allow a small buffer around the seek range.
     seekCount = 0;
-    currentTime = 1030.062441;
+    currentTime = 1030;
     jasmine.clock().tick(500);
     currentTime = 1027.9233;
     jasmine.clock().tick(500);
