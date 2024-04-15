@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.6.17](https://github.com/shaka-project/shaka-player/compare/v4.6.16...v4.6.17) (2024-04-15)
+
+
+### Bug Fixes
+
+* Correct playhead when seek beyond seekRange ([#6304](https://github.com/shaka-project/shaka-player/issues/6304)) ([09b154e](https://github.com/shaka-project/shaka-player/commit/09b154ed7a2f1539a239436b2cb8f76b464e4308))
+* **HLS:** Fix labelling of captions in Safari ([#6426](https://github.com/shaka-project/shaka-player/issues/6426)) ([f5fa229](https://github.com/shaka-project/shaka-player/commit/f5fa229181997133fcab40db113b411180810192))
+* Looser tolerance for ending trick play at edge of seek range. ([#6422](https://github.com/shaka-project/shaka-player/issues/6422)) ([4edf77e](https://github.com/shaka-project/shaka-player/commit/4edf77e8106ee550a3d32c90c572efec179a6b27)), closes [#6421](https://github.com/shaka-project/shaka-player/issues/6421)
+
+
+### Reverts
+
+* Fix potential AV sync issues after seek or adaptation ([#6435](https://github.com/shaka-project/shaka-player/issues/6435)) ([3a231dd](https://github.com/shaka-project/shaka-player/commit/3a231ddfce62a2f0ef0b7340a798e062d9814c24)), closes [#5785](https://github.com/shaka-project/shaka-player/issues/5785) [#4589](https://github.com/shaka-project/shaka-player/issues/4589)
+
 ## [4.6.16](https://github.com/shaka-project/shaka-player/compare/v4.6.15...v4.6.16) (2024-04-09)
 
 
