@@ -42,3 +42,16 @@ shaka.extern.MPEG_PES;
  * @property {?number} time
  */
 shaka.extern.VideoNalu;
+
+
+/**
+ * @typedef {{
+ *   projection: ?string,
+ *   hfov: ?number
+ * }}
+ *
+ * @summary VideoNalu.
+ * @property {?string} projection
+ * @property {?number} hfov
+ */
+shaka.extern.SpatialVideoInfo;
