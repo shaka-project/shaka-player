@@ -347,7 +347,9 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.AdsConfiguration');
     this.addSection_('Ads', docLink)
         .addBoolInput_('Custom playhead tracker',
-            'ads.customPlayheadTracker');
+            'ads.customPlayheadTracker')
+        .addBoolInput_('Skip play detection',
+            'ads.skipPlayDetection');
   }
 
   /**

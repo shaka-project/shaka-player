@@ -1445,7 +1445,8 @@ shaka.extern.MediaSourceConfiguration;
 
 /**
  * @typedef {{
- *   customPlayheadTracker: boolean
+ *   customPlayheadTracker: boolean,
+ *   skipPlayDetection: boolean
  * }}
  *
  * @description
@@ -1456,6 +1457,12 @@ shaka.extern.MediaSourceConfiguration;
  *   Client Side. This is useful because it allows you to implement the use of
  *   IMA on platforms that do not support multiple video elements.
  *   This value defaults to <code>false</code>.
+ * @property {boolean} skipPlayDetection
+ *   If this is true, we will load Client Side ads without waiting for a play
+ *   event.
+ *   Defaults to <code>false</code> except on Tizen, WebOS, Chromecast,
+ *   Hisense, PlayStation 4, PlayStation5, Xbox whose default value is
+ *   <code>true</code>.
  *
  * @exportDoc
  */
