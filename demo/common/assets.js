@@ -43,6 +43,7 @@ shakaAssets.Source = {
   BRIGHTCOVE: 'Brightcove',
   BROADPEAK: 'Broadpeak',
   EZDRM: 'EZDRM',
+  THEO_PLAYER: 'THEOplayer',
 };
 
 
@@ -165,6 +166,9 @@ shakaAssets.Feature = {
 
   // Set if the asset has Content Steering.
   CONTENT_STEERING: 'Content Steering',
+
+  // Set if the asset is VR.
+  VR: 'VR',
 };
 
 
@@ -1062,6 +1066,15 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.THUMBNAILS)
       .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'VR Playhouse (DASH, VR)',
+      /* iconUri= */ 'https://cdn.bitmovin.com/content/assets/playhouse-vr/poster.jpg',
+      /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/playhouse-vr/mpds/105560.mpd',
+      /* source= */ shakaAssets.Source.BITCODIN)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.VR),
   // End bitcodin assets }}}
 
   // MetaCDN assets {{{
@@ -1678,6 +1691,20 @@ shakaAssets.testAssets = [
           },
         },
       }),
+  // }}}
+
+  // THEOplayer assets {{{
+  /* THEOplayer Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'National Geographic (HLS, VR)',
+      /* iconUri= */ 'https://demo.theoplayer.com/hubfs/videos/natgeo/poster.jpg',
+      /* manifestUri= */ 'https://demo.theoplayer.com/hubfs/videos/natgeo/playlist.m3u8',
+      /* source= */ shakaAssets.Source.THEO_PLAYER)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.VR)
+      .addFeature(shakaAssets.Feature.OFFLINE),
   // }}}
 ];
 /* eslint-enable max-len */

@@ -29,8 +29,9 @@ shaka.ui.Overlay = class {
    * @param {!shaka.Player} player
    * @param {!HTMLElement} videoContainer
    * @param {!HTMLMediaElement} video
+   * @param {!HTMLCanvasElement} vrCanvas
    */
-  constructor(player, videoContainer, video) {
+  constructor(player, videoContainer, video, vrCanvas) {
     /** @private {shaka.Player} */
     this.player_ = player;
 
@@ -52,7 +53,7 @@ shaka.ui.Overlay = class {
 
     /** @private {shaka.ui.Controls} */
     this.controls_ = new shaka.ui.Controls(
-        player, videoContainer, video, this.config_);
+        player, videoContainer, video, vrCanvas, this.config_);
 
     // Run the initial setup so that no configure() call is required for default
     // settings.
@@ -251,6 +252,7 @@ shaka.ui.Overlay = class {
       seekOnTaps: true,
       tapSeekDistance: 10,
       refreshTickInSeconds: 0.125,
+      displayInVrMode: false,
     };
 
     // eslint-disable-next-line no-restricted-syntax
@@ -309,6 +311,12 @@ shaka.ui.Overlay = class {
     const canvases = document.querySelectorAll(
         '[data-shaka-player-canvas]');
 
+    // Look for elements marked 'data-shaka-player-vr-canvas'
+    // on the page. These will be used to create our default
+    // UI.
+    const vrCanvases = document.querySelectorAll(
+        '[data-shaka-player-vr-canvas]');
+
     if (!videos.length && !containers.length) {
       // No elements have been tagged with shaka attributes.
     } else if (videos.length && !containers.length) {
@@ -326,21 +334,37 @@ shaka.ui.Overlay = class {
         const videoParent = video.parentElement;
         videoParent.replaceChild(container, video);
         container.appendChild(video);
-        let currentCanvas = null;
+        let lcevcCanvas = null;
         for (const canvas of canvases) {
           goog.asserts.assert(canvas.tagName.toLowerCase() == 'canvas',
               'Should be a canvas element!');
           if (canvas.parentElement == container) {
-            currentCanvas = canvas;
+            lcevcCanvas = canvas;
             break;
           }
         }
-        if (!currentCanvas) {
-          currentCanvas = document.createElement('canvas');
-          currentCanvas.classList.add('shaka-canvas-container');
-          container.appendChild(currentCanvas);
+        if (!lcevcCanvas) {
+          lcevcCanvas = document.createElement('canvas');
+          lcevcCanvas.classList.add('shaka-canvas-container');
+          container.appendChild(lcevcCanvas);
         }
-        shaka.ui.Overlay.setupUIandAutoLoad_(container, video, currentCanvas);
+
+        let vrCanvas = null;
+        for (const canvas of vrCanvases) {
+          goog.asserts.assert(canvas.tagName.toLowerCase() == 'canvas',
+              'Should be a canvas element!');
+          if (canvas.parentElement == container) {
+            vrCanvas = canvas;
+            break;
+          }
+        }
+        if (!vrCanvas) {
+          vrCanvas = document.createElement('canvas');
+          vrCanvas.classList.add('shaka-vr-canvas-container');
+          container.appendChild(vrCanvas);
+        }
+        shaka.ui.Overlay.setupUIandAutoLoad_(
+            container, video, lcevcCanvas, vrCanvas);
       }
     } else {
       for (const container of containers) {
@@ -368,25 +392,40 @@ shaka.ui.Overlay = class {
           container.appendChild(currentVideo);
         }
 
-        let currentCanvas = null;
+        let lcevcCanvas = null;
         for (const canvas of canvases) {
           goog.asserts.assert(canvas.tagName.toLowerCase() == 'canvas',
               'Should be a canvas element!');
           if (canvas.parentElement == container) {
-            currentCanvas = canvas;
+            lcevcCanvas = canvas;
             break;
           }
         }
-        if (!currentCanvas) {
-          currentCanvas = document.createElement('canvas');
-          currentCanvas.classList.add('shaka-canvas-container');
-          container.appendChild(currentCanvas);
+        if (!lcevcCanvas) {
+          lcevcCanvas = document.createElement('canvas');
+          lcevcCanvas.classList.add('shaka-canvas-container');
+          container.appendChild(lcevcCanvas);
+        }
+
+        let vrCanvas = null;
+        for (const canvas of vrCanvases) {
+          goog.asserts.assert(canvas.tagName.toLowerCase() == 'canvas',
+              'Should be a canvas element!');
+          if (canvas.parentElement == container) {
+            vrCanvas = canvas;
+            break;
+          }
+        }
+        if (!vrCanvas) {
+          vrCanvas = document.createElement('canvas');
+          vrCanvas.classList.add('shaka-vr-canvas-container');
+          container.appendChild(vrCanvas);
         }
 
         try {
           // eslint-disable-next-line no-await-in-loop
           await shaka.ui.Overlay.setupUIandAutoLoad_(
-              container, currentVideo, currentCanvas);
+              container, currentVideo, lcevcCanvas, vrCanvas);
         } catch (e) {
           // This can fail if, for example, not every player file has loaded.
           // Ad-block is a likely cause for this sort of failure.
@@ -425,18 +464,20 @@ shaka.ui.Overlay = class {
   /**
    * @param {!Element} container
    * @param {!Element} video
-   * @param {!Element} canvas
+   * @param {!Element} lcevcCanvas
+   * @param {!Element} vrCanvas
    * @private
    */
-  static async setupUIandAutoLoad_(container, video, canvas) {
+  static async setupUIandAutoLoad_(container, video, lcevcCanvas, vrCanvas) {
     // Create the UI
     const player = new shaka.Player();
     const ui = new shaka.ui.Overlay(player,
         shaka.util.Dom.asHTMLElement(container),
-        shaka.util.Dom.asHTMLMediaElement(video));
+        shaka.util.Dom.asHTMLMediaElement(video),
+        shaka.util.Dom.asHTMLCanvasElement(vrCanvas));
 
     // Attach Canvas used for LCEVC Decoding
-    player.attachCanvas(/** @type {HTMLCanvasElement} */(canvas));
+    player.attachCanvas(/** @type {HTMLCanvasElement} */(lcevcCanvas));
 
     // Get and configure cast app id.
     let castAppId = '';

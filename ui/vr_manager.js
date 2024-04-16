@@ -1,0 +1,496 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+goog.provide('shaka.ui.VRManager');
+
+goog.require('shaka.log');
+goog.require('shaka.ui.VRUtils');
+goog.require('shaka.ui.VRWebgl');
+goog.require('shaka.util.EventManager');
+goog.require('shaka.util.IReleasable');
+
+goog.requireType('shaka.Player');
+
+
+/**
+ * @implements {shaka.util.IReleasable}
+ */
+shaka.ui.VRManager = class {
+  /**
+   * @param {!HTMLElement} container
+   * @param {!HTMLCanvasElement} canvas
+   * @param {!HTMLMediaElement} video
+   * @param {!shaka.Player} player
+   * @param {shaka.extern.UIConfiguration} config
+   */
+  constructor(container, canvas, video, player, config) {
+    /** @private {!HTMLElement} */
+    this.container_ = container;
+
+    /** @private {!HTMLCanvasElement} */
+    this.canvas_ = canvas;
+
+    /** @private {!HTMLMediaElement} */
+    this.video_ = video;
+
+    /** @private {!shaka.Player} */
+    this.player_ = player;
+
+    /** @private {shaka.extern.UIConfiguration} */
+    this.config_ = config;
+
+    /** @private {shaka.util.EventManager} */
+    this.loadEventManager_ = new shaka.util.EventManager();
+
+    /** @private {shaka.util.EventManager} */
+    this.eventManager_ = new shaka.util.EventManager();
+
+    /** @private {?shaka.ui.VRWebgl} */
+    this.vrWebgl_ = null;
+
+    /** @private {boolean} */
+    this.onGesture_ = false;
+
+    /** @private {number} */
+    this.prevX_ = 0;
+
+    /** @private {number} */
+    this.prevY_ = 0;
+
+    /** @private {number} */
+    this.prevAlpha_ = 0;
+
+    /** @private {number} */
+    this.prevBeta_ = 0;
+
+    /** @private {number} */
+    this.prevGamma_ = 0;
+
+    /** @private {boolean} */
+    this.vrAsset_ = false;
+
+    this.loadEventManager_.listen(player, 'spatialvideoinfo', (event) => {
+      /** @type {shaka.extern.SpatialVideoInfo} */
+      const spatialInfo = event['detail'];
+      let unsupported = false;
+      switch (spatialInfo.projection) {
+        case 'hequ':
+          unsupported = spatialInfo.hfov != 360;
+          this.vrAsset_ = true;
+          break;
+        case 'fish':
+          this.vrAsset_ = true;
+          unsupported = true;
+          break;
+        default:
+          this.vrAsset_ = false;
+          break;
+      }
+      if (unsupported) {
+        shaka.log.warning('Unsupported VR projection or hfov', spatialInfo);
+      }
+      this.checkVrStatus_();
+    });
+
+    this.loadEventManager_.listen(player, 'nospatialvideoinfo', () => {
+      this.vrAsset_ = false;
+      this.checkVrStatus_();
+    });
+
+    this.loadEventManager_.listen(player, 'unloading', () => {
+      this.vrAsset_ = false;
+      this.checkVrStatus_();
+    });
+
+    this.checkVrStatus_();
+  }
+
+  /**
+   * @override
+   */
+  release() {
+    if (this.loadEventManager_) {
+      this.loadEventManager_.release();
+      this.loadEventManager_ = null;
+    }
+    if (this.eventManager_) {
+      this.eventManager_.release();
+      this.eventManager_ = null;
+    }
+    if (this.vrWebgl_) {
+      this.vrWebgl_.release();
+      this.vrWebgl_ = null;
+    }
+  }
+
+  /**
+   * @param {!shaka.extern.UIConfiguration} config
+   */
+  configure(config) {
+    this.config_ = config;
+    this.checkVrStatus_();
+  }
+
+  /**
+   * Returns if a VR is supported.
+   *
+   * @return {boolean}
+   */
+  isPlayingVR() {
+    return !!this.vrWebgl_;
+  }
+
+  /**
+   * Get the angle of the north.
+   *
+   * @return {?number}
+   */
+  getNorth() {
+    if (!this.vrWebgl_) {
+      shaka.log.alwaysWarn('Not playing VR content');
+      return null;
+    }
+    return this.vrWebgl_.getNorth();
+  }
+
+  /**
+   * Returns the field view.
+   *
+   * @return {?number}
+   */
+  getFieldView() {
+    if (!this.vrWebgl_) {
+      shaka.log.alwaysWarn('Not playing VR content');
+      return null;
+    }
+    return this.vrWebgl_.getFieldView();
+  }
+
+  /**
+   * Set the field view.
+   *
+   * @param {number} fieldView
+   */
+  setFieldView(fieldView) {
+    if (!this.vrWebgl_) {
+      shaka.log.alwaysWarn('Not playing VR content');
+      return;
+    }
+    if (fieldView < 0) {
+      shaka.log.alwaysWarn('Field view should be greater than 0');
+      fieldView = 0;
+    } else if (fieldView > 100) {
+      shaka.log.alwaysWarn('Field view should be less than 100');
+      fieldView = 100;
+    }
+    this.vrWebgl_.setFieldView(fieldView);
+  }
+
+  /**
+   * Toggle stereoscopic mode.
+   */
+  toggleStereoscopicMode() {
+    if (!this.vrWebgl_) {
+      shaka.log.alwaysWarn('Not playing VR content');
+      return;
+    }
+    this.vrWebgl_.togglestereoscopicMode();
+  }
+
+  /**
+   * Increment the yaw in X angle in degrees.
+   *
+   * @param {number} angle
+   */
+  incrementYaw(angle) {
+    if (!this.vrWebgl_) {
+      shaka.log.alwaysWarn('Not playing VR content');
+      return;
+    }
+    if (angle < -359) {
+      shaka.log.alwaysWarn('Yaw angle should be greater than -360');
+      angle = -359;
+    } else if (angle > 359) {
+      shaka.log.alwaysWarn('Yaw angle should be less than 360');
+      angle = 359;
+    }
+    this.vrWebgl_.rotateViewGlobal(angle * shaka.ui.VRUtils.TO_RADIANS, 0, 0);
+  }
+
+  /**
+   * Increment the pitch in X angle in degrees.
+   *
+   * @param {number} angle
+   */
+  incrementPitch(angle) {
+    if (!this.vrWebgl_) {
+      shaka.log.alwaysWarn('Not playing VR content');
+      return;
+    }
+    if (angle < -89) {
+      shaka.log.alwaysWarn('Pitch angle should be greater than -90');
+      angle = -89;
+    } else if (angle > 89) {
+      shaka.log.alwaysWarn('Pitch angle should be less than 90');
+      angle = 89;
+    }
+    this.vrWebgl_.rotateViewGlobal(0, angle * shaka.ui.VRUtils.TO_RADIANS, 0);
+  }
+
+  /**
+   * Increment the roll in X angle in degrees.
+   *
+   * @param {number} angle
+   */
+  incrementRoll(angle) {
+    if (!this.vrWebgl_) {
+      shaka.log.alwaysWarn('Not playing VR content');
+      return;
+    }
+    if (angle < -359) {
+      shaka.log.alwaysWarn('Roll angle should be greater than -360');
+      angle = -359;
+    } else if (angle > 359) {
+      shaka.log.alwaysWarn('Roll angle should be less than 360');
+      angle = 359;
+    }
+    this.vrWebgl_.rotateViewGlobal(0, 0, angle * shaka.ui.VRUtils.TO_RADIANS);
+  }
+
+  /**
+   * @private
+   */
+  checkVrStatus_() {
+    if ((this.config_.displayInVrMode || this.vrAsset_) && !this.vrWebgl_) {
+      this.canvas_.style.display = '';
+      this.init_();
+    } else if (!this.config_.displayInVrMode && !this.vrAsset_ &&
+        this.vrWebgl_) {
+      this.canvas_.style.display = 'none';
+      this.eventManager_.removeAll();
+      this.vrWebgl_.release();
+      this.vrWebgl_ = null;
+    }
+  }
+
+  /**
+   * @private
+   */
+  init_() {
+    const gl = this.getGL_();
+    if (gl) {
+      this.vrWebgl_ = new shaka.ui.VRWebgl(
+          this.video_, this.player_, this.canvas_, gl);
+      this.setupVRListerners_();
+    }
+  }
+
+  /**
+   * @return {?WebGLRenderingContext}
+   * @private
+   */
+  getGL_() {
+    const webglContexts = [
+      'webgl2',
+      'webgl',
+    ];
+    for (const webgl of webglContexts) {
+      const gl = this.canvas_.getContext(webgl);
+      if (gl) {
+        return /** @type {!WebGLRenderingContext} */(gl);
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @private
+   */
+  setupVRListerners_() {
+    // Start
+    this.eventManager_.listen(this.container_, 'mousedown', (event) => {
+      if (!this.onGesture_) {
+        this.gestureStart_(event.clientX, event.clientY);
+      }
+    });
+    if (navigator.maxTouchPoints > 0) {
+      this.eventManager_.listen(this.container_, 'touchstart', (e) => {
+        if (!this.onGesture_) {
+          const event = /** @type {!TouchEvent} */(e);
+          this.gestureStart_(
+              event.touches[0].clientX, event.touches[0].clientY);
+        }
+      });
+    }
+
+    // Zoom
+    this.eventManager_.listen(this.container_, 'wheel', (e) => {
+      if (!this.onGesture_) {
+        const event = /** @type {!WheelEvent} */(e);
+        this.vrWebgl_.zoom(event.deltaY);
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    });
+
+    // Move
+    this.eventManager_.listen(this.container_, 'mousemove', (event) => {
+      if (this.onGesture_) {
+        this.gestureMove_(event.clientX, event.clientY);
+      }
+    });
+    if (navigator.maxTouchPoints > 0) {
+      this.eventManager_.listen(this.container_, 'touchmove', (e) => {
+        if (this.onGesture_) {
+          const event = /** @type {!TouchEvent} */(e);
+          this.gestureMove_(
+              event.touches[0].clientX, event.touches[0].clientY);
+        }
+        e.preventDefault();
+      });
+    }
+
+    // End
+    this.eventManager_.listen(this.container_, 'mouseleave', () => {
+      this.onGesture_ = false;
+    });
+    this.eventManager_.listen(this.container_, 'mouseup', () => {
+      this.onGesture_ = false;
+    });
+    if (navigator.maxTouchPoints > 0) {
+      this.eventManager_.listen(this.container_, 'touchend', () => {
+        this.onGesture_ = false;
+      });
+    }
+
+    // Detect device movement
+    let deviceOrientationListener = false;
+    if (window.DeviceOrientationEvent) {
+      // See: https://dev.to/li/how-to-requestpermission-for-devicemotion-and-deviceorientation-events-in-ios-13-46g2
+      if (typeof DeviceMotionEvent.requestPermission == 'function') {
+        const userGestureListener = () => {
+          DeviceMotionEvent.requestPermission().then((newPermissionState) => {
+            if (newPermissionState !== 'granted' ||
+                deviceOrientationListener) {
+              return;
+            }
+            deviceOrientationListener = true;
+            this.setupDeviceOrientationListener_();
+          });
+        };
+        DeviceMotionEvent.requestPermission().then((permissionState) => {
+          this.eventManager_.unlisten(
+              this.container_, 'click', userGestureListener);
+          this.eventManager_.unlisten(
+              this.container_, 'mouseup', userGestureListener);
+          if (navigator.maxTouchPoints > 0) {
+            this.eventManager_.unlisten(
+                this.container_, 'touchend', userGestureListener);
+          }
+          if (permissionState !== 'granted') {
+            this.eventManager_.listenOnce(
+                this.container_, 'click', userGestureListener);
+            this.eventManager_.listenOnce(
+                this.container_, 'mouseup', userGestureListener);
+            if (navigator.maxTouchPoints > 0) {
+              this.eventManager_.listenOnce(
+                  this.container_, 'touchend', userGestureListener);
+            }
+            return;
+          }
+          deviceOrientationListener = true;
+          this.setupDeviceOrientationListener_();
+        }).catch(() => {
+          this.eventManager_.unlisten(
+              this.container_, 'click', userGestureListener);
+          this.eventManager_.unlisten(
+              this.container_, 'mouseup', userGestureListener);
+          if (navigator.maxTouchPoints > 0) {
+            this.eventManager_.unlisten(
+                this.container_, 'touchend', userGestureListener);
+          }
+          this.eventManager_.listenOnce(
+              this.container_, 'click', userGestureListener);
+          this.eventManager_.listenOnce(
+              this.container_, 'mouseup', userGestureListener);
+          if (navigator.maxTouchPoints > 0) {
+            this.eventManager_.listenOnce(
+                this.container_, 'touchend', userGestureListener);
+          }
+        });
+      } else {
+        deviceOrientationListener = true;
+        this.setupDeviceOrientationListener_();
+      }
+    }
+  }
+
+  /**
+   * @private
+   */
+  setupDeviceOrientationListener_() {
+    this.eventManager_.listen(window, 'deviceorientation', (e) => {
+      const event = /** @type {!DeviceOrientationEvent} */(e);
+      let alphaDif = (event.alpha || 0) - this.prevAlpha_;
+      let betaDif = (event.beta || 0) - this.prevBeta_;
+      let gammaDif = (event.gamma || 0) - this.prevGamma_;
+
+      if (Math.abs(alphaDif) > 10) {
+        alphaDif = 0;
+      }
+      if (Math.abs(gammaDif) > 10) {
+        gammaDif = 0;
+      }
+      if (Math.abs(betaDif) > 10) {
+        betaDif = 0;
+      }
+
+      this.prevAlpha_ = event.alpha || 0;
+      this.prevBeta_ = event.beta || 0;
+      this.prevGamma_ = event.gamma || 0;
+
+      const toRadians = shaka.ui.VRUtils.TO_RADIANS;
+
+      const orientation = screen.orientation.angle;
+      if (orientation == 90 || orientation == -90) {
+        this.vrWebgl_.rotateViewGlobal(
+            alphaDif * toRadians * -1, gammaDif * toRadians * -1, 0);
+      } else {
+        this.vrWebgl_.rotateViewGlobal(
+            alphaDif * toRadians * -1, betaDif * toRadians, 0);
+      }
+    });
+  }
+
+  /**
+   * @param {number} x
+   * @param {number} y
+   * @private
+   */
+  gestureStart_(x, y) {
+    this.onGesture_ = true;
+    this.prevX_ = x;
+    this.prevY_ = y;
+  }
+
+  /**
+   * @param {number} x
+   * @param {number} y
+   * @private
+   */
+  gestureMove_(x, y) {
+    const touchScaleFactor = -0.60 * Math.PI / 180;
+    this.vrWebgl_.rotateViewGlobal((x - this.prevX_) * touchScaleFactor,
+        (y - this.prevY_) * -1 * touchScaleFactor, 0);
+
+    this.prevX_ = x;
+    this.prevY_ = y;
+  }
+};
+
+
+shaka.ui.VRManager.TO_RADIANS = Math.PI / 180;

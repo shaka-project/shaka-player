@@ -40,7 +40,8 @@ filterDescribe('Cue layout', shaka.test.TextLayoutTests.supported, () => {
         const player = new shaka.Player();
         ui = new shaka.ui.Overlay(
             player, /** @type {!HTMLElement} */(helper.videoContainer),
-            shaka.test.UiUtils.createVideoElement());
+            shaka.test.UiUtils.createVideoElement(),
+            shaka.test.UiUtils.createCanvasElement());
         // Turn off every part of the UI that we can, so that the screenshot is
         // less likey to change because of something unrelated to text
         // rendering.

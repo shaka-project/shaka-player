@@ -41,3 +41,9 @@
 +../../ui/ui.js
 +../../ui/ui_utils.js
 +../../ui/volume_bar.js
++../../ui/vr_manager.js
++../../ui/vr_utils.js
++../../ui/vr_webgl.js
+
++../../ui/gl_matrix/matrix_4x4.js
++../../ui/gl_matrix/matrix_quaternion.js

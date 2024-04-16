@@ -93,7 +93,8 @@ shaka.extern.UIVolumeBarColors;
  *   showAudioChannelCountVariants: boolean,
  *   seekOnTaps: boolean,
  *   tapSeekDistance: number,
- *   refreshTickInSeconds: number
+ *   refreshTickInSeconds: number,
+ *   displayInVrMode: boolean
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -232,6 +233,9 @@ shaka.extern.UIVolumeBarColors;
  * @property {number} refreshTickInSeconds
  *   The time interval, in seconds, to update the seek bar.
  *   Defaults to 0.125 seconds.
+ * @property {boolean} displayInVrMode
+ *   Indicates whether or not the content should be rendered as VR.
+ *   Defaults to false.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

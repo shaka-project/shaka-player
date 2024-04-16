@@ -22,6 +22,7 @@ goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.SeekBar');
 goog.require('shaka.ui.Utils');
+goog.require('shaka.ui.VRManager');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
@@ -42,9 +43,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @param {!shaka.Player} player
    * @param {!HTMLElement} videoContainer
    * @param {!HTMLMediaElement} video
+   * @param {!HTMLCanvasElement} vrCanvas
    * @param {shaka.extern.UIConfiguration} config
    */
-  constructor(player, videoContainer, video, config) {
+  constructor(player, videoContainer, video, vrCanvas, config) {
     super();
 
     /** @private {boolean} */
@@ -75,6 +77,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @private {!HTMLElement} */
     this.videoContainer_ = videoContainer;
+
+    this.vrCanvas_ = vrCanvas;
 
     /** @private {shaka.extern.IAdManager} */
     this.adManager_ = this.player_.getAdManager();
@@ -173,6 +177,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.configure(this.config_);
     this.addEventListeners_();
 
+    goog.asserts.assert(
+        this.controlsContainer_, 'Controls container must be created!');
+
+    this.vr_ = new shaka.ui.VRManager(this.controlsContainer_, this.vrCanvas_,
+        this.localVideo_, this.player_, this.config_);
+
     /**
      * The pressed keys set is used to record which keys are currently pressed
      * down, so we can know what keys are pressed at the same time.
@@ -257,6 +267,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.localization_ = null;
     this.pressedKeys_.clear();
 
+    if (this.vr_) {
+      this.vr_.release();
+      this.vr_ = null;
+    }
+
     // FakeEventTarget implements IReleasable
     super.release();
   }
@@ -332,6 +347,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     if (this.contextMenu_) {
       this.contextMenu_ = null;
+    }
+
+    if (this.vr_) {
+      this.vr_.configure(config);
     }
 
     if (this.controlsContainer_) {
@@ -1384,7 +1403,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   onContainerClick_() {
-    if (!this.enabled_) {
+    if (!this.enabled_ || this.vr_.isPlayingVR()) {
       return;
     }
 
@@ -1715,6 +1734,85 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   hideUI() {
     this.onMouseLeave_();
+  }
+
+  /**
+   * Returns if a VR is supported.
+   *
+   * @return {boolean}
+   * @export
+   */
+  isPlayingVR() {
+    return this.vr_.isPlayingVR();
+  }
+
+  /**
+   * Get the angle of the north.
+   *
+   * @return {?number}
+   * @export
+   */
+  getVRNorth() {
+    return this.vr_.getNorth();
+  }
+
+  /**
+   * Returns the field view.
+   *
+   * @return {?number}
+   * @export
+   */
+  getVRFieldView() {
+    return this.vr_.getFieldView();
+  }
+
+  /**
+   * Set the field view.
+   *
+   * @param {number} fieldView
+   * @export
+   */
+  setVRFieldView(fieldView) {
+    this.vr_.setFieldView(fieldView);
+  }
+
+  /**
+   * Toggle stereoscopic mode.
+   *
+   * @export
+   */
+  toggleStereoscopicMode() {
+    this.vr_.toggleStereoscopicMode();
+  }
+
+  /**
+   * Increment the yaw in X angle in degrees.
+   *
+   * @param {number} angle
+   * @export
+   */
+  incrementYaw(angle) {
+    this.vr_.incrementYaw(angle);
+  }
+
+  /**
+   * Increment the pitch in X angle in degrees.
+   *
+   * @param {number} angle
+   * @export
+   */
+  incrementPitch(angle) {
+    this.vr_.incrementPitch(angle);
+  }
+
+  /**
+   * Increment the roll in X angle in degrees.
+   *
+   * @param {number} angle
+   * @export
+   */
+  incrementRoll(angle) {
+    this.vr_.incrementRoll(angle);
   }
 
   /**

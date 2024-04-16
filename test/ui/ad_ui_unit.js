@@ -12,6 +12,8 @@ describe('Ad UI', () => {
   let container;
   /** @type {!HTMLMediaElement} */
   let video;
+  /** @type {!HTMLCanvasElement} */
+  let canvas;
   /** @type {!shaka.test.FakeAd} */
   let ad;
   /** @type {!shaka.test.FakeAdManager} */
@@ -32,7 +34,8 @@ describe('Ad UI', () => {
 
     video = shaka.test.UiUtils.createVideoElement();
     container.appendChild(video);
-    await UiUtils.createUIThroughAPI(container, video);
+    canvas = shaka.test.UiUtils.createCanvasElement();
+    await UiUtils.createUIThroughAPI(container, video, canvas);
     adManager = video['ui'].getControls().getPlayer().getAdManager();
   });
 

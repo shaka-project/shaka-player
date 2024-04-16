@@ -25,6 +25,7 @@ v5.0 - 2024 Q1
  - AES-256 and AES-256-CTR (HLS)
    https://github.com/shaka-project/shaka-player/issues/6001
  - Detect maximum HW resolution automatically on some platforms
+ - UI support for VR content
 
 =====
 
