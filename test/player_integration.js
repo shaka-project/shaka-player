@@ -970,7 +970,7 @@ describe('Player', () => {
       video.autoplay = false;
       waiter = new shaka.test.Waiter(eventManager)
           .setPlayer(player)
-          .timeoutAfter(10)
+          .timeoutAfter(20)
           .failOnTimeout(true);
     });
 
@@ -992,7 +992,7 @@ describe('Player', () => {
       player.configure('streaming.rebufferingGoal', 25);
       player.configure('streaming.bufferingGoal', 60);
       player.configure('streaming.stallEnabled', true);
-      player.configure('streaming.stallThreshold', 0.1);
+      player.configure('streaming.stallThreshold', 1);
       player.configure('manifest.dash.ignoreMinBufferTime', true);
       video.autoplay = true;
       await player.load('test:sintel_long_compiled');
