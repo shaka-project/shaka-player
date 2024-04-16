@@ -1458,8 +1458,8 @@ shaka.extern.MediaSourceConfiguration;
  *   IMA on platforms that do not support multiple video elements.
  *   This value defaults to <code>false</code>.
  * @property {boolean} skipPlayDetection
- *   If this is <code>true</code>, we avoid to detect play event to load the
- *   Client Side ads.
+ *   If this is true, we will load Client Side ads without waiting for a play
+ *   event.
  *   Defaults to <code>false</code> except on Tizen, WebOS, Chromecast,
  *   Hisense, PlayStation 4, PlayStation5, Xbox whose default value is
  *   <code>true</code>.
