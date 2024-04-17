@@ -219,7 +219,7 @@ describe('MssParser Manifest', () => {
     expect(stream).toBeUndefined();
   });
 
-  it('Invokes manifestPreprocessor in config', async () => {
+  it('Invokes manifestPreprocessorTXml in config', async () => {
     const manifestText = [
       '<SmoothStreamingMedia Duration="1209510000">',
       '  <StreamIndex Type="video" Url="uri">',
@@ -243,7 +243,7 @@ describe('MssParser Manifest', () => {
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.mss.manifestPreprocessor = (mss) => {
+    config.mss.manifestPreprocessorTXml = (mss) => {
       /** @type{shaka.extern.xml.Node} */ (mss).children.pop();
     };
     parser.configure(config);

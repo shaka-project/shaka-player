@@ -888,7 +888,8 @@ shaka.extern.xml.Node;
  *   ignoreEmptyAdaptationSet: boolean,
  *   ignoreMaxSegmentDuration: boolean,
  *   keySystemsByURI: !Object.<string, string>,
- *   manifestPreprocessor: function(!shaka.extern.xml.Node),
+ *   manifestPreprocessor: function(!Element),
+ *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
  *   enableAudioGroups: boolean,
  *   multiTypeVariantsAllowed: boolean,
@@ -943,7 +944,11 @@ shaka.extern.xml.Node;
  * @property {Object.<string, string>} keySystemsByURI
  *   A map of scheme URI to key system name. Defaults to default key systems
  *   mapping handled by Shaka.
- * @property {function(!shaka.extern.xml.Node)} manifestPreprocessor
+ * @property {function(!Element)} manifestPreprocessor
+ *   Called immediately after the DASH manifest has been parsed into an
+ *   XMLDocument. Provides a way for applications to perform efficient
+ *   preprocessing of the manifest.
+ * @property {function(!shaka.extern.xml.Node)} manifestPreprocessorTXml
  *   Called immediately after the DASH manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
@@ -1076,12 +1081,17 @@ shaka.extern.HlsManifestConfiguration;
 
 /**
  * @typedef {{
- *   manifestPreprocessor: function(!shaka.extern.xml.Node),
+ *   manifestPreprocessor: function(!Element),
+ *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
  *   keySystemsBySystemId: !Object.<string, string>
  * }}
  *
- * @property {function(!shaka.extern.xml.Node)} manifestPreprocessor
+ * @property {function(!Element)} manifestPreprocessor
+ *   Called immediately after the MSS manifest has been parsed into an
+ *   XMLDocument. Provides a way for applications to perform efficient
+ *   preprocessing of the manifest.
+ * @property {function(!shaka.extern.xml.Node)} manifestPreprocessorTXml
  *   Called immediately after the MSS manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.

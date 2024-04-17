@@ -1840,7 +1840,7 @@ describe('DashParser Manifest', () => {
     expect(manifest.presentationTimeline).toBeTruthy();
   });
 
-  it('Invokes manifestPreprocessor in config', async () => {
+  it('Invokes manifestPreprocessorTXml in config', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
@@ -1867,7 +1867,7 @@ describe('DashParser Manifest', () => {
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.dash.manifestPreprocessor = (mpd) => {
+    config.dash.manifestPreprocessorTXml = (mpd) => {
       /** @type {shaka.extern.xml.Node} */
       const manifest = /** @type {shaka.extern.xml.Node} */ (
         /** @type {shaka.extern.xml.Node} */(mpd).children[0]);
