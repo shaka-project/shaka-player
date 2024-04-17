@@ -9,8 +9,6 @@ The goals of future milestones are fluid until we begin that development cycle,
 so the exact milestone for future features is not pre-determined.
 
 Candidate features for future release cycles:
- - Official TypeScript defs, generated from source
-   https://github.com/shaka-project/shaka-player/issues/1030
  - Background fetch for offline storage
    https://github.com/shaka-project/shaka-player/issues/879
  - A method to stitch together clips
@@ -19,7 +17,10 @@ Candidate features for future release cycles:
    https://github.com/shaka-project/shaka-player/issues/898
  - Smaller, more modular binary
 
-v5.0 - 2024 Q1
+v5.0 - 2024 Q4
+ - Conversion to Typescript
+
+v4.8 - 2024 Q2
  - Preload API
    https://github.com/shaka-project/shaka-player/issues/880
  - Common Media Server Data (CMSD)
