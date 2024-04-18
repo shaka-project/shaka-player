@@ -134,6 +134,7 @@ describe('RegionTimeline', () => {
       startTime: startTimeSeconds,
       endTime: endTimeSeconds,
       eventElement: null,
+      eventNode: null,
     };
   }
 });

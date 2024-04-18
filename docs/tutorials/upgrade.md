@@ -110,4 +110,4 @@ application:
 
   - Player API Changes:
     - The constructor no longer takes `mediaElement` as a parameter; use the `attach` method to attach to a media element instead. (Deprecated in v4.6)
-    - The `TimelineRegionInfo.eventElement` property is now a type of `shaka.externs.xml.Node` instead of `Element`
+    - The `TimelineRegionInfo.eventElement` has been replaced with `TimelineRegionInfo.eventNode` property, the new property type is `shaka.externs.xml.Node` instead of `Element`

@@ -534,7 +534,8 @@ shaka.extern.MetadataFrame;
  *   startTime: number,
  *   endTime: number,
  *   id: string,
- *   eventElement: ?shaka.extern.xml.Node
+ *   eventElement: Element,
+ *   eventNode: ?shaka.extern.xml.Node
  * }}
  *
  * @description
@@ -552,7 +553,10 @@ shaka.extern.MetadataFrame;
  *   The presentation time (in seconds) that the region should end.
  * @property {string} id
  *   Specifies an identifier for this instance of the region.
- * @property {?shaka.extern.xml.Node} eventElement
+ * @property {Elment} eventElement
+ *   <b>DEPRECATED</b>: Use eventElement instead.
+ *   The XML element that defines the Event.
+ * @property {?shaka.extern.xml.Node} eventNode
  *   The XML element that defines the Event.
  * @exportDoc
  */
