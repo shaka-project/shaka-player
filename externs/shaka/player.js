@@ -1436,7 +1436,7 @@ shaka.extern.StreamingConfiguration;
  *   Defaults to SMOOTH if SMOOTH codec switching is supported, RELOAD
  *   overwise.
  * @property {function(string): string} addExtraFeaturesToSourceBuffer
- *   Callback to generate extra features striug based on used MIME type.
+ *   Callback to generate extra features string based on used MIME type.
  *   Some platforms may need to pass features when initializing the
  *   sourceBuffer.
  *   This string is ultimately appended to a MIME type in addSourceBuffer() &
