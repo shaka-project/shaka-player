@@ -534,7 +534,8 @@ shaka.extern.MetadataFrame;
  *   startTime: number,
  *   endTime: number,
  *   id: string,
- *   eventElement: ?shaka.extern.xml.Node
+ *   eventElement: Element,
+ *   eventNode: ?shaka.extern.xml.Node
  * }}
  *
  * @description
@@ -552,7 +553,10 @@ shaka.extern.MetadataFrame;
  *   The presentation time (in seconds) that the region should end.
  * @property {string} id
  *   Specifies an identifier for this instance of the region.
- * @property {?shaka.extern.xml.Node} eventElement
+ * @property {Elment} eventElement
+ *   <b>DEPRECATED</b>: Use eventElement instead.
+ *   The XML element that defines the Event.
+ * @property {?shaka.extern.xml.Node} eventNode
  *   The XML element that defines the Event.
  * @exportDoc
  */
@@ -888,7 +892,8 @@ shaka.extern.xml.Node;
  *   ignoreEmptyAdaptationSet: boolean,
  *   ignoreMaxSegmentDuration: boolean,
  *   keySystemsByURI: !Object.<string, string>,
- *   manifestPreprocessor: function(!shaka.extern.xml.Node),
+ *   manifestPreprocessor: function(!Element),
+ *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
  *   enableAudioGroups: boolean,
  *   multiTypeVariantsAllowed: boolean,
@@ -943,7 +948,12 @@ shaka.extern.xml.Node;
  * @property {Object.<string, string>} keySystemsByURI
  *   A map of scheme URI to key system name. Defaults to default key systems
  *   mapping handled by Shaka.
- * @property {function(!shaka.extern.xml.Node)} manifestPreprocessor
+ * @property {function(!Element)} manifestPreprocessor
+ *   <b>DEPRECATED</b>: Use manifestPreprocessorTXml instead.
+ *   Called immediately after the DASH manifest has been parsed into an
+ *   XMLDocument. Provides a way for applications to perform efficient
+ *   preprocessing of the manifest.
+ * @property {function(!shaka.extern.xml.Node)} manifestPreprocessorTXml
  *   Called immediately after the DASH manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
@@ -1076,12 +1086,18 @@ shaka.extern.HlsManifestConfiguration;
 
 /**
  * @typedef {{
- *   manifestPreprocessor: function(!shaka.extern.xml.Node),
+ *   manifestPreprocessor: function(!Element),
+ *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
  *   keySystemsBySystemId: !Object.<string, string>
  * }}
  *
- * @property {function(!shaka.extern.xml.Node)} manifestPreprocessor
+ * @property {function(!Element)} manifestPreprocessor
+ *   <b>DEPRECATED</b>: Use manifestPreprocessorTXml instead.
+ *   Called immediately after the MSS manifest has been parsed into an
+ *   XMLDocument. Provides a way for applications to perform efficient
+ *   preprocessing of the manifest.
+ * @property {function(!shaka.extern.xml.Node)} manifestPreprocessorTXml
  *   Called immediately after the MSS manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
