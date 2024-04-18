@@ -180,6 +180,7 @@ shaka.extern.UIVolumeBarColors;
  *   Defaults to true.
  * @property {boolean} singleClickForPlayAndPause
  *   Whether or not clicking on the video should cause it to play or pause.
+ *   It does not work in VR mode.
  *   Defaults to true.
  * @property {boolean} enableKeyboardPlaybackControls
  *   Whether or not playback controls via keyboard is enabled, such as seek
@@ -234,7 +235,9 @@ shaka.extern.UIVolumeBarColors;
  *   The time interval, in seconds, to update the seek bar.
  *   Defaults to 0.125 seconds.
  * @property {boolean} displayInVrMode
- *   Indicates whether or not the content should be rendered as VR.
+ *   If true, the content will be treated as VR.
+ *   If false, it will only be treated as VR if we automatically detect it as
+ *   such. (See the Enabling VR section in docs/tutorials/ui.md)
  *   Defaults to false.
  * @exportDoc
  */

@@ -108,9 +108,6 @@ shaka.ui.VRWebgl = class {
     this.fieldOfView_ = 75;
 
     /** @private {number} */
-    this.animDuration_ = 0.5;
-
-    /** @private {number} */
     this.cont_ = 0;
 
     this.init_();
@@ -168,7 +165,7 @@ shaka.ui.VRWebgl = class {
   /**
    * Toogle stereoscopic mode
    */
-  togglestereoscopicMode() {
+  toggleStereoscopicMode() {
     this.stereoscopicMode_ = !this.stereoscopicMode_;
     if (!this.stereoscopicMode_) {
       this.gl_.viewport(0, 0, this.canvas_.width, this.canvas_.height);
@@ -312,10 +309,11 @@ shaka.ui.VRWebgl = class {
     this.gl_.compileShader(shader);
 
     if (!this.gl_.getShaderParameter(shader, this.gl_.COMPILE_STATUS)) {
-      shaka.log.warning(
-          'Error in ' + glType + ' shader' + this.gl_.getShaderInfoLog(shader));
-      return null;
+      shaka.log.warning('Error in ' + glType + ' shader: ' +
+          this.gl_.getShaderInfoLog(shader));
     }
+
+    goog.asserts.assert(shader, 'Should have a shader!');
 
     return shader;
   }
@@ -446,7 +444,6 @@ shaka.ui.VRWebgl = class {
    * @private
    */
   updateViewPort_() {
-    const scale = 1.8;
     let currentWidth = this.video_.videoWidth;
     if (!currentWidth) {
       currentWidth = this.canvas_.scrollWidth;
@@ -467,7 +464,7 @@ shaka.ui.VRWebgl = class {
       const ratio = currentWidth / currentHeight;
 
       this.projectionMatrix_ = shaka.ui.Matrix4x4.frustum(
-          this.projectionMatrix_, -ratio, ratio, -1, 1, scale, 50.5);
+          this.projectionMatrix_, -ratio, ratio, -1, 1, 0, 1);
 
       this.gl_.viewport(0, 0, currentWidth, currentHeight);
     }
@@ -497,8 +494,8 @@ shaka.ui.VRWebgl = class {
       // Rotate local axis
       shaka.ui.Matrix4x4.multiply(matrix, out, matrix);
     } else {
-    // Doing this we restart the value to the previous position,
-    // to not mantain a value over 90º or under -90º.
+      // Doing this we restart the value to the previous position,
+      // to not mantain a value over 90º or under -90º.
       this.positionY_ -= pitch;
     }
 
@@ -601,11 +598,15 @@ shaka.ui.VRWebgl = class {
         this.positionY_ = 0;
         this.cont_++;
         this.renderGL_(false);
-      }).tickAfter(this.animDuration_ / steps);
+      }).tickAfter(shaka.ui.VRWebgl.ANIMATION_DURATION_ / steps);
     } else {
       shaka.ui.Matrix4x4.fromQuat(out, this.originalQuaternion_);
       this.viewMatrix_ = out;
-      this.renderGL_(false);
     }
   }
 };
+
+/**
+ * @constant {number}
+ */
+shaka.ui.VRWebgl.ANIMATION_DURATION_ = 0.5;

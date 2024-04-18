@@ -73,6 +73,12 @@ shaka.ui.VRManager = class {
     /** @private {boolean} */
     this.vrAsset_ = false;
 
+    this.loadEventManager_.listen(player, 'loading', () => {
+      if (this.vrWebgl_) {
+        this.vrWebgl_.reset();
+      }
+    });
+
     this.loadEventManager_.listen(player, 'spatialvideoinfo', (event) => {
       /** @type {shaka.extern.SpatialVideoInfo} */
       const spatialInfo = event['detail'];
@@ -145,6 +151,17 @@ shaka.ui.VRManager = class {
   }
 
   /**
+   * Reset VR view.
+   */
+  reset() {
+    if (!this.vrWebgl_) {
+      shaka.log.alwaysWarn('Not playing VR content');
+      return;
+    }
+    this.vrWebgl_.reset();
+  }
+
+  /**
    * Get the angle of the north.
    *
    * @return {?number}
@@ -198,7 +215,7 @@ shaka.ui.VRManager = class {
       shaka.log.alwaysWarn('Not playing VR content');
       return;
     }
-    this.vrWebgl_.togglestereoscopicMode();
+    this.vrWebgl_.toggleStereoscopicMode();
   }
 
   /**
@@ -210,13 +227,6 @@ shaka.ui.VRManager = class {
     if (!this.vrWebgl_) {
       shaka.log.alwaysWarn('Not playing VR content');
       return;
-    }
-    if (angle < -359) {
-      shaka.log.alwaysWarn('Yaw angle should be greater than -360');
-      angle = -359;
-    } else if (angle > 359) {
-      shaka.log.alwaysWarn('Yaw angle should be less than 360');
-      angle = 359;
     }
     this.vrWebgl_.rotateViewGlobal(angle * shaka.ui.VRUtils.TO_RADIANS, 0, 0);
   }
@@ -231,13 +241,6 @@ shaka.ui.VRManager = class {
       shaka.log.alwaysWarn('Not playing VR content');
       return;
     }
-    if (angle < -89) {
-      shaka.log.alwaysWarn('Pitch angle should be greater than -90');
-      angle = -89;
-    } else if (angle > 89) {
-      shaka.log.alwaysWarn('Pitch angle should be less than 90');
-      angle = 89;
-    }
     this.vrWebgl_.rotateViewGlobal(0, angle * shaka.ui.VRUtils.TO_RADIANS, 0);
   }
 
@@ -250,13 +253,6 @@ shaka.ui.VRManager = class {
     if (!this.vrWebgl_) {
       shaka.log.alwaysWarn('Not playing VR content');
       return;
-    }
-    if (angle < -359) {
-      shaka.log.alwaysWarn('Roll angle should be greater than -360');
-      angle = -359;
-    } else if (angle > 359) {
-      shaka.log.alwaysWarn('Roll angle should be less than 360');
-      angle = 359;
     }
     this.vrWebgl_.rotateViewGlobal(0, 0, angle * shaka.ui.VRUtils.TO_RADIANS);
   }
@@ -439,13 +435,10 @@ shaka.ui.VRManager = class {
       let betaDif = (event.beta || 0) - this.prevBeta_;
       let gammaDif = (event.gamma || 0) - this.prevGamma_;
 
-      if (Math.abs(alphaDif) > 10) {
+      if (Math.abs(alphaDif) > 10 || Math.abs(betaDif) > 10 ||
+          Math.abs(gammaDif) > 5) {
         alphaDif = 0;
-      }
-      if (Math.abs(gammaDif) > 10) {
         gammaDif = 0;
-      }
-      if (Math.abs(betaDif) > 10) {
         betaDif = 0;
       }
 

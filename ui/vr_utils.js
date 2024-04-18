@@ -110,6 +110,8 @@ highp vec4 texelColor =
   gl_FragColor = vec4(texelColor.rgb, texelColor.a);
 }`;
 
-
+/**
+ * @constant {number}
+ */
 shaka.ui.VRUtils.TO_RADIANS = Math.PI / 180;
 

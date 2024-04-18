@@ -419,9 +419,9 @@ shaka.ui.Matrix4x4 = class {
 
   /**
    * Returns a quaternion representing the rotational component
-   *  of a transformation matrix. If a matrix is built with
-   *  fromRotationTranslation, the returned quaternion will be the
-   *  same as the quaternion originally supplied.
+   * of a transformation matrix. If a matrix is built with
+   * fromRotationTranslation, the returned quaternion will be the
+   * same as the quaternion originally supplied.
    * @param {!Float32Array} out Quaternion to receive the rotation component
    * @param {!Float32Array} mat Matrix to be decomposed (input)
    */
@@ -529,30 +529,17 @@ shaka.ui.Matrix4x4 = class {
    * @private
    */
   static identity_(out) {
-    out[0] = 1;
-    out[1] = 0;
-    out[2] = 0;
-    out[3] = 0;
-    out[4] = 0;
-    out[5] = 1;
-    out[6] = 0;
-    out[7] = 0;
-    out[8] = 0;
-    out[9] = 0;
-    out[10] = 1;
-    out[11] = 0;
-    out[12] = 0;
-    out[13] = 0;
-    out[14] = 0;
-    out[15] = 1;
+    for (let i = 0; i < 16; i++) {
+      out[i] = (i % 5) == 0 ? 1 : 0;
+    }
   }
 
   /**
    * Returns the scaling factor component of a transformation
-   *  matrix. If a matrix is built with fromRotationTranslationScale
-   *  with a normalized Quaternion paramter, the returned vector will be
-   *  the same as the scaling vector
-   *  originally supplied.
+   * matrix. If a matrix is built with fromRotationTranslationScale
+   * with a normalized Quaternion paramter, the returned vector will be
+   * the same as the scaling vector
+   * originally supplied.
    * @param  {!Float32Array} out Vector to receive scaling factor component
    * @param  {!Float32Array} mat Matrix to be decomposed (input)
    * @private

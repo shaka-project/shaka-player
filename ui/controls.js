@@ -1743,7 +1743,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isPlayingVR() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
     return this.vr_.isPlayingVR();
+  }
+
+  /**
+   * Reset VR view.
+   */
+  resetVR() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    this.vr_.reset();
   }
 
   /**
@@ -1753,6 +1762,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   getVRNorth() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
     return this.vr_.getNorth();
   }
 
@@ -1763,6 +1773,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   getVRFieldView() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
     return this.vr_.getFieldView();
   }
 
@@ -1773,6 +1784,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   setVRFieldView(fieldView) {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
     this.vr_.setFieldView(fieldView);
   }
 
@@ -1782,6 +1794,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   toggleStereoscopicMode() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
     this.vr_.toggleStereoscopicMode();
   }
 
@@ -1792,6 +1805,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   incrementYaw(angle) {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
     this.vr_.incrementYaw(angle);
   }
 
@@ -1802,6 +1816,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   incrementPitch(angle) {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
     this.vr_.incrementPitch(angle);
   }
 
@@ -1812,6 +1827,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   incrementRoll(angle) {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
     this.vr_.incrementRoll(angle);
   }
 

@@ -112,8 +112,10 @@ const config = {
 ui.configure(config);
 ```
 
-2. Using HLS or DASH with fMP4 segments and in the init segment exists 'prji'
-   and 'hfov' boxes.
+2. Content is automatically treated as VR if it fits the following criteria:
+ - HLS or DASH manifest
+ - fMP4 segments
+ - Init segment contains `prji` and `hfov` boxes
 
 
 Note: VR is only supported for DASH/HLS clear streams or HLS-AES stream.

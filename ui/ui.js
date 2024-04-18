@@ -334,29 +334,13 @@ shaka.ui.Overlay = class {
         const videoParent = video.parentElement;
         videoParent.replaceChild(container, video);
         container.appendChild(video);
-        let lcevcCanvas = null;
-        for (const canvas of canvases) {
-          goog.asserts.assert(canvas.tagName.toLowerCase() == 'canvas',
-              'Should be a canvas element!');
-          if (canvas.parentElement == container) {
-            lcevcCanvas = canvas;
-            break;
-          }
-        }
+        let {lcevcCanvas, vrCanvas} =
+            shaka.ui.Overlay.findOrMakeSpecialCanvases_(
+                container, canvases, vrCanvases);
         if (!lcevcCanvas) {
           lcevcCanvas = document.createElement('canvas');
           lcevcCanvas.classList.add('shaka-canvas-container');
           container.appendChild(lcevcCanvas);
-        }
-
-        let vrCanvas = null;
-        for (const canvas of vrCanvases) {
-          goog.asserts.assert(canvas.tagName.toLowerCase() == 'canvas',
-              'Should be a canvas element!');
-          if (canvas.parentElement == container) {
-            vrCanvas = canvas;
-            break;
-          }
         }
         if (!vrCanvas) {
           vrCanvas = document.createElement('canvas');
@@ -391,30 +375,13 @@ shaka.ui.Overlay = class {
           currentVideo.setAttribute('playsinline', '');
           container.appendChild(currentVideo);
         }
-
-        let lcevcCanvas = null;
-        for (const canvas of canvases) {
-          goog.asserts.assert(canvas.tagName.toLowerCase() == 'canvas',
-              'Should be a canvas element!');
-          if (canvas.parentElement == container) {
-            lcevcCanvas = canvas;
-            break;
-          }
-        }
+        let {lcevcCanvas, vrCanvas} =
+            shaka.ui.Overlay.findOrMakeSpecialCanvases_(
+                container, canvases, vrCanvases);
         if (!lcevcCanvas) {
           lcevcCanvas = document.createElement('canvas');
           lcevcCanvas.classList.add('shaka-canvas-container');
           container.appendChild(lcevcCanvas);
-        }
-
-        let vrCanvas = null;
-        for (const canvas of vrCanvases) {
-          goog.asserts.assert(canvas.tagName.toLowerCase() == 'canvas',
-              'Should be a canvas element!');
-          if (canvas.parentElement == container) {
-            vrCanvas = canvas;
-            break;
-          }
         }
         if (!vrCanvas) {
           vrCanvas = document.createElement('canvas');
@@ -536,6 +503,39 @@ shaka.ui.Overlay = class {
     }
 
     await player.attach(shaka.util.Dom.asHTMLMediaElement(video));
+  }
+
+
+  /**
+   * @param {!Element} container
+   * @param {!NodeList.<!Element>} canvases
+   * @param {!NodeList.<!Element>} vrCanvases
+   * @return {{lcevcCanvas: ?Element, vrCanvas: ?Element}}
+   * @private
+   */
+  static findOrMakeSpecialCanvases_(container, canvases, vrCanvases) {
+    let lcevcCanvas = null;
+    for (const canvas of canvases) {
+      goog.asserts.assert(canvas.tagName.toLowerCase() == 'canvas',
+          'Should be a canvas element!');
+      if (canvas.parentElement == container) {
+        lcevcCanvas = canvas;
+        break;
+      }
+    }
+    let vrCanvas = null;
+    for (const canvas of vrCanvases) {
+      goog.asserts.assert(canvas.tagName.toLowerCase() == 'canvas',
+          'Should be a canvas element!');
+      if (canvas.parentElement == container) {
+        vrCanvas = canvas;
+        break;
+      }
+    }
+    return {
+      lcevcCanvas,
+      vrCanvas,
+    };
   }
 };
 
