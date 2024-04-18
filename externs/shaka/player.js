@@ -1400,7 +1400,6 @@ shaka.extern.StreamingConfiguration;
  * @typedef {{
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   addExtraFeaturesToSourceBuffer: function(string): string,
- *   sourceBufferExtraFeatures: string,
  *   forceTransmux: boolean,
  *   insertFakeEncryptionInInit: boolean,
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback
@@ -1420,11 +1419,6 @@ shaka.extern.StreamingConfiguration;
  *   sourceBuffer.
  *   This string is ultimately appended to a MIME type in addSourceBuffer() &
  *   changeType().
- * @property {string} sourceBufferExtraFeatures
- *   <i>Deprecated, use `addExtraFeaturesToSourceBuffer` instead!</i>
- *   Some platforms may need to pass features when initializing the
- *   sourceBuffer.
- *   This string is ultimately appended to MIME types in addSourceBuffer().
  * @property {boolean} forceTransmux
  *   If this is <code>true</code>, we will transmux AAC and TS content even if
  *   not strictly necessary for the assets to be played.
