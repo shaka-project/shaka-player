@@ -945,6 +945,7 @@ shaka.extern.xml.Node;
  *   A map of scheme URI to key system name. Defaults to default key systems
  *   mapping handled by Shaka.
  * @property {function(!Element)} manifestPreprocessor
+ *   <b>DEPRECATED</b>: Use manifestPreprocessorTXml instead.
  *   Called immediately after the DASH manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
@@ -1088,6 +1089,7 @@ shaka.extern.HlsManifestConfiguration;
  * }}
  *
  * @property {function(!Element)} manifestPreprocessor
+ *   <b>DEPRECATED</b>: Use manifestPreprocessorTXml instead.
  *   Called immediately after the MSS manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.

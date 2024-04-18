@@ -98,7 +98,10 @@ application:
       (deprecated in v4.3.0)
     - `manifest.dash.manifestPreprocessor` and `manifest.mss.manifestPreprocessor`
       have been replaced with `manifest.dash.manifestPreprocessorTXml` and
-      `manifest.mss.manifestPreprocessorTXml` callbacks.
+      `manifest.mss.manifestPreprocessorTXml` callbacks. This new callbacks now
+      accept `shaka.externs.xml.Node`. `getAttribute()` and `textContent` results
+      must now be decoded if they might contain escape sequences. You can use
+      `shaka.util.StringUtils.htmlUnescape` for this purpose.
     - `streaming.useNativeHlsOnSafari` has removed. Now we have another config to do the same for FairPlay `streaming.useNativeHlsForFairPlay` or for HLS (any browser) `streaming.preferNativeHls`.
     - `mediaSource.sourceBufferExtraFeatures` has been replaced with `mediaSource.addExtraFeaturesToSourceBuffer` callback.
 
