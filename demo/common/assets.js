@@ -1076,6 +1076,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.VR)
+      .addFeature(shakaAssets.Feature.OFFLINE)
       .setExtraUiConfig({
         displayInVrMode: true,
         defaultVrProjectionMode: 'equirectangular',
