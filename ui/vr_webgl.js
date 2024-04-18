@@ -27,8 +27,9 @@ shaka.ui.VRWebgl = class {
    * @param {!shaka.Player} player
    * @param {!HTMLCanvasElement} canvas
    * @param {WebGLRenderingContext} gl
+   * @param {string} projectionMode
    */
-  constructor(video, player, canvas, gl) {
+  constructor(video, player, canvas, gl, projectionMode) {
     /** @private {HTMLVideoElement} */
     this.video_ = /** @type {!HTMLVideoElement} */ (video);
 
@@ -50,10 +51,16 @@ shaka.ui.VRWebgl = class {
     /** @private {!Float32Array} */
     this.currentQuaternion_ = shaka.ui.MatrixQuaternion.create();
 
+    /** @private {?WebGLProgram} */
     this.shaderProgram_ = null;
+
+    /** @private {?WebGLBuffer} */
     this.verticesBuffer_ = null;
-    this.normalsBuffer_ = null;
+
+    /** @private {?WebGLBuffer} */
     this.verticesTextureCoordBuffer_ = null;
+
+    /** @private {?WebGLBuffer} */
     this.verticesIndexBuffer_ = null;
 
     /** @private {!Float32Array} */
@@ -61,9 +68,6 @@ shaka.ui.VRWebgl = class {
 
     /** @private {!Float32Array} */
     this.projectionMatrix_ = shaka.ui.Matrix4x4.create();
-
-    /** @private {!Float32Array} */
-    this.normalMatrix_ = shaka.ui.Matrix4x4.create();
 
     /** @private {!Float32Array} */
     this.viewProjectionMatrix_ = shaka.ui.Matrix4x4.create();
@@ -87,10 +91,10 @@ shaka.ui.VRWebgl = class {
     this.previousCanvasHeight_ = 0;
 
     /**
-     * @private {?{vertices: !Array.<number>, texCoords: !Array.<number>,
+     * @private {?{vertices: !Array.<number>, textureCoords: !Array.<number>,
      *           indices: !Array.<number>}}
      */
-    this.sphere_ = null;
+    this.geometry_ = null;
 
     /** @private {?number} */
     this.vertexPositionAttribute_ = null;
@@ -110,6 +114,9 @@ shaka.ui.VRWebgl = class {
     /** @private {number} */
     this.cont_ = 0;
 
+    /** @private {string} */
+    this.projectionMode_ = projectionMode;
+
     this.init_();
   }
 
@@ -125,6 +132,13 @@ shaka.ui.VRWebgl = class {
       this.activeTimer_.stop();
       this.activeTimer_ = null;
     }
+  }
+
+  /**
+   * @return {string}
+   */
+  getProjectionMode() {
+    return this.projectionMode_;
   }
 
   /**
@@ -273,12 +287,19 @@ shaka.ui.VRWebgl = class {
     }
 
     // Bind data
-    this.vertexPositionAttribute_ = this.gl_.getAttribLocation(
-        this.shaderProgram_, 'a_vPosition');
-    this.gl_.enableVertexAttribArray(this.vertexPositionAttribute_);
-    this.textureCoordAttribute_ = this.gl_.getAttribLocation(
-        this.shaderProgram_, 'a_TexCoordinate');
-    this.gl_.enableVertexAttribArray(this.textureCoordAttribute_);
+    if (this.projectionMode_ == 'cubemap') {
+      this.vertexPositionAttribute_ = this.gl_.getAttribLocation(
+          this.shaderProgram_, 'aVertexPosition');
+      this.textureCoordAttribute_ = this.gl_.getAttribLocation(
+          this.shaderProgram_, 'aTextureCoord');
+    } else {
+      this.vertexPositionAttribute_ = this.gl_.getAttribLocation(
+          this.shaderProgram_, 'a_vPosition');
+      this.gl_.enableVertexAttribArray(this.vertexPositionAttribute_);
+      this.textureCoordAttribute_ = this.gl_.getAttribLocation(
+          this.shaderProgram_, 'a_TexCoordinate');
+      this.gl_.enableVertexAttribArray(this.textureCoordAttribute_);
+    }
   }
 
   /**
@@ -293,10 +314,18 @@ shaka.ui.VRWebgl = class {
 
     switch (glType) {
       case this.gl_.VERTEX_SHADER:
-        source = shaka.ui.VRUtils.VERTEX_SPHERE_SHADER;
+        if (this.projectionMode_ == 'cubemap') {
+          source = shaka.ui.VRUtils.VERTEX_CUBE_SHADER;
+        } else {
+          source = shaka.ui.VRUtils.VERTEX_SPHERE_SHADER;
+        }
         break;
       case this.gl_.FRAGMENT_SHADER:
-        source = shaka.ui.VRUtils.FRAGMENT_SPHERE_SHADER;
+        if (this.projectionMode_ == 'cubemap') {
+          source = shaka.ui.VRUtils.FRAGMENT_CUBE_SHADER;
+        } else {
+          source = shaka.ui.VRUtils.FRAGMENT_SPHERE_SHADER;
+        }
         break;
       default:
         return null;
@@ -322,21 +351,25 @@ shaka.ui.VRWebgl = class {
    * @private
    */
   initGLBuffers_() {
-    this.sphere_ = shaka.ui.VRUtils.generateSphere(100);
+    if (this.projectionMode_ == 'cubemap') {
+      this.geometry_ = shaka.ui.VRUtils.generateCube();
+    } else {
+      this.geometry_ = shaka.ui.VRUtils.generateSphere(100);
+    }
     this.verticesBuffer_ = this.gl_.createBuffer();
     this.gl_.bindBuffer(this.gl_.ARRAY_BUFFER, this.verticesBuffer_);
     this.gl_.bufferData(this.gl_.ARRAY_BUFFER,
-        new Float32Array(this.sphere_.vertices), this.gl_.STATIC_DRAW);
+        new Float32Array(this.geometry_.vertices), this.gl_.STATIC_DRAW);
     this.verticesTextureCoordBuffer_ = this.gl_.createBuffer();
     this.gl_.bindBuffer(
         this.gl_.ARRAY_BUFFER, this.verticesTextureCoordBuffer_);
     this.gl_.bufferData(this.gl_.ARRAY_BUFFER,
-        new Float32Array(this.sphere_.texCoords), this.gl_.STATIC_DRAW);
+        new Float32Array(this.geometry_.textureCoords), this.gl_.STATIC_DRAW);
     this.verticesIndexBuffer_ = this.gl_.createBuffer();
     this.gl_.bindBuffer(
         this.gl_.ELEMENT_ARRAY_BUFFER, this.verticesIndexBuffer_);
     this.gl_.bufferData(this.gl_.ELEMENT_ARRAY_BUFFER,
-        new Uint16Array(this.sphere_.indices), this.gl_.STATIC_DRAW);
+        new Uint16Array(this.geometry_.indices), this.gl_.STATIC_DRAW);
   }
 
   /**
@@ -370,6 +403,14 @@ shaka.ui.VRWebgl = class {
     shaka.ui.Matrix4x4.perspective(this.projectionMatrix_,
         this.fieldOfView_ * Math.PI / 180, 5 / 3.2, 0.1, 100.0);
 
+    if (this.projectionMode_ == 'cubemap') {
+      shaka.ui.Matrix4x4.perspective(this.projectionMatrix_,
+          this.fieldOfView_ * Math.PI / 180, 5 / 2, 0.1, 100.0);
+    } else {
+      shaka.ui.Matrix4x4.perspective(this.projectionMatrix_,
+          this.fieldOfView_ * Math.PI / 180, 5 / 3.2, 0.1, 100.0);
+    }
+
     this.gl_.useProgram(this.shaderProgram_);
 
     this.gl_.clear(this.gl_.COLOR_BUFFER_BIT);
@@ -384,10 +425,12 @@ shaka.ui.VRWebgl = class {
     }
 
     // Update matrix
-    shaka.ui.Matrix4x4.multiply(this.viewProjectionMatrix_,
-        this.viewMatrix_, this.identityMatrix_);
-    shaka.ui.Matrix4x4.multiply(this.viewProjectionMatrix_,
-        this.projectionMatrix_, this.viewProjectionMatrix_);
+    if (this.projectionMode_ == 'equirectangular') {
+      shaka.ui.Matrix4x4.multiply(this.viewProjectionMatrix_,
+          this.viewMatrix_, this.identityMatrix_);
+      shaka.ui.Matrix4x4.multiply(this.viewProjectionMatrix_,
+          this.projectionMatrix_, this.viewProjectionMatrix_);
+    }
 
     // Plumbing
     // Vertices
@@ -421,13 +464,13 @@ shaka.ui.VRWebgl = class {
 
     // Draw
     this.gl_.drawElements(this.gl_.TRIANGLES,
-        this.sphere_.indices.length, this.gl_.UNSIGNED_SHORT, 0);
+        this.geometry_.indices.length, this.gl_.UNSIGNED_SHORT, 0);
 
     if (this.stereoscopicMode_) {
       this.gl_.viewport(this.canvas_.width / 2, 0,
           this.canvas_.width / 2, this.canvas_.height);
       this.gl_.drawElements(this.gl_.TRIANGLES,
-          this.sphere_.indices.length, this.gl_.UNSIGNED_SHORT, 0);
+          this.geometry_.indices.length, this.gl_.UNSIGNED_SHORT, 0);
     }
   }
 
@@ -435,9 +478,18 @@ shaka.ui.VRWebgl = class {
    * @private
    */
   setMatrixUniforms_() {
-    const pUniform =
-        this.gl_.getUniformLocation(this.shaderProgram_, 'u_VPMatrix');
-    this.gl_.uniformMatrix4fv(pUniform, false, this.viewProjectionMatrix_);
+    if (this.projectionMode_ == 'cubemap') {
+      this.gl_.uniformMatrix4fv(
+          this.gl_.getUniformLocation(this.shaderProgram_, 'uProjectionMatrix'),
+          false, this.projectionMatrix_);
+      this.gl_.uniformMatrix4fv(
+          this.gl_.getUniformLocation(this.shaderProgram_, 'uModelViewMatrix'),
+          false, this.viewProjectionMatrix_);
+    } else {
+      this.gl_.uniformMatrix4fv(
+          this.gl_.getUniformLocation(this.shaderProgram_, 'u_VPMatrix'),
+          false, this.viewProjectionMatrix_);
+    }
   }
 
   /**
@@ -479,7 +531,12 @@ shaka.ui.VRWebgl = class {
    */
   rotateViewGlobal(yaw, pitch, roll) {
     const pitchBoundary = 90.0 * Math.PI / 180;
-    const matrix = this.viewMatrix_;
+    let matrix;
+    if (this.projectionMode_ == 'cubemap') {
+      matrix = this.viewProjectionMatrix_;
+    } else {
+      matrix = this.viewMatrix_;
+    }
 
     // Rotate global axis
     shaka.ui.Matrix4x4.rotateY(matrix, matrix, yaw);

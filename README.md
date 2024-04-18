@@ -327,6 +327,7 @@ Shaka Player supports VR when:
 
 VR modes supported:
 - Equirectangular projection with 360 degrees of horizontal field of view.
+- Cubemap projection with 360 degrees of horizontal field of view.
 
 
 NOTES:

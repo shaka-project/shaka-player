@@ -253,6 +253,7 @@ shaka.ui.Overlay = class {
       tapSeekDistance: 10,
       refreshTickInSeconds: 0.125,
       displayInVrMode: false,
+      defaultVrProjectionMode: 'equirectangular',
     };
 
     // eslint-disable-next-line no-restricted-syntax

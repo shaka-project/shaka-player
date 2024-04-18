@@ -44,6 +44,7 @@ shakaAssets.Source = {
   BROADPEAK: 'Broadpeak',
   EZDRM: 'EZDRM',
   THEO_PLAYER: 'THEOplayer',
+  JWPLAYER: 'JW Player',
 };
 
 
@@ -1074,7 +1075,11 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.VR),
+      .addFeature(shakaAssets.Feature.VR)
+      .setExtraUiConfig({
+        displayInVrMode: true,
+        defaultVrProjectionMode: 'equirectangular',
+      }),
   // End bitcodin assets }}}
 
   // MetaCDN assets {{{
@@ -1704,7 +1709,27 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.VR)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .setExtraUiConfig({
+        displayInVrMode: true,
+        defaultVrProjectionMode: 'equirectangular',
+      }),
+  // }}}
+
+  // JW Player assets {{{
+  /* JW Player Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Delta wing (MP4, VR)',
+      /* iconUri= */ 'https://electroteque.org/plugins/jwplayer/vrvideo/images/previews/cubemap.png',
+      /* manifestUri= */ 'https://videos.electroteque.org/360/ultra_light_flight_cubemap.mp4',
+      /* source= */ shakaAssets.Source.JWPLAYER)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.VR)
+      .setExtraUiConfig({
+        displayInVrMode: true,
+        defaultVrProjectionMode: 'cubemap',
+      }),
   // }}}
 ];
 /* eslint-enable max-len */

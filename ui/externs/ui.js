@@ -94,7 +94,8 @@ shaka.extern.UIVolumeBarColors;
  *   seekOnTaps: boolean,
  *   tapSeekDistance: number,
  *   refreshTickInSeconds: number,
- *   displayInVrMode: boolean
+ *   displayInVrMode: boolean,
+ *   defaultVrProjectionMode: string
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -239,6 +240,10 @@ shaka.extern.UIVolumeBarColors;
  *   If false, it will only be treated as VR if we automatically detect it as
  *   such. (See the Enabling VR section in docs/tutorials/ui.md)
  *   Defaults to false.
+ * @property {string} defaultVrProjectionMode
+ *   Indicate the default VR projection mode.
+ *   Possible values: <code>'equirectangular'</code> or <code>'cubemap'</code>.
+ *   Defaults to <code>'equirectangular'</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

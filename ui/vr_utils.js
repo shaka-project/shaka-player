@@ -11,26 +11,20 @@ goog.provide('shaka.ui.VRUtils');
 shaka.ui.VRUtils = class {
   /**
    * @param {number} resolution
-   * @param {boolean=} semisphere
-   * @return {{vertices: !Array.<number>, texCoords: !Array.<number>,
+   * @return {{vertices: !Array.<number>, textureCoords: !Array.<number>,
    *          indices: !Array.<number>}}
    */
-  static generateSphere(resolution, semisphere = false) {
+  static generateSphere(resolution) {
     /** @type {!Array.<number>} */
     const vertices = [];
     /** @type {!Array.<number>} */
-    const texCoords = [];
+    const textureCoords = [];
     /** @type {!Array.<number>} */
     const indices = [];
 
-    let phiMax = Math.PI;
-    if (semisphere) {
-      phiMax = Math.PI / 2;
-    }
-
     for (let i = 0; i <= resolution; i++) {
       const v = i / resolution;
-      const phi = v * phiMax;
+      const phi = v * Math.PI;
       const sinPhi = Math.sin(phi);
       const cosPhi = Math.cos(phi);
 
@@ -47,8 +41,8 @@ shaka.ui.VRUtils = class {
 
         vertices.push(x, y, z);
 
-        texCoords.push(u);
-        texCoords.push(v);
+        textureCoords.push(u);
+        textureCoords.push(v);
       }
     }
 
@@ -64,7 +58,104 @@ shaka.ui.VRUtils = class {
       }
     }
 
-    return {vertices, texCoords, indices};
+    return {vertices, textureCoords, indices};
+  }
+
+  /**
+   * @return {{vertices: !Array.<number>, textureCoords: !Array.<number>,
+   *          indices: !Array.<number>}}
+   */
+  static generateCube() {
+    /** @type {!Array.<number>} */
+    const vertices = [
+      //  order : left top back right bottom front
+      // Front face 3
+      -1.0, -1.0, -1.0,
+      -1.0, -1.0, 1.0,
+      -1.0, 1.0, 1.0,
+      -1.0, 1.0, -1.0,
+      // Back face 2
+      -1.0, 1.0, -1.0,
+      -1.0, 1.0, 1.0,
+      1.0, 1.0, 1.0,
+      1.0, 1.0, -1.0,
+      // Top face 6
+      -1.0, -1.0, 1.0,
+      1.0, -1.0, 1.0,
+      1.0, 1.0, 1.0,
+      -1.0, 1.0, 1.0,
+      // Bottom face 1
+      1.0, -1.0, -1.0,
+      1.0, 1.0, -1.0,
+      1.0, 1.0, 1.0,
+      1.0, -1.0, 1.0,
+      // Right face 4
+      -1.0, -1.0, -1.0,
+      1.0, -1.0, -1.0,
+      1.0, -1.0, 1.0,
+      -1.0, -1.0, 1.0,
+      // Left face 5
+      -1.0, -1.0, -1.0,
+      -1.0, 1.0, -1.0,
+      1.0, 1.0, -1.0,
+      1.0, -1.0, -1.0,
+    ];
+    /** @type {!Array.<number>} */
+    const textureCoords = [
+      // Left Face
+      2 / 3, 0.5,
+      1 / 3, 0.5,
+      1 / 3, 0.0,
+      2 / 3, 0.0,
+      // Top Face
+      2 / 3, 0.5,
+      2 / 3, 0.0,
+      1.0, 0.0,
+      1.0, 0.5,
+      // Back Face
+      1.0, 1.0,
+      2 / 3, 1.0,
+      2 / 3, 0.5,
+      1.0, 0.5,
+      // Right Face
+      0.0, 0.5,
+      0.0, 0.0,
+      1 / 3, 0.0,
+      1 / 3, 0.5,
+      // Bottom Face
+      0.0, 0.5,
+      1 / 3, 0.5,
+      1 / 3, 1.0,
+      0.0, 1.0,
+      // Front Face
+      1 / 3, 1.0,
+      1 / 3, 0.5,
+      2 / 3, 0.5,
+      2 / 3, 1.0,
+    ];
+    /** @type {!Array.<number>} */
+    const indices = [
+      // Front face
+      0, 1, 2,
+      0, 2, 3,
+      // Back face
+      4, 5, 6,
+      4, 6, 7,
+      // Top face
+      8, 9, 10,
+      8, 10, 11,
+      // Bottom face
+      12, 13, 14,
+      12, 14, 15,
+      // Right face
+      16, 17, 18,
+      16, 18, 19,
+      // Left face
+      20, 21, 22,
+      20, 22, 23,
+    ];
+
+    return {vertices, textureCoords, indices};
   }
 };
 
@@ -111,7 +202,31 @@ highp vec4 texelColor =
 }`;
 
 /**
- * @constant {number}
+ * Cube vertex shader.
+ *
+ * @constant {string}
  */
-shaka.ui.VRUtils.TO_RADIANS = Math.PI / 180;
+shaka.ui.VRUtils.VERTEX_CUBE_SHADER =
+`attribute vec4 aVertexPosition;
+attribute vec2 aTextureCoord;
+uniform mat4 uModelViewMatrix;
+uniform mat4 uProjectionMatrix;
+varying highp vec2 vTextureCoord;
+varying highp vec3 vLighting;
+void main(void) {
+  gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+  vTextureCoord = aTextureCoord;
+}`;
 
+/**
+ * Cube fragment shader.
+ *
+ * @constant {string}
+ */
+shaka.ui.VRUtils.FRAGMENT_CUBE_SHADER =
+`varying highp vec2 vTextureCoord;
+uniform sampler2D uSampler;
+void main(void) {
+  highp vec4 texelColor = texture2D(uSampler, vTextureCoord);
+  gl_FragColor = vec4(texelColor.rgb , texelColor.a);
+}`;

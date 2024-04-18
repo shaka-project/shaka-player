@@ -8,7 +8,6 @@
 goog.provide('shaka.ui.VRManager');
 
 goog.require('shaka.log');
-goog.require('shaka.ui.VRUtils');
 goog.require('shaka.ui.VRWebgl');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.IReleasable');
@@ -70,13 +69,14 @@ shaka.ui.VRManager = class {
     /** @private {number} */
     this.prevGamma_ = 0;
 
-    /** @private {boolean} */
-    this.vrAsset_ = false;
+    /** @private {?string} */
+    this.vrAsset_ = null;
 
     this.loadEventManager_.listen(player, 'loading', () => {
       if (this.vrWebgl_) {
         this.vrWebgl_.reset();
       }
+      this.checkVrStatus_();
     });
 
     this.loadEventManager_.listen(player, 'spatialvideoinfo', (event) => {
@@ -86,14 +86,14 @@ shaka.ui.VRManager = class {
       switch (spatialInfo.projection) {
         case 'hequ':
           unsupported = spatialInfo.hfov != 360;
-          this.vrAsset_ = true;
+          this.vrAsset_ = 'equirectangular';
           break;
         case 'fish':
-          this.vrAsset_ = true;
+          this.vrAsset_ = 'equirectangular';
           unsupported = true;
           break;
         default:
-          this.vrAsset_ = false;
+          this.vrAsset_ = null;
           break;
       }
       if (unsupported) {
@@ -103,12 +103,12 @@ shaka.ui.VRManager = class {
     });
 
     this.loadEventManager_.listen(player, 'nospatialvideoinfo', () => {
-      this.vrAsset_ = false;
+      this.vrAsset_ = null;
       this.checkVrStatus_();
     });
 
     this.loadEventManager_.listen(player, 'unloading', () => {
-      this.vrAsset_ = false;
+      this.vrAsset_ = null;
       this.checkVrStatus_();
     });
 
@@ -228,7 +228,8 @@ shaka.ui.VRManager = class {
       shaka.log.alwaysWarn('Not playing VR content');
       return;
     }
-    this.vrWebgl_.rotateViewGlobal(angle * shaka.ui.VRUtils.TO_RADIANS, 0, 0);
+    this.vrWebgl_.rotateViewGlobal(
+        angle * shaka.ui.VRManager.TO_RADIANS_, 0, 0);
   }
 
   /**
@@ -241,7 +242,8 @@ shaka.ui.VRManager = class {
       shaka.log.alwaysWarn('Not playing VR content');
       return;
     }
-    this.vrWebgl_.rotateViewGlobal(0, angle * shaka.ui.VRUtils.TO_RADIANS, 0);
+    this.vrWebgl_.rotateViewGlobal(
+        0, angle * shaka.ui.VRManager.TO_RADIANS_, 0);
   }
 
   /**
@@ -254,16 +256,28 @@ shaka.ui.VRManager = class {
       shaka.log.alwaysWarn('Not playing VR content');
       return;
     }
-    this.vrWebgl_.rotateViewGlobal(0, 0, angle * shaka.ui.VRUtils.TO_RADIANS);
+    this.vrWebgl_.rotateViewGlobal(
+        0, 0, angle * shaka.ui.VRManager.TO_RADIANS_);
   }
 
   /**
    * @private
    */
   checkVrStatus_() {
-    if ((this.config_.displayInVrMode || this.vrAsset_) && !this.vrWebgl_) {
-      this.canvas_.style.display = '';
-      this.init_();
+    if ((this.config_.displayInVrMode || this.vrAsset_)) {
+      const newProjectionMode =
+          this.vrAsset_ || this.config_.defaultVrProjectionMode;
+      if (!this.vrWebgl_) {
+        this.canvas_.style.display = '';
+        this.init_(newProjectionMode);
+      } else {
+        const currentProjectionMode = this.vrWebgl_.getProjectionMode();
+        if (currentProjectionMode != newProjectionMode) {
+          this.eventManager_.removeAll();
+          this.vrWebgl_.release();
+          this.init_(newProjectionMode);
+        }
+      }
     } else if (!this.config_.displayInVrMode && !this.vrAsset_ &&
         this.vrWebgl_) {
       this.canvas_.style.display = 'none';
@@ -274,13 +288,14 @@ shaka.ui.VRManager = class {
   }
 
   /**
+   * @param {string} projectionMode
    * @private
    */
-  init_() {
+  init_(projectionMode) {
     const gl = this.getGL_();
     if (gl) {
       this.vrWebgl_ = new shaka.ui.VRWebgl(
-          this.video_, this.player_, this.canvas_, gl);
+          this.video_, this.player_, this.canvas_, gl, projectionMode);
       this.setupVRListerners_();
     }
   }
@@ -446,7 +461,7 @@ shaka.ui.VRManager = class {
       this.prevBeta_ = event.beta || 0;
       this.prevGamma_ = event.gamma || 0;
 
-      const toRadians = shaka.ui.VRUtils.TO_RADIANS;
+      const toRadians = shaka.ui.VRManager.TO_RADIANS_;
 
       const orientation = screen.orientation.angle;
       if (orientation == 90 || orientation == -90) {
@@ -485,5 +500,8 @@ shaka.ui.VRManager = class {
   }
 };
 
-
-shaka.ui.VRManager.TO_RADIANS = Math.PI / 180;
+/**
+ * @constant {number}
+ * @private
+ */
+shaka.ui.VRManager.TO_RADIANS_ = Math.PI / 180;
