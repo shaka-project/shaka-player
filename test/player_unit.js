@@ -689,6 +689,7 @@ describe('Player', () => {
         video.canPlayType.and.returnValue('maybe');
         spyOn(shaka.util.Platform, 'anyMediaElement').and.returnValue(video);
         spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
+        spyOn(shaka.util.Platform, 'isApple').and.returnValue(false);
         // Make sure player.load() resolves for src=
         spyOn(shaka.util.MediaReadyState, 'waitForReadyState').and.callFake(
             (mediaElement, readyState, eventManager, callback) => {
@@ -698,6 +699,7 @@ describe('Player', () => {
         player.configure({
           streaming: {
             preferNativeHls: true,
+            useNativeHlsOnSafari: false,
           },
         });
 
@@ -709,10 +711,12 @@ describe('Player', () => {
       it('does not apply to non-HLS streams', async () => {
         video.canPlayType.and.returnValue('maybe');
         spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
+        spyOn(shaka.util.Platform, 'isApple').and.returnValue(false);
 
         player.configure({
           streaming: {
             preferNativeHls: true,
+            useNativeHlsOnSafari: false,
           },
         });
 
