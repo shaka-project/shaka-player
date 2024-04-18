@@ -331,7 +331,8 @@ VR modes supported:
 
 
 NOTES:
-  - VR is only supported for DASH/HLS clear streams or HLS-AES stream.
+  - VR is only supported for clear streams or HLS-AES stream. DRM prevents
+    access to the video pixels for transformation.
 
 
 ## Documentation & Important Links ##
