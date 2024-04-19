@@ -1767,25 +1767,29 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * Returns the field view.
+   * Returns the angle of the current field of view displayed.
    *
    * @return {?number}
    * @export
    */
-  getVRFieldView() {
+  getVRFieldOfView() {
     goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
-    return this.vr_.getFieldView();
+    return this.vr_.getFieldOfView();
   }
 
   /**
-   * Set the field view.
+   * Changing the field of view increases or decreases the portion of the video
+   * that is viewed at one time. If the field of view is decreased, a small
+   * part of the video will be seen, but with more detail. If the field of view
+   * is increased, a larger part of the video will be seen, but with less
+   * detail.
    *
    * @param {number} fieldView
    * @export
    */
-  setVRFieldView(fieldView) {
+  setVRFieldOfView(fieldOfView) {
     goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
-    this.vr_.setFieldView(fieldView);
+    this.vr_.setFieldOfView(fieldOfView);
   }
 
   /**

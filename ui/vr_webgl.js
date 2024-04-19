@@ -586,15 +586,15 @@ shaka.ui.VRWebgl = class {
   /**
    * @return {number}
    */
-  getFieldView() {
+  getFieldOfView() {
     return this.fieldOfView_;
   }
 
   /**
-   * @param {number} fieldView
+   * @param {number} fieldOfView
    */
-  setFieldView(fieldView) {
-    this.fieldOfView_ = fieldView;
+  setFieldOfView(fieldView) {
+    this.fieldOfView_ = fieldOfView;
     this.renderGL_(false);
   }
 

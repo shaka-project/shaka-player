@@ -175,36 +175,36 @@ shaka.ui.VRManager = class {
   }
 
   /**
-   * Returns the field view.
+   * Returns the field of view.
    *
    * @return {?number}
    */
-  getFieldView() {
+  getFieldOfView() {
     if (!this.vrWebgl_) {
       shaka.log.alwaysWarn('Not playing VR content');
       return null;
     }
-    return this.vrWebgl_.getFieldView();
+    return this.vrWebgl_.getFieldOfView();
   }
 
   /**
-   * Set the field view.
+   * Set the field of view.
    *
-   * @param {number} fieldView
+   * @param {number} fieldOfView
    */
-  setFieldView(fieldView) {
+  setFieldOfView(fieldOfView) {
     if (!this.vrWebgl_) {
       shaka.log.alwaysWarn('Not playing VR content');
       return;
     }
-    if (fieldView < 0) {
-      shaka.log.alwaysWarn('Field view should be greater than 0');
-      fieldView = 0;
-    } else if (fieldView > 100) {
-      shaka.log.alwaysWarn('Field view should be less than 100');
-      fieldView = 100;
+    if (fieldOfView < 0) {
+      shaka.log.alwaysWarn('Field of view should be greater than 0');
+      fieldOfView = 0;
+    } else if (fieldOfView > 100) {
+      shaka.log.alwaysWarn('Field of view should be less than 100');
+      fieldOfView = 100;
     }
-    this.vrWebgl_.setFieldView(fieldView);
+    this.vrWebgl_.setFieldOfView(fieldOfView);
   }
 
   /**
