@@ -51,10 +51,12 @@ describe('Codec Switching', () => {
       if (!MediaSource.isTypeSupported('audio/webm; codecs="opus"')) {
         pending('Codec OPUS in WEBM is not supported by the platform.');
       }
+
+      // English is AAC MP4.
       const preferredAudioLanguage = 'en';
       player.configure({preferredAudioLanguage: preferredAudioLanguage});
       player.configure('manifest.disableVideo', true);
-      player.configure('streaming.mediaSource.codecSwitchingStrategy',
+      player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
 
       await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd', 9);
@@ -68,6 +70,7 @@ describe('Codec Switching', () => {
       expect(variants.length).toBe(2);
       expect(variants.find((v) => !!v.active).language).toBe('en');
 
+      // Spanish is Opus WebM.
       player.selectAudioLanguage('es');
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
 
@@ -86,10 +89,12 @@ describe('Codec Switching', () => {
       if (!MediaSource.isTypeSupported('audio/webm; codecs="opus"')) {
         pending('Codec OPUS in WEBM is not supported by the platform.');
       }
+
+      // English is AAC MP4.
       const preferredAudioLanguage = 'en';
       player.configure({preferredAudioLanguage: preferredAudioLanguage});
       player.configure('manifest.disableVideo', true);
-      player.configure('streaming.mediaSource.codecSwitchingStrategy',
+      player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 
       await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd', 9);
@@ -103,6 +108,7 @@ describe('Codec Switching', () => {
       expect(variants.length).toBe(2);
       expect(variants.find((v) => !!v.active).language).toBe('en');
 
+      // Spanish is Opus WebM.
       player.selectAudioLanguage('es');
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
 
@@ -119,9 +125,11 @@ describe('Codec Switching', () => {
       if (!MediaSource.isTypeSupported('audio/webm; codecs="opus"')) {
         pending('Codec OPUS in WEBM is not supported by the platform.');
       }
+
+      // English is AAC MP4.
       const preferredAudioLanguage = 'en';
       player.configure({preferredAudioLanguage: preferredAudioLanguage});
-      player.configure('streaming.mediaSource.codecSwitchingStrategy',
+      player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
 
       await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd', 9);
@@ -135,6 +143,7 @@ describe('Codec Switching', () => {
       expect(variants.length).toBe(2);
       expect(variants.find((v) => !!v.active).language).toBe('en');
 
+      // Spanish is Opus WebM.
       player.selectAudioLanguage('es');
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
 
@@ -153,9 +162,11 @@ describe('Codec Switching', () => {
       if (!MediaSource.isTypeSupported('audio/webm; codecs="opus"')) {
         pending('Codec OPUS in WEBM is not supported by the platform.');
       }
+
+      // English is AAC MP4.
       const preferredAudioLanguage = 'en';
       player.configure({preferredAudioLanguage: preferredAudioLanguage});
-      player.configure('streaming.mediaSource.codecSwitchingStrategy',
+      player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 
       await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd', 9);
@@ -169,6 +180,7 @@ describe('Codec Switching', () => {
       expect(variants.length).toBe(2);
       expect(variants.find((v) => !!v.active).language).toBe('en');
 
+      // Spanish is Opus WebM.
       player.selectAudioLanguage('es');
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
 
