@@ -76,8 +76,8 @@ The following elements can be added to the UI bar using this configuration value
 * captions: adds a button that controls the current text track selection (including turning it off).
 * recenter_vr: adds a button that recenter the VR view to the initial view. The button is visible
   only if playing a VR content.
-* toggle_stereoscopic: adds a button that toggle that switch between monoscopic and stereoscopic.
-  The button is visible only if playing a VR content.
+* toggle_stereoscopic: adds a button that toggle between monoscopic and stereoscopic. The button
+  is visible only if playing a VR content.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 [Document Picture-in-Picture API]: https://developer.chrome.com/docs/web-platform/document-picture-in-picture/
 
@@ -102,8 +102,8 @@ The following buttons can be added to the overflow menu:
 * Statistics: adds a button that displays statistics of the video.
 * recenter_vr: adds a button that recenter the VR view to the initial view. The button is visible
   only if playing a VR content.
-* toggle_stereoscopic: adds a button that toggle that switch between monoscopic and stereoscopic.
-  The button is visible only if playing a VR content.
+* toggle_stereoscopic: adds a button that toggle between monoscopic and stereoscopic. The button
+  is visible only if playing a VR content.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:
