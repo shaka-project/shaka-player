@@ -1784,7 +1784,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * is increased, a larger part of the video will be seen, but with less
    * detail.
    *
-   * @param {number} fieldView
+   * @param {number} fieldOfView
    * @export
    */
   setVRFieldOfView(fieldOfView) {
