@@ -337,19 +337,9 @@ shaka.ui.Overlay = class {
         const videoParent = video.parentElement;
         videoParent.replaceChild(container, video);
         container.appendChild(video);
-        let {lcevcCanvas, vrCanvas} =
+        const {lcevcCanvas, vrCanvas} =
             shaka.ui.Overlay.findOrMakeSpecialCanvases_(
                 container, canvases, vrCanvases);
-        if (!lcevcCanvas) {
-          lcevcCanvas = document.createElement('canvas');
-          lcevcCanvas.classList.add('shaka-canvas-container');
-          container.appendChild(lcevcCanvas);
-        }
-        if (!vrCanvas) {
-          vrCanvas = document.createElement('canvas');
-          vrCanvas.classList.add('shaka-vr-canvas-container');
-          container.appendChild(vrCanvas);
-        }
         shaka.ui.Overlay.setupUIandAutoLoad_(
             container, video, lcevcCanvas, vrCanvas);
       }
@@ -378,20 +368,9 @@ shaka.ui.Overlay = class {
           currentVideo.setAttribute('playsinline', '');
           container.appendChild(currentVideo);
         }
-        let {lcevcCanvas, vrCanvas} =
+        const {lcevcCanvas, vrCanvas} =
             shaka.ui.Overlay.findOrMakeSpecialCanvases_(
                 container, canvases, vrCanvases);
-        if (!lcevcCanvas) {
-          lcevcCanvas = document.createElement('canvas');
-          lcevcCanvas.classList.add('shaka-canvas-container');
-          container.appendChild(lcevcCanvas);
-        }
-        if (!vrCanvas) {
-          vrCanvas = document.createElement('canvas');
-          vrCanvas.classList.add('shaka-vr-canvas-container');
-          container.appendChild(vrCanvas);
-        }
-
         try {
           // eslint-disable-next-line no-await-in-loop
           await shaka.ui.Overlay.setupUIandAutoLoad_(
@@ -513,7 +492,7 @@ shaka.ui.Overlay = class {
    * @param {!Element} container
    * @param {!NodeList.<!Element>} canvases
    * @param {!NodeList.<!Element>} vrCanvases
-   * @return {{lcevcCanvas: ?Element, vrCanvas: ?Element}}
+   * @return {{lcevcCanvas: !Element, vrCanvas: !Element}}
    * @private
    */
   static findOrMakeSpecialCanvases_(container, canvases, vrCanvases) {
@@ -526,6 +505,11 @@ shaka.ui.Overlay = class {
         break;
       }
     }
+    if (!lcevcCanvas) {
+      lcevcCanvas = document.createElement('canvas');
+      lcevcCanvas.classList.add('shaka-canvas-container');
+      container.appendChild(lcevcCanvas);
+    }
     let vrCanvas = null;
     for (const canvas of vrCanvases) {
       goog.asserts.assert(canvas.tagName.toLowerCase() == 'canvas',
@@ -534,6 +518,11 @@ shaka.ui.Overlay = class {
         vrCanvas = canvas;
         break;
       }
+    }
+    if (!vrCanvas) {
+      vrCanvas = document.createElement('canvas');
+      vrCanvas.classList.add('shaka-vr-canvas-container');
+      container.appendChild(vrCanvas);
     }
     return {
       lcevcCanvas,

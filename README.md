@@ -323,7 +323,7 @@ Shaka Player supports VR when:
   - HLS or DASH manifest
   - fMP4 segments
   - Init segment contains `prji` and `hfov` boxes
-- It is enabled via UI config.
+- Or, if it is manually enabled via the UI config.
 
 VR modes supported:
 - Equirectangular projection with 360 degrees of horizontal field of view.
