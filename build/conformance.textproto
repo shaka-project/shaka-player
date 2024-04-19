@@ -209,6 +209,7 @@ requirement: {
     "Using \"Element.innerHTML\" or \"Element.outerHTML\" is not "
     "allowed due to security concerns; use textContent, "
     "appendChild, or removeChild instead"
+  whitelist_regexp: "lib/util/xml_utils.js"
   whitelist_regexp: "test/test/util/util.js"
 }
 
@@ -380,6 +381,7 @@ requirement: {
     "Using \"DOMParser.parseFromString\" directly is not allowed; "
     "use shaka.util.TXml.parseXmlString instead."
   whitelist_regexp: "lib/util/tXml.js"
+  whitelist_regexp: "lib/util/xml_utils.js"
   whitelist_regexp: "test/"
 }
 

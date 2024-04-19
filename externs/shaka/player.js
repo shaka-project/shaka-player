@@ -534,7 +534,8 @@ shaka.extern.MetadataFrame;
  *   startTime: number,
  *   endTime: number,
  *   id: string,
- *   eventElement: ?shaka.extern.xml.Node
+ *   eventElement: Element,
+ *   eventNode: ?shaka.extern.xml.Node
  * }}
  *
  * @description
@@ -552,7 +553,10 @@ shaka.extern.MetadataFrame;
  *   The presentation time (in seconds) that the region should end.
  * @property {string} id
  *   Specifies an identifier for this instance of the region.
- * @property {?shaka.extern.xml.Node} eventElement
+ * @property {Elment} eventElement
+ *   <b>DEPRECATED</b>: Use eventElement instead.
+ *   The XML element that defines the Event.
+ * @property {?shaka.extern.xml.Node} eventNode
  *   The XML element that defines the Event.
  * @exportDoc
  */
@@ -888,7 +892,8 @@ shaka.extern.xml.Node;
  *   ignoreEmptyAdaptationSet: boolean,
  *   ignoreMaxSegmentDuration: boolean,
  *   keySystemsByURI: !Object.<string, string>,
- *   manifestPreprocessor: function(!shaka.extern.xml.Node),
+ *   manifestPreprocessor: function(!Element),
+ *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
  *   enableAudioGroups: boolean,
  *   multiTypeVariantsAllowed: boolean,
@@ -943,7 +948,12 @@ shaka.extern.xml.Node;
  * @property {Object.<string, string>} keySystemsByURI
  *   A map of scheme URI to key system name. Defaults to default key systems
  *   mapping handled by Shaka.
- * @property {function(!shaka.extern.xml.Node)} manifestPreprocessor
+ * @property {function(!Element)} manifestPreprocessor
+ *   <b>DEPRECATED</b>: Use manifestPreprocessorTXml instead.
+ *   Called immediately after the DASH manifest has been parsed into an
+ *   XMLDocument. Provides a way for applications to perform efficient
+ *   preprocessing of the manifest.
+ * @property {function(!shaka.extern.xml.Node)} manifestPreprocessorTXml
  *   Called immediately after the DASH manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
@@ -1076,12 +1086,18 @@ shaka.extern.HlsManifestConfiguration;
 
 /**
  * @typedef {{
- *   manifestPreprocessor: function(!shaka.extern.xml.Node),
+ *   manifestPreprocessor: function(!Element),
+ *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
  *   keySystemsBySystemId: !Object.<string, string>
  * }}
  *
- * @property {function(!shaka.extern.xml.Node)} manifestPreprocessor
+ * @property {function(!Element)} manifestPreprocessor
+ *   <b>DEPRECATED</b>: Use manifestPreprocessorTXml instead.
+ *   Called immediately after the MSS manifest has been parsed into an
+ *   XMLDocument. Provides a way for applications to perform efficient
+ *   preprocessing of the manifest.
+ * @property {function(!shaka.extern.xml.Node)} manifestPreprocessorTXml
  *   Called immediately after the MSS manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
@@ -1177,6 +1193,7 @@ shaka.extern.ManifestConfiguration;
  *   stallEnabled: boolean,
  *   stallThreshold: number,
  *   stallSkip: number,
+ *   useNativeHlsOnSafari: boolean,
  *   useNativeHlsForFairPlay: boolean,
  *   inaccurateManifestTolerance: number,
  *   lowLatencyMode: boolean,
@@ -1278,6 +1295,11 @@ shaka.extern.ManifestConfiguration;
  *   been detected.  If 0, the player will pause and immediately play instead of
  *   seeking.  A value of 0 is recommended and provided as default on TV
  *   platforms (WebOS, Tizen, Chromecast, etc).
+ * @property {boolean} useNativeHlsOnSafari
+ *   Desktop Safari has both MediaSource and their native HLS implementation.
+ *   Depending on the application's needs, it may prefer one over the other.
+ *   Only applies to clear streams
+ *   Defaults to <code>true</code>.
  * @property {boolean} useNativeHlsForFairPlay
  *   Desktop Safari has both MediaSource and their native HLS implementation.
  *   Depending on the application's needs, it may prefer one over the other.
@@ -1414,7 +1436,7 @@ shaka.extern.StreamingConfiguration;
  *   Defaults to SMOOTH if SMOOTH codec switching is supported, RELOAD
  *   overwise.
  * @property {function(string): string} addExtraFeaturesToSourceBuffer
- *   Callback to generate extra features striug based on used MIME type.
+ *   Callback to generate extra features string based on used MIME type.
  *   Some platforms may need to pass features when initializing the
  *   sourceBuffer.
  *   This string is ultimately appended to a MIME type in addSourceBuffer() &

@@ -358,6 +358,7 @@ describe('RegionObserver', () => {
       startTime: startTimeSeconds,
       endTime: endTimeSeconds,
       eventElement: null,
+      eventNode: null,
     };
   }
 
