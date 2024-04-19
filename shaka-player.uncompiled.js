@@ -111,6 +111,7 @@ goog.require('shaka.ui.SmallPlayButton');
 goog.require('shaka.ui.Spacer');
 goog.require('shaka.ui.StatisticsButton');
 goog.require('shaka.ui.TextSelection');
+goog.require('shaka.ui.ToggleStereoscopicButton');
 goog.require('shaka.ui.VolumeBar');
 goog.require('shaka.ui.VRManager');
 goog.require('shaka.ui.VRUtils');

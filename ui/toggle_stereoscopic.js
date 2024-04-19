@@ -5,7 +5,7 @@
  */
 
 
-goog.provide('shaka.ui.RecenterVRButton');
+goog.provide('shaka.ui.ToggleStereoscopicButton');
 
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
@@ -23,7 +23,7 @@ goog.requireType('shaka.ui.Controls');
  * @final
  * @export
  */
-shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
+shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
@@ -32,31 +32,32 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
     super(parent, controls);
 
     /** @private {!HTMLButtonElement} */
-    this.recenterVRButton_ = shaka.util.Dom.createButton();
-    this.recenterVRButton_.classList.add('shaka-recenter-vr-button');
-    this.recenterVRButton_.classList.add('shaka-tooltip');
-    this.recenterVRButton_.ariaPressed = 'false';
+    this.toggleStereoscopicButton_ = shaka.util.Dom.createButton();
+    this.toggleStereoscopicButton_.classList.add(
+        'shaka-toggle-stereoscopic-button');
+    this.toggleStereoscopicButton_.classList.add('shaka-tooltip');
+    this.toggleStereoscopicButton_.ariaPressed = 'false';
 
     /** @private {!HTMLElement} */
-    this.recenterVRIcon_ = shaka.util.Dom.createHTMLElement('i');
-    this.recenterVRIcon_.classList.add('material-icons-round');
-    this.recenterVRIcon_.textContent =
-        shaka.ui.Enums.MaterialDesignIcons.RECENTER_VR;
-    this.recenterVRButton_.appendChild(this.recenterVRIcon_);
+    this.toggleStereoscopicIcon_ = shaka.util.Dom.createHTMLElement('i');
+    this.toggleStereoscopicIcon_.classList.add('material-icons-round');
+    this.toggleStereoscopicIcon_.textContent =
+        shaka.ui.Enums.MaterialDesignIcons.TOGGLE_STEREOSCOPIC;
+    this.toggleStereoscopicButton_.appendChild(this.toggleStereoscopicIcon_);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
     label.classList.add('shaka-overflow-menu-only');
-    this.recenterVRNameSpan_ = shaka.util.Dom.createHTMLElement('span');
-    label.appendChild(this.recenterVRNameSpan_);
+    this.toggleStereoscopicNameSpan_ = shaka.util.Dom.createHTMLElement('span');
+    label.appendChild(this.toggleStereoscopicNameSpan_);
 
-    this.recenterVRCurrentSelectionSpan_ =
+    this.toggleStereoscopicCurrentSelectionSpan_ =
       shaka.util.Dom.createHTMLElement('span');
-    this.recenterVRCurrentSelectionSpan_.classList.add(
+    this.toggleStereoscopicCurrentSelectionSpan_.classList.add(
         'shaka-current-selection-span');
-    label.appendChild(this.recenterVRCurrentSelectionSpan_);
-    this.recenterVRButton_.appendChild(label);
-    this.parent.appendChild(this.recenterVRButton_);
+    label.appendChild(this.toggleStereoscopicCurrentSelectionSpan_);
+    this.toggleStereoscopicButton_.appendChild(label);
+    this.parent.appendChild(this.toggleStereoscopicButton_);
 
     // Setup strings in the correct language
     this.updateLocalizedStrings_();
@@ -73,8 +74,8 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
 
     const vr = this.controls.getVR();
 
-    this.eventManager.listen(this.recenterVRButton_, 'click', () => {
-      vr.reset();
+    this.eventManager.listen(this.toggleStereoscopicButton_, 'click', () => {
+      vr.toggleStereoscopicMode();
     });
 
     this.eventManager.listen(vr, 'vrstatuschanged', () => {
@@ -89,7 +90,7 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
    * @private
    */
   checkAvailability_() {
-    shaka.ui.Utils.setDisplay(this.recenterVRButton_,
+    shaka.ui.Utils.setDisplay(this.toggleStereoscopicButton_,
         this.controls.isPlayingVR());
   }
 
@@ -100,10 +101,10 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.recenterVRButton_.ariaLabel =
-        this.localization.resolve(LocIds.RECENTER_VR);
-    this.recenterVRNameSpan_.textContent =
-        this.localization.resolve(LocIds.RECENTER_VR);
+    this.toggleStereoscopicButton_.ariaLabel =
+        this.localization.resolve(LocIds.TOGGLE_STEREOSCOPIC);
+    this.toggleStereoscopicNameSpan_.textContent =
+        this.localization.resolve(LocIds.TOGGLE_STEREOSCOPIC);
   }
 };
 
@@ -112,15 +113,15 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
  * @implements {shaka.extern.IUIElement.Factory}
  * @final
  */
-shaka.ui.RecenterVRButton.Factory = class {
+shaka.ui.ToggleStereoscopicButton.Factory = class {
   /** @override */
   create(rootElement, controls) {
-    return new shaka.ui.RecenterVRButton(rootElement, controls);
+    return new shaka.ui.ToggleStereoscopicButton(rootElement, controls);
   }
 };
 
 shaka.ui.OverflowMenu.registerElement(
-    'recenter_vr', new shaka.ui.RecenterVRButton.Factory());
+    'toggle_stereoscopic', new shaka.ui.ToggleStereoscopicButton.Factory());
 
 shaka.ui.Controls.registerElement(
-    'recenter_vr', new shaka.ui.RecenterVRButton.Factory());
+    'toggle_stereoscopic', new shaka.ui.ToggleStereoscopicButton.Factory());

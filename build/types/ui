@@ -39,6 +39,7 @@
 +../../ui/spacer.js
 +../../ui/statistics_button.js
 +../../ui/text_selection.js
++../../ui/toggle_stereoscopic.js
 +../../ui/ui.js
 +../../ui/ui_utils.js
 +../../ui/volume_bar.js
