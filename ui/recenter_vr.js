@@ -120,7 +120,7 @@ shaka.ui.RecenterVRButton.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
-    'recenter-vr', new shaka.ui.RecenterVRButton.Factory());
+    'recenter_vr', new shaka.ui.RecenterVRButton.Factory());
 
 shaka.ui.Controls.registerElement(
-    'recenter-vr', new shaka.ui.RecenterVRButton.Factory());
+    'recenter_vr', new shaka.ui.RecenterVRButton.Factory());
