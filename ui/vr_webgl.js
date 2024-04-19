@@ -188,6 +188,15 @@ shaka.ui.VRWebgl = class {
   }
 
   /**
+   * Returns true if stereoscopic mode is enabled.
+   *
+   * @return {boolean}
+   */
+  isStereoscopicModeEnabled() {
+    return this.stereoscopicMode_;
+  }
+
+  /**
    * @private
    */
   init_() {

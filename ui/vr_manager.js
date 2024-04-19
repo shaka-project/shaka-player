@@ -219,6 +219,19 @@ shaka.ui.VRManager = class {
   }
 
   /**
+   * Returns true if stereoscopic mode is enabled.
+   *
+   * @return {boolean}
+   */
+  isStereoscopicModeEnabled() {
+    if (!this.vrWebgl_) {
+      shaka.log.alwaysWarn('Not playing VR content');
+      return false;
+    }
+    return this.vrWebgl_.isStereoscopicModeEnabled();
+  }
+
+  /**
    * Increment the yaw in X angle in degrees.
    *
    * @param {number} angle

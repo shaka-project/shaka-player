@@ -1803,6 +1803,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * Returns true if stereoscopic mode is enabled.
+   *
+   * @return {boolean}
+   */
+  isStereoscopicModeEnabled() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    return this.vr_.isStereoscopicModeEnabled();
+  }
+
+  /**
    * Increment the yaw in X angle in degrees.
    *
    * @param {number} angle
