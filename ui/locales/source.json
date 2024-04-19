@@ -118,6 +118,10 @@
     "meaning": "Audio quality",
     "message": "Quality"
   },
+  "RECENTER_VR": {
+    "description": "Label for a button used to recenter the VR view.",
+    "message": "Recenter"
+  },
   "REPLAY": {
     "description": "Label for a button used to replay the video in a video player.",
     "message": "Replay"

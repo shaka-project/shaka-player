@@ -10,6 +10,8 @@ goog.provide('shaka.ui.VRManager');
 goog.require('shaka.log');
 goog.require('shaka.ui.VRWebgl');
 goog.require('shaka.util.EventManager');
+goog.require('shaka.util.FakeEvent');
+goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IReleasable');
 
 goog.requireType('shaka.Player');
@@ -18,7 +20,7 @@ goog.requireType('shaka.Player');
 /**
  * @implements {shaka.util.IReleasable}
  */
-shaka.ui.VRManager = class {
+shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
   /**
    * @param {!HTMLElement} container
    * @param {!HTMLCanvasElement} canvas
@@ -27,6 +29,8 @@ shaka.ui.VRManager = class {
    * @param {shaka.extern.UIConfiguration} config
    */
   constructor(container, canvas, video, player, config) {
+    super();
+
     /** @private {!HTMLElement} */
     this.container_ = container;
 
@@ -131,6 +135,9 @@ shaka.ui.VRManager = class {
       this.vrWebgl_.release();
       this.vrWebgl_ = null;
     }
+
+    // FakeEventTarget implements IReleasable
+    super.release();
   }
 
   /**
@@ -283,12 +290,16 @@ shaka.ui.VRManager = class {
       if (!this.vrWebgl_) {
         this.canvas_.style.display = '';
         this.init_(newProjectionMode);
+        this.dispatchEvent(new shaka.util.FakeEvent(
+            'vrstatuschanged',
+            (new Map()).set('newStatus', this.isPlayingVR())));
       } else {
         const currentProjectionMode = this.vrWebgl_.getProjectionMode();
         if (currentProjectionMode != newProjectionMode) {
           this.eventManager_.removeAll();
           this.vrWebgl_.release();
           this.init_(newProjectionMode);
+          // Re-initialization the status does not change.
         }
       }
     } else if (!this.config_.displayInVrMode && !this.vrAsset_ &&
@@ -297,6 +308,9 @@ shaka.ui.VRManager = class {
       this.eventManager_.removeAll();
       this.vrWebgl_.release();
       this.vrWebgl_ = null;
+      this.dispatchEvent(new shaka.util.FakeEvent(
+          'vrstatuschanged',
+          (new Map()).set('newStatus', this.isPlayingVR())));
     }
   }
 

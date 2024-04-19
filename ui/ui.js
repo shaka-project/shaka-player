@@ -190,6 +190,7 @@ shaka.ui.Overlay = class {
         'picture_in_picture',
         'cast',
         'playback_rate',
+        'recenter-vr',
       ],
       statisticsList: [
         'width',

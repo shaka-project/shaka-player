@@ -28,6 +28,7 @@
 +../../ui/playback_rate_selection.js
 +../../ui/presentation_time.js
 +../../ui/range_element.js
++../../ui/recenter_vr.js
 +../../ui/remote_button.js
 +../../ui/resolution_selection.js
 +../../ui/rewind_button.js

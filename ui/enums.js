@@ -44,4 +44,5 @@ shaka.ui.Enums.MaterialDesignIcons = {
   'REPLAY': 'replay',
   'STATISTICS_ON': 'insert_chart_outlined',
   'STATISTICS_OFF': 'insert_chart',
+  'RECENTER_VR': 'control_camera',
 };

@@ -173,15 +173,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {shaka.util.EventManager} */
     this.eventManager_ = new shaka.util.EventManager();
 
+    /** @private {?shaka.ui.VRManager} */
+    this.vr_ = null;
+
     // Configure and create the layout of the controls
     this.configure(this.config_);
     this.addEventListeners_();
-
-    goog.asserts.assert(
-        this.controlsContainer_, 'Controls container must be created!');
-
-    this.vr_ = new shaka.ui.VRManager(this.controlsContainer_, this.vrCanvas_,
-        this.localVideo_, this.player_, this.config_);
 
     /**
      * The pressed keys set is used to record which keys are currently pressed
@@ -362,6 +359,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // re-created or uprooted in the DOM, even when the DOM is re-created,
       // since that seemingly breaks the IMA SDK.
       this.addClientAdContainer_();
+
+      goog.asserts.assert(
+          this.controlsContainer_, 'Should have a controlsContainer_!');
+      goog.asserts.assert(this.localVideo_, 'Should have a localVideo_!');
+      goog.asserts.assert(this.player_, 'Should have a player_!');
+      this.vr_ = new shaka.ui.VRManager(this.controlsContainer_, this.vrCanvas_,
+          this.localVideo_, this.player_, this.config_);
     }
 
     // Create the new layout
@@ -1734,6 +1738,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   hideUI() {
     this.onMouseLeave_();
+  }
+
+  /**
+   * @return {shaka.ui.VRManager}
+   */
+  getVR() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    return this.vr_;
   }
 
   /**
