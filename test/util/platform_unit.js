@@ -6,6 +6,8 @@
 
 describe('Platform', () => {
   const originalUserAgent = navigator.userAgent;
+
+  // See: https://webostv.developer.lge.com/develop/specifications/web-api-and-web-engine#useragent-string
   // eslint-disable-next-line max-len
   const webOs3 = 'Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.2.1 Chrome/38.0.2125.122 Safari/537.36 WebAppManager';
   // eslint-disable-next-line max-len
