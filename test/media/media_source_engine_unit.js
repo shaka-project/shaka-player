@@ -1206,30 +1206,6 @@ describe('MediaSourceEngine', () => {
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledTimes(2);
     });
 
-    // TODO: Fix this test/feature.  This only passed before because the
-    // original author failed to await the reset. */
-    xit('should persist the previous source buffer parameters', async () => {
-      await mediaSourceEngine.init(initObject, false);
-
-      audioSourceBuffer.timestampOffset = 10;
-      audioSourceBuffer.appendWindowStart = 5;
-      audioSourceBuffer.appendWindowEnd = 20;
-
-      videoSourceBuffer.timestampOffset = 20;
-      videoSourceBuffer.appendWindowStart = 15;
-      videoSourceBuffer.appendWindowEnd = 30;
-
-      await resetMSE(initObject);
-
-      expect(audioSourceBuffer.timestampOffset).toBe(10);
-      expect(audioSourceBuffer.appendWindowStart).toBe(5);
-      expect(audioSourceBuffer.appendWindowEnd).toBe(20);
-
-      expect(videoSourceBuffer.timestampOffset).toBe(20);
-      expect(videoSourceBuffer.appendWindowStart).toBe(15);
-      expect(videoSourceBuffer.appendWindowEnd).toBe(30);
-    });
-
     it('should preserve autoplay and paused state', async () => {
       await mediaSourceEngine.init(initObject, false);
 
