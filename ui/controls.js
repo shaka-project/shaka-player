@@ -78,6 +78,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.videoContainer_ = videoContainer;
 
+    /** @private {!HTMLCanvasElement} */
     this.vrCanvas_ = vrCanvas;
 
     /** @private {shaka.extern.IAdManager} */
@@ -1779,7 +1780,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * Returns the angle of the current field of view displayed.
+   * Returns the angle of the current field of view displayed in degrees.
    *
    * @return {?number}
    * @export
@@ -1796,7 +1797,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * is increased, a larger part of the video will be seen, but with less
    * detail.
    *
-   * @param {number} fieldOfView
+   * @param {number} fieldOfView In degrees
    * @export
    */
   setVRFieldOfView(fieldOfView) {
@@ -1827,7 +1828,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /**
    * Increment the yaw in X angle in degrees.
    *
-   * @param {number} angle
+   * @param {number} angle In degrees
    * @export
    */
   incrementYaw(angle) {
@@ -1838,7 +1839,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /**
    * Increment the pitch in X angle in degrees.
    *
-   * @param {number} angle
+   * @param {number} angle In degrees
    * @export
    */
   incrementPitch(angle) {
@@ -1849,7 +1850,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /**
    * Increment the roll in X angle in degrees.
    *
-   * @param {number} angle
+   * @param {number} angle In degrees
    * @export
    */
   incrementRoll(angle) {

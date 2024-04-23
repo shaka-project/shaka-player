@@ -121,7 +121,8 @@ ui.configure(config);
 If you want the VR to be rendered outside of the main container, add the
 `data-shaka-player-vr-canvas` tag to a canvas element on the page.
 
-Note: VR is only supported for DASH/HLS clear streams or HLS-AES stream.
+Note: VR is only supported for clear streams or HLS-AES stream. DRM prevents
+access to the video pixels for transformation.
 
 
 #### Enabling Chromecast support
