@@ -1648,33 +1648,7 @@ describe('DashParser Live', () => {
     ].join('\n');
 
     beforeEach(() => {
-      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-      config.dash.enablePatchMPDSupport = true;
-      parser.configure(config);
-
       fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    });
-
-    it('does not use Mpd.PatchLocation if not configured', async () => {
-      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-      config.dash.enablePatchMPDSupport = false;
-      parser.configure(config);
-
-      const patchText = [
-        '<Patch>',
-        '</Patch>',
-      ].join('\n');
-      fakeNetEngine.setResponseText('dummy://bar', patchText);
-
-      await parser.start('dummy://foo', playerInterface);
-
-      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
-      fakeNetEngine.request.calls.reset();
-
-      await updateManifest();
-      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
     });
 
     it('uses Mpd.PatchLocation', async () => {
