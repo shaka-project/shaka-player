@@ -13,8 +13,6 @@ describe('UI', () => {
 
   /** @type {!HTMLVideoElement} */
   let video;
-  /** @type {!HTMLCanvasElement} */
-  let canvas;
   /** @type {!HTMLElement} */
   let videoContainer;
   /** @type {!shaka.Player} */
@@ -43,11 +41,9 @@ describe('UI', () => {
 
   beforeEach(async () => {
     video = shaka.test.UiUtils.createVideoElement();
-    canvas = shaka.test.UiUtils.createCanvasElement();
 
     videoContainer = shaka.util.Dom.createHTMLElement('div');
     videoContainer.appendChild(video);
-    videoContainer.appendChild(canvas);
     document.body.appendChild(videoContainer);
     player = new compiledShaka.Player();
     await player.attach(video);
@@ -74,7 +70,7 @@ describe('UI', () => {
       // TODO: Cast receiver id to test chromecast integration
     };
 
-    ui = new compiledShaka.ui.Overlay(player, videoContainer, video, canvas);
+    ui = new compiledShaka.ui.Overlay(player, videoContainer, video);
     ui.configure(config);
 
     // Grab event manager from the uncompiled library:

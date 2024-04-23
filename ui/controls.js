@@ -43,7 +43,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @param {!shaka.Player} player
    * @param {!HTMLElement} videoContainer
    * @param {!HTMLMediaElement} video
-   * @param {!HTMLCanvasElement} vrCanvas
+   * @param {?HTMLCanvasElement} vrCanvas
    * @param {shaka.extern.UIConfiguration} config
    */
   constructor(player, videoContainer, video, vrCanvas, config) {
@@ -78,7 +78,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.videoContainer_ = videoContainer;
 
-    /** @private {!HTMLCanvasElement} */
+    /** @private {?HTMLCanvasElement} */
     this.vrCanvas_ = vrCanvas;
 
     /** @private {shaka.extern.IAdManager} */

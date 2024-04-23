@@ -7,6 +7,7 @@
 
 goog.provide('shaka.ui.VRManager');
 
+goog.require('goog.asserts');
 goog.require('shaka.log');
 goog.require('shaka.ui.VRWebgl');
 goog.require('shaka.util.EventManager');
@@ -23,7 +24,7 @@ goog.requireType('shaka.Player');
 shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
   /**
    * @param {!HTMLElement} container
-   * @param {!HTMLCanvasElement} canvas
+   * @param {?HTMLCanvasElement} canvas
    * @param {!HTMLMediaElement} video
    * @param {!shaka.Player} player
    * @param {shaka.extern.UIConfiguration} config
@@ -34,7 +35,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.container_ = container;
 
-    /** @private {!HTMLCanvasElement} */
+    /** @private {?HTMLCanvasElement} */
     this.canvas_ = canvas;
 
     /** @private {!HTMLMediaElement} */
@@ -284,6 +285,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @private
    */
   checkVrStatus_() {
+    if (!this.canvas_) {
+      return;
+    }
     if ((this.config_.displayInVrMode || this.vrAsset_)) {
       const newProjectionMode =
           this.vrAsset_ || this.config_.defaultVrProjectionMode;
@@ -319,6 +323,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @private
    */
   init_(projectionMode) {
+    goog.asserts.assert(this.canvas_, 'Should have a canvas at this point!');
     const gl = this.getGL_();
     if (gl) {
       this.vrWebgl_ = new shaka.ui.VRWebgl(
@@ -332,6 +337,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @private
    */
   getGL_() {
+    goog.asserts.assert(this.canvas_, 'Should have a canvas at this point!');
     const webglContexts = [
       'webgl2',
       'webgl',

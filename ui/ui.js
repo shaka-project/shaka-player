@@ -29,9 +29,9 @@ shaka.ui.Overlay = class {
    * @param {!shaka.Player} player
    * @param {!HTMLElement} videoContainer
    * @param {!HTMLMediaElement} video
-   * @param {!HTMLCanvasElement} vrCanvas
+   * @param {?HTMLCanvasElement=} vrCanvas
    */
-  constructor(player, videoContainer, video, vrCanvas) {
+  constructor(player, videoContainer, video, vrCanvas = null) {
     /** @private {shaka.Player} */
     this.player_ = player;
 

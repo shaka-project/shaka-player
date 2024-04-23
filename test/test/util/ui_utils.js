@@ -8,7 +8,7 @@ shaka.test.UiUtils = class {
   /**
    * @param {!HTMLElement} videoContainer
    * @param {!HTMLMediaElement} video
-   * @param {!HTMLCanvasElement} canvas
+   * @param {?HTMLCanvasElement=} canvas
    * @param {!Object=} config
    * @return {!Promise.<!shaka.ui.Overlay>}
    */
