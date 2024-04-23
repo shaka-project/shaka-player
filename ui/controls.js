@@ -238,6 +238,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.timeAndSeekRangeTimer_ = null;
     }
 
+    if (this.vr_) {
+      this.vr_.release();
+      this.vr_ = null;
+    }
+
     // Important!  Release all child elements before destroying the cast proxy
     // or player.  This makes sure those destructions will not trigger event
     // listeners in the UI which would then invoke the cast proxy or player.
@@ -264,11 +269,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.localization_ = null;
     this.pressedKeys_.clear();
-
-    if (this.vr_) {
-      this.vr_.release();
-      this.vr_ = null;
-    }
 
     // FakeEventTarget implements IReleasable
     super.release();
