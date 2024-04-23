@@ -100,7 +100,7 @@ describe('VR UI', () => {
     });
 
     it('change field of view', async () => {
-      await Util.shortDelay();
+      await Util.delay(/* seconds= */ 1);
       expect(controls.isPlayingVR()).toBe(true);
       controls.setVRFieldOfView(100);
       expect(controls.getVRFieldOfView()).toBe(100);

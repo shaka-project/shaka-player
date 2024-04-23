@@ -1412,7 +1412,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   onContainerClick_() {
-    if (!this.enabled_ || this.vr_.isPlayingVR()) {
+    if (!this.enabled_ || this.isPlayingVR()) {
       return;
     }
 
