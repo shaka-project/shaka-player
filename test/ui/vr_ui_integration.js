@@ -102,7 +102,7 @@ describe('VR UI', () => {
       await controlsPromise;
     });
 
-    it('change field of view', async () => {
+    it('change field of view', () => {
       expect(controls.isPlayingVR()).toBe(true);
       controls.setVRFieldOfView(100);
       expect(controls.getVRFieldOfView()).toBe(100);
