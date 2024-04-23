@@ -551,8 +551,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest,
-          /* preferredKeySystems= */ []);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       // Covers a regression in which we would remove streams with codecs.
       // The last two streams should be removed because their full MIME types
@@ -587,8 +586,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest,
-          /* preferredKeySystems= */ []);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       // Covers a regression in which we would remove streams with codecs.
       // The first 4 streams should be there because they are always supported.
@@ -650,8 +648,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest,
-          /* preferredKeySystems= */ []);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       // Covers a regression in which we would remove streams with codecs.
       // The last two streams should be removed because their full MIME types
@@ -677,8 +674,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest,
-          /* preferredKeySystems= */ []);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
       expect(manifest.variants.length).toBe(1);
     });
 
@@ -694,8 +690,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest,
-          /* preferredKeySystems= */ []);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       expect(manifest.variants.length).toBe(1);
     });
@@ -717,8 +712,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest,
-          /* preferredKeySystems= */ []);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       expect(manifest.variants.length).toBe(2);
     });
@@ -740,8 +734,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest,
-          /* preferredKeySystems= */ []);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       expect(manifest.variants.length).toBe(2);
     });
@@ -758,8 +751,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest,
-          /* preferredKeySystems= */ []);
+      await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
       expect(manifest.variants.length).toBe(1);
     });
