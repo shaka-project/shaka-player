@@ -92,7 +92,7 @@ describe('VR UI', () => {
       };
 
       ui.configure(config);
-      await player.load('/base/test/test/assets/vr-equirectangular.mp4');
+      await player.load('/base/test/test/assets/dash-vr/dash.mpd');
       // For playback to begin so that we have some content buffered.
       await video.play();
       await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */ 10);
