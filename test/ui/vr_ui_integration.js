@@ -31,6 +31,8 @@ describe('VR UI', () => {
   let controls;
   /** @type {shakaNamespaceType} */
   let compiledShaka;
+  /** @type {boolean} */
+  let canPlayVR;
 
   beforeAll(async () => {
     cssLink =
@@ -66,6 +68,7 @@ describe('VR UI', () => {
     const tempControls = ui.getControls();
     goog.asserts.assert(tempControls != null, 'Controls are null!');
     controls = tempControls;
+    canPlayVR = controls.canPlayVR();
 
     onErrorSpy = jasmine.createSpy('onError');
     onErrorSpy.and.callFake((event) => {
@@ -81,7 +84,7 @@ describe('VR UI', () => {
     await UiUtils.cleanupUI();
   });
 
-  describe('equirectangular', () => {
+  filterDescribe('equirectangular', () => canPlayVR, () => {
     beforeEach(async () => {
       const controlsPromise =
           waiter.timeoutAfter(30).waitForEvent(controls, 'vrstatuschanged');
@@ -100,10 +103,6 @@ describe('VR UI', () => {
     });
 
     it('change field of view', async () => {
-      await Util.delay(/* seconds= */ 1);
-      if (!controls.canPlayVR()) {
-        pending('WebGL is not supported by the platform.');
-      }
       expect(controls.isPlayingVR()).toBe(true);
       controls.setVRFieldOfView(100);
       expect(controls.getVRFieldOfView()).toBe(100);
