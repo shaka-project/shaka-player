@@ -35,8 +35,6 @@ describe('UI', () => {
     let videoContainer;
     /** @type {!HTMLVideoElement} */
     let video;
-    /** @type {!HTMLCanvasElement} */
-    let canvas;
 
     beforeEach(async () => {
       videoContainer =
@@ -45,10 +43,7 @@ describe('UI', () => {
 
       video = shaka.test.UiUtils.createVideoElement();
       videoContainer.appendChild(video);
-
-      canvas = shaka.test.UiUtils.createCanvasElement();
-      videoContainer.appendChild(canvas);
-      await UiUtils.createUIThroughAPI(videoContainer, video, canvas);
+      await UiUtils.createUIThroughAPI(videoContainer, video);
     });
 
     it('has all the basic elements', () => {
@@ -174,8 +169,6 @@ describe('UI', () => {
     let videoContainer;
     /** @type {!HTMLVideoElement} */
     let video;
-    /** @type {!HTMLCanvasElement} */
-    let canvas;
 
     beforeEach(() => {
       videoContainer =
@@ -184,8 +177,6 @@ describe('UI', () => {
 
       video = shaka.test.UiUtils.createVideoElement();
       videoContainer.appendChild(video);
-      canvas = shaka.test.UiUtils.createCanvasElement();
-      videoContainer.appendChild(canvas);
     });
 
     it('goes into fullscreen on double click', async () => {
@@ -203,7 +194,7 @@ describe('UI', () => {
         doubleClickForFullscreen: false,
       };
       const ui = await UiUtils.createUIThroughAPI(
-          videoContainer, video, canvas, config);
+          videoContainer, video, config);
       const controls = ui.getControls();
 
       const spy = spyOn(controls, 'toggleFullScreen');
@@ -227,8 +218,7 @@ describe('UI', () => {
       let controlsContainer;
 
       beforeEach(async () => {
-        const ui = await UiUtils.createUIThroughAPI(
-            videoContainer, video, canvas);
+        const ui = await UiUtils.createUIThroughAPI(videoContainer, video);
         player = ui.getControls().getLocalPlayer();
         const controlsContainers =
             videoContainer.getElementsByClassName('shaka-controls-container');
@@ -264,7 +254,7 @@ describe('UI', () => {
           ],
         };
         const ui = await UiUtils.createUIThroughAPI(
-            videoContainer, video, canvas, config);
+            videoContainer, video, config);
         player = ui.getControls().getLocalPlayer();
 
         const overflowMenus =
@@ -336,7 +326,7 @@ describe('UI', () => {
       let controlsButtonPanel;
 
       it('has default elements', async () => {
-        await UiUtils.createUIThroughAPI(videoContainer, video, canvas);
+        await UiUtils.createUIThroughAPI(videoContainer, video);
         const controlsButtonPanels = videoContainer.getElementsByClassName(
             'shaka-controls-button-panel');
 
@@ -388,7 +378,7 @@ describe('UI', () => {
           ],
         };
 
-        await UiUtils.createUIThroughAPI(videoContainer, video, canvas, config);
+        await UiUtils.createUIThroughAPI(videoContainer, video, config);
         const controlsButtonPanels = videoContainer.getElementsByClassName(
             'shaka-controls-button-panel');
         expect(controlsButtonPanels.length).toBe(1);
@@ -423,7 +413,7 @@ describe('UI', () => {
           ],
         };
         const ui = await UiUtils.createUIThroughAPI(
-            videoContainer, video, canvas, config);
+            videoContainer, video, config);
         player = ui.getControls().getLocalPlayer();
 
         const resolutionsMenus =
@@ -496,7 +486,7 @@ describe('UI', () => {
           ],
         };
         const ui = await UiUtils.createUIThroughAPI(
-            videoContainer, video, canvas, config);
+            videoContainer, video, config);
         controls = ui.getControls();
         player = controls.getLocalPlayer();
 
@@ -720,7 +710,7 @@ describe('UI', () => {
           ],
         };
         const ui = await UiUtils.createUIThroughAPI(
-            videoContainer, video, canvas, config);
+            videoContainer, video, config);
 
         controlsContainer = ui.getControls().getControlsContainer();
 
@@ -769,7 +759,7 @@ describe('UI', () => {
           statisticsList: Object.keys(new shaka.util.Stats().getBlob()),
         };
         const ui = await UiUtils.createUIThroughAPI(
-            videoContainer, video, canvas, config);
+            videoContainer, video, config);
         player = ui.getControls().getLocalPlayer();
 
         const statisticsButtons =

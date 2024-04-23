@@ -8,11 +8,11 @@ shaka.test.UiUtils = class {
   /**
    * @param {!HTMLElement} videoContainer
    * @param {!HTMLMediaElement} video
-   * @param {?HTMLCanvasElement=} canvas
    * @param {!Object=} config
+   * @param {?HTMLCanvasElement=} canvas
    * @return {!Promise.<!shaka.ui.Overlay>}
    */
-  static async createUIThroughAPI(videoContainer, video, canvas, config) {
+  static async createUIThroughAPI(videoContainer, video, config, canvas) {
     const player = new shaka.Player();
     await player.attach(video);
     // Create UI
