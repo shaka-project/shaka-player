@@ -90,6 +90,7 @@ describe('Transmuxer Player', () => {
     await player.attach(video);
 
     player.configure('mediaSource.forceTransmux', true);
+    player.configure('streaming.useNativeHlsOnSafari', false);
 
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
@@ -175,6 +176,22 @@ describe('Transmuxer Player', () => {
       }
 
       await player.load('/base/test/test/assets/hls-raw-ec3/prog_index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
+    it('raw AAC with ts extension', async () => {
+      await player.load('/base/test/test/assets/hls-ts-raw-aac/index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
 
@@ -325,6 +342,28 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
+    it('H.264+AAC in TS with rollover', async () => {
+      // eslint-disable-next-line max-len
+      await player.load('/base/test/test/assets/hls-ts-rollover/playlist.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // The rollover occurs around the 9th second, without the rollover, the
+      // media source times are wrong and the stream freezes. The purpose is to
+      // play at least 15 seconds to see that the rollover passes and the
+      // stream continues without problems.
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
     it('H.265+AAC in TS', async () => {
       if (!isH265Supported()) {
         pending('Codec H.265 is not supported by the platform.');
@@ -394,6 +433,27 @@ describe('Transmuxer Player', () => {
 
       // eslint-disable-next-line max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-ec3-h264/prog_index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
+    it('H.264+Opus in TS', async () => {
+      if (!MediaSource.isTypeSupported('audio/mp4; codecs="opus"')) {
+        pending('Codec opus is not supported by the platform.');
+      }
+
+      // eslint-disable-next-line max-len
+      await player.load('/base/test/test/assets/hls-ts-muxed-opus-h264/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
 

@@ -119,8 +119,6 @@ DASH features **not** supported:
 
 ## HLS features
 
-**Only supported on browsers with SourceBuffer.mode=sequence support**
-
 HLS features supported:
  - VOD, Live, and Event types
  - Low-latency streaming with partial segments, preload hints, delta updates and
@@ -132,6 +130,8 @@ HLS features supported:
  - CEA-608/708 captions
  - Encrypted content with PlayReady and Widevine
  - Encrypted content with FairPlay (Safari on macOS and iOS 9+ only)
+ - AES-128, AES-256 and AES-256-CTR support on browsers with Web Crypto API support
+ - SAMPLE-AES and SAMPLE-AES-CTR (identity) support on browsers with ClearKey support
  - Key rotation
  - Raw AAC, MP3, AC-3 and EC-3 (without an MP4 container)
  - I-frame-only playlists with mjpg codec for thumbnails
@@ -177,8 +177,8 @@ MSS features **not** supported:
 |Edge Chromium |**Y**     |**Y**    | -       |**Y**     |
 |Safari        | -        | -       |**Y**    | -        |
 |Opera         |untested⁵ | -       | -       |untested⁵ |
-|Chromecast    |**Y**     |**Y**    | -       |untested⁵ |
-|Tizen TV      |**Y**     |**Y**    | -       |untested⁵ |
+|Chromecast    |**Y**     |**Y**    | -       |**Y**     |
+|Tizen TV      |**Y**     |**Y**    | -       |**Y**     |
 |WebOS⁷        |untested⁷ |untested⁷| -       |untested⁷ |
 |Hisense⁷      |untested⁷ |untested⁷| -       |untested⁷ |
 |Xbox One      | -        |**Y**    | -       | -        |
@@ -280,6 +280,7 @@ Shaka Player supports:
   - EC-3 in MPEG-2 TS to EC-3 in MP4
   - MP3 in MPEG-2 TS to MP3 in MP4
   - MP3 in MPEG-2 TS to raw MP3
+  - Opus in MPEG-2 TS to MP3 in MP4
   - H.264 in MPEG-2 TS to H.264 in MP4
   - H.265 in MPEG-2 TS to H.265 in MP4
   - Muxed content in MPEG-2 TS with the previous codecs

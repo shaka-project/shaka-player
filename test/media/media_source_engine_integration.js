@@ -33,7 +33,7 @@ describe('MediaSourceEngine', () => {
       jasmine.objectContaining({
         startTime: Util.closeTo(0.067, 0.001),
         endTime: Util.closeTo(1, 0.001),
-        payload: 'eng:⠀00:00:00:00',
+        payload: 'eng: 00:00:00:00',
         textAlign: Cue.textAlign.CENTER,
       }),
     ],
@@ -259,10 +259,41 @@ describe('MediaSourceEngine', () => {
   }
 
   function getFakeStream(streamMetadata) {
+    const mimeType = streamMetadata.mimeType;
+    const codecs = streamMetadata.codecs;
+    const segmentIndex = {
+      isEmpty: () => false,
+    };
+    segmentIndex[Symbol.iterator] = () => {
+      let nextPosition = 0;
+
+      return {
+        next: () => {
+          if (nextPosition == 0) {
+            nextPosition += 1;
+            return {
+              value: {mimeType, codecs},
+              done: false,
+            };
+          } else {
+            return {
+              value: null,
+              done: true,
+            };
+          }
+        },
+        current: () => {
+          return {mimeType, codecs};
+        },
+      };
+    };
     return {
       mimeType: streamMetadata.mimeType,
       codecs: streamMetadata.codecs,
       drmInfos: [],
+      segmentIndex,
+      fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
+          streamMetadata.mimeType, streamMetadata.codecs)]),
     };
   }
 

@@ -1319,7 +1319,8 @@ describe('DashParser Live', () => {
         startTime: 10,
         endTime: 60,
         id: '',
-        eventElement: jasmine.any(Object),
+        eventElement: jasmine.any(Element),
+        eventNode: jasmine.any(Object),
       });
       expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith({
         schemeIdUri: 'http://example.com',
@@ -1327,7 +1328,8 @@ describe('DashParser Live', () => {
         startTime: 13,
         endTime: 23,
         id: 'abc',
-        eventElement: jasmine.any(Object),
+        eventElement: jasmine.any(Element),
+        eventNode: jasmine.any(Object),
       });
     });
 

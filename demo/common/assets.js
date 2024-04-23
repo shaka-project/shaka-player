@@ -385,6 +385,15 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
   new ShakaDemoAssetInfo(
+      /* name= */ 'Angel One (HLS, MP4, SAMPLE-AES-CTR, multi-key)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/angel-one-sample-aes-ctr-multiple-key/manifest.m3u8',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addKeySystem(shakaAssets.KeySystem.CLEAR_KEY)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
       /* name= */ 'Sintel (HLS, TS, AES-128 key rotation)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/sintel-ts-aes-key-rotation/master.m3u8',
@@ -514,6 +523,15 @@ shakaAssets.testAssets = [
       /* name= */ 'Heliocentrism (multicodec, multiperiod)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/heliocentricism.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/heliocentrism/heliocentrism.mpd',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.WEBM)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Heliocentrism (multiperiod with forced mimeType/codec changes)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/heliocentricism.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/heliocentrism-mixed-codec/heliocentrism.mpd',
       /* source= */ shakaAssets.Source.SHAKA)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
@@ -1456,9 +1474,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.LCEVC)
       .addDescription('LCEVC Enhanced eSports content selection.')
       .setExtraConfig({
-        mediaSource: {
-          forceTransmux: true,
-        },
         lcevc: {
           enabled: true,
           dynamicPerformanceScaling: true,
@@ -1477,6 +1492,9 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
       .setExtraConfig({
+        streaming: {
+          useNativeHlsOnSafari: false,
+        },
         lcevc: {
           enabled: true,
           dynamicPerformanceScaling: true,
@@ -1495,8 +1513,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
       .setExtraConfig({
-        mediaSource: {
-          forceTransmux: true,
+        streaming: {
+          useNativeHlsOnSafari: false,
         },
         lcevc: {
           enabled: true,
@@ -1516,8 +1534,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
       .setExtraConfig({
-        mediaSource: {
-          forceTransmux: true,
+        streaming: {
+          useNativeHlsOnSafari: false,
         },
         lcevc: {
           enabled: true,

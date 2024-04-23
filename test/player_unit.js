@@ -689,6 +689,7 @@ describe('Player', () => {
         video.canPlayType.and.returnValue('maybe');
         spyOn(shaka.util.Platform, 'anyMediaElement').and.returnValue(video);
         spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
+        spyOn(shaka.util.Platform, 'isApple').and.returnValue(false);
         // Make sure player.load() resolves for src=
         spyOn(shaka.util.MediaReadyState, 'waitForReadyState').and.callFake(
             (mediaElement, readyState, eventManager, callback) => {
@@ -698,6 +699,7 @@ describe('Player', () => {
         player.configure({
           streaming: {
             preferNativeHls: true,
+            useNativeHlsOnSafari: false,
           },
         });
 
@@ -709,10 +711,12 @@ describe('Player', () => {
       it('does not apply to non-HLS streams', async () => {
         video.canPlayType.and.returnValue('maybe');
         spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
+        spyOn(shaka.util.Platform, 'isApple').and.returnValue(false);
 
         player.configure({
           streaming: {
             preferNativeHls: true,
+            useNativeHlsOnSafari: false,
           },
         });
 
@@ -1210,6 +1214,7 @@ describe('Player', () => {
           rebufferingGoal: 1,
           inaccurateManifestTolerance: 1,
           segmentPrefetchLimit: 1,
+          updateIntervalSeconds: 10,
           retryParameters: {
             baseDelay: 2000,
           },
@@ -1229,6 +1234,8 @@ describe('Player', () => {
       expect(player.getConfiguration().streaming.inaccurateManifestTolerance)
           .toBe(1);
       expect(player.getConfiguration().streaming.segmentPrefetchLimit).toBe(1);
+      expect(player.getConfiguration().streaming.updateIntervalSeconds)
+          .toBe(10);
       expect(player.getConfiguration().streaming.retryParameters.baseDelay)
           .toBe(2000);
       expect(player.getConfiguration().manifest.retryParameters.baseDelay)
@@ -1245,6 +1252,8 @@ describe('Player', () => {
       expect(player.getConfiguration().streaming.inaccurateManifestTolerance)
           .toBe(0);
       expect(player.getConfiguration().streaming.segmentPrefetchLimit).toBe(2);
+      expect(player.getConfiguration().streaming.updateIntervalSeconds)
+          .toBe(0.1);
       expect(player.getConfiguration().streaming.retryParameters.baseDelay)
           .toBe(100);
       expect(player.getConfiguration().manifest.retryParameters.baseDelay)
@@ -3800,11 +3809,14 @@ describe('Player', () => {
   });
 
   describe('getPlayheadTimeAsDate()', () => {
+    /** @type {?shaka.media.PresentationTimeline} */
+    let timeline;
     beforeEach(async () => {
-      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(false);
 
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        goog.asserts.assert(timeline, 'timeline must be non-null');
         manifest.presentationTimeline = timeline;
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1);
@@ -3821,6 +3833,68 @@ describe('Player', () => {
       const liveTimeUtc = player.getPlayheadTimeAsDate();
       // (300 (presentation start time) + 20 (playhead time)) * 1000 (ms/sec)
       expect(liveTimeUtc).toEqual(new Date(320 * 1000));
+    });
+
+    it('uses program date time', () => {
+      timeline.setInitialProgramDateTime(100);
+      playhead.getTime.and.returnValue(20);
+
+      const liveTimeUtc = player.getPlayheadTimeAsDate();
+      // (100 (program date time) + 20 (playhead time)) * 1000 (ms/sec)
+      expect(liveTimeUtc).toEqual(new Date(120 * 1000));
+    });
+
+    it('uses program date time for VoD', () => {
+      timeline.setStatic(true);
+      timeline.setInitialProgramDateTime(100);
+      playhead.getTime.and.returnValue(20);
+
+      const liveTimeUtc = player.getPlayheadTimeAsDate();
+      // (100 (program date time) + 20 (playhead time)) * 1000 (ms/sec)
+      expect(liveTimeUtc).toEqual(new Date(120 * 1000));
+    });
+  });
+
+  describe('getPresentationStartTimeAsDate()', () => {
+    /** @type {?shaka.media.PresentationTimeline} */
+    let timeline;
+    beforeEach(async () => {
+      timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(false);
+
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        goog.asserts.assert(timeline, 'timeline must be non-null');
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1);
+        });
+      });
+
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+    });
+
+    it('gets current wall clock time in UTC', () => {
+      const liveTimeUtc = player.getPresentationStartTimeAsDate();
+      // 300 (presentation start time) * 1000 (ms/sec)
+      expect(liveTimeUtc).toEqual(new Date(300 * 1000));
+    });
+
+    it('uses program date time', () => {
+      timeline.setInitialProgramDateTime(100);
+
+      const liveTimeUtc = player.getPresentationStartTimeAsDate();
+      // 100 (program date time) * 1000 (ms/sec)
+      expect(liveTimeUtc).toEqual(new Date(100 * 1000));
+    });
+
+    it('uses program date time for VoD', () => {
+      timeline.setStatic(true);
+      timeline.setInitialProgramDateTime(100);
+
+      const liveTimeUtc = player.getPlayheadTimeAsDate();
+      // 100 (program date time) * 1000 (ms/sec)
+      expect(liveTimeUtc).toEqual(new Date(100 * 1000));
     });
   });
 
@@ -4408,6 +4482,13 @@ describe('Player', () => {
 
     it('does not fail with no segments', async () => {
       player.configure('streaming.startAtSegmentBoundary', true);
+      for (const variant of manifest.variants) {
+        for (const stream of [variant.video, variant.audio]) {
+          if (stream) {
+            stream.segmentIndex.references = [];
+          }
+        }
+      }
 
       // Without useSegmentTemplate in the fake manifest, the call to
       // getIteratorForTime() in Player produces a null iterator.  Using the

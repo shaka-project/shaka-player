@@ -250,6 +250,7 @@ shaka.ui.Overlay = class {
       showAudioChannelCountVariants: true,
       seekOnTaps: true,
       tapSeekDistance: 10,
+      refreshTickInSeconds: 0.125,
     };
 
     // eslint-disable-next-line no-restricted-syntax

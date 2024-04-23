@@ -96,57 +96,70 @@ shaka.extern.StateChange;
  * again.
  *
  * @property {number} width
- *   The width of the current video track.
+ *   The width of the current video track. If nothing is loaded or the content
+ *   is audio-only, NaN.
  * @property {number} height
- *   The height of the current video track.
+ *   The height of the current video track. If nothing is loaded or the content
+ *   is audio-only, NaN.
  * @property {number} streamBandwidth
  *   The bandwidth required for the current streams (total, in bit/sec).
- *   It takes into account the playbackrate.
+ *   It takes into account the playbackrate. If nothing is loaded, NaN.
  *
  * @property {number} decodedFrames
- *   The total number of frames decoded by the Player.  This may be
- *   <code>NaN</code> if this is not supported by the browser.
+ *   The total number of frames decoded by the Player. If not reported by the
+ *   browser, NaN.
  * @property {number} droppedFrames
- *   The total number of frames dropped by the Player.  This may be
- *   <code>NaN</code> if this is not supported by the browser.
+ *   The total number of frames dropped by the Player. If not reported by the
+ *   browser, NaN.
  * @property {number} corruptedFrames
- *   The total number of corrupted frames dropped by the browser.  This may be
- *   <code>NaN</code> if this is not supported by the browser.
+ *   The total number of corrupted frames dropped by the browser. If not
+ *   reported by the browser, NaN.
  * @property {number} estimatedBandwidth
- *   The current estimated network bandwidth (in bit/sec).
+ *   The current estimated network bandwidth (in bit/sec). If no estimate
+ *   available, NaN.
  *
  * @property {number} gapsJumped
  *   The total number of playback gaps jumped by the GapJumpingController.
+ *   If nothing is loaded, NaN.
  * @property {number} stallsDetected
  *   The total number of playback stalls detected by the StallDetector.
+ *   If nothing is loaded, NaN.
  *
  * @property {number} completionPercent
  *   This is the greatest completion percent that the user has experienced in
- *   playback.  Also known as the "high water mark".  Is NaN when there is no
- *   known duration, such as for livestreams.
+ *   playback. Also known as the "high water mark". If nothing is loaded, or
+ *   the stream is live (and therefore indefinite), NaN.
  * @property {number} loadLatency
  *   This is the number of seconds it took for the video element to have enough
  *   data to begin playback.  This is measured from the time load() is called to
  *   the time the <code>'loadeddata'</code> event is fired by the media element.
+ *   If nothing is loaded, NaN.
  * @property {number} manifestTimeSeconds
  *   The amount of time it took to download and parse the manifest.
+ *   If nothing is loaded, NaN.
  * @property {number} drmTimeSeconds
  *   The amount of time it took to download the first drm key, and load that key
- *   into the drm system.
+ *   into the drm system. If nothing is loaded or DRM is not in use, NaN.
  * @property {number} playTime
- *   The total time spent in a playing state in seconds.
+ *   The total time spent in a playing state in seconds. If nothing is loaded,
+ *   NaN.
  * @property {number} pauseTime
- *   The total time spent in a paused state in seconds.
+ *   The total time spent in a paused state in seconds. If nothing is loaded,
+ *   NaN.
  * @property {number} bufferingTime
- *   The total time spent in a buffering state in seconds.
+ *   The total time spent in a buffering state in seconds. If nothing is
+ *   loaded, NaN.
  * @property {number} licenseTime
- *   The time spent on license requests during this session in seconds, or NaN.
+ *   The time spent on license requests during this session in seconds. If DRM
+ *   is not in use, NaN.
  * @property {number} liveLatency
  *   The time between the capturing of a frame and the end user having it
- *   displayed on their screen.
+ *   displayed on their screen. If nothing is loaded or the content is VOD,
+ *   NaN.
  *
  * @property {number} maxSegmentDuration
- *   The presentation's max segment duration in seconds, or NaN.
+ *   The presentation's max segment duration in seconds. If nothing is loaded,
+ *   NaN.
  *
  * @property {!Array.<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.
@@ -521,7 +534,8 @@ shaka.extern.MetadataFrame;
  *   startTime: number,
  *   endTime: number,
  *   id: string,
- *   eventElement: ?shaka.extern.xml.Node
+ *   eventElement: Element,
+ *   eventNode: ?shaka.extern.xml.Node
  * }}
  *
  * @description
@@ -539,7 +553,10 @@ shaka.extern.MetadataFrame;
  *   The presentation time (in seconds) that the region should end.
  * @property {string} id
  *   Specifies an identifier for this instance of the region.
- * @property {?shaka.extern.xml.Node} eventElement
+ * @property {Elment} eventElement
+ *   <b>DEPRECATED</b>: Use eventElement instead.
+ *   The XML element that defines the Event.
+ * @property {?shaka.extern.xml.Node} eventNode
  *   The XML element that defines the Event.
  * @exportDoc
  */
@@ -875,12 +892,14 @@ shaka.extern.xml.Node;
  *   ignoreEmptyAdaptationSet: boolean,
  *   ignoreMaxSegmentDuration: boolean,
  *   keySystemsByURI: !Object.<string, string>,
- *   manifestPreprocessor: function(!shaka.extern.xml.Node),
+ *   manifestPreprocessor: function(!Element),
+ *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
  *   enablePatchMPDSupport: boolean,
  *   enableAudioGroups: boolean,
  *   multiTypeVariantsAllowed: boolean,
- *   useStreamOnceInPeriodFlattening: boolean
+ *   useStreamOnceInPeriodFlattening: boolean,
+ *   updatePeriod: number
  * }}
  *
  * @property {string} clockSyncUri
@@ -930,7 +949,12 @@ shaka.extern.xml.Node;
  * @property {Object.<string, string>} keySystemsByURI
  *   A map of scheme URI to key system name. Defaults to default key systems
  *   mapping handled by Shaka.
- * @property {function(!shaka.extern.xml.Node)} manifestPreprocessor
+ * @property {function(!Element)} manifestPreprocessor
+ *   <b>DEPRECATED</b>: Use manifestPreprocessorTXml instead.
+ *   Called immediately after the DASH manifest has been parsed into an
+ *   XMLDocument. Provides a way for applications to perform efficient
+ *   preprocessing of the manifest.
+ * @property {function(!shaka.extern.xml.Node)} manifestPreprocessorTXml
  *   Called immediately after the DASH manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
@@ -962,6 +986,12 @@ shaka.extern.xml.Node;
  *   but may raise issues if manifest does not have stream consistency
  *   between periods.
  *   Defaults to <code>false</code>.
+ * @property {number} updatePeriod
+ *   Override the minimumUpdatePeriod of the manifest. The value is in second
+ *   if the value is greater than the minimumUpdatePeriod, it will update the
+ *   manifest less frequently. if you update the value during for a dynamic
+ *   manifest, it will directly trigger a new download of the manifest
+ *   Defaults to <code>-1</code>.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -974,6 +1004,7 @@ shaka.extern.DashManifestConfiguration;
  *   defaultAudioCodec: string,
  *   defaultVideoCodec: string,
  *   ignoreManifestProgramDateTime: boolean,
+ *   ignoreManifestProgramDateTimeForTypes: !Array<string>,
  *   mediaPlaylistFullMimeType: string,
  *   useSafariBehaviorForLive: boolean,
  *   liveSegmentsDelay: number,
@@ -1002,6 +1033,14 @@ shaka.extern.DashManifestConfiguration;
  *   Meant for streams where <code>EXT-X-PROGRAM-DATE-TIME</code> is incorrect
  *   or malformed.
  *   <i>Defaults to <code>false</code>.</i>
+ * @property {!Array.<string>} ignoreManifestProgramDateTimeForTypes
+ *   An array of strings representing types for which
+ *   <code>EXT-X-PROGRAM-DATE-TIME</code> should be ignored. Only used if the
+ *   the main ignoreManifestProgramDateTime is set to false.
+ *   For example, setting this to ['text', 'video'] will cause the PDT values
+ *   text and video streams to be ignored, while still using the PDT values for
+ *   audio.
+ *   <i>Defaults to an empty array.</i>
  * @property {string} mediaPlaylistFullMimeType
  *   A string containing a full mime type, including both the basic mime type
  *   and also the codecs. Used when the HLS parser parses a media playlist
@@ -1052,12 +1091,18 @@ shaka.extern.HlsManifestConfiguration;
 
 /**
  * @typedef {{
- *   manifestPreprocessor: function(!shaka.extern.xml.Node),
+ *   manifestPreprocessor: function(!Element),
+ *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
  *   keySystemsBySystemId: !Object.<string, string>
  * }}
  *
- * @property {function(!shaka.extern.xml.Node)} manifestPreprocessor
+ * @property {function(!Element)} manifestPreprocessor
+ *   <b>DEPRECATED</b>: Use manifestPreprocessorTXml instead.
+ *   Called immediately after the MSS manifest has been parsed into an
+ *   XMLDocument. Provides a way for applications to perform efficient
+ *   preprocessing of the manifest.
+ * @property {function(!shaka.extern.xml.Node)} manifestPreprocessorTXml
  *   Called immediately after the MSS manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
@@ -1153,6 +1198,7 @@ shaka.extern.ManifestConfiguration;
  *   stallEnabled: boolean,
  *   stallThreshold: number,
  *   stallSkip: number,
+ *   useNativeHlsOnSafari: boolean,
  *   useNativeHlsForFairPlay: boolean,
  *   inaccurateManifestTolerance: number,
  *   lowLatencyMode: boolean,
@@ -1254,6 +1300,11 @@ shaka.extern.ManifestConfiguration;
  *   been detected.  If 0, the player will pause and immediately play instead of
  *   seeking.  A value of 0 is recommended and provided as default on TV
  *   platforms (WebOS, Tizen, Chromecast, etc).
+ * @property {boolean} useNativeHlsOnSafari
+ *   Desktop Safari has both MediaSource and their native HLS implementation.
+ *   Depending on the application's needs, it may prefer one over the other.
+ *   Only applies to clear streams
+ *   Defaults to <code>true</code>.
  * @property {boolean} useNativeHlsForFairPlay
  *   Desktop Safari has both MediaSource and their native HLS implementation.
  *   Depending on the application's needs, it may prefer one over the other.
@@ -1375,7 +1426,7 @@ shaka.extern.StreamingConfiguration;
 /**
  * @typedef {{
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
- *   sourceBufferExtraFeatures: string,
+ *   addExtraFeaturesToSourceBuffer: function(string): string,
  *   forceTransmux: boolean,
  *   insertFakeEncryptionInInit: boolean,
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback
@@ -1389,10 +1440,12 @@ shaka.extern.StreamingConfiguration;
  *   SourceBuffer.changeType. RELOAD uses cycling of MediaSource.
  *   Defaults to SMOOTH if SMOOTH codec switching is supported, RELOAD
  *   overwise.
- * @property {string} sourceBufferExtraFeatures
+ * @property {function(string): string} addExtraFeaturesToSourceBuffer
+ *   Callback to generate extra features string based on used MIME type.
  *   Some platforms may need to pass features when initializing the
  *   sourceBuffer.
- *   This string is ultimately appended to MIME types in addSourceBuffer().
+ *   This string is ultimately appended to a MIME type in addSourceBuffer() &
+ *   changeType().
  * @property {boolean} forceTransmux
  *   If this is <code>true</code>, we will transmux AAC and TS content even if
  *   not strictly necessary for the assets to be played.
@@ -1419,7 +1472,8 @@ shaka.extern.MediaSourceConfiguration;
 
 /**
  * @typedef {{
- *   customPlayheadTracker: boolean
+ *   customPlayheadTracker: boolean,
+ *   skipPlayDetection: boolean
  * }}
  *
  * @description
@@ -1430,6 +1484,12 @@ shaka.extern.MediaSourceConfiguration;
  *   Client Side. This is useful because it allows you to implement the use of
  *   IMA on platforms that do not support multiple video elements.
  *   This value defaults to <code>false</code>.
+ * @property {boolean} skipPlayDetection
+ *   If this is true, we will load Client Side ads without waiting for a play
+ *   event.
+ *   Defaults to <code>false</code> except on Tizen, WebOS, Chromecast,
+ *   Hisense, PlayStation 4, PlayStation5, Xbox whose default value is
+ *   <code>true</code>.
  *
  * @exportDoc
  */

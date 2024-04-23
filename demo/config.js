@@ -232,7 +232,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Enable DASH sequence mode',
             'manifest.dash.sequenceMode')
         .addBoolInput_('Use stream once in period flattening',
-            'manifest.dash.useStreamOnceInPeriodFlattening');
+            'manifest.dash.useStreamOnceInPeriodFlattening')
+        .addNumberInput_('override the Update period of dash manifest',
+            'manifest.dash.updatePeriod');
   }
 
   /** @private */
@@ -345,7 +347,9 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.AdsConfiguration');
     this.addSection_('Ads', docLink)
         .addBoolInput_('Custom playhead tracker',
-            'ads.customPlayheadTracker');
+            'ads.customPlayheadTracker')
+        .addBoolInput_('Skip play detection',
+            'ads.skipPlayDetection');
   }
 
   /**
@@ -543,6 +547,8 @@ shakaDemo.Config = class {
         .addBoolInput_('Ignore Text Stream Failures',
             'streaming.ignoreTextStreamFailures')
         .addBoolInput_('Stall Detector Enabled', 'streaming.stallEnabled')
+        .addBoolInput_('Use native HLS on Safari (Clear)',
+            'streaming.useNativeHlsOnSafari')
         .addBoolInput_('Use native HLS for FairPlay',
             'streaming.useNativeHlsForFairPlay');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
@@ -558,8 +564,6 @@ shakaDemo.Config = class {
 
     const docLink = this.resolveExternLink_('.MediaSourceConfiguration');
     this.addSection_('Media source', docLink)
-        .addTextInput_('Source buffer extra features',
-            'mediaSource.sourceBufferExtraFeatures')
         .addBoolInput_('Force Transmux', 'mediaSource.forceTransmux')
         .addBoolInput_('Insert fake encryption in init segments when needed ' +
             'by the platform.', 'mediaSource.insertFakeEncryptionInInit')

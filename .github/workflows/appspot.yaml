@@ -15,24 +15,24 @@ jobs:
   appspot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
           registry-url: 'https://registry.npmjs.org'
 
       - uses: ./.github/workflows/custom-actions/prep-for-appspot
 
-      - uses: google-github-actions/auth@v0
+      - uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
 
-      - uses: google-github-actions/deploy-appengine@v0
+      - uses: google-github-actions/deploy-appengine@v2
         with:
           project_id: shaka-player-demo
           version: ${{ inputs.subdomain }}
