@@ -84,6 +84,9 @@ shaka.ui.VRWebgl = class {
     /** @private {?shaka.util.Timer} */
     this.activeTimer_ = null;
 
+    /** @private {?shaka.util.Timer} */
+    this.resetTimer_ = null;
+
     /** @private {number} */
     this.previousCanvasWidth_ = 0;
 
@@ -131,6 +134,10 @@ shaka.ui.VRWebgl = class {
     if (this.activeTimer_) {
       this.activeTimer_.stop();
       this.activeTimer_ = null;
+    }
+    if (this.resetTimer_) {
+      this.resetTimer_.stop();
+      this.resetTimer_ = null;
     }
   }
 
@@ -666,8 +673,12 @@ shaka.ui.VRWebgl = class {
 
     this.viewMatrix_ = out;
 
+    if (this.resetTimer_) {
+      this.resetTimer_.stop();
+      this.resetTimer_ = null;
+    }
     if (this.cont_ < steps) {
-      new shaka.util.Timer(() => {
+      this.resetTimer_ = new shaka.util.Timer(() => {
         this.reset(false);
         this.positionY_ = 0;
         this.cont_++;
