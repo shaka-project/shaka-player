@@ -83,6 +83,8 @@ describe('VR UI', () => {
 
   describe('equirectangular', () => {
     beforeEach(async () => {
+      const controlsPromise =
+          waiter.timeoutAfter(30).waitForEvent(controls, 'vrstatuschanged');
       // Create VR UI
       const config = {
         displayInVrMode: true,
@@ -92,7 +94,7 @@ describe('VR UI', () => {
       ui.configure(config);
       await player.load('/base/test/test/assets/vr-equirectangular.mp4');
       video.play();
-      await waiter.failOnTimeout(false).waitForEvent(video, 'play');
+      await controlsPromise;
       expect(video.readyState).not.toBe(0);
 
       // All other events after this should fail on timeout (the default).

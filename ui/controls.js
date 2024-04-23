@@ -1196,6 +1196,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onCastStatusChange_();
     });
 
+    this.eventManager_.listen(this.vr_, 'vrstatuschanged', () => {
+      this.dispatchEvent(new shaka.util.FakeEvent('vrstatuschanged'));
+    });
+
     this.eventManager_.listen(this.videoContainer_, 'keydown', (e) => {
       this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
     });
@@ -1888,6 +1892,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
  * @property {boolean} newStatus
  *  The new status of the application. True for 'is casting' and
  *  false otherwise.
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#VRStatusChangedEvent
+ * @description Fired when VR status change
+ * @property {string} type
+ *   'vrstatuschanged'
  * @exportDoc
  */
 
