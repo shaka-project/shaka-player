@@ -143,36 +143,40 @@ shaka.ui.VRWebgl = class {
 
   /**
    * @param {!Float32Array} quat
+   * @return {{pitch: number, yaw: number, roll: number}} as radians
    * @private
    */
   toEulerAngles_(quat) {
-    const angles = {};
-
-    const sinr = 2.0 * (quat[3] * quat[0] + quat[1] * quat[2]);
-    const cosr = 1.0 - 2.0 * (quat[0] * quat[0] + quat[1] * quat[1]);
-
-    angles.roll = Math.atan2(sinr, cosr);
-
-    const sinp = 2.0 * (quat[3] * quat[1] - quat[2] * quat[0]);
-
-    if (Math.abs(sinp) >= 1) {
-      switch (Math.sign(sinp)) {
-        case 1:
-          angles.pitch = Math.PI / 2;
-          break;
-        case -1:
-          angles.pitch = (-1) * Math.PI / 2;
-          break;
-      }
+    const angles = {
+      pitch: 0,
+      yaw: 0,
+      roll: 0,
+    };
+    const x = quat[0];
+    const y = quat[1];
+    const z = quat[2];
+    const w = quat[3];
+    const x2 = x * x;
+    const y2 = y * y;
+    const z2 = z * z;
+    const w2 = w * w;
+    const unit = x2 + y2 + z2 + w2;
+    const test = x * w - y * z;
+    if (test > 0.499995 * unit) {
+      // singularity at the north pole
+      angles.pitch = Math.PI / 2;
+      angles.yaw = 2 * Math.atan2(y, x);
+      angles.roll = 0;
+    } else if (test < -0.499995 * unit) {
+      // singularity at the south pole
+      angles.pitch = -Math.PI / 2;
+      angles.yaw = 2 * Math.atan2(y, x);
+      angles.roll = 0;
     } else {
-      angles.pitch = Math.asin(sinp);
+      angles.pitch = Math.asin(2 * (x * z - w * y));
+      angles.yaw = Math.atan2(2 * (x * w + y * z), 1 - 2 * (z2 + w2));
+      angles.roll = Math.atan2(2 * (x * y + z * w), 1 - 2 * (y2 + z2));
     }
-
-    const siny = 2.0 * (quat[3] * quat[2] + quat[0] * quat[1]);
-    const cosy = 1.0 - 2.0 * (quat[1] * quat[1] + quat[2] * quat[2]);
-
-    angles.yaw = Math.atan2(siny, cosy);
-
     return angles;
   }
 
@@ -615,11 +619,15 @@ shaka.ui.VRWebgl = class {
 
     const angles = this.toEulerAngles_(this.currentQuaternion_);
 
-    let result = ((angles.yaw * 180) / Math.PI);
-    if (result < 0) {
-      result = 360 + result;
-    }
-    return result;
+    const normalizedDir = {
+      x: Math.cos(angles.yaw) * Math.cos(angles.pitch),
+      y: Math.sin(angles.yaw) * Math.cos(angles.pitch),
+      z: Math.sin(angles.pitch),
+    };
+
+    const northYaw = Math.acos(normalizedDir.x);
+
+    return ((northYaw * 180) / Math.PI);
   }
 
   /**
