@@ -34,7 +34,7 @@ describe('VR UI', () => {
 
   beforeAll(async () => {
     cssLink =
-        /** @type {!HTMLLinkElement} */(document.createElement('link'));
+      /** @type {!HTMLLinkElement} */(document.createElement('link'));
     await UiUtils.setupCSS(cssLink);
 
     compiledShaka =
@@ -81,7 +81,7 @@ describe('VR UI', () => {
     await UiUtils.cleanupUI();
   });
 
-  describe('equirectangular' , () => {
+  describe('equirectangular', () => {
     beforeEach(async () => {
       // Create VR UI
       const config = {
