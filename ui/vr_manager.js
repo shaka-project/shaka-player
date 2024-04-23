@@ -55,6 +55,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
 
     /** @private {boolean} */
     this.canPlayVR_ = false;
+    if (this.getGL_()) {
+      this.canPlayVR_ = true;
+    }
 
     /** @private {?shaka.ui.VRWebgl} */
     this.vrWebgl_ = null;
@@ -352,7 +355,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @private
    */
   getGL_() {
-    goog.asserts.assert(this.canvas_, 'Should have a canvas at this point!');
+    if (!this.canvas_) {
+      return null;
+    }
     const webglContexts = [
       'webgl2',
       'webgl',
