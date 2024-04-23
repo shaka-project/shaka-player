@@ -625,8 +625,7 @@ describe('StreamUtils', () => {
         shaka.util.StreamUtils.filterManifestByCurrentVariant =
           shaka.test.Util.spyFunc(filterManifestByCurrentVariantSpy);
 
-        await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest,
-            /* preferredKeySystems= */ []);
+        await shaka.util.StreamUtils.filterManifest(fakeDrmEngine, manifest);
 
         expect(filterManifestByCurrentVariantSpy).not.toHaveBeenCalled();
       } finally {
