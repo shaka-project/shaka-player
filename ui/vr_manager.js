@@ -53,6 +53,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     /** @private {shaka.util.EventManager} */
     this.eventManager_ = new shaka.util.EventManager();
 
+    /** @private {boolean} */
+    this.canPlayVR_ = false;
+
     /** @private {?shaka.ui.VRWebgl} */
     this.vrWebgl_ = null;
 
@@ -147,6 +150,15 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
   configure(config) {
     this.config_ = config;
     this.checkVrStatus_();
+  }
+
+  /**
+   * Returns if a VR is capable.
+   *
+   * @return {boolean}
+   */
+  canPlayVR() {
+    return this.canPlayVR_;
   }
 
   /**
@@ -326,9 +338,12 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     goog.asserts.assert(this.canvas_, 'Should have a canvas at this point!');
     const gl = this.getGL_();
     if (gl) {
+      this.canPlayVR_ = true;
       this.vrWebgl_ = new shaka.ui.VRWebgl(
           this.video_, this.player_, this.canvas_, gl, projectionMode);
       this.setupVRListerners_();
+    } else {
+      this.canPlayVR_ = false;
     }
   }
 

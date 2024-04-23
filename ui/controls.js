@@ -1754,6 +1754,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * Returns if a VR is capable.
+   *
+   * @return {boolean}
+   * @export
+   */
+  canPlayVR() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    return this.vr_.canPlayVR();
+  }
+
+  /**
    * Returns if a VR is supported.
    *
    * @return {boolean}
