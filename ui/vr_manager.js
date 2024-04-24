@@ -7,7 +7,6 @@
 
 goog.provide('shaka.ui.VRManager');
 
-goog.require('goog.asserts');
 goog.require('shaka.log');
 goog.require('shaka.ui.VRWebgl');
 goog.require('shaka.util.EventManager');
@@ -53,11 +52,8 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     /** @private {shaka.util.EventManager} */
     this.eventManager_ = new shaka.util.EventManager();
 
-    /** @private {boolean} */
-    this.canPlayVR_ = false;
-    if (this.getGL_()) {
-      this.canPlayVR_ = true;
-    }
+    /** @private {?WebGLRenderingContext} */
+    this.gl_ = this.getGL_();
 
     /** @private {?shaka.ui.VRWebgl} */
     this.vrWebgl_ = null;
@@ -161,7 +157,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @return {boolean}
    */
   canPlayVR() {
-    return this.canPlayVR_;
+    return !!this.gl_;
   }
 
   /**
@@ -338,15 +334,10 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @private
    */
   init_(projectionMode) {
-    goog.asserts.assert(this.canvas_, 'Should have a canvas at this point!');
-    const gl = this.getGL_();
-    if (gl) {
-      this.canPlayVR_ = true;
+    if (this.gl_ && this.canvas_) {
       this.vrWebgl_ = new shaka.ui.VRWebgl(
-          this.video_, this.player_, this.canvas_, gl, projectionMode);
+          this.video_, this.player_, this.canvas_, this.gl_, projectionMode);
       this.setupVRListerners_();
-    } else {
-      this.canPlayVR_ = false;
     }
   }
 
