@@ -876,6 +876,8 @@ shaka.extern.InitDataTransform;
  *   The child nodes or string body of the element
  * @property {?shaka.extern.xml.Node} parent
  *   The parent of the current element
+ *
+ * @exportDoc
  */
 shaka.extern.xml.Node;
 
