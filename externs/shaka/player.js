@@ -1755,6 +1755,23 @@ shaka.extern.OfflineConfiguration;
 
 /**
  * @typedef {{
+ *   captionsUpdatePeriod: number
+ * }}
+ *
+ * @description
+ *   Text displayer configuration.
+ *
+ * @property {number} captionsUpdatePeriod
+ *   The number of seconds to see if the captions should be updated.
+ *   Defaults to <code>0.25</code>.
+ *
+ * @exportDoc
+ */
+shaka.extern.TextDisplayerConfiguration;
+
+
+/**
+ * @typedef {{
  *   ads: shaka.extern.AdsConfiguration,
  *   autoShowText: shaka.config.AutoShowText,
  *   drm: shaka.extern.DrmConfiguration,
@@ -1784,6 +1801,7 @@ shaka.extern.OfflineConfiguration;
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
+ *   textDisplayer: shaka.extern.TextDisplayerConfiguration,
  *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
@@ -1870,6 +1888,8 @@ shaka.extern.OfflineConfiguration;
  * @property {number} playRangeEnd
  *   Optional playback and seek end time in seconds. Defaults to the end of
  *   the presentation if not provided.
+ * @property {shaka.extern.TextDisplayerConfiguration} textDisplayer
+ *   Text displayer configuration and settings.
  * @property {shaka.extern.TextDisplayer.Factory} textDisplayFactory
  *   A factory to construct a text displayer. Note that, if this is changed
  *   during playback, it will cause the text tracks to be reloaded.

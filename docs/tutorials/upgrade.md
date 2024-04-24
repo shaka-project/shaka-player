@@ -106,6 +106,8 @@ application:
     - `mediaSource.sourceBufferExtraFeatures` has been replaced with `mediaSource.addExtraFeaturesToSourceBuffer` callback.
 
   - Plugin changes:
+    - `TextDisplayer` plugins must implement the `configure()` method.
+    - `TextParser` plugins must implement the `setManifestType()` and `setSequenceMode()` methods.
     - `Transmuxer` plugins now has three new parameters in `transmux()` method.
 
   - Player API Changes:

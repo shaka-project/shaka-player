@@ -35,6 +35,9 @@ shaka.test.FakeTextDisplayer = class {
   }
 
   /** @override */
+  configure(config) {}
+
+  /** @override */
   append(cues) {
     const func = shaka.test.Util.spyFunc(this.appendSpy);
     return func(cues);
