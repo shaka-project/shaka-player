@@ -416,4 +416,25 @@ describe('tXml', () => {
     expect(TXml.parseFloat(HUGE_NUMBER_STRING)).toBe(Infinity);
     expect(TXml.parseFloat('-' + HUGE_NUMBER_STRING)).toBe(-Infinity);
   });
+
+  it('parseXpath', () => {
+    expect(TXml.parseXpath('/MPD')).toEqual([{name: 'MPD', id: null}]);
+    expect(TXml.parseXpath('/MPD/@type'))
+        .toEqual([{name: 'MPD', id: null}]);
+
+    const timelinePath = '/' + [
+      'MPD',
+      'Period[@id=\'6469\']',
+      'AdaptationSet[@id=\'7\']',
+      'SegmentTemplate',
+      'SegmentTimeline',
+    ].join('/');
+    expect(TXml.parseXpath(timelinePath)).toEqual([
+      {name: 'MPD', id: null},
+      {name: 'Period', id: '6469'},
+      {name: 'AdaptationSet', id: '7'},
+      {name: 'SegmentTemplate', id: null},
+      {name: 'SegmentTimeline', id: null},
+    ]);
+  });
 });
