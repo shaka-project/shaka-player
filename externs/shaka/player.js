@@ -827,7 +827,8 @@ shaka.extern.PersistentSessionMetadata;
  *   <i>Defaults to 1.</i> <br>
  *   The frequency in seconds with which to check the expiration of a session.
  * @property {!Array.<string>} preferredKeySystems
- *   <i>Defaults to an empty array. </i> <br>
+ *   <i>Defaults ['com.microsoft.playready'] on Xbox One and PlayStation 4, and
+ *   an empty array for all other browsers.</i> <br>
  *   Specifies the priorties of available DRM key systems.
  * @property {Object.<string, string>} keySystemsMapping
  *   A map of key system name to key system name.
