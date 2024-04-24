@@ -165,6 +165,9 @@ shakaAssets.Feature = {
 
   // Set if the asset has Content Steering.
   CONTENT_STEERING: 'Content Steering',
+
+  // Set if the asset supports MPD Patch.
+  MPD_PATCH: 'MPD Patch',
 };
 
 
@@ -989,6 +992,15 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.THUMBNAILS),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'DASH-IF MPD Patch - Live stream w/ SegmentTimeline (livesim)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/patch_60/segtimeline_1/testpic_2s/Manifest.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MPD_PATCH),
   // End DASH-IF Assets }}}
 
   // bitcodin assets {{{
