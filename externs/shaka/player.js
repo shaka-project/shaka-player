@@ -85,6 +85,8 @@ shaka.extern.StateChange;
  *   gapsJumped: number,
  *   stallsDetected: number,
  *
+ *   bytesDownloaded: number,
+ *
  *   switchHistory: !Array.<shaka.extern.TrackChoice>,
  *   stateHistory: !Array.<shaka.extern.StateChange>
  * }}
@@ -160,6 +162,9 @@ shaka.extern.StateChange;
  * @property {number} maxSegmentDuration
  *   The presentation's max segment duration in seconds. If nothing is loaded,
  *   NaN.
+ *
+ * @property {number} bytesDownloaded
+ *   The bytes downloaded during the playback. If nothing is loaded, NaN.
  *
  * @property {!Array.<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.
@@ -876,6 +881,8 @@ shaka.extern.InitDataTransform;
  *   The child nodes or string body of the element
  * @property {?shaka.extern.xml.Node} parent
  *   The parent of the current element
+ *
+ * @exportDoc
  */
 shaka.extern.xml.Node;
 
