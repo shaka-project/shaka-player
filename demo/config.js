@@ -93,6 +93,7 @@ shakaDemo.Config = class {
     this.addMssManifestSection_();
     this.addRetrySection_('manifest', 'Manifest Retry Parameters');
     this.addRetrictionsSection_('', 'Restrictions');
+    this.addTextDisplayerSection_();
     this.addCmcdSection_();
     this.addCmsdSection_();
     this.addLcevcSection_();
@@ -304,6 +305,15 @@ shakaDemo.Config = class {
             'abr.safeMarginSwitch',
             /* canBeDecimal= */ true);
     this.addRetrictionsSection_('abr', 'Adaptation Restrictions');
+  }
+
+  /** @private */
+  addTextDisplayerSection_() {
+    const docLink = this.resolveExternLink_('.TextDisplayerConfiguration');
+    this.addSection_('Text displayer', docLink)
+        .addNumberInput_('Captions update period',
+            'textDisplayer.captionsUpdatePeriod',
+            /* canBeDecimal= */ true);
   }
 
   /** @private */
