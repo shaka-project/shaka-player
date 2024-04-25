@@ -68,6 +68,8 @@ const ShakaDemoAssetInfo = class {
     this.clearKeys = new Map(); // TODO: Setter method?
     /** @type {?Object} */
     this.extraConfig = null;
+    /** @type {?Object} */
+    this.extraUiConfig = null;
     /** @type {?string} */
     this.adTagUri = null;
     /** @type {?string} */
@@ -186,6 +188,15 @@ const ShakaDemoAssetInfo = class {
    */
   setExtraConfig(extraConfig) {
     this.extraConfig = extraConfig;
+    return this;
+  }
+
+  /**
+   * @param {!Object} extraUiConfig
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setExtraUiConfig(extraUiConfig) {
+    this.extraUiConfig = extraUiConfig;
     return this;
   }
 

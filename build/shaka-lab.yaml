@@ -43,6 +43,8 @@ vars:
         - "--disable-backgrounding-occluded-windows"
         # Disable GPU acceleration to avoid contention for hardware resources
         # during parallel testing and to create more stability for screenshots.
+        # NOTE: This breaks WebGL-based tests, specifically on Mac.  Other
+        # platforms seem to fall back to software GL.
         - "--disable-gpu"
 
       # Instruct chromedriver not to disable component updater. The component

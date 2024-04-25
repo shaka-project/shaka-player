@@ -93,7 +93,9 @@ shaka.extern.UIVolumeBarColors;
  *   showAudioChannelCountVariants: boolean,
  *   seekOnTaps: boolean,
  *   tapSeekDistance: number,
- *   refreshTickInSeconds: number
+ *   refreshTickInSeconds: number,
+ *   displayInVrMode: boolean,
+ *   defaultVrProjectionMode: string
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -179,6 +181,7 @@ shaka.extern.UIVolumeBarColors;
  *   Defaults to true.
  * @property {boolean} singleClickForPlayAndPause
  *   Whether or not clicking on the video should cause it to play or pause.
+ *   It does not work in VR mode.
  *   Defaults to true.
  * @property {boolean} enableKeyboardPlaybackControls
  *   Whether or not playback controls via keyboard is enabled, such as seek
@@ -232,6 +235,15 @@ shaka.extern.UIVolumeBarColors;
  * @property {number} refreshTickInSeconds
  *   The time interval, in seconds, to update the seek bar.
  *   Defaults to 0.125 seconds.
+ * @property {boolean} displayInVrMode
+ *   If true, the content will be treated as VR.
+ *   If false, it will only be treated as VR if we automatically detect it as
+ *   such. (See the Enabling VR section in docs/tutorials/ui.md)
+ *   Defaults to false.
+ * @property {string} defaultVrProjectionMode
+ *   Indicate the default VR projection mode.
+ *   Possible values: <code>'equirectangular'</code> or <code>'cubemap'</code>.
+ *   Defaults to <code>'equirectangular'</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

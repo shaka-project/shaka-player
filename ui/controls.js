@@ -22,6 +22,7 @@ goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.SeekBar');
 goog.require('shaka.ui.Utils');
+goog.require('shaka.ui.VRManager');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
@@ -42,9 +43,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @param {!shaka.Player} player
    * @param {!HTMLElement} videoContainer
    * @param {!HTMLMediaElement} video
+   * @param {?HTMLCanvasElement} vrCanvas
    * @param {shaka.extern.UIConfiguration} config
    */
-  constructor(player, videoContainer, video, config) {
+  constructor(player, videoContainer, video, vrCanvas, config) {
     super();
 
     /** @private {boolean} */
@@ -75,6 +77,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @private {!HTMLElement} */
     this.videoContainer_ = videoContainer;
+
+    /** @private {?HTMLCanvasElement} */
+    this.vrCanvas_ = vrCanvas;
 
     /** @private {shaka.extern.IAdManager} */
     this.adManager_ = this.player_.getAdManager();
@@ -169,6 +174,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {shaka.util.EventManager} */
     this.eventManager_ = new shaka.util.EventManager();
 
+    /** @private {?shaka.ui.VRManager} */
+    this.vr_ = null;
+
     // Configure and create the layout of the controls
     this.configure(this.config_);
     this.addEventListeners_();
@@ -228,6 +236,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.timeAndSeekRangeTimer_) {
       this.timeAndSeekRangeTimer_.stop();
       this.timeAndSeekRangeTimer_ = null;
+    }
+
+    if (this.vr_) {
+      this.vr_.release();
+      this.vr_ = null;
     }
 
     // Important!  Release all child elements before destroying the cast proxy
@@ -334,6 +347,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.contextMenu_ = null;
     }
 
+    if (this.vr_) {
+      this.vr_.configure(config);
+    }
+
     if (this.controlsContainer_) {
       shaka.util.Dom.removeAllChildren(this.controlsContainer_);
       this.releaseChildElements_();
@@ -343,6 +360,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // re-created or uprooted in the DOM, even when the DOM is re-created,
       // since that seemingly breaks the IMA SDK.
       this.addClientAdContainer_();
+
+      goog.asserts.assert(
+          this.controlsContainer_, 'Should have a controlsContainer_!');
+      goog.asserts.assert(this.localVideo_, 'Should have a localVideo_!');
+      goog.asserts.assert(this.player_, 'Should have a player_!');
+      this.vr_ = new shaka.ui.VRManager(this.controlsContainer_, this.vrCanvas_,
+          this.localVideo_, this.player_, this.config_);
     }
 
     // Create the new layout
@@ -1172,6 +1196,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onCastStatusChange_();
     });
 
+    this.eventManager_.listen(this.vr_, 'vrstatuschanged', () => {
+      this.dispatchEvent(new shaka.util.FakeEvent('vrstatuschanged'));
+    });
+
     this.eventManager_.listen(this.videoContainer_, 'keydown', (e) => {
       this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
     });
@@ -1384,7 +1412,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   onContainerClick_() {
-    if (!this.enabled_) {
+    if (!this.enabled_ || this.isPlayingVR()) {
       return;
     }
 
@@ -1718,6 +1746,134 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @return {shaka.ui.VRManager}
+   */
+  getVR() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    return this.vr_;
+  }
+
+  /**
+   * Returns if a VR is capable.
+   *
+   * @return {boolean}
+   * @export
+   */
+  canPlayVR() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    return this.vr_.canPlayVR();
+  }
+
+  /**
+   * Returns if a VR is supported.
+   *
+   * @return {boolean}
+   * @export
+   */
+  isPlayingVR() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    return this.vr_.isPlayingVR();
+  }
+
+  /**
+   * Reset VR view.
+   */
+  resetVR() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    this.vr_.reset();
+  }
+
+  /**
+   * Get the angle of the north.
+   *
+   * @return {?number}
+   * @export
+   */
+  getVRNorth() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    return this.vr_.getNorth();
+  }
+
+  /**
+   * Returns the angle of the current field of view displayed in degrees.
+   *
+   * @return {?number}
+   * @export
+   */
+  getVRFieldOfView() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    return this.vr_.getFieldOfView();
+  }
+
+  /**
+   * Changing the field of view increases or decreases the portion of the video
+   * that is viewed at one time. If the field of view is decreased, a small
+   * part of the video will be seen, but with more detail. If the field of view
+   * is increased, a larger part of the video will be seen, but with less
+   * detail.
+   *
+   * @param {number} fieldOfView In degrees
+   * @export
+   */
+  setVRFieldOfView(fieldOfView) {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    this.vr_.setFieldOfView(fieldOfView);
+  }
+
+  /**
+   * Toggle stereoscopic mode.
+   *
+   * @export
+   */
+  toggleStereoscopicMode() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    this.vr_.toggleStereoscopicMode();
+  }
+
+  /**
+   * Returns true if stereoscopic mode is enabled.
+   *
+   * @return {boolean}
+   */
+  isStereoscopicModeEnabled() {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    return this.vr_.isStereoscopicModeEnabled();
+  }
+
+  /**
+   * Increment the yaw in X angle in degrees.
+   *
+   * @param {number} angle In degrees
+   * @export
+   */
+  incrementYaw(angle) {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    this.vr_.incrementYaw(angle);
+  }
+
+  /**
+   * Increment the pitch in X angle in degrees.
+   *
+   * @param {number} angle In degrees
+   * @export
+   */
+  incrementPitch(angle) {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    this.vr_.incrementPitch(angle);
+  }
+
+  /**
+   * Increment the roll in X angle in degrees.
+   *
+   * @param {number} angle In degrees
+   * @export
+   */
+  incrementRoll(angle) {
+    goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
+    this.vr_.incrementRoll(angle);
+  }
+
+  /**
    * Create a localization instance already pre-loaded with all the locales that
    * we support.
    *
@@ -1747,6 +1903,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
  * @property {boolean} newStatus
  *  The new status of the application. True for 'is casting' and
  *  false otherwise.
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#VRStatusChangedEvent
+ * @description Fired when VR status change
+ * @property {string} type
+ *   'vrstatuschanged'
  * @exportDoc
  */
 

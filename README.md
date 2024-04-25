@@ -317,6 +317,24 @@ Content Steering features **not** supported:
 - PATHWAY-CLONES other replacements than HOST.
 
 
+## VR support
+Shaka Player supports VR when:
+- Content is automatically treated as VR if it fits the following criteria:
+  - HLS or DASH manifest
+  - fMP4 segments
+  - Init segment contains `prji` and `hfov` boxes
+- Or, if it is manually enabled via the UI config.
+
+VR modes supported:
+- Equirectangular projection with 360 degrees of horizontal field of view.
+- Cubemap projection with 360 degrees of horizontal field of view.
+
+
+NOTES:
+  - VR is only supported for clear streams or HLS-AES stream. DRM prevents
+    access to the video pixels for transformation.
+
+
 ## Documentation & Important Links ##
 
  * [Demo](https://shaka-player-demo.appspot.com)([sources](demo/))
