@@ -13,6 +13,7 @@ goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IReleasable');
+goog.require('shaka.util.Platform');
 
 goog.requireType('shaka.Player');
 
@@ -347,6 +348,11 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    */
   getGL_() {
     if (!this.canvas_) {
+      return null;
+    }
+    // The user interface is not intended for devices that are controlled with
+    // a remote control, and WebGL may run slowly on these devices.
+    if (shaka.util.Platform.isSmartTV()) {
       return null;
     }
     const webglContexts = [
