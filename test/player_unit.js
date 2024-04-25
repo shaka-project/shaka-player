@@ -4477,7 +4477,7 @@ describe('Player', () => {
 
       await player.load(fakeManifestUri, 12, fakeMimeType);
 
-      expect(playhead.getTime()).toBe(10);
+      expect(shaka.test.Util.spyFunc(playhead.getTime)()).toBe(10);
     });
 
     it('does not fail with no segments', async () => {
