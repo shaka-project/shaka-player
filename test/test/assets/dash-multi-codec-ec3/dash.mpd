@@ -4,15 +4,6 @@
   xmlns:dolby="http://www.dolby.com/ns/online/DASH"
   xmlns="urn:mpeg:dash:schema:mpd:2011" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT0H1M11.880S" minBufferTime="PT1.2S" profiles="urn:mpeg:dash:profile:isoff-on-demand:2011">
   <Period>
-    <!-- Video -->
-    <AdaptationSet mimeType="video/mp4" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
-      <Representation id="1" codecs="avc1.4d4028" bandwidth="3506260" width="1280" height="720" frameRate="25">
-        <BaseURL>Living-Room-51_720p_25fps_h264.mp4</BaseURL>
-        <SegmentBase indexRange="759-1222">
-          <Initialization range="0-758"/>
-        </SegmentBase>
-      </Representation>
-    </AdaptationSet>
     <!-- Audio -->
     <AdaptationSet mimeType="audio/mp4" lang="es" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
       <Accessibility schemeIdUri="urn:tva:metadata:cs:AudioPurposeCS:2007" value="6"/>
