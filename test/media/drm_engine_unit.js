@@ -2296,6 +2296,7 @@ describe('DrmEngine', () => {
       const drmInfo = drmEngine.getDrmInfo();
       expect(drmInfo).toEqual({
         keySystem: 'drm.abc',
+        encryptionScheme: '',
         licenseServerUri: 'http://abc.drm/license',
         distinctiveIdentifierRequired: true,
         persistentStateRequired: true,

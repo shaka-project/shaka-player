@@ -181,6 +181,7 @@ shaka.extern.ServiceDescription;
 /**
  * @typedef {{
  *   keySystem: string,
+ *   encryptionScheme: string,
  *   licenseServerUri: string,
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
@@ -199,6 +200,9 @@ shaka.extern.ServiceDescription;
  * @property {string} keySystem
  *   <i>Required.</i> <br>
  *   The key system, e.g., "com.widevine.alpha".
+ * @property {string} encryptionScheme
+ *   <i>Required.</i> <br>
+ *   The encryption scheme, e.g., "cenc", "cbcs", "cbcs-1-9".
  * @property {string} licenseServerUri
  *   <i>Filled in by DRM config if missing.</i> <br>
  *   The license server URI.

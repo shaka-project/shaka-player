@@ -391,6 +391,8 @@ shaka.test.ManifestGenerator.DrmInfo = class {
     /** @type {string} */
     this.keySystem = keySystem;
     /** @type {string} */
+    this.encryptionScheme = '';
+    /** @type {string} */
     this.licenseServerUri = '';
     /** @type {boolean} */
     this.distinctiveIdentifierRequired = false;
