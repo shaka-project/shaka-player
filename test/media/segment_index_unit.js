@@ -742,6 +742,40 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       expect(iterator.current()).toBe(null);
     });
 
+    it('reverse iteration', () => {
+      const refs = inputRefs.slice();
+      const index = new shaka.media.SegmentIndex(refs);
+
+      // This simulates the pattern of calls in StreamingEngine when we buffer
+      // to the edge of a live stream.
+      const iterator = index[Symbol.iterator]();
+      iterator.next();
+      expect(iterator.current()).toBe(inputRefs[0]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(inputRefs[1]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(inputRefs[2]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(null);
+
+      iterator.setReverse(true);
+
+      iterator.next();
+      expect(iterator.current()).toBe(inputRefs[2]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(inputRefs[1]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(inputRefs[0]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(null);
+    });
+
     describe('getIteratorForTime', () => {
       it('begins with an independent partial segment', () => {
         // This test contains its own segment refs, which are manipulated to
