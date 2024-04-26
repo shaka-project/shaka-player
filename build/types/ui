@@ -28,6 +28,7 @@
 +../../ui/playback_rate_selection.js
 +../../ui/presentation_time.js
 +../../ui/range_element.js
++../../ui/recenter_vr.js
 +../../ui/remote_button.js
 +../../ui/resolution_selection.js
 +../../ui/rewind_button.js
@@ -38,6 +39,13 @@
 +../../ui/spacer.js
 +../../ui/statistics_button.js
 +../../ui/text_selection.js
++../../ui/toggle_stereoscopic.js
 +../../ui/ui.js
 +../../ui/ui_utils.js
 +../../ui/volume_bar.js
++../../ui/vr_manager.js
++../../ui/vr_utils.js
++../../ui/vr_webgl.js
+
++../../ui/gl_matrix/matrix_4x4.js
++../../ui/gl_matrix/matrix_quaternion.js

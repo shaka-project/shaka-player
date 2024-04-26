@@ -100,6 +100,31 @@ document.addEventListener('shaka-ui-load-failed', initFailed);
 ```
 
 
+#### Enabling VR
+
+To enable the playback of VR content, there are two possibilities:
+
+1. Enable via UI config:
+```js
+const config = {
+  'displayInVrMode': true
+}
+ui.configure(config);
+```
+
+2. Content is automatically treated as VR if it fits the following criteria:
+ - HLS or DASH manifest
+ - fMP4 segments
+ - Init segment contains `prji` and `hfov` boxes
+
+
+If you want the VR to be rendered outside of the main container, add the
+`data-shaka-player-vr-canvas` tag to a canvas element on the page.
+
+Note: VR is only supported for clear streams or HLS-AES stream. DRM prevents
+access to the video pixels for transformation.
+
+
 #### Enabling Chromecast support
 
 If you'd like to take advantage of Shaka's built-in Chromecast support,

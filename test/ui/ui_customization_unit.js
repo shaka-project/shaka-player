@@ -12,6 +12,8 @@ describe('UI Customization', () => {
   let container;
   /** @type {!HTMLMediaElement} */
   let video;
+  /** @type {!HTMLCanvasElement} */
+  let canvas;
 
   beforeAll(async () => {
     // Add css file
@@ -34,11 +36,13 @@ describe('UI Customization', () => {
 
     video = shaka.test.UiUtils.createVideoElement();
     container.appendChild(video);
+    canvas = shaka.test.UiUtils.createCanvasElement();
+    container.appendChild(canvas);
   });
 
   it('only the specified controls are created', async () => {
     const config = {controlPanelElements: ['time_and_duration', 'mute']};
-    await UiUtils.createUIThroughAPI(container, video, config);
+    await UiUtils.createUIThroughAPI(container, video, config, canvas);
 
     // Only current time and mute button should've been created
     UiUtils.confirmElementFound(container, 'shaka-current-time');
@@ -51,7 +55,7 @@ describe('UI Customization', () => {
 
   it('only the specified overflow menu buttons are created', async () => {
     const config = {overflowMenuButtons: ['cast']};
-    await UiUtils.createUIThroughAPI(container, video, config);
+    await UiUtils.createUIThroughAPI(container, video, config, canvas);
 
     UiUtils.confirmElementFound(container, 'shaka-cast-button');
 
@@ -60,30 +64,31 @@ describe('UI Customization', () => {
 
   it('seek bar only created when configured', async () => {
     const ui = await UiUtils.createUIThroughAPI(
-        container, video, {addSeekBar: false});
+        container, video, {addSeekBar: false}, canvas);
     UiUtils.confirmElementMissing(container, 'shaka-seek-bar');
     await ui.destroy();
 
-    await UiUtils.createUIThroughAPI(container, video, {addSeekBar: true});
+    await UiUtils.createUIThroughAPI(
+        container, video, {addSeekBar: true}, canvas);
     UiUtils.confirmElementFound(container, 'shaka-seek-bar');
   });
 
   it('big play button only created when configured', async () => {
     const ui = await UiUtils.createUIThroughAPI(
-        container, video, {addBigPlayButton: false});
+        container, video, {addBigPlayButton: false}, canvas);
     UiUtils.confirmElementMissing(container, 'shaka-play-button-container');
     UiUtils.confirmElementMissing(container, 'shaka-play-button');
     await ui.destroy();
 
     await UiUtils.createUIThroughAPI(
-        container, video, {addBigPlayButton: true});
+        container, video, {addBigPlayButton: true}, canvas);
     UiUtils.confirmElementFound(container, 'shaka-play-button-container');
     UiUtils.confirmElementFound(container, 'shaka-play-button');
   });
 
   it('settings menus are lower when seek bar is absent', async () => {
     const config = {addSeekBar: false};
-    await UiUtils.createUIThroughAPI(container, video, config);
+    await UiUtils.createUIThroughAPI(container, video, config, canvas);
 
     function confirmLowPosition(className) {
       const elements =
@@ -111,7 +116,7 @@ describe('UI Customization', () => {
       ],
     };
 
-    await UiUtils.createUIThroughAPI(container, video, config);
+    await UiUtils.createUIThroughAPI(container, video, config, canvas);
 
     const controlsButtonPanels =
         container.getElementsByClassName('shaka-controls-button-panel');
@@ -132,7 +137,8 @@ describe('UI Customization', () => {
 
   it('layout can be re-configured after the creation', async () => {
     const config = {controlPanelElements: ['time_and_duration', 'mute']};
-    const ui = await UiUtils.createUIThroughAPI(container, video, config);
+    const ui = await UiUtils.createUIThroughAPI(
+        container, video, config, canvas);
 
     // Only current time and mute button should've been created
     UiUtils.confirmElementFound(container, 'shaka-current-time');
@@ -178,7 +184,8 @@ describe('UI Customization', () => {
   it('cast proxy and controls are unchanged by reconfiguration', async () => {
     const config = {controlPanelElements: ['time_and_duration', 'mute']};
     /** @type {!shaka.ui.Overlay} */
-    const ui = await UiUtils.createUIThroughAPI(container, video, config);
+    const ui = await UiUtils.createUIThroughAPI(
+        container, video, config, canvas);
 
     const eventManager = new shaka.util.EventManager();
     const waiter = new shaka.test.Waiter(eventManager);

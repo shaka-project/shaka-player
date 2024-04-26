@@ -827,7 +827,8 @@ shaka.extern.PersistentSessionMetadata;
  *   <i>Defaults to 1.</i> <br>
  *   The frequency in seconds with which to check the expiration of a session.
  * @property {!Array.<string>} preferredKeySystems
- *   <i>Defaults to an empty array. </i> <br>
+ *   <i>Defaults ['com.microsoft.playready'] on Xbox One and PlayStation 4, and
+ *   an empty array for all other browsers.</i> <br>
  *   Specifies the priorties of available DRM key systems.
  * @property {Object.<string, string>} keySystemsMapping
  *   A map of key system name to key system name.
@@ -1754,6 +1755,23 @@ shaka.extern.OfflineConfiguration;
 
 /**
  * @typedef {{
+ *   captionsUpdatePeriod: number
+ * }}
+ *
+ * @description
+ *   Text displayer configuration.
+ *
+ * @property {number} captionsUpdatePeriod
+ *   The number of seconds to see if the captions should be updated.
+ *   Defaults to <code>0.25</code>.
+ *
+ * @exportDoc
+ */
+shaka.extern.TextDisplayerConfiguration;
+
+
+/**
+ * @typedef {{
  *   ads: shaka.extern.AdsConfiguration,
  *   autoShowText: shaka.config.AutoShowText,
  *   drm: shaka.extern.DrmConfiguration,
@@ -1783,6 +1801,7 @@ shaka.extern.OfflineConfiguration;
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
+ *   textDisplayer: shaka.extern.TextDisplayerConfiguration,
  *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
@@ -1869,6 +1888,8 @@ shaka.extern.OfflineConfiguration;
  * @property {number} playRangeEnd
  *   Optional playback and seek end time in seconds. Defaults to the end of
  *   the presentation if not provided.
+ * @property {shaka.extern.TextDisplayerConfiguration} textDisplayer
+ *   Text displayer configuration and settings.
  * @property {shaka.extern.TextDisplayer.Factory} textDisplayFactory
  *   A factory to construct a text displayer. Note that, if this is changed
  *   during playback, it will cause the text tracks to be reloaded.

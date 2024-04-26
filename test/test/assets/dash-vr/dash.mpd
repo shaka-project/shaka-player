@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MPD id="1" profiles="urn:mpeg:dash:profile:isoff-main:2011" type="static" availabilityStartTime="2016-01-14T09:30:35.000Z" publishTime="2016-01-14T09:31:33.000Z" mediaPresentationDuration="P0Y0M0DT0H2M17.000S" xmlns="urn:mpeg:dash:schema:mpd:2011">
+    <Period>
+        <AdaptationSet mimeType="video/mp4" codecs="avc1.42c00d">
+            <SegmentTemplate media="segment_$Number$.m4s" initialization="init.mp4" duration="120119" startNumber="0" timescale="30000"/>
+            <Representation id="360_1000000" bandwidth="1000000" width="720" height="360" frameRate="30"/>
+        </AdaptationSet>
+    </Period>
+</MPD>

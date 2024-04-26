@@ -1696,6 +1696,7 @@ filterDescribe('Storage', storageSupport, () => {
   function makeDrmInfo() {
     const drmInfo = {
       keySystem: 'com.example.abc',
+      encryptionScheme: 'example',
       licenseServerUri: 'http://example.com',
       persistentStateRequired: true,
       distinctiveIdentifierRequired: false,

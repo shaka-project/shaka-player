@@ -1294,6 +1294,15 @@ shakaDemo.Main = class {
 
       await this.drmConfiguration_(asset);
       this.controls_.getCastProxy().setAppData({'asset': asset});
+      const ui = this.video_['ui'];
+      if (asset.extraUiConfig) {
+        ui.configure(asset.extraUiConfig);
+      } else {
+        const uiConfig = {
+          displayInVrMode: false,
+        };
+        ui.configure(uiConfig);
+      }
 
       // Finally, the asset can be loaded.
       if (asset.preloadManager) {
