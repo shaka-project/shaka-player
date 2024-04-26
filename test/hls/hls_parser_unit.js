@@ -3630,7 +3630,7 @@ describe('HlsParser', () => {
           stream.encrypted = true;
           stream.addDrmInfo('com.apple.fps', (drmInfo) => {
             drmInfo.addInitData('sinf', new Uint8Array(0));
-            drmInfo.encryptionScheme = 'cbcs-1-9';
+            drmInfo.encryptionScheme = 'cenc';
           });
         });
       });
@@ -3900,7 +3900,7 @@ describe('HlsParser', () => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
             stream.addDrmInfo('com.apple.fps', (drmInfo) => {
               drmInfo.addInitData('sinf', new Uint8Array(0));
-              drmInfo.encryptionScheme = 'cbcs-1-9';
+              drmInfo.encryptionScheme = 'cenc';
             });
           });
         });
@@ -3908,7 +3908,7 @@ describe('HlsParser', () => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
             stream.addDrmInfo('com.apple.fps', (drmInfo) => {
               drmInfo.addInitData('sinf', new Uint8Array(0));
-              drmInfo.encryptionScheme = 'cbcs-1-9';
+              drmInfo.encryptionScheme = 'cenc';
             });
           });
         });
