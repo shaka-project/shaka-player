@@ -5,6 +5,8 @@
  */
 
 describe('Codec Switching', () => {
+  const Util = shaka.test.Util;
+
   /** @type {!HTMLVideoElement} */
   let video;
   /** @type {shaka.Player} */
@@ -35,6 +37,12 @@ describe('Codec Switching', () => {
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
     waiter.setPlayer(player);
+
+    const onErrorSpy = jasmine.createSpy('onError');
+    onErrorSpy.and.callFake((event) => {
+      fail(event.detail);
+    });
+    eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
   });
 
   afterEach(async () => {
