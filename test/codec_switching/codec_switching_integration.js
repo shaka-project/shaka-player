@@ -200,7 +200,7 @@ describe('Codec Switching', () => {
 
   describe('for audio aac -> ec3', () => {
     it('can switch codecs RELOAD', async () => {
-      if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec3"')) {
+      if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec-3"')) {
         pending('Codec EC3 in MP4 is not supported by the platform.');
       }
 
@@ -238,7 +238,7 @@ describe('Codec Switching', () => {
         pending('Mediasource.ChangeType is not considered ' +
           'reliable on this device');
       }
-      if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec3"')) {
+      if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec-3"')) {
         pending('Codec EC3 in MP4 is not supported by the platform.');
       }
 
@@ -274,7 +274,7 @@ describe('Codec Switching', () => {
 
   describe('for audio ec3 -> aac', () => {
     it('can switch codecs RELOAD', async () => {
-      if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec3"')) {
+      if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec-3"')) {
         pending('Codec EC3 in MP4 is not supported by the platform.');
       }
 
@@ -312,7 +312,7 @@ describe('Codec Switching', () => {
         pending('Mediasource.ChangeType is not considered ' +
           'reliable on this device');
       }
-      if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec3"')) {
+      if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec-3"')) {
         pending('Codec EC3 in MP4 is not supported by the platform.');
       }
 
