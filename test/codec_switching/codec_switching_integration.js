@@ -249,7 +249,7 @@ describe('Codec Switching', () => {
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 
       await player.load(
-          '/base/test/test/assets/dash-multi-codec-ec3/dash.mpd', 9);
+          '/base/test/test/assets/dash-multi-codec-ec3/dash.mpd', 1);
       await video.play();
       await waiter.waitForMovementOrFailOnTimeout(video, 1);
 
@@ -335,7 +335,7 @@ describe('Codec Switching', () => {
       expect(variants.find((v) => !!v.active).language).toBe('es');
 
       // English is AAC MP4.
-      player.selectAudioLanguage('es');
+      player.selectAudioLanguage('en');
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 45);
 
       variants = player.getVariantTracks();
