@@ -20,13 +20,29 @@ Candidate features for future release cycles:
 v5.0 - 2024 Q4
  - Conversion to Typescript
 
+v4.9 - 2024 Q3
+ - DASH patch manifests
+   https://github.com/shaka-project/shaka-player/issues/2228
+
+=====
+
 v4.8 - 2024 Q2
  - Preload API
    https://github.com/shaka-project/shaka-player/issues/880
+ - AES-256 and AES-256-CTR (HLS)
+   https://github.com/shaka-project/shaka-player/issues/6001
+ - Detect maximum HW resolution automatically on some platforms
+
+v4.7 - 2023 Q4
  - Common Media Server Data (CMSD)
    https://github.com/shaka-project/shaka-player/issues/5890
-
-=====
+ - DASH: Handle mixed-codec variants
+   https://github.com/shaka-project/shaka-player/issues/5961
+ - Allow Media Source Recoveries
+ - UI: Add double tap to forward/rewind in the video
+   https://github.com/shaka-project/shaka-player/issues/3357
+ - Improve npm package size
+   https://github.com/shaka-project/shaka-player/issues/2172
 
 v4.6 - 2023 Q4
  - Content Steering
