@@ -235,7 +235,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Use stream once in period flattening',
             'manifest.dash.useStreamOnceInPeriodFlattening')
         .addNumberInput_('override the Update period of dash manifest',
-            'manifest.dash.updatePeriod');
+            'manifest.dash.updatePeriod')
+        .addBoolInput_('Enable fast switching',
+            'manifest.dash.enableFastSwitching');
   }
 
   /** @private */
