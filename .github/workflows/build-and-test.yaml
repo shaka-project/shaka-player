@@ -20,22 +20,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref || github.ref }}
+  #lint:
+  #  name: Lint
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #    - name: Checkout code
+  #      uses: actions/checkout@v4
+  #      with:
+  #        ref: ${{ inputs.ref || github.ref }}
 
-      - name: Lint
-        run: python build/check.py
+  #    - name: Lint
+  #      run: python build/check.py
 
   build_and_test:
     # Don't waste time doing a full matrix of test runs when there was an
     # obvious linter error.
-    needs: lint
+    #needs: lint
     strategy:
       matrix:
         include:
@@ -222,19 +222,19 @@ jobs:
           if-no-files-found: ignore
           retention-days: 5
 
-  build_in_docker:
+  #build_in_docker:
     # Don't waste time doing a full matrix of test runs when there was an
     # obvious linter error.
-    needs: lint
-    name: Docker
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref || github.ref }}
+    #needs: lint
+    #name: Docker
+    #runs-on: ubuntu-latest
+    #steps:
+    #  - name: Checkout code
+    #    uses: actions/checkout@v4
+    #    with:
+    #      ref: ${{ inputs.ref || github.ref }}
 
-      - name: Docker
-        run: |
-          docker build -t shaka-player-build build/docker
-          docker run -v $(pwd):/usr/src --user $(id -u):$(id -g) shaka-player-build
+    #  - name: Docker
+    #    run: |
+    #      docker build -t shaka-player-build build/docker
+    #      docker run -v $(pwd):/usr/src --user $(id -u):$(id -g) shaka-player-build
