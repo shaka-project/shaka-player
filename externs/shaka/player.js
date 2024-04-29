@@ -436,11 +436,16 @@ shaka.extern.Restrictions;
 
 /**
  * @typedef {{
- *   persistentState: boolean
+ *   persistentState: boolean,
+ *   encryptionSchemes: !Array<string>
  * }}
  *
  * @property {boolean} persistentState
  *   Whether this key system supports persistent state.
+ * @property {!Array<string|null>} encryptionSchemes
+ *   An array of encryption schemes that are reported to work, through either
+ *   EME or MCap APIs. An empty array indicates that encryptionScheme queries
+ *   are not supported. This should not happen if our polyfills are installed.
  * @exportDoc
  */
 shaka.extern.DrmSupportType;
