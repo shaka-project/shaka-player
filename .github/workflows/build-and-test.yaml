@@ -127,10 +127,10 @@ jobs:
         run: choco install -y googlechrome --ignore-checksums
 
       # Firefox and Edge might be missing on Mac CI images.
-      - name: 'Install "Firefox" on Mac'
+      - name: 'Install Firefox on Mac'
         if: matrix.os == 'macos-latest' && matrix.browser == 'Firefox'
         run: brew install --cask firefox
-      - name: 'Install "Edge" on Mac'
+      - name: 'Install Edge on Mac'
         if: matrix.os == 'macos-latest' && matrix.browser == 'Edge'
         run: brew install --cask microsoft-edge
 
@@ -141,8 +141,8 @@ jobs:
           distribution: zulu
           java-version: 11
 
-      #- name: Build Player
-      #  run: python build/all.py
+      - name: Build Player
+        run: python build/all.py
 
       - name: Test Player
         shell: bash
