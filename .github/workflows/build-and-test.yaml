@@ -133,6 +133,13 @@ jobs:
           distribution: zulu
           java-version: 11
 
+      - name: DEBUG
+        run: |
+          npm ci
+          ./node_modules/.bin/webdriver-installer
+          ls /Users/runner/.webdriver-installer-cache/
+          exit 1
+
       - name: Build Player
         run: python build/all.py
 
