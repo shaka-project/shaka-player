@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.8.1](https://github.com/shaka-project/shaka-player/compare/v4.8.0...v4.8.1) (2024-04-29)
+
+
+### Bug Fixes
+
+* **DASH:** decrease memory preasure on manifest with SegmentReference by updating old initSegmentReference ([#6499](https://github.com/shaka-project/shaka-player/issues/6499)) ([ad6944f](https://github.com/shaka-project/shaka-player/commit/ad6944fb756dacdf7554d818cb095db06ac5645e))
+* **DASH:** Fix unescape UTCTiming uris ([#6501](https://github.com/shaka-project/shaka-player/issues/6501)) ([cd98bcd](https://github.com/shaka-project/shaka-player/commit/cd98bcd57b96e03e5c1c1cdbc0ae42eb5cca4d14))
+* Fix deprecation warning for manifestPreprocessor that is always logged ([#6496](https://github.com/shaka-project/shaka-player/issues/6496)) ([f5e7a82](https://github.com/shaka-project/shaka-player/commit/f5e7a82002ff39dc443159d6cd6587599c21ff8b))
+* Fix flac detection in Safari ([#6497](https://github.com/shaka-project/shaka-player/issues/6497)) ([c91867f](https://github.com/shaka-project/shaka-player/commit/c91867fb982d03643f3909fa03fa1bea36064723))
+* Fix inefficient buffering behavior with negative trick play rate ([#6489](https://github.com/shaka-project/shaka-player/issues/6489)) ([8daec03](https://github.com/shaka-project/shaka-player/commit/8daec039cc19d65985e2e92817c8ed9ab0e6930a))
+
 ## [4.8.0](https://github.com/shaka-project/shaka-player/compare/v4.7.0...v4.8.0) (2024-04-26)
 
 
