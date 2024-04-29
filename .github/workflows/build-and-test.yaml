@@ -137,7 +137,10 @@ jobs:
         run: |
           npm ci
           ./node_modules/.bin/webdriver-installer
-          ls /Users/runner/.webdriver-installer-cache/
+          set +e
+          ls ~/.webdriver-installer-cache/
+          ls /Applications/
+          osascript -e 'tell application "Firefox" to get version'
           exit 1
 
       - name: Build Player
