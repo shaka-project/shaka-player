@@ -34,7 +34,7 @@ describe('Codec Switching', () => {
     // Disable allow MediaSource recoveries, which can interfere with playback
     // tests.
     player.configure('streaming.allowMediaSourceRecoveries', false);
-    
+
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
 
