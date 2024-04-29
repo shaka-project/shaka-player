@@ -156,7 +156,7 @@ jobs:
           else
             APPSPOT_PROMOTE=false
           fi
-          APPSPOT_PROMOTE=$APPSPOT_PROMOTE >> $GITHUB_ENV
+          echo APPSPOT_PROMOTE=$APPSPOT_PROMOTE >> $GITHUB_ENV
 
           # Debug the decisions made here.
           echo "Subdomain: $APPSPOT_SUBDOMAIN"
