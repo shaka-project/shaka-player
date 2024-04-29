@@ -31,6 +31,10 @@ describe('Codec Switching', () => {
     player = new compiledShaka.Player();
     await player.attach(video);
 
+    // Disable allow MediaSource recoveries, which can interfere with playback
+    // tests.
+    player.configure('streaming.allowMediaSourceRecoveries', false);
+    
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
 
