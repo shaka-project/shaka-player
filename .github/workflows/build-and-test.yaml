@@ -141,18 +141,8 @@ jobs:
           distribution: zulu
           java-version: 11
 
-      - name: DEBUG
-        run: |
-          npm ci
-          ./node_modules/.bin/webdriver-installer
-          set +e
-          ls ~/.webdriver-installer-cache/
-          ls /Applications/
-          osascript -e 'tell application "Firefox" to get version'
-          exit 1
-
-      - name: Build Player
-        run: python build/all.py
+      #- name: Build Player
+      #  run: python build/all.py
 
       - name: Test Player
         shell: bash
