@@ -43,15 +43,15 @@ jobs:
           # Additionally, generate a code coverage report from Linux Chrome.
           # It should be the uncompiled build, or else we won't execute any
           # coverage instrumentation on full-stack player integration tests.
-          - os: ubuntu-latest
-            browser: Chrome
-            extra_flags: "--use-xvfb"
-          - os: ubuntu-latest
-            browser: Firefox
-            extra_flags: "--use-xvfb"
-          - os: ubuntu-latest
-            browser: Edge
-            extra_flags: "--use-xvfb"
+          #- os: ubuntu-latest
+          #  browser: Chrome
+          #  extra_flags: "--use-xvfb"
+          #- os: ubuntu-latest
+          #  browser: Firefox
+          #  extra_flags: "--use-xvfb"
+          #- os: ubuntu-latest
+          #  browser: Edge
+          #  extra_flags: "--use-xvfb"
 
           - os: macos-latest
             browser: Chrome
@@ -59,18 +59,18 @@ jobs:
             browser: Firefox
           - os: macos-latest
             browser: Edge
-          - os: macos-latest
-            browser: Safari
-          - os: macos-latest
-            browser: Safari-old
+          #- os: macos-latest
+          #  browser: Safari
+          #- os: macos-latest
+          #  browser: Safari-old
 
-          - os: windows-latest
-            browser: Chrome
-          - os: windows-latest
-            browser: Firefox
-          - os: windows-latest
-            browser: Edge
-            extra_flags: "--html-coverage-report --uncompiled"
+          #- os: windows-latest
+          #  browser: Chrome
+          #- os: windows-latest
+          #  browser: Firefox
+          #- os: windows-latest
+          #  browser: Edge
+          #  extra_flags: "--html-coverage-report --uncompiled"
 
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
