@@ -346,7 +346,6 @@ describe('Playhead', () => {
 
     // This is important for recovering from drift.
     // See: https://github.com/shaka-project/shaka-player/issues/1105
-    // TODO: Re-evaluate after https://github.com/shaka-project/shaka-player/issues/999
     it('does not change once the initial position is set', () => {
       timeline.isLive.and.returnValue(true);
       timeline.getDuration.and.returnValue(Infinity);
