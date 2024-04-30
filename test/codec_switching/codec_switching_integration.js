@@ -19,6 +19,21 @@ describe('Codec Switching', () => {
   /** @type {!shaka.test.Waiter} */
   let waiter;
 
+  function isEc3Supported() {
+    if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec-3"')) {
+      return false;
+    }
+    // It seems that EC3 on Edge Windows from github actions is not working
+    // (in the lab EC3 is working). The EC3 detection is currently hard-coded
+    // to true, which leads to a failure in GitHub's environment.
+    // We must enable this, once it is resolved:
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
+    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge()) {
+      return false;
+    }
+    return true;
+  }
+
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
@@ -204,7 +219,7 @@ describe('Codec Switching', () => {
 
   describe('for audio aac -> ec3', () => {
     it('can switch codecs RELOAD', async () => {
-      if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec-3"')) {
+      if (!isEc3Supported()) {
         pending('Codec EC3 in MP4 is not supported by the platform.');
       }
 
@@ -242,7 +257,7 @@ describe('Codec Switching', () => {
         pending('Mediasource.ChangeType is not considered ' +
           'reliable on this device');
       }
-      if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec-3"')) {
+      if (!isEc3Supported()) {
         pending('Codec EC3 in MP4 is not supported by the platform.');
       }
 
@@ -278,7 +293,7 @@ describe('Codec Switching', () => {
 
   describe('for audio ec3 -> aac', () => {
     it('can switch codecs RELOAD', async () => {
-      if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec-3"')) {
+      if (!isEc3Supported()) {
         pending('Codec EC3 in MP4 is not supported by the platform.');
       }
 
@@ -316,7 +331,7 @@ describe('Codec Switching', () => {
         pending('Mediasource.ChangeType is not considered ' +
           'reliable on this device');
       }
-      if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec-3"')) {
+      if (!isEc3Supported()) {
         pending('Codec EC3 in MP4 is not supported by the platform.');
       }
 
