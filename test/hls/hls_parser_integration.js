@@ -26,12 +26,11 @@ describe('HlsParser', () => {
   let waiter;
 
   function checkClearKeySupport() {
-    // Some versions of Tizen doesn't support CBCS, so omit it for now.
-    // See: https://github.com/shaka-project/shaka-player/issues/1419
-    if (shaka.util.Platform.isTizen()) {
+    const clearKeySupport = support['org.w3.clearkey'];
+    if (!clearKeySupport) {
       return false;
     }
-    return support['org.w3.clearkey'];
+    return clearKeySupport.encryptionSchemes.includes('cbcs');
   }
 
   beforeAll(async () => {
