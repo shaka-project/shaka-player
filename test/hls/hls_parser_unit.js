@@ -4032,6 +4032,38 @@ describe('HlsParser', () => {
     });
   });
 
+  it('Preload AES key with EXT-X-SESSION-KEY', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
+      'RESOLUTION=960x540,FRAME-RATE=30\n',
+      'video\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1.4d401f",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'video2\n',
+      '#EXT-X-SESSION-KEY:METHOD=AES-128,',
+      'URI="800k.key"\n',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO);
+      });
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO);
+      });
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+    });
+
+    fakeNetEngine.setResponseText('test:/master', master)
+        .setResponseValue('test:/800k.key', aesKey);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    expect(actual).toEqual(manifest);
+  });
+
   it('falls back to mp4 if HEAD request fails', async () => {
     const master = [
       '#EXTM3U\n',

@@ -70,6 +70,8 @@ describe('StreamingEngine', () => {
   let onSegmentAppended;
   /** @type {!jasmine.Spy} */
   let getBandwidthEstimate;
+  /** @type {!jasmine.Spy} */
+  let getPlaybackRate;
   /** @type {!shaka.media.StreamingEngine} */
   let streamingEngine;
   /** @type {!jasmine.Spy} */
@@ -441,6 +443,8 @@ describe('StreamingEngine', () => {
     onMetadata = jasmine.createSpy('onMetadata');
     getBandwidthEstimate = jasmine.createSpy('getBandwidthEstimate');
     getBandwidthEstimate.and.returnValue(1e3);
+    getPlaybackRate = jasmine.createSpy('getPlaybackRate');
+    getPlaybackRate.and.returnValue(1);
     disableStream = jasmine.createSpy('disableStream');
     disableStream.and.callFake(() => false);
 
@@ -462,6 +466,7 @@ describe('StreamingEngine', () => {
     const playerInterface = {
       getPresentationTime: () => presentationTimeInSeconds,
       getBandwidthEstimate: Util.spyFunc(getBandwidthEstimate),
+      getPlaybackRate: Util.spyFunc(getPlaybackRate),
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
       onError: Util.spyFunc(onError),

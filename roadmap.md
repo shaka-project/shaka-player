@@ -20,6 +20,12 @@ Candidate features for future release cycles:
 v5.0 - 2024 Q4
  - Conversion to Typescript
 
+v4.9 - 2024 Q3
+ - DASH patch manifests
+   https://github.com/shaka-project/shaka-player/issues/2228
+
+=====
+
 v4.8 - 2024 Q2
  - Preload API
    https://github.com/shaka-project/shaka-player/issues/880
@@ -27,8 +33,6 @@ v4.8 - 2024 Q2
    https://github.com/shaka-project/shaka-player/issues/6001
  - Detect maximum HW resolution automatically on some platforms
  - UI support for VR content
-
-=====
 
 v4.7 - 2023 Q4
  - Common Media Server Data (CMSD)

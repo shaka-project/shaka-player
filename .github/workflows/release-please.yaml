@@ -32,7 +32,7 @@ jobs:
   tag-main:
     runs-on: ubuntu-latest
     needs: release
-    if: needs.release.outputs.release_created && needs.release.outputs.patch == '0'
+    if: needs.release.outputs.release_created && needs.release.outputs.patch != '0'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -156,7 +156,7 @@ jobs:
           else
             APPSPOT_PROMOTE=false
           fi
-          APPSPOT_PROMOTE=$APPSPOT_PROMOTE >> $GITHUB_ENV
+          echo APPSPOT_PROMOTE=$APPSPOT_PROMOTE >> $GITHUB_ENV
 
           # Debug the decisions made here.
           echo "Subdomain: $APPSPOT_SUBDOMAIN"

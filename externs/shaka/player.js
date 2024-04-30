@@ -906,7 +906,8 @@ shaka.extern.xml.Node;
  *   enableAudioGroups: boolean,
  *   multiTypeVariantsAllowed: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
- *   updatePeriod: number
+ *   updatePeriod: number,
+ *   enableFastSwitching: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -995,6 +996,9 @@ shaka.extern.xml.Node;
  *   manifest less frequently. if you update the value during for a dynamic
  *   manifest, it will directly trigger a new download of the manifest
  *   Defaults to <code>-1</code>.
+ * @property {boolean} enableFastSwitching
+ *   If false, disables fast switching track recognition.
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
