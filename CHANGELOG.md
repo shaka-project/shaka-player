@@ -1,4 +1,4 @@
-## 3.1.613 (2021-04-29)
+## 3.1.614 (2021-04-29)
 
 New Features:
   - Ads APIs are now STABLE (no longer BETA)
