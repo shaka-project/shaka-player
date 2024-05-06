@@ -96,6 +96,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       } else {
         otherIdx = tracks.findIndex((t) => {
           return t.height == track.height &&
+              t.videoBandwidth == track.videoBandwidth &&
               t.frameRate == track.frameRate &&
               t.hdr == track.hdr &&
               t.videoLayout == track.videoLayout;
