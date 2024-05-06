@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!-- Generated Fri Nov 11 14:05:52 2016 by Dolby Media Generator (built 15:30:29 Oct 11 2016) -->
+<MPD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:dolby="http://www.dolby.com/ns/online/DASH"
+  xmlns="urn:mpeg:dash:schema:mpd:2011" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT0H1M11.880S" minBufferTime="PT1.2S" profiles="urn:mpeg:dash:profile:isoff-on-demand:2011">
+  <Period>
+    <!-- Audio -->
+    <AdaptationSet mimeType="audio/mp4" lang="es" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
+      <Accessibility schemeIdUri="urn:tva:metadata:cs:AudioPurposeCS:2007" value="6"/>
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main" />
+      <Representation id="2" codecs="ec-3" bandwidth="256000" audioSamplingRate="48000">
+        <AudioChannelConfiguration schemeIdUri="tag:dolby.com,2014:dash:audio_channel_configuration:2011" value="F801"/>
+        <BaseURL>ChID_voices_6ch_256kbps_ddp.mp4</BaseURL>
+        <SegmentBase indexRange="603-1078">
+          <Initialization range="0-602"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    <!-- Audio -->
+    <AdaptationSet mimeType="audio/mp4" lang="en" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
+      <Accessibility schemeIdUri="urn:tva:metadata:cs:AudioPurposeCS:2007" value="6"/>
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="alternate" />
+      <Representation id="3" codecs="mp4a.40.2" bandwidth="640431" audioSamplingRate="48000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="6"/>
+        <BaseURL>ChID_voices_6ch_640kbps_aac.mp4</BaseURL>
+        <SegmentBase indexRange="652-1127">
+          <Initialization range="0-651"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>
