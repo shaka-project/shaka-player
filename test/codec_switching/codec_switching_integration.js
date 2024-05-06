@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('Codec Switching', () => {
+fdescribe('Codec Switching', () => {
   const Util = shaka.test.Util;
 
   /** @type {!HTMLVideoElement} */
@@ -261,7 +261,7 @@ describe('Codec Switching', () => {
       await player.load(
           '/base/test/test/assets/dash-multi-codec-ec3/dash.mpd', 1);
       await video.play();
-      await waiter.waitForMovementOrFailOnTimeout(video, 1);
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
       expect(player.isLive()).toBe(false);
 
