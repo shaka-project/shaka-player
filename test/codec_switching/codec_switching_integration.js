@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-fdescribe('Codec Switching', () => {
+describe('Codec Switching', () => {
   const Util = shaka.test.Util;
 
   /** @type {!HTMLVideoElement} */
