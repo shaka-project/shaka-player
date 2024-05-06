@@ -615,4 +615,11 @@ describe('UITextDisplayer', () => {
 
     expect(videoContainer.childNodes.length).toBe(0);
   });
+
+  it('Backward compatible UITextDisplayer constructor', () => {
+    // The third argument to UITextDisplayer constructor is new in v4.8.0.
+    // Test without, to support existing applications.
+    /** @suppress {checkTypes} */
+    textDisplayer = new shaka.text.UITextDisplayer(video, videoContainer);
+  });
 });
