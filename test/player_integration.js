@@ -950,6 +950,79 @@ describe('Player', () => {
     });
   });
 
+  describe('rebufferGoal', () => {
+    const startBuffering = jasmine.objectContaining({buffering: true});
+    const endBuffering = jasmine.objectContaining({buffering: false});
+    /** @type {!jasmine.Spy} */
+    const onBuffering = jasmine.createSpy('onBuffering');
+    /** @type {!jasmine.Spy} */
+    const onSeeking = jasmine.createSpy('onSeeking');
+    /** @type {!jasmine.Spy} */
+    const onPlaying = jasmine.createSpy('onPlaying');
+    /** @type {!jasmine.Spy} */
+    const onTimeUpdate = jasmine.createSpy('onTimeUpdate');
+    /** @type {!shaka.test.Waiter} */
+    let waiter;
+
+    beforeEach(() => {
+      player.addEventListener('buffering', Util.spyFunc(onBuffering));
+      eventManager.listen(video, 'seeking', Util.spyFunc(onSeeking));
+      eventManager.listen(video, 'timeupdate', Util.spyFunc(onTimeUpdate));
+      eventManager.listen(video, 'playing', Util.spyFunc(onPlaying));
+      video.autoplay = false;
+      waiter = new shaka.test.Waiter(eventManager)
+          .setPlayer(player)
+          .timeoutAfter(20)
+          .failOnTimeout(true);
+    });
+
+    it('state orchestration and buffer length', async () => {
+      // the expected player behaviours should be the following one
+      // buffering event start
+      // playing event but player is not playing
+      // because of the rebufferingGoal > to the buffer )
+      // buffering event stop
+      // timeupdate
+
+      // create a delay in the request to check the event's order
+      const netEngine = player.getNetworkingEngine();
+      netEngine.registerResponseFilter(
+          async (type, response, context) => {
+            await shaka.test.Util.delay(2);
+          });
+
+      player.configure('streaming.rebufferingGoal', 25);
+      player.configure('streaming.bufferingGoal', 60);
+      player.configure('streaming.stallEnabled', true);
+      player.configure('streaming.stallThreshold', 1);
+      player.configure('manifest.dash.ignoreMinBufferTime', true);
+      video.autoplay = true;
+      await player.load('test:sintel_long_compiled');
+
+      expect(onBuffering).toHaveBeenCalledTimes(1);
+      expect(onBuffering).toHaveBeenCalledWith(startBuffering);
+      expect(onSeeking).not.toHaveBeenCalled();
+      expect(onTimeUpdate).not.toHaveBeenCalled();
+      expect(getBufferedAhead()).toBeLessThanOrEqual(25);
+      onBuffering.calls.reset();
+
+      await waiter.waitForEvent(video, 'playing');
+      expect(getBufferedAhead()).toBeLessThanOrEqual(25);
+      expect(video.currentTime).toBe(0);
+
+      await waiter.waitForEvent(player, 'buffering');
+      await shaka.test.Util.delay(1);
+      expect(onSeeking).not.toHaveBeenCalled();
+      expect(onTimeUpdate).toHaveBeenCalled();
+      expect(onBuffering).toHaveBeenCalledTimes(1);
+      expect(onBuffering).toHaveBeenCalledWith(endBuffering);
+      await waiter.waitForEvent(video, 'timeupdate');
+      // segment duration are 10s meaning
+      // that the expected buffer should be 30..
+      expect(getBufferedAhead()).toBeGreaterThanOrEqual(25);
+    });
+  });
+
   describe('buffering', () => {
     const startBuffering = jasmine.objectContaining({buffering: true});
     const endBuffering = jasmine.objectContaining({buffering: false});
@@ -1068,14 +1141,6 @@ describe('Player', () => {
       expect(getBufferedBehind()).toBeLessThanOrEqual(10);
     });
 
-    function getBufferedAhead() {
-      const end = shaka.media.TimeRangesUtils.bufferEnd(video.buffered);
-      if (end == null) {
-        return 0;
-      }
-      return end - video.currentTime;
-    }
-
     function getBufferedBehind() {
       const start = shaka.media.TimeRangesUtils.bufferStart(video.buffered);
       if (start == null) {
@@ -1084,6 +1149,14 @@ describe('Player', () => {
       return video.currentTime - start;
     }
   });  // describe('buffering')
+
+  function getBufferedAhead() {
+    const end = shaka.media.TimeRangesUtils.bufferEnd(video.buffered);
+    if (end == null) {
+      return 0;
+    }
+    return end - video.currentTime;
+  }
 
   describe('configuration', () => {
     it('has the correct number of arguments in compiled callbacks', () => {
