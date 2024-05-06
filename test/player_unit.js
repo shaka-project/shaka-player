@@ -2683,6 +2683,7 @@ describe('Player', () => {
     });
 
     it('tracks info about current stream', () => {
+      forceBufferingTo(false);
       let stats = player.getStats();
       // Should have chosen the first of each type of stream.
       expect(stats.width).toBe(100);
