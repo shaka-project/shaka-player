@@ -63,6 +63,7 @@ describe('Codec Switching', () => {
   });
 
   afterEach(async () => {
+    await player.unload();
     eventManager.release();
     await player.destroy();
   });
@@ -102,8 +103,6 @@ describe('Codec Switching', () => {
       variants = player.getVariantTracks();
 
       expect(variants.find((v) => !!v.active).language).toBe('es');
-
-      await player.unload();
     });
 
     it('can switch codecs SMOOTH', async () => {
@@ -140,8 +139,6 @@ describe('Codec Switching', () => {
       variants = player.getVariantTracks();
 
       expect(variants.find((v) => !!v.active).language).toBe('es');
-
-      await player.unload();
     });
   });
 
@@ -175,8 +172,6 @@ describe('Codec Switching', () => {
       variants = player.getVariantTracks();
 
       expect(variants.find((v) => !!v.active).language).toBe('es');
-
-      await player.unload();
     });
 
     it('can switch codecs SMOOTH', async () => {
@@ -212,8 +207,6 @@ describe('Codec Switching', () => {
       variants = player.getVariantTracks();
 
       expect(variants.find((v) => !!v.active).language).toBe('es');
-
-      await player.unload();
     });
   });
 
@@ -248,8 +241,6 @@ describe('Codec Switching', () => {
       variants = player.getVariantTracks();
 
       expect(variants.find((v) => !!v.active).language).toBe('es');
-
-      await player.unload();
     });
 
     it('can switch codecs SMOOTH', async () => {
@@ -286,8 +277,6 @@ describe('Codec Switching', () => {
       variants = player.getVariantTracks();
 
       expect(variants.find((v) => !!v.active).language).toBe('es');
-
-      await player.unload();
     });
   });
 
@@ -322,8 +311,6 @@ describe('Codec Switching', () => {
       variants = player.getVariantTracks();
 
       expect(variants.find((v) => !!v.active).language).toBe('en');
-
-      await player.unload();
     });
 
     it('can switch codecs SMOOTH', async () => {
@@ -360,8 +347,6 @@ describe('Codec Switching', () => {
       variants = player.getVariantTracks();
 
       expect(variants.find((v) => !!v.active).language).toBe('en');
-
-      await player.unload();
     });
   });
 });
