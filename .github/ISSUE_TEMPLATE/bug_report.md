@@ -73,3 +73,6 @@ assignees: ''
 **What actually happened?**
 <!-- A clear and concise description of what the bug is -->
 <!-- If applicable, you may add screenshots to help explain your problem. -->
+
+
+**Are you planning send a PR to fix it?**
