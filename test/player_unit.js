@@ -1220,6 +1220,9 @@ describe('Player', () => {
           },
         },
         manifest: {
+          dash: {
+            autoCorrectDrift: true,
+          },
           retryParameters: {
             baseDelay: 2000,
           },
@@ -1238,6 +1241,8 @@ describe('Player', () => {
           .toBe(10);
       expect(player.getConfiguration().streaming.retryParameters.baseDelay)
           .toBe(2000);
+      expect(player.getConfiguration().manifest.dash.autoCorrectDrift)
+          .toBe(true);
       expect(player.getConfiguration().manifest.retryParameters.baseDelay)
           .toBe(2000);
       expect(player.getConfiguration().drm.retryParameters.baseDelay)
@@ -1256,6 +1261,8 @@ describe('Player', () => {
           .toBe(0.1);
       expect(player.getConfiguration().streaming.retryParameters.baseDelay)
           .toBe(100);
+      expect(player.getConfiguration().manifest.dash.autoCorrectDrift)
+          .toBe(false);
       expect(player.getConfiguration().manifest.retryParameters.baseDelay)
           .toBe(100);
       expect(player.getConfiguration().drm.retryParameters.baseDelay)
