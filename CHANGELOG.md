@@ -1,5 +1,33 @@
 # Changelog
 
+## [4.3.16](https://github.com/shaka-project/shaka-player/compare/v4.3.15...v4.3.16) (2024-05-07)
+
+
+### Bug Fixes
+
+* call to load in MediaElement using src= in HLS Safari ([#6478](https://github.com/shaka-project/shaka-player/issues/6478)) ([bf7ac86](https://github.com/shaka-project/shaka-player/commit/bf7ac86a883c6f31642ffca6785915e5868ce0d6))
+* **Cast:** Don't pause local video until the cast connection is established ([#6359](https://github.com/shaka-project/shaka-player/issues/6359)) ([c81c853](https://github.com/shaka-project/shaka-player/commit/c81c853167696a5bad08550102489da615e3c7ba))
+* **DASH:** Fix get partial current position for LL when using SegmentTemplate@duration ([#6516](https://github.com/shaka-project/shaka-player/issues/6516)) ([8d913a7](https://github.com/shaka-project/shaka-player/commit/8d913a7b24bfcae0818ade267270a3aef1c8bed9))
+* **DASH:** Set delay to 0 for LL streams ([#6406](https://github.com/shaka-project/shaka-player/issues/6406)) ([9c49645](https://github.com/shaka-project/shaka-player/commit/9c496458d2c2bcd3ee2e3070cea7e267f17abbbc))
+* **demo:** Remove max height of demo config tabs ([#6324](https://github.com/shaka-project/shaka-player/issues/6324)) ([6b5098b](https://github.com/shaka-project/shaka-player/commit/6b5098bd780a8337a130f3fc3501887cb0bf0756))
+* Do not make LICENSE_REQUEST_FAILED fatal if other keys are successful ([#6457](https://github.com/shaka-project/shaka-player/issues/6457)) ([688cceb](https://github.com/shaka-project/shaka-player/commit/688cceb2d5a08faa30a93af7cb31834a8a84d879))
+* Don't update captions when video is paused ([#6474](https://github.com/shaka-project/shaka-player/issues/6474)) ([2e62152](https://github.com/shaka-project/shaka-player/commit/2e621527a3b350182327b96ca0fab54bd183f056))
+* Fix cea608 whitespace rendering ([#6329](https://github.com/shaka-project/shaka-player/issues/6329)) ([f7c978e](https://github.com/shaka-project/shaka-player/commit/f7c978e6584aa063910d7c34384b5a3f6431b5c8)), closes [#6328](https://github.com/shaka-project/shaka-player/issues/6328)
+* Fix flac detection in Safari ([#6497](https://github.com/shaka-project/shaka-player/issues/6497)) ([5e68fba](https://github.com/shaka-project/shaka-player/commit/5e68fbacff5ae32faf15ee8089cb7e05256ccc33))
+* Fix reusing region elements in UITextDisplayer ([#6476](https://github.com/shaka-project/shaka-player/issues/6476)) ([2c60a94](https://github.com/shaka-project/shaka-player/commit/2c60a94d2d2e8261ab49b37d985475488e2d11ed))
+* Fix support of getAllThumbnails when using DASH multi-period ([#6464](https://github.com/shaka-project/shaka-player/issues/6464)) ([59e1f10](https://github.com/shaka-project/shaka-player/commit/59e1f10d8defe1ae426471604d09d407a95400a0))
+* **HLS:** Fix IAMF codec selection in HLS ([#6389](https://github.com/shaka-project/shaka-player/issues/6389)) ([9b02fe3](https://github.com/shaka-project/shaka-player/commit/9b02fe31ca6ebb60564f8f25d46b8ab50a61ae23))
+* **HLS:** Fix labelling of captions in Safari ([#6426](https://github.com/shaka-project/shaka-player/issues/6426)) ([9282a1b](https://github.com/shaka-project/shaka-player/commit/9282a1b8014d9ad3d174b90c6999edd4d7b57ca8))
+* **HLS:** getPlayheadTimeAsDate() differs from X-EXT-PROGRAM-DATE-TIME ([#6371](https://github.com/shaka-project/shaka-player/issues/6371)) ([a8aaabb](https://github.com/shaka-project/shaka-player/commit/a8aaabb0780580ddf4cc7f0d749b51cb3b7c33c6))
+* **HLS:** Only offset segment ref times when needed w/ EXT-X-MEDIA-SEQUENCE ([#6378](https://github.com/shaka-project/shaka-player/issues/6378)) ([543f081](https://github.com/shaka-project/shaka-player/commit/543f08173536c1f4fc53514c2ad5cc6dcbe35056))
+* Looser tolerance for ending trick play at edge of seek range. ([#6422](https://github.com/shaka-project/shaka-player/issues/6422)) ([ce1a86e](https://github.com/shaka-project/shaka-player/commit/ce1a86e952033d829b0fb89894f6cdd2b618fc0f)), closes [#6421](https://github.com/shaka-project/shaka-player/issues/6421)
+
+
+### Reverts
+
+* Fix potential AV sync issues after seek or adaptation ([#6435](https://github.com/shaka-project/shaka-player/issues/6435)) ([c3ce673](https://github.com/shaka-project/shaka-player/commit/c3ce6733c748dc9681950d5e14dfdd43b17cdd75)), closes [#5785](https://github.com/shaka-project/shaka-player/issues/5785) [#4589](https://github.com/shaka-project/shaka-player/issues/4589)
+* getPlayheadTimeAsDate() differs from X-EXT-PROGRAM-DATE-TIME ([#6330](https://github.com/shaka-project/shaka-player/issues/6330)) ([4050614](https://github.com/shaka-project/shaka-player/commit/4050614513deb832883ef4a44f4014a9d83eab55))
+
 ## [4.3.15](https://github.com/shaka-project/shaka-player/compare/v4.3.14...v4.3.15) (2024-02-27)
 
 
