@@ -109,7 +109,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     // Remove duplicate entries with the same resolution or quality depending
     // on content type.  Pick an arbitrary one.
     tracks = tracks.filter((track, idx) => {
-      // Keep the first one with the same height and framrate or bandwidth.
+      // Keep the first one with the same height and framerate or bandwidth.
       let otherIdx = -1;
       if (this.player.isAudioOnly()) {
         otherIdx = tracks.findIndex((t) => t.bandwidth == track.bandwidth);
@@ -164,7 +164,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       if (this.player.isAudioOnly() && track.bandwidth) {
         span.textContent = Math.round(track.bandwidth / 1000) + ' kbits/s';
       } else if (track.height && track.width) {
-        span.textContent = this.getResolutionLabel_(track);
+        span.textContent = this.getResolutionLabel_(track, tracks);
       } else {
         span.textContent = 'Unknown';
       }
@@ -222,10 +222,11 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
   /**
    * @param {!shaka.extern.Track} track
+   * @param {!Array.<!shaka.extern.Track>} tracks
    * @return {string}
    * @private
    */
-  getResolutionLabel_(track) {
+  getResolutionLabel_(track, tracks) {
     const trackHeight = track.height || 0;
     const trackWidth = track.width || 0;
     let height = trackHeight;
@@ -246,6 +247,14 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     }
     if (track.videoLayout == 'CH-STEREO') {
       text += ' (3D)';
+    }
+    if (track.videoBandwidth) {
+      const hasDuplicateResolution = tracks.some((otherTrack) => {
+        return otherTrack != track && otherTrack.height == track.height;
+      });
+      if (hasDuplicateResolution) {
+        text += ' (' + Math.round(track.videoBandwidth / 1000) + ' kbits/s)';
+      }
     }
     return text;
   }
