@@ -1331,9 +1331,8 @@ shaka.extern.ManifestConfiguration;
  *   extra segment requests necessary to compensate for drift.
  * @property {boolean} lowLatencyMode
  *   If <code>true</code>, low latency streaming mode is enabled. If
- *   lowLatencyMode is set to true, inaccurateManifestTolerance is set to 0
- *   unless specified, and rebufferingGoal to 0.01 unless specified at the same
- *   time.
+ *   lowLatencyMode is set to true, it changes the default config values for
+ *   other things, see: docs/tutorials/config.md
  * @property {boolean} autoLowLatencyMode
  *   If the stream is low latency and the user has not configured the
  *   lowLatencyMode, but if it has been configured to activate the
