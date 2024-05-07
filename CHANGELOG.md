@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.8.2](https://github.com/shaka-project/shaka-player/compare/v4.8.1...v4.8.2) (2024-05-07)
+
+
+### Bug Fixes
+
+* **DASH:** Fix get partial current position for LL when using SegmentTemplate@duration ([#6516](https://github.com/shaka-project/shaka-player/issues/6516)) ([7f8099d](https://github.com/shaka-project/shaka-player/commit/7f8099d7fa47d016af06fd1cc5a9833dc1c06113))
+* Fix init segment equality in Segment Prefetch ([#6537](https://github.com/shaka-project/shaka-player/issues/6537)) ([812c7e2](https://github.com/shaka-project/shaka-player/commit/812c7e20a2c4171a636260a08978f48ff73d5244))
+* Fix seeking timeouts ([#6539](https://github.com/shaka-project/shaka-player/issues/6539)) ([b3e3eef](https://github.com/shaka-project/shaka-player/commit/b3e3eef20732d09dad14a355afde70936518fe9b)), closes [#5202](https://github.com/shaka-project/shaka-player/issues/5202)
+* Fix tXml conversion to DOMElement ([#6538](https://github.com/shaka-project/shaka-player/issues/6538)) ([25c37e0](https://github.com/shaka-project/shaka-player/commit/25c37e07739d0fd4860869bdae88b971d9129a6b))
+* Handle non existing navigator.platform string ([#6517](https://github.com/shaka-project/shaka-player/issues/6517)) ([#6518](https://github.com/shaka-project/shaka-player/issues/6518)) ([feb176c](https://github.com/shaka-project/shaka-player/commit/feb176cea88248c456d216618239d4a307a4648c))
+* Make UITextDisplayer constructor backward compatible ([#6532](https://github.com/shaka-project/shaka-player/issues/6532)) ([6fc4e42](https://github.com/shaka-project/shaka-player/commit/6fc4e42effd309fb8d700662582fe7072da87f75))
+* reBufferingGoal is not respected  ([#6433](https://github.com/shaka-project/shaka-player/issues/6433)) ([99ed5db](https://github.com/shaka-project/shaka-player/commit/99ed5db1db35c7f838af3faf2e0b748f95638946))
+* Remove preloaded segment when segment has network error ([#6515](https://github.com/shaka-project/shaka-player/issues/6515)) ([a1b9ff4](https://github.com/shaka-project/shaka-player/commit/a1b9ff4631b31ffc1b6ef96bd6df7c99edd51e53))
+* **UI:** Allow show same resolution with different video bandwidth ([#6536](https://github.com/shaka-project/shaka-player/issues/6536)) ([4cd9d37](https://github.com/shaka-project/shaka-player/commit/4cd9d37cbc303042cccdf7cf5a31da7e87171ede))
+
 ## [4.8.1](https://github.com/shaka-project/shaka-player/compare/v4.8.0...v4.8.1) (2024-04-29)
 
 
