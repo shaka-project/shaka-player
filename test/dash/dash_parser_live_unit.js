@@ -1672,12 +1672,12 @@ describe('DashParser Live', () => {
     it('transforms from dynamic to static', async () => {
       const patchText = [
         '<Patch xmlns:p="urn:ietf:params:xml:schema:patchops">',
-        '  <p:replace sel="/MPD/@type">',
+        '  <replace sel="/MPD/@type">',
         '    static',
-        '  </p:replace>',
-        '  <p:add sel="/MPD/@mediaPresentationDuration">',
+        '  </replace>',
+        '  <add sel="/MPD/@mediaPresentationDuration">',
         '    PT28462.033599998S',
-        '  </p:add>',
+        '  </add>',
         '</Patch>',
       ].join('\n');
       fakeNetEngine.setResponseText('dummy://bar', patchText);
@@ -1700,7 +1700,7 @@ describe('DashParser Live', () => {
       const stream = manifest.variants[0].video;
       const patchText = [
         '<Patch xmlns:p="urn:ietf:params:xml:schema:patchops">',
-        '  <p:add sel="/MPD">',
+        '  <add sel="/MPD">',
         '    <Period id="2" duration="PT10S">',
         '      <AdaptationSet id="2" mimeType="video/mp4">',
         '        <Representation id="3" bandwidth="500">',
@@ -1708,7 +1708,7 @@ describe('DashParser Live', () => {
         '        </Representation>',
         '      </AdaptationSet>',
         '    </Period>',
-        '  </p:add>',
+        '  </add>',
         '</Patch>',
       ].join('\n');
       fakeNetEngine.setResponseText('dummy://bar', patchText);
@@ -1734,9 +1734,9 @@ describe('DashParser Live', () => {
       ].join('/');
       const patchText = [
         '<Patch xmlns:p="urn:ietf:params:xml:schema:patchops">',
-        '  <p:add sel="' + xPath + '">',
+        '  <add sel="' + xPath + '">',
         '    <S d="1" t="1" />',
-        '  </p:add>',
+        '  </add>',
         '</Patch>',
       ].join('\n');
       fakeNetEngine.setResponseText('dummy://bar', patchText);
