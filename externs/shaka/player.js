@@ -1528,11 +1528,14 @@ shaka.extern.AdsConfiguration;
  * @property {boolean} enabled
  *   If true, enable adaptation by the current AbrManager.  Defaults to true.
  * @property {boolean} useNetworkInformation
- *   If true, use Network Information API in the current AbrManager.
+ *   If true, use the Network Information API in the current AbrManager, if it
+ *   is available in the browser environment.  If the Network Information API is
+ *   used, Shaka Player will ignore the defaultBandwidthEstimate config.
  *   Defaults to true.
  * @property {number} defaultBandwidthEstimate
  *   The default bandwidth estimate to use if there is not enough data, in
- *   bit/sec.
+ *   bit/sec.  Only used if useNetworkInformation is false, or if the Network
+ *   Information API is not available.
  * @property {shaka.extern.Restrictions} restrictions
  *   The restrictions to apply to ABR decisions.  These are "soft" restrictions.
  *   Any track that fails to meet these restrictions will not be selected
