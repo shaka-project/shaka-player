@@ -77,7 +77,11 @@ shakaDemo.AssetCard = class {
       img.src = asset.iconUri;
       img.alt = '';  // Not necessary to understand the page
 
-      picture.appendChild(webpSource);
+      // It can only be guaranteed that they have a webp version if they are on
+      // our server.
+      if (asset.iconUri.startsWith('https://storage.googleapis.com')) {
+        picture.appendChild(webpSource);
+      }
       picture.appendChild(pngSource);
       picture.appendChild(img);
 

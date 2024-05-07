@@ -93,6 +93,7 @@ shakaDemo.Config = class {
     this.addMssManifestSection_();
     this.addRetrySection_('manifest', 'Manifest Retry Parameters');
     this.addRetrictionsSection_('', 'Restrictions');
+    this.addTextDisplayerSection_();
     this.addCmcdSection_();
     this.addCmsdSection_();
     this.addLcevcSection_();
@@ -234,7 +235,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Use stream once in period flattening',
             'manifest.dash.useStreamOnceInPeriodFlattening')
         .addNumberInput_('override the Update period of dash manifest',
-            'manifest.dash.updatePeriod');
+            'manifest.dash.updatePeriod')
+        .addBoolInput_('Enable fast switching',
+            'manifest.dash.enableFastSwitching');
   }
 
   /** @private */
@@ -304,6 +307,15 @@ shakaDemo.Config = class {
             'abr.safeMarginSwitch',
             /* canBeDecimal= */ true);
     this.addRetrictionsSection_('abr', 'Adaptation Restrictions');
+  }
+
+  /** @private */
+  addTextDisplayerSection_() {
+    const docLink = this.resolveExternLink_('.TextDisplayerConfiguration');
+    this.addSection_('Text displayer', docLink)
+        .addNumberInput_('Captions update period',
+            'textDisplayer.captionsUpdatePeriod',
+            /* canBeDecimal= */ true);
   }
 
   /** @private */

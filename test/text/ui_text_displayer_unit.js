@@ -51,7 +51,8 @@ describe('UITextDisplayer', () => {
 
   beforeEach(() => {
     video.currentTime = 0;
-    textDisplayer = new shaka.text.UITextDisplayer(video, videoContainer);
+    textDisplayer = new shaka.text.UITextDisplayer(
+        video, videoContainer, {captionsUpdatePeriod: 0.25});
   });
 
   afterEach(async () => {
@@ -613,5 +614,12 @@ describe('UITextDisplayer', () => {
     textDisplayer.destroy();
 
     expect(videoContainer.childNodes.length).toBe(0);
+  });
+
+  it('Backward compatible UITextDisplayer constructor', () => {
+    // The third argument to UITextDisplayer constructor is new in v4.8.0.
+    // Test without, to support existing applications.
+    /** @suppress {checkTypes} */
+    textDisplayer = new shaka.text.UITextDisplayer(video, videoContainer);
   });
 });

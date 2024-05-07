@@ -16,9 +16,9 @@ Set up controls with HTML data attributes:
 <!DOCTYPE html>
 <html>
   <head>
-    <!-- Shaka Player ui compiled library: -->
+    <!-- Shaka Player UI compiled library: -->
     <script src="dist/shaka-player.ui.js"></script>
-    <!-- Shaka Player ui compiled library default CSS: -->
+    <!-- Shaka Player UI compiled library default CSS: -->
     <link rel="stylesheet" type="text/css" href="dist/controls.css">
     <!-- Chromecast SDK (if you want Chromecast support for your app): -->
     <script defer src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
@@ -52,7 +52,7 @@ async function init() {
   const controls = ui.getControls();
   const player = controls.getPlayer();
 
-  // Attach player and ui to the window to make it easy to access in the JS console.
+  // Attach player and UI to the window to make it easy to access in the JS console.
   window.player = player;
   window.ui = ui;
 
@@ -100,6 +100,31 @@ document.addEventListener('shaka-ui-load-failed', initFailed);
 ```
 
 
+#### Enabling VR
+
+To enable the playback of VR content, there are two possibilities:
+
+1. Enable via UI config:
+```js
+const config = {
+  'displayInVrMode': true
+}
+ui.configure(config);
+```
+
+2. Content is automatically treated as VR if it fits the following criteria:
+ - HLS or DASH manifest
+ - fMP4 segments
+ - Init segment contains `prji` and `hfov` boxes
+
+
+If you want the VR to be rendered outside of the main container, add the
+`data-shaka-player-vr-canvas` tag to a canvas element on the page.
+
+Note: VR is only supported for clear streams or HLS-AES stream. DRM prevents
+access to the video pixels for transformation.
+
+
 #### Enabling Chromecast support
 
 If you'd like to take advantage of Shaka's built-in Chromecast support,
@@ -145,7 +170,7 @@ casting to an Android receiver app.
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%"
        src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"></video>
     </div
-
+```
 
 #### Providing source(s) for auto load.
 

@@ -43,6 +43,8 @@ shakaAssets.Source = {
   BRIGHTCOVE: 'Brightcove',
   BROADPEAK: 'Broadpeak',
   EZDRM: 'EZDRM',
+  THEO_PLAYER: 'THEOplayer',
+  JWPLAYER: 'JW Player',
 };
 
 
@@ -168,6 +170,9 @@ shakaAssets.Feature = {
 
   // Set if the asset supports MPD Patch.
   MPD_PATCH: 'MPD Patch',
+
+  // Set if the asset is VR.
+  VR: 'VR',
 };
 
 
@@ -1074,6 +1079,20 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.THUMBNAILS)
       .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'VR Playhouse (DASH, VR equirectangular)',
+      /* iconUri= */ 'https://cdn.bitmovin.com/content/assets/playhouse-vr/poster.jpg',
+      /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/playhouse-vr/mpds/105560.mpd',
+      /* source= */ shakaAssets.Source.BITCODIN)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.VR)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .setExtraUiConfig({
+        displayInVrMode: true,
+        defaultVrProjectionMode: 'equirectangular',
+      }),
   // End bitcodin assets }}}
 
   // MetaCDN assets {{{
@@ -1689,6 +1708,52 @@ shakaAssets.testAssets = [
             },
           },
         },
+      }),
+  // }}}
+
+  // THEOplayer assets {{{
+  /* THEOplayer Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'National Geographic (HLS, VR equirectangular)',
+      /* iconUri= */ 'https://demo.theoplayer.com/hubfs/videos/natgeo/poster.jpg',
+      /* manifestUri= */ 'https://demo.theoplayer.com/hubfs/videos/natgeo/playlist.m3u8',
+      /* source= */ shakaAssets.Source.THEO_PLAYER)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.VR)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .setExtraUiConfig({
+        displayInVrMode: true,
+        defaultVrProjectionMode: 'equirectangular',
+      }),
+  // }}}
+
+  // JW Player assets {{{
+  /* JW Player Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Delta wing (MP4, VR cubemap)',
+      /* iconUri= */ 'https://electroteque.org/plugins/jwplayer/vrvideo/images/previews/cubemap.png',
+      /* manifestUri= */ 'https://videos.electroteque.org/360/ultra_light_flight_cubemap.mp4',
+      /* source= */ shakaAssets.Source.JWPLAYER)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.VR)
+      .setExtraUiConfig({
+        displayInVrMode: true,
+        defaultVrProjectionMode: 'cubemap',
+      }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dragster (MP4, VR equirectangular)',
+      /* iconUri= */ 'https://electroteque.org/plugins/jwplayer/vrvideo/images/previews/playlists.png',
+      /* manifestUri= */ 'https://videos.electroteque.org/360/dragster_4k_720p.mp4',
+      /* source= */ shakaAssets.Source.JWPLAYER)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.VR)
+      .setExtraUiConfig({
+        displayInVrMode: true,
+        defaultVrProjectionMode: 'equirectangular',
       }),
   // }}}
 ];

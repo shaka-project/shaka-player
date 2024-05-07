@@ -346,7 +346,6 @@ describe('Playhead', () => {
 
     // This is important for recovering from drift.
     // See: https://github.com/shaka-project/shaka-player/issues/1105
-    // TODO: Re-evaluate after https://github.com/shaka-project/shaka-player/issues/999
     it('does not change once the initial position is set', () => {
       timeline.isLive.and.returnValue(true);
       timeline.getDuration.and.returnValue(Infinity);
@@ -683,7 +682,7 @@ describe('Playhead', () => {
 
     // It should allow a small buffer around the seek range.
     seekCount = 0;
-    currentTime = 1030;
+    currentTime = 1030.062441;
     jasmine.clock().tick(500);
     currentTime = 1027.9233;
     jasmine.clock().tick(500);

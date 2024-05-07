@@ -110,6 +110,17 @@
   pointer-events: none;
 }
 
+/* A container for VR
+ * Sits inside .shaka-video-container, on top of (Z axis) .shaka-video, and
+ * below (Y axis) .shaka-play-button-container. */
+.shaka-vr-canvas-container {
+  .overlay-child();
+
+  /* Make sure pointer events can reach the video element in the case of native
+   * controls. */
+  pointer-events: none;
+}
+
 /* Container for controls positioned at the bottom of the video container:
  * controls button panel and the seek bar. */
 .shaka-bottom-controls {

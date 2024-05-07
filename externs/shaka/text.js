@@ -133,6 +133,13 @@ shaka.extern.TextDisplayer = class {
   destroy() {}
 
   /**
+   * Sets the TextDisplayer configuration.
+   *
+   * @param {shaka.extern.TextDisplayerConfiguration} config
+   */
+  configure(config) {}
+
+  /**
    * Append given text cues to the list of cues to be displayed.
    *
    * @param {!Array.<!shaka.text.Cue>} cues

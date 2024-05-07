@@ -3547,6 +3547,7 @@ describe('HlsParser', () => {
           stream.addDrmInfo('com.widevine.alpha', (drmInfo) => {
             drmInfo.addCencInitData(initDataBase64);
             drmInfo.keyIds.add(keyId);
+            drmInfo.encryptionScheme = 'cenc';
           });
         });
       });
@@ -3589,6 +3590,7 @@ describe('HlsParser', () => {
           stream.encrypted = true;
           stream.addDrmInfo('com.microsoft.playready', (drmInfo) => {
             drmInfo.addCencInitData(initDataBase64);
+            drmInfo.encryptionScheme = 'cenc';
           });
         });
       });
@@ -3628,6 +3630,7 @@ describe('HlsParser', () => {
           stream.encrypted = true;
           stream.addDrmInfo('com.apple.fps', (drmInfo) => {
             drmInfo.addInitData('sinf', new Uint8Array(0));
+            drmInfo.encryptionScheme = 'cenc';
           });
         });
       });
@@ -3673,6 +3676,7 @@ describe('HlsParser', () => {
               'IiwiayI6IlVHbzJhRVpuZERWcFJscDBaa0pNVGpadmNUaEZaejA5In1dfQ==';
             drmInfo.keyIds.add(keyId);
             drmInfo.addKeyIdsData(initDataBase64);
+            drmInfo.encryptionScheme = 'cenc';
           });
         });
       });
@@ -3719,6 +3723,7 @@ describe('HlsParser', () => {
               'IiwiayI6IlVHbzJhRVpuZERWcFJscDBaa0pNVGpadmNUaEZaejA5In1dfQ==';
             drmInfo.keyIds.add(keyId);
             drmInfo.addKeyIdsData(initDataBase64);
+            drmInfo.encryptionScheme = 'cenc';
           });
         });
       });
@@ -3766,6 +3771,7 @@ describe('HlsParser', () => {
               'IiwiayI6IlBqNmhGZ3Q1aUZadGZCTE42b3E4RWcifV19';
             drmInfo.keyIds.add(keyId);
             drmInfo.addKeyIdsData(initDataBase64);
+            drmInfo.encryptionScheme = 'cenc';
           });
         });
       });
@@ -3806,6 +3812,7 @@ describe('HlsParser', () => {
             stream.addDrmInfo('com.widevine.alpha', (drmInfo) => {
               drmInfo.addCencInitData(initDataBase64);
               drmInfo.keyIds.add(keyId);
+              drmInfo.encryptionScheme = 'cenc';
             });
           });
         });
@@ -3814,6 +3821,7 @@ describe('HlsParser', () => {
             stream.addDrmInfo('com.widevine.alpha', (drmInfo) => {
               drmInfo.addCencInitData(initDataBase64);
               drmInfo.keyIds.add(keyId);
+              drmInfo.encryptionScheme = 'cenc';
             });
           });
         });
@@ -3850,6 +3858,7 @@ describe('HlsParser', () => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
             stream.addDrmInfo('com.microsoft.playready', (drmInfo) => {
               drmInfo.addCencInitData(initDataBase64);
+              drmInfo.encryptionScheme = 'cenc';
             });
           });
         });
@@ -3857,6 +3866,7 @@ describe('HlsParser', () => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
             stream.addDrmInfo('com.microsoft.playready', (drmInfo) => {
               drmInfo.addCencInitData(initDataBase64);
+              drmInfo.encryptionScheme = 'cenc';
             });
           });
         });
@@ -3890,6 +3900,7 @@ describe('HlsParser', () => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
             stream.addDrmInfo('com.apple.fps', (drmInfo) => {
               drmInfo.addInitData('sinf', new Uint8Array(0));
+              drmInfo.encryptionScheme = 'cenc';
             });
           });
         });
@@ -3897,6 +3908,7 @@ describe('HlsParser', () => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
             stream.addDrmInfo('com.apple.fps', (drmInfo) => {
               drmInfo.addInitData('sinf', new Uint8Array(0));
+              drmInfo.encryptionScheme = 'cenc';
             });
           });
         });
@@ -3939,6 +3951,7 @@ describe('HlsParser', () => {
               drmInfo.licenseServerUri = licenseServerUri;
               drmInfo.keyIds.add(keyId);
               drmInfo.addKeyIdsData(initDataBase64);
+              drmInfo.encryptionScheme = 'cenc';
             });
           });
         });
@@ -3948,6 +3961,7 @@ describe('HlsParser', () => {
               drmInfo.licenseServerUri = licenseServerUri;
               drmInfo.keyIds.add(keyId);
               drmInfo.addKeyIdsData(initDataBase64);
+              drmInfo.encryptionScheme = 'cenc';
             });
           });
         });
@@ -3991,6 +4005,7 @@ describe('HlsParser', () => {
               drmInfo.licenseServerUri = licenseServerUri;
               drmInfo.keyIds.add(keyId);
               drmInfo.addKeyIdsData(initDataBase64);
+              drmInfo.encryptionScheme = 'cenc';
             });
           });
         });
@@ -4000,6 +4015,7 @@ describe('HlsParser', () => {
               drmInfo.licenseServerUri = licenseServerUri;
               drmInfo.keyIds.add(keyId);
               drmInfo.addKeyIdsData(initDataBase64);
+              drmInfo.encryptionScheme = 'cenc';
             });
           });
         });
@@ -4014,6 +4030,38 @@ describe('HlsParser', () => {
       const actual = await parser.start('test:/master', playerInterface);
       expect(actual).toEqual(manifest);
     });
+  });
+
+  it('Preload AES key with EXT-X-SESSION-KEY', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
+      'RESOLUTION=960x540,FRAME-RATE=30\n',
+      'video\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1.4d401f",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'video2\n',
+      '#EXT-X-SESSION-KEY:METHOD=AES-128,',
+      'URI="800k.key"\n',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO);
+      });
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO);
+      });
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+    });
+
+    fakeNetEngine.setResponseText('test:/master', master)
+        .setResponseValue('test:/800k.key', aesKey);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    expect(actual).toEqual(manifest);
   });
 
   it('falls back to mp4 if HEAD request fails', async () => {

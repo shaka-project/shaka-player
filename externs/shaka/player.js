@@ -436,11 +436,16 @@ shaka.extern.Restrictions;
 
 /**
  * @typedef {{
- *   persistentState: boolean
+ *   persistentState: boolean,
+ *   encryptionSchemes: !Array<string>
  * }}
  *
  * @property {boolean} persistentState
  *   Whether this key system supports persistent state.
+ * @property {!Array<string|null>} encryptionSchemes
+ *   An array of encryption schemes that are reported to work, through either
+ *   EME or MCap APIs. An empty array indicates that encryptionScheme queries
+ *   are not supported. This should not happen if our polyfills are installed.
  * @exportDoc
  */
 shaka.extern.DrmSupportType;
@@ -827,7 +832,8 @@ shaka.extern.PersistentSessionMetadata;
  *   <i>Defaults to 1.</i> <br>
  *   The frequency in seconds with which to check the expiration of a session.
  * @property {!Array.<string>} preferredKeySystems
- *   <i>Defaults to an empty array. </i> <br>
+ *   <i>Defaults ['com.microsoft.playready'] on Xbox One and PlayStation 4, and
+ *   an empty array for all other browsers.</i> <br>
  *   Specifies the priorties of available DRM key systems.
  * @property {Object.<string, string>} keySystemsMapping
  *   A map of key system name to key system name.
@@ -905,7 +911,8 @@ shaka.extern.xml.Node;
  *   enableAudioGroups: boolean,
  *   multiTypeVariantsAllowed: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
- *   updatePeriod: number
+ *   updatePeriod: number,
+ *   enableFastSwitching: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -994,6 +1001,9 @@ shaka.extern.xml.Node;
  *   manifest less frequently. if you update the value during for a dynamic
  *   manifest, it will directly trigger a new download of the manifest
  *   Defaults to <code>-1</code>.
+ * @property {boolean} enableFastSwitching
+ *   If false, disables fast switching track recognition.
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -1518,11 +1528,14 @@ shaka.extern.AdsConfiguration;
  * @property {boolean} enabled
  *   If true, enable adaptation by the current AbrManager.  Defaults to true.
  * @property {boolean} useNetworkInformation
- *   If true, use Network Information API in the current AbrManager.
+ *   If true, use the Network Information API in the current AbrManager, if it
+ *   is available in the browser environment.  If the Network Information API is
+ *   used, Shaka Player will ignore the defaultBandwidthEstimate config.
  *   Defaults to true.
  * @property {number} defaultBandwidthEstimate
  *   The default bandwidth estimate to use if there is not enough data, in
- *   bit/sec.
+ *   bit/sec.  Only used if useNetworkInformation is false, or if the Network
+ *   Information API is not available.
  * @property {shaka.extern.Restrictions} restrictions
  *   The restrictions to apply to ABR decisions.  These are "soft" restrictions.
  *   Any track that fails to meet these restrictions will not be selected
@@ -1754,6 +1767,23 @@ shaka.extern.OfflineConfiguration;
 
 /**
  * @typedef {{
+ *   captionsUpdatePeriod: number
+ * }}
+ *
+ * @description
+ *   Text displayer configuration.
+ *
+ * @property {number} captionsUpdatePeriod
+ *   The number of seconds to see if the captions should be updated.
+ *   Defaults to <code>0.25</code>.
+ *
+ * @exportDoc
+ */
+shaka.extern.TextDisplayerConfiguration;
+
+
+/**
+ * @typedef {{
  *   ads: shaka.extern.AdsConfiguration,
  *   autoShowText: shaka.config.AutoShowText,
  *   drm: shaka.extern.DrmConfiguration,
@@ -1783,6 +1813,7 @@ shaka.extern.OfflineConfiguration;
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
+ *   textDisplayer: shaka.extern.TextDisplayerConfiguration,
  *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
@@ -1869,6 +1900,8 @@ shaka.extern.OfflineConfiguration;
  * @property {number} playRangeEnd
  *   Optional playback and seek end time in seconds. Defaults to the end of
  *   the presentation if not provided.
+ * @property {shaka.extern.TextDisplayerConfiguration} textDisplayer
+ *   Text displayer configuration and settings.
  * @property {shaka.extern.TextDisplayer.Factory} textDisplayFactory
  *   A factory to construct a text displayer. Note that, if this is changed
  *   during playback, it will cause the text tracks to be reloaded.

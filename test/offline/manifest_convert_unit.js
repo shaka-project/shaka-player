@@ -87,6 +87,7 @@ describe('ManifestConverter', () => {
         sessionIds: [1, 2, 3, 4],
         drmInfo: {
           keySystem: 'com.foo.bar',
+          encryptionScheme: 'foo',
           licenseServerUri: 'http://example.com/drm',
           distinctiveIdentifierRequired: true,
           persistentStateRequired: true,

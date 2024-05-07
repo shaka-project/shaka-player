@@ -501,6 +501,8 @@ shaka.test.FakeSegmentIndex = class {
               nextPosition = this.find(time);
               return this.get(nextPosition++);
             },
+
+            setReverse: () => {},
           };
         });
   }
