@@ -1,5 +1,29 @@
 # Changelog
 
+## [4.6.18](https://github.com/shaka-project/shaka-player/compare/v4.6.17...v4.6.18) (2024-05-07)
+
+
+### Bug Fixes
+
+* **Ads:** Fix ad pausing when using customPlayheadTracker ([#6444](https://github.com/shaka-project/shaka-player/issues/6444)) ([0bbdb00](https://github.com/shaka-project/shaka-player/commit/0bbdb00c9af4fbb1993da70429b1a33964ecda1a))
+* call to load in MediaElement using src= in HLS Safari ([#6478](https://github.com/shaka-project/shaka-player/issues/6478)) ([96bc67e](https://github.com/shaka-project/shaka-player/commit/96bc67e5d91374b63713e71c78f1a4591d9aa4d8))
+* clear listeners when resetting media source ([#6449](https://github.com/shaka-project/shaka-player/issues/6449)) ([d84a794](https://github.com/shaka-project/shaka-player/commit/d84a79438b1316b0db91e7ee45ac5f06d8e6cbf7))
+* **DASH:** decrease memory preasure on manifest with SegmentReference by updating old initSegmentReference ([#6499](https://github.com/shaka-project/shaka-player/issues/6499)) ([4df22d2](https://github.com/shaka-project/shaka-player/commit/4df22d2495b0324e8552efc2b165ba597c862d76))
+* **DASH:** Fix get partial current position for LL when using SegmentTemplate@duration ([#6516](https://github.com/shaka-project/shaka-player/issues/6516)) ([136befa](https://github.com/shaka-project/shaka-player/commit/136befaf623b0b6c79010c30bb6d72bf920b7e54))
+* Do not make LICENSE_REQUEST_FAILED fatal if other keys are successful ([#6457](https://github.com/shaka-project/shaka-player/issues/6457)) ([69e58f7](https://github.com/shaka-project/shaka-player/commit/69e58f7472891f053e10a24e849cc312828f817a))
+* Don't update captions when video is paused ([#6474](https://github.com/shaka-project/shaka-player/issues/6474)) ([cd4b692](https://github.com/shaka-project/shaka-player/commit/cd4b692d8ca2307b1d2d752a629ef5a62646f4b8))
+* Fix duplicate init segment download when using startAtSegmentBoundary ([#6479](https://github.com/shaka-project/shaka-player/issues/6479)) ([b94c94a](https://github.com/shaka-project/shaka-player/commit/b94c94a29fc9bd29554daeb78201dfc0c7970149))
+* Fix exceptions in StreamingEngine when reloading ([#6466](https://github.com/shaka-project/shaka-player/issues/6466)) ([6505d1a](https://github.com/shaka-project/shaka-player/commit/6505d1a2e8d8bcc7e555b1235d388769349e70bf))
+* Fix flac detection in Safari ([#6497](https://github.com/shaka-project/shaka-player/issues/6497)) ([5809c1c](https://github.com/shaka-project/shaka-player/commit/5809c1c276086d86c338e01ee37db4e206c9bcbc))
+* Fix reusing region elements in UITextDisplayer ([#6476](https://github.com/shaka-project/shaka-player/issues/6476)) ([c753a72](https://github.com/shaka-project/shaka-player/commit/c753a72c72f0126cf3682b732d3219a9440eb17b))
+* Fix seeking timeouts ([#6539](https://github.com/shaka-project/shaka-player/issues/6539)) ([f81908f](https://github.com/shaka-project/shaka-player/commit/f81908f28343069fcceb1f1c0fb27b1654be5570)), closes [#5202](https://github.com/shaka-project/shaka-player/issues/5202)
+* Fix support of getAllThumbnails when using DASH multi-period ([#6464](https://github.com/shaka-project/shaka-player/issues/6464)) ([1aa29a2](https://github.com/shaka-project/shaka-player/commit/1aa29a2fa2baaa2428335ec3e93d01678f9c45f8))
+* Fix uncaught global OBJECT_DESTROYED errors ([#6460](https://github.com/shaka-project/shaka-player/issues/6460)) ([08e736c](https://github.com/shaka-project/shaka-player/commit/08e736ceb4e38a3559be61a81749c0114a84b360))
+* Fix webOS 4 & 5 utility methods ([#6463](https://github.com/shaka-project/shaka-player/issues/6463)) ([f3ba2a6](https://github.com/shaka-project/shaka-player/commit/f3ba2a62aecfdbfd3a9d9a028559c2afdaa2dc46))
+* Handle non existing navigator.platform string ([#6517](https://github.com/shaka-project/shaka-player/issues/6517)) ([#6518](https://github.com/shaka-project/shaka-player/issues/6518)) ([3747b8e](https://github.com/shaka-project/shaka-player/commit/3747b8e816cae278bca9bc04e84dad3d420580af))
+* reBufferingGoal is not respected  ([#6433](https://github.com/shaka-project/shaka-player/issues/6433)) ([f6f4771](https://github.com/shaka-project/shaka-player/commit/f6f4771387b315969db05279b416cf2238737812))
+* **UI:** Allow show same resolution with different video bandwidth ([#6536](https://github.com/shaka-project/shaka-player/issues/6536)) ([8ba6503](https://github.com/shaka-project/shaka-player/commit/8ba6503276826278041f7f6cfffd3e01c3c481b7))
+
 ## [4.6.17](https://github.com/shaka-project/shaka-player/compare/v4.6.16...v4.6.17) (2024-04-15)
 
 
