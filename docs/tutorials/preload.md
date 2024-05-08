@@ -26,7 +26,8 @@ async function initPlayer() {
     await preloadManager.destroy();
   } else {
     // This asset is something that cannot be preloaded (for instance, a raw
-    // media file).
+    // media file, or browser-based HLS on Safari), so the promise of the
+    // preload method yielded null.
   }
 }
 ```
@@ -34,6 +35,14 @@ You need a player instance to preload an asset, and you must use the returned
 preloadManager on the same player instance.
 The preloading process loads the manifest and first segments of the asset. It
 will not load the whole asset ahead of time.
+
+The preload method can be provided an optional startTime and mimeType parameter,
+much the same as the load method.
+```js
+  const preloadManager = await player.preload(
+    'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
+    15, 'application/dash+xml');
+```
 
 
 #### Saving Preloaders
@@ -52,4 +61,5 @@ const preloadManager = await player.unloadAndSavePreload();
 
 The resulting preload manager can be used just like one created via the preload
 method. Much like a normal preload manager, it must be used on the same player
-instance that created it.
+instance that created it. It contains the loaded manifest, and depending on the
+optional configuration values passed in it may contain 
