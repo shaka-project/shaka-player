@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.8.3](https://github.com/shaka-project/shaka-player/compare/v4.8.2...v4.8.3) (2024-05-08)
+
+
+### Bug Fixes
+
+* Issue with compiler minifying webOS device properties ([#6558](https://github.com/shaka-project/shaka-player/issues/6558)) ([b591bfe](https://github.com/shaka-project/shaka-player/commit/b591bfeb5d90d92896dab6d5550ba53b61707a77))
+* Re-add setting playbackRate to 0 to control buffering state ([#6546](https://github.com/shaka-project/shaka-player/issues/6546)) ([91d3792](https://github.com/shaka-project/shaka-player/commit/91d3792e9643150cb15aea6c63e3d9f067642c68))
+
 ## [4.8.2](https://github.com/shaka-project/shaka-player/compare/v4.8.1...v4.8.2) (2024-05-07)
 
 
