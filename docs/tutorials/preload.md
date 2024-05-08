@@ -16,7 +16,7 @@ To preload an asset, call the preload method on a player instance.
 async function initPlayer() {
   const player = new shaka.Player();
   const preloadManager = await player.preload(
-    'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd');
+      'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd');
   if (preloadManager) {
     // The asset is something that can be preloaded. Once you have this manager,
     // you can load it later by passing it to the load method:
@@ -39,7 +39,7 @@ will not load the whole asset ahead of time.
 The preload method can be provided an optional startTime and mimeType parameter,
 much the same as the load method.
 ```js
-  const preloadManager = await player.preload(
+const preloadManager = await player.preload(
     'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
     15, 'application/dash+xml');
 ```
