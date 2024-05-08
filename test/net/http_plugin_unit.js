@@ -227,7 +227,7 @@ function httpPluginTests(usingFetch) {
         shaka.util.Error.Severity.RECOVERABLE,
         shaka.util.Error.Category.NETWORK,
         shaka.util.Error.Code.BAD_HTTP_STATUS,
-        uri, 202, '', jasmine.any(Object), requestType);
+        uri, 202, '', jasmine.any(Object), requestType, uri);
     await testFails(uri, expected);
   });
 
@@ -237,7 +237,7 @@ function httpPluginTests(usingFetch) {
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.NETWORK,
         shaka.util.Error.Code.BAD_HTTP_STATUS,
-        uri, 401, '', jasmine.any(Object), requestType);
+        uri, 401, '', jasmine.any(Object), requestType, uri);
     await testFails(uri, expected);
   });
 
@@ -247,7 +247,7 @@ function httpPluginTests(usingFetch) {
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.NETWORK,
         shaka.util.Error.Code.BAD_HTTP_STATUS,
-        uri, 403, '', jasmine.any(Object), requestType);
+        uri, 403, '', jasmine.any(Object), requestType, uri);
     await testFails(uri, expected);
   });
 
@@ -257,7 +257,7 @@ function httpPluginTests(usingFetch) {
         shaka.util.Error.Severity.RECOVERABLE,
         shaka.util.Error.Category.NETWORK,
         shaka.util.Error.Code.BAD_HTTP_STATUS,
-        uri, 404, 'ABC', {'foo': 'BAR'}, requestType);
+        uri, 404, 'ABC', {'foo': 'BAR'}, requestType, uri);
     await testFails(uri, expected);
   });
 
