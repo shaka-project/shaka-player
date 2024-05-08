@@ -242,8 +242,6 @@ ChromecastGTV:
   version: GTV
 
 Chromebook:
-  # TODO(b/145916766): Persistent license tests failing
-  disabled: true
   browser: chromeos
   version: Pixelbook
   extra_configs:
