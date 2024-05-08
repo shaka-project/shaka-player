@@ -455,7 +455,8 @@ shaka.extern.DrmSupportType;
  * @typedef {{
  *   manifest: !Object.<string, boolean>,
  *   media: !Object.<string, boolean>,
- *   drm: !Object.<string, ?shaka.extern.DrmSupportType>
+ *   drm: !Object.<string, ?shaka.extern.DrmSupportType>,
+ *   hardwareResolution: shaka.extern.Resolution
  * }}
  *
  * @description
@@ -471,6 +472,10 @@ shaka.extern.DrmSupportType;
  *   A map of supported key systems.
  *   The keys are the key system names.  The value is <code>null</code> if it is
  *   not supported.  Key systems not probed will not be in this dictionary.
+ * @property {shaka.extern.Resolution} hardwareResolution
+ *   The maximum detected hardware resolution, which may have
+ *   height==width==Infinity for devices without a maximum resolution or
+ *   without a way to detect the maximum.
  *
  * @exportDoc
  */
@@ -1992,3 +1997,17 @@ shaka.extern.Thumbnail;
  * @exportDoc
  */
 shaka.extern.Chapter;
+
+/**
+ * @typedef {{
+ *   width: number,
+ *   height: number
+ * }}
+ *
+ * @property {number} width
+ *   Width in pixels.
+ * @property {number} height
+ *   Height in pixels.
+ * @exportDoc
+ */
+shaka.extern.Resolution;
