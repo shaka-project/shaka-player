@@ -102,23 +102,23 @@ describe('MediaCapabilities', () => {
 
   describe('decodingInfo', () => {
     it('should check codec support when MediaDecodingConfiguration.type ' +
-      'is "media-source"', () => {
+        'is "media-source"', async () => {
       expect(window['MediaSource']['isTypeSupported']).toBeDefined();
       shaka.polyfill.MediaCapabilities.install();
-      navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
+      await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
 
       expect(supportMap.has(mockDecodingConfig.video.contentType)).toBe(true);
       expect(supportMap.has(mockDecodingConfig.audio.contentType)).toBe(true);
     });
 
     it('should check codec support when MediaDecodingConfiguration.type ' +
-      'is "file"', () => {
+        'is "file"', async () => {
       const supportsMediaTypeSpy =
           spyOn(shaka['util']['Platform'],
               'supportsMediaType').and.returnValue(true);
       mockDecodingConfig.type = 'file';
       shaka.polyfill.MediaCapabilities.install();
-      navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
+      await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
 
       expect(supportsMediaTypeSpy).toHaveBeenCalledTimes(2);
       expect(supportsMediaTypeSpy).toHaveBeenCalledWith(
@@ -172,10 +172,8 @@ describe('MediaCapabilities', () => {
               'requestMediaKeySystemAccess').and.returnValue(mockResult);
 
       shaka.polyfill.MediaCapabilities.install();
-      await navigator.mediaCapabilities
-          .decodingInfo(mockDecodingConfig);
-      await navigator.mediaCapabilities
-          .decodingInfo(mockDecodingConfig);
+      await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
+      await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
 
       expect(requestKeySystemAccessSpy)
           .toHaveBeenCalledTimes(1);
