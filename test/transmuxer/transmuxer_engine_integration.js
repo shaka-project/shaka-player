@@ -58,9 +58,13 @@ describe('TransmuxerEngine', () => {
     });
 
     it('converts legacy avc1 codec strings', () => {
+      // This test is dependent on platform support for these codecs, because
+      // TransmuxerEngine will only convert codecs through a matching Transmuxer
+      // that returns true from isSupported().  The numbers have been carefully
+      // tweaked for codec settings that should work on every device with H.264.
       expect(convertCodecs(
-          ContentType.VIDEO, 'video/mp2t; codecs="avc1.100.42"'))
-          .toBe('video/mp4; codecs="avc1.64002a"');
+          ContentType.VIDEO, 'video/mp2t; codecs="avc1.100.40"'))
+          .toBe('video/mp4; codecs="avc1.640028"');
       expect(convertCodecs(
           ContentType.VIDEO, 'video/mp2t; codecs="avc1.66.1"'))
           .toBe('video/mp4; codecs="avc1.420001"');

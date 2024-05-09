@@ -728,6 +728,7 @@ describe('UI', () => {
         UiUtils.simulateEvent(controlsContainer, 'contextmenu');
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
       });
+
       it('hides on click event', () => {
         UiUtils.simulateEvent(controlsContainer, 'contextmenu');
         UiUtils.simulateEvent(controlsContainer, 'click');
@@ -736,6 +737,7 @@ describe('UI', () => {
         UiUtils.simulateEvent(window, 'click');
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
       });
+
       it('builds internal elements', () => {
         expect(contextMenu.childNodes.length).toBe(1);
 
@@ -807,6 +809,7 @@ describe('UI', () => {
           }
         }
       });
+
       it('is updated periodically', async () => {
         // There is no guaranteed ordering, so fetch by the stat name.
         function getStatsElementByName(name) {
@@ -838,11 +841,11 @@ describe('UI', () => {
         /** @type {!string} */
         let lastBufferingTime;
 
-        const manifest =
-        shaka.test.ManifestGenerator.generate((manifest) => {
+        const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
           manifest.addVariant(/* id= */ 0, (variant) => {
             variant.addVideo(1, (stream) => {
-              stream.size(1920, 1080);
+              // Keep this at 720p to pass max-height checks on Chromecast Hub.
+              stream.size(1280, 720);
             });
           });
         });
@@ -864,8 +867,8 @@ describe('UI', () => {
         await Util.delay(0.2);
 
         getStatsFromContainer();
-        expect(width).toBe('1920');
-        expect(height).toBe('1080');
+        expect(width).toBe('1280');
+        expect(height).toBe('720');
         expect(bufferingTime).toBeGreaterThanOrEqual(0.1);
 
         // Statistics are updated over time
