@@ -63,6 +63,11 @@
     "tippy.js": "^4.3.5",
     "which": "^2.0.2"
   },
+  "overrides": {
+    "karma": {
+      "ua-parser-js": "github:joeyparrish/ua-parser-js#preview"
+    }
+  },
   "shakaCustom": {
     "purposeOfDemoDeps": "These are the files from node_modules that need to be deployed with the demo app.",
     "demoDeps": [
