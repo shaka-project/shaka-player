@@ -218,6 +218,9 @@ module.exports = (config) => {
       // test utilities next, which fill in that namespace
       'test/test/util/*.js',
 
+      // Proxy cast.__platform__ methods across frames, necessary in testing
+      'proxy-cast-platform.js',
+
       // bootstrapping for the test suite last; this will load the actual tests
       'test/test/boot.js',
 

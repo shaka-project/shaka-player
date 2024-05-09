@@ -19,7 +19,7 @@ webapis.systeminfo = {};
 
 
 /**
- * @return {{width: number, height: number}}
+ * @return {shaka.extern.Resolution}
  */
 webapis.systeminfo.getMaxVideoResolution = function() {};
 
