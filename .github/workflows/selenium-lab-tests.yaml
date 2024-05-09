@@ -121,7 +121,7 @@ jobs:
             // A browser is enabled if it's requested, or if it's on by default
             // and nothing was requested.
             const enabled = thisBrowserRequested ||
-                (nothingRequested == 0 && thisBrowserOnByDefault);
+                (nothingRequested && thisBrowserOnByDefault);
 
             if (enabled) {
               include.push({browser: name});
