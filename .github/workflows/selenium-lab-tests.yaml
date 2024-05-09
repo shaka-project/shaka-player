@@ -114,11 +114,14 @@ jobs:
               continue;
             }
 
-            // A browser is enabled if it's not disabled and (either the browser
-            // filter is empty or it contains the browser name).
-            const enabled = !gridBrowserMetadata[name].disabled &&
-                (browserFilter.size == 0 ||
-                 browserFilter.has(name.toLowerCase()));
+            const thisBrowserRequested = browserFilter.has(name.toLowerCase());
+            const nothingRequested = browserFilter.size == 0;
+            const thisBrowserOnByDefault = !gridBrowserMetadata[name].disabled;
+
+            // A browser is enabled if it's requested, or if it's on by default
+            // and nothing was requested.
+            const enabled = thisBrowserRequested ||
+                (nothingRequested && thisBrowserOnByDefault);
 
             if (enabled) {
               include.push({browser: name});
