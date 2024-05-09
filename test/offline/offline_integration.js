@@ -19,10 +19,18 @@ filterDescribe('Offline', supportsStorage, () => {
   let eventManager;
   /** @type {shaka.test.Waiter} */
   let waiter;
+  /** @type {boolean} */
+  let widevineSupport;
+  /** @type {boolean} */
+  let playreadySupport;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
+
+    const support = await shaka.Player.probeSupport();
+    widevineSupport = support.drm['com.widevine.alpha'];
+    playreadySupport = support.drm['com.microsoft.playready'];
   });
 
   afterAll(() => {
@@ -81,9 +89,6 @@ filterDescribe('Offline', supportsStorage, () => {
   drmIt(
       'stores, plays, and deletes protected content with a persistent license',
       async () => {
-        const support = await shaka.Player.probeSupport();
-        const widevineSupport = support.drm['com.widevine.alpha'];
-
         if (!widevineSupport || !widevineSupport.persistentState) {
           pending('Widevine persistent licenses are not supported');
           return;
@@ -116,10 +121,6 @@ filterDescribe('Offline', supportsStorage, () => {
   drmIt(
       'stores, plays, and deletes protected content with a temporary license',
       async () => {
-        const support = await shaka.Player.probeSupport();
-        const widevineSupport = support.drm['com.widevine.alpha'];
-        const playreadySupport = support.drm['com.microsoft.playready'];
-
         if (!(widevineSupport || playreadySupport)) {
           pending('Widevine and PlayReady are not supported');
           return;
