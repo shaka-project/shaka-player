@@ -368,6 +368,14 @@ describe('Transmuxer Player', () => {
       if (!isH265Supported()) {
         pending('Codec H.265 is not supported by the platform.');
       }
+      if (shaka.util.Platform.isChromecast()) {
+        // FIXME: Test disabled on Chromecast.  Now that our test environment
+        // can do full support checks on Chromecast, including resolution, this
+        // 720x1280 vertical video is over the limit for a 1080p screen.  This
+        // fails on any Chromecast with H.265 support.
+        pending('Disabled on Chromecast.');
+      }
+
       // eslint-disable-next-line max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-aac-h265/media.m3u8');
       await video.play();

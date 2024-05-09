@@ -109,7 +109,7 @@ shaka.test.Waiter = class {
    * @return {!Promise}
    */
   waitUntilPlayheadReaches(mediaElement, timeGoal) {
-    this.macPlaybackWorkaround_(mediaElement);
+    this.improveTestSpeed_(mediaElement);
 
     // The name of what we're waiting for
     const goalName = 'movement from ' + mediaElement.currentTime +
@@ -117,17 +117,21 @@ shaka.test.Waiter = class {
 
     // The conditions for success
     const p = new Promise((resolve) => {
-      this.eventManager_.listen(mediaElement, 'timeupdate', () => {
+      const check = () => {
         if (mediaElement.currentTime >= timeGoal || mediaElement.ended) {
           this.eventManager_.unlisten(mediaElement, 'timeupdate');
+          this.eventManager_.unlisten(mediaElement, 'ended');
           resolve();
         }
-      });
+      };
+      this.eventManager_.listen(mediaElement, 'timeupdate', check);
+      this.eventManager_.listen(mediaElement, 'ended', check);
     });
 
     // The cleanup on timeout
     const cleanup = () => {
       this.eventManager_.unlisten(mediaElement, 'timeupdate');
+      this.eventManager_.unlisten(mediaElement, 'ended');
     };
 
     return this.waitUntilGeneric_(goalName, p, cleanup, mediaElement);
@@ -155,7 +159,7 @@ shaka.test.Waiter = class {
    * @return {!Promise}
    */
   waitForEnd(mediaElement) {
-    this.macPlaybackWorkaround_(mediaElement);
+    this.improveTestSpeed_(mediaElement);
 
     // The name of what we're waiting for.
     const goalName = 'end of media';
@@ -398,14 +402,14 @@ shaka.test.Waiter = class {
    * @param {!HTMLMediaElement} mediaElement
    * @private
    */
-  macPlaybackWorkaround_(mediaElement) {
-    if (shaka.util.Platform.isMac()) {
-      // Work around bizarre playback slowdowns that only seem to occur with
-      // WebDriver and only on Mac.  Increasing the playback rate allows tests
-      // to complete without timing out.
-      if (mediaElement.playbackRate == 1) {
-        mediaElement.playbackRate = 2;
-      }
+  improveTestSpeed_(mediaElement) {
+    // Work around bizarre playback slowdowns that only seem to occur with
+    // WebDriver and only on Mac.  Increasing the playback rate allows tests
+    // to complete without timing out.
+    // We also use it on all platforms (except Tizen) because it reduces the
+    // time it takes for tests to run.
+    if (mediaElement.playbackRate == 1 && !shaka.util.Platform.isTizen()) {
+      mediaElement.playbackRate = 2;
     }
   }
 };

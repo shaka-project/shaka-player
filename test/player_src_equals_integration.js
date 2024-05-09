@@ -177,7 +177,7 @@ describe('Player Src Equals', () => {
 
     // Let playback run for a little.
     await video.play();
-    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */ 10);
 
     // Enabling trick play should change our playback rate to the same rate.
     player.trickPlay(2);
