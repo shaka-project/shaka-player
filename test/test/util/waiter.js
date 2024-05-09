@@ -117,17 +117,21 @@ shaka.test.Waiter = class {
 
     // The conditions for success
     const p = new Promise((resolve) => {
-      this.eventManager_.listen(mediaElement, 'timeupdate', () => {
+      const check = () => {
         if (mediaElement.currentTime >= timeGoal || mediaElement.ended) {
           this.eventManager_.unlisten(mediaElement, 'timeupdate');
+          this.eventManager_.unlisten(mediaElement, 'ended');
           resolve();
         }
-      });
+      };
+      this.eventManager_.listen(mediaElement, 'timeupdate', check);
+      this.eventManager_.listen(mediaElement, 'ended', check);
     });
 
     // The cleanup on timeout
     const cleanup = () => {
       this.eventManager_.unlisten(mediaElement, 'timeupdate');
+      this.eventManager_.unlisten(mediaElement, 'ended');
     };
 
     return this.waitUntilGeneric_(goalName, p, cleanup, mediaElement);
