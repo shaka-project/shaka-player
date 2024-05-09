@@ -241,6 +241,26 @@ ChromecastGTV:
   browser: chromecast
   version: GTV
 
+ChromecastHub:
+  browser: chromecast
+  version: hub
+
+ChromecastSpeaker:
+  # This is a headless device, and our tests are not yet known to work here.
+  # Do not run tests here by default.
+  # This device can still be requested explicitly in the Selenium workflow.
+  disabled: true
+  browser: chromecast
+  version: speaker
+
+ChromecastV1:
+  # This is a very low-performing device, and many of our tests don't work here.
+  # Do not run tests here by default.
+  # This device can still be requested explicitly in the Selenium workflow.
+  disabled: true
+  browser: chromecast
+  version: v1
+
 Chromebook:
   # TODO(b/145916766): Persistent license tests failing
   disabled: true

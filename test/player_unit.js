@@ -3493,7 +3493,7 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
-            stream.size(900, 900);
+            stream.size(500, 500);
           });
         });
         manifest.addVariant(1, (variant) => {
@@ -3511,7 +3511,7 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(player.getVariantTracks().length).toBe(3);
 
-      player.configure({restrictions: {minPixels: 100, maxPixels: 800 * 800}});
+      player.configure({restrictions: {minPixels: 100, maxPixels: 400 * 400}});
 
       const tracks = player.getVariantTracks();
       expect(tracks.length).toBe(1);
@@ -3527,7 +3527,7 @@ describe('Player', () => {
         });
         manifest.addVariant(1, (variant) => {
           variant.addVideo(2, (stream) => {
-            stream.size(1500, 200);
+            stream.size(1000, 200);
           });
         });
         manifest.addVariant(2, (variant) => {
@@ -3540,7 +3540,7 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(player.getVariantTracks().length).toBe(3);
 
-      player.configure({restrictions: {minWidth: 100, maxWidth: 1000}});
+      player.configure({restrictions: {minWidth: 100, maxWidth: 500}});
 
       const tracks = player.getVariantTracks();
       expect(tracks.length).toBe(1);
@@ -3557,7 +3557,7 @@ describe('Player', () => {
 
         manifest.addVariant(1, (variant) => {
           variant.addVideo(2, (stream) => {
-            stream.size(1024, 1024);
+            stream.size(500, 500);
           });
         });
 
@@ -3571,7 +3571,7 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(player.getVariantTracks().length).toBe(3);
 
-      player.configure({restrictions: {minHeight: 100, maxHeight: 1000}});
+      player.configure({restrictions: {minHeight: 100, maxHeight: 400}});
 
       const tracks = player.getVariantTracks();
       expect(tracks.length).toBe(1);
