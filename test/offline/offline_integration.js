@@ -19,9 +19,9 @@ filterDescribe('Offline', supportsStorage, () => {
   let eventManager;
   /** @type {shaka.test.Waiter} */
   let waiter;
-  /** @type {boolean} */
+  /** @type {?shaka.extern.DrmSupportType} */
   let widevineSupport;
-  /** @type {boolean} */
+  /** @type {?shaka.extern.DrmSupportType} */
   let playreadySupport;
 
   beforeAll(async () => {
