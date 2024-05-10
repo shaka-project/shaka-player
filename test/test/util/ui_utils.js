@@ -193,4 +193,18 @@ shaka.test.UiUtils = class {
 
     return canvas;
   }
+
+  /**
+   * Creates a IMA SDK script element for testing.
+   *
+   * @return {!HTMLScriptElement}
+   */
+  static createImaSdkScript() {
+    const script = /** @type {!HTMLScriptElement} */(document.createElement(
+        'script'));
+
+    script.src = 'https://imasdk.googleapis.com/js/sdkloader/ima3.js';
+
+    return script;
+  }
 };
