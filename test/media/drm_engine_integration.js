@@ -7,8 +7,7 @@
 describe('DrmEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
-  // These come from Axinom and use the Axinom license server.
-  // TODO: Do not rely on third-party services long-term.
+  // These come from Axinom.
   const videoInitSegmentUri = '/base/test/test/assets/multidrm-video-init.mp4';
   const videoSegmentUri = '/base/test/test/assets/multidrm-video-segment.mp4';
   const audioInitSegmentUri = '/base/test/test/assets/multidrm-audio-init.mp4';
@@ -89,9 +88,13 @@ describe('DrmEngine', () => {
     drmEngine = new shaka.media.DrmEngine(playerInterface);
     const config = shaka.util.PlayerConfiguration.createDefault().drm;
     config.servers['com.widevine.alpha'] =
-        'https://cwip-shaka-proxy.appspot.com/specific_key?blodJidXR9eARuql0dNLWg=GX8m9XLIZNIzizrl0RTqnA';
+        'https://cwip-shaka-proxy.appspot.com/specific_key?QGCoZYh4Qmecv5GuW64ecg=/DU0CDcxDMD7U96X4ipp4A';
     config.servers['com.microsoft.playready'] =
-        'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:6e5a1d26-2757-47d7-8046-eaa5d1d34b5a,contentkey:GX8m9XLIZNIzizrl0RTqnA==,sl:150)';
+        'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:4060a865-8878-4267-9cbf-91ae5bae1e72,contentkey:/DU0CDcxDMD7U96X4ipp4A==,sl:150)';
+    config.preferredKeySystems = [
+      'com.widevine.alpha',
+      'com.microsoft.playready',
+    ];
     drmEngine.configure(config);
 
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -179,8 +182,11 @@ describe('DrmEngine', () => {
       eventManager.listen(video, 'encrypted', () => {
         encryptedEventSeen.resolve();
       });
+
       eventManager.listen(video, 'error', () => {
+        fail('MediaError message ' + video.error.message);
         fail('MediaError code ' + video.error.code);
+
         let extended = video.error.msExtendedCode;
         if (extended) {
           if (extended < 0) {
@@ -197,9 +203,9 @@ describe('DrmEngine', () => {
       });
 
       const variants = manifest.variants;
-
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       await drmEngine.attach(video);
+
       await mediaSourceEngine.appendBuffer(
           ContentType.VIDEO, videoInitSegment, null, fakeStream,
           /* hasClosedCaptions= */ false);
@@ -207,6 +213,7 @@ describe('DrmEngine', () => {
           ContentType.AUDIO, audioInitSegment, null, fakeStream,
           /* hasClosedCaptions= */ false);
       await encryptedEventSeen;
+
       // With PlayReady, a persistent license policy can cause a different
       // chain of events.  In particular, the request is bypassed and we
       // get a usable key right away.
@@ -264,8 +271,8 @@ describe('DrmEngine', () => {
       // Configure DrmEngine for ClearKey playback.
       const config = shaka.util.PlayerConfiguration.createDefault().drm;
       config.clearKeys = {
-        // From https://github.com/Axinom/public-test-vectors/tree/conservative#v61-multidrm
-        '6e5a1d26275747d78046eaa5d1d34b5a': '197f26f572c864d2338b3ae5d114ea9c',
+        // From https://github.com/Axinom/public-test-vectors/blob/master/README.md#v10
+        '4060a865887842679cbf91ae5bae1e72': 'fc35340837310cc0fb53de97e22a69e0',
       };
       drmEngine.configure(config);
 
@@ -277,8 +284,11 @@ describe('DrmEngine', () => {
       eventManager.listen(video, 'encrypted', () => {
         encryptedEventSeen.resolve();
       });
+
       eventManager.listen(video, 'error', () => {
+        fail('MediaError message ' + video.error.message);
         fail('MediaError code ' + video.error.code);
+
         let extended = video.error.msExtendedCode;
         if (extended) {
           if (extended < 0) {
@@ -295,9 +305,9 @@ describe('DrmEngine', () => {
       });
 
       const variants = manifest.variants;
-
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       await drmEngine.attach(video);
+
       await mediaSourceEngine.appendBuffer(
           ContentType.VIDEO, videoInitSegment, null, fakeStream,
           /* hasClosedCaptions= */ false);
