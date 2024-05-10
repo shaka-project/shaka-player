@@ -377,6 +377,7 @@ module.exports = (config) => {
         'ui/**/*.js': ['babel', 'sourcemap'],
         'test/**/*.js': ['babel', 'sourcemap'],
         'third_party/**/*.js': ['babel', 'sourcemap'],
+        'proxy-cast-platform.js': ['babel', 'sourcemap'],
       },
 
       babelPreprocessor: {
