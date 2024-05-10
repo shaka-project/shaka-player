@@ -310,6 +310,63 @@ shaka.test.Util = class {
     // https://github.com/shaka-project/closure-compiler/issues/1422
     return /** @type {Function} */(spy)(...varArgs);
   }
+
+  /**
+   * @param {!string} mimetype
+   * @param {?number=} width
+   * @param {?number=} height
+   * @return {!Promise.<boolean>}
+   */
+  static async isTypeSupported(mimetype, width, height) {
+    const MimeUtils = shaka.util.MimeUtils;
+    const StreamUtils = shaka.util.StreamUtils;
+
+    /** @type {!MediaDecodingConfiguration} */
+    const mediaDecodingConfig = {
+      type: 'media-source',
+    };
+    if (mimetype.startsWith('audio')) {
+      const codecs = StreamUtils.getCorrectAudioCodecs(
+          MimeUtils.getCodecs(mimetype));
+      if (codecs == 'ac-3' && shaka.util.Platform.isTizen()) {
+        // AC3 is flaky in some Tizen devices, so we need omit it for now.
+        return false;
+      }
+      if ((codecs == 'ec-3' || codecs == 'ac-3') &&
+          shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge()) {
+        // It seems that AC3 and EC3 on Edge Windows from github actions is not
+        // working (in the lab AC3 and EC3 are working). The AC3 and EC3
+        // detection is currently hard-coded to true, which leads to a failure
+        // in GitHub's environment. We must enable this, once it is resolved:
+        // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
+        return false;
+      }
+      // AudioConfiguration
+      mediaDecodingConfig.audio = {
+        contentType: mimetype,
+      };
+    } else {
+      // VideoConfiguration
+      mediaDecodingConfig.video = {
+        contentType: mimetype,
+
+        // NOTE: Some decoders strictly check the width and height fields and
+        // won't decode smaller than 64x64.  So if we don't have this info (as
+        // is the case in some of our simpler tests), assume a 64x64
+        // resolution to fill in this required field for MediaCapabilities.
+        //
+        // This became an issue specifically on Firefox on M1 Macs.
+        width: width || 64,
+        height: height || 64,
+
+        bitrate: 1,
+        framerate: 1,
+      };
+    }
+    const result =
+        await navigator.mediaCapabilities.decodingInfo(mediaDecodingConfig);
+    return result.supported;
+  }
 };
 
 /**
