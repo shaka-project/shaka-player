@@ -52,6 +52,7 @@ describe('Ads', () => {
     await player.attach(video);
 
     player.configure('ads.skipPlayDetection', true);
+    player.configure('ads.supportsMultipleMediaElements', false);
     player.configure('streaming.useNativeHlsOnSafari', false);
 
     // Disable stall detection, which can interfere with playback tests.
@@ -80,7 +81,7 @@ describe('Ads', () => {
   });
 
   it('supports IMA SDK with vast', async () => {
-    await player.load('/base/test/test/assets/hls-aes-256/index.m3u8');
+    await player.load('/base/test/test/assets/dash-aes-128/dash.mpd');
     await video.play();
     expect(player.isLive()).toBe(false);
 
