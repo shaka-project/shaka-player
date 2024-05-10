@@ -51,6 +51,7 @@ describe('Ads', () => {
     adManager = player.getAdManager();
     await player.attach(video);
 
+    player.configure('ads.customPlayheadTracker', true);
     player.configure('ads.skipPlayDetection', true);
     player.configure('ads.supportsMultipleMediaElements', false);
     player.configure('streaming.useNativeHlsOnSafari', false);
