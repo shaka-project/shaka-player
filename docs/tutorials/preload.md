@@ -61,5 +61,4 @@ const preloadManager = await player.unloadAndSavePreload();
 
 The resulting preload manager can be used just like one created via the preload
 method. Much like a normal preload manager, it must be used on the same player
-instance that created it. It contains the loaded manifest, and depending on the
-optional configuration values passed in it may contain 
+instance that created it. It contains the loaded manifest, and stores the time of the video and last abr estimates.
