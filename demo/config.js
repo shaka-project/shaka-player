@@ -361,7 +361,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Custom playhead tracker',
             'ads.customPlayheadTracker')
         .addBoolInput_('Skip play detection',
-            'ads.skipPlayDetection');
+            'ads.skipPlayDetection')
+        .addBoolInput_('Supports multiple media elements',
+            'ads.supportsMultipleMediaElements');
   }
 
   /**

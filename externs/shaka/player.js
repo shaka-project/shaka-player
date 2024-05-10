@@ -1489,7 +1489,8 @@ shaka.extern.MediaSourceConfiguration;
 /**
  * @typedef {{
  *   customPlayheadTracker: boolean,
- *   skipPlayDetection: boolean
+ *   skipPlayDetection: boolean,
+ *   supportsMultipleMediaElements: boolean
  * }}
  *
  * @description
@@ -1506,6 +1507,11 @@ shaka.extern.MediaSourceConfiguration;
  *   Defaults to <code>false</code> except on Tizen, WebOS, Chromecast,
  *   Hisense, PlayStation 4, PlayStation5, Xbox whose default value is
  *   <code>true</code>.
+ * @property {boolean} supportsMultipleMediaElements
+ *   If this is true, the browser supports multiple media elements.
+ *   Defaults to <code>false</code> except on Tizen, WebOS, Chromecast,
+ *   Hisense, PlayStation 4, PlayStation5, Xbox whose default value is
+ *   <code>false</code>.
  *
  * @exportDoc
  */
