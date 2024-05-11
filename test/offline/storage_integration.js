@@ -736,8 +736,7 @@ filterDescribe('Storage', storageSupport, () => {
     /** @type {!shaka.util.EventManager} */
     let eventManager;
     /** @type {!HTMLVideoElement} */
-    const videoElement = /** @type {!HTMLVideoElement} */(
-      document.createElement('video'));
+    const videoElement = shaka.test.UiUtils.createVideoElement();
 
     beforeEach(async () => {
       netEngine = makeNetworkEngine();
