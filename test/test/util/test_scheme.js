@@ -453,47 +453,58 @@ const widevineDrmServers = {
   'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
 };
 
+/** @type {string} */
+const axinomMultiDrmInitData = [
+  'AAAAXHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAADwSEEBgqGWIeEJnnL+RrluuHnISEE',
+  'BgqGWIeEJnnL+RrluuHnISEEBgqGWIeEJnnL+RrluuHnJI49yVmwYAAAImcHNzaAAAAACa',
+  'BPB5mEBChquS5lvgiF+VAAACBgYCAAABAAEA/AE8AFcAUgBNAEgARQBBAEQARQBSACAAeA',
+  'BtAGwAbgBzAD0AIgBoAHQAdABwADoALwAvAHMAYwBoAGUAbQBhAHMALgBtAGkAYwByAG8A',
+  'cwBvAGYAdAAuAGMAbwBtAC8ARABSAE0ALwAyADAAMAA3AC8AMAAzAC8AUABsAGEAeQBSAG',
+  'UAYQBkAHkASABlAGEAZABlAHIAIgAgAHYAZQByAHMAaQBvAG4APQAiADQALgAwAC4AMAAu',
+  'ADAAIgA+ADwARABBAFQAQQA+ADwAUABSAE8AVABFAEMAVABJAE4ARgBPAD4APABLAEUAWQ',
+  'BMAEUATgA+ADEANgA8AC8ASwBFAFkATABFAE4APgA8AEEATABHAEkARAA+AEEARQBTAEMA',
+  'VABSADwALwBBAEwARwBJAEQAPgA8AC8AUABSAE8AVABFAEMAVABJAE4ARgBPAD4APABLAE',
+  'kARAA+AFoAYQBoAGcAUQBIAGkASQBaADAASwBjAHYANQBHAHUAVwA2ADQAZQBjAGcAPQA9',
+  'ADwALwBLAEkARAA+ADwAQwBIAEUAQwBLAFMAVQBNAD4AeQB4AGwARwBsAGgAZgBEACsAYQ',
+  'BjAD0APAAvAEMASABFAEMASwBTAFUATQA+ADwALwBEAEEAVABBAD4APAAvAFcAUgBNAEgA',
+  'RQBBAEQARQBSAD4A',
+].join('');
+
 /** @type {AVMetadataType} */
 const axinomMultiDrmVideoSegment = {
-  // Taken from Axinom's v6 test vector.
+  // Taken from Axinom's v10 test vectors.
   initSegmentUri: '/base/test/test/assets/multidrm-video-init.mp4',
-  mdhdOffset: 0x1d1,
+  mdhdOffset: 0x191,
   segmentUri: '/base/test/test/assets/multidrm-video-segment.mp4',
-  tfdtOffset: 0x78,
+  tfdtOffset: 0x88,
   segmentDuration: 4,
   mimeType: 'video/mp4',
   codecs: 'avc1.64001e',
-  initData:
-      'AAAANHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABQIARIQblodJidXR9eARuq' +
-      'l0dNLWg==',
+  initData: axinomMultiDrmInitData,
 };
 
 /** @type {AVMetadataType} */
 const axinomMultiDrmAudioSegment = {
-  // Taken from Axinom's v6 test vector.
+  // Taken from Axinom's v10 test vectors.
   initSegmentUri: '/base/test/test/assets/multidrm-audio-init.mp4',
-  mdhdOffset: 0x192,
+  mdhdOffset: 0x18d,
   segmentUri: '/base/test/test/assets/multidrm-audio-segment.mp4',
-  tfdtOffset: 0x7c,
+  tfdtOffset: 0x88,
   segmentDuration: 4,
   mimeType: 'audio/mp4',
   codecs: 'mp4a.40.2',
-  initData:
-      'AAAANHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABQIARIQblodJidXR9eARuq' +
-      'l0dNLWg==',
+  initData: axinomMultiDrmInitData,
 };
 
 /** @type {!Object.<string, string>} */
 const axinomDrmServers = {
   // NOTE: These are not Axinom's actual servers.  These are test servers for
   // Widevine and PlayReady that let us specify the known key IDs and keys for
-  // Axinom's v6 test vectors.  Axinom's own servers started returning 403
-  // errors for these older test vectors, and we were forced to switch to
-  // something stable and independent.
+  // Axinom's v10 test vectors.
   'com.widevine.alpha':
-      'https://cwip-shaka-proxy.appspot.com/specific_key?blodJidXR9eARuql0dNLWg=GX8m9XLIZNIzizrl0RTqnA',
+      'https://cwip-shaka-proxy.appspot.com/specific_key?QGCoZYh4Qmecv5GuW64ecg=/DU0CDcxDMD7U96X4ipp4A',
   'com.microsoft.playready':
-      'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:6e5a1d26-2757-47d7-8046-eaa5d1d34b5a,contentkey:GX8m9XLIZNIzizrl0RTqnA==,sl:150)',
+      'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:4060a865-8878-4267-9cbf-91ae5bae1e72,contentkey:/DU0CDcxDMD7U96X4ipp4A==,sl:150)',
 };
 
 /** @type {TextMetadataType} */
