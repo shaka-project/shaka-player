@@ -274,6 +274,7 @@ jobs:
       # ALLOCATED_PORT must be defined by the self-hosted runner, and mapped
       # from the host to the container.
       - name: Test Player
+        timeout-minutes: 30
         run: |
           # Use of an array keeps elements intact, and allows an element to
           # contain spaces without being expanded into multiple arguments in a
