@@ -115,24 +115,30 @@ shaka.test.Waiter = class {
     const goalName = 'movement from ' + mediaElement.currentTime +
                      ' to ' + timeGoal;
 
+    // The cleanup on timeout
+    let timer = null;
+    const cleanup = () => {
+      if (timer) {
+        timer.stop();
+      }
+      this.eventManager_.unlisten(mediaElement, 'timeupdate');
+      this.eventManager_.unlisten(mediaElement, 'ended');
+    };
+
     // The conditions for success
     const p = new Promise((resolve) => {
       const check = () => {
         if (mediaElement.currentTime >= timeGoal || mediaElement.ended) {
-          this.eventManager_.unlisten(mediaElement, 'timeupdate');
-          this.eventManager_.unlisten(mediaElement, 'ended');
+          cleanup();
           resolve();
         }
       };
+
+      timer = new shaka.util.Timer(check);
+      timer.tickEvery(/* seconds= */ 1);
       this.eventManager_.listen(mediaElement, 'timeupdate', check);
       this.eventManager_.listen(mediaElement, 'ended', check);
     });
-
-    // The cleanup on timeout
-    const cleanup = () => {
-      this.eventManager_.unlisten(mediaElement, 'timeupdate');
-      this.eventManager_.unlisten(mediaElement, 'ended');
-    };
 
     return this.waitUntilGeneric_(goalName, p, cleanup, mediaElement);
   }
