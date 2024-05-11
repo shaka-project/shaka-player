@@ -935,6 +935,6 @@ function AugmentReportersFactory(reporters) {
 
   // Return a dummy middleware that does nothing and chains to the next
   // middleware.
-  return function (request, response, next) { next(); };
+  return (request, response, next) => next();
 }
 AugmentReportersFactory.$inject = ['reporter._reporters'];
