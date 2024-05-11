@@ -802,7 +802,8 @@ shaka.extern.PersistentSessionMetadata;
  *   keySystemsMapping: !Object.<string, string>,
  *   parseInbandPsshEnabled: boolean,
  *   minHdcpVersion: string,
- *   ignoreDuplicateInitData: boolean
+ *   ignoreDuplicateInitData: boolean,
+ *   enableMediaCapabilitiesCache: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -865,6 +866,10 @@ shaka.extern.PersistentSessionMetadata;
  *   Note: Tizen 2015 and 2016 models will send multiple webkitneedkey events
  *   with the same init data. If the duplicates are supressed, playback
  *   will stall without errors.
+ * @property {boolean} enableMediaCapabilitiesCache
+ *   Custom optimization, enable aggressive cache on mediaCapabilities call.
+ *   Should only be enabled on platform where polyfill for mediaCapabilities
+ *   is used.
  * @exportDoc
  */
 shaka.extern.DrmConfiguration;
