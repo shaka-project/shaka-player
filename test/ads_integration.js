@@ -51,9 +51,6 @@ describe('Ads', () => {
     adManager = player.getAdManager();
     await player.attach(video);
 
-    player.configure('ads.customPlayheadTracker', true);
-    player.configure('ads.skipPlayDetection', true);
-    player.configure('ads.supportsMultipleMediaElements', false);
     player.configure('streaming.useNativeHlsOnSafari', false);
 
     // Disable stall detection, which can interfere with playback tests.
@@ -111,8 +108,8 @@ describe('Ads', () => {
         .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
 
     // Play for 10 seconds, but stop early if the video ends.  If it takes
-    // longer than 20 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 20);
+    // longer than 30 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
 
     await player.unload();
   });

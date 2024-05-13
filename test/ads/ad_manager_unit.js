@@ -25,6 +25,9 @@ describe('Ad manager', () => {
     expect(adManager instanceof shaka.ads.AdManager).toBe(true);
 
     const config = shaka.util.PlayerConfiguration.createDefault().ads;
+    // Since we are using a fake video we cannot use a custom playhead tracker
+    // in these tests.
+    config.customPlayheadTracker = false;
     adManager.configure(config);
 
     adContainer =
