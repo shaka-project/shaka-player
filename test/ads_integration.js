@@ -82,6 +82,9 @@ describe('Ads', () => {
   });
 
   it('supports IMA SDK with vast', async () => {
+    adManager.initClientSide(
+        adContainer, video, /** adsRenderingSettings= **/ null);
+
     await player.load('/base/test/test/assets/dash-aes-128/dash.mpd');
     await video.play();
     expect(player.isLive()).toBe(false);
@@ -94,8 +97,6 @@ describe('Ads', () => {
     // longer than 20 seconds, fail the test.
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 20);
 
-    adManager.initClientSide(
-        adContainer, video, /** adsRenderingSettings= **/ null);
     const adRequest = new google.ima.AdsRequest();
     adRequest.adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?' +
         'sz=640x480&iu=/124319096/external/single_ad_samples&' +
@@ -104,6 +105,8 @@ describe('Ads', () => {
         'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
     adManager.requestClientSideAds(adRequest);
 
+    // The ad lasts 10 seconds. If it takes longer than 300 seconds, fail the
+    // test.
     await waiter.timeoutAfter(30)
         .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
 
