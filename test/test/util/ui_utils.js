@@ -171,9 +171,11 @@ shaka.test.UiUtils = class {
     const video = /** @type {!HTMLVideoElement} */(document.createElement(
         'video'));
 
-    // Tizen has issues with audio-only playbacks on muted video elements.
-    // Don't mute Tizen.
-    if (!shaka.util.Platform.isTizen()) {
+    // Some platforms have issues with audio-only playbacks on muted video
+    // elements. Don't mute them.
+    // Fuchsia reference: https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/platform/media/web_media_player_impl.cc;l=3535;drc=d23075f3
+    if (!shaka.util.Platform.isTizen() &&
+        !shaka.util.Platform.isFuchsiaCastDevice()) {
       video.muted = true;
     }
     video.width = 600;
