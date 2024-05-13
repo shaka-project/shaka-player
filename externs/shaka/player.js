@@ -1500,7 +1500,9 @@ shaka.extern.MediaSourceConfiguration;
  *   If this is <code>true</code>, we create a custom playhead tracker for
  *   Client Side. This is useful because it allows you to implement the use of
  *   IMA on platforms that do not support multiple video elements.
- *   This value defaults to <code>false</code>.
+ *   Defaults to <code>false</code> except on Tizen, WebOS, Chromecast,
+ *   Hisense, PlayStation 4, PlayStation5, Xbox whose default value is
+ *   <code>true</code>.
  * @property {boolean} skipPlayDetection
  *   If this is true, we will load Client Side ads without waiting for a play
  *   event.
@@ -1509,7 +1511,7 @@ shaka.extern.MediaSourceConfiguration;
  *   <code>true</code>.
  * @property {boolean} supportsMultipleMediaElements
  *   If this is true, the browser supports multiple media elements.
- *   Defaults to <code>false</code> except on Tizen, WebOS, Chromecast,
+ *   Defaults to <code>true</code> except on Tizen, WebOS, Chromecast,
  *   Hisense, PlayStation 4, PlayStation5, Xbox whose default value is
  *   <code>false</code>.
  *
