@@ -422,6 +422,10 @@ function setupTestEnvironment() {
   // detected.
   shaka.polyfill.installAll();
 
+  shaka.Player.probeSupport().then(function(support) {
+    console.log(JSON.stringify(support, null, '  '));
+  });
+
   configureJasmineEnvironment();
 }
 
