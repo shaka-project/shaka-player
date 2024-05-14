@@ -341,9 +341,10 @@ shaka.test.Util = class {
         // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
         return false;
       }
+      const baseMimeType = MimeUtils.getBasicType(mimetype);
       // AudioConfiguration
       mediaDecodingConfig.audio = {
-        contentType: mimetype,
+        contentType: MimeUtils.getFullType(baseMimeType, codecs),
       };
     } else {
       // VideoConfiguration
