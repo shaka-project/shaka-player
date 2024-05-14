@@ -931,6 +931,10 @@ function AugmentReportersFactory(reporters) {
       const left = results.total - processed;
       return orig(browser) + ` (${left} left)`;
     };
+
+    reporter.specSkipped = (browser, result) => {
+      reporter.writeCommonMsg(result.fullName + ' SKIPPED\n');
+    };
   }
 
   // Return a dummy middleware that does nothing and chains to the next

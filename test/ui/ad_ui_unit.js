@@ -94,9 +94,7 @@ describe('Ad UI', () => {
     UiUtils.confirmElementHidden(adControlsContainer);
   });
 
-  // TODO: Skip button isn't currently used. Re-enable this suit
-  // once we have other, non-IMA ad integrations.
-  xdescribe('skip button', () => {
+  describe('skip button', () => {
     /** @type {!HTMLButtonElement} */
     let skipButton;
 

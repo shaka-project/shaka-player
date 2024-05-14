@@ -7,6 +7,9 @@
 describe('MSS Player', () => {
   const Util = shaka.test.Util;
 
+  /** @type {!Object.<string, ?shaka.extern.DrmSupportType>} */
+  let support = {};
+
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
 
@@ -31,11 +34,20 @@ describe('MSS Player', () => {
   // eslint-disable-next-line max-len
   const playreadyLicenseUrl = 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)';
 
+  function checkPlayReadySupport() {
+    const playReadySupport = support['com.microsoft.playready'];
+    if (!playReadySupport) {
+      return false;
+    }
+    return playReadySupport.encryptionSchemes.includes('cenc');
+  }
+
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
     compiledShaka =
         await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
+    support = await shaka.media.DrmEngine.probeSupport();
   });
 
   beforeEach(async () => {
@@ -92,9 +104,8 @@ describe('MSS Player', () => {
     await player.unload();
   });
 
-  it('MSS VoD PlayReady', async () => {
-    const support = await shaka.media.DrmEngine.probeSupport();
-    if (!support['com.microsoft.playready']) {
+  drmIt('MSS VoD PlayReady', async () => {
+    if (!checkPlayReadySupport()) {
       pending('PlayReady is not supported by the platform.');
     }
 
