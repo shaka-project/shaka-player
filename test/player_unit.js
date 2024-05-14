@@ -3616,6 +3616,38 @@ describe('Player', () => {
       expect(tracks[0].id).toBe(1);
     });
 
+    it('removes based on channelsCount', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addAudio(1, (stream) => {
+            stream.channelsCount = 1;
+          });
+        });
+
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(2, (stream) => {
+            stream.channelsCount = 2;
+          });
+        });
+
+        manifest.addVariant(2, (variant) => {
+          variant.addAudio(3, (stream) => {
+            stream.channelsCount = 6;
+          });
+        });
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(player.getVariantTracks().length).toBe(3);
+
+      player.configure({restrictions:
+          {minChannelsCount: 2, maxChannelsCount: 4}});
+
+      const tracks = player.getVariantTracks();
+      expect(tracks.length).toBe(1);
+      expect(tracks[0].id).toBe(1);
+    });
+
     it('removes the whole variant if one stream is restricted', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {

@@ -382,7 +382,9 @@ shakaDemo.Config = class {
         .addNumberInput_('Min Framerate', prefix + 'minFrameRate')
         .addNumberInput_('Max Framerate', prefix + 'maxFrameRate')
         .addNumberInput_('Min Bandwidth', prefix + 'minBandwidth')
-        .addNumberInput_('Max Bandwidth', prefix + 'maxBandwidth');
+        .addNumberInput_('Max Bandwidth', prefix + 'maxBandwidth')
+        .addNumberInput_('Min Channels Count', prefix + 'minChannelsCount')
+        .addNumberInput_('Max Channels Count', prefix + 'maxChannelsCount');
   }
 
   /**
