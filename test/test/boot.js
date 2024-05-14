@@ -422,7 +422,7 @@ function setupTestEnvironment() {
   // detected.
   shaka.polyfill.installAll();
 
-  shaka.Player.probeSupport().then(function(support) {
+  shaka.Player.probeSupport().then((support) => {
     console.log(JSON.stringify(support, null, '  '));
   });
 
