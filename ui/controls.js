@@ -21,6 +21,7 @@ goog.require('shaka.ui.HiddenRewindButton');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.SeekBar');
+goog.require('shaka.ui.SkipAdButton');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.ui.VRManager');
 goog.require('shaka.util.Dom');
@@ -968,6 +969,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     const adCounter = new shaka.ui.AdCounter(this.adPanel_, this);
     this.elements_.push(adCounter);
+
+    const skipButton = new shaka.ui.SkipAdButton(this.adPanel_, this);
+    this.elements_.push(skipButton);
   }
 
   /** @private */

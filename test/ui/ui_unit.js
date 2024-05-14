@@ -123,8 +123,7 @@ describe('UI', () => {
         // multi-video use case. It could be replaces with any other
         // (reasonable) number.
         for (let i = 0; i < 4; i++) {
-          const video = /** @type {!HTMLVideoElement} */
-              (document.createElement('video'));
+          const video = shaka.test.UiUtils.createVideoElement();
 
           document.body.appendChild(video);
           videos.push(video);
