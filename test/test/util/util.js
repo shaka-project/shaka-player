@@ -341,14 +341,18 @@ shaka.test.Util = class {
         // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
         return false;
       }
+      const baseMimeType = MimeUtils.getBasicType(mimetype);
       // AudioConfiguration
       mediaDecodingConfig.audio = {
-        contentType: mimetype,
+        contentType: MimeUtils.getFullType(baseMimeType, codecs),
       };
     } else {
+      const codecs = StreamUtils.getCorrectVideoCodecs(
+          MimeUtils.getCodecs(mimetype));
+      const baseMimeType = MimeUtils.getBasicType(mimetype);
       // VideoConfiguration
       mediaDecodingConfig.video = {
-        contentType: mimetype,
+        contentType: MimeUtils.getFullType(baseMimeType, codecs),
 
         // NOTE: Some decoders strictly check the width and height fields and
         // won't decode smaller than 64x64.  So if we don't have this info (as

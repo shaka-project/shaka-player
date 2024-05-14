@@ -5,6 +5,7 @@
  */
 
 describe('StreamUtils', () => {
+  const Util = shaka.test.Util;
   const StreamUtils = shaka.util.StreamUtils;
 
   let manifest;
@@ -678,7 +679,7 @@ describe('StreamUtils', () => {
     });
 
     it('supports VP9 codec', async () => {
-      if (!MediaSource.isTypeSupported('video/webm; codecs="vp9"')) {
+      if (!await Util.isTypeSupported('video/webm; codecs="vp9"')) {
         pending('Codec VP9 is not supported by the platform.');
       }
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -695,7 +696,7 @@ describe('StreamUtils', () => {
     });
 
     it('supports fLaC codec', async () => {
-      if (!MediaSource.isTypeSupported('audio/mp4; codecs="flac"')) {
+      if (!await Util.isTypeSupported('audio/mp4; codecs="flac"')) {
         pending('Codec fLaC is not supported by the platform.');
       }
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -717,7 +718,7 @@ describe('StreamUtils', () => {
     });
 
     it('supports Opus codec', async () => {
-      if (!MediaSource.isTypeSupported('audio/mp4; codecs="opus"')) {
+      if (!await Util.isTypeSupported('audio/mp4; codecs="opus"')) {
         pending('Codec Opus is not supported by the platform.');
       }
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -739,7 +740,7 @@ describe('StreamUtils', () => {
     });
 
     it('supports legacy AVC1 codec', async () => {
-      if (!MediaSource.isTypeSupported('video/mp4; codecs="avc1.42001e"')) {
+      if (!await Util.isTypeSupported('video/mp4; codecs="avc1.42001e"')) {
         pending('Codec avc1.42001e is not supported by the platform.');
       }
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -886,11 +887,11 @@ describe('StreamUtils', () => {
           .toBeTruthy();
     });
 
-    it('should allow multiple codecs for codec switching', () => {
-      if (!MediaSource.isTypeSupported('video/webm; codecs="vp9"')) {
+    it('should allow multiple codecs for codec switching', async () => {
+      if (!await Util.isTypeSupported('video/webm; codecs="vp9"')) {
         pending('Codec VP9 is not supported by the platform.');
       }
-      if (!MediaSource.isTypeSupported('video/webm; codecs="vorbis"')) {
+      if (!await Util.isTypeSupported('audio/webm; codecs="vorbis"')) {
         pending('Codec vorbis is not supported by the platform.');
       }
       // This test is flaky in some Tizen devices, due to codec restrictions.
@@ -915,11 +916,11 @@ describe('StreamUtils', () => {
           .not.toBe(manifest.variants[1].video.codecs);
     });
 
-    it('chooses preferred audio and video codecs', () => {
-      if (!MediaSource.isTypeSupported('video/webm; codecs="vp9"')) {
+    it('chooses preferred audio and video codecs', async () => {
+      if (!await Util.isTypeSupported('video/webm; codecs="vp9"')) {
         pending('Codec VP9 is not supported by the platform.');
       }
-      if (!MediaSource.isTypeSupported('video/webm; codecs="vorbis"')) {
+      if (!await Util.isTypeSupported('audio/webm; codecs="vorbis"')) {
         pending('Codec vorbis is not supported by the platform.');
       }
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -937,11 +938,11 @@ describe('StreamUtils', () => {
       expect(variants[0].audio.codecs).toBe('mp4a.40.2');
     });
 
-    it('chooses preferred video codecs', () => {
-      if (!MediaSource.isTypeSupported('video/webm; codecs="vp9"')) {
+    it('chooses preferred video codecs', async () => {
+      if (!await Util.isTypeSupported('video/webm; codecs="vp9"')) {
         pending('Codec VP9 is not supported by the platform.');
       }
-      if (!MediaSource.isTypeSupported('video/webm; codecs="vorbis"')) {
+      if (!await Util.isTypeSupported('audio/webm; codecs="vorbis"')) {
         pending('Codec vorbis is not supported by the platform.');
       }
       // If no preferred audio codecs is specified or can be found, choose the
@@ -963,11 +964,11 @@ describe('StreamUtils', () => {
       expect(variants[1].audio.codecs).toBe('mp4a.40.2');
     });
 
-    it('chooses preferred audio codecs', () => {
-      if (!MediaSource.isTypeSupported('video/webm; codecs="vp9"')) {
+    it('chooses preferred audio codecs', async () => {
+      if (!await Util.isTypeSupported('video/webm; codecs="vp9"')) {
         pending('Codec VP9 is not supported by the platform.');
       }
-      if (!MediaSource.isTypeSupported('video/webm; codecs="vorbis"')) {
+      if (!await Util.isTypeSupported('audio/webm; codecs="vorbis"')) {
         pending('Codec vorbis is not supported by the platform.');
       }
       // If no preferred video codecs is specified or can be found, choose the
