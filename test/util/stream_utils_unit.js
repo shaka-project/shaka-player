@@ -891,7 +891,7 @@ describe('StreamUtils', () => {
       if (!await Util.isTypeSupported('video/webm; codecs="vp9"')) {
         pending('Codec VP9 is not supported by the platform.');
       }
-      if (!await Util.isTypeSupported('video/webm; codecs="vorbis"')) {
+      if (!await Util.isTypeSupported('audio/webm; codecs="vorbis"')) {
         pending('Codec vorbis is not supported by the platform.');
       }
       // This test is flaky in some Tizen devices, due to codec restrictions.
@@ -920,7 +920,7 @@ describe('StreamUtils', () => {
       if (!await Util.isTypeSupported('video/webm; codecs="vp9"')) {
         pending('Codec VP9 is not supported by the platform.');
       }
-      if (!await Util.isTypeSupported('video/webm; codecs="vorbis"')) {
+      if (!await Util.isTypeSupported('audio/webm; codecs="vorbis"')) {
         pending('Codec vorbis is not supported by the platform.');
       }
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -942,7 +942,7 @@ describe('StreamUtils', () => {
       if (!await Util.isTypeSupported('video/webm; codecs="vp9"')) {
         pending('Codec VP9 is not supported by the platform.');
       }
-      if (!await Util.isTypeSupported('video/webm; codecs="vorbis"')) {
+      if (!await Util.isTypeSupported('audio/webm; codecs="vorbis"')) {
         pending('Codec vorbis is not supported by the platform.');
       }
       // If no preferred audio codecs is specified or can be found, choose the
@@ -968,7 +968,7 @@ describe('StreamUtils', () => {
       if (!await Util.isTypeSupported('video/webm; codecs="vp9"')) {
         pending('Codec VP9 is not supported by the platform.');
       }
-      if (!await Util.isTypeSupported('video/webm; codecs="vorbis"')) {
+      if (!await Util.isTypeSupported('audio/webm; codecs="vorbis"')) {
         pending('Codec vorbis is not supported by the platform.');
       }
       // If no preferred video codecs is specified or can be found, choose the
