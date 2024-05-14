@@ -96,7 +96,7 @@ describe('HlsParser', () => {
     expect(keyRequests).toBe(5);
   });
 
-  it('supports SAMPLE-AES identity streaming', async () => {
+  drmIt('supports SAMPLE-AES identity streaming', async () => {
     if (!checkClearKeySupport()) {
       pending('ClearKey is not supported');
     }
