@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.8.4](https://github.com/shaka-project/shaka-player/compare/v4.8.3...v4.8.4) (2024-05-14)
+
+
+### Bug Fixes
+
+* **CEA:** reset PTS on new init segment ([#6606](https://github.com/shaka-project/shaka-player/issues/6606)) ([6d6ac83](https://github.com/shaka-project/shaka-player/commit/6d6ac8321bf4e72ff7ec4e81fc250f3f547773fd))
+* Clear preload array before awaiting destroy ([#6584](https://github.com/shaka-project/shaka-player/issues/6584)) ([fc49dde](https://github.com/shaka-project/shaka-player/commit/fc49dde3d08b9f19406569b54e93bd2561a4ebb7))
+* Destroy preload managers on player destroy ([#6576](https://github.com/shaka-project/shaka-player/issues/6576)) ([87d1c50](https://github.com/shaka-project/shaka-player/commit/87d1c50399f11f4e786df898b35d72aade44c446))
+* Do not assume 1080p Cast devices, some are 720p ([#6562](https://github.com/shaka-project/shaka-player/issues/6562)) ([3661ac4](https://github.com/shaka-project/shaka-player/commit/3661ac44714c2818a5369e1745840bf470dfc3ea))
+* **HLS:** Fix mimetype checking when using SUPPLEMENTAL-CODECS ([#6597](https://github.com/shaka-project/shaka-player/issues/6597)) ([8763ea2](https://github.com/shaka-project/shaka-player/commit/8763ea2ea2db2a864fa90a68c2e9fd05db9e633e)), closes [#6586](https://github.com/shaka-project/shaka-player/issues/6586)
+
 ## [4.8.3](https://github.com/shaka-project/shaka-player/compare/v4.8.2...v4.8.3) (2024-05-08)
 
 
