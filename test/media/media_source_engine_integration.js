@@ -707,9 +707,6 @@ describe('MediaSourceEngine', () => {
   });
 
   it('extracts ID3 metadata from AAC when transmuxing', async () => {
-    if (!MediaSource.isTypeSupported('audio/aac')) {
-      pending('Raw AAC codec is not supported by the platform.');
-    }
     metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
     generators = shaka.test.TestScheme.GENERATORS['id3-metadata_aac'];
 
