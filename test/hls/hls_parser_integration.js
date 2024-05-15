@@ -39,6 +39,7 @@ describe('HlsParser', () => {
     compiledShaka =
         await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
     support = await shaka.media.DrmEngine.probeSupport();
+    console.log(JSON.stringify(support, null, '  '));
   });
 
   beforeEach(async () => {
