@@ -1781,7 +1781,7 @@ describe('PeriodCombiner', () => {
    * @return {shaka.extern.Stream}
    * @suppress {accessControls}
    */
-  function makeImageStream(height, aspectRatio) {
+  function makeImageStream(height, aspectRatio=4/3) {
     const width = Math.round(height * aspectRatio);
     const streamGenerator = new shaka.test.ManifestGenerator.Stream(
         /* manifest= */ null,
