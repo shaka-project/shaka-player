@@ -207,10 +207,8 @@ module.exports = (config) => {
       'node_modules/codem-isoboxer/dist/iso_boxer.min.js',
 
       // EME encryption scheme polyfill, compiled into Shaka Player, but outside
-      // of the Closure deps system, so not in shaka-player.uncompiled.js.  This
-      // is specifically the compiled, minified, cross-browser build of it.
-      // eslint-disable-next-line max-len
-      'node_modules/eme-encryption-scheme-polyfill/dist/eme-encryption-scheme-polyfill.js',
+      // of the Closure deps system, so not in shaka-player.uncompiled.js.
+      'node_modules/eme-encryption-scheme-polyfill/index.js',
 
       // load closure base, the deps tree, and the uncompiled library
       'node_modules/google-closure-library/closure/goog/base.js',
