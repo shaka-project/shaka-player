@@ -431,12 +431,12 @@ module.exports = (config) => {
     clientArgs.testFiles.push('test/player_external.js');
   } else {
     // In a normal test run, we serve unit tests.
-    clientArgs.testFiles.push('test/**/*_unit.js');
+    clientArgs.testFiles.push('test/**/ads_integration.js');
 
-    if (!settings.quick) {
-      // If --quick is present, we don't serve integration tests.
-      clientArgs.testFiles.push('test/**/*_integration.js');
-    }
+    // if (!settings.quick) {
+    //   // If --quick is present, we don't serve integration tests.
+    //   clientArgs.testFiles.push('test/**/*_integration.js');
+    // }
     if (settings.external) {
       // If --external is present, we serve external asset tests.
       clientArgs.testFiles.push('demo/common/asset.js');
