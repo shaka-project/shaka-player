@@ -73,7 +73,6 @@ describe('Ads', () => {
 
     onErrorSpy = jasmine.createSpy('onError');
     onErrorSpy.and.callFake((event) => {
-      console.log(event);
       fail(event.detail);
     });
     eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
@@ -87,13 +86,9 @@ describe('Ads', () => {
   });
 
   afterAll(() => {
-    console.log('remove imaScript', imaScript);
     document.head.removeChild(imaScript);
-    console.log('remove video', video);
     document.body.removeChild(video);
-    console.log('remove adContainer', adContainer);
     document.body.removeChild(adContainer);
-    console.log('end');
   });
 
   describe('supports IMA SDK with vast', () => {
@@ -152,19 +147,13 @@ describe('Ads', () => {
       await video.play();
       expect(player.isLive()).toBe(false);
 
-      console.log('loaded');
-
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-      console.log('movement');
-
       // Play for 5 seconds, but stop early if the video ends.  If it takes
       // longer than 20 seconds, fail the test.
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 20);
-
-      console.log('video', video.currentTime);
 
       const adRequest = new google.ima.AdsRequest();
       adRequest.adTagUrl = adUri;
@@ -174,24 +163,16 @@ describe('Ads', () => {
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
 
-      console.log('AD_STARTED');
-
       // The ad lasts 10 seconds. If it takes longer than 20 seconds, fail the
       // test.
       await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
 
-      console.log('AD_STOPPED');
-
       // Play for 10 seconds, but stop early if the video ends.  If it takes
       // longer than 30 seconds, fail the test.
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
 
-      console.log('video', video.currentTime);
-
       await player.unload();
-
-      console.log('unload');
     });
   });
 });

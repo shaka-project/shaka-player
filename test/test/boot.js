@@ -89,19 +89,16 @@ function failOnError(messageHeader, error) {
 function failTestsOnUnhandledErrors() {
   // https://developer.mozilla.org/en-US/docs/Web/Events/unhandledrejection
   window.addEventListener('unhandledrejection', (event) => {
-    console.warn(event);
     /** @type {?} */
     const error = event.reason;
-    if (error) {
-      failOnError('Unhandled rejection in Promise', error);
-    }
+    failOnError('Unhandled rejection in Promise', error);
   });
 
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event
   // https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
   window.addEventListener('error', (event) => {
-    console.warn(event, event.filename, event.lineno, event.colno,
-        event.message);
+    console.warn(event, event['filename'], event['lineno'], event['colno'],
+        event['message']);
     /** @type {?} */
     const error = event['error'];
     if (error) {
