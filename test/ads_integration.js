@@ -28,6 +28,12 @@ describe('Ads', () => {
   /** @type {!shaka.test.Waiter} */
   let waiter;
 
+  const adUri = 'https://pubads.g.doubleclick.net/gampad/ads?' +
+      'sz=640x480&iu=/124319096/external/single_ad_samples&' +
+      'ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&' +
+      'unviewed_position_start=1&' +
+      'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
+
   beforeAll(async () => {
     imaScript = shaka.test.UiUtils.createImaSdkScript();
     const loadImaScript = new Promise((resolve, reject) => {
@@ -104,11 +110,7 @@ describe('Ads', () => {
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 20);
 
       const adRequest = new google.ima.AdsRequest();
-      adRequest.adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?' +
-          'sz=640x480&iu=/124319096/external/single_ad_samples&' +
-          'ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&' +
-          'unviewed_position_start=1&' +
-          'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
+      adRequest.adTagUrl = adUri;
       adManager.requestClientSideAds(adRequest);
 
       // The ad lasts 10 seconds. If it takes longer than 30 seconds, fail the
@@ -145,11 +147,7 @@ describe('Ads', () => {
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 20);
 
       const adRequest = new google.ima.AdsRequest();
-      adRequest.adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?' +
-          'sz=640x480&iu=/124319096/external/single_ad_samples&' +
-          'ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&' +
-          'unviewed_position_start=1&' +
-          'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
+      adRequest.adTagUrl = adUri;
       adManager.requestClientSideAds(adRequest);
 
       // The ad lasts 10 seconds. If it takes longer than 30 seconds, fail the
