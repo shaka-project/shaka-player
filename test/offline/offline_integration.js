@@ -97,10 +97,10 @@ filterDescribe('Offline', supportsStorage, () => {
           pending('Skipping offline DRM tests on Android - crbug.com/1108158');
           return;
         }
-        if (shaka.util.Platform.isChromeOS()) {
-          pending('Skipping offline DRM tests on ChromeOS');
-          return;
-        }
+        // if (shaka.util.Platform.isChromeOS()) {
+        //   pending('Skipping offline DRM tests on ChromeOS');
+        //   return;
+        // }
 
         shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
 
@@ -109,10 +109,10 @@ filterDescribe('Offline', supportsStorage, () => {
 
         // Work around http://crbug.com/887535 in which load cannot happen right
         // after close.  Experimentally, we seem to need a ~1s delay, so we're
-        // using a 3s delay to ensure it doesn't flake.  Without this, we get
+        // using a 10s delay to ensure it doesn't flake.  Without this, we get
         // error 6005 (FAILED_TO_CREATE_SESSION) with system code 70.
         // TODO: Remove when Chrome is fixed
-        await shaka.test.Util.delay(3);
+        await shaka.test.Util.delay(10);
 
         const contentUri = content.offlineUri;
         goog.asserts.assert(
