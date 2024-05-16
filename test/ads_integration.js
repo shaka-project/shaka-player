@@ -28,6 +28,10 @@ describe('Ads', () => {
   /** @type {!shaka.test.Waiter} */
   let waiter;
 
+  /** @type {string} */
+  const streamUri = '/base/test/test/assets/dash-multi-codec/dash.mpd';
+
+  /** @type {string} */
   const adUri = 'https://pubads.g.doubleclick.net/gampad/ads?' +
       'sz=640x480&iu=/124319096/external/single_ad_samples&' +
       'ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&' +
@@ -93,13 +97,12 @@ describe('Ads', () => {
       player.configure('ads.skipPlayDetection', false);
       player.configure('ads.supportsMultipleMediaElements', true);
 
+      await player.load(streamUri);
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
       adManager.initClientSide(
           adContainer, video, /** adsRenderingSettings= **/ null);
-
-      await player.load('/base/test/test/assets/dash-aes-128/dash.mpd');
-      await video.play();
-      expect(player.isLive()).toBe(false);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -130,13 +133,12 @@ describe('Ads', () => {
       player.configure('ads.skipPlayDetection', true);
       player.configure('ads.supportsMultipleMediaElements', false);
 
+      await player.load(streamUri);
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
       adManager.initClientSide(
           adContainer, video, /** adsRenderingSettings= **/ null);
-
-      await player.load('/base/test/test/assets/dash-aes-128/dash.mpd');
-      await video.play();
-      expect(player.isLive()).toBe(false);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
