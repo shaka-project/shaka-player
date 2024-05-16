@@ -72,7 +72,10 @@ describe('Ads', () => {
     waiter.setPlayer(player);
 
     onErrorSpy = jasmine.createSpy('onError');
-    onErrorSpy.and.callFake((event) => fail(event.detail));
+    onError.and.callFake((event) => {
+      console.log(event);
+      fail(event.detail);
+    });
     eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
     eventManager.listen(adManager, shaka.ads.AdManager.AD_ERROR,
         Util.spyFunc(onErrorSpy));
