@@ -72,7 +72,7 @@ describe('Ads', () => {
     waiter.setPlayer(player);
 
     onErrorSpy = jasmine.createSpy('onError');
-    onError.and.callFake((event) => {
+    onErrorSpy.and.callFake((event) => {
       console.log(event);
       fail(event.detail);
     });
