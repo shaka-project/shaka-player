@@ -445,25 +445,6 @@ function loadScript(file) {
 }
 
 /**
- * Load a IMA Sdk script and await completion.
- *
- * @return {!Promise}
- */
-function loadImaSdk() {
-  return new Promise((resolve, reject) => {
-    const script = /** @type {!HTMLScriptElement} */(
-      document.createElement('script'));
-    script.defer = false;
-    script['async'] = false;
-    script.onload = resolve;
-    script.onerror = reject;
-    script.setAttribute('src',
-        'https://imasdk.googleapis.com/js/sdkloader/ima3.js');
-    document.head.appendChild(script);
-  });
-}
-
-/**
  * Load all test scripts and await completion.
  *
  * @return {!Promise}
@@ -503,7 +484,6 @@ window.__karma__.start = async () => {
     setupTestEnvironment();
     console.log('Set up test environment.');
     await loadTests();
-    await loadImaSdk();
     console.log('Loaded all tests.');
 
     // eslint-disable-next-line no-restricted-syntax

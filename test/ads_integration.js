@@ -10,6 +10,8 @@ describe('Ads', () => {
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
 
+  /** @type {!HTMLScriptElement} */
+  let imaScript;
   /** @type {!HTMLVideoElement} */
   let video;
   /** @type {!HTMLElement} */
@@ -27,6 +29,13 @@ describe('Ads', () => {
   let waiter;
 
   beforeAll(async () => {
+    imaScript = shaka.test.UiUtils.createImaSdkScript();
+    const loadImaScript = new Promise((resolve, reject) => {
+      imaScript.onload = resolve;
+      imaScript.onerror= reject;
+    });
+    document.head.appendChild(imaScript);
+    await loadImaScript;
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
     adContainer =
@@ -65,6 +74,7 @@ describe('Ads', () => {
   });
 
   afterAll(() => {
+    document.head.removeChild(imaScript);
     document.body.removeChild(video);
   });
 
