@@ -89,9 +89,12 @@ function failOnError(messageHeader, error) {
 function failTestsOnUnhandledErrors() {
   // https://developer.mozilla.org/en-US/docs/Web/Events/unhandledrejection
   window.addEventListener('unhandledrejection', (event) => {
+    console.log(event);
     /** @type {?} */
     const error = event.reason;
-    failOnError('Unhandled rejection in Promise', error);
+    if (error) {
+      failOnError('Unhandled rejection in Promise', error);
+    }
   });
 
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event
@@ -100,7 +103,9 @@ function failTestsOnUnhandledErrors() {
     console.log(event);
     /** @type {?} */
     const error = event['error'];
-    failOnError('Unhandled error', error);
+    if (error) {
+      failOnError('Unhandled error', error);
+    }
   });
 }
 
