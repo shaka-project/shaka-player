@@ -97,6 +97,10 @@ filterDescribe('Offline', supportsStorage, () => {
           pending('Skipping offline DRM tests on Android - crbug.com/1108158');
           return;
         }
+        if (shaka.util.Platform.isChromeOS()) {
+          pending('Skipping offline DRM tests on ChromeOS');
+          return;
+        }
 
         shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
 
