@@ -97,6 +97,7 @@ function failTestsOnUnhandledErrors() {
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event
   // https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
   window.addEventListener('error', (event) => {
+    console.log(event);
     /** @type {?} */
     const error = event['error'];
     failOnError('Unhandled error', error);
