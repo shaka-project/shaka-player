@@ -319,6 +319,7 @@ shaka.test.Util = class {
    */
   static async isTypeSupported(mimetype, width, height) {
     const MimeUtils = shaka.util.MimeUtils;
+    const ContentType = shaka.util.ManifestParserUtils.ContentType;
     const StreamUtils = shaka.util.StreamUtils;
 
     /** @type {!MediaDecodingConfiguration} */
@@ -326,8 +327,9 @@ shaka.test.Util = class {
       type: 'media-source',
     };
     if (mimetype.startsWith('audio')) {
+      const baseMimeType = MimeUtils.getBasicType(mimetype);
       const codecs = StreamUtils.getCorrectAudioCodecs(
-          MimeUtils.getCodecs(mimetype));
+          MimeUtils.getCodecs(mimetype), baseMimeType);
       if (codecs == 'ac-3' && shaka.util.Platform.isTizen()) {
         // AC3 is flaky in some Tizen devices, so we need omit it for now.
         return false;
@@ -341,10 +343,10 @@ shaka.test.Util = class {
         // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
         return false;
       }
-      const baseMimeType = MimeUtils.getBasicType(mimetype);
       // AudioConfiguration
       mediaDecodingConfig.audio = {
-        contentType: MimeUtils.getFullType(baseMimeType, codecs),
+        contentType: MimeUtils.getFullOrConvertedType(
+            baseMimeType, codecs, ContentType.AUDIO),
       };
     } else {
       const codecs = StreamUtils.getCorrectVideoCodecs(
@@ -352,7 +354,8 @@ shaka.test.Util = class {
       const baseMimeType = MimeUtils.getBasicType(mimetype);
       // VideoConfiguration
       mediaDecodingConfig.video = {
-        contentType: MimeUtils.getFullType(baseMimeType, codecs),
+        contentType: MimeUtils.getFullOrConvertedType(
+            baseMimeType, codecs, ContentType.VIDEO),
 
         // NOTE: Some decoders strictly check the width and height fields and
         // won't decode smaller than 64x64.  So if we don't have this info (as

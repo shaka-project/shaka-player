@@ -1215,6 +1215,7 @@ describe('Player', () => {
           inaccurateManifestTolerance: 1,
           segmentPrefetchLimit: 1,
           updateIntervalSeconds: 10,
+          maxDisabledTime: 10,
           retryParameters: {
             baseDelay: 2000,
           },
@@ -1239,6 +1240,7 @@ describe('Player', () => {
       expect(player.getConfiguration().streaming.segmentPrefetchLimit).toBe(1);
       expect(player.getConfiguration().streaming.updateIntervalSeconds)
           .toBe(10);
+      expect(player.getConfiguration().streaming.maxDisabledTime).toBe(10);
       expect(player.getConfiguration().streaming.retryParameters.baseDelay)
           .toBe(2000);
       expect(player.getConfiguration().manifest.dash.autoCorrectDrift)
@@ -1259,6 +1261,7 @@ describe('Player', () => {
       expect(player.getConfiguration().streaming.segmentPrefetchLimit).toBe(2);
       expect(player.getConfiguration().streaming.updateIntervalSeconds)
           .toBe(0.1);
+      expect(player.getConfiguration().streaming.maxDisabledTime).toBe(1);
       expect(player.getConfiguration().streaming.retryParameters.baseDelay)
           .toBe(100);
       expect(player.getConfiguration().manifest.dash.autoCorrectDrift)
