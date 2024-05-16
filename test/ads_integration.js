@@ -84,8 +84,13 @@ describe('Ads', () => {
   });
 
   afterAll(() => {
+    console.log('remove imaScript', imaScript);
     document.head.removeChild(imaScript);
+    console.log('remove video', video);
     document.body.removeChild(video);
+    console.log('remove adContainer', adContainer);
+    document.body.removeChild(adContainer);
+    console.log('end');
   });
 
   describe('supports IMA SDK with vast', () => {
