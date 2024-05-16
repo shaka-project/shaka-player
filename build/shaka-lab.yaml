@@ -137,9 +137,6 @@ vars:
       - "--disable-background-media-suspend"
       - "--disable-background-timer-throttling"
       - "--disable-backgrounding-occluded-windows"
-      # Disable GPU acceleration to avoid contention for hardware resources
-      # during parallel testing and to create more stability for screenshots.
-      - "--disable-gpu"
 
   safari_tp_config: &safari_tp_config
     safari.options:
@@ -261,11 +258,12 @@ ChromecastV1:
   browser: chromecast
   version: v1
 
-Chromebook:
+ChromeOS:
   # TODO(b/145916766): Persistent license tests failing
   disabled: true
   browser: chromeos
-  version: Pixelbook
+  # https://www.acer.com/us-en/desktops-and-all-in-ones/acer-chromebox/acer-chromebox-cxi3/indexnew
+  version: Acer-CXI3
   extra_configs:
     - *chromeos_config
 
