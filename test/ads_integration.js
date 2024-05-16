@@ -78,39 +78,58 @@ describe('Ads', () => {
     document.body.removeChild(video);
   });
 
-  it('supports IMA SDK with vast', async () => {
-    adManager.initClientSide(
-        adContainer, video, /** adsRenderingSettings= **/ null);
+  describe('supports IMA SDK with vast', () => {
+    const imaTest = async () => {
+      adManager.initClientSide(
+          adContainer, video, /** adsRenderingSettings= **/ null);
 
-    await player.load('/base/test/test/assets/dash-aes-128/dash.mpd');
-    await video.play();
-    expect(player.isLive()).toBe(false);
+      await player.load('/base/test/test/assets/dash-aes-128/dash.mpd');
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 5 seconds, but stop early if the video ends.  If it takes
-    // longer than 20 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 20);
+      // Play for 5 seconds, but stop early if the video ends.  If it takes
+      // longer than 20 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 20);
 
-    const adRequest = new google.ima.AdsRequest();
-    adRequest.adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?' +
-        'sz=640x480&iu=/124319096/external/single_ad_samples&' +
-        'ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&' +
-        'unviewed_position_start=1&' +
-        'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
-    adManager.requestClientSideAds(adRequest);
+      const adRequest = new google.ima.AdsRequest();
+      adRequest.adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?' +
+          'sz=640x480&iu=/124319096/external/single_ad_samples&' +
+          'ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&' +
+          'unviewed_position_start=1&' +
+          'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
+      adManager.requestClientSideAds(adRequest);
 
-    // The ad lasts 10 seconds. If it takes longer than 300 seconds, fail the
-    // test.
-    await waiter.timeoutAfter(30)
-        .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
+      // The ad lasts 10 seconds. If it takes longer than 300 seconds, fail the
+      // test.
+      await waiter.timeoutAfter(30)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
 
-    // Play for 10 seconds, but stop early if the video ends.  If it takes
-    // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+      // Play for 10 seconds, but stop early if the video ends.  If it takes
+      // longer than 30 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
 
-    await player.unload();
+      await player.unload();
+    };
+
+    it('with support for multiple media elements', async () => {
+      if (shaka.util.Platform.isSmartTV()) {
+        pending('Platform without support for multiple media elements.');
+      }
+      player.configure('ads.customPlayheadTracker', false);
+      player.configure('ads.skipPlayDetection', false);
+      player.configure('ads.supportsMultipleMediaElements', true);
+      await imaTest();
+    });
+
+    it('without support for multiple media elements', async () => {
+      player.configure('ads.customPlayheadTracker', true);
+      player.configure('ads.skipPlayDetection', true);
+      player.configure('ads.supportsMultipleMediaElements', false);
+      await imaTest();
+    });
   });
 });
