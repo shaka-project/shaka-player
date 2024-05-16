@@ -97,12 +97,12 @@ describe('Ads', () => {
       player.configure('ads.skipPlayDetection', false);
       player.configure('ads.supportsMultipleMediaElements', true);
 
+      adManager.initClientSide(
+          adContainer, video, /** adsRenderingSettings= **/ null);
+
       await player.load(streamUri);
       await video.play();
       expect(player.isLive()).toBe(false);
-
-      adManager.initClientSide(
-          adContainer, video, /** adsRenderingSettings= **/ null);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -116,9 +116,13 @@ describe('Ads', () => {
       adRequest.adTagUrl = adUri;
       adManager.requestClientSideAds(adRequest);
 
-      // The ad lasts 10 seconds. If it takes longer than 30 seconds, fail the
+      // Wait a maximum of 10 seconds before the ad starts playing.
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
+
+      // The ad lasts 10 seconds. If it takes longer than 20 seconds, fail the
       // test.
-      await waiter.timeoutAfter(30)
+      await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
 
       // Play for 10 seconds, but stop early if the video ends.  If it takes
@@ -133,12 +137,12 @@ describe('Ads', () => {
       player.configure('ads.skipPlayDetection', true);
       player.configure('ads.supportsMultipleMediaElements', false);
 
+      adManager.initClientSide(
+          adContainer, video, /** adsRenderingSettings= **/ null);
+
       await player.load(streamUri);
       await video.play();
       expect(player.isLive()).toBe(false);
-
-      adManager.initClientSide(
-          adContainer, video, /** adsRenderingSettings= **/ null);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -152,9 +156,13 @@ describe('Ads', () => {
       adRequest.adTagUrl = adUri;
       adManager.requestClientSideAds(adRequest);
 
-      // The ad lasts 10 seconds. If it takes longer than 30 seconds, fail the
+      // Wait a maximum of 10 seconds before the ad starts playing.
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
+
+      // The ad lasts 10 seconds. If it takes longer than 20 seconds, fail the
       // test.
-      await waiter.timeoutAfter(30)
+      await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
 
       // Play for 10 seconds, but stop early if the video ends.  If it takes
