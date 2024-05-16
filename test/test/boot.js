@@ -102,6 +102,7 @@ function failTestsOnUnhandledErrors() {
     /** @type {?} */
     const error = event['error'];
     if (error) {
+      console.warn(error['name'], error['cause']);
       failOnError('Unhandled error', error);
     }
   });
