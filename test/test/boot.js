@@ -404,10 +404,20 @@ function configureJasmineEnvironment() {
   };
 }
 
+async function logSupport() {
+  try {
+    const support = await shaka.Player.probeSupport();
+    console.log('Platform support:', JSON.stringify(support, null, 2));
+  } catch (error) {
+    console.error('Support check failed at boot!', error);
+  }
+}
+
 /**
  * Set up the Shaka Player test environment.
+ * @return {!Promise}
  */
-function setupTestEnvironment() {
+async function setupTestEnvironment() {
   failTestsOnFailedAssertions();
   failTestsOnNamespacedElementOrAttributeNames();
   failTestsOnUnhandledErrors();
@@ -421,6 +431,8 @@ function setupTestEnvironment() {
   // install polyfills here to ensure that browser support is correctly
   // detected.
   shaka.polyfill.installAll();
+
+  await logSupport();
 
   configureJasmineEnvironment();
 }
@@ -481,7 +493,7 @@ window.__karma__.start = async () => {
   // See https://github.com/shaka-project/shaka-player/issues/4094
 
   try {
-    setupTestEnvironment();
+    await setupTestEnvironment();
     console.log('Set up test environment.');
     await loadTests();
     console.log('Loaded all tests.');
