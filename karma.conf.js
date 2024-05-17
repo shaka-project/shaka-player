@@ -377,6 +377,10 @@ module.exports = (config) => {
       suppressSkipped: true,
       showBrowser: true,
     },
+
+    // Use these setting to avoid DRM issues
+    useIframe: false,
+    runInParent: true,
   });
 
   if (settings.babel) {
