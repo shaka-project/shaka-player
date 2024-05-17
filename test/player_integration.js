@@ -610,6 +610,9 @@ describe('Player', () => {
     });
 
     it('in sequence mode', async () => {
+      if (!shaka.util.Platform.supportsSequenceMode()) {
+        pending('Sequence mode is not supported by the platform.');
+      }
       await player.load('test:sintel_sequence_compiled');
       expect(player.getManifest().sequenceMode).toBe(true);
 
