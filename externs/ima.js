@@ -204,6 +204,8 @@ google.ima.AdDisplayContainer = class {
   constructor(adContainer, video) {}
 
   initialize() {}
+
+  destroy() {}
 };
 
 
