@@ -30,6 +30,7 @@ describe('CastUtils', () => {
       'releaseAllMutexes', // Very specific to the inner workings of the player.
       'unloadAndSavePreload',
       'preload',
+      'getNonDefaultConfiguration',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
