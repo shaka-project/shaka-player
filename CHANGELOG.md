@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.8.5](https://github.com/shaka-project/shaka-player/compare/v4.8.4...v4.8.5) (2024-05-17)
+
+
+### Bug Fixes
+
+* **Ads:** Fix CS destroy ([#6624](https://github.com/shaka-project/shaka-player/issues/6624)) ([92c195b](https://github.com/shaka-project/shaka-player/commit/92c195bb89b126e4b23eb37b32642bc14d284029))
+* Enable SMOOTH codec switching on Fuchsia cast devices ([#6609](https://github.com/shaka-project/shaka-player/issues/6609)) ([4f58aad](https://github.com/shaka-project/shaka-player/commit/4f58aad0f4a29f30920553b3a9c4fd76e4e9da79))
+* Fix Opus support in Safari ([#6607](https://github.com/shaka-project/shaka-player/issues/6607)) ([9e7e4cc](https://github.com/shaka-project/shaka-player/commit/9e7e4cc984a5e1a2a911e10b56b04668fe2c05c1))
+* **HLS:** Fix bad detection in some MediaPlaylist ([#6608](https://github.com/shaka-project/shaka-player/issues/6608)) ([1e28ce6](https://github.com/shaka-project/shaka-player/commit/1e28ce6d667eb41c369906ad3004dadf65103c5e))
+* **HLS:** Support request byterange on media playlist detection ([#6629](https://github.com/shaka-project/shaka-player/issues/6629)) ([ac3797e](https://github.com/shaka-project/shaka-player/commit/ac3797eb91063d164bb9d31f80bd443b0aecc5a7))
+
 ## [4.8.4](https://github.com/shaka-project/shaka-player/compare/v4.8.3...v4.8.4) (2024-05-14)
 
 
