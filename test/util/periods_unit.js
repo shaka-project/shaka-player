@@ -1580,6 +1580,86 @@ describe('PeriodCombiner', () => {
     expect(variantsAfter4Periods).toEqual(variantsAfterAllPeriods);
   });
 
+  it('creates 4k content streams with a pre-roll 1080p ad', async () => {
+    // This test is based on the content from b/337064527
+
+    /** @type {!Array.<shaka.extern.Period>} */
+    const periods = [
+      // pre-roll ad at 1080p max, 16:9 aspect ratio
+      {
+        id: '0',
+        videoStreams: [
+          makeVideoStream(252, 16/9),
+          makeVideoStream(288, 16/9),
+          makeVideoStream(324, 16/9),
+          makeVideoStream(360, 16/9),
+          makeVideoStream(432, 16/9),
+          makeVideoStream(576, 16/9),
+          makeVideoStream(720, 16/9),
+          makeVideoStream(900, 16/9),
+          makeVideoStream(1080, 16/9),
+        ],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [
+          makeImageStream(198, 16/9),
+        ],
+      },
+      // content at 4k max, at 64:27 aspect ratio
+      {
+        id: '1',
+        videoStreams: [
+          makeVideoStream(214, 64/27),
+          makeVideoStream(242, 64/27),
+          makeVideoStream(268, 64/27),
+          makeVideoStream(322, 64/27),
+          makeVideoStream(428, 64/27),
+          makeVideoStream(536, 64/27),
+          makeVideoStream(670, 64/27),
+          makeVideoStream(804, 64/27),
+          makeVideoStream(1072, 64/27),
+          makeVideoStream(1608, 64/27),
+        ],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [
+          makeImageStream(148, 64/27),
+        ],
+      },
+      // content at 4k max, at 64:27 aspect ratio, one smaller video stream here
+      {
+        id: '2',
+        videoStreams: [
+          makeVideoStream(188, 64/27),  // Not in period 2
+          makeVideoStream(214, 64/27),
+          makeVideoStream(242, 64/27),
+          makeVideoStream(268, 64/27),
+          makeVideoStream(322, 64/27),
+          makeVideoStream(428, 64/27),
+          makeVideoStream(536, 64/27),
+          makeVideoStream(670, 64/27),
+          makeVideoStream(804, 64/27),
+          makeVideoStream(1072, 64/27),
+          makeVideoStream(1608, 64/27),
+        ],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [
+          makeImageStream(148, 64/27),
+        ],
+      },
+      // In reality, there were also periods 3 - 7, all equivalent to 2.
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ false);
+
+    // Less interested in the entire list, but one of these should be the
+    // highest res (4K) stream:
+    expect(combiner.getVariants()).toEqual(jasmine.arrayContaining([
+      makeVideoOnlyVariant(1608),
+    ]));
+  });
+
 
   describe('compareClosestPreferLower', () => {
     const PeriodCombiner = shaka.util.PeriodCombiner;
@@ -1635,11 +1715,12 @@ describe('PeriodCombiner', () => {
 
   /**
    * @param {number} height
+   * @param {number=} aspectRatio
    * @return {shaka.extern.Stream}
    * @suppress {accessControls}
    */
-  function makeVideoStream(height) {
-    const width = height * 4 / 3;
+  function makeVideoStream(height, aspectRatio=4/3) {
+    const width = Math.round(height * aspectRatio);
     const streamGenerator = new shaka.test.ManifestGenerator.Stream(
         /* manifest= */ null,
         /* isPartial= */ false,
@@ -1696,11 +1777,12 @@ describe('PeriodCombiner', () => {
 
   /**
    * @param {number} height
+   * @param {number=} aspectRatio
    * @return {shaka.extern.Stream}
    * @suppress {accessControls}
    */
-  function makeImageStream(height) {
-    const width = height * 4 / 3;
+  function makeImageStream(height, aspectRatio=4/3) {
+    const width = Math.round(height * aspectRatio);
     const streamGenerator = new shaka.test.ManifestGenerator.Stream(
         /* manifest= */ null,
         /* isPartial= */ false,
@@ -1727,6 +1809,19 @@ describe('PeriodCombiner', () => {
         roles,
         channelsCount: channels,
       }),
+      video: jasmine.objectContaining({
+        height,
+      }),
+    });
+    return /** @type {shaka.extern.Variant} */(/** @type {?} */(variant));
+  }
+
+  /**
+   * @param {number} height
+   * @return {shaka.extern.Variant}
+   */
+  function makeVideoOnlyVariant(height) {
+    const variant = jasmine.objectContaining({
       video: jasmine.objectContaining({
         height,
       }),
