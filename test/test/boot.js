@@ -408,6 +408,7 @@ async function logSupport() {
   try {
     const support = await shaka.Player.probeSupport();
     console.log('Platform support:', JSON.stringify(support, null, 2));
+    // eslint-disable-next-line no-restricted-syntax
   } catch (error) {
     console.error('Support check failed at boot!', error);
   }
