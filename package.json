@@ -39,7 +39,7 @@
     "jimp": "^0.16.1",
     "js-yaml": "^4.1.0",
     "jsdoc": "github:joeyparrish/jsdoc#2ca85bb6",
-    "karma": "^6.4.3",
+    "karma": "github:joeyparrish/karma#shaka-fixes",
     "karma-coverage": "^2.2.0",
     "karma-jasmine": "^4.0.1",
     "karma-jasmine-ajax": "^0.1.13",
