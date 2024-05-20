@@ -39,7 +39,7 @@
     "jimp": "^0.16.1",
     "js-yaml": "^4.1.0",
     "jsdoc": "github:joeyparrish/jsdoc#2ca85bb6",
-    "karma": "^6.3.16",
+    "karma": "github:joeyparrish/karma#shaka-fixes",
     "karma-coverage": "^2.2.0",
     "karma-jasmine": "^4.0.1",
     "karma-jasmine-ajax": "^0.1.13",
@@ -62,6 +62,11 @@
     "stylelint-config-standard": "^25.0.0",
     "tippy.js": "^4.3.5",
     "which": "^2.0.2"
+  },
+  "overrides": {
+    "karma": {
+      "ua-parser-js": "github:joeyparrish/ua-parser-js#preview"
+    }
   },
   "shakaCustom": {
     "purposeOfDemoDeps": "These are the files from node_modules that need to be deployed with the demo app.",
@@ -100,7 +105,7 @@
     "prepublishOnly": "python build/checkversion.py && python build/all.py --force"
   },
   "dependencies": {
-    "eme-encryption-scheme-polyfill": "^2.1.1"
+    "eme-encryption-scheme-polyfill": "^2.1.2"
   },
   "engines": {
     "node": ">=14"

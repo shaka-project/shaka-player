@@ -392,7 +392,10 @@ shaka.extern.TrackList;
  *   maxFrameRate: number,
  *
  *   minBandwidth: number,
- *   maxBandwidth: number
+ *   maxBandwidth: number,
+ *
+ *   minChannelsCount: number,
+ *   maxChannelsCount: number
  * }}
  *
  * @description
@@ -429,6 +432,11 @@ shaka.extern.TrackList;
  *   The minimum bandwidth of a variant track, in bit/sec.
  * @property {number} maxBandwidth
  *   The maximum bandwidth of a variant track, in bit/sec.
+ *
+ * @property {number} minChannelsCount
+ *   The minimum channels count of a variant track.
+ * @property {number} maxChannelsCount
+ *   The maximum channels count of a variant track.
  * @exportDoc
  */
 shaka.extern.Restrictions;
@@ -455,7 +463,8 @@ shaka.extern.DrmSupportType;
  * @typedef {{
  *   manifest: !Object.<string, boolean>,
  *   media: !Object.<string, boolean>,
- *   drm: !Object.<string, ?shaka.extern.DrmSupportType>
+ *   drm: !Object.<string, ?shaka.extern.DrmSupportType>,
+ *   hardwareResolution: shaka.extern.Resolution
  * }}
  *
  * @description
@@ -471,6 +480,10 @@ shaka.extern.DrmSupportType;
  *   A map of supported key systems.
  *   The keys are the key system names.  The value is <code>null</code> if it is
  *   not supported.  Key systems not probed will not be in this dictionary.
+ * @property {shaka.extern.Resolution} hardwareResolution
+ *   The maximum detected hardware resolution, which may have
+ *   height==width==Infinity for devices without a maximum resolution or
+ *   without a way to detect the maximum.
  *
  * @exportDoc
  */
@@ -1331,9 +1344,8 @@ shaka.extern.ManifestConfiguration;
  *   extra segment requests necessary to compensate for drift.
  * @property {boolean} lowLatencyMode
  *   If <code>true</code>, low latency streaming mode is enabled. If
- *   lowLatencyMode is set to true, inaccurateManifestTolerance is set to 0
- *   unless specified, and rebufferingGoal to 0.01 unless specified at the same
- *   time.
+ *   lowLatencyMode is set to true, it changes the default config values for
+ *   other things, see: docs/tutorials/config.md
  * @property {boolean} autoLowLatencyMode
  *   If the stream is low latency and the user has not configured the
  *   lowLatencyMode, but if it has been configured to activate the
@@ -1993,3 +2005,17 @@ shaka.extern.Thumbnail;
  * @exportDoc
  */
 shaka.extern.Chapter;
+
+/**
+ * @typedef {{
+ *   width: number,
+ *   height: number
+ * }}
+ *
+ * @property {number} width
+ *   Width in pixels.
+ * @property {number} height
+ *   Height in pixels.
+ * @exportDoc
+ */
+shaka.extern.Resolution;

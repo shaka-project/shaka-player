@@ -39,6 +39,7 @@
 
     </style>
     <script src="dist/shaka-player.compiled.js"></script>
+    <script src="proxy-cast-platform.js"></script>
     <script>
       function whenLoaded(fn) {
         // IE 9 fires DOMContentLoaded, and enters the "interactive"
@@ -73,7 +74,9 @@
       }
 
       function doTest() {
+        proxyCastCanDisplayType();
         shaka.polyfill.installAll();
+
         if (shaka.Player.isBrowserSupported()) {
           shaka.Player.probeSupport().then(function(support) {
             printSupport(JSON.stringify(support, null, '  '));

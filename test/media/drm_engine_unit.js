@@ -589,9 +589,11 @@ describe('DrmEngine', () => {
           sessionTypes: ['persistent-license'],
           initDataType: 'cenc',
           audio: containing({
+            encryptionScheme: '',
             robustness: 'good',
           }),
           video: containing({
+            encryptionScheme: '',
             robustness: 'really_really_ridiculously_good',
           }),
         }),
@@ -621,6 +623,7 @@ describe('DrmEngine', () => {
         drmInfos[0].persistentStateRequired = true;
         drmInfos[0].audioRobustness = 'good';
         drmInfos[0].videoRobustness = 'really_really_ridiculously_good';
+        drmInfos[0].encryptionScheme = 'bad';
       });
 
       config.advanced['drm.abc'] = {
@@ -647,9 +650,11 @@ describe('DrmEngine', () => {
         keySystemConfiguration: containing({
           keySystem: 'drm.abc',
           audio: containing({
+            encryptionScheme: 'bad',
             robustness: 'good',
           }),
           video: containing({
+            encryptionScheme: 'bad',
             robustness: 'really_really_ridiculously_good',
           }),
           distinctiveIdentifier: 'required',

@@ -612,6 +612,9 @@ describe('Player', () => {
     });
 
     it('in sequence mode', async () => {
+      if (!shaka.util.Platform.supportsSequenceMode()) {
+        pending('Sequence mode is not supported by the platform.');
+      }
       await player.load('test:sintel_sequence_compiled');
       expect(player.getManifest().sequenceMode).toBe(true);
 
@@ -1191,7 +1194,8 @@ describe('Player', () => {
     drmIt('unloads properly after DRM error', async () => {
       const drmSupport = await shaka.media.DrmEngine.probeSupport();
       if (!drmSupport['com.widevine.alpha'] &&
-          !drmSupport['com.microsoft.playready']) {
+          !drmSupport['com.microsoft.playready'] &&
+          !drmSupport['com.chromecast.playready']) {
         pending('Skipping DRM error test, only runs on Widevine and PlayReady');
       }
 
@@ -1388,6 +1392,16 @@ describe('Player', () => {
   it('preload', async () => {
     const preloadManager = await player.preload('test:sintel_compiled');
     await preloadManager.waitForFinish();
+    await player.load(preloadManager);
+    await video.play();
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+  });
+
+  it('detachAndSavePreload', async () => {
+    await player.load('test:sintel_compiled');
+    await video.play();
+    const preloadManager = await player.detachAndSavePreload();
+    await player.attach(video);
     await player.load(preloadManager);
     await video.play();
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);

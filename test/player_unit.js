@@ -753,6 +753,17 @@ describe('Player', () => {
     });
   });
 
+  it('getNonDefaultConfiguration', () => {
+    player.configure({
+      drm: {
+        retryParameters: {backoffFactor: 5},
+      },
+    });
+    const nonDefaultConfiguration = player.getNonDefaultConfiguration();
+    const config = player.getConfiguration();
+    expect(nonDefaultConfiguration).not.toBe(config);
+  });
+
   describe('configure', () => {
     it('overwrites defaults', () => {
       const defaultConfig = player.getConfiguration();
@@ -1215,11 +1226,15 @@ describe('Player', () => {
           inaccurateManifestTolerance: 1,
           segmentPrefetchLimit: 1,
           updateIntervalSeconds: 10,
+          maxDisabledTime: 10,
           retryParameters: {
             baseDelay: 2000,
           },
         },
         manifest: {
+          dash: {
+            autoCorrectDrift: true,
+          },
           retryParameters: {
             baseDelay: 2000,
           },
@@ -1236,8 +1251,11 @@ describe('Player', () => {
       expect(player.getConfiguration().streaming.segmentPrefetchLimit).toBe(1);
       expect(player.getConfiguration().streaming.updateIntervalSeconds)
           .toBe(10);
+      expect(player.getConfiguration().streaming.maxDisabledTime).toBe(10);
       expect(player.getConfiguration().streaming.retryParameters.baseDelay)
           .toBe(2000);
+      expect(player.getConfiguration().manifest.dash.autoCorrectDrift)
+          .toBe(true);
       expect(player.getConfiguration().manifest.retryParameters.baseDelay)
           .toBe(2000);
       expect(player.getConfiguration().drm.retryParameters.baseDelay)
@@ -1254,8 +1272,11 @@ describe('Player', () => {
       expect(player.getConfiguration().streaming.segmentPrefetchLimit).toBe(2);
       expect(player.getConfiguration().streaming.updateIntervalSeconds)
           .toBe(0.1);
+      expect(player.getConfiguration().streaming.maxDisabledTime).toBe(1);
       expect(player.getConfiguration().streaming.retryParameters.baseDelay)
           .toBe(100);
+      expect(player.getConfiguration().manifest.dash.autoCorrectDrift)
+          .toBe(false);
       expect(player.getConfiguration().manifest.retryParameters.baseDelay)
           .toBe(100);
       expect(player.getConfiguration().drm.retryParameters.baseDelay)
@@ -3493,7 +3514,7 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
-            stream.size(900, 900);
+            stream.size(500, 500);
           });
         });
         manifest.addVariant(1, (variant) => {
@@ -3511,7 +3532,7 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(player.getVariantTracks().length).toBe(3);
 
-      player.configure({restrictions: {minPixels: 100, maxPixels: 800 * 800}});
+      player.configure({restrictions: {minPixels: 100, maxPixels: 400 * 400}});
 
       const tracks = player.getVariantTracks();
       expect(tracks.length).toBe(1);
@@ -3527,7 +3548,7 @@ describe('Player', () => {
         });
         manifest.addVariant(1, (variant) => {
           variant.addVideo(2, (stream) => {
-            stream.size(1500, 200);
+            stream.size(1000, 200);
           });
         });
         manifest.addVariant(2, (variant) => {
@@ -3540,7 +3561,7 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(player.getVariantTracks().length).toBe(3);
 
-      player.configure({restrictions: {minWidth: 100, maxWidth: 1000}});
+      player.configure({restrictions: {minWidth: 100, maxWidth: 500}});
 
       const tracks = player.getVariantTracks();
       expect(tracks.length).toBe(1);
@@ -3557,7 +3578,7 @@ describe('Player', () => {
 
         manifest.addVariant(1, (variant) => {
           variant.addVideo(2, (stream) => {
-            stream.size(1024, 1024);
+            stream.size(500, 500);
           });
         });
 
@@ -3571,7 +3592,7 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(player.getVariantTracks().length).toBe(3);
 
-      player.configure({restrictions: {minHeight: 100, maxHeight: 1000}});
+      player.configure({restrictions: {minHeight: 100, maxHeight: 400}});
 
       const tracks = player.getVariantTracks();
       expect(tracks.length).toBe(1);
@@ -3603,6 +3624,38 @@ describe('Player', () => {
       expect(player.getVariantTracks().length).toBe(3);
 
       player.configure({restrictions: {minFrameRate: 20, maxFrameRate: 40}});
+
+      const tracks = player.getVariantTracks();
+      expect(tracks.length).toBe(1);
+      expect(tracks[0].id).toBe(1);
+    });
+
+    it('removes based on channelsCount', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addAudio(1, (stream) => {
+            stream.channelsCount = 1;
+          });
+        });
+
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(2, (stream) => {
+            stream.channelsCount = 2;
+          });
+        });
+
+        manifest.addVariant(2, (variant) => {
+          variant.addAudio(3, (stream) => {
+            stream.channelsCount = 6;
+          });
+        });
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(player.getVariantTracks().length).toBe(3);
+
+      player.configure({restrictions:
+          {minChannelsCount: 2, maxChannelsCount: 4}});
 
       const tracks = player.getVariantTracks();
       expect(tracks.length).toBe(1);

@@ -166,19 +166,31 @@ module.exports = (config) => {
       'jasmine',
     ],
 
-    // An expressjs middleware, essentially a component that handles requests
-    // in Karma's webserver.  This one is custom, and will let us take
-    // screenshots of browsers connected through WebDriver.
-    middleware: ['webdriver-screenshot'],
+    middleware: [
+      // An expressjs middleware, essentially a component that handles requests
+      // in Karma's webserver.  This one is custom, and will let us take
+      // screenshots of browsers connected through WebDriver.
+      'webdriver-screenshot',
+
+      // A "middleware" that lets us hook and augment the reporters with
+      // additional information.
+      'augment-reporters',
+    ],
 
     plugins: [
       'karma-*',  // default plugins
       '@*/karma-*', // default scoped plugins
 
-      // An inline plugin which supplies the webdriver-screenshot middleware.
       {
+        // An inline plugin which supplies the webdriver-screenshot middleware.
         'middleware:webdriver-screenshot': [
           'factory', WebDriverScreenshotMiddlewareFactory,
+        ],
+
+        // An inline plugin which augments the Reporter to add additional
+        // information.
+        'middleware:augment-reporters': [
+          'factory', AugmentReportersFactory,
         ],
       },
     ],
@@ -217,6 +229,9 @@ module.exports = (config) => {
 
       // test utilities next, which fill in that namespace
       'test/test/util/*.js',
+
+      // Proxy cast.__platform__ methods across frames, necessary in testing
+      'proxy-cast-platform.js',
 
       // bootstrapping for the test suite last; this will load the actual tests
       'test/test/boot.js',
@@ -374,6 +389,7 @@ module.exports = (config) => {
         'ui/**/*.js': ['babel', 'sourcemap'],
         'test/**/*.js': ['babel', 'sourcemap'],
         'third_party/**/*.js': ['babel', 'sourcemap'],
+        'proxy-cast-platform.js': ['babel', 'sourcemap'],
       },
 
       babelPreprocessor: {
@@ -886,3 +902,49 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
   }
 }
 WebDriverScreenshotMiddlewareFactory.$inject = ['launcher'];
+
+/**
+ * This is a factory for a "middleware" component that handles requests in
+ * Karma's webserver.  We don't handle any actual requests here, but we use this
+ * plugin to get access to the reporters through dependency injection and
+ * augment them to display the number of tests left to be processed.
+ *
+ * This is useful when running tests locally on many browsers, since you can
+ * see more clearly which browsers are still working and which are done.
+ *
+ * This could have been done through a fork of Karma itself, but this plugin
+ * was clearer in some ways than using a fork of a now-extinct project.
+ *
+ * @param {karma.Launcher} launcher
+ * @param {string} settingsJson
+ * @return {karma.Middleware}
+ */
+function AugmentReportersFactory(reporters, settingsJson) {
+  const settings = JSON.parse(settingsJson);
+
+  // Augment each reporter in the list.
+  for (const reporter of reporters) {
+    // Shim the renderBrowser function to add the number of test cases not yet
+    // processed (passed, failed, or skipped).
+    // The source we are patching: https://github.com/karma-runner/karma/blob/d8cf806e/lib/reporters/base.js#L37
+    const orig = reporter.renderBrowser;
+    reporter.renderBrowser = (browser) => {
+      const results = browser.lastResult;
+      const processed = results.success + results.failed + results.skipped;
+      const left = results.total - processed;
+      return orig(browser) + ` (${left} left)`;
+    };
+
+    // If we're not filtering explicitly, log any skipped tests.
+    if (!settings.filter) {
+      reporter.specSkipped = (browser, result) => {
+        reporter.writeCommonMsg(result.fullName + ' SKIPPED\n');
+      };
+    }
+  }
+
+  // Return a dummy middleware that does nothing and chains to the next
+  // middleware.
+  return (request, response, next) => next();
+}
+AugmentReportersFactory.$inject = ['reporter._reporters', 'config.settings'];

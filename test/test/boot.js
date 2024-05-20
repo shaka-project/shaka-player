@@ -414,6 +414,9 @@ function setupTestEnvironment() {
   disableScrollbars();
   workAroundLegacyEdgePromiseIssues();
 
+  // Defined in proxy-cast-platform.js:
+  proxyCastCanDisplayType();
+
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly
   // detected.
