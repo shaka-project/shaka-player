@@ -1252,7 +1252,8 @@ shaka.extern.ManifestConfiguration;
  *   vodDynamicPlaybackRate: boolean,
  *   vodDynamicPlaybackRateLowBufferRate: number,
  *   vodDynamicPlaybackRateBufferRatio: number,
- *   infiniteLiveStreamDuration: boolean
+ *   infiniteLiveStreamDuration: boolean,
+ *   minCompletionPreloadNextUrl: number
  * }}
  *
  * @description
@@ -1442,6 +1443,11 @@ shaka.extern.ManifestConfiguration;
  *   If <code>true</code>, the media source live duration
  *   set as a<code>Infinity</code>
  *   Defaults to <code> false </code>.
+ * @property {numebr} minCompletionPreloadNextUrl
+ *   Minimum completion percentage to preload the next URL. The range of
+ *   accepted values is between 0 and 100. If the value is 0 it implies that
+ *   there is no preloading of the next URL.
+ *   Defaults to <code> 90 </code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
