@@ -916,9 +916,12 @@ WebDriverScreenshotMiddlewareFactory.$inject = ['launcher'];
  * was clearer in some ways than using a fork of a now-extinct project.
  *
  * @param {karma.Launcher} launcher
+ * @param {string} settingsJson
  * @return {karma.Middleware}
  */
-function AugmentReportersFactory(reporters) {
+function AugmentReportersFactory(reporters, settingsJson) {
+  const settings = JSON.parse(settingsJson);
+
   // Augment each reporter in the list.
   for (const reporter of reporters) {
     // Shim the renderBrowser function to add the number of test cases not yet
@@ -932,13 +935,16 @@ function AugmentReportersFactory(reporters) {
       return orig(browser) + ` (${left} left)`;
     };
 
-    reporter.specSkipped = (browser, result) => {
-      reporter.writeCommonMsg(result.fullName + ' SKIPPED\n');
-    };
+    // If we're not filtering explicitly, log any skipped tests.
+    if (!settings.filter) {
+      reporter.specSkipped = (browser, result) => {
+        reporter.writeCommonMsg(result.fullName + ' SKIPPED\n');
+      };
+    }
   }
 
   // Return a dummy middleware that does nothing and chains to the next
   // middleware.
   return (request, response, next) => next();
 }
-AugmentReportersFactory.$inject = ['reporter._reporters'];
+AugmentReportersFactory.$inject = ['reporter._reporters', 'config.settings'];

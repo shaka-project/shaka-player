@@ -58,8 +58,9 @@ assignees: ''
 **What configuration are you using?  What is the output of `player.getConfiguration()`?**
 <!-- NOTE:
   You can censor URLs to keep them private, but include them in the email.  You
-  can also use JSON.stringify(obj, null, 2) to print nicely on platforms that
-  don't print objects well in the console.  DON'T SEND '[object Object]'!
+  can also use JSON.stringify(player.getNonDefaultConfiguration(), null, 2) to
+  print nicely on platforms that don't print objects well in the console.
+  DON'T SEND '[object Object]'!
 -->
 
 
