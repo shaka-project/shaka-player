@@ -38,9 +38,10 @@
 }
 
     </style>
+    <script src="dist/cast-boot.js"></script>
     <script src="dist/shaka-player.compiled.js"></script>
-    <script src="proxy-cast-platform.js"></script>
     <script>
+
       function whenLoaded(fn) {
         // IE 9 fires DOMContentLoaded, and enters the "interactive"
         // readyState, before document.body has been initialized, so wait
@@ -74,7 +75,6 @@
       }
 
       function doTest() {
-        proxyCastCanDisplayType();
         shaka.polyfill.installAll();
 
         if (shaka.Player.isBrowserSupported()) {
