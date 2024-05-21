@@ -97,8 +97,29 @@ function failTestsOnUnhandledErrors() {
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event
   // https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
   window.addEventListener('error', (event) => {
+    if (typeof event == 'string') {
+      // Since we moved to a flat (frameless) testing environment, we sometimes
+      // get error "events" on Chromecast where we only get the string "Script
+      // error." instead of an actual event object.  This would be consistent
+      // with an unhandled error thrown by a cross-origin script (such as the
+      // Cast SDK), but this string-only form should only be sent to the
+      // onerror callback and not the 'error' event listener.  This is both a
+      // bug in the SDK (unhandled error) and in the platform (called event
+      // listener with wrong format).  We ignore it here.
+      console.log('Suppressing error event with only string:', event);
+      return;
+    }
+
     /** @type {?} */
     const error = event['error'];
+    if (!error) {
+      // Since we moved to a flat (frameless) testing environment, we sometimes
+      // get error events on Chromecast where the error field is null.  It's not
+      // clear why.  Ignore these.
+      console.log('Suppressing error event with no error:', event);
+      return;
+    }
+
     failOnError('Unhandled error', error);
   });
 }
@@ -129,9 +150,9 @@ function disableScrollbars() {
 
     // eslint-disable-next-line no-restricted-syntax
   } catch (error) {
-    // On some platforms (Chromecast, Tizen), we are prevented from accessing
-    // the host context, even though it should be in the same origin.  Ignore
-    // errors here, so that the rest of the critical boot sequence can complete.
+    // On some platforms (Tizen), we are prevented from accessing the host
+    // context, even though it should be in the same origin.  Ignore errors
+    // here, so that the rest of the critical boot sequence can complete.
   }
 }
 
@@ -413,9 +434,6 @@ function setupTestEnvironment() {
   failTestsOnUnhandledErrors();
   disableScrollbars();
   workAroundLegacyEdgePromiseIssues();
-
-  // Defined in proxy-cast-platform.js:
-  proxyCastCanDisplayType();
 
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly

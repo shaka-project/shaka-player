@@ -753,6 +753,17 @@ describe('Player', () => {
     });
   });
 
+  it('getNonDefaultConfiguration', () => {
+    player.configure({
+      drm: {
+        retryParameters: {backoffFactor: 5},
+      },
+    });
+    const nonDefaultConfiguration = player.getNonDefaultConfiguration();
+    const config = player.getConfiguration();
+    expect(nonDefaultConfiguration).not.toBe(config);
+  });
+
   describe('configure', () => {
     it('overwrites defaults', () => {
       const defaultConfig = player.getConfiguration();
