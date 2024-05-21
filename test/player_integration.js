@@ -1420,7 +1420,7 @@ describe('Player', () => {
     const urlWithNextUrl = 'test:sintel_next_url_compiled';
 
     it('with preload', async () => {
-      player.configure('streaming.minCompletionPreloadNextUrl', 1);
+      player.configure('streaming.preloadNextUrlWindow', 30);
       await player.load(urlWithNextUrl);
       await video.play();
       await waiter.timeoutAfter(30).waitForEnd(video);
@@ -1431,7 +1431,7 @@ describe('Player', () => {
     });
 
     it('without preload', async () => {
-      player.configure('streaming.minCompletionPreloadNextUrl', 0);
+      player.configure('streaming.preloadNextUrlWindow', 0);
       await player.load(urlWithNextUrl);
       await video.play();
       await waiter.timeoutAfter(30).waitForEnd(video);

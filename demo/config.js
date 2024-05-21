@@ -565,8 +565,8 @@ shakaDemo.Config = class {
             'streaming.useNativeHlsOnSafari')
         .addBoolInput_('Use native HLS for FairPlay',
             'streaming.useNativeHlsForFairPlay')
-        .addNumberInput_('Min completion percent to preload next URL',
-            'streaming.minCompletionPreloadNextUrl',
+        .addNumberInput_('Time window at end to preload next URL',
+            'streaming.preloadNextUrlWindow',
             /* canBeDecimal= */ true,
             /* canBeZero= */ true);
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
