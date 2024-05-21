@@ -998,9 +998,54 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.THUMBNAILS),
   new ShakaDemoAssetInfo(
-      /* name= */ 'DASH-IF MPD Patch - Live stream w/ SegmentTimeline (livesim)',
+      /* name= */ 'DASH-IF MPD Patch - SegmentTemplate with $Number$ (livesim)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/patch_60/testpic_2s/Manifest.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MPD_PATCH),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'DASH-IF MPD Patch - SegmentTemplate with $Number$, multiperiod (livesim)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/patch_60/periods_60/testpic_2s/Manifest.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MPD_PATCH),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'DASH-IF MPD Patch - SegmentTimeline with $Number$ (livesim)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/patch_60/segtimelinenr_1/testpic_2s/Manifest.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MPD_PATCH),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'DASH-IF MPD Patch - SegmentTimeline with $Number$, multiperiod (livesim)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/patch_60/segtimelinenr_1/periods_60/testpic_2s/Manifest.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MPD_PATCH),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'DASH-IF MPD Patch - SegmentTimeline with $Time$ (livesim)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
       /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/patch_60/segtimeline_1/testpic_2s/Manifest.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MPD_PATCH),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'DASH-IF MPD Patch - SegmentTimeline with $Time$, multiperiod (livesim)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/patch_60/segtimeline_1/periods_60/testpic_2s/Manifest.mpd',
       /* source= */ shakaAssets.Source.DASH_IF)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
