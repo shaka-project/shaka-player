@@ -5,8 +5,8 @@
  */
 
 /**
- * @fileoverview Externs for HTMLMediaElement related to casting which were
- * missing in the Closure compiler.
+ * @fileoverview Externs for HTMLMediaElement related to remote playback which
+ * were missing in the Closure compiler.
  *
  * @externs
  */

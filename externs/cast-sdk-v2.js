@@ -16,10 +16,6 @@ var __onGCastApiAvailable;
 
 
 /** @const */
-var cast = {};
-
-
-/** @const */
 cast.receiver = {};
 
 

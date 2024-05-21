@@ -197,7 +197,13 @@ module.exports = (config) => {
 
     // list of files / patterns to load in the browser
     files: [
-      // Polyfills first, primarily for IE 11 and older TVs:
+      // The Cast boot file must come first, to start the SDK and respond as
+      // quickly as possible to the Cast platform.  Without this up front, we
+      // tend to see the Chromecast time out and shut down the receiver that
+      // hosts our tests.
+      'test/test/cast-boot.js',
+
+      // Polyfills before anything else, primarily for older TVs:
       //   Promise polyfill, required since we test uncompiled code on IE11
       'node_modules/es6-promise-polyfill/promise.js',
       //   Babel polyfill, required for async/await
@@ -229,9 +235,6 @@ module.exports = (config) => {
 
       // test utilities next, which fill in that namespace
       'test/test/util/*.js',
-
-      // Proxy cast.__platform__ methods across frames, necessary in testing
-      'proxy-cast-platform.js',
 
       // bootstrapping for the test suite last; this will load the actual tests
       'test/test/boot.js',
@@ -389,7 +392,6 @@ module.exports = (config) => {
         'ui/**/*.js': ['babel', 'sourcemap'],
         'test/**/*.js': ['babel', 'sourcemap'],
         'third_party/**/*.js': ['babel', 'sourcemap'],
-        'proxy-cast-platform.js': ['babel', 'sourcemap'],
       },
 
       babelPreprocessor: {
