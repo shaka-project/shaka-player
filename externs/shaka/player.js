@@ -1443,7 +1443,7 @@ shaka.extern.ManifestConfiguration;
  *   If <code>true</code>, the media source live duration
  *   set as a<code>Infinity</code>
  *   Defaults to <code> false </code>.
- * @property {numebr} minCompletionPreloadNextUrl
+ * @property {number} minCompletionPreloadNextUrl
  *   Minimum completion percentage to preload the next URL. The range of
  *   accepted values is between 0 and 100. If the value is 0 it implies that
  *   there is no preloading of the next URL.
