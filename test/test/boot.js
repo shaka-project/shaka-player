@@ -97,14 +97,9 @@ function failTestsOnUnhandledErrors() {
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event
   // https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
   window.addEventListener('error', (event) => {
-    console.warn(event, event['filename'], event['lineno'], event['colno'],
-        event['message'], event['source']);
     /** @type {?} */
     const error = event['error'];
-    if (error) {
-      console.warn(error['name'], error['cause']);
-      failOnError('Unhandled error', error);
-    }
+    failOnError('Unhandled error', error);
   });
 }
 
