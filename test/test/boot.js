@@ -352,6 +352,7 @@ function configureJasmineEnvironment() {
   // Reset decoding config cache after each test.
   afterEach(/** @suppress {accessControls} */ () => {
     shaka.util.StreamUtils.decodingConfigCache_ = {};
+    shaka.media.Capabilities.MediaSourceTypeSupportMap.clear();
   });
 
   // Code in karma-jasmine's adapter will malform test failures when the
