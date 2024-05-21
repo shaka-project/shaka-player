@@ -120,6 +120,10 @@ function failTestsOnUnhandledErrors() {
       return;
     }
 
+    console.warn(event, event['filename'], event['lineno'], event['colno'],
+        event['message'], event['source']);
+    console.warn(error, error['name']);
+
     failOnError('Unhandled error', error);
   });
 }
