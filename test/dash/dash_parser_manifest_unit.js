@@ -2630,6 +2630,23 @@ describe('DashParser Manifest', () => {
     });
   });
 
+  it('parses urn:mpeg:dash:chaining:2016', async () => {
+    const source = [
+      '<MPD minBufferTime="PT75S" type="dynamic"',
+      '     availabilityStartTime="1970-01-01T00:00:00Z">',
+      '  <SupplementalProperty schemeIdUri="urn:mpeg:dash:chaining:2016"',
+      '    value="https://nextUrl" />',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', source);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    expect(manifest.nextUrl).toBe('https://nextUrl');
+  });
+
   it('parses urn:mpeg:dash:ssr:2023', async () => { // eslint-disable-line max-len
     const manifestText = [
       '<MPD minBufferTime="PT75S">',

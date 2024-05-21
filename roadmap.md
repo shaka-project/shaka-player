@@ -23,6 +23,8 @@ v5.0 - 2024 Q4
 v4.9 - 2024 Q3
  - DASH patch manifests
    https://github.com/shaka-project/shaka-player/issues/2228
+ - DASH: MPD chaining
+   https://github.com/shaka-project/shaka-player/issues/3926
 
 =====
 
