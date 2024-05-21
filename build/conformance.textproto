@@ -393,3 +393,11 @@ requirement: {
   error_message:
     "Using \"Array.flat\" is not allowed because is not supported on Tizen 3."
 }
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: "Object.prototype.fromEntries"
+  error_message:
+    "Using \"Object.fromEntries\" is not allowed because is not supported on "
+    "Tizen 3."
+}

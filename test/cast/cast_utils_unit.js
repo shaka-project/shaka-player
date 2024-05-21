@@ -28,8 +28,10 @@ describe('CastUtils', () => {
       'setVideoContainer',
       'getActiveSessionsMetadata',
       'releaseAllMutexes', // Very specific to the inner workings of the player.
+      'detachAndSavePreload',
       'unloadAndSavePreload',
       'preload',
+      'getNonDefaultConfiguration',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',

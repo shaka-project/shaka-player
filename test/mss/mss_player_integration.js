@@ -35,7 +35,8 @@ describe('MSS Player', () => {
   const playreadyLicenseUrl = 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)';
 
   function checkPlayReadySupport() {
-    const playReadySupport = support['com.microsoft.playready'];
+    const playReadySupport = support['com.microsoft.playready'] ||
+        support['com.chromecast.playready'];
     if (!playReadySupport) {
       return false;
     }
