@@ -399,6 +399,8 @@ shakaDemo.Search = class {
         'Filters for assets that use Content Steering.');
     this.makeBooleanInput_(specialContainer, Feature.VR, FEATURE,
         'Filters for assets that are VR.');
+    this.makeBooleanInput_(specialContainer, Feature.MPD_CHAINING, FEATURE,
+        'Filters for assets that have MPD Chaining');
 
     container.appendChild(this.resultsDiv_);
   }

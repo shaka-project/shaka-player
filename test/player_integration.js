@@ -1397,6 +1397,16 @@ describe('Player', () => {
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
   });
 
+  it('detachAndSavePreload', async () => {
+    await player.load('test:sintel_compiled');
+    await video.play();
+    const preloadManager = await player.detachAndSavePreload();
+    await player.attach(video);
+    await player.load(preloadManager);
+    await video.play();
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+  });
+
   it('unloadAndSavePreload', async () => {
     await player.load('test:sintel_compiled');
     await video.play();
@@ -1404,6 +1414,32 @@ describe('Player', () => {
     await player.load(preloadManager);
     await video.play();
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+  });
+
+  describe('supports nextUrl', () => {
+    const urlWithNextUrl = 'test:sintel_next_url_compiled';
+
+    it('with preload', async () => {
+      player.configure('streaming.preloadNextUrlWindow', 30);
+      await player.load(urlWithNextUrl);
+      await video.play();
+      await waiter.timeoutAfter(30).waitForEnd(video);
+      expect(player.getAssetUri()).toBe(urlWithNextUrl);
+      // Delay needed to load the next URL.
+      await shaka.test.Util.delay(1);
+      expect(player.getAssetUri()).not.toBe(urlWithNextUrl);
+    });
+
+    it('without preload', async () => {
+      player.configure('streaming.preloadNextUrlWindow', 0);
+      await player.load(urlWithNextUrl);
+      await video.play();
+      await waiter.timeoutAfter(30).waitForEnd(video);
+      expect(player.getAssetUri()).toBe(urlWithNextUrl);
+      // Delay needed to load the next URL.
+      await shaka.test.Util.delay(1);
+      expect(player.getAssetUri()).not.toBe(urlWithNextUrl);
+    });
   });
 
   describe('buffer gap', () => {
