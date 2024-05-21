@@ -170,6 +170,9 @@ shakaAssets.Feature = {
 
   // Set if the asset is VR.
   VR: 'VR',
+
+  // Set if the asset has MPD Chaining.
+  MPD_CHAINING: 'MPD Chaining',
 };
 
 
@@ -303,6 +306,20 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Angel One (multicodec, multilingual, mpd chaining)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash_chaining.mpd',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addDescription('A clip from a classic Star Trek TNG episode, presented in MPEG-DASH.')
+      .markAsFeatured('Angel One')
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.WEBM)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addFeature(shakaAssets.Feature.MPD_CHAINING),
   new ShakaDemoAssetInfo(
       /* name= */ 'Angel One (multicodec, multilingual, Widevine)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
@@ -994,6 +1011,15 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.THUMBNAILS),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'DASH-IF - Regular chaining, Live',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://dash.akamaized.net/dash264/TestCasesIOP33/MPDChaining/regular_chain/1/manifest_regular_MPDChaining_live.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MPD_CHAINING),
   // End DASH-IF Assets }}}
 
   // bitcodin assets {{{

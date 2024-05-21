@@ -21,7 +21,8 @@
  *   sequenceMode: boolean,
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   type: string,
- *   serviceDescription: ?shaka.extern.ServiceDescription
+ *   serviceDescription: ?shaka.extern.ServiceDescription,
+ *   nextUrl: ?string
  * }}
  *
  * @description
@@ -93,6 +94,8 @@
  * @property {?shaka.extern.ServiceDescription} serviceDescription
  *   The service description for the manifest. Used to adapt playbackRate to
  *   decrease latency.
+ * @property {?string} nextUrl
+ *   The next url to play.
  *
  * @exportDoc
  */

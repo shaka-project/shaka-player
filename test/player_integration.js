@@ -1416,6 +1416,32 @@ describe('Player', () => {
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
   });
 
+  describe('supports nextUrl', () => {
+    const urlWithNextUrl = 'test:sintel_next_url_compiled';
+
+    it('with preload', async () => {
+      player.configure('streaming.preloadNextUrlWindow', 30);
+      await player.load(urlWithNextUrl);
+      await video.play();
+      await waiter.timeoutAfter(30).waitForEnd(video);
+      expect(player.getAssetUri()).toBe(urlWithNextUrl);
+      // Delay needed to load the next URL.
+      await shaka.test.Util.delay(1);
+      expect(player.getAssetUri()).not.toBe(urlWithNextUrl);
+    });
+
+    it('without preload', async () => {
+      player.configure('streaming.preloadNextUrlWindow', 0);
+      await player.load(urlWithNextUrl);
+      await video.play();
+      await waiter.timeoutAfter(30).waitForEnd(video);
+      expect(player.getAssetUri()).toBe(urlWithNextUrl);
+      // Delay needed to load the next URL.
+      await shaka.test.Util.delay(1);
+      expect(player.getAssetUri()).not.toBe(urlWithNextUrl);
+    });
+  });
+
   describe('buffer gap', () => {
     // Regression test for issue #6339.
     it('skip initial buffer gap', async () => {

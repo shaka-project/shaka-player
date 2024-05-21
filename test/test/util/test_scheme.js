@@ -53,7 +53,8 @@ let ExtraMetadataType;
  *   licenseServers: (!Object.<string, string>|undefined),
  *   licenseRequestHeaders: (!Object.<string, string>|undefined),
  *   customizeStream: (function(shaka.test.ManifestGenerator.Stream)|undefined),
- *   sequenceMode: (boolean|undefined)
+ *   sequenceMode: (boolean|undefined),
+ *   nextUrl: (string|undefined)
  * }}
  */
 let MetadataType;
@@ -289,6 +290,9 @@ shaka.test.TestScheme = class {
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.presentationTimeline.setDuration(data.duration);
         manifest.sequenceMode = data.sequenceMode || false;
+        if (data.nextUrl) {
+          manifest.nextUrl = data.nextUrl + suffix;
+        }
 
         const videoResolutions = data.videoResolutions || [undefined];
         const audioLanguages = data.audioLanguages ||
@@ -586,6 +590,13 @@ shaka.test.TestScheme.DATA = {
     video: sintelVideoSegment,
     audio: sintelAudioSegment,
     duration: 30,
+  },
+
+  'sintel_next_url': {
+    video: sintelVideoSegment,
+    audio: sintelAudioSegment,
+    duration: 5,
+    nextUrl: 'test:sintel',
   },
 
   // https://github.com/shaka-project/shaka-player/issues/2553

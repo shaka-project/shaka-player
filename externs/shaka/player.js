@@ -1252,7 +1252,8 @@ shaka.extern.ManifestConfiguration;
  *   vodDynamicPlaybackRate: boolean,
  *   vodDynamicPlaybackRateLowBufferRate: number,
  *   vodDynamicPlaybackRateBufferRatio: number,
- *   infiniteLiveStreamDuration: boolean
+ *   infiniteLiveStreamDuration: boolean,
+ *   preloadNextUrlWindow: number
  * }}
  *
  * @description
@@ -1442,6 +1443,12 @@ shaka.extern.ManifestConfiguration;
  *   If <code>true</code>, the media source live duration
  *   set as a<code>Infinity</code>
  *   Defaults to <code> false </code>.
+ * @property {number} preloadNextUrlWindow
+ *   The window of time at the end of the presentation to begin preloading the
+ *   next URL, such as one specified by a urn:mpeg:dash:chaining:2016 element
+ *   in DASH. Measured in seconds. If the value is 0, the next URL will not
+ *   be preloaded at all.
+ *   Defaults to <code> 30 </code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
