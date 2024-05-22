@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('Ads', () => {
+/** @return {boolean} */
+const supportsImaWithoutPolyfills = () => shaka.util.Platform.isTizen3();
+filterDescribe('Ads', supportsImaWithoutPolyfills, () => {
   const Util = shaka.test.Util;
 
   /** @type {!jasmine.Spy} */
@@ -143,9 +145,6 @@ describe('Ads', () => {
     });
 
     it('without support for multiple media elements', async () => {
-      if (shaka.util.Platform.isTizen3()) {
-        pending('Tizen 3 needs some polyfills for work with IMA.');
-      }
       player.configure('ads.customPlayheadTracker', true);
       player.configure('ads.skipPlayDetection', true);
       player.configure('ads.supportsMultipleMediaElements', false);
