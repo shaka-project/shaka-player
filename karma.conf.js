@@ -222,6 +222,8 @@ module.exports = (config) => {
       // eslint-disable-next-line max-len
       'node_modules/eme-encryption-scheme-polyfill/dist/eme-encryption-scheme-polyfill.js',
 
+      'node_modules/url-search-params-polyfill/index.js',
+
       // load closure base, the deps tree, and the uncompiled library
       'node_modules/google-closure-library/closure/goog/base.js',
       'dist/deps.js',
