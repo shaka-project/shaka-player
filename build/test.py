@@ -167,17 +167,6 @@ class Launcher:
              'browser to connect to it.',
         action='store_true')
     running_commands.add_argument(
-        '--single-run',
-        help='Run the test when browsers capture and exit.',
-        dest='single_run',
-        action='store_true',
-        default=True)
-    running_commands.add_argument(
-        '--no-single-run',
-        help='Do not shut down Karma when tests are complete.',
-        dest='single_run',
-        action='store_false')
-    running_commands.add_argument(
         '--random',
         help='Run the tests in a random order. This can be used with --seed '
              'to control the random order. If used without --seed, a seed '
@@ -412,7 +401,6 @@ class Launcher:
       'reporters',
       'report_slower_than',
       'seed',
-      'single_run',
       'spec_hide_passed',
       'test_custom_asset',
       'test_custom_license_server',

@@ -62,10 +62,10 @@ shaka.test.LayoutTests = class {
     // We need our own ID for Karma to look up the WebDriver connection.
     // For manually-connected browsers, this ID may not exist.  In those cases,
     // this method is expected to return false.
-    const parentUrlParams = window.parent.location.search;
+    const urlParams = location.search;
 
     const buffer = await shaka.test.Util.fetch(
-        '/screenshot/isSupported' + parentUrlParams);
+        '/screenshot/isSupported' + urlParams);
     const json = shaka.util.StringUtils.fromUTF8(buffer);
     const ok = /** @type {boolean} */(JSON.parse(json));
     return ok;
@@ -96,18 +96,12 @@ shaka.test.LayoutTests = class {
     // We need our own ID for Karma to look up the WebDriver connection.
     // By this point, we should have passed supportsScreenshots(), so the ID
     // should definitely be there.
-    const parentUrlParams = window.parent.location.search;
-    goog.asserts.assert(parentUrlParams.includes('id='), 'No ID in URL!');
+    const urlParams = location.search;
+    goog.asserts.assert(urlParams.includes('id='), 'No ID in URL!');
 
-    // Tests run in an iframe.  So we also need the coordinates of that iframe
-    // within the page, so that the screenshot can be consistently cropped to
-    // the element we care about.
-    const iframe = /** @type {HTMLIFrameElement} */(
-      window.parent.document.getElementById('context'));
-    const iframeRect = iframe.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
-    const x = iframeRect.left + elementRect.left;
-    const y = iframeRect.top + elementRect.top;
+    const x = elementRect.left;
+    const y = elementRect.top;
     const width = elementRect.width;
     const height = elementRect.height;
 
@@ -116,8 +110,8 @@ shaka.test.LayoutTests = class {
     // so it can convert coordinates before cropping.  This value, as opposed to
     // document.body.getBoundingClientRect(), seems to most accurately reflect
     // the size of the screenshot area.
-    const bodyWidth = window.parent.innerWidth;
-    const bodyHeight = window.parent.innerHeight;
+    const bodyWidth = window.innerWidth;
+    const bodyHeight = window.innerHeight;
 
     // In addition to the id param from the top-level window, pass these
     // parameters to the screenshot endpoint in Karma.
@@ -129,7 +123,7 @@ shaka.test.LayoutTests = class {
     }
 
     const buffer = await shaka.test.Util.fetch(
-        '/screenshot/diff' + parentUrlParams + paramsString);
+        '/screenshot/diff' + urlParams + paramsString);
     const json = shaka.util.StringUtils.fromUTF8(buffer);
     const similarity = /** @type {number} */(JSON.parse(json));
 
@@ -154,8 +148,7 @@ shaka.test.LayoutTests = class {
     // cropping issues.
     element.style.backgroundColor = 'green';
 
-    // Make sure the element is in the top-left corner of the iframe that
-    // contains the tests.
+    // Make sure the element is in the top-left corner of the window.
     element.style.top = '0';
     element.style.left = '0';
     element.style.position = 'fixed';
