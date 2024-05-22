@@ -203,6 +203,8 @@ module.exports = (config) => {
       // hosts our tests.
       'test/test/cast-boot.js',
 
+      'ima3.js',
+
       // Polyfills before anything else, primarily for older TVs:
       //   Promise polyfill, required since we test uncompiled code on IE11
       'node_modules/es6-promise-polyfill/promise.js',
@@ -221,8 +223,6 @@ module.exports = (config) => {
       'node_modules/eme-encryption-scheme-polyfill/dist/eme-encryption-scheme-polyfill.js',
 
       'node_modules/url-search-params-polyfill/index.js',
-
-      'ima3.js',
 
       // load closure base, the deps tree, and the uncompiled library
       'node_modules/google-closure-library/closure/goog/base.js',
