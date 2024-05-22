@@ -437,25 +437,6 @@ async function logSupport() {
 }
 
 /**
- * Load IMA script dynamically and await completion.
- *
- * @return {!Promise}
- */
-function loadImaSdk() {
-  return new Promise((resolve, reject) => {
-    const script = /** @type {!HTMLScriptElement} */(
-      document.createElement('script'));
-    script.defer = false;
-    script['async'] = false;
-    script.onload = resolve;
-    script.onerror = reject;
-    script.setAttribute('src',
-        'https://imasdk.googleapis.com/js/sdkloader/ima3.js');
-    document.head.appendChild(script);
-  });
-}
-
-/**
  * Set up the Shaka Player test environment.
  * @return {!Promise}
  */
@@ -474,8 +455,6 @@ async function setupTestEnvironment() {
   await logSupport();
 
   configureJasmineEnvironment();
-
-  await loadImaSdk();
 }
 
 /**

@@ -10,6 +10,8 @@ describe('Ads', () => {
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
 
+  /** @type {!HTMLScriptElement} */
+  let imaScript;
   /** @type {!HTMLVideoElement} */
   let video;
   /** @type {!HTMLElement} */
@@ -37,6 +39,17 @@ describe('Ads', () => {
       'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
 
   beforeAll(async () => {
+    await new Promise((resolve, reject) => {
+      imaScript = /** @type {!HTMLScriptElement} */(
+        document.createElement('script'));
+      imaScript.defer = false;
+      imaScript['async'] = false;
+      imaScript.onload = resolve;
+      imaScript.onerror = reject;
+      imaScript.setAttribute('src',
+          'https://imasdk.googleapis.com/js/sdkloader/ima3.js');
+      document.head.appendChild(imaScript);
+    });
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
     adContainer =
@@ -77,6 +90,7 @@ describe('Ads', () => {
   });
 
   afterAll(() => {
+    document.head.removeChild(imaScript);
     document.body.removeChild(video);
     document.body.removeChild(adContainer);
   });
