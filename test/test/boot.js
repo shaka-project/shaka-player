@@ -453,7 +453,7 @@ function loadImaSdk() {
     script['async'] = false;
     script.onload = resolve;
     script.onerror = reject;
-    script.setAttribute('src', '/base/test/test/ima3.js');
+    script.setAttribute('src','/base/test/test/ima3.js');
     document.head.appendChild(script);
   });
 }
@@ -478,7 +478,7 @@ async function setupTestEnvironment() {
 
   configureJasmineEnvironment();
 
-  // await loadImaSdk();
+  await loadImaSdk();
 }
 
 /**

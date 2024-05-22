@@ -2,4 +2,3 @@
 
 # This is default ignored, but we want to still lint it.
 !.eslintrc.js
-ima3.js

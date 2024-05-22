@@ -203,8 +203,6 @@ module.exports = (config) => {
       // hosts our tests.
       'test/test/cast-boot.js',
 
-      'ima3.js',
-
       // Polyfills before anything else, primarily for older TVs:
       //   Promise polyfill, required since we test uncompiled code on IE11
       'node_modules/es6-promise-polyfill/promise.js',
