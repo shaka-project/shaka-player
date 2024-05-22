@@ -61,7 +61,6 @@
     "stylelint": "^14.5.1",
     "stylelint-config-standard": "^25.0.0",
     "tippy.js": "^4.3.5",
-    "url-search-params-polyfill": "^8.2.5",
     "which": "^2.0.2"
   },
   "overrides": {
