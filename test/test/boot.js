@@ -453,8 +453,7 @@ function loadImaSdk() {
     script['async'] = false;
     script.onload = resolve;
     script.onerror = reject;
-    script.setAttribute('src',
-        'https://imasdk.googleapis.com/js/sdkloader/ima3.js');
+    script.setAttribute('src','/base/test/test/ima3.js');
     document.head.appendChild(script);
   });
 }
