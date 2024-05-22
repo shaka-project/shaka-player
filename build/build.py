@@ -45,6 +45,7 @@ import argparse
 import logging
 import os
 import re
+import shutil
 
 import compiler
 import generateLocalizations
@@ -302,11 +303,12 @@ class Build(object):
     if not closure.compile(closure_opts, force):
       return False
 
+    source_base = shakaBuildHelpers.get_source_base()
+
     # Don't pass local node modules to the extern generator.  But don't simply
     # exclude the string 'node_modules', either, since Shaka Player could be
     # rebuilt after installing it as a node module.
-    node_modules_path = os.path.join(
-        shakaBuildHelpers.get_source_base(), 'node_modules')
+    node_modules_path = os.path.join(source_base, 'node_modules')
     local_include = set([f for f in self.include if node_modules_path not in f])
     extern_generator = compiler.ExternGenerator(local_include, build_name)
 
@@ -322,6 +324,11 @@ class Build(object):
 
     if not ts_def_generator.generate(force):
       return False
+
+    # Copy this file to dist/ where support.html can use it
+    shutil.copy(
+        os.path.join(source_base, 'test', 'test', 'cast-boot.js'),
+        os.path.join(source_base, 'dist', 'cast-boot.js'))
 
     return True
 

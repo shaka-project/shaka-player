@@ -106,6 +106,7 @@ DASH features supported:
  - WebVTT and TTML
  - CEA-608/708 captions
  - Multi-codec variants (on platforms with changeType support)
+ - MPD chaining
 
 DASH features **not** supported:
  - Xlink with actuate=onRequest
