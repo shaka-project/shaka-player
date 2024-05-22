@@ -1228,6 +1228,7 @@ shaka.extern.ManifestConfiguration;
  *   inaccurateManifestTolerance: number,
  *   lowLatencyMode: boolean,
  *   autoLowLatencyMode: boolean,
+ *   forceHTTP: boolean,
  *   forceHTTPS: boolean,
  *   preferNativeHls: boolean,
  *   updateIntervalSeconds: number,
@@ -1352,6 +1353,8 @@ shaka.extern.ManifestConfiguration;
  *   lowLatencyMode, but if it has been configured to activate the
  *   lowLatencyMode if a stream of this type is detected, we automatically
  *   activate the lowLatencyMode. Defaults to false.
+ * @property {boolean} forceHTTP
+ *   If true, if the protocol is HTTPs change it to HTTP.
  * @property {boolean} forceHTTPS
  *   If true, if the protocol is HTTP change it to HTTPs.
  * @property {boolean} preferNativeHls
