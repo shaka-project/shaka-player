@@ -38,6 +38,7 @@ describe('Ads', () => {
       'unviewed_position_start=1&' +
       'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
 
+  // Load IMA script breaks Tizen 3, so we need avoid load to the script.
   if (!shaka.util.Platform.isTizen3()) {
     beforeAll(async () => {
       await new Promise((resolve, reject) => {
