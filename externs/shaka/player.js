@@ -705,7 +705,8 @@ shaka.extern.ProducerReferenceTime;
  *   serverCertificate: Uint8Array,
  *   serverCertificateUri: string,
  *   individualizationServer: string,
- *   sessionType: string
+ *   sessionType: string,
+ *   headers: !Object.<string, string>
  * }}
  *
  * @property {boolean} distinctiveIdentifierRequired
@@ -744,6 +745,8 @@ shaka.extern.ProducerReferenceTime;
  *   <i>Defaults to <code>'temporary'</code> for streaming.</i> <br>
  *   The MediaKey session type to create streaming licenses with.  This doesn't
  *   affect offline storage.
+ * @property {!Object.<string, string>} headers
+ *   The headers to use in the license request.
  *
  * @exportDoc
  */
