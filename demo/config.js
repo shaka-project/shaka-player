@@ -305,6 +305,9 @@ shakaDemo.Config = class {
             'abr.clearBufferSwitch')
         .addNumberInput_('Safe margin on abr switch rendition',
             'abr.safeMarginSwitch',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Milliseconds to consider a request cached',
+            'abr.cacheLoadThreshold',
             /* canBeDecimal= */ true);
     this.addRetrictionsSection_('abr', 'Adaptation Restrictions');
   }

@@ -1567,7 +1567,8 @@ shaka.extern.AdsConfiguration;
  *   restrictToScreenSize: boolean,
  *   ignoreDevicePixelRatio: boolean,
  *   clearBufferSwitch: boolean,
- *   safeMarginSwitch: number
+ *   safeMarginSwitch: number,
+ *   cacheLoadThreshold: number
  * }}
  *
  * @property {boolean} enabled
@@ -1625,6 +1626,10 @@ shaka.extern.AdsConfiguration;
  *   Can cause hiccups on some browsers if chosen too small, e.g.
  *   The amount of two segments is a fair minimum to consider as safeMargin
  *   value.
+ * @property {number} cacheLoadThreshold
+ *   Indicates the value in milliseconds from which a request is not
+ *   considered cached.
+ *   Defaults to <code>20</code>.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
