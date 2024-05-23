@@ -427,6 +427,7 @@ shaka.extern.SegmentIndex = class {
  *   frameRate: (number|undefined),
  *   pixelAspectRatio: (string|undefined),
  *   hdr: (string|undefined),
+ *   colorGamut: (string|undefined),
  *   videoLayout: (string|undefined),
  *   bandwidth: (number|undefined),
  *   width: (number|undefined),
@@ -504,6 +505,9 @@ shaka.extern.SegmentIndex = class {
  * @property {(string|undefined)} hdr
  *   <i>Video streams only.</i> <br>
  *   The Stream's HDR info
+ * @property {(string|undefined)} colorGamut
+ *   <i>Video streams only.</i> <br>
+ *   The Stream's color gamut info
  * @property {(string|undefined)} videoLayout
  *   <i>Video streams only.</i> <br>
  *   The Stream's video layout info.
