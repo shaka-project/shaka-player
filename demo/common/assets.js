@@ -27,16 +27,12 @@ shakaAssets.Source = {
   CUSTOM: 'Custom',
   SHAKA: 'Shaka',
   AXINOM: 'Axinom',
-  UNIFIED_STREAMING: 'Unified Streaming',
   DASH_IF: 'DASH-IF',
   BITCODIN: 'Bitcodin',
-  METACDN: 'MetaCDN',
   NIMBLE_STREAMER: 'Nimble Streamer',
-  AZURE_MEDIA_SERVICES: 'Azure Media Services',
   GPAC: 'GPAC',
   UPLYNK: 'Verizon Digital Media Services',
   APPLE: 'Apple',
-  IRT: 'IRT',
   MICROSOFT: 'Microsoft',
   VNOVA: 'V-Nova',
   AWS: 'AWS',
@@ -846,72 +842,6 @@ shakaAssets.testAssets = [
       }),
   // End Axinom assets }}}
 
-  // Unified Streaming assets {{{
-  // Src: http://demo.unified-streaming.com/features.html
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Tears of Steel',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
-      /* manifestUri= */ 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel.ism/.mpd',
-      /* source= */ shakaAssets.Source.UNIFIED_STREAMING)
-      .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.OFFLINE),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Tears of Steel (HLS, Subtitles)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
-      /* manifestUri= */ 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-multiple-subtitles.ism/.m3u8',
-      /* source= */ shakaAssets.Source.UNIFIED_STREAMING)
-      .addFeature(shakaAssets.Feature.HLS)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.OFFLINE),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Tears of Steel (Widevine)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
-      /* manifestUri= */ 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-dash-widevine.ism/.mpd',
-      /* source= */ shakaAssets.Source.UNIFIED_STREAMING)
-      .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
-      .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Tears of Steel (PlayReady)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
-      /* manifestUri= */ 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-dash-playready.ism/.mpd',
-      /* source= */ shakaAssets.Source.UNIFIED_STREAMING)
-      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
-      .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?PlayRight=1&UseSimpleNonPersistentLicense=1'),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Tears of Steel (subtitles)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
-      /* manifestUri= */ 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-en.ism/.mpd',
-      /* source= */ shakaAssets.Source.UNIFIED_STREAMING)
-      .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.OFFLINE),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Tears of Steel (Thumbnails)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
-      /* manifestUri= */ 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-tiled-thumbnails-timeline.ism/.mpd',
-      /* source= */ shakaAssets.Source.UNIFIED_STREAMING)
-      .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.OFFLINE)
-      .addFeature(shakaAssets.Feature.THUMBNAILS),
-  // End Unified Streaming assets }}}
-
   // DASH-IF assets {{{
   // Src: http://dashif.org/test-vectors/
   new ShakaDemoAssetInfo(
@@ -953,6 +883,7 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/segtimeline_1/startrel_-20/stoprel_20/timeoffset_0/testpic_2s/Manifest.mpd',
       /* source= */ shakaAssets.Source.DASH_IF)
       .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4),
   new ShakaDemoAssetInfo(
       /* name= */ 'Live sim StartOver SegTmpl Duration [-20s, +20s] (2s segments)',
@@ -960,6 +891,7 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/startrel_-20/stoprel_20/timeoffset_0/testpic_2s/Manifest.mpd',
       /* source= */ shakaAssets.Source.DASH_IF)
       .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4),
   new ShakaDemoAssetInfo(
       /* name= */ 'Live sim SegTmpl Duration (multi-period 60s)',
@@ -972,7 +904,7 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'Live sim TTML Image Subtitles embedded (VoD)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
-      /* manifestUri= */ 'https://livesim2.dashif.org/dash/testpic_2s/img_subs.mpd',
+      /* manifestUri= */ 'https://livesim2.dashif.org/vod/testpic_2s/img_subs.mpd',
       /* source= */ shakaAssets.Source.DASH_IF)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.SUBTITLES)
@@ -994,7 +926,7 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'DASH-IF CEA-608 VOD',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
-      /* manifestUri= */ 'https://livesim2.dashif.org/dash/testpic_2s/cea608.mpd',
+      /* manifestUri= */ 'https://livesim2.dashif.org/vod/testpic_2s/cea608.mpd',
       /* source= */ shakaAssets.Source.DASH_IF)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.SUBTITLES)
@@ -1072,13 +1004,12 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.THUMBNAILS),
   new ShakaDemoAssetInfo(
-      /* name= */ 'DASH-IF - Regular chaining, Live',
+      /* name= */ 'DASH-IF - Regular chaining',
       /* iconUri= */ '',
       /* manifestUri= */ 'https://dash.akamaized.net/dash264/TestCasesIOP33/MPDChaining/regular_chain/1/manifest_regular_MPDChaining_live.mpd',
       /* source= */ shakaAssets.Source.DASH_IF)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MPD_CHAINING),
   // End DASH-IF Assets }}}
 
@@ -1169,45 +1100,6 @@ shakaAssets.testAssets = [
       }),
   // End bitcodin assets }}}
 
-  // MetaCDN assets {{{
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Car Ride (DASH, VOD, 180 Degrees)',
-      /* iconUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/.png?scale=300:210',
-      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/Feature.DASH/.mpd',
-      /* source= */ shakaAssets.Source.METACDN)
-      .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.VOD),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Car Ride (HLS, VOD, 180 Degrees)',
-      /* iconUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/.png?scale=300:210',
-      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/Feature.HLS/.m3u8',
-      /* source= */ shakaAssets.Source.METACDN)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.HLS)
-      .addFeature(shakaAssets.Feature.MP2TS)
-      .addFeature(shakaAssets.Feature.VOD),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Queensland, Australia Landscape (DASH)',
-      /* iconUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/.png?scale=300:210',
-      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/Feature.DASH/.mpd',
-      /* source= */ shakaAssets.Source.METACDN)
-      .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.VOD),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Queensland, Australia Landscape (HLS)',
-      /* iconUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/.png?scale=300:210',
-      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/Feature.HLS/.m3u8',
-      /* source= */ shakaAssets.Source.METACDN)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.HLS)
-      .addFeature(shakaAssets.Feature.MP2TS)
-      .addFeature(shakaAssets.Feature.VOD),
-  // End MetaCDN assets }}}
-
   // Nimble Streamer assets {{{
   // Src: https://wmspanel.com/nimble/demo
   new ShakaDemoAssetInfo(
@@ -1232,66 +1124,6 @@ shakaAssets.testAssets = [
 
   // End Nimble Streamer assets }}}
 
-  // Azure Media Services assets {{{
-  // Src: http://amp.azure.net/libs/amp/latest/docs/samples.html
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Azure Trailer',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/azure.png',
-      /* manifestUri= */ 'https://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=mpd-time-csf)',
-      /* source= */ shakaAssets.Source.AZURE_MEDIA_SERVICES)
-      .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.OFFLINE),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Big Buck Bunny (Azure)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
-      /* manifestUri= */ 'https://amssamples.streaming.mediaservices.windows.net/622b189f-ec39-43f2-93a2-201ac4e31ce1/BigBuckBunny.ism/manifest(format=mpd-time-csf)',
-      /* source= */ shakaAssets.Source.AZURE_MEDIA_SERVICES)
-      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
-      .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
-      .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.widevine.alpha', 'https://amssamples.keydelivery.mediaservices.windows.net/Widevine/?KID=1ab45440-532c-4399-94dc-5c5ad9584bac')
-      .addLicenseServer('com.microsoft.playready', 'https://amssamples.keydelivery.mediaservices.windows.net/PlayReady/'),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Tears of Steel (external text)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
-      /* manifestUri= */ 'https://ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TearsOfSteel_WAMEH264SmoothStreaming720p.ism/manifest(format=mpd-time-csf)',
-      /* source= */ shakaAssets.Source.AZURE_MEDIA_SERVICES)
-      .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.OFFLINE)
-      .addExtraText({
-        uri: 'https://ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-en.vtt',
-        language: 'en',
-        kind: 'subtitle',
-        mime: 'text/vtt',
-      }).addExtraText({
-        uri: 'https://ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-es.vtt',
-        language: 'es',
-        kind: 'subtitle',
-        mime: 'text/vtt',
-      }).addExtraText({
-        uri: 'https://ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-fr.vtt',
-        language: 'fr',
-        kind: 'subtitle',
-        mime: 'text/vtt',
-      }),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Sintel (DASH, AES-128)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
-      /* manifestUri= */ 'https://amssamples.streaming.mediaservices.windows.net/49b57c87-f5f3-48b3-ba22-c55cfdffa9cb/Sintel.ism/manifest(format=mpd-time-csf)',
-      /* source= */ shakaAssets.Source.AZURE_MEDIA_SERVICES)
-      .addKeySystem(shakaAssets.KeySystem.AES128)
-      .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.OFFLINE),
-  // End Azure Media Services assets }}}
 
   // GPAC assets {{{
   // Src: https://gpac.wp.mines-telecom.fr/2012/02/23/dash-sequences/
@@ -1506,29 +1338,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.DOLBY_VISION_3D)
       .addFeature(shakaAssets.Feature.OFFLINE),
-  // }}}
-
-  // IRT assets {{{
-  // Src: http://subtitling.irt.de/cmaf/#urls
-  // Note: According to the website, these assets may not be available 24/7.
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Bayerischer Rundfunk Recorded Loop (DASH)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bayerischer_rundfunk.png',
-      /* manifestUri= */ 'https://irtdashreference-i.akamaihd.net/dash/live/901161/keepixo1/manifestBR2.mpd',
-      /* source= */ shakaAssets.Source.IRT)
-      .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.LIVE),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Bayerischer Rundfunk Recorded Loop (HLS)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bayerischer_rundfunk.png',
-      /* manifestUri= */ 'https://irtdashreference-i.akamaihd.net/dash/live/901161/keepixo1/playlistBR2.m3u8',
-      /* source= */ shakaAssets.Source.IRT)
-      .addFeature(shakaAssets.Feature.HLS)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.LIVE),
   // }}}
 
   // MICROSOFT assets {{{
