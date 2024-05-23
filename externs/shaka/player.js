@@ -446,7 +446,8 @@ shaka.extern.Restrictions;
  * @typedef {{
  *   persistentState: boolean,
  *   encryptionSchemes: !Array<string|null>,
- *   robustnessLevels: !Array<string>
+ *   videoRobustnessLevels: !Array<string>,
+ *   audioRobustnessLevels: !Array<string>
  * }}
  *
  * @property {boolean} persistentState
@@ -455,10 +456,14 @@ shaka.extern.Restrictions;
  *   An array of encryption schemes that are reported to work, through either
  *   EME or MCap APIs. An empty array indicates that encryptionScheme queries
  *   are not supported. This should not happen if our polyfills are installed.
- * @property {!Array<string>} robustnessLevels
- *   An array of robustness levels that are reported to work. An empty array
- *   indicates that none were tested. Not all key systems have a list of known
- *   robustness levels built into probeSupport().
+ * @property {!Array<string>} videoRobustnessLevels
+ *   An array of video robustness levels that are reported to work. An empty
+ *   array indicates that none were tested. Not all key systems have a list of
+ *   known robustness levels built into probeSupport().
+ * @property {!Array<string>} audioRobustnessLevels
+ *   An array of audio robustness levels that are reported to work. An empty
+ *   array indicates that none were tested. Not all key systems have a list of
+ *   known robustness levels built into probeSupport().
  * @exportDoc
  */
 shaka.extern.DrmSupportType;
