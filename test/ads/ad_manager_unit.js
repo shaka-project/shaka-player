@@ -5,6 +5,7 @@
  */
 
 describe('Ad manager', () => {
+  const originalGoogle = window['google'];
   /** @type {!shaka.test.FakeVideo} */
   let mockVideo;
   /** @type {!shaka.Player} */
@@ -32,6 +33,10 @@ describe('Ad manager', () => {
 
     adContainer =
       /** @type {!HTMLElement} */ (document.createElement('div'));
+  });
+
+  afterEach(() => {
+    window['google'] = originalGoogle;
   });
 
   describe('client side', () => {
