@@ -9,14 +9,13 @@ function storageSupport() {
   return shaka.offline.Storage.support();
 }
 
-/** @return {!Promise.<boolean>} */
-async function drmStorageSupport() {
+/** @return {boolean} */
+function drmStorageSupport() {
   if (!shaka.offline.Storage.support()) {
     return false;
   }
 
-  const support = await shaka.Player.probeSupport();
-  const widevineSupport = support.drm['com.widevine.alpha'];
+  const widevineSupport = window['shakaSupport'].drm['com.widevine.alpha'];
   return !!(widevineSupport && widevineSupport.persistentState);
 }
 

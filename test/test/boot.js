@@ -459,6 +459,7 @@ async function logSupport() {
     const support = await shaka.Player.probeSupport();
     // Bypass Karma's log settings and dump this to the console.
     window.dump('Platform support:' + JSON.stringify(support, null, 2));
+    window['shakaSupport'] = support;
     // eslint-disable-next-line no-restricted-syntax
   } catch (error) {
     console.error('Support check failed at boot!', error);
