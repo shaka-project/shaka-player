@@ -25,6 +25,8 @@ v4.9 - 2024 Q3
    https://github.com/shaka-project/shaka-player/issues/2228
  - DASH: MPD chaining
    https://github.com/shaka-project/shaka-player/issues/3926
+ - Support CS on devices that don't support multiple media elements
+   https://github.com/shaka-project/shaka-player/issues/2792
 
 =====
 
