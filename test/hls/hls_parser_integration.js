@@ -7,9 +7,6 @@
 describe('HlsParser', () => {
   const Util = shaka.test.Util;
 
-  /** @type {!Object.<string, ?shaka.extern.DrmSupportType>} */
-  let support = {};
-
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
 
@@ -26,7 +23,7 @@ describe('HlsParser', () => {
   let waiter;
 
   function checkClearKeySupport() {
-    const clearKeySupport = support['org.w3.clearkey'];
+    const clearKeySupport = window['shakaSupport'].drm['org.w3.clearkey'];
     if (!clearKeySupport) {
       return false;
     }
@@ -38,7 +35,6 @@ describe('HlsParser', () => {
     document.body.appendChild(video);
     compiledShaka =
         await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
-    support = await shaka.media.DrmEngine.probeSupport();
   });
 
   beforeEach(async () => {

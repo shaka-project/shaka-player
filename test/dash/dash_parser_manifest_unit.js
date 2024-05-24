@@ -2146,6 +2146,8 @@ describe('DashParser Manifest', () => {
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
+    const stream = manifest.variants[0].video;
+    expect(stream.colorGamut).toBe('rec2020');
   });
 
   it('supports HDR signaling via EssentialProperty', async () => {

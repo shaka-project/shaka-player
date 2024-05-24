@@ -234,6 +234,7 @@ shaka.extern.BufferedInfo;
  *   frameRate: ?number,
  *   pixelAspectRatio: ?string,
  *   hdr: ?string,
+ *   colorGamut: ?string,
  *   videoLayout: ?string,
  *   mimeType: ?string,
  *   audioMimeType: ?string,
@@ -299,6 +300,8 @@ shaka.extern.BufferedInfo;
  *   The video pixel aspect ratio provided in the manifest, if present.
  * @property {?string} hdr
  *   The video HDR provided in the manifest, if present.
+ * @property {?string} colorGamut
+ *   The video color gamut provided in the manifest, if present.
  * @property {?string} videoLayout
  *   The video layout provided in the manifest, if present.
  * @property {?string} mimeType
@@ -1567,7 +1570,8 @@ shaka.extern.AdsConfiguration;
  *   restrictToScreenSize: boolean,
  *   ignoreDevicePixelRatio: boolean,
  *   clearBufferSwitch: boolean,
- *   safeMarginSwitch: number
+ *   safeMarginSwitch: number,
+ *   cacheLoadThreshold: number
  * }}
  *
  * @property {boolean} enabled
@@ -1625,6 +1629,10 @@ shaka.extern.AdsConfiguration;
  *   Can cause hiccups on some browsers if chosen too small, e.g.
  *   The amount of two segments is a fair minimum to consider as safeMargin
  *   value.
+ * @property {number} cacheLoadThreshold
+ *   Indicates the value in milliseconds from which a request is not
+ *   considered cached.
+ *   Defaults to <code>20</code>.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;

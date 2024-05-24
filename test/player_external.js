@@ -11,12 +11,6 @@ describe('Player', () => {
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
 
-  /** @type {shaka.extern.SupportType} */
-  let support;
-  /** @type {!HTMLScriptElement} */
-  let imaScript;
-  /** @type {!HTMLScriptElement} */
-  let daiScript;
   /** @type {!HTMLVideoElement} */
   let video;
   /** @type {!HTMLElement} */
@@ -34,28 +28,6 @@ describe('Player', () => {
   let waiter;
 
   beforeAll(async () => {
-    await new Promise((resolve, reject) => {
-      imaScript = /** @type {!HTMLScriptElement} */(
-        document.createElement('script'));
-      imaScript.defer = false;
-      imaScript['async'] = false;
-      imaScript.onload = resolve;
-      imaScript.onerror = reject;
-      imaScript.setAttribute('src',
-          'https://imasdk.googleapis.com/js/sdkloader/ima3.js');
-      document.head.appendChild(imaScript);
-    });
-    await new Promise((resolve, reject) => {
-      daiScript = /** @type {!HTMLScriptElement} */(
-        document.createElement('script'));
-      daiScript.defer = false;
-      daiScript['async'] = false;
-      daiScript.onload = resolve;
-      daiScript.onerror = reject;
-      daiScript.setAttribute('src',
-          'https://imasdk.googleapis.com/js/sdkloader/ima3_dai.js');
-      document.head.appendChild(daiScript);
-    });
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
     adContainer =
@@ -63,7 +35,6 @@ describe('Player', () => {
     document.body.appendChild(adContainer);
     compiledShaka =
         await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
-    support = await compiledShaka.Player.probeSupport();
   });
 
   beforeEach(async () => {
@@ -108,8 +79,6 @@ describe('Player', () => {
   });
 
   afterAll(() => {
-    document.head.removeChild(imaScript);
-    document.head.removeChild(daiScript);
     document.body.removeChild(video);
     document.body.removeChild(adContainer);
   });
@@ -131,7 +100,8 @@ describe('Player', () => {
             !asset.drm.some((keySystem) => {
               // Demo assets use an enum here, which we look up in idFor.
               // Command-line assets use a direct key system ID.
-              return support.drm[idFor(keySystem)] || support.drm[keySystem];
+              return window['shakaSupport'].drm[idFor(keySystem)] ||
+                 window['shakaSupport'].drm[keySystem];
             })) {
           pending('None of the required key systems are supported.');
         }
@@ -154,7 +124,7 @@ describe('Player', () => {
             mimeTypes.push('video/mp4; codecs="dvh1.20.01"');
           }
           if (mimeTypes.length &&
-              !mimeTypes.some((type) => support.media[type])) {
+              !mimeTypes.some((type) => window['shakaSupport'].media[type])) {
             pending('None of the required MIME types are supported.');
           }
         }
