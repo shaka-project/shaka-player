@@ -7,9 +7,6 @@
 describe('MSS Player', () => {
   const Util = shaka.test.Util;
 
-  /** @type {!Object.<string, ?shaka.extern.DrmSupportType>} */
-  let support = {};
-
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
 
@@ -35,8 +32,9 @@ describe('MSS Player', () => {
   const playreadyLicenseUrl = 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)';
 
   function checkPlayReadySupport() {
-    const playReadySupport = support['com.microsoft.playready'] ||
-        support['com.chromecast.playready'];
+    const playReadySupport =
+        window['shakaSupport'].drm['com.microsoft.playready'] ||
+        window['shakaSupport'].drm['com.chromecast.playready'];
     if (!playReadySupport) {
       return false;
     }
@@ -48,7 +46,6 @@ describe('MSS Player', () => {
     document.body.appendChild(video);
     compiledShaka =
         await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
-    support = await shaka.media.DrmEngine.probeSupport();
   });
 
   beforeEach(async () => {
