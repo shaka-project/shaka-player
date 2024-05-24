@@ -47,6 +47,9 @@ shaka.test.FakeNetworkingEngine = class {
     this.responseFilter_ = null;
 
     /** @type {!jasmine.Spy} */
+    this.setForceHTTP = jasmine.createSpy('setForceHTTP').and.stub();
+
+    /** @type {!jasmine.Spy} */
     this.setForceHTTPS = jasmine.createSpy('setForceHTTPS').and.stub();
 
     /** @private {number} */

@@ -11,8 +11,6 @@ describe('Player', () => {
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
 
-  /** @type {shaka.extern.SupportType} */
-  let support;
   /** @type {!HTMLVideoElement} */
   let video;
   /** @type {shaka.Player} */
@@ -30,7 +28,6 @@ describe('Player', () => {
     document.body.appendChild(video);
     compiledShaka =
         await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
-    support = await compiledShaka.Player.probeSupport();
   });
 
   beforeEach(async () => {
@@ -93,7 +90,8 @@ describe('Player', () => {
             !asset.drm.some((keySystem) => {
               // Demo assets use an enum here, which we look up in idFor.
               // Command-line assets use a direct key system ID.
-              return support.drm[idFor(keySystem)] || support.drm[keySystem];
+              return window['shakaSupport'].drm[idFor(keySystem)] ||
+                 window['shakaSupport'].drm[keySystem];
             })) {
           pending('None of the required key systems are supported.');
         }
@@ -107,7 +105,7 @@ describe('Player', () => {
             mimeTypes.push('video/mp4');
           }
           if (mimeTypes.length &&
-              !mimeTypes.some((type) => support.media[type])) {
+              !mimeTypes.some((type) => window['shakaSupport'].media[type])) {
             pending('None of the required MIME types are supported.');
           }
         }

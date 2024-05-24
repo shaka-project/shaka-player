@@ -571,6 +571,7 @@ describe('DrmEngine', () => {
         individualizationServer: '',
         distinctiveIdentifierRequired: true,
         persistentStateRequired: true,
+        headers: {},
       };
       drmEngine.configure(config);
 
@@ -635,6 +636,7 @@ describe('DrmEngine', () => {
         individualizationServer: '',
         distinctiveIdentifierRequired: false,
         persistentStateRequired: false,
+        headers: {},
       };
       drmEngine.configure(config);
 
@@ -2292,6 +2294,7 @@ describe('DrmEngine', () => {
         sessionType: '',
         individualizationServer: '',
         persistentStateRequired: true,
+        headers: {},
       };
       drmEngine.configure(config);
 
@@ -2798,6 +2801,7 @@ describe('DrmEngine', () => {
       individualizationServer: '',
       sessionType: '',
       videoRobustness: '',
+      headers: {},
     };
   }
 

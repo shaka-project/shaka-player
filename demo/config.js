@@ -305,6 +305,9 @@ shakaDemo.Config = class {
             'abr.clearBufferSwitch')
         .addNumberInput_('Safe margin on abr switch rendition',
             'abr.safeMarginSwitch',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Milliseconds to consider a request cached',
+            'abr.cacheLoadThreshold',
             /* canBeDecimal= */ true);
     this.addRetrictionsSection_('abr', 'Adaptation Restrictions');
   }
@@ -361,7 +364,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Custom playhead tracker',
             'ads.customPlayheadTracker')
         .addBoolInput_('Skip play detection',
-            'ads.skipPlayDetection');
+            'ads.skipPlayDetection')
+        .addBoolInput_('Supports multiple media elements',
+            'ads.supportsMultipleMediaElements');
   }
 
   /**
@@ -451,6 +456,7 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addBoolInput_('Low Latency Mode', 'streaming.lowLatencyMode')
         .addBoolInput_('Auto Low Latency Mode', 'streaming.autoLowLatencyMode')
+        .addBoolInput_('Force HTTP', 'streaming.forceHTTP')
         .addBoolInput_('Force HTTPS', 'streaming.forceHTTPS')
         .addBoolInput_('Prefer native HLS playback when available',
             'streaming.preferNativeHls')

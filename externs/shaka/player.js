@@ -234,6 +234,7 @@ shaka.extern.BufferedInfo;
  *   frameRate: ?number,
  *   pixelAspectRatio: ?string,
  *   hdr: ?string,
+ *   colorGamut: ?string,
  *   videoLayout: ?string,
  *   mimeType: ?string,
  *   audioMimeType: ?string,
@@ -299,6 +300,8 @@ shaka.extern.BufferedInfo;
  *   The video pixel aspect ratio provided in the manifest, if present.
  * @property {?string} hdr
  *   The video HDR provided in the manifest, if present.
+ * @property {?string} colorGamut
+ *   The video color gamut provided in the manifest, if present.
  * @property {?string} videoLayout
  *   The video layout provided in the manifest, if present.
  * @property {?string} mimeType
@@ -445,7 +448,9 @@ shaka.extern.Restrictions;
 /**
  * @typedef {{
  *   persistentState: boolean,
- *   encryptionSchemes: !Array<string>
+ *   encryptionSchemes: !Array<string|null>,
+ *   videoRobustnessLevels: !Array<string>,
+ *   audioRobustnessLevels: !Array<string>
  * }}
  *
  * @property {boolean} persistentState
@@ -454,6 +459,14 @@ shaka.extern.Restrictions;
  *   An array of encryption schemes that are reported to work, through either
  *   EME or MCap APIs. An empty array indicates that encryptionScheme queries
  *   are not supported. This should not happen if our polyfills are installed.
+ * @property {!Array<string>} videoRobustnessLevels
+ *   An array of video robustness levels that are reported to work. An empty
+ *   array indicates that none were tested. Not all key systems have a list of
+ *   known robustness levels built into probeSupport().
+ * @property {!Array<string>} audioRobustnessLevels
+ *   An array of audio robustness levels that are reported to work. An empty
+ *   array indicates that none were tested. Not all key systems have a list of
+ *   known robustness levels built into probeSupport().
  * @exportDoc
  */
 shaka.extern.DrmSupportType;
@@ -695,7 +708,8 @@ shaka.extern.ProducerReferenceTime;
  *   serverCertificate: Uint8Array,
  *   serverCertificateUri: string,
  *   individualizationServer: string,
- *   sessionType: string
+ *   sessionType: string,
+ *   headers: !Object.<string, string>
  * }}
  *
  * @property {boolean} distinctiveIdentifierRequired
@@ -734,6 +748,8 @@ shaka.extern.ProducerReferenceTime;
  *   <i>Defaults to <code>'temporary'</code> for streaming.</i> <br>
  *   The MediaKey session type to create streaming licenses with.  This doesn't
  *   affect offline storage.
+ * @property {!Object.<string, string>} headers
+ *   The headers to use in the license request.
  *
  * @exportDoc
  */
@@ -1228,6 +1244,7 @@ shaka.extern.ManifestConfiguration;
  *   inaccurateManifestTolerance: number,
  *   lowLatencyMode: boolean,
  *   autoLowLatencyMode: boolean,
+ *   forceHTTP: boolean,
  *   forceHTTPS: boolean,
  *   preferNativeHls: boolean,
  *   updateIntervalSeconds: number,
@@ -1352,8 +1369,12 @@ shaka.extern.ManifestConfiguration;
  *   lowLatencyMode, but if it has been configured to activate the
  *   lowLatencyMode if a stream of this type is detected, we automatically
  *   activate the lowLatencyMode. Defaults to false.
+ * @property {boolean} forceHTTP
+ *   If true, if the protocol is HTTPs change it to HTTP.
+ *   If both forceHTTP and forceHTTPS are set, forceHTTPS wins.
  * @property {boolean} forceHTTPS
  *   If true, if the protocol is HTTP change it to HTTPs.
+ *   If both forceHTTP and forceHTTPS are set, forceHTTPS wins.
  * @property {boolean} preferNativeHls
  *   If true, prefer native HLS playback when possible, regardless of platform.
  * @property {number} updateIntervalSeconds
@@ -1504,7 +1525,8 @@ shaka.extern.MediaSourceConfiguration;
 /**
  * @typedef {{
  *   customPlayheadTracker: boolean,
- *   skipPlayDetection: boolean
+ *   skipPlayDetection: boolean,
+ *   supportsMultipleMediaElements: boolean
  * }}
  *
  * @description
@@ -1514,13 +1536,20 @@ shaka.extern.MediaSourceConfiguration;
  *   If this is <code>true</code>, we create a custom playhead tracker for
  *   Client Side. This is useful because it allows you to implement the use of
  *   IMA on platforms that do not support multiple video elements.
- *   This value defaults to <code>false</code>.
+ *   Defaults to <code>false</code> except on Tizen, WebOS, Chromecast,
+ *   Hisense, PlayStation 4, PlayStation5, Xbox whose default value is
+ *   <code>true</code>.
  * @property {boolean} skipPlayDetection
  *   If this is true, we will load Client Side ads without waiting for a play
  *   event.
  *   Defaults to <code>false</code> except on Tizen, WebOS, Chromecast,
  *   Hisense, PlayStation 4, PlayStation5, Xbox whose default value is
  *   <code>true</code>.
+ * @property {boolean} supportsMultipleMediaElements
+ *   If this is true, the browser supports multiple media elements.
+ *   Defaults to <code>true</code> except on Tizen, WebOS, Chromecast,
+ *   Hisense, PlayStation 4, PlayStation5, Xbox whose default value is
+ *   <code>false</code>.
  *
  * @exportDoc
  */
@@ -1541,7 +1570,8 @@ shaka.extern.AdsConfiguration;
  *   restrictToScreenSize: boolean,
  *   ignoreDevicePixelRatio: boolean,
  *   clearBufferSwitch: boolean,
- *   safeMarginSwitch: number
+ *   safeMarginSwitch: number,
+ *   cacheLoadThreshold: number
  * }}
  *
  * @property {boolean} enabled
@@ -1599,6 +1629,10 @@ shaka.extern.AdsConfiguration;
  *   Can cause hiccups on some browsers if chosen too small, e.g.
  *   The amount of two segments is a fair minimum to consider as safeMargin
  *   value.
+ * @property {number} cacheLoadThreshold
+ *   Indicates the value in milliseconds from which a request is not
+ *   considered cached.
+ *   Defaults to <code>20</code>.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;

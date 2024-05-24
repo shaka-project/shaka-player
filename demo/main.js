@@ -1901,6 +1901,7 @@ shakaDemo.Main = class {
       serverCertificate: new Uint8Array(0),
       serverCertificateUri: '',
       individualizationServer: '',
+      headers: {},
     };
   }
 };

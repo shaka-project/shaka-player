@@ -13,9 +13,6 @@ describe('DrmEngine', () => {
   const audioInitSegmentUri = '/base/test/test/assets/multidrm-audio-init.mp4';
   const audioSegmentUri = '/base/test/test/assets/multidrm-audio-segment.mp4';
 
-  /** @type {!Object.<string, ?shaka.extern.DrmSupportType>} */
-  let support = {};
-
   /** @type {!HTMLVideoElement} */
   let video;
   /** @type {shaka.extern.Manifest} */
@@ -56,17 +53,15 @@ describe('DrmEngine', () => {
     document.body.appendChild(video);
 
     const responses = await Promise.all([
-      shaka.media.DrmEngine.probeSupport(),
       shaka.test.Util.fetch(videoInitSegmentUri),
       shaka.test.Util.fetch(videoSegmentUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
       shaka.test.Util.fetch(audioSegmentUri),
     ]);
-    support = responses[0];
-    videoInitSegment = responses[1];
-    videoSegment = responses[2];
-    audioInitSegment = responses[3];
-    audioSegment = responses[4];
+    videoInitSegment = responses[0];
+    videoSegment = responses[1];
+    audioInitSegment = responses[2];
+    audioSegment = responses[3];
   });
 
   beforeEach(async () => {
@@ -151,11 +146,12 @@ describe('DrmEngine', () => {
       // https://testweb.playready.microsoft.com/Server/ServiceQueryStringSyntax
       return false;
     }
-    return support['com.widevine.alpha'] || support['com.microsoft.playready'];
+    return window['shakaSupport'].drm['com.widevine.alpha'] ||
+        window['shakaSupport'].drm['com.microsoft.playready'];
   }
 
   function checkClearKeySupport() {
-    return support['org.w3.clearkey'];
+    return window['shakaSupport'].drm['org.w3.clearkey'];
   }
 
   filterDescribe('basic flow', checkTrueDrmSupport, () => {

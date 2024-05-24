@@ -221,6 +221,7 @@ module.exports = (config) => {
       'node_modules/eme-encryption-scheme-polyfill/dist/eme-encryption-scheme-polyfill.js',
 
       // load closure base, the deps tree, and the uncompiled library
+      'test/test/closure-boot.js',
       'node_modules/google-closure-library/closure/goog/base.js',
       'dist/deps.js',
       'shaka-player.uncompiled.js',
@@ -309,6 +310,12 @@ module.exports = (config) => {
       // Hide the list of connected clients in Karma, to make screenshots more
       // stable.
       clientDisplayNone: true,
+      // Run directly in the top frame, instead of in an iframe.  This makes it
+      // easier to work around cross-origin frame issues or frame permissions
+      // issues when testing platforms like Chromecast, where there is already
+      // an iframe involved in the test framework.
+      useIframe: false,  // No iframe
+      runInParent: true,  // No new window
       // Only capture the client's logs if the settings want logging.
       captureConsole: !!settings.logging && settings.logging != 'none',
       // |args| must be an array; pass a key-value map as the sole client
@@ -369,8 +376,9 @@ module.exports = (config) => {
     autoWatch: settings.auto_watch,
 
     // Do a single run of the tests on captured browsers and then quit.
-    // Defaults to true.
-    singleRun: settings.single_run,
+    // This is required when running tests without Karma's iframe.
+    // (See useIframe above.)
+    singleRun: true,
 
     // Set the time limit (ms) that should be used to identify slow tests.
     reportSlowerThan: settings.report_slower_than,

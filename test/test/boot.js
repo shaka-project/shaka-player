@@ -426,10 +426,40 @@ function configureJasmineEnvironment() {
   };
 }
 
+async function loadImaScript() {
+  await new Promise((resolve, reject) => {
+    const script = /** @type {!HTMLScriptElement} */(
+      document.createElement('script'));
+    script.defer = false;
+    script['async'] = false;
+    script.onload = resolve;
+    script.onerror = reject;
+    script.setAttribute('src',
+        'https://imasdk.googleapis.com/js/sdkloader/ima3.js');
+    document.head.appendChild(script);
+  });
+}
+
+async function loadDaiScript() {
+  await new Promise((resolve, reject) => {
+    const script = /** @type {!HTMLScriptElement} */(
+      document.createElement('script'));
+    script.defer = false;
+    script['async'] = false;
+    script.onload = resolve;
+    script.onerror = reject;
+    script.setAttribute('src',
+        'https://imasdk.googleapis.com/js/sdkloader/ima3_dai.js');
+    document.head.appendChild(script);
+  });
+}
+
 async function logSupport() {
   try {
     const support = await shaka.Player.probeSupport();
-    console.log('Platform support:', JSON.stringify(support, null, 2));
+    // Bypass Karma's log settings and dump this to the console.
+    window.dump('Platform support:' + JSON.stringify(support, null, 2));
+    window['shakaSupport'] = support;
     // eslint-disable-next-line no-restricted-syntax
   } catch (error) {
     console.error('Support check failed at boot!', error);
@@ -446,6 +476,11 @@ async function setupTestEnvironment() {
   failTestsOnUnhandledErrors();
   disableScrollbars();
   workAroundLegacyEdgePromiseIssues();
+
+  if (!shaka.util.Platform.isTizen3()) {
+    await loadImaScript();
+  }
+  await loadDaiScript();
 
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly

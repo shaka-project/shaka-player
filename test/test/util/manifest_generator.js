@@ -575,6 +575,8 @@ shaka.test.ManifestGenerator.Stream = class {
       /** @type {(string|undefined)} */
       this.hdr = undefined;
       /** @type {(string|undefined)} */
+      this.colorGamut = undefined;
+      /** @type {(string|undefined)} */
       this.videoLayout = undefined;
       /** @type {(string|undefined)} */
       this.tilesLayout = undefined;
