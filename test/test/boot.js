@@ -426,6 +426,34 @@ function configureJasmineEnvironment() {
   };
 }
 
+async function loadImaScript() {
+  await new Promise((resolve, reject) => {
+    const script = /** @type {!HTMLScriptElement} */(
+      document.createElement('script'));
+    script.defer = false;
+    script['async'] = false;
+    script.onload = resolve;
+    script.onerror = reject;
+    script.setAttribute('src',
+        'https://imasdk.googleapis.com/js/sdkloader/ima3.js');
+    document.head.appendChild(script);
+  });
+}
+
+async function loadDaiScript() {
+  await new Promise((resolve, reject) => {
+    const script = /** @type {!HTMLScriptElement} */(
+      document.createElement('script'));
+    script.defer = false;
+    script['async'] = false;
+    script.onload = resolve;
+    script.onerror = reject;
+    script.setAttribute('src',
+        'https://imasdk.googleapis.com/js/sdkloader/ima3_dai.js');
+    document.head.appendChild(script);
+  });
+}
+
 async function logSupport() {
   try {
     const support = await shaka.Player.probeSupport();
@@ -447,6 +475,11 @@ async function setupTestEnvironment() {
   failTestsOnUnhandledErrors();
   disableScrollbars();
   workAroundLegacyEdgePromiseIssues();
+
+  if (!shaka.util.Platform.isTizen3()) {
+    await loadImaScript();
+  }
+  await loadDaiScript();
 
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly
