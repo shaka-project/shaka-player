@@ -13,8 +13,12 @@ describe('Player', () => {
 
   /** @type {!HTMLVideoElement} */
   let video;
+  /** @type {!HTMLElement} */
+  let adContainer;
   /** @type {shaka.Player} */
   let player;
+  /** @type {shaka.extern.IAdManager} */
+  let adManager;
   /** @type {!shaka.util.EventManager} */
   let eventManager;
 
@@ -26,12 +30,16 @@ describe('Player', () => {
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
+    adContainer =
+      /** @type {!HTMLElement} */ (document.createElement('div'));
+    document.body.appendChild(adContainer);
     compiledShaka =
         await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
   });
 
   beforeEach(async () => {
     player = new compiledShaka.Player();
+    adManager = player.getAdManager();
     await player.attach(video);
 
     // Make sure we are playing the lowest res available to avoid test flake
@@ -67,10 +75,12 @@ describe('Player', () => {
 
     await player.destroy();
     player.releaseAllMutexes();
+    shaka.util.Dom.removeAllChildren(adContainer);
   });
 
   afterAll(() => {
     document.body.removeChild(video);
+    document.body.removeChild(adContainer);
   });
 
   describe('plays', () => {
@@ -86,7 +96,7 @@ describe('Player', () => {
       const wit = asset.focus ? fit : it;
       wit(testName, async () => {
         const idFor = shakaAssets.identifierForKeySystem;
-        if (!asset.isClear() &&
+        if (!asset.isClear() && !asset.isAes128() &&
             !asset.drm.some((keySystem) => {
               // Demo assets use an enum here, which we look up in idFor.
               // Command-line assets use a direct key system ID.
@@ -103,6 +113,15 @@ describe('Player', () => {
           }
           if (asset.features.includes(Feature.MP4)) {
             mimeTypes.push('video/mp4');
+          }
+          if (asset.features.includes(Feature.MP2TS)) {
+            mimeTypes.push('video/mp2t');
+          }
+          if (asset.features.includes(Feature.CONTAINERLESS)) {
+            mimeTypes.push('audio/aac');
+          }
+          if (asset.features.includes(Feature.DOLBY_VISION_3D)) {
+            mimeTypes.push('video/mp4; codecs="dvh1.20.01"');
           }
           if (mimeTypes.length &&
               !mimeTypes.some((type) => window['shakaSupport'].media[type])) {
@@ -121,7 +140,8 @@ describe('Player', () => {
         // wait on the 'canplay' event.  This has the advantage that we will
         // get better logging of the media state on a timeout, since that
         // capabilitiy is built into the waiter for media element events.
-        player.load(asset.manifestUri).catch(fail);
+        const manifestUri = await getManifestUri(asset);
+        player.load(manifestUri).catch(fail);
         await waiter.timeoutAfter(60).waitForEvent(video, 'canplay');
 
         if (asset.features) {
@@ -216,20 +236,88 @@ describe('Player', () => {
   }
 
   /**
-   * @param {!Object.<string, string>} headers
-   * @param {shaka.net.NetworkingEngine.RequestType} requestType
-   * @param {shaka.extern.Request} request
+   * @param {ShakaDemoAssetInfo} asset
+   * @return {!Promise.<string>}
    */
-  function addLicenseRequestHeaders(headers, requestType, request) {
-    const RequestType = compiledShaka.net.NetworkingEngine.RequestType;
-    if (requestType != RequestType.LICENSE) {
-      return;
+  async function getManifestUri(asset) {
+    let manifestUri = asset.manifestUri;
+    // If it's a server side dai asset, request ad-containing manifest
+    // from the ad manager.
+    if (asset.imaAssetKey || (asset.imaContentSrcId && asset.imaVideoId)) {
+      manifestUri = await getManifestUriFromAdManager(asset);
     }
+    // If it's a MediaTailor asset, request ad-containing manifest
+    // from the ad manager.
+    if (asset.mediaTailorUrl) {
+      manifestUri = await getManifestUriFromMediaTailorAdManager(asset);
+    }
+    return manifestUri;
+  }
 
-    // Add these to the existing headers.  Do not clobber them!
-    // For PlayReady, there will already be headers in the request.
-    for (const k in headers) {
-      request.headers[k] = headers[k];
+  /**
+   * @param {ShakaDemoAssetInfo} asset
+   * @return {!Promise.<string>}
+   */
+  async function getManifestUriFromAdManager(asset) {
+    try {
+      adManager.initServerSide(adContainer, video);
+      let request;
+      if (asset.imaAssetKey != null) {
+        // LIVE stream
+        request = new google.ima.dai.api.LiveStreamRequest();
+        request.assetKey = asset.imaAssetKey;
+      } else {
+        // VOD
+        goog.asserts.assert(asset.imaContentSrcId != null &&
+            asset.imaVideoId != null, 'Asset should have ima ids!');
+        request = new google.ima.dai.api.VODStreamRequest();
+        request.contentSourceId = asset.imaContentSrcId;
+        request.videoId = asset.imaVideoId;
+      }
+      switch (asset.imaManifestType) {
+        case 'DASH':
+        case 'dash':
+        case 'MPD':
+        case 'mpd':
+          request.format = google.ima.dai.api.StreamRequest.StreamFormat.DASH;
+          break;
+        case 'HLS':
+        case 'hls':
+        case 'M3U8':
+        case 'm3u8':
+          request.format = google.ima.dai.api.StreamRequest.StreamFormat.HLS;
+          break;
+      }
+
+      const uri = await adManager.requestServerSideStream(
+          request, /* backupUri= */ asset.manifestUri);
+      return uri;
+    // eslint-disable-next-line no-restricted-syntax
+    } catch (error) {
+      fail(error);
+      return asset.manifestUri;
+    }
+  }
+
+  /**
+   * @param {ShakaDemoAssetInfo} asset
+   * @return {!Promise.<string>}
+   */
+  async function getManifestUriFromMediaTailorAdManager(asset) {
+    try {
+      const netEngine = player.getNetworkingEngine();
+      goog.asserts.assert(netEngine, 'There should be a net engine.');
+      adManager.initMediaTailor(adContainer, netEngine, video);
+      goog.asserts.assert(asset.mediaTailorUrl != null,
+          'Media Tailor info not be null!');
+      const uri = await adManager.requestMediaTailorStream(
+          asset.mediaTailorUrl, asset.mediaTailorAdsParams,
+          /* backupUri= */ asset.manifestUri);
+      return uri;
+    // eslint-disable-next-line no-restricted-syntax
+    } catch (error) {
+      fail(error);
+      return asset.manifestUri;
     }
   }
 });
