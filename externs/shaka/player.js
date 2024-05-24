@@ -300,7 +300,7 @@ shaka.extern.BufferedInfo;
  *   The video pixel aspect ratio provided in the manifest, if present.
  * @property {?string} hdr
  *   The video HDR provided in the manifest, if present.
- * @property {?string} hdr
+ * @property {?string} colorGamut
  *   The video color gamut provided in the manifest, if present.
  * @property {?string} videoLayout
  *   The video layout provided in the manifest, if present.
