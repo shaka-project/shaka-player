@@ -70,11 +70,12 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     this.container.appendChild(this.bar);
     this.parent.appendChild(this.container);
 
-    this.eventManager.listen(this.bar, 'mousedown', () => {
+    this.eventManager.listen(this.bar, 'mousedown', (e) => {
       if (this.controls.isOpaque()) {
         this.isChanging_ = true;
         this.onChangeStart();
       }
+      e.stopPropagation();
     });
 
     this.eventManager.listen(this.bar, 'touchstart', (e) => {
@@ -83,6 +84,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
         this.setBarValueForTouch_(e);
         this.onChangeStart();
       }
+      e.stopPropagation();
     });
 
     this.eventManager.listen(this.bar, 'input', () => {
@@ -94,6 +96,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
         this.setBarValueForTouch_(e);
         this.onChange();
       }
+      e.stopPropagation();
     });
 
     this.eventManager.listen(this.bar, 'touchend', (e) => {
@@ -102,6 +105,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
         this.setBarValueForTouch_(e);
         this.onChangeEnd();
       }
+      e.stopPropagation();
     });
 
     this.eventManager.listen(this.bar, 'touchcancel', (e) => {
@@ -110,13 +114,15 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
         this.setBarValueForTouch_(e);
         this.onChangeEnd();
       }
+      e.stopPropagation();
     });
 
-    this.eventManager.listen(this.bar, 'mouseup', () => {
+    this.eventManager.listen(this.bar, 'mouseup', (e) => {
       if (this.isChanging_) {
         this.isChanging_ = false;
         this.onChangeEnd();
       }
+      e.stopPropagation();
     });
 
     this.eventManager.listen(this.bar, 'blur', () => {
