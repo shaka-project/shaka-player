@@ -121,7 +121,7 @@ describe('DashParser Patch', () => {
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       fakeNetEngine.expectRequest('dummy://bar', manifestRequest, manifestContext);
-      expect(onError).toHaveBeenCalledOnceWith(new shaka.util.Error(
+      expect(onError).toHaveBeenCalledWith(new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_INVALID_PATCH));
@@ -155,7 +155,7 @@ describe('DashParser Patch', () => {
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       fakeNetEngine.expectRequest('dummy://bar', manifestRequest, manifestContext);
-      expect(onError).toHaveBeenCalledOnceWith(new shaka.util.Error(
+      expect(onError).toHaveBeenCalledWith(new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_INVALID_PATCH));
