@@ -9,6 +9,7 @@ describe('DashParser Patch', () => {
   const ManifestParser = shaka.test.ManifestParser;
 
   const oldNow = Date.now;
+  const mpdId = 'foo';
   const updateTime = 5;
   const ttl = 60;
   const originalUri = 'http://example.com/';
@@ -49,11 +50,12 @@ describe('DashParser Patch', () => {
     Date.now = () => publishTime.getTime() + 10;
 
     const manifestText = [
-      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
-      '    publishTime="' + publishTime.toUTCString() + '"',
+      `<MPD id="${mpdId}" type="dynamic"`,
+      '    availabilityStartTime="1970-01-01T00:00:00Z"',
+      `    publishTime="${publishTime.toUTCString()}"`,
       '    suggestedPresentationDelay="PT5S"',
-      '    minimumUpdatePeriod="PT' + updateTime + 'S">',
-      '  <PatchLocation ttl="' + ttl + '">dummy://bar</PatchLocation>',
+      `    minimumUpdatePeriod="PT${updateTime}S">`,
+      `  <PatchLocation ttl="${ttl}">dummy://bar</PatchLocation>`,
       '  <Period id="1">',
       '    <AdaptationSet id="1" mimeType="video/mp4">',
       '      <Representation id="3" bandwidth="500">',
@@ -98,9 +100,77 @@ describe('DashParser Patch', () => {
   }
 
   describe('MPD', () => {
+    it('rolls back to regular update if id mismatches', async () => {
+      const patchText = [
+        '<Patch mpdId="bar"',
+        `    originalPublishTime="${publishTime.toUTCString()}"`,
+        '/>',
+      ].join('\n');
+      fakeNetEngine.setResponseText('dummy://bar', patchText);
+
+      /** @type {!jasmine.Spy} */
+      const onError = jasmine.createSpy('onError');
+      playerInterface.onError = Util.spyFunc(onError);
+
+      await parser.start('dummy://foo', playerInterface);
+
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+      fakeNetEngine.request.calls.reset();
+
+      await updateManifest();
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, manifestContext);
+      expect(onError).toHaveBeenCalledOnceWith(new shaka.util.Error(
+          shaka.util.Error.Severity.RECOVERABLE,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.DASH_INVALID_PATCH));
+
+      fakeNetEngine.request.calls.reset();
+
+      await updateManifest();
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+    });
+
+    it('rolls back to regular update if publishTime mismatches', async () => {
+      const publishTime = new Date(1992, 5, 2);
+      const patchText = [
+        `<Patch mpdId="${mpdId}"`,
+        `    originalPublishTime="${publishTime.toUTCString()}"`,
+        '/>',
+      ].join('\n');
+      fakeNetEngine.setResponseText('dummy://bar', patchText);
+
+      /** @type {!jasmine.Spy} */
+      const onError = jasmine.createSpy('onError');
+      playerInterface.onError = Util.spyFunc(onError);
+
+      await parser.start('dummy://foo', playerInterface);
+
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+      fakeNetEngine.request.calls.reset();
+
+      await updateManifest();
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, manifestContext);
+      expect(onError).toHaveBeenCalledOnceWith(new shaka.util.Error(
+          shaka.util.Error.Severity.RECOVERABLE,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.DASH_INVALID_PATCH));
+
+      fakeNetEngine.request.calls.reset();
+
+      await updateManifest();
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+    });
+
     it('transforms from dynamic to static', async () => {
       const patchText = [
-        '<Patch >',
+        `<Patch mpdId="${mpdId}"`,
+        `    originalPublishTime="${publishTime.toUTCString()}">`,
         '  <replace sel="/MPD/@type">',
         '    static',
         '  </replace>',
@@ -127,7 +197,11 @@ describe('DashParser Patch', () => {
 
   describe('PatchLocation', () => {
     beforeEach(() => {
-      const patchText = '<Patch></Patch>';
+      const patchText = [
+        `<Patch mpdId="${mpdId}"`,
+        `    originalPublishTime="${publishTime.toUTCString()}"`,
+        '/>',
+      ].join('\n');
       fakeNetEngine.setResponseText('dummy://bar', patchText);
     });
 
@@ -145,10 +219,11 @@ describe('DashParser Patch', () => {
 
     it('does not use PatchLocation if publishTime is not defined', async () => {
       const manifestText = [
-        '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+        `<MPD id="${mpdId}" type="dynamic"`,
+        '    availabilityStartTime="1970-01-01T00:00:00Z"',
         '    suggestedPresentationDelay="PT5S"',
-        '    minimumUpdatePeriod="PT' + updateTime + 'S">',
-        '  <PatchLocation ttl="' + ttl + '">dummy://bar</PatchLocation>',
+        `    minimumUpdatePeriod="PT${updateTime}S">`,
+        `  <PatchLocation ttl="${ttl}">dummy://bar</PatchLocation>`,
         '  <Period id="1">',
         '    <AdaptationSet id="1" mimeType="video/mp4">',
         '      <Representation id="3" bandwidth="500">',
@@ -200,9 +275,10 @@ describe('DashParser Patch', () => {
       fakeNetEngine.request.calls.reset();
 
       const patchText = [
-        '<Patch>',
+        `<Patch mpdId="${mpdId}"`,
+        `    originalPublishTime="${publishTime.toUTCString()}">`,
         '  <replace sel="/MPD/PatchLocation[1]">',
-        '    <PatchLocation ttl="' + ttl + '">dummy://bar2</PatchLocation>',
+        `    <PatchLocation ttl="${ttl}">dummy://bar2</PatchLocation>`,
         '  </replace>',
         '</Patch>',
       ].join('\n');
@@ -226,7 +302,8 @@ describe('DashParser Patch', () => {
       const manifest = await parser.start('dummy://foo', playerInterface);
       const stream = manifest.variants[0].video;
       const patchText = [
-        '<Patch>',
+        `<Patch mpdId="${mpdId}"`,
+        `    originalPublishTime="${publishTime.toUTCString()}">`,
         '  <add sel="/MPD">',
         '    <Period id="2" duration="PT10S">',
         '      <AdaptationSet id="2" mimeType="video/mp4">',
@@ -254,7 +331,8 @@ describe('DashParser Patch', () => {
       const manifest = await parser.start('dummy://foo', playerInterface);
       const stream = manifest.variants[0].video;
       const patchText = [
-        '<Patch>',
+        `<Patch mpdId="${mpdId}"`,
+        `    originalPublishTime="${publishTime.toUTCString()}">`,
         '  <add sel="/MPD/Period[@id=\'1\']" pos="after">',
         '    <Period id="2" duration="PT10S">',
         '      <AdaptationSet id="2" mimeType="video/mp4">',
@@ -290,8 +368,9 @@ describe('DashParser Patch', () => {
         'SegmentTimeline',
       ].join('/');
       const patchText = [
-        '<Patch>',
-        '  <add sel="' + xPath + '">',
+        `<Patch mpdId="${mpdId}"`,
+        `    originalPublishTime="${publishTime.toUTCString()}">`,
+        `  <add sel="${xPath}">`,
         '    <S d="1" t="1" />',
         '  </add>',
         '</Patch>',
@@ -324,8 +403,9 @@ describe('DashParser Patch', () => {
         'S',
       ].join('/');
       const patchText = [
-        '<Patch>',
-        '  <add sel="' + xPath + '" pos="after">',
+        `<Patch mpdId="${mpdId}"`,
+        `    originalPublishTime="${publishTime.toUTCString()}"">`,
+        `  <add sel="${xPath}" pos="after">`,
         '    <S d="1" t="1" />',
         '  </add>',
         '</Patch>',
@@ -358,8 +438,9 @@ describe('DashParser Patch', () => {
         'S[1]/@r',
       ].join('/');
       const patchText = [
-        '<Patch>',
-        '  <add sel="' + xPath + '">',
+        `<Patch mpdId="${mpdId}"`,
+        `    originalPublishTime="${publishTime.toUTCString()}">`,
+        `  <add sel="${xPath}">`,
         '    2',
         '  </add>',
         '</Patch>',
