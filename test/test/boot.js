@@ -372,7 +372,7 @@ function configureJasmineEnvironment() {
 
   // Reset decoding config cache after each test.
   afterEach(/** @suppress {accessControls} */ () => {
-    shaka.util.StreamUtils.decodingConfigCache_ = {};
+    shaka.util.StreamUtils.clearDecodingConfigCache();
     shaka.media.Capabilities.MediaSourceTypeSupportMap.clear();
   });
 
