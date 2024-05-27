@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.8.6](https://github.com/shaka-project/shaka-player/compare/v4.8.5...v4.8.6) (2024-05-27)
+
+
+### Bug Fixes
+
+* **CEA:** reset PTS on new init segment ([#6671](https://github.com/shaka-project/shaka-player/issues/6671)) ([af74719](https://github.com/shaka-project/shaka-player/commit/af74719f4746b3d61a12efa2c6e1c772bd529ba8))
+* Fix internal network filter for HEAD requests ([#6660](https://github.com/shaka-project/shaka-player/issues/6660)) ([8d4ad60](https://github.com/shaka-project/shaka-player/commit/8d4ad60db22dd318938ffce02cc621cf9b828c47))
+* Fix numBytesRemaining when the request is done ([#6653](https://github.com/shaka-project/shaka-player/issues/6653)) ([29280a3](https://github.com/shaka-project/shaka-player/commit/29280a3bc3824ca2db96bd809f07dfe295f52eee))
+
 ## [4.8.5](https://github.com/shaka-project/shaka-player/compare/v4.8.4...v4.8.5) (2024-05-17)
 
 
