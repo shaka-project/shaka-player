@@ -119,6 +119,7 @@ DASH features **not** supported:
  - Timescales so large that timestamps cannot be represented as integers in
    JavaScript (2^53): https://github.com/shaka-project/shaka-player/issues/1667
  - Modifying elements with an @schemeIdUri attribute via MPD Patch
+ - Xlink dereferencing with MPD Patch
 
 
 ## HLS features
