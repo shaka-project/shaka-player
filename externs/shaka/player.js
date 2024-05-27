@@ -1270,7 +1270,8 @@ shaka.extern.ManifestConfiguration;
  *   vodDynamicPlaybackRateLowBufferRate: number,
  *   vodDynamicPlaybackRateBufferRatio: number,
  *   infiniteLiveStreamDuration: boolean,
- *   preloadNextUrlWindow: number
+ *   preloadNextUrlWindow: number,
+ *   loadTimeout: number
  * }}
  *
  * @description
@@ -1469,6 +1470,10 @@ shaka.extern.ManifestConfiguration;
  *   next URL, such as one specified by a urn:mpeg:dash:chaining:2016 element
  *   in DASH. Measured in seconds. If the value is 0, the next URL will not
  *   be preloaded at all.
+ *   Defaults to <code> 30 </code>.
+ * @property {number} loadTimeout
+ *   The maximum timeout to reject the load when using src= in case the content
+ *   does not work correctly.  Measured in seconds.
  *   Defaults to <code> 30 </code>.
  * @exportDoc
  */
