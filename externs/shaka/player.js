@@ -1270,7 +1270,8 @@ shaka.extern.ManifestConfiguration;
  *   vodDynamicPlaybackRateLowBufferRate: number,
  *   vodDynamicPlaybackRateBufferRatio: number,
  *   infiniteLiveStreamDuration: boolean,
- *   preloadNextUrlWindow: number
+ *   preloadNextUrlWindow: number,
+ *   clearDecodingCache: boolean
  * }}
  *
  * @description
@@ -1470,6 +1471,12 @@ shaka.extern.ManifestConfiguration;
  *   in DASH. Measured in seconds. If the value is 0, the next URL will not
  *   be preloaded at all.
  *   Defaults to <code> 30 </code>.
+ * @property {boolean} clearDecodingCache
+ *   Clears decodingInfo and MediaKeySystemAccess cache during player unload
+ *   as these objects may become corrupt and cause issues during subsequent
+ *   playbacks on some platforms.
+ *   Defaults to <code>true</code> on PlayStation devices and to
+ *   <code>false</code> on other devices.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
