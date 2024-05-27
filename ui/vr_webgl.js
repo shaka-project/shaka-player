@@ -245,7 +245,9 @@ shaka.ui.VRWebgl = class {
         }).tickNow().tickEvery(1 / frameRate);
       });
       this.eventManager_.listen(this.video_, 'pause', () => {
-        this.activeTimer_.stop();
+        if (this.activeTimer_) {
+          this.activeTimer_.stop();
+        }
         this.activeTimer_ = null;
         this.renderGL_();
       });
