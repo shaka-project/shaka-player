@@ -80,6 +80,8 @@ describe('StreamingEngine', () => {
   let onMetadata;
   /** @type {!jasmine.Spy} */
   let disableStream;
+  /** @type {!jasmine.Spy} */
+  let setPrefetchStreams;
 
   /** @type {function(function(), number)} */
   let realSetTimeout;
@@ -447,6 +449,7 @@ describe('StreamingEngine', () => {
     getPlaybackRate.and.returnValue(1);
     disableStream = jasmine.createSpy('disableStream');
     disableStream.and.callFake(() => false);
+    setPrefetchStreams = jasmine.createSpy('setPrefetchStreams');
 
     beforeAppendSegment.and.callFake((segment) => {
       return Promise.resolve();
@@ -477,7 +480,7 @@ describe('StreamingEngine', () => {
       beforeAppendSegment: Util.spyFunc(beforeAppendSegment),
       onMetadata: Util.spyFunc(onMetadata),
       disableStream: Util.spyFunc(disableStream),
-      setPrefetchStreams: (streams) => {},
+      setPrefetchStreams: Util.spyFunc(setPrefetchStreams),
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
@@ -4089,6 +4092,9 @@ describe('StreamingEngine', () => {
       await runTest();
       expectHasBuffer();
       expectSegmentRequest(true);
+    });
+
+    it('should let the player know about the prefetched stream', () => {
     });
   });
 
