@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.8.7](https://github.com/shaka-project/shaka-player/compare/v4.8.6...v4.8.7) (2024-05-28)
+
+
+### Bug Fixes
+
+* Add timeout to fullyLoaded in src= ([#6676](https://github.com/shaka-project/shaka-player/issues/6676)) ([5fa9b4a](https://github.com/shaka-project/shaka-player/commit/5fa9b4ab2fb3a5ff44637c5fd78aa38d887092c4))
+* **Cast:** Incorrect detection of MediaCapabilities on Chromecast ([#6656](https://github.com/shaka-project/shaka-player/issues/6656)) ([87eb506](https://github.com/shaka-project/shaka-player/commit/87eb506fd7bf19c069d1298ada7f464f583bdae6))
+* Fix MCap checking when using src= ([#6675](https://github.com/shaka-project/shaka-player/issues/6675)) ([5ad91dc](https://github.com/shaka-project/shaka-player/commit/5ad91dc9e746b53e7045a3d49448684a7be9b443))
+* **HLS:** Fix HLS load when using #EXT-X-I-FRAME-STREAM-INF without resolution ([#6680](https://github.com/shaka-project/shaka-player/issues/6680)) ([4354266](https://github.com/shaka-project/shaka-player/commit/4354266156286cda5ecfce4d21b737b2d6f8d804))
+* **UI:** Fix dragging the seek bar seeks and pans the view in VR mode ([#6677](https://github.com/shaka-project/shaka-player/issues/6677)) ([389a250](https://github.com/shaka-project/shaka-player/commit/389a250c4c13b238bebdd3d84372ac18f9ef701d))
+* **UI:** Fix unhandled error when playing VR ([#6679](https://github.com/shaka-project/shaka-player/issues/6679)) ([9440ef6](https://github.com/shaka-project/shaka-player/commit/9440ef6cb1280487eebc93196731bea19d415870))
+
 ## [4.8.6](https://github.com/shaka-project/shaka-player/compare/v4.8.5...v4.8.6) (2024-05-27)
 
 
