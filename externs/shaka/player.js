@@ -1435,7 +1435,7 @@ shaka.extern.ManifestConfiguration;
  * @property {number} liveSyncMinPlaybackRate
  *   Minimum playback rate used for latency chasing. It is recommended to use a
  *   value between 0 and 1. Effective only if liveSync is true. Defaults to
- *   <code>1</code>.
+ *   <code>0.95</code>.
  * @property {boolean} liveSyncPanicMode
  *   If <code>true</code>, panic mode for live sync is enabled. When enabled,
  *   will set the playback rate to the <code>liveSyncMinPlaybackRate</code>
