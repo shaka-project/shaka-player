@@ -1258,6 +1258,7 @@ shaka.extern.ManifestConfiguration;
  *   disableTextPrefetch: boolean,
  *   disableVideoPrefetch: boolean,
  *   liveSync: boolean,
+ *   liveSyncTargetLatencyTolerance: number,
  *   liveSyncMaxLatency: number,
  *   liveSyncPlaybackRate: number,
  *   liveSyncMinLatency: number,
@@ -1422,6 +1423,9 @@ shaka.extern.ManifestConfiguration;
  *   rate. Defaults to <code>false</code>.
  *   Note: on some SmartTVs, if this is activated, it may not work or the sound
  *   may be lost when activated.
+ * @property {number} liveSyncTargetLatencyTolerance
+ *   Latency tolerance for target latency, in seconds. Effective only if
+ *   liveSync is true. Defaults to <code>0.5</code>.
  * @property {number} liveSyncMaxLatency
  *   Maximum acceptable latency, in seconds. Effective only if liveSync is
  *   true. Defaults to <code>1</code>.
