@@ -1492,7 +1492,13 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LIVE),
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
+      .setExtraConfig({
+        streaming: {
+          lowLatencyMode: true,
+        },
+      }),
   // }}}
 
   // EZDRM assets {{{
