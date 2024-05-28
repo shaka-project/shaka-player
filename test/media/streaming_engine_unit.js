@@ -4103,30 +4103,32 @@ describe('StreamingEngine', () => {
       await runTest();
 
       expect(setPrefetchStreams).toHaveBeenCalledWith(
-        [variant.video, variant.audio]);
+          [variant.video, variant.audio]);
     });
 
-    it('should set prefetched streams to empty array if prefetch is turned off', async () => {
-      streamingEngine.switchVariant(variant);
-      await streamingEngine.start();
-      playing = true;
-      expectNoBuffer();
+    it('should set prefetched streams to empty array if prefetch is turned off',
+        async () => {
+          streamingEngine.switchVariant(variant);
+          await streamingEngine.start();
+          playing = true;
+          expectNoBuffer();
 
-      await runTest();
+          await runTest();
 
-      expect(setPrefetchStreams).toHaveBeenCalledWith(
-        [variant.video, variant.audio]);
+          expect(setPrefetchStreams).toHaveBeenCalledWith(
+              [variant.video, variant.audio]);
 
-      setPrefetchStreams.calls.reset();
+          setPrefetchStreams.calls.reset();
 
-      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
-      config.segmentPrefetchLimit = 0;
-      streamingEngine.configure(config);
-      streamingEngine.switchVariant(variant);
-      await runTest();
+          const config =
+              shaka.util.PlayerConfiguration.createDefault().streaming;
+          config.segmentPrefetchLimit = 0;
+          streamingEngine.configure(config);
+          streamingEngine.switchVariant(variant);
+          await runTest();
 
-      expect(setPrefetchStreams).toHaveBeenCalledWith([]);
-    });
+          expect(setPrefetchStreams).toHaveBeenCalledWith([]);
+        });
 
     it('should exclude prefetched streams based on config', async () => {
       streamingEngine.switchVariant(variant);
@@ -4137,7 +4139,7 @@ describe('StreamingEngine', () => {
       await runTest();
 
       expect(setPrefetchStreams).toHaveBeenCalledWith(
-        [variant.video, variant.audio]);
+          [variant.video, variant.audio]);
 
       setPrefetchStreams.calls.reset();
 
@@ -4341,27 +4343,29 @@ describe('StreamingEngine', () => {
           expect(streamingEngine.audioPrefetchMap_.size).toBe(0);
         });
 
-    it('should set prefetched streams to empty array if prefetch is turned off', async () => {
-      streamingEngine.switchVariant(variant);
-      await streamingEngine.start();
-      playing = true;
-      expectNoBuffer();
+    it('should set prefetched streams to empty array if prefetch is turned off',
+        async () => {
+          streamingEngine.switchVariant(variant);
+          await streamingEngine.start();
+          playing = true;
+          expectNoBuffer();
 
-      await runTest();
+          await runTest();
 
-      expect(setPrefetchStreams).toHaveBeenCalledWith(
-        [variant.video, variant.audio, altVariant.audio]);
+          expect(setPrefetchStreams).toHaveBeenCalledWith(
+              [variant.video, variant.audio, altVariant.audio]);
 
-      setPrefetchStreams.calls.reset();
+          setPrefetchStreams.calls.reset();
 
-      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
-      config.segmentPrefetchLimit = 0;
-      streamingEngine.configure(config);
-      streamingEngine.switchVariant(variant);
-      await runTest();
+          const config =
+              shaka.util.PlayerConfiguration.createDefault().streaming;
+          config.segmentPrefetchLimit = 0;
+          streamingEngine.configure(config);
+          streamingEngine.switchVariant(variant);
+          await runTest();
 
-      expect(setPrefetchStreams).toHaveBeenCalledWith([]);
-    });
+          expect(setPrefetchStreams).toHaveBeenCalledWith([]);
+        });
 
     it('should exclude prefetched streams based on config', async () => {
       streamingEngine.switchVariant(variant);
@@ -4372,7 +4376,7 @@ describe('StreamingEngine', () => {
       await runTest();
 
       expect(setPrefetchStreams).toHaveBeenCalledWith(
-        [variant.video, variant.audio, altVariant.audio]);
+          [variant.video, variant.audio, altVariant.audio]);
 
       setPrefetchStreams.calls.reset();
 
@@ -4384,7 +4388,8 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(variant);
       await runTest();
 
-      expect(setPrefetchStreams).toHaveBeenCalledWith([variant.audio, altVariant.audio]);
+      expect(setPrefetchStreams).toHaveBeenCalledWith(
+          [variant.audio, altVariant.audio]);
     });
   });
 
