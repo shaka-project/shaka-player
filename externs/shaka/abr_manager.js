@@ -108,6 +108,14 @@ shaka.extern.AbrManager = class {
   trySuggestStreams() {}
 
   /**
+   * Updates the manager's prefetched streams collection
+   *
+   * @param {!Array.<!shaka.extern.Stream>} streams
+   * @exportDoc
+   */
+  setPrefetchStreams(streams) {}
+
+  /**
    * Gets an estimate of the current bandwidth in bit/sec.  This is used by the
    * Player to generate stats.
    *
