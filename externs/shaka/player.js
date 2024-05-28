@@ -1271,7 +1271,8 @@ shaka.extern.ManifestConfiguration;
  *   vodDynamicPlaybackRateBufferRatio: number,
  *   infiniteLiveStreamDuration: boolean,
  *   preloadNextUrlWindow: number,
- *   loadTimeout: number
+ *   loadTimeout: number,
+ *   clearDecodingCache: boolean
  * }}
  *
  * @description
@@ -1475,6 +1476,12 @@ shaka.extern.ManifestConfiguration;
  *   The maximum timeout to reject the load when using src= in case the content
  *   does not work correctly.  Measured in seconds.
  *   Defaults to <code> 30 </code>.
+ * @property {boolean} clearDecodingCache
+ *   Clears decodingInfo and MediaKeySystemAccess cache during player unload
+ *   as these objects may become corrupt and cause issues during subsequent
+ *   playbacks on some platforms.
+ *   Defaults to <code>true</code> on PlayStation devices and to
+ *   <code>false</code> on other devices.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

@@ -519,7 +519,9 @@ shakaDemo.Config = class {
             'streaming.vodDynamicPlaybackRateBufferRatio',
             /* canBeDecimal= */ true)
         .addBoolInput_('Infinite Live Stream Duration',
-            'streaming.infiniteLiveStreamDuration');
+            'streaming.infiniteLiveStreamDuration')
+        .addBoolInput_('Clear decodingInfo cache on unload',
+            'streaming.clearDecodingCache');
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_('Always Stream Text', 'streaming.alwaysStreamText');
     } else {

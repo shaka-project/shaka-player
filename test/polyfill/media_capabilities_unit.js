@@ -68,7 +68,7 @@ describe('MediaCapabilities', () => {
         width: 512,
       },
     };
-    shaka.polyfill.MediaCapabilities.memoizedMediaKeySystemAccessRequests_ = {};
+    shaka.media.DrmEngine.clearMediaKeySystemAccessMap();
     supportMap.clear();
 
     mockCanDisplayType = jasmine.createSpy('canDisplayType');
@@ -163,7 +163,7 @@ describe('MediaCapabilities', () => {
           expect(result.keySystemAccess).toEqual(mockResult);
         });
 
-    it('should read previously requested codec/key system'+
+    it('should read previously requested codec/key system ' +
         'combinations from cache', async () => {
       const mockResult = {mockKeySystemAccess: 'mockKeySystemAccess'};
       spyOn(window['MediaSource'], 'isTypeSupported').and.returnValue(true);
