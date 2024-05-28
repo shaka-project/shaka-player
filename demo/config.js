@@ -576,7 +576,10 @@ shakaDemo.Config = class {
         .addNumberInput_('Time window at end to preload next URL',
             'streaming.preloadNextUrlWindow',
             /* canBeDecimal= */ true,
-            /* canBeZero= */ true);
+            /* canBeZero= */ true)
+        .addNumberInput_('Load timeout for src=',
+            'streaming.loadTimeout',
+            /* canBeDecimal= */ true);
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
   }
 
