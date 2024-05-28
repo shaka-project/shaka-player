@@ -4094,7 +4094,15 @@ describe('StreamingEngine', () => {
       expectSegmentRequest(true);
     });
 
-    it('should let the player know about the prefetched stream', () => {
+    it('should let the player know about the prefetched stream', async () => {
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      playing = true;
+      expectNoBuffer();
+
+      await runTest();
+
+      expect(setPrefetchStreams).toHaveBeenCalledWith([variant.video, variant.audio]);
     });
   });
 
