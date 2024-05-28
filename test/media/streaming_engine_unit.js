@@ -4102,7 +4102,53 @@ describe('StreamingEngine', () => {
 
       await runTest();
 
-      expect(setPrefetchStreams).toHaveBeenCalledWith([variant.video, variant.audio]);
+      expect(setPrefetchStreams).toHaveBeenCalledWith(
+        [variant.video, variant.audio]);
+    });
+
+    it('should set prefetched streams to empty array if prefetch is turned off', async () => {
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      playing = true;
+      expectNoBuffer();
+
+      await runTest();
+
+      expect(setPrefetchStreams).toHaveBeenCalledWith(
+        [variant.video, variant.audio]);
+
+      setPrefetchStreams.calls.reset();
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 0;
+      streamingEngine.configure(config);
+      streamingEngine.switchVariant(variant);
+      await runTest();
+
+      expect(setPrefetchStreams).toHaveBeenCalledWith([]);
+    });
+
+    it('should exclude prefetched streams based on config', async () => {
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      playing = true;
+      expectNoBuffer();
+
+      await runTest();
+
+      expect(setPrefetchStreams).toHaveBeenCalledWith(
+        [variant.video, variant.audio]);
+
+      setPrefetchStreams.calls.reset();
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 5;
+      config.disableVideoPrefetch = true;
+      streamingEngine.configure(config);
+      streamingEngine.switchVariant(variant);
+      await runTest();
+
+      expect(setPrefetchStreams).toHaveBeenCalledWith([variant.audio]);
     });
   });
 
