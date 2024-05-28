@@ -560,7 +560,10 @@ shakaDemo.Config = class {
         .addBoolInput_('Use native HLS on Safari (Clear)',
             'streaming.useNativeHlsOnSafari')
         .addBoolInput_('Use native HLS for FairPlay',
-            'streaming.useNativeHlsForFairPlay');
+            'streaming.useNativeHlsForFairPlay')
+        .addNumberInput_('Load timeout for src=',
+            'streaming.loadTimeout',
+            /* canBeDecimal= */ true);
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
   }
 

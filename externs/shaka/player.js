@@ -1230,7 +1230,8 @@ shaka.extern.ManifestConfiguration;
  *   vodDynamicPlaybackRate: boolean,
  *   vodDynamicPlaybackRateLowBufferRate: number,
  *   vodDynamicPlaybackRateBufferRatio: number,
- *   infiniteLiveStreamDuration: boolean
+ *   infiniteLiveStreamDuration: boolean,
+ *   loadTimeout: number
  * }}
  *
  * @description
@@ -1421,6 +1422,10 @@ shaka.extern.ManifestConfiguration;
  *   If <code>true</code>, the media source live duration
  *   set as a<code>Infinity</code>
  *   Defaults to <code> false </code>.
+ * @property {number} loadTimeout
+ *   The maximum timeout to reject the load when using src= in case the content
+ *   does not work correctly.  Measured in seconds.
+ *   Defaults to <code> 30 </code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
