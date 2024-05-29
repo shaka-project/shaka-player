@@ -107,6 +107,8 @@ DASH features supported:
  - CEA-608/708 captions
  - Multi-codec variants (on platforms with changeType support)
  - MPD chaining
+ - MPD Patch updates for SegmentTemplate with $Number$, SegmentTimeline with
+   $Number$ and SegmentTimeline with $Time$
 
 DASH features **not** supported:
  - Xlink with actuate=onRequest
@@ -116,6 +118,8 @@ DASH features **not** supported:
    bitrates
  - Timescales so large that timestamps cannot be represented as integers in
    JavaScript (2^53): https://github.com/shaka-project/shaka-player/issues/1667
+ - Modifying elements with an @schemeIdUri attribute via MPD Patch
+ - Xlink dereferencing with MPD Patch
 
 
 ## HLS features

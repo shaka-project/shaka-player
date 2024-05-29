@@ -418,9 +418,10 @@ describe('tXml', () => {
   });
 
   it('parseXpath', () => {
-    expect(TXml.parseXpath('/MPD')).toEqual([{name: 'MPD', id: null}]);
+    expect(TXml.parseXpath('/MPD'))
+        .toEqual([{name: 'MPD', id: null, position: null, attribute: null}]);
     expect(TXml.parseXpath('/MPD/@type'))
-        .toEqual([{name: 'MPD', id: null}]);
+        .toEqual([{name: 'MPD', id: null, position: null, attribute: 'type'}]);
 
     const timelinePath = '/' + [
       'MPD',
@@ -428,13 +429,15 @@ describe('tXml', () => {
       'AdaptationSet[@id=\'7\']',
       'SegmentTemplate',
       'SegmentTimeline',
+      'S[2]',
     ].join('/');
     expect(TXml.parseXpath(timelinePath)).toEqual([
-      {name: 'MPD', id: null},
-      {name: 'Period', id: '6469'},
-      {name: 'AdaptationSet', id: '7'},
-      {name: 'SegmentTemplate', id: null},
-      {name: 'SegmentTimeline', id: null},
+      {name: 'MPD', id: null, position: null, attribute: null},
+      {name: 'Period', id: '6469', position: null, attribute: null},
+      {name: 'AdaptationSet', id: '7', position: null, attribute: null},
+      {name: 'SegmentTemplate', id: null, position: null, attribute: null},
+      {name: 'SegmentTimeline', id: null, position: null, attribute: null},
+      {name: 'S', id: null, position: 1, attribute: null},
     ]);
   });
 });
