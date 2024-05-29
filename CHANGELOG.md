@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.8.8](https://github.com/shaka-project/shaka-player/compare/v4.8.7...v4.8.8) (2024-05-29)
+
+
+### Bug Fixes
+
+* Ban smooth codec switching on Tizen 5 & 6 ([#6686](https://github.com/shaka-project/shaka-player/issues/6686)) ([82df7dc](https://github.com/shaka-project/shaka-player/commit/82df7dc63cd615bba0ccd7c70fb32ecfb890328e))
+* **DASH:** Firefox multi-period/multi-codec bug ([#6691](https://github.com/shaka-project/shaka-player/issues/6691)) ([18eeef1](https://github.com/shaka-project/shaka-player/commit/18eeef14ced4985b3e44fe8e121170fb50398720)), closes [#6690](https://github.com/shaka-project/shaka-player/issues/6690)
+* **DASH:** Fix update of SegmentTemplate with $number$ for LL ([#6687](https://github.com/shaka-project/shaka-player/issues/6687)) ([4e76ff4](https://github.com/shaka-project/shaka-player/commit/4e76ff41ef90907064cc07418f5547423c62bd76))
+* Fix default value of liveSyncMinPlaybackRate ([#6685](https://github.com/shaka-project/shaka-player/issues/6685)) ([a5ae34d](https://github.com/shaka-project/shaka-player/commit/a5ae34d1c9d04ad84b3e8aa5b189f58d23a216a5))
+* Fix progress events for VOD when using vodDynamicPlaybackRate ([#6688](https://github.com/shaka-project/shaka-player/issues/6688)) ([d6b1535](https://github.com/shaka-project/shaka-player/commit/d6b15358a8b4c38b588729635804be88f7d094ef))
+* patch `setServerCertificate()` on older Tizens & webOS ([#6696](https://github.com/shaka-project/shaka-player/issues/6696)) ([d17a25c](https://github.com/shaka-project/shaka-player/commit/d17a25cdc51368c39b82d56d6eb29bd7cf4f05a2))
+* Xbox - round gap jumping values ([#6695](https://github.com/shaka-project/shaka-player/issues/6695)) ([01ad037](https://github.com/shaka-project/shaka-player/commit/01ad037ff3b9109ccbf44475713da1439f78b0e5))
+
 ## [4.8.7](https://github.com/shaka-project/shaka-player/compare/v4.8.6...v4.8.7) (2024-05-28)
 
 
