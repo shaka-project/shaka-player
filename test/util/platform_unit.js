@@ -40,6 +40,21 @@ describe('Platform', () => {
     expect(shaka.util.Platform.isTizen5()).toBe(false);
   });
 
+  it('checks is Tizen 5.0', () => {
+    setUserAgent(webOs3);
+    expect(shaka.util.Platform.isTizen5_0()).toBe(false);
+    setUserAgent(tizen50);
+    expect(shaka.util.Platform.isTizen5_0()).toBe(true);
+    setUserAgent(tizen55);
+    expect(shaka.util.Platform.isTizen5_0()).toBe(false);
+    setUserAgent(tizen60);
+    expect(shaka.util.Platform.isTizen5_0()).toBe(false);
+    setUserAgent(tizen65);
+    expect(shaka.util.Platform.isTizen5_0()).toBe(false);
+    setUserAgent(tizen70);
+    expect(shaka.util.Platform.isTizen5_0()).toBe(false);
+  });
+
   it('checks is Tizen 6', () => {
     setUserAgent(webOs3);
     expect(shaka.util.Platform.isTizen6()).toBe(false);
