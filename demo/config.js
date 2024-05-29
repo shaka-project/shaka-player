@@ -263,6 +263,8 @@ shakaDemo.Config = class {
             'manifest.hls.ignoreManifestTimestampsInSegmentsMode')
         .addBoolInput_('Disable codec guessing',
             'manifest.hls.disableCodecGuessing')
+        .addBoolInput_('Disable closed caption detection',
+            'manifest.hls.disableClosedCaptionsDetection')
         .addBoolInput_('Allow LL-HLS byterange optimization',
             'manifest.hls.allowLowLatencyByteRangeOptimization');
   }

@@ -1052,6 +1052,7 @@ shaka.extern.DashManifestConfiguration;
  *   sequenceMode: boolean,
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   disableCodecGuessing: boolean,
+ *   disableClosedCaptionsDetection: boolean,
  *   allowLowLatencyByteRangeOptimization: boolean
  * }}
  *
@@ -1119,6 +1120,11 @@ shaka.extern.DashManifestConfiguration;
  *   extract the missing information from the media segment.
  *   As a consequence, lazy-loading media playlists won't be possible for this
  *   use case, which may result in longer video startup times.
+ *   <i>Defaults to <code>false</code>.</i>
+ * @property {boolean} disableClosedCaptionsDetection
+ *   If set to false, If there is no EXT-X-MEDIA with TYPE="CLOSED-CAPTIONS" we
+ *   will try to detect which closed captions are available.  If your manifest
+ *   has CLOSED-CAPTIONS=NONE we will not try to do any detection.
  *   <i>Defaults to <code>false</code>.</i>
  * @property {boolean} allowLowLatencyByteRangeOptimization
  *   If set to true, the HLS parser will optimize operation with LL and partial

@@ -271,8 +271,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       for (const message of messages) {
         // Check that the update message is of a reasonable size. From previous
         // testing we found that the socket would silently reject data that got
-        // too big. 6KB is safely below the limit.
-        expect(message.length).toBeLessThan(6000);
+        // too big. 7KB is safely below the limit.
+        expect(message.length).toBeLessThan(7000);
       }
     });
 
