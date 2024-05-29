@@ -2,8 +2,8 @@
 
 We are currently maintaining the following branches of Shaka Player:
 
- - v4.8 (latest)
- - v4.7 (previous)
+ - v4.9 (latest)
+ - v4.8 (previous)
  - v4.3 (in use by the Cast Application Framework)
  - No active LTS branches at this time
 
