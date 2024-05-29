@@ -986,7 +986,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.THUMBNAILS),
   new ShakaDemoAssetInfo(
       /* name= */ 'DASH-IF - Regular chaining',
-      /* iconUri= */ '',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/elephant.png',
       /* manifestUri= */ 'https://dash.akamaized.net/dash264/TestCasesIOP33/MPDChaining/regular_chain/1/manifest_regular_MPDChaining_live.mpd',
       /* source= */ shakaAssets.Source.DASH_IF)
       .addFeature(shakaAssets.Feature.DASH)
@@ -1486,7 +1486,7 @@ shakaAssets.testAssets = [
   /* Broadpeak Contents */
   new ShakaDemoAssetInfo(
       /* name= */ 'Live low latency (SegmentTemplate, CMSD)',
-      /* iconUri= */ '',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/spring.png',
       /* manifestUri= */ 'https://explo.broadpeak.tv:8343/bpk-tv/spring/lowlat/index.mpd',
       /* source= */ shakaAssets.Source.BROADPEAK)
       .addFeature(shakaAssets.Feature.DASH)
