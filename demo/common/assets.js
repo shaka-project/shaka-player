@@ -1312,7 +1312,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.THUMBNAILS),
   new ShakaDemoAssetInfo(
       /* name= */ '3D movie stream',
-      /* iconUri= */ '',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/prehistoric.png',
       /* manifestUri= */ 'https://devstreaming-cdn.apple.com/videos/streaming/examples/historic_planet_content_2023-10-26-3d-video/main.m3u8',
       /* source= */ shakaAssets.Source.APPLE)
       .addFeature(shakaAssets.Feature.HLS)
