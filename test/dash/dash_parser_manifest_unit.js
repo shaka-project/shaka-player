@@ -2614,7 +2614,7 @@ describe('DashParser Manifest', () => {
         '<MPD minBufferTime="PT75S" type="dynamic"',
         '     availabilityStartTime="1970-01-01T00:00:00Z">',
         '  <ServiceDescription id="0">',
-        '    <Latency max="2000" min="1000" referenceId="0" target="4000" />',
+        '    <Latency max="4000" min="1000" referenceId="0" target="2000" />',
         '    <PlaybackRate max="1.10" min="0.95" />',
         '  </ServiceDescription>',
         '</MPD>',
@@ -2625,9 +2625,33 @@ describe('DashParser Manifest', () => {
       /** @type {shaka.extern.Manifest} */
       const manifest = await parser.start('dummy://foo', playerInterface);
 
-      expect(manifest.serviceDescription.maxLatency).toBe(2);
+      expect(manifest.serviceDescription.targetLatency).toBe(2);
+      expect(manifest.serviceDescription.maxLatency).toBe(4);
       expect(manifest.serviceDescription.maxPlaybackRate).toBe(1.1);
       expect(manifest.serviceDescription.minLatency).toBe(1);
+      expect(manifest.serviceDescription.minPlaybackRate).toBe(0.95);
+    });
+
+    it('and excludes missing attributes', async () => {
+      const source = [
+        '<MPD minBufferTime="PT75S" type="dynamic"',
+        '     availabilityStartTime="1970-01-01T00:00:00Z">',
+        '  <ServiceDescription id="0">',
+        '    <Latency referenceId="0" target="2000" />',
+        '    <PlaybackRate max="1.10" min="0.95" />',
+        '  </ServiceDescription>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('dummy://foo', source);
+
+      /** @type {shaka.extern.Manifest} */
+      const manifest = await parser.start('dummy://foo', playerInterface);
+
+      expect(manifest.serviceDescription.targetLatency).toBe(2);
+      expect(manifest.serviceDescription.maxLatency).toBeUndefined();
+      expect(manifest.serviceDescription.maxPlaybackRate).toBe(1.1);
+      expect(manifest.serviceDescription.minLatency).toBeUndefined();
       expect(manifest.serviceDescription.minPlaybackRate).toBe(0.95);
     });
   });
