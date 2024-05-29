@@ -172,6 +172,9 @@ shakaAssets.Feature = {
 
   // Set if the asset has MPD Chaining.
   MPD_CHAINING: 'MPD Chaining',
+
+  // Set if the asset has Common Media Server Data.
+  CMSD: 'Common Media Server Data',
 };
 
 
@@ -1551,6 +1554,23 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.LOW_LATENCY)
+      .addFeature(shakaAssets.Feature.CMSD)
+      .setExtraConfig({
+        streaming: {
+          lowLatencyMode: true,
+        },
+      }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live low latency (SegmentTimeline, CMSD)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/spring.png',
+      /* manifestUri= */ 'https://explo.broadpeak.tv:8343/bpk-tv/spring/lowlat/index_timeline.mpd',
+      /* source= */ shakaAssets.Source.BROADPEAK)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
+      .addFeature(shakaAssets.Feature.CMSD)
       .setExtraConfig({
         streaming: {
           lowLatencyMode: true,

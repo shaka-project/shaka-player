@@ -403,6 +403,8 @@ shakaDemo.Search = class {
         'Filters for assets that are VR.');
     this.makeBooleanInput_(specialContainer, Feature.MPD_CHAINING, FEATURE,
         'Filters for assets that have MPD Chaining');
+    this.makeBooleanInput_(specialContainer, Feature.CMSD, FEATURE,
+        'Filters for assets that have Common Media Server Data.');
 
     container.appendChild(this.resultsDiv_);
   }
