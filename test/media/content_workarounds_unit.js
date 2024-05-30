@@ -30,7 +30,7 @@ describe('ContentWorkarounds', () => {
         ]);
 
         const faked =
-            shaka.media.ContentWorkarounds.fakeEncryption(unencrypted);
+            shaka.media.ContentWorkarounds.fakeEncryption(unencrypted, null);
         const spy = jasmine.createSpy('boxCallback');
         new shaka.util.Mp4Parser()
             .fullBox('stsd', shaka.util.Mp4Parser.sampleDescription)
