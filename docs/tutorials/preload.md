@@ -35,6 +35,8 @@ You need a player instance to preload an asset, and you must use the returned
 preloadManager on the same player instance.
 The preloading process loads the manifest and first segments of the asset. It
 will not load the whole asset ahead of time.
+If you need to define any response or request filters for your assets to be
+downloaded, remember to do it before calling `player.preload`.
 
 The preload method can be provided an optional startTime and mimeType parameter,
 much the same as the load method.

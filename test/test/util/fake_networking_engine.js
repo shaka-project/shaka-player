@@ -145,6 +145,17 @@ shaka.test.FakeNetworkingEngine = class {
   }
 
   /**
+   * @param {!shaka.net.NetworkingEngine} other
+   * @override
+   */
+  copyFiltersInto(other) {
+    if (this.responseFilter_) {
+      other.registerResponseFilter(this.responseFilter_);
+    }
+    // FakeNetworkingEngine does not have request filters.
+  }
+
+  /**
    * Useable by tests directly.  Library code will only call this via the Spy on
    * registerResponseFilter.
    *
