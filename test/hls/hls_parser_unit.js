@@ -1129,7 +1129,8 @@ describe('HlsParser', () => {
   it('parses discontinuity tags', async () => {
     const master = [
       '#EXTM3U\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=2000000,CODECS="avc1"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=2000000,CODECS="avc1",',
+      'CLOSED-CAPTIONS=NONE\n',
       'video\n',
     ].join('');
 
@@ -3606,7 +3607,7 @@ describe('HlsParser', () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
-      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'RESOLUTION=960x540,FRAME-RATE=60,CLOSED-CAPTIONS=NONE\n',
       'video\n',
     ].join('');
 
@@ -3884,10 +3885,10 @@ describe('HlsParser', () => {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
-        'RESOLUTION=960x540,FRAME-RATE=30\n',
+        'RESOLUTION=960x540,FRAME-RATE=30,CLOSED-CAPTIONS=NONE\n',
         'video\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1.4d401f",',
-        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'RESOLUTION=960x540,FRAME-RATE=60,CLOSED-CAPTIONS=NONE\n',
         'video2\n',
         '#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES-CTR,',
         'KEYFORMAT="com.apple.streamingkeydelivery",',
@@ -4247,7 +4248,7 @@ describe('HlsParser', () => {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
-        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'RESOLUTION=960x540,FRAME-RATE=60,CLOSED-CAPTIONS=NONE\n',
         'video\n',
       ].join('');
 
@@ -4275,7 +4276,7 @@ describe('HlsParser', () => {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
-        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'RESOLUTION=960x540,FRAME-RATE=60,CLOSED-CAPTIONS=NONE\n',
         'video\n',
       ].join('');
 
@@ -5204,7 +5205,7 @@ describe('HlsParser', () => {
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",URI="audio"\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
-      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",CLOSED-CAPTIONS=NONE\n',
       'video\n',
     ].join('');
 
@@ -5289,10 +5290,10 @@ describe('HlsParser', () => {
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",URI="audio"\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
-      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",CLOSED-CAPTIONS=NONE\n',
       'video\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
-      'RESOLUTION=960x540,FRAME-RATE=120,AUDIO="aud1"\n',
+      'RESOLUTION=960x540,FRAME-RATE=120,AUDIO="aud1",CLOSED-CAPTIONS=NONE\n',
       'video2\n',
     ].join('');
 
@@ -5438,10 +5439,10 @@ describe('HlsParser', () => {
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="b",LANGUAGE="eng",',
       'URI="audio/b/media.m3u8"\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc,mp4a",',
-      'AUDIO="a",PATHWAY-ID="a"\n',
+      'AUDIO="a",PATHWAY-ID="a",CLOSED-CAPTIONS=NONE\n',
       'a/media.m3u8\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc,mp4a",',
-      'AUDIO="b",PATHWAY-ID="b"\n',
+      'AUDIO="b",PATHWAY-ID="b",CLOSED-CAPTIONS=NONE\n',
       'b/media.m3u8',
     ].join('');
 

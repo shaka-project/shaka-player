@@ -32,20 +32,22 @@ describe('HlsParser live', () => {
   beforeEach(() => {
     // TODO: use StreamGenerator?
     initSegmentData = new Uint8Array([
-      0x00, 0x00, 0x00, 0x30, // size (48)
+      0x00, 0x00, 0x00, 0x36, // size (54)
       0x6D, 0x6F, 0x6F, 0x76, // type (moov)
-      0x00, 0x00, 0x00, 0x28, // trak size (40)
+      0x00, 0x00, 0x00, 0x2E, // trak size (46)
       0x74, 0x72, 0x61, 0x6B, // type (trak)
-      0x00, 0x00, 0x00, 0x20, // mdia size (32)
+      0x00, 0x00, 0x00, 0x26, // mdia size (38)
       0x6D, 0x64, 0x69, 0x61, // type (mdia)
 
-      0x00, 0x00, 0x00, 0x18, // mdhd size (24)
+      0x00, 0x00, 0x00, 0x1E, // mdhd size (30)
       0x6D, 0x64, 0x68, 0x64, // type (mdhd)
       0x00, 0x00, 0x00, 0x00, // version and flags
 
       0x00, 0x00, 0x00, 0x00, // creation time (0)
       0x00, 0x00, 0x00, 0x00, // modification time (0)
       0x00, 0x00, 0x03, 0xe8, // timescale (1000)
+      0x00, 0x00, 0x00, 0x00, // duration (0)
+      0x55, 0xC4, // language (und)
     ]);
     segmentData = new Uint8Array([
       0x00, 0x00, 0x00, 0x24, // size (36)
@@ -56,7 +58,7 @@ describe('HlsParser live', () => {
       0x74, 0x66, 0x64, 0x74, // type (tfdt)
       0x01, 0x00, 0x00, 0x00, // version and flags
       0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes
-      0x00, 0x00, 0x07, 0xd0,  // baseMediaDecodeTime last 4 bytes (2000)
+      0x00, 0x00, 0x07, 0xd0, // baseMediaDecodeTime last 4 bytes (2000)
     ]);
 
     selfInitializingSegmentData =
@@ -122,11 +124,13 @@ describe('HlsParser live', () => {
         .setResponseText('test:/audio', media1)
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData)
+        .setResponseValue('test:/main0.mp4', segmentData)
         .setResponseValue('test:/main2.mp4', segmentData)
         .setResponseValue('test:/main3.mp4', segmentData)
         .setResponseValue('test:/main4.mp4', segmentData)
         .setResponseValue('test:/partial.mp4', segmentData)
         .setResponseValue('test:/partial2.mp4', segmentData)
+        .setResponseValue('test:/ref1.mp4', segmentData)
         .setResponseValue('test:/selfInit.mp4', selfInitializingSegmentData);
   }
 

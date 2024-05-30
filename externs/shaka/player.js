@@ -1052,6 +1052,7 @@ shaka.extern.DashManifestConfiguration;
  *   sequenceMode: boolean,
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   disableCodecGuessing: boolean,
+ *   disableClosedCaptionsDetection: boolean,
  *   allowLowLatencyByteRangeOptimization: boolean
  * }}
  *
@@ -1119,6 +1120,11 @@ shaka.extern.DashManifestConfiguration;
  *   extract the missing information from the media segment.
  *   As a consequence, lazy-loading media playlists won't be possible for this
  *   use case, which may result in longer video startup times.
+ *   <i>Defaults to <code>false</code>.</i>
+ * @property {boolean} disableClosedCaptionsDetection
+ *   If true, disables the automatic detection of closed captions.
+ *   Otherwise, in the absence of a EXT-X-MEDIA tag with TYPE="CLOSED-CAPTIONS",
+ *   Shaka Player will attempt to detect captions based on the media data.
  *   <i>Defaults to <code>false</code>.</i>
  * @property {boolean} allowLowLatencyByteRangeOptimization
  *   If set to true, the HLS parser will optimize operation with LL and partial
