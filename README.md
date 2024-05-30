@@ -1,5 +1,3 @@
-FAKE CHANGE
-
 # ![Shaka Player](docs/shaka-player-logo.png)
 
 Shaka Player is an open-source JavaScript library for adaptive media.  It plays
