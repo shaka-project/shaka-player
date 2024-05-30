@@ -9,14 +9,13 @@ function storageSupport() {
   return shaka.offline.Storage.support();
 }
 
-/** @return {!Promise.<boolean>} */
-async function drmStorageSupport() {
+/** @return {boolean} */
+function drmStorageSupport() {
   if (!shaka.offline.Storage.support()) {
     return false;
   }
 
-  const support = await shaka.Player.probeSupport();
-  const widevineSupport = support.drm['com.widevine.alpha'];
+  const widevineSupport = window['shakaSupport'].drm['com.widevine.alpha'];
   return !!(widevineSupport && widevineSupport.persistentState);
 }
 
@@ -1385,6 +1384,7 @@ filterDescribe('Storage', storageSupport, () => {
       frameRate: 30,
       pixelAspectRatio: '59:54',
       hdr: null,
+      colorGamut: null,
       videoLayout: null,
       mimeType: 'video/mp4,audio/mp4',
       audioMimeType: 'audio/mp4',
@@ -1432,6 +1432,7 @@ filterDescribe('Storage', storageSupport, () => {
       frameRate: null,
       pixelAspectRatio: null,
       hdr: null,
+      colorGamut: null,
       videoLayout: null,
       mimeType: 'text/vtt',
       audioMimeType: null,

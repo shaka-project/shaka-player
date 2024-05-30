@@ -41,9 +41,6 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
   let toRestore;
   let pendingWaitWrapperCalls = 0;
 
-  /** @type {!Object.<string, ?shaka.extern.DrmSupportType>} */
-  let support = {};
-
   let fakeInitState;
 
   beforeAll(async () => {
@@ -62,7 +59,6 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
         shaka.test.TestScheme.ManifestParser.factory);
 
     await shaka.test.TestScheme.createManifests(shaka, '');
-    support = await shaka.media.DrmEngine.probeSupport();
   });
 
   beforeEach(async () => {
@@ -247,7 +243,9 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     });
   });
 
-  filterDescribe('with drm', () => support['com.widevine.alpha'], () => {
+  const widevineSupport =
+      () => window['shakaSupport'].drm['com.widevine.alpha'];
+  filterDescribe('with drm', widevineSupport, () => {
     drmIt('sends reasonably-sized updates', async () => {
       // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
       fakeInitState.manifest = 'test:sintel-enc';
@@ -273,8 +271,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       for (const message of messages) {
         // Check that the update message is of a reasonable size. From previous
         // testing we found that the socket would silently reject data that got
-        // too big. 6KB is safely below the limit.
-        expect(message.length).toBeLessThan(6000);
+        // too big. 7KB is safely below the limit.
+        expect(message.length).toBeLessThan(7000);
       }
     });
 

@@ -320,6 +320,7 @@ shaka.test.StreamingEngineUtil = class {
       ignoreManifestTimestampsInSegmentsMode: false,
       type: 'UNKNOWN',
       serviceDescription: null,
+      nextUrl: null,
     };
 
     /** @type {shaka.extern.Variant} */

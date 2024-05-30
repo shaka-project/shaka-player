@@ -105,7 +105,7 @@
     "prepublishOnly": "python build/checkversion.py && python build/all.py --force"
   },
   "dependencies": {
-    "eme-encryption-scheme-polyfill": "^2.1.2"
+    "eme-encryption-scheme-polyfill": "^2.1.5"
   },
   "engines": {
     "node": ">=14"

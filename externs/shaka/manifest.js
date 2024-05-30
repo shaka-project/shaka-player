@@ -21,7 +21,8 @@
  *   sequenceMode: boolean,
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   type: string,
- *   serviceDescription: ?shaka.extern.ServiceDescription
+ *   serviceDescription: ?shaka.extern.ServiceDescription,
+ *   nextUrl: ?string
  * }}
  *
  * @description
@@ -93,6 +94,8 @@
  * @property {?shaka.extern.ServiceDescription} serviceDescription
  *   The service description for the manifest. Used to adapt playbackRate to
  *   decrease latency.
+ * @property {?string} nextUrl
+ *   The next url to play.
  *
  * @exportDoc
  */
@@ -151,6 +154,7 @@ shaka.extern.InitDataOverride;
 
 /**
  * @typedef {{
+ *   targetLatency:?number,
  *   maxLatency: ?number,
  *   maxPlaybackRate: ?number,
  *   minLatency: ?number,
@@ -164,6 +168,8 @@ shaka.extern.InitDataOverride;
  * minPlaybackRate to increase  latency.
  * More information {@link https://dashif.org/docs/CR-Low-Latency-Live-r8.pdf here}.
  *
+ * @property {?number} targetLatency
+ *  The target latency to aim for.
  * @property {?number} maxLatency
  *  Maximum latency in seconds.
  * @property {?number} maxPlaybackRate
@@ -424,6 +430,7 @@ shaka.extern.SegmentIndex = class {
  *   frameRate: (number|undefined),
  *   pixelAspectRatio: (string|undefined),
  *   hdr: (string|undefined),
+ *   colorGamut: (string|undefined),
  *   videoLayout: (string|undefined),
  *   bandwidth: (number|undefined),
  *   width: (number|undefined),
@@ -501,6 +508,9 @@ shaka.extern.SegmentIndex = class {
  * @property {(string|undefined)} hdr
  *   <i>Video streams only.</i> <br>
  *   The Stream's HDR info
+ * @property {(string|undefined)} colorGamut
+ *   <i>Video streams only.</i> <br>
+ *   The Stream's color gamut info
  * @property {(string|undefined)} videoLayout
  *   <i>Video streams only.</i> <br>
  *   The Stream's video layout info.

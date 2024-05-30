@@ -103,6 +103,8 @@ shaka.test.ManifestGenerator.Manifest = class {
     this.type = 'UNKNOWN';
     /** @type {?shaka.extern.ServiceDescription} */
     this.serviceDescription = null;
+    /** @type {?string} */
+    this.nextUrl = null;
 
 
     /** @type {shaka.extern.Manifest} */
@@ -572,6 +574,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.closedCaptions = null;
       /** @type {(string|undefined)} */
       this.hdr = undefined;
+      /** @type {(string|undefined)} */
+      this.colorGamut = undefined;
       /** @type {(string|undefined)} */
       this.videoLayout = undefined;
       /** @type {(string|undefined)} */

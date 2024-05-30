@@ -24,14 +24,13 @@ filterDescribe('Offline', supportsStorage, () => {
   /** @type {?shaka.extern.DrmSupportType} */
   let playreadySupport;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
 
-    const support = await shaka.media.DrmEngine.probeSupport();
-    widevineSupport = support['com.widevine.alpha'];
-    playreadySupport = support['com.microsoft.playready'] ||
-        support['com.chromecast.playready'];
+    widevineSupport = window['shakaSupport'].drm['com.widevine.alpha'];
+    playreadySupport = window['shakaSupport'].drm['com.microsoft.playready'] ||
+        window['shakaSupport'].drm['com.chromecast.playready'];
   });
 
   afterAll(() => {
