@@ -20,15 +20,21 @@ Candidate features for future release cycles:
 v5.0 - 2024 Q4
  - Conversion to Typescript
 
-v4.9 - 2024 Q3
+v4.10 - 2024 Q3
+ - HLS support for EXT-X-DATERANGE
+   https://github.com/shaka-project/shaka-player/issues/3523
+ - HLS interstitials
+   https://github.com/shaka-project/shaka-player/issues/3364
+
+=====
+
+v4.9 - 2024 Q2
  - DASH patch manifests
    https://github.com/shaka-project/shaka-player/issues/2228
  - DASH: MPD chaining
    https://github.com/shaka-project/shaka-player/issues/3926
  - Support CS on devices that don't support multiple media elements
    https://github.com/shaka-project/shaka-player/issues/2792
-
-=====
 
 v4.8 - 2024 Q2
  - Preload API
