@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.8.9](https://github.com/shaka-project/shaka-player/compare/v4.8.8...v4.8.9) (2024-05-30)
+
+
+### Bug Fixes
+
+* **CEA:** Fix stream detection when the stream has not control codes ([#6703](https://github.com/shaka-project/shaka-player/issues/6703)) ([860e531](https://github.com/shaka-project/shaka-player/commit/860e5319bdd11f2b2184fb6cb8a1b7f9bbc8fbf9))
+* **CEA:** Ignore XDS control codes ([#6702](https://github.com/shaka-project/shaka-player/issues/6702)) ([ed613ef](https://github.com/shaka-project/shaka-player/commit/ed613efac3255514314df682fc4e741ea24fe2d4))
+* Fix multi-codec filtering on DASH live ([#6647](https://github.com/shaka-project/shaka-player/issues/6647)) ([fcd0b40](https://github.com/shaka-project/shaka-player/commit/fcd0b400e8b3fe6c2ceba3d2d6d92269dec0a4e6))
+
 ## [4.8.8](https://github.com/shaka-project/shaka-player/compare/v4.8.7...v4.8.8) (2024-05-29)
 
 
