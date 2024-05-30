@@ -399,6 +399,8 @@ shakaDemo.Search = class {
         'Filters for assets that use Content Steering.');
     this.makeBooleanInput_(specialContainer, Feature.VR, FEATURE,
         'Filters for assets that are VR.');
+    this.makeBooleanInput_(specialContainer, Feature.CMSD, FEATURE,
+        'Filters for assets that have Common Media Server Data.');
 
     container.appendChild(this.resultsDiv_);
   }
