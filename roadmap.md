@@ -21,7 +21,7 @@ v5.0 - 2024 Q4
  - Conversion to Typescript
 
 v4.10 - 2024 Q3
- - HLS support for EXT-X-DATARANGE
+ - HLS support for EXT-X-DATERANGE
    https://github.com/shaka-project/shaka-player/issues/3523
  - HLS interstitials
    https://github.com/shaka-project/shaka-player/issues/3364
