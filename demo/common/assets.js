@@ -827,6 +827,48 @@ shakaAssets.testAssets = [
           },
         },
       }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'ClearKey with raw single key',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+      /* manifestUri= */ 'https://media.axprod.net/TestVectors/v7-MultiDRM-SingleKey/Manifest_1080p_ClearKey.mpd',
+      /* source= */ shakaAssets.Source.AXINOM)
+      .addKeySystem(shakaAssets.KeySystem.CLEAR_KEY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .setExtraConfig({
+        drm: {
+          clearKeys: {
+            'nrQFDeRLSAKTLifXUIPiZg': 'FmY0xnWCPCNaSpRG-tUuTQ',
+          },
+        },
+      }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'ClearKey with raw multiple keys',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+      /* manifestUri= */ 'https://media.axprod.net/TestVectors/v7-MultiDRM-MultiKey/Manifest_1080p_ClearKey.mpd',
+      /* source= */ shakaAssets.Source.AXINOM)
+      .addKeySystem(shakaAssets.KeySystem.CLEAR_KEY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .setExtraConfig({
+        drm: {
+          clearKeys: {
+            'gDmb9YohQBSAU-J-dI6YwA': '3aHppzZ2g3Y3wK1uNnUXmg',
+            'kJU-CWyySaOiYHpf7-rUmQ': 'zsmKW7Mq9Unz5R7oUGeF8w',
+            'Dk2pK9DoSmaMP8Jal-tlMg': 'UmYYfGb7znuoFAQM79ayHw',
+            'WF8jPzByRvGfpG3CLGagFA': 'jayKpC3tmPq4YKXkapa8FA',
+            'QiK9eLxFQb-2Pm-BTcOR3w': 'GAMi9v92b9ca5yBwaptN-Q',
+          },
+        },
+      }),
   // End Axinom assets }}}
 
   // DASH-IF assets {{{
