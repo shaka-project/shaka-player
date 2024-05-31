@@ -1,5 +1,33 @@
 # Changelog
 
+## [4.7.15](https://github.com/shaka-project/shaka-player/compare/v4.7.14...v4.7.15) (2024-05-31)
+
+
+### Bug Fixes
+
+* **Ads:** Fix CS destroy ([#6624](https://github.com/shaka-project/shaka-player/issues/6624)) ([88d837a](https://github.com/shaka-project/shaka-player/commit/88d837a5a33da00d0daee486183118581dfeb10f))
+* Ban smooth codec switching on Tizen 5 & 6 ([#6686](https://github.com/shaka-project/shaka-player/issues/6686)) ([ea6df06](https://github.com/shaka-project/shaka-player/commit/ea6df062e5c3652c3ee2cccd74ad5048eae683b7))
+* **Cast:** Incorrect detection of MediaCapabilities on Chromecast ([#6656](https://github.com/shaka-project/shaka-player/issues/6656)) ([7681d4f](https://github.com/shaka-project/shaka-player/commit/7681d4f4324e0ea1b6d2ef98d4ca58ac5ceb01aa))
+* **CEA:** Fix stream detection when the stream has not control codes ([#6703](https://github.com/shaka-project/shaka-player/issues/6703)) ([9fad4d3](https://github.com/shaka-project/shaka-player/commit/9fad4d311e9c3110515a269b4adcff82e7168de5))
+* **CEA:** Ignore XDS control codes ([#6702](https://github.com/shaka-project/shaka-player/issues/6702)) ([888ab39](https://github.com/shaka-project/shaka-player/commit/888ab39e037178c30df1b25b365b7be7c77df2b3))
+* **CEA:** reset PTS on new init segment ([#6606](https://github.com/shaka-project/shaka-player/issues/6606)) ([c9e6885](https://github.com/shaka-project/shaka-player/commit/c9e6885320aa470eb4f603380b76f45734416bfd))
+* **CEA:** reset PTS on new init segment ([#6671](https://github.com/shaka-project/shaka-player/issues/6671)) ([871a556](https://github.com/shaka-project/shaka-player/commit/871a5564af8a78aa9ca6bc6e6aa2dc6bd98c6838))
+* **DASH:** Firefox multi-period/multi-codec bug ([#6691](https://github.com/shaka-project/shaka-player/issues/6691)) ([bd085c0](https://github.com/shaka-project/shaka-player/commit/bd085c08116b2f1b87eb3af81d23383e7403398c)), closes [#6690](https://github.com/shaka-project/shaka-player/issues/6690)
+* **DASH:** Fix update of SegmentTemplate with $number$ for LL ([#6687](https://github.com/shaka-project/shaka-player/issues/6687)) ([737fac7](https://github.com/shaka-project/shaka-player/commit/737fac772031b7de2e3c1d8cc0d812199ac22bc5))
+* ensure all timelineregionenter events are fired ([#6713](https://github.com/shaka-project/shaka-player/issues/6713)) ([e1bec6b](https://github.com/shaka-project/shaka-player/commit/e1bec6b5ffe4dc518788399d7282e1ecf98e9d07)), closes [#6711](https://github.com/shaka-project/shaka-player/issues/6711)
+* Fix MCap checking when using src= ([#6675](https://github.com/shaka-project/shaka-player/issues/6675)) ([d56ce53](https://github.com/shaka-project/shaka-player/commit/d56ce533de18d992d447107920f3b63157a2ec69))
+* Fix numBytesRemaining when the request is done ([#6653](https://github.com/shaka-project/shaka-player/issues/6653)) ([7f75320](https://github.com/shaka-project/shaka-player/commit/7f75320b14d4e5492cc27902f7709175cedb856c))
+* Fix Opus support in Safari ([#6607](https://github.com/shaka-project/shaka-player/issues/6607)) ([a52cbe5](https://github.com/shaka-project/shaka-player/commit/a52cbe553267f9c739788d49b587cbf40204d43e))
+* Fix progress events for VOD when using vodDynamicPlaybackRate ([#6688](https://github.com/shaka-project/shaka-player/issues/6688)) ([c5308b7](https://github.com/shaka-project/shaka-player/commit/c5308b7d1454c6490b257f198de18a6e68a82504))
+* **HLS:** Fix bad detection in some MediaPlaylist ([#6608](https://github.com/shaka-project/shaka-player/issues/6608)) ([f3f2c04](https://github.com/shaka-project/shaka-player/commit/f3f2c044954d7decc3918edfc29d0ad8759fd68f))
+* **HLS:** Support request byterange on media playlist detection ([#6629](https://github.com/shaka-project/shaka-player/issues/6629)) ([00fdaf5](https://github.com/shaka-project/shaka-player/commit/00fdaf5ff666cf3e50635735bf19b597ebafa66f))
+* patch `setServerCertificate()` on older Tizens & webOS ([#6696](https://github.com/shaka-project/shaka-player/issues/6696)) ([0c76912](https://github.com/shaka-project/shaka-player/commit/0c7691273b4fcf284bc66ab8c5b323199557794a))
+* **PS4:** Fix serverCertificate defaulted to null ([#6716](https://github.com/shaka-project/shaka-player/issues/6716)) ([b1c5384](https://github.com/shaka-project/shaka-player/commit/b1c5384a5c93c4620f044dd9b8a9d110ce788a53))
+* Re-add setting playbackRate to 0 to control buffering state ([#6546](https://github.com/shaka-project/shaka-player/issues/6546)) ([49b580d](https://github.com/shaka-project/shaka-player/commit/49b580d467ece1b7d404916520b1066204def394))
+* **UI:** Fix dragging the seek bar seeks and pans the view in VR mode ([#6677](https://github.com/shaka-project/shaka-player/issues/6677)) ([45d8a34](https://github.com/shaka-project/shaka-player/commit/45d8a340ad62c2ff3f2e8fe02420960b662d4238))
+* **UI:** UI does not update after loading a new stream ([#6721](https://github.com/shaka-project/shaka-player/issues/6721)) ([839b550](https://github.com/shaka-project/shaka-player/commit/839b550bbbcfeb380f5950e7b56590cb81d0f620))
+* Xbox - round gap jumping values ([#6695](https://github.com/shaka-project/shaka-player/issues/6695)) ([784a1e7](https://github.com/shaka-project/shaka-player/commit/784a1e79043d12b15cf12113b0a59395c830eff6))
+
 ## [4.7.14](https://github.com/shaka-project/shaka-player/compare/v4.7.13...v4.7.14) (2024-05-07)
 
 
