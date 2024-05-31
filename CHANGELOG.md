@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.9.1](https://github.com/shaka-project/shaka-player/compare/v4.9.0...v4.9.1) (2024-05-31)
+
+
+### Bug Fixes
+
+* Add segment URIs to segment-related errors ([#6714](https://github.com/shaka-project/shaka-player/issues/6714)) ([3512e8c](https://github.com/shaka-project/shaka-player/commit/3512e8c004365bc232a1214bdd926aea6558b4a1)), closes [#6712](https://github.com/shaka-project/shaka-player/issues/6712)
+* ensure all timelineregionenter events are fired ([#6713](https://github.com/shaka-project/shaka-player/issues/6713)) ([f5f1822](https://github.com/shaka-project/shaka-player/commit/f5f1822c31087d38a50ef906d362139a4305e9c1)), closes [#6711](https://github.com/shaka-project/shaka-player/issues/6711)
+* **PS4:** Fix serverCertificate defaulted to null ([#6716](https://github.com/shaka-project/shaka-player/issues/6716)) ([f4f2f30](https://github.com/shaka-project/shaka-player/commit/f4f2f3097408a9aa95d9776ff43ee23bd9b1289f))
+* **UI:** UI does not update after loading a new stream ([#6721](https://github.com/shaka-project/shaka-player/issues/6721)) ([6d9ddb1](https://github.com/shaka-project/shaka-player/commit/6d9ddb14c3a3498e3fcd75bbcf2ea3417608aaea))
+
 ## [4.9.0](https://github.com/shaka-project/shaka-player/compare/v4.8.0...v4.9.0) (2024-05-30)
 
 
