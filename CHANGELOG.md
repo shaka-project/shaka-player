@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.8.10](https://github.com/shaka-project/shaka-player/compare/v4.8.9...v4.8.10) (2024-05-31)
+
+
+### Bug Fixes
+
+* ensure all timelineregionenter events are fired ([#6713](https://github.com/shaka-project/shaka-player/issues/6713)) ([c44126e](https://github.com/shaka-project/shaka-player/commit/c44126eaedeaa46b2cb4dc60ebbbed2f1bac4e29)), closes [#6711](https://github.com/shaka-project/shaka-player/issues/6711)
+* **preload:** Copy net filters to preload manager ([#6709](https://github.com/shaka-project/shaka-player/issues/6709)) ([71b01bb](https://github.com/shaka-project/shaka-player/commit/71b01bbaf05558909fea737481c6862b1cef1afe)), closes [#6698](https://github.com/shaka-project/shaka-player/issues/6698)
+* **PS4:** Fix serverCertificate defaulted to null ([#6716](https://github.com/shaka-project/shaka-player/issues/6716)) ([2d1a91d](https://github.com/shaka-project/shaka-player/commit/2d1a91d1cc4c73cc96c2881ad06a0969f248e77a))
+* **UI:** UI does not update after loading a new stream ([#6721](https://github.com/shaka-project/shaka-player/issues/6721)) ([bf05413](https://github.com/shaka-project/shaka-player/commit/bf05413b668a18e07a77eadc1a97986d11acec8b))
+
 ## [4.8.9](https://github.com/shaka-project/shaka-player/compare/v4.8.8...v4.8.9) (2024-05-30)
 
 
