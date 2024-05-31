@@ -4,12 +4,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// These definitions will override the defaults when the Closure base library
-// is loaded.  This is necessary to get Closure to load dependencies by
-// creating DOM elements in JavaScript, rather than the legacy default of using
-// document.write().  This is more compatible with a wider variety of setups,
-// and allows us to enable Karma options {useIframe: false, runInParent: true}
-// to test in a single frame.
-window['CLOSURE_UNCOMPILED_DEFINES'] = {
-  'goog.ENABLE_CHROME_APP_SAFE_SCRIPT_LOADING': true,
-};
+(() => {
+  const karmaUsesFrames = __karma__.config.useIframe ||
+      !__karma__.config.runInParent;
+  const isDebugPage = location.pathname.endsWith('/debug.html');
+
+  // When Karma uses frames, or is on the debug page, it loads scripts by
+  // inserting them directly into the HTML it serves.  Otherwise, it creates
+  // new <script> elements at runtime and appends them to <head>.
+  const karmaInsertsScriptsDirectly = karmaUsesFrames || isDebugPage;
+  const karmaUsesCreateElement = !karmaInsertsScriptsDirectly;
+
+  // We must always match Karma's methodology in Closure to avoid scripts
+  // loading out of order.
+  const closureShouldUseCreateElement = karmaUsesCreateElement;
+
+  // This is how Closure's loader gets configured.  The setting
+  // goog.ENABLE_CHROME_APP_SAFE_SCRIPT_LOADING means to use createElement.
+  window['CLOSURE_UNCOMPILED_DEFINES'] = {
+    'goog.ENABLE_CHROME_APP_SAFE_SCRIPT_LOADING': closureShouldUseCreateElement,
+  };
+
+  if (isDebugPage) {
+    // In browser debug mode, we don't get Karma's dump() function.  Everything
+    // is in browser context only, with no back-channel to the Karma server, so
+    // we define Karma's dump() here to simply log to the browser.
+    window.dump = (string) => {
+      console.debug(string);
+    };
+  }
+})();
