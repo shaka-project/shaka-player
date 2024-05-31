@@ -29,6 +29,8 @@ describe('HlsParser', () => {
   let onEventSpy;
   /** @type {!jasmine.Spy} */
   let newDrmInfoSpy;
+  /** @type {!jasmine.Spy} */
+  let onMetadataSpy;
   /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
   /** @type {shaka.extern.ManifestConfiguration} */
@@ -76,6 +78,7 @@ describe('HlsParser', () => {
     sequenceMode = config.hls.sequenceMode;
     onEventSpy = jasmine.createSpy('onEvent');
     newDrmInfoSpy = jasmine.createSpy('newDrmInfo');
+    onMetadataSpy = jasmine.createSpy('onMetadata');
     playerInterface = {
       modifyManifestRequest: (request, manifestInfo) => {},
       modifySegmentRequest: (request, segmentInfo) => {},
@@ -92,6 +95,7 @@ describe('HlsParser', () => {
       newDrmInfo: shaka.test.Util.spyFunc(newDrmInfoSpy),
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
+      onMetadata: shaka.test.Util.spyFunc(onMetadataSpy),
     };
 
     parser = new shaka.hls.HlsParser();
@@ -5497,5 +5501,183 @@ describe('HlsParser', () => {
 
     expect(videoUri0).toBe('http://master/b/main.mp4');
     expect(videoUri1).toBe('http://master/a/main.mp4');
+  });
+
+  describe('EXT-X-DATERANGE', () => {
+    it('supports multiples tags', async () => {
+      const mediaPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+        '#EXTINF:5,\n',
+        'video1.ts\n',
+        '#EXT-X-DATERANGE:ID="0",START-DATE="2000-01-01T00:00:00.00Z",',
+        'DURATION=1,X-SHAKA="FOREVER"\n',
+        '#EXT-X-DATERANGE:ID="1",START-DATE="2000-01-01T00:00:05.00Z",',
+        'END-DATE="2000-01-01T00:00:06.00Z",X-SHAKA="FOREVER"\n',
+        '#EXT-X-DATERANGE:ID="2",START-DATE="2000-01-01T00:00:10.00Z",',
+        'X-SHAKA="FOREVER"\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', mediaPlaylist)
+          .setResponseValue('test:/video1.ts', tsSegmentData);
+
+      await parser.start('test:/master', playerInterface);
+
+      const metadataType = 'com.apple.quicktime.HLS';
+      const value = {
+        key: 'X-SHAKA',
+        data: 'FOREVER',
+      };
+      expect(onMetadataSpy).toHaveBeenCalledTimes(3);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 1,
+          [jasmine.objectContaining(value)]);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 5, 6,
+          [jasmine.objectContaining(value)]);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 10, null,
+          [jasmine.objectContaining(value)]);
+    });
+
+    it('supports END-ON-NEXT', async () => {
+      const mediaPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+        '#EXTINF:5,\n',
+        'video1.ts\n',
+        '#EXT-X-DATERANGE:ID="0",START-DATE="2000-01-01T00:00:00.00Z",',
+        'END-ON-NEXT=YES,X-SHAKA="FOREVER"\n',
+        '#EXT-X-DATERANGE:ID="1",START-DATE="2000-01-01T00:00:05.00Z",',
+        'END-ON-NEXT=YES,X-SHAKA="FOREVER"\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', mediaPlaylist)
+          .setResponseValue('test:/video1.ts', tsSegmentData);
+
+      await parser.start('test:/master', playerInterface);
+
+      const metadataType = 'com.apple.quicktime.HLS';
+      const value = {
+        key: 'X-SHAKA',
+        data: 'FOREVER',
+      };
+      expect(onMetadataSpy).toHaveBeenCalledTimes(1);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 5,
+          [jasmine.objectContaining(value)]);
+    });
+
+    it('skip duplicate IDs', async () => {
+      const mediaPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+        '#EXTINF:5,\n',
+        'video1.ts\n',
+        '#EXT-X-DATERANGE:ID="0",START-DATE="2000-01-01T00:00:00.00Z",',
+        'DURATION=1,X-SHAKA="FOREVER"\n',
+        '#EXT-X-DATERANGE:ID="0",START-DATE="2000-01-01T00:00:00.00Z",',
+        'DURATION=1,X-SHAKA="FOREVER"\n',
+        '#EXT-X-DATERANGE:ID="0",START-DATE="2000-01-01T00:00:00.00Z",',
+        'DURATION=1,X-SHAKA="FOREVER"\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', mediaPlaylist)
+          .setResponseValue('test:/video1.ts', tsSegmentData);
+
+      await parser.start('test:/master', playerInterface);
+
+      const metadataType = 'com.apple.quicktime.HLS';
+      const value = {
+        key: 'X-SHAKA',
+        data: 'FOREVER',
+      };
+      expect(onMetadataSpy).toHaveBeenCalledTimes(1);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 1,
+          [jasmine.objectContaining(value)]);
+    });
+
+    it('with no EXT-X-PROGRAM-DATE-TIME', async () => {
+      const mediaPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXTINF:5,\n',
+        'video1.ts\n',
+        '#EXT-X-DATERANGE:ID="0",START-DATE="2000-01-01T00:00:00.00Z",',
+        'DURATION=1,X-SHAKA="FOREVER"\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', mediaPlaylist)
+          .setResponseValue('test:/video1.ts', tsSegmentData);
+
+      await parser.start('test:/master', playerInterface);
+
+      expect(onMetadataSpy).not.toHaveBeenCalled();
+    });
+
+    it('ignores without useful value', async () => {
+      const mediaPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+        '#EXTINF:5,\n',
+        'video1.ts\n',
+        '#EXT-X-DATERANGE:ID="0",START-DATE="2000-01-01T00:00:00.00Z",',
+        'DURATION=1\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', mediaPlaylist)
+          .setResponseValue('test:/video1.ts', tsSegmentData);
+
+      await parser.start('test:/master', playerInterface);
+
+      expect(onMetadataSpy).not.toHaveBeenCalled();
+    });
+
+    it('supports interstitial', async () => {
+      const mediaPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+        '#EXTINF:5,\n',
+        'video1.ts\n',
+        '#EXT-X-DATERANGE:ID="1",CLASS="com.apple.hls.interstitial",',
+        'START-DATE="2000-01-01T00:00:05.00Z",DURATION=30.0,',
+        'X-ASSET-URI="fake",CUE="PRE,ONCE",X-RESTRICT="SKIP,JUMP",',
+        'X-SNAP="IN"\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', mediaPlaylist)
+          .setResponseValue('test:/video1.ts', tsSegmentData);
+
+      await parser.start('test:/master', playerInterface);
+
+      const metadataType = 'com.apple.hls.interstitial';
+      const values = [
+        jasmine.objectContaining({
+          key: 'X-ASSET-URI',
+          data: 'fake',
+        }),
+        jasmine.objectContaining({
+          key: 'CUE',
+          data: 'PRE,ONCE',
+        }),
+        jasmine.objectContaining({
+          key: 'X-RESTRICT',
+          data: 'SKIP,JUMP',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SNAP',
+          data: 'IN',
+        }),
+      ];
+      expect(onMetadataSpy).toHaveBeenCalledTimes(1);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 5, 35, values);
+    });
   });
 });
