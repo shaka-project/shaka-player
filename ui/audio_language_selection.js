@@ -69,7 +69,8 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
         (track) => this.onAudioTrackSelected_(track),
         /* updateChosen= */ true, this.currentSelection, this.localization,
         this.controls.getConfig().trackLabelFormat,
-        this.controls.getConfig().showAudioChannelCountVariants);
+        this.controls.getConfig().showAudioChannelCountVariants,
+        this.controls.getConfig().showAudioCodecs);
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);
 
     this.controls.dispatchEvent(
@@ -93,13 +94,17 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
    * @private
    */
   onAudioTrackSelected_(track) {
+    let channelsCount = undefined;
     if (track.channelsCount &&
         this.controls.getConfig().showAudioChannelCountVariants) {
-      this.player.selectAudioLanguage(
-          track.language, track.roles[0], track.channelsCount);
-    } else {
-      this.player.selectAudioLanguage(track.language, track.roles[0]);
+      channelsCount = track.channelsCount;
     }
+    let codec = undefined;
+    if (track.audioCodec && this.controls.getConfig().showAudioCodecs) {
+      codec = track.audioCodec;
+    }
+    this.player.selectAudioLanguage(track.language, track.roles[0],
+        channelsCount, /* safeMargin= */ 0, codec);
   }
 
 

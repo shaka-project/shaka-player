@@ -27,10 +27,11 @@ shaka.ui.LanguageUtils = class {
    * @param {shaka.ui.Localization} localization
    * @param {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
    * @param {boolean} showAudioChannelCountVariants
+   * @param {boolean} showAudioCodecs
    */
   static updateTracks(tracks, langMenu, onTrackSelected, updateChosen,
       currentSelectionElement, localization, trackLabelFormat,
-      showAudioChannelCountVariants) {
+      showAudioChannelCountVariants, showAudioCodecs) {
     const LocIds = shaka.ui.Locales.Ids;
 
     // TODO: Do the benefits of having this common code in a method still
@@ -59,13 +60,17 @@ shaka.ui.LanguageUtils = class {
       }
     };
 
-    const getCombination = (language, rolesString, label, channelsCount) => {
+    const getCombination = (language, rolesString, label, channelsCount,
+        audioCodec) => {
       const keys = [
         language,
         rolesString,
       ];
       if (showAudioChannelCountVariants && channelsCount != null) {
         keys.push(channelsCount);
+      }
+      if (showAudioCodecs && audioCodec) {
+        keys.push(audioCodec);
       }
       if (label &&
           trackLabelFormat == shaka.ui.Overlay.TrackLabelFormat.LABEL) {
@@ -82,6 +87,19 @@ shaka.ui.LanguageUtils = class {
       return name;
     };
 
+    const getAudioCodecName = (audioCodec) => {
+      let name = '';
+      audioCodec = audioCodec.toLowerCase();
+      if (audioCodec.startsWith('mp4a')) {
+        name = 'AAC';
+      } else if (audioCodec === 'ec-3' || audioCodec === 'ac-3') {
+        name = 'EC3';
+      } else if (audioCodec === 'opus') {
+        name = 'OPUS';
+      }
+      return name ? ' ' + name : name;
+    };
+
     /** @type {!Map.<string, !Set.<string>>} */
     const rolesByLanguage = new Map();
     for (const track of tracks) {
@@ -96,7 +114,8 @@ shaka.ui.LanguageUtils = class {
     const combinationsMade = new Set();
     const selectedCombination = selectedTrack ? getCombination(
         selectedTrack.language, getRolesString(selectedTrack),
-        selectedTrack.label, selectedTrack.channelsCount) : '';
+        selectedTrack.label, selectedTrack.channelsCount,
+        selectedTrack.audioCodec) : '';
 
     for (const track of tracks) {
       const language = track.language;
@@ -105,8 +124,10 @@ shaka.ui.LanguageUtils = class {
       const rolesString = getRolesString(track);
       const label = track.label;
       const channelsCount = track.channelsCount;
+      const audioCodec = track.audioCodec;
       const combinationName =
-          getCombination(language, rolesString, label, channelsCount);
+          getCombination(language, rolesString, label, channelsCount,
+              audioCodec);
       if (combinationsMade.has(combinationName)) {
         continue;
       }
@@ -124,6 +145,9 @@ shaka.ui.LanguageUtils = class {
           shaka.ui.LanguageUtils.getLanguageName(language, localization);
       switch (trackLabelFormat) {
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
+          if (showAudioCodecs) {
+            span.textContent += getAudioCodecName(audioCodec);
+          }
           if (showAudioChannelCountVariants) {
             span.textContent += getChannelsCountName(channelsCount);
           }
@@ -132,6 +156,9 @@ shaka.ui.LanguageUtils = class {
           }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.ROLE:
+          if (showAudioCodecs) {
+            span.textContent += getAudioCodecName(audioCodec);
+          }
           if (showAudioChannelCountVariants) {
             span.textContent += getChannelsCountName(channelsCount);
           }
@@ -148,6 +175,9 @@ shaka.ui.LanguageUtils = class {
           }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE_ROLE:
+          if (showAudioCodecs) {
+            span.textContent += getAudioCodecName(audioCodec);
+          }
           if (showAudioChannelCountVariants) {
             span.textContent += getChannelsCountName(channelsCount);
           }
