@@ -126,6 +126,10 @@ describe('Ad manager', () => {
             getVolume() {
               return 0;
             }
+
+            setVolume() {
+              // Nothing
+            }
           };
           return new MockAdManager();
         };
