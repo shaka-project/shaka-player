@@ -50,6 +50,10 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
         });
 
 
+    this.eventManager.listen(this.player, 'loading', () => {
+      this.updateResolutionSelection_();
+    });
+
     this.eventManager.listen(this.player, 'variantchanged', () => {
       this.updateResolutionSelection_();
     });

@@ -46,6 +46,10 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
         });
 
 
+    this.eventManager.listen(this.player, 'loading', () => {
+      this.onTracksChanged_();
+    });
+
     this.eventManager.listen(this.player, 'trackschanged', () => {
       this.onTracksChanged_();
     });
