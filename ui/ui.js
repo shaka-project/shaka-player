@@ -252,7 +252,7 @@ shaka.ui.Overlay = class {
       fullScreenElement: this.videoContainer_,
       preferDocumentPictureInPicture: true,
       showAudioChannelCountVariants: true,
-      showAudioCodecs: true,
+      showAudioCodecs: false,
       seekOnTaps: true,
       tapSeekDistance: 10,
       refreshTickInSeconds: 0.125,

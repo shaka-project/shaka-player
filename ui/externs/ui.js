@@ -228,7 +228,7 @@ shaka.extern.UIVolumeBarColors;
  *   Indicates whether the combination of language and audio codec should be
  *   displayed or if, on the contrary, only the language should be displayed
  *   regardless of the audio codec.
- *   Defaults to true.
+ *   Defaults to false.
  * @property {boolean} seekOnTaps
  *   Indicates whether or not a fast-forward and rewind tap button that seeks
  *   video some seconds.
