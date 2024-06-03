@@ -22,5 +22,13 @@ __karma__.config = {};
 __karma__.config.args;
 
 
+/** @const {boolean|undefined} */
+__karma__.config.useIframe;
+
+
+/** @const {boolean|undefined} */
+__karma__.config.runInParent;
+
+
 /** @param {?} error */
 __karma__.error = function(error) {};
