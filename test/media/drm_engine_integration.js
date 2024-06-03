@@ -114,7 +114,11 @@ describe('DrmEngine', () => {
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
-        new shaka.test.FakeTextDisplayer());
+        new shaka.test.FakeTextDisplayer(),
+        {
+          getKeySystem: () => null,
+          onMetadata: () => {},
+        });
     const mediaSourceConfig =
         shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine.configure(mediaSourceConfig);

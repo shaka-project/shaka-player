@@ -245,7 +245,11 @@ describe('MediaSourceEngine', () => {
     mockTextDisplayer = new shaka.test.FakeTextDisplayer();
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
-        mockTextDisplayer);
+        mockTextDisplayer,
+        {
+          getKeySystem: () => null,
+          onMetadata: () => {},
+        });
     mediaSourceEngine.getCaptionParser = () => {
       return mockClosedCaptionParser;
     };
@@ -315,7 +319,11 @@ describe('MediaSourceEngine', () => {
     it('creates a MediaSource object and sets video.src', () => {
       mediaSourceEngine = new shaka.media.MediaSourceEngine(
           video,
-          new shaka.test.FakeTextDisplayer());
+          new shaka.test.FakeTextDisplayer(),
+          {
+            getKeySystem: () => null,
+            onMetadata: () => {},
+          });
 
       expect(createMediaSourceSpy).toHaveBeenCalled();
       expect(createObjectURLSpy).toHaveBeenCalled();
@@ -333,7 +341,11 @@ describe('MediaSourceEngine', () => {
 
       mediaSourceEngine = new shaka.media.MediaSourceEngine(
           video,
-          new shaka.test.FakeTextDisplayer());
+          new shaka.test.FakeTextDisplayer(),
+          {
+            getKeySystem: () => null,
+            onMetadata: () => {},
+          });
 
       if (window.ManagedMediaSource) {
         expect(mockMediaSource.addEventListener).toHaveBeenCalledTimes(3);
