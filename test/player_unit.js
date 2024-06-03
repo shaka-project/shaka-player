@@ -3399,7 +3399,6 @@ describe('Player', () => {
     });
 
     it('doesn\'t remove when using empty map key status event', async () => {
-      spyOn(shaka.util.Platform, 'isZenterio').and.returnValue(true);
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
