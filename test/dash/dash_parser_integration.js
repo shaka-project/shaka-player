@@ -22,6 +22,14 @@ describe('DashParser', () => {
   /** @type {!shaka.test.Waiter} */
   let waiter;
 
+  function checkClearKeySupport() {
+    const clearKeySupport = window['shakaSupport'].drm['org.w3.clearkey'];
+    if (!clearKeySupport) {
+      return false;
+    }
+    return clearKeySupport.encryptionSchemes.includes('cenc');
+  }
+
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
@@ -58,6 +66,33 @@ describe('DashParser', () => {
 
   it('supports AES-128 streaming', async () => {
     await player.load('/base/test/test/assets/dash-aes-128/dash.mpd');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 10 seconds, but stop early if the video ends.  If it takes
+    // longer than 30 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+
+    await player.unload();
+  });
+
+  it('supports ClearKey with raw single key', async () => {
+    if (!checkClearKeySupport()) {
+      pending('ClearKey is not supported');
+    }
+
+    player.configure({
+      drm: {
+        clearKeys: {
+          'nrQFDeRLSAKTLifXUIPiZg': 'FmY0xnWCPCNaSpRG-tUuTQ',
+        },
+      },
+    });
+    await player.load('/base/test/test/assets/dash-clearkey/dash.mpd');
     await video.play();
     expect(player.isLive()).toBe(false);
 
