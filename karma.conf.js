@@ -259,6 +259,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/3675/*', included: false},
       {pattern: 'test/test/assets/6339/*', included: false},
       {pattern: 'test/test/assets/dash-aes-128/*', included: false},
+      {pattern: 'test/test/assets/dash-clearkey/*', included: false},
       {pattern: 'test/test/assets/dash-vr/*', included: false},
       {pattern: 'test/test/assets/hls-aes-256/*', included: false},
       {pattern: 'test/test/assets/hls-raw-aac/*', included: false},
