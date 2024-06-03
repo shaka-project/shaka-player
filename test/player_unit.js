@@ -3398,6 +3398,30 @@ describe('Player', () => {
       expect(tracks.length).toBe(2);
     });
 
+    it('doesn\'t remove when using empty map key status event', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.keyIds = new Set(['abc']);
+            stream.size(10, 10);
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3, (stream) => {
+            stream.size(20, 20);
+          });
+        });
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(player.getVariantTracks().length).toBe(2);
+
+      // Empty key status event map ID.
+      onKeyStatus({'': 'usable'});
+
+      expect(player.getVariantTracks().length).toBe(2);
+    });
+
     it('doesn\'t remove when using synthetic key status', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
