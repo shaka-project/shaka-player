@@ -1071,9 +1071,9 @@ shaka.extern.DashManifestConfiguration;
  * @property {boolean} ignoreManifestProgramDateTime
  *   If <code>true</code>, the HLS parser will ignore the
  *   <code>EXT-X-PROGRAM-DATE-TIME</code> tags in the manifest and use media
- *   sequence numbers instead.
- *   Meant for streams where <code>EXT-X-PROGRAM-DATE-TIME</code> is incorrect
- *   or malformed.
+ *   sequence numbers instead. It also causes EXT-X-DATERANGE tags to be
+ *   ignored.  Meant for streams where <code>EXT-X-PROGRAM-DATE-TIME</code> is
+ *   incorrect or malformed.
  *   <i>Defaults to <code>false</code>.</i>
  * @property {!Array.<string>} ignoreManifestProgramDateTimeForTypes
  *   An array of strings representing types for which

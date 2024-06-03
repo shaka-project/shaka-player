@@ -46,6 +46,7 @@ describe('DashParser Patch', () => {
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
+      onMetadata: () => {},
     };
     Date.now = () => publishTime.getTime() + 10;
 
