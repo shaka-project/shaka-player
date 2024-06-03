@@ -82,6 +82,7 @@ shakaDemo.Config = class {
 
     this.addMetaSection_();
     this.addLanguageSection_();
+    this.addCodecPreferenceSection_();
     this.addAbrSection_();
     this.addOfflineSection_();
     this.addDrmSection_();
@@ -645,6 +646,17 @@ shakaDemo.Config = class {
   }
 
   /** @private */
+  addCodecPreferenceSection_() {
+    const docLink = this.resolveExternLink_('.PlayerConfiguration');
+
+    this.addSection_('Codec preference', docLink)
+        .addArrayStringInput_('Preferred video codecs',
+            'preferredVideoCodecs')
+        .addArrayStringInput_('Preferred audio codecs',
+            'preferredAudioCodecs');
+  }
+
+  /** @private */
   addMetaSection_() {
     this.addSection_(/* name= */ null, /* docLink= */ null);
 
@@ -792,6 +804,26 @@ shakaDemo.Config = class {
     this.createRow_(name, tooltipMessage);
     this.latestInput_ = new shakaDemo.BoolInput(
         this.getLatestSection_(), name, onChange);
+    return this;
+  }
+
+  /**
+   * @param {!string} name
+   * @param {string} valueName
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addArrayStringInput_(name, valueName, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configure(valueName,
+          input.value.split(',').filter(Boolean));
+      shakaDemoMain.remakeHash();
+    };
+    this.addCustomTextInput_(name, onChange, tooltipMessage);
+    const configValue = /** @type {!Array.<string>} */ (
+      shakaDemoMain.getCurrentConfigValue(valueName));
+    this.latestInput_.input().value = configValue.join(',');
     return this;
   }
 
