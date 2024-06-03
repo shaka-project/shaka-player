@@ -46,6 +46,7 @@ describe('DashParser ContentProtection', () => {
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
+      onMetadata: () => {},
     };
 
     const actual = await dashParser.start(
