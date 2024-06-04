@@ -140,6 +140,9 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       tracks.sort((t1, t2) => {
         goog.asserts.assert(t1.height != null, 'Null height');
         goog.asserts.assert(t2.height != null, 'Null height');
+        if (t2.height == t1.height) {
+          return t2.bandwidth - t1.bandwidth;
+        }
         return t2.height - t1.height;
       });
     }
