@@ -61,16 +61,12 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   /** @override */
   replaceServerSideAdTagParameters(adTagParameters) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   getServerSideCuePoints() {
     return [];
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getCuePoints() {
     return [];
   }
@@ -80,24 +76,16 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
     return this.stats_;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   onManifestUpdated(isLive) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   onDashTimedMetadata(region) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   onHlsTimedMetadata(metadata) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   onCueMetadataChange(data) {}
 
   /**
