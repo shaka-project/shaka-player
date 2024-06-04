@@ -27,17 +27,20 @@ shaka.ui.LanguageUtils = class {
    * @param {shaka.ui.Localization} localization
    * @param {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
    * @param {boolean} showAudioChannelCountVariants
-   * @param {boolean} showAudioCodecs
    */
   static updateTracks(tracks, langMenu, onTrackSelected, updateChosen,
       currentSelectionElement, localization, trackLabelFormat,
-      showAudioChannelCountVariants, showAudioCodecs) {
+      showAudioChannelCountVariants) {
     const LocIds = shaka.ui.Locales.Ids;
 
     // TODO: Do the benefits of having this common code in a method still
     // outweigh the complexity of the parameter list?
     const selectedTrack = tracks.find((track) => {
       return track.active == true;
+    });
+
+    const hasDifferentAudioCodecs = tracks.some((track) => {
+      return tracks[0] !== track && tracks[0].audioCodec !== track.audioCodec;
     });
 
     // Remove old tracks
@@ -69,7 +72,7 @@ shaka.ui.LanguageUtils = class {
       if (showAudioChannelCountVariants && channelsCount != null) {
         keys.push(channelsCount);
       }
-      if (showAudioCodecs && audioCodec) {
+      if (hasDifferentAudioCodecs && audioCodec) {
         keys.push(audioCodec);
       }
       if (label &&
@@ -147,7 +150,7 @@ shaka.ui.LanguageUtils = class {
           shaka.ui.LanguageUtils.getLanguageName(language, localization);
       switch (trackLabelFormat) {
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
-          if (showAudioCodecs) {
+          if (hasDifferentAudioCodecs) {
             span.textContent += getAudioCodecName(audioCodec);
           }
           if (showAudioChannelCountVariants) {
@@ -158,7 +161,7 @@ shaka.ui.LanguageUtils = class {
           }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.ROLE:
-          if (showAudioCodecs) {
+          if (hasDifferentAudioCodecs) {
             span.textContent += getAudioCodecName(audioCodec);
           }
           if (showAudioChannelCountVariants) {
@@ -177,7 +180,7 @@ shaka.ui.LanguageUtils = class {
           }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE_ROLE:
-          if (showAudioCodecs) {
+          if (hasDifferentAudioCodecs) {
             span.textContent += getAudioCodecName(audioCodec);
           }
           if (showAudioChannelCountVariants) {

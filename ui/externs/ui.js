@@ -91,7 +91,6 @@ shaka.extern.UIVolumeBarColors;
  *   fullScreenElement: HTMLElement,
  *   preferDocumentPictureInPicture: boolean,
  *   showAudioChannelCountVariants: boolean,
- *   showAudioCodecs: boolean,
  *   seekOnTaps: boolean,
  *   tapSeekDistance: number,
  *   refreshTickInSeconds: number,
@@ -224,11 +223,6 @@ shaka.extern.UIVolumeBarColors;
  *   displayed or if, on the contrary, only the language should be displayed
  *   regardless of the channel count.
  *   Defaults to true.
- * @property {boolean} showAudioCodecs
- *   Indicates whether the combination of language and audio codec should be
- *   displayed or if, on the contrary, only the language should be displayed
- *   regardless of the audio codec.
- *   Defaults to false.
  * @property {boolean} seekOnTaps
  *   Indicates whether or not a fast-forward and rewind tap button that seeks
  *   video some seconds.
