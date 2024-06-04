@@ -1494,7 +1494,7 @@ shakaDemo.Main = class {
 
     for (const key of ['preferredVideoCodecs', 'preferredAudioCodecs']) {
       const array = /** @type {!Array.<string>} */(
-          this.getCurrentConfigValue(key));
+        this.getCurrentConfigValue(key));
       if (array.length) {
         params.push(key + '=' + array.join(','));
       }
