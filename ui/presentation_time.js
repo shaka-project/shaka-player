@@ -7,6 +7,7 @@
 
 goog.provide('shaka.ui.PresentationTimeTracker');
 
+goog.require('shaka.ads.AdManager');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Locales');
@@ -40,6 +41,10 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
       }
     });
 
+    this.eventManager.listen(this.player, 'loading', () => {
+      shaka.ui.Utils.setDisplay(this.currentTime_, true);
+    });
+
     this.eventManager.listen(this.controls, 'timeandseekrangeupdated', () => {
       this.updateTime_();
     });
@@ -47,6 +52,16 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
     this.eventManager.listen(this.player, 'trackschanged', () => {
       this.onTracksChanged_();
     });
+
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
+          shaka.ui.Utils.setDisplay(this.currentTime_, false);
+        });
+
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.AD_STOPPED, () => {
+          shaka.ui.Utils.setDisplay(this.currentTime_, true);
+        });
   }
 
   /** @private */
