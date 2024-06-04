@@ -1492,16 +1492,12 @@ shakaDemo.Main = class {
     }
     params.push('uilang=' + this.getUILocale());
 
-    const preferredVideoCodecs = /** @type {!Array.<string>} */(
-      this.getCurrentConfigValue('preferredVideoCodecs'));
-    if (preferredVideoCodecs.length) {
-      params.push('preferredVideoCodecs=' + preferredVideoCodecs.join(','));
-    }
-
-    const preferredAudioCodecs = /** @type {!Array.<string>} */(
-      this.getCurrentConfigValue('preferredAudioCodecs'));
-    if (preferredAudioCodecs.length) {
-      params.push('preferredAudioCodecs=' + preferredAudioCodecs.join(','));
+    for (const key of ['preferredVideoCodecs', 'preferredAudioCodecs']) {
+      const array = /** @type {!Array.<string>} */(
+          this.getCurrentConfigValue(key));
+      if (array.length) {
+        params.push(key + '=' + array.join(','));
+      }
     }
 
     if (this.selectedAsset) {
