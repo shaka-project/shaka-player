@@ -2873,6 +2873,43 @@ describe('DashParser Manifest', () => {
       const fourthPartialReference = firstReference.partialReferences[3];
       expect(fourthPartialReference.isIndependent()).toBeFalsy();
     });
+
+    it('with SegmentTemplate and $Number$', async () => {
+      const manifestText = [
+        '<MPD minBufferTime="PT75S">',
+        '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet id="1" mimeType="video/mp4">',
+        '      <Representation bandwidth="1" codecs="avc1.4d401f">',
+        '        <SegmentTemplate startNumber="1" k="4"',
+        '          media="l-$Number$-p$SubNumber$.mp4"',
+        '          initialization="init.mp4" timescale="50" duration="100">',
+        '        </SegmentTemplate>',
+        '        <SegmentSequenceProperties>',
+        '          <SAP type="1" cadence="1" />',
+        '        </SegmentSequenceProperties>',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      /** @type {shaka.extern.Manifest} */
+      const manifest = await parser.start('dummy://foo', playerInterface);
+      const stream = manifest.variants[0].video;
+      await stream.createSegmentIndex();
+      goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+
+      const firstReference = stream.segmentIndex.get(0);
+      const firstPartialReference = firstReference.partialReferences[0];
+      expect(firstPartialReference.isIndependent()).toBeTruthy();
+      const secondPartialReference = firstReference.partialReferences[1];
+      expect(secondPartialReference.isIndependent()).toBeTruthy();
+      const thirdPartialReference = firstReference.partialReferences[2];
+      expect(thirdPartialReference.isIndependent()).toBeTruthy();
+      const fourthPartialReference = firstReference.partialReferences[3];
+      expect(fourthPartialReference.isIndependent()).toBeTruthy();
+    });
   });
 
   describe('supports ContentSteering', () => {
