@@ -45,6 +45,7 @@ describe('ContentWorkarounds', () => {
 
   it('faked encryption on Edge returns two init segments', () => {
     spyOn(shaka.util.Platform, 'isEdge').and.returnValue(true);
+    spyOn(shaka.util.Platform, 'isWindows').and.returnValue(true);
 
     const unencrypted = new Uint8Array([
       0x00, 0x00, 0x00, 0x20, // size
