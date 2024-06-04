@@ -930,6 +930,16 @@ shakaDemo.Main = class {
       this.configure('abr.enabled', false);
     }
 
+    if ('preferredVideoCodecs' in params) {
+      this.configure('preferredVideoCodecs',
+          params['preferredVideoCodecs'].split(','));
+    }
+
+    if ('preferredAudioCodecs' in params) {
+      this.configure('preferredAudioCodecs',
+          params['preferredAudioCodecs'].split(','));
+    }
+
     // Add compiled/uncompiled links.
     this.makeVersionLinks_();
 
@@ -1481,6 +1491,14 @@ shakaDemo.Main = class {
       params.push('noadaptation');
     }
     params.push('uilang=' + this.getUILocale());
+
+    for (const key of ['preferredVideoCodecs', 'preferredAudioCodecs']) {
+      const array = /** @type {!Array.<string>} */(
+        this.getCurrentConfigValue(key));
+      if (array.length) {
+        params.push(key + '=' + array.join(','));
+      }
+    }
 
     if (this.selectedAsset) {
       const isDefault = shakaAssets.testAssets.includes(this.selectedAsset);
