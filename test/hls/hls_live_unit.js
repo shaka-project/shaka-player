@@ -1110,6 +1110,8 @@ describe('HlsParser live', () => {
           '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=60.0,\n',
           '#EXT-X-SKIP:SKIPPED-SEGMENTS=1\n',
           '#EXTINF:2,\n',
+          'main1.mp4\n',
+          '#EXTINF:2,\n',
           'main2.mp4\n',
         ].join('');
 
@@ -1121,6 +1123,8 @@ describe('HlsParser live', () => {
           '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=60.0,\n',
           '#EXT-X-SKIP:SKIPPED-SEGMENTS=1\n',
           '#EXTINF:2,\n',
+          'main2.mp4\n',
+          '#EXTINF:2,\n',
           'main3.mp4\n',
         ].join('');
 
@@ -1128,7 +1132,7 @@ describe('HlsParser live', () => {
             'test:/video?_HLS_msn=2&_HLS_skip=YES', mediaWithSkippedSegments1);
 
         fakeNetEngine.setResponseText(
-            'test:/video?_HLS_msn=3&_HLS_skip=YES', mediaWithSkippedSegments2);
+            'test:/video?_HLS_msn=4&_HLS_skip=YES', mediaWithSkippedSegments2);
 
         playerInterface.isLowLatencyMode = () => true;
 
@@ -1145,7 +1149,7 @@ describe('HlsParser live', () => {
 
         await delayForUpdatePeriod();
         fakeNetEngine.expectRequest(
-            'test:/video?_HLS_msn=3&_HLS_skip=YES',
+            'test:/video?_HLS_msn=4&_HLS_skip=YES',
             shaka.net.NetworkingEngine.RequestType.MANIFEST,
             {type:
               shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST});
