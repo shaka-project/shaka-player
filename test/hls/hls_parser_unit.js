@@ -5638,6 +5638,28 @@ describe('HlsParser', () => {
       expect(onMetadataSpy).not.toHaveBeenCalled();
     });
 
+    it('ignores if date ranges are in the past', async () => {
+      const mediaPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+        '#EXTINF:5,\n',
+        'video1.ts\n',
+        '#EXT-X-DATERANGE:ID="0",START-DATE="1999-01-01T00:00:00.00Z",',
+        'DURATION=1,X-SHAKA="FOREVER"\n',
+        '#EXT-X-DATERANGE:ID="1",START-DATE="2000-01-01T00:00:05.00Z",',
+        'END-DATE="1999-01-01T00:00:06.00Z",X-SHAKA="FOREVER"\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', mediaPlaylist)
+          .setResponseValue('test:/video1.ts', tsSegmentData);
+
+      await parser.start('test:/master', playerInterface);
+
+      expect(onMetadataSpy).not.toHaveBeenCalled();
+    });
+
     it('supports interstitial', async () => {
       const mediaPlaylist = [
         '#EXTM3U\n',
