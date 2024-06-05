@@ -1279,7 +1279,8 @@ shaka.extern.ManifestConfiguration;
  *   infiniteLiveStreamDuration: boolean,
  *   preloadNextUrlWindow: number,
  *   loadTimeout: number,
- *   clearDecodingCache: boolean
+ *   clearDecodingCache: boolean,
+ *   dontChooseCodecs: boolean
  * }}
  *
  * @description
@@ -1492,6 +1493,9 @@ shaka.extern.ManifestConfiguration;
  *   playbacks on some platforms.
  *   Defaults to <code>true</code> on PlayStation devices and to
  *   <code>false</code> on other devices.
+ * @property {boolean} dontChooseCodecs
+ *   If true, we don't choose codecs in the player, and keep all the variants.
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
