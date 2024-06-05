@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.8.11](https://github.com/shaka-project/shaka-player/compare/v4.8.10...v4.8.11) (2024-06-05)
+
+
+### Bug Fixes
+
+* Avoid filter manifest when the DRM is not initialized ([#6737](https://github.com/shaka-project/shaka-player/issues/6737)) ([0545c5e](https://github.com/shaka-project/shaka-player/commit/0545c5e2b26bcb38163fe63b0f579b3f25125c48))
+* **preload:** Fix error handling ([#6753](https://github.com/shaka-project/shaka-player/issues/6753)) ([b400d9d](https://github.com/shaka-project/shaka-player/commit/b400d9d21d549d21e46222da0a9e4078daf0bd07))
+* **preload:** Fix preload error reporting ([#6746](https://github.com/shaka-project/shaka-player/issues/6746)) ([3f09fbe](https://github.com/shaka-project/shaka-player/commit/3f09fbe6795fb9803779f9cdb5c2b7e0f27e6944))
+* Support for Zenterio ([#6717](https://github.com/shaka-project/shaka-player/issues/6717)) ([78797b7](https://github.com/shaka-project/shaka-player/commit/78797b7a92fe2139cebcc20f52514d7028c378c0))
+* **UI:** Don't show presentation time in ads ([#6752](https://github.com/shaka-project/shaka-player/issues/6752)) ([30c2c8a](https://github.com/shaka-project/shaka-player/commit/30c2c8a9514014cb6fca9091d06825478bcd262f))
+* **UI:** Fix resolution sorting ([#6742](https://github.com/shaka-project/shaka-player/issues/6742)) ([ce545e0](https://github.com/shaka-project/shaka-player/commit/ce545e08de45bb8590d692fe7aa90081b885079f))
+
 ## [4.8.10](https://github.com/shaka-project/shaka-player/compare/v4.8.9...v4.8.10) (2024-05-31)
 
 
