@@ -586,7 +586,9 @@ shakaDemo.Config = class {
             /* canBeZero= */ true)
         .addNumberInput_('Load timeout for src=',
             'streaming.loadTimeout',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Ignore choose codecs',
+            'streaming.ignoreChooseCodecs');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
   }
 
