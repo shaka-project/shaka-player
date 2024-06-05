@@ -31,6 +31,7 @@ describe('CastUtils', () => {
       'detachAndSavePreload',
       'unloadAndSavePreload',
       'preload',
+      'destroyAllPreloads',
       'getNonDefaultConfiguration',
 
       // Test helper methods (not @export'd)
