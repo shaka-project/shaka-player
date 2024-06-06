@@ -296,6 +296,17 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
+      /* name= */ 'Big Buck Bunny: the Dark Truths of a Video Dev Cartoon (HLS, interstitials)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dark_truth.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/hls-interstitials/interstitial.m3u8',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addDescription('A serious documentary about a problem plaguing video developers.')
+      .markAsFeatured('Big Buck Bunny: the Dark Truths')
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ADS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
       /* name= */ 'Angel One (multicodec, multilingual)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
