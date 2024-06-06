@@ -43,6 +43,7 @@ describe('Ads', () => {
     await player.attach(video);
 
     player.configure('streaming.useNativeHlsOnSafari', false);
+    player.configure('manifest.hls.useSafariBehaviorForLive', false);
 
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
@@ -224,6 +225,42 @@ describe('Ads', () => {
       player.configure('ads.supportsMultipleMediaElements', false);
 
       adManager.initInterstitial(adContainer, player);
+
+      await player.load(streamUri);
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Wait a maximum of 10 seconds before the ad starts playing.
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
+
+      await shaka.test.Util.delay(1);
+      expect(video.currentTime).toBeLessThanOrEqual(5);
+
+      // Wait a maximum of 10 seconds before the ad starts playing.
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
+
+      await shaka.test.Util.delay(1);
+      expect(video.currentTime).toBeGreaterThan(14);
+
+      // Play for 10 seconds, but stop early if the video ends.  If it takes
+      // longer than 30 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+
+      await player.unload();
+    });
+
+    it('using the main media element', async () => {
+      goog.asserts.assert(adManager, 'Must have adManager');
 
       await player.load(streamUri);
       await video.play();
