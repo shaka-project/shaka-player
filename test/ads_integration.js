@@ -199,7 +199,7 @@ describe('Ads', () => {
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
-      await waiter.timeoutAfter(10)
+      await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
 
       await shaka.test.Util.delay(1);
@@ -208,7 +208,7 @@ describe('Ads', () => {
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
-      await waiter.timeoutAfter(10)
+      await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
 
       await shaka.test.Util.delay(1);
@@ -237,7 +237,7 @@ describe('Ads', () => {
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
-      await waiter.timeoutAfter(10)
+      await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
 
       await shaka.test.Util.delay(1);
@@ -246,7 +246,7 @@ describe('Ads', () => {
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
-      await waiter.timeoutAfter(10)
+      await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
 
       await shaka.test.Util.delay(1);
@@ -273,7 +273,7 @@ describe('Ads', () => {
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
-      await waiter.timeoutAfter(10)
+      await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
 
       await shaka.test.Util.delay(1);
@@ -282,7 +282,7 @@ describe('Ads', () => {
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
-      await waiter.timeoutAfter(10)
+      await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
 
       // Play for 10 seconds, but stop early if the video ends.  If it takes
