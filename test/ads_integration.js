@@ -26,16 +26,6 @@ describe('Ads', () => {
   /** @type {!shaka.test.Waiter} */
   let waiter;
 
-  /** @type {string} */
-  const streamUri = '/base/test/test/assets/dash-multi-codec/dash.mpd';
-
-  /** @type {string} */
-  const adUri = 'https://pubads.g.doubleclick.net/gampad/ads?' +
-      'sz=640x480&iu=/124319096/external/single_ad_samples&' +
-      'ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&' +
-      'unviewed_position_start=1&' +
-      'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
-
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
@@ -82,6 +72,16 @@ describe('Ads', () => {
   });
 
   describe('supports IMA SDK with vast', () => {
+    /** @type {string} */
+    const streamUri = '/base/test/test/assets/dash-multi-codec/dash.mpd';
+
+    /** @type {string} */
+    const adUri = 'https://pubads.g.doubleclick.net/gampad/ads?' +
+        'sz=640x480&iu=/124319096/external/single_ad_samples&' +
+        'ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&' +
+        'unviewed_position_start=1&' +
+        'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
+
     it('with support for multiple media elements', async () => {
       if (shaka.util.Platform.isSmartTV()) {
         pending('Platform without support for multiple media elements.');
@@ -166,6 +166,90 @@ describe('Ads', () => {
           .waitForEvent(adManager, shaka.ads.AdManager.AD_THIRD_QUARTILE);
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
+
+      // Play for 10 seconds, but stop early if the video ends.  If it takes
+      // longer than 30 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+
+      await player.unload();
+    });
+  });
+
+  describe('support HLS Interstitials', () => {
+    /** @type {string} */
+    const streamUri = '/base/test/test/assets/hls-interstitial/main.m3u8';
+
+    it('with support for multiple media elements', async () => {
+      if (shaka.util.Platform.isSmartTV()) {
+        pending('Platform without support for multiple media elements.');
+      }
+      player.configure('ads.supportsMultipleMediaElements', true);
+
+      adManager.initInterstitial(adContainer, player);
+
+      await player.load(streamUri);
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Wait a maximum of 10 seconds before the ad starts playing.
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
+
+      await shaka.test.Util.delay(1);
+      expect(video.currentTime).toBeLessThanOrEqual(4);
+
+      // Wait a maximum of 10 seconds before the ad starts playing.
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
+
+      await shaka.test.Util.delay(1);
+      expect(video.currentTime).toBeGreaterThan(10);
+
+      // Play for 10 seconds, but stop early if the video ends.  If it takes
+      // longer than 30 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+
+      await player.unload();
+    });
+
+    it('without support for multiple media elements', async () => {
+      player.configure('ads.supportsMultipleMediaElements', false);
+
+      adManager.initInterstitial(adContainer, player);
+
+      await player.load(streamUri);
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Wait a maximum of 10 seconds before the ad starts playing.
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
+
+      await shaka.test.Util.delay(1);
+      expect(video.currentTime).toBeLessThanOrEqual(4);
+
+      // Wait a maximum of 10 seconds before the ad starts playing.
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
+
+      await shaka.test.Util.delay(1);
+      expect(video.currentTime).toBeGreaterThan(10);
 
       // Play for 10 seconds, but stop early if the video ends.  If it takes
       // longer than 30 seconds, fail the test.
