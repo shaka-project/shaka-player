@@ -300,8 +300,6 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dark_truth.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/hls-interstitials/interstitial.m3u8',
       /* source= */ shakaAssets.Source.SHAKA)
-      .addDescription('A serious documentary about a problem plaguing video developers.')
-      .markAsFeatured('Big Buck Bunny: the Dark Truths')
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.ADS)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
@@ -324,8 +322,6 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash_chaining.mpd',
       /* source= */ shakaAssets.Source.SHAKA)
-      .addDescription('A clip from a classic Star Trek TNG episode, presented in MPEG-DASH.')
-      .markAsFeatured('Angel One')
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
