@@ -42,7 +42,7 @@ shaka.ui.LanguageUtils = class {
     /** @type {!Map<string, !Set<string>} */
     const codecsByLanguage = new Map();
     for (const track of tracks) {
-      if (codecsByLanguage.has(track.language)) {
+      if (!codecsByLanguage.has(track.language)) {
         codecsByLanguage.set(track.language, new Set());
       }
       codecsByLanguage.get(track.language).add(track.audioCodec);
