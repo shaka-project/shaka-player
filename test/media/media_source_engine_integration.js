@@ -170,7 +170,10 @@ describe('MediaSourceEngine', () => {
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
         textDisplayer,
-        shaka.test.Util.spyFunc(onMetadata));
+        {
+          getKeySystem: () => null,
+          onMetadata: shaka.test.Util.spyFunc(onMetadata),
+        });
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine.configure(config);
 
