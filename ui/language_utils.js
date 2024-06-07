@@ -39,7 +39,7 @@ shaka.ui.LanguageUtils = class {
       return track.active == true;
     });
 
-    /** @type {!Map<string, !Set<string>} */
+    /** @type {!Map<string, !Set<string>>} */
     const codecsByLanguage = new Map();
     for (const track of tracks) {
       if (!codecsByLanguage.has(track.language)) {
