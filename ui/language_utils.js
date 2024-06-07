@@ -39,6 +39,20 @@ shaka.ui.LanguageUtils = class {
       return track.active == true;
     });
 
+    /** @type {!Map<string, !Set<string>>} */
+    const codecsByLanguage = new Map();
+    for (const track of tracks) {
+      if (!track.audioCodec) {
+        continue;
+      }
+      if (!codecsByLanguage.has(track.language)) {
+        codecsByLanguage.set(track.language, new Set());
+      }
+      codecsByLanguage.get(track.language).add(track.audioCodec);
+    }
+    const hasDifferentAudioCodecs = (language) =>
+      codecsByLanguage.has(language) && codecsByLanguage.get(language).size > 1;
+
     // Remove old tracks
     // 1. Save the back to menu button
     const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
@@ -59,13 +73,17 @@ shaka.ui.LanguageUtils = class {
       }
     };
 
-    const getCombination = (language, rolesString, label, channelsCount) => {
+    const getCombination = (language, rolesString, label, channelsCount,
+        audioCodec) => {
       const keys = [
         language,
         rolesString,
       ];
       if (showAudioChannelCountVariants && channelsCount != null) {
         keys.push(channelsCount);
+      }
+      if (hasDifferentAudioCodecs(language) && audioCodec) {
+        keys.push(audioCodec);
       }
       if (label &&
           trackLabelFormat == shaka.ui.Overlay.TrackLabelFormat.LABEL) {
@@ -82,6 +100,21 @@ shaka.ui.LanguageUtils = class {
       return name;
     };
 
+    const getAudioCodecName = (audioCodec) => {
+      let name = '';
+      audioCodec = audioCodec.toLowerCase();
+      if (audioCodec.startsWith('mp4a')) {
+        name = 'AAC';
+      } else if (audioCodec === 'ec-3' || audioCodec === 'ac-3') {
+        name = 'Dolby';
+      } else if (audioCodec === 'opus') {
+        name = 'Opus';
+      } else if (audioCodec === 'flac') {
+        name = 'fLaC';
+      }
+      return name ? ' ' + name : name;
+    };
+
     /** @type {!Map.<string, !Set.<string>>} */
     const rolesByLanguage = new Map();
     for (const track of tracks) {
@@ -96,7 +129,8 @@ shaka.ui.LanguageUtils = class {
     const combinationsMade = new Set();
     const selectedCombination = selectedTrack ? getCombination(
         selectedTrack.language, getRolesString(selectedTrack),
-        selectedTrack.label, selectedTrack.channelsCount) : '';
+        selectedTrack.label, selectedTrack.channelsCount,
+        selectedTrack.audioCodec) : '';
 
     for (const track of tracks) {
       const language = track.language;
@@ -105,8 +139,10 @@ shaka.ui.LanguageUtils = class {
       const rolesString = getRolesString(track);
       const label = track.label;
       const channelsCount = track.channelsCount;
+      const audioCodec = track.audioCodec;
       const combinationName =
-          getCombination(language, rolesString, label, channelsCount);
+          getCombination(language, rolesString, label, channelsCount,
+              audioCodec);
       if (combinationsMade.has(combinationName)) {
         continue;
       }
@@ -124,6 +160,9 @@ shaka.ui.LanguageUtils = class {
           shaka.ui.LanguageUtils.getLanguageName(language, localization);
       switch (trackLabelFormat) {
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
+          if (hasDifferentAudioCodecs(language)) {
+            span.textContent += getAudioCodecName(audioCodec);
+          }
           if (showAudioChannelCountVariants) {
             span.textContent += getChannelsCountName(channelsCount);
           }
@@ -132,6 +171,9 @@ shaka.ui.LanguageUtils = class {
           }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.ROLE:
+          if (hasDifferentAudioCodecs(language)) {
+            span.textContent += getAudioCodecName(audioCodec);
+          }
           if (showAudioChannelCountVariants) {
             span.textContent += getChannelsCountName(channelsCount);
           }
@@ -148,6 +190,9 @@ shaka.ui.LanguageUtils = class {
           }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE_ROLE:
+          if (hasDifferentAudioCodecs(language)) {
+            span.textContent += getAudioCodecName(audioCodec);
+          }
           if (showAudioChannelCountVariants) {
             span.textContent += getChannelsCountName(channelsCount);
           }
