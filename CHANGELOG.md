@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.9.3](https://github.com/shaka-project/shaka-player/compare/v4.9.2...v4.9.3) (2024-06-07)
+
+
+### Bug Fixes
+
+* **ABR:** Fix variant choose when two variants have the same bandwidth but different resolution ([#6760](https://github.com/shaka-project/shaka-player/issues/6760)) ([0344c24](https://github.com/shaka-project/shaka-player/commit/0344c2495d95b2e6fa87eaa2ff857ca7d24aaef3))
+* **HLS:** Fix seekRange when using delta playlist ([#6758](https://github.com/shaka-project/shaka-player/issues/6758)) ([83fdb33](https://github.com/shaka-project/shaka-player/commit/83fdb33769c199f1e33861045afdd3039a352919))
+* **HLS:** Ignore query params in the uri of EXT-X-SESSION-KEY tags ([#6755](https://github.com/shaka-project/shaka-player/issues/6755)) ([726b3a8](https://github.com/shaka-project/shaka-player/commit/726b3a8b6cec4fc7be4403febffd02ded9661e3e))
+
 ## [4.9.2](https://github.com/shaka-project/shaka-player/compare/v4.9.1...v4.9.2) (2024-06-04)
 
 
