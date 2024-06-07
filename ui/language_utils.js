@@ -39,9 +39,16 @@ shaka.ui.LanguageUtils = class {
       return track.active == true;
     });
 
-    const hasDifferentAudioCodecs = tracks.some((track) => {
-      return tracks[0] !== track && tracks[0].audioCodec !== track.audioCodec;
-    });
+    /** @type {!Map<string, !Set<string>} */
+    const codecsByLanguage = new Map();
+    for (const track of tracks) {
+      if (codecsByLanguage.has(track.language)) {
+        codecsByLanguage.set(track.language, new Set());
+      }
+      codecsByLanguage.get(track.language).add(track.audioCodec);
+    }
+    const hasDifferentAudioCodecs = (language) =>
+      codecsByLanguage.has(language) && codecsByLanguage.get(language).size > 1;
 
     // Remove old tracks
     // 1. Save the back to menu button
@@ -72,7 +79,7 @@ shaka.ui.LanguageUtils = class {
       if (showAudioChannelCountVariants && channelsCount != null) {
         keys.push(channelsCount);
       }
-      if (hasDifferentAudioCodecs && audioCodec) {
+      if (hasDifferentAudioCodecs(language) && audioCodec) {
         keys.push(audioCodec);
       }
       if (label &&
@@ -150,7 +157,7 @@ shaka.ui.LanguageUtils = class {
           shaka.ui.LanguageUtils.getLanguageName(language, localization);
       switch (trackLabelFormat) {
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
-          if (hasDifferentAudioCodecs) {
+          if (hasDifferentAudioCodecs(language)) {
             span.textContent += getAudioCodecName(audioCodec);
           }
           if (showAudioChannelCountVariants) {
@@ -161,7 +168,7 @@ shaka.ui.LanguageUtils = class {
           }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.ROLE:
-          if (hasDifferentAudioCodecs) {
+          if (hasDifferentAudioCodecs(language)) {
             span.textContent += getAudioCodecName(audioCodec);
           }
           if (showAudioChannelCountVariants) {
@@ -180,7 +187,7 @@ shaka.ui.LanguageUtils = class {
           }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE_ROLE:
-          if (hasDifferentAudioCodecs) {
+          if (hasDifferentAudioCodecs(language)) {
             span.textContent += getAudioCodecName(audioCodec);
           }
           if (showAudioChannelCountVariants) {
