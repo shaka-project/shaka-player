@@ -5683,7 +5683,49 @@ describe('HlsParser', () => {
       const values = [
         jasmine.objectContaining({
           key: 'X-ASSET-URI',
-          data: 'fake',
+          data: 'test:/fake',
+        }),
+        jasmine.objectContaining({
+          key: 'CUE',
+          data: 'PRE,ONCE',
+        }),
+        jasmine.objectContaining({
+          key: 'X-RESTRICT',
+          data: 'SKIP,JUMP',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SNAP',
+          data: 'IN',
+        }),
+      ];
+      expect(onMetadataSpy).toHaveBeenCalledTimes(1);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 5, 35, values);
+    });
+
+    it('supports interstitial', async () => {
+      const mediaPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+        '#EXTINF:5,\n',
+        'video1.ts\n',
+        '#EXT-X-DATERANGE:ID="1",CLASS="com.apple.hls.interstitial",',
+        'START-DATE="2000-01-01T00:00:05.00Z",DURATION=30.0,',
+        'X-ASSET-LIST="fake",CUE="PRE,ONCE",X-RESTRICT="SKIP,JUMP",',
+        'X-SNAP="IN"\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', mediaPlaylist)
+          .setResponseValue('test:/video1.ts', tsSegmentData);
+
+      await parser.start('test:/master', playerInterface);
+
+      const metadataType = 'com.apple.hls.interstitial';
+      const values = [
+        jasmine.objectContaining({
+          key: 'X-ASSET-LIST',
+          data: 'test:/fake',
         }),
         jasmine.objectContaining({
           key: 'CUE',

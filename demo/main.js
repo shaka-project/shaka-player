@@ -482,6 +482,11 @@ shakaDemo.Main = class {
       this.hideElement_(drawerCloseButton);
     });
     this.hideElement_(drawerCloseButton);
+
+    const adManager = this.player_.getAdManager();
+    adManager.initInterstitial(
+        this.controls_.getClientSideAdContainer(), this.player_,
+        /** @type {!HTMLMediaElement} */(video));
   }
 
   /** @return {boolean} */

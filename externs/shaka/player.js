@@ -565,6 +565,21 @@ shaka.extern.MetadataFrame;
 
 /**
  * @typedef {{
+ *   startTime: number,
+ *   endTime: ?number,
+ *   values: !Array.<shaka.extern.MetadataFrame>
+ * }}
+ *
+ * @property {number} startTime
+ * @property {?number} endTime
+ * @property {!Array.<shaka.extern.MetadataFrame>} values
+ * @exportDoc
+ */
+shaka.extern.Interstitial;
+
+
+/**
+ * @typedef {{
  *   schemeIdUri: string,
  *   value: string,
  *   startTime: number,

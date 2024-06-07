@@ -78,6 +78,13 @@ shaka.extern.IAdManager = class extends EventTarget {
   onAssetUnload() {}
 
   /**
+   * @param {?HTMLElement} adContainer
+   * @param {!shaka.Player} basePlayer
+   * @param {!HTMLMediaElement} baseVideo
+   */
+  initInterstitial(adContainer, basePlayer, baseVideo) {}
+
+  /**
    * @param {!HTMLElement} adContainer
    * @param {!HTMLMediaElement} video
    * @param {?google.ima.AdsRenderingSettings} adsRenderingSettings
@@ -170,6 +177,13 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @param {shaka.extern.MetadataFrame} value
    */
   onCueMetadataChange(value) {}
+
+  /**
+   * @param {!shaka.Player} basePlayer
+   * @param {!HTMLMediaElement} baseVideo
+   * @param {shaka.extern.Interstitial} interstitial
+   */
+  onInterstitialMetadata(basePlayer, baseVideo, interstitial) {}
 };
 
 

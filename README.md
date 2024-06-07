@@ -141,6 +141,10 @@ HLS features supported:
  - Raw AAC, MP3, AC-3 and EC-3 (without an MP4 container)
  - I-frame-only playlists with mjpg codec for thumbnails
  - #EXT-X-IMAGE-STREAM-INF for thumbnails
+ - Interstitials
+
+HLS features **not** supported:
+ - CUE and X-SNAP attributes in interstitials
 
 
 ## MPEG-5 Part2 LCEVC Support
