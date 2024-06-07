@@ -221,7 +221,11 @@ describe('CastUtils', () => {
 
         mediaSourceEngine = new shaka.media.MediaSourceEngine(
             video,
-            new shaka.test.FakeTextDisplayer());
+            new shaka.test.FakeTextDisplayer(),
+            {
+              getKeySystem: () => null,
+              onMetadata: () => {},
+            });
         const config =
             shaka.util.PlayerConfiguration.createDefault().mediaSource;
         mediaSourceEngine.configure(config);
