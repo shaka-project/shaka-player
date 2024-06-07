@@ -485,7 +485,8 @@ shakaDemo.Main = class {
 
     const adManager = this.player_.getAdManager();
     adManager.initInterstitial(
-        this.controls_.getClientSideAdContainer(), this.player_);
+        this.controls_.getClientSideAdContainer(), this.player_,
+        /** @type {!HTMLMediaElement} */(video));
   }
 
   /** @return {boolean} */

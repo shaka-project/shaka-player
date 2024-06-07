@@ -186,7 +186,7 @@ describe('Ads', () => {
       }
       player.configure('ads.supportsMultipleMediaElements', true);
 
-      adManager.initInterstitial(adContainer, player);
+      adManager.initInterstitial(adContainer, player, video);
 
       await player.load(streamUri);
       await video.play();
@@ -224,7 +224,7 @@ describe('Ads', () => {
     it('without support for multiple media elements', async () => {
       player.configure('ads.supportsMultipleMediaElements', false);
 
-      adManager.initInterstitial(adContainer, player);
+      adManager.initInterstitial(adContainer, player, video);
 
       await player.load(streamUri);
       await video.play();

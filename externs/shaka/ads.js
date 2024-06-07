@@ -80,8 +80,9 @@ shaka.extern.IAdManager = class extends EventTarget {
   /**
    * @param {?HTMLElement} adContainer
    * @param {!shaka.Player} basePlayer
+   * @param {!HTMLMediaElement} baseVideo
    */
-  initInterstitial(adContainer, basePlayer) {}
+  initInterstitial(adContainer, basePlayer, baseVideo) {}
 
   /**
    * @param {!HTMLElement} adContainer
@@ -179,10 +180,11 @@ shaka.extern.IAdManager = class extends EventTarget {
 
   /**
    * @param {!shaka.Player} basePlayer
+   * @param {!HTMLMediaElement} baseVideo
    * @param {shaka.extern.Interstitial} interstitial
    * @param {!Object} playerConfig
    */
-  onInterstitialMetadata(basePlayer, interstitial, playerConfig) {}
+  onInterstitialMetadata(basePlayer, baseVideo, interstitial, playerConfig) {}
 };
 
 
