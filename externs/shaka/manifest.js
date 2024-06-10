@@ -96,6 +96,7 @@
  *   decrease latency.
  * @property {?string} nextUrl
  *   The next url to play.
+ *
  * @exportDoc
  */
 shaka.extern.Manifest;
