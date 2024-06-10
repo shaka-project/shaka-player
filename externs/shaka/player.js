@@ -86,7 +86,7 @@ shaka.extern.StateChange;
  *   stallsDetected: number,
  *
  *   bytesDownloaded: number,
- * 
+ *
  *   nonFatalErrorCount: number,
  *
  *   switchHistory: !Array.<shaka.extern.TrackChoice>,
