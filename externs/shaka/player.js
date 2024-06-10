@@ -87,6 +87,8 @@ shaka.extern.StateChange;
  *
  *   bytesDownloaded: number,
  *
+ *   nonFatalErrorCount: number,
+ *
  *   switchHistory: !Array.<shaka.extern.TrackChoice>,
  *   stateHistory: !Array.<shaka.extern.StateChange>
  * }}
@@ -165,6 +167,9 @@ shaka.extern.StateChange;
  *
  * @property {number} bytesDownloaded
  *   The bytes downloaded during the playback. If nothing is loaded, NaN.
+ *
+ * @property {number} nonFatalErrorCount
+ *   The amount of non fatal errors that occurred.  If nothing is loaded, NaN.
  *
  * @property {!Array.<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.
