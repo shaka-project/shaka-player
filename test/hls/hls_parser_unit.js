@@ -186,7 +186,6 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.language = 'en';
@@ -268,7 +267,6 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.language = 'en';
@@ -345,7 +343,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -385,7 +382,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -417,7 +413,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -448,7 +443,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -482,7 +476,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -513,7 +506,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -550,7 +542,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -587,7 +578,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -617,7 +607,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -646,7 +635,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -684,7 +672,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -722,7 +709,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -763,7 +749,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -804,7 +789,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -843,7 +827,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -876,7 +859,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -908,7 +890,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -940,7 +921,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -977,7 +957,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -1013,7 +992,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -1046,7 +1024,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -1102,7 +1079,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -1149,7 +1125,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -1260,7 +1235,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -1327,7 +1301,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine.setResponseText('test:/master', master);
@@ -1384,7 +1357,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -1451,7 +1423,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine.setResponseText('test:/master', master);
@@ -1489,7 +1460,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     // The extra parameters should be stripped by the parser.
@@ -1550,7 +1520,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -1617,7 +1586,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -1692,7 +1660,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -1756,7 +1723,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -1824,7 +1790,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -1889,7 +1854,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -2674,7 +2638,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -2720,7 +2683,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -2773,7 +2735,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -2820,7 +2781,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -2991,7 +2951,6 @@ describe('HlsParser', () => {
         });
         manifest.sequenceMode = sequenceMode;
         manifest.type = shaka.media.ManifestParser.HLS;
-        manifest.sizeBytes = master.length;
       });
 
       fakeNetEngine
@@ -3141,7 +3100,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -3182,7 +3140,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -3228,7 +3185,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -3316,7 +3272,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -3466,7 +3421,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -3604,7 +3558,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -3648,7 +3601,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -3689,7 +3641,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -3736,7 +3687,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine.setResponseText('test:/key.bin', 'Pj6hFgt5iFZtfBLN6oq8Eg==');
@@ -3784,7 +3734,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine.setResponseText('test:/key.bin', 'Pj6hFgt5iFZtfBLN6oq8Eg==');
@@ -3833,7 +3782,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -3884,7 +3832,6 @@ describe('HlsParser', () => {
         });
         manifest.sequenceMode = sequenceMode;
         manifest.type = shaka.media.ManifestParser.HLS;
-        manifest.sizeBytes = master.length;
       });
 
       fakeNetEngine.setResponseText('test:/master', master);
@@ -3930,7 +3877,6 @@ describe('HlsParser', () => {
         });
         manifest.sequenceMode = sequenceMode;
         manifest.type = shaka.media.ManifestParser.HLS;
-        manifest.sizeBytes = master.length;
       });
 
       fakeNetEngine.setResponseText('test:/master', master);
@@ -3973,7 +3919,6 @@ describe('HlsParser', () => {
         });
         manifest.sequenceMode = sequenceMode;
         manifest.type = shaka.media.ManifestParser.HLS;
-        manifest.sizeBytes = master.length;
       });
 
       fakeNetEngine.setResponseText('test:/master', master);
@@ -4027,7 +3972,6 @@ describe('HlsParser', () => {
         });
         manifest.sequenceMode = sequenceMode;
         manifest.type = shaka.media.ManifestParser.HLS;
-        manifest.sizeBytes = master.length;
       });
 
       fakeNetEngine.setResponseText('test:/master', master);
@@ -4116,7 +4060,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine.setResponseText('test:/master', master)
@@ -4156,7 +4099,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine.setHeaders(
@@ -4662,7 +4604,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     await testHlsParser(master, media, manifest);
@@ -4714,7 +4655,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     const actual = await testHlsParser(master, media, manifest, media2);
@@ -4767,7 +4707,6 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
     });
 
     fakeNetEngine
@@ -4961,7 +4900,6 @@ describe('HlsParser', () => {
         });
         manifest.sequenceMode = sequenceMode;
         manifest.type = shaka.media.ManifestParser.HLS;
-        manifest.sizeBytes = master.length;
       });
 
       await testHlsParser(master, media, manifest);
@@ -5001,7 +4939,6 @@ describe('HlsParser', () => {
         });
         manifest.sequenceMode = sequenceMode;
         manifest.type = shaka.media.ManifestParser.HLS;
-        manifest.sizeBytes = master.length;
       });
 
       await testHlsParser(master, media, manifest);
@@ -5042,7 +4979,6 @@ describe('HlsParser', () => {
         });
         manifest.sequenceMode = sequenceMode;
         manifest.type = shaka.media.ManifestParser.HLS;
-        manifest.sizeBytes = master.length;
       });
 
       await testHlsParser(master, media, manifest);
@@ -5084,7 +5020,6 @@ describe('HlsParser', () => {
         });
         manifest.sequenceMode = sequenceMode;
         manifest.type = shaka.media.ManifestParser.HLS;
-        manifest.sizeBytes = master.length;
       });
 
       await testHlsParser(master, media, manifest);
@@ -5129,7 +5064,6 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      anifest.sizeBytes = media.length;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
@@ -5171,7 +5105,6 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = media.length;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.bandwidth = 359000;
@@ -5202,7 +5135,6 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
@@ -5230,7 +5162,6 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = media.length;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
@@ -5258,7 +5189,6 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = media.length;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.AUDIO, (stream) => {

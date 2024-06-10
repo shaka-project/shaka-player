@@ -606,7 +606,6 @@ describe('StreamingEngine', () => {
         type: 'UNKNOWN',
         serviceDescription: null,
         nextUrl: null,
-        sizeBytes: 0,
         variants: [{
           id: 1,
           video: {
