@@ -102,6 +102,42 @@ describe('Platform', () => {
     setUserAgent(webOs5);
     expect(shaka.util.Platform.isWebOS5()).toBe(true);
   });
+
+  describe('isMediaKeysPolyfilled', () => {
+    let shakaMediaKeysPolyfill;
+
+    beforeAll(() => {
+      shakaMediaKeysPolyfill = window.shakaMediaKeysPolyfill;
+    });
+
+    afterAll(() => {
+      window.shakaMediaKeysPolyfill = shakaMediaKeysPolyfill;
+    });
+
+    it('should return true if media keys are polyfilled', () => {
+      window.shakaMediaKeysPolyfill = 'webkit';
+      const result = shaka.util.Platform.isMediaKeysPolyfilled();
+      expect(result).toBe(true);
+    });
+
+    it('should return false if media keys are not polyfilled', () => {
+      window.shakaMediaKeysPolyfill = '';
+      const result = shaka.util.Platform.isMediaKeysPolyfilled();
+      expect(result).toBe(false);
+    });
+
+    it('should return true with a matching polyfill type', () => {
+      window.shakaMediaKeysPolyfill = 'webkit';
+      const result = shaka.util.Platform.isMediaKeysPolyfilled('webkit');
+      expect(result).toBe(true);
+    });
+
+    it('should return false with a non-matching polyfill type', () => {
+      window.shakaMediaKeysPolyfill = 'webkit';
+      const result = shaka.util.Platform.isMediaKeysPolyfilled('apple');
+      expect(result).toBe(false);
+    });
+  });
 });
 
 /** @param {string} userAgent */

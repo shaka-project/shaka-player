@@ -95,7 +95,7 @@ describe('PatchedMediaKeys_Apple', () => {
           .toEqual(PatchedMediaKeysApple.MediaKeySystemAccess);
       expect(navigator.requestMediaKeySystemAccess)
           .toEqual(PatchedMediaKeysApple.requestMediaKeySystemAccess);
-      expect(window.shakaMediaKeysPolyfill).toBe(true);
+      expect(window.shakaMediaKeysPolyfill).toBe('apple');
     });
   });
 
@@ -124,7 +124,7 @@ describe('PatchedMediaKeys_Apple', () => {
           .toEqual(originalWindowMediaKeySystemAccess);
       expect(navigator.requestMediaKeySystemAccess)
           .toEqual(originalNavigatorRequestMediaKeySystemAccess);
-      expect(window.shakaMediaKeysPolyfill).toBe(false);
+      expect(window.shakaMediaKeysPolyfill).toBe('');
     });
   });
 });
