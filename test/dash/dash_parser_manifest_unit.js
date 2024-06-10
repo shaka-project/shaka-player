@@ -166,6 +166,7 @@ describe('DashParser Manifest', () => {
           manifest.type = shaka.media.ManifestParser.DASH;
           manifest.anyTimeline();
           manifest.minBufferTime = 75;
+          manifest.sizeBytes = jasmine.any(Number);
           manifest.addPartialVariant((variant) => {
             variant.language = 'en';
             variant.bandwidth = 200;
@@ -252,6 +253,7 @@ describe('DashParser Manifest', () => {
           manifest.type = shaka.media.ManifestParser.DASH;
           manifest.anyTimeline();
           manifest.minBufferTime = 75;
+          manifest.sizeBytes = jasmine.any(Number);
           manifest.addPartialVariant((variant) => {
             variant.language = 'en';
             variant.bandwidth = 200;

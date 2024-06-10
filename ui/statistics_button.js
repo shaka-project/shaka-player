@@ -117,7 +117,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       return this.currentStats_[name] + ' (stalls)';
     };
 
-    const parseBytesDownloaded = (name) => {
+    const parseBytes = (name) => {
       const bytes = parseInt(this.currentStats_[name], 10);
       if (bytes > 1e6) {
         return (bytes / 1e6).toFixed(2) + 'MB';
@@ -149,7 +149,8 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       'droppedFrames': parseFrames,
       'stallsDetected': parseStalls,
       'gapsJumped': parseGaps,
-      'bytesDownloaded': parseBytesDownloaded,
+      'manifestSizeBytes': parseBytes,
+      'bytesDownloaded': parseBytes,
     };
 
     /** @private {shaka.util.Timer} */

@@ -22,7 +22,8 @@
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   type: string,
  *   serviceDescription: ?shaka.extern.ServiceDescription,
- *   nextUrl: ?string
+ *   nextUrl: ?string,
+ *   sizeBytes: number
  * }}
  *
  * @description
@@ -96,7 +97,8 @@
  *   decrease latency.
  * @property {?string} nextUrl
  *   The next url to play.
- *
+ * @property {number} sizeBytes
+ *   The size of the manifest payload in bytes.
  * @exportDoc
  */
 shaka.extern.Manifest;

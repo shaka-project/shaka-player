@@ -85,6 +85,7 @@ shaka.extern.StateChange;
  *   gapsJumped: number,
  *   stallsDetected: number,
  *
+ *   manifestSizeBytes: number,
  *   bytesDownloaded: number,
  *
  *   switchHistory: !Array.<shaka.extern.TrackChoice>,
@@ -163,6 +164,9 @@ shaka.extern.StateChange;
  *   The presentation's max segment duration in seconds. If nothing is loaded,
  *   NaN.
  *
+ * @property {number} manifestSizeBytes
+ *   Size of the manifest payload, this will be the master manifest for HLS.
+ *   If nothing is loaded or in src= mode, NaN.
  * @property {number} bytesDownloaded
  *   The bytes downloaded during the playback. If nothing is loaded, NaN.
  *

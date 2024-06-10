@@ -51,6 +51,7 @@ describe('DashParser ContentProtection', () => {
 
     const actual = await dashParser.start(
         'http://example.com', playerInterface);
+    expected.sizeBytes = manifestText.length;
     expect(actual).toEqual(expected);
     // When the above expectation fails, it is far too hard to read the output
     // and debug the test failure.  So we also do these more targetted
