@@ -85,6 +85,7 @@ shaka.extern.StateChange;
  *   gapsJumped: number,
  *   stallsDetected: number,
  *
+ *   manifestSizeBytes: number,
  *   bytesDownloaded: number,
  *
  *   nonFatalErrorCount: number,
@@ -165,6 +166,10 @@ shaka.extern.StateChange;
  *   The presentation's max segment duration in seconds. If nothing is loaded,
  *   NaN.
  *
+ * @property {number} manifestSizeBytes
+ *   Size of the manifest payload. For DASH & MSS it will match the latest
+ *   downloaded manifest. For HLS, it will match the lastly downloaded playlist.
+ *   If nothing is loaded or in src= mode, NaN.
  * @property {number} bytesDownloaded
  *   The bytes downloaded during the playback. If nothing is loaded, NaN.
  *

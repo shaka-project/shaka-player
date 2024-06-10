@@ -218,6 +218,7 @@ describe('Player', () => {
 
         maxSegmentDuration: jasmine.any(Number),
 
+        manifestSizeBytes: jasmine.any(Number),
         bytesDownloaded: jasmine.any(Number),
 
         nonFatalErrorCount: jasmine.any(Number),
