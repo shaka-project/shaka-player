@@ -221,6 +221,8 @@ describe('Player', () => {
         manifestSizeBytes: jasmine.any(Number),
         bytesDownloaded: jasmine.any(Number),
 
+        nonFatalErrorCount: jasmine.any(Number),
+
         // We should have loaded the first Period by now, so we should have a
         // history.
         switchHistory: jasmine.arrayContaining([{
