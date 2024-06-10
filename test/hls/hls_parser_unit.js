@@ -3182,7 +3182,7 @@ describe('HlsParser', () => {
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
+      manifest.sizeBytes = shaka.util.StringUtils.toUTF8(master).byteLength;
     });
 
     fakeNetEngine
@@ -4082,6 +4082,7 @@ describe('HlsParser', () => {
         });
         manifest.sequenceMode = sequenceMode;
         manifest.type = shaka.media.ManifestParser.HLS;
+        manifest.sizeBytes = master.length;
       });
 
       fakeNetEngine.setResponseText('test:/master', master);
@@ -5129,7 +5130,7 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      anifest.sizeBytes = media.length;
+      manifest.sizeBytes = media.length;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
@@ -5202,7 +5203,7 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
-      manifest.sizeBytes = master.length;
+      manifest.sizeBytes = media.length;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
@@ -5310,6 +5311,7 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
+      manifest.sizeBytes = master.length;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.language = 'en';
