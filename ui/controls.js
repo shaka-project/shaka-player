@@ -203,6 +203,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           const locale = e['locales'][0];
           this.adManager_.setLocale(locale);
         });
+
+    this.adManager_.initInterstitial(
+        this.getClientSideAdContainer(), this.localPlayer_, this.localVideo_);
   }
 
   /**
