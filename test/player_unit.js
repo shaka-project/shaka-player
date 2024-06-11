@@ -236,6 +236,25 @@ describe('Player', () => {
       }
     });
 
+    it('destroys drmEngine before mediaSourceEngine with webkit polyfill',
+        async () => {
+          spyOn(shaka.util.Platform, 'isMediaKeysPolyfilled')
+              .and.returnValue(true);
+          goog.asserts.assert(manifest, 'Manifest should be non-null');
+
+          Util.funcSpy(drmEngine.destroy).and.callFake(async () => {
+            expect(mediaSourceEngine.destroy).not.toHaveBeenCalled();
+            await Util.shortDelay();
+            expect(mediaSourceEngine.destroy).not.toHaveBeenCalled();
+          });
+
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+          await player.destroy();
+
+          expect(drmEngine.destroy).toHaveBeenCalled();
+          expect(mediaSourceEngine.destroy).toHaveBeenCalled();
+        });
+
     it('destroys mediaSourceEngine before drmEngine', async () => {
       goog.asserts.assert(manifest, 'Manifest should be non-null');
 
