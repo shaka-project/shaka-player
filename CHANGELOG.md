@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.8.13](https://github.com/shaka-project/shaka-player/compare/v4.8.12...v4.8.13) (2024-06-11)
+
+
+### Bug Fixes
+
+* `getPresentationStartTimeAsDate()` should return time unaffected by clock drift ([#6790](https://github.com/shaka-project/shaka-player/issues/6790)) ([cb20e00](https://github.com/shaka-project/shaka-player/commit/cb20e002e659b762a85248ffa77f0b2af205074c))
+* **DRM:** close properly webkit media key sessions ([#6775](https://github.com/shaka-project/shaka-player/issues/6775)) ([f91c65a](https://github.com/shaka-project/shaka-player/commit/f91c65a57de9754b8ed7fd363426a226486354a9))
+* Fix AC-4 codec string in MediaSourceEngine ([#6780](https://github.com/shaka-project/shaka-player/issues/6780)) ([7b633f0](https://github.com/shaka-project/shaka-player/commit/7b633f0738d25bbf2fe868b966552a4816375e2d))
+
 ## [4.8.12](https://github.com/shaka-project/shaka-player/compare/v4.8.11...v4.8.12) (2024-06-07)
 
 
