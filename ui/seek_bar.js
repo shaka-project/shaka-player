@@ -375,6 +375,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   markAdBreaks_() {
     if (!this.adCuePoints_.length) {
       this.adMarkerContainer_.style.background = 'transparent';
+      this.adBreaksTimer_.stop();
       return;
     }
 
@@ -445,16 +446,24 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    */
   onAdCuePointsChanged_() {
     this.markAdBreaks_();
-    const seekRange = this.player.seekRange();
-    const seekRangeSize = seekRange.end - seekRange.start;
-    const minSeekBarWindow = shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR;
-    // Seek range keeps changing for live content and some of the known
-    // ad breaks might not be in the seek range now, but get into
-    // it later.
-    // If we have a LIVE seekable content, keep checking for ad breaks
-    // every second.
-    if (this.player.isLive() && seekRangeSize > minSeekBarWindow) {
-      this.adBreaksTimer_.tickEvery(1);
+    const action = () => {
+      const seekRange = this.player.seekRange();
+      const seekRangeSize = seekRange.end - seekRange.start;
+      const minSeekBarWindow =
+          shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR;
+      // Seek range keeps changing for live content and some of the known
+      // ad breaks might not be in the seek range now, but get into
+      // it later.
+      // If we have a LIVE seekable content, keep checking for ad breaks
+      // every second.
+      if (this.player.isLive() && seekRangeSize > minSeekBarWindow) {
+        this.adBreaksTimer_.tickEvery(/* seconds= */ 0.25);
+      }
+    };
+    if (this.player.isFullyLoaded()) {
+      action();
+    } else {
+      this.eventManager.listenOnce(this.player, 'loaded', action);
     }
   }
 
