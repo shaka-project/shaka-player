@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.9.4](https://github.com/shaka-project/shaka-player/compare/v4.9.3...v4.9.4) (2024-06-11)
+
+
+### Bug Fixes
+
+* `getPresentationStartTimeAsDate()` should return time unaffected by clock drift ([#6790](https://github.com/shaka-project/shaka-player/issues/6790)) ([d7f003c](https://github.com/shaka-project/shaka-player/commit/d7f003c7b39498eb8f939e5d6aedd3922c516b57))
+* **DRM:** close properly webkit media key sessions ([#6775](https://github.com/shaka-project/shaka-player/issues/6775)) ([035fa18](https://github.com/shaka-project/shaka-player/commit/035fa18136e45fa7e13d7484644849c8d9e413bc))
+* Fix AC-4 codec string in MediaSourceEngine ([#6780](https://github.com/shaka-project/shaka-player/issues/6780)) ([551a6b3](https://github.com/shaka-project/shaka-player/commit/551a6b34ed7a8d376cc8f41afe8cd0a17f701ace))
+* Fix green screen issue on Edge with mixed content ([#6719](https://github.com/shaka-project/shaka-player/issues/6719)) ([0aca20b](https://github.com/shaka-project/shaka-player/commit/0aca20b4a7df56a9de76d8e8e6448e004d7bbef7))
+
 ## [4.9.3](https://github.com/shaka-project/shaka-player/compare/v4.9.2...v4.9.3) (2024-06-07)
 
 
