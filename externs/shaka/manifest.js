@@ -22,7 +22,8 @@
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   type: string,
  *   serviceDescription: ?shaka.extern.ServiceDescription,
- *   nextUrl: ?string
+ *   nextUrl: ?string,
+ *   periodCount: number
  * }}
  *
  * @description
@@ -96,6 +97,11 @@
  *   decrease latency.
  * @property {?string} nextUrl
  *   The next url to play.
+ * @property {number} periodCount
+ *   Number of periods found in a manifest. For DASH, it represents number of
+ *   Period elements in a manifest. If streaming protocol does not implement
+ *   period-like structure, it should be set to 1.
+ *   <i>Defaults to <code>1</code>.</i>
  *
  * @exportDoc
  */

@@ -304,6 +304,7 @@ describe('DashParser Patch', () => {
   describe('Period', () => {
     it('adds new period as an MPD child', async () => {
       const manifest = await parser.start('dummy://foo', playerInterface);
+      expect(manifest.periodCount).toBe(1);
       const stream = manifest.variants[0].video;
       const patchText = [
         `<Patch mpdId="${mpdId}"`,
@@ -326,6 +327,7 @@ describe('DashParser Patch', () => {
       expect(stream.matchedStreams.length).toBe(1);
 
       await updateManifest();
+      expect(manifest.periodCount).toBe(2);
       await stream.createSegmentIndex();
 
       expect(stream.matchedStreams.length).toBe(2);
@@ -333,6 +335,7 @@ describe('DashParser Patch', () => {
 
     it('adds new period as a Period successor', async () => {
       const manifest = await parser.start('dummy://foo', playerInterface);
+      expect(manifest.periodCount).toBe(1);
       const stream = manifest.variants[0].video;
       const patchText = [
         `<Patch mpdId="${mpdId}"`,
@@ -355,6 +358,7 @@ describe('DashParser Patch', () => {
       expect(stream.matchedStreams.length).toBe(1);
 
       await updateManifest();
+      expect(manifest.periodCount).toBe(2);
       await stream.createSegmentIndex();
 
       expect(stream.matchedStreams.length).toBe(2);

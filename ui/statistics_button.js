@@ -121,6 +121,10 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       return this.currentStats_[name] + ' (errors)';
     };
 
+    const parsePeriods = (name) => {
+      return this.currentStats_[name] + ' (periods)';
+    };
+
     const parseBytes = (name) => {
       const bytes = parseInt(this.currentStats_[name], 10);
       if (bytes > 1e6) {
@@ -156,6 +160,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       'manifestSizeBytes': parseBytes,
       'bytesDownloaded': parseBytes,
       'nonFatalErrorCount': parseErrors,
+      'manifestPeriodCount': parsePeriods,
     };
 
     /** @private {shaka.util.Timer} */
