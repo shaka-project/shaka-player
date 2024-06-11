@@ -144,7 +144,7 @@ HLS features supported:
  - Interstitials
 
 HLS features **not** supported:
- - CUE and X-SNAP attributes in interstitials
+ - X-SNAP attribute in interstitials
 
 
 ## MPEG-5 Part2 LCEVC Support
