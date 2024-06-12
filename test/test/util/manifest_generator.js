@@ -105,6 +105,8 @@ shaka.test.ManifestGenerator.Manifest = class {
     this.serviceDescription = null;
     /** @type {?string} */
     this.nextUrl = null;
+    /** @type {number} */
+    this.periodCount = 1;
 
 
     /** @type {shaka.extern.Manifest} */
