@@ -5516,6 +5516,8 @@ describe('HlsParser', () => {
         '#EXT-X-DATERANGE:ID="1",START-DATE="2000-01-01T00:00:05.00Z",',
         'END-DATE="2000-01-01T00:00:06.00Z",X-SHAKA="FOREVER"\n',
         '#EXT-X-DATERANGE:ID="2",START-DATE="2000-01-01T00:00:10.00Z",',
+        'PLANNED-DURATION=1,X-SHAKA="FOREVER"\n',
+        '#EXT-X-DATERANGE:ID="3",START-DATE="2000-01-01T00:00:15.00Z",',
         'X-SHAKA="FOREVER"\n',
       ].join('');
 
@@ -5530,12 +5532,21 @@ describe('HlsParser', () => {
         key: 'X-SHAKA',
         data: 'FOREVER',
       };
-      expect(onMetadataSpy).toHaveBeenCalledTimes(3);
+      const plannedDuration = {
+        key: 'PLANNED-DURATION',
+        data: '1',
+      };
+      expect(onMetadataSpy).toHaveBeenCalledTimes(4);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 1,
           [jasmine.objectContaining(value)]);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 5, 6,
           [jasmine.objectContaining(value)]);
-      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 10, null,
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 10, 11,
+          [
+            jasmine.objectContaining(plannedDuration),
+            jasmine.objectContaining(value),
+          ]);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 15, null,
           [jasmine.objectContaining(value)]);
     });
 
