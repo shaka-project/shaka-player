@@ -353,6 +353,7 @@ describe('DashParser SegmentList', () => {
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
+      disableStream: (stream) => {},
     };
     try {
       const manifest = await dashParser.start('dummy://foo', playerInterface);

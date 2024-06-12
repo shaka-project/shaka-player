@@ -39,6 +39,7 @@ describe('DashParser Live', () => {
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
+      disableStream: (stream) => {},
     };
   });
 
