@@ -58,15 +58,25 @@ jobs:
       REF: ${{ steps.compute.outputs.REF }}
 
     steps:
-      - name: Compute ref
+      - name: Fetch REF information
         id: compute
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_AT: ${{ github.event_name == 'workflow_call' && github.event.comment.created_at || github.event.repository.updated_at }}
         run: |
-          if [[ "${{ inputs.pr }}" != "" ]]; then
-            LAB_TEST_REF="refs/pull/${{ inputs.pr }}/head"
+          if [[ -z "${{ inputs.pr }}" ]]; then
+            REF="main"
           else
-            LAB_TEST_REF="main"
+            pr="$(gh api repos/${{ github.repository }}/pulls/${{ inputs.pr }})"
+            head_sha="$(echo "$pr" | jq -r .head.sha)"
+            updated_at="$(echo "$pr" | jq -r .updated_at)"
+            if [[ $(date -d "$updated_at") > $(date -d "$RUN_AT") ]]; then
+              exit 1
+            fi
+            REF="$head_sha"
           fi
-          echo "REF=$LAB_TEST_REF" | tee -a $GITHUB_OUTPUT
+          echo "REF=$REF" >> $GITHUB_OUTPUT
+
 
   # Configure the build matrix based on our grid's YAML config.
   # The matrix contents will be computed by this first job and deserialized
