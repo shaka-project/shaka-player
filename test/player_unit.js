@@ -2292,6 +2292,14 @@ describe('Player', () => {
       expect(getActiveVariantTrack().roles).toContain('commentary');
     });
 
+    it('selectAudioLanguage() ignores unplayable variants', () => {
+      player.configure({
+        restrictions: {minChannelsCount: 6},
+      });
+      player.selectAudioLanguage('es');
+      expect(getActiveVariantTrack().channelsCount).toBe(6);
+    });
+
     it('selectAudioLanguage() respects selected audio codec', () => {
       player.selectAudioLanguage('es', '', 0, 0, 'mp4a.40.2');
       expect(getActiveVariantTrack().audioCodec).toBe('mp4a.40.2');
