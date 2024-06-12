@@ -382,7 +382,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
     const gradient = ['to right'];
-    const pointsAsFractions = [];
+    let pointsAsFractions = [];
     const adBreakColor = this.config_.seekBarColors.adBreaks;
     let postRollAd = false;
     for (const point of this.adCuePoints_) {
@@ -413,6 +413,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         });
       }
     }
+
+    pointsAsFractions = pointsAsFractions.sort((a, b) => {
+      return a.start - b.start;
+    });
 
     for (const point of pointsAsFractions) {
       gradient.push(this.makeColor_('transparent', point.start));
