@@ -223,6 +223,7 @@ describe('Player', () => {
 
         nonFatalErrorCount: jasmine.any(Number),
         manifestPeriodCount: jasmine.any(Number),
+        manifestGapCount: jasmine.any(Number),
 
         // We should have loaded the first Period by now, so we should have a
         // history.

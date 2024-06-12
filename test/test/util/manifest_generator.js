@@ -107,6 +107,8 @@ shaka.test.ManifestGenerator.Manifest = class {
     this.nextUrl = null;
     /** @type {number} */
     this.periodCount = 1;
+    /** @type {number} */
+    this.gapCount = 0;
 
 
     /** @type {shaka.extern.Manifest} */

@@ -2175,6 +2175,7 @@ describe('HlsParser', () => {
     const actual = await parser.start('test:/master', playerInterface);
     await loadAllStreamsFor(actual);
 
+    expect(actual.gapCount).toBe(2);
     expect(actual.variants.length).toBe(1);
 
     const variant = actual.variants[0];

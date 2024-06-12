@@ -161,6 +161,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       'bytesDownloaded': parseBytes,
       'nonFatalErrorCount': parseErrors,
       'manifestPeriodCount': parsePeriods,
+      'manifestGapCount': parseGaps,
     };
 
     /** @private {shaka.util.Timer} */
