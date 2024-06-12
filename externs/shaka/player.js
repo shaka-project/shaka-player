@@ -89,6 +89,7 @@ shaka.extern.StateChange;
  *   bytesDownloaded: number,
  *
  *   nonFatalErrorCount: number,
+ *   manifestPeriodCount: number,
  *
  *   switchHistory: !Array.<shaka.extern.TrackChoice>,
  *   stateHistory: !Array.<shaka.extern.StateChange>
@@ -175,6 +176,10 @@ shaka.extern.StateChange;
  *
  * @property {number} nonFatalErrorCount
  *   The amount of non fatal errors that occurred.  If nothing is loaded, NaN.
+ * @property {number} manifestPeriodCount
+ *   The amount of periods occurred in the manifest. For DASH it represents
+ *   number of Period elements in a manifest. For HLS & MSS it is always 1.
+ *   In src= mode or if nothing is loaded, NaN.
  *
  * @property {!Array.<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.
