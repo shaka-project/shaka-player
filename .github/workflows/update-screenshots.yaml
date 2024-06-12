@@ -21,7 +21,7 @@ jobs:
           ref: refs/pull/${{ inputs.pr }}/head
 
       - name: Set commit status to pending
-        uses: ./.github/workflows/custom-actions/set-commit-status
+        uses: shaka-project/shaka-github-tools/set-commit-status@main
         with:
           context: Update All Screenshots
           state: pending
@@ -122,7 +122,7 @@ jobs:
           fi
 
       - name: Report final status
-        uses: ./.github/workflows/custom-actions/set-commit-status
+        uses: shaka-project/shaka-github-tools/set-commit-status@main
         with:
           context: Update All Screenshots
           state: ${{ steps.compute.outputs.status }}

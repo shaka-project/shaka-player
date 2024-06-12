@@ -150,7 +150,7 @@ jobs:
 
       - name: Set commit status to pending
         if: ${{ inputs.skip_test_status == false }}
-        uses: ./.github/workflows/custom-actions/set-commit-status
+        uses: shaka-project/shaka-github-tools/set-commit-status@main
         with:
           context: Selenium / Build
           job_name: "${{ inputs.job_name_prefix }}Pre-build Player"
@@ -195,7 +195,7 @@ jobs:
         # Will run on success or failure, but not if the workflow is cancelled
         # or if we were asked to ignore the test status.
         if: ${{ (success() || failure()) && inputs.skip_commit_status == false }}
-        uses: ./.github/workflows/custom-actions/set-commit-status
+        uses: shaka-project/shaka-github-tools/set-commit-status@main
         with:
           context: Selenium / Build
           job_name: "${{ inputs.job_name_prefix }}Pre-build Player"
@@ -220,7 +220,7 @@ jobs:
 
       - name: Set commit status to pending
         if: ${{ inputs.skip_commit_status == false }}
-        uses: ./.github/workflows/custom-actions/set-commit-status
+        uses: shaka-project/shaka-github-tools/set-commit-status@main
         with:
           context: Selenium / ${{ matrix.browser }}
           job_name: "${{ inputs.job_name_prefix }}${{ matrix.browser }}"
@@ -378,7 +378,7 @@ jobs:
         # Will run on success or failure, but not if the workflow is cancelled
         # or if we were asked to ignore the test status.
         if: ${{ (success() || failure()) && inputs.skip_commit_status == false }}
-        uses: ./.github/workflows/custom-actions/set-commit-status
+        uses: shaka-project/shaka-github-tools/set-commit-status@main
         with:
           context: Selenium / ${{ matrix.browser }}
           job_name: "${{ inputs.job_name_prefix }}${{ matrix.browser }}"
