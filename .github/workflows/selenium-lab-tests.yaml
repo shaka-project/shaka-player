@@ -70,6 +70,7 @@ jobs:
             REF=$(git rev-parse refs/pull/${{ inputs.pr }}/head)
             updated_at="$(gh api repos/${{ github.repository }}/pulls/${{ inputs.pr }} | jq -r .updated_at)"
             if [[ $(date -d "$updated_at") > $(date -d "$RUN_AT") ]]; then
+              echo "PR updated after trigger!  Quitting with error."
               exit 1
             fi
           fi
