@@ -54,6 +54,15 @@ shaka.test.FakeDemoMain = class {
         jasmine.createSpy('setTrickPlayControlsEnabled');
 
     /** @type {!jasmine.Spy} */
+    this.getCustomContextMenuEnabled =
+        jasmine.createSpy('getCustomContextMenuEnabled');
+    this.getCustomContextMenuEnabled.and.returnValue(false);
+
+    /** @type {!jasmine.Spy} */
+    this.setCustomContextMenuEnabled =
+        jasmine.createSpy('setCustomContextMenuEnabled');
+
+    /** @type {!jasmine.Spy} */
     this.getConfiguration = jasmine.createSpy('getConfiguration');
     this.getConfiguration.and.returnValue(this.config_);
 

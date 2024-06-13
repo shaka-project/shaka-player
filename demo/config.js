@@ -694,6 +694,12 @@ shakaDemo.Config = class {
       this.latestInput_.input().disabled = true;
       this.latestInput_.input().checked = false;
     }
+    this.addCustomBoolInput_('Enabled custom context menu', (input) => {
+      shakaDemoMain.setCustomContextMenuEnabled(input.checked);
+    });
+    if (shakaDemoMain.getCustomContextMenuEnabled()) {
+      this.latestInput_.input().checked = true;
+    }
 
     // shaka.log is not set if logging isn't enabled.
     // I.E. if using the release version of shaka.
