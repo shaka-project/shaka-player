@@ -133,9 +133,6 @@ describe('Ads', () => {
     });
 
     it('without support for multiple media elements', async () => {
-      if (shaka.util.Platform.isTizen3()) {
-        pending('IMA not supported on this platform');
-      }
       player.configure('ads.customPlayheadTracker', true);
       player.configure('ads.skipPlayDetection', true);
       player.configure('ads.supportsMultipleMediaElements', false);
