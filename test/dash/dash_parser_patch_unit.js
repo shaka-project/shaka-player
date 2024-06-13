@@ -50,6 +50,7 @@ describe('DashParser Patch', () => {
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
+      disableStream: (stream) => {},
     };
     Date.now = () => publishTime.getTime() + 10;
 

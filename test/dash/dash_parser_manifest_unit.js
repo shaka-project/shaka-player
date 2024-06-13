@@ -57,6 +57,7 @@ describe('DashParser Manifest', () => {
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
+      disableStream: (stream) => {},
     };
   });
 

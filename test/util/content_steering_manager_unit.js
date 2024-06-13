@@ -30,6 +30,7 @@ describe('ContentSteeringManager', () => {
       onManifestUpdated: fail,
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
+      disableStream: (stream) => {},
     };
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     manager = new shaka.util.ContentSteeringManager(playerInterface);
