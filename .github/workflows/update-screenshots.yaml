@@ -8,8 +8,11 @@ on:
     # avoid malicious code executing in the lab.
     inputs:
       pr:
-        description: "A PR number to build and test in the lab, then update all the screenshots."
-        required: true
+        description: "A PR number to build and test in the lab.  Overridden by \"ref\" input.  If both are empty, will fail."
+        required: false
+      ref:
+        description: "A specific git reference to build and test in the lab.  Overrides \"pr\" input.  If both are empty, will fail."
+        required: false
 
 jobs:
   compute-ref:
@@ -21,20 +24,12 @@ jobs:
     steps:
       - name: Compute ref
         id: compute
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Decide on the symbolic reference first.
-          # We're testing against a PR head.
-          SYMREF="refs/pull/${{ inputs.pr }}/head"
-
-          # Compute a specific sha1 now.  We should use that in all other jobs
-          # instead of a symbolic reference that can change meaning if the repo
-          # changes.
-          REF=$(git ls-remote https://github.com/${{ github.repository }} "$SYMREF" | cut -f 1)
-
-          # Output the ref for other jobs to consume.
-          echo "REF=$REF" >> $GITHUB_OUTPUT
+        #uses: shaka-project/shaka-github-tools/compute-ref@main
+        uses: joeyparrish/shaka-github-tools/compute-ref@compute-ref  # FIXME
+        with:
+          # If ref is given, it overrides PR.  If neither is given, we fail.
+          pr: ${{ inputs.pr }}
+          ref: ${{ inputs.ref }}
 
   set-pending-status:
     name: Set Pending Status
@@ -57,7 +52,7 @@ jobs:
     needs: [set-pending-status]
     uses: ./.github/workflows/selenium-lab-tests.yaml
     with:
-      pr: ${{ inputs.pr }}
+      ref: ${{ needs.compute-ref.outputs.REF }}
       test_filter: layout
       ignore_test_status: true
       job_name_prefix: "Get Selenium Lab Screenshots / "
