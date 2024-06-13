@@ -8,11 +8,8 @@ on:
     # avoid malicious code executing in the lab.
     inputs:
       pr:
-        description: "A PR number to build and test in the lab."
-        required: false
-      sha:
-        description: "A specific git SHA to build and test in the lab.  Overrides \"pr\" input.  If both are empty, this workflow will fail."
-        required: false
+        description: "A PR number to build and test in the lab.  Required even if \"pr\" is given."
+        required: true
 
 jobs:
   compute-sha:
@@ -27,9 +24,7 @@ jobs:
         #uses: shaka-project/shaka-github-tools/compute-sha@main
         uses: joeyparrish/shaka-github-tools/compute-sha@compute-sha  # FIXME
         with:
-          # If sha is given, it overrides PR.  If neither is given, we fail.
-          sha: ${{ inputs.sha }}
-          ref: ${{ inputs.pr && format('refs/pull/{0}/head', inputs.pr) || '' }}
+          ref: refs/pull/${{ inputs.pr }}/head
 
   set-pending-status:
     name: Set Pending Status
