@@ -8,17 +8,31 @@ on:
     # avoid malicious code executing in the lab.
     inputs:
       pr:
-        description: "A PR number to build and test in the lab, then update all the screenshots."
+        description: "A PR number to build and test in the lab.  Required even if \"pr\" is given."
         required: true
 
 jobs:
+  compute-sha:
+    name: Compute SHA
+    runs-on: ubuntu-latest
+    outputs:
+      SHA: ${{ steps.compute.outputs.SHA }}
+
+    steps:
+      - name: Compute SHA
+        id: compute
+        uses: shaka-project/shaka-github-tools/compute-sha@main
+        with:
+          ref: refs/pull/${{ inputs.pr }}/head
+
   set-pending-status:
     name: Set Pending Status
+    needs: compute-sha
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: refs/pull/${{ inputs.pr }}/head
+          ref: ${{ needs.compute-sha.outputs.SHA }}
 
       - name: Set commit status to pending
         uses: shaka-project/shaka-github-tools/set-commit-status@main
@@ -32,7 +46,9 @@ jobs:
     needs: [set-pending-status]
     uses: ./.github/workflows/selenium-lab-tests.yaml
     with:
-      pr: ${{ inputs.pr }}
+      # Pass the pre-computed SHA directly to the nested workflow.
+      # Do NOT pass "pr" and reinterpret it into a SHA in the nested workflow.
+      sha: ${{ needs.compute-sha.outputs.SHA }}
       test_filter: layout
       ignore_test_status: true
       job_name_prefix: "Get Selenium Lab Screenshots / "
@@ -40,11 +56,11 @@ jobs:
   update-pr:
     name: Update PR
     runs-on: ubuntu-latest
-    needs: [run-lab-tests]
+    needs: [compute-sha, run-lab-tests]
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: refs/pull/${{ inputs.pr }}/head
+          ref: ${{ needs.compute-sha.outputs.SHA }}
 
       - name: Get artifacts
         uses: actions/download-artifact@v4
@@ -91,13 +107,13 @@ jobs:
   set-final-status:
     name: Set Final Status
     runs-on: ubuntu-latest
-    needs: [run-lab-tests, update-pr]
+    needs: [compute-sha, run-lab-tests, update-pr]
     # Will run on success or failure, but not if the workflow is cancelled.
     if: ${{ success() || failure() }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: refs/pull/${{ inputs.pr }}/head
+          ref: ${{ needs.compute-sha.outputs.SHA }}
 
       - name: Compute final status
         id: compute
