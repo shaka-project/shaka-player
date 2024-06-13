@@ -491,6 +491,10 @@ shakaDemo.Config = class {
         .addBoolInput_('Disable Video Prefetch',
             'streaming.disableVideoPrefetch')
         .addBoolInput_('Live Sync', 'streaming.liveSync')
+        .addNumberInput_('Target latency for live sync',
+            'streaming.liveSyncTargetLatency',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
         .addNumberInput_('Target latency tolerance',
             'streaming.liveSyncTargetLatencyTolerance',
             /* canBeDecimal= */ true,
