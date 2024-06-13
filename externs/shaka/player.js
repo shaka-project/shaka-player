@@ -90,6 +90,7 @@ shaka.extern.StateChange;
  *
  *   nonFatalErrorCount: number,
  *   manifestPeriodCount: number,
+ *   manifestGapCount: number,
  *
  *   switchHistory: !Array.<shaka.extern.TrackChoice>,
  *   stateHistory: !Array.<shaka.extern.StateChange>
@@ -180,6 +181,11 @@ shaka.extern.StateChange;
  *   The amount of periods occurred in the manifest. For DASH it represents
  *   number of Period elements in a manifest. For HLS & MSS it is always 1.
  *   In src= mode or if nothing is loaded, NaN.
+ * @property {number} manifestGapCount
+ *   The amount of gaps found in a manifest. For DASH, it represents number of
+ *   discontinuities found between periods. For HLS, it is a number of EXT-X-GAP
+ *   and GAP=YES occurrences. For MSS, it is always set to 0.
+ *   If in src= mode or nothing is loaded, NaN.
  *
  * @property {!Array.<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.

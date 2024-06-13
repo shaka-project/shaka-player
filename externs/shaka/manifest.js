@@ -23,7 +23,8 @@
  *   type: string,
  *   serviceDescription: ?shaka.extern.ServiceDescription,
  *   nextUrl: ?string,
- *   periodCount: number
+ *   periodCount: number,
+ *   gapCount: number
  * }}
  *
  * @description
@@ -102,6 +103,11 @@
  *   Period elements in a manifest. If streaming protocol does not implement
  *   period-like structure, it should be set to 1.
  *   <i>Defaults to <code>1</code>.</i>
+ * @property {number} gapCount
+ *   The amount of gaps found in a manifest. For DASH, it represents number of
+ *   discontinuities found between periods. For HLS, it is a number of EXT-X-GAP
+ *   and GAP=YES occurrences. For MSS, it is always set to 0.
+ *   If in src= mode or nothing is loaded, NaN.
  *
  * @exportDoc
  */

@@ -2739,7 +2739,7 @@ describe('DashParser Manifest', () => {
   });
 
   describe('parses partial segments correctly', () => {
-    it('whitout cadence', async () => {
+    it('without cadence', async () => {
       const manifestText = [
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S">',
@@ -3163,5 +3163,31 @@ describe('DashParser Manifest', () => {
 
       expect(audioUri0).toBe('http://example.foo/r0/1.mp4');
     });
+  });
+
+  it('counts gaps', async () => {
+    const manifestText = [
+      '<MPD type="static">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation id="video" bandwidth="1">',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '  <Period id="2" start="PT31S" duration="PT30S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation id="video" bandwidth="1">',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    expect(manifest.gapCount).toBe(1);
   });
 });
