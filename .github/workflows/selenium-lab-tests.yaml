@@ -65,15 +65,13 @@ jobs:
           RUN_AT: ${{ github.event_name == 'workflow_call' && github.event.comment.created_at || github.event.repository.updated_at }}
         run: |
           if [[ -z "${{ inputs.pr }}" ]]; then
-            REF="main"
+            REF=$(git rev-parse refs/heads/main)
           else
-            pr="$(gh api repos/${{ github.repository }}/pulls/${{ inputs.pr }})"
-            head_sha="$(echo "$pr" | jq -r .head.sha)"
-            updated_at="$(echo "$pr" | jq -r .updated_at)"
+            REF=$(git rev-parse refs/pull/${{ inputs.pr }}/head)
+            updated_at="$(gh api repos/${{ github.repository }}/pulls/${{ inputs.pr }} | jq -r .updated_at)"
             if [[ $(date -d "$updated_at") > $(date -d "$RUN_AT") ]]; then
               exit 1
             fi
-            REF="$head_sha"
           fi
           echo "REF=$REF" >> $GITHUB_OUTPUT
 
