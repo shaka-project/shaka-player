@@ -6,10 +6,10 @@ on:
     # avoid malicious code executing in the lab.
     inputs:
       pr:
-        description: "A PR number to build and test in the lab.  Overridden by \"ref\" input.  If both are empty, will build and test from main."
+        description: "A PR number to build and test in the lab.  Overridden by \"sha\" input.  If both are empty, will build and test from main."
         required: false
-      ref:
-        description: "A specific git reference to build and test in the lab.  Overrides \"pr\" input.  If both are empty, will build and test from main."
+      sha:
+        description: "A specific git SHA to build and test in the lab.  Overrides \"pr\" input.  If both are empty, will build and test from main."
         required: false
       test_filter:
         description: "A regex filter to run a subset of the tests.  If empty, all tests will run."
@@ -22,7 +22,11 @@ on:
     # workflow.
     inputs:
       pr:
-        description: "A PR number to build and test in the lab.  If empty, will build and test from main."
+        description: "A PR number to build and test in the lab.  Overridden by \"sha\" input.  If both are empty, will build and test from main."
+        required: false
+        type: string
+      sha:
+        description: "A specific git SHA to build and test in the lab.  Overrides \"pr\" input.  If both are empty, will build and test from main."
         required: false
         type: string
       test_filter:
@@ -54,29 +58,29 @@ on:
 concurrency: selenium-lab
 
 jobs:
-  compute-ref:
-    name: Compute ref
+  compute-sha:
+    name: Compute SHA
     runs-on: ubuntu-latest
     outputs:
-      REF: ${{ steps.compute.outputs.REF }}
+      SHA: ${{ steps.compute.outputs.SHA }}
 
     steps:
-      - name: Compute ref
+      - name: Compute SHA
         id: compute
-        #uses: shaka-project/shaka-github-tools/compute-ref@main
-        uses: joeyparrish/shaka-github-tools/compute-ref@compute-ref  # FIXME
+        #uses: shaka-project/shaka-github-tools/compute-sha@main
+        uses: joeyparrish/shaka-github-tools/compute-sha@compute-sha  # FIXME
         with:
-          # If ref is given, it overrides PR.  If neither is given, we fall
+          # If "sha" is given, it overrides PR.  If neither is given, we fall
           # back to testing "main".
-          pr: ${{ inputs.pr }}
-          ref: ${{ inputs.pr == '' && (inputs.ref || 'refs/heads/main') }}
+          ref: ${{ inputs.pr == '' ? 'refs/heads/main' : 'refs/pull/${{ inputs.pr }}/head' }}
+          sha: ${{ inputs.sha }}
 
   # Configure the build matrix based on our grid's YAML config.
   # The matrix contents will be computed by this first job and deserialized
   # into the second job's config.
   matrix-config:
     name: Matrix config
-    needs: compute-ref
+    needs: compute-sha
     runs-on: ubuntu-latest
     outputs:
       INCLUDE: ${{ steps.configure.outputs.INCLUDE }}
@@ -84,7 +88,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.compute-ref.outputs.REF }}
+          sha: ${{ needs.compute-sha.outputs.SHA }}
 
       - name: Install dependencies
         run: npm ci
@@ -144,12 +148,12 @@ jobs:
   # self-hosted Selenium jobs are run in containers on one machine).
   build-shaka:
     name: Pre-build Player
-    needs: compute-ref
+    needs: compute-sha
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.compute-ref.outputs.REF }}
+          ref: ${{ needs.compute-sha.outputs.SHA }}
 
       - name: Set commit status to pending
         if: ${{ inputs.skip_test_status == false }}
@@ -209,7 +213,7 @@ jobs:
     # This is a self-hosted runner in a Docker container, with access to our
     # lab's Selenium grid on port 4444.
     runs-on: self-hosted-selenium
-    needs: [compute-ref, build-shaka, matrix-config]
+    needs: [compute-sha, build-shaka, matrix-config]
     strategy:
       fail-fast: false
       matrix:
@@ -219,7 +223,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.compute-ref.outputs.REF }}
+          ref: ${{ needs.compute-sha.outputs.SHA }}
 
       - name: Set commit status to pending
         if: ${{ inputs.skip_commit_status == false }}
