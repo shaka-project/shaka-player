@@ -69,7 +69,7 @@ jobs:
           # If ref is given, it overrides PR.  If neither is given, we fall
           # back to testing "main".
           pr: ${{ inputs.pr }}
-          ref: ${{ inputs.ref || "refs/heads/main" }}
+          ref: ${{ inputs.ref || 'refs/heads/main' }}
 
   # Configure the build matrix based on our grid's YAML config.
   # The matrix contents will be computed by this first job and deserialized
