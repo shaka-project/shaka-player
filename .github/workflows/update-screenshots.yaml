@@ -29,7 +29,7 @@ jobs:
         with:
           # If sha is given, it overrides PR.  If neither is given, we fail.
           sha: ${{ inputs.sha }}
-          ref: ${{ inputs.pr ? ('refs/pull/' + inputs.pr + '/head') : '' }}
+          ref: ${{ inputs.pr && ('refs/pull/' + inputs.pr + '/head') || '' }}
 
   set-pending-status:
     name: Set Pending Status
