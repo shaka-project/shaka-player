@@ -28,8 +28,8 @@ jobs:
         uses: joeyparrish/shaka-github-tools/compute-sha@compute-sha  # FIXME
         with:
           # If sha is given, it overrides PR.  If neither is given, we fail.
-          ref: refs/pull/${{ inputs.pr }}/head
           sha: ${{ inputs.sha }}
+          ref: ${{ inputs.pr ? ('refs/pull/' + inputs.pr + '/head') : '' }}
 
   set-pending-status:
     name: Set Pending Status
