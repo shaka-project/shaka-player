@@ -24,12 +24,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Decide on the symbolic reference first.
+          # We're testing against a PR head.
+          SYMREF="refs/pull/${{ inputs.pr }}/head"
+
           # Compute a specific sha1 now.  We should use that in all other jobs
           # instead of a symbolic reference that can change meaning if the repo
           # changes.
-
-          # We're testing against a PR.  Turn that PR head into a sha1.
-          REF=$(git rev-parse refs/pull/${{ inputs.pr }}/head)
+          REF=$(git ls-remote https://github.com/${{ github.repository }} "$SYMREF" | cut -f 1)
 
           # Output the ref for other jobs to consume.
           echo "REF=$REF" >> $GITHUB_OUTPUT

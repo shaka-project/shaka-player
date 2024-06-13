@@ -64,16 +64,24 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUN_AT: ${{ github.event_name == 'workflow_call' && github.event.comment.created_at || github.event.repository.updated_at }}
         run: |
+          # Decide on the symbolic reference first.
+          if [[ "${{ inputs.pr }}" != "" ]]; then
+            # We're testing against a PR head.
+            SYMREF="refs/pull/${{ inputs.pr }}/head"
+          else
+            # We're testing against main.
+            SYMREF=refs/heads/main
+          fi
+
           # Compute a specific sha1 now.  We should use that in all other jobs
           # instead of a symbolic reference that can change meaning if the repo
           # changes.
-          if [[ -z "${{ inputs.pr }}" ]]; then
-            # We're testing against main.  Turn "main" into a sha1.
-            REF=$(git rev-parse refs/heads/main)
-          else
-            # We're testing against a PR.  Turn that PR head into a sha1.
-            REF=$(git rev-parse refs/pull/${{ inputs.pr }}/head)
+          REF=$(git ls-remote https://github.com/${{ github.repository }} "$SYMREF" | cut -f 1)
 
+          # Output the ref for other jobs to consume.
+          echo "REF=$REF" >> $GITHUB_OUTPUT
+
+          if [[ "${{ inputs.pr }}" != "" ]]; then
             # Check if the PR has been updated since the workflow was triggered.
             # If so, exit with an error message.
             updated_at="$(gh api repos/${{ github.repository }}/pulls/${{ inputs.pr }} | jq -r .updated_at)"
@@ -82,9 +90,6 @@ jobs:
               exit 1
             fi
           fi
-
-          # Output the ref for other jobs to consume.
-          echo "REF=$REF" >> $GITHUB_OUTPUT
 
   # Configure the build matrix based on our grid's YAML config.
   # The matrix contents will be computed by this first job and deserialized
