@@ -21,8 +21,7 @@ jobs:
     steps:
       - name: Compute SHA
         id: compute
-        #uses: shaka-project/shaka-github-tools/compute-sha@main
-        uses: joeyparrish/shaka-github-tools/compute-sha@compute-sha  # FIXME
+        uses: shaka-project/shaka-github-tools/compute-sha@main
         with:
           ref: refs/pull/${{ inputs.pr }}/head
 
