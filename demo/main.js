@@ -60,6 +60,9 @@ shakaDemo.Main = class {
     this.trickPlayControlsEnabled_ = false;
 
     /** @private {boolean} */
+    this.customContextMenu_ = false;
+
+    /** @private {boolean} */
     this.nativeControlsEnabled_ = false;
 
     /** @private {shaka.extern.SupportType} */
@@ -360,6 +363,7 @@ shakaDemo.Main = class {
     const ui = video['ui'];
 
     const uiConfig = ui.getConfiguration();
+    uiConfig.customContextMenu = this.customContextMenu_;
     // Remove any trick play configurations from a previous config.
     uiConfig.addSeekBar = true;
     uiConfig.controlPanelElements =
@@ -795,6 +799,27 @@ shakaDemo.Main = class {
   }
 
   /**
+   * Enable or disable the UI's custom context menu.
+   *
+   * @param {boolean} enabled
+   */
+  setCustomContextMenuEnabled(enabled) {
+    this.customContextMenu_ = enabled;
+    // Configure the UI, to add or remove the controls.
+    this.configureUI_();
+    this.remakeHash();
+  }
+
+  /**
+   * Get if the UI's custom context menu is enabled.
+   *
+   * @return {boolean} enabled
+   */
+  getCustomContextMenuEnabled() {
+    return this.customContextMenu_;
+  }
+
+  /**
    * Enable or disable the native controls.
    * Goes into effect during the next load.
    *
@@ -949,6 +974,11 @@ shakaDemo.Main = class {
     // Enable trick play.
     if ('trickplay' in params) {
       this.trickPlayControlsEnabled_ = true;
+      this.configureUI_();
+    }
+
+    if ('customContextMenu' in params) {
+      this.customContextMenu_ = true;
       this.configureUI_();
     }
 
@@ -1553,6 +1583,10 @@ shakaDemo.Main = class {
 
     if (this.trickPlayControlsEnabled_) {
       params.push('trickplay');
+    }
+
+    if (this.customContextMenu_) {
+      params.push('customContextMenu');
     }
 
     // MAX_LOG_LEVEL is the default starting log level. Only save the log level
