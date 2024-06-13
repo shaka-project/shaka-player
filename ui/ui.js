@@ -211,7 +211,11 @@ shaka.ui.Overlay = class {
         'pauseTime',
         'playTime',
         'completionPercent',
+        'manifestSizeBytes',
         'bytesDownloaded',
+        'nonFatalErrorCount',
+        'manifestPeriodCount',
+        'manifestGapCount',
       ],
       contextMenuElements: [
         'loop',
