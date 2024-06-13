@@ -58,7 +58,7 @@ jobs:
       REF: ${{ steps.compute.outputs.REF }}
 
     steps:
-      - name: Fetch REF information
+      - name: Compute ref
         id: compute
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
