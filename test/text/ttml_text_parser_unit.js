@@ -357,7 +357,7 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 60, segmentEnd: 3730, vttOffset: 0},
         {startTime: 62.05, endTime: 3723.2});
   });
-  
+
   it('supports colon formatted time with 0 or 1 dp', () => {
     verifyHelper(
         [
