@@ -8,6 +8,7 @@
 goog.provide('shaka.ui.AdStatisticsButton');
 
 goog.require('shaka.log');
+goog.require('shaka.ads.AdManager');
 goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
@@ -125,6 +126,15 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
       this.onClick_();
       this.updateLocalizedStrings_();
     });
+
+    this.eventManager.listen(this.player, 'loading', () => {
+      shaka.ui.Utils.setDisplay(this.button_, false);
+    });
+
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
+          shaka.ui.Utils.setDisplay(this.button_, true);
+        });
   }
 
   /** @private */
