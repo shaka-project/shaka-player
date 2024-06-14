@@ -1,6 +1,7 @@
 {
   "AD_DURATION": "Ad duration",
   "AD_PROGRESS": "Ad [AD_ON] of [NUM_ADS]",
+  "AD_STATISTICS": "Ad statistics",
   "AD_TIME": "Ad: [AD_TIME]",
   "AIRPLAY": "AirPlay",
   "AUTO_QUALITY": "Auto",

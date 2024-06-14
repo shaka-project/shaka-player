@@ -1,6 +1,7 @@
 {
   "AD_DURATION": "Duración del anuncio",
   "AD_PROGRESS": "Anuncio [AD_ON] de [NUM_ADS]",
+  "AD_STATISTICS": "Estadísticas de anuncios",
   "AD_TIME": "Anuncio: [AD_TIME]",
   "AUTO_QUALITY": "Automático",
   "BACK": "Atrás",
@@ -32,6 +33,7 @@
   "SEEK": "Buscar",
   "SKIP_AD": "Saltar anuncio",
   "SKIP_TO_LIVE": "Ir al vídeo en directo",
+  "STATISTICS": "Estadísticas",
   "SUBTITLE_FORCED": "Forzado",
   "SURROUND": "Envolvente",
   "TOGGLE_STEREOSCOPIC": "Alternar estereoscópico",
