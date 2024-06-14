@@ -602,12 +602,12 @@ shaka.extern.PlaybackInfo;
 
 /**
  * @typedef {{
- *   codecs: !Array.<string>,
+ *   codecs: string,
  *   mimeType: string
  * }}
  *
  * @description Represents the state of the given stream.
- * @property {!Array.<string>} codecs
+ * @property {string} codecs
  * @property {string} mimeType
  * @exportDoc
  */
