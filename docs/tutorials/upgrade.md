@@ -104,6 +104,9 @@ application:
       `shaka.util.StringUtils.htmlUnescape` for this purpose.
     - `streaming.useNativeHlsOnSafari` has removed. Now we have another config to do the same for FairPlay `streaming.useNativeHlsForFairPlay` or for HLS (any browser) `streaming.preferNativeHls`.
     - `mediaSource.sourceBufferExtraFeatures` has been replaced with `mediaSource.addExtraFeaturesToSourceBuffer` callback.
+    - `streaming.liveSyncMinLatency` and `streaming.liveSyncMaxLatency` have
+      been removed in favor of `streaming.liveSyncTargetLatency`. (deprecated
+      in v4.10.0)
 
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.
