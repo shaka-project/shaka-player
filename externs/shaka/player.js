@@ -603,12 +603,14 @@ shaka.extern.PlaybackInfo;
 /**
  * @typedef {{
  *   codecs: string,
- *   mimeType: string
+ *   mimeType: string,
+ *   bandwidth: number
  * }}
  *
  * @description Represents the state of the given stream.
  * @property {string} codecs
  * @property {string} mimeType
+ * @property {number} bandwidth
  * @exportDoc
  */
 shaka.extern.PlaybackStreamInfo;
