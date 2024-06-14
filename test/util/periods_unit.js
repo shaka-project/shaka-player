@@ -1124,7 +1124,8 @@ describe('PeriodCombiner', () => {
     expect(audio2.originalId).toBe('2,4');
   });
 
-  it('Matches streams with related codecs', async () => {
+  it('Creates a video stream for each unique codec base ' +
+  'and matches streams with related codecs', async () => {
     const stream1 = makeVideoStream(1080);
     stream1.originalId = '1';
     stream1.bandwidth = 120000;
@@ -1189,19 +1190,35 @@ describe('PeriodCombiner', () => {
 
     await combiner.combinePeriods(periods, /* isDynamic= */ true);
     const variants = combiner.getVariants();
-    expect(variants.length).toBe(4);
+    expect(variants.length).toBe(7);
     // We can use the originalId field to see what each track is composed of.
     const video1 = variants[0].video;
     expect(video1.originalId).toBe('1,2');
+    expect(video1.codecs).toBe(stream1.codecs);
 
     const video2 = variants[1].video;
     expect(video2.originalId).toBe('3,4');
+    expect(video2.codecs).toBe(stream3.codecs);
 
     const video3 = variants[2].video;
     expect(video3.originalId).toBe('5,6');
+    expect(video3.codecs).toBe(stream5.codecs);
 
     const video4 = variants[3].video;
     expect(video4.originalId).toBe('7,8');
+    expect(video4.codecs).toBe(stream7.codecs);
+
+    const video5 = variants[4].video;
+    expect(video5.originalId).toBe('1,2');
+    expect(video5.codecs).toBe(stream2.codecs);
+
+    const video6 = variants[5].video;
+    expect(video6.originalId).toBe('3,4');
+    expect(video6.codecs).toBe(stream4.codecs);
+
+    const video7 = variants[6].video;
+    expect(video7.originalId).toBe('5,6');
+    expect(video7.codecs).toBe(stream6.codecs);
   });
 
   it('Matches streams with most roles in common', async () => {
