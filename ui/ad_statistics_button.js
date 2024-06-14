@@ -125,7 +125,6 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
       this.onClick_();
       this.updateLocalizedStrings_();
     });
-    this.onClick_();
   }
 
   /** @private */
