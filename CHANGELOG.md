@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.9.5](https://github.com/shaka-project/shaka-player/compare/v4.9.4...v4.9.5) (2024-06-14)
+
+
+### Bug Fixes
+
+* **CMCD:** Fix reset CMCD on unload ([#6821](https://github.com/shaka-project/shaka-player/issues/6821)) ([f9d99dd](https://github.com/shaka-project/shaka-player/commit/f9d99dd70e05857c4e5a84dac611b1a48f89e562))
+* Fix initial track selection in src= when using HLS ([#6803](https://github.com/shaka-project/shaka-player/issues/6803)) ([b2fd9a3](https://github.com/shaka-project/shaka-player/commit/b2fd9a379784a03ffed3f1c74d4dd682ec8cc073))
+* **HLS:** Fix AC-4 codec selection in HLS ([#6818](https://github.com/shaka-project/shaka-player/issues/6818)) ([c24c73b](https://github.com/shaka-project/shaka-player/commit/c24c73b0b90984b369e2a5b5d35f37989166e459))
+* ignore buffered content less than 1e-4s ([#6802](https://github.com/shaka-project/shaka-player/issues/6802)) ([de119b5](https://github.com/shaka-project/shaka-player/commit/de119b564b302716299ef92979dbef4a3dde13c6))
+
 ## [4.9.4](https://github.com/shaka-project/shaka-player/compare/v4.9.3...v4.9.4) (2024-06-11)
 
 
