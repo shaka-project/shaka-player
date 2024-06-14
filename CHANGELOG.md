@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.8.14](https://github.com/shaka-project/shaka-player/compare/v4.8.13...v4.8.14) (2024-06-14)
+
+
+### Bug Fixes
+
+* Fix initial track selection in src= when using HLS ([#6803](https://github.com/shaka-project/shaka-player/issues/6803)) ([0e1dd96](https://github.com/shaka-project/shaka-player/commit/0e1dd96d266d23cb00eb2ee3d406c0a806a60737))
+* **HLS:** Fix AC-4 codec selection in HLS ([#6818](https://github.com/shaka-project/shaka-player/issues/6818)) ([d19bc51](https://github.com/shaka-project/shaka-player/commit/d19bc517ba3b7509644379463af3594bb5b5eed5))
+* ignore buffered content less than 1e-4s ([#6802](https://github.com/shaka-project/shaka-player/issues/6802)) ([5dc0b23](https://github.com/shaka-project/shaka-player/commit/5dc0b23d9bc12feee2693aa28121272565530a7c))
+
 ## [4.8.13](https://github.com/shaka-project/shaka-player/compare/v4.8.12...v4.8.13) (2024-06-11)
 
 
