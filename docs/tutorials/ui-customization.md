@@ -99,11 +99,12 @@ The following buttons can be added to the overflow menu:
   supports AirPlay.
 * remote: adds a button that opens a Remote Playback dialog. The button is visible only if the
   browser supports Remote Playback API.
-* Statistics: adds a button that displays statistics of the video.
+* statistics: adds a button that displays statistics of the video.
 * recenter_vr: adds a button that recenter the VR view to the initial view. The button is visible
   only if playing a VR content.
 * toggle_stereoscopic: adds a button that toggle between monoscopic and stereoscopic. The button
   is visible only if playing a VR content.
+* ad_statistics: adds a button that displays ad statistics of the video.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:
