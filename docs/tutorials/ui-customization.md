@@ -135,11 +135,12 @@ ui.configure(config);
 
 A custom context menu can be added through the `customContextMenu` boolean. Additionally, the `contextMenuElements` option can be used to add elements to it.
 The following buttons can be added to the context menu:
-* Statistics: adds a button that displays statistics of the video.
+* statistics: adds a button that displays statistics of the video.
 * loop: adds a button that controls if the currently selected video is played in a loop.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
   that support it. Button is invisible on other browsers. Note that it will use the 
   [Document Picture-in-Picture API]() if supported.
+* ad_statistics: adds a button that displays ad statistics of the video.
 
 Example:
 ```js
