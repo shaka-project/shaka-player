@@ -686,6 +686,7 @@ describe('StreamingEngine', () => {
     // Use the VOD manifests to test the streamDataCallback function in the low
     // latency mode.
     setupVod();
+    manifest.isLowLatency = true;
 
     const config = shaka.util.PlayerConfiguration.createDefault().streaming;
     config.lowLatencyMode = true;
