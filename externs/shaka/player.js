@@ -1263,6 +1263,28 @@ shaka.extern.MssManifestConfiguration;
 shaka.extern.ManifestConfiguration;
 
 
+
+/**
+ * @typedef {{
+ *   enabled: boolean,
+ *   stabilityThreshold: number,
+ *   rebufferIncrement: number,
+ *   maxAttempts: number
+ * }}
+ *
+ * @description
+ * Dynamic Target Latency configuration options.
+ *
+ * @property {boolean} enabled
+ *   Enable the live stream sync against the live edge by changing the playback
+ *   rate. Defaults to <code>false</code>.
+ *   Note: on some SmartTVs, if this is activated, it may not work or the sound
+ *   may be lost when activated.
+ * @exportDoc
+ */
+shaka.extern.DynamicTargetLatencyConfiguration;
+
+
 /**
  * @typedef {{
  *   enabled: boolean,
@@ -1271,7 +1293,8 @@ shaka.extern.ManifestConfiguration;
  *   maxPlaybackRate: number,
  *   minPlaybackRate: number,
  *   panicMode: boolean,
- *   panicThreshold: number
+ *   panicThreshold: number,
+ *   dynamicTargetLatency: shaka.extern.DynamicTargetLatencyConfiguration
  * }}
  *
  * @description
@@ -1304,6 +1327,10 @@ shaka.extern.ManifestConfiguration;
  * @property {number} panicThreshold
  *   Number of seconds that playback stays in panic mode after a rebuffering.
  *   Defaults to <code>60</code>
+ * @property {shaka.extern.DynamicTargetLatencyConfiguration} dynamicTargetLatency
+ *   The dynamic target latency config for dynamically adjusting the target
+ *   latency to be closer to edge when network conditions are good and to back
+ *   off when network conditions are bad.
  * @exportDoc
  */
 shaka.extern.LiveSyncConfiguration;
