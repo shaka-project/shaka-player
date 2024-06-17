@@ -164,6 +164,21 @@ const config = {
 ui.configure(config);
 ```
 
+#### Configuring Ad Statistics
+The list of ad statistics that are displayed when toggling the ad statistics button can be customized by specifying a `adStatisticsList` on the configuration. All of the statistics from the {@link shaka.extern.AdsStats `AdsStats`} extern can be displayed.
+
+Example:
+```js
+// Add a context menu with the 'ad_statistics' button that displays a container with
+// the current 'started' and 'playedCompletely' values.
+const config = {
+  'customContextMenu' : true,
+  'contextMenuElements' : ['ad_statistics'],
+  'adStatisticsList' : ['started', 'playedCompletely'],
+}
+ui.configure(config);
+```
+
 The presence of the seek bar and the big play button in the center of the video element can be
 customized with `addSeekBar` and `addBigPlayButton` booleans in the config.
 
