@@ -7,6 +7,10 @@
     "description": "The contents of the ad countdown element, describing what ad you are on in a sequence of ads.",
     "message": "Ad [AD_ON:1] of [NUM_ADS:6]"
   },
+  "AD_STATISTICS": {
+    "description": "Label for a button that displays ad statistics.",
+    "message": "Ad statistics"
+  },
   "AD_TIME": {
     "description": "The text content of a label that shows how much time is left in the current ad.",
     "message": "Ad: [AD_TIME:0:05/0:10]"

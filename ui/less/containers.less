@@ -248,6 +248,38 @@
   }
 }
 
+.shaka-ad-statistics-container {
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  min-width: 150px;
+
+  color: white;
+  background-color: rgba(35 35 35 / 90%);
+
+  font-size: 14px;
+
+  padding: 5px 10px;
+  border-radius: 2px;
+
+  position: absolute;
+  z-index: 2;
+  right: 15px;
+  top: 15px;
+
+  /* Fades out with the other controls. */
+  .show-when-controls-shown();
+
+  div {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  span {
+    color: rgb(150 150 150);
+  }
+}
+
 .shaka-context-menu {
   background-color: rgba(35 35 35 / 90%);
 

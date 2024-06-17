@@ -217,10 +217,17 @@ shaka.ui.Overlay = class {
         'manifestPeriodCount',
         'manifestGapCount',
       ],
+      adStatisticsList: [
+        'loadTimes',
+        'started',
+        'playedCompletely',
+        'skipped',
+      ],
       contextMenuElements: [
         'loop',
         'picture_in_picture',
         'statistics',
+        'ad_statistics',
       ],
       playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
       fastForwardRates: [2, 4, 8, 1],
