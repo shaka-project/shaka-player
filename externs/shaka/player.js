@@ -1262,7 +1262,50 @@ shaka.extern.MssManifestConfiguration;
  */
 shaka.extern.ManifestConfiguration;
 
-
+/**
+ * @typedef {{
+ *   enabled: boolean,
+ *   targetLatency: number,
+ *   targetLatencyTolerance: number,
+ *   playbackRate: number,
+ *   minPlaybackRate: number,
+ *   panicMode: boolean,
+ *   panicThreshold: number
+ * }}
+ *
+ * @description
+ * LiveSync configuration options.
+ *
+ * @property {boolean} enabled
+ *   Enable the live stream sync against the live edge by changing the playback
+ *   rate. Defaults to <code>false</code>.
+ *   Note: on some SmartTVs, if this is activated, it may not work or the sound
+ *   may be lost when activated.
+ * @property {number} targetLatency
+ *   Preferred latency, in seconds. Effective only if liveSync is true.
+ *   Defaults to <code>0.5</code>.
+ * @property {number} targetLatencyTolerance
+ *   Latency tolerance for target latency, in seconds. Effective only if
+ *   liveSync is enabled. Defaults to <code>0.5</code>.
+ * @property {number} playbackRate
+ *   Playback rate used for latency chasing. It is recommended to use a value
+ *   between 1 and 2. Effective only if liveSync is enabled. Defaults to
+ *   <code>1.1</code>.
+ * @property {number} minPlaybackRate
+ *   Minimum playback rate used for latency chasing. It is recommended to use a
+ *   value between 0 and 1. Effective only if liveSync is enabled. Defaults to
+ *   <code>0.95</code>.
+ * @property {boolean} panicMode
+ *   If <code>true</code>, panic mode for live sync is enabled. When enabled,
+ *   will set the playback rate to the <code>minPlaybackRate</code>
+ *   until playback has continued past a rebuffering for longer than the
+ *   <code>panicThreshold</code>. Defaults to <code>false</code>.
+ * @property {number} panicThreshold
+ *   Number of seconds that playback stays in panic mode after a rebuffering.
+ *   Defaults to <code>60</code>
+ *
+ */
+shaka.extern.LiveSync;
 /**
  * @typedef {{
  *   retryParameters: shaka.extern.RetryParameters,
@@ -1299,13 +1342,7 @@ shaka.extern.ManifestConfiguration;
  *   disableAudioPrefetch: boolean,
  *   disableTextPrefetch: boolean,
  *   disableVideoPrefetch: boolean,
- *   liveSync: boolean,
- *   liveSyncTargetLatency: number,
- *   liveSyncTargetLatencyTolerance: number,
- *   liveSyncPlaybackRate: number,
- *   liveSyncMinPlaybackRate: number,
- *   liveSyncPanicMode: boolean,
- *   liveSyncPanicThreshold: number,
+ *   liveSync: shaka.extern.LiveSync,
  *   allowMediaSourceRecoveries: boolean,
  *   minTimeBetweenRecoveries: number,
  *   vodDynamicPlaybackRate: boolean,
@@ -1460,33 +1497,8 @@ shaka.extern.ManifestConfiguration;
  *   If set and prefetch limit is defined, it will prevent from prefetching data
  *   for video.
  *   Defaults to <code>false</code>.
- * @property {boolean} liveSync
- *   Enable the live stream sync against the live edge by changing the playback
- *   rate. Defaults to <code>false</code>.
- *   Note: on some SmartTVs, if this is activated, it may not work or the sound
- *   may be lost when activated.
- * @property {number} liveSyncTargetLatency
- *   Preferred latency, in seconds. Effective only if liveSync is true.
- *   Defaults to <code>0.5</code>.
- * @property {number} liveSyncTargetLatencyTolerance
- *   Latency tolerance for target latency, in seconds. Effective only if
- *   liveSync is true. Defaults to <code>0.5</code>.
- * @property {number} liveSyncPlaybackRate
- *   Playback rate used for latency chasing. It is recommended to use a value
- *   between 1 and 2. Effective only if liveSync is true. Defaults to
- *   <code>1.1</code>.
- * @property {number} liveSyncMinPlaybackRate
- *   Minimum playback rate used for latency chasing. It is recommended to use a
- *   value between 0 and 1. Effective only if liveSync is true. Defaults to
- *   <code>0.95</code>.
- * @property {boolean} liveSyncPanicMode
- *   If <code>true</code>, panic mode for live sync is enabled. When enabled,
- *   will set the playback rate to the <code>liveSyncMinPlaybackRate</code>
- *   until playback has continued past a rebuffering for longer than the
- *   <code>liveSyncPanicThreshold</code>. Defaults to <code>false</code>.
- * @property {number} liveSyncPanicThreshold
- *   Number of seconds that playback stays in panic mode after a rebuffering.
- *   Defaults to <code>60</code>
+ * @property {shaka.extern.LiveSync} liveSync
+ *   The live sync configuration for keeping near the live edge.
  * @property {boolean} allowMediaSourceRecoveries
  *   Indicate if we should recover from VIDEO_ERROR resetting Media Source.
  *   Defaults to <code>true</code>.
