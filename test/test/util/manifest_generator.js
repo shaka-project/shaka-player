@@ -109,6 +109,8 @@ shaka.test.ManifestGenerator.Manifest = class {
     this.periodCount = 1;
     /** @type {number} */
     this.gapCount = 0;
+    /** @type {boolean} */
+    this.isLowLatency = false;
 
 
     /** @type {shaka.extern.Manifest} */

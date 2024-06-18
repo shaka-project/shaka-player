@@ -608,6 +608,7 @@ describe('StreamingEngine', () => {
         nextUrl: null,
         periodCount: 1,
         gapCount: 0,
+        isLowLatency: false,
         variants: [{
           id: 1,
           video: {

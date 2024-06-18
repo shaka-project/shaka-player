@@ -2923,8 +2923,10 @@ describe('HlsParser', () => {
      * @param {!Array.<number>} startTimes
      * @param {number} syncTimeOffset
      * @param {(function(!shaka.media.SegmentReference))=} modifyFn
+     * @param {boolean=} isLowLatency
      */
-    async function test(media, startTimes, syncTimeOffset, modifyFn) {
+    async function test(media, startTimes, syncTimeOffset, modifyFn,
+        isLowLatency = false) {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,vtt",',
@@ -2953,6 +2955,7 @@ describe('HlsParser', () => {
         });
         manifest.sequenceMode = sequenceMode;
         manifest.type = shaka.media.ManifestParser.HLS;
+        manifest.isLowLatency = !!isLowLatency;
       });
 
       fakeNetEngine
@@ -3073,7 +3076,7 @@ describe('HlsParser', () => {
           reference.partialReferences = [partialRef, partialRef2];
           reference.allPartialSegments = true;
         }
-      });
+      }, /* isLowLatency= */ true);
     });
   });
 
