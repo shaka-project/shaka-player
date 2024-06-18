@@ -74,9 +74,8 @@ These arguments can be passed in using `test.py` or using `karma start`
 directly:
 * `--quick` will only run unit tests, skipping integration tests.
 * `--enable-logging` will enable console logging.  Logs will be printed to
-  the console.  It also accepts a value for the log level `--enable-logging=1`,
-  defaulting to 3.  See [lib/debug/log.js][] for the log levels (you must
-  pass the number).
+  the console.  It accepts the enum for the log level `--enable-logging=v2`,
+  defaulting to `info`.  See [lib/debug/log.js][] for the log levels.
 * `--external` will run integration tests against external assets.  This will
   take an extremely long time to run, and requires a fast and reliable internet
   connection.
