@@ -219,9 +219,11 @@ shaka.ui.Overlay = class {
       ],
       adStatisticsList: [
         'loadTimes',
+        'averageLoadTime',
         'started',
         'playedCompletely',
         'skipped',
+        'errors',
       ],
       contextMenuElements: [
         'loop',

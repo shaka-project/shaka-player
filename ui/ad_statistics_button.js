@@ -98,9 +98,11 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
     /** @private {!Object.<string, function(string):string>} */
     this.parseFrom_ = {
       'loadTimes': parseLoadTimes,
+      'averageLoadTime': showNumber,
       'started': showNumber,
       'playedCompletely': showNumber,
       'skipped': showNumber,
+      'errors': showNumber,
     };
 
     /** @private {shaka.util.Timer} */
