@@ -225,7 +225,7 @@ shaka.extern.ServiceDescription;
  * @property {string} encryptionScheme
  *   <i>Required.</i> <br>
  *   The encryption scheme, e.g., "cenc", "cbcs", "cbcs-1-9".
- * @property {Set.<string>} keySystemUris
+ * @property {(Set.<string>|undefined)} keySystemUris
  *   <i>Optional.</i> <br>
  *   The key system uri, e.g., "skd://" for fairplay.
  * @property {string} licenseServerUri
