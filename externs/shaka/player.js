@@ -1268,7 +1268,7 @@ shaka.extern.ManifestConfiguration;
  *   enabled: boolean,
  *   targetLatency: number,
  *   targetLatencyTolerance: number,
- *   playbackRate: number,
+ *   maxPlaybackRate: number,
  *   minPlaybackRate: number,
  *   panicMode: boolean,
  *   panicThreshold: number
@@ -1288,9 +1288,9 @@ shaka.extern.ManifestConfiguration;
  * @property {number} targetLatencyTolerance
  *   Latency tolerance for target latency, in seconds. Effective only if
  *   liveSync is enabled. Defaults to <code>0.5</code>.
- * @property {number} playbackRate
- *   Playback rate used for latency chasing. It is recommended to use a value
- *   between 1 and 2. Effective only if liveSync is enabled. Defaults to
+ * @property {number} maxPlaybackRate
+ *   Max playback rate used for latency chasing. It is recommended to use a
+ *   value between 1 and 2. Effective only if liveSync is enabled. Defaults to
  *   <code>1.1</code>.
  * @property {number} minPlaybackRate
  *   Minimum playback rate used for latency chasing. It is recommended to use a

@@ -112,7 +112,7 @@ application:
       `liveSyncPlaybackRate`, `liveSyncMinPlaybackRate`, `liveSyncPanicMode`
       `liveSyncPanicThreshold`. `streaming.liveSync` is now an options object
       with the relevant options: `enabled`, `targetLatency`,
-      `targetLatencyTolerance`, `playbackRate`, `minPlaybackRate`, `panicMode`
+      `targetLatencyTolerance`, `maxPlaybackRate`, `minPlaybackRate`, `panicMode`
       `panicThreshold`. (deprecated in v4.10.0)
 
   - Plugin changes:

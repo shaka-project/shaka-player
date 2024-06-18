@@ -583,8 +583,8 @@ shakaDemo.Config = class {
             'streaming.liveSync.targetLatencyTolerance',
             /* canBeDecimal= */ true,
             /* canBeZero= */ true)
-        .addNumberInput_('Playback rate',
-            'streaming.liveSync.playbackRate',
+        .addNumberInput_('Max playback rate',
+            'streaming.liveSync.maxPlaybackRate',
             /* canBeDecimal= */ true,
             /* canBeZero= */ false)
         .addNumberInput_('Min playback rate',
