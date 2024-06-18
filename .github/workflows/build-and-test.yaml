@@ -60,9 +60,10 @@ jobs:
           - os: macos-13
             browser: Chrome
           - os: macos-13
-            browser: Firefox
-          - os: macos-13
             browser: Edge
+
+          - os: macos-latest
+            browser: Firefox
 
           - os: macos-latest
             browser: Safari
@@ -133,7 +134,7 @@ jobs:
 
       # Firefox and Edge might be missing on Mac CI images.
       - name: 'Install Firefox on Mac'
-        if: matrix.os == 'macos-13' && matrix.browser == 'Firefox'
+        if: matrix.os == 'macos-latest' && matrix.browser == 'Firefox'
         run: brew install --cask firefox
       - name: 'Install Edge on Mac'
         if: matrix.os == 'macos-13' && matrix.browser == 'Edge'
