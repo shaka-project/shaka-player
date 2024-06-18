@@ -604,7 +604,11 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true,
             /* canBeZero= */ true)
         .addNumberInput_('Dynamic Target Latency Max Attempts',
-            'streaming.liveSyncDynamicTargetLatencyMaxAttempts')
+            'streaming.liveSync.dynamicTargetLatency.maxAttempts')
+        .addNumberInput_('Dynamic Target Latency Max Latency',
+            'streaming.liveSync.dynamicTargetLatency.maxLatency')
+        .addNumberInput_('Dynamic Target Latency Min Latency',
+            'streaming.liveSync.dynamicTargetLatency.minLatency');
   }
 
   /** @private */
