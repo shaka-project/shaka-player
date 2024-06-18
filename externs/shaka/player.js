@@ -1262,6 +1262,7 @@ shaka.extern.MssManifestConfiguration;
  */
 shaka.extern.ManifestConfiguration;
 
+
 /**
  * @typedef {{
  *   enabled: boolean,
@@ -1303,9 +1304,11 @@ shaka.extern.ManifestConfiguration;
  * @property {number} panicThreshold
  *   Number of seconds that playback stays in panic mode after a rebuffering.
  *   Defaults to <code>60</code>
- *
+ * @exportDoc
  */
-shaka.extern.LiveSync;
+shaka.extern.LiveSyncConfiguration;
+
+
 /**
  * @typedef {{
  *   retryParameters: shaka.extern.RetryParameters,
@@ -1342,7 +1345,7 @@ shaka.extern.LiveSync;
  *   disableAudioPrefetch: boolean,
  *   disableTextPrefetch: boolean,
  *   disableVideoPrefetch: boolean,
- *   liveSync: shaka.extern.LiveSync,
+ *   liveSync: shaka.extern.LiveSyncConfiguration,
  *   allowMediaSourceRecoveries: boolean,
  *   minTimeBetweenRecoveries: number,
  *   vodDynamicPlaybackRate: boolean,
@@ -1497,7 +1500,7 @@ shaka.extern.LiveSync;
  *   If set and prefetch limit is defined, it will prevent from prefetching data
  *   for video.
  *   Defaults to <code>false</code>.
- * @property {shaka.extern.LiveSync} liveSync
+ * @property {shaka.extern.LiveSyncConfiguration} liveSync
  *   The live sync configuration for keeping near the live edge.
  * @property {boolean} allowMediaSourceRecoveries
  *   Indicate if we should recover from VIDEO_ERROR resetting Media Source.

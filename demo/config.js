@@ -572,7 +572,7 @@ shakaDemo.Config = class {
 
   /** @private */
   addLiveSyncSection_() {
-    const docLink = this.resolveExternLink_('.LiveSync');
+    const docLink = this.resolveExternLink_('.LiveSyncConfiguration');
     this.addSection_('Streaming Live Sync', docLink);
     this.addBoolInput_('Live Sync', 'streaming.liveSync')
         .addNumberInput_('Target latency',
