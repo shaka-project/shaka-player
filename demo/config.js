@@ -490,25 +490,6 @@ shakaDemo.Config = class {
             'streaming.disableTextPrefetch')
         .addBoolInput_('Disable Video Prefetch',
             'streaming.disableVideoPrefetch')
-        .addBoolInput_('Live Sync', 'streaming.liveSync')
-        .addNumberInput_('Target latency for live sync',
-            'streaming.liveSyncTargetLatency',
-            /* canBeDecimal= */ true,
-            /* canBeZero= */ true)
-        .addNumberInput_('Target latency tolerance',
-            'streaming.liveSyncTargetLatencyTolerance',
-            /* canBeDecimal= */ true,
-            /* canBeZero= */ true)
-        .addNumberInput_('Playback rate for live sync',
-            'streaming.liveSyncPlaybackRate',
-            /* canBeDecimal= */ true,
-            /* canBeZero= */ false)
-        .addNumberInput_('Min playback rate for live sync',
-            'streaming.liveSyncMinPlaybackRate',
-            /* canBeDecimal= */ true)
-        .addBoolInput_('Live Sync Panic Mode', 'streaming.liveSyncPanicMode')
-        .addNumberInput_('Live Sync Panic Mode Threshold',
-            'streaming.liveSyncPanicThreshold')
         .addBoolInput_('Allow Media Source recoveries',
             'streaming.allowMediaSourceRecoveries')
         .addNumberInput_('Minimum time between recoveries',
@@ -586,6 +567,32 @@ shakaDemo.Config = class {
         .addBoolInput_('Don\'t choose codecs',
             'streaming.dontChooseCodecs');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
+    this.addLiveSyncSection_();
+  }
+
+  /** @private */
+  addLiveSyncSection_() {
+    const docLink = this.resolveExternLink_('.LiveSyncConfiguration');
+    this.addSection_('Streaming Live Sync', docLink);
+    this.addBoolInput_('Live Sync', 'streaming.liveSync.enabled')
+        .addNumberInput_('Target latency',
+            'streaming.liveSync.targetLatency',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Target latency tolerance',
+            'streaming.liveSync.targetLatencyTolerance',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Max playback rate',
+            'streaming.liveSync.maxPlaybackRate',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ false)
+        .addNumberInput_('Min playback rate',
+            'streaming.liveSync.minPlaybackRate',
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Panic Mode', 'streaming.liveSync.panicMode')
+        .addNumberInput_('Panic Mode Threshold',
+            'streaming.liveSync.panicThreshold');
   }
 
   /** @private */
