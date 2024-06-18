@@ -1269,17 +1269,39 @@ shaka.extern.ManifestConfiguration;
  *   enabled: boolean,
  *   stabilityThreshold: number,
  *   rebufferIncrement: number,
- *   maxAttempts: number
+ *   maxAttempts: number,
+ *   maxLatency: number,
+ *   minLatency: number
  * }}
  *
  * @description
  * Dynamic Target Latency configuration options.
  *
  * @property {boolean} enabled
- *   Enable the live stream sync against the live edge by changing the playback
- *   rate. Defaults to <code>false</code>.
- *   Note: on some SmartTVs, if this is activated, it may not work or the sound
- *   may be lost when activated.
+ *   If <code>true</code>, dynamic latency for live sync is enabled. When
+ *   enabled, the target latency will be adjusted closer to the min latency
+ *   when playback is stable (see <code>stabilityThreshold</code>). If
+ *   there are rebuffering events, then the target latency will move towards
+ *   the max latency value in increments of <code>rebufferIncrement</code>.
+ *   Defaults to <code>false</code>.
+ * @property {number} rebufferIncrement
+ *   The value, in seconds, to increment the target latency towards
+ *   <code>maxLatency</code> after a rebuffering event. Defaults to
+ *   <code>0.5</code>.
+ * @property {number} stabilityThreshold
+ *   Number of seconds after a rebuffering before we are considered stable and
+ *   will move the target latency towards <code>minLatency</code>
+ *   value. Defaults to <code>60</code>
+ * @property {number} maxAttempts
+ *   Number of times that dynamic target latency will back off to
+ *   <code>maxLatency</code> and attempt to adjust it closer to
+ *   <code>minLatency</code>. Defaults to <code>5</code>
+ * @property {number} maxLatency
+ *   The latency to use when a rebuffering event causes us to back off from
+ *   the live edge. Defaults to <code>4</code>
+ * @property {number} minLatency
+ *   The latency to work towards when the network is stable and we want to get
+ *   closer to the live edge. Defaults to <code>1</code>
  * @exportDoc
  */
 shaka.extern.DynamicTargetLatencyConfiguration;
