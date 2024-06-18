@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.9.6](https://github.com/shaka-project/shaka-player/compare/v4.9.5...v4.9.6) (2024-06-18)
+
+
+### Bug Fixes
+
+* Exclude fetch polyfill from fetch plugin ([#6838](https://github.com/shaka-project/shaka-player/issues/6838)) ([65bb569](https://github.com/shaka-project/shaka-player/commit/65bb56972412188a54d7111d0645cb63779b75f9))
+* **TTML:** Extended subtitle codec support ([#6832](https://github.com/shaka-project/shaka-player/issues/6832)) ([af732cb](https://github.com/shaka-project/shaka-player/commit/af732cb78e6b16a5ec11686902bf8babd5a9ad63)), closes [#6831](https://github.com/shaka-project/shaka-player/issues/6831)
+* **TTML:** Fix timing parsing when using 1dp ([#6830](https://github.com/shaka-project/shaka-player/issues/6830)) ([6f029d9](https://github.com/shaka-project/shaka-player/commit/6f029d9a9b395fd8619c6ced447b61b3ce7313ff)), closes [#6829](https://github.com/shaka-project/shaka-player/issues/6829)
+* **UI:** update Polish translations ([#6846](https://github.com/shaka-project/shaka-player/issues/6846)) ([06d99c9](https://github.com/shaka-project/shaka-player/commit/06d99c90ff37ceb2644537d38e0e2cc172ca6c8a))
+
 ## [4.9.5](https://github.com/shaka-project/shaka-player/compare/v4.9.4...v4.9.5) (2024-06-14)
 
 
