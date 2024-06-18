@@ -1,4 +1,4 @@
-# Configuring text displayer`
+# Configuring text displayer
 
 Shaka Player supports two types of Text Displayer.
 1) Using the browser's native API, Shaka Player creates a textTrack along
