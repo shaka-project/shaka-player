@@ -473,7 +473,6 @@ shaka.test.ManifestGenerator.DrmInfo = class {
     const buffer = shaka.util.Uint8ArrayUtils.fromBase64(base64);
     this.initData.push({initData: buffer, initDataType: 'keyids'});
   }
-};
 
   /**
    * Adds a new keySystemUris to the current DRM info.
