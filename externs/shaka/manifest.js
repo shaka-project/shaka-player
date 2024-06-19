@@ -203,6 +203,7 @@ shaka.extern.ServiceDescription;
  * @typedef {{
  *   keySystem: string,
  *   encryptionScheme: string,
+ *   keySystemUris: (Set.<string>|undefined),
  *   licenseServerUri: string,
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
@@ -224,6 +225,9 @@ shaka.extern.ServiceDescription;
  * @property {string} encryptionScheme
  *   <i>Required.</i> <br>
  *   The encryption scheme, e.g., "cenc", "cbcs", "cbcs-1-9".
+ * @property {(Set.<string>|undefined)} keySystemUris
+ *   <i>Optional.</i> <br>
+ *   The key system uri, e.g., "skd://" for fairplay.
  * @property {string} licenseServerUri
  *   <i>Filled in by DRM config if missing.</i> <br>
  *   The license server URI.
