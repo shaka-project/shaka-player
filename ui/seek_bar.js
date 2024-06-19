@@ -113,6 +113,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.thumbnailContainer_.appendChild(this.thumbnailTime_);
     this.container.appendChild(this.thumbnailContainer_);
 
+    this.timeContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.timeContainer_.id = 'shaka-player-ui-time-container';
+    this.container.appendChild(this.timeContainer_);
+
     /**
      * @private {?shaka.extern.Thumbnail}
      */
@@ -180,13 +184,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           }
           this.lastThumbnail_ = null;
           this.hideThumbnail_();
+          this.hideTime_();
         });
 
     this.eventManager.listen(this.bar, 'mousemove', (event) => {
-      if (!this.player.getImageTracks().length) {
-        this.hideThumbnail_();
-        return;
-      }
       const rect = this.bar.getBoundingClientRect();
       const min = parseFloat(this.bar.min);
       const max = parseFloat(this.bar.max);
@@ -196,11 +197,17 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       const scale = (max - min) / rect.width;
       // Mouse position in units, which may be outside the allowed range.
       const value = Math.round(min + scale * mousePosition);
-      // Show Thumbnail
+      if (!this.player.getImageTracks().length) {
+        this.hideThumbnail_();
+        this.showTime_(mousePosition, value);
+        return;
+      }
+      this.hideTime_();
       this.showThumbnail_(mousePosition, value);
     });
 
     this.eventManager.listen(this.container, 'mouseleave', () => {
+      this.hideTime_();
       this.hideThumbnailTimer_.stop();
       this.hideThumbnailTimer_.tickAfter(/* seconds= */ 0.25);
     });
@@ -495,6 +502,33 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.SEEK);
   }
 
+  /** @private */
+  showTime_(pixelPosition, value) {
+    const offsetTop = -10;
+    const width = this.timeContainer_.clientWidth;
+    const height = 20;
+    this.timeContainer_.style.width = 'auto';
+    this.timeContainer_.style.height = height + 'px';
+    this.timeContainer_.style.top = -(height - offsetTop) + 'px';
+    const leftPosition = Math.min(this.bar.offsetWidth - width,
+        Math.max(0, pixelPosition - (width / 2)));
+    this.timeContainer_.style.left = leftPosition + 'px';
+    this.timeContainer_.style.visibility = 'visible';
+    if (this.player.isLive()) {
+      const seekRange = this.player.seekRange();
+      const totalSeconds = seekRange.end - value;
+      if (totalSeconds < 1) {
+        this.timeContainer_.textContent =
+            this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
+      } else {
+        this.timeContainer_.textContent =
+            '-' + this.timeFormatter_(totalSeconds);
+      }
+    } else {
+      this.timeContainer_.textContent = this.timeFormatter_(value);
+    }
+  }
+
 
   /**
    * @private
@@ -667,6 +701,14 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   hideThumbnail_() {
     this.thumbnailContainer_.style.visibility = 'hidden';
     this.thumbnailTime_.textContent = '';
+  }
+
+
+  /**
+   * @private
+   */
+  hideTime_() {
+    this.timeContainer_.style.visibility = 'hidden';
   }
 
 
