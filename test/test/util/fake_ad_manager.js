@@ -98,7 +98,7 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
    * @param {!shaka.test.FakeAd} ad
    */
   startAd(ad) {
-    const event = new shaka.util.FakeEvent(shaka.ads.AdManager.AD_STARTED,
+    const event = new shaka.util.FakeEvent(shaka.ads.Utils.AD_STARTED,
         (new Map()).set('ad', ad));
 
     this.dispatchEvent(event);
@@ -106,14 +106,14 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
 
   /** @public */
   finishAd() {
-    const event = new shaka.util.FakeEvent(shaka.ads.AdManager.AD_STOPPED);
+    const event = new shaka.util.FakeEvent(shaka.ads.Utils.AD_STOPPED);
     this.dispatchEvent(event);
   }
 
   /** @public */
   changeSkipState() {
     const event =
-        new shaka.util.FakeEvent(shaka.ads.AdManager.AD_SKIP_STATE_CHANGED);
+        new shaka.util.FakeEvent(shaka.ads.Utils.AD_SKIP_STATE_CHANGED);
     this.dispatchEvent(event);
   }
 };

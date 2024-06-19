@@ -7,7 +7,7 @@
 
 goog.provide('shaka.ui.PresentationTimeTracker');
 
-goog.require('shaka.ads.AdManager');
+goog.require('shaka.ads.Utils');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Locales');
@@ -54,12 +54,12 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
+        this.adManager, shaka.ads.Utils.AD_STARTED, () => {
           shaka.ui.Utils.setDisplay(this.currentTime_, false);
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_STOPPED, () => {
+        this.adManager, shaka.ads.Utils.AD_STOPPED, () => {
           shaka.ui.Utils.setDisplay(this.currentTime_, true);
         });
   }

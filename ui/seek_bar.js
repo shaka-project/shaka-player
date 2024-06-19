@@ -7,7 +7,7 @@
 
 goog.provide('shaka.ui.SeekBar');
 
-goog.require('shaka.ads.AdManager');
+goog.require('shaka.ads.Utils');
 goog.require('shaka.net.NetworkingEngine');
 goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Locales');
@@ -151,21 +151,21 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         () => this.updateAriaLabel_());
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
+        this.adManager, shaka.ads.Utils.AD_STARTED, () => {
           if (!this.shouldBeDisplayed_()) {
             shaka.ui.Utils.setDisplay(this.container, false);
           }
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_STOPPED, () => {
+        this.adManager, shaka.ads.Utils.AD_STOPPED, () => {
           if (this.shouldBeDisplayed_()) {
             shaka.ui.Utils.setDisplay(this.container, true);
           }
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.CUEPOINTS_CHANGED, (e) => {
+        this.adManager, shaka.ads.Utils.CUEPOINTS_CHANGED, (e) => {
           this.adCuePoints_ = (e)['cuepoints'];
           this.onAdCuePointsChanged_();
         });
