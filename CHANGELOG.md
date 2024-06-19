@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.9.7](https://github.com/shaka-project/shaka-player/compare/v4.9.6...v4.9.7) (2024-06-19)
+
+
+### Bug Fixes
+
+* Allow use startTime equal to 0 in HLS live streams using src= ([#6843](https://github.com/shaka-project/shaka-player/issues/6843)) ([b81664f](https://github.com/shaka-project/shaka-player/commit/b81664f178f667028433f4afb11fe7b37bccd158))
+* **DRM:** Probe robustness only for modern PlayReady keysystem ([#6851](https://github.com/shaka-project/shaka-player/issues/6851)) ([9ff9b3e](https://github.com/shaka-project/shaka-player/commit/9ff9b3e2373dd2c656aedfa7ddf23b0eb8de86bf))
+
 ## [4.9.6](https://github.com/shaka-project/shaka-player/compare/v4.9.5...v4.9.6) (2024-06-18)
 
 
