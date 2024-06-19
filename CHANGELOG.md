@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.8.16](https://github.com/shaka-project/shaka-player/compare/v4.8.15...v4.8.16) (2024-06-19)
+
+
+### Bug Fixes
+
+* Allow use startTime equal to 0 in HLS live streams using src= ([#6843](https://github.com/shaka-project/shaka-player/issues/6843)) ([e913516](https://github.com/shaka-project/shaka-player/commit/e9135168e459ecd2c87ff1de3df551bc71962217))
+
 ## [4.8.15](https://github.com/shaka-project/shaka-player/compare/v4.8.14...v4.8.15) (2024-06-18)
 
 
