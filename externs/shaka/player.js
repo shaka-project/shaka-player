@@ -1355,7 +1355,8 @@ shaka.extern.LiveSyncConfiguration;
  *   preloadNextUrlWindow: number,
  *   loadTimeout: number,
  *   clearDecodingCache: boolean,
- *   dontChooseCodecs: boolean
+ *   dontChooseCodecs: boolean,
+ *   shouldFixTimestampOffset: boolean
  * }}
  *
  * @description
@@ -1543,6 +1544,12 @@ shaka.extern.LiveSyncConfiguration;
  * @property {boolean} dontChooseCodecs
  *   If true, we don't choose codecs in the player, and keep all the variants.
  *   Defaults to <code>false</code>.
+ * @property {boolean} shouldFixTimestampOffset
+ *   If true, we will try to fix problems when the timestampOffset is less than
+ *   the baseMediaDecodeTime. This only works when the manifest is DASH with
+ *   MP4 segments.
+ *   Defaults to <code>false</code> except on Tizen, WebOS whose default value
+ *   is <code>true</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
