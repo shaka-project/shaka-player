@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.8.17](https://github.com/shaka-project/shaka-player/compare/v4.8.16...v4.8.17) (2024-06-20)
+
+
+### Bug Fixes
+
+* Fix audio properties detection ([#6867](https://github.com/shaka-project/shaka-player/issues/6867)) ([fc6a95e](https://github.com/shaka-project/shaka-player/commit/fc6a95ee880551effc80389d75f567ec8a0c03d3))
+* Fix continues to play a few seconds after reaching playRangeEnd ([#6861](https://github.com/shaka-project/shaka-player/issues/6861)) ([e1b5fa8](https://github.com/shaka-project/shaka-player/commit/e1b5fa88121d01aa38f58265f055cf600ab8ddd8))
+* Fix normalized codec for Dolby Vision ([#6865](https://github.com/shaka-project/shaka-player/issues/6865)) ([4efbd29](https://github.com/shaka-project/shaka-player/commit/4efbd29bf809ab670e1fd42f7a94a6a44999513d))
+* **UI:** update French translations ([#6873](https://github.com/shaka-project/shaka-player/issues/6873)) ([e1520bf](https://github.com/shaka-project/shaka-player/commit/e1520bf480993cec0f0df901287863e7ff6c6c95))
+* **UI:** update Portuguese translations ([#6874](https://github.com/shaka-project/shaka-player/issues/6874)) ([6ed887b](https://github.com/shaka-project/shaka-player/commit/6ed887bc796df78c00f8df2a9bbf365b17bf150a))
+* **UI:** update Spanish translations ([#6875](https://github.com/shaka-project/shaka-player/issues/6875)) ([24d28da](https://github.com/shaka-project/shaka-player/commit/24d28daa0fd62fb41ed76d1dcff6b1fa52a8c23a))
+
 ## [4.8.16](https://github.com/shaka-project/shaka-player/compare/v4.8.15...v4.8.16) (2024-06-19)
 
 
