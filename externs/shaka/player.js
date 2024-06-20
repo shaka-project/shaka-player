@@ -1293,7 +1293,7 @@ shaka.extern.ManifestConfiguration;
  * @property {number} maxAttempts
  *   Number of times that dynamic target latency will back off to
  *   <code>maxLatency</code> and attempt to adjust it closer to
- *   <code>minLatency</code>. Defaults to <code>5</code>
+ *   <code>minLatency</code>. Defaults to <code>10</code>
  * @property {number} maxLatency
  *   The latency to use when a rebuffering event causes us to back off from
  *   the live edge. Defaults to <code>4</code>
