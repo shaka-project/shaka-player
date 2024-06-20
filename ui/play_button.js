@@ -7,7 +7,7 @@
 
 goog.provide('shaka.ui.PlayButton');
 
-goog.require('shaka.ads.AdManager');
+goog.require('shaka.ads.Utils');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.util.Dom');
@@ -26,8 +26,6 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
    */
   constructor(parent, controls) {
     super(parent, controls);
-
-    const AdManager = shaka.ads.AdManager;
 
     /** @protected {!HTMLButtonElement} */
     this.button = shaka.util.Dom.createButton();
@@ -58,22 +56,22 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
       this.updateIcon();
     });
 
-    this.eventManager.listen(this.adManager, AdManager.AD_PAUSED, () => {
+    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_PAUSED, () => {
       this.updateAriaLabel();
       this.updateIcon();
     });
 
-    this.eventManager.listen(this.adManager, AdManager.AD_RESUMED, () => {
+    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_RESUMED, () => {
       this.updateAriaLabel();
       this.updateIcon();
     });
 
-    this.eventManager.listen(this.adManager, AdManager.AD_STARTED, () => {
+    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_STARTED, () => {
       this.updateAriaLabel();
       this.updateIcon();
     });
 
-    this.eventManager.listen(this.adManager, AdManager.AD_STOPPED, () => {
+    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_STOPPED, () => {
       this.updateAriaLabel();
       this.updateIcon();
     });

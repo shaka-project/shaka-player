@@ -222,7 +222,7 @@ Let's register a simple listener to Shaka's AD_STARTED event. It will log the
 start of the ad in the console.
 
 ```js
-adManager.addEventListener(shaka.ads.AdManager.AD_STARTED, () => {
+adManager.addEventListener(shaka.ads.Utils.AD_STARTED, () => {
   console.log('An ad has started');
 });
 ```
@@ -235,7 +235,7 @@ that requires access to those, here is how to get them:
 // Note that unlike in the previous example, we are capturing the AD_STARTED
 // event object here (the "e" parameter of the lambda function) so we can access
 // its properties.
-adManager.addEventListener(shaka.ads.AdManager.AD_STARTED, (e) => {
+adManager.addEventListener(shaka.ads.Utils.AD_STARTED, (e) => {
   const sdkAdObject = e['sdkAdObject'];
   const originalEvent = e['originalEvent'];
 });
@@ -250,11 +250,11 @@ Client Side or the {@link shaka.ads.AdManager#event:ImaStreamManagerLoadedEvent}
 for Server Side to get the IMA [AdManager][] or [StreamManager][] objects.
 
 ```js
-adManager.addEventListener(shaka.ads.AdManager.IMA_AD_MANAGER_LOADED, (e) => {
+adManager.addEventListener(shaka.ads.Utils.IMA_AD_MANAGER_LOADED, (e) => {
   const imaAdManager = e['imaAdManager'];
 });
 
-adManager.addEventListener(shaka.ads.AdManager.IMA_STREAM_MANAGER_LOADED, (e) => {
+adManager.addEventListener(shaka.ads.Utils.IMA_STREAM_MANAGER_LOADED, (e) => {
   const imaStreamManager = e['imaStreamManager'];
 });
 ```

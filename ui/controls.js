@@ -9,7 +9,7 @@ goog.provide('shaka.ui.Controls');
 goog.provide('shaka.ui.ControlsPanel');
 
 goog.require('goog.asserts');
-goog.require('shaka.ads.AdManager');
+goog.require('shaka.ads.Utils');
 goog.require('shaka.cast.CastProxy');
 goog.require('shaka.log');
 goog.require('shaka.ui.AdCounter');
@@ -1216,13 +1216,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(
-        this.adManager_, shaka.ads.AdManager.AD_STARTED, (e) => {
+        this.adManager_, shaka.ads.Utils.AD_STARTED, (e) => {
           this.ad_ = (/** @type {!Object} */ (e))['ad'];
           this.showAdUI();
         });
 
     this.eventManager_.listen(
-        this.adManager_, shaka.ads.AdManager.AD_STOPPED, () => {
+        this.adManager_, shaka.ads.Utils.AD_STOPPED, () => {
           this.ad_ = null;
           this.hideAdUI();
         });

@@ -152,11 +152,11 @@ describe('Ad manager', () => {
       const eventManager = new shaka.util.EventManager();
       let loaded = false;
       let numAdStarted = 0;
-      const AdManager = shaka.ads.AdManager;
-      eventManager.listen(adManager, AdManager.IMA_AD_MANAGER_LOADED, () => {
-        loaded = true;
-      });
-      eventManager.listen(adManager, AdManager.AD_STARTED, () => {
+      eventManager.listen(adManager,
+          shaka.ads.Utils.IMA_AD_MANAGER_LOADED, () => {
+            loaded = true;
+          });
+      eventManager.listen(adManager, shaka.ads.Utils.AD_STARTED, () => {
         numAdStarted += 1;
       });
 
