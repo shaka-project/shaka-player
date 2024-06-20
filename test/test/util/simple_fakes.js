@@ -85,6 +85,9 @@ shaka.test.FakeStreamingEngine = class {
     this.configure = jasmine.createSpy('configure');
 
     /** @type {!jasmine.Spy} */
+    this.applyPlayRange = jasmine.createSpy('applyPlayRange');
+
+    /** @type {!jasmine.Spy} */
     this.seeked = jasmine.createSpy('seeked');
 
     /** @type {!jasmine.Spy} */
