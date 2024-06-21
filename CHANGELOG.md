@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.8.18](https://github.com/shaka-project/shaka-player/compare/v4.8.17...v4.8.18) (2024-06-21)
+
+
+### Bug Fixes
+
+* Avoid firing SEGMENT_MISSING when there is an alternative ([#6881](https://github.com/shaka-project/shaka-player/issues/6881)) ([9971dc5](https://github.com/shaka-project/shaka-player/commit/9971dc50c64aa5572201bf1ac289e33036a9c7fd))
+* **CEA:** CEA-608 is not rendered in some cases (multiples TRAF boxes) ([#6878](https://github.com/shaka-project/shaka-player/issues/6878)) ([745b596](https://github.com/shaka-project/shaka-player/commit/745b59687c42ec23ff6c4ada030c7f443b7c843f))
+* **HLS:** Avoid make a HEAD request of gap segments ([#6880](https://github.com/shaka-project/shaka-player/issues/6880)) ([5a8417e](https://github.com/shaka-project/shaka-player/commit/5a8417e4efc0db336fc7f48947f0457bf1167f8a))
+* **HLS:** Identify EXT-X-GAP with segment tags ([#6884](https://github.com/shaka-project/shaka-player/issues/6884)) ([a1056e2](https://github.com/shaka-project/shaka-player/commit/a1056e28b367cc036a148b7c2727ee1d8041fa16))
+
 ## [4.8.17](https://github.com/shaka-project/shaka-player/compare/v4.8.16...v4.8.17) (2024-06-20)
 
 
