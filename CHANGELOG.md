@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.9.9](https://github.com/shaka-project/shaka-player/compare/v4.9.8...v4.9.9) (2024-06-21)
+
+
+### Bug Fixes
+
+* Avoid firing SEGMENT_MISSING when there is an alternative ([#6881](https://github.com/shaka-project/shaka-player/issues/6881)) ([d2f5794](https://github.com/shaka-project/shaka-player/commit/d2f579489247ee9c3fdcae0d932bc4e62e7acb49))
+* **CEA:** CEA-608 is not rendered in some cases (multiples TRAF boxes) ([#6878](https://github.com/shaka-project/shaka-player/issues/6878)) ([4ee40f5](https://github.com/shaka-project/shaka-player/commit/4ee40f58084a3c84471e0285d5c3efb6381baf72))
+* Generate the correct codec for AV1 HDR ([#6879](https://github.com/shaka-project/shaka-player/issues/6879)) ([564ec22](https://github.com/shaka-project/shaka-player/commit/564ec22c7a71b44548d04fa94c1af8ffbe6be93f))
+* **HLS:** Avoid get basic info when the first segment is a gap ([#6882](https://github.com/shaka-project/shaka-player/issues/6882)) ([4a04b72](https://github.com/shaka-project/shaka-player/commit/4a04b72069b1f384c3e8e18302af768373099de6))
+* **HLS:** Avoid make a HEAD request of gap segments ([#6880](https://github.com/shaka-project/shaka-player/issues/6880)) ([3fd9aef](https://github.com/shaka-project/shaka-player/commit/3fd9aefb4d792e48d6a8422a3ca024510e2fbc4b))
+* **HLS:** Identify EXT-X-GAP with segment tags ([#6884](https://github.com/shaka-project/shaka-player/issues/6884)) ([f2d4eb6](https://github.com/shaka-project/shaka-player/commit/f2d4eb622a944ccbf9163003ef5657d96c92bfae))
+
 ## [4.9.8](https://github.com/shaka-project/shaka-player/compare/v4.9.7...v4.9.8) (2024-06-20)
 
 
