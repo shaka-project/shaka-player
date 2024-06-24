@@ -588,7 +588,7 @@ shakaDemo.Config = class {
         .addNumberInput_('Max playback rate',
             'streaming.liveSync.maxPlaybackRate',
             /* canBeDecimal= */ true,
-            /* canBeZero= */ true)
+            /* canBeZero= */ false)
         .addNumberInput_('Min playback rate',
             'streaming.liveSync.minPlaybackRate',
             /* canBeDecimal= */ true)
