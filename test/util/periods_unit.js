@@ -1124,7 +1124,58 @@ describe('PeriodCombiner', () => {
     expect(audio2.originalId).toBe('2,4');
   });
 
-  it('Creates a video stream for each unique codec base ' +
+  it('Creates an audio stream per unique codec ' +
+  'and matches streams with related codecs', async () => {
+    const stream1 = makeAudioStream('en', /* channels= */ 2);
+    stream1.originalId = '1';
+    stream1.bandwidth = 129597;
+    stream1.codecs = 'mp4a.40.2';
+
+    const stream2 = makeAudioStream('en', /* channels= */ 2);
+    stream2.originalId = '2';
+    stream2.bandwidth = 131033;
+    stream2.codecs = 'mp4a.40.29';
+
+    /** @type {!Array.<shaka.extern.Period>} */
+    const periods = [
+      {
+        id: '0',
+        videoStreams: [
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          stream1,
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '1',
+        videoStreams: [
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          stream2,
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ true);
+    const variants = combiner.getVariants();
+    expect(variants.length).toBe(2);
+    // We can use the originalId field to see what each track is composed of.
+    const audio1 = variants[0].audio;
+    expect(audio1.codecs).toBe(stream1.codecs);
+    expect(audio1.originalId).toBe('1,2');
+
+    const audio2 = variants[1].audio;
+    expect(audio2.codecs).toBe(stream2.codecs);
+    expect(audio2.originalId).toBe('1,2');
+  });
+
+  it('Creates a video stream per unique codec base ' +
   'and matches streams with related codecs', async () => {
     const stream1 = makeVideoStream(1080);
     stream1.originalId = '1';
