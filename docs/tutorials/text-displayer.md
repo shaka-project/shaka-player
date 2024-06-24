@@ -9,7 +9,7 @@ Shaka Player supports two types of Text Displayer.
 
 By default, if not configured otherwise, the player will use type 1.
 To configure type 2, you have to call `setVideoContainer` function before
-making `load` call in the player.
+making `attach` call in the player.
 
 Note: The UI calls setVideoContainer for you if the video's controls are
 disabled, so this isn't always necessary when using the UI.
