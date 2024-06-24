@@ -49,11 +49,6 @@ shaka.test.FakeSegmentPrefetch = class {
   }
 
   /** @override */
-  getLastKnownPosition() {
-    return this.prefetchPosTime_;
-  }
-
-  /** @override */
   prefetchSegmentsByTime(currTime) {
     const maxTime = Math.max(currTime, this.prefetchPosTime_);
     const iterator = this.streamObj_.segmentIndex.getIteratorForTime(maxTime);
