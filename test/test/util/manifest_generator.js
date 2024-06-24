@@ -590,6 +590,7 @@ shaka.test.ManifestGenerator.Stream = class {
       this.external = false;
       /** @type {boolean} */
       this.fastSwitching = false;
+      this.bandwidth = jasmine.anything();
     }
     /** @type {!Set.<string>} */
     this.fullMimeTypes = new Set([shaka.util.MimeUtils.getFullType(
