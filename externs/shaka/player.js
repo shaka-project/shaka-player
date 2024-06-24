@@ -625,8 +625,8 @@ shaka.extern.Interstitial;
  *   The presentation time (in seconds) that the region should end.
  * @property {string} id
  *   Specifies an identifier for this instance of the region.
- * @property {Elment} eventElement
- *   <b>DEPRECATED</b>: Use eventElement instead.
+ * @property {Element} eventElement
+ *   <b>DEPRECATED</b>: Use eventNode instead.
  *   The XML element that defines the Event.
  * @property {?shaka.extern.xml.Node} eventNode
  *   The XML element that defines the Event.
