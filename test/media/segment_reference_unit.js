@@ -44,6 +44,8 @@ describe('InitSegmentReference', () => {
     height: 720,
     mimeType: 'mime type',
     label: null,
+    roles: null,
+    language: null,
     channelsCount: 2,
     pixelAspectRatio: '1:1',
     width: 1280,
