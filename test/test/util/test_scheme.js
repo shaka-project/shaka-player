@@ -206,6 +206,7 @@ shaka.test.TestScheme = class {
         channelsCount: null,
         pixelAspectRatio: null,
         width: null,
+        label: null,
       };
       stream.mimeType = data[contentType].mimeType;
       stream.codecs = data[contentType].codecs;

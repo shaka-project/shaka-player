@@ -643,6 +643,7 @@ shaka.extern.TimelineRegionInfo;
  *   frameRate: ?number,
  *   height: ?number,
  *   mimeType: ?string,
+ *   label: ?string,
  *   channelsCount: ?number,
  *   pixelAspectRatio: ?string,
  *   width: ?number
@@ -666,6 +667,8 @@ shaka.extern.TimelineRegionInfo;
  *   The video height in pixels.
  * @property {string} mimeType
  *   The MIME type.
+ * @property {?string} label
+ *   The stream's label, when available.
  * @property {?number} channelsCount
  *   The number of audio channels, or null if unknown.
  * @property {?string} pixelAspectRatio
