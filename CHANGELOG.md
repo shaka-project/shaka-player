@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.9.10](https://github.com/shaka-project/shaka-player/compare/v4.9.9...v4.9.10) (2024-06-25)
+
+
+### Bug Fixes
+
+* **DASH:** Allow play when SegmentTimeline has a duration 0 "S" element ([#6896](https://github.com/shaka-project/shaka-player/issues/6896)) ([3f8066e](https://github.com/shaka-project/shaka-player/commit/3f8066ed4286665051d9d01ba218ece5f4e2d09e))
+* **HLS:** Allow detect mimeType from non-gap segments ([#6892](https://github.com/shaka-project/shaka-player/issues/6892)) ([1a3f6ae](https://github.com/shaka-project/shaka-player/commit/1a3f6ae4cc0e01526c5421577e2d9d511b9e96cc))
+* **HLS:** Fix MPEG-H codec selection in HLS ([#6901](https://github.com/shaka-project/shaka-player/issues/6901)) ([f8ddefb](https://github.com/shaka-project/shaka-player/commit/f8ddefb5f408dfb3fd04ca908c01feb939dd7b3f))
+* **Prefetch:** cache iterator to avoid precision issues ([#6899](https://github.com/shaka-project/shaka-player/issues/6899)) ([dd3b20e](https://github.com/shaka-project/shaka-player/commit/dd3b20e1d7db2f629690b9ac4c8218dbe3d53435))
+* **Prefetch:** Ensure prefetched segments are continuous ([#6908](https://github.com/shaka-project/shaka-player/issues/6908)) ([3dcb24b](https://github.com/shaka-project/shaka-player/commit/3dcb24bd3ecd154bea958e68fdf7b4d1984765a4))
+* **preload:** Fix memory leak with preload feature ([#6894](https://github.com/shaka-project/shaka-player/issues/6894)) ([6f39210](https://github.com/shaka-project/shaka-player/commit/6f3921011b6557b3d9e02c9b7d2837f8282aba73)), closes [#6883](https://github.com/shaka-project/shaka-player/issues/6883)
+
 ## [4.9.9](https://github.com/shaka-project/shaka-player/compare/v4.9.8...v4.9.9) (2024-06-21)
 
 
