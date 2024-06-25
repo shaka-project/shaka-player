@@ -47,8 +47,7 @@ describe('SegmentPrefetch', () => {
           ),
         );
     segmentPrefetch = new shaka.media.SegmentPrefetch(
-        3, stream, Util.spyFunc(fetchDispatcher),
-    );
+        3, stream, Util.spyFunc(fetchDispatcher), /* reverse= */ false);
   });
 
   describe('prefetchSegmentsByTime', () => {
@@ -103,9 +102,7 @@ describe('SegmentPrefetch', () => {
 
       stream = createStream();
       stream.segmentIndex = new shaka.media.SegmentIndex(references);
-      segmentPrefetch = new shaka.media.SegmentPrefetch(
-          3, stream, Util.spyFunc(fetchDispatcher),
-      );
+      segmentPrefetch.switchStream(stream);
 
       segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
 
@@ -126,6 +123,14 @@ describe('SegmentPrefetch', () => {
       // this is 6 to account for the init segments,
       // which is not part of the prefetch limit
       expect(fetchDispatcher).toHaveBeenCalledTimes(6);
+    });
+
+    it('changes fetch direction', async () => {
+      segmentPrefetch.setReverse(true);
+      segmentPrefetch.prefetchSegmentsByTime(references[3].startTime);
+      const op = segmentPrefetch.getPrefetchedSegment(references[0]);
+      expect(op).toBeNull();
+      await expectSegmentsPrefetched(1);
     });
   });
 
