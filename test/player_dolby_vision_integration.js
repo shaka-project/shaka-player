@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('Player', () => {
+describe('Player Dolby Vision', () => {
   const Util = shaka.test.Util;
 
   /** @type {!jasmine.Spy} */
@@ -58,25 +58,33 @@ describe('Player', () => {
     document.body.removeChild(video);
   });
 
-  describe('supports Dolby Vision P8 with fallback to HEVC', () => {
+  /**
+   * @param {string} uri
+   * @return {!Promise}
+   */
+  async function testPlayback(uri) {
+    await player.load(uri);
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 2 seconds, but stop early if the video ends.  If it takes
+    // longer than 10 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 10);
+
+    await player.unload();
+  }
+
+  describe('P8 with fallback to HEVC', () => {
     it('with DASH', async () => {
       if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.90"',
           /* width= */ 640, /* height= */ 360)) {
         pending('Codec HEVC is not supported by the platform.');
       }
-      await player.load('/base/test/test/assets/dv-p8-hevc/manifest.mpd');
-      await video.play();
-      expect(player.isLive()).toBe(false);
-
-      // Wait for the video to start playback.  If it takes longer than 10
-      // seconds, fail the test.
-      await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-      // Play for 2 seconds, but stop early if the video ends.  If it takes
-      // longer than 10 seconds, fail the test.
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 10);
-
-      await player.unload();
+      await testPlayback('/base/test/test/assets/dv-p8-hevc/manifest.mpd');
     });
 
     it('with master playlist (HLS)', async () => {
@@ -84,19 +92,7 @@ describe('Player', () => {
           /* width= */ 640, /* height= */ 360)) {
         pending('Codec HEVC is not supported by the platform.');
       }
-      await player.load('/base/test/test/assets/dv-p8-hevc/master.m3u8');
-      await video.play();
-      expect(player.isLive()).toBe(false);
-
-      // Wait for the video to start playback.  If it takes longer than 10
-      // seconds, fail the test.
-      await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-      // Play for 2 seconds, but stop early if the video ends.  If it takes
-      // longer than 10 seconds, fail the test.
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 10);
-
-      await player.unload();
+      await testPlayback('/base/test/test/assets/dv-p8-hevc/master.m3u8');
     });
 
     it('with media playlist (HLS)', async () => {
@@ -104,42 +100,18 @@ describe('Player', () => {
           /* width= */ 640, /* height= */ 360)) {
         pending('Codec HEVC is not supported by the platform.');
       }
-      await player.load('/base/test/test/assets/dv-p8-hevc/media.m3u8');
-      await video.play();
-      expect(player.isLive()).toBe(false);
-
-      // Wait for the video to start playback.  If it takes longer than 10
-      // seconds, fail the test.
-      await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-      // Play for 2 seconds, but stop early if the video ends.  If it takes
-      // longer than 10 seconds, fail the test.
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 10);
-
-      await player.unload();
+      await testPlayback('/base/test/test/assets/dv-p8-hevc/media.m3u8');
     });
   });
 
-  describe('supports Dolby Vision P10 with fallback to AV1', () => {
+  describe('P10 with fallback to AV1', () => {
     it('with DASH', async () => {
       if (!await Util.isTypeSupported(
           'video/mp4; codecs="av01.0.04M.10.0.111.09.16.09.0"',
           /* width= */ 640, /* height= */ 360)) {
         pending('Codec AV1 is not supported by the platform.');
       }
-      await player.load('/base/test/test/assets/dv-p10-av1/manifest.mpd');
-      await video.play();
-      expect(player.isLive()).toBe(false);
-
-      // Wait for the video to start playback.  If it takes longer than 10
-      // seconds, fail the test.
-      await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-      // Play for 2 seconds, but stop early if the video ends.  If it takes
-      // longer than 10 seconds, fail the test.
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 10);
-
-      await player.unload();
+      await testPlayback('/base/test/test/assets/dv-p10-av1/manifest.mpd');
     });
 
     it('with master playlist (HLS)', async () => {
@@ -148,19 +120,7 @@ describe('Player', () => {
           /* width= */ 640, /* height= */ 360)) {
         pending('Codec AV1 is not supported by the platform.');
       }
-      await player.load('/base/test/test/assets/dv-p10-av1/master.m3u8');
-      await video.play();
-      expect(player.isLive()).toBe(false);
-
-      // Wait for the video to start playback.  If it takes longer than 10
-      // seconds, fail the test.
-      await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-      // Play for 2 seconds, but stop early if the video ends.  If it takes
-      // longer than 10 seconds, fail the test.
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 10);
-
-      await player.unload();
+      await testPlayback('/base/test/test/assets/dv-p10-av1/master.m3u8');
     });
 
     it('with media playlist (HLS)', async () => {
@@ -169,19 +129,7 @@ describe('Player', () => {
           /* width= */ 640, /* height= */ 360)) {
         pending('Codec AV1 is not supported by the platform.');
       }
-      await player.load('/base/test/test/assets/dv-p10-av1/media.m3u8');
-      await video.play();
-      expect(player.isLive()).toBe(false);
-
-      // Wait for the video to start playback.  If it takes longer than 10
-      // seconds, fail the test.
-      await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-      // Play for 2 seconds, but stop early if the video ends.  If it takes
-      // longer than 10 seconds, fail the test.
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 10);
-
-      await player.unload();
+      await testPlayback('/base/test/test/assets/dv-p10-av1/media.m3u8');
     });
   });
 });
