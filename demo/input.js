@@ -262,7 +262,7 @@ shakaDemo.NumberInput = class extends shakaDemo.TextInput {
 
     if (canBeDecimal) {
       // strictly allow for 0.xxxx decimals
-      this.input_.pattern += '?(0(?=\.))?';
+      this.input_.pattern += '?(0(?=.))?';
       // TODO: Handle commas as decimal delimeters, for appropriate regions?
       this.input_.pattern += '(.[0-9]+)?';
     }
