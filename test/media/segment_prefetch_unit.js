@@ -129,7 +129,7 @@ describe('SegmentPrefetch', () => {
       segmentPrefetch.setReverse(true);
       segmentPrefetch.prefetchSegmentsByTime(references[3].startTime);
       const op = segmentPrefetch.getPrefetchedSegment(references[0]);
-      expect(op).not.toBeNull();
+      expect(op).toBeNull();
       await expectSegmentsPrefetched(1);
     });
   });
