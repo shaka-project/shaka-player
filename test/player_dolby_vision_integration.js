@@ -60,7 +60,7 @@ describe('Player', () => {
     it('with DASH', async () => {
       if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.90"',
           /* width= */ 640, /* height= */ 360)) {
-        pending('Codec AV1 is not supported by the platform.');
+        pending('Codec HEVC is not supported by the platform.');
       }
       await player.load('/base/test/test/assets/dv-p8-hevc/manifest.mpd');
       await video.play();
@@ -80,7 +80,7 @@ describe('Player', () => {
     it('with master playlist (HLS)', async () => {
       if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.90"',
           /* width= */ 640, /* height= */ 360)) {
-        pending('Codec AV1 is not supported by the platform.');
+        pending('Codec HEVC is not supported by the platform.');
       }
       await player.load('/base/test/test/assets/dv-p8-hevc/master.m3u8');
       await video.play();
@@ -100,7 +100,7 @@ describe('Player', () => {
     it('with media playlist (HLS)', async () => {
       if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.90"',
           /* width= */ 640, /* height= */ 360)) {
-        pending('Codec AV1 is not supported by the platform.');
+        pending('Codec HEVC is not supported by the platform.');
       }
       await player.load('/base/test/test/assets/dv-p8-hevc/media.m3u8');
       await video.play();
