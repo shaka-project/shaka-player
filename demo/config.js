@@ -594,7 +594,21 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addBoolInput_('Panic Mode', 'streaming.liveSync.panicMode')
         .addNumberInput_('Panic Mode Threshold',
-            'streaming.liveSync.panicThreshold');
+            'streaming.liveSync.panicThreshold')
+        .addBoolInput_('Dynamic Target Latency',
+            'streaming.liveSync.dynamicTargetLatency.enabled')
+        .addNumberInput_('Dynamic Target Latency Stability Threshold',
+            'streaming.liveSync.dynamicTargetLatency.stabilityThreshold')
+        .addNumberInput_('Dynamic Target Latency Rebuffer Increment',
+            'streaming.liveSync.dynamicTargetLatency.rebufferIncrement',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Dynamic Target Latency Max Attempts',
+            'streaming.liveSync.dynamicTargetLatency.maxAttempts')
+        .addNumberInput_('Dynamic Target Latency Max Latency',
+            'streaming.liveSync.dynamicTargetLatency.maxLatency')
+        .addNumberInput_('Dynamic Target Latency Min Latency',
+            'streaming.liveSync.dynamicTargetLatency.minLatency');
   }
 
   /** @private */

@@ -1262,6 +1262,48 @@ shaka.extern.MssManifestConfiguration;
  */
 shaka.extern.ManifestConfiguration;
 
+/**
+ * @typedef {{
+ *   enabled: boolean,
+ *   stabilityThreshold: number,
+ *   rebufferIncrement: number,
+ *   maxAttempts: number,
+ *   maxLatency: number,
+ *   minLatency: number
+ * }}
+ *
+ * @description
+ * Dynamic Target Latency configuration options.
+ *
+ * @property {boolean} enabled
+ *   If <code>true</code>, dynamic latency for live sync is enabled. When
+ *   enabled, the target latency will be adjusted closer to the min latency
+ *   when playback is stable (see <code>stabilityThreshold</code>). If
+ *   there are rebuffering events, then the target latency will move towards
+ *   the max latency value in increments of <code>rebufferIncrement</code>.
+ *   Defaults to <code>false</code>.
+ * @property {number} rebufferIncrement
+ *   The value, in seconds, to increment the target latency towards
+ *   <code>maxLatency</code> after a rebuffering event. Defaults to
+ *   <code>0.5</code>.
+ * @property {number} stabilityThreshold
+ *   Number of seconds after a rebuffering before we are considered stable and
+ *   will move the target latency towards <code>minLatency</code>
+ *   value. Defaults to <code>60</code>
+ * @property {number} maxAttempts
+ *   Number of times that dynamic target latency will back off to
+ *   <code>maxLatency</code> and attempt to adjust it closer to
+ *   <code>minLatency</code>. Defaults to <code>10</code>
+ * @property {number} maxLatency
+ *   The latency to use when a rebuffering event causes us to back off from
+ *   the live edge. Defaults to <code>4</code>
+ * @property {number} minLatency
+ *   The latency to work towards when the network is stable and we want to get
+ *   closer to the live edge. Defaults to <code>1</code>
+ * @exportDoc
+ */
+shaka.extern.DynamicTargetLatencyConfiguration;
+
 
 /**
  * @typedef {{
@@ -1271,7 +1313,8 @@ shaka.extern.ManifestConfiguration;
  *   maxPlaybackRate: number,
  *   minPlaybackRate: number,
  *   panicMode: boolean,
- *   panicThreshold: number
+ *   panicThreshold: number,
+ *   dynamicTargetLatency: shaka.extern.DynamicTargetLatencyConfiguration
  * }}
  *
  * @description
@@ -1304,6 +1347,12 @@ shaka.extern.ManifestConfiguration;
  * @property {number} panicThreshold
  *   Number of seconds that playback stays in panic mode after a rebuffering.
  *   Defaults to <code>60</code>
+ * @property {shaka.extern.DynamicTargetLatencyConfiguration}
+ * dynamicTargetLatency
+ *
+ *   The dynamic target latency config for dynamically adjusting the target
+ *   latency to be closer to edge when network conditions are good and to back
+ *   off when network conditions are bad.
  * @exportDoc
  */
 shaka.extern.LiveSyncConfiguration;
