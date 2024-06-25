@@ -373,7 +373,7 @@ describe('MpdUtils', () => {
       checkTimePoints(timePoints, result, 1, 0, 20);
     });
 
-    it('ignores elements after null duration', () => {
+    it('ignores elements with null duration', () => {
       const timePoints = [
         createTimePoint(0, 10, 0),
         createTimePoint(10, 10, 0),
@@ -383,7 +383,9 @@ describe('MpdUtils', () => {
       ];
       const result = [
         {start: 0, end: 10},
-        {start: 10, end: 20},
+        {start: 10, end: 30},
+        {start: 30, end: 40},
+        {start: 40, end: 50},
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
