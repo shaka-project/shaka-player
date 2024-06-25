@@ -132,6 +132,26 @@ describe('SegmentPrefetch', () => {
       expect(op).toBeNull();
       await expectSegmentsPrefetched(1);
     });
+
+    it('properly iterates on subsequent prefetchSegments calls', async () => {
+      segmentPrefetch.resetLimit(1);
+      segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
+      let op = segmentPrefetch.getPrefetchedSegment(references[1]);
+      expect(op).toBeNull();
+      await expectSegmentsPrefetched(0, 1);
+
+      // Evict our only one prefetched segment.
+      segmentPrefetch.evict(references[1].endTime);
+      op = segmentPrefetch.getPrefetchedSegment(references[0]);
+      expect(op).toBeNull();
+
+      // Underlying iterator should traverse to next element, regardless
+      // of specified time.
+      segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
+      op = segmentPrefetch.getPrefetchedSegment(references[0]);
+      expect(op).toBeNull();
+      await expectSegmentsPrefetched(1, 1);
+    });
   });
 
   describe('clearAll', () => {
