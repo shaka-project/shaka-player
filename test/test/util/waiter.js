@@ -415,7 +415,7 @@ shaka.test.Waiter = class {
     // We also use it on all platforms (except Tizen) because it reduces the
     // time it takes for tests to run.
     if (mediaElement.playbackRate == 1 && !shaka.util.Platform.isTizen()) {
-      mediaElement.playbackRate = 2;
+      mediaElement.playbackRate = 3;
     }
   }
 };
