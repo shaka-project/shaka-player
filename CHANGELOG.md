@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.8.19](https://github.com/shaka-project/shaka-player/compare/v4.8.18...v4.8.19) (2024-06-25)
+
+
+### Bug Fixes
+
+* **DASH:** Allow play when SegmentTimeline has a duration 0 "S" element ([#6896](https://github.com/shaka-project/shaka-player/issues/6896)) ([a658c53](https://github.com/shaka-project/shaka-player/commit/a658c5319ca897ba6174250c8d4bead60da3248f))
+* **HLS:** Fix MPEG-H codec selection in HLS ([#6901](https://github.com/shaka-project/shaka-player/issues/6901)) ([5df6a69](https://github.com/shaka-project/shaka-player/commit/5df6a69131a7ead49aeb46c1f11b7be947151979))
+* **preload:** Fix memory leak with preload feature ([#6894](https://github.com/shaka-project/shaka-player/issues/6894)) ([eff1d40](https://github.com/shaka-project/shaka-player/commit/eff1d404f505fb529e6a8f4540495f10f5ac0d40)), closes [#6883](https://github.com/shaka-project/shaka-player/issues/6883)
+
 ## [4.8.18](https://github.com/shaka-project/shaka-player/compare/v4.8.17...v4.8.18) (2024-06-21)
 
 
