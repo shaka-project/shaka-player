@@ -124,7 +124,7 @@ describe('HlsParser', () => {
     await video.play();
 
     // Wait for last cue
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 7, 30);
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
 
     const cues = video.textTracks[0].cues;
     expect(cues.length).toBe(3);
