@@ -1214,7 +1214,8 @@ shaka.extern.MssManifestConfiguration;
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration,
  *   mss: shaka.extern.MssManifestConfiguration,
- *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean
+ *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean,
+ *   continueLoadingWhenPaused: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1257,7 +1258,10 @@ shaka.extern.MssManifestConfiguration;
  * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
  *   If true, manifest update request failures will cause a fatal error.
  *   Defaults to <code>false</code> if not provided.
- *
+ * @property {boolean} continueLoadingWhenPaused
+ *   If true, live manifest will be updated with the regular intervals even if
+ *   the video is paused.
+ *   Defaults to <code>true</code> if not provided.
  * @exportDoc
  */
 shaka.extern.ManifestConfiguration;

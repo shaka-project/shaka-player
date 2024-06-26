@@ -111,6 +111,14 @@ shaka.extern.ManifestParser = class {
    * @exportDoc
    */
   banLocation(uri) {}
+
+  /**
+   * Set media element.
+   *
+   * @param {HTMLMediaElement} mediaElement
+   * @exportDoc
+   */
+  setMediaElement(mediaElement) {}
 };
 
 

@@ -791,6 +791,9 @@ shaka.test.TestScheme.ManifestParser = class {
 
   /** @override */
   banLocation() {}
+
+  /** @override */
+  setMediaElement() {}
 };
 
 
