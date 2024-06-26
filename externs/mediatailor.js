@@ -66,7 +66,7 @@ mediaTailor.AdBreak;
  *   creativeId: string,
  *   creativeSequence: string,
  *   durationInSeconds: number,
- *   skipOffset: ?number,
+ *   skipOffset: ?string,
  *   startTimeInSeconds: number,
  *   nonLinearAdList: !Array.<mediaTailor.NonLinearAd>,
  *   trackingEvents: !Array.<mediaTailor.TrackingEvent>
@@ -79,7 +79,7 @@ mediaTailor.AdBreak;
  * @property {string} creativeId
  * @property {string} creativeSequence
  * @property {number} durationInSeconds
- * @property {?number} skipOffset
+ * @property {?string} skipOffset
  * @property {number} startTimeInSeconds
  * @property {!Array.<mediaTailor.NonLinearAd>} nonLinearAdList
  * @property {!Array.<mediaTailor.TrackingEvent>} trackingEvents
