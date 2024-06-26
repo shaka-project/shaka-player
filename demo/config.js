@@ -200,7 +200,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Disable Text', 'manifest.disableText')
         .addBoolInput_('Disable Thumbnails', 'manifest.disableThumbnails')
         .addBoolInput_('Enable segment-relative VTT Timing',
-            'manifest.segmentRelativeVttTiming');
+            'manifest.segmentRelativeVttTiming')
+        .addBoolInput_('Continue loading when paused',
+            'manifest.continueLoadingWhenPaused');
   }
 
   /** @private */
