@@ -242,6 +242,7 @@ shakaDemo.Visualizer = class {
 
   /** @private */
   pruneUpdates_() {
+    // Prune updates that are no longer buffered.
     const allBufferedInfo = this.player_.getBufferedInfo();
     this.updates_ = this.updates_.filter((update) => {
       /** @type {!Array.<shaka.extern.BufferedRange>} */
@@ -258,6 +259,10 @@ shakaDemo.Visualizer = class {
           break;
         default:
           return false;
+      }
+      // Fall back on total if there is no buffered info (e.g. for src=).
+      if (bufferedInfo.length == 0) {
+        bufferedInfo = allBufferedInfo.total;
       }
       for (const range of bufferedInfo) {
         if (update.start <= range.end && range.start <= update.end) {
