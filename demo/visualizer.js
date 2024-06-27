@@ -65,6 +65,7 @@ shakaDemo.Visualizer = class {
      *   start: number,
      *   end: number,
      *   contentType: string,
+     *   isMuxed: boolean,
      * }>}
      */
     this.updates_ = [];
@@ -74,7 +75,8 @@ shakaDemo.Visualizer = class {
       const start = /** @type {number} */ (event['start']);
       const end = /** @type {number} */ (event['end']);
       const contentType = /** @type {string} */ (event['contentType']);
-      this.updates_.push({age: 0, start, end, contentType});
+      const isMuxed = /** @type {boolean} */ (event['isMuxed']);
+      this.updates_.push({age: 0, start, end, contentType, isMuxed});
     });
 
     player.addEventListener('unloading', () => {
@@ -174,8 +176,15 @@ shakaDemo.Visualizer = class {
 
         // Also draw text labels, to show what type of segment this was.
         let text = update.contentType.toUpperCase();
+        if (update.isMuxed) {
+          text = 'AUDIO&VIDEO';
+        }
         if (!longFormText) {
-          text = text[0];
+          if (update.isMuxed) {
+            text = 'AV';
+          } else {
+            text = text[0];
+          }
         }
         const textX = s + (e - s) / 2;
         let textY = y + h;
