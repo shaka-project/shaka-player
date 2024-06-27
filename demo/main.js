@@ -201,7 +201,6 @@ shakaDemo.Main = class {
     // player.
     this.noInput_ = 'noinput' in this.getParams_();
     this.setupPlayer_();
-    this.readHash_();
     window.addEventListener('hashchange', () => this.hashChanged_());
 
     await this.setupStorage_();
@@ -238,6 +237,8 @@ shakaDemo.Main = class {
           vCanvas, vDiv, vScreenshotDiv, vControlsDiv, this.video_,
           this.player_);
     }
+
+    this.readHash_();
 
     // The main page is loaded. Dispatch an event, so the various
     // configurations will load themselves.
@@ -982,6 +983,12 @@ shakaDemo.Main = class {
       this.configureUI_();
     }
 
+    if ('visualizer' in params) {
+      this.setIsVisualizerActive(true);
+    } else {
+      this.setIsVisualizerActive(false);
+    }
+
     // Check if uncompiled mode is supported.
     if (!shakaDemo.Utils.browserSupportsUncompiledMode()) {
       const uncompiledLink = document.getElementById('uncompiled-link');
@@ -1587,6 +1594,10 @@ shakaDemo.Main = class {
 
     if (this.customContextMenu_) {
       params.push('customContextMenu');
+    }
+
+    if (this.getIsVisualizerActive()) {
+      params.push('visualizer');
     }
 
     // MAX_LOG_LEVEL is the default starting log level. Only save the log level
