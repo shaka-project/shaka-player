@@ -718,7 +718,6 @@ describe('Player', () => {
         player.configure({
           streaming: {
             preferNativeHls: true,
-            useNativeHlsOnSafari: false,
           },
         });
 
@@ -735,7 +734,6 @@ describe('Player', () => {
         player.configure({
           streaming: {
             preferNativeHls: true,
-            useNativeHlsOnSafari: false,
           },
         });
 
