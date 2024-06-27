@@ -1180,12 +1180,13 @@ describe('StreamingEngine', () => {
 
       const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
       const segmentContext = {
-        type: shaka.net.NetworkingEngine.AdvancedRequestType.INIT_SEGMENT,
+        type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
       };
 
-      // Quickly switching back to text1, and text init segment should be
+      // Quickly switching back to text1, and text init segment shouldn't be
       // fetched again.
-      netEngine.expectRequest('text-20-init', segmentType, segmentContext);
+      netEngine.expectRequest('text-20-0.mp4', segmentType, segmentContext);
+      netEngine.expectNoRequest('text-20-init', segmentType, segmentContext);
       netEngine.expectNoRequest('text-21-init', segmentType, segmentContext);
       // TODO: huh?
     });
