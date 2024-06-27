@@ -77,6 +77,10 @@ shakaDemo.Visualizer = class {
       this.updates_.push({age: 0, start, end, contentType});
     });
 
+    player.addEventListener('unloading', () => {
+      this.updates_ = [];
+    });
+
     // Add controls.
     const inputContainer = new shakaDemo.InputContainer(
         controlsDiv, null, shakaDemo.InputContainer.Style.VERTICAL, null);
