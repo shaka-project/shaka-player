@@ -33,6 +33,7 @@
 +../../ui/remote_button.js
 +../../ui/resolution_selection.js
 +../../ui/rewind_button.js
++../../ui/save_video_frame_button.js
 +../../ui/seek_bar.js
 +../../ui/settings_menu.js
 +../../ui/small_play_button.js

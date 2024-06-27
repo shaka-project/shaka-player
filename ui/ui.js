@@ -192,6 +192,7 @@ shaka.ui.Overlay = class {
         'playback_rate',
         'recenter_vr',
         'toggle_stereoscopic',
+        'save_video_frame',
       ],
       statisticsList: [
         'width',
@@ -228,6 +229,7 @@ shaka.ui.Overlay = class {
       contextMenuElements: [
         'loop',
         'picture_in_picture',
+        'save_video_frame',
         'statistics',
         'ad_statistics',
       ],
