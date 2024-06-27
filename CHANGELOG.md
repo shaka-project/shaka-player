@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.9.11](https://github.com/shaka-project/shaka-player/compare/v4.9.10...v4.9.11) (2024-06-27)
+
+
+### Bug Fixes
+
+* **Ads:** Fix skip functionality in MediaTailor ([#6910](https://github.com/shaka-project/shaka-player/issues/6910)) ([cbc4c46](https://github.com/shaka-project/shaka-player/commit/cbc4c462b4de104ddfab48dfd36434de83a7b508))
+
 ## [4.9.10](https://github.com/shaka-project/shaka-player/compare/v4.9.9...v4.9.10) (2024-06-25)
 
 
