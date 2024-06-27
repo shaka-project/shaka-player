@@ -105,6 +105,7 @@ The following buttons can be added to the overflow menu:
 * toggle_stereoscopic: adds a button that toggle between monoscopic and stereoscopic. The button
   is visible only if playing a VR content.
 * ad_statistics: adds a button that displays ad statistics of the video.
+* save_video_frame: adds a button to save the current video frame.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:
@@ -141,6 +142,7 @@ The following buttons can be added to the context menu:
   that support it. Button is invisible on other browsers. Note that it will use the 
   [Document Picture-in-Picture API]() if supported.
 * ad_statistics: adds a button that displays ad statistics of the video.
+* save_video_frame: adds a button to save the current video frame.
 
 Example:
 ```js

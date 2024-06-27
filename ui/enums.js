@@ -46,4 +46,5 @@ shaka.ui.Enums.MaterialDesignIcons = {
   'STATISTICS_OFF': 'insert_chart',
   'RECENTER_VR': 'control_camera',
   'TOGGLE_STEREOSCOPIC': '3d_rotation',
+  'DOWNLOAD': 'download',
 };

@@ -107,6 +107,7 @@ goog.require('shaka.ui.RecenterVRButton');
 goog.require('shaka.ui.RemoteButton');
 goog.require('shaka.ui.ResolutionSelection');
 goog.require('shaka.ui.RewindButton');
+goog.require('shaka.ui.SaveVideoFrameButton');
 goog.require('shaka.ui.SkipAdButton');
 goog.require('shaka.ui.SmallPlayButton');
 goog.require('shaka.ui.Spacer');
