@@ -45,7 +45,7 @@ shakaDemo.Visualizer = class {
 
     /** @private {shaka.util.Timer} */
     this.timer_ = new shaka.util.Timer(() => {
-      this.ageUpdates_();
+      this.pruneUpdates_();
       this.updateCanvas_();
       this.takeAutomaticScreenshots_();
     });
@@ -61,7 +61,6 @@ shakaDemo.Visualizer = class {
 
     /**
      * @private {!Array.<{
-     *   age: number,
      *   start: number,
      *   end: number,
      *   contentType: string,
@@ -76,7 +75,7 @@ shakaDemo.Visualizer = class {
       const end = /** @type {number} */ (event['end']);
       const contentType = /** @type {string} */ (event['contentType']);
       const isMuxed = /** @type {boolean} */ (event['isMuxed']);
-      this.updates_.push({age: 0, start, end, contentType, isMuxed});
+      this.updates_.push({start, end, contentType, isMuxed});
     });
 
     player.addEventListener('unloading', () => {
@@ -168,9 +167,7 @@ shakaDemo.Visualizer = class {
         // Note that these are drawn at reduced opacity, so that multiple
         // updates in the same time range (e.g. video and audio) will visibly
         // overlap.
-        // They also fade away further over time, until they are gone entirely.
-        ctx.globalAlpha =
-            0.1 + 0.2 * (1 - update.age / shakaDemo.Visualizer.maxUpdateAge_);
+        ctx.globalAlpha = 0.3;
         ctx.fillRect(s, y, e - s, h);
         ctx.globalAlpha = 1;
 
@@ -244,12 +241,35 @@ shakaDemo.Visualizer = class {
   }
 
   /** @private */
-  ageUpdates_() {
-    for (const update of this.updates_) {
-      update.age += shakaDemo.Visualizer.updateFrequency_;
-    }
+  pruneUpdates_() {
+    // Prune updates that are no longer buffered.
+    const allBufferedInfo = this.player_.getBufferedInfo();
     this.updates_ = this.updates_.filter((update) => {
-      return update.age < shakaDemo.Visualizer.maxUpdateAge_;
+      /** @type {!Array.<shaka.extern.BufferedRange>} */
+      let bufferedInfo = [];
+      switch (update.contentType) {
+        case 'video':
+          bufferedInfo = allBufferedInfo.video;
+          break;
+        case 'audio':
+          bufferedInfo = allBufferedInfo.audio;
+          break;
+        case 'text':
+          bufferedInfo = allBufferedInfo.text;
+          break;
+        default:
+          return false;
+      }
+      // Fall back on total if there is no buffered info (e.g. for src=).
+      if (bufferedInfo.length == 0) {
+        bufferedInfo = allBufferedInfo.total;
+      }
+      for (const range of bufferedInfo) {
+        if (update.start <= range.end && range.start <= update.end) {
+          return true;
+        }
+      }
+      return false;
     });
   }
 
@@ -332,13 +352,6 @@ shakaDemo.Visualizer = class {
         tickWidth, this.canvas_.height);
   }
 };
-
-
-/**
- * How many seconds an update event should be displayed.
- * @const {number}
- */
-shakaDemo.Visualizer.maxUpdateAge_ = 20;
 
 
 /**
