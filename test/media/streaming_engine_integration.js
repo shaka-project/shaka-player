@@ -69,7 +69,11 @@ describe('StreamingEngine', () => {
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
-        new shaka.test.FakeTextDisplayer());
+        new shaka.test.FakeTextDisplayer(),
+        {
+          getKeySystem: () => null,
+          onMetadata: () => {},
+        });
     const mediaSourceConfig =
         shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine.configure(mediaSourceConfig);
@@ -602,6 +606,9 @@ describe('StreamingEngine', () => {
         type: 'UNKNOWN',
         serviceDescription: null,
         nextUrl: null,
+        periodCount: 1,
+        gapCount: 0,
+        isLowLatency: false,
         variants: [{
           id: 1,
           video: {

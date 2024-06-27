@@ -477,9 +477,7 @@ async function setupTestEnvironment() {
   disableScrollbars();
   workAroundLegacyEdgePromiseIssues();
 
-  if (!shaka.util.Platform.isTizen3()) {
-    await loadImaScript();
-  }
+  await loadImaScript();
   await loadDaiScript();
 
   // The spec filter callback occurs before calls to beforeAll, so we need to

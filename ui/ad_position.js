@@ -7,7 +7,7 @@
 
 goog.provide('shaka.ui.AdPosition');
 
-goog.require('shaka.ads.AdManager');
+goog.require('shaka.ads.Utils');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
@@ -63,12 +63,12 @@ shaka.ui.AdPosition = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
+        this.adManager, shaka.ads.Utils.AD_STARTED, () => {
           this.setPosition_();
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_STOPPED, () => {
+        this.adManager, shaka.ads.Utils.AD_STOPPED, () => {
           this.span_.textContent = '';
           shaka.ui.Utils.setDisplay(this.container_, false);
         });

@@ -82,6 +82,7 @@ shakaDemo.Config = class {
 
     this.addMetaSection_();
     this.addLanguageSection_();
+    this.addCodecPreferenceSection_();
     this.addAbrSection_();
     this.addOfflineSection_();
     this.addDrmSection_();
@@ -199,7 +200,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Disable Text', 'manifest.disableText')
         .addBoolInput_('Disable Thumbnails', 'manifest.disableThumbnails')
         .addBoolInput_('Enable segment-relative VTT Timing',
-            'manifest.segmentRelativeVttTiming');
+            'manifest.segmentRelativeVttTiming')
+        .addBoolInput_('Continue loading when paused',
+            'manifest.continueLoadingWhenPaused');
   }
 
   /** @private */
@@ -489,29 +492,6 @@ shakaDemo.Config = class {
             'streaming.disableTextPrefetch')
         .addBoolInput_('Disable Video Prefetch',
             'streaming.disableVideoPrefetch')
-        .addBoolInput_('Live Sync', 'streaming.liveSync')
-        .addNumberInput_('Target latency tolerance',
-            'streaming.liveSyncTargetLatencyTolerance',
-            /* canBeDecimal= */ true,
-            /* canBeZero= */ true)
-        .addNumberInput_('Max latency for live sync',
-            'streaming.liveSyncMaxLatency',
-            /* canBeDecimal= */ true,
-            /* canBeZero= */ true)
-        .addNumberInput_('Playback rate for live sync',
-            'streaming.liveSyncPlaybackRate',
-            /* canBeDecimal= */ true,
-            /* canBeZero= */ false)
-        .addNumberInput_('Min latency for live sync',
-            'streaming.liveSyncMinLatency',
-            /* canBeDecimal= */ true,
-            /* canBeZero= */ true)
-        .addNumberInput_('Min playback rate for live sync',
-            'streaming.liveSyncMinPlaybackRate',
-            /* canBeDecimal= */ true)
-        .addBoolInput_('Live Sync Panic Mode', 'streaming.liveSyncPanicMode')
-        .addNumberInput_('Live Sync Panic Mode Threshold',
-            'streaming.liveSyncPanicThreshold')
         .addBoolInput_('Allow Media Source recoveries',
             'streaming.allowMediaSourceRecoveries')
         .addNumberInput_('Minimum time between recoveries',
@@ -585,8 +565,52 @@ shakaDemo.Config = class {
             /* canBeZero= */ true)
         .addNumberInput_('Load timeout for src=',
             'streaming.loadTimeout',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Don\'t choose codecs',
+            'streaming.dontChooseCodecs')
+        .addBoolInput_('Should fix timestampOffset',
+            'streaming.shouldFixTimestampOffset');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
+    this.addLiveSyncSection_();
+  }
+
+  /** @private */
+  addLiveSyncSection_() {
+    const docLink = this.resolveExternLink_('.LiveSyncConfiguration');
+    this.addSection_('Streaming Live Sync', docLink);
+    this.addBoolInput_('Live Sync', 'streaming.liveSync.enabled')
+        .addNumberInput_('Target latency',
+            'streaming.liveSync.targetLatency',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Target latency tolerance',
+            'streaming.liveSync.targetLatencyTolerance',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Max playback rate',
+            'streaming.liveSync.maxPlaybackRate',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ false)
+        .addNumberInput_('Min playback rate',
+            'streaming.liveSync.minPlaybackRate',
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Panic Mode', 'streaming.liveSync.panicMode')
+        .addNumberInput_('Panic Mode Threshold',
+            'streaming.liveSync.panicThreshold')
+        .addBoolInput_('Dynamic Target Latency',
+            'streaming.liveSync.dynamicTargetLatency.enabled')
+        .addNumberInput_('Dynamic Target Latency Stability Threshold',
+            'streaming.liveSync.dynamicTargetLatency.stabilityThreshold')
+        .addNumberInput_('Dynamic Target Latency Rebuffer Increment',
+            'streaming.liveSync.dynamicTargetLatency.rebufferIncrement',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Dynamic Target Latency Max Attempts',
+            'streaming.liveSync.dynamicTargetLatency.maxAttempts')
+        .addNumberInput_('Dynamic Target Latency Max Latency',
+            'streaming.liveSync.dynamicTargetLatency.maxLatency')
+        .addNumberInput_('Dynamic Target Latency Min Latency',
+            'streaming.liveSync.dynamicTargetLatency.minLatency');
   }
 
   /** @private */
@@ -645,6 +669,17 @@ shakaDemo.Config = class {
   }
 
   /** @private */
+  addCodecPreferenceSection_() {
+    const docLink = this.resolveExternLink_('.PlayerConfiguration');
+
+    this.addSection_('Codec preference', docLink)
+        .addArrayStringInput_('Preferred video codecs',
+            'preferredVideoCodecs')
+        .addArrayStringInput_('Preferred audio codecs',
+            'preferredAudioCodecs');
+  }
+
+  /** @private */
   addMetaSection_() {
     this.addSection_(/* name= */ null, /* docLink= */ null);
 
@@ -679,6 +714,12 @@ shakaDemo.Config = class {
           noop, 'Trick Play controls require the Shaka UI.');
       this.latestInput_.input().disabled = true;
       this.latestInput_.input().checked = false;
+    }
+    this.addCustomBoolInput_('Enabled custom context menu', (input) => {
+      shakaDemoMain.setCustomContextMenuEnabled(input.checked);
+    });
+    if (shakaDemoMain.getCustomContextMenuEnabled()) {
+      this.latestInput_.input().checked = true;
     }
 
     // shaka.log is not set if logging isn't enabled.
@@ -792,6 +833,26 @@ shakaDemo.Config = class {
     this.createRow_(name, tooltipMessage);
     this.latestInput_ = new shakaDemo.BoolInput(
         this.getLatestSection_(), name, onChange);
+    return this;
+  }
+
+  /**
+   * @param {!string} name
+   * @param {string} valueName
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addArrayStringInput_(name, valueName, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configure(valueName,
+          input.value.split(',').filter(Boolean));
+      shakaDemoMain.remakeHash();
+    };
+    this.addCustomTextInput_(name, onChange, tooltipMessage);
+    const configValue = /** @type {!Array.<string>} */ (
+      shakaDemoMain.getCurrentConfigValue(valueName));
+    this.latestInput_.input().value = configValue.join(',');
     return this;
   }
 

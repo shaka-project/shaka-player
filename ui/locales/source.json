@@ -7,6 +7,10 @@
     "description": "The contents of the ad countdown element, describing what ad you are on in a sequence of ads.",
     "message": "Ad [AD_ON:1] of [NUM_ADS:6]"
   },
+  "AD_STATISTICS": {
+    "description": "Label for a button that displays ad statistics.",
+    "message": "Ad statistics"
+  },
   "AD_TIME": {
     "description": "The text content of a label that shows how much time is left in the current ad.",
     "message": "Ad: [AD_TIME:0:05/0:10]"
@@ -32,6 +36,10 @@
   "CAST": {
     "description": "Label for a button used to open the native Cast dialog in the browser and select a destination to Cast to.",
     "message": "Cast..."
+  },
+  "DOWNLOAD_VIDEO_FRAME": {
+    "description": "Label for a button used to download the current video frame.",
+    "message": "Save video frame"
   },
   "ENTER_LOOP_MODE": {
     "description": "Label for a button that controls the loop mode of a video player. This mode will loop (play over and over) currently selected video.",

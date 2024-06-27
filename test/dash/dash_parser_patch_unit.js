@@ -17,6 +17,9 @@ describe('DashParser Patch', () => {
   const manifestContext = {
     type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD,
   };
+  const patchContext = {
+    type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD_PATCH,
+  };
 
   /** @type {!shaka.test.FakeNetworkingEngine} */
   let fakeNetEngine;
@@ -47,6 +50,7 @@ describe('DashParser Patch', () => {
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
+      disableStream: (stream) => {},
     };
     Date.now = () => publishTime.getTime() + 10;
 
@@ -121,7 +125,7 @@ describe('DashParser Patch', () => {
 
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, manifestContext);
+      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, patchContext);
       expect(onError).toHaveBeenCalledWith(new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.MANIFEST,
@@ -155,7 +159,7 @@ describe('DashParser Patch', () => {
 
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, manifestContext);
+      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, patchContext);
       expect(onError).toHaveBeenCalledWith(new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.MANIFEST,
@@ -215,7 +219,7 @@ describe('DashParser Patch', () => {
 
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, manifestContext);
+      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, patchContext);
     });
 
     it('does not use PatchLocation if publishTime is not defined', async () => {
@@ -250,7 +254,7 @@ describe('DashParser Patch', () => {
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
-      fakeNetEngine.expectNoRequest('dummy://bar', manifestRequest, manifestContext);
+      fakeNetEngine.expectNoRequest('dummy://bar', manifestRequest, patchContext);
     });
 
     it('does not use PatchLocation if it expired', async () => {
@@ -265,7 +269,7 @@ describe('DashParser Patch', () => {
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
-      fakeNetEngine.expectNoRequest('dummy://bar', manifestRequest, manifestContext);
+      fakeNetEngine.expectNoRequest('dummy://bar', manifestRequest, patchContext);
     });
 
     it('replaces PatchLocation with new URL', async () => {
@@ -287,20 +291,21 @@ describe('DashParser Patch', () => {
 
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, manifestContext);
+      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, patchContext);
       fakeNetEngine.request.calls.reset();
 
       fakeNetEngine.setResponseText('dummy://bar2', patchText);
       // Another request should be made to new URI.
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://bar2', manifestRequest, manifestContext);
+      fakeNetEngine.expectRequest('dummy://bar2', manifestRequest, patchContext);
     });
   });
 
   describe('Period', () => {
     it('adds new period as an MPD child', async () => {
       const manifest = await parser.start('dummy://foo', playerInterface);
+      expect(manifest.periodCount).toBe(1);
       const stream = manifest.variants[0].video;
       const patchText = [
         `<Patch mpdId="${mpdId}"`,
@@ -323,6 +328,7 @@ describe('DashParser Patch', () => {
       expect(stream.matchedStreams.length).toBe(1);
 
       await updateManifest();
+      expect(manifest.periodCount).toBe(2);
       await stream.createSegmentIndex();
 
       expect(stream.matchedStreams.length).toBe(2);
@@ -330,6 +336,7 @@ describe('DashParser Patch', () => {
 
     it('adds new period as a Period successor', async () => {
       const manifest = await parser.start('dummy://foo', playerInterface);
+      expect(manifest.periodCount).toBe(1);
       const stream = manifest.variants[0].video;
       const patchText = [
         `<Patch mpdId="${mpdId}"`,
@@ -352,6 +359,7 @@ describe('DashParser Patch', () => {
       expect(stream.matchedStreams.length).toBe(1);
 
       await updateManifest();
+      expect(manifest.periodCount).toBe(2);
       await stream.createSegmentIndex();
 
       expect(stream.matchedStreams.length).toBe(2);

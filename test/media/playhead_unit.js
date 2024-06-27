@@ -138,6 +138,9 @@ describe('Playhead', () => {
       type: 'UNKNOWN',
       serviceDescription: null,
       nextUrl: null,
+      periodCount: 1,
+      gapCount: 0,
+      isLowLatency: false,
     };
 
     config = shaka.util.PlayerConfiguration.createDefault().streaming;

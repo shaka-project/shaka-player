@@ -253,15 +253,21 @@ shakaDemo.NumberInput = class extends shakaDemo.TextInput {
     }
 
     this.input_.pattern = '(Infinity|';
+
     if (canBeZero) {
-      this.input_.pattern += '[0-9]*';
-    } else {
-      this.input_.pattern += '[0-9]*[1-9][0-9]*';
+      this.input_.pattern += '0+|';
     }
+
+    this.input_.pattern += '([0-9]*[1-9][0-9]*)';
+
     if (canBeDecimal) {
+      // strictly allow for 0.xxxx decimals
+      this.input_.pattern += '?(0(?=.))?';
       // TODO: Handle commas as decimal delimeters, for appropriate regions?
       this.input_.pattern += '(.[0-9]+)?';
     }
+
+
     this.input_.pattern += ')';
     if (canBeUnset) {
       this.input_.pattern += '?';

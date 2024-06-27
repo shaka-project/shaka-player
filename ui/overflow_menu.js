@@ -8,7 +8,7 @@
 goog.provide('shaka.ui.OverflowMenu');
 
 goog.require('goog.asserts');
-goog.require('shaka.ads.AdManager');
+goog.require('shaka.ads.Utils');
 goog.require('shaka.log');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
@@ -59,14 +59,14 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
+        this.adManager, shaka.ads.Utils.AD_STARTED, () => {
           if (this.ad && this.ad.isLinear()) {
             shaka.ui.Utils.setDisplay(this.overflowMenuButton_, false);
           }
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_STOPPED, () => {
+        this.adManager, shaka.ads.Utils.AD_STOPPED, () => {
           shaka.ui.Utils.setDisplay(this.overflowMenuButton_, true);
         });
 

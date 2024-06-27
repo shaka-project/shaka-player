@@ -909,6 +909,39 @@ describe('AdaptationSetCriteria', () => {
         manifest.variants[2],
       ]);
     });
+
+    it('chooses variants with preferred audio codec', () => {
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(10, (stream) => {
+            stream.codecs = 'mp4a.40.2';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addAudio(20, (stream) => {
+            stream.codecs = 'ec-3';
+          });
+        });
+      });
+
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          /* language= */ 'en',
+          /* role= */ '',
+          /* channelCount= */ 0,
+          /* hdrLevel= */ '',
+          /* spatialAudio= */ false,
+          /* videoLayout= */ '',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ 'ec-3');
+      const set = builder.create(manifest.variants);
+
+      checkSet(set, [
+        manifest.variants[1],
+      ]);
+    });
   });
 
   /**

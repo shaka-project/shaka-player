@@ -7,7 +7,7 @@
 
 goog.provide('shaka.ui.Element');
 
-goog.require('shaka.ads.AdManager');
+goog.require('shaka.ads.Utils');
 goog.require('shaka.util.EventManager');
 goog.requireType('shaka.Player');
 goog.requireType('shaka.ui.Controls');
@@ -73,12 +73,12 @@ shaka.ui.Element = class {
      */
     this.ad = controls.getAd();
 
-    const AD_STARTED = shaka.ads.AdManager.AD_STARTED;
+    const AD_STARTED = shaka.ads.Utils.AD_STARTED;
     this.eventManager.listen(this.adManager, AD_STARTED, (e) => {
       this.ad = (/** @type {!Object} */ (e))['ad'];
     });
 
-    const AD_STOPPED = shaka.ads.AdManager.AD_STOPPED;
+    const AD_STOPPED = shaka.ads.Utils.AD_STOPPED;
     this.eventManager.listen(this.adManager, AD_STOPPED, () => {
       this.ad = null;
     });

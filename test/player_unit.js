@@ -236,6 +236,25 @@ describe('Player', () => {
       }
     });
 
+    it('destroys drmEngine before mediaSourceEngine with webkit polyfill',
+        async () => {
+          spyOn(shaka.util.Platform, 'isMediaKeysPolyfilled')
+              .and.returnValue(true);
+          goog.asserts.assert(manifest, 'Manifest should be non-null');
+
+          Util.funcSpy(drmEngine.destroy).and.callFake(async () => {
+            expect(mediaSourceEngine.destroy).not.toHaveBeenCalled();
+            await Util.shortDelay();
+            expect(mediaSourceEngine.destroy).not.toHaveBeenCalled();
+          });
+
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+          await player.destroy();
+
+          expect(drmEngine.destroy).toHaveBeenCalled();
+          expect(mediaSourceEngine.destroy).toHaveBeenCalled();
+        });
+
     it('destroys mediaSourceEngine before drmEngine', async () => {
       goog.asserts.assert(manifest, 'Manifest should be non-null');
 
@@ -1520,6 +1539,25 @@ describe('Player', () => {
           variant.addExistingStream(2);  // video
           variant.addExistingStream(6);  // audio
         });
+        manifest.addVariant(108, (variant) => {  // spanish ec-3, low res
+          variant.language = 'es';
+          variant.bandwidth = 1100;
+          variant.addExistingStream(1);  // video
+          variant.addAudio(7, (stream) => {
+            stream.mime('audio/mp4', 'ec-3');
+            stream.originalId = 'audio-es-ec3';
+            stream.bandwidth = 100;
+            stream.channelsCount = 2;
+            stream.audioSamplingRate = 48000;
+            // stream.codecs = 'ec-3';
+          });
+        });
+        manifest.addVariant(109, (variant) => {  // spanish ec-3, high res
+          variant.language = 'es';
+          variant.bandwidth = 2100;
+          variant.addExistingStream(2);  // video
+          variant.addExistingStream(7);  // audio
+        });
 
         // All text tracks should remain, even with different MIME types.
         manifest.addTextStream(50, (stream) => {
@@ -1884,6 +1922,86 @@ describe('Player', () => {
           originalImageId: null,
           accessibilityPurpose: undefined,
         },
+        {
+          id: 108,
+          active: false,
+          type: 'variant',
+          bandwidth: 1100,
+          language: 'es',
+          originalLanguage: 'es',
+          label: null,
+          kind: null,
+          width: 100,
+          height: 200,
+          frameRate: 1000000 / 42000,
+          pixelAspectRatio: '59:54',
+          hdr: null,
+          colorGamut: null,
+          videoLayout: null,
+          mimeType: 'video/mp4',
+          audioMimeType: 'audio/mp4',
+          videoMimeType: 'video/mp4',
+          codecs: 'avc1.4d401f, ec-3',
+          audioCodec: 'ec-3',
+          videoCodec: 'avc1.4d401f',
+          primary: false,
+          roles: ['main'],
+          audioRoles: [],
+          forced: false,
+          videoId: 1,
+          audioId: 7,
+          channelsCount: 2,
+          audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
+          audioBandwidth: 100,
+          videoBandwidth: 1000,
+          originalAudioId: 'audio-es-ec3',
+          originalVideoId: 'video-1kbps',
+          originalTextId: null,
+          originalImageId: null,
+          accessibilityPurpose: undefined,
+        },
+        {
+          id: 109,
+          active: false,
+          type: 'variant',
+          bandwidth: 2100,
+          language: 'es',
+          originalLanguage: 'es',
+          label: null,
+          kind: null,
+          width: 200,
+          height: 400,
+          frameRate: 24,
+          pixelAspectRatio: '59:54',
+          hdr: null,
+          colorGamut: null,
+          videoLayout: null,
+          mimeType: 'video/mp4',
+          audioMimeType: 'audio/mp4',
+          videoMimeType: 'video/mp4',
+          codecs: 'avc1.4d401f, ec-3',
+          audioCodec: 'ec-3',
+          videoCodec: 'avc1.4d401f',
+          primary: false,
+          roles: [],
+          audioRoles: [],
+          forced: false,
+          videoId: 2,
+          audioId: 7,
+          channelsCount: 2,
+          audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
+          audioBandwidth: 100,
+          videoBandwidth: 2000,
+          originalAudioId: 'audio-es-ec3',
+          originalVideoId: 'video-2kbps',
+          originalTextId: null,
+          originalImageId: null,
+          accessibilityPurpose: undefined,
+        },
       ];
 
       textTracks = [
@@ -2172,6 +2290,22 @@ describe('Player', () => {
       expect(args[0].audio.roles).toContain('commentary');
       expect(args[1]).toBe(true);
       expect(getActiveVariantTrack().roles).toContain('commentary');
+    });
+
+    it('selectAudioLanguage() ignores unplayable variants', () => {
+      player.configure({
+        restrictions: {minChannelsCount: 6},
+      });
+      player.selectAudioLanguage('es');
+      expect(getActiveVariantTrack().channelsCount).toBe(6);
+    });
+
+    it('selectAudioLanguage() respects selected audio codec', () => {
+      player.selectAudioLanguage('es', '', 0, 0, 'mp4a.40.2');
+      expect(getActiveVariantTrack().audioCodec).toBe('mp4a.40.2');
+
+      player.selectAudioLanguage('es', '', 0, 0, 'ec-3');
+      expect(getActiveVariantTrack().audioCodec).toBe('ec-3');
     });
 
     it('selectAudioLanguage() applies role only to audio', () => {

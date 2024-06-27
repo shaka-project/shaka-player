@@ -65,6 +65,7 @@ shaka.extern.UIVolumeBarColors;
  *   overflowMenuButtons: !Array.<string>,
  *   contextMenuElements: !Array.<string>,
  *   statisticsList: !Array.<string>,
+ *   adStatisticsList: !Array.<string>,
  *   playbackRates: !Array.<number>,
  *   fastForwardRates: !Array.<number>,
  *   rewindRates: !Array.<number>,
@@ -106,6 +107,8 @@ shaka.extern.UIVolumeBarColors;
  *   The ordered list of buttons in the context menu.
  * @property {!Array.<string>} statisticsList
  *   The ordered list of statistics present in the statistics container.
+ * @property {!Array.<string>} adStatisticsList
+ *   The ordered list of ad statistics present in the ad statistics container.
  * @property {!Array.<number>} playbackRates
  *   The ordered list of rates for playback selection.
   * @property {!Array.<number>} fastForwardRates

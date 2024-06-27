@@ -99,11 +99,13 @@ The following buttons can be added to the overflow menu:
   supports AirPlay.
 * remote: adds a button that opens a Remote Playback dialog. The button is visible only if the
   browser supports Remote Playback API.
-* Statistics: adds a button that displays statistics of the video.
+* statistics: adds a button that displays statistics of the video.
 * recenter_vr: adds a button that recenter the VR view to the initial view. The button is visible
   only if playing a VR content.
 * toggle_stereoscopic: adds a button that toggle between monoscopic and stereoscopic. The button
   is visible only if playing a VR content.
+* ad_statistics: adds a button that displays ad statistics of the video.
+* save_video_frame: adds a button to save the current video frame.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:
@@ -134,11 +136,13 @@ ui.configure(config);
 
 A custom context menu can be added through the `customContextMenu` boolean. Additionally, the `contextMenuElements` option can be used to add elements to it.
 The following buttons can be added to the context menu:
-* Statistics: adds a button that displays statistics of the video.
+* statistics: adds a button that displays statistics of the video.
 * loop: adds a button that controls if the currently selected video is played in a loop.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
   that support it. Button is invisible on other browsers. Note that it will use the 
   [Document Picture-in-Picture API]() if supported.
+* ad_statistics: adds a button that displays ad statistics of the video.
+* save_video_frame: adds a button to save the current video frame.
 
 Example:
 ```js
@@ -160,6 +164,21 @@ const config = {
   'customContextMenu' : true,
   'contextMenuElements' : ['statistics'],
   'statisticsList' : ['width', 'height', 'playTime', 'bufferingTime'],
+}
+ui.configure(config);
+```
+
+#### Configuring Ad Statistics
+The list of ad statistics that are displayed when toggling the ad statistics button can be customized by specifying a `adStatisticsList` on the configuration. All of the statistics from the {@link shaka.extern.AdsStats `AdsStats`} extern can be displayed.
+
+Example:
+```js
+// Add a context menu with the 'ad_statistics' button that displays a container with
+// the current 'started' and 'playedCompletely' values.
+const config = {
+  'customContextMenu' : true,
+  'contextMenuElements' : ['ad_statistics'],
+  'adStatisticsList' : ['started', 'playedCompletely'],
 }
 ui.configure(config);
 ```

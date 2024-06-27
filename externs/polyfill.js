@@ -11,5 +11,5 @@
  */
 
 
-/** @type {boolean} */
+/** @type {string} */
 window.shakaMediaKeysPolyfill;

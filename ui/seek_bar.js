@@ -7,7 +7,7 @@
 
 goog.provide('shaka.ui.SeekBar');
 
-goog.require('shaka.ads.AdManager');
+goog.require('shaka.ads.Utils');
 goog.require('shaka.net.NetworkingEngine');
 goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Locales');
@@ -113,6 +113,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.thumbnailContainer_.appendChild(this.thumbnailTime_);
     this.container.appendChild(this.thumbnailContainer_);
 
+    this.timeContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.timeContainer_.id = 'shaka-player-ui-time-container';
+    this.container.appendChild(this.timeContainer_);
+
     /**
      * @private {?shaka.extern.Thumbnail}
      */
@@ -151,21 +155,21 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         () => this.updateAriaLabel_());
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
+        this.adManager, shaka.ads.Utils.AD_STARTED, () => {
           if (!this.shouldBeDisplayed_()) {
             shaka.ui.Utils.setDisplay(this.container, false);
           }
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_STOPPED, () => {
+        this.adManager, shaka.ads.Utils.AD_STOPPED, () => {
           if (this.shouldBeDisplayed_()) {
             shaka.ui.Utils.setDisplay(this.container, true);
           }
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.CUEPOINTS_CHANGED, (e) => {
+        this.adManager, shaka.ads.Utils.CUEPOINTS_CHANGED, (e) => {
           this.adCuePoints_ = (e)['cuepoints'];
           this.onAdCuePointsChanged_();
         });
@@ -180,13 +184,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           }
           this.lastThumbnail_ = null;
           this.hideThumbnail_();
+          this.hideTime_();
         });
 
     this.eventManager.listen(this.bar, 'mousemove', (event) => {
-      if (!this.player.getImageTracks().length) {
-        this.hideThumbnail_();
-        return;
-      }
       const rect = this.bar.getBoundingClientRect();
       const min = parseFloat(this.bar.min);
       const max = parseFloat(this.bar.max);
@@ -196,11 +197,17 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       const scale = (max - min) / rect.width;
       // Mouse position in units, which may be outside the allowed range.
       const value = Math.round(min + scale * mousePosition);
-      // Show Thumbnail
+      if (!this.player.getImageTracks().length) {
+        this.hideThumbnail_();
+        this.showTime_(mousePosition, value);
+        return;
+      }
+      this.hideTime_();
       this.showThumbnail_(mousePosition, value);
     });
 
     this.eventManager.listen(this.container, 'mouseleave', () => {
+      this.hideTime_();
       this.hideThumbnailTimer_.stop();
       this.hideThumbnailTimer_.tickAfter(/* seconds= */ 0.25);
     });
@@ -375,13 +382,14 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   markAdBreaks_() {
     if (!this.adCuePoints_.length) {
       this.adMarkerContainer_.style.background = 'transparent';
+      this.adBreaksTimer_.stop();
       return;
     }
 
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
     const gradient = ['to right'];
-    const pointsAsFractions = [];
+    let pointsAsFractions = [];
     const adBreakColor = this.config_.seekBarColors.adBreaks;
     let postRollAd = false;
     for (const point of this.adCuePoints_) {
@@ -412,6 +420,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         });
       }
     }
+
+    pointsAsFractions = pointsAsFractions.sort((a, b) => {
+      return a.start - b.start;
+    });
 
     for (const point of pointsAsFractions) {
       gradient.push(this.makeColor_('transparent', point.start));
@@ -445,16 +457,24 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    */
   onAdCuePointsChanged_() {
     this.markAdBreaks_();
-    const seekRange = this.player.seekRange();
-    const seekRangeSize = seekRange.end - seekRange.start;
-    const minSeekBarWindow = shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR;
-    // Seek range keeps changing for live content and some of the known
-    // ad breaks might not be in the seek range now, but get into
-    // it later.
-    // If we have a LIVE seekable content, keep checking for ad breaks
-    // every second.
-    if (this.player.isLive() && seekRangeSize > minSeekBarWindow) {
-      this.adBreaksTimer_.tickEvery(1);
+    const action = () => {
+      const seekRange = this.player.seekRange();
+      const seekRangeSize = seekRange.end - seekRange.start;
+      const minSeekBarWindow =
+          shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR;
+      // Seek range keeps changing for live content and some of the known
+      // ad breaks might not be in the seek range now, but get into
+      // it later.
+      // If we have a LIVE seekable content, keep checking for ad breaks
+      // every second.
+      if (this.player.isLive() && seekRangeSize > minSeekBarWindow) {
+        this.adBreaksTimer_.tickEvery(/* seconds= */ 0.25);
+      }
+    };
+    if (this.player.isFullyLoaded()) {
+      action();
+    } else {
+      this.eventManager.listenOnce(this.player, 'loaded', action);
     }
   }
 
@@ -480,6 +500,33 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   /** @private */
   updateAriaLabel_() {
     this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.SEEK);
+  }
+
+  /** @private */
+  showTime_(pixelPosition, value) {
+    const offsetTop = -10;
+    const width = this.timeContainer_.clientWidth;
+    const height = 20;
+    this.timeContainer_.style.width = 'auto';
+    this.timeContainer_.style.height = height + 'px';
+    this.timeContainer_.style.top = -(height - offsetTop) + 'px';
+    const leftPosition = Math.min(this.bar.offsetWidth - width,
+        Math.max(0, pixelPosition - (width / 2)));
+    this.timeContainer_.style.left = leftPosition + 'px';
+    this.timeContainer_.style.visibility = 'visible';
+    if (this.player.isLive()) {
+      const seekRange = this.player.seekRange();
+      const totalSeconds = seekRange.end - value;
+      if (totalSeconds < 1) {
+        this.timeContainer_.textContent =
+            this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
+      } else {
+        this.timeContainer_.textContent =
+            '-' + this.timeFormatter_(totalSeconds);
+      }
+    } else {
+      this.timeContainer_.textContent = this.timeFormatter_(value);
+    }
   }
 
 
@@ -654,6 +701,14 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   hideThumbnail_() {
     this.thumbnailContainer_.style.visibility = 'hidden';
     this.thumbnailTime_.textContent = '';
+  }
+
+
+  /**
+   * @private
+   */
+  hideTime_() {
+    this.timeContainer_.style.visibility = 'hidden';
   }
 
 

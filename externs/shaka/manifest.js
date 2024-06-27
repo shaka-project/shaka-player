@@ -22,7 +22,10 @@
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   type: string,
  *   serviceDescription: ?shaka.extern.ServiceDescription,
- *   nextUrl: ?string
+ *   nextUrl: ?string,
+ *   periodCount: number,
+ *   gapCount: number,
+ *   isLowLatency: boolean
  * }}
  *
  * @description
@@ -96,6 +99,18 @@
  *   decrease latency.
  * @property {?string} nextUrl
  *   The next url to play.
+ * @property {number} periodCount
+ *   Number of periods found in a manifest. For DASH, it represents number of
+ *   Period elements in a manifest. If streaming protocol does not implement
+ *   period-like structure, it should be set to 1.
+ *   <i>Defaults to <code>1</code>.</i>
+ * @property {number} gapCount
+ *   The amount of gaps found in a manifest. For DASH, it represents number of
+ *   discontinuities found between periods. For HLS, it is a number of EXT-X-GAP
+ *   and GAP=YES occurrences. For MSS, it is always set to 0.
+ *   If in src= mode or nothing is loaded, NaN.
+ * @property {bolean} isLowLatency
+ *   If true, the manifest is Low Latency.
  *
  * @exportDoc
  */
@@ -188,6 +203,7 @@ shaka.extern.ServiceDescription;
  * @typedef {{
  *   keySystem: string,
  *   encryptionScheme: string,
+ *   keySystemUris: (Set.<string>|undefined),
  *   licenseServerUri: string,
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
@@ -209,6 +225,9 @@ shaka.extern.ServiceDescription;
  * @property {string} encryptionScheme
  *   <i>Required.</i> <br>
  *   The encryption scheme, e.g., "cenc", "cbcs", "cbcs-1-9".
+ * @property {(Set.<string>|undefined)} keySystemUris
+ *   <i>Optional.</i> <br>
+ *   The key system uri, e.g., "skd://" for fairplay.
  * @property {string} licenseServerUri
  *   <i>Filled in by DRM config if missing.</i> <br>
  *   The license server URI.

@@ -85,7 +85,12 @@ shaka.extern.StateChange;
  *   gapsJumped: number,
  *   stallsDetected: number,
  *
+ *   manifestSizeBytes: number,
  *   bytesDownloaded: number,
+ *
+ *   nonFatalErrorCount: number,
+ *   manifestPeriodCount: number,
+ *   manifestGapCount: number,
  *
  *   switchHistory: !Array.<shaka.extern.TrackChoice>,
  *   stateHistory: !Array.<shaka.extern.StateChange>
@@ -163,8 +168,24 @@ shaka.extern.StateChange;
  *   The presentation's max segment duration in seconds. If nothing is loaded,
  *   NaN.
  *
+ * @property {number} manifestSizeBytes
+ *   Size of the manifest payload. For DASH & MSS it will match the latest
+ *   downloaded manifest. For HLS, it will match the lastly downloaded playlist.
+ *   If nothing is loaded or in src= mode, NaN.
  * @property {number} bytesDownloaded
  *   The bytes downloaded during the playback. If nothing is loaded, NaN.
+ *
+ * @property {number} nonFatalErrorCount
+ *   The amount of non fatal errors that occurred.  If nothing is loaded, NaN.
+ * @property {number} manifestPeriodCount
+ *   The amount of periods occurred in the manifest. For DASH it represents
+ *   number of Period elements in a manifest. For HLS & MSS it is always 1.
+ *   In src= mode or if nothing is loaded, NaN.
+ * @property {number} manifestGapCount
+ *   The amount of gaps found in a manifest. For DASH, it represents number of
+ *   discontinuities found between periods. For HLS, it is a number of EXT-X-GAP
+ *   and GAP=YES occurrences. For MSS, it is always set to 0.
+ *   If in src= mode or nothing is loaded, NaN.
  *
  * @property {!Array.<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.
@@ -565,6 +586,21 @@ shaka.extern.MetadataFrame;
 
 /**
  * @typedef {{
+ *   startTime: number,
+ *   endTime: ?number,
+ *   values: !Array.<shaka.extern.MetadataFrame>
+ * }}
+ *
+ * @property {number} startTime
+ * @property {?number} endTime
+ * @property {!Array.<shaka.extern.MetadataFrame>} values
+ * @exportDoc
+ */
+shaka.extern.Interstitial;
+
+
+/**
+ * @typedef {{
  *   schemeIdUri: string,
  *   value: string,
  *   startTime: number,
@@ -589,8 +625,8 @@ shaka.extern.MetadataFrame;
  *   The presentation time (in seconds) that the region should end.
  * @property {string} id
  *   Specifies an identifier for this instance of the region.
- * @property {Elment} eventElement
- *   <b>DEPRECATED</b>: Use eventElement instead.
+ * @property {Element} eventElement
+ *   <b>DEPRECATED</b>: Use eventNode instead.
  *   The XML element that defines the Event.
  * @property {?shaka.extern.xml.Node} eventNode
  *   The XML element that defines the Event.
@@ -607,6 +643,9 @@ shaka.extern.TimelineRegionInfo;
  *   frameRate: ?number,
  *   height: ?number,
  *   mimeType: ?string,
+ *   label: ?string,
+ *   roles: ?Array.<string>,
+ *   language: ?string,
  *   channelsCount: ?number,
  *   pixelAspectRatio: ?string,
  *   width: ?number
@@ -630,6 +669,12 @@ shaka.extern.TimelineRegionInfo;
  *   The video height in pixels.
  * @property {string} mimeType
  *   The MIME type.
+ * @property {?string} label
+ *   The stream's label, when available.
+ * @property {?Array.<string>} roles
+ *   The stream's role, when available.
+ * @property {?string} language
+ *   The stream's language, when available.
  * @property {?number} channelsCount
  *   The number of audio channels, or null if unknown.
  * @property {?string} pixelAspectRatio
@@ -1178,7 +1223,8 @@ shaka.extern.MssManifestConfiguration;
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration,
  *   mss: shaka.extern.MssManifestConfiguration,
- *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean
+ *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean,
+ *   continueLoadingWhenPaused: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1221,10 +1267,108 @@ shaka.extern.MssManifestConfiguration;
  * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
  *   If true, manifest update request failures will cause a fatal error.
  *   Defaults to <code>false</code> if not provided.
- *
+ * @property {boolean} continueLoadingWhenPaused
+ *   If true, live manifest will be updated with the regular intervals even if
+ *   the video is paused.
+ *   Defaults to <code>true</code> if not provided.
  * @exportDoc
  */
 shaka.extern.ManifestConfiguration;
+
+/**
+ * @typedef {{
+ *   enabled: boolean,
+ *   stabilityThreshold: number,
+ *   rebufferIncrement: number,
+ *   maxAttempts: number,
+ *   maxLatency: number,
+ *   minLatency: number
+ * }}
+ *
+ * @description
+ * Dynamic Target Latency configuration options.
+ *
+ * @property {boolean} enabled
+ *   If <code>true</code>, dynamic latency for live sync is enabled. When
+ *   enabled, the target latency will be adjusted closer to the min latency
+ *   when playback is stable (see <code>stabilityThreshold</code>). If
+ *   there are rebuffering events, then the target latency will move towards
+ *   the max latency value in increments of <code>rebufferIncrement</code>.
+ *   Defaults to <code>false</code>.
+ * @property {number} rebufferIncrement
+ *   The value, in seconds, to increment the target latency towards
+ *   <code>maxLatency</code> after a rebuffering event. Defaults to
+ *   <code>0.5</code>.
+ * @property {number} stabilityThreshold
+ *   Number of seconds after a rebuffering before we are considered stable and
+ *   will move the target latency towards <code>minLatency</code>
+ *   value. Defaults to <code>60</code>
+ * @property {number} maxAttempts
+ *   Number of times that dynamic target latency will back off to
+ *   <code>maxLatency</code> and attempt to adjust it closer to
+ *   <code>minLatency</code>. Defaults to <code>10</code>
+ * @property {number} maxLatency
+ *   The latency to use when a rebuffering event causes us to back off from
+ *   the live edge. Defaults to <code>4</code>
+ * @property {number} minLatency
+ *   The latency to work towards when the network is stable and we want to get
+ *   closer to the live edge. Defaults to <code>1</code>
+ * @exportDoc
+ */
+shaka.extern.DynamicTargetLatencyConfiguration;
+
+
+/**
+ * @typedef {{
+ *   enabled: boolean,
+ *   targetLatency: number,
+ *   targetLatencyTolerance: number,
+ *   maxPlaybackRate: number,
+ *   minPlaybackRate: number,
+ *   panicMode: boolean,
+ *   panicThreshold: number,
+ *   dynamicTargetLatency: shaka.extern.DynamicTargetLatencyConfiguration
+ * }}
+ *
+ * @description
+ * LiveSync configuration options.
+ *
+ * @property {boolean} enabled
+ *   Enable the live stream sync against the live edge by changing the playback
+ *   rate. Defaults to <code>false</code>.
+ *   Note: on some SmartTVs, if this is activated, it may not work or the sound
+ *   may be lost when activated.
+ * @property {number} targetLatency
+ *   Preferred latency, in seconds. Effective only if liveSync is true.
+ *   Defaults to <code>0.5</code>.
+ * @property {number} targetLatencyTolerance
+ *   Latency tolerance for target latency, in seconds. Effective only if
+ *   liveSync is enabled. Defaults to <code>0.5</code>.
+ * @property {number} maxPlaybackRate
+ *   Max playback rate used for latency chasing. It is recommended to use a
+ *   value between 1 and 2. Effective only if liveSync is enabled. Defaults to
+ *   <code>1.1</code>.
+ * @property {number} minPlaybackRate
+ *   Minimum playback rate used for latency chasing. It is recommended to use a
+ *   value between 0 and 1. Effective only if liveSync is enabled. Defaults to
+ *   <code>0.95</code>.
+ * @property {boolean} panicMode
+ *   If <code>true</code>, panic mode for live sync is enabled. When enabled,
+ *   will set the playback rate to the <code>minPlaybackRate</code>
+ *   until playback has continued past a rebuffering for longer than the
+ *   <code>panicThreshold</code>. Defaults to <code>false</code>.
+ * @property {number} panicThreshold
+ *   Number of seconds that playback stays in panic mode after a rebuffering.
+ *   Defaults to <code>60</code>
+ * @property {shaka.extern.DynamicTargetLatencyConfiguration}
+ * dynamicTargetLatency
+ *
+ *   The dynamic target latency config for dynamically adjusting the target
+ *   latency to be closer to edge when network conditions are good and to back
+ *   off when network conditions are bad.
+ * @exportDoc
+ */
+shaka.extern.LiveSyncConfiguration;
 
 
 /**
@@ -1263,14 +1407,7 @@ shaka.extern.ManifestConfiguration;
  *   disableAudioPrefetch: boolean,
  *   disableTextPrefetch: boolean,
  *   disableVideoPrefetch: boolean,
- *   liveSync: boolean,
- *   liveSyncTargetLatencyTolerance: number,
- *   liveSyncMaxLatency: number,
- *   liveSyncPlaybackRate: number,
- *   liveSyncMinLatency: number,
- *   liveSyncMinPlaybackRate: number,
- *   liveSyncPanicMode: boolean,
- *   liveSyncPanicThreshold: number,
+ *   liveSync: shaka.extern.LiveSyncConfiguration,
  *   allowMediaSourceRecoveries: boolean,
  *   minTimeBetweenRecoveries: number,
  *   vodDynamicPlaybackRate: boolean,
@@ -1279,7 +1416,9 @@ shaka.extern.ManifestConfiguration;
  *   infiniteLiveStreamDuration: boolean,
  *   preloadNextUrlWindow: number,
  *   loadTimeout: number,
- *   clearDecodingCache: boolean
+ *   clearDecodingCache: boolean,
+ *   dontChooseCodecs: boolean,
+ *   shouldFixTimestampOffset: boolean
  * }}
  *
  * @description
@@ -1424,36 +1563,8 @@ shaka.extern.ManifestConfiguration;
  *   If set and prefetch limit is defined, it will prevent from prefetching data
  *   for video.
  *   Defaults to <code>false</code>.
- * @property {boolean} liveSync
- *   Enable the live stream sync against the live edge by changing the playback
- *   rate. Defaults to <code>false</code>.
- *   Note: on some SmartTVs, if this is activated, it may not work or the sound
- *   may be lost when activated.
- * @property {number} liveSyncTargetLatencyTolerance
- *   Latency tolerance for target latency, in seconds. Effective only if
- *   liveSync is true. Defaults to <code>0.5</code>.
- * @property {number} liveSyncMaxLatency
- *   Maximum acceptable latency, in seconds. Effective only if liveSync is
- *   true. Defaults to <code>1</code>.
- * @property {number} liveSyncPlaybackRate
- *   Playback rate used for latency chasing. It is recommended to use a value
- *   between 1 and 2. Effective only if liveSync is true. Defaults to
- *   <code>1.1</code>.
- * @property {number} liveSyncMinLatency
- *   Minimum acceptable latency, in seconds. Effective only if liveSync is
- *   true. Defaults to <code>0</code>.
- * @property {number} liveSyncMinPlaybackRate
- *   Minimum playback rate used for latency chasing. It is recommended to use a
- *   value between 0 and 1. Effective only if liveSync is true. Defaults to
- *   <code>0.95</code>.
- * @property {boolean} liveSyncPanicMode
- *   If <code>true</code>, panic mode for live sync is enabled. When enabled,
- *   will set the playback rate to the <code>liveSyncMinPlaybackRate</code>
- *   until playback has continued past a rebuffering for longer than the
- *   <code>liveSyncPanicThreshold</code>. Defaults to <code>false</code>.
- * @property {number} liveSyncPanicThreshold
- *   Number of seconds that playback stays in panic mode after a rebuffering.
- *   Defaults to <code>60</code>
+ * @property {shaka.extern.LiveSyncConfiguration} liveSync
+ *   The live sync configuration for keeping near the live edge.
  * @property {boolean} allowMediaSourceRecoveries
  *   Indicate if we should recover from VIDEO_ERROR resetting Media Source.
  *   Defaults to <code>true</code>.
@@ -1492,6 +1603,15 @@ shaka.extern.ManifestConfiguration;
  *   playbacks on some platforms.
  *   Defaults to <code>true</code> on PlayStation devices and to
  *   <code>false</code> on other devices.
+ * @property {boolean} dontChooseCodecs
+ *   If true, we don't choose codecs in the player, and keep all the variants.
+ *   Defaults to <code>false</code>.
+ * @property {boolean} shouldFixTimestampOffset
+ *   If true, we will try to fix problems when the timestampOffset is less than
+ *   the baseMediaDecodeTime. This only works when the manifest is DASH with
+ *   MP4 segments.
+ *   Defaults to <code>false</code> except on Tizen, WebOS whose default value
+ *   is <code>true</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

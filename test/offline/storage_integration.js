@@ -1755,6 +1755,9 @@ filterDescribe('Storage', storageSupport, () => {
 
     /** @override */
     banLocation(uri) {}
+
+    /** @override */
+    setMediaElement(mediaElement) {}
   };
 
   /**

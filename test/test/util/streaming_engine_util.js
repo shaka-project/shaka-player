@@ -321,6 +321,9 @@ shaka.test.StreamingEngineUtil = class {
       type: 'UNKNOWN',
       serviceDescription: null,
       nextUrl: null,
+      periodCount: 1,
+      gapCount: 0,
+      isLowLatency: false,
     };
 
     /** @type {shaka.extern.Variant} */

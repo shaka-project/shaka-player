@@ -206,6 +206,9 @@ shaka.test.TestScheme = class {
         channelsCount: null,
         pixelAspectRatio: null,
         width: null,
+        label: null,
+        roles: null,
+        language: null,
       };
       stream.mimeType = data[contentType].mimeType;
       stream.codecs = data[contentType].codecs;
@@ -791,6 +794,9 @@ shaka.test.TestScheme.ManifestParser = class {
 
   /** @override */
   banLocation() {}
+
+  /** @override */
+  setMediaElement() {}
 };
 
 
