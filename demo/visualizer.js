@@ -355,13 +355,6 @@ shakaDemo.Visualizer = class {
 
 
 /**
- * How many seconds an update event should be displayed.
- * @const {number}
- */
-shakaDemo.Visualizer.maxUpdateAge_ = 20;
-
-
-/**
  * How often the visualizer should update, in seconds.
  * @const {number}
  */
