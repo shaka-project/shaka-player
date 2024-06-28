@@ -1439,9 +1439,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
       .setExtraConfig({
-        streaming: {
-          useNativeHlsOnSafari: false,
-        },
         lcevc: {
           enabled: true,
           dynamicPerformanceScaling: true,
@@ -1460,9 +1457,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
       .setExtraConfig({
-        streaming: {
-          useNativeHlsOnSafari: false,
-        },
         lcevc: {
           enabled: true,
           dynamicPerformanceScaling: true,
@@ -1481,9 +1475,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
       .setExtraConfig({
-        streaming: {
-          useNativeHlsOnSafari: false,
-        },
         lcevc: {
           enabled: true,
           dynamicPerformanceScaling: true,

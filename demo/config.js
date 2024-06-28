@@ -555,8 +555,6 @@ shakaDemo.Config = class {
         .addBoolInput_('Ignore Text Stream Failures',
             'streaming.ignoreTextStreamFailures')
         .addBoolInput_('Stall Detector Enabled', 'streaming.stallEnabled')
-        .addBoolInput_('Use native HLS on Safari (Clear)',
-            'streaming.useNativeHlsOnSafari')
         .addBoolInput_('Use native HLS for FairPlay',
             'streaming.useNativeHlsForFairPlay')
         .addNumberInput_('Time window at end to preload next URL',
