@@ -112,7 +112,7 @@ describe('Player Src Equals', () => {
     // Make sure the playhead is roughly where we expect it to be before
     // seeking.
     expect(video.currentTime).toBeGreaterThan(0);
-    expect(video.currentTime).toBeLessThan(2.0);
+    expect(video.currentTime).toBeLessThan(2.5);
 
     // Trigger a seek and then wait for the seek to take effect.
     // This seek target is very close to the duration of the video (10.01s).

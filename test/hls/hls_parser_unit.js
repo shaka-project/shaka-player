@@ -2911,7 +2911,23 @@ describe('HlsParser', () => {
      */
     function makeReference(startTime, endTime, syncTime) {
       const initUris = () => ['test:/init.mp4'];
+      const mediaQuality = {
+        bandwidth: 200,
+        audioSamplingRate: null,
+        codecs: 'avc1.4d401f',
+        contentType: 'video',
+        frameRate: 60,
+        height: 540,
+        mimeType: 'video/mp4',
+        channelsCount: null,
+        pixelAspectRatio: null,
+        width: 960,
+        label: null,
+        roles: [],
+        language: null,
+      };
       const init = new shaka.media.InitSegmentReference(initUris, 0, 615);
+      init.mediaQuality = mediaQuality;
       const uris = () => ['test:/main.mp4'];
       return new shaka.media.SegmentReference(
           startTime, endTime, uris, 0, null, init, 0, 0, Infinity,

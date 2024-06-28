@@ -34,8 +34,6 @@ describe('Player Dolby Vision', () => {
     player = new compiledShaka.Player();
     await player.attach(video);
 
-    player.configure('streaming.useNativeHlsOnSafari', false);
-
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
 
