@@ -412,8 +412,8 @@ describe('UITextDisplayer', () => {
     // be created.
     const cues = [
       new shaka.text.Cue(0, 100, ''),
-      new shaka.text.Cue(0, 100, ''),
-      new shaka.text.Cue(0, 100, ''),
+      new shaka.text.Cue(0, 200, ''),
+      new shaka.text.Cue(0, 300, ''),
     ];
     for (const cue of cues) {
       cue.displayAlign = shaka.text.Cue.displayAlign.CENTER;
@@ -567,8 +567,8 @@ describe('UITextDisplayer', () => {
     // be created.
     const firstBatchOfCues = [
       new shaka.text.Cue(0, 100, ''),
-      new shaka.text.Cue(0, 100, ''),
-      new shaka.text.Cue(0, 100, ''),
+      new shaka.text.Cue(0, 200, ''),
+      new shaka.text.Cue(0, 300, ''),
     ];
     for (const cue of firstBatchOfCues) {
       cue.displayAlign = shaka.text.Cue.displayAlign.CENTER;
@@ -578,8 +578,8 @@ describe('UITextDisplayer', () => {
     // Another batch for the other region
     const secondBatchOfCues = [
       new shaka.text.Cue(0, 100, ''),
-      new shaka.text.Cue(0, 100, ''),
-      new shaka.text.Cue(0, 100, ''),
+      new shaka.text.Cue(0, 200, ''),
+      new shaka.text.Cue(0, 300, ''),
     ];
     for (const cue of secondBatchOfCues) {
       cue.displayAlign = shaka.text.Cue.displayAlign.CENTER;
