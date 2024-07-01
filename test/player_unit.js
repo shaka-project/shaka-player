@@ -162,7 +162,7 @@ describe('Player', () => {
     }
 
     video = new shaka.test.FakeVideo(20);
-    player = new shaka.Player(null, dependencyInjector);
+    player = new shaka.Player(null, null, dependencyInjector);
     await player.attach(video);
     player.configure({
       // Ensures we don't get a warning about missing preference.
