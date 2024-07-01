@@ -68,7 +68,7 @@ describe('MediaCapabilities', () => {
         width: 512,
       },
     };
-    shaka.media.DrmEngine.clearMediaKeySystemAccessMap();
+    shaka.util.DrmUtils.clearMediaKeySystemAccessMap();
     supportMap.clear();
 
     mockCanDisplayType = jasmine.createSpy('canDisplayType');
