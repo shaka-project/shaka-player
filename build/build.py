@@ -316,7 +316,7 @@ class Build(object):
       return False
 
     generated_externs = [extern_generator.output]
-    shaka_externs = shakaBuildHelpers.get_all_js_files('externs')
+    shaka_externs = shakaBuildHelpers.get_all_js_files('externs/shaka')
     if self.has_ui():
       shaka_externs += shakaBuildHelpers.get_all_js_files('ui/externs')
     ts_def_generator = compiler.TsDefGenerator(
