@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.9.12](https://github.com/shaka-project/shaka-player/compare/v4.9.11...v4.9.12) (2024-07-01)
+
+
+### Bug Fixes
+
+* **ABR:** Add a guard when variant is null ([#6928](https://github.com/shaka-project/shaka-player/issues/6928)) ([df99f61](https://github.com/shaka-project/shaka-player/commit/df99f6103b1859b376895ae68e9c019dcfcf520a))
+* Don't clear the buffer when disable a stream ([#6931](https://github.com/shaka-project/shaka-player/issues/6931)) ([53a1147](https://github.com/shaka-project/shaka-player/commit/53a114792a39f3ae9b17bb99dd066735b57c6942))
+* Only request initialization segment when it's necessary ([#6929](https://github.com/shaka-project/shaka-player/issues/6929)) ([190fa3f](https://github.com/shaka-project/shaka-player/commit/190fa3fc6b1649d192a5a6785212cbc174d98229))
+
 ## [4.9.11](https://github.com/shaka-project/shaka-player/compare/v4.9.10...v4.9.11) (2024-06-27)
 
 
