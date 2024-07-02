@@ -1102,6 +1102,14 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MPD_CHAINING),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'DASH-IF IMSC1 (CMAF) Image Subtitle',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/vod/testpic_2s/imsc1_img.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.MP4),
   // End DASH-IF Assets }}}
 
   // bitcodin assets {{{
