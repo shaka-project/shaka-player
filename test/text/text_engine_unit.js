@@ -106,6 +106,7 @@ describe('TextEngine', () => {
         dummyData,
         {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
         undefined,
+        [],
       ]);
 
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
@@ -122,6 +123,7 @@ describe('TextEngine', () => {
         dummyData,
         {periodStart: 0, segmentStart: 3, segmentEnd: 5, vttOffset: 0},
         undefined,
+        [],
       ]);
 
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
@@ -289,6 +291,7 @@ describe('TextEngine', () => {
         dummyData,
         {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
         undefined,
+        [],
       ]);
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [
@@ -304,6 +307,7 @@ describe('TextEngine', () => {
         dummyData,
         {periodStart: 4, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
         undefined,
+        [],
       ]);
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [
@@ -335,6 +339,7 @@ describe('TextEngine', () => {
         dummyData,
         {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
         undefined,
+        [],
       ]);
 
       textEngine.setTimestampOffset(8);
@@ -345,6 +350,7 @@ describe('TextEngine', () => {
         dummyData,
         {periodStart: 8, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
         undefined,
+        [],
       ]);
     });
   });

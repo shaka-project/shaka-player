@@ -2154,7 +2154,7 @@ describe('TtmlTextParser', () => {
     const data =
         shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
     const result = new shaka.text.TtmlTextParser()
-        .parseMedia(data, time, 'foo://bar');
+        .parseMedia(data, time, 'foo://bar', /* images= */ []);
     shaka.test.TtmlUtils.verifyHelper(
         cues, result, bodyProperties, divProperties);
   }
@@ -2182,7 +2182,7 @@ describe('TtmlTextParser', () => {
       new shaka.text.TtmlTextParser().parseMedia(
           shaka.util.BufferUtils.toUint8(data),
           {periodStart: 0, segmentStart: 0, segmentEnd: 10, vttOffset: 0},
-          'foo://bar');
+          'foo://bar', /* images= */ []);
     }).toThrow(error);
   }
 });

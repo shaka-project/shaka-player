@@ -38,11 +38,12 @@ shaka.extern.TextParser = class {
    *    for each cue.
    * @param {?(string|undefined)} uri
    *    The media uri.
+   * @param {!Array.<string>} images
    * @return {!Array.<!shaka.text.Cue>}
    *
    * @exportDoc
    */
-  parseMedia(data, timeContext, uri) {}
+  parseMedia(data, timeContext, uri, images) {}
 
   /**
    * Notifies the stream if the manifest is in sequence mode or not.
