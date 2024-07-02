@@ -111,6 +111,8 @@ shaka.test.ManifestGenerator.Manifest = class {
     this.gapCount = 0;
     /** @type {boolean} */
     this.isLowLatency = false;
+    /** @type {?number} */
+    this.startTime = null;
 
 
     /** @type {shaka.extern.Manifest} */

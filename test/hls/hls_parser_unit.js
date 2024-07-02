@@ -156,6 +156,7 @@ describe('HlsParser', () => {
   it('parses manifest attributes', async () => {
     const master = [
       '#EXTM3U\n',
+      '#EXT-X-START:TIME-OFFSET=2\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
       'CHANNELS="16/JOC",SAMPLE-RATE="48000",URI="audio"\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
@@ -187,6 +188,7 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
+      manifest.startTime = 2;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.language = 'en';
@@ -5081,6 +5083,7 @@ describe('HlsParser', () => {
   it('parses media playlists directly', async () => {
     const media = [
       '#EXTM3U\n',
+      '#EXT-X-START:TIME-OFFSET=-2\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
@@ -5091,6 +5094,7 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
+      manifest.startTime = -2;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.VIDEO, (stream) => {

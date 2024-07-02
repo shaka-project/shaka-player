@@ -141,6 +141,7 @@ describe('Playhead', () => {
       periodCount: 1,
       gapCount: 0,
       isLowLatency: false,
+      startTime: null,
     };
 
     config = shaka.util.PlayerConfiguration.createDefault().streaming;
