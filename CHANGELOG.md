@@ -1,5 +1,29 @@
 # Changelog
 
+## [4.11.0](https://github.com/shaka-project/shaka-player/compare/v4.10.0...v4.11.0) (2024-07-02)
+
+
+### Features
+
+* **HLS:** Add support for EXT-X-START ([#6938](https://github.com/shaka-project/shaka-player/issues/6938)) ([d63df14](https://github.com/shaka-project/shaka-player/commit/d63df145aacbf09f9a4c99c54e22a09c10432d9e))
+
+
+### Bug Fixes
+
+* Avoid clear buffer when select the same audio track ([#6959](https://github.com/shaka-project/shaka-player/issues/6959)) ([b953a75](https://github.com/shaka-project/shaka-player/commit/b953a75474f52f79d3f6ade0a2a18cb30e56cd9e))
+* Filter duplicate cues on text displayer append ([#6949](https://github.com/shaka-project/shaka-player/issues/6949)) ([fa9feb3](https://github.com/shaka-project/shaka-player/commit/fa9feb346f0a9dac1a86bdd364868a48c88c058f))
+* Fix NaN and empty objects in getNonDefaultConfiguration ([#6956](https://github.com/shaka-project/shaka-player/issues/6956)) ([52e3864](https://github.com/shaka-project/shaka-player/commit/52e3864fd06ab7f3acb6d7bab87cc1a25b7ff7f1))
+* **SimpleTextDisplayer:** Do not disable metadata & chapters tracks ([#6948](https://github.com/shaka-project/shaka-player/issues/6948)) ([c6d834e](https://github.com/shaka-project/shaka-player/commit/c6d834ed367efeba520a5c91d3d289d41a2f2475))
+* **SSA:** Support files with line breaks that are not necessary ([#6947](https://github.com/shaka-project/shaka-player/issues/6947)) ([88431b6](https://github.com/shaka-project/shaka-player/commit/88431b6f3d71a84dd203ecd3d3837629fbfb95e4))
+* **Stats:** Fix completionPercent for Live ([#6957](https://github.com/shaka-project/shaka-player/issues/6957)) ([d719328](https://github.com/shaka-project/shaka-player/commit/d719328ffaee752eba2f1d45299b60ec499ee57d))
+* **UI:** Don't display NaN stats ([#6958](https://github.com/shaka-project/shaka-player/issues/6958)) ([7c33192](https://github.com/shaka-project/shaka-player/commit/7c33192a07b7ec7046adef607d177422789e7fe5))
+
+
+### Performance Improvements
+
+* **DRM:** compare init data only when config flag is set ([#6952](https://github.com/shaka-project/shaka-player/issues/6952)) ([be22e5b](https://github.com/shaka-project/shaka-player/commit/be22e5b0ce4093aedc434f81206a29eaad12c5ec))
+* **HLS:** do not loop twice when processing nalus ([#6954](https://github.com/shaka-project/shaka-player/issues/6954)) ([a779d31](https://github.com/shaka-project/shaka-player/commit/a779d31efcf7c9f1db6b306165722c3b7d6ed1e6))
+
 ## [4.10.0](https://github.com/shaka-project/shaka-player/compare/v4.9.0...v4.10.0) (2024-07-01)
 
 
