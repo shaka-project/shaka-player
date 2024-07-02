@@ -774,6 +774,9 @@ describe('Player', () => {
 
   it('getNonDefaultConfiguration', () => {
     player.configure({
+      manifest: {
+        disableThumbnails: true,
+      },
       drm: {
         retryParameters: {backoffFactor: 5},
       },
@@ -781,6 +784,9 @@ describe('Player', () => {
     const nonDefaultConfiguration = player.getNonDefaultConfiguration();
     const config = player.getConfiguration();
     expect(nonDefaultConfiguration).not.toBe(config);
+    expect(nonDefaultConfiguration['mediaSource']).toBeUndefined();
+    expect(nonDefaultConfiguration['manifest']['availabilityWindowOverride'])
+        .toBeUndefined();
   });
 
   describe('configure', () => {
