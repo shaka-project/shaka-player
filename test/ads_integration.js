@@ -10,6 +10,9 @@ describe('Ads', () => {
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
 
+  /** @type {!jasmine.Spy} */
+  let onAdErrorSpy;
+
   /** @type {!HTMLVideoElement} */
   let video;
   /** @type {!HTMLElement} */
@@ -60,8 +63,23 @@ describe('Ads', () => {
       fail(event.detail);
     });
     eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
+
+    onAdErrorSpy = jasmine.createSpy('onAdError');
+    onAdErrorSpy.and.callFake((event) => {
+      if (!event['originalEvent']) {
+        fail(event);
+        return;
+      }
+      if (event['originalEvent'] instanceof shaka.util.Error) {
+        fail(event['originalEvent']);
+        return;
+      }
+      const imaEvent =
+      /** @type {!google.ima.AdErrorEvent} */ (event['originalEvent']);
+      fail(imaEvent.getError());
+    });
     eventManager.listen(adManager, shaka.ads.Utils.AD_ERROR,
-        Util.spyFunc(onErrorSpy));
+        Util.spyFunc(onAdErrorSpy));
   });
 
   afterEach(async () => {
