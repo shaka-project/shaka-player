@@ -925,5 +925,6 @@ function makeTemplateInfo(timeline) {
     'indexTemplate': null,
     'mimeType': 'video/mp4',
     'codecs': 'avc1.42E01E',
+    'bandwidth': 0,
   };
 }
