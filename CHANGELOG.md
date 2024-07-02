@@ -1,5 +1,27 @@
 # Changelog
 
+## [4.10.1](https://github.com/shaka-project/shaka-player/compare/v4.10.0...v4.10.1) (2024-07-02)
+
+
+### Bug Fixes
+
+* Avoid clear buffer when select the same audio track ([#6959](https://github.com/shaka-project/shaka-player/issues/6959)) ([f7c849b](https://github.com/shaka-project/shaka-player/commit/f7c849be4d5aed436e8a8e582ef04e9a459d9c51))
+* Exclude future segments in notifyTimeRange calculations ([#6970](https://github.com/shaka-project/shaka-player/issues/6970)) ([32d63c6](https://github.com/shaka-project/shaka-player/commit/32d63c66e8587307964a79bf6509ff944517f4fd))
+* Filter duplicate cues on text displayer append ([#6949](https://github.com/shaka-project/shaka-player/issues/6949)) ([4e1f528](https://github.com/shaka-project/shaka-player/commit/4e1f5281e0948dc446d77cb74a73f4f7faa4882f))
+* Fix NaN and empty objects in getNonDefaultConfiguration ([#6956](https://github.com/shaka-project/shaka-player/issues/6956)) ([b15bb94](https://github.com/shaka-project/shaka-player/commit/b15bb943d6a0ccc44c28cb10a0b5b31bdf4d109e))
+* **SimpleTextDisplayer:** Do not disable metadata & chapters tracks ([#6948](https://github.com/shaka-project/shaka-player/issues/6948)) ([b9e7ffe](https://github.com/shaka-project/shaka-player/commit/b9e7ffe1d6023c66b9d719cb60ec4f48045bfa3c))
+* **SSA:** Support files with line breaks that are not necessary ([#6947](https://github.com/shaka-project/shaka-player/issues/6947)) ([f54170e](https://github.com/shaka-project/shaka-player/commit/f54170edeb3cd8743ec7856c021492b47f6caa37))
+* **Stats:** Fix completionPercent for Live ([#6957](https://github.com/shaka-project/shaka-player/issues/6957)) ([4dcc8ae](https://github.com/shaka-project/shaka-player/commit/4dcc8ae4feeeca45719e130f5c9b819d95837c01))
+* **TTML:** Fix font styles parsing ([#6969](https://github.com/shaka-project/shaka-player/issues/6969)) ([5decb34](https://github.com/shaka-project/shaka-player/commit/5decb344df14a2173839052e98ca7a03da7a8b41))
+* **TTML:** Show background color with image subtitles ([#6967](https://github.com/shaka-project/shaka-player/issues/6967)) ([40241e6](https://github.com/shaka-project/shaka-player/commit/40241e65a34bd043069f670641f57feceaeb04a2))
+* **UI:** Don't display NaN stats ([#6958](https://github.com/shaka-project/shaka-player/issues/6958)) ([7b894e6](https://github.com/shaka-project/shaka-player/commit/7b894e6c2d6479e72f9edd4489791136d32c6ce5))
+
+
+### Performance Improvements
+
+* **DRM:** compare init data only when config flag is set ([#6952](https://github.com/shaka-project/shaka-player/issues/6952)) ([030386c](https://github.com/shaka-project/shaka-player/commit/030386ca7afb5fe9e4bfa9919b36ea43f7c5b96c))
+* **HLS:** do not loop twice when processing nalus ([#6954](https://github.com/shaka-project/shaka-player/issues/6954)) ([7a2fc6d](https://github.com/shaka-project/shaka-player/commit/7a2fc6d7d0df6f01534d6e46048f08eb1d6d3839))
+
 ## [4.10.0](https://github.com/shaka-project/shaka-player/compare/v4.9.0...v4.10.0) (2024-07-01)
 
 
