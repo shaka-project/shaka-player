@@ -22,6 +22,7 @@ v5.0 - 2024 Q4
 
 v4.11 - 2024 Q3
  - HLS improvements
+ - HLS: EXT-X-START support
 
 =====
 

@@ -25,7 +25,8 @@
  *   nextUrl: ?string,
  *   periodCount: number,
  *   gapCount: number,
- *   isLowLatency: boolean
+ *   isLowLatency: boolean,
+ *   startTime: ?number
  * }}
  *
  * @description
@@ -111,6 +112,10 @@
  *   If in src= mode or nothing is loaded, NaN.
  * @property {bolean} isLowLatency
  *   If true, the manifest is Low Latency.
+ * @property {?number} startTime
+ *   Indicate the startTime of the playback, when <code>startTime</code> is
+ *   <code>null</code>, playback will start at the default start time.
+ *   Note: It only overrides the load startTime when it is not defined.
  *
  * @exportDoc
  */
