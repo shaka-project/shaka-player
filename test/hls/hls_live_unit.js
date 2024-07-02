@@ -83,6 +83,7 @@ describe('HlsParser live', () => {
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
       disableStream: (stream) => {},
+      addFont: (name, url) => {},
     };
 
     parser = new shaka.hls.HlsParser();

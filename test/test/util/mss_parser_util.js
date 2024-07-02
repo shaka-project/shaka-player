@@ -49,6 +49,7 @@ shaka.test.Mss = class {
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
       disableStream: (stream) => {},
+      addFont: (name, url) => {},
     };
     const manifest = await mssParser.start('dummy://foo', playerInterface);
     const stream = manifest.variants[0].audio;
@@ -89,6 +90,7 @@ shaka.test.Mss = class {
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
       disableStream: (stream) => {},
+      addFont: (name, url) => {},
     };
     const p = mssParser.start('dummy://foo', playerInterface);
     await expectAsync(p).toBeRejectedWith(
