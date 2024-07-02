@@ -354,6 +354,7 @@ describe('DashParser SegmentList', () => {
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
       disableStream: (stream) => {},
+      addFont: (name, url) => {},
     };
     try {
       const manifest = await dashParser.start('dummy://foo', playerInterface);

@@ -41,6 +41,7 @@ shakaAssets.Source = {
   EZDRM: 'EZDRM',
   THEO_PLAYER: 'THEOplayer',
   JWPLAYER: 'JW Player',
+  BBC: 'BBC',
 };
 
 
@@ -1685,6 +1686,40 @@ shakaAssets.testAssets = [
         displayInVrMode: true,
         defaultVrProjectionMode: 'equirectangular',
       }),
+  // }}}
+
+  // BBC assets {{{
+  /* BBC Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'On-demand Testcard - WOFF Font Download signalled with supplemental property descriptor',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-ctv-stereo-en-sfdt-woff.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'On-demand Testcard - WOFF Font Download signalled with essential property descriptor',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-ctv-stereo-en-efdt-woff.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live Testcard - WOFF Font Download signalled with supplemental property descriptor',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/simulcast/manifests/avc-ctv-stereo-en-sfdt-woff.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live Testcard - WOFF Font Download signalled with essential property descriptor',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/simulcast/manifests/avc-ctv-stereo-en-efdt-woff.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE),
   // }}}
 ];
 /* eslint-enable max-len */

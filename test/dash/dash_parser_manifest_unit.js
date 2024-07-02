@@ -16,6 +16,8 @@ describe('DashParser Manifest', () => {
   let parser;
   /** @type {!jasmine.Spy} */
   let onEventSpy;
+  /** @type {!jasmine.Spy} */
+  let addFontSpy;
   /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
   /** @type {!ArrayBuffer} */
@@ -40,6 +42,7 @@ describe('DashParser Manifest', () => {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
     onEventSpy = jasmine.createSpy('onEvent');
+    addFontSpy = jasmine.createSpy('addFont');
     playerInterface = {
       networkingEngine: fakeNetEngine,
       modifyManifestRequest: (request, manifestInfo) => {},
@@ -58,6 +61,7 @@ describe('DashParser Manifest', () => {
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
       disableStream: (stream) => {},
+      addFont: shaka.test.Util.spyFunc(addFontSpy),
     };
   });
 
@@ -3189,5 +3193,40 @@ describe('DashParser Manifest', () => {
 
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.gapCount).toBe(1);
+  });
+
+  it('supports dvb fonts', async () => {
+    const manifestText = [
+      '<MPD type="static">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <SupplementalProperty',
+      '         schemeIdUri="urn:dvb:dash:fontdownload:2014"',
+      '         value="1" dvb:url="foo.woff"',
+      '         dvb:mimeType="application/font-woff" dvb:fontFamily="foo"/>',
+      '      <Representation id="video" bandwidth="1">',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '  <Period id="2" start="PT31S" duration="PT30S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <EssentialProperty schemeIdUri="urn:dvb:dash:fontdownload:2014"',
+      '         value="1" dvb:url="foo2.woff"',
+      '         dvb:mimeType="application/font-woff" dvb:fontFamily="foo2"/>',
+      '      <Representation id="video" bandwidth="1">',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    await parser.start('dummy://foo', playerInterface);
+    expect(addFontSpy).toHaveBeenCalledTimes(2);
+    expect(addFontSpy).toHaveBeenCalledWith('foo', 'foo.woff');
+    expect(addFontSpy).toHaveBeenCalledWith('foo2', 'foo2.woff');
   });
 });

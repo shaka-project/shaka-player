@@ -33,6 +33,7 @@ describe('CastUtils', () => {
       'preload',
       'destroyAllPreloads',
       'getNonDefaultConfiguration',
+      'addFont',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',

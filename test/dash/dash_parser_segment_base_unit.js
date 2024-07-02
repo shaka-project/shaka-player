@@ -44,6 +44,7 @@ describe('DashParser SegmentBase', () => {
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
       disableStream: (stream) => {},
+      addFont: (name, url) => {},
     };
   });
 

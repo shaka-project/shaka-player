@@ -51,6 +51,7 @@ describe('DashParser Patch', () => {
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
       disableStream: (stream) => {},
+      addFont: (name, url) => {},
     };
     Date.now = () => publishTime.getTime() + 10;
 
