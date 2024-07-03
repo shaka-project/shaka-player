@@ -1708,7 +1708,7 @@ shaka.extern.AdsConfiguration;
  *   clearBufferSwitch: boolean,
  *   safeMarginSwitch: number,
  *   cacheLoadThreshold: number,
- *   minTimeToSwitch
+ *   minTimeToSwitch: number
  * }}
  *
  * @property {boolean} enabled
