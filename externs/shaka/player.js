@@ -1707,7 +1707,8 @@ shaka.extern.AdsConfiguration;
  *   ignoreDevicePixelRatio: boolean,
  *   clearBufferSwitch: boolean,
  *   safeMarginSwitch: number,
- *   cacheLoadThreshold: number
+ *   cacheLoadThreshold: number,
+ *   minTimeToSwitch: number
  * }}
  *
  * @property {boolean} enabled
@@ -1769,6 +1770,11 @@ shaka.extern.AdsConfiguration;
  *   Indicates the value in milliseconds from which a request is not
  *   considered cached.
  *   Defaults to <code>20</code>.
+ * @property {number} minTimeToSwitch
+ *   Indicates the minimum time to change quality once the real bandwidth is
+ *   available, in seconds. This time is only used on the first load.
+ *   Defaults to <code>0</code> seconds except in Apple browsers whose default
+ *   value  is <code>0.5</code> seconds.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
