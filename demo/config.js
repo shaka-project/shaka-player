@@ -313,7 +313,11 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_('Milliseconds to consider a request cached',
             'abr.cacheLoadThreshold',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Minimum time to switch',
+            'abr.minTimeToSwitch',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true);
     this.addRetrictionsSection_('abr', 'Adaptation Restrictions');
   }
 
