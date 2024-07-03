@@ -257,8 +257,6 @@ shakaDemo.Config = class {
             'manifest.hls.mediaPlaylistFullMimeType')
         .addBoolInput_('Ignore Program Date Time from manifest',
             'manifest.hls.ignoreManifestProgramDateTime')
-        .addBoolInput_('Use Safari behavior for live',
-            'manifest.hls.useSafariBehaviorForLive')
         .addNumberInput_('Live segments delay',
             'manifest.hls.liveSegmentsDelay')
         .addBoolInput_('Enable HLS sequence mode', 'manifest.hls.sequenceMode')
