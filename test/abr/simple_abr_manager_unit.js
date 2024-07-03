@@ -63,6 +63,7 @@ describe('SimpleAbrManager', () => {
     config = shaka.util.PlayerConfiguration.createDefault().abr;
     config.defaultBandwidthEstimate = defaultBandwidthEstimate;
     config.useNetworkInformation = false;
+    config.minTimeToSwitch = 0;
 
     variants = manifest.variants;
 
