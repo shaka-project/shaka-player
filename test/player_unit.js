@@ -228,6 +228,7 @@ describe('Player', () => {
       expect(playhead.release).toHaveBeenCalled();
       expect(mediaSourceEngine.destroy).toHaveBeenCalled();
       expect(streamingEngine.destroy).toHaveBeenCalled();
+      expect(textDisplayer.destroySpy).toHaveBeenCalled();
 
       for (const segmentIndex of segmentIndexes) {
         if (segmentIndex) {
