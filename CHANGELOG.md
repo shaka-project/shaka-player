@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.9.14](https://github.com/shaka-project/shaka-player/compare/v4.9.13...v4.9.14) (2024-07-04)
+
+
+### Bug Fixes
+
+* **ABR:** Not change to another quality without respecting a min time ([#6979](https://github.com/shaka-project/shaka-player/issues/6979)) ([2722374](https://github.com/shaka-project/shaka-player/commit/272237493573232bded5d7d6f3ba4a4badfd60d4))
+* honor autoShowText on non-audio streams ([#6977](https://github.com/shaka-project/shaka-player/issues/6977)) ([f5e6700](https://github.com/shaka-project/shaka-player/commit/f5e6700a69df0a599e72c2571424b24098b8070f))
+* **UI:** fix wrong french in translation ([#6982](https://github.com/shaka-project/shaka-player/issues/6982)) ([aa449a5](https://github.com/shaka-project/shaka-player/commit/aa449a54027f3f9b5e7d8b93c8c2f1d92ef583f9))
+
 ## [4.9.13](https://github.com/shaka-project/shaka-player/compare/v4.9.12...v4.9.13) (2024-07-02)
 
 
