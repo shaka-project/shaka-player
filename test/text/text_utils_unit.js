@@ -23,7 +23,7 @@ describe('TextUtils', () => {
       vttCue.align = 'left';
       vttCue.vertical = 'rl';
 
-      const cue = shaka.text.Utils.mapNativeCue(vttCue);
+      const cue = shaka.text.Utils.mapNativeCue(vttCue, jasmine.any(Number));
       expect(cue.startTime).toBe(10);
       expect(cue.endTime).toBe(20);
       expect(cue.payload).toBe('foo');
@@ -56,7 +56,8 @@ describe('TextUtils', () => {
       const vttCue = new VTTCue(10, 20, 'foo');
       vttCue.region = vttRegion;
 
-      const region = shaka.text.Utils.mapNativeCue(vttCue).region;
+      const region = shaka.text.Utils.mapNativeCue(vttCue, jasmine.any(Number))
+          .region;
       expect(region.id).toBe('bar');
       expect(region.width).toBe(100);
       expect(region.widthUnits).toBe(shaka.text.CueRegion.units.PERCENTAGE);
