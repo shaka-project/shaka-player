@@ -5109,6 +5109,46 @@ describe('HlsParser', () => {
     expect(actualManifest.presentationTimeline.getDuration()).toBe(5);
   });
 
+  it('throw error when no segments', async () => {
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/media', media);
+
+    const expectedError = shaka.test.Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.MANIFEST,
+        shaka.util.Error.Code.HLS_EMPTY_MEDIA_PLAYLIST));
+    await expectAsync(parser.start('test:/media', playerInterface))
+        .toBeRejectedWith(expectedError);
+  });
+
+  it('throw error when all segments are gap', async () => {
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-START:TIME-OFFSET=-2\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-GAP\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/media', media);
+
+    const expectedError = shaka.test.Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.MANIFEST,
+        shaka.util.Error.Code.HLS_EMPTY_MEDIA_PLAYLIST));
+    await expectAsync(parser.start('test:/media', playerInterface))
+        .toBeRejectedWith(expectedError);
+  });
+
   it('parses #EXT-X-BITRATE', async () => {
     const media = [
       '#EXTM3U\n',
