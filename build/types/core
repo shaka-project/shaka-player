@@ -59,6 +59,7 @@
 +../../lib/cea/dummy_caption_decoder.js
 
 +../../lib/text/cue.js
++../../lib/text/cue_region.js
 +../../lib/text/simple_text_displayer.js
 +../../lib/text/stub_text_displayer.js
 +../../lib/text/text_engine.js
