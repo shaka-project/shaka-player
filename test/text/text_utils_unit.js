@@ -43,7 +43,11 @@ describe('TextUtils', () => {
       let vttCue = new VTTCue(20, 10, '');
       expect(shaka.text.Utils.mapNativeCue(vttCue)).toBe(null);
 
-      vttCue = new VTTCue(20, Infinity, '');
+      // VTTCue constructor does not allow for creating a cue with
+      // non-finite time. However, Safari adds such cues to text tracks,
+      // so hack creation of object with such properties via cloning.
+      vttCue = shaka.util.ObjectUtils.shallowCloneObject(vttCue);
+      vttCue.endTime = Infinity;
       expect(shaka.text.Utils.mapNativeCue(vttCue)).toBe(null);
     });
 
