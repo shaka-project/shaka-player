@@ -39,6 +39,14 @@ describe('TextUtils', () => {
           .toBe(shaka.text.Cue.writingMode.VERTICAL_RIGHT_TO_LEFT);
     });
 
+    it('returns null if cue has invalid timing', () => {
+      let vttCue = new VTTCue(20, 10, '');
+      expect(shaka.text.Utils.mapNativeCue(vttCue)).toBe(null);
+
+      vttCue = new VTTCue(20, Infinity, '');
+      expect(shaka.text.Utils.mapNativeCue(vttCue)).toBe(null);
+    });
+
     it('should map VTTRegion to shaka region', () => {
       if (!window.VTTRegion) {
         pending('VTTRegion not available');
