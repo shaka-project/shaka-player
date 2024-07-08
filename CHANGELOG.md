@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.10.3](https://github.com/shaka-project/shaka-player/compare/v4.10.2...v4.10.3) (2024-07-08)
+
+
+### Bug Fixes
+
+* **HLS:** A/V sync regression for HLS live ([#6987](https://github.com/shaka-project/shaka-player/issues/6987)) ([8791368](https://github.com/shaka-project/shaka-player/commit/8791368541cdb48b49913822473ab220d45d0acb))
+* **HLS:** Fix parsing of width and height when using media playlist ([#6989](https://github.com/shaka-project/shaka-player/issues/6989)) ([5ce0354](https://github.com/shaka-project/shaka-player/commit/5ce03542efd2fddaef4c1e12957567fff86dbab6))
+* Offset text regions that are out of viewport ([#6986](https://github.com/shaka-project/shaka-player/issues/6986)) ([3e20d5e](https://github.com/shaka-project/shaka-player/commit/3e20d5e6c8ec2113c01cab828a43dbe70affa9b2))
+* **UI:** Show the ad marker in the seek bar when there are some intersections ([#6990](https://github.com/shaka-project/shaka-player/issues/6990)) ([0dd6435](https://github.com/shaka-project/shaka-player/commit/0dd6435c971583f04970ab8299d4e18bde939a93))
+* **Xbox:** Fix screen resolution detection ([#6988](https://github.com/shaka-project/shaka-player/issues/6988)) ([5ea77b1](https://github.com/shaka-project/shaka-player/commit/5ea77b1a5147205f4282498af59d01b870e0d04c))
+
 ## [4.10.2](https://github.com/shaka-project/shaka-player/compare/v4.10.1...v4.10.2) (2024-07-04)
 
 
