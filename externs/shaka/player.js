@@ -596,7 +596,7 @@ shaka.extern.MetadataFrame;
  * @property {!Array.<shaka.extern.MetadataFrame>} values
  * @exportDoc
  */
-shaka.extern.Interstitial;
+shaka.extern.HLSInterstitial;
 
 
 /**

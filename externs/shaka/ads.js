@@ -58,6 +58,58 @@ shaka.extern.AdCuePoint;
 
 
 /**
+ * @typedef {{
+ *   startTime: number,
+ *   endTime: ?number,
+ *   uri: string,
+ *   isSkippable: boolean,
+ *   canJump: boolean,
+ *   resumeOffset: ?number,
+ *   playoutLimit: ?number,
+ *   once: boolean,
+ *   pre: boolean,
+ *   post: boolean,
+ *   timelineRange: boolean
+ * }}
+ *
+ * @description
+ * Contains the ad interstitial info.
+ *
+ * @property {number} startTime
+ *   The start time of the interstitial.
+ * @property {?number} endTime
+ *   The end time of the interstitial.
+ * @property {string} uri
+ *   The uri of the interstitial, can be any type that
+ *   ShakaPlayer supports (either in MSE or src=)
+ * @property {boolean} isSkippable
+ *   Indicate if the interstitial is skippable.
+ * @property {boolean} canJump
+ *   Indicate if the interstitial is jumpable.
+ * @property {?number} resumeOffset
+ *   Indicates where the primary playback will resume after the interstitial
+ *   plays. It is expressed as a time lag from when interstitial playback was
+ *   scheduled on the primary player's timeline. For live ad replacement it
+ *   must be null.
+ * @property {?number} playoutLimit
+ *   Indicate a limit for the playout time of the entire interstitial.
+ * @property {boolean} once
+ *   Indicates that the interstitial should only be played once.
+ * @property {boolean} pre
+ *   Indicates that an action is to be triggered before playback of the
+ *   primary asset begins, regardless of where playback begins in the primary
+ *   asset.
+ * @property {boolean} post
+ *   Indicates that an action is to be triggered after the primary asset has
+ *   been played to its end without error.
+ * @property {boolean} timelineRange
+ *   Indicates whether the  interstitial should be presented in a timeline UI
+ *   as a single point or as a range.
+ */
+shaka.extern.AdInterstitial;
+
+
+/**
  * An object that's responsible for all the ad-related logic
  * in the player.
  *
@@ -187,9 +239,14 @@ shaka.extern.IAdManager = class extends EventTarget {
   /**
    * @param {!shaka.Player} basePlayer
    * @param {!HTMLMediaElement} baseVideo
-   * @param {shaka.extern.Interstitial} interstitial
+   * @param {shaka.extern.HLSInterstitial} interstitial
    */
-  onInterstitialMetadata(basePlayer, baseVideo, interstitial) {}
+  onHLSInterstitialMetadata(basePlayer, baseVideo, interstitial) {}
+
+  /**
+   * @param {shaka.extern.AdInterstitial} interstitial
+   */
+  addCustomInterstitial(interstitial) {}
 };
 
 
