@@ -11,6 +11,7 @@
   { "ui": { "title": "UI Library" } },
   { "ui-customization": { "title": "Configuring the UI" } },
   { "text-displayer": { "title": "Configuring text displayer" } },
+  { "screen-resolution-detection": { "title": "Screen resolution detection" } },
   { "errors": { "title": "Error Handling" } },
   { "a11y": { "title": "Creating accessible buttons" } },
   { "ad_monetization": { "title": "Serving ads with our IMA SDK integration" } },
