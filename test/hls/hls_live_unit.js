@@ -663,8 +663,7 @@ describe('HlsParser live', () => {
       }
 
       it('does not affect seek range if unset', async () => {
-        // 15 seconds is three segment durations.
-        await testWindowOverride(15);
+        await testWindowOverride(2000);
       });
 
       it('overrides default seek range if set', async () => {
