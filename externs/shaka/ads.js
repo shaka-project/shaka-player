@@ -80,7 +80,7 @@ shaka.extern.AdCuePoint;
  * @property {?number} endTime
  *   The end time of the interstitial.
  * @property {string} uri
- *   The uri of the interstitial, an be any type that
+ *   The uri of the interstitial, can be any type that
  *   ShakaPlayer supports (either in MSE or src=)
  * @property {boolean} isSkippable
  *   Indicate if the interstitial is skippable.
@@ -88,7 +88,7 @@ shaka.extern.AdCuePoint;
  *   Indicate if the interstitial is jumpable.
  * @property {?number} resumeOffset
  *   Indicates where the primary playback will resume after the interstitial
- *   plays. It is expressed as a time lag from which interstitial playback was
+ *   plays. It is expressed as a time lag from when interstitial playback was
  *   scheduled on the primary player's timeline. For live ad replacement it
  *   must be null.
  * @property {?number} playoutLimit
@@ -96,8 +96,8 @@ shaka.extern.AdCuePoint;
  * @property {boolean} once
  *   Indicates that the interstitial should only be played once.
  * @property {boolean} pre
- *   Indicates that an action is to be  triggered before playback of the
- *   primary asset begins, regardless of  where playback begins in the primary
+ *   Indicates that an action is to be triggered before playback of the
+ *   primary asset begins, regardless of where playback begins in the primary
  *   asset.
  * @property {boolean} post
  *   Indicates that an action is to be triggered after the primary asset has
