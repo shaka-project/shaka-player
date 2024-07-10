@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.10.4](https://github.com/shaka-project/shaka-player/compare/v4.10.3...v4.10.4) (2024-07-10)
+
+
+### Bug Fixes
+
+* **Ads:** Fix mangled properties when using X-ASSET-LIST ([#7002](https://github.com/shaka-project/shaka-player/issues/7002)) ([e42fd3f](https://github.com/shaka-project/shaka-player/commit/e42fd3f23f703a7d91381534471d0f14e4754250))
+* Avoid reset iterator when seek into the buffer ([#7004](https://github.com/shaka-project/shaka-player/issues/7004)) ([7a1c3ea](https://github.com/shaka-project/shaka-player/commit/7a1c3eab91ddf450338adf05fab7b82746ea6f7f))
+* Disable seek retry cooldown on most platforms ([#7010](https://github.com/shaka-project/shaka-player/issues/7010)) ([072d21d](https://github.com/shaka-project/shaka-player/commit/072d21d7c59cb695724e70a1966f8693c02471df))
+* Fix bad warning when use selectAudioLanguage ([#6999](https://github.com/shaka-project/shaka-player/issues/6999)) ([7ff4dc9](https://github.com/shaka-project/shaka-player/commit/7ff4dc91d4f67a240be0161fb5f4c81ceaa15cee))
+* **HLS:** Fix filtering video/audio streams without bandwidth ([#7008](https://github.com/shaka-project/shaka-player/issues/7008)) ([529db5b](https://github.com/shaka-project/shaka-player/commit/529db5bfe95a768dc5dce29e6fffff37515c7424))
+* **HLS:** Fix load AES media playlist ([#7012](https://github.com/shaka-project/shaka-player/issues/7012)) ([bd1bd93](https://github.com/shaka-project/shaka-player/commit/bd1bd9302f8ae986f84aa6ea08d0d6062355a3fe))
+* **HLS:** Propagate bandwidth to stream in audio-only and video-only ([#7006](https://github.com/shaka-project/shaka-player/issues/7006)) ([bd30a23](https://github.com/shaka-project/shaka-player/commit/bd30a230fc992939166cd3587850a12cd0aec9c7))
+* **Prefetch:** Use the same references time for evict and prefetchSegmentsByTime ([#7003](https://github.com/shaka-project/shaka-player/issues/7003)) ([3c71c71](https://github.com/shaka-project/shaka-player/commit/3c71c71d512ff4459e02d801048b2cf1d2992143))
+
 ## [4.10.3](https://github.com/shaka-project/shaka-player/compare/v4.10.2...v4.10.3) (2024-07-08)
 
 
