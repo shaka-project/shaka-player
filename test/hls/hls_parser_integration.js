@@ -72,7 +72,7 @@ describe('HlsParser', () => {
         keyRequests++;
       }
     });
-    await player.load('/base/test/test/assets/hls-aes-256/index.m3u8');
+    await player.load('/base/test/test/assets/hls-aes-256/media.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);
 
