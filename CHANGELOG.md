@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.9.16](https://github.com/shaka-project/shaka-player/compare/v4.9.15...v4.9.16) (2024-07-10)
+
+
+### Bug Fixes
+
+* Avoid reset iterator when seek into the buffer ([#7004](https://github.com/shaka-project/shaka-player/issues/7004)) ([ef0d936](https://github.com/shaka-project/shaka-player/commit/ef0d936b9bbf5c4f8314113ff5bc80c4cf217cf4))
+* Disable seek retry cooldown on most platforms ([#7010](https://github.com/shaka-project/shaka-player/issues/7010)) ([6e439f0](https://github.com/shaka-project/shaka-player/commit/6e439f04baa1198b93806654103a72bcbaea1a1c))
+* Fix bad warning when use selectAudioLanguage ([#6999](https://github.com/shaka-project/shaka-player/issues/6999)) ([f86e93b](https://github.com/shaka-project/shaka-player/commit/f86e93bfe8550a3e4331098ba9fa221f4c06c19d))
+* **HLS:** Fix filtering video/audio streams without bandwidth ([#7008](https://github.com/shaka-project/shaka-player/issues/7008)) ([8a078d1](https://github.com/shaka-project/shaka-player/commit/8a078d1a0662727cf98cdec0416531a4e8a2f95b))
+* **HLS:** Propagate bandwidth to stream in audio-only and video-only ([#7006](https://github.com/shaka-project/shaka-player/issues/7006)) ([368860e](https://github.com/shaka-project/shaka-player/commit/368860e3baf4465515fc50003dc917a5f1babef1))
+* **Prefetch:** Use the same references time for evict and prefetchSegmentsByTime ([#7003](https://github.com/shaka-project/shaka-player/issues/7003)) ([eee3e2f](https://github.com/shaka-project/shaka-player/commit/eee3e2fe8d18cc154ad139346bf5ee54b73afa3e))
+
 ## [4.9.15](https://github.com/shaka-project/shaka-player/compare/v4.9.14...v4.9.15) (2024-07-08)
 
 
