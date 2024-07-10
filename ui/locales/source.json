@@ -37,6 +37,10 @@
     "description": "Label for a button used to open the native Cast dialog in the browser and select a destination to Cast to.",
     "message": "Cast..."
   },
+  "CHAPTERS": {
+    "description": "Label for a button used to open a submenu to choose a chapter.",
+    "message": "Chapters"
+  },
   "DOWNLOAD_VIDEO_FRAME": {
     "description": "Label for a button used to download the current video frame.",
     "message": "Save video frame"

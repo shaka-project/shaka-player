@@ -187,6 +187,7 @@ shaka.ui.Overlay = class {
         'captions',
         'quality',
         'language',
+        'chapter',
         'picture_in_picture',
         'cast',
         'playback_rate',
