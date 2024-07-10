@@ -337,6 +337,7 @@ describe('HlsParser', () => {
       manifest.addPartialVariant((variant) => {
         variant.bandwidth = 100;
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.bandwidth = 100;
           stream.frameRate = 60;
           stream.mime('video/mp4', 'avc1');
           stream.size(960, 540);
@@ -501,8 +502,10 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
+        variant.bandwidth = 200;
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.mime('audio/mp4', 'mp4a');
+          stream.bandwidth = 200;
         });
       });
       manifest.sequenceMode = sequenceMode;
