@@ -91,7 +91,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('align-center-position-50');
     });
 
-    // FIXME: UI version is wrong: not positioned on the right
     it('align center position 90%', async () => {
       parseAndDisplay([
         'WEBVTT\n',
@@ -115,7 +114,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('align-center-position-10');
     });
 
-    // FIXME: UI version is wrong: not positioned on the left
     it('align center position 10% size 10%', async () => {
       parseAndDisplay([
         'WEBVTT\n',
@@ -127,7 +125,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('align-center-position-10-size-10');
     });
 
-    // FIXME: UI version is wrong: not positioned on the right
     it('align end', async () => {
       parseAndDisplay([
         'WEBVTT\n',
@@ -152,7 +149,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('align-end-long');
     });
 
-    // FIXME: UI version is wrong: not positioned on the left
     it('align start', async () => {
       parseAndDisplay([
         'WEBVTT\n',
@@ -201,7 +197,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('size-50');
     });
 
-    // FIXME: UI version is wrong: not positioned by line
     it('line -2', async () => {
       parseAndDisplay([
         'WEBVTT\n',
@@ -224,7 +219,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('line-0');
     });
 
-    // FIXME: UI version is wrong: not positioned by line
     it('line 1', async () => {
       parseAndDisplay([
         'WEBVTT\n',
