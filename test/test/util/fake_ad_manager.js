@@ -92,7 +92,10 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   onCueMetadataChange(data) {}
 
   /** @override */
-  onInterstitialMetadata(basePlayer, baseVideo, interstitial) {}
+  onHLSInterstitialMetadata(basePlayer, baseVideo, interstitial) {}
+
+  /** @override */
+  addCustomInterstitial(interstitial) {}
 
   /**
    * @param {!shaka.test.FakeAd} ad

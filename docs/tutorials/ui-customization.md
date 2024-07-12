@@ -78,6 +78,7 @@ The following elements can be added to the UI bar using this configuration value
   only if playing a VR content.
 * toggle_stereoscopic: adds a button that toggle between monoscopic and stereoscopic. The button
   is visible only if playing a VR content.
+* chapter: adds a button that controls the chapter selection.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 [Document Picture-in-Picture API]: https://developer.chrome.com/docs/web-platform/document-picture-in-picture/
 
@@ -106,6 +107,7 @@ The following buttons can be added to the overflow menu:
   is visible only if playing a VR content.
 * ad_statistics: adds a button that displays ad statistics of the video.
 * save_video_frame: adds a button to save the current video frame.
+* chapter: adds a button that controls the chapter selection.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:

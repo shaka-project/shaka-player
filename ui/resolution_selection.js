@@ -112,22 +112,38 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     // Remove duplicate entries with the same resolution or quality depending
     // on content type.  Pick an arbitrary one.
-    tracks = tracks.filter((track, idx) => {
-      // Keep the first one with the same height and framerate or bandwidth.
-      let otherIdx = -1;
-      if (this.player.isAudioOnly()) {
-        otherIdx = tracks.findIndex((t) => t.bandwidth == track.bandwidth);
+    if (this.player.isAudioOnly()) {
+      tracks = tracks.filter((track, idx) => {
+        return tracks.findIndex((t) => t.bandwidth == track.bandwidth) == idx;
+      });
+    } else {
+      const audiosIds = [...new Set(tracks.map((t) => t.audioId))];
+      if (audiosIds.length > 1) {
+        tracks = tracks.filter((track, idx) => {
+          // Keep the first one with the same height and framerate or bandwidth.
+          const otherIdx = tracks.findIndex((t) => {
+            return t.height == track.height &&
+                t.videoBandwidth == track.videoBandwidth &&
+                t.frameRate == track.frameRate &&
+                t.hdr == track.hdr &&
+                t.videoLayout == track.videoLayout;
+          });
+          return otherIdx == idx;
+        });
       } else {
-        otherIdx = tracks.findIndex((t) => {
-          return t.height == track.height &&
-              t.videoBandwidth == track.videoBandwidth &&
-              t.frameRate == track.frameRate &&
-              t.hdr == track.hdr &&
-              t.videoLayout == track.videoLayout;
+        tracks = tracks.filter((track, idx) => {
+          // Keep the first one with the same height and framerate or bandwidth.
+          const otherIdx = tracks.findIndex((t) => {
+            return t.height == track.height &&
+                t.bandwidth == track.bandwidth &&
+                t.frameRate == track.frameRate &&
+                t.hdr == track.hdr &&
+                t.videoLayout == track.videoLayout;
+          });
+          return otherIdx == idx;
         });
       }
-      return otherIdx == idx;
-    });
+    }
 
     // Sort the tracks by height or bandwidth depending on content type.
     if (this.player.isAudioOnly()) {
@@ -255,13 +271,12 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     if (track.videoLayout == 'CH-STEREO') {
       text += ' (3D)';
     }
-    if (track.videoBandwidth) {
-      const hasDuplicateResolution = tracks.some((otherTrack) => {
-        return otherTrack != track && otherTrack.height == track.height;
-      });
-      if (hasDuplicateResolution) {
-        text += ' (' + Math.round(track.videoBandwidth / 1000) + ' kbits/s)';
-      }
+    const hasDuplicateResolution = tracks.some((otherTrack) => {
+      return otherTrack != track && otherTrack.height == track.height;
+    });
+    if (hasDuplicateResolution) {
+      const bandwidth = track.videoBandwidth || track.bandwidth;
+      text += ' (' + Math.round(bandwidth / 1000) + ' kbits/s)';
     }
     return text;
   }

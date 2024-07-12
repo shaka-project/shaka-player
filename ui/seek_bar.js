@@ -396,15 +396,14 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       // Post-roll ads are marked as starting at -1 in CS IMA ads.
       if (point.start == -1 && !point.end) {
         postRollAd = true;
+        continue;
       }
       // Filter point within the seek range. For points with no endpoint
       // (client side ads) check that the start point is within range.
-      if (point.start >= seekRange.start && point.start < seekRange.end) {
-        if (point.end && point.end > seekRange.end) {
-          continue;
-        }
-
-        const startDist = point.start - seekRange.start;
+      if ((!point.end && point.start >= seekRange.start) ||
+          (typeof point.end == 'number' && point.end > seekRange.start)) {
+        const startDist =
+            Math.max(point.start, seekRange.start) - seekRange.start;
         const startFrac = (startDist / seekRangeSize) || 0;
         // For points with no endpoint assume a 1% length: not too much,
         // but enough to be visible on the timeline.

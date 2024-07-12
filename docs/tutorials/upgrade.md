@@ -114,6 +114,7 @@ application:
       with the relevant options: `enabled`, `targetLatency`,
       `targetLatencyTolerance`, `maxPlaybackRate`, `minPlaybackRate`, `panicMode`
       `panicThreshold`. (deprecated in v4.10.0)
+    - `useSafariBehaviorForLive` has been removed.
 
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.

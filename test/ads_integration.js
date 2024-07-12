@@ -48,8 +48,6 @@ describe('Ads', () => {
     adManager = player.getAdManager();
     await player.attach(video);
 
-    player.configure('manifest.hls.useSafariBehaviorForLive', false);
-
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
 
