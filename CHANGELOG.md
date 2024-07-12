@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.10.5](https://github.com/shaka-project/shaka-player/compare/v4.10.4...v4.10.5) (2024-07-12)
+
+
+### Bug Fixes
+
+* **CEA:** Offset text CEA-608 that are out of viewport ([#7024](https://github.com/shaka-project/shaka-player/issues/7024)) ([8511e5a](https://github.com/shaka-project/shaka-player/commit/8511e5acd1a0180dc84a26eff7f8312511beb054))
+* **HLS:** A/V sync regression for HLS with different segment sizes ([#7015](https://github.com/shaka-project/shaka-player/issues/7015)) ([536c58d](https://github.com/shaka-project/shaka-player/commit/536c58d05be7d84f525b495009e7c06eab17470f))
+* **UI:** Show all resolutions when there are only one audio. ([#7017](https://github.com/shaka-project/shaka-player/issues/7017)) ([26f9511](https://github.com/shaka-project/shaka-player/commit/26f951163bb76526dec20edb5918439466811074))
+
 ## [4.10.4](https://github.com/shaka-project/shaka-player/compare/v4.10.3...v4.10.4) (2024-07-10)
 
 
