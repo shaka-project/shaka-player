@@ -513,8 +513,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         Math.max(0, pixelPosition - (width / 2)));
     this.timeContainer_.style.left = leftPosition + 'px';
     this.timeContainer_.style.visibility = 'visible';
+    const seekRange = this.player.seekRange();
     if (this.player.isLive()) {
-      const seekRange = this.player.seekRange();
       const totalSeconds = seekRange.end - value;
       if (totalSeconds < 1) {
         this.timeContainer_.textContent =
@@ -524,7 +524,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
             '-' + this.timeFormatter_(totalSeconds);
       }
     } else {
-      this.timeContainer_.textContent = this.timeFormatter_(value);
+      const totalSeconds = value - seekRange.start;
+      this.timeContainer_.textContent = this.timeFormatter_(totalSeconds);
     }
   }
 
