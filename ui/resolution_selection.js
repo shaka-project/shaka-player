@@ -154,9 +154,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       });
     } else {
       tracks.sort((t1, t2) => {
-        goog.asserts.assert(t1.height != null, 'Null height');
-        goog.asserts.assert(t2.height != null, 'Null height');
-        if (t2.height == t1.height) {
+        if (t2.height == t1.height || t1.height == null || t2.height == null) {
           return t2.bandwidth - t1.bandwidth;
         }
         return t2.height - t1.height;
@@ -184,10 +182,10 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           () => this.onTrackSelected_(track));
 
       const span = shaka.util.Dom.createHTMLElement('span');
-      if (this.player.isAudioOnly() && track.bandwidth) {
-        span.textContent = Math.round(track.bandwidth / 1000) + ' kbits/s';
-      } else if (track.height && track.width) {
+      if (!this.player.isAudioOnly() && track.height && track.width) {
         span.textContent = this.getResolutionLabel_(track, tracks);
+      } else if (track.bandwidth) {
+        span.textContent = Math.round(track.bandwidth / 1000) + ' kbits/s';
       } else {
         span.textContent = 'Unknown';
       }
