@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.10.6](https://github.com/shaka-project/shaka-player/compare/v4.10.5...v4.10.6) (2024-07-15)
+
+
+### Bug Fixes
+
+* **DASH:** Fix transitions from 'dynamic' to 'static' ([#7029](https://github.com/shaka-project/shaka-player/issues/7029)) ([a05ebaf](https://github.com/shaka-project/shaka-player/commit/a05ebaf14c8d6c2e3b2a6e0b99dbac6c052fb239))
+* **DASH:** Improve memory usage with live streams ([#7039](https://github.com/shaka-project/shaka-player/issues/7039)) ([c1480c7](https://github.com/shaka-project/shaka-player/commit/c1480c7614e1f60b662055a4971b30e15abde129))
+* **PeriodCombiner:** Use normalized codec to remove duplicates ([#7032](https://github.com/shaka-project/shaka-player/issues/7032)) ([3dec226](https://github.com/shaka-project/shaka-player/commit/3dec2267fcb1d70d19642e14b1a6012ea33106c0))
+
 ## [4.10.5](https://github.com/shaka-project/shaka-player/compare/v4.10.4...v4.10.5) (2024-07-12)
 
 
