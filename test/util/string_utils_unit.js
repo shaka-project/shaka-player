@@ -133,6 +133,20 @@ function defineStringUtilTests() {
     });
   });
 
+  describe('htmlUnescape', () => {
+    it('handles special characters', () => {
+      expect(StringUtils.htmlUnescape('foo &amp; bar')).toBe('foo & bar');
+    });
+
+    it('handles decimal special characters', () => {
+      expect(StringUtils.htmlUnescape('foo &#70; bar')).toBe('foo F bar');
+    });
+
+    it('handles hex special characters', () => {
+      expect(StringUtils.htmlUnescape('foo &#x44; bar')).toBe('foo D bar');
+    });
+  });
+
   it('converts toUTF8', () => {
     const str = 'Xe\u4524\u1952';
     const arr = [0x58, 0x65, 0xe4, 0x94, 0xa4, 0xe1, 0xa5, 0x92];
