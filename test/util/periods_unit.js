@@ -1204,6 +1204,59 @@ describe('PeriodCombiner', () => {
     expect(video4.originalId).toBe('7,8');
   });
 
+  it('Variant has highest bandwidth from matched streams', async () => {
+    const stream1 = makeVideoStream(1080);
+    stream1.originalId = '1';
+    stream1.bandwidth = 917000;
+    stream1.codecs = 'avc1.640028';
+
+    const stream2 = makeVideoStream(1080);
+    stream2.originalId = '2';
+    stream2.bandwidth = 5715000;
+    stream2.codecs = 'avc1.640028';
+
+    const stream3 = makeVideoStream(1080);
+    stream3.originalId = '3';
+    stream3.bandwidth = 3835000;
+    stream3.codecs = 'avc1.640028';
+
+    /** @type {!Array.<shaka.extern.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams: [
+          stream1,
+        ],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '2',
+        videoStreams: [
+          stream2,
+        ],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '3',
+        videoStreams: [
+          stream3,
+        ],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ false);
+    const variants = combiner.getVariants();
+    expect(variants.length).toBe(1);
+    expect(variants[0].bandwidth).toBe(5715000);
+  });
+
   it('Matches streams with most roles in common', async () => {
     const makeAudioStreamWithRoles = (roles) => {
       const stream = makeAudioStream('en');
