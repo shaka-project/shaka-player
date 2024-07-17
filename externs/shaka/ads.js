@@ -59,6 +59,7 @@ shaka.extern.AdCuePoint;
 
 /**
  * @typedef {{
+ *   id: ?string,
  *   startTime: number,
  *   endTime: ?number,
  *   uri: string,
@@ -76,6 +77,8 @@ shaka.extern.AdCuePoint;
  * @description
  * Contains the ad interstitial info.
  *
+ * @property {?string} id
+ *   The id of the interstitial.
  * @property {number} startTime
  *   The start time of the interstitial.
  * @property {?number} endTime

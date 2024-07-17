@@ -5603,26 +5603,59 @@ describe('HlsParser', () => {
       await parser.start('test:/master', playerInterface);
 
       const metadataType = 'com.apple.quicktime.HLS';
-      const value = {
-        key: 'X-SHAKA',
-        data: 'FOREVER',
-      };
-      const plannedDuration = {
-        key: 'PLANNED-DURATION',
-        data: '1',
-      };
+      const firstValues = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '0',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
+      const secondValues = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '1',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
+      const thirdValues = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '2',
+        }),
+        jasmine.objectContaining({
+          key: 'PLANNED-DURATION',
+          data: '1',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
+      const forthValues = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '3',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
       expect(onMetadataSpy).toHaveBeenCalledTimes(4);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 1,
-          [jasmine.objectContaining(value)]);
+          firstValues);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 5, 6,
-          [jasmine.objectContaining(value)]);
+          secondValues);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 10, 11,
-          [
-            jasmine.objectContaining(plannedDuration),
-            jasmine.objectContaining(value),
-          ]);
+          thirdValues);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 15, null,
-          [jasmine.objectContaining(value)]);
+          forthValues);
     });
 
     it('supports END-ON-NEXT', async () => {
@@ -5645,13 +5678,18 @@ describe('HlsParser', () => {
       await parser.start('test:/master', playerInterface);
 
       const metadataType = 'com.apple.quicktime.HLS';
-      const value = {
-        key: 'X-SHAKA',
-        data: 'FOREVER',
-      };
+      const values = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '0',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
       expect(onMetadataSpy).toHaveBeenCalledTimes(1);
-      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 5,
-          [jasmine.objectContaining(value)]);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 5, values);
     });
 
     it('skip duplicate IDs', async () => {
@@ -5676,13 +5714,18 @@ describe('HlsParser', () => {
       await parser.start('test:/master', playerInterface);
 
       const metadataType = 'com.apple.quicktime.HLS';
-      const value = {
-        key: 'X-SHAKA',
-        data: 'FOREVER',
-      };
+      const values = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '0',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
       expect(onMetadataSpy).toHaveBeenCalledTimes(1);
-      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 1,
-          [jasmine.objectContaining(value)]);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 1, values);
     });
 
     it('with no EXT-X-PROGRAM-DATE-TIME', async () => {
@@ -5768,6 +5811,10 @@ describe('HlsParser', () => {
       const metadataType = 'com.apple.hls.interstitial';
       const values = [
         jasmine.objectContaining({
+          key: 'ID',
+          data: '1',
+        }),
+        jasmine.objectContaining({
           key: 'X-ASSET-URI',
           data: 'test:/fake',
         }),
@@ -5809,6 +5856,10 @@ describe('HlsParser', () => {
 
       const metadataType = 'com.apple.hls.interstitial';
       const values = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '1',
+        }),
         jasmine.objectContaining({
           key: 'X-ASSET-LIST',
           data: 'test:/fake',
