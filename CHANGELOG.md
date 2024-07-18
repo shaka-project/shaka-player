@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.10.7](https://github.com/shaka-project/shaka-player/compare/v4.10.6...v4.10.7) (2024-07-18)
+
+
+### Bug Fixes
+
+* Allow reference mimeType change in StreamingEngine ([#7061](https://github.com/shaka-project/shaka-player/issues/7061)) ([2fe4dcc](https://github.com/shaka-project/shaka-player/commit/2fe4dcc076079816dc8999354bffe05994ec1d33))
+* **DASH:** Prioritize highest bandwidth in PeriodCombiner ([#7045](https://github.com/shaka-project/shaka-player/issues/7045)) ([30cdd61](https://github.com/shaka-project/shaka-player/commit/30cdd612a5eeb2a2bdcffde5cc37314829e56bad))
+* Destroy correctly unused transmuxer ([#7059](https://github.com/shaka-project/shaka-player/issues/7059)) ([7641475](https://github.com/shaka-project/shaka-player/commit/76414755abe708419d5ff5828e1d506866004084))
+* Fix MSE polyfill for iOS ([#7049](https://github.com/shaka-project/shaka-player/issues/7049)) ([44dc9a9](https://github.com/shaka-project/shaka-player/commit/44dc9a96f91d274daec4fcb63577794ffa55cca3))
+* **HLS:** Remove init segment on formats without init segment ([#7060](https://github.com/shaka-project/shaka-player/issues/7060)) ([ee179ad](https://github.com/shaka-project/shaka-player/commit/ee179ad3d041c85c663682b9f34cf0a52c0f0535))
+* **Transmuxer:** Fix init segment between discontinuities ([#7042](https://github.com/shaka-project/shaka-player/issues/7042)) ([dd2a6d7](https://github.com/shaka-project/shaka-player/commit/dd2a6d7c1289b1315942abfe3956096e84e3c001))
+* **ttml:** Handle escaped special characters. ([#7047](https://github.com/shaka-project/shaka-player/issues/7047)) ([451a41e](https://github.com/shaka-project/shaka-player/commit/451a41e625c7665ec42d0b98a191bab45077e193)), closes [#7044](https://github.com/shaka-project/shaka-player/issues/7044)
+* **UI:** Fix resolution label when the stream has not resolution ([#7043](https://github.com/shaka-project/shaka-player/issues/7043)) ([9e468f4](https://github.com/shaka-project/shaka-player/commit/9e468f48d32b6b795b2c9fbe2242b9c6e794b820))
+
 ## [4.10.6](https://github.com/shaka-project/shaka-player/compare/v4.10.5...v4.10.6) (2024-07-15)
 
 
