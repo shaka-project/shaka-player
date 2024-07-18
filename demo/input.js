@@ -154,8 +154,9 @@ shakaDemo.BoolInput = class extends shakaDemo.Input {
    * @param {!shakaDemo.InputContainer} parentContainer
    * @param {string} name
    * @param {function(!HTMLInputElement, !shakaDemo.Input)} onChange
+   * @param {boolean=} showName
    */
-  constructor(parentContainer, name, onChange) {
+  constructor(parentContainer, name, onChange, showName) {
     super(parentContainer, 'input', 'label', 'span', onChange);
     this.input_.type = 'checkbox';
     this.container_.classList.add('mdl-switch');
@@ -164,6 +165,9 @@ shakaDemo.BoolInput = class extends shakaDemo.Input {
     this.container_.setAttribute('for', this.input_.id);
     this.input_.classList.add('mdl-switch__input');
     this.extra_.classList.add('mdl-switch__label');
+    if (name && showName) {
+      this.extra_.textContent = name;
+    }
   }
 };
 
