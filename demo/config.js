@@ -408,7 +408,9 @@ shakaDemo.Config = class {
     const prefix = category + '.retryParameters.';
     const docLink = this.resolveExternLink_('.RetryParameters');
     this.addSection_(sectionName, docLink)
-        .addNumberInput_('Max Attempts', prefix + 'maxAttempts')
+        .addNumberInput_('Max Attempts', prefix + 'maxAttempts',
+            /* canBeDecimal= */ false,
+            /* canBeZero= */ false)
         .addNumberInput_('Base Delay', prefix + 'baseDelay',
             /* canBeDecimal= */ true)
         .addNumberInput_('Backoff Factor', prefix + 'backoffFactor',

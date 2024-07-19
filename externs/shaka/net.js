@@ -26,6 +26,7 @@
  *
  * @property {number} maxAttempts
  *   The maximum number of times the request should be attempted.
+ *   The minimum supported value is 1 (only one request without retries).
  * @property {number} baseDelay
  *   The delay before the first retry, in milliseconds.
  * @property {number} backoffFactor
