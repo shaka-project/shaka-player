@@ -610,6 +610,38 @@ shaka.extern.MetadataFrame;
 
 /**
  * @typedef {{
+ *   video: ?shaka.extern.PlaybackStreamInfo,
+ *   audio: ?shaka.extern.PlaybackStreamInfo,
+ *   text: ?shaka.extern.PlaybackStreamInfo
+ * }}
+ *
+ * @description Represents the state of the current variant and text.
+ * @property {?shaka.extern.PlaybackStreamInfo} video
+ * @property {?shaka.extern.PlaybackStreamInfo} audio
+ * @property {?shaka.extern.PlaybackStreamInfo} text
+ * @exportDoc
+ */
+shaka.extern.PlaybackInfo;
+
+
+/**
+ * @typedef {{
+ *   codecs: string,
+ *   mimeType: string,
+ *   bandwidth: number
+ * }}
+ *
+ * @description Represents the state of the given stream.
+ * @property {string} codecs
+ * @property {string} mimeType
+ * @property {number} bandwidth
+ * @exportDoc
+ */
+shaka.extern.PlaybackStreamInfo;
+
+
+/**
+ * @typedef {{
  *   startTime: number,
  *   endTime: ?number,
  *   values: !Array.<shaka.extern.MetadataFrame>
