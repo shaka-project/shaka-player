@@ -14,7 +14,7 @@
   { "screen-resolution-detection": { "title": "Screen resolution detection" } },
   { "errors": { "title": "Error Handling" } },
   { "a11y": { "title": "Creating accessible buttons" } },
-  { "ad_monetization": { "title": "Serving ads with our IMA SDK integration" } },
+  { "ad_monetization": { "title": "Monetization with Ads" } },
   { "plugins": { "title": "Plugins and Customizing the Build" } },
   { "manifest-parser": { "title": "Manifest Parser Plugins" } },
   { "architecture": { "title": "Architecture Diagrams" } },
