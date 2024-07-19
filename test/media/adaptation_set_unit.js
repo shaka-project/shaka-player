@@ -162,6 +162,22 @@ describe('AdaptationSet', () => {
     expect(set.canInclude(variants[1])).toBeFalsy();
   });
 
+  it('rejects misaligned spatial audio', () => {
+    const variants = [
+      makeVariant(
+          1,  // variant id
+          makeStream(11, 'a', ['a.35'], [], 6, false),
+          makeStream(12, 'a', ['b.12'], [], 6, false)),
+      makeVariant(
+          2,  // variant id
+          makeStream(21, 'a', ['a.35'], [], 6, true),
+          makeStream(22, 'a', ['b.12'], [], 6, true)),
+    ];
+
+    const set = new shaka.media.AdaptationSet(variants[0]);
+    expect(set.canInclude(variants[1])).toBeFalsy();
+  });
+
   /**
    * Create a variant where the audio stream is optional but the video stream
    * is required. For the cases where audio and video are in the same stream,
@@ -193,13 +209,15 @@ describe('AdaptationSet', () => {
    * @param {!Array.<string>} codecs
    * @param {!Array.<string>} roles
    * @param {?number} channelsCount
+   * @param {boolean=} spatialAudio
    * @return {shaka.extern.Stream}
    */
-  function makeStream(id, mimeType, codecs, roles, channelsCount) {
+  function makeStream(id, mimeType, codecs, roles, channelsCount,
+      spatialAudio = false) {
     return {
       audioSamplingRate: null,
       channelsCount: channelsCount,
-      spatialAudio: false,
+      spatialAudio,
       closedCaptions: null,
       codecs: codecs.join(','),
       createSegmentIndex: () => Promise.resolve(),
