@@ -590,11 +590,9 @@ describe('DrmEngine', () => {
           sessionTypes: ['persistent-license'],
           initDataType: 'cenc',
           audio: containing({
-            encryptionScheme: '',
             robustness: 'good',
           }),
           video: containing({
-            encryptionScheme: '',
             robustness: 'really_really_ridiculously_good',
           }),
         }),
