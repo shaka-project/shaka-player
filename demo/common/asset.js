@@ -85,7 +85,7 @@ const ShakaDemoAssetInfo = class {
     /** @type {?Object} */
     this.mediaTailorAdsParams = null;
     /** @type {boolean} */
-    this.preferIMA = true;
+    this.useIMA = true;
     /** @type {?string} */
     this.mimeType = null;
 

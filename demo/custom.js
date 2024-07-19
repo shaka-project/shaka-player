@@ -360,14 +360,13 @@ shakaDemo.Custom = class {
     this.makeField_(
         container, mediaTailorName, mediaTailorSetup, mediaTailorOnChange);
 
-    // Make the Prefer IMA checkbox
-    const preferIMAOnChange = (input) => {
-      assetInProgress.preferIMA = input.checked;
+    // Make the use IMA checkbox
+    const useIMAOnChange = (input) => {
+      assetInProgress.useIMA = input.checked;
     };
-    const preferIMAName = 'Prefer IMA';
-    const preferIMA = assetInProgress.preferIMA;
-    this.makeBoolInput_(
-        container, preferIMAName, preferIMAOnChange, preferIMA);
+    const useIMAName = 'Use IMA';
+    const useIMA = assetInProgress.useIMA;
+    this.makeBoolInput_(container, useIMAName, useIMAOnChange, useIMA);
 
     return adsDiv;
   }

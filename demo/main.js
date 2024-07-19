@@ -1395,7 +1395,7 @@ shakaDemo.Main = class {
 
       // If the asset has an ad tag attached to it, load the ads
       const adManager = this.player_.getAdManager();
-      if (adManager && asset.adTagUri && asset.preferIMA) {
+      if (adManager && asset.adTagUri && asset.useIMA) {
         try {
           // If IMA is blocked by an AdBlocker, init() will throw.
           // If that happens, just proceed to load.
@@ -1412,7 +1412,7 @@ shakaDemo.Main = class {
             'Proceeding without ads.');
         }
       }
-      if (adManager && asset.adTagUri && !asset.preferIMA) {
+      if (adManager && asset.adTagUri && !asset.useIMA) {
         adManager.addAdUrlInterstitial(asset.adTagUri);
       }
 
