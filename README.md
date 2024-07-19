@@ -142,6 +142,7 @@ HLS features supported:
  - I-frame-only playlists with mjpg codec for thumbnails
  - #EXT-X-IMAGE-STREAM-INF for thumbnails
  - Interstitials
+ - Container change during the playback (eg: MP4 to TS, or AAC to TS)
 
 HLS features **not** supported:
  - X-SNAP attribute in interstitials
@@ -312,6 +313,9 @@ Shaka Player supports:
 - AWS MediaTailor for Client-Side
 - AWS MediaTailor for Server-Side
 - AWS MediaTailor overlays
+- HLS interstitials
+- Custom Interstitials
+- Basic support of VAST and VMAP without IMA (playback without tracking)
 
 
 ## Content Steering support
