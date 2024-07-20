@@ -34,6 +34,7 @@ describe('CastUtils', () => {
       'destroyAllPreloads',
       'getNonDefaultConfiguration',
       'addFont',
+      'getFetchedPlaybackInfo',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
