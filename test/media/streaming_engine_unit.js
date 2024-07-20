@@ -2256,7 +2256,9 @@ describe('StreamingEngine', () => {
 
           onError.and.callFake((error) => {
             expect(error.code).toBe(shaka.util.Error.Code.HTTP_ERROR);
+            expect(error.handled).toBeFalsy();
           });
+          disableStream.and.callFake((stream, disableTime) => disableTime != 0);
 
           // Here we go!
           streamingEngine.switchVariant(variant);
@@ -2265,7 +2267,7 @@ describe('StreamingEngine', () => {
           playing = true;
 
           await runTest();
-          expect(disableStream).not.toHaveBeenCalled();
+          expect(disableStream).toHaveBeenCalledTimes(1);
         });
 
     it('always tries to recover shaka.util.Error.Code.SEGMENT_MISSING',
