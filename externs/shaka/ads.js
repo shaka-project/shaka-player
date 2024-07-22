@@ -281,6 +281,11 @@ shaka.extern.IAdManager.Factory;
  */
 shaka.extern.IAd = class {
   /**
+   * @return {string}
+   */
+  getAdManagerName() {}
+
+  /**
    * @return {number}
    */
   getDuration() {}

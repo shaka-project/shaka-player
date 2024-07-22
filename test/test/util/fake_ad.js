@@ -72,6 +72,13 @@ shaka.test.FakeAd = class {
   /**
    * @override
    */
+  getAdManagerName() {
+    return 'FAKE';
+  }
+
+  /**
+   * @override
+   */
   getDuration() {
     return this.duration_;
   }
