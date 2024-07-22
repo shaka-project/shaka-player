@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.9.20](https://github.com/shaka-project/shaka-player/compare/v4.9.19...v4.9.20) (2024-07-22)
+
+
+### Bug Fixes
+
+* **ABR:** Do not adapt between spatial & non spatial audio ([#7067](https://github.com/shaka-project/shaka-player/issues/7067)) ([3f87da6](https://github.com/shaka-project/shaka-player/commit/3f87da6f6089d8a5752eea6d8247e7e5bc66ab75))
+* **DASH:** Fix codec/mimeType for single text file ([#7075](https://github.com/shaka-project/shaka-player/issues/7075)) ([f464b8e](https://github.com/shaka-project/shaka-player/commit/f464b8e4871c055c4f0a9ba01b565ada631f46b5))
+* **DASH:** Fix period combining when roles are equal ([#7065](https://github.com/shaka-project/shaka-player/issues/7065)) ([8e3cd0f](https://github.com/shaka-project/shaka-player/commit/8e3cd0f5626f9458727f4a801f8b166fd112430b))
+* Only check encryptionScheme when is not null and not empty string ([#7079](https://github.com/shaka-project/shaka-player/issues/7079)) ([6c0718c](https://github.com/shaka-project/shaka-player/commit/6c0718cfdacae2072da4449ea814ade7229cece5))
+* Unify maxDisabledTime behaviour ([#7077](https://github.com/shaka-project/shaka-player/issues/7077)) ([d60bd6a](https://github.com/shaka-project/shaka-player/commit/d60bd6af74ac625921557ead315a3159b0e8f330))
+
 ## [4.9.19](https://github.com/shaka-project/shaka-player/compare/v4.9.18...v4.9.19) (2024-07-18)
 
 
