@@ -59,10 +59,12 @@ shaka.extern.AdCuePoint;
 
 /**
  * @typedef {{
+ *   id: ?string,
  *   startTime: number,
  *   endTime: ?number,
  *   uri: string,
  *   isSkippable: boolean,
+ *   skipOffset: ?number,
  *   canJump: boolean,
  *   resumeOffset: ?number,
  *   playoutLimit: ?number,
@@ -75,6 +77,8 @@ shaka.extern.AdCuePoint;
  * @description
  * Contains the ad interstitial info.
  *
+ * @property {?string} id
+ *   The id of the interstitial.
  * @property {number} startTime
  *   The start time of the interstitial.
  * @property {?number} endTime
@@ -84,6 +88,9 @@ shaka.extern.AdCuePoint;
  *   ShakaPlayer supports (either in MSE or src=)
  * @property {boolean} isSkippable
  *   Indicate if the interstitial is skippable.
+ * @property {?number} skipOffset
+ *   Time value that identifies when skip controls are made available to the
+ *   end user.
  * @property {boolean} canJump
  *   Indicate if the interstitial is jumpable.
  * @property {?number} resumeOffset
@@ -247,6 +254,12 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @param {shaka.extern.AdInterstitial} interstitial
    */
   addCustomInterstitial(interstitial) {}
+
+  /**
+   * @param {string} url
+   * @return {!Promise}
+   */
+  addAdUrlInterstitial(url) {}
 };
 
 

@@ -21,8 +21,12 @@ v5.0 - 2024 Q4
  - Conversion to Typescript
 
 v4.11 - 2024 Q3
- - HLS improvements
  - HLS: EXT-X-START support
+ - Basic support of VAST and VMAP without IMA (playback without tracking)
+ - DASH: DVB Fonts
+ - TTML: IMSC1 (CMAF) image subtitle
+ - Render native cues using text displayer
+   https://github.com/shaka-project/shaka-player/issues/2585
 
 =====
 
