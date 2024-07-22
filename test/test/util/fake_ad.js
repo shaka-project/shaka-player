@@ -72,8 +72,8 @@ shaka.test.FakeAd = class {
   /**
    * @override
    */
-  getAdManagerName() {
-    return 'FAKE';
+  needsSkipUI() {
+    return true;
   }
 
   /**

@@ -281,9 +281,9 @@ shaka.extern.IAdManager.Factory;
  */
 shaka.extern.IAd = class {
   /**
-   * @return {string}
+   * @return {boolean}
    */
-  getAdManagerName() {}
+  needsSkipUI() {}
 
   /**
    * @return {number}
