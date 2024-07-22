@@ -107,7 +107,7 @@ describe('Transmuxer Player', () => {
       // seconds, fail the test.
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-      // Play for 10 seconds, but stop early if the video ends.  If it takes
+      // Play for 8 seconds, but stop early if the video ends.  If it takes
       // longer than 45 seconds, fail the test.
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 45);
 
