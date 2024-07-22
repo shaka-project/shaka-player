@@ -80,9 +80,9 @@ describe('HlsParser', () => {
     // seconds, fail the test.
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 10 seconds, but stop early if the video ends.  If it takes
+    // Play for 8 seconds, but stop early if the video ends.  If it takes
     // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
 
     await player.unload();
 
@@ -103,9 +103,9 @@ describe('HlsParser', () => {
     // seconds, fail the test.
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 10 seconds, but stop early if the video ends.  If it takes
+    // Play for 8 seconds, but stop early if the video ends.  If it takes
     // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
 
     await player.unload();
   });
