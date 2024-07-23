@@ -3276,7 +3276,7 @@ describe('DashParser Manifest', () => {
         '    <SupplementalProperty',
         '        schemeIdUri="urn:mpeg:dash:urlparam:2014"',
         '        xmlns:up="urn:mpeg:dash:schema:urlparam:2014">',
-        '     <up:UrlQueryInfo queryTemplate="$querypart$"',
+        '     <up:UrlQueryInfo queryTemplate="$querypart$&b=1"',
         '          useMPDUrlQuery="true"/>',
         '    </SupplementalProperty>',
         '    <AdaptationSet mimeType="video/mp4">',
@@ -3303,9 +3303,9 @@ describe('DashParser Manifest', () => {
 
       const variant1Ref = Array.from(variant1.video.segmentIndex)[0];
 
-      expect(variant1Ref.getUris()).toEqual(['dummy://foo/s1.mp4?a=1']);
+      expect(variant1Ref.getUris()).toEqual(['dummy://foo/s1.mp4?a=1&b=1']);
       expect(variant1Ref.initSegmentReference.getUris())
-          .toEqual(['dummy://foo/init.mp4?a=1']);
+          .toEqual(['dummy://foo/init.mp4?a=1&b=1']);
     });
 
     it('with SegmentTemplate', async () => {
@@ -3443,7 +3443,7 @@ describe('DashParser Manifest', () => {
         '        <SupplementalProperty',
         '            schemeIdUri="urn:mpeg:dash:urlparam:2014"',
         '            xmlns:up="urn:mpeg:dash:schema:urlparam:2014">',
-        '          <up:UrlQueryInfo queryTemplate="$querypart$"',
+        '          <up:UrlQueryInfo queryTemplate="$query:a$&b=foo"',
         '              useMPDUrlQuery="true"/>',
         '        </SupplementalProperty>',
         '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4"',
@@ -3471,9 +3471,9 @@ describe('DashParser Manifest', () => {
 
       const variant1Ref = Array.from(variant1.video.segmentIndex)[0];
 
-      expect(variant1Ref.getUris()).toEqual(['dummy://foo/l-1.mp4?a=1']);
+      expect(variant1Ref.getUris()).toEqual(['dummy://foo/l-1.mp4?a=1&b=foo']);
       expect(variant1Ref.initSegmentReference.getUris())
-          .toEqual(['dummy://foo/init.mp4?a=1']);
+          .toEqual(['dummy://foo/init.mp4?a=1&b=foo']);
     });
 
     it('with EssentialProperty in Representation', async () => {
@@ -3485,7 +3485,7 @@ describe('DashParser Manifest', () => {
         '        <EssentialProperty',
         '            schemeIdUri="urn:mpeg:dash:urlparam:2014"',
         '            xmlns:up="urn:mpeg:dash:schema:urlparam:2014">',
-        '         <up:UrlQueryInfo queryTemplate="$query:a$"',
+        '          <up:UrlQueryInfo queryTemplate="$query:a$"',
         '              useMPDUrlQuery="true"/>',
         '        </EssentialProperty>',
         '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4"',
