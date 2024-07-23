@@ -211,6 +211,11 @@ shaka.extern.IAdManager.Factory;
  */
 shaka.extern.IAd = class {
   /**
+   * @return {boolean}
+   */
+  needsSkipUI() {}
+
+  /**
    * @return {number}
    */
   getDuration() {}

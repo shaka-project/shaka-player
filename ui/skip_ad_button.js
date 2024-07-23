@@ -127,7 +127,7 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
    * @private
    */
   onAdStarted_() {
-    if (this.ad.isSkippable()) {
+    if (this.ad.isSkippable() && this.ad.needsSkipUI()) {
       shaka.ui.Utils.setDisplay(this.button_, true);
       shaka.ui.Utils.setDisplay(this.counter_, true);
       this.counter_.textContent = '';
