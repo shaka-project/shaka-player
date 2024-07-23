@@ -114,7 +114,7 @@ describe('DashParser Live', () => {
    */
   function cloneRefs(references) {
     return references.map((ref) => {
-      return new shaka.media.SegmentReference(
+      const clone = new shaka.media.SegmentReference(
           ref.startTime,
           ref.endTime,
           ref.getUrisInner,
@@ -124,6 +124,10 @@ describe('DashParser Live', () => {
           ref.timestampOffset,
           ref.appendWindowStart,
           ref.appendWindowEnd);
+      clone.codecs = ref.codecs;
+      clone.mimeType = ref.mimeType;
+      clone.bandwidth = ref.bandwidth;
+      return clone;
     });
   }
 
