@@ -455,8 +455,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @private
    */
   onAdCuePointsChanged_() {
-    this.markAdBreaks_();
     const action = () => {
+      this.markAdBreaks_();
       const seekRange = this.player.seekRange();
       const seekRangeSize = seekRange.end - seekRange.start;
       const minSeekBarWindow =
