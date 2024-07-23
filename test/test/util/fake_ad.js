@@ -72,6 +72,13 @@ shaka.test.FakeAd = class {
   /**
    * @override
    */
+  needsSkipUI() {
+    return true;
+  }
+
+  /**
+   * @override
+   */
   getDuration() {
     return this.duration_;
   }
