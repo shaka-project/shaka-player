@@ -200,7 +200,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Disable Text', 'manifest.disableText')
         .addBoolInput_('Disable Thumbnails', 'manifest.disableThumbnails')
         .addBoolInput_('Enable segment-relative VTT Timing',
-            'manifest.segmentRelativeVttTiming');
+            'manifest.segmentRelativeVttTiming')
+        .addBoolInput_('Continue loading when paused',
+            'manifest.continueLoadingWhenPaused');
   }
 
   /** @private */
@@ -255,8 +257,6 @@ shakaDemo.Config = class {
             'manifest.hls.mediaPlaylistFullMimeType')
         .addBoolInput_('Ignore Program Date Time from manifest',
             'manifest.hls.ignoreManifestProgramDateTime')
-        .addBoolInput_('Use Safari behavior for live',
-            'manifest.hls.useSafariBehaviorForLive')
         .addNumberInput_('Live segments delay',
             'manifest.hls.liveSegmentsDelay')
         .addBoolInput_('Enable HLS sequence mode', 'manifest.hls.sequenceMode')
@@ -311,7 +311,11 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_('Milliseconds to consider a request cached',
             'abr.cacheLoadThreshold',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Minimum time to switch',
+            'abr.minTimeToSwitch',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true);
     this.addRetrictionsSection_('abr', 'Adaptation Restrictions');
   }
 
@@ -404,7 +408,9 @@ shakaDemo.Config = class {
     const prefix = category + '.retryParameters.';
     const docLink = this.resolveExternLink_('.RetryParameters');
     this.addSection_(sectionName, docLink)
-        .addNumberInput_('Max Attempts', prefix + 'maxAttempts')
+        .addNumberInput_('Max Attempts', prefix + 'maxAttempts',
+            /* canBeDecimal= */ false,
+            /* canBeZero= */ false)
         .addNumberInput_('Base Delay', prefix + 'baseDelay',
             /* canBeDecimal= */ true)
         .addNumberInput_('Backoff Factor', prefix + 'backoffFactor',
@@ -490,29 +496,6 @@ shakaDemo.Config = class {
             'streaming.disableTextPrefetch')
         .addBoolInput_('Disable Video Prefetch',
             'streaming.disableVideoPrefetch')
-        .addBoolInput_('Live Sync', 'streaming.liveSync')
-        .addNumberInput_('Target latency tolerance',
-            'streaming.liveSyncTargetLatencyTolerance',
-            /* canBeDecimal= */ true,
-            /* canBeZero= */ true)
-        .addNumberInput_('Max latency for live sync',
-            'streaming.liveSyncMaxLatency',
-            /* canBeDecimal= */ true,
-            /* canBeZero= */ true)
-        .addNumberInput_('Playback rate for live sync',
-            'streaming.liveSyncPlaybackRate',
-            /* canBeDecimal= */ true,
-            /* canBeZero= */ false)
-        .addNumberInput_('Min latency for live sync',
-            'streaming.liveSyncMinLatency',
-            /* canBeDecimal= */ true,
-            /* canBeZero= */ true)
-        .addNumberInput_('Min playback rate for live sync',
-            'streaming.liveSyncMinPlaybackRate',
-            /* canBeDecimal= */ true)
-        .addBoolInput_('Live Sync Panic Mode', 'streaming.liveSyncPanicMode')
-        .addNumberInput_('Live Sync Panic Mode Threshold',
-            'streaming.liveSyncPanicThreshold')
         .addBoolInput_('Allow Media Source recoveries',
             'streaming.allowMediaSourceRecoveries')
         .addNumberInput_('Minimum time between recoveries',
@@ -576,8 +559,6 @@ shakaDemo.Config = class {
         .addBoolInput_('Ignore Text Stream Failures',
             'streaming.ignoreTextStreamFailures')
         .addBoolInput_('Stall Detector Enabled', 'streaming.stallEnabled')
-        .addBoolInput_('Use native HLS on Safari (Clear)',
-            'streaming.useNativeHlsOnSafari')
         .addBoolInput_('Use native HLS for FairPlay',
             'streaming.useNativeHlsForFairPlay')
         .addNumberInput_('Time window at end to preload next URL',
@@ -588,8 +569,50 @@ shakaDemo.Config = class {
             'streaming.loadTimeout',
             /* canBeDecimal= */ true)
         .addBoolInput_('Don\'t choose codecs',
-            'streaming.dontChooseCodecs');
+            'streaming.dontChooseCodecs')
+        .addBoolInput_('Should fix timestampOffset',
+            'streaming.shouldFixTimestampOffset');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
+    this.addLiveSyncSection_();
+  }
+
+  /** @private */
+  addLiveSyncSection_() {
+    const docLink = this.resolveExternLink_('.LiveSyncConfiguration');
+    this.addSection_('Streaming Live Sync', docLink);
+    this.addBoolInput_('Live Sync', 'streaming.liveSync.enabled')
+        .addNumberInput_('Target latency',
+            'streaming.liveSync.targetLatency',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Target latency tolerance',
+            'streaming.liveSync.targetLatencyTolerance',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Max playback rate',
+            'streaming.liveSync.maxPlaybackRate',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ false)
+        .addNumberInput_('Min playback rate',
+            'streaming.liveSync.minPlaybackRate',
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Panic Mode', 'streaming.liveSync.panicMode')
+        .addNumberInput_('Panic Mode Threshold',
+            'streaming.liveSync.panicThreshold')
+        .addBoolInput_('Dynamic Target Latency',
+            'streaming.liveSync.dynamicTargetLatency.enabled')
+        .addNumberInput_('Dynamic Target Latency Stability Threshold',
+            'streaming.liveSync.dynamicTargetLatency.stabilityThreshold')
+        .addNumberInput_('Dynamic Target Latency Rebuffer Increment',
+            'streaming.liveSync.dynamicTargetLatency.rebufferIncrement',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Dynamic Target Latency Max Attempts',
+            'streaming.liveSync.dynamicTargetLatency.maxAttempts')
+        .addNumberInput_('Dynamic Target Latency Max Latency',
+            'streaming.liveSync.dynamicTargetLatency.maxLatency')
+        .addNumberInput_('Dynamic Target Latency Min Latency',
+            'streaming.liveSync.dynamicTargetLatency.minLatency');
   }
 
   /** @private */

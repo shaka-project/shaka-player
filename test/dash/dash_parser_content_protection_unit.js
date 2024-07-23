@@ -48,6 +48,7 @@ describe('DashParser ContentProtection', () => {
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
       disableStream: (stream) => {},
+      addFont: (name, url) => {},
     };
 
     const actual = await dashParser.start(

@@ -54,6 +54,7 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
     this.eventManager.listen(this.button_, 'click', () => {
       shakaDemoMain.setIsVisualizerActive(
           !shakaDemoMain.getIsVisualizerActive());
+      shakaDemoMain.remakeHash();
       this.setIcon_();
     });
   }

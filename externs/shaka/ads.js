@@ -12,9 +12,11 @@
 /**
  * @typedef {{
  *   loadTimes: !Array.<number>,
+ *   averageLoadTime: number,
  *   started: number,
  *   playedCompletely: number,
- *   skipped: number
+ *   skipped: number,
+ *   errors: number
  * }}
  *
  * @description
@@ -22,12 +24,16 @@
  *
  * @property {number} loadTimes
  *   The set of amounts of time it took to get the final manifest.
+ * @property {number} averageLoadTime
+ *   The average time it took to get the final manifest.
  * @property {number} started
  *   The number of ads started.
  * @property {number} playedCompletely
  *   The number of ads played completely.
  * @property {number} skipped
  *   The number of ads skipped.
+ * @property {number} errors
+ *   The number of ads with errors.
  * @exportDoc
  */
 shaka.extern.AdsStats;
@@ -49,6 +55,65 @@ shaka.extern.AdsStats;
  * @exportDoc
  */
 shaka.extern.AdCuePoint;
+
+
+/**
+ * @typedef {{
+ *   id: ?string,
+ *   startTime: number,
+ *   endTime: ?number,
+ *   uri: string,
+ *   isSkippable: boolean,
+ *   skipOffset: ?number,
+ *   canJump: boolean,
+ *   resumeOffset: ?number,
+ *   playoutLimit: ?number,
+ *   once: boolean,
+ *   pre: boolean,
+ *   post: boolean,
+ *   timelineRange: boolean
+ * }}
+ *
+ * @description
+ * Contains the ad interstitial info.
+ *
+ * @property {?string} id
+ *   The id of the interstitial.
+ * @property {number} startTime
+ *   The start time of the interstitial.
+ * @property {?number} endTime
+ *   The end time of the interstitial.
+ * @property {string} uri
+ *   The uri of the interstitial, can be any type that
+ *   ShakaPlayer supports (either in MSE or src=)
+ * @property {boolean} isSkippable
+ *   Indicate if the interstitial is skippable.
+ * @property {?number} skipOffset
+ *   Time value that identifies when skip controls are made available to the
+ *   end user.
+ * @property {boolean} canJump
+ *   Indicate if the interstitial is jumpable.
+ * @property {?number} resumeOffset
+ *   Indicates where the primary playback will resume after the interstitial
+ *   plays. It is expressed as a time lag from when interstitial playback was
+ *   scheduled on the primary player's timeline. For live ad replacement it
+ *   must be null.
+ * @property {?number} playoutLimit
+ *   Indicate a limit for the playout time of the entire interstitial.
+ * @property {boolean} once
+ *   Indicates that the interstitial should only be played once.
+ * @property {boolean} pre
+ *   Indicates that an action is to be triggered before playback of the
+ *   primary asset begins, regardless of where playback begins in the primary
+ *   asset.
+ * @property {boolean} post
+ *   Indicates that an action is to be triggered after the primary asset has
+ *   been played to its end without error.
+ * @property {boolean} timelineRange
+ *   Indicates whether the  interstitial should be presented in a timeline UI
+ *   as a single point or as a range.
+ */
+shaka.extern.AdInterstitial;
 
 
 /**
@@ -181,9 +246,20 @@ shaka.extern.IAdManager = class extends EventTarget {
   /**
    * @param {!shaka.Player} basePlayer
    * @param {!HTMLMediaElement} baseVideo
-   * @param {shaka.extern.Interstitial} interstitial
+   * @param {shaka.extern.HLSInterstitial} interstitial
    */
-  onInterstitialMetadata(basePlayer, baseVideo, interstitial) {}
+  onHLSInterstitialMetadata(basePlayer, baseVideo, interstitial) {}
+
+  /**
+   * @param {shaka.extern.AdInterstitial} interstitial
+   */
+  addCustomInterstitial(interstitial) {}
+
+  /**
+   * @param {string} url
+   * @return {!Promise}
+   */
+  addAdUrlInterstitial(url) {}
 };
 
 
@@ -204,6 +280,11 @@ shaka.extern.IAdManager.Factory;
  * @exportDoc
  */
 shaka.extern.IAd = class {
+  /**
+   * @return {boolean}
+   */
+  needsSkipUI() {}
+
   /**
    * @return {number}
    */

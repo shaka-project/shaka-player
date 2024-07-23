@@ -1467,12 +1467,6 @@ describe('MediaSourceEngine', () => {
       expect(mockTextEngine).toBeTruthy();
       expect(mockTextEngine.destroy).toHaveBeenCalled();
     });
-
-    // Regression test for https://github.com/shaka-project/shaka-player/issues/984
-    it('destroys TextDisplayer on destroy', async () => {
-      await mediaSourceEngine.destroy();
-      expect(mockTextDisplayer.destroySpy).toHaveBeenCalled();
-    });
   });
 
   function createMockMediaSource() {

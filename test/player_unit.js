@@ -162,7 +162,7 @@ describe('Player', () => {
     }
 
     video = new shaka.test.FakeVideo(20);
-    player = new shaka.Player(null, dependencyInjector);
+    player = new shaka.Player(null, null, dependencyInjector);
     await player.attach(video);
     player.configure({
       // Ensures we don't get a warning about missing preference.
@@ -228,6 +228,7 @@ describe('Player', () => {
       expect(playhead.release).toHaveBeenCalled();
       expect(mediaSourceEngine.destroy).toHaveBeenCalled();
       expect(streamingEngine.destroy).toHaveBeenCalled();
+      expect(textDisplayer.destroySpy).toHaveBeenCalled();
 
       for (const segmentIndex of segmentIndexes) {
         if (segmentIndex) {
@@ -718,7 +719,6 @@ describe('Player', () => {
         player.configure({
           streaming: {
             preferNativeHls: true,
-            useNativeHlsOnSafari: false,
           },
         });
 
@@ -735,7 +735,6 @@ describe('Player', () => {
         player.configure({
           streaming: {
             preferNativeHls: true,
-            useNativeHlsOnSafari: false,
           },
         });
 
@@ -774,6 +773,9 @@ describe('Player', () => {
 
   it('getNonDefaultConfiguration', () => {
     player.configure({
+      manifest: {
+        disableThumbnails: true,
+      },
       drm: {
         retryParameters: {backoffFactor: 5},
       },
@@ -781,6 +783,9 @@ describe('Player', () => {
     const nonDefaultConfiguration = player.getNonDefaultConfiguration();
     const config = player.getConfiguration();
     expect(nonDefaultConfiguration).not.toBe(config);
+    expect(nonDefaultConfiguration['mediaSource']).toBeUndefined();
+    expect(nonDefaultConfiguration['manifest']['availabilityWindowOverride'])
+        .toBeUndefined();
   });
 
   describe('configure', () => {

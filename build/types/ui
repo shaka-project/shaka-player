@@ -3,12 +3,14 @@
 +../../third_party/language-mapping-list/language-mapping-list.js
 +../../ui/ad_counter.js
 +../../ui/ad_position.js
++../../ui/ad_statistics_button.js
 +../../ui/audio_language_selection.js
 +../../ui/externs/ui.js
 +../../ui/play_button.js
 +../../ui/big_play_button.js
 +../../ui/airplay_button.js
 +../../ui/cast_button.js
++../../ui/chapter_selection.js
 +../../ui/context_menu.js
 +../../ui/controls.js
 +../../ui/constants.js
@@ -32,6 +34,7 @@
 +../../ui/remote_button.js
 +../../ui/resolution_selection.js
 +../../ui/rewind_button.js
++../../ui/save_video_frame_button.js
 +../../ui/seek_bar.js
 +../../ui/settings_menu.js
 +../../ui/small_play_button.js

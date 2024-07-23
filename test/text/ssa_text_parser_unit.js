@@ -172,9 +172,9 @@ describe('SsaTextParser', () => {
         'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, ' +
         'Effect, Text\n' +
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
-        ',,{\\pos(400,570)}Test\n' +
+        ',,{\\pos(400,570)}Test\n\n' +
         'Dialogue: 0,0:00:04.50,0:00:06.10,DefaultVCD, NTP,0000,0000,0000' +
-        ',,{\\pos(400,570)}Test2\n' +
+        ',,{\\pos(400,570)}Test2\n\n' +
         'Dialogue: 0,0:00:08.01,0:00:10.10,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test3',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});

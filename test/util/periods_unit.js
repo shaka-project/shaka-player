@@ -1204,6 +1204,59 @@ describe('PeriodCombiner', () => {
     expect(video4.originalId).toBe('7,8');
   });
 
+  it('Variant has highest bandwidth from matched streams', async () => {
+    const stream1 = makeVideoStream(1080);
+    stream1.originalId = '1';
+    stream1.bandwidth = 917000;
+    stream1.codecs = 'avc1.640028';
+
+    const stream2 = makeVideoStream(1080);
+    stream2.originalId = '2';
+    stream2.bandwidth = 5715000;
+    stream2.codecs = 'avc1.640028';
+
+    const stream3 = makeVideoStream(1080);
+    stream3.originalId = '3';
+    stream3.bandwidth = 3835000;
+    stream3.codecs = 'avc1.640028';
+
+    /** @type {!Array.<shaka.extern.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams: [
+          stream1,
+        ],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '2',
+        videoStreams: [
+          stream2,
+        ],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '3',
+        videoStreams: [
+          stream3,
+        ],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ false);
+    const variants = combiner.getVariants();
+    expect(variants.length).toBe(1);
+    expect(variants[0].bandwidth).toBe(5715000);
+  });
+
   it('Matches streams with most roles in common', async () => {
     const makeAudioStreamWithRoles = (roles) => {
       const stream = makeAudioStream('en');
@@ -1314,6 +1367,74 @@ describe('PeriodCombiner', () => {
     expect(variants[1].audio.originalId).toBe('stream1,stream1');
     expect(variants[2].audio.originalId).toBe('stream2,stream2');
     expect(variants[3].audio.originalId).toBe('stream2,stream2');
+  });
+
+  it('Matches streams based on bandwidth when roles are equal', async () => {
+    const stream1 = makeAudioStream('en');
+    stream1.bandwidth = 192000;
+    stream1.roles = ['main'];
+    stream1.originalId = 'stream1';
+
+    const stream2 = makeAudioStream('en');
+    stream2.bandwidth = 640000;
+    stream2.roles = ['main'];
+    stream2.originalId = 'stream2';
+
+    const stream3 = makeAudioStream('en');
+    stream3.bandwidth = 192000;
+    stream3.roles = ['main'];
+    stream3.originalId = 'stream3';
+
+    const stream4 = makeAudioStream('en');
+    // make slightly different bandwidth to avoid direct match by hashing.
+    stream4.bandwidth = 639000;
+    stream4.roles = ['main'];
+    stream4.originalId = 'stream4';
+
+    /** @type {!Array.<shaka.extern.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams: [
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          stream1,
+          stream2,
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '2',
+        videoStreams: [
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          stream3,
+          stream4,
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ false);
+    const variants = combiner.getVariants();
+
+    expect(variants).toEqual(jasmine.arrayWithExactContents([
+      makeAVVariant(1080, 'en', 2, ['main']),
+      makeAVVariant(1080, 'en', 2, ['main']),
+    ]));
+
+    // We can use the originalId field to see what each track is composed of.
+    const audio1 = variants[0].audio;
+    expect(audio1.bandwidth).toBe(192000);
+    expect(audio1.originalId).toBe('stream1,stream3');
+
+    const audio2 = variants[1].audio;
+    expect(audio2.bandwidth).toBe(640000);
+    expect(audio2.originalId).toBe('stream2,stream4');
   });
 
   it('Matches streams with mismatched roles', async () => {

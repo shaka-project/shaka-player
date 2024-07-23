@@ -61,6 +61,73 @@ player.load(uri);
 
 Note: overlays ad insertions is the same as server side.
 
+#### Interstitial Integration
+
+Shaka Player supports different types of interstitials:
+ - HLS Interstitials
+ - Custom Interstitials
+ - VAST (playback without tracking)
+ - VMAP (playback without tracking)
+
+
+##### HLS Interstitials
+
+It is not necessary to do anything, Shaka Player supports it natively without
+any type of intervention.
+
+
+##### Custom Interstitials
+
+Example:
+
+```js
+const adManager = player.getAdManager();
+const video = document.getElementById('video');
+const ui = video['ui'];
+// If you're using a non-UI build, this is the div you'll need to create
+// for your layout.  The ad manager will clear this div, when it unloads, so
+// don't pass in a div that contains non-ad elements.
+const container = video.ui.getControls().getClientSideAdContainer();
+adManager.initInterstitial(container, player, video);
+adManager.addCustomInterstitial({
+  id: null,
+  startTime: 10,
+  endTime: null,
+  uri: 'YOUR_URL',
+  isSkippable: true,
+  skipOffset: 10,
+  canJump: false,
+  resumeOffset: null,
+  playoutLimit: null,
+  once: true,
+  pre: false,
+  post: false,
+  timelineRange: false,
+});
+```
+
+
+##### VAST/VMAP (playback without tracking)
+
+Example:
+
+```js
+const adManager = player.getAdManager();
+const video = document.getElementById('video');
+const ui = video['ui'];
+// If you're using a non-UI build, this is the div you'll need to create
+// for your layout.  The ad manager will clear this div, when it unloads, so
+// don't pass in a div that contains non-ad elements.
+const container = video.ui.getControls().getClientSideAdContainer();
+adManager.initInterstitial(container, player, video);
+const url = 'https://pubads.g.doubleclick.net/gampad/ads?' +
+    'sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&' +
+    'impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&' +
+    'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
+adManager.addAdUrlInterstitial(url);
+```
+
+
 #### IMA SDK Integration
 
 Shaka Player provides an integration with the [Interactive Media Ads][] SDKs.
@@ -222,7 +289,7 @@ Let's register a simple listener to Shaka's AD_STARTED event. It will log the
 start of the ad in the console.
 
 ```js
-adManager.addEventListener(shaka.ads.AdManager.AD_STARTED, () => {
+adManager.addEventListener(shaka.ads.Utils.AD_STARTED, () => {
   console.log('An ad has started');
 });
 ```
@@ -235,7 +302,7 @@ that requires access to those, here is how to get them:
 // Note that unlike in the previous example, we are capturing the AD_STARTED
 // event object here (the "e" parameter of the lambda function) so we can access
 // its properties.
-adManager.addEventListener(shaka.ads.AdManager.AD_STARTED, (e) => {
+adManager.addEventListener(shaka.ads.Utils.AD_STARTED, (e) => {
   const sdkAdObject = e['sdkAdObject'];
   const originalEvent = e['originalEvent'];
 });
@@ -250,11 +317,11 @@ Client Side or the {@link shaka.ads.AdManager#event:ImaStreamManagerLoadedEvent}
 for Server Side to get the IMA [AdManager][] or [StreamManager][] objects.
 
 ```js
-adManager.addEventListener(shaka.ads.AdManager.IMA_AD_MANAGER_LOADED, (e) => {
+adManager.addEventListener(shaka.ads.Utils.IMA_AD_MANAGER_LOADED, (e) => {
   const imaAdManager = e['imaAdManager'];
 });
 
-adManager.addEventListener(shaka.ads.AdManager.IMA_STREAM_MANAGER_LOADED, (e) => {
+adManager.addEventListener(shaka.ads.Utils.IMA_STREAM_MANAGER_LOADED, (e) => {
   const imaStreamManager = e['imaStreamManager'];
 });
 ```

@@ -42,8 +42,6 @@ describe('HlsParser', () => {
     player = new compiledShaka.Player();
     await player.attach(video);
 
-    player.configure('streaming.useNativeHlsOnSafari', false);
-
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
 
@@ -74,7 +72,7 @@ describe('HlsParser', () => {
         keyRequests++;
       }
     });
-    await player.load('/base/test/test/assets/hls-aes-256/index.m3u8');
+    await player.load('/base/test/test/assets/hls-aes-256/media.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);
 
@@ -82,9 +80,9 @@ describe('HlsParser', () => {
     // seconds, fail the test.
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 10 seconds, but stop early if the video ends.  If it takes
+    // Play for 8 seconds, but stop early if the video ends.  If it takes
     // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
 
     await player.unload();
 
@@ -105,9 +103,9 @@ describe('HlsParser', () => {
     // seconds, fail the test.
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 10 seconds, but stop early if the video ends.  If it takes
+    // Play for 8 seconds, but stop early if the video ends.  If it takes
     // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
 
     await player.unload();
   });
@@ -124,7 +122,7 @@ describe('HlsParser', () => {
     await video.play();
 
     // Wait for last cue
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 7, 30);
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
 
     const cues = video.textTracks[0].cues;
     expect(cues.length).toBe(3);

@@ -9,6 +9,7 @@ describe('Mp4BoxParsers', () => {
   const videoSegmentUri = '/base/test/test/assets/sintel-video-segment.mp4';
 
   const audioInitSegmentXheAacUri = '/base/test/test/assets/audio-xhe-aac.mp4';
+  const audioInitSegmentAC4Uri = '/base/test/test/assets/audio-ac-4.mp4';
 
   /** @type {!ArrayBuffer} */
   let videoInitSegment;
@@ -16,16 +17,20 @@ describe('Mp4BoxParsers', () => {
   let videoSegment;
   /** @type {!ArrayBuffer} */
   let audioInitSegmentXheAac;
+  /** @type {!ArrayBuffer} */
+  let audioInitSegmentAC4;
 
   beforeAll(async () => {
     const responses = await Promise.all([
       shaka.test.Util.fetch(videoInitSegmentUri),
       shaka.test.Util.fetch(videoSegmentUri),
       shaka.test.Util.fetch(audioInitSegmentXheAacUri),
+      shaka.test.Util.fetch(audioInitSegmentAC4Uri),
     ]);
     videoInitSegment = responses[0];
     videoSegment = responses[1];
     audioInitSegmentXheAac = responses[2];
+    audioInitSegmentAC4 = responses[3];
   });
 
   it('parses init segment', () => {
@@ -177,9 +182,10 @@ describe('Mp4BoxParsers', () => {
         .box('stbl', Mp4Parser.children)
         .fullBox('stsd', Mp4Parser.sampleDescription)
         .box('mp4a', (box) => {
-          const parsedMP4ABox = shaka.util.Mp4BoxParsers.parseMP4A(box.reader);
-          channelCount = parsedMP4ABox.channelCount;
-          sampleRate = parsedMP4ABox.sampleRate;
+          const parsedAudioSampleEntryBox =
+              shaka.util.Mp4BoxParsers.audioSampleEntry(box.reader);
+          channelCount = parsedAudioSampleEntryBox.channelCount;
+          sampleRate = parsedAudioSampleEntryBox.sampleRate;
           if (box.reader.hasMoreData()) {
             Mp4Parser.children(box);
           }
@@ -191,6 +197,28 @@ describe('Mp4BoxParsers', () => {
     expect(channelCount).toBe(2);
     expect(sampleRate).toBe(48000);
     expect(codec).toBe('mp4a.40.42');
+  });
+
+  it('parses ac-4 box for ac-4 segment', () => {
+    let channelCount;
+    let sampleRate;
+
+    const Mp4Parser = shaka.util.Mp4Parser;
+    new Mp4Parser()
+        .box('moov', Mp4Parser.children)
+        .box('trak', Mp4Parser.children)
+        .box('mdia', Mp4Parser.children)
+        .box('minf', Mp4Parser.children)
+        .box('stbl', Mp4Parser.children)
+        .fullBox('stsd', Mp4Parser.sampleDescription)
+        .box('ac-4', (box) => {
+          const parsedAudioSampleEntryBox =
+              shaka.util.Mp4BoxParsers.audioSampleEntry(box.reader);
+          channelCount = parsedAudioSampleEntryBox.channelCount;
+          sampleRate = parsedAudioSampleEntryBox.sampleRate;
+        }).parse(audioInitSegmentAC4, /* partialOkay= */ false);
+    expect(channelCount).toBe(10);
+    expect(sampleRate).toBe(48000);
   });
 
   /**

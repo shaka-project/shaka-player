@@ -97,6 +97,7 @@ describe('HlsParser', () => {
       getBandwidthEstimate: () => 1e6,
       onMetadata: shaka.test.Util.spyFunc(onMetadataSpy),
       disableStream: (stream) => {},
+      addFont: (name, url) => {},
     };
 
     parser = new shaka.hls.HlsParser();
@@ -156,6 +157,7 @@ describe('HlsParser', () => {
   it('parses manifest attributes', async () => {
     const master = [
       '#EXTM3U\n',
+      '#EXT-X-START:TIME-OFFSET=2\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
       'CHANNELS="16/JOC",SAMPLE-RATE="48000",URI="audio"\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
@@ -187,6 +189,7 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
+      manifest.startTime = 2;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.language = 'en';
@@ -337,6 +340,7 @@ describe('HlsParser', () => {
       manifest.addPartialVariant((variant) => {
         variant.bandwidth = 100;
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.bandwidth = 100;
           stream.frameRate = 60;
           stream.mime('video/mp4', 'avc1');
           stream.size(960, 540);
@@ -501,8 +505,10 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
+        variant.bandwidth = 200;
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.mime('audio/mp4', 'mp4a');
+          stream.bandwidth = 200;
         });
       });
       manifest.sequenceMode = sequenceMode;
@@ -2911,7 +2917,23 @@ describe('HlsParser', () => {
      */
     function makeReference(startTime, endTime, syncTime) {
       const initUris = () => ['test:/init.mp4'];
+      const mediaQuality = {
+        bandwidth: 200,
+        audioSamplingRate: null,
+        codecs: 'avc1.4d401f',
+        contentType: 'video',
+        frameRate: 60,
+        height: 540,
+        mimeType: 'video/mp4',
+        channelsCount: null,
+        pixelAspectRatio: null,
+        width: 960,
+        label: null,
+        roles: [],
+        language: null,
+      };
       const init = new shaka.media.InitSegmentReference(initUris, 0, 615);
+      init.mediaQuality = mediaQuality;
       const uris = () => ['test:/main.mp4'];
       return new shaka.media.SegmentReference(
           startTime, endTime, uris, 0, null, init, 0, 0, Infinity,
@@ -2923,8 +2945,10 @@ describe('HlsParser', () => {
      * @param {!Array.<number>} startTimes
      * @param {number} syncTimeOffset
      * @param {(function(!shaka.media.SegmentReference))=} modifyFn
+     * @param {boolean=} isLowLatency
      */
-    async function test(media, startTimes, syncTimeOffset, modifyFn) {
+    async function test(media, startTimes, syncTimeOffset, modifyFn,
+        isLowLatency = false) {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,vtt",',
@@ -2953,6 +2977,7 @@ describe('HlsParser', () => {
         });
         manifest.sequenceMode = sequenceMode;
         manifest.type = shaka.media.ManifestParser.HLS;
+        manifest.isLowLatency = !!isLowLatency;
       });
 
       fakeNetEngine
@@ -3073,7 +3098,7 @@ describe('HlsParser', () => {
           reference.partialReferences = [partialRef, partialRef2];
           reference.allPartialSegments = true;
         }
-      });
+      }, /* isLowLatency= */ true);
     });
   });
 
@@ -3638,6 +3663,8 @@ describe('HlsParser', () => {
           stream.addDrmInfo('com.apple.fps', (drmInfo) => {
             drmInfo.addInitData('sinf', new Uint8Array(0));
             drmInfo.encryptionScheme = 'cenc';
+            drmInfo.addKeySystemUris(new Set(
+                ['skd://f93d4e700d7ddde90529a27735d9e7cb']));
           });
         });
       });
@@ -3908,6 +3935,8 @@ describe('HlsParser', () => {
             stream.addDrmInfo('com.apple.fps', (drmInfo) => {
               drmInfo.addInitData('sinf', new Uint8Array(0));
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.addKeySystemUris(new Set(
+                  ['skd://f93d4e700d7ddde90529a27735d9e7cb']));
             });
           });
         });
@@ -3916,6 +3945,8 @@ describe('HlsParser', () => {
             stream.addDrmInfo('com.apple.fps', (drmInfo) => {
               drmInfo.addInitData('sinf', new Uint8Array(0));
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.addKeySystemUris(new Set(
+                  ['skd://f93d4e700d7ddde90529a27735d9e7cb']));
             });
           });
         });
@@ -5056,6 +5087,7 @@ describe('HlsParser', () => {
   it('parses media playlists directly', async () => {
     const media = [
       '#EXTM3U\n',
+      '#EXT-X-START:TIME-OFFSET=-2\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
@@ -5066,6 +5098,7 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
+      manifest.startTime = -2;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
@@ -5077,6 +5110,46 @@ describe('HlsParser', () => {
     const actualManifest = await testHlsParser(media, '', manifest);
 
     expect(actualManifest.presentationTimeline.getDuration()).toBe(5);
+  });
+
+  it('throw error when no segments', async () => {
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/media', media);
+
+    const expectedError = shaka.test.Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.MANIFEST,
+        shaka.util.Error.Code.HLS_EMPTY_MEDIA_PLAYLIST));
+    await expectAsync(parser.start('test:/media', playerInterface))
+        .toBeRejectedWith(expectedError);
+  });
+
+  it('throw error when all segments are gap', async () => {
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-START:TIME-OFFSET=-2\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-GAP\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/media', media);
+
+    const expectedError = shaka.test.Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.MANIFEST,
+        shaka.util.Error.Code.HLS_EMPTY_MEDIA_PLAYLIST));
+    await expectAsync(parser.start('test:/media', playerInterface))
+        .toBeRejectedWith(expectedError);
   });
 
   it('parses #EXT-X-BITRATE', async () => {
@@ -5530,26 +5603,59 @@ describe('HlsParser', () => {
       await parser.start('test:/master', playerInterface);
 
       const metadataType = 'com.apple.quicktime.HLS';
-      const value = {
-        key: 'X-SHAKA',
-        data: 'FOREVER',
-      };
-      const plannedDuration = {
-        key: 'PLANNED-DURATION',
-        data: '1',
-      };
+      const firstValues = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '0',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
+      const secondValues = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '1',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
+      const thirdValues = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '2',
+        }),
+        jasmine.objectContaining({
+          key: 'PLANNED-DURATION',
+          data: '1',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
+      const forthValues = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '3',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
       expect(onMetadataSpy).toHaveBeenCalledTimes(4);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 1,
-          [jasmine.objectContaining(value)]);
+          firstValues);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 5, 6,
-          [jasmine.objectContaining(value)]);
+          secondValues);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 10, 11,
-          [
-            jasmine.objectContaining(plannedDuration),
-            jasmine.objectContaining(value),
-          ]);
+          thirdValues);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 15, null,
-          [jasmine.objectContaining(value)]);
+          forthValues);
     });
 
     it('supports END-ON-NEXT', async () => {
@@ -5572,13 +5678,18 @@ describe('HlsParser', () => {
       await parser.start('test:/master', playerInterface);
 
       const metadataType = 'com.apple.quicktime.HLS';
-      const value = {
-        key: 'X-SHAKA',
-        data: 'FOREVER',
-      };
+      const values = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '0',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
       expect(onMetadataSpy).toHaveBeenCalledTimes(1);
-      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 5,
-          [jasmine.objectContaining(value)]);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 5, values);
     });
 
     it('skip duplicate IDs', async () => {
@@ -5603,13 +5714,18 @@ describe('HlsParser', () => {
       await parser.start('test:/master', playerInterface);
 
       const metadataType = 'com.apple.quicktime.HLS';
-      const value = {
-        key: 'X-SHAKA',
-        data: 'FOREVER',
-      };
+      const values = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '0',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
       expect(onMetadataSpy).toHaveBeenCalledTimes(1);
-      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 1,
-          [jasmine.objectContaining(value)]);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 1, values);
     });
 
     it('with no EXT-X-PROGRAM-DATE-TIME', async () => {
@@ -5695,6 +5811,10 @@ describe('HlsParser', () => {
       const metadataType = 'com.apple.hls.interstitial';
       const values = [
         jasmine.objectContaining({
+          key: 'ID',
+          data: '1',
+        }),
+        jasmine.objectContaining({
           key: 'X-ASSET-URI',
           data: 'test:/fake',
         }),
@@ -5736,6 +5856,10 @@ describe('HlsParser', () => {
 
       const metadataType = 'com.apple.hls.interstitial';
       const values = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '1',
+        }),
         jasmine.objectContaining({
           key: 'X-ASSET-LIST',
           data: 'test:/fake',

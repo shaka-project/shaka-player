@@ -109,6 +109,10 @@ shaka.test.ManifestGenerator.Manifest = class {
     this.periodCount = 1;
     /** @type {number} */
     this.gapCount = 0;
+    /** @type {boolean} */
+    this.isLowLatency = false;
+    /** @type {?number} */
+    this.startTime = null;
 
 
     /** @type {shaka.extern.Manifest} */
@@ -418,6 +422,8 @@ shaka.test.ManifestGenerator.DrmInfo = class {
     this.sessionType = '';
     /** @type {string} */
     this.serverCertificateUri = '';
+    /** @type {(Set.<string>|undefined)} */
+    this.keySystemUris;
 
     /** @type {shaka.extern.DrmInfo} */
     const foo = this;
@@ -468,6 +474,16 @@ shaka.test.ManifestGenerator.DrmInfo = class {
 
     const buffer = shaka.util.Uint8ArrayUtils.fromBase64(base64);
     this.initData.push({initData: buffer, initDataType: 'keyids'});
+  }
+
+  /**
+   * Adds a new keySystemUris to the current DRM info.
+   *
+   *
+   * @param {Set.<string>} keySystemUris
+   */
+  addKeySystemUris(keySystemUris) {
+    this.keySystemUris = keySystemUris;
   }
 };
 

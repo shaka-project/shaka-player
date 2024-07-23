@@ -41,6 +41,7 @@ shakaAssets.Source = {
   EZDRM: 'EZDRM',
   THEO_PLAYER: 'THEOplayer',
   JWPLAYER: 'JW Player',
+  BBC: 'BBC',
 };
 
 
@@ -1101,6 +1102,14 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MPD_CHAINING),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'DASH-IF IMSC1 (CMAF) Image Subtitle',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/vod/testpic_2s/imsc1_img.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.MP4),
   // End DASH-IF Assets }}}
 
   // bitcodin assets {{{
@@ -1439,9 +1448,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
       .setExtraConfig({
-        streaming: {
-          useNativeHlsOnSafari: false,
-        },
         lcevc: {
           enabled: true,
           dynamicPerformanceScaling: true,
@@ -1460,9 +1466,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
       .setExtraConfig({
-        streaming: {
-          useNativeHlsOnSafari: false,
-        },
         lcevc: {
           enabled: true,
           dynamicPerformanceScaling: true,
@@ -1481,9 +1484,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
       .setExtraConfig({
-        streaming: {
-          useNativeHlsOnSafari: false,
-        },
         lcevc: {
           enabled: true,
           dynamicPerformanceScaling: true,
@@ -1694,6 +1694,47 @@ shakaAssets.testAssets = [
         displayInVrMode: true,
         defaultVrProjectionMode: 'equirectangular',
       }),
+  // }}}
+
+  // BBC assets {{{
+  /* BBC Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'On-demand Testcard - WOFF Font Download signalled with supplemental property descriptor',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-ctv-stereo-en-sfdt-woff.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'On-demand Testcard - WOFF Font Download signalled with essential property descriptor',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-ctv-stereo-en-efdt-woff.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'On-demand Testcard - WOFF Font Download signalled with essential property descriptor with relative url',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-ctv-stereo-en-efdt-woff-bur.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live Testcard - WOFF Font Download signalled with supplemental property descriptor',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/simulcast/manifests/avc-ctv-stereo-en-sfdt-woff.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live Testcard - WOFF Font Download signalled with essential property descriptor',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/simulcast/manifests/avc-ctv-stereo-en-efdt-woff.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE),
   // }}}
 ];
 /* eslint-enable max-len */

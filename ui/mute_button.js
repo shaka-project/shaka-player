@@ -7,7 +7,7 @@
 
 goog.provide('shaka.ui.MuteButton');
 
-goog.require('shaka.ads.AdManager');
+goog.require('shaka.ads.Utils');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -62,19 +62,19 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(this.adManager,
-        shaka.ads.AdManager.AD_VOLUME_CHANGED, () => {
+        shaka.ads.Utils.AD_VOLUME_CHANGED, () => {
           this.updateAriaLabel_();
           this.updateIcon_();
         });
 
     this.eventManager.listen(this.adManager,
-        shaka.ads.AdManager.AD_MUTED, () => {
+        shaka.ads.Utils.AD_MUTED, () => {
           this.updateAriaLabel_();
           this.updateIcon_();
         });
 
     this.eventManager.listen(this.adManager,
-        shaka.ads.AdManager.AD_STOPPED, () => {
+        shaka.ads.Utils.AD_STOPPED, () => {
           // The base class also listens for this event and sets this.ad
           // to null. This is a safeguard in case of a race condition as
           // the label and icon code depends on this.ad being correctly

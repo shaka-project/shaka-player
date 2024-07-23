@@ -24,7 +24,9 @@
  *   serviceDescription: ?shaka.extern.ServiceDescription,
  *   nextUrl: ?string,
  *   periodCount: number,
- *   gapCount: number
+ *   gapCount: number,
+ *   isLowLatency: boolean,
+ *   startTime: ?number
  * }}
  *
  * @description
@@ -108,6 +110,12 @@
  *   discontinuities found between periods. For HLS, it is a number of EXT-X-GAP
  *   and GAP=YES occurrences. For MSS, it is always set to 0.
  *   If in src= mode or nothing is loaded, NaN.
+ * @property {bolean} isLowLatency
+ *   If true, the manifest is Low Latency.
+ * @property {?number} startTime
+ *   Indicate the startTime of the playback, when <code>startTime</code> is
+ *   <code>null</code>, playback will start at the default start time.
+ *   Note: It only overrides the load startTime when it is not defined.
  *
  * @exportDoc
  */
@@ -200,6 +208,7 @@ shaka.extern.ServiceDescription;
  * @typedef {{
  *   keySystem: string,
  *   encryptionScheme: string,
+ *   keySystemUris: (Set.<string>|undefined),
  *   licenseServerUri: string,
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
@@ -221,6 +230,9 @@ shaka.extern.ServiceDescription;
  * @property {string} encryptionScheme
  *   <i>Required.</i> <br>
  *   The encryption scheme, e.g., "cenc", "cbcs", "cbcs-1-9".
+ * @property {(Set.<string>|undefined)} keySystemUris
+ *   <i>Optional.</i> <br>
+ *   The key system uri, e.g., "skd://" for fairplay.
  * @property {string} licenseServerUri
  *   <i>Filled in by DRM config if missing.</i> <br>
  *   The license server URI.

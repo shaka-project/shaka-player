@@ -53,6 +53,7 @@ describe('DashParser SegmentTemplate', () => {
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
       disableStream: (stream) => {},
+      addFont: (name, url) => {},
     };
   });
 
@@ -926,5 +927,6 @@ function makeTemplateInfo(timeline) {
     'mimeType': 'video/mp4',
     'codecs': 'avc1.42E01E',
     'bandwidth': 0,
+    'numChunks': 0,
   };
 }

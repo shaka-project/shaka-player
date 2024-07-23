@@ -140,6 +140,8 @@ describe('Playhead', () => {
       nextUrl: null,
       periodCount: 1,
       gapCount: 0,
+      isLowLatency: false,
+      startTime: null,
     };
 
     config = shaka.util.PlayerConfiguration.createDefault().streaming;
@@ -591,7 +593,10 @@ describe('Playhead', () => {
     expect(onSeek).toHaveBeenCalled();
   });  // clamps playhead after seeking for VOD
 
-  it('doesn\'t repeatedly re-seek', () => {
+  it('doesn\'t repeatedly re-seek in seeking slow platforms', () => {
+    if (!shaka.util.Platform.isSeekingSlow()) {
+      pending('No seeking slow platform');
+    }
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
     video.buffered = createFakeBuffered([{start: 25, end: 55}]);

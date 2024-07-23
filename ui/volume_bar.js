@@ -8,7 +8,7 @@
 goog.provide('shaka.ui.VolumeBar');
 
 goog.require('goog.asserts');
-goog.require('shaka.ads.AdManager');
+goog.require('shaka.ads.Utils');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
@@ -41,15 +41,15 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
         () => this.onPresentationVolumeChange_());
 
     this.eventManager.listen(this.adManager,
-        shaka.ads.AdManager.AD_VOLUME_CHANGED,
+        shaka.ads.Utils.AD_VOLUME_CHANGED,
         () => this.onAdVolumeChange_());
 
     this.eventManager.listen(this.adManager,
-        shaka.ads.AdManager.AD_MUTED,
+        shaka.ads.Utils.AD_MUTED,
         () => this.onAdVolumeChange_());
 
     this.eventManager.listen(this.adManager,
-        shaka.ads.AdManager.AD_STOPPED,
+        shaka.ads.Utils.AD_STOPPED,
         () => this.onPresentationVolumeChange_());
 
     this.eventManager.listen(this.localization,

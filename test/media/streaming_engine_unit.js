@@ -686,6 +686,7 @@ describe('StreamingEngine', () => {
     // Use the VOD manifests to test the streamDataCallback function in the low
     // latency mode.
     setupVod();
+    manifest.isLowLatency = true;
 
     const config = shaka.util.PlayerConfiguration.createDefault().streaming;
     config.lowLatencyMode = true;
@@ -1179,12 +1180,13 @@ describe('StreamingEngine', () => {
 
       const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
       const segmentContext = {
-        type: shaka.net.NetworkingEngine.AdvancedRequestType.INIT_SEGMENT,
+        type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
       };
 
-      // Quickly switching back to text1, and text init segment should be
+      // Quickly switching back to text1, and text init segment shouldn't be
       // fetched again.
-      netEngine.expectRequest('text-20-init', segmentType, segmentContext);
+      netEngine.expectRequest('text-20-0.mp4', segmentType, segmentContext);
+      netEngine.expectNoRequest('text-20-init', segmentType, segmentContext);
       netEngine.expectNoRequest('text-21-init', segmentType, segmentContext);
       // TODO: huh?
     });
@@ -2254,7 +2256,9 @@ describe('StreamingEngine', () => {
 
           onError.and.callFake((error) => {
             expect(error.code).toBe(shaka.util.Error.Code.HTTP_ERROR);
+            expect(error.handled).toBeFalsy();
           });
+          disableStream.and.callFake((stream, disableTime) => disableTime != 0);
 
           // Here we go!
           streamingEngine.switchVariant(variant);
@@ -2263,7 +2267,7 @@ describe('StreamingEngine', () => {
           playing = true;
 
           await runTest();
-          expect(disableStream).not.toHaveBeenCalled();
+          expect(disableStream).toHaveBeenCalledTimes(1);
         });
 
     it('always tries to recover shaka.util.Error.Code.SEGMENT_MISSING',

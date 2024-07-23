@@ -8,7 +8,7 @@
 goog.provide('shaka.ui.SkipAdButton');
 
 goog.require('goog.asserts');
-goog.require('shaka.ads.AdManager');
+goog.require('shaka.ads.Utils');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
@@ -74,17 +74,17 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
+        this.adManager, shaka.ads.Utils.AD_STARTED, () => {
           this.onAdStarted_();
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_SKIP_STATE_CHANGED, () => {
+        this.adManager, shaka.ads.Utils.AD_SKIP_STATE_CHANGED, () => {
           this.onSkipStateChanged_();
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_STOPPED, () => {
+        this.adManager, shaka.ads.Utils.AD_STOPPED, () => {
           this.reset_();
         });
 
@@ -127,7 +127,7 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
    * @private
    */
   onAdStarted_() {
-    if (this.ad.isSkippable()) {
+    if (this.ad.isSkippable() && this.ad.needsSkipUI()) {
       shaka.ui.Utils.setDisplay(this.button_, true);
       shaka.ui.Utils.setDisplay(this.counter_, true);
       this.counter_.textContent = '';

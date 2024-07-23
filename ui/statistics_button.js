@@ -241,8 +241,11 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
   loadContainer_() {
     for (const name of this.controls.getConfig().statisticsList) {
       if (name in this.currentStats_ && !this.skippedStats_.includes(name)) {
-        this.container_.appendChild(this.generateComponent_(name));
+        const element = this.generateComponent_(name);
+        this.container_.appendChild(element);
         this.statisticsList_.push(name);
+        shaka.ui.Utils.setDisplay(element.parentElement,
+            !isNaN(this.currentStats_[name]));
       } else {
         shaka.log.alwaysWarn('Unrecognized statistic element:', name);
       }
@@ -254,8 +257,12 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     this.currentStats_ = this.player.getStats();
 
     for (const name of this.statisticsList_) {
-      this.displayedElements_[name].textContent =
-          this.parseFrom_[name](name);
+      const element = this.displayedElements_[name];
+      element.textContent = this.parseFrom_[name](name);
+      if (element && element.parentElement) {
+        shaka.ui.Utils.setDisplay(element.parentElement,
+            !isNaN(this.currentStats_[name]));
+      }
     }
   }
 

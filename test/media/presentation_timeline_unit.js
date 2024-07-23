@@ -163,6 +163,25 @@ describe('PresentationTimeline', () => {
       // now (100) - max segment duration (10) - availability start time (0)
       expect(timeline.getSegmentAvailabilityEnd()).toBe(90);
     });
+
+    it('excludes future segments when auto correcting drift', () => {
+      const timeline = makeLiveTimeline(/* availability= */ 0);
+      const pastTime = Date.now() / 1000;
+      const futureTime = pastTime * 9;
+      const timeRanges = [
+        makeTimeRange(pastTime - 10, pastTime),
+        makeTimeRange(pastTime, pastTime + 10),
+        makeTimeRange(pastTime + 10, pastTime + 20),
+        makeTimeRange(futureTime, futureTime + 10),
+        makeTimeRange(futureTime + 10, futureTime + 20),
+      ];
+
+      setElapsed(1000);
+      timeline.notifyTimeRange(timeRanges, 0);
+
+      // last segment end time less than Date.now()
+      expect(timeline.getMaxSegmentEndTime()).toBe(pastTime + 20);
+    });
   });
 
   describe('getSegmentAvailabilityStart', () => {

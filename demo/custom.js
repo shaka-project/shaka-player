@@ -10,6 +10,7 @@ goog.provide('shakaDemo.Custom');
 
 goog.require('ShakaDemoAssetInfo');
 goog.require('shakaDemo.AssetCard');
+goog.require('shakaDemo.BoolInput');
 goog.require('shakaDemo.Input');
 goog.require('shakaDemo.InputContainer');
 goog.require('shakaDemo.TextInput');
@@ -110,6 +111,21 @@ shakaDemo.Custom = class {
         new shakaDemo.TextInput(container, name, onChange, isTextArea);
     input.extra().textContent = name;
     setup(input.input(), input.container());
+  }
+
+  /**
+   * A utility to simplify the creation of bool on the dialog.
+   * @param {!shakaDemo.InputContainer} container
+   * @param {string} name
+   * @param {function(!Element, !shakaDemo.Input)} onChange
+   * @param {boolean} value
+   * @private
+   */
+  makeBoolInput_(container, name, onChange, value) {
+    container.addRow(/* labelString= */ null, /* tooltipString= */ null);
+    const input = new shakaDemo.BoolInput(
+        container, name, onChange, /* showName= */ true);
+    input.input().checked = value;
   }
 
   /**
@@ -343,6 +359,14 @@ shakaDemo.Custom = class {
     const mediaTailorName = 'Media Tailor URL';
     this.makeField_(
         container, mediaTailorName, mediaTailorSetup, mediaTailorOnChange);
+
+    // Make the use IMA checkbox
+    const useIMAOnChange = (input) => {
+      assetInProgress.useIMA = input.checked;
+    };
+    const useIMAName = 'Use IMA';
+    const useIMA = assetInProgress.useIMA;
+    this.makeBoolInput_(container, useIMAName, useIMAOnChange, useIMA);
 
     return adsDiv;
   }

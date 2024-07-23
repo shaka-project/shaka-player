@@ -358,6 +358,18 @@ describe('TtmlTextParser', () => {
         {startTime: 62.05, endTime: 3723.2});
   });
 
+  it('supports colon formatted time with 0 or 1 dp', () => {
+    verifyHelper(
+        [
+          {startTime: 62, endTime: 3723.2, payload: 'Test'},
+        ],
+        '<tt><body><div>' +
+        '<p begin="01:02" end="01:02:03.2">Test</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 60, segmentEnd: 3730, vttOffset: 0},
+        {startTime: 62, endTime: 3723.2});
+  });
+
   it('accounts for offset', () => {
     verifyHelper(
         [
@@ -2142,7 +2154,7 @@ describe('TtmlTextParser', () => {
     const data =
         shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
     const result = new shaka.text.TtmlTextParser()
-        .parseMedia(data, time, 'foo://bar');
+        .parseMedia(data, time, 'foo://bar', /* images= */ []);
     shaka.test.TtmlUtils.verifyHelper(
         cues, result, bodyProperties, divProperties);
   }
@@ -2170,7 +2182,7 @@ describe('TtmlTextParser', () => {
       new shaka.text.TtmlTextParser().parseMedia(
           shaka.util.BufferUtils.toUint8(data),
           {periodStart: 0, segmentStart: 0, segmentEnd: 10, vttOffset: 0},
-          'foo://bar');
+          'foo://bar', /* images= */ []);
     }).toThrow(error);
   }
 });
