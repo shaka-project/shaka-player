@@ -20,7 +20,7 @@ For more info about this video, see https://github.com/Axinom/dash-test-vectors
   <Period duration="PT0H00M16.000S">
     <EventStream schemeIdUri="urn:mpeg:dash:event:alternativeMPD:2022" timescale="10000000">
       <Event presentationTime="0" duration="40000000" id="1">
-        <AlternativeMPD uri="https://storage.googleapis.com/shaka-demo-assets/heliocentrism/heliocentrism.mpd" mode="replace" />
+        <AlternativeMPD uri="/base/test/test/assets/dash-aes-128/dash.mpd" mode="replace" />
       </Event>
     </EventStream>
     <AdaptationSet segmentAlignment="true" group="1" maxWidth="1920" maxHeight="1080" maxFrameRate="24" par="16:9" lang="und">
