@@ -43,14 +43,6 @@ describe('Ads', () => {
       'ad_rule=1&output=vmap&unviewed_position_start=1&' +
       'env=vp&impl=s&correlator=';
 
-  function checkClearKeySupport() {
-    const clearKeySupport = window['shakaSupport'].drm['org.w3.clearkey'];
-    if (!clearKeySupport) {
-      return false;
-    }
-    return clearKeySupport.encryptionSchemes.includes('cenc');
-  }
-
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
@@ -381,18 +373,7 @@ describe('Ads', () => {
     const streamUri = '/base/test/test/assets/dash-mpd-alternate/dash.mpd';
 
     it('without support for multiple media elements', async () => {
-      if (!checkClearKeySupport()) {
-        pending('ClearKey is not supported');
-      }
-
       player.configure('ads.supportsMultipleMediaElements', false);
-      player.configure({
-        drm: {
-          clearKeys: {
-            'nrQFDeRLSAKTLifXUIPiZg': 'FmY0xnWCPCNaSpRG-tUuTQ',
-          },
-        },
-      });
 
       adManager.initInterstitial(adContainer, player, video);
 
