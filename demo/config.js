@@ -315,7 +315,9 @@ shakaDemo.Config = class {
         .addNumberInput_('Minimum time to switch',
             'abr.minTimeToSwitch',
             /* canBeDecimal= */ true,
-            /* canBeZero= */ true);
+            /* canBeZero= */ true)
+        .addBoolInput_('Prefer Network Information bandwidth',
+            'abr.preferNetworkInformationBandwidth');
     this.addRetrictionsSection_('abr', 'Adaptation Restrictions');
   }
 
