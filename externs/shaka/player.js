@@ -1922,7 +1922,8 @@ shaka.extern.AdsConfiguration;
  *   clearBufferSwitch: boolean,
  *   safeMarginSwitch: number,
  *   cacheLoadThreshold: number,
- *   minTimeToSwitch: number
+ *   minTimeToSwitch: number,
+ *   preferNetworkInformationBandwidth: boolean
  * }}
  *
  * @property {boolean} enabled
@@ -2008,6 +2009,13 @@ shaka.extern.AdsConfiguration;
  *   <br>
  *   Defaults to <code>0</code> seconds except in Apple browsers whose default
  *   value  is <code>0.5</code> seconds.
+ * @property {boolean} preferNetworkInformationBandwidth
+ *   If true, use the Network Information API bandwidth estimation in the
+ *   current AbrManager, if it is available in the browser environment. This
+ *   way Shaka Player will never estimate the bandwidth and we will always
+ *   trust the information provided by the browser.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
