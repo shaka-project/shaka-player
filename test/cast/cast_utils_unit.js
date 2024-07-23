@@ -33,7 +33,6 @@ describe('CastUtils', () => {
       'preload',
       'destroyAllPreloads',
       'getNonDefaultConfiguration',
-      'getCurrentPlaybackInfo',
       'addFont',
       'getFetchedPlaybackInfo',
 

@@ -96,7 +96,7 @@ shaka.test.ManifestParser = class {
         /* tileDuration= */ undefined,
         syncTime);
     ref.discontinuitySequence = /** @type {?} */(jasmine.any(Number));
-    ref.bandwidth = /** @type {?} */(jasmine.any(Number));
+    ref.bandwidth = /** @type {?} */(new shaka.test.AnyOrNull(Number));
     ref.codecs = /** @type {?} */(jasmine.any(String));
     ref.mimeType = /** @type {?} */(jasmine.any(String));
     return ref;
