@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.9.21](https://github.com/shaka-project/shaka-player/compare/v4.9.20...v4.9.21) (2024-07-24)
+
+
+### Bug Fixes
+
+* Allow dispatch metadata event with cueTime equal to 0 ([#7098](https://github.com/shaka-project/shaka-player/issues/7098)) ([2d32e18](https://github.com/shaka-project/shaka-player/commit/2d32e18e09cda9d9e552e0ed898e8ee72c411597))
+* Fix ID3 timing when included in EMSG ([#7099](https://github.com/shaka-project/shaka-player/issues/7099)) ([98b1270](https://github.com/shaka-project/shaka-player/commit/98b1270148f0a8f27bc81270d1ed558c4a79236e))
+* **WebVTT:** Fix rendering of WebVTT in UITextDisplayer ([#7023](https://github.com/shaka-project/shaka-player/issues/7023)) ([c83cac1](https://github.com/shaka-project/shaka-player/commit/c83cac1bdb43688ac65b57676ab8137183a9690d))
+
 ## [4.9.20](https://github.com/shaka-project/shaka-player/compare/v4.9.19...v4.9.20) (2024-07-22)
 
 
