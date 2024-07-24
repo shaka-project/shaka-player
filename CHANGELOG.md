@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.10.9](https://github.com/shaka-project/shaka-player/compare/v4.10.8...v4.10.9) (2024-07-24)
+
+
+### Bug Fixes
+
+* **Ads:** Don't show duplicate SKIP UI in IMA CS ([#7084](https://github.com/shaka-project/shaka-player/issues/7084)) ([ee12c74](https://github.com/shaka-project/shaka-player/commit/ee12c74cb13801564a644359f26a4e45b10524af))
+* **Ads:** Fix back to live for native HLS when interstitial endTime is Infinity ([#7095](https://github.com/shaka-project/shaka-player/issues/7095)) ([f697217](https://github.com/shaka-project/shaka-player/commit/f697217068a792da18f01136773815a4a22400a3))
+* **Ads:** Fix playback of preroll interstitial when the currentTime is 0 ([#7092](https://github.com/shaka-project/shaka-player/issues/7092)) ([8635ab2](https://github.com/shaka-project/shaka-player/commit/8635ab23480e3efb37fdb6e1a256a246599fc1da))
+* **Ads:** Fix timelineRange detection in HLS interstitials ([#7091](https://github.com/shaka-project/shaka-player/issues/7091)) ([c0723c2](https://github.com/shaka-project/shaka-player/commit/c0723c2fdd58df4ea70cb7af7a7bdeb391e66143))
+* **Ads:** Only allow play the preroll once ([#7096](https://github.com/shaka-project/shaka-player/issues/7096)) ([c60b092](https://github.com/shaka-project/shaka-player/commit/c60b0921d73444b7834dcbbca63de3e051a2a965))
+* Allow dispatch metadata event with cueTime equal to 0 ([#7098](https://github.com/shaka-project/shaka-player/issues/7098)) ([143f5d4](https://github.com/shaka-project/shaka-player/commit/143f5d4bde023dc06399f15225ca91adba035254))
+* Fix ID3 timing when included in EMSG ([#7099](https://github.com/shaka-project/shaka-player/issues/7099)) ([bbbcdfd](https://github.com/shaka-project/shaka-player/commit/bbbcdfd771464b5c7711b88e70c6ca629679efa1))
+* **UI:** Fix ad markers set before full initialization ([#7089](https://github.com/shaka-project/shaka-player/issues/7089)) ([dc5551e](https://github.com/shaka-project/shaka-player/commit/dc5551e77f66101cd646720cbad69e8d3a3218dc))
+* **WebVTT:** Fix rendering of WebVTT in UITextDisplayer ([#7023](https://github.com/shaka-project/shaka-player/issues/7023)) ([dc5404d](https://github.com/shaka-project/shaka-player/commit/dc5404d5035669ad560e53bc5b39ccd18eca9a5b))
+
 ## [4.10.8](https://github.com/shaka-project/shaka-player/compare/v4.10.7...v4.10.8) (2024-07-22)
 
 
