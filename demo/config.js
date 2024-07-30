@@ -469,6 +469,8 @@ shakaDemo.Config = class {
         .addBoolInput_('Auto Low Latency Mode', 'streaming.autoLowLatencyMode')
         .addBoolInput_('Force HTTP', 'streaming.forceHTTP')
         .addBoolInput_('Force HTTPS', 'streaming.forceHTTPS')
+        .addNumberInput_('Min bytes for progress events',
+            'streaming.minBytesForProgressEvents')
         .addBoolInput_('Prefer native HLS playback when available',
             'streaming.preferNativeHls')
         .addNumberInput_('Update interval seconds',

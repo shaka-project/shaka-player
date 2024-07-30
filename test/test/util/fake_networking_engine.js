@@ -52,6 +52,10 @@ shaka.test.FakeNetworkingEngine = class {
     /** @type {!jasmine.Spy} */
     this.setForceHTTPS = jasmine.createSpy('setForceHTTPS').and.stub();
 
+    /** @type {!jasmine.Spy} */
+    this.setMinBytesForProgressEvents =
+        jasmine.createSpy('setMinBytesForProgressEvents').and.stub();
+
     /** @private {number} */
     this.maxUris_ = 1;
 

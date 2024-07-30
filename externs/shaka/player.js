@@ -1544,6 +1544,7 @@ shaka.extern.LiveSyncConfiguration;
  *   autoLowLatencyMode: boolean,
  *   forceHTTP: boolean,
  *   forceHTTPS: boolean,
+ *   minBytesForProgressEvents: number,
  *   preferNativeHls: boolean,
  *   updateIntervalSeconds: number,
  *   dispatchAllEmsgBoxes: boolean,
@@ -1702,6 +1703,11 @@ shaka.extern.LiveSyncConfiguration;
  *   If both forceHTTP and forceHTTPS are set, forceHTTPS wins.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {number} minBytesForProgressEvents
+ *   Defines minimum number of bytes that should be used to emit progress event,
+ *   if possible. To avoid issues around feeding ABR with request history, this
+ *   value should be greater than or equal to `abr.advanced.minBytes`.
+ *   By default equals 16e3 (the same value as `abr.advanced.minBytes`).
  * @property {boolean} preferNativeHls
  *   If true, prefer native HLS playback when possible, regardless of platform.
  *   <br>
