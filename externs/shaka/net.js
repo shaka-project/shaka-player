@@ -169,7 +169,8 @@ shaka.extern.Response;
  *                     shaka.extern.Request,
  *                     shaka.net.NetworkingEngine.RequestType,
  *                     shaka.extern.ProgressUpdated,
- *                     shaka.extern.HeadersReceived):
+ *                     shaka.extern.HeadersReceived,
+ *                     shaka.extern.SchemePluginConfig):
  *     !shaka.extern.IAbortableOperation.<shaka.extern.Response>}
  * @description
  * Defines a plugin that handles a specific scheme.
@@ -183,6 +184,23 @@ shaka.extern.Response;
  * @exportDoc
  */
 shaka.extern.SchemePlugin;
+
+
+/**
+ * @typedef {{
+*   minBytesForProgressEvents: (number|undefined)
+* }}
+*
+* @description
+*   Defines configuration object to use by SchemePlugins.
+*
+* @property {(number|undefined)} minBytesForProgressEvents
+*   Defines minimum number of bytes that should be use to emit progress event,
+*   if possible.
+*
+* @exportDoc
+*/
+shaka.extern.SchemePluginConfig;
 
 
 /**
