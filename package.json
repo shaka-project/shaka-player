@@ -36,7 +36,7 @@
     "google-closure-library": "^20221102.0.0",
     "htmlhint": "^1.1.3",
     "jasmine-ajax": "^4.0.0",
-    "jimp": "^0.16.1",
+    "jimp": "^0.22.12",
     "js-yaml": "^4.1.0",
     "jsdoc": "github:joeyparrish/jsdoc#2ca85bb6",
     "karma": "github:joeyparrish/karma#shaka-fixes",
