@@ -264,7 +264,7 @@ class Build(object):
 
     return True
 
-  def build_library(self, name, langout, locales, force, is_debug):
+  def build_library(self, name, langout, locales, force, is_debug, skip_ts):
     """Builds Shaka Player using the files in |self.include|.
 
     Args:
@@ -273,6 +273,7 @@ class Build(object):
       locales: A list of strings of locale identifiers.
       force: True to rebuild, False to ignore if no changes are detected.
       is_debug: True to compile for debugging, false for release.
+      skip_ts: True to skip generation of TypeScript definitions.
 
     Returns:
       True on success; False on failure.
@@ -319,11 +320,13 @@ class Build(object):
     shaka_externs = shakaBuildHelpers.get_all_js_files('externs/shaka')
     if self.has_ui():
       shaka_externs += shakaBuildHelpers.get_all_js_files('ui/externs')
-    ts_def_generator = compiler.TsDefGenerator(
-        generated_externs + shaka_externs, build_name)
 
-    if not ts_def_generator.generate(force):
-      return False
+    if not skip_ts:
+      ts_def_generator = compiler.TsDefGenerator(
+          generated_externs + shaka_externs, build_name)
+
+      if not ts_def_generator.generate(force):
+        return False
 
     # Copy this file to dist/ where support.html can use it
     shutil.copy(
@@ -376,6 +379,11 @@ def main(args):
       type=str,
       default='ECMASCRIPT5')
 
+  parser.add_argument(
+    '--skip-ts',
+    help='Skips generation of TypeScript definition files (.d.ts).',
+    action='store_true')
+
   parsed_args, commands = parser.parse_known_args(args)
 
   # Make the dist/ folder, ignore errors.
@@ -406,8 +414,10 @@ def main(args):
   locales = parsed_args.locales
   force = parsed_args.force
   is_debug = parsed_args.mode == 'debug'
+  skip_ts = parsed_args.skip_ts
 
-  if not custom_build.build_library(name, langout, locales, force, is_debug):
+  if not custom_build.build_library(name, langout, locales, force, is_debug,
+      skip_ts):
     return 1
 
   return 0
