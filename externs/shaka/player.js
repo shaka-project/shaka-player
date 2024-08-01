@@ -1343,8 +1343,7 @@ shaka.extern.MssManifestConfiguration;
  *   hls: shaka.extern.HlsManifestConfiguration,
  *   mss: shaka.extern.MssManifestConfiguration,
  *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean,
- *   continueLoadingWhenPaused: boolean,
- *   overrideDolbyVisionCodecs: boolean
+ *   continueLoadingWhenPaused: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1401,14 +1400,6 @@ shaka.extern.MssManifestConfiguration;
  *   the video is paused.
  *   <br>
  *   Defaults to <code>true</code>.
- * @property {boolean} overrideDolbyVisionCodecs
- *   If true, Dolby Vision codecs in a manifest will be overriden to their
- *   AVC/HEVC equivalents. This is a workaround for platforms which MediaSource
- *   methods claim they are not able to play Dolby Vision, but when segments are
- *   appended it appears to play ocrrectly.
- *   <br>
- *   Defaults to <code>true</code> on Xbox One and <code>false</code> on other
- *   platforms.
  * @exportDoc
  */
 shaka.extern.ManifestConfiguration;
