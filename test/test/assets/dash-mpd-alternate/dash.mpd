@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Version information:
+Axinom.MediaProcessing v3.0.0 targeting General Purpose Media Format specification v7
+ffmpeg version N-81423-g61fac0e Copyright (c) 2000-2016 the FFmpeg developers
+x265 [info]: HEVC encoder version 2.0+12-49a0d1176aef5bc6
+x264 0.148.2705 3f5ed56
+MP4Box - GPAC version 0.6.2-DEV-rev683-g7b29fbe-master
+MediaInfoLib - v0.7.87
+
+For more info about this video, see https://github.com/Axinom/dash-test-vectors
+-->
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT0H12M14.000S" maxSegmentDuration="PT0H0M4.000S" profiles="urn:mpeg:dash:profile:isoff-live:2011,http://dashif.org/guidelines/dash264" >
+  <Period duration="PT0H00M04.000S">
+    <AdaptationSet segmentAlignment="true" group="1" maxWidth="1920" maxHeight="1080" maxFrameRate="24" par="16:9" lang="und">
+      <SegmentTemplate timescale="24" media="$Number%04d$.m4s" startNumber="1" duration="96" initialization="init.mp4" />
+      <Representation id="1" mimeType="video/mp4" codecs="avc1.64001f" width="512" height="288" frameRate="24" sar="1:1" startWithSAP="1" bandwidth="389802"></Representation>
+    </AdaptationSet>
+  </Period>
+  <Period duration="PT0H00M16.000S">
+    <EventStream schemeIdUri="urn:mpeg:dash:event:alternativeMPD:2022" timescale="10000000">
+      <Event presentationTime="0" duration="40000000" id="1">
+        <AlternativeMPD uri="/base/test/test/assets/dash-aes-128/dash.mpd" mode="replace" />
+      </Event>
+    </EventStream>
+    <AdaptationSet segmentAlignment="true" group="1" maxWidth="1920" maxHeight="1080" maxFrameRate="24" par="16:9" lang="und">
+      <SegmentTemplate timescale="24" media="$Number%04d$.m4s" startNumber="1" duration="96" initialization="init.mp4" />
+      <Representation id="1" mimeType="video/mp4" codecs="avc1.64001f" width="512" height="288" frameRate="24" sar="1:1" startWithSAP="1" bandwidth="389802"></Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

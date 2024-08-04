@@ -367,4 +367,31 @@ describe('Ads', () => {
       await player.unload();
     });
   });
+
+  describe('support MPD Alternate', () => {
+    /** @type {string} */
+    const streamUri = '/base/test/test/assets/dash-mpd-alternate/dash.mpd';
+
+    it('without support for multiple media elements', async () => {
+      player.configure('ads.supportsMultipleMediaElements', false);
+
+      adManager.initInterstitial(adContainer, player, video);
+
+      await player.load(streamUri);
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait a maximum of 10 seconds before the ad starts playing.
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+      await waiter.timeoutAfter(20)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
+
+      // Play for 5 seconds, but stop early if the video ends.  If it takes
+      // longer than 30 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 30);
+
+      await player.unload();
+    });
+  });
 });
