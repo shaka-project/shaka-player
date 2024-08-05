@@ -627,14 +627,13 @@ shakaAssets.testAssets = [
       .setIMAVideoId('tears-of-steel')
       .setIMAManifestType('HLS'),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Tears of Steel (live, DASH, Server Side ads)',
+      /* name= */ 'Tears of Steel (DASH, Server Side ads)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/tos-ttml/dash.mpd',
       /* source= */ shakaAssets.Source.SHAKA)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.LIVE)
       .setIMAAssetKey('PSzZMzAkSXCmlJOWDmRj8Q')
       .setIMAManifestType('DASH'),
   new ShakaDemoAssetInfo(
