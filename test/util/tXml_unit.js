@@ -419,9 +419,9 @@ describe('tXml', () => {
 
   it('parseXpath', () => {
     expect(TXml.parseXpath('/MPD'))
-        .toEqual([{name: 'MPD', id: null, position: null, attribute: null}]);
+        .toEqual([{name: 'MPD', id: null, position: null, t: null, attribute: null}]);
     expect(TXml.parseXpath('/MPD/@type'))
-        .toEqual([{name: 'MPD', id: null, position: null, attribute: 'type'}]);
+        .toEqual([{name: 'MPD', id: null, position: null, t: null, attribute: 'type'}]);
 
     const timelinePath = '/' + [
       'MPD',
@@ -432,12 +432,28 @@ describe('tXml', () => {
       'S[2]',
     ].join('/');
     expect(TXml.parseXpath(timelinePath)).toEqual([
-      {name: 'MPD', id: null, position: null, attribute: null},
-      {name: 'Period', id: '6469', position: null, attribute: null},
-      {name: 'AdaptationSet', id: '7', position: null, attribute: null},
-      {name: 'SegmentTemplate', id: null, position: null, attribute: null},
-      {name: 'SegmentTimeline', id: null, position: null, attribute: null},
-      {name: 'S', id: null, position: 1, attribute: null},
+      {name: 'MPD', id: null, position: null, t: null, attribute: null},
+      {name: 'Period', id: '6469', position: null, t: null, attribute: null},
+      {name: 'AdaptationSet', id: '7', position: null, t: null, attribute: null},
+      {name: 'SegmentTemplate', id: null, position: null, t: null, attribute: null},
+      {name: 'SegmentTimeline', id: null, position: null, t: null, attribute: null},
+      {name: 'S', id: null, position: 1, t: null, attribute: null},
+    ]);
+    const timelinePath2 = '/' + [
+      'MPD',
+      'Period[@id=\'6469\']',
+      'AdaptationSet[@id=\'7\']',
+      'SegmentTemplate',
+      'SegmentTimeline',
+      'S[@t=&#39;12345678&#39;]',
+    ].join('/');
+    expect(TXml.parseXpath(timelinePath2)).toEqual([
+      {name: 'MPD', id: null, position: null, t: null, attribute: null},
+      {name: 'Period', id: '6469', position: null, t: null, attribute: null},
+      {name: 'AdaptationSet', id: '7', position: null, t: null, attribute: null},
+      {name: 'SegmentTemplate', id: null, position: null, t: null, attribute: null},
+      {name: 'SegmentTimeline', id: null, position: null, t: null, attribute: null},
+      {name: 'S', id: null, position: null, t: 12345678, attribute: null},
     ]);
   });
 });
