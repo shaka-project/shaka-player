@@ -515,9 +515,7 @@ shakaDemo.Config = class {
         .addBoolInput_('Infinite Live Stream Duration',
             'streaming.infiniteLiveStreamDuration')
         .addBoolInput_('Clear decodingInfo cache on unload',
-            'streaming.clearDecodingCache')
-        .addBoolInput_('Defer old stream cleanup during ABR switches',
-            'streaming.deferOldStreamCleanupDuringSwitch');
+            'streaming.clearDecodingCache');
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_('Always Stream Text', 'streaming.alwaysStreamText');
     } else {

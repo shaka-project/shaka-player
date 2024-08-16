@@ -1567,8 +1567,7 @@ shaka.extern.LiveSyncConfiguration;
  *   loadTimeout: number,
  *   clearDecodingCache: boolean,
  *   dontChooseCodecs: boolean,
- *   shouldFixTimestampOffset: boolean,
- *   deferOldStreamCleanupDuringSwitch: boolean
+ *   shouldFixTimestampOffset: boolean
  * }}
  *
  * @description
@@ -1825,14 +1824,6 @@ shaka.extern.LiveSyncConfiguration;
  *   <br>
  *   Defaults to <code>false</code> except on Tizen, WebOS whose default value
  *   is <code>true</code>.
- * @property {boolean} deferOldStreamCleanupDuringSwitch
- *   If true, defers cleanup of the old stream during an ABR stream switch
- *   until it is safe to cleanup.
- *   For example, if <code>StreamingEngine</code> is in the middle of a segment
- *   fetch using the old stream information when a switch happens, segment
- *   availability issues may arise if the cleanup is not deferred.
- *   <br>
- *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

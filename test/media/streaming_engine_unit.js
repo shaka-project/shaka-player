@@ -1125,6 +1125,62 @@ describe('StreamingEngine', () => {
       expect(mediaSourceEngine.resetCaptionParser).not.toHaveBeenCalled();
     });
 
+    it('defers old stream cleanup on switchVariant during update', async () => {
+      // Delay the appendBuffer call until later so we are waiting for this to
+      // finish when we switch.
+      const p = new shaka.util.PublicPromise();
+      const old = mediaSourceEngine.appendBuffer;
+      const appendPromises = [];
+      // Replace the whole spy since we want to call the original.
+      mediaSourceEngine.appendBuffer =
+          jasmine.createSpy('appendBuffer')
+              .and.callFake(async (type, data, reference) => {
+                appendPromises.push(new shaka.util.PublicPromise());
+                return Util.invokeSpy(old, type, data, reference);
+              });
+
+      // Starts with 'initialVariant' (video-11-%d/audio-10-%d).
+      await streamingEngine.start();
+      playing = true;
+
+      await Util.fakeEventLoop(1);
+
+      // Grab a reference to initialVariant's segmentIndex before the switch so
+      // we can test how it's internal fields change overtime.
+      const initialVariantSegmentIndex = initialVariant.video.segmentIndex;
+
+      // Switch to 'differentVariant' (video-14-%d/audio-15-%d) in the middle of
+      // the update.
+      streamingEngine.switchVariant(differentVariant, /* clearBuffer= */ true);
+
+      // Finish the update for 'initialVariant'.
+      expect(appendPromises.length).toBe(1);
+      appendPromises.shift().resolve();
+      await Util.fakeEventLoop(1);
+
+      const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+      const segmentContext = {
+        type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
+      };
+
+      // Since a switch occurred in the middle of a fetch for a 'initialVariant'
+      // segment, the closing of the segment index for 'initialVariant' was
+      // deferred.
+      // We check the length of the segment references array to determine
+      // whether it was closed or not.
+      expect(initialVariantSegmentIndex.references.length).toBeGreaterThan(0);
+      netEngine.expectRequest('video-11-0.mp4', segmentType, segmentContext);
+      netEngine.expectRequest('audio-10-0.mp4', segmentType, segmentContext);
+      netEngine.expectNoRequest('video-14-0.mp4', segmentType, segmentContext);
+      netEngine.expectNoRequest('audio-15-0.mp4', segmentType, segmentContext);
+
+      // Finish the update for 'differentVariant'. At this point, the
+      // segmentIndex for 'initialVariant' has been closed.
+      Promise.all(appendPromises);
+      await Util.fakeEventLoop(2);
+      expect(initialVariantSegmentIndex.references.length).toEqual(0);
+    });
+
     // See https://github.com/shaka-project/shaka-player/issues/2956
     it('works with fast variant switches during update', async () => {
       // Delay the appendBuffer call until later so we are waiting for this to
@@ -1188,7 +1244,6 @@ describe('StreamingEngine', () => {
       netEngine.expectRequest('text-20-0.mp4', segmentType, segmentContext);
       netEngine.expectNoRequest('text-20-init', segmentType, segmentContext);
       netEngine.expectNoRequest('text-21-init', segmentType, segmentContext);
-      // TODO: huh?
     });
   });
 
