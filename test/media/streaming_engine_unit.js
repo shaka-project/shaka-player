@@ -1128,14 +1128,13 @@ describe('StreamingEngine', () => {
     it('defers old stream cleanup on switchVariant during update', async () => {
       // Delay the appendBuffer call until later so we are waiting for this to
       // finish when we switch.
-      const p = new shaka.util.PublicPromise();
+      let p = new shaka.util.PublicPromise();
       const old = mediaSourceEngine.appendBuffer;
-      const appendPromises = [];
       // Replace the whole spy since we want to call the original.
       mediaSourceEngine.appendBuffer =
           jasmine.createSpy('appendBuffer')
               .and.callFake(async (type, data, reference) => {
-                appendPromises.push(new shaka.util.PublicPromise());
+                await p;
                 return Util.invokeSpy(old, type, data, reference);
               });
 
@@ -1154,8 +1153,9 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(differentVariant, /* clearBuffer= */ true);
 
       // Finish the update for 'initialVariant'.
-      expect(appendPromises.length).toBe(1);
-      appendPromises.shift().resolve();
+      p.resolve();
+      // Create a new promise to delay the appendBuffer for 'differentVariant'.
+      p = new shaka.util.PublicPromise();
       await Util.fakeEventLoop(1);
 
       const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
@@ -1176,9 +1176,9 @@ describe('StreamingEngine', () => {
 
       // Finish the update for 'differentVariant'. At this point, the
       // segmentIndex for 'initialVariant' has been closed.
-      Promise.all(appendPromises);
+      p.resolve();
       await Util.fakeEventLoop(2);
-      expect(initialVariantSegmentIndex.references.length).toEqual(0);
+      expect(initialVariantSegmentIndex.references.length).toBe(0);
     });
 
     // See https://github.com/shaka-project/shaka-player/issues/2956
