@@ -532,6 +532,10 @@ shaka.test.ManifestGenerator.Stream = class {
           jasmine.createSpy('createSegmentIndex').and.callFake(() => {
             return Promise.resolve();
           });
+      const close =
+          jasmine.createSpy('closeSegmentIndex').and.callFake(() => {
+            return Promise.resolve();
+          });
       const shaka_ = manifest ? manifest.shaka_ : shaka;
       const segmentIndex = shaka_.media.SegmentIndex.forSingleSegment(
           /* startTime= */ 0, /* duration= */ 10, ['testUri']);
@@ -542,6 +546,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.groupId = null;
       /** @type {shaka.extern.CreateSegmentIndexFunction} */
       this.createSegmentIndex = shaka.test.Util.spyFunc(create);
+      /** @type {!function()|undefined} */
+      this.closeSegmentIndex = shaka.test.Util.spyFunc(close);
       /** @type {shaka.media.SegmentIndex} */
       this.segmentIndex = segmentIndex;
       /** @type {string} */
