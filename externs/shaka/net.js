@@ -235,7 +235,8 @@ shaka.extern.HeadersReceived;
  * @typedef {{
  *   type: (shaka.net.NetworkingEngine.AdvancedRequestType|undefined),
  *   stream: (shaka.extern.Stream|undefined),
- *   segment: (shaka.media.SegmentReference|undefined)
+ *   segment: (shaka.media.SegmentReference|undefined),
+ *   isPreload: (boolean|undefined)
  * }}
  *
  * @description
@@ -247,6 +248,8 @@ shaka.extern.HeadersReceived;
  *   The duration of the segment in seconds
  * @property {shaka.media.SegmentReference=} segment
  *   The request's segment reference
+ * @property {boolean=} isPreload
+ *   Whether the request came from a preload or a normal load.
  * @exportDoc
  */
 shaka.extern.RequestContext;
