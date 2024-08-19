@@ -47,10 +47,10 @@ shaka.extern.ManifestParser = class {
    * configuration changes.  Will be called at least once before start().
    *
    * @param {shaka.extern.ManifestConfiguration} config
-   * @param {(function():boolean)=} isPreload
+   * @param {(function():boolean)=} isPreloadFn
    * @exportDoc
    */
-  configure(config, isPreload) {}
+  configure(config, isPreloadFn) {}
 
   /**
    * Initialize and start the parser. When |start| resolves, it should return
