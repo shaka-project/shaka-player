@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.10.10](https://github.com/shaka-project/shaka-player/compare/v4.10.9...v4.10.10) (2024-08-19)
+
+
+### Bug Fixes
+
+* **ABR:** Fix restrictToElementSize running while abr disabled ([#7153](https://github.com/shaka-project/shaka-player/issues/7153)) ([1f06885](https://github.com/shaka-project/shaka-player/commit/1f068852725eb89f7372960675c5fdc3ca164d50))
+* **CEA:** Always init CEA parser with new init segment ([#7102](https://github.com/shaka-project/shaka-player/issues/7102)) ([e63a7a0](https://github.com/shaka-project/shaka-player/commit/e63a7a0dc3affa7e1e096fbf52f3d77141fa8ffb))
+* Compare normalized codecs in codec switching checks ([#7143](https://github.com/shaka-project/shaka-player/issues/7143)) ([60776c4](https://github.com/shaka-project/shaka-player/commit/60776c4887fd9384c27658d09f4a621a0eadb6ad))
+* Defer `closeSegmentIndex()` for old streams during ABR switches when segment fetches are ongoing ([#7157](https://github.com/shaka-project/shaka-player/issues/7157)) ([cd76d3f](https://github.com/shaka-project/shaka-player/commit/cd76d3fec591a0fb040a727f77b0b2f4d12839c5))
+* Pass correct adaptation value to MediaSourceEngine ([#7111](https://github.com/shaka-project/shaka-player/issues/7111)) ([1261c03](https://github.com/shaka-project/shaka-player/commit/1261c033db59665e9a32a1e09eea720bb1474d3c))
+* properly map region height/width when applying anchors ([#7105](https://github.com/shaka-project/shaka-player/issues/7105)) ([152b5b1](https://github.com/shaka-project/shaka-player/commit/152b5b18a374aa9110432c588e3c2cd331fb0a8d))
+* Repeated initial segment load & cancellations ([#7147](https://github.com/shaka-project/shaka-player/issues/7147)) ([f5e3221](https://github.com/shaka-project/shaka-player/commit/f5e3221c7790032faa6e79c87254fb2dab16d074))
+* **WebVTT:** Re-add rollover logic ([#7104](https://github.com/shaka-project/shaka-player/issues/7104)) ([c93ac32](https://github.com/shaka-project/shaka-player/commit/c93ac3213266f96d6450050aabdf1dca31493716))
+* **Xbox:** Override Dolby Vision codecs ([#7115](https://github.com/shaka-project/shaka-player/issues/7115)) ([74c69c7](https://github.com/shaka-project/shaka-player/commit/74c69c732e4489cd82486b9b69267206a2d0014f))
+* **Xbox:** Support screen resolution detection on Xbox when using WebView2 ([#7144](https://github.com/shaka-project/shaka-player/issues/7144)) ([9fa35b2](https://github.com/shaka-project/shaka-player/commit/9fa35b28926821d460467daae1b8638d0e9212c5)), closes [#7141](https://github.com/shaka-project/shaka-player/issues/7141)
+
 ## [4.10.9](https://github.com/shaka-project/shaka-player/compare/v4.10.8...v4.10.9) (2024-07-24)
 
 
