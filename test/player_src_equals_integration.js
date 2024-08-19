@@ -252,6 +252,23 @@ describe('Player Src Equals', () => {
     expect(player.getTextTracks()).toEqual([]);
   });
 
+  it('configures play and seek range for VOD with start', async () => {
+    player.configure({playRangeStart: 3});
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
+    expect(video.src.includes('#t=3')).toBeTruthy();
+  });
+
+  it('configures play and seek range for VOD with end', async () => {
+    player.configure({playRangeEnd: 8});
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
+    expect(video.src.includes('#t=,8')).toBeTruthy();
+  });
+
+  it('configures play and seek range for VOD with start and end', async () => {
+    player.configure({playRangeStart: 3, playRangeEnd: 8});
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
+    expect(video.src.includes('#t=3,8')).toBeTruthy();
+  });
 
   // TODO: test HLS on platforms with native HLS
   it('returns no languages or roles for simple mp4 content', async () => {
