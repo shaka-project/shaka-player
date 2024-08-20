@@ -420,10 +420,10 @@ describe('tXml', () => {
   it('parseXpath', () => {
     expect(TXml.parseXpath('/MPD'))
         .toEqual([{name: 'MPD', id: null, position: null,
-          t: null, attribute: null}]);
+          t: null, n: null, attribute: null}]);
     expect(TXml.parseXpath('/MPD/@type'))
         .toEqual([{name: 'MPD', id: null, position: null,
-          t: null, attribute: 'type'}]);
+          t: null, n: null, attribute: 'type'}]);
 
     const timelinePath = '/' + [
       'MPD',
@@ -435,17 +435,17 @@ describe('tXml', () => {
     ].join('/');
     expect(TXml.parseXpath(timelinePath)).toEqual([
       {name: 'MPD', id: null, position: null,
-        t: null, attribute: null},
+        t: null, n: null, attribute: null},
       {name: 'Period', id: '6469', position: null,
-        t: null, attribute: null},
+        t: null, n: null, attribute: null},
       {name: 'AdaptationSet', id: '7', position: null,
-        t: null, attribute: null},
+        t: null, n: null, attribute: null},
       {name: 'SegmentTemplate', id: null, position: null,
-        t: null, attribute: null},
+        t: null, n: null, attribute: null},
       {name: 'SegmentTimeline', id: null, position: null,
-        t: null, attribute: null},
+        t: null, n: null, attribute: null},
       {name: 'S', id: null, position: 1,
-        t: null, attribute: null},
+        t: null, n: null, attribute: null},
     ]);
     const timelinePath2 = '/' + [
       'MPD',
@@ -457,17 +457,62 @@ describe('tXml', () => {
     ].join('/');
     expect(TXml.parseXpath(timelinePath2)).toEqual([
       {name: 'MPD', id: null, position: null,
-        t: null, attribute: null},
+        t: null, n: null, attribute: null},
       {name: 'Period', id: '6469', position: null,
-        t: null, attribute: null},
+        t: null, n: null, attribute: null},
       {name: 'AdaptationSet', id: '7', position: null,
-        t: null, attribute: null},
+        t: null, n: null, attribute: null},
       {name: 'SegmentTemplate', id: null, position: null,
-        t: null, attribute: null},
+        t: null, n: null, attribute: null},
       {name: 'SegmentTimeline', id: null, position: null,
-        t: null, attribute: null},
+        t: null, n: null, attribute: null},
       {name: 'S', id: null, position: null,
-        t: 12345678, attribute: null},
+        t: 12345678, n: null, attribute: null},
+    ]);
+    const timelinePath3 = '/' + [
+      'MPD',
+      'Period[@id=\'6469\']',
+      'AdaptationSet[1]',
+      'SegmentTemplate',
+      'SegmentTimeline',
+      'S[@t=&#39;12345678&#39;]',
+    ].join('/');
+    expect(TXml.parseXpath(timelinePath3)).toEqual([
+      {name: 'MPD', id: null, position: null,
+        t: null, n: null, attribute: null},
+      {name: 'Period', id: '6469', position: null,
+        t: null, n: null, attribute: null},
+      {name: 'AdaptationSet', id: null, position: 0,
+        t: null, n: null, attribute: null},
+      {name: 'SegmentTemplate', id: null, position: null,
+        t: null, n: null, attribute: null},
+      {name: 'SegmentTimeline', id: null, position: null,
+        t: null, n: null, attribute: null},
+      {name: 'S', id: null, position: null,
+        t: 12345678, n: null, attribute: null},
+    ]);
+
+    const timelinePath4 = '/' + [
+      'MPD',
+      'Period[@id=\'6469\']',
+      'AdaptationSet[1]',
+      'SegmentTemplate',
+      'SegmentTimeline',
+      'S[@n=&#39;42&#39;]',
+    ].join('/');
+    expect(TXml.parseXpath(timelinePath4)).toEqual([
+      {name: 'MPD', id: null, position: null,
+        t: null, n: null, attribute: null},
+      {name: 'Period', id: '6469', position: null,
+        t: null, n: null, attribute: null},
+      {name: 'AdaptationSet', id: null, position: 0,
+        t: null, n: null, attribute: null},
+      {name: 'SegmentTemplate', id: null, position: null,
+        t: null, n: null, attribute: null},
+      {name: 'SegmentTimeline', id: null, position: null,
+        t: null, n: null, attribute: null},
+      {name: 'S', id: null, position: null,
+        t: null, n: 42, attribute: null},
     ]);
   });
 });
