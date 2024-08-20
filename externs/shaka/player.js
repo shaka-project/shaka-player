@@ -2188,17 +2188,3 @@ shaka.extern.Thumbnail;
  * @exportDoc
  */
 shaka.extern.Chapter;
-
-/**
- * @typedef {{
- *   width: number,
- *   height: number
- * }}
- *
- * @property {number} width
- *   Width in pixels.
- * @property {number} height
- *   Height in pixels.
- * @exportDoc
- */
-shaka.extern.Resolution;
