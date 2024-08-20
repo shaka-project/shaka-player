@@ -863,8 +863,9 @@ shakaDemo.Main = class {
     const params = this.getParams_();
 
     const manifest = params['asset'];
-    const adTagUri = params['adTagUri'];
+    const assetBase64 = params['assetBase64'];
     if (manifest) {
+      const adTagUri = params['adTagUri'];
       // See if it's a default asset.
       for (const asset of shakaAssets.testAssets) {
         if (asset.manifestUri == manifest && asset.adTagUri == adTagUri) {
@@ -898,6 +899,22 @@ shakaDemo.Main = class {
         asset.addCertificateUri(params['certificate']);
       }
       return asset;
+    } else if (assetBase64) {
+      // See if it's a default asset.
+      for (const asset of shakaAssets.testAssets) {
+        if (asset.toBase64() == assetBase64) {
+          return asset;
+        }
+      }
+
+      // See if it's a custom asset saved here.
+      for (const asset of shakaDemoCustom.assets()) {
+        if (asset.toBase64() == assetBase64) {
+          return asset;
+        }
+      }
+
+      return ShakaDemoAssetInfo.fromBase64(assetBase64);
     }
     return null;
   }
@@ -1541,24 +1558,7 @@ shakaDemo.Main = class {
     }
 
     if (this.selectedAsset) {
-      const isDefault = shakaAssets.testAssets.includes(this.selectedAsset);
-      params.push('asset=' + this.selectedAsset.manifestUri);
-      if (this.selectedAsset.adTagUri) {
-        params.push('adTagUri=' + this.selectedAsset.adTagUri);
-      }
-      if (!isDefault && this.selectedAsset.licenseServers.size) {
-        const uri = this.selectedAsset.licenseServers.values().next().value;
-        params.push('license=' + uri);
-        for (const drmSystem of this.selectedAsset.licenseServers.keys()) {
-          if (!shakaDemo.Main.commonDrmSystems.includes(drmSystem)) {
-            params.push('drmSystem=' + drmSystem);
-            break;
-          }
-        }
-      }
-      if (!isDefault && this.selectedAsset.certificateUri) {
-        params.push('certificate=' + this.selectedAsset.certificateUri);
-      }
+      params.push('assetBase64=' + this.selectedAsset.toBase64());
     }
 
     const navButtons = document.getElementById('nav-button-container');

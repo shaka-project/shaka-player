@@ -28,6 +28,36 @@ shaka.test.StatusPromise = class {
   }
 };
 
+shaka.test.AnyOrNull = class {
+  /** @param {Function} factory */
+  constructor(factory) {
+    /** @type {!Object} */
+    this.any = jasmine.any(factory);
+  }
+
+  /**
+   * @param {?Object} other
+   * @return {boolean}
+   * @suppress {checkTypes}
+   */
+  asymmetricMatch(other) {
+    if (other == null) {
+      return true;
+    } else {
+      return this.any.asymmetricMatch(other);
+    }
+  }
+
+  /**
+   * @return {boolean}
+   * @suppress {checkTypes}
+   */
+  jasmineToString() {
+    return this.any.jasmineToString()
+        .replace('jasmine.any', 'shaka.test.AnyOrNull');
+  }
+};
+
 shaka.test.Util = class {
   /**
    * Fakes an event loop. Each tick processes some number of instantaneous

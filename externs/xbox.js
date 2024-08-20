@@ -41,3 +41,23 @@ Windows.Media.Protection.ProtectionCapabilityResult = {
   maybe: 'Maybe',
   probably: 'Probably',
 };
+
+
+/** @const */
+var chrome = {};
+
+
+/** @const */
+chrome.webview = {};
+
+
+/** @const */
+chrome.webview.hostObjects = {};
+
+
+/** @const */
+chrome.webview.hostObjects.sync = {};
+
+
+/** @const */
+chrome.webview.hostObjects.sync.Windows = Windows;
