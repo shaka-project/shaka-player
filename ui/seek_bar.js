@@ -489,7 +489,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const seekRangeSize = seekRange.end - seekRange.start;
 
     if (this.player.isLive() &&
-        seekRangeSize < shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR) {
+        (seekRangeSize < shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR ||
+        !isFinite(seekRangeSize))) {
       return false;
     }
 
