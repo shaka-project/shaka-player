@@ -442,6 +442,13 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
+   * @return {!string}
+   */
+  toBase64() {
+    return window.btoa(JSON.stringify(this.toJSON()));
+  }
+
+  /**
    * Applies appropriate request or response filters to the player.
    * @param {shaka.net.NetworkingEngine} networkingEngine
    */
@@ -553,5 +560,18 @@ const ShakaDemoAssetInfo = class {
     const asset = ShakaDemoAssetInfo.makeBlankAsset();
     Object.assign(asset, parsed);
     return asset;
+  }
+
+  /**
+   * @param {!string} raw
+   * @return {?ShakaDemoAssetInfo}
+   */
+  static fromBase64(raw) {
+    const data = window.atob(raw);
+    try {
+      const dataAsJson = /** @type {!Object} */(JSON.parse(data));
+      return ShakaDemoAssetInfo.fromJSON(dataAsJson);
+    } catch (e) {}
+    return null;
   }
 };
