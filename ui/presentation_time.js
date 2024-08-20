@@ -84,12 +84,9 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
     const Utils = shaka.ui.Utils;
 
     if (!isFinite(seekRangeSize)) {
-      shaka.ui.Utils.setDisplay(this.currentTime_, false);
-      return;
-    }
-    shaka.ui.Utils.setDisplay(this.currentTime_, true);
-
-    if (this.player.isLive()) {
+      this.setValue_(this.localization.resolve(shaka.ui.Locales.Ids.LIVE));
+      this.currentTime_.disabled = true;
+    } else if (this.player.isLive()) {
       // The amount of time we are behind the live edge.
       const behindLive = Math.floor(seekRange.end - displayTime);
       displayTime = Math.max(0, behindLive);
