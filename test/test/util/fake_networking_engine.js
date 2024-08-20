@@ -330,7 +330,8 @@ shaka.test.FakeNetworkingEngine = class {
           jasmine.objectContaining({type: context.type}));
     } else {
       expect(requestSpy).toHaveBeenCalledWith(
-          type, jasmine.objectContaining({uris: [uri]}));
+          type, jasmine.objectContaining({uris: [uri]}),
+          jasmine.anything());
     }
   }
 
@@ -350,7 +351,8 @@ shaka.test.FakeNetworkingEngine = class {
           jasmine.objectContaining({type: context.type}));
     } else {
       expect(requestSpy).not.toHaveBeenCalledWith(
-          type, jasmine.objectContaining({uris: [uri]}));
+          type, jasmine.objectContaining({uris: [uri]}),
+          jasmine.anything());
     }
   }
 

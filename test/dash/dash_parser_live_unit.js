@@ -757,6 +757,7 @@ describe('DashParser Live', () => {
     const manifestRequest = shaka.net.NetworkingEngine.RequestType.MANIFEST;
     const manifestContext = {
       type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD,
+      isPreload: false,
     };
     await parser.start('dummy://foo', playerInterface);
 
@@ -1613,6 +1614,7 @@ describe('DashParser Live', () => {
     const manifestRequest = shaka.net.NetworkingEngine.RequestType.MANIFEST;
     const manifestContext = {
       type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD,
+      isPreload: false,
     };
 
     await parser.start('dummy://foo', playerInterface);
