@@ -27,7 +27,7 @@ describe('HlsParser', () => {
     if (!clearKeySupport) {
       return false;
     }
-    return clearKeySupport.encryptionSchemes.includes('cbcs');
+    return clearKeySupport.encryptionSchemes.includes('cenc');
   }
 
   beforeAll(async () => {
