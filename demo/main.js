@@ -397,12 +397,19 @@ shakaDemo.Main = class {
 
     // Change the poster by the APIC ID3 if the stream is audio only.
     this.player_.addEventListener('metadata', (event) => {
+      const payload = event['payload'];
+      if (!payload) {
+        return;
+      }
+      if (navigator.mediaSession && navigator.mediaSession.metadata) {
+        if (payload['key'] == 'TIT2' && payload['data']) {
+          navigator.mediaSession.metadata.title = payload['data'];
+        }
+      }
       if (!this.player_.isAudioOnly()) {
         return;
       }
-      const payload = event['payload'];
-      if (payload &&
-          payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
+      if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
         const url = payload['data'];
         if (url && url != video.poster) {
           video.poster = url;
@@ -863,8 +870,9 @@ shakaDemo.Main = class {
     const params = this.getParams_();
 
     const manifest = params['asset'];
-    const adTagUri = params['adTagUri'];
+    const assetBase64 = params['assetBase64'];
     if (manifest) {
+      const adTagUri = params['adTagUri'];
       // See if it's a default asset.
       for (const asset of shakaAssets.testAssets) {
         if (asset.manifestUri == manifest && asset.adTagUri == adTagUri) {
@@ -898,6 +906,22 @@ shakaDemo.Main = class {
         asset.addCertificateUri(params['certificate']);
       }
       return asset;
+    } else if (assetBase64) {
+      // See if it's a default asset.
+      for (const asset of shakaAssets.testAssets) {
+        if (asset.toBase64() == assetBase64) {
+          return asset;
+        }
+      }
+
+      // See if it's a custom asset saved here.
+      for (const asset of shakaDemoCustom.assets()) {
+        if (asset.toBase64() == assetBase64) {
+          return asset;
+        }
+      }
+
+      return ShakaDemoAssetInfo.fromBase64(assetBase64);
     }
     return null;
   }
@@ -1418,9 +1442,10 @@ shakaDemo.Main = class {
 
       // Set media session title, but only if the browser supports that API.
       if (navigator.mediaSession) {
+        const icon = asset.iconUri || shakaDemo.Main.logo_;
         const metadata = {
           title: asset.name,
-          artwork: [{src: asset.iconUri}],
+          artwork: [{src: icon}],
         };
         metadata.artist = asset.source;
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
@@ -1541,24 +1566,7 @@ shakaDemo.Main = class {
     }
 
     if (this.selectedAsset) {
-      const isDefault = shakaAssets.testAssets.includes(this.selectedAsset);
-      params.push('asset=' + this.selectedAsset.manifestUri);
-      if (this.selectedAsset.adTagUri) {
-        params.push('adTagUri=' + this.selectedAsset.adTagUri);
-      }
-      if (!isDefault && this.selectedAsset.licenseServers.size) {
-        const uri = this.selectedAsset.licenseServers.values().next().value;
-        params.push('license=' + uri);
-        for (const drmSystem of this.selectedAsset.licenseServers.keys()) {
-          if (!shakaDemo.Main.commonDrmSystems.includes(drmSystem)) {
-            params.push('drmSystem=' + drmSystem);
-            break;
-          }
-        }
-      }
-      if (!isDefault && this.selectedAsset.certificateUri) {
-        params.push('certificate=' + this.selectedAsset.certificateUri);
-      }
+      params.push('assetBase64=' + this.selectedAsset.toBase64());
     }
 
     const navButtons = document.getElementById('nav-button-container');
@@ -1999,6 +2007,14 @@ shakaDemo.Main.mainPoster_ =
  */
 shakaDemo.Main.audioOnlyPoster_ =
     'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
+
+
+/**
+ * @private
+ * @const {string}
+ */
+shakaDemo.Main.logo_ =
+    'https://shaka-player-demo.appspot.com/demo/shaka_logo_trans.png';
 
 
 // If setup fails and the global error handler does, too, (as happened on IE

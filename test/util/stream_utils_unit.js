@@ -1059,4 +1059,38 @@ describe('StreamUtils', () => {
       expect(shaka.util.StreamUtils.isPlayable(variant)).toBe(false);
     });
   });
+
+  describe('overrideDolbyVisionCodecs', () => {
+    it('overrides Dolby Vision codecs', () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.mime('video/mp4', 'dvav.05.03');
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3, (stream) => {
+            stream.mime('video/mp4', 'dva1.05.03');
+          });
+        });
+        manifest.addVariant(4, (variant) => {
+          variant.addVideo(5, (stream) => {
+            stream.mime('video/mp4', 'dvhe.05.03');
+          });
+        });
+        manifest.addVariant(6, (variant) => {
+          variant.addVideo(7, (stream) => {
+            stream.mime('video/mp4', 'dvh1.05.03');
+          });
+        });
+      });
+
+      shaka.util.StreamUtils.overrideDolbyVisionCodecs(manifest.variants);
+
+      expect(manifest.variants[0].video.codecs).toBe('avc3.05.03');
+      expect(manifest.variants[1].video.codecs).toBe('avc1.05.03');
+      expect(manifest.variants[2].video.codecs).toBe('hev1.05.03');
+      expect(manifest.variants[3].video.codecs).toBe('hvc1.05.03');
+    });
+  });
 });

@@ -1499,7 +1499,7 @@ describe('DrmEngine', () => {
               method: 'POST',
               body: message,
               licenseRequestType: messageType,
-            }));
+            }), jasmine.anything());
       }
     });  // describe('message')
 
@@ -2126,7 +2126,7 @@ describe('DrmEngine', () => {
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       expect(fakeNetEngine.request).toHaveBeenCalledWith(
           shaka.net.NetworkingEngine.RequestType.LICENSE,
-          jasmine.anything());
+          jasmine.anything(), jasmine.anything());
 
       await drmEngine.destroy();
 
@@ -2155,7 +2155,7 @@ describe('DrmEngine', () => {
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       expect(fakeNetEngine.request).toHaveBeenCalledWith(
           shaka.net.NetworkingEngine.RequestType.LICENSE,
-          jasmine.anything());
+          jasmine.anything(), jasmine.anything());
 
       await drmEngine.destroy();
 
@@ -2303,7 +2303,7 @@ describe('DrmEngine', () => {
             uris: ['http://abc.drm/license'],
             method: 'POST',
             body: message,
-          }));
+          }), jasmine.anything());
     });
 
     it('does not delay license renewal requests', async () => {
@@ -2329,7 +2329,7 @@ describe('DrmEngine', () => {
             uris: ['http://abc.drm/license'],
             method: 'POST',
             body: message,
-          }));
+          }), jasmine.anything());
 
       fakeNetEngine.request.calls.reset();
 
@@ -2342,7 +2342,7 @@ describe('DrmEngine', () => {
             uris: ['http://abc.drm/license'],
             method: 'POST',
             body: message,
-          }));
+          }), jasmine.anything());
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
     });
   }); // describe('configure')

@@ -60,12 +60,11 @@ shaka.extern.AbrManager = class {
 
   /**
    * Chooses one variant to switch to.  Called by the Player.
-   * @param {boolean=} preferFastSwitching If not provided meant "avoid fast
-   *                                       switching if possible".
+   *
    * @return {shaka.extern.Variant}
    * @exportDoc
    */
-  chooseVariant(preferFastSwitching) {}
+  chooseVariant() {}
 
   /**
    * Enables automatic Variant choices from the last ones passed to setVariants.
