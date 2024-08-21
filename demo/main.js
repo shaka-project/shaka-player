@@ -397,12 +397,19 @@ shakaDemo.Main = class {
 
     // Change the poster by the APIC ID3 if the stream is audio only.
     this.player_.addEventListener('metadata', (event) => {
+      const payload = event['payload'];
+      if (!payload) {
+        return;
+      }
+      if (navigator.mediaSession && navigator.mediaSession.metadata) {
+        if (payload['key'] == 'TIT2' && payload['data']) {
+          navigator.mediaSession.metadata.title = payload['data'];
+        }
+      }
       if (!this.player_.isAudioOnly()) {
         return;
       }
-      const payload = event['payload'];
-      if (payload &&
-          payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
+      if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
         const url = payload['data'];
         if (url && url != video.poster) {
           video.poster = url;
@@ -1435,9 +1442,10 @@ shakaDemo.Main = class {
 
       // Set media session title, but only if the browser supports that API.
       if (navigator.mediaSession) {
+        const icon = asset.iconUri || shakaDemo.Main.logo_;
         const metadata = {
           title: asset.name,
-          artwork: [{src: asset.iconUri}],
+          artwork: [{src: icon}],
         };
         metadata.artist = asset.source;
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
@@ -1999,6 +2007,14 @@ shakaDemo.Main.mainPoster_ =
  */
 shakaDemo.Main.audioOnlyPoster_ =
     'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
+
+
+/**
+ * @private
+ * @const {string}
+ */
+shakaDemo.Main.logo_ =
+    'https://shaka-player-demo.appspot.com/demo/shaka_logo_trans.png';
 
 
 // If setup fails and the global error handler does, too, (as happened on IE
