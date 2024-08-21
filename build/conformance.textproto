@@ -329,6 +329,20 @@ requirement: {
   whitelist_regexp: "test/test/util/util.js"
 }
 
+# Disallow the general use of AbortController, which is not available on all
+# supported platforms. For aborting requests, we internally use AbortController
+# in the fetch plugin if it exists, otherwise we will use XMLHttpRequest.abort()
+# from the XHR plugin.
+requirement: {
+  type: BANNED_NAME_CALL
+  value: "AbortController"
+  value: "window.AbortController"
+  error_message:
+    "Using \"AbortController\" directly is not allowed; "
+    "use PendingRequest.abort instead."
+  whitelist_regexp: "lib/net/http_fetch_plugin.js"
+}
+
 # Disallow the use of generators, which are a major performance issue.  See
 # https://github.com/shaka-project/shaka-player/issues/4062#issuecomment-1079428268
 requirement: {
