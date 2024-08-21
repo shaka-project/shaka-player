@@ -259,9 +259,17 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     if (height == 2160) {
       text = '4K';
     }
-    const frameRate = track.frameRate;
-    if (frameRate && (frameRate >= 50 || frameRate <= 20)) {
-      text += Math.round(track.frameRate);
+    const frameRates = new Set();
+    for (const item of tracks) {
+      if (item.frameRate) {
+        frameRates.add(Math.round(item.frameRate));
+      }
+    }
+    if (frameRates.size > 1) {
+      const frameRate = track.frameRate;
+      if (frameRate && (frameRate >= 50 || frameRate <= 20)) {
+        text += Math.round(track.frameRate);
+      }
     }
     if (track.hdr == 'PQ' || track.hdr == 'HLG') {
       text += ' (HDR)';
