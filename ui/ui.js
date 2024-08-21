@@ -273,6 +273,7 @@ shaka.ui.Overlay = class {
       refreshTickInSeconds: 0.125,
       displayInVrMode: false,
       defaultVrProjectionMode: 'equirectangular',
+      setupMediaSession: true,
     };
 
     // eslint-disable-next-line no-restricted-syntax
