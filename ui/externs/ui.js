@@ -249,7 +249,9 @@ shaka.extern.UIVolumeBarColors;
  *   Possible values: <code>'equirectangular'</code> or <code>'cubemap'</code>.
  *   Defaults to <code>'equirectangular'</code>.
  * @property {boolean} setupMediaSession
- *   If true, MediaSession controls will managed by the UI.
+ *   If true, MediaSession controls will managed by the UI. It will also use
+ *   the ID3 APIC and TIT2 as image and title in Media Session, and ID3 APIC
+ *   will also be used to change video poster.
  *   Default to true.
  * @exportDoc
  */
