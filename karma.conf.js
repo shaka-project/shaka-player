@@ -260,6 +260,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/6339/*', included: false},
       {pattern: 'test/test/assets/dash-aes-128/*', included: false},
       {pattern: 'test/test/assets/dash-clearkey/*', included: false},
+      {pattern: 'test/test/assets/dash-mpd-alternate/*', included: false},
       {pattern: 'test/test/assets/dash-vr/*', included: false},
       {pattern: 'test/test/assets/dv-p8-hevc/*', included: false},
       {pattern: 'test/test/assets/dv-p10-av1/*', included: false},
