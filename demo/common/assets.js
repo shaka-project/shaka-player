@@ -1699,41 +1699,189 @@ shakaAssets.testAssets = [
   /* BBC Contents */
   new ShakaDemoAssetInfo(
       /* name= */ 'On-demand Testcard - WOFF Font Download signalled with supplemental property descriptor',
-      /* iconUri= */ '',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
       /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-ctv-stereo-en-sfdt-woff.mpd',
       /* source= */ shakaAssets.Source.BBC)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'On-demand Testcard - WOFF Font Download signalled with essential property descriptor',
-      /* iconUri= */ '',
-      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-ctv-stereo-en-efdt-woff.mpd',
-      /* source= */ shakaAssets.Source.BBC)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'On-demand Testcard - WOFF Font Download signalled with essential property descriptor with relative url',
-      /* iconUri= */ '',
-      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-ctv-stereo-en-efdt-woff-bur.mpd',
-      /* source= */ shakaAssets.Source.BBC)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Live Testcard - WOFF Font Download signalled with supplemental property descriptor',
-      /* iconUri= */ '',
-      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/simulcast/manifests/avc-ctv-stereo-en-sfdt-woff.mpd',
-      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.SUBTITLES),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'On-demand Testcard - WOFF Font Download signalled with essential property descriptor',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-ctv-stereo-en-efdt-woff.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.SUBTITLES),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'On-demand Testcard - WOFF Font Download signalled with essential property descriptor with relative url',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-ctv-stereo-en-efdt-woff-bur.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.SUBTITLES),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live Testcard - WOFF Font Download signalled with supplemental property descriptor',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/simulcast/manifests/avc-ctv-stereo-en-sfdt-woff.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.LIVE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Live Testcard - WOFF Font Download signalled with essential property descriptor',
-      /* iconUri= */ '',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
       /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/simulcast/manifests/avc-ctv-stereo-en-efdt-woff.mpd',
       /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.LIVE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'On-demand Testcard - Multiple Languages, AAC Stereo and Surround, Audio Description, AVC Video',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-full.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live Testcard - Multiple Languages, AVC Video',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/simulcast/manifests/avc-full.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.LIVE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live Testcard - Multiple Languages, HEVC Video',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/simulcast/manifests/hevc-ctv.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.LIVE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Low-Latency Live Testcard - 4 Chunks per Segment, Multiple Languages, AVC Video',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/lowlatency/manifests/ll-avc-full.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
+      .setExtraConfig({
+        streaming: {
+          lowLatencyMode: true,
+        },
+      }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Low-Latency Live Testcard - 4 Chunks per Segment, Multiple Languages, HEVC Video',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/lowlatency/manifests/ll-hevc-ctv.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
+      .setExtraConfig({
+        streaming: {
+          lowLatencyMode: true,
+        },
+      }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'On-demand Elephant\'s Dream - with EBU-TT-D Subtitle Track in English',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/elephant.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/elephants_dream/1/client_manifest-all.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'On-demand Elephant\'s Dream - with EBU-TT-D \'Snaking\' Subtitle Track (random text) - lines grow over time simulating live subtitles',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/elephant.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/elephants_dream/1/client_manifest-snake.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live Testcard Audio - DASH - AAC-LC Stereo in English',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/simulcast/manifests/radio-lc-en.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.AUDIO_ONLY),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live Testcard Audio - DASH - HE-AAC Stereo in English',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/simulcast/manifests/radio-he-en.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.AUDIO_ONLY),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'On-demand Testcard Audio - DASH - AAC-LC Surround (4 active channels) in English',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/vod/manifests/radio-surround-en.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.AUDIO_ONLY)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'On-demand Testcard Audio - DASH - FLAC Stereo in English',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/vod/manifests/radio-flac-en.mpd',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.AUDIO_ONLY)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'On-demand Testcard Audio - HLS - FLAC Stereo in English',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
+      /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/vod/manifests/radio-flac-en.m3u8',
+      /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.AUDIO_ONLY)
+      .addFeature(shakaAssets.Feature.OFFLINE),
   // }}}
 ];
 /* eslint-enable max-len */
