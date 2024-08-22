@@ -252,7 +252,7 @@ shaka.extern.UIVolumeBarColors;
  *   If true, MediaSession controls will be managed by the UI. It will also use
  *   the ID3 APIC and TIT2 as image and title in Media Session, and ID3 APIC
  *   will also be used to change video poster.
- *   Default to true.
+ *   Defaults to true.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;
