@@ -395,28 +395,6 @@ shakaDemo.Main = class {
     const ui = video['ui'];
     this.player_ = ui.getControls().getPlayer();
 
-    // Change the poster by the APIC ID3 if the stream is audio only.
-    this.player_.addEventListener('metadata', (event) => {
-      const payload = event['payload'];
-      if (!payload) {
-        return;
-      }
-      if (navigator.mediaSession && navigator.mediaSession.metadata) {
-        if (payload['key'] == 'TIT2' && payload['data']) {
-          navigator.mediaSession.metadata.title = payload['data'];
-        }
-      }
-      if (!this.player_.isAudioOnly()) {
-        return;
-      }
-      if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
-        const url = payload['data'];
-        if (url && url != video.poster) {
-          video.poster = url;
-        }
-      }
-    });
-
     if (!this.noInput_) {
       // Don't add the close button if in noInput mode; it doesn't make much
       // sense to stop playing a video if you can't start playing other videos.
@@ -1449,46 +1427,6 @@ shakaDemo.Main = class {
         };
         metadata.artist = asset.source;
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
-
-        const addMediaSessionHandler = (type, callback) => {
-          try {
-            navigator.mediaSession.setActionHandler(type, (details) => {
-              callback(details);
-            });
-          } catch (error) {
-            console.warn(
-                `The "${type}" media session action is not supported.`);
-          }
-        };
-        const commonHandler = (details) => {
-          switch (details.action) {
-            case 'pause':
-              this.video_.pause();
-              break;
-            case 'play':
-              this.video_.play();
-              break;
-            case 'seekbackward':
-              this.video_.currentTime -= (details.seekOffset || 10);
-              break;
-            case 'seekforward':
-              this.video_.currentTime += (details.seekOffset || 10);
-              break;
-            case 'stop':
-              this.unload();
-              break;
-            case 'enterpictureinpicture':
-              this.controls_.togglePiP();
-              break;
-          }
-        };
-
-        addMediaSessionHandler('pause', commonHandler);
-        addMediaSessionHandler('play', commonHandler);
-        addMediaSessionHandler('seekbackward', commonHandler);
-        addMediaSessionHandler('seekforward', commonHandler);
-        addMediaSessionHandler('stop', commonHandler);
-        addMediaSessionHandler('enterpictureinpicture', commonHandler);
       }
 
       if (this.visualizer_ && this.visualizer_.active) {

@@ -36,9 +36,18 @@ const MediaSession = class {
   setActionHandler(type, callback) {
     /** @type {string} */
     this.type = type;
-    /** @type {!function(!{action: string, seekOffset: ?number})} */
+
+    /** @type {!function(!{action: string, seekOffset: ?number,
+     *                     seekTime: ?number})}
+     */
     this.callback = callback;
   }
+
+  /**
+   * @param {?{duration: ?number, playbackRate: ?number,
+   *         position: ?number}=} stateDict
+   */
+  setPositionState(stateDict) {}
 };
 
 

@@ -96,7 +96,8 @@ shaka.extern.UIVolumeBarColors;
  *   tapSeekDistance: number,
  *   refreshTickInSeconds: number,
  *   displayInVrMode: boolean,
- *   defaultVrProjectionMode: string
+ *   defaultVrProjectionMode: string,
+ *   setupMediaSession: boolean
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -247,6 +248,11 @@ shaka.extern.UIVolumeBarColors;
  *   Indicate the default VR projection mode.
  *   Possible values: <code>'equirectangular'</code> or <code>'cubemap'</code>.
  *   Defaults to <code>'equirectangular'</code>.
+ * @property {boolean} setupMediaSession
+ *   If true, MediaSession controls will be managed by the UI. It will also use
+ *   the ID3 APIC and TIT2 as image and title in Media Session, and ID3 APIC
+ *   will also be used to change video poster.
+ *   Defaults to true.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

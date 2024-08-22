@@ -181,6 +181,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Configure and create the layout of the controls
     this.configure(this.config_);
     this.addEventListeners_();
+    this.setupMediaSession_();
 
     /**
      * The pressed keys set is used to record which keys are currently pressed
@@ -273,6 +274,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.localization_ = null;
     this.pressedKeys_.clear();
+
+    this.removeMediaSession_();
 
     // FakeEventTarget implements IReleasable
     super.release();
@@ -1232,6 +1235,154 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         await this.onScreenRotation_();
       });
     }
+  }
+
+
+  /**
+   * @private
+   */
+  setupMediaSession_() {
+    if (!this.config_.setupMediaSession || !navigator.mediaSession) {
+      return;
+    }
+    const addMediaSessionHandler = (type, callback) => {
+      try {
+        navigator.mediaSession.setActionHandler(type, (details) => {
+          callback(details);
+        });
+      } catch (error) {
+        shaka.log.warning(
+            `The "${type}" media session action is not supported.`);
+      }
+    };
+    const updatePositionState = () => {
+      const seekRange = this.player_.seekRange();
+      let duration = seekRange.end - seekRange.start;
+      const position = parseFloat(
+          (this.video_.currentTime - seekRange.start).toFixed(2));
+      if (this.player_.isLive() && Math.abs(duration - position) < 1) {
+        // Positive infinity indicates media without a defined end, such as a
+        // live stream.
+        duration = Infinity;
+      }
+      try {
+        if ((this.ad_ && this.ad_.isLinear())) {
+          navigator.mediaSession.setPositionState();
+        } else {
+          navigator.mediaSession.setPositionState({
+            duration: Math.max(0, duration),
+            playbackRate: this.video_.playbackRate,
+            position: Math.max(0, position),
+          });
+        }
+      } catch (error) {
+        shaka.log.warning(
+            'setPositionState in media session is not supported.');
+      }
+    };
+    const commonHandler = (details) => {
+      const keyboardSeekDistance = this.config_.keyboardSeekDistance;
+      const seekRange = this.player_.seekRange();
+      switch (details.action) {
+        case 'pause':
+          this.onPlayPauseClick_();
+          break;
+        case 'play':
+          this.onPlayPauseClick_();
+          break;
+        case 'seekbackward':
+          if (!this.ad_ || !this.ad_.isLinear()) {
+            this.seek_(this.seekBar_.getValue() -
+                (details.seekOffset || keyboardSeekDistance));
+          }
+          break;
+        case 'seekforward':
+          if (!this.ad_ || !this.ad_.isLinear()) {
+            this.seek_(this.seekBar_.getValue() +
+                (details.seekOffset || keyboardSeekDistance));
+          }
+          break;
+        case 'seekto':
+          if (!this.ad_ || !this.ad_.isLinear()) {
+            this.seek_(seekRange.start + details.seekTime);
+          }
+          break;
+        case 'stop':
+          this.player_.unload();
+          break;
+        case 'enterpictureinpicture':
+          if (!this.ad_ || !this.ad_.isLinear()) {
+            this.togglePiP();
+          }
+          break;
+      }
+    };
+
+    addMediaSessionHandler('pause', commonHandler);
+    addMediaSessionHandler('play', commonHandler);
+    addMediaSessionHandler('seekbackward', commonHandler);
+    addMediaSessionHandler('seekforward', commonHandler);
+    addMediaSessionHandler('seekto', commonHandler);
+    addMediaSessionHandler('stop', commonHandler);
+    addMediaSessionHandler('enterpictureinpicture', commonHandler);
+
+    this.eventManager_.listen(this.video_, 'timeupdate', () => {
+      updatePositionState();
+    });
+
+    this.eventManager_.listen(this.player_, 'metadata', (event) => {
+      const payload = event['payload'];
+      if (!payload) {
+        return;
+      }
+      let title;
+      if (payload['key'] == 'TIT2' && payload['data']) {
+        title = payload['data'];
+      }
+      let imageUrl;
+      if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
+        imageUrl = payload['data'];
+      }
+      if (navigator.mediaSession.metadata && title) {
+        navigator.mediaSession.metadata.title = title;
+      }
+      if (imageUrl) {
+        const video = /** @type {HTMLVideoElement} */ (this.localVideo_);
+        if (imageUrl != video.poster) {
+          video.poster = imageUrl;
+        }
+        if (navigator.mediaSession.metadata) {
+          navigator.mediaSession.metadata.artwork = [{src: imageUrl}];
+        }
+      }
+    });
+  }
+
+
+  /**
+   * @private
+   */
+  removeMediaSession_() {
+    if (!this.config_.setupMediaSession || !navigator.mediaSession) {
+      return;
+    }
+    try {
+      navigator.mediaSession.setPositionState();
+    } catch (error) {}
+
+    const disableMediaSessionHandler = (type) => {
+      try {
+        navigator.mediaSession.setActionHandler(type, null);
+      } catch (error) {}
+    };
+
+    disableMediaSessionHandler('pause');
+    disableMediaSessionHandler('play');
+    disableMediaSessionHandler('seekbackward');
+    disableMediaSessionHandler('seekforward');
+    disableMediaSessionHandler('seekto');
+    disableMediaSessionHandler('stop');
+    disableMediaSessionHandler('enterpictureinpicture');
   }
 
 
