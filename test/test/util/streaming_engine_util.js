@@ -166,6 +166,24 @@ shaka.test.StreamingEngineUtil = class {
 
     /**
      * @param {string} type
+     * @return {number}
+     */
+    const getNumReferences = (type) => {
+      let totalReferences = 0;
+      for (let i = 0; i < periodStartTimes.length; ++i) {
+        const startTime = periodStartTimes[i];
+        const nextStartTime = i < periodStartTimes.length - 1 ?
+            periodStartTimes[i + 1] :
+            presentationDuration;
+        const periodDuration = nextStartTime - startTime;
+        const numSegments = Math.ceil(periodDuration / segmentDurations[type]);
+        totalReferences += numSegments;
+      }
+      return totalReferences;
+    };
+
+    /**
+     * @param {string} type
      * @param {number} time
      * @return {?number} A segment position.
      */
@@ -374,6 +392,8 @@ shaka.test.StreamingEngineUtil = class {
 
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
         const segmentIndex = new shaka.test.FakeSegmentIndex();
+        segmentIndex.getNumReferences.and.callFake(
+            () => getNumReferences(ContentType.AUDIO));
         segmentIndex.find.and.callFake((time) => find(ContentType.AUDIO, time));
         segmentIndex.get.and.callFake((pos) => {
           return get(ContentType.AUDIO, pos,
@@ -420,6 +440,8 @@ shaka.test.StreamingEngineUtil = class {
       }
 
       const segmentIndex = new shaka.test.FakeSegmentIndex();
+      segmentIndex.getNumReferences.and.callFake(
+          () => getNumReferences(type));
       segmentIndex.find.and.callFake((time) => find(type, time));
       segmentIndex.get.and.callFake((pos) => {
         return get(type, pos, stream.mimeType, stream.codecs);
