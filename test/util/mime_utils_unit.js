@@ -48,6 +48,9 @@ describe('MimeUtils', () => {
     expect(getNormalizedCodec('hvc1')).toBe('hevc');
     expect(getNormalizedCodec('hev1')).toBe('hevc');
 
+    expect(getNormalizedCodec('vvc1')).toBe('vvc');
+    expect(getNormalizedCodec('vvi1')).toBe('vvc');
+
     expect(getNormalizedCodec('dvh1.05')).toBe('dovi-hevc');
     expect(getNormalizedCodec('dvhe.05')).toBe('dovi-hevc');
 
