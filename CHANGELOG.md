@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.9.23](https://github.com/shaka-project/shaka-player/compare/v4.9.22...v4.9.23) (2024-08-22)
+
+
+### Bug Fixes
+
+* Add more info in getVariantTracks for muxed streams ([#7181](https://github.com/shaka-project/shaka-player/issues/7181)) ([316a405](https://github.com/shaka-project/shaka-player/commit/316a405ef5a68b488dc358ab3b9c93129618e115))
+* Adjust timing of mediaqualitychanged event when safe margin is set ([#7114](https://github.com/shaka-project/shaka-player/issues/7114)) ([39b5480](https://github.com/shaka-project/shaka-player/commit/39b548029fd2236dd9062123436c49ffb87f8a5c))
+* Apply playRange config to src= ([#7168](https://github.com/shaka-project/shaka-player/issues/7168)) ([911d9e7](https://github.com/shaka-project/shaka-player/commit/911d9e76fa033d10e5a165226098e91fc3f15bc4))
+* **DASH:** Patch manifest Adaptationset indexing, [@n](https://github.com/n)=&lt;Numbering&gt; and [@t](https://github.com/t)=<time> ([#7131](https://github.com/shaka-project/shaka-player/issues/7131)) ([68a5044](https://github.com/shaka-project/shaka-player/commit/68a50449c8628614404a2bf26e23c88b77c44fa1))
+* Fire the correct error code in src= mode in some situations ([#7167](https://github.com/shaka-project/shaka-player/issues/7167)) ([69217ed](https://github.com/shaka-project/shaka-player/commit/69217eda30d67e6e0027abcea54b4ed46ff60934))
+* Fix ended state in stateHistory ([#7189](https://github.com/shaka-project/shaka-player/issues/7189)) ([866d68c](https://github.com/shaka-project/shaka-player/commit/866d68ca7a538015de74a1bde3cd553f25b5068c))
+* Fix error thrown after catching null error ([#7177](https://github.com/shaka-project/shaka-player/issues/7177)) ([3e91f7b](https://github.com/shaka-project/shaka-player/commit/3e91f7b4bcca6b10ef4564bc9b124742fad65472))
+* Fix horizontal alignment of WebVTT in UITextDisplayer ([#7169](https://github.com/shaka-project/shaka-player/issues/7169)) ([aed223f](https://github.com/shaka-project/shaka-player/commit/aed223f9377d61c3e43eecf1b245e7f8e13a307d))
+* **HLS:** Fix use of EXT-X-MEDIA when not using Content Steering ([#7166](https://github.com/shaka-project/shaka-player/issues/7166)) ([9829836](https://github.com/shaka-project/shaka-player/commit/98298364151801655a7fa0305a70790a97556222))
+* **UI:** Fix display seekbar and time when the seekrange is infinite ([#7182](https://github.com/shaka-project/shaka-player/issues/7182)) ([eb7e2ae](https://github.com/shaka-project/shaka-player/commit/eb7e2aea1e039e6fd6e75c3fdb72e232f167973c))
+* **UI:** Only show frame rate if there are several frame rates ([#7190](https://github.com/shaka-project/shaka-player/issues/7190)) ([ad050ca](https://github.com/shaka-project/shaka-player/commit/ad050cab2fa65d2e32e7faaad165273e91b76c19))
+
 ## [4.9.22](https://github.com/shaka-project/shaka-player/compare/v4.9.21...v4.9.22) (2024-08-19)
 
 
