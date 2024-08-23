@@ -4451,6 +4451,9 @@ describe('StreamingEngine', () => {
     altSegmentIndex.find.and.callFake(
         (time) => baseStream.segmentIndex.find(time));
 
+    altSegmentIndex.getNumReferences.and.callFake(
+        () => baseStream.segmentIndex.getNumReferences());
+
     altSegmentIndex.get.and.callFake((pos) => {
       const ref = baseStream.segmentIndex.get(pos);
 
