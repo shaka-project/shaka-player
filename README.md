@@ -73,6 +73,7 @@ NOTES for iOS and iPadOS:
  - Since iPadOS 13 [MediaSource Extensions][] is supported
  - Since iPadOS 17 and iOS 17.1 [ManagedMediaSource Extensions][] is supported
 
+[ManagedMediaSource Extensions]: https://www.w3.org/TR/media-source-2/#dom-managedmediasource
 
 ## Manifest format support matrix
 
