@@ -990,6 +990,48 @@ describe('StreamUtils', () => {
       expect(variants[1].audio.codecs).toBe('mp4a.40.2');
     });
 
+    it('choose better codec at same bitrate and same resolution', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.bandwidth = 4000000;
+            stream.size(1920, 1080);
+            stream.mime('video/mp4', 'vp9');
+          });
+        });
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(2, (stream) => {
+            stream.bandwidth = 4000000;
+            stream.size(1920, 1080);
+            stream.mime('video/mp4', 'avc1.42E01E');
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3, (stream) => {
+            stream.bandwidth = 4000000;
+            stream.size(1920, 1080);
+            stream.mime('video/mp4', 'dvh1.05.03');
+          });
+        });
+      });
+      navigator.mediaCapabilities.decodingInfo =
+          shaka.test.Util.spyFunc(decodingInfoSpy);
+      decodingInfoSpy.and.callFake((config) => {
+        return Promise.resolve({supported: true, smooth: true});
+      });
+
+      await StreamUtils.getDecodingInfosForVariants(manifest.variants,
+          /* usePersistentLicenses= */false, /* srcEquals= */ false,
+          /* preferredKeySystems= */ []);
+
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
+          /* preferredVideoCodecs= */[],
+          /* preferredAudioCodecs= */[],
+          /* preferredDecodingAttributes= */[]);
+      expect(manifest.variants.length).toBe(1);
+      expect(manifest.variants[0].video.codecs).toBe('dvh1.05.03');
+    });
+
     it('chooses variants by decoding attributes', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
