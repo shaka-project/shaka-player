@@ -308,7 +308,7 @@ describe('Player', () => {
               stream.mime('audio/webm', 'opus');
             });
             variant.addVideo(4, (stream) => {
-              stream.mime('video/webm', 'vp9');
+              stream.mime('video/webm', 'vp8');
             });
           });
         });
