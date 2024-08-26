@@ -551,7 +551,7 @@ describe('HlsParser live', () => {
         async () => {
           const media = [
             '#EXTM3U\n',
-            '#EXT-X-TARGETDURATION:5\n',
+            '#EXT-X-TARGETDURATION:2\n',
             '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
             '#EXT-X-MEDIA-SEQUENCE:0\n',
             '#EXTINF:2,\n',
@@ -568,14 +568,14 @@ describe('HlsParser live', () => {
             'main.mp4\n',
           ].join('');
           const manifest = await testInitialManifest(master, media);
-          expect(manifest.presentationTimeline.getDelay()).toBe(15);
+          expect(manifest.presentationTimeline.getDelay()).toBe(6);
         });
 
     it('sets 3 times target duration as presentation delay if not configured and clamped to the start', async () => { // eslint-disable-line max-len
       const media = [
         '#EXTM3U\n',
-        '#EXT-X-TARGETDURATION:5\n',
-        '#EXT-X-START:TIME-OFFSET=-10\n',
+        '#EXT-X-TARGETDURATION:2\n',
+        '#EXT-X-START:TIME-OFFSET=-4\n',
         '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
         '#EXT-X-MEDIA-SEQUENCE:0\n',
         '#EXTINF:2,\n',
@@ -592,14 +592,14 @@ describe('HlsParser live', () => {
         'main.mp4\n',
       ].join('');
       const manifest = await testInitialManifest(master, media);
-      expect(manifest.presentationTimeline.getDelay()).toBe(10);
+      expect(manifest.presentationTimeline.getDelay()).toBe(4);
       expect(manifest.startTime).toBe(0);
     });
 
     it('sets 1 times target duration as presentation delay if there are not enough segments', async () => { // eslint-disable-line max-len
       const media = [
         '#EXTM3U\n',
-        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-TARGETDURATION:2\n',
         '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
         '#EXT-X-MEDIA-SEQUENCE:0\n',
         '#EXTINF:2,\n',
@@ -608,7 +608,7 @@ describe('HlsParser live', () => {
         'main.mp4\n',
       ].join('');
       const manifest = await testInitialManifest(master, media);
-      expect(manifest.presentationTimeline.getDelay()).toBe(5);
+      expect(manifest.presentationTimeline.getDelay()).toBe(2);
     });
 
     it('sets presentation delay if defined', async () => {
