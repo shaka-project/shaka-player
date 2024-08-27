@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.10.12](https://github.com/shaka-project/shaka-player/compare/v4.10.11...v4.10.12) (2024-08-27)
+
+
+### Bug Fixes
+
+* Add null check for current reference ([#7184](https://github.com/shaka-project/shaka-player/issues/7184)) ([4ae6082](https://github.com/shaka-project/shaka-player/commit/4ae608281656171377bdf31fce90155b88402687))
+* **DASH:** Fix EventStream Elements creation ([#7194](https://github.com/shaka-project/shaka-player/issues/7194)) ([51f4c3f](https://github.com/shaka-project/shaka-player/commit/51f4c3f9c2e770e8acff91dfe27428c216ac7536))
+* Do not minify CodecSwitchingStrategy enum keys ([#7200](https://github.com/shaka-project/shaka-player/issues/7200)) ([57d391d](https://github.com/shaka-project/shaka-player/commit/57d391d538290724f1d347da031719c5f3902bc4))
+* Dont use inaccurateManifestTolerance for sequenceMode ([#7207](https://github.com/shaka-project/shaka-player/issues/7207)) ([6f516a5](https://github.com/shaka-project/shaka-player/commit/6f516a5befd490923f04d6e265b09bfef6899f9b))
+* Fix normalized codec for VVC ([#7201](https://github.com/shaka-project/shaka-player/issues/7201)) ([22713b1](https://github.com/shaka-project/shaka-player/commit/22713b14978cfa3156a91401e94cef052e1f351c))
+* Fix support for Dolby Vision based in VVC ([#7212](https://github.com/shaka-project/shaka-player/issues/7212)) ([5c3ea38](https://github.com/shaka-project/shaka-player/commit/5c3ea3855f21d8c9068d8060a16563035c7edaa2))
+* **HLS:** Check that segment 0 exists ([#7208](https://github.com/shaka-project/shaka-player/issues/7208)) ([2c804a9](https://github.com/shaka-project/shaka-player/commit/2c804a9a8ba1e741543c89de63fe46eaee35d177))
+* Revert change that caused stalls with "cannot find endTime" ([#7213](https://github.com/shaka-project/shaka-player/issues/7213)) ([c690e4e](https://github.com/shaka-project/shaka-player/commit/c690e4eba1076b0e7ad73153831e45c27b6bd8b7))
+
 ## [4.10.11](https://github.com/shaka-project/shaka-player/compare/v4.10.10...v4.10.11) (2024-08-22)
 
 
