@@ -4499,8 +4499,8 @@ describe('StreamingEngine', () => {
    * @param {shaka.extern.Stream} alternateStream
    */
   function createAlternateSegmentIndex(baseStream, alternateStream) {
-    const closeSegmentIndexSpy =
-        Util.funcSpy(alternateStream.closeSegmentIndex);
+    const closeSegmentIndexSpy = Util.funcSpy(
+        /** @type {!function()} */ (alternateStream.closeSegmentIndex));
     const createSegmentIndexSpy =
         Util.funcSpy(alternateStream.createSegmentIndex);
 
