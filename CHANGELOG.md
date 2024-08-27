@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.9.24](https://github.com/shaka-project/shaka-player/compare/v4.9.23...v4.9.24) (2024-08-27)
+
+
+### Bug Fixes
+
+* Add null check for current reference ([#7184](https://github.com/shaka-project/shaka-player/issues/7184)) ([e44da8f](https://github.com/shaka-project/shaka-player/commit/e44da8fcc032c4d24b30d926fa23c33111da0975))
+* **DASH:** Fix EventStream Elements creation ([#7194](https://github.com/shaka-project/shaka-player/issues/7194)) ([a730d06](https://github.com/shaka-project/shaka-player/commit/a730d06e4b23c1c75f1d4eb827801075f6f213d8))
+* Do not minify CodecSwitchingStrategy enum keys ([#7200](https://github.com/shaka-project/shaka-player/issues/7200)) ([2bc3ef9](https://github.com/shaka-project/shaka-player/commit/2bc3ef9801d21a3237a1760ffad856830d584e59))
+* Dont use inaccurateManifestTolerance for sequenceMode ([#7207](https://github.com/shaka-project/shaka-player/issues/7207)) ([4d4fc14](https://github.com/shaka-project/shaka-player/commit/4d4fc14b8294c4a4279dd11216755c8457bb271c))
+* Fix normalized codec for VVC ([#7201](https://github.com/shaka-project/shaka-player/issues/7201)) ([e4a9ee3](https://github.com/shaka-project/shaka-player/commit/e4a9ee36ff0543b8612ee77bf1ba9a82557b4322))
+* **HLS:** Check that segment 0 exists ([#7208](https://github.com/shaka-project/shaka-player/issues/7208)) ([e1ecc44](https://github.com/shaka-project/shaka-player/commit/e1ecc44c1e9af516053216c5f44c15225f092c97))
+* Revert change that caused stalls with "cannot find endTime" ([#7213](https://github.com/shaka-project/shaka-player/issues/7213)) ([e69ade2](https://github.com/shaka-project/shaka-player/commit/e69ade2787e314275e1c8ade087e34533590c919))
+
 ## [4.9.23](https://github.com/shaka-project/shaka-player/compare/v4.9.22...v4.9.23) (2024-08-22)
 
 
