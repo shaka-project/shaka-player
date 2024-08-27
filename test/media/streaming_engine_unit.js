@@ -2315,9 +2315,11 @@ describe('StreamingEngine', () => {
       });
 
       onError.and.callFake((error) => {
-        expect(error.severity).toBe(shaka.util.Error.Severity.RECOVERABLE);
-        expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
-        expect(error.code).toBe(shaka.util.Error.Code.BAD_HTTP_STATUS);
+        if (error instanceof shaka.util.Error) {
+          expect(error.severity).toBe(shaka.util.Error.Severity.RECOVERABLE);
+          expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
+          expect(error.code).toBe(shaka.util.Error.Code.BAD_HTTP_STATUS);
+        }
       });
 
       disableStream.and.callFake((stream, time) => {
@@ -2340,6 +2342,7 @@ describe('StreamingEngine', () => {
 
       await runTest();
       expect(disableStream).toHaveBeenCalledTimes(1);
+      expect(onError).toHaveBeenCalled();
     });
 
     it('does not temporarily disables stream if not configured to',
@@ -2391,9 +2394,11 @@ describe('StreamingEngine', () => {
           });
 
           onError.and.callFake((error) => {
-            expect(error.severity).toBe(shaka.util.Error.Severity.RECOVERABLE);
-            expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
-            expect(error.code).toBe(shaka.util.Error.Code.SEGMENT_MISSING);
+            if (error instanceof shaka.util.Error) {
+              expect(error.severity).toBe(shaka.util.Error.Severity.RECOVERABLE);
+              expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
+              expect(error.code).toBe(shaka.util.Error.Code.SEGMENT_MISSING);
+            }
           });
 
           disableStream.and.callFake((stream, time) => {
@@ -2416,6 +2421,7 @@ describe('StreamingEngine', () => {
 
           await runTest();
           expect(disableStream).toHaveBeenCalledTimes(1);
+          expect(onError).toHaveBeenCalled();
         });
 
     it('throws recoverable error if try to disable stream succeeded',
@@ -4492,42 +4498,43 @@ describe('StreamingEngine', () => {
    * @param {shaka.extern.Stream} alternateStream
    */
   function createAlternateSegmentIndex(baseStream, alternateStream) {
-    const origCloseSegmentIndex = alternateStream.closeSegmentIndex;
-    const closeSegmentIndexSpy = Util.funcSpy(
-        /** @type {!function()} */ (alternateStream.closeSegmentIndex));
+    const closeSegmentIndexSpy =
+        Util.funcSpy(alternateStream.closeSegmentIndex);
     const createSegmentIndexSpy =
         Util.funcSpy(alternateStream.createSegmentIndex);
 
-    const altSegmentIndex = new shaka.test.FakeSegmentIndex();
-
-    altSegmentIndex.find.and.callFake(
-        (time) => baseStream.segmentIndex.find(time));
-
-    altSegmentIndex.getNumReferences.and.callFake(
-        () => baseStream.segmentIndex.getNumReferences());
-
-    altSegmentIndex.get.and.callFake((pos) => {
-      const ref = baseStream.segmentIndex.get(pos);
-
-      if (ref) {
-        const altInitUri = ref.initSegmentReference.getUris()[0] + '_alt';
-        const altSegmentUri = ref.getUris()[0] + '_alt';
-
-        ref.initSegmentReference.getUris = () => [altInitUri];
-        ref.getUris = () => [altSegmentUri];
-        return ref;
-      }
-
-      return null;
-    });
-
     createSegmentIndexSpy.and.callFake(() => {
+      const altSegmentIndex = new shaka.test.FakeSegmentIndex();
+
+      altSegmentIndex.find.and.callFake(
+          (time) => baseStream.segmentIndex.find(time));
+
+      altSegmentIndex.getNumReferences.and.callFake(
+          () => baseStream.segmentIndex.getNumReferences());
+
+      altSegmentIndex.get.and.callFake((pos) => {
+        const ref = baseStream.segmentIndex.get(pos);
+
+        if (ref) {
+          const altInitUri = ref.initSegmentReference.getUris()[0] + '_alt';
+          const altSegmentUri = ref.getUris()[0] + '_alt';
+
+          ref.initSegmentReference.getUris = () => [altInitUri];
+          ref.getUris = () => [altSegmentUri];
+          return ref;
+        }
+
+        return null;
+      });
       alternateStream.segmentIndex = altSegmentIndex;
       return Promise.resolve();
     });
-    closeSegmentIndex.and.callFake(() => {
+    closeSegmentIndexSpy.and.callFake(() => {
+      if (alternateStream.segmentIndex) {
+        alternateStream.segmentIndex.release();
+      }
       alternateStream.segmentIndex = null;
-      return origCloseSegmentIndex();
+      return Promise.resolve();
     });
   }
 });
