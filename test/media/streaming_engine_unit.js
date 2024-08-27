@@ -2395,7 +2395,8 @@ describe('StreamingEngine', () => {
 
           onError.and.callFake((error) => {
             if (error instanceof shaka.util.Error) {
-              expect(error.severity).toBe(shaka.util.Error.Severity.RECOVERABLE);
+              expect(error.severity).toBe(
+                  shaka.util.Error.Severity.RECOVERABLE);
               expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
               expect(error.code).toBe(shaka.util.Error.Code.SEGMENT_MISSING);
             }
