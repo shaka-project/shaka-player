@@ -77,6 +77,57 @@ describe('DashParser Patch', () => {
       '</MPD>',
     ].join('\n');
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    const manifestText_threeRes = [
+      `<MPD id="threeRes" type="dynamic"`,
+      '    availabilityStartTime="1970-01-01T00:00:00Z"',
+      `    publishTime="${publishTime.toUTCString()}"`,
+      '    suggestedPresentationDelay="PT5S"',
+      `    minimumUpdatePeriod="PT${updateTime}S">`,
+      `  <PatchLocation ttl="${ttl}">dummy://bar</PatchLocation>`,
+      '  <Period id="x">',
+      `    <BaseURL>http://example.com</BaseURL>`,
+      '    <AdaptationSet id="x" mimeType="video/mp4">',
+      '      <SegmentTemplate media="s$Number$.mp4">',
+      '        <SegmentTimeline>',
+      '            <S d="1" t="0" />',
+      '            <S d="2" t="1" />',
+      '        </SegmentTimeline>',
+      '      </SegmentTemplate>',
+      '      <Representation id="a" bandwidth="100" ></Representation>',
+      '      <Representation id="b" bandwidth="200" ></Representation>',
+      '      <Representation id="c" bandwidth="300" ></Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    fakeNetEngine.setResponseText('dummy://three', manifestText_threeRes);
+
+    const manifestText_fourRes = [
+      `<MPD id="fourRes" type="dynamic"`,
+      '    availabilityStartTime="1970-01-01T00:00:00Z"',
+      `    publishTime="${publishTime.toUTCString()}"`,
+      '    suggestedPresentationDelay="PT5S"',
+      `    minimumUpdatePeriod="PT${updateTime}S">`,
+      `  <PatchLocation ttl="${ttl}">dummy://bar</PatchLocation>`,
+      '  <Period id="x">',
+      `    <BaseURL>http://example.com</BaseURL>`,
+      '    <AdaptationSet id="x" mimeType="video/mp4">',
+      '      <SegmentTemplate media="s$Number$.mp4">',
+      '        <SegmentTimeline>',
+      '            <S d="1" t="0" />',
+      '            <S d="2" t="1" />',
+      '        </SegmentTimeline>',
+      '      </SegmentTemplate>',
+      '      <Representation id="a" bandwidth="100" ></Representation>',
+      '      <Representation id="b" bandwidth="200" ></Representation>',
+      '      <Representation id="c" bandwidth="300" ></Representation>',
+      '      <Representation id="d" bandwidth="300" ></Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    fakeNetEngine.setResponseText('dummy://four', manifestText_fourRes);
+  });
   });
 
   afterEach(() => {
@@ -648,6 +699,103 @@ describe('DashParser Patch', () => {
         ManifestParser.makeReference('s3.mp4', 4, 7, originalUri),
         ManifestParser.makeReference('s4.mp4', 7, 10, originalUri),
       ]);
+    });
+  });
+
+  describe('3 Representations', () => {
+    it('adds new S', async () => {
+      const xPath = '/' + [
+        'MPD',
+        'Period[@id=\'x\']',
+        'AdaptationSet[1]',
+        'SegmentTemplate',
+        'SegmentTimeline'
+      ].join('/');
+      const patchText = [
+        `<Patch mpdId="threeRes"`,
+        `    originalPublishTime="${publishTime.toUTCString()}"">`,
+        `  <add sel="${xPath}">`,
+        '    <S d="1" t="3" />',
+        '  </add>',
+        '</Patch>',
+      ].join('\n');
+      fakeNetEngine.setResponseText('dummy://bar', patchText);
+
+      const manifest = await parser.start('dummy://three', playerInterface);
+      const stream = manifest.variants[0].video;
+      expect(stream).toBeTruthy();
+      await stream.createSegmentIndex();
+      ManifestParser.verifySegmentIndex(stream, [
+        ManifestParser.makeReference('s1.mp4', 0, 1, originalUri),
+        ManifestParser.makeReference('s2.mp4', 1, 3, originalUri),
+      ]);
+
+      await updateManifest();
+
+      /*
+        The thing inside expect() is the bug, the desire behavour should be:
+        [{"start":0,"end":1,"unscaledStart":0,"partialSegments":0,"segmentPosition":1},
+        {"start":1,"end":3,"unscaledStart":1,"partialSegments":0,"segmentPosition":2},
+        {"start":3,"end":4,"unscaledStart":3,"partialSegments":0,"segmentPosition":3}]
+      */
+      expect(JSON.stringify(stream.segmentIndex.indexes_[0].templateInfo_.timeline)).toBe(['[',
+        `{"start":0,"end":1,"unscaledStart":0,"partialSegments":0,"segmentPosition":1},`,
+        `{"start":1,"end":3,"unscaledStart":1,"partialSegments":0,"segmentPosition":2},`,
+        `{"start":3,"end":3,"unscaledStart":3,"partialSegments":0,"segmentPosition":3},`,
+        `{"start":3,"end":3,"unscaledStart":3,"partialSegments":0,"segmentPosition":4},`,
+        `{"start":3,"end":4,"unscaledStart":3,"partialSegments":0,"segmentPosition":5}]`].join('')
+      )
+    });
+  });
+
+  describe('4 Representations', () => {
+    it('adds new S', async () => {
+      const xPath = '/' + [
+        'MPD',
+        'Period[@id=\'x\']',
+        'AdaptationSet[1]',
+        'SegmentTemplate',
+        'SegmentTimeline'
+      ].join('/');
+      const patchText = [
+        `<Patch mpdId="fourRes"`,
+        `    originalPublishTime="${publishTime.toUTCString()}"">`,
+        `  <add sel="${xPath}">`,
+        '    <S d="1" t="3" />',
+        '  </add>',
+        '</Patch>',
+      ].join('\n');
+      fakeNetEngine.setResponseText('dummy://bar', patchText);
+
+      const manifest = await parser.start('dummy://four', playerInterface);
+      const stream = manifest.variants[0].video;
+      expect(stream).toBeTruthy();
+      await stream.createSegmentIndex();
+      ManifestParser.verifySegmentIndex(stream, [
+        ManifestParser.makeReference('s1.mp4', 0, 1, originalUri),
+        ManifestParser.makeReference('s2.mp4', 1, 3, originalUri),
+      ]);
+
+      await updateManifest();
+
+      /*
+        The thing inside expect() is the bug, the desire behavour should be:
+        [{"start":0,"end":1,"unscaledStart":0,"partialSegments":0,"segmentPosition":1},
+        {"start":1,"end":3,"unscaledStart":1,"partialSegments":0,"segmentPosition":2},
+        {"start":3,"end":4,"unscaledStart":3,"partialSegments":0,"segmentPosition":3}]
+
+        Also, you can see the mpd patch content is same compare to previous test, except the mpd got one more representation.
+        But the processPatchManifest_() or modifiedTimelines() somehow managed to patch N times under N representations.
+      */
+
+      expect(JSON.stringify(stream.segmentIndex.indexes_[0].templateInfo_.timeline)).toBe(['[',
+        `{"start":0,"end":1,"unscaledStart":0,"partialSegments":0,"segmentPosition":1},`,
+        `{"start":1,"end":3,"unscaledStart":1,"partialSegments":0,"segmentPosition":2},`,
+        `{"start":3,"end":3,"unscaledStart":3,"partialSegments":0,"segmentPosition":3},`,
+        `{"start":3,"end":3,"unscaledStart":3,"partialSegments":0,"segmentPosition":4},`,
+        `{"start":3,"end":3,"unscaledStart":3,"partialSegments":0,"segmentPosition":5},`,
+        `{"start":3,"end":4,"unscaledStart":3,"partialSegments":0,"segmentPosition":6}]`].join('')
+      )
     });
   });
 });
