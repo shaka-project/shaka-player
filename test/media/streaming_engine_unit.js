@@ -1124,6 +1124,109 @@ describe('StreamingEngine', () => {
       expect(mediaSourceEngine.resetCaptionParser).not.toHaveBeenCalled();
     });
 
+    it('defers old stream cleanup on switchVariant during update', async () => {
+      // Delay the appendBuffer call until later so we are waiting for this to
+      // finish when we switch.
+      let p = new shaka.util.PublicPromise();
+      const old = mediaSourceEngine.appendBuffer;
+      // Replace the whole spy since we want to call the original.
+      mediaSourceEngine.appendBuffer =
+          jasmine.createSpy('appendBuffer')
+              .and.callFake(async (type, data, reference) => {
+                await p;
+                return Util.invokeSpy(old, type, data, reference);
+              });
+
+      // Starts with 'initialVariant' (video-11-%d/audio-10-%d).
+      await streamingEngine.start();
+      playing = true;
+
+      await Util.fakeEventLoop(1);
+
+      // Grab a reference to initialVariant's segmentIndex before the switch so
+      // we can test how its internal fields change overtime.
+      const initialVariantSegmentIndex = initialVariant.video.segmentIndex;
+
+      // Switch to 'differentVariant' (video-14-%d/audio-15-%d) in the middle of
+      // the update.
+      streamingEngine.switchVariant(differentVariant, /* clearBuffer= */ true);
+
+      // Finish the update for 'initialVariant'.
+      p.resolve();
+      // Create a new promise to delay the appendBuffer for 'differentVariant'.
+      p = new shaka.util.PublicPromise();
+      await Util.fakeEventLoop(1);
+
+      const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+      const segmentContext = {
+        type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
+      };
+
+      // Since a switch occurred in the middle of a fetch for a 'initialVariant'
+      // segment, the closing of the segment index for 'initialVariant' was
+      // deferred.
+      // We check the length of the segment references array to determine
+      // whether it was closed or not.
+      expect(initialVariantSegmentIndex.references.length).toBeGreaterThan(0);
+      netEngine.expectRequest('video-11-0.mp4', segmentType, segmentContext);
+      netEngine.expectRequest('audio-10-0.mp4', segmentType, segmentContext);
+      netEngine.expectNoRequest('video-14-0.mp4', segmentType, segmentContext);
+      netEngine.expectNoRequest('audio-15-0.mp4', segmentType, segmentContext);
+
+      // Finish the update for 'differentVariant'. At this point, the
+      // segmentIndex for 'initialVariant' has been closed.
+      p.resolve();
+      await Util.fakeEventLoop(2);
+      expect(initialVariantSegmentIndex.references.length).toBe(0);
+    });
+
+    it('defers old stream cleanup on fast switch during update', async () => {
+      setupVod();
+
+      // Delay the appendBuffer call until later so we are waiting for this to
+      // finish when we switch.
+      const p = new shaka.util.PublicPromise();
+      const old = mediaSourceEngine.appendBuffer;
+      mediaSourceEngine.appendBuffer =
+          jasmine.createSpy('appendBuffer')
+              .and.callFake(async (type, data, reference) => {
+                await p;
+                return Util.invokeSpy(old, type, data, reference);
+              });
+
+      streamingEngine.switchVariant(variant, /* clearBuffer= */ true);
+      await streamingEngine.start();
+      playing = true;
+
+      expect(variant.video.createSegmentIndex).not.toHaveBeenCalled();
+      await Util.fakeEventLoop(1);
+      expect(variant.video.createSegmentIndex).toHaveBeenCalledTimes(1);
+
+      // Switch from variant A -> B -> A ("fast switch") multiple times.
+      for (let i = 0; i < 5; i++) {
+        streamingEngine.switchVariant(
+            alternateVariant, /* clearBuffer= */ true);
+        streamingEngine.switchVariant(variant, /* clearBuffer= */ true);
+      }
+      // Can resolve now to ensure all the switches happened during the update.
+      p.resolve();
+
+      // Give enough time for the next scheduled update to execute with the
+      // currently active variant ('variant').
+      await runTest();
+
+      // During the next scheduled update for 'variant', we close all streams
+      // that were switched away from, regardless of whether it is the active
+      // stream.
+      expect(variant.video.closeSegmentIndex).toHaveBeenCalledTimes(1);
+      expect(alternateVariant.video.closeSegmentIndex).toHaveBeenCalledTimes(1);
+      // However, we close all the deferred streams right before the check to
+      // create a new segmentIndex for the currently active stream.
+      expect(variant.video.createSegmentIndex).toHaveBeenCalledTimes(2);
+      expect(variant.video.segmentIndex).not.toBe(null);
+      expect(alternateVariant.video.segmentIndex).toBe(null);
+    });
+
     // See https://github.com/shaka-project/shaka-player/issues/2956
     it('works with fast variant switches during update', async () => {
       // Delay the appendBuffer call until later so we are waiting for this to
@@ -1187,7 +1290,6 @@ describe('StreamingEngine', () => {
       netEngine.expectRequest('text-20-0.mp4', segmentType, segmentContext);
       netEngine.expectNoRequest('text-20-init', segmentType, segmentContext);
       netEngine.expectNoRequest('text-21-init', segmentType, segmentContext);
-      // TODO: huh?
     });
   });
 
@@ -2212,9 +2314,11 @@ describe('StreamingEngine', () => {
       });
 
       onError.and.callFake((error) => {
-        expect(error.severity).toBe(shaka.util.Error.Severity.RECOVERABLE);
-        expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
-        expect(error.code).toBe(shaka.util.Error.Code.BAD_HTTP_STATUS);
+        if (error instanceof shaka.util.Error) {
+          expect(error.severity).toBe(shaka.util.Error.Severity.RECOVERABLE);
+          expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
+          expect(error.code).toBe(shaka.util.Error.Code.BAD_HTTP_STATUS);
+        }
       });
 
       disableStream.and.callFake((stream, time) => {
@@ -2237,6 +2341,7 @@ describe('StreamingEngine', () => {
 
       await runTest();
       expect(disableStream).toHaveBeenCalledTimes(1);
+      expect(onError).toHaveBeenCalled();
     });
 
     it('does not temporarily disables stream if not configured to',
@@ -2288,9 +2393,12 @@ describe('StreamingEngine', () => {
           });
 
           onError.and.callFake((error) => {
-            expect(error.severity).toBe(shaka.util.Error.Severity.RECOVERABLE);
-            expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
-            expect(error.code).toBe(shaka.util.Error.Code.SEGMENT_MISSING);
+            if (error instanceof shaka.util.Error) {
+              expect(error.severity).toBe(
+                  shaka.util.Error.Severity.RECOVERABLE);
+              expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
+              expect(error.code).toBe(shaka.util.Error.Code.SEGMENT_MISSING);
+            }
           });
 
           disableStream.and.callFake((stream, time) => {
@@ -2313,6 +2421,7 @@ describe('StreamingEngine', () => {
 
           await runTest();
           expect(disableStream).toHaveBeenCalledTimes(1);
+          expect(onError).toHaveBeenCalled();
         });
 
     it('throws recoverable error if try to disable stream succeeded',
@@ -4389,33 +4498,42 @@ describe('StreamingEngine', () => {
    * @param {shaka.extern.Stream} alternateStream
    */
   function createAlternateSegmentIndex(baseStream, alternateStream) {
+    const closeSegmentIndexSpy = Util.funcSpy(
+        /** @type {!function()} */ (alternateStream.closeSegmentIndex));
     const createSegmentIndexSpy =
         Util.funcSpy(alternateStream.createSegmentIndex);
-    const altSegmentIndex = new shaka.test.FakeSegmentIndex();
-
-    altSegmentIndex.find.and.callFake(
-        (time) => baseStream.segmentIndex.find(time));
-
-    altSegmentIndex.getNumReferences.and.callFake(
-        () => baseStream.segmentIndex.getNumReferences());
-
-    altSegmentIndex.get.and.callFake((pos) => {
-      const ref = baseStream.segmentIndex.get(pos);
-
-      if (ref) {
-        const altInitUri = ref.initSegmentReference.getUris()[0] + '_alt';
-        const altSegmentUri = ref.getUris()[0] + '_alt';
-
-        ref.initSegmentReference.getUris = () => [altInitUri];
-        ref.getUris = () => [altSegmentUri];
-        return ref;
-      }
-
-      return null;
-    });
 
     createSegmentIndexSpy.and.callFake(() => {
+      const altSegmentIndex = new shaka.test.FakeSegmentIndex();
+
+      altSegmentIndex.find.and.callFake(
+          (time) => baseStream.segmentIndex.find(time));
+
+      altSegmentIndex.getNumReferences.and.callFake(
+          () => baseStream.segmentIndex.getNumReferences());
+
+      altSegmentIndex.get.and.callFake((pos) => {
+        const ref = baseStream.segmentIndex.get(pos);
+
+        if (ref) {
+          const altInitUri = ref.initSegmentReference.getUris()[0] + '_alt';
+          const altSegmentUri = ref.getUris()[0] + '_alt';
+
+          ref.initSegmentReference.getUris = () => [altInitUri];
+          ref.getUris = () => [altSegmentUri];
+          return ref;
+        }
+
+        return null;
+      });
       alternateStream.segmentIndex = altSegmentIndex;
+      return Promise.resolve();
+    });
+    closeSegmentIndexSpy.and.callFake(() => {
+      if (alternateStream.segmentIndex) {
+        alternateStream.segmentIndex.release();
+      }
+      alternateStream.segmentIndex = null;
       return Promise.resolve();
     });
   }
