@@ -386,7 +386,7 @@ shaka.test.StreamingEngineUtil = class {
       variant.audio = /** @type {shaka.extern.Stream} */(
         shaka.test.StreamingEngineUtil.createMockStream('audio', 1));
       if (secondaryAudioVariant) {
-        variant2.audio = /** @type {shaka.extern.Stream} */(
+        variant2.audio = /** @type {shaka.extern.Stream} */ (
           shaka.test.StreamingEngineUtil.createMockStream('audio', 11));
 
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
@@ -403,6 +403,13 @@ shaka.test.StreamingEngineUtil = class {
             variant2.audio.createSegmentIndex);
         createSegmentIndexSpy.and.callFake(() => {
           variant2.audio.segmentIndex = segmentIndex;
+          return Promise.resolve();
+        });
+
+        const closeSegmentIndexSpy = Util.funcSpy(
+            /** @type {!function()} */ (variant2.audio.closeSegmentIndex));
+        closeSegmentIndexSpy.and.callFake(() => {
+          variant2.audio.segmentIndex = null;
           return Promise.resolve();
         });
       }
@@ -449,6 +456,12 @@ shaka.test.StreamingEngineUtil = class {
       const createSegmentIndexSpy = Util.funcSpy(stream.createSegmentIndex);
       createSegmentIndexSpy.and.callFake(() => {
         stream.segmentIndex = segmentIndex;
+        return Promise.resolve();
+      });
+      const closeSegmentIndexSpy = Util.funcSpy(
+          /** @type {!function()} */ (stream.closeSegmentIndex));
+      closeSegmentIndexSpy.and.callFake(() => {
+        stream.segmentIndex = null;
         return Promise.resolve();
       });
     }
@@ -501,6 +514,7 @@ shaka.test.StreamingEngineUtil = class {
       originalId: id.toString(),
       groupId: null,
       createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
+      closeSegmentIndex: Util.spyFunc(jasmine.createSpy('closeSegmentIndex')),
       segmentIndex: null,
       mimeType,
       codecs,
@@ -545,6 +559,7 @@ shaka.test.StreamingEngineUtil = class {
       originalId: id.toString(),
       groupId: null,
       createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
+      closeSegmentIndex: Util.spyFunc(jasmine.createSpy('closeSegmentIndex')),
       segmentIndex: null,
       mimeType,
       codecs,
@@ -591,6 +606,7 @@ shaka.test.StreamingEngineUtil = class {
       originalId: id.toString(),
       groupId: null,
       createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
+      closeSegmentIndex: Util.spyFunc(jasmine.createSpy('closeSegmentIndex')),
       segmentIndex: null,
       mimeType,
       codecs,
