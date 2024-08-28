@@ -1096,6 +1096,61 @@ describe('DashParser Manifest', () => {
     }));
   });
 
+  it('multiple trick-mode tracks with multiple AdaptationSet elements', async () => { // eslint-disable-line max-len
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f"',
+      '          width="640" height="360">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '      <Representation bandwidth="2" codecs="avc1.4d401f"',
+      '          width="1024" height="576">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="3" mimeType="video/mp4">',
+      '      <EssentialProperty value="1" ',
+      '        schemeIdUri="http://dashif.org/guidelines/trickmode" />',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f"',
+      '          width="640" height="360">',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '      <Representation bandwidth="2" codecs="avc1.4d401f"',
+      '          width="1024" height="576">',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    expect(manifest.variants.length).toBe(2);
+    expect(manifest.textStreams.length).toBe(0);
+
+    const variant = manifest.variants[0];
+    const trickModeVideo = variant && variant.video &&
+                         variant.video.trickModeVideo;
+    expect(trickModeVideo).toEqual(jasmine.objectContaining({
+      id: 3,
+      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+    }));
+    expect(trickModeVideo.bandwidth).toBe(1);
+
+    const variant2 = manifest.variants[1];
+    const trickModeVideo2 = variant2 && variant2.video &&
+                         variant2.video.trickModeVideo;
+    expect(trickModeVideo2).toEqual(jasmine.objectContaining({
+      id: 4,
+      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+    }));
+    expect(trickModeVideo2.bandwidth).toBe(2);
+  });
+
   it('ignore incompatible trickmode tracks', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
