@@ -1493,29 +1493,11 @@ shakaAssets.testAssets = [
         },
       }),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Tears of Steel LCEVC H264 (HLS, MP4)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
-      /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vn2LvEps745ShGtQ/master.m3u8',
-      /* source= */ shakaAssets.Source.VNOVA)
-      .addFeature(shakaAssets.Feature.HLS)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.OFFLINE)
-      .addFeature(shakaAssets.Feature.LCEVC)
-      .setExtraConfig({
-        lcevc: {
-          enabled: true,
-          dynamicPerformanceScaling: true,
-          logLevel: 0,
-          drawLogo: false,
-        },
-      }),
-  new ShakaDemoAssetInfo(
       /* name= */ ' eSports LCEVC HEVC (DASH, MP4)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/shaka.png',
       /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vnCTVqNpUs9400xP/master.mpd',
       /* source= */ shakaAssets.Source.VNOVA)
-      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.OFFLINE)
