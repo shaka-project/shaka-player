@@ -10,6 +10,10 @@ describe('tXml', () => {
 
   const TXml = shaka.util.TXml;
 
+  beforeAll(() => {
+    TXml.setKnownNameSpace('urn:scte:scte35:2014:xml+bin', 'scte35');
+  });
+
   describe('findChild', () => {
     it('finds a child node', () => {
       const xmlString = [
@@ -514,6 +518,31 @@ describe('tXml', () => {
       {name: 'S', id: null, position: null,
         t: null, n: 42, attribute: null},
     ]);
+  });
+
+  it('txmlNodeToDomElement', () => {
+    const node = {
+      tagName: 'Event',
+      parent: null,
+      attributes: {
+        'presentationTime': '0',
+      },
+      children: [
+        {
+          tagName: 'scte35:Signal',
+          parent: null,
+          attributes: {},
+          children: [],
+        },
+      ],
+    };
+    node.children[0].parent = node;
+
+    const element = TXml.txmlNodeToDomElement(node);
+    expect(element.tagName).toBe('Event');
+    expect(element.getAttribute('presentationTime')).toBe('0');
+    const signal = element.firstElementChild;
+    expect(signal.tagName).toBe('scte35:Signal');
   });
 
   it('cloneNode', () => {
