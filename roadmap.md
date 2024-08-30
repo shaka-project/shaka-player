@@ -22,6 +22,7 @@ v5.0 - 2024 Q4
 
 v4.11 - 2024 Q3
  - HLS: EXT-X-START support
+ - HLS: EXT-X-I-FRAME-STREAM-INF support
  - Basic support of VAST and VMAP without IMA (playback without tracking)
  - DASH: DVB Fonts
  - TTML: IMSC1 (CMAF) image subtitle

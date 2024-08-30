@@ -140,7 +140,7 @@ HLS features supported:
  - SAMPLE-AES and SAMPLE-AES-CTR (identity) support on browsers with ClearKey support
  - Key rotation
  - Raw AAC, MP3, AC-3 and EC-3 (without an MP4 container)
- - I-frame-only playlists with mjpg codec for thumbnails
+ - I-frame-only playlists (for trick play and thumbnails)
  - #EXT-X-IMAGE-STREAM-INF for thumbnails
  - Interstitials
  - Container change during the playback (eg: MP4 to TS, or AAC to TS)
