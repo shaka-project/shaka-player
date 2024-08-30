@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.9.25](https://github.com/shaka-project/shaka-player/compare/v4.9.24...v4.9.25) (2024-08-30)
+
+
+### Bug Fixes
+
+* Allow recover normal stream when trick play stream fails ([#7234](https://github.com/shaka-project/shaka-player/issues/7234)) ([e7820d8](https://github.com/shaka-project/shaka-player/commit/e7820d866d2a0baba8919402621b2ec531dcf22d))
+* Correct the behavior to defer closeSegmentIndex() calls during updates ([#7217](https://github.com/shaka-project/shaka-player/issues/7217)) ([b9005b3](https://github.com/shaka-project/shaka-player/commit/b9005b32f48d29bed4120e696e3ef90fb45847b1))
+* **DASH:** Clear streamMap when period is removed from the manifest ([#7202](https://github.com/shaka-project/shaka-player/issues/7202)) ([b18dcbf](https://github.com/shaka-project/shaka-player/commit/b18dcbf14d38ff61c168a9e2ab2a9cec4d461f2f))
+* **DASH:** Fix creation of multiperiod trickmode streams ([#7229](https://github.com/shaka-project/shaka-player/issues/7229)) ([97d6fd8](https://github.com/shaka-project/shaka-player/commit/97d6fd8c948ee9999de2633913d4f987f7a0f57c))
+* **DASH:** Fix MPD Patch when SegmentTemplate is shared between Representations ([#7218](https://github.com/shaka-project/shaka-player/issues/7218)) ([0635c10](https://github.com/shaka-project/shaka-player/commit/0635c103ed6807bd2c421b864a0d31a1e5568930)), closes [#7214](https://github.com/shaka-project/shaka-player/issues/7214)
+* **DASH:** Use proper namespace when mapping TXml node to Element ([#7240](https://github.com/shaka-project/shaka-player/issues/7240)) ([7e6f3dc](https://github.com/shaka-project/shaka-player/commit/7e6f3dc837ee15b289eb36c4663d55b33ce302fb))
+* Don't throw an error when trying to disable a trick mode stream ([#7235](https://github.com/shaka-project/shaka-player/issues/7235)) ([c41615b](https://github.com/shaka-project/shaka-player/commit/c41615bf0372f8d0ead9c8ea16b8c80402c8ba6b))
+* Revert change that caused a lot of warning with "cannot find endTime" and hls playback errors ([#7239](https://github.com/shaka-project/shaka-player/issues/7239)) ([9d6ba9b](https://github.com/shaka-project/shaka-player/commit/9d6ba9b47f4f6d62747c84ac9ef298d65b0ec8b0))
+* **Stats:** Fix bytesDownloaded when using src= ([#7223](https://github.com/shaka-project/shaka-player/issues/7223)) ([b7ebe9e](https://github.com/shaka-project/shaka-player/commit/b7ebe9e8838e3600f65c8edc8db9591a5937d295))
+
 ## [4.9.24](https://github.com/shaka-project/shaka-player/compare/v4.9.23...v4.9.24) (2024-08-27)
 
 
