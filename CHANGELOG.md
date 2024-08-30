@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.10.13](https://github.com/shaka-project/shaka-player/compare/v4.10.12...v4.10.13) (2024-08-30)
+
+
+### Bug Fixes
+
+* Allow recover normal stream when trick play stream fails ([#7234](https://github.com/shaka-project/shaka-player/issues/7234)) ([ece8302](https://github.com/shaka-project/shaka-player/commit/ece830285e0352a6d85502727547976ba9cf639a))
+* Correct the behavior to defer closeSegmentIndex() calls during updates ([#7217](https://github.com/shaka-project/shaka-player/issues/7217)) ([af80b87](https://github.com/shaka-project/shaka-player/commit/af80b876971426882c28135de3c1af245610994c))
+* **DASH:** Clear streamMap when period is removed from the manifest ([#7202](https://github.com/shaka-project/shaka-player/issues/7202)) ([e76f6b2](https://github.com/shaka-project/shaka-player/commit/e76f6b215464258ffa940db54aebc3d24d14ee78))
+* **DASH:** Fix creation of multiperiod trickmode streams ([#7229](https://github.com/shaka-project/shaka-player/issues/7229)) ([dd9c0e0](https://github.com/shaka-project/shaka-player/commit/dd9c0e0163b80abad646c7db345d58ef28a16d27))
+* **DASH:** Fix MPD Patch when SegmentTemplate is shared between Representations ([#7218](https://github.com/shaka-project/shaka-player/issues/7218)) ([7e49622](https://github.com/shaka-project/shaka-player/commit/7e49622670aca09835b0e75357e286c38f49a305)), closes [#7214](https://github.com/shaka-project/shaka-player/issues/7214)
+* **DASH:** Use proper namespace when mapping TXml node to Element ([#7240](https://github.com/shaka-project/shaka-player/issues/7240)) ([64473c6](https://github.com/shaka-project/shaka-player/commit/64473c63445cbe5d0df7183c6908eb8504ef3918))
+* Don't throw an error when trying to disable a trick mode stream ([#7235](https://github.com/shaka-project/shaka-player/issues/7235)) ([855d714](https://github.com/shaka-project/shaka-player/commit/855d7145d15d5267e4beceee78a1be66642d008a))
+* Dont use trick play track for liveSync feature ([#7219](https://github.com/shaka-project/shaka-player/issues/7219)) ([70258db](https://github.com/shaka-project/shaka-player/commit/70258dbae4e50abc361d247c71bf11307283188f))
+* Revert change that caused a lot of warning with "cannot find endTime" and hls playback errors ([#7239](https://github.com/shaka-project/shaka-player/issues/7239)) ([5774aea](https://github.com/shaka-project/shaka-player/commit/5774aeada35cd435fd37dc44c84b15a7b4bab938))
+* **Stats:** Fix bytesDownloaded when using src= ([#7223](https://github.com/shaka-project/shaka-player/issues/7223)) ([7665e10](https://github.com/shaka-project/shaka-player/commit/7665e10af6259894c9b9934fc2d1b8ee10f2c9c0))
+
 ## [4.10.12](https://github.com/shaka-project/shaka-player/compare/v4.10.11...v4.10.12) (2024-08-27)
 
 
