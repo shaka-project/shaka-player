@@ -38,6 +38,7 @@ describe('HlsParser', () => {
   });
 
   beforeEach(async () => {
+    video.muted = true;
     await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
     player = new compiledShaka.Player();
     await player.attach(video);
@@ -99,6 +100,7 @@ describe('HlsParser', () => {
 
     await player.load('/base/test/test/assets/hls-sample-aes/index.m3u8');
     console.log('play');
+    video.muted = false;
     await video.play();
     expect(player.isLive()).toBe(false);
 
