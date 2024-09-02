@@ -17,8 +17,13 @@ Candidate features for future release cycles:
    https://github.com/shaka-project/shaka-player/issues/898
  - Smaller, more modular binary
 
-v5.0 - 2024 Q4
+v5.0
  - Conversion to Typescript
+
+v4.12 - 2024 Q4
+ - Performance improvements
+
+=====
 
 v4.11 - 2024 Q3
  - HLS: EXT-X-START support
@@ -28,8 +33,6 @@ v4.11 - 2024 Q3
  - TTML: IMSC1 (CMAF) image subtitle
  - Render native cues using text displayer
    https://github.com/shaka-project/shaka-player/issues/2585
-
-=====
 
 v4.10 - 2024 Q3
  - HLS support for EXT-X-DATERANGE
