@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.9.26](https://github.com/shaka-project/shaka-player/compare/v4.9.25...v4.9.26) (2024-09-04)
+
+
+### Bug Fixes
+
+* Fix type passed to isTypeSupported in some cases ([#7233](https://github.com/shaka-project/shaka-player/issues/7233)) ([9a726b7](https://github.com/shaka-project/shaka-player/commit/9a726b73528e92ec3ae066105870f739855c6039))
+* **UI:** Fix font-family override in UITextDisplayer ([#7249](https://github.com/shaka-project/shaka-player/issues/7249)) ([26dfcaa](https://github.com/shaka-project/shaka-player/commit/26dfcaa5ed565762f8d326a82ccdcec398c10ae0))
+* **UI:** Remove not loaded font ([#7242](https://github.com/shaka-project/shaka-player/issues/7242)) ([4e6d144](https://github.com/shaka-project/shaka-player/commit/4e6d1447d390861a198b00eff595cd116e6d901e))
+
 ## [4.9.25](https://github.com/shaka-project/shaka-player/compare/v4.9.24...v4.9.25) (2024-08-30)
 
 
