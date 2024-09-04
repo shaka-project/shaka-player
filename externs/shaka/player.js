@@ -1337,6 +1337,7 @@ shaka.extern.MssManifestConfiguration;
  *   disableVideo: boolean,
  *   disableText: boolean,
  *   disableThumbnails: boolean,
+ *   disableIFrames: boolean,
  *   defaultPresentationDelay: number,
  *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
@@ -1369,6 +1370,10 @@ shaka.extern.MssManifestConfiguration;
  *   Defaults to <code>false</code>.
  * @property {boolean} disableThumbnails
  *   If <code>true</code>, the image tracks are ignored.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disableIFrames
+ *   If <code>true</code>, the I-Frames tracks are ignored.
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {number} defaultPresentationDelay
