@@ -1179,6 +1179,41 @@ describe('DashParser Manifest', () => {
     expect(manifest.variants[0].video.trickModeVideo).toBeUndefined();
   });
 
+  it('Disable I-Frame does not create I-Frame streams', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <EssentialProperty value="1" ',
+      '        schemeIdUri="http://dashif.org/guidelines/trickmode" />',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f">',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.disableIFrames = true;
+    parser.configure(config);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    expect(manifest.variants.length).toBe(1);
+    expect(manifest.textStreams.length).toBe(0);
+
+    const trickModeVideo = manifest.variants[0].video.trickModeVideo;
+    expect(trickModeVideo).toBeNull();
+  });
+
   it('skips unrecognized EssentialProperty elements', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
