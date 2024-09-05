@@ -67,11 +67,16 @@ shaka.test.Dash = class {
    *
    * @param {string} manifestText
    * @param {!shaka.util.Error} expectedError
+   * @param {?shaka.extern.ManifestConfiguration=} config
    * @return {!Promise}
    */
-  static async testFails(manifestText, expectedError) {
+  static async testFails(manifestText, expectedError, config) {
     const manifestData = shaka.util.StringUtils.toUTF8(manifestText);
     const dashParser = shaka.test.Dash.makeDashParser();
+
+    if (config) {
+      dashParser.configure(config);
+    }
 
     const networkingEngine = new shaka.test.FakeNetworkingEngine()
         .setResponseValue('dummy://foo', manifestData);
