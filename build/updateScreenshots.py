@@ -70,7 +70,8 @@ def main(args):
           # No original?  Then everything has changed!
           similarity = 0
 
-        if similarity >= 0.95:
+        threshold = 0.95 if '-ui-' in fullPath else 0.97
+        if similarity >= threshold:
           # Similar enough to pass tests, so don't update the image.  This will
           # keep the git history from getting bigger for no reason.
           continue
