@@ -376,7 +376,11 @@ shakaDemo.Config = class {
         .addBoolInput_('Skip play detection',
             'ads.skipPlayDetection')
         .addBoolInput_('Supports multiple media elements',
-            'ads.supportsMultipleMediaElements');
+            'ads.supportsMultipleMediaElements')
+        .addBoolInput_('Ignore HLS Interstitial',
+            'ads.disableHLSInterstitial')
+        .addBoolInput_('Ignore DASH Interstitial',
+            'ads.disableDASHInterstitial');
   }
 
   /**
