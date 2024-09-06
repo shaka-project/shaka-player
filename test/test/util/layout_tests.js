@@ -11,7 +11,8 @@
 
 
 // A minimum similarity score for screenshots, between 0 and 1.
-const minSimilarity = 0.95;
+const MIN_SIMILARITY_UI = 0.95;
+const MIN_SIMILARITY_NATIVE = 0.97;
 
 const originalCast = window.chrome && window.chrome.cast;
 
@@ -87,7 +88,7 @@ shaka.test.LayoutTests = class {
    * @param {number} minSimilarity A minimum similarity score between 0 and 1.
    * @return {!Promise}
    */
-  static async checkScreenshot(element, name, minSimilarity=1) {
+  static async checkScreenshot(element, name, minSimilarity) {
     // Make sure the DOM is up-to-date and layout has settled before continuing.
     // Without this delay, or with a shorter delay, we sometimes get missing
     // elements in our UITextDisplayer tests on some platforms.
@@ -167,6 +168,9 @@ shaka.test.TextLayoutTests = class extends shaka.test.LayoutTests {
 
     /** @type {shaka.extern.TextDisplayer} */
     this.textDisplayer = null;
+
+    /** @type {number} */
+    this.minSimilarity = MIN_SIMILARITY_NATIVE;
   }
 
   /** @override */
@@ -229,7 +233,7 @@ shaka.test.TextLayoutTests = class extends shaka.test.LayoutTests {
     return shaka.test.LayoutTests.checkScreenshot(
         /* element= */ this.videoContainer,
         this.prefix + '-' + baseName,
-        minSimilarity);
+        this.minSimilarity);
   }
 };
 
@@ -243,6 +247,9 @@ shaka.test.DomTextLayoutTests = class extends shaka.test.TextLayoutTests {
 
     /** @type {shaka.test.FakeVideo} */
     this.mockVideo = null;
+
+    /** @type {number} */
+    this.minSimilarity = MIN_SIMILARITY_UI;
   }
 
   /** @override */
