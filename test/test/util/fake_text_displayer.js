@@ -26,6 +26,8 @@ shaka.test.FakeTextDisplayer = class {
         jasmine.createSpy('setTextVisibility').and.callFake((on) => {
           isVisible = on;
         });
+    /** @type {!jasmine.Spy} */
+    this.setTextLanguageSpy = jasmine.createSpy('setTextLanguage');
   }
 
   /** @override */
@@ -59,5 +61,11 @@ shaka.test.FakeTextDisplayer = class {
   setTextVisibility(on) {
     const func = shaka.test.Util.spyFunc(this.setTextVisibilitySpy);
     return func(on);
+  }
+
+  /** @override */
+  setTextLanguage(language) {
+    const func = shaka.test.Util.spyFunc(this.setTextLanguageSpy);
+    return func(language);
   }
 };

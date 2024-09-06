@@ -203,6 +203,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         shaka.ui.Localization.LOCALE_CHANGED, (e) => {
           const locale = e['locales'][0];
           this.adManager_.setLocale(locale);
+          this.videoContainer_.setAttribute('lang', locale);
         });
 
     this.adManager_.initInterstitial(
