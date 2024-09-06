@@ -1888,7 +1888,9 @@ shaka.extern.MediaSourceConfiguration;
  * @typedef {{
  *   customPlayheadTracker: boolean,
  *   skipPlayDetection: boolean,
- *   supportsMultipleMediaElements: boolean
+ *   supportsMultipleMediaElements: boolean,
+ *   disableHLSInterstitial: boolean,
+ *   disableDASHInterstitial: boolean
  * }}
  *
  * @description
@@ -1915,6 +1917,14 @@ shaka.extern.MediaSourceConfiguration;
  *   Defaults to <code>true</code> except on Tizen, WebOS, Chromecast,
  *   Hisense, PlayStation 4, PlayStation5, Xbox whose default value is
  *   <code>false</code>.
+ * @property {boolean} disableHLSInterstitial
+ *   If this is true, we ignore HLS interstitial events.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disableDASHInterstitial
+ *   If this is true, we ignore DASH interstitial events.
+ *   <br>
+ *   Defaults to <code>false</code>.
  *
  * @exportDoc
  */
