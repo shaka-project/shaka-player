@@ -148,6 +148,52 @@ HLS features supported:
 HLS features **not** supported:
  - X-SNAP attribute in interstitials
 
+<details>
+<summary>
+<h3>Supported HLS tags</h3>
+</summary>
+
+For details on the HLS format and these tags' meanings, see https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis
+
+<h4> Multivariant Playlist tags</h4>
+
+- `#EXT-X-STREAM-INF:<attribute-list>`
+  `<URI>`
+- `#EXT-X-MEDIA:<attribute-list>`
+- `#EXT-X-IMAGE-STREAM-INF:<attribute-list>`
+- `#EXT-X-I-FRAME-STREAM-INF:<attribute-list>`
+- `#EXT-X-SESSION-DATA:<attribute-list>`
+- `#EXT-X-SESSION-KEY:<attribute-list>` EME Key-System selection and preloading
+- `#EXT-X-START:TIME-OFFSET=<n>`
+- `#EXT-X-CONTENT-STEERING:<attribute-list>` Content Steering
+- `#EXT-X-DEFINE:<attribute-list>` Variable Substitution (`NAME,VALUE,QUERYPARAM` attributes)
+
+<h4>Media Playlist tags</h4>
+
+- `#EXTM3U`
+- `#EXTINF:<duration>,[<title>]`
+- `#EXT-X-ENDLIST`
+- `#EXT-X-MEDIA-SEQUENCE=<n>`
+- `#EXT-X-TARGETDURATION=<n>`
+- `#EXT-X-DISCONTINUITY`
+- `#EXT-X-DISCONTINUITY-SEQUENCE=<n>`
+- `#EXT-X-BYTERANGE=<n>[@<o>]`
+- `#EXT-X-MAP:<attribute-list>`
+- `#EXT-X-KEY:<attribute-list>` (`KEYFORMAT="identity",METHOD=SAMPLE-AES` is only supports with MP4 segments)
+- `#EXT-X-PROGRAM-DATE-TIME:<attribute-list>`
+- `#EXT-X-START:TIME-OFFSET=<n>`
+- `#EXT-X-SERVER-CONTROL:<attribute-list>`
+- `#EXT-X-PART-INF:PART-TARGET=<n>`
+- `#EXT-X-PART:<attribute-list>`
+- `#EXT-X-SKIP:<attribute-list>` Delta Playlists
+- `#EXT-X-DATERANGE:<attribute-list>` Metadata
+- `#EXT-X-DEFINE:<attribute-list>` Variable Import and Substitution (`NAME,VALUE,IMPORT,QUERYPARAM` attributes)
+- `#EXT-X-GAP`
+- `#EXT-X-PRELOAD-HINT:<attribute-list>`
+- `#EXT-X-BITRATE`
+
+</details>
+
 
 ## MPEG-5 Part2 LCEVC Support
 
