@@ -269,7 +269,6 @@ google.ima.Ad = class {
   getMediaUrl() {}
 };
 
-
 /** @const */
 google.ima.AdPodInfo = class {
   /** @return {number} */
@@ -366,7 +365,7 @@ google.ima.AdEvent.Type = {
  * @description Request for the ad server
  * @property {string|undefined} adTagUrl
  *   Specifies the ad tag url that is requested from the ad server.
- *   This parameter is optional if adsReponse is given.
+ *   This parameter is optional if adsResponse is given.
  * @property {string|undefined} adsResponse
  *   Specifies a VAST 2.0 document to be used as the ads response instead of
  *   making a request via an ad tag url. This can be useful for debugging
@@ -518,6 +517,9 @@ google.ima.dai.api.Ad = class {
 
   /** @return {string} */
   getCreativeAdId() {}
+
+  /** @return {!Array.<!google.ima.dai.api.CompanionAd>} */
+  getCompanionAds() {}
 };
 
 
@@ -534,6 +536,24 @@ google.ima.dai.api.AdPodInfo = class {
 
   /** @return {number} */
   getPodIndex() {}
+};
+
+/** @const */
+google.ima.dai.api.CompanionAd = class {
+  /** @return {?string} */
+  getAdSlotId() {}
+
+  /** @return {string} */
+  getContent() {}
+
+  /** @return {?string} */
+  getContentType() {}
+
+  /** @return {number} */
+  getHeight() {}
+
+  /** @return {?number} */
+  getWidth() {}
 };
 
 
