@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.10.15](https://github.com/shaka-project/shaka-player/compare/v4.10.14...v4.10.15) (2024-09-09)
+
+
+### Bug Fixes
+
+* Fix rendering of image subs when using SimpleTextDisplayer ([#7258](https://github.com/shaka-project/shaka-player/issues/7258)) ([618eace](https://github.com/shaka-project/shaka-player/commit/618eace9e655595910a969287f0e95d49e21df00))
+* **TTML:** Fix subtitles not rendered due to complaint about xml:id ([#7270](https://github.com/shaka-project/shaka-player/issues/7270)) ([a89a2aa](https://github.com/shaka-project/shaka-player/commit/a89a2aad3fd62814ea82cc3d29d732fbe0401f34))
+* **UI:** Display the font-family correctly in some cases ([#7266](https://github.com/shaka-project/shaka-player/issues/7266)) ([1509c6d](https://github.com/shaka-project/shaka-player/commit/1509c6d617aa02f3baf656ce39fb61d6ce8ab459))
+* **WebVTT:** Fix mapNativeCueToShakaCue in Chromium browsers ([#7273](https://github.com/shaka-project/shaka-player/issues/7273)) ([a204963](https://github.com/shaka-project/shaka-player/commit/a2049638915a6d741ce4211b06ca0495eff9a9ed))
+
 ## [4.10.14](https://github.com/shaka-project/shaka-player/compare/v4.10.13...v4.10.14) (2024-09-04)
 
 
