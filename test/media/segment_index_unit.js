@@ -1040,6 +1040,19 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       expect(Array.from(metaIndex)).toEqual(allRefs.slice(4));
     });
 
+    it('evicts empty segmentIndexes when calling evictEmpty', () => {
+      metaIndex.appendSegmentIndex(index0);
+      metaIndex.appendSegmentIndex(index1);
+      metaIndex.appendSegmentIndex(index2);
+      expect(Array.from(metaIndex)).toEqual(
+          inputRefs0.concat(inputRefs1, inputRefs2));
+      index0.evict(75);
+      index1.evict(75);
+      index2.evict(75);
+      metaIndex.evictEmpty();
+      expect(Array.from(metaIndex)).toEqual(inputRefs2.slice(1));
+    });
+
     it('updates through updateEvery', async () => {
       metaIndex.appendSegmentIndex(index0);
       metaIndex.appendSegmentIndex(index1);
