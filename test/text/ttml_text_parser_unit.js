@@ -1591,6 +1591,36 @@ describe('TtmlTextParser', () => {
         {startTime: 1, endTime: 2});
   });
 
+  it('translates alpha level between TTML rgba() and HTML rgba()', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 1,
+            endTime: 2,
+            backgroundColor: '',
+            nestedCues: [{
+              payload: 'alpha value',
+              color: 'rgba(255,255,255,1)',
+              backgroundColor: 'rgba(0,128,128,0.4)',
+              textStrokeColor: 'rgba(0,0,0,0.8)',
+              textStrokeWidth: '3px',
+            }],
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<head><styling>' +
+        '<style xml:id="style_1" tts:color="rgba(255,255,255,255)" ' +
+        'tts:textOutline="rgba(0,0,0,204) 3px" ' +
+        'tts:backgroundColor="rgba(0,128,128,102) "' +
+        '/></styling>' +
+        '</head><body><div>' +
+        '<p tts:textAlign="center" begin="00:01.00" end="00:02.00">' +
+        '<span style="style_1">alpha value</span></p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 10, vttOffset: 0},
+        {startTime: 1, endTime: 2});
+  });
+
   // Regression test for #2623
   it('does not apply background colors to containers', () => {
     verifyHelper(
