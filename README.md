@@ -172,6 +172,7 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 
 - `#EXTM3U`
 - `#EXTINF:<duration>,[<title>]`
+- `#EXT-X-PLAYLIST-TYPE:<type`
 - `#EXT-X-ENDLIST`
 - `#EXT-X-MEDIA-SEQUENCE=<n>`
 - `#EXT-X-TARGETDURATION=<n>`
