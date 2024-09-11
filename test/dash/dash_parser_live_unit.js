@@ -1483,6 +1483,37 @@ describe('DashParser Live', () => {
       expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
           jasmine.objectContaining({id: '4'}));
     });
+
+    it('will offset events by given presentationTimeOffset', async () => {
+      const newManifest = [
+        '<MPD>',
+        '  <Period id="1" duration="PT30S">',
+        '    <EventStream schemeIdUri="http://example.com" timescale="1"',
+        '                 presentationTimeOffset="10">',
+        '      <Event presentationTime="10" duration="15"/>',
+        '      <Event presentationTime="25" duration="10"/>',
+        '    </EventStream>',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '                         duration="2" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('dummy://foo', newManifest);
+      await parser.start('dummy://foo', playerInterface);
+
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(2);
+      expect(onTimelineRegionAddedSpy)
+          .toHaveBeenCalledWith(
+              jasmine.objectContaining({startTime: 0, endTime: 15}));
+      expect(onTimelineRegionAddedSpy)
+          .toHaveBeenCalledWith(
+              jasmine.objectContaining({startTime: 15, endTime: 25}));
+    });
   });
 
   it('honors clockSyncUri for in-progress recordings', async () => {
