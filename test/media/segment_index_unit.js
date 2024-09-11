@@ -1040,6 +1040,27 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       expect(Array.from(metaIndex)).toEqual(allRefs.slice(4));
     });
 
+    it('evicts empty SegmentIndexes when calling evictEmpty', () => {
+      const release0 = spyOn(index0, 'release');
+      const release1 = spyOn(index1, 'release');
+      const release2 = spyOn(index2, 'release');
+      metaIndex.appendSegmentIndex(index0);
+      metaIndex.appendSegmentIndex(index1);
+      metaIndex.appendSegmentIndex(index2);
+      expect(Array.from(metaIndex)).toEqual(
+          inputRefs0.concat(inputRefs1, inputRefs2));
+      expect(metaIndex.getNumEvicted()).toBe(0);
+      index0.evict(75);
+      index1.evict(75);
+      index2.evict(75);
+      metaIndex.evictEmpty();
+      expect(Array.from(metaIndex)).toEqual(inputRefs2.slice(1));
+      expect(release0).toHaveBeenCalled();
+      expect(release1).toHaveBeenCalled();
+      expect(release2).not.toHaveBeenCalled();
+      expect(metaIndex.getNumEvicted()).toBe(6);
+    });
+
     it('updates through updateEvery', async () => {
       metaIndex.appendSegmentIndex(index0);
       metaIndex.appendSegmentIndex(index1);
