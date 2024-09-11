@@ -100,15 +100,15 @@ describe('PeriodCombiner', () => {
     expect(h1080Surround.audio.originalId).toBe('en-6c,en');
     expect(h720Surround.video.originalId).toBe('720,480');
     expect(h720Surround.audio.originalId).toBe('en-6c,en');
-    expect(h480Surround.video.originalId).toBe('480,480');
+    expect(h480Surround.video.originalId).toBe('480');
     expect(h480Surround.audio.originalId).toBe('en-6c,en');
 
     expect(h1080Stereo.video.originalId).toBe('1080,480');
-    expect(h1080Stereo.audio.originalId).toBe('en,en');
+    expect(h1080Stereo.audio.originalId).toBe('en');
     expect(h720Stereo.video.originalId).toBe('720,480');
-    expect(h720Stereo.audio.originalId).toBe('en,en');
-    expect(h480Stereo.video.originalId).toBe('480,480');
-    expect(h480Stereo.audio.originalId).toBe('en,en');
+    expect(h720Stereo.audio.originalId).toBe('en');
+    expect(h480Stereo.video.originalId).toBe('480');
+    expect(h480Stereo.audio.originalId).toBe('en');
   });
 
   it('Ad insertion - join during ad', async () => {
@@ -178,15 +178,15 @@ describe('PeriodCombiner', () => {
     expect(h1080Surround.audio.originalId).toBe('en,en-6c');
     expect(h720Surround.video.originalId).toBe('480,720');
     expect(h720Surround.audio.originalId).toBe('en,en-6c');
-    expect(h480Surround.video.originalId).toBe('480,480');
+    expect(h480Surround.video.originalId).toBe('480');
     expect(h480Surround.audio.originalId).toBe('en,en-6c');
 
     expect(h1080Stereo.video.originalId).toBe('480,1080');
-    expect(h1080Stereo.audio.originalId).toBe('en,en');
+    expect(h1080Stereo.audio.originalId).toBe('en');
     expect(h720Stereo.video.originalId).toBe('480,720');
-    expect(h720Stereo.audio.originalId).toBe('en,en');
-    expect(h480Stereo.video.originalId).toBe('480,480');
-    expect(h480Stereo.audio.originalId).toBe('en,en');
+    expect(h720Stereo.audio.originalId).toBe('en');
+    expect(h480Stereo.video.originalId).toBe('480');
+    expect(h480Stereo.audio.originalId).toBe('en');
   });
 
   it('Ad insertion - smaller ad, res not found in main content', async () => {
@@ -690,8 +690,8 @@ describe('PeriodCombiner', () => {
 
     const imageIds = imageStreams.map((i) => i.originalId);
     expect(imageIds).toEqual([
-      '240,240',
-      '480,480',
+      '240',
+      '480',
     ]);
   });
 
@@ -756,9 +756,9 @@ describe('PeriodCombiner', () => {
     // Both tracks are composed of the same things.
     const spanish = textStreams.find((s) => s.language == 'es');
     const english = textStreams.find((s) => s.language == 'en');
-    expect(spanish.originalId).toBe(',,es');
+    expect(spanish.originalId).toBe(',es');
     expect(spanish.originalLanguage).toBe('spa');
-    expect(english.originalId).toBe('en,,en');
+    expect(english.originalId).toBe('en');
     expect(english.originalLanguage).toBe('en');
   });
 
@@ -822,8 +822,8 @@ describe('PeriodCombiner', () => {
 
     const i240 = imageStreams.find((s) => s.height == 240);
     const i480 = imageStreams.find((s) => s.height == 480);
-    expect(i240.originalId).toBe('240,,240');
-    expect(i480.originalId).toBe('240,,480');
+    expect(i240.originalId).toBe('240');
+    expect(i480.originalId).toBe('240,480');
   });
 
   it('Disjoint audio channels', async () => {
@@ -1363,10 +1363,10 @@ describe('PeriodCombiner', () => {
     ]));
 
     // We can use the originalId field to see what each track is composed of.
-    expect(variants[0].audio.originalId).toBe('stream1,stream1');
-    expect(variants[1].audio.originalId).toBe('stream1,stream1');
-    expect(variants[2].audio.originalId).toBe('stream2,stream2');
-    expect(variants[3].audio.originalId).toBe('stream2,stream2');
+    expect(variants[0].audio.originalId).toBe('stream1');
+    expect(variants[1].audio.originalId).toBe('stream1');
+    expect(variants[2].audio.originalId).toBe('stream2');
+    expect(variants[3].audio.originalId).toBe('stream2');
   });
 
   it('Matches streams based on bandwidth when roles are equal', async () => {
@@ -1508,10 +1508,10 @@ describe('PeriodCombiner', () => {
 
     // We can use the originalId field to see what each track is composed of.
     expect(variants[0].audio.originalId)
-        .toBe('stream1,stream1,stream1,stream1');
+        .toBe('stream1');
 
     expect(variants[1].audio.originalId)
-        .toBe('stream1,stream1,stream1,stream1');
+        .toBe('stream1');
 
     expect(variants[2].audio.originalId)
         .toBe('stream1,stream2,stream1,stream2');
