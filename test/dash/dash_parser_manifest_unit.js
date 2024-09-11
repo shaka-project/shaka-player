@@ -3615,13 +3615,13 @@ describe('DashParser Manifest', () => {
 
   it('mixing SegmentTemplate-SegmentTimeline with SegmentTemplate-numbering', async () => { // eslint-disable-line max-len
     const manifestText = [
-      `<MPD type="static">`,
+      '<MPD type="static">',
       '  <Period id="1" duration="PT2S">',
       '    <AdaptationSet id="2" mimeType="video/mp4">',
       '      <Representation id="3" width="640" height="480">',
       '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4">',
       '          <SegmentTimeline>',
-      `            <S t="0" d="2" />`,
+      '            <S t="0" d="2" />',
       '          </SegmentTimeline>',
       '        </SegmentTemplate>',
       '      </Representation>',
@@ -3648,7 +3648,7 @@ describe('DashParser Manifest', () => {
 
   it('mixing SegmentTemplate-numbering with SegmentTemplate-SegmentTimeline', async () => { // eslint-disable-line max-len
     const manifestText = [
-      `<MPD type="static">`,
+      '<MPD type="static">',
       '  <Period id="4" duration="PT30S">',
       '    <AdaptationSet id="5" mimeType="video/mp4">',
       '      <SegmentTemplate media="$Number$.mp4" duration="1" />',
@@ -3660,7 +3660,7 @@ describe('DashParser Manifest', () => {
       '      <Representation id="3" width="640" height="480">',
       '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4">',
       '          <SegmentTimeline>',
-      `            <S t="0" d="2" />`,
+      '            <S t="0" d="2" />',
       '          </SegmentTimeline>',
       '        </SegmentTemplate>',
       '      </Representation>',
