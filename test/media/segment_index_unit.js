@@ -1049,6 +1049,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       metaIndex.appendSegmentIndex(index2);
       expect(Array.from(metaIndex)).toEqual(
           inputRefs0.concat(inputRefs1, inputRefs2));
+      expect(metaIndex.getNumEvicted()).toEqual(0);
       index0.evict(75);
       index1.evict(75);
       index2.evict(75);
@@ -1057,6 +1058,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       expect(release0).toHaveBeenCalled();
       expect(release1).toHaveBeenCalled();
       expect(release2).not.toHaveBeenCalled();
+      expect(metaIndex.getNumEvicted()).toEqual(6);
     });
 
     it('updates through updateEvery', async () => {
