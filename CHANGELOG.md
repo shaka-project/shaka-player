@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.11.2](https://github.com/shaka-project/shaka-player/compare/v4.11.1...v4.11.2) (2024-09-11)
+
+
+### Bug Fixes
+
+* **DASH:** Avoid adding originalId when it is not necessary ([#7281](https://github.com/shaka-project/shaka-player/issues/7281)) ([15ebdc1](https://github.com/shaka-project/shaka-player/commit/15ebdc10510556a7f53b936220b72ea189d0e45d))
+* **DASH:** Clone EventStream nodes to reduce memory consumption ([#7285](https://github.com/shaka-project/shaka-player/issues/7285)) ([edd232b](https://github.com/shaka-project/shaka-player/commit/edd232ba1425aa98ce029e52a729e067f05a6fbe)), closes [#7148](https://github.com/shaka-project/shaka-player/issues/7148)
+* **DASH:** Evict empty indexes in MetaSegmentIndex ([#7272](https://github.com/shaka-project/shaka-player/issues/7272)) ([b00ea8b](https://github.com/shaka-project/shaka-player/commit/b00ea8bd551f8bc8de3237e75b915bbbe9eba81c))
+* **DASH:** Use presentationTimeOffset in EventStream ([#7282](https://github.com/shaka-project/shaka-player/issues/7282)) ([0a21de1](https://github.com/shaka-project/shaka-player/commit/0a21de1a1a014ef7d4a3f7b698f991c1ea20c00f)), closes [#7277](https://github.com/shaka-project/shaka-player/issues/7277)
+* **TTML:** Fix absence of conversion of alpha (transparency) from 0-255 -&gt; 0-1 ([#7280](https://github.com/shaka-project/shaka-player/issues/7280)) ([dbb6518](https://github.com/shaka-project/shaka-player/commit/dbb6518981d2f49b6ddd279a292985081268d8a0)), closes [#7279](https://github.com/shaka-project/shaka-player/issues/7279)
+
 ## [4.11.1](https://github.com/shaka-project/shaka-player/compare/v4.11.0...v4.11.1) (2024-09-09)
 
 
