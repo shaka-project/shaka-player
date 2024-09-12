@@ -46,6 +46,13 @@ const preloadManager = await player.preload(
     15, 'application/dash+xml');
 ```
 
+In order to cancel a preload in process, you can call the `destroy` method on
+the preloadManager.
+
+If you want to configure how many segments are preloaded by the preloadManager,
+set the `streaming.segmentPrefetchLimit` configuration value before calling
+`player.preload`.
+
 
 #### Saving Preloaders
 
