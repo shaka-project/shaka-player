@@ -3573,4 +3573,70 @@ describe('DashParser Manifest', () => {
           .toEqual(['dummy://foo/init.mp4?a=1']);
     });
   });
+
+  it('mixing SegmentTemplate-SegmentTimeline with SegmentTemplate-numbering', async () => { // eslint-disable-line max-len
+    const manifestText = [
+      '<MPD type="static">',
+      '  <Period id="1" duration="PT2S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation id="3" width="640" height="480">',
+      '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="2" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '  <Period id="4" duration="PT30S">',
+      '    <AdaptationSet id="5" mimeType="video/mp4">',
+      '      <SegmentTemplate media="$Number$.mp4" duration="1" />',
+      '      <Representation id="6" width="640" height="480" />',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    const timeline = manifest.presentationTimeline;
+    expect(timeline.getSeekRangeStart()).toBe(0);
+    expect(timeline.getSeekRangeEnd()).toBe(32);
+  });
+
+  it('mixing SegmentTemplate-numbering with SegmentTemplate-SegmentTimeline', async () => { // eslint-disable-line max-len
+    const manifestText = [
+      '<MPD type="static">',
+      '  <Period id="4" duration="PT30S">',
+      '    <AdaptationSet id="5" mimeType="video/mp4">',
+      '      <SegmentTemplate media="$Number$.mp4" duration="1" />',
+      '      <Representation id="6" width="640" height="480" />',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '  <Period id="1" duration="PT2S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation id="3" width="640" height="480">',
+      '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="2" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    const timeline = manifest.presentationTimeline;
+    expect(timeline.getSeekRangeStart()).toBe(0);
+    expect(timeline.getSeekRangeEnd()).toBe(32);
+  });
 });
