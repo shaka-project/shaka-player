@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.9.2-caf1](https://github.com/shaka-project/shaka-player/compare/v4.9.2...v4.9.2-caf1) (2024-09-13)
+
+
+### Bug Fixes
+
+* Do not seek to first subtitle ([8e91b45](https://github.com/shaka-project/shaka-player/commit/8e91b4525bd6fac887fea5e9028d072cf9542d94)), closes [#7310](https://github.com/shaka-project/shaka-player/issues/7310)
+
 ## [4.9.2](https://github.com/shaka-project/shaka-player/compare/v4.9.1...v4.9.2) (2024-06-04)
 
 
