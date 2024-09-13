@@ -87,7 +87,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          sha: ${{ needs.compute-sha.outputs.SHA }}
+          ref: ${{ needs.compute-sha.outputs.SHA }}
 
       - name: Install dependencies
         run: npm ci
