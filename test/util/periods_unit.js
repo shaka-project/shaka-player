@@ -1259,8 +1259,8 @@ describe('PeriodCombiner', () => {
     expect(video2.originalId).toBe('3,4');
     expect(video2.matchedStreams.length).toBe(2);
 
-    combiner.deleteStream(stream1);
-    combiner.deleteStream(stream3);
+    combiner.deleteStream(stream1, '0');
+    combiner.deleteStream(stream3, '1');
 
     variants = combiner.getVariants();
     expect(variants.length).toBe(2);
