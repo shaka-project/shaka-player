@@ -53,10 +53,6 @@ on:
     # Runs every night at 2am PST / 10am UTC, testing against the main branch.
     - cron: '0 10 * * *'
 
-# Only one run of this workflow is allowed at a time, since it uses physical
-# resources in our lab.
-concurrency: selenium-lab
-
 jobs:
   compute-sha:
     name: Compute SHA
@@ -212,6 +208,11 @@ jobs:
     # This is a self-hosted runner in a Docker container, with access to our
     # lab's Selenium grid on port 4444.
     runs-on: self-hosted-selenium
+
+    # Only one run of this job is allowed at a time, since it uses physical
+    # resources in our lab.
+    concurrency: selenium-lab-${{ matrix.browser }}
+
     needs: [compute-sha, build-shaka, matrix-config]
     strategy:
       fail-fast: false
