@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.10.17](https://github.com/shaka-project/shaka-player/compare/v4.10.16...v4.10.17) (2024-09-14)
+
+
+### Bug Fixes
+
+* **DASH:** Allow mixing SegmentTemplate-SegmentTimeline with SegmentTemplate-numbering ([#7286](https://github.com/shaka-project/shaka-player/issues/7286)) ([9d4caab](https://github.com/shaka-project/shaka-player/commit/9d4caab8943fe67f2660271d721568f0d7a0aaf4))
+* **DASH:** Clear streamMap when period is removed from the manifest ([#7297](https://github.com/shaka-project/shaka-player/issues/7297)) ([71a8414](https://github.com/shaka-project/shaka-player/commit/71a84144a1fe203b69f049cfa7ac7e74c1a2bf0a))
+* **DASH:** Clear usedPeriodIds when period is removed from the manifest ([#7305](https://github.com/shaka-project/shaka-player/issues/7305)) ([cbce2dc](https://github.com/shaka-project/shaka-player/commit/cbce2dcca7a45fdc56f09ed456860c9d7a005e79))
+* **DASH:** Clone closedCaptions map in PeriodCombiner output stream ([#7309](https://github.com/shaka-project/shaka-player/issues/7309)) ([5eff3d9](https://github.com/shaka-project/shaka-player/commit/5eff3d9116b9b395019fe88ca281a79b939eddb4)), closes [#7303](https://github.com/shaka-project/shaka-player/issues/7303)
+* **DASH:** Evict (by time) indexes in MetaSegmentIndex ([#7296](https://github.com/shaka-project/shaka-player/issues/7296)) ([a919feb](https://github.com/shaka-project/shaka-player/commit/a919febf0ef5115689128aa266af7ac1fe40fd73))
+* Do not seek to first subtitle ([#7312](https://github.com/shaka-project/shaka-player/issues/7312)) ([b7a940a](https://github.com/shaka-project/shaka-player/commit/b7a940acc02df30ad544c93b2ec50ae702d6080b)), closes [#7310](https://github.com/shaka-project/shaka-player/issues/7310)
+
+
+### Performance Improvements
+
+* **DASH:** Create segment indexes only on new periods ([#7294](https://github.com/shaka-project/shaka-player/issues/7294)) ([0333f9e](https://github.com/shaka-project/shaka-player/commit/0333f9ef563a39d9b877a562e79bc160d486c881))
+* **DASH:** Delete old matchedStreams ([#7301](https://github.com/shaka-project/shaka-player/issues/7301)) ([729afb1](https://github.com/shaka-project/shaka-player/commit/729afb1089b39641d647f34bf11bceb2816929b1))
+* **DASH:** Delete old matchedStreams when using trickmodeVideo ([#7306](https://github.com/shaka-project/shaka-player/issues/7306)) ([ea25ca3](https://github.com/shaka-project/shaka-player/commit/ea25ca3b418f0919f3406f8c0c84988c4b81af38))
+* Only use tXml parent when necessary ([#7304](https://github.com/shaka-project/shaka-player/issues/7304)) ([81a0efa](https://github.com/shaka-project/shaka-player/commit/81a0efa36d99bd5c9bf41a04b3568d4431c35107))
+
 ## [4.10.16](https://github.com/shaka-project/shaka-player/compare/v4.10.15...v4.10.16) (2024-09-11)
 
 
