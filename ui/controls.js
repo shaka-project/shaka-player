@@ -259,6 +259,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.castProxy_ = null;
     }
 
+    if (this.spinnerContainer_) {
+      this.videoContainer_.removeChild(this.spinnerContainer_);
+      this.spinnerContainer_ = null;
+    }
+
+    if (this.clientAdContainer_) {
+      this.videoContainer_.removeChild(this.clientAdContainer_);
+      this.clientAdContainer_ = null;
+    }
+
     if (this.localPlayer_) {
       await this.localPlayer_.destroy();
       this.localPlayer_ = null;
@@ -518,6 +528,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   getClientSideAdContainer() {
+    goog.asserts.assert(
+        this.clientAdContainer_, 'No client ad container after destruction!');
     return this.clientAdContainer_;
   }
 
@@ -976,7 +988,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   addBufferingSpinner_() {
-    /** @private {!HTMLElement} */
+    /** @private {HTMLElement} */
     this.spinnerContainer_ = shaka.util.Dom.createHTMLElement('div');
     this.spinnerContainer_.classList.add('shaka-spinner-container');
     this.videoContainer_.appendChild(this.spinnerContainer_);
@@ -1133,7 +1145,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   addClientAdContainer_() {
-    /** @private {!HTMLElement} */
+    /** @private {HTMLElement} */
     this.clientAdContainer_ = shaka.util.Dom.createHTMLElement('div');
     this.clientAdContainer_.classList.add('shaka-client-side-ad-container');
     shaka.ui.Utils.setDisplay(this.clientAdContainer_, false);
