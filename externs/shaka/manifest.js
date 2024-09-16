@@ -562,3 +562,25 @@ shaka.extern.Stream;
  * @exportDoc
  */
 shaka.extern.MssPrivateData;
+
+
+/**
+ * @typedef {{
+ *   height: number,
+ *   positionX: number,
+ *   positionY: number,
+ *   width: number
+ * }}
+ *
+ * @property {number} height
+ *    The thumbnail height in px.
+ * @property {number} positionX
+ *    The thumbnail left position in px.
+ * @property {number} positionY
+ *    The thumbnail top position in px.
+ * @property {number} width
+ *    The thumbnail width in px.
+ *
+ * @exportDoc
+ */
+shaka.extern.ThumbnailSprite;
