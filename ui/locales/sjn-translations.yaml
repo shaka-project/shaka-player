@@ -5,9 +5,13 @@
 # This documents the manual translation of our UI into Sindarin.
 # This file is not consumed automatically.
 
+# To edit this file, install the "Tengwar Telcontar" font linked below and use
+# an editor that will pick that up automatically for the correct character set.
+# For example, gedit does a good job of this.
+
 # References:
 #  - Font: http://freetengwar.sourceforge.net/tengtelc.html
-#  - Transliteration & dictionary: https://www.tecendil.com/?mode=sindarin
+#  - Transliteration: https://www.tecendil.com/?mode=sindarin
 #  - Dictionary: https://www.jrrvf.com/hisweloke/sindar/
 #  - Dictionary: https://www.elfdict.com/w/run/s?include_old=1
 #  - Grammar: https://www.elvish.org/gwaith/sindarin_intro.htm
@@ -27,6 +31,12 @@ translations:
    sjn-literal: "break for money [A] / [B]"
    sjn-roman: "hastië an mirian [A] / [B]"
    sjn: "   [AD_ON] / [NUM_ADS]"
+
+ - key: AD_STATISTICS
+   english: "Ad statistics"
+   sjn-literal: "break for money tidings"
+   sjn-roman: "hastië an mirian siniath"
+   sjn: "   "
 
  - key: AD_TIME
    english: "Ad: [AD_TIME]"
@@ -63,6 +73,18 @@ translations:
    sjn-literal: "throw"
    sjn-roman: "hanto"
    sjn: ""
+
+ - key: CHAPTERS
+   english: Chapters
+   sjn-literal: "events"
+   sjn-roman: "tylme"
+   sjn: ""
+
+ - key: DOWNLOAD_VIDEO_FRAME
+   english: Save video frame
+   sjn-literal: "keep mind-picture"
+   sjn-roman: "garo fanwos"
+   sjn: " "
 
  - key: ENTER_LOOP_MODE
    english: "Loop the current video"
@@ -148,13 +170,13 @@ translations:
    sjn-roman: "la bâl"
    sjn: " "
 
- - key: OFF
+ - key: "OFF"
    english: "Off"
    sjn-literal: "nothing"
    sjn-roman: "unt"
    sjn: ""
 
- - key: ON
+ - key: "ON"
    english: "On"
    sjn-literal: "active"
    sjn-roman: "carweg"
@@ -184,6 +206,18 @@ translations:
    sjn-roman: "lintië"
    sjn: ""
 
+ - key: QUALITY
+   english: Quality
+   sjn-literal: "brilliance"
+   sjn-roman: "aglar"
+   sjn: ""
+
+ - key: RECENTER_VR
+   english: Recenter
+   sjn-literal: "center"
+   sjn-roman: "ened"
+   sjn: ""
+
  - key: REPLAY
    english: "Replay"
    sjn-literal: "make-run again"
@@ -212,7 +246,7 @@ translations:
    english: "Skip Ad"
    sjn-literal: "leap across break for money"
    sjn-roman: "cabo thar hastië an mirian"
-   sjn: "    "
+   sjn: "    "
 
  - key: SKIP_TO_LIVE
    english: "Skip ahead to live"
@@ -231,6 +265,18 @@ translations:
    sjn-literal: "words written firm/abiding"
    sjn-roman: "pith teithiel taug"
    sjn: "  "
+
+ - key: SURROUND
+   english: Surround
+   sjn-literal: "surround"
+   sjn-roman: "ostao"
+   sjn: ""
+
+ - key: TOGGLE_STEREOSCOPIC
+   english: Toggle stereoscopic
+   sjn-literal: "double-seeing"
+   sjn-roman: "at-tírad"
+   sjn: ""
 
  - key: UNDETERMINED_LANGUAGE
    english: "Undetermined"
