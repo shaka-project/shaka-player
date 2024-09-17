@@ -1175,6 +1175,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.THUMBNAILS)
+      .addFeature(shakaAssets.Feature.OFFLINE)
       .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt'),
   new ShakaDemoAssetInfo(
       /* name= */ 'Art of Motion (HLS) (external thumbnails)',
@@ -1185,6 +1186,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.THUMBNAILS)
+      .addFeature(shakaAssets.Feature.OFFLINE)
       .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt'),
   new ShakaDemoAssetInfo(
       /* name= */ 'Art of Motion (MP4) (external thumbnails)',

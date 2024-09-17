@@ -347,6 +347,7 @@ describe('ManifestConverter', () => {
       tilesLayout: '',
       mimeType,
       codecs,
+      thumbnailSprite: null,
     };
 
     return segment;

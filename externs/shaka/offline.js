@@ -235,7 +235,8 @@ shaka.extern.StreamDB;
  *   pendingInitSegmentRefId: (string|undefined),
  *   dataKey: number,
  *   mimeType: ?string,
- *   codecs: ?string
+ *   codecs: ?string,
+ *   thumbnailSprite: ?shaka.extern.ThumbnailSprite
  * }}
  *
  * @property {?number} initSegmentKey
@@ -272,6 +273,8 @@ shaka.extern.StreamDB;
  *   The mimeType of the segment.
  * @property {?string} codecs
  *   The codecs of the segment.
+ * @property {?shaka.extern.ThumbnailSprite} thumbnailSprite
+ *   The segment's thumbnail sprite.
  */
 shaka.extern.SegmentDB;
 
