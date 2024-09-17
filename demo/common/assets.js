@@ -183,29 +183,6 @@ shakaAssets.Feature = {
  * @typedef {{
  *   uri: string,
  *   language: string,
- *   kind: string,
- *   mime: string,
- *   codecs: (string|undefined)
- * }}
- *
- * @property {string} uri
- *   The URI of the text.
- * @property {string} language
- *   The language of the text (e.g. 'en').
- * @property {string} kind
- *   The kind of text (e.g. 'subtitles').
- * @property {string} mime
- *   The MIME type of the text (e.g. 'text/vtt')
- * @property {(string|undefined)} codecs
- *   (optional) The codecs string, if needed to refine the MIME type.
- */
-shakaAssets.ExtraText;
-
-
-/**
- * @typedef {{
- *   uri: string,
- *   language: string,
  *   mime: string
  * }}
  *
