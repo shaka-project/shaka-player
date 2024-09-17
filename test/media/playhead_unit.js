@@ -150,7 +150,7 @@ describe('Playhead', () => {
     if (shaka.util.Platform.isLegacyEdge() ||
         shaka.util.Platform.isXboxOne() ||
         shaka.util.Platform.isTizen()) {
-      gapPadding = config_.gapPadding;
+      gapPadding = config.gapPadding;
     }
   });
 
