@@ -891,7 +891,7 @@ describe('Playhead', () => {
           start: 3,
           waitingAt: 10,
           expectEvent: false,
-          expectedEndTime: 10 + config.streaming.gapPadding,
+          expectedEndTime: 10 + gapPadding,
         });
 
         playingTest('won\'t jump at end of multiple regions', {
