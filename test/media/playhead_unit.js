@@ -92,7 +92,7 @@ describe('Playhead', () => {
   let playhead;
   /** @type {shaka.extern.StreamingConfiguration} */
   let config;
-  /** @type {Number} */
+  /** @type {number} */
   let gapPadding = 0;
 
   // Callback to us from Playhead when a valid 'seeking' event occurs.
