@@ -40,7 +40,7 @@ const ShakaDemoAssetInfo = class {
     this.focus = false;
     /** @type {boolean} */
     this.disabled = false;
-    /** @type {!Array.<!shakaAssets.ExtraText>} */
+    /** @type {!Array.<!shaka.extern.ExtraText>} */
     this.extraText = [];
     /** @type {!Array.<string>} */
     this.extraThumbnail = [];
@@ -327,7 +327,7 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * @param {shakaAssets.ExtraText} extraText
+   * @param {shaka.extern.ExtraText} extraText
    * @return {!ShakaDemoAssetInfo}
    */
   addExtraText(extraText) {

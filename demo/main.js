@@ -587,7 +587,8 @@ shakaDemo.Main = class {
         this.dispatchEventWithName_('shaka-main-offline-progress');
         const start = Date.now();
         const stored = await storage.store(asset.manifestUri, metadata,
-            /* mimeType= */ null, asset.extraThumbnail).promise;
+            /* mimeType= */ null, asset.extraThumbnail,
+            asset.extraText).promise;
         const end = Date.now();
         console.log('Download time:', end - start);
         asset.storedContent = stored;
@@ -1372,17 +1373,16 @@ shakaDemo.Main = class {
         this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
       }
 
-      for (const extraText of asset.extraText) {
-        if (extraText.mime) {
-          this.player_.addTextTrackAsync(extraText.uri, extraText.language,
-              extraText.kind, extraText.mime, extraText.codecs);
-        } else {
-          this.player_.addTextTrackAsync(extraText.uri, extraText.language,
-              extraText.kind);
-        }
-      }
-
       if (!(asset.storedContent && asset.storedContent.offlineUri)) {
+        for (const extraText of asset.extraText) {
+          if (extraText.mime) {
+            this.player_.addTextTrackAsync(extraText.uri, extraText.language,
+                extraText.kind, extraText.mime, extraText.codecs);
+          } else {
+            this.player_.addTextTrackAsync(extraText.uri, extraText.language,
+                extraText.kind);
+          }
+        }
         for (const extraThumbnail of asset.extraThumbnail) {
           this.player_.addThumbnailsTrack(extraThumbnail);
         }
