@@ -55,7 +55,7 @@ assignees: ''
 -->
 
 
-**What configuration are you using?  What is the output of `player.getConfiguration()`?**
+**What configuration are you using?  What is the output of `player.getNonDefaultConfiguration()`?**
 <!-- NOTE:
   You can censor URLs to keep them private, but include them in the email.  You
   can also use JSON.stringify(player.getNonDefaultConfiguration(), null, 2) to
