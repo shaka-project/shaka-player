@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.10.18](https://github.com/shaka-project/shaka-player/compare/v4.10.17...v4.10.18) (2024-09-18)
+
+
+### Bug Fixes
+
+* Avoid make HEAD request for image mime type ([#7332](https://github.com/shaka-project/shaka-player/issues/7332)) ([7a509a9](https://github.com/shaka-project/shaka-player/commit/7a509a97764a80b79d99b4b939c418eb3369dd25))
+* **DASH:** Fix HTTP redirect during manifest update ([#7339](https://github.com/shaka-project/shaka-player/issues/7339)) ([5ba69b1](https://github.com/shaka-project/shaka-player/commit/5ba69b18c1757fc4baf01eec79baf5910dae4b2b))
+* Fix external image track mime type ([#7333](https://github.com/shaka-project/shaka-player/issues/7333)) ([3cc5c1f](https://github.com/shaka-project/shaka-player/commit/3cc5c1fe191fd6516caf94b737d59e235204de0f))
+* **HLS:** Fix uncaught error in slow network scenario ([#7321](https://github.com/shaka-project/shaka-player/issues/7321)) ([b8e5f74](https://github.com/shaka-project/shaka-player/commit/b8e5f7415f234d323f36a9705873d588497d6ffd))
+* **offline:** Text segments are downloaded before audio&video ([#7336](https://github.com/shaka-project/shaka-player/issues/7336)) ([c76b145](https://github.com/shaka-project/shaka-player/commit/c76b145abaf88c18e35682bb2b40e8d8733e9e66))
+* **Tizen:** Adding gapPadding to gap manager to solve Tizen issue ([#7331](https://github.com/shaka-project/shaka-player/issues/7331)) ([2a4bc1d](https://github.com/shaka-project/shaka-player/commit/2a4bc1d4f516b97c8bf1ebbd43e3c6c53a0e8433))
+* **UI:** Remove spinner and client side ad container elements when calling destroy ([#7320](https://github.com/shaka-project/shaka-player/issues/7320)) ([2c44f2e](https://github.com/shaka-project/shaka-player/commit/2c44f2e78a4faa194358272f6ebd05663420e06b))
+
 ## [4.10.17](https://github.com/shaka-project/shaka-player/compare/v4.10.16...v4.10.17) (2024-09-14)
 
 
