@@ -1383,6 +1383,7 @@ shaka.extern.LiveSyncConfiguration;
  *   alwaysStreamText: boolean,
  *   startAtSegmentBoundary: boolean,
  *   gapDetectionThreshold: number,
+ *   gapPadding: number,
  *   gapJumpTimerTime: number,
  *   durationBackoff: number,
  *   safeSeekOffset: number,
@@ -1462,6 +1463,13 @@ shaka.extern.LiveSyncConfiguration;
  * @property {number} gapDetectionThreshold
  *   The maximum distance (in seconds) before a gap when we'll automatically
  *   jump. This value defaults to <code>0.5</code>.
+ * @property {number} gapPadding
+ *   Padding added only for Xbox, Legacy Edge and Tizen.
+ *   Based on our research (specific to Tizen), the gapPadding value must be
+ *   greater than your GOP length.
+ *   It’s crucial to verify this value according to your actual stream.
+ *   <br>
+ *   Defaults to <code>0.01</code> for Xbox and Legacy Edge, Tizen at 2.
  * @property {number} gapJumpTimerTime
  *   The polling time in seconds to check for gaps in the media. This value
  *   defaults to <code>0.25</code>.
