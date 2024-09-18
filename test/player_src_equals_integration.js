@@ -453,6 +453,8 @@ describe('Player Src Equals', () => {
 
           expect(player.getImageTracks()).toEqual([newTrack]);
 
+          expect(newTrack.mimeType).toBe('image/jpeg');
+
           const thumbnail1 = await player.getThumbnails(newTrack.id, 0);
           expect(thumbnail1.startTime).toBe(0);
           expect(thumbnail1.duration).toBe(5);
@@ -490,6 +492,8 @@ describe('Player Src Equals', () => {
               await player.addThumbnailsTrack(absoluteUri.toString());
 
           expect(player.getImageTracks()).toEqual([newTrack]);
+
+          expect(newTrack.mimeType).toBe('image/jpeg');
 
           const thumbnail1 = await player.getThumbnails(newTrack.id, 0);
           expect(thumbnail1.startTime).toBe(0);
