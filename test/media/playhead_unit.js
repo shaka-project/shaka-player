@@ -147,6 +147,18 @@ describe('Playhead', () => {
     playhead.release();
   });
 
+  function calculateGap(time) {
+    let jumpTo = time;
+    if (shaka.util.Platform.isLegacyEdge() ||
+        shaka.util.Platform.isXboxOne() ||
+        shaka.util.Platform.isTizen()) {
+      const gapPadding = shaka.util.PlayerConfiguration.createDefault()
+          .streaming.gapPadding;
+      jumpTo = Math.ceil((jumpTo + gapPadding) * 100) / 100;
+    }
+    return jumpTo;
+  }
+
   function setMockDate(seconds) {
     const minutes = Math.floor(seconds / 60);
     seconds %= 60;
@@ -896,7 +908,7 @@ describe('Playhead', () => {
           start: 5,
           waitingAt: 10,
           expectEvent: true,
-          expectedEndTime: 11,
+          expectedEndTime: calculateGap(11),
         });
 
         playingTest('won\'t skip a buffered range', {
@@ -905,7 +917,7 @@ describe('Playhead', () => {
           start: 5,
           waitingAt: 10,
           expectEvent: true,
-          expectedEndTime: 11,
+          expectedEndTime: calculateGap(11),
         });
 
         playingTest('will jump gap into last buffer', {
@@ -914,7 +926,7 @@ describe('Playhead', () => {
           start: 15,
           waitingAt: 20,
           expectEvent: true,
-          expectedEndTime: 21,
+          expectedEndTime: calculateGap(21),
         });
       });  // with small gaps
 
@@ -924,7 +936,7 @@ describe('Playhead', () => {
           start: 5,
           waitingAt: 10,
           expectEvent: true,
-          expectedEndTime: 30,
+          expectedEndTime: calculateGap(30),
         });
 
         playingTest('will only jump one buffer', {
@@ -933,7 +945,7 @@ describe('Playhead', () => {
           start: 5,
           waitingAt: 10,
           expectEvent: true,
-          expectedEndTime: 30,
+          expectedEndTime: calculateGap(30),
         });
 
         playingTest('will jump into last buffer', {
@@ -942,7 +954,7 @@ describe('Playhead', () => {
           start: 24,
           waitingAt: 30,
           expectEvent: true,
-          expectedEndTime: 50,
+          expectedEndTime: calculateGap(50),
         });
       });  // with large gaps
 
@@ -1015,7 +1027,7 @@ describe('Playhead', () => {
           start: 3,
           seekTo: 10.4,
           expectEvent: true,
-          expectedEndTime: 11,
+          expectedEndTime: calculateGap(11),
         });
 
         seekTest('won\'t jump multiple buffers', {
@@ -1024,7 +1036,7 @@ describe('Playhead', () => {
           start: 3,
           seekTo: 10.4,
           expectEvent: true,
-          expectedEndTime: 11,
+          expectedEndTime: calculateGap(11),
         });
 
         seekTest('will jump into last range with seeking', {
@@ -1033,7 +1045,7 @@ describe('Playhead', () => {
           start: 3,
           seekTo: 20.5,
           expectEvent: true,
-          expectedEndTime: 21,
+          expectedEndTime: calculateGap(21),
         });
 
         seekTest('treats large gaps as small if playhead near end', {
@@ -1041,7 +1053,7 @@ describe('Playhead', () => {
           start: 3,
           seekTo: 29.2,
           expectEvent: true,
-          expectedEndTime: 30,
+          expectedEndTime: calculateGap(30),
         });
       });  // with small gaps
 
@@ -1051,7 +1063,7 @@ describe('Playhead', () => {
           start: 5,
           seekTo: 12,
           expectEvent: true,
-          expectedEndTime: 30,
+          expectedEndTime: calculateGap(30),
         });
       });  // with large gaps
     });  // with buffered seeks
@@ -1076,7 +1088,7 @@ describe('Playhead', () => {
           start: 4,
           seekTo: 0,
           expectEvent: true,
-          expectedEndTime: 0.2,
+          expectedEndTime: calculateGap(0.2),
         });
 
         seekTest('will jump when seeking into gap', {
@@ -1086,7 +1098,7 @@ describe('Playhead', () => {
           start: 3,
           seekTo: 30.2,
           expectEvent: true,
-          expectedEndTime: 31,
+          expectedEndTime: calculateGap(31),
         });
 
         seekTest('will jump when seeking to the end of a range', {
@@ -1096,7 +1108,7 @@ describe('Playhead', () => {
           start: 3,
           seekTo: 30,
           expectEvent: true,
-          expectedEndTime: 31,
+          expectedEndTime: calculateGap(31),
         });
 
         seekTest('won\'t jump when past end', {
@@ -1137,7 +1149,7 @@ describe('Playhead', () => {
           start: 24,
           seekTo: 1.6,
           expectEvent: true,
-          expectedEndTime: 2,
+          expectedEndTime: calculateGap(2),
         });
       });  // with small gaps
 
@@ -1148,7 +1160,7 @@ describe('Playhead', () => {
           start: 25,
           seekTo: 0,
           expectEvent: true,
-          expectedEndTime: 20,
+          expectedEndTime: calculateGap(20),
         });
 
         seekTest('will jump large gaps', {
@@ -1158,7 +1170,7 @@ describe('Playhead', () => {
           start: 3,
           seekTo: 32,
           expectEvent: true,
-          expectedEndTime: 40,
+          expectedEndTime: calculateGap(40),
         });
       });  // with large gaps
     });  // with unbuffered seeks
@@ -1233,7 +1245,7 @@ describe('Playhead', () => {
       jasmine.clock().tick(500);
 
       expect(seekCount).toBe(1);
-      expect(currentTime).toBe(10);
+      expect(currentTime).toBe(calculateGap(10));
     });
 
     it('doesn\'t gap jump if paused', () => {
@@ -1283,7 +1295,7 @@ describe('Playhead', () => {
       jasmine.clock().tick(500);
 
       // There SHOULD have been a gap jump.
-      expect(video.currentTime).toBe(10);
+      expect(video.currentTime).toBe(calculateGap(10));
     });
 
     // Regression test for https://github.com/shaka-project/shaka-player/issues/3451
