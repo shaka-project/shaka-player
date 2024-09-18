@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.11.4](https://github.com/shaka-project/shaka-player/compare/v4.11.3...v4.11.4) (2024-09-18)
+
+
+### Bug Fixes
+
+* **Ads:** Fix JUMP implementation to avoid loop the same ad group in Interstitials ([#7329](https://github.com/shaka-project/shaka-player/issues/7329)) ([b53e173](https://github.com/shaka-project/shaka-player/commit/b53e17393d4e4d538c167bad43f4cb8893e8555f))
+* Avoid make HEAD request for image mime type ([#7332](https://github.com/shaka-project/shaka-player/issues/7332)) ([42a62a6](https://github.com/shaka-project/shaka-player/commit/42a62a62731f2eac5dece1a85177b25260a3e709))
+* **DASH:** Fix HTTP redirect during manifest update ([#7339](https://github.com/shaka-project/shaka-player/issues/7339)) ([e625a47](https://github.com/shaka-project/shaka-player/commit/e625a47f5b811740ad92ba18396253dd65d73730))
+* Fix external image track mime type ([#7333](https://github.com/shaka-project/shaka-player/issues/7333)) ([cd7ee74](https://github.com/shaka-project/shaka-player/commit/cd7ee7473942596f4d5da12d32a90f3d2e7725e7))
+* **HLS:** Fix uncaught error in slow network scenario ([#7321](https://github.com/shaka-project/shaka-player/issues/7321)) ([8abc69d](https://github.com/shaka-project/shaka-player/commit/8abc69d90aa330ae4a98530f018e924bb7e78723))
+* **offline:** Text segments are downloaded before audio&video ([#7336](https://github.com/shaka-project/shaka-player/issues/7336)) ([2db857b](https://github.com/shaka-project/shaka-player/commit/2db857ba65f53dbd073f9f519200571c36a8145c))
+* **Tizen:** Adding gapPadding to gap manager to solve Tizen issue ([#7331](https://github.com/shaka-project/shaka-player/issues/7331)) ([a9617b1](https://github.com/shaka-project/shaka-player/commit/a9617b121f5372a0fbf175323568165357aaeeb1))
+* **UI:** Remove spinner and client side ad container elements when calling destroy ([#7320](https://github.com/shaka-project/shaka-player/issues/7320)) ([192f9ad](https://github.com/shaka-project/shaka-player/commit/192f9ad4b62bc6ff1ac94ab4fdfd3550583c23a6))
+
 ## [4.11.3](https://github.com/shaka-project/shaka-player/compare/v4.11.2...v4.11.3) (2024-09-14)
 
 
