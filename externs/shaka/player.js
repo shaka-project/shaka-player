@@ -1633,6 +1633,9 @@ shaka.extern.LiveSyncConfiguration;
  *   Defaults to <code>0.5</code>.
  * @property {number} gapPadding
  *   Padding added only for Xbox, Legacy Edge and Tizen.
+ *   Based on our research (specific to Tizen), the gapPadding value must be 
+ *   greater than your GOP length. 
+ *   It’s crucial to verify this value according to your actual stream.
  *   <br>
  *   Defaults to <code>0.01</code> for Xbox and Legacy Edge, Tizen at 2.
  * @property {number} gapJumpTimerTime
