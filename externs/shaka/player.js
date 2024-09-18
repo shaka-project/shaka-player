@@ -2242,7 +2242,8 @@ shaka.extern.LcevcConfiguration;
  *   <br>
  *   Defaults to <code>true</code>.
  * @property {number} numberOfParallelDownloads
- *   Number of parallel downloads.
+ *   Number of parallel downloads. If the value is 0, downloads will be
+ *   sequential for each stream.
  *   Note: normally browsers limit to 5 request in parallel, so putting a
  *   number higher than this will not help it download faster.
  *   <br>
