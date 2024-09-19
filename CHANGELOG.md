@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.9.28](https://github.com/shaka-project/shaka-player/compare/v4.9.27...v4.9.28) (2024-09-19)
+
+
+### Bug Fixes
+
+* Avoid make HEAD request for image mime type ([#7332](https://github.com/shaka-project/shaka-player/issues/7332)) ([6d74d9f](https://github.com/shaka-project/shaka-player/commit/6d74d9f37a03cb66a64a70c253383bc4b4254a1c))
+* **DASH:** Fix HTTP redirect during manifest update ([#7339](https://github.com/shaka-project/shaka-player/issues/7339)) ([8df7cc9](https://github.com/shaka-project/shaka-player/commit/8df7cc92aa984917656eb17826a82a22ce435a33))
+* Fix external image track mime type ([#7333](https://github.com/shaka-project/shaka-player/issues/7333)) ([d40d9fa](https://github.com/shaka-project/shaka-player/commit/d40d9fa0595e83c65e9509723a9027f876451334))
+* **HLS:** Allow sync live streams without PROGRAM-DATE-TIME ([#7340](https://github.com/shaka-project/shaka-player/issues/7340)) ([7bd481f](https://github.com/shaka-project/shaka-player/commit/7bd481fb4f36cdbcf10f729dcd11d00d9239fb5b))
+* **HLS:** Fix uncaught error in slow network scenario ([#7321](https://github.com/shaka-project/shaka-player/issues/7321)) ([25d8f1b](https://github.com/shaka-project/shaka-player/commit/25d8f1bb58c5cfe488cac4bf07c12773211a009c))
+* **offline:** Text segments are downloaded before audio&video ([#7336](https://github.com/shaka-project/shaka-player/issues/7336)) ([71c5f32](https://github.com/shaka-project/shaka-player/commit/71c5f323eee529dd63d58fe88e45e3b3222d53bb))
+* **Tizen:** Adding gapPadding to gap manager to solve Tizen issue ([#7331](https://github.com/shaka-project/shaka-player/issues/7331)) ([cbd0199](https://github.com/shaka-project/shaka-player/commit/cbd01999133de98749a5072b13417bdd2715f516))
+* **UI:** Remove spinner and client side ad container elements when calling destroy ([#7320](https://github.com/shaka-project/shaka-player/issues/7320)) ([52b48be](https://github.com/shaka-project/shaka-player/commit/52b48be55dad8e89dad4d2d6181521209d04df36))
+
 ## [4.9.27](https://github.com/shaka-project/shaka-player/compare/v4.9.26...v4.9.27) (2024-09-14)
 
 
