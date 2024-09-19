@@ -142,7 +142,8 @@ shaka.extern.ManifestDB;
  *   closedCaptions: Map.<string, string>,
  *   tilesLayout: (string|undefined),
  *   external: boolean,
- *   fastSwitching: boolean
+ *   fastSwitching: boolean,
+ *   isAudioMuxedInVideo: boolean
  * }}
  *
  * @property {number} id
@@ -218,6 +219,8 @@ shaka.extern.ManifestDB;
  *   Eg: external text tracks.
  * @property {boolean} fastSwitching
  *   Indicate if the stream should be used for fast switching.
+ * @property {boolean} isAudioMuxedInVideo
+ *   Indicate if the audio of this stream is muxed in the video of other stream.
  */
 shaka.extern.StreamDB;
 

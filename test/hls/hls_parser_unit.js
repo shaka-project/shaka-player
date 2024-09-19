@@ -991,7 +991,10 @@ describe('HlsParser', () => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
-          stream.mime('video/mp4', 'avc1.42E01E,mp4a.40.2');
+          stream.mime('video/mp4', 'avc1.42E01E');
+        });
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('video/mp2t', 'mp4a.40.2');
           stream.language = 'en';
           stream.originalLanguage = 'eng';
           stream.label = 'audio';

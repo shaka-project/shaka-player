@@ -60,6 +60,7 @@ shaka.test.OfflineUtils = class {
       closedCaptions: null,
       external: false,
       fastSwitching: false,
+      isAudioMuxedInVideo: false,
     };
   }
 
