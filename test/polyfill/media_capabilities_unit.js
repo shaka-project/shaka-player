@@ -183,7 +183,15 @@ describe('MediaCapabilities', () => {
         async () => {
           // Temporarily remove window.cast to trigger error. It's restored
           // after every test.
-          delete window['cast'];
+          try {
+            delete window['cast'];
+            // eslint-disable-next-line no-restricted-syntax
+          } catch (error) {
+            // This may fail on some Cast devices where you can't delete the
+            // cast API.  The test should still be valid on non-Cast devices,
+            // since we're mocking everything including the platform.
+            pending('Unable to delete window.cast');
+          }
 
           const isChromecastSpy =
               spyOn(shaka['util']['Platform'],
