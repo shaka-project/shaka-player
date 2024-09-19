@@ -462,7 +462,7 @@ async function logSupport() {
     window['shakaSupport'] = support;
     // eslint-disable-next-line no-restricted-syntax
   } catch (error) {
-    console.error('Support check failed at boot!', error);
+    window.dump('Support check failed at boot!', error);
   }
 }
 
@@ -553,7 +553,7 @@ window.__karma__.start = async () => {
 
     // eslint-disable-next-line no-restricted-syntax
   } catch (error) {
-    console.error('Error during setup:', error);
+    window.dump('Error during setup:', error);
     window.__karma__.error(error);
     return;
   }

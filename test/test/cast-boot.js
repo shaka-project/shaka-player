@@ -33,5 +33,9 @@ if (navigator.userAgent.indexOf('CrKey') != -1) {
     console.log('Cast SDK loaded');
   };
 
+  script.onerror = function(error) {
+    window.dump('Unable to load Cast SDK!', error);
+  };
+
   document.head.appendChild(script);
 }
