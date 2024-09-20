@@ -82,11 +82,6 @@ describe('Player', () => {
       // Play the stream.
       await player.load('/base/test/test/assets/3675/dash_0.mpd');
       await video.play();
-      const waiterstart = new shaka.test.Waiter(eventManager)
-          .setPlayer(player)
-          .timeoutAfter(10)
-          .failOnTimeout(true);
-      await waiterstart.waitForEnd(video);
       const seekRangeForStart = player.seekRange();
       const start = seekRangeForStart.start;
       // Wait for the stream to be over.
