@@ -82,7 +82,13 @@ describe('Player', () => {
       // Play the stream.
       await player.load('/base/test/test/assets/3675/dash_0.mpd');
       await video.play();
-
+      const waiterstart = new shaka.test.Waiter(eventManager)
+          .setPlayer(player)
+          .timeoutAfter(10)
+          .failOnTimeout(true);
+      await waiterstart.waitForEnd(video);
+      const seekRangeForStart = player.seekRange();
+      const start = seekRangeForStart.start;
       // Wait for the stream to be over.
       eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
       /** @type {shaka.test.Waiter} */
@@ -97,7 +103,8 @@ describe('Player', () => {
 
       // Check that the final seek range is as expected.
       const seekRange = player.seekRange();
-      expect(seekRange.end).toBeCloseTo(14);
+      expect(seekRange.end).toBeCloseTo(24);
+      expect(seekRange.start).toBeCloseTo(start);
     });
   });
 
