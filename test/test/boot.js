@@ -347,9 +347,13 @@ function configureJasmineEnvironment() {
     shaka.log.setLevel(shaka.log.Level.INFO);
   }
 
-  // Ensure node modules are loaded before any tests execute.
   beforeAll(async () => {
+    // Ensure node modules are loaded before any tests execute.
     await loadNodeModules();
+
+    // Replace jasmine's global error handler, since we have our own more
+    // nuanced version.
+    window.onerror = null;
   });
 
   const originalSetTimeout = window.setTimeout;
