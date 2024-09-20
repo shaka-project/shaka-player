@@ -37,7 +37,7 @@ if (navigator.userAgent.indexOf('CrKey') != -1) {
   // functions, for compatibility with the oldest devices and runtimes.
   // eslint-disable-next-line no-restricted-syntax
   script.onerror = function(error) {
-    window.dump('Unable to load Cast SDK!', error);
+    window.dump('Unable to load Cast SDK: ' + error);
   };
 
   document.head.appendChild(script);
