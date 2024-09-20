@@ -33,5 +33,12 @@ if (navigator.userAgent.indexOf('CrKey') != -1) {
     console.log('Cast SDK loaded');
   };
 
+  // Use an anonymous function here, normally banned in favor of arrow
+  // functions, for compatibility with the oldest devices and runtimes.
+  // eslint-disable-next-line no-restricted-syntax
+  script.onerror = function(error) {
+    window.dump('Unable to load Cast SDK: ' + error);
+  };
+
   document.head.appendChild(script);
 }
