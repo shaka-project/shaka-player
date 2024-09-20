@@ -297,6 +297,7 @@ describe('MediaSourceEngine', () => {
       segmentIndex,
       fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
           streamMetadata.mimeType, streamMetadata.codecs)]),
+      isAudioMuxedInVideo: false,
     };
   }
 

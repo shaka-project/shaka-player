@@ -22,6 +22,8 @@ v5.0
 
 v4.12 - 2024 Q4
  - Performance improvements
+ - HLS - Make dummy streams for tags representing muxed audio
+   https://github.com/shaka-project/shaka-player/issues/5836
 
 =====
 
