@@ -369,7 +369,7 @@ describe('Player', () => {
         expect(onAdaptation).toHaveBeenCalled();
 
         // First event
-        /** @type {{oldTrack?:{active:boolean}, newTrack:{active:boolean}}} */
+        /** @type {{oldTrack:null, newTrack:{active:boolean}}} */
         const event = onAdaptation.calls.first().args[0];
         expect(event.oldTrack).toBe(null);
         expect(event.newTrack).toBeDefined();
