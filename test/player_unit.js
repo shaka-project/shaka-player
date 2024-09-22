@@ -384,11 +384,11 @@ describe('Player', () => {
         });
 
         // Produce next 'adaptation' event
-        const activeTrack = player.getVariantTracks().find((t) => !t.active);
-        expect(activeTrack).toBeDefined();
+        const inactiveTrack = player.getVariantTracks().find((t) => !t.active);
+        expect(inactiveTrack).toBeDefined();
 
         const newTrack = abrManager.variants.filter((t) => {
-          return t.id == activeTrack.id;
+          return t.id == inactiveTrack.id;
         })[0];
         expect(newTrack).toBeDefined();
 
