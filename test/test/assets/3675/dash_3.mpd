@@ -16,7 +16,7 @@
 	</ProgramInformation>
 	<ServiceDescription id="0">
 	</ServiceDescription>
-	<Period id="0" start="PT0.0S">
+	<Period id="0" start="PT10.0S">
 		<AdaptationSet id="0" contentType="video" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true" frameRate="30/1" maxWidth="1280" maxHeight="720" par="16:9">
 			<Representation id="0" mimeType="video/mp4" codecs="avc1.64001f" bandwidth="122012" width="1280" height="720" sar="1:1">
 				<SegmentTemplate timescale="15360" initialization="init-stream$RepresentationID$.m4s" media="chunk-stream$RepresentationID$-$Number%05d$.m4s" startNumber="1">
