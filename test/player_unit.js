@@ -351,6 +351,51 @@ describe('Player', () => {
       });
     });
 
+    describe('adaptation event', () => {
+      /** @type {jasmine.Spy} */
+      let onAdaptation;
+
+      beforeEach(() => {
+        onAdaptation = jasmine.createSpy('onAdaptation');
+        player.addEventListener('adaptation', Util.spyFunc(onAdaptation));
+        player.configure({abr: {enabled: true}});
+      });
+
+      it('fires with correct payload and tracks active state', async () => {
+        expect(onAdaptation).not.toHaveBeenCalled();
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+        expect(abrManager.chooseVariant).toHaveBeenCalled();
+        expect(onAdaptation).toHaveBeenCalled();
+
+        // First event
+        /** @type {{oldTrack:null, newTrack:{active:boolean}}} */
+        const event = onAdaptation.calls.first().args[0];
+        expect(event.oldTrack).toBe(null);
+        expect(event.newTrack).toBeDefined();
+        expect(event.newTrack.active).toBe(true);
+
+        // In subsequent events both |oldTrack| and |newTrack| shall be defined
+        onAdaptation.and.callFake((e) => {
+          expect(e.oldTrack).toBeDefined();
+          expect(e.oldTrack.active).toBe(false);
+          expect(e.newTrack).toBeDefined();
+          expect(e.newTrack.active).toBe(true);
+        });
+
+        // Produce next 'adaptation' event
+        const inactiveTrack = player.getVariantTracks().find((t) => !t.active);
+        expect(inactiveTrack).toBeDefined();
+
+        const newTrack = abrManager.variants.filter((t) => {
+          return t.id == inactiveTrack.id;
+        })[0];
+        expect(newTrack).toBeDefined();
+
+        abrManager.switchCallback(newTrack, true);
+        expect(streamingEngine.switchVariant).toHaveBeenCalledTimes(2);
+      });
+    });
+
     describe('disableStream', () => {
       /** @type {number} */
       let disableTimeInSeconds;
@@ -2582,6 +2627,12 @@ describe('Player', () => {
         player.addEventListener('textchanged', Util.spyFunc(textChanged));
 
         variantChanged = jasmine.createSpy('variantChanged');
+        variantChanged.and.callFake((e) => {
+          expect(e.oldTrack).toBeDefined();
+          expect(e.oldTrack.active).toBe(false);
+          expect(e.newTrack).toBeDefined();
+          expect(e.newTrack.active).toBe(true);
+        });
         player.addEventListener('variantchanged', Util.spyFunc(variantChanged));
       });
 
