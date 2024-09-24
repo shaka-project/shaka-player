@@ -138,7 +138,7 @@ jobs:
 
       - name: 'Install Opera on Windows'
         if: matrix.os == 'windows-latest' && matrix.browser == 'Opera'
-        run: choco install opera
+        run: choco install -y opera --ignore-checksums
 
       # Firefox, Edge and Opera might be missing on Mac CI images.
       - name: 'Install Firefox on Mac'
