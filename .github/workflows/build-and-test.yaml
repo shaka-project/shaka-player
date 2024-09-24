@@ -82,8 +82,9 @@ jobs:
           - os: windows-latest
             browser: Edge
             extra_flags: "--html-coverage-report --uncompiled"
-          - os: windows-latest
-            browser: Opera
+          # Disabled until working properly
+          # - os: windows-latest
+          #   browser: Opera
 
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
@@ -157,10 +158,6 @@ jobs:
       - name: 'Install Opera on Mac'
         if: matrix.os == 'macos-13' && matrix.browser == 'Opera'
         run: brew install --cask opera
-
-      - name: 'Close Opera on Windows'
-        if: matrix.os == 'windows-latest' && matrix.browser == 'Opera'
-        run: taskkill /IM opera.exe /F
 
       # Some CI images (self-hosted or otherwise) don't have the minimum Java
       # version necessary for the compiler (Java 11).
