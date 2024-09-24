@@ -141,7 +141,7 @@ jobs:
 
       - name: 'Install Opera on Ubuntu'
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Opera'
-        run: sudo apt -y update && sudo apt -y install snapd && snap install opera
+        run: sudo apt -y update && sudo apt -y install snapd && sudo snap install opera
 
       - name: 'Install Opera on Windows'
         if: matrix.os == 'windows-latest' && matrix.browser == 'Opera'
