@@ -52,6 +52,9 @@ jobs:
           - os: ubuntu-latest
             browser: Edge
             extra_flags: "--use-xvfb"
+          - os: ubuntu-latest
+            browser: Opera
+            extra_flags: "--use-xvfb"
 
           # Use macos-13 for these browsers, due to
           # https://github.com/shaka-project/shaka-player/issues/6508
@@ -135,6 +138,10 @@ jobs:
         if: matrix.os == 'windows-latest' && matrix.browser == 'Chrome'
         shell: bash
         run: choco install -y googlechrome --ignore-checksums
+
+      - name: 'Install Opera on Ubuntu'
+        if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Opera'
+        run: sudo apt install snapd && snap install opera
 
       - name: 'Install Opera on Windows'
         if: matrix.os == 'windows-latest' && matrix.browser == 'Opera'
