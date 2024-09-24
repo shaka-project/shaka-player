@@ -148,7 +148,7 @@ jobs:
         if: matrix.os == 'macos-13' && matrix.browser == 'Edge'
         run: brew install --cask microsoft-edge
       - name: 'Install Opera on Mac'
-        if: matrix.os == 'macos-latest' && matrix.browser == 'Opera'
+        if: matrix.os == 'macos-13' && matrix.browser == 'Opera'
         run: brew install --cask opera
 
       # Some CI images (self-hosted or otherwise) don't have the minimum Java
