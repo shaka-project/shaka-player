@@ -227,6 +227,7 @@ describe('CastUtils', () => {
             {
               getKeySystem: () => null,
               onMetadata: () => {},
+              onEvent: () => {},
             });
         const config =
             shaka.util.PlayerConfiguration.createDefault().mediaSource;

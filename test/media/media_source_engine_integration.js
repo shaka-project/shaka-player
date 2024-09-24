@@ -173,6 +173,7 @@ describe('MediaSourceEngine', () => {
         {
           getKeySystem: () => null,
           onMetadata: shaka.test.Util.spyFunc(onMetadata),
+          onEvent: () => {},
         });
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine.configure(config);
