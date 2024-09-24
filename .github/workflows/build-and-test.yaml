@@ -79,6 +79,8 @@ jobs:
           - os: windows-latest
             browser: Edge
             extra_flags: "--html-coverage-report --uncompiled"
+          - os: windows-latest
+            browser: Opera
 
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
@@ -133,6 +135,10 @@ jobs:
         if: matrix.os == 'windows-latest' && matrix.browser == 'Chrome'
         shell: bash
         run: choco install -y googlechrome --ignore-checksums
+
+      - name: 'Install Opera on Windows'
+        if: matrix.os == 'windows-latest' && matrix.browser == 'Opera'
+        run: choco install opera
 
       # Firefox, Edge and Opera might be missing on Mac CI images.
       - name: 'Install Firefox on Mac'
