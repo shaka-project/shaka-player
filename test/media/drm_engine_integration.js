@@ -118,6 +118,7 @@ describe('DrmEngine', () => {
         {
           getKeySystem: () => null,
           onMetadata: () => {},
+          onEvent: () => {},
         });
     const mediaSourceConfig =
         shaka.util.PlayerConfiguration.createDefault().mediaSource;
