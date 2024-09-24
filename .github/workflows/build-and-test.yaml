@@ -61,6 +61,8 @@ jobs:
             browser: Chrome
           - os: macos-13
             browser: Edge
+          - os: macos-13
+            browser: Opera
 
           - os: macos-latest
             browser: Firefox
@@ -132,13 +134,16 @@ jobs:
         shell: bash
         run: choco install -y googlechrome --ignore-checksums
 
-      # Firefox and Edge might be missing on Mac CI images.
+      # Firefox, Edge and Opera might be missing on Mac CI images.
       - name: 'Install Firefox on Mac'
         if: matrix.os == 'macos-latest' && matrix.browser == 'Firefox'
         run: brew install --cask firefox
       - name: 'Install Edge on Mac'
         if: matrix.os == 'macos-13' && matrix.browser == 'Edge'
         run: brew install --cask microsoft-edge
+      - name: 'Install Opera on Mac'
+        if: matrix.os == 'macos-latest' && matrix.browser == 'Opera'
+        run: brew install --cask opera
 
       # Some CI images (self-hosted or otherwise) don't have the minimum Java
       # version necessary for the compiler (Java 11).
