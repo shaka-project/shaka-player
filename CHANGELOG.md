@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.11.5](https://github.com/shaka-project/shaka-player/compare/v4.11.4...v4.11.5) (2024-09-24)
+
+
+### Bug Fixes
+
+* Active track state on variantchanged and adaptation events ([#7350](https://github.com/shaka-project/shaka-player/issues/7350)) ([4968472](https://github.com/shaka-project/shaka-player/commit/49684725ee8691338d324be21585bed25af557e9))
+* Avoid notify buffered changes when segment appended is text ([#7353](https://github.com/shaka-project/shaka-player/issues/7353)) ([68b77bb](https://github.com/shaka-project/shaka-player/commit/68b77bbee4a95c757f184fec3f864effde4f9d0b))
+* **dash:** live to vod transition seek start ([#7347](https://github.com/shaka-project/shaka-player/issues/7347)) ([371edbe](https://github.com/shaka-project/shaka-player/commit/371edbe52ed60df1075a6f0de3a530f09a95f802))
+* Disable Encryption Scheme Polyfil On Some Devices ([#7355](https://github.com/shaka-project/shaka-player/issues/7355)) ([b9bd851](https://github.com/shaka-project/shaka-player/commit/b9bd851682bd50cfec688887861c0bc15c33b416))
+* Do not recognize Sky Q as Apple device ([#7357](https://github.com/shaka-project/shaka-player/issues/7357)) ([30d9628](https://github.com/shaka-project/shaka-player/commit/30d9628f47dac6a582208c527259782c3a0a2b91))
+* **HLS:** Allow sync live streams without PROGRAM-DATE-TIME ([#7340](https://github.com/shaka-project/shaka-player/issues/7340)) ([5655ade](https://github.com/shaka-project/shaka-player/commit/5655ade7d8aff6d0342a8fe7e5124a6d99f98e02))
+* **UI:** Fix missing tracks in resolution selector ([#7352](https://github.com/shaka-project/shaka-player/issues/7352)) ([9c3cd7c](https://github.com/shaka-project/shaka-player/commit/9c3cd7c12ee0e5f82709e587cb8675be4489687c))
+
 ## [4.11.4](https://github.com/shaka-project/shaka-player/compare/v4.11.3...v4.11.4) (2024-09-18)
 
 
