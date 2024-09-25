@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.11.6](https://github.com/shaka-project/shaka-player/compare/v4.11.5...v4.11.6) (2024-09-25)
+
+
+### Bug Fixes
+
+* **Ads:** Release interstitials timer correctly ([#7373](https://github.com/shaka-project/shaka-player/issues/7373)) ([8cb3628](https://github.com/shaka-project/shaka-player/commit/8cb362885484aa5e897e707a5174398da31e14ff))
+* **DASH:** Release period combiner info correctly ([#7364](https://github.com/shaka-project/shaka-player/issues/7364)) ([b4329ac](https://github.com/shaka-project/shaka-player/commit/b4329ac26aa4fc81a3bb446065d27aaaf3b3ba4d))
+* Evict buffer on QUOTA_EXCEEDED_ERROR error ([#7361](https://github.com/shaka-project/shaka-player/issues/7361)) ([af4b3b7](https://github.com/shaka-project/shaka-player/commit/af4b3b75ea0e3133012712473285376abb87cab2))
+* Evict text buffer when unload the text stream ([#7360](https://github.com/shaka-project/shaka-player/issues/7360)) ([e609917](https://github.com/shaka-project/shaka-player/commit/e609917fd00793894e1b1c1f36246ed50f28e411))
+* **preload:** Set manifest before initializing DRM ([#7359](https://github.com/shaka-project/shaka-player/issues/7359)) ([03904ee](https://github.com/shaka-project/shaka-player/commit/03904eeddc3d6394c5246589d3f6e9e9412f175c))
+* **UI:** Don't try to add MediaSessionHandler for PiP when it's not available ([#7376](https://github.com/shaka-project/shaka-player/issues/7376)) ([25eb8c0](https://github.com/shaka-project/shaka-player/commit/25eb8c0ec6b5dc1e5f80067a146ed7f708bd4103))
+* **UI:** Fix mediaSession metadata update on Firefox ([#7375](https://github.com/shaka-project/shaka-player/issues/7375)) ([c3c18ee](https://github.com/shaka-project/shaka-player/commit/c3c18eee13637229bd57615610f975529bc63c54))
+
 ## [4.11.5](https://github.com/shaka-project/shaka-player/compare/v4.11.4...v4.11.5) (2024-09-24)
 
 
