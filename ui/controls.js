@@ -1337,7 +1337,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     addMediaSessionHandler('seekforward', commonHandler);
     addMediaSessionHandler('seekto', commonHandler);
     addMediaSessionHandler('stop', commonHandler);
-    addMediaSessionHandler('enterpictureinpicture', commonHandler);
+    if ('documentPictureInPicture' in window ||
+        document.pictureInPictureEnabled) {
+      addMediaSessionHandler('enterpictureinpicture', commonHandler);
+    }
 
     this.eventManager_.listen(this.video_, 'timeupdate', () => {
       updatePositionState();
