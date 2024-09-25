@@ -31,7 +31,8 @@
  *   st: (string|undefined),
  *   v: (number|undefined),
  *   bs: (boolean|undefined),
- *   rtp: (number|undefined)
+ *   rtp: (number|undefined),
+ *   msd: (number|undefined),
  * }}
  *
  * @description
@@ -182,5 +183,11 @@
  *   delivery. The concept is that each client receives the throughput necessary
  *   for great performance, but no more. The CDN may not support the rtp
  *   feature.
+ *
+ * @property {number} msd
+ *   The Media Start Delay represents in milliseconds the delay between the
+ *   initiation of the playback request and the moment the first frame is
+ *   rendered. This is sent only once when it is calculated.
+ *
  */
 var CmcdData;
