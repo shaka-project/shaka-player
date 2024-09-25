@@ -1357,7 +1357,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         imageUrl = payload['data'];
       }
       if (navigator.mediaSession.metadata && title) {
-        navigator.mediaSession.metadata.title = title;
+        const metadata = navigator.mediaSession.metadata;
+        metadata.title = title;
+        navigator.mediaSession.metadata = new MediaMetadata(metadata);
       }
       if (imageUrl) {
         const video = /** @type {HTMLVideoElement} */ (this.localVideo_);
@@ -1365,7 +1367,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           video.poster = imageUrl;
         }
         if (navigator.mediaSession.metadata) {
-          navigator.mediaSession.metadata.artwork = [{src: imageUrl}];
+          const metadata = navigator.mediaSession.metadata;
+          metadata.artwork = [{src: imageUrl}];
+          navigator.mediaSession.metadata = new MediaMetadata(metadata);
         }
       }
     });
