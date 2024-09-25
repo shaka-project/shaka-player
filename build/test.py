@@ -96,15 +96,13 @@ def _GetDefaultBrowsers():
 
   if shakaBuildHelpers.is_linux():
     # For MP4 support on Linux Firefox, install gstreamer1.0-libav.
-    # Opera on Linux only supports MP4 for Ubuntu 15.04+, so it is not in the
-    # default list of browsers for Linux at this time.
-    return ['Chrome','Edge','Firefox']
+    return ['Chrome','Edge','Firefox','Opera']
 
   if shakaBuildHelpers.is_darwin():
-    return ['Chrome','Edge','Firefox','Safari']
+    return ['Chrome','Edge','Firefox','Safari','Opera']
 
   if shakaBuildHelpers.is_windows() or shakaBuildHelpers.is_cygwin():
-    return ['Chrome','Edge','Firefox']
+    return ['Chrome','Edge','Firefox','Opera']
 
   raise Error('Unrecognized system: %s' % platform.uname()[0])
 
