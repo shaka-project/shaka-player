@@ -52,6 +52,9 @@ jobs:
           - os: ubuntu-latest
             browser: Edge
             extra_flags: "--use-xvfb"
+          - os: ubuntu-latest
+            browser: Opera
+            extra_flags: "--use-xvfb"
 
           # Use macos-13 for these browsers, due to
           # https://github.com/shaka-project/shaka-player/issues/6508
@@ -61,6 +64,8 @@ jobs:
             browser: Chrome
           - os: macos-13
             browser: Edge
+          - os: macos-13
+            browser: Opera
 
           - os: macos-latest
             browser: Firefox
@@ -77,6 +82,9 @@ jobs:
           - os: windows-latest
             browser: Edge
             extra_flags: "--html-coverage-report --uncompiled"
+          # Disabled until working properly
+          # - os: windows-latest
+          #   browser: Opera
 
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
@@ -132,13 +140,24 @@ jobs:
         shell: bash
         run: choco install -y googlechrome --ignore-checksums
 
-      # Firefox and Edge might be missing on Mac CI images.
+      - name: 'Install Opera on Ubuntu'
+        if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Opera'
+        run: sudo apt -y update && sudo apt -y install snapd && sudo snap install opera
+
+      - name: 'Install Opera on Windows'
+        if: matrix.os == 'windows-latest' && matrix.browser == 'Opera'
+        run: choco install -y opera --ignore-checksums --params '"/NoAutostart /NoDesktopShortcut /NoTaskbarShortcut"'
+
+      # Firefox, Edge and Opera might be missing on Mac CI images.
       - name: 'Install Firefox on Mac'
         if: matrix.os == 'macos-latest' && matrix.browser == 'Firefox'
         run: brew install --cask firefox
       - name: 'Install Edge on Mac'
         if: matrix.os == 'macos-13' && matrix.browser == 'Edge'
         run: brew install --cask microsoft-edge
+      - name: 'Install Opera on Mac'
+        if: matrix.os == 'macos-13' && matrix.browser == 'Opera'
+        run: brew install --cask opera
 
       # Some CI images (self-hosted or otherwise) don't have the minimum Java
       # version necessary for the compiler (Java 11).
