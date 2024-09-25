@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.10.20](https://github.com/shaka-project/shaka-player/compare/v4.10.19...v4.10.20) (2024-09-25)
+
+
+### Bug Fixes
+
+* **Ads:** Release interstitials timer correctly ([#7373](https://github.com/shaka-project/shaka-player/issues/7373)) ([fcb99cf](https://github.com/shaka-project/shaka-player/commit/fcb99cf4d0e419ee098faf84b5e34d0e2466914c))
+* **DASH:** Release period combiner info correctly ([#7364](https://github.com/shaka-project/shaka-player/issues/7364)) ([173cf6d](https://github.com/shaka-project/shaka-player/commit/173cf6d5d00606948dcbd34120a786cece0df9c8))
+* Evict buffer on QUOTA_EXCEEDED_ERROR error ([#7361](https://github.com/shaka-project/shaka-player/issues/7361)) ([3f36283](https://github.com/shaka-project/shaka-player/commit/3f3628365371cb86742826b6a759e47cf155d987))
+* Evict text buffer when unload the text stream ([#7360](https://github.com/shaka-project/shaka-player/issues/7360)) ([496d0e4](https://github.com/shaka-project/shaka-player/commit/496d0e40c473ca8d649fc54b1c36bf147e2f783e))
+* **preload:** Set manifest before initializing DRM ([#7359](https://github.com/shaka-project/shaka-player/issues/7359)) ([6166c83](https://github.com/shaka-project/shaka-player/commit/6166c8377fe4de9f20d2c0a868b70fe4a1103aa0))
+
 ## [4.10.19](https://github.com/shaka-project/shaka-player/compare/v4.10.18...v4.10.19) (2024-09-24)
 
 
