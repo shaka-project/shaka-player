@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.9.29](https://github.com/shaka-project/shaka-player/compare/v4.9.28...v4.9.29) (2024-09-26)
+
+
+### Bug Fixes
+
+* Active track state on variantchanged and adaptation events ([#7350](https://github.com/shaka-project/shaka-player/issues/7350)) ([5e193b9](https://github.com/shaka-project/shaka-player/commit/5e193b973b014e7fe07be7995c0af80f32784070))
+* Avoid notify buffered changes when segment appended is text ([#7353](https://github.com/shaka-project/shaka-player/issues/7353)) ([adb766d](https://github.com/shaka-project/shaka-player/commit/adb766d0db1a2d2c2971a15a4216ac8c47fbbc9c))
+* **dash:** live to vod transition seek start ([#7347](https://github.com/shaka-project/shaka-player/issues/7347)) ([f4ef439](https://github.com/shaka-project/shaka-player/commit/f4ef4391003e49b40c4f2c59d6797d6eadf5bbdb))
+* **DASH:** Release period combiner info correctly ([#7364](https://github.com/shaka-project/shaka-player/issues/7364)) ([a04c717](https://github.com/shaka-project/shaka-player/commit/a04c71780cf8624e82bd0fafd36a954700fb34d7))
+* Disable Encryption Scheme Polyfil On Some Devices ([#7355](https://github.com/shaka-project/shaka-player/issues/7355)) ([0a5abf5](https://github.com/shaka-project/shaka-player/commit/0a5abf5602d5b1b05ac284b9b5f549ee42f8cb79))
+* Do not recognize Sky Q as Apple device ([#7357](https://github.com/shaka-project/shaka-player/issues/7357)) ([cfee7d9](https://github.com/shaka-project/shaka-player/commit/cfee7d92bf752220035861e12f630ecf02bf396f))
+* Evict buffer on QUOTA_EXCEEDED_ERROR error ([#7361](https://github.com/shaka-project/shaka-player/issues/7361)) ([cef9959](https://github.com/shaka-project/shaka-player/commit/cef99590c4b59adb27d7f82b8937f7daf1018bb9))
+* Evict text buffer when unload the text stream ([#7360](https://github.com/shaka-project/shaka-player/issues/7360)) ([8938ae9](https://github.com/shaka-project/shaka-player/commit/8938ae9271b17cdcc3c6b2b5b7c39ba00ccfbcb8))
+* Exclude TIMEOUT errors when disabling streams ([#7369](https://github.com/shaka-project/shaka-player/issues/7369)) ([00f0b06](https://github.com/shaka-project/shaka-player/commit/00f0b06fcbe521878d9028158392424a7e45e900)), closes [#7368](https://github.com/shaka-project/shaka-player/issues/7368)
+* **preload:** Set manifest before initializing DRM ([#7359](https://github.com/shaka-project/shaka-player/issues/7359)) ([c194cce](https://github.com/shaka-project/shaka-player/commit/c194ccee4e576e3a1adec650dfcac4bc41c957a1))
+* Reduce calls to EME by ignoring MIME type in MediaKeySystemAccess cache ([#7374](https://github.com/shaka-project/shaka-player/issues/7374)) ([bbcc8c9](https://github.com/shaka-project/shaka-player/commit/bbcc8c9c595f411feb462a0dfefc9202dbca7a06)), closes [#7325](https://github.com/shaka-project/shaka-player/issues/7325)
+* **UI:** Fix missing tracks in resolution selector ([#7352](https://github.com/shaka-project/shaka-player/issues/7352)) ([400cc38](https://github.com/shaka-project/shaka-player/commit/400cc3869891f60f4734a721a5b7ea4e81226d10))
+
 ## [4.9.28](https://github.com/shaka-project/shaka-player/compare/v4.9.27...v4.9.28) (2024-09-19)
 
 
