@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.10.21](https://github.com/shaka-project/shaka-player/compare/v4.10.20...v4.10.21) (2024-09-26)
+
+
+### Bug Fixes
+
+* Exclude TIMEOUT errors when disabling streams ([#7369](https://github.com/shaka-project/shaka-player/issues/7369)) ([72ac0f8](https://github.com/shaka-project/shaka-player/commit/72ac0f8f33f35b17b16648a70bf95ac67861856e)), closes [#7368](https://github.com/shaka-project/shaka-player/issues/7368)
+* **preload:** Resolve manifest promise sooner ([#7380](https://github.com/shaka-project/shaka-player/issues/7380)) ([99159fb](https://github.com/shaka-project/shaka-player/commit/99159fbafe473f977e5eba6d0aefc90c1e620a85))
+* Reduce calls to EME by ignoring MIME type in MediaKeySystemAccess cache ([#7374](https://github.com/shaka-project/shaka-player/issues/7374)) ([2047aa4](https://github.com/shaka-project/shaka-player/commit/2047aa4ebc8690bd990d5f30e75f0246b0bdf218)), closes [#7325](https://github.com/shaka-project/shaka-player/issues/7325)
+
 ## [4.10.20](https://github.com/shaka-project/shaka-player/compare/v4.10.19...v4.10.20) (2024-09-25)
 
 
