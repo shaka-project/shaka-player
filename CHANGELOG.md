@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.9.2-caf2](https://github.com/shaka-project/shaka-player/compare/v4.9.2-caf1...v4.9.2-caf2) (2024-09-26)
+
+
+### Bug Fixes
+
+* Exclude TIMEOUT errors when disabling streams ([#7369](https://github.com/shaka-project/shaka-player/issues/7369)) ([d5d46b0](https://github.com/shaka-project/shaka-player/commit/d5d46b037b6de8a88594de7e8e83493c3e82a182))
+
 ## [4.9.2-caf1](https://github.com/shaka-project/shaka-player/compare/v4.9.2...v4.9.2-caf1) (2024-09-13)
 
 
