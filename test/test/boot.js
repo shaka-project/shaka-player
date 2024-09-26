@@ -352,8 +352,10 @@ function configureJasmineEnvironment() {
     await loadNodeModules();
 
     // Replace jasmine's global error handler, since we have our own more
-    // nuanced version.
-    window.onerror = null;
+    // nuanced version.  You can't set this to null, since jasmine still tries
+    // to call it.  Note also that our handler uses window.addEventListener
+    // instead of window.onerror.
+    window.onerror = function() {};
   });
 
   const originalSetTimeout = window.setTimeout;
