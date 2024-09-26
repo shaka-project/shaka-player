@@ -355,7 +355,7 @@ function configureJasmineEnvironment() {
     // nuanced version.  You can't set this to null, since jasmine still tries
     // to call it.  Note also that our handler uses window.addEventListener
     // instead of window.onerror.
-    window.onerror = function() {};
+    window.onerror = () => {};
   });
 
   const originalSetTimeout = window.setTimeout;
