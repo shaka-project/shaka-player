@@ -33,6 +33,7 @@
  *   bs: (boolean|undefined),
  *   rtp: (number|undefined),
  *   msd: (number|undefined),
+ *   ltc: (number|undefined),
  * }}
  *
  * @description
@@ -189,5 +190,12 @@
  *   initiation of the playback request and the moment the first frame is
  *   rendered. This is sent only once when it is calculated.
  *
+ * @property {number} ltc
+ *   Live Stream Latency
+ *
+ *   The time delta between when a given media timestamp was made available at
+ *   the origin and when it was rendered by the client. The accuracy of this
+ *   estimate is dependent on synchronization between the packager and the
+ *   player clocks.
  */
 var CmcdData;

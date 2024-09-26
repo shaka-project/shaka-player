@@ -31,6 +31,7 @@ describe('CmcdManager', () => {
 
   const playerInterface = {
     isLive: () => false,
+    getLiveLatency: () => 0,
     getBandwidthEstimate: () => 10000000,
     getBufferedInfo: () => ({
       video: [
