@@ -2424,6 +2424,41 @@ describe('StreamingEngine', () => {
           expect(onError).toHaveBeenCalled();
         });
 
+    it('never tries to recover from shaka.util.Error.Code.TIMEOUT',
+        async () => {
+          setupVod();
+
+          const targetUri = '0_video_0';
+          failRequestsForTarget(
+              netEngine, targetUri, shaka.util.Error.Code.TIMEOUT);
+
+          mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+          const config =
+              shaka.util.PlayerConfiguration.createDefault().streaming;
+          config.maxDisabledTime = 2;
+          createStreamingEngine(config);
+
+          spyOn(streamingEngine, 'makeAbortDecision_').and.callFake(() => {
+            return Promise.resolve();
+          });
+          // Silence error
+          onError.and.callFake(() => {});
+
+          // Here we go!
+          streamingEngine.switchVariant(variant);
+          streamingEngine.switchTextStream(textStream);
+          await streamingEngine.start();
+          playing = true;
+
+          await runTest();
+          expect(disableStream).not.toHaveBeenCalled();
+          expect(onError).toHaveBeenCalledOnceWith(jasmine.objectContaining({
+            severity: shaka.util.Error.Severity.CRITICAL,
+            category: shaka.util.Error.Category.NETWORK,
+            code: shaka.util.Error.Code.TIMEOUT,
+          }));
+        });
+
     it('throws recoverable error if try to disable stream succeeded',
         async () => {
           setupVod();
