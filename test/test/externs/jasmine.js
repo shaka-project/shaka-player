@@ -147,6 +147,10 @@ jasmine.Matchers.prototype.toHaveBeenCalled = function(value) {};
 jasmine.Matchers.prototype.toHaveBeenCalledWith = function(varArgs) {};
 
 
+/** @param {...*} varArgs */
+jasmine.Matchers.prototype.toHaveBeenCalledOnceWith = function(varArgs) {};
+
+
 /** @param {number} times */
 jasmine.Matchers.prototype.toHaveBeenCalledTimes = function(times) {};
 
