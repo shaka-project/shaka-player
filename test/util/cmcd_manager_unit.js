@@ -506,6 +506,72 @@ describe('CmcdManager', () => {
           const result = request.uris[0];
           expect(result).not.toContain('?CMCD=');
         });
+
+        it('returns cmcd v2 data in query if version is 2', async () => {
+          cmcdManager = createCmcdManager({
+            reporting: {
+              requestMode: {
+                version: 2,
+              },
+            },
+            includeKeys: ['ltc', 'msd'],
+          });
+          await networkingEngine.request(RequestType.MANIFEST, request,
+              {type: AdvancedRequestType.MPD});
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ltc'));
+          expect(result).toContain(encodeURIComponent('msd'));
+        });
+
+        it('doesnt return cmcd v2 data in query if version is not 2',
+            async () => {
+              cmcdManager = createCmcdManager({
+                reporting: {
+                  requestMode: {
+                    version: 1,
+                  },
+                },
+                includeKeys: ['ltc', 'msd'],
+              });
+              await networkingEngine.request(RequestType.MANIFEST, request,
+                  {type: AdvancedRequestType.MPD});
+              const result = request.uris[0];
+              expect(result).not.toContain(encodeURIComponent('ltc'));
+              expect(result).not.toContain(encodeURIComponent('msd'));
+            });
+
+        it('returns cmcd v2 data in header if version is 2', async () => {
+          cmcdManager = createCmcdManager({
+            reporting: {
+              requestMode: {
+                useHeaders: true,
+                version: 2,
+              },
+            },
+            includeKeys: ['ltc', 'msd'],
+          });
+          await networkingEngine.request(RequestType.MANIFEST, request,
+              {type: AdvancedRequestType.MPD});
+          expect(request.headers['CMCD-Request']).toContain('ltc');
+          expect(request.headers['CMCD-Session']).toContain('msd');
+        });
+
+        it('doesnt return cmcd v2 data in headers if version is not 2',
+            async () => {
+              cmcdManager = createCmcdManager({
+                reporting: {
+                  requestMode: {
+                    useHeaders: true,
+                    version: 1,
+                  },
+                },
+                includeKeys: ['ltc', 'msd'],
+              });
+              await networkingEngine.request(RequestType.MANIFEST, request,
+                  {type: AdvancedRequestType.MPD});
+              expect(request.headers['CMCD-Request']).not.toContain('ltc');
+              expect(request.headers['CMCD-Session']).not.toContain('msd');
+            });
       });
     });
   });
