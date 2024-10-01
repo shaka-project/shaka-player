@@ -279,7 +279,8 @@ shaka.ui.Overlay = class {
     // eslint-disable-next-line no-restricted-syntax
     if ('remote' in HTMLMediaElement.prototype) {
       config.overflowMenuButtons.push('remote');
-    } else if (window.WebKitPlaybackTargetAvailabilityEvent) {
+    }
+    if (window.WebKitPlaybackTargetAvailabilityEvent) {
       config.overflowMenuButtons.push('airplay');
     }
 
