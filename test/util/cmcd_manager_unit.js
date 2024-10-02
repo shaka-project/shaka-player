@@ -65,6 +65,11 @@ describe('CmcdManager', () => {
     rtpSafetyFactor: 5,
     useHeaders: false,
     includeKeys: [],
+    reporting: {
+      requestMode: {
+        version: 1,
+      },
+    },
   };
 
   function createCmcdConfig(cfg = {}) {
@@ -508,24 +513,36 @@ describe('CmcdManager', () => {
         });
 
         it('returns cmcd v2 data in query if version is 2', async () => {
+          // Set live to true to enable ltc
+          playerInterface.isLive = () => true;
           cmcdManager = createCmcdManager({
             reporting: {
               requestMode: {
                 version: 2,
               },
             },
-            includeKeys: ['ltc', 'msd'],
+            includeKeys: ['ltc', 'msd', 'v'],
           });
+          networkingEngine = createNetworkingEngine(cmcdManager);
+
+          // Trigger Play and Playing events
+          cmcdManager.onPlaybackPlay();
+          cmcdManager.onPlaybackPlaying();
+          const request = NetworkingEngine.makeRequest([uri], retry);
           await networkingEngine.request(RequestType.MANIFEST, request,
               {type: AdvancedRequestType.MPD});
           const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('v=2'));
           expect(result).toContain(encodeURIComponent('ltc'));
           expect(result).toContain(encodeURIComponent('msd'));
         });
 
         it('doesnt return cmcd v2 data in query if version is not 2',
             async () => {
-              cmcdManager = createCmcdManager({
+              // Set live to true to enable ltc
+              playerInterface.isLive = () => true;
+
+              const cmcdManagerTmp = createCmcdManager({
                 reporting: {
                   requestMode: {
                     version: 1,
@@ -533,6 +550,13 @@ describe('CmcdManager', () => {
                 },
                 includeKeys: ['ltc', 'msd'],
               });
+              networkingEngine = createNetworkingEngine(cmcdManagerTmp);
+
+              // Trigger Play and Playing events
+              cmcdManagerTmp.onPlaybackPlay();
+              cmcdManagerTmp.onPlaybackPlaying();
+
+              const request = NetworkingEngine.makeRequest([uri], retry);
               await networkingEngine.request(RequestType.MANIFEST, request,
                   {type: AdvancedRequestType.MPD});
               const result = request.uris[0];
@@ -541,15 +565,22 @@ describe('CmcdManager', () => {
             });
 
         it('returns cmcd v2 data in header if version is 2', async () => {
+          playerInterface.isLive = () => true;
           cmcdManager = createCmcdManager({
             reporting: {
               requestMode: {
-                useHeaders: true,
                 version: 2,
               },
             },
             includeKeys: ['ltc', 'msd'],
+            useHeaders: true,
           });
+          networkingEngine = createNetworkingEngine(cmcdManager);
+
+          // Trigger Play and Playing events
+          cmcdManager.onPlaybackPlay();
+          cmcdManager.onPlaybackPlaying();
+          const request = NetworkingEngine.makeRequest([uri], retry);
           await networkingEngine.request(RequestType.MANIFEST, request,
               {type: AdvancedRequestType.MPD});
           expect(request.headers['CMCD-Request']).toContain('ltc');
@@ -558,15 +589,20 @@ describe('CmcdManager', () => {
 
         it('doesnt return cmcd v2 data in headers if version is not 2',
             async () => {
+              playerInterface.isLive = () => true;
               cmcdManager = createCmcdManager({
                 reporting: {
                   requestMode: {
-                    useHeaders: true,
                     version: 1,
                   },
                 },
                 includeKeys: ['ltc', 'msd'],
+                useHeaders: true,
               });
+              networkingEngine = createNetworkingEngine(cmcdManager);
+              cmcdManager.onPlaybackPlay();
+              cmcdManager.onPlaybackPlaying();
+              const request = NetworkingEngine.makeRequest([uri], retry);
               await networkingEngine.request(RequestType.MANIFEST, request,
                   {type: AdvancedRequestType.MPD});
               expect(request.headers['CMCD-Request']).not.toContain('ltc');

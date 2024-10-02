@@ -338,6 +338,7 @@ shakaDemo.Config = class {
         .addBoolInput_('Enabled', 'cmcd.enabled')
         .addTextInput_('Session ID', 'cmcd.sessionId')
         .addTextInput_('Content ID', 'cmcd.contentId')
+        .addTextInput_('Version', 'cmcd.reporting.requestMode.version')
         .addNumberInput_('RTP safety Factor', 'cmcd.rtpSafetyFactor',
             /* canBeDecimal= */ true)
         .addBoolInput_('Use Headers', 'cmcd.useHeaders');
