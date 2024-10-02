@@ -1427,8 +1427,8 @@ shakaDemo.Main = class {
         const metadata = {
           title: asset.name,
           artwork: [{src: icon}],
+          artist: asset.source,
         };
-        metadata.artist = asset.source;
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
       }
 

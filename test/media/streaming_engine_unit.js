@@ -2425,6 +2425,41 @@ describe('StreamingEngine', () => {
           expect(onError).toHaveBeenCalled();
         });
 
+    it('never tries to recover from shaka.util.Error.Code.TIMEOUT',
+        async () => {
+          setupVod();
+
+          const targetUri = '0_video_0';
+          failRequestsForTarget(
+              netEngine, targetUri, shaka.util.Error.Code.TIMEOUT);
+
+          mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+          const config =
+              shaka.util.PlayerConfiguration.createDefault().streaming;
+          config.maxDisabledTime = 2;
+          createStreamingEngine(config);
+
+          spyOn(streamingEngine, 'makeAbortDecision_').and.callFake(() => {
+            return Promise.resolve();
+          });
+          // Silence error
+          onError.and.callFake(() => {});
+
+          // Here we go!
+          streamingEngine.switchVariant(variant);
+          streamingEngine.switchTextStream(textStream);
+          await streamingEngine.start();
+          playing = true;
+
+          await runTest();
+          expect(disableStream).not.toHaveBeenCalled();
+          expect(onError).toHaveBeenCalledOnceWith(jasmine.objectContaining({
+            severity: shaka.util.Error.Severity.CRITICAL,
+            category: shaka.util.Error.Category.NETWORK,
+            code: shaka.util.Error.Code.TIMEOUT,
+          }));
+        });
+
     it('throws recoverable error if try to disable stream succeeded',
         async () => {
           setupVod();
@@ -3305,83 +3340,6 @@ describe('StreamingEngine', () => {
 
       const event = onEvent.calls.argsFor(0)[0];
       expect(event.detail).toEqual(emsgObj);
-    });
-  });
-
-  describe('embedded prft boxes', () => {
-    const prftSegment = Uint8ArrayUtils.fromHex(
-        '00000020707266740100000000000001E683B62E8E63CC580000001B319D5767');
-    const mdhdSegment = Uint8ArrayUtils.fromHex(
-        '000000446D6F6F760000003C7472616B000000346D6469610000002C6D646864'+
-        '0100000000000000DF22526500000000DF22526500989680FFFFFFFFFFFFFFFF'+
-        '15C70000');
-
-    const prftEventObj = {
-      wallClockTime: 1658402734556,
-      startDate: new Date(1658391054904.7898),
-    };
-
-    beforeEach(() => {
-      setupVod();
-      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
-      config.parsePrftBox = true;
-      createStreamingEngine(config);
-    });
-
-    it('raises an event for registered prft v1', async () => {
-      segmentData[ContentType.VIDEO].segments[0] = prftSegment;
-      segmentData[ContentType.VIDEO].initSegments[0] = mdhdSegment;
-
-      streamingEngine.switchVariant(variant);
-      streamingEngine.switchTextStream(textStream);
-      await streamingEngine.start();
-      playing = true;
-      await runTest();
-      expect(onEvent).toHaveBeenCalled();
-
-      const event = onEvent.calls.argsFor(0)[0];
-      expect(event.detail.wallClockTime).toBe(prftEventObj.wallClockTime);
-      expect(event.detail.programStartDate.getUTCMilliseconds()).toBe(
-          prftEventObj.startDate.getUTCMilliseconds());
-      expect(event.detail.programStartDate.toUTCString()).toBe(
-          prftEventObj.startDate.toUTCString());
-    });
-
-    it('raises an event for registered prft v0', async () => {
-      const prftSegment = Uint8ArrayUtils.fromHex(
-          '0000001C707266740000000000000001E683B62E8E63CC5819999999');
-      const expectedStartDate = new Date(1658402691606.3271);
-      segmentData[ContentType.VIDEO].segments[0] = prftSegment;
-      segmentData[ContentType.VIDEO].initSegments[0] = mdhdSegment;
-
-      streamingEngine.switchVariant(variant);
-      streamingEngine.switchTextStream(textStream);
-      await streamingEngine.start();
-      playing = true;
-      await runTest();
-      expect(onEvent).toHaveBeenCalled();
-
-      const event = onEvent.calls.argsFor(0)[0];
-      expect(event.detail.wallClockTime).toBe(prftEventObj.wallClockTime);
-      expect(event.detail.programStartDate.getUTCMilliseconds()).toBe(
-          expectedStartDate.getUTCMilliseconds());
-      expect(event.detail.programStartDate.toUTCString()).toBe(
-          expectedStartDate.toUTCString());
-    });
-
-    it('raises an event once only', async () => {
-      segmentData[ContentType.VIDEO].segments[0] =
-          shaka.util.Uint8ArrayUtils.concat(prftSegment, prftSegment);
-      segmentData[ContentType.VIDEO].segments[1] = prftSegment;
-      segmentData[ContentType.VIDEO].initSegments[0] = mdhdSegment;
-
-      streamingEngine.switchVariant(variant);
-      streamingEngine.switchTextStream(textStream);
-      await streamingEngine.start();
-      playing = true;
-      await runTest();
-      expect(onEvent).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -249,6 +249,7 @@ describe('MediaSourceEngine', () => {
         {
           getKeySystem: () => null,
           onMetadata: () => {},
+          onEvent: () => {},
         });
     mediaSourceEngine.getCaptionParser = () => {
       return mockClosedCaptionParser;
@@ -323,6 +324,7 @@ describe('MediaSourceEngine', () => {
           {
             getKeySystem: () => null,
             onMetadata: () => {},
+            onEvent: () => {},
           });
 
       expect(createMediaSourceSpy).toHaveBeenCalled();
@@ -345,6 +347,7 @@ describe('MediaSourceEngine', () => {
           {
             getKeySystem: () => null,
             onMetadata: () => {},
+            onEvent: () => {},
           });
 
       if (window.ManagedMediaSource) {

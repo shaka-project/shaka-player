@@ -491,8 +491,6 @@ shakaDemo.Config = class {
             'streaming.observeQualityChanges')
         .addNumberInput_('Max Variant Disabled Time',
             'streaming.maxDisabledTime')
-        .addBoolInput_('Parse PRFT box',
-            'streaming.parsePrftBox')
         .addNumberInput_('Segment Prefetch Limit',
             'streaming.segmentPrefetchLimit',
             /* canBeDecimal= */ false,

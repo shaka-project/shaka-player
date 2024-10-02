@@ -173,6 +173,7 @@ describe('MediaSourceEngine', () => {
         {
           getKeySystem: () => null,
           onMetadata: shaka.test.Util.spyFunc(onMetadata),
+          onEvent: () => {},
         });
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine.configure(config);
@@ -297,6 +298,7 @@ describe('MediaSourceEngine', () => {
       segmentIndex,
       fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
           streamMetadata.mimeType, streamMetadata.codecs)]),
+      isAudioMuxedInVideo: false,
     };
   }
 

@@ -19,6 +19,7 @@ goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.FakeEvent');
+goog.require('shaka.util.Functional');
 goog.requireType('shaka.ui.Controls');
 
 
@@ -91,6 +92,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           return false;
         }
         if (this.controls.getConfig().showAudioChannelCountVariants &&
+            track.channelsCount && selectedTrack.channelsCount &&
             track.channelsCount != selectedTrack.channelsCount) {
           return false;
         }
@@ -117,7 +119,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
         return tracks.findIndex((t) => t.bandwidth == track.bandwidth) == idx;
       });
     } else {
-      const audiosIds = [...new Set(tracks.map((t) => t.audioId))];
+      const audiosIds = [...new Set(tracks.map((t) => t.audioId))]
+          .filter(shaka.util.Functional.isNotNull);
       if (audiosIds.length > 1) {
         tracks = tracks.filter((track, idx) => {
           // Keep the first one with the same height and framerate or bandwidth.

@@ -387,7 +387,8 @@ shaka.extern.SegmentIndex = class {
  *   mssPrivateData: (shaka.extern.MssPrivateData|undefined),
  *   external: boolean,
  *   fastSwitching: boolean,
- *   fullMimeTypes: !Set.<string>
+ *   fullMimeTypes: !Set.<string>,
+ *   isAudioMuxedInVideo: boolean
  * }}
  *
  * @description
@@ -534,6 +535,8 @@ shaka.extern.SegmentIndex = class {
  *   represents the types used in each period of the original manifest.
  *   Meant for being used by compatibility checking, such as with
  *   MediaSource.isTypeSupported.
+ * @property {boolean} isAudioMuxedInVideo
+ *   Indicate if the audio of this stream is muxed in the video of other stream.
  *
  * @exportDoc
  */

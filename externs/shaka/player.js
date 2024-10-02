@@ -1556,7 +1556,6 @@ shaka.extern.LiveSyncConfiguration;
  *   dispatchAllEmsgBoxes: boolean,
  *   observeQualityChanges: boolean,
  *   maxDisabledTime: number,
- *   parsePrftBox: boolean,
  *   segmentPrefetchLimit: number,
  *   prefetchAudioLanguages: !Array<string>,
  *   disableAudioPrefetch: boolean,
@@ -1744,14 +1743,6 @@ shaka.extern.LiveSyncConfiguration;
  *   If all variants are disabled this way, NETWORK HTTP_ERROR will be thrown.
  *   <br>
  *   Defaults to <code>30</code>.
- * @property {boolean} parsePrftBox
- *   If <code>true</code>, will raise a shaka.extern.ProducerReferenceTime
- *   player event (event name 'prft').
- *   The event will be raised only once per playback session as program
- *   start date will not change, and would save parsing the segment multiple
- *   times needlessly.
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {number} segmentPrefetchLimit
  *   The maximum number of segments for each active stream to be prefetched
  *   ahead of playhead in parallel.

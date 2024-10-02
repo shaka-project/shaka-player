@@ -41,7 +41,7 @@ for the up-to-date list of maintained branches of Shaka Player.
 |Edge Chromium |**Y**     |**Y**    |**Y**    |untested⁵|**Native**|**Native** |**Native**  | -      | -   |
 |IE            | N        | -       | -       | -       | -        | -         | -          | -      | -   |
 |Safari¹       | -        |**Y**    | -       | -       |**Native**|**Y**      |**Y**       | -      | -   |
-|Opera¹        |untested⁵ |untested⁵|untested⁵|untested⁵|**Native**| -         | -          | -      | -   |
+|Opera¹        |**Y**     |**Y**    |**Y**    |untested⁵|**Native**| -         | -          | -      | -   |
 |Chromecast².  | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Tizen TV³     | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |WebOS⁶        | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
@@ -234,7 +234,7 @@ MSS features **not** supported:
 |Edge³         | -        |**Y**    | -       | -        |
 |Edge Chromium |**Y**     |**Y**    | -       |**Y**     |
 |Safari        | -        | -       |**Y**    | -        |
-|Opera         |untested⁵ | -       | -       |untested⁵ |
+|Opera         |**Y**     | -       | -       |**Y**     |
 |Chromecast    |**Y**     |**Y**    | -       |**Y**     |
 |Tizen TV      |**Y**     |**Y**    | -       |**Y**     |
 |WebOS⁷        |untested⁷ |untested⁷| -       |untested⁷ |
@@ -252,8 +252,6 @@ NOTES:
  - ²: DRM must be enabled by the user.  The first time a Firefox user visits a
    site with encrypted media, the user will be prompted to enable DRM.
  - ³: PlayReady in Edge does not seem to work on a VM or over Remote Desktop.
- - ⁵: These are expected to work, but are not actively tested by the Shaka
-   Player team.
  - ⁶: ClearKey is a useful tool for debugging, and does not provide actual
    content security.
  - ⁷: These are expected to work, but are community-supported and untested by
