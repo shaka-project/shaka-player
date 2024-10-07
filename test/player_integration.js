@@ -102,6 +102,48 @@ describe('Player', () => {
       expect(seekRange.start).toBeCloseTo(start);
     });
   });
+  // ./build/test.py  --browsers Chrome  --filter "playback transition when current time is in the past" --enable-logging v2   
+  describe('Live to VOD', () => {
+    it('playback transition when current time is in the past', async () => {
+      const netEngine = player.getNetworkingEngine();
+      const startTime = Date.now();
+      netEngine.registerRequestFilter((type, request) => {
+        if (type != shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+          return;
+        }
+        // Simulate a live stream by providing different manifests over time.
+        const time = (Date.now() - startTime) / 1000;
+        const manifestNumber = Math.min(5, Math.floor(0.5 + time / 2));
+        request.uris = [
+          '/base/test/test/assets/7401/dash_' + manifestNumber + '.mpd',
+        ];
+        console.log('getting manifest', request.uris);
+      });
+      // Play the stream.
+      await player.load('/base/test/test/assets/7401/dash_0.mpd', 1001);
+      console.log(player.getConfiguration().streaming);
+      await video.play();
+      const seekRangeForStart = player.seekRange();
+      const start = seekRangeForStart.start;
+      // Wait for the stream to be over.
+      eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
+      /** @type {shaka.test.Waiter} */
+      const waiter = new shaka.test.Waiter(eventManager)
+          .setPlayer(player)
+          .timeoutAfter(40)
+          .failOnTimeout(true);
+      await waiter.waitForEnd(video);
+      video.currentTime = 1001;
+      await video.play();
+      await waiter.waitForEnd(video);
+      // The stream should have transitioned to VOD by now.
+      expect(player.isLive()).toBe(false);
+      // Check that the final seek range is as expected.
+      const seekRange = player.seekRange();
+      // expect(seekRange.end).toBeCloseTo(24);
+      expect(seekRange.start).toBeCloseTo(start);
+    });
+  });
 
   describe('attach', () => {
     beforeEach(async () => {
