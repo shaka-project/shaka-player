@@ -123,6 +123,9 @@ describe('Player', () => {
     // Regression test for:
     // https://github.com/shaka-project/shaka-player/issues/4850
     it('does not leave any lingering timers', async () => {
+      // First destroy player instance created in standard routine, so
+      // media element is not attached to it.
+      await player.destroy();
       shaka.util.Timer.activeTimers.clear();
 
       // Unlike the other tests in this file, this uses an uncompiled build of
