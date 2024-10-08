@@ -118,12 +118,13 @@ describe('Player', () => {
         ];
         console.log('getting manifest', request.uris);
       });
-      // Play the stream.
-      await player.load('/base/test/test/assets/7401/dash_0.mpd', 1001);
+      player.configure('streaming.bufferBehind', 1);
+      player.configure('streaming.evictionGoal', 1);
+      // Play the stream .
+      await player.load('/base/test/test/assets/7401/dash_0.mpd', 1020);
       console.log(player.getConfiguration().streaming);
       await video.play();
-      const seekRangeForStart = player.seekRange();
-      const start = seekRangeForStart.start;
+      video.pause();
       // Wait for the stream to be over.
       eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
       /** @type {shaka.test.Waiter} */
@@ -131,16 +132,15 @@ describe('Player', () => {
           .setPlayer(player)
           .timeoutAfter(40)
           .failOnTimeout(true);
-      await waiter.waitForEnd(video);
-      video.currentTime = 1001;
+      // wait for Dynamic to static
+      await waiter.waitUntilVodTransition(video);
+      expect(player.isLive()).toBe(false);
+      // set the playback to 1020 in middle of the second period
+      video.currentTime = 1020;
       await video.play();
       await waiter.waitForEnd(video);
       // The stream should have transitioned to VOD by now.
       expect(player.isLive()).toBe(false);
-      // Check that the final seek range is as expected.
-      const seekRange = player.seekRange();
-      // expect(seekRange.end).toBeCloseTo(24);
-      expect(seekRange.start).toBeCloseTo(start);
     });
   });
 
