@@ -102,7 +102,6 @@ describe('Player', () => {
       expect(seekRange.start).toBeCloseTo(start);
     });
   });
-  // ./build/test.py  --browsers Chrome  --filter "playback transition when current time is in the past" --enable-logging v2   
   describe('Live to VOD', () => {
     it('playback transition when current time is in the past', async () => {
       const netEngine = player.getNetworkingEngine();
