@@ -122,7 +122,6 @@ describe('Player', () => {
       player.configure('streaming.evictionGoal', 1);
       // Play the stream .
       await player.load('/base/test/test/assets/7401/dash_0.mpd', 1020);
-      console.log(player.getConfiguration().streaming);
       await video.play();
       video.pause();
       // Wait for the stream to be over.
