@@ -144,6 +144,41 @@ shaka.test.Waiter = class {
   }
 
   /**
+   * Wait for the video player to fetch the static manifest.
+   * Promise is resolved player.isLive is false.
+   *
+   * @param {!HTMLMediaElement} mediaElement
+   * @return {!Promise}
+  */
+  waitUntilVodTransition(mediaElement) {
+    // The name of what we're waiting for
+    const goalName = 'manifest to be static';
+
+    // The cleanup on timeout
+    let timer = null;
+    const cleanup = () => {
+      if (timer) {
+        timer.stop();
+      }
+    };
+
+    // The conditions for success
+    const p = new Promise((resolve) => {
+      const check = () => {
+        if (!this.player_.isLive()) {
+          cleanup();
+          resolve();
+        }
+      };
+
+      timer = new shaka.util.Timer(check);
+      timer.tickEvery(/* seconds= */ 1);
+    });
+
+    return this.waitUntilGeneric_(goalName, p, cleanup, mediaElement);
+  }
+
+  /**
    * Wait for the video playhead to reach a certain target time.
    * If the playhead reaches |timeGoal| or the video ends before |timeout|
    * seconds pass, the Promise is resolved.

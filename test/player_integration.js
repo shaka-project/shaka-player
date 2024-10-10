@@ -102,6 +102,46 @@ describe('Player', () => {
       expect(seekRange.start).toBeCloseTo(start);
     });
   });
+  describe('Live to VOD', () => {
+    it('playback transition when current time is in the past', async () => {
+      const netEngine = player.getNetworkingEngine();
+      const startTime = Date.now();
+      netEngine.registerRequestFilter((type, request) => {
+        if (type != shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+          return;
+        }
+        // Simulate a live stream by providing different manifests over time.
+        const time = (Date.now() - startTime) / 1000;
+        const manifestNumber = Math.min(5, Math.floor(0.5 + time / 2));
+        request.uris = [
+          '/base/test/test/assets/7401/dash_' + manifestNumber + '.mpd',
+        ];
+        console.log('getting manifest', request.uris);
+      });
+      player.configure('streaming.bufferBehind', 1);
+      player.configure('streaming.evictionGoal', 1);
+      // Play the stream .
+      await player.load('/base/test/test/assets/7401/dash_0.mpd', 1020);
+      await video.play();
+      video.pause();
+      // Wait for the stream to be over.
+      eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
+      /** @type {shaka.test.Waiter} */
+      const waiter = new shaka.test.Waiter(eventManager)
+          .setPlayer(player)
+          .timeoutAfter(40)
+          .failOnTimeout(true);
+      // wait for Dynamic to static
+      await waiter.waitUntilVodTransition(video);
+      expect(player.isLive()).toBe(false);
+      // set the playback to 1020 in middle of the second period
+      video.currentTime = 1020;
+      await video.play();
+      await waiter.waitForEnd(video);
+      // The stream should have transitioned to VOD by now.
+      expect(player.isLive()).toBe(false);
+    });
+  });
 
   describe('attach', () => {
     beforeEach(async () => {
