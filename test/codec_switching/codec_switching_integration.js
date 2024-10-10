@@ -91,8 +91,11 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
+      if (!shaka.media.Capabilities.isChangeTypeSupported()) {
+        pending('SourceBuffer.changeType is not supported');
+      }
       if (!shaka.util.Platform.supportsSmoothCodecSwitching()) {
-        pending('Mediasource.ChangeType is not considered ' +
+        pending('SourceBuffer.changeType is not considered ' +
           'reliable on this device');
       }
       if (!await Util.isTypeSupported('audio/webm; codecs="opus"')) {
@@ -160,8 +163,11 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
+      if (!shaka.media.Capabilities.isChangeTypeSupported()) {
+        pending('SourceBuffer.changeType is not supported');
+      }
       if (!shaka.util.Platform.supportsSmoothCodecSwitching()) {
-        pending('Mediasource.ChangeType is not considered ' +
+        pending('SourceBuffer.changeType is not considered ' +
           'reliable on this device');
       }
       if (!await Util.isTypeSupported('audio/webm; codecs="opus"')) {
@@ -229,8 +235,11 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
+      if (!shaka.media.Capabilities.isChangeTypeSupported()) {
+        pending('SourceBuffer.changeType is not supported');
+      }
       if (!shaka.util.Platform.supportsSmoothCodecSwitching()) {
-        pending('Mediasource.ChangeType is not considered ' +
+        pending('SourceBuffer.changeType is not considered ' +
           'reliable on this device');
       }
       if (!await Util.isTypeSupported('audio/mp4; codecs="ec-3"')) {
@@ -299,8 +308,11 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
+      if (!shaka.media.Capabilities.isChangeTypeSupported()) {
+        pending('SourceBuffer.changeType is not supported');
+      }
       if (!shaka.util.Platform.supportsSmoothCodecSwitching()) {
-        pending('Mediasource.ChangeType is not considered ' +
+        pending('SourceBuffer.changeType is not considered ' +
           'reliable on this device');
       }
       if (!await Util.isTypeSupported('audio/mp4; codecs="ec-3"')) {
