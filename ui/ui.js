@@ -491,9 +491,9 @@ shaka.ui.Overlay = class {
       urls.push(src);
       video.removeAttribute('src');
     }
-    for (const source of /** @type {!NodeList<!HTMLSourceElement>}*/(
-      video.getElementsByTagName('source'))) {
-      urls.push(source.src);
+
+    for (const source of video.getElementsByTagName('source')) {
+      urls.push(/** @type {!HTMLSourceElement} */ (source).src);
       video.removeChild(source);
     }
 
