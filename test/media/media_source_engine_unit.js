@@ -218,24 +218,22 @@ describe('MediaSourceEngine', () => {
     //  - seek to flush the pipeline on some platforms
     //  - check buffered.length to assert that flushing the pipeline is okay
     mockVideo = {
-      src: '',
+      firstElementChild: undefined,
       error: null,
       currentTime: 0,
       buffered: {
         length: 0,
       },
-      removeAttribute: /** @this {HTMLVideoElement} */ (attr) => {
-        // Only called with attr == 'src'.
-        // This assertion alerts us if the requirements for this mock change.
-        goog.asserts.assert(attr == 'src', 'Unexpected removeAttribute() call');
-        mockVideo.src = '';
+      appendChild: (element) => {
+        mockVideo.firstElementChild = element;
       },
+      removeChild: () => {
+        mockVideo.firstElementChild = undefined;
+      },
+      removeAttribute: jasmine.createSpy('removeAttribute'),
       addEventListener: jasmine.createSpy('addVideoEventListener'),
       removeEventListener: jasmine.createSpy('removeVideoEventListener'),
-      load: /** @this {HTMLVideoElement} */ () => {
-        // This assertion alerts us if the requirements for this mock change.
-        goog.asserts.assert(mockVideo.src == '', 'Unexpected load() call');
-      },
+      load: jasmine.createSpy('load'),
       play: jasmine.createSpy('play'),
       paused: true,
       autoplay: false,
@@ -329,7 +327,7 @@ describe('MediaSourceEngine', () => {
 
       expect(createMediaSourceSpy).toHaveBeenCalled();
       expect(createObjectURLSpy).toHaveBeenCalled();
-      expect(mockVideo.src).toBe('blob:foo');
+      expect(mockVideo.firstElementChild.src).toBe('blob:foo');
     });
 
     it('revokes object URL after MediaSource opens', () => {

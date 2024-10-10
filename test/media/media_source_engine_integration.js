@@ -179,7 +179,7 @@ describe('MediaSourceEngine', () => {
     mediaSourceEngine.configure(config);
 
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];
-    expect(video.src).toBeTruthy();
+    expect(video.getElementsByTagName('source').length).toBe(1);
     await mediaSourceEngine.init(new Map(), false);
   });
 
