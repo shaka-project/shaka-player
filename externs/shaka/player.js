@@ -1537,6 +1537,7 @@ shaka.extern.LiveSyncConfiguration;
  *   alwaysStreamText: boolean,
  *   startAtSegmentBoundary: boolean,
  *   gapDetectionThreshold: number,
+ *   seekSlowDelay: number,
  *   gapPadding: number,
  *   gapJumpTimerTime: number,
  *   durationBackoff: number,
@@ -1630,6 +1631,11 @@ shaka.extern.LiveSyncConfiguration;
  *   jump.
  *   <br>
  *   Defaults to <code>0.5</code>.
+ * @property {number} seekSlowDelay
+ *   The minimum time duration (in seconds) before we can operate a new seek
+ *   on cast devices (Only for Chromecast)
+ *   <br>
+ *   Defaults to <code>1</code>.
  * @property {number} gapPadding
  *   Padding added only for Xbox, Legacy Edge and Tizen.
  *   Based on our research (specific to Tizen), the gapPadding value must be
