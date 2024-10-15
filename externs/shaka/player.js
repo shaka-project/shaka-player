@@ -1633,7 +1633,8 @@ shaka.extern.LiveSyncConfiguration;
  *   Defaults to <code>0.5</code>.
  * @property {number} seekSlowDelay
  *   The minimum time duration (in seconds) before we can operate a new seek
- *   on cast devices (Only for Chromecast)
+ *   it's for devices which have slow seek time.
+ *   Even now, it does not apply to Android based Chromecasts
  *   <br>
  *   Defaults to <code>1</code>.
  * @property {number} gapPadding
