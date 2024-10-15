@@ -485,17 +485,21 @@ shaka.ui.Overlay = class {
     //    <source src='foo.m2u8'/>
     //  </video>
     // It should not be specified on both.
+    const urls = [];
     const src = video.getAttribute('src');
     if (src) {
-      const sourceElem = document.createElement('source');
-      sourceElem.setAttribute('src', src);
-      video.appendChild(sourceElem);
+      urls.push(src);
       video.removeAttribute('src');
     }
 
-    for (const elem of video.querySelectorAll('source')) {
+    for (const source of video.getElementsByTagName('source')) {
+      urls.push(/** @type {!HTMLSourceElement} */ (source).src);
+      video.removeChild(source);
+    }
+
+    for (const url of urls) {
       try { // eslint-disable-next-line no-await-in-loop
-        await ui.getControls().getPlayer().load(elem.getAttribute('src'));
+        await ui.getControls().getPlayer().load(url);
         break;
       } catch (e) {
         shaka.log.error('Error auto-loading asset', e);

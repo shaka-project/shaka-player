@@ -58,18 +58,18 @@ describe('Player Load Graph', () => {
       async () => {
         createPlayer();
 
-        expect(video.src).toBeFalsy();
+        expect(video.getElementsByTagName('source').length).toBeFalsy();
         await player.attach(video, /* initializeMediaSource= */ true);
-        expect(video.src).toBeTruthy();
+        expect(video.getElementsByTagName('source').length).toBeTruthy();
       });
 
   it('attach + initializeMediaSource=false will not intialize media source',
       async () => {
         createPlayer();
 
-        expect(video.src).toBeFalsy();
+        expect(video.getElementsByTagName('source').length).toBeFalsy();
         await player.attach(video, /* initializeMediaSource= */ false);
-        expect(video.src).toBeFalsy();
+        expect(video.getElementsByTagName('source').length).toBeFalsy();
       });
 
   it('unload + initializeMediaSource=false does not initialize media source',
@@ -80,7 +80,7 @@ describe('Player Load Graph', () => {
         await player.load('test:sintel');
 
         await player.unload(/* initializeMediaSource= */ false);
-        expect(video.src).toBeFalsy();
+        expect(video.getElementsByTagName('source').length).toBeFalsy();
       });
 
   it('unload + initializeMediaSource=true initializes media source',
@@ -91,7 +91,7 @@ describe('Player Load Graph', () => {
         await player.load('test:sintel');
 
         await player.unload(/* initializeMediaSource= */ true);
-        expect(video.src).toBeTruthy();
+        expect(video.getElementsByTagName('source').length).toBeTruthy();
       });
 
   it('load and unload can be called multiple times', async () => {
