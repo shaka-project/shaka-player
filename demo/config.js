@@ -449,6 +449,9 @@ shakaDemo.Config = class {
         .addNumberInput_('Gap detection threshold',
             'streaming.gapDetectionThreshold',
             /* canBeDecimal= */ true)
+        .addNumberInput_('Seeking delay Chromecast',
+            'streaming.seekSlowDelay',
+            /* canBeDecimal= */ true)
         .addNumberInput_('Gap padding',
             'streaming.gapPadding',
             /* canBeDecimal= */ true)
