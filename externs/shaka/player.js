@@ -2082,6 +2082,20 @@ shaka.extern.AbrConfiguration;
  */
 shaka.extern.AdvancedAbrConfiguration;
 
+/**
+ * @typedef {{
+ *   version: number
+ * }}
+ * @property {number} version
+ */
+shaka.extern.RequestMode;
+
+/**
+ * @typedef {{
+ *   requestMode: shaka.extern.RequestMode
+ * }}
+ */
+shaka.extern.Reporting;
 
 /**
  * @typedef {{
@@ -2090,7 +2104,8 @@ shaka.extern.AdvancedAbrConfiguration;
  *   sessionId: string,
  *   contentId: string,
  *   rtpSafetyFactor: number,
- *   includeKeys: !Array<string>
+ *   includeKeys: !Array<string>,
+ *   reporting: shaka.extern.Reporting
  * }}
  *
  * @description
@@ -2129,6 +2144,8 @@ shaka.extern.AdvancedAbrConfiguration;
  *   will be included.
  *   <br>
  *   Defaults to <code>[]</code>.
+ * @property {shaka.extern.Reporting} reporting
+ *   Reporting mode configuration.
  * @exportDoc
  */
 shaka.extern.CmcdConfiguration;
