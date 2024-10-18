@@ -35,6 +35,7 @@ describe('CastUtils', () => {
       'getNonDefaultConfiguration',
       'addFont',
       'getFetchedPlaybackInfo',
+      'getLiveLatency',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',

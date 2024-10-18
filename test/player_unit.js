@@ -2876,6 +2876,44 @@ describe('Player', () => {
     }
   });  // describe('languages')
 
+  describe('getLiveLatency()', () => {
+    let timeline;
+
+    beforeEach(async () => {
+      // Create a presentation timeline for a live stream.
+      timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(false); // Indicate that this is a live stream.
+
+      // Set an initial program date time to simulate a live stream with a known start time.
+      timeline.setInitialProgramDateTime(1000);
+
+      // Generate a manifest that uses this timeline.
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1);
+        });
+      });
+
+      // Load the player with the live manifest.
+      await player.load(fakeManifestUri, null, fakeMimeType);
+
+      video.currentTime = 10; // Simulate that we're 10 seconds into playback.
+    });
+
+    it('returns null if video element does not exist', () => {
+      player.video_ = null;
+      const latency = player.getLiveLatency();
+      expect(latency).toBeNull();
+    });
+
+    it('returns correct latency when video is playing', () => {
+      Date.now = () => 2000 * 1000;
+      const latency = player.getLiveLatency();
+      expect(latency).toBe(990000);
+    });
+  });
+
   describe('getStats', () => {
     const oldDateNow = Date.now;
 
