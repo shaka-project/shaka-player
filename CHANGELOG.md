@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.11.8](https://github.com/shaka-project/shaka-player/compare/v4.11.7...v4.11.8) (2024-10-18)
+
+
+### Bug Fixes
+
+* **DASH:** Live DASH allows segment overlap in the updated manifest for first new segments ([#7405](https://github.com/shaka-project/shaka-player/issues/7405)) ([1a95178](https://github.com/shaka-project/shaka-player/commit/1a9517805d8280be764cca11b18a528406214cfa))
+* **DASH:** Live to vod transition ([#7404](https://github.com/shaka-project/shaka-player/issues/7404)) ([f650764](https://github.com/shaka-project/shaka-player/commit/f650764c69c65b21e7f701c48326f1465f70736e))
+* Disable smooth codec switch if changeType is unavailable ([#7414](https://github.com/shaka-project/shaka-player/issues/7414)) ([b2146ce](https://github.com/shaka-project/shaka-player/commit/b2146ce6039699853fa2d5d1031fd2eaf8922fbd))
+* Export getFetchedPlaybackInfo ([#7418](https://github.com/shaka-project/shaka-player/issues/7418)) ([3dbae25](https://github.com/shaka-project/shaka-player/commit/3dbae2540bd375240dbffb9857a05a28d8d38afc)), closes [#7416](https://github.com/shaka-project/shaka-player/issues/7416)
+* **PS4/5:** Disable smooth codec switch on PS4/5 ([#7413](https://github.com/shaka-project/shaka-player/issues/7413)) ([6316946](https://github.com/shaka-project/shaka-player/commit/631694606e80d9e2441ada777a64bd906111470d))
+* Seek delay for Cast Nest hub ([#7423](https://github.com/shaka-project/shaka-player/issues/7423)) ([fb3a333](https://github.com/shaka-project/shaka-player/commit/fb3a333987bb70640a10fdf83d034871e104876c))
+* **UI:** Disable save frame when using remote playback ([#7433](https://github.com/shaka-project/shaka-player/issues/7433)) ([b66b03c](https://github.com/shaka-project/shaka-player/commit/b66b03c210548be1f361c23afb6c079c5083b545))
+* **UI:** Restore missing AirPlay button ([#7389](https://github.com/shaka-project/shaka-player/issues/7389)) ([eaa1bda](https://github.com/shaka-project/shaka-player/commit/eaa1bda7b8c660bc367d046820f58c2f7e7e04cc))
+
 ## [4.11.7](https://github.com/shaka-project/shaka-player/compare/v4.11.6...v4.11.7) (2024-09-26)
 
 
