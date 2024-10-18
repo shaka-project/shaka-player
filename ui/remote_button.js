@@ -141,8 +141,11 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
           const disableRemote = this.video.disableRemotePlayback;
           const loadMode = this.player.getLoadMode();
           const srcMode = loadMode == shaka.Player.LoadMode.SRC_EQUALS;
+          const mseMode = loadMode == shaka.Player.LoadMode.MEDIA_SOURCE;
+          const hlsType = this.player.getManifestType() == 'HLS';
+          const canCast = srcMode || (mseMode && hlsType);
           shaka.ui.Utils.setDisplay(
-              this.remoteButton_, srcMode && availability && !disableRemote);
+              this.remoteButton_, canCast && availability && !disableRemote);
         } else {
           shaka.ui.Utils.setDisplay(this.remoteButton_, false);
         }
