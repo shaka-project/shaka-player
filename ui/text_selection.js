@@ -81,6 +81,20 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
       this.onTracksChanged_();
     });
 
+    if (this.video.remote) {
+      this.eventManager.listen(this.video.remote, 'connect', () => {
+        this.onTracksChanged_();
+      });
+
+      this.eventManager.listen(this.video.remote, 'connecting', () => {
+        this.onTracksChanged_();
+      });
+
+      this.eventManager.listen(this.video.remote, 'disconnect', () => {
+        this.onTracksChanged_();
+      });
+    }
+
     // Initialize caption state with a fake event.
     this.onCaptionStateChange_();
 

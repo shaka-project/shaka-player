@@ -58,6 +58,20 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
       this.updateAudioLanguages_();
     });
 
+    if (this.video.remote) {
+      this.eventManager.listen(this.video.remote, 'connect', () => {
+        this.onTracksChanged_();
+      });
+
+      this.eventManager.listen(this.video.remote, 'connecting', () => {
+        this.onTracksChanged_();
+      });
+
+      this.eventManager.listen(this.video.remote, 'disconnect', () => {
+        this.onTracksChanged_();
+      });
+    }
+
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
 

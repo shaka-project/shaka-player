@@ -67,6 +67,20 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       this.updateResolutionSelection_();
     });
 
+    if (this.video.remote) {
+      this.eventManager.listen(this.video.remote, 'connect', () => {
+        this.updateResolutionSelection_();
+      });
+
+      this.eventManager.listen(this.video.remote, 'connecting', () => {
+        this.updateResolutionSelection_();
+      });
+
+      this.eventManager.listen(this.video.remote, 'disconnect', () => {
+        this.updateResolutionSelection_();
+      });
+    }
+
     this.updateResolutionSelection_();
   }
 
