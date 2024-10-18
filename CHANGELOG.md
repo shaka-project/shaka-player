@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.10.22](https://github.com/shaka-project/shaka-player/compare/v4.10.21...v4.10.22) (2024-10-18)
+
+
+### Bug Fixes
+
+* **DASH:** Live DASH allows segment overlap in the updated manifest for first new segments ([#7405](https://github.com/shaka-project/shaka-player/issues/7405)) ([8d7526b](https://github.com/shaka-project/shaka-player/commit/8d7526b17ad7cf939570432177b346776b688698))
+* **DASH:** Live to vod transition ([#7404](https://github.com/shaka-project/shaka-player/issues/7404)) ([a468216](https://github.com/shaka-project/shaka-player/commit/a4682163408759ace3c7460177210bb075b790ef))
+* Disable smooth codec switch if changeType is unavailable ([#7414](https://github.com/shaka-project/shaka-player/issues/7414)) ([67bc16e](https://github.com/shaka-project/shaka-player/commit/67bc16eac3a581bf1563c9c3f806e20485d29e7f))
+* **PS4/5:** Disable smooth codec switch on PS4/5 ([#7413](https://github.com/shaka-project/shaka-player/issues/7413)) ([df0bfd4](https://github.com/shaka-project/shaka-player/commit/df0bfd408ef3e05cbeaf076cdc00d33f7aa87abd))
+* Seek delay for Cast Nest hub ([#7423](https://github.com/shaka-project/shaka-player/issues/7423)) ([2997dc0](https://github.com/shaka-project/shaka-player/commit/2997dc0284b06f8b846f0fc36fba085da1f4070b))
+* **UI:** Disable save frame when using remote playback ([#7433](https://github.com/shaka-project/shaka-player/issues/7433)) ([de251cd](https://github.com/shaka-project/shaka-player/commit/de251cd68b98c128ca57e74498770a9b233cc5ff))
+* **UI:** Restore missing AirPlay button ([#7389](https://github.com/shaka-project/shaka-player/issues/7389)) ([96d2bd5](https://github.com/shaka-project/shaka-player/commit/96d2bd531d222857cd9ebf9116cfa80cfd5854f5))
+
 ## [4.10.21](https://github.com/shaka-project/shaka-player/compare/v4.10.20...v4.10.21) (2024-09-26)
 
 
