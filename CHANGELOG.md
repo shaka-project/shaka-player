@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.11.9](https://github.com/shaka-project/shaka-player/compare/v4.11.8...v4.11.9) (2024-10-18)
+
+
+### Bug Fixes
+
+* **UI:** Fix auto-load with source tags ([#7430](https://github.com/shaka-project/shaka-player/issues/7430)) ([755a6ea](https://github.com/shaka-project/shaka-player/commit/755a6ea6f3dcd2da958ebb99dbffea7e12b3512c))
+* **UI:** Fix the position of save video frame in the overflow menu ([#7438](https://github.com/shaka-project/shaka-player/issues/7438)) ([a7261d6](https://github.com/shaka-project/shaka-player/commit/a7261d61e6420a13b4229de30c7d27fc0ada01f9))
+
 ## [4.11.8](https://github.com/shaka-project/shaka-player/compare/v4.11.7...v4.11.8) (2024-10-18)
 
 
