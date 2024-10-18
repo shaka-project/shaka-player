@@ -108,6 +108,7 @@ The following buttons can be added to the overflow menu:
 * ad_statistics: adds a button that displays ad statistics of the video.
 * save_video_frame: adds a button to save the current video frame.
 * chapter: adds a button that controls the chapter selection.
+* mute: adds a button that mutes/unmutes the video on click.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:
@@ -145,6 +146,7 @@ The following buttons can be added to the context menu:
   [Document Picture-in-Picture API]() if supported.
 * ad_statistics: adds a button that displays ad statistics of the video.
 * save_video_frame: adds a button to save the current video frame.
+* mute: adds a button that mutes/unmutes the video on click.
 
 Example:
 ```js

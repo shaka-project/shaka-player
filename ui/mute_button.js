@@ -8,11 +8,13 @@
 goog.provide('shaka.ui.MuteButton');
 
 goog.require('shaka.ads.Utils');
+goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.util.Dom');
 
 
@@ -29,23 +31,44 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
+    const LocIds = shaka.ui.Locales.Ids;
     /** @private {!HTMLButtonElement} */
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-mute-button');
-    this.button_.classList.add('material-icons-round');
     this.button_.classList.add('shaka-tooltip');
+
+    /** @private {!HTMLElement} */
+    this.icon_ = shaka.util.Dom.createHTMLElement('i');
+    this.icon_.classList.add('material-icons-round');
+    this.icon_.textContent = shaka.ui.Enums.MaterialDesignIcons.MUTE;
+    this.button_.appendChild(this.icon_);
+
+    const label = shaka.util.Dom.createHTMLElement('label');
+    label.classList.add('shaka-overflow-button-label');
+    label.classList.add('shaka-overflow-menu-only');
+    this.nameSpan_ = shaka.util.Dom.createHTMLElement('span');
+    this.nameSpan_.textContent = this.localization.resolve(LocIds.MUTE);
+    label.appendChild(this.nameSpan_);
+
+    /** @private {!HTMLElement} */
+    this.currentState_ = shaka.util.Dom.createHTMLElement('span');
+    this.currentState_.classList.add('shaka-current-selection-span');
+    label.appendChild(this.currentState_);
+
+    this.button_.appendChild(label);
+
     this.parent.appendChild(this.button_);
-    this.updateAriaLabel_();
+    this.updateLocalizedStrings_();
     this.updateIcon_();
 
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateAriaLabel_();
+          this.updateLocalizedStrings_();
         });
 
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateAriaLabel_();
+          this.updateLocalizedStrings_();
         });
 
     this.eventManager.listen(this.button_, 'click', () => {
@@ -57,19 +80,19 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(this.video, 'volumechange', () => {
-      this.updateAriaLabel_();
+      this.updateLocalizedStrings_();
       this.updateIcon_();
     });
 
     this.eventManager.listen(this.adManager,
         shaka.ads.Utils.AD_VOLUME_CHANGED, () => {
-          this.updateAriaLabel_();
+          this.updateLocalizedStrings_();
           this.updateIcon_();
         });
 
     this.eventManager.listen(this.adManager,
         shaka.ads.Utils.AD_MUTED, () => {
-          this.updateAriaLabel_();
+          this.updateLocalizedStrings_();
           this.updateIcon_();
         });
 
@@ -80,7 +103,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
           // the label and icon code depends on this.ad being correctly
           // updated at the time it runs.
           this.ad = null;
-          this.updateAriaLabel_();
+          this.updateLocalizedStrings_();
           this.updateIcon_();
         });
   }
@@ -88,7 +111,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
   /**
    * @private
    */
-  updateAriaLabel_() {
+  updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
     let label;
     if (this.ad) {
@@ -98,6 +121,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     }
 
     this.button_.ariaLabel = this.localization.resolve(label);
+    this.nameSpan_.textContent = this.localization.resolve(label);
   }
 
   /**
@@ -111,7 +135,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     } else {
       icon = this.video.muted ? Icons.UNMUTE : Icons.MUTE;
     }
-    this.button_.textContent = icon;
+    this.icon_.textContent = icon;
   }
 };
 
@@ -127,4 +151,11 @@ shaka.ui.MuteButton.Factory = class {
   }
 };
 
-shaka.ui.Controls.registerElement('mute', new shaka.ui.MuteButton.Factory());
+shaka.ui.OverflowMenu.registerElement(
+    'mute', new shaka.ui.MuteButton.Factory());
+
+shaka.ui.Controls.registerElement(
+    'mute', new shaka.ui.MuteButton.Factory());
+
+shaka.ui.ContextMenu.registerElement(
+    'mute', new shaka.ui.MuteButton.Factory());
