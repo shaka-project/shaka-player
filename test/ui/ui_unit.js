@@ -70,6 +70,60 @@ describe('UI', () => {
       });
     });
 
+    describe('set up with one container and src=', () => {
+      /** @type {!HTMLElement} */
+      let container;
+      /** @type {!HTMLVideoElement} */
+      let video;
+
+      beforeEach(async () => {
+        container =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        document.body.appendChild(container);
+
+        video = shaka.test.UiUtils.createVideoElement();
+        video.src = 'test:sintel_multi_lingual_multi_res';
+        container.appendChild(video);
+
+        await UiUtils.createUIThroughDOMAutoSetup(
+            [container], [video]);
+      });
+
+      it('has loaded the video', () => {
+        expect(video.duration).not.toBeNaN();
+        expect(video.duration).not.toBe(0);
+      });
+    });
+
+    describe('set up with one container and source element', () => {
+      /** @type {!HTMLElement} */
+      let container;
+      /** @type {!HTMLVideoElement} */
+      let video;
+
+      beforeEach(async () => {
+        container =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        document.body.appendChild(container);
+
+        video = shaka.test.UiUtils.createVideoElement();
+        container.appendChild(video);
+
+        const sourceElement = /** @type {!HTMLSourceElement} */(
+          document.createElement('source'));
+        sourceElement.src = 'test:sintel_multi_lingual_multi_res';
+        video.appendChild(sourceElement);
+
+        await UiUtils.createUIThroughDOMAutoSetup(
+            [container], [video]);
+      });
+
+      it('has loaded the video', () => {
+        expect(video.duration).not.toBeNaN();
+        expect(video.duration).not.toBe(0);
+      });
+    });
+
     describe('set up with several containers', () => {
       /** @type {!HTMLElement} */
       let container1;
