@@ -275,6 +275,9 @@ shaka.ui.Overlay = class {
           (name) => name != 'play_pause' && name != 'volume');
     }
 
+    // Set this button here to push it at the end.
+    config.overflowMenuButtons.push('save_video_frame');
+
     return config;
   }
 
