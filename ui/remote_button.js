@@ -144,8 +144,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
           let canCast = srcMode;
           const mseMode = loadMode == shaka.Player.LoadMode.MEDIA_SOURCE;
           const hlsType = this.player.getManifestType() == 'HLS';
-          if (mseMode && hlsType && shaka.util.Platform.isApple() &&
-            shaka.util.Platform.isSafari()) {
+          if (mseMode && hlsType && shaka.util.Platform.isSafari()) {
             canCast = true;
           }
           shaka.ui.Utils.setDisplay(
