@@ -159,6 +159,9 @@ shaka.ui.SaveVideoFrameButton = class extends shaka.ui.Element {
     if (this.ad) {
       available = false;
     }
+    if (this.video.remote && this.video.remote.state != 'disconnected') {
+      available = false;
+    }
     shaka.ui.Utils.setDisplay(this.button_, available);
   }
 
