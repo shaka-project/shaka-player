@@ -2086,15 +2086,34 @@ shaka.extern.AdvancedAbrConfiguration;
  * @typedef {{
  *   version: number
  * }}
+ *
+ * @description
+ *   Configuration options for CMCD Request Mode reporting.
+ *
  * @property {number} version
+ *   The CMCD version to use for Request Mode reporting.
+ *   Valid values are <code>1</code> or <code>2</code>, corresponding to CMCD v1
+ *   and CMCD v2 specifications, respectively.
+ *   <br>
+ *   Defaults to <code>2</code>.
  */
 shaka.extern.RequestMode;
 
 /**
  * @typedef {{
- *   requestMode: shaka.extern.RequestMode
- * }}
- */
+*   requestMode: shaka.extern.RequestMode
+* }}
+*
+* @description
+*   Configuration for CMCD reporting modes.
+*
+* @property {shaka.extern.RequestMode} requestMode
+*   Configuration options for Request Mode reporting.
+*   <br>
+*   Request Mode attaches CMCD data to each media object request, matching the
+*   default delivery mode in CMCD v1. It is mandatory for CMCD clients to support
+*   this mode.
+*/
 shaka.extern.Reporting;
 
 /**
