@@ -188,9 +188,10 @@ shaka.test.FakeVideo = class {
     this.autoplay = false;
     this.paused = false;
     this.buffered = createFakeBuffered([]);
-    this.src = '';
     this.offsetWidth = 1000;
     this.offsetHeight = 1000;
+    /** @private {!Array<!Element>} */
+    this.children_ = [];
 
     /** @type {!jasmine.Spy} */
     this.addTextTrack =
@@ -234,6 +235,19 @@ shaka.test.FakeVideo = class {
 
     /** @type {!jasmine.Spy} */
     this.canPlayType = jasmine.createSpy('canPlayType');
+
+    /** @type {!jasmine.Spy} */
+    this.appendChild =
+      jasmine.createSpy('appendChild').and.callFake((element) => {
+        this.children_.push(element);
+      });
+
+    /** @type {!jasmine.Spy} */
+    this.getElementsByTagName =
+      jasmine.createSpy('getElementsByTagName').and.callFake((tagName) => {
+        tagName = tagName.toUpperCase();
+        return this.children_.filter((tag) => tag.tagName === tagName);
+      });
   }
 };
 
