@@ -493,6 +493,8 @@ shaka.ui.Overlay = class {
       video.removeAttribute('src');
     }
 
+    await player.attach(shaka.util.Dom.asHTMLMediaElement(video));
+
     for (const elem of video.querySelectorAll('source')) {
       try { // eslint-disable-next-line no-await-in-loop
         await ui.getControls().getPlayer().load(elem.getAttribute('src'));
@@ -501,8 +503,6 @@ shaka.ui.Overlay = class {
         shaka.log.error('Error auto-loading asset', e);
       }
     }
-
-    await player.attach(shaka.util.Dom.asHTMLMediaElement(video));
   }
 
 
