@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.9.30](https://github.com/shaka-project/shaka-player/compare/v4.9.29...v4.9.30) (2024-10-21)
+
+
+### Bug Fixes
+
+* calculations of channel count for DASH AudioChannelConfiguration elements. ([#7421](https://github.com/shaka-project/shaka-player/issues/7421)) ([d6ed6b0](https://github.com/shaka-project/shaka-player/commit/d6ed6b080b85ef682209288a7651649c68d3a3cc))
+* **DASH:** Live DASH allows segment overlap in the updated manifest for first new segments ([#7405](https://github.com/shaka-project/shaka-player/issues/7405)) ([fcc1128](https://github.com/shaka-project/shaka-player/commit/fcc1128235d56ab516c2cb014a516c452bbf8410))
+* **DASH:** Live to vod transition ([#7404](https://github.com/shaka-project/shaka-player/issues/7404)) ([a9e87c7](https://github.com/shaka-project/shaka-player/commit/a9e87c7ebcb4e450a39286a255b38fa7b8c4e649))
+* Disable smooth codec switch if changeType is unavailable ([#7414](https://github.com/shaka-project/shaka-player/issues/7414)) ([257272c](https://github.com/shaka-project/shaka-player/commit/257272c502650e79e30eb8464e9159b4e285c64b))
+* **DRM:** Fix persistent licenses not working for online playback ([#7457](https://github.com/shaka-project/shaka-player/issues/7457)) ([274678c](https://github.com/shaka-project/shaka-player/commit/274678cd05915ce571678ec43d6ac3ba3378ba2a))
+* **PS4/5:** Disable smooth codec switch on PS4/5 ([#7413](https://github.com/shaka-project/shaka-player/issues/7413)) ([341c632](https://github.com/shaka-project/shaka-player/commit/341c63272362ea63962788bc5531cc4c4faa9273))
+* Seek delay for Cast Nest hub ([#7423](https://github.com/shaka-project/shaka-player/issues/7423)) ([465174c](https://github.com/shaka-project/shaka-player/commit/465174cda0242e464497bd3bf62884ef635c02ac))
+* **UI:** Fix auto-load with source tags ([#7430](https://github.com/shaka-project/shaka-player/issues/7430)) ([3addfa2](https://github.com/shaka-project/shaka-player/commit/3addfa2fb0a799738629d0c2b0427e8f80baffb8))
+* **UI:** Fix the position of save video frame in the overflow menu ([#7438](https://github.com/shaka-project/shaka-player/issues/7438)) ([d7338cc](https://github.com/shaka-project/shaka-player/commit/d7338cc7df685952f54d1568a0af0ae9bb09e563))
+* **UI:** Hidden cursor correctly when no touch screen ([#7458](https://github.com/shaka-project/shaka-player/issues/7458)) ([53ef21c](https://github.com/shaka-project/shaka-player/commit/53ef21c95d1dd93df51a9173a6f6e56410bb0ab2))
+* **UI:** Restore missing AirPlay button ([#7389](https://github.com/shaka-project/shaka-player/issues/7389)) ([afa2099](https://github.com/shaka-project/shaka-player/commit/afa2099831113671d55b2d0caed9cf7e85be192f))
+
 ## [4.9.29](https://github.com/shaka-project/shaka-player/compare/v4.9.28...v4.9.29) (2024-09-26)
 
 
