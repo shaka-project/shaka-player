@@ -226,7 +226,8 @@ shaka.extern.UIVolumeBarColors;
  * @property {boolean} seekOnTaps
  *   Indicates whether or not a fast-forward and rewind tap button that seeks
  *   video some seconds.
- *   Defaults to true.
+ *   Defaults to true if the browser <code>navigator.maxTouchPoints > 0</code>
+ *   is true.
  * @property {number} tapSeekDistance
  *   The time interval, in seconds, to seek when the user presses the left or
  *   right part of the video. If less than or equal to 0,
