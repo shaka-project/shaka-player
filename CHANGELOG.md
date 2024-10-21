@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.10.23](https://github.com/shaka-project/shaka-player/compare/v4.10.22...v4.10.23) (2024-10-21)
+
+
+### Bug Fixes
+
+* calculations of channel count for DASH AudioChannelConfiguration elements. ([#7421](https://github.com/shaka-project/shaka-player/issues/7421)) ([697489c](https://github.com/shaka-project/shaka-player/commit/697489c5ec46c5c7cd1b8e01874913855ce04402))
+* **DRM:** Fix persistent licenses not working for online playback ([#7457](https://github.com/shaka-project/shaka-player/issues/7457)) ([0b7ff0c](https://github.com/shaka-project/shaka-player/commit/0b7ff0c79cb58ccb67e30567b62dbdaf8cec53dd))
+* **UI:** Fix auto-load with source tags ([#7430](https://github.com/shaka-project/shaka-player/issues/7430)) ([6c1fcd8](https://github.com/shaka-project/shaka-player/commit/6c1fcd844192bef5bde697eb2ec3524d675667b3))
+* **UI:** Fix the position of save video frame in the overflow menu ([#7438](https://github.com/shaka-project/shaka-player/issues/7438)) ([6998802](https://github.com/shaka-project/shaka-player/commit/69988029b743bee9c34fba1a2a32195c7b2bad7a))
+* **UI:** Hidden cursor correctly when no touch screen ([#7458](https://github.com/shaka-project/shaka-player/issues/7458)) ([fb44a92](https://github.com/shaka-project/shaka-player/commit/fb44a92377ff6c3554a4b930ce10cad21285112d))
+
 ## [4.10.22](https://github.com/shaka-project/shaka-player/compare/v4.10.21...v4.10.22) (2024-10-18)
 
 
