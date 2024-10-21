@@ -485,9 +485,6 @@ async function setupTestEnvironment() {
   disableScrollbars();
   workAroundLegacyEdgePromiseIssues();
 
-  await loadImaScript();
-  await loadDaiScript();
-
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly
   // detected.
