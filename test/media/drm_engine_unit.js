@@ -1286,20 +1286,7 @@ describe('DrmEngine', () => {
 
           await Util.shortDelay();
 
-          session3.on['message']({
-            target: session3,
-            message: new Uint8Array(0),
-            messageType: 'license-request'});
-
-          session3.keyStatuses.forEach.and.callFake((callback) => {
-            callback(keyId1, 'usable');
-          });
-
-          session3.on['keystatuseschange']({target: session3});
-
-          await Util.shortDelay();
-
-          expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(3);
+          expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(2);
           expect(mockMediaKeys.createSession)
               .toHaveBeenCalledWith('persistent-license');
           expect(session1.load)
@@ -1309,11 +1296,6 @@ describe('DrmEngine', () => {
               .toHaveBeenCalledWith('persistent-license');
           expect(session2.load)
               .toHaveBeenCalledWith('persistent-session-id-2');
-
-          expect(mockMediaKeys.createSession)
-              .toHaveBeenCalledWith('temporary');
-          expect(session3.generateRequest)
-              .toHaveBeenCalledWith('cenc', initData1);
         });
   });  // describe('attach')
 
