@@ -432,34 +432,6 @@ function configureJasmineEnvironment() {
   };
 }
 
-async function loadImaScript() {
-  await new Promise((resolve, reject) => {
-    const script = /** @type {!HTMLScriptElement} */(
-      document.createElement('script'));
-    script.defer = false;
-    script['async'] = false;
-    script.onload = resolve;
-    script.onerror = reject;
-    script.setAttribute('src',
-        'https://imasdk.googleapis.com/js/sdkloader/ima3.js');
-    document.head.appendChild(script);
-  });
-}
-
-async function loadDaiScript() {
-  await new Promise((resolve, reject) => {
-    const script = /** @type {!HTMLScriptElement} */(
-      document.createElement('script'));
-    script.defer = false;
-    script['async'] = false;
-    script.onload = resolve;
-    script.onerror = reject;
-    script.setAttribute('src',
-        'https://imasdk.googleapis.com/js/sdkloader/ima3_dai.js');
-    document.head.appendChild(script);
-  });
-}
-
 async function checkSupport() {
   try {
     const startMs = Date.now();
@@ -484,9 +456,6 @@ async function setupTestEnvironment() {
   failTestsOnUnhandledErrors();
   disableScrollbars();
   workAroundLegacyEdgePromiseIssues();
-
-  await loadImaScript();
-  await loadDaiScript();
 
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly
