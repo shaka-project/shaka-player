@@ -2884,7 +2884,8 @@ describe('Player', () => {
       timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(false); // Indicate that this is a live stream.
 
-      // Set an initial program date time to simulate a live stream with a known start time.
+      // Set an initial program date time to simulate a live stream with a
+      // known start time.
       timeline.setInitialProgramDateTime(1000);
 
       // Generate a manifest that uses this timeline.
@@ -2901,8 +2902,8 @@ describe('Player', () => {
       video.currentTime = 10; // Simulate that we're 10 seconds into playback.
     });
 
-    it('returns null if video element does not exist', () => {
-      player.video_ = null;
+    it('returns null if video element does not exist', async () => {
+      await player.detach();
       const latency = player.getLiveLatency();
       expect(latency).toBeNull();
     });

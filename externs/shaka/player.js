@@ -2111,8 +2111,8 @@ shaka.extern.RequestMode;
 *   Configuration options for Request Mode reporting.
 *   <br>
 *   Request Mode attaches CMCD data to each media object request, matching the
-*   default delivery mode in CMCD v1. It is mandatory for CMCD clients to support
-*   this mode.
+*   default delivery mode in CMCD v1. It is mandatory for CMCD clients to
+*   support this mode.
 */
 shaka.extern.Reporting;
 
