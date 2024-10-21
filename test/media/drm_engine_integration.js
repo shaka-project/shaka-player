@@ -150,12 +150,12 @@ describe('DrmEngine', () => {
       // https://testweb.playready.microsoft.com/Server/ServiceQueryStringSyntax
       return false;
     }
-    return window['shakaSupport'].drm['com.widevine.alpha'] ||
-        window['shakaSupport'].drm['com.microsoft.playready'];
+    return shakaSupport.drm['com.widevine.alpha'] ||
+        shakaSupport.drm['com.microsoft.playready'];
   }
 
   function checkClearKeySupport() {
-    return window['shakaSupport'].drm['org.w3.clearkey'];
+    return shakaSupport.drm['org.w3.clearkey'];
   }
 
   filterDescribe('basic flow', checkTrueDrmSupport, () => {
