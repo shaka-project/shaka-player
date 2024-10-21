@@ -90,8 +90,12 @@ describe('UI', () => {
       });
 
       it('has loaded the video', () => {
-        expect(video.duration).not.toBeNaN();
-        expect(video.duration).not.toBe(0);
+        // The above promise for DOMAutoSetup() doesn't guarantee that load()
+        // is complete, only that we started it.  So don't check duration or
+        // other things that require load() to complete.
+        const overlay = /** @type {!shaka.ui.Overlay} */(video['ui']);
+        const player = overlay.getControls().getPlayer();
+        expect(player.getAssetUri()).toBeTruthy();
       });
     });
 
@@ -119,8 +123,12 @@ describe('UI', () => {
       });
 
       it('has loaded the video', () => {
-        expect(video.duration).not.toBeNaN();
-        expect(video.duration).not.toBe(0);
+        // The above promise for DOMAutoSetup() doesn't guarantee that load()
+        // is complete, only that we started it.  So don't check duration or
+        // other things that require load() to complete.
+        const overlay = /** @type {!shaka.ui.Overlay} */(video['ui']);
+        const player = overlay.getControls().getPlayer();
+        expect(player.getAssetUri()).toBeTruthy();
       });
     });
 
