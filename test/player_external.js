@@ -100,8 +100,8 @@ describe('Player', () => {
             !asset.drm.some((keySystem) => {
               // Demo assets use an enum here, which we look up in idFor.
               // Command-line assets use a direct key system ID.
-              return window['shakaSupport'].drm[idFor(keySystem)] ||
-                 window['shakaSupport'].drm[keySystem];
+              return shakaSupport.drm[idFor(keySystem)] ||
+                 shakaSupport.drm[keySystem];
             })) {
           pending('None of the required key systems are supported.');
         }
@@ -124,7 +124,7 @@ describe('Player', () => {
             mimeTypes.push('video/mp4; codecs="dvh1.20.01"');
           }
           if (mimeTypes.length &&
-              !mimeTypes.some((type) => window['shakaSupport'].media[type])) {
+              !mimeTypes.some((type) => shakaSupport.media[type])) {
             pending('None of the required MIME types are supported.');
           }
         }
