@@ -460,12 +460,14 @@ async function loadDaiScript() {
   });
 }
 
-async function logSupport() {
+async function checkSupport() {
   try {
-    const support = await shaka.Player.probeSupport();
+    const startMs = Date.now();
+    window.shakaSupport = await shaka.Player.probeSupport();
+    const endMs = Date.now();
     // Bypass Karma's log settings and dump this to the console.
-    window.dump('Platform support: ' + JSON.stringify(support, null, 2));
-    window['shakaSupport'] = support;
+    window.dump('Platform support: ' + JSON.stringify(shakaSupport, null, 2));
+    window.dump(`Platform support check took ${endMs - startMs} ms.`);
     // eslint-disable-next-line no-restricted-syntax
   } catch (error) {
     window.dump('Support check failed at boot: ' + error);
@@ -491,7 +493,7 @@ async function setupTestEnvironment() {
   // detected.
   shaka.polyfill.installAll();
 
-  await logSupport();
+  await checkSupport();
 
   configureJasmineEnvironment();
 }
