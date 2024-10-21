@@ -15,7 +15,7 @@ function drmStorageSupport() {
     return false;
   }
 
-  const widevineSupport = window['shakaSupport'].drm['com.widevine.alpha'];
+  const widevineSupport = shakaSupport.drm['com.widevine.alpha'];
   return !!(widevineSupport && widevineSupport.persistentState);
 }
 

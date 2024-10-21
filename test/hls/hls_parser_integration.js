@@ -23,7 +23,7 @@ describe('HlsParser', () => {
   let waiter;
 
   function checkClearKeySupport() {
-    const clearKeySupport = window['shakaSupport'].drm['org.w3.clearkey'];
+    const clearKeySupport = shakaSupport.drm['org.w3.clearkey'];
     if (!clearKeySupport) {
       return false;
     }

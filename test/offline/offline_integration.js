@@ -28,9 +28,9 @@ filterDescribe('Offline', supportsStorage, () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
 
-    widevineSupport = window['shakaSupport'].drm['com.widevine.alpha'];
-    playreadySupport = window['shakaSupport'].drm['com.microsoft.playready'] ||
-        window['shakaSupport'].drm['com.chromecast.playready'];
+    widevineSupport = shakaSupport.drm['com.widevine.alpha'];
+    playreadySupport = shakaSupport.drm['com.microsoft.playready'] ||
+        shakaSupport.drm['com.chromecast.playready'];
   });
 
   afterAll(() => {
