@@ -1427,18 +1427,55 @@ describe('DashParser Manifest', () => {
     });
 
     it('parses dolby scheme', async () => {
-      // Parses a hex value in which each 1-bit is a channel.
+      // L,R,C,LFE,Ls,Rs (5.1)
       await testAudioChannelConfiguration(6,
           {'tag:dolby.com,2014:dash:audio_channel_configuration:2011':
-                'F801'});
+             'F801'});
 
-      // This scheme seems to use the same format.
+      // L,R,C,LFE,Ls,Rs,Lrs,Rrs (7.1)
       await testAudioChannelConfiguration(8,
-          {'urn:dolby:dash:audio_channel_configuration:2011': '7037'});
+          {'tag:dolby.com,2014:dash:audio_channel_configuration:2011':
+             'FA01'});
+
+      // L,R,C,LFE,Ls,Rs,Ltm,Rtm (5.1.2)
+      await testAudioChannelConfiguration(8,
+          {'tag:dolby.com,2014:dash:audio_channel_configuration:2011':
+             'F805'});
+
+      // L,R,C,LFE,Ls,Rs (5.1)
+      await testAudioChannelConfiguration(6,
+          {'urn:dolby:dash:audio_channel_configuration:2011': 'F801'});
+
+      // L,R,C,LFE,Ls,Rs,Lrs,Rrs (7.1)
+      await testAudioChannelConfiguration(8,
+          {'urn:dolby:dash:audio_channel_configuration:2011': 'FA01'});
+
+      // L,R,C,LFE,Ls,Rs,Ltm,Rtm (5.1.2)
+      await testAudioChannelConfiguration(8,
+          {'urn:dolby:dash:audio_channel_configuration:2011': 'F805'});
 
       // Results in null if the value is not a valid hex number.
       await testAudioChannelConfiguration(null,
           {'urn:dolby:dash:audio_channel_configuration:2011': 'x'});
+
+      // L,R,C,LFE,Ls,Rs (5.1)
+      await testAudioChannelConfiguration(6,
+          {'tag:dolby.com,2015:dash:audio_channel_configuration:2015':
+             '000047'});
+
+      // L,R,C,LFE,Ls,Rs,Lrs,Rrs (7.1)
+      await testAudioChannelConfiguration(8,
+          {'tag:dolby.com,2015:dash:audio_channel_configuration:2015':
+             '00004F'});
+
+      // L,R,C,LFE,Ls,Rs,Ltm,Rtm (5.1.2)
+      await testAudioChannelConfiguration(8,
+          {'tag:dolby.com,2015:dash:audio_channel_configuration:2015':
+             '0000c7'});
+
+      // Results in null if the value is not a valid hex number.
+      await testAudioChannelConfiguration(null,
+          {'tag:dolby.com,2015:dash:audio_channel_configuration:2015': 'x'});
     });
 
     it('parses MPEG channel configuration scheme', async () => {
