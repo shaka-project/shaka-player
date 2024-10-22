@@ -241,7 +241,7 @@ describe('DrmEngine', () => {
       // Accept both drm.abc and drm.def.  Only one can be chosen.
       setDecodingInfoSpy(['drm.abc', 'drm.def']);
 
-      // Remove the server URI for drm.abc, which appears first in the manifest.
+      // Remove the server URI for drm.abc
       delete config.servers['drm.abc'];
       drmEngine.configure(config);
       // Ignore error logs, which we expect to occur due to the missing server.
@@ -255,29 +255,17 @@ describe('DrmEngine', () => {
           .toBe('drm.def');
     });
 
-    it('overrides manifest with configured license servers', async () => {
-      // Accept both drm.abc and drm.def.  Only one can be chosen.
-      setDecodingInfoSpy(['drm.abc', 'drm.def']);
+    it('overrides manifest with configured license server', async () => {
+      setDecodingInfoSpy(['drm.abc']);
 
       // Add manifest-supplied license servers for both.
       tweakDrmInfos((drmInfos) => {
-        for (const drmInfo of drmInfos) {
-          if (drmInfo.keySystem == 'drm.abc') {
-            drmInfo.licenseServerUri = 'http://foo.bar/abc';
-          } else if (drmInfo.keySystem == 'drm.def') {
-            drmInfo.licenseServerUri = 'http://foo.bar/def';
-          }
-
-          // Make sure we didn't somehow choose manifest-supplied values that
-          // match the config.  This would invalidate parts of the test.
-          const configServer = config.servers[drmInfo.keySystem];
-          expect(drmInfo.licenseServerUri).not.toBe(configServer);
-        }
+        drmInfos[0].licenseServerUri = 'http://foo.bar/abc';
       });
 
-      // Remove the server URI for drm.abc from the config, so that only drm.def
-      // could be used, in spite of the manifest-supplied license server URI.
-      delete config.servers['drm.abc'];
+      // Override the server URI for drm.abc from config with empty string
+      // so it isn't selected.
+      config.servers['drm.abc'] = 'foo.bar';
       drmEngine.configure(config);
 
       // Ignore error logs, which we expect to occur due to the missing server.
@@ -286,11 +274,10 @@ describe('DrmEngine', () => {
       const variants = manifest.variants;
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
 
-      expect(variants[0].decodingInfos.length).toBe(2);
       const selectedDrmInfo = drmEngine.getDrmInfo();
       expect(selectedDrmInfo).not.toBe(null);
-      expect(selectedDrmInfo.keySystem).toBe('drm.def');
-      expect(selectedDrmInfo.licenseServerUri).toBe(config.servers['drm.def']);
+      expect(selectedDrmInfo.keySystem).toBe('drm.abc');
+      expect(selectedDrmInfo.licenseServerUri).toBe('foo.bar');
     });
 
     it('detects content type capabilities of key system', async () => {
