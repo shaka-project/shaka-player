@@ -193,7 +193,6 @@ shaka.ui.Overlay = class {
         'playback_rate',
         'recenter_vr',
         'toggle_stereoscopic',
-        'save_video_frame',
       ],
       statisticsList: [
         'width',
@@ -268,7 +267,7 @@ shaka.ui.Overlay = class {
       fullScreenElement: this.videoContainer_,
       preferDocumentPictureInPicture: true,
       showAudioChannelCountVariants: true,
-      seekOnTaps: true,
+      seekOnTaps: navigator.maxTouchPoints > 0,
       tapSeekDistance: 10,
       refreshTickInSeconds: 0.125,
       displayInVrMode: false,
@@ -291,6 +290,9 @@ shaka.ui.Overlay = class {
       config.controlPanelElements = config.controlPanelElements.filter(
           (name) => name != 'play_pause' && name != 'volume');
     }
+
+    // Set this button here to push it at the end.
+    config.overflowMenuButtons.push('save_video_frame');
 
     return config;
   }

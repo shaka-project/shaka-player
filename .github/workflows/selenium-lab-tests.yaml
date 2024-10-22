@@ -212,6 +212,7 @@ jobs:
     # Only one run of this job is allowed at a time, since it uses physical
     # resources in our lab.
     concurrency: selenium-lab-${{ matrix.browser }}
+    cancel-in-progress: false
 
     needs: [compute-sha, build-shaka, matrix-config]
     strategy:

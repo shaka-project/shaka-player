@@ -432,40 +432,14 @@ function configureJasmineEnvironment() {
   };
 }
 
-async function loadImaScript() {
-  await new Promise((resolve, reject) => {
-    const script = /** @type {!HTMLScriptElement} */(
-      document.createElement('script'));
-    script.defer = false;
-    script['async'] = false;
-    script.onload = resolve;
-    script.onerror = reject;
-    script.setAttribute('src',
-        'https://imasdk.googleapis.com/js/sdkloader/ima3.js');
-    document.head.appendChild(script);
-  });
-}
-
-async function loadDaiScript() {
-  await new Promise((resolve, reject) => {
-    const script = /** @type {!HTMLScriptElement} */(
-      document.createElement('script'));
-    script.defer = false;
-    script['async'] = false;
-    script.onload = resolve;
-    script.onerror = reject;
-    script.setAttribute('src',
-        'https://imasdk.googleapis.com/js/sdkloader/ima3_dai.js');
-    document.head.appendChild(script);
-  });
-}
-
-async function logSupport() {
+async function checkSupport() {
   try {
-    const support = await shaka.Player.probeSupport();
+    const startMs = Date.now();
+    window.shakaSupport = await shaka.Player.probeSupport();
+    const endMs = Date.now();
     // Bypass Karma's log settings and dump this to the console.
-    window.dump('Platform support: ' + JSON.stringify(support, null, 2));
-    window['shakaSupport'] = support;
+    window.dump('Platform support: ' + JSON.stringify(shakaSupport, null, 2));
+    window.dump(`Platform support check took ${endMs - startMs} ms.`);
     // eslint-disable-next-line no-restricted-syntax
   } catch (error) {
     window.dump('Support check failed at boot: ' + error);
@@ -483,15 +457,12 @@ async function setupTestEnvironment() {
   disableScrollbars();
   workAroundLegacyEdgePromiseIssues();
 
-  await loadImaScript();
-  await loadDaiScript();
-
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly
   // detected.
   shaka.polyfill.installAll();
 
-  await logSupport();
+  await checkSupport();
 
   configureJasmineEnvironment();
 }
