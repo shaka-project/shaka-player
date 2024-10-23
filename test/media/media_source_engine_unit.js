@@ -230,9 +230,6 @@ describe('MediaSourceEngine', () => {
       removeChild: () => {
         mockVideo.firstElementChild = undefined;
       },
-      insertBefore: (newNode, referenceNode) => {
-        mockVideo.firstElementChild = newNode;
-      },
       removeAttribute: jasmine.createSpy('removeAttribute'),
       addEventListener: jasmine.createSpy('addVideoEventListener'),
       removeEventListener: jasmine.createSpy('removeVideoEventListener'),
