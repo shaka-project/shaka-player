@@ -244,8 +244,6 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
         const element = this.generateComponent_(name);
         this.container_.appendChild(element);
         this.statisticsList_.push(name);
-        shaka.ui.Utils.setDisplay(element.parentElement,
-            !isNaN(this.currentStats_[name]));
       } else {
         shaka.log.alwaysWarn('Unrecognized statistic element:', name);
       }
