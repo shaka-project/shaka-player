@@ -189,6 +189,18 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
 
   /** @private */
   loadContainer_() {
+    const closeElement = shaka.util.Dom.createHTMLElement('div');
+    closeElement.classList.add('shaka-no-propagation');
+    closeElement.classList.add('shaka-statistics-close');
+    const icon = shaka.util.Dom.createHTMLElement('i');
+    icon.classList.add('material-icons-round');
+    icon.textContent =
+      shaka.ui.Enums.MaterialDesignIcons.CLOSE;
+    closeElement.appendChild(icon);
+    this.container_.appendChild(closeElement);
+    this.eventManager.listen(icon, 'click', () => {
+      this.onClick_();
+    });
     for (const name of this.controls.getConfig().adStatisticsList) {
       if (name in this.currentStats_) {
         this.container_.appendChild(this.generateComponent_(name));
