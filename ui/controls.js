@@ -1301,7 +1301,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     // Use the cursor specified in the CSS file.
-    this.videoContainer_.style.cursor = '';
+    this.videoContainer_.classList.remove('no-cursor');
 
     this.recentMouseMovement_ = true;
 
@@ -1354,7 +1354,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   onMouseStill_() {
     // Hide the cursor.
-    this.videoContainer_.style.cursor = 'none';
+    this.videoContainer_.classList.add('no-cursor');
     this.recentMouseMovement_ = false;
     this.computeOpacity();
   }
