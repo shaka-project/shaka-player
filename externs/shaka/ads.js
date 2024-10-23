@@ -93,7 +93,7 @@ shaka.extern.AdCuePoint;
  *   Time value that identifies when skip controls are made available to the
  *   end user.
  * @property {?number} skipFor
- *   The amount of time the in seconds a skip button should be displayed for.
+ *   The amount of time in seconds a skip button should be displayed for.
  *   Note that this value should be >= 0.
  * @property {boolean} canJump
  *   Indicate if the interstitial is jumpable.
