@@ -50,6 +50,8 @@ assignees: ''
   enough to reproduce your issue, and we **will** ask you to send a
   URI instead.  You can copy the URI of the demo app to send us the
   exact asset, licence server, and settings you have selected there.
+  Avoid geo-blocked content if at all possible, as the contributors who diagnose
+  Shaka Player issues may not be able to access it.
   If you send the URIs to email, the response time and resolution
   will be much higher.
 -->
