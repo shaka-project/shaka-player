@@ -65,6 +65,7 @@ shaka.extern.AdCuePoint;
  *   uri: string,
  *   isSkippable: boolean,
  *   skipOffset: ?number,
+ *   skipFor: ?number,
  *   canJump: boolean,
  *   resumeOffset: ?number,
  *   playoutLimit: ?number,
@@ -91,6 +92,9 @@ shaka.extern.AdCuePoint;
  * @property {?number} skipOffset
  *   Time value that identifies when skip controls are made available to the
  *   end user.
+ * @property {?number} skipFor
+ *   The amount of time in seconds a skip button should be displayed for.
+ *   Note that this value should be >= 0.
  * @property {boolean} canJump
  *   Indicate if the interstitial is jumpable.
  * @property {?number} resumeOffset
