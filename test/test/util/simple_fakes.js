@@ -513,6 +513,8 @@ shaka.test.FakeSegmentIndex = class {
             },
 
             setReverse: () => {},
+
+            resetToLastIndependent: () => {},
           };
         });
   }
