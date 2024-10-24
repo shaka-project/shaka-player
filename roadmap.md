@@ -26,6 +26,7 @@ v4.12 - 2024 Q4
    https://github.com/shaka-project/shaka-player/issues/5836
  - Enable AirPlay in MSE
    https://github.com/shaka-project/shaka-player/issues/5022
+ - DASH compatibility with FairPlay
 
 =====
 
