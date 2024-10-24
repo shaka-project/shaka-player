@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.10.24](https://github.com/shaka-project/shaka-player/compare/v4.10.23...v4.10.24) (2024-10-24)
+
+
+### Bug Fixes
+
+* **Ads:** Don't load useless segments when using playoutLimit on interstitial ads ([#7469](https://github.com/shaka-project/shaka-player/issues/7469)) ([d1ec8dc](https://github.com/shaka-project/shaka-player/commit/d1ec8dc5f497f4ac37a2e40ca027eb5b5b96296e))
+* **Ads:** Limit interstitial duration to actual duration if available ([#7480](https://github.com/shaka-project/shaka-player/issues/7480)) ([9af4397](https://github.com/shaka-project/shaka-player/commit/9af439782b501136700c05261240975f356b699e))
+* **Ads:** Limit interstitial duration to actual duration if available when using src= ([#7488](https://github.com/shaka-project/shaka-player/issues/7488)) ([c0b8966](https://github.com/shaka-project/shaka-player/commit/c0b8966b634580346abc7328a57215a1f34fb48f))
+* Allow streaming again when we reset MSE ([#7495](https://github.com/shaka-project/shaka-player/issues/7495)) ([7ba1ee7](https://github.com/shaka-project/shaka-player/commit/7ba1ee7c7f27f9979c8321a6215ca06d6850ca84))
+* Fix disable stream when no manifest ([#7497](https://github.com/shaka-project/shaka-player/issues/7497)) ([5fa20dd](https://github.com/shaka-project/shaka-player/commit/5fa20dda04a7635abf742a6934994ed9f2daa829))
+* Fix metadata timing when using TS ([#7478](https://github.com/shaka-project/shaka-player/issues/7478)) ([1b4ea37](https://github.com/shaka-project/shaka-player/commit/1b4ea37a52935e4ed44803b49c3049451a65477a))
+* Fix reset MSE to last independent segment ([#7494](https://github.com/shaka-project/shaka-player/issues/7494)) ([8a01b67](https://github.com/shaka-project/shaka-player/commit/8a01b673b21dde3d82c3da54420faff85b3a535f))
+* Fix select HLG tracks when using AUTO hdr level ([#7470](https://github.com/shaka-project/shaka-player/issues/7470)) ([5799156](https://github.com/shaka-project/shaka-player/commit/57991562febef08cce8faa2091f8369333ad010d))
+* Fix Windows detection ([#7476](https://github.com/shaka-project/shaka-player/issues/7476)) ([1aef0d1](https://github.com/shaka-project/shaka-player/commit/1aef0d1154ca26bb92dfc5edb531f0bea9c6a83f))
+* **MSS:** Don't allow prefetch segments with self-generated data ([#7485](https://github.com/shaka-project/shaka-player/issues/7485)) ([4bbb9f5](https://github.com/shaka-project/shaka-player/commit/4bbb9f5bede2b493eb6014db4f1890147c978e51))
+* **MSS:** Fix timeline repetitions ([#7484](https://github.com/shaka-project/shaka-player/issues/7484)) ([7a45a57](https://github.com/shaka-project/shaka-player/commit/7a45a57d639f254dd8ed78a43dadd2494860a587))
+* **UI:** Don't enable StatisticsButton when create overflow menu ([#7481](https://github.com/shaka-project/shaka-player/issues/7481)) ([3b1ecae](https://github.com/shaka-project/shaka-player/commit/3b1ecaef86daa0d9788ca5222057833885b21c02))
+* **UI:** Hidden cursor correctly ([#7464](https://github.com/shaka-project/shaka-player/issues/7464)) ([11ab62a](https://github.com/shaka-project/shaka-player/commit/11ab62a0d56e730bc05f8a5e6c85cbfd63f8cc75))
+
 ## [4.10.23](https://github.com/shaka-project/shaka-player/compare/v4.10.22...v4.10.23) (2024-10-21)
 
 
