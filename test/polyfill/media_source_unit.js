@@ -25,13 +25,15 @@ describe('MediaSource', () => {
 
     it('dvh1 returns false', () => {
       reject('dvh1');
-      expect(window.MediaSource.isTypeSupported('video/mp4; codecs="dvh1.05.03"'))
+      expect(window.MediaSource
+          .isTypeSupported('video/mp4; codecs="dvh1.05.03"'))
           .toBe(false);
     });
 
     reject('dvhe');
     it('dvhe returns false', () => {
-      expect(window.MediaSource.isTypeSupported('video/mp4; codecs="dvhe.05.03"'))
+      expect(window.MediaSource
+          .isTypeSupported('video/mp4; codecs="dvhe.05.03"'))
           .toBe(false);
     });
   });
