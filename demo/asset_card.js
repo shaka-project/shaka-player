@@ -187,6 +187,9 @@ shakaDemo.AssetCard = class {
         case KeySystem.PLAYREADY:
           this.addFeatureIcon_('playready', drm);
           break;
+        case KeySystem.FAIRPLAY:
+          this.addFeatureIcon_('fairplay', drm);
+          break;
       }
     }
   }

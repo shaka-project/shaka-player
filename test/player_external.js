@@ -120,6 +120,9 @@ describe('Player', () => {
           if (asset.features.includes(Feature.CONTAINERLESS)) {
             mimeTypes.push('audio/aac');
           }
+          if (asset.features.includes(Feature.DOLBY_VISION_P5)) {
+            mimeTypes.push('video/mp4; codecs="dvh1.05.01"');
+          }
           if (asset.features.includes(Feature.DOLBY_VISION_3D)) {
             mimeTypes.push('video/mp4; codecs="dvh1.20.01"');
           }
