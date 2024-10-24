@@ -1078,7 +1078,8 @@ shaka.extern.xml.Node;
  *   multiTypeVariantsAllowed: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
  *   updatePeriod: number,
- *   enableFastSwitching: boolean
+ *   enableFastSwitching: boolean,
+ *   ignoreSupplementalCodecs: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -1189,6 +1190,10 @@ shaka.extern.xml.Node;
  *   If false, disables fast switching track recognition.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {boolean} ignoreSupplementalCodecs
+ *   If false, ignores supplemental codecs
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -1208,7 +1213,8 @@ shaka.extern.DashManifestConfiguration;
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
- *   allowLowLatencyByteRangeOptimization: boolean
+ *   allowLowLatencyByteRangeOptimization: boolean,
+ *   ignoreSupplementalCodecs: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -1294,6 +1300,10 @@ shaka.extern.DashManifestConfiguration;
  *   https://www.akamai.com/blog/performance/-using-ll-hls-with-byte-range-addressing-to-achieve-interoperabi
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {boolean} ignoreSupplementalCodecs
+ *   If false, ignores supplemental codecs
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
