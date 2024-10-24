@@ -228,23 +228,29 @@ describe('DashParser ContentProtection', () => {
         ['9a04f079-9840-4286-ab92-e65be0885f95'], ['com.microsoft.playready']);
     testKeySystemMappings('for old PlayReady',
         ['79f0049a-4098-8642-ab92-e65be0885f95'], ['com.microsoft.playready']);
+    testKeySystemMappings('for FairPlay',
+        ['94ce86fb-07ff-4f43-adb8-93d2fa968ca2'], ['com.apple.fps']);
 
     testKeySystemMappings('for multiple DRMs in the specified order',
         [
           'edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',
           '9a04f079-9840-4286-ab92-e65be0885f95',
+          '94ce86fb-07ff-4f43-adb8-93d2fa968ca2',
         ], [
           'com.widevine.alpha',
           'com.microsoft.playready',
+          'com.apple.fps',
         ]);
 
     testKeySystemMappings('in a case-insensitive way',
         [
           'EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED',
           '9A04F079-9840-4286-AB92-E65BE0885F95',
+          '94CE86FB-07FF-4F43-ADB8-93D2FA968CA2',
         ], [
           'com.widevine.alpha',
           'com.microsoft.playready',
+          'com.apple.fps',
         ]);
   });
 
@@ -337,6 +343,10 @@ describe('DashParser ContentProtection', () => {
       '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
       '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5</cenc:pssh>',
       '</ContentProtection>',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:94ce86fb-07ff-4f43-adb8-93d2fa968ca2">',
+      '  <cenc:pssh>ZmFrZSBGYWlyUGxheSBQU1NI</cenc:pssh>',
+      '</ContentProtection>',
     ], [], []);
     const expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha',
@@ -345,6 +355,9 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.microsoft.playready',
           [], // key IDs
           buildInitData(['bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'])),
+      buildDrmInfo('com.apple.fps',
+          [], // key IDs
+          buildInitData(['ZmFrZSBGYWlyUGxheSBQU1NI'])),
     ]);
     await testDashParser(source, expected);
   });
@@ -395,6 +408,7 @@ describe('DashParser ContentProtection', () => {
     const drmInfos = jasmine.arrayContaining([
       buildDrmInfo('com.widevine.alpha'),
       buildDrmInfo('com.microsoft.playready'),
+      buildDrmInfo('com.apple.fps'),
     ]);
     const expected = buildExpectedManifest(
         /** @type {!Array.<shaka.extern.DrmInfo>} */(drmInfos),
@@ -414,6 +428,7 @@ describe('DashParser ContentProtection', () => {
     const drmInfos = jasmine.arrayContaining([
       buildDrmInfo('com.widevine.alpha', [], [], 'cbcs'),
       buildDrmInfo('com.microsoft.playready', [], [], 'cbcs'),
+      buildDrmInfo('com.apple.fps', [], [], 'cbcs'),
     ]);
     const expected = buildExpectedManifest(
         /** @type {!Array.<shaka.extern.DrmInfo>} */(drmInfos),
@@ -433,6 +448,9 @@ describe('DashParser ContentProtection', () => {
       '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
       '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcm</cenc:pssh>',
       '</ContentProtection>',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:94ce86fb-07ff-4f43-adb8-93d2fa968ca2">',
+      '</ContentProtection>',
     ], [], []);
 
     // The order does not matter here, so use arrayContaining.
@@ -440,6 +458,7 @@ describe('DashParser ContentProtection', () => {
     const drmInfos = jasmine.arrayContaining([
       buildDrmInfo('com.widevine.alpha'),
       buildDrmInfo('com.microsoft.playready'),
+      buildDrmInfo('com.apple.fps'),
     ]);
     const expected = buildExpectedManifest(
         /** @type {!Array.<shaka.extern.DrmInfo>} */(drmInfos),
@@ -455,6 +474,9 @@ describe('DashParser ContentProtection', () => {
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:94ce86fb-07ff-4f43-adb8-93d2fa968ca2"',
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [], []);
     const keyIds = [
@@ -473,6 +495,7 @@ describe('DashParser ContentProtection', () => {
       // PlayReady has two associated UUIDs, so it appears twice.
       buildDrmInfo('com.microsoft.playready', keyIds),
       buildDrmInfo('com.microsoft.playready', keyIds),
+      buildDrmInfo('com.apple.fps', keyIds),
     ], variantKeyIds);
     await testDashParser(source, expected, /* ignoreDrmInfo= */ true);
   });
@@ -488,12 +511,17 @@ describe('DashParser ContentProtection', () => {
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:94ce86fb-07ff-4f43-adb8-93d2fa968ca2" />',
     ], [], []);
     const expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha',
           [], // key IDs
           buildInitData(['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])),
       buildDrmInfo('com.microsoft.playready',
+          [], // key IDs
+          buildInitData(['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])),
+      buildDrmInfo('com.apple.fps',
           [], // key IDs
           buildInitData(['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])),
     ]);
@@ -515,6 +543,10 @@ describe('DashParser ContentProtection', () => {
       '</ContentProtection>',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:94ce86fb-07ff-4f43-adb8-93d2fa968ca2">',
+      '  <cenc:pssh>ZmFpcnBsYXkgb3ZlcnJpZGU=</cenc:pssh>',
+      '</ContentProtection>',
     ], [], []);
     const expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha',
@@ -524,6 +556,9 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.microsoft.playready',
           [], // key IDs
           buildInitData(['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])),
+      buildDrmInfo('com.apple.fps',
+          [], // key IDs
+          buildInitData(['ZmFpcnBsYXkgb3ZlcnJpZGU='])),
     ]);
     await testDashParser(source, expected);
   });
@@ -629,6 +664,9 @@ describe('DashParser ContentProtection', () => {
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:94ce86fb-07ff-4f43-adb8-93d2fa968ca2"',
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [
       // Representation 2 lines
       '<ContentProtection',
@@ -636,6 +674,9 @@ describe('DashParser ContentProtection', () => {
       '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
+      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:94ce86fb-07ff-4f43-adb8-93d2fa968ca2"',
       '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
     ]);
     const keyIds = [
@@ -647,6 +688,7 @@ describe('DashParser ContentProtection', () => {
     const expected = buildExpectedManifest([
       buildDrmInfo('com.microsoft.playready', keyIds),
       buildDrmInfo('com.widevine.alpha', keyIds),
+      buildDrmInfo('com.apple.fps', keyIds),
     ]);
     await testDashParser(source, expected);
   });
@@ -659,6 +701,9 @@ describe('DashParser ContentProtection', () => {
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:94ce86fb-07ff-4f43-adb8-93d2fa968ca2"',
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [], []);
     const keyIds = [
@@ -674,6 +719,7 @@ describe('DashParser ContentProtection', () => {
     const expected = buildExpectedManifest([
       buildDrmInfo('com.microsoft.playready', keyIds),
       buildDrmInfo('com.widevine.alpha', keyIds),
+      buildDrmInfo('com.apple.fps', keyIds),
     ], variantKeyIds);
     await testDashParser(source, expected);
   });
@@ -1023,6 +1069,52 @@ describe('DashParser ContentProtection', () => {
         node: strToXml('<test></test>'),
       };
       const actual = ContentProtection.getPlayReadyLicenseUrl(input);
+      expect(actual).toBe('');
+    });
+  });
+
+  describe('getFairPlayLicenseUrl', () => {
+    it('valid dashif:Laurl node', () => {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        encryptionScheme: null,
+        node: strToXml([
+          '<test xmlns:dashif="https://dashif.org/CPS">',
+          '  <dashif:Laurl>www.example.com</dashif:Laurl>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getFairPlayLicenseUrl(input);
+      expect(actual).toBe('www.example.com');
+    });
+
+    it('dashif:Laurl without license url', () => {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        encryptionScheme: null,
+        node: strToXml([
+          '<test xmlns:dashif="https://dashif.org/CPS">',
+          '  <dashif:Laurl></dashif:Laurl>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getFairPlayLicenseUrl(input);
+      expect(actual).toBe('');
+    });
+
+    it('no dashif:Laurl node', () => {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        encryptionScheme: null,
+        node: strToXml('<test></test>'),
+      };
+      const actual = ContentProtection.getFairPlayLicenseUrl(input);
       expect(actual).toBe('');
     });
   });
