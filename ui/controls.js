@@ -1235,12 +1235,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.adManager_, shaka.ads.Utils.AD_STARTED, (e) => {
           this.ad_ = (/** @type {!Object} */ (e))['ad'];
           this.showAdUI();
+          this.onBufferingStateChange_();
         });
 
     this.eventManager_.listen(
         this.adManager_, shaka.ads.Utils.AD_STOPPED, () => {
           this.ad_ = null;
           this.hideAdUI();
+          this.onBufferingStateChange_();
         });
 
     if (screen.orientation) {
@@ -1741,6 +1743,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   onBufferingStateChange_() {
     if (!this.enabled_) {
+      return;
+    }
+
+    if (this.ad_ && this.ad_.isClientRendering() && this.ad_.isLinear()) {
+      shaka.ui.Utils.setDisplay(this.spinnerContainer_, false);
       return;
     }
 
