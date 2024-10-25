@@ -1208,7 +1208,8 @@ shaka.extern.DashManifestConfiguration;
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
- *   allowLowLatencyByteRangeOptimization: boolean
+ *   allowLowLatencyByteRangeOptimization: boolean,
+ *   updatePeriod: number
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -1294,6 +1295,13 @@ shaka.extern.DashManifestConfiguration;
  *   https://www.akamai.com/blog/performance/-using-ll-hls-with-byte-range-addressing-to-achieve-interoperabi
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {number} updatePeriod
+ *   Override the updatePeriod of the manifest. The value is in second
+ *   if the value is greater than 0 it will update the target duration,
+ *   if you update the value during the live, it will directly trigger
+ *   a new download of the manifest
+ *   <br>
+ *   Defaults to <code>-1</code>.
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
