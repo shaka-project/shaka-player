@@ -216,6 +216,11 @@ shaka.extern.IAd = class {
   needsSkipUI() {}
 
   /**
+   * @return {boolean}
+   */
+  isClientRendering() {}
+
+  /**
    * @return {number}
    */
   getDuration() {}
