@@ -313,6 +313,7 @@ Shaka Player supports:
 - AWS MediaTailor for Server-Side
 - AWS MediaTailor overlays
 - HLS interstitials
+- DASH Media Presentation Insertion (MPD alternate)
 - Custom Interstitials
 - Basic support of VAST and VMAP without IMA (playback without tracking)
 

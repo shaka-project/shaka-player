@@ -65,12 +65,19 @@ Note: overlays ad insertions is the same as server side.
 
 Shaka Player supports different types of interstitials:
  - HLS Interstitials
+ - DASH Media Presentation Insertion
  - Custom Interstitials
  - VAST (playback without tracking)
  - VMAP (playback without tracking)
 
 
 ##### HLS Interstitials
+
+It is not necessary to do anything, Shaka Player supports it natively without
+any type of intervention.
+
+
+##### DASH Media Presentation Insertion (MPD alternate)
 
 It is not necessary to do anything, Shaka Player supports it natively without
 any type of intervention.
