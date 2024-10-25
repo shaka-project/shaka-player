@@ -1298,8 +1298,8 @@ shaka.extern.DashManifestConfiguration;
  * @property {number} updatePeriod
  *   Override the update period of the playlist. The value is in seconds.
  *   If the value is less than 0, the period will be determined based on the
- *   segment length.  If the value is greater than 0, it will update the target 
- *   duration.  If you update the value during the live, it will directly 
+ *   segment length.  If the value is greater than 0, it will update the target
+ *   duration.  If you update the value during the live, it will directly
  *   trigger a new download of the manifest.
  *   <br>
  *   Defaults to <code>-1</code>.
