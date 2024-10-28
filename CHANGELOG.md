@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.10.25](https://github.com/shaka-project/shaka-player/compare/v4.10.24...v4.10.25) (2024-10-28)
+
+
+### Bug Fixes
+
+* **AirPlay:** Prefer Playback Remote API for closeOpenSessions ([#7500](https://github.com/shaka-project/shaka-player/issues/7500)) ([d316690](https://github.com/shaka-project/shaka-player/commit/d3166908e974b8dbdb939f573f7e26e55daddac5))
+* Fix support of getAllThumbnails when using shaka.dash.TimelineSegmentIndex ([#7508](https://github.com/shaka-project/shaka-player/issues/7508)) ([52f53cd](https://github.com/shaka-project/shaka-player/commit/52f53cdf9fbb9af20e7671ee682b732719514179))
+* **UI:** Remove buffering spinner when playing a client side ad ([#7507](https://github.com/shaka-project/shaka-player/issues/7507)) ([6ffadc0](https://github.com/shaka-project/shaka-player/commit/6ffadc047612c3e8f504eb72caf3bdd1578174f3))
+
 ## [4.10.24](https://github.com/shaka-project/shaka-player/compare/v4.10.23...v4.10.24) (2024-10-24)
 
 
