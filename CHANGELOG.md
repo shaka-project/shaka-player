@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.11.11](https://github.com/shaka-project/shaka-player/compare/v4.11.10...v4.11.11) (2024-10-28)
+
+
+### Bug Fixes
+
+* **AirPlay:** Prefer Playback Remote API for closeOpenSessions ([#7500](https://github.com/shaka-project/shaka-player/issues/7500)) ([71ec7ca](https://github.com/shaka-project/shaka-player/commit/71ec7ca0e12d36ef6a9be91ad265b88dee048f55))
+* Don't use info from MSE mode when using Remote Playback ([#7504](https://github.com/shaka-project/shaka-player/issues/7504)) ([791f9b1](https://github.com/shaka-project/shaka-player/commit/791f9b1881432ac908e9e524fc5d8a7e31a57285))
+* Fix support of getAllThumbnails when using shaka.dash.TimelineSegmentIndex ([#7508](https://github.com/shaka-project/shaka-player/issues/7508)) ([4d5e9ba](https://github.com/shaka-project/shaka-player/commit/4d5e9bacbd67ba437484a2fb37e103ee1c1d93f1))
+* **HLS:** Ignore DATERANGE with errors instead of fire an error ([#7499](https://github.com/shaka-project/shaka-player/issues/7499)) ([a58befc](https://github.com/shaka-project/shaka-player/commit/a58befc9f1ff3280b2e7a51cc57f0b0b49328ac2))
+* Reset MSE when we disconnect from Remote Playback ([#7506](https://github.com/shaka-project/shaka-player/issues/7506)) ([efaabe9](https://github.com/shaka-project/shaka-player/commit/efaabe90b61520578b882842263e14f64f14bbdb))
+* **UI:** Remove buffering spinner when playing a client side ad ([#7507](https://github.com/shaka-project/shaka-player/issues/7507)) ([c96eb30](https://github.com/shaka-project/shaka-player/commit/c96eb30e29692e247a7a1b50494fe7399ef9b55f))
+
 ## [4.11.10](https://github.com/shaka-project/shaka-player/compare/v4.11.9...v4.11.10) (2024-10-24)
 
 
