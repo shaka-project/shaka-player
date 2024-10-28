@@ -268,7 +268,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Disable closed caption detection',
             'manifest.hls.disableClosedCaptionsDetection')
         .addBoolInput_('Allow LL-HLS byterange optimization',
-            'manifest.hls.allowLowLatencyByteRangeOptimization');
+            'manifest.hls.allowLowLatencyByteRangeOptimization')
+        .addNumberInput_('override the Update time of the manifest',
+            'manifest.hls.updatePeriod');
   }
 
   /** @private */
