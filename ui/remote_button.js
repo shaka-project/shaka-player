@@ -112,7 +112,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         this.updateRemoteState_();
       });
 
-      this.updateRemoteState_();
+      this.updateRemoteState_(/* force= */ true);
       this.updateIcon_();
     }
   }
@@ -129,9 +129,10 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
   }
 
   /**
+   * @param {boolean=} force
    * @private
    */
-  async updateRemoteState_() {
+  async updateRemoteState_(force = false) {
     if (this.controls.getCastProxy().canCast() &&
         this.controls.isCastAllowed()) {
       shaka.ui.Utils.setDisplay(this.remoteButton_, false);
@@ -139,7 +140,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         this.video.remote.cancelWatchAvailability(this.callbackId_);
         this.callbackId_ = -1;
       }
-    } else if (this.video.remote.state == 'disconnected') {
+    } else if (this.video.remote.state == 'disconnected' || force) {
       const handleAvailabilityChange = (availability) => {
         if (this.player) {
           const disableRemote = this.video.disableRemotePlayback;
