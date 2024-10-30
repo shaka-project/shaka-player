@@ -155,7 +155,8 @@ shaka.test.FakeManifestParser = class {
     this.onExpirationUpdated = jasmine.createSpy('onExpirationUpdated');
 
     /** @type {!jasmine.Spy} */
-    this.setCloseSegmentIndexRegister = jasmine.createSpy('setCloseSegmentIndexRegister');
+    this.setCloseSegmentIndexRegister =
+      jasmine.createSpy('setCloseSegmentIndexRegister');
   }
 };
 
