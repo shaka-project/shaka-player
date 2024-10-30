@@ -1360,9 +1360,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
         imageUrl = payload['data'];
       }
-      if (navigator.mediaSession.metadata && title) {
-        const metadata = navigator.mediaSession.metadata;
-        metadata.title = title;
+      if (title) {
+        let metadata = {
+          title: title,
+          artwork: [],
+        };
+        if (navigator.mediaSession.metadata) {
+          metadata = navigator.mediaSession.metadata;
+          metadata.title = title;
+        }
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
       }
       if (imageUrl) {
@@ -1370,11 +1376,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (imageUrl != video.poster) {
           video.poster = imageUrl;
         }
+        let metadata = {
+          title: '',
+          artwork: [{src: imageUrl}],
+        };
         if (navigator.mediaSession.metadata) {
-          const metadata = navigator.mediaSession.metadata;
+          metadata = navigator.mediaSession.metadata;
           metadata.artwork = [{src: imageUrl}];
-          navigator.mediaSession.metadata = new MediaMetadata(metadata);
         }
+        navigator.mediaSession.metadata = new MediaMetadata(metadata);
       }
     });
   }
