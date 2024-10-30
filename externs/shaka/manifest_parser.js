@@ -120,6 +120,13 @@ shaka.extern.ManifestParser = class {
    * @exportDoc
    */
   setMediaElement(mediaElement) {}
+
+  /**
+   * provide CloseSegmentIndexRegister
+   * @param {shaka.util.CloseSegmentIndexRegister} register
+   * @exportDoc
+   */
+  setCloseSegmentIndexRegister(register) {}
 };
 
 

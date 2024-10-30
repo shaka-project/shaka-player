@@ -755,6 +755,11 @@ shaka.test.TestScheme.ManifestParser = class {
   }
 
   /** @override */
+  setCloseSegmentIndexRegister(register) {
+    // No-op
+  }
+
+  /** @override */
   start(uri, playerInterface) {
     const re = /^test:([^/]+)$/;
     const manifestParts = re.exec(uri);

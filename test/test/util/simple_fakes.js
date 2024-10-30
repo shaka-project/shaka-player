@@ -120,6 +120,10 @@ shaka.test.FakeStreamingEngine = class {
         jasmine.createSpy('switchTextStream').and.callFake((textStream) => {
           activeText = textStream;
         });
+
+    /** @type {!jasmine.Spy} */
+    this.getCloseSegmentIndexRegister =
+      jasmine.createSpy('getCloseSegmentIndexRegister');
   }
 };
 
@@ -149,6 +153,9 @@ shaka.test.FakeManifestParser = class {
 
     /** @type {!jasmine.Spy} */
     this.onExpirationUpdated = jasmine.createSpy('onExpirationUpdated');
+
+    /** @type {!jasmine.Spy} */
+    this.setCloseSegmentIndexRegister = jasmine.createSpy('setCloseSegmentIndexRegister');
   }
 };
 
