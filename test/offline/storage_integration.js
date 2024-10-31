@@ -1736,7 +1736,7 @@ filterDescribe('Storage', storageSupport, () => {
 
     /** @override */
     setCloseSegmentIndexRegister(register) {
-    // No-op
+      // No-op
     }
 
     /** @override */
