@@ -1265,7 +1265,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           callback(details);
         });
       } catch (error) {
-        shaka.log.warning(
+        shaka.log.debug(
             `The "${type}" media session action is not supported.`);
       }
     };
@@ -1290,7 +1290,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           });
         }
       } catch (error) {
-        shaka.log.warning(
+        shaka.log.v2(
             'setPositionState in media session is not supported.');
       }
     };
