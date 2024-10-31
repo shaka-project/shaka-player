@@ -973,6 +973,11 @@ shakaDemo.Main = class {
           params['preferredAudioCodecs'].split(','));
     }
 
+    if ('preferredTextFormats' in params) {
+      this.configure('preferredTextFormats',
+          params['preferredTextFormats'].split(','));
+    }
+
     // Add compiled/uncompiled links.
     this.makeVersionLinks_();
 
@@ -1501,7 +1506,13 @@ shakaDemo.Main = class {
     }
     params.push('uilang=' + this.getUILocale());
 
-    for (const key of ['preferredVideoCodecs', 'preferredAudioCodecs']) {
+    const preferredArray = [
+      'preferredVideoCodecs',
+      'preferredAudioCodecs',
+      'preferredTextFormats',
+    ];
+
+    for (const key of preferredArray) {
       const array = /** @type {!Array.<string>} */(
         this.getCurrentConfigValue(key));
       if (array.length) {

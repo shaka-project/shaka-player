@@ -2300,6 +2300,7 @@ shaka.extern.TextDisplayerConfiguration;
  *   preferredTextRole: string,
  *   preferredVideoCodecs: !Array.<string>,
  *   preferredAudioCodecs: !Array.<string>,
+ *   preferredTextFormats: !Array.<string>,
  *   preferredAudioChannelCount: number,
  *   preferredVideoHdrLevel: string,
  *   preferredVideoLayout: string,
@@ -2377,6 +2378,10 @@ shaka.extern.TextDisplayerConfiguration;
  *   Defaults to <code>[]</code>.
  * @property {!Array.<string>} preferredAudioCodecs
  *   The list of preferred audio codecs, in order of highest to lowest priority.
+ *   <br>
+ *   Defaults to <code>[]</code>.
+ * @property {!Array.<string>} preferredTextFormats
+ *   The list of preferred text formats, in order of highest to lowest priority.
  *   <br>
  *   Defaults to <code>[]</code>.
  * @property {number} preferredAudioChannelCount

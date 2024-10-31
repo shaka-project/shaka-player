@@ -690,7 +690,9 @@ shakaDemo.Config = class {
         .addArrayStringInput_('Preferred video codecs',
             'preferredVideoCodecs')
         .addArrayStringInput_('Preferred audio codecs',
-            'preferredAudioCodecs');
+            'preferredAudioCodecs')
+        .addArrayStringInput_('Preferred text formats',
+            'preferredTextFormats');
   }
 
   /** @private */
