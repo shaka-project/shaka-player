@@ -1506,13 +1506,13 @@ shakaDemo.Main = class {
     }
     params.push('uilang=' + this.getUILocale());
 
-    const preferedArray = [
+    const preferredArray = [
       'preferredVideoCodecs',
       'preferredAudioCodecs',
       'preferredTextFormats',
     ];
 
-    for (const key of preferedArray) {
+    for (const key of preferredArray) {
       const array = /** @type {!Array.<string>} */(
         this.getCurrentConfigValue(key));
       if (array.length) {
