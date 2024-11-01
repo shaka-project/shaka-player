@@ -1550,6 +1550,7 @@ shaka.extern.LiveSyncConfiguration;
  *   gapJumpTimerTime: number,
  *   durationBackoff: number,
  *   safeSeekOffset: number,
+ *   safeSeekEndOffset: number,
  *   stallEnabled: boolean,
  *   stallThreshold: number,
  *   stallSkip: number,
@@ -1666,6 +1667,13 @@ shaka.extern.LiveSyncConfiguration;
  *   bandwidth scenarios.
  *   <br>
  *   Defaults to <code>5</code>.
+ * @property {number} safeSeekEndOffset
+ *   The amount of seconds that should be added when repositioning the playhead
+ *   after falling out of the seakable end range. This is helpful for live
+ *   stream with a lot of GAP. This will reposition the playback in the past
+ *   and avoid to be block at the edge and buffer at the next GAP
+ *   <br>
+ *   Defaults to <code>0</code>.
  * @property {boolean} stallEnabled
  *   When set to <code>true</code>, the stall detector logic will run.  If the
  *   playhead stops moving for <code>stallThreshold</code> seconds, the player
