@@ -63,6 +63,7 @@ shaka.test.FakeSegmentPrefetch = class {
       this.prefetchPosTime_ = reference.startTime;
       reference = iterator.next().value;
     }
+    return Promise.resolve();
   }
 
   /** @override */
