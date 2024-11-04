@@ -142,17 +142,20 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
   onTimerTick_() {
     goog.asserts.assert(this.ad != null,
         'this.ad should exist at this point');
-
-    const secondsLeft = Math.round(this.ad.getTimeUntilSkippable());
-    if (secondsLeft > 0) {
-      this.counter_.textContent = secondsLeft;
+    if (this.ad.isSkippable()) {
+      const secondsLeft = Math.round(this.ad.getTimeUntilSkippable());
+      if (secondsLeft > 0) {
+        this.counter_.textContent = secondsLeft;
+      } else {
+        // The ad should now be skippable. OnSkipStateChanged() is
+        // listening for a SKIP_STATE_CHANGED event and will take care
+        // of the button. Here we just stop the timer and hide the counter.
+        // NOTE: onSkipStateChanged_() also hides the counter.
+        this.timer_.stop();
+        shaka.ui.Utils.setDisplay(this.counter_, false);
+      }
     } else {
-      // The ad should now be skippable. OnSkipStateChanged() is
-      // listening for a SKIP_STATE_CHANGED event and will take care
-      // of the button. Here we just stop the timer and hide the counter.
-      // NOTE: onSkipStateChanged_() also hides the counter.
-      this.timer_.stop();
-      shaka.ui.Utils.setDisplay(this.counter_, false);
+      this.reset_();
     }
   }
 
@@ -161,7 +164,9 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
    */
   onSkipStateChanged_() {
     // Double-check that the ad is now skippable
-    if (this.ad.canSkipNow()) {
+    if (!this.ad.isSkippable()) {
+      this.reset_();
+    } else if (this.ad.canSkipNow()) {
       this.button_.disabled = false;
       this.timer_.stop();
       shaka.ui.Utils.setDisplay(this.counter_, false);

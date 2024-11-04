@@ -853,7 +853,8 @@ describe('UI', () => {
       it('displays all the available statistics', () => {
         const skippedStats = ['stateHistory', 'switchHistory'];
         const nodes = statisticsContainer.childNodes;
-        let nodeIndex = 0;
+        // First index is close button.
+        let nodeIndex = 1;
 
         for (const statistic in new shaka.util.Stats().getBlob()) {
           if (!skippedStats.includes(statistic)) {

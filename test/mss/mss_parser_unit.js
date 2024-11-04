@@ -257,6 +257,27 @@ describe('MssParser Manifest', () => {
     expect(stream).toBeUndefined();
   });
 
+  it('support for repetitions', async () => {
+    const manifestText = [
+      '<SmoothStreamingMedia Duration="3600000000">',
+      '  <StreamIndex Name="audio" Type="audio" Url="{bitrate}/{start time}">',
+      '    <QualityLevel Bitrate="128000" Channels="2" CodecPrivateData="',
+      aacCodecPrivateData,
+      '" FourCC="AACL"/>',
+      '    <c t="0" d="30000000" r="12"/>',
+      '  </StreamIndex>',
+      '</SmoothStreamingMedia>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    expect(manifest.variants.length).toBe(1);
+    await manifest.variants[0].audio.createSegmentIndex();
+    const segmentIndex = manifest.variants[0].audio.segmentIndex;
+    expect(segmentIndex.getNumReferences()).toBe(12);
+  });
+
   it('generate a fake init segment', async () => {
     const manifestText = [
       '<SmoothStreamingMedia Duration="3600000000">',

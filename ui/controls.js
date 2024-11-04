@@ -1235,12 +1235,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.adManager_, shaka.ads.Utils.AD_STARTED, (e) => {
           this.ad_ = (/** @type {!Object} */ (e))['ad'];
           this.showAdUI();
+          this.onBufferingStateChange_();
         });
 
     this.eventManager_.listen(
         this.adManager_, shaka.ads.Utils.AD_STOPPED, () => {
           this.ad_ = null;
           this.hideAdUI();
+          this.onBufferingStateChange_();
         });
 
     if (screen.orientation) {
@@ -1264,7 +1266,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           callback(details);
         });
       } catch (error) {
-        shaka.log.warning(
+        shaka.log.debug(
             `The "${type}" media session action is not supported.`);
       }
     };
@@ -1289,7 +1291,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           });
         }
       } catch (error) {
-        shaka.log.warning(
+        shaka.log.v2(
             'setPositionState in media session is not supported.');
       }
     };
@@ -1359,9 +1361,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
         imageUrl = payload['data'];
       }
-      if (navigator.mediaSession.metadata && title) {
-        const metadata = navigator.mediaSession.metadata;
-        metadata.title = title;
+      if (title) {
+        let metadata = {
+          title: title,
+          artwork: [],
+        };
+        if (navigator.mediaSession.metadata) {
+          metadata = navigator.mediaSession.metadata;
+          metadata.title = title;
+        }
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
       }
       if (imageUrl) {
@@ -1369,11 +1377,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (imageUrl != video.poster) {
           video.poster = imageUrl;
         }
+        let metadata = {
+          title: '',
+          artwork: [{src: imageUrl}],
+        };
         if (navigator.mediaSession.metadata) {
-          const metadata = navigator.mediaSession.metadata;
+          metadata = navigator.mediaSession.metadata;
           metadata.artwork = [{src: imageUrl}];
-          navigator.mediaSession.metadata = new MediaMetadata(metadata);
         }
+        navigator.mediaSession.metadata = new MediaMetadata(metadata);
       }
     });
   }
@@ -1463,7 +1475,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     // Use the cursor specified in the CSS file.
-    this.videoContainer_.style.cursor = '';
+    this.videoContainer_.classList.remove('no-cursor');
 
     this.recentMouseMovement_ = true;
 
@@ -1516,7 +1528,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   onMouseStill_() {
     // Hide the cursor.
-    this.videoContainer_.style.cursor = 'none';
+    this.videoContainer_.classList.add('no-cursor');
     this.recentMouseMovement_ = false;
     this.computeOpacity();
   }
@@ -1741,6 +1753,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   onBufferingStateChange_() {
     if (!this.enabled_) {
+      return;
+    }
+
+    if (this.ad_ && this.ad_.isClientRendering() && this.ad_.isLinear()) {
+      shaka.ui.Utils.setDisplay(this.spinnerContainer_, false);
       return;
     }
 

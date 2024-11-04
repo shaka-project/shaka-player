@@ -42,6 +42,7 @@ shakaAssets.Source = {
   THEO_PLAYER: 'THEOplayer',
   JWPLAYER: 'JW Player',
   BBC: 'BBC',
+  DOLBY: 'Dolby',
 };
 
 
@@ -132,6 +133,8 @@ shakaAssets.Feature = {
   // Set if the asset has at least one containerless stream (AAC, etc).
   CONTAINERLESS: 'Containerless',
 
+  // Set if the asset requires Dolby Vision Profile 5 support.
+  DOLBY_VISION_P5: 'Dolby Vision P5',
   // Set if the asset requires Dolby Vision with MV-HEVC (for 3D) support.
   DOLBY_VISION_3D: 'Dolby Vision 3D',
 
@@ -1870,6 +1873,30 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.AUDIO_ONLY)
       .addFeature(shakaAssets.Feature.OFFLINE),
+  // }}}
+
+  // Dolby assets {{{
+  /* Dolby Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P5 DASH (FairPlay, PlayReady, Widevine)',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://content.media24.link/drm/manifest.mpd',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addKeySystem(shakaAssets.KeySystem.FAIRPLAY)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P5)
+      .setExtraConfig({
+        drm: {
+          advanced: {
+            'com.apple.fps': {
+              serverCertificateUri: 'https://ott.dolby.com/OnDelKits/fairplay.cer',
+            },
+          },
+        },
+      }),
   // }}}
 ];
 /* eslint-enable max-len */
