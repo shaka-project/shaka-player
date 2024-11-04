@@ -468,6 +468,8 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_('Safe Seek Offset', 'streaming.safeSeekOffset',
             /* canBeDecimal= */ true)
+        .addNumberInput_('Safe Seek Offset', 'streaming.safeSeekEndOffset',
+            /* canBeDecimal= */ true)
         .addNumberInput_('Stall Threshold', 'streaming.stallThreshold',
             /* canBeDecimal= */ true)
         .addNumberInput_('Safe Skip Distance', 'streaming.stallSkip',
