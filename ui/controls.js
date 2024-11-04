@@ -611,9 +611,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (document.fullscreenEnabled) {
       return true;
     }
-    const video = /** @type {HTMLVideoElement} */(this.localVideo_);
-    if (video.webkitSupportsFullscreen) {
-      return true;
+    if (!this.ad_ || !this.ad_.isUsingAnotherMediaElement()) {
+      const video = /** @type {HTMLVideoElement} */(this.localVideo_);
+      if (video.webkitSupportsFullscreen) {
+        return true;
+      }
     }
     return false;
   }
