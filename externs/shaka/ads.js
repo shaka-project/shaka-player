@@ -302,6 +302,11 @@ shaka.extern.IAd = class {
   isClientRendering() {}
 
   /**
+   * @return {boolean}
+   */
+  isUsingAnotherMediaElement() {}
+
+  /**
    * @return {number}
    */
   getDuration() {}

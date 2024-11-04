@@ -85,6 +85,14 @@ shaka.test.FakeAd = class {
 
   /**
    * @override
+   * @export
+   */
+  isUsingAnotherMediaElement() {
+    return true;
+  }
+
+  /**
+   * @override
    */
   getDuration() {
     return this.duration_;
