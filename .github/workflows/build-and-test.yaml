@@ -1,4 +1,4 @@
-name: Build and Test PR
+name: Build and Test
 
 on:
   pull_request: # Trigger for pull requests.
@@ -11,6 +11,9 @@ on:
       ref:
         description: "The ref to build and test."
         required: false
+  schedule:
+    # Run every night at midnight PST / 8am UTC, testing against the main branch.
+    - cron: '0 8 * * *'
 
 # If another instance of this workflow is started for the same PR, cancel the
 # old one.  If a PR is updated and a new test run is started, the old test run
