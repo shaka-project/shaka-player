@@ -105,8 +105,10 @@ shaka.ui.LanguageUtils = class {
       audioCodec = audioCodec.toLowerCase();
       if (audioCodec.startsWith('mp4a')) {
         name = 'AAC';
-      } else if (audioCodec === 'ec-3' || audioCodec === 'ac-3') {
+      } else if (audioCodec === 'ac-3') {
         name = 'Dolby';
+      } else if (audioCodec === 'ec-3') {
+        name = 'DD+';
       } else if (audioCodec === 'opus') {
         name = 'Opus';
       } else if (audioCodec === 'flac') {
