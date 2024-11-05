@@ -8,7 +8,7 @@ on:
   workflow_run:
     workflows:
       - Selenium Lab Tests
-      - Build and Test PR
+      - Build and Test
     types: [completed]
 
 jobs:
