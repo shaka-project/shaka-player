@@ -29,6 +29,7 @@ goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IDestroyable');
+goog.require('shaka.util.Platform');
 goog.require('shaka.util.Timer');
 
 goog.requireType('shaka.Player');
@@ -605,10 +606,25 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @return {boolean}
+   * @private
+   */
+  isWebKitFullScreenPreferred_() {
+    const video = /** @type {HTMLVideoElement} */(this.localVideo_);
+    if (!video.webkitSupportsFullscreen) {
+      return false;
+    }
+    if (!this.config_.preferVideoFullScreenInVisionOS) {
+      return false;
+    }
+    return shaka.util.Platform.isVisionOS();
+  }
+
+  /**
+   * @return {boolean}
    * @export
    */
   isFullScreenSupported() {
-    if (document.fullscreenEnabled) {
+    if (document.fullscreenEnabled && !this.isWebKitFullScreenPreferred_()) {
       return true;
     }
     if (!this.ad_ || !this.ad_.isUsingAnotherMediaElement()) {
@@ -625,7 +641,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isFullScreenEnabled() {
-    if (document.fullscreenEnabled) {
+    if (document.fullscreenEnabled && !this.isWebKitFullScreenPreferred_()) {
       return !!document.fullscreenElement;
     }
     const video = /** @type {HTMLVideoElement} */(this.localVideo_);
@@ -638,7 +654,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   async enterFullScreen_() {
     try {
-      if (document.fullscreenEnabled) {
+      if (document.fullscreenEnabled && !this.isWebKitFullScreenPreferred_()) {
         if (document.pictureInPictureElement) {
           await document.exitPictureInPicture();
         }
@@ -669,7 +685,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   async exitFullScreen_() {
-    if (document.fullscreenEnabled) {
+    if (document.fullscreenEnabled && !this.isWebKitFullScreenPreferred_()) {
       if (screen.orientation) {
         screen.orientation.unlock();
       }
