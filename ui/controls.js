@@ -608,15 +608,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @return {boolean}
    * @private
    */
-  isWebKitFullScreenPreferred_() {
+  shouldUseDocumentFullscreen_() {
+    if (!document.fullscreenEnabled) {
+      return false;
+    }
+    // When the preferVideoFullScreenInVisionOS configuration value applies,
+    // we avoid using document fullscreen, even if it is available.
     const video = /** @type {HTMLVideoElement} */(this.localVideo_);
-    if (!video.webkitSupportsFullscreen) {
-      return false;
+    if (video.webkitSupportsFullscreen) {
+      if (this.config_.preferVideoFullScreenInVisionOS &&
+          shaka.util.Platform.isVisionOS()) {
+        return false;
+      }
     }
-    if (!this.config_.preferVideoFullScreenInVisionOS) {
-      return false;
-    }
-    return shaka.util.Platform.isVisionOS();
+    return true;
   }
 
   /**
@@ -624,7 +629,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isFullScreenSupported() {
-    if (document.fullscreenEnabled && !this.isWebKitFullScreenPreferred_()) {
+    if (document.fullscreenEnabled && this.shouldUseDocumentFullscreen_()) {
       return true;
     }
     if (!this.ad_ || !this.ad_.isUsingAnotherMediaElement()) {
@@ -641,7 +646,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isFullScreenEnabled() {
-    if (document.fullscreenEnabled && !this.isWebKitFullScreenPreferred_()) {
+    if (document.fullscreenEnabled && this.shouldUseDocumentFullscreen_()) {
       return !!document.fullscreenElement;
     }
     const video = /** @type {HTMLVideoElement} */(this.localVideo_);
@@ -654,7 +659,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   async enterFullScreen_() {
     try {
-      if (document.fullscreenEnabled && !this.isWebKitFullScreenPreferred_()) {
+      if (document.fullscreenEnabled && this.shouldUseDocumentFullscreen_()) {
         if (document.pictureInPictureElement) {
           await document.exitPictureInPicture();
         }
@@ -685,7 +690,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   async exitFullScreen_() {
-    if (document.fullscreenEnabled && !this.isWebKitFullScreenPreferred_()) {
+    if (document.fullscreenEnabled && this.shouldUseDocumentFullscreen_()) {
       if (screen.orientation) {
         screen.orientation.unlock();
       }
