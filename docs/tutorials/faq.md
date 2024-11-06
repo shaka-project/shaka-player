@@ -261,7 +261,7 @@ patience in these matters.
 
 **Q:** My HLS streams video/audio are out of sync.
 
-**A:** This error may be caused by your media playlists using #EXTINF with
+**A:** This error may be caused by your Media Playlists using #EXTINF with
 integer durations. Although the HLS spec allows it, Shaka Player requires that
 the duration must be precise with decimal-floating-point or decimal-integer
 number. If this is not your case, please open an issue so we can investigate it.
