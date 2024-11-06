@@ -19,7 +19,7 @@ on:
 # old one.  If a PR is updated and a new test run is started, the old test run
 # will be cancelled automatically to conserve resources.
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.ref || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.number || inputs.ref }}
   cancel-in-progress: true
 
 jobs:
