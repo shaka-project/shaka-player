@@ -25,7 +25,12 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
           /* spatialAudio= */ false,
-          /* videoLayout= */ '');
+          /* videoLayout= */ '',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -52,7 +57,12 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
           /* spatialAudio= */ false,
-          /* videoLayout= */ '');
+          /* videoLayout= */ '',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -107,7 +117,9 @@ describe('AdaptationSetCriteria', () => {
             /* videoLayout= */ '',
             /* audioLabel= */ '',
             /* videoLabel= */ '',
-            shaka.config.CodecSwitchingStrategy.SMOOTH);
+            shaka.config.CodecSwitchingStrategy.SMOOTH,
+            /* enableAudioGroups= */ false,
+            /* audioCodec= */ '');
         const set = builder.create(manifest.variants);
 
         expect(Array.from(set.values()).length).toBe(3);
@@ -155,7 +167,9 @@ describe('AdaptationSetCriteria', () => {
           /* videoLayout= */ '',
           /* audioLabel= */ '',
           /* videoLabel= */ '',
-          shaka.config.CodecSwitchingStrategy.RELOAD);
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       expect(Array.from(set.values()).length).toBe(1);
@@ -189,7 +203,12 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
           /* spatialAudio= */ false,
-          /* videoLayout= */ '');
+          /* videoLayout= */ '',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -244,7 +263,12 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
           /* spatialAudio= */ false,
-          /* videoLayout= */ '');
+          /* videoLayout= */ '',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       // Which role is chosen is an implementation detail.
@@ -308,7 +332,12 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
           /* spatialAudio= */ false,
-          /* videoLayout= */ '');
+          /* videoLayout= */ '',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       // Which role is chosen is an implementation detail.
@@ -350,7 +379,12 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
           /* spatialAudio= */ false,
-          /* videoLayout= */ '');
+          /* videoLayout= */ '',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       // Which language is chosen is an implementation detail.
@@ -412,7 +446,12 @@ describe('AdaptationSetCriteria', () => {
               /* channelCount= */ 0,
               /* hdrLevel= */ '',
               /* spatialAudio= */ false,
-              /* videoLayout= */ '');
+              /* videoLayout= */ '',
+              /* audioLabel= */ '',
+              /* videoLabel= */ '',
+              shaka.config.CodecSwitchingStrategy.RELOAD,
+              /* enableAudioGroups= */ false,
+              /* audioCodec= */ '');
           const set = builder.create(manifest.variants);
 
           // Which role is chosen is an implementation detail. Each role is
@@ -475,7 +514,12 @@ describe('AdaptationSetCriteria', () => {
               /* channelCount= */ 0,
               /* hdrLevel= */ '',
               /* spatialAudio= */ false,
-              /* videoLayout= */ '');
+              /* videoLayout= */ '',
+              /* audioLabel= */ '',
+              /* videoLabel= */ '',
+              shaka.config.CodecSwitchingStrategy.RELOAD,
+              /* enableAudioGroups= */ false,
+              /* audioCodec= */ '');
           const set = builder.create(manifest.variants);
 
           checkSet(set, [
@@ -509,7 +553,12 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 0,
           /* hdrLevel= */ 'PQ',
           /* spatialAudio= */ false,
-          /* videoLayout= */ '');
+          /* videoLayout= */ '',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -543,7 +592,12 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
           /* spatialAudio= */ false,
-          /* videoLayout= */ 'CH-STEREO');
+          /* videoLayout= */ 'CH-STEREO',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -577,7 +631,12 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 0,
           /* hdrLevel= */ '',
           /* spatialAudio= */ false,
-          /* videoLayout= */ 'CH-MONO');
+          /* videoLayout= */ 'CH-MONO',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -610,7 +669,12 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 2,
           /* hdrLevel= */ '',
           /* spatialAudio= */ false,
-          /* videoLayout= */ '');
+          /* videoLayout= */ '',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -645,7 +709,12 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 6,
           /* hdrLevel= */ '',
           /* spatialAudio= */ false,
-          /* videoLayout= */ '');
+          /* videoLayout= */ '',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -680,7 +749,12 @@ describe('AdaptationSetCriteria', () => {
           /* channelCount= */ 2,
           /* hdrLevel= */ '',
           /* spatialAudio= */ false,
-          /* videoLayout= */ '');
+          /* videoLayout= */ '',
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -715,7 +789,11 @@ describe('AdaptationSetCriteria', () => {
           /* hdrLevel= */ '',
           /* spatialAudio= */ false,
           /* videoLayout= */ '',
-          /* audioLabel= */ 'preferredLabel');
+          /* audioLabel= */ 'preferredLabel',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -745,7 +823,11 @@ describe('AdaptationSetCriteria', () => {
           /* hdrLevel= */ '',
           /* spatialAudio= */ true,
           /* videoLayout= */ '',
-          /* audioLabel= */ '');
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -774,7 +856,11 @@ describe('AdaptationSetCriteria', () => {
           /* hdrLevel= */ '',
           /* spatialAudio= */ false,
           /* videoLayout= */ '',
-          /* audioLabel= */ '');
+          /* audioLabel= */ '',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -821,7 +907,11 @@ describe('AdaptationSetCriteria', () => {
           /* hdrLevel= */ '',
           /* spatialAudio= */ false,
           /* videoLayout= */ '',
-          /* audioLabel= */ 'preferredLabel');
+          /* audioLabel= */ 'preferredLabel',
+          /* videoLabel= */ '',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -857,7 +947,10 @@ describe('AdaptationSetCriteria', () => {
           /* spatialAudio= */ false,
           /* videoLayout= */ '',
           /* audioLabel= */ '',
-          /* videoLabel= */ 'preferredLabel');
+          /* videoLabel= */ 'preferredLabel',
+          shaka.config.CodecSwitchingStrategy.RELOAD,
+          /* enableAudioGroups= */ false,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
@@ -901,7 +994,8 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ true);
+          /* enableAudioGroups= */ true,
+          /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
