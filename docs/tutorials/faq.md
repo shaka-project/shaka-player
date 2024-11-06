@@ -257,6 +257,15 @@ Therefore it is not unusual for a day or two to pass before a new version of
 Shaka Player is hosted on Google's ajax.googleapis.com website. We ask for your
 patience in these matters.
 
+<hr>
+
+**Q:** My HLS streams video/audio are out of sync.
+
+**A:** This error may be caused by your media playlists using #EXTINF with
+integer durations. Although the HLS spec allows it, Shaka Player requires that
+the duration must be precise with decimal-floating-point or decimal-integer
+number. If this is not your case, please open an issue so we can investigate it.
+
 
 [386]: https://github.com/shaka-project/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/shaka-project/shaka-player/issues/489#issuecomment-240466224
