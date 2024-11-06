@@ -226,7 +226,6 @@ shakaDemo.Config = class {
         .addBoolInput_('Allow DASH multi type variants',
             'manifest.dash.multiTypeVariantsAllowed')
         .addTextInput_('Clock Sync URI', 'manifest.dash.clockSyncUri')
-        .addBoolInput_('Enable Audio Groups', 'manifest.dash.enableAudioGroups')
         .addBoolInput_('Ignore Min Buffer Time',
             'manifest.dash.ignoreMinBufferTime')
         .addNumberInput_('Initial Segment Limit',

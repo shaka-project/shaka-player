@@ -1252,7 +1252,7 @@ describe('DashParser Manifest', () => {
     expect(trickModeVideo).toBe(null);
   });
 
-  it('populates groupId if configuration enabled', async () => {
+  it('populates groupId', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
@@ -1278,10 +1278,6 @@ describe('DashParser Manifest', () => {
     ].join('\n');
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
-
-    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.dash.enableAudioGroups = true;
-    parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
