@@ -673,17 +673,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.LIVE)
-      .addFeature(shakaAssets.Feature.MP4)
-      .setExtraConfig({
-        manifest: {
-          // HLS doesn't signal the availability window, but this stream is
-          // seekable.
-          availabilityWindowOverride: 3600,
-          // This is the presentation delay signaled explicitly in the DASH
-          // version.
-          defaultPresentationDelay: 60,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.MP4),
   // End Shaka assets }}}
 
   // Axinom assets {{{
