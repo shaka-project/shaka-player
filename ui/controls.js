@@ -629,7 +629,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isFullScreenSupported() {
-    if (document.fullscreenEnabled && this.shouldUseDocumentFullscreen_()) {
+    if (this.shouldUseDocumentFullscreen_()) {
       return true;
     }
     if (!this.ad_ || !this.ad_.isUsingAnotherMediaElement()) {
@@ -646,7 +646,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isFullScreenEnabled() {
-    if (document.fullscreenEnabled && this.shouldUseDocumentFullscreen_()) {
+    if (this.shouldUseDocumentFullscreen_()) {
       return !!document.fullscreenElement;
     }
     const video = /** @type {HTMLVideoElement} */(this.localVideo_);
@@ -659,7 +659,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   async enterFullScreen_() {
     try {
-      if (document.fullscreenEnabled && this.shouldUseDocumentFullscreen_()) {
+      if (this.shouldUseDocumentFullscreen_()) {
         if (document.pictureInPictureElement) {
           await document.exitPictureInPicture();
         }
@@ -690,7 +690,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   async exitFullScreen_() {
-    if (document.fullscreenEnabled && this.shouldUseDocumentFullscreen_()) {
+    if (this.shouldUseDocumentFullscreen_()) {
       if (screen.orientation) {
         screen.orientation.unlock();
       }
