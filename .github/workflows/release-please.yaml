@@ -57,6 +57,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: refs/tags/${{ needs.release.outputs.tag_name }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -129,6 +130,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: refs/tags/${{ needs.release.outputs.tag_name }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -183,6 +185,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: refs/tags/${{ needs.release.outputs.tag_name }}
           fetch-depth: 0
           # Use a special shaka-bot access token for releases.
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
