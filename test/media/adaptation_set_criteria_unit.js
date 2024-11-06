@@ -29,7 +29,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -61,7 +60,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -118,7 +116,6 @@ describe('AdaptationSetCriteria', () => {
             /* audioLabel= */ '',
             /* videoLabel= */ '',
             shaka.config.CodecSwitchingStrategy.SMOOTH,
-            /* enableAudioGroups= */ false,
             /* audioCodec= */ '');
         const set = builder.create(manifest.variants);
 
@@ -168,7 +165,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -207,7 +203,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -267,7 +262,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -336,7 +330,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -383,7 +376,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -450,7 +442,6 @@ describe('AdaptationSetCriteria', () => {
               /* audioLabel= */ '',
               /* videoLabel= */ '',
               shaka.config.CodecSwitchingStrategy.RELOAD,
-              /* enableAudioGroups= */ false,
               /* audioCodec= */ '');
           const set = builder.create(manifest.variants);
 
@@ -518,7 +509,6 @@ describe('AdaptationSetCriteria', () => {
               /* audioLabel= */ '',
               /* videoLabel= */ '',
               shaka.config.CodecSwitchingStrategy.RELOAD,
-              /* enableAudioGroups= */ false,
               /* audioCodec= */ '');
           const set = builder.create(manifest.variants);
 
@@ -557,7 +547,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -596,7 +585,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -635,7 +623,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -673,7 +660,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -713,7 +699,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -753,7 +738,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -792,7 +776,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ 'preferredLabel',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -826,7 +809,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -859,7 +841,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -910,7 +891,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ 'preferredLabel',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -949,7 +929,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ 'preferredLabel',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -994,7 +973,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ true,
           /* audioCodec= */ '');
       const set = builder.create(manifest.variants);
 
@@ -1028,7 +1006,6 @@ describe('AdaptationSetCriteria', () => {
           /* audioLabel= */ '',
           /* videoLabel= */ '',
           shaka.config.CodecSwitchingStrategy.RELOAD,
-          /* enableAudioGroups= */ false,
           /* audioCodec= */ 'ec-3');
       const set = builder.create(manifest.variants);
 

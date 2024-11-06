@@ -1074,7 +1074,6 @@ shaka.extern.xml.Node;
  *   manifestPreprocessor: function(!Element),
  *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
- *   enableAudioGroups: boolean,
  *   multiTypeVariantsAllowed: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
  *   updatePeriod: number,
@@ -1153,11 +1152,6 @@ shaka.extern.xml.Node;
  * @property {boolean} sequenceMode
  *   If true, the media segments are appended to the SourceBuffer in
  *   "sequence mode" (ignoring their internal timestamps).
- *   <br>
- *   Defaults to <code>false</code>.
- * @property {boolean} enableAudioGroups
- *   If set, audio streams will be grouped and filtered by their parent
- *   adaptation set ID.
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {boolean} multiTypeVariantsAllowed
