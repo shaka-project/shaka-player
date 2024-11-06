@@ -18,6 +18,10 @@ on:
     # Run every night at 10pm PST / 6am UTC.
     - cron: '0 6 * * *'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   appspot:
     runs-on: ubuntu-latest
