@@ -118,9 +118,9 @@ shakaAssets.Feature = {
   // Does not need to be set manually.
   ADS: 'Ads',
 
-  // Set if the asset is a livestream.
+  // Set if the asset is a live stream.
   LIVE: 'Live',
-  // A synthetic property used if the asset is VOD (not-livestream).
+  // A synthetic property used if the asset is VOD (not a live stream).
   VOD: 'VOD',
   // Set if the asset has at least one WebM stream.
   WEBM: 'WebM',
@@ -665,24 +665,23 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Shaka Player History (multicodec, live, DASH)',
+      /* name= */ 'Shaka Player History (H264, VP9, AV1, live, DASH)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/shaka.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-live-assets/player-source.mpd',
       /* source= */ shakaAssets.Source.SHAKA)
-      .markAsDisabled()
+      .addDescription('A self-indulgent DASH live stream.')
+      .markAsFeatured('Shaka Player History: Live')
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.WEBM),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Shaka Player History (live, HLS)',
+      /* name= */ 'Shaka Player History (H264, VP9, AV1, live, HLS)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/shaka.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-live-assets/player-source.m3u8',
       /* source= */ shakaAssets.Source.SHAKA)
-      .addDescription('A self-indulgent HLS livestream.')
-      .markAsFeatured('Shaka Player History')
-      .markAsDisabled()
+      .addDescription('A self-indulgent HLS live stream.')
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.LIVE)
