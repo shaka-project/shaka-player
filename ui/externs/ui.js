@@ -97,7 +97,8 @@ shaka.extern.UIVolumeBarColors;
  *   refreshTickInSeconds: number,
  *   displayInVrMode: boolean,
  *   defaultVrProjectionMode: string,
- *   setupMediaSession: boolean
+ *   setupMediaSession: boolean,
+ *   preferVideoFullScreenInVisionOS: boolean
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -254,6 +255,12 @@ shaka.extern.UIVolumeBarColors;
  *   the ID3 APIC and TIT2 as image and title in Media Session, and ID3 APIC
  *   will also be used to change video poster.
  *   Defaults to true.
+ * @property {boolean} preferVideoFullScreenInVisionOS
+ *   If true, we will use the fullscreen API of the video element itself if it
+ *   is available in Vision OS. This is useful to be able to access 3D
+ *   experiences that are only allowed with the fullscreen of the video element
+ *   itself.
+ *   Defaults to false.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;
