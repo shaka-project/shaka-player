@@ -487,8 +487,6 @@ shakaDemo.Config = class {
         .addNumberInput_('Update interval seconds',
             'streaming.updateIntervalSeconds',
             /* canBeDecimal= */ true)
-        .addBoolInput_('Dispatch all emsg boxes',
-            'streaming.dispatchAllEmsgBoxes')
         .addBoolInput_('Observe media quality changes',
             'streaming.observeQualityChanges')
         .addNumberInput_('Max Variant Disabled Time',
@@ -645,7 +643,9 @@ shakaDemo.Config = class {
             'Codec Switching Strategy',
             'mediaSource.codecSwitchingStrategy',
             strategyOptions,
-            strategyOptionsNames);
+            strategyOptionsNames)
+        .addBoolInput_('Dispatch all emsg boxes',
+            'mediaSource.dispatchAllEmsgBoxes');
   }
 
   /** @private */
