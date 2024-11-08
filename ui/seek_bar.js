@@ -513,6 +513,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const leftPosition = Math.min(this.bar.offsetWidth - width,
         Math.max(0, pixelPosition - (width / 2)));
     this.timeContainer_.style.left = leftPosition + 'px';
+    this.timeContainer_.style.right = '';
     this.timeContainer_.style.visibility = 'visible';
     const seekRange = this.player.seekRange();
     if (this.player.isLive()) {
@@ -520,6 +521,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       if (totalSeconds < 1) {
         this.timeContainer_.textContent =
             this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
+        this.timeContainer_.style.left = '';
+        this.timeContainer_.style.right = '0px';
       } else {
         this.timeContainer_.textContent =
             '-' + this.timeFormatter_(totalSeconds);
