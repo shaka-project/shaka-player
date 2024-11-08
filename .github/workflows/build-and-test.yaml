@@ -101,6 +101,7 @@ jobs:
       # installed. Otherwise, the browser might not support some codecs that the
       # tests assume will be supported.
       - name: Install FFmpeg
+        timeout-minutes: 5
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox'
         run: sudo apt -y update && sudo apt -y install ffmpeg
 
@@ -116,6 +117,7 @@ jobs:
       # with rm -rf and cp, this will fail.  Safari may be on a read-only
       # filesystem.
       - name: Install old Safari to home directory
+        timeout-minutes: 5
         if: matrix.os == 'macos-latest' && matrix.browser == 'Safari-old'
         run: |
           # Download Safari 15
@@ -135,29 +137,36 @@ jobs:
       # causing many of our test scenarios to fail.  Deleting "Chrome for
       # Testing" fixes this.
       - name: 'Delete "Chrome for Testing" on Mac'
+        timeout-minutes: 5
         if: matrix.os == 'macos-13' && matrix.browser == 'Chrome'
         run: sudo rm -rf /Applications/Google\ Chrome\ for\ Testing.app
       - name: 'Overwrite "Chrome for Testing" on Windows'
+        timeout-minutes: 5
         if: matrix.os == 'windows-latest' && matrix.browser == 'Chrome'
         shell: bash
         run: choco install -y googlechrome --ignore-checksums
 
       - name: 'Install Opera on Ubuntu'
+        timeout-minutes: 5
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Opera'
         run: sudo apt -y update && sudo apt -y install snapd && sudo snap install opera
 
       - name: 'Install Opera on Windows'
+        timeout-minutes: 5
         if: matrix.os == 'windows-latest' && matrix.browser == 'Opera'
         run: choco install -y opera --ignore-checksums --params '"/NoAutostart /NoDesktopShortcut /NoTaskbarShortcut"'
 
       # Firefox, Edge and Opera might be missing on Mac CI images.
       - name: 'Install Firefox on Mac'
+        timeout-minutes: 5
         if: matrix.os == 'macos-latest' && matrix.browser == 'Firefox'
         run: brew install --cask firefox
       - name: 'Install Edge on Mac'
+        timeout-minutes: 5
         if: matrix.os == 'macos-13' && matrix.browser == 'Edge'
         run: brew install --cask microsoft-edge
       - name: 'Install Opera on Mac'
+        timeout-minutes: 5
         if: matrix.os == 'macos-latest' && matrix.browser == 'Opera'
         run: brew install --cask opera
 
@@ -169,6 +178,7 @@ jobs:
           java-version: 11
 
       - name: Build Player
+        timeout-minutes: 10
         run: python build/all.py
 
       - name: Test Player
