@@ -248,6 +248,7 @@ describe('MediaSourceEngine', () => {
           getKeySystem: () => null,
           onMetadata: () => {},
           onEvent: () => {},
+          onManifestUpdate: () => {},
         });
     mediaSourceEngine.getCaptionParser = () => {
       return mockClosedCaptionParser;
@@ -323,6 +324,7 @@ describe('MediaSourceEngine', () => {
             getKeySystem: () => null,
             onMetadata: () => {},
             onEvent: () => {},
+            onManifestUpdate: () => {},
           });
 
       expect(createMediaSourceSpy).toHaveBeenCalled();
@@ -346,6 +348,7 @@ describe('MediaSourceEngine', () => {
             getKeySystem: () => null,
             onMetadata: () => {},
             onEvent: () => {},
+            onManifestUpdate: () => {},
           });
 
       if (window.ManagedMediaSource) {

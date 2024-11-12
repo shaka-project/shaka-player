@@ -364,15 +364,6 @@ shaka.test.Util = class {
         // AC3 is flaky in some Tizen devices, so we need omit it for now.
         return false;
       }
-      if ((codecs == 'ec-3' || codecs == 'ac-3') &&
-          shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge()) {
-        // It seems that AC3 and EC3 on Edge Windows from github actions is not
-        // working (in the lab AC3 and EC3 are working). The AC3 and EC3
-        // detection is currently hard-coded to true, which leads to a failure
-        // in GitHub's environment. We must enable this, once it is resolved:
-        // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
-        return false;
-      }
       // AudioConfiguration
       mediaDecodingConfig.audio = {
         contentType: MimeUtils.getFullOrConvertedType(

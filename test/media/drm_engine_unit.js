@@ -143,26 +143,6 @@ describe('DrmEngine', () => {
     shaka.log.error = originalLogError;
   });
 
-  describe('supportsVariants', () => {
-    it('supports all clear variants', async () => {
-      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        manifest.addVariant(0, (variant) => {
-          variant.addVideo(1, (stream) => {
-            stream.encrypted = false;
-            stream.addDrmInfo('drm.abc');
-            stream.addDrmInfo('drm.def');
-            stream.mime('video/foo', 'vbar');
-          });
-        });
-      });
-
-      const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
-
-      expect(drmEngine.supportsVariant(variants[0])).toBeTruthy();
-    });
-  });
-
 
   describe('createOrLoad', () => {
     it('does not hang when given empty init data for offline', async () => {
@@ -291,24 +271,6 @@ describe('DrmEngine', () => {
       expect(selectedDrmInfo).not.toBe(null);
       expect(selectedDrmInfo.keySystem).toBe('drm.def');
       expect(selectedDrmInfo.licenseServerUri).toBe(config.servers['drm.def']);
-    });
-
-    it('detects content type capabilities of key system', async () => {
-      setDecodingInfoSpy(['drm.abc']);
-
-      const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
-      expect(drmEngine.initialized()).toBe(true);
-      expect(drmEngine.willSupport('audio/webm')).toBeTruthy();
-      expect(drmEngine.willSupport('video/mp4; codecs="fake"')).toBeTruthy();
-      expect(drmEngine.willSupport('video/mp4; codecs="FAKE"')).toBeTruthy();
-
-      // Because DrmEngine will err on being too accepting, make sure it will
-      // reject something. However, we can only check that it is actually
-      // thing on non-Edge browsers because of https://bit.ly/2IcEgv0
-      if (!shaka.util.Platform.isLegacyEdge()) {
-        expect(drmEngine.willSupport('this-should-fail')).toBeFalsy();
-      }
     });
 
     it('fails to initialize if no key systems are available', async () => {
@@ -761,8 +723,7 @@ describe('DrmEngine', () => {
         // The default mock for this is so unrealistic, some of our test
         // conditions would always fail.  Make it realistic enough for this
         // test case by returning the same types we are supposed to be querying
-        // for.  That way, supportsVariant() should work produce the correct
-        // result after translating the types of the variant's streams.
+        // for.
         mockMediaKeySystemAccess.getConfiguration.and.callFake(() => {
           return {
             audioCapabilities: [{contentType: 'audio/mp4; codecs="abar"'}],
@@ -802,8 +763,6 @@ describe('DrmEngine', () => {
         });
         expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
         expect(decodingInfoSpy).toHaveBeenCalledWith(decodingConfig);
-
-        expect(drmEngine.supportsVariant(variants[0])).toBeTruthy();
       } finally {
         // Restore the mock.
         shaka.transmuxer.TransmuxerEngine.isSupported = originalIsSupported;
@@ -1286,20 +1245,7 @@ describe('DrmEngine', () => {
 
           await Util.shortDelay();
 
-          session3.on['message']({
-            target: session3,
-            message: new Uint8Array(0),
-            messageType: 'license-request'});
-
-          session3.keyStatuses.forEach.and.callFake((callback) => {
-            callback(keyId1, 'usable');
-          });
-
-          session3.on['keystatuseschange']({target: session3});
-
-          await Util.shortDelay();
-
-          expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(3);
+          expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(2);
           expect(mockMediaKeys.createSession)
               .toHaveBeenCalledWith('persistent-license');
           expect(session1.load)
@@ -1309,11 +1255,6 @@ describe('DrmEngine', () => {
               .toHaveBeenCalledWith('persistent-license');
           expect(session2.load)
               .toHaveBeenCalledWith('persistent-session-id-2');
-
-          expect(mockMediaKeys.createSession)
-              .toHaveBeenCalledWith('temporary');
-          expect(session3.generateRequest)
-              .toHaveBeenCalledWith('cenc', initData1);
         });
   });  // describe('attach')
 

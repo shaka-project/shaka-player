@@ -168,7 +168,7 @@ casting to an Android receiver app.
          data-shaka-player-cast-android-receiver-compatible="true">
       <!-- The manifest url in the src attribute will be automatically loaded -->
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%"
-       src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"></video>
+             src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"></video>
     </div
 ```
 
@@ -182,7 +182,7 @@ or a `<source>` tag inside it to enable auto loading of the specified content.
          data-shaka-player-cast-receiver-id="07AEE832">
       <!-- The manifest url in the src attribute will be automatically loaded -->
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%"
-       src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"></video>
+             src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"></video>
     </div>
 ```
 
@@ -193,7 +193,7 @@ or
          data-shaka-player-cast-receiver-id="07AEE832">
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%">
         <!-- The manifest url in the src attribute will be auto loaded -->
-       <source src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"/>
+        <source src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"/>
       </video>
     </div>
 ```
@@ -218,6 +218,7 @@ a `<source>` tag inside it.
 
 
 #### Programmatic UI setup.
+
 It is possible to set up the UI programmatically after the page loads.
 (One of the big use cases for this is building Shaka Player into UI frameworks
 that modify the DOM after the page load.)
@@ -255,3 +256,18 @@ ui.configure({
   'castAndroidReceiverCompatible': true,
 });
 ```
+
+
+#### Fully-featured example
+
+You can see a fully-featured example of the Shaka Player UI with autoloading
+here:
+
+[https://github.com/joeyparrish/bbbcm-if.org/blob/main/watch/index.html](https://github.com/joeyparrish/bbbcm-if.org/blob/main/watch/index.html)
+
+This example loads Shaka from a Google CDN, autoloads content, has CSS for a
+full-window watch page, and lazy-loads translations as needed.
+
+See it live at [https://bbbcm-if.org/watch/](https://bbbcm-if.org/watch/), and
+override the UI language with the lang= parameter.
+(ex: [https://bbbcm-if.org/watch/?lang=sjn](https://bbbcm-if.org/watch/?lang=sjn))

@@ -226,7 +226,6 @@ shakaDemo.Config = class {
         .addBoolInput_('Allow DASH multi type variants',
             'manifest.dash.multiTypeVariantsAllowed')
         .addTextInput_('Clock Sync URI', 'manifest.dash.clockSyncUri')
-        .addBoolInput_('Enable Audio Groups', 'manifest.dash.enableAudioGroups')
         .addBoolInput_('Ignore Min Buffer Time',
             'manifest.dash.ignoreMinBufferTime')
         .addNumberInput_('Initial Segment Limit',
@@ -268,7 +267,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Disable closed caption detection',
             'manifest.hls.disableClosedCaptionsDetection')
         .addBoolInput_('Allow LL-HLS byterange optimization',
-            'manifest.hls.allowLowLatencyByteRangeOptimization');
+            'manifest.hls.allowLowLatencyByteRangeOptimization')
+        .addNumberInput_('override the Update time of the manifest',
+            'manifest.hls.updatePeriod');
   }
 
   /** @private */
@@ -467,6 +468,8 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_('Safe Seek Offset', 'streaming.safeSeekOffset',
             /* canBeDecimal= */ true)
+        .addNumberInput_('Safe Seek Offset', 'streaming.safeSeekEndOffset',
+            /* canBeDecimal= */ true)
         .addNumberInput_('Stall Threshold', 'streaming.stallThreshold',
             /* canBeDecimal= */ true)
         .addNumberInput_('Safe Skip Distance', 'streaming.stallSkip',
@@ -485,8 +488,6 @@ shakaDemo.Config = class {
         .addNumberInput_('Update interval seconds',
             'streaming.updateIntervalSeconds',
             /* canBeDecimal= */ true)
-        .addBoolInput_('Dispatch all emsg boxes',
-            'streaming.dispatchAllEmsgBoxes')
         .addBoolInput_('Observe media quality changes',
             'streaming.observeQualityChanges')
         .addNumberInput_('Max Variant Disabled Time',
@@ -643,7 +644,9 @@ shakaDemo.Config = class {
             'Codec Switching Strategy',
             'mediaSource.codecSwitchingStrategy',
             strategyOptions,
-            strategyOptionsNames);
+            strategyOptionsNames)
+        .addBoolInput_('Dispatch all emsg boxes',
+            'mediaSource.dispatchAllEmsgBoxes');
   }
 
   /** @private */
@@ -689,7 +692,9 @@ shakaDemo.Config = class {
         .addArrayStringInput_('Preferred video codecs',
             'preferredVideoCodecs')
         .addArrayStringInput_('Preferred audio codecs',
-            'preferredAudioCodecs');
+            'preferredAudioCodecs')
+        .addArrayStringInput_('Preferred text formats',
+            'preferredTextFormats');
   }
 
   /** @private */

@@ -1,4 +1,4 @@
-name: Build and Test PR
+name: Build and Test
 
 on:
   pull_request: # Trigger for pull requests.
@@ -11,12 +11,15 @@ on:
       ref:
         description: "The ref to build and test."
         required: false
+  schedule:
+    # Run every night at midnight PST / 8am UTC, testing against the main branch.
+    - cron: '0 8 * * *'
 
 # If another instance of this workflow is started for the same PR, cancel the
 # old one.  If a PR is updated and a new test run is started, the old test run
 # will be cancelled automatically to conserve resources.
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.ref || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.number || inputs.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -64,12 +67,11 @@ jobs:
             browser: Chrome
           - os: macos-13
             browser: Edge
-          - os: macos-13
-            browser: Opera
 
           - os: macos-latest
+            browser: Opera
+          - os: macos-latest
             browser: Firefox
-
           - os: macos-latest
             browser: Safari
           - os: macos-latest
@@ -99,6 +101,7 @@ jobs:
       # installed. Otherwise, the browser might not support some codecs that the
       # tests assume will be supported.
       - name: Install FFmpeg
+        timeout-minutes: 5
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox'
         run: sudo apt -y update && sudo apt -y install ffmpeg
 
@@ -114,6 +117,7 @@ jobs:
       # with rm -rf and cp, this will fail.  Safari may be on a read-only
       # filesystem.
       - name: Install old Safari to home directory
+        timeout-minutes: 5
         if: matrix.os == 'macos-latest' && matrix.browser == 'Safari-old'
         run: |
           # Download Safari 15
@@ -133,30 +137,37 @@ jobs:
       # causing many of our test scenarios to fail.  Deleting "Chrome for
       # Testing" fixes this.
       - name: 'Delete "Chrome for Testing" on Mac'
+        timeout-minutes: 5
         if: matrix.os == 'macos-13' && matrix.browser == 'Chrome'
         run: sudo rm -rf /Applications/Google\ Chrome\ for\ Testing.app
       - name: 'Overwrite "Chrome for Testing" on Windows'
+        timeout-minutes: 5
         if: matrix.os == 'windows-latest' && matrix.browser == 'Chrome'
         shell: bash
         run: choco install -y googlechrome --ignore-checksums
 
       - name: 'Install Opera on Ubuntu'
+        timeout-minutes: 5
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Opera'
         run: sudo apt -y update && sudo apt -y install snapd && sudo snap install opera
 
       - name: 'Install Opera on Windows'
+        timeout-minutes: 5
         if: matrix.os == 'windows-latest' && matrix.browser == 'Opera'
         run: choco install -y opera --ignore-checksums --params '"/NoAutostart /NoDesktopShortcut /NoTaskbarShortcut"'
 
       # Firefox, Edge and Opera might be missing on Mac CI images.
       - name: 'Install Firefox on Mac'
+        timeout-minutes: 5
         if: matrix.os == 'macos-latest' && matrix.browser == 'Firefox'
         run: brew install --cask firefox
       - name: 'Install Edge on Mac'
+        timeout-minutes: 5
         if: matrix.os == 'macos-13' && matrix.browser == 'Edge'
         run: brew install --cask microsoft-edge
       - name: 'Install Opera on Mac'
-        if: matrix.os == 'macos-13' && matrix.browser == 'Opera'
+        timeout-minutes: 5
+        if: matrix.os == 'macos-latest' && matrix.browser == 'Opera'
         run: brew install --cask opera
 
       # Some CI images (self-hosted or otherwise) don't have the minimum Java
@@ -167,6 +178,7 @@ jobs:
           java-version: 11
 
       - name: Build Player
+        timeout-minutes: 10
         run: python build/all.py
 
       - name: Test Player

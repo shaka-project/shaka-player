@@ -33,6 +33,9 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
+    /** @private {boolean} */
+    this.isAirPlay_ = shaka.util.Platform.isSafari();
+
     /** @private {!HTMLButtonElement} */
     this.remoteButton_ = shaka.util.Dom.createButton();
     this.remoteButton_.classList.add('shaka-remote-button');
@@ -42,12 +45,9 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     /** @private {!HTMLElement} */
     this.remoteIcon_ = shaka.util.Dom.createHTMLElement('i');
     this.remoteIcon_.classList.add('material-icons-round');
-    let icon = shaka.ui.Enums.MaterialDesignIcons.CAST;
-    const safariVersion = shaka.util.Platform.safariVersion();
-    if (safariVersion && safariVersion >= 13) {
-      icon = shaka.ui.Enums.MaterialDesignIcons.AIRPLAY;
-    }
-    this.remoteIcon_.textContent = icon;
+    this.remoteIcon_.textContent = this.isAirPlay_ ?
+        shaka.ui.Enums.MaterialDesignIcons.AIRPLAY :
+        shaka.ui.Enums.MaterialDesignIcons.CAST;
     this.remoteButton_.appendChild(this.remoteIcon_);
 
     const label = shaka.util.Dom.createHTMLElement('label');
@@ -95,21 +95,25 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
 
       this.eventManager.listen(this.video.remote, 'connect', () => {
         this.updateRemoteState_();
+        this.updateIcon_();
       });
 
       this.eventManager.listen(this.video.remote, 'connecting', () => {
         this.updateRemoteState_();
+        this.updateIcon_();
       });
 
       this.eventManager.listen(this.video.remote, 'disconnect', () => {
         this.updateRemoteState_();
+        this.updateIcon_();
       });
 
       this.eventManager.listen(this.player, 'loaded', () => {
         this.updateRemoteState_();
       });
 
-      this.updateRemoteState_();
+      this.updateRemoteState_(/* force= */ true);
+      this.updateIcon_();
     }
   }
 
@@ -125,9 +129,10 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
   }
 
   /**
+   * @param {boolean=} force
    * @private
    */
-  async updateRemoteState_() {
+  async updateRemoteState_(force = false) {
     if (this.controls.getCastProxy().canCast() &&
         this.controls.isCastAllowed()) {
       shaka.ui.Utils.setDisplay(this.remoteButton_, false);
@@ -135,14 +140,20 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         this.video.remote.cancelWatchAvailability(this.callbackId_);
         this.callbackId_ = -1;
       }
-    } else if (this.video.remote.state == 'disconnected') {
+    } else if (this.video.remote.state == 'disconnected' || force) {
       const handleAvailabilityChange = (availability) => {
         if (this.player) {
           const disableRemote = this.video.disableRemotePlayback;
-          const loadMode = this.player.getLoadMode();
-          const srcMode = loadMode == shaka.Player.LoadMode.SRC_EQUALS;
+          let canCast = true;
+          if (shaka.util.Platform.isSafari()) {
+            const loadMode = this.player.getLoadMode();
+            const mseMode = loadMode == shaka.Player.LoadMode.MEDIA_SOURCE;
+            if (mseMode && this.player.getManifestType() != 'HLS') {
+              canCast = false;
+            }
+          }
           shaka.ui.Utils.setDisplay(
-              this.remoteButton_, srcMode && availability && !disableRemote);
+              this.remoteButton_, canCast && availability && !disableRemote);
         } else {
           shaka.ui.Utils.setDisplay(this.remoteButton_, false);
         }
@@ -175,13 +186,27 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
    */
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
-    let text = this.localization.resolve(LocIds.CAST);
-    const safariVersion = shaka.util.Platform.safariVersion();
-    if (safariVersion && safariVersion >= 13) {
-      text = this.localization.resolve(LocIds.AIRPLAY);
-    }
+    const text = this.isAirPlay_ ?
+        this.localization.resolve(LocIds.AIRPLAY) :
+        this.localization.resolve(LocIds.CAST);
     this.remoteButton_.ariaLabel = text;
     this.remoteNameSpan_.textContent = text;
+  }
+
+  /**
+   * @private
+   */
+  updateIcon_() {
+    if (this.isAirPlay_) {
+      return;
+    }
+    if (this.video.remote.state == 'disconnected') {
+      this.remoteIcon_.textContent =
+          shaka.ui.Enums.MaterialDesignIcons.CAST;
+    } else {
+      this.remoteIcon_.textContent =
+          shaka.ui.Enums.MaterialDesignIcons.EXIT_CAST;
+    }
   }
 };
 

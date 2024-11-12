@@ -7,6 +7,7 @@
 
 goog.provide('shaka.ui.FullscreenButton');
 
+goog.require('shaka.ads.Utils');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -67,6 +68,14 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(this.localVideo_, 'loadeddata', () => {
+      this.checkSupport_();
+    });
+
+    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_STARTED, () => {
+      this.checkSupport_();
+    });
+
+    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_STOPPED, () => {
       this.checkSupport_();
     });
   }

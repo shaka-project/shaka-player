@@ -1074,7 +1074,6 @@ shaka.extern.xml.Node;
  *   manifestPreprocessor: function(!Element),
  *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
- *   enableAudioGroups: boolean,
  *   multiTypeVariantsAllowed: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
  *   updatePeriod: number,
@@ -1155,11 +1154,6 @@ shaka.extern.xml.Node;
  *   "sequence mode" (ignoring their internal timestamps).
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {boolean} enableAudioGroups
- *   If set, audio streams will be grouped and filtered by their parent
- *   adaptation set ID.
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {boolean} multiTypeVariantsAllowed
  *   If true, the manifest parser will create variants that have multiple
  *   mimeTypes or codecs for video or for audio if there is no other choice.
@@ -1179,10 +1173,10 @@ shaka.extern.xml.Node;
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {number} updatePeriod
- *   Override the minimumUpdatePeriod of the manifest. The value is in second
- *   if the value is greater than the minimumUpdatePeriod, it will update the
- *   manifest less frequently. if you update the value during for a dynamic
- *   manifest, it will directly trigger a new download of the manifest
+ *   Override the minimumUpdatePeriod of the manifest. The value is in seconds.
+ *   If the value is greater than the minimumUpdatePeriod, it will update the
+ *   manifest less frequently. If you update the value during for a dynamic
+ *   manifest, it will directly trigger a new download of the manifest.
  *   <br>
  *   Defaults to <code>-1</code>.
  * @property {boolean} enableFastSwitching
@@ -1208,7 +1202,8 @@ shaka.extern.DashManifestConfiguration;
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
- *   allowLowLatencyByteRangeOptimization: boolean
+ *   allowLowLatencyByteRangeOptimization: boolean,
+ *   updatePeriod: number
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -1294,6 +1289,14 @@ shaka.extern.DashManifestConfiguration;
  *   https://www.akamai.com/blog/performance/-using-ll-hls-with-byte-range-addressing-to-achieve-interoperabi
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {number} updatePeriod
+ *   Override the update period of the playlist. The value is in seconds.
+ *   If the value is less than 0, the period will be determined based on the
+ *   segment length.  If the value is greater than 0, it will update the target
+ *   duration.  If you update the value during the live, it will directly
+ *   trigger a new download of the manifest.
+ *   <br>
+ *   Defaults to <code>-1</code>.
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
@@ -1541,6 +1544,7 @@ shaka.extern.LiveSyncConfiguration;
  *   gapJumpTimerTime: number,
  *   durationBackoff: number,
  *   safeSeekOffset: number,
+ *   safeSeekEndOffset: number,
  *   stallEnabled: boolean,
  *   stallThreshold: number,
  *   stallSkip: number,
@@ -1553,7 +1557,6 @@ shaka.extern.LiveSyncConfiguration;
  *   minBytesForProgressEvents: number,
  *   preferNativeHls: boolean,
  *   updateIntervalSeconds: number,
- *   dispatchAllEmsgBoxes: boolean,
  *   observeQualityChanges: boolean,
  *   maxDisabledTime: number,
  *   segmentPrefetchLimit: number,
@@ -1657,6 +1660,13 @@ shaka.extern.LiveSyncConfiguration;
  *   bandwidth scenarios.
  *   <br>
  *   Defaults to <code>5</code>.
+ * @property {number} safeSeekEndOffset
+ *   The amount of seconds that should be added when repositioning the playhead
+ *   after falling out of the seakable end range. This is helpful for live
+ *   stream with a lot of GAP. This will reposition the playback in the past
+ *   and avoid to be block at the edge and buffer at the next GAP
+ *   <br>
+ *   Defaults to <code>0</code>.
  * @property {boolean} stallEnabled
  *   When set to <code>true</code>, the stall detector logic will run.  If the
  *   playhead stops moving for <code>stallThreshold</code> seconds, the player
@@ -1728,10 +1738,6 @@ shaka.extern.LiveSyncConfiguration;
  *   The minimum number of seconds to see if the manifest has changes.
  *   <br>
  *   Defaults to <code>1</code>.
- * @property {boolean} dispatchAllEmsgBoxes
- *   If true, all emsg boxes are parsed and dispatched.
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {boolean} observeQualityChanges
  *   If true, monitor media quality changes and emit
  *   <code>shaka.Player.MediaQualityChangedEvent</code>.
@@ -1839,7 +1845,8 @@ shaka.extern.StreamingConfiguration;
  *   addExtraFeaturesToSourceBuffer: function(string): string,
  *   forceTransmux: boolean,
  *   insertFakeEncryptionInInit: boolean,
- *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback
+ *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback,
+ *   dispatchAllEmsgBoxes: boolean
  * }}
  *
  * @description
@@ -1878,6 +1885,10 @@ shaka.extern.StreamingConfiguration;
  *    A callback called for each cue after it is parsed, but right before it
  *    is appended to the presentation.
  *    Gives a chance for client-side editing of cue text, cue timing, etc.
+ * @property {boolean} dispatchAllEmsgBoxes
+ *   If true, all emsg boxes are parsed and dispatched.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;
@@ -2297,6 +2308,7 @@ shaka.extern.TextDisplayerConfiguration;
  *   preferredTextRole: string,
  *   preferredVideoCodecs: !Array.<string>,
  *   preferredAudioCodecs: !Array.<string>,
+ *   preferredTextFormats: !Array.<string>,
  *   preferredAudioChannelCount: number,
  *   preferredVideoHdrLevel: string,
  *   preferredVideoLayout: string,
@@ -2374,6 +2386,10 @@ shaka.extern.TextDisplayerConfiguration;
  *   Defaults to <code>[]</code>.
  * @property {!Array.<string>} preferredAudioCodecs
  *   The list of preferred audio codecs, in order of highest to lowest priority.
+ *   <br>
+ *   Defaults to <code>[]</code>.
+ * @property {!Array.<string>} preferredTextFormats
+ *   The list of preferred text formats, in order of highest to lowest priority.
  *   <br>
  *   Defaults to <code>[]</code>.
  * @property {number} preferredAudioChannelCount

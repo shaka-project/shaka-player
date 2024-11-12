@@ -68,7 +68,7 @@ jobs:
           # If "sha" is given, it overrides PR.  If neither is given, we fall
           # back to testing "main".
           sha: ${{ inputs.sha }}
-          ref: ${{ inputs.pr && format('refs/pull/{0}/head', inputs.pr) || 'refs/heads/main' }}
+          ref: ${{ inputs.pr && format('refs/pull/{0}/merge', inputs.pr) || 'refs/heads/main' }}
 
   # Configure the build matrix based on our grid's YAML config.
   # The matrix contents will be computed by this first job and deserialized
@@ -211,7 +211,9 @@ jobs:
 
     # Only one run of this job is allowed at a time, since it uses physical
     # resources in our lab.
-    concurrency: selenium-lab-${{ matrix.browser }}
+    concurrency:
+      group: selenium-lab-${{ matrix.browser }}
+      cancel-in-progress: false
 
     needs: [compute-sha, build-shaka, matrix-config]
     strategy:

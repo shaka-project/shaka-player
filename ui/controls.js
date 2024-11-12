@@ -29,6 +29,7 @@ goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IDestroyable');
+goog.require('shaka.util.Platform');
 goog.require('shaka.util.Timer');
 
 goog.requireType('shaka.Player');
@@ -605,15 +606,37 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @return {boolean}
+   * @private
+   */
+  shouldUseDocumentFullscreen_() {
+    if (!document.fullscreenEnabled) {
+      return false;
+    }
+    // When the preferVideoFullScreenInVisionOS configuration value applies,
+    // we avoid using document fullscreen, even if it is available.
+    const video = /** @type {HTMLVideoElement} */(this.localVideo_);
+    if (video.webkitSupportsFullscreen) {
+      if (this.config_.preferVideoFullScreenInVisionOS &&
+          shaka.util.Platform.isVisionOS()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @return {boolean}
    * @export
    */
   isFullScreenSupported() {
-    if (document.fullscreenEnabled) {
+    if (this.shouldUseDocumentFullscreen_()) {
       return true;
     }
-    const video = /** @type {HTMLVideoElement} */(this.localVideo_);
-    if (video.webkitSupportsFullscreen) {
-      return true;
+    if (!this.ad_ || !this.ad_.isUsingAnotherMediaElement()) {
+      const video = /** @type {HTMLVideoElement} */(this.localVideo_);
+      if (video.webkitSupportsFullscreen) {
+        return true;
+      }
     }
     return false;
   }
@@ -623,7 +646,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isFullScreenEnabled() {
-    if (document.fullscreenEnabled) {
+    if (this.shouldUseDocumentFullscreen_()) {
       return !!document.fullscreenElement;
     }
     const video = /** @type {HTMLVideoElement} */(this.localVideo_);
@@ -636,7 +659,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   async enterFullScreen_() {
     try {
-      if (document.fullscreenEnabled) {
+      if (this.shouldUseDocumentFullscreen_()) {
         if (document.pictureInPictureElement) {
           await document.exitPictureInPicture();
         }
@@ -667,7 +690,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   async exitFullScreen_() {
-    if (document.fullscreenEnabled) {
+    if (this.shouldUseDocumentFullscreen_()) {
       if (screen.orientation) {
         screen.orientation.unlock();
       }
@@ -1235,12 +1258,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.adManager_, shaka.ads.Utils.AD_STARTED, (e) => {
           this.ad_ = (/** @type {!Object} */ (e))['ad'];
           this.showAdUI();
+          this.onBufferingStateChange_();
         });
 
     this.eventManager_.listen(
         this.adManager_, shaka.ads.Utils.AD_STOPPED, () => {
           this.ad_ = null;
           this.hideAdUI();
+          this.onBufferingStateChange_();
         });
 
     if (screen.orientation) {
@@ -1264,7 +1289,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           callback(details);
         });
       } catch (error) {
-        shaka.log.warning(
+        shaka.log.debug(
             `The "${type}" media session action is not supported.`);
       }
     };
@@ -1289,7 +1314,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           });
         }
       } catch (error) {
-        shaka.log.warning(
+        shaka.log.v2(
             'setPositionState in media session is not supported.');
       }
     };
@@ -1359,9 +1384,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
         imageUrl = payload['data'];
       }
-      if (navigator.mediaSession.metadata && title) {
-        const metadata = navigator.mediaSession.metadata;
-        metadata.title = title;
+      if (title) {
+        let metadata = {
+          title: title,
+          artwork: [],
+        };
+        if (navigator.mediaSession.metadata) {
+          metadata = navigator.mediaSession.metadata;
+          metadata.title = title;
+        }
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
       }
       if (imageUrl) {
@@ -1369,11 +1400,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (imageUrl != video.poster) {
           video.poster = imageUrl;
         }
+        let metadata = {
+          title: '',
+          artwork: [{src: imageUrl}],
+        };
         if (navigator.mediaSession.metadata) {
-          const metadata = navigator.mediaSession.metadata;
+          metadata = navigator.mediaSession.metadata;
           metadata.artwork = [{src: imageUrl}];
-          navigator.mediaSession.metadata = new MediaMetadata(metadata);
         }
+        navigator.mediaSession.metadata = new MediaMetadata(metadata);
       }
     });
   }
@@ -1463,7 +1498,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     // Use the cursor specified in the CSS file.
-    this.videoContainer_.style.cursor = '';
+    this.videoContainer_.classList.remove('no-cursor');
 
     this.recentMouseMovement_ = true;
 
@@ -1516,7 +1551,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   onMouseStill_() {
     // Hide the cursor.
-    this.videoContainer_.style.cursor = 'none';
+    this.videoContainer_.classList.add('no-cursor');
     this.recentMouseMovement_ = false;
     this.computeOpacity();
   }
@@ -1741,6 +1776,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   onBufferingStateChange_() {
     if (!this.enabled_) {
+      return;
+    }
+
+    if (this.ad_ && this.ad_.isClientRendering() && this.ad_.isLinear()) {
+      shaka.ui.Utils.setDisplay(this.spinnerContainer_, false);
       return;
     }
 
