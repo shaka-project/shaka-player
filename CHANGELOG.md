@@ -1,5 +1,30 @@
 # Changelog
 
+## [4.9.31](https://github.com/shaka-project/shaka-player/compare/v4.9.30...v4.9.31) (2024-11-12)
+
+
+### Bug Fixes
+
+* **AirPlay:** Prefer Playback Remote API for closeOpenSessions ([#7500](https://github.com/shaka-project/shaka-player/issues/7500)) ([4e89d83](https://github.com/shaka-project/shaka-player/commit/4e89d8305dee61aa247792082b07a2b085f096e0))
+* **AirPlay:** Show AirPlay button when starting the playback with AirPlay ([#7515](https://github.com/shaka-project/shaka-player/issues/7515)) ([fffe2ce](https://github.com/shaka-project/shaka-player/commit/fffe2ce310a82637046864b342d32777e4981816))
+* Allow streaming again when we reset MSE ([#7495](https://github.com/shaka-project/shaka-player/issues/7495)) ([23a8ea9](https://github.com/shaka-project/shaka-player/commit/23a8ea979db86251be5fd83658c7cba5818c5d28))
+* **DASH:** Exclude text segments when calculating max segment size ([#7564](https://github.com/shaka-project/shaka-player/issues/7564)) ([7e669c0](https://github.com/shaka-project/shaka-player/commit/7e669c05ee84dfb944c8d43b1185a0ce6cc53c36))
+* Do not reuse the same tsParser for different contentType ([#7563](https://github.com/shaka-project/shaka-player/issues/7563)) ([0534a75](https://github.com/shaka-project/shaka-player/commit/0534a7543cb604037c2736bfb40398bae3476298))
+* Fix disable stream when no manifest ([#7497](https://github.com/shaka-project/shaka-player/issues/7497)) ([3fc7ca4](https://github.com/shaka-project/shaka-player/commit/3fc7ca4b561b4b32612b5be0fc4fdf6de017945a))
+* Fix metadata timing when using TS ([#7478](https://github.com/shaka-project/shaka-player/issues/7478)) ([6d7fbbe](https://github.com/shaka-project/shaka-player/commit/6d7fbbe100af3139077e591db734487331dd9ae1))
+* Fix reset MSE to last independent segment ([#7494](https://github.com/shaka-project/shaka-player/issues/7494)) ([d666fbf](https://github.com/shaka-project/shaka-player/commit/d666fbf8b56395f65f77c16997551b40bef5f9fb))
+* Fix select HLG tracks when using AUTO hdr level ([#7470](https://github.com/shaka-project/shaka-player/issues/7470)) ([8284eec](https://github.com/shaka-project/shaka-player/commit/8284eec22be4417902ff61b4efe0ea8bbe057765))
+* Fix support of getAllThumbnails when using shaka.dash.TimelineSegmentIndex ([#7508](https://github.com/shaka-project/shaka-player/issues/7508)) ([e3d23cd](https://github.com/shaka-project/shaka-player/commit/e3d23cdd015971dd9435bc6488032a65dbb29c4e))
+* Fix Windows detection ([#7476](https://github.com/shaka-project/shaka-player/issues/7476)) ([7e279fa](https://github.com/shaka-project/shaka-player/commit/7e279fae8d0ccaba58863d436c61894610813b86))
+* Install polyfills for Comcast X1 devices ([#7529](https://github.com/shaka-project/shaka-player/issues/7529)) ([5fde258](https://github.com/shaka-project/shaka-player/commit/5fde2583c217019ea9b93dcae9fdf8978a095708))
+* **MSS:** Don't allow prefetch segments with self-generated data ([#7485](https://github.com/shaka-project/shaka-player/issues/7485)) ([00f4763](https://github.com/shaka-project/shaka-player/commit/00f4763392e913bb85070782b14b8e8be66469e2))
+* **MSS:** Fix playback of some MSS streams ([#7517](https://github.com/shaka-project/shaka-player/issues/7517)) ([4c4f7bf](https://github.com/shaka-project/shaka-player/commit/4c4f7bf7a497505fd65cd844027cb7f040cc0cb6))
+* **MSS:** Fix timeline repetitions ([#7484](https://github.com/shaka-project/shaka-player/issues/7484)) ([9fea5f6](https://github.com/shaka-project/shaka-player/commit/9fea5f634a78a1a7c2e931bfba568368068f4493))
+* only use lastSegmentReference for knowing if variant changed ([#7537](https://github.com/shaka-project/shaka-player/issues/7537)) ([2650a11](https://github.com/shaka-project/shaka-player/commit/2650a11843bdc87f918a30782832fef94beeaf34))
+* **UI:** Don't enable StatisticsButton when create overflow menu ([#7481](https://github.com/shaka-project/shaka-player/issues/7481)) ([0e1c42c](https://github.com/shaka-project/shaka-player/commit/0e1c42ccd5222504a388e17fdf301bc162a50558))
+* **UI:** Fix remote button availability and icon ([#7513](https://github.com/shaka-project/shaka-player/issues/7513)) ([ae78ff4](https://github.com/shaka-project/shaka-player/commit/ae78ff48d986962ebf76cfafcda4238342e0bea4))
+* **UI:** Hidden cursor correctly ([#7464](https://github.com/shaka-project/shaka-player/issues/7464)) ([c2d8945](https://github.com/shaka-project/shaka-player/commit/c2d8945e3d88013180a65cfeb15048ae84503fe8))
+
 ## [4.9.30](https://github.com/shaka-project/shaka-player/compare/v4.9.29...v4.9.30) (2024-10-21)
 
 
