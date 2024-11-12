@@ -1,5 +1,33 @@
 # Changelog
 
+## [4.11.12](https://github.com/shaka-project/shaka-player/compare/v4.11.11...v4.11.12) (2024-11-12)
+
+
+### Bug Fixes
+
+* **Ads:** Allow play interstitials on iOS fullscreen ([#7538](https://github.com/shaka-project/shaka-player/issues/7538)) ([5a9f4ed](https://github.com/shaka-project/shaka-player/commit/5a9f4ed43fb6132c5ca3ba1020a49b2f39eeba6f))
+* **Ads:** Allow play interstitials using single video element when use native HLS ([#7550](https://github.com/shaka-project/shaka-player/issues/7550)) ([9de9410](https://github.com/shaka-project/shaka-player/commit/9de94109ac7775d496b63bc5af70229fff8f2862))
+* **Ads:** Fix duplicate Ads when playing interstitials through native HLS player ([#7527](https://github.com/shaka-project/shaka-player/issues/7527)) ([12e8b03](https://github.com/shaka-project/shaka-player/commit/12e8b0368e6df0f7260eb2388010474b9fde9b94))
+* **AirPlay:** Don't show subtitles on the player when using AirPlay ([#7514](https://github.com/shaka-project/shaka-player/issues/7514)) ([9987e5a](https://github.com/shaka-project/shaka-player/commit/9987e5aac785ff5daef17a66c43d58bdd489bc0c))
+* **AirPlay:** Show AirPlay button when starting the playback with AirPlay ([#7515](https://github.com/shaka-project/shaka-player/issues/7515)) ([400e47d](https://github.com/shaka-project/shaka-player/commit/400e47d4dafb2cfa9623c06d0eb9816194239911))
+* Allow show subtitles using webkit Fullscreen API when playing native HLS ([#7539](https://github.com/shaka-project/shaka-player/issues/7539)) ([185a6fc](https://github.com/shaka-project/shaka-player/commit/185a6fc0c7409f7427e9123816e7aed97355d2ef))
+* **DASH:** Exclude text segments when calculating max segment size ([#7564](https://github.com/shaka-project/shaka-player/issues/7564)) ([d20a870](https://github.com/shaka-project/shaka-player/commit/d20a8709e9a5647b62723de4f830e65e9d45350e))
+* Do not reuse the same tsParser for different contentType ([#7563](https://github.com/shaka-project/shaka-player/issues/7563)) ([8b0c1eb](https://github.com/shaka-project/shaka-player/commit/8b0c1ebef644007954797a6fcf02be4fdb748c18))
+* Install polyfills for Comcast X1 devices ([#7529](https://github.com/shaka-project/shaka-player/issues/7529)) ([30fd3d7](https://github.com/shaka-project/shaka-player/commit/30fd3d75b3e68205d609ce5b5f0790de4872793c))
+* **MSS:** Fix playback of some MSS streams ([#7517](https://github.com/shaka-project/shaka-player/issues/7517)) ([b57515f](https://github.com/shaka-project/shaka-player/commit/b57515f10cf64242ea59867912e711b467c8c5eb))
+* only use lastSegmentReference for knowing if variant changed ([#7537](https://github.com/shaka-project/shaka-player/issues/7537)) ([987c5a4](https://github.com/shaka-project/shaka-player/commit/987c5a46a1bbfc67c11a3d21379cf88ff9c7be3f))
+* **UI:** Fix "Live" label in some languages ([#7560](https://github.com/shaka-project/shaka-player/issues/7560)) ([02b6133](https://github.com/shaka-project/shaka-player/commit/02b6133021a7df07de27fd31d6b00355f7d10ae1))
+* **UI:** Fix name for Dolby Digital Plus ([#7541](https://github.com/shaka-project/shaka-player/issues/7541)) ([b129de3](https://github.com/shaka-project/shaka-player/commit/b129de334f23cbcd46053320b35ec7f73ace5952))
+* **UI:** Fix remote button availability and icon ([#7513](https://github.com/shaka-project/shaka-player/issues/7513)) ([b98ece1](https://github.com/shaka-project/shaka-player/commit/b98ece18a397675b0fdcec3c044adf1ffe935dd0))
+* **UI:** Fix set MediaSession info when no previous Metadata ([#7521](https://github.com/shaka-project/shaka-player/issues/7521)) ([07abb2a](https://github.com/shaka-project/shaka-player/commit/07abb2af2137a19f72bd38d97adbd724704cb455))
+* **WebVTT:** Fix display italic subtitles with end align ([#7559](https://github.com/shaka-project/shaka-player/issues/7559)) ([b8b0776](https://github.com/shaka-project/shaka-player/commit/b8b077607714e2823dcbc77d353dee7210472de8))
+
+
+### Performance Improvements
+
+* **Ads:** Reduce latency for interstitial to start playing ([#7525](https://github.com/shaka-project/shaka-player/issues/7525)) ([9a40848](https://github.com/shaka-project/shaka-player/commit/9a408482ed47c96d91f3cdc359900a70e3beeb2e))
+* **Ads:** Reduce latency for interstitial to start playing ([#7528](https://github.com/shaka-project/shaka-player/issues/7528)) ([fb0d76d](https://github.com/shaka-project/shaka-player/commit/fb0d76d1a493fe5b6b6f5839ea42e3b75952bcd5))
+
 ## [4.11.11](https://github.com/shaka-project/shaka-player/compare/v4.11.10...v4.11.11) (2024-10-28)
 
 
