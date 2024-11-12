@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.10.26](https://github.com/shaka-project/shaka-player/compare/v4.10.25...v4.10.26) (2024-11-12)
+
+
+### Bug Fixes
+
+* **Ads:** Allow play interstitials on iOS fullscreen ([#7538](https://github.com/shaka-project/shaka-player/issues/7538)) ([a503e9b](https://github.com/shaka-project/shaka-player/commit/a503e9bae1697ce1d62dd4036ec3b401d00bc864))
+* **AirPlay:** Show AirPlay button when starting the playback with AirPlay ([#7515](https://github.com/shaka-project/shaka-player/issues/7515)) ([5cc8292](https://github.com/shaka-project/shaka-player/commit/5cc8292ff2c2342f3948c49bb85aa07ff5b7e041))
+* **DASH:** Exclude text segments when calculating max segment size ([#7564](https://github.com/shaka-project/shaka-player/issues/7564)) ([08b907c](https://github.com/shaka-project/shaka-player/commit/08b907c41fd23189d463f7b6c9086bb2ace3545b))
+* Install polyfills for Comcast X1 devices ([#7529](https://github.com/shaka-project/shaka-player/issues/7529)) ([54f9b34](https://github.com/shaka-project/shaka-player/commit/54f9b343ac22892009d4ad03ffc6d43a5bf0c486))
+* **MSS:** Fix playback of some MSS streams ([#7517](https://github.com/shaka-project/shaka-player/issues/7517)) ([6659221](https://github.com/shaka-project/shaka-player/commit/6659221d3f1375f9affc5a9129637fb60fe15c25))
+* only use lastSegmentReference for knowing if variant changed ([#7537](https://github.com/shaka-project/shaka-player/issues/7537)) ([ced97be](https://github.com/shaka-project/shaka-player/commit/ced97bec624d1ad8d436fe28759767462cf5cfdb))
+* **UI:** Fix "Live" label in some languages ([#7560](https://github.com/shaka-project/shaka-player/issues/7560)) ([12d2cce](https://github.com/shaka-project/shaka-player/commit/12d2cce34ac4c082621c3e15f167fd36b52af555))
+* **UI:** Fix name for Dolby Digital Plus ([#7541](https://github.com/shaka-project/shaka-player/issues/7541)) ([8701876](https://github.com/shaka-project/shaka-player/commit/870187672c23b11aecd69be219fe07713a54e22c))
+* **UI:** Fix remote button availability and icon ([#7513](https://github.com/shaka-project/shaka-player/issues/7513)) ([af59dad](https://github.com/shaka-project/shaka-player/commit/af59dad457a1854b968aa5b1fb6b5b415334af66))
+
 ## [4.10.25](https://github.com/shaka-project/shaka-player/compare/v4.10.24...v4.10.25) (2024-10-28)
 
 
