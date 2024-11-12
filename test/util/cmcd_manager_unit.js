@@ -65,11 +65,7 @@ describe('CmcdManager', () => {
     rtpSafetyFactor: 5,
     useHeaders: false,
     includeKeys: [],
-    reporting: {
-      requestMode: {
-        version: 1,
-      },
-    },
+    version: 1,
   };
 
   function createCmcdConfig(cfg = {}) {
@@ -516,11 +512,7 @@ describe('CmcdManager', () => {
           // Set live to true to enable ltc
           playerInterface.isLive = () => true;
           cmcdManager = createCmcdManager({
-            reporting: {
-              requestMode: {
-                version: 2,
-              },
-            },
+            version: 2,
             includeKeys: ['ltc', 'msd', 'v'],
           });
           networkingEngine = createNetworkingEngine(cmcdManager);
@@ -543,11 +535,7 @@ describe('CmcdManager', () => {
               playerInterface.isLive = () => true;
 
               const cmcdManagerTmp = createCmcdManager({
-                reporting: {
-                  requestMode: {
-                    version: 1,
-                  },
-                },
+                version: 1,
                 includeKeys: ['ltc', 'msd'],
               });
               networkingEngine = createNetworkingEngine(cmcdManagerTmp);
@@ -567,11 +555,7 @@ describe('CmcdManager', () => {
         it('returns cmcd v2 data in header if version is 2', async () => {
           playerInterface.isLive = () => true;
           cmcdManager = createCmcdManager({
-            reporting: {
-              requestMode: {
-                version: 2,
-              },
-            },
+            version: 2,
             includeKeys: ['ltc', 'msd'],
             useHeaders: true,
           });
@@ -591,11 +575,7 @@ describe('CmcdManager', () => {
             async () => {
               playerInterface.isLive = () => true;
               cmcdManager = createCmcdManager({
-                reporting: {
-                  requestMode: {
-                    version: 1,
-                  },
-                },
+                version: 1,
                 includeKeys: ['ltc', 'msd'],
                 useHeaders: true,
               });
