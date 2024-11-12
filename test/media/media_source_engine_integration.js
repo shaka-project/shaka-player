@@ -6,6 +6,7 @@
 
 describe('MediaSourceEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
   const Cue = shaka.text.Cue;
   const Util = shaka.test.Util;
   const presentationDuration = 840;
@@ -153,6 +154,10 @@ describe('MediaSourceEngine', () => {
 
   /** @type {!jasmine.Spy} */
   let onMetadata;
+  /** @type {!jasmine.Spy} */
+  let onEvent;
+  /** @type {!jasmine.Spy} */
+  let onManifestUpdate;
 
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
@@ -166,14 +171,17 @@ describe('MediaSourceEngine', () => {
     textDisplayer = new shaka.test.FakeTextDisplayer();
 
     onMetadata = jasmine.createSpy('onMetadata');
+    onEvent = jasmine.createSpy('onEvent');
+    onManifestUpdate = jasmine.createSpy('onManifestUpdate');
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
         textDisplayer,
         {
           getKeySystem: () => null,
-          onMetadata: shaka.test.Util.spyFunc(onMetadata),
-          onEvent: () => {},
+          onMetadata: Util.spyFunc(onMetadata),
+          onEvent: Util.spyFunc(onEvent),
+          onManifestUpdate: Util.spyFunc(onManifestUpdate),
         });
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine.configure(config);
@@ -725,5 +733,249 @@ describe('MediaSourceEngine', () => {
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
+  });
+
+  describe('embedded emsg boxes', () => {
+    // V0 box format
+    const emsgSegmentV0 = Uint8ArrayUtils.fromHex(
+        '0000003b656d736700000000666f6f3a6261723a637573746f6d646174617363' +
+        '68656d6500310000000001000000080000ffff0000000174657374');
+
+    // V1 box format
+    const emsgSegmentV1 = Uint8ArrayUtils.fromHex(
+        '0000003f656d7367010000000000000100000000000000080000ffff00000001' +
+        '666f6f3a6261723a637573746f6d64617461736368656d6500310074657374');
+
+    // V1 box format, non-zero start time
+    const emsgSegmentV1NonZeroStart = Uint8ArrayUtils.fromHex(
+        '0000003f656d7367010000000000000100000000000000120000ffff00000001' +
+        '666f6f3a6261723a637573746f6d64617461736368656d6500310074657374');
+
+    const dummyBox = Uint8ArrayUtils.fromHex('0000000c6672656501020304');
+
+    const emsgSegmentV0Twice =
+        Uint8ArrayUtils.concat(emsgSegmentV0, dummyBox, emsgSegmentV0);
+
+    // This is an 'emsg' box that contains a scheme of
+    // urn:mpeg:dash:event:2012 to indicate a manifest update.
+    const emsgSegmentV0ReloadManifest = Uint8ArrayUtils.fromHex(
+        '0000003a656d73670000000075726e3a6d7065673a646173683a6576656e743a' +
+        '3230313200000000003100000008000000ff0000000c74657374');
+
+    const reloadManifestSchemeUri = 'urn:mpeg:dash:event:2012';
+
+    // This is an 'emsg' box that contains a scheme of
+    // https://aomedia.org/emsg/ID to indicate a ID3 metadata.
+    const emsgSegmentV0ID3 = Uint8ArrayUtils.fromHex((
+      // 105 bytes  emsg box     v0, flags 0
+      '00 00 00 69  65 6d 73 67  00 00 00 00' +
+
+      // scheme id uri (13 bytes) 'https://aomedia.org/emsg/ID3'
+      '68 74 74 70  73 3a 2f 2f   61 6f 6d 65  64 69 61 2e' +
+      '6f 72 67 2f  65 6d 73 67   2f 49 44 33  00' +
+
+      // value (1 byte) ''
+      '00' +
+
+      // timescale (4 bytes) 49
+      '00 00 00 31' +
+
+      // presentation time delta (4 bytes) 8
+      '00 00 00 08' +
+
+      // event duration (4 bytes) 255
+      '00 00 00 ff' +
+
+      // id (4 bytes) 51
+      '00 00 00 33' +
+
+      // message data (47 bytes)
+      '49 44 33 03  00 40 00 00   00 1b 00 00  00 06 00 00' +
+      '00 00 00 02  54 58 58 58   00 00 00 07  e0 00 03 00' +
+      '53 68 61 6b  61 33 44 49   03 00 40 00  00 00 1b'
+    ).replace(/\s/g, ''));
+
+    const id3SchemeUri = 'https://aomedia.org/emsg/ID3';
+
+    const emsgObj = {
+      startTime: 8,
+      endTime: 0xffff + 8,
+      schemeIdUri: 'foo:bar:customdatascheme',
+      value: '1',
+      timescale: 1,
+      presentationTimeDelta: 8,
+      eventDuration: 0xffff,
+      id: 1,
+      messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74]),
+    };
+
+    const emsgObjWithOffset = {
+      startTime: -2,
+      endTime: 0xffff - 2,
+      schemeIdUri: 'foo:bar:customdatascheme',
+      value: '1',
+      timescale: 1,
+      presentationTimeDelta: -2,
+      eventDuration: 0xffff,
+      id: 1,
+      messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74]),
+    };
+
+    const initSegmentReference = new shaka.media.InitSegmentReference(
+        /* uris= */ () => [],
+        /* startByte= */ 0,
+        /* endByte= */ null);
+    initSegmentReference.timescale = 1;
+
+    const reference = new shaka.media.SegmentReference(
+        /* startTime= */ 0,
+        /* endTime= */ 1,
+        /* uris= */ () => [],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        initSegmentReference,
+        /* timestampOffset= */ -10,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
+
+    it('raises an event for registered embedded emsg boxes', () => {
+      const videoStream =
+          shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+      videoStream.emsgSchemeIdUris = [emsgObj.schemeIdUri];
+
+      mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO,
+          emsgSegmentV0,
+          reference,
+          videoStream,
+          /* mimeType= */ 'video/mp4');
+
+      expect(onEvent).toHaveBeenCalledTimes(1);
+
+      const event = onEvent.calls.argsFor(0)[0];
+      expect(event.detail).toEqual(emsgObj);
+    });
+
+    it('raises an event for registered embedded v1 emsg boxes', () => {
+      const videoStream =
+          shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+      videoStream.emsgSchemeIdUris = [emsgObjWithOffset.schemeIdUri];
+
+      mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO,
+          emsgSegmentV1,
+          reference,
+          videoStream,
+          /* mimeType= */ 'video/mp4');
+
+      expect(onEvent).toHaveBeenCalledTimes(1);
+
+      const event = onEvent.calls.argsFor(0)[0];
+      expect(event.detail).toEqual(emsgObjWithOffset);
+    });
+
+    it('raises multiple events', () => {
+      const videoStream =
+          shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+      videoStream.emsgSchemeIdUris = [emsgObj.schemeIdUri];
+
+      mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO,
+          emsgSegmentV0Twice,
+          reference,
+          videoStream,
+          /* mimeType= */ 'video/mp4');
+
+      expect(onEvent).toHaveBeenCalledTimes(2);
+    });
+
+    it('won\'t raise an event for an unregistered emsg box', () => {
+      const videoStream =
+          shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+
+      mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO,
+          emsgSegmentV0,
+          reference,
+          videoStream,
+          /* mimeType= */ 'video/mp4');
+
+      expect(onEvent).not.toHaveBeenCalled();
+    });
+
+    it('triggers manifest updates', () => {
+      const videoStream =
+          shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+      videoStream.emsgSchemeIdUris = [reloadManifestSchemeUri];
+
+      mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO,
+          emsgSegmentV0ReloadManifest,
+          reference,
+          videoStream,
+          /* mimeType= */ 'video/mp4');
+
+      expect(onEvent).not.toHaveBeenCalled();
+      expect(onManifestUpdate).toHaveBeenCalled();
+    });
+
+    it('triggers both emsg event and metadata event for ID3', () => {
+      const videoStream =
+          shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+      videoStream.emsgSchemeIdUris = [id3SchemeUri];
+
+      onEvent.and.callFake((emsgEvent) => {
+        expect(emsgEvent.type).toBe('emsg');
+      });
+
+      mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO,
+          emsgSegmentV0ID3,
+          reference,
+          videoStream,
+          /* mimeType= */ 'video/mp4');
+
+      expect(onEvent).toHaveBeenCalled();
+      expect(onMetadata).toHaveBeenCalled();
+    });
+
+    it('only triggers emsg event for ID3 if event canceled', () => {
+      const videoStream =
+          shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+      videoStream.emsgSchemeIdUris = [id3SchemeUri];
+
+      onEvent.and.callFake((emsgEvent) => {
+        expect(emsgEvent.type).toBe('emsg');
+        emsgEvent.preventDefault();
+      });
+
+      mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO,
+          emsgSegmentV0ID3,
+          reference,
+          videoStream,
+          /* mimeType= */ 'video/mp4');
+
+      expect(onEvent).toHaveBeenCalled();
+      expect(onMetadata).not.toHaveBeenCalled();
+    });
+
+    it('event start matches presentation time', () => {
+      const videoStream =
+          shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+      videoStream.emsgSchemeIdUris = [emsgObj.schemeIdUri];
+
+      mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO,
+          emsgSegmentV1NonZeroStart,
+          reference,
+          videoStream,
+          /* mimeType= */ 'video/mp4');
+
+      expect(onEvent).toHaveBeenCalledTimes(1);
+
+      const event = onEvent.calls.argsFor(0)[0];
+      expect(event.detail).toEqual(emsgObj);
+    });
   });
 });

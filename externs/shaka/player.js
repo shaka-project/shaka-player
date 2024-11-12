@@ -1557,7 +1557,6 @@ shaka.extern.LiveSyncConfiguration;
  *   minBytesForProgressEvents: number,
  *   preferNativeHls: boolean,
  *   updateIntervalSeconds: number,
- *   dispatchAllEmsgBoxes: boolean,
  *   observeQualityChanges: boolean,
  *   maxDisabledTime: number,
  *   segmentPrefetchLimit: number,
@@ -1739,10 +1738,6 @@ shaka.extern.LiveSyncConfiguration;
  *   The minimum number of seconds to see if the manifest has changes.
  *   <br>
  *   Defaults to <code>1</code>.
- * @property {boolean} dispatchAllEmsgBoxes
- *   If true, all emsg boxes are parsed and dispatched.
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {boolean} observeQualityChanges
  *   If true, monitor media quality changes and emit
  *   <code>shaka.Player.MediaQualityChangedEvent</code>.
@@ -1850,7 +1845,8 @@ shaka.extern.StreamingConfiguration;
  *   addExtraFeaturesToSourceBuffer: function(string): string,
  *   forceTransmux: boolean,
  *   insertFakeEncryptionInInit: boolean,
- *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback
+ *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback,
+ *   dispatchAllEmsgBoxes: boolean
  * }}
  *
  * @description
@@ -1889,6 +1885,10 @@ shaka.extern.StreamingConfiguration;
  *    A callback called for each cue after it is parsed, but right before it
  *    is appended to the presentation.
  *    Gives a chance for client-side editing of cue text, cue timing, etc.
+ * @property {boolean} dispatchAllEmsgBoxes
+ *   If true, all emsg boxes are parsed and dispatched.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;
