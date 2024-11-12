@@ -2295,6 +2295,7 @@ shaka.extern.TextDisplayerConfiguration;
  *   cmsd: shaka.extern.CmsdConfiguration,
  *   lcevc: shaka.extern.LcevcConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
+ *   ignoreHardwareResolution: boolean,
  *   preferredAudioLanguage: string,
  *   preferredAudioLabel: string,
  *   preferredTextLanguage: string,
@@ -2345,6 +2346,11 @@ shaka.extern.TextDisplayerConfiguration;
  *   (Low Complexity Enhancement Video Codec)
  * @property {shaka.extern.OfflineConfiguration} offline
  *   Offline configuration and settings.
+ * @property {boolean} ignoreHardwareResolution
+ *   Do not detect the hardware resolution.  For some niche cases where content
+ *   is only available at resolutions beyond the device's native resolution,
+ *   and you are confident it can be decoded and downscaled, this flag can
+ *   allow playback when it would otherwise fail.
  * @property {string} preferredAudioLanguage
  *   The preferred language to use for audio tracks.  If not given it will use
  *   the <code>'main'</code> track.
