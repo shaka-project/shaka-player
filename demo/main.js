@@ -1347,8 +1347,16 @@ shakaDemo.Main = class {
       } else {
         this.controls_.setEnabledShakaControls(true);
         this.controls_.setEnabledNativeControls(false);
-        // This will force the player to use UITextDisplayer.
-        this.player_.setVideoContainer(this.container_);
+        // On devices where the Fullscreen API is not available we prefer
+        // SimpleTextDisplayer because it works with the Fullscreen API
+        // of the video element itself.
+        if (document.fullscreenEnabled) {
+          // This will force the player to use UITextDisplayer.
+          this.player_.setVideoContainer(this.container_);
+        } else {
+          // This will force the player to use SimpleTextDisplayer.
+          this.player_.setVideoContainer(null);
+        }
       }
 
       await this.drmConfiguration_(asset);
