@@ -23,7 +23,7 @@ jobs:
         id: compute
         uses: shaka-project/shaka-github-tools/compute-sha@main
         with:
-          ref: refs/pull/${{ inputs.pr }}/merge
+          ref: refs/pull/${{ inputs.pr }}/head
 
   set-pending-status:
     name: Set Pending Status
