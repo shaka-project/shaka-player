@@ -1735,11 +1735,6 @@ filterDescribe('Storage', storageSupport, () => {
     configure(params) {}
 
     /** @override */
-    setCloseSegmentIndexRegister(register) {
-      // No-op
-    }
-
-    /** @override */
     start(uri, player) {
       return Promise.resolve(this.map_[uri]);
     }

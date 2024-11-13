@@ -467,6 +467,8 @@ describe('StreamingEngine', () => {
       onSegmentAppended: Util.spyFunc(onSegmentAppended),
       onInitSegmentAppended: () => {},
       beforeAppendSegment: Util.spyFunc(beforeAppendSegment),
+      onMetadata: Util.spyFunc(onMetadata),
+      closeSegmentIndex: (stream, closeSegmentIndex) => {},
       disableStream: Util.spyFunc(disableStream),
     };
     streamingEngine = new shaka.media.StreamingEngine(

@@ -271,6 +271,8 @@ describe('StreamingEngine', () => {
       onSegmentAppended: () => playhead.notifyOfBufferingChange(),
       onInitSegmentAppended: () => {},
       beforeAppendSegment: () => Promise.resolve(),
+      onMetadata: () => {},
+      closeSegmentIndex: (stream, closeSegmentIndex) => {},
       disableStream: (stream, time) => false,
     };
     streamingEngine = new shaka.media.StreamingEngine(

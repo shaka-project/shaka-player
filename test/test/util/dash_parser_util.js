@@ -48,6 +48,7 @@ shaka.test.Dash = class {
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
+      closeSegmentIndex: (stream, closeSegmentIndex) => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
     };
@@ -98,6 +99,7 @@ shaka.test.Dash = class {
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
+      closeSegmentIndex: (stream, closeSegmentIndex) => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
     };
