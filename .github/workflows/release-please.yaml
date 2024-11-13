@@ -194,4 +194,4 @@ jobs:
         run: |
           TAG=${{ needs.release.outputs.tag_name }}
           BRANCH=$(echo "$TAG" | sed -e 's/\.0$/.x/')
-          git push origin HEAD:"$BRANCH"
+          git push origin refs/tags/"$TAG"^{commit}:refs/heads/"$BRANCH"
