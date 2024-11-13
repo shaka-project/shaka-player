@@ -10,17 +10,17 @@ MediaInfoLib - v0.7.87
 
 For more info about this video, see https://github.com/Axinom/dash-test-vectors
 -->
-<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT0H12M14.000S" maxSegmentDuration="PT0H0M4.000S" profiles="urn:mpeg:dash:profile:isoff-live:2011,http://dashif.org/guidelines/dash264" >
-  <Period duration="PT0H00M04.000S">
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT0H00M20.000S" maxSegmentDuration="PT0H0M4.000S" profiles="urn:mpeg:dash:profile:isoff-live:2011,http://dashif.org/guidelines/dash264" >
+  <Period id="0" duration="PT0H00M04.000S">
     <AdaptationSet segmentAlignment="true" group="1" maxWidth="1920" maxHeight="1080" maxFrameRate="24" par="16:9" lang="und">
       <SegmentTemplate timescale="24" media="$Number%04d$.m4s" startNumber="1" duration="96" initialization="init.mp4" />
       <Representation id="1" mimeType="video/mp4" codecs="avc1.64001f" width="512" height="288" frameRate="24" sar="1:1" startWithSAP="1" bandwidth="389802"></Representation>
     </AdaptationSet>
   </Period>
-  <Period duration="PT0H00M16.000S">
+  <Period id="1" duration="PT0H00M16.000S">
     <EventStream schemeIdUri="urn:mpeg:dash:event:alternativeMPD:2022" timescale="10000000">
-      <Event presentationTime="0" duration="40000000" id="1">
-        <AlternativeMPD uri="/base/test/test/assets/dash-aes-128/dash.mpd" mode="replace" />
+      <Event presentationTime="0" duration="20000000" id="1">
+        <AlternativeMPD uri="/base/test/test/assets/dash-multi-codec/dash.mpd" mode="replace" />
       </Event>
     </EventStream>
     <AdaptationSet segmentAlignment="true" group="1" maxWidth="1920" maxHeight="1080" maxFrameRate="24" par="16:9" lang="und">
