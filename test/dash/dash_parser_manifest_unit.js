@@ -60,6 +60,7 @@ describe('DashParser Manifest', () => {
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
+      closeSegmentIndex: (stream, closeSegmentIndex) => {},
       disableStream: (stream) => {},
       addFont: shaka.test.Util.spyFunc(addFontSpy),
     };
