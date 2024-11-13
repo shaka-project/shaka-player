@@ -436,8 +436,7 @@ shakaDemo.Main = class {
     // default values assigned to UI config elements as well as the decision
     // about what values to place in the URL hash.
     this.player_.configure(
-        'manifest.dash.clockSyncUri',
-        'https://shaka-player-demo.appspot.com/time.txt');
+        'manifest.dash.clockSyncUri', 'https://time.akamai.com/?ms&iso');
 
     // Get default config.
     this.defaultConfig_ = this.player_.getConfiguration();
