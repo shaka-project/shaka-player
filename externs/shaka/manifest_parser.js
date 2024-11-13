@@ -140,9 +140,9 @@ shaka.extern.ManifestParser = class {
  *   getBandwidthEstimate: function():number,
  *   onMetadata: function(string, number, ?number,
  *                        !Array.<shaka.extern.MetadataFrame>),
-*    closeSegmentIndex: function(shaka.extern.Stream, function()),
-*    disableStream: function(!shaka.extern.Stream),
-*    addFont: function(string, string)
+ *   closeSegmentIndex: function(shaka.extern.Stream, function()),
+ *   disableStream: function(!shaka.extern.Stream),
+ *   addFont: function(string, string)
  * }}
  *
  * @description
