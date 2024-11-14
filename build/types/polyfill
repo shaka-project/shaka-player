@@ -8,7 +8,6 @@
 +../../lib/polyfill/media_capabilities.js
 +../../lib/polyfill/orientation.js
 +../../lib/polyfill/patchedmediakeys_cert.js
-+../../lib/polyfill/patchedmediakeys_nop.js
 +../../lib/polyfill/patchedmediakeys_webkit.js
 +../../lib/polyfill/pip_webkit.js
 +../../lib/polyfill/random_uuid.js
