@@ -114,5 +114,10 @@
     "remove": [
       "engines"
     ]
+  },
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://packages.atlassian.com/api/npm/atlassian-npm/",
+    "@loomhq/registry": "https://packages.atlassian.com/api/npm/atlassian-npm/"
   }
 }
