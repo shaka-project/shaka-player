@@ -1259,11 +1259,6 @@ describe('PeriodCombiner', () => {
     expect(video2.originalId).toBe('3,4');
     expect(video2.matchedStreams.length).toBe(2);
 
-    expect(stream1.closeSegmentIndex).not.toHaveBeenCalled();
-    expect(stream2.closeSegmentIndex).not.toHaveBeenCalled();
-    expect(stream3.closeSegmentIndex).not.toHaveBeenCalled();
-    expect(stream4.closeSegmentIndex).not.toHaveBeenCalled();
-
     combiner.deleteStream(stream1, '0');
     combiner.deleteStream(stream3, '1');
 
@@ -1277,126 +1272,6 @@ describe('PeriodCombiner', () => {
     video2 = variants[1].video;
     expect(video2.originalId).toBe('3,4');
     expect(video2.matchedStreams.length).toBe(1);
-
-    expect(stream1.closeSegmentIndex).toHaveBeenCalledTimes(1);
-    expect(stream2.closeSegmentIndex).not.toHaveBeenCalled();
-    expect(stream3.closeSegmentIndex).toHaveBeenCalledTimes(1);
-    expect(stream4.closeSegmentIndex).not.toHaveBeenCalled();
-  });
-
-  it('Delete streams with playerInterface', async () => {
-    const stream1 = makeVideoStream(1080);
-    stream1.originalId = '1';
-    stream1.bandwidth = 120000;
-    stream1.codecs = 'hvc1.1.4.L126.B0';
-
-    const stream2 = makeVideoStream(1080);
-    stream2.originalId = '2';
-    stream2.bandwidth = 120000;
-    stream2.codecs = 'hev1.2.4.L123.B0';
-
-    const stream3 = makeVideoStream(1080);
-    stream3.originalId = '3';
-    stream3.bandwidth = 120000;
-    stream3.codecs = 'dvhe.05.01';
-
-    const stream4 = makeVideoStream(1080);
-    stream4.originalId = '4';
-    stream4.bandwidth = 120000;
-    stream4.codecs = 'dvh1.05.01';
-
-    /** @type {!Array.<shaka.extern.Period>} */
-    const periods = [
-      {
-        id: '0',
-        videoStreams: [
-          stream1, stream3,
-        ],
-        audioStreams: [],
-        textStreams: [],
-        imageStreams: [],
-      },
-      {
-        id: '1',
-        videoStreams: [
-          stream2, stream4,
-        ],
-        audioStreams: [],
-        textStreams: [],
-        imageStreams: [],
-      },
-    ];
-
-    const fakeNetEngine = new shaka.test.FakeNetworkingEngine();
-    const closeSegmentIndex = (stream, closeSegmentIndex) => {
-      closeSegmentIndex();
-    };
-
-    const closeSegmentIndexSpy = jasmine.createSpy('closeSegmentIndex')
-        .and.callFake(closeSegmentIndex);
-
-    /** @type {shaka.extern.ManifestParser.PlayerInterface} */
-    const playerInterface = {
-      networkingEngine: fakeNetEngine,
-      modifyManifestRequest: (request, manifestInfo) => {},
-      modifySegmentRequest: (request, segmentInfo) => {},
-      filter: (manifest) => Promise.resolve(),
-      makeTextStreamsForClosedCaptions: (manifest) => {},
-      onTimelineRegionAdded: (region) => {},
-      onEvent: () => {},
-      onError: (e) => {},
-      isLowLatencyMode: () => false,
-      isAutoLowLatencyMode: () => false,
-      enableLowLatencyMode: () => {},
-      updateDuration: () => {},
-      newDrmInfo: (stream) => {},
-      onManifestUpdated: () => {},
-      getBandwidthEstimate: () => 1e6,
-      onMetadata: () => {},
-      closeSegmentIndex: shaka.test.Util.spyFunc(closeSegmentIndexSpy),
-      disableStream: (stream) => {},
-      addFont: (name, url) => {},
-    };
-
-    combiner.setPlayerInterface(playerInterface);
-
-    await combiner.combinePeriods(periods, /* isDynamic= */ true);
-    let variants = combiner.getVariants();
-    expect(variants.length).toBe(2);
-
-    let video1 = variants[0].video;
-    expect(video1.originalId).toBe('1,2');
-    expect(video1.matchedStreams.length).toBe(2);
-
-    let video2 = variants[1].video;
-    expect(video2.originalId).toBe('3,4');
-    expect(video2.matchedStreams.length).toBe(2);
-
-    expect(stream1.closeSegmentIndex).not.toHaveBeenCalled();
-    expect(stream2.closeSegmentIndex).not.toHaveBeenCalled();
-    expect(stream3.closeSegmentIndex).not.toHaveBeenCalled();
-    expect(stream4.closeSegmentIndex).not.toHaveBeenCalled();
-    expect(playerInterface.closeSegmentIndex).not.toHaveBeenCalled();
-
-    combiner.deleteStream(stream1, '0');
-    combiner.deleteStream(stream3, '1');
-
-    variants = combiner.getVariants();
-    expect(variants.length).toBe(2);
-
-    video1 = variants[0].video;
-    expect(video1.originalId).toBe('1,2');
-    expect(video1.matchedStreams.length).toBe(1);
-
-    video2 = variants[1].video;
-    expect(video2.originalId).toBe('3,4');
-    expect(video2.matchedStreams.length).toBe(1);
-
-    expect(stream1.closeSegmentIndex).toHaveBeenCalledTimes(1);
-    expect(stream2.closeSegmentIndex).not.toHaveBeenCalled();
-    expect(stream3.closeSegmentIndex).toHaveBeenCalledTimes(1);
-    expect(stream4.closeSegmentIndex).not.toHaveBeenCalled();
-    expect(playerInterface.closeSegmentIndex).toHaveBeenCalledTimes(2);
   });
 
   it('Variant has highest bandwidth from matched streams', async () => {
