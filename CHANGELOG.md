@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.11.13](https://github.com/shaka-project/shaka-player/compare/v4.11.12...v4.11.13) (2024-11-15)
+
+
+### Bug Fixes
+
+* **Ads:** Always fire CUEPOINTS_CHANGED when not using multi video elements ([#7584](https://github.com/shaka-project/shaka-player/issues/7584)) ([9802264](https://github.com/shaka-project/shaka-player/commit/980226403ad716e9bc7144e3d59b5ececaff8044))
+* **Ads:** Always set endTime for MPD Alternate ([#7583](https://github.com/shaka-project/shaka-player/issues/7583)) ([6a6d8e8](https://github.com/shaka-project/shaka-player/commit/6a6d8e8c0a5064253362a62d169fcb015f67a9c9))
+* **Ads:** Fix VAST_INVALID_XML error code ([#7593](https://github.com/shaka-project/shaka-player/issues/7593)) ([9f345c9](https://github.com/shaka-project/shaka-player/commit/9f345c9ee623edb78af38af45d87cc5719a8e06c))
+* **Ads:** Prevent playing the same ad twice ([#7585](https://github.com/shaka-project/shaka-player/issues/7585)) ([80041d7](https://github.com/shaka-project/shaka-player/commit/80041d7cbb96e56065b9c1068c43c22a32e92ac0))
+* Allow the user to disable subtitles while paused ([#7578](https://github.com/shaka-project/shaka-player/issues/7578)) ([745730b](https://github.com/shaka-project/shaka-player/commit/745730b55b2ad70c47e1c662459df30d6fd04f62))
+* Calculate timeToFirstByte before fire the event 'downloadheadersreceived' ([#7605](https://github.com/shaka-project/shaka-player/issues/7605)) ([e7e285b](https://github.com/shaka-project/shaka-player/commit/e7e285b947d3e7839bc2d26eed12558ac9859327)), closes [#7604](https://github.com/shaka-project/shaka-player/issues/7604)
+* Disable live sync when the stream is paused ([#7579](https://github.com/shaka-project/shaka-player/issues/7579)) ([7a78670](https://github.com/shaka-project/shaka-player/commit/7a78670f124b2a6c854524b52536c34fb0403751))
+* Prefer SimpleTextDisplayer on iOS ([#7569](https://github.com/shaka-project/shaka-player/issues/7569)) ([dfc94f1](https://github.com/shaka-project/shaka-player/commit/dfc94f1eead73f1ec63d723bf3a532410dc192d3))
+* **UI:** Use trickPlay method to control the playback rate ([#7580](https://github.com/shaka-project/shaka-player/issues/7580)) ([9bcaa46](https://github.com/shaka-project/shaka-player/commit/9bcaa4665d291708177acc19c9a5be76d32eee23))
+
 ## [4.11.12](https://github.com/shaka-project/shaka-player/compare/v4.11.11...v4.11.12) (2024-11-12)
 
 
