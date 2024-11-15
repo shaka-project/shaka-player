@@ -96,7 +96,6 @@ describe('HlsParser', () => {
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
       onMetadata: shaka.test.Util.spyFunc(onMetadataSpy),
-      closeSegmentIndex: (stream, closeSegmentIndex) => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
     };
