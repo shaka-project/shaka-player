@@ -52,7 +52,6 @@ describe('DashParser SegmentTemplate', () => {
       onManifestUpdated: () => {},
       getBandwidthEstimate: () => 1e6,
       onMetadata: () => {},
-      closeSegmentIndex: (stream, closeSegmentIndex) => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
     };
