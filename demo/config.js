@@ -460,7 +460,8 @@ shakaDemo.Config = class {
         .addNumberInput_('Duration Backoff', 'streaming.durationBackoff',
             /* canBeDecimal= */ true)
         .addNumberInput_('Rebuffering Goal', 'streaming.rebufferingGoal',
-            /* canBeDecimal= */ true)
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
         .addNumberInput_('Buffer Behind', 'streaming.bufferBehind',
             /* canBeDecimal= */ true)
         .addNumberInput_('Eviction Goal', 'streaming.evictionGoal',

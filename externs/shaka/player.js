@@ -1591,8 +1591,9 @@ shaka.extern.LiveSyncConfiguration;
  *   buffer before it can begin playback or can continue playback after it has
  *   entered into a buffering state (i.e., after it has depleted one more
  *   more of its buffers).
+ *   When the value is 0, the playback rate is not used to control the buffer.
  *   <br>
- *   Defaults to <code>2</code>.
+ *   Defaults to <code>0</code>.
  * @property {number} bufferingGoal
  *   The number of seconds of content that the StreamingEngine will attempt to
  *   buffer ahead of the playhead. This value must be greater than or equal to
