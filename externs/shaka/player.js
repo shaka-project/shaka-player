@@ -2141,7 +2141,7 @@ shaka.extern.AdvancedAbrConfiguration;
  *   <br>
  *   Defaults to <code>[]</code>.
  * @property {number} version
- *   The CMCD version to use for Request Mode reporting.
+ *   The CMCD version.
  *   Valid values are <code>1</code> or <code>2</code>, corresponding to CMCD v1
  *   and CMCD v2 specifications, respectively.
  *   <br>
