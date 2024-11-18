@@ -1104,8 +1104,7 @@ shaka.extern.xml.Node;
  *   Defaults to <code>false</code>.
  * @property {boolean} ignoreMinBufferTime
  *   If true will cause DASH parser to ignore <code>minBufferTime</code> from
- *   manifest. It allows player config to take precedence over manifest for
- *   <code>rebufferingGoal</code>.
+ *   manifest.
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {boolean} autoCorrectDrift

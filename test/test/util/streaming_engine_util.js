@@ -329,7 +329,6 @@ shaka.test.StreamingEngineUtil = class {
     /** @type {shaka.extern.Manifest} */
     const manifest = {
       presentationTimeline,
-      minBufferTime: 2,
       offlineSessionIds: [],
       variants: [],
       textStreams: [],

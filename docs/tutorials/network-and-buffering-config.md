@@ -70,13 +70,6 @@ content will be removed from the start of the buffer to save memory.
 This is a minimum; if the stream's max segment size is longer than the
 'bufferBehind', then that will be used instead.
 
-
-*NOTES:*
- - *`rebufferingGoal` should always be less than `bufferingGoal`.*
- - *A DASH manifest's `minBufferTime`, if greater, overrides `rebufferingGoal`.*
- - *You can ignore `minBufferTime` by setting the
-   `manifest.dash.ignoreMinBufferTime` configuration to true.*
-
 All of these settings should be customized for your application.  The default
 values are very conservative.
 

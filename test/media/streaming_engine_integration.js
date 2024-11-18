@@ -598,7 +598,6 @@ describe('StreamingEngine', () => {
       return {
         presentationTimeline: timeline,
         offlineSessionIds: [],
-        minBufferTime: 2,
         textStreams: [],
         imageStreams: [],
         sequenceMode: false,
