@@ -113,7 +113,7 @@ describe('CmcdManager', () => {
       cmcd.applyData(type, request, context);
     }
 
-    return new NetworkingEngine(undefined, undefined, undefined,
+    return new NetworkingEngine(undefined, undefined, undefined, undefined,
         onRequest);
   }
 
