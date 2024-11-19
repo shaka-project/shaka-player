@@ -115,7 +115,6 @@ describe('HlsParser', () => {
       pending('Sequence mode is not supported by the platform.');
     }
 
-    player.configure('manifest.hls.ignoreManifestProgramDateTime', true);
     player.setTextTrackVisibility(true);
 
     await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
