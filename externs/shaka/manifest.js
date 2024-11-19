@@ -17,7 +17,6 @@
  *   textStreams: !Array.<shaka.extern.Stream>,
  *   imageStreams: !Array.<shaka.extern.Stream>,
  *   offlineSessionIds: !Array.<string>,
- *   minBufferTime: number,
  *   sequenceMode: boolean,
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   type: string,
@@ -76,11 +75,6 @@
  * @property {!Array.<string>} offlineSessionIds
  *   <i>Defaults to [].</i> <br>
  *   An array of EME sessions to load for offline playback.
- * @property {number} minBufferTime
- *   <i>Defaults to 0.</i> <br>
- *   The minimum number of seconds of content that must be buffered before
- *   playback can begin.  Can be overridden by a higher value from the Player
- *   configuration.
  * @property {boolean} sequenceMode
  *   If true, we will append the media segments using sequence mode; that is to
  *   say, ignoring any timestamps inside the media files.

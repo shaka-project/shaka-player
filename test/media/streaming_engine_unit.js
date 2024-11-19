@@ -2641,8 +2641,6 @@ describe('StreamingEngine', () => {
     beforeEach(() => {
       setupVod();
 
-      manifest.minBufferTime = 1;
-
       config = shaka.util.PlayerConfiguration.createDefault().streaming;
       config.rebufferingGoal = 1;
       config.bufferingGoal = 1;
@@ -2752,8 +2750,6 @@ describe('StreamingEngine', () => {
     it('does not fail immediately', async () => {
       setupVod();
 
-      manifest.minBufferTime = 1;
-
       // Create StreamingEngine.
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
       config.rebufferingGoal = 1;
@@ -2815,8 +2811,6 @@ describe('StreamingEngine', () => {
 
     it('fails after multiple QuotaExceededError', async () => {
       setupVod();
-
-      manifest.minBufferTime = 1;
 
       // Create StreamingEngine.
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;

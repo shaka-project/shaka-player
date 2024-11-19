@@ -93,8 +93,6 @@ shaka.test.ManifestGenerator.Manifest = class {
     this.presentationTimeline = timeline;
     /** @type {!Array.<string>} */
     this.offlineSessionIds = [];
-    /** @type {number} */
-    this.minBufferTime = 0;
     /** @type {boolean} */
     this.sequenceMode = false;
     /** @type {boolean} */

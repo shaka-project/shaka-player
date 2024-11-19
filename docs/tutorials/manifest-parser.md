@@ -256,7 +256,6 @@ MyManifestParser.prototype.loadManifest_ = function(data) {
 
   return {
     presentationTimeline: timeline,
-    minBufferTime: 5,  // seconds
     offlineSessionIds: [],
     variants: [
       this.loadVariant_(true, true),

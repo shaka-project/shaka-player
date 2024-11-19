@@ -279,7 +279,6 @@ filterDescribe('Storage Compatibility', offlineSupported, () => {
 
       const expected = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.anyTimeline();
-        manifest.minBufferTime = 2;
 
         manifest.addPartialVariant((variant) => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
