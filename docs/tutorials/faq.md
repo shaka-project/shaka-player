@@ -191,19 +191,6 @@ the ad blocker in compiled mode as well.
 
 <hr>
 
-**Q:** Why does some DASH content take a long time to start playback?
-
-**A:** Shaka Player honors the `minBufferTime` field in DASH.  If this field is
-set to a large value, Shaka Player will buffer that much content before
-beginning playback.  To override this behavior and ignore the `minBufferTime`
-field, we offer the following configuration:
-
-```js
-player.configure('manifest.dash.ignoreMinBufferTime', true);
-```
-
-<hr>
-
 **Q:** My HLS stream is failing on Chrome, with a chunk demuxer append failed
 error.
 

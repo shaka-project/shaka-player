@@ -131,7 +131,6 @@ describe('Playhead', () => {
       textStreams: [],
       imageStreams: [],
       presentationTimeline: timeline,
-      minBufferTime: 10,
       offlineSessionIds: [],
       sequenceMode: false,
       ignoreManifestTimestampsInSegmentsMode: false,
@@ -404,6 +403,8 @@ describe('Playhead', () => {
     timeline.getDuration.and.returnValue(Infinity);
     timeline.getSeekRangeStart.and.returnValue(5);
     timeline.getSeekRangeEnd.and.returnValue(60);
+
+    config.rebufferingGoal = 10;
 
     playhead = new shaka.media.MediaSourcePlayhead(
         video,
