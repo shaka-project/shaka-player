@@ -84,6 +84,7 @@ module.exports = {
     'no-empty': ['error', {'allowEmptyCatch': true}],
     'no-misleading-character-class': 'error',
     'no-template-curly-in-string': 'error',
+    'no-fallthrough': ['error', {'allowEmptyCase': true}],
     // TODO: Try to re-enable this if possible.  Right now, it produces way too
     // many false-positives with eslint 7.  It worked well enough in eslint 5.
     // 'require-atomic-updates': 'error',
