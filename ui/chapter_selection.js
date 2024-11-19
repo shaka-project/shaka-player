@@ -119,14 +119,18 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
     const currentLocales = this.localization.getCurrentLocales();
     for (const locale of Array.from(currentLocales)) {
       nextLanguage = locale;
-      nextChapters = this.player.getChapters(nextLanguage);
+      // If player is a proxy, and the cast receiver doesn't support this
+      // method, you get back undefined.
+      nextChapters = this.player.getChapters(nextLanguage) || [];
       if (nextChapters.length) {
         break;
       }
     }
     if (!nextChapters.length) {
       nextLanguage = 'und';
-      nextChapters = this.player.getChapters(nextLanguage);
+      // If player is a proxy, and the cast receiver doesn't support this
+      // method, you get back undefined.
+      nextChapters = this.player.getChapters(nextLanguage) || [];
     }
 
     const languageChanged = nextLanguage !== this.chaptersLanguage_;
