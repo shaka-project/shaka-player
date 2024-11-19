@@ -1142,6 +1142,7 @@ describe('HlsParser', () => {
       '#EXT-X-VERSION:3\n',
       '#EXT-X-TARGETDURATION:5\n',
       '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXT-X-DISCONTINUITY-SEQUENCE:0\n',
       '#EXTINF:3,\n',
       'clip0-video-0.ts\n',
       '#EXTINF:1,\n',

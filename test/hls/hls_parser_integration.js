@@ -113,10 +113,6 @@ describe('HlsParser', () => {
   });
 
   it('supports text discontinuity', async () => {
-    if (!shaka.util.Platform.supportsSequenceMode()) {
-      pending('Sequence mode is not supported by the platform.');
-    }
-
     player.setTextTrackVisibility(true);
 
     await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
@@ -133,6 +129,27 @@ describe('HlsParser', () => {
     expect(cues[1].endTime).toBeCloseTo(4, 0);
     expect(cues[2].startTime).toBeCloseTo(6, 0);
     expect(cues[2].endTime).toBeCloseTo(8, 0);
+
+    await player.unload();
+  });
+
+  it('supports text without discontinuity', async () => {
+    player.setTextTrackVisibility(true);
+
+    // eslint-disable-next-line max-len
+    await player.load('/base/test/test/assets/hls-text-no-discontinuity/index.m3u8');
+    await video.play();
+
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 30);
+
+    const cues = video.textTracks[0].cues;
+    expect(cues.length).toBe(3);
+    expect(cues[0].startTime).toBeCloseTo(0.6, 0);
+    expect(cues[0].endTime).toBeCloseTo(2.88, 0);
+    expect(cues[1].startTime).toBeCloseTo(2.88, 0);
+    expect(cues[1].endTime).toBeCloseTo(6.36, 0);
+    expect(cues[2].startTime).toBeCloseTo(6.36, 0);
+    expect(cues[2].endTime).toBeCloseTo(10.68, 0);
 
     await player.unload();
   });

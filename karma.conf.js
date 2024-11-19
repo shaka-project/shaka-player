@@ -268,6 +268,8 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-raw-ec3/*', included: false},
       {pattern: 'test/test/assets/hls-raw-mp3/*', included: false},
       {pattern: 'test/test/assets/hls-sample-aes/*', included: false},
+      // eslint-disable-next-line max-len
+      {pattern: 'test/test/assets/hls-text-no-discontinuity/*', included: false},
       {pattern: 'test/test/assets/hls-text-offset/*', included: false},
       {pattern: 'test/test/assets/hls-ts-aac/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ac3/*', included: false},
