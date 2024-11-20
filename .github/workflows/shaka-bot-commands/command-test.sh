@@ -27,8 +27,8 @@ case "${SHAKA_BOT_ARGUMENTS[0]}" in
   # CE devices only.
   ce) WORKFLOW_ARGS+=( "browser_filter=Tizen ChromecastUltra ChromecastGTV ChromeAndroid" ) ;;
 
-  # Chromecast devices only.
-  chromecast) WORKFLOW_ARGS+=( "browser_filter=ChromecastUltra ChromecastGTV" ) ;;
+  # Cast devices only.
+  cast) WORKFLOW_ARGS+=( "browser_filter=ChromecastUltra ChromecastGTV" ) ;;
 
   # Tizen device only.
   tizen) WORKFLOW_ARGS+=( "browser_filter=Tizen" ) ;;
