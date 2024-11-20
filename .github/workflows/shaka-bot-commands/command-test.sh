@@ -27,6 +27,12 @@ case "${SHAKA_BOT_ARGUMENTS[0]}" in
   # CE devices only.
   ce) WORKFLOW_ARGS+=( "browser_filter=Tizen ChromecastUltra ChromecastGTV ChromeAndroid" ) ;;
 
+  # Cast devices only.
+  cast) WORKFLOW_ARGS+=( "browser_filter=ChromecastUltra ChromecastGTV" ) ;;
+
+  # Tizen device only.
+  tizen) WORKFLOW_ARGS+=( "browser_filter=Tizen" ) ;;
+
   # No command argument, no extra workflow arguments.
   "") ;;
 
