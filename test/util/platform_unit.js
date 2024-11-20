@@ -19,6 +19,7 @@ describe('Platform', () => {
   const webOs3 = 'Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.2.1 Chrome/38.0.2125.122 Safari/537.36 WebAppManager';
   const webOs4 = 'Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.34 Safari/537.36 WebAppManager';
   const webOs5 = 'Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36 WebAppManager';
+  const webOs6 = 'Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36 WebAppManager';
   /* eslint-enable max-len */
 
   afterEach(() => {
@@ -79,6 +80,8 @@ describe('Platform', () => {
     expect(shaka.util.Platform.isWebOS3()).toBe(false);
     setUserAgent(webOs5);
     expect(shaka.util.Platform.isWebOS3()).toBe(false);
+    setUserAgent(webOs6);
+    expect(shaka.util.Platform.isWebOS3()).toBe(false);
   });
 
   it('checks is webOS 4', () => {
@@ -89,6 +92,8 @@ describe('Platform', () => {
     setUserAgent(webOs4);
     expect(shaka.util.Platform.isWebOS4()).toBe(true);
     setUserAgent(webOs5);
+    expect(shaka.util.Platform.isWebOS4()).toBe(false);
+    setUserAgent(webOs6);
     expect(shaka.util.Platform.isWebOS4()).toBe(false);
   });
 
@@ -101,6 +106,21 @@ describe('Platform', () => {
     expect(shaka.util.Platform.isWebOS5()).toBe(false);
     setUserAgent(webOs5);
     expect(shaka.util.Platform.isWebOS5()).toBe(true);
+    setUserAgent(webOs6);
+    expect(shaka.util.Platform.isWebOS5()).toBe(false);
+  });
+
+  it('checks is webOS 6', () => {
+    setUserAgent(tizen50);
+    expect(shaka.util.Platform.isWebOS6()).toBe(false);
+    setUserAgent(webOs3);
+    expect(shaka.util.Platform.isWebOS6()).toBe(false);
+    setUserAgent(webOs4);
+    expect(shaka.util.Platform.isWebOS6()).toBe(false);
+    setUserAgent(webOs5);
+    expect(shaka.util.Platform.isWebOS6()).toBe(false);
+    setUserAgent(webOs6);
+    expect(shaka.util.Platform.isWebOS6()).toBe(true);
   });
 
   describe('isMediaKeysPolyfilled', () => {
