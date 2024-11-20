@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.9.32](https://github.com/shaka-project/shaka-player/compare/v4.9.31...v4.9.32) (2024-11-20)
+
+
+### Bug Fixes
+
+* Abort operations only once ([#7624](https://github.com/shaka-project/shaka-player/issues/7624)) ([adc646a](https://github.com/shaka-project/shaka-player/commit/adc646a8b0191d41ad13f408b19373ebf5f53484))
+* Allow the user to disable subtitles while paused ([#7578](https://github.com/shaka-project/shaka-player/issues/7578)) ([b60a47c](https://github.com/shaka-project/shaka-player/commit/b60a47c47db3fb33a437f8980fadcdfdf4933350))
+* Calculate timeToFirstByte before fire the event 'downloadheadersreceived' ([#7605](https://github.com/shaka-project/shaka-player/issues/7605)) ([48a362e](https://github.com/shaka-project/shaka-player/commit/48a362e907455bd0e18a7b06d933c3dcbed3357f)), closes [#7604](https://github.com/shaka-project/shaka-player/issues/7604)
+* **Cast:** Incorrect detection of MediaCapabilities on Linux Chromecast ([#7628](https://github.com/shaka-project/shaka-player/issues/7628)) ([eccc245](https://github.com/shaka-project/shaka-player/commit/eccc245f79dadf6bd590eba8d3581a5ccb4c17d7))
+* Disable live sync when the stream is paused ([#7579](https://github.com/shaka-project/shaka-player/issues/7579)) ([2d6dabe](https://github.com/shaka-project/shaka-player/commit/2d6dabe331c6bddc915c871fa88e241f436eaaad))
+* Disable smooth codec switch on Tizen 8 ([#7614](https://github.com/shaka-project/shaka-player/issues/7614)) ([28e7380](https://github.com/shaka-project/shaka-player/commit/28e7380a0de94cbd37d3310673c8580e578f14df))
+* Disable smooth codec switch on webOS 6 ([#7636](https://github.com/shaka-project/shaka-player/issues/7636)) ([4ca6cd5](https://github.com/shaka-project/shaka-player/commit/4ca6cd58b73dea09b0ad1be789400be953d3f059))
+* Fix cast support for HLG HDR ([#7632](https://github.com/shaka-project/shaka-player/issues/7632)) ([4280979](https://github.com/shaka-project/shaka-player/commit/42809793f18a6c2dc4fee108b75004c67b6c03ed))
+* Fix parameters lost during codec switch ([#7630](https://github.com/shaka-project/shaka-player/issues/7630)) ([2f4d09d](https://github.com/shaka-project/shaka-player/commit/2f4d09d6cb3f8886cb1033d824b84bcd9c808f9c))
+* **HLS:** Fix subtitle timing ([#7625](https://github.com/shaka-project/shaka-player/issues/7625)) ([d37a472](https://github.com/shaka-project/shaka-player/commit/d37a472f696a7d7bf2af769dde39ce750aa719fd))
+* Prefer SimpleTextDisplayer on iOS ([#7569](https://github.com/shaka-project/shaka-player/issues/7569)) ([7203a05](https://github.com/shaka-project/shaka-player/commit/7203a05b1e486be46762c504ebb69cd2bd3c279a))
+* Silence aborted errors from PreloadManager. ([#7619](https://github.com/shaka-project/shaka-player/issues/7619)) ([548342d](https://github.com/shaka-project/shaka-player/commit/548342ddcf21b1aa4a282e8b15016fe571887eb3)), closes [#7618](https://github.com/shaka-project/shaka-player/issues/7618)
+
 ## [4.9.31](https://github.com/shaka-project/shaka-player/compare/v4.9.30...v4.9.31) (2024-11-12)
 
 
