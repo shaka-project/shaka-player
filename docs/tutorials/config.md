@@ -75,7 +75,7 @@ player.getConfiguration();
        failureCallback: Function
        ignoreTextStreamFailures: false
        alwaysStreamText: false
-       rebufferingGoal: 2
+       rebufferingGoal: 0
        retryParameters: Object
        startAtSegmentBoundary: false
        safeSeekOffset: 5
@@ -103,7 +103,7 @@ player.getConfiguration().preferredAudioLanguage
 // check buffering goal, which is 2 minutes:
 player.getConfiguration().streaming.bufferingGoal
 
-// check rebuffering goal, which is still the default of 2 seconds:
+// check rebuffering goal, which is still the default of 0 seconds:
 player.getConfiguration().streaming.rebufferingGoal
 
 // set the rebuffering goal to 15 seconds and revert buffering goal to default:
@@ -124,7 +124,6 @@ buffering settings) while some will not have any effect until the next call to
 
 With `.streaming.lowLatencyMode` set to true,
 `.streaming.inaccurateManifestTolerance` is set to 0 by default,
-`.streaming.rebufferingGoal` is set to 0.01 by default,
 `.streaming.segmentPrefetchLimit` is set to 2 by default,
 `.streaming.updateIntervalSeconds` is set to 0.1 by default,
 `.streaming.maxDisabledTime` is set to 1 by default,
@@ -141,7 +140,6 @@ player.configure({
   streaming: {
     lowLatencyMode: true,
     inaccurateManifestTolerance: 0,
-    rebufferingGoal: 0.01,
     segmentPrefetchLimit: 2,
     updateIntervalSeconds: 0.1,
     maxDisabledTime: 1,
