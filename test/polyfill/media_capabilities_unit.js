@@ -64,8 +64,8 @@ describe('MediaCapabilities', () => {
         bitrate: 349265,
         contentType: 'video/mp4; codecs="avc1.4D4015"',
         framerate: 23.976023976023978,
-        height: 288,
-        width: 512,
+        height: 1080,
+        width: 1920,
       },
     };
     shaka.util.DrmUtils.clearMediaKeySystemAccessMap();
@@ -258,14 +258,14 @@ describe('MediaCapabilities', () => {
           'video/mp4; codecs="hev1.2.4.L153.B0"';
       // Round to a whole number since we can't rely on number => string
       // conversion precision on all devices.
-      mockDecodingConfig.video.framerate = 24;
+      mockDecodingConfig.video.framerate = 60;
 
       const chromecastType =
           'video/mp4; ' +
           'codecs="hev1.2.4.L153.B0"; ' +
-          'width=512; ' +
-          'height=288; ' +
-          'framerate=24; ' +
+          'width=1920; ' +
+          'height=1080; ' +
+          'framerate=60; ' +
           'eotf=smpte2084';
       mockCanDisplayType.and.callFake((type) => {
         expect(type).toBe(chromecastType);
