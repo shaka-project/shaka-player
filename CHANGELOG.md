@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.11.14](https://github.com/shaka-project/shaka-player/compare/v4.11.13...v4.11.14) (2024-11-20)
+
+
+### Bug Fixes
+
+* Abort operations only once ([#7624](https://github.com/shaka-project/shaka-player/issues/7624)) ([b888aad](https://github.com/shaka-project/shaka-player/commit/b888aad5cb53f53e51d2fad5283177319fde882a))
+* **Ads:** Disable interstitials when playing an interstitials ([#7621](https://github.com/shaka-project/shaka-player/issues/7621)) ([cf68ece](https://github.com/shaka-project/shaka-player/commit/cf68ecee181b6e962dc94aa690025a891557a0a4))
+* cache source buffer params on codec switch reload ([#7630](https://github.com/shaka-project/shaka-player/issues/7630)) ([aac5906](https://github.com/shaka-project/shaka-player/commit/aac5906930e9e762ad022b8edda29c1d68d71070))
+* **Cast:** Incorrect detection of MediaCapabilities on Linux Chromecast ([#7628](https://github.com/shaka-project/shaka-player/issues/7628)) ([defd2ee](https://github.com/shaka-project/shaka-player/commit/defd2ee1b070317c7b7e1fb14052219bc5249d90))
+* Disable smooth codec switch on Tizen 8 ([#7614](https://github.com/shaka-project/shaka-player/issues/7614)) ([18b3ae3](https://github.com/shaka-project/shaka-player/commit/18b3ae30dcc5f400acc08cf873379ce0925a1a59))
+* Disable smooth codec switch on webOS 6 ([#7636](https://github.com/shaka-project/shaka-player/issues/7636)) ([36ff499](https://github.com/shaka-project/shaka-player/commit/36ff499c84439469d2f5dba0c8ea557ddcabd213))
+* Fix cast support for HLG HDR ([#7632](https://github.com/shaka-project/shaka-player/issues/7632)) ([05e54e4](https://github.com/shaka-project/shaka-player/commit/05e54e4e39e18570647e15c1f2a0753f738c982f))
+* **HLS:** Fix subtitle timing ([#7625](https://github.com/shaka-project/shaka-player/issues/7625)) ([8e28506](https://github.com/shaka-project/shaka-player/commit/8e28506a3e540d8166ba459c930d6e75c777c678))
+* Silence aborted errors from PreloadManager. ([#7619](https://github.com/shaka-project/shaka-player/issues/7619)) ([d014d86](https://github.com/shaka-project/shaka-player/commit/d014d8647e61a0c8c41748940c01e08432495f47)), closes [#7618](https://github.com/shaka-project/shaka-player/issues/7618)
+* **UI:** Fix exception while casting to mismatched player version ([#7631](https://github.com/shaka-project/shaka-player/issues/7631)) ([a5184fd](https://github.com/shaka-project/shaka-player/commit/a5184fdb67583166fc726e70244efc9f145293cf))
+
 ## [4.11.13](https://github.com/shaka-project/shaka-player/compare/v4.11.12...v4.11.13) (2024-11-15)
 
 
