@@ -114,8 +114,10 @@ shakaDemo.Main = class {
     // Display unhandled rejections.
     window.addEventListener('unhandledrejection', (event) => {
       const rejectionEvent = /** @type {!PromiseRejectionEvent} */(event);
-      const message = `Unhandled rejection in promise: ${rejectionEvent.reason}`;
-      console.error('unhandledrejection', rejectionEvent.reason, rejectionEvent.promise);
+      const message =
+          `Unhandled rejection in promise: ${rejectionEvent.reason}`;
+      console.error('unhandledrejection', rejectionEvent.reason,
+          rejectionEvent.promise);
       this.handleError_(shaka.util.Error.Severity.CRITICAL, message, '');
     });
 
