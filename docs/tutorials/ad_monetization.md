@@ -113,6 +113,41 @@ adManager.addCustomInterstitial({
 });
 ```
 
+You can also use this with SCTE-35:
+
+```js
+const adManager = player.getAdManager();
+const video = document.getElementById('video');
+const ui = video['ui'];
+// If you're using a non-UI build, this is the div you'll need to create
+// for your layout.  The ad manager will clear this div, when it unloads, so
+// don't pass in a div that contains non-ad elements.
+const container = video.ui.getControls().getClientSideAdContainer();
+adManager.initInterstitial(container, player, video);
+player.addEventListener('timelineregionadded', (e) => {
+  const event = e.detail;
+  if (event.schemeIdUri != 'urn:scte:scte35:2014:xml+bin') {
+    return;
+  }
+  adManager.addCustomInterstitial({
+    id: event.id,
+    startTime: event.startTime,
+    endTime: event.endTime,
+    uri: 'YOUR_URL',
+    isSkippable: false,
+    skipOffset: null,
+    skipFor: null,
+    canJump: true,
+    resumeOffset: player.isLive() ? null : 0,
+    playoutLimit: null,
+    once: false,
+    pre: false,
+    post: false,
+    timelineRange: player.isLive(), // true, for replace the original part of the video
+  });
+});
+```
+
 
 ##### VAST/VMAP (playback without tracking)
 
