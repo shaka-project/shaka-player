@@ -16,6 +16,7 @@ module.exports = {
 
 const RULES = [
   'arg-comment-spacing',
+  'array-no-instanceof',
   'private',
 ];
 for (const rule of RULES) {
