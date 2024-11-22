@@ -14,6 +14,7 @@ goog.require('shaka.ui.Overlay.TrackLabelFormat');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.LanguageUtils');
+goog.require('shaka.util.MimeUtils');
 goog.requireType('shaka.ui.Localization');
 
 
@@ -48,7 +49,8 @@ shaka.ui.LanguageUtils = class {
       if (!codecsByLanguage.has(track.language)) {
         codecsByLanguage.set(track.language, new Set());
       }
-      codecsByLanguage.get(track.language).add(track.audioCodec);
+      codecsByLanguage.get(track.language).add(
+          shaka.util.MimeUtils.getNormalizedCodec(track.audioCodec));
     }
     const hasDifferentAudioCodecs = (language) =>
       codecsByLanguage.has(language) && codecsByLanguage.get(language).size > 1;
