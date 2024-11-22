@@ -56,6 +56,10 @@ shaka.test.FakeNetworkingEngine = class {
     this.setMinBytesForProgressEvents =
         jasmine.createSpy('setMinBytesForProgressEvents').and.stub();
 
+    /** @type {!jasmine.Spy} */
+    this.clearCommonAccessTokenMap =
+        jasmine.createSpy('clearCommonAccessTokenMap').and.stub();
+
     /** @private {number} */
     this.maxUris_ = 1;
 
