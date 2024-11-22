@@ -59,7 +59,7 @@ shaka.test.ManifestParser = class {
       partialReferences = [], tilesLayout = '', syncTime = null) {
     const getUris = () => {
       const uris = [];
-      if (uri instanceof Array) {
+      if (Array.isArray(uri)) {
         for (const url of uri) {
           if (url.length) {
             uris.push(baseUri + url);
