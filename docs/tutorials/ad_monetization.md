@@ -143,7 +143,7 @@ player.addEventListener('timelineregionadded', (e) => {
     once: false,
     pre: false,
     post: false,
-    timelineRange: player.isLive(), // true, for replace the original part of the video
+    timelineRange: player.isLive(), // If true, the ad will appear as a range on the timeline.
   });
 });
 ```
