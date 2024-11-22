@@ -98,7 +98,8 @@ shaka.extern.UIVolumeBarColors;
  *   displayInVrMode: boolean,
  *   defaultVrProjectionMode: string,
  *   setupMediaSession: boolean,
- *   preferVideoFullScreenInVisionOS: boolean
+ *   preferVideoFullScreenInVisionOS: boolean,
+ *   showAudioCodec: boolean
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -261,6 +262,9 @@ shaka.extern.UIVolumeBarColors;
  *   experiences that are only allowed with the fullscreen of the video element
  *   itself.
  *   Defaults to false.
+ * @property {boolean} showAudioCodec
+ *   Show the audio codec if the language has more than one audio codec.
+ *   Defaults to true.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

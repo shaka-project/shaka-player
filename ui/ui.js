@@ -274,6 +274,7 @@ shaka.ui.Overlay = class {
       defaultVrProjectionMode: 'equirectangular',
       setupMediaSession: true,
       preferVideoFullScreenInVisionOS: false,
+      showAudioCodec: true,
     };
 
     // eslint-disable-next-line no-restricted-syntax
