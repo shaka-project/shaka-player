@@ -63,6 +63,7 @@ shaka.extern.AdCuePoint;
  *   startTime: number,
  *   endTime: ?number,
  *   uri: string,
+ *   mimeType: ?string,
  *   isSkippable: boolean,
  *   skipOffset: ?number,
  *   skipFor: ?number,
@@ -87,6 +88,8 @@ shaka.extern.AdCuePoint;
  * @property {string} uri
  *   The uri of the interstitial, can be any type that
  *   ShakaPlayer supports (either in MSE or src=)
+ * @property {?string} mimeType
+ *   The mimeType of the interstitial if known.
  * @property {boolean} isSkippable
  *   Indicate if the interstitial is skippable.
  * @property {?number} skipOffset
