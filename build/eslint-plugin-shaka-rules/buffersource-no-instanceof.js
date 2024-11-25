@@ -8,7 +8,7 @@ module.exports = {
   meta: {
     type: 'suggestion',
     docs: {
-      description: 'Disallows usage of instanceof ArrayBuffer',
+      description: 'Disallows usage of instanceof on BufferSource objects',
       category: 'Best Practices',
       recommended: false,
     },
@@ -16,11 +16,24 @@ module.exports = {
   },
   create: (ctx) => ({
     BinaryExpression: (node) => {
+      const buffers = [
+        'ArrayBuffer',
+        'DataView',
+        'Uint8Array',
+        'Uint8ClampedArray',
+        'Int8Array',
+        'Uint16Array',
+        'Int16Array',
+        'Uint32Array',
+        'Int32Array',
+        'Float32Array',
+        'Float64Array',
+      ];
       if (node.operator === 'instanceof' && node.right.type === 'Identifier' &&
-          node.right.name === 'ArrayBuffer') {
+          buffers.includes(node.right.name)) {
         ctx.report({
           node,
-          message: 'Do not use instanceof ArrayBuffer, consider using ' +
+          message: `Do not use instanceof ${node.right.name}, consider using ` +
             'ArrayBuffer.isView() if possible',
         });
       }
