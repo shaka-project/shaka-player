@@ -110,6 +110,8 @@ adManager.addCustomInterstitial({
   pre: false,
   post: false,
   timelineRange: false,
+  loop: false,
+  overlay: null,
 });
 ```
 
@@ -144,7 +146,55 @@ player.addEventListener('timelineregionadded', (e) => {
     pre: false,
     post: false,
     timelineRange: player.isLive(), // If true, the ad will appear as a range on the timeline.
+    loop: false,
+    overlay: null
   });
+});
+```
+
+
+##### Custom Overlay Interstitials
+
+Example:
+
+```js
+const adManager = player.getAdManager();
+const video = document.getElementById('video');
+const ui = video['ui'];
+// If you're using a non-UI build, this is the div you'll need to create
+// for your layout.  The ad manager will clear this div, when it unloads, so
+// don't pass in a div that contains non-ad elements.
+const container = video.ui.getControls().getClientSideAdContainer();
+adManager.initInterstitial(container, player, video);
+adManager.addCustomInterstitial({
+  id: null,
+  startTime: 10,
+  endTime: null,
+  uri: 'YOUR_URL',
+  isSkippable: true,
+  skipOffset: 10,
+  canJump: false,
+  resumeOffset: null,
+  playoutLimit: null,
+  once: true,
+  pre: false,
+  post: false,
+  timelineRange: false,
+  loop: false,
+  overlay: { // Show interstitial in upper right quadrant
+    viewport: {
+      x: 1920, // Pixels
+      y: 1080, // Pixels
+    },
+    topLeft: {
+      x: 960, // Pixels
+      y: 0, // Pixels
+    },
+    size: {
+      x: 960, // Pixels
+      y: 540, // Pixels
+    },
+  },
 });
 ```
 
