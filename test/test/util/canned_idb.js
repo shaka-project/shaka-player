@@ -119,6 +119,7 @@ shaka.test.CannedIDB = class {
    * @private
    */
   static replacer_(dummyArrayBuffers, key, value) {
+    // eslint-disable-next-line shaka-rules/buffersource-no-instanceof
     if (value instanceof ArrayBuffer) {
       /** @type {string} */
       let data;
