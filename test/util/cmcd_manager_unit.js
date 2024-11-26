@@ -518,8 +518,8 @@ describe('CmcdManager', () => {
           networkingEngine = createNetworkingEngine(cmcdManager);
 
           // Trigger Play and Playing events
-          cmcdManager.onPlaybackPlay();
-          cmcdManager.onPlaybackPlaying();
+          cmcdManager.onPlaybackPlay_();
+          cmcdManager.onPlaybackPlaying_();
           const request = NetworkingEngine.makeRequest([uri], retry);
           await networkingEngine.request(RequestType.MANIFEST, request,
               {type: AdvancedRequestType.MPD});
@@ -541,8 +541,8 @@ describe('CmcdManager', () => {
               networkingEngine = createNetworkingEngine(cmcdManagerTmp);
 
               // Trigger Play and Playing events
-              cmcdManagerTmp.onPlaybackPlay();
-              cmcdManagerTmp.onPlaybackPlaying();
+              cmcdManagerTmp.onPlaybackPlay_();
+              cmcdManagerTmp.onPlaybackPlaying_();
 
               const request = NetworkingEngine.makeRequest([uri], retry);
               await networkingEngine.request(RequestType.MANIFEST, request,
@@ -562,8 +562,8 @@ describe('CmcdManager', () => {
           networkingEngine = createNetworkingEngine(cmcdManager);
 
           // Trigger Play and Playing events
-          cmcdManager.onPlaybackPlay();
-          cmcdManager.onPlaybackPlaying();
+          cmcdManager.onPlaybackPlay_();
+          cmcdManager.onPlaybackPlaying_();
           const request = NetworkingEngine.makeRequest([uri], retry);
           await networkingEngine.request(RequestType.MANIFEST, request,
               {type: AdvancedRequestType.MPD});
@@ -580,8 +580,8 @@ describe('CmcdManager', () => {
                 useHeaders: true,
               });
               networkingEngine = createNetworkingEngine(cmcdManager);
-              cmcdManager.onPlaybackPlay();
-              cmcdManager.onPlaybackPlaying();
+              cmcdManager.onPlaybackPlay_();
+              cmcdManager.onPlaybackPlaying_();
               const request = NetworkingEngine.makeRequest([uri], retry);
               await networkingEngine.request(RequestType.MANIFEST, request,
                   {type: AdvancedRequestType.MPD});
