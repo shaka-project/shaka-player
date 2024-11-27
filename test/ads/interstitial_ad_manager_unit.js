@@ -245,6 +245,478 @@ describe('Interstitial Ad manager', () => {
 
       expect(onEventSpy).not.toHaveBeenCalled();
     });
+
+    it('supports X-ASSET-LIST', async () => {
+      const assetsList = JSON.stringify({
+        ASSETS: [
+          {
+            URI: 'ad.m3u8',
+          },
+        ],
+      });
+
+      networkingEngine.setResponseText('test:/test.json', assetsList);
+
+      const metadata = {
+        startTime: 0,
+        endTime: null,
+        values: [
+          {
+            key: 'ID',
+            data: 'PREROLL',
+          },
+          {
+            key: 'CUE',
+            data: 'PRE',
+          },
+          {
+            key: 'X-ASSET-LIST',
+            data: 'test:/test.json',
+          },
+          {
+            key: 'X-RESUME-OFFSET',
+            data: '0.0',
+          },
+          {
+            key: 'X-RESTRICT',
+            data: 'SKIP,JUMP',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      expect(onEventSpy).toHaveBeenCalledTimes(1);
+      const eventValue1 = {
+        type: 'ad-cue-points-changed',
+        cuepoints: [
+          {
+            start: 0,
+            end: null,
+          },
+        ],
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValue1));
+    });
+
+    it('supports X-RESTRICT', async () => {
+      const metadata = {
+        startTime: 0,
+        endTime: null,
+        values: [
+          {
+            key: 'ID',
+            data: 'TEST',
+          },
+          {
+            key: 'X-ASSET-URI',
+            data: 'test.m3u8',
+          },
+          {
+            key: 'X-RESTRICT',
+            data: 'SKIP,JUMP',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      const expectedInterstitial = {
+        id: 'TEST',
+        startTime: 0,
+        endTime: null,
+        uri: 'test.m3u8',
+        mimeType: null,
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: false,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: false,
+        pre: false,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
+    it('supports X-ENABLE-SKIP-AFTER and X-ENABLE-SKIP-FOR', async () => {
+      const metadata = {
+        startTime: 0,
+        endTime: null,
+        values: [
+          {
+            key: 'ID',
+            data: 'TEST',
+          },
+          {
+            key: 'X-ASSET-URI',
+            data: 'test.m3u8',
+          },
+          {
+            key: 'X-ENABLE-SKIP-AFTER',
+            data: 5,
+          },
+          {
+            key: 'X-ENABLE-SKIP-FOR',
+            data: 10,
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      const expectedInterstitial = {
+        id: 'TEST',
+        startTime: 0,
+        endTime: null,
+        uri: 'test.m3u8',
+        mimeType: null,
+        isSkippable: true,
+        skipOffset: 5,
+        skipFor: 10,
+        canJump: true,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: false,
+        pre: false,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
+    it('supports X-RESUME-OFFSET', async () => {
+      const metadata = {
+        startTime: 0,
+        endTime: null,
+        values: [
+          {
+            key: 'ID',
+            data: 'TEST',
+          },
+          {
+            key: 'X-ASSET-URI',
+            data: 'test.m3u8',
+          },
+          {
+            key: 'X-RESUME-OFFSET',
+            data: '1.5',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      const expectedInterstitial = {
+        id: 'TEST',
+        startTime: 0,
+        endTime: null,
+        uri: 'test.m3u8',
+        mimeType: null,
+        isSkippable: true,
+        skipOffset: 0,
+        skipFor: null,
+        canJump: true,
+        resumeOffset: 1.5,
+        playoutLimit: null,
+        once: false,
+        pre: false,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
+    it('supports X-PLAYOUT-LIMIT', async () => {
+      const metadata = {
+        startTime: 0,
+        endTime: null,
+        values: [
+          {
+            key: 'ID',
+            data: 'TEST',
+          },
+          {
+            key: 'X-ASSET-URI',
+            data: 'test.m3u8',
+          },
+          {
+            key: 'X-PLAYOUT-LIMIT',
+            data: '15',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      const expectedInterstitial = {
+        id: 'TEST',
+        startTime: 0,
+        endTime: null,
+        uri: 'test.m3u8',
+        mimeType: null,
+        isSkippable: true,
+        skipOffset: 0,
+        skipFor: null,
+        canJump: true,
+        resumeOffset: null,
+        playoutLimit: 15,
+        once: false,
+        pre: false,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
+    it('supports CUE-ONCE', async () => {
+      const metadata = {
+        startTime: 0,
+        endTime: null,
+        values: [
+          {
+            key: 'ID',
+            data: 'TEST',
+          },
+          {
+            key: 'X-ASSET-URI',
+            data: 'test.m3u8',
+          },
+          {
+            key: 'CUE',
+            data: 'ONCE',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      const expectedInterstitial = {
+        id: 'TEST',
+        startTime: 0,
+        endTime: null,
+        uri: 'test.m3u8',
+        mimeType: null,
+        isSkippable: true,
+        skipOffset: 0,
+        skipFor: null,
+        canJump: true,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: true,
+        pre: false,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
+    it('supports CUE-PRE', async () => {
+      const metadata = {
+        startTime: 0,
+        endTime: null,
+        values: [
+          {
+            key: 'ID',
+            data: 'TEST',
+          },
+          {
+            key: 'X-ASSET-URI',
+            data: 'test.m3u8',
+          },
+          {
+            key: 'CUE',
+            data: 'PRE',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      const expectedInterstitial = {
+        id: 'TEST',
+        startTime: 0,
+        endTime: null,
+        uri: 'test.m3u8',
+        mimeType: null,
+        isSkippable: true,
+        skipOffset: 0,
+        skipFor: null,
+        canJump: true,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: false,
+        pre: true,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
+    it('supports CUE-POST', async () => {
+      const metadata = {
+        startTime: 0,
+        endTime: null,
+        values: [
+          {
+            key: 'ID',
+            data: 'TEST',
+          },
+          {
+            key: 'X-ASSET-URI',
+            data: 'test.m3u8',
+          },
+          {
+            key: 'CUE',
+            data: 'POST',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      const expectedInterstitial = {
+        id: 'TEST',
+        startTime: 0,
+        endTime: null,
+        uri: 'test.m3u8',
+        mimeType: null,
+        isSkippable: true,
+        skipOffset: 0,
+        skipFor: null,
+        canJump: true,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: false,
+        pre: false,
+        post: true,
+        timelineRange: false,
+        loop: false,
+        overlay: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
+    it('supports X-TIMELINE-OCCUPIES', async () => {
+      const metadata = {
+        startTime: 100,
+        endTime: 130,
+        values: [
+          {
+            key: 'ID',
+            data: 'TEST',
+          },
+          {
+            key: 'X-ASSET-URI',
+            data: 'test.m3u8',
+          },
+          {
+            key: 'X-TIMELINE-OCCUPIES',
+            data: 'RANGE',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      const expectedInterstitial = {
+        id: 'TEST',
+        startTime: 100,
+        endTime: 130,
+        uri: 'test.m3u8',
+        mimeType: null,
+        isSkippable: true,
+        skipOffset: 0,
+        skipFor: null,
+        canJump: true,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: false,
+        pre: false,
+        post: false,
+        timelineRange: true,
+        loop: false,
+        overlay: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
+    it('supports ENABLE-SKIP-AFTER and ENABLE-SKIP-FOR', async () => {
+      const assetsList = JSON.stringify({
+        'ASSETS': [
+          {
+            URI: 'ad.m3u8',
+          },
+        ],
+        'SKIP-CONTROL': {
+          'ENABLE-SKIP-AFTER': 5,
+          'ENABLE-SKIP-FOR': 10,
+        },
+      });
+
+      networkingEngine.setResponseText('test:/test.json', assetsList);
+
+      const metadata = {
+        startTime: 0,
+        endTime: null,
+        values: [
+          {
+            key: 'ID',
+            data: 'TEST',
+          },
+          {
+            key: 'X-ASSET-LIST',
+            data: 'test:/test.json',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      const expectedInterstitial = {
+        id: 'TEST_asset_0',
+        startTime: 0,
+        endTime: null,
+        uri: 'ad.m3u8',
+        mimeType: null,
+        isSkippable: true,
+        skipOffset: 5,
+        skipFor: 10,
+        canJump: true,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: false,
+        pre: false,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
   });
 
   describe('DASH', () => {
@@ -385,6 +857,7 @@ describe('Interstitial Ad manager', () => {
           mimeType: null,
           isSkippable: true,
           skipOffset: 5,
+          skipFor: null,
           canJump: false,
           resumeOffset: null,
           playoutLimit: null,
@@ -403,6 +876,7 @@ describe('Interstitial Ad manager', () => {
           mimeType: null,
           isSkippable: true,
           skipOffset: 10,
+          skipFor: null,
           canJump: false,
           resumeOffset: null,
           playoutLimit: null,
@@ -443,6 +917,7 @@ describe('Interstitial Ad manager', () => {
         mimeType: null,
         isSkippable: true,
         skipOffset: 10,
+        skipFor: null,
         canJump: false,
         resumeOffset: null,
         playoutLimit: null,
@@ -513,6 +988,20 @@ describe('Interstitial Ad manager', () => {
       expect(onEventSpy).toHaveBeenCalledWith(
           jasmine.objectContaining(eventValue1));
     });
+
+    it('ignore empty', async () => {
+      const vast = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<VAST version="3.0">',
+        '</VAST>',
+      ].join('');
+
+      networkingEngine.setResponseText('test:/vast', vast);
+
+      await interstitialAdManager.addAdUrlInterstitial('test:/vast');
+
+      expect(onEventSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('VMAP', () => {
@@ -574,5 +1063,20 @@ describe('Interstitial Ad manager', () => {
       expect(onEventSpy).toHaveBeenCalledWith(
           jasmine.objectContaining(eventValue1));
     });
+  });
+
+  it('ignore empty', async () => {
+    const vmap = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<vmap:VMAP xmlns:vmap="http://www.iab.net/videosuite/vmap"',
+      ' version="1.0">',
+      '</vmap:VMAP>',
+    ].join('');
+
+    networkingEngine.setResponseText('test:/vmap', vmap);
+
+    await interstitialAdManager.addAdUrlInterstitial('test:/vmap');
+
+    expect(onEventSpy).not.toHaveBeenCalled();
   });
 });
