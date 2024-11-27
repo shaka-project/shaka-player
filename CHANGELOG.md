@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.11.15](https://github.com/shaka-project/shaka-player/compare/v4.11.14...v4.11.15) (2024-11-27)
+
+
+### Bug Fixes
+
+* **Ads:** Fix behavior when user JUMPS across more than one interstitial ([#7667](https://github.com/shaka-project/shaka-player/issues/7667)) ([8e9d548](https://github.com/shaka-project/shaka-player/commit/8e9d548387ec21450fc02836d25e1a4b8ae1b687))
+* **Ads:** Fix post-roll playback ([#7663](https://github.com/shaka-project/shaka-player/issues/7663)) ([697e943](https://github.com/shaka-project/shaka-player/commit/697e94315310c2d04885a913e44b31020d9a9b89))
+* **Ads:** Use region.id as id for Alternative MPD interstitial ([#7671](https://github.com/shaka-project/shaka-player/issues/7671)) ([a35f645](https://github.com/shaka-project/shaka-player/commit/a35f6459c141ef135734f855b7a921b9153605e6))
+* Detect smooth codec switch support on Apple devices ([#7678](https://github.com/shaka-project/shaka-player/issues/7678)) ([c7be2f4](https://github.com/shaka-project/shaka-player/commit/c7be2f49c55a4db68630b30840b0113ad7cfa671))
+* Fix CBCS support in recent WebOS ([#7647](https://github.com/shaka-project/shaka-player/issues/7647)) ([edea6a2](https://github.com/shaka-project/shaka-player/commit/edea6a20b758b18bfa173aac54f417cf1694a4c4))
+* Fix normalized codec for VP9 ([#7645](https://github.com/shaka-project/shaka-player/issues/7645)) ([e9c8261](https://github.com/shaka-project/shaka-player/commit/e9c8261affa6d1bac771433454c0194850a3a8d5))
+* Fix video progress events accuracy ([#7654](https://github.com/shaka-project/shaka-player/issues/7654)) ([e93e8e1](https://github.com/shaka-project/shaka-player/commit/e93e8e17072ec0ff824be1b17bf0736f9518235e))
+* Forbid usage of instanceof ArrayBuffer ([#7653](https://github.com/shaka-project/shaka-player/issues/7653)) ([5c5785b](https://github.com/shaka-project/shaka-player/commit/5c5785b1a20a508059e8ecfeceb8b5b6ee9134be)), closes [#6279](https://github.com/shaka-project/shaka-player/issues/6279)
+* **HLS:** Fix playback of raw AAC ([#7641](https://github.com/shaka-project/shaka-player/issues/7641)) ([5bd6348](https://github.com/shaka-project/shaka-player/commit/5bd6348e08d93741758c53fdffd82176cf821331))
+* **HLS:** Fix subtitle timing when no discontinuity but there is X-TIMESTAMP-MAP ([#7681](https://github.com/shaka-project/shaka-player/issues/7681)) ([284b21c](https://github.com/shaka-project/shaka-player/commit/284b21ccfb4d71a9001f46392a92d9ed8e97200b))
+* **HLS:** Ignore errors when try to detect CC ([#7668](https://github.com/shaka-project/shaka-player/issues/7668)) ([b4d87a0](https://github.com/shaka-project/shaka-player/commit/b4d87a020ba4ed77d64c07ca21f994301216b1c9))
+* **PS5:** Prevent uncaught promise rejections when requests are aborted ([#7637](https://github.com/shaka-project/shaka-player/issues/7637)) ([623888e](https://github.com/shaka-project/shaka-player/commit/623888ea50580143bec1d64f7a31065bcb483ff9))
+* **UI:** Change to use legacy css format to support old TVs ([#7658](https://github.com/shaka-project/shaka-player/issues/7658)) ([a8eed1d](https://github.com/shaka-project/shaka-player/commit/a8eed1d83a3e444bd3d2d968c5d4e255e622f538))
+* **UI:** Do not show codec name when the same codec is used for the same language ([#7643](https://github.com/shaka-project/shaka-player/issues/7643)) ([091cb47](https://github.com/shaka-project/shaka-player/commit/091cb478cf41dd918471f674037d6f55b30579af))
+
 ## [4.11.14](https://github.com/shaka-project/shaka-player/compare/v4.11.13...v4.11.14) (2024-11-20)
 
 
