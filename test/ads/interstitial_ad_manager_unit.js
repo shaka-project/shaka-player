@@ -14,14 +14,18 @@ describe('Interstitial Ad manager', () => {
   let adContainer;
   /** @type {!shaka.Player} */
   let player;
-  /** @type {!shaka.test.FakeVideo} */
-  let mockVideo;
+  /** @type {!HTMLVideoElement} */
+  let video;
   /** @type {!jasmine.Spy} */
   let onEventSpy;
   /** @type {!shaka.ads.InterstitialAdManager} */
   let interstitialAdManager;
 
   beforeEach(() => {
+    // Allows us to use a timer instead of requestVideoFrameCallback
+    // (which doesn't work well in all platform tests)
+    spyOn(shaka.util.Platform, 'isSmartTV').and.returnValue(true);
+
     function dependencyInjector(player) {
       // Create a networking engine that always returns an empty buffer.
       networkingEngine = new shaka.test.FakeNetworkingEngine();
@@ -32,10 +36,15 @@ describe('Interstitial Ad manager', () => {
     adContainer =
       /** @type {!HTMLElement} */ (document.createElement('div'));
     player = new shaka.Player(null, null, dependencyInjector);
-    mockVideo = new shaka.test.FakeVideo();
+    video = shaka.test.UiUtils.createVideoElement();
     onEventSpy = jasmine.createSpy('onEvent');
     interstitialAdManager = new shaka.ads.InterstitialAdManager(
-        adContainer, player, mockVideo, shaka.test.Util.spyFunc(onEventSpy));
+        adContainer, player, video, shaka.test.Util.spyFunc(onEventSpy));
+    const config = shaka.util.PlayerConfiguration.createDefault().ads;
+    // We always support multiple video elements so that we can properly
+    // control timing in unit tests.
+    config.supportsMultipleMediaElements = true;
+    interstitialAdManager.configure(config);
   });
 
   afterEach(async () => {
@@ -1063,20 +1072,169 @@ describe('Interstitial Ad manager', () => {
       expect(onEventSpy).toHaveBeenCalledWith(
           jasmine.objectContaining(eventValue1));
     });
+
+    it('ignore empty', async () => {
+      const vmap = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<vmap:VMAP xmlns:vmap="http://www.iab.net/videosuite/vmap"',
+        ' version="1.0">',
+        '</vmap:VMAP>',
+      ].join('');
+
+      networkingEngine.setResponseText('test:/vmap', vmap);
+
+      await interstitialAdManager.addAdUrlInterstitial('test:/vmap');
+
+      expect(onEventSpy).not.toHaveBeenCalled();
+    });
   });
 
-  it('ignore empty', async () => {
-    const vmap = [
-      '<?xml version="1.0" encoding="UTF-8"?>',
-      '<vmap:VMAP xmlns:vmap="http://www.iab.net/videosuite/vmap"',
-      ' version="1.0">',
-      '</vmap:VMAP>',
-    ].join('');
+  it('plays pre-roll correctly', async () => {
+    const metadata = {
+      startTime: 0,
+      endTime: null,
+      values: [
+        {
+          key: 'ID',
+          data: 'PREROLL',
+        },
+        {
+          key: 'CUE',
+          data: 'PRE',
+        },
+        {
+          key: 'X-ASSET-URI',
+          data: 'test.m3u8',
+        },
+        {
+          key: 'X-RESTRICT',
+          data: 'SKIP,JUMP',
+        },
+      ],
+    };
+    await interstitialAdManager.addMetadata(metadata);
 
-    networkingEngine.setResponseText('test:/vmap', vmap);
+    video.dispatchEvent(new Event('timeupdate'));
 
-    await interstitialAdManager.addAdUrlInterstitial('test:/vmap');
+    await shaka.test.Util.shortDelay();
 
-    expect(onEventSpy).not.toHaveBeenCalled();
+    expect(onEventSpy).toHaveBeenCalledTimes(2);
+    const eventValue1 = {
+      type: 'ad-cue-points-changed',
+      cuepoints: [
+        {
+          start: 0,
+          end: null,
+        },
+      ],
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValue1));
+    const eventValue2 = {
+      type: 'ad-started',
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValue2));
+  });
+
+  it('dispatch skip event correctly', async () => {
+    const metadata = {
+      startTime: 0,
+      endTime: null,
+      values: [
+        {
+          key: 'ID',
+          data: 'PREROLL',
+        },
+        {
+          key: 'CUE',
+          data: 'PRE',
+        },
+        {
+          key: 'X-ASSET-URI',
+          data: 'test.m3u8',
+        },
+      ],
+    };
+    await interstitialAdManager.addMetadata(metadata);
+
+    video.dispatchEvent(new Event('timeupdate'));
+
+    await shaka.test.Util.shortDelay();
+
+    expect(onEventSpy).toHaveBeenCalledTimes(3);
+    const eventValue1 = {
+      type: 'ad-cue-points-changed',
+      cuepoints: [
+        {
+          start: 0,
+          end: null,
+        },
+      ],
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValue1));
+    const eventValue2 = {
+      type: 'ad-started',
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValue2));
+    const eventValue3 = {
+      type: 'ad-skip-state-changed',
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValue3));
+  });
+
+  it('jumping a mid-roll with JUMP restriction is not allowed', async () => {
+    const metadata = {
+      startTime: 10,
+      endTime: null,
+      values: [
+        {
+          key: 'ID',
+          data: 'MIDROLL',
+        },
+        {
+          key: 'X-ASSET-URI',
+          data: 'test.m3u8',
+        },
+        {
+          key: 'X-RESTRICT',
+          data: 'SKIP,JUMP',
+        },
+      ],
+    };
+    await interstitialAdManager.addMetadata(metadata);
+
+    video.currentTime = 0;
+    video.dispatchEvent(new Event('timeupdate'));
+
+    await shaka.test.Util.shortDelay();
+
+    expect(onEventSpy).toHaveBeenCalledTimes(1);
+    const eventValue1 = {
+      type: 'ad-cue-points-changed',
+      cuepoints: [
+        {
+          start: 10,
+          end: null,
+        },
+      ],
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValue1));
+
+    video.currentTime = 20;
+    video.dispatchEvent(new Event('timeupdate'));
+
+    await shaka.test.Util.delay(0.25);
+
+    expect(onEventSpy).toHaveBeenCalledTimes(2);
+    const eventValue2 = {
+      type: 'ad-started',
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValue2));
   });
 });
