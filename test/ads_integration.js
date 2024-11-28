@@ -218,6 +218,12 @@ describe('Ads', () => {
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_FIRST_QUARTILE);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_MIDPOINT);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_THIRD_QUARTILE);
       await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
 
@@ -227,6 +233,12 @@ describe('Ads', () => {
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_FIRST_QUARTILE);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_MIDPOINT);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_THIRD_QUARTILE);
       await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
 
@@ -249,6 +261,12 @@ describe('Ads', () => {
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_FIRST_QUARTILE);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_MIDPOINT);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_THIRD_QUARTILE);
       await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
 
@@ -258,6 +276,12 @@ describe('Ads', () => {
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_FIRST_QUARTILE);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_MIDPOINT);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_THIRD_QUARTILE);
       await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
 
@@ -278,6 +302,12 @@ describe('Ads', () => {
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_FIRST_QUARTILE);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_MIDPOINT);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_THIRD_QUARTILE);
       await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
 
@@ -287,6 +317,12 @@ describe('Ads', () => {
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_FIRST_QUARTILE);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_MIDPOINT);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_THIRD_QUARTILE);
       await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
 
@@ -378,6 +414,12 @@ describe('Ads', () => {
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_FIRST_QUARTILE);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_MIDPOINT);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_THIRD_QUARTILE);
       await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
 
