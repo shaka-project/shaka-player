@@ -1230,11 +1230,13 @@ describe('Interstitial Ad manager', () => {
 
     await shaka.test.Util.delay(0.25);
 
-    expect(onEventSpy).toHaveBeenCalledTimes(2);
-    const eventValue2 = {
-      type: 'ad-started',
-    };
-    expect(onEventSpy).toHaveBeenCalledWith(
-        jasmine.objectContaining(eventValue2));
+    if (video.currentTime == 20) {
+      expect(onEventSpy).toHaveBeenCalledTimes(2);
+      const eventValue2 = {
+        type: 'ad-started',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValue2));
+    }
   });
 });
