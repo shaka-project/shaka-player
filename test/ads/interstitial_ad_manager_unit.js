@@ -1239,4 +1239,45 @@ describe('Interstitial Ad manager', () => {
           jasmine.objectContaining(eventValue2));
     }
   });
+
+  it('don\'t dispatch cue points changed if it is an overlay', async () => {
+    const interstitial = {
+      id: null,
+      startTime: 10,
+      endTime: null,
+      uri: 'test.mp4',
+      mimeType: null,
+      isSkippable: false,
+      skipOffset: null,
+      skipFor: null,
+      canJump: false,
+      resumeOffset: null,
+      playoutLimit: null,
+      once: true,
+      pre: false,
+      post: false,
+      timelineRange: false,
+      loop: false,
+      overlay: {
+        viewport: {
+          x: 1920,
+          y: 1080,
+        },
+        topLeft: {
+          x: 960,
+          y: 0,
+        },
+        size: {
+          x: 960,
+          y: 540,
+        },
+      },
+    };
+    await interstitialAdManager.addInterstitials([interstitial]);
+
+    expect(onEventSpy).not.toHaveBeenCalled();
+
+    const interstitials = interstitialAdManager.getInterstitials();
+    expect(interstitials.length).toBe(1);
+  });
 });
