@@ -953,6 +953,32 @@ describe('Interstitial Ad manager', () => {
       expect(onEventSpy).toHaveBeenCalledWith(
           jasmine.objectContaining(eventValue1));
     });
+
+    it('ignore invalid interstitial', async () => {
+      // It is not valid because it does not have an interstitial URL
+      const interstitial = {
+        id: null,
+        startTime: 10,
+        endTime: null,
+        uri: '',
+        mimeType: null,
+        isSkippable: true,
+        skipOffset: 10,
+        skipFor: null,
+        canJump: false,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: true,
+        pre: false,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: null,
+      };
+      await interstitialAdManager.addInterstitials([interstitial]);
+
+      expect(onEventSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('VAST', () => {
