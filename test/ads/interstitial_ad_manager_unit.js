@@ -1024,6 +1024,71 @@ describe('Interstitial Ad manager', () => {
           jasmine.objectContaining(eventValue1));
     });
 
+    it('supports non-linear ads', async () => {
+      const vast = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<VAST version="3.0">',
+        '<Ad id="5925573263">',
+        '<InLine>',
+        '<Creatives>',
+        '<Creative id="138381721867" sequence="1">',
+        '<NonLinearAds>',
+        '<NonLinear width="535" height="80" minSuggestedDuration="00:00:05">',
+        '<StaticResource creativeType="image/png">',
+        '<![CDATA[test.png]]>',
+        '</StaticResource>',
+        '</NonLinear>',
+        '</NonLinearAds>',
+        '</Creative>',
+        '</Creatives>',
+        '</InLine>',
+        '</Ad>',
+        '</VAST>',
+      ].join('');
+
+      networkingEngine.setResponseText('test:/vast', vast);
+
+      await interstitialAdManager.addAdUrlInterstitial('test:/vast');
+
+      expect(onEventSpy).not.toHaveBeenCalled();
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      const expectedInterstitial = {
+        id: null,
+        startTime: 0,
+        endTime: null,
+        uri: 'test.png',
+        mimeType: 'image/png',
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: false,
+        resumeOffset: 0,
+        playoutLimit: 5,
+        once: true,
+        pre: true,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: {
+          viewport: {
+            x: 0,
+            y: 0,
+          },
+          topLeft: {
+            x: 0,
+            y: 0,
+          },
+          size: {
+            x: 535,
+            y: 80,
+          },
+        },
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
     it('ignore empty', async () => {
       const vast = [
         '<?xml version="1.0" encoding="UTF-8"?>',
