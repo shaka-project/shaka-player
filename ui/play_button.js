@@ -77,11 +77,13 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(this.button, 'click', () => {
-      if (this.ad && this.ad.isLinear()) {
+      if (this.ad) {
         this.controls.playPauseAd();
-      } else {
-        this.controls.playPausePresentation();
+        if (this.ad.isLinear()) {
+          return;
+        }
       }
+      this.controls.playPausePresentation();
     });
 
     if (this.ad) {
