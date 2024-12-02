@@ -48,7 +48,7 @@ shaka.test.FakeDrmEngine = class {
 
     /** @type {!jasmine.Spy} */
     this.waitForActiveRequests = jasmine.createSpy('waitForActiveRequests');
-    this.getExpiration.and.returnValue(Promise.resolve());
+    this.waitForActiveRequests.and.returnValue(Promise.resolve());
 
     /** @type {!jasmine.Spy} */
     this.getExpiration = jasmine.createSpy('getExpiration');
