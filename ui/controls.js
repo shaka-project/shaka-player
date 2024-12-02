@@ -1614,11 +1614,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   onPlayPauseClick_() {
-    if (this.ad_ && this.ad_.isLinear()) {
+    if (this.ad_) {
       this.playPauseAd();
-    } else {
-      this.playPausePresentation();
+      if (this.ad_.isLinear()) {
+        return;
+      }
     }
+    this.playPausePresentation();
   }
 
   /** @private */
