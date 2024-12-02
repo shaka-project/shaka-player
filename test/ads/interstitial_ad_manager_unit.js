@@ -818,6 +818,68 @@ describe('Interstitial Ad manager', () => {
 
       expect(onEventSpy).not.toHaveBeenCalled();
     });
+
+    it('supports overlay events', async () => {
+      const eventString = [
+        '<Event duration="1" id="OVERLAY" presentationTime="0">',
+        '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd">',
+        '<Viewport x="1920" y="1080"/>',
+        '<TopLeft x="0" y="720"/>',
+        '<Size x="480" y="360"/>',
+        '</OverlayEvent>',
+        '</Event>',
+      ].join('');
+      const eventNode = TXml.parseXmlString(eventString);
+      goog.asserts.assert(eventNode, 'Should have a event node!');
+      const region = {
+        startTime: 0,
+        endTime: 1,
+        id: 'OVERLAY',
+        schemeIdUri: 'urn:mpeg:dash:event:2012',
+        eventNode,
+        eventElement: TXml.txmlNodeToDomElement(eventNode),
+        value: '',
+      };
+      await interstitialAdManager.addOverlayRegion(region);
+
+      expect(onEventSpy).not.toHaveBeenCalled();
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      const expectedInterstitial = {
+        id: 'OVERLAY',
+        startTime: 0,
+        endTime: 1,
+        uri: 'test.mpd',
+        mimeType: 'application/dash+xml',
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: true,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: false,
+        pre: false,
+        post: false,
+        timelineRange: true,
+        loop: false,
+        overlay: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 0,
+            y: 720,
+          },
+          size: {
+            x: 480,
+            y: 360,
+          },
+        },
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
   });
 
   describe('custom', () => {
