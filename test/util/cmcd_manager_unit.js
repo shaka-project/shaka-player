@@ -31,6 +31,7 @@ describe('CmcdManager', () => {
 
   const playerInterface = {
     isLive: () => false,
+    getLiveLatency: () => 0,
     getBandwidthEstimate: () => 10000000,
     getBufferedInfo: () => ({
       video: [
@@ -64,6 +65,7 @@ describe('CmcdManager', () => {
     rtpSafetyFactor: 5,
     useHeaders: false,
     includeKeys: [],
+    version: 1,
   };
 
   function createCmcdConfig(cfg = {}) {
@@ -505,6 +507,87 @@ describe('CmcdManager', () => {
           const result = request.uris[0];
           expect(result).not.toContain('?CMCD=');
         });
+
+        it('returns cmcd v2 data in query if version is 2', async () => {
+          // Set live to true to enable ltc
+          playerInterface.isLive = () => true;
+          cmcdManager = createCmcdManager({
+            version: 2,
+            includeKeys: ['ltc', 'msd', 'v'],
+          });
+          networkingEngine = createNetworkingEngine(cmcdManager);
+
+          // Trigger Play and Playing events
+          cmcdManager.onPlaybackPlay_();
+          cmcdManager.onPlaybackPlaying_();
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.MANIFEST, request,
+              {type: AdvancedRequestType.MPD});
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('v=2'));
+          expect(result).toContain(encodeURIComponent('ltc'));
+          expect(result).toContain(encodeURIComponent('msd'));
+        });
+
+        it('doesnt return cmcd v2 data in query if version is not 2',
+            async () => {
+              // Set live to true to enable ltc
+              playerInterface.isLive = () => true;
+
+              const cmcdManagerTmp = createCmcdManager({
+                version: 1,
+                includeKeys: ['ltc', 'msd'],
+              });
+              networkingEngine = createNetworkingEngine(cmcdManagerTmp);
+
+              // Trigger Play and Playing events
+              cmcdManagerTmp.onPlaybackPlay_();
+              cmcdManagerTmp.onPlaybackPlaying_();
+
+              const request = NetworkingEngine.makeRequest([uri], retry);
+              await networkingEngine.request(RequestType.MANIFEST, request,
+                  {type: AdvancedRequestType.MPD});
+              const result = request.uris[0];
+              expect(result).not.toContain(encodeURIComponent('ltc'));
+              expect(result).not.toContain(encodeURIComponent('msd'));
+            });
+
+        it('returns cmcd v2 data in header if version is 2', async () => {
+          playerInterface.isLive = () => true;
+          cmcdManager = createCmcdManager({
+            version: 2,
+            includeKeys: ['ltc', 'msd'],
+            useHeaders: true,
+          });
+          networkingEngine = createNetworkingEngine(cmcdManager);
+
+          // Trigger Play and Playing events
+          cmcdManager.onPlaybackPlay_();
+          cmcdManager.onPlaybackPlaying_();
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.MANIFEST, request,
+              {type: AdvancedRequestType.MPD});
+          expect(request.headers['CMCD-Request']).toContain('ltc');
+          expect(request.headers['CMCD-Session']).toContain('msd');
+        });
+
+        it('doesnt return cmcd v2 data in headers if version is not 2',
+            async () => {
+              playerInterface.isLive = () => true;
+              cmcdManager = createCmcdManager({
+                version: 1,
+                includeKeys: ['ltc', 'msd'],
+                useHeaders: true,
+              });
+              networkingEngine = createNetworkingEngine(cmcdManager);
+              cmcdManager.onPlaybackPlay_();
+              cmcdManager.onPlaybackPlaying_();
+              const request = NetworkingEngine.makeRequest([uri], retry);
+              await networkingEngine.request(RequestType.MANIFEST, request,
+                  {type: AdvancedRequestType.MPD});
+              expect(request.headers['CMCD-Request']).not.toContain('ltc');
+              expect(request.headers['CMCD-Session']).not.toContain('msd');
+            });
       });
     });
   });

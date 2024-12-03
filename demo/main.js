@@ -111,6 +111,16 @@ shakaDemo.Main = class {
       this.onError_(/** @type {!shaka.util.Error} */ (errorEvent.error));
     });
 
+    // Display unhandled rejections.
+    window.addEventListener('unhandledrejection', (event) => {
+      const rejectionEvent = /** @type {!PromiseRejectionEvent} */(event);
+      const message =
+          `Unhandled rejection in promise: ${rejectionEvent.reason}`;
+      console.error('unhandledrejection', rejectionEvent.reason,
+          rejectionEvent.promise);
+      this.handleError_(shaka.util.Error.Severity.CRITICAL, message, '');
+    });
+
     // Set up event listeners.
     document.getElementById('error-display-close-button').addEventListener(
         'click', (event) => this.closeError_());

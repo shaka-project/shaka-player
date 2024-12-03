@@ -101,8 +101,10 @@ adManager.addCustomInterstitial({
   startTime: 10,
   endTime: null,
   uri: 'YOUR_URL',
+  mimeType: null,
   isSkippable: true,
   skipOffset: 10,
+  skipFor: null,
   canJump: false,
   resumeOffset: null,
   playoutLimit: null,
@@ -110,6 +112,94 @@ adManager.addCustomInterstitial({
   pre: false,
   post: false,
   timelineRange: false,
+  loop: false,
+  overlay: null,
+});
+```
+
+You can also use this with SCTE-35:
+
+```js
+const adManager = player.getAdManager();
+const video = document.getElementById('video');
+const ui = video['ui'];
+// If you're using a non-UI build, this is the div you'll need to create
+// for your layout.  The ad manager will clear this div, when it unloads, so
+// don't pass in a div that contains non-ad elements.
+const container = video.ui.getControls().getClientSideAdContainer();
+adManager.initInterstitial(container, player, video);
+player.addEventListener('timelineregionadded', (e) => {
+  const event = e.detail;
+  if (event.schemeIdUri != 'urn:scte:scte35:2014:xml+bin') {
+    return;
+  }
+  adManager.addCustomInterstitial({
+    id: event.id,
+    startTime: event.startTime,
+    endTime: event.endTime,
+    uri: 'YOUR_URL',
+    mimeType: null,
+    isSkippable: false,
+    skipOffset: null,
+    skipFor: null,
+    canJump: true,
+    resumeOffset: player.isLive() ? null : 0,
+    playoutLimit: null,
+    once: false,
+    pre: false,
+    post: false,
+    timelineRange: player.isLive(), // If true, the ad will appear as a range on the timeline.
+    loop: false,
+    overlay: null
+  });
+});
+```
+
+
+##### Custom Overlay Interstitials
+
+Example:
+
+```js
+const adManager = player.getAdManager();
+const video = document.getElementById('video');
+const ui = video['ui'];
+// If you're using a non-UI build, this is the div you'll need to create
+// for your layout.  The ad manager will clear this div, when it unloads, so
+// don't pass in a div that contains non-ad elements.
+const container = video.ui.getControls().getClientSideAdContainer();
+adManager.initInterstitial(container, player, video);
+adManager.addCustomInterstitial({
+  id: null,
+  startTime: 10,
+  endTime: null,
+  uri: 'YOUR_URL',
+  mimeType: null,
+  isSkippable: true,
+  skipOffset: 10,
+  skipFor: null,
+  canJump: false,
+  resumeOffset: null,
+  playoutLimit: null,
+  once: true,
+  pre: false,
+  post: false,
+  timelineRange: false,
+  loop: false,
+  overlay: { // Show interstitial in upper right quadrant
+    viewport: {
+      x: 1920, // Pixels
+      y: 1080, // Pixels
+    },
+    topLeft: {
+      x: 960, // Pixels
+      y: 0, // Pixels
+    },
+    size: {
+      x: 960, // Pixels
+      y: 540, // Pixels
+    },
+  },
 });
 ```
 

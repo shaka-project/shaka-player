@@ -140,7 +140,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
         this.currentSelection,
         this.localization,
         this.controls.getConfig().textTrackLabelFormat,
-        this.controls.getConfig().showAudioChannelCountVariants);
+        this.controls.getConfig().showAudioChannelCountVariants,
+        this.controls.getConfig().showAudioCodec);
 
     // Add the Off button
     const offButton = shaka.util.Dom.createButton();

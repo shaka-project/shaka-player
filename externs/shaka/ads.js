@@ -63,6 +63,7 @@ shaka.extern.AdCuePoint;
  *   startTime: number,
  *   endTime: ?number,
  *   uri: string,
+ *   mimeType: ?string,
  *   isSkippable: boolean,
  *   skipOffset: ?number,
  *   skipFor: ?number,
@@ -72,7 +73,9 @@ shaka.extern.AdCuePoint;
  *   once: boolean,
  *   pre: boolean,
  *   post: boolean,
- *   timelineRange: boolean
+ *   timelineRange: boolean,
+ *   loop: boolean,
+ *   overlay: ?shaka.extern.AdInterstitialOverlay
  * }}
  *
  * @description
@@ -87,6 +90,8 @@ shaka.extern.AdCuePoint;
  * @property {string} uri
  *   The uri of the interstitial, can be any type that
  *   ShakaPlayer supports (either in MSE or src=)
+ * @property {?string} mimeType
+ *   The mimeType of the interstitial if known.
  * @property {boolean} isSkippable
  *   Indicate if the interstitial is skippable.
  * @property {?number} skipOffset
@@ -116,8 +121,37 @@ shaka.extern.AdCuePoint;
  * @property {boolean} timelineRange
  *   Indicates whether the  interstitial should be presented in a timeline UI
  *   as a single point or as a range.
+ * @property {boolean} loop
+ *   Indicates that the interstitials should play in loop.
+ *   Only applies if the interstitials is an overlay.
+ *   Only supported when using multiple video elements for interstitials.
+ * @property {?shaka.extern.AdInterstitialOverlay} overlay
+ *   Indicates the characteristics of the overlay
+ *   Only supported when using multiple video elements for interstitials.
+ * @exportDoc
  */
 shaka.extern.AdInterstitial;
+
+
+/**
+ * @typedef {{
+ *   viewport: {x: number, y: number},
+ *   topLeft: {x: number, y: number},
+ *   size: {x: number, y: number}
+ * }}
+ *
+ * @description
+ * Contains the ad interstitial overlay info.
+ *
+ * @property {{x: number, y: number}} viewport
+ *   The viewport in pixels.
+ * @property {{x: number, y: number}} topLeft
+ *   The topLeft in pixels.
+ * @property {{x: number, y: number}} size
+ *   The size in pixels.
+ * @exportDoc
+ */
+shaka.extern.AdInterstitialOverlay;
 
 
 /**

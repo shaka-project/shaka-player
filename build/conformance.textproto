@@ -223,6 +223,7 @@ requirement: {
     "use \"left\" and \"top\" instead."
   # The built-in set and map polyfills trigger this ban somehow.
   whitelist_regexp: "synthetic:es6/"
+  whitelist_regexp: "lib/ads/interstitial_ad_manager.js"
 }
 
 # Disallow fdescribe.

@@ -2101,7 +2101,8 @@ shaka.extern.AdvancedAbrConfiguration;
  *   sessionId: string,
  *   contentId: string,
  *   rtpSafetyFactor: number,
- *   includeKeys: !Array<string>
+ *   includeKeys: !Array<string>,
+ *   version: number
  * }}
  *
  * @description
@@ -2140,6 +2141,12 @@ shaka.extern.AdvancedAbrConfiguration;
  *   will be included.
  *   <br>
  *   Defaults to <code>[]</code>.
+ * @property {number} version
+ *   The CMCD version.
+ *   Valid values are <code>1</code> or <code>2</code>, corresponding to CMCD v1
+ *   and CMCD v2 specifications, respectively.
+ *   <br>
+ *   Defaults to <code>1</code>.
  * @exportDoc
  */
 shaka.extern.CmcdConfiguration;

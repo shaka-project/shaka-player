@@ -17,7 +17,7 @@ shaka.test.TtmlUtils = class {
         cue.region = jasmine.objectContaining(cue.region);
       }
 
-      if (cue.nestedCues && (cue.nestedCues instanceof Array)) {
+      if (Array.isArray(cue.nestedCues)) {
         cue.nestedCues = cue.nestedCues.map(mapExpected);
       }
 
