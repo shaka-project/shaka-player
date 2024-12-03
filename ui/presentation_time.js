@@ -55,7 +55,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
 
     this.eventManager.listen(
         this.adManager, shaka.ads.Utils.AD_STARTED, () => {
-          shaka.ui.Utils.setDisplay(this.currentTime_, false);
+          shaka.ui.Utils.setDisplay(this.currentTime_, !this.ad.isLinear());
         });
 
     this.eventManager.listen(
