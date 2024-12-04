@@ -5,7 +5,7 @@ name: Report Incremental Coverage
 # comments, when we would not be able to do so otherwise.
 on:
   workflow_run:
-    workflows: [Build and Test PR]
+    workflows: [Build and Test]
     types: [completed]
 
 jobs:
