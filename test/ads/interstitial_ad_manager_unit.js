@@ -732,7 +732,7 @@ describe('Interstitial Ad manager', () => {
     it('supports alternative MPD', async () => {
       const eventString = [
         '<Event duration="1" id="PREROLL" presentationTime="0">',
-        '<AlternativeMPD mode="insert" uri="test.mpd"/>',
+        '<AlternativeMPD uri="test.mpd"/>',
         '</Event>',
       ].join('');
       const eventNode = TXml.parseXmlString(eventString);
@@ -741,7 +741,7 @@ describe('Interstitial Ad manager', () => {
         startTime: 0,
         endTime: 1,
         id: 'PREROLL',
-        schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:2022',
+        schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:insert:2025',
         eventNode,
         eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
@@ -765,7 +765,7 @@ describe('Interstitial Ad manager', () => {
     it('ignore duplicate alternative MPD', async () => {
       const eventString = [
         '<Event duration="1" id="PREROLL" presentationTime="0">',
-        '<AlternativeMPD mode="insert" uri="test.mpd"/>',
+        '<AlternativeMPD uri="test.mpd"/>',
         '</Event>',
       ].join('');
       const eventNode = TXml.parseXmlString(eventString);
@@ -774,7 +774,7 @@ describe('Interstitial Ad manager', () => {
         startTime: 0,
         endTime: 1,
         id: 'PREROLL',
-        schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:2022',
+        schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:insert:2025',
         eventNode,
         eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
@@ -800,7 +800,7 @@ describe('Interstitial Ad manager', () => {
       // It is not valid because it does not have an interstitial URL
       const eventString = [
         '<Event duration="1" id="PREROLL" presentationTime="0">',
-        '<AlternativeMPD mode="insert"/>',
+        '<AlternativeMPD/>',
         '</Event>',
       ].join('');
       const eventNode = TXml.parseXmlString(eventString);
@@ -809,7 +809,7 @@ describe('Interstitial Ad manager', () => {
         startTime: 0,
         endTime: 1,
         id: 'PREROLL',
-        schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:2022',
+        schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:insert:2025',
         eventNode,
         eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
