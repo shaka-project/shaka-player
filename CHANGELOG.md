@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.12.4](https://github.com/shaka-project/shaka-player/compare/v4.12.3...v4.12.4) (2024-12-04)
+
+
+### Bug Fixes
+
+* **Ads:** Avoid skip interstitial when is not allowed ([#7686](https://github.com/shaka-project/shaka-player/issues/7686)) ([7eb6e74](https://github.com/shaka-project/shaka-player/commit/7eb6e74e4d1bc0f75c293a826251679707b3aa75))
+* Allow set maxLatency and minLatency to 0 ([#7704](https://github.com/shaka-project/shaka-player/issues/7704)) ([64b861c](https://github.com/shaka-project/shaka-player/commit/64b861c665d9412469d57c93381dcad5df14dd94))
+* Fix unload call after destroy ([#7690](https://github.com/shaka-project/shaka-player/issues/7690)) ([2280965](https://github.com/shaka-project/shaka-player/commit/22809651bea8085eff97b40dc9cdf80369127d64))
+* **preload:** Wait for drm keys when preloading ([#7698](https://github.com/shaka-project/shaka-player/issues/7698)) ([c2242dc](https://github.com/shaka-project/shaka-player/commit/c2242dcd4730c15d410049e9732a48e5cfb7260f)), closes [#7520](https://github.com/shaka-project/shaka-player/issues/7520)
+* Timeout unfulfilled request to decodingInfo and requestMediaKeySystemAccess ([#7682](https://github.com/shaka-project/shaka-player/issues/7682)) ([c0e6322](https://github.com/shaka-project/shaka-player/commit/c0e6322ed3cbe3e7d350a21ffaa0bd8518da0a64)), closes [#7680](https://github.com/shaka-project/shaka-player/issues/7680)
+* **UI:** Allow pause non-linear video ads ([#7699](https://github.com/shaka-project/shaka-player/issues/7699)) ([cc11605](https://github.com/shaka-project/shaka-player/commit/cc11605be8d448e3b89e81c5c9b13097edddb3f4))
+* **UI:** Hide ad position when the ad is non-linear ([#7711](https://github.com/shaka-project/shaka-player/issues/7711)) ([0de1435](https://github.com/shaka-project/shaka-player/commit/0de1435f67329e9f5b9b42820642decc59b84daa))
+* **UI:** Show presentation time when playing non-linear ads ([#7707](https://github.com/shaka-project/shaka-player/issues/7707)) ([755e9d2](https://github.com/shaka-project/shaka-player/commit/755e9d23c618b23588908325f5c402cc28ed8497))
+
 ## [4.12.3](https://github.com/shaka-project/shaka-player/compare/v4.12.2...v4.12.3) (2024-11-27)
 
 
