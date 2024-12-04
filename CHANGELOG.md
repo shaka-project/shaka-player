@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.11.16](https://github.com/shaka-project/shaka-player/compare/v4.11.15...v4.11.16) (2024-12-04)
+
+
+### Bug Fixes
+
+* Allow set maxLatency and minLatency to 0 ([#7704](https://github.com/shaka-project/shaka-player/issues/7704)) ([92f2db9](https://github.com/shaka-project/shaka-player/commit/92f2db9959e7b13dbf0c048a3c471da72fa77da1))
+* Fix unload call after destroy ([#7690](https://github.com/shaka-project/shaka-player/issues/7690)) ([0121c0c](https://github.com/shaka-project/shaka-player/commit/0121c0c175490c1c3f76e0f3d70ad90c2db8ace7))
+* Timeout unfulfilled request to decodingInfo and requestMediaKeySystemAccess ([#7682](https://github.com/shaka-project/shaka-player/issues/7682)) ([cc7c738](https://github.com/shaka-project/shaka-player/commit/cc7c738702ef393694cedd289dbc296ff79f94a4)), closes [#7680](https://github.com/shaka-project/shaka-player/issues/7680)
+* **UI:** Allow pause non-linear video ads ([#7699](https://github.com/shaka-project/shaka-player/issues/7699)) ([8633980](https://github.com/shaka-project/shaka-player/commit/863398097f8a6b702fae28d466263a093f2b58fa))
+* **UI:** Hide ad position when the ad is non-linear ([#7711](https://github.com/shaka-project/shaka-player/issues/7711)) ([b70f923](https://github.com/shaka-project/shaka-player/commit/b70f923eca69ad0f9eac020966b1d17e944aab72))
+* **UI:** Show presentation time when playing non-linear ads ([#7707](https://github.com/shaka-project/shaka-player/issues/7707)) ([f456152](https://github.com/shaka-project/shaka-player/commit/f4561524919089ba13f9acc0874e59b3ddf74161))
+
 ## [4.11.15](https://github.com/shaka-project/shaka-player/compare/v4.11.14...v4.11.15) (2024-11-27)
 
 
