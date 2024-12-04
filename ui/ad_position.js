@@ -91,9 +91,9 @@ shaka.ui.AdPosition = class extends shaka.ui.Element {
    */
   setPosition_() {
     const adsInAdPod = this.ad.getSequenceLength();
-    if (adsInAdPod > 1) {
+    if (adsInAdPod > 1 && this.ad.isLinear()) {
       // If it's a single ad, showing 'Ad 1 of 1' isn't helpful.
-      // Only show this element if there's more than 1 ad.
+      // Only show this element if there's more than 1 ad and it's a linear ad.
       const LocIds = shaka.ui.Locales.Ids;
       const adPosition = this.ad.getPositionInSequence();
       this.span_.textContent = this.localization.resolve(LocIds.AD_PROGRESS)
