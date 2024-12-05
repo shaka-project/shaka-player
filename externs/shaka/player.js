@@ -1077,7 +1077,8 @@ shaka.extern.xml.Node;
  *   multiTypeVariantsAllowed: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
  *   updatePeriod: number,
- *   enableFastSwitching: boolean
+ *   enableFastSwitching: boolean,
+ *   ignoreSupplementalCodecs: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -1182,6 +1183,10 @@ shaka.extern.xml.Node;
  *   If false, disables fast switching track recognition.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {boolean} ignoreSupplementalCodecs
+ *   If true, ignores supplemental codecs.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -1202,7 +1207,8 @@ shaka.extern.DashManifestConfiguration;
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
  *   allowLowLatencyByteRangeOptimization: boolean,
- *   updatePeriod: number
+ *   updatePeriod: number,
+ *   ignoreSupplementalCodecs: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -1296,6 +1302,10 @@ shaka.extern.DashManifestConfiguration;
  *   trigger a new download of the manifest.
  *   <br>
  *   Defaults to <code>-1</code>.
+ * @property {boolean} ignoreSupplementalCodecs
+ *   If true, ignores supplemental codecs.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
