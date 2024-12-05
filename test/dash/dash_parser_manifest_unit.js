@@ -34,6 +34,12 @@ describe('DashParser Manifest', () => {
    */
   const cicpScheme = (parameter) => `urn:mpeg:mpegB:cicp:${parameter}`;
 
+  const originalIsTypeSupported = window.MediaSource.isTypeSupported;
+  let originalIsTypeSupportedManaged;
+  if (window.ManagedMediaSource) {
+    originalIsTypeSupportedManaged = window.ManagedMediaSource.isTypeSupported;
+  }
+
   beforeAll(async () => {
     mp4Index = await shaka.test.Util.fetch(mp4IndexSegmentUri);
   });
@@ -63,11 +69,26 @@ describe('DashParser Manifest', () => {
       disableStream: (stream) => {},
       addFont: shaka.test.Util.spyFunc(addFontSpy),
     };
+    window.MediaSource.isTypeSupported = (mimeType) => {
+      const type = mimeType.split('/')[0];
+      return type == 'video' || type == 'audio';
+    };
+    if (window.ManagedMediaSource) {
+      window.ManagedMediaSource.isTypeSupported = (mimeType) => {
+        const type = mimeType.split('/')[0];
+        return type == 'video' || type == 'audio';
+      };
+    }
   });
 
   afterEach(() => {
     // Dash parser stop is synchronous.
     parser.stop();
+    window.MediaSource.isTypeSupported = originalIsTypeSupported;
+    if (window.ManagedMediaSource) {
+      window.ManagedMediaSource.isTypeSupported =
+          originalIsTypeSupportedManaged;
+    }
   });
 
   /**
@@ -3658,5 +3679,73 @@ describe('DashParser Manifest', () => {
     const timeline = manifest.presentationTimeline;
     expect(timeline.getSeekRangeStart()).toBe(0);
     expect(timeline.getSeekRangeEnd()).toBe(32);
+  });
+
+  it('supports scte214:supplementalCodecs', async () => {
+    const manifestText = [
+      '<MPD type="static" xmlns:scte214="urn:scte:dash:scte214-extensions">',
+      '  <Period id="0" duration="PT2S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="2" width="640" height="480"',
+      '          codecs="av01.0.04M.10.0.111.09.16.09.0"',
+      '          scte214:supplementalCodecs="dav1.10.01">',
+      '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="2" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    expect(manifest.variants.length).toBe(1);
+    expect(manifest.textStreams.length).toBe(0);
+
+    const variant = manifest.variants[0];
+    const video = variant && variant.video;
+    expect(video.codecs).toBe('dav1.10.01');
+  });
+
+  it('ignore scte214:supplementalCodecs by config', async () => {
+    const manifestText = [
+      '<MPD type="static" xmlns:scte214="urn:scte:dash:scte214-extensions">',
+      '  <Period id="0" duration="PT2S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="2" width="640" height="480"',
+      '          codecs="av01.0.04M.10.0.111.09.16.09.0"',
+      '          scte214:supplementalCodecs="dav1.10.01">',
+      '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="2" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.ignoreSupplementalCodecs = true;
+    parser.configure(config);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    expect(manifest.variants.length).toBe(1);
+    expect(manifest.textStreams.length).toBe(0);
+
+    const variant = manifest.variants[0];
+    const video = variant && variant.video;
+    expect(video.codecs).toBe('av01.0.04M.10.0.111.09.16.09.0');
   });
 });
