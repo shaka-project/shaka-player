@@ -154,6 +154,7 @@ module.exports = {
     'brace-style': ['error', '1tbs', {'allowSingleLine': true}],
     'id-denylist': ['error', 'async'],
     'lines-between-class-members': 'error',
+    'max-len': 'off',  // Disable maximum line length restriction
     'max-statements-per-line': ['error', {'max': 1}],
     'new-parens': 'error',
     'no-mixed-operators': [

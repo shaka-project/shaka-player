@@ -1,0 +1,14 @@
+{
+  "name": "Watermark",
+  "description": "Watermark feature for Shaka Player UI",
+  "path": "ui/watermark.js",
+  "api": {
+    "setTextWatermark": {
+      "description": "Sets a text watermark on the video"
+    },
+ 
+    "removeWatermark": {
+      "description": "Removes the current watermark"
+    }
+  }
+}

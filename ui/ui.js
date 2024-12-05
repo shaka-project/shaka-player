@@ -1,10 +1,3 @@
-/*! @license
- * Shaka Player
- * Copyright 2016 Google LLC
- * SPDX-License-Identifier: Apache-2.0
- */
-
-
 goog.provide('shaka.ui.Overlay');
 goog.provide('shaka.ui.Overlay.FailReasonCode');
 goog.provide('shaka.ui.Overlay.TrackLabelFormat');
@@ -14,6 +7,7 @@ goog.require('shaka.Player');
 goog.require('shaka.log');
 goog.require('shaka.polyfill');
 goog.require('shaka.ui.Controls');
+goog.require('shaka.ui.Watermark');
 goog.require('shaka.util.ConfigUtils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.FakeEvent');
@@ -66,6 +60,9 @@ shaka.ui.Overlay = class {
 
     videoContainer['ui'] = this;
     video['ui'] = this;
+
+    // Create watermark
+    this.watermark_ = new shaka.ui.Watermark(this.videoContainer_, this.controls_);
   }
 
 
@@ -83,6 +80,11 @@ shaka.ui.Overlay = class {
       await this.player_.destroy();
     }
     this.player_ = null;
+
+    // if (this.watermark_) {
+    //   await this.watermark_.destroy();
+    // }
+    this.watermark_ = null;
   }
 
 
@@ -166,6 +168,34 @@ shaka.ui.Overlay = class {
   setEnabled(enabled) {
     this.controls_.setEnabledShakaControls(enabled);
   }
+
+
+  /**
+   * @param {string} text
+   * @param {shaka.ui.Watermark.Options=} options
+   * @export
+   */
+  setTextWatermark(text, options) {
+    if (this.watermark_) {
+      this.watermark_.setTextWatermark(text, options);
+    }
+  }
+
+  /**
+   * @export
+   */
+  removeWatermark() {
+    if (this.watermark_) {
+      this.watermark_.removeWatermark();
+    }
+  }
+
+
+  /**
+   * @param {string} imageUrl
+   * @param {Object=} options
+   * @export
+   */
 
 
   /**
@@ -593,4 +623,3 @@ if (document.readyState == 'complete') {
 } else {
   window.addEventListener('load', shaka.ui.Overlay.scanPageForShakaElements_);
 }
-

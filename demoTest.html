@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shaka Player Test</title>
+  
+  <link rel="stylesheet" href="./dist/controls.css">
+  <script src="./dist/shaka-player.compiled.js"></script>
+  <script src="./dist/shaka-player.ui.js"></script>
+  <script src="./ui/watermark.js"></script>
+  
+  <style>
+    .controls {
+      margin: 20px 0;
+    }
+    button {
+      padding: 8px 16px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Shaka Player Test</h1>
+  
+  <div class="controls">
+    <button onclick="setStaticWatermark()">Static Watermark</button>
+    <button onclick="setDynamicWatermark()">Dynamic Watermark</button>
+    <button onclick="clearWatermark()">Clear Watermark</button>
+  </div>
+
+  <div id="video-container" class="shaka-video-container">
+    <video id="video" width="640" class="shaka-video">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <script>
+    let watermarkInstance;
+
+    async function initShakaPlayer() {
+      const video = document.getElementById('video');
+      const videoContainer = document.getElementById('video-container');
+      
+      if (shaka.Player.isBrowserSupported()) {
+        const player = new shaka.Player(video);
+        const ui = new shaka.ui.Overlay(player, videoContainer, video);
+        const controls = ui.getControls();
+        
+        // Store watermark instance globally
+        watermarkInstance = new shaka.ui.Watermark(videoContainer, controls);
+        
+        try {
+          await player.load('https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd');
+          console.log('The video has been loaded successfully!');
+        } catch (error) {
+          console.error('Error loading video:', error);
+        }
+      } else {
+        console.error('Shaka Player is not supported on this browser!');
+      }
+    }
+
+    function setStaticWatermark() {
+      if (watermarkInstance) {
+        watermarkInstance.setTextWatermark('Static Watermark', {
+          type: 'static',
+          position: 'top-left',
+          color: 'red',
+          size: 24,
+          alpha: 0.7
+        });
+      }
+    }
+
+    function setDynamicWatermark() {
+      if (watermarkInstance) {
+        watermarkInstance.setTextWatermark('Dynamic Watermark', {
+          type: 'dynamic',
+          color: 'red',
+          size: 24,
+          alpha: 0.7
+        });
+      }
+    }
+
+    function clearWatermark() {
+      if (watermarkInstance) {
+        watermarkInstance.removeWatermark();
+      }
+    }
+
+    document.addEventListener('shaka-ui-loaded', initShakaPlayer);
+  </script>
+</body>
+</html>

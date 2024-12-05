@@ -17,3 +17,26 @@
 @import (css, inline) "https://fonts.googleapis.com/css?family=Roboto";
 // NOTE: Working around google/material-design-icons#958
 @import (css, inline) "https://fonts.googleapis.com/icon?family=Material+Icons+Round";
+
+.shaka-watermark-container {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.shaka-text-watermark {
+  position: absolute;
+  color: white;
+  font-size: 24px;
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 50%);
+  opacity: 0.5;
+}
+
+.shaka-image-watermark {
+  position: absolute;
+  max-width: 150px;
+  max-height: 150px;
+  opacity: 0.5;
+}
