@@ -100,6 +100,11 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
     goog.asserts.assert(this.ad != null,
         'this.ad should exist at this point');
 
+    if (!this.ad.isLinear()) {
+      // Do not show information for non-linear ads.
+      return;
+    }
+
     const secondsLeft = Math.round(this.ad.getRemainingTime());
     const adDuration = this.ad.getDuration();
     if (secondsLeft == -1 || adDuration == -1) {
