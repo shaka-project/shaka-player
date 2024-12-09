@@ -145,6 +145,11 @@ jobs:
     name: Pre-build Player
     needs: compute-sha
     runs-on: ubuntu-latest
+
+    permissions:
+      # "Write" to statuses to update commit status
+      statuses: write
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -208,6 +213,10 @@ jobs:
     # This is a self-hosted runner in a Docker container, with access to our
     # lab's Selenium grid on port 4444.
     runs-on: self-hosted-selenium
+
+    permissions:
+      # "Write" to statuses to update commit status
+      statuses: write
 
     # Only one run of this job is allowed at a time, since it uses physical
     # resources in our lab.
