@@ -16,6 +16,11 @@ on:
 jobs:
   sync-labels:
     runs-on: ubuntu-latest
+
+    permissions:
+      # "Write" to Issues to manage labels for the repo
+      issues: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
