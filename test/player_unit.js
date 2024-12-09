@@ -3487,6 +3487,8 @@ describe('Player', () => {
             stream.mimeType = 'video';
             stream.codecs = 'unsupported';
             stream.addDrmInfo('foo.bar');
+            stream.fullMimeTypes = new Set([shaka.util.MimeUtils.getFullType(
+                stream.mimeType, stream.codecs)]);
           });
         });
         manifest.addVariant(1, (variant) => {
