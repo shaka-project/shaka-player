@@ -528,8 +528,8 @@ describe('DrmEngine', () => {
           setDecodingInfoSpy([]);
 
           config.advanced['drm.abc'] = {
-            audioRobustness: 'good',
-            videoRobustness: 'really_really_ridiculously_good',
+            audioRobustness: ['good'],
+            videoRobustness: ['really_really_ridiculously_good'],
             serverCertificate: null,
             serverCertificateUri: '',
             sessionType: 'persistent-license',
@@ -583,9 +583,9 @@ describe('DrmEngine', () => {
           setDecodingInfoSpy([]);
 
           config.advanced['drm.abc'] = {
-            audioRobustness: 'good',
+            audioRobustness: ['good'],
             videoRobustness: [
-              'really_ridiculously_good','a_mid_one', 'another_worse_one'
+              'really_ridiculously_good', 'a_mid_one', 'another_worse_one',
             ],
             serverCertificate: null,
             serverCertificateUri: '',
@@ -671,9 +671,9 @@ describe('DrmEngine', () => {
 
           config.advanced['drm.abc'] = {
             audioRobustness: [
-              'really_ridiculously_good','a_mid_one', 'another_worse_one'
+              'really_ridiculously_good', 'a_mid_one', 'another_worse_one',
             ],
-            videoRobustness: 'good',
+            videoRobustness: ['good'],
             serverCertificate: null,
             serverCertificateUri: '',
             sessionType: 'persistent-license',
@@ -765,8 +765,8 @@ describe('DrmEngine', () => {
       });
 
       config.advanced['drm.abc'] = {
-        audioRobustness: 'bad',
-        videoRobustness: 'so_bad_it_hurts',
+        audioRobustness: ['bad'],
+        videoRobustness: ['so_bad_it_hurts'],
         serverCertificate: null,
         serverCertificateUri: '',
         sessionType: '',
@@ -2366,8 +2366,8 @@ describe('DrmEngine', () => {
       });
 
       config.advanced['drm.abc'] = {
-        audioRobustness: 'good',
-        videoRobustness: 'really_really_ridiculously_good',
+        audioRobustness: ['good'],
+        videoRobustness: ['really_really_ridiculously_good'],
         distinctiveIdentifierRequired: true,
         serverCertificate: null,
         serverCertificateUri: '',
@@ -2735,14 +2735,14 @@ describe('DrmEngine', () => {
    */
   function createAdvancedConfig(serverCert) {
     return {
-      audioRobustness: '',
+      audioRobustness: [''],
       distinctiveIdentifierRequired: false,
       persistentStateRequired: false,
       serverCertificate: serverCert,
       serverCertificateUri: '',
       individualizationServer: '',
       sessionType: '',
-      videoRobustness: '',
+      videoRobustness: [''],
       headers: {},
     };
   }
