@@ -116,6 +116,7 @@ application:
       `panicThreshold`. (deprecated in v4.10.0)
     - `useSafariBehaviorForLive` has been removed.
     - `parsePrftBox` has been removed.
+    - `videoRobustness` and `audioRobustness` are now only an array of strings. (deprecated in v4.13.0)
 
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.
