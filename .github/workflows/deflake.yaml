@@ -16,6 +16,10 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     runs-on: ubuntu-latest
 
+    permissions:
+      # "Write" to Actions to enable rerun command.
+      actions: write
+
     steps:
       - name: Check run count and re-run workflow
         env:
