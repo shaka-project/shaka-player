@@ -29,6 +29,7 @@ mediasourcerecovered
 mozfullscreenchange
 mozfullscreenerror
 needkey
+noinline
 painton
 playbackrate
 playrate
@@ -45,6 +46,7 @@ seekto
 segmentappended
 stalldetected
 startstreaming
+statechanged
 submenuopen
 textchanged
 texttrackvisibility
@@ -90,8 +92,10 @@ trickvideo
 txml
 uints
 uncompiled
+unconfigured
 vint
 vints
+xywh
 
 # jasmine
 fdescribe
@@ -104,12 +108,15 @@ Chromecast
 Chromecasts
 Clearkey
 Clearkeys
+codem
 Conax
 Expressplay
 EZDRM
 Fairplay
 Hisense
-Muxjs
+isoboxer
+Kaltura
+muxjs
 Playready
 Quicktime
 Tizen
@@ -119,9 +126,13 @@ Widevine
 Zenterio
 
 # streaming
+aach
+aacl
 apic
+arib
 atsc
 avcc
+bsid
 buffersource
 cbcs
 cdna
@@ -133,6 +144,7 @@ cmfa
 cmft
 cmfv
 cmsd
+colr
 containerless
 cuelist
 cuepoints
@@ -140,7 +152,9 @@ dinf
 dops
 dovi
 dref
+drms
 dtsc
+dtse
 dtsx
 dtvcc
 dvav
@@ -153,6 +167,7 @@ ebutts
 emsg
 enca
 encv
+eotf
 esds
 flac
 fontname
@@ -160,6 +175,9 @@ frma
 ftyp
 hdcp
 hdlr
+hvcc
+iamf
+imagetype
 imsc
 inband
 keyids
@@ -174,9 +192,11 @@ mdat
 mdats
 mdhd
 mdia
+mfhd
 midroll
 midrow
 minf
+mjpg
 mksa
 moof
 moov
@@ -190,7 +210,10 @@ muxer
 mvex
 nalu
 nalus
+nclx
 notsmooth
+pasp
+piff
 playout
 preroll
 prft
@@ -200,9 +223,14 @@ psshs
 regionanchor
 rbsp
 samplerate
+saio
+saiz
 schi
 schm
 scte
+sdtp
+senc
+sepiff
 sidx
 sinf
 smhd
@@ -224,17 +252,21 @@ tenc
 tcop
 tfdt
 tfhd
+tfrf
+tfxd
 timecodes
 timepoint
 timepoints
 tkhd
 traf
 trak
+traks
 trickmode
 trun
 ttml
 txxx
 unskippable
+valu
 videoframe
 viewportanchor
 vmap
@@ -293,9 +325,11 @@ crbug
 googlers
 halfling
 heliocentrism
+homebrewed
 ismena
 kbits
 khtml
+masterlist
 mbps
 msdk
 productinfo
