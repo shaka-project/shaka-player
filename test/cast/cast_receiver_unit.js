@@ -615,7 +615,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
         appData: {},
       }, mockShakaMessageBus);
 
-      // The messages will show up asychronously:
+      // The messages will show up asynchronously:
       await Util.shortDelay();
       expectMediaInfo('URI A', 1);
       mockGenericMessageBus.messages = [];
@@ -698,7 +698,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
         appData: {},
       }, mockShakaMessageBus);
 
-      // The messages will show up asychronously:
+      // The messages will show up asynchronously:
       await Util.shortDelay();
       expectMediaInfo('URI A', 1);
       mockGenericMessageBus.messages = [];
@@ -838,7 +838,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
         appData: {},
       }, mockShakaMessageBus);
 
-      // The messages will show up asychronously:
+      // The messages will show up asynchronously:
       await Util.shortDelay();
       expectMediaInfo('URI A', 1);
       mockGenericMessageBus.messages = [];

@@ -2680,7 +2680,7 @@ describe('StreamingEngine', () => {
       await streamingEngine.start();
       playing = true;
 
-      // Since StreamingEngine is free to peform audio, video, and text updates
+      // Since StreamingEngine is free to perform audio, video, and text updates
       // in any order, there are many valid ways in which StreamingEngine can
       // evict segments. So, instead of verifying the exact, final buffer
       // configuration, ensure the byte limit is never exceeded and at least
@@ -3889,7 +3889,7 @@ describe('StreamingEngine', () => {
       expectSegmentRequest(true);
     });
 
-    it('should disable prefetch when reset config at begining', async () => {
+    it('should disable prefetch when reset config at beginning', async () => {
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
       config.segmentPrefetchLimit = 0;
       streamingEngine.configure(config);
@@ -4052,7 +4052,7 @@ describe('StreamingEngine', () => {
       expectSegmentRequest(true);
     });
 
-    it('should disable prefetch when limit is reset at begining', async () => {
+    it('should disable prefetch when limit is reset at beginning', async () => {
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
       config.segmentPrefetchLimit = 0;
       streamingEngine.configure(config);

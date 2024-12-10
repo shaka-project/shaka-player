@@ -489,7 +489,7 @@ describe('CastProxy', () => {
         },
         player: {
           getConfiguration: {key: 'value'},
-          isTextTrackVisisble: true,
+          isTextTrackVisible: true,
         },
       };
       mockSender.get.and.callFake((targetName, property) => {

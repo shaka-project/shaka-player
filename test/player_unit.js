@@ -4232,9 +4232,9 @@ describe('Player', () => {
     it('gets current segment availability duration', () => {
       playhead.getTime.and.returnValue(20);
 
-      const segmentAvailabiltyDuration =
+      const segmentAvailabilityDuration =
           player.getSegmentAvailabilityDuration();
-      expect(segmentAvailabiltyDuration).toBe(1000);
+      expect(segmentAvailabilityDuration).toBe(1000);
     });
   });
 

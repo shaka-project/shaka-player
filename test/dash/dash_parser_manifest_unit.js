@@ -1888,9 +1888,9 @@ describe('DashParser Manifest', () => {
   });
 
   it('Uses 1.5 times minBufferTime as default presentation delay', async () => {
-    // When sugguestedPresentDelay should be ignored, and
-    // config.defaultpresentdelay is not set other than 0, use 1.5*minBufferTime
-    // as the presentationDelay.
+    // When suggestedPresentDelay should be ignored, and
+    // config.defaultPresentationDelay is not set other than 0,
+    // use 1.5*minBufferTime as the presentationDelay.
     const manifestText = [
       '<MPD minBufferTime="PT2S" suggestedPresentationDelay="PT25S">',
       '  <Period id="1" duration="PT30S">',

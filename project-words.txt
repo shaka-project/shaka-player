@@ -208,11 +208,13 @@ multidrm
 muxed
 muxer
 mvex
+mvhd
 nalu
 nalus
 nclx
 notsmooth
 pasp
+payl
 piff
 playout
 preroll
@@ -243,6 +245,7 @@ stpp
 stsc
 stsd
 stsz
+sttg
 stts
 subcues
 subframes
@@ -273,6 +276,8 @@ vmap
 vmhd
 vorbis
 vpcc
+vttc
+vtte
 wcop
 webvtt
 wrmheader

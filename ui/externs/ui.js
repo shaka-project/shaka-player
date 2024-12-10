@@ -132,7 +132,7 @@ shaka.extern.UIVolumeBarColors;
  * @property {boolean} clearBufferOnQualityChange
  *   Only applicable if the resolution selection is part of the UI.
  *   Whether buffer should be cleared when changing resolution
- *   via UI. Clearing buffer would result in immidiate change of quality,
+ *   via UI. Clearing buffer would result in immediate change of quality,
  *   but playback may flicker/stall for a sec as the content in new
  *   resolution is being buffered. Not clearing the buffer will mean
  *   we play the content in the previously selected resolution that we
@@ -486,7 +486,7 @@ shaka.extern.IUISettingsMenu = class {
 
 /**
  * Interface for SeekBars. SeekBars should inherit from the concrete base
- * class shaka.ui.Element. If you do not need to totaly rebuild the
+ * class shaka.ui.Element. If you do not need to totally rebuild the
  * SeekBar, you should consider using shaka.ui.RangeElement or
  * shaka.ui.SeekBar as your base class.
  *

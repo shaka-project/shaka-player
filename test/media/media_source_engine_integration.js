@@ -382,7 +382,7 @@ describe('MediaSourceEngine', () => {
     expect(mediaSource.duration).toBeCloseTo(30);
   });
 
-  it('does not throw if endOfStrem called more than once', async () => {
+  it('does not throw if endOfStream called more than once', async () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
     await mediaSourceEngine.init(initObject, false);

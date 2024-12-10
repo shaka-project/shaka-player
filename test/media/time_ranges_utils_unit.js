@@ -86,7 +86,7 @@ describe('TimeRangesUtils', () => {
       expect(TimeRangesUtils.getGapIndex(null, 10, 0.1)).toBe(null);
     });
 
-    it('still works whith nothing buffered', () => {
+    it('still works with nothing buffered', () => {
       const b = createFakeBuffered([]);
       expect(TimeRangesUtils.getGapIndex(b, 10, 0.1)).toBe(null);
     });

@@ -66,7 +66,7 @@ describe('RegionTimeline', () => {
     expect(onNewRegion).toHaveBeenCalledTimes(2);
   });
 
-  it('dedups identical regions', () => {
+  it('deduplicates identical regions', () => {
     // Add two identical regions and verify only one is stored
     timeline.addRegion(createRegion('urn:foo', 'my-region', 0, 10));
     timeline.addRegion(createRegion('urn:foo', 'my-region', 0, 10));

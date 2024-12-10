@@ -1001,11 +1001,11 @@ describe('MediaSourceEngine', () => {
       // Since the fix was to remove the implicit seek, this behavior would then
       // be removed from the mock, which would render the test useless.
 
-      // An integration test involving both StreamingEngine and MediaSourcEngine
-      // would also be problematic.  The bug involved a race, so it would be
-      // difficult to reproduce the necessary timing.  And if we succeeded, it
-      // would be tough to detect that we were definitely in a seek loop, since
-      // nothing was mocked.
+      // An integration test involving both StreamingEngine
+      // and MediaSourceEngine would also be problematic.  The bug involved
+      // a race, so it would be difficult to reproduce the necessary timing.
+      // And if we succeeded, it would be tough to detect that we were
+      // definitely in a seek loop, since nothing was mocked.
 
       // So the best option seems to be to enforce that clear() does not result
       // in a seek.  This can be done here, in a unit test on MediaSourceEngine.

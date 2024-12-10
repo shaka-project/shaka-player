@@ -91,7 +91,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
       this.lastTouchEventTimeSet_ = Date.now();
       this.hideSeekButtonContainerTimer_.tickAfter(1);
     } else if (this.lastTouchEventTimeSet_+1000 > Date.now()) {
-      // stops hidding of seek button incase the timmer is active
+      // stops hiding of seek button incase the timmer is active
       // because of previous touch event.
       this.hideSeekButtonContainerTimer_.stop();
       this.lastTouchEventTimeSet_ = Date.now();

@@ -87,9 +87,9 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     // 2) create a timer that checks the state of the loop property
     // regularly.
     // I (ismena) opted to go for #2 as at least video.currentTime
-    // will be changing constatntly during playback, to say nothing
+    // will be changing constantly during playback, to say nothing
     // about other video properties. I expect the timer to be less
-    // of a performence hit.
+    // of a performance hit.
     /**
      * The timer that tracks down the ad progress.
      *

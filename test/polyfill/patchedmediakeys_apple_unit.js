@@ -11,11 +11,11 @@ describe('PatchedMediaKeys_Apple', () => {
   let originalWindowMediaKeys;
   let originalWindowMediaKeySystemAccess;
   let originalNavigatorRequestMediaKeySystemAccess;
-  let originalHTMLSVideoElement;
+  let originalHTMLVideoElement;
   let originalWebKitMediaKeys;
 
   beforeEach(() => {
-    originalHTMLSVideoElement = window.HTMLVideoElement;
+    originalHTMLVideoElement = window.HTMLVideoElement;
     originalWebKitMediaKeys = window.WebKitMediaKeys;
 
     Object.defineProperty(window,
@@ -42,7 +42,7 @@ describe('PatchedMediaKeys_Apple', () => {
   });
 
   afterEach(() => {
-    window.HTMLVideoElement = originalHTMLSVideoElement;
+    window.HTMLVideoElement = originalHTMLVideoElement;
     window.WebKitMediaKeys = originalWebKitMediaKeys;
 
     Object.defineProperty(

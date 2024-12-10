@@ -380,7 +380,7 @@ module.exports = (config) => {
     // Set Karma's level of logging.
     logLevel: KARMA_LOG_MAP[settings.log_level],
 
-    // Should Karma xecute tests whenever a file changes?
+    // Should Karma execute tests whenever a file changes?
     autoWatch: settings.auto_watch,
 
     // Do a single run of the tests on captured browsers and then quit.

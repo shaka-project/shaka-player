@@ -93,7 +93,7 @@ describe('Cea708Window', () => {
       const text1 = 'test';
       const text2 = 'word';
 
-      // Set the pen lcoation to the very last row in the buffer.
+      // Set the pen location to the very last row in the buffer.
       window.setPenLocation(/* row= */ rowCount-1, /* col= */ 0);
 
       for (const c of text1) {
@@ -455,7 +455,7 @@ describe('Cea708Window', () => {
 
     it('handles bottom right of video window anchors using line values', () => {
       window = new shaka.cea.Cea708Window(/* windowNum= */ 0,
-          /* serviceNumbe= */ 3);
+          /* serviceNumber= */ 3);
       window.defineWindow(
           /* visible= */ true, /* verticalAnchor= */ 74,
           /* horAnchor= */ 209, /* anchorId= */ 8, /* relativeToggle= */ false,

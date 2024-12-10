@@ -529,7 +529,7 @@ describe('CmcdManager', () => {
           expect(result).toContain(encodeURIComponent('msd'));
         });
 
-        it('doesnt return cmcd v2 data in query if version is not 2',
+        it('doesn\'t return cmcd v2 data in query if version is not 2',
             async () => {
               // Set live to true to enable ltc
               playerInterface.isLive = () => true;
@@ -571,7 +571,7 @@ describe('CmcdManager', () => {
           expect(request.headers['CMCD-Session']).toContain('msd');
         });
 
-        it('doesnt return cmcd v2 data in headers if version is not 2',
+        it('doesn\'t return cmcd v2 data in headers if version is not 2',
             async () => {
               playerInterface.isLive = () => true;
               cmcdManager = createCmcdManager({

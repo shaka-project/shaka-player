@@ -52,7 +52,7 @@ describe('Player Src Equals', () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
   });
 
-  // This test verifys that we can successfully unload content that required
+  // This test verifies that we can successfully unload content that required
   // |src=| to load.
   it('unloads content', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);

@@ -1150,7 +1150,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /**
    * Adds a seekbar depending on the configuration.
    * By default an instance of shaka.ui.SeekBar is created
-   * This behaviour can be overriden by providing a SeekBar factory using the
+   * This behaviour can be overridden by providing a SeekBar factory using the
    * registerSeekBarFactory function.
    *
    * @private
@@ -1918,7 +1918,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
 
       const activeElement = document.activeElement;
-      // When only Tab key is pressed, navigate to the next elememnt.
+      // When only Tab key is pressed, navigate to the next element.
       // If it's currently focused on the last shown child element of the
       // overflow menu, let the focus move to the first child element of the
       // menu.
