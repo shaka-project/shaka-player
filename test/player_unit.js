@@ -731,6 +731,62 @@ describe('Player', () => {
       });
     });
 
+    describe('when config.streaming.preferNativeDash is set to true', () => {
+      beforeAll(() => {
+        shaka.media.ManifestParser.registerParserByMime(
+            'application/dash+xml',
+            () => new shaka.test.FakeManifestParser(manifest));
+      });
+
+      afterAll(() => {
+        // IMPORTANT: restore the ORIGINAL parser.  DO NOT just unregister the
+        // fake!
+        shaka.media.ManifestParser.registerParserByMime(
+            'application/dash+xml',
+            () => new shaka.dash.DashParser());
+      });
+
+      afterEach(() => {
+        video.canPlayType.calls.reset();
+      });
+
+      it('only applies to DASH streams', async () => {
+        video.canPlayType.and.returnValue('maybe');
+        spyOn(shaka.util.Platform, 'anyMediaElement').and.returnValue(video);
+        spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
+        // Make sure player.load() resolves for src=
+        spyOn(shaka.util.MediaReadyState, 'waitForReadyState').and.callFake(
+            (mediaElement, readyState, eventManager, callback) => {
+              callback();
+            });
+
+        player.configure({
+          streaming: {
+            preferNativeDash: true,
+          },
+        });
+
+        await player.load(fakeManifestUri, undefined, 'application/dash+xml');
+
+        expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.SRC_EQUALS);
+      });
+
+      it('does not apply to non-DASH streams', async () => {
+        video.canPlayType.and.returnValue('maybe');
+        spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
+
+        player.configure({
+          streaming: {
+            preferNativeDash: true,
+          },
+        });
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.MEDIA_SOURCE);
+      });
+    });
+
     describe('when config.streaming.preferNativeHls is set to true', () => {
       beforeAll(() => {
         shaka.media.ManifestParser.registerParserByMime(
