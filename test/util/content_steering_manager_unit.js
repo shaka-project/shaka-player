@@ -23,8 +23,6 @@ describe('ContentSteeringManager', () => {
       onEvent: fail,
       onError: fail,
       isLowLatencyMode: fail,
-      isAutoLowLatencyMode: fail,
-      enableLowLatencyMode: fail,
       updateDuration: fail,
       newDrmInfo: fail,
       onManifestUpdated: fail,
