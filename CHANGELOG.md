@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.9.2-caf3](https://github.com/shaka-project/shaka-player/compare/v4.9.2-caf2...v4.9.2-caf3) (2024-12-11)
+
+
+### Bug Fixes
+
+* **Cast:** Incorrect detection of MediaCapabilities on Linux Chromecast ([#7628](https://github.com/shaka-project/shaka-player/issues/7628)) ([86fa9f1](https://github.com/shaka-project/shaka-player/commit/86fa9f1e4dcea57cf57f69495380b85f353386ea))
+* Disable seek retry cooldown on most platforms ([#7010](https://github.com/shaka-project/shaka-player/issues/7010)) ([f980ae9](https://github.com/shaka-project/shaka-player/commit/f980ae96646cf4bda9920328889534af285c504d))
+* Fix cast support for HLG HDR ([#7632](https://github.com/shaka-project/shaka-player/issues/7632)) ([b1df345](https://github.com/shaka-project/shaka-player/commit/b1df345daef0380276b2e3363dd1ee2390b3cd84))
+* **HLS:** Fix playback of raw AAC ([#7641](https://github.com/shaka-project/shaka-player/issues/7641)) ([1e3e65f](https://github.com/shaka-project/shaka-player/commit/1e3e65fc129393de0269844a48c1214cbd1da4e4))
+* Seek delay for Cast Nest hub ([#7423](https://github.com/shaka-project/shaka-player/issues/7423)) ([3adfd8f](https://github.com/shaka-project/shaka-player/commit/3adfd8f5b47c15ab76f7ca447f562e8325beaa33))
+
+
+### Performance Improvements
+
+* Reduce calls to isTypeSupported ([#7729](https://github.com/shaka-project/shaka-player/issues/7729)) ([c1da00a](https://github.com/shaka-project/shaka-player/commit/c1da00a6099984c2b8a87c9f91049d560b045046))
+
 ## [4.9.2-caf2](https://github.com/shaka-project/shaka-player/compare/v4.9.2-caf1...v4.9.2-caf2) (2024-09-26)
 
 
