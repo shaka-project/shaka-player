@@ -19,7 +19,7 @@ shaka.test.UiUtils = class {
     config = config || {};
     const ui = new shaka.ui.Overlay(player, videoContainer, video, canvas);
     // TODO: generate externs automatically from @event types
-    // This event should be a shaka.Player.ErrorEvent
+    // This event should be a shaka.events.ErrorEvent
     ui.getControls().addEventListener('error', (e) => fail(e['detail']));
     ui.configure(config);
     return ui;
