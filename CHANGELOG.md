@@ -1,5 +1,28 @@
 # Changelog
 
+## [4.9.33](https://github.com/shaka-project/shaka-player/compare/v4.9.32...v4.9.33) (2024-12-11)
+
+
+### Bug Fixes
+
+* Avoid stack overflow when stringifying objects ([#7721](https://github.com/shaka-project/shaka-player/issues/7721)) ([8318911](https://github.com/shaka-project/shaka-player/commit/8318911c08e6ca65d5757be388a2dad9f226972e)), closes [#7435](https://github.com/shaka-project/shaka-player/issues/7435)
+* Detect smooth codec switch support on Apple devices ([#7678](https://github.com/shaka-project/shaka-player/issues/7678)) ([8fa036a](https://github.com/shaka-project/shaka-player/commit/8fa036af1815cb57c5a4e4886f04e46826b10543))
+* Fix CBCS support in recent WebOS ([#7647](https://github.com/shaka-project/shaka-player/issues/7647)) ([ccae978](https://github.com/shaka-project/shaka-player/commit/ccae978d9d8ce9de61bd29dcd6fc7705e7f40a8f))
+* Fix normalized codec for VP9 ([#7645](https://github.com/shaka-project/shaka-player/issues/7645)) ([e12f2eb](https://github.com/shaka-project/shaka-player/commit/e12f2eb41008d1e8c6e68f59e0b4f0b82b563c74))
+* Fix unload call after destroy ([#7690](https://github.com/shaka-project/shaka-player/issues/7690)) ([3bc3ca5](https://github.com/shaka-project/shaka-player/commit/3bc3ca50ed2599091f191c16f195f5ddd1e69555))
+* Fix video progress events accuracy ([#7654](https://github.com/shaka-project/shaka-player/issues/7654)) ([576daba](https://github.com/shaka-project/shaka-player/commit/576daba0caa17a333a3c77877caf8a8b3c5423e9))
+* **HLS:** Fix playback of raw AAC ([#7641](https://github.com/shaka-project/shaka-player/issues/7641)) ([8da4a61](https://github.com/shaka-project/shaka-player/commit/8da4a61648b5eb1976d8eb4eb36e34e01139d652))
+* **HLS:** Fix subtitle timing when no discontinuity but there is X-TIMESTAMP-MAP ([#7681](https://github.com/shaka-project/shaka-player/issues/7681)) ([3fa6242](https://github.com/shaka-project/shaka-player/commit/3fa6242417bed8bbac69f4ff2b21ac6eac31c94a))
+* **HLS:** Ignore errors when try to detect CC ([#7668](https://github.com/shaka-project/shaka-player/issues/7668)) ([0499bc4](https://github.com/shaka-project/shaka-player/commit/0499bc4375cb164989fb802ab6421692d0da8328))
+* **PS5:** Prevent uncaught promise rejections when requests are aborted ([#7637](https://github.com/shaka-project/shaka-player/issues/7637)) ([6fff9d2](https://github.com/shaka-project/shaka-player/commit/6fff9d26e7a53cced54d89205f10b185fe2a9bce))
+* Timeout unfulfilled request to decodingInfo and requestMediaKeySystemAccess ([#7682](https://github.com/shaka-project/shaka-player/issues/7682)) ([b1bec73](https://github.com/shaka-project/shaka-player/commit/b1bec73a82f1b5a57427300f8cb40f38d65ab0cc)), closes [#7680](https://github.com/shaka-project/shaka-player/issues/7680)
+* **Xbox:** Simplify the use of WebView2 ([#7743](https://github.com/shaka-project/shaka-player/issues/7743)) ([0cbe208](https://github.com/shaka-project/shaka-player/commit/0cbe20861aaec905f2b22d053c4a3f7762cabe29))
+
+
+### Performance Improvements
+
+* Reduce calls to isTypeSupported ([#7729](https://github.com/shaka-project/shaka-player/issues/7729)) ([77859b5](https://github.com/shaka-project/shaka-player/commit/77859b53d2ac05547e6811813ec1db9deb409b08))
+
 ## [4.9.32](https://github.com/shaka-project/shaka-player/compare/v4.9.31...v4.9.32) (2024-11-20)
 
 
