@@ -1062,8 +1062,7 @@ describe('StreamUtils', () => {
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
           /* preferredVideoCodecs= */[],
           /* preferredAudioCodecs= */[],
-          /* preferredDecodingAttributes= */[],
-          /* preferredTextFormats= */ []);
+          /* preferredDecodingAttributes= */[]);
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].video.codecs).toBe('dav1.10.01');
     });
@@ -1101,8 +1100,7 @@ describe('StreamUtils', () => {
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
           /* preferredVideoCodecs= */[],
           /* preferredAudioCodecs= */[],
-          /* preferredDecodingAttributes= */[],
-          /* preferredTextFormats= */ []);
+          /* preferredDecodingAttributes= */[]);
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].video.codecs).toBe('dvh1.05.06');
     });
