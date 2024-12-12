@@ -483,7 +483,6 @@ shakaDemo.Config = class {
             'streaming.inaccurateManifestTolerance',
             /* canBeDecimal= */ true)
         .addBoolInput_('Low Latency Mode', 'streaming.lowLatencyMode')
-        .addBoolInput_('Auto Low Latency Mode', 'streaming.autoLowLatencyMode')
         .addBoolInput_('Force HTTP', 'streaming.forceHTTP')
         .addBoolInput_('Force HTTPS', 'streaming.forceHTTPS')
         .addNumberInput_('Min bytes for progress events',
