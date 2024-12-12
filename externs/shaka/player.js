@@ -853,8 +853,8 @@ shaka.extern.ProducerReferenceTime;
  *   <br>
  *   Defaults to <code>''</code>.
  * @property {string} individualizationServer
- *   The server that handles an <code>'individualiation-request'</code>.  If the
- *   server isn't given, it will default to the license server.
+ *   The server that handles an <code>'individualization-request'</code>.
+ *   If the server isn't given, it will default to the license server.
  *   <br>
  *   Defaults to <code>''</code>.
  * @property {string} sessionType
@@ -1672,7 +1672,7 @@ shaka.extern.LiveSyncConfiguration;
  *   Defaults to <code>5</code>.
  * @property {number} safeSeekEndOffset
  *   The amount of seconds that should be added when repositioning the playhead
- *   after falling out of the seakable end range. This is helpful for live
+ *   after falling out of the seekable end range. This is helpful for live
  *   stream with a lot of GAP. This will reposition the playback in the past
  *   and avoid to be block at the edge and buffer at the next GAP
  *   <br>
@@ -1885,7 +1885,7 @@ shaka.extern.StreamingConfiguration;
  *   <br><br>
  *   See https://github.com/shaka-project/shaka-player/issues/2759.
  *   <br><br>
- *   If you know you don't need this, you canset this value to
+ *   If you know you don't need this, you can set this value to
  *   <code>false</code> to gain a few milliseconds on loading time and seek
  *   time.
  *   <br><br>

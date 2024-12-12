@@ -93,7 +93,7 @@ shakaDemo.Config = class {
     this.addHlsManifestSection_();
     this.addMssManifestSection_();
     this.addRetrySection_('manifest', 'Manifest Retry Parameters');
-    this.addRetrictionsSection_('', 'Restrictions');
+    this.addRestrictionsSection_('', 'Restrictions');
     this.addTextDisplayerSection_();
     this.addCmcdSection_();
     this.addCmsdSection_();
@@ -324,7 +324,7 @@ shakaDemo.Config = class {
             /* canBeZero= */ true)
         .addBoolInput_('Prefer Network Information bandwidth',
             'abr.preferNetworkInformationBandwidth');
-    this.addRetrictionsSection_('abr', 'Adaptation Restrictions');
+    this.addRestrictionsSection_('abr', 'Adaptation Restrictions');
   }
 
   /** @private */
@@ -394,7 +394,7 @@ shakaDemo.Config = class {
    * @param {string} sectionName
    * @private
    */
-  addRetrictionsSection_(category, sectionName) {
+  addRestrictionsSection_(category, sectionName) {
     const prefix = (category ? category + '.' : '') + 'restrictions.';
     const docLink = this.resolveExternLink_('.Restrictions');
     this.addSection_(sectionName, docLink)

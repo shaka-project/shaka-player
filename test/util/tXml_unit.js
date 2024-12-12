@@ -290,6 +290,7 @@ describe('tXml', () => {
     // Error cases.
     expect(TXml.parseDuration('-PT3S')).toBeNull();
     expect(TXml.parseDuration('PT-3S')).toBeNull();
+    // cspell: disable-next-line
     expect(TXml.parseDuration('P1Sasdf')).toBeNull();
     expect(TXml.parseDuration('1H2M3S')).toBeNull();
     expect(TXml.parseDuration('123')).toBeNull();

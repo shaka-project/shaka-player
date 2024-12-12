@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:ignore FBQUFBQUFBQUFBQUFBQUFBQUFBQU Gxhe Ijpb Ijpbey AAEC
+
 describe('HlsParser', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const TextStreamKind = shaka.util.ManifestParserUtils.TextStreamKind;

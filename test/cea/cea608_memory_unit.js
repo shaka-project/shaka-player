@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:ignore testt
+
 describe('Cea608Memory', () => {
   const CeaUtils = shaka.test.CeaUtils;
 

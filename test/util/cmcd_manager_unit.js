@@ -122,11 +122,14 @@ describe('CmcdManager', () => {
   describe('Query serialization', () => {
     it('produces correctly serialized data', () => {
       const query = CmcdManager.toQuery(data);
-      const result = 'br=52317,bs,cid="xyz",com.test-exists,' +
-                     'com.test-hello="world",com.test-testing=1234,' +
-                     'com.test-token=s,d=6067,mtp=10000,' +
-                     'nor="..%2Ftesting%2F3.m4v",nrr="0-99",' +
-                     `sid="${sessionId}"`;
+      const result =
+        // cspell: disable
+        'br=52317,bs,cid="xyz",com.test-exists,' +
+        'com.test-hello="world",com.test-testing=1234,' +
+        'com.test-token=s,d=6067,mtp=10000,' +
+        'nor="..%2Ftesting%2F3.m4v",nrr="0-99",' +
+        `sid="${sessionId}"`;
+        // cspell: enable
       expect(query).toBe(result);
     });
 
@@ -146,6 +149,7 @@ describe('CmcdManager', () => {
         'CMCD-Object': 'br=52317,d=6067',
         'CMCD-Request': 'com.test-exists,com.test-hello="world",' +
                         'com.test-testing=1234,com.test-token=s,mtp=10000,' +
+                        // cspell: disable-next-line
                         'nor="..%2Ftesting%2F3.m4v",nrr="0-99"',
         'CMCD-Session': `cid="xyz",sid="${sessionId}"`,
         'CMCD-Status': 'bs',
@@ -243,8 +247,7 @@ describe('CmcdManager', () => {
         const r = createRequest();
         cmcdManager.applyManifestData(r, manifestInfo);
 
-        const uri = 'https://test.com/test.mpd?CMCD=cid%3D%22testing%22' +
-          `%2Csid%3D%22${sessionId}%22`;
+        const uri = `https://test.com/test.mpd?CMCD=cid%3D%22testing%22%2Csid%3D%22${sessionId}%22`;
         expect(r.uris[0]).toBe(uri);
       });
     });
@@ -264,18 +267,15 @@ describe('CmcdManager', () => {
         // modifies segment request uris
         r = createRequest();
         cmcdManager.applySegmentData(r, segmentInfo);
-        uri = 'https://test.com/test.mpd?CMCD=bl%3D21200%2Cbr%3D5234%' +
-          '2Ccid%3D%22testing%22%2Cd%3D3330%2Cdl%3D21200%2Cmtp%3D10000%2Cot%' +
-          `3Dv%2Csf%3Dd%2Csid%3D%22${sessionId}%22%2` +
-          'Cst%3Dv%2Csu%2Ctb%3D4000';
+        uri =
+          `https://test.com/test.mpd?CMCD=bl%3D21200%2Cbr%3D5234%2Ccid%3D%22testing%22%2Cd%3D3330%2Cdl%3D21200%2Cmtp%3D10000%2Cot%3Dv%2Csf%3Dd%2Csid%3D%22${sessionId}%22%2Cst%3Dv%2Csu%2Ctb%3D4000`;
         expect(r.uris[0]).toBe(uri);
 
         // modifies text request uris
         r = createRequest();
         cmcdManager.applyTextData(r);
-        uri = 'https://test.com/test.mpd?CMCD=cid%3D%22' +
-          'testing%22%2Cmtp%3D10000%2Cot%3Dc%2Csf%3Dd%2C' +
-          `sid%3D%22${sessionId}%22%2Csu`;
+        uri =
+          `https://test.com/test.mpd?CMCD=cid%3D%22testing%22%2Cmtp%3D10000%2Cot%3Dc%2Csf%3Dd%2Csid%3D%22${sessionId}%22%2Csu`;
         expect(r.uris[0]).toBe(uri);
       });
     });

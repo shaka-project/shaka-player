@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:words bien
+
 filterDescribe('Cue layout', shaka.test.TextLayoutTests.supported, () => {
   /** @type {shaka.test.TextLayoutTests} */
   let helper;

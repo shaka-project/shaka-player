@@ -2754,7 +2754,7 @@ describe('Player', () => {
       await runTest(['en', 'pt', 'pt-BR'], 'pt', 1);
     });
 
-    it('chooses exact match for subtags', async () => {
+    it('chooses exact match for sub tags', async () => {
       await runTest(['en', 'pt', 'pt-BR'], 'PT-BR', 2);
     });
 
@@ -2762,7 +2762,7 @@ describe('Player', () => {
       await runTest(['en', 'es', 'pt'], 'pt-BR', 2);
     });
 
-    it('chooses other subtags if base language does not exist', async () => {
+    it('chooses other sub tags if base language does not exist', async () => {
       await runTest(['en', 'es', 'pt-BR'], 'pt-PT', 2);
     });
 

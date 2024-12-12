@@ -462,6 +462,7 @@ const widevineDrmServers = {
 
 /** @type {string} */
 const axinomMultiDrmInitData = [
+  // cspell:disable
   'AAAAXHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAADwSEEBgqGWIeEJnnL+RrluuHnISEE',
   'BgqGWIeEJnnL+RrluuHnISEEBgqGWIeEJnnL+RrluuHnJI49yVmwYAAAImcHNzaAAAAACa',
   'BPB5mEBChquS5lvgiF+VAAACBgYCAAABAAEA/AE8AFcAUgBNAEgARQBBAEQARQBSACAAeA',
@@ -475,6 +476,7 @@ const axinomMultiDrmInitData = [
   'ADwALwBLAEkARAA+ADwAQwBIAEUAQwBLAFMAVQBNAD4AeQB4AGwARwBsAGgAZgBEACsAYQ',
   'BjAD0APAAvAEMASABFAEMASwBTAFUATQA+ADwALwBEAEEAVABBAD4APAAvAFcAUgBNAEgA',
   'RQBBAEQARQBSAD4A',
+  // cspell:enable
 ].join('');
 
 /** @type {AVMetadataType} */

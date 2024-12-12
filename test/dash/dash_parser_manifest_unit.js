@@ -3345,7 +3345,7 @@ describe('DashParser Manifest', () => {
       '  <Period id="2" start="PT31S" duration="PT30S">',
       '    <AdaptationSet id="2" mimeType="video/mp4">',
       '      <EssentialProperty schemeIdUri="urn:dvb:dash:fontdownload:2014"',
-      '         value="1" dvb:url="htpps://foo/foo2.woff"',
+      '         value="1" dvb:url="https://foo/foo2.woff"',
       '         dvb:mimeType="application/font-woff" dvb:fontFamily="foo2"/>',
       '      <Representation id="video" bandwidth="1">',
       '        <SegmentBase indexRange="100-200" />',
@@ -3360,7 +3360,7 @@ describe('DashParser Manifest', () => {
     await parser.start('dummy://foo', playerInterface);
     expect(addFontSpy).toHaveBeenCalledTimes(2);
     expect(addFontSpy).toHaveBeenCalledWith('foo', 'dummy://foo/foo.woff');
-    expect(addFontSpy).toHaveBeenCalledWith('foo2', 'htpps://foo/foo2.woff');
+    expect(addFontSpy).toHaveBeenCalledWith('foo2', 'https://foo/foo2.woff');
   });
 
   // DASH: Annex I

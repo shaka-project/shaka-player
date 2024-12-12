@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:ignore deadbeefdeadbeefdeadbeefdeadbeef
+
 describe('Pssh', () => {
   const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
 

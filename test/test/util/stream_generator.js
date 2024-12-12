@@ -554,9 +554,9 @@ shaka.test.Mp4LiveStreamGenerator = class {
       return null;
     } else if (wallClockTime > segmentAvailabilityEndTime) {
       shaka.log.debug(
-          'wallClockTime > segmentAvailabiltyEndTime',
+          'wallClockTime > segmentAvailabilityEndTime',
           'wallClockTime=' + wallClockTime,
-          'segmentAvailabiltyEndTime=' + segmentAvailabilityEndTime);
+          'segmentAvailabilityEndTime=' + segmentAvailabilityEndTime);
       return null;
     }
 

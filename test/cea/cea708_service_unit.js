@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:ignore testtest
+
 describe('Cea708Service', () => {
   const CeaUtils = shaka.test.CeaUtils;
 

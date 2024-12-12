@@ -395,7 +395,7 @@ describe('ContentSteeringManager', () => {
       expect(locations[2]).toBe('http://cdn-c');
     });
 
-    it('use baseuris if no locations', () => {
+    it('use base uris if no locations', () => {
       manager.clearPreviousLocations();
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(1);

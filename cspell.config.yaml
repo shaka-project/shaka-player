@@ -3,7 +3,7 @@ version: '0.2'
 language: en
 dictionaryDefinitions:
   - name: project-words
-    path: './project-words.txt'
+    path: ./project-words.txt
     addWords: true
 dictionaries:
   - en_US
@@ -12,6 +12,7 @@ dictionaries:
   - python
   - project-words
 ignorePaths:
-  - 'node_modules'
-  - 'dist'
-  - '/project-words.txt'
+  - node_modules
+  - dist
+  - externs/*.js
+  - /project-words.txt

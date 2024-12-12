@@ -1,10 +1,13 @@
-# events
+# events / html
 abrstatuschanged
+adblocker
 audiotrackchange
 audiotrackchanged
 autoplaying
 captionselectionupdated
 caststatuschanged
+defaultselected
+disableonfail
 downloadcompleted
 downloadfailed
 downloadheadersreceived
@@ -29,7 +32,10 @@ mediasourcerecovered
 mozfullscreenchange
 mozfullscreenerror
 needkey
+newstate
+noadaptation
 noinline
+noinput
 painton
 playbackrate
 playrate
@@ -44,6 +50,7 @@ seekbackward
 seekforward
 seekto
 segmentappended
+spacebar
 stalldetected
 startstreaming
 statechanged
@@ -56,6 +63,8 @@ timelineregionadded
 timelineregionenter
 timelineregionexit
 trackschanged
+trickplay
+uilang
 uiupdated
 unlisten
 unloop
@@ -72,6 +81,7 @@ webkitpresentationmodechanged
 # Shaka specific
 datas
 degrad
+discardable
 displayer
 displayers
 ewma
@@ -80,9 +90,13 @@ indexeddb
 largesize
 metadatas
 multimap
+nondisplayed
+nonprefixed
 overlayed
 playhead
+prio
 seekbar
+statelessly
 transmux
 transmuxed
 transmuxer
@@ -93,6 +107,9 @@ txml
 uints
 uncompiled
 unconfigured
+unfuzzed
+unregisters
+unstore
 vint
 vints
 xywh
@@ -103,23 +120,30 @@ xdescribe
 xfilter
 
 # 3rd party
+Bitcodin
 Brightcove
+Broadpeak
 Chromecast
 Chromecasts
 Clearkey
 Clearkeys
 codem
 Conax
+cvox
+expressjs
 Expressplay
 EZDRM
 Fairplay
 Hisense
 isoboxer
+Jwplayer
 Kaltura
+Livesim
 muxjs
 Playready
 Quicktime
 Tizen
+Uplynk
 Verimatrix
 Vidaa
 Widevine
@@ -128,12 +152,15 @@ Zenterio
 # streaming
 aach
 aacl
+abgr
 apic
 arib
 atsc
 avcc
+bmff
 bsid
 buffersource
+cabac
 cbcs
 cdna
 cenc
@@ -148,9 +175,12 @@ colr
 containerless
 cuelist
 cuepoints
+demuxer
+dfxp
 dinf
 dops
 dovi
+downmixing
 dref
 drms
 dtsc
@@ -164,13 +194,16 @@ dvvc
 ebml
 ebsp
 ebutts
+edtyp
 emsg
 enca
 encv
 eotf
 esds
 flac
+fntag
 fontname
+fourcc
 frma
 ftyp
 hdcp
@@ -180,10 +213,13 @@ iamf
 imagetype
 imsc
 inband
+isom
 keyids
 keysystem
 laurl
 lcevc
+linears
+loas
 lpcm
 lrtb
 luma
@@ -198,12 +234,15 @@ midrow
 minf
 mjpg
 mksa
+monoscopic
 moof
 moov
 mpegts
 mpegurl
 mspr
 mspro
+mssim
+multicodec
 multidrm
 muxed
 muxer
@@ -217,13 +256,17 @@ pasp
 payl
 piff
 playout
+pocs
+postroll
 preroll
 prft
 prji
 pssh
 psshs
-regionanchor
+radl
 rbsp
+regionanchor
+rltb
 samplerate
 saio
 saiz
@@ -235,9 +278,12 @@ senc
 sepiff
 sidx
 sinf
+skipoffset
 smhd
 smpte
+sntp
 soun
+ssim
 sstr
 stbl
 stco
@@ -249,6 +295,7 @@ sttg
 stts
 subcues
 subframes
+subviewer
 tblr
 tbrl
 tenc
@@ -257,6 +304,7 @@ tfdt
 tfhd
 tfrf
 tfxd
+timecode
 timecodes
 timepoint
 timepoints
@@ -264,31 +312,40 @@ tkhd
 traf
 trak
 traks
+transquant
+trexs
 trickmode
 trun
 ttml
 txxx
 unskippable
+urlparam
 valu
+vexu
 videoframe
 viewportanchor
 vmap
 vmhd
 vorbis
+vpaid
 vpcc
 vttc
 vtte
 wcop
+weba
 webvtt
+wnsty
 wrmheader
 wvtt
 wxxx
 xlink
+xsdate
 
 # vr
 centerx
 centery
 centerz
+coef
 cubemap
 equirectangular
 eyex
@@ -300,10 +357,12 @@ hfov
 highp
 nospatialvideoinfo
 spatialvideoinfo
+xyzw
 
 # DASH
 dashif
 fontdownload
+querypart
 startnumber
 Xlinks
 
@@ -323,10 +382,13 @@ streamingkeydelivery
 TARGETDURATION
 
 # other
+autoglottonym
 awesomplete
 axinom
 checkmark
 crbug
+doclet
+doclets
 googlers
 halfling
 heliocentrism
@@ -334,6 +396,7 @@ homebrewed
 ismena
 kbits
 khtml
+malform
 masterlist
 mbps
 msdk
@@ -341,5 +404,6 @@ productinfo
 sintel
 stardate
 systeminfo
+templatized
 vaage
 webapis
