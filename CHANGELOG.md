@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.12.5](https://github.com/shaka-project/shaka-player/compare/v4.12.4...v4.12.5) (2024-12-12)
+
+
+### Bug Fixes
+
+* Avoid stack overflow when stringifying objects ([#7721](https://github.com/shaka-project/shaka-player/issues/7721)) ([aa2fbe0](https://github.com/shaka-project/shaka-player/commit/aa2fbe03b403837d9a8a28f43a3cf744defabb1a)), closes [#7435](https://github.com/shaka-project/shaka-player/issues/7435)
+* Codec switch reload - apply boundaries correctly ([#7700](https://github.com/shaka-project/shaka-player/issues/7700)) ([8923834](https://github.com/shaka-project/shaka-player/commit/8923834d7f2afe4da5201b51ff68a7eff06269cb)), closes [#7595](https://github.com/shaka-project/shaka-player/issues/7595)
+* **DASH:** Error due to deleted stream ([#7723](https://github.com/shaka-project/shaka-player/issues/7723)) ([70e926b](https://github.com/shaka-project/shaka-player/commit/70e926b4339ff1b59b566b61ce1ce5f06a6db926))
+* Fix usage of keySystemsMapping ([#7736](https://github.com/shaka-project/shaka-player/issues/7736)) ([af092db](https://github.com/shaka-project/shaka-player/commit/af092dbb46f07bf518b529a657112a00df2894a1))
+* Prefer Dolby Vision p5 over Dolby Vision p8 ([#7745](https://github.com/shaka-project/shaka-player/issues/7745)) ([f76fdf8](https://github.com/shaka-project/shaka-player/commit/f76fdf8e393b2845dd6102d495479bc573d3813e))
+* **UI:** Fix playback rate resets when pausing or playing the video ([#7728](https://github.com/shaka-project/shaka-player/issues/7728)) ([06efdb1](https://github.com/shaka-project/shaka-player/commit/06efdb1c09e9082e47731ee42c30ec6afc903d00))
+* **UI:** Hide ad counter when the ad is non-linear ([#7718](https://github.com/shaka-project/shaka-player/issues/7718)) ([cd67a0f](https://github.com/shaka-project/shaka-player/commit/cd67a0f1af22410582d5a0b208548f47f1c534d2))
+* **Xbox:** Simplify the use of WebView2 ([#7743](https://github.com/shaka-project/shaka-player/issues/7743)) ([b0c8b05](https://github.com/shaka-project/shaka-player/commit/b0c8b05f01d0674ca440296d0f45c00d19d5c6f9))
+
+
+### Performance Improvements
+
+* Reduce calls to isTypeSupported ([#7729](https://github.com/shaka-project/shaka-player/issues/7729)) ([029dc86](https://github.com/shaka-project/shaka-player/commit/029dc8683156d372c2cb19d3cde65418b0925d45))
+
 ## [4.12.4](https://github.com/shaka-project/shaka-player/compare/v4.12.3...v4.12.4) (2024-12-04)
 
 
