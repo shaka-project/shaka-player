@@ -275,6 +275,7 @@ shaka.ui.Overlay = class {
       setupMediaSession: true,
       preferVideoFullScreenInVisionOS: false,
       showAudioCodec: true,
+      showVideoCodec: true,
     };
 
     // eslint-disable-next-line no-restricted-syntax
