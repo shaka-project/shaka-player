@@ -949,10 +949,10 @@ shakaDemo.Main = class {
             advanced[drmSystem] = shakaDemo.Main.defaultAdvancedDrmConfig();
           }
           if ('videoRobustness' in params) {
-            advanced[drmSystem].videoRobustness = params['videoRobustness'];
+            advanced[drmSystem].videoRobustness = [params['videoRobustness']];
           }
           if ('audioRobustness' in params) {
-            advanced[drmSystem].audioRobustness = params['audioRobustness'];
+            advanced[drmSystem].audioRobustness = [params['audioRobustness']];
           }
         }
       }
@@ -1933,8 +1933,8 @@ shakaDemo.Main = class {
     return {
       distinctiveIdentifierRequired: false,
       persistentStateRequired: false,
-      videoRobustness: '',
-      audioRobustness: '',
+      videoRobustness: [''],
+      audioRobustness: [''],
       sessionType: '',
       serverCertificate: new Uint8Array(0),
       serverCertificateUri: '',
