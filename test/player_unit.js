@@ -889,6 +889,17 @@ describe('Player', () => {
         .toBeUndefined();
   });
 
+  it('configurationForLowLatency and getConfigurationForLowLatency', () => {
+    let configurationForLowLatency = player.getConfigurationForLowLatency();
+    expect(configurationForLowLatency).not.toBeNull();
+    player.configurationForLowLatency({
+      ignoreHardwareResolution: true,
+    });
+    configurationForLowLatency = player.getConfigurationForLowLatency();
+    expect(configurationForLowLatency).not.toBeNull();
+    expect(configurationForLowLatency['ignoreHardwareResolution']).toBeTruthy();
+  });
+
   describe('configure', () => {
     it('overwrites defaults', () => {
       const defaultConfig = player.getConfiguration();
