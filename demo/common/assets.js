@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:ignore playenabler
+
 /**
  * @fileoverview
  */
@@ -59,24 +61,10 @@ shakaAssets.KeySystem = {
 
 /** @enum {string} */
 shakaAssets.AdTag = {
-  SINGLE_LINEAR_AD: 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480' +
-    '&iu=/124319096/external/' +
-    'single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&' +
-    'unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%' +
-    '3Dlinear&correlator=',
-  SINGLE_NON_LINEAR_AD: 'https://pubads.g.doubleclick.net/gampad/ads?' +
-    'sz=480x70&iu=/124319096/external/single_ad_samples&ciu_szs=300x250 ' +
-    '&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1' +
-    '&cust_params=deployment%3Ddevsite%26sample_ct%3Dnonlinear&correlator=',
-  SINGLE_SKIPPABLE_AD: 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/' +
-    '124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&' +
-    'gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=' +
-    'deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator=',
-  AD_POD_PREROLL_MIDROLL_POSTROLL: 'https://pubads.g.doubleclick.net/gampad/ads?' +
-    'sz=640x480&iu=/124319096/external/ad_rule_samples&' +
-    'ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=' +
-    'vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite' +
-    '%26sample_ar%3Dpremidpostpod&cmsid=496&vid=short_onecue&correlator=',
+  SINGLE_LINEAR_AD: 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=',
+  SINGLE_NON_LINEAR_AD: 'https://pubads.g.doubleclick.net/gampad/ads?sz=480x70&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dnonlinear&correlator=',
+  SINGLE_SKIPPABLE_AD: 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator=',
+  AD_POD_PREROLL_MIDROLL_POSTROLL: 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostpod&cmsid=496&vid=short_onecue&correlator=',
 };
 
 
@@ -116,7 +104,7 @@ shakaAssets.Feature = {
   // A synthetic property used in the "all content" tab. Should not be given to
   // assets.
   STORED: 'Downloaded',
-  // Set if the asset has ads. Autoset by calling setAdTagUri() on an asset.
+  // Set if the asset has ads. Auto set by calling setAdTagUri() on an asset.
   // Does not need to be set manually.
   ADS: 'Ads',
 

@@ -1,12 +1,14 @@
 # events / html
 abrstatuschanged
 adblocker
+audiolang
 audiotrackchange
 audiotrackchanged
 autoplaying
 captionselectionupdated
 caststatuschanged
 defaultselected
+describedby
 disableonfail
 downloadcompleted
 downloadfailed
@@ -50,12 +52,15 @@ seekbackward
 seekforward
 seekto
 segmentappended
+selectcomplete
 spacebar
 stalldetected
 startstreaming
 statechanged
 submenuopen
 textchanged
+textlang
+textrole
 texttrackvisibility
 thirdquartile
 timeandseekrangeupdated
@@ -85,8 +90,10 @@ discardable
 displayer
 displayers
 ewma
+externed
 golomb
 indexeddb
+interruptor
 largesize
 metadatas
 multimap
@@ -110,6 +117,7 @@ unconfigured
 unfuzzed
 unregisters
 unstore
+unviewed
 vint
 vints
 xywh
@@ -118,6 +126,9 @@ xywh
 fdescribe
 xdescribe
 xfilter
+
+# jsdoc
+longname
 
 # 3rd party
 Bitcodin
@@ -134,6 +145,7 @@ expressjs
 Expressplay
 EZDRM
 Fairplay
+GPAC
 Hisense
 isoboxer
 Jwplayer
@@ -146,17 +158,21 @@ Tizen
 Uplynk
 Verimatrix
 Vidaa
+Vnova
 Widevine
 Zenterio
 
 # streaming
 aach
 aacl
+aacp
 abgr
 apic
+apos
 arib
 atsc
 avcc
+bipred
 bmff
 bsid
 buffersource
@@ -178,6 +194,7 @@ cuepoints
 demuxer
 dfxp
 dinf
+dualmono
 dops
 dovi
 downmixing
@@ -204,6 +221,7 @@ flac
 fntag
 fontname
 fourcc
+frequence
 frma
 ftyp
 hdcp
@@ -252,6 +270,7 @@ nalu
 nalus
 nclx
 notsmooth
+packetized
 pasp
 payl
 piff
@@ -263,6 +282,7 @@ prft
 prji
 pssh
 psshs
+qpprime
 radl
 rbsp
 regionanchor
@@ -295,6 +315,7 @@ sttg
 stts
 subcues
 subframes
+subt
 subviewer
 tblr
 tbrl
@@ -321,6 +342,7 @@ txxx
 unskippable
 urlparam
 valu
+vdms
 vexu
 videoframe
 viewportanchor
@@ -389,11 +411,14 @@ checkmark
 crbug
 doclet
 doclets
+foldmarker
+foldmethod
 googlers
 halfling
 heliocentrism
 homebrewed
 ismena
+Kartenberg
 kbits
 khtml
 malform

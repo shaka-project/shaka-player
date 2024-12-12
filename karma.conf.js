@@ -604,6 +604,7 @@ function allUsableBrowserLaunchers(config) {
       const browserPath = process.env[ENV_CMD] || DEFAULT_CMD[process.platform];
 
       if (!fs.existsSync(browserPath) &&
+          // cspell: disable-next-line
           !which.sync(browserPath, {nothrow: true})) {
         continue;
       }

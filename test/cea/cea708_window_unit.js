@@ -257,6 +257,7 @@ describe('Cea708Window', () => {
 
   it('resets the pen correctly', () => {
     const text1 = 'abcd';
+    // cspell: disable-next-line
     const text2 = 'efgh';
 
     // Set some styles on the pen and add the first text to window.
@@ -288,6 +289,7 @@ describe('Cea708Window', () => {
   });
 
   it('handles the backspace command to backspace text correctly', () => {
+    // cspell: disable-next-line
     const text = 'testt';
     const backspacedText = 'test';
 
