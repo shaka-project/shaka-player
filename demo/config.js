@@ -140,7 +140,7 @@ shakaDemo.Config = class {
             'drm.ignoreDuplicateInitData');
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const addDRMAdvancedField = (name, valueName, suggestions,
-      arrayString = false) => {
+        arrayString = false) => {
       // All advanced fields of a given type are set at once.
       this.addDatalistInput_(name, suggestions, (input) => {
         // Add in any common drmSystem not currently in advanced.
