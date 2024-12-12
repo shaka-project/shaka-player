@@ -949,12 +949,16 @@ shakaDemo.Main = class {
             advanced[drmSystem] = shakaDemo.Main.defaultAdvancedDrmConfig();
           }
           if ('videoRobustness' in params) {
-            advanced[drmSystem].videoRobustness = [params['videoRobustness']];
+            advanced[drmSystem].videoRobustness =
+                params['videoRobustness'].split(',');
           }
           if ('audioRobustness' in params) {
-            advanced[drmSystem].audioRobustness = [params['audioRobustness']];
+            advanced[drmSystem].audioRobustness =
+                params['audioRobustness'].split(',');
           }
         }
+
+        this.configure('drm.advanced', advanced);
       }
     }
     if ('lang' in params) {
@@ -1500,10 +1504,12 @@ shakaDemo.Main = class {
           const advancedFor = advanced[drmSystem];
           if (advancedFor) {
             if (advancedFor.videoRobustness) {
-              params.push('videoRobustness=' + advancedFor.videoRobustness);
+              params.push('videoRobustness=' +
+                  advancedFor.videoRobustness.join());
             }
             if (advancedFor.audioRobustness) {
-              params.push('audioRobustness=' + advancedFor.audioRobustness);
+              params.push('audioRobustness=' +
+                  advancedFor.audioRobustness.join());
             }
             break;
           }
