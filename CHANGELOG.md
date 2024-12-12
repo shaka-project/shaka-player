@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.11.17](https://github.com/shaka-project/shaka-player/compare/v4.11.16...v4.11.17) (2024-12-12)
+
+
+### Bug Fixes
+
+* Avoid stack overflow when stringifying objects ([#7721](https://github.com/shaka-project/shaka-player/issues/7721)) ([d2284ae](https://github.com/shaka-project/shaka-player/commit/d2284ae86109eb1c5b3c5c203cfb9d9b68b3b77c)), closes [#7435](https://github.com/shaka-project/shaka-player/issues/7435)
+* Fix usage of keySystemsMapping ([#7736](https://github.com/shaka-project/shaka-player/issues/7736)) ([1d620c7](https://github.com/shaka-project/shaka-player/commit/1d620c708487fcdaab28a33f84ca95811575405b))
+* Prefer Dolby Vision p5 over Dolby Vision p8 ([#7745](https://github.com/shaka-project/shaka-player/issues/7745)) ([05d8072](https://github.com/shaka-project/shaka-player/commit/05d80723fa5e0e1096271004dab407615b6a3dcb))
+* **UI:** Fix playback rate resets when pausing or playing the video ([#7728](https://github.com/shaka-project/shaka-player/issues/7728)) ([d942cad](https://github.com/shaka-project/shaka-player/commit/d942cad061aa22d327896092ca785c06e75d5ab1))
+* **UI:** Hide ad counter when the ad is non-linear ([#7718](https://github.com/shaka-project/shaka-player/issues/7718)) ([72f74fa](https://github.com/shaka-project/shaka-player/commit/72f74fa54841cb40efdcb7ff65da5e797dd7abbd))
+* **Xbox:** Simplify the use of WebView2 ([#7743](https://github.com/shaka-project/shaka-player/issues/7743)) ([f614183](https://github.com/shaka-project/shaka-player/commit/f614183142144dd9dcae4ccf3ac35d0c73ebde5c))
+
+
+### Performance Improvements
+
+* Reduce calls to isTypeSupported ([#7729](https://github.com/shaka-project/shaka-player/issues/7729)) ([1fd1691](https://github.com/shaka-project/shaka-player/commit/1fd1691a183adbe4cac879aae6f925f953ca0c0f))
+
 ## [4.11.16](https://github.com/shaka-project/shaka-player/compare/v4.11.15...v4.11.16) (2024-12-04)
 
 
