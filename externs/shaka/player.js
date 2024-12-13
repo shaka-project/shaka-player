@@ -829,16 +829,16 @@ shaka.extern.ProducerReferenceTime;
  *   Defaults to <code>false</code>.
  * @property {Array.<string>} videoRobustness
  *   A key-system-specific Array of strings that specifies a required security
- *   level for video. Can be an array of strings to represent multiple
- *   robustness.
+ *   level for video. For multiple robustness leveles, list items in priority
+ *   order.
  *   <br>
- *   Defaults to <code>['']</code>, i.e., no specific robustness required.
+ *   Defaults to <code>[]</code>, i.e., no specific robustness required.
  * @property {Array.<string>} audioRobustness
  *   A key-system-specific Array of strings that specifies a required security
- *   level for audio. Can be an array of strings to represent multiple
- *   robustness.
+ *   level for audio. For multiple robustness leveles, list items in priority
+ *   order.
  *   <br>
- *   Defaults to <code>['']</code>, i.e., no specific robustness required.
+ *   Defaults to <code>[]</code>, i.e., no specific robustness required.
  * @property {Uint8Array} serverCertificate
  *   <i>An empty certificate (<code>byteLength==0</code>) will be treated as
  *   <code>null</code>.</i> <br>
