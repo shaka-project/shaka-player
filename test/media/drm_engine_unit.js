@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// cspell:words abar vbar deadbeefdeadbeefdeadbeefdeadbeef
+// cspell:words abar vbar
 
 describe('DrmEngine', () => {
   const Util = shaka.test.Util;

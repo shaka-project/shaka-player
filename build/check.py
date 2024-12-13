@@ -154,8 +154,12 @@ def check_complete(_):
 def check_spelling(_):
   base = shakaBuildHelpers.get_source_base()
   config_path = os.path.join(base, 'cspell.config.yaml')
+  lint_files = get_lint_files()
+  match = re.compile(r'.*\.md$')
+  md_files = shakaBuildHelpers.get_all_files(
+        os.path.join(base, 'docs'), match)
   cspell = shakaBuildHelpers.get_node_binary('cspell')
-  cmd_line = cspell + ['--config=' + config_path] + get_lint_files()
+  cmd_line = cspell + ['--config=' + config_path] + lint_files + md_files
   
   if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
     return False

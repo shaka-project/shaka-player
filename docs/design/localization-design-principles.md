@@ -1,3 +1,5 @@
+<!--  cspell:words arret -->
+
 # Localization Design Principles
 
 ## Summary

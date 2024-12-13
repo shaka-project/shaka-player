@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// cspell:words deadbeefdeadbeefdeadbeefdeadbeef
 // cspell:words eadbeefdeadbeefdeadbeefdeadbeefd
 
 describe('DrmUtils', () => {

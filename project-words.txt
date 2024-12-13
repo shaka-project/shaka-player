@@ -36,6 +36,7 @@ mozfullscreenchange
 mozfullscreenerror
 nativecontrols
 needkey
+newdemo
 newstate
 noadaptation
 noinline
@@ -75,6 +76,7 @@ uilang
 uiupdated
 unlisten
 unloop
+unmutes
 variantchanged
 vrstatuschanged
 webkitcurrentplaybacktargetiswirelesschanged
@@ -86,6 +88,7 @@ webkitplaybacktargetavailabilitychanged
 webkitpresentationmodechanged
 
 # Shaka specific
+appspot
 datas
 degrad
 discardable
@@ -99,10 +102,13 @@ interruptor
 largesize
 metadatas
 multimap
+myapp
 nondisplayed
 nonprefixed
 overlayed
 playhead
+preflighted
+preloaders
 prio
 seekbar
 statelessly
@@ -130,6 +136,7 @@ xdescribe
 xfilter
 
 # jsdoc
+linksource
 longname
 
 # 3rd party
@@ -138,6 +145,7 @@ Brightcove
 Broadpeak
 Chromecast
 Chromecasts
+chromedriver
 Clearkey
 Clearkeys
 codem
@@ -154,6 +162,7 @@ Jwplayer
 Kaltura
 Livesim
 muxjs
+Nagra
 Playready
 Quicktime
 Tizen
@@ -194,6 +203,7 @@ colr
 containerless
 cuelist
 cuepoints
+cwip
 demuxer
 dfxp
 dinf
@@ -342,6 +352,7 @@ transquant
 trexs
 trickmode
 trun
+tsbd
 ttml
 txxx
 unskippable
@@ -413,8 +424,10 @@ TARGETDURATION
 autoglottonym
 awesomplete
 axinom
+beatle
 checkmark
 crbug
+*deadbeef*
 doclet
 doclets
 foldmarker

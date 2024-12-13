@@ -217,10 +217,7 @@ const ui = video['ui'];
 // don't pass in a div that contains non-ad elements.
 const container = video.ui.getControls().getClientSideAdContainer();
 adManager.initInterstitial(container, player, video);
-const url = 'https://pubads.g.doubleclick.net/gampad/ads?' +
-    'sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&' +
-    'impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&' +
-    'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
+const url = 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
 adManager.addAdUrlInterstitial(url);
 ```
 
@@ -288,10 +285,7 @@ the presentation.
 const adsRequest = new google.ima.AdsRequest();
 // Your ad tag url should go here. We are using a sample ad tag from the
 // IMA HTML5 SDK implementation guide for this tutorial.
-adsRequest.adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?' +
-    'sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&' +
-    'impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&' +
-    'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
+adsRequest.adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
 adManager.requestClientSideAds(adsRequest);
 ```
 
@@ -361,6 +355,7 @@ See [google.ima.dai.api.VODStreamRequest][] for details on the request object.
 
 Requesting a LIVE stream:
 
+<!--cSpell:disable -->
 ```js
 const streamRequest = new google.ima.dai.api.LiveStreamRequest();
 // Your stream information will go here. We are using IMA's sample stream info
@@ -369,6 +364,7 @@ streamRequest.assetKey = 'sN_IYUG8STe1ZzhIIE_ksA';
 const uri = await adManager.requestServerSideStream(streamRequest);
 player.load(uri);
 ```
+<!--cSpell:enable -->
 
 See: [google.ima.dai.api.LiveStreamRequest][] for details on the request object.
 
