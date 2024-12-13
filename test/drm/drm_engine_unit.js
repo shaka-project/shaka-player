@@ -564,6 +564,66 @@ describe('DrmEngine', () => {
           }));
         });
 
+    it('uses advanced config to fill in DrmInfo, single robustness, default',
+        async () => {
+          // Leave only one drmInfo
+          manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addVariant(0, (variant) => {
+              variant.addVideo(1, (stream) => {
+                stream.encrypted = true;
+                stream.addDrmInfo('drm.abc');
+              });
+              variant.addAudio(2, (stream) => {
+                stream.encrypted = true;
+                stream.addDrmInfo('drm.abc');
+              });
+            });
+          });
+
+          setDecodingInfoSpy([]);
+
+          config.advanced['drm.abc'] = {
+            audioRobustness: [],
+            videoRobustness: [],
+            serverCertificate: null,
+            serverCertificateUri: '',
+            sessionType: 'persistent-license',
+            individualizationServer: '',
+            distinctiveIdentifierRequired: true,
+            persistentStateRequired: true,
+            headers: {},
+          };
+          drmEngine.configure(config);
+
+          const variants = manifest.variants;
+          await expectAsync(
+              drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
+              .toBeRejected();
+
+          expect(drmEngine.initialized()).toBe(false);
+          expect(decodingInfoSpy).toHaveBeenCalledTimes(1);
+          expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
+            keySystemConfiguration: containing({
+              keySystem: 'drm.abc',
+              distinctiveIdentifier: 'required',
+              persistentState: 'required',
+              sessionTypes: ['persistent-license'],
+              initDataType: 'cenc',
+            }),
+          }));
+          expect(decodingInfoSpy).not.toHaveBeenCalledWith(containing({
+            keySystemConfiguration: containing({
+              keySystem: 'drm.abc',
+              audio: containing({
+                robustness: '',
+              }),
+              video: containing({
+                robustness: '',
+              }),
+            }),
+          }));
+        });
+
     it('uses advanced config to fill in DrmInfo, multiple video robustness',
         async () => {
           // Leave only one drmInfo
