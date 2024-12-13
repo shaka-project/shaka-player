@@ -7,6 +7,7 @@ audiotrackchanged
 autoplaying
 captionselectionupdated
 caststatuschanged
+customwarning
 defaultselected
 describedby
 disableonfail
@@ -33,6 +34,7 @@ mediaqualitychanged
 mediasourcerecovered
 mozfullscreenchange
 mozfullscreenerror
+nativecontrols
 needkey
 newstate
 noadaptation
@@ -170,6 +172,7 @@ abgr
 apic
 apos
 arib
+assetid
 atsc
 avcc
 bipred
@@ -234,6 +237,7 @@ inband
 isom
 keyids
 keysystem
+latm
 laurl
 lcevc
 linears
@@ -276,6 +280,7 @@ payl
 piff
 playout
 pocs
+podduration
 postroll
 preroll
 prft
@@ -362,6 +367,7 @@ wvtt
 wxxx
 xlink
 xsdate
+xyzx
 
 # vr
 centerx
