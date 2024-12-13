@@ -64,40 +64,6 @@ segments like before.  It will buffer segments independently of whether there
 are gaps in the media.  Then if Playhead detects a gap in the media, it will
 jump it there.
 
-There are two kinds of gaps: small gaps that may not be noticeable (and may be
-jumped automatically), and large gaps caused by missing segments in live
-streams.  Small gaps (less than 0.5 seconds) should be jumped automatically on
-all browsers to provide seamless playback.  Larger gaps should be identified and
-sent to the app to make a decision.  If the app wants to (through a
-configuration parameter), we will jump those gaps also.  Additionally, we should
-gracefully handle attempted seeks into gaps (for both buffered and unbuffered
-seeks).
-
-### Configuration
-
-- `.streaming.smallGapLimit` (default 0.5) the threshold (in seconds) for a gap
-  to be considered small and jumped automatically.
-- `.streaming.jumpLargeGaps` (default false) if true, automatically jump large
-  gaps. (see event below)
-
-### Small vs Large Gaps
-
-To support gap jumping across browsers, we will jump small gaps on all browsers
-without user interaction.  These gaps should be small so they do not interrupt
-playback visually.  Larger gaps can be optionally jumped, but we will tell the
-app about it first.
-
-There will be a new event `largegap`.  When the playhead enters a large gap, the
-video will be paused, but we won’t enter a buffering state.  We will then fire
-the event to the app, giving it the current time and the start and end time of
-the gap.
-
-If `jumpLargeGaps` is set, we will use the default action of the event to get
-feedback from the event listeners.  The “default” action here is to jump the
-gap.  If the event handlers call `preventDefault()`, we will not jump this gap.
-If `jumpLargeGaps` is not set, we will still fire the event, but never jump the
-gap ourselves.
-
 ### Manifest Parser
 
 The manifest parser should remove all gaps from the index.  The segment index
