@@ -31,9 +31,30 @@ jobs:
               --run-id ${{ github.event.workflow_run.id }}
 
       - name: Report incremental code coverage
-        uses: thollander/actions-comment-pull-request@686ab1cab89e0f715a44a0d04b9fdfdd4f33d751
-        with:
-          message: "Incremental code coverage: ${{ steps.compute.outputs.coverage }}"
-          comment_includes: "Incremental code coverage: "
-          pr_number: ${{ steps.compute.outputs.pr_number }}
+        shell: bash
+        env:
           GITHUB_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
+          PR_NUMBER: ${{ steps.compute.outputs.pr_number }}
+          MESSAGE: "Incremental code coverage: ${{ steps.compute.outputs.coverage }}"
+          COMMENT_INCLUDES: "Incremental code coverage: "
+          COMMENT_USER: "shaka-bot"
+        run: |
+          # Look for an old comment
+          jq_filter=".[] | select((.user.login == \"$COMMENT_USER\") and (.body | startswith(\"$COMMENT_INCLUDES\"))) | .id"
+          gh api \
+            /repos/${{ github.repository }}/issues/$PR_NUMBER/comments \
+            | jq "$jq_filter" > old-comment-id
+
+          if [[ -z "$(cat old-comment-id)" ]]; then
+            # Create a new comment
+            gh api \
+              --method POST \
+              /repos/${{ github.repository }}/issues/$PR_NUMBER/comments \
+              -F "body=$MESSAGE"
+          else
+            # Update an old comment
+            gh api \
+              --method PATCH \
+              /repos/${{ github.repository }}/issues/comments/$(cat old-comment-id) \
+              -F "body=$MESSAGE"
+          fi
