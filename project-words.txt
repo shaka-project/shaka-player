@@ -89,6 +89,10 @@ webkitpresentationmodechanged
 
 # Shaka specific
 appspot
+csslint
+csslintrc
+csslintstamp
+cygpath
 datas
 degrad
 discardable
@@ -96,13 +100,26 @@ displayer
 displayers
 ewma
 externed
+gendep
+gendeps
 golomb
+htmlhint
+htmlhintrc
+htmllint
+htmllinter
+htmllintstamp
 indexeddb
 interruptor
+jscomp
+langout
 largesize
+levelname
+lessc
+lintstamp
 metadatas
 multimap
 myapp
+nodrm
 nondisplayed
 nonprefixed
 overlayed
@@ -112,6 +129,8 @@ preloaders
 prio
 seekbar
 statelessly
+testcheckstamp
+textproto
 transmux
 transmuxed
 transmuxer
@@ -148,6 +167,7 @@ Chromecasts
 chromedriver
 Clearkey
 Clearkeys
+Clutz
 codem
 Conax
 cvox
@@ -155,6 +175,7 @@ expressjs
 Expressplay
 EZDRM
 Fairplay
+gstreamer
 GPAC
 Hisense
 isoboxer
@@ -165,6 +186,7 @@ muxjs
 Nagra
 Playready
 Quicktime
+teppeis
 Tizen
 Uplynk
 Verimatrix
@@ -250,6 +272,7 @@ keysystem
 latm
 laurl
 lcevc
+libav
 linears
 loas
 lpcm
@@ -318,6 +341,7 @@ smhd
 smpte
 sntp
 soun
+srcs
 ssim
 sstr
 stbl
@@ -430,6 +454,7 @@ crbug
 *deadbeef*
 doclet
 doclets
+enoent
 foldmarker
 foldmethod
 googlers
@@ -437,6 +462,7 @@ halfling
 heliocentrism
 homebrewed
 ismena
+joeyparrish
 Kartenberg
 kbits
 khtml
@@ -445,6 +471,7 @@ masterlist
 mbps
 msdk
 productinfo
+servernum
 sintel
 stardate
 systeminfo

@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# cspell:ignore goverlap neato tsvg
+
 """A program for analyzing the Shaka compiled sources.
 
 This can be used to find areas that can be removed if not needed.  This uses
