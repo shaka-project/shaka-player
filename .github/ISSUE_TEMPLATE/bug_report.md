@@ -78,4 +78,4 @@ assignees: ''
 <!-- If applicable, you may add screenshots to help explain your problem. -->
 
 
-**Are you planning send a PR to fix it?**
+**Are you planning to send a PR to fix it?**
