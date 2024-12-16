@@ -868,8 +868,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
-    this.player_.cancelTrickPlay();
-
     if (this.presentationIsPaused()) {
       this.video_.play();
     } else {

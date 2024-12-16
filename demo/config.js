@@ -488,6 +488,8 @@ shakaDemo.Config = class {
         .addBoolInput_('Force HTTPS', 'streaming.forceHTTPS')
         .addNumberInput_('Min bytes for progress events',
             'streaming.minBytesForProgressEvents')
+        .addBoolInput_('Prefer native DASH playback when available',
+            'streaming.preferNativeDash')
         .addBoolInput_('Prefer native HLS playback when available',
             'streaming.preferNativeHls')
         .addNumberInput_('Update interval seconds',

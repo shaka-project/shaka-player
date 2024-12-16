@@ -8,13 +8,16 @@ on:
     # Run every 30 minutes
     - cron: '*/30 * * * *'
 
-permissions:
-  issues: write
-  pull-requests: write
-
 jobs:
   update-issues:
     runs-on: ubuntu-latest
+
+    permissions:
+      # "Write" to Issues to add labels, milestones, comments, etc.
+      issues: write
+      # "Write" to Pull Requests for the same.
+      pull-requests: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

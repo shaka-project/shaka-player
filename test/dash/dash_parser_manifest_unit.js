@@ -34,12 +34,6 @@ describe('DashParser Manifest', () => {
    */
   const cicpScheme = (parameter) => `urn:mpeg:mpegB:cicp:${parameter}`;
 
-  const originalIsTypeSupported = window.MediaSource.isTypeSupported;
-  let originalIsTypeSupportedManaged;
-  if (window.ManagedMediaSource) {
-    originalIsTypeSupportedManaged = window.ManagedMediaSource.isTypeSupported;
-  }
-
   beforeAll(async () => {
     mp4Index = await shaka.test.Util.fetch(mp4IndexSegmentUri);
   });
@@ -69,26 +63,11 @@ describe('DashParser Manifest', () => {
       disableStream: (stream) => {},
       addFont: shaka.test.Util.spyFunc(addFontSpy),
     };
-    window.MediaSource.isTypeSupported = (mimeType) => {
-      const type = mimeType.split('/')[0];
-      return type == 'video' || type == 'audio';
-    };
-    if (window.ManagedMediaSource) {
-      window.ManagedMediaSource.isTypeSupported = (mimeType) => {
-        const type = mimeType.split('/')[0];
-        return type == 'video' || type == 'audio';
-      };
-    }
   });
 
   afterEach(() => {
     // Dash parser stop is synchronous.
     parser.stop();
-    window.MediaSource.isTypeSupported = originalIsTypeSupported;
-    if (window.ManagedMediaSource) {
-      window.ManagedMediaSource.isTypeSupported =
-          originalIsTypeSupportedManaged;
-    }
   });
 
   /**
@@ -3705,12 +3684,14 @@ describe('DashParser Manifest', () => {
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
 
-    expect(manifest.variants.length).toBe(1);
+    expect(manifest.variants.length).toBe(2);
     expect(manifest.textStreams.length).toBe(0);
 
-    const variant = manifest.variants[0];
-    const video = variant && variant.video;
-    expect(video.codecs).toBe('dav1.10.01');
+    const video1 = manifest.variants[0] && manifest.variants[0].video;
+    expect(video1.codecs).toBe('av01.0.04M.10.0.111.09.16.09.0');
+
+    const video2 = manifest.variants[1] && manifest.variants[1].video;
+    expect(video2.codecs).toBe('dav1.10.01');
   });
 
   it('ignore scte214:supplementalCodecs by config', async () => {
@@ -3744,8 +3725,7 @@ describe('DashParser Manifest', () => {
     expect(manifest.variants.length).toBe(1);
     expect(manifest.textStreams.length).toBe(0);
 
-    const variant = manifest.variants[0];
-    const video = variant && variant.video;
-    expect(video.codecs).toBe('av01.0.04M.10.0.111.09.16.09.0');
+    const video1 = manifest.variants[0] && manifest.variants[0].video;
+    expect(video1.codecs).toBe('av01.0.04M.10.0.111.09.16.09.0');
   });
 });

@@ -20,6 +20,7 @@ goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.Functional');
+goog.require('shaka.util.MimeUtils');
 goog.requireType('shaka.ui.Controls');
 
 
@@ -125,11 +126,17 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
         tracks = tracks.filter((track, idx) => {
           // Keep the first one with the same height and framerate or bandwidth.
           const otherIdx = tracks.findIndex((t) => {
-            return t.height == track.height &&
+            let ret = t.height == track.height &&
                 t.videoBandwidth == track.videoBandwidth &&
                 t.frameRate == track.frameRate &&
                 t.hdr == track.hdr &&
                 t.videoLayout == track.videoLayout;
+            if (ret && this.controls.getConfig().showVideoCodec &&
+                t.videoCodec && track.videoCodec) {
+              ret = shaka.util.MimeUtils.getNormalizedCodec(t.videoCodec) ==
+                  shaka.util.MimeUtils.getNormalizedCodec(track.videoCodec);
+            }
+            return ret;
           });
           return otherIdx == idx;
         });
@@ -137,11 +144,17 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
         tracks = tracks.filter((track, idx) => {
           // Keep the first one with the same height and framerate or bandwidth.
           const otherIdx = tracks.findIndex((t) => {
-            return t.height == track.height &&
+            let ret = t.height == track.height &&
                 t.bandwidth == track.bandwidth &&
                 t.frameRate == track.frameRate &&
                 t.hdr == track.hdr &&
                 t.videoLayout == track.videoLayout;
+            if (ret && this.controls.getConfig().showVideoCodec &&
+                t.videoCodec && track.videoCodec) {
+              ret = shaka.util.MimeUtils.getNormalizedCodec(t.videoCodec) ==
+                  shaka.util.MimeUtils.getNormalizedCodec(track.videoCodec);
+            }
+            return ret;
           });
           return otherIdx == idx;
         });
@@ -284,8 +297,31 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       return otherTrack != track && otherTrack.height == track.height;
     });
     if (hasDuplicateResolution) {
-      const bandwidth = track.videoBandwidth || track.bandwidth;
-      text += ' (' + Math.round(bandwidth / 1000) + ' kbits/s)';
+      const hasDuplicateBandwidth = tracks.some((otherTrack) => {
+        return otherTrack != track && otherTrack.height == track.height &&
+            (otherTrack.videoBandwidth || otherTrack.bandwidth) ==
+            (track.videoBandwidth || track.bandwidth);
+      });
+      if (!hasDuplicateBandwidth) {
+        const bandwidth = track.videoBandwidth || track.bandwidth;
+        text += ' (' + Math.round(bandwidth / 1000) + ' kbits/s)';
+      }
+
+      if (this.controls.getConfig().showVideoCodec) {
+        const getVideoCodecName = (videoCodec) => {
+          let name = '';
+          if (videoCodec) {
+            const codec = shaka.util.MimeUtils.getNormalizedCodec(videoCodec);
+            if (codec.startsWith('dovi-')) {
+              name = 'Dolby Vision';
+            } else {
+              name = codec.toUpperCase();
+            }
+          }
+          return name ? ' ' + name : name;
+        };
+        text += getVideoCodecName(track.videoCodec);
+      }
     }
     return text;
   }
