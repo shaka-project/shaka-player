@@ -129,6 +129,7 @@ preloaders
 prio
 seekbar
 statelessly
+stringifiers
 testcheckstamp
 textproto
 transmux
