@@ -479,3 +479,6 @@ systeminfo
 templatized
 vaage
 webapis
+
+# banned words
+!timmer
