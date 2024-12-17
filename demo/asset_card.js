@@ -307,7 +307,7 @@ shakaDemo.AssetCard = class {
   addStoreButton() {
     /**
      * Makes the contents of the button into an MDL icon, and moves it into the
-     * upper-right hand corner with CSS styles.
+     * upper-right-hand corner with CSS styles.
      * @param {!Element} button
      * @param {!Element} attachPoint If there is no attach point, just pass the
      *  button in here.
