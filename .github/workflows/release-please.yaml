@@ -40,6 +40,10 @@ jobs:
           ref: main
           # Use a special shaka-bot access token for releases.
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          # We want to explicitly use these credentials to push a tag.
+          # The job is only one more step, so they don't leak.
+          persist-credentials: true
+
       - name: Tag the main branch
         run: |
           # Set missing git config for the tag.
@@ -189,6 +193,9 @@ jobs:
           fetch-depth: 0
           # Use a special shaka-bot access token for releases.
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          # We want to explicitly use these credentials to create the branch.
+          # The job is only one more step, so they don't leak.
+          persist-credentials: true
 
       - name: Create release branch
         run: |
