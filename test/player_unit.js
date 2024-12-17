@@ -889,6 +889,17 @@ describe('Player', () => {
         .toBeUndefined();
   });
 
+  it('configurationForLowLatency and getConfigurationForLowLatency', () => {
+    let configurationForLowLatency = player.getConfigurationForLowLatency();
+    expect(configurationForLowLatency).not.toBeNull();
+    player.configurationForLowLatency({
+      ignoreHardwareResolution: true,
+    });
+    configurationForLowLatency = player.getConfigurationForLowLatency();
+    expect(configurationForLowLatency).not.toBeNull();
+    expect(configurationForLowLatency['ignoreHardwareResolution']).toBeTruthy();
+  });
+
   describe('configure', () => {
     it('overwrites defaults', () => {
       const defaultConfig = player.getConfiguration();
@@ -1341,67 +1352,6 @@ describe('Player', () => {
       const barConfig2 = player.getConfiguration().drm.advanced['bar'];
       expect(fooConfig2.distinctiveIdentifierRequired).toBe(true);
       expect(barConfig2.distinctiveIdentifierRequired).toBe(false);
-    });
-
-    it('sets default streaming configuration with low latency mode', () => {
-      player.configure({
-        streaming: {
-          lowLatencyMode: true,
-          inaccurateManifestTolerance: 1,
-          segmentPrefetchLimit: 1,
-          updateIntervalSeconds: 10,
-          maxDisabledTime: 10,
-          retryParameters: {
-            baseDelay: 2000,
-          },
-        },
-        manifest: {
-          dash: {
-            autoCorrectDrift: true,
-          },
-          retryParameters: {
-            baseDelay: 2000,
-          },
-        },
-        drm: {
-          retryParameters: {
-            baseDelay: 2000,
-          },
-        },
-      });
-      expect(player.getConfiguration().streaming.inaccurateManifestTolerance)
-          .toBe(1);
-      expect(player.getConfiguration().streaming.segmentPrefetchLimit).toBe(1);
-      expect(player.getConfiguration().streaming.updateIntervalSeconds)
-          .toBe(10);
-      expect(player.getConfiguration().streaming.maxDisabledTime).toBe(10);
-      expect(player.getConfiguration().streaming.retryParameters.baseDelay)
-          .toBe(2000);
-      expect(player.getConfiguration().manifest.dash.autoCorrectDrift)
-          .toBe(true);
-      expect(player.getConfiguration().manifest.retryParameters.baseDelay)
-          .toBe(2000);
-      expect(player.getConfiguration().drm.retryParameters.baseDelay)
-          .toBe(2000);
-
-      // When low latency streaming gets enabled, inaccurateManifestTolerance
-      // will default to 0 unless specified, and segmentPrefetchLimit will
-      // default to 2 unless specified.
-      player.configure('streaming.lowLatencyMode', true);
-      expect(player.getConfiguration().streaming.inaccurateManifestTolerance)
-          .toBe(0);
-      expect(player.getConfiguration().streaming.segmentPrefetchLimit).toBe(2);
-      expect(player.getConfiguration().streaming.updateIntervalSeconds)
-          .toBe(0.1);
-      expect(player.getConfiguration().streaming.maxDisabledTime).toBe(1);
-      expect(player.getConfiguration().streaming.retryParameters.baseDelay)
-          .toBe(100);
-      expect(player.getConfiguration().manifest.dash.autoCorrectDrift)
-          .toBe(false);
-      expect(player.getConfiguration().manifest.retryParameters.baseDelay)
-          .toBe(100);
-      expect(player.getConfiguration().drm.retryParameters.baseDelay)
-          .toBe(100);
     });
   });
 

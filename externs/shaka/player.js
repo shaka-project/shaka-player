@@ -1560,7 +1560,6 @@ shaka.extern.LiveSyncConfiguration;
  *   useNativeHlsForFairPlay: boolean,
  *   inaccurateManifestTolerance: number,
  *   lowLatencyMode: boolean,
- *   autoLowLatencyMode: boolean,
  *   forceHTTP: boolean,
  *   forceHTTPS: boolean,
  *   minBytesForProgressEvents: number,
@@ -1717,13 +1716,6 @@ shaka.extern.LiveSyncConfiguration;
  *   If <code>true</code>, low latency streaming mode is enabled. If
  *   lowLatencyMode is set to true, it changes the default config values for
  *   other things, see: docs/tutorials/config.md
- *   <br>
- *   Defaults to <code>false</code>.
- * @property {boolean} autoLowLatencyMode
- *   If the stream is low latency and the user has not configured the
- *   lowLatencyMode, but if it has been configured to activate the
- *   lowLatencyMode if a stream of this type is detected, we automatically
- *   activate the lowLatencyMode.
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {boolean} forceHTTP
