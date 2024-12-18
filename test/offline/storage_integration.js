@@ -386,7 +386,7 @@ filterDescribe('Storage', storageSupport, () => {
     let storage;
 
     // CAUTION: Do not put overrideSupport() or clearSupport() in
-    // beforEach/afterEach.  They change what is supported at a static level.
+    // beforeEach/afterEach.  They change what is supported at a static level.
     // When the test is run, a shim will call the support check and the test
     // will be skipped if overrideSupport() has been called already.  A shim of
     // afterEach will call the same check and skip afterEach's body, too, and
@@ -710,7 +710,7 @@ filterDescribe('Storage', storageSupport, () => {
           'Expecting manifest to have audio stream');
       goog.asserts.assert(
           variant.video,
-          'Expecting manigest to have video stream');
+          'Expecting manifest to have video stream');
 
       // Remove the per stream bandwidth information.
       variant.audio.bandwidth = undefined;
@@ -1091,7 +1091,7 @@ filterDescribe('Storage', storageSupport, () => {
         return manifest;
       };
 
-      // The uri won't matter much, as we have overriden |parseManifest|.
+      // The uri won't matter much, as we have overridden |parseManifest|.
       /** @type {!shaka.extern.IAbortableOperation} */
       const waitOnStore = storage.store('any-uri', noMetadata, fakeMimeType);
 

@@ -392,7 +392,7 @@ describe('StreamUtils', () => {
   });
 
   describe('getDecodingInfosForVariants', () => {
-    it('for multiplexd content', async () => {
+    it('for multiplexed content', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
@@ -431,7 +431,7 @@ describe('StreamUtils', () => {
           shaka.test.Util.spyFunc(decodingInfoSpy);
       // If decodingInfo() fails, setDecodingInfo should finish without throwing
       // an exception, and the variant should have no decodingInfo result.
-      decodingInfoSpy.and.throwError('MediaCapabilties.decodingInfo failed.');
+      decodingInfoSpy.and.throwError('MediaCapabilities.decodingInfo failed.');
 
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {

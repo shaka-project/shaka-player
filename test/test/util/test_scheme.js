@@ -462,6 +462,7 @@ const widevineDrmServers = {
 
 /** @type {string} */
 const axinomMultiDrmInitData = [
+  // cspell:disable
   'AAAAXHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAADwSEEBgqGWIeEJnnL+RrluuHnISEE',
   'BgqGWIeEJnnL+RrluuHnISEEBgqGWIeEJnnL+RrluuHnJI49yVmwYAAAImcHNzaAAAAACa',
   'BPB5mEBChquS5lvgiF+VAAACBgYCAAABAAEA/AE8AFcAUgBNAEgARQBBAEQARQBSACAAeA',
@@ -475,6 +476,7 @@ const axinomMultiDrmInitData = [
   'ADwALwBLAEkARAA+ADwAQwBIAEUAQwBLAFMAVQBNAD4AeQB4AGwARwBsAGgAZgBEACsAYQ',
   'BjAD0APAAvAEMASABFAEMASwBTAFUATQA+ADwALwBEAEEAVABBAD4APAAvAFcAUgBNAEgA',
   'RQBBAEQARQBSAD4A',
+  // cspell:enable
 ].join('');
 
 /** @type {AVMetadataType} */
@@ -715,7 +717,7 @@ beforeAll(async () => {
  * streamed or stored offline.  If one test loads the content for streaming,
  * then another test loads the same content for offline storage, the second test
  * would encounter the cached decoding info from the first test, and the
- * negotatied key system would not be set up for the correct session types.
+ * negotiated key system would not be set up for the correct session types.
  * This would lead to a test failure.  This sort of failure would not be seen in
  * real playback (since no supported manifest parser would ever cache variants).
  *

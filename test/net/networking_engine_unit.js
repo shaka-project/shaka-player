@@ -1234,7 +1234,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       expect(onProgress).not.toHaveBeenCalled();
     });
 
-    it('repports progress even if plugin doesn\'t report it', async () => {
+    it('reports progress even if plugin doesn\'t report it', async () => {
       const resp = networkingEngine.request(
           requestType, createRequest('resolve://'));
       await resp.promise;

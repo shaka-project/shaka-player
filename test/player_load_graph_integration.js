@@ -63,7 +63,7 @@ describe('Player Load Graph', () => {
         expect(video.getElementsByTagName('source').length).toBeTruthy();
       });
 
-  it('attach + initializeMediaSource=false will not intialize media source',
+  it('attach + initializeMediaSource=false will not initialize media source',
       async () => {
         createPlayer();
 

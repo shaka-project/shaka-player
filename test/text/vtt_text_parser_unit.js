@@ -41,7 +41,7 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
-  it('supports comment blocks with inital comment', () => {
+  it('supports comment blocks with initial comment', () => {
     verifyHelper([],
         'WEBVTT\n\n' +
         'NOTE - A header comment\n' +

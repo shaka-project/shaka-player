@@ -126,7 +126,8 @@ module.exports = {
     'no-sequences': 'error',
     'no-throw-literal': 'error',
     'no-unmodified-loop-condition': 'error',
-    'no-unused-vars': 'off',  // Interface impls may not require all args
+    // Interface implementations may not require all args
+    'no-unused-vars': 'off',
     'no-useless-call': 'error',
     'no-useless-catch': 'error',
     'no-useless-concat': 'error',
@@ -167,6 +168,7 @@ module.exports = {
       ...commonNoRestrictedSyntax,
     ],
     'no-whitespace-before-property': 'error',
+    // cspell: disable-next-line
     'nonblock-statement-body-position': ['error', 'below'],
     'operator-assignment': 'error',
     'spaced-comment': ['error', 'always', {

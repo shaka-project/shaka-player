@@ -73,6 +73,7 @@ const CRITICAL_RESOURCES = [
   '../node_modules/popper.js/dist/umd/popper.min.js',
 
   // PWA compatibility for iOS:
+  // cspell: disable-next-line
   '../node_modules/pwacompat/pwacompat.min.js',
 ].map(resolveRelativeUrl);
 

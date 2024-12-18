@@ -74,7 +74,7 @@ def GenerateTsDefs(inputs, output):
   global_error_def = b'declare class GlobalError extends Error {}\n\n'
   contents = global_error_def + contents
   # There are some types that implement multiple interfaces, such as IReleasable
-  # and Iteratable.  Also, there are tools used inside Google that (for some
+  # and Iterable.  Also, there are tools used inside Google that (for some
   # reason) want to convert TS defs _BACK_ into Closure Compiler externs.  When
   # that happens, these multiple implementors generate externs with broken
   # @implements annotations.  Since this team can't control that process or

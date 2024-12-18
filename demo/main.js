@@ -101,7 +101,7 @@ shakaDemo.Main = class {
     window.addEventListener('error', (event) => {
       const errorEvent = /** @type {!ErrorEvent} */(event);
 
-      // Exception to the exceptions we catch: ChromeVox (screenreader) always
+      // Exception to the exceptions we catch: ChromeVox (screen reader) always
       // throws an error as of Chrome 73.  Screen these out since they are
       // unrelated to our application and we can't control them.
       if (errorEvent.message.includes('cvox.Api')) {
@@ -1080,7 +1080,7 @@ shakaDemo.Main = class {
 
     // Because they are being concatenated in this order, if both an
     // URL fragment and an URL parameter of the same type are present
-    // the URL fragment takes precendence.
+    // the URL fragment takes precedence.
     /** @type {!Array.<string>} */
     const combined = fields.concat(fragments);
     const params = {};

@@ -24,7 +24,7 @@ shaka.ui.HiddenFastForwardButton = class extends shaka.ui.HiddenSeekButton {
   constructor(parent, controls) {
     super(parent, controls);
 
-    this.seekContainer.classList.add('shaka-fast-foward-container');
+    this.seekContainer.classList.add('shaka-fast-forward-container');
     this.seekIcon.textContent =
         shaka.ui.Enums.MaterialDesignIcons.FAST_FORWARD;
     this.isRewind = false;

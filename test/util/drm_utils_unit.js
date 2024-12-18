@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:words eadbeefdeadbeefdeadbeefdeadbeefd
+
 describe('DrmUtils', () => {
   describe('getCommonDrmInfos', () => {
     it('returns one array if the other is empty', () => {

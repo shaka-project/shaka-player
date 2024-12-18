@@ -74,7 +74,7 @@ describe('DownloadProgressEstimator', () => {
   // When tracking progress, we want to use the estimated size. This means no
   // matter what value we provide for the actual downloaded size, it should not
   // affect the progress (the original estimate should be used).
-  it('actual bytes do not affect progres', () => {
+  it('actual bytes do not affect progress', () => {
     expect(estimator.getEstimatedProgress()).toBe(0);
 
     estimator.open(/* estimate= */ 15);

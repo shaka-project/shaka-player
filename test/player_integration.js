@@ -448,7 +448,7 @@ describe('Player', () => {
       expect(textTracks[0].language).toBe('en');
       expect(textTracks[1].language).toBe('fr');
 
-      // Enable text visibilty and immediately change language.
+      // Enable text visibility and immediately change language.
       // Only one set of cues should be active.
       // Cues should be of the selected language track.
       player.setTextTrackVisibility(true);

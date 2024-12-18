@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:dictionaries lorem-ipsum
+
 describe('ObjectUtils', () => {
   const ObjectUtils = shaka.util.ObjectUtils;
 
@@ -32,7 +34,7 @@ describe('ObjectUtils', () => {
           sit: 123,
           amet: ',',
           consectetur: {},
-          adipisecing: [1, 2, 3],
+          adipiscing: [1, 2, 3],
           elit: [
             1, null,
             {

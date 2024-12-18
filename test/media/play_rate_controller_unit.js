@@ -107,7 +107,7 @@ describe('PlayRateController', () => {
 
   // Make sure that when the playback rate set, if the new rate matches the
   // current rate, the controller will not set the rate on the media element.
-  it('does not redundently set the playrate', () => {
+  it('does not redundantly set the playrate', () => {
     // Make sure we don't see the play rate change before and after we set the
     // rate on the controller.
     expect(setPlayRateSpy).not.toHaveBeenCalled();

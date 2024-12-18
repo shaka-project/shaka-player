@@ -247,8 +247,8 @@ const controls = ui.getControls();
 const player = controls.getPlayer();
 const video = controls.getVideo();
 
-// Programatically configure the Chromecast Receiver App Id and Android
-// Receiver Compatability.
+// Programmatically configure the Chromecast Receiver App Id and Android
+// Receiver Compatibility.
 ui.configure({
   // Set the castReceiverAppId
   'castReceiverAppId': '07AEE832',

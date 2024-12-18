@@ -40,7 +40,7 @@ describe('EventManager', () => {
       expect(listener).toHaveBeenCalled();
     });
 
-    it('listens for an event from mutiple targets', () => {
+    it('listens for an event from multiple targets', () => {
       const listener1 = jasmine.createSpy('listener1');
       const listener2 = jasmine.createSpy('listener2');
 
@@ -68,7 +68,7 @@ describe('EventManager', () => {
       expect(listener2).toHaveBeenCalled();
     });
 
-    it('listens for multiple events from mutiple targets', () => {
+    it('listens for multiple events from multiple targets', () => {
       const listener1 = jasmine.createSpy('listener1');
       const listener2 = jasmine.createSpy('listener2');
 

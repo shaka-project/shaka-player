@@ -109,7 +109,7 @@ describe('StallDetector', () => {
     expect(onEvent).toHaveBeenCalled();
     expect(onStall).toHaveBeenCalledOnceMoreWith([
       /* stalledWith= */ 5,
-      /* stallDurationms= */ 10,
+      /* stallDurationMs= */ 10,
     ]);
   });
 

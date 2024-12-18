@@ -76,7 +76,7 @@ describe('SegmentPrefetch', () => {
 
     it('do not prefetch already fetched segment', async () => {
       segmentPrefetch.prefetchSegmentsByTime(references[1].startTime);
-      // since 2 was alreay pre-fetched when prefetch 1, expect
+      // since 2 was already pre-fetched when prefetch 1, expect
       // no extra fetch is made.
       segmentPrefetch.prefetchSegmentsByTime(references[2].startTime);
 

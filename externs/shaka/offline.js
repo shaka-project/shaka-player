@@ -313,9 +313,9 @@ shaka.extern.SegmentDataDB;
  *   A key-system-specific server certificate used to encrypt license requests.
  *   Its use is optional and is meant as an optimization to avoid a round-trip
  *   to request a certificate.
- * @property {!Array.<MediaKeySystemMediacapability>} audioCapabilities
+ * @property {!Array.<MediaKeySystemMediaCapability>} audioCapabilities
  *   The EME audio capabilities used to create the session.
- * @property {!Array.<MediaKeySystemMediacapability>} videoCapabilities
+ * @property {!Array.<MediaKeySystemMediaCapability>} videoCapabilities
  *   The EME video capabilities used to create the session.
  */
 shaka.extern.EmeSessionDB;

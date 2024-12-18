@@ -8,7 +8,7 @@ describe('Mp4TtmlParser', () => {
   const ttmlInitSegmentUri = '/base/test/test/assets/ttml-init.mp4';
   const ttmlSegmentUri = '/base/test/test/assets/ttml-segment.mp4';
   const ttmlSegmentMultipleMDATUri =
-      '/base/test/test/assets/ttml-segment-multiplemdat.mp4';
+      '/base/test/test/assets/ttml-segment-multiple-mdat.mp4';
   const imscImageInitSegmentUri =
       '/base/test/test/assets/imsc-image-init.cmft';
   const imscImageSegmentUri =
@@ -159,6 +159,7 @@ describe('Mp4TtmlParser', () => {
         startTime: 42.2,
         endTime: 45,
         nestedCues: [{
+          // cspell:disable-next-line
           payload: '"Fourty years later"',
         }, {
           lineBreak: true,

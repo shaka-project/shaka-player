@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# cspell:words Merin haryalye alasse
+
 """Generates Javascript to load compile-time localization data.
 
 This reads localization data at compile-time in a flat JSON-formatted

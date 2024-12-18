@@ -275,7 +275,7 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
      *    // Preference 2 base
      *    'dwarfish',
      *    // Preference 2 Siblings
-     *    'dwarfish-MOUNTAIN', 'dwarfish-NORTH', "dwarish-SOUTH",
+     *    'dwarfish-MOUNTAIN', 'dwarfish-NORTH', "dwarfish-SOUTH",
      *    // Fallback
      *    'common-HUMAN',
      * ])

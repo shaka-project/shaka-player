@@ -298,7 +298,7 @@ describe('Ad UI', () => {
           container, 'shaka-ad-markers');
     });
 
-    it('dissappears when an ad is playing', async () => {
+    it('disappears when an ad is playing', async () => {
       const eventManager = new shaka.util.EventManager();
       const waiter = new shaka.test.Waiter(eventManager);
       const p = waiter.waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);

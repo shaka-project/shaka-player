@@ -140,7 +140,7 @@ class ShakaReceiverApp {
       this.idleTimerId_ = null;
     }
   }
-}  // class ShakaRecevierApp
+}  // class ShakaReceiverApp
 
 /**
  * @const {number}

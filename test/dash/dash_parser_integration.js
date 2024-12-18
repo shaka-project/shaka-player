@@ -88,6 +88,7 @@ describe('DashParser', () => {
     player.configure({
       drm: {
         clearKeys: {
+          // cspell: disable-next-line
           'nrQFDeRLSAKTLifXUIPiZg': 'FmY0xnWCPCNaSpRG-tUuTQ',
         },
       },

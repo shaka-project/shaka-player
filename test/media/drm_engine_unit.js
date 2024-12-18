@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:words abar vbar
+
 describe('DrmEngine', () => {
   const Util = shaka.test.Util;
 
@@ -1700,7 +1702,9 @@ describe('DrmEngine', () => {
         keys: [
           {kid: '3q2-796tvu_erb7v3q2-7w',
             k: 'GGdTCRhnUwkYZ1MJGGdTCQ', kty: 'oct'},
+          // cspell: disable-next-line
           {kid: 'AgMFBwEQEwFwGQIwKQMQNw',
+            // cspell: disable-next-line
             k: 'AwUHATAjAyBCAQgEJQmAMw', kty: 'oct'},
         ],
       });

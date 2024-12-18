@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:ignore FCFC
+
 describe('SsaTextParser', () => {
   const Cue = shaka.text.Cue;
 

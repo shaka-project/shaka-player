@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:ignore Rldmlu ZSBQU ZSBGY Gxhe SBQU Rpcm Rlci Fpcn Xkgb UFJP Zlcn
+
 // Test DRM-related parsing.
 describe('DashParser ContentProtection', () => {
   const Dash = shaka.test.Dash;
