@@ -1005,7 +1005,7 @@ describe('DashParser ContentProtection', () => {
         // record count
         1,
         // type
-        ContentProtection.PLAYREADY_RECORD_TYPES.RIGHTS_MANAGEMENT,
+        1,
         // record size (in num bytes)
         laurl.length * 2,
         // value
