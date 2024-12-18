@@ -26,6 +26,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: shaka-project/shaka-github-tools
+          persist-credentials: false
 
       # TODO: revert to micnncim and new release after landing
       #       https://github.com/micnncim/action-label-syncer/pull/68
