@@ -111,6 +111,7 @@
 +../../lib/util/periods.js
 +../../lib/util/platform.js
 +../../lib/util/player_configuration.js
++../../lib/util/playready.js
 +../../lib/util/pssh.js
 +../../lib/util/public_promise.js
 +../../lib/util/state_history.js
