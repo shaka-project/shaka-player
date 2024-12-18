@@ -30,6 +30,7 @@ jobs:
         with:
           # We need a list of all tags for this, so fetch the entire history.
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: google-github-actions/auth@v2
         with:
