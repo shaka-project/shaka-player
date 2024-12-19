@@ -108,7 +108,7 @@
     "eme-encryption-scheme-polyfill": "^2.1.6"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=18"
   },
   "clean-package": {
     "remove": [
