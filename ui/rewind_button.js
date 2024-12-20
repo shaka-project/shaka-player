@@ -82,6 +82,13 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
     // selected. If no more rates are available, the first one is set.
     const newRate = (newRateIndex != this.rewindRates_.length) ?
         this.rewindRates_[newRateIndex] : this.rewindRates_[0];
+
+    if (this.video.paused) {
+      // Our fast forward is implemented with playbackRate and needs the video
+      // to be playing (to not be paused) to take immediate effect.
+      // If the video is paused, "unpause" it.
+      this.video.play();
+    }
     this.player.trickPlay(newRate);
 
     this.button_.setAttribute('shaka-status', newRate + 'x');
