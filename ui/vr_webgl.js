@@ -188,7 +188,7 @@ shaka.ui.VRWebgl = class {
   }
 
   /**
-   * Toogle stereoscopic mode
+   * Toggle stereoscopic mode
    */
   toggleStereoscopicMode() {
     this.stereoscopicMode_ = !this.stereoscopicMode_;
@@ -574,7 +574,7 @@ shaka.ui.VRWebgl = class {
       shaka.ui.Matrix4x4.multiply(matrix, out, matrix);
     } else {
       // Doing this we restart the value to the previous position,
-      // to not mantain a value over 90º or under -90º.
+      // to not maintain a value over 90º or under -90º.
       this.positionY_ -= pitch;
     }
 

@@ -537,7 +537,7 @@ shaka.ui.Matrix4x4 = class {
   /**
    * Returns the scaling factor component of a transformation
    * matrix. If a matrix is built with fromRotationTranslationScale
-   * with a normalized Quaternion paramter, the returned vector will be
+   * with a normalized Quaternion parameter, the returned vector will be
    * the same as the scaling vector
    * originally supplied.
    * @param  {!Float32Array} out Vector to receive scaling factor component

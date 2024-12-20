@@ -299,6 +299,7 @@ uiConfig['controlPanelElements'] = ['rewind', 'fast_forward', 'skip'];
   localization docs explaining how to take advantage of our localization system. -->
 
 ####  Shaka Theme Gallery
+<!-- cspell: disable-next-line -->
 Check out the set of [pre-packaged Shaka UI themes][], created by [@lucksy][]!
 PR contributions to [the gallery repo][] are welcome.
 [@lucksy]: https://github.com/lucksy

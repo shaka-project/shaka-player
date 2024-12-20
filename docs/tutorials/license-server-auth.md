@@ -61,6 +61,7 @@ To authenticate to this endpoint, we must send a special header.  You can add
 arbitrary headers to Shaka's requests through a request filter callback.
 Register the filter before calling `player.load()`:
 
+<!--cSpell:disable -->
 ```js
   player.getNetworkingEngine().registerRequestFilter(function(type, request, context) {
     // Only add headers to license requests:
@@ -70,6 +71,7 @@ Register the filter before calling `player.load()`:
     }
   });
 ```
+<!--cSpell:enable -->
 
 Load the page again, and the license request will succeed.  Although we are
 using a fixed value for the purposes of this tutorial, your application can
@@ -91,6 +93,7 @@ try to use it without setting the parameter, you will see `Error code 6007`
 
 We can use a request filter to modify the URL and add the required parameter:
 
+<!--cSpell:disable -->
 ```js
   player.getNetworkingEngine().registerRequestFilter(function(type, request, context) {
     // Only add headers to license requests:
@@ -103,6 +106,7 @@ We can use a request filter to modify the URL and add the required parameter:
     }
   });
 ```
+<!--cSpell:enable -->
 
 Load the page again, and the license request will succeed.
 
@@ -125,6 +129,7 @@ the JavaScript application.  So to set the required cookie value, point your
 browser to the server's [set\_cookie][] page.
 
 Open the JavaScript console and check the value of `document.cookie` to confirm
+<!--cSpell:disable-next-line -->
 that you have the cookie. You should see `"CWIP-Auth-Cookie=VGhpc0lzQVRlc3QK"`.
 
 Now load the Shaka page again, and ... we still get error code 6007.  What
@@ -238,11 +243,13 @@ Load the page again.  The license request will be delayed, an additional request
 will be made for the auth token, and then the license request will continue.
 You should see these messages in the JavaScript console:
 
+<!--cSpell:disable -->
 ```html
 Need auth token.
 Received auth token VGhpc0lzQVRlc3QK
 License request can now continue.
 ```
+<!--cSpell:enable -->
 
 If you need them, you can also create asynchronous response filters in the same
 way.

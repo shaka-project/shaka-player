@@ -2760,7 +2760,7 @@ describe('Player', () => {
       await runTest(['en', 'pt', 'pt-BR'], 'pt', 1);
     });
 
-    it('chooses exact match for subtags', async () => {
+    it('chooses exact match for sub tags', async () => {
       await runTest(['en', 'pt', 'pt-BR'], 'PT-BR', 2);
     });
 
@@ -2768,7 +2768,7 @@ describe('Player', () => {
       await runTest(['en', 'es', 'pt'], 'pt-BR', 2);
     });
 
-    it('chooses other subtags if base language does not exist', async () => {
+    it('chooses other sub tags if base language does not exist', async () => {
       await runTest(['en', 'es', 'pt-BR'], 'pt-PT', 2);
     });
 
@@ -4240,9 +4240,9 @@ describe('Player', () => {
     it('gets current segment availability duration', () => {
       playhead.getTime.and.returnValue(20);
 
-      const segmentAvailabiltyDuration =
+      const segmentAvailabilityDuration =
           player.getSegmentAvailabilityDuration();
-      expect(segmentAvailabiltyDuration).toBe(1000);
+      expect(segmentAvailabilityDuration).toBe(1000);
     });
   });
 

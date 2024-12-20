@@ -261,7 +261,7 @@ describe('DashParser SegmentList', () => {
   });
 
   describe('Segment start', () => {
-    it('shoud be adjusted with presentationTimeOffset', async () => {
+    it('should be adjusted with presentationTimeOffset', async () => {
       const source = [
         '<MPD mediaPresentationDuration="PT70S">',
         '  <Period>',

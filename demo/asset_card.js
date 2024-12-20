@@ -34,13 +34,13 @@ shakaDemo.AssetCard = class {
     this.featureIconsContainer_ = document.createElement('div');
     /** @private {!Element} */
     this.progressCircle_ = document.createElement('div');
-    const svgns = 'http://www.w3.org/2000/svg';
+    const svgNs = 'http://www.w3.org/2000/svg';
     /** @private {!Element} */
-    this.progressCircleSvg_ = document.createElementNS(svgns, 'svg');
+    this.progressCircleSvg_ = document.createElementNS(svgNs, 'svg');
     /** @private {!Element} */
-    this.progressCircleBack_ = document.createElementNS(svgns, 'circle');
+    this.progressCircleBack_ = document.createElementNS(svgNs, 'circle');
     /** @private {!Element} */
-    this.progressCircleBar_ = document.createElementNS(svgns, 'circle');
+    this.progressCircleBar_ = document.createElementNS(svgNs, 'circle');
     /** @private {function(!shakaDemo.AssetCard)} */
     this.remakeButtonsFn_ = remakeButtonsFn;
 
@@ -307,7 +307,7 @@ shakaDemo.AssetCard = class {
   addStoreButton() {
     /**
      * Makes the contents of the button into an MDL icon, and moves it into the
-     * upper-righthand corner with CSS styles.
+     * upper-right-hand corner with CSS styles.
      * @param {!Element} button
      * @param {!Element} attachPoint If there is no attach point, just pass the
      *  button in here.

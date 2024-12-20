@@ -222,7 +222,7 @@ function getLeadingBlockComment(node) {
   }
 
   // In case there are multiple (for example, a file-level comment that also
-  // preceeds the node), take the most recent one, which is closest to the node.
+  // precedes the node), take the most recent one, which is closest to the node.
   const mostRecentComment = blockComments[blockComments.length - 1];
 
   // Reconstruct the original block comment by adding back /* and */.

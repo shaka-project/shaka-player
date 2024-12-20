@@ -1865,9 +1865,9 @@ describe('DashParser Manifest', () => {
   });
 
   it('Uses 1.5 times minBufferTime as default presentation delay', async () => {
-    // When sugguestedPresentDelay should be ignored, and
-    // config.defaultpresentdelay is not set other than 0, use 1.5*minBufferTime
-    // as the presentationDelay.
+    // When suggestedPresentDelay should be ignored, and
+    // config.defaultPresentationDelay is not set other than 0,
+    // use 1.5*minBufferTime as the presentationDelay.
     const manifestText = [
       '<MPD minBufferTime="PT2S" suggestedPresentationDelay="PT25S">',
       '  <Period id="1" duration="PT30S">',
@@ -3322,7 +3322,7 @@ describe('DashParser Manifest', () => {
       '  <Period id="2" start="PT31S" duration="PT30S">',
       '    <AdaptationSet id="2" mimeType="video/mp4">',
       '      <EssentialProperty schemeIdUri="urn:dvb:dash:fontdownload:2014"',
-      '         value="1" dvb:url="htpps://foo/foo2.woff"',
+      '         value="1" dvb:url="https://foo/foo2.woff"',
       '         dvb:mimeType="application/font-woff" dvb:fontFamily="foo2"/>',
       '      <Representation id="video" bandwidth="1">',
       '        <SegmentBase indexRange="100-200" />',
@@ -3337,7 +3337,7 @@ describe('DashParser Manifest', () => {
     await parser.start('dummy://foo', playerInterface);
     expect(addFontSpy).toHaveBeenCalledTimes(2);
     expect(addFontSpy).toHaveBeenCalledWith('foo', 'dummy://foo/foo.woff');
-    expect(addFontSpy).toHaveBeenCalledWith('foo2', 'htpps://foo/foo2.woff');
+    expect(addFontSpy).toHaveBeenCalledWith('foo2', 'https://foo/foo2.woff');
   });
 
   // DASH: Annex I

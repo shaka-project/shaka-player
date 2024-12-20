@@ -853,8 +853,8 @@ shaka.extern.ProducerReferenceTime;
  *   <br>
  *   Defaults to <code>''</code>.
  * @property {string} individualizationServer
- *   The server that handles an <code>'individualiation-request'</code>.  If the
- *   server isn't given, it will default to the license server.
+ *   The server that handles an <code>'individualization-request'</code>.
+ *   If the server isn't given, it will default to the license server.
  *   <br>
  *   Defaults to <code>''</code>.
  * @property {string} sessionType
@@ -990,7 +990,7 @@ shaka.extern.PersistentSessionMetadata;
  *   <br>
  *   Defaults to <code>1</code>.
  * @property {!Array.<string>} preferredKeySystems
- *   Specifies the priorties of available DRM key systems.
+ *   Specifies the priorities of available DRM key systems.
  *   <br>
  *   Defaults <code>['com.microsoft.playready']</code> on Xbox One and
  *   PlayStation 4, and <code>[]</code> for all other browsers.
@@ -1013,7 +1013,7 @@ shaka.extern.PersistentSessionMetadata;
  * @property {boolean} ignoreDuplicateInitData
  *   When true indicate that the player doesn't ignore duplicate init data.
  *   Note: Tizen 2015 and 2016 models will send multiple webkitneedkey events
- *   with the same init data. If the duplicates are supressed, playback
+ *   with the same init data. If the duplicates are suppressed, playback
  *   will stall without errors.
  *   <br>
  *   Defaults to <code>false</code> on Tizen 2, and <code>true</code> for all
@@ -1672,7 +1672,7 @@ shaka.extern.LiveSyncConfiguration;
  *   Defaults to <code>5</code>.
  * @property {number} safeSeekEndOffset
  *   The amount of seconds that should be added when repositioning the playhead
- *   after falling out of the seakable end range. This is helpful for live
+ *   after falling out of the seekable end range. This is helpful for live
  *   stream with a lot of GAP. This will reposition the playback in the past
  *   and avoid to be block at the edge and buffer at the next GAP
  *   <br>
@@ -1882,7 +1882,7 @@ shaka.extern.StreamingConfiguration;
  *   <br><br>
  *   See https://github.com/shaka-project/shaka-player/issues/2759.
  *   <br><br>
- *   If you know you don't need this, you canset this value to
+ *   If you know you don't need this, you can set this value to
  *   <code>false</code> to gain a few milliseconds on loading time and seek
  *   time.
  *   <br><br>

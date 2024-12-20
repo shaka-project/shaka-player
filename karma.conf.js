@@ -380,7 +380,7 @@ module.exports = (config) => {
     // Set Karma's level of logging.
     logLevel: KARMA_LOG_MAP[settings.log_level],
 
-    // Should Karma xecute tests whenever a file changes?
+    // Should Karma execute tests whenever a file changes?
     autoWatch: settings.auto_watch,
 
     // Do a single run of the tests on captured browsers and then quit.
@@ -604,6 +604,7 @@ function allUsableBrowserLaunchers(config) {
       const browserPath = process.env[ENV_CMD] || DEFAULT_CMD[process.platform];
 
       if (!fs.existsSync(browserPath) &&
+          // cspell: disable-next-line
           !which.sync(browserPath, {nothrow: true})) {
         continue;
       }

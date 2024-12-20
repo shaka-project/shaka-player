@@ -69,7 +69,7 @@ describe('AdaptationSetCriteria', () => {
       ]);
     });
 
-    it('should not filter varaints when codec switching startegy is smooth '+
+    it('should not filter variants when codec switching strategy is smooth '+
         'and changeType is supported', () => {
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(1, (variant) => {
@@ -126,7 +126,7 @@ describe('AdaptationSetCriteria', () => {
       }
     });
 
-    it('should filter varaints when codec switching strategy'+
+    it('should filter variants when codec switching strategy'+
         'is not SMOOTH', () => {
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(1, (variant) => {

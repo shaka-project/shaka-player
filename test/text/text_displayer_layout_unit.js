@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:words bien
+
 filterDescribe('Cue layout', shaka.test.TextLayoutTests.supported, () => {
   /** @type {shaka.test.TextLayoutTests} */
   let helper;
@@ -42,7 +44,7 @@ filterDescribe('Cue layout', shaka.test.TextLayoutTests.supported, () => {
             player, /** @type {!HTMLElement} */(helper.videoContainer),
             shaka.test.UiUtils.createVideoElement());
         // Turn off every part of the UI that we can, so that the screenshot is
-        // less likey to change because of something unrelated to text
+        // less likely to change because of something unrelated to text
         // rendering.
         ui.configure('controlPanelElements', []);
         ui.configure('addSeekBar', false);

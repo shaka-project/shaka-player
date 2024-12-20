@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:ignore FBQUFBQUFBQUFBQUFBQUFBQUFBQU Gxhe Ijpb Ijpbey AAEC
+
 describe('HlsParser', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const TextStreamKind = shaka.util.ManifestParserUtils.TextStreamKind;
@@ -454,7 +456,7 @@ describe('HlsParser', () => {
   it('guesses video-only variant when text codecs are present', async () => {
     const master = [
       // NOTE: This manifest is technically invalid. It has text codecs, but
-      // no text stream. We're tesing text stream parsing elswhere, so this
+      // no text stream. We're testing text stream parsing elsewhere, so this
       // only has the stream we're interested in (video) for simplicity.
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,stpp.ttml.im1t"\n',
@@ -5193,7 +5195,7 @@ describe('HlsParser', () => {
           jasmine.objectContaining(eventValue));
     });
 
-    it('parses mutiple data', async () => {
+    it('parses multiple data', async () => {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-SESSION-DATA:DATA-ID="fooId",LANGUAGE="en",VALUE="fooValue"\n',

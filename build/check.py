@@ -150,45 +150,29 @@ def check_complete(_):
     return False
   return True
 
-
 @_Check('spelling')
 def check_spelling(_):
-  """Checks that source files don't have any common misspellings."""
-  logging.info('Checking for common misspellings...')
-
-  complete_build = complete_build_files()
-  if not complete_build:
-    return False
-
   base = shakaBuildHelpers.get_source_base()
-  complete_build.update(shakaBuildHelpers.get_all_js_files('test'))
-  complete_build.update(shakaBuildHelpers.get_all_js_files('demo'))
-  complete_build.update(shakaBuildHelpers.get_all_js_files('externs'))
-  complete_build.update(shakaBuildHelpers.get_all_files(
-      os.path.join(base, 'build'), re.compile(r'.*\.(js|py)$')))
-
-  with shakaBuildHelpers.open_file(
-      os.path.join(base, 'build', 'misspellings.txt')) as f:
-    misspellings = ast.literal_eval(f.read())
-  has_error = False
-  for path in complete_build:
-    with shakaBuildHelpers.open_file(path) as f:
-      for i, line in enumerate(f):
-        for regex, replace_pattern in misspellings.items():
-          for match in re.finditer(regex, line):
-            repl = match.expand(replace_pattern).lower()
-            if match.group(0).lower() == repl:
-              continue  # No-op suggestion
-
-            if not has_error:
-              logging.error('The following file(s) have misspellings:')
-            logging.error(
-                '  %s:%d:%d: Did you mean %r?' %
-                (os.path.relpath(path, base), i + 1, match.start() + 1, repl))
-            has_error = True
-
-  return not has_error
-
+  config_path = os.path.join(base, 'cspell.config.yaml')
+  lint_files = get_lint_files()
+  py_match = re.compile(r'.*\.py$')
+  py_files = shakaBuildHelpers.get_all_files(
+        os.path.join(base, 'build'), py_match)
+  md_match = re.compile(r'.*\.md$')
+  md_files = shakaBuildHelpers.get_all_files(
+        os.path.join(base, 'docs'), md_match)
+  cspell = shakaBuildHelpers.get_node_binary('cspell')
+  cmd_line = cspell + ['--config=' + config_path] + ['--no-progress']
+  logging.info('Checking for spelling mistakes in js files...')
+  if shakaBuildHelpers.execute_get_code(cmd_line + lint_files) != 0:
+    return False
+  logging.info('Checking for spelling mistakes in md files...')
+  if shakaBuildHelpers.execute_get_code(cmd_line + md_files) != 0:
+    return False
+  logging.info('Checking for spelling mistakes in py files...')
+  if shakaBuildHelpers.execute_get_code(cmd_line + py_files) != 0:
+    return False
+  return True
 
 @_Check('eslint_disable')
 def check_eslint_disable(_):

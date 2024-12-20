@@ -250,10 +250,10 @@ describe('DashParser Live', () => {
       ].join('\n');
       // Set the period start to the sum of the durations of the references
       // in the previous period.
-      const durs = basicRefs.map((r) => {
+      const durations = basicRefs.map((r) => {
         return r.endTime - r.startTime;
       });
-      const pStart = durs.reduce((p, d) => p + d, 0);
+      const pStart = durations.reduce((p, d) => p + d, 0);
       const args = {
         updateTime: updateTime,
         pStart: pStart,

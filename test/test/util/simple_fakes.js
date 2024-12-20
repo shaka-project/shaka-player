@@ -6,7 +6,7 @@
 
 /**
  * @fileoverview Defines simple mocks for library types.
- * @suppress {checkTypes} Suppress errors about missmatches between the
+ * @suppress {checkTypes} Suppress errors about mismatches between the
  *   definition and the interface.  This allows us to have the members be
  *   |jasmine.Spy|.  BE CAREFUL IN THIS FILE.
  */

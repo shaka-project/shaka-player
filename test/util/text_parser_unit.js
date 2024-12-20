@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:ignore AABB AABBAA BBAA
+
 describe('TextParser', () => {
   const TextParser = shaka.util.TextParser;
 

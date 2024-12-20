@@ -438,7 +438,7 @@ describe('UI', () => {
     it('enabling ABR via API gets the Auto button selected', async () => {
       expect(player.getConfiguration().abr.enabled).toBe(false);
 
-      // Setup listener to the ui event. The event, trigerring the update
+      // Setup listener to the ui event. The event, triggering the update
       // is dispatched inside player.configure(), so we need to start
       // listening before calling it.
       const uiReady = waiter.waitForEvent(
