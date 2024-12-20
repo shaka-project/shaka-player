@@ -1730,7 +1730,7 @@ describe('HlsParser', () => {
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
         stream.kind = TextStreamKind.SUBTITLE;
-        stream.mime('application/mp4', '');
+        stream.mime('text/vtt', '');
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
