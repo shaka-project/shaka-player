@@ -1682,7 +1682,7 @@ filterDescribe('Storage', storageSupport, () => {
 
   /**
    * @param {!shaka.offline.Storage} storage
-   * @param {!shaka.media.DrmEngine} drm
+   * @param {!shaka.drm.DrmEngine} drm
    * @param {shaka.extern.Manifest} manifest
    */
   function overrideDrmAndManifest(storage, drm, manifest) {
@@ -1761,7 +1761,7 @@ filterDescribe('Storage', storageSupport, () => {
   };
 
   /**
-   * @param {!shaka.media.DrmEngine} drmEngine
+   * @param {!shaka.drm.DrmEngine} drmEngine
    * @param {string} sessionName
    * @return {!Promise.<MediaKeySession>}
    *
@@ -1800,7 +1800,7 @@ filterDescribe('Storage', storageSupport, () => {
   /**
    * @param {!shaka.Player} player
    * @param {shaka.extern.Manifest} manifest
-   * @param {function(!shaka.media.DrmEngine):Promise} action
+   * @param {function(!shaka.drm.DrmEngine):Promise} action
    * @return {!Promise}
    */
   async function withDrm(player, manifest, action) {
@@ -1809,8 +1809,8 @@ filterDescribe('Storage', storageSupport, () => {
 
     let error = null;
 
-    /** @type {!shaka.media.DrmEngine} */
-    const drm = new shaka.media.DrmEngine({
+    /** @type {!shaka.drm.DrmEngine} */
+    const drm = new shaka.drm.DrmEngine({
       netEngine: net,
       onError: (e) => { error = error || e; },
       onKeyStatus: () => {},
