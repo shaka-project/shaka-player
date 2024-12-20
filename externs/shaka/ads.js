@@ -305,6 +305,11 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @return {!Promise}
    */
   addAdUrlInterstitial(url) {}
+
+  /**
+   * @return {shaka.Player}
+   */
+  getInterstitialPlayer() {}
 };
 
 
