@@ -167,7 +167,7 @@ describe('MediaSourceEngine', () => {
     mockMediaSource.addSourceBuffer.and.callFake((mimeType) => {
       if (mockMediaSource.readyState !== 'open') {
         // https://w3c.github.io/media-source/#addsourcebuffer-method
-        throw new InvalidStateError();
+        throw new Error('InvalidStateError');
       }
       const type = mimeType.split('/')[0];
       const buffer = type == 'audio' ? audioSourceBuffer : videoSourceBuffer;
@@ -405,27 +405,31 @@ describe('MediaSourceEngine', () => {
       expect(shaka.text.TextEngine).not.toHaveBeenCalled();
     });
 
-    it('creates SourceBuffers when MediaSource readyState is closed', async () => {
-      const initObject = new Map();
-      initObject.set(ContentType.AUDIO, fakeAudioStream);
-      initObject.set(ContentType.VIDEO, fakeVideoStream);
+    it('creates SourceBuffers when MediaSource readyState is closed',
+        async () => {
+          const initObject = new Map();
+          initObject.set(ContentType.AUDIO, fakeAudioStream);
+          initObject.set(ContentType.VIDEO, fakeVideoStream);
 
-      await mediaSourceEngine.open();
+          await mediaSourceEngine.open();
 
-      mockMediaSource.readyState = 'closed';
-      await expectAsync(mediaSourceEngine.init(initObject, false)).not.toBeRejected();
-    });
+          mockMediaSource.readyState = 'closed';
+          await expectAsync(
+              mediaSourceEngine.init(initObject, false)).not.toBeRejected();
+        });
 
-    it('creates SourceBuffers when MediaSource readyState is ended', async () => {
-      const initObject = new Map();
-      initObject.set(ContentType.AUDIO, fakeAudioStream);
-      initObject.set(ContentType.VIDEO, fakeVideoStream);
+    it('creates SourceBuffers when MediaSource readyState is ended',
+        async () => {
+          const initObject = new Map();
+          initObject.set(ContentType.AUDIO, fakeAudioStream);
+          initObject.set(ContentType.VIDEO, fakeVideoStream);
 
-      await mediaSourceEngine.open();
+          await mediaSourceEngine.open();
 
-      mockMediaSource.readyState = 'ended';
-      await expectAsync(mediaSourceEngine.init(initObject, false)).not.toBeRejected();
-    });
+          mockMediaSource.readyState = 'ended';
+          await expectAsync(
+              mediaSourceEngine.init(initObject, false)).not.toBeRejected();
+        });
 
     it('creates TextEngines for text types', async () => {
       const initObject = new Map();
