@@ -7,7 +7,7 @@
 /**
  * A fake DrmEngine.
  *
- * @extends {shaka.media.DrmEngine}
+ * @extends {shaka.drm.DrmEngine}
  */
 shaka.test.FakeDrmEngine = class {
   constructor() {

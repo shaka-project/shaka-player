@@ -17,6 +17,8 @@
 +../../lib/deprecate/enforcer.js
 +../../lib/deprecate/version.js
 
++../../lib/drm/drm_engine.js
++../../lib/drm/drm_utils.js
 +../../lib/drm/playready.js
 
 +../../lib/media/adaptation_set.js
@@ -24,7 +26,6 @@
 +../../lib/media/buffering_observer.js
 +../../lib/media/closed_caption_parser.js
 +../../lib/media/content_workarounds.js
-+../../lib/media/drm_engine.js
 +../../lib/media/example_based_criteria.js
 +../../lib/media/gap_jumping_controller.js
 +../../lib/media/manifest_filterer.js
@@ -84,7 +85,6 @@
 +../../lib/util/delayed_tick.js
 +../../lib/util/destroyer.js
 +../../lib/util/dom_utils.js
-+../../lib/util/drm_utils.js
 +../../lib/util/ebml_parser.js
 +../../lib/util/error.js
 +../../lib/util/event_manager.js

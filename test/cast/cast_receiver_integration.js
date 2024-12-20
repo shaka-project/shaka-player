@@ -324,10 +324,10 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
         'start');
     waitForUpdateMessageWrapper(
         // eslint-disable-next-line no-restricted-syntax
-        shaka.media.DrmEngine.prototype, 'DrmEngine', 'initForPlayback');
+        shaka.drm.DrmEngine.prototype, 'DrmEngine', 'initForPlayback');
     waitForUpdateMessageWrapper(
         // eslint-disable-next-line no-restricted-syntax
-        shaka.media.DrmEngine.prototype, 'DrmEngine', 'attach');
+        shaka.drm.DrmEngine.prototype, 'DrmEngine', 'attach');
     waitForUpdateMessageWrapper(
         // eslint-disable-next-line no-restricted-syntax
         shaka.media.StreamingEngine.prototype, 'StreamingEngine', 'start');

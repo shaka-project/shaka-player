@@ -12,7 +12,7 @@ describe('DrmEngine', () => {
   const originalRequestMediaKeySystemAccess =
       navigator.requestMediaKeySystemAccess;
   const originalLogError = shaka.log.error;
-  const originalBatchTime = shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME;
+  const originalBatchTime = shaka.drm.DrmEngine.KEY_STATUS_BATCH_TIME;
   const originalDecodingInfo = navigator.mediaCapabilities.decodingInfo;
 
   /** @type {!jasmine.Spy} */
@@ -30,7 +30,7 @@ describe('DrmEngine', () => {
 
   /** @type {!shaka.test.FakeNetworkingEngine} */
   let fakeNetEngine;
-  /** @type {!shaka.media.DrmEngine} */
+  /** @type {!shaka.drm.DrmEngine} */
   let drmEngine;
   /** @type {shaka.extern.Manifest} */
   let manifest;
@@ -49,11 +49,11 @@ describe('DrmEngine', () => {
   const containing = jasmine.objectContaining;
 
   beforeAll(() => {
-    shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME = 0;
+    shaka.drm.DrmEngine.KEY_STATUS_BATCH_TIME = 0;
   });
 
   afterAll(() => {
-    shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME = originalBatchTime;
+    shaka.drm.DrmEngine.KEY_STATUS_BATCH_TIME = originalBatchTime;
   });
 
   beforeEach(() => {
@@ -121,7 +121,7 @@ describe('DrmEngine', () => {
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
     };
 
-    drmEngine = new shaka.media.DrmEngine(playerInterface);
+    drmEngine = new shaka.drm.DrmEngine(playerInterface);
 
     config = shaka.util.PlayerConfiguration.createDefault().drm;
     config.servers = {
@@ -169,7 +169,7 @@ describe('DrmEngine', () => {
       const variants = manifest.variants;
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
-      expect(shaka.util.DrmUtils.keySystem(drmEngine.getDrmInfo()))
+      expect(shaka.drm.DrmUtils.keySystem(drmEngine.getDrmInfo()))
           .toBe('drm.abc');
     });
 
@@ -198,7 +198,7 @@ describe('DrmEngine', () => {
       const variants = manifest.variants;
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
-      expect(shaka.util.DrmUtils.keySystem(drmEngine.getDrmInfo()))
+      expect(shaka.drm.DrmUtils.keySystem(drmEngine.getDrmInfo()))
           .toBe('drm.def');
     });
 
@@ -215,7 +215,7 @@ describe('DrmEngine', () => {
       // should be only one variant, as preferredKeySystems is propagated
       // to getDecodingInfos
       expect(variants[0].decodingInfos.length).toBe(1);
-      expect(shaka.util.DrmUtils.keySystem(drmEngine.getDrmInfo()))
+      expect(shaka.drm.DrmUtils.keySystem(drmEngine.getDrmInfo()))
           .toBe('drm.def');
     });
 
@@ -233,7 +233,7 @@ describe('DrmEngine', () => {
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
 
       expect(variants[0].decodingInfos.length).toBe(2);
-      expect(shaka.util.DrmUtils.keySystem(drmEngine.getDrmInfo()))
+      expect(shaka.drm.DrmUtils.keySystem(drmEngine.getDrmInfo()))
           .toBe('drm.def');
     });
 
@@ -488,7 +488,7 @@ describe('DrmEngine', () => {
           expect(variants[0].decodingInfos.length).toBe(1);
           expect(variants[0].decodingInfos[0].keySystemAccess).toBeFalsy();
           expect(
-              shaka.util.DrmUtils.keySystem(drmEngine.getDrmInfo())).toBe('');
+              shaka.drm.DrmUtils.keySystem(drmEngine.getDrmInfo())).toBe('');
           expect(drmEngine.initialized()).toBe(true);
         });
 
@@ -504,7 +504,7 @@ describe('DrmEngine', () => {
       const variants = manifest.variants;
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
-      expect(shaka.util.DrmUtils.keySystem(drmEngine.getDrmInfo()))
+      expect(shaka.drm.DrmUtils.keySystem(drmEngine.getDrmInfo()))
           .toBe('drm.abc');
       expect(variants[0].decodingInfos.length).toBe(1);
     });
@@ -1891,7 +1891,7 @@ describe('DrmEngine', () => {
       p.resolve();  // Success for drm.abc.
       await expectAsync(init).toBeRejected();
       // Due to the interruption, we never created MediaKeys.
-      expect(shaka.util.DrmUtils.keySystem(drmEngine.getDrmInfo())).toBe('');
+      expect(shaka.drm.DrmUtils.keySystem(drmEngine.getDrmInfo())).toBe('');
       expect(drmEngine.initialized()).toBe(false);
     });
 
