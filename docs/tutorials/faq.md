@@ -253,6 +253,14 @@ integer durations. Although the HLS spec allows it, Shaka Player requires that
 the duration must be precise with decimal-floating-point or decimal-integer
 number. If this is not your case, please open an issue so we can investigate it.
 
+<hr>
+
+**Q:** My HLS stream uses PlayReady with the embedded license url.
+
+**A:** Make sure that EXT-X-SESSION-KEY is used in the master playlist, this is
+necessary for the correct operation of the player. If you use Shaka Packager it
+is recommended to use the `--create_session_keys` option.
+
 
 [386]: https://github.com/shaka-project/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/shaka-project/shaka-player/issues/489#issuecomment-240466224
