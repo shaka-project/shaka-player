@@ -250,7 +250,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
       # The Docker image for this self-hosted runner doesn't contain java.
