@@ -5,12 +5,12 @@
  */
 
 // Test DRM-related parsing.
-describe('MssParser ContentProtection', () => {
+describe('PlayReady', () => {
   const strToXml = (str) => {
     return shaka.util.TXml.parseXmlString(str);
   };
 
-  it('getPlayReadyLicenseURL', () => {
+  it('getLicenseURL', () => {
     const laurl = [
       '<WRMHEADER>',
       '  <DATA>',
@@ -36,11 +36,11 @@ describe('MssParser ContentProtection', () => {
 
     const encodedPrObject = shaka.util.Uint8ArrayUtils.toBase64(prBytes);
     const input = strToXml([
-      '<ProtectionHeader SystemID="9a04f079-9840-4286-ab92-e65be0885f95">',
+      '<TEST>',
       encodedPrObject,
-      '</ProtectionHeader>',
+      '</TEST>',
     ].join('\n'));
-    const actual = shaka.mss.ContentProtection.getPlayReadyLicenseUrl(input);
+    const actual = shaka.drm.PlayReady.getLicenseUrl(input);
     expect(actual).toBe('www.example.com');
   });
 });

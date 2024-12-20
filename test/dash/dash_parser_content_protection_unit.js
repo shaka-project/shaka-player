@@ -1003,7 +1003,7 @@ describe('DashParser ContentProtection', () => {
         // record count
         1,
         // type
-        ContentProtection.PLAYREADY_RECORD_TYPES.RIGHTS_MANAGEMENT,
+        shaka.drm.PlayReady.PLAYREADY_RECORD_TYPES.RIGHTS_MANAGEMENT,
         // record size (in num bytes)
         laurl.length * 2,
         // value
