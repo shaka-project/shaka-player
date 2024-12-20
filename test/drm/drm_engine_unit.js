@@ -2795,14 +2795,14 @@ describe('DrmEngine', () => {
    */
   function createAdvancedConfig(serverCert) {
     return {
-      audioRobustness: [''],
+      audioRobustness: [],
       distinctiveIdentifierRequired: false,
       persistentStateRequired: false,
       serverCertificate: serverCert,
       serverCertificateUri: '',
       individualizationServer: '',
       sessionType: '',
-      videoRobustness: [''],
+      videoRobustness: [],
       headers: {},
     };
   }
