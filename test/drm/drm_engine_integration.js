@@ -27,7 +27,7 @@ describe('DrmEngine', () => {
   /** @type {!jasmine.Spy} */
   let onEventSpy;
 
-  /** @type {!shaka.media.DrmEngine} */
+  /** @type {!shaka.drm.DrmEngine} */
   let drmEngine;
   /** @type {!shaka.media.MediaSourceEngine} */
   let mediaSourceEngine;
@@ -80,7 +80,7 @@ describe('DrmEngine', () => {
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
     };
 
-    drmEngine = new shaka.media.DrmEngine(playerInterface);
+    drmEngine = new shaka.drm.DrmEngine(playerInterface);
     const config = shaka.util.PlayerConfiguration.createDefault().drm;
     config.servers['com.widevine.alpha'] =
         'https://cwip-shaka-proxy.appspot.com/specific_key?QGCoZYh4Qmecv5GuW64ecg=/DU0CDcxDMD7U96X4ipp4A';
