@@ -25,6 +25,7 @@
 +../../lib/media/closed_caption_parser.js
 +../../lib/media/content_workarounds.js
 +../../lib/media/drm_engine.js
++../../lib/media/example_based_criteria.js
 +../../lib/media/gap_jumping_controller.js
 +../../lib/media/manifest_filterer.js
 +../../lib/media/manifest_parser.js
@@ -34,6 +35,7 @@
 +../../lib/media/play_rate_controller.js
 +../../lib/media/playhead.js
 +../../lib/media/playhead_observer.js
++../../lib/media/preference_based_criteria.js
 +../../lib/media/preload_manager.js
 +../../lib/media/presentation_timeline.js
 +../../lib/media/quality_observer.js
