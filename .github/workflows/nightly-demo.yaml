@@ -22,7 +22,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
       # The nightly demo has its own receiver app ID that points to the nightly
