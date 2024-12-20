@@ -121,7 +121,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
 
       this.eventManager.listen(button, 'click', () => {
         const rate = this.playbackRates_.get(rateStr);
-        if (rate == 1) {
+        if (rate == this.video.defaultPlaybackRate) {
           this.player.cancelTrickPlay();
         } else {
           this.player.trickPlay(rate, /* useTrickPlayTrack= */ false);
