@@ -442,12 +442,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
   /**
    * @param {string} color
-   * @param {number} fracture
+   * @param {number} fraction
    * @return {string}
    * @private
    */
-  makeColor_(color, fracture) {
-    return color + ' ' + (fracture * 100) + '%';
+  makeColor_(color, fraction) {
+    return color + ' ' + (fraction * 100) + '%';
   }
 
 
