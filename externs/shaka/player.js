@@ -829,13 +829,13 @@ shaka.extern.ProducerReferenceTime;
  *   Defaults to <code>false</code>.
  * @property {Array.<string>} videoRobustness
  *   A key-system-specific Array of strings that specifies a required security
- *   level for video. For multiple robustness leveles, list items in priority
+ *   level for video. For multiple robustness levels, list items in priority
  *   order.
  *   <br>
  *   Defaults to <code>[]</code>, i.e., no specific robustness required.
  * @property {Array.<string>} audioRobustness
  *   A key-system-specific Array of strings that specifies a required security
- *   level for audio. For multiple robustness leveles, list items in priority
+ *   level for audio. For multiple robustness levels, list items in priority
  *   order.
  *   <br>
  *   Defaults to <code>[]</code>, i.e., no specific robustness required.
