@@ -67,7 +67,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
       - name: Compute NPM tags
@@ -140,7 +140,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
       - name: Compute appspot subdomain and promotion
