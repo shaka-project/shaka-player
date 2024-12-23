@@ -223,7 +223,7 @@ describe('DrmEngine', () => {
       // Accept both drm.abc and drm.def.  Only one can be chosen.
       setDecodingInfoSpy(['drm.abc', 'drm.def']);
 
-      // Remove the server URI for drm.abc, which appears first in the manifest.
+      // Remove the server URI for drm.abc.
       delete config.servers['drm.abc'];
       drmEngine.configure(config);
       // Ignore error logs, which we expect to occur due to the missing server.
@@ -237,7 +237,7 @@ describe('DrmEngine', () => {
           .toBe('drm.def');
     });
 
-    it('overrides manifest with configured license servers', async () => {
+    it('overrides manifest with configured license server', async () => {
       // Accept both drm.abc and drm.def.  Only one can be chosen.
       setDecodingInfoSpy(['drm.abc', 'drm.def']);
 
@@ -257,9 +257,8 @@ describe('DrmEngine', () => {
         }
       });
 
-      // Remove the server URI for drm.abc from the config, so that only drm.def
-      // could be used, in spite of the manifest-supplied license server URI.
-      delete config.servers['drm.abc'];
+      // Override the server URI for drm.abc from config.
+      config.servers['drm.abc'] = 'override.drm.abc';
       drmEngine.configure(config);
 
       // Ignore error logs, which we expect to occur due to the missing server.
@@ -271,8 +270,8 @@ describe('DrmEngine', () => {
       expect(variants[0].decodingInfos.length).toBe(2);
       const selectedDrmInfo = drmEngine.getDrmInfo();
       expect(selectedDrmInfo).not.toBe(null);
-      expect(selectedDrmInfo.keySystem).toBe('drm.def');
-      expect(selectedDrmInfo.licenseServerUri).toBe(config.servers['drm.def']);
+      expect(selectedDrmInfo.keySystem).toBe('drm.abc');
+      expect(selectedDrmInfo.licenseServerUri).toBe(config.servers['drm.abc']);
     });
 
     it('fails to initialize if no key systems are available', async () => {
