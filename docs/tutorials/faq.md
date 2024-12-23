@@ -255,7 +255,7 @@ number. If this is not your case, please open an issue so we can investigate it.
 
 <hr>
 
-**Q:** My HLS stream uses PlayReady with the embedded license url.
+**Q:** Why my PlayReady HLS stream with the embedded license url doesn't work?
 
 **A:** Make sure that EXT-X-SESSION-KEY is used in the master playlist, this is
 necessary for the correct operation of the player. If you use Shaka Packager it
