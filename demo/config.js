@@ -139,7 +139,8 @@ shakaDemo.Config = class {
         .addBoolInput_('Ignore duplicate init data',
             'drm.ignoreDuplicateInitData');
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
-    const addDRMAdvancedField = (name, valueName, suggestions) => {
+    const addDRMAdvancedField = (name, valueName, suggestions,
+        arrayString = false) => {
       // All advanced fields of a given type are set at once.
       this.addDatalistInput_(name, suggestions, (input) => {
         // Add in any common drmSystem not currently in advanced.
@@ -150,7 +151,9 @@ shakaDemo.Config = class {
         }
         // Set the robustness.
         for (const drmSystem in advanced) {
-          advanced[drmSystem][valueName] = input.value;
+          advanced[drmSystem][valueName] = arrayString ?
+              input.value.split(',').filter(Boolean) :
+              input.value;
         }
         shakaDemoMain.configure('drm.advanced', advanced);
         shakaDemoMain.remakeHash();
@@ -176,9 +179,11 @@ shakaDemo.Config = class {
     const sessionTypeSuggestions = ['temporary', 'persistent-license'];
 
     addDRMAdvancedField(
-        'Video Robustness', 'videoRobustness', robustnessSuggestions);
+        'Video Robustness', 'videoRobustness', robustnessSuggestions,
+        /* arrayString= */ true);
     addDRMAdvancedField(
-        'Audio Robustness', 'audioRobustness', robustnessSuggestions);
+        'Audio Robustness', 'audioRobustness', robustnessSuggestions,
+        /* arrayString= */ true);
     addDRMAdvancedField('Session Type', 'sessionType', sessionTypeSuggestions);
 
     this.addRetrySection_('drm', 'DRM Retry Parameters');

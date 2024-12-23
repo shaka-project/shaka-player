@@ -808,8 +808,8 @@ shaka.extern.ProducerReferenceTime;
  * @typedef {{
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
- *   videoRobustness: string,
- *   audioRobustness: string,
+ *   videoRobustness: Array.<string>,
+ *   audioRobustness: Array.<string>,
  *   serverCertificate: Uint8Array,
  *   serverCertificateUri: string,
  *   individualizationServer: string,
@@ -827,16 +827,18 @@ shaka.extern.ProducerReferenceTime;
  *   state, e.g., for persistent license storage.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {string} videoRobustness
- *   A key-system-specific string that specifies a required security level for
- *   video.
+ * @property {Array.<string>} videoRobustness
+ *   A key-system-specific Array of strings that specifies a required security
+ *   level for video. For multiple robustness levels, list items in priority
+ *   order.
  *   <br>
- *   Defaults to <code>''</code>, i.e., no specific robustness required.
- * @property {string} audioRobustness
- *   A key-system-specific string that specifies a required security level for
- *   audio.
+ *   Defaults to <code>[]</code>, i.e., no specific robustness required.
+ * @property {Array.<string>} audioRobustness
+ *   A key-system-specific Array of strings that specifies a required security
+ *   level for audio. For multiple robustness levels, list items in priority
+ *   order.
  *   <br>
- *   Defaults to <code>''</code>, i.e., no specific robustness required.
+ *   Defaults to <code>[]</code>, i.e., no specific robustness required.
  * @property {Uint8Array} serverCertificate
  *   <i>An empty certificate (<code>byteLength==0</code>) will be treated as
  *   <code>null</code>.</i> <br>

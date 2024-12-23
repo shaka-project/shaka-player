@@ -949,11 +949,17 @@ shakaDemo.Main = class {
             advanced[drmSystem] = shakaDemo.Main.defaultAdvancedDrmConfig();
           }
           if ('videoRobustness' in params) {
-            advanced[drmSystem].videoRobustness = params['videoRobustness'];
+            advanced[drmSystem].videoRobustness =
+                params['videoRobustness'].split(',');
           }
           if ('audioRobustness' in params) {
-            advanced[drmSystem].audioRobustness = params['audioRobustness'];
+            advanced[drmSystem].audioRobustness =
+                params['audioRobustness'].split(',');
           }
+        }
+
+        if ('audioRobustness' in params || 'videoRobustness' in params) {
+          this.configure('drm.advanced', advanced);
         }
       }
     }
@@ -1499,11 +1505,15 @@ shakaDemo.Main = class {
         for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
           const advancedFor = advanced[drmSystem];
           if (advancedFor) {
-            if (advancedFor.videoRobustness) {
-              params.push('videoRobustness=' + advancedFor.videoRobustness);
+            if (advancedFor.videoRobustness &&
+              advancedFor.videoRobustness.length) {
+              params.push('videoRobustness=' +
+                  advancedFor.videoRobustness.join());
             }
-            if (advancedFor.audioRobustness) {
-              params.push('audioRobustness=' + advancedFor.audioRobustness);
+            if (advancedFor.audioRobustness &&
+              advancedFor.audioRobustness.length) {
+              params.push('audioRobustness=' +
+                  advancedFor.audioRobustness.join());
             }
             break;
           }
@@ -1933,8 +1943,8 @@ shakaDemo.Main = class {
     return {
       distinctiveIdentifierRequired: false,
       persistentStateRequired: false,
-      videoRobustness: '',
-      audioRobustness: '',
+      videoRobustness: [],
+      audioRobustness: [],
       sessionType: '',
       serverCertificate: new Uint8Array(0),
       serverCertificateUri: '',
