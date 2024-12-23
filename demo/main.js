@@ -596,7 +596,7 @@ shakaDemo.Main = class {
         this.dispatchEventWithName_('shaka-main-offline-progress');
         const start = Date.now();
         const stored = await storage.store(asset.manifestUri, metadata,
-            /* mimeType= */ null, asset.extraThumbnail,
+            asset.mimeType || null, asset.extraThumbnail,
             asset.extraText).promise;
         const end = Date.now();
         console.log('Download time:', end - start);
@@ -1385,10 +1385,15 @@ shakaDemo.Main = class {
         await this.player_.load(preloadManager);
       } else {
         const manifestUri = await this.getManifestUri_(asset);
+        let mimeType = undefined;
+        if (asset.mimeType &&
+            manifestUri && !manifestUri.startsWith('offline:')) {
+          mimeType = asset.mimeType;
+        }
         await this.player_.load(
             manifestUri,
             /* startTime= */ null,
-            asset.mimeType || undefined);
+            mimeType);
       }
 
       if (this.player_.isAudioOnly() &&
