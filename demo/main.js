@@ -1105,15 +1105,19 @@ shakaDemo.Main = class {
   getValueFromGivenConfig_(valueName, configObject) {
     let objOn = configObject;
     let valueNameOn = valueName;
-    while (valueNameOn) {
-      // Split using a regex that only matches the first period.
-      const split = valueNameOn.split(/\.(.+)/);
-      if (split.length == 3) {
-        valueNameOn = split[1];
-        objOn = objOn[split[0]];
-      } else {
-        return objOn[split[0]];
+    try {
+      while (valueNameOn) {
+        // Split using a regex that only matches the first period.
+        const split = valueNameOn.split(/\.(.+)/);
+        if (split.length == 3) {
+          valueNameOn = split[1];
+          objOn = objOn[split[0]];
+        } else {
+          return objOn[split[0]];
+        }
       }
+    } catch (e) {
+      // Ignore errors
     }
     return undefined;
   }
