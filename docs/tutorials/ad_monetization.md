@@ -98,6 +98,7 @@ const container = video.ui.getControls().getClientSideAdContainer();
 adManager.initInterstitial(container, player, video);
 adManager.addCustomInterstitial({
   id: null,
+  groupId: null,
   startTime: 10,
   endTime: null,
   uri: 'YOUR_URL',
@@ -135,6 +136,7 @@ player.addEventListener('timelineregionadded', (e) => {
   }
   adManager.addCustomInterstitial({
     id: event.id,
+    groupId: null,
     startTime: event.startTime,
     endTime: event.endTime,
     uri: 'YOUR_URL',
@@ -171,6 +173,7 @@ const container = video.ui.getControls().getClientSideAdContainer();
 adManager.initInterstitial(container, player, video);
 adManager.addCustomInterstitial({
   id: null,
+  groupId: null,
   startTime: 10,
   endTime: null,
   uri: 'YOUR_URL',

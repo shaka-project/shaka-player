@@ -331,8 +331,10 @@ describe('Interstitial Ad manager', () => {
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
         id: 'TEST',
+        groupId: null,
         startTime: 0,
         endTime: null,
         uri: 'test.m3u8',
@@ -380,8 +382,10 @@ describe('Interstitial Ad manager', () => {
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
         id: 'TEST',
+        groupId: null,
         startTime: 0,
         endTime: null,
         uri: 'test.m3u8',
@@ -425,8 +429,10 @@ describe('Interstitial Ad manager', () => {
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
         id: 'TEST',
+        groupId: null,
         startTime: 0,
         endTime: null,
         uri: 'test.m3u8',
@@ -470,8 +476,10 @@ describe('Interstitial Ad manager', () => {
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
         id: 'TEST',
+        groupId: null,
         startTime: 0,
         endTime: null,
         uri: 'test.m3u8',
@@ -515,8 +523,10 @@ describe('Interstitial Ad manager', () => {
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
         id: 'TEST',
+        groupId: null,
         startTime: 0,
         endTime: null,
         uri: 'test.m3u8',
@@ -560,8 +570,10 @@ describe('Interstitial Ad manager', () => {
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
         id: 'TEST',
+        groupId: null,
         startTime: 0,
         endTime: null,
         uri: 'test.m3u8',
@@ -605,8 +617,10 @@ describe('Interstitial Ad manager', () => {
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
         id: 'TEST',
+        groupId: null,
         startTime: 0,
         endTime: null,
         uri: 'test.m3u8',
@@ -650,8 +664,10 @@ describe('Interstitial Ad manager', () => {
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
         id: 'TEST',
+        groupId: null,
         startTime: 100,
         endTime: 130,
         uri: 'test.m3u8',
@@ -705,8 +721,10 @@ describe('Interstitial Ad manager', () => {
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
-        id: 'TEST_asset_0',
+        id: 'TEST_shaka_asset_0',
+        groupId: 'TEST',
         startTime: 0,
         endTime: null,
         uri: 'ad.m3u8',
@@ -846,8 +864,10 @@ describe('Interstitial Ad manager', () => {
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
         id: 'OVERLAY',
+        groupId: null,
         startTime: 0,
         endTime: 1,
         uri: 'test.mpd',
@@ -884,14 +904,17 @@ describe('Interstitial Ad manager', () => {
 
   describe('custom', () => {
     it('basic interstitial support', async () => {
+      /** @type {!shaka.extern.AdInterstitial} */
       const interstitial = {
         id: null,
+        groupId: null,
         startTime: 10,
         endTime: null,
         uri: 'test.mp4',
         mimeType: null,
         isSkippable: true,
         skipOffset: 10,
+        skipFor: null,
         canJump: false,
         resumeOffset: null,
         playoutLimit: null,
@@ -919,9 +942,11 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports multiple interstitials', async () => {
+      /** @type {!Array.<!shaka.extern.AdInterstitial>} */
       const interstitials = [
         {
           id: null,
+          groupId: null,
           startTime: 0,
           endTime: null,
           uri: 'test.mp4',
@@ -941,6 +966,7 @@ describe('Interstitial Ad manager', () => {
         },
         {
           id: null,
+          groupId: null,
           startTime: 10,
           endTime: null,
           uri: 'test.mp4',
@@ -980,8 +1006,10 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('ignore duplicate interstitial', async () => {
+      /** @type {!shaka.extern.AdInterstitial} */
       const interstitial = {
         id: null,
+        groupId: null,
         startTime: 10,
         endTime: null,
         uri: 'test.mp4',
@@ -1018,8 +1046,10 @@ describe('Interstitial Ad manager', () => {
 
     it('ignore invalid interstitial', async () => {
       // It is not valid because it does not have an interstitial URL
+      /** @type {!shaka.extern.AdInterstitial} */
       const interstitial = {
         id: null,
+        groupId: null,
         startTime: 10,
         endTime: null,
         uri: '',
@@ -1116,8 +1146,10 @@ describe('Interstitial Ad manager', () => {
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
         id: null,
+        groupId: null,
         startTime: 0,
         endTime: null,
         uri: 'test.png',
@@ -1394,8 +1426,10 @@ describe('Interstitial Ad manager', () => {
   });
 
   it('don\'t dispatch cue points changed if it is an overlay', async () => {
+    /** @type {!shaka.extern.AdInterstitial} */
     const interstitial = {
       id: null,
+      groupId: null,
       startTime: 10,
       endTime: null,
       uri: 'test.mp4',
