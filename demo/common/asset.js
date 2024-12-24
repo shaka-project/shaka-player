@@ -59,6 +59,8 @@ const ShakaDemoAssetInfo = class {
     /** @type {!Map.<string, string>} */
     this.licenseServers = new Map();
     /** @type {!Map.<string, string>} */
+    this.offlineLicenseServers = new Map();
+    /** @type {!Map.<string, string>} */
     this.licenseRequestHeaders = new Map();
     /** @type {?shaka.extern.RequestFilter} */
     this.requestFilter = null;
@@ -236,6 +238,16 @@ const ShakaDemoAssetInfo = class {
    */
   addLicenseServer(keySystem, licenseServer) {
     this.licenseServers.set(keySystem, licenseServer);
+    return this;
+  }
+
+  /**
+   * @param {string} keySystem
+   * @param {string} licenseServer
+   * @return {!ShakaDemoAssetInfo}
+   */
+  addOfflineLicenseServer(keySystem, licenseServer) {
+    this.offlineLicenseServers.set(keySystem, licenseServer);
     return this;
   }
 
@@ -476,9 +488,11 @@ const ShakaDemoAssetInfo = class {
 
   /**
    * Gets the configuration object for the asset.
+   *
+   * @param {boolean=} forStorage
    * @return {!shaka.extern.PlayerConfiguration}
    */
-  getConfiguration() {
+  getConfiguration(forStorage = false) {
     const config = /** @type {shaka.extern.PlayerConfiguration} */(
       {drm: {advanced: {}}, manifest: {dash: {}, hls: {}}});
 
@@ -488,9 +502,15 @@ const ShakaDemoAssetInfo = class {
       }
     }
 
-    if (this.licenseServers.size) {
+    let licenseServers = this.licenseServers;
+    // PR license servers may require a different URL for offline.
+    if (forStorage && this.offlineLicenseServers.size) {
+      licenseServers = this.offlineLicenseServers;
+    }
+
+    if (licenseServers.size) {
       config.drm.servers = config.drm.servers || {};
-      this.licenseServers.forEach((value, key) => {
+      licenseServers.forEach((value, key) => {
         config.drm.servers[key] = value;
       });
     }
@@ -501,6 +521,18 @@ const ShakaDemoAssetInfo = class {
         config.drm.clearKeys[key] = value;
       });
     }
+
+    // Windows Edge only support persistent licenses with
+    // `com.microsoft.playready.recommendation` keySystem.
+    if (forStorage &&
+        navigator.userAgent.match(/Edge?\//) &&
+        navigator.platform &&
+        navigator.platform.toLowerCase().includes('win32')) {
+      config.drm.keySystemsMapping = {
+        'com.microsoft.playready': 'com.microsoft.playready.recommendation',
+      };
+    }
+
     return config;
   }
 
