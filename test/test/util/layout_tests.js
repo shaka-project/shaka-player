@@ -290,9 +290,7 @@ shaka.test.DomTextLayoutTests = class extends shaka.test.TextLayoutTests {
   /** @override */
   recreateTextDisplayer() {
     this.textDisplayer = new shaka.text.UITextDisplayer(
-        /** @type {!HTMLMediaElement} */(this.mockVideo),
-        this.videoContainer,
-        {captionsUpdatePeriod: 0.25});
+        /** @type {!HTMLMediaElement} */(this.mockVideo), this.videoContainer);
     this.textDisplayer.setTextVisibility(true);
   }
 
