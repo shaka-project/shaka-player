@@ -1384,7 +1384,8 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.MICROSOFT)
       .addFeature(shakaAssets.Feature.MSS)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4),
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Super Speedway Trailer (MSS - PlayReady)',
       /* iconUri= */ 'https://reference.dashif.org/dash.js/latest/samples/lib/img/mss-1.jpg',
