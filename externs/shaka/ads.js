@@ -60,6 +60,7 @@ shaka.extern.AdCuePoint;
 /**
  * @typedef {{
  *   id: ?string,
+ *   groupId: ?string,
  *   startTime: number,
  *   endTime: ?number,
  *   uri: string,
@@ -83,6 +84,8 @@ shaka.extern.AdCuePoint;
  *
  * @property {?string} id
  *   The id of the interstitial.
+ * @property {?string} groupId
+ *   The group id of the interstitial.
  * @property {number} startTime
  *   The start time of the interstitial.
  * @property {?number} endTime
