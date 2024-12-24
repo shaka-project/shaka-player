@@ -1418,7 +1418,9 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MSS)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
       .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)')
+      .addOfflineLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:true,sl:150)')
       .setMimeType('application/vnd.ms-sstr+xml'),
   // }}}
 

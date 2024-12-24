@@ -1234,10 +1234,11 @@ shakaDemo.Main = class {
     goog.asserts.assert(netEngine, 'There should be a net engine.');
     asset.applyFilters(netEngine);
 
-    const assetConfig = asset.getConfiguration();
     if (storage) {
+      const assetConfig = asset.getConfiguration(/* forStorage= */ true);
       storage.configure(assetConfig);
     } else {
+      const assetConfig = asset.getConfiguration();
       // Remove all not-player-applied configurations, by resetting the
       // configuration then re-applying the desired configuration.
       this.player_.resetConfiguration();
