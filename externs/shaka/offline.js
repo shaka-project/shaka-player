@@ -141,6 +141,7 @@ shaka.extern.ManifestDB;
  *   spatialAudio: boolean,
  *   closedCaptions: Map.<string, string>,
  *   tilesLayout: (string|undefined),
+ *   mssPrivateData: (shaka.extern.MssPrivateData|undefined),
  *   external: boolean,
  *   fastSwitching: boolean,
  *   isAudioMuxedInVideo: boolean
@@ -214,6 +215,9 @@ shaka.extern.ManifestDB;
  *   The value is a grid-item-dimension consisting of two positive decimal
  *   integers in the format: column-x-row ('4x3'). It describes the arrangement
  *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
+ * @property {(shaka.extern.MssPrivateData|undefined)} mssPrivateData
+ *   <i>Microsoft Smooth Streaming only.</i> <br>
+ *   Private MSS data that is necessary to be able to do transmuxing.
  * @property {boolean} external
  *   Indicate if the stream was added externally.
  *   Eg: external text tracks.
