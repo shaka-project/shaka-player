@@ -495,7 +495,8 @@ shaka.extern.Restrictions;
  *   persistentState: boolean,
  *   encryptionSchemes: !Array<string|null>,
  *   videoRobustnessLevels: !Array<string>,
- *   audioRobustnessLevels: !Array<string>
+ *   audioRobustnessLevels: !Array<string>,
+ *   minHdcpVersions: !Array<string>
  * }}
  *
  * @property {boolean} persistentState
@@ -512,6 +513,10 @@ shaka.extern.Restrictions;
  *   An array of audio robustness levels that are reported to work. An empty
  *   array indicates that none were tested. Not all key systems have a list of
  *   known robustness levels built into probeSupport().
+ * @property {!Array<string>} minHdcpVersions
+ *   An array of min HDCP levels that are reported to work. An empty
+ *   array indicates that none were tested. Not all key systems have support to
+ *   check min HDCP levels.
  * @exportDoc
  */
 shaka.extern.DrmSupportType;
