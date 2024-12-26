@@ -123,6 +123,14 @@ shakaDemo.Config = class {
 
   /** @private */
   addDrmSection_() {
+    const widevineRobustnessLevels = {
+      '': '',
+      'SW_SECURE_CRYPTO': 'SW_SECURE_CRYPTO',
+      'SW_SECURE_DECODE': 'SW_SECURE_DECODE',
+      'HW_SECURE_CRYPTO': 'HW_SECURE_CRYPTO',
+      'HW_SECURE_DECODE': 'HW_SECURE_DECODE',
+      'HW_SECURE_ALL': 'HW_SECURE_ALL',
+    };
     const docLink = this.resolveExternLink_('.DrmConfiguration');
     this.addSection_('DRM', docLink)
         .addBoolInput_('Delay License Request Until Played',
@@ -137,7 +145,13 @@ shakaDemo.Config = class {
             'drm.parseInbandPsshEnabled')
         .addTextInput_('Min HDCP version', 'drm.minHdcpVersion')
         .addBoolInput_('Ignore duplicate init data',
-            'drm.ignoreDuplicateInitData');
+            'drm.ignoreDuplicateInitData')
+        .addSelectInput_('Default audio robustness for Widevine',
+            'drm.defaultAudioRobustnessForWidevine',
+            widevineRobustnessLevels, widevineRobustnessLevels)
+        .addSelectInput_('Default video robustness for Widevine',
+            'drm.defaultVideoRobustnessForWidevine',
+            widevineRobustnessLevels, widevineRobustnessLevels);
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const addDRMAdvancedField = (name, valueName, suggestions,
         arrayString = false) => {
