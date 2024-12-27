@@ -31,6 +31,7 @@ See [maintained-branches.md](https://github.com/shaka-project/shaka-player/blob/
 for the up-to-date list of maintained branches of Shaka Player.
 
 
+
 ## Platform and browser support matrix
 
 |Browser       |Windows   |Mac      |Linux    |Android  |iOS >= 9  |iOS >= 17.1|iPadOS >= 13|ChromeOS|Other|
