@@ -145,6 +145,22 @@ describe('DrmUtils', () => {
     });
   }); // describe('getCommonDrmInfos')
 
+  describe('isWidevineKeySystem', () => {
+    it('should return true for Widevine', () => {
+      expect(shaka.drm.DrmUtils.isWidevineKeySystem(
+          'com.widevine.alpha')).toBe(true);
+      expect(shaka.drm.DrmUtils.isWidevineKeySystem(
+          'com.widevine.alpha.anything')).toBe(true);
+    });
+
+    it('should return false for non-Widevine key systems', () => {
+      expect(shaka.drm.DrmUtils.isWidevineKeySystem(
+          'com.microsoft.playready')).toBe(false);
+      expect(shaka.drm.DrmUtils.isWidevineKeySystem(
+          'com.apple.fps')).toBe(false);
+    });
+  });
+
   describe('isPlayReadyKeySystem', () => {
     it('should return true for MS & Chromecast PlayReady', () => {
       expect(shaka.drm.DrmUtils.isPlayReadyKeySystem(

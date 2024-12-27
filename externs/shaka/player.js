@@ -941,7 +941,9 @@ shaka.extern.PersistentSessionMetadata;
  *   keySystemsMapping: !Object.<string, string>,
  *   parseInbandPsshEnabled: boolean,
  *   minHdcpVersion: string,
- *   ignoreDuplicateInitData: boolean
+ *   ignoreDuplicateInitData: boolean,
+ *   defaultAudioRobustnessForWidevine: string,
+ *   defaultVideoRobustnessForWidevine: string
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1025,6 +1027,16 @@ shaka.extern.PersistentSessionMetadata;
  *   <br>
  *   Defaults to <code>false</code> on Tizen 2, and <code>true</code> for all
  *   other browsers.
+ * @property {string} defaultAudioRobustnessForWidevine
+ *   Specify the default audio security level for Widevine when audio robustness
+ *   is not specified.
+ *   <br>
+ *   Defaults to <code>'SW_SECURE_CRYPTO'</code>.
+ * @property {string} defaultVideoRobustnessForWidevine
+ *   Specify the default video security level for Widevine when video robustness
+ *   is not specified.
+ *   <br>
+ *   Defaults to <code>'SW_SECURE_DECODE'</code>.
  * @exportDoc
  */
 shaka.extern.DrmConfiguration;
