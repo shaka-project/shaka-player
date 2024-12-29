@@ -134,6 +134,9 @@ shakaAssets.Feature = {
   // Set if the asset requires Dolby Vision with MV-HEVC (for 3D) support.
   DOLBY_VISION_3D: 'Dolby Vision 3D',
 
+  // Set if the asset requires AV1 support.
+  AV1: 'AV1',
+
   // Set if the asset has at least one stream that is at least 720p.
   HIGH_DEFINITION: 'High definition',
   // Set if the asset has at least one stream that is at least 4k.
@@ -1399,6 +1402,87 @@ shakaAssets.testAssets = [
       .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)')
       .addOfflineLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:true,sl:150)')
       .setMimeType('application/vnd.ms-sstr+xml'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Taxi3 soundtrack (MSS - Clear)',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://test.playready.microsoft.com/media/profficialsite/Taxi3_AACHE.ism/manifest',
+      /* source= */ shakaAssets.Source.MICROSOFT)
+      .addFeature(shakaAssets.Feature.MSS)
+      .addFeature(shakaAssets.Feature.AUDIO_ONLY)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Taxi3 soundtrack (MSS - PlayReady)',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://test.playready.microsoft.com/media/profficialsite/Taxi3_AACHEPR.ism/manifest',
+      /* source= */ shakaAssets.Source.MICROSOFT)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addFeature(shakaAssets.Feature.MSS)
+      .addFeature(shakaAssets.Feature.AUDIO_ONLY)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)')
+      .addOfflineLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:true,sl:150)'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Big Buck Bunny CBCS AV1 (DASH - PlayReady)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://test.playready.microsoft.com/media/dash/BBBAV1CBC/manifest.mpd',
+      /* source= */ shakaAssets.Source.MICROSOFT)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.AV1)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/core/rightsmanager.asmx?cfg=(ckt:AES128BitCBC)'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Big Buck Bunny CENC AV1 (DASH - PlayReady)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://test.playready.microsoft.com/media/dash/BBBAV1/manifest.mpd',
+      /* source= */ shakaAssets.Source.MICROSOFT)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.AV1)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/core/rightsmanager.asmx'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Big Buck Bunny CENC (DASH - PlayReady)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://test.playready.microsoft.com/media/dash/APPLEENC_CBCS_BBB_1080p/1080p.mpd',
+      /* source= */ shakaAssets.Source.MICROSOFT)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,ck:W31bfVt9W31bfVt9W31bfQ==,ckt:aescbc)')
+      .addOfflineLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:true,ck:W31bfVt9W31bfVt9W31bfQ==,ckt:aescbc)'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Tears of Steel (DASH - PlayReady)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+      /* manifestUri= */ 'https://test.playready.microsoft.com/media/profficialsite/tearsofsteel_4k.ism/manifest.mpd',
+      /* source= */ shakaAssets.Source.MICROSOFT)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)')
+      .addOfflineLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:true,sl:150)'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Tears of Steel (MSS - PlayReady)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+      /* manifestUri= */ 'https://test.playready.microsoft.com/media/profficialsite/tearsofsteel_4k.ism.smoothstreaming/manifest',
+      /* source= */ shakaAssets.Source.MICROSOFT)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addFeature(shakaAssets.Feature.MSS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)')
+      .addOfflineLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:true,sl:150)'),
   // }}}
 
   // MPEG-5 LCEVC assets {{{

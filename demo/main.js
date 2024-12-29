@@ -764,6 +764,9 @@ shakaDemo.Main = class {
     if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_3D)) {
       mimeTypes.push('video/mp4; codecs="dvh1.20.01"');
     }
+    if (asset.features.includes(shakaAssets.Feature.AV1)) {
+      mimeTypes.push('video/mp4; codecs="av01.0.01M.08"');
+    }
     let hasSupportedMimeType = mimeTypes.some((type) => {
       return this.support_.media[type];
     });
