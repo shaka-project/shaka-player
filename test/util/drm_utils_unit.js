@@ -143,6 +143,38 @@ describe('DrmUtils', () => {
     });
   }); // describe('getCommonDrmInfos')
 
+  describe('isClearKeySystem', () => {
+    it('should return true for ClearKey', () => {
+      expect(shaka.util.DrmUtils.isClearKeySystem(
+          'org.w3.clearkey')).toBe(true);
+    });
+
+    it('should return false for non-ClearKey key systems', () => {
+      expect(shaka.util.DrmUtils.isClearKeySystem(
+          'com.widevine.alpha')).toBe(false);
+      expect(shaka.util.DrmUtils.isClearKeySystem(
+          'com.microsoft.playready')).toBe(false);
+      expect(shaka.util.DrmUtils.isClearKeySystem(
+          'com.apple.fps')).toBe(false);
+    });
+  });
+
+  describe('isWidevineKeySystem', () => {
+    it('should return true for Widevine', () => {
+      expect(shaka.util.DrmUtils.isWidevineKeySystem(
+          'com.widevine.alpha')).toBe(true);
+      expect(shaka.util.DrmUtils.isWidevineKeySystem(
+          'com.widevine.alpha.anything')).toBe(true);
+    });
+
+    it('should return false for non-Widevine key systems', () => {
+      expect(shaka.util.DrmUtils.isWidevineKeySystem(
+          'com.microsoft.playready')).toBe(false);
+      expect(shaka.util.DrmUtils.isWidevineKeySystem(
+          'com.apple.fps')).toBe(false);
+    });
+  });
+
   describe('isPlayReadyKeySystem', () => {
     it('should return true for MS & Chromecast PlayReady', () => {
       expect(shaka.util.DrmUtils.isPlayReadyKeySystem(
