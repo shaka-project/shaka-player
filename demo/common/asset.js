@@ -242,6 +242,13 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
+   * @return {!Map.<string, string>}
+   */
+  getLicenseServers() {
+    return this.licenseServers;
+  }
+
+  /**
    * @param {string} keySystem
    * @param {string} licenseServer
    * @return {!ShakaDemoAssetInfo}

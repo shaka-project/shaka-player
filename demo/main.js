@@ -713,6 +713,13 @@ shakaDemo.Main = class {
       if (needOffline) {
         const hasSupportedOfflineDRM = asset.drm.some((drm) => {
           const identifier = shakaAssets.identifierForKeySystem(drm);
+          // Special case when using clear keys.
+          if (identifier == 'org.w3.clearkey') {
+            const licenseServers = asset.getLicenseServers();
+            if (!licenseServers.has(identifier)) {
+              return this.support_.drm[identifier];
+            }
+          }
           return this.support_.drm[identifier] &&
                  this.support_.drm[identifier].persistentState;
         });
