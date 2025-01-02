@@ -309,6 +309,40 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
+    it('H.264+AAC with AAC sample with overflow aac samples', async () => {
+      // eslint-disable-next-line max-len
+      await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264-with-overflow-samples/media.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for e seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 3, 45);
+
+      await player.unload();
+    });
+
+    it('H.264+AAC with AAC sample with overflow nalus', async () => {
+      // eslint-disable-next-line max-len
+      await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264-with-overflow-nalus/media.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for e seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 3, 45);
+
+      await player.unload();
+    });
+
     it('H.265+AAC in TS', async () => {
       if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L123.B0"',
           /* width= */ 720, /* height= */ 1280)) {
