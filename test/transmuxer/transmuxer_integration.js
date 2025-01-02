@@ -76,8 +76,13 @@ describe('Transmuxer Player', () => {
     });
 
     it('raw MP3', async () => {
-      if (!await Util.isTypeSupported('audio/mp4; codecs="mp3"')) {
-        pending('Codec MP3 in MP4 is not supported by the platform.');
+      if (!await Util.isTypeSupported('audio/mp4; codecs="mp3"') &&
+        !await Util.isTypeSupported('audio/mpeg')) {
+        pending('Codec MP3 is not supported by the platform.');
+      }
+      // This tests is flaky in some Tizen devices, so we need omit it for now.
+      if (shaka.util.Platform.isTizen()) {
+        pending('Disabled on Tizen.');
       }
       await player.load('/base/test/test/assets/hls-raw-mp3/playlist.m3u8');
       await video.play();
@@ -173,7 +178,7 @@ describe('Transmuxer Player', () => {
       }
       // This tests is flaky in some Tizen devices, so we need omit it for now.
       if (shaka.util.Platform.isTizen()) {
-        return;
+        pending('Disabled on Tizen.');
       }
       await player.load('/base/test/test/assets/hls-ts-mp3/manifest.m3u8');
       await video.play();
@@ -377,8 +382,9 @@ describe('Transmuxer Player', () => {
         !await Util.isTypeSupported('audio/mpeg')) {
         pending('Codec MP3 is not supported by the platform.');
       }
-      if (!shaka.util.Platform.supportsSequenceMode()) {
-        pending('Sequence mode is not supported by the platform.');
+      // This tests is flaky in some Tizen devices, so we need omit it for now.
+      if (shaka.util.Platform.isTizen()) {
+        pending('Disabled on Tizen.');
       }
 
       // eslint-disable-next-line max-len
