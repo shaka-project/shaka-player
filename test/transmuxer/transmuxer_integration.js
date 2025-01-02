@@ -384,12 +384,7 @@ describe('Transmuxer Player', () => {
 
       // eslint-disable-next-line max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-mp3-h264/index.m3u8');
-      try {
-        await video.play();
-      // eslint-disable-next-line no-restricted-syntax
-      } catch (e) {
-        // Ignore play errors
-      }
+      await video.play();
       expect(player.isLive()).toBe(false);
 
       // Wait for the video to start playback.  If it takes longer than 10
