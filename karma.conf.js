@@ -278,6 +278,10 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-ts-h265/*', included: false},
       {pattern: 'test/test/assets/hls-ts-mp3/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-aac-h264/*', included: false},
+      // eslint-disable-next-line max-len
+      {pattern: 'test/test/assets/hls-ts-muxed-aac-h264-with-overflow-nalus/*', included: false},
+      // eslint-disable-next-line max-len
+      {pattern: 'test/test/assets/hls-ts-muxed-aac-h264-with-overflow-samples/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-aac-h265/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-ac3-h264/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-mp3-h264/*', included: false},
