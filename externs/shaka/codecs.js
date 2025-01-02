@@ -30,6 +30,27 @@ shaka.extern.MPEG_PES;
 /**
  * @typedef {{
  *   data: !Uint8Array,
+ *   frame: boolean,
+ *   isKeyframe: boolean,
+ *   pts: ?number,
+ *   dts: ?number,
+ *   nalus: !Array.<!shaka.extern.VideoNalu>
+ * }}
+ *
+ * @summary VideoSample.
+ * @property {!Uint8Array} data
+ * @property {boolean} frame
+ * @property {boolean} isKeyframe
+ * @property {?number} pts
+ * @property {?number} dts
+ * @property {!Array.<!shaka.extern.VideoNalu>} nalus
+ */
+shaka.extern.VideoSample;
+
+
+/**
+ * @typedef {{
+ *   data: !Uint8Array,
  *   fullData: !Uint8Array,
  *   type: number,
  *   time: ?number
