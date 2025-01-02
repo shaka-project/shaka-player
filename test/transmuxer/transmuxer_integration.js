@@ -339,13 +339,22 @@ describe('Transmuxer Player', () => {
     });
 
     it('H.264+MP3 in TS', async () => {
-      if (!await Util.isTypeSupported('audio/mp4; codecs="mp3"')) {
-        pending('Codec MP3 in MP4 is not supported by the platform.');
+      if (!await Util.isTypeSupported('audio/mp4; codecs="mp3"') &&
+        !await Util.isTypeSupported('audio/mpeg')) {
+        pending('Codec MP3 is not supported by the platform.');
+      }
+      if (!shaka.util.Platform.supportsSequenceMode()) {
+        pending('Sequence mode is not supported by the platform.');
       }
 
       // eslint-disable-next-line max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-mp3-h264/index.m3u8');
-      await video.play();
+      try {
+        await video.play();
+      // eslint-disable-next-line no-restricted-syntax
+      } catch (e) {
+        // Ignore play errors
+      }
       expect(player.isLive()).toBe(false);
 
       // Wait for the video to start playback.  If it takes longer than 10
