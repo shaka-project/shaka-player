@@ -116,7 +116,7 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
       return false;
     }
 
-    return this.video.ended;
+    return this.player ? this.player.isEnded() : true;
   }
 
   /**

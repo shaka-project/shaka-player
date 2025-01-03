@@ -841,6 +841,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.player_.cancelTrickPlay();
 
     if (this.presentationIsPaused()) {
+      // If we are at the end, go back to the beginning.
+      if (this.player_.isEnded()) {
+        this.video_.currentTime = this.player_.seekRange().start;
+      }
       this.video_.play();
     } else {
       this.video_.pause();
