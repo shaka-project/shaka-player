@@ -396,9 +396,7 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
-    // TODO: Fix the transmuxer for segments that do not start with a keyframe
-    // https://github.com/shaka-project/shaka-player/issues/7462
-    xit('H.264+AC3 in TS', async () => {
+    it('H.264+AC3 in TS', async () => {
       if (!await Util.isTypeSupported('audio/mp4; codecs="ac-3"')) {
         pending('Codec AC-3 is not supported by the platform.');
       }
