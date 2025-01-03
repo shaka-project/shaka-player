@@ -407,9 +407,6 @@ describe('Transmuxer Player', () => {
       if (!await Util.isTypeSupported('audio/mp4; codecs="ac-3"')) {
         pending('Codec AC-3 is not supported by the platform.');
       }
-      if (shaka.util.Platform.isTizen()) {
-        pending('Muxed AC-3 codec is not supported by the platform.');
-      }
 
       // eslint-disable-next-line max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-ac3-h264/media.m3u8');
@@ -430,9 +427,6 @@ describe('Transmuxer Player', () => {
     it('H.264+EC3 in TS', async () => {
       if (!await Util.isTypeSupported('audio/mp4; codecs="ec-3"')) {
         pending('Codec EC-3 is not supported by the platform.');
-      }
-      if (shaka.util.Platform.isTizen()) {
-        pending('Muxed AC-3 codec is not supported by the platform.');
       }
 
       // eslint-disable-next-line max-len
