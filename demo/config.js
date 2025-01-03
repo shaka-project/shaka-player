@@ -213,7 +213,9 @@ shakaDemo.Config = class {
             /* canBeZero= */ false,
             /* canBeUnset= */ true)
         .addNumberInput_('Default Presentation Delay',
-            'manifest.defaultPresentationDelay')
+            'manifest.defaultPresentationDelay',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
         .addBoolInput_('Disable Audio', 'manifest.disableAudio')
         .addBoolInput_('Disable Video', 'manifest.disableVideo')
         .addBoolInput_('Disable Text', 'manifest.disableText')
