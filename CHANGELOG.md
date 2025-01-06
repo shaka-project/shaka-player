@@ -1,5 +1,28 @@
 # Changelog
 
+## [4.9.34](https://github.com/shaka-project/shaka-player/compare/v4.9.33...v4.9.34) (2025-01-06)
+
+
+### Bug Fixes
+
+* Avoid useless MSE reset when transmuxing muxed content ([#7818](https://github.com/shaka-project/shaka-player/issues/7818)) ([5244029](https://github.com/shaka-project/shaka-player/commit/5244029fe30691a8ed161bbca086acdabdca24e9))
+* **Docs:** Remove info about small/large gaps from manual ([#7762](https://github.com/shaka-project/shaka-player/issues/7762)) ([8d317d5](https://github.com/shaka-project/shaka-player/commit/8d317d5cf49e77c8425a22f68cc20fc3ff8c21fb))
+* Don't ignore the license server in manifest when another key-system has license server in configuration ([#7797](https://github.com/shaka-project/shaka-player/issues/7797)) ([5dac9d3](https://github.com/shaka-project/shaka-player/commit/5dac9d344ada4c1f57697257cac3ec4931e2096b))
+* Fix change timestampOffset on discontinuities when not necessary ([#7823](https://github.com/shaka-project/shaka-player/issues/7823)) ([a25dab0](https://github.com/shaka-project/shaka-player/commit/a25dab084ac7043525f5388257e131f8414ad1a3))
+* Fix ClearKey license on old CDMs ([#7816](https://github.com/shaka-project/shaka-player/issues/7816)) ([9da369d](https://github.com/shaka-project/shaka-player/commit/9da369d3f4bb39dbd70e6fb4d00400aa0e05e122))
+* Fix gaps produced by the transmuxer ([#7822](https://github.com/shaka-project/shaka-player/issues/7822)) ([7ec609e](https://github.com/shaka-project/shaka-player/commit/7ec609e7e500d934931246e123327c1aa57e12b3))
+* Follow the configured playRange for src= ([#7825](https://github.com/shaka-project/shaka-player/issues/7825)) ([3c2b3cf](https://github.com/shaka-project/shaka-player/commit/3c2b3cf658cedcc59cd99e7d5b744d387926fa97))
+* **HLS:** Correctly identify webvtt subtitles with cmft extension ([#7791](https://github.com/shaka-project/shaka-player/issues/7791)) ([cef3940](https://github.com/shaka-project/shaka-player/commit/cef39402b7205113d6ce1a12c39328ac80bf6811))
+* **HLS:** Disable audio/video correctly when loading a TS media playlist ([#7815](https://github.com/shaka-project/shaka-player/issues/7815)) ([1690f1f](https://github.com/shaka-project/shaka-player/commit/1690f1f20e14c56f356953a193ae1a817be35a59))
+* **HLS:** Do not use EXT-X-PROGRAM-DATE-TIME on vod when there is only video or audio ([#7802](https://github.com/shaka-project/shaka-player/issues/7802)) ([3db710c](https://github.com/shaka-project/shaka-player/commit/3db710c6a9969b906bce0ed2843e272b8079454a))
+* **HLS:** Fix timestamp offset for raw formats when using segments mode ([#7819](https://github.com/shaka-project/shaka-player/issues/7819)) ([19d94ef](https://github.com/shaka-project/shaka-player/commit/19d94ef0c1012d2fe5e689d8cb12cfc436d83645))
+* **Offline:** Allow storage of MSS streams ([#7799](https://github.com/shaka-project/shaka-player/issues/7799)) ([9749923](https://github.com/shaka-project/shaka-player/commit/9749923a128fe2759b1377b8cd1243df0e726d98))
+* re-open the `MediaSource` if `readyState` is not open when the `init()` method is called. ([#7783](https://github.com/shaka-project/shaka-player/issues/7783)) ([6061413](https://github.com/shaka-project/shaka-player/commit/60614134b89176b2d5fc7e812cec48ddcc8198b4))
+* Remove useless calls to isTypeSupported ([#7817](https://github.com/shaka-project/shaka-player/issues/7817)) ([9d01c9a](https://github.com/shaka-project/shaka-player/commit/9d01c9a017b642af12228e6d3a2783356fa7dda7))
+* Remove useless deprecation in UITextDisplayer and add some guards in SimpleTextDisplayer ([#7805](https://github.com/shaka-project/shaka-player/issues/7805)) ([9364bc6](https://github.com/shaka-project/shaka-player/commit/9364bc695743e2c802200006174f183837631038))
+* **Transmuxer:** Fix transmuxer with overflow data (video nalus and aac samples) between PES ([#7813](https://github.com/shaka-project/shaka-player/issues/7813)) ([306ab6e](https://github.com/shaka-project/shaka-player/commit/306ab6ea47187360f4e6f87b31fadb22c979631b))
+* **UI:** Video starts playing automatically when selecting a playback rate ([#7786](https://github.com/shaka-project/shaka-player/issues/7786)) ([91cb1db](https://github.com/shaka-project/shaka-player/commit/91cb1dbe5ee6a88e4c9aa5273db7ef3583f9a9b0))
+
 ## [4.9.33](https://github.com/shaka-project/shaka-player/compare/v4.9.32...v4.9.33) (2024-12-11)
 
 
