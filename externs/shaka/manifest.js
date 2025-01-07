@@ -452,6 +452,7 @@ shaka.extern.SegmentIndex = class {
  * @property {boolean} encrypted
  *   <i>Defaults to false.</i><br>
  *   True if the stream is encrypted.
+ *   Note: DRM encryption only, so AES encryption is not taken into account.
  * @property {!Array.<!shaka.extern.DrmInfo>} drmInfos
  *   <i>Defaults to [] (i.e., no DRM).</i> <br>
  *   An array of DrmInfo objects which describe DRM schemes are compatible with
