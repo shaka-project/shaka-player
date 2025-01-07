@@ -949,6 +949,26 @@ shakaAssets.testAssets = [
         },
       }),
   new ShakaDemoAssetInfo(
+      /* name= */ 'Live sim (CBCS single key)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/drm_EZDRM-1-key-cbcs/testpic_2s/Manifest.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.DASH),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live sim (CBCS multi-key)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/drm_EZDRM-2-keys-cbcs/testpic_2s/Manifest.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.DASH),
+  new ShakaDemoAssetInfo(
       /* name= */ 'DASH-IF CEA-608 VOD',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
       /* manifestUri= */ 'https://livesim2.dashif.org/vod/testpic_2s/cea608.mpd',
