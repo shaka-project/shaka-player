@@ -23,13 +23,16 @@ shaka.test.ManifestParser = class {
     for (const expectedRef of references) {
       // Don't query negative times.  Query 0 instead.
       const startTime = Math.max(0, expectedRef.startTime);
-      const position = stream.segmentIndex.find(startTime);
-      expect(position).not.toBe(null);
-      const actualRef =
-          stream.segmentIndex.get(/** @type {number} */ (position));
+      // Some segment start times are before the beginning of the period.
+      // So default to 0 here if position is null.
+      const position = stream.segmentIndex.find(startTime) || 0;
+      const actualRef = stream.segmentIndex.get(position);
       // NOTE: A custom matcher for SegmentReferences is installed, so this
       // checks the URIs as well.
       expect(actualRef).toEqual(expectedRef);
+      // However, if it does fail because of URIs, you won't see them in the
+      // output without this, as well:
+      expect(actualRef.getUris()).toEqual(expectedRef.getUris());
     }
 
     // Make sure that the references stop at the end.
