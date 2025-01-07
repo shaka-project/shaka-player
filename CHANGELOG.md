@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.9.2-caf4](https://github.com/shaka-project/shaka-player/compare/v4.9.2-caf3...v4.9.2-caf4) (2025-01-06)
+
+
+### Bug Fixes
+
+* re-open the `MediaSource` if `readyState` is not open when the `init()` method is called. ([#7783](https://github.com/shaka-project/shaka-player/issues/7783)) ([9fa9078](https://github.com/shaka-project/shaka-player/commit/9fa90781fb2fb4d1593a5ba35d617808bdd099de))
+
 ## [4.9.2-caf3](https://github.com/shaka-project/shaka-player/compare/v4.9.2-caf2...v4.9.2-caf3) (2024-12-11)
 
 
