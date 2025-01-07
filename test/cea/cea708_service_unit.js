@@ -123,6 +123,35 @@ describe('Cea708Service', () => {
     expect(captions).toEqual(expectedCaptions);
   });
 
+
+  it('decodes multibyte unstyled caption text', () => {
+    const controlCodes = [
+      ...defineWindow,
+      // Series of C0 control codes that add multi-byte text.
+      0x18, 0xb9, 0xd9, 0x18, 0xb7, 0xce, // 맙, 럎
+    ];
+
+    const packet1 = createCea708PacketFromBytes(controlCodes, startTime);
+    const packet2 = createCea708PacketFromBytes(hideWindow, endTime);
+
+    const text = '맙럎';
+    const topLevelCue = CeaUtils.createWindowedCue(startTime, endTime, '',
+        serviceNumber, windowId, rowCount, colCount, anchorId);
+    topLevelCue.nestedCues = [
+      CeaUtils.createDefaultCue(startTime, endTime, /* payload= */ text),
+    ];
+
+    const expectedCaptions = [
+      {
+        stream,
+        cue: topLevelCue,
+      },
+    ];
+
+    const captions = getCaptionsFromPackets(service, packet1, packet2);
+    expect(captions).toEqual(expectedCaptions);
+  });
+
   it('setPenLocation sets the pen location correctly', () => {
     const controlCodes = [
       ...defineWindow,
