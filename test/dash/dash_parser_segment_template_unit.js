@@ -96,7 +96,7 @@ describe('DashParser SegmentTemplate', () => {
     it('honors presentationTimeOffset', async () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate media="s$Number$.mp4" duration="10"',
-        ' presentationTimeOffset="50" />',
+        ' presentationTimeOffset="10" />',
       ], /* duration= */ 30, /* startTime= */ 40);
 
       fakeNetEngine.setResponseText('dummy://foo', source);
@@ -110,16 +110,43 @@ describe('DashParser SegmentTemplate', () => {
 
       const expectedRef1 = ManifestParser.makeReference(
           's1.mp4', 40, 50, baseUri);
-      expectedRef1.timestampOffset = -10;
+      expectedRef1.timestampOffset = 30; // period start 40 - pto 10
 
       const expectedRef2 = ManifestParser.makeReference(
           's2.mp4', 50, 60, baseUri);
-      expectedRef2.timestampOffset = -10;
+      expectedRef2.timestampOffset = 30; // period start 40 - pto 10
 
       const ref1 = stream.segmentIndex.getIteratorForTime(45).next().value;
       const ref2 = stream.segmentIndex.getIteratorForTime(55).next().value;
       expect(ref1).toEqual(expectedRef1);
       expect(ref2).toEqual(expectedRef2);
+    });
+
+    it('constructs $Time$ ignoring offset and period', async () => {
+      const source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate media="s$Number$-$Time$.mp4" duration="10"',
+        ' presentationTimeOffset="10" />',
+      ], /* duration= */ 30, /* startTime= */ 40);
+
+      fakeNetEngine.setResponseText('dummy://foo', source);
+      const manifest = await parser.start('dummy://foo', playerInterface);
+
+      expect(manifest.variants.length).toBe(1);
+
+      const stream = manifest.variants[0].video;
+      expect(stream).toBeTruthy();
+      await stream.createSegmentIndex();
+
+      // The media time of the segment (0) is used in $Time$, without regard
+      // for the presentationTimeOffset (10), and without regard for the period
+      // start (40).  The reference itself has a start time that includes the
+      // period.
+      const expectedRef1 = ManifestParser.makeReference(
+          's1-0.mp4', 40, 50, baseUri);
+      expectedRef1.timestampOffset = 30; // period start 40 - pto 10
+
+      const ref1 = stream.segmentIndex.getIteratorForTime(45).next().value;
+      expect(ref1).toEqual(expectedRef1);
     });
 
     it('handles segments larger than the period', async () => {
@@ -514,6 +541,28 @@ describe('DashParser SegmentTemplate', () => {
       expect(firstSegment(variants[2]).getUris()).toEqual(
           ['http://example.com/segment-test3-0.dash']);
     });
+
+    it('constructs $Time$ ignoring offset and period', async () => {
+      const source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate media="$Number$-$Time$.mp4"',
+        ' presentationTimeOffset="10" startNumber="0">',
+        '  <SegmentTimeline>',
+        '    <S t="0" d="15" r="2" />',
+        '  </SegmentTimeline>',
+        '</SegmentTemplate>',
+      ], /* duration= */ 35, /* startTime= */ 40);
+      const references = [
+        // Reference time is the media time plus period time, but the $Time$
+        // used in the URL ignores both presentationTimeOffset and period start.
+        ManifestParser.makeReference('0-0.mp4', 30, 45, baseUri),
+        ManifestParser.makeReference('1-15.mp4', 45, 60, baseUri),
+        ManifestParser.makeReference('2-30.mp4', 60, 75, baseUri),
+      ].map((ref) => {
+        ref.timestampOffset = 30; // period start 40 - pto 10
+        return ref;
+      });
+      await Dash.testSegmentIndex(source, references);
+    });
   });
 
   describe('rejects streams with', () => {
@@ -737,6 +786,7 @@ describe('DashParser SegmentTemplate', () => {
         expect(pos).toBeNull();
       });
     });
+
     describe('get', () => {
       it('creates a segment reference for a given position', async () => {
         const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
@@ -914,6 +964,7 @@ function makeRanges(start, duration, num) {
  */
 function makeTemplateInfo(timeline) {
   return {
+    'unscaledSegmentDuration': null,
     'segmentDuration': null,
     'timescale': 90000,
     'startNumber': 1,
