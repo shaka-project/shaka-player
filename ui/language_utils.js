@@ -78,10 +78,11 @@ shaka.ui.LanguageUtils = class {
     };
 
     const getCombination = (language, rolesString, label, channelsCount,
-        audioCodec) => {
+        audioCodec, spatialAudio) => {
       const keys = [
         language,
         rolesString,
+        spatialAudio,
       ];
       if (showAudioChannelCountVariants && channelsCount != null) {
         keys.push(channelsCount);
@@ -136,7 +137,7 @@ shaka.ui.LanguageUtils = class {
     const selectedCombination = selectedTrack ? getCombination(
         selectedTrack.language, getRolesString(selectedTrack),
         selectedTrack.label, selectedTrack.channelsCount,
-        selectedTrack.audioCodec) : '';
+        selectedTrack.audioCodec, selectedTrack.spatialAudio) : '';
 
     for (const track of tracks) {
       const language = track.language;
@@ -146,9 +147,10 @@ shaka.ui.LanguageUtils = class {
       const label = track.label;
       const channelsCount = track.channelsCount;
       const audioCodec = track.audioCodec;
+      const spatialAudio = track.spatialAudio;
       const combinationName =
           getCombination(language, rolesString, label, channelsCount,
-              audioCodec);
+              audioCodec, spatialAudio);
       if (combinationsMade.has(combinationName)) {
         continue;
       }
@@ -164,25 +166,27 @@ shaka.ui.LanguageUtils = class {
 
       span.textContent =
           shaka.ui.LanguageUtils.getLanguageName(language, localization);
+      let basicInfo = '';
+      if (showAudioCodec && showAudioChannelCountVariants &&
+          spatialAudio && audioCodec == 'ec-3') {
+        basicInfo += ' Dolby Atmos';
+      } else {
+        if (showAudioCodec && hasDifferentAudioCodecs(language)) {
+          basicInfo += getAudioCodecName(audioCodec);
+        }
+        if (showAudioChannelCountVariants) {
+          basicInfo += getChannelsCountName(channelsCount);
+        }
+      }
       switch (trackLabelFormat) {
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
-          if (showAudioCodec && hasDifferentAudioCodecs(language)) {
-            span.textContent += getAudioCodecName(audioCodec);
-          }
-          if (showAudioChannelCountVariants) {
-            span.textContent += getChannelsCountName(channelsCount);
-          }
+          span.textContent += basicInfo;
           if (forced) {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.ROLE:
-          if (showAudioCodec && hasDifferentAudioCodecs(language)) {
-            span.textContent += getAudioCodecName(audioCodec);
-          }
-          if (showAudioChannelCountVariants) {
-            span.textContent += getChannelsCountName(channelsCount);
-          }
+          span.textContent += basicInfo;
           if (!rolesString) {
             // Fallback behavior. This probably shouldn't happen.
             shaka.log.alwaysWarn('Track #' + track.id + ' does not have a ' +
@@ -196,12 +200,7 @@ shaka.ui.LanguageUtils = class {
           }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE_ROLE:
-          if (showAudioCodec && hasDifferentAudioCodecs(language)) {
-            span.textContent += getAudioCodecName(audioCodec);
-          }
-          if (showAudioChannelCountVariants) {
-            span.textContent += getChannelsCountName(channelsCount);
-          }
+          span.textContent += basicInfo;
           if (rolesString) {
             span.textContent += ': ' + rolesString;
           }
