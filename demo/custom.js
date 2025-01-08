@@ -442,12 +442,9 @@ shakaDemo.Custom = class {
     // Make the drm system field.
     const drmSetup = (input, container) => {
       customDrmSystemInput = input;
-      const drmSystems = assetInProgress.licenseServers.keys();
-      for (const drmSystem of drmSystems) {
-        if (!shakaDemo.Main.commonDrmSystems.includes(drmSystem)) {
-          input.value = drmSystem;
-          break;
-        }
+      if (assetInProgress.licenseServers.size == 1) {
+        const drmSystems = assetInProgress.licenseServers.keys();
+        input.value = Array.from(drmSystems)[0];
       }
     };
     const drmOnChange = (input) => {
