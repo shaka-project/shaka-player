@@ -557,7 +557,7 @@ describe('DashParser SegmentTemplate', () => {
         ManifestParser.makeReference('0-0.mp4', 30, 45, baseUri),
         ManifestParser.makeReference('1-15.mp4', 45, 60, baseUri),
         ManifestParser.makeReference('2-30.mp4', 60, 75, baseUri),
-      ].map(ref => {
+      ].map((ref) => {
         ref.timestampOffset = 30; // period start 40 - pto 10
         return ref;
       });
@@ -964,6 +964,7 @@ function makeRanges(start, duration, num) {
  */
 function makeTemplateInfo(timeline) {
   return {
+    'unscaledSegmentDuration': null,
     'segmentDuration': null,
     'timescale': 90000,
     'startNumber': 1,
