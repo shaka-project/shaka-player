@@ -114,6 +114,23 @@ shakaDemo.Custom = class {
   }
 
   /**
+   * A utility to simplify the creation of datalist input on the dialog.
+   * @param {!shakaDemo.InputContainer} container
+   * @param {string} name
+   * @param {function(!HTMLInputElement, !Element)} setup
+   * @param {function(!Element, !shakaDemo.Input)} onChange
+   * @param {!Array.<string>} values
+   * @private
+   */
+  makeDatalistInput_(container, name, setup, onChange, values) {
+    container.addRow(/* labelString= */ null, /* tooltipString= */ null);
+    const input =
+        new shakaDemo.DatalistInput(container, name, onChange, values);
+    input.extra().textContent = name;
+    setup(input.input(), input.container());
+  }
+
+  /**
    * A utility to simplify the creation of bool on the dialog.
    * @param {!shakaDemo.InputContainer} container
    * @param {string} name
@@ -450,7 +467,9 @@ shakaDemo.Custom = class {
     const drmOnChange = (input) => {
       setLicenseServerURLs();
     };
-    this.makeField_(container, 'Custom DRM System', drmSetup, drmOnChange);
+    this.makeDatalistInput_(
+        container, 'Custom DRM System', drmSetup, drmOnChange,
+        shakaDemo.Main.commonDrmSystems);
 
     return drmDiv;
   }
