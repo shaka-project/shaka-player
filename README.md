@@ -256,6 +256,7 @@ NOTES:
    content security.
  - ⁷: These are expected to work, but are community-supported and untested by
    us.
+ - WisePlay is community-supported and untested by us.
 
 |Manifest  |Widevine  |PlayReady|FairPlay |ClearKey  |
 |:--------:|:--------:|:-------:|:-------:|:--------:|
