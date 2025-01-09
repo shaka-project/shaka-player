@@ -3461,6 +3461,7 @@ describe('StreamingEngine', () => {
           originalUri: request.uris[0],
           data: buffer,
           headers: {},
+          originalRequest: request,
         };
         return shaka.util.AbortableOperation.completed(response);
       });

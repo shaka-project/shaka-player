@@ -1275,6 +1275,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       originalUri: '',
       data: new ArrayBuffer(5),
       headers: {},
+      originalRequest: createRequest('fake'),
     };
   }
 });  // describe('NetworkingEngine')

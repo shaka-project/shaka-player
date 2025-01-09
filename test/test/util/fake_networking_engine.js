@@ -138,6 +138,7 @@ shaka.test.FakeNetworkingEngine = class {
         originalUri: requestedUri,
         data: result,
         headers: headers,
+        originalRequest: request,
       };
 
       // Modify the response using the response filter, this allows the app

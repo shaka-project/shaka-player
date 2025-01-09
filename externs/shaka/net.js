@@ -130,7 +130,8 @@ shaka.extern.Request;
  *   status: (number|undefined),
  *   headers: !Object.<string, string>,
  *   timeMs: (number|undefined),
- *   fromCache: (boolean|undefined)
+ *   fromCache: (boolean|undefined),
+ *   originalRequest: shaka.extern.Request
  * }}
  *
  * @description
@@ -158,6 +159,8 @@ shaka.extern.Request;
  * @property {(boolean|undefined)} fromCache
  *   Optional. If true, this response was from a cache and should be ignored
  *   for bandwidth estimation.
+ * @property {shaka.extern.Request} originalRequest
+ *   The original request that gave rise to this response.
  *
  * @exportDoc
  */

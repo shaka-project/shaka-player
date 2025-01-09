@@ -83,6 +83,7 @@ shaka.test.TestScheme = class {
         originalUri: uri,
         data: new ArrayBuffer(0),
         headers: {'content-type': 'application/x-test-manifest'},
+        originalRequest: request,
       };
       return shaka.util.AbortableOperation.completed(response);
     }
@@ -127,7 +128,13 @@ shaka.test.TestScheme = class {
     }
 
     /** @type {shaka.extern.Response} */
-    const ret = {uri: uri, originalUri: uri, data: responseData, headers: {}};
+    const ret = {
+      uri: uri,
+      originalUri: uri,
+      data: responseData,
+      headers: {},
+      originalRequest: request,
+    };
     return shaka.util.AbortableOperation.completed(ret);
   }
 
