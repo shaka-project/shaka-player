@@ -134,7 +134,7 @@ HLS features supported:
  - MPEG-2 TS support
  - WebVTT and TTML
  - CEA-608/708 captions
- - Encrypted content with PlayReady and Widevine
+ - Encrypted content with PlayReady, Widevine and WisePlay
  - Encrypted content with FairPlay (Safari on macOS and iOS 9+ only)
  - AES-128, AES-256 and AES-256-CTR support on browsers with Web Crypto API support
  - SAMPLE-AES and SAMPLE-AES-CTR (identity) support on browsers with ClearKey support
@@ -227,21 +227,22 @@ MSS features **not** supported:
 
 ## DRM support matrix
 
-|Browser       |Widevine  |PlayReady|FairPlay |ClearKey⁶ |
-|:------------:|:--------:|:-------:|:-------:|:--------:|
-|Chrome¹       |**Y**     | -       | -       |**Y**     |
-|Firefox²      |**Y**     | -       | -       |**Y**     |
-|Edge³         | -        |**Y**    | -       | -        |
-|Edge Chromium |**Y**     |**Y**    | -       |**Y**     |
-|Safari        | -        | -       |**Y**    | -        |
-|Opera         |**Y**     | -       | -       |**Y**     |
-|Chromecast    |**Y**     |**Y**    | -       |**Y**     |
-|Tizen TV      |**Y**     |**Y**    | -       |**Y**     |
-|WebOS⁷        |untested⁷ |untested⁷| -       |untested⁷ |
-|Hisense⁷      |untested⁷ |untested⁷| -       |untested⁷ |
-|Xbox One      | -        |**Y**    | -       | -        |
-|Playstation 4⁷| -        |untested⁷| -       |untested⁷ |
-|Playstation 5⁷| -        |untested⁷| -       |untested⁷ |
+|Browser       |Widevine  |PlayReady|FairPlay |WisePlay |ClearKey⁶ |
+|:------------:|:--------:|:-------:|:-------:|:-------:|:--------:|
+|Chrome¹       |**Y**     | -       | -       | -       |**Y**     |
+|Firefox²      |**Y**     | -       | -       | -       |**Y**     |
+|Edge³         | -        |**Y**    | -       | -       | -        |
+|Edge Chromium |**Y**     |**Y**    | -       | -       |**Y**     |
+|Safari        | -        | -       |**Y**    | -       | -        |
+|Opera         |**Y**     | -       | -       | -       |**Y**     |
+|Chromecast    |**Y**     |**Y**    | -       | -       |**Y**     |
+|Tizen TV      |**Y**     |**Y**    | -       | -       |**Y**     |
+|WebOS⁷        |untested⁷ |untested⁷| -       | -       |untested⁷ |
+|Hisense⁷      |untested⁷ |untested⁷| -       | -       |untested⁷ |
+|Xbox One      | -        |**Y**    | -       | -       | -        |
+|Playstation 4⁷| -        |untested⁷| -       | -       |untested⁷ |
+|Playstation 5⁷| -        |untested⁷| -       | -       |untested⁷ |
+|Huawei⁷       | -        | -       | -       |untested⁷|untested⁷ |
 
 Other DRM systems should work out of the box if they are interoperable and
 compliant to the EME spec.
@@ -257,11 +258,11 @@ NOTES:
  - ⁷: These are expected to work, but are community-supported and untested by
    us.
 
-|Manifest  |Widevine  |PlayReady|FairPlay |ClearKey  |
-|:--------:|:--------:|:-------:|:-------:|:--------:|
-|DASH      |**Y**     |**Y**    | -       |**Y**     |
-|HLS       |**Y**     |**Y**    |**Y** ¹  | -        |
-|MSS       | -        |**Y**    | -       | -        |
+|Manifest  |Widevine  |PlayReady|FairPlay |WisePlay |ClearKey  |
+|:--------:|:--------:|:-------:|:-------:|:-------:|:--------:|
+|DASH      |**Y**     |**Y**    |**Y**    |**Y**    |**Y**     |
+|HLS       |**Y**     |**Y**    |**Y** ¹  |**Y**    |**Y**     |
+|MSS       | -        |**Y**    | -       | -       | -        |
 
 NOTES:
  - ¹: By default, FairPlay is handled using Apple's native HLS player, when on

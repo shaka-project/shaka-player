@@ -194,6 +194,7 @@ Verimatrix
 Vidaa
 Vnova
 Widevine
+wiseplay
 Zenterio
 
 # streaming
