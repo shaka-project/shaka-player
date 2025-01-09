@@ -24,6 +24,11 @@ v5.0
 v4.13 - 2025 Q1
  - Time ID3, emsg, and metadata events to the presentation timeline
    https://github.com/shaka-project/shaka-player/issues/7556
+ - WisePlay DRM support
+ - Support for multiple robustness levels in drm
+ - Clearkey download support
+ - Stop setting playbackRate to 0 to control buffering state when streaming.rebufferingGoal = 0
+   https://github.com/shaka-project/shaka-player/issues/7602
 
 =====
 
