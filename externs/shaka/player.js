@@ -2323,6 +2323,7 @@ shaka.extern.TextDisplayerConfiguration;
  *   streaming: shaka.extern.StreamingConfiguration,
  *   mediaSource: shaka.extern.MediaSourceConfiguration,
  *   abrFactory: shaka.extern.AbrManager.Factory,
+ *   adaptationSetCriteriaFactory: shaka.media.AdaptationSetCriteria.Factory,
  *   abr: shaka.extern.AbrConfiguration,
  *   cmcd: shaka.extern.CmcdConfiguration,
  *   cmsd: shaka.extern.CmsdConfiguration,
