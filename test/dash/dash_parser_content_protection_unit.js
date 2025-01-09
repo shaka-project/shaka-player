@@ -496,6 +496,7 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.microsoft.playready', keyIds),
       buildDrmInfo('com.microsoft.playready', keyIds),
       buildDrmInfo('com.apple.fps', keyIds),
+      buildDrmInfo('com.huawei.wiseplay', keyIds),
     ], variantKeyIds);
     await testDashParser(source, expected, /* ignoreDrmInfo= */ true);
   });
