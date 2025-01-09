@@ -4119,6 +4119,15 @@ describe('HlsParser', () => {
             });
           });
         });
+        manifest.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.addDrmInfo('com.huawei.wiseplay', (drmInfo) => {
+              drmInfo.addCencInitData(initDataBase64);
+              drmInfo.keyIds.add(keyId);
+              drmInfo.encryptionScheme = 'cenc';
+            });
+          });
+        });
         manifest.sequenceMode = sequenceMode;
         manifest.type = shaka.media.ManifestParser.HLS;
       });
