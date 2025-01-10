@@ -70,10 +70,10 @@ shaka.ui.Overlay = class {
 
     // Create watermark
     this.watermark_ = new shaka.ui.Watermark(
-      this.videoContainer_,
-      this.controls_
+        this.videoContainer_,
+        this.controls_,
     );
-      }
+  }
 
 
   /**
