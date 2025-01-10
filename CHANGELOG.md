@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.12.7](https://github.com/shaka-project/shaka-player/compare/v4.12.6...v4.12.7) (2025-01-10)
+
+
+### Bug Fixes
+
+* **CEA:** Fix multi byte language support in CEA-708 ([#7837](https://github.com/shaka-project/shaka-player/issues/7837)) ([12f2e2b](https://github.com/shaka-project/shaka-player/commit/12f2e2b441475fb5fd379f370384026c90eadf65))
+* **dash:** Fix $Time$ usage with SegmentTemplate ([#7849](https://github.com/shaka-project/shaka-player/issues/7849)) ([9e72d38](https://github.com/shaka-project/shaka-player/commit/9e72d386c8ea985588efc4718e3644e229081bbb))
+* **DASH:** Fix Dolby Atmos detection when there is not SupplementalProperty ([#7847](https://github.com/shaka-project/shaka-player/issues/7847)) ([ca70821](https://github.com/shaka-project/shaka-player/commit/ca708213a67338d94d950d8ce867c1085e65a574))
+* Fix missing EMSG events ([#7839](https://github.com/shaka-project/shaka-player/issues/7839)) ([ec6113a](https://github.com/shaka-project/shaka-player/commit/ec6113a90007dfe90af76bc38ec3955441356eeb))
+* Fix SEGMENT HEAD requests, compatibility with Cast SDK ([#7851](https://github.com/shaka-project/shaka-player/issues/7851)) ([341a0ad](https://github.com/shaka-project/shaka-player/commit/341a0adea499ba5875f6189bc8aefdc3f4710297)), closes [#7600](https://github.com/shaka-project/shaka-player/issues/7600)
+* Fix select spatial audio when using selectAudioLanguage ([#7846](https://github.com/shaka-project/shaka-player/issues/7846)) ([dcb27f7](https://github.com/shaka-project/shaka-player/commit/dcb27f796e1abbd1da1f0928f0cc613de919c34a))
+* **HLS:** Disable text correctly when loading a media playlist ([#7840](https://github.com/shaka-project/shaka-player/issues/7840)) ([56460e1](https://github.com/shaka-project/shaka-player/commit/56460e1cd79db89a98848f5f6f1fd86b98df8b07))
+* **HLS:** Fix audio detection when there is no audio data but it appears in PMT ([#7838](https://github.com/shaka-project/shaka-player/issues/7838)) ([04554a9](https://github.com/shaka-project/shaka-player/commit/04554a9635567287206ea8d884f49a79aaaa3686))
+* **HLS:** Omit daterange without START-DATE in order to avoid errors ([#7841](https://github.com/shaka-project/shaka-player/issues/7841)) ([0510a53](https://github.com/shaka-project/shaka-player/commit/0510a532cdc6094dc6ed7769ee9c9a221ec8a123))
+
 ## [4.12.6](https://github.com/shaka-project/shaka-player/compare/v4.12.5...v4.12.6) (2025-01-06)
 
 
