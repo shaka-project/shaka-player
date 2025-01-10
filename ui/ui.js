@@ -1,3 +1,10 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
 goog.provide('shaka.ui.Overlay');
 goog.provide('shaka.ui.Overlay.FailReasonCode');
 goog.provide('shaka.ui.Overlay.TrackLabelFormat');
