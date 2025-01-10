@@ -102,7 +102,7 @@
   "scripts": {
     "prepack": "clean-package",
     "postpack": "clean-package restore",
-    "prepublishOnly": "python3 build/checkversion.py && python3 build/all.py --force"
+    "prepublishOnly": "python build/checkversion.py && python build/all.py --force"
   },
   "dependencies": {
     "eme-encryption-scheme-polyfill": "^2.1.6"

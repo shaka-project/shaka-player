@@ -81,9 +81,7 @@ shaka.ui.Overlay = class {
     }
     this.player_ = null;
 
-    // if (this.watermark_) {
-    //   await this.watermark_.destroy();
-    // }
+   
     this.watermark_ = null;
   }
 
