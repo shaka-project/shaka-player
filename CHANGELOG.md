@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.9.2-caf5](https://github.com/shaka-project/shaka-player/compare/v4.9.2-caf4...v4.9.2-caf5) (2025-01-10)
+
+
+### Bug Fixes
+
+* Fix SEGMENT HEAD requests, compatibility with Cast SDK ([#7851](https://github.com/shaka-project/shaka-player/issues/7851)) ([0d92755](https://github.com/shaka-project/shaka-player/commit/0d927550a31671072d3f4e5169486b2ed37630b9)), closes [#7600](https://github.com/shaka-project/shaka-player/issues/7600)
+
 ## [4.9.2-caf4](https://github.com/shaka-project/shaka-player/compare/v4.9.2-caf3...v4.9.2-caf4) (2025-01-06)
 
 
