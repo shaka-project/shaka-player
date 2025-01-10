@@ -38,7 +38,9 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
     super(parent, controls);
 
     /** @private {!HTMLCanvasElement} */
-    this.canvas_ = /** @type {!HTMLCanvasElement} */ (document.createElement('canvas'));
+    this.canvas_ = /** @type {!HTMLCanvasElement} */ (
+      document.createElement('canvas')
+    );
     this.canvas_.style.position = 'absolute';
     this.canvas_.style.top = '0';
     this.canvas_.style.left = '0';

@@ -69,8 +69,11 @@ shaka.ui.Overlay = class {
     video['ui'] = this;
 
     // Create watermark
-    this.watermark_ = new shaka.ui.Watermark(this.videoContainer_, this.controls_);
-  }
+    this.watermark_ = new shaka.ui.Watermark(
+      this.videoContainer_,
+      this.controls_
+    );
+      }
 
 
   /**
@@ -87,8 +90,6 @@ shaka.ui.Overlay = class {
       await this.player_.destroy();
     }
     this.player_ = null;
-
-   
     this.watermark_ = null;
   }
 
