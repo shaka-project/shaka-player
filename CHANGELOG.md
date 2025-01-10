@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.9.35](https://github.com/shaka-project/shaka-player/compare/v4.9.34...v4.9.35) (2025-01-10)
+
+
+### Bug Fixes
+
+* **CEA:** Fix multi byte language support in CEA-708 ([#7837](https://github.com/shaka-project/shaka-player/issues/7837)) ([61a2875](https://github.com/shaka-project/shaka-player/commit/61a2875bea08fb260e23c06d4f751def2eed1200))
+* **dash:** Fix $Time$ usage with SegmentTemplate ([#7849](https://github.com/shaka-project/shaka-player/issues/7849)) ([3971440](https://github.com/shaka-project/shaka-player/commit/397144050b63674b34a0450e211b56d46e53774f))
+* **DASH:** Fix Dolby Atmos detection when there is not SupplementalProperty ([#7847](https://github.com/shaka-project/shaka-player/issues/7847)) ([8ebde5a](https://github.com/shaka-project/shaka-player/commit/8ebde5aae6b0ec4afe7eb811bc30f6cd6bd507ba))
+* Fix isEnded for live streams ([#7866](https://github.com/shaka-project/shaka-player/issues/7866)) ([87c5314](https://github.com/shaka-project/shaka-player/commit/87c53149ccddd4f835809d8012e80d7925de14bd))
+* Fix SEGMENT HEAD requests, compatibility with Cast SDK ([#7851](https://github.com/shaka-project/shaka-player/issues/7851)) ([3b4ab2b](https://github.com/shaka-project/shaka-player/commit/3b4ab2bde57c6014f994a18add32e9d3cc744b22)), closes [#7600](https://github.com/shaka-project/shaka-player/issues/7600)
+* **HLS:** Assign EXT-X-TILES to segment tags ([#7864](https://github.com/shaka-project/shaka-player/issues/7864)) ([d472447](https://github.com/shaka-project/shaka-player/commit/d472447a39f0d189a2b3e7781324a5e565ae8e55))
+* **HLS:** Disable text correctly when loading a media playlist ([#7840](https://github.com/shaka-project/shaka-player/issues/7840)) ([f67a2c8](https://github.com/shaka-project/shaka-player/commit/f67a2c86dc30cd51bc9f9ee7ddbd94a0973e807f))
+* **HLS:** Fix audio detection when there is no audio data but it appears in PMT ([#7838](https://github.com/shaka-project/shaka-player/issues/7838)) ([e1a482a](https://github.com/shaka-project/shaka-player/commit/e1a482adea423e8988ffbbef1c2071aea6c8f6fc))
+* **Offline:** Fix download HLG tracks when using AUTO hdr level ([#7865](https://github.com/shaka-project/shaka-player/issues/7865)) ([0b75b8a](https://github.com/shaka-project/shaka-player/commit/0b75b8ac7b6bfb0b35bf4dd1ccbedafbfd70e062))
+* Use getSegmentAvailabilityStart instead of getSeekRangeStart to evict segments ([#7867](https://github.com/shaka-project/shaka-player/issues/7867)) ([f7a436c](https://github.com/shaka-project/shaka-player/commit/f7a436c197a4b8af1ee9efba48c4fb73584bb934))
+
 ## [4.9.34](https://github.com/shaka-project/shaka-player/compare/v4.9.33...v4.9.34) (2025-01-06)
 
 
