@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.11.19](https://github.com/shaka-project/shaka-player/compare/v4.11.18...v4.11.19) (2025-01-10)
+
+
+### Bug Fixes
+
+* **CEA:** Fix multi byte language support in CEA-708 ([#7837](https://github.com/shaka-project/shaka-player/issues/7837)) ([4f18e72](https://github.com/shaka-project/shaka-player/commit/4f18e72d040fd21b2dcedac09ce67b7c805bc187))
+* **dash:** Fix $Time$ usage with SegmentTemplate ([#7849](https://github.com/shaka-project/shaka-player/issues/7849)) ([1786ac1](https://github.com/shaka-project/shaka-player/commit/1786ac1634df8b889c78ba75a6bcc5b19da01303))
+* **DASH:** Fix Dolby Atmos detection when there is not SupplementalProperty ([#7847](https://github.com/shaka-project/shaka-player/issues/7847)) ([260dfd6](https://github.com/shaka-project/shaka-player/commit/260dfd601a735f3baa6b8df1f9283eae9e319a22))
+* Fix SEGMENT HEAD requests, compatibility with Cast SDK ([#7851](https://github.com/shaka-project/shaka-player/issues/7851)) ([5d9f0eb](https://github.com/shaka-project/shaka-player/commit/5d9f0eb90a1c58fc1e0b3e4a8cd33215510f51ac)), closes [#7600](https://github.com/shaka-project/shaka-player/issues/7600)
+* **HLS:** Disable text correctly when loading a media playlist ([#7840](https://github.com/shaka-project/shaka-player/issues/7840)) ([f3c464b](https://github.com/shaka-project/shaka-player/commit/f3c464b6178015af40365d03502497dfb56d8451))
+* **HLS:** Fix audio detection when there is no audio data but it appears in PMT ([#7838](https://github.com/shaka-project/shaka-player/issues/7838)) ([1d700a9](https://github.com/shaka-project/shaka-player/commit/1d700a973a4efd311eac6e3306df31b154f2da5f))
+* **HLS:** Omit daterange without START-DATE in order to avoid errors ([#7841](https://github.com/shaka-project/shaka-player/issues/7841)) ([faf324d](https://github.com/shaka-project/shaka-player/commit/faf324dd570398777a9965110c95c240740d87ec))
+
 ## [4.11.18](https://github.com/shaka-project/shaka-player/compare/v4.11.17...v4.11.18) (2025-01-06)
 
 
