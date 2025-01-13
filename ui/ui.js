@@ -21,7 +21,6 @@ goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Platform');
 
-
 /**
  * @implements {shaka.util.IDestroyable}
  * @export
@@ -180,7 +179,7 @@ shaka.ui.Overlay = class {
 
   /**
    * @param {string} text
-   * @param {shaka.extern.WatermarkOptions=} options
+   * @param {shaka.ui.Watermark.Options=} options
    * @export
    */
   setTextWatermark(text, options) {

@@ -6,6 +6,7 @@
 +../../ui/ad_statistics_button.js
 +../../ui/audio_language_selection.js
 +../../ui/externs/ui.js
++../../ui/externs/watermark.js
 +../../ui/play_button.js
 +../../ui/big_play_button.js
 +../../ui/airplay_button.js

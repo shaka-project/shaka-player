@@ -9,6 +9,7 @@ goog.provide('shaka.ui.Watermark');
 goog.requireType('shaka.ui.Controls');
 
 goog.require('shaka.ui.Element');
+goog.require('shaka.log');
 
 /**
  * A UI component that adds watermark functionality to the Shaka Player.
@@ -62,7 +63,7 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
   getContext2D_() {
     const ctx = this.canvas_.getContext('2d');
     if (!ctx) {
-      console.error('2D context is not available');
+      shaka.log.error('2D context is not available');
       return null;
     }
     return /** @type {!CanvasRenderingContext2D} */ (ctx);
@@ -81,11 +82,11 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
    * Sets a text watermark on the video with customizable options.
    * The watermark can be either static (fixed position) or dynamic (moving).
    * @param {string} text The text to display as watermark
-   * @param {shaka.extern.WatermarkOptions=} options Watermark  options
+   * @param {shaka.ui.Watermark.Options=} options  configuration options
    * @export
    */
   setTextWatermark(text, options) {
-    /** @type {!shaka.extern.WatermarkOptions} */
+    /** @type {!shaka.ui.Watermark.Options} */
     const defaultOptions = {
       type: 'static',
       text: text,
@@ -97,8 +98,8 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
       skip: 500,
     };
 
-    /** @type {!shaka.extern.WatermarkOptions} */
-    const config = /** @type {!shaka.extern.WatermarkOptions} */ (
+    /** @type {!shaka.ui.Watermark.Options} */
+    const config = /** @type {!shaka.ui.Watermark.Options} */ (
       Object.assign({}, defaultOptions, options || defaultOptions)
     );
 
@@ -111,7 +112,7 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
 
   /**
    * Draws a static watermark on the canvas.
-   * @param {!shaka.extern.WatermarkOptions} config  configuration options
+   * @param {!shaka.ui.Watermark.Options} config  configuration options
    * @private
    */
   drawStaticWatermark_(config) {
@@ -158,7 +159,7 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
 
   /**
    * Starts a dynamic watermark animation on the canvas.
-   * @param {!shaka.extern.WatermarkOptions} config  configuration options
+   * @param {!shaka.ui.Watermark.Options} config  configuration options
    * @private
    */
   startDynamicWatermark_(config) {
