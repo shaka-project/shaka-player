@@ -1791,12 +1791,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     goog.asserts.assert(
         this.seekBar_, 'Caller of seek_ must check for seekBar_ first!');
 
-    this.seekBar_.changeTo(currentTime);
-
-    if (this.isOpaque()) {
-      // Only update the time and seek range if it's visible.
-      this.updateTimeAndSeekRange_();
-    }
+    this.video_.currentTime = currentTime;
+    this.updateTimeAndSeekRange_();
   }
 
   /**
