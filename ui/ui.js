@@ -179,7 +179,7 @@ shaka.ui.Overlay = class {
 
   /**
    * @param {string} text
-   * @param {shaka.ui.Watermark.Options=} options
+   * @param {!shaka.ui.Watermark.Options} options
    * @export
    */
   setTextWatermark(text, options) {
