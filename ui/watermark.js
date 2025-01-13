@@ -25,14 +25,17 @@ goog.require('shaka.ui.Element');
 shaka.ui.Watermark.Options;
 
 /**
+ * A UI component that adds watermark functionality to the Shaka Player.
+ * Allows adding text watermarks with various customization options.
  * @extends {shaka.ui.Element}
  * @final
  * @export
  */
 shaka.ui.Watermark = class extends shaka.ui.Element {
   /**
-   * @param {!HTMLElement} parent
-   * @param {!shaka.ui.Controls} controls
+   * Creates a new Watermark instance.
+   * @param {!HTMLElement} parent The parent element for the watermark canvas
+   * @param {!shaka.ui.Controls} controls The controls instance
    */
   constructor(parent, controls) {
     super(parent, controls);
@@ -80,8 +83,10 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
   }
 
   /**
-   * @param {string} text
-   * @param {shaka.ui.Watermark.Options=} options
+   * Sets a text watermark on the video with customizable options.
+   * The watermark can be either static (fixed position) or dynamic (moving).
+   * @param {string} text The text to display as watermark
+   * @param {shaka.ui.Watermark.Options=} options Watermark options
    * @export
    */
   setTextWatermark(text, options) {
@@ -110,7 +115,8 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
   }
 
   /**
-   * @param {!shaka.ui.Watermark.Options} config
+   * Draws a static watermark on the canvas.
+   * @param {!shaka.ui.Watermark.Options} config Watermark configuration options
    * @private
    */
   drawStaticWatermark_(config) {
@@ -156,7 +162,8 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
   }
 
   /**
-   * @param {!shaka.ui.Watermark.Options} config
+   * Starts a dynamic watermark animation on the canvas.
+   * @param {!shaka.ui.Watermark.Options} config Watermark configuration options
    * @private
    */
   startDynamicWatermark_(config) {
@@ -211,7 +218,7 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
   }
 
   /**
-   * Removes the watermark from the canvas
+   * Removes the current watermark from the video and stops any animations.
    * @export
    */
   removeWatermark() {
@@ -227,6 +234,7 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
   }
 
   /**
+   * Releases the watermark instance and cleans up the canvas element.
    * @override
    */
   release() {
