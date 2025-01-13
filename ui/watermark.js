@@ -94,9 +94,9 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
       color: 'rgba(255, 255, 255, 0.7)',
       size: 20,
       alpha: 0.7,
-      interval: 3000,
-      skip: 500,
-      displayDuration: 3,
+      interval: 2 * 1000,
+      skip: 0.5 * 1000,
+      displayDuration: 2 * 1000,
       transitionDuration: 0.5,
     };
 

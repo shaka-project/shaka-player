@@ -44,17 +44,17 @@
  *   Opacity of the watermark (0.0 to 1.0).
  *   Defaults to 0.7.
  * @property {number} interval
- *   Interval between position updates for dynamic watermarks (in milliseconds).
+ *   Interval between position updates for dynamic watermarks (in seconds).
  *   Only used when type is 'dynamic'.
- *   Defaults to 2000.
+ *   Defaults to 2.
  * @property {number} skip
- *   Skip duration for dynamic watermarks (in milliseconds).
+ *   Skip duration for dynamic watermarks (in seconds).
  *   Only used when type is 'dynamic'.
- *   Defaults to 500.
+ *   Defaults to 0.5.
  * @property {number} displayDuration
  *   Duration to display watermark at each position (in seconds).
  *   Only used when type is 'dynamic'.
- *   Defaults to 3.
+ *   Defaults to 2.
  * @property {number} transitionDuration
  *   Duration of fade transitions between positions (in seconds).
  *   Only used when type is 'dynamic'.

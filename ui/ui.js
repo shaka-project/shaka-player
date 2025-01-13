@@ -67,9 +67,7 @@ shaka.ui.Overlay = class {
 
     videoContainer['ui'] = this;
     video['ui'] = this;
-
     /** @private {shaka.ui.Watermark} */
-
     this.watermark_ = new shaka.ui.Watermark(
         this.videoContainer_,
         this.controls_,
