@@ -68,7 +68,7 @@ def get_lint_files():
       get('build'))
   main_sources.remove(os.path.join(base, 'build', 'wrapper.template.js'))
   tool_sources = [
-      os.path.join(base, 'eslint.config.mjs'),
+      os.path.join(base, 'eslint.config.js'),
       os.path.join(base, 'docs', 'jsdoc-plugin.js'),
       os.path.join(base, 'karma.conf.js'),
   ]
@@ -82,7 +82,7 @@ def check_js_lint(args):
   logging.info('Linting JavaScript...')
 
   base = shakaBuildHelpers.get_source_base()
-  config_path = os.path.join(base, 'eslint.config.mjs')
+  config_path = os.path.join(base, 'eslint.config.js')
 
   linter = compiler.Linter(get_lint_files(), config_path)
   return linter.lint(fix=args.fix, force=args.force)

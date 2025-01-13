@@ -42,7 +42,7 @@ const commonNoRestrictedSyntax = [
 
 export default [
   {
-    ignores: ['!**/eslint.config.mjs'],
+    ignores: ['!**/eslint.config.js'],
   },
   js.configs.recommended,
   google,
