@@ -21,7 +21,9 @@
  *   size: number,
  *   alpha: number,
  *   interval: number,
- *   skip: number
+ *   skip: number,
+ *   displayDuration: number,
+ *   transitionDuration: number
  * }}
  *
  * @property {string} type
@@ -42,6 +44,12 @@
  * @property {number} skip
  *   Skip duration for dynamic watermarks (in milliseconds).
  *   Only used when type is 'dynamic'. Defaults to 500.
+ * @property {number} displayDuration
+ *   Duration to display watermark at each position (in seconds).
+ *   Only used when type is 'dynamic'. Defaults to 3.
+ * @property {number} transitionDuration
+ *   Duration of fade transitions between positions (in seconds).
+ *   Only used when type is 'dynamic'. Defaults to 0.5.
  * @exportDoc
  */
 shaka.ui.Watermark.Options;

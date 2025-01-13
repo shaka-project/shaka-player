@@ -96,6 +96,8 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
       alpha: 0.7,
       interval: 3000,
       skip: 500,
+      displayDuration: 3,
+      transitionDuration: 0.5,
     };
 
     /** @type {!shaka.ui.Watermark.Options} */
@@ -163,54 +165,113 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
    * @private
    */
   startDynamicWatermark_(config) {
-    // Cancel any existing animation
-    if (this.animationId_) {
-      cancelAnimationFrame(this.animationId_);
-    }
+    const ctx = /** @type {!CanvasRenderingContext2D} */ (
+      this.canvas_.getContext('2d')
+    );
+    let currentPosition = {left: 0, top: 0};
+    let currentAlpha = 0;
+    let phase = 'fadeIn'; // States: fadeIn, display, fadeOut, transition
 
-    const ctx = this.getContext2D_();
-    if (!ctx) {
-      return;
-    }
+    let displayFrames = Math.round(config.displayDuration * 60); // 60fps
+    const transitionFrames = Math.round(config.transitionDuration * 60);
+    const fadeSpeed = 1 / (transitionFrames / 2); // Smoother fade speed
 
-    ctx.font = `${config.size}px Arial`;
-    const textWidth = ctx.measureText(config.text).width;
-    const textHeight = config.size;
+    /** @private {number} */
+    let positionIndex = 0;
 
-    // Initial position
-    let x = Math.random() * (this.canvas_.width - textWidth);
-    let y = Math.random() * (this.canvas_.height - textHeight) + textHeight;
-
-    // Random direction
-    let dx = (Math.random() > 0.5 ? 1 : -1) * 2;
-    let dy = (Math.random() > 0.5 ? 1 : -1) * 2;
-
-    const animate = () => {
-      ctx.clearRect(0, 0, this.canvas_.width, this.canvas_.height);
-      ctx.globalAlpha = config.alpha;
-      ctx.fillStyle = config.color;
+    const getNextPosition = () => {
       ctx.font = `${config.size}px Arial`;
+      const textMetrics = ctx.measureText(config.text);
+      const textWidth = textMetrics.width;
+      const textHeight = config.size;
+      const padding = 20;
 
-      ctx.fillText(config.text, x, y);
+      // Define fixed positions
+      const positions = [
+        // Top-left
+        {
+          left: padding,
+          top: textHeight + padding,
+        },
+        // Top-right
+        {
+          left: this.canvas_.width - textWidth - padding,
+          top: textHeight + padding,
+        },
+        // Bottom-left
+        {
+          left: padding,
+          top: this.canvas_.height - padding,
+        },
+        // Bottom-right
+        {
+          left: this.canvas_.width - textWidth - padding,
+          top: this.canvas_.height - padding,
+        },
+        // Center
+        {
+          left: (this.canvas_.width - textWidth) / 2,
+          top: (this.canvas_.height + textHeight) / 2,
+        },
+      ];
 
-      // Update position
-      x += dx;
-      y += dy;
-
-      // Bounce off walls
-      if (x <= 0 || x + textWidth >= this.canvas_.width) {
-        dx = -dx;
-        x = Math.max(0, Math.min(x, this.canvas_.width - textWidth));
-      }
-      if (y <= textHeight || y >= this.canvas_.height) {
-        dy = -dy;
-        y = Math.max(textHeight, Math.min(y, this.canvas_.height));
-      }
-
-      this.animationId_ = requestAnimationFrame(animate);
+      // Cycle through positions
+      const position = positions[positionIndex];
+      positionIndex = (positionIndex + 1) % positions.length;
+      return position;
     };
 
-    animate();
+    currentPosition = getNextPosition();
+
+    const updateWatermark = () => {
+      if (!this.animationId_) {
+        return;
+      }
+
+      const width = this.canvas_.width;
+      const height = this.canvas_.height;
+      ctx.clearRect(0, 0, width, height);
+
+      // State machine for watermark phases
+      switch (phase) {
+        case 'fadeIn':
+          currentAlpha = Math.min(config.alpha, currentAlpha + fadeSpeed);
+          if (currentAlpha >= config.alpha) {
+            phase = 'display';
+          }
+          break;
+        case 'display':
+          if (--displayFrames <= 0) {
+            phase = 'fadeOut';
+          }
+          break;
+        case 'fadeOut':
+          currentAlpha = Math.max(0, currentAlpha - fadeSpeed);
+          if (currentAlpha <= 0) {
+            phase = 'transition';
+            currentPosition = getNextPosition();
+            displayFrames = Math.round(config.displayDuration * 60);
+            phase = 'fadeIn';
+          }
+          break;
+      }
+
+      // Draw watermark if visible
+      if (currentAlpha > 0) {
+        ctx.globalAlpha = currentAlpha;
+        ctx.fillStyle = config.color;
+        ctx.font = `${config.size}px Arial`;
+        ctx.fillText(config.text, currentPosition.left, currentPosition.top);
+      }
+
+      // Request next frame if animation is still active
+      if (this.animationId_) {
+        this.animationId_ = requestAnimationFrame(updateWatermark);
+      }
+    };
+
+    // Start the animation loop
+    this.animationId_ = requestAnimationFrame(updateWatermark);
   }
 
   /**
