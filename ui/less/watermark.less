@@ -1,0 +1,46 @@
+/** @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* Styles for watermark components in the UI. */
+
+/* Container that holds all watermark elements */
+.shaka-watermark-container {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+
+  /* Ensure watermarks don't interfere with video interactions */
+  .unselectable();
+}
+
+/* Text-based watermark styling */
+.shaka-text-watermark {
+  position: absolute;
+  color: white;
+  font-size: 24px;
+
+  /* Add subtle text shadow for better visibility */
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 50%);
+  opacity: 0.5;
+
+  /* Ensure text is crisp */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Image-based watermark styling */
+.shaka-image-watermark {
+  position: absolute;
+  max-width: 150px;
+  max-height: 150px;
+  opacity: 0.5;
+
+  /* Ensure smooth scaling */
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
