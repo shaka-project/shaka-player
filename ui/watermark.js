@@ -82,7 +82,7 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
    * Sets a text watermark on the video with customizable options.
    * The watermark can be either static (fixed position) or dynamic (moving).
    * @param {string} text The text to display as watermark
-   * @param {shaka.ui.Watermark.Options} options  configuration options
+   * @param {?shaka.ui.Watermark.Options=} options  configuration options
    * @export
    */
   setTextWatermark(text, options) {

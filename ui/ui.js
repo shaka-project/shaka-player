@@ -177,7 +177,7 @@ shaka.ui.Overlay = class {
 
   /**
    * @param {string} text
-   * @param {!shaka.ui.Watermark.Options} options
+   * @param {?shaka.ui.Watermark.Options=} options
    * @export
    */
   setTextWatermark(text, options) {
@@ -621,4 +621,3 @@ if (document.readyState == 'complete') {
 } else {
   window.addEventListener('load', shaka.ui.Overlay.scanPageForShakaElements_);
 }
-
