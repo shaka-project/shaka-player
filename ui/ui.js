@@ -21,6 +21,7 @@ goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Platform');
 
+
 /**
  * @implements {shaka.util.IDestroyable}
  * @export
@@ -68,7 +69,8 @@ shaka.ui.Overlay = class {
     videoContainer['ui'] = this;
     video['ui'] = this;
 
-    // Create watermark
+    /** @private {shaka.ui.Watermark} */
+
     this.watermark_ = new shaka.ui.Watermark(
         this.videoContainer_,
         this.controls_,
@@ -178,7 +180,7 @@ shaka.ui.Overlay = class {
 
   /**
    * @param {string} text
-   * @param {shaka.ui.Watermark.Options=} options
+   * @param {shaka.extern.WatermarkOptions=} options
    * @export
    */
   setTextWatermark(text, options) {
