@@ -57,6 +57,20 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
   }
 
   /**
+   * Gets the 2D rendering context safely
+   * @return {?CanvasRenderingContext2D}
+   * @private
+   */
+  getContext2D_() {
+    const ctx = this.canvas_.getContext('2d');
+    if (!ctx) {
+      console.error('2D context is not available');
+      return null;
+    }
+    return /** @type {!CanvasRenderingContext2D} */ (ctx);
+  }
+
+  /**
    * Resize canvas to match video container
    * @private
    */
@@ -100,9 +114,10 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
    * @private
    */
   drawStaticWatermark_(config) {
-    const ctx = /** @type {!CanvasRenderingContext2D} */ (
-      this.canvas_.getContext('2d')
-    );
+    const ctx = this.getContext2D_();
+    if (!ctx) {
+      return;
+    }
 
     ctx.clearRect(0, 0, this.canvas_.width, this.canvas_.height);
 
@@ -150,9 +165,10 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
       cancelAnimationFrame(this.animationId_);
     }
 
-    const ctx = /** @type {!CanvasRenderingContext2D} */ (
-      this.canvas_.getContext('2d')
-    );
+    const ctx = this.getContext2D_();
+    if (!ctx) {
+      return;
+    }
 
     ctx.font = `${config.size}px Arial`;
     const textWidth = ctx.measureText(config.text).width;
@@ -203,9 +219,10 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
       cancelAnimationFrame(this.animationId_);
       this.animationId_ = null;
     }
-    const ctx = /** @type {!CanvasRenderingContext2D} */ (
-      this.canvas_.getContext('2d')
-    );
+    const ctx = this.getContext2D_();
+    if (!ctx) {
+      return;
+    }
     ctx.clearRect(0, 0, this.canvas_.width, this.canvas_.height);
   }
 
