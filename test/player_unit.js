@@ -1391,6 +1391,31 @@ describe('Player', () => {
     });
   });
 
+  describe('AdaptationSetCriteria.Factory', () => {
+    it('uses the provided Factory method', async () => {
+      const preferenceBasedCriteria = new shaka.media.PreferenceBasedCriteria();
+      /** @type {!jasmine.Spy} */
+      const spy1 =
+          jasmine.createSpy('AdaptationSetCriteria.Factory')
+              .and.returnValue(preferenceBasedCriteria);
+      /** @type {!jasmine.Spy} */
+      const spy2 =
+          jasmine.createSpy('AdaptationSetCriteria.Factory')
+              .and.returnValue(preferenceBasedCriteria);
+      player.configure({adaptationSetCriteriaFactory: spy1});
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(spy1).toHaveBeenCalled();
+      expect(spy2).not.toHaveBeenCalled();
+      spy1.calls.reset();
+
+      player.configure({adaptationSetCriteriaFactory: spy2});
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(spy1).not.toHaveBeenCalled();
+      expect(spy2).toHaveBeenCalled();
+    });
+  });
+
   describe('AbrManager', () => {
     beforeEach(() => {
       goog.asserts.assert(manifest, 'manifest must be non-null');

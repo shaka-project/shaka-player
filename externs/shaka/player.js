@@ -2323,6 +2323,7 @@ shaka.extern.TextDisplayerConfiguration;
  *   streaming: shaka.extern.StreamingConfiguration,
  *   mediaSource: shaka.extern.MediaSourceConfiguration,
  *   abrFactory: shaka.extern.AbrManager.Factory,
+ *   adaptationSetCriteriaFactory: shaka.media.AdaptationSetCriteria.Factory,
  *   abr: shaka.extern.AbrConfiguration,
  *   cmcd: shaka.extern.CmcdConfiguration,
  *   cmsd: shaka.extern.CmsdConfiguration,
@@ -2368,6 +2369,9 @@ shaka.extern.TextDisplayerConfiguration;
  *   Media source configuration and settings.
  * @property {shaka.extern.AbrManager.Factory} abrFactory
  *   A factory to construct an abr manager.
+ * @property {shaka.media.AdaptationSetCriteria.Factory}
+ *     adaptationSetCriteriaFactory
+ *   A factory to construct an adaptation set criteria.
  * @property {shaka.extern.AbrConfiguration} abr
  *   ABR configuration and settings.
  * @property {shaka.extern.CmcdConfiguration} cmcd
