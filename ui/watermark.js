@@ -55,8 +55,17 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
     /** @private {number|null} */
     this.animationId_ = null;
 
-    // Listen for video container resize
-    window.addEventListener('resize', () => this.resizeCanvas_());
+    /** @private {ResizeObserver|null} */
+    this.resizeObserver_ = null;
+
+    // Use ResizeObserver if available, fallback to window resize event
+    if (window.ResizeObserver) {
+      this.resizeObserver_ = new ResizeObserver(() => this.resizeCanvas_());
+      this.resizeObserver_.observe(this.parent);
+    } else {
+      // Fallback for older browsers
+      window.addEventListener('resize', () => this.resizeCanvas_());
+    }
   }
 
   /**
@@ -241,6 +250,16 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
     if (this.canvas_ && this.canvas_.parentNode) {
       this.canvas_.parentNode.removeChild(this.canvas_);
     }
+
+    // Clean up resize observer if it exists
+    if (this.resizeObserver_) {
+      this.resizeObserver_.disconnect();
+      this.resizeObserver_ = null;
+    } else {
+      // Remove window resize listener if we were using that
+      window.removeEventListener('resize', () => this.resizeCanvas_());
+    }
+
     super.release();
   }
 };

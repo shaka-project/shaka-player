@@ -198,13 +198,6 @@ shaka.ui.Overlay = class {
 
 
   /**
-   * @param {string} imageUrl
-   * @param {Object=} options
-   * @export
-   */
-
-
-  /**
    * @return {!shaka.extern.UIConfiguration}
    * @private
    */
