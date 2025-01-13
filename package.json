@@ -100,6 +100,7 @@
   },
   "license": "Apache-2.0",
   "scripts": {
+    "build": "python build/all.py",
     "prepack": "clean-package",
     "postpack": "clean-package restore",
     "prepublishOnly": "python build/checkversion.py && python build/all.py --force"
