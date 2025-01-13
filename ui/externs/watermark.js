@@ -27,29 +27,38 @@
  * }}
  *
  * @property {string} type
- *   The type of watermark ('static' or 'dynamic'). Defaults to 'static'.
+ *   The type of watermark ('static' or 'dynamic').
+ *   Defaults to 'static'.
  * @property {string} text
  *   The text content of the watermark. Required.
  * @property {string} position
- *   Position of the watermark. Defaults to 'top-left'.
+ *   Position of the watermark.
+ *   Defaults to 'top-left'.
  * @property {string} color
- *   The color of the watermark text. Defaults to 'white'.
+ *   The color of the watermark text.
+ *   Defaults to 'white'.
  * @property {number} size
- *   Font size of the watermark text in pixels. Defaults to 24.
+ *   Font size of the watermark text in pixels.
+ *   Defaults to 24.
  * @property {number} alpha
- *   Opacity of the watermark (0.0 to 1.0). Defaults to 0.7.
+ *   Opacity of the watermark (0.0 to 1.0).
+ *   Defaults to 0.7.
  * @property {number} interval
  *   Interval between position updates for dynamic watermarks (in milliseconds).
- *   Only used when type is 'dynamic'. Defaults to 2000.
+ *   Only used when type is 'dynamic'.
+ *   Defaults to 2000.
  * @property {number} skip
  *   Skip duration for dynamic watermarks (in milliseconds).
- *   Only used when type is 'dynamic'. Defaults to 500.
+ *   Only used when type is 'dynamic'.
+ *   Defaults to 500.
  * @property {number} displayDuration
  *   Duration to display watermark at each position (in seconds).
- *   Only used when type is 'dynamic'. Defaults to 3.
+ *   Only used when type is 'dynamic'.
+ *   Defaults to 3.
  * @property {number} transitionDuration
  *   Duration of fade transitions between positions (in seconds).
- *   Only used when type is 'dynamic'. Defaults to 0.5.
+ *   Only used when type is 'dynamic'.
+ *   Defaults to 0.5.
  * @exportDoc
  */
 shaka.ui.Watermark.Options;
