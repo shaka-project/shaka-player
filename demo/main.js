@@ -62,6 +62,9 @@ shakaDemo.Main = class {
     /** @private {boolean} */
     this.customContextMenu_ = false;
 
+    /** @private {string} */
+    this.watermarkText_ = '';
+
     /** @private {boolean} */
     this.nativeControlsEnabled_ = false;
 
@@ -397,6 +400,11 @@ shakaDemo.Main = class {
       uiConfig.overflowMenuButtons.push('visualizer');
     }
     ui.configure(uiConfig);
+    if (this.watermarkText_) {
+      ui.setTextWatermark(this.watermarkText_);
+    } else {
+      ui.removeWatermark();
+    }
   }
 
   /** @private */
@@ -830,6 +838,27 @@ shakaDemo.Main = class {
   }
 
   /**
+   * Set the text for watermark.
+   *
+   * @param {string} text
+   */
+  setWatermarkText(text) {
+    this.watermarkText_ = text;
+    // Configure the UI, to add or remove the controls.
+    this.configureUI_();
+    this.remakeHash();
+  }
+
+  /**
+   * Get the current text for watermark.
+   *
+   * @return {string}
+   */
+  getWatermarkText() {
+    return this.watermarkText_;
+  }
+
+  /**
    * Enable or disable the native controls.
    * Goes into effect during the next load.
    *
@@ -1018,6 +1047,10 @@ shakaDemo.Main = class {
     if ('customContextMenu' in params) {
       this.customContextMenu_ = true;
       this.configureUI_();
+    }
+
+    if ('watermarkText' in params) {
+      this.watermarkText_ = params['watermarkText'];
     }
 
     if ('visualizer' in params) {
@@ -1601,6 +1634,10 @@ shakaDemo.Main = class {
       params.push('customContextMenu');
     }
 
+    if (this.watermarkText_) {
+      params.push('watermarkText=' + this.watermarkText_);
+    }
+
     if (this.getIsVisualizerActive()) {
       params.push('visualizer');
     }
@@ -2038,3 +2075,4 @@ document.addEventListener('shaka-ui-load-failed', (event) => {
     shakaDemoMain.initFailed(reasonCode);
   });
 });
+

@@ -6,6 +6,7 @@
 +../../ui/ad_statistics_button.js
 +../../ui/audio_language_selection.js
 +../../ui/externs/ui.js
++../../ui/externs/watermark.js
 +../../ui/play_button.js
 +../../ui/big_play_button.js
 +../../ui/airplay_button.js
@@ -50,5 +51,6 @@
 +../../ui/vr_utils.js
 +../../ui/vr_webgl.js
 
++../../ui/watermark.js
 +../../ui/gl_matrix/matrix_4x4.js
 +../../ui/gl_matrix/matrix_quaternion.js

@@ -767,6 +767,11 @@ shakaDemo.Config = class {
       this.latestInput_.input().checked = true;
     }
 
+    this.addCustomTextInput_('Watermark text', (input) => {
+      shakaDemoMain.setWatermarkText(input.value);
+    });
+    this.latestInput_.input().value = shakaDemoMain.getWatermarkText();
+
     // shaka.log is not set if logging isn't enabled.
     // I.E. if using the release version of shaka.
     if (!shaka['log']) {
