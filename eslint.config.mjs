@@ -1,7 +1,7 @@
 import js from '@eslint/js';
 import google from 'eslint-config-google';
 import globals from 'globals';
-import local from './build/eslint-plugin-shaka-rules/index.js';
+import shakaRules from 'eslint-plugin-shaka-rules';
 
 // This is a matcher (usable in no-restricted-syntax) that matches either a
 // test or a before/after block.
@@ -46,21 +46,14 @@ export default [
   },
   js.configs.recommended,
   google,
+  shakaRules.configs.config,
   {
     languageOptions: {
       globals: globals.browser,
       ecmaVersion: 2017,
     },
 
-    plugins: {'shaka-rules': local},
-
     rules: {
-      // shaka rules
-      'shaka-rules/arg-comment-spacing': 'error',
-      'shaka-rules/array-no-instanceof': 'error',
-      'shaka-rules/buffersource-no-instanceof': 'error',
-      'shaka-rules/private': 'error',
-      // shaka rules end
       'no-console': 'off',
       'no-eq-null': 'off',
       'no-eval': 'off',
