@@ -106,6 +106,19 @@ shaka.test.FakeDemoMain = class {
     this.getAssetUnsupportedReason =
         jasmine.createSpy('getAssetUnsupportedReason');
     this.getAssetUnsupportedReason.and.returnValue(null);
+
+    /** @private {string} */
+    this.watermarkText_ = '';
+
+    /** @type {!jasmine.Spy} */
+    this.getWatermarkText = jasmine.createSpy('getWatermarkText');
+    this.getWatermarkText.and.callFake(() => this.watermarkText_);
+
+    /** @type {!jasmine.Spy} */
+    this.setWatermarkText = jasmine.createSpy('setWatermarkText');
+    this.setWatermarkText.and.callFake((text) => {
+      this.watermarkText_ = text;
+    });
   }
 
   /** Creates and assigns the mock demo main (and all of the real tab). */
