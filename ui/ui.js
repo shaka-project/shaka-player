@@ -621,3 +621,4 @@ if (document.readyState == 'complete') {
 } else {
   window.addEventListener('load', shaka.ui.Overlay.scanPageForShakaElements_);
 }
+
