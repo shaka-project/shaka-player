@@ -39,7 +39,6 @@ describe('Demo', () => {
           .add('preferredAudioCodecs')
           .add('preferredVideoCodecs')
           .add('preferredTextFormats');
-
       // We determine whether a config option has been made or not by looking at
       // which config values have been queried (via the fake main object's
       // |getCurrentConfigValue| method).
@@ -91,7 +90,6 @@ describe('Demo', () => {
           .add('drm.persistentSessionOnlinePlayback')
           .add('drm.persistentSessionsMetadata')
           .add('mediaSource.modifyCueCallback');
-
 
       /**
        * @param {!Object} section
