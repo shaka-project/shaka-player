@@ -145,56 +145,7 @@ describe('Demo', () => {
           .add('drm.persistentSessionOnlinePlayback')
           .add('drm.persistentSessionsMetadata')
           .add('mediaSource.modifyCueCallback')
-          // Add new exceptions for preference fields
-          .add('preferredAudioLanguage')
-          .add('preferredAudioLabel')
-          .add('preferredTextLanguage')
-          .add('preferredVariantRole')
-          .add('preferredTextRole')
-          .add('preferredAudioChannelCount')
-          .add('preferredVideoHdrLevel')
-          .add('preferredVideoLayout')
-          .add('preferredVideoLabel')
-          .add('preferForcedSubs')
-          .add('preferSpatialAudio')
-          // Add new exceptions for restrictions
-          .add('restrictions.minWidth')
-          .add('restrictions.maxWidth')
-          .add('restrictions.minHeight')
-          .add('restrictions.maxHeight')
-          .add('restrictions.minPixels')
-          .add('restrictions.maxPixels')
-          .add('restrictions.minFrameRate')
-          .add('restrictions.maxFrameRate')
-          .add('restrictions.minBandwidth')
-          .add('restrictions.maxBandwidth')
-          .add('restrictions.minChannelsCount')
-          .add('restrictions.maxChannelsCount')
-          // Add new exceptions for text displayer
-          .add('textDisplayer.captionsUpdatePeriod')
-          // Add new exceptions for CMCD
-          .add('cmcd.enabled')
-          .add('cmcd.sessionId')
-          .add('cmcd.contentId')
-          .add('cmcd.rtpSafetyFactor')
-          .add('cmcd.useHeaders')
-          .add('cmcd.version')
-          // Add new exceptions for CMSD
-          .add('cmsd.enabled')
-          .add('cmsd.applyMaximumSuggestedBitrate')
-          .add('cmsd.estimatedThroughputWeightRatio')
-          // Add new exceptions for LCEVC
-          .add('lcevc.enabled')
-          .add('lcevc.dynamicPerformanceScaling')
-          .add('lcevc.logLevel')
-          .add('lcevc.drawLogo')
-          // Add new exceptions for ads
-          .add('ads.customPlayheadTracker')
-          .add('ads.skipPlayDetection')
-          .add('ads.supportsMultipleMediaElements')
-          .add('ads.disableHLSInterstitial')
-          .add('ads.disableDASHInterstitial')
-          .add('watermarkText');
+        
 
       /**
        * @param {!Object} section
