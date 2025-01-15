@@ -117,6 +117,7 @@ goog.require('shaka.ui.VolumeBar');
 goog.require('shaka.ui.VRManager');
 goog.require('shaka.ui.VRUtils');
 goog.require('shaka.ui.VRWebgl');
+goog.require('shaka.ui.Watermark');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Error');
 goog.require('shaka.util.FairPlayUtils');
