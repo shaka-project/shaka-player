@@ -214,4 +214,20 @@ describe('DrmUtils', () => {
           'com.abc.playready')).toBe(false);
     });
   });
+
+  describe('isWisePlayKeySystem', () => {
+    it('should return true for WisePlay', () => {
+      expect(shaka.drm.DrmUtils.isWisePlayKeySystem(
+          'com.huawei.wiseplay')).toBe(true);
+    });
+
+    it('should return false for non-WisePlay key systems', () => {
+      expect(shaka.drm.DrmUtils.isWisePlayKeySystem(
+          'com.widevine.alpha')).toBe(false);
+      expect(shaka.drm.DrmUtils.isWisePlayKeySystem(
+          'com.microsoft.playready')).toBe(false);
+      expect(shaka.drm.DrmUtils.isWisePlayKeySystem(
+          'com.apple.fps')).toBe(false);
+    });
+  });
 });
