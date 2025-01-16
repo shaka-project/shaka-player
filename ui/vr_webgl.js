@@ -694,6 +694,6 @@ shaka.ui.VRWebgl = class {
 };
 
 /**
- * @constant {number}
+ * @const {number}
  */
 shaka.ui.VRWebgl.ANIMATION_DURATION_ = 0.5;

@@ -8,8 +8,9 @@
 
 import js from '@eslint/js';
 import google from 'eslint-config-google';
-import globals from 'globals';
+import jsdoc from 'eslint-plugin-jsdoc';
 import shakaRules from 'eslint-plugin-shaka-rules';
+import globals from 'globals';
 
 // This is a matcher (usable in no-restricted-syntax) that matches either a
 // test or a before/after block.
@@ -53,6 +54,7 @@ export default [
     ignores: ['!**/eslint.config.mjs'],
   },
   js.configs.recommended,
+  jsdoc.configs['flat/recommended-error'],
   google,
   shakaRules.configs.config,
   {
@@ -60,7 +62,22 @@ export default [
       globals: globals.browser,
       ecmaVersion: 2017,
     },
-
+    settings: {
+      jsdoc: {
+        mode: 'closure',
+        preferredTypes: {
+          object: 'Object',
+          symbol: 'Symbol',
+        },
+        tagNamePreference: {
+          augments: 'extends',
+          constant: 'const',
+          constructor: 'constructor',
+          file: 'fileoverview',
+          returns: 'return',
+        },
+      },
+    },
     rules: {
       // Things the compiler already takes care of, with more precision: {{{
       'no-console': 'off',
@@ -206,6 +223,23 @@ export default [
         ignoreReadBeforeAssign: true,
       }],
       // }}}
+
+      // jsdoc rules {{{
+      'jsdoc/check-tag-names': ['error', {
+        definedTags: ['exportDoc', 'exportInterface'],
+      }],
+      // Do not check license, authors, etc
+      'jsdoc/check-values': 'off',
+      // This should be checked by the compiler
+      'jsdoc/no-undefined-types': 'off',
+      // Some params/props/returns are self-explanatory
+      'jsdoc/require-param-description': 'off',
+      'jsdoc/require-property-description': 'off',
+      'jsdoc/require-returns-description': 'off',
+      'jsdoc/tag-lines': 'off',
+      // It throws syntax error on @suppress {missingReturn}
+      'jsdoc/valid-types': 'off',
+      // }}}
     },
   },
   {
@@ -250,17 +284,6 @@ export default [
   },
   {
     files: [
-      'demo/load.js',
-      'externs/**/*.js',
-      'test/test/externs/*.js',
-      'ui/externs/*.js',
-    ],
-    rules: {
-      'no-restricted-syntax': 'off',
-    },
-  },
-  {
-    files: [
       // Closure requires using var in externs.
       'ui/externs/*.js',
       'externs/**/*.js',
@@ -270,7 +293,9 @@ export default [
       'demo/load.js',
     ],
     rules: {
+      'no-restricted-syntax': 'off',
       'no-var': 'off',
+      'jsdoc/require-returns-check': 'off',
     },
   },
   {
@@ -301,6 +326,17 @@ export default [
     rules: {
       // Externs naturally redeclare things eslint knows about.
       'no-redeclare': 'off',
+    },
+  },
+  {
+    files: [
+      'demo/load.js',
+      'externs/**/*.js',
+      'test/**/*.js',
+    ],
+    rules: {
+      // JSDoc is not strictly required in externs, tests, and in load.js.
+      'jsdoc/require-jsdoc': 'off',
     },
   },
 ];

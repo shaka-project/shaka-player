@@ -1295,7 +1295,11 @@ describe('MediaSourceEngine', () => {
     initObject.set(ContentType.VIDEO, fakeVideoStream);
     initObject.set(ContentType.AUDIO, fakeAudioStream);
 
-    /** @suppress {visibility} */
+    /**
+     * @param {!Map<shaka.util.ManifestParserUtils.ContentType,
+     *              shaka.extern.Stream>} initObject
+     * @suppress {visibility}
+     */
     async function resetMSE(initObject) {
       await mediaSourceEngine.reset_(initObject);
     }

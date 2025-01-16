@@ -148,8 +148,8 @@ var ISOBoxerUtils;
  * @property {function(!string, !number, !string, !number)} _procFieldArray
  * @property {function(!string, !number, !function(!ISOEntry))} _procEntries
  * @property {function(!ISOBox, !string, !string, !number)} _procEntryField
- * @property {function(!ISOBox, !string, !number, !function(!ISOEntry))}
- *    _procSubEntries
+ * @property {function(!ISOBox, !string, !number, !function(!ISOEntry))
+ *           } _procSubEntries
  * @property {string} major_brand
  * @property {number} minor_version
  * @property {Array.<string>} compatible_brands

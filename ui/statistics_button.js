@@ -220,7 +220,11 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     this.stateSpan_.textContent = this.localization.resolve(labelText);
   }
 
-  /** @private */
+  /**
+   * @param {string} name
+   * @return {!HTMLElement}
+   * @private
+   */
   generateComponent_(name) {
     const section = shaka.util.Dom.createHTMLElement('div');
 

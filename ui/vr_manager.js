@@ -551,7 +551,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
 };
 
 /**
- * @constant {number}
+ * @const {number}
  * @private
  */
 shaka.ui.VRManager.TO_RADIANS_ = Math.PI / 180;

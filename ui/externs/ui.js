@@ -115,7 +115,7 @@ shaka.extern.UIVolumeBarColors;
  *   The ordered list of ad statistics present in the ad statistics container.
  * @property {!Array.<number>} playbackRates
  *   The ordered list of rates for playback selection.
-  * @property {!Array.<number>} fastForwardRates
+ * @property {!Array.<number>} fastForwardRates
  *   The ordered list of rates for fast forward selection.
  * @property {!Array.<number>} rewindRates
  *   The ordered list of rates for rewind selection.

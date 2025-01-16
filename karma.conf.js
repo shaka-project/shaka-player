@@ -12,7 +12,6 @@ const _ = require('lodash');
 const fs = require('fs');
 const glob = require('glob');
 const Jimp = require('jimp');
-const path = require('path');
 const rimraf = require('rimraf');
 const {ssim} = require('ssim.js');
 const util = require('karma/common/util');
@@ -940,7 +939,7 @@ WebDriverScreenshotMiddlewareFactory.$inject = ['launcher'];
  * This could have been done through a fork of Karma itself, but this plugin
  * was clearer in some ways than using a fork of a now-extinct project.
  *
- * @param {karma.Launcher} launcher
+ * @param {!Array<karma.Reporter>} reporters
  * @param {string} settingsJson
  * @return {karma.Middleware}
  */

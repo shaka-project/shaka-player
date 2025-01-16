@@ -363,16 +363,21 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
   function waitForUpdateMessageWrapper(prototype, name, methodName) {
     pendingWaitWrapperCalls += 1;
     const original = prototype[methodName];
-    // eslint-disable-next-line no-restricted-syntax
-    prototype[methodName] = /** @this {Object} @return {*} */ async function() {
-      pendingWaitWrapperCalls -= 1;
-      shaka.log.debug(
-          'Waiting for update message before calling ' +
-          name + '.' + methodName + '...');
-      const originalArguments = Array.from(arguments);
-      await waitForUpdateMessages();
-      return original.apply(this, originalArguments);
-    };
+    prototype[methodName] =
+      /**
+       * @this {Object}
+       * @return {*}
+       */
+      // eslint-disable-next-line no-restricted-syntax
+      async function() {
+        pendingWaitWrapperCalls -= 1;
+        shaka.log.debug(
+            'Waiting for update message before calling ' +
+            name + '.' + methodName + '...');
+        const originalArguments = Array.from(arguments);
+        await waitForUpdateMessages();
+        return original.apply(this, originalArguments);
+      };
     toRestore.push(() => {
       prototype[methodName] = original;
     });

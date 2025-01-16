@@ -313,7 +313,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
   /**
    * @override
-  */
+   */
   isShowing() {
     // It is showing by default, so it is hidden if shaka-hidden is in the list.
     return !this.container.classList.contains('shaka-hidden');
