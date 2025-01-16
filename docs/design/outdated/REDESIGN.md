@@ -206,7 +206,7 @@ separate browser support test in Shaka 1.
 
 ## Architecture Diagrams
 
-See [architecture.md](architecture.md).
+See [architecture.md](../current/architecture.md).
 
 
 ## Rough Sample APIs
