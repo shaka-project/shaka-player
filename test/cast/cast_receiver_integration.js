@@ -371,7 +371,6 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
           name + '.' + methodName + '...');
       const originalArguments = Array.from(arguments);
       await waitForUpdateMessages();
-      // eslint-disable-next-line no-restricted-syntax
       return original.apply(this, originalArguments);
     };
     toRestore.push(() => {
