@@ -29,6 +29,7 @@
     "es6-promise-polyfill": "^1.2.0",
     "eslint": "^9.18.0",
     "eslint-config-google": "github:google/eslint-config-google#3ae571a",
+    "eslint-plugin-jsdoc": "^50.6.1",
     "eslint-plugin-shaka-rules": "file:./build/eslint-plugin-shaka-rules",
     "esprima": "^4.0.1",
     "fontfaceonload": "^1.0.2",
