@@ -9,8 +9,6 @@ on:
     paths:
       - .github/workflows/demo-version-index.yaml
       - app-engine/demo-version-index/**
-  release:
-    types: [published]
   # NOTE: So long as releases are made without a personal access token (PAT),
   # they will not activate this workflow's release trigger.  For now, the
   # schedule trigger will compensate for that by updating the index nightly.
