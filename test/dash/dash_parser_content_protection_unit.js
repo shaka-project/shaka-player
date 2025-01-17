@@ -1029,7 +1029,7 @@ describe('DashParser ContentProtection', () => {
       expect(actual).toBe('www.example.com');
     });
 
-    it('pssh', () => {
+    it('pssh version 0', () => {
       const laurl = [
         '<WRMHEADER>',
         '  <DATA>',
@@ -1054,6 +1054,7 @@ describe('DashParser ContentProtection', () => {
       ].concat(laurlCodes));
       const encodedPrObject = shaka.util.Uint8ArrayUtils.toBase64(prBytes);
       const data = shaka.util.Uint8ArrayUtils.fromBase64(encodedPrObject);
+      // PlayReady SystemID
       const systemId = new Uint8Array([
         0x9a, 0x04, 0xf0, 0x79, 0x98, 0x40, 0x42, 0x86,
         0xab, 0x92, 0xe6, 0x5b, 0xe0, 0x88, 0x5f, 0x95,
