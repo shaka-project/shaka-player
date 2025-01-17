@@ -7,6 +7,9 @@ on:
     # Allows calling this from another workflow with "uses:".
     # The release workflow will trigger this as a final step after updating the
     # appspot deployment.
+    secrets:
+      APPENGINE_DEPLOY_KEY:
+        required: true
   push:
     branches:
       - main
