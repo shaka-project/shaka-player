@@ -428,10 +428,9 @@ const ShakaDemoAssetInfo = class {
   /**
    * @return {!Object}
    * @override
-   *
+   * @suppress {checkTypes}
    * Suppress checkTypes warnings, so that we can access properties of this
    * object as though it were a struct.
-   * @suppress {checkTypes}
    */
   toJSON() {
     // Construct a generic object with the values of this object, but with the

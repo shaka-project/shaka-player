@@ -5,11 +5,11 @@
  */
 
 /**
-* @fileoverview Externs for LcevcDec
-* compiler.
-*
-* @externs
-*/
+ * @fileoverview Externs for LcevcDec
+ * compiler.
+ *
+ * @externs
+ */
 
 // This empty namespace is declared to check if LcevcDec libraries are loaded.
 /** @const */
@@ -18,9 +18,9 @@ var libDPIModule = {};
 var LCEVCdec = {};
 
 /**
-* LCEVC Dec constructor
-* @constructor
-*/
+ * LCEVC Dec constructor
+ * @constructor
+ */
 LCEVCdec.LCEVCdec = class {
   /**
    * @param {HTMLVideoElement} media

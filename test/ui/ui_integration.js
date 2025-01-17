@@ -607,11 +607,11 @@ describe('UI', () => {
   }
 
   /**
-    * @param {!Array.<!HTMLElement>} buttons
-    * @param {!Array.<string>|!Array.<number>} choices
-    * @param {function(string):string|function(number):string} modifier
-    * @return {!Map.<string, !HTMLElement>|!Map.<number, !HTMLElement>}
-    */
+   * @param {!Array.<!HTMLElement>} buttons
+   * @param {!Array.<string>|!Array.<number>} choices
+   * @param {function(string):string|function(number):string} modifier
+   * @return {!Map.<string, !HTMLElement>|!Map.<number, !HTMLElement>}
+   */
   function mapChoicesToButtons(buttons, choices, modifier) {
     expect(buttons.length).toBe(choices.length);
 

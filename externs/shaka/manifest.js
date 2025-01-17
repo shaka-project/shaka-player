@@ -118,29 +118,29 @@ shaka.extern.Manifest;
 
 /**
  * @typedef {{
-*   id: string,
-*   audioStreams: !Array.<shaka.extern.Stream>,
-*   videoStreams: !Array.<shaka.extern.Stream>,
-*   textStreams: !Array.<shaka.extern.Stream>,
-*   imageStreams: !Array.<shaka.extern.Stream>
-* }}
-*
-* @description Contains the streams from one DASH period.
-* For use in {@link shaka.util.PeriodCombiner}.
-*
-* @property {string} id
-*   The Period ID.
-* @property {!Array.<shaka.extern.Stream>} audioStreams
-*   The audio streams from one Period.
-* @property {!Array.<shaka.extern.Stream>} videoStreams
-*   The video streams from one Period.
-* @property {!Array.<shaka.extern.Stream>} textStreams
-*   The text streams from one Period.
-* @property {!Array.<shaka.extern.Stream>} imageStreams
-*   The image streams from one Period.
-*
-* @exportDoc
-*/
+ *   id: string,
+ *   audioStreams: !Array.<shaka.extern.Stream>,
+ *   videoStreams: !Array.<shaka.extern.Stream>,
+ *   textStreams: !Array.<shaka.extern.Stream>,
+ *   imageStreams: !Array.<shaka.extern.Stream>
+ * }}
+ *
+ * @description Contains the streams from one DASH period.
+ * For use in {@link shaka.util.PeriodCombiner}.
+ *
+ * @property {string} id
+ *   The Period ID.
+ * @property {!Array.<shaka.extern.Stream>} audioStreams
+ *   The audio streams from one Period.
+ * @property {!Array.<shaka.extern.Stream>} videoStreams
+ *   The video streams from one Period.
+ * @property {!Array.<shaka.extern.Stream>} textStreams
+ *   The text streams from one Period.
+ * @property {!Array.<shaka.extern.Stream>} imageStreams
+ *   The image streams from one Period.
+ *
+ * @exportDoc
+ */
 shaka.extern.Period;
 
 /**
@@ -489,8 +489,8 @@ shaka.extern.SegmentIndex = class {
  * @property {!Array.<string>} roles
  *   The roles of the stream as they appear on the manifest,
  *   e.g. 'main', 'caption', or 'commentary'.
- * @property {?shaka.media.ManifestParser.AccessibilityPurpose}
- *     accessibilityPurpose
+ * @property {?shaka.media.ManifestParser.AccessibilityPurpose
+ *           } accessibilityPurpose
  *   The DASH accessibility descriptor, if one was provided for this stream.
  * @property {boolean} forced
  *   <i>Defaults to false.</i> <br>

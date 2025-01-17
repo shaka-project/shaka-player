@@ -13,6 +13,7 @@ shaka.test.CeaUtils = class {
    * @param {number} startTime
    * @param {number} endTime
    * @param {string} payload
+   * @return {!shaka.text.Cue}
    */
   static createDefaultCue(startTime, endTime, payload) {
     const cue = new shaka.text.Cue(startTime, endTime, payload);

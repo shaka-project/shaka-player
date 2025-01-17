@@ -110,6 +110,7 @@ shaka.ui.AirPlayButton = class extends shaka.ui.Element {
   }
 
   /**
+   * @param {!AirPlayEvent} e
    * @private
    */
   onAirPlayAvailabilityChange_(e) {

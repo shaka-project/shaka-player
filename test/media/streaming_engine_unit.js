@@ -108,6 +108,7 @@ describe('StreamingEngine', () => {
    * @param {number=} mediaOffset The offset from 0 for the segment start times
    * @param {shaka.extern.aesKey=} aesKey The AES-128 key to put in
    *   the manifest, if one should exist
+   * @param {boolean=} secondaryAudioVariant
    */
   function setupVod(trickMode, mediaOffset, aesKey,
       secondaryAudioVariant = false) {
@@ -370,6 +371,7 @@ describe('StreamingEngine', () => {
    * @param {number} secondPeriodStartTime
    * @param {number} presentationDuration
    * @param {shaka.extern.aesKey=} aesKey
+   * @param {boolean=} secondaryAudioVariant
    */
   function setupManifest(
       firstPeriodStartTime, secondPeriodStartTime, presentationDuration,
@@ -424,7 +426,7 @@ describe('StreamingEngine', () => {
 
   /**
    * Creates the StreamingEngine.
-   **
+   *
    * @param {shaka.extern.StreamingConfiguration=} config Optional
    *   configuration object which overrides the default one.
    */
@@ -3775,6 +3777,7 @@ describe('StreamingEngine', () => {
 
   /**
    * Expect buffers have been added to MSE.
+   * @param {boolean=} secondaryAudioVariant
    */
   function expectHasBuffer(secondaryAudioVariant = false) {
     expect(mediaSourceEngine.initSegments).toEqual({

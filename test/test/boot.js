@@ -47,7 +47,11 @@ function failTestsOnNamespacedElementOrAttributeNames() {
   const patchElementNamespaceFunction = (name) => {
     // eslint-disable-next-line no-restricted-syntax
     const real = Element.prototype[name];
-    /** @this {Element} */
+    /**
+     * @this {Element}
+     * @param {string} arg
+     * @return {*}
+     */
     // eslint-disable-next-line no-restricted-syntax
     Element.prototype[name] = function(arg) {
       // Ignore xml: namespaces since it's builtin.

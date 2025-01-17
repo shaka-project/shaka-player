@@ -149,7 +149,7 @@ shaka.test.Waiter = class {
    *
    * @param {!HTMLMediaElement} mediaElement
    * @return {!Promise}
-  */
+   */
   waitUntilVodTransition(mediaElement) {
     // The name of what we're waiting for
     const goalName = 'manifest to be static';

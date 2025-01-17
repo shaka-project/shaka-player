@@ -14,8 +14,8 @@
  */
 shaka.test.FakeMediaSourceEngine = class {
   /**
-   * @param {!Object.<string, shaka.test.FakeMediaSourceEngine.SegmentData>}
-   *   segmentData
+   * @param {!Object.<string,
+   *                  shaka.test.FakeMediaSourceEngine.SegmentData>} segmentData
    * @param {number=} drift Optional drift. Defaults to 0.
    */
   constructor(segmentData, drift) {
