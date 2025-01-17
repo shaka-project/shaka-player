@@ -1080,6 +1080,58 @@ describe('DashParser ContentProtection', () => {
       expect(actual).toBe('www.example.com');
     });
 
+    it('pssh version 1', () => {
+      const laurl = [
+        '<WRMHEADER>',
+        '  <DATA>',
+        '    <LA_URL>www.example.com</LA_URL>',
+        '  </DATA>',
+        '</WRMHEADER>',
+      ].join('\n');
+      const laurlCodes = laurl.split('').map((c) => {
+        return c.charCodeAt();
+      });
+      const prBytes = new Uint16Array([
+        // pr object size (in num bytes).
+        // + 10 for PRO size, count, and type
+        laurl.length * 2 + 10, 0,
+        // record count
+        1,
+        // type
+        shaka.drm.PlayReady.PLAYREADY_RECORD_TYPES.RIGHTS_MANAGEMENT,
+        // record size (in num bytes)
+        laurl.length * 2,
+        // value
+      ].concat(laurlCodes));
+      const encodedPrObject = shaka.util.Uint8ArrayUtils.toBase64(prBytes);
+      const data = shaka.util.Uint8ArrayUtils.fromBase64(encodedPrObject);
+      // PlayReady SystemID
+      const systemId = new Uint8Array([
+        0x9a, 0x04, 0xf0, 0x79, 0x98, 0x40, 0x42, 0x86,
+        0xab, 0x92, 0xe6, 0x5b, 0xe0, 0x88, 0x5f, 0x95,
+      ]);
+      const keyIds = new Set();
+      keyIds.add('575e49ee6270de247bb5f814a98a6b2b');
+      const psshVersion = 1;
+      const pssh =
+          shaka.util.Pssh.createPssh(data, systemId, keyIds, psshVersion);
+      const psshBase64 = shaka.util.Uint8ArrayUtils.toBase64(pssh);
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        encryptionScheme: null,
+        node:
+        strToXml([
+          '<test xmlns:cenc="urn:mpeg:cenc:2013">',
+          '  <cenc:pssh>' + psshBase64 + '</cenc:pssh>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getPlayReadyLicenseUrl(input);
+      expect(actual).toBe('www.example.com');
+    });
+
     it('valid dashif:Laurl node', () => {
       const input = {
         init: null,
