@@ -191,18 +191,18 @@ shaka.extern.SchemePlugin;
 
 /**
  * @typedef {{
-*   minBytesForProgressEvents: (number|undefined)
-* }}
-*
-* @description
-*   Defines configuration object to use by SchemePlugins.
-*
-* @property {(number|undefined)} minBytesForProgressEvents
-*   Defines minimum number of bytes that should be use to emit progress event,
-*   if possible.
-*
-* @exportDoc
-*/
+ *   minBytesForProgressEvents: (number|undefined)
+ * }}
+ *
+ * @description
+ *   Defines configuration object to use by SchemePlugins.
+ *
+ * @property {(number|undefined)} minBytesForProgressEvents
+ *   Defines minimum number of bytes that should be use to emit progress event,
+ *   if possible.
+ *
+ * @exportDoc
+ */
 shaka.extern.SchemePluginConfig;
 
 

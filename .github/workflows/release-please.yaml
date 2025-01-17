@@ -202,3 +202,10 @@ jobs:
           TAG=${{ needs.release.outputs.tag_name }}
           BRANCH=$(echo "$TAG" | sed -e 's/\.0$/.x/')
           git push origin refs/tags/"$TAG"^{commit}:refs/heads/"$BRANCH"
+
+  update-demo-index:
+    name: Deploy Demo Version Index
+    needs: [appspot]
+    uses: ./.github/workflows/demo-version-index.yaml
+    secrets:
+      APPENGINE_DEPLOY_KEY: '${{ secrets.APPENGINE_DEPLOY_KEY }}'

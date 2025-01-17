@@ -293,7 +293,6 @@ describe('Transmuxer Player', () => {
     });
 
     it('H.264+AAC in TS with rollover', async () => {
-      // eslint-disable-next-line max-len
       await player.load('/base/test/test/assets/hls-ts-rollover/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);

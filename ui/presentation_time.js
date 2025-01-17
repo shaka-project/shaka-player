@@ -64,7 +64,10 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
         });
   }
 
-  /** @private */
+  /**
+   * @param {string} value
+   * @private
+   */
   setValue_(value) {
     // To avoid constant updates to the DOM, which makes debugging more
     // difficult, only set the value if it has changed.  If we don't do this

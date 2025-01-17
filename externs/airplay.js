@@ -26,5 +26,5 @@ HTMLMediaElement.prototype.webkitShowPlaybackTargetPicker = function() {};
 
 var AirPlayEvent = class extends Event {};
 
-/** @type {String} */
+/** @type {string} */
 AirPlayEvent.prototype.availability;

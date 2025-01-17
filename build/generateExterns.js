@@ -315,7 +315,7 @@ function getFunctionParameters(node) {
  * Take the original block comment and prep it for the externs by removing
  * export annotations and blank lines.
  *
- * @param {string}
+ * @param {string} comment
  * @return {string}
  */
 function removeExportAnnotationsFromComment(comment) {
@@ -498,7 +498,7 @@ function createExternMethod(node) {
 /**
  * Find the constructor of an ES6 class, if it exists.
  *
- * @param {ASTNode} className
+ * @param {ASTNode} classNode
  * @return {ASTNode}
  */
 function getClassConstructor(classNode) {

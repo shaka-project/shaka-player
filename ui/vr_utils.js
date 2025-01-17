@@ -162,7 +162,7 @@ shaka.ui.VRUtils = class {
 /**
  * Sphere vertex shader.
  *
- * @constant {string}
+ * @const {string}
  */
 shaka.ui.VRUtils.VERTEX_SPHERE_SHADER =
 `attribute vec4 a_vPosition;
@@ -183,7 +183,7 @@ void main()
 /**
  * Sphere fragment shader.
  *
- * @constant {string}
+ * @const {string}
  */
 shaka.ui.VRUtils.FRAGMENT_SPHERE_SHADER =
 `precision highp float;
@@ -204,7 +204,7 @@ highp vec4 texelColor =
 /**
  * Cube vertex shader.
  *
- * @constant {string}
+ * @const {string}
  */
 shaka.ui.VRUtils.VERTEX_CUBE_SHADER =
 `attribute vec4 aVertexPosition;
@@ -221,7 +221,7 @@ void main(void) {
 /**
  * Cube fragment shader.
  *
- * @constant {string}
+ * @const {string}
  */
 shaka.ui.VRUtils.FRAGMENT_CUBE_SHADER =
 `varying highp vec2 vTextureCoord;
