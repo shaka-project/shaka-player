@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.12.8](https://github.com/shaka-project/shaka-player/compare/v4.12.7...v4.12.8) (2025-01-17)
+
+
+### Bug Fixes
+
+* Detect mov extension as video/quicktime ([#7884](https://github.com/shaka-project/shaka-player/issues/7884)) ([b3df5ad](https://github.com/shaka-project/shaka-player/commit/b3df5ad1e96dd2a723fcbabf10d6686bf88ce2e2))
+* Fix isEnded for live streams ([#7866](https://github.com/shaka-project/shaka-player/issues/7866)) ([0cefc93](https://github.com/shaka-project/shaka-player/commit/0cefc93e7d33d3f2b00f85b811fe4bf781eeb3e7))
+* Fix isEnded when is not fullyLoaded ([#7883](https://github.com/shaka-project/shaka-player/issues/7883)) ([afe544a](https://github.com/shaka-project/shaka-player/commit/afe544a98ffe06be7f659f81683073db71d0a7bd))
+* **HLS:** Assign EXT-X-TILES to segment tags ([#7864](https://github.com/shaka-project/shaka-player/issues/7864)) ([8a35d7c](https://github.com/shaka-project/shaka-player/commit/8a35d7cd42b33be8a7d6daf177eeb172c6d0c46a))
+* **Offline:** Fix download HLG tracks when using AUTO hdr level ([#7865](https://github.com/shaka-project/shaka-player/issues/7865)) ([9a1594a](https://github.com/shaka-project/shaka-player/commit/9a1594a1de220a32af54fe93320041b84ee2e230))
+* **tXml:** Fix findChildrenNS when the namespace is in the element ([#7896](https://github.com/shaka-project/shaka-player/issues/7896)) ([2ae2408](https://github.com/shaka-project/shaka-player/commit/2ae2408bf8d796dc9ea1de32c563602f09ec4830))
+* **UI:** Fix handle of seek on MediaSession ([#7879](https://github.com/shaka-project/shaka-player/issues/7879)) ([b51bd79](https://github.com/shaka-project/shaka-player/commit/b51bd797c03eb69f9c160c44c0587512fc08bdaf))
+* Use getSegmentAvailabilityStart instead of getSeekRangeStart to evict segments ([#7867](https://github.com/shaka-project/shaka-player/issues/7867)) ([aae2b37](https://github.com/shaka-project/shaka-player/commit/aae2b37d5d770d3975b83e4d81971bd68d3675db))
+* Use infiniteLiveStreamDuration equal to true in Safari 17 or above ([#7901](https://github.com/shaka-project/shaka-player/issues/7901)) ([7686637](https://github.com/shaka-project/shaka-player/commit/7686637f8f95c8c4a3a0558c912b476aab21ce67))
+
 ## [4.12.7](https://github.com/shaka-project/shaka-player/compare/v4.12.6...v4.12.7) (2025-01-10)
 
 
