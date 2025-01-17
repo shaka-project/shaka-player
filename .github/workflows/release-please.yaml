@@ -207,3 +207,5 @@ jobs:
     name: Deploy Demo Version Index
     needs: [appspot]
     uses: ./.github/workflows/demo-version-index.yaml
+    secrets:
+      APPENGINE_DEPLOY_KEY: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
