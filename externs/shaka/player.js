@@ -1829,7 +1829,8 @@ shaka.extern.LiveSyncConfiguration;
  *   If <code>true</code>, the media source live duration
  *   set as a<code>Infinity</code>
  *   <br>
- *   Defaults to <code>false</code>.
+ *   Defaults to <code>false</code> except on Safari 17 or above whose default
+ *   value is <code>true</code>.
  * @property {number} preloadNextUrlWindow
  *   The window of time at the end of the presentation to begin preloading the
  *   next URL, such as one specified by a urn:mpeg:dash:chaining:2016 element
