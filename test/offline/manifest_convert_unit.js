@@ -10,12 +10,12 @@ describe('ManifestConverter', () => {
     const videoType = 'video';
 
     it('will create variants with variant ids', () => {
-      /** @type {!Array.<shaka.extern.StreamDB>} */
+      /** @type {!Array<shaka.extern.StreamDB>} */
       const audios = [
         createStreamDB(0, audioType, [0]),
         createStreamDB(1, audioType, [1]),
       ];
-      /** @type {!Array.<shaka.extern.StreamDB>} */
+      /** @type {!Array<shaka.extern.StreamDB>} */
       const videos = [
         createStreamDB(2, videoType, [0]),
         createStreamDB(3, videoType, [1]),
@@ -23,7 +23,7 @@ describe('ManifestConverter', () => {
 
       const timeline = createTimeline();
 
-      /** @type {!Map.<number, shaka.extern.Variant>} */
+      /** @type {!Map<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
           audios, videos, timeline);
       expect(variants.size).toBe(2);
@@ -38,26 +38,26 @@ describe('ManifestConverter', () => {
     });
 
     it('will create variants when there is only audio', () => {
-      /** @type {!Array.<shaka.extern.StreamDB>} */
+      /** @type {!Array<shaka.extern.StreamDB>} */
       const audios = [
         createStreamDB(0, audioType, [0]),
         createStreamDB(1, audioType, [1]),
       ];
-      /** @type {!Array.<shaka.extern.StreamDB>} */
+      /** @type {!Array<shaka.extern.StreamDB>} */
       const videos = [];
 
       const timeline = createTimeline();
 
-      /** @type {!Map.<number, shaka.extern.Variant>} */
+      /** @type {!Map<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
           audios, videos, timeline);
       expect(variants.size).toBe(2);
     });
 
     it('will create variants when there is only video', () => {
-      /** @type {!Array.<shaka.extern.StreamDB>} */
+      /** @type {!Array<shaka.extern.StreamDB>} */
       const audios = [];
-      /** @type {!Array.<shaka.extern.StreamDB>} */
+      /** @type {!Array<shaka.extern.StreamDB>} */
       const videos = [
         createStreamDB(2, videoType, [0]),
         createStreamDB(3, videoType, [1]),
@@ -65,7 +65,7 @@ describe('ManifestConverter', () => {
 
       const timeline = createTimeline();
 
-      /** @type {!Map.<number, shaka.extern.Variant>} */
+      /** @type {!Map<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
           audios, videos, timeline);
       expect(variants.size).toBe(2);
@@ -291,7 +291,7 @@ describe('ManifestConverter', () => {
   /**
    * @param {number} id
    * @param {string} type
-   * @param {!Array.<number>} variantIds
+   * @param {!Array<number>} variantIds
    * @return {shaka.extern.StreamDB}
    */
   function createStreamDB(id, type, variantIds) {
@@ -356,7 +356,7 @@ describe('ManifestConverter', () => {
 
   /**
    * @param {number} id
-   * @param {!Array.<number>} variantIds
+   * @param {!Array<number>} variantIds
    * @return {shaka.extern.StreamDB}
    */
   function createVideoStreamDB(id, variantIds) {
@@ -418,7 +418,7 @@ describe('ManifestConverter', () => {
 
   /**
    * @param {number} id
-   * @param {!Array.<number>} variantIds
+   * @param {!Array<number>} variantIds
    * @return {shaka.extern.StreamDB}
    */
   function createAudioStreamDB(id, variantIds) {
@@ -631,7 +631,7 @@ describe('ManifestConverter', () => {
   }
 
   /**
-   * @param {!Array.<shaka.extern.Variant>} variants
+   * @param {!Array<shaka.extern.Variant>} variants
    * @param {?number} audioId
    * @param {?number} videoId
    * @return {?shaka.extern.Variant}

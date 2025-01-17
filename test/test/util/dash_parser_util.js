@@ -21,7 +21,7 @@ shaka.test.Dash = class {
    * Tests the segment index produced by the DASH manifest parser.
    *
    * @param {string} manifestText
-   * @param {!Array.<shaka.media.SegmentReference>} references
+   * @param {!Array<shaka.media.SegmentReference>} references
    * @return {!Promise}
    */
   static async testSegmentIndex(manifestText, references) {
@@ -110,7 +110,7 @@ shaka.test.Dash = class {
   /**
    * Makes a simple manifest with the given representation contents.
    *
-   * @param {!Array.<string>} lines
+   * @param {!Array<string>} lines
    * @param {number=} duration
    * @param {number=} startTime
    * @return {string}
@@ -144,7 +144,7 @@ shaka.test.Dash = class {
 
   /**
    * @param {shaka.extern.Manifest} manifest
-   * @return {!Promise.<shaka.media.SegmentReference>}
+   * @return {!Promise<shaka.media.SegmentReference>}
    */
   static async getFirstVideoSegmentReference(manifest) {
     const variant = manifest.variants[0];
@@ -188,7 +188,7 @@ shaka.test.Dash = class {
    * @param {string} type The type of manifest being tested; either
    *   'SegmentTemplate' or 'SegmentList'.
    * @param {string} extraAttrs
-   * @param {!Array.<string>} extraChildren
+   * @param {!Array<string>} extraChildren
    */
   static makeTimelineTests(type, extraAttrs, extraChildren) {
     describe('SegmentTimeline', () => {
@@ -197,7 +197,7 @@ shaka.test.Dash = class {
       const baseUri = 'http://example.com/';
 
       /**
-       * @param {!Array.<string>} timeline
+       * @param {!Array<string>} timeline
        * @param {string} testAttrs
        * @param {number=} dur
        * @param {number=} startTime

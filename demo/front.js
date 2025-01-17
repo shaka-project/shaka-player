@@ -29,7 +29,7 @@ shakaDemo.Front = class {
 
   /** @param {!Element} container */
   constructor(container) {
-    /** @private {!Array.<!shakaDemo.AssetCard>} */
+    /** @private {!Array<!shakaDemo.AssetCard>} */
     this.assetCards_ = [];
 
     /** @private {!Element} */

@@ -72,7 +72,7 @@ shaka.extern.ICaptionDecoder = class {
   /**
    * Decodes all currently extracted packets and then clears them.
    * This should be called once for a set of extracts (see comment on extract).
-   * @return {!Array.<!shaka.extern.ICaptionDecoder.ClosedCaption>}
+   * @return {!Array<!shaka.extern.ICaptionDecoder.ClosedCaption>}
    * @exportDoc
    */
   decode() {}
@@ -87,7 +87,7 @@ shaka.extern.ICaptionDecoder = class {
 
   /**
    * Returns the streams that the CEA decoder found.
-   * @return {!Array.<string>}
+   * @return {!Array<string>}
    * @exportDoc
    */
   getStreams() {}

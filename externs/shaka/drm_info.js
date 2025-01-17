@@ -38,7 +38,7 @@ shaka.extern.InitDataOverride;
  * @typedef {{
  *   keySystem: string,
  *   encryptionScheme: string,
- *   keySystemUris: (Set.<string>|undefined),
+ *   keySystemUris: (Set<string>|undefined),
  *   licenseServerUri: string,
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
@@ -47,8 +47,8 @@ shaka.extern.InitDataOverride;
  *   serverCertificate: Uint8Array,
  *   serverCertificateUri: string,
  *   sessionType: string,
- *   initData: Array.<!shaka.extern.InitDataOverride>,
- *   keyIds: Set.<string>
+ *   initData: Array<!shaka.extern.InitDataOverride>,
+ *   keyIds: Set<string>
  * }}
  *
  * @description
@@ -60,7 +60,7 @@ shaka.extern.InitDataOverride;
  * @property {string} encryptionScheme
  *   <i>Required.</i> <br>
  *   The encryption scheme, e.g., "cenc", "cbcs", "cbcs-1-9".
- * @property {(Set.<string>|undefined)} keySystemUris
+ * @property {(Set<string>|undefined)} keySystemUris
  *   <i>Optional.</i> <br>
  *   The key system uri, e.g., "skd://" for fairplay.
  * @property {string} licenseServerUri
@@ -95,11 +95,11 @@ shaka.extern.InitDataOverride;
  *   <i>Defaults to '', e.g., server certificate will be requested from the
  *   given URI if serverCertificate is not provided. Can be filled in by
  *   advanced DRM config.</i>
- * @property {Array.<!shaka.extern.InitDataOverride>} initData
+ * @property {Array<!shaka.extern.InitDataOverride>} initData
  *   <i>Defaults to [], e.g., no override.</i> <br>
  *   A list of initialization data which override any initialization data found
  *   in the content.  See also shaka.extern.InitDataOverride.
- * @property {Set.<string>} keyIds
+ * @property {Set<string>} keyIds
  *   <i>Defaults to the empty Set</i> <br>
  *   If not empty, contains the default key IDs for this key system, as
  *   lowercase hex strings.

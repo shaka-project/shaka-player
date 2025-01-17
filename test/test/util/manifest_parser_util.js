@@ -9,7 +9,7 @@ shaka.test.ManifestParser = class {
    * Verifies the segment references of a stream.
    *
    * @param {?shaka.extern.Stream} stream
-   * @param {!Array.<shaka.media.SegmentReference>} references
+   * @param {!Array<shaka.media.SegmentReference>} references
    */
   static verifySegmentIndex(stream, references) {
     expect(stream).toBeTruthy();
@@ -45,14 +45,14 @@ shaka.test.ManifestParser = class {
   /**
    * Creates a segment reference using a relative URI.
    *
-   * @param {string|Array.<string>} uri A relative URI to http://example.com
+   * @param {string | Array<string>} uri A relative URI to http://example.com
    * @param {number} start
    * @param {number} end
    * @param {string=} baseUri
    * @param {number=} startByte
    * @param {?number=} endByte
    * @param {number=} timestampOffset
-   * @param {!Array.<!shaka.media.SegmentReference>=} partialReferences
+   * @param {!Array<!shaka.media.SegmentReference>=} partialReferences
    * @param {?string=} tilesLayout
    * @param {?number=} syncTime
    * @return {!shaka.media.SegmentReference}

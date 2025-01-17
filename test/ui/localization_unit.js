@@ -497,7 +497,7 @@ describe('Localization', () => {
    *
    * @param {!shaka.ui.Localization} localization
    * @param {string} eventName
-   * @param {!Array.<!shaka.util.FakeEvent>} out
+   * @param {!Array<!shaka.util.FakeEvent>} out
    */
   function collectEvents(localization, eventName, out) {
     const onEvent = (event) => {

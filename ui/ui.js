@@ -545,8 +545,8 @@ shaka.ui.Overlay = class {
 
   /**
    * @param {!Element} container
-   * @param {!NodeList.<!Element>} canvases
-   * @param {!NodeList.<!Element>} vrCanvases
+   * @param {!NodeList<!Element>} canvases
+   * @param {!NodeList<!Element>} vrCanvases
    * @return {{lcevcCanvas: !Element, vrCanvas: !Element}}
    * @private
    */

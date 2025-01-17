@@ -34,7 +34,7 @@ VideoTrack.prototype.sourceBuffer;
 
 
 /**
- * @extends {IArrayLike.<VideoTrack>}
+ * @extends {IArrayLike<VideoTrack>}
  * @extends {EventTarget}
  * @interface
  */

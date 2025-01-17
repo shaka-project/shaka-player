@@ -359,7 +359,7 @@ describe('AbortableOperation', () => {
 
   describe('chain', () => {
     it('passes the value to the next operation on success', async () => {
-      /** @type {!Array.<number>} */
+      /** @type {!Array<number>} */
       const values = [];
 
       const op = shaka.util.AbortableOperation.completed(100).chain((value) => {

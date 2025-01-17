@@ -17,7 +17,7 @@ describe('SimpleAbrManager', () => {
   let abrManager;
   /** @type {shaka.extern.Manifest} */
   let manifest;
-  /** @type {!Array.<shaka.extern.Variant>} */
+  /** @type {!Array<shaka.extern.Variant>} */
   let variants;
 
   beforeEach(() => {

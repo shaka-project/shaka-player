@@ -43,7 +43,7 @@ let shakaNamespaceType;
 shaka.test.Loader = class {
   /**
    * @param {boolean} loadUncompiled
-   * @return {!Promise.<shakaNamespaceType>}
+   * @return {!Promise<shakaNamespaceType>}
    */
   static async loadShaka(loadUncompiled) {
     /** @type {!shaka.util.PublicPromise} */

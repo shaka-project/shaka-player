@@ -40,7 +40,7 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
     this.parent.appendChild(this.button_);
     this.updateAriaLabel_();
 
-    /** @private {!Array.<number>} */
+    /** @private {!Array<number>} */
     this.rewindRates_ = this.controls.getConfig().rewindRates;
 
     this.eventManager.listen(

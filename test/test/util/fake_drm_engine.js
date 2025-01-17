@@ -11,7 +11,7 @@
  */
 shaka.test.FakeDrmEngine = class {
   constructor() {
-    /** @private {!Array.<string>} */
+    /** @private {!Array<string>} */
     this.offlineSessions_ = [];
     /** @private {?shaka.extern.DrmInfo} */
     this.drmInfo_ = null;
@@ -98,7 +98,7 @@ shaka.test.FakeDrmEngine = class {
   }
 
   /**
-   * @param {!Array.<string>} sessions
+   * @param {!Array<string>} sessions
    */
   setSessionIds(sessions) {
     // Copy the values to break the reference to the input value.

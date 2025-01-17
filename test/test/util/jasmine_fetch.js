@@ -71,7 +71,7 @@ jasmine.Fetch = class {
   /**
    * @param {string} url
    * @param {RequestInit} init
-   * @return {!Promise.<!Response>}
+   * @return {!Promise<!Response>}
    * @private
    */
   static impl_(url, init) {
