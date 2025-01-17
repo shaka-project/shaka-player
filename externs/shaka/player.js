@@ -1826,8 +1826,9 @@ shaka.extern.LiveSyncConfiguration;
  *   <br>
  *   Defaults to <code>0.5</code>.
  * @property {boolean} infiniteLiveStreamDuration
- *   If <code>true</code>, the media source live duration
- *   set as a<code>Infinity</code>
+ *   If <code>true</code>, the media source duration of livestreams will be set
+ *   to <code>Infinity</code>. Otherwise, it will be set to a high but
+ *   non-infinite number (2^32).
  *   <br>
  *   Defaults to <code>false</code> except on Safari 17 or above whose default
  *   value is <code>true</code>.
