@@ -37,8 +37,9 @@ const MediaSession = class {
     /** @type {string} */
     this.type = type;
 
-    /** @type {!function(!{action: string, seekOffset: ?number,
-     *                     seekTime: ?number})}
+    /**
+     * @type {!function(!{action: string, seekOffset: ?number,
+     *                   seekTime: ?number})}
      */
     this.callback = callback;
   }

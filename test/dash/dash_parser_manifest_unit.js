@@ -2637,9 +2637,9 @@ describe('DashParser Manifest', () => {
   });
 
   /**
-     * @param {!Array.<number>} periods Start time of multiple periods
-     * @return {string}
-     */
+   * @param {!Array.<number>} periods Start time of multiple periods
+   * @return {string}
+   */
   function buildManifestWithPeriodStartTime(periods) {
     const mpdTemplate = [
       `<MPD type="dynamic"`,

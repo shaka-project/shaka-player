@@ -3,20 +3,19 @@ name: Deploy Demo Version Index
 on:
   workflow_dispatch:
     # Allows for manual triggering.
+  workflow_call:
+    # Allows calling this from another workflow with "uses:".
+    # The release workflow will trigger this as a final step after updating the
+    # appspot deployment.
+    secrets:
+      APPENGINE_DEPLOY_KEY:
+        required: true
   push:
     branches:
       - main
     paths:
       - .github/workflows/demo-version-index.yaml
       - app-engine/demo-version-index/**
-  release:
-    types: [published]
-  # NOTE: So long as releases are made without a personal access token (PAT),
-  # they will not activate this workflow's release trigger.  For now, the
-  # schedule trigger will compensate for that by updating the index nightly.
-  schedule:
-    # Run every night at 10pm PST / 6am UTC.
-    - cron: '0 6 * * *'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

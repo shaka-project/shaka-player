@@ -98,10 +98,10 @@ shakaDemo.Input = class {
   }
 
   /**
-  * @param {string} prefix
-  * @return {string}
-  * @private
-  */
+   * @param {string} prefix
+   * @return {string}
+   * @private
+   */
   static generateNewId_(prefix) {
     const idNumber = shakaDemo.Input.lastId_;
     shakaDemo.Input.lastId_ += 1;

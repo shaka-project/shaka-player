@@ -244,7 +244,7 @@ describe('MssParser Manifest', () => {
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.mss.manifestPreprocessorTXml = (mss) => {
-      /** @type{shaka.extern.xml.Node} */ (mss).children.pop();
+      /** @type {shaka.extern.xml.Node} */ (mss).children.pop();
     };
     parser.configure(config);
 

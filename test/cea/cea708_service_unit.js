@@ -64,6 +64,7 @@ describe('Cea708Service', () => {
    * and converts it into a CEA-708 DTVCC Packet.
    * @param {!Array<number>} bytes
    * @param {number} pts
+   * @return {!shaka.cea.DtvccPacket}
    */
   const createCea708PacketFromBytes = (bytes, pts) => {
     const cea708Bytes = bytes.map((code, i) => {
@@ -82,6 +83,7 @@ describe('Cea708Service', () => {
    * and returns all the captions inside of them, using the service to decode.
    * @param {!shaka.cea.Cea708Service} service
    * @param {...!shaka.cea.DtvccPacket} packets
+   * @return {!Array<shaka.extern.ICaptionDecoder.ClosedCaption>}
    */
   const getCaptionsFromPackets = (service, ...packets) => {
     const allCaptions = [];

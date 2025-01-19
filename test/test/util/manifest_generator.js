@@ -667,6 +667,7 @@ shaka.test.ManifestGenerator.Stream = class {
    *   index and give a URI.
    * @param {number} segmentDuration
    * @param {?number=} segmentSize
+   * @return {shaka.test.ManifestGenerator.Stream}
    */
   useSegmentTemplate(template, segmentDuration, segmentSize = null) {
     goog.asserts.assert(this.manifest_,

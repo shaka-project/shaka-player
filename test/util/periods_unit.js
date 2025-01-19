@@ -1990,6 +1990,7 @@ describe('PeriodCombiner', () => {
    * @param {number} height
    * @param {string} language
    * @param {number=} channels
+   * @param {!Array<string>=} roles
    * @return {shaka.extern.Variant}
    */
   function makeAVVariant(height, language, channels = 2, roles = []) {

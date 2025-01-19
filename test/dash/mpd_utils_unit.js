@@ -734,13 +734,13 @@ describe('MpdUtils', () => {
     }
 
     /**
-    * Creates an XML string with an xlink link to another URL,
-    * for use in testing recursive chains of xlink links.
-    * @param {number} variable
-    * @param {string} link
-    * @return {string}
-    * @private
-    */
+     * Creates an XML string with an xlink link to another URL,
+     * for use in testing recursive chains of xlink links.
+     * @param {number} variable
+     * @param {string} link
+     * @return {string}
+     * @private
+     */
     function makeRecursiveXMLString(variable, link) {
       const format =
           '<ToReplace xmlns="urn:mpeg:dash:schema:mpd:2011" ' +

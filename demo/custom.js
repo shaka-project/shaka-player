@@ -894,6 +894,7 @@ shakaDemo.Custom = class {
 
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @return {boolean}
    * @private
    */
   checkManifestRequired_(assetInProgress) {

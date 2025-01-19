@@ -350,8 +350,8 @@ shaka.extern.BufferedInfo;
  *   The roles of the audio in the track, e.g. <code>'main'</code> or
  *   <code>'commentary'</code>. Will be null for text tracks or variant tracks
  *   without audio.
- * @property {?shaka.media.ManifestParser.AccessibilityPurpose}
- *     accessibilityPurpose
+ * @property {?shaka.media.ManifestParser.AccessibilityPurpose
+ *           } accessibilityPurpose
  *   The DASH accessibility descriptor, if one was provided for this track.
  *   For text tracks, this describes the text; otherwise, this is for the audio.
  * @property {boolean} forced
@@ -1545,8 +1545,8 @@ shaka.extern.DynamicTargetLatencyConfiguration;
  *   Number of seconds that playback stays in panic mode after a rebuffering.
  *   <br>
  *   Defaults to <code>60</code>.
- * @property {shaka.extern.DynamicTargetLatencyConfiguration}
- * dynamicTargetLatency
+ * @property {shaka.extern.DynamicTargetLatencyConfiguration
+ *           } dynamicTargetLatency
  *
  *   The dynamic target latency config for dynamically adjusting the target
  *   latency to be closer to edge when network conditions are good and to back
@@ -1826,10 +1826,12 @@ shaka.extern.LiveSyncConfiguration;
  *   <br>
  *   Defaults to <code>0.5</code>.
  * @property {boolean} infiniteLiveStreamDuration
- *   If <code>true</code>, the media source live duration
- *   set as a<code>Infinity</code>
+ *   If <code>true</code>, the media source duration of livestreams will be set
+ *   to <code>Infinity</code>. Otherwise, it will be set to a high but
+ *   non-infinite number (2^32).
  *   <br>
- *   Defaults to <code>false</code>.
+ *   Defaults to <code>false</code> except on Safari 17 or above whose default
+ *   value is <code>true</code>.
  * @property {number} preloadNextUrlWindow
  *   The window of time at the end of the presentation to begin preloading the
  *   next URL, such as one specified by a urn:mpeg:dash:chaining:2016 element
@@ -2263,8 +2265,8 @@ shaka.extern.LcevcConfiguration;
  *   numberOfParallelDownloads: number
  * }}
  *
- * @property {function(shaka.extern.TrackList):!Promise<shaka.extern.TrackList>}
- *     trackSelectionCallback
+ * @property {function(shaka.extern.TrackList):
+ *              !Promise<shaka.extern.TrackList>} trackSelectionCallback
  *   Called inside <code>store()</code> to determine which tracks to save from a
  *   manifest. It is passed an array of Tracks from the manifest and it should
  *   return an array of the tracks to store.
@@ -2369,8 +2371,8 @@ shaka.extern.TextDisplayerConfiguration;
  *   Media source configuration and settings.
  * @property {shaka.extern.AbrManager.Factory} abrFactory
  *   A factory to construct an abr manager.
- * @property {shaka.media.AdaptationSetCriteria.Factory}
- *     adaptationSetCriteriaFactory
+ * @property {shaka.media.AdaptationSetCriteria.Factory
+ *           } adaptationSetCriteriaFactory
  *   A factory to construct an adaptation set criteria.
  * @property {shaka.extern.AbrConfiguration} abr
  *   ABR configuration and settings.

@@ -330,7 +330,7 @@ function httpPluginTests(usingFetch) {
       // actually insert a call to abort in the middle.
       // Instead, install a very elementary mock.
       /** @constructor */
-      function NewXHRMock() {  // eslint-disable-line no-inner-declarations
+      function NewXHRMock() {
         this.abort = Util.spyFunc(jasmine.createSpy('abort'));
 
         this.open = Util.spyFunc(jasmine.createSpy('open'));

@@ -17,7 +17,8 @@ shaka.test.FakeNetworkingEngine = class {
     /**
      * @private {!Map.<
      *    string,
-     *    shaka.test.FakeNetworkingEngine.MockedResponse>} */
+     *    shaka.test.FakeNetworkingEngine.MockedResponse>}
+     */
     this.responseMap_ = new Map();
 
     /** @private {!Map.<string, !Object.<string, string>>} */

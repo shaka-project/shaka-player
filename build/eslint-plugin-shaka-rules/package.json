@@ -3,5 +3,6 @@
   "description": "Extra eslint rules for Shaka Player",
   "version": "0.0.1",
   "main": "index.js",
+  "type": "module",
   "private": true
 }
