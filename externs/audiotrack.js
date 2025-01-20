@@ -34,7 +34,7 @@ AudioTrack.prototype.sourceBuffer;
 
 
 /**
- * @extends {IArrayLike.<AudioTrack>}
+ * @extends {IArrayLike<AudioTrack>}
  * @extends {EventTarget}
  * @interface
  */

@@ -436,8 +436,8 @@ describe('MpdUtils', () => {
      * Checks that the createTimeline works with the given timePoints and the
      * given expected results.
      *
-     * @param {!Array.<{t: ?number, d: ?number, r: ?number}>} points
-     * @param {!Array.<{start: number, end: number}>} expected
+     * @param {!Array<{t: ?number, d: ?number, r: ?number}>} points
+     * @param {!Array<{start: number, end: number}>} expected
      * @param {number} timescale
      * @param {number} presentationTimeOffset
      * @param {number} periodDuration

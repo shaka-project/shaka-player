@@ -30,8 +30,8 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
-   * @param {!Array.<string>} containerClassNames
-   * @param {!Array.<string>} barClassNames
+   * @param {!Array<string>} containerClassNames
+   * @param {!Array<string>} barClassNames
    */
   constructor(parent, controls, containerClassNames, barClassNames) {
     super(parent, controls);

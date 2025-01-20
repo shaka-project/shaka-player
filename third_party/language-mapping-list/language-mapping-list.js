@@ -30,7 +30,7 @@ goog.provide('mozilla.LanguageMapping');
  * language.  The language code can be specific and include a locale, such as
  * "es-CL" instead of merely "es".
  *
- * @type {!Object.<string, {nativeName: string, englishName: string}>}
+ * @type {!Object<string, {nativeName: string, englishName: string}>}
  */
 mozilla.LanguageMapping = {
   'ach': {

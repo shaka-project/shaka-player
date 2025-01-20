@@ -95,13 +95,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {boolean} */
     this.isSeeking_ = false;
 
-    /** @private {!Array.<!HTMLElement>} */
+    /** @private {!Array<!HTMLElement>} */
     this.menus_ = [];
 
     /**
      * Individual controls which, when hovered or tab-focused, will force the
      * controls to be shown.
-     * @private {!Array.<!Element>}
+     * @private {!Array<!Element>}
      */
     this.showOnHoverControls_ = [];
 
@@ -167,7 +167,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {?number} */
     this.lastTouchEventTime_ = null;
 
-    /** @private {!Array.<!shaka.extern.IUIElement>} */
+    /** @private {!Array<!shaka.extern.IUIElement>} */
     this.elements_ = [];
 
     /** @private {shaka.ui.Localization} */
@@ -188,7 +188,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * The pressed keys set is used to record which keys are currently pressed
      * down, so we can know what keys are pressed at the same time.
      * Used by the focusInsideOverflowMenu_() function.
-     * @private {!Set.<string>}
+     * @private {!Set<string>}
      */
     this.pressedKeys_ = new Set();
 
@@ -2204,7 +2204,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
  * @exportDoc
  */
 
-/** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
+/** @private {!Map<string, !shaka.extern.IUIElement.Factory>} */
 shaka.ui.ControlsPanel.elementNamesToFactories_ = new Map();
 
 /** @private {?shaka.extern.IUISeekBar.Factory} */

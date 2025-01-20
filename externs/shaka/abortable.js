@@ -26,7 +26,7 @@ shaka.extern.IAbortableOperation = class {
      * aborted.  Aborted operations should be rejected with a shaka.util.Error
      * object using the error code OPERATION_ABORTED.
      *
-     * @const {!Promise.<T>}
+     * @const {!Promise<T>}
      * @exportDoc
      */
     this.promise;
@@ -49,7 +49,7 @@ shaka.extern.IAbortableOperation = class {
    * @param {function(boolean)} onFinal A callback to be invoked after the
    *   operation succeeds or fails.  The boolean argument is true
    *   if the operation succeeded and false if it failed.
-   * @return {!shaka.extern.IAbortableOperation.<T>} Returns this.
+   * @return {!shaka.extern.IAbortableOperation<T>} Returns this.
    * @exportDoc
    */
   finally(onFinal) {}

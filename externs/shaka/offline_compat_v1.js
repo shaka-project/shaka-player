@@ -16,8 +16,8 @@
  *   duration: number,
  *   size: number,
  *   expiration: number,
- *   periods: !Array.<shaka.extern.PeriodDBV1>,
- *   sessionIds: !Array.<string>,
+ *   periods: !Array<shaka.extern.PeriodDBV1>,
+ *   sessionIds: !Array<string>,
  *   drmInfo: ?shaka.extern.DrmInfo,
  *   appMetadata: Object
  * }}
@@ -34,9 +34,9 @@
  *   The license expiration, in milliseconds; or Infinity if not applicable.
  *   Note that upon JSON serialization, Infinity becomes null, and must be
  *   converted back upon loading from storage.
- * @property {!Array.<shaka.extern.PeriodDBV1>} periods
+ * @property {!Array<shaka.extern.PeriodDBV1>} periods
  *   The Periods that are stored.
- * @property {!Array.<string>} sessionIds
+ * @property {!Array<string>} sessionIds
  *   The DRM offline session IDs for the media.
  * @property {?shaka.extern.DrmInfo} drmInfo
  *   The DRM info used to initialize EME.
@@ -49,12 +49,12 @@ shaka.extern.ManifestDBV1;
 /**
  * @typedef {{
  *   startTime: number,
- *   streams: !Array.<shaka.extern.StreamDBV1>
+ *   streams: !Array<shaka.extern.StreamDBV1>
  * }}
  *
  * @property {number} startTime
  *   The start time of the period, in seconds.
- * @property {!Array.<shaka.extern.StreamDBV1>} streams
+ * @property {!Array<shaka.extern.StreamDBV1>} streams
  *   The streams that define the Period.
  */
 shaka.extern.PeriodDBV1;
@@ -77,8 +77,8 @@ shaka.extern.PeriodDBV1;
  *   initSegmentUri: ?string,
  *   encrypted: boolean,
  *   keyId: ?string,
- *   segments: !Array.<shaka.extern.SegmentDBV1>,
- *   variantIds: !Array.<number>
+ *   segments: !Array<shaka.extern.SegmentDBV1>,
+ *   variantIds: !Array<number>
  * }}
  *
  * @property {number} id
@@ -112,9 +112,9 @@ shaka.extern.PeriodDBV1;
  *   Whether this stream is encrypted.
  * @property {?string} keyId
  *   The key ID this stream is encrypted with.
- * @property {!Array.<shaka.extern.SegmentDBV1>} segments
+ * @property {!Array<shaka.extern.SegmentDBV1>} segments
  *   An array of segments that make up the stream.
- * @property {!Array.<number>} variantIds
+ * @property {!Array<number>} variantIds
  *   An array of ids of variants the stream is a part of.
  */
 shaka.extern.StreamDBV1;

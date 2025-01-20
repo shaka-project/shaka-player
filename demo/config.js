@@ -39,7 +39,7 @@ shakaDemo.Config = class {
 
     /**
      * A list of all sections.
-     * @private {!Array.<!shakaDemo.InputContainer>}
+     * @private {!Array<!shakaDemo.InputContainer>}
      */
     this.sections_ = [];
 
@@ -900,7 +900,7 @@ shakaDemo.Config = class {
       shakaDemoMain.remakeHash();
     };
     this.addCustomTextInput_(name, onChange, tooltipMessage);
-    const configValue = /** @type {!Array.<string>} */ (
+    const configValue = /** @type {!Array<string>} */ (
       shakaDemoMain.getCurrentConfigValue(valueName));
     this.latestInput_.input().value = configValue.join(',');
     return this;
@@ -985,7 +985,7 @@ shakaDemo.Config = class {
 
   /**
    * @param {string} name
-   * @param {!Array.<string>} values
+   * @param {!Array<string>} values
    * @param {function(!HTMLInputElement)} onChange
    * @param {string=} tooltipMessage
    * @return {!shakaDemo.Config}
@@ -1000,7 +1000,7 @@ shakaDemo.Config = class {
 
   /**
    * @param {string} name
-   * @param {!Object.<string, string>} values
+   * @param {!Object<string, string>} values
    * @param {function(!HTMLInputElement)} onChange
    * @param {string=} tooltipMessage
    * @return {!shakaDemo.Config}
@@ -1018,8 +1018,8 @@ shakaDemo.Config = class {
   /**
    * @param {string} name
    * @param {string} valueName
-   * @param {!Object.<string, ?>} options
-   * @param {!Object.<string, string>} optionNames
+   * @param {!Object<string, ?>} options
+   * @param {!Object<string, string>} optionNames
    * @param {string=} tooltipMessage
    * @return {!shakaDemo.Config}
    * @private

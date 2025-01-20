@@ -53,7 +53,7 @@ shaka.extern.Transmuxer = class {
    *   null for init segments
    * @param {number} duration
    * @param {string} contentType
-   * @return {!Promise.<!Uint8Array>}
+   * @return {!Promise<!Uint8Array>}
    */
   transmux(data, stream, reference, duration, contentType) {}
 };

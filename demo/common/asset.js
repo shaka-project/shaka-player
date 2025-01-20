@@ -40,11 +40,11 @@ const ShakaDemoAssetInfo = class {
     this.focus = false;
     /** @type {boolean} */
     this.disabled = false;
-    /** @type {!Array.<!shaka.extern.ExtraText>} */
+    /** @type {!Array<!shaka.extern.ExtraText>} */
     this.extraText = [];
-    /** @type {!Array.<string>} */
+    /** @type {!Array<string>} */
     this.extraThumbnail = [];
-    /** @type {!Array.<!shakaAssets.ExtraChapter>} */
+    /** @type {!Array<!shakaAssets.ExtraChapter>} */
     this.extraChapter = [];
     /** @type {?string} */
     this.certificateUri = null;
@@ -52,21 +52,21 @@ const ShakaDemoAssetInfo = class {
     this.description = null;
     /** @type {boolean} */
     this.isFeatured = false;
-    /** @type {!Array.<!shakaAssets.KeySystem>} */
+    /** @type {!Array<!shakaAssets.KeySystem>} */
     this.drm = [shakaAssets.KeySystem.CLEAR];
-    /** @type {!Array.<!shakaAssets.Feature>} */
+    /** @type {!Array<!shakaAssets.Feature>} */
     this.features = [shakaAssets.Feature.VOD];
-    /** @type {!Map.<string, string>} */
+    /** @type {!Map<string, string>} */
     this.licenseServers = new Map();
-    /** @type {!Map.<string, string>} */
+    /** @type {!Map<string, string>} */
     this.offlineLicenseServers = new Map();
-    /** @type {!Map.<string, string>} */
+    /** @type {!Map<string, string>} */
     this.licenseRequestHeaders = new Map();
     /** @type {?shaka.extern.RequestFilter} */
     this.requestFilter = null;
     /** @type {?shaka.extern.ResponseFilter} */
     this.responseFilter = null;
-    /** @type {!Map.<string, string>} */
+    /** @type {!Map<string, string>} */
     this.clearKeys = new Map(); // TODO: Setter method?
     /** @type {?Object} */
     this.extraConfig = null;
@@ -242,7 +242,7 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * @return {!Map.<string, string>}
+   * @return {!Map<string, string>}
    */
   getLicenseServers() {
     return this.licenseServers;
@@ -543,7 +543,7 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * @param {!Map.<string, string>} headers
+   * @param {!Map<string, string>} headers
    * @param {shaka.net.NetworkingEngine.RequestType} requestType
    * @param {shaka.extern.Request} request
    * @private

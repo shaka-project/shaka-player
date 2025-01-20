@@ -53,10 +53,10 @@ shaka.extern.RetryParameters;
 
 /**
  * @typedef {{
- *   uris: !Array.<string>,
+ *   uris: !Array<string>,
  *   method: string,
  *   body: ?BufferSource,
- *   headers: !Object.<string, string>,
+ *   headers: !Object<string, string>,
  *   allowCrossSiteCredentials: boolean,
  *   retryParameters: !shaka.extern.RetryParameters,
  *   licenseRequestType: ?string,
@@ -76,14 +76,14 @@ shaka.extern.RetryParameters;
  * that may alter the request, then it is passed to a scheme plugin which
  * performs the actual operation.
  *
- * @property {!Array.<string>} uris
+ * @property {!Array<string>} uris
  *   An array of URIs to attempt.  They will be tried in the order they are
  *   given.
  * @property {string} method
  *   The HTTP method to use for the request.
  * @property {?BufferSource} body
  *   The body of the request.
- * @property {!Object.<string, string>} headers
+ * @property {!Object<string, string>} headers
  *   A mapping of headers for the request.  e.g.: {'HEADER': 'VALUE'}
  * @property {boolean} allowCrossSiteCredentials
  *   Make requests with credentials.  This will allow cookies in cross-site
@@ -128,7 +128,7 @@ shaka.extern.Request;
  *   originalUri: string,
  *   data: BufferSource,
  *   status: (number|undefined),
- *   headers: !Object.<string, string>,
+ *   headers: !Object<string, string>,
  *   timeMs: (number|undefined),
  *   fromCache: (boolean|undefined),
  *   originalRequest: shaka.extern.Request
@@ -149,7 +149,7 @@ shaka.extern.Request;
  *   The body of the response.
  * @property {(number|undefined)} status
  *   The response HTTP status code.
- * @property {!Object.<string, string>} headers
+ * @property {!Object<string, string>} headers
  *   A map of response headers, if supported by the underlying protocol.
  *   All keys should be lowercased.
  *   For HTTP/HTTPS, may not be available cross-origin.
@@ -224,7 +224,7 @@ shaka.extern.ProgressUpdated;
 
 
 /**
- * @typedef {function(!Object.<string, string>)}
+ * @typedef {function(!Object<string, string>)}
  *
  * @description
  * A callback function to handle headers received events through networking

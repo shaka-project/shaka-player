@@ -13,10 +13,10 @@
 /**
  * @typedef {{
  *   presentationTimeline: !shaka.media.PresentationTimeline,
- *   variants: !Array.<shaka.extern.Variant>,
- *   textStreams: !Array.<shaka.extern.Stream>,
- *   imageStreams: !Array.<shaka.extern.Stream>,
- *   offlineSessionIds: !Array.<string>,
+ *   variants: !Array<shaka.extern.Variant>,
+ *   textStreams: !Array<shaka.extern.Stream>,
+ *   imageStreams: !Array<shaka.extern.Stream>,
+ *   offlineSessionIds: !Array<string>,
  *   sequenceMode: boolean,
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   type: string,
@@ -63,16 +63,16 @@
  * @property {!shaka.media.PresentationTimeline} presentationTimeline
  *   <i>Required.</i> <br>
  *   The presentation timeline.
- * @property {!Array.<shaka.extern.Variant>} variants
+ * @property {!Array<shaka.extern.Variant>} variants
  *   <i>Required.</i> <br>
  *   The presentation's Variants. There must be at least one Variant.
- * @property {!Array.<shaka.extern.Stream>} textStreams
+ * @property {!Array<shaka.extern.Stream>} textStreams
  *   <i>Required.</i> <br>
  *   The presentation's text streams.
- * @property {!Array.<shaka.extern.Stream>} imageStreams
+ * @property {!Array<shaka.extern.Stream>} imageStreams
  *   <i>Required.</i> <br>
  *   The presentation's image streams
- * @property {!Array.<string>} offlineSessionIds
+ * @property {!Array<string>} offlineSessionIds
  *   <i>Defaults to [].</i> <br>
  *   An array of EME sessions to load for offline playback.
  * @property {boolean} sequenceMode
@@ -119,10 +119,10 @@ shaka.extern.Manifest;
 /**
  * @typedef {{
  *   id: string,
- *   audioStreams: !Array.<shaka.extern.Stream>,
- *   videoStreams: !Array.<shaka.extern.Stream>,
- *   textStreams: !Array.<shaka.extern.Stream>,
- *   imageStreams: !Array.<shaka.extern.Stream>
+ *   audioStreams: !Array<shaka.extern.Stream>,
+ *   videoStreams: !Array<shaka.extern.Stream>,
+ *   textStreams: !Array<shaka.extern.Stream>,
+ *   imageStreams: !Array<shaka.extern.Stream>
  * }}
  *
  * @description Contains the streams from one DASH period.
@@ -130,13 +130,13 @@ shaka.extern.Manifest;
  *
  * @property {string} id
  *   The Period ID.
- * @property {!Array.<shaka.extern.Stream>} audioStreams
+ * @property {!Array<shaka.extern.Stream>} audioStreams
  *   The audio streams from one Period.
- * @property {!Array.<shaka.extern.Stream>} videoStreams
+ * @property {!Array<shaka.extern.Stream>} videoStreams
  *   The video streams from one Period.
- * @property {!Array.<shaka.extern.Stream>} textStreams
+ * @property {!Array<shaka.extern.Stream>} textStreams
  *   The text streams from one Period.
- * @property {!Array.<shaka.extern.Stream>} imageStreams
+ * @property {!Array<shaka.extern.Stream>} imageStreams
  *   The image streams from one Period.
  *
  * @exportDoc
@@ -186,7 +186,7 @@ shaka.extern.ServiceDescription;
  *   bandwidth: number,
  *   allowedByApplication: boolean,
  *   allowedByKeySystem: boolean,
- *   decodingInfos: !Array.<MediaCapabilitiesDecodingInfo>
+ *   decodingInfos: !Array<MediaCapabilitiesDecodingInfo>
  * }}
  *
  * @description
@@ -227,7 +227,7 @@ shaka.extern.ServiceDescription;
  *   <i>Defaults to true.</i><br>
  *   Set by the Player to indicate whether the variant is allowed to be played
  *   by the key system.
- * @property {!Array.<MediaCapabilitiesDecodingInfo>} decodingInfos
+ * @property {!Array<MediaCapabilitiesDecodingInfo>} decodingInfos
  *   <i>Defaults to [].</i><br>
  *   Set by StreamUtils to indicate the results from MediaCapabilities
  *   decodingInfo.
@@ -358,30 +358,30 @@ shaka.extern.SegmentIndex = class {
  *   height: (number|undefined),
  *   kind: (string|undefined),
  *   encrypted: boolean,
- *   drmInfos: !Array.<shaka.extern.DrmInfo>,
- *   keyIds: !Set.<string>,
+ *   drmInfos: !Array<shaka.extern.DrmInfo>,
+ *   keyIds: !Set<string>,
  *   language: string,
  *   originalLanguage: ?string,
  *   label: ?string,
  *   type: string,
  *   primary: boolean,
  *   trickModeVideo: ?shaka.extern.Stream,
- *   emsgSchemeIdUris: ?Array.<string>,
- *   roles: !Array.<string>,
+ *   emsgSchemeIdUris: ?Array<string>,
+ *   roles: !Array<string>,
  *   accessibilityPurpose: ?shaka.media.ManifestParser.AccessibilityPurpose,
  *   forced: boolean,
  *   channelsCount: ?number,
  *   audioSamplingRate: ?number,
  *   spatialAudio: boolean,
- *   closedCaptions: Map.<string, string>,
+ *   closedCaptions: Map<string, string>,
  *   tilesLayout: (string|undefined),
  *   matchedStreams:
- *      (!Array.<shaka.extern.Stream>|!Array.<shaka.extern.StreamDB>|
+ *      (!Array<shaka.extern.Stream>|!Array<shaka.extern.StreamDB>|
  *      undefined),
  *   mssPrivateData: (shaka.extern.MssPrivateData|undefined),
  *   external: boolean,
  *   fastSwitching: boolean,
- *   fullMimeTypes: !Set.<string>,
+ *   fullMimeTypes: !Set<string>,
  *   isAudioMuxedInVideo: boolean
  * }}
  *
@@ -453,11 +453,11 @@ shaka.extern.SegmentIndex = class {
  *   <i>Defaults to false.</i><br>
  *   True if the stream is encrypted.
  *   Note: DRM encryption only, so AES encryption is not taken into account.
- * @property {!Array.<!shaka.extern.DrmInfo>} drmInfos
+ * @property {!Array<!shaka.extern.DrmInfo>} drmInfos
  *   <i>Defaults to [] (i.e., no DRM).</i> <br>
  *   An array of DrmInfo objects which describe DRM schemes are compatible with
  *   the content.
- * @property {!Set.<string>} keyIds
+ * @property {!Set<string>} keyIds
  *   <i>Defaults to empty (i.e., unencrypted or key ID unknown).</i> <br>
  *   The stream's key IDs as lowercase hex strings. These key IDs identify the
  *   encryption keys that the browser (key system) can use to decrypt the
@@ -482,11 +482,11 @@ shaka.extern.SegmentIndex = class {
  * @property {?shaka.extern.Stream} trickModeVideo
  *   <i>Video streams only.</i> <br>
  *   An alternate video stream to use for trick mode playback.
- * @property {?Array.<string>} emsgSchemeIdUris
+ * @property {?Array<string>} emsgSchemeIdUris
  *   <i>Defaults to empty.</i><br>
  *   Array of registered emsg box scheme_id_uri that should result in
  *   Player events.
- * @property {!Array.<string>} roles
+ * @property {!Array<string>} roles
  *   The roles of the stream as they appear on the manifest,
  *   e.g. 'main', 'caption', or 'commentary'.
  * @property {?shaka.media.ManifestParser.AccessibilityPurpose
@@ -502,7 +502,7 @@ shaka.extern.SegmentIndex = class {
  * @property {boolean} spatialAudio
  *   <i>Defaults to false.</i> <br>
  *   Whether the stream set has spatial audio
- * @property {Map.<string, string>} closedCaptions
+ * @property {Map<string, string>} closedCaptions
  *   A map containing the description of closed captions, with the caption
  *   channel number (CC1 | CC2 | CC3 | CC4) as the key and the language code
  *   as the value. If the channel number is not provided by the description,
@@ -514,7 +514,7 @@ shaka.extern.SegmentIndex = class {
  *   The value is a grid-item-dimension consisting of two positive decimal
  *   integers in the format: column-x-row ('4x3'). It describes the arrangement
  *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
- * @property {(!Array.<shaka.extern.Stream>|!Array.<shaka.extern.StreamDB>|
+ * @property {(!Array<shaka.extern.Stream>|!Array<shaka.extern.StreamDB>|
  *   undefined)} matchedStreams
  *   The streams in all periods which match the stream. Used for Dash.
  * @property {(shaka.extern.MssPrivateData|undefined)} mssPrivateData
@@ -525,7 +525,7 @@ shaka.extern.SegmentIndex = class {
  *   Eg: external text tracks.
  * @property {boolean} fastSwitching
  *   Indicate if the stream should be used for fast switching.
- * @property {!Set.<string>} fullMimeTypes
+ * @property {!Set<string>} fullMimeTypes
  *   A set of full MIME types (e.g. MIME types plus codecs information), that
  *   represents the types used in each period of the original manifest.
  *   Meant for being used by compatibility checking, such as with

@@ -34,7 +34,7 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
     /** @private {HTMLElement} */
     this.controlsContainer_ = this.controls.getControlsContainer();
 
-    /** @private {!Array.<shaka.extern.IUIElement>} */
+    /** @private {!Array<shaka.extern.IUIElement>} */
     this.children_ = [];
 
     /** @private {!HTMLElement} */
@@ -105,5 +105,5 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
   }
 };
 
-/** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
+/** @private {!Map<string, !shaka.extern.IUIElement.Factory>} */
 shaka.ui.ContextMenu.elementNamesToFactories_ = new Map();

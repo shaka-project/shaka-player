@@ -32,9 +32,9 @@ shaka.ui.Matrix4x4 = class {
    * up axis.
    *
    * @param {!Float32Array} out 4x4 matrix frustum matrix will be written into
-   * @param {!Array.<number>} eye Position of the viewer
-   * @param {!Array.<number>} center Point the viewer is looking at
-   * @param {!Array.<number>} up Vector pointing up
+   * @param {!Array<number>} eye Position of the viewer
+   * @param {!Array<number>} center Point the viewer is looking at
+   * @param {!Array<number>} up Vector pointing up
    * @return {!Float32Array}
    */
   static lookAt(out, eye, center, up) {
@@ -130,7 +130,7 @@ shaka.ui.Matrix4x4 = class {
    *
    * @param {!Float32Array} out the receiving matrix
    * @param {!Float32Array} a the matrix to scale
-   * @param {!Array.<number>} v the vector to scale the matrix by
+   * @param {!Array<number>} v the vector to scale the matrix by
    */
   static scale(out, a, v) {
     const x = v[0];
