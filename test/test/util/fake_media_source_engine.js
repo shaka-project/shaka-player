@@ -138,8 +138,16 @@ shaka.test.FakeMediaSourceEngine = class {
         jasmine.createSpy('updateLcevcDec').and.stub();
 
     /** @type {!jasmine.Spy} */
-    this.resync=
+    this.resync =
         jasmine.createSpy('resync').and.stub();
+
+    /** @type {!jasmine.Spy} */
+    this.setLiveSeekableRang =
+        jasmine.createSpy('setLiveSeekableRange').and.stub();
+
+    /** @type {!jasmine.Spy} */
+    this.clearLiveSeekableRange =
+        jasmine.createSpy('clearLiveSeekableRange').and.stub();
   }
 
   /** @override */
