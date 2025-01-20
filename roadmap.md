@@ -20,17 +20,23 @@ Candidate features for future release cycles:
 
 v5.0
  - Conversion to Typescript
+ - Remove shaka.cast APIs, have UI talk directly to generic receivers
+   https://github.com/shaka-project/shaka-player/issues/4214
 
-v4.13 - 2025 Q1
+v4.14 - 2025 Q2
  - Time ID3, emsg, and metadata events to the presentation timeline
    https://github.com/shaka-project/shaka-player/issues/7556
+
+=====
+
+v4.13 - 2025 Q1
  - WisePlay DRM support
  - Support for multiple robustness levels in drm
  - Clearkey download support
  - Stop setting playbackRate to 0 to control buffering state when streaming.rebufferingGoal = 0
    https://github.com/shaka-project/shaka-player/issues/7602
-
-=====
+ - Use MSE clearLiveSeekableRange and setLiveSeekableRange when available
+   https://github.com/shaka-project/shaka-player/issues/3153
 
 v4.12 - 2024 Q4
  - Performance improvements
