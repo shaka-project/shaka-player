@@ -14,7 +14,7 @@
  *   packetLength: number,
  *   pts: ?number,
  *   dts: ?number,
- *   nalus: !Array.<!shaka.extern.VideoNalu>
+ *   nalus: !Array<!shaka.extern.VideoNalu>
  * }}
  *
  * @summary MPEG_PES.
@@ -22,7 +22,7 @@
  * @property {number} packetLength
  * @property {?number} pts
  * @property {?number} dts
- * @property {!Array.<!shaka.extern.VideoNalu>} nalus
+ * @property {!Array<!shaka.extern.VideoNalu>} nalus
  */
 shaka.extern.MPEG_PES;
 
@@ -34,7 +34,7 @@ shaka.extern.MPEG_PES;
  *   isKeyframe: boolean,
  *   pts: ?number,
  *   dts: ?number,
- *   nalus: !Array.<!shaka.extern.VideoNalu>
+ *   nalus: !Array<!shaka.extern.VideoNalu>
  * }}
  *
  * @summary VideoSample.
@@ -43,7 +43,7 @@ shaka.extern.MPEG_PES;
  * @property {boolean} isKeyframe
  * @property {?number} pts
  * @property {?number} dts
- * @property {!Array.<!shaka.extern.VideoNalu>} nalus
+ * @property {!Array<!shaka.extern.VideoNalu>} nalus
  */
 shaka.extern.VideoSample;
 

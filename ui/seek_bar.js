@@ -143,7 +143,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.hideThumbnail_();
     });
 
-    /** @private {!Array.<!shaka.extern.AdCuePoint>} */
+    /** @private {!Array<!shaka.extern.AdCuePoint>} */
     this.adCuePoints_ = [];
 
     this.eventManager.listen(this.localization,

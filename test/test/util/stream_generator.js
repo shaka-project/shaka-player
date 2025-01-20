@@ -66,7 +66,7 @@ shaka.test.TSVodStreamGenerator = class {
      */
     this.segmentDuration_ = segmentDuration * 90000;
 
-    /** @private {!Array.<{offset: number, dts: ?number, pts: ?number}>} */
+    /** @private {!Array<{offset: number, dts: ?number, pts: ?number}>} */
     this.timestamps_ = [];
 
     /** @private {number} */

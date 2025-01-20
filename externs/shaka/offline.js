@@ -13,12 +13,12 @@
 /**
  * @typedef {{
  *   basic: boolean,
- *   encrypted: !Object.<string, boolean>
+ *   encrypted: !Object<string, boolean>
  * }}
  *
  * @property {boolean} basic
  *   True if offline is usable at all.
- * @property {!Object.<string, boolean>} encrypted
+ * @property {!Object<string, boolean>} encrypted
  *   A map of key system name to whether it supports offline playback.
  * @exportDoc
  */
@@ -32,7 +32,7 @@ shaka.extern.OfflineSupport;
  *   duration: number,
  *   size: number,
  *   expiration: number,
- *   tracks: !Array.<shaka.extern.Track>,
+ *   tracks: !Array<shaka.extern.Track>,
  *   appMetadata: Object,
  *   isIncomplete: boolean
  * }}
@@ -50,7 +50,7 @@ shaka.extern.OfflineSupport;
  * @property {number} expiration
  *   The time that the encrypted license expires, in milliseconds.  If the media
  *   is clear or the license never expires, this will equal Infinity.
- * @property {!Array.<shaka.extern.Track>} tracks
+ * @property {!Array<shaka.extern.Track>} tracks
  *   The tracks that are stored.
  * @property {Object} appMetadata
  *   The metadata passed to store().
@@ -69,8 +69,8 @@ shaka.extern.StoredContent;
  *   duration: number,
  *   size: number,
  *   expiration: number,
- *   streams: !Array.<shaka.extern.StreamDB>,
- *   sessionIds: !Array.<string>,
+ *   streams: !Array<shaka.extern.StreamDB>,
+ *   sessionIds: !Array<string>,
  *   drmInfo: ?shaka.extern.DrmInfo,
  *   appMetadata: Object,
  *   isIncomplete: (boolean|undefined),
@@ -90,9 +90,9 @@ shaka.extern.StoredContent;
  *   The license expiration, in milliseconds; or Infinity if not applicable.
  *   Note that upon JSON serialization, Infinity becomes null, and must be
  *   converted back upon loading from storage.
- * @property {!Array.<shaka.extern.StreamDB>} streams
+ * @property {!Array<shaka.extern.StreamDB>} streams
  *   The Streams that are stored.
- * @property {!Array.<string>} sessionIds
+ * @property {!Array<string>} sessionIds
  *   The DRM offline session IDs for the media.
  * @property {?shaka.extern.DrmInfo} drmInfo
  *   The DRM info used to initialize EME.
@@ -131,15 +131,15 @@ shaka.extern.ManifestDB;
  *   width: ?number,
  *   height: ?number,
  *   encrypted: boolean,
- *   keyIds: !Set.<string>,
- *   segments: !Array.<shaka.extern.SegmentDB>,
- *   variantIds: !Array.<number>,
- *   roles: !Array.<string>,
+ *   keyIds: !Set<string>,
+ *   segments: !Array<shaka.extern.SegmentDB>,
+ *   variantIds: !Array<number>,
+ *   roles: !Array<string>,
  *   forced: boolean,
  *   channelsCount: ?number,
  *   audioSamplingRate: ?number,
  *   spatialAudio: boolean,
- *   closedCaptions: Map.<string, string>,
+ *   closedCaptions: Map<string, string>,
  *   tilesLayout: (string|undefined),
  *   mssPrivateData: (shaka.extern.MssPrivateData|undefined),
  *   external: boolean,
@@ -187,13 +187,13 @@ shaka.extern.ManifestDB;
  *   The height of the stream; null for audio/text.
  * @property {boolean} encrypted
  *   Whether this stream is encrypted.
- * @property {!Set.<string>} keyIds
+ * @property {!Set<string>} keyIds
  *   The key IDs this stream is encrypted with.
- * @property {!Array.<shaka.extern.SegmentDB>} segments
+ * @property {!Array<shaka.extern.SegmentDB>} segments
  *   An array of segments that make up the stream.
- * @property {!Array.<number>} variantIds
+ * @property {!Array<number>} variantIds
  *   An array of ids of variants the stream is a part of.
- * @property {!Array.<string>} roles
+ * @property {!Array<string>} roles
  *   The roles of the stream as they appear on the manifest,
  *   e.g. 'main', 'caption', or 'commentary'.
  * @property {boolean} forced
@@ -204,7 +204,7 @@ shaka.extern.ManifestDB;
  *   Specifies the maximum sampling rate of the content.
  * @property {boolean} spatialAudio
  *   Whether the stream set has spatial audio.
- * @property {Map.<string, string>} closedCaptions
+ * @property {Map<string, string>} closedCaptions
  *   A map containing the description of closed captions, with the caption
  *   channel number (CC1 | CC2 | CC3 | CC4) as the key and the language code
  *   as the value. If the channel number is not provided by the description,
@@ -303,8 +303,8 @@ shaka.extern.SegmentDataDB;
  *   keySystem: string,
  *   licenseUri: string,
  *   serverCertificate: Uint8Array,
- *   audioCapabilities: !Array.<MediaKeySystemMediaCapability>,
- *   videoCapabilities: !Array.<MediaKeySystemMediaCapability>
+ *   audioCapabilities: !Array<MediaKeySystemMediaCapability>,
+ *   videoCapabilities: !Array<MediaKeySystemMediaCapability>
  * }}
  *
  * @property {string} sessionId
@@ -317,9 +317,9 @@ shaka.extern.SegmentDataDB;
  *   A key-system-specific server certificate used to encrypt license requests.
  *   Its use is optional and is meant as an optimization to avoid a round-trip
  *   to request a certificate.
- * @property {!Array.<MediaKeySystemMediaCapability>} audioCapabilities
+ * @property {!Array<MediaKeySystemMediaCapability>} audioCapabilities
  *   The EME audio capabilities used to create the session.
- * @property {!Array.<MediaKeySystemMediaCapability>} videoCapabilities
+ * @property {!Array<MediaKeySystemMediaCapability>} videoCapabilities
  *   The EME video capabilities used to create the session.
  */
 shaka.extern.EmeSessionDB;
@@ -362,8 +362,8 @@ shaka.extern.StorageCell = class {
    * of keys for each segment. If one segment fails to be added, all segments
    * should fail to be added.
    *
-   * @param {!Array.<shaka.extern.SegmentDataDB>} segments
-   * @return {!Promise.<!Array.<number>>}
+   * @param {!Array<shaka.extern.SegmentDataDB>} segments
+   * @return {!Promise<!Array<number>>}
    */
   addSegments(segments) {}
 
@@ -371,7 +371,7 @@ shaka.extern.StorageCell = class {
    * Remove a group of segments using their keys to identify them. If a key
    * is not found, then that removal should be considered successful.
    *
-   * @param {!Array.<number>} keys
+   * @param {!Array<number>} keys
    * @param {function(number)} onRemove A callback for when a segment is removed
    *                                    from the cell. The key of the segment
    *                                    will be passed to the callback.
@@ -383,8 +383,8 @@ shaka.extern.StorageCell = class {
    * Get a group of segments using their keys to identify them. If any key is
    * not found, the promise chain will be rejected.
    *
-   * @param {!Array.<number>} keys
-   * @return {!Promise.<!Array.<shaka.extern.SegmentDataDB>>}
+   * @param {!Array<number>} keys
+   * @return {!Promise<!Array<shaka.extern.SegmentDataDB>>}
    */
   getSegments(keys) {}
 
@@ -393,8 +393,8 @@ shaka.extern.StorageCell = class {
    * of keys for each manifest. If one manifest fails to be added, all manifests
    * should fail to be added.
    *
-   * @param {!Array.<shaka.extern.ManifestDB>} manifests
-   * @return {!Promise<!Array.<number>>} keys
+   * @param {!Array<shaka.extern.ManifestDB>} manifests
+   * @return {!Promise<!Array<number>>} keys
    */
   addManifests(manifests) {}
 
@@ -422,7 +422,7 @@ shaka.extern.StorageCell = class {
    * Remove a group of manifests using their keys to identify them. If a key
    * is not found, then that removal should be considered successful.
    *
-   * @param {!Array.<number>} keys
+   * @param {!Array<number>} keys
    * @param {function(number)} onRemove A callback for when a manifest is
    *                                    removed from the cell. The key of the
    *                                    manifest will be passed to the callback.
@@ -434,8 +434,8 @@ shaka.extern.StorageCell = class {
    * Get a group of manifests using their keys to identify them. If any key is
    * not found, the promise chain will be rejected.
    *
-   * @param {!Array.<number>} keys
-   * @return {!Promise<!Array.<shaka.extern.ManifestDB>>}
+   * @param {!Array<number>} keys
+   * @return {!Promise<!Array<shaka.extern.ManifestDB>>}
    */
   getManifests(keys) {}
 
@@ -444,7 +444,7 @@ shaka.extern.StorageCell = class {
    * to the asset they describe, it is assumed that it is feasible to have them
    * all in main memory at one time.
    *
-   * @return {!Promise<!Map.<number, shaka.extern.ManifestDB>>}
+   * @return {!Promise<!Map<number, shaka.extern.ManifestDB>>}
    */
   getAllManifests() {}
 };
@@ -468,20 +468,20 @@ shaka.extern.EmeSessionStorageCell = class {
 
   /**
    * Gets the currently stored sessions.
-   * @return {!Promise.<!Array.<shaka.extern.EmeSessionDB>>}
+   * @return {!Promise<!Array<shaka.extern.EmeSessionDB>>}
    */
   getAll() {}
 
   /**
    * Adds the given sessions to the store.
-   * @param {!Array.<shaka.extern.EmeSessionDB>} sessions
+   * @param {!Array<shaka.extern.EmeSessionDB>} sessions
    * @return {!Promise}
    */
   add(sessions) {}
 
   /**
    * Removes the given session IDs from the store.
-   * @param {!Array.<string>} sessionIds
+   * @param {!Array<string>} sessionIds
    * @return {!Promise}
    */
   remove(sessionIds) {}
@@ -525,7 +525,7 @@ shaka.extern.StorageMechanism = class {
    * cell's address in the mechanism and should be consistent between calls to
    * |getCells|.
    *
-   * @return {!Map.<string, !shaka.extern.StorageCell>}
+   * @return {!Map<string, !shaka.extern.StorageCell>}
    */
   getCells() {}
 

@@ -96,7 +96,7 @@ google.ima.AdsManager = class {
   resize(width, height, viewMode) {}
 
   /**
-   * @return {!Array.<number>}
+   * @return {!Array<number>}
    */
   getCuePoints() {}
 
@@ -133,10 +133,10 @@ google.ima.AdsManagerLoadedEvent = class extends Event {
  *   bitrate: (number),
  *   enablePreloading: (boolean),
  *   loadVideoTimeout: (number),
- *   mimeTypes: (?Array.<string>),
+ *   mimeTypes: (?Array<string>),
  *   playAdsAfterTime: (number),
  *   restoreCustomPlaybackStateOnAdBreakComplete: (boolean),
- *   uiElements: (?Array.<string>),
+ *   uiElements: (?Array<string>),
  *   useStyledLinearAds: (boolean),
  *   useStyledNonLinearAds: (boolean),
  * }}
@@ -161,7 +161,7 @@ google.ima.AdsManagerLoadedEvent = class extends Event {
  *   If loading takes longer than this timeout, the ad playback is canceled
  *   and the next ad in the pod plays, if available.
  *   Use -1 for the default of 8 seconds.
- * @property {?Array.<string>} mimeTypes
+ * @property {?Array<string>} mimeTypes
  *   Only supported for linear video mime types.
  *   If specified, the SDK will include media that matches
  *   the MIME type(s) specified in the list and exclude media.
@@ -180,7 +180,7 @@ google.ima.AdsManagerLoadedEvent = class extends Event {
  *   state after an ad break completes. This is setting is used primarily
  *   when the publisher passes in its content player to use for
  *   custom ad playback.
- * @property {?Array.<string>} uiElements
+ * @property {?Array<string>} uiElements
  *   Specifies whether the UI elements that should be displayed.
  *   The elements in this array are ignored for AdSense/AdX ads.
  * @property {boolean} useStyledLinearAds
@@ -518,7 +518,7 @@ google.ima.dai.api.Ad = class {
   /** @return {string} */
   getCreativeAdId() {}
 
-  /** @return {!Array.<!google.ima.dai.api.CompanionAd>} */
+  /** @return {!Array<!google.ima.dai.api.CompanionAd>} */
   getCompanionAds() {}
 };
 
@@ -606,7 +606,7 @@ google.ima.dai.api.StreamData.prototype.adProgressData;
 google.ima.dai.api.StreamData.prototype.url;
 
 
-/** @type {!Array.<!google.ima.dai.api.CuePoint>} */
+/** @type {!Array<!google.ima.dai.api.CuePoint>} */
 google.ima.dai.api.StreamData.prototype.cuepoints;
 
 
@@ -657,7 +657,7 @@ google.ima.dai.api.StreamRequest.prototype.format;
 
 
 /**
- * @type {Object.<
+ * @type {Object<
  *   google.ima.dai.api.OmidVerificationVendor,
  *   (google.ima.dai.api.OmidAccessMode | undefined)>}
  */

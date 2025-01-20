@@ -13,7 +13,7 @@
 /** A JSON Web Key set. */
 class JWKSet {
   constructor() {
-    /** @type {Array.<JWK>} */
+    /** @type {Array<JWK>} */
     this.keys = [];
   }
 }

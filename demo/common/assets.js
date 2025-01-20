@@ -243,7 +243,7 @@ shakaAssets.UplynkRequestFilter = (type, request) => {
 
 
 /* eslint-disable max-len */
-/** @const {!Array.<!ShakaDemoAssetInfo>} */
+/** @const {!Array<!ShakaDemoAssetInfo>} */
 shakaAssets.testAssets = [
   // Shaka assets {{{
   new ShakaDemoAssetInfo(

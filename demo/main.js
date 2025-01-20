@@ -53,7 +53,7 @@ shakaDemo.Main = class {
     /** @private {?shaka.ui.Controls} */
     this.controls_ = null;
 
-    /** @private {?Array.<shaka.extern.StoredContent>} */
+    /** @private {?Array<shaka.extern.StoredContent>} */
     this.initialStoredList_;
 
     /** @private {boolean} */
@@ -280,7 +280,7 @@ shakaDemo.Main = class {
 
   /**
    * @param {string} url
-   * @return {!Promise.<string>}
+   * @return {!Promise<string>}
    * @private
    */
   async loadText_(url) {
@@ -1117,7 +1117,7 @@ shakaDemo.Main = class {
   }
 
   /**
-   * @return {!Object.<string, string>} params
+   * @return {!Object<string, string>} params
    * @private
    */
   getParams_() {
@@ -1130,7 +1130,7 @@ shakaDemo.Main = class {
     // Because they are being concatenated in this order, if both an
     // URL fragment and an URL parameter of the same type are present
     // the URL fragment takes precedence.
-    /** @type {!Array.<string>} */
+    /** @type {!Array<string>} */
     const combined = fields.concat(fragments);
     const params = {};
     for (const line of combined) {
@@ -1210,7 +1210,7 @@ shakaDemo.Main = class {
   /**
    * @param {string} uri
    * @param {!shaka.net.NetworkingEngine} netEngine
-   * @return {!Promise.<!ArrayBuffer>}
+   * @return {!Promise<!ArrayBuffer>}
    * @private
    */
   async requestCertificate_(uri, netEngine) {
@@ -1366,7 +1366,7 @@ shakaDemo.Main = class {
 
   /**
    * @param {ShakaDemoAssetInfo} asset
-   * @return {!Promise.<string>}
+   * @return {!Promise<string>}
    * @private
    */
   async getManifestUri_(asset) {
@@ -1585,7 +1585,7 @@ shakaDemo.Main = class {
     ];
 
     for (const key of preferredArray) {
-      const array = /** @type {!Array.<string>} */(
+      const array = /** @type {!Array<string>} */(
         this.getCurrentConfigValue(key));
       if (array.length) {
         params.push(key + '=' + array.join(','));
@@ -1709,7 +1709,7 @@ shakaDemo.Main = class {
 
   /**
    * @param {ShakaDemoAssetInfo} asset
-   * @return {!Promise.<string>}
+   * @return {!Promise<string>}
    * @private
    */
   async getManifestUriFromAdManager_(asset) {
@@ -1762,7 +1762,7 @@ shakaDemo.Main = class {
 
   /**
    * @param {ShakaDemoAssetInfo} asset
-   * @return {!Promise.<string>}
+   * @return {!Promise<string>}
    * @private
    */
   async getManifestUriFromMediaTailorAdManager_(asset) {
@@ -2012,7 +2012,7 @@ shakaDemo.Main = class {
 };
 
 
-/** @type {!Array.<string>} */
+/** @type {!Array<string>} */
 shakaDemo.Main.commonDrmSystems = [
   'com.widevine.alpha',
   'com.microsoft.playready',

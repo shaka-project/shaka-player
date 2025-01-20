@@ -12,20 +12,20 @@ describe('StreamingEngine', () => {
   // Create empty object first and initialize the fields through
   // [] to allow field names to be expressions.
   /**
-   * @type {!Object.<shaka.util.ManifestParserUtils.ContentType,
-   *                 !Array.<number>>}
+   * @type {!Object<shaka.util.ManifestParserUtils.ContentType,
+   *                 !Array<number>>}
    */
   const initSegmentRanges = {};
   initSegmentRanges[ContentType.AUDIO] = [100, 1000];
   initSegmentRanges[ContentType.VIDEO] = [200, 2000];
 
-  /** @type {!Object.<shaka.util.ManifestParserUtils.ContentType, number>} */
+  /** @type {!Object<shaka.util.ManifestParserUtils.ContentType, number>} */
   const segmentSizes = {};
   segmentSizes[ContentType.AUDIO] = 1000;
   segmentSizes[ContentType.VIDEO] = 10000;
   segmentSizes[ContentType.TEXT] = 500;
 
-  /** @type {!Object.<string, shaka.test.FakeMediaSourceEngine.SegmentData>} */
+  /** @type {!Object<string, shaka.test.FakeMediaSourceEngine.SegmentData>} */
   let segmentData;
   /** @type {number} */
   let presentationTimeInSeconds;
@@ -3091,9 +3091,9 @@ describe('StreamingEngine', () => {
     let initialVariant;
     /** @type {shaka.extern.Variant} */
     let newVariant;
-    /** @type {!Array.<string>} */
+    /** @type {!Array<string>} */
     let requestUris;
-    /** @type {!Array.<shaka.util.PublicPromise>} */
+    /** @type {!Array<shaka.util.PublicPromise>} */
     let delayedRequests;
     /** @type {shaka.net.NetworkingEngine.PendingRequest} */
     let lastPendingRequest;

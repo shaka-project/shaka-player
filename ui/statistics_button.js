@@ -77,10 +77,10 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     /** @private {!Array} */
     this.skippedStats_ = ['stateHistory', 'switchHistory'];
 
-    /** @private {!Object.<string, number>} */
+    /** @private {!Object<string, number>} */
     this.currentStats_ = this.player.getStats();
 
-    /** @private {!Object.<string, HTMLElement>} */
+    /** @private {!Object<string, HTMLElement>} */
     this.displayedElements_ = {};
 
 
@@ -136,7 +136,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       }
     };
 
-    /** @private {!Object.<string, function(string):string>} */
+    /** @private {!Object<string, function(string): string>} */
     this.parseFrom_ = {
       'width': parsePx,
       'height': parsePx,

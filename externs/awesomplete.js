@@ -13,7 +13,7 @@
 class Awesomplete {
   /** @param {!Element} input */
   constructor(input) {
-    /** @type {!Array.<string>} */
+    /** @type {!Array<string>} */
     this.list;
 
     /** @type {number} */

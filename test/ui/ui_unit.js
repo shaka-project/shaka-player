@@ -176,7 +176,7 @@ describe('UI', () => {
     });
 
     describe('set up with several videos', () => {
-      /** @type {!Array.<!HTMLVideoElement>} */
+      /** @type {!Array<!HTMLVideoElement>} */
       const videos = [];
 
       beforeEach(async () => {

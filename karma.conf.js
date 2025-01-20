@@ -538,8 +538,8 @@ module.exports = (config) => {
  * Resolves a list of paths using globs into a list of explicit paths.
  * Paths are all relative to the source directory.
  *
- * @param {!Array.<string>} list
- * @return {!Array.<string>}
+ * @param {!Array<string>} list
+ * @return {!Array<string>}
  */
 function resolveGlobs(list) {
   const options = {
@@ -560,7 +560,7 @@ function resolveGlobs(list) {
  * array of strings.
  *
  * @param {!Object} config
- * @return {!Array.<string>}
+ * @return {!Array<string>}
  */
 function allUsableBrowserLaunchers(config) {
   const browsers = [];
@@ -642,7 +642,7 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
    * Extract URL params from the request.
    *
    * @param {express.Request} request
-   * @return {!Object.<string, string>}
+   * @return {!Object<string, string>}
    */
   function getParams(request) {
     // This can be null for manually-connected browsers.
@@ -704,7 +704,7 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
    * @param {karma.Launcher.Browser.spec} spec
    * @param {wd.remote} webDriverClient A WebDriver client, an object from the
    *   "wd" package, created by "wd.remote()".
-   * @return {!Promise.<!Buffer>} A Buffer containing a PNG screenshot
+   * @return {!Promise<!Buffer>} A Buffer containing a PNG screenshot
    */
   function getScreenshot(spec, webDriverClient) {
     return new Promise((resolve, reject) => {
@@ -735,8 +735,8 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
    * Write the diff to disk, as well.
    *
    * @param {karma.Launcher.Browser} browser
-   * @param {!Object.<string, string>} params
-   * @return {!Promise.<number>} A similarity score between 0 and 1.
+   * @param {!Object<string, string>} params
+   * @return {!Promise<number>} A similarity score between 0 and 1.
    */
   async function diffScreenshot(browser, params) {
     const webDriverClient = getWebDriverClient(browser);

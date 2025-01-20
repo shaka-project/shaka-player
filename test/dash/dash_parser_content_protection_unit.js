@@ -86,9 +86,9 @@ describe('DashParser ContentProtection', () => {
    * Build a simple manifest with ContentProtection lines inserted into the
    * AdaptationSet and each Representation.
    *
-   * @param {!Array.<string>} adaptationSetLines
-   * @param {!Array.<string>} representation1Lines
-   * @param {!Array.<string>} representation2Lines
+   * @param {!Array<string>} adaptationSetLines
+   * @param {!Array<string>} representation1Lines
+   * @param {!Array<string>} representation2Lines
    * @return {string}
    */
   function buildManifestText(
@@ -121,8 +121,8 @@ describe('DashParser ContentProtection', () => {
   /**
    * Build an expected manifest which checks DRM-related fields.
    *
-   * @param {!Array.<!Object>} drmInfos A list of DrmInfo-like objects.
-   * @param {!Array.<string>=} keyIds The key IDs to attach to each variant.
+   * @param {!Array<!Object>} drmInfos A list of DrmInfo-like objects.
+   * @param {!Array<string>=} keyIds The key IDs to attach to each variant.
    *   Will default to the keyIds from the first drmInfo object.
    * @return {Object} A Manifest-like object.
    */
@@ -160,8 +160,8 @@ describe('DashParser ContentProtection', () => {
    * init data.
    *
    * @param {string} keySystem
-   * @param {!Array.<string>=} keyIds
-   * @param {!Array.<shaka.extern.InitDataOverride>=} initData
+   * @param {!Array<string>=} keyIds
+   * @param {!Array<shaka.extern.InitDataOverride>=} initData
    * @param {string=} encryptionScheme
    * @return {Object} A DrmInfo-like object.
    */
@@ -179,9 +179,9 @@ describe('DashParser ContentProtection', () => {
    * Build an expected InitDataOverride based on base-64-encoded PSSHs and
    * optional key IDs.
    *
-   * @param {!Array.<string>} base64Psshs
-   * @param {!Array.<string>=} keyIds
-   * @return {!Array.<shaka.extern.InitDataOverride>}
+   * @param {!Array<string>} base64Psshs
+   * @param {!Array<string>=} keyIds
+   * @return {!Array<shaka.extern.InitDataOverride>}
    */
   function buildInitData(base64Psshs, keyIds = []) {
     return base64Psshs.map((base64, index) => {
@@ -204,8 +204,8 @@ describe('DashParser ContentProtection', () => {
   describe('maps standard scheme IDs', () => {
     /**
      * @param {string} name A name for the test
-     * @param {!Array.<string>} uuids DRM scheme UUIDs
-     * @param {!Array.<string>} keySystems expected key system IDs
+     * @param {!Array<string>} uuids DRM scheme UUIDs
+     * @param {!Array<string>} keySystems expected key system IDs
      */
     function testKeySystemMappings(name, uuids, keySystems) {
       it(name, async () => {
@@ -411,7 +411,7 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.apple.fps'),
     ]);
     const expected = buildExpectedManifest(
-        /** @type {!Array.<shaka.extern.DrmInfo>} */(drmInfos),
+        /** @type {!Array<shaka.extern.DrmInfo>} */(drmInfos),
         [],  // key IDs
     );
     await testDashParser(source, expected);
@@ -431,7 +431,7 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.apple.fps', [], [], 'cbcs'),
     ]);
     const expected = buildExpectedManifest(
-        /** @type {!Array.<shaka.extern.DrmInfo>} */(drmInfos),
+        /** @type {!Array<shaka.extern.DrmInfo>} */(drmInfos),
         [],  // key IDs
     );
     await testDashParser(source, expected);
@@ -461,7 +461,7 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.apple.fps'),
     ]);
     const expected = buildExpectedManifest(
-        /** @type {!Array.<shaka.extern.DrmInfo>} */(drmInfos),
+        /** @type {!Array<shaka.extern.DrmInfo>} */(drmInfos),
         []);  // key IDs
     await testDashParser(source, expected, /* ignoreDrmInfo= */ true);
   });

@@ -42,7 +42,7 @@ describe('CmcdManager', () => {
     }),
     getCurrentTime: () => 10,
     getPlaybackRate: () => 1,
-    getVariantTracks: () => /** @type {Array.<shaka.extern.Track>} */([
+    getVariantTracks: () => /** @type {Array<shaka.extern.Track>} */([
       {
         type: 'variant',
         bandwidth: 50000,

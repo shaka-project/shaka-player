@@ -942,7 +942,7 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports multiple interstitials', async () => {
-      /** @type {!Array.<!shaka.extern.AdInterstitial>} */
+      /** @type {!Array<!shaka.extern.AdInterstitial>} */
       const interstitials = [
         {
           id: null,

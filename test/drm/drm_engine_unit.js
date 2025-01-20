@@ -1230,7 +1230,7 @@ describe('DrmEngine', () => {
       expect(session.generateRequest)
           .toHaveBeenCalledWith('keyids', jasmine.any(Uint8Array));
 
-      const initData = /** @type {{kids: !Array.<string>}} */(JSON.parse(
+      const initData = /** @type {{kids: !Array<string>}} */(JSON.parse(
           shaka.util.StringUtils.fromUTF8(
               session.generateRequest.calls.argsFor(0)[1])));
       const keyId1 = Uint8ArrayUtils.toHex(
@@ -2815,7 +2815,7 @@ describe('DrmEngine', () => {
   }
 
   /**
-   * @param {function(!Array.<shaka.extern.DrmInfo>)} callback
+   * @param {function(!Array<shaka.extern.DrmInfo>)} callback
    */
   function tweakDrmInfos(callback) {
     if (manifest.variants[0].video.encrypted) {

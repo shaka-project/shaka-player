@@ -38,8 +38,8 @@ shaka.extern.TextParser = class {
    *    for each cue.
    * @param {?(string|undefined)} uri
    *    The media uri.
-   * @param {!Array.<string>} images
-   * @return {!Array.<!shaka.text.Cue>}
+   * @param {!Array<string>} images
+   * @return {!Array<!shaka.text.Cue>}
    *
    * @exportDoc
    */
@@ -143,7 +143,7 @@ shaka.extern.TextDisplayer = class {
   /**
    * Append given text cues to the list of cues to be displayed.
    *
-   * @param {!Array.<!shaka.text.Cue>} cues
+   * @param {!Array<!shaka.text.Cue>} cues
    *    Text cues to be appended.
    *
    * @exportDoc

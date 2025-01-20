@@ -48,9 +48,9 @@ let partiallyExportedClassesDetected = false;
 /**
  * Topological sort of general objects using a DFS approach.
  * Will add a __mark field to each object as part of the sorting process.
- * @param {!Array.<T>} list
- * @param {function(T):!Array.<T>} getDeps
- * @return {!Array.<T>}
+ * @param {!Array<T>} list
+ * @param {function(T): !Array<T>} getDeps
+ * @return {!Array<T>}
  * @template T
  * @see https://en.wikipedia.org/wiki/Topological_sorting#Depth-first_search
  */
@@ -276,7 +276,7 @@ function getIdentifierString(node) {
 /**
  * @param {ASTNode} node A function definition node from the abstract syntax
  *   tree.
- * @return {!Array.<string>} a list of the parameter names.
+ * @return {!Array<string>} a list of the parameter names.
  */
 function getFunctionParameters(node) {
   assert(node.type == 'FunctionExpression' ||
@@ -334,7 +334,7 @@ function removeExportAnnotationsFromComment(comment) {
 /**
  * Recursively find all expression statements in all block nodes.
  * @param {ASTNode} node
- * @return {!Array.<ASTNode>}
+ * @return {!Array<ASTNode>}
  */
 function getAllExpressionStatements(node) {
   assert(node.body && node.body.body);
@@ -352,7 +352,7 @@ function getAllExpressionStatements(node) {
 
 
 /**
- * @param {!Set.<string>} names A set of the names of exported nodes.
+ * @param {!Set<string>} names A set of the names of exported nodes.
  * @param {ASTNode} node An exported node from the abstract syntax tree.
  * @return {string} An extern string for this node.
  */
@@ -425,7 +425,7 @@ function createExternFromExportNode(names, node) {
  * Some classes are not exported, but contain exported members.  These need to
  * have externs generated, too.
  *
- * @param {!Set.<string>} names A set of the names of exported nodes.
+ * @param {!Set<string>} names A set of the names of exported nodes.
  * @param {ASTNode} node An exported node from the abstract syntax tree.
  * @return {string} An extern string for this node.
  */
@@ -715,12 +715,12 @@ function createExternsFromConstructor(className, constructorNode) {
 
 
 /**
- * @param {!Set.<string>} names A set of the names of exported nodes.
+ * @param {!Set<string>} names A set of the names of exported nodes.
  * @param {string} inputPath
  * @return {{
  *   path: string,
- *   provides: !Array.<string>,
- *   requires: !Array.<string>,
+ *   provides: !Array<string>,
+ *   requires: !Array<string>,
  *   externs: string,
  * }}
  */
@@ -782,7 +782,7 @@ function generateExterns(names, inputPath) {
  * Generate externs from exported code.
  * Arguments: --output <EXTERNS> <INPUT> [<INPUT> ...]
  *
- * @param {!Array.<string>} args The args to this script, not counting node and
+ * @param {!Array<string>} args The args to this script, not counting node and
  *   the script name itself.
  */
 function main(args) {

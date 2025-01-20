@@ -75,16 +75,16 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
     /** @private {!Array} */
     this.statisticsList_ = [];
 
-    /** @private {!Object.<string, (number|!Array.<number>)>} */
+    /** @private {!Object<string, (number | !Array<number>)>} */
     this.currentStats_ = this.adManager.getStats();
 
-    /** @private {!Object.<string, HTMLElement>} */
+    /** @private {!Object<string, HTMLElement>} */
     this.displayedElements_ = {};
 
     const parseLoadTimes = (name) => {
       let totalTime = 0;
       const loadTimes =
-        /** @type {!Array.<number>} */ (this.currentStats_[name]);
+        /** @type {!Array<number>} */ (this.currentStats_[name]);
       for (const loadTime of loadTimes) {
         totalTime += parseFloat(loadTime);
       }
@@ -95,7 +95,7 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
       return this.currentStats_[name];
     };
 
-    /** @private {!Object.<string, function(string):string>} */
+    /** @private {!Object<string, function(string): string>} */
     this.parseFrom_ = {
       'loadTimes': parseLoadTimes,
       'averageLoadTime': showNumber,

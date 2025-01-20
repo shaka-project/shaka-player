@@ -11,7 +11,7 @@
 
 /**
  * @typedef {{
- *   loadTimes: !Array.<number>,
+ *   loadTimes: !Array<number>,
  *   averageLoadTime: number,
  *   started: number,
  *   playedCompletely: number,
@@ -218,7 +218,7 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @param {string} url
    * @param {Object} adsParams
    * @param {string=} backupUrl
-   * @return {!Promise.<string>}
+   * @return {!Promise<string>}
    */
   requestMediaTailorStream(url, adsParams, backupUrl) {}
 
@@ -236,7 +236,7 @@ shaka.extern.IAdManager = class extends EventTarget {
   /**
    * @param {!google.ima.dai.api.StreamRequest} imaRequest
    * @param {string=} backupUrl
-   * @return {!Promise.<string>}
+   * @return {!Promise<string>}
    */
   requestServerSideStream(imaRequest, backupUrl) {}
 
@@ -246,12 +246,12 @@ shaka.extern.IAdManager = class extends EventTarget {
   replaceServerSideAdTagParameters(adTagParameters) {}
 
   /**
-   * @return {!Array.<!shaka.extern.AdCuePoint>}
+   * @return {!Array<!shaka.extern.AdCuePoint>}
    */
   getServerSideCuePoints() {}
 
   /**
-   * @return {!Array.<!shaka.extern.AdCuePoint>}
+   * @return {!Array<!shaka.extern.AdCuePoint>}
    */
   getCuePoints() {}
 
