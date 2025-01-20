@@ -142,7 +142,7 @@ shaka.test.FakeMediaSourceEngine = class {
         jasmine.createSpy('resync').and.stub();
 
     /** @type {!jasmine.Spy} */
-    this.setLiveSeekableRang =
+    this.setLiveSeekableRange =
         jasmine.createSpy('setLiveSeekableRange').and.stub();
 
     /** @type {!jasmine.Spy} */
