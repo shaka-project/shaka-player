@@ -180,7 +180,7 @@ jasmine.Matchers.prototype.toHaveBeenCalledOnceMore = function() {};
  * with specific arguments. This will reset the call count after each
  * call.
  *
- * @param {!Array.<*>} args
+ * @param {!Array<*>} args
  */
 jasmine.Matchers.prototype.toHaveBeenCalledOnceMoreWith = function(args) {};
 
@@ -280,7 +280,7 @@ jasmine.CallContext = function() {};
 jasmine.CallContext.prototype.object;
 
 
-/** @const {!Array.<?>} */
+/** @const {!Array<?>} */
 jasmine.CallContext.prototype.args;
 
 
@@ -305,16 +305,16 @@ jasmine.CallTracker.prototype.count = function() {};
 
 /**
  * @param {number} i
- * @return {!Array.<?>}
+ * @return {!Array<?>}
  */
 jasmine.CallTracker.prototype.argsFor = function(i) {};
 
 
-/** @return {!Array.<!Array.<?>>} */
+/** @return {!Array<!Array<?>>} */
 jasmine.CallTracker.prototype.allArgs = function() {};
 
 
-/** @return {!Array.<!jasmine.CallContext>} */
+/** @return {!Array<!jasmine.CallContext>} */
 jasmine.CallTracker.prototype.all = function() {};
 
 
@@ -354,7 +354,7 @@ jasmine.createSpy = function(name) {};
 
 /**
  * @param {string} name
- * @param {!Array.<string>} members
+ * @param {!Array<string>} members
  * @return {?}
  */
 jasmine.createSpyObj = function(name, members) {};
@@ -401,8 +401,8 @@ jasmine.stringMatching = function(value) {};
 /**
  * Matches an Array containing all of the values specified, in any order.
  *
- * @param {!Array.<T>} values
- * @return {!Array.<T>}
+ * @param {!Array<T>} values
+ * @return {!Array<T>}
  * @template T
  */
 jasmine.arrayContaining = function(values) {};
@@ -412,8 +412,8 @@ jasmine.arrayContaining = function(values) {};
  * Matches an Array with exactly the values specified, no more, no less, in any
  * order.
  *
- * @param {!Array.<T>} values
- * @return {!Array.<T>}
+ * @param {!Array<T>} values
+ * @return {!Array<T>}
  * @template T
  */
 jasmine.arrayWithExactContents = function(values) {};
@@ -605,7 +605,7 @@ jasmine.Ajax.RequestStub.prototype.data;
 jasmine.Ajax.RequestStub.prototype.method;
 
 
-/** @const {!Object.<string, string>} */
+/** @const {!Object<string, string>} */
 jasmine.Ajax.RequestStub.prototype.requestHeaders;
 
 

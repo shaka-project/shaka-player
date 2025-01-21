@@ -10,7 +10,7 @@ shaka.test.UiUtils = class {
    * @param {!HTMLMediaElement} video
    * @param {!Object=} config
    * @param {?HTMLCanvasElement=} canvas
-   * @return {!Promise.<!shaka.ui.Overlay>}
+   * @return {!Promise<!shaka.ui.Overlay>}
    */
   static async createUIThroughAPI(videoContainer, video, config, canvas) {
     const player = new shaka.Player();
@@ -27,8 +27,8 @@ shaka.test.UiUtils = class {
 
 
   /**
-   * @param {!Array.<!Element>} containers
-   * @param {!Array.<!Element>} videos
+   * @param {!Array<!Element>} containers
+   * @param {!Array<!Element>} videos
    * @suppress {visibility}
    */
   static async createUIThroughDOMAutoSetup(containers, videos) {

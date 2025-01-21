@@ -42,7 +42,7 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
      * The current mappings that will be used when requests are made. Since
      * nothing has been loaded yet, there will be nothing in this map.
      *
-     * @private {!Map.<string, string>}
+     * @private {!Map<string, string>}
      */
     this.currentMap_ = new Map();
 
@@ -51,7 +51,7 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
      * have anything when we first initialize, an empty set means "no
      * preference".
      *
-     * @private {!Set.<string>}
+     * @private {!Set<string>}
      */
     this.currentLocales_ = new Set();
 
@@ -60,7 +60,7 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
      *  - The outer map is a mapping from locale code to localizations.
      *  - The inner map is a mapping from id to localized text.
      *
-     * @private {!Map.<string, !Map.<string, string>>}
+     * @private {!Map<string, !Map<string, string>>}
      */
     this.localizations_ = new Map();
   }
@@ -81,7 +81,7 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
    * an event identifying which locales it does not know. The localization
    * system will then continue to operate using the closest matches it has.
    *
-   * @param {!Iterable.<string>} locales
+   * @param {!Iterable<string>} locales
    *    The locale codes for the requested locales in order of preference.
    * @export
    */
@@ -128,7 +128,7 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
    *
    * @param {string} locale
    *   The locale that the localizations should be added to.
-   * @param {!Map.<string, string>} localizations
+   * @param {!Map<string, string>} localizations
    *   A mapping of id to localized text that should used to modify the internal
    *   collection of localizations.
    * @param {shaka.ui.Localization.ConflictResolution=} conflictResolution
@@ -183,7 +183,7 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
    *      dictionary.set(key, localization.resolve(key));
    *    }
    *
-   * @param {!Map.<string, string>} dictionary
+   * @param {!Map<string, string>} dictionary
    * @export
    */
   resolveDictionary(dictionary) {
@@ -233,7 +233,7 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
   /**
    * The locales currently used. An empty set means "no preference".
    *
-   * @return {!Set.<string>}
+   * @return {!Set<string>}
    * @export
    */
   getCurrentLocales() {
@@ -246,11 +246,11 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
   updateCurrentMap_() {
     const LanguageUtils = shaka.util.LanguageUtils;
 
-    /** @type {!Map.<string, !Map.<string, string>>} */
+    /** @type {!Map<string, !Map<string, string>>} */
     const localizations = this.localizations_;
     /** @type {string} */
     const fallbackLocale = this.fallbackLocale_;
-    /** @type {!Iterable.<string>} */
+    /** @type {!Iterable<string>} */
     const preferredLocales = this.currentLocales_;
 
     /**
@@ -280,7 +280,7 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
      *    'common-HUMAN',
      * ])
      *
-     * @type {!Set.<string>}
+     * @type {!Set<string>}
      */
     const localeOrder = new Set();
 
@@ -316,7 +316,7 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
     localeOrder.add(fallbackLocale);
 
     // Add all the sibling maps.
-    /** @type {!Array.<!Map.<string, string>>} */
+    /** @type {!Array<!Map<string, string>>} */
     const mergeOrder = [];
     for (const locale of localeOrder) {
       const map = localizations.get(locale);
@@ -343,10 +343,10 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
     // missing entries. This will allow app developers to find holes in their
     // localizations.
 
-    /** @type {!Iterable.<string>} */
+    /** @type {!Iterable<string>} */
     const allKeys = this.currentMap_.keys();
 
-    /** @type {!Set.<string>} */
+    /** @type {!Set<string>} */
     const missing = new Set();
 
     for (const locale of this.currentLocales_) {
@@ -373,9 +373,9 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
    * Go through a map and add all the keys that are in |keys| but not in
    * |map| to |missing|.
    *
-   * @param {!Map.<string, string>} map
-   * @param {!Iterable.<string>} keys
-   * @param {!Set.<string>} missing
+   * @param {!Map<string, string>} map
+   * @param {!Iterable<string>} keys
+   * @param {!Set<string>} missing
    * @private
    */
   static findMissingKeys_(map, keys, missing) {
@@ -454,7 +454,7 @@ shaka.ui.Localization.LOCALE_UPDATED = 'locale-updated';
  * @event shaka.ui.Localization.UnknownLocalesEvent
  * @property {string} type
  *   'unknown-locales'
- * @property {!Array.<string>} locales
+ * @property {!Array<string>} locales
  *    The locales that the user wanted but could not be found.
  * @exportDoc
  */
@@ -463,7 +463,7 @@ shaka.ui.Localization.LOCALE_UPDATED = 'locale-updated';
  * @event shaka.ui.Localization.MissingLocalizationsEvent
  * @property {string} type
  *   'unknown-localization'
- * @property {!Array.<string>} locales
+ * @property {!Array<string>} locales
  *    The locales that the user wanted.
  * @property {string} missing
  *    The id of the unknown entry.
@@ -476,7 +476,7 @@ shaka.ui.Localization.LOCALE_UPDATED = 'locale-updated';
  *   'missing-localizations'
  * @property {string} locale
  *    The locale that the user wanted.
- * @property {!Array.<string>} missing
+ * @property {!Array<string>} missing
  *    The ids of the missing entries.
  * @exportDoc
  */
@@ -485,7 +485,7 @@ shaka.ui.Localization.LOCALE_UPDATED = 'locale-updated';
  * @event shaka.ui.Localization.LocaleChangedEvent
  * @property {string} type
  *   'locale-changed'
- * @property {!Array.<string>} locales
+ * @property {!Array<string>} locales
  *    The new set of locales that user wanted,
  *    and that were successfully found.
  * @exportDoc

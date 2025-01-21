@@ -18,7 +18,7 @@ var __karma__ = {};
 __karma__.config = {};
 
 
-/** @const {!Array.<*>} */
+/** @const {!Array<*>} */
 __karma__.config.args;
 
 

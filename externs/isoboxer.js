@@ -57,8 +57,8 @@ var ISOBoxerUtils;
  *   type: string,
  *   size: number,
  *   _parent: ISOBox,
- *   boxes: !Array.<!ISOBox>,
- *   entry: !Array.<!Object>,
+ *   boxes: !Array<!ISOBox>,
+ *   entry: !Array<!Object>,
  *   version: !number,
  *   flags: !number,
  *   sample_count: !number,
@@ -73,8 +73,8 @@ var ISOBoxerUtils;
  *   _procSubEntries: function(!ISOBox, !string, !number, !function(!ISOEntry)),
  *   major_brand: string,
  *   minor_version: number,
- *   compatible_brands: Array.<string>,
- *   _data: Array.<number>,
+ *   compatible_brands: Array<string>,
+ *   _data: Array<number>,
  *   creation_time: number,
  *   modification_time: number,
  *   timescale: number,
@@ -82,9 +82,9 @@ var ISOBoxerUtils;
  *   rate: number,
  *   volume: number,
  *   reserved1: number,
- *   reserved2: (Array.<number>|number),
- *   matrix: Array.<number>,
- *   pre_defined: (Array.<number>|number),
+ *   reserved2: (Array<number>|number),
+ *   matrix: Array<number>,
+ *   pre_defined: (Array<number>|number),
  *   next_track_ID: number,
  *   track_ID: number,
  *   layer: number,
@@ -95,20 +95,20 @@ var ISOBoxerUtils;
  *   language: string,
  *   handler_type: string,
  *   name: string,
- *   reserved: Array.<number>,
+ *   reserved: Array<number>,
  *   graphicsmode: number,
- *   opcolor: Array.<number>,
+ *   opcolor: Array<number>,
  *   balance: number,
- *   entries: Array.<!ISOEntry>,
+ *   entries: Array<!ISOEntry>,
  *   location: string,
  *   data_reference_index: number,
  *   pre_defined1: number,
- *   pre_defined2: Array.<number>,
+ *   pre_defined2: Array<number>,
  *   pre_defined3: number,
  *   horizresolution: number,
  *   vertresolution: number,
  *   frame_count: number,
- *   compressorname: Array.<number>,
+ *   compressorname: Array<number>,
  *   depth: number,
  *   config: Uint8Array,
  *   channelcount: number,
@@ -121,23 +121,23 @@ var ISOBoxerUtils;
  *   scheme_version: number,
  *   default_IsEncrypted: number,
  *   default_IV_size: number,
- *   default_KID: Array.<number>,
+ *   default_KID: Array<number>,
  *   default_sample_description_index: number,
  *   default_sample_duration: number,
  *   default_sample_size: number,
  *   default_sample_flags: number,
  *   baseMediaDecodeTime: number,
  *   usertype: (string|null|undefined),
- *   offset: Array.<number>,
- *   sample_info_size: Array.<number>,
+ *   offset: Array<number>,
+ *   sample_info_size: Array<number>,
  *   data_offset: number
  * }}
  * @property {boolean} _parsing
  * @property {string} type
  * @property {number} size
  * @property {ISOBox} _parent
- * @property {!Array.<!ISOBox>} boxes
- * @property {!Array.<!ISOEntry>} entry
+ * @property {!Array<!ISOBox>} boxes
+ * @property {!Array<!ISOEntry>} entry
  * @property {!number} version
  * @property {!number} flags
  * @property {!number} sample_count
@@ -152,8 +152,8 @@ var ISOBoxerUtils;
  *           } _procSubEntries
  * @property {string} major_brand
  * @property {number} minor_version
- * @property {Array.<string>} compatible_brands
- * @property {Array.<number>} _data
+ * @property {Array<string>} compatible_brands
+ * @property {Array<number>} _data
  * @property {number} creation_time
  * @property {number} modification_time
  * @property {number} timescale
@@ -161,9 +161,9 @@ var ISOBoxerUtils;
  * @property {number} rate
  * @property {number} volume
  * @property {number} reserved1
- * @property {Array.<number>|number} reserved2
- * @property {Array.<number>} matrix
- * @property {Array.<number>|number} pre_defined
+ * @property {Array<number>|number} reserved2
+ * @property {Array<number>} matrix
+ * @property {Array<number>|number} pre_defined
  * @property {number} next_track_ID
  * @property {number} track_ID
  * @property {number} layer
@@ -174,15 +174,15 @@ var ISOBoxerUtils;
  * @property {string} language
  * @property {string} handler_type
  * @property {string} name
- * @property {Array.<number>} reserved
+ * @property {Array<number>} reserved
  * @property {number} graphicsmode
- * @property {Array.<number>} opcolor
+ * @property {Array<number>} opcolor
  * @property {number} balance
- * @property {Array.<!ISOEntry>} entries
+ * @property {Array<!ISOEntry>} entries
  * @property {string} location
  * @property {number} data_reference_index
  * @property {number} pre_defined1
- * @property {Array.<number>} pre_defined2
+ * @property {Array<number>} pre_defined2
  * @property {number} pre_defined3
  * @property {number} horizresolution
  * @property {number} vertresolution
@@ -200,15 +200,15 @@ var ISOBoxerUtils;
  * @property {number} scheme_version
  * @property {number} default_IsEncrypted
  * @property {number} default_IV_size
- * @property {Array.<number>} default_KID
+ * @property {Array<number>} default_KID
  * @property {number} default_sample_description_index
  * @property {number} default_sample_duration
  * @property {number} default_sample_size
  * @property {number} default_sample_flags
  * @property {number} baseMediaDecodeTime
  * @property {string|null|undefined} usertype
- * @property {Array.<number} offset
- * @property {Array.<number} sample_info_size
+ * @property {Array<number} offset
+ * @property {Array<number} sample_info_size
  * @property {number} data_offset
  * @const
  */

@@ -35,7 +35,7 @@ shakaDemo.Search = class {
    * @param {!Element} button
    */
   constructor(container, button) {
-    /** @private {!Array.<!shakaAssets.Feature>} */
+    /** @private {!Array<!shakaAssets.Feature>} */
     this.desiredFeatures_ = [];
 
     /** @private {?shakaAssets.Source} */
@@ -50,7 +50,7 @@ shakaDemo.Search = class {
     /** @private {!Element} */
     this.resultsDiv_ = document.createElement('div');
 
-    /** @private {!Array.<!shakaDemo.AssetCard>} */
+    /** @private {!Array<!shakaDemo.AssetCard>} */
     this.assetCards_ = [];
 
     document.addEventListener('shaka-main-selected-asset-changed', () => {
@@ -204,7 +204,7 @@ shakaDemo.Search = class {
   /**
    * @param {!shakaDemo.Search.SearchTerm} term
    * @param {shakaDemo.Search.TermType} type
-   * @param {!Array.<!shakaDemo.Search.SearchTerm>} others
+   * @param {!Array<!shakaDemo.Search.SearchTerm>} others
    * @private
    */
   addDesiredTerm_(term, type, others) {
@@ -289,7 +289,7 @@ shakaDemo.Search = class {
    * terms.
    * @param {!shakaDemo.InputContainer} searchContainer
    * @param {string} name
-   * @param {!Array.<!shakaDemo.Search.SearchTerm>} choices
+   * @param {!Array<!shakaDemo.Search.SearchTerm>} choices
    * An array of the terms in this term group.
    * @param {shakaDemo.Search.TermType} type
    * The type of term that this term group contains. All of the
@@ -410,7 +410,7 @@ shakaDemo.Search = class {
   }
 
   /**
-   * @return {!Array.<!ShakaDemoAssetInfo>}
+   * @return {!Array<!ShakaDemoAssetInfo>}
    * @private
    */
   searchResults_() {

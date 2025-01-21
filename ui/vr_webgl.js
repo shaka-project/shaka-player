@@ -94,8 +94,8 @@ shaka.ui.VRWebgl = class {
     this.previousCanvasHeight_ = 0;
 
     /**
-     * @private {?{vertices: !Array.<number>, textureCoords: !Array.<number>,
-     *           indices: !Array.<number>}}
+     * @private {?{vertices: !Array<number>, textureCoords: !Array<number>,
+     *           indices: !Array<number>}}
      */
     this.geometry_ = null;
 

@@ -71,7 +71,7 @@ describe('DashParser Live', () => {
   /**
    * Makes a simple live manifest with the given representation contents.
    *
-   * @param {!Array.<string>} lines
+   * @param {!Array<string>} lines
    * @param {number?} updateTime
    * @param {number=} duration
    * @return {string}
@@ -107,8 +107,8 @@ describe('DashParser Live', () => {
    * Make clones of a list of references so that they can be modified without
    * affecting the originals.
    *
-   * @param {!Array.<!shaka.media.SegmentReference>} references
-   * @return {!Array.<!shaka.media.SegmentReference>}
+   * @param {!Array<!shaka.media.SegmentReference>} references
+   * @return {!Array<!shaka.media.SegmentReference>}
    */
   function cloneRefs(references) {
     return references.map((ref) => {
@@ -133,24 +133,24 @@ describe('DashParser Live', () => {
    * Creates tests that test the behavior common between SegmentList and
    * SegmentTemplate.
    *
-   * @param {!Array.<string>} basicLines
-   * @param {!Array.<!shaka.media.SegmentReference>} basicRefs
-   * @param {!Array.<string>} updateLines
-   * @param {!Array.<!shaka.media.SegmentReference>} updateRefs
-   * @param {!Array.<string>} partialUpdateLines
+   * @param {!Array<string>} basicLines
+   * @param {!Array<!shaka.media.SegmentReference>} basicRefs
+   * @param {!Array<string>} updateLines
+   * @param {!Array<!shaka.media.SegmentReference>} updateRefs
+   * @param {!Array<string>} partialUpdateLines
    */
   function testCommonBehaviors(
       basicLines, basicRefs, updateLines, updateRefs, partialUpdateLines) {
     /**
      * Tests that an update will show the given references.
      *
-     * @param {!Array.<string>} firstLines The Representation contents for the
+     * @param {!Array<string>} firstLines The Representation contents for the
      *   first manifest.
-     * @param {!Array.<!shaka.media.SegmentReference>} firstReferences The media
+     * @param {!Array<!shaka.media.SegmentReference>} firstReferences The media
      *   references for the first parse.
-     * @param {!Array.<string>} secondLines The Representation contents for the
+     * @param {!Array<string>} secondLines The Representation contents for the
      *   updated manifest.
-     * @param {!Array.<!shaka.media.SegmentReference>} secondReferences The
+     * @param {!Array<!shaka.media.SegmentReference>} secondReferences The
      *   media references for the updated manifest.
      */
     async function testBasicUpdate(
@@ -265,9 +265,9 @@ describe('DashParser Live', () => {
       Date.now = () => 0;
       const manifest = await parser.start('dummy://foo', playerInterface);
 
-      /** @const {!Array.<!shaka.media.SegmentReference>} */
+      /** @const {!Array<!shaka.media.SegmentReference>} */
       const period1Refs = cloneRefs(basicRefs);
-      /** @const {!Array.<!shaka.media.SegmentReference>} */
+      /** @const {!Array<!shaka.media.SegmentReference>} */
       const period2Refs = cloneRefs(basicRefs);
       for (const ref of period2Refs) {
         ref.timestampOffset = pStart;
@@ -275,7 +275,7 @@ describe('DashParser Live', () => {
         ref.endTime += pStart;
         ref.trueEndTime += pStart;
       }
-      /** @const {!Array.<!shaka.media.SegmentReference>} */
+      /** @const {!Array<!shaka.media.SegmentReference>} */
       const allRefs = period1Refs.concat(period2Refs);
 
       const stream1 = manifest.variants[0].video;

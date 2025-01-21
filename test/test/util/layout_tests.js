@@ -57,7 +57,7 @@ shaka.test.LayoutTests = class {
    * knows if the browser is connected via WebDriver.  So this must be checked
    * in Karma via an HTTP request.
    *
-   * @return {!Promise.<boolean>}
+   * @return {!Promise<boolean>}
    */
   static async supported() {
     // We need our own ID for Karma to look up the WebDriver connection.

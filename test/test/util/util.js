@@ -288,7 +288,7 @@ shaka.test.Util = class {
    * Fetches the resource at the given URI.
    *
    * @param {string} uri
-   * @return {!Promise.<!ArrayBuffer>}
+   * @return {!Promise<!ArrayBuffer>}
    */
   static async fetch(uri) {
     const response = await fetch(uri);
@@ -345,7 +345,7 @@ shaka.test.Util = class {
    * @param {!string} mimetype
    * @param {?number=} width
    * @param {?number=} height
-   * @return {!Promise.<boolean>}
+   * @return {!Promise<boolean>}
    */
   static async isTypeSupported(mimetype, width, height) {
     const MimeUtils = shaka.util.MimeUtils;

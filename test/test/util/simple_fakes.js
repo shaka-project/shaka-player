@@ -21,7 +21,7 @@ shaka.test.FakeAbrManager = class {
     /** @type {number} */
     this.chooseIndex = 0;
 
-    /** @type {!Array.<shaka.extern.Variant>} */
+    /** @type {!Array<shaka.extern.Variant>} */
     this.variants = [];
 
     /** @type {shaka.extern.AbrManager.SwitchCallback} */
@@ -156,10 +156,10 @@ shaka.test.FakeManifestParser = class {
 shaka.test.FakeVideo = class {
   /** @param {number=} currentTime */
   constructor(currentTime) {
-    /** @const {!Object.<string, !Function>} */
+    /** @const {!Object<string, !Function>} */
     this.on = {};  // event listeners
 
-    /** @type {!Array.<!TextTrack>} */
+    /** @type {!Array<!TextTrack>} */
     this.textTracks = [];
 
     // In a real video element, textTracks is an event target.
@@ -254,7 +254,7 @@ shaka.test.FakeVideo = class {
 /**
  * Creates a fake buffered ranges object.
  *
- * @param {!Array.<{start: number, end: number}>} ranges
+ * @param {!Array<{start: number, end: number}>} ranges
  * @return {!TimeRanges}
  */
 function createFakeBuffered(ranges) {
@@ -402,7 +402,7 @@ shaka.test.FakeTextTrack = class {
     // "extend" TextTrack, so it won't let us assign to cues here.  But we
     // must, because this fake is a from-scratch implementation of the API.
     // This cast-hack works around the issue.
-    /** @type {!Array.<TextTrackCue>} */
+    /** @type {!Array<TextTrackCue>} */
     const cues = [];
     (/** @type {?} */(this))['cues'] = cues;
 

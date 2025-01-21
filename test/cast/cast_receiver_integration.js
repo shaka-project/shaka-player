@@ -34,10 +34,10 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
 
   /** @type {shaka.util.PublicPromise} */
   let messageWaitPromise;
-  /** @type {Array.<string>} */
+  /** @type {Array<string>} */
   let pendingMessages = null;
 
-  /** @type {!Array.<function()>} */
+  /** @type {!Array<function()>} */
   let toRestore;
   let pendingWaitWrapperCalls = 0;
 

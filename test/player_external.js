@@ -240,7 +240,7 @@ describe('Player', () => {
 
   /**
    * @param {ShakaDemoAssetInfo} asset
-   * @return {!Promise.<string>}
+   * @return {!Promise<string>}
    */
   async function getManifestUri(asset) {
     let manifestUri = asset.manifestUri;
@@ -259,7 +259,7 @@ describe('Player', () => {
 
   /**
    * @param {ShakaDemoAssetInfo} asset
-   * @return {!Promise.<string>}
+   * @return {!Promise<string>}
    */
   async function getManifestUriFromAdManager(asset) {
     try {
@@ -304,7 +304,7 @@ describe('Player', () => {
 
   /**
    * @param {ShakaDemoAssetInfo} asset
-   * @return {!Promise.<string>}
+   * @return {!Promise<string>}
    */
   async function getManifestUriFromMediaTailorAdManager(asset) {
     try {

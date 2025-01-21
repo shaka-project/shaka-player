@@ -26,7 +26,7 @@ shaka.test.FakeSegmentPrefetch = class {
     this.prefetchLimit_ = prefetchLimit;
 
     /**
-     * @private {(Set.<!shaka.media.SegmentReference|
+     * @private {(Set<!shaka.media.SegmentReference|
      *      !shaka.media.InitSegmentReference>)}
      */
     this.requestedReferences_ = new Set();
@@ -35,7 +35,7 @@ shaka.test.FakeSegmentPrefetch = class {
     this.streamObj_ = stream;
 
     /**
-     * @private {!Object.<string, shaka.test.FakeMediaSourceEngine.SegmentData>}
+     * @private {!Object<string, shaka.test.FakeMediaSourceEngine.SegmentData>}
      */
     this.segmentData_ = segmentData;
 

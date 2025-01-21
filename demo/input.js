@@ -122,7 +122,7 @@ shakaDemo.SelectInput = class extends shakaDemo.Input {
    * @param {!shakaDemo.InputContainer} parentContainer
    * @param {?string} name
    * @param {function(!HTMLInputElement, !shakaDemo.Input)} onChange
-   * @param {!Object.<string, string>} values
+   * @param {!Object<string, string>} values
    */
   constructor(parentContainer, name, onChange, values) {
     super(parentContainer, 'select', 'div', 'label', onChange);
@@ -203,7 +203,7 @@ shakaDemo.DatalistInput = class extends shakaDemo.TextInput {
    * @param {!shakaDemo.InputContainer} parentContainer
    * @param {string} name
    * @param {function(!HTMLInputElement, !shakaDemo.Input)} onChange
-   * @param {!Array.<string>} values
+   * @param {!Array<string>} values
    */
   constructor(parentContainer, name, onChange, values) {
     super(parentContainer, name, onChange, /* isTextArea= */ false);

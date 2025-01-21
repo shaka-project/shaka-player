@@ -109,7 +109,7 @@ describe('HlsParser', () => {
    * @param {string} media
    * @param {shaka.extern.Manifest} manifest
    * @param {string=} media2
-   * @return {!Promise.<shaka.extern.Manifest>}
+   * @return {!Promise<shaka.extern.Manifest>}
    */
   async function testHlsParser(master, media, manifest, media2) {
     fakeNetEngine
@@ -3112,7 +3112,7 @@ describe('HlsParser', () => {
 
     /**
      * @param {string} media
-     * @param {!Array.<number>} startTimes
+     * @param {!Array<number>} startTimes
      * @param {number} syncTimeOffset
      * @param {(function(!shaka.media.SegmentReference))=} modifyFn
      * @param {boolean=} isLowLatency

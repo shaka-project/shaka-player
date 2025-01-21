@@ -243,7 +243,7 @@ shakaAssets.UplynkRequestFilter = (type, request) => {
 
 
 /* eslint-disable max-len */
-/** @const {!Array.<!ShakaDemoAssetInfo>} */
+/** @const {!Array<!ShakaDemoAssetInfo>} */
 shakaAssets.testAssets = [
   // Shaka assets {{{
   new ShakaDemoAssetInfo(
@@ -1134,6 +1134,14 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.TRICK_MODE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'DASH-IF - DASH Annex I',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/annexI_a=X,b=Y/testpic_2s/Manifest.mpd?a=X&b=Y',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.DASH),
   // End DASH-IF Assets }}}
 
   // bitcodin assets {{{
