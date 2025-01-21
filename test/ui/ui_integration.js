@@ -112,11 +112,11 @@ describe('UI', () => {
   });
 
   describe('language selections', () => {
-    /** @type {!Map.<string, !HTMLElement>} */
+    /** @type {!Map<string, !HTMLElement>} */
     let languagesToButtons;
-    /** @type {!Array.<string>} */
+    /** @type {!Array<string>} */
     let langsFromContent;
-    /** @type {!Array.<!HTMLElement>} */
+    /** @type {!Array<!HTMLElement>} */
     let languageButtons;
     /** @type {!Element} */
     let languageMenu;
@@ -228,7 +228,7 @@ describe('UI', () => {
     });  // describe('caption selection')
 
     /**
-     * @param {!Array.<shaka.extern.LanguageRole>} languagesAndRoles
+     * @param {!Array<shaka.extern.LanguageRole>} languagesAndRoles
      */
     function setupLanguageTests(languagesAndRoles) {
       langsFromContent = languagesAndRoles.map((langAndRole) => {
@@ -266,7 +266,7 @@ describe('UI', () => {
 
     /**
      * @param {string} playerEventName
-     * @param {function():!Array.<!shaka.extern.Track>} getTracks
+     * @param {function(): !Array<!shaka.extern.Track>} getTracks
      */
     async function verifyLanguageChangeViaUI(playerEventName, getTracks) {
       expect(getSelectedTrack(getTracks()).language).toBe(oldLanguage);
@@ -281,7 +281,7 @@ describe('UI', () => {
 
     /**
      * @param {string} controlsEventName
-     * @param {function():!Array.<!shaka.extern.Track>} getTracks
+     * @param {function(): !Array<!shaka.extern.Track>} getTracks
      * @param {function(string)} selectLanguage
      */
     async function verifyLanguageChangeViaAPI(
@@ -312,9 +312,9 @@ describe('UI', () => {
   });  // describe('language selections')
 
   describe('resolution selection', () => {
-    /** @type {!Map.<number, !HTMLElement>} */
+    /** @type {!Map<number, !HTMLElement>} */
     let resolutionsToButtons;
-    /** @type {!Array.<!HTMLElement>} */
+    /** @type {!Array<!HTMLElement>} */
     let resolutionButtons;
     /** @type {!Element} */
     let resolutionsMenu;
@@ -322,7 +322,7 @@ describe('UI', () => {
     let oldResolution;
     /** @type {number} */
     let newResolution;
-    /** @type {!Array.<shaka.extern.Track>} */
+    /** @type {!Array<shaka.extern.Track>} */
     let tracks;
     /** @type {string} */
     let preferredLanguage;
@@ -471,7 +471,7 @@ describe('UI', () => {
      * appears in the UI
      *
      * @param {number} id
-     * @param {!Array.<!shaka.extern.Track>} tracks
+     * @param {!Array<!shaka.extern.Track>} tracks
      * @return {string}
      */
     function formatResolution(id, tracks) {
@@ -491,7 +491,7 @@ describe('UI', () => {
     }
 
     /**
-     * @param {!Array.<!shaka.extern.Track>} tracks
+     * @param {!Array<!shaka.extern.Track>} tracks
      * @param {number} height
      * @return {shaka.extern.Track}
      */
@@ -595,7 +595,7 @@ describe('UI', () => {
   });  // describe('UI element plugins')
 
   /**
-   * @param {!Array.<!shaka.extern.Track>} tracks
+   * @param {!Array<!shaka.extern.Track>} tracks
    * @return {!shaka.extern.Track}
    */
   function getSelectedTrack(tracks) {
@@ -607,10 +607,10 @@ describe('UI', () => {
   }
 
   /**
-   * @param {!Array.<!HTMLElement>} buttons
-   * @param {!Array.<string>|!Array.<number>} choices
+   * @param {!Array<!HTMLElement>} buttons
+   * @param {!Array<string> | !Array<number>} choices
    * @param {function(string):string|function(number):string} modifier
-   * @return {!Map.<string, !HTMLElement>|!Map.<number, !HTMLElement>}
+   * @return {!Map<string, !HTMLElement> | !Map<number, !HTMLElement>}
    */
   function mapChoicesToButtons(buttons, choices, modifier) {
     expect(buttons.length).toBe(choices.length);
@@ -636,8 +636,8 @@ describe('UI', () => {
    * Filter out buttons with given classes.
    *
    * @param {!NodeList} buttons
-   * @param {!Array.<string>} excludeClasses
-   * @return {!Array.<!HTMLElement>}
+   * @param {!Array<string>} excludeClasses
+   * @return {!Array<!HTMLElement>}
    */
   function filterButtons(buttons, excludeClasses) {
     return shaka.util.Iterables.filter(buttons,
@@ -656,8 +656,8 @@ describe('UI', () => {
    * Make sure elements from content match their UI representation.
    * (The order doesn't matter).
    *
-   * @param {!Array.<string>} elementsFromContent
-   * @param {!Array.<!HTMLElement>} elementsFromUI
+   * @param {!Array<string>} elementsFromContent
+   * @param {!Array<!HTMLElement>} elementsFromUI
    */
   function verifyItems(elementsFromContent, elementsFromUI) {
     for (const element of elementsFromUI) {

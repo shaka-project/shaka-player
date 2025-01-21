@@ -21,7 +21,7 @@ goog.requireType('shaka.ui.Localization');
 
 shaka.ui.LanguageUtils = class {
   /**
-   * @param {!Array.<shaka.extern.Track>} tracks
+   * @param {!Array<shaka.extern.Track>} tracks
    * @param {!HTMLElement} langMenu
    * @param {function(!shaka.extern.Track)} onTrackSelected
    * @param {boolean} updateChosen
@@ -122,7 +122,7 @@ shaka.ui.LanguageUtils = class {
       return name ? ' ' + name : name;
     };
 
-    /** @type {!Map.<string, !Set.<string>>} */
+    /** @type {!Map<string, !Set<string>>} */
     const rolesByLanguage = new Map();
     for (const track of tracks) {
       if (!rolesByLanguage.has(track.language)) {
@@ -132,7 +132,7 @@ shaka.ui.LanguageUtils = class {
     }
 
     // 5. Add new buttons
-    /** @type {!Set.<string>} */
+    /** @type {!Set<string>} */
     const combinationsMade = new Set();
     const selectedCombination = selectedTrack ? getCombination(
         selectedTrack.language, getRolesString(selectedTrack),

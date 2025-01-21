@@ -139,7 +139,7 @@ describe('HlsParser live', () => {
    * @param {string} master
    * @param {string} initialMedia
    * @param {Array=} initialReferences
-   * @return {!Promise.<shaka.extern.Manifest>}
+   * @return {!Promise<shaka.extern.Manifest>}
    */
   async function testInitialManifest(
       master, initialMedia, initialReferences=null) {
@@ -1395,7 +1395,7 @@ describe('HlsParser live', () => {
   });  // describe('playlist type LIVE')
 
   /**
-   * @param {string|Array.<string>} uri A relative URI to http://example.com
+   * @param {string | Array<string>} uri A relative URI to http://example.com
    * @param {number} start
    * @param {number} end
    * @param {?number} syncTime
@@ -1403,7 +1403,7 @@ describe('HlsParser live', () => {
    * @param {number=} startByte
    * @param {?number=} endByte
    * @param {number=} timestampOffset
-   * @param {!Array.<!shaka.media.SegmentReference>=} partialReferences
+   * @param {!Array<!shaka.media.SegmentReference>=} partialReferences
    * @param {?string=} tilesLayout
    * @return {!shaka.media.SegmentReference}
    */

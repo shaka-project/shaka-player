@@ -39,7 +39,7 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
     this.parent.appendChild(this.button_);
     this.updateAriaLabel_();
 
-    /** @private {!Array.<number>} */
+    /** @private {!Array<number>} */
     this.fastForwardRates_ = this.controls.getConfig().fastForwardRates;
 
     this.eventManager.listen(

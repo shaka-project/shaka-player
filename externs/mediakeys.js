@@ -13,6 +13,6 @@
 
 /**
  * @param {Object} policy
- * @return {!Promise.<string>}
+ * @return {!Promise<string>}
  */
 MediaKeys.prototype.getStatusForPolicy = function(policy) {};

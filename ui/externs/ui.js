@@ -61,14 +61,14 @@ shaka.extern.UIVolumeBarColors;
  * The UI's configuration options.
  *
  * @typedef {{
- *   controlPanelElements: !Array.<string>,
- *   overflowMenuButtons: !Array.<string>,
- *   contextMenuElements: !Array.<string>,
- *   statisticsList: !Array.<string>,
- *   adStatisticsList: !Array.<string>,
- *   playbackRates: !Array.<number>,
- *   fastForwardRates: !Array.<number>,
- *   rewindRates: !Array.<number>,
+ *   controlPanelElements: !Array<string>,
+ *   overflowMenuButtons: !Array<string>,
+ *   contextMenuElements: !Array<string>,
+ *   statisticsList: !Array<string>,
+ *   adStatisticsList: !Array<string>,
+ *   playbackRates: !Array<number>,
+ *   fastForwardRates: !Array<number>,
+ *   rewindRates: !Array<number>,
  *   addSeekBar: boolean,
  *   addBigPlayButton: boolean,
  *   customContextMenu: boolean,
@@ -103,21 +103,21 @@ shaka.extern.UIVolumeBarColors;
  *   showVideoCodec: boolean
  * }}
  *
- * @property {!Array.<string>} controlPanelElements
+ * @property {!Array<string>} controlPanelElements
  *   The ordered list of control panel elements of the UI.
- * @property {!Array.<string>} overflowMenuButtons
+ * @property {!Array<string>} overflowMenuButtons
  *   The ordered list of the overflow menu buttons.
- * @property {!Array.<string>} contextMenuElements
+ * @property {!Array<string>} contextMenuElements
  *   The ordered list of buttons in the context menu.
- * @property {!Array.<string>} statisticsList
+ * @property {!Array<string>} statisticsList
  *   The ordered list of statistics present in the statistics container.
- * @property {!Array.<string>} adStatisticsList
+ * @property {!Array<string>} adStatisticsList
  *   The ordered list of ad statistics present in the ad statistics container.
- * @property {!Array.<number>} playbackRates
+ * @property {!Array<number>} playbackRates
  *   The ordered list of rates for playback selection.
- * @property {!Array.<number>} fastForwardRates
+ * @property {!Array<number>} fastForwardRates
  *   The ordered list of rates for fast forward selection.
- * @property {!Array.<number>} rewindRates
+ * @property {!Array<number>} rewindRates
  *   The ordered list of rates for rewind selection.
  * @property {boolean} addSeekBar
  *   Whether or not a seek bar should be part of the UI.
@@ -376,8 +376,8 @@ shaka.extern.IUIRangeElement = class {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
-   * @param {!Array.<string>} containerClassNames
-   * @param {!Array.<string>} barClassNames
+   * @param {!Array<string>} containerClassNames
+   * @param {!Array<string>} barClassNames
    */
   constructor(parent, controls, containerClassNames, barClassNames) {
     /**

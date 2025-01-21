@@ -1519,11 +1519,11 @@ describe('Player', () => {
   });
 
   describe('tracks', () => {
-    /** @type {!Array.<shaka.extern.Track>} */
+    /** @type {!Array<shaka.extern.Track>} */
     let variantTracks;
-    /** @type {!Array.<shaka.extern.Track>} */
+    /** @type {!Array<shaka.extern.Track>} */
     let textTracks;
-    /** @type {!Array.<shaka.extern.Track>} */
+    /** @type {!Array<shaka.extern.Track>} */
     let imageTracks;
 
     beforeEach(async () => {
@@ -2868,7 +2868,7 @@ describe('Player', () => {
     });
 
     /**
-     * @param {!Array.<string>} languages
+     * @param {!Array<string>} languages
      * @param {string} preference
      * @param {number} expectedIndex
      * @return {!Promise}
@@ -3123,7 +3123,7 @@ describe('Player', () => {
 
       /**
        * Checks that the switch history is correct.
-       * @param {!Array.<shaka.extern.TrackChoice>} additional
+       * @param {!Array<shaka.extern.TrackChoice>} additional
        */
       function checkHistory(additional) {
         const variantPrefix = {
@@ -4973,7 +4973,7 @@ describe('Player', () => {
   }
 
   /**
-   * @param {!Object.<string, string>} keyStatusMap
+   * @param {!Object<string, string>} keyStatusMap
    * @suppress {accessControls}
    */
   function onKeyStatus(keyStatusMap) {

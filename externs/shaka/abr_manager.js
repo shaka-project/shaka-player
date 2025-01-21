@@ -53,7 +53,7 @@ shaka.extern.AbrManager = class {
   /**
    * Updates manager's variants collection.
    *
-   * @param {!Array.<!shaka.extern.Variant>} variants
+   * @param {!Array<!shaka.extern.Variant>} variants
    * @exportDoc
    */
   setVariants(variants) {}

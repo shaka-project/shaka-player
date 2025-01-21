@@ -109,7 +109,7 @@ function DocumentPictureInPicture() {}
 
 /**
  * @param {DocumentPictureInPictureOptions} options
- * @return {!Promise.<Window>}
+ * @return {!Promise<Window>}
  */
 DocumentPictureInPicture.prototype.requestWindow = function(options) {};
 

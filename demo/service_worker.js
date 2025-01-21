@@ -45,7 +45,7 @@ const NETWORK_TIMEOUT = 2;
  * An array of resources that MUST be cached to make the application
  * available offline.
  *
- * @const {!Array.<string>}
+ * @const {!Array<string>}
  */
 const CRITICAL_RESOURCES = [
   '.',  // This resolves to the page.
@@ -85,7 +85,7 @@ const CRITICAL_RESOURCES = [
  * flag and be cached as "opaque" resources.  This is critical for the cast
  * sender SDK below.
  *
- * @const {!Array.<string>}
+ * @const {!Array<string>}
  */
 const OPTIONAL_RESOURCES = [
   // Optional graphics.  Without these, the site won't be broken.
@@ -110,7 +110,7 @@ const OPTIONAL_RESOURCES = [
  * and SHOULD be served from cache first without waiting for updated versions
  * from the network.
  *
- * @const {!Array.<string>}
+ * @const {!Array<string>}
  */
 const CACHEABLE_URL_PREFIXES = [
   // Translations should be cached.  We don't know which ones the user will
@@ -267,7 +267,7 @@ function onFetch(event) {
  * the cache, or both, and return the appropriate version of the resource.
  *
  * @param {!Request} request
- * @return {!Promise.<!Response>}
+ * @return {!Promise<!Response>}
  */
 async function fetchCacheableResource(request) {
   const cache = await caches.open(CACHE_NAME);
@@ -306,7 +306,7 @@ async function fetchCacheableResource(request) {
  *
  * @param {!Cache} cache
  * @param {!Request} request
- * @return {!Promise.<!Response>}
+ * @return {!Promise<!Response>}
  */
 async function fetchAndCache(cache, request) {
   const response = await fetch(request);
@@ -326,8 +326,8 @@ async function fetchAndCache(cache, request) {
  * |asyncProcess| is still allowed to complete.
  *
  * @param {number} seconds
- * @param {!Promise.<T>} asyncProcess
- * @return {!Promise.<T>}
+ * @param {!Promise<T>} asyncProcess
+ * @return {!Promise<T>}
  * @template T
  */
 function timeout(seconds, asyncProcess) {

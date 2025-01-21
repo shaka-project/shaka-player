@@ -66,8 +66,9 @@ export default [
       jsdoc: {
         mode: 'closure',
         preferredTypes: {
-          object: 'Object',
-          symbol: 'Symbol',
+          '.<>': '<>',
+          'object': 'Object',
+          'symbol': 'Symbol',
         },
         tagNamePreference: {
           augments: 'extends',

@@ -75,7 +75,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
   /** @private */
   updateResolutionSelection_() {
     const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat;
-    /** @type {!Array.<shaka.extern.Track>} */
+    /** @type {!Array<shaka.extern.Track>} */
     let tracks = [];
     // When played with src=, the variant tracks available from
     // player.getVariantTracks() represent languages, not resolutions.
@@ -259,7 +259,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
   /**
    * @param {!shaka.extern.Track} track
-   * @param {!Array.<!shaka.extern.Track>} tracks
+   * @param {!Array<!shaka.extern.Track>} tracks
    * @return {string}
    * @private
    */

@@ -145,13 +145,13 @@ shaka.test.StreamingEngineUtil = class {
    * PERIOD_TYPE_POSITION, e.g., "1_text_2" or "2_video_5".
    *
    * @param {!shaka.media.PresentationTimeline} presentationTimeline
-   * @param {!Array.<number>} periodStartTimes The start time of each Period.
+   * @param {!Array<number>} periodStartTimes The start time of each Period.
    * @param {number} presentationDuration
-   * @param {!Object.<string, number>} segmentDurations The duration of each
+   * @param {!Object<string, number>} segmentDurations The duration of each
    *   type of segment.
-   * @param {!Object.<string, !Array.<number>>} initSegmentRanges The byte
+   * @param {!Object<string, !Array<number>>} initSegmentRanges The byte
    *   ranges for each type of init segment.
-   * @param {!Object.<string,number>=} timestampOffsets The timestamp offset
+   * @param {!Object<string, number>=} timestampOffsets The timestamp offset
    *  for each type of segment
    * @param {shaka.extern.aesKey=} aesKey The AES-128 key to provide
    *  to streams, if desired.

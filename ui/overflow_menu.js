@@ -39,7 +39,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     /** @private {HTMLElement} */
     this.controlsContainer_ = this.controls.getControlsContainer();
 
-    /** @private {!Array.<shaka.extern.IUIElement>} */
+    /** @private {!Array<shaka.extern.IUIElement>} */
     this.children_ = [];
 
     this.addOverflowMenuButton_();
@@ -217,6 +217,6 @@ shaka.ui.Controls.registerElement(
     'overflow_menu', new shaka.ui.OverflowMenu.Factory());
 
 
-/** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
+/** @private {!Map<string, !shaka.extern.IUIElement.Factory>} */
 shaka.ui.OverflowMenu.elementNamesToFactories_ = new Map();
 

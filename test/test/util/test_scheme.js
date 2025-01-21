@@ -15,7 +15,7 @@
  *   codecs: string,
  *   delaySetup: (boolean|undefined),
  *   language: (string|undefined),
- *   closedCaptions: (!Map.<string, string>|undefined),
+ *   closedCaptions: (!Map<string, string>|undefined),
  *   initData: (string|undefined)
  * }}
  */
@@ -34,7 +34,7 @@ let TextMetadataType;
 /**
  * @typedef {{
  *   delaySetup: (boolean|undefined),
- *   closedCaptions: (!Map.<string, string>|undefined),
+ *   closedCaptions: (!Map<string, string>|undefined),
  *   initData: (string|undefined),
  *   language: (string|undefined)
  * }}
@@ -46,12 +46,12 @@ let ExtraMetadataType;
  *   video: AVMetadataType,
  *   audio: AVMetadataType,
  *   text: TextMetadataType,
- *   videoResolutions: (!Array.<!Array.<number>>|undefined),
- *   audioLanguages: (!Array.<string>|undefined),
- *   textLanguages: (!Array.<string>|undefined),
+ *   videoResolutions: (!Array<!Array<number>>|undefined),
+ *   audioLanguages: (!Array<string>|undefined),
+ *   textLanguages: (!Array<string>|undefined),
  *   duration: number,
- *   licenseServers: (!Object.<string, string>|undefined),
- *   licenseRequestHeaders: (!Object.<string, string>|undefined),
+ *   licenseServers: (!Object<string, string>|undefined),
+ *   licenseRequestHeaders: (!Object<string, string>|undefined),
  *   customizeStream: (function(shaka.test.ManifestGenerator.Stream)|undefined),
  *   sequenceMode: (boolean|undefined),
  *   nextUrl: (string|undefined)
@@ -396,11 +396,11 @@ shaka.test.TestScheme = class {
 };
 
 
-/** @const {!Object.<string, shaka.extern.Manifest>} */
+/** @const {!Object<string, shaka.extern.Manifest>} */
 shaka.test.TestScheme.MANIFESTS = {};
 
 
-/** @const {!Object.<string, !Object.<string, !shaka.test.IStreamGenerator>>} */
+/** @const {!Object<string, !Object<string, !shaka.test.IStreamGenerator>>} */
 shaka.test.TestScheme.GENERATORS = {};
 
 
@@ -462,7 +462,7 @@ const sintelEncryptedAudio = {
       'bmVfdGVzdCIIzsW/9dxA3ckyAA==',
 };
 
-/** @type {!Object.<string, string>} */
+/** @type {!Object<string, string>} */
 const widevineDrmServers = {
   'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
 };
@@ -512,7 +512,7 @@ const axinomMultiDrmAudioSegment = {
   initData: axinomMultiDrmInitData,
 };
 
-/** @type {!Object.<string, string>} */
+/** @type {!Object<string, string>} */
 const axinomDrmServers = {
   // NOTE: These are not Axinom's actual servers.  These are test servers for
   // Widevine and PlayReady that let us specify the known key IDs and keys for
@@ -539,7 +539,7 @@ function inherit(base, overrides) {
   return Object.assign({}, base, overrides);
 }
 
-/** @const {!Object.<string, MetadataType>} */
+/** @const {!Object<string, MetadataType>} */
 shaka.test.TestScheme.DATA = {
   'sintel': {
     video: sintelVideoSegment,

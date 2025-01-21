@@ -122,7 +122,7 @@ goog.uri.utils.ComponentIndex = {
  * </pre>
  *
  * @param {string} uri The URI string to examine.
- * @return {!Array.<string|undefined>} Each component still URI-encoded.
+ * @return {!Array<string|undefined>} Each component still URI-encoded.
  *     Each component that is present will contain the encoded value, whereas
  *     components that are not present will be undefined or empty, depending
  *     on the browser's regular expression implementation.  Never null, since
@@ -130,6 +130,6 @@ goog.uri.utils.ComponentIndex = {
  */
 goog.uri.utils.split = function(uri) {
   // See @return comment -- never null.
-  return /** @type {!Array.<string|undefined>} */ (
+  return /** @type {!Array<string|undefined>} */ (
       uri.match(goog.uri.utils.splitRe_));
 };
