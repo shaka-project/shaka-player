@@ -1374,7 +1374,8 @@ shaka.extern.MssManifestConfiguration;
  * @property {number} defaultPresentationDelay
  *   For DASH, it's a default <code>presentationDelay</code> value if
  *   <code>suggestedPresentationDelay</code> is missing in the MPEG DASH
- *   manifest. The default value is <code>1.5 * minBufferTime</code> if not
+ *   manifest. The default value is the lower of <code>1.5 *
+ *   minBufferTime</code> and <code>segmentAvailabilityDuration</code> if not
  *   configured or set as 0.
  *   For HLS, the default value is 3 segments duration if not configured or
  *   set as 0.
