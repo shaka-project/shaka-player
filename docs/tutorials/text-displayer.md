@@ -2,21 +2,38 @@
 
 ### Default displayers
 
-Shaka Player supports two implementations of {@link shaka.extern.TextDisplayer}.
-1) {@link shaka.text.SimpleTextDisplayer} which uses browser's native cue
-  renderer. Shaka Player creates a custom text track attached to the video
-  element and provides necessary data so video element can render it. This is
-  the default displayer when shaka UI is **not** used.
-2) {@link shaka.text.UITextDisplayer} which renders subtitles inside of a DOM
-  container provided to shaka by a {@link shaka.Player#setVideoContainer}
-  method. This call is done automatically when using Shaka UI.
+Shaka Player supports two implementations of {@link shaka.extern.TextDisplayer}
+which can be used to render & style content subtitles.
+
+#### SimpleTextDisplayer
+
+{@link shaka.text.SimpleTextDisplayer} which uses browser's native cue
+renderer. Shaka Player creates a custom text track attached to the video
+element and provides necessary data so video element can render it. This is
+the default displayer when shaka UI is **not** used.
+
+#### UITextDisplayer
+
+{@link shaka.text.UITextDisplayer} which renders subtitles inside of a DOM
+container provided to shaka.
+Container can be provided in 2 ways, by either a {@link shaka.Player}
+constructor or a {@link shaka.Player#setVideoContainer} method. This call
+is done automatically when using Shaka UI.
+```js
+// Take your custom video container element.
+const container = document.getElementById('video_container');
+// Attach container using player constructor.
+const player = new shaka.Player(/* mediaElement= */ null, container);
+// Alternatively, pass it using dedicated method.
+player.setVideoContainer(container);
+```
 
 ### Text displayer configuration
 
 Additional configuration for the text displayer can be passed by calling:
 ```js
 player.configure({
-   textDisplayer: {...}
+   textDisplayer: {/*...*/}
 });
 ```
 See {@link shaka.extern.TextDisplayerConfiguration} for more details.
