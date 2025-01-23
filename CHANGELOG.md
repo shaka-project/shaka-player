@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.11.21](https://github.com/shaka-project/shaka-player/compare/v4.11.20...v4.11.21) (2025-01-23)
+
+
+### Bug Fixes
+
+* Avoid setAppendWindow when the window is Infinity ([#7923](https://github.com/shaka-project/shaka-player/issues/7923)) ([2801876](https://github.com/shaka-project/shaka-player/commit/2801876a2653ae4166da4dbc6cdab996d5b858e5))
+* **CEA:** Fix multi byte language support in CEA-708 ([#7929](https://github.com/shaka-project/shaka-player/issues/7929)) ([8c516d2](https://github.com/shaka-project/shaka-player/commit/8c516d215d7d2e757ec83138c0c1f12a0cc3ed6b))
+* **DASH:** Change fallback presentation delay ([#7918](https://github.com/shaka-project/shaka-player/issues/7918)) ([c2f01b6](https://github.com/shaka-project/shaka-player/commit/c2f01b65842c8a612aa4813e3d9fdda07e74349b))
+* **DASH:** Ignore early segments in a period ([#7910](https://github.com/shaka-project/shaka-player/issues/7910)) ([bcb6a92](https://github.com/shaka-project/shaka-player/commit/bcb6a92ecee0ab939be41de4e49512f5afdad55e))
+* **DASH:** Notify time range with the fitted timeline ([#7911](https://github.com/shaka-project/shaka-player/issues/7911)) ([942871c](https://github.com/shaka-project/shaka-player/commit/942871cd85792cae2c8a26027199fe429e5e7244))
+
+
+### Performance Improvements
+
+* Improve GapJumpingController times ([#7921](https://github.com/shaka-project/shaka-player/issues/7921)) ([7811268](https://github.com/shaka-project/shaka-player/commit/7811268c7e7ba6f48bc10bd07ee94112e71fc7ed))
+
 ## [4.11.20](https://github.com/shaka-project/shaka-player/compare/v4.11.19...v4.11.20) (2025-01-17)
 
 
