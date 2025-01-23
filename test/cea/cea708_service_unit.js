@@ -121,8 +121,7 @@ describe('Cea708Service', () => {
     expect(captions).toEqual(expectedCaptions);
   });
 
-
-  it('decodes multibyte unstyled caption text', () => {
+  it('decodes multibyte unstyled caption text (Korean)', () => {
     const controlCodes = [
       ...defineWindow,
       // Series of C0 control codes that add multi-byte text.
@@ -133,6 +132,34 @@ describe('Cea708Service', () => {
     const packet2 = createCea708PacketFromBytes(hideWindow, endTime);
 
     const text = '맙럎';
+    const topLevelCue = CeaUtils.createWindowedCue(startTime, endTime, '',
+        serviceNumber, windowId, rowCount, colCount, anchorId);
+    topLevelCue.nestedCues = [
+      CeaUtils.createDefaultCue(startTime, endTime, /* payload= */ text),
+    ];
+
+    const expectedCaptions = [
+      {
+        stream,
+        cue: topLevelCue,
+      },
+    ];
+
+    const captions = getCaptionsFromPackets(service, packet1, packet2);
+    expect(captions).toEqual(expectedCaptions);
+  });
+
+  it('decodes multibyte unstyled caption text (Polish)', () => {
+    const controlCodes = [
+      ...defineWindow,
+      // Series of C0 control codes that add multi-byte text.
+      0x18, 0x01, 0x7c, 0xF3, 0x18, 0x01, 0x42, 0x18, 0x01, 0x07, // ż, ó, ł, ć
+    ];
+
+    const packet1 = createCea708PacketFromBytes(controlCodes, startTime);
+    const packet2 = createCea708PacketFromBytes(hideWindow, endTime);
+
+    const text = 'żółć'; // cspell:ignore żółć
     const topLevelCue = CeaUtils.createWindowedCue(startTime, endTime, '',
         serviceNumber, windowId, rowCount, colCount, anchorId);
     topLevelCue.nestedCues = [
