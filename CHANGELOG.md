@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.12.9](https://github.com/shaka-project/shaka-player/compare/v4.12.8...v4.12.9) (2025-01-23)
+
+
+### Bug Fixes
+
+* Avoid setAppendWindow when the window is Infinity ([#7923](https://github.com/shaka-project/shaka-player/issues/7923)) ([1c3b66a](https://github.com/shaka-project/shaka-player/commit/1c3b66a4dd3b8410bfbee1809b8d73d371f7b89b))
+* **CEA:** Fix multi byte language support in CEA-708 ([#7929](https://github.com/shaka-project/shaka-player/issues/7929)) ([0f84e02](https://github.com/shaka-project/shaka-player/commit/0f84e02a0c646849f7afa028607d0d348255db57))
+* **DASH:** Change fallback presentation delay ([#7918](https://github.com/shaka-project/shaka-player/issues/7918)) ([0587397](https://github.com/shaka-project/shaka-player/commit/058739759c4eeef6c049e9f6fcf17333c50996b8))
+* **DASH:** Ignore early segments in a period ([#7910](https://github.com/shaka-project/shaka-player/issues/7910)) ([b84274d](https://github.com/shaka-project/shaka-player/commit/b84274d7c2da49fe89112ab24c9821d999cda1e5))
+* **DASH:** Notify time range with the fitted timeline ([#7911](https://github.com/shaka-project/shaka-player/issues/7911)) ([1ea73aa](https://github.com/shaka-project/shaka-player/commit/1ea73aa54d6e411415bee958f64debcdc9265ab5))
+* Only create TextTrack of SimpleTextDisplayer when necessary ([#7913](https://github.com/shaka-project/shaka-player/issues/7913)) ([b57bb9e](https://github.com/shaka-project/shaka-player/commit/b57bb9e10a91f1627651a6e7f01d719e39ec2f59))
+
+
+### Performance Improvements
+
+* Improve GapJumpingController times ([#7921](https://github.com/shaka-project/shaka-player/issues/7921)) ([2fc5a8a](https://github.com/shaka-project/shaka-player/commit/2fc5a8a46f97ae0ab4a9a0230d0846c8aab2f171))
+
 ## [4.12.8](https://github.com/shaka-project/shaka-player/compare/v4.12.7...v4.12.8) (2025-01-17)
 
 
