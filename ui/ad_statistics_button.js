@@ -75,7 +75,7 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
     /** @private {!Array} */
     this.statisticsList_ = [];
 
-    /** @private {!Object<string, (number | !Array<number>)>} */
+    /** @private {!shaka.extern.AdsStats} */
     this.currentStats_ = this.adManager.getStats();
 
     /** @private {!Map<string, HTMLElement>} */
