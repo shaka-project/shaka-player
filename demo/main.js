@@ -212,7 +212,7 @@ shakaDemo.Main = class {
 
     // Optionally enter noinput mode. This has to happen before setting up the
     // player.
-    this.noInput_ = 'noinput' in this.getParams_();
+    this.noInput_ = this.getParams_().has('noinput');
     this.setupPlayer_();
     window.addEventListener('hashchange', () => this.hashChanged_());
 
@@ -900,10 +900,10 @@ shakaDemo.Main = class {
   getLastAssetFromHash_() {
     const params = this.getParams_();
 
-    const manifest = params['asset'];
-    const assetBase64 = params['assetBase64'];
+    const manifest = params.get('asset');
+    const assetBase64 = params.get('assetBase64');
     if (manifest) {
-      const adTagUri = params['adTagUri'];
+      const adTagUri = params.get('adTagUri');
       // See if it's a default asset.
       for (const asset of shakaAssets.testAssets) {
         if (asset.manifestUri == manifest && asset.adTagUri == adTagUri) {
@@ -924,17 +924,17 @@ shakaDemo.Main = class {
           /* iconUri= */ '',
           /* manifestUri= */ manifest,
           /* source= */ shakaAssets.Source.CUSTOM);
-      if ('license' in params) {
+      if (params.has('license')) {
         let drmSystems = shakaDemo.Main.commonDrmSystems;
-        if ('drmSystem' in params) {
-          drmSystems = [params['drmSystem']];
+        if (params.has('drmSystem')) {
+          drmSystems = [params.get('drmSystem')];
         }
         for (const drmSystem of drmSystems) {
-          asset.addLicenseServer(drmSystem, params['license']);
+          asset.addLicenseServer(drmSystem, params.get('license'));
         }
       }
-      if ('certificate' in params) {
-        asset.addCertificateUri(params['certificate']);
+      if (params.has('certificate')) {
+        asset.addCertificateUri(params.get('certificate'));
       }
       return asset;
     } else if (assetBase64) {
@@ -963,13 +963,13 @@ shakaDemo.Main = class {
 
     if (this.player_) {
       const readParam = (hashName, configName) => {
-        if (hashName in params) {
+        if (params.has(hashName)) {
           const existing = this.getCurrentConfigValue(configName);
 
           // Translate the param string into a non-string value if appropriate.
           // Determine what type the parsed value should be based on the current
           // value.
-          let value = params[hashName];
+          let value = params.get(hashName);
           if (typeof existing == 'boolean') {
             value = value == 'true';
           } else if (typeof existing == 'number') {
@@ -987,73 +987,73 @@ shakaDemo.Main = class {
           if (!advanced[drmSystem]) {
             advanced[drmSystem] = shakaDemo.Main.defaultAdvancedDrmConfig();
           }
-          if ('videoRobustness' in params) {
+          if (params.has('videoRobustness')) {
             advanced[drmSystem].videoRobustness =
-                params['videoRobustness'].split(',');
+                params.get('videoRobustness').split(',');
           }
-          if ('audioRobustness' in params) {
+          if (params.has('audioRobustness')) {
             advanced[drmSystem].audioRobustness =
-                params['audioRobustness'].split(',');
+                params.get('audioRobustness').split(',');
           }
         }
 
-        if ('audioRobustness' in params || 'videoRobustness' in params) {
+        if (params.has('audioRobustness') || params.has('videoRobustness')) {
           this.configure('drm.advanced', advanced);
         }
       }
     }
-    if ('lang' in params) {
+    if (params.has('lang')) {
       // Load the legacy 'lang' hash value.
-      const lang = params['lang'];
+      const lang = params.get('lang');
       this.configure('preferredAudioLanguage', lang);
       this.configure('preferredTextLanguage', lang);
       this.setUILocale(lang);
     }
-    if ('uilang' in params) {
-      this.setUILocale(params['uilang']);
+    if (params.has('uilang')) {
+      this.setUILocale(params.get('uilang'));
       // TODO(#1591): Support multiple language preferences
     }
-    if ('noadaptation' in params) {
+    if (params.has('noadaptation')) {
       this.configure('abr.enabled', false);
     }
 
-    if ('preferredVideoCodecs' in params) {
+    if (params.has('preferredVideoCodecs')) {
       this.configure('preferredVideoCodecs',
-          params['preferredVideoCodecs'].split(','));
+          params.get('preferredVideoCodecs').split(','));
     }
 
-    if ('preferredAudioCodecs' in params) {
+    if (params.has('preferredAudioCodecs')) {
       this.configure('preferredAudioCodecs',
-          params['preferredAudioCodecs'].split(','));
+          params.get('preferredAudioCodecs').split(','));
     }
 
-    if ('preferredTextFormats' in params) {
+    if (params.has('preferredTextFormats')) {
       this.configure('preferredTextFormats',
-          params['preferredTextFormats'].split(','));
+          params.get('preferredTextFormats').split(','));
     }
 
     // Add compiled/uncompiled links.
     this.makeVersionLinks_();
 
     // Disable custom controls.
-    this.nativeControlsEnabled_ = 'nativecontrols' in params;
+    this.nativeControlsEnabled_ = params.has('nativecontrols');
 
     // Enable trick play.
-    if ('trickplay' in params) {
+    if (params.has('trickplay')) {
       this.trickPlayControlsEnabled_ = true;
       this.configureUI_();
     }
 
-    if ('customContextMenu' in params) {
+    if (params.has('customContextMenu')) {
       this.customContextMenu_ = true;
       this.configureUI_();
     }
 
-    if ('watermarkText' in params) {
-      this.watermarkText_ = params['watermarkText'];
+    if (params.has('watermarkText')) {
+      this.watermarkText_ = params.get('watermarkText');
     }
 
-    if ('visualizer' in params) {
+    if (params.has('visualizer')) {
       this.setIsVisualizerActive(true);
     } else {
       this.setIsVisualizerActive(false);
@@ -1070,13 +1070,13 @@ shakaDemo.Main = class {
     }
 
     if (shaka.log) {
-      if ('vv' in params) {
+      if (params.has('vv')) {
         shaka.log.setLevel(shaka.log.Level.V2);
-      } else if ('v' in params) {
+      } else if (params.has('v')) {
         shaka.log.setLevel(shaka.log.Level.V1);
-      } else if ('debug' in params) {
+      } else if (params.has('debug')) {
         shaka.log.setLevel(shaka.log.Level.DEBUG);
-      } else if ('info' in params) {
+      } else if (params.has('info')) {
         shaka.log.setLevel(shaka.log.Level.INFO);
       }
     }
@@ -1086,9 +1086,9 @@ shakaDemo.Main = class {
   makeVersionLinks_() {
     const params = this.getParams_();
     let buildType = 'uncompiled';
-    if ('build' in params) {
-      buildType = params['build'];
-    } else if ('compiled' in params) {
+    if (params.has('build')) {
+      buildType = params.get('build');
+    } else if (params.has('compiled')) {
       buildType = 'compiled';
     }
     for (const type of ['compiled', 'debug_compiled', 'uncompiled']) {
@@ -1117,7 +1117,7 @@ shakaDemo.Main = class {
   }
 
   /**
-   * @return {!Object<string, string>} params
+   * @return {!Map<string, string>} params
    * @private
    */
   getParams_() {
@@ -1132,10 +1132,10 @@ shakaDemo.Main = class {
     // the URL fragment takes precedence.
     /** @type {!Array<string>} */
     const combined = fields.concat(fragments);
-    const params = {};
+    const params = new Map();
     for (const line of combined) {
       const kv = line.split('=');
-      params[kv[0]] = kv.slice(1).join('=');
+      params.set([kv[0]], kv.slice(1).join('='));
     }
     return params;
   }
@@ -1809,14 +1809,14 @@ shakaDemo.Main = class {
     // Determine if the element is selected.
     const params = this.getParams_();
     let selected =
-        params['panel'] == encodeURI(button.getAttribute('tab-identifier'));
+        params.get('panel') == encodeURI(button.getAttribute('tab-identifier'));
     if (selected) {
       // Re-apply any saved data from hash.
-      const hashValues = params['panelData'];
+      const hashValues = params.get('panelData');
       if (hashValues) {
         button.setAttribute('tab-hash', hashValues);
       }
-    } else if (!params['panel']) {
+    } else if (!params.has('panel')) {
       // Check if it's selected by default.
       selected = button.getAttribute('defaultselected') != null;
     }

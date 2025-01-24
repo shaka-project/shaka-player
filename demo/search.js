@@ -299,11 +299,11 @@ shakaDemo.Search = class {
   makeSelectInput_(searchContainer, name, choices, type) {
     searchContainer.addRow(null, null);
     const nullOption = '---';
-    const valuesObject = {};
+    const valuesObject = new Map();
     for (const term of choices) {
-      valuesObject[term] = term;
+      valuesObject.set(term, term);
     }
-    valuesObject[nullOption] = nullOption;
+    valuesObject.set(nullOption, nullOption);
     let lastValue = nullOption;
     const onChange = (input) => {
       if (input.value != nullOption) {
