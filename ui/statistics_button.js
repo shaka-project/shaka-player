@@ -77,7 +77,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     /** @private {!Array} */
     this.skippedStats_ = ['stateHistory', 'switchHistory'];
 
-    /** @private {!Object<string, number>} */
+    /** @private {!shaka.extern.Stats} */
     this.currentStats_ = this.player.getStats();
 
     /** @private {!Map<string, HTMLElement>} */
