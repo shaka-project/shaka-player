@@ -464,8 +464,8 @@ filterDescribe('Storage', storageSupport, () => {
     /** @type {!shaka.offline.Storage} */
     let storage;
 
-    /** @type {!Object<string, function(): !Promise<ArrayBuffer>>} */
-    let fakeResponses = {};
+    /** @type {!Map<string, function(): !Promise<ArrayBuffer>>} */
+    const fakeResponses = new Map();
 
     let compiledShaka;
 
@@ -475,9 +475,9 @@ filterDescribe('Storage', storageSupport, () => {
 
       compiledShaka.net.NetworkingEngine.registerScheme(
           'fake', (uri, req, type, progress) => {
-            if (fakeResponses[uri]) {
+            if (fakeResponses.has(uri)) {
               const operation = async () => {
-                const data = await fakeResponses[uri]();
+                const data = await fakeResponses.get(uri)();
                 return {
                   uri,
                   data,
@@ -530,7 +530,7 @@ filterDescribe('Storage', storageSupport, () => {
        * @param {?string} dependingOn Another URI, or null
        */
       function setResponseFor(segment, dependingOn) {
-        fakeResponses[segment] = async () => {
+        fakeResponses.set(segment, async () => {
           if (dependingOn) {
             await delays[dependingOn];
           }
@@ -539,9 +539,9 @@ filterDescribe('Storage', storageSupport, () => {
           // now.
           delays[segment].resolve();
           return new ArrayBuffer(16);
-        };
+        });
       }
-      fakeResponses = {};
+      fakeResponses.clear();
       setResponseFor(audioSegment1Uri, null);
       setResponseFor(audioSegment2Uri, videoSegment1Uri);
       setResponseFor(audioSegment3Uri, videoSegment2Uri);
