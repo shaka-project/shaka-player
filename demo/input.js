@@ -122,7 +122,7 @@ shakaDemo.SelectInput = class extends shakaDemo.Input {
    * @param {!shakaDemo.InputContainer} parentContainer
    * @param {?string} name
    * @param {function(!HTMLInputElement, !shakaDemo.Input)} onChange
-   * @param {!Object<string, string>} values
+   * @param {!Map<string, string>} values
    */
   constructor(parentContainer, name, onChange, values) {
     super(parentContainer, 'select', 'div', 'label', onChange);
@@ -135,13 +135,13 @@ shakaDemo.SelectInput = class extends shakaDemo.Input {
     if (name) {
       this.extra_.textContent = name;
     }
-    for (const value of Object.keys(values)) {
+    values.forEach((value, key) => {
       const option =
         /** @type {!HTMLOptionElement} */(document.createElement('option'));
-      option.textContent = values[value];
-      option.value = value;
+      option.textContent = value;
+      option.value = key;
       this.input_.appendChild(option);
-    }
+    });
   }
 };
 
