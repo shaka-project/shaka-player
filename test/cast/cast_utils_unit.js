@@ -49,9 +49,10 @@ describe('CastUtils', () => {
 
     const castMembers = CastUtils.PlayerVoidMethods
         .concat(CastUtils.PlayerPromiseMethods)
-        .concat(Object.keys(CastUtils.PlayerGetterMethods))
-        .concat(Object.keys(CastUtils.LargePlayerGetterMethods))
-        .concat(Object.keys(CastUtils.PlayerGetterMethodsThatRequireLive));
+        .concat(Object.keys(CastUtils.PlayerGetterMethods.keys()))
+        .concat(Object.keys(CastUtils.LargePlayerGetterMethods.keys()))
+        .concat(Object.keys(
+            CastUtils.PlayerGetterMethodsThatRequireLive.keys()));
     // eslint-disable-next-line no-restricted-syntax
     const allPlayerMembers = Object.getOwnPropertyNames(shaka.Player.prototype);
     expect(
