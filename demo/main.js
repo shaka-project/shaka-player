@@ -1135,7 +1135,7 @@ shakaDemo.Main = class {
     const params = new Map();
     for (const line of combined) {
       const kv = line.split('=');
-      params.set([kv[0]], kv.slice(1).join('='));
+      params.set(kv[0], kv.slice(1).join('='));
     }
     return params;
   }
