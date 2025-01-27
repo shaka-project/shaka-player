@@ -733,7 +733,7 @@ goog.Uri.QueryData = function(query, uri) {
  */
 goog.Uri.QueryData.prototype.ensureKeyMapInitialized_ = function() {
   if (!this.keyMap_) {
-    this.keyMap_ = {};
+    this.keyMap_ = new Map();
     this.count_ = 0;
 
     if (this.encodedQuery_) {
@@ -764,7 +764,7 @@ goog.Uri.QueryData.prototype.ensureKeyMapInitialized_ = function() {
  * We need to use a Map because we cannot guarantee that the key names will
  * not be problematic for IE.
  *
- * @type {Object<string, !Array<string>>}
+ * @type {Map<string, !Array<string>>}
  * @private
  */
 goog.Uri.QueryData.prototype.keyMap_ = null;
@@ -798,9 +798,9 @@ goog.Uri.QueryData.prototype.add = function(key, value) {
   // Invalidate the cache.
   this.encodedQuery_ = null;
 
-  var values = this.keyMap_.hasOwnProperty(key) ? this.keyMap_[key] : null;
+  var values = this.keyMap_.has(key) ? this.keyMap_.get(key) : null;
   if (!values) {
-    this.keyMap_[key] = (values = []);
+    this.keyMap_.set(key, (values = []));
   }
   values.push(value);
   goog.asserts.assert(this.count_ != null, 'Should not be null.');
@@ -820,10 +820,10 @@ goog.Uri.QueryData.prototype.add = function(key, value) {
   // Invalidate the cache.
   this.encodedQuery_ = null;
 
-  if (!this.keyMap_.hasOwnProperty(key)) {
+  if (!this.keyMap_.has(key)) {
     this.add(key, value);
   } else {
-    this.keyMap_[key] = [value];
+    this.keyMap_.set(key, [value]);
   }
 
   return this;
@@ -838,7 +838,7 @@ goog.Uri.QueryData.prototype.add = function(key, value) {
  */
  goog.Uri.QueryData.prototype.get = function(key) {
   this.ensureKeyMapInitialized_();
-  return this.keyMap_[key] || [];
+  return this.keyMap_.get(key) || [];
 };
 
 
@@ -851,15 +851,15 @@ goog.Uri.QueryData.prototype.toString = function() {
     return this.encodedQuery_;
   }
 
-  if (!this.keyMap_) {
+  if (!this.keyMap_ || !this.keyMap_.size) {
     return '';
   }
 
   var sb = [];
 
-  for (var key in this.keyMap_) {
+  for (const key of this.keyMap_.keys()) {
     var encodedKey = encodeURIComponent(key);
-    var val = this.keyMap_[key];
+    var val = this.keyMap_.get(key);
     for (var j = 0; j < val.length; j++) {
       var param = encodedKey;
       // Ensure that null and undefined are encoded into the url as
@@ -891,9 +891,9 @@ goog.Uri.QueryData.prototype.clone = function() {
   var rv = new goog.Uri.QueryData();
   rv.encodedQuery_ = this.encodedQuery_;
   if (this.keyMap_) {
-    var cloneMap = {};
-    for (var key in this.keyMap_) {
-      cloneMap[key] = this.keyMap_[key].concat();
+    var cloneMap = new Map();
+    for (const [key, val] of this.keyMap_) {
+      cloneMap.set(key, val.concat());
     }
     rv.keyMap_ = cloneMap;
     rv.count_ = this.count_;
