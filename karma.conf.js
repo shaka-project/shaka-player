@@ -460,6 +460,7 @@ module.exports = (config) => {
     if (!settings.quick) {
       // If --quick is present, we don't serve integration tests.
       clientArgs.testFiles.push('test/dash/*_integration.js');
+      clientArgs.testFiles.push('test/transmuxer/*_integration.js');
     }
     if (settings.external) {
       // If --external is present, we serve external asset tests.
