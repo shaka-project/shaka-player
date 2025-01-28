@@ -455,6 +455,7 @@ describe('StreamingEngine', () => {
       config.rebufferingGoal = 2;
       config.bufferingGoal = 5;
       config.bufferBehind = Infinity;
+      config.maxDisabledTime = 0; // Do not disable stream by default
     }
 
     if (defaultConfig.segmentPrefetchLimit == config.segmentPrefetchLimit) {
