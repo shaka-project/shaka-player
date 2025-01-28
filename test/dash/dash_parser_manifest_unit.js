@@ -549,7 +549,7 @@ describe('DashParser Manifest', () => {
       '<MPD>',
       '  <Period duration="PT30M">',
       '    <AdaptationSet mimeType="audio/mp4" lang="\u2603">',
-      '      <Representation bandwidth="384000" codecs="ec-3">',
+      '      <Representation bandwidth="768000" codecs="ec-3">',
       '        <BaseURL>http://example.com</BaseURL>',
       '        <SegmentTemplate media="2.mp4" duration="1" />',
       '      </Representation>',
