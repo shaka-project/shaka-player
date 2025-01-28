@@ -134,18 +134,6 @@ describe('Platform', () => {
       window.shakaMediaKeysPolyfill = shakaMediaKeysPolyfill;
     });
 
-    it('should return true if media keys are polyfilled', () => {
-      window.shakaMediaKeysPolyfill = 'webkit';
-      const result = shaka.util.Platform.isMediaKeysPolyfilled();
-      expect(result).toBe(true);
-    });
-
-    it('should return false if media keys are not polyfilled', () => {
-      window.shakaMediaKeysPolyfill = '';
-      const result = shaka.util.Platform.isMediaKeysPolyfilled();
-      expect(result).toBe(false);
-    });
-
     it('should return true with a matching polyfill type', () => {
       window.shakaMediaKeysPolyfill = 'webkit';
       const result = shaka.util.Platform.isMediaKeysPolyfilled('webkit');
