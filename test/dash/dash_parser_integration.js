@@ -107,4 +107,23 @@ describe('DashParser', () => {
 
     await player.unload();
   });
+
+  it('supports AC-3 if platform supports it', async () => {
+    if (!await Util.isTypeSupported('audio/mp4; codecs="ac-3"')) {
+      pending('Codec AC-3 is not supported by the platform.');
+    }
+    await player.load('/base/test/test/assets/dash-audio-ac3/dash.mpd');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 5 seconds, but stop early if the video ends.  If it takes
+    // longer than 30 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 30);
+
+    await player.unload();
+  });
 });

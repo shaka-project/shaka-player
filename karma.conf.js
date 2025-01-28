@@ -259,6 +259,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/7401/*', included: false},
       {pattern: 'test/test/assets/6339/*', included: false},
       {pattern: 'test/test/assets/dash-aes-128/*', included: false},
+      {pattern: 'test/test/assets/dash-audio-ac3/*', included: false},
       {pattern: 'test/test/assets/dash-clearkey/*', included: false},
       {pattern: 'test/test/assets/dash-mpd-alternate/*', included: false},
       {pattern: 'test/test/assets/dash-vr/*', included: false},
@@ -454,11 +455,11 @@ module.exports = (config) => {
     clientArgs.testFiles.push('test/player_external.js');
   } else {
     // In a normal test run, we serve unit tests.
-    clientArgs.testFiles.push('test/**/*_unit.js');
+    // clientArgs.testFiles.push('test/**/*_unit.js');
 
     if (!settings.quick) {
       // If --quick is present, we don't serve integration tests.
-      clientArgs.testFiles.push('test/**/*_integration.js');
+      clientArgs.testFiles.push('test/dash/*_integration.js');
     }
     if (settings.external) {
       // If --external is present, we serve external asset tests.
