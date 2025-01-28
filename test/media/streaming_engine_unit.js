@@ -447,12 +447,19 @@ describe('StreamingEngine', () => {
       return Promise.resolve();
     });
 
+    const defaultConfig =
+        shaka.util.PlayerConfiguration.createDefault().streaming;
+
     if (!config) {
-      config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config = defaultConfig;
       config.rebufferingGoal = 2;
       config.bufferingGoal = 5;
       config.bufferBehind = Infinity;
       config.maxDisabledTime = 0; // Do not disable stream by default
+    }
+
+    if (defaultConfig.segmentPrefetchLimit == config.segmentPrefetchLimit) {
+      config.segmentPrefetchLimit = 0; // Do not prefetch segments by default
     }
 
     goog.asserts.assert(

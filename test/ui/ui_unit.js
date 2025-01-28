@@ -914,6 +914,8 @@ describe('UI', () => {
         shaka.media.ManifestParser.registerParserByMime(
             fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
 
+        player.configure('streaming.segmentPrefetchLimit', 0);
+
         await player.load(
             /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
 

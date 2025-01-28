@@ -1780,7 +1780,7 @@ shaka.extern.LiveSyncConfiguration;
  *   ahead of playhead in parallel.
  *   If <code>0</code>, the segments will be fetched sequentially.
  *   <br>
- *   Defaults to <code>0</code>.
+ *   Defaults to <code>1</code>.
  * @property {!Array<string>} prefetchAudioLanguages
  *   The audio languages to prefetch.
  *   <br>
