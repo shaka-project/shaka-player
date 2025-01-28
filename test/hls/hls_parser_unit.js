@@ -6214,7 +6214,7 @@ describe('HlsParser', () => {
         .setResponseText('test:/video', media);
 
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.hls.ignoreSupplementalCodecs = true;
+    config.ignoreSupplementalCodecs = true;
     parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
