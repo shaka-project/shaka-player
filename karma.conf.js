@@ -459,6 +459,7 @@ module.exports = (config) => {
 
     if (!settings.quick) {
       // If --quick is present, we don't serve integration tests.
+      // eslint-disable-next-line max-len
       clientArgs.testFiles.push('test/media/content_workarounds_integration.js');
       clientArgs.testFiles.push('test/transmuxer/*_integration.js');
     }
