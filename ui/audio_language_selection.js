@@ -107,8 +107,13 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
     if (track.audioCodec) {
       codec = track.audioCodec;
     }
+    let label = '';
+    if (track.label) {
+      label = track.label;
+    }
     this.player.selectAudioLanguage(track.language, track.roles[0],
-        channelsCount, /* safeMargin= */ 0, codec, track.spatialAudio);
+        channelsCount, /* safeMargin= */ 0, codec, track.spatialAudio,
+        label);
   }
 
 
