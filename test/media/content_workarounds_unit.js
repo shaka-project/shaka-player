@@ -74,4 +74,34 @@ describe('ContentWorkarounds', () => {
     // but only one encrypted
     expect(encvSpy).toHaveBeenCalledTimes(1);
   });
+
+  it('replaces ac-3 with ec-3', () => {
+    const unchanged = new Uint8Array([
+      0x00, 0x00, 0x00, 0x3f, // size
+      0x73, 0x74, 0x73, 0x64, // stsd
+      0x00,                   // version
+      0x00, 0x00, 0x00,       // flags
+      0x00, 0x00, 0x00, 0x01, // count
+      0x00, 0x00, 0x00, 0x2f, // size
+      0x61, 0x63, 0x2d, 0x33, // box type ac-3
+      0x00,                   // version
+      0x00, 0x00, 0x00,       // flags
+      0x00, 0x00, 0x00, 0x01, // payload
+      0x00, 0x00, 0x00, 0x00, // payload
+      0x00, 0x00, 0x00, 0x00, // payload
+      0x00, 0x02, 0x00, 0x10, // payload
+      0x00, 0x00, 0x00, 0x00, // payload
+      0xbb, 0x80, 0x00, 0x00, // payload
+      0x00, 0x00, 0x00, 0x0B, // size
+      0x64, 0x61, 0x63, 0x33, // box type dac3
+      0x0C, 0x11, 0xe0,       // payload
+    ]);
+    const faked = shaka.media.ContentWorkarounds.fakeEC3(unchanged);
+    const spy = jasmine.createSpy('boxCallback');
+    new shaka.util.Mp4Parser()
+        .fullBox('stsd', shaka.util.Mp4Parser.sampleDescription)
+        .box('ec-3', Util.spyFunc(spy))
+        .parse(faked);
+    expect(spy).toHaveBeenCalled();
+  });
 });
