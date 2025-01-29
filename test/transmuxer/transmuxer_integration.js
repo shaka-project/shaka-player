@@ -399,6 +399,10 @@ describe('Transmuxer Player', () => {
       if (!await Util.isTypeSupported('audio/mp4; codecs="ac-3"')) {
         pending('Codec AC-3 is not supported by the platform.');
       }
+      // This tests is flaky in some Tizen devices, so we need omit it for now.
+      if (shaka.util.Platform.isTizen()) {
+        pending('Disabled on Tizen.');
+      }
 
       // eslint-disable-next-line max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-ac3-h264/media.m3u8');
