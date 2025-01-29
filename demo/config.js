@@ -291,7 +291,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Allow LL-HLS byterange optimization',
             'manifest.hls.allowLowLatencyByteRangeOptimization')
         .addNumberInput_('override the Update time of the manifest',
-            'manifest.hls.updatePeriod');
+            'manifest.hls.updatePeriod')
+        .addBoolInput_('Allow range request to guess mime type',
+            'manifest.hls.allowRangeRequestsToGuessMimeType');
   }
 
   /** @private */
