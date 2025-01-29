@@ -125,6 +125,8 @@ describe('MediaSourceEngine', () => {
   /** @type {!jasmine.Spy} */
   let requiresEncryptionInfoInAllInitSegmentsSpy;
   /** @type {!jasmine.Spy} */
+  let requiresEC3InitSegments;
+  /** @type {!jasmine.Spy} */
   let fakeEncryptionSpy;
 
   /** @type {!shaka.media.MediaSourceEngine} */
@@ -213,6 +215,9 @@ describe('MediaSourceEngine', () => {
 
     requiresEncryptionInfoInAllInitSegmentsSpy = spyOn(shaka.util.Platform,
         'requiresEncryptionInfoInAllInitSegments').and.returnValue(false);
+
+    requiresEC3InitSegments = spyOn(shaka.util.Platform,
+        'requiresEC3InitSegments').and.returnValue(false);
 
     fakeEncryptionSpy = spyOn(shaka.media.ContentWorkarounds, 'fakeEncryption')
         .and.callFake((data) => data + 100);
@@ -540,6 +545,7 @@ describe('MediaSourceEngine', () => {
 
   describe('appendBuffer', () => {
     beforeEach(async () => {
+      requiresEC3InitSegments.and.returnValue(false);
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
       const initObject = new Map();
