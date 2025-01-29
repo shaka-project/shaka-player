@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.13.1](https://github.com/shaka-project/shaka-player/compare/v4.13.0...v4.13.1) (2025-01-29)
+
+
+### Bug Fixes
+
+* **DASH:** Fix DASH_DUPLICATE_REPRESENTATION_ID error when using supplemental codec ([#7961](https://github.com/shaka-project/shaka-player/issues/7961)) ([b183197](https://github.com/shaka-project/shaka-player/commit/b183197ea357c65274a8fd8c08084791d4e267cb))
+* **DASH:** Fix Dolby Atmos detection ([#7966](https://github.com/shaka-project/shaka-player/issues/7966)) ([09c7faa](https://github.com/shaka-project/shaka-player/commit/09c7faa1df8f72330c1533ca39a98d3d991233df))
+* Fix AC-3 playback on Tizen 3.0 devices ([#7969](https://github.com/shaka-project/shaka-player/issues/7969)) ([3a91bf0](https://github.com/shaka-project/shaka-player/commit/3a91bf0840eb4c8c5141916b0f73834a6098ad98))
+* Fix AC-3 playback on Tizen 3.0 devices when transmuxing ([#7972](https://github.com/shaka-project/shaka-player/issues/7972)) ([933052e](https://github.com/shaka-project/shaka-player/commit/933052e1881cb553e6de44a7996dfbca2cb3a0bd))
+* Fix playback with Apple Media Keys polyfill detection ([#7958](https://github.com/shaka-project/shaka-player/issues/7958)) ([3f1fdbe](https://github.com/shaka-project/shaka-player/commit/3f1fdbedc43f760b15024c75be93579f94d47abd))
+* Fix select label audio when using selectAudioLanguage ([#7970](https://github.com/shaka-project/shaka-player/issues/7970)) ([24608ff](https://github.com/shaka-project/shaka-player/commit/24608ff5b28da797f055057f63db122aee694fe5))
+* **HLS:** Fix redirect management at media playlist level ([#7944](https://github.com/shaka-project/shaka-player/issues/7944)) ([b564979](https://github.com/shaka-project/shaka-player/commit/b564979104d864e0530e20e6138bfbead847cfa2))
+* **net:** Add 304 as successful request ([#7963](https://github.com/shaka-project/shaka-player/issues/7963)) ([4dd0029](https://github.com/shaka-project/shaka-player/commit/4dd002977ce93dfe8a298f5ac541b1918346e565))
+* Use audio label on ExampleBasedCriteria ([#7971](https://github.com/shaka-project/shaka-player/issues/7971)) ([ac3b8dd](https://github.com/shaka-project/shaka-player/commit/ac3b8ddc3ee96119c963caaf5d48f3380a5cf762))
+
 ## [4.13.0](https://github.com/shaka-project/shaka-player/compare/v4.12.0...v4.13.0) (2025-01-23)
 
 
