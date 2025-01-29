@@ -1220,7 +1220,8 @@ shaka.extern.DashManifestConfiguration;
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
  *   allowLowLatencyByteRangeOptimization: boolean,
- *   updatePeriod: number
+ *   updatePeriod: number,
+ *   allowRangeRequestsToGuessMimeType: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -1314,6 +1315,11 @@ shaka.extern.DashManifestConfiguration;
  *   trigger a new download of the manifest.
  *   <br>
  *   Defaults to <code>-1</code>.
+ * @property {boolean} allowRangeRequestsToGuessMimeType
+ *   If set to true, the HLS parser will use range request (only first byte) to
+ *   guess the mime type.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
