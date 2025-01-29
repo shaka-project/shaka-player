@@ -3736,7 +3736,7 @@ describe('DashParser Manifest', () => {
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
 
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.dash.ignoreSupplementalCodecs = true;
+    config.ignoreSupplementalCodecs = true;
     parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */

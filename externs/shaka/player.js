@@ -1096,8 +1096,7 @@ shaka.extern.xml.Node;
  *   multiTypeVariantsAllowed: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
  *   updatePeriod: number,
- *   enableFastSwitching: boolean,
- *   ignoreSupplementalCodecs: boolean
+ *   enableFastSwitching: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -1202,11 +1201,6 @@ shaka.extern.xml.Node;
  *   If false, disables fast switching track recognition.
  *   <br>
  *   Defaults to <code>true</code>.
- * @property {boolean} ignoreSupplementalCodecs
- *   If true, ignores supplemental codecs.
- *   <br>
- *   Defaults to <code>false</code>.
- * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
 
@@ -1226,8 +1220,7 @@ shaka.extern.DashManifestConfiguration;
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
  *   allowLowLatencyByteRangeOptimization: boolean,
- *   updatePeriod: number,
- *   ignoreSupplementalCodecs: boolean
+ *   updatePeriod: number
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -1321,10 +1314,6 @@ shaka.extern.DashManifestConfiguration;
  *   trigger a new download of the manifest.
  *   <br>
  *   Defaults to <code>-1</code>.
- * @property {boolean} ignoreSupplementalCodecs
- *   If true, ignores supplemental codecs.
- *   <br>
- *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
@@ -1375,7 +1364,8 @@ shaka.extern.MssManifestConfiguration;
  *   hls: shaka.extern.HlsManifestConfiguration,
  *   mss: shaka.extern.MssManifestConfiguration,
  *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean,
- *   continueLoadingWhenPaused: boolean
+ *   continueLoadingWhenPaused: boolean,
+ *   ignoreSupplementalCodecs: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1437,6 +1427,10 @@ shaka.extern.MssManifestConfiguration;
  *   the video is paused.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {boolean} ignoreSupplementalCodecs
+ *   If true, ignores supplemental codecs.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.ManifestConfiguration;

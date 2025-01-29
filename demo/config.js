@@ -223,7 +223,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Enable segment-relative VTT Timing',
             'manifest.segmentRelativeVttTiming')
         .addBoolInput_('Continue loading when paused',
-            'manifest.continueLoadingWhenPaused');
+            'manifest.continueLoadingWhenPaused')
+        .addBoolInput_('Ignore supplemental codecs',
+            'manifest.ignoreSupplementalCodecs');
   }
 
   /** @private */
@@ -260,9 +262,7 @@ shakaDemo.Config = class {
         .addNumberInput_('override the Update period of dash manifest',
             'manifest.dash.updatePeriod')
         .addBoolInput_('Enable fast switching',
-            'manifest.dash.enableFastSwitching')
-        .addBoolInput_('Ignore supplemental codecs',
-            'manifest.dash.ignoreSupplementalCodecs');
+            'manifest.dash.enableFastSwitching');
   }
 
   /** @private */
@@ -291,9 +291,7 @@ shakaDemo.Config = class {
         .addBoolInput_('Allow LL-HLS byterange optimization',
             'manifest.hls.allowLowLatencyByteRangeOptimization')
         .addNumberInput_('override the Update time of the manifest',
-            'manifest.hls.updatePeriod')
-        .addBoolInput_('Ignore supplemental codecs',
-            'manifest.hls.ignoreSupplementalCodecs');
+            'manifest.hls.updatePeriod');
   }
 
   /** @private */
