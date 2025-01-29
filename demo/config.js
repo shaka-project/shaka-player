@@ -225,7 +225,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Continue loading when paused',
             'manifest.continueLoadingWhenPaused')
         .addBoolInput_('Ignore supplemental codecs',
-            'manifest.ignoreSupplementalCodecs');
+            'manifest.ignoreSupplementalCodecs')
+        .addNumberInput_('Override the Update time of the manifest',
+            'manifest.updatePeriod');
   }
 
   /** @private */
@@ -259,8 +261,6 @@ shakaDemo.Config = class {
             'manifest.dash.sequenceMode')
         .addBoolInput_('Use stream once in period flattening',
             'manifest.dash.useStreamOnceInPeriodFlattening')
-        .addNumberInput_('override the Update period of dash manifest',
-            'manifest.dash.updatePeriod')
         .addBoolInput_('Enable fast switching',
             'manifest.dash.enableFastSwitching');
   }
@@ -290,8 +290,6 @@ shakaDemo.Config = class {
             'manifest.hls.disableClosedCaptionsDetection')
         .addBoolInput_('Allow LL-HLS byterange optimization',
             'manifest.hls.allowLowLatencyByteRangeOptimization')
-        .addNumberInput_('override the Update time of the manifest',
-            'manifest.hls.updatePeriod')
         .addBoolInput_('Allow range request to guess mime type',
             'manifest.hls.allowRangeRequestsToGuessMimeType');
   }

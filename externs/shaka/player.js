@@ -1095,7 +1095,6 @@ shaka.extern.xml.Node;
  *   sequenceMode: boolean,
  *   multiTypeVariantsAllowed: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
- *   updatePeriod: number,
  *   enableFastSwitching: boolean
  * }}
  *
@@ -1190,13 +1189,6 @@ shaka.extern.xml.Node;
  *   between periods.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {number} updatePeriod
- *   Override the minimumUpdatePeriod of the manifest. The value is in seconds.
- *   If the value is greater than the minimumUpdatePeriod, it will update the
- *   manifest less frequently. If you update the value during for a dynamic
- *   manifest, it will directly trigger a new download of the manifest.
- *   <br>
- *   Defaults to <code>-1</code>.
  * @property {boolean} enableFastSwitching
  *   If false, disables fast switching track recognition.
  *   <br>
@@ -1220,7 +1212,6 @@ shaka.extern.DashManifestConfiguration;
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
  *   allowLowLatencyByteRangeOptimization: boolean,
- *   updatePeriod: number,
  *   allowRangeRequestsToGuessMimeType: boolean
  * }}
  *
@@ -1307,14 +1298,6 @@ shaka.extern.DashManifestConfiguration;
  *   https://www.akamai.com/blog/performance/-using-ll-hls-with-byte-range-addressing-to-achieve-interoperabi
  *   <br>
  *   Defaults to <code>true</code>.
- * @property {number} updatePeriod
- *   Override the update period of the playlist. The value is in seconds.
- *   If the value is less than 0, the period will be determined based on the
- *   segment length.  If the value is greater than 0, it will update the target
- *   duration.  If you update the value during the live, it will directly
- *   trigger a new download of the manifest.
- *   <br>
- *   Defaults to <code>-1</code>.
  * @property {boolean} allowRangeRequestsToGuessMimeType
  *   If set to true, the HLS parser will use range request (only first byte) to
  *   guess the mime type.
@@ -1371,7 +1354,8 @@ shaka.extern.MssManifestConfiguration;
  *   mss: shaka.extern.MssManifestConfiguration,
  *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean,
  *   continueLoadingWhenPaused: boolean,
- *   ignoreSupplementalCodecs: boolean
+ *   ignoreSupplementalCodecs: boolean,
+ *   updatePeriod: number
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1437,6 +1421,21 @@ shaka.extern.MssManifestConfiguration;
  *   If true, ignores supplemental codecs.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {number} updatePeriod
+ *   For DASH:
+ *   Override the minimumUpdatePeriod of the manifest. The value is in seconds.
+ *   If the value is greater than the minimumUpdatePeriod, it will update the
+ *   manifest less frequently. If you update the value during for a dynamic
+ *   manifest, it will directly trigger a new download of the manifest.
+ *   <br>
+ *   For HLS:
+ *   Override the update period of the playlist. The value is in seconds.
+ *   If the value is less than 0, the period will be determined based on the
+ *   segment length.  If the value is greater than 0, it will update the target
+ *   duration.  If you update the value during the live, it will directly
+ *   trigger a new download of the manifest.
+ *   <br>
+ *   Defaults to <code>-1</code>.
  * @exportDoc
  */
 shaka.extern.ManifestConfiguration;
