@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.12.10](https://github.com/shaka-project/shaka-player/compare/v4.12.9...v4.12.10) (2025-01-29)
+
+
+### Bug Fixes
+
+* **DASH:** Fix Dolby Atmos detection ([#7966](https://github.com/shaka-project/shaka-player/issues/7966)) ([cdbdc6a](https://github.com/shaka-project/shaka-player/commit/cdbdc6a3b776b15f8f9d0c911b6b3193d2ab3d5c))
+* Fix AC-3 playback on Tizen 3.0 devices ([#7969](https://github.com/shaka-project/shaka-player/issues/7969)) ([006de0c](https://github.com/shaka-project/shaka-player/commit/006de0ccbb2237ad240058bbe35300452c49e2ce))
+* Fix AC-3 playback on Tizen 3.0 devices when transmuxing ([#7972](https://github.com/shaka-project/shaka-player/issues/7972)) ([04e918d](https://github.com/shaka-project/shaka-player/commit/04e918d58285147f499098d2b94f16c4b8734cb4))
+* Fix playback with Apple Media Keys polyfill detection ([#7958](https://github.com/shaka-project/shaka-player/issues/7958)) ([c9345c3](https://github.com/shaka-project/shaka-player/commit/c9345c3ab7bba2f090b13abcca129b4eb64a71b5))
+* **HLS:** Fix redirect management at media playlist level ([#7944](https://github.com/shaka-project/shaka-player/issues/7944)) ([032ad42](https://github.com/shaka-project/shaka-player/commit/032ad422eac27cec49e940f20c053084b1709d34))
+* **net:** Add 304 as successful request ([#7963](https://github.com/shaka-project/shaka-player/issues/7963)) ([88e456d](https://github.com/shaka-project/shaka-player/commit/88e456dd8ac8a83be081bd995ff6ec09ce3c471b))
+
 ## [4.12.9](https://github.com/shaka-project/shaka-player/compare/v4.12.8...v4.12.9) (2025-01-23)
 
 
