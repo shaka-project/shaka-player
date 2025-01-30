@@ -127,7 +127,9 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
 
     const parseBytes = (name) => {
       const bytes = parseInt(this.currentStats_[name], 10);
-      if (bytes > 1e6) {
+      if (bytes > 2 * 1e9) {
+        return (bytes / 1e9).toFixed(2) + 'GB';
+      } else if (bytes > 1e6) {
         return (bytes / 1e6).toFixed(2) + 'MB';
       } else if (bytes > 1e3) {
         return (bytes / 1e3).toFixed(2) + 'KB';
