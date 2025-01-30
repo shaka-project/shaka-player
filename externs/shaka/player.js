@@ -1080,7 +1080,6 @@ shaka.extern.xml.Node;
 /**
  * @typedef {{
  *   clockSyncUri: string,
- *   ignoreDrmInfo: boolean,
  *   disableXlinkProcessing: boolean,
  *   xlinkFailGracefully: boolean,
  *   ignoreMinBufferTime: boolean,
@@ -1104,12 +1103,6 @@ shaka.extern.xml.Node;
  *   URI will be used to determine the current time.
  *   <br>
  *   Defaults to <code>''</code>.
- * @property {boolean} ignoreDrmInfo
- *   If true will cause DASH parser to ignore DRM information specified
- *   by the manifest and treat it as if it signaled no particular key
- *   system and contained no init data.
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {boolean} disableXlinkProcessing
  *   If true, xlink-related processing will be disabled.
  *   <br>
@@ -1212,8 +1205,7 @@ shaka.extern.DashManifestConfiguration;
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
  *   allowLowLatencyByteRangeOptimization: boolean,
- *   allowRangeRequestsToGuessMimeType: boolean,
- *   ignoreDrmInfo: boolean
+ *   allowRangeRequestsToGuessMimeType: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -1304,12 +1296,6 @@ shaka.extern.DashManifestConfiguration;
  *   guess the mime type.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {boolean} ignoreDrmInfo
- *   If set to true, the HLS parser will ignore DRM information specified by
- *   the manifest and treat it as if it signaled no particular key system and
- *   contained no init data.
- *   <br>
- *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
@@ -1362,7 +1348,8 @@ shaka.extern.MssManifestConfiguration;
  *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean,
  *   continueLoadingWhenPaused: boolean,
  *   ignoreSupplementalCodecs: boolean,
- *   updatePeriod: number
+ *   updatePeriod: number,
+ *   ignoreDrmInfo: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1443,6 +1430,12 @@ shaka.extern.MssManifestConfiguration;
  *   trigger a new download of the manifest.
  *   <br>
  *   Defaults to <code>-1</code>.
+ * @property {boolean} ignoreDrmInfo
+ *   If true will cause DASH/HLS parser to ignore DRM information specified
+ *   by the manifest and treat it as if it signaled no particular key
+ *   system and contained no init data.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.ManifestConfiguration;

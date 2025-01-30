@@ -3714,7 +3714,7 @@ describe('HlsParser', () => {
     }
   });
 
-  it('does not construct DrmInfo', async () => {
+  it('does not construct DrmInfo with ignoreDrmInfo = true', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
@@ -3752,7 +3752,7 @@ describe('HlsParser', () => {
       manifest.type = shaka.media.ManifestParser.HLS;
     });
 
-    config.hls.ignoreDrmInfo = true;
+    config.ignoreDrmInfo = true;
     await testHlsParser(master, media, manifest);
     expect(newDrmInfoSpy).not.toHaveBeenCalled();
   });

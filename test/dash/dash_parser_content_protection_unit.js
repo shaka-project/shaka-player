@@ -29,7 +29,7 @@ describe('DashParser ContentProtection', () => {
     const dashParser = new shaka.dash.DashParser();
 
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.dash.ignoreDrmInfo = ignoreDrmInfo || false;
+    config.ignoreDrmInfo = ignoreDrmInfo || false;
     dashParser.configure(config);
 
     const playerInterface = {
