@@ -227,14 +227,14 @@ shakaDemo.Config = class {
         .addBoolInput_('Ignore supplemental codecs',
             'manifest.ignoreSupplementalCodecs')
         .addNumberInput_('Override the Update time of the manifest',
-            'manifest.updatePeriod');
+            'manifest.updatePeriod')
+        .addBoolInput_('Ignore DRM Info', 'manifest.ignoreDrmInfo');
   }
 
   /** @private */
   addDashManifestSection_() {
     const docLink = this.resolveExternLink_('.ManifestConfiguration');
     this.addSection_('DASH Manifest', docLink)
-        .addBoolInput_('Ignore DASH DRM Info', 'manifest.dash.ignoreDrmInfo')
         .addBoolInput_('Auto-Correct DASH Drift',
             'manifest.dash.autoCorrectDrift')
         .addBoolInput_('Disable Xlink processing',
