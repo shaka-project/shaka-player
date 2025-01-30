@@ -1212,7 +1212,8 @@ shaka.extern.DashManifestConfiguration;
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
  *   allowLowLatencyByteRangeOptimization: boolean,
- *   allowRangeRequestsToGuessMimeType: boolean
+ *   allowRangeRequestsToGuessMimeType: boolean,
+ *   ignoreDrmInfo: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -1301,6 +1302,12 @@ shaka.extern.DashManifestConfiguration;
  * @property {boolean} allowRangeRequestsToGuessMimeType
  *   If set to true, the HLS parser will use range request (only first byte) to
  *   guess the mime type.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} ignoreDrmInfo
+ *   If set to true, the HLS parser will ignore DRM information specified by
+ *   the manifest and treat it as if it signaled no particular key system and
+ *   contained no init data.
  *   <br>
  *   Defaults to <code>false</code>.
  * @exportDoc

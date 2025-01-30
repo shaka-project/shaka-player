@@ -290,6 +290,7 @@ shakaDemo.Config = class {
             'manifest.hls.disableClosedCaptionsDetection')
         .addBoolInput_('Allow LL-HLS byterange optimization',
             'manifest.hls.allowLowLatencyByteRangeOptimization')
+        .addBoolInput_('Ignore HLS DRM Info', 'manifest.hls.ignoreDrmInfo')
         .addBoolInput_('Allow range request to guess mime type',
             'manifest.hls.allowRangeRequestsToGuessMimeType');
   }
