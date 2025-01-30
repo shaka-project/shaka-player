@@ -81,7 +81,6 @@ export default [
     },
     rules: {
       // Things the compiler already takes care of, with more precision: {{{
-      'no-console': 'off',
       'no-eq-null': 'off',
       'no-eval': 'off',
       'no-undef': 'off',
@@ -132,6 +131,7 @@ export default [
       'guard-for-in': 'off',
       'no-alert': 'error',
       'no-caller': 'error',
+      'no-console': 'error',
       'no-div-regex': 'error',
       'no-extend-native': 'error', // May conflict with future polyfills
       'no-extra-label': 'error',
@@ -338,6 +338,19 @@ export default [
     rules: {
       // JSDoc is not strictly required in externs, tests, and in load.js.
       'jsdoc/require-jsdoc': 'off',
+    },
+  },
+  {
+    files: [
+      'karma.conf.js',
+      'build/**/*.js',
+      'demo/**/*.js',
+      'lib/debug/asserts.js',
+      'lib/debug/log.js',
+      'test/**/**.js',
+    ],
+    rules: {
+      'no-console': 'off',
     },
   },
 ];
