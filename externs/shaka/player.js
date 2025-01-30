@@ -924,7 +924,6 @@ shaka.extern.xml.Node;
 /**
  * @typedef {{
  *   clockSyncUri: string,
- *   ignoreDrmInfo: boolean,
  *   disableXlinkProcessing: boolean,
  *   xlinkFailGracefully: boolean,
  *   ignoreMinBufferTime: boolean,
@@ -948,10 +947,8 @@ shaka.extern.xml.Node;
  *   A default clock sync URI to be used with live streams which do not
  *   contain any clock sync information.  The <code>Date</code> header from this
  *   URI will be used to determine the current time.
- * @property {boolean} ignoreDrmInfo
- *   If true will cause DASH parser to ignore DRM information specified
- *   by the manifest and treat it as if it signaled no particular key
- *   system and contained no init data. Defaults to false if not provided.
+ *   <br>
+ *   Defaults to <code>''</code>.
  * @property {boolean} disableXlinkProcessing
  *   If true, xlink-related processing will be disabled. Defaults to
  *   <code>false</code> if not provided.
@@ -1178,7 +1175,8 @@ shaka.extern.MssManifestConfiguration;
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration,
  *   mss: shaka.extern.MssManifestConfiguration,
- *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean
+ *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean,
+ *   ignoreDrmInfo: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1221,7 +1219,12 @@ shaka.extern.MssManifestConfiguration;
  * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
  *   If true, manifest update request failures will cause a fatal error.
  *   Defaults to <code>false</code> if not provided.
- *
+ * @property {boolean} ignoreDrmInfo
+ *   If true will cause DASH/HLS parser to ignore DRM information specified
+ *   by the manifest and treat it as if it signaled no particular key
+ *   system and contained no init data.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.ManifestConfiguration;

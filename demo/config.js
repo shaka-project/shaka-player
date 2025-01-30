@@ -200,14 +200,14 @@ shakaDemo.Config = class {
         .addBoolInput_('Disable Text', 'manifest.disableText')
         .addBoolInput_('Disable Thumbnails', 'manifest.disableThumbnails')
         .addBoolInput_('Enable segment-relative VTT Timing',
-            'manifest.segmentRelativeVttTiming');
+            'manifest.segmentRelativeVttTiming')
+        .addBoolInput_('Ignore DRM Info', 'manifest.ignoreDrmInfo');
   }
 
   /** @private */
   addDashManifestSection_() {
     const docLink = this.resolveExternLink_('.ManifestConfiguration');
     this.addSection_('DASH Manifest', docLink)
-        .addBoolInput_('Ignore DASH DRM Info', 'manifest.dash.ignoreDrmInfo')
         .addBoolInput_('Auto-Correct DASH Drift',
             'manifest.dash.autoCorrectDrift')
         .addBoolInput_('Disable Xlink processing',
