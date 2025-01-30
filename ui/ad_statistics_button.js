@@ -78,6 +78,8 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
     /** @private {!shaka.extern.AdsStats} */
     this.currentStats_ = this.adManager.getStats();
 
+    shaka.ui.Utils.setDisplay(this.button_, this.currentStats_.started > 0);
+
     /** @private {!Map<string, HTMLElement>} */
     this.displayedElements_ = new Map();
 
