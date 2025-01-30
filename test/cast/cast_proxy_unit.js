@@ -23,7 +23,11 @@ describe('CastProxy', () => {
   /** @type {shaka.cast.CastProxy} */
   let proxy;
 
+  const originalWindowChrome = window.chrome;
+
   beforeEach(() => {
+    window['chrome'] = originalWindowChrome || {};
+
     mockCastSenderConstructor = jasmine.createSpy('CastSender constructor');
     mockCastSenderConstructor.and.callFake(createMockCastSender);
     shaka.cast.CastSender = Util.spyFunc(mockCastSenderConstructor);
@@ -42,6 +46,7 @@ describe('CastProxy', () => {
     } finally {
       shaka.cast.CastSender = originalCastSender;
     }
+    window['chrome'] = originalWindowChrome;
   });
 
   describe('constructor', () => {
