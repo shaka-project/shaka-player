@@ -146,24 +146,6 @@ requirement: {
   error_message: "Use Date.now() instead."
 }
 
-# Disallow console logging.
-requirement: {
-  type: BANNED_PROPERTY_CALL
-  value: "Console.prototype.debug"
-  value: "Console.prototype.log"
-  value: "Console.prototype.info"
-  value: "Console.prototype.warn"
-  value: "Console.prototype.error"
-  error_message:
-    "Using \"console\" is not allowed; "
-    "use shaka.log instead"
-  whitelist_regexp: "demo/"
-  whitelist_regexp: "lib/debug/log.js"
-  whitelist_regexp: "test/test/boot.js"
-  whitelist_regexp: "node_modules/"
-  whitelist_regexp: "[synthetic:es6/promise/promise]"
-}
-
 # Disallow querySelector and querySelectorAll since they aren't supported on
 # Shaka Player Embedded.
 requirement: {
