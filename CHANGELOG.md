@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.9.2-caf6](https://github.com/shaka-project/shaka-player/compare/v4.9.2-caf5...v4.9.2-caf6) (2025-02-03)
+
+
+### Features
+
+* **HLS:** Add an option to ignore DRM info ([#7986](https://github.com/shaka-project/shaka-player/issues/7986)) ([466f8c9](https://github.com/shaka-project/shaka-player/commit/466f8c901c8e93ff7e8408a4e7181fb059fb3289))
+
 ## [4.9.2-caf5](https://github.com/shaka-project/shaka-player/compare/v4.9.2-caf4...v4.9.2-caf5) (2025-01-10)
 
 
