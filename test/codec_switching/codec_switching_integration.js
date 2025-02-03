@@ -76,18 +76,20 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
 
       // Spanish is Opus WebM.
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
     });
 
     it('can switch codecs SMOOTH', async () => {
@@ -115,18 +117,20 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
 
       // Spanish is Opus WebM.
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
     });
   });
 
@@ -148,18 +152,20 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
 
       // Spanish is Opus WebM.
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
     });
 
     it('can switch codecs SMOOTH', async () => {
@@ -186,18 +192,20 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
 
       // Spanish is Opus WebM.
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
     });
   });
 
@@ -220,18 +228,20 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
 
       // Spanish is EC3.
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
     });
 
     it('can switch codecs SMOOTH', async () => {
@@ -259,18 +269,20 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
 
       // Spanish is EC3.
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
     });
   });
 
@@ -293,18 +305,20 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
 
       // English is AAC MP4.
-      player.selectAudioLanguage('en');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'en');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
     });
 
     it('can switch codecs SMOOTH', async () => {
@@ -332,18 +346,20 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
 
       // English is AAC MP4.
-      player.selectAudioLanguage('en');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'en');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
     });
   });
 });

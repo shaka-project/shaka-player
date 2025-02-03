@@ -270,6 +270,7 @@ shaka.extern.BufferedInfo;
  *   forced: boolean,
  *   videoId: ?number,
  *   audioId: ?number,
+ *   audioGroupId: ?string,
  *   channelsCount: ?number,
  *   audioSamplingRate: ?number,
  *   tilesLayout: ?string,
@@ -361,6 +362,10 @@ shaka.extern.BufferedInfo;
  *   (only for variant tracks) The video stream id.
  * @property {?number} audioId
  *   (only for variant tracks) The audio stream id.
+ * @property {?string} audioGroupId
+ *   (only for variant tracks)
+ *   The ID of the stream's parent element. In DASH, this will be a unique
+ *   ID that represents the representation's parent adaptation element
  * @property {?number} channelsCount
  *   The count of the audio track channels.
  * @property {?number} audioSamplingRate
@@ -395,6 +400,68 @@ shaka.extern.BufferedInfo;
  * @exportDoc
  */
 shaka.extern.Track;
+
+/**
+ * @typedef {{
+ *   active: boolean,
+ *   language: string,
+ *   label: ?string,
+ *   mimeType: ?string,
+ *   codecs: ?string,
+ *   primary: boolean,
+ *   roles: !Array<string>,
+ *   accessibilityPurpose: ?shaka.media.ManifestParser.AccessibilityPurpose,
+ *   channelsCount: ?number,
+ *   audioSamplingRate: ?number,
+ *   spatialAudio: boolean,
+ *   originalLanguage: ?string
+ * }}
+ *
+ * @description
+ * An object describing a audio track.  This object should be treated as
+ * read-only as changing any values does not have any effect.
+ *
+ * @property {boolean} active
+ *   If true, this is the track being streamed (another track may be
+ *   visible/audible in the buffer).
+ *
+ * @property {string} language
+ *   The language of the track, or <code>'und'</code> if not given.  This value
+ *   is normalized as follows - language part is always lowercase and translated
+ *   to ISO-639-1 when possible, locale part is always uppercase,
+ *   i.e. <code>'en-US'</code>.
+ * @property {?string} label
+ *   The track label, which is unique text that should describe the track.
+ * @property {?string} mimeType
+ *   The MIME type of the content provided in the manifest.
+ * @property {?string} codecs
+ *   The audio codecs string provided in the manifest, if present.
+ * @property {boolean} primary
+ *   True indicates that this in the primary language for the content.
+ *   This flag is based on signals from the manifest.
+ *   This can be a useful hint about which language should be the default, and
+ *   indicates which track Shaka will use when the user's language preference
+ *   cannot be satisfied.
+ * @property {!Array<string>} roles
+ *   The roles of the track, e.g. <code>'main'</code>, <code>'caption'</code>,
+ *   or <code>'commentary'</code>.
+ * @property {?shaka.media.ManifestParser.AccessibilityPurpose
+ *           } accessibilityPurpose
+ *   The DASH accessibility descriptor, if one was provided for this track.
+ * @property {?number} channelsCount
+ *   The count of the audio track channels.
+ * @property {?number} audioSamplingRate
+ *   Specifies the maximum sampling rate of the content.
+ * @property {boolean} spatialAudio
+ *   True indicates that the content has spatial audio.
+ *   This flag is based on signals from the manifest.
+ * @property {?string} originalLanguage
+ *   The original language of the track, if any, as it appeared in the original
+ *   manifest.  This is the exact value provided in the manifest; for normalized
+ *   value use <code>language</code> property.
+ * @exportDoc
+ */
+shaka.extern.AudioTrack;
 
 
 /**

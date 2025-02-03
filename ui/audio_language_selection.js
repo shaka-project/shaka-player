@@ -47,29 +47,25 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
 
 
     this.eventManager.listen(this.player, 'loading', () => {
-      this.onTracksChanged_();
+      this.onAudioTracksChanged_();
     });
 
-    this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.onTracksChanged_();
-    });
-
-    this.eventManager.listen(this.player, 'variantchanged', () => {
-      this.updateAudioLanguages_();
+    this.eventManager.listen(this.player, 'audiotrackschanged', () => {
+      this.onAudioTracksChanged_();
     });
 
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
 
-    this.updateAudioLanguages_();
+    this.onAudioTracksChanged_();
   }
 
 
   /** @private */
-  updateAudioLanguages_() {
-    const tracks = this.player.getVariantTracks();
+  onAudioTracksChanged_() {
+    const audioTracks = this.player.getAudioTracks();
 
-    shaka.ui.LanguageUtils.updateTracks(tracks, this.menu,
+    shaka.ui.LanguageUtils.updateAudioTracks(audioTracks, this.menu,
         (track) => this.onAudioTrackSelected_(track),
         /* updateChosen= */ true, this.currentSelection, this.localization,
         this.controls.getConfig().trackLabelFormat,
@@ -86,34 +82,12 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
     shaka.ui.Utils.setDisplay(this.button, numberOfItems > 2);
   }
 
-  /** @private */
-  onTracksChanged_() {
-    const hasVariants = this.player.getVariantTracks().length > 0;
-    shaka.ui.Utils.setDisplay(this.button, hasVariants);
-    this.updateAudioLanguages_();
-  }
-
   /**
-   * @param {!shaka.extern.Track} track
+   * @param {!shaka.extern.AudioTrack} audioTrack
    * @private
    */
-  onAudioTrackSelected_(track) {
-    let channelsCount = undefined;
-    if (track.channelsCount &&
-        this.controls.getConfig().showAudioChannelCountVariants) {
-      channelsCount = track.channelsCount;
-    }
-    let codec = undefined;
-    if (track.audioCodec) {
-      codec = track.audioCodec;
-    }
-    let label = '';
-    if (track.label) {
-      label = track.label;
-    }
-    this.player.selectAudioLanguage(track.language, track.roles[0],
-        channelsCount, /* safeMargin= */ 0, codec, track.spatialAudio,
-        label);
+  onAudioTrackSelected_(audioTrack) {
+    this.player.selectAudioTrack(audioTrack);
   }
 
 
