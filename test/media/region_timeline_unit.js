@@ -5,7 +5,7 @@
  */
 
 describe('RegionTimeline', () => {
-  /** @type {!shaka.media.RegionTimeline} */
+  /** @type {!shaka.media.RegionTimeline<shaka.extern.TimelineRegionInfo>} */
   let timeline;
 
   /** @type {!jasmine.Spy} */
