@@ -2925,20 +2925,33 @@ describe('Player', () => {
 
       // Load the player with the live manifest.
       await player.load(fakeManifestUri, null, fakeMimeType);
-
-      video.currentTime = 10; // Simulate that we're 10 seconds into playback.
     });
 
     it('returns null if video element does not exist', async () => {
+      video.currentTime = 10; // Simulate that we're 10 seconds into playback.
       await player.detach();
       const latency = player.getLiveLatency();
       expect(latency).toBeNull();
     });
 
+    it('returns null if no position defined yet', () => {
+      video.currentTime = 0;
+      const latency = player.getLiveLatency();
+      expect(latency).toBeNull();
+    });
+
     it('returns correct latency when video is playing', () => {
+      video.currentTime = 10; // Simulate that we're 10 seconds into playback.
       Date.now = () => 2000 * 1000;
       const latency = player.getLiveLatency();
       expect(latency).toBe(990000);
+    });
+
+    it('returns integer latency also when Date.now returns float', () => {
+      video.currentTime = 10; // Simulate that we're 10 seconds into playback.
+      Date.now = () => 2000 * 1000.3;
+      const latency = player.getLiveLatency();
+      expect(latency).toBe(990600);
     });
   });
 
