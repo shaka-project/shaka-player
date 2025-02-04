@@ -1373,46 +1373,51 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       updatePositionState();
     });
 
-    this.eventManager_.listen(this.player_, 'metadata', (event) => {
-      const payload = event['payload'];
-      if (!payload) {
-        return;
-      }
-      let title;
-      if (payload['key'] == 'TIT2' && payload['data']) {
-        title = payload['data'];
-      }
-      let imageUrl;
-      if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
-        imageUrl = payload['data'];
-      }
-      if (title) {
-        let metadata = {
-          title: title,
-          artwork: [],
-        };
-        if (navigator.mediaSession.metadata) {
-          metadata = navigator.mediaSession.metadata;
-          metadata.title = title;
-        }
-        navigator.mediaSession.metadata = new MediaMetadata(metadata);
-      }
-      if (imageUrl) {
-        const video = /** @type {HTMLVideoElement} */ (this.localVideo_);
-        if (imageUrl != video.poster) {
-          video.poster = imageUrl;
-        }
-        let metadata = {
-          title: '',
-          artwork: [{src: imageUrl}],
-        };
-        if (navigator.mediaSession.metadata) {
-          metadata = navigator.mediaSession.metadata;
-          metadata.artwork = [{src: imageUrl}];
-        }
-        navigator.mediaSession.metadata = new MediaMetadata(metadata);
-      }
-    });
+    this.eventManager_.listen(
+        this.player_, 'metadatatimelineregionenter', (event) => {
+          const metadataRegion = event['detail'];
+          if (!metadataRegion) {
+            return;
+          }
+          const payload = metadataRegion['payload'];
+          if (!payload) {
+            return;
+          }
+          let title;
+          if (payload['key'] == 'TIT2' && payload['data']) {
+            title = payload['data'];
+          }
+          let imageUrl;
+          if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
+            imageUrl = payload['data'];
+          }
+          if (title) {
+            let metadata = {
+              title: title,
+              artwork: [],
+            };
+            if (navigator.mediaSession.metadata) {
+              metadata = navigator.mediaSession.metadata;
+              metadata.title = title;
+            }
+            navigator.mediaSession.metadata = new MediaMetadata(metadata);
+          }
+          if (imageUrl) {
+            const video = /** @type {HTMLVideoElement} */ (this.localVideo_);
+            if (imageUrl != video.poster) {
+              video.poster = imageUrl;
+            }
+            let metadata = {
+              title: '',
+              artwork: [{src: imageUrl}],
+            };
+            if (navigator.mediaSession.metadata) {
+              metadata = navigator.mediaSession.metadata;
+              metadata.artwork = [{src: imageUrl}];
+            }
+            navigator.mediaSession.metadata = new MediaMetadata(metadata);
+          }
+        });
   }
 
 

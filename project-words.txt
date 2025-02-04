@@ -32,6 +32,9 @@ manifestparsed
 manifestupdated
 mediaqualitychanged
 mediasourcerecovered
+metadatatimelineregionadded
+metadatatimelineregionenter
+metadatatimelineregionexit
 mozfullscreenchange
 mozfullscreenerror
 nativecontrols

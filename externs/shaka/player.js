@@ -699,6 +699,34 @@ shaka.extern.HLSInterstitial;
  */
 shaka.extern.TimelineRegionInfo;
 
+
+/**
+ * @typedef {{
+ *   schemeIdUri: string,
+ *   startTime: number,
+ *   endTime: number,
+ *   id: string,
+ *   payload: shaka.extern.MetadataFrame
+ * }}
+ *
+ * @description
+ * Contains information about a region of the timeline that will cause an event
+ * to be raised when the playhead enters or exits it.
+ *
+ * @property {string} schemeIdUri
+ *   Identifies the metadata type.
+ * @property {number} startTime
+ *   The presentation time (in seconds) that the region should start.
+ * @property {number} endTime
+ *   The presentation time (in seconds) that the region should end.
+ * @property {string} id
+ *   Specifies an identifier for this instance of the region.
+ * @property {shaka.extern.MetadataFrame} payload
+ *   Specifies the metadata frame.
+ * @exportDoc
+ */
+shaka.extern.MetadataTimelineRegionInfo;
+
 /**
  * @typedef {{
  *   audioSamplingRate: ?number,
