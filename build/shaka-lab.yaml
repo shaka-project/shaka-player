@@ -260,6 +260,11 @@ ChromecastV1:
   browser: chromecast
   version: v1
 
+ChromecastStreamer:
+  # This is publicly the "Google TV Streamer", but it's still a Chromecast, too.
+  browser: chromecast
+  version: streamer
+
 ChromeOS:
   # TODO(b/145916766): Persistent license tests failing
   disabled: true
