@@ -1381,7 +1381,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       let title;
       if (payload['key'] == 'TIT2' && payload['data']) {
         title = payload['data'];
-        console.log(title);
       }
       let imageUrl;
       if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
