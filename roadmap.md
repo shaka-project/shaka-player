@@ -23,6 +23,8 @@ v5.0
 v4.14 - 2025 Q2
  - Time ID3, emsg, and metadata events to the presentation timeline
    https://github.com/shaka-project/shaka-player/issues/7556
+ - New API for audio: `getAudioTracks` and `selectAudioTrack`
+   https://github.com/shaka-project/shaka-player/issues/3544
 
 =====
 
