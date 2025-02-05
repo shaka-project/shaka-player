@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.12.11](https://github.com/shaka-project/shaka-player/compare/v4.12.10...v4.12.11) (2025-02-05)
+
+
+### Bug Fixes
+
+* Add more info in getVariantTracks for muxed streams ([#8002](https://github.com/shaka-project/shaka-player/issues/8002)) ([5ce1d33](https://github.com/shaka-project/shaka-player/commit/5ce1d332042d064c7f9353dea3405b76353ffa21))
+* Allow change the native playbackRate with the same functionality as trickPlay ([#7993](https://github.com/shaka-project/shaka-player/issues/7993)) ([be36d90](https://github.com/shaka-project/shaka-player/commit/be36d909f5e1e56f95e4efad4b885eef5ab495fe))
+* Avoid launch RESTRICTIONS_CANNOT_BE_MET when it's not necessary ([#8014](https://github.com/shaka-project/shaka-player/issues/8014)) ([7e716ef](https://github.com/shaka-project/shaka-player/commit/7e716ef477bb87458216a163210f490fab8c530e))
+* Avoid rebuffering when using big trick play rates ([#7988](https://github.com/shaka-project/shaka-player/issues/7988)) ([6a64563](https://github.com/shaka-project/shaka-player/commit/6a645631673bafe83c289ddd50982b0903de0197))
+* Duplicate timelineregion* events fired for the same event id ([#8013](https://github.com/shaka-project/shaka-player/issues/8013)) ([a35e9d7](https://github.com/shaka-project/shaka-player/commit/a35e9d70835b78e50de03cf0119de2f451d3423f))
+* Fix displaying subtitles in UITextDisplayer at high playback rates ([#7991](https://github.com/shaka-project/shaka-player/issues/7991)) ([d1e64c2](https://github.com/shaka-project/shaka-player/commit/d1e64c279c214c5da909a8bee217d68a832a030b))
+* Fix segmentappended event when using muxed streams ([#7987](https://github.com/shaka-project/shaka-player/issues/7987)) ([8f6efcd](https://github.com/shaka-project/shaka-player/commit/8f6efcd70a0aade58d98d451890b7510b2284b51))
+* **PS5:** Disable sequence mode in PS5 ([#8004](https://github.com/shaka-project/shaka-player/issues/8004)) ([1b0dadd](https://github.com/shaka-project/shaka-player/commit/1b0dadd220125a98770ddd8568b08169b640be8a))
+* **Subtitles:** Prevent rounding errors when filtering duplicated cues ([#8018](https://github.com/shaka-project/shaka-player/issues/8018)) ([5557e6b](https://github.com/shaka-project/shaka-player/commit/5557e6bc295d98eaf5f2f29207e513b8b5023d65))
+* **UI:** Show GB unit in StatisticsButton ([#7990](https://github.com/shaka-project/shaka-player/issues/7990)) ([ea3ce89](https://github.com/shaka-project/shaka-player/commit/ea3ce89663aa7a8cbe257e1d27fa4ca1a20b8470))
+
+
+### Performance Improvements
+
+* Prevent CastSender initialization on CastProxy on unsupported browsers ([#7995](https://github.com/shaka-project/shaka-player/issues/7995)) ([eec48f2](https://github.com/shaka-project/shaka-player/commit/eec48f2cb13bec63a312a39a9236dd883ae7173a))
+
 ## [4.12.10](https://github.com/shaka-project/shaka-player/compare/v4.12.9...v4.12.10) (2025-01-29)
 
 
