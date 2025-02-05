@@ -1,5 +1,31 @@
 # Changelog
 
+## [4.13.2](https://github.com/shaka-project/shaka-player/compare/v4.13.1...v4.13.2) (2025-02-05)
+
+
+### Bug Fixes
+
+* Add more info in getVariantTracks for muxed streams ([#8002](https://github.com/shaka-project/shaka-player/issues/8002)) ([dcd89ed](https://github.com/shaka-project/shaka-player/commit/dcd89edbf8c5ca95a37eda422e75491678cf259c))
+* Allow change the native playbackRate with the same functionality as trickPlay ([#7993](https://github.com/shaka-project/shaka-player/issues/7993)) ([197b693](https://github.com/shaka-project/shaka-player/commit/197b693269e36fc6471720847ee81188ada4b84e))
+* Avoid launch RESTRICTIONS_CANNOT_BE_MET when it's not necessary ([#8014](https://github.com/shaka-project/shaka-player/issues/8014)) ([15c2e54](https://github.com/shaka-project/shaka-player/commit/15c2e54227c1a012f9045ebe16916d5cdf5eff5f))
+* Avoid rebuffering when using big trick play rates ([#7988](https://github.com/shaka-project/shaka-player/issues/7988)) ([1b778bb](https://github.com/shaka-project/shaka-player/commit/1b778bb6e28280cb334e4f8c97440527dde10d21))
+* **CMCD:** Only report ltc if playing; round to int ([#8011](https://github.com/shaka-project/shaka-player/issues/8011)) ([03acdfe](https://github.com/shaka-project/shaka-player/commit/03acdfe8ea490441e08c5166e4d119cafd28a5f8)), closes [#8010](https://github.com/shaka-project/shaka-player/issues/8010)
+* Do not recognize MultiChoice & Ziggo as Apple ([#7996](https://github.com/shaka-project/shaka-player/issues/7996)) ([81c9255](https://github.com/shaka-project/shaka-player/commit/81c925514fe73f8346280063539c2705b7edd4b9))
+* Duplicate timelineregion* events fired for the same event id ([#8013](https://github.com/shaka-project/shaka-player/issues/8013)) ([c9bab29](https://github.com/shaka-project/shaka-player/commit/c9bab292176b7f027fe167b7b0ba17679bc7771e))
+* Fix displaying subtitles in UITextDisplayer at high playback rates ([#7991](https://github.com/shaka-project/shaka-player/issues/7991)) ([33078c7](https://github.com/shaka-project/shaka-player/commit/33078c7400e7f10bdc40d47d56194f76395fc50f))
+* Fix segmentappended event when using muxed streams ([#7987](https://github.com/shaka-project/shaka-player/issues/7987)) ([e40f2ba](https://github.com/shaka-project/shaka-player/commit/e40f2bad2a9a69dfbcf0bff18a6b3079fce53ef4))
+* **HLS:** Fix support for SUPPLEMENTAL-CODECS on EXT-X-I-FRAME-STREAM-INF ([#7992](https://github.com/shaka-project/shaka-player/issues/7992)) ([f6235ba](https://github.com/shaka-project/shaka-player/commit/f6235ba71588c0f627c6d2d9e69dc12c025f1685))
+* **HLS:** Populate originalVideoId in HLS with the URI ([#8003](https://github.com/shaka-project/shaka-player/issues/8003)) ([75ece5b](https://github.com/shaka-project/shaka-player/commit/75ece5b91e6b010b122d1b123cd7c8f3df429d5b))
+* **PS5:** Disable sequence mode in PS5 ([#8004](https://github.com/shaka-project/shaka-player/issues/8004)) ([ca15de6](https://github.com/shaka-project/shaka-player/commit/ca15de60736cc791176b563cb041c71257fd8a28))
+* **Subtitles:** Prevent rounding errors when filtering duplicated cues ([#8018](https://github.com/shaka-project/shaka-player/issues/8018)) ([5e82ca3](https://github.com/shaka-project/shaka-player/commit/5e82ca3c9d0dc90cc331cb2ac2184f928c1dd74f))
+* **UI:** Fix show AdStatisticsButton when it's not necessary ([#7989](https://github.com/shaka-project/shaka-player/issues/7989)) ([0cf1c3c](https://github.com/shaka-project/shaka-player/commit/0cf1c3c9e6ee9d4df5d04b17f5612201d65fe70f))
+* **UI:** Show GB unit in StatisticsButton ([#7990](https://github.com/shaka-project/shaka-player/issues/7990)) ([269b540](https://github.com/shaka-project/shaka-player/commit/269b54047cd19aef24f53ceb90c62397178aa54f))
+
+
+### Performance Improvements
+
+* Prevent CastSender initialization on CastProxy on unsupported browsers ([#7995](https://github.com/shaka-project/shaka-player/issues/7995)) ([3722429](https://github.com/shaka-project/shaka-player/commit/37224299b5c8c000344852976a7dc0d206a16473))
+
 ## [4.13.1](https://github.com/shaka-project/shaka-player/compare/v4.13.0...v4.13.1) (2025-01-29)
 
 
