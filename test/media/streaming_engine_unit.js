@@ -458,6 +458,9 @@ describe('StreamingEngine', () => {
       config.bufferingGoal = 5;
       config.bufferBehind = Infinity;
       config.maxDisabledTime = 0; // Do not disable stream by default
+      // We don't want to evict segments in tests where there is no need to
+      // test them.
+      config.evictionGoal = 30;
     }
 
     goog.asserts.assert(
