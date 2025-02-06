@@ -4,6 +4,7 @@ adblocker
 audiolang
 audiotrackchange
 audiotrackchanged
+audiotrackschanged
 autoplaying
 captionselectionupdated
 caststatuschanged

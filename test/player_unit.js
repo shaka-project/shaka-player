@@ -1521,6 +1521,8 @@ describe('Player', () => {
   describe('tracks', () => {
     /** @type {!Array<shaka.extern.Track>} */
     let variantTracks;
+    /** @type {!Array<shaka.extern.AudioTrack>} */
+    let audioTracks;
     /** @type {!Array<shaka.extern.Track>} */
     let textTracks;
     /** @type {!Array<shaka.extern.Track>} */
@@ -1707,6 +1709,7 @@ describe('Player', () => {
           forced: false,
           videoId: 1,
           audioId: 3,
+          audioGroupId: null,
           channelsCount: 6,
           audioSamplingRate: 48000,
           spatialAudio: false,
@@ -1747,6 +1750,7 @@ describe('Player', () => {
           forced: false,
           videoId: 2,
           audioId: 3,
+          audioGroupId: null,
           channelsCount: 6,
           audioSamplingRate: 48000,
           spatialAudio: false,
@@ -1787,6 +1791,7 @@ describe('Player', () => {
           forced: false,
           videoId: 1,
           audioId: 4,
+          audioGroupId: null,
           channelsCount: 2,
           audioSamplingRate: 48000,
           spatialAudio: false,
@@ -1827,6 +1832,7 @@ describe('Player', () => {
           forced: false,
           videoId: 2,
           audioId: 4,
+          audioGroupId: null,
           channelsCount: 2,
           audioSamplingRate: 48000,
           spatialAudio: false,
@@ -1867,6 +1873,7 @@ describe('Player', () => {
           forced: false,
           videoId: 1,
           audioId: 5,
+          audioGroupId: null,
           channelsCount: 2,
           audioSamplingRate: 48000,
           spatialAudio: false,
@@ -1907,6 +1914,7 @@ describe('Player', () => {
           forced: false,
           videoId: 2,
           audioId: 5,
+          audioGroupId: null,
           channelsCount: 2,
           audioSamplingRate: 48000,
           spatialAudio: false,
@@ -1947,6 +1955,7 @@ describe('Player', () => {
           forced: false,
           videoId: 1,
           audioId: 6,
+          audioGroupId: null,
           channelsCount: 2,
           audioSamplingRate: 48000,
           spatialAudio: false,
@@ -1987,6 +1996,7 @@ describe('Player', () => {
           forced: false,
           videoId: 2,
           audioId: 6,
+          audioGroupId: null,
           channelsCount: 2,
           audioSamplingRate: 48000,
           spatialAudio: false,
@@ -2027,6 +2037,7 @@ describe('Player', () => {
           forced: false,
           videoId: 1,
           audioId: 7,
+          audioGroupId: null,
           channelsCount: 2,
           audioSamplingRate: 48000,
           spatialAudio: false,
@@ -2067,6 +2078,7 @@ describe('Player', () => {
           forced: false,
           videoId: 2,
           audioId: 7,
+          audioGroupId: null,
           channelsCount: 2,
           audioSamplingRate: 48000,
           spatialAudio: false,
@@ -2078,6 +2090,79 @@ describe('Player', () => {
           originalTextId: null,
           originalImageId: null,
           accessibilityPurpose: undefined,
+        },
+      ];
+
+      audioTracks = [
+        {
+          active: true,
+          language: 'en',
+          label: null,
+          mimeType: 'audio/mp4',
+          codecs: 'mp4a.40.2',
+          primary: false,
+          roles: ['main'],
+          accessibilityPurpose: undefined,
+          channelsCount: 6,
+          audioSamplingRate: 48000,
+          spatialAudio: false,
+          originalLanguage: 'en',
+        },
+        {
+          active: false,
+          language: 'en',
+          label: null,
+          mimeType: 'audio/mp4',
+          codecs: 'mp4a.40.2',
+          primary: false,
+          roles: ['main'],
+          accessibilityPurpose: undefined,
+          channelsCount: 2,
+          audioSamplingRate: 48000,
+          spatialAudio: false,
+          originalLanguage: 'en',
+        },
+        {
+          active: false,
+          language: 'en',
+          label: null,
+          mimeType: 'audio/mp4',
+          codecs: 'mp4a.40.2',
+          primary: false,
+          roles: ['commentary'],
+          accessibilityPurpose: undefined,
+          channelsCount: 2,
+          audioSamplingRate: 48000,
+          spatialAudio: false,
+          originalLanguage: 'en',
+        },
+        {
+          active: false,
+          language: 'es',
+          label: 'es-label',
+          mimeType: 'audio/mp4',
+          codecs: 'mp4a.40.2',
+          primary: false,
+          roles: [],
+          accessibilityPurpose: undefined,
+          channelsCount: 2,
+          audioSamplingRate: 48000,
+          spatialAudio: false,
+          originalLanguage: 'es',
+        },
+        {
+          active: false,
+          language: 'es',
+          label: null,
+          mimeType: 'audio/mp4',
+          codecs: 'ec-3',
+          primary: false,
+          roles: [],
+          accessibilityPurpose: undefined,
+          channelsCount: 2,
+          audioSamplingRate: 48000,
+          spatialAudio: false,
+          originalLanguage: 'es',
         },
       ];
 
@@ -2116,6 +2201,7 @@ describe('Player', () => {
           videoLayout: null,
           videoId: null,
           audioId: null,
+          audioGroupId: null,
           originalAudioId: null,
           originalVideoId: null,
           originalTextId: 'text-es',
@@ -2156,6 +2242,7 @@ describe('Player', () => {
           videoLayout: null,
           videoId: null,
           audioId: null,
+          audioGroupId: null,
           originalAudioId: null,
           originalVideoId: null,
           originalTextId: 'text-en',
@@ -2196,6 +2283,7 @@ describe('Player', () => {
           videoLayout: null,
           videoId: null,
           audioId: null,
+          audioGroupId: null,
           originalAudioId: null,
           originalVideoId: null,
           originalTextId: 'text-commentary',
@@ -2239,6 +2327,7 @@ describe('Player', () => {
           videoLayout: null,
           videoId: null,
           audioId: null,
+          audioGroupId: null,
           originalAudioId: null,
           originalVideoId: null,
           originalTextId: null,
@@ -2264,6 +2353,7 @@ describe('Player', () => {
 
     it('returns the correct tracks', () => {
       expect(player.getVariantTracks()).toEqual(variantTracks);
+      expect(player.getAudioTracks()).toEqual(audioTracks);
       expect(player.getTextTracks()).toEqual(textTracks);
       expect(player.getImageTracks()).toEqual(imageTracks);
     });
@@ -2274,6 +2364,7 @@ describe('Player', () => {
       parser.start.and.callFake((manifestUri, playerInterface) => {
         // The player does not yet have a manifest.
         expect(player.getVariantTracks()).toEqual([]);
+        expect(player.getAudioTracks()).toEqual([]);
         expect(player.getTextTracks()).toEqual([]);
         expect(player.getImageTracks()).toEqual([]);
 
@@ -2284,6 +2375,7 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
 
       expect(player.getVariantTracks()).toEqual(variantTracks);
+      expect(player.getAudioTracks()).toEqual(audioTracks);
       expect(player.getTextTracks()).toEqual(textTracks);
       expect(player.getImageTracks()).toEqual(imageTracks);
     });
@@ -2650,6 +2742,9 @@ describe('Player', () => {
       /** @type {jasmine.Spy} */
       let variantChanged;
 
+      /** @type {jasmine.Spy} */
+      let audioTracksChanged;
+
       beforeEach(() => {
         textChanged = jasmine.createSpy('textChanged');
         player.addEventListener('textchanged', Util.spyFunc(textChanged));
@@ -2662,6 +2757,10 @@ describe('Player', () => {
           expect(e.newTrack.active).toBe(true);
         });
         player.addEventListener('variantchanged', Util.spyFunc(variantChanged));
+
+        audioTracksChanged = jasmine.createSpy('audioTracksChanged');
+        player.addEventListener('audiotrackschanged',
+            Util.spyFunc(audioTracksChanged));
       });
 
       it('in selectTextTrack', async () => {
@@ -2738,6 +2837,24 @@ describe('Player', () => {
         player.selectAudioLanguage(newLanguage);
         await shaka.test.Util.shortDelay();
         expect(variantChanged).not.toHaveBeenCalled();
+      });
+
+      it('in selectAudioLanguage', async () => {
+        // New audio track.
+        const newAudioTrack = player.getAudioTracks().find((t) => !t.active);
+        goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+
+        // Call selectAudioTrack with a audio track.  Expect an event to fire.
+        player.selectAudioTrack(newAudioTrack);
+        await shaka.test.Util.shortDelay();
+        expect(audioTracksChanged).toHaveBeenCalled();
+        audioTracksChanged.calls.reset();
+
+        // Call again with the same audio track, and expect no event to fire,
+        // since nothing changed this time.
+        player.selectAudioTrack(newAudioTrack);
+        await shaka.test.Util.shortDelay();
+        expect(audioTracksChanged).not.toHaveBeenCalled();
       });
     });
 
@@ -2925,20 +3042,33 @@ describe('Player', () => {
 
       // Load the player with the live manifest.
       await player.load(fakeManifestUri, null, fakeMimeType);
-
-      video.currentTime = 10; // Simulate that we're 10 seconds into playback.
     });
 
     it('returns null if video element does not exist', async () => {
+      video.currentTime = 10; // Simulate that we're 10 seconds into playback.
       await player.detach();
       const latency = player.getLiveLatency();
       expect(latency).toBeNull();
     });
 
+    it('returns null if no position defined yet', () => {
+      video.currentTime = 0;
+      const latency = player.getLiveLatency();
+      expect(latency).toBeNull();
+    });
+
     it('returns correct latency when video is playing', () => {
+      video.currentTime = 10; // Simulate that we're 10 seconds into playback.
       Date.now = () => 2000 * 1000;
       const latency = player.getLiveLatency();
       expect(latency).toBe(990000);
+    });
+
+    it('returns integer latency also when Date.now returns float', () => {
+      video.currentTime = 10; // Simulate that we're 10 seconds into playback.
+      Date.now = () => 2000 * 1000.3;
+      const latency = player.getLiveLatency();
+      expect(latency).toBe(990600);
     });
   });
 

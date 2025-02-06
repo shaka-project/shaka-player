@@ -131,7 +131,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
   updateTextLanguages_() {
     const tracks = this.player.getTextTracks();
 
-    shaka.ui.LanguageUtils.updateTracks(tracks, this.menu,
+    shaka.ui.LanguageUtils.updateTextTracks(tracks, this.menu,
         (track) => this.onTextTrackSelected_(track),
 
         // Don't mark current text language as chosen unless captions are
@@ -139,9 +139,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
         this.player.isTextTrackVisible(),
         this.currentSelection,
         this.localization,
-        this.controls.getConfig().textTrackLabelFormat,
-        this.controls.getConfig().showAudioChannelCountVariants,
-        this.controls.getConfig().showAudioCodec);
+        this.controls.getConfig().textTrackLabelFormat);
 
     // Add the Off button
     const offButton = shaka.util.Dom.createButton();
