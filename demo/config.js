@@ -601,7 +601,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Don\'t choose codecs',
             'streaming.dontChooseCodecs')
         .addBoolInput_('Should fix timestampOffset',
-            'streaming.shouldFixTimestampOffset');
+            'streaming.shouldFixTimestampOffset')
+        .addBoolInput_('Avoid eviction on QuotaExceededError',
+            'streaming.avoidEvictionOnQuotaExceededError');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
   }

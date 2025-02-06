@@ -1670,7 +1670,8 @@ shaka.extern.LiveSyncConfiguration;
  *   loadTimeout: number,
  *   clearDecodingCache: boolean,
  *   dontChooseCodecs: boolean,
- *   shouldFixTimestampOffset: boolean
+ *   shouldFixTimestampOffset: boolean,
+ *   avoidEvictionOnQuotaExceededError: boolean
  * }}
  *
  * @description
@@ -1922,6 +1923,10 @@ shaka.extern.LiveSyncConfiguration;
  *   <br>
  *   Defaults to <code>false</code> except on Tizen, WebOS whose default value
  *   is <code>true</code>.
+ * @property {boolean} avoidEvictionOnQuotaExceededError
+ *   Avoid evict content on QuotaExceededError.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
