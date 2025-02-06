@@ -773,6 +773,34 @@ shaka.extern.TimelineRegionInfo;
  *   startTime: number,
  *   endTime: number,
  *   id: string,
+ *   emsg: shaka.extern.EmsgInfo
+ * }}
+ *
+ * @description
+ * Contains information about a region of the timeline that will cause an event
+ * to be raised when the playhead enters or exits it.
+ *
+ * @property {string} schemeIdUri
+ *   Identifies the metadata type.
+ * @property {number} startTime
+ *   The presentation time (in seconds) that the region should start.
+ * @property {number} endTime
+ *   The presentation time (in seconds) that the region should end.
+ * @property {string} id
+ *   Specifies an identifier for this instance of the region.
+ * @property {shaka.extern.EmsgInfo} emsg
+ *   Specifies the EMSG info.
+ * @exportDoc
+ */
+shaka.extern.EmsgTimelineRegionInfo;
+
+
+/**
+ * @typedef {{
+ *   schemeIdUri: string,
+ *   startTime: number,
+ *   endTime: number,
+ *   id: string,
  *   payload: shaka.extern.MetadataFrame
  * }}
  *

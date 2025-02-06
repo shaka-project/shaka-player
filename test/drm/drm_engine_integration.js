@@ -118,6 +118,7 @@ describe('DrmEngine', () => {
         {
           getKeySystem: () => null,
           onMetadata: () => {},
+          onEmsg: () => {},
           onEvent: () => {},
           onManifestUpdate: () => {},
         });

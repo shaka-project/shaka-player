@@ -73,6 +73,7 @@ describe('StreamingEngine', () => {
         {
           getKeySystem: () => null,
           onMetadata: () => {},
+          onEmsg: () => {},
           onEvent: () => {},
           onManifestUpdate: () => {},
         });
