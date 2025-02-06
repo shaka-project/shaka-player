@@ -45,21 +45,20 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
         });
 
     this.eventManager.listen(this.player, 'loaded', () => {
-      this.updatePlaybackRateSelection_(this.player.getPlaybackRate());
+      this.updatePlaybackRateSelection_();
     });
 
     this.eventManager.listen(this.player, 'ratechange', () => {
-      this.updatePlaybackRateSelection_(this.player.getPlaybackRate());
+      this.updatePlaybackRateSelection_();
     });
 
-    /** @type {!Map<string, number>} */
-    this.playbackRates_ = new Map(this.controls.getConfig().playbackRates
-        .map((rate) => [rate + 'x', rate]));
+    /** @type {!Array<number>} */
+    this.playbackRates_ = this.controls.getConfig().playbackRates;
 
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
-    this.addPlaybackRates_();
-    this.updatePlaybackRateSelection_(this.player.getPlaybackRate());
+    this.updatePlaybackRates_();
+    this.updatePlaybackRateSelection_();
   }
 
   /**
@@ -77,10 +76,10 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
   /**
    * Update checkmark icon and related class and attribute for the chosen rate
    * button.
-   * @param {number} rate The video playback rate.
    * @private
    */
-  updatePlaybackRateSelection_(rate) {
+  updatePlaybackRateSelection_() {
+    const rate = this.player.getPlaybackRate();
     // Remove the old checkmark icon and related tags and classes if it exists.
     const checkmarkIcon = shaka.ui.Utils.getDescendantIfExists(
         this.menu, 'material-icons-round shaka-chosen-item');
@@ -96,7 +95,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     // Add the checkmark icon, related tags and classes to the newly selected
     // button.
     const span = Array.from(this.menu.querySelectorAll('span')).find((el) => {
-      return this.playbackRates_.get(el.textContent) == rate;
+      return el.textContent == (rate + 'x');
     });
     if (span) {
       const button = span.parentElement;
@@ -112,15 +111,14 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
   }
 
   /** @private */
-  addPlaybackRates_() {
-    for (const rateStr of this.playbackRates_.keys()) {
+  updatePlaybackRates_() {
+    for (const rate of this.playbackRates_.sort()) {
       const button = shaka.util.Dom.createButton();
       const span = shaka.util.Dom.createHTMLElement('span');
-      span.textContent = rateStr;
+      span.textContent = rate + 'x';
       button.appendChild(span);
 
       this.eventManager.listen(button, 'click', () => {
-        const rate = this.playbackRates_.get(rateStr);
         if (rate == this.video.defaultPlaybackRate) {
           this.player.cancelTrickPlay();
         } else {
