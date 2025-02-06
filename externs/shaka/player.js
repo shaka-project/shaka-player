@@ -1253,6 +1253,7 @@ shaka.extern.xml.Node;
  *   If false, disables fast switching track recognition.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
 
