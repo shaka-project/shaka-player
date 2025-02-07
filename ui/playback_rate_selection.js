@@ -52,12 +52,9 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
       this.updatePlaybackRateSelection_();
     });
 
-    /** @type {!Array<number>} */
-    this.playbackRates_ = this.controls.getConfig().playbackRates;
-
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
-    this.updatePlaybackRates_();
+    this.addPlaybackRates_();
     this.updatePlaybackRateSelection_();
   }
 
@@ -111,8 +108,8 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
   }
 
   /** @private */
-  updatePlaybackRates_() {
-    for (const rate of this.playbackRates_.sort()) {
+  addPlaybackRates_() {
+    for (const rate of this.controls.getConfig().playbackRates.sort()) {
       const button = shaka.util.Dom.createButton();
       const span = shaka.util.Dom.createHTMLElement('span');
       span.textContent = rate + 'x';
