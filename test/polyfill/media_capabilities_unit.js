@@ -105,6 +105,7 @@ describe('MediaCapabilities', () => {
         'is "media-source"', async () => {
       expect(window['MediaSource']['isTypeSupported']).toBeDefined();
       shaka.polyfill.MediaCapabilities.install();
+      shaka.polyfill.MediaCapabilities.originalMcapDecodingInfo = null;
       await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
 
       expect(supportMap.has(mockDecodingConfig.video.contentType)).toBe(true);
@@ -118,6 +119,7 @@ describe('MediaCapabilities', () => {
               'supportsMediaType').and.returnValue(true);
       mockDecodingConfig.type = 'file';
       shaka.polyfill.MediaCapabilities.install();
+      shaka.polyfill.MediaCapabilities.originalMcapDecodingInfo = null;
       await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
 
       expect(supportsMediaTypeSpy).toHaveBeenCalledTimes(2);
@@ -138,6 +140,7 @@ describe('MediaCapabilities', () => {
               'requestMediaKeySystemAccess').and.returnValue(mockResult);
 
           shaka.polyfill.MediaCapabilities.install();
+          shaka.polyfill.MediaCapabilities.originalMcapDecodingInfo = null;
           const result = await navigator.mediaCapabilities
               .decodingInfo(mockDecodingConfig);
 
@@ -172,6 +175,7 @@ describe('MediaCapabilities', () => {
               'requestMediaKeySystemAccess').and.returnValue(mockResult);
 
       shaka.polyfill.MediaCapabilities.install();
+      shaka.polyfill.MediaCapabilities.originalMcapDecodingInfo = null;
       await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
       await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
 
