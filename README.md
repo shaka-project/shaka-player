@@ -339,6 +339,15 @@ NOTES:
     access to the video pixels for transformation.
 
 
+## Builds
+
+Shaka currently provides the following versions:
+- Complete build with UI (`shaka-player.ui.js`)
+- Complete build without UI (`shaka-player.compiled.js`)
+- DASH build without UI, Cast and Offline (`shaka-player.dash.js`)
+- HLS build without UI, Cast and Offline (`shaka-player.hls.js`)
+
+
 ## Documentation & Important Links ##
 
  * [Demo](https://shaka-player-demo.appspot.com)([sources](demo/))
