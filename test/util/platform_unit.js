@@ -41,6 +41,7 @@ describe('Platform', () => {
     });
 
     it('checks Safari version', () => {
+      setUserAgentData(null);
       setPlatform('MacIntel');
       setUserAgent(macSafari);
       expect(shaka.util.Platform.safariVersion()).toBe(18);
