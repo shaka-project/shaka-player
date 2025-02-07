@@ -6,8 +6,14 @@
 
 describe('Platform', () => {
   const originalUserAgent = navigator.userAgent;
+  const originalUserAgentData = navigator.userAgentData;
+  const originalVendor = navigator.vendor;
+  const originalPlatform = navigator.platform;
 
   /* eslint-disable max-len */
+  const macSafari = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15';
+  const ipadSafari = 'Mozilla/5.0 (iPad; CPU OS 18_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Mobile/15E148 Safari/604.1';
+  const iosChrome = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1';
   // See: https://developer.samsung.com/smarttv/develop/guides/fundamentals/retrieving-platform-information.html
   const tizen50 = 'Mozilla/5.0 (SMART-TV; LINUX; Tizen 5.0) AppleWebKit/537.36 (KHTML, like Gecko) Version/5.0 TV Safari/537.36';
   const tizen55 = 'Mozilla/5.0 (SMART-TV; LINUX; Tizen 5.5) AppleWebKit/537.36 (KHTML, like Gecko) 69.0.3497.106.1/5.5 TV Safari/537.36';
@@ -24,103 +30,179 @@ describe('Platform', () => {
 
   afterEach(() => {
     setUserAgent(originalUserAgent);
+    setUserAgentData(originalUserAgentData);
+    setVendor(originalVendor);
+    setPlatform(originalPlatform);
   });
 
-  it('checks is Tizen 5', () => {
-    setUserAgent(webOs3);
-    expect(shaka.util.Platform.isTizen5()).toBe(false);
-    setUserAgent(tizen50);
-    expect(shaka.util.Platform.isTizen5()).toBe(true);
-    setUserAgent(tizen55);
-    expect(shaka.util.Platform.isTizen5()).toBe(true);
-    setUserAgent(tizen60);
-    expect(shaka.util.Platform.isTizen5()).toBe(false);
-    setUserAgent(tizen65);
-    expect(shaka.util.Platform.isTizen5()).toBe(false);
-    setUserAgent(tizen70);
-    expect(shaka.util.Platform.isTizen5()).toBe(false);
+  describe('Apple', () => {
+    beforeEach(() => {
+      setVendor('Apple Computer, Inc.');
+    });
+
+    it('checks Safari version', () => {
+      setUserAgent(macSafari);
+      expect(shaka.util.Platform.safariVersion()).toBe(18);
+      setUserAgent(ipadSafari);
+      expect(shaka.util.Platform.safariVersion()).toBe(18);
+      setUserAgent(iosChrome);
+      expect(shaka.util.Platform.safariVersion()).toBe(10);
+      setUserAgent(webOs6);
+      expect(shaka.util.Platform.safariVersion()).toBe(null);
+
+      setVendor('Google Inc.');
+      setUserAgent(macSafari);
+      expect(shaka.util.Platform.safariVersion()).toBe(null);
+      setUserAgent(ipadSafari);
+      expect(shaka.util.Platform.safariVersion()).toBe(null);
+      setUserAgent(iosChrome);
+      expect(shaka.util.Platform.safariVersion()).toBe(null);
+      setUserAgent(webOs6);
+      expect(shaka.util.Platform.safariVersion()).toBe(null);
+    });
+
+    it('checks is iOS', () => {
+      setUserAgent(macSafari);
+      expect(shaka.util.Platform.isIOS()).toBe(false);
+      setUserAgent(ipadSafari);
+      expect(shaka.util.Platform.isIOS()).toBe(true);
+      setUserAgent(iosChrome);
+      expect(shaka.util.Platform.isIOS()).toBe(true);
+      setUserAgent(webOs6);
+      expect(shaka.util.Platform.isIOS()).toBe(false);
+    });
+
+    it('checks is Mac', () => {
+      setUserAgentData({platform: 'macOS'});
+      expect(shaka.util.Platform.isMac()).toBe(true);
+
+      setUserAgentData(null);
+      setPlatform('MacIntel');
+      expect(shaka.util.Platform.isMac()).toBe(true);
+
+      setPlatform('Win32');
+      expect(shaka.util.Platform.isMac()).toBe(false);
+    });
+
+    it('checks is Webkit STB', () => {
+      setUserAgent(ipadSafari);
+      setUserAgentData({platform: 'macOS'});
+      expect(shaka.util.Platform.isWebkitSTB()).toBe(false);
+
+      setUserAgentData(null);
+      setPlatform('MacIntel');
+      expect(shaka.util.Platform.isWebkitSTB()).toBe(false);
+
+      setPlatform('Win32');
+      expect(shaka.util.Platform.isWebkitSTB()).toBe(false);
+
+      setUserAgent(macSafari);
+      expect(shaka.util.Platform.isWebkitSTB()).toBe(true);
+
+      setVendor('Google Inc.');
+      expect(shaka.util.Platform.isWebkitSTB()).toBe(false);
+    });
   });
 
-  it('checks is Tizen 5.0', () => {
-    setUserAgent(webOs3);
-    expect(shaka.util.Platform.isTizen5_0()).toBe(false);
-    setUserAgent(tizen50);
-    expect(shaka.util.Platform.isTizen5_0()).toBe(true);
-    setUserAgent(tizen55);
-    expect(shaka.util.Platform.isTizen5_0()).toBe(false);
-    setUserAgent(tizen60);
-    expect(shaka.util.Platform.isTizen5_0()).toBe(false);
-    setUserAgent(tizen65);
-    expect(shaka.util.Platform.isTizen5_0()).toBe(false);
-    setUserAgent(tizen70);
-    expect(shaka.util.Platform.isTizen5_0()).toBe(false);
+  describe('Samsung', () => {
+    it('checks is Tizen 5', () => {
+      setUserAgent(webOs3);
+      expect(shaka.util.Platform.isTizen5()).toBe(false);
+      setUserAgent(tizen50);
+      expect(shaka.util.Platform.isTizen5()).toBe(true);
+      setUserAgent(tizen55);
+      expect(shaka.util.Platform.isTizen5()).toBe(true);
+      setUserAgent(tizen60);
+      expect(shaka.util.Platform.isTizen5()).toBe(false);
+      setUserAgent(tizen65);
+      expect(shaka.util.Platform.isTizen5()).toBe(false);
+      setUserAgent(tizen70);
+      expect(shaka.util.Platform.isTizen5()).toBe(false);
+    });
+
+    it('checks is Tizen 5.0', () => {
+      setUserAgent(webOs3);
+      expect(shaka.util.Platform.isTizen5_0()).toBe(false);
+      setUserAgent(tizen50);
+      expect(shaka.util.Platform.isTizen5_0()).toBe(true);
+      setUserAgent(tizen55);
+      expect(shaka.util.Platform.isTizen5_0()).toBe(false);
+      setUserAgent(tizen60);
+      expect(shaka.util.Platform.isTizen5_0()).toBe(false);
+      setUserAgent(tizen65);
+      expect(shaka.util.Platform.isTizen5_0()).toBe(false);
+      setUserAgent(tizen70);
+      expect(shaka.util.Platform.isTizen5_0()).toBe(false);
+    });
+
+    it('checks is Tizen 6', () => {
+      setUserAgent(webOs3);
+      expect(shaka.util.Platform.isTizen6()).toBe(false);
+      setUserAgent(tizen50);
+      expect(shaka.util.Platform.isTizen6()).toBe(false);
+      setUserAgent(tizen55);
+      expect(shaka.util.Platform.isTizen6()).toBe(false);
+      setUserAgent(tizen60);
+      expect(shaka.util.Platform.isTizen6()).toBe(true);
+      setUserAgent(tizen65);
+      expect(shaka.util.Platform.isTizen6()).toBe(true);
+      setUserAgent(tizen70);
+      expect(shaka.util.Platform.isTizen6()).toBe(false);
+    });
   });
 
-  it('checks is Tizen 6', () => {
-    setUserAgent(webOs3);
-    expect(shaka.util.Platform.isTizen6()).toBe(false);
-    setUserAgent(tizen50);
-    expect(shaka.util.Platform.isTizen6()).toBe(false);
-    setUserAgent(tizen55);
-    expect(shaka.util.Platform.isTizen6()).toBe(false);
-    setUserAgent(tizen60);
-    expect(shaka.util.Platform.isTizen6()).toBe(true);
-    setUserAgent(tizen65);
-    expect(shaka.util.Platform.isTizen6()).toBe(true);
-    setUserAgent(tizen70);
-    expect(shaka.util.Platform.isTizen6()).toBe(false);
-  });
+  describe('LG', () => {
+    it('checks is webOS 3', () => {
+      setUserAgent(tizen50);
+      expect(shaka.util.Platform.isWebOS3()).toBe(false);
+      setUserAgent(webOs3);
+      expect(shaka.util.Platform.isWebOS3()).toBe(true);
+      setUserAgent(webOs4);
+      expect(shaka.util.Platform.isWebOS3()).toBe(false);
+      setUserAgent(webOs5);
+      expect(shaka.util.Platform.isWebOS3()).toBe(false);
+      setUserAgent(webOs6);
+      expect(shaka.util.Platform.isWebOS3()).toBe(false);
+    });
 
-  it('checks is webOS 3', () => {
-    setUserAgent(tizen50);
-    expect(shaka.util.Platform.isWebOS3()).toBe(false);
-    setUserAgent(webOs3);
-    expect(shaka.util.Platform.isWebOS3()).toBe(true);
-    setUserAgent(webOs4);
-    expect(shaka.util.Platform.isWebOS3()).toBe(false);
-    setUserAgent(webOs5);
-    expect(shaka.util.Platform.isWebOS3()).toBe(false);
-    setUserAgent(webOs6);
-    expect(shaka.util.Platform.isWebOS3()).toBe(false);
-  });
+    it('checks is webOS 4', () => {
+      setUserAgent(tizen50);
+      expect(shaka.util.Platform.isWebOS4()).toBe(false);
+      setUserAgent(webOs3);
+      expect(shaka.util.Platform.isWebOS4()).toBe(false);
+      setUserAgent(webOs4);
+      expect(shaka.util.Platform.isWebOS4()).toBe(true);
+      setUserAgent(webOs5);
+      expect(shaka.util.Platform.isWebOS4()).toBe(false);
+      setUserAgent(webOs6);
+      expect(shaka.util.Platform.isWebOS4()).toBe(false);
+    });
 
-  it('checks is webOS 4', () => {
-    setUserAgent(tizen50);
-    expect(shaka.util.Platform.isWebOS4()).toBe(false);
-    setUserAgent(webOs3);
-    expect(shaka.util.Platform.isWebOS4()).toBe(false);
-    setUserAgent(webOs4);
-    expect(shaka.util.Platform.isWebOS4()).toBe(true);
-    setUserAgent(webOs5);
-    expect(shaka.util.Platform.isWebOS4()).toBe(false);
-    setUserAgent(webOs6);
-    expect(shaka.util.Platform.isWebOS4()).toBe(false);
-  });
+    it('checks is webOS 5', () => {
+      setUserAgent(tizen50);
+      expect(shaka.util.Platform.isWebOS5()).toBe(false);
+      setUserAgent(webOs3);
+      expect(shaka.util.Platform.isWebOS5()).toBe(false);
+      setUserAgent(webOs4);
+      expect(shaka.util.Platform.isWebOS5()).toBe(false);
+      setUserAgent(webOs5);
+      expect(shaka.util.Platform.isWebOS5()).toBe(true);
+      setUserAgent(webOs6);
+      expect(shaka.util.Platform.isWebOS5()).toBe(false);
+    });
 
-  it('checks is webOS 5', () => {
-    setUserAgent(tizen50);
-    expect(shaka.util.Platform.isWebOS5()).toBe(false);
-    setUserAgent(webOs3);
-    expect(shaka.util.Platform.isWebOS5()).toBe(false);
-    setUserAgent(webOs4);
-    expect(shaka.util.Platform.isWebOS5()).toBe(false);
-    setUserAgent(webOs5);
-    expect(shaka.util.Platform.isWebOS5()).toBe(true);
-    setUserAgent(webOs6);
-    expect(shaka.util.Platform.isWebOS5()).toBe(false);
-  });
-
-  it('checks is webOS 6', () => {
-    setUserAgent(tizen50);
-    expect(shaka.util.Platform.isWebOS6()).toBe(false);
-    setUserAgent(webOs3);
-    expect(shaka.util.Platform.isWebOS6()).toBe(false);
-    setUserAgent(webOs4);
-    expect(shaka.util.Platform.isWebOS6()).toBe(false);
-    setUserAgent(webOs5);
-    expect(shaka.util.Platform.isWebOS6()).toBe(false);
-    setUserAgent(webOs6);
-    expect(shaka.util.Platform.isWebOS6()).toBe(true);
+    it('checks is webOS 6', () => {
+      setUserAgent(tizen50);
+      expect(shaka.util.Platform.isWebOS6()).toBe(false);
+      setUserAgent(webOs3);
+      expect(shaka.util.Platform.isWebOS6()).toBe(false);
+      setUserAgent(webOs4);
+      expect(shaka.util.Platform.isWebOS6()).toBe(false);
+      setUserAgent(webOs5);
+      expect(shaka.util.Platform.isWebOS6()).toBe(false);
+      setUserAgent(webOs6);
+      expect(shaka.util.Platform.isWebOS6()).toBe(true);
+    });
   });
 
   describe('isMediaKeysPolyfilled', () => {
@@ -146,10 +228,28 @@ describe('Platform', () => {
       expect(result).toBe(false);
     });
   });
-});
 
-/** @param {string} userAgent */
-function setUserAgent(userAgent) {
-  Object.defineProperty(
-      navigator, 'userAgent', {value: userAgent, configurable: true});
-}
+  /** @param {string} userAgent */
+  function setUserAgent(userAgent) {
+    Object.defineProperty(
+        navigator, 'userAgent', {value: userAgent, configurable: true});
+  }
+
+  /** @param {?Object} userAgentData */
+  function setUserAgentData(userAgentData) {
+    Object.defineProperty(
+        navigator, 'userAgentData', {value: userAgentData, configurable: true});
+  }
+
+  /** @param {string} vendor */
+  function setVendor(vendor) {
+    Object.defineProperty(
+        navigator, 'vendor', {value: vendor, configurable: true});
+  }
+
+  /** @param {string} platform */
+  function setPlatform(platform) {
+    Object.defineProperty(
+        navigator, 'platform', {value: platform, configurable: true});
+  }
+});
