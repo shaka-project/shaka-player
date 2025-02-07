@@ -117,10 +117,22 @@ def main(args):
   build_args_with_ui = ['--name', 'ui', '+@complete']
   build_args_with_ui += ['--locales'] + parsed_args.locales
   build_args_without_ui = ['--name', 'compiled', '+@complete', '-@ui']
+  build_args_only_dash_without_ui = [
+    '--name', 'dash',
+    '+@complete', '-@ui',
+    '-@hls', '-@transmuxer', '-@mss', '-@offline', '-@cast', '-@optionalText',
+  ]
+  build_args_only_hls_without_ui = [
+    '--name', 'hls',
+    '+@complete', '-@ui',
+    '-@dash', '-@mss', '-@offline', '-@cast', '-@optionalText',
+  ]
 
   if parsed_args.force:
     build_args_with_ui += ['--force']
     build_args_without_ui += ['--force']
+    build_args_only_dash_without_ui += ['--force']
+    build_args_only_hls_without_ui += ['--force']
 
   # Create the list of build modes to build with. If the list is empty
   # by the end, then populate it with every mode.
@@ -132,11 +144,18 @@ def main(args):
   if not modes:
     modes += ['debug', 'release']
 
+  builds = [
+    build_args_with_ui,
+    build_args_without_ui,
+    build_args_only_dash_without_ui,
+    build_args_only_hls_without_ui,
+  ]
+
   for mode in modes:
     # Complete build includes the UI library, but it is optional and player lib
     # should build and work without it as well.
     # First, build the full build (UI included) and then build excluding UI.
-    for build_args in [build_args_with_ui, build_args_without_ui]:
+    for build_args in builds:
       if build.main(build_args + ['--mode', mode]) != 0:
         return 1
 
