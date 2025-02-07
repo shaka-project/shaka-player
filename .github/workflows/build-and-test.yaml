@@ -175,7 +175,7 @@ jobs:
           java-version: 11
 
       - name: Build Player
-        timeout-minutes: 15
+        timeout-minutes: 20
         run: python build/all.py
 
       - name: Test Player
