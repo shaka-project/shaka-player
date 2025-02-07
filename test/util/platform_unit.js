@@ -232,25 +232,29 @@ describe('Platform', () => {
 
   /** @param {string} userAgent */
   function setUserAgent(userAgent) {
-    Object.defineProperty(
-        navigator, 'userAgent', {value: userAgent, configurable: true});
+    setNavigatorProperty('userAgent', userAgent);
   }
 
   /** @param {?Object} userAgentData */
   function setUserAgentData(userAgentData) {
-    Object.defineProperty(
-        navigator, 'userAgentData', {value: userAgentData, configurable: true});
+    setNavigatorProperty('userAgentData', userAgentData);
   }
 
   /** @param {string} vendor */
   function setVendor(vendor) {
-    Object.defineProperty(
-        navigator, 'vendor', {value: vendor, configurable: true});
+    setNavigatorProperty('vendor', vendor);
   }
 
   /** @param {string} platform */
   function setPlatform(platform) {
-    Object.defineProperty(
-        navigator, 'platform', {value: platform, configurable: true});
+    setNavigatorProperty('platform', platform);
+  }
+
+  /**
+   * @param {string} key
+   * @param {*} value
+   */
+  function setNavigatorProperty(key, value) {
+    Object.defineProperty(navigator, key, {value, configurable: true});
   }
 });
