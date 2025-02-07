@@ -1,0 +1,6 @@
+# Optional plugins related to text parsing and displaying.
+
++../../lib/text/lrc_text_parser.js
++../../lib/text/sbv_text_parser.js
++../../lib/text/srt_text_parser.js
++../../lib/text/ssa_text_parser.js
