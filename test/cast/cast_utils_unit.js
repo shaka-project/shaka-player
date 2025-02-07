@@ -230,6 +230,7 @@ describe('CastUtils', () => {
             {
               getKeySystem: () => null,
               onMetadata: () => {},
+              onEmsg: () => {},
               onEvent: () => {},
               onManifestUpdate: () => {},
             });

@@ -257,6 +257,7 @@ describe('MediaSourceEngine', () => {
         {
           getKeySystem: () => null,
           onMetadata: () => {},
+          onEmsg: () => {},
           onEvent: () => {},
           onManifestUpdate: () => {},
         });
@@ -333,6 +334,7 @@ describe('MediaSourceEngine', () => {
           {
             getKeySystem: () => null,
             onMetadata: () => {},
+            onEmsg: () => {},
             onEvent: () => {},
             onManifestUpdate: () => {},
           });
@@ -357,6 +359,7 @@ describe('MediaSourceEngine', () => {
           {
             getKeySystem: () => null,
             onMetadata: () => {},
+            onEmsg: () => {},
             onEvent: () => {},
             onManifestUpdate: () => {},
           });
