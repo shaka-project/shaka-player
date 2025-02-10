@@ -580,6 +580,7 @@ describe('ManifestConverter', () => {
       type: streamDb.type,
       primary: streamDb.primary,
       trickModeVideo: null,
+      dependencyVideo: null,
       emsgSchemeIdUris: null,
       roles: streamDb.roles,
       forced: streamDb.forced,

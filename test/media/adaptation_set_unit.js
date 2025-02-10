@@ -236,6 +236,7 @@ describe('AdaptationSet', () => {
       roles: roles,
       forced: false,
       trickModeVideo: null,
+      dependencyVideo: null,
       type: '',
       accessibilityPurpose: null,
       external: false,
