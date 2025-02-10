@@ -9,6 +9,7 @@ describe('Platform', () => {
   const originalUserAgentData = navigator.userAgentData;
   const originalVendor = navigator.vendor;
   const originalPlatform = navigator.platform;
+  const originalMaxTouchPoints = navigator.maxTouchPoints;
 
   /* eslint-disable max-len */
   const macSafari = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15';
@@ -33,11 +34,13 @@ describe('Platform', () => {
     setUserAgentData(originalUserAgentData);
     setVendor(originalVendor);
     setPlatform(originalPlatform);
+    setMaxTouchPoints(originalMaxTouchPoints);
   });
 
   describe('Apple', () => {
     beforeEach(() => {
       setVendor('Apple Computer, Inc.');
+      setMaxTouchPoints(0);
     });
 
     it('checks Safari version', () => {
@@ -249,6 +252,11 @@ describe('Platform', () => {
   /** @param {string} platform */
   function setPlatform(platform) {
     setNavigatorProperty('platform', platform);
+  }
+
+  /** @param {number} maxTouchPoints */
+  function setMaxTouchPoints(maxTouchPoints) {
+    setNavigatorProperty('maxTouchPoints', maxTouchPoints);
   }
 
   /**
