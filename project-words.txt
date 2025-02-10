@@ -194,6 +194,8 @@ Tizen
 Uplynk
 Verimatrix
 Vidaa
+Vizio
+VIZIO
 Vnova
 Widevine
 wiseplay

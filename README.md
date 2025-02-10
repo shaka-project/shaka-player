@@ -46,6 +46,7 @@ for the up-to-date list of maintained branches of Shaka Player.
 |Tizen TV³     | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |WebOS⁶        | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Hisense⁷      | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
+|Vizio⁷        | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Xbox One      | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Playstation 4⁷| -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Playstation 5⁷| -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
@@ -239,6 +240,7 @@ MSS features **not** supported:
 |Tizen TV      |**Y**     |**Y**    | -       | -       |**Y**     |
 |WebOS⁷        |untested⁷ |untested⁷| -       | -       |untested⁷ |
 |Hisense⁷      |untested⁷ |untested⁷| -       | -       |untested⁷ |
+|Vizio⁷        |untested⁷ |untested⁷| -       | -       |untested⁷ |
 |Xbox One      | -        |**Y**    | -       | -       | -        |
 |Playstation 4⁷| -        |untested⁷| -       | -       |untested⁷ |
 |Playstation 5⁷| -        |untested⁷| -       | -       |untested⁷ |

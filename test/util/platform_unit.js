@@ -27,6 +27,9 @@ describe('Platform', () => {
   const webOs4 = 'Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.34 Safari/537.36 WebAppManager';
   const webOs5 = 'Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36 WebAppManager';
   const webOs6 = 'Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36 WebAppManager';
+
+  // cspell: disable-next-line
+  const vizio = 'Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36 CrKey/1.0.999999 VIZIO SmartCast(Conjure/MTKF-5.1.516.1 FW/0.6.11.1-2 Model/V50C6-J09)';
   /* eslint-enable max-len */
 
   afterEach(() => {
@@ -208,6 +211,12 @@ describe('Platform', () => {
       setUserAgent(webOs6);
       expect(shaka.util.Platform.isWebOS6()).toBe(true);
     });
+  });
+
+  it('checks is Vizio', () => {
+    setUserAgent(vizio);
+    expect(shaka.util.Platform.isVizio()).toBe(true);
+    expect(shaka.util.Platform.isChromecast()).toBe(false);
   });
 
   describe('isMediaKeysPolyfilled', () => {
