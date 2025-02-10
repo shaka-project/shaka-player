@@ -205,10 +205,9 @@ describe('MediaCapabilities', () => {
 
           expect(mockCanDisplayType).not.toHaveBeenCalled();
           // 3 (during install()) +
-          // 1 (for original MCap check) +
           // 1 (for video config check) +
           // 1 (for audio config check).
-          expect(isChromecastSpy).toHaveBeenCalledTimes(6);
+          expect(isChromecastSpy).toHaveBeenCalledTimes(5);
           // 1 (fallback in canCastDisplayType()) +
           // 1 (mockDecodingConfig.audio).
           expect(supportMap.has(mockDecodingConfig.video.contentType))
@@ -231,10 +230,9 @@ describe('MediaCapabilities', () => {
 
           expect(mockCanDisplayType).not.toHaveBeenCalled();
           // 3 (during install()) +
-          // 1 (for original MCap check) +
           // 1 (for video config check) +
           // 1 (for audio config check).
-          expect(isChromecastSpy).toHaveBeenCalledTimes(6);
+          expect(isChromecastSpy).toHaveBeenCalledTimes(5);
           // 1 (fallback in canCastDisplayType()) +
           // 1 (mockDecodingConfig.audio).
           expect(supportMap.has(mockDecodingConfig.video.contentType))
@@ -281,10 +279,9 @@ describe('MediaCapabilities', () => {
       await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
 
       // 3 (during install()) +
-      // 1 (for original MCap check) +
       // 1 (for video config check) +
       // 1 (for audio config check).
-      expect(isChromecastSpy).toHaveBeenCalledTimes(6);
+      expect(isChromecastSpy).toHaveBeenCalledTimes(5);
       // 1 (mockDecodingConfig.audio).
       expect(supportMap.has(chromecastType)).toBe(true);
       // Called once in canCastDisplayType.
