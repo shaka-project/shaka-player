@@ -115,6 +115,8 @@ adManager.addCustomInterstitial({
   timelineRange: false,
   loop: false,
   overlay: null,
+  displayOnBackground: false,
+  percentageReductionOfCurrentVideo: null,
 });
 ```
 
@@ -152,7 +154,9 @@ player.addEventListener('timelineregionadded', (e) => {
     post: false,
     timelineRange: player.isLive(), // If true, the ad will appear as a range on the timeline.
     loop: false,
-    overlay: null
+    overlay: null,
+    displayOnBackground: false,
+    percentageReductionOfCurrentVideo: null,
   });
 });
 ```
@@ -203,6 +207,8 @@ adManager.addCustomInterstitial({
       y: 540, // Pixels
     },
   },
+  displayOnBackground: false,
+  percentageReductionOfCurrentVideo: null,
 });
 ```
 
