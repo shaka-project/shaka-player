@@ -19,6 +19,7 @@ describe('UI', () => {
     // Add css file
     cssLink = /** @type {!HTMLLinkElement} */(document.createElement('link'));
     await UiUtils.setupCSS(cssLink);
+    shaka.polyfill.MediaCapabilities.allowUseOriginalMcapDecodingInfo = false;
   });
 
   afterEach(async () => {
@@ -28,6 +29,7 @@ describe('UI', () => {
 
   afterAll(() => {
     document.head.removeChild(cssLink);
+    shaka.polyfill.MediaCapabilities.allowUseOriginalMcapDecodingInfo = true;
   });
 
   describe('constructed through API', () => {
