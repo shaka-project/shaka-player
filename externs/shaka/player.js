@@ -2061,20 +2061,20 @@ shaka.extern.MediaSourceConfiguration;
  *   IMA on platforms that do not support multiple video elements.
  *   <br>
  *   Defaults to <code>false</code> except on Tizen, WebOS, Chromecast,
- *   Hisense, PlayStation 4, PlayStation5, Xbox whose default value is
+ *   Hisense, PlayStation 4, PlayStation5, Xbox, Vizio whose default value is
  *   <code>true</code>.
  * @property {boolean} skipPlayDetection
  *   If this is true, we will load Client Side ads without waiting for a play
  *   event.
  *   <br>
  *   Defaults to <code>false</code> except on Tizen, WebOS, Chromecast,
- *   Hisense, PlayStation 4, PlayStation5, Xbox whose default value is
+ *   Hisense, PlayStation 4, PlayStation5, Xbox, Vizio whose default value is
  *   <code>true</code>.
  * @property {boolean} supportsMultipleMediaElements
  *   If this is true, the browser supports multiple media elements.
  *   <br>
  *   Defaults to <code>true</code> except on Tizen, WebOS, Chromecast,
- *   Hisense, PlayStation 4, PlayStation5, Xbox whose default value is
+ *   Hisense, PlayStation 4, PlayStation5, Xbox, Vizio whose default value is
  *   <code>false</code>.
  * @property {boolean} disableHLSInterstitial
  *   If this is true, we ignore HLS interstitial events.
