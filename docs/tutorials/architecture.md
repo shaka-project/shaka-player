@@ -1,32 +1,32 @@
 # Architecture Diagrams
 
 <img
-  src="../design/dataflow.gv.png"
+  src="../design/current/dataflow.gv.png"
   alt="Shaka data flow diagram"
   style="max-width: 100%">
 
 <img
-  src="../design/ownership.gv.png"
+  src="../design/current/ownership.gv.png"
   alt="Shaka ownership diagram"
   style="max-width: 100%">
 
 <img
-  src="../design/cast.gv.png"
+  src="../design/current/cast.gv.png"
   alt="Shaka cast diagram"
   style="max-width: 100%;">
 
 <img
-  src="../design/offline.gv.png"
+  src="../design/current/offline.gv.png"
   alt="Shaka offline diagram"
   style="max-width: 100%">
 
 <img
-  src="../design/timeline.svg"
+  src="../design/current/timeline.svg"
   alt="PresentationTimeline diagram"
   style="max-width: 100%">
 
 <img
-  src="../design/newdemo.gv.png"
+  src="../design/current/newdemo.gv.png"
   alt="Demo page architecture"
   style="max-width: 100%">
 
