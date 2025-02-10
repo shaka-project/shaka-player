@@ -7,7 +7,7 @@
  - MPEG-5 Part2 LCEVC decoding support (decoding provided by [lcevc_dec.js][], 
  must be separately included) 
  
-##### Integration documentation : [docs](../design/lcevc-integration.md) 
+##### Integration documentation : [docs](../design/current/lcevc-integration.md) 
  
 ##### More on [MPEG-5 Part2 LCEVC][] 
  
