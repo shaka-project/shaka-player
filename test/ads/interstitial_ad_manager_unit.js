@@ -351,6 +351,8 @@ describe('Interstitial Ad manager', () => {
         timelineRange: false,
         loop: false,
         overlay: null,
+        displayOnBackground: false,
+        percentageReductionOfCurrentVideo: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -402,6 +404,8 @@ describe('Interstitial Ad manager', () => {
         timelineRange: false,
         loop: false,
         overlay: null,
+        displayOnBackground: false,
+        percentageReductionOfCurrentVideo: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -449,6 +453,8 @@ describe('Interstitial Ad manager', () => {
         timelineRange: false,
         loop: false,
         overlay: null,
+        displayOnBackground: false,
+        percentageReductionOfCurrentVideo: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -496,6 +502,8 @@ describe('Interstitial Ad manager', () => {
         timelineRange: false,
         loop: false,
         overlay: null,
+        displayOnBackground: false,
+        percentageReductionOfCurrentVideo: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -543,6 +551,8 @@ describe('Interstitial Ad manager', () => {
         timelineRange: false,
         loop: false,
         overlay: null,
+        displayOnBackground: false,
+        percentageReductionOfCurrentVideo: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -590,6 +600,8 @@ describe('Interstitial Ad manager', () => {
         timelineRange: false,
         loop: false,
         overlay: null,
+        displayOnBackground: false,
+        percentageReductionOfCurrentVideo: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -637,6 +649,8 @@ describe('Interstitial Ad manager', () => {
         timelineRange: false,
         loop: false,
         overlay: null,
+        displayOnBackground: false,
+        percentageReductionOfCurrentVideo: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -684,6 +698,8 @@ describe('Interstitial Ad manager', () => {
         timelineRange: true,
         loop: false,
         overlay: null,
+        displayOnBackground: false,
+        percentageReductionOfCurrentVideo: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -741,6 +757,8 @@ describe('Interstitial Ad manager', () => {
         timelineRange: false,
         loop: false,
         overlay: null,
+        displayOnBackground: false,
+        percentageReductionOfCurrentVideo: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -897,6 +915,96 @@ describe('Interstitial Ad manager', () => {
             y: 360,
           },
         },
+        displayOnBackground: false,
+        percentageReductionOfCurrentVideo: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
+    it('ignore overlay events with z=0', async () => {
+      const eventString = [
+        '<Event duration="1" id="OVERLAY" presentationTime="0">',
+        '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd" z="0">',
+        '<SqueezeCurrent percentage="0.7"/>',
+        '</OverlayEvent>',
+        '</Event>',
+      ].join('');
+      const eventNode = TXml.parseXmlString(eventString);
+      goog.asserts.assert(eventNode, 'Should have a event node!');
+      const region = {
+        startTime: 0,
+        endTime: 1,
+        id: 'OVERLAY',
+        schemeIdUri: 'urn:mpeg:dash:event:2012',
+        eventNode,
+        eventElement: TXml.txmlNodeToDomElement(eventNode),
+        value: '',
+      };
+      await interstitialAdManager.addOverlayRegion(region);
+
+      expect(onEventSpy).not.toHaveBeenCalled();
+    });
+
+    it('supports overlay events with L-Shape format', async () => {
+      const eventString = [
+        '<Event duration="1" id="OVERLAY" presentationTime="0">',
+        '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd" z="-1">',
+        '<SqueezeCurrent percentage="0.7"/>',
+        '</OverlayEvent>',
+        '</Event>',
+      ].join('');
+      const eventNode = TXml.parseXmlString(eventString);
+      goog.asserts.assert(eventNode, 'Should have a event node!');
+      const region = {
+        startTime: 0,
+        endTime: 1,
+        id: 'OVERLAY',
+        schemeIdUri: 'urn:mpeg:dash:event:2012',
+        eventNode,
+        eventElement: TXml.txmlNodeToDomElement(eventNode),
+        value: '',
+      };
+      await interstitialAdManager.addOverlayRegion(region);
+
+      expect(onEventSpy).not.toHaveBeenCalled();
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
+      const expectedInterstitial = {
+        id: 'OVERLAY',
+        groupId: null,
+        startTime: 0,
+        endTime: 1,
+        uri: 'test.mpd',
+        mimeType: 'application/dash+xml',
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: true,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: false,
+        pre: false,
+        post: false,
+        timelineRange: true,
+        loop: false,
+        overlay: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 0,
+            y: 0,
+          },
+          size: {
+            x: 1920,
+            y: 1080,
+          },
+        },
+        displayOnBackground: true,
+        percentageReductionOfCurrentVideo: 0.7,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -924,6 +1032,8 @@ describe('Interstitial Ad manager', () => {
         timelineRange: false,
         loop: false,
         overlay: null,
+        displayOnBackground: false,
+        percentageReductionOfCurrentVideo: null,
       };
       await interstitialAdManager.addInterstitials([interstitial]);
 
@@ -963,6 +1073,8 @@ describe('Interstitial Ad manager', () => {
           timelineRange: false,
           loop: false,
           overlay: null,
+          displayOnBackground: false,
+          percentageReductionOfCurrentVideo: null,
         },
         {
           id: null,
@@ -983,6 +1095,8 @@ describe('Interstitial Ad manager', () => {
           timelineRange: false,
           loop: false,
           overlay: null,
+          displayOnBackground: false,
+          percentageReductionOfCurrentVideo: null,
         },
       ];
       await interstitialAdManager.addInterstitials(interstitials);
@@ -1026,6 +1140,8 @@ describe('Interstitial Ad manager', () => {
         timelineRange: false,
         loop: false,
         overlay: null,
+        displayOnBackground: false,
+        percentageReductionOfCurrentVideo: null,
       };
       const interstitials = [interstitial, interstitial];
       await interstitialAdManager.addInterstitials(interstitials);
@@ -1066,6 +1182,8 @@ describe('Interstitial Ad manager', () => {
         timelineRange: false,
         loop: false,
         overlay: null,
+        displayOnBackground: false,
+        percentageReductionOfCurrentVideo: null,
       };
       await interstitialAdManager.addInterstitials([interstitial]);
 
@@ -1179,6 +1297,8 @@ describe('Interstitial Ad manager', () => {
             y: 80,
           },
         },
+        displayOnBackground: false,
+        percentageReductionOfCurrentVideo: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1459,6 +1579,8 @@ describe('Interstitial Ad manager', () => {
           y: 540,
         },
       },
+      displayOnBackground: false,
+      percentageReductionOfCurrentVideo: null,
     };
     await interstitialAdManager.addInterstitials([interstitial]);
 
