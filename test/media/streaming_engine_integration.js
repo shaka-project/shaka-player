@@ -415,16 +415,29 @@ describe('StreamingEngine', () => {
 
       // We are playing close to the beginning of the availability window.
       // We should be playing smoothly and not seeking repeatedly as we fall
-      // outside the window.
+      // outside the window.  Because we tried to seek before the beginning, we
+      // also want to know that this actually happened, so we have a minimum
+      // number of seeks we expect.  If those didn't happen as we thought, the
+      // test expectation to reach a certain time toward the end would be
+      // meaningless.
       //
       // Expected seeks:
       //   1. seek to live stream start time during startup
       //   2. explicit seek in the test to get outside the window
-      //   3. Playhead seeks to force us back inside the window
+      //   3. (usually) Playhead seeks to force us back inside the window
       //   4. (maybe) seek if there is a gap at the period boundary
       //   5. (maybe) seek to flush a pipeline stall
       //   6. (maybe) on slower platforms (e.g. GitHub actions)
-      expect(seekCount).toBeGreaterThan(2);
+      if (shaka.media.Capabilities.isInfiniteLiveStreamDurationSupported()) {
+        // On devices that support setLiveSeekableRange(), MediaSource handles
+        // keeping the playhead inside the seekable range.  We don't see
+        // explicit seeking events for the correction when this happens.
+        // Instead, the time in the seeking event is greater than what we set
+        // currentTime to.
+        expect(seekCount).toBeGreaterThan(1);
+      } else {
+        expect(seekCount).toBeGreaterThan(2);
+      }
       expect(seekCount).toBeLessThan(7);
     });
   });

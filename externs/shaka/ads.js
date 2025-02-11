@@ -76,7 +76,9 @@ shaka.extern.AdCuePoint;
  *   post: boolean,
  *   timelineRange: boolean,
  *   loop: boolean,
- *   overlay: ?shaka.extern.AdInterstitialOverlay
+ *   overlay: ?shaka.extern.AdInterstitialOverlay,
+ *   displayOnBackground: boolean,
+ *   percentageReductionOfCurrentVideo: ?number
  * }}
  *
  * @description
@@ -131,6 +133,10 @@ shaka.extern.AdCuePoint;
  * @property {?shaka.extern.AdInterstitialOverlay} overlay
  *   Indicates the characteristics of the overlay
  *   Only supported when using multiple video elements for interstitials.
+ * @property {boolean} displayOnBackground
+ *   Indicates if we should display on background, shrinking the current video.
+ * @property {?number} percentageReductionOfCurrentVideo
+ *   Indicates the percentage reduction of current video if applies.
  * @exportDoc
  */
 shaka.extern.AdInterstitial;
