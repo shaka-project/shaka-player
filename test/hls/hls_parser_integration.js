@@ -153,4 +153,36 @@ describe('HlsParser', () => {
 
     await player.unload();
   });
+
+  it('allow switch between mp4 muxed and ts muxed', async () => {
+    if (!await Util.isTypeSupported(
+        'video/mp4; codecs="av01.0.31M.08"',
+        /* width= */ 1920, /* height= */ 1080)) {
+      pending('Codec AV1 is not supported by the platform.');
+    }
+    player.configure('abr.enabled', false);
+    await player.load('/base/test/test/assets/hls-muxed-mp4-ts/master.m3u8');
+    await video.play();
+
+    expect(player.getVariantTracks().length).toBe(2);
+
+    // We want to test TS --> MP4 and MP4 --> TS, that's why
+    // selectVariantTrack is called twice
+
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 30);
+
+    let nonActiveVariant = player.getVariantTracks().find((v) => !v.active);
+    goog.asserts.assert(nonActiveVariant, 'variant should be non-null!');
+    player.selectVariantTrack(nonActiveVariant, /* clearBuffer= */ true);
+
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 3, 30);
+
+    nonActiveVariant = player.getVariantTracks().find((v) => !v.active);
+    goog.asserts.assert(nonActiveVariant, 'variant should be non-null!');
+    player.selectVariantTrack(nonActiveVariant, /* clearBuffer= */ true);
+
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 30);
+
+    await player.unload();
+  });
 });
