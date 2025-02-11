@@ -860,9 +860,9 @@ function main(args) {
       '/**\n' +
       ' * @fileoverview Generated externs.  DO NOT EDIT!\n' +
       ' * @externs\n' +
-      ' * @suppress {duplicate} To prevent compiler errors with the\n' +
-      ' *   namespace being declared both here and by goog.provide in the\n' +
-      ' *   library.\n' +
+      ' * @suppress {constantProperty, duplicate} To prevent compiler\n' +
+      ' *   errors with the namespace being declared both here and by\n' +
+      ' *   goog.provide in the library.\n' +
       ' */\n\n' +
       namespaceDeclarations.join('') + '\n' + externs);
 }
