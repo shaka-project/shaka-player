@@ -267,6 +267,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/dv-p10-av1/*', included: false},
       {pattern: 'test/test/assets/hls-aes-256/*', included: false},
       {pattern: 'test/test/assets/hls-interstitial/*', included: false},
+      {pattern: 'test/test/assets/hls-muxed-mp4-ts/*', included: false},
       {pattern: 'test/test/assets/hls-raw-aac/*', included: false},
       {pattern: 'test/test/assets/hls-raw-ac3/*', included: false},
       {pattern: 'test/test/assets/hls-raw-ec3/*', included: false},
