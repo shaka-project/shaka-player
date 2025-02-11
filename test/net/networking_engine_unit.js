@@ -63,6 +63,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   afterEach(() => {
     shaka.net.NetworkingEngine.unregisterScheme('resolve');
     shaka.net.NetworkingEngine.unregisterScheme('reject');
+    networkingEngine.destroy();
   });
 
   afterAll(() => {
@@ -140,6 +141,31 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       await expectAsync(networkingEngine.request(requestType, request).promise)
           .toBeRejectedWith(expected);
       expect(rejectScheme).toHaveBeenCalledTimes(3);
+    });
+
+    it('allow abort retry', async () => {
+      const request = createRequest('reject://foo', {
+        maxAttempts: 2,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      });
+      rejectScheme.and.callFake(() => {
+        if (rejectScheme.calls.count() == 1) {
+          return shaka.util.AbortableOperation.failed(error);
+        } else {
+          return shaka.util.AbortableOperation.completed(createResponse());
+        }
+      });
+      networkingEngine.addEventListener('retry', (event) => {
+        event.preventDefault();
+      });
+      await expectAsync(networkingEngine.request(requestType, request).promise)
+          .toBeRejected();
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
     });
 
     describe('backoff', () => {
