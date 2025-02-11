@@ -1035,6 +1035,44 @@ describe('DashParser Manifest', () => {
     });
   });
 
+  it('parses dependencyVideo tracks', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="main" bandwidth="1" codecs="avc1.4d401f">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation id="enhance" dependencyId="main"',
+      '          bandwidth="0.2" codecs="avc1.4d401f">',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    expect(manifest.variants.length).toBe(1);
+    expect(manifest.textStreams.length).toBe(0);
+
+    const variant = manifest.variants[0];
+    const video = variant && variant.video;
+    expect(video).toEqual(jasmine.objectContaining({
+      originalId: 'main',
+      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+    }));
+    const dependencyVideo = video && video.dependencyVideo;
+    expect(dependencyVideo).toEqual(jasmine.objectContaining({
+      originalId: 'enhance',
+      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+    }));
+  });
+
   it('parses trickmode tracks', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
