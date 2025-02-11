@@ -366,6 +366,7 @@ shaka.extern.SegmentIndex = class {
  *   type: string,
  *   primary: boolean,
  *   trickModeVideo: ?shaka.extern.Stream,
+ *   dependencyVideo: ?shaka.extern.Stream,
  *   emsgSchemeIdUris: ?Array<string>,
  *   roles: !Array<string>,
  *   accessibilityPurpose: ?shaka.media.ManifestParser.AccessibilityPurpose,
@@ -482,6 +483,9 @@ shaka.extern.SegmentIndex = class {
  * @property {?shaka.extern.Stream} trickModeVideo
  *   <i>Video streams only.</i> <br>
  *   An alternate video stream to use for trick mode playback.
+ * @property {?shaka.extern.Stream} dependencyVideo
+ *   <i>Video streams only.</i> <br>
+ *   Dependency video stream to use for enhance the quality of the video.
  * @property {?Array<string>} emsgSchemeIdUris
  *   <i>Defaults to empty.</i><br>
  *   Array of registered emsg box scheme_id_uri that should result in
