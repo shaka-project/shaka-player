@@ -123,13 +123,14 @@ shakaDemo.Config = class {
 
   /** @private */
   addDrmSection_() {
-    const widevineRobustnessLevels = new Map()
-        .set('', '')
-        .set('SW_SECURE_CRYPTO', 'SW_SECURE_CRYPTO')
-        .set('SW_SECURE_DECODE', 'SW_SECURE_DECODE')
-        .set('HW_SECURE_CRYPTO', 'HW_SECURE_CRYPTO')
-        .set('HW_SECURE_DECODE', 'HW_SECURE_DECODE')
-        .set('HW_SECURE_ALL', 'HW_SECURE_ALL');
+    const widevineRobustnessLevels = {
+      '': '',
+      'SW_SECURE_CRYPTO': 'SW_SECURE_CRYPTO',
+      'SW_SECURE_DECODE': 'SW_SECURE_DECODE',
+      'HW_SECURE_CRYPTO': 'HW_SECURE_CRYPTO',
+      'HW_SECURE_DECODE': 'HW_SECURE_DECODE',
+      'HW_SECURE_ALL': 'HW_SECURE_ALL',
+    };
     const docLink = this.resolveExternLink_('.DrmConfiguration');
     this.addSection_('DRM', docLink)
         .addBoolInput_('Delay License Request Until Played',
@@ -560,29 +561,33 @@ shakaDemo.Config = class {
       this.latestInput_.input().checked = true;
     }
 
-    const hdrLevels = new Map()
-        .set('', '')
-        .set('AUTO', 'AUTO')
-        .set('SDR', 'SDR')
-        .set('PQ', 'PQ')
-        .set('HLG', 'HLG');
-    const hdrLevelNames = new Map()
-        .set('AUTO', 'Auto Detect')
-        .set('SDR', 'SDR')
-        .set('PQ', 'PQ')
-        .set('HLG', 'HLG')
-        .set('', 'No Preference');
+    const hdrLevels = {
+      '': '',
+      'AUTO': 'AUTO',
+      'SDR': 'SDR',
+      'PQ': 'PQ',
+      'HLG': 'HLG',
+    };
+    const hdrLevelNames = {
+      'AUTO': 'Auto Detect',
+      'SDR': 'SDR',
+      'PQ': 'PQ',
+      'HLG': 'HLG',
+      '': 'No Preference',
+    };
     this.addSelectInput_('Preferred HDR Level', 'preferredVideoHdrLevel',
         hdrLevels, hdrLevelNames);
 
-    const videoLayouts = new Map()
-        .set('', '')
-        .set('CH-STEREO', 'CH-STEREO')
-        .set('CH-MONO', 'CH-MONO');
-    const videoLayoutsNames = new Map()
-        .set('CH-STEREO', 'Stereoscopic')
-        .set('CH-MONO', 'Monoscopic')
-        .set('', 'No Preference');
+    const videoLayouts = {
+      '': '',
+      'CH-STEREO': 'CH-STEREO',
+      'CH-MONO': 'CH-MONO',
+    };
+    const videoLayoutsNames = {
+      'CH-STEREO': 'Stereoscopic',
+      'CH-MONO': 'Monoscopic',
+      '': 'No Preference',
+    };
     this.addSelectInput_('Preferred video layout', 'preferredVideoLayout',
         videoLayouts, videoLayoutsNames);
 
@@ -651,13 +656,11 @@ shakaDemo.Config = class {
   addMediaSourceSection_() {
     const docLink = this.resolveExternLink_('.MediaSourceConfiguration');
 
-    const strategyOptions = new Map();
-    for (const key of Object.keys(shaka.config.CodecSwitchingStrategy)) {
-      strategyOptions.set(key, shaka.config.CodecSwitchingStrategy[key]);
-    }
-    const strategyOptionsNames = new Map()
-        .set('RELOAD', 'reload')
-        .set('SMOOTH', 'smooth');
+    const strategyOptions = shaka.config.CodecSwitchingStrategy;
+    const strategyOptionsNames = {
+      'RELOAD': 'reload',
+      'SMOOTH': 'smooth',
+    };
 
     this.addSection_('Media source', docLink)
         .addBoolInput_('Force Transmux', 'mediaSource.forceTransmux')
@@ -676,15 +679,13 @@ shakaDemo.Config = class {
   addLanguageSection_() {
     const docLink = this.resolveExternLink_('.PlayerConfiguration');
 
-    const autoShowTextOptions = new Map();
-    for (const key of Object.keys(shaka.config.AutoShowText)) {
-      autoShowTextOptions.set(key, shaka.config.AutoShowText[key]);
-    }
-    const autoShowTextOptionNames = new Map()
-        .set('NEVER', 'Never')
-        .set('ALWAYS', 'Always')
-        .set('IF_PREFERRED_TEXT_LANGUAGE', 'If preferred text language')
-        .set('IF_SUBTITLES_MAY_BE_NEEDED', 'If subtitles may be needed');
+    const autoShowTextOptions = shaka.config.AutoShowText;
+    const autoShowTextOptionNames = {
+      'NEVER': 'Never',
+      'ALWAYS': 'Always',
+      'IF_PREFERRED_TEXT_LANGUAGE': 'If preferred text language',
+      'IF_SUBTITLES_MAY_BE_NEEDED': 'If subtitles may be needed',
+    };
 
     this.addSection_('Language', docLink)
         .addTextInput_('Preferred Audio Language', 'preferredAudioLanguage')
@@ -785,11 +786,12 @@ shakaDemo.Config = class {
     const Level = shaka['log']['Level'];
     const setLevel = shaka['log']['setLevel'];
 
-    const logLevels = new Map()
-        .set('info', 'Info')
-        .set('debug', 'Debug')
-        .set('v', 'Verbose')
-        .set('vv', 'Very Verbose');
+    const logLevels = {
+      'info': 'Info',
+      'debug': 'Debug',
+      'v': 'Verbose',
+      'vv': 'Very Verbose',
+    };
     const onChange = (input) => {
       switch (input.value) {
         case 'info':
@@ -997,7 +999,7 @@ shakaDemo.Config = class {
 
   /**
    * @param {string} name
-   * @param {!Map<string, string>} values
+   * @param {!Object<string, string>} values
    * @param {function(!HTMLInputElement)} onChange
    * @param {string=} tooltipMessage
    * @return {!shakaDemo.Config}
@@ -1015,8 +1017,8 @@ shakaDemo.Config = class {
   /**
    * @param {string} name
    * @param {string} valueName
-   * @param {!Map<string, ?>} options
-   * @param {!Map<string, string>} optionNames
+   * @param {!Object<string, ?>} options
+   * @param {!Object<string, string>} optionNames
    * @param {string=} tooltipMessage
    * @return {!shakaDemo.Config}
    * @private
