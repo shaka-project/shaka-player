@@ -120,12 +120,12 @@ def main(args):
   build_args_only_dash_without_ui = [
     '--name', 'dash',
     '+@complete', '-@ui',
-    '-@hls', '-@transmuxer', '-@mss', '-@offline', '-@cast', '-@optionalText',
+    '-@hls', '-@transmuxer', '-@mss', '-@offline', '-@cast', '-@optionalText', '-@ads',
   ]
   build_args_only_hls_without_ui = [
     '--name', 'hls',
     '+@complete', '-@ui',
-    '-@dash', '-@mss', '-@offline', '-@cast', '-@optionalText',
+    '-@dash', '-@mss', '-@offline', '-@cast', '-@optionalText', '-@ads',
   ]
 
   if parsed_args.force:
