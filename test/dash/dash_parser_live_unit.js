@@ -1331,6 +1331,7 @@ describe('DashParser Live', () => {
         startTime: 10,
         endTime: 60,
         id: '',
+        timescale: 100,
         eventElement: jasmine.any(Element),
         eventNode: jasmine.any(Object),
       });
@@ -1340,6 +1341,7 @@ describe('DashParser Live', () => {
         startTime: 13,
         endTime: 23,
         id: 'abc',
+        timescale: 100,
         eventElement: jasmine.any(Element),
         eventNode: jasmine.any(Object),
       });

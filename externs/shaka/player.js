@@ -738,6 +738,7 @@ shaka.extern.HLSInterstitial;
  *   startTime: number,
  *   endTime: number,
  *   id: string,
+ *   timescale: number,
  *   eventElement: Element,
  *   eventNode: ?shaka.extern.xml.Node
  * }}
@@ -757,6 +758,8 @@ shaka.extern.HLSInterstitial;
  *   The presentation time (in seconds) that the region should end.
  * @property {string} id
  *   Specifies an identifier for this instance of the region.
+ * @property {number} timescale
+ *   Provides the timescale, in ticks per second.
  * @property {Element} eventElement
  *   <b>DEPRECATED</b>: Use eventNode instead.
  *   The XML element that defines the Event.
