@@ -284,6 +284,12 @@ describe('tXml', () => {
     expect(TXml.parseDuration('P1Y1M1DT1H2M3S')).toBeGreaterThan(
         (60 * 60 * 24 * 365) + (60 * 60 * 24 * 28) + 90123 - 1);
 
+    // Supports case insensitive
+    expect(TXml.parseDuration('p1y1m1dt1h2m3s')).toBeLessThan(
+        (60 * 60 * 24 * 366) + (60 * 60 * 24 * 31) + 90123 + 1);
+    expect(TXml.parseDuration('p1y1m1dt1h2m3s')).toBeGreaterThan(
+        (60 * 60 * 24 * 365) + (60 * 60 * 24 * 28) + 90123 - 1);
+
     expect(TXml.parseDuration('PT')).toBe(0);
     expect(TXml.parseDuration('P')).toBe(0);
 
