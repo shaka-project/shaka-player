@@ -6,9 +6,6 @@ on:
   push:
     branches:
       - main
-  schedule:
-    # Run every night at midnight PST / 8am UTC.
-    - cron: '0 8 * * *'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
