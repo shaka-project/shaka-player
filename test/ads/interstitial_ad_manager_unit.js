@@ -768,11 +768,12 @@ describe('Interstitial Ad manager', () => {
     it('supports alternative MPD', async () => {
       const eventString = [
         '<Event duration="1" id="PREROLL" presentationTime="0">',
-        '<AlternativeMPD uri="test.mpd"/>',
+        '<InsertPresentation url="test.mpd"/>',
         '</Event>',
       ].join('');
       const eventNode = TXml.parseXmlString(eventString);
       goog.asserts.assert(eventNode, 'Should have a event node!');
+      /** @type {shaka.extern.TimelineRegionInfo} */
       const region = {
         startTime: 0,
         endTime: 1,
@@ -781,6 +782,7 @@ describe('Interstitial Ad manager', () => {
         eventNode,
         eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
+        timescale: 1,
       };
       await interstitialAdManager.addRegion(region);
 
@@ -801,19 +803,21 @@ describe('Interstitial Ad manager', () => {
     it('ignore duplicate alternative MPD', async () => {
       const eventString = [
         '<Event duration="1" id="PREROLL" presentationTime="0">',
-        '<AlternativeMPD uri="test.mpd"/>',
+        '<ReplacePresentation url="test.mpd" returnOffset="1"/>',
         '</Event>',
       ].join('');
       const eventNode = TXml.parseXmlString(eventString);
       goog.asserts.assert(eventNode, 'Should have a event node!');
+      /** @type {shaka.extern.TimelineRegionInfo} */
       const region = {
         startTime: 0,
         endTime: 1,
         id: 'PREROLL',
-        schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:insert:2025',
+        schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:replace:2025',
         eventNode,
         eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
+        timescale: 1,
       };
       await interstitialAdManager.addRegion(region);
       await interstitialAdManager.addRegion(region);
@@ -824,7 +828,7 @@ describe('Interstitial Ad manager', () => {
         cuepoints: [
           {
             start: 0,
-            end: null,
+            end: 1,
           },
         ],
       };
@@ -836,11 +840,12 @@ describe('Interstitial Ad manager', () => {
       // It is not valid because it does not have an interstitial URL
       const eventString = [
         '<Event duration="1" id="PREROLL" presentationTime="0">',
-        '<AlternativeMPD/>',
+        '<InsertPresentation/>',
         '</Event>',
       ].join('');
       const eventNode = TXml.parseXmlString(eventString);
       goog.asserts.assert(eventNode, 'Should have a event node!');
+      /** @type {shaka.extern.TimelineRegionInfo} */
       const region = {
         startTime: 0,
         endTime: 1,
@@ -849,6 +854,7 @@ describe('Interstitial Ad manager', () => {
         eventNode,
         eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
+        timescale: 1,
       };
       await interstitialAdManager.addRegion(region);
 
@@ -867,6 +873,7 @@ describe('Interstitial Ad manager', () => {
       ].join('');
       const eventNode = TXml.parseXmlString(eventString);
       goog.asserts.assert(eventNode, 'Should have a event node!');
+      /** @type {shaka.extern.TimelineRegionInfo} */
       const region = {
         startTime: 0,
         endTime: 1,
@@ -875,6 +882,7 @@ describe('Interstitial Ad manager', () => {
         eventNode,
         eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
+        timescale: 1,
       };
       await interstitialAdManager.addOverlayRegion(region);
 
@@ -931,6 +939,7 @@ describe('Interstitial Ad manager', () => {
       ].join('');
       const eventNode = TXml.parseXmlString(eventString);
       goog.asserts.assert(eventNode, 'Should have a event node!');
+      /** @type {shaka.extern.TimelineRegionInfo} */
       const region = {
         startTime: 0,
         endTime: 1,
@@ -939,6 +948,7 @@ describe('Interstitial Ad manager', () => {
         eventNode,
         eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
+        timescale: 1,
       };
       await interstitialAdManager.addOverlayRegion(region);
 
@@ -955,6 +965,7 @@ describe('Interstitial Ad manager', () => {
       ].join('');
       const eventNode = TXml.parseXmlString(eventString);
       goog.asserts.assert(eventNode, 'Should have a event node!');
+      /** @type {shaka.extern.TimelineRegionInfo} */
       const region = {
         startTime: 0,
         endTime: 1,
@@ -963,6 +974,7 @@ describe('Interstitial Ad manager', () => {
         eventNode,
         eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
+        timescale: 1,
       };
       await interstitialAdManager.addOverlayRegion(region);
 
