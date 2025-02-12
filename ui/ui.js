@@ -250,6 +250,7 @@ shaka.ui.Overlay = class {
         'loadTimes',
         'averageLoadTime',
         'started',
+        'overlayAds',
         'playedCompletely',
         'skipped',
         'errors',
