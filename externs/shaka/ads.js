@@ -14,6 +14,7 @@
  *   loadTimes: !Array<number>,
  *   averageLoadTime: number,
  *   started: number,
+ *   overlayAds: number,
  *   playedCompletely: number,
  *   skipped: number,
  *   errors: number
@@ -27,7 +28,9 @@
  * @property {number} averageLoadTime
  *   The average time it took to get the final manifest.
  * @property {number} started
- *   The number of ads started.
+ *   The number of ads started (linear and overlays ads).
+ * @property {number} overlayAds
+ *   The number of overlay ads started.
  * @property {number} playedCompletely
  *   The number of ads played completely.
  * @property {number} skipped

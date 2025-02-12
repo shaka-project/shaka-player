@@ -102,6 +102,7 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
         .set('loadTimes', parseLoadTimes)
         .set('averageLoadTime', showNumber)
         .set('started', showNumber)
+        .set('overlayAds', showNumber)
         .set('playedCompletely', showNumber)
         .set('skipped', showNumber)
         .set('errors', showNumber);
