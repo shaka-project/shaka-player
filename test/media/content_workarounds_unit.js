@@ -24,6 +24,8 @@ describe('ContentWorkarounds', () => {
       'ac-3',
       'ec-3',
       'ac-4',
+      'Opus',
+      'fLaC',
       'mp4a',
     ],
   };
