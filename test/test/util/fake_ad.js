@@ -87,6 +87,14 @@ shaka.test.FakeAd = class {
    * @override
    * @export
    */
+  hasCustomClick() {
+    return true;
+  }
+
+  /**
+   * @override
+   * @export
+   */
   isUsingAnotherMediaElement() {
     return true;
   }

@@ -845,7 +845,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   showAdUI() {
     shaka.ui.Utils.setDisplay(this.adPanel_, true);
     shaka.ui.Utils.setDisplay(this.clientAdContainer_, true);
-    this.controlsContainer_.setAttribute('ad-active', 'true');
+    if (this.ad_.hasCustomClick()) {
+      this.controlsContainer_.setAttribute('ad-active', 'true');
+    } else {
+      this.controlsContainer_.removeAttribute('ad-active');
+    }
   }
 
   /** @export */
