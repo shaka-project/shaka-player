@@ -79,9 +79,10 @@ shaka.extern.AdCuePoint;
  *   post: boolean,
  *   timelineRange: boolean,
  *   loop: boolean,
- *   overlay: ?shaka.extern.AdInterstitialOverlay,
+ *   overlay: ?shaka.extern.AdPositionInfo,
  *   displayOnBackground: boolean,
- *   percentageReductionOfCurrentVideo: ?number
+ *   currentVideo: ?shaka.extern.AdPositionInfo,
+ *   background: ?string
  * }}
  *
  * @description
@@ -133,13 +134,17 @@ shaka.extern.AdCuePoint;
  *   Indicates that the interstitials should play in loop.
  *   Only applies if the interstitials is an overlay.
  *   Only supported when using multiple video elements for interstitials.
- * @property {?shaka.extern.AdInterstitialOverlay} overlay
+ * @property {?shaka.extern.AdPositionInfo} overlay
  *   Indicates the characteristics of the overlay
  *   Only supported when using multiple video elements for interstitials.
  * @property {boolean} displayOnBackground
  *   Indicates if we should display on background, shrinking the current video.
- * @property {?number} percentageReductionOfCurrentVideo
- *   Indicates the percentage reduction of current video if applies.
+ * @property {?shaka.extern.AdPositionInfo} currentVideo
+ *   Indicates the characteristics of the current video.
+ *   Only set if any feature changes.
+ * @property {?string} background
+ *   Specifies the background, the value can be any value of the CSS background
+ *   property.
  * @exportDoc
  */
 shaka.extern.AdInterstitial;
@@ -153,7 +158,7 @@ shaka.extern.AdInterstitial;
  * }}
  *
  * @description
- * Contains the ad interstitial overlay info.
+ * Contains the coordinates of a position info
  *
  * @property {{x: number, y: number}} viewport
  *   The viewport in pixels.
@@ -163,7 +168,7 @@ shaka.extern.AdInterstitial;
  *   The size in pixels.
  * @exportDoc
  */
-shaka.extern.AdInterstitialOverlay;
+shaka.extern.AdPositionInfo;
 
 
 /**
