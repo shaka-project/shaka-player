@@ -8,6 +8,14 @@
     {
       "name": "Joey Parrish",
       "email": "joeyparrish@google.com"
+    },
+    {
+      "name": "Alvaro Velad Galvan",
+      "email": "ladvan91@hotmail.com"
+    },
+    {
+      "name": "Wojciech Tyczyński",
+      "email": "tykus160@gmail.com"
     }
   ],
   "devDependencies": {
