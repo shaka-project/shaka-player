@@ -358,9 +358,6 @@ Shaka currently provides the following versions:
  * [Hosted builds on Google Hosted Libraries](https://developers.google.com/speed/libraries/#shaka-player)
  * [Hosted builds on jsDelivr](https://www.jsdelivr.com/package/npm/shaka-player)
  * [Development roadmap](roadmap.md)
- * [Announcement list](https://groups.google.com/forum/#!forum/shaka-player-users)
-     ([join](docs/announcement-list-join-group.png) for infrequent
-      announcements and surveys)
  * Subscribe to releases by following
      [instructions from this blog](https://www.jessesquires.com/blog/2020/07/30/github-tip-watching-releases/)
 
