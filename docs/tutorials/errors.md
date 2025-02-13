@@ -73,6 +73,7 @@ const vodManifestNotFoundHandler = (event /* shaka.net.NetworkingEngine.RetryEve
       data[1] === 404 &&
       data[4] === shaka.net.NetworkingEngine.RequestType.MANIFEST
     ) {
+      // preventDefault inside a retry callback will immediately stop retries
       event.preventDefault();
     }
   }
