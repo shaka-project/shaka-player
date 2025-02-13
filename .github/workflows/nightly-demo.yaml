@@ -3,9 +3,9 @@ name: Deploy Nightly Demo
 on:
   workflow_dispatch:
     # Allows for manual triggering.
-  schedule:
-    # Run every night at midnight PST / 8am UTC.
-    - cron: '0 8 * * *'
+  push:
+    branches:
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
