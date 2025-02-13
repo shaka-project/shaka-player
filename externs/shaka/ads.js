@@ -360,6 +360,11 @@ shaka.extern.IAd = class {
   /**
    * @return {boolean}
    */
+  hasCustomClick() {}
+
+  /**
+   * @return {boolean}
+   */
   isUsingAnotherMediaElement() {}
 
   /**
