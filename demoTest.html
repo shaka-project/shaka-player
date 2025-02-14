@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Shaka Player Layout Manager Demo</title>
+  <link rel="shortcut icon" href="#">
+  <link rel="stylesheet" type="text/css" href="dist/controls.css">
+  <script src="dist/shaka-player.ui.debug.js"></script>
+  <style>
+    .video-container {
+      max-width: 800px;
+      margin: 20px auto;
+    }
+  
+  </style>
+</head>
+<body>
+  <div class="video-container">
+    <video id="video" width="100%" poster="//shaka-player-demo.appspot.com/assets/poster.jpg"></video>
+  </div>
+
+  <div class="config-panel">
+    <h3>Layout Themes</h3>
+    <button class="theme-default" onclick="applyDefaultTheme()">Default Theme</button>
+  </div>
+
+  <script>
+    const manifestUri = "https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd";
+    let video; 
+    let player;
+    let ui;
+
+    async function init() {
+      // Check if the browser supports the player
+      const supported = await shaka.Player.isBrowserSupported();
+      if (!supported) {
+        console.error('Browser not supported!');
+        return;
+      }
+
+      // Get the video element
+      video = document.getElementById('video');
+      
+      // Initialize the player
+      player = new shaka.Player(video);
+      
+      // Initialize the UI
+      ui = new shaka.ui.Overlay(player, video.parentElement, video);
+      
+      // Listen to error events
+      player.addEventListener('error', onPlayerErrorEvent);
+
+      try {
+        // Load the manifest
+        await player.load(manifestUri);
+        
+        // Set start time to 30 seconds
+        video.currentTime = 30;
+        
+        console.log('Video loaded successfully');
+      } catch (error) {
+        console.error('Error code', error.code, 'object', error);
+      }
+    }
+
+    function onPlayerErrorEvent(event) {
+      console.error('Player error:', event.detail);
+    }
+
+    function onUIErrorEvent(event) {
+      console.error('UI error:', event);
+    }
+
+    function applyDefaultTheme() {
+      try {
+        console.log('Applying default theme...');
+        const controls = ui.getControls();
+        if (!controls) {
+          console.error('Controls not initialized');
+          return;
+        }
+
+        // Update UI configuration directly
+        ui.configure({
+          controlPanelElements: [
+            'play_pause',
+            'spacer',
+            'mute',
+            'volume',
+            'time_and_duration',
+            'overflow_menu'
+          ],
+          overflowMenuButtons: [
+            'captions',
+            'playback_rate', 
+            'quality'
+          ],
+          addSeekBar: true,
+          showBackward: true,
+          showForward: true,
+          showTimeText: true,
+          showPlayPauseBtn: true,
+          showFullScreen: true,
+          showProgressBar: true,
+          showQualityControl: true,
+          addBigPlayButton: true,
+          showSpeedControl: true,
+          primaryColor: "#00ff00",
+          seekBarColors: {
+            base: '#e0e0e0',
+            buffered: '#a0a0a0',
+            played: '#00ff00',
+            adBreaks: '#ff0000'
+          },
+          bigPlayButtonColor: "#00ff00",
+          playbackRates: [0.5, 1],
+          skipDuration: 10,
+          initialPlayButtonShape: 'Square',
+          buttonShape: 'Square'
+        });
+
+        // Additional direct style application for big play button
+        const container = video.parentElement;
+        const bigPlayButton = container.querySelector('.shaka-big-play-button');
+        if (bigPlayButton) {
+          bigPlayButton.style.setProperty('background-color', '#00ff00', 'important');
+          console.log('Big play button color applied directly');
+        } else {
+          console.warn('Big play button not found');
+        }
+
+        console.log('Default theme applied successfully');
+      } catch (error) {
+        console.error('Error applying default theme:', error);
+      }
+    }
+
+    
+
+    // Wait for DOM content to load before initializing
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>

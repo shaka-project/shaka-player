@@ -106,7 +106,7 @@
     "build": "python build/all.py",
     "prepack": "clean-package",
     "postpack": "clean-package restore",
-    "prepublishOnly": "python build/checkversion.py && python build/all.py --force"
+    "prepublishOnly": "python3 build/all.py --force"
   },
   "dependencies": {
     "eme-encryption-scheme-polyfill": "^2.2.1"
