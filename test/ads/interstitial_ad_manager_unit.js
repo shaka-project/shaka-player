@@ -980,7 +980,7 @@ describe('Interstitial Ad manager', () => {
         startTime: 0,
         endTime: 1,
         id: 'OVERLAY',
-        schemeIdUri: 'urn:mpeg:dash:event:2012',
+        schemeIdUri: 'urn:scte:dash:scte214-events',
         eventNode,
         eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
