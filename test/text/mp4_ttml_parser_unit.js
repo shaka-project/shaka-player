@@ -9,6 +9,8 @@ describe('Mp4TtmlParser', () => {
   const ttmlSegmentUri = '/base/test/test/assets/ttml-segment.mp4';
   const ttmlSegmentMultipleMDATUri =
       '/base/test/test/assets/ttml-segment-multiple-mdat.mp4';
+  const ttmlSegmentMultipleSampleUri =
+      '/base/test/test/assets/ttml-segment-multiple-sample.mp4';
   const imscImageInitSegmentUri =
       '/base/test/test/assets/imsc-image-init.cmft';
   const imscImageSegmentUri =
@@ -22,6 +24,8 @@ describe('Mp4TtmlParser', () => {
   /** @type {!Uint8Array} */
   let ttmlSegmentMultipleMDAT;
   /** @type {!Uint8Array} */
+  let ttmlSegmentMultipleSample;
+  /** @type {!Uint8Array} */
   let imscImageInitSegment;
   /** @type {!Uint8Array} */
   let imscImageSegment;
@@ -33,6 +37,7 @@ describe('Mp4TtmlParser', () => {
       shaka.test.Util.fetch(ttmlInitSegmentUri),
       shaka.test.Util.fetch(ttmlSegmentUri),
       shaka.test.Util.fetch(ttmlSegmentMultipleMDATUri),
+      shaka.test.Util.fetch(ttmlSegmentMultipleSampleUri),
       shaka.test.Util.fetch(imscImageInitSegmentUri),
       shaka.test.Util.fetch(imscImageSegmentUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
@@ -40,9 +45,10 @@ describe('Mp4TtmlParser', () => {
     ttmlInitSegment = shaka.util.BufferUtils.toUint8(responses[0]);
     ttmlSegment = shaka.util.BufferUtils.toUint8(responses[1]);
     ttmlSegmentMultipleMDAT = shaka.util.BufferUtils.toUint8(responses[2]);
-    imscImageInitSegment = shaka.util.BufferUtils.toUint8(responses[3]);
-    imscImageSegment = shaka.util.BufferUtils.toUint8(responses[4]);
-    audioInitSegment = shaka.util.BufferUtils.toUint8(responses[5]);
+    ttmlSegmentMultipleSample = shaka.util.BufferUtils.toUint8(responses[3]);
+    imscImageInitSegment = shaka.util.BufferUtils.toUint8(responses[4]);
+    imscImageSegment = shaka.util.BufferUtils.toUint8(responses[5]);
+    audioInitSegment = shaka.util.BufferUtils.toUint8(responses[6]);
   });
 
   it('parses init segment', () => {
@@ -62,8 +68,24 @@ describe('Mp4TtmlParser', () => {
     expect(ret[0].nestedCues.length).toBe(1);
     expect(ret[1].nestedCues.length).toBe(1);
     // Cues.
-    expect(ret[0].nestedCues[0].nestedCues.length).toBe(10);
-    expect(ret[1].nestedCues[0].nestedCues.length).toBe(10);
+    expect(ret[0].nestedCues[0].nestedCues.length).toBe(5);
+    expect(ret[1].nestedCues[0].nestedCues.length).toBe(5);
+  });
+
+  it('handles media segments with multiple sample', () => {
+    const parser = new shaka.text.Mp4TtmlParser();
+    parser.parseInit(ttmlInitSegment);
+    const time =
+        {periodStart: 0, segmentStart: 0, segmentEnd: 60, vttOffset: 0};
+    const ret = parser.parseMedia(ttmlSegmentMultipleSample, time, null);
+    // Bodies.
+    expect(ret.length).toBe(2);
+    // Divs.
+    expect(ret[0].nestedCues.length).toBe(1);
+    expect(ret[1].nestedCues.length).toBe(1);
+    // Cues.
+    expect(ret[0].nestedCues[0].nestedCues.length).toBe(5);
+    expect(ret[1].nestedCues[0].nestedCues.length).toBe(5);
   });
 
   it('accounts for offset', () => {
