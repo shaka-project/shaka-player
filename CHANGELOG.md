@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.12.12](https://github.com/shaka-project/shaka-player/compare/v4.12.11...v4.12.12) (2025-02-17)
+
+
+### Bug Fixes
+
+* **Ads:** Reset playRangeEnd value between interstitials ([#8082](https://github.com/shaka-project/shaka-player/issues/8082)) ([7421abb](https://github.com/shaka-project/shaka-player/commit/7421abb6c0fbfc8ec4812a04f9cd6a2426202d83))
+* **DASH:** Fix playback of ClearKey when only part of keys are defined ([#8055](https://github.com/shaka-project/shaka-player/issues/8055)) ([7a8022e](https://github.com/shaka-project/shaka-player/commit/7a8022ec91ebd0473adfb28400fd6dcc849fb1fc))
+* **DRM:** Fix drm choice when the user provide a server in the manifest ([#8067](https://github.com/shaka-project/shaka-player/issues/8067)) ([cfd3af9](https://github.com/shaka-project/shaka-player/commit/cfd3af95d6b7c4e2580cfa6caf560024c2699da7))
+* **HLS:** Fix duplicate segments on some inaccurate live streams ([#8084](https://github.com/shaka-project/shaka-player/issues/8084)) ([96e4ce0](https://github.com/shaka-project/shaka-player/commit/96e4ce0ca08f41b7e4420dc29c5b98ac62e825c3))
+* **net:** Allow preventDefault() on retry event ([#8058](https://github.com/shaka-project/shaka-player/issues/8058)) ([01125cd](https://github.com/shaka-project/shaka-player/commit/01125cdd23c8b803fb805a3c9fe6460cd4bc6aee))
+* Throw preload destroyed error when re-using same preloadManager ([#8046](https://github.com/shaka-project/shaka-player/issues/8046)) ([bb26482](https://github.com/shaka-project/shaka-player/commit/bb26482d562f7c82997977fc71d83b72e159c8c1))
+* **tXml:** Allow case insensitive in parseDuration ([#8064](https://github.com/shaka-project/shaka-player/issues/8064)) ([e3ea9c0](https://github.com/shaka-project/shaka-player/commit/e3ea9c060a2ddec796e481a25fe4d8e5207ec29d))
+* **UI:** Fix thumbnail sometimes not disappearing due to mouse hover ([#8089](https://github.com/shaka-project/shaka-player/issues/8089)) ([c6f8a35](https://github.com/shaka-project/shaka-player/commit/c6f8a35b09e589e8f2ae3e46274bc4b0c37afe3f))
+* **WebOS:** Do not preload DRM on legacy EME ([#8083](https://github.com/shaka-project/shaka-player/issues/8083)) ([79f5151](https://github.com/shaka-project/shaka-player/commit/79f515181b5a7571e90debcadf989544a51e33d4))
+
 ## [4.12.11](https://github.com/shaka-project/shaka-player/compare/v4.12.10...v4.12.11) (2025-02-05)
 
 
