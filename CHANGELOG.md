@@ -1,5 +1,27 @@
 # Changelog
 
+## [4.13.3](https://github.com/shaka-project/shaka-player/compare/v4.13.2...v4.13.3) (2025-02-17)
+
+
+### Bug Fixes
+
+* **Ads:** Only set ad-active in the controls-container when the ad has custom clicks ([#8075](https://github.com/shaka-project/shaka-player/issues/8075)) ([48fdcfb](https://github.com/shaka-project/shaka-player/commit/48fdcfbafb1096032b3bf30b8ece67d5e6c635f7))
+* **Ads:** Remove default background color on interstitial overlay ([#8085](https://github.com/shaka-project/shaka-player/issues/8085)) ([29a1073](https://github.com/shaka-project/shaka-player/commit/29a1073d2225bf29c7890d08dbe20d3eaad71495))
+* **Ads:** Reset playRangeEnd value between interstitials ([#8082](https://github.com/shaka-project/shaka-player/issues/8082)) ([8829e5d](https://github.com/shaka-project/shaka-player/commit/8829e5d61e502fc524fd6a71e9bd799b610385fb))
+* audio label when selecting variants by label ([#8038](https://github.com/shaka-project/shaka-player/issues/8038)) ([c4457f0](https://github.com/shaka-project/shaka-player/commit/c4457f07402a5576c4fcdbacab90cfe946d3608e))
+* **DASH:** Fix playback of ClearKey when only part of keys are defined ([#8055](https://github.com/shaka-project/shaka-player/issues/8055)) ([831ab7a](https://github.com/shaka-project/shaka-player/commit/831ab7ab79b052a4daa8c43a1455f40b3dc562aa))
+* Do not autoplay if autoplay is not set ([#8024](https://github.com/shaka-project/shaka-player/issues/8024)) ([e268207](https://github.com/shaka-project/shaka-player/commit/e2682070edffaa6f0a8c57979c964eda4ca1b4fd)), closes [#8022](https://github.com/shaka-project/shaka-player/issues/8022)
+* **DRM:** Fix drm choice when the user provide a server in the manifest ([#8067](https://github.com/shaka-project/shaka-player/issues/8067)) ([64d1e88](https://github.com/shaka-project/shaka-player/commit/64d1e884ba2642ad220835770d3ee02eb82ed41b))
+* Evict the buffer against seekRangeStart ([#8026](https://github.com/shaka-project/shaka-player/issues/8026)) ([583d4fe](https://github.com/shaka-project/shaka-player/commit/583d4fefbaee7411a155f1cb57cb431ddec713ed))
+* **HLS:** Fix duplicate segments on some inaccurate live streams ([#8084](https://github.com/shaka-project/shaka-player/issues/8084)) ([396a288](https://github.com/shaka-project/shaka-player/commit/396a28832856e3a7a0d87b2a463836354ec300ae))
+* **HLS:** Fix switching between muxed MP4 and muxed TS ([#8061](https://github.com/shaka-project/shaka-player/issues/8061)) ([fc1b96a](https://github.com/shaka-project/shaka-player/commit/fc1b96a4cef8bb53169fa722232e5c7da963c4cd))
+* **net:** Allow preventDefault() on retry event ([#8058](https://github.com/shaka-project/shaka-player/issues/8058)) ([a514199](https://github.com/shaka-project/shaka-player/commit/a514199256120ef7f7894fb7f6cebed00a99645a))
+* Throw preload destroyed error when re-using same preloadManager ([#8046](https://github.com/shaka-project/shaka-player/issues/8046)) ([91a7468](https://github.com/shaka-project/shaka-player/commit/91a7468dcbad3f4e0e734895d44e6e0ef9285605))
+* **TTML:** Correctly handle multiple samples in a segment ([#8088](https://github.com/shaka-project/shaka-player/issues/8088)) ([4446d4d](https://github.com/shaka-project/shaka-player/commit/4446d4d6ea3f26adb9845e78f5a397d1590840ff))
+* **tXml:** Allow case insensitive in parseDuration ([#8064](https://github.com/shaka-project/shaka-player/issues/8064)) ([0700000](https://github.com/shaka-project/shaka-player/commit/0700000288c5627d610590abb7c78080922a9687))
+* **UI:** Fix thumbnail sometimes not disappearing due to mouse hover ([#8089](https://github.com/shaka-project/shaka-player/issues/8089)) ([33037d1](https://github.com/shaka-project/shaka-player/commit/33037d1cad01fb440bc4b66019667dd73b1fdb1a))
+* **WebOS:** Do not preload DRM on legacy EME ([#8083](https://github.com/shaka-project/shaka-player/issues/8083)) ([d30533f](https://github.com/shaka-project/shaka-player/commit/d30533fc3cab611587e9159a4cfd6563c9ce97f1))
+
 ## [4.13.2](https://github.com/shaka-project/shaka-player/compare/v4.13.1...v4.13.2) (2025-02-05)
 
 
