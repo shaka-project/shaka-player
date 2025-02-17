@@ -13,3 +13,5 @@
 +../../lib/transmuxer/mpeg_ts_transmuxer.js
 +../../lib/transmuxer/opus.js
 +../../lib/transmuxer/ts_transmuxer.js
+
++../../lib/util/mp4_generator.js
