@@ -32,7 +32,6 @@
 +../../lib/media/manifest_parser.js
 +../../lib/media/media_source_capabilities.js
 +../../lib/media/media_source_engine.js
-+../../lib/media/mp4_segment_index_parser.js
 +../../lib/media/play_rate_controller.js
 +../../lib/media/playhead.js
 +../../lib/media/playhead_observer.js
@@ -50,7 +49,6 @@
 +../../lib/media/segment_utils.js
 +../../lib/media/time_ranges_utils.js
 +../../lib/media/video_wrapper.js
-+../../lib/media/webm_segment_index_parser.js
 
 +../../lib/net/backoff.js
 +../../lib/net/networking_engine.js
@@ -104,7 +102,6 @@
 +../../lib/util/media_ready_state_utils.js
 +../../lib/util/mime_utils.js
 +../../lib/util/mp4_box_parsers.js
-+../../lib/util/mp4_generator.js
 +../../lib/util/mp4_parser.js
 +../../lib/util/multi_map.js
 +../../lib/util/mutex.js
