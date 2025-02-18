@@ -194,6 +194,7 @@ describe('MediaCapabilities', () => {
           }
 
           spyOn(shaka['util']['Platform'], 'isAndroid').and.returnValue(false);
+          spyOn(shaka['util']['Platform'], 'isFuchsia').and.returnValue(false);
 
           const isChromecastSpy =
               spyOn(shaka['util']['Platform'],
@@ -204,10 +205,10 @@ describe('MediaCapabilities', () => {
           await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
 
           expect(mockCanDisplayType).not.toHaveBeenCalled();
-          // 3 (during install()) +
+          // 1 (during install()) +
           // 1 (for video config check) +
           // 1 (for audio config check).
-          expect(isChromecastSpy).toHaveBeenCalledTimes(5);
+          expect(isChromecastSpy).toHaveBeenCalledTimes(3);
           // 1 (fallback in canCastDisplayType()) +
           // 1 (mockDecodingConfig.audio).
           expect(supportMap.has(mockDecodingConfig.video.contentType))
@@ -221,6 +222,7 @@ describe('MediaCapabilities', () => {
           // We only set the cast namespace, but not the canDisplayType() API.
           window['cast'] = {};
           spyOn(shaka['util']['Platform'], 'isAndroid').and.returnValue(false);
+          spyOn(shaka['util']['Platform'], 'isFuchsia').and.returnValue(false);
           const isChromecastSpy =
               spyOn(shaka['util']['Platform'],
                   'isChromecast').and.returnValue(true);
@@ -230,10 +232,10 @@ describe('MediaCapabilities', () => {
           await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
 
           expect(mockCanDisplayType).not.toHaveBeenCalled();
-          // 3 (during install()) +
+          // 1 (during install()) +
           // 1 (for video config check) +
           // 1 (for audio config check).
-          expect(isChromecastSpy).toHaveBeenCalledTimes(5);
+          expect(isChromecastSpy).toHaveBeenCalledTimes(3);
           // 1 (fallback in canCastDisplayType()) +
           // 1 (mockDecodingConfig.audio).
           expect(supportMap.has(mockDecodingConfig.video.contentType))
@@ -251,6 +253,7 @@ describe('MediaCapabilities', () => {
         __platform__: {canDisplayType: mockCanDisplayType},
       };
       spyOn(shaka['util']['Platform'], 'isAndroid').and.returnValue(false);
+      spyOn(shaka['util']['Platform'], 'isFuchsia').and.returnValue(false);
       const isChromecastSpy =
           spyOn(shaka['util']['Platform'],
               'isChromecast').and.returnValue(true);
@@ -280,10 +283,10 @@ describe('MediaCapabilities', () => {
       shaka.polyfill.MediaCapabilities.install();
       await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
 
-      // 3 (during install()) +
+      // 1 (during install()) +
       // 1 (for video config check) +
       // 1 (for audio config check).
-      expect(isChromecastSpy).toHaveBeenCalledTimes(5);
+      expect(isChromecastSpy).toHaveBeenCalledTimes(3);
       // 1 (mockDecodingConfig.audio).
       expect(supportMap.has(chromecastType)).toBe(true);
       // Called once in canCastDisplayType.
