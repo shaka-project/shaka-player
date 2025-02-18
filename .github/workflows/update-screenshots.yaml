@@ -163,8 +163,8 @@ jobs:
 
           # Create a PR.
           gh pr create \
-            --title 'chore(:robot:): Update all screenshots' \
-            --body '' \
+            --title 'chore: Update all screenshots' \
+            --body ':robot:' \
             --reviewer 'shaka-project/shaka-player'
 
       - name: Update PR
