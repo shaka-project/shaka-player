@@ -25,7 +25,7 @@ describe('WebmSegmentIndexParser', () => {
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.WEBM_CUES_ELEMENT_MISSING));
-    expect(() => shaka.media.WebmSegmentIndexParser.parse(
+    expect(() => shaka.dash.WebmSegmentIndexParser.parse(
         /* indexSegment= */ initSegment,  // deliberate wrong data
         /* initSegment= */ initSegment,
         /* uris= */ [],
@@ -40,7 +40,7 @@ describe('WebmSegmentIndexParser', () => {
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.WEBM_EBML_HEADER_ELEMENT_MISSING));
-    expect(() => shaka.media.WebmSegmentIndexParser.parse(
+    expect(() => shaka.dash.WebmSegmentIndexParser.parse(
         /* indexSegment= */ indexSegment,
         /* initSegment= */ indexSegment,  // deliberate wrong data
         /* uris= */ [],
@@ -51,7 +51,7 @@ describe('WebmSegmentIndexParser', () => {
   });
 
   it('parses index segment ', () => {
-    const result = shaka.media.WebmSegmentIndexParser.parse(
+    const result = shaka.dash.WebmSegmentIndexParser.parse(
         indexSegment, initSegment,
         /* uris= */ [],
         /* initSegmentReference= */ null,
@@ -70,7 +70,7 @@ describe('WebmSegmentIndexParser', () => {
   });
 
   it('takes a timestamp offset in seconds', () => {
-    const result = shaka.media.WebmSegmentIndexParser.parse(
+    const result = shaka.dash.WebmSegmentIndexParser.parse(
         indexSegment, initSegment,
         /* uris= */ [],
         /* initSegmentReference= */ null,
