@@ -156,7 +156,7 @@ jobs:
           gh auth setup-git
 
           # If there were no changes, this will do nothing, but succeed.
-          git push -f HEAD:update-screenshots
+          git push -f origin HEAD:update-screenshots
 
           # Create a PR.
           gh pr create \
