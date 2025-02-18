@@ -119,12 +119,12 @@ def main(args):
   build_args_without_ui = ['--name', 'compiled', '+@complete', '-@ui']
   build_args_only_dash_without_ui = [
     '--name', 'dash',
-    '+@complete', '-@ui',
+    '+@complete', '-@ui', '-@polyfillForUI',
     '-@hls', '-@transmuxer', '-@mss', '-@offline', '-@cast', '-@optionalText', '-@ads',
   ]
   build_args_only_hls_without_ui = [
     '--name', 'hls',
-    '+@complete', '-@ui',
+    '+@complete', '-@ui', '-@polyfillForUI',
     '-@dash', '-@mss', '-@offline', '-@cast', '-@optionalText', '-@ads',
   ]
 
