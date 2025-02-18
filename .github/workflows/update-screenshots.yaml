@@ -152,6 +152,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
         run: |
+          # Create a local branch.
+          git checkout -b update-screenshots
+
           # Lean on $GH_TOKEN to authenticate the push.
           gh auth setup-git
 
