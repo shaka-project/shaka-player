@@ -28,7 +28,7 @@ describe('Mp4SegmentIndexParser', () => {
         shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.MP4_SIDX_WRONG_BOX_TYPE));
 
-    expect(() => shaka.media.Mp4SegmentIndexParser.parse(
+    expect(() => shaka.dash.Mp4SegmentIndexParser.parse(
         mediaSegment,
         /* sidxOffset= */ 0,
         /* uris= */ [],
@@ -39,7 +39,7 @@ describe('Mp4SegmentIndexParser', () => {
   });
 
   it('parses index segment ', () => {
-    const result = shaka.media.Mp4SegmentIndexParser.parse(
+    const result = shaka.dash.Mp4SegmentIndexParser.parse(
         indexSegment,
         /* sidxOffset= */ 0,
         /* uris= */ [],
@@ -59,7 +59,7 @@ describe('Mp4SegmentIndexParser', () => {
   });
 
   it('takes a timestamp offset in seconds', () => {
-    const result = shaka.media.Mp4SegmentIndexParser.parse(
+    const result = shaka.dash.Mp4SegmentIndexParser.parse(
         indexSegment,
         /* sidxOffset= */ 0,
         /* uris= */ [],
