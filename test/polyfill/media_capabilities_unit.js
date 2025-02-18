@@ -193,6 +193,8 @@ describe('MediaCapabilities', () => {
             pending('Unable to delete window.cast');
           }
 
+          spyOn(shaka['util']['Platform'], 'isAndroid').and.returnValue(false);
+
           const isChromecastSpy =
               spyOn(shaka['util']['Platform'],
                   'isChromecast').and.returnValue(true);
@@ -218,6 +220,7 @@ describe('MediaCapabilities', () => {
         async () => {
           // We only set the cast namespace, but not the canDisplayType() API.
           window['cast'] = {};
+          spyOn(shaka['util']['Platform'], 'isAndroid').and.returnValue(false);
           const isChromecastSpy =
               spyOn(shaka['util']['Platform'],
                   'isChromecast').and.returnValue(true);
@@ -247,6 +250,7 @@ describe('MediaCapabilities', () => {
       window['cast'] = {
         __platform__: {canDisplayType: mockCanDisplayType},
       };
+      spyOn(shaka['util']['Platform'], 'isAndroid').and.returnValue(false);
       const isChromecastSpy =
           spyOn(shaka['util']['Platform'],
               'isChromecast').and.returnValue(true);
