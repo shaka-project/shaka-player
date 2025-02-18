@@ -2,16 +2,12 @@
 
 +../../node_modules/eme-encryption-scheme-polyfill/index.js
 +../../lib/polyfill/abort_controller.js
-+../../lib/polyfill/aria.js
 +../../lib/polyfill/encryption_scheme.js
-+../../lib/polyfill/fullscreen.js
 +../../lib/polyfill/mediasource.js
 +../../lib/polyfill/media_capabilities.js
-+../../lib/polyfill/orientation.js
 +../../lib/polyfill/patchedmediakeys_cert.js
 +../../lib/polyfill/patchedmediakeys_nop.js
 +../../lib/polyfill/patchedmediakeys_webkit.js
-+../../lib/polyfill/pip_webkit.js
 +../../lib/polyfill/random_uuid.js
 +../../lib/polyfill/symbol.js
 +../../lib/polyfill/video_play_promise.js
