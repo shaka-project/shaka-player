@@ -8,8 +8,8 @@ on:
     # avoid malicious code executing in the lab.
     inputs:
       pr:
-        description: "A PR number to build and test in the lab."
-        required: true
+        description: "A PR number to build and test in the lab.  Otherwise, will create a new PR."
+        required: false
 
 jobs:
   compute-sha:
@@ -23,7 +23,7 @@ jobs:
         id: compute
         uses: shaka-project/shaka-github-tools/compute-sha@main
         with:
-          ref: refs/pull/${{ inputs.pr }}/head
+          ref: ${{ inputs.pr && format('refs/pull/{0}/head', inputs.pr) || 'refs/heads/main' }}
 
   set-pending-status:
     name: Set Pending Status
@@ -147,7 +147,25 @@ jobs:
           path: .git/
           key: screenshot-commits-${{ needs.compute-sha.outputs.SHA }}
 
+      - name: Create PR
+        if: ${{ inputs.pr == '' }}
+        env:
+          GH_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
+        run: |
+          # Lean on $GH_TOKEN to authenticate the push.
+          gh auth setup-git
+
+          # If there were no changes, this will do nothing, but succeed.
+          git push -f HEAD:update-screenshots
+
+          # Create a PR.
+          gh pr create \
+            --title 'chore(:robot:): Update all screenshots' \
+            --body '' \
+            --reviewer 'shaka-project/shaka-player'
+
       - name: Update PR
+        if: ${{ inputs.pr != '' }}
         env:
           GH_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
         run: |
