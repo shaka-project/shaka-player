@@ -1296,6 +1296,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     };
     const updatePositionState = () => {
+      if (this.ad_ && this.ad_.isLinear()) {
+        clearPositionState();
+        return;
+      }
       const seekRange = this.player_.seekRange();
       let duration = seekRange.end - seekRange.start;
       const position = parseFloat(
@@ -1306,15 +1310,19 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         duration = Infinity;
       }
       try {
-        if ((this.ad_ && this.ad_.isLinear())) {
-          navigator.mediaSession.setPositionState();
-        } else {
-          navigator.mediaSession.setPositionState({
-            duration: Math.max(0, duration),
-            playbackRate: this.video_.playbackRate,
-            position: Math.max(0, position),
-          });
-        }
+        navigator.mediaSession.setPositionState({
+          duration: Math.max(0, duration),
+          playbackRate: this.video_.playbackRate,
+          position: Math.max(0, position),
+        });
+      } catch (error) {
+        shaka.log.v2(
+            'setPositionState in media session is not supported.');
+      }
+    };
+    const clearPositionState = () => {
+      try {
+        navigator.mediaSession.setPositionState();
       } catch (error) {
         shaka.log.v2(
             'setPositionState in media session is not supported.');
@@ -1322,7 +1330,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     };
     const commonHandler = (details) => {
       const keyboardSeekDistance = this.config_.keyboardSeekDistance;
-      const seekRange = this.player_.seekRange();
       switch (details.action) {
         case 'pause':
           this.onPlayPauseClick_();
@@ -1331,20 +1338,29 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.onPlayPauseClick_();
           break;
         case 'seekbackward':
+          if (details.seekOffset && !isFinite(details.seekOffset)) {
+            break;
+          }
           if (!this.ad_ || !this.ad_.isLinear()) {
             this.seek_(this.seekBar_.getValue() -
                 (details.seekOffset || keyboardSeekDistance));
           }
           break;
         case 'seekforward':
+          if (details.seekOffset && !isFinite(details.seekOffset)) {
+            break;
+          }
           if (!this.ad_ || !this.ad_.isLinear()) {
             this.seek_(this.seekBar_.getValue() +
                 (details.seekOffset || keyboardSeekDistance));
           }
           break;
         case 'seekto':
+          if (details.seekTime && !isFinite(details.seekTime)) {
+            break;
+          }
           if (!this.ad_ || !this.ad_.isLinear()) {
-            this.seek_(seekRange.start + details.seekTime);
+            this.seek_(this.player_.seekRange().start + details.seekTime);
           }
           break;
         case 'stop':
@@ -1369,10 +1385,25 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       addMediaSessionHandler('enterpictureinpicture', commonHandler);
     }
 
-    this.eventManager_.listen(this.video_, 'timeupdate', () => {
-      updatePositionState();
-    });
+    const playerLoaded = () => {
+      if (this.player_.isLive() || this.player_.seekRange().start != 0) {
+        updatePositionState();
+        this.eventManager_.listen(
+            this.video_, 'timeupdate', updatePositionState);
+      } else {
+        clearPositionState();
+      }
+    };
+    const playerUnloading = () => {
+      this.eventManager_.unlisten(
+          this.video_, 'timeupdate', updatePositionState);
+    };
 
+    if (this.player_.isFullyLoaded()) {
+      playerLoaded();
+    }
+    this.eventManager_.listen(this.player_, 'loaded', playerLoaded);
+    this.eventManager_.listen(this.player_, 'unloading', playerUnloading);
     this.eventManager_.listen(this.player_, 'metadata', (event) => {
       const payload = event['payload'];
       if (!payload) {
