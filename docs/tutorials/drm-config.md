@@ -170,7 +170,7 @@ If you don't need them, you can leave these at their default settings.
 
 ##### Headers configuration
 
-You can configure the custom headers required by the license server as follows:
+You can configure any custom headers required by the license server as follows:
 
 ```js
 player.configure({
@@ -291,8 +291,8 @@ metadata.
 
 #### Requires a minimum HDCP version
 
-Some CDMs support query a minimum HDCP version, Shaka can be honors it if the
-CDM support it.
+Some CDMs support querying a minimum HDCP version.  Shaka can honor it if the
+CDM supports it.
 
 Example:
 ```js
