@@ -58,7 +58,32 @@ playback will hang when you get to the encrypted part of the stream (10 seconds
 in).
 
 To authenticate to this endpoint, we must send a special header.  You can add
-arbitrary headers to Shaka's requests through a request filter callback.
+arbitrary headers to Shaka's requests through a request filter callback or
+using a custom config:
+
+Configure the headers before calling `player.load()`:
+
+<!--cSpell:disable -->
+```js
+player.configure({
+  drm: {
+    servers: {
+      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/header_auth'
+    },
+    advanced: {
+      'com.widevine.alpha': {
+        'headers': {
+          // This is the specific header name and value the server wants:
+          'CWIP-Auth-Header': 'VGhpc0lzQVRlc3QK',
+        }
+      }
+    }
+  }
+});
+```
+<!--cSpell:enable -->
+
+
 Register the filter before calling `player.load()`:
 
 <!--cSpell:disable -->
