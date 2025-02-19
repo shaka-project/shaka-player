@@ -42,6 +42,35 @@ shaka.ui.Overlay = class {
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.defaultConfig_();
 
+    // Get and configure cast app id.
+    let castAppId = '';
+
+    // Get and configure cast Android Receiver Compatibility
+    let castAndroidReceiverCompatible = false;
+
+    // Cast receiver id can be specified on either container or video.
+    // It should not be provided on both. If it was, we will use the last
+    // one we saw.
+    if (videoContainer['dataset'] &&
+        videoContainer['dataset']['shakaPlayerCastReceiverId']) {
+      const dataSet = videoContainer['dataset'];
+      castAppId = dataSet['shakaPlayerCastReceiverId'];
+      castAndroidReceiverCompatible =
+          dataSet['shakaPlayerCastAndroidReceiverCompatible'] === 'true';
+    } else if (video['dataset'] &&
+               video['dataset']['shakaPlayerCastReceiverId']) {
+      const dataSet = video['dataset'];
+      castAppId = dataSet['shakaPlayerCastReceiverId'];
+      castAndroidReceiverCompatible =
+          dataSet['shakaPlayerCastAndroidReceiverCompatible'] === 'true';
+    }
+
+    if (castAppId.length) {
+      this.config_.castReceiverAppId = castAppId;
+      this.config_.castAndroidReceiverCompatible =
+          castAndroidReceiverCompatible;
+    }
+
     // Make sure this container is discoverable and that the UI can be reached
     // through it.
     videoContainer['dataset']['shakaPlayerContainer'] = '';
@@ -479,33 +508,6 @@ shaka.ui.Overlay = class {
 
     // Attach Canvas used for LCEVC Decoding
     player.attachCanvas(/** @type {HTMLCanvasElement} */(lcevcCanvas));
-
-    // Get and configure cast app id.
-    let castAppId = '';
-
-    // Get and configure cast Android Receiver Compatibility
-    let castAndroidReceiverCompatible = false;
-
-    // Cast receiver id can be specified on either container or video.
-    // It should not be provided on both. If it was, we will use the last
-    // one we saw.
-    if (container['dataset'] &&
-        container['dataset']['shakaPlayerCastReceiverId']) {
-      castAppId = container['dataset']['shakaPlayerCastReceiverId'];
-      castAndroidReceiverCompatible =
-          container['dataset']['shakaPlayerCastAndroidReceiverCompatible'] ===
-          'true';
-    } else if (video['dataset'] &&
-               video['dataset']['shakaPlayerCastReceiverId']) {
-      castAppId = video['dataset']['shakaPlayerCastReceiverId'];
-      castAndroidReceiverCompatible =
-        video['dataset']['shakaPlayerCastAndroidReceiverCompatible'] === 'true';
-    }
-
-    if (castAppId.length) {
-      ui.configure({castReceiverAppId: castAppId,
-        castAndroidReceiverCompatible: castAndroidReceiverCompatible});
-    }
 
     if (shaka.util.Dom.asHTMLMediaElement(video).controls) {
       ui.getControls().setEnabledNativeControls(true);
