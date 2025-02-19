@@ -34,7 +34,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     super(parent, controls);
 
     /** @private {boolean} */
-    this.isAirPlay_ = shaka.util.Platform.isSafari();
+    this.isAirPlay_ = shaka.util.Platform.isApple();
 
     /** @private {!HTMLButtonElement} */
     this.remoteButton_ = shaka.util.Dom.createButton();
@@ -145,7 +145,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         if (this.player) {
           const disableRemote = this.video.disableRemotePlayback;
           let canCast = true;
-          if (shaka.util.Platform.isSafari()) {
+          if (shaka.util.Platform.isApple()) {
             const loadMode = this.player.getLoadMode();
             const mseMode = loadMode == shaka.Player.LoadMode.MEDIA_SOURCE;
             if (mseMode && this.player.getManifestType() != 'HLS') {
