@@ -27,6 +27,8 @@ The support in each case would be the following:
 
 Adding FairPlay support involves a bit more work than other key systems.
 
+Note: If you are using an older version of Safari that doesn't support
+Modern EME, legacy Apple Media Keys is used by default.
 
 ## Keysystem used in EME
 
