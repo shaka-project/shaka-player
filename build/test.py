@@ -207,7 +207,7 @@ class Launcher:
         action='store_false')
     running_commands.add_argument(
         '--trust-safari-native-text-layout',
-        help='Trust layout tests for native text display on Safari. ',
+        help='Trust layout tests for native text display on Safari. '
              'Rendering may be inconsistent across devices.',
         action='store_true')
     running_commands.add_argument(
