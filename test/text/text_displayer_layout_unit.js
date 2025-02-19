@@ -46,10 +46,12 @@ filterDescribe('Cue layout', shaka.test.TextLayoutTests.supported, () => {
         // Turn off every part of the UI that we can, so that the screenshot is
         // less likely to change because of something unrelated to text
         // rendering.
-        ui.configure('controlPanelElements', []);
-        ui.configure('addSeekBar', false);
-        ui.configure('addBigPlayButton', false);
-        ui.configure('enableFullscreenOnRotation', false);
+        ui.configure({
+          controlPanelElements: [],
+          addSeekBar: false,
+          addBigPlayButton: false,
+          enableFullscreenOnRotation: false,
+        });
 
         // Recreate the text displayer so that the text container comes after
         // the controls (as it does in production).  This is important for the

@@ -162,7 +162,6 @@ shaka.ui.Overlay = class {
 
     goog.asserts.assert(typeof(config) == 'object', 'Should be an object!');
 
-
     const newConfig = /** @type {!shaka.extern.UIConfiguration} */(
       Object.assign({}, this.config_));
     shaka.util.ConfigUtils.mergeConfigObjects(
