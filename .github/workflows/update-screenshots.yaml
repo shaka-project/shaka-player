@@ -161,11 +161,25 @@ jobs:
           # If there were no changes, this will do nothing, but succeed.
           git push -f origin HEAD:refs/heads/update-screenshots
 
-          # Create a PR.
-          gh pr create \
-            --title 'chore: Update all screenshots' \
-            --body ':robot:' \
-            --reviewer 'shaka-project/shaka-player'
+          # Check if a PR already exists.
+          REPO_OWNER=$(echo "${{ github.repository }}" | cut -f 1 -d /)
+          REPO_NAME=$(echo "${{ github.repository }}" | cut -f 2 -d /)
+          gh pr list \
+              --json number,headRepository,headRefName,headRepositoryOwner \
+          | jq "map(select(
+              .headRepositoryOwner.login == \"$REPO_OWNER\" and
+              .headRepository.name == \"$REPO_NAME\" and
+              .headRefName == \"update-screenshots\").number)[0]" > pr-number
+
+          if [[ "$(cat pr-number)" == "null" ]]; then
+            # Create a PR.
+            gh pr create \
+              --title 'chore: Update all screenshots' \
+              --body ':robot:' \
+              --reviewer 'shaka-project/shaka-player'
+          fi
+          # If a PR already existed, pushing to the branch was enough to update
+          # it.
 
       - name: Update PR
         if: ${{ inputs.pr != '' }}
