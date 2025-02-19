@@ -168,6 +168,27 @@ player.configure({
 
 If you don't need them, you can leave these at their default settings.
 
+##### Headers configuration
+
+You can configure any custom headers required by the license server as follows:
+
+```js
+player.configure({
+  drm: {
+    servers: {
+      'com.widevine.alpha': 'https://foo.bar/drm/widevine'
+    },
+    advanced: {
+      'com.widevine.alpha': {
+        'headers': {
+          'customHeader1': 'value1',
+          'customHeader2': 'value2'
+        }
+      }
+    }
+  }
+});
+```
 
 #### Robustness
 
@@ -267,6 +288,31 @@ player.configure({
 
 NB: Shaka doesn't provide a out-of-the-box storage mechanism for the sessions
 metadata.
+
+#### Requires a minimum HDCP version
+
+Some CDMs support querying a minimum HDCP version.  Shaka can honor it if the
+CDM supports it.
+
+Example:
+```js
+player.configure({
+  drm: {
+    minHdcpVersion: '2.3'
+  }
+});
+```
+
+Possible supported values are:
+- `1.0`
+- `1.1`
+- `1.2`
+- `1.3`
+- `1.4`
+- `2.0`
+- `2.1`
+- `2.2`
+- `2.3`
 
 #### Continue the Tutorials
 
