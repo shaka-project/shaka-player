@@ -85,10 +85,6 @@ shaka.ui.Overlay = class {
     this.controls_ = new shaka.ui.Controls(
         player, videoContainer, video, vrCanvas, this.config_);
 
-    // Run the initial setup so that no configure() call is required for default
-    // settings.
-    this.configure({});
-
     // If the browser's native controls are disabled, use UI TextDisplayer.
     if (!video.controls) {
       player.setVideoContainer(videoContainer);
@@ -166,17 +162,29 @@ shaka.ui.Overlay = class {
 
     goog.asserts.assert(typeof(config) == 'object', 'Should be an object!');
 
+
+    const newConfig = /** @type {!shaka.extern.UIConfiguration} */(
+      Object.assign({}, this.config_));
     shaka.util.ConfigUtils.mergeConfigObjects(
-        this.config_, config, this.defaultConfig_(),
+        newConfig, config, this.defaultConfig_(),
         /* overrides= */ {}, /* path= */ '');
 
     // If a cast receiver app id has been given, add a cast button to the UI
-    if (this.config_.castReceiverAppId &&
-        !this.config_.overflowMenuButtons.includes('cast')) {
-      this.config_.overflowMenuButtons.push('cast');
+    if (newConfig.castReceiverAppId &&
+        !newConfig.overflowMenuButtons.includes('cast')) {
+      newConfig.overflowMenuButtons.push('cast');
     }
 
     goog.asserts.assert(this.player_ != null, 'Should have a player!');
+
+    const diff = shaka.util.ConfigUtils.getDifferenceFromConfigObjects(
+        newConfig, this.config_);
+    if (!Object.keys(diff).length) {
+      // No changes
+      return;
+    }
+
+    this.config_ = newConfig;
 
     this.controls_.configure(this.config_);
 
