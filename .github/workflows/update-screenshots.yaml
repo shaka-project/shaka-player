@@ -8,8 +8,8 @@ on:
     # avoid malicious code executing in the lab.
     inputs:
       pr:
-        description: "A PR number to build and test in the lab."
-        required: true
+        description: "A PR number to build and test in the lab.  Otherwise, will create a new PR."
+        required: false
 
 jobs:
   compute-sha:
@@ -23,7 +23,7 @@ jobs:
         id: compute
         uses: shaka-project/shaka-github-tools/compute-sha@main
         with:
-          ref: refs/pull/${{ inputs.pr }}/head
+          ref: ${{ inputs.pr && format('refs/pull/{0}/head', inputs.pr) || 'refs/heads/main' }}
 
   set-pending-status:
     name: Set Pending Status
@@ -123,8 +123,8 @@ jobs:
           limit-access-to-actor: true
         if: failure()
 
-  update-pr:
-    name: Update PR
+  manage-pr:
+    name: Manage PR
     runs-on: ubuntu-latest
     needs: [compute-sha, commit-new-screenshots]
 
@@ -147,7 +147,28 @@ jobs:
           path: .git/
           key: screenshot-commits-${{ needs.compute-sha.outputs.SHA }}
 
+      - name: Create PR
+        if: ${{ inputs.pr == '' }}
+        env:
+          GH_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
+        run: |
+          # Create a local branch.
+          git checkout -b update-screenshots
+
+          # Lean on $GH_TOKEN to authenticate the push.
+          gh auth setup-git
+
+          # If there were no changes, this will do nothing, but succeed.
+          git push -f origin HEAD:refs/heads/update-screenshots
+
+          # Create a PR.
+          gh pr create \
+            --title 'chore: Update all screenshots' \
+            --body ':robot:' \
+            --reviewer 'shaka-project/shaka-player'
+
       - name: Update PR
+        if: ${{ inputs.pr != '' }}
         env:
           GH_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
         run: |
@@ -180,7 +201,7 @@ jobs:
       # "Write" to statuses to update commit status
       statuses: write
 
-    needs: [compute-sha, run-lab-tests, update-pr]
+    needs: [compute-sha, run-lab-tests, manage-pr]
     # Will run on success or failure, but not if the workflow is cancelled.
     if: ${{ success() || failure() }}
     steps:
@@ -198,11 +219,11 @@ jobs:
           # We start by mapping those.
           LAB_TEST_RESULT=$(echo "${{ needs.run-lab-tests.result }}" \
               | sed -Ee 's/(cancelled|skipped)/error/')
-          UPDATE_PR_RESULT=$(echo "${{ needs.update-pr.result }}" \
+          UPDATE_PR_RESULT=$(echo "${{ needs.manage-pr.result }}" \
               | sed -Ee 's/(cancelled|skipped)/error/')
 
           if [[ "$LAB_TEST_RESULT" == "success" ]]; then
-            # If run-lab-tests succeeded, use the status of update-pr, which
+            # If run-lab-tests succeeded, use the status of manage-pr, which
             # comes after that.  If that is blank, default to "error".
             echo "status=${UPDATE_PR_RESULT:-error}" >> $GITHUB_OUTPUT
           else
