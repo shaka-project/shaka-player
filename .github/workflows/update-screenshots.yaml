@@ -171,15 +171,26 @@ jobs:
               .headRepository.name == \"$REPO_NAME\" and
               .headRefName == \"update-screenshots\").number)[0]" > pr-number
 
-          if [[ "$(cat pr-number)" == "null" ]]; then
-            # Create a PR.
-            gh pr create \
-              --title 'chore: Update all screenshots' \
-              --body ':robot:' \
-              --reviewer 'shaka-project/shaka-player'
+          PR=$(cat pr-number)
+          if [[ "$PR" == "null" ]]; then
+            # No PR exists.
+            if git diff --quiet remotes/origin/main; then
+              # Exit code 0 means "no changes".  No need to make a PR.
+              echo "No changes.  Not creating a PR."
+            else
+              echo "Creating a new PR."
+
+              # Create a PR.
+              gh pr create \
+                --title 'chore: Update all screenshots' \
+                --body ':robot:' \
+                --reviewer 'shaka-project/shaka-player'
+            fi
+          else
+            # If a PR already existed, pushing to the branch was enough to
+            # update it.
+            echo "PR #$PR already exists, and has been updated."
           fi
-          # If a PR already existed, pushing to the branch was enough to update
-          # it.
 
       - name: Update PR
         if: ${{ inputs.pr != '' }}
@@ -194,6 +205,8 @@ jobs:
           PR_API_URL="/repos/${{ github.repository }}/pulls/${{ inputs.pr }}"
           REMOTE=$(gh api $PR_API_URL | jq -r .head.repo.html_url)
           BRANCH=$(gh api $PR_API_URL | jq -r .head.ref)
+
+          echo "Updating PR #${{ inputs.pr }} at remote $REMOTE, branch $BRANCH"
 
           # Lean on $GH_TOKEN to authenticate the push.
           gh auth setup-git
