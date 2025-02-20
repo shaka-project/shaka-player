@@ -2647,7 +2647,9 @@ shaka.extern.LanguageRole;
  *   duration: number,
  *   uris: !Array<string>,
  *   width: number,
- *   sprite: boolean
+ *   sprite: boolean,
+ *   mimeType: ?string,
+ *   codecs: ?string
  * }}
  *
  * @property {shaka.media.SegmentReference} segment
@@ -2675,6 +2677,10 @@ shaka.extern.LanguageRole;
  *    The thumbnail width in px.
  * @property {boolean} sprite
  *    Indicate if the thumbnail is a sprite.
+ * @property {?string} mimeType
+ *   The thumbnail MIME type, if present.
+ * @property {?string} codecs
+ *   The thumbnail codecs, if present.
  * @exportDoc
  */
 shaka.extern.Thumbnail;
