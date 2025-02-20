@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.12.13](https://github.com/shaka-project/shaka-player/compare/v4.12.12...v4.12.13) (2025-02-20)
+
+
+### Bug Fixes
+
+* **FairPlay:** Install by default shaka.polyfill.PatchedMediaKeysApple on older Safari versions ([#8106](https://github.com/shaka-project/shaka-player/issues/8106)) ([f8082c1](https://github.com/shaka-project/shaka-player/commit/f8082c1222491729211929ef73a74015abfa2c5c))
+* **UI:** Improve performance and compatibility with MediaSession ([#8100](https://github.com/shaka-project/shaka-player/issues/8100)) ([3098543](https://github.com/shaka-project/shaka-player/commit/3098543fcf7a214afc788ae88a81908091d2cd3d))
+
+
+### Performance Improvements
+
+* Close segmentIndex after getAllThumbnails ([#8128](https://github.com/shaka-project/shaka-player/issues/8128)) ([332db85](https://github.com/shaka-project/shaka-player/commit/332db85f6c1f80d26c2fd0a482664d95baeed2cd))
+* Only set the timers on UITextDisplayer when there are cues ([#8114](https://github.com/shaka-project/shaka-player/issues/8114)) ([0129ff5](https://github.com/shaka-project/shaka-player/commit/0129ff58e0024c77b16ba0d98b0ef85bb54e030f))
+* Remove promises from getAllThumbnails loop ([#8118](https://github.com/shaka-project/shaka-player/issues/8118)) ([755e956](https://github.com/shaka-project/shaka-player/commit/755e95629f8e5142af4fd28ebabe69ffa88c7947))
+* **UI:** Avoid unnecessary calls to controls configure ([#8116](https://github.com/shaka-project/shaka-player/issues/8116)) ([5106dee](https://github.com/shaka-project/shaka-player/commit/5106dee79448bc6090453766b2e1f15f021f2b12))
+* **UI:** Reduce configure calls to use shakaPlayerCastReceiverId ([#8115](https://github.com/shaka-project/shaka-player/issues/8115)) ([7c6546c](https://github.com/shaka-project/shaka-player/commit/7c6546cdbd0d086a327178a8449020312bc2045a))
+* Use navigator.userAgentData.platform to detect Android and Fuchsia ([#8102](https://github.com/shaka-project/shaka-player/issues/8102)) ([e16e936](https://github.com/shaka-project/shaka-player/commit/e16e93688a91771f5215e093989fa2b8069cbbdc))
+
 ## [4.12.12](https://github.com/shaka-project/shaka-player/compare/v4.12.11...v4.12.12) (2025-02-17)
 
 
