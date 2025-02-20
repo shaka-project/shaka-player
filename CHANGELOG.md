@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.13.4](https://github.com/shaka-project/shaka-player/compare/v4.13.3...v4.13.4) (2025-02-20)
+
+
+### Bug Fixes
+
+* **DASH:** ContentSteering promise is resolved too late for fetching of init segment ([#8126](https://github.com/shaka-project/shaka-player/issues/8126)) ([2442a51](https://github.com/shaka-project/shaka-player/commit/2442a51327e7329ad97f90686cb02e77abc69013))
+* **FairPlay:** Install by default shaka.polyfill.PatchedMediaKeysApple on older Safari versions ([#8106](https://github.com/shaka-project/shaka-player/issues/8106)) ([c82d01b](https://github.com/shaka-project/shaka-player/commit/c82d01bc1774df929fbd67d0edfbdff4c47d2c03))
+* Install Safari workarounds on WPE STBs ([#8103](https://github.com/shaka-project/shaka-player/issues/8103)) ([cd025b9](https://github.com/shaka-project/shaka-player/commit/cd025b92f6c5b0b91747745f9f4e25209eb38cdd))
+* Remove isSafari and always use isApple ([#8104](https://github.com/shaka-project/shaka-player/issues/8104)) ([0a325ad](https://github.com/shaka-project/shaka-player/commit/0a325adf32f9c29a249be7ae5a7b3221e3f91b5a))
+* **UI:** Improve performance and compatibility with MediaSession ([#8100](https://github.com/shaka-project/shaka-player/issues/8100)) ([9afa9dd](https://github.com/shaka-project/shaka-player/commit/9afa9dd40fe5de78b8ad6e1be73c218553d0f8b0))
+
+
+### Performance Improvements
+
+* Close segmentIndex after getAllThumbnails ([#8128](https://github.com/shaka-project/shaka-player/issues/8128)) ([85b92e8](https://github.com/shaka-project/shaka-player/commit/85b92e827fcedcf5ed495e503bfb7f42fe26a89c))
+* Only set the timers on UITextDisplayer when there are cues ([#8114](https://github.com/shaka-project/shaka-player/issues/8114)) ([21b1be9](https://github.com/shaka-project/shaka-player/commit/21b1be95265ac96ddf4a72d13781d77fb62a12b9))
+* Remove promises from getAllThumbnails loop ([#8118](https://github.com/shaka-project/shaka-player/issues/8118)) ([6717699](https://github.com/shaka-project/shaka-player/commit/671769903cc6af888b05775447d838b2c0f3ef0b))
+* **UI:** Avoid unnecessary calls to controls configure ([#8116](https://github.com/shaka-project/shaka-player/issues/8116)) ([7a7f632](https://github.com/shaka-project/shaka-player/commit/7a7f63296a66a350e4388d729927728f3321dfa9))
+* **UI:** Reduce configure calls to use shakaPlayerCastReceiverId ([#8115](https://github.com/shaka-project/shaka-player/issues/8115)) ([cbd6764](https://github.com/shaka-project/shaka-player/commit/cbd6764c32fa1875e2e33c6c7d583aa657821af6))
+* Use navigator.userAgentData.platform to detect Android and Fuchsia ([#8102](https://github.com/shaka-project/shaka-player/issues/8102)) ([5ef5639](https://github.com/shaka-project/shaka-player/commit/5ef5639d491081e961ef62872564cc977c47cf95))
+
 ## [4.13.3](https://github.com/shaka-project/shaka-player/compare/v4.13.2...v4.13.3) (2025-02-17)
 
 
