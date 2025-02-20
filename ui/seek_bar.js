@@ -538,11 +538,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @private
    */
   async showThumbnail_(pixelPosition, value) {
-    const thumbnailTrack = this.getThumbnailTrack_();
-    if (!thumbnailTrack) {
-      this.hideThumbnail_();
-      return;
-    }
     if (value < 0) {
       value = 0;
     }
@@ -550,7 +545,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const playerValue = Math.max(Math.ceil(seekRange.start),
         Math.min(Math.floor(seekRange.end), value));
     const thumbnail =
-        await this.player.getThumbnails(thumbnailTrack.id, playerValue);
+        await this.player.getThumbnails(/* trackId= */ null, playerValue);
     if (!thumbnail || !thumbnail.uris.length) {
       this.hideThumbnail_();
       return;
@@ -588,7 +583,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         this.lastThumbnailPendingRequest_.abort();
         this.lastThumbnailPendingRequest_ = null;
       }
-      if (thumbnailTrack.codecs == 'mjpg' || uri.startsWith('offline:')) {
+      if (thumbnail.codecs == 'mjpg' || uri.startsWith('offline:')) {
         this.thumbnailImage_.src = shaka.ui.SeekBar.Transparent_Image_;
         try {
           const requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
@@ -603,7 +598,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
               .request(requestType, request, {type});
           const response = await this.lastThumbnailPendingRequest_.promise;
           this.lastThumbnailPendingRequest_ = null;
-          if (thumbnailTrack.codecs == 'mjpg') {
+          if (thumbnail.codecs == 'mjpg') {
             const parser = new shaka.util.Mp4Parser()
                 .box('mdat', shaka.util.Mp4Parser.allData((data) => {
                   const blob = new Blob([data], {type: 'image/jpeg'});
@@ -611,7 +606,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
                 }));
             parser.parse(response.data, /* partialOkay= */ false);
           } else {
-            const mimeType = thumbnailTrack.mimeType || 'image/jpeg';
+            const mimeType = thumbnail.mimeType || 'image/jpeg';
             const blob = new Blob([response.data], {type: mimeType});
             uri = URL.createObjectURL(blob);
           }
@@ -661,41 +656,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     height = Math.floor(width * thumbnail.height / thumbnail.width);
     this.thumbnailContainer_.style.height = height + 'px';
     this.thumbnailContainer_.style.top = -(height - offsetTop) + 'px';
-  }
-
-
-  /**
-   * @return {?shaka.extern.Track} The thumbnail track.
-   * @private
-   */
-  getThumbnailTrack_() {
-    const imageTracks = this.player.getImageTracks();
-    if (!imageTracks.length) {
-      return null;
-    }
-    const mimeTypesPreference = [
-      'image/avif',
-      'image/webp',
-      'image/jpeg',
-      'image/png',
-      'image/svg+xml',
-    ];
-    for (const mimeType of mimeTypesPreference) {
-      const estimatedBandwidth = this.player.getStats().estimatedBandwidth;
-      const bestOptions = imageTracks.filter((track) => {
-        return track.mimeType.toLowerCase() === mimeType &&
-            track.bandwidth < estimatedBandwidth * 0.01;
-      }).sort((a, b) => {
-        return b.bandwidth - a.bandwidth;
-      });
-      if (bestOptions && bestOptions.length) {
-        return bestOptions[0];
-      }
-    }
-    const mjpgTrack = imageTracks.find((track) => {
-      return track.mimeType == 'application/mp4' && track.codecs == 'mjpg';
-    });
-    return mjpgTrack || imageTracks[0];
   }
 
 
