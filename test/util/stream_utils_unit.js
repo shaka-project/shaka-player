@@ -851,6 +851,38 @@ describe('StreamUtils', () => {
           v.video.bandwidth))).toBeTruthy();
     });
 
+    it('should keep variants where the lower resolution bandwidth' +
+      ' is greater than the higher resolution bandwidth', () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.bandwidth = 4000000;
+            stream.size(1920, 1080);
+          });
+        });
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(2, (stream) => {
+            stream.bandwidth = 5000000;
+            stream.size(1280, 720);
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3, (stream) => {
+            stream.bandwidth = 3000000;
+            stream.size(640, 360);
+          });
+        });
+      });
+
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
+          /* preferredVideoCodecs= */[],
+          /* preferredAudioCodecs= */[],
+          /* preferredDecodingAttributes= */[],
+          /* preferredTextFormats= */ []);
+
+      expect(manifest.variants.length).toBe(3);
+    });
+
     it('should filter variants by the best available bandwidth' +
     ' for audio language', () => {
       // This test is flaky in some Tizen devices, due to codec restrictions.
