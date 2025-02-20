@@ -309,6 +309,12 @@ jobs:
             extra_flags+=(--html-coverage-report --uncompiled)
           fi
 
+          # In the lab, and only in the lab, we trust Safari to run these
+          # native text layout tests.
+          if [[ "${{ matrix.browser }}" == "Safari" ]]; then
+            extra_flags+=(--trust-safari-native-text-layout)
+          fi
+
           if [[ "${{ inputs.test_filter }}" != "" ]]; then
             echo "Adding filter: ${{ inputs.test_filter }}"
             extra_flags+=(--filter "${{ inputs.test_filter }}")
