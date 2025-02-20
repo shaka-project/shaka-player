@@ -206,6 +206,11 @@ class Launcher:
         dest='drm',
         action='store_false')
     running_commands.add_argument(
+        '--trust-safari-native-text-layout',
+        help='Trust layout tests for native text display on Safari. '
+             'Rendering may be inconsistent across devices.',
+        action='store_true')
+    running_commands.add_argument(
         '--quarantined',
         help='Run tests that have been quarantined.',
         action='store_true')
@@ -405,6 +410,7 @@ class Launcher:
       'test_timeout',
       'tls_key',
       'tls_cert',
+      'trust_safari_native_text_layout',
       'uncompiled',
     ]
 
