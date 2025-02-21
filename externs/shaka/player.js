@@ -2385,14 +2385,17 @@ shaka.extern.TextDisplayerConfiguration;
  *   Defaults to <code>''</code>.
  * @property {!Array.<string>} preferredVideoCodecs
  *   The list of preferred video codecs, in order of highest to lowest priority.
+ *   This is used to do a filtering of the variants available for the player.
  *   <br>
  *   Defaults to <code>[]</code>.
  * @property {!Array.<string>} preferredAudioCodecs
  *   The list of preferred audio codecs, in order of highest to lowest priority.
+ *   This is used to do a filtering of the variants available for the player.
  *   <br>
  *   Defaults to <code>[]</code>.
  * @property {!Array.<string>} preferredTextFormats
  *   The list of preferred text formats, in order of highest to lowest priority.
+ *   This is used to do a filtering of the text tracks available for the player.
  *   <br>
  *   Defaults to <code>[]</code>.
  * @property {number} preferredAudioChannelCount
@@ -2418,6 +2421,7 @@ shaka.extern.TextDisplayerConfiguration;
  * @property {!Array.<string>} preferredDecodingAttributes
  *   The list of preferred attributes of decodingInfo, in the order of their
  *   priorities.
+ *   This is used to do a filtering of the variants available for the player.
  *   <br>
  *   Defaults to <code>[]</code>.
  * @property {boolean} preferForcedSubs
