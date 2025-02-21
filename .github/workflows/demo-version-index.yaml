@@ -36,7 +36,9 @@ jobs:
           credentials_json: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
 
       - name: Generate static content
-        run: python3 app-engine/demo-version-index/generate.py
+        run: |
+          python3 app-engine/demo-version-index/generate.py
+          cp app-engine/gcloudignore app-engine/demo-version-index/.gcloudignore
 
       - uses: google-github-actions/deploy-appengine@v2
         with:
@@ -44,4 +46,3 @@ jobs:
           version: index
           working_directory: app-engine/demo-version-index/
           promote: false
-
