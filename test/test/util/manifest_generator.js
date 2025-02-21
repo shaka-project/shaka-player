@@ -589,7 +589,7 @@ shaka.test.ManifestGenerator.Stream = class {
       /** @type {?shaka.extern.Stream} */
       this.trickModeVideo = null;
       /** @type {?shaka.extern.Stream} */
-      this.dependencyVideo = null;
+      this.dependencyStream = null;
       /** @type {Array<string>} */
       this.emsgSchemeIdUris = null;
       /** @type {!Array<string>} */

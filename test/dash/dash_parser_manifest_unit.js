@@ -1013,7 +1013,7 @@ describe('DashParser Manifest', () => {
     });
   });
 
-  it('parses dependencyVideo tracks', async () => {
+  it('parses dependencyStream tracks', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
@@ -1047,8 +1047,8 @@ describe('DashParser Manifest', () => {
       type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
       bandwidth: 2,
     }));
-    let dependencyVideo = video && video.dependencyVideo;
-    expect(dependencyVideo).toBeNull();
+    let dependencyStream = video && video.dependencyStream;
+    expect(dependencyStream).toBeNull();
 
     variant = manifest.variants[1];
     expect(variant.bandwidth).toBe(3);
@@ -1058,8 +1058,8 @@ describe('DashParser Manifest', () => {
       type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
       bandwidth: 2,
     }));
-    dependencyVideo = video && video.dependencyVideo;
-    expect(dependencyVideo).toEqual(jasmine.objectContaining({
+    dependencyStream = video && video.dependencyStream;
+    expect(dependencyStream).toEqual(jasmine.objectContaining({
       originalId: 'enhance',
       type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
       bandwidth: 1,
