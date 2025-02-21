@@ -2581,6 +2581,7 @@ shaka.extern.TextDisplayerConfiguration;
  * @property {!Array<string>} preferredDecodingAttributes
  *   The list of preferred attributes of decodingInfo, in the order of their
  *   priorities.
+ *   This is used to do a filtering of the variants available for the player.
  *   <br>
  *   Defaults to <code>[]</code>.
  * @property {boolean} preferForcedSubs
