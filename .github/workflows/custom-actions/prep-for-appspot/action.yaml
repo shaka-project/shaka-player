@@ -54,3 +54,4 @@ runs:
       run: |
         mv app-engine/shaka-player-demo/* .
         rm README.md
+        mv app-engine/gcloudignore .gcloudignore
