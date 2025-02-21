@@ -1036,18 +1036,29 @@ describe('DashParser Manifest', () => {
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
-    expect(manifest.variants.length).toBe(1);
+    expect(manifest.variants.length).toBe(2);
     expect(manifest.textStreams.length).toBe(0);
 
-    const variant = manifest.variants[0];
-    expect(variant.bandwidth).toBe(3);
-    const video = variant && variant.video;
+    let variant = manifest.variants[0];
+    expect(variant.bandwidth).toBe(2);
+    let video = variant && variant.video;
     expect(video).toEqual(jasmine.objectContaining({
       originalId: 'main',
       type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
       bandwidth: 2,
     }));
-    const dependencyVideo = video && video.dependencyVideo;
+    let dependencyVideo = video && video.dependencyVideo;
+    expect(dependencyVideo).toBeNull();
+
+    variant = manifest.variants[1];
+    expect(variant.bandwidth).toBe(3);
+    video = variant && variant.video;
+    expect(video).toEqual(jasmine.objectContaining({
+      originalId: 'main',
+      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+      bandwidth: 2,
+    }));
+    dependencyVideo = video && video.dependencyVideo;
     expect(dependencyVideo).toEqual(jasmine.objectContaining({
       originalId: 'enhance',
       type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
