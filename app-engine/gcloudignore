@@ -1,0 +1,7 @@
+# Defaults you get without an explicit .gcloudignore file
+.git
+.gitignore
+.gcloudignore
+
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json
