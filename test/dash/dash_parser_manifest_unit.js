@@ -1052,6 +1052,7 @@ describe('DashParser Manifest', () => {
       originalId: 'enhance',
       type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
       bandwidth: 1,
+      baseOriginalId: 'main',
     }));
   });
 

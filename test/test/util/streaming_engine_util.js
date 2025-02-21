@@ -540,6 +540,7 @@ shaka.test.StreamingEngineUtil = class {
       fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
           mimeType, codecs)]),
       isAudioMuxedInVideo: false,
+      baseOriginalId: null,
     };
   }
 
@@ -588,6 +589,7 @@ shaka.test.StreamingEngineUtil = class {
       fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
           mimeType, codecs)]),
       isAudioMuxedInVideo: false,
+      baseOriginalId: null,
     };
   }
 
@@ -634,6 +636,7 @@ shaka.test.StreamingEngineUtil = class {
       fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
           mimeType, codecs)]),
       isAudioMuxedInVideo: false,
+      baseOriginalId: null,
     };
   }
 };

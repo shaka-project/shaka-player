@@ -245,6 +245,7 @@ describe('AdaptationSet', () => {
       fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
           mimeType, codecs.join(','))]),
       isAudioMuxedInVideo: false,
+      baseOriginalId: null,
     };
   }
 });

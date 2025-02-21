@@ -383,7 +383,8 @@ shaka.extern.SegmentIndex = class {
  *   external: boolean,
  *   fastSwitching: boolean,
  *   fullMimeTypes: !Set<string>,
- *   isAudioMuxedInVideo: boolean
+ *   isAudioMuxedInVideo: boolean,
+ *   baseOriginalId: ?string
  * }}
  *
  * @description
@@ -536,6 +537,11 @@ shaka.extern.SegmentIndex = class {
  *   MediaSource.isTypeSupported.
  * @property {boolean} isAudioMuxedInVideo
  *   Indicate if the audio of this stream is muxed in the video of other stream.
+ * @property {?string} baseOriginalId
+ *   <i>Optional.</i> <br>
+ *   Indicate the original ID of the base stream, if any, that appeared in the
+ *   manifest. Only populated when the stream is included within another stream
+ *   using dependencyVideo.
  *
  * @exportDoc
  */
