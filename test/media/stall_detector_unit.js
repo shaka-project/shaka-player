@@ -52,9 +52,8 @@ describe('StallDetector', () => {
     detector = new shaka.media.StallDetector(
         implementation,
         /* stallThresholdSeconds= */ 1,
-        Util.spyFunc(onEvent));
-
-    detector.onStall(Util.spyFunc(onStall));
+        Util.spyFunc(onEvent),
+        Util.spyFunc(onStall));
   });
 
   it('does not call onStall when values changes', () => {
