@@ -366,7 +366,7 @@ shaka.extern.SegmentIndex = class {
  *   type: string,
  *   primary: boolean,
  *   trickModeVideo: ?shaka.extern.Stream,
- *   dependencyVideo: ?shaka.extern.Stream,
+ *   dependencyStream: ?shaka.extern.Stream,
  *   emsgSchemeIdUris: ?Array<string>,
  *   roles: !Array<string>,
  *   accessibilityPurpose: ?shaka.media.ManifestParser.AccessibilityPurpose,
@@ -383,7 +383,8 @@ shaka.extern.SegmentIndex = class {
  *   external: boolean,
  *   fastSwitching: boolean,
  *   fullMimeTypes: !Set<string>,
- *   isAudioMuxedInVideo: boolean
+ *   isAudioMuxedInVideo: boolean,
+ *   baseOriginalId: ?string
  * }}
  *
  * @description
@@ -483,9 +484,9 @@ shaka.extern.SegmentIndex = class {
  * @property {?shaka.extern.Stream} trickModeVideo
  *   <i>Video streams only.</i> <br>
  *   An alternate video stream to use for trick mode playback.
- * @property {?shaka.extern.Stream} dependencyVideo
+ * @property {?shaka.extern.Stream} dependencyStream
  *   <i>Video streams only.</i> <br>
- *   Dependency video stream to use for enhance the quality of the video.
+ *   Dependency stream to use for enhance the quality of the base stream.
  * @property {?Array<string>} emsgSchemeIdUris
  *   <i>Defaults to empty.</i><br>
  *   Array of registered emsg box scheme_id_uri that should result in
@@ -536,6 +537,11 @@ shaka.extern.SegmentIndex = class {
  *   MediaSource.isTypeSupported.
  * @property {boolean} isAudioMuxedInVideo
  *   Indicate if the audio of this stream is muxed in the video of other stream.
+ * @property {?string} baseOriginalId
+ *   <i>Optional.</i> <br>
+ *   Indicate the original ID of the base stream, if any, that appeared in the
+ *   manifest. Only populated when the stream is included within another stream
+ *   using dependencyStream.
  *
  * @exportDoc
  */

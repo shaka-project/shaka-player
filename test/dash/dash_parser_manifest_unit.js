@@ -1013,18 +1013,19 @@ describe('DashParser Manifest', () => {
     });
   });
 
-  it('parses dependencyVideo tracks', async () => {
+  it('parses dependencyStream tracks', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet id="1" mimeType="video/mp4">',
-      '      <Representation id="main" bandwidth="1" codecs="avc1.4d401f">',
+      '      <Representation id="main" bandwidth="1" codecs="avc1.4d401f"',
+      '          bandwidth="2">',
       '        <SegmentTemplate media="1.mp4" duration="1" />',
       '      </Representation>',
       '    </AdaptationSet>',
       '    <AdaptationSet id="2" mimeType="video/mp4">',
       '      <Representation id="enhance" dependencyId="main"',
-      '          bandwidth="0.2" codecs="avc1.4d401f">',
+      '          bandwidth="1" codecs="avc1.4d401f">',
       '        <SegmentTemplate media="2.mp4" duration="1" />',
       '      </Representation>',
       '    </AdaptationSet>',
@@ -1035,19 +1036,34 @@ describe('DashParser Manifest', () => {
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
-    expect(manifest.variants.length).toBe(1);
+    expect(manifest.variants.length).toBe(2);
     expect(manifest.textStreams.length).toBe(0);
 
-    const variant = manifest.variants[0];
-    const video = variant && variant.video;
+    let variant = manifest.variants[0];
+    expect(variant.bandwidth).toBe(2);
+    let video = variant && variant.video;
     expect(video).toEqual(jasmine.objectContaining({
       originalId: 'main',
       type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+      bandwidth: 2,
     }));
-    const dependencyVideo = video && video.dependencyVideo;
-    expect(dependencyVideo).toEqual(jasmine.objectContaining({
+    let dependencyStream = video && video.dependencyStream;
+    expect(dependencyStream).toBeNull();
+
+    variant = manifest.variants[1];
+    expect(variant.bandwidth).toBe(3);
+    video = variant && variant.video;
+    expect(video).toEqual(jasmine.objectContaining({
+      originalId: 'main',
+      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+      bandwidth: 2,
+    }));
+    dependencyStream = video && video.dependencyStream;
+    expect(dependencyStream).toEqual(jasmine.objectContaining({
       originalId: 'enhance',
       type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+      bandwidth: 1,
+      baseOriginalId: 'main',
     }));
   });
 

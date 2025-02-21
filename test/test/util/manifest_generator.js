@@ -589,7 +589,7 @@ shaka.test.ManifestGenerator.Stream = class {
       /** @type {?shaka.extern.Stream} */
       this.trickModeVideo = null;
       /** @type {?shaka.extern.Stream} */
-      this.dependencyVideo = null;
+      this.dependencyStream = null;
       /** @type {Array<string>} */
       this.emsgSchemeIdUris = null;
       /** @type {!Array<string>} */
@@ -620,6 +620,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.fastSwitching = false;
       /** @type {boolean} */
       this.isAudioMuxedInVideo = false;
+      /** @type {?string} */
+      this.baseOriginalId = null;
     }
     /** @type {!Set<string>} */
     this.fullMimeTypes = new Set([shaka.util.MimeUtils.getFullType(

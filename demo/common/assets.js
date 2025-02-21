@@ -1612,6 +1612,24 @@ shakaAssets.testAssets = [
           drawLogo: false,
         },
       }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Big Buck Bunny LCEVC Dual track (DASH, MP4)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://s3.eu-west-1.amazonaws.com/origin-prod-lon-v-nova.com/lcevcDualTrack/1080p30_3Mbps_no_dR/master.mpd',
+      /* source= */ shakaAssets.Source.VNOVA)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LCEVC),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Big Buck Bunny LCEVC Dual track Debug (DASH, MP4)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://s3.eu-west-1.amazonaws.com/origin-prod-lon-v-nova.com/lcevcDualTrack/1080p30_3Mbps_with_dR/master.mpd',
+      /* source= */ shakaAssets.Source.VNOVA)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LCEVC),
   // }}}
 
   // AWS assets {{{
