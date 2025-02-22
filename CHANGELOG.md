@@ -1,5 +1,63 @@
 # Changelog
 
+## [4.9.36](https://github.com/shaka-project/shaka-player/compare/v4.9.35...v4.9.36) (2025-02-22)
+
+
+### Bug Fixes
+
+* Add more info in getVariantTracks for muxed streams ([#8002](https://github.com/shaka-project/shaka-player/issues/8002)) ([e29e94c](https://github.com/shaka-project/shaka-player/commit/e29e94c6cbbebb3b02f356e75ee5448020cc7ba9))
+* Allow change the native playbackRate with the same functionality as trickPlay ([#7993](https://github.com/shaka-project/shaka-player/issues/7993)) ([66c06a3](https://github.com/shaka-project/shaka-player/commit/66c06a3c393422bcf637b32d21162b4db5a58aec))
+* Avoid launch RESTRICTIONS_CANNOT_BE_MET when it's not necessary ([#8014](https://github.com/shaka-project/shaka-player/issues/8014)) ([784c0b4](https://github.com/shaka-project/shaka-player/commit/784c0b44bd1171c6bfe991bcbffd6458f971f3e1))
+* Avoid rebuffering when using big trick play rates ([#7988](https://github.com/shaka-project/shaka-player/issues/7988)) ([6e171ec](https://github.com/shaka-project/shaka-player/commit/6e171ece2cba0fdca77a50977435f2674736c19b))
+* Avoid setAppendWindow when the window is Infinity ([#7923](https://github.com/shaka-project/shaka-player/issues/7923)) ([7e63cfd](https://github.com/shaka-project/shaka-player/commit/7e63cfdaf3dfd138fd0a7b28c712602fcad6f18b))
+* **CEA:** Fix multi byte language support in CEA-708 ([#7929](https://github.com/shaka-project/shaka-player/issues/7929)) ([947e305](https://github.com/shaka-project/shaka-player/commit/947e3052bdee604ada409317d4efc6e03db23acf))
+* **DASH:** Change fallback presentation delay ([#7918](https://github.com/shaka-project/shaka-player/issues/7918)) ([989207f](https://github.com/shaka-project/shaka-player/commit/989207fd711b144c9f219e07f09e81c32ed201b5))
+* **DASH:** Fix Dolby Atmos detection ([#7966](https://github.com/shaka-project/shaka-player/issues/7966)) ([c8accd7](https://github.com/shaka-project/shaka-player/commit/c8accd70ec68f2cf7ecff3c00da5e6af3206284b))
+* **DASH:** Fix playback of ClearKey when only part of keys are defined ([#8055](https://github.com/shaka-project/shaka-player/issues/8055)) ([d4bb311](https://github.com/shaka-project/shaka-player/commit/d4bb31140a1a419ea7e717376f7f64ec4056c51d))
+* **DASH:** Ignore early segments in a period ([#7910](https://github.com/shaka-project/shaka-player/issues/7910)) ([a1fd74c](https://github.com/shaka-project/shaka-player/commit/a1fd74c8533586c83597b46f000375dc65bbd4a8))
+* **DASH:** Notify time range with the fitted timeline ([#7911](https://github.com/shaka-project/shaka-player/issues/7911)) ([a845481](https://github.com/shaka-project/shaka-player/commit/a84548171852194356234077553fe118fab72ce2))
+* **DASH:** Revert Dolby Atmos detection when there is not SupplementalProperty ([#8132](https://github.com/shaka-project/shaka-player/issues/8132)) ([4cbf150](https://github.com/shaka-project/shaka-player/commit/4cbf15026c5e7aa8f1db72f93bc047899d0ef499))
+* Detect mov extension as video/quicktime ([#7884](https://github.com/shaka-project/shaka-player/issues/7884)) ([170caf8](https://github.com/shaka-project/shaka-player/commit/170caf8dea310dd534d98104cc8a722a8a2137db))
+* Do not recognize MultiChoice & Ziggo as Apple ([#7996](https://github.com/shaka-project/shaka-player/issues/7996)) ([7befef8](https://github.com/shaka-project/shaka-player/commit/7befef80521d2032cc2b9d89785fbaf1f8e939db))
+* **DRM:** Fix drm choice when the user provide a server in the manifest ([#8067](https://github.com/shaka-project/shaka-player/issues/8067)) ([79e47af](https://github.com/shaka-project/shaka-player/commit/79e47af9de9cdde03a5b7fa71d732acdc34e1efd))
+* Duplicate timelineregion* events fired for the same event id ([#8013](https://github.com/shaka-project/shaka-player/issues/8013)) ([56b5ec5](https://github.com/shaka-project/shaka-player/commit/56b5ec5758fd33216411812a10f408eab9b0b845))
+* Evict the buffer against seekRangeStart ([#8026](https://github.com/shaka-project/shaka-player/issues/8026)) ([d24718b](https://github.com/shaka-project/shaka-player/commit/d24718b9ed8f83c9f9bdc0ec4d718f8cff51bdb1))
+* **FairPlay:** Install by default shaka.polyfill.PatchedMediaKeysApple on older Safari versions ([#8106](https://github.com/shaka-project/shaka-player/issues/8106)) ([55ddcf0](https://github.com/shaka-project/shaka-player/commit/55ddcf075454d3308faf302f475b69f7af000fb9))
+* Fix AC-3 playback on Tizen 3.0 devices ([#7969](https://github.com/shaka-project/shaka-player/issues/7969)) ([2217fcf](https://github.com/shaka-project/shaka-player/commit/2217fcf901c14627f031ea7e4b2bb4d7a09c3cfd))
+* Fix AC-3 playback on Tizen 3.0 devices when transmuxing ([#7972](https://github.com/shaka-project/shaka-player/issues/7972)) ([5b12bca](https://github.com/shaka-project/shaka-player/commit/5b12bca11a4e58317706e8bf7c8e53a11e8604f5))
+* Fix displaying subtitles in UITextDisplayer at high playback rates ([#7991](https://github.com/shaka-project/shaka-player/issues/7991)) ([fde0bef](https://github.com/shaka-project/shaka-player/commit/fde0beface4fcb6d4fe4f6e883c22016cd4b363e))
+* Fix DRM workaround with fLaC and Opus boxes ([#8070](https://github.com/shaka-project/shaka-player/issues/8070)) ([9e2a17f](https://github.com/shaka-project/shaka-player/commit/9e2a17f4c164ba76dbef47bef9a708612ef766de))
+* Fix Hisense 4K detection ([#8133](https://github.com/shaka-project/shaka-player/issues/8133)) ([d1ebe18](https://github.com/shaka-project/shaka-player/commit/d1ebe18866b6caeb96c5448abe7105118875f63f))
+* Fix isEnded when is not fullyLoaded ([#7883](https://github.com/shaka-project/shaka-player/issues/7883)) ([a1b2859](https://github.com/shaka-project/shaka-player/commit/a1b28594ca263342901c6d23f23e9f516624a6e5))
+* Fix playback with Apple Media Keys polyfill detection ([#7958](https://github.com/shaka-project/shaka-player/issues/7958)) ([51633c9](https://github.com/shaka-project/shaka-player/commit/51633c9d2b84a5183c3c04fcc47d588c0daa5856))
+* **HLS:** Fix duplicate segments on some inaccurate live streams ([#8084](https://github.com/shaka-project/shaka-player/issues/8084)) ([ab2e0b6](https://github.com/shaka-project/shaka-player/commit/ab2e0b6a70b0bc866ce41914fff6f8eb2af3b5b1))
+* **HLS:** Fix switching between muxed MP4 and muxed TS ([#8061](https://github.com/shaka-project/shaka-player/issues/8061)) ([9066d8b](https://github.com/shaka-project/shaka-player/commit/9066d8ba71b71343ee227aff764c5bc180fb0d51))
+* **net:** Add 304 as successful request ([#7963](https://github.com/shaka-project/shaka-player/issues/7963)) ([e78bca3](https://github.com/shaka-project/shaka-player/commit/e78bca31e37113501a8665f5309b175797498282))
+* **net:** Allow preventDefault() on retry event ([#8058](https://github.com/shaka-project/shaka-player/issues/8058)) ([c0e18fc](https://github.com/shaka-project/shaka-player/commit/c0e18fcd3b14d732bbc9ecd4c14a5d681f3c74ee))
+* **PS5:** Disable sequence mode in PS5 ([#8004](https://github.com/shaka-project/shaka-player/issues/8004)) ([7bbd438](https://github.com/shaka-project/shaka-player/commit/7bbd4388e5d729c1da4befeeeecd82438457ec99))
+* **Subtitles:** Prevent rounding errors when filtering duplicated cues ([#8018](https://github.com/shaka-project/shaka-player/issues/8018)) ([2ab22a3](https://github.com/shaka-project/shaka-player/commit/2ab22a3e58b0aeb1369c89bb5853b0d84c47db95))
+* Throw preload destroyed error when re-using same preloadManager ([#8046](https://github.com/shaka-project/shaka-player/issues/8046)) ([9314a79](https://github.com/shaka-project/shaka-player/commit/9314a79c588ab3442386abb8909b5c6c06dd8477))
+* **TTML:** Correctly handle multiple samples in a segment ([#8088](https://github.com/shaka-project/shaka-player/issues/8088)) ([a4e0f1e](https://github.com/shaka-project/shaka-player/commit/a4e0f1e22e723416caa55806e831e2cfeeae085b))
+* **tXml:** Allow case insensitive in parseDuration ([#8064](https://github.com/shaka-project/shaka-player/issues/8064)) ([3fdbd13](https://github.com/shaka-project/shaka-player/commit/3fdbd134483bfd258b0b865993b8f99103bd1048))
+* **tXml:** Fix findChildrenNS when the namespace is in the element ([#7896](https://github.com/shaka-project/shaka-player/issues/7896)) ([a03f5ae](https://github.com/shaka-project/shaka-player/commit/a03f5aeb75890531fa36cf93335975cfbf0d011d))
+* **UI:** Fix handle of seek on MediaSession ([#7879](https://github.com/shaka-project/shaka-player/issues/7879)) ([ba0658a](https://github.com/shaka-project/shaka-player/commit/ba0658a5a816908104315e838f6967dc6377a363))
+* **UI:** Fix thumbnail sometimes not disappearing due to mouse hover ([#8089](https://github.com/shaka-project/shaka-player/issues/8089)) ([bb23fad](https://github.com/shaka-project/shaka-player/commit/bb23fad5ef123ff8a36012ab1f06b5bf17988d28))
+* **UI:** Show GB unit in StatisticsButton ([#7990](https://github.com/shaka-project/shaka-player/issues/7990)) ([4661d61](https://github.com/shaka-project/shaka-player/commit/4661d611c67eaec70715feec83fcd13362d6cb70))
+* Use infiniteLiveStreamDuration equal to true in Safari 17 or above ([#7901](https://github.com/shaka-project/shaka-player/issues/7901)) ([c092ea8](https://github.com/shaka-project/shaka-player/commit/c092ea80e2d705f2dff00cf718ef6e04da22b331))
+
+
+### Performance Improvements
+
+* Close segmentIndex after getAllThumbnails ([#8128](https://github.com/shaka-project/shaka-player/issues/8128)) ([b34c3a4](https://github.com/shaka-project/shaka-player/commit/b34c3a4bc5fedf50247b5a72543299338e8e8f04))
+* Improve GapJumpingController times ([#7921](https://github.com/shaka-project/shaka-player/issues/7921)) ([2e71610](https://github.com/shaka-project/shaka-player/commit/2e7161092f96bd07ce5175e6924d6f657ec354f2))
+* Improve times of probeSupport ([#7889](https://github.com/shaka-project/shaka-player/issues/7889)) ([08019ed](https://github.com/shaka-project/shaka-player/commit/08019ed757c620fc6e21b0a9f1bb05d3f47fc45d))
+* Only set the timers on UITextDisplayer when there are cues ([#8114](https://github.com/shaka-project/shaka-player/issues/8114)) ([5910103](https://github.com/shaka-project/shaka-player/commit/5910103d756018b852ee6aa068ed6eec7a41b647))
+* Prevent CastSender initialization on CastProxy on unsupported browsers ([#7995](https://github.com/shaka-project/shaka-player/issues/7995)) ([7048dc0](https://github.com/shaka-project/shaka-player/commit/7048dc07411f9ed2ec142c1314d6769758be85ab))
+* Remove promises from getAllThumbnails loop ([#8118](https://github.com/shaka-project/shaka-player/issues/8118)) ([aef5ba4](https://github.com/shaka-project/shaka-player/commit/aef5ba413757721c14c2601230c39a72700532f7))
+* **UI:** Avoid unnecessary calls to controls configure ([#8116](https://github.com/shaka-project/shaka-player/issues/8116)) ([4937ccb](https://github.com/shaka-project/shaka-player/commit/4937ccba11a67824d064e475b51ec08b5c8e3f31))
+* **UI:** Reduce configure calls to use shakaPlayerCastReceiverId ([#8115](https://github.com/shaka-project/shaka-player/issues/8115)) ([7a9f56d](https://github.com/shaka-project/shaka-player/commit/7a9f56db188e853ecdf737f71e9c4f4cf6592788))
+* Use navigator.userAgentData.platform to detect Android and Fuchsia ([#8102](https://github.com/shaka-project/shaka-player/issues/8102)) ([caad5b2](https://github.com/shaka-project/shaka-player/commit/caad5b2bbfcc85f12f1fbdb0901895b0686f39b4))
+
 ## [4.9.35](https://github.com/shaka-project/shaka-player/compare/v4.9.34...v4.9.35) (2025-01-10)
 
 
