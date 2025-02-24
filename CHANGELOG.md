@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.13.5](https://github.com/shaka-project/shaka-player/compare/v4.13.4...v4.13.5) (2025-02-24)
+
+
+### Bug Fixes
+
+* Check bandwidth when filtering streams ([#8125](https://github.com/shaka-project/shaka-player/issues/8125)) ([f7185c0](https://github.com/shaka-project/shaka-player/commit/f7185c079ee01dd79080d3224d96b928a748400a))
+* **CMCD:** Do not call play() if CMCD is not enabled ([#8149](https://github.com/shaka-project/shaka-player/issues/8149)) ([3395dc8](https://github.com/shaka-project/shaka-player/commit/3395dc86072948261c756e4ea826fed0ad0aba21))
+* **DASH:** Revert Dolby Atmos detection when there is not SupplementalProperty ([#8132](https://github.com/shaka-project/shaka-player/issues/8132)) ([9da2fe3](https://github.com/shaka-project/shaka-player/commit/9da2fe3cf13a91fa34b27bf7ecaf367ac8e2d4bf))
+* Fix Hisense 4K detection ([#8133](https://github.com/shaka-project/shaka-player/issues/8133)) ([810582c](https://github.com/shaka-project/shaka-player/commit/810582cf46db0ce725e1db41962435ff7f9c3e95))
+
 ## [4.13.4](https://github.com/shaka-project/shaka-player/compare/v4.13.3...v4.13.4) (2025-02-20)
 
 
