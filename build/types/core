@@ -43,7 +43,6 @@
 +../../lib/media/region_timeline.js
 +../../lib/media/segment_index.js
 +../../lib/media/segment_reference.js
-+../../lib/media/stall_detector.js
 +../../lib/media/streaming_engine.js
 +../../lib/media/segment_prefetch.js
 +../../lib/media/segment_utils.js
