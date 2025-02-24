@@ -540,6 +540,10 @@ describe('StreamingEngine', () => {
      * @return {shaka.extern.Manifest}
      */
     function setupGappyManifest(gapAtStart, dropSegment) {
+      // In these tests we are going to test GapJumpingController so we are
+      // interested in activating the stall detector.
+      config.stallEnabled = true;
+
       /**
        * @param {string} type
        * @param {shaka.media.InitSegmentReference} initSegmentReference
