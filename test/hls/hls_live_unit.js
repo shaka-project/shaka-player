@@ -430,6 +430,36 @@ describe('HlsParser live', () => {
         // No new updates were requested.
         expect(fakeNetEngine.request).not.toHaveBeenCalled();
       });
+
+      it('convert variant to encrypted on update', async () => {
+        const manifest = await testInitialManifest(master, media);
+        expect(manifest.variants[0].video.encrypted).toBe(false);
+
+        const initDataBase64 =
+            'dGhpcyBpbml0IGRhdGEgY29udGFpbnMgaGlkZGVuIHNlY3JldHMhISE=';
+
+        const keyId = 'abc123';
+
+        const mediaWithAdditionalInfo = [
+          '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:EVENT\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXTINF:2,\n',
+          'main.mp4\n',
+          '#EXT-X-KEY:METHOD=SAMPLE-AES-CTR,',
+          'KEYID=0X' + keyId + ',',
+          'KEYFORMAT="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",',
+          'URI="data:text/plain;base64,',
+          initDataBase64, '",\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXTINF:2,\n',
+          'main2.mp4\n',
+        ].join('');
+
+        await testUpdate(manifest, mediaWithAdditionalInfo);
+        expect(manifest.variants[0].video.encrypted).toBe(true);
+      });
     });  // describe('update')
   });  // describe('playlist type EVENT')
 
