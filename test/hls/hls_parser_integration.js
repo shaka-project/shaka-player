@@ -138,7 +138,7 @@ describe('HlsParser', () => {
     await player.load('/base/test/test/assets/hls-text-no-discontinuity/index.m3u8');
     await video.play();
 
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 30);
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 3, 30);
 
     const cues = video.textTracks[0].cues;
     expect(cues.length).toBe(3);
