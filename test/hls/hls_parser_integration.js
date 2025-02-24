@@ -138,6 +138,8 @@ describe('HlsParser', () => {
     await player.load('/base/test/test/assets/hls-text-no-discontinuity/index.m3u8');
     await video.play();
 
+    // This test sometimes fails on Tizen with missing cues if we use too
+    // small a delay here.
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 3, 30);
 
     const cues = video.textTracks[0].cues;
