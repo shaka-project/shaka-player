@@ -84,7 +84,8 @@ describe('ContentWorkarounds', () => {
     eventManager.listen(player, 'keystatuschanged', Util.spyFunc(keyStatusSpy));
 
     const networkRequestSpy = jasmine.createSpy('networkRequest');
-    player.getNetworkingEngine().registerRequestFilter(networkRequestSpy);
+    player.getNetworkingEngine().registerRequestFilter(
+        Util.spyFunc(networkRequestSpy));
 
     player.configure({
       drm: {
@@ -129,7 +130,8 @@ describe('ContentWorkarounds', () => {
     eventManager.listen(player, 'keystatuschanged', Util.spyFunc(keyStatusSpy));
 
     const networkRequestSpy = jasmine.createSpy('networkRequest');
-    player.getNetworkingEngine().registerRequestFilter(networkRequestSpy);
+    player.getNetworkingEngine().registerRequestFilter(
+        Util.spyFunc(networkRequestSpy));
 
     player.configure({
       drm: {
