@@ -589,6 +589,13 @@ shakaDemo.Config = class {
     this.addSelectInput_('Preferred video layout', 'preferredVideoLayout',
         videoLayouts, videoLayoutsNames);
 
+    const strategyOptions = shaka.config.PeriodSwitchingStrategy;
+    const strategyOptionsNames = {
+      'NONE': 'none',
+      'RESET': 'reset',
+      'ENCRYPTED': 'encrypted',
+    };
+
     this.addBoolInput_('Start At Segment Boundary',
         'streaming.startAtSegmentBoundary')
         .addBoolInput_('Ignore Text Stream Failures',
@@ -611,12 +618,7 @@ shakaDemo.Config = class {
             'streaming.avoidEvictionOnQuotaExceededError')
         .addSelectInput_('Period Switching Strategy',
             'streaming.periodSwitchingStrategy',
-            shaka.config.PeriodSwitchingStrategy,
-            {
-              NONE: 'none',
-              RESET: 'reset',
-              ENCRYPTED: 'encrypted',
-            });
+            strategyOptions, strategyOptionsNames);
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
   }
