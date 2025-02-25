@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static"
-  xmlns:cenc="urn:mpeg:cenc:2013">
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" xmlns:cenc="urn:mpeg:cenc:2013">
   <Period id="0" duration="PT4.0S">
     <AdaptationSet contentType="video">
       <Representation id="0" codecs="avc1.64001f" mimeType="video/mp4" width="512" height="288" frameRate="24">
