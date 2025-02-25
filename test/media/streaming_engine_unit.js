@@ -465,8 +465,6 @@ describe('StreamingEngine', () => {
       config.segmentPrefetchLimit = 0; // Do not prefetch segments by default
     }
 
-    const mockVideo = {};
-
     goog.asserts.assert(
         presentationTimeInSeconds != undefined,
         'All tests should have defined an initial presentation time by now!');
@@ -474,7 +472,7 @@ describe('StreamingEngine', () => {
       getPresentationTime: () => presentationTimeInSeconds,
       getBandwidthEstimate: Util.spyFunc(getBandwidthEstimate),
       getPlaybackRate: Util.spyFunc(getPlaybackRate),
-      video: mockVideo,
+      video: shaka.test.UiUtils.createVideoElement(),
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
       onError: Util.spyFunc(onError),
