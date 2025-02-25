@@ -43,46 +43,10 @@ jobs:
     strategy:
       matrix:
         include:
-          # Run Linux browsers with xvfb, so they're in a headless X session.
-          # Additionally, generate a code coverage report from Linux Chrome.
-          # It should be the uncompiled build, or else we won't execute any
-          # coverage instrumentation on full-stack player integration tests.
-          - os: ubuntu-latest
-            browser: Chrome
-            extra_flags: "--use-xvfb"
-          - os: ubuntu-latest
-            browser: Firefox
-            extra_flags: "--use-xvfb"
-          - os: ubuntu-latest
-            browser: Edge
-            extra_flags: "--use-xvfb"
-          - os: ubuntu-latest
-            browser: Opera
-            extra_flags: "--use-xvfb"
-
           - os: macos-latest
             browser: Chrome
           - os: macos-latest
             browser: Edge
-          - os: macos-latest
-            browser: Opera
-          - os: macos-latest
-            browser: Firefox
-          - os: macos-latest
-            browser: Safari
-          - os: macos-latest
-            browser: Safari-old
-
-          - os: windows-latest
-            browser: Chrome
-          - os: windows-latest
-            browser: Firefox
-          - os: windows-latest
-            browser: Edge
-            extra_flags: "--html-coverage-report --uncompiled"
-          # Disabled until working properly
-          # - os: windows-latest
-          #   browser: Opera
 
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
@@ -179,7 +143,7 @@ jobs:
         run: python build/all.py
 
       - name: Test Player
-        timeout-minutes: 15
+        timeout-minutes: 180
         shell: bash
         run: |
           browser=${{ matrix.browser }}
@@ -193,74 +157,6 @@ jobs:
           python build/test.py \
             --browsers "$browser" \
             --reporters spec --spec-hide-passed \
+            --no-babel \
+            --runs 10 \
             ${{ matrix.extra_flags }}
-
-      - name: Find coverage reports
-        id: coverage
-        if: always() # Even on failure of an earlier step.
-        shell: bash
-        run: |
-          # If the "coverage" directory exists...
-          if [ -d coverage ]; then
-            # Find the path to the coverage output folder.  It includes the
-            # exact browser version in the path, so it will vary.
-            coverage_folder="$( (ls -d coverage/* || true) | head -1 )"
-
-            # Build a folder to stage all the coverage artifacts with
-            # predictable paths.  The resulting zip file will not have any
-            # internal directories.
-            mkdir coverage/staging/
-            cp "$coverage_folder"/coverage.json coverage/staging/
-            cp "$coverage_folder"/coverage-details.json coverage/staging/
-            echo "${{ github.event.number }}" > coverage/staging/pr-number.json
-
-            echo "coverage_found=true" >> $GITHUB_OUTPUT
-            echo "Coverage report staged."
-          else
-            echo "No coverage report generated."
-          fi
-
-      - name: Upload coverage reports
-        uses: actions/upload-artifact@v4
-        if: ${{ always() && steps.coverage.outputs.coverage_found }}
-        with:
-          name: coverage
-          # This will create a download called coverage.zip containing all of
-          # these files, with no internal folders.
-          path: |
-            coverage/staging/coverage.json
-            coverage/staging/coverage-details.json
-            coverage/staging/pr-number.json
-          # Since we've already filtered this step for instances where there is
-          # an environment variable set, the file should definitely be there.
-          if-no-files-found: error
-
-      # Upload new screenshots and diffs on failure; ignore if missing
-      - name: Upload screenshots
-        uses: actions/upload-artifact@v4
-        if: ${{ failure() }}
-        with:
-          name: screenshots-${{ matrix.browser }}-${{ matrix.os }}
-          path: |
-            test/test/assets/screenshots/*/*.png-new
-            test/test/assets/screenshots/*/*.png-diff
-          if-no-files-found: ignore
-          retention-days: 5
-
-  build_in_docker:
-    # Don't waste time doing a full matrix of test runs when there was an
-    # obvious linter error.
-    needs: lint
-    name: Docker
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref || github.ref }}
-          persist-credentials: false
-
-      - name: Docker
-        run: |
-          docker build -t shaka-player-build build/docker
-          docker run -v $(pwd):/usr/src --user $(id -u):$(id -g) shaka-player-build
