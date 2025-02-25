@@ -1430,7 +1430,7 @@ shakaDemo.Main = class {
 
       this.player_.configure({
         streaming: {
-          // inaccurateManifestTolerance: 0,
+          inaccurateManifestTolerance: 0,
         },
         drm: {
           servers: {
