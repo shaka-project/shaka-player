@@ -1986,6 +1986,9 @@ shaka.extern.LiveSyncConfiguration;
  *   Avoid evict content on QuotaExceededError.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} resetMediaSourceOnStreamSwitch
+ *   When the active stream switches (eg: moving from one period to another),
+ *   reset MediaSource. Defaults to <code>false</code>
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
