@@ -80,8 +80,12 @@ describe('ContentWorkarounds', () => {
     if (!shakaSupport.drm['com.widevine.alpha']) {
       pending('Needed DRM is not supported on this platform');
     }
-    const spy = jasmine.createSpy('onKeyStatus');
-    eventManager.listen(player, 'keystatuschanged', Util.spyFunc(spy));
+    const keyStatusSpy = jasmine.createSpy('onKeyStatus');
+    eventManager.listen(player, 'keystatuschanged', Util.spyFunc(keyStatusSpy));
+
+    const networkRequestSpy = jasmine.createSpy('networkRequest');
+    player.getNetworkingEngine().registerRequestFilter(networkRequestSpy);
+
     player.configure({
       drm: {
         servers: {
@@ -109,7 +113,11 @@ describe('ContentWorkarounds', () => {
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 30);
 
     // Check did we have key status change.
-    expect(spy).toHaveBeenCalled();
+    expect(keyStatusSpy).toHaveBeenCalled();
+    // Check did we have a license request.
+    expect(networkRequestSpy).toHaveBeenCalledWith(
+        shaka.net.NetworkingEngine.RequestType.LICENSE, jasmine.anything(),
+        jasmine.anything());
   });
 
   drmIt('plays mixed clear and encrypted content with playready', async () => {
@@ -117,8 +125,12 @@ describe('ContentWorkarounds', () => {
         !shakaSupport.drm['com.chromecast.playready']) {
       pending('Needed DRM is not supported on this platform');
     }
-    const spy = jasmine.createSpy('onKeyStatus');
-    eventManager.listen(player, 'keystatuschanged', Util.spyFunc(spy));
+    const keyStatusSpy = jasmine.createSpy('onKeyStatus');
+    eventManager.listen(player, 'keystatuschanged', Util.spyFunc(keyStatusSpy));
+
+    const networkRequestSpy = jasmine.createSpy('networkRequest');
+    player.getNetworkingEngine().registerRequestFilter(networkRequestSpy);
+
     player.configure({
       drm: {
         servers: {
@@ -146,6 +158,10 @@ describe('ContentWorkarounds', () => {
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 30);
 
     // Check did we have key status change.
-    expect(spy).toHaveBeenCalled();
+    expect(keyStatusSpy).toHaveBeenCalled();
+    // Check did we have a license request.
+    expect(networkRequestSpy).toHaveBeenCalledWith(
+      shaka.net.NetworkingEngine.RequestType.LICENSE, jasmine.anything(),
+      jasmine.anything());
   });
 });
