@@ -1431,7 +1431,7 @@ shakaDemo.Main = class {
       this.player_.configure({
         streaming: {
           inaccurateManifestTolerance: 0,
-          resetMediaSourceOnStreamSwitch: true,
+          periodSwitchingStrategy: shaka.config.PeriodSwitchingStrategy.NONE,
         },
         drm: {
           servers: {

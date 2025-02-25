@@ -1731,7 +1731,7 @@ shaka.extern.LiveSyncConfiguration;
  *   dontChooseCodecs: boolean,
  *   shouldFixTimestampOffset: boolean,
  *   avoidEvictionOnQuotaExceededError: boolean,
- *   resetMediaSourceOnStreamSwitch: boolean
+ *   periodSwitchingStrategy: shaka.config.PeriodSwitchingStrategy
  * }}
  *
  * @description
@@ -1987,9 +1987,9 @@ shaka.extern.LiveSyncConfiguration;
  *   Avoid evict content on QuotaExceededError.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {boolean} resetMediaSourceOnStreamSwitch
- *   When the active stream switches (eg: moving from one period to another),
- *   reset MediaSource. Defaults to <code>false</code>
+ * @property {shaka.config.PeriodSwitchingStrategy} periodSwitchingStrategy
+ *   Allows MSE to be reset during period transitions. Defaults to NONE,
+ *   which means no MSE reset across periods.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

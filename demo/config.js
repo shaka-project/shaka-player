@@ -609,8 +609,14 @@ shakaDemo.Config = class {
             'streaming.shouldFixTimestampOffset')
         .addBoolInput_('Avoid eviction on QuotaExceededError',
             'streaming.avoidEvictionOnQuotaExceededError')
-        .addBoolInput_('Reset MSE on stream switch',
-            'streaming.resetMediaSourceOnStreamSwitch');
+        .addSelectInput_('Period Switching Strategy',
+            'streaming.periodSwitchingStrategy',
+            shaka.config.PeriodSwitchingStrategy,
+            {
+              NONE: 'none',
+              RESET: 'reset',
+              ENCRYPTED: 'encrypted',
+            });
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
   }
