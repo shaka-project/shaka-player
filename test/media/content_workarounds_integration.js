@@ -26,7 +26,7 @@ describe('ContentWorkarounds', () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
     compiledShaka =
-      await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
+        await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
   });
 
   beforeEach(async () => {
@@ -76,7 +76,7 @@ describe('ContentWorkarounds', () => {
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 30);
   });
 
-  drmIt('plays mixed clear and encrypted content with widevine', async () => {
+  drmIt('plays mixed clear and encrypted content with Widevine', async () => {
     if (!shakaSupport.drm['com.widevine.alpha']) {
       pending('Needed DRM is not supported on this platform');
     }
@@ -120,7 +120,7 @@ describe('ContentWorkarounds', () => {
         jasmine.anything());
   });
 
-  drmIt('plays mixed clear and encrypted content with playready', async () => {
+  drmIt('plays mixed clear and encrypted content with PlayReady', async () => {
     if (!shakaSupport.drm['com.microsoft.playready'] &&
         !shakaSupport.drm['com.chromecast.playready']) {
       pending('Needed DRM is not supported on this platform');
