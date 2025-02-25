@@ -265,6 +265,7 @@ describe('StreamingEngine', () => {
       getPresentationTime: () => playhead.getTime(),
       getBandwidthEstimate: () => 1e6,
       getPlaybackRate: () => video.playbackRate,
+      video: video,
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
       onError: Util.spyFunc(onError),
@@ -273,7 +274,6 @@ describe('StreamingEngine', () => {
       onInitSegmentAppended: () => {},
       beforeAppendSegment: () => Promise.resolve(),
       disableStream: (stream, time) => false,
-      seekTo: () => {},
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
