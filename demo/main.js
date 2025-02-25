@@ -1426,23 +1426,67 @@ shakaDemo.Main = class {
         ui.configure(uiConfig);
       }
 
-      // Finally, the asset can be loaded.
-      if (asset.preloadManager) {
-        const preloadManager = asset.preloadManager;
-        asset.preloadManager = null;
-        await this.player_.load(preloadManager);
-      } else {
-        const manifestUri = await this.getManifestUri_(asset);
-        let mimeType = undefined;
-        if (asset.mimeType &&
-            manifestUri && !manifestUri.startsWith('offline:')) {
-          mimeType = asset.mimeType;
+      const data = await fetch('http://localhost:3000/asset').then((response) => response.json());
+
+      this.player_.configure({
+        streaming: {
+          // inaccurateManifestTolerance: 0,
+        },
+        drm: {
+          servers: {
+            'com.widevine.alpha': data.widevineLicenseUrl,
+            'com.microsoft.playready': data.playreadyLicenseUrl,
+          },
+          advanced: {
+            'com.widevine.alpha': {
+              headers: {
+                'x-dt-auth-token': data.licenseToken,
+              },
+            },
+            'com.microsoft.playready': {
+              headers: {
+                'x-dt-auth-token': data.licenseToken,
+              },
+            },
+          },
+        },
+      });
+
+      const networkingEngine = this.player_.getNetworkingEngine();
+      networkingEngine.registerResponseFilter((type, response) => {
+        if (type === shaka.net.NetworkingEngine.RequestType.LICENSE) {
+          const {keySystem} = response.originalRequest.drmInfo;
+
+          if (keySystem === 'com.widevine.alpha') {
+            const {license} = JSON.parse(shaka.util.StringUtils.fromUTF8(
+                response.data));
+            response.data = shaka.util.Uint8ArrayUtils.fromBase64(license)
+                .buffer;
+          }
         }
-        await this.player_.load(
-            manifestUri,
-            /* startTime= */ null,
-            mimeType);
-      }
+      });
+
+      this.player_.load(data.playlistUrl);
+
+      Object.assign(window, {player: this.player_});
+
+      // Finally, the asset can be loaded.
+      // if (asset.preloadManager) {
+      //   const preloadManager = asset.preloadManager;
+      //   asset.preloadManager = null;
+      //   await this.player_.load(preloadManager);
+      // } else {
+      //   const manifestUri = await this.getManifestUri_(asset);
+      //   let mimeType = undefined;
+      //   if (asset.mimeType &&
+      //       manifestUri && !manifestUri.startsWith('offline:')) {
+      //     mimeType = asset.mimeType;
+      //   }
+      //   await this.player_.load(
+      //       manifestUri,
+      //       /* startTime= */ null,
+      //       mimeType);
+      // }
 
       if (this.player_.isAudioOnly() &&
           this.video_.poster == shakaDemo.Main.mainPoster_) {
