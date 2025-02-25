@@ -113,7 +113,8 @@ describe('ContentWorkarounds', () => {
   });
 
   drmIt('plays mixed clear and encrypted content with playready', async () => {
-    if (!shakaSupport.drm['com.microsoft.playready']) {
+    if (!shakaSupport.drm['com.microsoft.playready'] &&
+        !shakaSupport.drm['com.chromecast.playready']) {
       pending('Needed DRM is not supported on this platform');
     }
     const spy = jasmine.createSpy('onKeyStatus');
