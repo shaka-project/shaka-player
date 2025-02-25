@@ -161,7 +161,7 @@ describe('ContentWorkarounds', () => {
     expect(keyStatusSpy).toHaveBeenCalled();
     // Check did we have a license request.
     expect(networkRequestSpy).toHaveBeenCalledWith(
-      shaka.net.NetworkingEngine.RequestType.LICENSE, jasmine.anything(),
-      jasmine.anything());
+        shaka.net.NetworkingEngine.RequestType.LICENSE, jasmine.anything(),
+        jasmine.anything());
   });
 });
