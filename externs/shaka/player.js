@@ -1988,7 +1988,7 @@ shaka.extern.LiveSyncConfiguration;
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {shaka.config.PeriodSwitchingStrategy} periodSwitchingStrategy
- *   Allows MSE to be reset during period transitions. Defaults to NONE,
+ *   Allows MSE to be reset during period transitions. Defaults to NEVER,
  *   which means no MSE reset across periods.
  * @exportDoc
  */

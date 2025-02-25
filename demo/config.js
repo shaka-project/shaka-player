@@ -591,9 +591,9 @@ shakaDemo.Config = class {
 
     const strategyOptions = shaka.config.PeriodSwitchingStrategy;
     const strategyOptionsNames = {
-      'NONE': 'none',
-      'RESET': 'reset',
-      'ENCRYPTED': 'encrypted',
+      'NEVER': 'never',
+      'ALWAYS': 'always',
+      'PLAIN_TO_ENCRYPTED': 'plain to encrypted',
     };
 
     this.addBoolInput_('Start At Segment Boundary',
