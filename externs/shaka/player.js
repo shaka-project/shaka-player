@@ -1730,7 +1730,8 @@ shaka.extern.LiveSyncConfiguration;
  *   clearDecodingCache: boolean,
  *   dontChooseCodecs: boolean,
  *   shouldFixTimestampOffset: boolean,
- *   avoidEvictionOnQuotaExceededError: boolean
+ *   avoidEvictionOnQuotaExceededError: boolean,
+ *   resetMediaSourceOnStreamSwitch: boolean
  * }}
  *
  * @description
