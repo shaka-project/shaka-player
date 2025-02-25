@@ -480,6 +480,7 @@ describe('StreamingEngine', () => {
       onInitSegmentAppended: () => {},
       beforeAppendSegment: Util.spyFunc(beforeAppendSegment),
       disableStream: Util.spyFunc(disableStream),
+      seekTo: () => {},
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
