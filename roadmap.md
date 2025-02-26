@@ -25,6 +25,7 @@ v4.14 - 2025 Q2
    https://github.com/shaka-project/shaka-player/issues/7556
  - New API for audio: `getAudioTracks` and `selectAudioTrack`
    https://github.com/shaka-project/shaka-player/issues/3544
+ - DASH: LCEVC Dual track support
 
 =====
 
