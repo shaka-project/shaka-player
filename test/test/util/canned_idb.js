@@ -176,7 +176,6 @@ shaka.test.CannedIDB = class {
       };
 
       request.onerror = (event) => {
-        event.preventDefault();
         reject(request.error);
       };
     });
@@ -238,7 +237,6 @@ shaka.test.CannedIDB = class {
       };
 
       request.onerror = (event) => {
-        event.preventDefault();
         resolve();
       };
     });
@@ -300,7 +298,6 @@ shaka.test.CannedIDB = class {
       };
 
       request.onerror = (event) => {
-        event.preventDefault();
         reject(request.error);
       };
     });
@@ -341,7 +338,6 @@ shaka.test.CannedIDB = class {
 
       transaction.onerror = (event) => {
         reject(event.error);
-        event.preventDefault();
       };
     });
   }
