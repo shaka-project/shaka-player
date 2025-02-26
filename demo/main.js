@@ -1428,11 +1428,9 @@ shakaDemo.Main = class {
 
       const data = await fetch('http://localhost:3000/asset').then((response) => response.json());
 
-      const PeriodSwitchingStrategy = shaka.config.PeriodSwitchingStrategy;
       this.player_.configure({
         streaming: {
           inaccurateManifestTolerance: 0,
-          periodSwitchingStrategy: PeriodSwitchingStrategy.PLAIN_TO_ENCRYPTED,
         },
         drm: {
           servers: {

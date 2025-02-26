@@ -1731,7 +1731,7 @@ shaka.extern.LiveSyncConfiguration;
  *   dontChooseCodecs: boolean,
  *   shouldFixTimestampOffset: boolean,
  *   avoidEvictionOnQuotaExceededError: boolean,
- *   periodSwitchingStrategy: shaka.config.PeriodSwitchingStrategy
+ *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy
  * }}
  *
  * @description
@@ -1987,9 +1987,9 @@ shaka.extern.LiveSyncConfiguration;
  *   Avoid evict content on QuotaExceededError.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {shaka.config.PeriodSwitchingStrategy} periodSwitchingStrategy
- *   Allows MSE to be reset during period transitions. Defaults to NEVER,
- *   which means no MSE reset across periods.
+ * @property {shaka.config.CrossBoundaryStrategy} crossBoundaryStrategy
+ *   Allows MSE to be reset when crossing a boundary. Optionally, we can stop
+ *   resetting MSE when MSE passed an encrypted boundary.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
