@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.12.15](https://github.com/shaka-project/shaka-player/compare/v4.12.14...v4.12.15) (2025-02-26)
+
+
+### Bug Fixes
+
+* Fit template check template info ([#8162](https://github.com/shaka-project/shaka-player/issues/8162)) ([8616ac3](https://github.com/shaka-project/shaka-player/commit/8616ac3ad05d5608e50487ea95ca10d81116bf21))
+* **HLS:** Populate encrypted info correctly on updates ([#8153](https://github.com/shaka-project/shaka-player/issues/8153)) ([7e88502](https://github.com/shaka-project/shaka-player/commit/7e88502c81a1ed829fbfe80c04e64c38456fb374))
+
 ## [4.12.14](https://github.com/shaka-project/shaka-player/compare/v4.12.13...v4.12.14) (2025-02-24)
 
 
