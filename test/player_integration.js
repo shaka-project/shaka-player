@@ -1368,7 +1368,7 @@ describe('Player', () => {
         shaka.util.Error.Category.DRM,
         shaka.util.Error.Code.NO_LICENSE_SERVER_GIVEN,
         'org.w3.clearkey'));
-    await expectAsync(player.load('test:sintel-hls-clearkey'))
+    await expectAsync(player.load('test:sintel-hls-clearkey_compiled'))
         .toBeRejectedWith(expectedError);
   });
 
