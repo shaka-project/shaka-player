@@ -77,7 +77,17 @@ shaka.test.IndexedDBUtils = class {
     /** @type {!shaka.util.PublicPromise} */
     const p = new shaka.util.PublicPromise();
 
+    let stack;
+    try {
+      throw new Error('');
+    } catch (error) {  // eslint-disable-line
+      stack = error.stack;
+    }
+
     const open = window.indexedDB.open(name, version);
+    open.onversionchange = (event) => {
+      window.dump('VERSIONCHANGE from dbOpenNew_ in idb_utils from ' + stack);
+    };
     open.onerror = (e) => {
       p.reject();
     };
@@ -111,7 +121,17 @@ shaka.test.IndexedDBUtils = class {
     /** @type {!shaka.util.PublicPromise} */
     const p = new shaka.util.PublicPromise();
 
+    let stack;
+    try {
+      throw new Error('');
+    } catch (error) {  // eslint-disable-line
+      stack = error.stack;
+    }
+
     const open = window.indexedDB.open(name);
+    open.onversionchange = (event) => {
+      window.dump('VERSIONCHANGE from open in idb_utils from ' + stack);
+    };
     open.onerror = (e) => {
       p.reject();
     };
