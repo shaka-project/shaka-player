@@ -3,10 +3,7 @@
   <Period id="0" duration="PT4.0S">
     <AdaptationSet contentType="video">
       <Representation id="0" codecs="avc1.64001f" mimeType="video/mp4" width="512" height="288" frameRate="24">
-        <SegmentList>
-          <Initialization sourceURL="init-1.mp4"/>
-          <SegmentURL media="0001.m4s"/>
-        </SegmentList>
+        <SegmentTemplate timescale="1000" media="000$Number$.m4s" startNumber="1" duration="4000" initialization="init-1.mp4"/>
       </Representation>
     </AdaptationSet>
   </Period>
@@ -21,10 +18,7 @@
         <cenc:pssh>AAAANHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABQIARIQCHJ4bvnnRl+jok5bDvj6RQ==</cenc:pssh>
       </ContentProtection>
       <Representation id="0" codecs="avc1.64001f" mimeType="video/mp4" width="512" height="288" frameRate="24">
-        <SegmentList>
-          <Initialization sourceURL="init-2.mp4"/>
-          <SegmentURL media="0002.m4s"/>
-        </SegmentList>
+        <SegmentTemplate media="000$Number$.m4s" startNumber="2" duration="4" initialization="init-2.mp4" presentationTimeOffset="4"/>
       </Representation>
     </AdaptationSet>
   </Period>
