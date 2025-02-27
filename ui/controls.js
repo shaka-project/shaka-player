@@ -958,9 +958,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // setEnabledShakaControls:
     this.videoContainer_.setAttribute('shaka-controls', 'true');
 
-    this.eventManager_.listen(this.controlsContainer_, 'touchstart', (e) => {
+    this.eventManager_.listen(this.controlsContainer_, 'touchend', (e) => {
       this.onContainerTouch_(e);
-    }, {passive: false});
+    });
 
     this.eventManager_.listen(this.controlsContainer_, 'click', () => {
       this.onContainerClick_();
