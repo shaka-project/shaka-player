@@ -83,7 +83,8 @@ describe('ContentWorkarounds', () => {
         pending('Needed DRM is not supported on this platform');
       }
       if (shaka.util.Platform.isTizen3()) {
-        pending('Tizen 3 currently does not support mixed clear encrypted content');
+        pending('Tizen 3 currently does not support mixed clear ' +
+            'encrypted content');
       }
       const keyStatusSpy = jasmine.createSpy('onKeyStatus');
       eventManager.listen(player, 'keystatuschanged',
