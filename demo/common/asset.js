@@ -500,7 +500,7 @@ const ShakaDemoAssetInfo = class {
    */
   getConfiguration(forStorage = false) {
     const config = /** @type {shaka.extern.PlayerConfiguration} */(
-      {drm: {advanced: {}}, manifest: {dash: {}, hls: {}}});
+      {drm: {advanced: {}}, manifest: {dash: {}, hls: {}}, streaming: {}});
 
     if (this.extraConfig) {
       for (const key in this.extraConfig) {
@@ -526,6 +526,10 @@ const ShakaDemoAssetInfo = class {
       this.clearKeys.forEach((value, key) => {
         config.drm.clearKeys[key] = value;
       });
+    }
+
+    if (this.features.includes(shakaAssets.Feature.LOW_LATENCY)) {
+      config.streaming.lowLatencyMode = true;
     }
 
     // Windows Edge only support persistent licenses with
