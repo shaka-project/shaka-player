@@ -966,12 +966,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY)
-      .setExtraConfig({
-        streaming: {
-          lowLatencyMode: true,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.LOW_LATENCY),
   new ShakaDemoAssetInfo(
       /* name= */ 'Live sim (CBCS single key)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
@@ -1017,12 +1012,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY)
-      .setExtraConfig({
-        streaming: {
-          lowLatencyMode: true,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.LOW_LATENCY),
   new ShakaDemoAssetInfo(
       /* name= */ 'DASH-IF THUMBNAILS - Single adaptation set, 7 tiles at 10x1, each thumb 320x180',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
@@ -1396,12 +1386,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY)
-      .setExtraConfig({
-        streaming: {
-          lowLatencyMode: true,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.LOW_LATENCY),
   new ShakaDemoAssetInfo(
       /* name= */ 'Audio only HLS with raw AAC',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
@@ -1731,12 +1716,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.LOW_LATENCY)
-      .addFeature(shakaAssets.Feature.CMSD)
-      .setExtraConfig({
-        streaming: {
-          lowLatencyMode: true,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.CMSD),
   new ShakaDemoAssetInfo(
       /* name= */ 'Live low latency (SegmentTimeline, CMSD)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/spring.png',
@@ -1747,12 +1727,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.LOW_LATENCY)
-      .addFeature(shakaAssets.Feature.CMSD)
-      .setExtraConfig({
-        streaming: {
-          lowLatencyMode: true,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.CMSD),
   // }}}
 
   // EZDRM assets {{{
@@ -1921,12 +1896,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.SURROUND)
       .addFeature(shakaAssets.Feature.LIVE)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY)
-      .setExtraConfig({
-        streaming: {
-          lowLatencyMode: true,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.LOW_LATENCY),
   new ShakaDemoAssetInfo(
       /* name= */ 'Low-Latency Live Testcard - 4 Chunks per Segment, Multiple Languages, HEVC Video',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
@@ -1939,12 +1909,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.SURROUND)
       .addFeature(shakaAssets.Feature.LIVE)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY)
-      .setExtraConfig({
-        streaming: {
-          lowLatencyMode: true,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.LOW_LATENCY),
   new ShakaDemoAssetInfo(
       /* name= */ 'On-demand Elephant\'s Dream - with EBU-TT-D Subtitle Track in English',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/elephant.png',
