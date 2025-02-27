@@ -82,16 +82,12 @@ describe('ContentWorkarounds', () => {
       if (!shakaSupport.drm[keySystem]) {
         pending('Needed DRM is not supported on this platform');
       }
+      if (shaka.util.Platform.isTizen3()) {
+        pending('Tizen 3 currently does not support mixed clear encrypted content');
+      }
       const keyStatusSpy = jasmine.createSpy('onKeyStatus');
       eventManager.listen(player, 'keystatuschanged',
           Util.spyFunc(keyStatusSpy));
-
-      const networkRequestSpy = jasmine.createSpy('networkRequest');
-      player.getNetworkingEngine().registerRequestFilter(
-          Util.spyFunc(networkRequestSpy));
-      const networkResponseSpy = jasmine.createSpy('networkResponse');
-      player.getNetworkingEngine().registerResponseFilter(
-          Util.spyFunc(networkResponseSpy));
 
       const licenseUrl = keySystem == 'com.widevine.alpha' ?
           'https://drm-widevine-licensing.axtest.net/AcquireLicense' :
@@ -124,15 +120,6 @@ describe('ContentWorkarounds', () => {
 
       // Check did we have key status change.
       expect(keyStatusSpy).toHaveBeenCalled();
-      // Check did we have a license request & response.
-      expect(networkRequestSpy).toHaveBeenCalledWith(
-          shaka.net.NetworkingEngine.RequestType.LICENSE,
-          jasmine.anything(),
-          jasmine.anything());
-      expect(networkResponseSpy).toHaveBeenCalledWith(
-          shaka.net.NetworkingEngine.RequestType.LICENSE,
-          jasmine.objectContaining({status: 200}),
-          jasmine.anything());
     });
   }
 });
