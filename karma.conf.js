@@ -253,6 +253,7 @@ module.exports = (config) => {
       {pattern: 'third_party/**/*.js', included: false},
       {pattern: 'test/**/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
+      {pattern: 'test/test/assets/clear-encrypted/*', included: false},
       {pattern: 'test/test/assets/dash-multi-codec/*', included: false},
       {pattern: 'test/test/assets/dash-multi-codec-ec3/*', included: false},
       {pattern: 'test/test/assets/3675/*', included: false},
