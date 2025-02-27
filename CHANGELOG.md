@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.13.6](https://github.com/shaka-project/shaka-player/compare/v4.13.5...v4.13.6) (2025-02-26)
+
+
+### Bug Fixes
+
+* Avoid DRM setup for VOD that does not need it ([#8154](https://github.com/shaka-project/shaka-player/issues/8154)) ([ef80720](https://github.com/shaka-project/shaka-player/commit/ef8072063c3877fa081ff029ca5cb9967469ba21))
+* Fit template check template info ([#8162](https://github.com/shaka-project/shaka-player/issues/8162)) ([a049315](https://github.com/shaka-project/shaka-player/commit/a0493154869badc5aa1a4dc049fc22afcbad29ae))
+* **HLS:** Populate encrypted info correctly on updates ([#8153](https://github.com/shaka-project/shaka-player/issues/8153)) ([4755cb6](https://github.com/shaka-project/shaka-player/commit/4755cb68a319fc9eab94e3b3002e82050d5f115a))
+* Remove timeout for decodingInfo in some platforms and increase the timeout ([#8172](https://github.com/shaka-project/shaka-player/issues/8172)) ([c929725](https://github.com/shaka-project/shaka-player/commit/c929725668e8126fd329c0704c478259823cf74b))
+
 ## [4.13.5](https://github.com/shaka-project/shaka-player/compare/v4.13.4...v4.13.5) (2025-02-24)
 
 
