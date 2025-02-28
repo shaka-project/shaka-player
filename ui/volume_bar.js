@@ -81,11 +81,6 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
       this.ad.setVolume(this.getValue() / 100);
     } else {
       this.video.volume = this.getValue() / 100;
-      if (this.video.volume == 0) {
-        this.video.muted = true;
-      } else {
-        this.video.muted = false;
-      }
     }
   }
 
