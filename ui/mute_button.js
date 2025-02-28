@@ -75,7 +75,11 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
       if (this.ad && this.ad.isLinear()) {
         this.ad.setMuted(!this.ad.isMuted());
       } else {
-        this.video.muted = !this.video.muted;
+        if (!this.video.muted && this.video.volume == 0) {
+          this.video.volume = 1;
+        } else {
+          this.video.muted = !this.video.muted;
+        }
       }
     });
 
@@ -117,7 +121,8 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     if (this.ad) {
       label = this.ad.isMuted() ? LocIds.UNMUTE : LocIds.MUTE;
     } else {
-      label = this.video.muted ? LocIds.UNMUTE : LocIds.MUTE;
+      label = (this.video.muted || this.video.volume == 0) ?
+          LocIds.UNMUTE : LocIds.MUTE;
     }
 
     this.button_.ariaLabel = this.localization.resolve(label);
@@ -133,7 +138,8 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     if (this.ad) {
       icon = this.ad.isMuted() ? Icons.UNMUTE : Icons.MUTE;
     } else {
-      icon = this.video.muted ? Icons.UNMUTE : Icons.MUTE;
+      icon = (this.video.muted || this.video.volume == 0) ?
+          Icons.UNMUTE : Icons.MUTE;
     }
     this.icon_.textContent = icon;
   }
