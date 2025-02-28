@@ -143,8 +143,6 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
 
   /** @private */
   onClick_() {
-    shaka.ui.Utils.setDisplay(this.parent, false);
-
     if (this.container_.classList.contains('shaka-hidden')) {
       this.icon_.textContent =
           shaka.ui.Enums.MaterialDesignIcons.STATISTICS_OFF;
