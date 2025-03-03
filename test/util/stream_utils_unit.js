@@ -803,6 +803,21 @@ describe('StreamUtils', () => {
       });
     };
 
+    const addVariant1080HEVC = (manifest) => {
+      manifest.addVariant(9, (variant) => {
+        variant.bandwidth = 4811000;
+        variant.addAudio(1, (stream) => {
+          stream.bandwidth = 129998;
+          stream.mime('audio/mp4', 'mp4a.40.2');
+        });
+        variant.addVideo(10, (stream) => {
+          stream.bandwidth = 4681002;
+          stream.size(1920, 1080);
+          stream.mime('video/mp4', 'hvc1.1.6.L93.90');
+        });
+      });
+    };
+
     const addTextStreamVTT = (manifest) => {
       manifest.addTextStream(0, (stream) => {
         stream.mimeType = 'text/vtt';
@@ -940,6 +955,9 @@ describe('StreamUtils', () => {
       if (!await Util.isTypeSupported('audio/webm; codecs="vorbis"')) {
         pending('Codec vorbis is not supported by the platform.');
       }
+      if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.1.6.L93.90"')) {
+        pending('Codec HEVC is not supported by the platform.');
+      }
       // This test is flaky in some Tizen devices, due to codec restrictions.
       if (shaka.util.Platform.isTizen()) {
         pending('Skip flaky test in Tizen');
@@ -948,6 +966,7 @@ describe('StreamUtils', () => {
         addVariant720Avc1(manifest);
         addVariant720Vp9(manifest);
         addVariant1080Vp9(manifest);
+        addVariant1080HEVC(manifest);
       });
 
       manifest.variants[0].video.bandwidth = 1;
