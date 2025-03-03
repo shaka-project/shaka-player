@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.12.16](https://github.com/shaka-project/shaka-player/compare/v4.12.15...v4.12.16) (2025-03-03)
+
+
+### Bug Fixes
+
+* Fix seek to initial live position on slow devices ([#8181](https://github.com/shaka-project/shaka-player/issues/8181)) ([9f55da5](https://github.com/shaka-project/shaka-player/commit/9f55da5a8e4a21f5a40f9e4c1c0917775573c62e))
+* Prevent race condition when seeking backwards during load ([#8188](https://github.com/shaka-project/shaka-player/issues/8188)) ([f87fe66](https://github.com/shaka-project/shaka-player/commit/f87fe66bd4a928fc8861181aa88568d26532ba59))
+* **UI:** Fix weird behaviour when volume was 0, and we unmute ([#8186](https://github.com/shaka-project/shaka-player/issues/8186)) ([cfc8515](https://github.com/shaka-project/shaka-player/commit/cfc85151a87bd0b5705519b814df463eb76c6d6f))
+* **UI:** Use touchend to show the controls ([#8180](https://github.com/shaka-project/shaka-player/issues/8180)) ([b593325](https://github.com/shaka-project/shaka-player/commit/b593325fa7f12037903a19295c7fe5c029536261))
+
+
+### Performance Improvements
+
+* Pause PlayheadObserverManager operations on pause event ([#8183](https://github.com/shaka-project/shaka-player/issues/8183)) ([260935b](https://github.com/shaka-project/shaka-player/commit/260935b9db4b008281e44c97858b7b959b6ea507))
+
 ## [4.12.15](https://github.com/shaka-project/shaka-player/compare/v4.12.14...v4.12.15) (2025-02-26)
 
 
