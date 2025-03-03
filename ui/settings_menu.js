@@ -114,7 +114,8 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
       this.backButton.firstChild.textContent =
             shaka.ui.Enums.MaterialDesignIcons.BACK;
 
-      this.eventManager.listen(this.backButton, 'click', () => {
+      this.eventManager.listen(this.menu, 'click', () => {
+        shaka.ui.Utils.setDisplay(this.menu, false);
         shaka.ui.Utils.setDisplay(this.parent, true);
 
         const isDisplayed =

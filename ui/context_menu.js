@@ -64,6 +64,10 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
       shaka.ui.Utils.setDisplay(this.contextMenu_, false);
     });
 
+    this.eventManager.listen(this.contextMenu_, 'click', () => {
+      shaka.ui.Utils.setDisplay(this.contextMenu_, false);
+    });
+
     this.createChildren_();
   }
 
