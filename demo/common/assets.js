@@ -1990,6 +1990,7 @@ shakaAssets.testAssets = [
       .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
       .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
       .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.DOLBY_VISION_P5)
       .setExtraConfig({
@@ -2001,6 +2002,15 @@ shakaAssets.testAssets = [
           },
         },
       }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Multiple Dolby audio formats',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://webapi.streaming.dolby.com/v0_9/sources/media/v01/dash/lesson_8.mpd',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.OFFLINE),
   // }}}
 ];
 /* eslint-enable max-len */
