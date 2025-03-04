@@ -247,3 +247,19 @@ For integration with Nagra the following can be used:
 ```js
 shaka.polyfill.PatchedMediaKeysApple.install();
 ```
+
+#### Mux (legacy Apple Media Keys)
+
+For integration with Mux the following can be used:
+
+```js
+shaka.polyfill.PatchedMediaKeysApple.install();
+const FairPlayUtils = shaka.util.FairPlayUtils;
+player.getNetworkingEngine()
+    .registerRequestFilter(FairPlayUtils.muxFairPlayRequest);
+player.getNetworkingEngine()
+    .registerResponseFilter(FairPlayUtils.commonFairPlayResponse);
+player.configure('drm.initDataTransform',
+                 FairPlayUtils.muxInitDataTransform);
+```
+
