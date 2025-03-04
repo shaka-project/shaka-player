@@ -863,6 +863,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
+    if (this.ad_) {
+      this.playPauseAd();
+      if (this.ad_.isLinear()) {
+        return;
+      }
+    }
+
     if (!this.video_.duration) {
       // Can't play yet.  Ignore.
       return;
@@ -1332,10 +1339,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       const keyboardSeekDistance = this.config_.keyboardSeekDistance;
       switch (details.action) {
         case 'pause':
-          this.onPlayPauseClick_();
+          this.playPausePresentation();
           break;
         case 'play':
-          this.onPlayPauseClick_();
+          this.playPausePresentation();
           break;
         case 'seekbackward':
           if (details.seekOffset && !isFinite(details.seekOffset)) {
@@ -1665,19 +1672,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.anySettingsMenusAreOpen()) {
       this.hideSettingsMenusTimer_.tickNow();
     } else if (this.config_.singleClickForPlayAndPause) {
-      this.onPlayPauseClick_();
+      this.playPausePresentation();
     }
-  }
-
-  /** @private */
-  onPlayPauseClick_() {
-    if (this.ad_) {
-      this.playPauseAd();
-      if (this.ad_.isLinear()) {
-        return;
-      }
-    }
-    this.playPausePresentation();
   }
 
   /** @private */
@@ -1788,7 +1784,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // Pause or play by pressing space on the seek bar.
       case ' ':
         if (isSeekBar) {
-          this.onPlayPauseClick_();
+          this.playPausePresentation();
         }
         break;
     }
