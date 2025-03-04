@@ -103,13 +103,14 @@ shaka.ui.LanguageUtils = class {
 
     const getAudioCodecName = (audioCodec) => {
       let name = '';
-      audioCodec = audioCodec.toLowerCase();
-      if (audioCodec.startsWith('mp4a')) {
+      if (audioCodec == 'aac') {
         name = 'AAC';
       } else if (audioCodec === 'ac-3') {
         name = 'Dolby';
       } else if (audioCodec === 'ec-3') {
         name = 'DD+';
+      } else if (audioCodec === 'ac-4') {
+        name = 'Dolby AC-4';
       } else if (audioCodec === 'opus') {
         name = 'Opus';
       } else if (audioCodec === 'flac') {
@@ -140,7 +141,8 @@ shaka.ui.LanguageUtils = class {
       const rolesString = getRolesString(track);
       const label = track.label;
       const channelsCount = track.channelsCount;
-      const audioCodec = track.codecs;
+      const audioCodec = track.codecs &&
+          shaka.util.MimeUtils.getNormalizedCodec(track.codecs);
       const spatialAudio = track.spatialAudio;
       const combinationName =
           getCombination(language, rolesString, label, channelsCount,
@@ -162,7 +164,7 @@ shaka.ui.LanguageUtils = class {
           shaka.ui.LanguageUtils.getLanguageName(language, localization);
       let basicInfo = '';
       if (showAudioCodec && showAudioChannelCountVariants &&
-          spatialAudio && audioCodec == 'ec-3') {
+          spatialAudio && (audioCodec == 'ec-3' || audioCodec == 'ac-4')) {
         basicInfo += ' Dolby Atmos';
       } else {
         if (showAudioCodec && hasDifferentAudioCodecs(language)) {
