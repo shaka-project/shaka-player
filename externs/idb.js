@@ -23,3 +23,6 @@ var IDBOpenDBRequest = function() {};
 
 /** @type {!IDBDatabase} */
 IDBOpenDBRequest.prototype.result;
+
+/** @type {function(!Event)} */
+IDBOpenDBRequest.prototype.onversionchange;
