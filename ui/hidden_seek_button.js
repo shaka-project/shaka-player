@@ -37,7 +37,11 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
      * @private {shaka.util.Timer}
      */
     this.hideSeekButtonContainerTimer_ = new shaka.util.Timer(() => {
+      const position = parseInt(this.seekValue_.textContent, 10);
       this.hideSeekButtonContainer_();
+      if (position == 0) {
+        this.controls.playPausePresentation();
+      }
     });
 
     /** @protected {!HTMLElement} */
