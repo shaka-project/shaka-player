@@ -1990,6 +1990,9 @@ shaka.extern.LiveSyncConfiguration;
  * @property {shaka.config.CrossBoundaryStrategy} crossBoundaryStrategy
  *   Allows MSE to be reset when crossing a boundary. Optionally, we can stop
  *   resetting MSE when MSE passed an encrypted boundary.
+ *   Defaults to <code>KEEP</code> except on Tizen 3 where the default value
+ *   is <code>RESET_TO_ENCRYPTED</code> and WebOS 3 where the default value
+ *   is <code>RESET</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
