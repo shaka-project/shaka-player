@@ -37,6 +37,9 @@ describe('ContentWorkarounds', () => {
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
 
+    player.configure('streaming.crossBoundaryStrategy',
+        shaka.config.CrossBoundaryStrategy.KEEP);
+
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
