@@ -864,6 +864,31 @@ shakaAssets.testAssets = [
           },
         },
       }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Tears of Steel (HLS HEVC - FairPlay)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+      /* manifestUri= */ 'https://media.axprod.net/TestVectors/H265/protected_cmaf_1080p_h265_singlekey/manifest.m3u8',
+      /* source= */ shakaAssets.Source.AXINOM)
+      .addKeySystem(shakaAssets.KeySystem.FAIRPLAY)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addLicenseServer('com.apple.fps', 'https://drm-fairplay-licensing.axprod.net/AcquireLicense')
+      .setExtraConfig({
+        drm: {
+          advanced: {
+            'com.apple.fps': {
+              serverCertificateUri: 'https://vtb.axinom.com/FPScert/fairplay.cer',
+              headers: {
+                // cspell: disable-next-line
+                'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJpZCI6IjY2MjNhYTAzLTA1NjQtNDhjZi04NDRlLTZlYTliN2E1NmM3OSIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMjUtMDMtMjVUMTU6NDk6MzQrMDA6MDAiLCJjb21fa2V5X2lkIjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsInZlcnNpb24iOjIsImNvbnRlbnRfa2V5c19zb3VyY2UiOnsiaW5saW5lIjpbeyJpZCI6ImFiY2M0NGU1LWMxMjItNDVhYi1hYzgwLWE1YjM1MjJhMGEzMSJ9XX19fQ.tyhM8mgAj0w6rsxwzpWyQ0N8k4u15sbyN7Rae7F_QBU',
+              },
+            },
+          },
+        },
+      }),
   // End Axinom assets }}}
 
   // DASH-IF assets {{{
@@ -941,12 +966,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY)
-      .setExtraConfig({
-        streaming: {
-          lowLatencyMode: true,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.LOW_LATENCY),
   new ShakaDemoAssetInfo(
       /* name= */ 'Live sim (CBCS single key)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
@@ -992,12 +1012,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY)
-      .setExtraConfig({
-        streaming: {
-          lowLatencyMode: true,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.LOW_LATENCY),
   new ShakaDemoAssetInfo(
       /* name= */ 'DASH-IF THUMBNAILS - Single adaptation set, 7 tiles at 10x1, each thumb 320x180',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
@@ -1371,12 +1386,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY)
-      .setExtraConfig({
-        streaming: {
-          lowLatencyMode: true,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.LOW_LATENCY),
   new ShakaDemoAssetInfo(
       /* name= */ 'Audio only HLS with raw AAC',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
@@ -1724,12 +1734,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.LOW_LATENCY)
-      .addFeature(shakaAssets.Feature.CMSD)
-      .setExtraConfig({
-        streaming: {
-          lowLatencyMode: true,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.CMSD),
   new ShakaDemoAssetInfo(
       /* name= */ 'Live low latency (SegmentTimeline, CMSD)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/spring.png',
@@ -1740,12 +1745,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.LOW_LATENCY)
-      .addFeature(shakaAssets.Feature.CMSD)
-      .setExtraConfig({
-        streaming: {
-          lowLatencyMode: true,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.CMSD),
   // }}}
 
   // EZDRM assets {{{
@@ -1914,12 +1914,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.SURROUND)
       .addFeature(shakaAssets.Feature.LIVE)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY)
-      .setExtraConfig({
-        streaming: {
-          lowLatencyMode: true,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.LOW_LATENCY),
   new ShakaDemoAssetInfo(
       /* name= */ 'Low-Latency Live Testcard - 4 Chunks per Segment, Multiple Languages, HEVC Video',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
@@ -1932,12 +1927,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.SURROUND)
       .addFeature(shakaAssets.Feature.LIVE)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY)
-      .setExtraConfig({
-        streaming: {
-          lowLatencyMode: true,
-        },
-      }),
+      .addFeature(shakaAssets.Feature.LOW_LATENCY),
   new ShakaDemoAssetInfo(
       /* name= */ 'On-demand Elephant\'s Dream - with EBU-TT-D Subtitle Track in English',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/elephant.png',
@@ -2017,6 +2007,7 @@ shakaAssets.testAssets = [
       .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
       .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
       .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.DOLBY_VISION_P5)
       .setExtraConfig({
@@ -2028,6 +2019,15 @@ shakaAssets.testAssets = [
           },
         },
       }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Multiple Dolby audio formats',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://webapi.streaming.dolby.com/v0_9/sources/media/v01/dash/lesson_8.mpd',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.OFFLINE),
   // }}}
 ];
 /* eslint-enable max-len */

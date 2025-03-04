@@ -15,8 +15,10 @@ vars:
       # for each test run.
       prefs:
         # Overrides Selenium's explicit default setting, to allow Firefox to
-        # install the Widevine CDM on demand.
+        # install the Widevine CDM on demand and use it.
         media.gmp-manager.updateEnabled: true
+        media.gmp-widevinecdm.enabled: true
+        media.gmp-widevinecdm.visible: true
         # Overrides Firefox's Linux-specific default setting to disable DRM.
         media.eme.enabled: true
         # Disable GPU acceleration to avoid contention for hardware resources
