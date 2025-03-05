@@ -63,6 +63,7 @@ describe('LCEVC Integration', () => {
   });
 
   afterEach(async () => {
+    await player.unload();
     eventManager.release();
     await player.destroy();
   });
