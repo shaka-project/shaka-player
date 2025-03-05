@@ -26,6 +26,7 @@
 +../../lib/device/tizen.js
 +../../lib/device/vizio.js
 +../../lib/device/webos.js
++../../lib/device/xbox.js
 
 +../../lib/drm/drm_engine.js
 +../../lib/drm/drm_utils.js

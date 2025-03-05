@@ -22,6 +22,7 @@ goog.require('shaka.device.PlayStation');
 goog.require('shaka.device.Tizen');
 goog.require('shaka.device.Vizio');
 goog.require('shaka.device.WebOS');
+goog.require('shaka.device.Xbox');
 goog.require('shaka.hls.HlsParser');
 goog.require('shaka.mss.MssParser');
 goog.require('shaka.log');
