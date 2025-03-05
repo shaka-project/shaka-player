@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.12.17](https://github.com/shaka-project/shaka-player/compare/v4.12.16...v4.12.17) (2025-03-05)
+
+
+### Bug Fixes
+
+* **HLS:** Only apply compensation if the difference is greater than 150ms ([#8207](https://github.com/shaka-project/shaka-player/issues/8207)) ([4b28c55](https://github.com/shaka-project/shaka-player/commit/4b28c559e35ab566881f6968114ba1ac88d311dc))
+* **UI:** Allow play/pause when seekOnTaps is enabled ([#8206](https://github.com/shaka-project/shaka-player/issues/8206)) ([9082aed](https://github.com/shaka-project/shaka-player/commit/9082aed4ea21fe1513d95df6ee217b8b84c1c353))
+
 ## [4.12.16](https://github.com/shaka-project/shaka-player/compare/v4.12.15...v4.12.16) (2025-03-03)
 
 
