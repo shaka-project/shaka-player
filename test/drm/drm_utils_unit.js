@@ -230,4 +230,28 @@ describe('DrmUtils', () => {
           'com.apple.fps')).toBe(false);
     });
   });
+
+  describe('isMediaKeysPolyfilled', () => {
+    let shakaMediaKeysPolyfill;
+
+    beforeAll(() => {
+      shakaMediaKeysPolyfill = window.shakaMediaKeysPolyfill;
+    });
+
+    afterAll(() => {
+      window.shakaMediaKeysPolyfill = shakaMediaKeysPolyfill;
+    });
+
+    it('should return true with a matching polyfill type', () => {
+      window.shakaMediaKeysPolyfill = 'webkit';
+      const result = shaka.drm.DrmUtils.isMediaKeysPolyfilled('webkit');
+      expect(result).toBe(true);
+    });
+
+    it('should return false with a non-matching polyfill type', () => {
+      window.shakaMediaKeysPolyfill = 'webkit';
+      const result = shaka.drm.DrmUtils.isMediaKeysPolyfilled('apple');
+      expect(result).toBe(false);
+    });
+  });
 });
