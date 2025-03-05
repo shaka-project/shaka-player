@@ -79,6 +79,9 @@ describe('LCEVC Integration', () => {
         pending('Disabled on unsupported platform.');
       }
 
+      // Wait for LCEVCdec to finish loading
+      await LCEVCdec.ready;
+
       await player.load(seiManifests.FMP4_DASH);
       await video.play();
 

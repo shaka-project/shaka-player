@@ -104,6 +104,12 @@ LCEVCdec.SupportObject.SupportStatus;
 LCEVCdec.SupportObject.SupportError;
 
 /**
+ * Promise that resolves once the LCEVC libraries have finished loading.
+ * @type {Promise}
+ */
+LCEVCdec.ready;
+
+/**
  * LCEVC instance for debugging and testing
  * @type {typeof LCEVCdec.LCEVCdec}
  */
