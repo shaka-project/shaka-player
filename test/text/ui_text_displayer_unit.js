@@ -74,7 +74,12 @@ describe('UITextDisplayer', () => {
   }
 
   function accessibilityScalingFontSize(cueSize) {
-    return `calc(${cueSize}*var(--shaka-text-font-size-scaling))`;
+    let result = cueSize;
+    if (window.CSS &&
+          CSS.supports('font-size', 'var(--shaka-text-font-size-scaling)')) {
+      result = `calc(${cueSize}*var(--shaka-text-font-size-scaling))`;
+    }
+    return result;
   }
 
   it('correctly displays styles for cues', () => {
