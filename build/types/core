@@ -19,10 +19,8 @@
 
 +../../lib/device/abstract_device.js
 +../../lib/device/apple_browser.js
-+../../lib/device/chrome_browser.js
++../../lib/device/default_browser.js
 +../../lib/device/device_factory.js
-+../../lib/device/edge_browser.js
-+../../lib/device/firefox_browser.js
 +../../lib/device/i_device.js
 
 +../../lib/drm/drm_engine.js
