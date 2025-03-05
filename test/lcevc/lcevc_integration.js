@@ -51,6 +51,7 @@ describe('LCEVC Integration', () => {
     player.configure('lcevc.enabled', true);
     player.configure('lcevc.drawLogo', true);
     player.configure('lcevc.dynamicPerformanceScaling', false);
+    player.configure('lcevc.poster', false);
 
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
