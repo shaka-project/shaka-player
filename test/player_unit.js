@@ -239,7 +239,7 @@ describe('Player', () => {
 
     it('destroys drmEngine before mediaSourceEngine with webkit polyfill',
         async () => {
-          spyOn(shaka.util.Platform, 'isMediaKeysPolyfilled')
+          spyOn(shaka.drm.DrmUtils, 'isMediaKeysPolyfilled')
               .and.returnValue(true);
           goog.asserts.assert(manifest, 'Manifest should be non-null');
 
