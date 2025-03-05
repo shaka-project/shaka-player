@@ -95,7 +95,7 @@ describe('Ads', () => {
     const streamUri = '/base/test/test/assets/hls-interstitial/main.m3u8';
 
     it('with support for multiple media elements', async () => {
-      if (shaka.util.Platform.isSmartTV()) {
+      if (!player.getConfiguration().ads.supportsMultipleMediaElements) {
         pending('Platform without support for multiple media elements.');
       }
       player.configure('ads.supportsMultipleMediaElements', true);
