@@ -52,10 +52,6 @@ describe('LCEVC Integration', () => {
     player.configure('lcevc.drawLogo', true);
     player.configure('lcevc.dynamicPerformanceScaling', false);
 
-    // Enable transmuxing
-    player.configure('streaming.preferNativeHls', false);
-    player.configure('mediaSource.forceTransmux', true);
-
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
