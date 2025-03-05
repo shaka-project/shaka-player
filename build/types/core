@@ -18,6 +18,7 @@
 +../../lib/deprecate/version.js
 
 +../../lib/device/abstract_device.js
++../../lib/device/apple_browser.js
 +../../lib/device/device_factory.js
 +../../lib/device/i_device.js
 
