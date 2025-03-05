@@ -95,8 +95,6 @@ describe('LCEVC Integration', () => {
       expect(LCEVCdec.instance.isLcevcEnabled).toBe(true);
       expect(LCEVCdec.instance.firstLcevcSegmentLoaded).toBe(true);
       expect(LCEVCdec.instance.lcevcDataDetected).toBe(true);
-
-      await player.unload();
     });
   });
 });
