@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.13.8](https://github.com/shaka-project/shaka-player/compare/v4.13.7...v4.13.8) (2025-03-05)
+
+
+### Bug Fixes
+
+* Clear some caches when install/uninstall PatchedMediaKeysApple ([#8198](https://github.com/shaka-project/shaka-player/issues/8198)) ([ee8473e](https://github.com/shaka-project/shaka-player/commit/ee8473e98685226d4308bb06160453534a0b2358))
+* **HLS:** Only apply compensation if the difference is greater than 150ms ([#8207](https://github.com/shaka-project/shaka-player/issues/8207)) ([36edcc3](https://github.com/shaka-project/shaka-player/commit/36edcc38ad429d9b14d2dadda828cb1a2f5dc9b4))
+* **UI:** Allow play/pause when seekOnTaps is enabled ([#8206](https://github.com/shaka-project/shaka-player/issues/8206)) ([aa9c10e](https://github.com/shaka-project/shaka-player/commit/aa9c10e4e4272486dbff20ae827231e10cded380))
+
+
+### Performance Improvements
+
+* Region timeline improvements ([#8203](https://github.com/shaka-project/shaka-player/issues/8203)) ([f41935c](https://github.com/shaka-project/shaka-player/commit/f41935c42baa7ac7bc6a985f9347fc2c2dbd624c))
+
 ## [4.13.7](https://github.com/shaka-project/shaka-player/compare/v4.13.6...v4.13.7) (2025-03-03)
 
 
