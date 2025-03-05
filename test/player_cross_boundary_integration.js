@@ -14,28 +14,35 @@ describe('Player Cross Boundary', () => {
   /** @type {shaka.test.Waiter} */
   let waiter;
 
-  beforeAll(() => {
+  let compiledShaka;
+
+  beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
+    compiledShaka =
+        await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
   });
 
-  beforeEach(() => {
-    player = new shaka.Player();
-    player.addEventListener('error', fail);
-    player.attach(video);
+  beforeEach(async () => {
+    await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
+    player = new compiledShaka.Player();
+    await player.attach(video);
 
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
 
+    // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
+    waiter.setPlayer(player);
+
+    eventManager.listen(player, 'error', fail);
   });
 
   afterEach(async () => {
-    await player.destroy();
-    player.releaseAllMutexes();
-
+    await player.unload();
     eventManager.release();
+    await player.destroy();
   });
 
   afterAll(() => {
@@ -67,7 +74,11 @@ describe('Player Cross Boundary', () => {
       });
     });
 
-    it('should reset MSE when crossing a boundary', async () => {
+    drmIt('should reset MSE when crossing a boundary', async () => {
+      if (!shakaSupport.drm['com.widevine.alpha']) {
+        pending('Needed Widevine DRM is not supported on this platform');
+      }
+
       await player.load(MULTI_PERIOD_ASSET_URI_);
       await video.play();
 
@@ -78,17 +89,49 @@ describe('Player Cross Boundary', () => {
       await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */ 10);
     });
 
-    it('should buffer no further than boundary', async () => {
+    drmIt('should buffer no further than boundary', async () => {
+      if (!shakaSupport.drm['com.widevine.alpha']) {
+        pending('Needed Widevine DRM is not supported on this platform');
+      }
+
       await player.load(MULTI_PERIOD_ASSET_URI_);
       await video.play();
 
       await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */ 10);
 
       video.pause();
+
+      // Wait to ensure we buffered to the end of the boundary. The asset is
+      // small enough that this is a safe assumption.
       await shaka.test.Util.delay(1);
 
       const end = player.getBufferedInfo().total[0].end;
       expect(end).toBeLessThanOrEqual(4);
+    });
+
+    drmIt('should skip MSE reset from encrypted boundary', async () => {
+      if (!shakaSupport.drm['com.widevine.alpha']) {
+        pending('Needed Widevine DRM is not supported on this platform');
+      }
+
+      player.configure({
+        streaming: {
+          crossBoundaryStrategy:
+            shaka.config.CrossBoundaryStrategy.RESET_TO_ENCRYPTED,
+        },
+      });
+      await player.load(MULTI_PERIOD_ASSET_URI_);
+      await video.play();
+
+      // The boundary is at 4 (from plain to encrypted period), we'll wait
+      // until we crossed it.
+      await waiter.timeoutAfter(15).waitUntilPlayheadReaches(video, 6);
+
+      video.currentTime = 1;
+
+      // When we seek back and we still have a readyState > 0, we did not
+      // reset MSE.
+      expect(video.readyState).toBeGreaterThan(0);
     });
   });
 });
