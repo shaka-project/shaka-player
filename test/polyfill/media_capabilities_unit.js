@@ -113,9 +113,8 @@ describe('MediaCapabilities', () => {
 
     it('should check codec support when MediaDecodingConfiguration.type ' +
         'is "file"', async () => {
-      const supportsMediaTypeSpy =
-          spyOn(shaka['util']['Platform'],
-              'supportsMediaType').and.returnValue(true);
+      const supportsMediaTypeSpy = spyOn(deviceDetected, 'supportsMediaType')
+          .and.returnValue(true);
       mockDecodingConfig.type = 'file';
       shaka.polyfill.MediaCapabilities.install();
       await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
