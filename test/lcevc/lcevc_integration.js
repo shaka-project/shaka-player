@@ -76,7 +76,7 @@ describe('LCEVC Integration', () => {
 
   describe('SEI Integration', () => {
     it('Should decode LCEVC in FMP4 DASH manifest', async () => {
-      if (shaka.util.Platform.isTizen()) {
+      if (shaka.util.Platform.isTizen() || shaka.util.Platform.isChromecast()) {
         pending('Disabled on unsupported platform.');
       }
 
