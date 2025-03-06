@@ -26,6 +26,7 @@ goog.require('shaka.device.Vizio');
 goog.require('shaka.device.WebKitSTB');
 goog.require('shaka.device.WebOS');
 goog.require('shaka.device.Xbox');
+goog.require('shaka.drm.FairPlay');
 goog.require('shaka.hls.HlsParser');
 goog.require('shaka.mss.MssParser');
 goog.require('shaka.log');
