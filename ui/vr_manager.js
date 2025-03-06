@@ -356,7 +356,8 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     const device = shaka.device.DeviceFactory.getDevice();
     const deviceType = device.getDeviceType();
     if (deviceType == shaka.device.IDevice.DeviceType.TV ||
-        deviceType == shaka.device.IDevice.DeviceType.CONSOLE) {
+        deviceType == shaka.device.IDevice.DeviceType.CONSOLE ||
+        deviceType == shaka.device.IDevice.DeviceType.CAST) {
       return null;
     }
     const webglContexts = [
