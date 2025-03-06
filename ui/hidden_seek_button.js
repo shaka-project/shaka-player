@@ -30,6 +30,9 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     /** @private {?boolean} */
     this.triggeredTouchValid_ = false;
 
+    /** @private {boolean} */
+    this.validTouchStart_ = false;
+
     /**
      * This timer will be used to hide seek button on video Container.
      * When the timer ticks it will force button to be invisible.
@@ -48,7 +51,15 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     this.seekContainer = shaka.util.Dom.createHTMLElement('div');
     this.parent.appendChild(this.seekContainer);
 
+    this.eventManager.listen(this.seekContainer, 'touchstart', (event) => {
+      this.validTouchStart_ = true;
+    });
+
     this.eventManager.listen(this.seekContainer, 'touchend', (event) => {
+      if (!this.validTouchStart_) {
+        return;
+      }
+      this.validTouchStart_ = false;
       // Do nothing if the controls are not visible
       if (!this.controls.isOpaque()) {
         return;
@@ -93,8 +104,8 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     if (!this.triggeredTouchValid_) {
       this.triggeredTouchValid_ = true;
       this.lastTouchEventTimeSet_ = Date.now();
-      this.hideSeekButtonContainerTimer_.tickAfter(1);
-    } else if (this.lastTouchEventTimeSet_+1000 > Date.now()) {
+      this.hideSeekButtonContainerTimer_.tickAfter(0.5);
+    } else if ((this.lastTouchEventTimeSet_ + 1000) > Date.now()) {
       // stops hiding of seek button incase the timer is active
       // because of previous touch event.
       this.hideSeekButtonContainerTimer_.stop();
