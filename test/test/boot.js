@@ -449,6 +449,12 @@ async function checkSupport() {
   }
 }
 
+function getDevice() {
+  const device = shaka.device.DeviceFactory.getDevice();
+  goog.asserts.assert(device, 'device must be non-null');
+  window.deviceDetected = device;
+}
+
 /**
  * Set up the Shaka Player test environment.
  * @return {!Promise}
@@ -466,6 +472,8 @@ async function setupTestEnvironment() {
   shaka.polyfill.installAll();
 
   await checkSupport();
+
+  getDevice();
 
   configureJasmineEnvironment();
 }

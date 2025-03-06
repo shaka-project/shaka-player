@@ -405,7 +405,8 @@ describe('UI', () => {
         UiUtils.confirmElementFound(videoContainer, 'shaka-seek-bar');
 
         // The default settings vary in mobile/desktop context.
-        if (shaka.util.Platform.isMobile()) {
+        const deviceType = deviceDetected.getDeviceType();
+        if (deviceType == shaka.device.IDevice.DeviceType.MOBILE) {
           UiUtils.confirmElementFound(videoContainer,
               'shaka-play-button-container');
           UiUtils.confirmElementFound(videoContainer, 'shaka-play-button');

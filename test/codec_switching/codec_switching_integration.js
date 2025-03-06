@@ -96,7 +96,7 @@ describe('Codec Switching', () => {
       if (!shaka.media.Capabilities.isChangeTypeSupported()) {
         pending('SourceBuffer.changeType is not supported');
       }
-      if (!shaka.util.Platform.supportsSmoothCodecSwitching()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching()) {
         pending('SourceBuffer.changeType is not considered ' +
           'reliable on this device');
       }
@@ -172,7 +172,7 @@ describe('Codec Switching', () => {
       if (!shaka.media.Capabilities.isChangeTypeSupported()) {
         pending('SourceBuffer.changeType is not supported');
       }
-      if (!shaka.util.Platform.supportsSmoothCodecSwitching()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching()) {
         pending('SourceBuffer.changeType is not considered ' +
           'reliable on this device');
       }
@@ -248,7 +248,7 @@ describe('Codec Switching', () => {
       if (!shaka.media.Capabilities.isChangeTypeSupported()) {
         pending('SourceBuffer.changeType is not supported');
       }
-      if (!shaka.util.Platform.supportsSmoothCodecSwitching()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching()) {
         pending('SourceBuffer.changeType is not considered ' +
           'reliable on this device');
       }
@@ -325,7 +325,7 @@ describe('Codec Switching', () => {
       if (!shaka.media.Capabilities.isChangeTypeSupported()) {
         pending('SourceBuffer.changeType is not supported');
       }
-      if (!shaka.util.Platform.supportsSmoothCodecSwitching()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching()) {
         pending('SourceBuffer.changeType is not considered ' +
           'reliable on this device');
       }
