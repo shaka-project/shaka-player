@@ -753,7 +753,7 @@ describe('Player', () => {
       it('only applies to DASH streams', async () => {
         video.canPlayType.and.returnValue('maybe');
         spyOn(shaka.util.Dom, 'anyMediaElement').and.returnValue(video);
-        spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
+        spyOn(deviceDetected, 'supportsMediaSource').and.returnValue(true);
         // Make sure player.load() resolves for src=
         spyOn(shaka.util.MediaReadyState, 'waitForReadyState').and.callFake(
             (mediaElement, readyState, eventManager, callback) => {
@@ -773,7 +773,7 @@ describe('Player', () => {
 
       it('does not apply to non-DASH streams', async () => {
         video.canPlayType.and.returnValue('maybe');
-        spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
+        spyOn(deviceDetected, 'supportsMediaSource').and.returnValue(true);
 
         player.configure({
           streaming: {
@@ -809,7 +809,7 @@ describe('Player', () => {
       it('only applies to HLS streams', async () => {
         video.canPlayType.and.returnValue('maybe');
         spyOn(shaka.util.Dom, 'anyMediaElement').and.returnValue(video);
-        spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
+        spyOn(deviceDetected, 'supportsMediaSource').and.returnValue(true);
         spyOn(shaka.util.Platform, 'isApple').and.returnValue(false);
         // Make sure player.load() resolves for src=
         spyOn(shaka.util.MediaReadyState, 'waitForReadyState').and.callFake(
@@ -830,7 +830,7 @@ describe('Player', () => {
 
       it('does not apply to non-HLS streams', async () => {
         video.canPlayType.and.returnValue('maybe');
-        spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
+        spyOn(deviceDetected, 'supportsMediaSource').and.returnValue(true);
         spyOn(shaka.util.Platform, 'isApple').and.returnValue(false);
 
         player.configure({
