@@ -86,7 +86,7 @@ player.configure('drm.initDataTransform', (initData, initDataType, drmInfo) => {
   const skdUri = shaka.util.StringUtils.fromBytesAutoDetect(initData);
   const contentId = getMyContentId(skdUri);
   const cert = drmInfo.serverCertificate;
-  return shaka.drm.shaka.drm.FairPlay.initDataTransform(initData, contentId, cert);
+  return shaka.drm.FairPlay.initDataTransform(initData, contentId, cert);
 });
 ```
 
