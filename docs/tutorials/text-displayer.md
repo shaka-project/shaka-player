@@ -28,6 +28,27 @@ const player = new shaka.Player(/* mediaElement= */ null, container);
 player.setVideoContainer(container);
 ```
 
+##### Font size scaling for readability
+
+For improved readability the option to scale text size is provided via CSS variable (where supported).  The application must provide the following fallback setting in its CSS as a bare minimum:
+
+```css
+:root {
+  --shaka-text-font-size-scaling: 1;
+}
+```
+
+The scale factor can be changed in JS, for example, in response to the user selecting a percentage scale factor:
+
+```js
+const fontSizeSelectElement = document.getElementById("fontScaling");
+const root = document.querySelector(":root");
+root.style.setProperty(
+   "--shaka-text-font-size-scaling",
+   fontSizeSelectElement.value / 100
+);
+```
+
 ### Text displayer configuration
 
 Additional configuration for the text displayer can be passed by calling:

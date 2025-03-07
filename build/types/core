@@ -20,6 +20,7 @@
 
 +../../lib/drm/drm_engine.js
 +../../lib/drm/drm_utils.js
++../../lib/drm/fairplay.js
 +../../lib/drm/playready.js
 
 +../../lib/media/adaptation_set.js
