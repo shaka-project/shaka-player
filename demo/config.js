@@ -589,6 +589,13 @@ shakaDemo.Config = class {
     this.addSelectInput_('Preferred video layout', 'preferredVideoLayout',
         videoLayouts, videoLayoutsNames);
 
+    const strategyOptions = shaka.config.CrossBoundaryStrategy;
+    const strategyOptionsNames = {
+      'KEEP': 'Keep',
+      'RESET': 'Reset',
+      'RESET_TO_ENCRYPTED': 'Reset to encrypted',
+    };
+
     this.addBoolInput_('Start At Segment Boundary',
         'streaming.startAtSegmentBoundary')
         .addBoolInput_('Ignore Text Stream Failures',
@@ -608,7 +615,10 @@ shakaDemo.Config = class {
         .addBoolInput_('Should fix timestampOffset',
             'streaming.shouldFixTimestampOffset')
         .addBoolInput_('Avoid eviction on QuotaExceededError',
-            'streaming.avoidEvictionOnQuotaExceededError');
+            'streaming.avoidEvictionOnQuotaExceededError')
+        .addSelectInput_('Cross Boundary Strategy',
+            'streaming.crossBoundaryStrategy',
+            strategyOptions, strategyOptionsNames);
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
   }
