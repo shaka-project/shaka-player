@@ -2431,7 +2431,8 @@ shaka.extern.OfflineConfiguration;
 
 /**
  * @typedef {{
- *   captionsUpdatePeriod: number
+ *   captionsUpdatePeriod: number,
+ *   fontScaleFactor: number
  * }}
  *
  * @description
@@ -2441,7 +2442,10 @@ shaka.extern.OfflineConfiguration;
  *   The number of seconds to see if the captions should be updated.
  *   <br>
  *   Defaults to <code>0.25</code>.
- *
+ * @property {number} fontScaleFactor
+ *   Applies a factor to the font scale for all cues.
+ *   <br>
+ *   Defaults to <code>1</code>.
  * @exportDoc
  */
 shaka.extern.TextDisplayerConfiguration;

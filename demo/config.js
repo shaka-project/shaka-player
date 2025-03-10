@@ -352,6 +352,9 @@ shakaDemo.Config = class {
     this.addSection_('Text displayer', docLink)
         .addNumberInput_('Captions update period',
             'textDisplayer.captionsUpdatePeriod',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Captions update period',
+            'textDisplayer.fontScaleFactor',
             /* canBeDecimal= */ true);
   }
 
