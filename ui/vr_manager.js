@@ -93,8 +93,17 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       let unsupported = false;
       switch (spatialInfo.projection) {
         case 'hequ':
-          unsupported = spatialInfo.hfov != 360;
-          this.vrAsset_ = 'equirectangular';
+          switch (spatialInfo.hfov) {
+            case 360:
+              this.vrAsset_ = 'equirectangular';
+              break;
+            case 180:
+              this.vrAsset_ = 'halfequirectangular';
+              break;
+            default:
+              unsupported = true;
+              break;
+          }
           break;
         case 'fish':
           this.vrAsset_ = 'equirectangular';

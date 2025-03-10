@@ -62,6 +62,55 @@ shaka.ui.VRUtils = class {
   }
 
   /**
+   * @param {number} resolution
+   * @return {{vertices: !Array<number>, textureCoords: !Array<number>,
+   *          indices: !Array<number>}}
+   */
+  static generateHalfSphere(resolution) {
+    /** @type {!Array<number>} */
+    const vertices = [];
+    /** @type {!Array<number>} */
+    const textureCoords = [];
+    /** @type {!Array<number>} */
+    const indices = [];
+
+    const PI = Math.PI;
+    const HALF_PI = PI / 2;
+
+    for (let latNumber = 0; latNumber <= resolution; latNumber++) {
+      const theta = latNumber * PI / resolution;
+      const sinTheta = Math.sin(theta);
+      const cosTheta = Math.cos(theta);
+
+      for (let longNumber = 0; longNumber <= resolution; longNumber++) {
+        const phi = longNumber * 2 * HALF_PI / resolution;
+        const sinPhi = Math.sin(phi);
+        const cosPhi = Math.cos(phi);
+
+        const x = cosPhi * sinTheta;
+        const y = cosTheta;
+        const z = sinPhi * sinTheta;
+
+        vertices.push(z, y, x);
+        textureCoords.push(longNumber / resolution, latNumber / resolution);
+      }
+    }
+
+    for (let latNumber = 0; latNumber < resolution; latNumber++) {
+      for (let longNumber = 0; longNumber < resolution; longNumber++) {
+        const first = (latNumber * (resolution + 1)) + longNumber;
+        const second = first + resolution + 1;
+
+        indices.push(first, second, first + 1);
+        indices.push(second, second + 1, first + 1);
+      }
+    }
+
+    return {vertices, textureCoords, indices};
+  }
+
+
+  /**
    * @return {{vertices: !Array<number>, textureCoords: !Array<number>,
    *          indices: !Array<number>}}
    */

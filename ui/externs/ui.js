@@ -250,7 +250,8 @@ shaka.extern.UIVolumeBarColors;
  *   Defaults to false.
  * @property {string} defaultVrProjectionMode
  *   Indicate the default VR projection mode.
- *   Possible values: <code>'equirectangular'</code> or <code>'cubemap'</code>.
+ *   Possible values: <code>'equirectangular'</code> or
+ *   <code>'halfequirectangular'</code> or <code>'cubemap'</code>.
  *   Defaults to <code>'equirectangular'</code>.
  * @property {boolean} setupMediaSession
  *   If true, MediaSession controls will be managed by the UI. It will also use
