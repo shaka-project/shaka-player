@@ -83,7 +83,16 @@ describe('LCEVC Integration', () => {
       // Wait for LCEVCdec to finish loading
       await LCEVCdec.ready;
 
+      await new Promise((resolve) => {
+        setTimeout(resolve, 5000);
+      });
+
       await player.load(seiManifests.FMP4_DASH);
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 5000);
+      });
+
       await video.play();
 
       // Wait for the video to start playback.  If it takes longer than 10
