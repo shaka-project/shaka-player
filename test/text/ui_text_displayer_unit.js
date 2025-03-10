@@ -73,15 +73,6 @@ describe('UITextDisplayer', () => {
     textDisplayer.updateCaptions_();
   }
 
-  function accessibilityScalingFontSize(cueSize) {
-    let result = cueSize;
-    if (window.CSS &&
-          CSS.supports('font-size', 'var(--shaka-text-font-size-scaling)')) {
-      result = `calc(${cueSize}*var(--shaka-text-font-size-scaling))`;
-    }
-    return result;
-  }
-
   it('correctly displays styles for cues', () => {
     /** @type {!shaka.text.Cue} */
     const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
@@ -108,7 +99,7 @@ describe('UITextDisplayer', () => {
     const expectCssObj = {
       'color': 'green',
       'direction': 'ltr',
-      'font-size': accessibilityScalingFontSize(cueSampleFontSize),
+      'font-size': cueSampleFontSize,
       'font-style': 'normal',
       'font-weight': 400,
       'text-align': 'center',
@@ -159,7 +150,7 @@ describe('UITextDisplayer', () => {
 
     const expectCssObj = {
       'color': 'green',
-      'font-size': accessibilityScalingFontSize(cueSampleFontSize),
+      'font-size': cueSampleFontSize,
       'font-style': 'normal',
       'font-weight': 400,
       'text-align': 'center',
@@ -202,8 +193,6 @@ describe('UITextDisplayer', () => {
     // videoContainerHeight=450px and tts:fontSize="0.80c" on the default style.
     const calculatedFontSize = (450/20) * fontSizeAsCellResolution;
     const expectedFontSize = `${calculatedFontSize}px`;
-    const expectedAccessibilityFontSize = accessibilityScalingFontSize(
-        expectedFontSize);
 
     // Expected value is calculated based on ttp:cellResolution="60 20"
     // videoContainerHeight=450px and ebutts:linePadding="0.5c" on the default
@@ -215,7 +204,7 @@ describe('UITextDisplayer', () => {
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({
-          'font-size': expectedAccessibilityFontSize,
+          'font-size': expectedFontSize,
           'padding-left': expectedLinePadding,
           'padding-right': expectedLinePadding,
         }));
@@ -239,14 +228,12 @@ describe('UITextDisplayer', () => {
     // videoContainerHeight=450px and tts:fontSize="90%" on the default style.
     const calculatedFontSize = (450/15) * (cueSampleFontSize/100);
     const expectedFontSize = `${calculatedFontSize}px`;
-    const expectedAccessibilityFontSize = accessibilityScalingFontSize(
-        expectedFontSize);
 
     const textContainer = videoContainer.querySelector('.shaka-text-container');
     const captions = textContainer.querySelector('div');
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
-        jasmine.objectContaining({'font-size': expectedAccessibilityFontSize}));
+        jasmine.objectContaining({'font-size': expectedFontSize}));
   });
 
   it('does not display duplicate cues', () => {
