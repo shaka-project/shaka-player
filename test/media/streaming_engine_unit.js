@@ -472,7 +472,6 @@ describe('StreamingEngine', () => {
       getPresentationTime: () => presentationTimeInSeconds,
       getBandwidthEstimate: Util.spyFunc(getBandwidthEstimate),
       getPlaybackRate: Util.spyFunc(getPlaybackRate),
-      video: shaka.test.UiUtils.createVideoElement(),
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
       onError: Util.spyFunc(onError),

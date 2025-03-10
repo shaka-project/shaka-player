@@ -265,7 +265,6 @@ describe('StreamingEngine', () => {
       getPresentationTime: () => playhead.getTime(),
       getBandwidthEstimate: () => 1e6,
       getPlaybackRate: () => video.playbackRate,
-      video: video,
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
       onError: Util.spyFunc(onError),

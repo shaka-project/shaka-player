@@ -6,7 +6,6 @@ audiotrackchange
 audiotrackchanged
 audiotrackschanged
 autoplaying
-boundarycrossed
 captionselectionupdated
 caststatuschanged
 customwarning
