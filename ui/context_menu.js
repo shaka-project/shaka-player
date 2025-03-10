@@ -84,6 +84,13 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
   }
 
   /**
+   * @export
+   */
+  closeMenu() {
+    shaka.ui.Utils.setDisplay(this.contextMenu_, false);
+  }
+
+  /**
    * @param {string} name
    * @param {!shaka.extern.IUIElement.Factory} factory
    * @export

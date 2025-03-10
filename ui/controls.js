@@ -126,6 +126,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.fadeControlsTimer_ = new shaka.util.Timer(() => {
       this.controlsContainer_.removeAttribute('shown');
 
+      if (this.contextMenu_) {
+        this.contextMenu_.closeMenu();
+      }
+
       // If there's an overflow menu open, keep it this way for a couple of
       // seconds in case a user immediately initiates another mouse move to
       // interact with the menus. If that didn't happen, go ahead and hide
