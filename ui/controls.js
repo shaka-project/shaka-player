@@ -130,7 +130,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // seconds in case a user immediately initiates another mouse move to
       // interact with the menus. If that didn't happen, go ahead and hide
       // the menus.
-      this.hideSettingsMenusTimer_.tickAfter(/* seconds= */ 2);
+      this.hideSettingsMenusTimer_.tickAfter(
+          /* seconds= */ this.config_.closeMenusDelay);
     });
 
     /**
