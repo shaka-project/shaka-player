@@ -24,20 +24,6 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    /**
-     * Replaces the original 1-second double-tap detection
-     * with 500 ms for a more responsive single tap.
-     * @private {number}
-     */
-    this.DOUBLE_TAP_WINDOW_MS_ = 500;
-
-    /**
-     * Minimum distance (px) the finger must move during touch
-     * to consider it a scroll rather than a tap.
-     * @private {number}
-     */
-    this.SCROLL_THRESHOLD_ = 10;
-
     /** @private {?number} */
     this.lastTouchEventTimeSet_ = null;
 
@@ -78,16 +64,6 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     this.seekContainer = shaka.util.Dom.createHTMLElement('div');
     this.parent.appendChild(this.seekContainer);
 
-    // ---------------------------------------------------------------
-    //  TOUCH EVENT LISTENERS for SCROLL vs. TAP DETECTION
-    // ---------------------------------------------------------------
-    this.eventManager.listen(this.seekContainer, 'touchstart',
-        (e) => this.onTouchStart_(e));
-    this.eventManager.listen(this.seekContainer, 'touchmove',
-        (e) => this.onTouchMove_(e));
-    this.eventManager.listen(this.seekContainer, 'touchend',
-        (e) => this.onTouchEnd_(e));
-
     /** @private {!HTMLElement} */
     this.seekValue_ = shaka.util.Dom.createHTMLElement('span');
     this.seekValue_.textContent = '0s';
@@ -101,12 +77,28 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
 
     /** @protected {boolean} */
     this.isRewind = false;
+
+    // ---------------------------------------------------------------
+    //  TOUCH EVENT LISTENERS for SCROLL vs. TAP DETECTION
+    // ---------------------------------------------------------------
+    this.eventManager.listen(this.seekContainer, 'touchstart', (e) => {
+      const event = /** @type {!TouchEvent} */(e);
+      this.onTouchStart_(event);
+    });
+    this.eventManager.listen(this.seekContainer, 'touchmove', (e) => {
+      const event = /** @type {!TouchEvent} */(e);
+      this.onTouchMove_(event);
+    });
+    this.eventManager.listen(this.seekContainer, 'touchend', (e) => {
+      const event = /** @type {!TouchEvent} */(e);
+      this.onTouchEnd_(event);
+    });
   }
 
   /**
    * Called when the user starts touching the screen.
    * We record the initial touch coordinates for scroll detection.
-   * @param {!Event} event
+   * @param {!TouchEvent} event
    * @private
    */
   onTouchStart_(event) {
@@ -115,7 +107,8 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
       return;
     }
 
-    // If multiple touches, handle or ignore as needed. Here, we assume single-touch.
+    // If multiple touches, handle or ignore as needed. Here, we assume
+    // single-touch.
     if (event.touches.length > 0) {
       this.touchStartX_ = event.touches[0].clientX;
       this.touchStartY_ = event.touches[0].clientY;
@@ -126,7 +119,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
   /**
    * Called when the user moves the finger on the screen.
    * If the movement exceeds the scroll threshold, we mark this as scrolling.
-   * @param {!Event} event
+   * @param {!TouchEvent} event
    * @private
    */
   onTouchMove_(event) {
@@ -136,7 +129,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
       const dx = event.touches[0].clientX - this.touchStartX_;
       const dy = event.touches[0].clientY - this.touchStartY_;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance > this.SCROLL_THRESHOLD_) {
+      if (distance > shaka.ui.HiddenSeekButton.SCROLL_THRESHOLD_) {
         this.hasMoved_ = true;
       }
     }
@@ -145,7 +138,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
   /**
    * Called when the user lifts the finger from the screen.
    * If we haven't moved beyond the threshold, treat it as a tap.
-   * @param {!Event} event
+   * @param {!TouchEvent} event
    * @private
    */
   onTouchEnd_(event) {
@@ -159,7 +152,8 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
       return;
     }
 
-    // If any settings menus are open, this tap closes them instead of toggling play/seek.
+    // If any settings menus are open, this tap closes them instead of toggling
+    // play/seek.
     if (this.controls.anySettingsMenusAreOpen()) {
       event.preventDefault();
       this.controls.hideSettingsMenus();
@@ -181,14 +175,16 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
   onSeekButtonClick_() {
     const tapSeekDistance = this.controls.getConfig().tapSeekDistance;
 
+    const doubleTapWindow = shaka.ui.HiddenSeekButton.DOUBLE_TAP_WINDOW_;
+
     if (!this.triggeredTouchValid_) {
       // First tap: start our 500 ms "double-tap" timer.
       this.triggeredTouchValid_ = true;
       this.lastTouchEventTimeSet_ = Date.now();
 
-      this.hideSeekButtonContainerTimer_.tickAfter(
-          this.DOUBLE_TAP_WINDOW_MS_ / 1000);
-    } else if (this.lastTouchEventTimeSet_ + this.DOUBLE_TAP_WINDOW_MS_ > Date.now()) {
+      this.hideSeekButtonContainerTimer_.tickAfter(doubleTapWindow);
+    } else if ((this.lastTouchEventTimeSet_ +
+        doubleTapWindow * 1000) > Date.now()) {
       // Second tap arrived in time — interpret as a double tap to seek.
       this.hideSeekButtonContainerTimer_.stop();
       this.lastTouchEventTimeSet_ = Date.now();
@@ -203,8 +199,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
       this.seekContainer.style.opacity = '1';
 
       // Restart timer if user might tap again (triple tap).
-      this.hideSeekButtonContainerTimer_.tickAfter(
-          this.DOUBLE_TAP_WINDOW_MS_ / 1000);
+      this.hideSeekButtonContainerTimer_.tickAfter(doubleTapWindow);
     }
   }
 
@@ -225,3 +220,18 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     this.seekValue_.textContent = '0s';
   }
 };
+
+/**
+ * The amount of time, in seconds, to double-tap detection.
+ *
+ * @const {number}
+ */
+shaka.ui.HiddenSeekButton.DOUBLE_TAP_WINDOW_ = 0.5;
+
+/**
+ * Minimum distance (px) the finger must move during touch to consider it a
+ * scroll rather than a tap.
+ *
+ * @const {number}
+ */
+shaka.ui.HiddenSeekButton.SCROLL_THRESHOLD_ = 10;
