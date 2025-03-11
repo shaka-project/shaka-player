@@ -16,6 +16,7 @@ goog.require('shaka.ads.AdManager');
 goog.require('shaka.cast.CastProxy');
 goog.require('shaka.cast.CastReceiver');
 goog.require('shaka.dash.DashParser');
+goog.require('shaka.drm.FairPlay');
 goog.require('shaka.hls.HlsParser');
 goog.require('shaka.mss.MssParser');
 goog.require('shaka.log');
