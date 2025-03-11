@@ -1987,7 +1987,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   hideUI() {
-    this.onMouseLeave_();
+    // Stop the timer and invoke the callback now to hide the controls.  If we
+    // don't, the opacity style we set in onMouseMove_ will continue to override
+    // the opacity in CSS and force the controls to stay visible.
+    this.mouseStillTimer_.tickNow();
   }
 
   /**
