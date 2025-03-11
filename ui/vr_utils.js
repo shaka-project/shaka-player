@@ -59,7 +59,6 @@ shaka.ui.VRUtils = class {
     return {vertices, textureCoords, indices};
   }
 
-
   /**
    * @return {{vertices: !Array<number>, textureCoords: !Array<number>,
    *          indices: !Array<number>}}
