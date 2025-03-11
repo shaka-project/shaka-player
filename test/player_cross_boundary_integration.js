@@ -65,6 +65,16 @@ describe('Player Cross Boundary', () => {
           },
         },
       });
+
+      // PlayReady on Chromecast is deprecated, so we prefer to use the DRM
+      // that is officially supported.
+      if (shaka.util.Platform.isChromecast()) {
+        player.configure({
+          drm: {
+            preferredKeySystems: ['com.widevine.alpha'],
+          },
+        });
+      }
     });
 
     drmIt('should reset MSE when crossing a boundary', async () => {
