@@ -80,6 +80,11 @@ describe('LCEVC Integration', () => {
         pending('Disabled on unsupported platform.');
       }
 
+      if (!(canvas.getContext('webgl') ||
+          canvas.getContext('experimental-webgl'))) {
+        pending('Current platform does not offer WebGL support.');
+      }
+
       // Wait for LCEVCdec to finish loading
       await LCEVCdec.ready;
 
