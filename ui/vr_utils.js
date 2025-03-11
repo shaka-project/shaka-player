@@ -11,62 +11,11 @@ goog.provide('shaka.ui.VRUtils');
 shaka.ui.VRUtils = class {
   /**
    * @param {number} resolution
+   * @param {boolean=} isSemiSphere
    * @return {{vertices: !Array<number>, textureCoords: !Array<number>,
    *          indices: !Array<number>}}
    */
-  static generateSphere(resolution) {
-    /** @type {!Array<number>} */
-    const vertices = [];
-    /** @type {!Array<number>} */
-    const textureCoords = [];
-    /** @type {!Array<number>} */
-    const indices = [];
-
-    for (let i = 0; i <= resolution; i++) {
-      const v = i / resolution;
-      const phi = v * Math.PI;
-      const sinPhi = Math.sin(phi);
-      const cosPhi = Math.cos(phi);
-
-      for (let j = 0; j <= resolution; j++) {
-        const u = j / resolution;
-        const theta = u * Math.PI * 2;
-
-        const sinTheta = Math.sin(theta);
-        const cosTheta = Math.cos(theta);
-
-        const x = -1 * cosTheta * sinPhi;
-        const y = cosPhi;
-        const z = sinTheta * sinPhi;
-
-        vertices.push(x, y, z);
-
-        textureCoords.push(u);
-        textureCoords.push(v);
-      }
-    }
-
-    for (let i = 0; i < resolution; i++) {
-      for (let j = 0; j < resolution; j++) {
-        const a = i * (resolution + 1) + j;
-        const b = a + 1;
-        const c = (i + 1) * (resolution + 1) + j;
-        const d = c + 1;
-
-        indices.push(a, c, b);
-        indices.push(b, c, d);
-      }
-    }
-
-    return {vertices, textureCoords, indices};
-  }
-
-  /**
-   * @param {number} resolution
-   * @return {{vertices: !Array<number>, textureCoords: !Array<number>,
-   *          indices: !Array<number>}}
-   */
-  static generateHalfSphere(resolution) {
+  static generateSphere(resolution, isSemiSphere = false) {
     /** @type {!Array<number>} */
     const vertices = [];
     /** @type {!Array<number>} */
@@ -76,6 +25,7 @@ shaka.ui.VRUtils = class {
 
     const PI = Math.PI;
     const HALF_PI = PI / 2;
+    const maxPhi = isSemiSphere ? HALF_PI : PI;
 
     for (let latNumber = 0; latNumber <= resolution; latNumber++) {
       const theta = latNumber * PI / resolution;
@@ -83,7 +33,7 @@ shaka.ui.VRUtils = class {
       const cosTheta = Math.cos(theta);
 
       for (let longNumber = 0; longNumber <= resolution; longNumber++) {
-        const phi = longNumber * 2 * HALF_PI / resolution;
+        const phi = longNumber * 2 * maxPhi / resolution;
         const sinPhi = Math.sin(phi);
         const cosPhi = Math.cos(phi);
 
@@ -98,11 +48,11 @@ shaka.ui.VRUtils = class {
 
     for (let latNumber = 0; latNumber < resolution; latNumber++) {
       for (let longNumber = 0; longNumber < resolution; longNumber++) {
-        const first = (latNumber * (resolution + 1)) + longNumber;
-        const second = first + resolution + 1;
+        const firstRow = (latNumber * (resolution + 1)) + longNumber;
+        const secondRow = firstRow + resolution + 1;
 
-        indices.push(first, second, first + 1);
-        indices.push(second, second + 1, first + 1);
+        indices.push(firstRow, secondRow, firstRow + 1);
+        indices.push(secondRow, secondRow + 1, firstRow + 1);
       }
     }
 

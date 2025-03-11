@@ -416,7 +416,7 @@ shaka.ui.VRWebgl = class {
     if (this.projectionMode_ == 'cubemap') {
       this.geometry_ = shaka.ui.VRUtils.generateCube();
     } else if (this.projectionMode_ == 'halfequirectangular') {
-      this.geometry_ = shaka.ui.VRUtils.generateHalfSphere(100);
+      this.geometry_ = shaka.ui.VRUtils.generateSphere(100, true);
     } else {
       this.geometry_ = shaka.ui.VRUtils.generateSphere(100);
     }
