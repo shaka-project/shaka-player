@@ -110,6 +110,9 @@ shaka.ui.VRWebgl = class {
     this.texture_ = null;
 
     /** @private {number} */
+    this.positionX_ = 0;
+
+    /** @private {number} */
     this.positionY_ = 0;
 
     /** @private {number} */
@@ -412,6 +415,8 @@ shaka.ui.VRWebgl = class {
   initGLBuffers_() {
     if (this.projectionMode_ == 'cubemap') {
       this.geometry_ = shaka.ui.VRUtils.generateCube();
+    } else if (this.projectionMode_ == 'halfequirectangular') {
+      this.geometry_ = shaka.ui.VRUtils.generateSphere(100, true);
     } else {
       this.geometry_ = shaka.ui.VRUtils.generateSphere(100);
     }
@@ -484,7 +489,8 @@ shaka.ui.VRWebgl = class {
     }
 
     // Update matrix
-    if (this.projectionMode_ == 'equirectangular') {
+    if (this.projectionMode_ == 'equirectangular' ||
+        this.projectionMode_ == 'halfequirectangular') {
       shaka.ui.Matrix4x4.multiply(this.viewProjectionMatrix_,
           this.viewMatrix_, this.identityMatrix_);
       shaka.ui.Matrix4x4.multiply(this.viewProjectionMatrix_,
@@ -589,7 +595,14 @@ shaka.ui.VRWebgl = class {
    * @param {!number} roll Roll.
    */
   rotateViewGlobal(yaw, pitch, roll) {
-    const pitchBoundary = 90.0 * Math.PI / 180;
+    let yawBoundary = Infinity;
+    let pitchBoundary = 90.0 * Math.PI / 180;
+
+    if (this.projectionMode_ == 'halfequirectangular') {
+      yawBoundary = 90.0 * Math.PI / 180;
+      pitchBoundary /= 2;
+    }
+
     let matrix;
     if (this.projectionMode_ == 'cubemap') {
       matrix = this.viewProjectionMatrix_;
@@ -597,11 +610,17 @@ shaka.ui.VRWebgl = class {
       matrix = this.viewMatrix_;
     }
 
-    // Rotate global axis
-    shaka.ui.Matrix4x4.rotateY(matrix, matrix, yaw);
-
-    // Variable to limit the pitch movement
+    // Variable to limit the movement
+    this.positionX_ += yaw;
     this.positionY_ += pitch;
+
+    if (this.positionX_ < yawBoundary &&
+      this.positionX_ > -yawBoundary) {
+      // Rotate global axis
+      shaka.ui.Matrix4x4.rotateY(matrix, matrix, yaw);
+    } else {
+      this.positionX_ -= yaw;
+    }
 
     if (this.positionY_ < pitchBoundary &&
       this.positionY_ > -pitchBoundary) {
@@ -719,6 +738,7 @@ shaka.ui.VRWebgl = class {
     if (this.cont_ < steps) {
       this.resetTimer_ = new shaka.util.Timer(() => {
         this.reset(false);
+        this.positionX_ = 0;
         this.positionY_ = 0;
         this.cont_++;
         this.renderGL_(false);

@@ -422,6 +422,7 @@ eyex
 eyey
 eyez
 fovy
+halfequirectangular
 hequ
 hfov
 highp
