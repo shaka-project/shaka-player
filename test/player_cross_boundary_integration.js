@@ -76,7 +76,7 @@ describe('Player Cross Boundary', () => {
       await player.load(MULTI_PERIOD_ASSET_URI_);
       await video.play();
 
-      await waiter.timeoutAfter(10).waitForEvent(player, 'boundarycrossed');
+      await waiter.timeoutAfter(20).waitForEvent(player, 'boundarycrossed');
 
       expect(video.readyState).toBe(0);
 
@@ -101,7 +101,7 @@ describe('Player Cross Boundary', () => {
       await shaka.test.Util.delay(1);
 
       const end = player.getBufferedInfo().total[0].end;
-      expect(end).toBeLessThanOrEqual(4);
+      expect(end).toBeLessThanOrEqual(8);
     });
 
     drmIt('should skip MSE reset from encrypted boundary', async () => {
@@ -119,9 +119,9 @@ describe('Player Cross Boundary', () => {
       await player.load(MULTI_PERIOD_ASSET_URI_);
       await video.play();
 
-      // The boundary is at 4 (from plain to encrypted period), we'll wait
+      // The boundary is at 8 (from plain to encrypted period), we'll wait
       // until we crossed it.
-      await waiter.timeoutAfter(15).waitUntilPlayheadReaches(video, 6);
+      await waiter.timeoutAfter(20).waitUntilPlayheadReaches(video, 10);
 
       video.currentTime = 1;
 
