@@ -504,6 +504,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    */
   setupDeviceOrientationListener_() {
     this.eventManager_.listen(window, 'deviceorientation', (e) => {
+      if (!this.vrWebgl_) {
+        return;
+      }
       const event = /** @type {!DeviceOrientationEvent} */(e);
       let alphaDif = (event.alpha || 0) - this.prevAlpha_;
       let betaDif = (event.beta || 0) - this.prevBeta_;
