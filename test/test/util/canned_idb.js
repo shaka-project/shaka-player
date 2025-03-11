@@ -160,8 +160,20 @@ shaka.test.CannedIDB = class {
    * @private
    */
   static openDatabase_(name) {
+    let stack;
+    try {
+      throw new Error('');
+    } catch (error) {  // eslint-disable-line
+      stack = error.stack;
+    }
+
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(name);
+
+      request.onversionchange = (event) => {
+        window.dump(
+            'VERSIONCHANGE from openDatabase_ in canned_idb from ' + stack);
+      };
 
       request.onupgradeneeded = (event) => {
         reject(new Error('DB did not exist!'));
@@ -176,7 +188,6 @@ shaka.test.CannedIDB = class {
       };
 
       request.onerror = (event) => {
-        event.preventDefault();
         reject(request.error);
       };
     });
@@ -238,7 +249,6 @@ shaka.test.CannedIDB = class {
       };
 
       request.onerror = (event) => {
-        event.preventDefault();
         resolve();
       };
     });
@@ -255,8 +265,20 @@ shaka.test.CannedIDB = class {
    * @private
    */
   static createDatabase_(name, savedDatabase) {
+    let stack;
+    try {
+      throw new Error('');
+    } catch (error) {  // eslint-disable-line
+      stack = error.stack;
+    }
+
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(name, savedDatabase.version);
+
+      request.onversionchange = (event) => {
+        window.dump(
+            'VERSIONCHANGE from createDatabase_ in canned_idb from ' + stack);
+      };
 
       request.onupgradeneeded = (event) => {
         shaka.log.debug('DB upgrade from', event.oldVersion, 'to',
@@ -300,7 +322,6 @@ shaka.test.CannedIDB = class {
       };
 
       request.onerror = (event) => {
-        event.preventDefault();
         reject(request.error);
       };
     });
@@ -341,7 +362,6 @@ shaka.test.CannedIDB = class {
 
       transaction.onerror = (event) => {
         reject(event.error);
-        event.preventDefault();
       };
     });
   }
