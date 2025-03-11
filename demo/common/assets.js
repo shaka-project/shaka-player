@@ -523,6 +523,50 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SURROUND)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
+      /* name= */ 'Sintel 4k (multiperiod, mixed encryption, encrypted first)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/sintel-mixed-encryption/enc-clear-enc.mpd',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.WEBM)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth')
+      .setExtraConfig({
+        drm: {
+          advanced: {
+            'com.widevine.alpha': {
+              serverCertificateUri: 'https://cwip-shaka-proxy.appspot.com/service-cert',
+            },
+          },
+        },
+      }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Sintel 4k (multiperiod, mixed encryption, clear first)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/sintel-mixed-encryption/clear-enc-clear.mpd',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.WEBM)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth')
+      .setExtraConfig({
+        drm: {
+          advanced: {
+            'com.widevine.alpha': {
+              serverCertificateUri: 'https://cwip-shaka-proxy.appspot.com/service-cert',
+            },
+          },
+        },
+      }),
+  new ShakaDemoAssetInfo(
       /* name= */ 'Heliocentrism (multicodec, multiperiod)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/heliocentricism.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/heliocentrism/heliocentrism.mpd',
