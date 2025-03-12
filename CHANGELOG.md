@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.13.9](https://github.com/shaka-project/shaka-player/compare/v4.13.8...v4.13.9) (2025-03-12)
+
+
+### Bug Fixes
+
+* **HLS:** Detect spatial audio when using Dolby AC-4 ([#8223](https://github.com/shaka-project/shaka-player/issues/8223)) ([8b2db5a](https://github.com/shaka-project/shaka-player/commit/8b2db5a176fa2fe043b18623445b2097e6de639b))
+* Only dispatch spatialvideoinfo and nospatialvideoinfo for video streams ([#8236](https://github.com/shaka-project/shaka-player/issues/8236)) ([f709654](https://github.com/shaka-project/shaka-player/commit/f709654ef45e03ef59c8b2b8d61b2af53e29a76a))
+* **UI:** Allow configure close menu delay time ([#8235](https://github.com/shaka-project/shaka-player/issues/8235)) ([f094b35](https://github.com/shaka-project/shaka-player/commit/f094b35a680aa61bcb0e8f13df053597c69a318f))
+* **UI:** Allow use hideUI on mobile devices ([#8233](https://github.com/shaka-project/shaka-player/issues/8233)) ([bd37796](https://github.com/shaka-project/shaka-player/commit/bd37796af7020175c5073958c945a9802053dac9))
+* **UI:** Close context menu when hide the UI ([#8234](https://github.com/shaka-project/shaka-player/issues/8234)) ([eb49526](https://github.com/shaka-project/shaka-player/commit/eb495263141d4274ae05ff5db1a0cd6906595681))
+* **UI:** Don't sort playback rates ([#8230](https://github.com/shaka-project/shaka-player/issues/8230)) ([a22770d](https://github.com/shaka-project/shaka-player/commit/a22770de6ca9faff26beea731a59837050e0ac3f))
+* **UI:** Fix bad behavior when we are on muted status and we turn volume up ([#8231](https://github.com/shaka-project/shaka-player/issues/8231)) ([830244d](https://github.com/shaka-project/shaka-player/commit/830244df5772a2a4f9afbd181c4c86ecffd5befa))
+* **UI:** Improve seekOnTaps behavior on tap and scroll ([#8225](https://github.com/shaka-project/shaka-player/issues/8225)) ([04528c7](https://github.com/shaka-project/shaka-player/commit/04528c7de518fe41abb73f494224f35903070b60))
+* When standard load, do not wait for pending license requests to finish. ([#8219](https://github.com/shaka-project/shaka-player/issues/8219)) ([be4aac6](https://github.com/shaka-project/shaka-player/commit/be4aac6fe884c431cec9c1e6fcdb85e98d3d7f39))
+
+
+### Performance Improvements
+
+* **UI:** Improve VR performance ([#8237](https://github.com/shaka-project/shaka-player/issues/8237)) ([8fcf676](https://github.com/shaka-project/shaka-player/commit/8fcf6768b4507f2a6e017b0d7a75515ca332ff72))
+
 ## [4.13.8](https://github.com/shaka-project/shaka-player/compare/v4.13.7...v4.13.8) (2025-03-05)
 
 
