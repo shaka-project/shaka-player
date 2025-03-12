@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.12.18](https://github.com/shaka-project/shaka-player/compare/v4.12.17...v4.12.18) (2025-03-12)
+
+
+### Bug Fixes
+
+* **HLS:** Detect spatial audio when using Dolby AC-4 ([#8223](https://github.com/shaka-project/shaka-player/issues/8223)) ([0ac51a5](https://github.com/shaka-project/shaka-player/commit/0ac51a5c37882774da3f9a0d81c894c1a55fdc49))
+* Only dispatch spatialvideoinfo and nospatialvideoinfo for video streams ([#8236](https://github.com/shaka-project/shaka-player/issues/8236)) ([6ca8f55](https://github.com/shaka-project/shaka-player/commit/6ca8f55fa441c886f7b62dfbf6e31bb5f8b61795))
+* **UI:** Allow configure close menu delay time ([#8235](https://github.com/shaka-project/shaka-player/issues/8235)) ([3b631bc](https://github.com/shaka-project/shaka-player/commit/3b631bca61ddd42bf081f57531aafe187925c241))
+* **UI:** Allow use hideUI on mobile devices ([#8233](https://github.com/shaka-project/shaka-player/issues/8233)) ([56bb926](https://github.com/shaka-project/shaka-player/commit/56bb92685720133d652ad931e964d4009fda6832))
+* **UI:** Close context menu when hide the UI ([#8234](https://github.com/shaka-project/shaka-player/issues/8234)) ([9784aa4](https://github.com/shaka-project/shaka-player/commit/9784aa40beffedfbaa182c2edbf12b64fafbdd1a))
+* **UI:** Fix bad behavior when we are on muted status and we turn volume up ([#8231](https://github.com/shaka-project/shaka-player/issues/8231)) ([6dccafb](https://github.com/shaka-project/shaka-player/commit/6dccafbf817e78804e8879b1775d249e029d819b))
+* When standard load, do not wait for pending license requests to finish. ([#8219](https://github.com/shaka-project/shaka-player/issues/8219)) ([dd62df4](https://github.com/shaka-project/shaka-player/commit/dd62df49da81f419e9665cafe36ef0bb95669988))
+
+
+### Performance Improvements
+
+* **UI:** Improve VR performance ([#8237](https://github.com/shaka-project/shaka-player/issues/8237)) ([6f044da](https://github.com/shaka-project/shaka-player/commit/6f044da49e0e1835476979c6fd6cdf9893043c5d))
+
 ## [4.12.17](https://github.com/shaka-project/shaka-player/compare/v4.12.16...v4.12.17) (2025-03-05)
 
 
