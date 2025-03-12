@@ -158,8 +158,8 @@ player.configure({
     },
     advanced: {
       'com.widevine.alpha': {
-        'videoRobustness': 'HW_SECURE_ALL',
-        'audioRobustness': 'HW_SECURE_ALL'
+        'videoRobustness': ['HW_SECURE_ALL'],
+        'audioRobustness': ['HW_SECURE_ALL']
       }
     }
   }
@@ -196,10 +196,34 @@ Robustness refers to how securely the content is handled by the key system. This
 is a key-system-specific string that specifies the requirements for successful
 playback.  Passing in a higher security level than can be supported will cause
 `player.load()` to fail with `REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE`.  The
-default is the empty string, which is the lowest security level supported by the
+default is an empty array, which is the lowest security level supported by the
 key system.
 
 Each key system has their own values for robustness.
+
+##### Multiple Robustness
+
+As the video and audio robustness config options are now arrays, it's possible
+to set multiple values in the array. When setting up DRM, the first robustness
+available will be used.
+
+For example, to set both hardware and software security in Widevine:
+
+```js
+player.configure({
+  drm: {
+    servers: {
+      'com.widevine.alpha': 'https://foo.bar/drm/widevine'
+    },
+    advanced: {
+      'com.widevine.alpha': {
+        'videoRobustness': ['HW_SECURE_ALL', 'SW_SECURE_CRYPTO'],
+        'audioRobustness': ['HW_SECURE_ALL', 'SW_SECURE_CRYPTO']
+      }
+    }
+  }
+});
+```
 
 ##### Widevine
 
