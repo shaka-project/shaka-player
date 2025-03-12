@@ -20,14 +20,17 @@ v5.0
  - Remove shaka.cast APIs, have UI talk directly to generic receivers
    https://github.com/shaka-project/shaka-player/issues/4214
 
-v4.14 - 2025 Q2
+v4.15 - 2025 Q2
+  TBD
+
+=====
+
+v4.14 - 2025 Q1
  - Time ID3, emsg, and metadata events to the presentation timeline
    https://github.com/shaka-project/shaka-player/issues/7556
  - New API for audio: `getAudioTracks` and `selectAudioTrack`
    https://github.com/shaka-project/shaka-player/issues/3544
  - DASH: LCEVC Dual track support
-
-=====
 
 v4.13 - 2025 Q1
  - WisePlay DRM support
