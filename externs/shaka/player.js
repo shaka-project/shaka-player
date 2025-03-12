@@ -1730,7 +1730,8 @@ shaka.extern.LiveSyncConfiguration;
  *   clearDecodingCache: boolean,
  *   dontChooseCodecs: boolean,
  *   shouldFixTimestampOffset: boolean,
- *   avoidEvictionOnQuotaExceededError: boolean
+ *   avoidEvictionOnQuotaExceededError: boolean,
+ *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy
  * }}
  *
  * @description
@@ -1986,6 +1987,12 @@ shaka.extern.LiveSyncConfiguration;
  *   Avoid evict content on QuotaExceededError.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {shaka.config.CrossBoundaryStrategy} crossBoundaryStrategy
+ *   Allows MSE to be reset when crossing a boundary. Optionally, we can stop
+ *   resetting MSE when MSE passed an encrypted boundary.
+ *   Defaults to <code>KEEP</code> except on Tizen 3 where the default value
+ *   is <code>RESET_TO_ENCRYPTED</code> and WebOS 3 where the default value
+ *   is <code>RESET</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -2424,7 +2431,8 @@ shaka.extern.OfflineConfiguration;
 
 /**
  * @typedef {{
- *   captionsUpdatePeriod: number
+ *   captionsUpdatePeriod: number,
+ *   fontScaleFactor: number
  * }}
  *
  * @description
@@ -2434,7 +2442,10 @@ shaka.extern.OfflineConfiguration;
  *   The number of seconds to see if the captions should be updated.
  *   <br>
  *   Defaults to <code>0.25</code>.
- *
+ * @property {number} fontScaleFactor
+ *   The font scale factor used to increase or decrease the font size.
+ *   <br>
+ *   Defaults to <code>1</code>.
  * @exportDoc
  */
 shaka.extern.TextDisplayerConfiguration;

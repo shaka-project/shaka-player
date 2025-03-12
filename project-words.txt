@@ -6,6 +6,7 @@ audiotrackchange
 audiotrackchanged
 audiotrackschanged
 autoplaying
+boundarycrossed
 captionselectionupdated
 caststatuschanged
 customwarning
@@ -421,6 +422,7 @@ eyex
 eyey
 eyez
 fovy
+halfequirectangular
 hequ
 hfov
 highp

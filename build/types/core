@@ -7,6 +7,7 @@
 
 +../../lib/config/auto_show_text.js
 +../../lib/config/codec_switching_strategy.js
++../../lib/config/cross_boundary_strategy.js
 
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js

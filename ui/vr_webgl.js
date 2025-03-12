@@ -15,6 +15,7 @@ goog.require('shaka.ui.MatrixQuaternion');
 goog.require('shaka.ui.VRUtils');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.IReleasable');
+goog.require('shaka.util.MediaReadyState');
 goog.require('shaka.util.Timer');
 
 
@@ -30,7 +31,7 @@ shaka.ui.VRWebgl = class {
    * @param {string} projectionMode
    */
   constructor(video, player, canvas, gl, projectionMode) {
-    /** @private {HTMLVideoElement} */
+    /** @private {!HTMLVideoElement} */
     this.video_ = /** @type {!HTMLVideoElement} */ (video);
 
     /** @private {shaka.Player} */
@@ -109,6 +110,9 @@ shaka.ui.VRWebgl = class {
     this.texture_ = null;
 
     /** @private {number} */
+    this.positionX_ = 0;
+
+    /** @private {number} */
     this.positionY_ = 0;
 
     /** @private {number} */
@@ -120,6 +124,9 @@ shaka.ui.VRWebgl = class {
     /** @private {string} */
     this.projectionMode_ = projectionMode;
 
+    /** @private {number} */
+    this.videoCallbackId_ = -1;
+
     this.init_();
   }
 
@@ -127,6 +134,10 @@ shaka.ui.VRWebgl = class {
    * @override
    */
   release() {
+    if (this.videoCallbackId_ != -1) {
+      this.video_.cancelVideoFrameCallback(this.videoCallbackId_);
+      this.videoCallbackId_ = -1;
+    }
     if (this.eventManager_) {
       this.eventManager_.release();
       this.eventManager_ = null;
@@ -217,48 +228,77 @@ shaka.ui.VRWebgl = class {
     this.initGLBuffers_();
     this.initGLTexture_();
 
-    this.eventManager_.listenOnce(this.video_, 'loadeddata', () => {
-      let frameRate;
-      this.eventManager_.listen(this.video_, 'canplaythrough', () => {
+    const setupListeners = () => {
+      if (this.video_.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) {
         this.renderGL_();
-      });
-      this.eventManager_.listen(this.video_, 'playing', () => {
-        if (this.activeTimer_) {
-          this.activeTimer_.stop();
-        }
-        if (!frameRate) {
-          const variants = this.player_.getVariantTracks();
-          for (const variant of variants) {
-            const variantFrameRate = variant.frameRate;
-            if (variantFrameRate &&
-                (!frameRate || frameRate < variantFrameRate)) {
-              frameRate = variantFrameRate;
+      }
+
+      if ('requestVideoFrameCallback' in this.video_) {
+        const videoFrameCallback = (now, metadata) => {
+          if (this.videoCallbackId_ == -1) {
+            return;
+          }
+          this.renderGL_();
+          // It is necessary to check this again because this callback can be
+          // executed in another thread by the browser and we have to be sure
+          // again here that we have not cancelled it in the middle of an
+          // execution.
+          if (this.videoCallbackId_ == -1) {
+            return;
+          }
+          this.videoCallbackId_ =
+              this.video_.requestVideoFrameCallback(videoFrameCallback);
+        };
+        this.videoCallbackId_ =
+            this.video_.requestVideoFrameCallback(videoFrameCallback);
+      } else {
+        let frameRate;
+        this.eventManager_.listen(this.video_, 'canplaythrough', () => {
+          this.renderGL_();
+        });
+        this.eventManager_.listen(this.video_, 'playing', () => {
+          if (this.activeTimer_) {
+            this.activeTimer_.stop();
+          }
+          if (!frameRate) {
+            const variants = this.player_.getVariantTracks();
+            for (const variant of variants) {
+              const variantFrameRate = variant.frameRate;
+              if (variantFrameRate &&
+                  (!frameRate || frameRate < variantFrameRate)) {
+                frameRate = variantFrameRate;
+              }
             }
           }
-        }
-        if (!frameRate) {
-          frameRate = 60;
-        }
-        this.renderGL_();
-        this.activeTimer_ = new shaka.util.Timer(() => {
+          if (!frameRate) {
+            frameRate = 60;
+          }
           this.renderGL_();
-        }).tickNow().tickEvery(1 / frameRate);
-      });
-      this.eventManager_.listen(this.video_, 'pause', () => {
-        if (this.activeTimer_) {
-          this.activeTimer_.stop();
-        }
-        this.activeTimer_ = null;
-        this.renderGL_();
-      });
-      this.eventManager_.listen(this.video_, 'seeked', () => {
-        this.renderGL_();
-      });
+          this.activeTimer_ = new shaka.util.Timer(() => {
+            this.renderGL_();
+          }).tickNow().tickEvery(1 / frameRate);
+        });
+        this.eventManager_.listen(this.video_, 'pause', () => {
+          if (this.activeTimer_) {
+            this.activeTimer_.stop();
+          }
+          this.activeTimer_ = null;
+          this.renderGL_();
+        });
+        this.eventManager_.listen(this.video_, 'seeked', () => {
+          this.renderGL_();
+        });
 
-      this.eventManager_.listen(document, 'visibilitychange', () => {
-        this.renderGL_();
-      });
-    });
+        this.eventManager_.listen(document, 'visibilitychange', () => {
+          this.renderGL_();
+        });
+      }
+    };
+
+    shaka.util.MediaReadyState.waitForReadyState(this.video_,
+        HTMLMediaElement.HAVE_CURRENT_DATA,
+        this.eventManager_,
+        setupListeners);
   }
 
   /**
@@ -375,6 +415,8 @@ shaka.ui.VRWebgl = class {
   initGLBuffers_() {
     if (this.projectionMode_ == 'cubemap') {
       this.geometry_ = shaka.ui.VRUtils.generateCube();
+    } else if (this.projectionMode_ == 'halfequirectangular') {
+      this.geometry_ = shaka.ui.VRUtils.generateSphere(100, true);
     } else {
       this.geometry_ = shaka.ui.VRUtils.generateSphere(100);
     }
@@ -447,7 +489,8 @@ shaka.ui.VRWebgl = class {
     }
 
     // Update matrix
-    if (this.projectionMode_ == 'equirectangular') {
+    if (this.projectionMode_ == 'equirectangular' ||
+        this.projectionMode_ == 'halfequirectangular') {
       shaka.ui.Matrix4x4.multiply(this.viewProjectionMatrix_,
           this.viewMatrix_, this.identityMatrix_);
       shaka.ui.Matrix4x4.multiply(this.viewProjectionMatrix_,
@@ -552,7 +595,14 @@ shaka.ui.VRWebgl = class {
    * @param {!number} roll Roll.
    */
   rotateViewGlobal(yaw, pitch, roll) {
-    const pitchBoundary = 90.0 * Math.PI / 180;
+    let yawBoundary = Infinity;
+    let pitchBoundary = 90.0 * Math.PI / 180;
+
+    if (this.projectionMode_ == 'halfequirectangular') {
+      yawBoundary = 90.0 * Math.PI / 180;
+      pitchBoundary /= 2;
+    }
+
     let matrix;
     if (this.projectionMode_ == 'cubemap') {
       matrix = this.viewProjectionMatrix_;
@@ -560,11 +610,17 @@ shaka.ui.VRWebgl = class {
       matrix = this.viewMatrix_;
     }
 
-    // Rotate global axis
-    shaka.ui.Matrix4x4.rotateY(matrix, matrix, yaw);
-
-    // Variable to limit the pitch movement
+    // Variable to limit the movement
+    this.positionX_ += yaw;
     this.positionY_ += pitch;
+
+    if (this.positionX_ < yawBoundary &&
+      this.positionX_ > -yawBoundary) {
+      // Rotate global axis
+      shaka.ui.Matrix4x4.rotateY(matrix, matrix, yaw);
+    } else {
+      this.positionX_ -= yaw;
+    }
 
     if (this.positionY_ < pitchBoundary &&
       this.positionY_ > -pitchBoundary) {
@@ -682,6 +738,7 @@ shaka.ui.VRWebgl = class {
     if (this.cont_ < steps) {
       this.resetTimer_ = new shaka.util.Timer(() => {
         this.reset(false);
+        this.positionX_ = 0;
         this.positionY_ = 0;
         this.cont_++;
         this.renderGL_(false);
