@@ -21,7 +21,7 @@ v5.0
    https://github.com/shaka-project/shaka-player/issues/4214
 
 v4.15 - 2025 Q2
- - Allow customize UITextDisplayer default Values
+  TBD
 
 =====
 
