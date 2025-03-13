@@ -287,8 +287,7 @@ shaka.extern.BufferedInfo;
  * @description
  * An object describing a media track.  This object should be treated as
  * read-only as changing any values does not have any effect.  This is the
- * public view of an audio/video paring (variant type) or text track (text
- * type) or image track (image type).
+ * public view of an audio/video paring (variant type).
  *
  * @property {number} id
  *   The unique ID of the track.
@@ -468,6 +467,7 @@ shaka.extern.AudioTrack;
  * @typedef {{
  *   id: number,
  *   active: boolean,
+ *   type: string,
  *   bandwidth: number,
  *   language: string,
  *   label: ?string,
@@ -483,16 +483,17 @@ shaka.extern.AudioTrack;
  * }}
  *
  * @description
- * An object describing a media track.  This object should be treated as
- * read-only as changing any values does not have any effect.  This is the
- * public view of an audio/video paring (variant type) or text track (text
- * type) or image track (image type).
+ * An object describing a text track.  This object should be treated as
+ * read-only as changing any values does not have any effect.
  *
  * @property {number} id
  *   The unique ID of the track.
  * @property {boolean} active
  *   If true, this is the track being streamed (another track may be
- *   visible/audible in the buffer).
+ *   visible in the buffer).
+ * @property {string} type
+ *   The type of track, either <code>'variant'</code> or <code>'text'</code>
+ *   or <code>'image'</code>.
  * @property {number} bandwidth
  *   The bandwidth required to play the track, in bits/sec.
  * @property {string} language
@@ -503,12 +504,12 @@ shaka.extern.AudioTrack;
  * @property {?string} label
  *   The track label, which is unique text that should describe the track.
  * @property {?string} kind
- *   (only for text tracks) The kind of text track, either
- *   <code>'caption'</code> or <code>'subtitle'</code>.
+ *   The kind of text track, either <code>'caption'</code> or
+ *  <code>'subtitle'</code>.
  * @property {?string} mimeType
  *   The MIME type of the content provided in the manifest.
  * @property {?string} codecs
- *   The audio/video codecs string provided in the manifest, if present.
+ *   The codecs string provided in the manifest, if present.
  * @property {boolean} primary
  *   True indicates that this in the primary language for the content.
  *   This flag is based on signals from the manifest.
@@ -521,12 +522,11 @@ shaka.extern.AudioTrack;
  * @property {?shaka.media.ManifestParser.AccessibilityPurpose
  *           } accessibilityPurpose
  *   The DASH accessibility descriptor, if one was provided for this track.
- *   For text tracks, this describes the text; otherwise, this is for the audio.
  * @property {boolean} forced
  *   True indicates that this in the forced text language for the content.
  *   This flag is based on signals from the manifest.
  * @property {?string} originalTextId
- *   (text tracks only) The original ID of the text track, if any, as it
+ *   The original ID of the text track, if any, as it
  *   appeared in the original manifest.
  * @property {?string} originalLanguage
  *   The original language of the track, if any, as it appeared in the original
@@ -535,6 +535,50 @@ shaka.extern.AudioTrack;
  * @exportDoc
  */
 shaka.extern.TextTrack;
+
+
+/**
+ * @typedef {{
+ *   id: number,
+ *   type: string,
+ *   bandwidth: number,
+ *   width: ?number,
+ *   height: ?number,
+ *   mimeType: ?string,
+ *   codecs: ?string,
+ *   tilesLayout: ?string,
+ *   originalImageId: ?string
+ * }}
+ *
+ * @description
+ * An object describing a image track.  This object should be treated as
+ * read-only as changing any values does not have any effect.
+ *
+ * @property {number} id
+ *   The unique ID of the track.
+ * @property {string} type
+ *   The type of track, either <code>'variant'</code> or <code>'text'</code>
+ *   or <code>'image'</code>.
+ * @property {number} bandwidth
+ *   The bandwidth required to play the track, in bits/sec.
+ * @property {?number} width
+ *   The width provided in the manifest, if present.
+ * @property {?number} height
+ *   The height provided in the manifest, if present.
+ * @property {?string} mimeType
+ *   The MIME type of the content provided in the manifest.
+ * @property {?string} codecs
+ *   The image codecs string provided in the manifest, if present.
+ * @property {?string} tilesLayout
+ *   The value is a grid-item-dimension consisting of two positive decimal
+ *   integers in the format: column-x-row ('4x3'). It describes the arrangement
+ *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
+ * @property {?string} originalImageId
+ *   (image tracks only) The original ID of the image track, if any, as it
+ *   appeared in the original manifest.
+ * @exportDoc
+ */
+shaka.extern.ImageTrack;
 
 
 /**
