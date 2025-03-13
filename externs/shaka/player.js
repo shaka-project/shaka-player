@@ -574,8 +574,8 @@ shaka.extern.TextTrack;
  *   integers in the format: column-x-row ('4x3'). It describes the arrangement
  *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
  * @property {?string} originalImageId
- *   (image tracks only) The original ID of the image track, if any, as it
- *   appeared in the original manifest.
+ *   The original ID of the image track, if any, as it appeared in the original
+ *   manifest.
  * @exportDoc
  */
 shaka.extern.ImageTrack;
