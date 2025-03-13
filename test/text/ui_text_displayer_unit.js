@@ -617,6 +617,7 @@ describe('UITextDisplayer', () => {
     textDisplayer.configure({
       fontScaleFactor: 1.75,
       textColor: 'red',
+      captionsUpdatePeriod: 0.25,
       backgroundColor: 'rgba(255, 255, 255, 0.5)',
     });
 
