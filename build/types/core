@@ -11,6 +11,7 @@
 
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
++../../lib/debug/running_in_lab.js
 
 +../../lib/dependencies/all.js
 
