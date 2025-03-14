@@ -10,7 +10,8 @@
 // only be run on Chrome and Chromecast.
 /** @return {boolean} */
 const castReceiverSupport =
-    () => shaka.util.Platform.isChrome() || shaka.util.Platform.isChromecast();
+    () => deviceDetected.getDeviceName() === 'Chrome' ||
+      deviceDetected.getDeviceType() === shaka.device.IDevice.DeviceType.CAST;
 filterDescribe('CastReceiver', castReceiverSupport, () => {
   const CastReceiver = shaka.cast.CastReceiver;
   const CastUtils = shaka.cast.CastUtils;

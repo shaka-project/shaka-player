@@ -68,7 +68,8 @@ describe('Player Cross Boundary', () => {
 
       // PlayReady on Chromecast is deprecated, so we prefer to use the DRM
       // that is officially supported.
-      if (shaka.util.Platform.isChromecast()) {
+      if (deviceDetected.getDeviceType() ===
+          shaka.device.IDevice.DeviceType.CAST) {
         player.configure({
           drm: {
             preferredKeySystems: ['com.widevine.alpha'],
