@@ -174,6 +174,15 @@ function workAroundLegacyEdgePromiseIssues() {
 }
 
 /**
+ * Work around lab crashes by flagging if we're running in the lab.  This lets
+ * us add lab-specific workarounds for our unique lab environment.  This won't
+ * affect local test runs on developer machines or GitHub Actions workflows.
+ */
+function workAroundLabCrashes() {
+  shaka.debug.RunningInLab = getClientArg('runningInLab');
+}
+
+/**
  * Returns a Jasmine callback which shims the real callback and checks for
  * a certain condition.  The test will only be run if the condition is true.
  *
@@ -465,6 +474,7 @@ async function setupTestEnvironment() {
   failTestsOnUnhandledErrors();
   disableScrollbars();
   workAroundLegacyEdgePromiseIssues();
+  workAroundLabCrashes();
 
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly

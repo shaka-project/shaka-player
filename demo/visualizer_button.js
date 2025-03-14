@@ -57,6 +57,17 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
       shakaDemoMain.remakeHash();
       this.setIcon_();
     });
+
+    /** @private {shaka.cast.CastProxy} */
+    this.castProxy_ = this.controls.getCastProxy();
+
+    this.eventManager.listen(this.controls, 'caststatuschanged', () => {
+      this.button_.disabled = this.castProxy_.isCasting();
+      if (this.castProxy_.isCasting() &&
+          shakaDemoMain.getIsVisualizerActive()) {
+        shakaDemoMain.setIsVisualizerActive(false);
+      }
+    });
   }
 
   /** @private */
