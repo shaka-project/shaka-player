@@ -2059,7 +2059,8 @@ shaka.extern.MediaSourceConfiguration;
  *   skipPlayDetection: boolean,
  *   supportsMultipleMediaElements: boolean,
  *   disableHLSInterstitial: boolean,
- *   disableDASHInterstitial: boolean
+ *   disableDASHInterstitial: boolean,
+ *   allowPreloadOnDomElements: boolean
  * }}
  *
  * @description
@@ -2094,6 +2095,10 @@ shaka.extern.MediaSourceConfiguration;
  *   If this is true, we ignore DASH interstitial events.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} allowPreloadOnDomElements
+ *   If this is true, we will use HTMLLinkElement to preload some resources.
+ *   <br>
+ *   Defaults to <code>true</code>.
  *
  * @exportDoc
  */

@@ -408,7 +408,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Ignore HLS Interstitial',
             'ads.disableHLSInterstitial')
         .addBoolInput_('Ignore DASH Interstitial',
-            'ads.disableDASHInterstitial');
+            'ads.disableDASHInterstitial')
+        .addBoolInput_('Allow preload on DOM elements',
+            'ads.allowPreloadOnDomElements');
   }
 
   /**
