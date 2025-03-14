@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.14.1](https://github.com/shaka-project/shaka-player/compare/v4.14.0...v4.14.1) (2025-03-14)
+
+
+### Bug Fixes
+
+* **Ads:** Destroy preloadManagers on stop interstitials ([#8268](https://github.com/shaka-project/shaka-player/issues/8268)) ([a5119e4](https://github.com/shaka-project/shaka-player/commit/a5119e4ce7212709b9c6d3d770ac013594da2efc))
+* **changelog:** Add missing ref to PR [#8156](https://github.com/shaka-project/shaka-player/issues/8156) in v4.14.0 ([#8259](https://github.com/shaka-project/shaka-player/issues/8259)) ([84cbeb8](https://github.com/shaka-project/shaka-player/commit/84cbeb8f59a2748287d37ecc242e97089c8543c9))
+* Closure compiler removes call to modifyCueCallback in src= mode ([#8261](https://github.com/shaka-project/shaka-player/issues/8261)) ([a09f421](https://github.com/shaka-project/shaka-player/commit/a09f421ac2326e35beb72ae73663250260c22c4f))
+* Make shaka.util.Lazy work with null ([#8267](https://github.com/shaka-project/shaka-player/issues/8267)) ([8f2486a](https://github.com/shaka-project/shaka-player/commit/8f2486a9cfd5b1edbe58e1a3372d2770579ea52d))
+* Persist selected audio track role after variant update in `selectVariantTrack` ([#8249](https://github.com/shaka-project/shaka-player/issues/8249)) ([2aa9400](https://github.com/shaka-project/shaka-player/commit/2aa9400557a105edaa5028256ffe74e1eede4f6e)), closes [#8248](https://github.com/shaka-project/shaka-player/issues/8248)
+* **UI:** Disable save video frame button while casting ([#8258](https://github.com/shaka-project/shaka-player/issues/8258)) ([bddd5dc](https://github.com/shaka-project/shaka-player/commit/bddd5dc628db64fcab4f74ccb7d2db1b105f4030))
+* Update region observer with new rules for small regions ([#8275](https://github.com/shaka-project/shaka-player/issues/8275)) ([67160e6](https://github.com/shaka-project/shaka-player/commit/67160e6163fef58e3227fabce5dd8b0c00867d36))
+
+
+### Performance Improvements
+
+* **Ads:** Preload images on interstitials ([#8269](https://github.com/shaka-project/shaka-player/issues/8269)) ([2e28ac8](https://github.com/shaka-project/shaka-player/commit/2e28ac8dae8bb73124d152bb66d0d4f6154e6980))
+
 ## [4.14.0](https://github.com/shaka-project/shaka-player/compare/v4.13.0...v4.14.0) (2025-03-12)
 
 
