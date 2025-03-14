@@ -24,7 +24,8 @@ describe('Interstitial Ad manager', () => {
   beforeEach(() => {
     // Allows us to use a timer instead of requestVideoFrameCallback
     // (which doesn't work well in all platform tests)
-    spyOn(shaka.util.Platform, 'isSmartTV').and.returnValue(true);
+    spyOn(deviceDetected, 'getDeviceType')
+        .and.returnValue(shaka.device.IDevice.DeviceType.TV);
 
     function dependencyInjector(player) {
       // Create a networking engine that always returns an empty buffer.
