@@ -113,25 +113,29 @@ describe('RegionObserver', () => {
     expect(onExitRegion).toHaveBeenCalledOnceMoreWith([region, false]);
   });
 
-  it('fires skip event when we enter and leave region in one move', () => {
-    const region = createRegion('my-region', 5, 10);
-    timeline.addRegion(region);
+  it('fires start and end events when we enter and leave region in one move',
+      () => {
+        const region = createRegion('my-region', 5, 10);
+        timeline.addRegion(region);
 
-    // Make sure we are before the region starts.
-    poll(observer,
-        /* timeInSeconds= */ 4,
-        /* seeking= */ false);
-    expect(onSkipRegion).not.toHaveBeenCalled();
+        // Make sure we are before the region starts.
+        poll(observer,
+            /* timeInSeconds= */ 4,
+            /* seeking= */ false);
+        expect(onEnterRegion).not.toHaveBeenCalled();
+        expect(onExitRegion).not.toHaveBeenCalled();
+        expect(onSkipRegion).not.toHaveBeenCalled();
 
-    // Make sure we call |onSkip| when we move so far that we skip over the
-    // region.
-    poll(observer,
-        /* timeInSeconds= */ 15,
-        /* seeking= */ false);
-    expect(onSkipRegion).toHaveBeenCalledOnceMoreWith([region, false]);
-  });
+        // Make sure we call |onEnter| and |onExit|
+        poll(observer,
+            /* timeInSeconds= */ 15,
+            /* seeking= */ false);
+        expect(onEnterRegion).toHaveBeenCalledOnceMoreWith([region, false]);
+        expect(onExitRegion).toHaveBeenCalledOnceMoreWith([region, false]);
+        expect(onSkipRegion).not.toHaveBeenCalled();
+      });
 
-  it('fires skip events for zero-duration regions', () => {
+  it('fires start and end events for zero-duration regions', () => {
     // Make a region with no duration.
     const region = createRegion('my-region', 5, 5);
     timeline.addRegion(region);
@@ -140,14 +144,17 @@ describe('RegionObserver', () => {
     poll(observer,
         /* timeInSeconds= */ 4,
         /* seeking= */ false);
+    expect(onEnterRegion).not.toHaveBeenCalled();
+    expect(onExitRegion).not.toHaveBeenCalled();
     expect(onSkipRegion).not.toHaveBeenCalled();
 
-    // Make sure we call |onSkip| when we move so far that we skip over the
-    // region.
+    // Make sure we call |onEnter| and |onExit|
     poll(observer,
         /* timeInSeconds= */ 10,
         /* seeking= */ false);
-    expect(onSkipRegion).toHaveBeenCalledOnceMoreWith([region, false]);
+    expect(onEnterRegion).toHaveBeenCalledOnceMoreWith([region, false]);
+    expect(onExitRegion).toHaveBeenCalledOnceMoreWith([region, false]);
+    expect(onSkipRegion).not.toHaveBeenCalled();
   });
 
   // We want to simulate a "normal" case of overlapping regions. For this we
