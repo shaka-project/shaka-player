@@ -1,5 +1,30 @@
 # Changelog
 
+## [4.15.0](https://github.com/shaka-project/shaka-player/compare/v4.14.0...v4.15.0) (2025-03-14)
+
+
+### Features
+
+* Simplicate Image/Thumbnails API ([#8266](https://github.com/shaka-project/shaka-player/issues/8266)) ([d2f3657](https://github.com/shaka-project/shaka-player/commit/d2f3657c966c392389ebd3ce9019a5556e9fbe2d))
+* Simplicate Text and Chapters APIs ([#8264](https://github.com/shaka-project/shaka-player/issues/8264)) ([c0455d7](https://github.com/shaka-project/shaka-player/commit/c0455d781ff37a53349b6c10318e534a37c5a10f))
+
+
+### Bug Fixes
+
+* **Ads:** Destroy preloadManagers on stop interstitials ([#8268](https://github.com/shaka-project/shaka-player/issues/8268)) ([ace6cb7](https://github.com/shaka-project/shaka-player/commit/ace6cb7202dadeb68820aa12054e287dde369ab5))
+* **changelog:** Add missing ref to PR [#8156](https://github.com/shaka-project/shaka-player/issues/8156) in v4.14.0 ([#8259](https://github.com/shaka-project/shaka-player/issues/8259)) ([b5a261a](https://github.com/shaka-project/shaka-player/commit/b5a261aed91b8da211af1540c0e318f0b2bdf873))
+* Closure compiler removes call to modifyCueCallback in src= mode ([#8261](https://github.com/shaka-project/shaka-player/issues/8261)) ([b7865b4](https://github.com/shaka-project/shaka-player/commit/b7865b43233a95da31c252a4b6bc54c2e8fe83dd))
+* Make shaka.util.Lazy work with null ([#8267](https://github.com/shaka-project/shaka-player/issues/8267)) ([e0a57bb](https://github.com/shaka-project/shaka-player/commit/e0a57bb27def16598ffc88e4a55856473629a634))
+* Persist selected audio track role after variant update in `selectVariantTrack` ([#8249](https://github.com/shaka-project/shaka-player/issues/8249)) ([b30e0ce](https://github.com/shaka-project/shaka-player/commit/b30e0ce67ee5c529ca1fae59eef5f691da974acb)), closes [#8248](https://github.com/shaka-project/shaka-player/issues/8248)
+* **UI:** Disable save video frame button while casting ([#8258](https://github.com/shaka-project/shaka-player/issues/8258)) ([e71d94c](https://github.com/shaka-project/shaka-player/commit/e71d94cf08a1ceaff3cb94d4e5435b825aa59175))
+* **UI:** Optimize portrait thumbnail display ([#8274](https://github.com/shaka-project/shaka-player/issues/8274)) ([1f336dd](https://github.com/shaka-project/shaka-player/commit/1f336dd319ad23a6feb785f2ab05a8bc5fc8e2a2))
+* Update region observer with new rules for small regions ([#8275](https://github.com/shaka-project/shaka-player/issues/8275)) ([2f18b47](https://github.com/shaka-project/shaka-player/commit/2f18b47d95b79f5e8109e155c8ff36c190569569))
+
+
+### Performance Improvements
+
+* **Ads:** Preload images on interstitials ([#8269](https://github.com/shaka-project/shaka-player/issues/8269)) ([c49102c](https://github.com/shaka-project/shaka-player/commit/c49102ca3d4f87ad6b2a64b07f037e8e3fd3a136))
+
 ## [4.14.0](https://github.com/shaka-project/shaka-player/compare/v4.13.0...v4.14.0) (2025-03-12)
 
 
