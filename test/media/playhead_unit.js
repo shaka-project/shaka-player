@@ -675,7 +675,7 @@ describe('Playhead', () => {
   });  // does not clamp playhead if setLiveSeekableRange is used
 
   it('doesn\'t repeatedly re-seek in seeking slow platforms', () => {
-    if (!deviceDetected.isSeekingSlow()) {
+    if (!deviceDetected.seekDelay()) {
       pending('No seeking slow platform');
     }
     video.readyState = HTMLMediaElement.HAVE_METADATA;
