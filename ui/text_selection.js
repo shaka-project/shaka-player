@@ -171,7 +171,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
 
   /**
-   * @param {!shaka.extern.Track} track
+   * @param {!shaka.extern.TextTrack} track
    * @return {!Promise}
    * @private
    */
