@@ -9,7 +9,7 @@
 // browsers our library supports.  Because of this, CastReceiver tests will
 // only be run on Chrome and Chromecast.
 /** @return {boolean} */
-const castReceiverSupport =
+const castReceiverIntegrationSupport =
     () => deviceDetected.getDeviceName() === 'Chrome' ||
       deviceDetected.getDeviceType() === shaka.device.IDevice.DeviceType.CAST;
 filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
