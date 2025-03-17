@@ -706,13 +706,18 @@ describe('AdaptationSetCriteria', () => {
           });
         });
         manifest.addVariant(2, (variant) => {
+          variant.addAudio(30, (stream) => {
+            stream.channelsCount = 4;
+          });
+        });
+        manifest.addVariant(3, (variant) => {
           variant.addAudio(20, (stream) => {
             stream.channelsCount = 8;
           });
         });
-        manifest.addVariant(3, (variant) => {
+        manifest.addVariant(4, (variant) => {
           variant.addAudio(30, (stream) => {
-            stream.channelsCount = 2;
+            stream.channelsCount = 4;
           });
         });
       });
@@ -733,8 +738,8 @@ describe('AdaptationSetCriteria', () => {
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
-        manifest.variants[0],
-        manifest.variants[2],
+        manifest.variants[1],
+        manifest.variants[3],
       ]);
     });
 
