@@ -288,7 +288,7 @@ shakaDemo.Custom = class {
       }
     };
     const adTagOnChange = (input) => {
-      assetInProgress.adTagUri = input.value;
+      assetInProgress.setAdTagUri(input.value);
     };
     this.makeField_(container, 'Ad Tag URL', adTagSetup, adTagOnChange);
 
@@ -302,7 +302,7 @@ shakaDemo.Custom = class {
         this.checkManifestRequired_(assetInProgress);
     };
     const contentSrcIdOnChange = (input) => {
-      assetInProgress.imaContentSrcId = input.value;
+      assetInProgress.setIMAContentSourceId(input.value);
       this.manifestField_.required =
         this.checkManifestRequired_(assetInProgress);
     };
@@ -320,7 +320,7 @@ shakaDemo.Custom = class {
         this.checkManifestRequired_(assetInProgress);
     };
     const videoIdOnChange = (input) => {
-      assetInProgress.imaVideoId = input.value;
+      assetInProgress.setIMAVideoId(input.value);
       this.manifestField_.required =
         this.checkManifestRequired_(assetInProgress);
     };
@@ -337,7 +337,7 @@ shakaDemo.Custom = class {
         this.checkManifestRequired_(assetInProgress);
     };
     const assetKeyChange = (input) => {
-      assetInProgress.imaAssetKey = input.value;
+      assetInProgress.setIMAAssetKey(input.value);
       this.manifestField_.required =
         this.checkManifestRequired_(assetInProgress);
     };
@@ -354,7 +354,7 @@ shakaDemo.Custom = class {
         this.checkManifestRequired_(assetInProgress);
     };
     const manifestTypeChange = (input) => {
-      assetInProgress.imaManifestType = input.value;
+      assetInProgress.setIMAManifestType(input.value);
       this.manifestField_.required =
         this.checkManifestRequired_(assetInProgress);
     };
