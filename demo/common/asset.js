@@ -162,6 +162,37 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
+   * @param {shakaAssets.Feature} feature
+   * @return {!ShakaDemoAssetInfo}
+   */
+  removeFeature(feature) {
+    this.features = this.features.filter((f) => f != feature);
+    // Sort the features list, so that features are in a predictable order.
+    this.features.sort(ShakaDemoAssetInfo.caseLessAlphaComparator_);
+    return this;
+  }
+
+  /**
+   * @private
+   */
+  checkAdFeature_() {
+    let isAd = false;
+    if (this.adTagUri || (this.imaVideoId && this.imaContentSrcId) ||
+      this.imaAssetKey || this.mediaTailorUrl) {
+      isAd = true;
+    }
+    if (isAd) {
+      if (!this.features.includes(shakaAssets.Feature.ADS)) {
+        this.addFeature(shakaAssets.Feature.ADS);
+      }
+    } else {
+      if (this.features.includes(shakaAssets.Feature.ADS)) {
+        this.removeFeature(shakaAssets.Feature.ADS);
+      }
+    }
+  }
+
+  /**
    * @param {shakaAssets.KeySystem} keySystem
    * @return {!ShakaDemoAssetInfo}
    */
@@ -263,8 +294,8 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   setAdTagUri(uri) {
-    this.adTagUri = uri;
-    this.addFeature(shakaAssets.Feature.ADS);
+    this.adTagUri = uri.trim();
+    this.checkAdFeature_();
     return this;
   }
 
@@ -273,10 +304,8 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   setIMAContentSourceId(id) {
-    this.imaContentSrcId = id;
-    if (!this.features.includes(shakaAssets.Feature.ADS)) {
-      this.addFeature(shakaAssets.Feature.ADS);
-    }
+    this.imaContentSrcId = id.trim();
+    this.checkAdFeature_();
 
     return this;
   }
@@ -286,10 +315,8 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   setIMAVideoId(id) {
-    this.imaVideoId = id;
-    if (!this.features.includes(shakaAssets.Feature.ADS)) {
-      this.addFeature(shakaAssets.Feature.ADS);
-    }
+    this.imaVideoId = id.trim();
+    this.checkAdFeature_();
 
     return this;
   }
@@ -299,10 +326,8 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   setIMAAssetKey(key) {
-    this.imaAssetKey = key;
-    if (!this.features.includes(shakaAssets.Feature.ADS)) {
-      this.addFeature(shakaAssets.Feature.ADS);
-    }
+    this.imaAssetKey = key.trim();
+    this.checkAdFeature_();
 
     return this;
   }
@@ -312,10 +337,8 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   setIMAManifestType(type) {
-    this.imaManifestType = type;
-    if (!this.features.includes(shakaAssets.Feature.ADS)) {
-      this.addFeature(shakaAssets.Feature.ADS);
-    }
+    this.imaManifestType = type.trim();
+    this.checkAdFeature_();
 
     return this;
   }
@@ -326,13 +349,18 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   setMediaTailor(url, adsParams=null) {
-    this.mediaTailorUrl = url;
+    this.mediaTailorUrl = url.trim();
     this.mediaTailorAdsParams = adsParams;
-    if (!this.features.includes(shakaAssets.Feature.ADS)) {
-      this.addFeature(shakaAssets.Feature.ADS);
-    }
+    this.checkAdFeature_();
 
     return this;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasAds() {
+    return this.features.includes(shakaAssets.Feature.ADS);
   }
 
   /**
