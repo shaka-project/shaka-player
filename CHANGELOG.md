@@ -6,6 +6,7 @@
 ### Features
 
 * Add avoidEvictionOnQuotaExceededError config ([#8031](https://github.com/shaka-project/shaka-player/issues/8031)) ([6d30f61](https://github.com/shaka-project/shaka-player/commit/6d30f618144e8de83aac43bb2360a9a9ef302c57))
+* Add config to allow reset MSE on cross boundary ([#8156](https://github.com/shaka-project/shaka-player/issues/8156)) ([3699164](https://github.com/shaka-project/shaka-player/commit/369916489e3b1017b814a9b51e88c2e07150b827))
 * Add LCEVC dual track rendering ([#8168](https://github.com/shaka-project/shaka-player/issues/8168)) ([389f45c](https://github.com/shaka-project/shaka-player/commit/389f45c2155c6cfd635dfad38b14f07a5091b514))
 * Add new error code when the streaming is not allowed ([#7994](https://github.com/shaka-project/shaka-player/issues/7994)) ([455163f](https://github.com/shaka-project/shaka-player/commit/455163f874f623f6ffd4edc85cf81966f27aa26c))
 * Add Vizio as community support ([#8049](https://github.com/shaka-project/shaka-player/issues/8049)) ([16ca489](https://github.com/shaka-project/shaka-player/commit/16ca489843134e3e37b5c3855dee032dbb253af6))

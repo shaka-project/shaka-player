@@ -221,9 +221,9 @@ shaka.ui.LanguageUtils = class {
 
 
   /**
-   * @param {!Array<shaka.extern.Track>} tracks
+   * @param {!Array<shaka.extern.TextTrack>} tracks
    * @param {!HTMLElement} langMenu
-   * @param {function(!shaka.extern.Track)} onTrackSelected
+   * @param {function(!shaka.extern.TextTrack)} onTrackSelected
    * @param {boolean} updateChosen
    * @param {!HTMLElement} currentSelectionElement
    * @param {shaka.ui.Localization} localization
