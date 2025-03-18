@@ -2218,7 +2218,7 @@ shaka.extern.MediaSourceConfiguration;
  *   <br>
  *   Defaults to <code>true</code>.
  * @property {boolean} allowStartInMiddleOfInterstitial
- *   If this is true, we allow start in middle of an interstitial.
+ *   If this is true, we will allow start in the middle of an interstitial.
  *   <br>
  *   Defaults to <code>true</code>.
  *
