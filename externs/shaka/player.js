@@ -2178,7 +2178,7 @@ shaka.extern.MediaSourceConfiguration;
  *   disableHLSInterstitial: boolean,
  *   disableDASHInterstitial: boolean,
  *   allowPreloadOnDomElements: boolean,
- *   allowStartInMiddleOfAnInterstitial: boolean
+ *   allowStartInMiddleOfInterstitial: boolean
  * }}
  *
  * @description
@@ -2217,7 +2217,7 @@ shaka.extern.MediaSourceConfiguration;
  *   If this is true, we will use HTMLLinkElement to preload some resources.
  *   <br>
  *   Defaults to <code>true</code>.
- * @property {boolean} allowStartInMiddleOfAnInterstitial
+ * @property {boolean} allowStartInMiddleOfInterstitial
  *   If this is true, we allow start in middle of an interstitial.
  *   <br>
  *   Defaults to <code>true</code>.

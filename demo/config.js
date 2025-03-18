@@ -412,7 +412,7 @@ shakaDemo.Config = class {
         .addBoolInput_('Allow preload on DOM elements',
             'ads.allowPreloadOnDomElements')
         .addBoolInput_('Allow start in middle of an interstitial',
-            'ads.allowStartInMiddleOfAnInterstitial');
+            'ads.allowStartInMiddleOfInterstitial');
   }
 
   /**
