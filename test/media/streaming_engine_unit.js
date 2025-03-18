@@ -2683,11 +2683,12 @@ describe('StreamingEngine', () => {
                         .toBeGreaterThanOrEqual(30);
                     expect(start).toBe(10);
                     expect(end).toBe(20);
-                    return originalRemove(type, start, end);
+                    return originalRemove(
+                        type, start, end, continuityTimelines);
                   });
             }
 
-            return originalRemove(type, start, end);
+            return originalRemove(type, start, end, continuityTimelines);
           });
 
       // Here we go!
