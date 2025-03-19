@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.14.2](https://github.com/shaka-project/shaka-player/compare/v4.14.1...v4.14.2) (2025-03-19)
+
+
+### Bug Fixes
+
+* **Ads:** Fix overlay interstitial when the seeked is outside of the current window ([#8288](https://github.com/shaka-project/shaka-player/issues/8288)) ([566490e](https://github.com/shaka-project/shaka-player/commit/566490e24ed1bc1da92b54f72cc7918ff32b559a))
+* Fix audio selection by channel count ([#8286](https://github.com/shaka-project/shaka-player/issues/8286)) ([f2e1131](https://github.com/shaka-project/shaka-player/commit/f2e113196750afcee696caed049fb62aca72abdf))
+* Fix destroy CastProxy on browser without Cast support ([#8294](https://github.com/shaka-project/shaka-player/issues/8294)) ([15e8147](https://github.com/shaka-project/shaka-player/commit/15e8147c8eee92452d256f1c7c59c9feb9610bee))
+* Text tracks with src= on Safari & UITextDisplayer are sometimes rendered natively ([#8256](https://github.com/shaka-project/shaka-player/issues/8256)) ([68e45e4](https://github.com/shaka-project/shaka-player/commit/68e45e4f25a64cf6f093e024cd36ab77d0b4ad30))
+* **UI:** Optimize portrait thumbnail display ([#8274](https://github.com/shaka-project/shaka-player/issues/8274)) ([ec3c545](https://github.com/shaka-project/shaka-player/commit/ec3c54581d90f5c1cfc2bae4388e11f8c0c662d2))
+
+
+### Performance Improvements
+
+* AdaptationSetCriteria improvements ([#8287](https://github.com/shaka-project/shaka-player/issues/8287)) ([40f0f43](https://github.com/shaka-project/shaka-player/commit/40f0f4395ebf81f47bf93c1e90c846a6e16ee09e))
+* **Ads:** Improve presentation time of pre-roll interstitials ([#8284](https://github.com/shaka-project/shaka-player/issues/8284)) ([0e825c2](https://github.com/shaka-project/shaka-player/commit/0e825c2d29064f1d3ef6821e5de204671d6d69aa))
+
 ## [4.14.1](https://github.com/shaka-project/shaka-player/compare/v4.14.0...v4.14.1) (2025-03-14)
 
 
