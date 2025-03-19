@@ -410,7 +410,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Ignore DASH Interstitial',
             'ads.disableDASHInterstitial')
         .addBoolInput_('Allow preload on DOM elements',
-            'ads.allowPreloadOnDomElements');
+            'ads.allowPreloadOnDomElements')
+        .addBoolInput_('Allow start in the middle of an interstitial',
+            'ads.allowStartInMiddleOfInterstitial');
   }
 
   /**
