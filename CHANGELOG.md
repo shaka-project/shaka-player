@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.13.11](https://github.com/shaka-project/shaka-player/compare/v4.13.10...v4.13.11) (2025-03-19)
+
+
+### Bug Fixes
+
+* Fix audio selection by channel count ([#8286](https://github.com/shaka-project/shaka-player/issues/8286)) ([9167196](https://github.com/shaka-project/shaka-player/commit/9167196c2e8513b05a9dfa629faaacf004daa200))
+* Fix destroy CastProxy on browser without Cast support ([#8294](https://github.com/shaka-project/shaka-player/issues/8294)) ([b08c64b](https://github.com/shaka-project/shaka-player/commit/b08c64b8c6e49785bcf8103776acc0d43d17b8e3))
+* Text tracks with src= on Safari & UITextDisplayer are sometimes rendered natively ([#8256](https://github.com/shaka-project/shaka-player/issues/8256)) ([bdf1fc5](https://github.com/shaka-project/shaka-player/commit/bdf1fc577f4eeb2f560dfddaa7d5aa5fb34a811c))
+
+
+### Performance Improvements
+
+* AdaptationSetCriteria improvements ([#8287](https://github.com/shaka-project/shaka-player/issues/8287)) ([898a036](https://github.com/shaka-project/shaka-player/commit/898a0360fdd7024356032dff341b4c090820db86))
+
 ## [4.13.10](https://github.com/shaka-project/shaka-player/compare/v4.13.9...v4.13.10) (2025-03-14)
 
 
