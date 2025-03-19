@@ -23,6 +23,7 @@
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.16.11",
     "@joeyparrish/karma-babel-preprocessor": "^8.2.0",
+    "@stylistic/eslint-plugin-js": "^4.2.0",
     "@teppeis/clutz": "^1.0.29-4c95e12.v20190929",
     "awesomplete": "^1.1.5",
     "babel-plugin-istanbul": "^6.1.1",
