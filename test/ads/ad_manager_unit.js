@@ -228,7 +228,7 @@ describe('Ad manager', () => {
     window['google'].ima.dai.api.StreamRequest = class {};
     window['google'].ima.settings = {};
     window['google'].ima.settings.setLocale = (locale) => {};
-    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @stylistic/max-len
     window['google'].ima.settings.setDisableCustomPlaybackForIOS10Plus = (disable) => {};
     window['google'].ima.AdsManagerLoadedEvent = {};
     window['google'].ima.AdsManagerLoadedEvent.Type = {

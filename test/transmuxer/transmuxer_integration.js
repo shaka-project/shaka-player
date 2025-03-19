@@ -276,7 +276,7 @@ describe('Transmuxer Player', () => {
 
   describe('for muxed content', () => {
     it('H.264+AAC in TS', async () => {
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
@@ -314,7 +314,7 @@ describe('Transmuxer Player', () => {
     });
 
     it('H.264+AAC with AAC sample with overflow aac samples', async () => {
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264-with-overflow-samples/media.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
@@ -331,7 +331,7 @@ describe('Transmuxer Player', () => {
     });
 
     it('H.264+AAC with AAC sample with overflow nalus', async () => {
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264-with-overflow-nalus/media.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
@@ -353,7 +353,7 @@ describe('Transmuxer Player', () => {
         pending('Codec H.265 is not supported by the platform.');
       }
 
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-aac-h265/media.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
@@ -379,7 +379,7 @@ describe('Transmuxer Player', () => {
         pending('Disabled on Tizen.');
       }
 
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-mp3-h264/index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
@@ -404,7 +404,7 @@ describe('Transmuxer Player', () => {
         pending('Disabled on Tizen.');
       }
 
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-ac3-h264/media.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
@@ -425,7 +425,7 @@ describe('Transmuxer Player', () => {
         pending('Codec EC-3 is not supported by the platform.');
       }
 
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-ec3-h264/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
@@ -446,7 +446,7 @@ describe('Transmuxer Player', () => {
         pending('Codec opus is not supported by the platform.');
       }
 
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-opus-h264/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);

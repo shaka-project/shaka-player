@@ -11,7 +11,7 @@ describe('Platform', () => {
   const originalPlatform = navigator.platform;
   const originalMaxTouchPoints = navigator.maxTouchPoints;
 
-  /* eslint-disable max-len */
+  /* eslint-disable @stylistic/max-len */
   const macSafari = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15';
   const ipadSafari = 'Mozilla/5.0 (iPad; CPU OS 18_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Mobile/15E148 Safari/604.1';
   const iosChrome = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1';
@@ -30,7 +30,7 @@ describe('Platform', () => {
 
   // cspell: disable-next-line
   const vizio = 'Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36 CrKey/1.0.999999 VIZIO SmartCast(Conjure/MTKF-5.1.516.1 FW/0.6.11.1-2 Model/V50C6-J09)';
-  /* eslint-enable max-len */
+  /* eslint-enable @stylistic/max-len */
 
   afterEach(() => {
     setUserAgent(originalUserAgent);

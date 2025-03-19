@@ -126,37 +126,37 @@ describe('MpdUtils', () => {
     it('handles multiple identifiers', () => {
       expect(
           MpdUtils.fillUriTemplate(
-              '/example/$RepresentationID$_$Number$_$SubNumber$_$Bandwidth$_$Time$.mp4', // eslint-disable-line max-len
+              '/example/$RepresentationID$_$Number$_$SubNumber$_$Bandwidth$_$Time$.mp4', // eslint-disable-line @stylistic/max-len
               '1', 2, 3, 4, 5).toString()).toBe('/example/1_2_3_4_5.mp4');
 
       // No spaces.
       expect(
           MpdUtils.fillUriTemplate(
-              '/example/$RepresentationID$$Number$$SubNumber$$Bandwidth$$Time$.mp4', // eslint-disable-line max-len
+              '/example/$RepresentationID$$Number$$SubNumber$$Bandwidth$$Time$.mp4', // eslint-disable-line @stylistic/max-len
               '1', 2, 3, 4, 5).toString()).toBe('/example/12345.mp4');
 
       // Different order.
       expect(
           MpdUtils.fillUriTemplate(
-              '/example/$SubNumber$_$Bandwidth$_$Time$_$RepresentationID$_$Number$.mp4', // eslint-disable-line max-len
+              '/example/$SubNumber$_$Bandwidth$_$Time$_$RepresentationID$_$Number$.mp4', // eslint-disable-line @stylistic/max-len
               '1', 2, 3, 4, 5).toString()).toBe('/example/3_4_5_1_2.mp4');
 
       // Single width.
       expect(
           MpdUtils.fillUriTemplate(
-              '$RepresentationID$_$Number%01d$_$SubNumber%01d$_$Bandwidth%01d$_$Time%01d$', // eslint-disable-line max-len
+              '$RepresentationID$_$Number%01d$_$SubNumber%01d$_$Bandwidth%01d$_$Time%01d$', // eslint-disable-line @stylistic/max-len
               '1', 2, 3, 4, 500).toString()).toBe('1_2_3_4_500');
 
       // Different widths.
       expect(
           MpdUtils.fillUriTemplate(
-              '$RepresentationID$_$Number%02d$_$SubNumber%02d$_$Bandwidth%02d$_$Time%02d$', // eslint-disable-line max-len
+              '$RepresentationID$_$Number%02d$_$SubNumber%02d$_$Bandwidth%02d$_$Time%02d$', // eslint-disable-line @stylistic/max-len
               '1', 2, 3, 4, 5).toString()).toBe('1_02_03_04_05');
 
       // Double $$.
       expect(
           MpdUtils.fillUriTemplate(
-              '$$/$RepresentationID$$$$Number$$$$SubNumber$$$$Bandwidth$$$$Time$$$.$$', // eslint-disable-line max-len
+              '$$/$RepresentationID$$$$Number$$$$SubNumber$$$$Bandwidth$$$$Time$$$.$$', // eslint-disable-line @stylistic/max-len
               '1', 2, 3, 4, 5).toString()).toBe('$/1$2$3$4$5$.$');
     });
 
