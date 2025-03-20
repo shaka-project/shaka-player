@@ -31,6 +31,9 @@ shaka.test.FakeNetworkingEngine = class {
     this.delayNextRequestPromise_ = null;
 
     /** @type {!jasmine.Spy} */
+    this.configure = jasmine.createSpy('configure').and.stub();
+
+    /** @type {!jasmine.Spy} */
     this.request = jasmine.createSpy('request')
         .and.callFake((type, request) => this.requestImpl_(type, request));
 
