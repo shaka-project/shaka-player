@@ -104,6 +104,25 @@ LCEVCdec.SupportObject.SupportStatus;
 LCEVCdec.SupportObject.SupportError;
 
 /**
+ * Promise that resolves once the LCEVC libraries have finished loading.
+ * @type {Promise}
+ */
+LCEVCdec.ready;
+
+/**
+ * LCEVC instance for debugging and testing
+ * @type {typeof LCEVCdec.LCEVCdec}
+ */
+LCEVCdec.instance;
+
+/** @type {boolean} */
+LCEVCdec.instance.isLcevcEnabled;
+/** @type {boolean} */
+LCEVCdec.instance.firstLcevcSegmentLoaded;
+/** @type {boolean} */
+LCEVCdec.instance.lcevcDataDetected;
+
+/**
  * Typedef for the module interface.  Both LCEVCdec (new module) and LcevcDil
  * (old module) implement roughly the same interface.
  *
