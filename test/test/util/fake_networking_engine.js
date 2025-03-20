@@ -48,16 +48,6 @@ shaka.test.FakeNetworkingEngine = class {
     this.responseFilter_ = null;
 
     /** @type {!jasmine.Spy} */
-    this.setForceHTTP = jasmine.createSpy('setForceHTTP').and.stub();
-
-    /** @type {!jasmine.Spy} */
-    this.setForceHTTPS = jasmine.createSpy('setForceHTTPS').and.stub();
-
-    /** @type {!jasmine.Spy} */
-    this.setMinBytesForProgressEvents =
-        jasmine.createSpy('setMinBytesForProgressEvents').and.stub();
-
-    /** @type {!jasmine.Spy} */
     this.clearCommonAccessTokenMap =
         jasmine.createSpy('clearCommonAccessTokenMap').and.stub();
 
