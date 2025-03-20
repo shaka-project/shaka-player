@@ -151,7 +151,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
         .set('manifestTimeSeconds', parseSeconds)
         .set('estimatedBandwidth', parseBits)
         .set('streamBandwidth', parseBits)
-        .set('maxSegmentDuration', parseTime)
+        .set('maxSegmentDuration', parseSeconds)
         .set('pauseTime', parseTime)
         .set('playTime', parseTime)
         .set('corruptedFrames', parseFrames)
