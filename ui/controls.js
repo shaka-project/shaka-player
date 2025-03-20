@@ -569,6 +569,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   setSeeking(seeking) {
     this.isSeeking_ = seeking;
+    if (seeking) {
+      this.mouseStillTimer_.stop();
+    } else {
+      this.mouseStillTimer_.tickAfter(/* seconds= */ 3);
+    }
   }
 
   /**
