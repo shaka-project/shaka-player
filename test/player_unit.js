@@ -2180,7 +2180,7 @@ describe('Player', () => {
           primary: false,
           roles: [],
           forced: false,
-          bandwidth: 0,
+          bandwidth: 10,
           originalTextId: 'text-es',
           accessibilityPurpose: undefined,
         },
@@ -2197,7 +2197,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           forced: false,
-          bandwidth: 0,
+          bandwidth: 10,
           originalTextId: 'text-en',
           accessibilityPurpose: undefined,
         },
@@ -2214,7 +2214,7 @@ describe('Player', () => {
           primary: false,
           roles: ['commentary'],
           forced: false,
-          bandwidth: 0,
+          bandwidth: 10,
           originalTextId: 'text-commentary',
           accessibilityPurpose: undefined,
         },
@@ -3117,7 +3117,8 @@ describe('Player', () => {
       });
 
       it('includes selectVariantTrack choices', () => {
-        const track = player.getVariantTracks()[3];
+        const track = player.getVariantTracks().find((t) => !t.active);
+        goog.asserts.assert(track, 'track should not be null!');
 
         const variants = manifest.variants;
         const variant = variants.find((variant) => variant.id == track.id);
@@ -3135,7 +3136,7 @@ describe('Player', () => {
       });
 
       it('includes adaptation choices', () => {
-        const variant = manifest.variants[3];
+        const variant = manifest.variants[2];
 
         switch_(variant);
         checkHistory(jasmine.arrayContaining([
