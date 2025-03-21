@@ -3118,6 +3118,7 @@ describe('Player', () => {
 
       it('includes selectVariantTrack choices', () => {
         const track = player.getVariantTracks().find((t) => !t.active);
+        goog.asserts.assert(track, 'track should not be null!');
 
         const variants = manifest.variants;
         const variant = variants.find((variant) => variant.id == track.id);
