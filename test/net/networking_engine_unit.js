@@ -1211,19 +1211,25 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         return new shaka.util.AbortableOperation(p, () => {});
       });
 
+      /** @const {shaka.extern.RequestContext} */
+      const ctx = {type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD};
+
       /** @const {shaka.net.NetworkingEngine.PendingRequest} */
       const resp = networkingEngine.request(
-          requestType, createRequest('resolve://'));
+          requestType, createRequest('resolve://'), ctx);
       await Util.shortDelay();  // Allow Promises to resolve.
       expect(onProgress).toHaveBeenCalledTimes(2);
-      expect(onProgress).toHaveBeenCalledWith(1, 2, true, requestLikeObject);
-      expect(onProgress).toHaveBeenCalledWith(4, 5, true, requestLikeObject);
+      expect(onProgress).toHaveBeenCalledWith(1, 2, true, requestLikeObject,
+          ctx);
+      expect(onProgress).toHaveBeenCalledWith(4, 5, true, requestLikeObject,
+          ctx);
       onProgress.calls.reset();
 
       delay.resolve();
       await resp.promise;
       expect(onProgress).toHaveBeenCalledTimes(1);
-      expect(onProgress).toHaveBeenCalledWith(7, 8, true, requestLikeObject);
+      expect(onProgress).toHaveBeenCalledWith(7, 8, true, requestLikeObject,
+          ctx);
     });
 
     it('appends request packet number', async () => {
@@ -1240,16 +1246,19 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         return new shaka.util.AbortableOperation(p, () => {});
       });
 
+      /** @const {shaka.extern.RequestContext} */
+      const ctx = {type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD};
+
       /** @const {shaka.net.NetworkingEngine.PendingRequest} */
       const resp = networkingEngine.request(
-          requestType, createRequest('resolve://'));
+          requestType, createRequest('resolve://'), ctx);
       await Util.shortDelay();  // Allow Promises to resolve.
       expect(onProgress).toHaveBeenCalledWith(1, 2, true,
-          jasmine.objectContaining({packetNumber: 1}));
+          jasmine.objectContaining({packetNumber: 1}), ctx);
       delay.resolve();
       await resp.promise;
       expect(onProgress).toHaveBeenCalledWith(4, 5, true,
-          jasmine.objectContaining({packetNumber: 2}));
+          jasmine.objectContaining({packetNumber: 2}), ctx);
     });
 
     it('doesn\'t forward progress events for non-SEGMENT', async () => {
