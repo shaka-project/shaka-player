@@ -117,6 +117,9 @@ application:
     - `useSafariBehaviorForLive` has been removed.
     - `parsePrftBox` has been removed.
     - `videoRobustness` and `audioRobustness` are now only an array of strings. (deprecated in v4.13.0)
+    - `streaming.forceHTTP` has been renamed to `networking.forceHTTP` (deprecated in v4.15.0)
+    - `streaming.forceHTTPS` has been renamed to `networking.forceHTTPS` (deprecated in v4.15.0)
+    - `streaming.minBytesForProgressEvents` has been renamed to `networking.minBytesForProgressEvents` (deprecated in v4.15.0)
 
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.

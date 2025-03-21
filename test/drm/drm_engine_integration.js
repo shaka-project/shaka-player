@@ -72,6 +72,10 @@ describe('DrmEngine', () => {
 
     networkingEngine = new shaka.net.NetworkingEngine();
 
+    const defaultConfig =
+        shaka.util.PlayerConfiguration.createDefault().networking;
+    networkingEngine.configure(defaultConfig);
+
     const playerInterface = {
       netEngine: networkingEngine,
       onError: shaka.test.Util.spyFunc(onErrorSpy),

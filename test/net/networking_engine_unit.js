@@ -45,6 +45,9 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
     onProgress = jasmine.createSpy('onProgressUpdated');
     networkingEngine = new shaka.net.NetworkingEngine(Util.spyFunc(onProgress));
+    const defaultConfig =
+        shaka.util.PlayerConfiguration.createDefault().networking;
+    networkingEngine.configure(defaultConfig);
     resolveScheme = makeResolveScheme('resolve scheme');
     rejectScheme = jasmine.createSpy('reject scheme').and.callFake(() =>
       shaka.util.AbortableOperation.failed(error));
@@ -946,6 +949,9 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     const onSegmentDownloaded = jasmine.createSpy('onSegmentDownloaded');
     networkingEngine =
         new shaka.net.NetworkingEngine(Util.spyFunc(onSegmentDownloaded));
+    const defaultConfig =
+        shaka.util.PlayerConfiguration.createDefault().networking;
+    networkingEngine.configure(defaultConfig);
 
     await networkingEngine.request(requestType, createRequest('resolve://foo'))
         .promise;
