@@ -1,5 +1,47 @@
 # Changelog
 
+## [4.15.0](https://github.com/shaka-project/shaka-player/compare/v4.14.0...v4.15.0) (2025-03-21)
+
+
+### Features
+
+* Add more info on src= tracks when the browser support it ([#8299](https://github.com/shaka-project/shaka-player/issues/8299)) ([9021bd8](https://github.com/shaka-project/shaka-player/commit/9021bd8272d2bd797d816041ec539cf011755d21))
+* Add more info on src= tracks when the browser support it ([#8302](https://github.com/shaka-project/shaka-player/issues/8302)) ([77a3f56](https://github.com/shaka-project/shaka-player/commit/77a3f567bdd892ba76b2990e6d22e02fae1fceb5))
+* Added MetadataAdded event ([#8282](https://github.com/shaka-project/shaka-player/issues/8282)) ([f3a8113](https://github.com/shaka-project/shaka-player/commit/f3a81136eb09df2a1807b102da4dd2e8ab87210a))
+* **Ads:** Add allowStartInMiddleOfInterstitial config ([#8289](https://github.com/shaka-project/shaka-player/issues/8289)) ([c012b9c](https://github.com/shaka-project/shaka-player/commit/c012b9c690dfe23b1dde52deb9e69f5d04d7752d))
+* Improve stats when using src= in Safari ([#8304](https://github.com/shaka-project/shaka-player/issues/8304)) ([251ff28](https://github.com/shaka-project/shaka-player/commit/251ff289bfb8d62e193c521e5168ec4c038c33e7))
+* **net:** Add networking config ([#8306](https://github.com/shaka-project/shaka-player/issues/8306)) ([36db472](https://github.com/shaka-project/shaka-player/commit/36db472d930fbf8cfbd664f1031bafefee24ed70))
+* Simplicate Image/Thumbnails API ([#8266](https://github.com/shaka-project/shaka-player/issues/8266)) ([d2f3657](https://github.com/shaka-project/shaka-player/commit/d2f3657c966c392389ebd3ce9019a5556e9fbe2d))
+* Simplicate Text and Chapters APIs ([#8264](https://github.com/shaka-project/shaka-player/issues/8264)) ([c0455d7](https://github.com/shaka-project/shaka-player/commit/c0455d781ff37a53349b6c10318e534a37c5a10f))
+* Simplify getStats to support MSE-AirPlay ([#8309](https://github.com/shaka-project/shaka-player/issues/8309)) ([2d8ad94](https://github.com/shaka-project/shaka-player/commit/2d8ad94690ef76959ccc2c88d7f5a06e0570cf55))
+
+
+### Bug Fixes
+
+* **Ads:** Destroy preloadManagers on stop interstitials ([#8268](https://github.com/shaka-project/shaka-player/issues/8268)) ([ace6cb7](https://github.com/shaka-project/shaka-player/commit/ace6cb7202dadeb68820aa12054e287dde369ab5))
+* **Ads:** Fix overlay interstitial when the seeked is outside of the current window ([#8288](https://github.com/shaka-project/shaka-player/issues/8288)) ([9fd5900](https://github.com/shaka-project/shaka-player/commit/9fd59002bbf2884c977258b810506f53d72b322e))
+* **changelog:** Add missing ref to PR [#8156](https://github.com/shaka-project/shaka-player/issues/8156) in v4.14.0 ([#8259](https://github.com/shaka-project/shaka-player/issues/8259)) ([b5a261a](https://github.com/shaka-project/shaka-player/commit/b5a261aed91b8da211af1540c0e318f0b2bdf873))
+* Closure compiler removes call to modifyCueCallback in src= mode ([#8261](https://github.com/shaka-project/shaka-player/issues/8261)) ([b7865b4](https://github.com/shaka-project/shaka-player/commit/b7865b43233a95da31c252a4b6bc54c2e8fe83dd))
+* Fix audio selection by channel count ([#8286](https://github.com/shaka-project/shaka-player/issues/8286)) ([b9625c7](https://github.com/shaka-project/shaka-player/commit/b9625c7f349587f30edf7bf039232b8c8da2db30))
+* Fix buffering event on native playback ([#8310](https://github.com/shaka-project/shaka-player/issues/8310)) ([a18b37f](https://github.com/shaka-project/shaka-player/commit/a18b37f51bc595acd02f514acbdfce0d2fa370e4))
+* Fix destroy CastProxy on browser without Cast support ([#8294](https://github.com/shaka-project/shaka-player/issues/8294)) ([b2a1d35](https://github.com/shaka-project/shaka-player/commit/b2a1d359e66940c779bb3ac6d65870f16c3a4d5c))
+* Make shaka.util.Lazy work with null ([#8267](https://github.com/shaka-project/shaka-player/issues/8267)) ([e0a57bb](https://github.com/shaka-project/shaka-player/commit/e0a57bb27def16598ffc88e4a55856473629a634))
+* Persist selected audio track role after variant update in `selectVariantTrack` ([#8249](https://github.com/shaka-project/shaka-player/issues/8249)) ([b30e0ce](https://github.com/shaka-project/shaka-player/commit/b30e0ce67ee5c529ca1fae59eef5f691da974acb)), closes [#8248](https://github.com/shaka-project/shaka-player/issues/8248)
+* Prevent unhandled rejections on segment fetch failures ([#8313](https://github.com/shaka-project/shaka-player/issues/8313)) ([8ba2722](https://github.com/shaka-project/shaka-player/commit/8ba2722004c7ac37282e3c560b4076595d035ba1))
+* Text tracks with src= on Safari & UITextDisplayer are sometimes rendered natively ([#8256](https://github.com/shaka-project/shaka-player/issues/8256)) ([306b682](https://github.com/shaka-project/shaka-player/commit/306b68200bb442535b73e478b48bacf245aa5648))
+* **UI:** Avoid hide controls when seeking ([#8303](https://github.com/shaka-project/shaka-player/issues/8303)) ([6cc035a](https://github.com/shaka-project/shaka-player/commit/6cc035a61f48f11dcb98a3282c174f1fc5984b5c))
+* **UI:** Disable save video frame button while casting ([#8258](https://github.com/shaka-project/shaka-player/issues/8258)) ([e71d94c](https://github.com/shaka-project/shaka-player/commit/e71d94cf08a1ceaff3cb94d4e5435b825aa59175))
+* **UI:** Display max segment duration in seconds ([#8305](https://github.com/shaka-project/shaka-player/issues/8305)) ([1c42190](https://github.com/shaka-project/shaka-player/commit/1c421905ffdda581272cef06759d0e972a72a2fa))
+* **UI:** Optimize portrait thumbnail display ([#8274](https://github.com/shaka-project/shaka-player/issues/8274)) ([1f336dd](https://github.com/shaka-project/shaka-player/commit/1f336dd319ad23a6feb785f2ab05a8bc5fc8e2a2))
+* Update region observer with new rules for small regions ([#8275](https://github.com/shaka-project/shaka-player/issues/8275)) ([2f18b47](https://github.com/shaka-project/shaka-player/commit/2f18b47d95b79f5e8109e155c8ff36c190569569))
+
+
+### Performance Improvements
+
+* AdaptationSetCriteria improvements ([#8287](https://github.com/shaka-project/shaka-player/issues/8287)) ([78a16d9](https://github.com/shaka-project/shaka-player/commit/78a16d9e225f5c4aa2284140551d8cffc73856e3))
+* **Ads:** Improve presentation time of pre-roll interstitials ([#8284](https://github.com/shaka-project/shaka-player/issues/8284)) ([fad638e](https://github.com/shaka-project/shaka-player/commit/fad638ee13f4b687e4b63acbee540b7a54d8a9f9))
+* **Ads:** Preload images on interstitials ([#8269](https://github.com/shaka-project/shaka-player/issues/8269)) ([c49102c](https://github.com/shaka-project/shaka-player/commit/c49102ca3d4f87ad6b2a64b07f037e8e3fd3a136))
+
 ## [4.14.0](https://github.com/shaka-project/shaka-player/compare/v4.13.0...v4.14.0) (2025-03-12)
 
 
