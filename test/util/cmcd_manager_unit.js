@@ -115,8 +115,12 @@ describe('CmcdManager', () => {
       cmcd.applyData(type, request, context);
     }
 
-    return new NetworkingEngine(undefined, undefined, undefined, undefined,
-        onRequest);
+    const networkingEngine = new NetworkingEngine(
+        undefined, undefined, undefined, undefined, onRequest);
+    const defaultConfig =
+        shaka.util.PlayerConfiguration.createDefault().networking;
+    networkingEngine.configure(defaultConfig);
+    return networkingEngine;
   }
 
   describe('Query serialization', () => {
