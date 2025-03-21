@@ -119,15 +119,6 @@ shaka.ui.LanguageUtils = class {
       return name ? ' ' + name : name;
     };
 
-    /** @type {!Map<string, !Set<string>>} */
-    const rolesByLanguage = new Map();
-    for (const track of tracks) {
-      if (!rolesByLanguage.has(track.language)) {
-        rolesByLanguage.set(track.language, new Set());
-      }
-      rolesByLanguage.get(track.language).add(getRolesString(track));
-    }
-
     // 5. Add new buttons
     /** @type {!Set<string>} */
     const combinationsMade = new Set();
@@ -266,15 +257,6 @@ shaka.ui.LanguageUtils = class {
       }
       return keys.join(': ');
     };
-
-    /** @type {!Map<string, !Set<string>>} */
-    const rolesByLanguage = new Map();
-    for (const track of tracks) {
-      if (!rolesByLanguage.has(track.language)) {
-        rolesByLanguage.set(track.language, new Set());
-      }
-      rolesByLanguage.get(track.language).add(getRolesString(track));
-    }
 
     // 5. Add new buttons
     /** @type {!Set<string>} */
