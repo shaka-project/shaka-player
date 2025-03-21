@@ -1,0 +1,10 @@
+# Device
+
++../../lib/device/chromecast.js
++../../lib/device/hisense.js
++../../lib/device/playstation.js
++../../lib/device/tizen.js
++../../lib/device/vizio.js
++../../lib/device/webkit_stb.js
++../../lib/device/webos.js
++../../lib/device/xbox.js

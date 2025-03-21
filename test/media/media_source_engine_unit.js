@@ -213,10 +213,10 @@ describe('MediaSourceEngine', () => {
     shaka.media.MediaSourceEngine.prototype.createMediaSource =
         Util.spyFunc(createMediaSourceSpy);
 
-    requiresEncryptionInfoInAllInitSegmentsSpy = spyOn(shaka.util.Platform,
+    requiresEncryptionInfoInAllInitSegmentsSpy = spyOn(deviceDetected,
         'requiresEncryptionInfoInAllInitSegments').and.returnValue(false);
 
-    requiresEC3InitSegments = spyOn(shaka.util.Platform,
+    requiresEC3InitSegments = spyOn(deviceDetected,
         'requiresEC3InitSegments').and.returnValue(false);
 
     fakeEncryptionSpy = spyOn(shaka.media.ContentWorkarounds, 'fakeEncryption')

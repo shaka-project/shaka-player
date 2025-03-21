@@ -7,13 +7,14 @@
 
 goog.provide('shaka.ui.VRManager');
 
+goog.require('shaka.device.DeviceFactory');
+goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
 goog.require('shaka.ui.VRWebgl');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IReleasable');
-goog.require('shaka.util.Platform');
 
 goog.requireType('shaka.Player');
 
@@ -361,7 +362,11 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     }
     // The user interface is not intended for devices that are controlled with
     // a remote control, and WebGL may run slowly on these devices.
-    if (shaka.util.Platform.isSmartTV()) {
+    const device = shaka.device.DeviceFactory.getDevice();
+    const deviceType = device.getDeviceType();
+    if (deviceType == shaka.device.IDevice.DeviceType.TV ||
+        deviceType == shaka.device.IDevice.DeviceType.CONSOLE ||
+        deviceType == shaka.device.IDevice.DeviceType.CAST) {
       return null;
     }
     const webglContexts = [
