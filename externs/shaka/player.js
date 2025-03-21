@@ -1823,9 +1823,6 @@ shaka.extern.LiveSyncConfiguration;
  *   useNativeHlsForFairPlay: boolean,
  *   inaccurateManifestTolerance: number,
  *   lowLatencyMode: boolean,
- *   forceHTTP: boolean,
- *   forceHTTPS: boolean,
- *   minBytesForProgressEvents: number,
  *   preferNativeDash: boolean,
  *   preferNativeHls: boolean,
  *   updateIntervalSeconds: number,
@@ -1982,21 +1979,6 @@ shaka.extern.LiveSyncConfiguration;
  *   other things, see: docs/tutorials/config.md
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {boolean} forceHTTP
- *   If true, if the protocol is HTTPs change it to HTTP.
- *   If both forceHTTP and forceHTTPS are set, forceHTTPS wins.
- *   <br>
- *   Defaults to <code>false</code>.
- * @property {boolean} forceHTTPS
- *   If true, if the protocol is HTTP change it to HTTPs.
- *   If both forceHTTP and forceHTTPS are set, forceHTTPS wins.
- *   <br>
- *   Defaults to <code>false</code>.
- * @property {number} minBytesForProgressEvents
- *   Defines minimum number of bytes that should be used to emit progress event,
- *   if possible. To avoid issues around feeding ABR with request history, this
- *   value should be greater than or equal to `abr.advanced.minBytes`.
- *   By default equals 16e3 (the same value as `abr.advanced.minBytes`).
  * @property {boolean} preferNativeDash
  *   If true, prefer native DASH playback when possible, regardless of platform.
  *   <br>
@@ -2117,6 +2099,36 @@ shaka.extern.StreamingConfiguration;
 
 /**
  * @typedef {{
+ *   forceHTTP: boolean,
+ *   forceHTTPS: boolean,
+ *   minBytesForProgressEvents: number
+ * }}
+ *
+ * @description
+ * The Networking's configuration options.
+ *
+ * @property {boolean} forceHTTP
+ *   If true, if the protocol is HTTPs change it to HTTP.
+ *   If both forceHTTP and forceHTTPS are set, forceHTTPS wins.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} forceHTTPS
+ *   If true, if the protocol is HTTP change it to HTTPs.
+ *   If both forceHTTP and forceHTTPS are set, forceHTTPS wins.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {number} minBytesForProgressEvents
+ *   Defines minimum number of bytes that should be used to emit progress event,
+ *   if possible. To avoid issues around feeding ABR with request history, this
+ *   value should be greater than or equal to `abr.advanced.minBytes`.
+ *   By default equals 16e3 (the same value as `abr.advanced.minBytes`).
+ * @exportDoc
+ */
+shaka.extern.NetworkingConfiguration;
+
+
+/**
+ * @typedef {{
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   addExtraFeaturesToSourceBuffer: function(string): string,
  *   forceTransmux: boolean,
@@ -2177,7 +2189,8 @@ shaka.extern.MediaSourceConfiguration;
  *   supportsMultipleMediaElements: boolean,
  *   disableHLSInterstitial: boolean,
  *   disableDASHInterstitial: boolean,
- *   allowPreloadOnDomElements: boolean
+ *   allowPreloadOnDomElements: boolean,
+ *   allowStartInMiddleOfInterstitial: boolean
  * }}
  *
  * @description
@@ -2214,6 +2227,10 @@ shaka.extern.MediaSourceConfiguration;
  *   Defaults to <code>false</code>.
  * @property {boolean} allowPreloadOnDomElements
  *   If this is true, we will use HTMLLinkElement to preload some resources.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} allowStartInMiddleOfInterstitial
+ *   If this is true, we will allow start in the middle of an interstitial.
  *   <br>
  *   Defaults to <code>true</code>.
  *
@@ -2580,6 +2597,7 @@ shaka.extern.TextDisplayerConfiguration;
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
  *   streaming: shaka.extern.StreamingConfiguration,
+ *   networking: shaka.extern.NetworkingConfiguration,
  *   mediaSource: shaka.extern.MediaSourceConfiguration,
  *   abrFactory: shaka.extern.AbrManager.Factory,
  *   adaptationSetCriteriaFactory: shaka.media.AdaptationSetCriteria.Factory,
@@ -2624,6 +2642,8 @@ shaka.extern.TextDisplayerConfiguration;
  *   Manifest configuration and settings.
  * @property {shaka.extern.StreamingConfiguration} streaming
  *   Streaming configuration and settings.
+ * @property {shaka.extern.NetworkingConfiguration} networking
+ *   Networking configuration and settings.
  * @property {shaka.extern.MediaSourceConfiguration} mediaSource
  *   Media source configuration and settings.
  * @property {shaka.extern.AbrManager.Factory} abrFactory

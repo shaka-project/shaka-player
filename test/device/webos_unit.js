@@ -5,7 +5,7 @@
  */
 
 describe('WebOS', () => {
-  /* eslint-disable max-len */
+  /* eslint-disable @stylistic/max-len */
   // See: https://webostv.developer.lge.com/develop/specifications/web-api-and-web-engine#useragent-string
   const webOs3 = 'Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.2.1 Chrome/38.0.2125.122 Safari/537.36 WebAppManager';
   const webOs4 = 'Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.34 Safari/537.36 WebAppManager';
@@ -13,7 +13,7 @@ describe('WebOS', () => {
   const webOs6 = 'Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36 WebAppManager';
 
   const tizen50 = 'Mozilla/5.0 (SMART-TV; LINUX; Tizen 5.0) AppleWebKit/537.36 (KHTML, like Gecko) Version/5.0 TV Safari/537.36';
-  /* eslint-enable max-len */
+  /* eslint-enable @stylistic/max-len */
 
   const Util = shaka.test.Util;
   const originalUserAgent = navigator.userAgent;

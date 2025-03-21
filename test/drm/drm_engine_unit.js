@@ -2032,7 +2032,7 @@ describe('DrmEngine', () => {
     });
 
     it(
-        // eslint-disable-next-line max-len
+        // eslint-disable-next-line @stylistic/max-len
         'tears down & does not remove active persistent sessions based on configuration flag',
         async () => {
           config.advanced['drm.abc'] = createAdvancedConfig(null);

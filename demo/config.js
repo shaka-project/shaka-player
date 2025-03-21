@@ -87,6 +87,7 @@ shakaDemo.Config = class {
     this.addOfflineSection_();
     this.addDrmSection_();
     this.addStreamingSection_();
+    this.addNetworkingSection_();
     this.addMediaSourceSection_();
     this.addManifestSection_();
     this.addDashManifestSection_();
@@ -410,7 +411,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Ignore DASH Interstitial',
             'ads.disableDASHInterstitial')
         .addBoolInput_('Allow preload on DOM elements',
-            'ads.allowPreloadOnDomElements');
+            'ads.allowPreloadOnDomElements')
+        .addBoolInput_('Allow start in the middle of an interstitial',
+            'ads.allowStartInMiddleOfInterstitial');
   }
 
   /**
@@ -507,10 +510,6 @@ shakaDemo.Config = class {
             'streaming.inaccurateManifestTolerance',
             /* canBeDecimal= */ true)
         .addBoolInput_('Low Latency Mode', 'streaming.lowLatencyMode')
-        .addBoolInput_('Force HTTP', 'streaming.forceHTTP')
-        .addBoolInput_('Force HTTPS', 'streaming.forceHTTPS')
-        .addNumberInput_('Min bytes for progress events',
-            'streaming.minBytesForProgressEvents')
         .addBoolInput_('Prefer native DASH playback when available',
             'streaming.preferNativeDash')
         .addBoolInput_('Prefer native HLS playback when available',
@@ -665,6 +664,16 @@ shakaDemo.Config = class {
             'streaming.liveSync.dynamicTargetLatency.maxLatency')
         .addNumberInput_('Dynamic Target Latency Min Latency',
             'streaming.liveSync.dynamicTargetLatency.minLatency');
+  }
+
+  /** @private */
+  addNetworkingSection_() {
+    const docLink = this.resolveExternLink_('.NetworkingConfiguration');
+    this.addSection_('Networking', docLink)
+        .addBoolInput_('Force HTTP', 'networking.forceHTTP')
+        .addBoolInput_('Force HTTPS', 'networking.forceHTTPS')
+        .addNumberInput_('Min bytes for progress events',
+            'networking.minBytesForProgressEvents');
   }
 
   /** @private */

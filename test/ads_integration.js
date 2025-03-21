@@ -103,7 +103,7 @@ describe('Ads', () => {
       adManager.initInterstitial(adContainer, player, video);
 
       await player.load(streamUri);
-      await video.play();
+      video.play();
       expect(player.isLive()).toBe(false);
 
       // Wait a maximum of 10 seconds before the ad starts playing.
@@ -146,7 +146,7 @@ describe('Ads', () => {
       adManager.initInterstitial(adContainer, player, video);
 
       await player.load(streamUri);
-      await video.play();
+      video.play();
       expect(player.isLive()).toBe(false);
 
       // Wait a maximum of 10 seconds before the ad starts playing.
@@ -187,7 +187,7 @@ describe('Ads', () => {
       goog.asserts.assert(adManager, 'Must have adManager');
 
       await player.load(streamUri);
-      await video.play();
+      video.play();
       expect(player.isLive()).toBe(false);
 
       // Wait a maximum of 10 seconds before the ad starts playing.
@@ -235,7 +235,7 @@ describe('Ads', () => {
       adManager.initInterstitial(adContainer, player, video);
 
       await player.load(streamUri);
-      await video.play();
+      video.play();
       expect(player.isLive()).toBe(false);
 
       // Wait a maximum of 10 seconds before the ad starts playing.

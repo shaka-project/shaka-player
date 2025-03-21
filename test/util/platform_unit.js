@@ -11,12 +11,12 @@ describe('Platform', () => {
   const originalPlatform = navigator.platform;
   const originalMaxTouchPoints = navigator.maxTouchPoints;
 
-  /* eslint-disable max-len */
+  /* eslint-disable @stylistic/max-len */
   const macSafari = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15';
   const ipadSafari = 'Mozilla/5.0 (iPad; CPU OS 18_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Mobile/15E148 Safari/604.1';
   const iosChrome = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1';
   const webOs6 = 'Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36 WebAppManager';
-  /* eslint-enable max-len */
+  /* eslint-enable @stylistic/max-len */
 
   afterEach(() => {
     setUserAgent(originalUserAgent);

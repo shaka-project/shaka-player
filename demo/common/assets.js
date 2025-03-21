@@ -242,7 +242,7 @@ shakaAssets.UplynkRequestFilter = (type, request) => {
 // End custom callbacks }}}
 
 
-/* eslint-disable max-len */
+/* eslint-disable @stylistic/max-len */
 /** @const {!Array<!ShakaDemoAssetInfo>} */
 shakaAssets.testAssets = [
   // Shaka assets {{{
@@ -2074,4 +2074,4 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE),
   // }}}
 ];
-/* eslint-enable max-len */
+/* eslint-enable @stylistic/max-len */

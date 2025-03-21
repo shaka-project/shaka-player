@@ -599,7 +599,7 @@ describe('HlsParser live', () => {
           expect(manifest.presentationTimeline.getDelay()).toBe(6);
         });
 
-    it('sets 3 times target duration as presentation delay if not configured and clamped to the start', async () => { // eslint-disable-line max-len
+    it('sets 3 times target duration as presentation delay if not configured and clamped to the start', async () => { // eslint-disable-line @stylistic/max-len
       const media = [
         '#EXTM3U\n',
         '#EXT-X-TARGETDURATION:2\n',
@@ -624,7 +624,7 @@ describe('HlsParser live', () => {
       expect(manifest.startTime).toBe(0);
     });
 
-    it('sets 1 times target duration as presentation delay if there are not enough segments', async () => { // eslint-disable-line max-len
+    it('sets 1 times target duration as presentation delay if there are not enough segments', async () => { // eslint-disable-line @stylistic/max-len
       const media = [
         '#EXTM3U\n',
         '#EXT-X-TARGETDURATION:2\n',
@@ -782,7 +782,7 @@ describe('HlsParser live', () => {
       await testInitialManifest(master, mediaWithPartialSegments, [ref, ref2]);
     });
 
-    it('parses streams with partial and preload hinted segments and BYTERANGE', async () => { // eslint-disable-line max-len
+    it('parses streams with partial and preload hinted segments and BYTERANGE', async () => { // eslint-disable-line @stylistic/max-len
       playerInterface.isLowLatencyMode = () => true;
       const mediaWithPartialSegments = [
         '#EXTM3U\n',
