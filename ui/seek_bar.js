@@ -546,14 +546,14 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         Math.min(Math.floor(seekRange.end), value));
     const thumbnail =
         await this.player.getThumbnails(/* trackId= */ null, playerValue);
+    if (!thumbnail || !thumbnail.uris.length) {
+      this.hideThumbnail_();
+      return;
+    }
     if (thumbnail.width < thumbnail.height) {
       this.thumbnailContainer_.classList.add('portrait-thumbnail');
     } else {
       this.thumbnailContainer_.classList.remove('portrait-thumbnail');
-    }
-    if (!thumbnail || !thumbnail.uris.length) {
-      this.hideThumbnail_();
-      return;
     }
     if (this.player.isLive()) {
       const totalSeconds = seekRange.end - value;
