@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.13.12](https://github.com/shaka-project/shaka-player/compare/v4.13.11...v4.13.12) (2025-03-24)
+
+
+### Bug Fixes
+
+* Fix buffering event on native playback ([#8310](https://github.com/shaka-project/shaka-player/issues/8310)) ([4b49143](https://github.com/shaka-project/shaka-player/commit/4b4914303dea73be0a935a32f83a691204a0643e))
+* **HLS:** Fix HLS live playback on older Webkit STBs ([#8325](https://github.com/shaka-project/shaka-player/issues/8325)) ([fcea469](https://github.com/shaka-project/shaka-player/commit/fcea469c4f6e7bb6eaeda5d47b0ef9490a96b750)), closes [#8324](https://github.com/shaka-project/shaka-player/issues/8324)
+* **HLS:** Supports SUPPLEMENTAL-CODECS with muxed audio ([#8323](https://github.com/shaka-project/shaka-player/issues/8323)) ([500d249](https://github.com/shaka-project/shaka-player/commit/500d24929a696e591895c6df8398ad02716337e7))
+* Prevent unhandled rejections on segment fetch failures ([#8313](https://github.com/shaka-project/shaka-player/issues/8313)) ([ef6eeb3](https://github.com/shaka-project/shaka-player/commit/ef6eeb3330b26e5a56482407045c2100f3ea2eda))
+* **UI:** Avoid hide controls when seeking ([#8303](https://github.com/shaka-project/shaka-player/issues/8303)) ([fdb8058](https://github.com/shaka-project/shaka-player/commit/fdb80585de65e31e99571ef072e903159caa8665))
+* **UI:** Display max segment duration in seconds ([#8305](https://github.com/shaka-project/shaka-player/issues/8305)) ([4066612](https://github.com/shaka-project/shaka-player/commit/406661254d8389070a3bfb63f48232fa6e542e67))
+
 ## [4.13.11](https://github.com/shaka-project/shaka-player/compare/v4.13.10...v4.13.11) (2025-03-19)
 
 
