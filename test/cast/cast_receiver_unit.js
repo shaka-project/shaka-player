@@ -55,6 +55,8 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     mockReceiverApi = createMockReceiverApi();
     mockCanDisplayType = jasmine.createSpy('canDisplayType');
     mockCanDisplayType.and.returnValue(false);
+    spyOn(deviceDetected, 'getDeviceType').and
+        .returnValue(shaka.device.IDevice.DeviceType.CAST);
 
     // We're using quotes to access window.cast because the compiler
     // knows about lots of Cast-specific APIs we aren't mocking.  We
