@@ -26,4 +26,5 @@
   echo ' - `@shaka-bot test ce`: Start lab tests on CE devices only (no desktop browsers)'
   echo ' - `@shaka-bot test cast`: Start lab tests on Cast devices only'
   echo ' - `@shaka-bot test tizen`: Start lab tests on Tizen device only'
+  echo ' - `@shaka-bot test android`: Start lab tests on Android device only'
 ) | reply_from_pipe
