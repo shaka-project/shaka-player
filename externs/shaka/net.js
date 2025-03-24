@@ -248,7 +248,7 @@ shaka.extern.HeadersReceived;
  * @property {shaka.net.NetworkingEngine.AdvancedRequestType=} type
  *   The advanced type
  * @property {shaka.extern.Stream=} stream
- *   The duration of the segment in seconds
+ *   A reference to the Stream object
  * @property {shaka.media.SegmentReference=} segment
  *   The request's segment reference
  * @property {boolean=} isPreload
