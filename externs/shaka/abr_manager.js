@@ -93,9 +93,11 @@ shaka.extern.AbrManager = class {
    *     to another stream.
    * @param {shaka.extern.Request=} request
    *     A reference to the request
+   * @param {shaka.extern.RequestContext=} context
+   *     A reference to the request context
    * @exportDoc
    */
-  segmentDownloaded(deltaTimeMs, numBytes, allowSwitch, request) {}
+  segmentDownloaded(deltaTimeMs, numBytes, allowSwitch, request, context) {}
 
   /**
    * Notifies the ABR that it is a time to suggest new streams. This is used by
