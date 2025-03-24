@@ -6286,6 +6286,43 @@ describe('HlsParser', () => {
     expect(video2.codecs).toBe('dav1.10.01');
   });
 
+  it('supports SUPPLEMENTAL-CODECS with muxed audio', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=550702,AVERAGE-BANDWIDTH=577484,',
+      'CODECS="av01.0.04M.10.0.111.09.16.09.0,mp4a.40.2",',
+      'SUPPLEMENTAL-CODECS="dav1.10.01/db1p",',
+      'RESOLUTION=640x360,FRAME-RATE=59.940,VIDEO-RANGE=PQ,',
+      'CLOSED-CAPTIONS=NONE\n',
+      'video',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', media);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('test:/master', playerInterface);
+
+    expect(manifest.variants.length).toBe(2);
+    expect(manifest.textStreams.length).toBe(0);
+
+    const video1 = manifest.variants[0] && manifest.variants[0].video;
+    expect(video1.codecs).toBe('av01.0.04M.10.0.111.09.16.09.0,mp4a.40.2');
+
+    const video2 = manifest.variants[1] && manifest.variants[1].video;
+    expect(video2.codecs).toBe('dav1.10.01,mp4a.40.2');
+  });
+
   it('ignore SUPPLEMENTAL-CODECS by config', async () => {
     const master = [
       '#EXTM3U\n',
