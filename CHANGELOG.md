@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.14.3](https://github.com/shaka-project/shaka-player/compare/v4.14.2...v4.14.3) (2025-03-24)
+
+
+### Bug Fixes
+
+* Fix buffering event on native playback ([#8310](https://github.com/shaka-project/shaka-player/issues/8310)) ([efe5817](https://github.com/shaka-project/shaka-player/commit/efe58178823036c25af37a0174c0967cbee6eb79))
+* **HLS:** Fix HLS live playback on older Webkit STBs ([#8325](https://github.com/shaka-project/shaka-player/issues/8325)) ([8dec33c](https://github.com/shaka-project/shaka-player/commit/8dec33ccd9acc835414554d754f64fa05cf0b652)), closes [#8324](https://github.com/shaka-project/shaka-player/issues/8324)
+* **HLS:** Supports SUPPLEMENTAL-CODECS with muxed audio ([#8323](https://github.com/shaka-project/shaka-player/issues/8323)) ([fc3b69a](https://github.com/shaka-project/shaka-player/commit/fc3b69a15db89f913c4f21168b731f0443bf1bb3))
+* Prevent unhandled rejections on segment fetch failures ([#8313](https://github.com/shaka-project/shaka-player/issues/8313)) ([f38f943](https://github.com/shaka-project/shaka-player/commit/f38f9430f2aa6cc50b9d973a6fffc9dec8705bc8))
+* **UI:** Avoid hide controls when seeking ([#8303](https://github.com/shaka-project/shaka-player/issues/8303)) ([be5b1da](https://github.com/shaka-project/shaka-player/commit/be5b1da2b6f706202007bbc3050364397281282a))
+* **UI:** Display max segment duration in seconds ([#8305](https://github.com/shaka-project/shaka-player/issues/8305)) ([a086192](https://github.com/shaka-project/shaka-player/commit/a08619269ffb381e905cc7032badaf2fb6218d29))
+* **UI:** Don't cover useless space with the position in the thumbnail image ([#8322](https://github.com/shaka-project/shaka-player/issues/8322)) ([46fef56](https://github.com/shaka-project/shaka-player/commit/46fef56866554366d5a01e7c5170be22265a0eeb))
+* **UI:** Fix thumbnail exception when the thumbnails doesn't exist ([#8318](https://github.com/shaka-project/shaka-player/issues/8318)) ([a86f442](https://github.com/shaka-project/shaka-player/commit/a86f442975f114a7bd632811b31bf41101f788a7))
+
 ## [4.14.2](https://github.com/shaka-project/shaka-player/compare/v4.14.1...v4.14.2) (2025-03-19)
 
 
