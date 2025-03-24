@@ -33,6 +33,9 @@ case "${SHAKA_BOT_ARGUMENTS[0]}" in
   # Tizen device only.
   tizen) WORKFLOW_ARGS+=( "browser_filter=Tizen" ) ;;
 
+  # Android device only.
+  android) WORKFLOW_ARGS+=( "browser_filter=ChromeAndroid" ) ;;
+
   # No command argument, no extra workflow arguments.
   "") ;;
 
