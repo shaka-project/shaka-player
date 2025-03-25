@@ -425,6 +425,39 @@ shaka.test.Util = class {
         await navigator.mediaCapabilities.decodingInfo(mediaDecodingConfig);
     return result.supported;
   }
+
+  /** @param {string} userAgent */
+  static setUserAgent(userAgent) {
+    shaka.test.Util.setNavigatorProperty('userAgent', userAgent);
+  }
+
+  /** @param {?Object} userAgentData */
+  static setUserAgentData(userAgentData) {
+    shaka.test.Util.setNavigatorProperty('userAgentData', userAgentData);
+  }
+
+  /** @param {string} vendor */
+  static setVendor(vendor) {
+    shaka.test.Util.setNavigatorProperty('vendor', vendor);
+  }
+
+  /** @param {string} platform */
+  static setPlatform(platform) {
+    shaka.test.Util.setNavigatorProperty('platform', platform);
+  }
+
+  /** @param {number} maxTouchPoints */
+  static setMaxTouchPoints(maxTouchPoints) {
+    shaka.test.Util.setNavigatorProperty('maxTouchPoints', maxTouchPoints);
+  }
+
+  /**
+   * @param {string} key
+   * @param {*} value
+   */
+  static setNavigatorProperty(key, value) {
+    Object.defineProperty(navigator, key, {value, configurable: true});
+  }
 };
 
 /**

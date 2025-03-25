@@ -10,7 +10,8 @@
 // only be run on Chrome and Chromecast.
 /** @return {boolean} */
 const castReceiverSupport =
-    () => shaka.util.Platform.isChrome() || shaka.util.Platform.isChromecast();
+    () => deviceDetected.getDeviceName() === 'Chrome' ||
+      deviceDetected.getDeviceType() === shaka.device.IDevice.DeviceType.CAST;
 filterDescribe('CastReceiver', castReceiverSupport, () => {
   const CastReceiver = shaka.cast.CastReceiver;
   const CastUtils = shaka.cast.CastUtils;
@@ -54,6 +55,8 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     mockReceiverApi = createMockReceiverApi();
     mockCanDisplayType = jasmine.createSpy('canDisplayType');
     mockCanDisplayType.and.returnValue(false);
+    spyOn(deviceDetected, 'getDeviceType').and
+        .returnValue(shaka.device.IDevice.DeviceType.CAST);
 
     // We're using quotes to access window.cast because the compiler
     // knows about lots of Cast-specific APIs we aren't mocking.  We
