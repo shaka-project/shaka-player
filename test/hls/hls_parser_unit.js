@@ -3176,7 +3176,7 @@ describe('HlsParser', () => {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,vtt",',
-        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'RESOLUTION=960x540,FRAME-RATE=60,CLOSED-CAPTIONS=NONE\n',
         'video\n',
       ].join('');
 

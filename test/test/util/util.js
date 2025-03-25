@@ -58,6 +58,35 @@ shaka.test.AnyOrNull = class {
   }
 };
 
+shaka.test.AnythingOrNull = class {
+  constructor() {
+    /** @type {!Object} */
+    this.anything = jasmine.anything();
+  }
+
+  /**
+   * @param {?Object} other
+   * @return {boolean}
+   * @suppress {checkTypes}
+   */
+  asymmetricMatch(other) {
+    if (other == null) {
+      return true;
+    } else {
+      return this.anything.asymmetricMatch(other);
+    }
+  }
+
+  /**
+   * @return {boolean}
+   * @suppress {checkTypes}
+   */
+  jasmineToString() {
+    return this.anything.jasmineToString()
+        .replace('jasmine.anything', 'shaka.test.AnythingOrNull');
+  }
+};
+
 shaka.test.Util = class {
   /**
    * Fakes an event loop. Each tick processes some number of instantaneous
