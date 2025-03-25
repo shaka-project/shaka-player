@@ -5832,6 +5832,36 @@ describe('HlsParser', () => {
     expect(video.height).toBe(110);
   });
 
+  it('supports redirect', async () => {
+    const mediaPlaylist = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXTINF:5,\n',
+      'video1.ts\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', mediaPlaylist)
+        .setResponseValue('test:/redirected/video1.ts', tsSegmentData)
+        .setResponseFilter((type, response) => {
+          // Simulate a redirect by changing the response URI.
+          if (response.uri == 'test:/master') {
+            response.uri = 'test:/redirected/master';
+          }
+        });
+
+    const actualManifest = await parser.start('test:/master', playerInterface);
+    expect(actualManifest.variants.length).toBe(1);
+
+    const video = actualManifest.variants[0].video;
+    await video.createSegmentIndex();
+    goog.asserts.assert(video.segmentIndex, 'Null segmentIndex!');
+    const videoSegment0 = Array.from(video.segmentIndex)[0];
+    const videoUri0 = videoSegment0.getUris()[0];
+
+    expect(videoUri0).toBe('test:/redirected/video1.ts');
+  });
+
   it('supports ContentSteering', async () => {
     const master = [
       '#EXTM3U\n',
