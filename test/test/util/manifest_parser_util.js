@@ -102,6 +102,8 @@ shaka.test.ManifestParser = class {
     ref.bandwidth = /** @type {?} */(new shaka.test.AnyOrNull(Number));
     ref.codecs = /** @type {?} */(jasmine.any(String));
     ref.mimeType = /** @type {?} */(jasmine.any(String));
+    ref.segmentData = /** @type {?} */(new shaka.test.AnythingOrNull());
+    ref.removeSegmentDataOnGet = /** @type {?} */(jasmine.any(Boolean));
     return ref;
   }
 };
