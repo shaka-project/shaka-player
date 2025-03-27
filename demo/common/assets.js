@@ -1608,6 +1608,7 @@ shakaAssets.testAssets = [
           dynamicPerformanceScaling: true,
           logLevel: 0,
           drawLogo: false,
+          poster: true,
         },
       }),
   new ShakaDemoAssetInfo(
@@ -1627,6 +1628,7 @@ shakaAssets.testAssets = [
           dynamicPerformanceScaling: true,
           logLevel: 0,
           drawLogo: false,
+          poster: true,
         },
       }),
   new ShakaDemoAssetInfo(
@@ -1646,6 +1648,7 @@ shakaAssets.testAssets = [
           dynamicPerformanceScaling: true,
           logLevel: 0,
           drawLogo: false,
+          poster: true,
         },
       }),
   new ShakaDemoAssetInfo(
@@ -1664,6 +1667,7 @@ shakaAssets.testAssets = [
           dynamicPerformanceScaling: true,
           logLevel: 0,
           drawLogo: false,
+          poster: true,
         },
       }),
   new ShakaDemoAssetInfo(
