@@ -1339,7 +1339,7 @@ describe('MediaSourceEngine', () => {
 
       let canPlayThroughListener = null;
       mockVideo.addEventListener.and.callFake((eventName, callback, _) => {
-        if (eventName == 'canplay') {
+        if (eventName == 'canplaythrough') {
           canPlayThroughListener = callback;
         }
       });
@@ -1383,7 +1383,7 @@ describe('MediaSourceEngine', () => {
 
       let canPlayThroughListener = null;
       mockVideo.addEventListener.and.callFake((eventName, callback, _) => {
-        if (eventName == 'canplay') {
+        if (eventName == 'canplaythrough') {
           canPlayThroughListener = callback;
         }
       });
