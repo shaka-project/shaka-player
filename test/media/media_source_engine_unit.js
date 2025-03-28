@@ -128,8 +128,6 @@ describe('MediaSourceEngine', () => {
   let requiresEC3InitSegments;
   /** @type {!jasmine.Spy} */
   let fakeEncryptionSpy;
-  /** @type {!jasmine.Spy} */
-  let fakeMediaEncryptionSpy;
 
   /** @type {!shaka.media.MediaSourceEngine} */
   let mediaSourceEngine;
@@ -223,9 +221,6 @@ describe('MediaSourceEngine', () => {
 
     fakeEncryptionSpy = spyOn(shaka.media.ContentWorkarounds, 'fakeEncryption')
         .and.callFake((stream, data) => data + 100);
-    fakeMediaEncryptionSpy =
-        spyOn(shaka.media.ContentWorkarounds, 'fakeMediaEncryption').and
-            .callFake((data) => data);
 
     // MediaSourceEngine uses video to:
     //  - set src attribute
