@@ -71,7 +71,6 @@ describe('StreamingEngine', () => {
         video,
         new shaka.test.FakeTextDisplayer(),
         {
-          getEncryptionScheme: () => null,
           getKeySystem: () => null,
           onMetadata: () => {},
           onEmsg: () => {},

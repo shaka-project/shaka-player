@@ -49,8 +49,8 @@ describe('ContentWorkarounds', () => {
           0x00, 0x11, 0x22, 0x33, // payload
         ]);
 
-        const faked = shaka.media.ContentWorkarounds.fakeEncryption(unencrypted,
-            'cenc', null);
+        const faked =
+            shaka.media.ContentWorkarounds.fakeEncryption(unencrypted, null);
         const spy = jasmine.createSpy('boxCallback');
         new shaka.util.Mp4Parser()
             .fullBox('stsd', shaka.util.Mp4Parser.sampleDescription)
@@ -78,8 +78,8 @@ describe('ContentWorkarounds', () => {
       0x00, 0x11, 0x22, 0x33, // payload
     ]);
 
-    const faked = shaka.media.ContentWorkarounds.fakeEncryption(unencrypted,
-        'cenc', null);
+    const faked =
+        shaka.media.ContentWorkarounds.fakeEncryption(unencrypted, null);
     const stsdSpy = jasmine.createSpy('stsdCallback').and
         .callFake(shaka.util.Mp4Parser.sampleDescription);
     const encvSpy = jasmine.createSpy('encvCallback');
