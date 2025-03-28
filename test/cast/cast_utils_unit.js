@@ -228,6 +228,7 @@ describe('CastUtils', () => {
             video,
             new shaka.test.FakeTextDisplayer(),
             {
+              getEncryptionScheme: () => null,
               getKeySystem: () => null,
               onMetadata: () => {},
               onEmsg: () => {},

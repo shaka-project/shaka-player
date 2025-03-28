@@ -255,6 +255,7 @@ describe('MediaSourceEngine', () => {
         video,
         mockTextDisplayer,
         {
+          getEncryptionScheme: () => null,
           getKeySystem: () => null,
           onMetadata: () => {},
           onEmsg: () => {},
@@ -332,6 +333,7 @@ describe('MediaSourceEngine', () => {
           video,
           new shaka.test.FakeTextDisplayer(),
           {
+            getEncryptionScheme: () => null,
             getKeySystem: () => null,
             onMetadata: () => {},
             onEmsg: () => {},
@@ -357,6 +359,7 @@ describe('MediaSourceEngine', () => {
           video,
           new shaka.test.FakeTextDisplayer(),
           {
+            getEncryptionScheme: () => null,
             getKeySystem: () => null,
             onMetadata: () => {},
             onEmsg: () => {},

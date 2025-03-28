@@ -183,6 +183,7 @@ describe('MediaSourceEngine', () => {
         video,
         textDisplayer,
         {
+          getEncryptionScheme: () => null,
           getKeySystem: () => null,
           onMetadata: Util.spyFunc(onMetadata),
           onEmsg: Util.spyFunc(onEmsg),
