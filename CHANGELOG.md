@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.14.4](https://github.com/shaka-project/shaka-player/compare/v4.14.3...v4.14.4) (2025-03-27)
+
+
+### Bug Fixes
+
+* Add new crossBoundaryStrategy for Apple browsers ([#8345](https://github.com/shaka-project/shaka-player/issues/8345)) ([e011780](https://github.com/shaka-project/shaka-player/commit/e011780ccd8581d1a45f926c9fa4bc0b197534e5))
+* Add support to crossBoundaryStrategy when using HLS ([#8343](https://github.com/shaka-project/shaka-player/issues/8343)) ([240cc5f](https://github.com/shaka-project/shaka-player/commit/240cc5fdaa5f867454bc4b4df67e29b99c290324))
+* Don't allow MSE reset in middle of a reset ([#8338](https://github.com/shaka-project/shaka-player/issues/8338)) ([e5972bd](https://github.com/shaka-project/shaka-player/commit/e5972bdda057035d92e608d54e2448c609f9642b))
+* Fix MSE recovery on Apple platform ([#8341](https://github.com/shaka-project/shaka-player/issues/8341)) ([c1da121](https://github.com/shaka-project/shaka-player/commit/c1da121f19655504045c60706a8603bc3ed7a96c))
+* **HLS:** Fix queryData to prevent url params percent encoding ([#8346](https://github.com/shaka-project/shaka-player/issues/8346)) ([d6ac9ad](https://github.com/shaka-project/shaka-player/commit/d6ac9ad07dce29b057e5a78985efaa6342805332))
+* **HLS:** Handle redirect URLs correctly ([#8331](https://github.com/shaka-project/shaka-player/issues/8331)) ([7fc915e](https://github.com/shaka-project/shaka-player/commit/7fc915e063ea17295b8fd54de14c1ddff7dc90c3))
+* Only schedule an update on reset when we are not clearing the buffer ([#8340](https://github.com/shaka-project/shaka-player/issues/8340)) ([a8407f6](https://github.com/shaka-project/shaka-player/commit/a8407f67586797d3d8d2c6b0e56f0904c6aee797))
+* Reset lastMediaSourceReset when seeking to unbuffered part ([#8339](https://github.com/shaka-project/shaka-player/issues/8339)) ([2a8d735](https://github.com/shaka-project/shaka-player/commit/2a8d735ba3d5ba8f8417233aa757d5bd4c8ea510))
+
+
+### Performance Improvements
+
+* **HLS:** Make initial segment requests in parallel ([#8337](https://github.com/shaka-project/shaka-player/issues/8337)) ([186de7b](https://github.com/shaka-project/shaka-player/commit/186de7b24fc3b525c6b83e7ce96573ca3ba92897))
+* **HLS:** Reduce load time when loading in the player a media playlist ([#8333](https://github.com/shaka-project/shaka-player/issues/8333)) ([8ac6c14](https://github.com/shaka-project/shaka-player/commit/8ac6c14ea89bef718e9f12ebedb87690dd1d8e9b))
+
 ## [4.14.3](https://github.com/shaka-project/shaka-player/compare/v4.14.2...v4.14.3) (2025-03-24)
 
 
