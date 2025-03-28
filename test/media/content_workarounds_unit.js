@@ -7,6 +7,8 @@
 describe('ContentWorkarounds', () => {
   const Util = shaka.test.Util;
 
+  const fakeStream = shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+
   const encryptionBoxes = {
     'encv': ['hev1', 'hvc1', 'avc1', 'avc3'],
     'enca': ['ac-3', 'ec-3', 'ac-4', 'mp4a'],
@@ -31,8 +33,8 @@ describe('ContentWorkarounds', () => {
           0x00, 0x11, 0x22, 0x33, // payload
         ]);
 
-        const faked =
-            shaka.media.ContentWorkarounds.fakeEncryption(unencrypted, null);
+        const faked = shaka.media.ContentWorkarounds.fakeEncryption(
+            fakeStream, unencrypted, null);
         const spy = jasmine.createSpy('boxCallback');
         new shaka.util.Mp4Parser()
             .fullBox('stsd', shaka.util.Mp4Parser.sampleDescription)
@@ -60,8 +62,8 @@ describe('ContentWorkarounds', () => {
       0x00, 0x11, 0x22, 0x33, // payload
     ]);
 
-    const faked =
-        shaka.media.ContentWorkarounds.fakeEncryption(unencrypted, null);
+    const faked = shaka.media.ContentWorkarounds.fakeEncryption(
+        fakeStream, unencrypted, null);
     const stsdSpy = jasmine.createSpy('stsdCallback').and
         .callFake(shaka.util.Mp4Parser.sampleDescription);
     const encvSpy = jasmine.createSpy('encvCallback');
