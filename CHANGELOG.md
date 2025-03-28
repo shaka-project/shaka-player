@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.13.13](https://github.com/shaka-project/shaka-player/compare/v4.13.12...v4.13.13) (2025-03-27)
+
+
+### Bug Fixes
+
+* Don't allow MSE reset in middle of a reset ([#8338](https://github.com/shaka-project/shaka-player/issues/8338)) ([df82085](https://github.com/shaka-project/shaka-player/commit/df820851f9f4b2ed54b39ef5042b3dbe982091f9))
+* Fix MSE recovery on Apple platform ([#8341](https://github.com/shaka-project/shaka-player/issues/8341)) ([74fc422](https://github.com/shaka-project/shaka-player/commit/74fc4228444a77b8f99aee616b62ead8e236b4ea))
+* **HLS:** Fix queryData to prevent url params percent encoding ([#8346](https://github.com/shaka-project/shaka-player/issues/8346)) ([b620c77](https://github.com/shaka-project/shaka-player/commit/b620c77f3e57c670fa7d457227d89f5c1f29ad5c))
+* **HLS:** Handle redirect URLs correctly ([#8331](https://github.com/shaka-project/shaka-player/issues/8331)) ([4a0451e](https://github.com/shaka-project/shaka-player/commit/4a0451e2ba8ecfc1c9338b24ec95b71cc46c45bc))
+* Only schedule an update on reset when we are not clearing the buffer ([#8340](https://github.com/shaka-project/shaka-player/issues/8340)) ([dbcde41](https://github.com/shaka-project/shaka-player/commit/dbcde41b3f62fbc19e0af7bc3be994c8752b72cf))
+* Reset lastMediaSourceReset when seeking to unbuffered part ([#8339](https://github.com/shaka-project/shaka-player/issues/8339)) ([1bd6343](https://github.com/shaka-project/shaka-player/commit/1bd63438eb62f597f67310d4e8fb05acd2f63976))
+
+
+### Performance Improvements
+
+* **HLS:** Make initial segment requests in parallel ([#8337](https://github.com/shaka-project/shaka-player/issues/8337)) ([f08fd02](https://github.com/shaka-project/shaka-player/commit/f08fd02b7d5dd566c865b98c2747cd2e97c1a0e0))
+* **HLS:** Reduce load time when loading in the player a media playlist ([#8333](https://github.com/shaka-project/shaka-player/issues/8333)) ([3e6788c](https://github.com/shaka-project/shaka-player/commit/3e6788c84c8b3c9b00c378bb907196691bba92e3))
+
 ## [4.13.12](https://github.com/shaka-project/shaka-player/compare/v4.13.11...v4.13.12) (2025-03-24)
 
 
