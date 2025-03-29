@@ -223,7 +223,8 @@ describe('CastUtils', () => {
         function onError() {
           fail('Error code ' + (video.error ? video.error.code : 0));
         }
-
+        const config =
+            shaka.util.PlayerConfiguration.createDefault().mediaSource;
         mediaSourceEngine = new shaka.media.MediaSourceEngine(
             video,
             new shaka.test.FakeTextDisplayer(),
@@ -233,10 +234,8 @@ describe('CastUtils', () => {
               onEmsg: () => {},
               onEvent: () => {},
               onManifestUpdate: () => {},
-            });
-        const config =
-            shaka.util.PlayerConfiguration.createDefault().mediaSource;
-        mediaSourceEngine.configure(config);
+            },
+            config);
 
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
         const initObject = new Map();
