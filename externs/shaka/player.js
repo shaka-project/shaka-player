@@ -2134,7 +2134,8 @@ shaka.extern.NetworkingConfiguration;
  *   forceTransmux: boolean,
  *   insertFakeEncryptionInInit: boolean,
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback,
- *   dispatchAllEmsgBoxes: boolean
+ *   dispatchAllEmsgBoxes: boolean,
+ *   useLoad: boolean
  * }}
  *
  * @description
@@ -2177,6 +2178,11 @@ shaka.extern.NetworkingConfiguration;
  *   If true, all emsg boxes are parsed and dispatched.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} useLoad
+ *   If true, uses load API of HtmlMediaElement.Otherwise,
+ *   sets the mediaSource url blob to src attribute
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;
