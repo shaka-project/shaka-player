@@ -175,6 +175,8 @@ describe('ContentWorkarounds', () => {
       // Sample description index flag is added
       expect(view.getUint32(8)).toBe(2);
       expect(view.getUint32(16)).toBe(2);
+
+      expect(view.getUint32(36)).toBe(5);
     });
   });
 
