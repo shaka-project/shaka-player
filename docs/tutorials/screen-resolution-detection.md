@@ -15,6 +15,11 @@ We can detect if the device supports 3840x2160 (4K) or 7680x4320 (8K).
 
 By default, the maximum resolution supported is 1920x1080.
 
+In order to use the necessary APIs you need add the next privilege to your
+`config.xml` file:
+
+`<tizen:privilege name="http://developer.samsung.com/privilege/productinfo"/>`
+
 ## WebOS
 
 We can detect if the device supports 1280x720, 1920x1080, 3840x2160 (4K) or
