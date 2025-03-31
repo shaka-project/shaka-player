@@ -272,7 +272,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       height = Math.round(trackWidth * 9 / 16);
     }
     let text = height + 'p';
-    if (height == 2160) {
+    if (height == 2160 || trackHeight == 2160) {
       text = '4K';
     }
     const frameRates = new Set();
