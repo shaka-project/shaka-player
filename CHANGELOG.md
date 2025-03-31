@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.14.5](https://github.com/shaka-project/shaka-player/compare/v4.14.4...v4.14.5) (2025-03-31)
+
+
+### Bug Fixes
+
+* **HLS:** Avoid duplicate init segment request when using SAMPLE-AES ([#8361](https://github.com/shaka-project/shaka-player/issues/8361)) ([2932756](https://github.com/shaka-project/shaka-player/commit/2932756b45cef2af8fa7a417869e311378ffc75a))
+* **HLS:** Fix variable substitution when using relative paths ([#8350](https://github.com/shaka-project/shaka-player/issues/8350)) ([3959641](https://github.com/shaka-project/shaka-player/commit/395964109a0129ab57c740bb9d6d08b743bd76a3))
+* Improve boundary gap mitigation at DASH period transitions ([#8344](https://github.com/shaka-project/shaka-player/issues/8344)) ([f192af5](https://github.com/shaka-project/shaka-player/commit/f192af5553deef21229ffd87b2a4c8149cad1a74))
+* **UI:** Make UI display 4096x2160 (DCI 4k) video as also being "4k" ([#8359](https://github.com/shaka-project/shaka-player/issues/8359)) ([cf78c1c](https://github.com/shaka-project/shaka-player/commit/cf78c1c79bbbd3422f4e07306c0063ea7d580d49))
+
+
+### Performance Improvements
+
+* **ContentWorkarounds:** Do not override codec twice ([#8358](https://github.com/shaka-project/shaka-player/issues/8358)) ([b899d3b](https://github.com/shaka-project/shaka-player/commit/b899d3b3945fb912a485ab36fdfc00dbe8bfae70))
+* Stop parsing the mp4 when the init segment is encrypted on ContentWorkarounds ([#8353](https://github.com/shaka-project/shaka-player/issues/8353)) ([d36637a](https://github.com/shaka-project/shaka-player/commit/d36637ae1717dfb908a4f52e7764a3c77b5c748e))
+
 ## [4.14.4](https://github.com/shaka-project/shaka-player/compare/v4.14.3...v4.14.4) (2025-03-27)
 
 
