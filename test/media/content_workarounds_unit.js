@@ -129,6 +129,53 @@ describe('ContentWorkarounds', () => {
       view = shaka.util.BufferUtils.toDataView(modified);
       expect(view.getUint32(24)).toBe(2);
     });
+
+    it('adds sample description index when missing', () => {
+      const media = new Uint8Array([
+        0x00, 0x00, 0x00, 0x10,    // size
+        ...boxNameToArray('tfhd'), // tfhd
+        0x00, 0x00, 0x00, 0x00,    // version & flags
+        0x00, 0x00, 0x00, 0x01,    // track id
+      ]);
+      let view = shaka.util.BufferUtils.toDataView(media);
+      expect(view.getUint32(0)).toBe(16);
+      expect(view.getUint32(8)).toBe(0);
+
+      const modified =
+          shaka.media.ContentWorkarounds.fakeMediaEncryption(media);
+      view = shaka.util.BufferUtils.toDataView(modified);
+      // Size needs to be updated
+      expect(view.getUint32(0)).toBe(20);
+      // Sample description index flag is added
+      expect(view.getUint32(8)).toBe(2);
+      expect(view.getUint32(16)).toBe(2);
+    });
+
+    it('adjusts trun data offset', () => {
+      const media = new Uint8Array([
+        0x00, 0x00, 0x00, 0x10,    // tfhd size
+        ...boxNameToArray('tfhd'), // tfhd
+        0x00, 0x00, 0x00, 0x00,    // version & flags
+        0x00, 0x00, 0x00, 0x01,    // track id
+        0x00, 0x00, 0x00, 0x14,    // trun size
+        ...boxNameToArray('trun'), // trun
+        0x00, 0x00, 0x00, 0x01,    // version & flags
+        0x00, 0x00, 0x00, 0x00,    // sample count
+        0x00, 0x00, 0x00, 0x01,    // data offset
+      ]);
+      let view = shaka.util.BufferUtils.toDataView(media);
+      expect(view.getUint32(0)).toBe(16);
+      expect(view.getUint32(8)).toBe(0);
+
+      const modified =
+          shaka.media.ContentWorkarounds.fakeMediaEncryption(media);
+      view = shaka.util.BufferUtils.toDataView(modified);
+      // Size needs to be updated
+      expect(view.getUint32(0)).toBe(20);
+      // Sample description index flag is added
+      expect(view.getUint32(8)).toBe(2);
+      expect(view.getUint32(16)).toBe(2);
+    });
   });
 
   describe('fakeEC3', () => {
