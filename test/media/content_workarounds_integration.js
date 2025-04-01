@@ -82,7 +82,28 @@ describe('ContentWorkarounds', () => {
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 30);
   });
 
-  for (const keySystem of ['com.widevine.alpha', 'com.microsoft.playready']) {
+  const keySystemsConfigs = new Map()
+      .set('com.widevine.alpha', {
+        servers: {
+          'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+        },
+      })
+      .set('com.microsoft.playready', {
+        servers: {
+          'com.microsoft.playready': 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:51745386-2d42-56fd-8bad-4f58422004d7,contentkey:UXRThi1CVv2LrU9YQiAE1w==),(kid:26470f42-96d4-5d04-a9ba-bb442e169800,contentkey:JkcPQpbUXQSpurtELhaYAA==)',
+        },
+      })
+      .set('com.apple.fps', {
+        servers: {
+          'com.apple.fps': 'https://fps.ezdrm.com/api/licenses/b99ed9e5-c641-49d1-bfa8-43692b686ddb',
+        },
+        advanced: {
+          'com.apple.fps': {
+            serverCertificateUri: 'https://fps.ezdrm.com/demo/video/eleisure.cer',
+          },
+        },
+      });
+  for (const [keySystem, drmConfig] of keySystemsConfigs) {
     drmIt(`plays mixed clear encrypted content with ${keySystem}`, async () => {
       if (!shakaSupport.drm[keySystem]) {
         pending('Needed DRM is not supported on this platform');
@@ -95,26 +116,23 @@ describe('ContentWorkarounds', () => {
       eventManager.listen(player, 'keystatuschanged',
           Util.spyFunc(keyStatusSpy));
 
-      const licenseUrl = keySystem == 'com.widevine.alpha' ?
-          'https://cwip-shaka-proxy.appspot.com/no_auth' :
-          'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:51745386-2d42-56fd-8bad-4f58422004d7,contentkey:UXRThi1CVv2LrU9YQiAE1w==),(kid:26470f42-96d4-5d04-a9ba-bb442e169800,contentkey:JkcPQpbUXQSpurtELhaYAA==)';
-      player.configure({
-        drm: {
-          servers: {
-            [keySystem]: licenseUrl,
-          },
-        },
-      });
-      await player.load('/base/test/test/assets/clear-encrypted/manifest.mpd');
+      player.configure({drm: drmConfig});
+      const url = keySystem === 'com.apple.fps' ?
+        '/base/test/test/assets/clear-encrypted-hls/manifest.m3u8' :
+        '/base/test/test/assets/clear-encrypted/manifest.mpd';
+      await player.load(url);
       await video.play();
+
+      // Ensure we're using MediaSource.
+      expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.MEDIA_SOURCE);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-      // Play for 5 seconds, but stop early if the video ends.  If it takes
+      // Play for 10 seconds, but stop early if the video ends.  If it takes
       // longer than 30 seconds, fail the test.
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 30);
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
 
       // Check did we have key status change.
       expect(keyStatusSpy).toHaveBeenCalled();
