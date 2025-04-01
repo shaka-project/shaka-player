@@ -691,7 +691,7 @@ There is a default timeout of 5 seconds for opening IndexedDB-based storage.
 This is useful to ensure that your application does not block indefinitely
 while waiting for the IndexedDB database to open.
 
-If you want to change the value this timeout, you can do so by setting
+If you want to change the value of this timeout, you can do so by setting
 accordingly the value of the `shaka.offline.indexeddb.StorageMechanismOpenTimeout`
 variable. For example, to set the timeout to 10 seconds, you can do the following:
 
