@@ -684,3 +684,12 @@ setting or set it explicitly with:
 ```js
 usePersistentLicense: true
 ```
+
+## Configure opening IndexedDB timeout
+
+This configuration must be done before doing any other operation:
+
+```js
+// In seconds
+shaka.offline.indexeddb.StorageMechanismOpenTimeout = 5;
+```
