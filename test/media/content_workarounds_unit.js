@@ -178,6 +178,43 @@ describe('ContentWorkarounds', () => {
 
       expect(view.getUint32(36)).toBe(5);
     });
+
+    it('adjusts sizes of ancestor boxes', () => {
+      const media = new Uint8Array([
+        0x00, 0x00, 0x00, 0x34,    // moof size
+        ...boxNameToArray('moof'), // moof
+        0x00, 0x00, 0x00, 0x2c,    // traf size
+        ...boxNameToArray('traf'), // traf
+        0x00, 0x00, 0x00, 0x10,    // tfhd size
+        ...boxNameToArray('tfhd'), // tfhd
+        0x00, 0x00, 0x00, 0x00,    // version & flags
+        0x00, 0x00, 0x00, 0x01,    // track id
+        0x00, 0x00, 0x00, 0x14,    // trun size
+        ...boxNameToArray('trun'), // trun
+        0x00, 0x00, 0x00, 0x01,    // version & flags
+        0x00, 0x00, 0x00, 0x00,    // sample count
+        0x00, 0x00, 0x00, 0x01,    // data offset
+      ]);
+      let view = shaka.util.BufferUtils.toDataView(media);
+      expect(view.getUint32(0)).toBe(52); // moof size
+      expect(view.getUint32(8)).toBe(44); // traf size
+      expect(view.getUint32(16)).toBe(16); // tfhd size
+      expect(view.getUint32(32)).toBe(20); // trun size
+
+      const modified =
+          shaka.media.ContentWorkarounds.fakeMediaEncryption(media);
+      view = shaka.util.BufferUtils.toDataView(modified);
+
+      expect(view.getUint32(0)).toBe(56); // moof size
+      expect(view.getUint32(8)).toBe(48); // traf size
+      expect(view.getUint32(16)).toBe(20); // tfhd size
+      expect(view.getUint32(36)).toBe(20); // trun size
+
+      expect(view.getUint32(24)).toBe(2); // sample description index flag
+      expect(view.getUint32(32)).toBe(2); // sample description index
+
+      expect(view.getUint32(52)).toBe(5); // data offset
+    });
   });
 
   describe('fakeEC3', () => {
