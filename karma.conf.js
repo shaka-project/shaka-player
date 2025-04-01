@@ -295,6 +295,8 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-ts-muxed-opus-h264/*', included: false},
       {pattern: 'test/test/assets/hls-ts-raw-aac/*', included: false},
       {pattern: 'test/test/assets/hls-ts-rollover/*', included: false},
+      {pattern: 'test/test/assets/mss-clear/*', included: false},
+      {pattern: 'test/test/assets/mss-playready/*', included: false},
       {pattern: 'dist/shaka-player.ui.js', included: false},
       {pattern: 'dist/locales.js', included: false},
       {pattern: 'demo/**/*.js', included: false},
