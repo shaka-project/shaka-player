@@ -379,15 +379,6 @@ function configureJasmineEnvironment() {
     });
   }
 
-  // Work-around: allow the Tizen media pipeline to cool down.
-  // Without this, Tizen's pipeline seems to hang in subsequent tests.
-  // TODO: file a bug on Tizen
-  if (shaka.util.Platform.isTizen()) {
-    afterEach((done) => {  // eslint-disable-line no-restricted-syntax
-      originalSetTimeout(done, /* ms= */ 100);
-    });
-  }
-
   // Reset decoding config cache after each test.
   afterEach(/** @suppress {accessControls} */ () => {
     shaka.util.StreamUtils.clearDecodingConfigCache();
