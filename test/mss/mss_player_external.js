@@ -22,7 +22,7 @@ describe('MSS Player', () => {
   /** @type {!shaka.test.Waiter} */
   let waiter;
 
-  const url = 'https://test.playready.microsoft.com/smoothstreaming/SSWSS720H264PR/SuperSpeedway_720.ism/Manifest';
+  const url = 'https://test.playready.microsoft.com/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest';
   const playreadyLicenseUrl = 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)';
 
   function checkPlayReadySupport() {
