@@ -34,11 +34,14 @@ describe('ContentWorkarounds', () => {
     player = new compiledShaka.Player();
     await player.attach(video);
 
-    // Disable stall detection, which can interfere with playback tests.
-    player.configure('streaming.stallEnabled', false);
-
-    player.configure('streaming.crossBoundaryStrategy',
-        shaka.config.CrossBoundaryStrategy.KEEP);
+    player.configure({
+      streaming: {
+        allowMediaSourceRecoveries: false,
+        crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy.KEEP,
+        stallEnabled: false,
+        useNativeHlsForFairPlay: false,
+      },
+    });
 
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
