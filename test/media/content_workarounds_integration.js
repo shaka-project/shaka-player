@@ -118,8 +118,8 @@ describe('ContentWorkarounds', () => {
 
       if (keySystem === 'com.apple.fps') {
         const serverCert = await Util.fetch(
-            '/base/test/test/assets/clear-encrypted-hls/eleisure.cer');
-        drmConfig.advanced[keySystem].serverCertificate = 
+            '/base/test/test/assets/clear-encrypted-hls/certificate.cer');
+        drmConfig.advanced[keySystem].serverCertificate =
             shaka.util.BufferUtils.toUint8(serverCert);
       }
       player.configure({drm: drmConfig});
