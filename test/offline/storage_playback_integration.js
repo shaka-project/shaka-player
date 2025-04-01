@@ -97,9 +97,9 @@ filterDescribe('Storage', checkStorageSupport, () => {
       'downloaded': new Date(),
     };
 
-    storage.store(url, metadata);
+    const result = await storage.store(url, metadata).promise;
 
-    await player.load(url);
+    await player.load(result.offlineUri);
     await video.play();
     expect(player.isLive()).toBe(false);
 
@@ -121,9 +121,9 @@ filterDescribe('Storage', checkStorageSupport, () => {
       'downloaded': new Date(),
     };
 
-    storage.store(url, metadata);
+    const result = await storage.store(url, metadata).promise;
 
-    await player.load(url);
+    await player.load(result.offlineUri);
     await video.play();
     expect(player.isLive()).toBe(false);
 
