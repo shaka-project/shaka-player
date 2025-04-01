@@ -99,7 +99,7 @@ describe('ContentWorkarounds', () => {
         },
         advanced: {
           'com.apple.fps': {
-            serverCertificateUri: 'https://fps.ezdrm.com/demo/video/eleisure.cer',
+            serverCertificate: null, // empty now, fulfilled during actual test
           },
         },
       });
@@ -116,7 +116,14 @@ describe('ContentWorkarounds', () => {
       eventManager.listen(player, 'keystatuschanged',
           Util.spyFunc(keyStatusSpy));
 
+      if (keySystem === 'com.apple.fps') {
+        const serverCert = await Util.fetch(
+            '/base/test/test/assets/clear-encrypted-hls/eleisure.cer');
+        drmConfig.advanced[keySystem].serverCertificate = 
+            shaka.util.BufferUtils.toUint8(serverCert);
+      }
       player.configure({drm: drmConfig});
+
       const url = keySystem === 'com.apple.fps' ?
         '/base/test/test/assets/clear-encrypted-hls/manifest.m3u8' :
         '/base/test/test/assets/clear-encrypted/manifest.mpd';
