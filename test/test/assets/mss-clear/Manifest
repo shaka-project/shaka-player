@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SmoothStreamingMedia Duration="80080000" MajorVersion="2" MinorVersion="1">
+  <StreamIndex Chunks="4" DisplayHeight="128" DisplayWidth="224" MaxHeight="128" MaxWidth="224" Name="video" QualityLevels="1" Type="video" Url="Fragments(video={start time})">
+    <QualityLevel Bitrate="230000" CodecPrivateData="000000016764000DAC2CA50E11BFF040003F0520C0C0C800001F480005DC0300001C1200038273F8C7180000E090001C139FC63876848945800000000168E9093525" FourCC="H264" Index="7" MaxHeight="128" MaxWidth="224"/>
+    <c d="20020000"/>
+    <c d="20020000"/>
+    <c d="20020000"/>
+    <c d="20020000"/>
+  </StreamIndex>
+  <StreamIndex Chunks="4" Index="0" Name="audio" QualityLevels="1" Type="audio" Url="Fragments(audio={start time})">
+    <QualityLevel AudioTag="255" Bitrate="128000" BitsPerSample="16" Channels="2" CodecPrivateData="1210" FourCC="AACL" PacketSize="4" SamplingRate="44100"/>
+    <c d="20201360"/>
+    <c d="19969161"/>
+    <c d="19969161"/>
+    <c d="19969161"/>
+  </StreamIndex>
+</SmoothStreamingMedia>

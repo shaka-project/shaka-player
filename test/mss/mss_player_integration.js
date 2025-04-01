@@ -22,8 +22,8 @@ describe('MSS Player', () => {
   /** @type {!shaka.test.Waiter} */
   let waiter;
 
-  const url = 'https://test.playready.microsoft.com/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest';
-  const playreadyUrl = 'https://test.playready.microsoft.com/smoothstreaming/SSWSS720H264PR/SuperSpeedway_720.ism/Manifest';
+  const url = '/base/test/test/assets/mss-clear/Manifest';
+  const playreadyUrl = '/base/test/test/assets/mss-playready/Manifest';
   const playreadyLicenseUrl = 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)';
 
   function checkPlayReadySupport() {
@@ -46,17 +46,6 @@ describe('MSS Player', () => {
   beforeEach(async () => {
     player = new compiledShaka.Player();
     await player.attach(video);
-
-    // Make sure we are playing the lowest res available to avoid test flake
-    // based on network issues.  Note that disabling ABR and setting a low
-    // abr.defaultBandwidthEstimate would not be sufficient, because it
-    // would only affect the choice of track on the first period.  When we
-    // cross a period boundary, the default bandwidth estimate will no
-    // longer be in effect, and AbrManager may choose higher res tracks for
-    // the new period.  Using abr.restrictions.maxHeight will let us force
-    // AbrManager to the lowest resolution, which is its fallback when these
-    // soft restrictions cannot be met.
-    player.configure('abr.restrictions.maxHeight', 1);
 
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
