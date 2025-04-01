@@ -685,11 +685,29 @@ setting or set it explicitly with:
 usePersistentLicense: true
 ```
 
-## Configure opening IndexedDB timeout
+## Configure the timeout for opening IndexedDB-based storage
 
-This configuration must be done before doing any other operation:
+There is a default timeout of 5 seconds for opening IndexedDB-based storage.
+This is useful to ensure that your application does not block indefinitely
+while waiting for the IndexedDB database to open.
+
+If you want to change the value this timeout, you can do so by setting
+accordingly the value of the `shaka.offline.indexeddb.StorageMechanismOpenTimeout`
+variable. For example, to set the timeout to 10 seconds, you can do the following:
 
 ```js
 // In seconds
-shaka.offline.indexeddb.StorageMechanismOpenTimeout = 5;
+shaka.offline.indexeddb.StorageMechanismOpenTimeout = 10;
 ```
+
+You can also disable this timeout and consequently wait indefinitely for the
+IndexedDB database to open successfully or fail to open. To do this, set the
+`shaka.offline.indexeddb.StorageMechanismOpenTimeout` variable to `false`:
+
+```js
+shaka.offline.indexeddb.StorageMechanismOpenTimeout = false;
+```
+
+Note that this configuration must be done before doing any other offline
+storage related operation (download and store content, list content,
+remove content, playback of content).
