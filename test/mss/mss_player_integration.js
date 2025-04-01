@@ -23,7 +23,6 @@ describe('MSS Player', () => {
   let waiter;
 
   const url = 'https://test.playready.microsoft.com/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest';
-  const playreadyUrl = 'https://test.playready.microsoft.com/smoothstreaming/SSWSS720H264PR/SuperSpeedway_720.ism/Manifest';
   const playreadyLicenseUrl = 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)';
 
   function checkPlayReadySupport() {
@@ -110,7 +109,7 @@ describe('MSS Player', () => {
       },
     });
 
-    await player.load(playreadyUrl, /* startTime= */ null,
+    await player.load(url, /* startTime= */ null,
         /* mimeType= */ 'application/vnd.ms-sstr+xml');
     await video.play();
     expect(player.isLive()).toBe(false);
