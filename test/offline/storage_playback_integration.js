@@ -166,7 +166,8 @@ filterDescribe('Storage', checkStorageSupport, () => {
   });
 
   it('supports MSS download and playback', async () => {
-    // This tests is flaky in some Chromecast devices, so we need omit it for now.
+    // This tests is flaky in some Chromecast devices, so we need omit it
+    // for now.
     if (shaka.util.Platform.isChromecast()) {
       pending('Disabled on Tizen.');
     }
