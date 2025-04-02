@@ -122,6 +122,12 @@ function defineStringUtilTests() {
       expect(StringUtils.fromBytesAutoDetect(new Uint8Array(arr))).toBe('Foo');
     });
 
+    // Regression test for #8336
+    it('counts newlines as ASCII', () => {
+      const arr = [0x0a, 0x46, 0x6f];
+      expect(StringUtils.fromBytesAutoDetect(new Uint8Array(arr))).toBe('\nFo');
+    });
+
     it('fails if unable to guess', () => {
       const expected = shaka.test.Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
