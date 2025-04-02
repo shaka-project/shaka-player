@@ -112,6 +112,9 @@ describe('ContentWorkarounds', () => {
         pending('Tizen 3 currently does not support mixed clear ' +
             'encrypted content');
       }
+      if (keySystem === 'com.apple.fps' && getClientArg('runningInVM')) {
+        pending('FairPlay is not supported in a VM');
+      }
       const keyStatusSpy = jasmine.createSpy('onKeyStatus');
       eventManager.listen(player, 'keystatuschanged',
           Util.spyFunc(keyStatusSpy));
