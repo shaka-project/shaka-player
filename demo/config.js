@@ -698,7 +698,7 @@ shakaDemo.Config = class {
         .addBoolInput_('Dispatch all emsg boxes',
             'mediaSource.dispatchAllEmsgBoxes')
         .addBoolInput_('Uses Load API',
-              'mediaSource.useLoad');
+            'mediaSource.useLoad');
   }
 
   /** @private */
