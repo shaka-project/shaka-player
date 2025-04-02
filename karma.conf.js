@@ -356,7 +356,7 @@ module.exports = (config) => {
         filter: settings.filter,
 
         // Set what level of logs for the player to print.
-        logLevel: 6,
+        logLevel: SHAKA_LOG_MAP[settings.logging],
 
         // Delay tests to aid in debugging async failures that pollute
         // subsequent tests.

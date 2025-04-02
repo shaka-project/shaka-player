@@ -395,6 +395,7 @@ describe('StreamingEngine', () => {
       // In these tests we are going to test GapJumpingController so we are
       // interested in activating the stall detector.
       config.stallEnabled = true;
+      config.stallSkip = 0.1;
 
       /**
        * @param {string} type
