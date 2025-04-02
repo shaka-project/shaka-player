@@ -696,7 +696,9 @@ shakaDemo.Config = class {
             strategyOptions,
             strategyOptionsNames)
         .addBoolInput_('Dispatch all emsg boxes',
-            'mediaSource.dispatchAllEmsgBoxes');
+            'mediaSource.dispatchAllEmsgBoxes')
+        .addBoolInput_('Uses Load API',
+              'mediaSource.useLoad');
   }
 
   /** @private */
