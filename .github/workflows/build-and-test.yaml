@@ -49,37 +49,45 @@ jobs:
           # coverage instrumentation on full-stack player integration tests.
           - os: ubuntu-latest
             browser: Chrome
-            extra_flags: "--use-xvfb"
+            extra_flags: "--use-xvfb --running_in_vm"
           - os: ubuntu-latest
             browser: Firefox
-            extra_flags: "--use-xvfb"
+            extra_flags: "--use-xvfb --running_in_vm"
           - os: ubuntu-latest
             browser: Edge
-            extra_flags: "--use-xvfb"
+            extra_flags: "--use-xvfb --running_in_vm"
           - os: ubuntu-latest
             browser: Opera
-            extra_flags: "--use-xvfb"
+            extra_flags: "--use-xvfb --running_in_vm"
 
           - os: macos-latest
             browser: Chrome
+            extra_flags: "--running_in_vm"
           - os: macos-latest
             browser: Edge
+            extra_flags: "--running_in_vm"
           - os: macos-latest
             browser: Opera
+            extra_flags: "--running_in_vm"
           - os: macos-latest
             browser: Firefox
+            extra_flags: "--running_in_vm"
           - os: macos-latest
             browser: Safari
+            extra_flags: "--running_in_vm"
           - os: macos-latest
             browser: Safari-old
+            extra_flags: "--running_in_vm"
 
           - os: windows-latest
             browser: Chrome
+            extra_flags: "--running_in_vm"
           - os: windows-latest
             browser: Firefox
+            extra_flags: "--running_in_vm"
           - os: windows-latest
             browser: Edge
-            extra_flags: "--html-coverage-report --uncompiled"
+            extra_flags: "--html-coverage-report --uncompiled --running_in_vm"
           # Disabled until working properly
           # - os: windows-latest
           #   browser: Opera
