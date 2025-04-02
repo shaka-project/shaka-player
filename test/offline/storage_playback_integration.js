@@ -169,7 +169,7 @@ filterDescribe('Storage', checkStorageSupport, () => {
     // This tests is flaky in some Chromecast devices, so we need omit it
     // for now.
     if (shaka.util.Platform.isChromecast()) {
-      pending('Disabled on Tizen.');
+      pending('Disabled on Chromecast.');
     }
     const url = '/base/test/test/assets/mss-clear/Manifest';
     const metadata = {
