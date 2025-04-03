@@ -101,6 +101,8 @@ describe('ContentWorkarounds', () => {
         0x00, 0x00, 0x00, 0x02,    // version & flags
         0x00, 0x00, 0x00, 0x01,    // track id
         0x00, 0x00, 0x00, 0x01,    // sample description index
+        0x00, 0x00, 0x00, 0x08,    // mdat size
+        ...boxNameToArray('mdat'), // mdat
       ]);
       let view = shaka.util.BufferUtils.toDataView(media);
       expect(view.getUint32(16)).toBe(1);
@@ -120,6 +122,8 @@ describe('ContentWorkarounds', () => {
         0x00, 0x00, 0x00, 0x00,    // base data offset (high)
         0x00, 0x00, 0x00, 0x00,    // base data offset (low)
         0x00, 0x00, 0x00, 0x01,    // sample description index
+        0x00, 0x00, 0x00, 0x08,    // mdat size
+        ...boxNameToArray('mdat'), // mdat
       ]);
       let view = shaka.util.BufferUtils.toDataView(media);
       expect(view.getUint32(24)).toBe(1);
@@ -136,6 +140,8 @@ describe('ContentWorkarounds', () => {
         ...boxNameToArray('tfhd'), // tfhd
         0x00, 0x00, 0x00, 0x00,    // version & flags
         0x00, 0x00, 0x00, 0x01,    // track id
+        0x00, 0x00, 0x00, 0x08,    // mdat size
+        ...boxNameToArray('mdat'), // mdat
       ]);
       let view = shaka.util.BufferUtils.toDataView(media);
       expect(view.getUint32(0)).toBe(16);
@@ -162,6 +168,8 @@ describe('ContentWorkarounds', () => {
         0x00, 0x00, 0x00, 0x01,    // version & flags
         0x00, 0x00, 0x00, 0x00,    // sample count
         0x00, 0x00, 0x00, 0x01,    // data offset
+        0x00, 0x00, 0x00, 0x08,    // mdat size
+        ...boxNameToArray('mdat'), // mdat
       ]);
       let view = shaka.util.BufferUtils.toDataView(media);
       expect(view.getUint32(0)).toBe(16);
@@ -194,6 +202,8 @@ describe('ContentWorkarounds', () => {
         0x00, 0x00, 0x00, 0x01,    // version & flags
         0x00, 0x00, 0x00, 0x00,    // sample count
         0x00, 0x00, 0x00, 0x01,    // data offset
+        0x00, 0x00, 0x00, 0x08,    // mdat size
+        ...boxNameToArray('mdat'), // mdat
       ]);
       let view = shaka.util.BufferUtils.toDataView(media);
       expect(view.getUint32(0)).toBe(52); // moof size
