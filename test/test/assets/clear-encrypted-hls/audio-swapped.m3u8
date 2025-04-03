@@ -14,4 +14,6 @@ audio-s2.mp4
 audio-enc-s1.mp4
 #EXTINF:5.995,
 audio-enc-s2.mp4
+#EXTINF:5.995,
+audio-enc-s3.mp4
 #EXT-X-ENDLIST
