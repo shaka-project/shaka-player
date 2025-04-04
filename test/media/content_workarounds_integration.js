@@ -108,10 +108,6 @@ fdescribe('ContentWorkarounds', () => {
       if (!shakaSupport.drm[keySystem]) {
         pending('Needed DRM is not supported on this platform');
       }
-      if (shaka.util.Platform.isTizen3()) {
-        pending('Tizen 3 currently does not support mixed clear ' +
-            'encrypted content');
-      }
       if (keySystem === 'com.apple.fps' && getClientArg('runningInVM')) {
         pending('FairPlay is not supported in a VM');
       }
