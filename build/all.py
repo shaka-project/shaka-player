@@ -145,10 +145,10 @@ def main(args):
     modes += ['debug', 'release']
 
   builds = [
-    # build_args_with_ui,
+    build_args_with_ui,
     build_args_without_ui,
-    # build_args_only_dash_without_ui,
-    # build_args_only_hls_without_ui,
+    build_args_only_dash_without_ui,
+    build_args_only_hls_without_ui,
   ]
 
   for mode in modes:
