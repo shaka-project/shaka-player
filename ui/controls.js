@@ -1677,7 +1677,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.isOpaque()) {
       this.lastTouchEventTime_ = Date.now();
       // The controls are showing.
-      // Let this event continue and become a click.
+      this.onContainerClick(/* fromTouchEvent= */ true);
+      // Stop this event from becoming a click event.
+      event.cancelable && event.preventDefault();
     } else {
       // The controls are hidden, so show them.
       this.onMouseMove_(event);
@@ -1688,8 +1690,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * Manage the container click.
+   * @param {boolean=} fromTouchEvent
    */
-  onContainerClick() {
+  onContainerClick(fromTouchEvent = false) {
     if (!this.enabled_ || this.isPlayingVR()) {
       return;
     }
@@ -1698,6 +1701,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.hideSettingsMenusTimer_.tickNow();
     } else if (this.config_.singleClickForPlayAndPause) {
       this.playPausePresentation();
+    } else if (fromTouchEvent && this.isOpaque()) {
+      this.hideUI();
     }
   }
 

@@ -333,7 +333,7 @@ shaka.ui.Overlay = class {
       fullScreenElement: this.videoContainer_,
       preferDocumentPictureInPicture: true,
       showAudioChannelCountVariants: true,
-      seekOnTaps: navigator.maxTouchPoints > 0,
+      seekOnTaps: false,
       tapSeekDistance: 10,
       refreshTickInSeconds: 0.125,
       displayInVrMode: false,
@@ -356,6 +356,8 @@ shaka.ui.Overlay = class {
     // This is in line with default styles in Chrome.
     if (this.isMobile()) {
       config.addBigPlayButton = true;
+      config.singleClickForPlayAndPause = false;
+      config.seekOnTaps = true;
       config.controlPanelElements = config.controlPanelElements.filter(
           (name) => name != 'play_pause' && name != 'volume');
     }
