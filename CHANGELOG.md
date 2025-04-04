@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.14.6](https://github.com/shaka-project/shaka-player/compare/v4.14.5...v4.14.6) (2025-04-04)
+
+
+### Bug Fixes
+
+* Check addTextTrack in video ([#8388](https://github.com/shaka-project/shaka-player/issues/8388)) ([edb16bd](https://github.com/shaka-project/shaka-player/commit/edb16bd11b2118defcd122f35f615f67c960d996))
+* Count line break characters as ASCII ([#8376](https://github.com/shaka-project/shaka-player/issues/8376)) ([0cc08b4](https://github.com/shaka-project/shaka-player/commit/0cc08b4e83472f1498b3efb9a1a7c46a1ccc9a07)), closes [#8336](https://github.com/shaka-project/shaka-player/issues/8336)
+* Detect and skip stall correctly ([#8390](https://github.com/shaka-project/shaka-player/issues/8390)) ([459f0d7](https://github.com/shaka-project/shaka-player/commit/459f0d7372f068799892a9f4ea4bea4b7c65e80d))
+* Fix cross boundary when playing at higher playbackRates ([#8392](https://github.com/shaka-project/shaka-player/issues/8392)) ([37849cf](https://github.com/shaka-project/shaka-player/commit/37849cf698c177089e2c0c0777f5fad55f57604a))
+* FRMA generation ([#8367](https://github.com/shaka-project/shaka-player/issues/8367)) ([5305ec5](https://github.com/shaka-project/shaka-player/commit/5305ec5b01db7992d3be2f090fe1b88c70e6c16d))
+* Handle missing window.matchMedia API ([#8385](https://github.com/shaka-project/shaka-player/issues/8385)) ([4cb8d67](https://github.com/shaka-project/shaka-player/commit/4cb8d6767f4efeaea1c99f2bd7d2ab02326b5eba))
+* Handle null response body for fetch responses ([#8384](https://github.com/shaka-project/shaka-player/issues/8384)) ([3a12986](https://github.com/shaka-project/shaka-player/commit/3a129862541868cb93f1af52242ffd280d49d433))
+* **HLS:** Add key ids to Fairplay DRM parser ([#8371](https://github.com/shaka-project/shaka-player/issues/8371)) ([10bf089](https://github.com/shaka-project/shaka-player/commit/10bf089bfabc3caf84b12c7345475b248670d3f4))
+* Improve maxResolution detection on Tizen ([#8365](https://github.com/shaka-project/shaka-player/issues/8365)) ([001202d](https://github.com/shaka-project/shaka-player/commit/001202d6ef267cf494d114be1820a0c61db46797))
+* Mixed clear/encrypted playback on Safari MSE ([#8354](https://github.com/shaka-project/shaka-player/issues/8354)) ([c71ab14](https://github.com/shaka-project/shaka-player/commit/c71ab1416dfb2ae9a627ffe0527558726f6d2319))
+* **Offline:** Fix HLS-AES download ([#8374](https://github.com/shaka-project/shaka-player/issues/8374)) ([547e286](https://github.com/shaka-project/shaka-player/commit/547e286fb9b56c676faf8ee63b277e01579eb958))
+* Read TRUN data_offset as signed int ([#8383](https://github.com/shaka-project/shaka-player/issues/8383)) ([fd2911e](https://github.com/shaka-project/shaka-player/commit/fd2911e9d2d0a52b455ad7d717626d47a7e2aac3))
+* Support more Dolby codec notations ([#8387](https://github.com/shaka-project/shaka-player/issues/8387)) ([f5f71cc](https://github.com/shaka-project/shaka-player/commit/f5f71cc94db27a339641dd68e7bd229332fd74af))
+* **UI:** Don't allow click on the buttons when the UI is not visible ([#8396](https://github.com/shaka-project/shaka-player/issues/8396)) ([3ac8db0](https://github.com/shaka-project/shaka-player/commit/3ac8db060373d42f6ffee9bc37f6f99fca210694))
+* **UI:** honors singleClickForPlayAndPause when made a single tap with seekOnTaps = true ([#8393](https://github.com/shaka-project/shaka-player/issues/8393)) ([6bc9d4e](https://github.com/shaka-project/shaka-player/commit/6bc9d4ee604f9ee5745faa614fff01110a0717b7))
+
 ## [4.14.5](https://github.com/shaka-project/shaka-player/compare/v4.14.4...v4.14.5) (2025-03-31)
 
 
