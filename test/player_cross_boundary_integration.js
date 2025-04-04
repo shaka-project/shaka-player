@@ -113,31 +113,5 @@ describe('Player Cross Boundary', () => {
       const end = player.getBufferedInfo().total[0].end;
       expect(end).toBeLessThanOrEqual(8);
     });
-
-    drmIt('should skip MSE reset from encrypted boundary', async () => {
-      if (!shakaSupport.drm['com.widevine.alpha'] &&
-          !shakaSupport.drm['com.microsoft.playready']) {
-        pending('Needed DRM is not supported on this platform');
-      }
-
-      player.configure({
-        streaming: {
-          crossBoundaryStrategy:
-            shaka.config.CrossBoundaryStrategy.RESET_TO_ENCRYPTED,
-        },
-      });
-      await player.load(MULTI_PERIOD_ASSET_URI_);
-      await video.play();
-
-      // The boundary is at 8 (from plain to encrypted period), we'll wait
-      // until we crossed it.
-      await waiter.timeoutAfter(20).waitUntilPlayheadReaches(video, 10);
-
-      video.currentTime = 1;
-
-      // When we seek back and we still have a readyState > 0, we did not
-      // reset MSE.
-      expect(video.readyState).toBeGreaterThan(0);
-    });
   });
 });

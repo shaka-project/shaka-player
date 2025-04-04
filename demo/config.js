@@ -597,7 +597,6 @@ shakaDemo.Config = class {
     const strategyOptionsNames = {
       'KEEP': 'Keep',
       'RESET': 'Reset',
-      'RESET_TO_ENCRYPTED': 'Reset to encrypted',
       'RESET_ON_ENCRYPTION_CHANGE': 'Reset on encryption change',
     };
 
