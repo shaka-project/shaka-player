@@ -406,6 +406,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       const cb = (event) => event.stopPropagation();
       this.eventManager_.listen(element, 'click', cb);
       this.eventManager_.listen(element, 'dblclick', cb);
+      if (navigator.maxTouchPoints > 0) {
+        const touchCb = (event) => {
+          if (!this.isOpaque()) {
+            return;
+          }
+          event.stopPropagation();
+        };
+        this.eventManager_.listen(element, 'touchend', touchCb);
+      }
     }
   }
 

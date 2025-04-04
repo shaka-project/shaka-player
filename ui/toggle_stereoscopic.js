@@ -75,6 +75,9 @@ shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
     const vr = this.controls.getVR();
 
     this.eventManager.listen(this.toggleStereoscopicButton_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       vr.toggleStereoscopicMode();
     });
 

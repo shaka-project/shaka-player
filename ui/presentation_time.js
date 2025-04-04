@@ -35,6 +35,9 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
     this.parent.appendChild(this.currentTime_);
 
     this.eventManager.listen(this.currentTime_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       // Jump to LIVE if the user clicks on the current time.
       if (this.player.isLive()) {
         this.video.currentTime = this.player.seekRange().end;
