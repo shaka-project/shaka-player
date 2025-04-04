@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('ContentWorkarounds', () => {
+fdescribe('ContentWorkarounds', () => {
   const Util = shaka.test.Util;
 
   /** @type {!jasmine.Spy} */
