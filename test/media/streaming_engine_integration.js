@@ -67,6 +67,8 @@ describe('StreamingEngine', () => {
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
 
+    const mediaSourceConfig =
+        shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
         new shaka.test.FakeTextDisplayer(),
@@ -76,10 +78,8 @@ describe('StreamingEngine', () => {
           onEmsg: () => {},
           onEvent: () => {},
           onManifestUpdate: () => {},
-        });
-    const mediaSourceConfig =
-        shaka.util.PlayerConfiguration.createDefault().mediaSource;
-    mediaSourceEngine.configure(mediaSourceConfig);
+        },
+        mediaSourceConfig);
     waiter.setMediaSourceEngine(mediaSourceEngine);
   });
 
