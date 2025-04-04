@@ -90,6 +90,9 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
       });
 
       this.eventManager.listen(this.remoteButton_, 'click', () => {
+        if (!this.controls.isOpaque()) {
+          return;
+        }
         this.video.remote.prompt();
       });
 

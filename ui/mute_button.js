@@ -72,6 +72,9 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.button_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       if (this.ad && this.ad.isLinear()) {
         this.ad.setMuted(!this.ad.isMuted());
       } else {
