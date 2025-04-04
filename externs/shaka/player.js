@@ -2135,7 +2135,7 @@ shaka.extern.NetworkingConfiguration;
  *   insertFakeEncryptionInInit: boolean,
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback,
  *   dispatchAllEmsgBoxes: boolean,
- *   useLoad: boolean
+ *   useSourceElements: boolean
  * }}
  *
  * @description
@@ -2178,9 +2178,10 @@ shaka.extern.NetworkingConfiguration;
  *   If true, all emsg boxes are parsed and dispatched.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {boolean} useLoad
- *   If true, uses load API of HtmlMediaElement.Otherwise,
- *   sets the mediaSource url blob to src attribute
+ * @property {boolean} useSourceElements
+ *   If true, uses <source> element. Otherwise,
+ *   sets the mediaSource url blob to src attribute.
+ *   Disabling it will prevent using AirPlay on MSE.
  *   <br>
  *   Defaults to <code>true</code>.
  * @exportDoc
