@@ -54,6 +54,9 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.button_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       this.rewind_();
     });
   }

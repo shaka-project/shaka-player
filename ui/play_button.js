@@ -77,6 +77,9 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(this.button, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       this.controls.playPausePresentation();
     });
 

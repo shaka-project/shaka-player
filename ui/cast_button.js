@@ -81,6 +81,9 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.castButton_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       this.onCastClick_();
     });
 

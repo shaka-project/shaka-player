@@ -87,6 +87,9 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.pipButton_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       this.controls.togglePiP();
     });
 

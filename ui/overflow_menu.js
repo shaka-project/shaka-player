@@ -86,6 +86,9 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.overflowMenuButton_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       this.onOverflowMenuButtonClick_();
     });
 
