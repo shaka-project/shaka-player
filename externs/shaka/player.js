@@ -1820,6 +1820,7 @@ shaka.extern.LiveSyncConfiguration;
  *   stallEnabled: boolean,
  *   stallThreshold: number,
  *   stallSkip: number,
+ *   shouldBeMakingProgressCallback: function(): boolean,
  *   useNativeHlsForFairPlay: boolean,
  *   inaccurateManifestTolerance: number,
  *   lowLatencyMode: boolean,
@@ -1958,6 +1959,11 @@ shaka.extern.LiveSyncConfiguration;
  *   <br>
  *   Defaults to <code>0.1</code>  except on Tizen, WebOS, Chromecast,
  *   Hisense whose default value is <code>0</code>.
+ * @property {function(): boolean} shouldBeMakingProgressCallback
+ *   A callback to decide whether the player should be making progress.
+ *   Applications can override the stall detector operation when necessary.
+ *   Return true for stall detector to continue to handle stalls.
+ *   Return false to force stall detector to no-op.
  * @property {boolean} useNativeHlsForFairPlay
  *   Desktop Safari has both MediaSource and their native HLS implementation.
  *   Depending on the application's needs, it may prefer one over the other.
