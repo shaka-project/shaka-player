@@ -699,7 +699,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Dispatch all emsg boxes',
             'mediaSource.dispatchAllEmsgBoxes')
         .addBoolInput_('Uses source elements',
-            'mediaSource.useSourceElements');
+            'mediaSource.useSourceElements')
+        .addBoolInput_('Expect updateEnd when duration is truncated',
+            'mediaSource.durationReductionEmitsUpdateEnd');
   }
 
   /** @private */

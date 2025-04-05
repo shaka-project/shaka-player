@@ -2135,7 +2135,8 @@ shaka.extern.NetworkingConfiguration;
  *   insertFakeEncryptionInInit: boolean,
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback,
  *   dispatchAllEmsgBoxes: boolean,
- *   useSourceElements: boolean
+ *   useSourceElements: boolean,
+ *   durationReductionEmitsUpdateEnd: boolean
  * }}
  *
  * @description
@@ -2184,6 +2185,15 @@ shaka.extern.NetworkingConfiguration;
  *   Disabling it will prevent using AirPlay on MSE.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {boolean} durationReductionEmitsUpdateEnd
+ *   https://www.w3.org/TR/media-source-2/#duration-change-algorithm
+ *   "Duration reductions that would truncate currently buffered media are
+ *   disallowed.
+ *   When truncation is necessary, use remove() to reduce the buffered range
+ *   before updating duration."
+ *   When set indicates media source duration change can truncate buffer, hence
+ *   updateend event is expected on setDuration operation if new duration is
+ *   smaller than existing value. Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;
