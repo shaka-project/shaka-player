@@ -320,7 +320,14 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           }
           return name ? ' ' + name : name;
         };
-        text += getVideoCodecName(track.videoCodec);
+        const hasDuplicateCodec = tracks.some((otherTrack) => {
+          return otherTrack != track && otherTrack.height == track.height &&
+              getVideoCodecName(otherTrack.videoCodec) !=
+              getVideoCodecName(track.videoCodec);
+        });
+        if (hasDuplicateCodec) {
+          text += getVideoCodecName(track.videoCodec);
+        }
       }
     }
     return text;
