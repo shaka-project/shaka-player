@@ -385,8 +385,6 @@ shakaDemo.Main = class {
           return element != 'rewind' && element != 'fast_forward';
         });
     if (this.trickPlayControlsEnabled_) {
-      // Trick mode controls don't have a seek bar.
-      uiConfig.addSeekBar = false;
       // Replace the position the play_pause button was at with a full suite of
       // trick play controls, including rewind and fast-forward.
       const index = uiConfig.controlPanelElements.indexOf('play_pause');

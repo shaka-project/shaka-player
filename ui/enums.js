@@ -26,13 +26,13 @@ shaka.ui.Enums.MaterialDesignIcons = {
   // of the p-i-p icon. We use "dark version" icons to signal that the
   // feature is turned on.
   'EXIT_PIP': 'branding_watermark',
-  'BACK': 'arrow_back',
-  'RESOLUTION': 'settings',
+  'BACK': 'navigate_before',
+  'RESOLUTION': 'tune',
   'MUTE': 'volume_up',
   'UNMUTE': 'volume_off',
   'CAST': 'cast',
   'EXIT_CAST': 'cast_connected',
-  'OPEN_OVERFLOW': 'more_vert',
+  'OPEN_OVERFLOW': 'settings',
   'REWIND': 'fast_rewind',
   'FAST_FORWARD': 'fast_forward',
   'PLAY': 'play_arrow',

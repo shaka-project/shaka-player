@@ -53,6 +53,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
     label.classList.add('shaka-overflow-menu-only');
+    label.classList.add('shaka-simple-overflow-button-label-inline');
     this.pipNameSpan_ = shaka.util.Dom.createHTMLElement('span');
     this.pipNameSpan_.textContent =
       this.localization.resolve(LocIds.PICTURE_IN_PICTURE);

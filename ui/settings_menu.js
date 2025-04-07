@@ -63,6 +63,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
     label.classList.add('shaka-overflow-menu-only');
+    label.classList.add('shaka-overflow-button-label-inline');
 
     /** @protected {!HTMLElement}*/
     this.nameSpan = shaka.util.Dom.createHTMLElement('span');

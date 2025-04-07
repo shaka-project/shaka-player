@@ -60,19 +60,17 @@
     color: white;
     font-size: initial;
   }
+}
 
-  div:not(.shaka-skip-ad-counter):not(.shaka-skip-ad-container) {
-    .bottom-panels-elements-margin();
+.shaka-ad-info {
+  font-size: 14px;
+  color: white;
+  width: auto;
+  padding: 0 5px;
+
+  &[disabled] {
+    .disabled-button();
   }
-}
-
-.shaka-ad-counter, .shaka-ad-position {
-  .bottom-align-children();
-  .ad-text-shadow();
-}
-
-.shaka-ad-controls .shaka-ad-position:not(.shaka-hidden) + .shaka-ad-counter {
-  margin-left: 0.75em;
 }
 
 .shaka-skip-ad-container {

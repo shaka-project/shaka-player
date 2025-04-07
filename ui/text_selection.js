@@ -159,6 +159,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
       this.captionsOffSpan_.classList.add('shaka-chosen-item');
       this.currentSelection.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.OFF);
+    } else {
+      this.captionsOffSpan_.classList.remove('shaka-chosen-item');
     }
 
     this.button.setAttribute('shaka-status', this.currentSelection.textContent);

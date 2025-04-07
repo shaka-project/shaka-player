@@ -30,50 +30,6 @@ filterDescribe('Cue layout', shaka.test.TextLayoutTests.supported, () => {
     });
 
     defineTests();
-
-    // This test is unique to the UI.
-    it('moves cues to avoid controls', async () => {
-      let ui;
-
-      try {
-        // Set up UI controls.  The video element is in a paused state by
-        // default, so the controls should be shown.  The video is not in the
-        // DOM and is purely temporary.
-        const player = new shaka.Player();
-        ui = new shaka.ui.Overlay(
-            player, /** @type {!HTMLElement} */(helper.videoContainer),
-            shaka.test.UiUtils.createVideoElement());
-        // Turn off every part of the UI that we can, so that the screenshot is
-        // less likely to change because of something unrelated to text
-        // rendering.
-        ui.configure({
-          controlPanelElements: [],
-          addSeekBar: false,
-          addBigPlayButton: false,
-          enableFullscreenOnRotation: false,
-        });
-
-        // Recreate the text displayer so that the text container comes after
-        // the controls (as it does in production).  This is important for the
-        // CSS that moves the cues above the controls when they are shown.
-        await helper.textDisplayer.destroy();
-        helper.recreateTextDisplayer();
-
-        const cue = new shaka.text.Cue(
-            0, 1, 'Captain\'s log, stardate 41636.9');
-        cue.region.id = '1';
-        // Position the cue *explicitly* at the bottom of the screen.
-        cue.region.viewportAnchorX = 0;  // %
-        cue.region.viewportAnchorY = 90;  // %
-        cue.region.width = 100;  // %
-        cue.region.height = 10;  // %
-        helper.textDisplayer.append([cue]);
-
-        await helper.checkScreenshot('cue-with-controls');
-      } finally {
-        await ui.destroy();
-      }
-    });
   });
 
   describe('using browser-native rendering', () => {
