@@ -216,13 +216,13 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
    * @private
    */
   computeMaxHeight_() {
-    const rectOverflow = this.overflowMenu_.getBoundingClientRect();
-    const styleOverflow = window.getComputedStyle(this.overflowMenu_);
-    const paddingTop = parseFloat(styleOverflow.paddingTop);
-    const paddingBottom = parseFloat(styleOverflow.paddingBottom);
+    const rectMenu = this.overflowMenu_.getBoundingClientRect();
+    const styleMenu = window.getComputedStyle(this.overflowMenu_);
+    const paddingTop = parseFloat(styleMenu.paddingTop);
+    const paddingBottom = parseFloat(styleMenu.paddingBottom);
     const rectContainer = this.videoContainer_.getBoundingClientRect();
     const heightIntersection =
-        rectOverflow.bottom - rectContainer.top - paddingTop - paddingBottom;
+        rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom;
 
     this.overflowMenu_.style.maxHeight = heightIntersection + 'px';
   }
