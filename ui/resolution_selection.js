@@ -155,18 +155,19 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     if (aspectRatio > (16 / 9)) {
       height = Math.round(trackWidth * 9 / 16);
     }
+    const qualityMarks = this.controls.getConfig().qualityMarks;
     if (height >= 8640) {
       return height + 'p';
     } else if (height >= 4320) {
-      return '8K';
+      return qualityMarks['4320'];
     } else if (height >= 2160) {
-      return '4K';
+      return qualityMarks['2160'];
     } else if (height >= 1440) {
-      return '2K';
+      return qualityMarks['1440'];
     } else if (height >= 1080) {
-      return 'HD';
+      return qualityMarks['1080'];
     } else if (height >= 720) {
-      return '';
+      return qualityMarks['720'];
     }
     return '';
   }

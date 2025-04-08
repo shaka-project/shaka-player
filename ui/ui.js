@@ -329,6 +329,13 @@ shaka.ui.Overlay = class {
         base: 'rgba(255, 255, 255, 0.54)',
         level: 'rgb(255, 255, 255)',
       },
+      qualityMarks: {
+        720: '',
+        1080: 'HD',
+        1440: '2K',
+        2160: '4K',
+        4320: '8K',
+      },
       trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
       textTrackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
       fadeDelay: 0,
