@@ -163,8 +163,10 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       return '4K';
     } else if (height >= 1440) {
       return '2K';
-    } else if (height >= 720) {
+    } else if (height >= 1080) {
       return 'HD';
+    } else if (height >= 720) {
+      return '';
     }
     return '';
   }
