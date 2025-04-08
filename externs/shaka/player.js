@@ -64,6 +64,7 @@ shaka.extern.StateChange;
  *   width: number,
  *   height: number,
  *   streamBandwidth: number,
+ *   currentCodecs: string,
  *
  *   decodedFrames: number,
  *   droppedFrames: number,
@@ -111,6 +112,8 @@ shaka.extern.StateChange;
  * @property {number} streamBandwidth
  *   The bandwidth required for the current streams (total, in bit/sec).
  *   It takes into account the playbackrate. If nothing is loaded, NaN.
+ * @property {string} currentCodecs
+ *   The current codec of the current streams.
  *
  * @property {number} decodedFrames
  *   The total number of frames decoded by the Player. If not reported by the

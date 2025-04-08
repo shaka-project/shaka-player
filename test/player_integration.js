@@ -242,6 +242,7 @@ describe('Player', () => {
         width: jasmine.any(Number),
         height: jasmine.any(Number),
         streamBandwidth: jasmine.any(Number),
+        currentCodecs: jasmine.any(String),
 
         decodedFrames: jasmine.any(Number),
         droppedFrames: jasmine.any(Number),

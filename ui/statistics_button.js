@@ -89,6 +89,10 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       return this.currentStats_[name] + ' (px)';
     };
 
+    const parseString = (name) => {
+      return this.currentStats_[name];
+    };
+
     const parsePercent = (name) => {
       return this.currentStats_[name] + ' (%)';
     };
@@ -143,6 +147,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     this.parseFrom_ = new Map()
         .set('width', parsePx)
         .set('height', parsePx)
+        .set('currentCodecs', parseString)
         .set('completionPercent', parsePercent)
         .set('bufferingTime', parseSeconds)
         .set('drmTimeSeconds', parseSeconds)
@@ -276,8 +281,12 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       const element = this.displayedElements_.get(name);
       element.textContent = this.parseFrom_.get(name)(name);
       if (element && element.parentElement) {
-        shaka.ui.Utils.setDisplay(element.parentElement,
-            !isNaN(this.currentStats_[name]));
+        const value = this.currentStats_[name];
+        if (typeof value == 'string') {
+          shaka.ui.Utils.setDisplay(element.parentElement, value != '');
+        } else {
+          shaka.ui.Utils.setDisplay(element.parentElement, !isNaN(value));
+        }
       }
     }
   }
