@@ -237,23 +237,34 @@ shaka.ui.Overlay = class {
    * @private
    */
   defaultConfig_() {
+    const controlPanelElements = [
+      'play_pause',
+      'mute',
+      'volume',
+      'time_and_duration',
+      'spacer',
+      'overflow_menu',
+    ];
+
+    if (window.chrome) {
+      controlPanelElements.push('cast');
+    }
+    // eslint-disable-next-line no-restricted-syntax
+    if ('remote' in HTMLMediaElement.prototype) {
+      controlPanelElements.push('remote');
+    } else if (window.WebKitPlaybackTargetAvailabilityEvent) {
+      controlPanelElements.push('airplay');
+    }
+    controlPanelElements.push('fullscreen');
+
     const config = {
-      controlPanelElements: [
-        'play_pause',
-        'time_and_duration',
-        'spacer',
-        'mute',
-        'volume',
-        'fullscreen',
-        'overflow_menu',
-      ],
+      controlPanelElements,
       overflowMenuButtons: [
         'captions',
         'quality',
         'language',
         'chapter',
         'picture_in_picture',
-        'cast',
         'playback_rate',
         'recenter_vr',
         'toggle_stereoscopic',
@@ -318,6 +329,13 @@ shaka.ui.Overlay = class {
         base: 'rgba(255, 255, 255, 0.54)',
         level: 'rgb(255, 255, 255)',
       },
+      qualityMarks: {
+        '720': '',
+        '1080': 'HD',
+        '1440': '2K',
+        '2160': '4K',
+        '4320': '8K',
+      },
       trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
       textTrackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
       fadeDelay: 0,
@@ -327,7 +345,7 @@ shaka.ui.Overlay = class {
       enableKeyboardPlaybackControls: true,
       enableFullscreenOnRotation: true,
       forceLandscapeOnFullscreen: true,
-      enableTooltips: false,
+      enableTooltips: true,
       keyboardSeekDistance: 5,
       keyboardLargeSeekDistance: 60,
       fullScreenElement: this.videoContainer_,
@@ -344,13 +362,6 @@ shaka.ui.Overlay = class {
       showVideoCodec: true,
     };
 
-    // eslint-disable-next-line no-restricted-syntax
-    if ('remote' in HTMLMediaElement.prototype) {
-      config.overflowMenuButtons.push('remote');
-    } else if (window.WebKitPlaybackTargetAvailabilityEvent) {
-      config.overflowMenuButtons.push('airplay');
-    }
-
     // On mobile, by default, hide the volume slide and the small play/pause
     // button and show the big play/pause button in the center.
     // This is in line with default styles in Chrome.
@@ -358,6 +369,8 @@ shaka.ui.Overlay = class {
       config.addBigPlayButton = true;
       config.singleClickForPlayAndPause = false;
       config.seekOnTaps = true;
+      config.enableTooltips = false;
+      config.doubleClickForFullscreen = false;
       config.controlPanelElements = config.controlPanelElements.filter(
           (name) => name != 'play_pause' && name != 'volume');
     }
