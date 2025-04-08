@@ -304,6 +304,10 @@ shaka.test.FakePresentationTimeline = class {
         jasmine.createSpy('getPresentationStartTime');
 
     /** @type {!jasmine.Spy} */
+    this.getInitialProgramDateTime =
+        jasmine.createSpy('getInitialProgramDateTime');
+
+    /** @type {!jasmine.Spy} */
     this.setClockOffset = jasmine.createSpy('setClockOffset');
 
     /** @type {!jasmine.Spy} */
