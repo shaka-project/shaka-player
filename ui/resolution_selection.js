@@ -79,6 +79,11 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       this.updateResolutionLabels_();
     });
 
+    this.eventManager.listen(this.player, 'unloading', () => {
+      this.updateResolutionSelection_();
+      this.updateResolutionLabels_();
+    });
+
     this.eventManager.listen(this.player, 'variantchanged', () => {
       this.updateResolutionSelection_();
       this.updateResolutionLabels_();
@@ -106,6 +111,10 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     const tracks = this.player.getVariantTracks();
     const track = tracks.find((track) => track.active);
     if (!track) {
+      if (this.overflowQualityMark) {
+        this.overflowQualityMark.textContent = '';
+        this.overflowQualityMark.style.display = 'none';
+      }
       return;
     }
     const abrEnabled = this.player.getConfiguration().abr.enabled;
