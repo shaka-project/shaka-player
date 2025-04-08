@@ -1,7 +1,7 @@
 #shaka-player-ui-thumbnail-container {
-  background-color: black;
-  border: 1px solid black;
-  box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 50%);
+  background-color: @general-background-color-opaque;
+  border: 1px solid @general-background-color-opaque;
+  box-shadow: 0 8px 8px 0 @general-background-color;
   min-width: 150px;
   overflow: hidden;
   position: absolute;
@@ -23,10 +23,10 @@
     justify-content: center;
 
     #shaka-player-ui-thumbnail-time {
-      background-color: rgb(0, 0, 0, 50%);
-      border-radius: 14px;
-      color: white;
-      font-size: 14px;
+      background-color: @general-background-color;
+      border-radius: @general-font-size;
+      color: @general-font-color;
+      font-size: @general-font-size;
       padding: 0 5px;
     }
   }
@@ -38,11 +38,11 @@
 }
 
 #shaka-player-ui-time-container {
-  background: rgba(0, 0, 0, 50%);
+  background-color: @general-background-color;
   border-radius: 5px;
-  color: white;
+  color: @general-font-color;
   display: flex;
-  font-size: 14px;
+  font-size: @general-font-size;
   justify-content: center;
   overflow: hidden;
   padding: 0 3px;

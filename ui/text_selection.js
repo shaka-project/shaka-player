@@ -106,7 +106,6 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     /** @private {!HTMLElement} */
     this.captionsOffSpan_ = shaka.util.Dom.createHTMLElement('span');
 
-    this.captionsOffSpan_.classList.add('shaka-auto-span');
     off.appendChild(this.captionsOffSpan_);
   }
 

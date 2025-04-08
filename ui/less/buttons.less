@@ -12,7 +12,7 @@
   /* Set the background and the color, otherwise it might be overwritten by
    * the css styles in demo. */
   background-color: transparent;
-  color: white;
+  color: @general-font-color;
   cursor: default;
 }
 
@@ -73,8 +73,8 @@
  * edge. Otherwise, the button is disabled.
  */
 .shaka-current-time {
-  font-size: 14px;
-  color: white;
+  font-size: @general-font-size;
+  color: @general-font-color;
   cursor: pointer;
   width: auto;
   padding: 0 5px;
@@ -128,11 +128,8 @@
   /* No border. */
   border: none;
 
-  /* Setting text color to white */
-  color: rgb(255, 255, 255);
-
-  /* Setting background color to black so white text can be seen clearly */
-  background-color: rgba(0, 0, 0, 50%);
+  color: @general-font-color;
+  background-color: @general-background-color;
 
   cursor: default;
   font-size: 20px;

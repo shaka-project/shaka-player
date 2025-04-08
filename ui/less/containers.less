@@ -22,7 +22,7 @@
   }
 
   /* Set the fonts for all other content. */
-  font-family: Roboto, sans-serif, TengwarTelcontar;
+  font-family: @general-font-family;
   font-weight: normal;
   -webkit-font-smoothing: antialiased;
 }
@@ -36,7 +36,7 @@
 .fullscreen-container() {
   .fill-container();
 
-  background-color: black;
+  background-color: @general-background-color-opaque;
 
   .shaka-text-container {
     /* In fullscreen mode, the text displayer's font size should be relative to
@@ -171,7 +171,7 @@
    * have these characteristics by default. */
   & > * {
     /* White text or button icons. */
-    color: white;
+    color: @general-font-color;
 
     /* 48px tall controls. */
     height: 48px;
@@ -189,7 +189,7 @@
     cursor: pointer;
     opacity: 0.9;
     transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 100ms;
-    text-shadow: 0 0 2px rgba(0, 0, 0, 50%);
+    text-shadow: 0 0 2px @general-background-color;
 
     &.material-icons-round {
       font-size: 34px;
@@ -238,10 +238,10 @@
 
   min-width: 300px;
 
-  color: white;
+  color: @general-font-color;
   background-color: rgba(35, 35, 35, 90%);
 
-  font-size: 14px;
+  font-size: @general-font-size;
 
   padding: 5px 10px;
   border-radius: 2px;
@@ -270,10 +270,10 @@
 
   min-width: 150px;
 
-  color: white;
+  color: @general-font-color;
   background-color: rgba(35, 35, 35, 90%);
 
-  font-size: 14px;
+  font-size: @general-font-size;
 
   padding: 5px 10px;
   border-radius: 2px;
@@ -324,9 +324,9 @@
   z-index: 3;
 
   button {
-    font-size: 13px;
+    font-size: @general-font-size;
     background: transparent;
-    color: #eee;
+    color: @general-font-color;
     border: none;
     min-height: 30px;
     padding: 10px;
@@ -400,7 +400,7 @@
   /* These are defaults which are overridden by JS or cue styles. */
   font-size: 20px;
   line-height: 1.4;  // relative to font size.
-  color: white;
+  color: @general-font-color;
 
   span.shaka-text-wrapper {
     display: inline;

@@ -323,7 +323,6 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     /** @private {!HTMLElement}*/
     this.abrOnSpan_ = shaka.util.Dom.createHTMLElement('span');
-    this.abrOnSpan_.classList.add('shaka-auto-span');
     this.abrOnSpan_.textContent =
         this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
     autoButton.appendChild(this.abrOnSpan_);

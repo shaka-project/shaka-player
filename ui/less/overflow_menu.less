@@ -40,9 +40,9 @@
 
   /* The buttons inside the menu. */
   button {
-    font-size: 13px;
+    font-size: @general-font-size;
     background: transparent;
-    color: #eee;
+    color: @general-font-color;
     border: none;
     min-height: 30px;
     padding: 10px;
@@ -142,12 +142,12 @@
 .shaka-current-auto-quality {
   margin-left: 5px;
   font-size: 11px;
-  color: #ccc;
+  color: @general-font-color-secondary;
 }
 
 .shaka-quality-mark,
 .shaka-current-quality-mark {
-  color: #f00;
+  color: @quality-mark-hightlight-color;
   margin-left: 2px !important;
   font-size: 10px;
   height: 17px;
@@ -158,10 +158,10 @@
 }
 
 .shaka-overflow-quality-mark {
-  background: #f00;
-  color: #fff;
+  background: @quality-mark-hightlight-color;
+  color: @quality-mark-color;
   border-radius: 2px;
-  font-family: Roboto, sans-serif, TengwarTelcontar;
+  font-family: @general-font-family;
   font-size: 8px;
   font-weight: bold;
   text-shadow: 1px 1px 0 #840000;
@@ -211,10 +211,4 @@
   &:hover {
     background: transparent !important;
   }
-}
-
-/* The menu item for resolutions which contains "auto". */
-.shaka-auto-span {
-  /* TODO(b/116651454): eliminate hard-coded offsets */
-  left: 17px;
 }
