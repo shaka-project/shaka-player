@@ -272,6 +272,7 @@ shaka.ui.Overlay = class {
       statisticsList: [
         'width',
         'height',
+        'currentCodecs',
         'corruptedFrames',
         'decodedFrames',
         'droppedFrames',
