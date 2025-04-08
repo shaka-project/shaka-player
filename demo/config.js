@@ -87,6 +87,7 @@ shakaDemo.Config = class {
     this.addOfflineSection_();
     this.addDrmSection_();
     this.addStreamingSection_();
+    this.addNetworkingSection_();
     this.addMediaSourceSection_();
     this.addManifestSection_();
     this.addDashManifestSection_();
@@ -352,6 +353,9 @@ shakaDemo.Config = class {
     this.addSection_('Text displayer', docLink)
         .addNumberInput_('Captions update period',
             'textDisplayer.captionsUpdatePeriod',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Font scale factor',
+            'textDisplayer.fontScaleFactor',
             /* canBeDecimal= */ true);
   }
 
@@ -406,7 +410,11 @@ shakaDemo.Config = class {
         .addBoolInput_('Ignore HLS Interstitial',
             'ads.disableHLSInterstitial')
         .addBoolInput_('Ignore DASH Interstitial',
-            'ads.disableDASHInterstitial');
+            'ads.disableDASHInterstitial')
+        .addBoolInput_('Allow preload on DOM elements',
+            'ads.allowPreloadOnDomElements')
+        .addBoolInput_('Allow start in the middle of an interstitial',
+            'ads.allowStartInMiddleOfInterstitial');
   }
 
   /**
@@ -503,10 +511,6 @@ shakaDemo.Config = class {
             'streaming.inaccurateManifestTolerance',
             /* canBeDecimal= */ true)
         .addBoolInput_('Low Latency Mode', 'streaming.lowLatencyMode')
-        .addBoolInput_('Force HTTP', 'streaming.forceHTTP')
-        .addBoolInput_('Force HTTPS', 'streaming.forceHTTPS')
-        .addNumberInput_('Min bytes for progress events',
-            'streaming.minBytesForProgressEvents')
         .addBoolInput_('Prefer native DASH playback when available',
             'streaming.preferNativeDash')
         .addBoolInput_('Prefer native HLS playback when available',
@@ -595,6 +599,7 @@ shakaDemo.Config = class {
       'KEEP': 'Keep',
       'RESET': 'Reset',
       'RESET_TO_ENCRYPTED': 'Reset to encrypted',
+      'RESET_ON_ENCRYPTION_CHANGE': 'Reset on encryption change',
     };
 
     this.addBoolInput_('Start At Segment Boundary',
@@ -664,6 +669,16 @@ shakaDemo.Config = class {
   }
 
   /** @private */
+  addNetworkingSection_() {
+    const docLink = this.resolveExternLink_('.NetworkingConfiguration');
+    this.addSection_('Networking', docLink)
+        .addBoolInput_('Force HTTP', 'networking.forceHTTP')
+        .addBoolInput_('Force HTTPS', 'networking.forceHTTPS')
+        .addNumberInput_('Min bytes for progress events',
+            'networking.minBytesForProgressEvents');
+  }
+
+  /** @private */
   addMediaSourceSection_() {
     const docLink = this.resolveExternLink_('.MediaSourceConfiguration');
 
@@ -683,7 +698,9 @@ shakaDemo.Config = class {
             strategyOptions,
             strategyOptionsNames)
         .addBoolInput_('Dispatch all emsg boxes',
-            'mediaSource.dispatchAllEmsgBoxes');
+            'mediaSource.dispatchAllEmsgBoxes')
+        .addBoolInput_('Uses source elements',
+            'mediaSource.useSourceElements');
   }
 
   /** @private */

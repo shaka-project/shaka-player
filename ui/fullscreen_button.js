@@ -55,6 +55,9 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.button_, 'click', async () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       await this.controls.toggleFullScreen();
     });
 

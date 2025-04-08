@@ -53,7 +53,15 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.button_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       this.fastForward_();
+    });
+
+    this.eventManager.listen(this.player, 'ratechange', () => {
+      this.button_.setAttribute(
+          'shaka-status', this.player.getPlaybackRate() + 'x');
     });
   }
 

@@ -2176,36 +2176,12 @@ describe('Player', () => {
           label: 'Spanish',
           kind: 'caption',
           mimeType: 'text/vtt',
-          audioMimeType: null,
-          videoMimeType: null,
           codecs: null,
-          audioCodec: null,
-          videoCodec: null,
           primary: false,
           roles: [],
-          audioRoles: null,
           forced: false,
-          channelsCount: null,
-          audioSamplingRate: null,
-          spatialAudio: false,
-          tilesLayout: null,
-          audioBandwidth: null,
-          videoBandwidth: null,
-          bandwidth: 0,
-          width: null,
-          height: null,
-          frameRate: null,
-          pixelAspectRatio: null,
-          hdr: null,
-          colorGamut: null,
-          videoLayout: null,
-          videoId: null,
-          audioId: null,
-          audioGroupId: null,
-          originalAudioId: null,
-          originalVideoId: null,
+          bandwidth: 10,
           originalTextId: 'text-es',
-          originalImageId: null,
           accessibilityPurpose: undefined,
         },
         {
@@ -2217,36 +2193,12 @@ describe('Player', () => {
           label: 'English',
           kind: 'caption',
           mimeType: 'application/ttml+xml',
-          audioMimeType: null,
-          videoMimeType: null,
           codecs: null,
-          audioCodec: null,
-          videoCodec: null,
           primary: false,
           roles: ['main'],
-          audioRoles: null,
           forced: false,
-          channelsCount: null,
-          audioSamplingRate: null,
-          spatialAudio: false,
-          tilesLayout: null,
-          audioBandwidth: null,
-          videoBandwidth: null,
-          bandwidth: 0,
-          width: null,
-          height: null,
-          frameRate: null,
-          pixelAspectRatio: null,
-          hdr: null,
-          colorGamut: null,
-          videoLayout: null,
-          videoId: null,
-          audioId: null,
-          audioGroupId: null,
-          originalAudioId: null,
-          originalVideoId: null,
+          bandwidth: 10,
           originalTextId: 'text-en',
-          originalImageId: null,
           accessibilityPurpose: undefined,
         },
         {
@@ -2258,36 +2210,12 @@ describe('Player', () => {
           label: 'English',
           kind: 'caption',
           mimeType: 'application/ttml+xml',
-          audioMimeType: null,
-          videoMimeType: null,
           codecs: null,
-          audioCodec: null,
-          videoCodec: null,
           primary: false,
           roles: ['commentary'],
-          audioRoles: null,
           forced: false,
-          channelsCount: null,
-          spatialAudio: false,
-          audioSamplingRate: null,
-          tilesLayout: null,
-          audioBandwidth: null,
-          videoBandwidth: null,
-          bandwidth: 0,
-          width: null,
-          height: null,
-          frameRate: null,
-          pixelAspectRatio: null,
-          hdr: null,
-          colorGamut: null,
-          videoLayout: null,
-          videoId: null,
-          audioId: null,
-          audioGroupId: null,
-          originalAudioId: null,
-          originalVideoId: null,
+          bandwidth: 10,
           originalTextId: 'text-commentary',
-          originalImageId: null,
           accessibilityPurpose: undefined,
         },
       ];
@@ -2295,44 +2223,14 @@ describe('Player', () => {
       imageTracks = [
         {
           id: 53,
-          active: false,
           type: ContentType.IMAGE,
-          language: '',
-          originalLanguage: null,
-          label: null,
-          kind: null,
           mimeType: 'image/jpeg',
-          audioMimeType: null,
-          videoMimeType: null,
           codecs: null,
-          audioCodec: null,
-          videoCodec: null,
-          primary: false,
-          roles: [],
-          audioRoles: null,
-          forced: false,
-          channelsCount: null,
-          audioSamplingRate: null,
-          spatialAudio: false,
           tilesLayout: '1x1',
-          audioBandwidth: null,
-          videoBandwidth: null,
           bandwidth: 10,
           width: 200,
           height: 400,
-          frameRate: null,
-          pixelAspectRatio: null,
-          hdr: null,
-          colorGamut: null,
-          videoLayout: null,
-          videoId: null,
-          audioId: null,
-          audioGroupId: null,
-          originalAudioId: null,
-          originalVideoId: null,
-          originalTextId: null,
           originalImageId: 'thumbnail',
-          accessibilityPurpose: null,
         },
       ];
 
@@ -3219,7 +3117,8 @@ describe('Player', () => {
       });
 
       it('includes selectVariantTrack choices', () => {
-        const track = player.getVariantTracks()[3];
+        const track = player.getVariantTracks().find((t) => !t.active);
+        goog.asserts.assert(track, 'track should not be null!');
 
         const variants = manifest.variants;
         const variant = variants.find((variant) => variant.id == track.id);
@@ -3237,7 +3136,7 @@ describe('Player', () => {
       });
 
       it('includes adaptation choices', () => {
-        const variant = manifest.variants[3];
+        const variant = manifest.variants[2];
 
         switch_(variant);
         checkHistory(jasmine.arrayContaining([
@@ -5081,7 +4980,7 @@ describe('Player', () => {
 
   /**
    * Gets the currently active text track.
-   * @return {?shaka.extern.Track}
+   * @return {?shaka.extern.TextTrack}
    */
   function getActiveTextTrack() {
     const activeTracks = player.getTextTracks().filter((track) => {

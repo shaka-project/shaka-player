@@ -174,6 +174,15 @@ function workAroundLegacyEdgePromiseIssues() {
 }
 
 /**
+ * Work around lab crashes by flagging if we're running in the lab.  This lets
+ * us add lab-specific workarounds for our unique lab environment.  This won't
+ * affect local test runs on developer machines or GitHub Actions workflows.
+ */
+function workAroundLabCrashes() {
+  shaka.debug.RunningInLab = getClientArg('runningInLab');
+}
+
+/**
  * Returns a Jasmine callback which shims the real callback and checks for
  * a certain condition.  The test will only be run if the condition is true.
  *
@@ -370,15 +379,6 @@ function configureJasmineEnvironment() {
     });
   }
 
-  // Work-around: allow the Tizen media pipeline to cool down.
-  // Without this, Tizen's pipeline seems to hang in subsequent tests.
-  // TODO: file a bug on Tizen
-  if (shaka.util.Platform.isTizen()) {
-    afterEach((done) => {  // eslint-disable-line no-restricted-syntax
-      originalSetTimeout(done, /* ms= */ 100);
-    });
-  }
-
   // Reset decoding config cache after each test.
   afterEach(/** @suppress {accessControls} */ () => {
     shaka.util.StreamUtils.clearDecodingConfigCache();
@@ -459,6 +459,7 @@ async function setupTestEnvironment() {
   failTestsOnUnhandledErrors();
   disableScrollbars();
   workAroundLegacyEdgePromiseIssues();
+  workAroundLabCrashes();
 
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly

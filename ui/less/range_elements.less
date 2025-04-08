@@ -26,8 +26,8 @@
  * the element is inherently accessible. */
 
 /* These control the color and size of the various pieces. */
-@thumb-color: white;
-@track-default-color: white;
+@thumb-color: @general-font-color;
+@track-default-color: @general-font-color;
 @thumb-size: 12px;
 @track-height: 4px;
 
@@ -98,6 +98,7 @@
   /* Remove any browser styling of the range element. */
   -webkit-appearance: none;
   background: transparent;
+  cursor: pointer;
 
   /* Overlay and fill the container div. */
   .overlay-child();
@@ -149,6 +150,21 @@
 
 .shaka-seek-bar-container {
   .show-when-controls-shown();
+  top: 5px;
+  height: 5px;
+  margin-bottom: 0;
+  background-clip: padding-box !important;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+
+  .shaka-seek-bar {
+    transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 250ms;
+    opacity: 0;
+  }
+
+  &:hover .shaka-seek-bar {
+    opacity: 1;
+  }
 }
 
 .shaka-ad-markers {

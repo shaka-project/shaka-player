@@ -47,6 +47,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
     label.classList.add('shaka-overflow-menu-only');
+    label.classList.add('shaka-simple-overflow-button-label-inline');
     this.nameSpan_ = shaka.util.Dom.createHTMLElement('span');
     this.nameSpan_.textContent = this.localization.resolve(LocIds.LOOP);
     label.appendChild(this.nameSpan_);
@@ -73,6 +74,9 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.button_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       this.onClick_();
     });
 

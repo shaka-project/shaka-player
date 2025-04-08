@@ -7,6 +7,7 @@
 // ESlint config
 
 import js from '@eslint/js';
+import stylisticJs from '@stylistic/eslint-plugin-js';
 import google from 'eslint-config-google';
 import jsdoc from 'eslint-plugin-jsdoc';
 import shakaRules from 'eslint-plugin-shaka-rules';
@@ -57,10 +58,17 @@ export default [
   jsdoc.configs['flat/recommended-error'],
   google,
   shakaRules.configs.config,
+  stylisticJs.configs['disable-legacy'],
   {
     languageOptions: {
       globals: globals.browser,
       ecmaVersion: 2017,
+    },
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
+    },
+    plugins: {
+      '@stylistic': stylisticJs,
     },
     settings: {
       jsdoc: {
@@ -125,7 +133,6 @@ export default [
       // causes issues when implementing an interface
       'class-methods-use-this': 'off',
       'consistent-return': 'error',
-      'dot-location': ['error', 'property'],
       'dot-notation': 'off', // We use bracket notation in tests on purpose
       'eqeqeq': 'off',       // Compiler handles type checking in advance
       'guard-for-in': 'off',
@@ -135,7 +142,6 @@ export default [
       'no-div-regex': 'error',
       'no-extend-native': 'error', // May conflict with future polyfills
       'no-extra-label': 'error',
-      'no-floating-decimal': 'error',
       'no-implicit-coercion': ['error', {
         allow: ['!!'],
       }],
@@ -144,9 +150,6 @@ export default [
       'no-iterator': 'error',
       'no-labels': 'error',
       'no-lone-blocks': 'error',
-      'no-multi-spaces': ['error', {
-        ignoreEOLComments: true,
-      }],
       'no-multi-str': 'error',
       'no-new': 'error',
       'no-new-func': 'error',
@@ -170,7 +173,6 @@ export default [
       'no-warning-comments': 'off', // TODO and FIXME are fine
       'radix': ['error', 'always'],
       'require-await': 'error',
-      'wrap-iife': ['error', 'inside'],
       'yoda': ['error', 'never'],
       // }}}
 
@@ -184,40 +186,103 @@ export default [
       // }}}
 
       // "Stylistic Issues" rules: {{{
-      'array-bracket-newline': ['error', 'consistent'],
-      'block-spacing': ['error', 'always'],
-      'brace-style': ['error', '1tbs', {
+      '@stylistic/array-bracket-newline': ['error', 'consistent'],
+      '@stylistic/array-bracket-spacing': ['error', 'never'],
+      '@stylistic/array-element-newline': 'off',
+      '@stylistic/arrow-spacing': 'error',
+      '@stylistic/arrow-parens': ['error', 'always'],
+      '@stylistic/block-spacing': ['error', 'always'],
+      '@stylistic/brace-style': ['error', '1tbs', {
         allowSingleLine: true,
       }],
-      'id-denylist': ['error', 'async'],
-      'lines-between-class-members': 'error',
-      'max-statements-per-line': ['error', {
+      '@stylistic/comma-dangle': ['error', 'always-multiline'],
+      '@stylistic/comma-spacing': 'error',
+      '@stylistic/comma-style': 'error',
+      '@stylistic/computed-property-spacing': 'error',
+      '@stylistic/dot-location': ['error', 'property'],
+      '@stylistic/eol-last': 'error',
+      '@stylistic/func-call-spacing': 'error',
+      '@stylistic/indent': [
+        'error', 2, {
+          'CallExpression': {
+            'arguments': 2,
+          },
+          'FunctionDeclaration': {
+            'body': 1,
+            'parameters': 2,
+          },
+          'FunctionExpression': {
+            'body': 1,
+            'parameters': 2,
+          },
+          'MemberExpression': 2,
+          'ObjectExpression': 1,
+          'SwitchCase': 1,
+          'ignoredNodes': [
+            'ConditionalExpression',
+          ],
+        },
+      ],
+      '@stylistic/key-spacing': 'error',
+      '@stylistic/keyword-spacing': 'error',
+      '@stylistic/linebreak-style': 'error',
+      '@stylistic/lines-between-class-members': 'error',
+      '@stylistic/max-len': ['error', {
+        code: 80,
+        tabWidth: 2,
+        ignoreUrls: true,
+        ignorePattern: 'goog.(module|require)',
+      }],
+      '@stylistic/max-statements-per-line': ['error', {
         max: 1,
       }],
-      'new-parens': 'error',
-      'no-mixed-operators': ['error', {
+      '@stylistic/new-parens': 'error',
+      '@stylistic/no-floating-decimal': 'error',
+      '@stylistic/no-mixed-operators': ['error', {
         groups: [['&', '|', '^', '~', '<<', '>>', '>>>', '&&', '||']],
         allowSamePrecedence: false,
       }],
-      'no-restricted-syntax': [
-        'error',
-        ...commonNoRestrictedSyntax,
-      ],
-      'no-whitespace-before-property': 'error',
+      '@stylistic/no-mixed-spaces-and-tabs': 'error',
+      '@stylistic/no-multiple-empty-lines': ['error', {max: 2}],
+      '@stylistic/no-multi-spaces': ['error', {
+        ignoreEOLComments: true,
+      }],
+      '@stylistic/no-tabs': 'error',
+      '@stylistic/no-trailing-spaces': 'error',
+      '@stylistic/no-whitespace-before-property': 'error',
       // cspell:ignore nonblock
-      'nonblock-statement-body-position': ['error', 'below'],
-      'operator-assignment': 'error',
-      'spaced-comment': ['error', 'always', {
+      '@stylistic/nonblock-statement-body-position': ['error', 'below'],
+      '@stylistic/object-curly-spacing': 'error',
+      '@stylistic/operator-linebreak': ['error', 'after'],
+      '@stylistic/padded-blocks': ['error', 'never'],
+      '@stylistic/quote-props': ['error', 'consistent'],
+      '@stylistic/quotes': ['error', 'single', {allowTemplateLiterals: true}],
+      '@stylistic/rest-spread-spacing': 'error',
+      '@stylistic/semi': 'error',
+      '@stylistic/semi-spacing': 'error',
+      '@stylistic/space-before-blocks': 'error',
+      '@stylistic/space-before-function-paren': ['error', {
+        asyncArrow: 'always',
+        anonymous: 'never',
+        named: 'never',
+      }],
+      '@stylistic/spaced-comment': ['error', 'always', {
         // Characters which may be glued to the start of a comment block, but
         // which do not violate the rule.  The "*" is for jsdoc's "/**" syntax,
         // and the "!" is for the "/*!" of license headers which are passed
         // verbatim through the compiler.
         markers: ['*', '!'],
       }],
+      '@stylistic/switch-colon-spacing': 'error',
+      '@stylistic/wrap-iife': ['error', 'inside'],
+      'id-denylist': ['error', 'async'],
+      'no-restricted-syntax': [
+        'error',
+        ...commonNoRestrictedSyntax,
+      ],
       // }}}
 
       // "ECMAScript 6" rules: {{{
-      'arrow-spacing': 'error',
       'no-useless-constructor': 'error',
       'prefer-arrow-callback': 'error',
       'prefer-const': ['error', {

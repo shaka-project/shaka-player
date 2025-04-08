@@ -1,7 +1,7 @@
 {
   "name": "shaka-player",
   "description": "DASH/EME video player library",
-  "version": "4.13.0",
+  "version": "4.14.0",
   "homepage": "https://github.com/shaka-project/shaka-player",
   "author": "Google",
   "maintainers": [
@@ -23,6 +23,7 @@
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.16.11",
     "@joeyparrish/karma-babel-preprocessor": "^8.2.0",
+    "@stylistic/eslint-plugin-js": "^4.2.0",
     "@teppeis/clutz": "^1.0.29-4c95e12.v20190929",
     "awesomplete": "^1.1.5",
     "babel-plugin-istanbul": "^6.1.1",
@@ -54,7 +55,7 @@
     "karma-coverage": "^2.2.0",
     "karma-jasmine": "^4.0.1",
     "karma-jasmine-ajax": "^0.1.13",
-    "karma-local-wd-launcher": "^1.7.0",
+    "karma-local-wd-launcher": "^1.7.1",
     "karma-opera-launcher": "^1.0.0",
     "karma-sourcemap-loader": "^0.3.8",
     "karma-spec-reporter": "^0.0.34",

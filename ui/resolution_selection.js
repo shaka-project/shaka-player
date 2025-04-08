@@ -41,6 +41,28 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     this.button.classList.add('shaka-tooltip-status');
     this.menu.classList.add('shaka-resolutions');
 
+    this.autoQuality = shaka.util.Dom.createHTMLElement('span');
+    this.autoQuality.classList.add('shaka-current-auto-quality');
+    this.autoQuality.style.display = 'none';
+
+    this.qualityMark = shaka.util.Dom.createHTMLElement('sup');
+    this.qualityMark.classList.add('shaka-current-quality-mark');
+    this.qualityMark.style.display = 'none';
+
+    if (this.parent.parentElement) {
+      const parentElement =
+          shaka.util.Dom.asHTMLElement(this.parent.parentElement);
+      this.overflowQualityMark = shaka.util.Dom.getElementByClassNameIfItExists(
+          'shaka-overflow-quality-mark', parentElement,
+      );
+    }
+
+    const spanWrapper = shaka.util.Dom.createHTMLElement('span');
+    this.button.childNodes[1].appendChild(spanWrapper);
+    spanWrapper.appendChild(this.currentSelection);
+    spanWrapper.appendChild(this.autoQuality);
+    spanWrapper.appendChild(this.qualityMark);
+
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
           this.updateLocalizedStrings_();
@@ -54,23 +76,101 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     this.eventManager.listen(this.player, 'loading', () => {
       this.updateResolutionSelection_();
+      this.updateResolutionLabels_();
+    });
+
+    this.eventManager.listen(this.player, 'unloading', () => {
+      this.updateResolutionSelection_();
+      this.updateResolutionLabels_();
     });
 
     this.eventManager.listen(this.player, 'variantchanged', () => {
       this.updateResolutionSelection_();
+      this.updateResolutionLabels_();
     });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
       this.updateResolutionSelection_();
+      this.updateResolutionLabels_();
     });
 
     this.eventManager.listen(this.player, 'abrstatuschanged', () => {
       this.updateResolutionSelection_();
+      this.updateResolutionLabels_();
+    });
+
+    this.eventManager.listen(this.player, 'adaptation', () => {
+      this.updateResolutionLabels_();
     });
 
     this.updateResolutionSelection_();
   }
 
+  /** @private */
+  updateResolutionLabels_() {
+    const tracks = this.player.getVariantTracks();
+    const track = tracks.find((track) => track.active);
+    if (!track) {
+      if (this.overflowQualityMark) {
+        this.overflowQualityMark.textContent = '';
+        this.overflowQualityMark.style.display = 'none';
+      }
+      return;
+    }
+    const abrEnabled = this.player.getConfiguration().abr.enabled;
+    if (abrEnabled) {
+      if (!this.player.isAudioOnly() && track.height && track.width) {
+        this.autoQuality.textContent = this.getResolutionLabel_(track, tracks);
+      } else if (track.bandwidth) {
+        this.autoQuality.textContent =
+            Math.round(track.bandwidth / 1000) + ' kbits/s';
+      } else {
+        this.autoQuality.textContent = 'Unknown';
+      }
+      this.autoQuality.style.display = '';
+    } else {
+      this.autoQuality.style.display = 'none';
+    }
+
+    /** @type {string} */
+    const mark = this.getQualityMark_(track);
+    this.qualityMark.textContent = mark;
+    this.qualityMark.style.display = mark !== '' ? '' : 'none';
+    if (this.overflowQualityMark) {
+      this.overflowQualityMark.textContent = mark;
+      this.overflowQualityMark.style.display = mark !== '' ? '' : 'none';
+    }
+  }
+
+  /**
+   * @param {!shaka.extern.Track} track
+   * @return {string}
+   * @private
+   */
+  getQualityMark_(track) {
+    const trackHeight = track.height || 0;
+    const trackWidth = track.width || 0;
+    let height = trackHeight;
+    const aspectRatio = trackWidth / trackHeight;
+    if (aspectRatio > (16 / 9)) {
+      height = Math.round(trackWidth * 9 / 16);
+    }
+    const qualityMarks = this.controls.getConfig().qualityMarks;
+    if (height >= 8640) {
+      return height + 'p';
+    } else if (height >= 4320) {
+      return qualityMarks['4320'];
+    } else if (height >= 2160) {
+      return qualityMarks['2160'];
+    } else if (height >= 1440) {
+      return qualityMarks['1440'];
+    } else if (height >= 1080) {
+      return qualityMarks['1080'];
+    } else if (height >= 720) {
+      return qualityMarks['720'];
+    }
+    return '';
+  }
 
   /** @private */
   updateResolutionSelection_() {
@@ -207,6 +307,14 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       }
       button.appendChild(span);
 
+      const mark = this.getQualityMark_(track);
+      if (mark !== '') {
+        const markEl = shaka.util.Dom.createHTMLElement('sup');
+        markEl.classList.add('shaka-quality-mark');
+        markEl.textContent = mark;
+        button.appendChild(markEl);
+      }
+
       if (!abrEnabled && track == selectedTrack) {
         // If abr is disabled, mark the selected track's resolution.
         button.ariaSelected = 'true';
@@ -228,7 +336,6 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     /** @private {!HTMLElement}*/
     this.abrOnSpan_ = shaka.util.Dom.createHTMLElement('span');
-    this.abrOnSpan_.classList.add('shaka-auto-span');
     this.abrOnSpan_.textContent =
         this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
     autoButton.appendChild(this.abrOnSpan_);
@@ -253,7 +360,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     this.updateLocalizedStrings_();
 
-    shaka.ui.Utils.setDisplay(this.button, tracks.length > 1);
+    shaka.ui.Utils.setDisplay(this.button, tracks.length > 0);
   }
 
 
@@ -272,9 +379,6 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       height = Math.round(trackWidth * 9 / 16);
     }
     let text = height + 'p';
-    if (height == 2160) {
-      text = '4K';
-    }
     const frameRates = new Set();
     for (const item of tracks) {
       if (item.frameRate) {
@@ -288,10 +392,10 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       }
     }
     if (track.hdr == 'PQ' || track.hdr == 'HLG') {
-      text += ' (HDR)';
+      text += ' HDR';
     }
     if (track.videoLayout == 'CH-STEREO') {
-      text += ' (3D)';
+      text += ' 3D';
     }
     const hasDuplicateResolution = tracks.some((otherTrack) => {
       return otherTrack != track && otherTrack.height == track.height;
@@ -320,7 +424,14 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           }
           return name ? ' ' + name : name;
         };
-        text += getVideoCodecName(track.videoCodec);
+        const hasDuplicateCodec = tracks.some((otherTrack) => {
+          return otherTrack != track && otherTrack.height == track.height &&
+              getVideoCodecName(otherTrack.videoCodec) !=
+              getVideoCodecName(track.videoCodec);
+        });
+        if (hasDuplicateCodec) {
+          text += getVideoCodecName(track.videoCodec);
+        }
       }
     }
     return text;

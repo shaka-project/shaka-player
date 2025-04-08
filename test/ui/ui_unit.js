@@ -961,7 +961,7 @@ describe('UI', () => {
     const videos = container.getElementsByTagName('video');
     expect(videos.length).not.toBe(0);
 
-    UiUtils.confirmElementFound(container, 'shaka-spinner-svg');
+    UiUtils.confirmElementFound(container, 'shaka-spinner');
     UiUtils.confirmElementFound(container, 'shaka-overflow-menu');
     UiUtils.confirmElementFound(container, 'shaka-controls-button-panel');
   }

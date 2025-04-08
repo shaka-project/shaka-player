@@ -220,7 +220,7 @@ describe('MediaSourceEngine', () => {
         'requiresEC3InitSegments').and.returnValue(false);
 
     fakeEncryptionSpy = spyOn(shaka.media.ContentWorkarounds, 'fakeEncryption')
-        .and.callFake((data) => data + 100);
+        .and.callFake((stream, data) => data + 100);
 
     // MediaSourceEngine uses video to:
     //  - set src attribute
@@ -251,6 +251,8 @@ describe('MediaSourceEngine', () => {
     video = /** @type {HTMLMediaElement} */(mockVideo);
     mockClosedCaptionParser = new shaka.test.FakeClosedCaptionParser();
     mockTextDisplayer = new shaka.test.FakeTextDisplayer();
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
         mockTextDisplayer,
@@ -260,12 +262,11 @@ describe('MediaSourceEngine', () => {
           onEmsg: () => {},
           onEvent: () => {},
           onManifestUpdate: () => {},
-        });
+        },
+        config);
     mediaSourceEngine.getCaptionParser = () => {
       return mockClosedCaptionParser;
     };
-    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
-    mediaSourceEngine.configure(config);
   });
 
   afterEach(() => {
@@ -326,6 +327,7 @@ describe('MediaSourceEngine', () => {
       window.ManagedMediaSource = originalManagedMediaSource;
       window.URL.revokeObjectURL = originalRevokeObjectURL;
     });
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
 
     it('creates a MediaSource object and sets video.src', () => {
       mediaSourceEngine = new shaka.media.MediaSourceEngine(
@@ -337,7 +339,8 @@ describe('MediaSourceEngine', () => {
             onEmsg: () => {},
             onEvent: () => {},
             onManifestUpdate: () => {},
-          });
+          },
+          config);
 
       expect(createMediaSourceSpy).toHaveBeenCalled();
       expect(createObjectURLSpy).toHaveBeenCalled();
@@ -352,6 +355,7 @@ describe('MediaSourceEngine', () => {
           onSourceOpenListener = callback;
         }
       });
+      const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
 
       mediaSourceEngine = new shaka.media.MediaSourceEngine(
           video,
@@ -362,7 +366,8 @@ describe('MediaSourceEngine', () => {
             onEmsg: () => {},
             onEvent: () => {},
             onManifestUpdate: () => {},
-          });
+          },
+          config);
 
       if (window.ManagedMediaSource) {
         expect(mockMediaSource.addEventListener).toHaveBeenCalledTimes(3);

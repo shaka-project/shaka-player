@@ -1,7 +1,7 @@
 #shaka-player-ui-thumbnail-container {
-  background-color: black;
-  border: 1px solid black;
-  box-shadow: 0 8px 8px 0 rgb(0, 0, 0, 50%);
+  background-color: @general-background-color-opaque;
+  border: 1px solid @general-background-color-opaque;
+  box-shadow: 0 8px 8px 0 @general-background-color;
   min-width: 150px;
   overflow: hidden;
   position: absolute;
@@ -14,26 +14,38 @@
     position: absolute;
   }
 
-  #shaka-player-ui-thumbnail-time {
-    background-color: rgb(0, 0, 0, 50%);
+  #shaka-player-ui-thumbnail-time-container {
     bottom: 0;
-    color: white;
-    font-size: 16px;
     left: 0;
     position: absolute;
     right: 0;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+
+    #shaka-player-ui-thumbnail-time {
+      background-color: @general-background-color;
+      border-radius: @general-font-size;
+      color: @general-font-color;
+      font-size: @general-font-size;
+      padding: 0 5px;
+    }
+  }
+
+  &.portrait-thumbnail {
+    min-width: 75px;
+    width: 7.5%;
   }
 }
 
 #shaka-player-ui-time-container {
-  background-color: white;
-  border: 1px solid black;
-  border-radius: 10px;
-  box-shadow: 0 8px 8px 0 rgb(0, 0, 0, 50%);
-  color: black;
+  background-color: @general-background-color;
+  border-radius: 5px;
+  color: @general-font-color;
+  display: flex;
+  font-size: @general-font-size;
+  justify-content: center;
   overflow: hidden;
-  padding: 1px 7px;
+  padding: 0 3px;
   position: absolute;
   visibility: hidden;
   z-index: 1;

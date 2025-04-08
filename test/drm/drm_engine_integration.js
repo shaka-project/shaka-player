@@ -72,6 +72,10 @@ describe('DrmEngine', () => {
 
     networkingEngine = new shaka.net.NetworkingEngine();
 
+    const defaultConfig =
+        shaka.util.PlayerConfiguration.createDefault().networking;
+    networkingEngine.configure(defaultConfig);
+
     const playerInterface = {
       netEngine: networkingEngine,
       onError: shaka.test.Util.spyFunc(onErrorSpy),
@@ -111,7 +115,8 @@ describe('DrmEngine', () => {
     const audioStream = manifest.variants[0].audio;
 
     eventManager = new shaka.util.EventManager();
-
+    const mediaSourceConfig =
+        shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
         new shaka.test.FakeTextDisplayer(),
@@ -121,10 +126,8 @@ describe('DrmEngine', () => {
           onEmsg: () => {},
           onEvent: () => {},
           onManifestUpdate: () => {},
-        });
-    const mediaSourceConfig =
-        shaka.util.PlayerConfiguration.createDefault().mediaSource;
-    mediaSourceEngine.configure(mediaSourceConfig);
+        },
+        mediaSourceConfig);
 
     const expectedObject = new Map();
     expectedObject.set(ContentType.AUDIO, audioStream);

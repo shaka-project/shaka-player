@@ -11,7 +11,7 @@ describe('Platform', () => {
   const originalPlatform = navigator.platform;
   const originalMaxTouchPoints = navigator.maxTouchPoints;
 
-  /* eslint-disable max-len */
+  /* eslint-disable @stylistic/max-len */
   const macSafari = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15';
   const ipadSafari = 'Mozilla/5.0 (iPad; CPU OS 18_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Mobile/15E148 Safari/604.1';
   const iosChrome = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1';
@@ -30,7 +30,13 @@ describe('Platform', () => {
 
   // cspell: disable-next-line
   const vizio = 'Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36 CrKey/1.0.999999 VIZIO SmartCast(Conjure/MTKF-5.1.516.1 FW/0.6.11.1-2 Model/V50C6-J09)';
-  /* eslint-enable max-len */
+  // cspell: disable-next-line
+  const chromecastBuiltinOrOlder = 'Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.225 Safari/537.36 CrKey/1.56.500000 DeviceType/Chromecast';
+  // cspell: disable-next-line
+  const chromecastFuchsia = 'Mozilla/5.0 (Fuchsia) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 CrKey/1.56.500000';
+  // cspell: disable-next-line
+  const chromecastAndroid = 'Mozilla/5.0 (Linux; Android 12; Build/STTL.240206.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.0 Safari/537.36 CrKey/1.56.500000 DeviceType/AndroidTV';
+  /* eslint-enable @stylistic/max-len */
 
   afterEach(() => {
     setUserAgent(originalUserAgent);
@@ -217,6 +223,33 @@ describe('Platform', () => {
     setUserAgent(vizio);
     expect(shaka.util.Platform.isVizio()).toBe(true);
     expect(shaka.util.Platform.isChromecast()).toBe(false);
+  });
+
+  it('checks is Chromecast Fuchsia', () => {
+    setUserAgent(chromecastFuchsia);
+    setUserAgentData(null);
+    expect(shaka.util.Platform.isVizio()).toBe(false);
+    expect(shaka.util.Platform.isChromecast()).toBe(true);
+    expect(shaka.util.Platform.isAndroidCastDevice()).toBe(false);
+    expect(shaka.util.Platform.isFuchsia()).toBe(true);
+  });
+
+  it('checks is Chromecast Android', () => {
+    setUserAgent(chromecastAndroid);
+    setUserAgentData(null);
+    expect(shaka.util.Platform.isVizio()).toBe(false);
+    expect(shaka.util.Platform.isChromecast()).toBe(true);
+    expect(shaka.util.Platform.isAndroidCastDevice()).toBe(true);
+    expect(shaka.util.Platform.isFuchsia()).toBe(false);
+  });
+
+  it('checks is Chromecast', () => {
+    setUserAgent(chromecastBuiltinOrOlder);
+    setUserAgentData(null);
+    expect(shaka.util.Platform.isVizio()).toBe(false);
+    expect(shaka.util.Platform.isChromecast()).toBe(true);
+    expect(shaka.util.Platform.isAndroidCastDevice()).toBe(false);
+    expect(shaka.util.Platform.isFuchsia()).toBe(false);
   });
 
   /** @param {string} userAgent */

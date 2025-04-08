@@ -242,7 +242,7 @@ shakaAssets.UplynkRequestFilter = (type, request) => {
 // End custom callbacks }}}
 
 
-/* eslint-disable max-len */
+/* eslint-disable @stylistic/max-len */
 /** @const {!Array<!ShakaDemoAssetInfo>} */
 shakaAssets.testAssets = [
   // Shaka assets {{{
@@ -1487,7 +1487,7 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'Super Speedway Trailer (MSS - Clear)',
       /* iconUri= */ 'https://reference.dashif.org/dash.js/latest/samples/lib/img/mss-1.jpg',
-      /* manifestUri= */ 'https://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest',
+      /* manifestUri= */ 'https://test.playready.microsoft.com/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest',
       /* source= */ shakaAssets.Source.MICROSOFT)
       .addFeature(shakaAssets.Feature.MSS)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
@@ -2078,4 +2078,4 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE),
   // }}}
 ];
-/* eslint-enable max-len */
+/* eslint-enable @stylistic/max-len */

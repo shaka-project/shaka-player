@@ -12,8 +12,7 @@ goog.require('goog.asserts');
 goog.require('shaka.ads.Utils');
 goog.require('shaka.cast.CastProxy');
 goog.require('shaka.log');
-goog.require('shaka.ui.AdCounter');
-goog.require('shaka.ui.AdPosition');
+goog.require('shaka.ui.AdInfo');
 goog.require('shaka.ui.BigPlayButton');
 goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.HiddenFastForwardButton');
@@ -125,6 +124,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      */
     this.fadeControlsTimer_ = new shaka.util.Timer(() => {
       this.controlsContainer_.removeAttribute('shown');
+      const shakaTextContainer = this.videoContainer_.getElementsByClassName(
+          'shaka-text-container')[0];
+      if (shakaTextContainer) {
+        shakaTextContainer.style.bottom = '0%';
+      }
+
 
       if (this.contextMenu_) {
         this.contextMenu_.closeMenu();
@@ -134,7 +139,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // seconds in case a user immediately initiates another mouse move to
       // interact with the menus. If that didn't happen, go ahead and hide
       // the menus.
-      this.hideSettingsMenusTimer_.tickAfter(/* seconds= */ 2);
+      this.hideSettingsMenusTimer_.tickAfter(
+          /* seconds= */ this.config_.closeMenusDelay);
     });
 
     /**
@@ -405,6 +411,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       const cb = (event) => event.stopPropagation();
       this.eventManager_.listen(element, 'click', cb);
       this.eventManager_.listen(element, 'dblclick', cb);
+      if (navigator.maxTouchPoints > 0) {
+        const touchCb = (event) => {
+          if (!this.isOpaque()) {
+            return;
+          }
+          event.stopPropagation();
+        };
+        this.eventManager_.listen(element, 'touchend', touchCb);
+      }
     }
   }
 
@@ -568,6 +583,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   setSeeking(seeking) {
     this.isSeeking_ = seeking;
+    if (seeking) {
+      this.mouseStillTimer_.stop();
+    } else {
+      this.mouseStillTimer_.tickAfter(/* seconds= */ 3);
+    }
   }
 
   /**
@@ -951,8 +971,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.menus_.push(...Array.from(
         this.videoContainer_.getElementsByClassName('shaka-overflow-menu')));
 
-    this.addSeekBar_();
-
     this.showOnHoverControls_ = Array.from(
         this.videoContainer_.getElementsByClassName(
             'shaka-show-controls-on-mouse-over'));
@@ -974,7 +992,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(this.controlsContainer_, 'click', () => {
-      this.onContainerClick_();
+      this.onContainerClick();
     });
 
     this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
@@ -1023,12 +1041,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     shaka.ui.Utils.setDisplay(this.adPanel_, showAdPanel);
     this.bottomControls_.appendChild(this.adPanel_);
 
-    const adPosition = new shaka.ui.AdPosition(this.adPanel_, this);
-    this.elements_.push(adPosition);
-
-    const adCounter = new shaka.ui.AdCounter(this.adPanel_, this);
-    this.elements_.push(adCounter);
-
     const skipButton = new shaka.ui.SkipAdButton(this.adPanel_, this);
     this.elements_.push(skipButton);
   }
@@ -1044,28 +1056,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     spinner.classList.add('shaka-spinner');
     this.spinnerContainer_.appendChild(spinner);
 
-    // Svg elements have to be created with the svg xml namespace.
-    const xmlns = 'http://www.w3.org/2000/svg';
-
-    const svg =
-      /** @type {!HTMLElement} */(document.createElementNS(xmlns, 'svg'));
-    svg.classList.add('shaka-spinner-svg');
-    svg.setAttribute('viewBox', '0 0 30 30');
-    spinner.appendChild(svg);
-
-    // These coordinates are relative to the SVG viewBox above.  This is
-    // distinct from the actual display size in the page, since the "S" is for
-    // "Scalable." The radius of 14.5 is so that the edges of the 1-px-wide
-    // stroke will touch the edges of the viewBox.
-    const spinnerCircle = document.createElementNS(xmlns, 'circle');
-    spinnerCircle.classList.add('shaka-spinner-path');
-    spinnerCircle.setAttribute('cx', '15');
-    spinnerCircle.setAttribute('cy', '15');
-    spinnerCircle.setAttribute('r', '14.5');
-    spinnerCircle.setAttribute('fill', 'none');
-    spinnerCircle.setAttribute('stroke-width', '1');
-    spinnerCircle.setAttribute('stroke-miterlimit', '10');
-    svg.appendChild(spinnerCircle);
+    const str = `<svg focusable="false" stroke="currentColor"
+         viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg"
+         width="50px" height="50px" class="q-spinner text-grey-9">
+      <g transform="translate(1 1)" stroke-width="6" fill="none"
+        fill-rule="evenodd">
+        <circle stroke-opacity=".5" cx="18" cy="18" r="16"></circle>
+        <path d="M34 18c0-9.94-8.06-16-16-16">
+          <animateTransform attributeName="transform" type="rotate"
+            from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite">
+          </animateTransform>
+        </path>
+      </g>
+    </svg>`;
+    spinner.insertAdjacentHTML('beforeend', str);
   }
 
   /**
@@ -1126,6 +1130,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.addAdControls_();
 
+    this.addSeekBar_();
+
     /** @private {!HTMLElement} */
     this.controlsButtonPanel_ = shaka.util.Dom.createHTMLElement('div');
     this.controlsButtonPanel_.classList.add('shaka-controls-button-panel');
@@ -1143,6 +1149,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
             shaka.ui.ControlsPanel.elementNamesToFactories_.get(name);
         const element = factory.create(this.controlsButtonPanel_, this);
         this.elements_.push(element);
+        if (name == 'time_and_duration') {
+          const adInfo = new shaka.ui.AdInfo(this.controlsButtonPanel_, this);
+          this.elements_.push(adInfo);
+        }
       } else {
         shaka.log.alwaysWarn('Unrecognized control panel element requested:',
             name);
@@ -1197,7 +1207,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.clientAdContainer_.classList.add('shaka-client-side-ad-container');
     shaka.ui.Utils.setDisplay(this.clientAdContainer_, false);
     this.eventManager_.listen(this.clientAdContainer_, 'click', () => {
-      this.onContainerClick_();
+      this.onContainerClick();
     });
     this.videoContainer_.appendChild(this.clientAdContainer_);
   }
@@ -1643,6 +1653,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.updateTimeAndSeekRange_();
 
       this.controlsContainer_.setAttribute('shown', 'true');
+      const shakaTextContainer = this.videoContainer_.getElementsByClassName(
+          'shaka-text-container')[0];
+      if (shakaTextContainer) {
+        shakaTextContainer.style.bottom =
+            this.bottomControls_.clientHeight + 'px';
+      }
       this.fadeControlsTimer_.stop();
     } else {
       this.fadeControlsTimer_.tickAfter(/* seconds= */ this.config_.fadeDelay);
@@ -1662,7 +1678,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.isOpaque()) {
       this.lastTouchEventTime_ = Date.now();
       // The controls are showing.
-      // Let this event continue and become a click.
+      this.onContainerClick(/* fromTouchEvent= */ true);
+      // Stop this event from becoming a click event.
+      event.cancelable && event.preventDefault();
     } else {
       // The controls are hidden, so show them.
       this.onMouseMove_(event);
@@ -1671,8 +1689,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
   }
 
-  /** @private */
-  onContainerClick_() {
+  /**
+   * Manage the container click.
+   * @param {boolean=} fromTouchEvent
+   */
+  onContainerClick(fromTouchEvent = false) {
     if (!this.enabled_ || this.isPlayingVR()) {
       return;
     }
@@ -1681,6 +1702,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.hideSettingsMenusTimer_.tickNow();
     } else if (this.config_.singleClickForPlayAndPause) {
       this.playPausePresentation();
+    } else if (fromTouchEvent && this.isOpaque()) {
+      this.hideUI();
     }
   }
 

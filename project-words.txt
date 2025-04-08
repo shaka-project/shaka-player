@@ -34,6 +34,7 @@ manifestparsed
 manifestupdated
 mediaqualitychanged
 mediasourcerecovered
+metadataadded
 mozfullscreenchange
 mozfullscreenerror
 nativecontrols
@@ -423,6 +424,7 @@ eyex
 eyey
 eyez
 fovy
+halfequirectangular
 hequ
 hfov
 highp

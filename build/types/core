@@ -11,6 +11,7 @@
 
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
++../../lib/debug/running_in_lab.js
 
 +../../lib/dependencies/all.js
 
@@ -28,7 +29,6 @@
 +../../lib/media/buffering_observer.js
 +../../lib/media/closed_caption_parser.js
 +../../lib/media/content_workarounds.js
-+../../lib/media/example_based_criteria.js
 +../../lib/media/gap_jumping_controller.js
 +../../lib/media/manifest_filterer.js
 +../../lib/media/manifest_parser.js
@@ -102,6 +102,7 @@
 +../../lib/util/media_ready_state_utils.js
 +../../lib/util/mime_utils.js
 +../../lib/util/mp4_box_parsers.js
++../../lib/util/mp4_generator.js
 +../../lib/util/mp4_parser.js
 +../../lib/util/multi_map.js
 +../../lib/util/mutex.js

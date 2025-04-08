@@ -106,11 +106,17 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.thumbnailImage_.draggable = false;
 
     /** @private {!HTMLElement} */
+    this.thumbnailTimeContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.thumbnailTimeContainer_.id =
+        'shaka-player-ui-thumbnail-time-container';
+
+    /** @private {!HTMLElement} */
     this.thumbnailTime_ = shaka.util.Dom.createHTMLElement('div');
     this.thumbnailTime_.id = 'shaka-player-ui-thumbnail-time';
+    this.thumbnailTimeContainer_.appendChild(this.thumbnailTime_);
 
     this.thumbnailContainer_.appendChild(this.thumbnailImage_);
-    this.thumbnailContainer_.appendChild(this.thumbnailTime_);
+    this.thumbnailContainer_.appendChild(this.thumbnailTimeContainer_);
     this.container.appendChild(this.thumbnailContainer_);
 
     this.timeContainer_ = shaka.util.Dom.createHTMLElement('div');
@@ -544,12 +550,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const seekRange = this.player.seekRange();
     const playerValue = Math.max(Math.ceil(seekRange.start),
         Math.min(Math.floor(seekRange.end), value));
-    const thumbnail =
-        await this.player.getThumbnails(/* trackId= */ null, playerValue);
-    if (!thumbnail || !thumbnail.uris.length) {
-      this.hideThumbnail_();
-      return;
-    }
     if (this.player.isLive()) {
       const totalSeconds = seekRange.end - value;
       if (totalSeconds < 1) {
@@ -561,6 +561,17 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       }
     } else {
       this.thumbnailTime_.textContent = this.timeFormatter_(value);
+    }
+    const thumbnail =
+        await this.player.getThumbnails(/* trackId= */ null, playerValue);
+    if (!thumbnail || !thumbnail.uris.length) {
+      this.hideThumbnail_();
+      return;
+    }
+    if (thumbnail.width < thumbnail.height) {
+      this.thumbnailContainer_.classList.add('portrait-thumbnail');
+    } else {
+      this.thumbnailContainer_.classList.remove('portrait-thumbnail');
     }
     const offsetTop = -10;
     const width = this.thumbnailContainer_.clientWidth;
@@ -664,7 +675,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    */
   hideThumbnail_() {
     this.thumbnailContainer_.style.visibility = 'hidden';
-    this.thumbnailTime_.textContent = '';
   }
 
 

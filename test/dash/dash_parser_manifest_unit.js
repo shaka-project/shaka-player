@@ -1150,7 +1150,7 @@ describe('DashParser Manifest', () => {
     }));
   });
 
-  it('multiple trick-mode tracks with multiple AdaptationSet elements', async () => { // eslint-disable-line max-len
+  it('multiple trick-mode tracks with multiple AdaptationSet elements', async () => { // eslint-disable-line @stylistic/max-len
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
@@ -2463,7 +2463,7 @@ describe('DashParser Manifest', () => {
       '      <SegmentTemplate media="$Number$.jpg" ',
       '        duration="2" startNumber="1"/>',
       '      <Representation id="thumbnails" width="1024" height="1152">',
-      `        <EssentialProperty schemeIdUri="${thumbnailScheme}" value="10x20"/>`, // eslint-disable-line max-len
+      `        <EssentialProperty schemeIdUri="${thumbnailScheme}" value="10x20"/>`, // eslint-disable-line @stylistic/max-len
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
@@ -2499,7 +2499,7 @@ describe('DashParser Manifest', () => {
       '      <SegmentTemplate media="$Number$.jpg" ',
       '        duration="2" startNumber="1"/>',
       '      <Representation id="thumbnails" width="1024" height="1152">',
-      `        <EssentialProperty schemeIdUri="${thumbnailScheme}" value="10x20"/>`, // eslint-disable-line max-len
+      `        <EssentialProperty schemeIdUri="${thumbnailScheme}" value="10x20"/>`, // eslint-disable-line @stylistic/max-len
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
@@ -2539,10 +2539,10 @@ describe('DashParser Manifest', () => {
       '      <SegmentTemplate media="$Number$.jpg" ',
       '        duration="2" startNumber="1"/>',
       '      <Representation id="thumbnails" width="1024" height="1152">',
-      `        <EssentialProperty schemeIdUri="${thumbnailScheme}" value="10x20"/>`, // eslint-disable-line max-len
+      `        <EssentialProperty schemeIdUri="${thumbnailScheme}" value="10x20"/>`, // eslint-disable-line @stylistic/max-len
       '      </Representation>',
       '      <Representation id="thumbnails" width="2048" height="1152">',
-      `        <EssentialProperty schemeIdUri="${thumbnailScheme}" value="20x20"/>`, // eslint-disable-line max-len
+      `        <EssentialProperty schemeIdUri="${thumbnailScheme}" value="20x20"/>`, // eslint-disable-line @stylistic/max-len
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
@@ -2806,7 +2806,7 @@ describe('DashParser Manifest', () => {
     expect(manifest.nextUrl).toBe('https://nextUrl');
   });
 
-  it('parses urn:mpeg:dash:ssr:2023', async () => { // eslint-disable-line max-len
+  it('parses urn:mpeg:dash:ssr:2023', async () => { // eslint-disable-line @stylistic/max-len
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
@@ -3646,7 +3646,7 @@ describe('DashParser Manifest', () => {
     });
   });
 
-  it('mixing SegmentTemplate-SegmentTimeline with SegmentTemplate-numbering', async () => { // eslint-disable-line max-len
+  it('mixing SegmentTemplate-SegmentTimeline with SegmentTemplate-numbering', async () => { // eslint-disable-line @stylistic/max-len
     const manifestText = [
       '<MPD type="static">',
       '  <Period id="1" duration="PT2S">',
@@ -3679,7 +3679,7 @@ describe('DashParser Manifest', () => {
     expect(timeline.getSeekRangeEnd()).toBe(32);
   });
 
-  it('mixing SegmentTemplate-numbering with SegmentTemplate-SegmentTimeline', async () => { // eslint-disable-line max-len
+  it('mixing SegmentTemplate-numbering with SegmentTemplate-SegmentTimeline', async () => { // eslint-disable-line @stylistic/max-len
     const manifestText = [
       '<MPD type="static">',
       '  <Period id="4" duration="PT30S">',

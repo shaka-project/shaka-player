@@ -119,15 +119,6 @@ shaka.ui.LanguageUtils = class {
       return name ? ' ' + name : name;
     };
 
-    /** @type {!Map<string, !Set<string>>} */
-    const rolesByLanguage = new Map();
-    for (const track of tracks) {
-      if (!rolesByLanguage.has(track.language)) {
-        rolesByLanguage.set(track.language, new Set());
-      }
-      rolesByLanguage.get(track.language).add(getRolesString(track));
-    }
-
     // 5. Add new buttons
     /** @type {!Set<string>} */
     const combinationsMade = new Set();
@@ -221,9 +212,9 @@ shaka.ui.LanguageUtils = class {
 
 
   /**
-   * @param {!Array<shaka.extern.Track>} tracks
+   * @param {!Array<shaka.extern.TextTrack>} tracks
    * @param {!HTMLElement} langMenu
-   * @param {function(!shaka.extern.Track)} onTrackSelected
+   * @param {function(!shaka.extern.TextTrack)} onTrackSelected
    * @param {boolean} updateChosen
    * @param {!HTMLElement} currentSelectionElement
    * @param {shaka.ui.Localization} localization
@@ -266,15 +257,6 @@ shaka.ui.LanguageUtils = class {
       }
       return keys.join(': ');
     };
-
-    /** @type {!Map<string, !Set<string>>} */
-    const rolesByLanguage = new Map();
-    for (const track of tracks) {
-      if (!rolesByLanguage.has(track.language)) {
-        rolesByLanguage.set(track.language, new Set());
-      }
-      rolesByLanguage.get(track.language).add(getRolesString(track));
-    }
 
     // 5. Add new buttons
     /** @type {!Set<string>} */

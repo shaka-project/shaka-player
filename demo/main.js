@@ -385,8 +385,6 @@ shakaDemo.Main = class {
           return element != 'rewind' && element != 'fast_forward';
         });
     if (this.trickPlayControlsEnabled_) {
-      // Trick mode controls don't have a seek bar.
-      uiConfig.addSeekBar = false;
       // Replace the position the play_pause button was at with a full suite of
       // trick play controls, including rewind and fast-forward.
       const index = uiConfig.controlPanelElements.indexOf('play_pause');
@@ -1426,6 +1424,48 @@ shakaDemo.Main = class {
         ui.configure(uiConfig);
       }
 
+      if (asset.hasAds()) {
+        // The player internally, if another stream is loaded, calls
+        // adManager.onAssetUnload and this would prevent the initial preloading
+        // of the ad, so we unload the player first to prevent the player
+        // from being unloaded the new ad.
+        const loadMode = this.player_.getLoadMode();
+        if (loadMode == shaka.Player.LoadMode.MEDIA_SOURCE ||
+            loadMode == shaka.Player.LoadMode.SRC_EQUALS) {
+          await this.player_.unload();
+        }
+      }
+
+      // If the asset has an ad tag attached to it, load the ads
+      const adManager = this.player_.getAdManager();
+      if (adManager && asset.adTagUri) {
+        const adTagUri = asset.adTagUri + Date.now();
+        if (asset.useIMA) {
+          try {
+            // If IMA is blocked by an AdBlocker, init() will throw.
+            // If that happens, just proceed to load.
+            goog.asserts.assert(
+                this.video_ != null, 'this.video should exist!');
+            adManager.initClientSide(
+                this.controls_.getClientSideAdContainer(), this.video_,
+                /** adsRenderingSettings= */ null);
+            const adRequest = new google.ima.AdsRequest();
+            adRequest.adTagUrl = adTagUri;
+            adManager.requestClientSideAds(adRequest);
+          } catch (error) {
+            console.log(error);
+            console.warn('Ads code has been prevented from running. ' +
+              'Proceeding without ads.');
+          }
+        } else {
+          try {
+            await adManager.addAdUrlInterstitial(adTagUri);
+          } catch (error) {
+            console.log(error);
+          }
+        }
+      }
+
       // Finally, the asset can be loaded.
       if (asset.preloadManager) {
         const preloadManager = asset.preloadManager;
@@ -1472,29 +1512,6 @@ shakaDemo.Main = class {
           this.player_.addChaptersTrack(
               extraChapter.uri, extraChapter.language);
         }
-      }
-
-      // If the asset has an ad tag attached to it, load the ads
-      const adManager = this.player_.getAdManager();
-      if (adManager && asset.adTagUri && asset.useIMA) {
-        try {
-          // If IMA is blocked by an AdBlocker, init() will throw.
-          // If that happens, just proceed to load.
-          goog.asserts.assert(this.video_ != null, 'this.video should exist!');
-          adManager.initClientSide(
-              this.controls_.getClientSideAdContainer(), this.video_,
-              /** adsRenderingSettings= */ null);
-          const adRequest = new google.ima.AdsRequest();
-          adRequest.adTagUrl = asset.adTagUri;
-          adManager.requestClientSideAds(adRequest);
-        } catch (error) {
-          console.log(error);
-          console.warn('Ads code has been prevented from running. ' +
-            'Proceeding without ads.');
-        }
-      }
-      if (adManager && asset.adTagUri && !asset.useIMA) {
-        adManager.addAdUrlInterstitial(asset.adTagUri);
       }
 
       // Set media session title, but only if the browser supports that API.
