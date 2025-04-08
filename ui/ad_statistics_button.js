@@ -201,7 +201,6 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
     closeElement.classList.add('shaka-no-propagation');
     closeElement.classList.add('shaka-statistics-close');
     const icon = shaka.util.Dom.createHTMLElement('i');
-    icon.classList.add('q-icon');
     icon.classList.add('material-icons');
     icon.classList.add('notranslate');
     icon.classList.add('material-icons-round');
