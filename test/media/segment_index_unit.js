@@ -1089,6 +1089,53 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
 
       expect(Array.from(metaIndex)).toEqual(oldRefs.concat(inputRefs2));
     });
+
+    it('can iterate through the indexes', () => {
+      metaIndex.appendSegmentIndex(index0);
+      metaIndex.appendSegmentIndex(index1);
+      metaIndex.appendSegmentIndex(index2);
+
+      const loopedIndexes = [];
+      metaIndex.forEachIndex((index) => {
+        loopedIndexes.push(index);
+      });
+
+      expect(loopedIndexes).toEqual([index0, index1, index2]);
+    });
+
+    it('can get continuity timeline for a given time for TimelineSegmentIndex',
+        () => {
+          const release0 = spyOn(index0, 'continuityTimeline')
+              .and.returnValue(0);
+          const release1 = spyOn(index1, 'continuityTimeline')
+              .and.returnValue(1);
+          const release2 = spyOn(index2, 'continuityTimeline')
+              .and.returnValue(0);
+          metaIndex.appendSegmentIndex(index0);
+          metaIndex.appendSegmentIndex(index1);
+          metaIndex.appendSegmentIndex(index2);
+
+          expect(metaIndex.getTimelineForTime(1)).toBe(0);
+          expect(metaIndex.getTimelineForTime(29)).toBe(0);
+          expect(metaIndex.getTimelineForTime(31)).toBe(1);
+          expect(metaIndex.getTimelineForTime(61)).toBe(0);
+          expect(metaIndex.getTimelineForTime(91)).toBe(-1);
+
+          expect(release0).toHaveBeenCalled();
+          expect(release1).toHaveBeenCalled();
+          expect(release2).toHaveBeenCalled();
+        });
+
+    it('return -1 for continuity timeline if not TimelineSegmentIndex', () => {
+      metaIndex.appendSegmentIndex(index0);
+      metaIndex.appendSegmentIndex(index1);
+      metaIndex.appendSegmentIndex(index2);
+
+      expect(metaIndex.getTimelineForTime(1)).toBe(-1);
+      expect(metaIndex.getTimelineForTime(29)).toBe(-1);
+      expect(metaIndex.getTimelineForTime(31)).toBe(-1);
+      expect(metaIndex.getTimelineForTime(61)).toBe(-1);
+    });
   });
 
   /**

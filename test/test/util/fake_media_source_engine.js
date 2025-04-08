@@ -325,9 +325,10 @@ shaka.test.FakeMediaSourceEngine = class {
    * @param {string} type
    * @param {number} start
    * @param {number} end
+   * @param {Array<number>=} continuityTimelines
    * @return {!Promise}
    */
-  removeImpl(type, start, end) {
+  removeImpl(type, start, end, continuityTimelines) {
     if (!this.segments[type]) {
       throw new Error('unexpected type');
     }

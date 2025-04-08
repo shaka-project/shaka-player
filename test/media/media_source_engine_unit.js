@@ -856,6 +856,59 @@ describe('MediaSourceEngine', () => {
       expect(mockTextEngine.storeAndAppendClosedCaptions).toHaveBeenCalled();
     });
 
+    it('passed continuity timeline to caption parser', async () => {
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+
+      mockClosedCaptionParser.parseFromSpy.and.callFake((data) => {
+        return ['foo', 'bar'];
+      });
+
+      await mediaSourceEngine.init(initObject, false);
+
+      // Initialize the closed caption parser.
+      let appendInit = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ true, /* seeked= */ false,
+          /* adaptation= */ false, /* isChunkedData= */ false,
+          /* fromSplit= */ false, /* continuityTimeline= */ 0);
+      // In MediaSourceEngine, appendBuffer() is async and Promise-based, but
+      // at the browser level, it's event-based.
+      // MediaSourceEngine waits for the 'updateend' event from the
+      // SourceBuffer, and uses that to resolve the appendBuffer Promise.
+      // Here, we must trigger the event on the fake/mock SourceBuffer before
+      // waiting on the appendBuffer Promise.
+      videoSourceBuffer.updateend();
+      await appendInit;
+
+      expect(mockClosedCaptionParser.initSpy)
+          .toHaveBeenCalledWith(buffer, false, 0);
+
+      // new init segment
+      appendInit = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ true, /* seeked= */ false,
+          /* adaptation= */ false, /* isChunkedData= */ false,
+          /* fromSplit= */ false, /* continuityTimeline= */ 1);
+      videoSourceBuffer.updateend();
+      await appendInit;
+
+      expect(mockClosedCaptionParser.initSpy)
+          .toHaveBeenCalledWith(buffer, false, 1);
+
+      // new init segment
+      appendInit = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ true, /* seeked= */ false,
+          /* adaptation= */ true, /* isChunkedData= */ false,
+          /* fromSplit= */ false, /* continuityTimeline= */ 1);
+      videoSourceBuffer.updateend();
+      await appendInit;
+
+      expect(mockClosedCaptionParser.initSpy)
+          .toHaveBeenCalledWith(buffer, true, 1);
+    });
+
     it('sets timestampOffset on adaptations in sequence mode', async () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeVideoStream);
@@ -897,6 +950,40 @@ describe('MediaSourceEngine', () => {
 
       await p;
       expect(audioSourceBuffer.remove).toHaveBeenCalledWith(1, 5);
+    });
+
+    it('caption parser is not updated on audio remove', async () => {
+      // init caption parser
+      const appendInit = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ true, /* seeked= */ false,
+          /* adaptation= */ false, /* isChunkedData= */ false,
+          /* fromSplit= */ false, /* continuityTimeline= */ 0);
+      videoSourceBuffer.updateend();
+      await appendInit;
+
+      const p = mediaSourceEngine.remove(ContentType.AUDIO, 1, 5, [0]);
+      audioSourceBuffer.updateend();
+
+      await p;
+      expect(mockClosedCaptionParser.removeSpy).not.toHaveBeenCalledWith([0]);
+    });
+
+    it('caption parser is updated on video remove', async () => {
+      // init caption parser
+      const appendInit = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ true, /* seeked= */ false,
+          /* adaptation= */ false, /* isChunkedData= */ false,
+          /* fromSplit= */ false, /* continuityTimeline= */ 0);
+      videoSourceBuffer.updateend();
+      await appendInit;
+
+      const p = mediaSourceEngine.remove(ContentType.VIDEO, 1, 5, [0]);
+      videoSourceBuffer.updateend();
+
+      await p;
+      expect(mockClosedCaptionParser.removeSpy).toHaveBeenCalledWith([0]);
     });
 
     it('rejects promise when operation throws', async () => {
