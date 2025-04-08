@@ -285,8 +285,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
         if (typeof value == 'string') {
           shaka.ui.Utils.setDisplay(element.parentElement, value != '');
         } else {
-          shaka.ui.Utils.setDisplay(element.parentElement,
-              !isNaN(this.currentStats_[name]));
+          shaka.ui.Utils.setDisplay(element.parentElement, !isNaN(value));
         }
       }
     }
