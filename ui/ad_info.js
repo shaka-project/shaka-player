@@ -34,6 +34,7 @@ shaka.ui.AdInfo = class extends shaka.ui.Element {
     /** @private {!HTMLElement} */
     this.adInfo_ = shaka.util.Dom.createButton();
     this.adInfo_.classList.add('shaka-ad-info');
+    this.adInfo_.disabled = true;
     this.parent.appendChild(this.adInfo_);
 
     /**
