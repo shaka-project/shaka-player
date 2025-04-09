@@ -236,6 +236,9 @@
   overflow-x: hidden;
   overflow-y: auto;
 
+  scrollbar-color: @general-font-color @general-background-color;
+  scrollbar-width: thin;
+
   min-width: 300px;
 
   color: @general-font-color;
@@ -250,6 +253,8 @@
   z-index: 2;
   left: 15px;
   top: 15px;
+
+  max-height: calc(100% - 115px);
 
   /* Fades out with the other controls. */
   .show-when-controls-shown();
@@ -268,6 +273,9 @@
   overflow-x: hidden;
   overflow-y: auto;
 
+  scrollbar-color: @general-font-color @general-background-color;
+  scrollbar-width: thin;
+
   min-width: 150px;
 
   color: @general-font-color;
@@ -282,6 +290,8 @@
   z-index: 2;
   right: 15px;
   top: 15px;
+
+  max-height: calc(100% - 115px);
 
   /* Fades out with the other controls. */
   .show-when-controls-shown();
