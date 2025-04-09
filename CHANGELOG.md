@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.14.7](https://github.com/shaka-project/shaka-player/compare/v4.14.6...v4.14.7) (2025-04-09)
+
+
+### Bug Fixes
+
+* Add vp9 to normalized codec list ([#8416](https://github.com/shaka-project/shaka-player/issues/8416)) ([c77b72e](https://github.com/shaka-project/shaka-player/commit/c77b72e4df733f482819c33750e353ea10ae1e60))
+* Cancel trick play when current time catch the seek range ([#8410](https://github.com/shaka-project/shaka-player/issues/8410)) ([811a4f3](https://github.com/shaka-project/shaka-player/commit/811a4f32d6b1bf2cfb11a8aa36f41c0f07dfa386))
+* **preload:** Fix preload segments in some cases ([#8401](https://github.com/shaka-project/shaka-player/issues/8401)) ([a7fb81f](https://github.com/shaka-project/shaka-player/commit/a7fb81f083c0241f7de45cd2908a324c242820ea))
+* **UI:** Don't hide the UI when using the wheel over the UI ([#8425](https://github.com/shaka-project/shaka-player/issues/8425)) ([ead4324](https://github.com/shaka-project/shaka-player/commit/ead4324b1cf97ed77c246350f447b5eb45fb8272))
+* **UI:** Improve layout of current time container above hovered seek bar ([#8412](https://github.com/shaka-project/shaka-player/issues/8412)) ([9690e95](https://github.com/shaka-project/shaka-player/commit/9690e9555fd2a17351133df22e9efc23c7a9a4de)), closes [#8411](https://github.com/shaka-project/shaka-player/issues/8411)
+* **UI:** Show the video codec only when there are two codecs for the same resolution ([#8407](https://github.com/shaka-project/shaka-player/issues/8407)) ([e825e14](https://github.com/shaka-project/shaka-player/commit/e825e14f6b86d56257f07fa2716ac6d298742965))
+
 ## [4.14.6](https://github.com/shaka-project/shaka-player/compare/v4.14.5...v4.14.6) (2025-04-04)
 
 
