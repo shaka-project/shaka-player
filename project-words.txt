@@ -280,6 +280,7 @@ latm
 laurl
 lcevc
 libav
+liblcevc
 linears
 loas
 lpcm

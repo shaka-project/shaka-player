@@ -211,6 +211,13 @@ module.exports = (config) => {
       // codem-isoboxer module next
       'node_modules/codem-isoboxer/dist/iso_boxer.min.js',
 
+      // LCEVC decoder libraries (.wasm & .js)
+      {
+        pattern: 'node_modules/lcevc_dec.js/dist/liblcevc_dpi.wasm',
+        included: false,
+      },
+      'node_modules/lcevc_dec.js/dist/lcevc_dec.min.js',
+
       // EME encryption scheme polyfill, compiled into Shaka Player, but outside
       // of the Closure deps system, so not in shaka-player.uncompiled.js.  This
       // is specifically the compiled, minified, cross-browser build of it.  It
@@ -296,6 +303,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-ts-muxed-opus-h264/*', included: false},
       {pattern: 'test/test/assets/hls-ts-raw-aac/*', included: false},
       {pattern: 'test/test/assets/hls-ts-rollover/*', included: false},
+      {pattern: 'test/test/assets/lcevc-sei/*', included: false},
       {pattern: 'test/test/assets/mss-clear/*', included: false},
       {pattern: 'test/test/assets/mss-playready/*', included: false},
       {pattern: 'dist/shaka-player.ui.js', included: false},
