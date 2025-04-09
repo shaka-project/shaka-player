@@ -131,6 +131,18 @@ shaka.ui.Overlay = class {
 
 
   /**
+   * Detects if this is a smart tv platform, in case you want to choose a
+   * different UI configuration on smart tv devices.
+   *
+   * @return {boolean}
+   * @export
+   */
+  isSmartTV() {
+    return shaka.util.Platform.isSmartTV();
+  }
+
+
+  /**
    * @return {!shaka.extern.UIConfiguration}
    * @export
    */
@@ -268,6 +280,7 @@ shaka.ui.Overlay = class {
         'playback_rate',
         'recenter_vr',
         'toggle_stereoscopic',
+        'save_video_frame',
       ],
       statisticsList: [
         'width',
@@ -372,12 +385,38 @@ shaka.ui.Overlay = class {
       config.seekOnTaps = true;
       config.enableTooltips = false;
       config.doubleClickForFullscreen = false;
+      const filterElements = [
+        'play_pause',
+        'volume',
+      ];
       config.controlPanelElements = config.controlPanelElements.filter(
-          (name) => name != 'play_pause' && name != 'volume');
+          (name) => !filterElements.includes(name));
+      config.overflowMenuButtons = config.overflowMenuButtons.filter(
+          (name) => !filterElements.includes(name));
+      config.contextMenuElements = config.contextMenuElements.filter(
+          (name) => !filterElements.includes(name));
     }
 
-    // Set this button here to push it at the end.
-    config.overflowMenuButtons.push('save_video_frame');
+    if (this.isSmartTV()) {
+      config.addBigPlayButton = true;
+      config.singleClickForPlayAndPause = false;
+      config.enableTooltips = false;
+      config.doubleClickForFullscreen = false;
+      const filterElements = [
+        'play_pause',
+        'cast',
+        'remote',
+        'airplay',
+        'volume',
+        'save_video_frame',
+      ];
+      config.controlPanelElements = config.controlPanelElements.filter(
+          (name) => !filterElements.includes(name));
+      config.overflowMenuButtons = config.overflowMenuButtons.filter(
+          (name) => !filterElements.includes(name));
+      config.contextMenuElements = config.contextMenuElements.filter(
+          (name) => !filterElements.includes(name));
+    }
 
     return config;
   }
