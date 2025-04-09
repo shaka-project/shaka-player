@@ -1,6 +1,9 @@
 # events / html
 abrstatuschanged
 adblocker
+audiofocuspaused
+audiofocusgranted
+audiofocuslost
 audiolang
 audiotrackchange
 audiotrackchanged
