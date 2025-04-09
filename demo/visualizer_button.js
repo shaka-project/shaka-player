@@ -68,6 +68,12 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
         shakaDemoMain.setIsVisualizerActive(false);
       }
     });
+
+    this.eventManager.listen(document, 'fullscreenchange', () => {
+      this.setDisplay_(!this.controls.isFullScreenEnabled());
+    });
+
+    this.setDisplay_(!this.controls.isFullScreenEnabled());
   }
 
   /** @private */
@@ -76,6 +82,21 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
       this.icon_.textContent = 'bar_chart';
     } else {
       this.icon_.textContent = 'add_chart';
+    }
+  }
+
+
+  /**
+   * @param {boolean} display
+   * @private
+   */
+  setDisplay_(display) {
+    if (display) {
+      // Removing a non-existent class doesn't throw, so, even if
+      // the element is not hidden, this should be fine.
+      this.button_.classList.remove('shaka-hidden');
+    } else {
+      this.button_.classList.add('shaka-hidden');
     }
   }
 };
