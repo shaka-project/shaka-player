@@ -2493,7 +2493,8 @@ shaka.extern.CmsdConfiguration;
  *   enabled: boolean,
  *   dynamicPerformanceScaling: boolean,
  *   logLevel: number,
- *   drawLogo: boolean
+ *   drawLogo: boolean,
+ *   poster: boolean
  * }}
  *
  * @description
@@ -2531,6 +2532,11 @@ shaka.extern.CmsdConfiguration;
  *   unless explicitly set to true through config.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} poster
+ *   If <code>true</code>, render a poster frame before the video is started.
+ *   Defaults to true for the lib and set to true in the integration.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.LcevcConfiguration;
