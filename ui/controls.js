@@ -1265,6 +1265,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onMouseLeave_();
     });
 
+    this.eventManager_.listen(this.videoContainer_, 'wheel', (e) => {
+      this.onMouseMove_(e);
+    }, {passive: true});
+
     this.eventManager_.listen(this.castProxy_, 'caststatuschanged', () => {
       this.onCastStatusChange_();
     });
@@ -1580,6 +1584,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Only start a timeout on 'touchend' or for 'mousemove' with no touch
     // events.
     if (event.type == 'touchend' ||
+        event.type == 'wheel' ||
         event.type == 'keyup'|| !this.lastTouchEventTime_) {
       this.mouseStillTimer_.tickAfter(/* seconds= */ 3);
     }
