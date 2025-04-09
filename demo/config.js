@@ -689,6 +689,8 @@ shakaDemo.Config = class {
 
     this.addSection_('Media source', docLink)
         .addBoolInput_('Force Transmux', 'mediaSource.forceTransmux')
+        .addBoolInput_('Allow Raw format transmux',
+            'mediaSource.allowRawFormatTransmux')
         .addBoolInput_('Insert fake encryption in init segments when needed ' +
             'by the platform.', 'mediaSource.insertFakeEncryptionInInit')
         .addSelectInput_(

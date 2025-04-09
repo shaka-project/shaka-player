@@ -2132,6 +2132,7 @@ shaka.extern.NetworkingConfiguration;
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   addExtraFeaturesToSourceBuffer: function(string): string,
  *   forceTransmux: boolean,
+ *   allowRawFormatTransmux: boolean,
  *   insertFakeEncryptionInInit: boolean,
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback,
  *   dispatchAllEmsgBoxes: boolean,
@@ -2158,6 +2159,12 @@ shaka.extern.NetworkingConfiguration;
  *   not strictly necessary for the assets to be played.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} allowRawFormatTransmux
+ *   If this is <code>true</code>, we will allow transmux of raw formats
+ *   when necessary. If this is <code>false</code> we will not transmux
+ *   even in segment mode.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {boolean} insertFakeEncryptionInInit
  *   If true, will apply a work-around for non-encrypted init segments on
  *   encrypted content for some platforms.
