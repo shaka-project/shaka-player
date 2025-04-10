@@ -12,7 +12,16 @@ dictionaries:
   - python
   - project-words
 ignorePaths:
+  - /**/*.html
+  - /**/*.less
+  - /**/*.sh
+  - /**/*.svg
+  - /**/*.yaml
   - node_modules
+  - build/types
+  - build/README.md
   - dist
   - externs/*.js
+  - test/test/assets
+  - ui/locales
   - /project-words.txt
