@@ -49,12 +49,16 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     this.qualityMark.classList.add('shaka-current-quality-mark');
     this.qualityMark.style.display = 'none';
 
-    if (this.parent.parentElement) {
+    if (!Array.from(parent.classList).includes('shaka-overflow-menu')) {
+      this.overflowQualityMark = shaka.util.Dom.createHTMLElement('span');
+      this.overflowQualityMark.classList.add(
+          'shaka-overflow-playback-rate-mark');
+      this.button.appendChild(this.overflowQualityMark);
+    } else if (this.parent.parentElement) {
       const parentElement =
           shaka.util.Dom.asHTMLElement(this.parent.parentElement);
       this.overflowQualityMark = shaka.util.Dom.getElementByClassNameIfItExists(
-          'shaka-overflow-quality-mark', parentElement,
-      );
+          'shaka-overflow-quality-mark', parentElement);
     }
 
     const spanWrapper = shaka.util.Dom.createHTMLElement('span');
