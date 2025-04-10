@@ -971,6 +971,7 @@ function makeTemplateInfo(timeline) {
     'scaledPresentationTimeOffset': 0,
     'unscaledPresentationTimeOffset': 0,
     'timeline': timeline,
+    'timelineNode': null,
     'mediaTemplate': 'master_540_2997_$Number%09d$.cmfv',
     'indexTemplate': null,
     'mimeType': 'video/mp4',
