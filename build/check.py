@@ -56,17 +56,16 @@ def complete_build_files():
 def get_lint_files():
   """Returns the absolute paths to all the files to run the linter over."""
   base = shakaBuildHelpers.get_source_base()
-  get = shakaBuildHelpers.get_all_js_files
-  main_sources = (
-      get('lib') +
+  main_sources = [
+      os.path.join(base, 'lib'),
       # TODO: get third_party/closure-uri in compliance and then lint it.
       # get('third_party') +
-      get('ui') +
-      get('externs') +
-      get('test') +
-      get('demo') +
-      get('build'))
-  main_sources.remove(os.path.join(base, 'build', 'wrapper.template.js'))
+      os.path.join(base, 'ui'),
+      os.path.join(base, 'externs'),
+      os.path.join(base, 'test'),
+      os.path.join(base, 'demo'),
+      os.path.join(base, 'build'),
+  ]
   tool_sources = [
       os.path.join(base, 'eslint.config.mjs'),
       os.path.join(base, 'docs', 'jsdoc-plugin.js'),

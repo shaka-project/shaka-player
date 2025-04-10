@@ -3780,4 +3780,47 @@ describe('DashParser Manifest', () => {
     const video1 = manifest.variants[0] && manifest.variants[0].video;
     expect(video1.codecs).toBe('av01.0.04M.10.0.111.09.16.09.0');
   });
+
+  it('parses ProducerReferenceTime', async () => {
+    const manifestText = [
+      '<MPD type="static">',
+      '  <Period id="0" duration="PT2S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <ProducerReferenceTime presentationTime="52431344916"',
+      '                             wallClockTime="2025-04-09T14:53:43.797Z">',
+      '        <UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-iso:2014"/>',
+      '      </ProducerReferenceTime>',
+      '      <Representation id="2" width="640" height="480">',
+      '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4"',
+      '                         timescale="10000000">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="20000000" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    const programStartTime = 1744205180.662;
+    const expectedEvent = {
+      type: shaka.util.FakeEvent.EventName.Prft,
+      detail: {
+        wallClockTime: 1744210423797,
+        programStartDate: new Date(programStartTime * 1000),
+      },
+    };
+
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(expectedEvent));
+
+    const timeline = manifest.presentationTimeline;
+    expect(timeline.getInitialProgramDateTime()).toBe(programStartTime);
+  });
 });
