@@ -293,12 +293,19 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     if (track.videoLayout == 'CH-STEREO') {
       text += ' (3D)';
     }
+    const basicResolutionComparison = (firstTrack, secondTrack) => {
+      return firstTrack != secondTrack &&
+          firstTrack.height == secondTrack.height &&
+          firstTrack.hdr == secondTrack.hdr &&
+          Math.round(firstTrack.frameRate || 0) ==
+          Math.round(secondTrack.frameRate || 0);
+    };
     const hasDuplicateResolution = tracks.some((otherTrack) => {
-      return otherTrack != track && otherTrack.height == track.height;
+      return basicResolutionComparison(track, otherTrack);
     });
     if (hasDuplicateResolution) {
       const hasDuplicateBandwidth = tracks.some((otherTrack) => {
-        return otherTrack != track && otherTrack.height == track.height &&
+        return basicResolutionComparison(track, otherTrack) &&
             (otherTrack.videoBandwidth || otherTrack.bandwidth) ==
             (track.videoBandwidth || track.bandwidth);
       });
@@ -321,7 +328,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           return name ? ' ' + name : name;
         };
         const hasDuplicateCodec = tracks.some((otherTrack) => {
-          return otherTrack != track && otherTrack.height == track.height &&
+          return basicResolutionComparison(track, otherTrack) &&
               getVideoCodecName(otherTrack.videoCodec) !=
               getVideoCodecName(track.videoCodec);
         });
