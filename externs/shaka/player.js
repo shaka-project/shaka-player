@@ -2194,7 +2194,7 @@ shaka.extern.NetworkingConfiguration;
  *   When set indicates media source duration change can truncate buffer, hence
  *   updateend event is expected on setDuration operation if new duration is
  *   smaller than existing value.
- *   <br> 
+ *   <br>
  *   Defaults to <code>false</code>.
  * @exportDoc
  */
