@@ -2266,7 +2266,8 @@ shaka.extern.AdsConfiguration;
  *   safeMarginSwitch: number,
  *   cacheLoadThreshold: number,
  *   minTimeToSwitch: number,
- *   preferNetworkInformationBandwidth: boolean
+ *   preferNetworkInformationBandwidth: boolean,
+ *   removeLatencyFromFirstPacketTime: boolean
  * }}
  *
  * @property {boolean} enabled
@@ -2359,6 +2360,11 @@ shaka.extern.AdsConfiguration;
  *   trust the information provided by the browser.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} removeLatencyFromFirstPacketTime
+ *   If true, we remove the latency from first packet time. This time is
+ *   used to calculate the real bandwidth.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
