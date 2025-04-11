@@ -2361,7 +2361,7 @@ shaka.extern.AdsConfiguration;
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {boolean} removeLatencyFromFirstPacketTime
- *   If true, we remove the latency from first packet time. This is time is
+ *   If true, we remove the latency from first packet time. This time is
  *   used to calculate the real bandwidth.
  *   <br>
  *   Defaults to <code>true</code>.
