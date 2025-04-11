@@ -2326,7 +2326,6 @@ describe('DashParser Manifest', () => {
     // (DASH-IF IOP v4.3 6.2.5.1.)
     const scheme = cicpScheme('TransferCharacteristics');
     const sdrValues = [1, 6, 13, 14, 15];
-    const manifestPromises = [];
     for (const value of sdrValues) {
       const manifestText = [
         '<MPD minBufferTime="PT75S">',
@@ -2350,10 +2349,9 @@ describe('DashParser Manifest', () => {
 
       fakeNetEngine.setResponseText('dummy://foo', manifestText);
 
-      manifestPromises.push(parser.start('dummy://foo', playerInterface));
-    }
-    const manifests = await Promise.all(manifestPromises);
-    for (const manifest of manifests) {
+      /** @type {shaka.extern.Manifest} */
+      // eslint-disable-next-line no-await-in-loop
+      const manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest.variants.length).toBe(1);
       const stream = manifest.variants[0].video;
       expect(stream.hdr).toBe('SDR');
