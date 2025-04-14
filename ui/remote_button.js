@@ -136,8 +136,8 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
    * @private
    */
   async updateRemoteState_(force = false) {
-    if (this.controls.getCastProxy().canCast() &&
-        this.controls.isCastAllowed()) {
+    if ((this.controls.getCastProxy().canCast() &&
+        this.controls.isCastAllowed()) || !this.video.remote) {
       shaka.ui.Utils.setDisplay(this.remoteButton_, false);
       if (this.callbackId_ != -1) {
         this.video.remote.cancelWatchAvailability(this.callbackId_);
