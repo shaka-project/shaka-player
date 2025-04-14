@@ -128,7 +128,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
   /** @private */
   updateTextLanguages_() {
-    const tracks = this.player.getTextTracks();
+    const tracks = this.player.getTextTracks() || [];
 
     shaka.ui.LanguageUtils.updateTextTracks(tracks, this.menu,
         (track) => this.onTextTrackSelected_(track),
@@ -206,7 +206,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
   /** @private */
   onTracksChanged_() {
-    const hasText = this.player.getTextTracks().length > 0;
+    const tracks = this.player.getTextTracks() || [];
+    const hasText = tracks.length > 0;
     shaka.ui.Utils.setDisplay(this.button, hasText);
     this.updateTextLanguages_();
   }

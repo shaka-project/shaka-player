@@ -63,7 +63,7 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
 
   /** @private */
   onAudioTracksChanged_() {
-    const audioTracks = this.player.getAudioTracks();
+    const audioTracks = this.player.getAudioTracks() || [];
 
     shaka.ui.LanguageUtils.updateAudioTracks(audioTracks, this.menu,
         (track) => this.onAudioTrackSelected_(track),

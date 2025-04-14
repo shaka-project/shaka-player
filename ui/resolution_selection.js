@@ -112,7 +112,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
   /** @private */
   updateResolutionLabels_() {
-    const tracks = this.player.getVariantTracks();
+    const tracks = this.player.getVariantTracks() || [];
     const track = tracks.find((track) => track.active);
     if (!track) {
       if (this.overflowQualityMark) {
@@ -184,7 +184,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     // When played with src=, the variant tracks available from
     // player.getVariantTracks() represent languages, not resolutions.
     if (this.player.getLoadMode() != shaka.Player.LoadMode.SRC_EQUALS) {
-      tracks = this.player.getVariantTracks();
+      tracks = this.player.getVariantTracks() || [];
     }
 
     // If there is a selected variant track, then we filter out any tracks in
