@@ -180,12 +180,6 @@ shaka.ui.Overlay = class {
         newConfig, config, this.defaultConfig_(),
         /* overrides= */ {}, /* path= */ '');
 
-    // If a cast receiver app id has been given, add a cast button to the UI
-    if (newConfig.castReceiverAppId &&
-        !newConfig.overflowMenuButtons.includes('cast')) {
-      newConfig.overflowMenuButtons.push('cast');
-    }
-
     goog.asserts.assert(this.player_ != null, 'Should have a player!');
 
     const diff = shaka.util.ConfigUtils.getDifferenceFromConfigObjects(
