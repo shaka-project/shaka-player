@@ -67,6 +67,7 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
           shakaDemoMain.getIsVisualizerActive()) {
         shakaDemoMain.setIsVisualizerActive(false);
       }
+      this.setDisplay_(!this.castProxy_.isCasting());
     });
 
     this.eventManager.listen(document, 'fullscreenchange', () => {
