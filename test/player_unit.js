@@ -1523,6 +1523,8 @@ describe('Player', () => {
     let variantTracks;
     /** @type {!Array<shaka.extern.AudioTrack>} */
     let audioTracks;
+    /** @type {!Array<shaka.extern.VideoTrack>} */
+    let videoTracks;
     /** @type {!Array<shaka.extern.Track>} */
     let textTracks;
     /** @type {!Array<shaka.extern.Track>} */
@@ -2166,6 +2168,35 @@ describe('Player', () => {
         },
       ];
 
+      videoTracks = [
+        {
+          active: true,
+          bandwidth: 1000,
+          width: 100,
+          height: 200,
+          frameRate: 1000000 / 42000,
+          pixelAspectRatio: '59:54',
+          hdr: null,
+          colorGamut: null,
+          videoLayout: null,
+          mimeType: 'video/mp4',
+          codecs: 'avc1.4d401f',
+        },
+        {
+          active: false,
+          bandwidth: 2000,
+          width: 200,
+          height: 400,
+          frameRate: 24,
+          pixelAspectRatio: '59:54',
+          hdr: null,
+          colorGamut: null,
+          videoLayout: null,
+          mimeType: 'video/mp4',
+          codecs: 'avc1.4d401f',
+        },
+      ];
+
       textTracks = [
         {
           id: 50,
@@ -2252,6 +2283,7 @@ describe('Player', () => {
     it('returns the correct tracks', () => {
       expect(player.getVariantTracks()).toEqual(variantTracks);
       expect(player.getAudioTracks()).toEqual(audioTracks);
+      expect(player.getVideoTracks()).toEqual(videoTracks);
       expect(player.getTextTracks()).toEqual(textTracks);
       expect(player.getImageTracks()).toEqual(imageTracks);
     });
@@ -2263,6 +2295,7 @@ describe('Player', () => {
         // The player does not yet have a manifest.
         expect(player.getVariantTracks()).toEqual([]);
         expect(player.getAudioTracks()).toEqual([]);
+        expect(player.getVideoTracks()).toEqual([]);
         expect(player.getTextTracks()).toEqual([]);
         expect(player.getImageTracks()).toEqual([]);
 
@@ -2274,6 +2307,7 @@ describe('Player', () => {
 
       expect(player.getVariantTracks()).toEqual(variantTracks);
       expect(player.getAudioTracks()).toEqual(audioTracks);
+      expect(player.getVideoTracks()).toEqual(videoTracks);
       expect(player.getTextTracks()).toEqual(textTracks);
       expect(player.getImageTracks()).toEqual(imageTracks);
     });
@@ -2695,6 +2729,23 @@ describe('Player', () => {
         expect(variantChanged).not.toHaveBeenCalled();
       });
 
+      it('in selectVideoTrack', async () => {
+        // Any variant track we're not already streaming.
+        const newTrack = player.getVideoTracks().filter((t) => !t.active)[0];
+
+        // Call selectVariantTrack with a new track.  Expect an event to fire.
+        player.selectVideoTrack(newTrack);
+        await shaka.test.Util.shortDelay();
+        expect(variantChanged).toHaveBeenCalled();
+        variantChanged.calls.reset();
+
+        // Call again with the same track, and expect no event to fire, since
+        // nothing changed this time.
+        player.selectVideoTrack(newTrack);
+        await shaka.test.Util.shortDelay();
+        expect(variantChanged).not.toHaveBeenCalled();
+      });
+
       it('in selectTextLanguage', async () => {
         // The current text language.
         const currentLanguage = player.getTextTracks()
@@ -2737,7 +2788,7 @@ describe('Player', () => {
         expect(variantChanged).not.toHaveBeenCalled();
       });
 
-      it('in selectAudioLanguage', async () => {
+      it('in selectAudioTrack', async () => {
         // New audio track.
         const newAudioTrack = player.getAudioTracks().find((t) => !t.active);
         goog.asserts.assert(newAudioTrack, 'audio track must be non-null');

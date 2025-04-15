@@ -589,7 +589,7 @@ describe('UI', () => {
         await player.load(
             /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
 
-        const selectVariantTrack = spyOn(player, 'selectVariantTrack');
+        const selectVideoTrack = spyOn(player, 'selectVideoTrack');
 
         // There should be at least one explicit quality button.
         const qualityButton =
@@ -597,11 +597,11 @@ describe('UI', () => {
         expect(qualityButton).toBeDefined();
 
         // Clicking this should select a track and clear the buffer.
-        expect(selectVariantTrack).not.toHaveBeenCalled();
+        expect(selectVideoTrack).not.toHaveBeenCalled();
         qualityButton.click();
 
         // The second argument is "clearBuffer", and should be true.
-        expect(selectVariantTrack).toHaveBeenCalledWith(
+        expect(selectVideoTrack).toHaveBeenCalledWith(
             jasmine.any(Object), true);
       });
 
@@ -745,7 +745,7 @@ describe('UI', () => {
           if (elem instanceof shaka.ui.OverflowMenu) {
             for (const child of elem.children_) {
               if (child instanceof shaka.ui.ResolutionSelection) {
-                child.updateResolutionSelection_();
+                child.updateSelection_();
                 found = true;
               }
             }

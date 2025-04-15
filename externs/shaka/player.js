@@ -542,6 +542,53 @@ shaka.extern.TextTrack;
 
 /**
  * @typedef {{
+ *   active: boolean,
+ *   bandwidth: number,
+ *   width: ?number,
+ *   height: ?number,
+ *   frameRate: ?number,
+ *   pixelAspectRatio: ?string,
+ *   hdr: ?string,
+ *   colorGamut: ?string,
+ *   videoLayout: ?string,
+ *   mimeType: ?string,
+ *   codecs: ?string
+ * }}
+ *
+ * @description
+ * An object describing a video track.  This object should be treated as
+ * read-only as changing any values does not have any effect.
+ *
+ * @property {boolean} active
+ *   If true, this is the track being streamed (another track may be
+ *   visible/audible in the buffer).
+ * @property {number} bandwidth
+ *   The bandwidth required to play the track, in bits/sec.
+ * @property {?number} width
+ *   The video width provided in the manifest, if present.
+ * @property {?number} height
+ *   The video height provided in the manifest, if present.
+ * @property {?number} frameRate
+ *   The video framerate provided in the manifest, if present.
+ * @property {?string} pixelAspectRatio
+ *   The video pixel aspect ratio provided in the manifest, if present.
+ * @property {?string} hdr
+ *   The video HDR provided in the manifest, if present.
+ * @property {?string} colorGamut
+ *   The video color gamut provided in the manifest, if present.
+ * @property {?string} videoLayout
+ *   The video layout provided in the manifest, if present.
+ * @property {?string} mimeType
+ *   The video MIME type of the content provided in the manifest.
+ * @property {?string} codecs
+ *   The video codecs string provided in the manifest, if present.
+ * @exportDoc
+ */
+shaka.extern.VideoTrack;
+
+
+/**
+ * @typedef {{
  *   id: number,
  *   type: string,
  *   bandwidth: number,
