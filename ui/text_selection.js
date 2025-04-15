@@ -65,7 +65,18 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
         });
 
     this.eventManager.listen(this.player, 'loading', () => {
-      this.onTracksChanged_();
+      this.onCaptionStateChange_();
+      this.updateTextLanguages_();
+    });
+
+    this.eventManager.listen(this.player, 'loaded', () => {
+      this.onCaptionStateChange_();
+      this.updateTextLanguages_();
+    });
+
+    this.eventManager.listen(this.player, 'unloading', () => {
+      this.onCaptionStateChange_();
+      this.updateTextLanguages_();
     });
 
     this.eventManager.listen(this.player, 'texttrackvisibility', () => {
@@ -78,7 +89,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.onTracksChanged_();
+      this.updateTextLanguages_();
     });
 
     // Initialize caption state with a fake event.
@@ -88,8 +99,6 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     this.updateLocalizedStrings_();
 
     this.updateTextLanguages_();
-
-    this.onTracksChanged_();
   }
 
 
@@ -128,7 +137,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
   /** @private */
   updateTextLanguages_() {
-    const tracks = this.player.getTextTracks();
+    const tracks = this.player.getTextTracks() || [];
 
     shaka.ui.LanguageUtils.updateTextTracks(tracks, this.menu,
         (track) => this.onTextTrackSelected_(track),
@@ -168,6 +177,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     this.controls.dispatchEvent(
         new shaka.util.FakeEvent('captionselectionupdated'));
+
+    shaka.ui.Utils.setDisplay(this.button, tracks.length > 0);
   }
 
 
@@ -201,14 +212,6 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
         this.localization.resolve(LocIds.CAPTIONS);
     this.captionsOffSpan_.textContent =
         this.localization.resolve(LocIds.OFF);
-  }
-
-
-  /** @private */
-  onTracksChanged_() {
-    const hasText = this.player.getTextTracks().length > 0;
-    shaka.ui.Utils.setDisplay(this.button, hasText);
-    this.updateTextLanguages_();
   }
 };
 

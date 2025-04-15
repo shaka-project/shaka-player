@@ -343,7 +343,9 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true,
             /* canBeZero= */ true)
         .addBoolInput_('Prefer Network Information bandwidth',
-            'abr.preferNetworkInformationBandwidth');
+            'abr.preferNetworkInformationBandwidth')
+        .addBoolInput_('Remove latency from first packet time',
+            'abr.removeLatencyFromFirstPacketTime');
     this.addRestrictionsSection_('abr', 'Adaptation Restrictions');
   }
 
