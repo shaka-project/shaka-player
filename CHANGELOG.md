@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.13.17](https://github.com/shaka-project/shaka-player/compare/v4.13.16...v4.13.17) (2025-04-14)
+
+
+### Bug Fixes
+
+* **Offline:** Handle missing window.matchMedia API ([#8442](https://github.com/shaka-project/shaka-player/issues/8442)) ([68682cb](https://github.com/shaka-project/shaka-player/commit/68682cb32d0af4c3eac9445cdb30b27ded8b2f79))
+* **UI:** Avoid show resolution bandwidth when it's not necessary ([#8440](https://github.com/shaka-project/shaka-player/issues/8440)) ([55615b9](https://github.com/shaka-project/shaka-player/commit/55615b957511b9d54f91501b82856536a0682916))
+* **UI:** Check remote availability on remote button ([#8453](https://github.com/shaka-project/shaka-player/issues/8453)) ([fe98cb1](https://github.com/shaka-project/shaka-player/commit/fe98cb1d2ba719bf5d7931303856be7485c9c7c2))
+
+
+### Performance Improvements
+
+* **DASH:** Release period combiner after parsing a VOD ([#8443](https://github.com/shaka-project/shaka-player/issues/8443)) ([6fda02f](https://github.com/shaka-project/shaka-player/commit/6fda02f130d140e86853f2e0b4928f824a508f45))
+
 ## [4.13.16](https://github.com/shaka-project/shaka-player/compare/v4.13.15...v4.13.16) (2025-04-09)
 
 
