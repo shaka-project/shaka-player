@@ -124,12 +124,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      */
     this.fadeControlsTimer_ = new shaka.util.Timer(() => {
       this.controlsContainer_.removeAttribute('shown');
-      const shakaTextContainer = this.videoContainer_.getElementsByClassName(
-          'shaka-text-container')[0];
-      if (shakaTextContainer) {
-        shakaTextContainer.style.bottom = '0%';
-      }
 
+      this.player_.configure('textDisplayer.edges.bottom', 0);
 
       if (this.contextMenu_) {
         this.contextMenu_.closeMenu();
@@ -1658,12 +1654,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.updateTimeAndSeekRange_();
 
       this.controlsContainer_.setAttribute('shown', 'true');
-      const shakaTextContainer = this.videoContainer_.getElementsByClassName(
-          'shaka-text-container')[0];
-      if (shakaTextContainer) {
-        shakaTextContainer.style.bottom =
-            this.bottomControls_.clientHeight + 'px';
-      }
+
+      this.player_.configure('textDisplayer.edges.bottom',
+          this.bottomControls_.clientHeight);
+
       this.fadeControlsTimer_.stop();
     } else {
       this.fadeControlsTimer_.tickAfter(/* seconds= */ this.config_.fadeDelay);

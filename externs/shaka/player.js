@@ -2640,7 +2640,8 @@ shaka.extern.OfflineConfiguration;
 /**
  * @typedef {{
  *   captionsUpdatePeriod: number,
- *   fontScaleFactor: number
+ *   fontScaleFactor: number,
+ *   edges: shaka.extern.BoundingBox
  * }}
  *
  * @description
@@ -2654,10 +2655,24 @@ shaka.extern.OfflineConfiguration;
  *   The font scale factor used to increase or decrease the font size.
  *   <br>
  *   Defaults to <code>1</code>.
+ * @property {shaka.extern.BoundingBox} edges
+ *   The max edges.
+ *   <br>
+ *   Defaults to <code>0</code> for each edge.
  * @exportDoc
  */
 shaka.extern.TextDisplayerConfiguration;
 
+
+/**
+ * @typedef {{
+ *   left: number,
+ *   right: number,
+ *   top: number,
+ *   bottom: number,
+ * }}
+ */
+shaka.extern.BoundingBox;
 
 /**
  * @typedef {{
