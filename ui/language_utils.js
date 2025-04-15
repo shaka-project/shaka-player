@@ -125,7 +125,9 @@ shaka.ui.LanguageUtils = class {
     const selectedCombination = selectedTrack ? getCombination(
         selectedTrack.language, getRolesString(selectedTrack),
         selectedTrack.label, selectedTrack.channelsCount,
-        selectedTrack.codecs, selectedTrack.spatialAudio) : '';
+        selectedTrack.codecs &&
+        shaka.util.MimeUtils.getNormalizedCodec(selectedTrack.codecs),
+        selectedTrack.spatialAudio) : '';
 
     for (const track of tracks) {
       const language = track.language;
