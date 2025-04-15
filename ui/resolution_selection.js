@@ -103,6 +103,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     });
 
     this.eventManager.listen(this.player, 'adaptation', () => {
+      this.updateSelection_();
       this.updateLabels_();
     });
 
