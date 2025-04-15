@@ -176,11 +176,14 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
       } catch (e) {
         handleAvailabilityChange(/* availability= */ true);
       }
-    } else if (this.callbackId_ != -1) {
-      // If remote device is connecting or connected, we should stop
-      // watching remote device availability to save power.
-      await this.video.remote.cancelWatchAvailability(this.callbackId_);
-      this.callbackId_ = -1;
+    } else {
+      shaka.ui.Utils.setDisplay(this.remoteButton_, true);
+      if (this.callbackId_ != -1) {
+        // If remote device is connecting or connected, we should stop
+        // watching remote device availability to save power.
+        await this.video.remote.cancelWatchAvailability(this.callbackId_);
+        this.callbackId_ = -1;
+      }
     }
   }
 
