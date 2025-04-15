@@ -28,6 +28,7 @@ describe('LCEVC Integration', () => {
   const seiManifests = {
     FMP4_DASH: '/base/test/test/assets/lcevc-sei/lcevc-sei.mpd',
     FMP4_HLS: '/base/test/test/assets/lcevc-sei/master.m3u8',
+    TS_HLS: '/base/test/test/assets/lcevc-sei-ts/master.m3u8',
   };
 
   beforeAll(async () => {
@@ -139,10 +140,34 @@ describe('LCEVC Integration', () => {
     });
 
     it('Should decode LCEVC in TS HLS manifest', async () => {
-      pending('work in progress');
+      if (shaka.util.Platform.isTizen() || shaka.util.Platform.isChromecast()) {
+        pending('Disabled on unsupported platform.');
+      }
+
+      if (!(canvas.getContext('webgl') ||
+          canvas.getContext('experimental-webgl'))) {
+        pending('Current platform does not offer WebGL support.');
+      }
 
       // Wait for LCEVCdec to finish loading
       await LCEVCdec.ready;
+
+      await player.load(seiManifests.TS_HLS);
+      await video.play();
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 6 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 6, 45);
+
+      // Expect LCEVCdec to be enabled and have detected LCEVC data in SEI
+      expect(LCEVCdec.instance).toBeDefined();
+      expect(LCEVCdec.instance.isLcevcEnabled).toBe(true);
+      expect(LCEVCdec.instance.firstLcevcSegmentLoaded).toBe(true);
+      expect(LCEVCdec.instance.lcevcDataDetected).toBe(true);
     });
   });
 });
