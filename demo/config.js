@@ -358,7 +358,9 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_('Font scale factor',
             'textDisplayer.fontScaleFactor',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Match video aspect ratio',
+            'textDisplayer.matchVideoAspectRatio');
   }
 
   /** @private */

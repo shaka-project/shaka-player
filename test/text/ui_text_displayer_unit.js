@@ -7,7 +7,7 @@
 describe('UITextDisplayer', () => {
   /** @type {!HTMLElement} */
   let videoContainer;
-  /** @type {!HTMLVideoElement} */
+  /** @type {!shaka.test.FakeVideo} */
   let video;
   /** @type {shaka.text.UITextDisplayer} */
   let textDisplayer;
@@ -627,5 +627,63 @@ describe('UITextDisplayer', () => {
     // Test without, to support existing applications.
     /** @suppress {checkTypes} */
     textDisplayer = new shaka.text.UITextDisplayer(video, videoContainer);
+  });
+
+  it('should match video aspect ratio vertically', () => {
+    // Video is a 16:9 aspect ratio.
+    video.videoWidth = 1920;
+    video.videoHeight = 1080;
+    video.on['resize']();
+    // Set the container size to smaller width than height to create letter
+    // boxing vertically.
+    videoContainer.style.width = '400px';
+    videoContainer.style.height = '600px';
+
+    textDisplayer.configure({
+      captionsUpdatePeriod: 0.25,
+      fontScaleFactor: 1,
+      matchVideoAspectRatio: true,
+      margin: {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+      },
+    });
+
+    const textContainer = textDisplayer.getTextContainer();
+    // Scale video to the width of 400px, which is 400 * (1080 / 1920),
+    // which is 225px, so (600 - 225) / 2 = 187.5
+    expect(textContainer.style.bottom).toBe('187.5px');
+    expect(textContainer.style.top).toBe('187.5px');
+    expect(textContainer.style.left).toBe('0px');
+    expect(textContainer.style.right).toBe('0px');
+  });
+
+  it('should match video aspect ratio horizontally', () => {
+    // Video is a 9:16 aspect ratio.
+    video.videoWidth = 1080;
+    video.videoHeight = 1920;
+    video.on['resize']();
+    videoContainer.style.width = '400px';
+    videoContainer.style.height = '600px';
+
+    textDisplayer.configure({
+      captionsUpdatePeriod: 0.25,
+      fontScaleFactor: 1,
+      matchVideoAspectRatio: true,
+      margin: {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+      },
+    });
+
+    const textContainer = textDisplayer.getTextContainer();
+    expect(textContainer.style.bottom).toBe('0px');
+    expect(textContainer.style.top).toBe('0px');
+    expect(textContainer.style.left).toBe('31.25px');
+    expect(textContainer.style.right).toBe('31.25px');
   });
 });

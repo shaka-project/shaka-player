@@ -89,7 +89,8 @@ describe('Demo', () => {
           .add('manifest.raiseFatalErrorOnManifestUpdateRequestFailure')
           .add('drm.persistentSessionOnlinePlayback')
           .add('drm.persistentSessionsMetadata')
-          .add('mediaSource.modifyCueCallback');
+          .add('mediaSource.modifyCueCallback')
+          .add('textDisplayer.margin');
 
       /**
        * @param {!Object} section

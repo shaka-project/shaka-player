@@ -78,4 +78,27 @@ describe('ObjectUtils', () => {
       expect(ObjectUtils.cloneObject(o)).toEqual({foo: 3, baz: null});
     });
   });
+
+  describe('shallowCompare', () => {
+    it('should compare primitives', () => {
+      expect(ObjectUtils.shallowCompare(true, true)).toBe(true);
+      expect(ObjectUtils.shallowCompare(true, false)).toBe(false);
+      expect(ObjectUtils.shallowCompare(1, 1)).toBe(true);
+      expect(ObjectUtils.shallowCompare(1, 2)).toBe(false);
+      expect(ObjectUtils.shallowCompare(true, 2)).toBe(false);
+    });
+
+    it('should compare objects', () => {
+      expect(ObjectUtils.shallowCompare({
+        value: true,
+      }, {
+        value: true,
+      })).toBe(true);
+      expect(ObjectUtils.shallowCompare({
+        value: true,
+      }, {
+        value: false,
+      })).toBe(false);
+    });
+  });
 });
