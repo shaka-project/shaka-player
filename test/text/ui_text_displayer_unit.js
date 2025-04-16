@@ -7,7 +7,7 @@
 describe('UITextDisplayer', () => {
   /** @type {!HTMLElement} */
   let videoContainer;
-  /** @type {!HTMLVideoElement} */
+  /** @type {!shaka.test.FakeVideo} */
   let video;
   /** @type {shaka.text.UITextDisplayer} */
   let textDisplayer;
