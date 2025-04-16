@@ -300,6 +300,14 @@ shaka.test.FakeAd = class {
    * @override
    * @export
    */
+  getVastAdId() {
+    return this.vastAdId_;
+  }
+
+  /**
+   * @override
+   * @export
+   */
   getAdId() {
     return this.adId_;
   }
