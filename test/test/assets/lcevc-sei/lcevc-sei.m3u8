@@ -1,0 +1,10 @@
+#EXTM3U
+#EXT-X-VERSION:6
+## Generated with https://github.com/google/shaka-packager version v2.4.3-dd98700-release
+#EXT-X-TARGETDURATION:11
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXT-X-MAP:URI="lcevc-sei-1.mp4",BYTERANGE="865@0"
+#EXTINF:10.167,
+#EXT-X-BYTERANGE:3319698@909
+lcevc-sei-1.mp4
+#EXT-X-ENDLIST

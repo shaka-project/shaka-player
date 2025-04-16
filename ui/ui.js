@@ -101,12 +101,14 @@ shaka.ui.Overlay = class {
 
 
   /**
+   * @param {boolean=} forceDisconnect If true, force the receiver app to shut
+   *   down by disconnecting.  Does nothing if not connected.
    * @override
    * @export
    */
-  async destroy() {
+  async destroy(forceDisconnect = false) {
     if (this.controls_) {
-      await this.controls_.destroy();
+      await this.controls_.destroy(forceDisconnect);
     }
     this.controls_ = null;
 

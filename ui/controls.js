@@ -218,10 +218,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @param {boolean=} forceDisconnect If true, force the receiver app to shut
+   *   down by disconnecting.  Does nothing if not connected.
    * @override
    * @export
    */
-  async destroy() {
+  async destroy(forceDisconnect = false) {
     if (document.pictureInPictureElement == this.localVideo_) {
       await document.exitPictureInPicture();
     }
@@ -267,7 +269,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     if (this.castProxy_) {
-      await this.castProxy_.destroy();
+      await this.castProxy_.destroy(forceDisconnect);
       this.castProxy_ = null;
     }
 
