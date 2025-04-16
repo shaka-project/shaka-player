@@ -76,6 +76,32 @@ describe('LCEVC Integration', () => {
     document.body.removeChild(canvas);
   });
 
+  /**
+   * @param {string} uri
+   * @return {!Promise}
+   */
+  async function testPlayback(uri) {
+    // Wait for LCEVCdec to finish loading
+    await LCEVCdec.ready;
+
+    await player.load(seiManifests.FMP4_DASH);
+    await video.play();
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 6 seconds, but stop early if the video ends.  If it takes
+    // longer than 45 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 6, 45);
+
+    // Expect LCEVCdec to be enabled and have detected LCEVC data in SEI
+    expect(LCEVCdec.instance).toBeDefined();
+    expect(LCEVCdec.instance.isLcevcEnabled).toBe(true);
+    expect(LCEVCdec.instance.firstLcevcSegmentLoaded).toBe(true);
+    expect(LCEVCdec.instance.lcevcDataDetected).toBe(true);
+  }
+
   describe('SEI Integration', () => {
     it('Should decode LCEVC in FMP4 DASH manifest', async () => {
       if (shaka.util.Platform.isTizen() || shaka.util.Platform.isChromecast()) {
@@ -87,25 +113,7 @@ describe('LCEVC Integration', () => {
         pending('Current platform does not offer WebGL support.');
       }
 
-      // Wait for LCEVCdec to finish loading
-      await LCEVCdec.ready;
-
-      await player.load(seiManifests.FMP4_DASH);
-      await video.play();
-
-      // Wait for the video to start playback.  If it takes longer than 10
-      // seconds, fail the test.
-      await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-      // Play for 6 seconds, but stop early if the video ends.  If it takes
-      // longer than 45 seconds, fail the test.
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 6, 45);
-
-      // Expect LCEVCdec to be enabled and have detected LCEVC data in SEI
-      expect(LCEVCdec.instance).toBeDefined();
-      expect(LCEVCdec.instance.isLcevcEnabled).toBe(true);
-      expect(LCEVCdec.instance.firstLcevcSegmentLoaded).toBe(true);
-      expect(LCEVCdec.instance.lcevcDataDetected).toBe(true);
+      await testPlayback(seiManifests.FMP4_DASH);
     });
 
     it('Should decode LCEVC in FMP4 HLS manifest', async () => {
@@ -118,25 +126,7 @@ describe('LCEVC Integration', () => {
         pending('Current platform does not offer WebGL support.');
       }
 
-      // Wait for LCEVCdec to finish loading
-      await LCEVCdec.ready;
-
-      await player.load(seiManifests.FMP4_HLS);
-      await video.play();
-
-      // Wait for the video to start playback.  If it takes longer than 10
-      // seconds, fail the test.
-      await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-      // Play for 6 seconds, but stop early if the video ends.  If it takes
-      // longer than 45 seconds, fail the test.
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 6, 45);
-
-      // Expect LCEVCdec to be enabled and have detected LCEVC data in SEI
-      expect(LCEVCdec.instance).toBeDefined();
-      expect(LCEVCdec.instance.isLcevcEnabled).toBe(true);
-      expect(LCEVCdec.instance.firstLcevcSegmentLoaded).toBe(true);
-      expect(LCEVCdec.instance.lcevcDataDetected).toBe(true);
+      await testPlayback(seiManifests.FMP4_HLS);
     });
 
     it('Should decode LCEVC in TS HLS manifest', async () => {
@@ -149,25 +139,7 @@ describe('LCEVC Integration', () => {
         pending('Current platform does not offer WebGL support.');
       }
 
-      // Wait for LCEVCdec to finish loading
-      await LCEVCdec.ready;
-
-      await player.load(seiManifests.TS_HLS);
-      await video.play();
-
-      // Wait for the video to start playback.  If it takes longer than 10
-      // seconds, fail the test.
-      await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-      // Play for 6 seconds, but stop early if the video ends.  If it takes
-      // longer than 45 seconds, fail the test.
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 6, 45);
-
-      // Expect LCEVCdec to be enabled and have detected LCEVC data in SEI
-      expect(LCEVCdec.instance).toBeDefined();
-      expect(LCEVCdec.instance.isLcevcEnabled).toBe(true);
-      expect(LCEVCdec.instance.firstLcevcSegmentLoaded).toBe(true);
-      expect(LCEVCdec.instance.lcevcDataDetected).toBe(true);
+      await testPlayback(seiManifests.TS_HLS);
     });
   });
 });
