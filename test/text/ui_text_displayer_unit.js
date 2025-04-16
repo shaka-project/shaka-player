@@ -629,14 +629,19 @@ describe('UITextDisplayer', () => {
     textDisplayer = new shaka.text.UITextDisplayer(video, videoContainer);
   });
 
-  it('should match video aspect ratio horizontally', () => {
+  it('should match video aspect ratio vertically', () => {
     // Video is a 16:9 aspect ratio.
-    textDisplayer.aspectRatio_ = 16 / 9;
-    // Set a 16:10 container aspect ratio.
-    videoContainer.style.width = '2880px';
-    videoContainer.style.height = '1800px';
+    video.videoWidth = 1920;
+    video.videoHeight = 1080;
+    video.on['resize']();
+    // Set the container size to smaller width than height to create letter
+    // boxing vertically.
+    videoContainer.style.width = '400px';
+    videoContainer.style.height = '600px';
 
     textDisplayer.configure({
+      captionsUpdatePeriod: 0.25,
+      fontScaleFactor: 1,
       matchVideoAspectRatio: true,
       margin: {
         left: 0,
@@ -646,30 +651,26 @@ describe('UITextDisplayer', () => {
       },
     });
 
-    // To fit the video into the screen horizontally, we scale
-    // the height proportionally: 2880 / (16 / 9) = 1620px.
-    // Screen is 1800px tall, but the video is only 1620px tall, thus
-    // letter box total is 1800 - 1620 = 180px.
-    // Splitting equally (as video is positioned in center), we'd have
-    // 90px on top and 90px on bottom.
-    const textContainer = textDisplayer.textContainer_;
-    expect(textContainer.style.bottom).toBe('90px');
-    expect(textContainer.style.top).toBe('90px');
+    const textContainer = textDisplayer.getTextContainer();
+    // Scale video to the width of 400px, which is 400 * (1080 / 1920),
+    // which is 225px, so (600 - 225) / 2 = 187.5
+    expect(textContainer.style.bottom).toBe('187.5px');
+    expect(textContainer.style.top).toBe('187.5px');
     expect(textContainer.style.left).toBe('0px');
     expect(textContainer.style.right).toBe('0px');
   });
 
-  it('should match video aspect ratio vertically', () => {
-    // Inverting the aspect ratio from previous test would give us a gutter
-    // on left and right as opposed to top and bottom.
-
+  it('should match video aspect ratio horizontally', () => {
     // Video is a 9:16 aspect ratio.
-    textDisplayer.aspectRatio_ = 9 / 16;
-    // Set a 10:16 container aspect ratio.
-    videoContainer.style.width = '1800px';
-    videoContainer.style.height = '2880px';
+    video.videoWidth = 1080;
+    video.videoHeight = 1920;
+    video.on['resize']();
+    videoContainer.style.width = '400px';
+    videoContainer.style.height = '600px';
 
     textDisplayer.configure({
+      captionsUpdatePeriod: 0.25,
+      fontScaleFactor: 1,
       matchVideoAspectRatio: true,
       margin: {
         left: 0,
@@ -679,10 +680,10 @@ describe('UITextDisplayer', () => {
       },
     });
 
-    const textContainer = textDisplayer.textContainer_;
+    const textContainer = textDisplayer.getTextContainer();
     expect(textContainer.style.bottom).toBe('0px');
     expect(textContainer.style.top).toBe('0px');
-    expect(textContainer.style.left).toBe('90px');
-    expect(textContainer.style.right).toBe('90px');
+    expect(textContainer.style.left).toBe('31.25px');
+    expect(textContainer.style.right).toBe('31.25px');
   });
 });
