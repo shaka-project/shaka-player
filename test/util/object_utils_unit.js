@@ -88,7 +88,7 @@ describe('ObjectUtils', () => {
       expect(ObjectUtils.shallowCompare(true, 2)).toBe(false);
     });
 
-    it('should compare objects', () => {
+    it('should compare objects', () => {
       expect(ObjectUtils.shallowCompare({
         value: true,
       }, {
