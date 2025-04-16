@@ -84,7 +84,7 @@ describe('LCEVC Integration', () => {
     // Wait for LCEVCdec to finish loading
     await LCEVCdec.ready;
 
-    await player.load(seiManifests.FMP4_DASH);
+    await player.load(uri);
     await video.play();
 
     // Wait for the video to start playback.  If it takes longer than 10
