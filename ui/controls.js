@@ -125,7 +125,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.fadeControlsTimer_ = new shaka.util.Timer(() => {
       this.controlsContainer_.removeAttribute('shown');
 
-      this.player_.configure('textDisplayer.edges.bottom', 0);
+      this.player_.configure('textDisplayer.margin.bottom', 0);
 
       if (this.contextMenu_) {
         this.contextMenu_.closeMenu();
@@ -1655,8 +1655,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
       this.controlsContainer_.setAttribute('shown', 'true');
 
-      this.player_.configure('textDisplayer.edges.bottom',
-          this.bottomControls_.clientHeight);
+      const config = this.player_.getConfiguration();
+      const clientHeight = this.bottomControls_.clientHeight;
+      if (config.textDisplayer.margin.bottom !== clientHeight) {
+        this.player_.configure('textDisplayer.margin.bottom',
+            clientHeight);
+      }
 
       this.fadeControlsTimer_.stop();
     } else {

@@ -2641,7 +2641,8 @@ shaka.extern.OfflineConfiguration;
  * @typedef {{
  *   captionsUpdatePeriod: number,
  *   fontScaleFactor: number,
- *   edges: shaka.extern.BoundingBox
+ *   margin: shaka.extern.BoxSides,
+ *   matchVideoAspectRatio: boolean
  * }}
  *
  * @description
@@ -2655,10 +2656,16 @@ shaka.extern.OfflineConfiguration;
  *   The font scale factor used to increase or decrease the font size.
  *   <br>
  *   Defaults to <code>1</code>.
- * @property {shaka.extern.BoundingBox} edges
- *   The max edges.
+ * @property {shaka.extern.BoxSides} margin
+ *   Applies the minimum margin to the container.
  *   <br>
- *   Defaults to <code>0</code> for each edge.
+ *   Defaults to <code>0</code> for each side.
+ * @property {boolean} matchVideoAspectRatio
+ *   When true, the subtitle container will maintain the same
+ *   aspect ratio as the video, ensuring text positioning remains
+ *   consistent regardless of player size.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.TextDisplayerConfiguration;
@@ -2669,10 +2676,24 @@ shaka.extern.TextDisplayerConfiguration;
  *   left: number,
  *   right: number,
  *   top: number,
- *   bottom: number,
+ *   bottom: number
  * }}
+ *
+ * @description
+ *   An object describing the sides of a box.
+ *
+ * @property {number} left
+ *   The left side of the box.
+ * @property {number} right
+ *   The right side of the box.
+ * @property {number} top
+ *   The top side of the box.
+ * @property {number} bottom
+ *   The bottom side of the box.
+ * @exportDoc
  */
-shaka.extern.BoundingBox;
+shaka.extern.BoxSides;
+
 
 /**
  * @typedef {{
