@@ -628,4 +628,61 @@ describe('UITextDisplayer', () => {
     /** @suppress {checkTypes} */
     textDisplayer = new shaka.text.UITextDisplayer(video, videoContainer);
   });
+
+  it('should match video aspect ratio horizontally', () => {
+    // Video is a 16:9 aspect ratio.
+    textDisplayer.aspectRatio_ = 16 / 9;
+    // Set a 16:10 container aspect ratio.
+    videoContainer.style.width = '2880px';
+    videoContainer.style.height = '1800px';
+
+    textDisplayer.configure({
+      matchVideoAspectRatio: true,
+      margin: {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+      },
+    });
+
+    // To fit the video into the screen horizontally, we scale
+    // the height proportionally: 2880 / (16 / 9) = 1620px.
+    // Screen is 1800px tall, but the video is only 1620px tall, thus
+    // letter box total is 1800 - 1620 = 180px.
+    // Splitting equally (as video is positioned in center), we'd have
+    // 90px on top and 90px on bottom.
+    const textContainer = textDisplayer.textContainer_;
+    expect(textContainer.style.bottom).toBe('90px');
+    expect(textContainer.style.top).toBe('90px');
+    expect(textContainer.style.left).toBe('0px');
+    expect(textContainer.style.right).toBe('0px');
+  });
+
+  it('should match video aspect ratio vertically', () => {
+    // Inverting the aspect ratio from previous test would give us a gutter
+    // on left and right as opposed to top and bottom.
+
+    // Video is a 9:16 aspect ratio.
+    textDisplayer.aspectRatio_ = 9 / 16;
+    // Set a 10:16 container aspect ratio.
+    videoContainer.style.width = '1800px';
+    videoContainer.style.height = '2880px';
+
+    textDisplayer.configure({
+      matchVideoAspectRatio: true,
+      margin: {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+      },
+    });
+
+    const textContainer = textDisplayer.textContainer_;
+    expect(textContainer.style.bottom).toBe('0px');
+    expect(textContainer.style.top).toBe('0px');
+    expect(textContainer.style.left).toBe('90px');
+    expect(textContainer.style.right).toBe('90px');
+  });
 });
