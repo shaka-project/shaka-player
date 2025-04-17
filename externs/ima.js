@@ -260,9 +260,6 @@ google.ima.Ad = class {
   getVastMediaWidth() {}
 
   /** @return {string} */
-  getVastAdId() {}
-
-  /** @return {string} */
   getAdId() {}
 
   /** @return {string} */
@@ -514,9 +511,6 @@ google.ima.dai.api.Ad = class {
 
   /** @return {number} */
   getVastMediaWidth() {}
-
-  /** @return {string} */
-  getVastAdId() {}
 
   /** @return {string} */
   getAdId() {}
