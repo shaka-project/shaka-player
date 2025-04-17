@@ -51,6 +51,9 @@ shaka.test.FakeAd = class {
     this.vastMediaWidth_ = 1280;
 
     /** @private {string} */
+    this.vastAdId_ = 'Test VAST Ad ID';
+
+    /** @private {string} */
     this.adId_ = 'Test Ad ID';
 
     /** @private {string} */
@@ -291,6 +294,14 @@ shaka.test.FakeAd = class {
    */
   getVastMediaWidth() {
     return this.vastMediaWidth_;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getVastAdId() {
+    return this.vastAdId_;
   }
 
   /**

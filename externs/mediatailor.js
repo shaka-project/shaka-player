@@ -69,7 +69,8 @@ mediaTailor.AdBreak;
  *   skipOffset: ?string,
  *   startTimeInSeconds: number,
  *   nonLinearAdList: !Array<mediaTailor.NonLinearAd>,
- *   trackingEvents: !Array<mediaTailor.TrackingEvent>
+ *   trackingEvents: !Array<mediaTailor.TrackingEvent>,
+ *   vastAdId: ?string
  * }}
  *
  * @property {string} adId
@@ -83,6 +84,7 @@ mediaTailor.AdBreak;
  * @property {number} startTimeInSeconds
  * @property {!Array<mediaTailor.NonLinearAd>} nonLinearAdList
  * @property {!Array<mediaTailor.TrackingEvent>} trackingEvents
+ * @property {?string} vastAdId
  * @exportDoc
  */
 mediaTailor.Ad;

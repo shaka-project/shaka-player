@@ -480,6 +480,11 @@ shaka.extern.IAd = class {
   /**
    * @return {string}
    */
+  getVastAdId() {}
+
+  /**
+   * @return {string}
+   */
   getAdId() {}
 
   /**
