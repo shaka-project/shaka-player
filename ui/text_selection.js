@@ -195,6 +195,11 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     // if captions are turned off -> on in a different language.
     this.player.selectTextTrack(track);
     await this.player.setTextTrackVisibility(true);
+
+    // Set text preference for when reloading the stream (e.g. casting), keep
+    // this selection.
+    this.player.configure('preferredTextLanguage', track.language);
+    this.player.configure('preferForcedSubs', track.forced);
   }
 
 
