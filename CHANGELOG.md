@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.14.9](https://github.com/shaka-project/shaka-player/compare/v4.14.8...v4.14.9) (2025-04-21)
+
+
+### Bug Fixes
+
+* Add a small fudge to prefetch eviction ([#8470](https://github.com/shaka-project/shaka-player/issues/8470)) ([23d1341](https://github.com/shaka-project/shaka-player/commit/23d134100b9a26158772be862e75bb763bcc243b))
+* Fix getAudioTracks when audioId is null but exists originalAudioId ([#8462](https://github.com/shaka-project/shaka-player/issues/8462)) ([c488e20](https://github.com/shaka-project/shaka-player/commit/c488e20c458e0ca4798e137c0da3099ef98ff131))
+* **HLS:** Fix mp4 detection when the mimetype is application/octet-stream ([#8459](https://github.com/shaka-project/shaka-player/issues/8459)) ([44ac236](https://github.com/shaka-project/shaka-player/commit/44ac236312ba7879dc21107b8d23e40061cc52a6))
+* Keep unique references in getAudioTracks ([#8460](https://github.com/shaka-project/shaka-player/issues/8460)) ([d3ad7b4](https://github.com/shaka-project/shaka-player/commit/d3ad7b487a9b343f078a78221bb4f8f9c5695d72))
+* Only expand robustness on each stream once ([#8458](https://github.com/shaka-project/shaka-player/issues/8458)) ([7ed73a6](https://github.com/shaka-project/shaka-player/commit/7ed73a6d6fb9e7aef4497989ac8169aa563190e3)), closes [#8408](https://github.com/shaka-project/shaka-player/issues/8408)
+* Subtitles appearing twice when switching to Fullscreen on iOS ([#8476](https://github.com/shaka-project/shaka-player/issues/8476)) ([52be99a](https://github.com/shaka-project/shaka-player/commit/52be99a26767c9a4146eeebff90e89a57a19e64b))
+* **UI:** Fix display language when showing the codec name ([#8455](https://github.com/shaka-project/shaka-player/issues/8455)) ([98dc415](https://github.com/shaka-project/shaka-player/commit/98dc415508058436e87183933268cc2868af7a4e))
+* **UI:** Show the remote button when we already connected ([#8461](https://github.com/shaka-project/shaka-player/issues/8461)) ([546f5fe](https://github.com/shaka-project/shaka-player/commit/546f5fe340aee429270d1b630d5da0aef4b18a29))
+
 ## [4.14.8](https://github.com/shaka-project/shaka-player/compare/v4.14.7...v4.14.8) (2025-04-14)
 
 
