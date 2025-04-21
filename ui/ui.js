@@ -442,6 +442,7 @@ shaka.ui.Overlay = class {
       const script =
         /** @type {HTMLScriptElement} **/(document.createElement('script'));
       script.src = castSenderUrl;
+      script.defer = true;
       document.head.appendChild(script);
     }
   }
