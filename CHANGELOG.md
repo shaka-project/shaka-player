@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.13.18](https://github.com/shaka-project/shaka-player/compare/v4.13.17...v4.13.18) (2025-04-21)
+
+
+### Bug Fixes
+
+* Add a small fudge to prefetch eviction ([#8470](https://github.com/shaka-project/shaka-player/issues/8470)) ([7a2afbb](https://github.com/shaka-project/shaka-player/commit/7a2afbbca907655c921ff162a3b1fa1ea74700df))
+* **HLS:** Fix mp4 detection when the mimetype is application/octet-stream ([#8459](https://github.com/shaka-project/shaka-player/issues/8459)) ([1e97fd1](https://github.com/shaka-project/shaka-player/commit/1e97fd19095d578a61a1a5f0089c4cdaadcfdc29))
+* Only expand robustness on each stream once ([#8458](https://github.com/shaka-project/shaka-player/issues/8458)) ([3ad45ff](https://github.com/shaka-project/shaka-player/commit/3ad45ffafede2cf2e25d99f400c10825c4a82762)), closes [#8408](https://github.com/shaka-project/shaka-player/issues/8408)
+* Subtitles appearing twice when switching to Fullscreen on iOS ([#8476](https://github.com/shaka-project/shaka-player/issues/8476)) ([694018c](https://github.com/shaka-project/shaka-player/commit/694018cffa9f00054a471e913db6391bc91e9e49))
+* **UI:** Show the remote button when we already connected ([#8461](https://github.com/shaka-project/shaka-player/issues/8461)) ([9a129fe](https://github.com/shaka-project/shaka-player/commit/9a129fed77b36b0665a35f1a02e87fe40ecb4905))
+
 ## [4.13.17](https://github.com/shaka-project/shaka-player/compare/v4.13.16...v4.13.17) (2025-04-14)
 
 
