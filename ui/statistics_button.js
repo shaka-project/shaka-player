@@ -47,6 +47,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
+    label.classList.add('shaka-simple-overflow-button-label-inline');
 
     /** @private {!HTMLElement} */
     this.nameSpan_ = shaka.util.Dom.createHTMLElement('span');
@@ -86,6 +87,10 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
 
     const parsePx = (name) => {
       return this.currentStats_[name] + ' (px)';
+    };
+
+    const parseString = (name) => {
+      return this.currentStats_[name];
     };
 
     const parsePercent = (name) => {
@@ -142,6 +147,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     this.parseFrom_ = new Map()
         .set('width', parsePx)
         .set('height', parsePx)
+        .set('currentCodecs', parseString)
         .set('completionPercent', parsePercent)
         .set('bufferingTime', parseSeconds)
         .set('drmTimeSeconds', parseSeconds)
@@ -246,6 +252,8 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     closeElement.classList.add('shaka-no-propagation');
     closeElement.classList.add('shaka-statistics-close');
     const icon = shaka.util.Dom.createHTMLElement('i');
+    icon.classList.add('material-icons');
+    icon.classList.add('notranslate');
     icon.classList.add('material-icons-round');
     icon.textContent =
       shaka.ui.Enums.MaterialDesignIcons.CLOSE;
@@ -273,8 +281,12 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       const element = this.displayedElements_.get(name);
       element.textContent = this.parseFrom_.get(name)(name);
       if (element && element.parentElement) {
-        shaka.ui.Utils.setDisplay(element.parentElement,
-            !isNaN(this.currentStats_[name]));
+        const value = this.currentStats_[name];
+        if (typeof value == 'string') {
+          shaka.ui.Utils.setDisplay(element.parentElement, value != '');
+        } else {
+          shaka.ui.Utils.setDisplay(element.parentElement, !isNaN(value));
+        }
       }
     }
   }

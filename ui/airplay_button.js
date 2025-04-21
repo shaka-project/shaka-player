@@ -81,6 +81,9 @@ shaka.ui.AirPlayButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.airplayButton_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       this.onAirPlayClick_();
     });
 

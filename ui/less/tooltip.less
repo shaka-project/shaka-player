@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-@material-icons-width: 32px;
+@material-icons-width: 48px;
 
 .translateX(@percent) {
   -webkit-transform: translateX(percentage(@percent));
@@ -47,20 +47,20 @@
       content: attr(aria-label);
 
       /* Override .material-icons-round text styling */
-      font-family: Roboto, sans-serif, TengwarTelcontar;
-      line-height: calc(@material-icons-width / 2);
+      font-family: @general-font-family;
+      line-height: 20px;
       white-space: nowrap;
-      font-size: 13px;
+      font-size: @general-font-size;
 
       /* Styling */
-      background: rgba(35, 35, 35, 90%);
-      color: white;
-      border-radius: 3px;
-      padding: 5px 10px;
+      background: @general-background-color;
+      color: @general-font-color;
+      border-radius: 2px;
+      padding: 2px 10px;
 
       /* Positioning */
       position: absolute;
-      bottom: calc(@material-icons-width + 5px);
+      bottom: @material-icons-width + 14px;
 
       /* Left attribute is set to half of the width of the parent button */
       left: calc(@material-icons-width / 2);

@@ -39,6 +39,9 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     /** @private {HTMLElement} */
     this.controlsContainer_ = this.controls.getControlsContainer();
 
+    /** @private {HTMLElement } */
+    this.videoContainer_ = this.controls.getVideoContainer();
+
     /** @private {!Array<shaka.extern.IUIElement>} */
     this.children_ = [];
 
@@ -86,6 +89,9 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.overflowMenuButton_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       this.onOverflowMenuButtonClick_();
     });
 
@@ -145,6 +151,10 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     this.overflowMenuButton_.classList.add('shaka-tooltip');
     this.overflowMenuButton_.textContent =
       shaka.ui.Enums.MaterialDesignIcons.OPEN_OVERFLOW;
+    const markEl = shaka.util.Dom.createHTMLElement('span');
+    markEl.classList.add('shaka-overflow-quality-mark');
+    markEl.style.display = 'none';
+    this.overflowMenuButton_.appendChild(markEl);
     this.parent.appendChild(this.overflowMenuButton_);
   }
 
@@ -187,6 +197,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
           Iterables.filter(this.overflowMenu_.childNodes, isDisplayed);
         /** @type {!HTMLElement} */ (visibleElements[0]).focus();
       }
+      this.computeMaxHeight_();
     }
   }
 
@@ -198,6 +209,22 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     const LocIds = shaka.ui.Locales.Ids;
     this.overflowMenuButton_.ariaLabel =
         this.localization.resolve(LocIds.MORE_SETTINGS);
+  }
+
+
+  /**
+   * @private
+   */
+  computeMaxHeight_() {
+    const rectMenu = this.overflowMenu_.getBoundingClientRect();
+    const styleMenu = window.getComputedStyle(this.overflowMenu_);
+    const paddingTop = parseFloat(styleMenu.paddingTop);
+    const paddingBottom = parseFloat(styleMenu.paddingBottom);
+    const rectContainer = this.videoContainer_.getBoundingClientRect();
+    const heightIntersection =
+        rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom;
+
+    this.overflowMenu_.style.maxHeight = heightIntersection + 'px';
   }
 };
 

@@ -343,7 +343,9 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true,
             /* canBeZero= */ true)
         .addBoolInput_('Prefer Network Information bandwidth',
-            'abr.preferNetworkInformationBandwidth');
+            'abr.preferNetworkInformationBandwidth')
+        .addBoolInput_('Remove latency from first packet time',
+            'abr.removeLatencyFromFirstPacketTime');
     this.addRestrictionsSection_('abr', 'Adaptation Restrictions');
   }
 
@@ -393,7 +395,8 @@ shakaDemo.Config = class {
         .addBoolInput_('LCEVC Dynamic Performance scaling',
             'lcevc.dynamicPerformanceScaling')
         .addNumberInput_('LCEVC Log Level', 'lcevc.logLevel')
-        .addBoolInput_('Draw LCEVC Logo', 'lcevc.drawLogo');
+        .addBoolInput_('Draw LCEVC Logo', 'lcevc.drawLogo')
+        .addBoolInput_('Enable LCEVC Poster', 'lcevc.poster');
   }
 
   /** @private */
@@ -697,7 +700,9 @@ shakaDemo.Config = class {
             strategyOptions,
             strategyOptionsNames)
         .addBoolInput_('Dispatch all emsg boxes',
-            'mediaSource.dispatchAllEmsgBoxes');
+            'mediaSource.dispatchAllEmsgBoxes')
+        .addBoolInput_('Uses source elements',
+            'mediaSource.useSourceElements');
   }
 
   /** @private */

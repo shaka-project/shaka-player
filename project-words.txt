@@ -1,6 +1,9 @@
 # events / html
 abrstatuschanged
 adblocker
+audiofocuspaused
+audiofocusgranted
+audiofocuslost
 audiolang
 audiotrackchange
 audiotrackchanged
@@ -281,6 +284,7 @@ latm
 laurl
 lcevc
 libav
+liblcevc
 linears
 loas
 lpcm

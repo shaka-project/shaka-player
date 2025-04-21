@@ -57,6 +57,39 @@ shaka.extern.UISeekBarColors;
 shaka.extern.UIVolumeBarColors;
 
 /**
+ * @typedef {{
+ *   720: string,
+ *   1080: string,
+ *   1440: string,
+ *   2160: string,
+ *   4320: string
+ * }}
+ *
+ * @property {string} 720
+ *   The mark that will be displayed when the quality is 720p.
+ *   <br>
+ *   Defaults to ''.
+ * @property {string} 1080
+ *   The mark that will be displayed when the quality is 1080p.
+ *   <br>
+ *   Defaults to 'HD'.
+ * @property {string} 1440
+ *   The mark that will be displayed when the quality is 1440p.
+ *   <br>
+ *   Defaults to '2K'.
+ * @property {string} 2160
+ *   The mark that will be displayed when the quality is 2160p.
+ *   <br>
+ *   Defaults to '4K'.
+ * @property {string} 4320
+ *   The mark that will be displayed when the quality is 4320p.
+ *   <br>
+ *   Defaults to '8K'.
+ * @exportDoc
+ */
+shaka.extern.UIQualityMarks;
+
+/**
  * @description
  * The UI's configuration options.
  *
@@ -78,6 +111,7 @@ shaka.extern.UIVolumeBarColors;
  *   showUnbufferedStart: boolean,
  *   seekBarColors: shaka.extern.UISeekBarColors,
  *   volumeBarColors: shaka.extern.UIVolumeBarColors,
+ *   qualityMarks: shaka.extern.UIQualityMarks,
  *   trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat,
  *   textTrackLabelFormat: shaka.ui.Overlay.TrackLabelFormat,
  *   fadeDelay: number,
@@ -158,6 +192,8 @@ shaka.extern.UIVolumeBarColors;
  *   The CSS colors applied to the volume bar.  This allows you to override the
  *   colors used in the linear gradient constructed in JavaScript, since you
  *   cannot do this in pure CSS.
+ * @property {shaka.extern.UIQualityMarks} qualityMarks
+ *   The name of the quality marks.
  * @property {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
  *   An enum that determines what is shown in the labels for audio variant
  *   selection.

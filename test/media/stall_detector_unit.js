@@ -29,6 +29,9 @@ describe('StallDetector', () => {
 
     /** @override */
     getWallSeconds() { return this.wallSeconds; }
+
+    /** @override */
+    release() {}
   }
 
   /** @type {!TestImplementation} */

@@ -1235,6 +1235,15 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
+      /* name= */ 'Art of Motion (HLS, MP4, AES-256)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
+      /* manifestUri= */ 'https://jvaryhlstests.blob.core.windows.net/hlstestdata/playlist_encrypted.m3u8',
+      /* source= */ shakaAssets.Source.BITCODIN)
+      .addKeySystem(shakaAssets.KeySystem.AES128)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
       /* name= */ 'Art of Motion (DASH) (external thumbnails)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
       /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
@@ -1608,6 +1617,7 @@ shakaAssets.testAssets = [
           dynamicPerformanceScaling: true,
           logLevel: 0,
           drawLogo: false,
+          poster: true,
         },
       }),
   new ShakaDemoAssetInfo(
@@ -1627,6 +1637,7 @@ shakaAssets.testAssets = [
           dynamicPerformanceScaling: true,
           logLevel: 0,
           drawLogo: false,
+          poster: true,
         },
       }),
   new ShakaDemoAssetInfo(
@@ -1646,6 +1657,7 @@ shakaAssets.testAssets = [
           dynamicPerformanceScaling: true,
           logLevel: 0,
           drawLogo: false,
+          poster: true,
         },
       }),
   new ShakaDemoAssetInfo(
@@ -1664,6 +1676,7 @@ shakaAssets.testAssets = [
           dynamicPerformanceScaling: true,
           logLevel: 0,
           drawLogo: false,
+          poster: true,
         },
       }),
   new ShakaDemoAssetInfo(

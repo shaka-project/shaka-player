@@ -22,7 +22,7 @@
   }
 
   /* Set the fonts for all other content. */
-  font-family: Roboto, sans-serif, TengwarTelcontar;
+  font-family: @general-font-family;
   font-weight: normal;
   -webkit-font-smoothing: antialiased;
 }
@@ -36,7 +36,7 @@
 .fullscreen-container() {
   .fill-container();
 
-  background-color: black;
+  background-color: @general-background-color-opaque;
 
   .shaka-text-container {
     /* In fullscreen mode, the text displayer's font size should be relative to
@@ -125,7 +125,6 @@
 .shaka-bottom-controls {
   width: @bottom-controls-width;
   padding: 0;
-  padding-bottom: 2.5%;
 
   /* Position the bottom panel in front of other controls (play button and
    * spinner containers).
@@ -172,24 +171,42 @@
    * have these characteristics by default. */
   & > * {
     /* White text or button icons. */
-    color: white;
+    color: @general-font-color;
 
-    /* 32px tall controls. */
-    height: 32px;
+    /* 48px tall controls. */
+    height: 48px;
+    width: 48px;
 
     /* Consistent alignment of buttons. */
     line-height: 0.5;
 
-    /* Consistent margins (external) and padding (internal) between controls. */
-    .bottom-panels-elements-margin();
-
-    padding: 0 5px;
+    padding: 0 2px;
 
     /* Transparent backgrounds, no borders, and a pointer when you mouse over
      * them. */
     background: transparent;
     border: 0;
     cursor: pointer;
+    opacity: 0.9;
+    transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 100ms;
+    text-shadow: 0 0 2px @general-background-color;
+
+    &.material-icons-round {
+      font-size: 34px;
+    }
+
+    &.shaka-mute-button {
+      font-size: 28px;
+    }
+
+    &.shaka-overflow-menu-button {
+      font-size: 24px !important;
+      position: relative;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 
@@ -219,12 +236,15 @@
   overflow-x: hidden;
   overflow-y: auto;
 
+  scrollbar-color: @general-font-color @general-background-color;
+  scrollbar-width: thin;
+
   min-width: 300px;
 
-  color: white;
+  color: @general-font-color;
   background-color: rgba(35, 35, 35, 90%);
 
-  font-size: 14px;
+  font-size: @general-font-size;
 
   padding: 5px 10px;
   border-radius: 2px;
@@ -233,6 +253,8 @@
   z-index: 2;
   left: 15px;
   top: 15px;
+
+  max-height: calc(100% - 115px);
 
   /* Fades out with the other controls. */
   .show-when-controls-shown();
@@ -251,12 +273,15 @@
   overflow-x: hidden;
   overflow-y: auto;
 
+  scrollbar-color: @general-font-color @general-background-color;
+  scrollbar-width: thin;
+
   min-width: 150px;
 
-  color: white;
+  color: @general-font-color;
   background-color: rgba(35, 35, 35, 90%);
 
-  font-size: 14px;
+  font-size: @general-font-size;
 
   padding: 5px 10px;
   border-radius: 2px;
@@ -265,6 +290,8 @@
   z-index: 2;
   right: 15px;
   top: 15px;
+
+  max-height: calc(100% - 115px);
 
   /* Fades out with the other controls. */
   .show-when-controls-shown();
@@ -280,56 +307,82 @@
 }
 
 .shaka-context-menu {
-  background-color: rgba(35, 35, 35, 90%);
+  /* It's okay to add a vertical scroll if there are too many items, but
+   * horizontal scrolling is not allowed. */
+  overflow-x: hidden;
+  overflow-y: auto;
 
+  /* Don't wrap text to the next line. */
+  white-space: nowrap;
+
+  /* Styles for the menu itself. */
+  background: rgba(28, 28, 28, 90%);
   border-radius: 2px;
+  min-width: 190px;
 
+  /* The menus fade out with the other controls. */
+  .show-when-controls-shown();
+
+  /* When displayed as a flex container, elements inside will flow in a
+   * vertical column. */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  /* Where the menu appears. */
   position: absolute;
   z-index: 3;
 
   button {
-    padding: 5px 10px;
+    font-size: @general-font-size;
+    background: transparent;
+    color: @general-font-color;
+    border: none;
+    min-height: 30px;
+    padding: 10px;
 
-    width: 100%;
+    /* The button itself is a flex container, with children center-aligned. */
     display: flex;
     align-items: center;
 
-    color: white;
-    background: transparent;
-    border: 0;
-    cursor: pointer;
-
+    /* When hovered, the button's background is highlighted. */
     &:hover {
-      background-color: rgba(50, 50, 50, 90%);
+      background: rgba(255, 255, 255, 10%);
     }
-  }
 
-  label {
-    padding: 0 20px;
-
-    align-items: flex-start;
-
-    color: white;
+    /* The button is clickable, showing cursor pointer */
     cursor: pointer;
-  }
 
-  .shaka-current-selection-span {
-    align-items: flex-start;
+    /* The label inside button is also showing cursor pointer  */
+    label {
+      cursor: pointer;
+      margin-left: 5px;
+    }
 
-    color: white;
-    cursor: pointer;
+    .shaka-keyboard-navigation &:focus {
+      background: rgba(255, 255, 255, 10%);
+    }
+
+    .shaka-current-selection-span {
+      display: none;
+    }
   }
 }
 
 .shaka-scrim-container {
   margin: 0;
-  .fill-container();
+  width: 100%;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   .shrinkable();
-  .absolute-position();
   .show-when-controls-shown();
 
+  height: 61px;
+
   /* A black gradient at the bottom, behind the controls, but only so high. */
-  background: linear-gradient(to top, black 0, transparent 15%);
+  background: linear-gradient(rgba(0, 0, 0, 0%) 0, rgba(0, 0, 0, 50%) 100%);
 }
 
 .shaka-text-container {
@@ -357,7 +410,7 @@
   /* These are defaults which are overridden by JS or cue styles. */
   font-size: 20px;
   line-height: 1.4;  // relative to font size.
-  color: white;
+  color: @general-font-color;
 
   span.shaka-text-wrapper {
     display: inline;
@@ -366,10 +419,6 @@
 }
 
 .shaka-controls-container[shown="true"] ~ .shaka-text-container {
-  /* While the controls are shown, the text container should avoid the 15%
-   * at the bottom of the video, to avoid overlapping with controls. */
-  bottom: 15%;
-
   /* Disable the transition delay when moving the captions up, so that the
    * controls don't appear over the captions. */
   transition-delay: 0ms;
@@ -385,28 +434,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-@spinner-size-percentage: 15.6%;
-
-.shaka-spinner {
-  /* This uses the same trickery as the big play button define
-  the spinner's width and height. See .shaka-play-button
-  for the detailed explanation. */
-
-  /* For the padding thing to work, spinner div needs to be an
-  overlay-parent and spinner svg - an overlay child. */
-  .overlay-parent();
-
-  margin: 0;
-  box-sizing: border-box;
-  padding: calc(@spinner-size-percentage / 2);
-  width: 0;
-  height: 0;
-
-  /* Add a bit of a white shadow to keep our black spinner visible
-  on a black background. */
-  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 50%));
 }
 
 .shaka-hidden-fast-forward-container,

@@ -21,7 +21,11 @@ v5.0
    https://github.com/shaka-project/shaka-player/issues/4214
 
 v4.15 - 2025 Q2
-  TBD
+ - Modernization of the UI
+   https://github.com/shaka-project/shaka-player/issues/8406
+ - Ability to pass in a Date object for playback start time
+   https://github.com/shaka-project/shaka-player/issues/8402
+ - New API for video: `getVideoTracks` and `selectVideoTrack`
 
 =====
 

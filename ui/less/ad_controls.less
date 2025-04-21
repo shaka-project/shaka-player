@@ -4,13 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* Ad controls. */
-.ad-text-shadow() {
-  /* Give white text a black shadow, so it's visible against a
-   * white background. */
-  text-shadow: 1px 1px 4px black;
-}
-
 .shaka-controls-container[ad-active="true"] {
   /* While showing an ad, pass pointer events through to the ad container. */
   pointer-events: none;
@@ -57,22 +50,21 @@
   padding-bottom: 1%;
 
   button, div {
-    color: white;
+    color: @general-font-color;
     font-size: initial;
   }
+}
 
-  div:not(.shaka-skip-ad-counter):not(.shaka-skip-ad-container) {
-    .bottom-panels-elements-margin();
+.shaka-ad-info {
+  font-size: @general-font-size;
+  color: @general-font-color;
+  width: auto;
+  padding: 0 5px;
+
+  &[disabled] {
+    .disabled-button();
+    padding: 0;
   }
-}
-
-.shaka-ad-counter, .shaka-ad-position {
-  .bottom-align-children();
-  .ad-text-shadow();
-}
-
-.shaka-ad-controls .shaka-ad-position:not(.shaka-hidden) + .shaka-ad-counter {
-  margin-left: 0.75em;
 }
 
 .shaka-skip-ad-container {

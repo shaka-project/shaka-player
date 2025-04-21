@@ -50,6 +50,14 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
       this.onAudioTracksChanged_();
     });
 
+    this.eventManager.listen(this.player, 'loaded', () => {
+      this.onAudioTracksChanged_();
+    });
+
+    this.eventManager.listen(this.player, 'unloading', () => {
+      this.onAudioTracksChanged_();
+    });
+
     this.eventManager.listen(this.player, 'audiotrackschanged', () => {
       this.onAudioTracksChanged_();
     });
@@ -63,7 +71,7 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
 
   /** @private */
   onAudioTracksChanged_() {
-    const audioTracks = this.player.getAudioTracks();
+    const audioTracks = this.player.getAudioTracks() || [];
 
     shaka.ui.LanguageUtils.updateAudioTracks(audioTracks, this.menu,
         (track) => this.onAudioTrackSelected_(track),

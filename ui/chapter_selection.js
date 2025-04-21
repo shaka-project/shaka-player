@@ -154,6 +154,9 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
         button.appendChild(span);
 
         this.eventManager.listen(button, 'click', () => {
+          if (!this.controls.isOpaque()) {
+            return;
+          }
           this.video.currentTime = chapter.startTime;
         });
 
