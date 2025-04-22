@@ -1,6 +1,9 @@
 # events / html
 abrstatuschanged
 adblocker
+audiofocuspaused
+audiofocusgranted
+audiofocuslost
 audiolang
 audiotrackchange
 audiotrackchanged
@@ -9,6 +12,7 @@ autoplaying
 boundarycrossed
 captionselectionupdated
 caststatuschanged
+clearlead
 customwarning
 defaultselected
 describedby
@@ -281,6 +285,7 @@ latm
 laurl
 lcevc
 libav
+liblcevc
 linears
 loas
 lpcm

@@ -5,7 +5,7 @@
  */
 
 
-goog.provide('shaka.ui.AdCounter');
+goog.provide('shaka.ui.AdInfo');
 
 goog.require('goog.asserts');
 goog.require('shaka.ads.Utils');
@@ -23,7 +23,7 @@ goog.requireType('shaka.ui.Controls');
  * @final
  * @export
  */
-shaka.ui.AdCounter = class extends shaka.ui.Element {
+shaka.ui.AdInfo = class extends shaka.ui.Element {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
@@ -32,14 +32,10 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
     super(parent, controls);
 
     /** @private {!HTMLElement} */
-    this.container_ = shaka.util.Dom.createHTMLElement('div');
-    this.container_.classList.add('shaka-ad-counter');
-    this.parent.appendChild(this.container_);
-
-    /** @private {!HTMLElement} */
-    this.span_ = shaka.util.Dom.createHTMLElement('span');
-    this.span_.classList.add('shaka-ad-counter-span');
-    this.container_.appendChild(this.span_);
+    this.adInfo_ = shaka.util.Dom.createButton();
+    this.adInfo_.classList.add('shaka-ad-info');
+    this.adInfo_.disabled = true;
+    this.parent.appendChild(this.adInfo_);
 
     /**
      * The timer that tracks down the ad progress.
@@ -97,6 +93,8 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
    * @private
    */
   onTimerTick_() {
+    const LocIds = shaka.ui.Locales.Ids;
+
     goog.asserts.assert(this.ad != null,
         'this.ad should exist at this point');
 
@@ -105,11 +103,23 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
       return;
     }
 
+    let text = '';
+
+    const adsInAdPod = this.ad.getSequenceLength();
+    if (adsInAdPod > 1) {
+      // If it's a single ad, showing 'Ad 1 of 1' isn't helpful.
+      // Only show this element if there's more than 1 ad and it's a linear ad.
+      const adPosition = this.ad.getPositionInSequence();
+      text = this.localization.resolve(LocIds.AD_PROGRESS)
+          .replace('[AD_ON]', String(adPosition))
+          .replace('[NUM_ADS]', String(adsInAdPod));
+    }
+
     const secondsLeft = Math.round(this.ad.getRemainingTime());
     const adDuration = this.ad.getDuration();
     if (secondsLeft == -1 || adDuration == -1) {
-      // Not enough information about the ad. Don't show the
-      // counter just yet.
+      this.adInfo_.textContent = text;
+      shaka.ui.Utils.setDisplay(this.adInfo_, text != '');
       return;
     }
 
@@ -121,17 +131,17 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
           adDuration, /* showHour= */ false);
       const timeString = timePassedStr + ' / ' + adLength;
 
-      const adsInAdPod = this.ad.getSequenceLength();
       // If there's more than one ad in the sequence, show the time
       // without the word 'Ad' (it will be shown by another element).
       // Otherwise, the format is "Ad: 0:05 / 0:10."
       if (adsInAdPod > 1) {
-        this.span_.textContent = timeString;
+        text += '\u00A0\u00A0' + timeString;
       } else {
-        const LocIds = shaka.ui.Locales.Ids;
-        const raw = this.localization.resolve(LocIds.AD_TIME);
-        this.span_.textContent = raw.replace('[AD_TIME]', timeString);
+        text = this.localization.resolve(LocIds.AD_TIME)
+            .replace('[AD_TIME]', timeString);
       }
+      this.adInfo_.textContent = text;
+      shaka.ui.Utils.setDisplay(this.adInfo_, text != '');
     } else {
       this.reset_();
     }
@@ -144,7 +154,7 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
     this.timer_.stop();
     // Controls are going to hide the whole ad panel once the ad is over,
     // this is just a safeguard.
-    this.span_.textContent = '';
+    this.adInfo_.textContent = '';
   }
 
   /**

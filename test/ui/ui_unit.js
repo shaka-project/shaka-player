@@ -404,8 +404,9 @@ describe('UI', () => {
 
         UiUtils.confirmElementFound(videoContainer, 'shaka-seek-bar');
 
-        // The default settings vary in mobile/desktop context.
-        if (shaka.util.Platform.isMobile()) {
+        // The default settings vary in mobile/desktop/SmartTV context.
+        if (shaka.util.Platform.isMobile() ||
+            shaka.util.Platform.isSmartTV()) {
           UiUtils.confirmElementFound(videoContainer,
               'shaka-play-button-container');
           UiUtils.confirmElementFound(videoContainer, 'shaka-play-button');
@@ -588,7 +589,7 @@ describe('UI', () => {
         await player.load(
             /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
 
-        const selectVariantTrack = spyOn(player, 'selectVariantTrack');
+        const selectVideoTrack = spyOn(player, 'selectVideoTrack');
 
         // There should be at least one explicit quality button.
         const qualityButton =
@@ -596,11 +597,11 @@ describe('UI', () => {
         expect(qualityButton).toBeDefined();
 
         // Clicking this should select a track and clear the buffer.
-        expect(selectVariantTrack).not.toHaveBeenCalled();
+        expect(selectVideoTrack).not.toHaveBeenCalled();
         qualityButton.click();
 
         // The second argument is "clearBuffer", and should be true.
-        expect(selectVariantTrack).toHaveBeenCalledWith(
+        expect(selectVideoTrack).toHaveBeenCalledWith(
             jasmine.any(Object), true);
       });
 
@@ -744,7 +745,7 @@ describe('UI', () => {
           if (elem instanceof shaka.ui.OverflowMenu) {
             for (const child of elem.children_) {
               if (child instanceof shaka.ui.ResolutionSelection) {
-                child.updateResolutionSelection_();
+                child.updateSelection_();
                 found = true;
               }
             }
@@ -961,7 +962,7 @@ describe('UI', () => {
     const videos = container.getElementsByTagName('video');
     expect(videos.length).not.toBe(0);
 
-    UiUtils.confirmElementFound(container, 'shaka-spinner-svg');
+    UiUtils.confirmElementFound(container, 'shaka-spinner');
     UiUtils.confirmElementFound(container, 'shaka-overflow-menu');
     UiUtils.confirmElementFound(container, 'shaka-controls-button-panel');
   }

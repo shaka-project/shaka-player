@@ -50,6 +50,14 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
       this.onAudioTracksChanged_();
     });
 
+    this.eventManager.listen(this.player, 'loaded', () => {
+      this.onAudioTracksChanged_();
+    });
+
+    this.eventManager.listen(this.player, 'unloading', () => {
+      this.onAudioTracksChanged_();
+    });
+
     this.eventManager.listen(this.player, 'audiotrackschanged', () => {
       this.onAudioTracksChanged_();
     });
@@ -63,7 +71,7 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
 
   /** @private */
   onAudioTracksChanged_() {
-    const audioTracks = this.player.getAudioTracks();
+    const audioTracks = this.player.getAudioTracks() || [];
 
     shaka.ui.LanguageUtils.updateAudioTracks(audioTracks, this.menu,
         (track) => this.onAudioTrackSelected_(track),
@@ -88,6 +96,18 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
    */
   onAudioTrackSelected_(audioTrack) {
     this.player.selectAudioTrack(audioTrack);
+
+    // Set audio preference for when reloading the stream (e.g. casting), keep
+    // this selection.
+    this.player.configure('preferredAudioLanguage', audioTrack.language);
+    if (audioTrack.label) {
+      this.player.configure('preferredAudioLabel', audioTrack.label);
+    }
+    if (audioTrack.channelsCount) {
+      this.player.configure('preferredAudioChannelCount',
+          audioTrack.channelsCount);
+    }
+    this.player.configure('preferSpatialAudio', audioTrack.spatialAudio);
   }
 
 

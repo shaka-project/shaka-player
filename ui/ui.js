@@ -101,12 +101,14 @@ shaka.ui.Overlay = class {
 
 
   /**
+   * @param {boolean=} forceDisconnect If true, force the receiver app to shut
+   *   down by disconnecting.  Does nothing if not connected.
    * @override
    * @export
    */
-  async destroy() {
+  async destroy(forceDisconnect = false) {
     if (this.controls_) {
-      await this.controls_.destroy();
+      await this.controls_.destroy(forceDisconnect);
     }
     this.controls_ = null;
 
@@ -127,6 +129,18 @@ shaka.ui.Overlay = class {
    */
   isMobile() {
     return shaka.util.Platform.isMobile();
+  }
+
+
+  /**
+   * Detects if this is a smart tv platform, in case you want to choose a
+   * different UI configuration on smart tv devices.
+   *
+   * @return {boolean}
+   * @export
+   */
+  isSmartTV() {
+    return shaka.util.Platform.isSmartTV();
   }
 
 
@@ -168,12 +182,6 @@ shaka.ui.Overlay = class {
         newConfig, config, this.defaultConfig_(),
         /* overrides= */ {}, /* path= */ '');
 
-    // If a cast receiver app id has been given, add a cast button to the UI
-    if (newConfig.castReceiverAppId &&
-        !newConfig.overflowMenuButtons.includes('cast')) {
-      newConfig.overflowMenuButtons.push('cast');
-    }
-
     goog.asserts.assert(this.player_ != null, 'Should have a player!');
 
     const diff = shaka.util.ConfigUtils.getDifferenceFromConfigObjects(
@@ -188,6 +196,8 @@ shaka.ui.Overlay = class {
     this.controls_.configure(this.config_);
 
     this.controls_.dispatchEvent(new shaka.util.FakeEvent('uiupdated'));
+
+    this.setupCastSenderUrl_();
   }
 
 
@@ -237,30 +247,43 @@ shaka.ui.Overlay = class {
    * @private
    */
   defaultConfig_() {
+    const controlPanelElements = [
+      'play_pause',
+      'mute',
+      'volume',
+      'time_and_duration',
+      'spacer',
+      'overflow_menu',
+    ];
+
+    if (window.chrome) {
+      controlPanelElements.push('cast');
+    }
+    // eslint-disable-next-line no-restricted-syntax
+    if ('remote' in HTMLMediaElement.prototype) {
+      controlPanelElements.push('remote');
+    } else if (window.WebKitPlaybackTargetAvailabilityEvent) {
+      controlPanelElements.push('airplay');
+    }
+    controlPanelElements.push('fullscreen');
+
     const config = {
-      controlPanelElements: [
-        'play_pause',
-        'time_and_duration',
-        'spacer',
-        'mute',
-        'volume',
-        'fullscreen',
-        'overflow_menu',
-      ],
+      controlPanelElements,
       overflowMenuButtons: [
         'captions',
         'quality',
         'language',
         'chapter',
         'picture_in_picture',
-        'cast',
         'playback_rate',
         'recenter_vr',
         'toggle_stereoscopic',
+        'save_video_frame',
       ],
       statisticsList: [
         'width',
         'height',
+        'currentCodecs',
         'corruptedFrames',
         'decodedFrames',
         'droppedFrames',
@@ -318,6 +341,13 @@ shaka.ui.Overlay = class {
         base: 'rgba(255, 255, 255, 0.54)',
         level: 'rgb(255, 255, 255)',
       },
+      qualityMarks: {
+        '720': '',
+        '1080': 'HD',
+        '1440': '2K',
+        '2160': '4K',
+        '4320': '8K',
+      },
       trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
       textTrackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
       fadeDelay: 0,
@@ -327,7 +357,7 @@ shaka.ui.Overlay = class {
       enableKeyboardPlaybackControls: true,
       enableFullscreenOnRotation: true,
       forceLandscapeOnFullscreen: true,
-      enableTooltips: false,
+      enableTooltips: true,
       keyboardSeekDistance: 5,
       keyboardLargeSeekDistance: 60,
       fullScreenElement: this.videoContainer_,
@@ -342,14 +372,8 @@ shaka.ui.Overlay = class {
       preferVideoFullScreenInVisionOS: false,
       showAudioCodec: true,
       showVideoCodec: true,
+      castSenderUrl: 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
     };
-
-    // eslint-disable-next-line no-restricted-syntax
-    if ('remote' in HTMLMediaElement.prototype) {
-      config.overflowMenuButtons.push('remote');
-    } else if (window.WebKitPlaybackTargetAvailabilityEvent) {
-      config.overflowMenuButtons.push('airplay');
-    }
 
     // On mobile, by default, hide the volume slide and the small play/pause
     // button and show the big play/pause button in the center.
@@ -358,14 +382,68 @@ shaka.ui.Overlay = class {
       config.addBigPlayButton = true;
       config.singleClickForPlayAndPause = false;
       config.seekOnTaps = true;
+      config.enableTooltips = false;
+      config.doubleClickForFullscreen = false;
+      const filterElements = [
+        'play_pause',
+        'volume',
+      ];
       config.controlPanelElements = config.controlPanelElements.filter(
-          (name) => name != 'play_pause' && name != 'volume');
+          (name) => !filterElements.includes(name));
+      config.overflowMenuButtons = config.overflowMenuButtons.filter(
+          (name) => !filterElements.includes(name));
+      config.contextMenuElements = config.contextMenuElements.filter(
+          (name) => !filterElements.includes(name));
     }
 
-    // Set this button here to push it at the end.
-    config.overflowMenuButtons.push('save_video_frame');
+    if (this.isSmartTV()) {
+      config.addBigPlayButton = true;
+      config.singleClickForPlayAndPause = false;
+      config.enableTooltips = false;
+      config.doubleClickForFullscreen = false;
+      const filterElements = [
+        'play_pause',
+        'cast',
+        'remote',
+        'airplay',
+        'volume',
+        'save_video_frame',
+      ];
+      config.controlPanelElements = config.controlPanelElements.filter(
+          (name) => !filterElements.includes(name));
+      config.overflowMenuButtons = config.overflowMenuButtons.filter(
+          (name) => !filterElements.includes(name));
+      config.contextMenuElements = config.contextMenuElements.filter(
+          (name) => !filterElements.includes(name));
+    }
 
     return config;
+  }
+
+  /**
+   * @private
+   */
+  setupCastSenderUrl_() {
+    const castSenderUrl = this.config_.castSenderUrl;
+    if (!castSenderUrl || !this.config_.castReceiverAppId ||
+        !window.chrome || chrome.cast || this.isSmartTV()) {
+      return;
+    }
+    let alreadyLoaded = false;
+    for (const element of document.getElementsByTagName('script')) {
+      const script = /** @type {HTMLScriptElement} **/(element);
+      if (script.src === castSenderUrl) {
+        alreadyLoaded = true;
+        break;
+      }
+    }
+    if (!alreadyLoaded) {
+      const script =
+        /** @type {HTMLScriptElement} **/(document.createElement('script'));
+      script.src = castSenderUrl;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
   }
 
   /**

@@ -157,7 +157,8 @@ describe('DrmEngine', () => {
       return false;
     }
     return shakaSupport.drm['com.widevine.alpha'] ||
-        shakaSupport.drm['com.microsoft.playready'];
+        shakaSupport.drm['com.microsoft.playready'] ||
+        shakaSupport.drm['com.microsoft.playready.recommendation'];
   }
 
   function checkClearKeySupport() {

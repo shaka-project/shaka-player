@@ -34,6 +34,12 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     this.menu.classList.add('shaka-playback-rates');
     this.button.classList.add('shaka-tooltip-status');
 
+    if (!Array.from(parent.classList).includes('shaka-overflow-menu')) {
+      this.playbackRateMark = shaka.util.Dom.createHTMLElement('span');
+      this.playbackRateMark.classList.add('shaka-overflow-playback-rate-mark');
+      this.button.appendChild(this.playbackRateMark);
+    }
+
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
           this.updateLocalizedStrings_();
@@ -105,6 +111,9 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     // in the format of '1x', '1.5x', etc.
     this.currentSelection.textContent = rate + 'x';
     this.button.setAttribute('shaka-status', rate + 'x');
+    if (this.playbackRateMark) {
+      this.playbackRateMark.textContent = rate + 'x';
+    }
   }
 
   /** @private */

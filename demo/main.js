@@ -385,8 +385,6 @@ shakaDemo.Main = class {
           return element != 'rewind' && element != 'fast_forward';
         });
     if (this.trickPlayControlsEnabled_) {
-      // Trick mode controls don't have a seek bar.
-      uiConfig.addSeekBar = false;
       // Replace the position the play_pause button was at with a full suite of
       // trick play controls, including rewind and fast-forward.
       const index = uiConfig.controlPanelElements.indexOf('play_pause');
@@ -713,23 +711,30 @@ shakaDemo.Main = class {
 
     if (!asset.isClear() && !asset.isAes128()) {
       const hasSupportedDRM = asset.drm.some((drm) => {
-        return this.support_.drm[shakaAssets.identifierForKeySystem(drm)];
+        for (const identifier of shakaAssets.identifiersForKeySystem(drm)) {
+          if (this.support_.drm[identifier]) {
+            return true;
+          }
+        }
+        return false;
       });
       if (!hasSupportedDRM) {
         return 'Your browser does not support the required key systems.';
       }
       if (needOffline) {
         const hasSupportedOfflineDRM = asset.drm.some((drm) => {
-          const identifier = shakaAssets.identifierForKeySystem(drm);
-          // Special case when using clear keys.
-          if (identifier == 'org.w3.clearkey') {
-            const licenseServers = asset.getLicenseServers();
-            if (!licenseServers.has(identifier)) {
-              return this.support_.drm[identifier];
+          for (const identifier of shakaAssets.identifiersForKeySystem(drm)) {
+            // Special case when using clear keys.
+            if (identifier == 'org.w3.clearkey') {
+              const licenseServers = asset.getLicenseServers();
+              if (!licenseServers.has(identifier)) {
+                return this.support_.drm[identifier];
+              }
+            } else if (this.support_.drm[identifier]) {
+              return this.support_.drm[identifier].persistentState;
             }
           }
-          return this.support_.drm[identifier] &&
-                 this.support_.drm[identifier].persistentState;
+          return false;
         });
         if (!hasSupportedOfflineDRM) {
           return 'Your browser does not support offline licenses for the ' +

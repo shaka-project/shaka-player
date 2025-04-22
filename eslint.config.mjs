@@ -52,7 +52,7 @@ const commonNoRestrictedSyntax = [
 
 export default [
   {
-    ignores: ['!**/eslint.config.mjs'],
+    ignores: ['!**/eslint.config.mjs', 'build/wrapper.template.js'],
   },
   js.configs.recommended,
   jsdoc.configs['flat/recommended-error'],
