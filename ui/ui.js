@@ -429,10 +429,9 @@ shaka.ui.Overlay = class {
         !window.chrome || chrome.cast || this.isSmartTV()) {
       return;
     }
-    const scripts = document.getElementsByTagName('script');
     let alreadyLoaded = false;
-    for (let i = 0; i < scripts.length; i++) {
-      const script = /** @type {HTMLScriptElement} **/(scripts[i]);
+    for (const element of document.getElementsByTagName('script')) {
+      const script = /** @type {HTMLScriptElement} **/(element);
       if (script.src === castSenderUrl) {
         alreadyLoaded = true;
         break;
