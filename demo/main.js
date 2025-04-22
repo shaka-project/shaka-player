@@ -713,23 +713,30 @@ shakaDemo.Main = class {
 
     if (!asset.isClear() && !asset.isAes128()) {
       const hasSupportedDRM = asset.drm.some((drm) => {
-        return this.support_.drm[shakaAssets.identifierForKeySystem(drm)];
+        for (const identifier of shakaAssets.identifiersForKeySystem(drm)) {
+          if (this.support_.drm[identifier]) {
+            return true;
+          }
+        }
+        return false;
       });
       if (!hasSupportedDRM) {
         return 'Your browser does not support the required key systems.';
       }
       if (needOffline) {
         const hasSupportedOfflineDRM = asset.drm.some((drm) => {
-          const identifier = shakaAssets.identifierForKeySystem(drm);
-          // Special case when using clear keys.
-          if (identifier == 'org.w3.clearkey') {
-            const licenseServers = asset.getLicenseServers();
-            if (!licenseServers.has(identifier)) {
-              return this.support_.drm[identifier];
+          for (const identifier of shakaAssets.identifiersForKeySystem(drm)) {
+            // Special case when using clear keys.
+            if (identifier == 'org.w3.clearkey') {
+              const licenseServers = asset.getLicenseServers();
+              if (!licenseServers.has(identifier)) {
+                return this.support_.drm[identifier];
+              }
+            } else if (this.support_.drm[identifier]) {
+              return this.support_.drm[identifier].persistentState;
             }
           }
-          return this.support_.drm[identifier] &&
-                 this.support_.drm[identifier].persistentState;
+          return false;
         });
         if (!hasSupportedOfflineDRM) {
           return 'Your browser does not support offline licenses for the ' +
