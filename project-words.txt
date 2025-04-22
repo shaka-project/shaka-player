@@ -9,6 +9,7 @@ autoplaying
 boundarycrossed
 captionselectionupdated
 caststatuschanged
+clearlead
 customwarning
 defaultselected
 describedby
