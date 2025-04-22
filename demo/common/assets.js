@@ -70,18 +70,29 @@ shakaAssets.AdTag = {
 
 /**
  * @param {!shakaAssets.KeySystem} keySystem
- * @return {string}
+ * @return {!Array<string>}
  */
-shakaAssets.identifierForKeySystem = (keySystem) => {
+shakaAssets.identifiersForKeySystem = (keySystem) => {
+  const keySystems = [];
   const KeySystem = shakaAssets.KeySystem;
   switch (keySystem) {
-    case KeySystem.CLEAR_KEY: return 'org.w3.clearkey';
-    case KeySystem.FAIRPLAY: return 'com.apple.fps';
-    case KeySystem.PLAYREADY: return 'com.microsoft.playready';
-    case KeySystem.WIDEVINE: return 'com.widevine.alpha';
-    case KeySystem.AES128: return 'aes128';
-    default: return 'no drm protection';
+    case KeySystem.CLEAR_KEY:
+      keySystems.push('org.w3.clearkey');
+      break;
+    case KeySystem.FAIRPLAY:
+      keySystems.push('com.apple.fps');
+      keySystems.push('com.apple.fps.1_0');
+      break;
+    case KeySystem.PLAYREADY:
+      keySystems.push('com.microsoft.playready');
+      keySystems.push('com.microsoft.playready.recommendation');
+      keySystems.push('com.microsoft.playready.recommendation.3000');
+      break;
+    case KeySystem.WIDEVINE:
+      keySystems.push('com.widevine.alpha');
+      break;
   }
+  return keySystems;
 };
 
 
