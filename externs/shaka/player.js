@@ -2195,7 +2195,7 @@ shaka.extern.NetworkingConfiguration;
  *   updateend event is expected on setDuration operation if new duration is
  *   smaller than existing value.
  *   <br>
- *   Defaults to <code>false</code>.
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;
