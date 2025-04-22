@@ -2042,7 +2042,6 @@ shakaAssets.testAssets = [
       .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
       .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
       .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.DOLBY_VISION_P5)
       .setExtraConfig({
