@@ -30,6 +30,7 @@ filterDescribe('Offline', supportsStorage, () => {
 
     widevineSupport = shakaSupport.drm['com.widevine.alpha'];
     playreadySupport = shakaSupport.drm['com.microsoft.playready'] ||
+        shakaSupport.drm['com.microsoft.playready.recommendation'] ||
         shakaSupport.drm['com.chromecast.playready'];
   });
 

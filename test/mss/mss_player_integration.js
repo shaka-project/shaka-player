@@ -29,6 +29,7 @@ describe('MSS Player', () => {
   function checkPlayReadySupport() {
     const playReadySupport =
         shakaSupport.drm['com.microsoft.playready'] ||
+        shakaSupport.drm['com.microsoft.playready.recommendation'] ||
         shakaSupport.drm['com.chromecast.playready'];
     if (!playReadySupport) {
       return false;
