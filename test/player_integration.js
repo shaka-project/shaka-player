@@ -1029,7 +1029,7 @@ describe('Player', () => {
 
       await player.load('test:sintel_long_compiled');
       video.pause();
-      expect(onBuffering).toHaveBeenCalledTimes(1);
+      expect(onBuffering).toHaveBeenCalledTimes(2);
       expect(onBuffering).toHaveBeenCalledWith(startBuffering);
       onBuffering.calls.reset();
 
