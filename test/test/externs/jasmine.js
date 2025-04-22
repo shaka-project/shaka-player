@@ -130,6 +130,7 @@ jasmine.Matchers.prototype.toBeTruthy = function() {};
 
 jasmine.Matchers.prototype.toBeUndefined = function() {};
 
+/** @param {*} value */
 jasmine.Matchers.prototype.toBeInstanceOf = function(value) {};
 
 
