@@ -428,7 +428,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.CHAPTERS)
       .addExtraChapter({
         uri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-chapters.vtt',
-        language: 'en',
+        language: 'und',
         mime: 'text/vtt',
       }),
   new ShakaDemoAssetInfo(
