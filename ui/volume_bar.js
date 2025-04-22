@@ -40,6 +40,14 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
         'volumechange',
         () => this.onPresentationVolumeChange_());
 
+    this.eventManager.listen(this.player,
+        'loading',
+        () => this.onPresentationVolumeChange_());
+
+    this.eventManager.listen(this.controls,
+        'caststatuschanged',
+        () => this.onPresentationVolumeChange_());
+
     this.eventManager.listen(this.adManager,
         shaka.ads.Utils.AD_VOLUME_CHANGED,
         () => this.onAdVolumeChange_());

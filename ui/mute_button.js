@@ -91,6 +91,16 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
       this.updateIcon_();
     });
 
+    this.eventManager.listen(this.player, 'loading', () => {
+      this.updateLocalizedStrings_();
+      this.updateIcon_();
+    });
+
+    this.eventManager.listen(this.controls, 'caststatuschanged', () => {
+      this.updateLocalizedStrings_();
+      this.updateIcon_();
+    });
+
     this.eventManager.listen(this.adManager,
         shaka.ads.Utils.AD_VOLUME_CHANGED, () => {
           this.updateLocalizedStrings_();
