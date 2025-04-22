@@ -196,6 +196,8 @@ shaka.ui.Overlay = class {
     this.controls_.configure(this.config_);
 
     this.controls_.dispatchEvent(new shaka.util.FakeEvent('uiupdated'));
+
+    this.setupCastSenderUrl_();
   }
 
 
@@ -370,6 +372,7 @@ shaka.ui.Overlay = class {
       preferVideoFullScreenInVisionOS: false,
       showAudioCodec: true,
       showVideoCodec: true,
+      castSenderUrl: 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause
@@ -415,6 +418,32 @@ shaka.ui.Overlay = class {
     }
 
     return config;
+  }
+
+  /**
+   * @private
+   */
+  setupCastSenderUrl_() {
+    const castSenderUrl = this.config_.castSenderUrl;
+    if (!castSenderUrl || !this.config_.castReceiverAppId ||
+        !window.chrome || chrome.cast || this.isSmartTV()) {
+      return;
+    }
+    let alreadyLoaded = false;
+    for (const element of document.getElementsByTagName('script')) {
+      const script = /** @type {HTMLScriptElement} **/(element);
+      if (script.src === castSenderUrl) {
+        alreadyLoaded = true;
+        break;
+      }
+    }
+    if (!alreadyLoaded) {
+      const script =
+        /** @type {HTMLScriptElement} **/(document.createElement('script'));
+      script.src = castSenderUrl;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
   }
 
   /**
