@@ -2607,6 +2607,178 @@ describe('DashParser Manifest', () => {
     expect(uri1).toBe('http://example.com/r1/1.mp4');
   });
 
+  describe('Continuity Timelines', () => {
+    it('are tagged correctly on the segment index for matching timelines',
+        async () => {
+          const manifestText = [
+            `<MPD type="static">`,
+            '  <Period id="1" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="0">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="0" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="2" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '  <Period id="3" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="30">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="30" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="2" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '</MPD>',
+          ].join('\n');
+
+          fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+          /** @type {shaka.extern.Manifest} */
+          const manifest = await parser.start('dummy://foo', playerInterface);
+
+          const video0 = manifest.variants[0].video;
+          await video0.createSegmentIndex();
+
+          expect(video0.segmentIndex)
+              .toBeInstanceOf(shaka.media.MetaSegmentIndex);
+
+          if (video0.segmentIndex instanceof shaka.media.MetaSegmentIndex) {
+            const continuityTimelines = [];
+            video0.segmentIndex.forEachIndex((index) => {
+              continuityTimelines.push(index.continuityTimeline());
+            });
+
+            expect(continuityTimelines).toEqual([0, 0]);
+          }
+        });
+
+    it('are tagged correctly on the segment index for non-matching timelines',
+        async () => {
+          const manifestText = [
+            `<MPD type="static">`,
+            '  <Period id="1" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="0" startNumber="0">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="0" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="2" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '  <Period id="3" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="0" startNumber="0">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="0" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="4" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '</MPD>',
+          ].join('\n');
+
+          fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+          /** @type {shaka.extern.Manifest} */
+          const manifest = await parser.start('dummy://foo', playerInterface);
+
+          const video0 = manifest.variants[0].video;
+          await video0.createSegmentIndex();
+
+          expect(video0.segmentIndex)
+              .toBeInstanceOf(shaka.media.MetaSegmentIndex);
+
+          if (video0.segmentIndex instanceof shaka.media.MetaSegmentIndex) {
+            const continuityTimelines = [];
+            video0.segmentIndex.forEachIndex((index) => {
+              continuityTimelines.push(index.continuityTimeline());
+            });
+            expect(continuityTimelines).toEqual([0, 1]);
+          }
+        });
+
+    it('are tagged correctly on the segment index for mixed timelines',
+        async () => {
+          const manifestText = [
+            `<MPD type="static">`,
+            '  <Period id="1" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="0" startNumber="0">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="0" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="2" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '  <Period id="3" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="0" startNumber="0">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="0" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="4" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '  <Period id="5" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="30">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="30" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="2" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '  <Period id="6" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="0" startNumber="0">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="0" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="7" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '</MPD>',
+          ].join('\n');
+
+          fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+          /** @type {shaka.extern.Manifest} */
+          const manifest = await parser.start('dummy://foo', playerInterface);
+
+          const video0 = manifest.variants[0].video;
+          await video0.createSegmentIndex();
+
+          expect(video0.segmentIndex)
+              .toBeInstanceOf(shaka.media.MetaSegmentIndex);
+
+          if (video0.segmentIndex instanceof shaka.media.MetaSegmentIndex) {
+            const continuityTimelines = [];
+            video0.segmentIndex.forEachIndex((index) => {
+              continuityTimelines.push(index.continuityTimeline());
+            });
+            expect(continuityTimelines).toEqual([0, 1, 0, 2]);
+          }
+        });
+  });
+
   // b/179025415: A "future" period (past the segment availability window end)
   // would cause us to generate bogus segment references for that period.  This
   // would happen upon update (once per segment duration), but not on initial
