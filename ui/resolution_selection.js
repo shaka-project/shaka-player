@@ -180,8 +180,12 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
    * @private
    */
   getQualityMark_(track) {
-    const trackHeight = track.height || 0;
-    const trackWidth = track.width || 0;
+    let trackHeight = track.height || 0;
+    let trackWidth = track.width || 0;
+    if (trackHeight > trackWidth) {
+      // Vertical video.
+      [trackWidth, trackHeight] = [trackHeight, trackWidth];
+    }
     let height = trackHeight;
     const aspectRatio = trackWidth / trackHeight;
     if (aspectRatio > (16 / 9)) {
@@ -434,8 +438,12 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
    * @private
    */
   getResolutionLabel_(track, tracks) {
-    const trackHeight = track.height || 0;
-    const trackWidth = track.width || 0;
+    let trackHeight = track.height || 0;
+    let trackWidth = track.width || 0;
+    if (trackHeight > trackWidth) {
+      // Vertical video.
+      [trackWidth, trackHeight] = [trackHeight, trackWidth];
+    }
     let height = trackHeight;
     const aspectRatio = trackWidth / trackHeight;
     if (aspectRatio > (16 / 9)) {
