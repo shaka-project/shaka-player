@@ -875,8 +875,10 @@ describe('Interstitial Ad manager', () => {
         '<Event duration="1" id="OVERLAY" presentationTime="0">',
         '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd">',
         '<Viewport x="1920" y="1080"/>',
+        '<Overlay>',
         '<TopLeft x="0" y="720"/>',
         '<Size x="480" y="360"/>',
+        '</Overlay>',
         '</OverlayEvent>',
         '</Event>',
       ].join('');
@@ -943,7 +945,11 @@ describe('Interstitial Ad manager', () => {
       const eventString = [
         '<Event duration="1" id="OVERLAY" presentationTime="0">',
         '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd" z="0">',
-        '<SqueezeCurrent percentage="0.7"/>',
+        '<Viewport x="1920" y="1080"/>',
+        '<Squeeze>',
+        '<TopLeft x="0" y="720"/>',
+        '<Size x="480" y="360"/>',
+        '</Squeeze>',
         '</OverlayEvent>',
         '</Event>',
       ].join('');
@@ -969,7 +975,11 @@ describe('Interstitial Ad manager', () => {
       const eventString = [
         '<Event duration="1" id="OVERLAY" presentationTime="0">',
         '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd" z="-1">',
-        '<SqueezeCurrent percentage="0.5"/>',
+        '<Viewport x="1920" y="1080"/>',
+        '<Squeeze>',
+        '<TopLeft x="0" y="0"/>',
+        '<Size x="960" y="540"/>',
+        '</Squeeze>',
         '</OverlayEvent>',
         '</Event>',
       ].join('');
@@ -1041,6 +1051,95 @@ describe('Interstitial Ad manager', () => {
           },
         },
         background: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
+    it('supports overlay events with double box format', async () => {
+      const eventString = [
+        '<Event duration="1" id="OVERLAY" presentationTime="0">',
+        '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd" z="-1" ',
+        'background="red">',
+        '<Viewport x="1920" y="1080"/>',
+        '<Overlay>',
+        '<TopLeft x="0" y="720"/>',
+        '<Size x="480" y="360"/>',
+        '</Overlay>',
+        '<Squeeze>',
+        '<TopLeft x="0" y="0"/>',
+        '<Size x="960" y="540"/>',
+        '</Squeeze>',
+        '</OverlayEvent>',
+        '</Event>',
+      ].join('');
+      const eventNode = TXml.parseXmlString(eventString);
+      goog.asserts.assert(eventNode, 'Should have a event node!');
+      /** @type {shaka.extern.TimelineRegionInfo} */
+      const region = {
+        startTime: 0,
+        endTime: 1,
+        id: 'OVERLAY',
+        schemeIdUri: 'urn:scte:dash:scte214-events',
+        eventNode,
+        eventElement: TXml.txmlNodeToDomElement(eventNode),
+        value: '',
+        timescale: 1,
+      };
+      await interstitialAdManager.addOverlayRegion(region);
+
+      expect(onEventSpy).not.toHaveBeenCalled();
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
+      const expectedInterstitial = {
+        id: 'OVERLAY',
+        groupId: null,
+        startTime: 0,
+        endTime: 1,
+        uri: 'test.mpd',
+        mimeType: 'application/dash+xml',
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: true,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: false,
+        pre: false,
+        post: false,
+        timelineRange: true,
+        loop: false,
+        overlay: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 0,
+            y: 720,
+          },
+          size: {
+            x: 480,
+            y: 360,
+          },
+        },
+        displayOnBackground: true,
+        currentVideo: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 0,
+            y: 0,
+          },
+          size: {
+            x: 960,
+            y: 540,
+          },
+        },
+        background: 'red',
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
