@@ -147,20 +147,6 @@ describe('DrmEngine', () => {
     document.body.removeChild(video);
   });
 
-  function checkTrueDrmSupport() {
-    if (shaka.util.Platform.isXboxOne()) {
-      // Axinom won't issue a license for an Xbox One.  The error message from
-      // the license server says "Your DRM client's security level is 150, but
-      // the entitlement message requires 2000 or higher."
-      // TODO: Stop using Axinom's license server.  Use
-      // https://testweb.playready.microsoft.com/Server/ServiceQueryStringSyntax
-      return false;
-    }
-    return shakaSupport.drm['com.widevine.alpha'] ||
-        shakaSupport.drm['com.microsoft.playready'] ||
-        shakaSupport.drm['com.microsoft.playready.recommendation'];
-  }
-
   filterDescribe('basic flow', checkTrueDrmSupport, () => {
     drmIt('gets a license and can play encrypted segments', async () => {
       // The error callback should not be invoked.

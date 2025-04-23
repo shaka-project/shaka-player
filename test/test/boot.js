@@ -468,7 +468,7 @@ function checkWidevineSupport() {
 }
 
 function checkFairPlaySupport() {
-  return shakaSupport.drm['com.apple.fps'];
+  return shakaSupport.drm['com.apple.fps'] && !getClientArg('runningInVM');
 }
 
 function checkWidevinePersistentSupport() {
