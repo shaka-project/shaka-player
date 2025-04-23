@@ -440,11 +440,13 @@ shaka.test.FakeClosedCaptionParser = class {
     this.parseFromSpy = jasmine.createSpy('parseFrom');
     /** @type {!jasmine.Spy} */
     this.resetSpy = jasmine.createSpy('reset');
+    /** @type {!jasmine.Spy} */
+    this.removeSpy = jasmine.createSpy('remove');
   }
 
   /** @override */
-  init() {
-    return shaka.test.Util.invokeSpy(this.initSpy);
+  init(...args) {
+    return shaka.test.Util.invokeSpy(this.initSpy, ...args);
   }
 
   /** @override */
@@ -455,6 +457,11 @@ shaka.test.FakeClosedCaptionParser = class {
   /** @override */
   reset() {
     return shaka.test.Util.invokeSpy(this.resetSpy);
+  }
+
+  /** @override */
+  remove(continuityTimelines) {
+    return shaka.test.Util.invokeSpy(this.removeSpy, continuityTimelines);
   }
 };
 
