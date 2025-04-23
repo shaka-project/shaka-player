@@ -467,16 +467,18 @@ function checkWidevineSupport() {
   return shakaSupport.drm['com.widevine.alpha'];
 }
 
+function checkFairPlaySupport() {
+  return shakaSupport.drm['com.apple.fps'];
+}
+
 function checkWidevinePersistentSupport() {
   const widevine = shakaSupport.drm['com.widevine.alpha'];
   return !!(widevine && widevine.persistentState);
 }
 
 function checkTrueDrmSupport() {
-  return shakaSupport.drm['com.widevine.alpha'] ||
-      shakaSupport.drm['com.microsoft.playready'] ||
-      shakaSupport.drm['com.microsoft.playready.recommendation'] ||
-      shakaSupport.drm['com.chromecast.playready'];
+  // We don't include FairPlay because our test assets aren't ready to use it.
+  return checkWidevineSupport() || checkPlayReadySupport();
 }
 
 /**
