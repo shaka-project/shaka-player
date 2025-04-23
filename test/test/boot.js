@@ -459,8 +459,7 @@ function checkClearKeySupport() {
 
 function checkPlayReadySupport() {
   return shakaSupport.drm['com.microsoft.playready'] ||
-      shakaSupport.drm['com.microsoft.playready.recommendation'] ||
-      shakaSupport.drm['com.chromecast.playready'];
+      shakaSupport.drm['com.microsoft.playready.recommendation'];
 }
 
 function checkWidevineSupport() {
