@@ -135,7 +135,8 @@ shaka.extern.UIQualityMarks;
  *   setupMediaSession: boolean,
  *   preferVideoFullScreenInVisionOS: boolean,
  *   showAudioCodec: boolean,
- *   showVideoCodec: boolean
+ *   showVideoCodec: boolean,
+ *   castSenderUrl: string
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -310,6 +311,11 @@ shaka.extern.UIQualityMarks;
  * @property {boolean} showVideoCodec
  *   Show the video codec if the resolution has more than one video codec.
  *   Defaults to true.
+ * @property {string} castSenderUrl
+ *   URL to load the cast sender if your platform supports it. This URL does not
+ *   apply to Smart TVs.
+ *   Note: This URL is only used if the cast sender is not previously loaded.
+ *   Defaults to 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js'.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

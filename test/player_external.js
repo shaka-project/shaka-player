@@ -95,13 +95,20 @@ describe('Player', () => {
 
       const wit = asset.focus ? fit : it;
       wit(testName, async () => {
-        const idFor = shakaAssets.identifierForKeySystem;
+        const idsFor = shakaAssets.identifiersForKeySystem;
         if (!asset.isClear() && !asset.isAes128() &&
             !asset.drm.some((keySystem) => {
-              // Demo assets use an enum here, which we look up in idFor.
+              if (shakaSupport.drm[keySystem]) {
+                return true;
+              }
+              // Demo assets use an enum here, which we look up in idsFor.
               // Command-line assets use a direct key system ID.
-              return shakaSupport.drm[idFor(keySystem)] ||
-                 shakaSupport.drm[keySystem];
+              for (const identifier of idsFor(keySystem)) {
+                if (shakaSupport.drm[identifier]) {
+                  return true;
+                }
+              }
+              return false;
             })) {
           pending('None of the required key systems are supported.');
         }

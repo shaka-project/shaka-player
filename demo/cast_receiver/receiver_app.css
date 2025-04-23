@@ -44,7 +44,7 @@ body {
   font-size: 4.4vh;
 }
 
-#idle {
+#welcome {
   position: absolute;
   top: 0;
   left: 0;
@@ -55,25 +55,11 @@ body {
    * they will be visible on top until we decide to hide them and show the
    * player. */
   z-index: 99;
-  padding-top: 60px;
-  padding-left: 0;
-  background-color: black;
+  background-color: white;
 
-  /* To make it easier to view in a browser in some non-Chromecast size: */
+  background-image: url("shaka-player-logo.png");
   background-repeat: no-repeat;
-
-  /* Chromecast receiver guidelines say to change the screen every 30-60s */
-  animation: bg-change 90s linear infinite;
-}
-
-#idle h1 {
-  margin-left: 100px;
-}
-
-#idle h2 {
-  font-weight: normal;
-  margin-left: 100px;
-  width: 550px;
+  background-position: center;
 }
 
 /* Preload the background images for idle mode */
@@ -83,29 +69,5 @@ body:after {
   height: 0;
   overflow: hidden;
   z-index: -1;
-  content: url("idle1.jpg") url("idle2.jpg") url("idle3.jpg");
-}
-
-@keyframes bg-change {
-  0% { background-image: url("idle1.jpg"); padding-left: 0; }
-
-  32% { background-image: url("idle1.jpg"); padding-left: 0; }
-
-  34% { background-image: url("idle2.jpg"); padding-left: 0; }
-
-  49% { background-image: url("idle2.jpg"); padding-left: 0; }
-
-  50% { background-image: url("idle2.jpg"); padding-left: 400px; }
-
-  65% { background-image: url("idle2.jpg"); padding-left: 400px; }
-
-  67% { background-image: url("idle3.jpg"); padding-left: 400px; }
-
-  87% { background-image: url("idle3.jpg"); padding-left: 400px; }
-
-  88% { background-image: url("idle3.jpg"); padding-left: 0; }
-
-  98% { background-image: url("idle3.jpg"); padding-left: 0; }
-
-  100% { background-image: url("idle1.jpg"); padding-left: 0; }
+  content: url("shaka-player-logo.png");
 }

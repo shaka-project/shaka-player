@@ -655,6 +655,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isFullScreenSupported() {
+    if (this.castProxy_.isCasting()) {
+      return false;
+    }
     if (this.shouldUseDocumentFullscreen_()) {
       return true;
     }
