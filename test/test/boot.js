@@ -449,6 +449,36 @@ async function checkSupport() {
   }
 }
 
+function checkClearKeySupport() {
+  const clearKeySupport = shakaSupport.drm['org.w3.clearkey'];
+  if (!clearKeySupport) {
+    return false;
+  }
+  return clearKeySupport.encryptionSchemes.includes('cenc');
+}
+
+function checkPlayReadySupport() {
+  return shakaSupport.drm['com.microsoft.playready'] ||
+      shakaSupport.drm['com.microsoft.playready.recommendation'] ||
+      shakaSupport.drm['com.chromecast.playready'];
+}
+
+function checkWidevineSupport() {
+  return shakaSupport.drm['com.widevine.alpha'];
+}
+
+function checkWidevinePersistentSupport() {
+  const widevine = shakaSupport.drm['com.widevine.alpha'];
+  return !!(widevine && widevine.persistentState);
+}
+
+function checkTrueDrmSupport() {
+  return shakaSupport.drm['com.widevine.alpha'] ||
+      shakaSupport.drm['com.microsoft.playready'] ||
+      shakaSupport.drm['com.microsoft.playready.recommendation'] ||
+      shakaSupport.drm['com.chromecast.playready'];
+}
+
 /**
  * Set up the Shaka Player test environment.
  * @return {!Promise}

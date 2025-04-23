@@ -243,8 +243,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     });
   });
 
-  const widevineSupport = () => shakaSupport.drm['com.widevine.alpha'];
-  filterDescribe('with drm', widevineSupport, () => {
+  filterDescribe('with drm', checkWidevineSupport, () => {
     drmIt('sends reasonably-sized updates', async () => {
       // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
       fakeInitState.manifest = 'test:sintel-enc';

@@ -161,10 +161,6 @@ describe('DrmEngine', () => {
         shakaSupport.drm['com.microsoft.playready.recommendation'];
   }
 
-  function checkClearKeySupport() {
-    return shakaSupport.drm['org.w3.clearkey'];
-  }
-
   filterDescribe('basic flow', checkTrueDrmSupport, () => {
     drmIt('gets a license and can play encrypted segments', async () => {
       // The error callback should not be invoked.
