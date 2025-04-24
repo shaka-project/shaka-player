@@ -463,28 +463,37 @@ function checkClearKeySupport() {
 
 /**
  * Check if PlayReady is supported.
- * @return {?shaka.extern.DrmSupportType}
+ * @return {boolean}
  */
 function checkPlayReadySupport() {
-  return shakaSupport.drm['com.microsoft.playready'] ||
+  if (shakaSupport.drm['com.microsoft.playready'] ||
       shakaSupport.drm['com.microsoft.playready.recommendation'] ||
-      shakaSupport.drm['com.microsoft.playready.recommendation.3000'];
+      shakaSupport.drm['com.microsoft.playready.recommendation.3000']) {
+    return true;
+  }
+  return false;
 }
 
 /**
  * Check if Widevine is supported.
- * @return {?shaka.extern.DrmSupportType}
+ * @return {boolean}
  */
 function checkWidevineSupport() {
-  return shakaSupport.drm['com.widevine.alpha'];
+  if (shakaSupport.drm['com.widevine.alpha']) {
+    return true;
+  }
+  return false;
 }
 
 /**
  * Check if FairPlay is supported.
- * @return {?boolean}
+ * @return {boolean}
  */
 function checkFairPlaySupport() {
-  return shakaSupport.drm['com.apple.fps'] && !getClientArg('runningInVM');
+  if (shakaSupport.drm['com.apple.fps'] && !getClientArg('runningInVM')) {
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -492,7 +501,7 @@ function checkFairPlaySupport() {
  * @return {boolean}
  */
 function checkWidevinePersistentSupport() {
-  const widevine = checkWidevineSupport();
+  const widevine = shakaSupport.drm['com.widevine.alpha'];
   if (!widevine) {
     return false;
   }
@@ -501,7 +510,7 @@ function checkWidevinePersistentSupport() {
 
 /**
  * Check if Widevine and/or PlayReady are supported.
- * @return {?shaka.extern.DrmSupportType}
+ * @return {boolean}
  */
 function checkTrueDrmSupport() {
   // We don't include FairPlay because our test assets aren't ready to use it.
