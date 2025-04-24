@@ -459,7 +459,9 @@ function checkClearKeySupport() {
 
 function checkPlayReadySupport() {
   return shakaSupport.drm['com.microsoft.playready'] ||
-      shakaSupport.drm['com.microsoft.playready.recommendation'];
+      shakaSupport.drm['com.microsoft.playready.recommendation'] ||
+      shakaSupport.drm['com.microsoft.playready.recommendation.3000'] ||
+      shakaSupport.drm['com.chromecast.playready'];
 }
 
 function checkWidevineSupport() {
@@ -471,8 +473,11 @@ function checkFairPlaySupport() {
 }
 
 function checkWidevinePersistentSupport() {
-  const widevine = shakaSupport.drm['com.widevine.alpha'];
-  return !!(widevine && widevine.persistentState);
+  const widevine = checkWidevineSupport();
+  if (!widevine) {
+    return false;
+  }
+  return widevine.persistentState;
 }
 
 function checkTrueDrmSupport() {
