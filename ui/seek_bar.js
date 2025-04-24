@@ -564,8 +564,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     }
     const thumbnail =
         await this.player.getThumbnails(/* trackId= */ null, playerValue);
-    if (!thumbnail || !thumbnail.uris.length) {
+    if (!thumbnail || !thumbnail.uris || !thumbnail.uris.length) {
       this.hideThumbnail_();
+      this.showTime_(pixelPosition, value);
       return;
     }
     if (thumbnail.width < thumbnail.height) {
