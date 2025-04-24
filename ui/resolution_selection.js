@@ -145,8 +145,10 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     const track = tracks.find((track) => track.active);
     if (!track) {
       if (this.overflowQualityMark) {
-        this.overflowQualityMark.textContent = '';
-        this.overflowQualityMark.style.display = 'none';
+        const stats = this.player.getStats();
+        const mark = this.getQualityMark_(stats.width, stats.height);
+        this.overflowQualityMark.textContent = mark;
+        this.overflowQualityMark.style.display = mark !== '' ? '' : 'none';
       }
       return;
     }
@@ -165,7 +167,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     }
 
     /** @type {string} */
-    const mark = this.getQualityMark_(track);
+    const mark = this.getQualityMark_(track.width, track.height);
     this.qualityMark.textContent = mark;
     this.qualityMark.style.display = mark !== '' ? '' : 'none';
     if (this.overflowQualityMark) {
@@ -175,34 +177,37 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
   }
 
   /**
-   * @param {!shaka.extern.VideoTrack} track
+   * @param {?number} width
+   * @param {?number} height
    * @return {string}
    * @private
    */
-  getQualityMark_(track) {
-    let trackHeight = track.height || 0;
-    let trackWidth = track.width || 0;
+  getQualityMark_(width, height) {
+    if (!width || !height) {
+      return '';
+    }
+    let trackHeight = height;
+    let trackWidth = width;
     if (trackHeight > trackWidth) {
       // Vertical video.
       [trackWidth, trackHeight] = [trackHeight, trackWidth];
     }
-    let height = trackHeight;
     const aspectRatio = trackWidth / trackHeight;
     if (aspectRatio > (16 / 9)) {
-      height = Math.round(trackWidth * 9 / 16);
+      trackHeight = Math.round(trackWidth * 9 / 16);
     }
     const qualityMarks = this.controls.getConfig().qualityMarks;
-    if (height >= 8640) {
-      return height + 'p';
-    } else if (height >= 4320) {
+    if (trackHeight >= 8640) {
+      return trackHeight + 'p';
+    } else if (trackHeight >= 4320) {
       return qualityMarks['4320'];
-    } else if (height >= 2160) {
+    } else if (trackHeight >= 2160) {
       return qualityMarks['2160'];
-    } else if (height >= 1440) {
+    } else if (trackHeight >= 1440) {
       return qualityMarks['1440'];
-    } else if (height >= 1080) {
+    } else if (trackHeight >= 1080) {
       return qualityMarks['1080'];
-    } else if (height >= 720) {
+    } else if (trackHeight >= 720) {
       return qualityMarks['720'];
     }
     return '';
@@ -409,7 +414,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       }
       button.appendChild(span);
 
-      const mark = this.getQualityMark_(track);
+      const mark = this.getQualityMark_(track.width, track.height);
       if (mark !== '') {
         const markEl = shaka.util.Dom.createHTMLElement('sup');
         markEl.classList.add('shaka-quality-mark');
