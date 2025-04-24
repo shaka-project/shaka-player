@@ -82,38 +82,38 @@ describe('ContentWorkarounds', () => {
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 30);
   });
 
-  const keySystemsConfigs = new Map();
-  if (checkWidevineSupport()) {
-    keySystemsConfigs.set('com.widevine.alpha', {
-      servers: {
-        'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
-      },
-    });
-  }
-  if (checkPlayReadySupport()) {
-    keySystemsConfigs.set('com.microsoft.playready', {
-      servers: {
-        'com.microsoft.playready': 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:51745386-2d42-56fd-8bad-4f58422004d7,contentkey:UXRThi1CVv2LrU9YQiAE1w==),(kid:26470f42-96d4-5d04-a9ba-bb442e169800,contentkey:JkcPQpbUXQSpurtELhaYAA==)',
-      },
-    });
-  }
-  if (checkFairPlaySupport()) {
-    keySystemsConfigs.set('com.apple.fps', {
-      servers: {
-        'com.apple.fps': 'https://fps.ezdrm.com/api/licenses/b99ed9e5-c641-49d1-bfa8-43692b686ddb',
-      },
-      advanced: {
-        'com.apple.fps': {
-          serverCertificate: null, // empty now, fulfilled during actual test
+  const keySystemsConfigs = new Map()
+      .set('com.widevine.alpha', {
+        servers: {
+          'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
         },
-      },
-    });
-  }
+      })
+      .set('com.microsoft.playready', {
+        servers: {
+          'com.microsoft.playready': 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:51745386-2d42-56fd-8bad-4f58422004d7,contentkey:UXRThi1CVv2LrU9YQiAE1w==),(kid:26470f42-96d4-5d04-a9ba-bb442e169800,contentkey:JkcPQpbUXQSpurtELhaYAA==)',
+        },
+      })
+      .set('com.apple.fps', {
+        servers: {
+          'com.apple.fps': 'https://fps.ezdrm.com/api/licenses/b99ed9e5-c641-49d1-bfa8-43692b686ddb',
+        },
+        advanced: {
+          'com.apple.fps': {
+            serverCertificate: null, // empty now, fulfilled during actual test
+          },
+        },
+      });
   for (const [keySystem, drmConfig] of keySystemsConfigs) {
     drmIt(`plays mixed clear encrypted content with ${keySystem}`, async () => {
+      if (!shakaSupport.drm[keySystem]) {
+        pending('Needed DRM is not supported on this platform');
+      }
       if (shaka.util.Platform.isTizen3()) {
         pending('Tizen 3 currently does not support mixed clear ' +
             'encrypted content');
+      }
+      if (keySystem === 'com.apple.fps' && getClientArg('runningInVM')) {
+        pending('FairPlay is not supported in a VM');
       }
       const keyStatusSpy = jasmine.createSpy('onKeyStatus');
       eventManager.listen(player, 'keystatuschanged',
