@@ -1242,10 +1242,7 @@ describe('Player', () => {
   /** Regression test for Issue #2741 */
   describe('unloading', () => {
     drmIt('unloads properly after DRM error', async () => {
-      if (!shakaSupport.drm['com.widevine.alpha'] &&
-          !shakaSupport.drm['com.microsoft.playready'] &&
-          !shakaSupport.drm['com.microsoft.playready.recommendation'] &&
-          !shakaSupport.drm['com.chromecast.playready']) {
+      if (!checkTrueDrmSupport()) {
         pending('Skipping DRM error test, only runs on Widevine and PlayReady');
       }
 

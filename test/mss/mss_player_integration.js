@@ -26,17 +26,6 @@ describe('MSS Player', () => {
   const playreadyUrl = '/base/test/test/assets/mss-playready/Manifest';
   const playreadyLicenseUrl = 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)';
 
-  function checkPlayReadySupport() {
-    const playReadySupport =
-        shakaSupport.drm['com.microsoft.playready'] ||
-        shakaSupport.drm['com.microsoft.playready.recommendation'] ||
-        shakaSupport.drm['com.chromecast.playready'];
-    if (!playReadySupport) {
-      return false;
-    }
-    return playReadySupport.encryptionSchemes.includes('cenc');
-  }
-
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
