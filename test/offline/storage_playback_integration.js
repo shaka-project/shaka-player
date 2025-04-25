@@ -29,14 +29,6 @@ filterDescribe('Storage', checkStorageSupport, () => {
   /** @type {!shaka.test.Waiter} */
   let waiter;
 
-  function checkClearKeySupport() {
-    const clearKeySupport = shakaSupport.drm['org.w3.clearkey'];
-    if (!clearKeySupport) {
-      return false;
-    }
-    return clearKeySupport.encryptionSchemes.includes('cenc');
-  }
-
   async function eraseStorage() {
     /** @type {!shaka.offline.StorageMuxer} */
     const muxer = new shaka.offline.StorageMuxer();

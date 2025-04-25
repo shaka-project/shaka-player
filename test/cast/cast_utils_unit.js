@@ -13,8 +13,12 @@ describe('CastUtils', () => {
 
   it('includes every Player member', () => {
     const ignoredMembers = [
+      'attach',  // Stubbed
+      'attachCanvas',  // Stubbed
+      'detach',  // Stubbed
       'constructor',  // JavaScript added field
       'getAdManager',  // Handled specially
+      'getChapters',  // Not serialized
       'getSharedConfiguration',  // Handled specially
       'getNetworkingEngine',  // Handled specially
       'getDrmEngine',  // Handled specially
@@ -35,7 +39,6 @@ describe('CastUtils', () => {
       'getNonDefaultConfiguration',
       'addFont',
       'getFetchedPlaybackInfo',
-      'getLiveLatency',
       'isRemotePlayback',
 
       // Test helper methods (not @export'd)

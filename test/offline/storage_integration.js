@@ -14,9 +14,7 @@ function drmStorageSupport() {
   if (!shaka.offline.Storage.support()) {
     return false;
   }
-
-  const widevineSupport = shakaSupport.drm['com.widevine.alpha'];
-  return !!(widevineSupport && widevineSupport.persistentState);
+  return checkWidevinePersistentSupport();
 }
 
 filterDescribe('Storage', storageSupport, () => {
