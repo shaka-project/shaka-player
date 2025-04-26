@@ -394,10 +394,9 @@ shaka.ui.LanguageUtils = class {
     // "unknown"), we should append the original language code.
     // Otherwise, there may be multiple identical-looking items in the list.
     if (locale in mozilla.LanguageMapping) {
-      return mozilla.LanguageMapping[locale].nativeName;
+      return mozilla.LanguageMapping[locale];
     } else if (language in mozilla.LanguageMapping) {
-      return mozilla.LanguageMapping[language].nativeName +
-          ' (' + locale + ')';
+      return mozilla.LanguageMapping[language] + ' (' + locale + ')';
     } else {
       return resolve(shaka.ui.Locales.Ids.UNRECOGNIZED_LANGUAGE) +
           ' (' + locale + ')';

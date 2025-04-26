@@ -243,15 +243,6 @@ describe('Player Src Equals', () => {
     }
   });
 
-  it('ignores extra text track on the video element', async () => {
-    // The extra text track with label "Shaka Player TextTrack" should not be
-    // listed.
-    video.addTextTrack('subtitles', /* label= */ shaka.Player.TextTrackLabel);
-
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
-    expect(player.getTextTracks()).toEqual([]);
-  });
-
   it('configures play and seek range for VOD with start', async () => {
     player.configure({playRangeStart: 3});
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);

@@ -311,28 +311,28 @@ describe('Player', () => {
     // to a crash in TextEngine.  This validates that we do not trigger this
     // behavior when changing visibility of text.
 
-    it('does not cause cues to be null', async () => {
+    it('does not enabled textTrack', async () => {
       await player.load('test:sintel_compiled');
       await video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
 
-      // This TextTrack was created as part of load() when we set up the
-      // TextDisplayer.
+      // SimpleTextDisplayer creates TextTracks if text streams are detected.
       const textTrack = video.textTracks[0];
       expect(textTrack).not.toBe(null);
 
-      if (textTrack) {
-        // This should not be null initially.
-        expect(textTrack.cues).not.toBe(null);
+      player.setTextTrackVisibility(true);
+      // Should be disabled still.
+      expect(textTrack.mode).toBe('disabled');
 
-        await player.setTextTrackVisibility(true);
-        // This should definitely not be null when visible.
-        expect(textTrack.cues).not.toBe(null);
+      const tracks = player.getTextTracks();
+      player.selectTextTrack(tracks[0]);
+      await waiter.waitForEvent(player, 'textchanged');
+      // Should definitely be showing when selected.
+      expect(textTrack.mode).toBe('showing');
 
-        await player.setTextTrackVisibility(false);
-        // This should not transition to null when invisible.
-        expect(textTrack.cues).not.toBe(null);
-      }
+      player.setTextTrackVisibility(false);
+      // Should transition to hidden when invisible.
+      expect(textTrack.mode).toBe('hidden');
     });
 
     // Repro for https://github.com/shaka-project/shaka-player/issues/1879.
@@ -458,7 +458,7 @@ describe('Player', () => {
       await video.play();
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-      expect(video.textTracks[0].activeCues.length).toBe(1);
+      expect(video.textTracks[1].activeCues.length).toBe(1);
       expect(player.getTextTracks()[1].active).toBe(true);
     });
   });  // describe('setTextTrackVisibility')

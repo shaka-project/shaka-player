@@ -328,10 +328,31 @@ shaka.test.NativeTextLayoutTests = class extends shaka.test.TextLayoutTests {
 
     /** @type {shaka.test.Waiter} */
     this.waiter = null;
+
+    /** @type {Object} **/
+    this.player = null;
   }
 
   /** @override */
   async beforeAll() {
+    /** @type {!Array<shaka.extern.TextTrack>} */
+    const textTracks= [{
+      id: 0,
+      active: true,
+    }];
+    this.player = {
+      addEventListener: () => { },
+      removeEventListener: () => { },
+      getMediaElement: () => this.video,
+      getLoadMode: () => shaka.Player.LoadMode.MEDIA_SOURCE,
+      getTextTracks: () => textTracks,
+      selectTextTrack: ({id}) => {
+        const track = textTracks.find((t) => t.id === id);
+        expect(track).toBeTruthy();
+        track.active = true;
+      },
+    };
+
     this.video = shaka.test.UiUtils.createVideoElement();
 
     // On some platforms, such as Chrome on Android, we may see a "cast"
@@ -367,8 +388,10 @@ shaka.test.NativeTextLayoutTests = class extends shaka.test.TextLayoutTests {
 
   /** @override */
   recreateTextDisplayer() {
-    this.textDisplayer = new shaka.text.SimpleTextDisplayer(
-        this.video, shaka.Player.TextTrackLabel);
+    /** @suppress {checkTypes} */
+    this.textDisplayer = new shaka.text.SimpleTextDisplayer(this.player);
+    /** @suppress {visibility} */
+    this.textDisplayer.onLoaded_();
     this.textDisplayer.setTextVisibility(true);
   }
 
