@@ -79,8 +79,7 @@ describe('Player Cross Boundary', () => {
     });
 
     drmIt('should reset MSE when crossing a boundary', async () => {
-      if (!shakaSupport.drm['com.widevine.alpha'] &&
-          !shakaSupport.drm['com.microsoft.playready']) {
+      if (!checkTrueDrmSupport()) {
         pending('Needed DRM is not supported on this platform');
       }
 
@@ -95,8 +94,7 @@ describe('Player Cross Boundary', () => {
     });
 
     drmIt('should buffer no further than boundary', async () => {
-      if (!shakaSupport.drm['com.widevine.alpha'] &&
-          !shakaSupport.drm['com.microsoft.playready']) {
+      if (!checkTrueDrmSupport()) {
         pending('Needed DRM is not supported on this platform');
       }
 
@@ -116,8 +114,7 @@ describe('Player Cross Boundary', () => {
     });
 
     drmIt('should skip MSE reset from encrypted boundary', async () => {
-      if (!shakaSupport.drm['com.widevine.alpha'] &&
-          !shakaSupport.drm['com.microsoft.playready']) {
+      if (!checkTrueDrmSupport()) {
         pending('Needed DRM is not supported on this platform');
       }
 

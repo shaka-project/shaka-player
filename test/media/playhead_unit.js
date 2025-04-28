@@ -130,6 +130,8 @@ describe('Playhead', () => {
     timeline.getSeekRangeStart.and.returnValue(5);
     timeline.getSeekRangeEnd.and.returnValue(60);
     timeline.getDuration.and.returnValue(60);
+    timeline.getInitialProgramDateTime.and.returnValue(
+        new Date(2005, 3, 2, 21, 37).getTime() / 1000.0);
 
     // These tests should not cause these methods to be invoked.
     timeline.getSegmentAvailabilityStart.and.throwError(new Error());
@@ -330,6 +332,24 @@ describe('Playhead', () => {
           Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(45);
+    });
+
+    it('playback using Date for live', () => {
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+      timeline.isLive.and.returnValue(true);
+      timeline.getDuration.and.returnValue(Infinity);
+      timeline.getSeekRangeStart.and.returnValue(0);
+      timeline.getSeekRangeEnd.and.returnValue(60);
+
+      playhead = new shaka.media.MediaSourcePlayhead(
+          video,
+          manifest,
+          config,
+          /* startTime= */ new Date(2005, 3, 2, 21, 37, 20),
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      expect(playhead.getTime()).toBe(20);
     });
 
     it('playback from segment seek range start time', () => {

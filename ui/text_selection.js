@@ -65,7 +65,18 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
         });
 
     this.eventManager.listen(this.player, 'loading', () => {
-      this.onTracksChanged_();
+      this.onCaptionStateChange_();
+      this.updateTextLanguages_();
+    });
+
+    this.eventManager.listen(this.player, 'loaded', () => {
+      this.onCaptionStateChange_();
+      this.updateTextLanguages_();
+    });
+
+    this.eventManager.listen(this.player, 'unloading', () => {
+      this.onCaptionStateChange_();
+      this.updateTextLanguages_();
     });
 
     this.eventManager.listen(this.player, 'texttrackvisibility', () => {
@@ -78,7 +89,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.onTracksChanged_();
+      this.updateTextLanguages_();
     });
 
     // Initialize caption state with a fake event.
@@ -88,8 +99,6 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     this.updateLocalizedStrings_();
 
     this.updateTextLanguages_();
-
-    this.onTracksChanged_();
   }
 
 
@@ -106,7 +115,6 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     /** @private {!HTMLElement} */
     this.captionsOffSpan_ = shaka.util.Dom.createHTMLElement('span');
 
-    this.captionsOffSpan_.classList.add('shaka-auto-span');
     off.appendChild(this.captionsOffSpan_);
   }
 
@@ -129,7 +137,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
   /** @private */
   updateTextLanguages_() {
-    const tracks = this.player.getTextTracks();
+    const tracks = this.player.getTextTracks() || [];
 
     shaka.ui.LanguageUtils.updateTextTracks(tracks, this.menu,
         (track) => this.onTextTrackSelected_(track),
@@ -159,6 +167,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
       this.captionsOffSpan_.classList.add('shaka-chosen-item');
       this.currentSelection.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.OFF);
+    } else {
+      this.captionsOffSpan_.classList.remove('shaka-chosen-item');
     }
 
     this.button.setAttribute('shaka-status', this.currentSelection.textContent);
@@ -167,6 +177,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     this.controls.dispatchEvent(
         new shaka.util.FakeEvent('captionselectionupdated'));
+
+    shaka.ui.Utils.setDisplay(this.button, tracks.length > 0);
   }
 
 
@@ -183,6 +195,11 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     // if captions are turned off -> on in a different language.
     this.player.selectTextTrack(track);
     await this.player.setTextTrackVisibility(true);
+
+    // Set text preference for when reloading the stream (e.g. casting), keep
+    // this selection.
+    this.player.configure('preferredTextLanguage', track.language);
+    this.player.configure('preferForcedSubs', track.forced);
   }
 
 
@@ -200,14 +217,6 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
         this.localization.resolve(LocIds.CAPTIONS);
     this.captionsOffSpan_.textContent =
         this.localization.resolve(LocIds.OFF);
-  }
-
-
-  /** @private */
-  onTracksChanged_() {
-    const hasText = this.player.getTextTracks().length > 0;
-    shaka.ui.Utils.setDisplay(this.button, hasText);
-    this.updateTextLanguages_();
   }
 };
 

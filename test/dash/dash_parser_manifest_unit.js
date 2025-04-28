@@ -2380,7 +2380,6 @@ describe('DashParser Manifest', () => {
     // (DASH-IF IOP v4.3 6.2.5.1.)
     const scheme = cicpScheme('TransferCharacteristics');
     const sdrValues = [1, 6, 13, 14, 15];
-    const manifestPromises = [];
     for (const value of sdrValues) {
       const manifestText = [
         '<MPD minBufferTime="PT75S">',
@@ -2404,10 +2403,9 @@ describe('DashParser Manifest', () => {
 
       fakeNetEngine.setResponseText('dummy://foo', manifestText);
 
-      manifestPromises.push(parser.start('dummy://foo', playerInterface));
-    }
-    const manifests = await Promise.all(manifestPromises);
-    for (const manifest of manifests) {
+      /** @type {shaka.extern.Manifest} */
+      // eslint-disable-next-line no-await-in-loop
+      const manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest.variants.length).toBe(1);
       const stream = manifest.variants[0].video;
       expect(stream.hdr).toBe('SDR');
@@ -2607,6 +2605,178 @@ describe('DashParser Manifest', () => {
 
     expect(uri0).toBe('http://example.com/r0/1.mp4');
     expect(uri1).toBe('http://example.com/r1/1.mp4');
+  });
+
+  describe('Continuity Timelines', () => {
+    it('are tagged correctly on the segment index for matching timelines',
+        async () => {
+          const manifestText = [
+            `<MPD type="static">`,
+            '  <Period id="1" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="0">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="0" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="2" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '  <Period id="3" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="30">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="30" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="2" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '</MPD>',
+          ].join('\n');
+
+          fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+          /** @type {shaka.extern.Manifest} */
+          const manifest = await parser.start('dummy://foo', playerInterface);
+
+          const video0 = manifest.variants[0].video;
+          await video0.createSegmentIndex();
+
+          expect(video0.segmentIndex)
+              .toBeInstanceOf(shaka.media.MetaSegmentIndex);
+
+          if (video0.segmentIndex instanceof shaka.media.MetaSegmentIndex) {
+            const continuityTimelines = [];
+            video0.segmentIndex.forEachIndex((index) => {
+              continuityTimelines.push(index.continuityTimeline());
+            });
+
+            expect(continuityTimelines).toEqual([0, 0]);
+          }
+        });
+
+    it('are tagged correctly on the segment index for non-matching timelines',
+        async () => {
+          const manifestText = [
+            `<MPD type="static">`,
+            '  <Period id="1" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="0" startNumber="0">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="0" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="2" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '  <Period id="3" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="0" startNumber="0">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="0" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="4" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '</MPD>',
+          ].join('\n');
+
+          fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+          /** @type {shaka.extern.Manifest} */
+          const manifest = await parser.start('dummy://foo', playerInterface);
+
+          const video0 = manifest.variants[0].video;
+          await video0.createSegmentIndex();
+
+          expect(video0.segmentIndex)
+              .toBeInstanceOf(shaka.media.MetaSegmentIndex);
+
+          if (video0.segmentIndex instanceof shaka.media.MetaSegmentIndex) {
+            const continuityTimelines = [];
+            video0.segmentIndex.forEachIndex((index) => {
+              continuityTimelines.push(index.continuityTimeline());
+            });
+            expect(continuityTimelines).toEqual([0, 1]);
+          }
+        });
+
+    it('are tagged correctly on the segment index for mixed timelines',
+        async () => {
+          const manifestText = [
+            `<MPD type="static">`,
+            '  <Period id="1" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="0" startNumber="0">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="0" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="2" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '  <Period id="3" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="0" startNumber="0">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="0" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="4" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '  <Period id="5" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="30">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="30" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="2" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '  <Period id="6" duration="PT30S">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <SegmentTemplate media="$Number$.mp4" presentationTimeOffset="0" startNumber="0">', // eslint-disable-line @stylistic/max-len
+            '        <SegmentTimeline>',
+            '          <S t="0" d="30" />',
+            '        </SegmentTimeline>',
+            '      </SegmentTemplate>',
+            '      <Representation id="7" width="640" height="480">',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '</MPD>',
+          ].join('\n');
+
+          fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+          /** @type {shaka.extern.Manifest} */
+          const manifest = await parser.start('dummy://foo', playerInterface);
+
+          const video0 = manifest.variants[0].video;
+          await video0.createSegmentIndex();
+
+          expect(video0.segmentIndex)
+              .toBeInstanceOf(shaka.media.MetaSegmentIndex);
+
+          if (video0.segmentIndex instanceof shaka.media.MetaSegmentIndex) {
+            const continuityTimelines = [];
+            video0.segmentIndex.forEachIndex((index) => {
+              continuityTimelines.push(index.continuityTimeline());
+            });
+            expect(continuityTimelines).toEqual([0, 1, 0, 2]);
+          }
+        });
   });
 
   // b/179025415: A "future" period (past the segment availability window end)
@@ -3779,5 +3949,48 @@ describe('DashParser Manifest', () => {
 
     const video1 = manifest.variants[0] && manifest.variants[0].video;
     expect(video1.codecs).toBe('av01.0.04M.10.0.111.09.16.09.0');
+  });
+
+  it('parses ProducerReferenceTime', async () => {
+    const manifestText = [
+      '<MPD type="static">',
+      '  <Period id="0" duration="PT2S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <ProducerReferenceTime presentationTime="52431344916"',
+      '                             wallClockTime="2025-04-09T14:53:43.797Z">',
+      '        <UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-iso:2014"/>',
+      '      </ProducerReferenceTime>',
+      '      <Representation id="2" width="640" height="480">',
+      '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4"',
+      '                         timescale="10000000">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="20000000" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    const programStartTime = 1744205180.662;
+    const expectedEvent = {
+      type: shaka.util.FakeEvent.EventName.Prft,
+      detail: {
+        wallClockTime: 1744210423797,
+        programStartDate: new Date(programStartTime * 1000),
+      },
+    };
+
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(expectedEvent));
+
+    const timeline = manifest.presentationTimeline;
+    expect(timeline.getInitialProgramDateTime()).toBe(programStartTime);
   });
 });

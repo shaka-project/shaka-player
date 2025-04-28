@@ -822,6 +822,19 @@ describe('DashParser SegmentTemplate', () => {
         const ref = index.get(-12);
         expect(ref).toBeNull();
       });
+
+      it('clamps last segment time to period duration', async () => {
+        const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
+        const index = await makeTimelineSegmentIndex(info);
+        // Modify last segment end time after creating TSI, but before making
+        // any operation on it.
+        info.timeline[info.timeline.length - 1].end = 100;
+        const ref = index.get(9);
+        // Last segment end time is clamped to period duration.
+        expect(ref.endTime).toBe(21);
+        // True end time is unaffected by period duration.
+        expect(ref.trueEndTime).toBe(100);
+      });
     });
 
     describe('appendTemplateInfo', () => {

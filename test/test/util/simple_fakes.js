@@ -304,6 +304,10 @@ shaka.test.FakePresentationTimeline = class {
         jasmine.createSpy('getPresentationStartTime');
 
     /** @type {!jasmine.Spy} */
+    this.getInitialProgramDateTime =
+        jasmine.createSpy('getInitialProgramDateTime');
+
+    /** @type {!jasmine.Spy} */
     this.setClockOffset = jasmine.createSpy('setClockOffset');
 
     /** @type {!jasmine.Spy} */
@@ -436,11 +440,13 @@ shaka.test.FakeClosedCaptionParser = class {
     this.parseFromSpy = jasmine.createSpy('parseFrom');
     /** @type {!jasmine.Spy} */
     this.resetSpy = jasmine.createSpy('reset');
+    /** @type {!jasmine.Spy} */
+    this.removeSpy = jasmine.createSpy('remove');
   }
 
   /** @override */
-  init() {
-    return shaka.test.Util.invokeSpy(this.initSpy);
+  init(...args) {
+    return shaka.test.Util.invokeSpy(this.initSpy, ...args);
   }
 
   /** @override */
@@ -451,6 +457,11 @@ shaka.test.FakeClosedCaptionParser = class {
   /** @override */
   reset() {
     return shaka.test.Util.invokeSpy(this.resetSpy);
+  }
+
+  /** @override */
+  remove(continuityTimelines) {
+    return shaka.test.Util.invokeSpy(this.removeSpy, continuityTimelines);
   }
 };
 

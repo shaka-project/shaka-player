@@ -175,11 +175,9 @@ shaka.test.TextLayoutTests = class extends shaka.test.LayoutTests {
 
   /** @override */
   static async supported() {
-    // We only trust Safari for native text layout tests if explicitly flagged.
     // We only do this in our lab, where we control device a11y settings that
     // impact these tests heavily.
-    if (shaka.util.Platform.isApple() &&
-        !getClientArg('trustSafariNativeTextLayout')) {
+    if (shaka.util.Platform.isApple() && getClientArg('runningInVM')) {
       return false;
     }
 

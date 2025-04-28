@@ -26,8 +26,8 @@
  * the element is inherently accessible. */
 
 /* These control the color and size of the various pieces. */
-@thumb-color: white;
-@track-default-color: white;
+@thumb-color: @general-font-color;
+@track-default-color: @general-font-color;
 @thumb-size: 12px;
 @track-height: 4px;
 
@@ -98,6 +98,7 @@
   /* Remove any browser styling of the range element. */
   -webkit-appearance: none;
   background: transparent;
+  cursor: pointer;
 
   /* Overlay and fill the container div. */
   .overlay-child();
@@ -141,6 +142,41 @@
 .shaka-volume-bar-container {
   width: 100px;
   padding: 0;
+  transition-property: opacity, width;
+  transition-duration: 250ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+
+  &:hover {
+    width: 100px !important;
+    opacity: 1 !important;
+  }
+}
+
+@media (max-width: 474px) {
+  .shaka-volume-bar-container {
+    width: 50px;
+
+    &:hover {
+      width: 50px !important;
+    }
+  }
+
+  .shaka-mute-button:hover + .shaka-volume-bar-container {
+    width: 50px;
+    opacity: 1;
+  }
+}
+
+.shaka-mute-button + .shaka-volume-bar-container {
+  width: 0;
+  opacity: 0;
+}
+
+@media (min-width: 475px) {
+  .shaka-mute-button:hover + .shaka-volume-bar-container {
+    width: 100px;
+    opacity: 1;
+  }
 }
 
 .shaka-range-element {
@@ -149,6 +185,21 @@
 
 .shaka-seek-bar-container {
   .show-when-controls-shown();
+  top: 5px;
+  height: 5px;
+  margin-bottom: 0;
+  background-clip: padding-box !important;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+
+  .shaka-seek-bar {
+    transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 250ms;
+    opacity: 0;
+  }
+
+  &:hover .shaka-seek-bar {
+    opacity: 1;
+  }
 }
 
 .shaka-ad-markers {

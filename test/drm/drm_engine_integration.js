@@ -115,7 +115,8 @@ describe('DrmEngine', () => {
     const audioStream = manifest.variants[0].audio;
 
     eventManager = new shaka.util.EventManager();
-
+    const mediaSourceConfig =
+        shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
         new shaka.test.FakeTextDisplayer(),
@@ -125,10 +126,8 @@ describe('DrmEngine', () => {
           onEmsg: () => {},
           onEvent: () => {},
           onManifestUpdate: () => {},
-        });
-    const mediaSourceConfig =
-        shaka.util.PlayerConfiguration.createDefault().mediaSource;
-    mediaSourceEngine.configure(mediaSourceConfig);
+        },
+        mediaSourceConfig);
 
     const expectedObject = new Map();
     expectedObject.set(ContentType.AUDIO, audioStream);
@@ -147,23 +146,6 @@ describe('DrmEngine', () => {
   afterAll(() => {
     document.body.removeChild(video);
   });
-
-  function checkTrueDrmSupport() {
-    if (shaka.util.Platform.isXboxOne()) {
-      // Axinom won't issue a license for an Xbox One.  The error message from
-      // the license server says "Your DRM client's security level is 150, but
-      // the entitlement message requires 2000 or higher."
-      // TODO: Stop using Axinom's license server.  Use
-      // https://testweb.playready.microsoft.com/Server/ServiceQueryStringSyntax
-      return false;
-    }
-    return shakaSupport.drm['com.widevine.alpha'] ||
-        shakaSupport.drm['com.microsoft.playready'];
-  }
-
-  function checkClearKeySupport() {
-    return shakaSupport.drm['org.w3.clearkey'];
-  }
 
   filterDescribe('basic flow', checkTrueDrmSupport, () => {
     drmIt('gets a license and can play encrypted segments', async () => {

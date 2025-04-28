@@ -242,6 +242,7 @@ describe('Player', () => {
         width: jasmine.any(Number),
         height: jasmine.any(Number),
         streamBandwidth: jasmine.any(Number),
+        currentCodecs: jasmine.any(String),
 
         decodedFrames: jasmine.any(Number),
         droppedFrames: jasmine.any(Number),
@@ -1028,7 +1029,7 @@ describe('Player', () => {
 
       await player.load('test:sintel_long_compiled');
       video.pause();
-      expect(onBuffering).toHaveBeenCalledTimes(1);
+      expect(onBuffering).toHaveBeenCalledTimes(2);
       expect(onBuffering).toHaveBeenCalledWith(startBuffering);
       onBuffering.calls.reset();
 
@@ -1242,9 +1243,7 @@ describe('Player', () => {
   /** Regression test for Issue #2741 */
   describe('unloading', () => {
     drmIt('unloads properly after DRM error', async () => {
-      if (!shakaSupport.drm['com.widevine.alpha'] &&
-          !shakaSupport.drm['com.microsoft.playready'] &&
-          !shakaSupport.drm['com.chromecast.playready']) {
+      if (!checkTrueDrmSupport()) {
         pending('Skipping DRM error test, only runs on Widevine and PlayReady');
       }
 

@@ -24,7 +24,7 @@ LCEVC Decoder library needs to be included in the HTML page:
 ``` 
 - Or use `unpkg.com` for latest LCEVC Decoder libraries.
 ```html 
-<script src="https://unpkg.com/lcevc_dec.js@1.2.0/dist/lcevc_dec.min.js"></script>
+<script src="https://unpkg.com/lcevc_dec.js@1.2.1/dist/lcevc_dec.min.js"></script>
 ``` 
  
 Configuration to enable LCEVC enhancement: 
@@ -45,7 +45,7 @@ Sample setup using the Shaka Player UI library:
     <link rel="stylesheet" href="dist/controls.css" /> 
  
     <!-- LCEVC decoder compiled library --> 
-    <script src="https://unpkg.com/lcevc_dec.js@1.2.0/dist/lcevc_dec.min.js"></script>
+    <script src="https://unpkg.com/lcevc_dec.js@1.2.1/dist/lcevc_dec.min.js"></script>
  
     <!-- Application source: --> 
     <script src="app.js"></script> 

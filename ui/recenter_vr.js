@@ -74,6 +74,9 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
     const vr = this.controls.getVR();
 
     this.eventManager.listen(this.recenterVRButton_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       vr.reset();
     });
 

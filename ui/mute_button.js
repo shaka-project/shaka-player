@@ -72,6 +72,9 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.button_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       if (this.ad && this.ad.isLinear()) {
         this.ad.setMuted(!this.ad.isMuted());
       } else {
@@ -84,6 +87,16 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(this.video, 'volumechange', () => {
+      this.updateLocalizedStrings_();
+      this.updateIcon_();
+    });
+
+    this.eventManager.listen(this.player, 'loading', () => {
+      this.updateLocalizedStrings_();
+      this.updateIcon_();
+    });
+
+    this.eventManager.listen(this.controls, 'caststatuschanged', () => {
       this.updateLocalizedStrings_();
       this.updateIcon_();
     });

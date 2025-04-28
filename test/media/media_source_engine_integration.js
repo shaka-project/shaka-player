@@ -178,6 +178,7 @@ describe('MediaSourceEngine', () => {
     onEmsg = jasmine.createSpy('onEmsg');
     onEvent = jasmine.createSpy('onEvent');
     onManifestUpdate = jasmine.createSpy('onManifestUpdate');
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
@@ -188,9 +189,8 @@ describe('MediaSourceEngine', () => {
           onEmsg: Util.spyFunc(onEmsg),
           onEvent: Util.spyFunc(onEvent),
           onManifestUpdate: Util.spyFunc(onManifestUpdate),
-        });
-    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
-    mediaSourceEngine.configure(config);
+        },
+        config);
 
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];
     expect(video.getElementsByTagName('source').length).toBe(1);

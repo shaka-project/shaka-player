@@ -108,6 +108,7 @@
 +../../lib/util/media_ready_state_utils.js
 +../../lib/util/mime_utils.js
 +../../lib/util/mp4_box_parsers.js
++../../lib/util/mp4_generator.js
 +../../lib/util/mp4_parser.js
 +../../lib/util/multi_map.js
 +../../lib/util/mutex.js
@@ -126,6 +127,7 @@
 +../../lib/util/string_utils.js
 +../../lib/util/switch_history.js
 +../../lib/util/text_parser.js
++../../lib/util/time_utils.js
 +../../lib/util/timer.js
 +../../lib/util/ts_parser.js
 +../../lib/util/tXml.js

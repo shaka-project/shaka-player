@@ -48,6 +48,7 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
+    label.classList.add('shaka-simple-overflow-button-label-inline');
 
     /** @private {!HTMLElement} */
     this.nameSpan_ = shaka.util.Dom.createHTMLElement('span');
@@ -127,6 +128,9 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.button_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       this.onClick_();
       this.updateLocalizedStrings_();
     });
@@ -197,6 +201,8 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
     closeElement.classList.add('shaka-no-propagation');
     closeElement.classList.add('shaka-statistics-close');
     const icon = shaka.util.Dom.createHTMLElement('i');
+    icon.classList.add('material-icons');
+    icon.classList.add('notranslate');
     icon.classList.add('material-icons-round');
     icon.textContent =
       shaka.ui.Enums.MaterialDesignIcons.CLOSE;

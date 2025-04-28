@@ -25,7 +25,7 @@ class ShakaReceiverApp {
     this.receiver_ = null;
 
     /** @private {Element} */
-    this.idleCard_ = null;
+    this.welcomeCard_ = null;
 
     /** @private {?number} */
     this.idleTimerId_ = null;
@@ -66,7 +66,7 @@ class ShakaReceiverApp {
     this.player_ = ui.getControls().getLocalPlayer();
     goog.asserts.assert(this.player_, 'Player should be available!');
 
-    this.idleCard_ = document.getElementById('idle');
+    this.welcomeCard_ = document.getElementById('welcome');
 
     this.receiver_ = new shaka.cast.CastReceiver(
         this.video_, this.player_,
@@ -106,10 +106,10 @@ class ShakaReceiverApp {
     // If the app is idle, show the idle card and set a timer to close the app.
     // Otherwise, hide the idle card and cancel the timer.
     if (this.receiver_.isIdle()) {
-      this.idleCard_.style.display = 'block';
+      this.welcomeCard_.style.display = 'block';
       this.startIdleTimer_();
     } else {
-      this.idleCard_.style.display = 'none';
+      this.welcomeCard_.style.display = 'none';
       this.cancelIdleTimer_();
 
       // Set a special poster for audio-only assets.

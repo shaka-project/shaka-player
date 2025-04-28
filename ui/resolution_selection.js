@@ -19,7 +19,6 @@ goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.FakeEvent');
-goog.require('shaka.util.Functional');
 goog.require('shaka.util.MimeUtils');
 goog.requireType('shaka.ui.Controls');
 
@@ -41,6 +40,32 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     this.button.classList.add('shaka-tooltip-status');
     this.menu.classList.add('shaka-resolutions');
 
+    this.autoQuality = shaka.util.Dom.createHTMLElement('span');
+    this.autoQuality.classList.add('shaka-current-auto-quality');
+    this.autoQuality.style.display = 'none';
+
+    this.qualityMark = shaka.util.Dom.createHTMLElement('sup');
+    this.qualityMark.classList.add('shaka-current-quality-mark');
+    this.qualityMark.style.display = 'none';
+
+    if (!Array.from(parent.classList).includes('shaka-overflow-menu')) {
+      this.overflowQualityMark = shaka.util.Dom.createHTMLElement('span');
+      this.overflowQualityMark.classList.add(
+          'shaka-overflow-playback-rate-mark');
+      this.button.appendChild(this.overflowQualityMark);
+    } else if (this.parent.parentElement) {
+      const parentElement =
+          shaka.util.Dom.asHTMLElement(this.parent.parentElement);
+      this.overflowQualityMark = shaka.util.Dom.getElementByClassNameIfItExists(
+          'shaka-overflow-quality-mark', parentElement);
+    }
+
+    const spanWrapper = shaka.util.Dom.createHTMLElement('span');
+    this.button.childNodes[1].appendChild(spanWrapper);
+    spanWrapper.appendChild(this.currentSelection);
+    spanWrapper.appendChild(this.autoQuality);
+    spanWrapper.appendChild(this.qualityMark);
+
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
           this.updateLocalizedStrings_();
@@ -53,34 +78,212 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
 
     this.eventManager.listen(this.player, 'loading', () => {
-      this.updateResolutionSelection_();
+      this.updateSelection_();
+      this.updateLabels_();
+    });
+
+    this.eventManager.listen(this.player, 'loaded', () => {
+      this.updateSelection_();
+      this.updateLabels_();
+    });
+
+    this.eventManager.listen(this.player, 'unloading', () => {
+      this.updateSelection_();
+      this.updateLabels_();
     });
 
     this.eventManager.listen(this.player, 'variantchanged', () => {
-      this.updateResolutionSelection_();
+      this.updateSelection_();
+      this.updateLabels_();
     });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.updateResolutionSelection_();
+      this.updateSelection_();
+      this.updateLabels_();
     });
 
     this.eventManager.listen(this.player, 'abrstatuschanged', () => {
-      this.updateResolutionSelection_();
+      this.updateSelection_();
+      this.updateLabels_();
     });
 
-    this.updateResolutionSelection_();
+    this.eventManager.listen(this.player, 'adaptation', () => {
+      this.updateSelection_();
+      this.updateLabels_();
+    });
+
+    this.updateSelection_();
   }
 
+  /** @private */
+  updateLabels_() {
+    const abrEnabled = this.player.getConfiguration().abr.enabled;
+    if (this.player.isAudioOnly()) {
+      if (this.overflowQualityMark) {
+        this.overflowQualityMark.textContent = '';
+        this.overflowQualityMark.style.display = 'none';
+      }
+      const audioTracks = this.player.getVariantTracks() || [];
+      const audioTrack = audioTracks.find((track) => track.active);
+      if (!audioTrack) {
+        return;
+      }
+      if (abrEnabled) {
+        if (audioTrack.bandwidth) {
+          this.autoQuality.textContent =
+              this.getQualityLabel_(audioTrack, audioTracks);
+        } else {
+          this.autoQuality.textContent = 'Unknown';
+        }
+        this.autoQuality.style.display = '';
+      } else {
+        this.autoQuality.style.display = 'none';
+      }
+      return;
+    }
+    const tracks = this.player.getVideoTracks() || [];
+    const track = tracks.find((track) => track.active);
+    if (!track) {
+      if (this.overflowQualityMark) {
+        const stats = this.player.getStats();
+        const mark = this.getQualityMark_(stats.width, stats.height);
+        this.overflowQualityMark.textContent = mark;
+        this.overflowQualityMark.style.display = mark !== '' ? '' : 'none';
+      }
+      return;
+    }
+    if (abrEnabled) {
+      if (track.height && track.width) {
+        this.autoQuality.textContent = this.getResolutionLabel_(track, tracks);
+      } else if (track.bandwidth) {
+        this.autoQuality.textContent =
+            Math.round(track.bandwidth / 1000) + ' kbits/s';
+      } else {
+        this.autoQuality.textContent = 'Unknown';
+      }
+      this.autoQuality.style.display = '';
+    } else {
+      this.autoQuality.style.display = 'none';
+    }
+
+    /** @type {string} */
+    const mark = this.getQualityMark_(track.width, track.height);
+    this.qualityMark.textContent = mark;
+    this.qualityMark.style.display = mark !== '' ? '' : 'none';
+    if (this.overflowQualityMark) {
+      this.overflowQualityMark.textContent = mark;
+      this.overflowQualityMark.style.display = mark !== '' ? '' : 'none';
+    }
+  }
+
+  /**
+   * @param {?number} width
+   * @param {?number} height
+   * @return {string}
+   * @private
+   */
+  getQualityMark_(width, height) {
+    if (!width || !height) {
+      return '';
+    }
+    let trackHeight = height;
+    let trackWidth = width;
+    if (trackHeight > trackWidth) {
+      // Vertical video.
+      [trackWidth, trackHeight] = [trackHeight, trackWidth];
+    }
+    const aspectRatio = trackWidth / trackHeight;
+    if (aspectRatio > (16 / 9)) {
+      trackHeight = Math.round(trackWidth * 9 / 16);
+    }
+    const qualityMarks = this.controls.getConfig().qualityMarks;
+    if (trackHeight >= 8640) {
+      return trackHeight + 'p';
+    } else if (trackHeight >= 4320) {
+      return qualityMarks['4320'];
+    } else if (trackHeight >= 2160) {
+      return qualityMarks['2160'];
+    } else if (trackHeight >= 1440) {
+      return qualityMarks['1440'];
+    } else if (trackHeight >= 1080) {
+      return qualityMarks['1080'];
+    } else if (trackHeight >= 720) {
+      return qualityMarks['720'];
+    }
+    return '';
+  }
 
   /** @private */
-  updateResolutionSelection_() {
+  updateSelection_() {
+    // Remove old shaka-resolutions
+    // 1. Save the back to menu button
+    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
+        this.menu, 'shaka-back-to-overflow-button');
+
+    // 2. Remove everything
+    shaka.util.Dom.removeAllChildren(this.menu);
+
+    // 3. Add the backTo Menu button back
+    this.menu.appendChild(backButton);
+
+    // Add new ones
+    let numberOfTracks = 0;
+    if (this.player.isAudioOnly()) {
+      numberOfTracks = this.updateAudioOnlySelection_();
+    } else {
+      numberOfTracks = this.updateResolutionSelection_();
+    }
+
+    // Add the Auto button
+    const autoButton = shaka.util.Dom.createButton();
+    autoButton.classList.add('shaka-enable-abr-button');
+    this.eventManager.listen(autoButton, 'click', () => {
+      const config = {abr: {enabled: true}};
+      this.player.configure(config);
+      this.updateSelection_();
+    });
+
+    /** @private {!HTMLElement}*/
+    this.abrOnSpan_ = shaka.util.Dom.createHTMLElement('span');
+    this.abrOnSpan_.textContent =
+        this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
+    autoButton.appendChild(this.abrOnSpan_);
+
+    // If abr is enabled reflect it by marking 'Auto' as selected.
+    if (this.player.getConfiguration().abr.enabled) {
+      autoButton.ariaSelected = 'true';
+      autoButton.appendChild(shaka.ui.Utils.checkmarkIcon());
+
+      this.abrOnSpan_.classList.add('shaka-chosen-item');
+
+      this.currentSelection.textContent =
+          this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
+    }
+
+    this.button.setAttribute('shaka-status', this.currentSelection.textContent);
+
+    this.menu.appendChild(autoButton);
+    shaka.ui.Utils.focusOnTheChosenItem(this.menu);
+    this.controls.dispatchEvent(
+        new shaka.util.FakeEvent('resolutionselectionupdated'));
+
+    this.updateLocalizedStrings_();
+
+    shaka.ui.Utils.setDisplay(this.button, numberOfTracks > 0);
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  updateAudioOnlySelection_() {
     const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat;
     /** @type {!Array<shaka.extern.Track>} */
     let tracks = [];
     // When played with src=, the variant tracks available from
     // player.getVariantTracks() represent languages, not resolutions.
     if (this.player.getLoadMode() != shaka.Player.LoadMode.SRC_EQUALS) {
-      tracks = this.player.getVariantTracks();
+      tracks = this.player.getVariantTracks() || [];
     }
 
     // If there is a selected variant track, then we filter out any tracks in
@@ -113,80 +316,17 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       });
     }
 
-    // Remove duplicate entries with the same resolution or quality depending
-    // on content type.  Pick an arbitrary one.
-    if (this.player.isAudioOnly()) {
-      tracks = tracks.filter((track, idx) => {
-        return tracks.findIndex((t) => t.bandwidth == track.bandwidth) == idx;
-      });
-    } else {
-      const audiosIds = [...new Set(tracks.map((t) => t.audioId))]
-          .filter(shaka.util.Functional.isNotNull);
-      if (audiosIds.length > 1) {
-        tracks = tracks.filter((track, idx) => {
-          // Keep the first one with the same height and framerate or bandwidth.
-          const otherIdx = tracks.findIndex((t) => {
-            let ret = t.height == track.height &&
-                t.videoBandwidth == track.videoBandwidth &&
-                t.frameRate == track.frameRate &&
-                t.hdr == track.hdr &&
-                t.videoLayout == track.videoLayout;
-            if (ret && this.controls.getConfig().showVideoCodec &&
-                t.videoCodec && track.videoCodec) {
-              ret = shaka.util.MimeUtils.getNormalizedCodec(t.videoCodec) ==
-                  shaka.util.MimeUtils.getNormalizedCodec(track.videoCodec);
-            }
-            return ret;
-          });
-          return otherIdx == idx;
-        });
-      } else {
-        tracks = tracks.filter((track, idx) => {
-          // Keep the first one with the same height and framerate or bandwidth.
-          const otherIdx = tracks.findIndex((t) => {
-            let ret = t.height == track.height &&
-                t.bandwidth == track.bandwidth &&
-                t.frameRate == track.frameRate &&
-                t.hdr == track.hdr &&
-                t.videoLayout == track.videoLayout;
-            if (ret && this.controls.getConfig().showVideoCodec &&
-                t.videoCodec && track.videoCodec) {
-              ret = shaka.util.MimeUtils.getNormalizedCodec(t.videoCodec) ==
-                  shaka.util.MimeUtils.getNormalizedCodec(track.videoCodec);
-            }
-            return ret;
-          });
-          return otherIdx == idx;
-        });
-      }
-    }
+    // Remove duplicate entries with the same quality.
+    tracks = tracks.filter((track, idx) => {
+      return tracks.findIndex((t) => t.bandwidth == track.bandwidth) == idx;
+    });
 
-    // Sort the tracks by height or bandwidth depending on content type.
-    if (this.player.isAudioOnly()) {
-      tracks.sort((t1, t2) => {
-        goog.asserts.assert(t1.bandwidth != null, 'Null bandwidth');
-        goog.asserts.assert(t2.bandwidth != null, 'Null bandwidth');
-        return t2.bandwidth - t1.bandwidth;
-      });
-    } else {
-      tracks.sort((t1, t2) => {
-        if (t2.height == t1.height || t1.height == null || t2.height == null) {
-          return t2.bandwidth - t1.bandwidth;
-        }
-        return t2.height - t1.height;
-      });
-    }
-
-    // Remove old shaka-resolutions
-    // 1. Save the back to menu button
-    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
-        this.menu, 'shaka-back-to-overflow-button');
-
-    // 2. Remove everything
-    shaka.util.Dom.removeAllChildren(this.menu);
-
-    // 3. Add the backTo Menu button back
-    this.menu.appendChild(backButton);
+    // Sort the tracks by bandwidth.
+    tracks.sort((t1, t2) => {
+      goog.asserts.assert(t1.bandwidth != null, 'Null bandwidth');
+      goog.asserts.assert(t2.bandwidth != null, 'Null bandwidth');
+      return t2.bandwidth - t1.bandwidth;
+    });
 
     const abrEnabled = this.player.getConfiguration().abr.enabled;
 
@@ -198,10 +338,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           () => this.onTrackSelected_(track));
 
       const span = shaka.util.Dom.createHTMLElement('span');
-      if (!this.player.isAudioOnly() && track.height && track.width) {
-        span.textContent = this.getResolutionLabel_(track, tracks);
-      } else if (track.bandwidth) {
-        span.textContent = Math.round(track.bandwidth / 1000) + ' kbits/s';
+      if (track.bandwidth) {
+        span.textContent = this.getQualityLabel_(track, tracks);
       } else {
         span.textContent = 'Unknown';
       }
@@ -217,64 +355,106 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       this.menu.appendChild(button);
     }
 
-    // Add the Auto button
-    const autoButton = shaka.util.Dom.createButton();
-    autoButton.classList.add('shaka-enable-abr-button');
-    this.eventManager.listen(autoButton, 'click', () => {
-      const config = {abr: {enabled: true}};
-      this.player.configure(config);
-      this.updateResolutionSelection_();
-    });
-
-    /** @private {!HTMLElement}*/
-    this.abrOnSpan_ = shaka.util.Dom.createHTMLElement('span');
-    this.abrOnSpan_.classList.add('shaka-auto-span');
-    this.abrOnSpan_.textContent =
-        this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
-    autoButton.appendChild(this.abrOnSpan_);
-
-    // If abr is enabled reflect it by marking 'Auto' as selected.
-    if (abrEnabled) {
-      autoButton.ariaSelected = 'true';
-      autoButton.appendChild(shaka.ui.Utils.checkmarkIcon());
-
-      this.abrOnSpan_.classList.add('shaka-chosen-item');
-
-      this.currentSelection.textContent =
-          this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
-    }
-
-    this.button.setAttribute('shaka-status', this.currentSelection.textContent);
-
-    this.menu.appendChild(autoButton);
-    shaka.ui.Utils.focusOnTheChosenItem(this.menu);
-    this.controls.dispatchEvent(
-        new shaka.util.FakeEvent('resolutionselectionupdated'));
-
-    this.updateLocalizedStrings_();
-
-    shaka.ui.Utils.setDisplay(this.button, tracks.length > 1);
+    return tracks.length;
   }
 
 
   /**
-   * @param {!shaka.extern.Track} track
-   * @param {!Array<!shaka.extern.Track>} tracks
+   * @return {number}
+   * @private
+   */
+  updateResolutionSelection_() {
+    /** @type {!Array<shaka.extern.VideoTrack>} */
+    let tracks = this.player.getVideoTracks() || [];
+
+    const selectedTrack = tracks.find((track) => track.active);
+
+    tracks = tracks.filter((track, idx) => {
+      // Keep the first one with the same height and framerate or bandwidth.
+      const otherIdx = tracks.findIndex((t) => {
+        let ret = t.height == track.height &&
+            t.bandwidth == track.bandwidth &&
+            t.frameRate == track.frameRate &&
+            t.hdr == track.hdr &&
+            t.videoLayout == track.videoLayout;
+        if (ret && this.controls.getConfig().showVideoCodec &&
+            t.codecs && track.codecs) {
+          ret = shaka.util.MimeUtils.getNormalizedCodec(t.codecs) ==
+              shaka.util.MimeUtils.getNormalizedCodec(track.codecs);
+        }
+        return ret;
+      });
+      return otherIdx == idx;
+    });
+
+    // Sort the tracks by height or bandwidth depending on content type.
+    tracks.sort((t1, t2) => {
+      if (t2.height == t1.height || t1.height == null || t2.height == null) {
+        return t2.bandwidth - t1.bandwidth;
+      }
+      return t2.height - t1.height;
+    });
+
+    const abrEnabled = this.player.getConfiguration().abr.enabled;
+
+    // Add new ones
+    for (const track of tracks) {
+      const button = shaka.util.Dom.createButton();
+      button.classList.add('explicit-resolution');
+      this.eventManager.listen(button, 'click',
+          () => this.onVideoTrackSelected_(track));
+
+      const span = shaka.util.Dom.createHTMLElement('span');
+      if (track.height && track.width) {
+        span.textContent = this.getResolutionLabel_(track, tracks);
+      } else if (track.bandwidth) {
+        span.textContent = Math.round(track.bandwidth / 1000) + ' kbits/s';
+      } else {
+        span.textContent = 'Unknown';
+      }
+      button.appendChild(span);
+
+      const mark = this.getQualityMark_(track.width, track.height);
+      if (mark !== '') {
+        const markEl = shaka.util.Dom.createHTMLElement('sup');
+        markEl.classList.add('shaka-quality-mark');
+        markEl.textContent = mark;
+        button.appendChild(markEl);
+      }
+
+      if (!abrEnabled && track == selectedTrack) {
+        // If abr is disabled, mark the selected track's resolution.
+        button.ariaSelected = 'true';
+        button.appendChild(shaka.ui.Utils.checkmarkIcon());
+        span.classList.add('shaka-chosen-item');
+        this.currentSelection.textContent = span.textContent;
+      }
+      this.menu.appendChild(button);
+    }
+
+    return tracks.length;
+  }
+
+
+  /**
+   * @param {!shaka.extern.VideoTrack} track
+   * @param {!Array<!shaka.extern.VideoTrack>} tracks
    * @return {string}
    * @private
    */
   getResolutionLabel_(track, tracks) {
-    const trackHeight = track.height || 0;
-    const trackWidth = track.width || 0;
+    let trackHeight = track.height || 0;
+    let trackWidth = track.width || 0;
+    if (trackHeight > trackWidth) {
+      // Vertical video.
+      [trackWidth, trackHeight] = [trackHeight, trackWidth];
+    }
     let height = trackHeight;
     const aspectRatio = trackWidth / trackHeight;
     if (aspectRatio > (16 / 9)) {
       height = Math.round(trackWidth * 9 / 16);
     }
     let text = height + 'p';
-    if (height == 2160) {
-      text = '4K';
-    }
     const frameRates = new Set();
     for (const item of tracks) {
       if (item.frameRate) {
@@ -288,30 +468,36 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       }
     }
     if (track.hdr == 'PQ' || track.hdr == 'HLG') {
-      text += ' (HDR)';
+      text += ' HDR';
     }
     if (track.videoLayout == 'CH-STEREO') {
-      text += ' (3D)';
+      text += ' 3D';
     }
+    const basicResolutionComparison = (firstTrack, secondTrack) => {
+      return firstTrack != secondTrack &&
+          firstTrack.height == secondTrack.height &&
+          firstTrack.hdr == secondTrack.hdr &&
+          Math.round(firstTrack.frameRate || 0) ==
+          Math.round(secondTrack.frameRate || 0);
+    };
     const hasDuplicateResolution = tracks.some((otherTrack) => {
-      return otherTrack != track && otherTrack.height == track.height;
+      return basicResolutionComparison(track, otherTrack);
     });
     if (hasDuplicateResolution) {
       const hasDuplicateBandwidth = tracks.some((otherTrack) => {
-        return otherTrack != track && otherTrack.height == track.height &&
-            (otherTrack.videoBandwidth || otherTrack.bandwidth) ==
-            (track.videoBandwidth || track.bandwidth);
+        return basicResolutionComparison(track, otherTrack) &&
+            otherTrack.bandwidth == track.bandwidth;
       });
       if (!hasDuplicateBandwidth) {
-        const bandwidth = track.videoBandwidth || track.bandwidth;
+        const bandwidth = track.bandwidth;
         text += ' (' + Math.round(bandwidth / 1000) + ' kbits/s)';
       }
 
       if (this.controls.getConfig().showVideoCodec) {
-        const getVideoCodecName = (videoCodec) => {
+        const getVideoCodecName = (codecs) => {
           let name = '';
-          if (videoCodec) {
-            const codec = shaka.util.MimeUtils.getNormalizedCodec(videoCodec);
+          if (codecs) {
+            const codec = shaka.util.MimeUtils.getNormalizedCodec(codecs);
             if (codec.startsWith('dovi-')) {
               name = 'Dolby Vision';
             } else {
@@ -320,10 +506,58 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           }
           return name ? ' ' + name : name;
         };
-        text += getVideoCodecName(track.videoCodec);
+        const hasDuplicateCodec = tracks.some((otherTrack) => {
+          return basicResolutionComparison(track, otherTrack) &&
+              getVideoCodecName(otherTrack.codecs) !=
+              getVideoCodecName(track.codecs);
+        });
+        if (hasDuplicateCodec) {
+          text += getVideoCodecName(track.codecs);
+        }
       }
     }
     return text;
+  }
+
+
+  /**
+   * @param {!shaka.extern.Track} track
+   * @param {!Array<!shaka.extern.Track>} tracks
+   * @return {string}
+   * @private
+   */
+  getQualityLabel_(track, tracks) {
+    let text = Math.round(track.bandwidth / 1000) + ' kbits/s';
+    if (this.controls.getConfig().showAudioCodec) {
+      const getCodecName = (codecs) => {
+        let name = '';
+        if (codecs) {
+          const codec = shaka.util.MimeUtils.getNormalizedCodec(codecs);
+          name = codec.toUpperCase();
+        }
+        return name ? ' ' + name : name;
+      };
+      const hasDuplicateCodec = tracks.some((otherTrack) => {
+        return getCodecName(otherTrack.codecs) != getCodecName(track.codecs);
+      });
+      if (hasDuplicateCodec) {
+        text += getCodecName(track.codecs);
+      }
+    }
+    return text;
+  }
+
+
+  /**
+   * @param {!shaka.extern.VideoTrack} track
+   * @private
+   */
+  onVideoTrackSelected_(track) {
+    // Disable abr manager before changing tracks.
+    const config = {abr: {enabled: false}};
+    this.player.configure(config);
+    const clearBuffer = this.controls.getConfig().clearBufferOnQualityChange;
+    this.player.selectVideoTrack(track, clearBuffer);
   }
 
 

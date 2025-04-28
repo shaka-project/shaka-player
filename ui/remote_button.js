@@ -90,6 +90,9 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
       });
 
       this.eventManager.listen(this.remoteButton_, 'click', () => {
+        if (!this.controls.isOpaque()) {
+          return;
+        }
         this.video.remote.prompt();
       });
 
@@ -133,8 +136,8 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
    * @private
    */
   async updateRemoteState_(force = false) {
-    if (this.controls.getCastProxy().canCast() &&
-        this.controls.isCastAllowed()) {
+    if ((this.controls.getCastProxy().canCast() &&
+        this.controls.isCastAllowed()) || !this.video.remote) {
       shaka.ui.Utils.setDisplay(this.remoteButton_, false);
       if (this.callbackId_ != -1) {
         this.video.remote.cancelWatchAvailability(this.callbackId_);
@@ -173,11 +176,14 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
       } catch (e) {
         handleAvailabilityChange(/* availability= */ true);
       }
-    } else if (this.callbackId_ != -1) {
-      // If remote device is connecting or connected, we should stop
-      // watching remote device availability to save power.
-      await this.video.remote.cancelWatchAvailability(this.callbackId_);
-      this.callbackId_ = -1;
+    } else {
+      shaka.ui.Utils.setDisplay(this.remoteButton_, true);
+      if (this.callbackId_ != -1) {
+        // If remote device is connecting or connected, we should stop
+        // watching remote device availability to save power.
+        await this.video.remote.cancelWatchAvailability(this.callbackId_);
+        this.callbackId_ = -1;
+      }
     }
   }
 

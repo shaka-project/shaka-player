@@ -379,15 +379,6 @@ function configureJasmineEnvironment() {
     });
   }
 
-  // Work-around: allow the Tizen media pipeline to cool down.
-  // Without this, Tizen's pipeline seems to hang in subsequent tests.
-  // TODO: file a bug on Tizen
-  if (shaka.util.Platform.isTizen()) {
-    afterEach((done) => {  // eslint-disable-line no-restricted-syntax
-      originalSetTimeout(done, /* ms= */ 100);
-    });
-  }
-
   // Reset decoding config cache after each test.
   afterEach(/** @suppress {accessControls} */ () => {
     shaka.util.StreamUtils.clearDecodingConfigCache();
@@ -462,6 +453,74 @@ function getDevice() {
   const device = shaka.device.DeviceFactory.getDevice();
   goog.asserts.assert(device, 'device must be non-null');
   window.deviceDetected = device;
+}
+
+/**
+ * Check if ClearKey CENC is supported.
+ * @return {boolean}
+ */
+function checkClearKeySupport() {
+  const clearKeySupport = shakaSupport.drm['org.w3.clearkey'];
+  if (!clearKeySupport) {
+    return false;
+  }
+  return clearKeySupport.encryptionSchemes.includes('cenc');
+}
+
+/**
+ * Check if PlayReady is supported.
+ * @return {boolean}
+ */
+function checkPlayReadySupport() {
+  if (shakaSupport.drm['com.microsoft.playready'] ||
+      shakaSupport.drm['com.microsoft.playready.recommendation'] ||
+      shakaSupport.drm['com.microsoft.playready.recommendation.3000']) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Check if Widevine is supported.
+ * @return {boolean}
+ */
+function checkWidevineSupport() {
+  if (shakaSupport.drm['com.widevine.alpha']) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Check if FairPlay is supported.
+ * @return {boolean}
+ */
+function checkFairPlaySupport() {
+  if (shakaSupport.drm['com.apple.fps'] && !getClientArg('runningInVM')) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Check if Widevine with persistence state is supported.
+ * @return {boolean}
+ */
+function checkWidevinePersistentSupport() {
+  const widevine = shakaSupport.drm['com.widevine.alpha'];
+  if (!widevine) {
+    return false;
+  }
+  return widevine.persistentState;
+}
+
+/**
+ * Check if Widevine and/or PlayReady are supported.
+ * @return {boolean}
+ */
+function checkTrueDrmSupport() {
+  // We don't include FairPlay because our test assets aren't ready to use it.
+  return checkWidevineSupport() || checkPlayReadySupport();
 }
 
 /**

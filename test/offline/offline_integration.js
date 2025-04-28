@@ -19,18 +19,10 @@ filterDescribe('Offline', supportsStorage, () => {
   let eventManager;
   /** @type {shaka.test.Waiter} */
   let waiter;
-  /** @type {?shaka.extern.DrmSupportType} */
-  let widevineSupport;
-  /** @type {?shaka.extern.DrmSupportType} */
-  let playreadySupport;
 
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
-
-    widevineSupport = shakaSupport.drm['com.widevine.alpha'];
-    playreadySupport = shakaSupport.drm['com.microsoft.playready'] ||
-        shakaSupport.drm['com.chromecast.playready'];
   });
 
   afterAll(() => {
@@ -89,7 +81,7 @@ filterDescribe('Offline', supportsStorage, () => {
   drmIt(
       'stores, plays, and deletes protected content with a persistent license',
       async () => {
-        if (!widevineSupport || !widevineSupport.persistentState) {
+        if (!checkWidevinePersistentSupport()) {
           pending('Widevine persistent licenses are not supported');
           return;
         }
@@ -125,7 +117,7 @@ filterDescribe('Offline', supportsStorage, () => {
   drmIt(
       'stores, plays, and deletes protected content with a temporary license',
       async () => {
-        if (!(widevineSupport || playreadySupport)) {
+        if (!checkTrueDrmSupport()) {
           pending('Widevine and PlayReady are not supported');
           return;
         }
