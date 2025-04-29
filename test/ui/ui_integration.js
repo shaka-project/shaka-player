@@ -250,7 +250,7 @@ describe('UI', () => {
      * @return {string}
      */
     function getNativeName(language) {
-      return mozilla.LanguageMapping[language].nativeName;
+      return mozilla.LanguageMapping[language];
     }
 
     /**
