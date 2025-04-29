@@ -1,5 +1,29 @@
 # Changelog
 
+## [4.14.10](https://github.com/shaka-project/shaka-player/compare/v4.14.9...v4.14.10) (2025-04-29)
+
+
+### Bug Fixes
+
+* Add optional content workaround to force ENCA.ChannelCount to 2 for EAC-3 Audio init segments ([#8517](https://github.com/shaka-project/shaka-player/issues/8517)) ([32cb088](https://github.com/shaka-project/shaka-player/commit/32cb088a72b53ecb0ed11f90eea362ca23b0afa7))
+* Allow use Chapter API on browsers without track element support ([#8515](https://github.com/shaka-project/shaka-player/issues/8515)) ([a40e2ff](https://github.com/shaka-project/shaka-player/commit/a40e2ffe5bb805434551eeabfb5bdfd1fdeaf2de))
+* **DASH:** Fix live playback with Period duration ([#8493](https://github.com/shaka-project/shaka-player/issues/8493)) ([bbb55c5](https://github.com/shaka-project/shaka-player/commit/bbb55c53569571e4e6b4372bf7e3ff6027834ba4)), closes [#8481](https://github.com/shaka-project/shaka-player/issues/8481)
+* Fix Firefox PlayReady support ([#8497](https://github.com/shaka-project/shaka-player/issues/8497)) ([e8e1590](https://github.com/shaka-project/shaka-player/commit/e8e159014467c57ad0e815c4602823eb67319f92))
+* Fix initial buffering state when we load a stream ([#8500](https://github.com/shaka-project/shaka-player/issues/8500)) ([36af32c](https://github.com/shaka-project/shaka-player/commit/36af32ce5e0f731e75f6e2bef6e0f1b2dba8be3e))
+* **HLS:** Fix text tracks disappear after seek ([#8494](https://github.com/shaka-project/shaka-player/issues/8494)) ([d1fc5fb](https://github.com/shaka-project/shaka-player/commit/d1fc5fb798bb93e2da129f9b6d517dff1135e27d))
+* Make sure we are calling setLiveSeekableRange and clearLiveSeekableRange at the correct time ([#8523](https://github.com/shaka-project/shaka-player/issues/8523)) ([3f75713](https://github.com/shaka-project/shaka-player/commit/3f757130f43f2865c3338b418948926ce720d684))
+* **UI:** Disable doubleClickForFullscreen while casting ([#8488](https://github.com/shaka-project/shaka-player/issues/8488)) ([2627947](https://github.com/shaka-project/shaka-player/commit/262794760d7c65d5f96740a2c0f4930486289b0b))
+* **UI:** Save track preferences for casting purposes ([#8489](https://github.com/shaka-project/shaka-player/issues/8489)) ([c6c0c63](https://github.com/shaka-project/shaka-player/commit/c6c0c63eefe225b593f10fb209b2d732b8bfe470))
+* **UI:** Show time when the thumbnail is not available ([#8510](https://github.com/shaka-project/shaka-player/issues/8510)) ([69f36df](https://github.com/shaka-project/shaka-player/commit/69f36df865488d2dacd850e543f71545de792553))
+* **UI:** Sync volume and mute values when loading a new content or casting ([#8487](https://github.com/shaka-project/shaka-player/issues/8487)) ([54266b3](https://github.com/shaka-project/shaka-player/commit/54266b3c371043cf927af55b27c40ff5e4b883f4))
+
+
+### Performance Improvements
+
+* Do not process stream DRM info several times ([#8505](https://github.com/shaka-project/shaka-player/issues/8505)) ([9042433](https://github.com/shaka-project/shaka-player/commit/90424331fc08b17d04ed4d1ba142bc40febc44a5))
+* Optimize getAllThumbnails() ([#8525](https://github.com/shaka-project/shaka-player/issues/8525)) ([6b7b4cd](https://github.com/shaka-project/shaka-player/commit/6b7b4cdb504a5ae05f48d10b34940ef802c5f5ee))
+* Remove extendedType when checking isTypeSupported on Tizen ([#8507](https://github.com/shaka-project/shaka-player/issues/8507)) ([40f28a7](https://github.com/shaka-project/shaka-player/commit/40f28a75a4b65bd51a353dbf40f91b3f9697148b))
+
 ## [4.14.9](https://github.com/shaka-project/shaka-player/compare/v4.14.8...v4.14.9) (2025-04-21)
 
 
