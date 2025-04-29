@@ -901,7 +901,7 @@ describe('StreamUtils', () => {
     it('should filter variants by the best available bandwidth' +
     ' for audio language', () => {
       // This test is flaky in some Tizen devices, due to codec restrictions.
-      if (shaka.util.Platform.isTizen()) {
+      if (deviceDetected.getDeviceName() === 'Tizen') {
         pending('Skip flaky test in Tizen');
       }
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -959,7 +959,7 @@ describe('StreamUtils', () => {
         pending('Codec HEVC is not supported by the platform.');
       }
       // This test is flaky in some Tizen devices, due to codec restrictions.
-      if (shaka.util.Platform.isTizen()) {
+      if (deviceDetected.getDeviceName() === 'Tizen') {
         pending('Skip flaky test in Tizen');
       }
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {

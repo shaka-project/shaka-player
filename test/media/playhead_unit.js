@@ -174,8 +174,8 @@ describe('Playhead', () => {
   function calculateGap(time) {
     let jumpTo = time;
     if (shaka.util.Platform.isLegacyEdge() ||
-        shaka.util.Platform.isXboxOne() ||
-        shaka.util.Platform.isTizen()) {
+        deviceDetected.getDeviceName() === 'Xbox' ||
+        deviceDetected.getDeviceName() === 'Tizen') {
       const gapPadding = shaka.util.PlayerConfiguration.createDefault()
           .streaming.gapPadding;
       jumpTo = Math.ceil((jumpTo + gapPadding) * 100) / 100;
