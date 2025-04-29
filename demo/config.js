@@ -694,6 +694,8 @@ shakaDemo.Config = class {
         .addBoolInput_('Force Transmux', 'mediaSource.forceTransmux')
         .addBoolInput_('Insert fake encryption in init segments when needed ' +
             'by the platform.', 'mediaSource.insertFakeEncryptionInInit')
+        .addBoolInput_('Force enca.ChannelCount to 2 for EC-3 audio if ' +
+          'needed by the platform.', 'mediaSource.correctEc3Enca')
         .addSelectInput_(
             'Codec Switching Strategy',
             'mediaSource.codecSwitchingStrategy',

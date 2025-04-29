@@ -2183,6 +2183,7 @@ shaka.extern.NetworkingConfiguration;
  *   addExtraFeaturesToSourceBuffer: function(string): string,
  *   forceTransmux: boolean,
  *   insertFakeEncryptionInInit: boolean,
+ *   correctEc3Enca: boolean,
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback,
  *   dispatchAllEmsgBoxes: boolean,
  *   useSourceElements: boolean,
@@ -2221,6 +2222,13 @@ shaka.extern.NetworkingConfiguration;
  *   <br><br>
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {boolean} correctEc3Enca
+ *   If true, will apply a work-around for Audio init segments signaling
+ *   EC-3 codec with protection. This will force the ChannelCount field
+ *   of the 'enca' box to be set to 2, which is required via the dolby
+ *   spec.
+ *   <br>
+ *   This value defaults to <code>false</code>.
  * @property {shaka.extern.TextParser.ModifyCueCallback} modifyCueCallback
  *    A callback called for each cue after it is parsed, but right before it
  *    is appended to the presentation.
