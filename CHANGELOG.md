@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.13.19](https://github.com/shaka-project/shaka-player/compare/v4.13.18...v4.13.19) (2025-04-29)
+
+
+### Bug Fixes
+
+* Allow use Chapter API on browsers without track element support ([#8515](https://github.com/shaka-project/shaka-player/issues/8515)) ([6120f5f](https://github.com/shaka-project/shaka-player/commit/6120f5fc6cb79a11a8ab487b0765c35552acaaef))
+* **DASH:** Fix live playback with Period duration ([#8493](https://github.com/shaka-project/shaka-player/issues/8493)) ([506b077](https://github.com/shaka-project/shaka-player/commit/506b077ac4142780da80aeb6c2277646e329e41a)), closes [#8481](https://github.com/shaka-project/shaka-player/issues/8481)
+* Fix Firefox PlayReady support ([#8497](https://github.com/shaka-project/shaka-player/issues/8497)) ([00f0540](https://github.com/shaka-project/shaka-player/commit/00f05407f00d386fb6820c4367901b4e58c59d79))
+* **HLS:** Fix text tracks disappear after seek ([#8494](https://github.com/shaka-project/shaka-player/issues/8494)) ([a9a3920](https://github.com/shaka-project/shaka-player/commit/a9a392085b5aae2f19c97b753b9738d79b5d6f49))
+* Make sure we are calling setLiveSeekableRange and clearLiveSeekableRange at the correct time ([#8523](https://github.com/shaka-project/shaka-player/issues/8523)) ([f4047cb](https://github.com/shaka-project/shaka-player/commit/f4047cbda110c1d56b7c6d223ea9efe5af178d31))
+* **UI:** Disable doubleClickForFullscreen while casting ([#8488](https://github.com/shaka-project/shaka-player/issues/8488)) ([0b9d451](https://github.com/shaka-project/shaka-player/commit/0b9d4519f05f7da8be4414356d3fb6da5c1fae6a))
+* **UI:** Sync volume and mute values when loading a new content or casting ([#8487](https://github.com/shaka-project/shaka-player/issues/8487)) ([8426862](https://github.com/shaka-project/shaka-player/commit/84268626150b1f818860913c4f9c8ead70372e03))
+
+
+### Performance Improvements
+
+* Do not process stream DRM info several times ([#8505](https://github.com/shaka-project/shaka-player/issues/8505)) ([21b749e](https://github.com/shaka-project/shaka-player/commit/21b749ee50c6f32ab5ffa769cf6058ada6a61807))
+* Remove extendedType when checking isTypeSupported on Tizen ([#8507](https://github.com/shaka-project/shaka-player/issues/8507)) ([89d1909](https://github.com/shaka-project/shaka-player/commit/89d19095f373f31d5d74602ccc98d6186484d588))
+
 ## [4.13.18](https://github.com/shaka-project/shaka-player/compare/v4.13.17...v4.13.18) (2025-04-21)
 
 
