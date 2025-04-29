@@ -2227,7 +2227,7 @@ shaka.extern.NetworkingConfiguration;
  *   EC-3 codec with protection. This will force the ChannelCount field
  *   of the 'enca' box to be set to 2, which is required via the dolby
  *   spec.
- *   <br><br>
+ *   <br>
  *   This value defaults to <code>false</code>.
  * @property {shaka.extern.TextParser.ModifyCueCallback} modifyCueCallback
  *    A callback called for each cue after it is parsed, but right before it
