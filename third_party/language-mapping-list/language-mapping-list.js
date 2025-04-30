@@ -26,8 +26,8 @@
 goog.provide('mozilla.LanguageMapping');
 
 /**
- * A mapping from language code to the native and English names for that
- * language.  The language code can be specific and include a locale, such as
+ * A mapping from language code to the native names for that language.
+ * The language code can be specific and include a locale, such as
  * "es-CL" instead of merely "es".
  *
  * @type {!Object<string, string>}
