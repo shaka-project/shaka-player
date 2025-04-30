@@ -4,22 +4,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('SimpleTextDisplayer', () => {
+describe('NativeTextDisplayer', () => {
   const originalVTTCue = window.VTTCue;
   const Cue = shaka.text.Cue;
-  const SimpleTextDisplayer = shaka.text.SimpleTextDisplayer;
+  const NativeTextDisplayer = shaka.text.NativeTextDisplayer;
 
   /** @type {!shaka.test.FakeVideo} */
   let video;
   /** @type {!shaka.test.FakeTextTrack} */
   let mockTrack;
-  /** @type {!shaka.text.SimpleTextDisplayer} */
+  /** @type {!shaka.text.NativeTextDisplayer} */
   let displayer;
+  /** @type {Object} **/
+  let player;
 
   beforeEach(() => {
+    /** @type {!Array<shaka.extern.TextTrack>} */
+    const textTracks = [{
+      id: 0,
+      active: true,
+    }];
+    player = {
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      getMediaElement: () => video,
+      getLoadMode: () => shaka.Player.LoadMode.MEDIA_SOURCE,
+      getTextTracks: () => textTracks,
+      selectTextTrack: ({id}) => {
+        const track = textTracks.find((t) => t.id === id);
+        expect(track).toBeTruthy();
+        track.active = true;
+      },
+    };
     video = new shaka.test.FakeVideo();
-    displayer = new SimpleTextDisplayer(video, shaka.Player.TextTrackLabel);
-    displayer.enableTextDisplayer();
+    /** @suppress {checkTypes} */
+    displayer = new NativeTextDisplayer(player);
+    /** @suppress {visibility} */
+    displayer.onLoaded_();
 
     expect(video.textTracks.length).toBe(1);
     mockTrack = /** @type {!shaka.test.FakeTextTrack} */ (video.textTracks[0]);
@@ -433,20 +454,14 @@ describe('SimpleTextDisplayer', () => {
   });
 
   describe('destroy', () => {
-    it('disables the TextTrack it created', async () => {
+    it('deletes the TextTrack it created', async () => {
       // There should only be the one track created by this displayer.
       expect(video.textTracks.length).toBe(1);
 
-      /** @type {!TextTrack} */
-      const textTrack = video.textTracks[0];
-
-      // It should not be disabled before we destroy it.
-      expect(textTrack.mode).not.toBe('disabled');
-
       await displayer.destroy();
 
-      // It should be disabled after we destroy it.
-      expect(textTrack.mode).toBe('disabled');
+      // It should be deleted after we destroy it.
+      expect(video.textTracks.length).toBe(0);
     });
   });
 

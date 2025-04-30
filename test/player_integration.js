@@ -316,7 +316,7 @@ describe('Player', () => {
       await video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
 
-      // SimpleTextDisplayer creates TextTracks if text streams are detected.
+      // NativeTextDisplayer creates TextTracks if text streams are detected.
       const textTrack = video.textTracks[0];
       expect(textTrack).not.toBe(null);
 

@@ -5,12 +5,12 @@
 Shaka Player supports two implementations of {@link shaka.extern.TextDisplayer}
 which can be used to render & style content subtitles.
 
-#### SimpleTextDisplayer
+#### NativeTextDisplayer
 
-{@link shaka.text.SimpleTextDisplayer} which uses browser's native cue
-renderer. Shaka Player creates a custom text track attached to the video
-element and provides necessary data so video element can render it. This is
-the default displayer when shaka UI is **not** used.
+{@link shaka.text.NativeTextDisplayer} which uses browser's native cue
+renderer. Shaka Player creates corresponding text tracks for text streams on
+the video element and provides necessary data so video element can render it.
+This is the default displayer when shaka UI is **not** used.
 
 #### UITextDisplayer
 

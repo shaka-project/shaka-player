@@ -1410,7 +1410,7 @@ shakaDemo.Main = class {
       if (this.nativeControlsEnabled_) {
         this.controls_.setEnabledShakaControls(false);
         this.controls_.setEnabledNativeControls(true);
-        // This will force the player to use SimpleTextDisplayer.
+        // This will force the player to use NativeTextDisplayer.
         this.player_.setVideoContainer(null);
       } else {
         this.controls_.setEnabledShakaControls(true);
