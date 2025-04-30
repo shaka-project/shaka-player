@@ -342,6 +342,7 @@ describe('Player Src Equals', () => {
 
     expect(newTrack).toBeTruthy();
     await player.unload();
+    /** @suppress {visibility} */
     expect(player.getFilteredTextTracks_().length).toBe(0);
   });
 
