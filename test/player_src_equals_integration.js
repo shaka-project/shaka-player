@@ -342,7 +342,7 @@ describe('Player Src Equals', () => {
 
     expect(newTrack).toBeTruthy();
     await player.unload();
-    expect(video.textTracks.length).toBe(0);
+    expect(player.getFilteredTextTracks_().length).toBe(0);
   });
 
   describe('addChaptersTrack', () => {
