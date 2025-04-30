@@ -1514,4 +1514,18 @@ describe('Player', () => {
       expect(video.currentTime).toBeGreaterThanOrEqual(0);
     });
   });
+
+  it('loads a sequence of streams', async () => {
+    player.configure('playRangeEnd', 2);
+    const uris = [
+      'test:sintel_compiled',
+      'test:sintel_compiled',
+    ];
+    await player.loadSequence(uris);
+    await video.play();
+    await waiter.timeoutAfter(10).waitForEvent(player, 'switchingtonewstream');
+    await shaka.test.Util.delay(1);
+    await video.play();
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+  });
 });

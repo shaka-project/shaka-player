@@ -68,6 +68,7 @@ stalldetected
 startstreaming
 statechanged
 submenuopen
+switchingtonewstream
 textchanged
 textlang
 textrole
