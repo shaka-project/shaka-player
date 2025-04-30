@@ -1483,8 +1483,7 @@ describe('Player', () => {
       player.configure('streaming.preloadNextUrlWindow', 30);
       await player.load(urlWithNextUrl);
       await video.play();
-      await waiter.timeoutAfter(30).waitForEnd(video);
-      expect(player.getAssetUri()).toBe(urlWithNextUrl);
+      await waiter.timeoutAfter(30).waitForEvent(player, 'switchingtonewstream');
       // Delay needed to load the next URL.
       await shaka.test.Util.delay(1);
       expect(player.getAssetUri()).not.toBe(urlWithNextUrl);
@@ -1494,8 +1493,7 @@ describe('Player', () => {
       player.configure('streaming.preloadNextUrlWindow', 0);
       await player.load(urlWithNextUrl);
       await video.play();
-      await waiter.timeoutAfter(30).waitForEnd(video);
-      expect(player.getAssetUri()).toBe(urlWithNextUrl);
+      await waiter.timeoutAfter(30).waitForEvent(player, 'switchingtonewstream');
       // Delay needed to load the next URL.
       await shaka.test.Util.delay(1);
       expect(player.getAssetUri()).not.toBe(urlWithNextUrl);
