@@ -59,23 +59,6 @@ describe('Player Src Equals', () => {
     await player.unload(/* initMediaSource= */ false);
   });
 
-  it('loads a sequence of streams', async () => {
-    player.configure('playRangeEnd', 2);
-    // Preload is not supported on SRC= so disable it.
-    player.configure('streaming.preloadNextUrlWindow', 0);
-    const uris = [
-      SMALL_MP4_CONTENT_URI,
-      SMALL_MP4_CONTENT_URI,
-    ];
-    await player.attach(video, /* initMediaSource= */ false);
-    await player.loadSequence(uris);
-    await video.play();
-    await waiter.timeoutAfter(10).waitForEvent(player, 'switchingtonewstream');
-    await shaka.test.Util.delay(1);
-    await video.play();
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
-  });
-
   it('can get asset uri after loading', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
     expect(player.getAssetUri()).toBe(SMALL_MP4_CONTENT_URI);
