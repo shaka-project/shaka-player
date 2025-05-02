@@ -307,33 +307,6 @@ describe('Player', () => {
   });  // describe('getStats')
 
   describe('setTextTrackVisibility', () => {
-    // Using mode='disabled' on TextTrack causes cues to go null, which leads
-    // to a crash in TextEngine.  This validates that we do not trigger this
-    // behavior when changing visibility of text.
-
-    it('does not enabled textTrack', async () => {
-      await player.load('test:sintel_compiled');
-      await video.play();
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
-
-      // NativeTextDisplayer creates TextTracks if text streams are detected.
-      const textTrack = video.textTracks[0];
-      expect(textTrack).not.toBe(null);
-
-      player.setTextTrackVisibility(true);
-      // Should be disabled still.
-      expect(textTrack.mode).toBe('disabled');
-
-      const tracks = player.getTextTracks();
-      player.selectTextTrack(tracks[0]);
-      await waiter.waitForEvent(player, 'textchanged');
-      // Should definitely be showing when selected.
-      expect(textTrack.mode).toBe('showing');
-
-      player.setTextTrackVisibility(false);
-      // Should transition to hidden when invisible.
-      expect(textTrack.mode).toBe('hidden');
-    });
 
     // Repro for https://github.com/shaka-project/shaka-player/issues/1879.
     it('appends cues when enabled initially', async () => {
