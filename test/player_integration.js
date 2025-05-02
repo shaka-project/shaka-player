@@ -307,7 +307,6 @@ describe('Player', () => {
   });  // describe('getStats')
 
   describe('setTextTrackVisibility', () => {
-
     // Repro for https://github.com/shaka-project/shaka-player/issues/1879.
     it('appends cues when enabled initially', async () => {
       let cues = [];
