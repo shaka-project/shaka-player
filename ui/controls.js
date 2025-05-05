@@ -778,11 +778,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isPiPEnabled() {
-    if (this.shouldUseDocumentPictureInPicture_()) {
-      return !!window.documentPictureInPicture.window;
-    } else {
-      return !!document.pictureInPictureElement;
-    }
+    return !((window.documentPictureInPicture &&
+        window.documentPictureInPicture.window) ||
+        document.pictureInPictureElement);
   }
 
   /** @export */
