@@ -141,6 +141,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // the menus.
       this.hideSettingsMenusTimer_.tickAfter(
           /* seconds= */ this.config_.closeMenusDelay);
+
+      this.dispatchEvent(new shaka.util.FakeEvent('hidingui'));
     });
 
     /**
@@ -1580,6 +1582,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // this right before making it visible.
       this.updateTimeAndSeekRange_();
       this.computeOpacity();
+
+      this.dispatchEvent(new shaka.util.FakeEvent('showingui'));
     }
 
     // Hide the cursor when the mouse stops moving.
