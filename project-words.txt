@@ -22,6 +22,7 @@ expirationupdated
 firstquartile
 fontfaceonload
 gapjumped
+hidingui
 keyadded
 keymessage
 keystatuschanged
@@ -57,6 +58,7 @@ seekforward
 seekto
 segmentappended
 selectcomplete
+showingui
 spacebar
 stalldetected
 startstreaming
