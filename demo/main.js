@@ -111,7 +111,10 @@ shakaDemo.Main = class {
         return;
       }
 
-      this.onError_(/** @type {!shaka.util.Error} */ (errorEvent.error));
+      const shakaError = /** @type {!shaka.util.Error} */ (errorEvent.error);
+      if (shakaError) {
+        this.onError_(shakaError);
+      }
     });
 
     // Display unhandled rejections.
