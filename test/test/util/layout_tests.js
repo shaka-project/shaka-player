@@ -390,8 +390,7 @@ shaka.test.NativeTextLayoutTests = class extends shaka.test.TextLayoutTests {
   recreateTextDisplayer() {
     /** @suppress {checkTypes} */
     this.textDisplayer = new shaka.text.NativeTextDisplayer(this.player);
-    /** @suppress {visibility} */
-    this.textDisplayer.onLoaded_();
+    this.textDisplayer.enableTextDisplayer();
     this.textDisplayer.setTextVisibility(true);
   }
 

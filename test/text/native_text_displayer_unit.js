@@ -39,8 +39,7 @@ describe('NativeTextDisplayer', () => {
     video = new shaka.test.FakeVideo();
     /** @suppress {checkTypes} */
     displayer = new NativeTextDisplayer(player);
-    /** @suppress {visibility} */
-    displayer.onLoaded_();
+    displayer.enableTextDisplayer();
 
     expect(video.textTracks.length).toBe(1);
     mockTrack = /** @type {!shaka.test.FakeTextTrack} */ (video.textTracks[0]);
