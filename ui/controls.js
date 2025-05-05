@@ -788,13 +788,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   async togglePiP() {
     try {
+      // If you were fullscreen, leave fullscreen first.
+      if (this.isFullScreenEnabled()) {
+        await this.exitFullScreen_();
+      }
       if (this.shouldUseDocumentPictureInPicture_()) {
         await this.toggleDocumentPictureInPicture_();
       } else if (!document.pictureInPictureElement) {
-        // If you were fullscreen, leave fullscreen first.
-        if (this.isFullScreenEnabled()) {
-          await this.exitFullScreen_();
-        }
         const video = /** @type {HTMLVideoElement} */(this.localVideo_);
         await video.requestPictureInPicture();
       } else {
@@ -817,11 +817,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (window.documentPictureInPicture.window) {
       window.documentPictureInPicture.window.close();
       return;
-    }
-
-    // If you were fullscreen, leave fullscreen first.
-    if (this.isFullScreenEnabled()) {
-      await this.exitFullScreen_();
     }
 
     // Open a Picture-in-Picture window.
