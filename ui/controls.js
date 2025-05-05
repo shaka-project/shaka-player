@@ -652,6 +652,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @return {boolean}
+   * @private
+   */
+  shouldUseDocumentPictureInPicture_() {
+    return 'documentPictureInPicture' in window &&
+        this.config_.preferDocumentPictureInPicture;
+  }
+
+  /**
+   * @return {boolean}
    * @export
    */
   isFullScreenSupported() {
@@ -689,8 +698,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   async enterFullScreen_() {
     try {
       if (this.shouldUseDocumentFullscreen_()) {
-        if (document.pictureInPictureElement) {
-          await document.exitPictureInPicture();
+        if (this.isPiPEnabled()) {
+          await this.togglePiP();
+          if (this.shouldUseDocumentPictureInPicture_()) {
+            // This is necessary because we need a small delay when
+            // executing actions when returning from document PiP.
+            await new Promise((resolve) => {
+              new shaka.util.Timer(resolve).tickAfter(0.05);
+            });
+          }
         }
         const fullScreenElement = this.config_.fullScreenElement;
         await fullScreenElement.requestFullscreen({navigationUI: 'hide'});
@@ -749,12 +765,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.castProxy_.isCasting()) {
       return false;
     }
-    if ('documentPictureInPicture' in window &&
-        this.config_.preferDocumentPictureInPicture) {
-      const video = /** @type {HTMLVideoElement} */(this.localVideo_);
-      return !video.disablePictureInPicture;
-    }
-    if (document.pictureInPictureEnabled) {
+    if (document.pictureInPictureEnabled ||
+        this.shouldUseDocumentPictureInPicture_()) {
       const video = /** @type {HTMLVideoElement} */(this.localVideo_);
       return !video.disablePictureInPicture;
     }
@@ -766,8 +778,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isPiPEnabled() {
-    if ('documentPictureInPicture' in window &&
-        this.config_.preferDocumentPictureInPicture) {
+    if (this.shouldUseDocumentPictureInPicture_()) {
       return !!window.documentPictureInPicture.window;
     } else {
       return !!document.pictureInPictureElement;
@@ -777,13 +788,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   async togglePiP() {
     try {
-      if ('documentPictureInPicture' in window &&
-        this.config_.preferDocumentPictureInPicture) {
+      if (this.shouldUseDocumentPictureInPicture_()) {
         await this.toggleDocumentPictureInPicture_();
       } else if (!document.pictureInPictureElement) {
         // If you were fullscreen, leave fullscreen first.
-        if (document.fullscreenElement) {
-          document.exitFullscreen();
+        if (this.isFullScreenEnabled()) {
+          await this.exitFullScreen_();
         }
         const video = /** @type {HTMLVideoElement} */(this.localVideo_);
         await video.requestPictureInPicture();
@@ -807,6 +817,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (window.documentPictureInPicture.window) {
       window.documentPictureInPicture.window.close();
       return;
+    }
+
+    // If you were fullscreen, leave fullscreen first.
+    if (this.isFullScreenEnabled()) {
+      await this.exitFullScreen_();
     }
 
     // Open a Picture-in-Picture window.
