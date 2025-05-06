@@ -2892,6 +2892,8 @@ shaka.extern.LanguageRole;
  *   startTime: number,
  *   duration: number,
  *   uris: !Array<string>,
+ *   uriStartByte: number,
+ *   uriEndByte: ?number,
  *   width: number,
  *   sprite: boolean,
  *   mimeType: ?string,
@@ -2919,6 +2921,12 @@ shaka.extern.LanguageRole;
  * @property {!Array<string>} uris
  *   An array of URIs to attempt.  They will be tried in the order they are
  *   given.
+ * @property {number} uriStartByte
+ *   The offset from the start of the uri resource.
+ * @property {?number} uriEndByte
+ *   The offset from the start of the resource to the end of the segment,
+ *   inclusive.  A value of null indicates that the segment extends to the end
+ *   of the resource.
  * @property {number} width
  *    The thumbnail width in px.
  * @property {boolean} sprite
