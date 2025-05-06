@@ -1057,7 +1057,7 @@ shakaDemo.Main = class {
     }
 
     if (params.has('watermarkText')) {
-      this.watermarkText_ = params.get('watermarkText');
+      this.setWatermarkText(params.get('watermarkText'));
     }
 
     if (params.has('visualizer')) {

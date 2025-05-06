@@ -93,10 +93,7 @@ shaka.ui.Overlay = class {
     videoContainer['ui'] = this;
     video['ui'] = this;
     /** @private {shaka.ui.Watermark} */
-    this.watermark_ = new shaka.ui.Watermark(
-        this.videoContainer_,
-        this.controls_,
-    );
+    this.watermark_ = null;
   }
 
 
@@ -217,6 +214,10 @@ shaka.ui.Overlay = class {
    * @export
    */
   setTextWatermark(text, options) {
+    if (text && !this.watermark_ && this.videoContainer_ && this.controls_) {
+      this.watermark_ = new shaka.ui.Watermark(
+          this.videoContainer_, this.controls_);
+    }
     if (this.watermark_) {
       this.watermark_.setTextWatermark(text, options);
     }
