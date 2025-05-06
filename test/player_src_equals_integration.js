@@ -357,7 +357,7 @@ describe('Player Src Equals', () => {
 
       // Data should be available as soon as addChaptersTrack resolves.
       // See https://github.com/shaka-project/shaka-player/issues/4186
-      const chapters = player.getChapters('en');
+      const chapters = await player.getChaptersAsync('en');
       expect(chapters.length).toBe(3);
       const chapter1 = chapters[0];
       expect(chapter1.title).toBe('Chapter 1');
@@ -376,7 +376,7 @@ describe('Player Src Equals', () => {
       const absoluteUri2 = locationUri.resolve(partialUri2);
       await player.addChaptersTrack(absoluteUri2.toString(), 'en');
 
-      const chaptersUpdated = player.getChapters('en');
+      const chaptersUpdated = await player.getChaptersAsync('en');
       expect(chaptersUpdated.length).toBe(6);
       const chapterUpdated1 = chaptersUpdated[0];
       expect(chapterUpdated1.title).toBe('Chapter 1');
@@ -412,7 +412,7 @@ describe('Player Src Equals', () => {
       const absoluteUri = locationUri.resolve(partialUri);
       await player.addChaptersTrack(absoluteUri.toString(), 'es');
 
-      const chapters = player.getChapters('es');
+      const chapters = await player.getChaptersAsync('es');
       expect(chapters.length).toBe(3);
       const chapter1 = chapters[0];
       expect(chapter1.title).toBe('Chapter 1');

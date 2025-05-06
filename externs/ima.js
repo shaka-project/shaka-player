@@ -57,9 +57,8 @@ google.ima.AdsManager = class {
   /**
    * @param {number} width
    * @param {number} height
-   * @param {google.ima.ViewMode} viewMode
    */
-  init(width, height, viewMode) {}
+  init(width, height) {}
 
   /**
    * @return {number}
@@ -91,9 +90,8 @@ google.ima.AdsManager = class {
   /**
    * @param {number} width
    * @param {number} height
-   * @param {google.ima.ViewMode} viewMode
    */
-  resize(width, height, viewMode) {}
+  resize(width, height) {}
 
   /**
    * @return {!Array<number>}
@@ -392,15 +390,6 @@ google.ima.AdErrorEvent = class extends Event {
  */
 google.ima.AdErrorEvent.Type = {
   AD_ERROR: 'AD_ERROR',
-};
-
-
-/**
- * @enum {string}
- */
-google.ima.ViewMode = {
-  FULLSCREEN: 'FULLSCREEN',
-  NORMAL: 'NORMAL',
 };
 
 

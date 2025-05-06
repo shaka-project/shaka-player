@@ -100,7 +100,7 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
   /**
    * @private
    */
-  updateChapters_() {
+  async updateChapters_() {
     /**
      * Does a value compare on chapters.
      * @param {shaka.extern.Chapter} a
@@ -121,16 +121,21 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
       nextLanguage = locale;
       // If player is a proxy, and the cast receiver doesn't support this
       // method, you get back undefined.
-      nextChapters = this.player.getChapters(nextLanguage) || [];
+      if (this.player) {
+        // eslint-disable-next-line no-await-in-loop
+        nextChapters = (await this.player.getChaptersAsync(nextLanguage)) || [];
+      }
       if (nextChapters.length) {
         break;
       }
     }
     if (!nextChapters.length) {
       nextLanguage = 'und';
-      // If player is a proxy, and the cast receiver doesn't support this
-      // method, you get back undefined.
-      nextChapters = this.player.getChapters(nextLanguage) || [];
+      if (this.player) {
+        // If player is a proxy, and the cast receiver doesn't support this
+        // method, you get back undefined.
+        nextChapters = (await this.player.getChaptersAsync(nextLanguage)) || [];
+      }
     }
 
     const languageChanged = nextLanguage !== this.chaptersLanguage_;

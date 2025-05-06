@@ -131,3 +131,4 @@ application:
     - The `TimelineRegionInfo.eventElement` has been replaced with `TimelineRegionInfo.eventNode` property, the new property type is `shaka.externs.xml.Node` instead of `Element`
     - New API for audio: `getAudioTracks` and `selectAudioTrack`, we also deprecated in v4.14 `getAudioLanguages`, `getAudioLanguagesAndRoles` and `selectAudioLanguage`.
     - `shaka.util.FairPlayUtils` is moved to `shaka.drm.FairPlay` (Deprecated in v4.14)
+    - `getChapters` is replaced by `getChaptersAsync` (Deprecated in v4.15)
