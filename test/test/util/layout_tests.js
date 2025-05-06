@@ -351,6 +351,8 @@ shaka.test.NativeTextLayoutTests = class extends shaka.test.TextLayoutTests {
         expect(track).toBeTruthy();
         track.active = true;
       },
+      setTextTrackVisibility: (visible) =>
+        this.textDisplayer.setTextVisibility(visible),
     };
 
     this.video = shaka.test.UiUtils.createVideoElement();
