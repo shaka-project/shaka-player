@@ -192,6 +192,10 @@ shaka.test.FakeVideo = class {
     this.offsetHeight = 1000;
     /** @private {!Array<!Element>} */
     this.children_ = [];
+    this.ownerDocument = {
+      // We just need to fake createElement for tracks.
+      createElement: (tagName) => new shaka.test.FakeTrackElement(),
+    };
 
     /** @type {!jasmine.Spy} */
     this.addTextTrack =
@@ -240,7 +244,36 @@ shaka.test.FakeVideo = class {
     this.appendChild =
       jasmine.createSpy('appendChild').and.callFake((element) => {
         this.children_.push(element);
+        if (element.tagName === 'TRACK') {
+          element.parentNode = this;
+          this.textTracks.push(element.track);
+
+          const trackEvent = new shaka.util.FakeEvent(
+              'addtrack',
+              {track: element.track},
+          );
+          this.textTracksEventTarget.dispatchEvent(trackEvent);
+        }
       });
+
+    this.removeChild = jasmine.createSpy('removeChild').and.callFake(
+        (element) => {
+          const idx = this.children_.indexOf(element);
+          expect(idx).not.toBeLessThan(0);
+          this.children_.splice(idx, 1);
+          if (element.tagName === 'TRACK') {
+            element.parentNode = null;
+            const idx = this.textTracks.indexOf(element.track);
+            expect(idx).not.toBeLessThan(0);
+            this.textTracks.splice(idx, 1);
+            const trackEvent = new shaka.util.FakeEvent(
+                'removetrack',
+                {track: element.track},
+            );
+            this.textTracksEventTarget.dispatchEvent(trackEvent);
+          }
+        },
+    );
 
     /** @type {!jasmine.Spy} */
     this.getElementsByTagName =
@@ -248,6 +281,38 @@ shaka.test.FakeVideo = class {
         tagName = tagName.toUpperCase();
         return this.children_.filter((tag) => tag.tagName === tagName);
       });
+  }
+};
+
+shaka.test.FakeTrackElement = class {
+  constructor() {
+    /** @type {string} */
+    this.tagName = 'TRACK';
+
+    /** @type {string} */
+    this.kind = 'subtitles';
+
+    /** @type {string} */
+    this.label = 'Fake Track';
+
+    /** @type {string} */
+    this.language = 'en';
+
+    /** @type {?shaka.test.FakeVideo} */
+    this.parentNode = null;
+
+    /** @type {!jasmine.Spy} */
+    this.track = new shaka.test.FakeTextTrack();
+
+    /** @const {!Object<string, !Function>} */
+    this.on = {};  // event listeners
+
+    /** @type {!jasmine.Spy} */
+    this.remove = jasmine.createSpy('remove').and.callFake(() => {
+      if (this.parentNode) {
+        this.parentNode.removeChild(this);
+      }
+    });
   }
 };
 

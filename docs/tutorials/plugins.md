@@ -49,7 +49,7 @@ __Subtitle/caption displayers__
   - Use {@link player.configure} and set the `textDisplayFactory` field
   - Must implement the {@link shaka.extern.TextDisplayer} interface
   - Default TextDisplayer implementation:
-    {@linksource shaka.text.SimpleTextDisplayer}
+    {@linksource shaka.text.NativeTextDisplayer}
 
 __Networking plugins__
   - Selected by URI scheme (http, https, etc.)

@@ -341,6 +341,9 @@ describe('Player Src Equals', () => {
         absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
 
     expect(newTrack).toBeTruthy();
+    await player.unload();
+    /** @suppress {visibility} */
+    expect(player.getFilteredTextTracks_().length).toBe(0);
   });
 
   describe('addChaptersTrack', () => {
