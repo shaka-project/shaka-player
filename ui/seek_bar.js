@@ -586,10 +586,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     let uri = thumbnail.uris[0].split('#xywh=')[0];
     if (!this.lastThumbnail_ ||
         uri !== this.lastThumbnail_.uris[0].split('#xywh=')[0] ||
-        thumbnail.segment.getStartByte() !=
-            this.lastThumbnail_.segment.getStartByte() ||
-        thumbnail.segment.getEndByte() !=
-            this.lastThumbnail_.segment.getEndByte()) {
+        thumbnail.startByte != this.lastThumbnail_.startByte ||
+        thumbnail.endByte != this.lastThumbnail_.endByte) {
       this.lastThumbnail_ = thumbnail;
       if (this.lastThumbnailPendingRequest_) {
         this.lastThumbnailPendingRequest_.abort();
@@ -602,9 +600,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           const type =
               shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT;
           const request = shaka.util.Networking.createSegmentRequest(
-              thumbnail.segment.getUris(),
-              thumbnail.segment.getStartByte(),
-              thumbnail.segment.getEndByte(),
+              thumbnail.uris,
+              thumbnail.startByte,
+              thumbnail.endByte,
               this.player.getConfiguration().streaming.retryParameters);
           this.lastThumbnailPendingRequest_ = this.player.getNetworkingEngine()
               .request(requestType, request, {type});
