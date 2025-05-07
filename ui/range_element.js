@@ -65,7 +65,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     this.bar.min = '0';
     this.bar.max = '1';
     this.bar.value = '0';
-    this.bar.disabled = this.controls.isOpaque();
+    this.bar.disabled = !this.controls.isOpaque();
 
     this.container.appendChild(this.bar);
     this.parent.appendChild(this.container);
