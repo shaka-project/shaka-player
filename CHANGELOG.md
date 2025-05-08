@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.14.11](https://github.com/shaka-project/shaka-player/compare/v4.14.10...v4.14.11) (2025-05-08)
+
+
+### Bug Fixes
+
+* Add new parameters to thumbnails in order to work with cast proxy ([#8554](https://github.com/shaka-project/shaka-player/issues/8554)) ([339a329](https://github.com/shaka-project/shaka-player/commit/339a32940a5887ead8b883a2c4ed4afb354bf390))
+* **Cast:** Add response to async calls on cast proxy ([#8549](https://github.com/shaka-project/shaka-player/issues/8549)) ([cc35f27](https://github.com/shaka-project/shaka-player/commit/cc35f27408e37dd3ae23a13ddebe44e77347f253))
+* Fix MediaCapabilities polyfill on Vizio ([#8542](https://github.com/shaka-project/shaka-player/issues/8542)) ([6e7a683](https://github.com/shaka-project/shaka-player/commit/6e7a68314466cc359eaa5182fd7a0261908b0ccc))
+* Fix race condition stoping timers ([#8530](https://github.com/shaka-project/shaka-player/issues/8530)) ([08601d3](https://github.com/shaka-project/shaka-player/commit/08601d318da2d676f2991bc5164c80e1c6984bc6))
+* **LCEVC:** Ensure unique originalVideoId for LCEVC dual-track ([#8562](https://github.com/shaka-project/shaka-player/issues/8562)) ([8cf6e2e](https://github.com/shaka-project/shaka-player/commit/8cf6e2ebe987835e3f9d4c63a62a1611480e15bf))
+* **UI:** Create watermark element only when necessary ([#8551](https://github.com/shaka-project/shaka-player/issues/8551)) ([4c7d045](https://github.com/shaka-project/shaka-player/commit/4c7d04504319e400b92f623db12e84e2b390b43d))
+* **UI:** Fix erroneous current time when dragging ([#8558](https://github.com/shaka-project/shaka-player/issues/8558)) ([d3f8956](https://github.com/shaka-project/shaka-player/commit/d3f89560995fdc9d0958d19053d25da5c2a1f641))
+* **UI:** Fix seek on the seekbar at the init ([#8555](https://github.com/shaka-project/shaka-player/issues/8555)) ([0c0ecc5](https://github.com/shaka-project/shaka-player/commit/0c0ecc50b600e82aeef129e4c8525fd3eb14b3cf))
+* **UI:** Fix seekbar allows seeking even when hidden ([#8540](https://github.com/shaka-project/shaka-player/issues/8540)) ([4444b03](https://github.com/shaka-project/shaka-player/commit/4444b03e6ed8dfe78d5e4b698cc9aa188d598d06))
+* **UI:** Fix UI behaviour when switching between PiP and fullscreen and vice versa ([#8544](https://github.com/shaka-project/shaka-player/issues/8544)) ([7bb58a3](https://github.com/shaka-project/shaka-player/commit/7bb58a3f369b4a6ed2e03a03ec92006ce49aa9f4))
+* Update eme-encryption-scheme-polyfill ([#8546](https://github.com/shaka-project/shaka-player/issues/8546)) ([fc4bf75](https://github.com/shaka-project/shaka-player/commit/fc4bf756d98bffe0b9d7089db4b8ac193e498f0c))
+
 ## [4.14.10](https://github.com/shaka-project/shaka-player/compare/v4.14.9...v4.14.10) (2025-04-29)
 
 
