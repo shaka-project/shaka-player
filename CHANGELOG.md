@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.13.20](https://github.com/shaka-project/shaka-player/compare/v4.13.19...v4.13.20) (2025-05-08)
+
+
+### Bug Fixes
+
+* Add new parameters to thumbnails in order to work with cast proxy ([#8554](https://github.com/shaka-project/shaka-player/issues/8554)) ([75d37c8](https://github.com/shaka-project/shaka-player/commit/75d37c806c10c8801571f943cdeb5702ef26cd3f))
+* **Cast:** Add response to async calls on cast proxy ([#8549](https://github.com/shaka-project/shaka-player/issues/8549)) ([542a987](https://github.com/shaka-project/shaka-player/commit/542a9874c74fa00787c91f565ff8d3972ea54a94))
+* **UI:** Create watermark element only when necessary ([#8551](https://github.com/shaka-project/shaka-player/issues/8551)) ([67c6a17](https://github.com/shaka-project/shaka-player/commit/67c6a17dc1fd77e9d287e507f057d3e7987d7473))
+* **UI:** Fix erroneous current time when dragging ([#8558](https://github.com/shaka-project/shaka-player/issues/8558)) ([29d15b1](https://github.com/shaka-project/shaka-player/commit/29d15b14f799386622ec457270e1a271d3673a75))
+* **UI:** Fix seek on the seekbar at the init ([#8555](https://github.com/shaka-project/shaka-player/issues/8555)) ([01708ec](https://github.com/shaka-project/shaka-player/commit/01708ec3921cbb8a19ca75077a30e6ac96507aa0))
+* **UI:** Fix seekbar allows seeking even when hidden ([#8540](https://github.com/shaka-project/shaka-player/issues/8540)) ([1ef4f25](https://github.com/shaka-project/shaka-player/commit/1ef4f25dc452941f826de11be2cbf0778877c0a0))
+* **UI:** Fix UI behaviour when switching between PiP and fullscreen and vice versa ([#8544](https://github.com/shaka-project/shaka-player/issues/8544)) ([1e39fd7](https://github.com/shaka-project/shaka-player/commit/1e39fd78fd43caca53a408c96ff5ccfbd4a79095))
+* Update eme-encryption-scheme-polyfill ([#8546](https://github.com/shaka-project/shaka-player/issues/8546)) ([fba8650](https://github.com/shaka-project/shaka-player/commit/fba865077d1cbde726b8799848f55cb7abb42343))
+
 ## [4.13.19](https://github.com/shaka-project/shaka-player/compare/v4.13.18...v4.13.19) (2025-04-29)
 
 
