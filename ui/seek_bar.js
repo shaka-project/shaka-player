@@ -346,39 +346,35 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     } else {
       shaka.ui.Utils.setDisplay(this.container, true);
 
-      if (bufferedLength == 0) {
-        this.container.style.background = colors.base;
-      } else {
-        const clampedBufferStart = Math.max(bufferedStart, seekRange.start);
-        const clampedBufferEnd = Math.min(bufferedEnd, seekRange.end);
-        const clampedCurrentTime = Math.min(
-            Math.max(currentTime, seekRange.start),
-            seekRange.end);
+      const clampedBufferStart = Math.max(bufferedStart, seekRange.start);
+      const clampedBufferEnd = Math.min(bufferedEnd, seekRange.end);
+      const clampedCurrentTime = Math.min(
+          Math.max(currentTime, seekRange.start),
+          seekRange.end);
 
-        const bufferStartDistance = clampedBufferStart - seekRange.start;
-        const bufferEndDistance = clampedBufferEnd - seekRange.start;
-        const playheadDistance = clampedCurrentTime - seekRange.start;
+      const bufferStartDistance = clampedBufferStart - seekRange.start;
+      const bufferEndDistance = clampedBufferEnd - seekRange.start;
+      const playheadDistance = clampedCurrentTime - seekRange.start;
 
-        // NOTE: the fallback to zero eliminates NaN.
-        const bufferStartFraction = (bufferStartDistance / seekRangeSize) || 0;
-        const bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
-        const playheadFraction = (playheadDistance / seekRangeSize) || 0;
+      // NOTE: the fallback to zero eliminates NaN.
+      const bufferStartFraction = (bufferStartDistance / seekRangeSize) || 0;
+      const bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
+      const playheadFraction = (playheadDistance / seekRangeSize) || 0;
 
-        const unbufferedColor =
-            this.config_.showUnbufferedStart ? colors.base : colors.played;
+      const unbufferedColor =
+          this.config_.showUnbufferedStart ? colors.base : colors.played;
 
-        const gradient = [
-          'to right',
-          this.makeColor_(unbufferedColor, bufferStartFraction),
-          this.makeColor_(colors.played, bufferStartFraction),
-          this.makeColor_(colors.played, playheadFraction),
-          this.makeColor_(colors.buffered, playheadFraction),
-          this.makeColor_(colors.buffered, bufferEndFraction),
-          this.makeColor_(colors.base, bufferEndFraction),
-        ];
-        this.container.style.background =
-            'linear-gradient(' + gradient.join(',') + ')';
-      }
+      const gradient = [
+        'to right',
+        this.makeColor_(unbufferedColor, bufferStartFraction),
+        this.makeColor_(colors.played, bufferStartFraction),
+        this.makeColor_(colors.played, playheadFraction),
+        this.makeColor_(colors.buffered, playheadFraction),
+        this.makeColor_(colors.buffered, bufferEndFraction),
+        this.makeColor_(colors.base, bufferEndFraction),
+      ];
+      this.container.style.background =
+          'linear-gradient(' + gradient.join(',') + ')';
     }
   }
 
