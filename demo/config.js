@@ -626,7 +626,9 @@ shakaDemo.Config = class {
             'streaming.avoidEvictionOnQuotaExceededError')
         .addSelectInput_('Cross Boundary Strategy',
             'streaming.crossBoundaryStrategy',
-            strategyOptions, strategyOptionsNames);
+            strategyOptions, strategyOptionsNames)
+        .addBoolInput_('Back to live when outside of live window',
+            'streaming.backToLiveWhenOutsideOfLiveWindow');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
   }
