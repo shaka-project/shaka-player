@@ -788,13 +788,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   async togglePiP() {
     try {
-      // If you were fullscreen, leave fullscreen first.
-      if (this.isFullScreenEnabled()) {
-        await this.exitFullScreen_();
-      }
       if (this.shouldUseDocumentPictureInPicture_()) {
+        // If you were fullscreen, leave fullscreen first.
+        if (this.isFullScreenEnabled()) {
+          await this.exitFullScreen_();
+        }
         await this.toggleDocumentPictureInPicture_();
       } else if (!document.pictureInPictureElement) {
+        // If you were fullscreen, leave fullscreen first.
+        if (this.isFullScreenEnabled()) {
+          this.exitFullScreen_();
+        }
         const video = /** @type {HTMLVideoElement} */(this.localVideo_);
         await video.requestPictureInPicture();
       } else {
