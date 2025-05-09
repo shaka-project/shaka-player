@@ -627,8 +627,9 @@ shakaDemo.Config = class {
         .addSelectInput_('Cross Boundary Strategy',
             'streaming.crossBoundaryStrategy',
             strategyOptions, strategyOptionsNames)
-        .addBoolInput_('Back to live when outside of live window',
-            'streaming.backToLiveWhenOutsideOfLiveWindow');
+        .addBoolInput_(
+            'Return to end of live window when outside of live window',
+            'streaming.returnToEndOfLiveWindowWhenOutside');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
   }

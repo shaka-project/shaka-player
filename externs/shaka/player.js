@@ -1896,7 +1896,7 @@ shaka.extern.LiveSyncConfiguration;
  *   shouldFixTimestampOffset: boolean,
  *   avoidEvictionOnQuotaExceededError: boolean,
  *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy,
- *   backToLiveWhenOutsideOfLiveWindow: boolean
+ *   returnToEndOfLiveWindowWhenOutside: boolean
  * }}
  *
  * @description
@@ -2143,7 +2143,7 @@ shaka.extern.LiveSyncConfiguration;
  *   Defaults to <code>KEEP</code> except on Tizen 3 where the default value
  *   is <code>RESET_TO_ENCRYPTED</code> and WebOS 3 where the default value
  *   is <code>RESET</code>.
- * @property {boolean} backToLiveWhenOutsideOfLiveWindow
+ * @property {boolean} returnToEndOfLiveWindowWhenOutside
  *   If true, when the playhead is behind the start of the live window,
  *   it will be moved to the end of the live window, instead of the start.
  *   <br>
