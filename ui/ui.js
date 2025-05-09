@@ -503,7 +503,7 @@ shaka.ui.Overlay = class {
    * @param {!Element} container
    * @param {!Element} video
    * @param {!Element} lcevcCanvas
-   * @param {!Element} vrCanvas
+   * @param {?Element} vrCanvas
    * @private
    */
   static async setupUIandAutoLoad_(container, video, lcevcCanvas, vrCanvas) {
@@ -512,7 +512,7 @@ shaka.ui.Overlay = class {
     const ui = new shaka.ui.Overlay(player,
         shaka.util.Dom.asHTMLElement(container),
         shaka.util.Dom.asHTMLMediaElement(video),
-        shaka.util.Dom.asHTMLCanvasElement(vrCanvas));
+        vrCanvas ? shaka.util.Dom.asHTMLCanvasElement(vrCanvas) : null);
 
     // Attach Canvas used for LCEVC Decoding
     player.attachCanvas(/** @type {HTMLCanvasElement} */(lcevcCanvas));
@@ -558,7 +558,7 @@ shaka.ui.Overlay = class {
    * @param {!Element} container
    * @param {!NodeList<!Element>} canvases
    * @param {!NodeList<!Element>} vrCanvases
-   * @return {{lcevcCanvas: !Element, vrCanvas: !Element}}
+   * @return {{lcevcCanvas: !Element, vrCanvas: ?Element}}
    * @private
    */
   static findOrMakeSpecialCanvases_(container, canvases, vrCanvases) {
@@ -584,11 +584,6 @@ shaka.ui.Overlay = class {
         vrCanvas = canvas;
         break;
       }
-    }
-    if (!vrCanvas) {
-      vrCanvas = document.createElement('canvas');
-      vrCanvas.classList.add('shaka-vr-canvas-container');
-      container.appendChild(vrCanvas);
     }
     return {
       lcevcCanvas,
