@@ -2666,7 +2666,9 @@ shaka.extern.OfflineConfiguration;
 /**
  * @typedef {{
  *   captionsUpdatePeriod: number,
- *   fontScaleFactor: number
+ *   fontScaleFactor: number,
+ *   textColor: string,
+ *   backgroundColor: string
  * }}
  *
  * @description
@@ -2680,6 +2682,15 @@ shaka.extern.OfflineConfiguration;
  *   The font scale factor used to increase or decrease the font size.
  *   <br>
  *   Defaults to <code>1</code>.
+ * @property {string} textColor
+ *   The override of text color (& opacity).
+ *   <br>
+ *   Defaults to <code>''</code> i.e. fallback to the stream's prescribed style.
+ * @property {string} backgroundColor
+ *   The override of background color (& opacity).
+ *   <br>
+ *   Defaults to <code>''</code> i.e. fallback to the stream's prescribed style.
+ *
  * @exportDoc
  */
 shaka.extern.TextDisplayerConfiguration;
