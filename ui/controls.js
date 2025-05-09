@@ -137,7 +137,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.hideSettingsMenusTimer_.tickAfter(
           /* seconds= */ this.config_.closeMenusDelay);
 
-      this.dispatchEvent(new shaka.util.FakeEvent('hidingui'));
+      this.dispatchVisibilityEvent_();
     });
 
     /**
@@ -1594,7 +1594,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.updateTimeAndSeekRange_();
       this.computeOpacity();
 
-      this.dispatchEvent(new shaka.util.FakeEvent('showingui'));
+      this.dispatchVisibilityEvent_();
     }
 
     // Hide the cursor when the mouse stops moving.
@@ -1732,6 +1732,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     } else {
       this.controlsContainer_.removeAttribute('casting');
     }
+    this.dispatchVisibilityEvent_();
   }
 
   /** @private */
@@ -1875,6 +1876,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     return this.controlsContainer_.getAttribute('shown') != null ||
         this.controlsContainer_.getAttribute('casting') != null;
+  }
+
+  /**
+   * @private
+   */
+  dispatchVisibilityEvent_() {
+    if (this.isOpaque()) {
+      this.dispatchEvent(new shaka.util.FakeEvent('showingui'));
+    } else {
+      this.dispatchEvent(new shaka.util.FakeEvent('hidingui'));
+    }
   }
 
   /**
