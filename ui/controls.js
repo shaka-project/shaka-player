@@ -124,12 +124,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      */
     this.fadeControlsTimer_ = new shaka.util.Timer(() => {
       this.controlsContainer_.removeAttribute('shown');
-      const shakaTextContainer = this.videoContainer_.getElementsByClassName(
-          'shaka-text-container')[0];
-      if (shakaTextContainer) {
-        shakaTextContainer.style.bottom = '0%';
-      }
-
+      this.computeShakaTextContainerSize_();
 
       if (this.contextMenu_) {
         this.contextMenu_.closeMenu();
@@ -221,6 +216,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.adManager_.initInterstitial(
         this.getClientSideAdContainer(), this.localPlayer_, this.localVideo_);
+
+    this.eventManager_.listen(this.player_, 'texttrackvisibility', () => {
+      this.computeShakaTextContainerSize_();
+    });
   }
 
   /**
@@ -1655,6 +1654,22 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @private
+   */
+  computeShakaTextContainerSize_() {
+    const shakaTextContainer = this.videoContainer_.getElementsByClassName(
+        'shaka-text-container')[0];
+    if (shakaTextContainer) {
+      if (this.isOpaque()) {
+        shakaTextContainer.style.bottom =
+            this.bottomControls_.clientHeight + 'px';
+      } else {
+        shakaTextContainer.style.bottom = '0px';
+      }
+    }
+  }
+
+  /**
    * Recompute whether the controls should be shown or hidden.
    */
   computeOpacity() {
@@ -1675,12 +1690,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.updateTimeAndSeekRange_();
 
       this.controlsContainer_.setAttribute('shown', 'true');
-      const shakaTextContainer = this.videoContainer_.getElementsByClassName(
-          'shaka-text-container')[0];
-      if (shakaTextContainer) {
-        shakaTextContainer.style.bottom =
-            this.bottomControls_.clientHeight + 'px';
-      }
+      this.computeShakaTextContainerSize_();
       this.fadeControlsTimer_.stop();
     } else {
       this.fadeControlsTimer_.tickAfter(/* seconds= */ this.config_.fadeDelay);
