@@ -34,6 +34,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -70,6 +71,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -131,6 +133,7 @@ describe('AdaptationSetCriteria', () => {
           activeAudioCodec: '',
           activeAudioChannelCount: 0,
           preferredAudioCodecs: [],
+          preferredAudioChannelCount: 0,
         });
         const set = builder.create(manifest.variants);
 
@@ -185,6 +188,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -228,6 +232,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -292,6 +297,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -365,6 +371,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -416,6 +423,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -487,6 +495,7 @@ describe('AdaptationSetCriteria', () => {
             activeAudioCodec: '',
             activeAudioChannelCount: 0,
             preferredAudioCodecs: [],
+            preferredAudioChannelCount: 0,
           });
           const set = builder.create(manifest.variants);
 
@@ -559,6 +568,7 @@ describe('AdaptationSetCriteria', () => {
             activeAudioCodec: '',
             activeAudioChannelCount: 0,
             preferredAudioCodecs: [],
+            preferredAudioChannelCount: 0,
           });
           const set = builder.create(manifest.variants);
 
@@ -602,6 +612,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -645,6 +656,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -688,6 +700,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -730,6 +743,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -779,6 +793,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -823,6 +838,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -866,6 +882,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -904,6 +921,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -941,6 +959,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -996,6 +1015,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -1039,6 +1059,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -1088,6 +1109,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -1126,6 +1148,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
