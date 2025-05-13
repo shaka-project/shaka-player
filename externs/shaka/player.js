@@ -1895,7 +1895,8 @@ shaka.extern.LiveSyncConfiguration;
  *   dontChooseCodecs: boolean,
  *   shouldFixTimestampOffset: boolean,
  *   avoidEvictionOnQuotaExceededError: boolean,
- *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy
+ *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy,
+ *   returnToEndOfLiveWindowWhenOutside: boolean
  * }}
  *
  * @description
@@ -2142,6 +2143,11 @@ shaka.extern.LiveSyncConfiguration;
  *   Defaults to <code>KEEP</code> except on Tizen 3 where the default value
  *   is <code>RESET_TO_ENCRYPTED</code> and WebOS 3 where the default value
  *   is <code>RESET</code>.
+ * @property {boolean} returnToEndOfLiveWindowWhenOutside
+ *   If true, when the playhead is behind the start of the live window,
+ *   it will be moved to the end of the live window, instead of the start.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -2183,6 +2189,7 @@ shaka.extern.NetworkingConfiguration;
  *   addExtraFeaturesToSourceBuffer: function(string): string,
  *   forceTransmux: boolean,
  *   insertFakeEncryptionInInit: boolean,
+ *   correctEc3Enca: boolean,
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback,
  *   dispatchAllEmsgBoxes: boolean,
  *   useSourceElements: boolean,
@@ -2221,6 +2228,13 @@ shaka.extern.NetworkingConfiguration;
  *   <br><br>
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {boolean} correctEc3Enca
+ *   If true, will apply a work-around for Audio init segments signaling
+ *   EC-3 codec with protection. This will force the ChannelCount field
+ *   of the 'enca' box to be set to 2, which is required via the dolby
+ *   spec.
+ *   <br>
+ *   This value defaults to <code>false</code>.
  * @property {shaka.extern.TextParser.ModifyCueCallback} modifyCueCallback
  *    A callback called for each cue after it is parsed, but right before it
  *    is appended to the presentation.
@@ -2884,6 +2898,8 @@ shaka.extern.LanguageRole;
  *   startTime: number,
  *   duration: number,
  *   uris: !Array<string>,
+ *   startByte: number,
+ *   endByte: ?number,
  *   width: number,
  *   sprite: boolean,
  *   mimeType: ?string,
@@ -2911,6 +2927,12 @@ shaka.extern.LanguageRole;
  * @property {!Array<string>} uris
  *   An array of URIs to attempt.  They will be tried in the order they are
  *   given.
+ * @property {number} startByte
+ *   The offset from the start of the uri resource.
+ * @property {?number} endByte
+ *   The offset from the start of the resource to the end of the segment,
+ *   inclusive.  A value of null indicates that the segment extends to the end
+ *   of the resource.
  * @property {number} width
  *    The thumbnail width in px.
  * @property {boolean} sprite

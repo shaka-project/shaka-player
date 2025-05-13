@@ -257,6 +257,41 @@ describe('ContentWorkarounds', () => {
           .parse(faked);
       expect(spy).toHaveBeenCalled();
     });
+
+    describe('enca correction', () => {
+      const initSegmentUri = '/base/test/test/assets/incorrect-enca-init.mp4';
+      /** @type {!ArrayBuffer} */
+      let initSegmentData;
+
+      const getChannelCount = (initSegment) => {
+        let channelCount = 0;
+        new shaka.util.Mp4Parser()
+            .box('moov', shaka.util.Mp4Parser.children)
+            .box('trak', shaka.util.Mp4Parser.children)
+            .box('mdia', shaka.util.Mp4Parser.children)
+            .box('minf', shaka.util.Mp4Parser.children)
+            .box('stbl', shaka.util.Mp4Parser.children)
+            .fullBox('stsd', shaka.util.Mp4Parser.sampleDescription)
+            .box('enca', (box) => {
+              const data = shaka.util.Mp4BoxParsers
+                  .audioSampleEntry(box.reader);
+              channelCount = data.channelCount;
+            }).parse(initSegment);
+        return channelCount;
+      };
+
+      beforeEach(async () => {
+        initSegmentData = await shaka.test.Util.fetch(initSegmentUri);
+      });
+
+      it('should replace the ChannelCount in the enca box', () => {
+        const ContentWorkarounds = shaka.media.ContentWorkarounds;
+        expect(getChannelCount(initSegmentData)).toBe(7);
+
+        const modified = ContentWorkarounds.correctEnca(initSegmentData);
+        expect(getChannelCount(modified)).toBe(2);
+      });
+    });
   });
 
   /**

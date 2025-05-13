@@ -65,25 +65,39 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     this.bar.min = '0';
     this.bar.max = '1';
     this.bar.value = '0';
+    this.bar.disabled = !this.controls.isOpaque();
 
     this.container.appendChild(this.bar);
     this.parent.appendChild(this.container);
 
+    this.showingUITimer_ = new shaka.util.Timer(() => {
+      this.bar.disabled = false;
+    });
+
+    this.eventManager.listen(this.controls, 'showingui', (e) => {
+      this.showingUITimer_.tickAfter(/* seconds= */ 0);
+    });
+
+    this.eventManager.listen(this.controls, 'hidingui', (e) => {
+      this.showingUITimer_.stop();
+      this.bar.disabled = true;
+    });
+
     this.eventManager.listen(this.bar, 'mousedown', (e) => {
-      if (this.controls.isOpaque()) {
+      if (!this.bar.disabled) {
         this.isChanging_ = true;
         this.onChangeStart();
+        e.stopPropagation();
       }
-      e.stopPropagation();
     });
 
     this.eventManager.listen(this.bar, 'touchstart', (e) => {
-      if (this.controls.isOpaque()) {
+      if (!this.bar.disabled) {
         this.isChanging_ = true;
         this.setBarValueForTouch_(e);
         this.onChangeStart();
+        e.stopPropagation();
       }
-      e.stopPropagation();
     });
 
     this.eventManager.listen(this.bar, 'input', () => {
@@ -94,8 +108,8 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
       if (this.isChanging_) {
         this.setBarValueForTouch_(e);
         this.onChange();
+        e.stopPropagation();
       }
-      e.stopPropagation();
     });
 
     this.eventManager.listen(this.bar, 'touchend', (e) => {
@@ -103,8 +117,8 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
         this.isChanging_ = false;
         this.setBarValueForTouch_(e);
         this.onChangeEnd();
+        e.stopPropagation();
       }
-      e.stopPropagation();
     });
 
     this.eventManager.listen(this.bar, 'touchcancel', (e) => {
@@ -112,16 +126,16 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
         this.isChanging_ = false;
         this.setBarValueForTouch_(e);
         this.onChangeEnd();
+        e.stopPropagation();
       }
-      e.stopPropagation();
     });
 
     this.eventManager.listen(this.bar, 'mouseup', (e) => {
       if (this.isChanging_) {
         this.isChanging_ = false;
         this.onChangeEnd();
+        e.stopPropagation();
       }
-      e.stopPropagation();
     });
 
     this.eventManager.listen(this.bar, 'blur', () => {

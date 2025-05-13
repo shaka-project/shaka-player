@@ -1059,8 +1059,8 @@ describe('Interstitial Ad manager', () => {
     it('supports overlay events with double box format', async () => {
       const eventString = [
         '<Event duration="1" id="OVERLAY" presentationTime="0">',
-        '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd" z="-1" ',
-        'background="red">',
+        '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd" z="-1">',
+        '<Background>red</Background>',
         '<Viewport x="1920" y="1080"/>',
         '<Overlay>',
         '<TopLeft x="0" y="720"/>',

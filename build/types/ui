@@ -1,6 +1,5 @@
 # UI library.
 
-+../../third_party/language-mapping-list/language-mapping-list.js
 +../../ui/ad_info.js
 +../../ui/ad_statistics_button.js
 +../../ui/audio_language_selection.js

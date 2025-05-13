@@ -1054,7 +1054,7 @@ describe('DashParser Manifest', () => {
     expect(variant.bandwidth).toBe(3);
     video = variant && variant.video;
     expect(video).toEqual(jasmine.objectContaining({
-      originalId: 'main',
+      originalId: 'mainenhance',
       type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
       bandwidth: 2,
     }));

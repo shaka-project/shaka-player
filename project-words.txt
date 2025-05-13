@@ -27,6 +27,7 @@ expirationupdated
 firstquartile
 fontfaceonload
 gapjumped
+hidingui
 keyadded
 keymessage
 keystatuschanged
@@ -63,6 +64,7 @@ seekforward
 seekto
 segmentappended
 selectcomplete
+showingui
 spacebar
 stalldetected
 startstreaming
@@ -178,6 +180,7 @@ Clearkey
 Clearkeys
 Clutz
 codem
+hbbtv
 Conax
 cvox
 expressjs
@@ -291,6 +294,7 @@ loas
 lpcm
 lrtb
 luma
+mainenhance
 mcap
 mdat
 mdats

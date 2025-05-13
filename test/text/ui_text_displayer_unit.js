@@ -614,6 +614,8 @@ describe('UITextDisplayer', () => {
   });
 
   it('textDisplayer does not crash if destroy is called more than once', () => {
+    textDisplayer.setTextVisibility(true);
+
     expect(videoContainer.childNodes.length).toBe(1);
 
     textDisplayer.destroy();

@@ -594,6 +594,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
         type: 'asyncComplete',
         id: fakeCallId,
         error: jasmine.any(Object),
+        res: null,
       }]);
       if (senderChannel.messages.length) {
         const error = senderChannel.messages[0].error;

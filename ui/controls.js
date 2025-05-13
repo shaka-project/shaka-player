@@ -125,12 +125,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      */
     this.fadeControlsTimer_ = new shaka.util.Timer(() => {
       this.controlsContainer_.removeAttribute('shown');
-      const shakaTextContainer = this.videoContainer_.getElementsByClassName(
-          'shaka-text-container')[0];
-      if (shakaTextContainer) {
-        shakaTextContainer.style.bottom = '0%';
-      }
-
+      this.computeShakaTextContainerSize_();
 
       if (this.contextMenu_) {
         this.contextMenu_.closeMenu();
@@ -142,6 +137,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // the menus.
       this.hideSettingsMenusTimer_.tickAfter(
           /* seconds= */ this.config_.closeMenusDelay);
+
+      this.dispatchVisibilityEvent_();
     });
 
     /**
@@ -220,6 +217,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.adManager_.initInterstitial(
         this.getClientSideAdContainer(), this.localPlayer_, this.localVideo_);
+
+    this.eventManager_.listen(this.player_, 'texttrackvisibility', () => {
+      this.computeShakaTextContainerSize_();
+    });
   }
 
   /**
@@ -654,6 +655,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @return {boolean}
+   * @private
+   */
+  shouldUseDocumentPictureInPicture_() {
+    return 'documentPictureInPicture' in window &&
+        this.config_.preferDocumentPictureInPicture;
+  }
+
+  /**
+   * @return {boolean}
    * @export
    */
   isFullScreenSupported() {
@@ -691,8 +701,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   async enterFullScreen_() {
     try {
       if (this.shouldUseDocumentFullscreen_()) {
-        if (document.pictureInPictureElement) {
-          await document.exitPictureInPicture();
+        if (this.isPiPEnabled()) {
+          await this.togglePiP();
+          if (this.shouldUseDocumentPictureInPicture_()) {
+            // This is necessary because we need a small delay when
+            // executing actions when returning from document PiP.
+            await new Promise((resolve) => {
+              new shaka.util.Timer(resolve).tickAfter(0.05);
+            });
+          }
         }
         const fullScreenElement = this.config_.fullScreenElement;
         await fullScreenElement.requestFullscreen({navigationUI: 'hide'});
@@ -751,12 +768,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.castProxy_.isCasting()) {
       return false;
     }
-    if ('documentPictureInPicture' in window &&
-        this.config_.preferDocumentPictureInPicture) {
-      const video = /** @type {HTMLVideoElement} */(this.localVideo_);
-      return !video.disablePictureInPicture;
-    }
-    if (document.pictureInPictureEnabled) {
+    if (document.pictureInPictureEnabled ||
+        this.shouldUseDocumentPictureInPicture_()) {
       const video = /** @type {HTMLVideoElement} */(this.localVideo_);
       return !video.disablePictureInPicture;
     }
@@ -768,24 +781,27 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   isPiPEnabled() {
-    if ('documentPictureInPicture' in window &&
-        this.config_.preferDocumentPictureInPicture) {
-      return !!window.documentPictureInPicture.window;
-    } else {
-      return !!document.pictureInPictureElement;
-    }
+    return !!((window.documentPictureInPicture &&
+        window.documentPictureInPicture.window) ||
+        document.pictureInPictureElement);
   }
 
   /** @export */
   async togglePiP() {
     try {
-      if ('documentPictureInPicture' in window &&
-        this.config_.preferDocumentPictureInPicture) {
+      if (this.shouldUseDocumentPictureInPicture_()) {
+        // If you were fullscreen, leave fullscreen first.
+        if (this.isFullScreenEnabled()) {
+          await this.exitFullScreen_();
+        }
         await this.toggleDocumentPictureInPicture_();
       } else if (!document.pictureInPictureElement) {
         // If you were fullscreen, leave fullscreen first.
-        if (document.fullscreenElement) {
-          document.exitFullscreen();
+        if (this.isFullScreenEnabled()) {
+          // When using this PiP API, we can't use an await because in Safari,
+          // the PiP action wouldn't come from the user's direct input.
+          // However, this works fine in all browsers.
+          this.exitFullScreen_();
         }
         const video = /** @type {HTMLVideoElement} */(this.localVideo_);
         await video.requestPictureInPicture();
@@ -1582,6 +1598,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // this right before making it visible.
       this.updateTimeAndSeekRange_();
       this.computeOpacity();
+
+      this.dispatchVisibilityEvent_();
     }
 
     // Hide the cursor when the mouse stops moving.
@@ -1645,6 +1663,22 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @private
+   */
+  computeShakaTextContainerSize_() {
+    const shakaTextContainer = this.videoContainer_.getElementsByClassName(
+        'shaka-text-container')[0];
+    if (shakaTextContainer) {
+      if (this.isOpaque()) {
+        shakaTextContainer.style.bottom =
+            this.bottomControls_.clientHeight + 'px';
+      } else {
+        shakaTextContainer.style.bottom = '0px';
+      }
+    }
+  }
+
+  /**
    * Recompute whether the controls should be shown or hidden.
    */
   computeOpacity() {
@@ -1665,12 +1699,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.updateTimeAndSeekRange_();
 
       this.controlsContainer_.setAttribute('shown', 'true');
-      const shakaTextContainer = this.videoContainer_.getElementsByClassName(
-          'shaka-text-container')[0];
-      if (shakaTextContainer) {
-        shakaTextContainer.style.bottom =
-            this.bottomControls_.clientHeight + 'px';
-      }
+      this.computeShakaTextContainerSize_();
       this.fadeControlsTimer_.stop();
     } else {
       this.fadeControlsTimer_.tickAfter(/* seconds= */ this.config_.fadeDelay);
@@ -1730,6 +1759,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     } else {
       this.controlsContainer_.removeAttribute('casting');
     }
+    this.dispatchVisibilityEvent_();
   }
 
   /** @private */
@@ -1873,6 +1903,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     return this.controlsContainer_.getAttribute('shown') != null ||
         this.controlsContainer_.getAttribute('casting') != null;
+  }
+
+  /**
+   * @private
+   */
+  dispatchVisibilityEvent_() {
+    if (this.isOpaque()) {
+      this.dispatchEvent(new shaka.util.FakeEvent('showingui'));
+    } else {
+      this.dispatchEvent(new shaka.util.FakeEvent('hidingui'));
+    }
   }
 
   /**
