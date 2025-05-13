@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.13.21](https://github.com/shaka-project/shaka-player/compare/v4.13.20...v4.13.21) (2025-05-13)
+
+
+### Bug Fixes
+
+* Avoid installing/uninstalling PatchedMediaKeysApple polyfill twice ([#8593](https://github.com/shaka-project/shaka-player/issues/8593)) ([780323d](https://github.com/shaka-project/shaka-player/commit/780323ddaf5ef06ab09657acfa28f26024733d65))
+* Fix config failures with multiple references to an input array ([#8585](https://github.com/shaka-project/shaka-player/issues/8585)) ([6e4b4b6](https://github.com/shaka-project/shaka-player/commit/6e4b4b6debc20e457fb33e716f1f320acfb45d27)), closes [#8478](https://github.com/shaka-project/shaka-player/issues/8478)
+* Fix onUpdateEnd when the MSE engine has been destroyed ([#8591](https://github.com/shaka-project/shaka-player/issues/8591)) ([d05e9c6](https://github.com/shaka-project/shaka-player/commit/d05e9c6343d108f046d9d7f222752dc90f35c545))
+* Fix text visibility when switching between stream with text and without text ([#8572](https://github.com/shaka-project/shaka-player/issues/8572)) ([f1e82d3](https://github.com/shaka-project/shaka-player/commit/f1e82d306b5decb53f172c5f90bbbc59c1bc748a))
+* Fixes eme-encryption-scheme-polyfill, null encryptionScheme is valid ([#8599](https://github.com/shaka-project/shaka-player/issues/8599)) ([6931c13](https://github.com/shaka-project/shaka-player/commit/6931c137c7f9fbcbc21a9780ad7f1abb89bdbd96)), closes [#8596](https://github.com/shaka-project/shaka-player/issues/8596)
+* Only check key status changes when drm engine is available ([#8589](https://github.com/shaka-project/shaka-player/issues/8589)) ([bf91889](https://github.com/shaka-project/shaka-player/commit/bf91889bd3b40512d88f2a191c5959d468714b1e))
+* Sony Bravia TV Playready DRM Failure ([#8577](https://github.com/shaka-project/shaka-player/issues/8577)) ([be6bdc5](https://github.com/shaka-project/shaka-player/commit/be6bdc5e29cf0a44ae8620cd450d82f2e1a11513))
+* **UI:** Fix transition from FullScreen to PiP in Safari ([#8566](https://github.com/shaka-project/shaka-player/issues/8566)) ([b728719](https://github.com/shaka-project/shaka-player/commit/b728719906475b98e2515fa5309141f2f5f1709a))
+* **UI:** Fix visibility events while casting ([#8574](https://github.com/shaka-project/shaka-player/issues/8574)) ([8786168](https://github.com/shaka-project/shaka-player/commit/8786168169498baa456d6045007d2937f278e62a))
+* **UI:** Keep the current position gradient when seeked ([#8571](https://github.com/shaka-project/shaka-player/issues/8571)) ([9fbb41b](https://github.com/shaka-project/shaka-player/commit/9fbb41b7bbf69788dabba421afdf22ac648ff583)), closes [#8548](https://github.com/shaka-project/shaka-player/issues/8548)
+* **UI:** Only create VR canvas when necessary ([#8580](https://github.com/shaka-project/shaka-player/issues/8580)) ([108e150](https://github.com/shaka-project/shaka-player/commit/108e150f54d39385692f85f0bd84127d726b2e2a))
+
 ## [4.13.20](https://github.com/shaka-project/shaka-player/compare/v4.13.19...v4.13.20) (2025-05-08)
 
 
