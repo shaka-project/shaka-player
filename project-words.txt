@@ -10,6 +10,7 @@ audiotrackchanged
 audiotrackschanged
 autoplaying
 boundarycrossed
+canupdatestarttime
 captionselectionupdated
 caststatuschanged
 clearlead
