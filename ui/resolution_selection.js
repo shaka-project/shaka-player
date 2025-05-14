@@ -119,6 +119,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
   updateLabels_() {
     const abrEnabled = this.player.getConfiguration().abr.enabled;
     if (this.player.isAudioOnly()) {
+      this.qualityMark.textContent = '';
+      this.qualityMark.style.display = 'none';
       if (this.overflowQualityMark) {
         this.overflowQualityMark.textContent = '';
         this.overflowQualityMark.style.display = 'none';
