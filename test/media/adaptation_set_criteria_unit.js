@@ -31,6 +31,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -64,6 +68,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -122,6 +130,10 @@ describe('AdaptationSetCriteria', () => {
           videoLabel: '',
           codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.SMOOTH,
           audioCodec: '',
+          activeAudioCodec: '',
+          activeAudioChannelCount: 0,
+          preferredAudioCodecs: [],
+          preferredAudioChannelCount: 0,
         });
         const set = builder.create(manifest.variants);
 
@@ -173,6 +185,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -213,6 +229,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -274,6 +294,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -344,6 +368,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -392,6 +420,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -460,6 +492,10 @@ describe('AdaptationSetCriteria', () => {
             videoLabel: '',
             codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
             audioCodec: '',
+            activeAudioCodec: '',
+            activeAudioChannelCount: 0,
+            preferredAudioCodecs: [],
+            preferredAudioChannelCount: 0,
           });
           const set = builder.create(manifest.variants);
 
@@ -529,6 +565,10 @@ describe('AdaptationSetCriteria', () => {
             videoLabel: '',
             codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
             audioCodec: '',
+            activeAudioCodec: '',
+            activeAudioChannelCount: 0,
+            preferredAudioCodecs: [],
+            preferredAudioChannelCount: 0,
           });
           const set = builder.create(manifest.variants);
 
@@ -569,6 +609,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -609,6 +653,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -649,6 +697,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -688,6 +740,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -734,6 +790,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -775,6 +835,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -815,6 +879,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -850,6 +918,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -884,6 +956,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -936,6 +1012,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -976,6 +1056,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: 'preferredLabel',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -1022,6 +1106,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
@@ -1057,6 +1145,10 @@ describe('AdaptationSetCriteria', () => {
         videoLabel: '',
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: 'ec-3',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
       });
       const set = builder.create(manifest.variants);
 
