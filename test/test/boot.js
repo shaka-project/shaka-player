@@ -449,6 +449,12 @@ async function checkSupport() {
   }
 }
 
+function getDevice() {
+  const device = shaka.device.DeviceFactory.getDevice();
+  goog.asserts.assert(device, 'device must be non-null');
+  window.deviceDetected = device;
+}
+
 /**
  * Check if ClearKey CENC is supported.
  * @return {boolean}
@@ -535,6 +541,8 @@ async function setupTestEnvironment() {
   shaka.polyfill.installAll();
 
   await checkSupport();
+
+  getDevice();
 
   configureJasmineEnvironment();
 }

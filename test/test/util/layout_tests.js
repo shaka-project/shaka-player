@@ -177,7 +177,9 @@ shaka.test.TextLayoutTests = class extends shaka.test.LayoutTests {
   static async supported() {
     // We only do this in our lab, where we control device a11y settings that
     // impact these tests heavily.
-    if (shaka.util.Platform.isApple() && getClientArg('runningInVM')) {
+    if (deviceDetected.getBrowserEngine() ===
+        shaka.device.IDevice.BrowserEngine.WEBKIT &&
+        getClientArg('runningInVM')) {
       return false;
     }
 

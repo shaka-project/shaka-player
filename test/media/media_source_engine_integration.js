@@ -710,7 +710,7 @@ describe('MediaSourceEngine', () => {
 
   it('extracts ID3 metadata from AAC', async () => {
     if (!MediaSource.isTypeSupported('audio/aac') ||
-        !shaka.util.Platform.supportsSequenceMode()) {
+        !deviceDetected.supportsSequenceMode()) {
       pending('Raw AAC codec is not supported by the platform.');
     }
     metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];

@@ -79,7 +79,8 @@ describe('Player Dolby Vision', () => {
   describe('P8 with fallback to HEVC', () => {
     it('with DASH', async () => {
       // This tests is flaky in Safari, so we need omit it for now.
-      if (shaka.util.Platform.isApple()) {
+      if (deviceDetected.getBrowserEngine() ===
+          shaka.device.IDevice.BrowserEngine.WEBKIT) {
         pending('Disabled on Safari.');
       }
       if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.90"',
@@ -91,7 +92,8 @@ describe('Player Dolby Vision', () => {
 
     it('with master playlist (HLS)', async () => {
       // This tests is flaky in Safari, so we need omit it for now.
-      if (shaka.util.Platform.isApple()) {
+      if (deviceDetected.getBrowserEngine() ===
+          shaka.device.IDevice.BrowserEngine.WEBKIT) {
         pending('Disabled on Safari.');
       }
       if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.90"',
@@ -103,7 +105,8 @@ describe('Player Dolby Vision', () => {
 
     it('with media playlist (HLS)', async () => {
       // This tests is flaky in Safari, so we need omit it for now.
-      if (shaka.util.Platform.isApple()) {
+      if (deviceDetected.getBrowserEngine() ===
+          shaka.device.IDevice.BrowserEngine.WEBKIT) {
         pending('Disabled on Safari.');
       }
       if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.90"',

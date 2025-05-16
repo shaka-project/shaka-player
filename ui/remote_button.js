@@ -8,6 +8,7 @@
 goog.provide('shaka.ui.RemoteButton');
 
 goog.require('shaka.Player');
+goog.require('shaka.device.DeviceFactory');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -16,7 +17,6 @@ goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
-goog.require('shaka.util.Platform');
 goog.requireType('shaka.ui.Controls');
 
 
@@ -34,7 +34,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     super(parent, controls);
 
     /** @private {boolean} */
-    this.isAirPlay_ = shaka.util.Platform.isApple();
+    this.isAirPlay_ = shaka.device.DeviceFactory.getDevice().supportsAirPlay();
 
     /** @private {!HTMLButtonElement} */
     this.remoteButton_ = shaka.util.Dom.createButton();
@@ -148,7 +148,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         if (this.player) {
           const disableRemote = this.video.disableRemotePlayback;
           let canCast = true;
-          if (shaka.util.Platform.isApple()) {
+          if (shaka.device.DeviceFactory.getDevice().supportsAirPlay()) {
             const loadMode = this.player.getLoadMode();
             const mseMode = loadMode == shaka.Player.LoadMode.MEDIA_SOURCE;
             if (mseMode && this.player.getManifestType() != 'HLS') {
