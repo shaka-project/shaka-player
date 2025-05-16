@@ -173,7 +173,8 @@ describe('Playhead', () => {
 
   function calculateGap(time) {
     let jumpTo = time;
-    if (shaka.util.Platform.isLegacyEdge() ||
+    if (deviceDetected.getBrowserEngine() ===
+        shaka.device.IDevice.BrowserEngine.EDGE ||
         deviceDetected.getDeviceName() === 'Xbox' ||
         deviceDetected.getDeviceName() === 'Tizen') {
       const gapPadding = shaka.util.PlayerConfiguration.createDefault()
