@@ -379,8 +379,9 @@ function configureJasmineEnvironment() {
     });
   }
 
-  // Reset decoding config cache after each test.
   afterEach(/** @suppress {accessControls} */ () => {
+    getDevice();
+    // Reset decoding config cache after each test.
     shaka.util.StreamUtils.clearDecodingConfigCache();
     shaka.media.Capabilities.MediaSourceTypeSupportMap.clear();
   });
@@ -541,8 +542,6 @@ async function setupTestEnvironment() {
   shaka.polyfill.installAll();
 
   await checkSupport();
-
-  getDevice();
 
   configureJasmineEnvironment();
 }
