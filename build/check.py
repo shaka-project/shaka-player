@@ -64,7 +64,7 @@ def get_lint_files():
       os.path.join(base, 'externs'),
       os.path.join(base, 'test'),
       os.path.join(base, 'demo'),
-      os.path.join(base, 'build'),
+      # os.path.join(base, 'build'),
   ]
   tool_sources = [
       os.path.join(base, 'eslint.config.mjs'),
