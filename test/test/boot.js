@@ -379,8 +379,16 @@ function configureJasmineEnvironment() {
     });
   }
 
+  const originalDevice = shaka.device.DeviceFactory.getDevice();
+  goog.asserts.assert(originalDevice, 'device must be non-null');
+  window.deviceDetected = originalDevice;
+
+  beforeEach(() => {
+    goog.asserts.assert(originalDevice, 'device must be non-null');
+    window.deviceDetected = originalDevice;
+  });
+
   afterEach(/** @suppress {accessControls} */ () => {
-    getDevice();
     // Reset decoding config cache after each test.
     shaka.util.StreamUtils.clearDecodingConfigCache();
     shaka.media.Capabilities.MediaSourceTypeSupportMap.clear();
@@ -448,12 +456,6 @@ async function checkSupport() {
   } catch (error) {
     window.dump('Support check failed at boot: ' + error);
   }
-}
-
-function getDevice() {
-  const device = shaka.device.DeviceFactory.getDevice();
-  goog.asserts.assert(device, 'device must be non-null');
-  window.deviceDetected = device;
 }
 
 /**
