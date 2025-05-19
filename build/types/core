@@ -118,7 +118,6 @@
 +../../lib/util/object_utils.js
 +../../lib/util/operation_manager.js
 +../../lib/util/periods.js
-+../../lib/util/platform.js
 +../../lib/util/player_configuration.js
 +../../lib/util/pssh.js
 +../../lib/util/public_promise.js
