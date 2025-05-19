@@ -104,6 +104,8 @@ describe('MediaCapabilities', () => {
     it('should check codec support when MediaDecodingConfiguration.type ' +
         'is "media-source"', async () => {
       expect(window['MediaSource']['isTypeSupported']).toBeDefined();
+      spyOn(deviceDetected, 'getDeviceType').and
+          .returnValue(shaka.device.IDevice.DeviceType.DESKTOP);
       shaka.polyfill.MediaCapabilities.install();
       await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
 
