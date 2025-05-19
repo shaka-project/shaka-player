@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.13.22](https://github.com/shaka-project/shaka-player/compare/v4.13.21...v4.13.22) (2025-05-19)
+
+
+### Bug Fixes
+
+* **DASH:** Inconsistent DRM across periods when using clearkeys ([#8602](https://github.com/shaka-project/shaka-player/issues/8602)) ([9e905c5](https://github.com/shaka-project/shaka-player/commit/9e905c5dcbdacd8c53c7c467bda3edad817f165c)), closes [#8559](https://github.com/shaka-project/shaka-player/issues/8559)
+* Fix garbage-collection issue in safari on mediaCapabilities polyfill ([#8613](https://github.com/shaka-project/shaka-player/issues/8613)) ([b0a8758](https://github.com/shaka-project/shaka-player/commit/b0a8758ea45a71971ca9576db41466a6efb810e3))
+* **HLS:** Fix MP4 data segment being parsed as MPEG2-TS ([#8612](https://github.com/shaka-project/shaka-player/issues/8612)) ([ac49030](https://github.com/shaka-project/shaka-player/commit/ac49030901871543532b42475902b769baa61762))
+
 ## [4.13.21](https://github.com/shaka-project/shaka-player/compare/v4.13.20...v4.13.21) (2025-05-13)
 
 
