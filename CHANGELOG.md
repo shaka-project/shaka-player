@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.14.13](https://github.com/shaka-project/shaka-player/compare/v4.14.12...v4.14.13) (2025-05-19)
+
+
+### Bug Fixes
+
+* **DASH:** Inconsistent DRM across periods when using clearkeys ([#8602](https://github.com/shaka-project/shaka-player/issues/8602)) ([3e1bb08](https://github.com/shaka-project/shaka-player/commit/3e1bb085d5f89a09390a75558e1affcee62a25a4)), closes [#8559](https://github.com/shaka-project/shaka-player/issues/8559)
+* Detect screen change to update ABR according HDR vs SDR ([#8606](https://github.com/shaka-project/shaka-player/issues/8606)) ([10749f4](https://github.com/shaka-project/shaka-player/commit/10749f425672419628ee11cb99de293b76f990aa))
+* Fix garbage-collection issue in safari on mediaCapabilities polyfill ([#8613](https://github.com/shaka-project/shaka-player/issues/8613)) ([0994471](https://github.com/shaka-project/shaka-player/commit/0994471f5fe9357e4992291ff77120c30f393cea))
+* **HLS:** Fix MP4 data segment being parsed as MPEG2-TS ([#8612](https://github.com/shaka-project/shaka-player/issues/8612)) ([5c96b36](https://github.com/shaka-project/shaka-player/commit/5c96b36a787b7bf9649ba6f6d7958470cc717bad))
+
 ## [4.14.12](https://github.com/shaka-project/shaka-player/compare/v4.14.11...v4.14.12) (2025-05-13)
 
 
