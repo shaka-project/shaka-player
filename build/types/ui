@@ -12,7 +12,6 @@
 +../../ui/chapter_selection.js
 +../../ui/context_menu.js
 +../../ui/controls.js
-+../../ui/constants.js
 +../../ui/enums.js
 +../../ui/element.js
 +../../ui/fast_forward_button.js
