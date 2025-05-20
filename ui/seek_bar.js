@@ -9,7 +9,6 @@ goog.provide('shaka.ui.SeekBar');
 
 goog.require('shaka.ads.Utils');
 goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.RangeElement');
@@ -462,7 +461,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       const seekRange = this.player.seekRange();
       const seekRangeSize = seekRange.end - seekRange.start;
       const minSeekBarWindow =
-          shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR;
+          shaka.ui.SeekBar.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_;
       // Seek range keeps changing for live content and some of the known
       // ad breaks might not be in the seek range now, but get into
       // it later.
@@ -491,7 +490,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const seekRangeSize = seekRange.end - seekRange.start;
 
     if (this.player.isLive() &&
-        (seekRangeSize < shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR ||
+        (seekRangeSize < shaka.ui.SeekBar.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_ ||
         !isFinite(seekRangeSize))) {
       return false;
     }
@@ -711,6 +710,13 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
  */
 shaka.ui.SeekBar.Transparent_Image_ =
     'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>';
+
+
+/**
+ * @const {number}
+ * @private
+ */
+shaka.ui.SeekBar.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_ = 5; // seconds
 
 
 /**
