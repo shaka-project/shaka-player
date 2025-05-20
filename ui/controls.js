@@ -136,8 +136,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // the menus.
       this.hideSettingsMenusTimer_.tickAfter(
           /* seconds= */ this.config_.closeMenusDelay);
-
-      this.dispatchVisibilityEvent_();
     });
 
     /**
@@ -153,6 +151,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       for (const menu of this.menus_) {
         shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
       }
+
+      this.dispatchVisibilityEvent_();
     });
 
     /**
