@@ -284,7 +284,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     let tracks = [];
     // When played with src=, the variant tracks available from
     // player.getVariantTracks() represent languages, not resolutions.
-    if (this.player.getLoadMode() != shaka.Player.LoadMode.SRC_EQUALS) {
+    if (this.player.getLoadMode() != shaka.Player.LoadMode.SRC_EQUALS &&
+        !this.player_.isRemotePlayback()) {
       tracks = this.player.getVariantTracks() || [];
     }
 
