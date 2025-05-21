@@ -8,6 +8,7 @@
 +../../lib/polyfill/patchedmediakeys_webkit.js
 +../../lib/polyfill/random_uuid.js
 +../../lib/polyfill/symbol.js
++../../lib/polyfill/typed_array.js
 +../../lib/polyfill/video_play_promise.js
 +../../lib/polyfill/videoplaybackquality.js
 +../../lib/polyfill/vttcue.js
