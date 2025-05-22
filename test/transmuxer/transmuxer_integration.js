@@ -81,7 +81,7 @@ describe('Transmuxer Player', () => {
         pending('Codec MP3 is not supported by the platform.');
       }
       // This tests is flaky in some Tizen devices, so we need omit it for now.
-      if (shaka.util.Platform.isTizen()) {
+      if (deviceDetected.getDeviceName() === 'Tizen') {
         pending('Disabled on Tizen.');
       }
       await player.load('/base/test/test/assets/hls-raw-mp3/playlist.m3u8');
@@ -177,7 +177,7 @@ describe('Transmuxer Player', () => {
         pending('Codec MP3 is not supported by the platform.');
       }
       // This tests is flaky in some Tizen devices, so we need omit it for now.
-      if (shaka.util.Platform.isTizen()) {
+      if (deviceDetected.getDeviceName() === 'Tizen') {
         pending('Disabled on Tizen.');
       }
       await player.load('/base/test/test/assets/hls-ts-mp3/manifest.m3u8');
@@ -375,7 +375,7 @@ describe('Transmuxer Player', () => {
         pending('Codec MP3 is not supported by the platform.');
       }
       // This tests is flaky in some Tizen devices, so we need omit it for now.
-      if (shaka.util.Platform.isTizen()) {
+      if (deviceDetected.getDeviceName() === 'Tizen') {
         pending('Disabled on Tizen.');
       }
 
@@ -400,7 +400,7 @@ describe('Transmuxer Player', () => {
         pending('Codec AC-3 is not supported by the platform.');
       }
       // This tests is flaky in some Tizen devices, so we need omit it for now.
-      if (shaka.util.Platform.isTizen()) {
+      if (deviceDetected.getDeviceName() === 'Tizen') {
         pending('Disabled on Tizen.');
       }
 

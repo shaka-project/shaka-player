@@ -160,7 +160,8 @@ filterDescribe('Storage', checkStorageSupport, () => {
   it('supports MSS download and playback', async () => {
     // This tests is flaky in some Chromecast devices, so we need omit it
     // for now.
-    if (shaka.util.Platform.isChromecast()) {
+    if (deviceDetected.getDeviceType() ===
+        shaka.device.IDevice.DeviceType.CAST) {
       pending('Disabled on Chromecast.');
     }
     const url = '/base/test/test/assets/mss-clear/Manifest';
