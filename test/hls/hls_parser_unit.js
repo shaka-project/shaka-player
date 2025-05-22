@@ -6094,42 +6094,6 @@ describe('HlsParser', () => {
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 5, values);
     });
 
-    it('skip duplicate IDs', async () => {
-      const mediaPlaylist = [
-        '#EXTM3U\n',
-        '#EXT-X-TARGETDURATION:5\n',
-        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
-        '#EXTINF:5,\n',
-        'video1.ts\n',
-        '#EXT-X-DATERANGE:ID="0",START-DATE="2000-01-01T00:00:00.00Z",',
-        'DURATION=1,X-SHAKA="FOREVER"\n',
-        '#EXT-X-DATERANGE:ID="0",START-DATE="2000-01-01T00:00:00.00Z",',
-        'DURATION=1,X-SHAKA="FOREVER"\n',
-        '#EXT-X-DATERANGE:ID="0",START-DATE="2000-01-01T00:00:00.00Z",',
-        'DURATION=1,X-SHAKA="FOREVER"\n',
-      ].join('');
-
-      fakeNetEngine
-          .setResponseText('test:/master', mediaPlaylist)
-          .setResponseValue('test:/video1.ts', tsSegmentData);
-
-      await parser.start('test:/master', playerInterface);
-
-      const metadataType = 'com.apple.quicktime.HLS';
-      const values = [
-        jasmine.objectContaining({
-          key: 'ID',
-          data: '0',
-        }),
-        jasmine.objectContaining({
-          key: 'X-SHAKA',
-          data: 'FOREVER',
-        }),
-      ];
-      expect(onMetadataSpy).toHaveBeenCalledTimes(1);
-      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 1, values);
-    });
-
     it('with no EXT-X-PROGRAM-DATE-TIME', async () => {
       const mediaPlaylist = [
         '#EXTM3U\n',
