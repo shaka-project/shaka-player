@@ -76,7 +76,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     this.eventManager.listen(this.adManager,
         shaka.ads.Utils.AD_STOPPED, () => {
           this.checkAvailability_();
-          this.onPresentationVolumeChange_()
+          this.onPresentationVolumeChange_();
         });
 
     this.eventManager.listen(this.localization,
