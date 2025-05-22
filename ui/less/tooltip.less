@@ -39,11 +39,13 @@
 .shaka-tooltips-on {
   overflow: visible;
 
-  & > [class*="shaka-tooltip"] {
+  & > .shaka-tooltip {
     position: relative;
 
     /* The :after pseudo-element contains the tooltip */
-    &:hover:after, &:focus-visible:after, &:active:after {
+    &:hover:after,
+    &:focus-visible:after,
+    &:active:after {
       content: attr(aria-label);
 
       /* Override .material-icons-round text styling */
@@ -67,6 +69,17 @@
 
       /* The tooltip is also translated 50% to appear centered */
       .translateX(-0.5);
+    }
+  }
+
+  // If the seekbar is missing, this is positioned lower.
+  &.shaka-tooltips-low-position {
+    & > .shaka-tooltip {
+      &:hover:after,
+      &:focus-visible:after,
+      &:active:after {
+        bottom: @material-icons-width;
+      }
     }
   }
 
