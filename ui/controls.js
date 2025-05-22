@@ -1213,6 +1213,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       for (const menu of this.menus_) {
         menu.classList.add('shaka-low-position');
       }
+      // Tooltips need to be positioned lower if the seekbar is absent.
+      const controlsButtonPanel = this.controlsButtonPanel_;
+      if (controlsButtonPanel.classList.contains('shaka-tooltips-on')) {
+        controlsButtonPanel.classList.add('shaka-tooltips-low-position');
+      }
     }
   }
 
@@ -1941,9 +1946,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         for (const menu of this.menus_) {
           menu.classList.remove('shaka-low-position');
         }
+        const controlsButtonPanel = this.controlsButtonPanel_;
+        if (controlsButtonPanel.classList.contains('shaka-tooltips-on')) {
+          controlsButtonPanel.classList.remove('shaka-tooltips-low-position');
+        }
       } else {
         for (const menu of this.menus_) {
           menu.classList.add('shaka-low-position');
+        }
+        const controlsButtonPanel = this.controlsButtonPanel_;
+        if (controlsButtonPanel.classList.contains('shaka-tooltips-on')) {
+          controlsButtonPanel.classList.add('shaka-tooltips-low-position');
         }
       }
     }

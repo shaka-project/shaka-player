@@ -86,11 +86,9 @@
     }
   }
 
-  /* If the seekbar is missing, this is positioned lower.
-   * TODO: Solve with flex layout instead? */
+  // If the seekbar is missing, this is positioned lower.
   &.shaka-low-position {
-    /* TODO(b/116651454): eliminate hard-coded offsets */
-    bottom: 15px;
+    bottom: @material-icons-width;
   }
 }
 
