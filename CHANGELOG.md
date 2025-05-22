@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.13.23](https://github.com/shaka-project/shaka-player/compare/v4.13.22...v4.13.23) (2025-05-22)
+
+
+### Bug Fixes
+
+* Allow use isLive, seekRange and isAudioOnly when using remote playback ([#8629](https://github.com/shaka-project/shaka-player/issues/8629)) ([8367e96](https://github.com/shaka-project/shaka-player/commit/8367e968bde613ec86b1d8ed241e4174b2c0562c))
+* Avoid reset MSE engine when using remote playback ([#8626](https://github.com/shaka-project/shaka-player/issues/8626)) ([cc5d459](https://github.com/shaka-project/shaka-player/commit/cc5d4596914765d58f2b42e5239ee37ac5ab1695))
+* **UI:** Fix visibility events on the UI ([#8619](https://github.com/shaka-project/shaka-player/issues/8619)) ([58bfc3d](https://github.com/shaka-project/shaka-player/commit/58bfc3d991afa6e5cfc1320e5206965a879bce4c))
+* **WebOS:** Do not throw error during parsing ID3 ([#8623](https://github.com/shaka-project/shaka-player/issues/8623)) ([8a05f56](https://github.com/shaka-project/shaka-player/commit/8a05f56c02a434412eefa0bdea37522bcbbb0e97))
+
+
+### Performance Improvements
+
+* **net:** Avoid parsing headers twice ([#8618](https://github.com/shaka-project/shaka-player/issues/8618)) ([452b213](https://github.com/shaka-project/shaka-player/commit/452b2138f30443b6bae4efd587bdbe3c2c7bc40f))
+
 ## [4.13.22](https://github.com/shaka-project/shaka-player/compare/v4.13.21...v4.13.22) (2025-05-19)
 
 
