@@ -1496,50 +1496,29 @@ shakaDemo.Main = class {
         const preloadManager = asset.preloadManager;
         asset.preloadManager = null;
         await this.player_.load(preloadManager);
-      } else {
-        const manifestUri = await this.getManifestUri_(asset);
-        let mimeType = null;
-        if (asset.mimeType &&
-            manifestUri && !manifestUri.startsWith('offline:')) {
-          mimeType = asset.mimeType;
-        }
-        const itemConfig = asset.getConfiguration();
-        shaka.util.PlayerConfiguration.mergeConfigObjects(
-            itemConfig, this.desiredConfig_, this.defaultConfig_);
-        /** @type {shaka.extern.QueueItem} */
-        const queueItem = {
-          manifestUri: manifestUri,
-          startTime: null,
-          mimeType: mimeType,
-          config: itemConfig,
-        };
-        queueManager.insertItems([queueItem]);
-        await queueManager.playItem(0);
-      }
 
-      if (!(asset.storedContent && asset.storedContent.offlineUri)) {
-        for (const extraText of asset.extraText) {
-          if (extraText.mime) {
-            this.player_.addTextTrackAsync(extraText.uri, extraText.language,
-                extraText.kind, extraText.mime, extraText.codecs);
-          } else {
-            this.player_.addTextTrackAsync(extraText.uri, extraText.language,
-                extraText.kind);
+        if (!(asset.storedContent && asset.storedContent.offlineUri)) {
+          for (const extraText of asset.extraText) {
+            if (extraText.mime) {
+              this.player_.addTextTrackAsync(extraText.uri, extraText.language,
+                  extraText.kind, extraText.mime, extraText.codecs);
+            } else {
+              this.player_.addTextTrackAsync(extraText.uri, extraText.language,
+                  extraText.kind);
+            }
+          }
+          for (const extraThumbnail of asset.extraThumbnail) {
+            this.player_.addThumbnailsTrack(extraThumbnail);
           }
         }
-        for (const extraThumbnail of asset.extraThumbnail) {
-          this.player_.addThumbnailsTrack(extraThumbnail);
-        }
-      }
-
-      for (const extraChapter of asset.extraChapter) {
-        if (extraChapter.mime) {
+        for (const extraChapter of asset.extraChapter) {
           this.player_.addChaptersTrack(
               extraChapter.uri, extraChapter.language, extraChapter.mime);
-        } else {
-          this.player_.addChaptersTrack(
-              extraChapter.uri, extraChapter.language);
         }
+      } else {
+        const queueItem = await this.getQueueItem_(asset);
+        queueManager.insertItems([queueItem]);
+        await queueManager.playItem(0);
       }
 
       // Set media session title, but only if the browser supports that API.
@@ -1574,6 +1553,17 @@ shakaDemo.Main = class {
    * @param {ShakaDemoAssetInfo} asset
    */
   async addToQueue(asset) {
+    const queueManager = this.player_.getQueueManager();
+    const queueItem = await this.getQueueItem_(asset);
+    queueManager.insertItems([queueItem]);
+  }
+
+  /**
+   * @param {ShakaDemoAssetInfo} asset
+   * @return {!Promise<shaka.extern.QueueItem>}
+   * @private
+   */
+  async getQueueItem_(asset) {
     const manifestUri = await this.getManifestUri_(asset);
     let mimeType = null;
     if (asset.mimeType &&
@@ -1583,15 +1573,18 @@ shakaDemo.Main = class {
     const itemConfig = asset.getConfiguration();
     shaka.util.PlayerConfiguration.mergeConfigObjects(
         itemConfig, this.desiredConfig_, this.defaultConfig_);
+    const isOffline = asset.storedContent && asset.storedContent.offlineUri;
     /** @type {shaka.extern.QueueItem} */
     const queueItem = {
       manifestUri: manifestUri,
       startTime: null,
       mimeType: mimeType,
       config: itemConfig,
+      extraText: isOffline ? null : asset.extraText,
+      extraThumbnail: isOffline ? null : asset.extraThumbnail,
+      extraChapter: asset.extraChapter,
     };
-    const queueManager = this.player_.getQueueManager();
-    queueManager.insertItems([queueItem]);
+    return queueItem;
   }
 
   /** Remakes the location's hash. */

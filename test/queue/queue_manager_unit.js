@@ -20,6 +20,9 @@ describe('Queue manager', () => {
     startTime: null,
     mimeType: null,
     config: null,
+    extraText: null,
+    extraThumbnail: null,
+    extraChapter: null,
   };
 
   beforeEach(async () => {

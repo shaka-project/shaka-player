@@ -15,13 +15,19 @@
  *   manifestUri: string,
  *   startTime: ?(number|Date),
  *   mimeType: ?string,
- *   config: ?shaka.extern.PlayerConfiguration
+ *   config: ?shaka.extern.PlayerConfiguration,
+ *   extraText: ?Array<!shaka.extern.ExtraText>,
+ *   extraThumbnail: ?Array<string>,
+ *   extraChapter: ?Array<!shaka.extern.ExtraChapter>
  * }}
  *
  * @property {string} manifestUri
  * @property {?(number|Date)} startTime
  * @property {?string} mimeType
  * @property {?shaka.extern.PlayerConfiguration} config
+ * @property {?Array<!shaka.extern.ExtraText>} extraText
+ * @property {?Array<string>} extraThumbnail
+ * @property {?Array<!shaka.extern.ExtraChapter>} extraChapter
  * @exportDoc
  */
 shaka.extern.QueueItem;
