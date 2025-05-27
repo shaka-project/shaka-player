@@ -1280,6 +1280,9 @@ shakaDemo.Main = class {
     }
     this.player_.unload();
 
+    const queueManager = this.player_.getQueueManager();
+    queueManager.removeAllItems();
+
     // The currently-selected asset changed, so update asset cards.
     this.dispatchEventWithName_('shaka-main-selected-asset-changed');
 
