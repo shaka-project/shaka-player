@@ -315,6 +315,9 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
             track.label != selectedTrack.label) {
           return false;
         }
+        if (!track.bandwidth) {
+          return false;
+        }
         return true;
       });
     }
