@@ -444,6 +444,13 @@ shakaDemo.Main = class {
     const onErrorEvent = (event) => this.onErrorEvent_(event);
     this.player_.addEventListener('error', onErrorEvent);
 
+    this.player_.addEventListener('loaded', () => {
+      if (this.player_.isAudioOnly() &&
+          this.video_.poster == shakaDemo.Main.mainPoster_) {
+        this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
+      }
+    });
+
     // Listen to events on controls.
     this.controls_ = ui.getControls();
     this.controls_.addEventListener('error', onErrorEvent);
@@ -1286,6 +1293,14 @@ shakaDemo.Main = class {
   }
 
   /**
+   * @return {boolean}
+   */
+  isPlaying() {
+    const videoBar = document.getElementById('video-bar');
+    return !videoBar.classList.contains('hidden');
+  }
+
+  /**
    * @param {ShakaDemoAssetInfo} asset
    * @param {shaka.offline.Storage=} storage
    * @return {!Promise}
@@ -1473,6 +1488,9 @@ shakaDemo.Main = class {
         }
       }
 
+      const queueManager = this.player_.getQueueManager();
+      queueManager.removeAllItems();
+
       // Finally, the asset can be loaded.
       if (asset.preloadManager) {
         const preloadManager = asset.preloadManager;
@@ -1480,20 +1498,23 @@ shakaDemo.Main = class {
         await this.player_.load(preloadManager);
       } else {
         const manifestUri = await this.getManifestUri_(asset);
-        let mimeType = undefined;
+        let mimeType = null;
         if (asset.mimeType &&
             manifestUri && !manifestUri.startsWith('offline:')) {
           mimeType = asset.mimeType;
         }
-        await this.player_.load(
-            manifestUri,
-            /* startTime= */ null,
-            mimeType);
-      }
-
-      if (this.player_.isAudioOnly() &&
-          this.video_.poster == shakaDemo.Main.mainPoster_) {
-        this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
+        const itemConfig = asset.getConfiguration();
+        shaka.util.PlayerConfiguration.mergeConfigObjects(
+            itemConfig, this.desiredConfig_, this.defaultConfig_);
+        /** @type {shaka.extern.QueueItem} */
+        const queueItem = {
+          manifestUri: manifestUri,
+          startTime: null,
+          mimeType: mimeType,
+          config: itemConfig,
+        };
+        queueManager.insertItems([queueItem]);
+        await queueManager.playItem(0);
       }
 
       if (!(asset.storedContent && asset.storedContent.offlineUri)) {
@@ -1547,6 +1568,30 @@ shakaDemo.Main = class {
 
     // Remake hash, to change the current asset.
     this.remakeHash();
+  }
+
+  /**
+   * @param {ShakaDemoAssetInfo} asset
+   */
+  async addToQueue(asset) {
+    const manifestUri = await this.getManifestUri_(asset);
+    let mimeType = null;
+    if (asset.mimeType &&
+        manifestUri && !manifestUri.startsWith('offline:')) {
+      mimeType = asset.mimeType;
+    }
+    const itemConfig = asset.getConfiguration();
+    shaka.util.PlayerConfiguration.mergeConfigObjects(
+        itemConfig, this.desiredConfig_, this.defaultConfig_);
+    /** @type {shaka.extern.QueueItem} */
+    const queueItem = {
+      manifestUri: manifestUri,
+      startTime: null,
+      mimeType: mimeType,
+      config: itemConfig,
+    };
+    const queueManager = this.player_.getQueueManager();
+    queueManager.insertItems([queueItem]);
   }
 
   /** Remakes the location's hash. */
