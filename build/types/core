@@ -42,7 +42,6 @@
 +../../lib/media/preload_manager.js
 +../../lib/media/presentation_timeline.js
 +../../lib/media/quality_observer.js
-+../../lib/media/queue_manager.js
 +../../lib/media/region_observer.js
 +../../lib/media/region_timeline.js
 +../../lib/media/segment_index.js
