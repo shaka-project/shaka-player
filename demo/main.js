@@ -445,9 +445,14 @@ shakaDemo.Main = class {
     this.player_.addEventListener('error', onErrorEvent);
 
     this.player_.addEventListener('loaded', () => {
-      if (this.player_.isAudioOnly() &&
-          this.video_.poster == shakaDemo.Main.mainPoster_) {
-        this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
+      if (this.player_.isAudioOnly()) {
+        if (this.video_.poster == shakaDemo.Main.mainPoster_) {
+          this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
+        }
+      } else {
+        if (this.video_.poster == shakaDemo.Main.audioOnlyPoster_) {
+          this.video_.poster = shakaDemo.Main.mainPoster_;
+        }
       }
     });
 
