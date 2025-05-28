@@ -63,15 +63,15 @@ shaka.ui.SkipNextButton = class extends shaka.ui.Element {
       this.queueManager_.playItem(this.queueManager_.getCurrentItemIndex() + 1);
     });
 
-    this.eventManager.listen(this.queueManager_, 'currentItemChanged', () => {
+    this.eventManager.listen(this.queueManager_, 'currentitemchanged', () => {
       this.checkAvailability_();
     });
 
-    this.eventManager.listen(this.queueManager_, 'itemsInserted', () => {
+    this.eventManager.listen(this.queueManager_, 'itemsinserted', () => {
       this.checkAvailability_();
     });
 
-    this.eventManager.listen(this.queueManager_, 'itemsRemoved', () => {
+    this.eventManager.listen(this.queueManager_, 'itemsremoved', () => {
       this.checkAvailability_();
     });
 
