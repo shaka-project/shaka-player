@@ -53,7 +53,7 @@ describe('Queue manager', () => {
 
   it('fire itemsRemoved', () => {
     const itemsRemoved = jasmine.createSpy('itemsRemoved');
-    queueManager.addEventListener('itemsInserted', Util.spyFunc(itemsRemoved));
+    queueManager.addEventListener(shaka.util.FakeEvent.ItemsRemoved, Util.spyFunc(itemsRemoved));
     queueManager.insertItems([queueItem]);
     queueManager.removeAllItems();
     expect(itemsRemoved).toHaveBeenCalledTimes(1);
