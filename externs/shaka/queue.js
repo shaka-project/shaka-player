@@ -37,6 +37,7 @@ shaka.extern.QueueItem;
  * in the player.
  *
  * @interface
+ * @extends {shaka.util.IDestroyable}
  * @exportDoc
  */
 shaka.extern.IQueueManager = class extends EventTarget {
