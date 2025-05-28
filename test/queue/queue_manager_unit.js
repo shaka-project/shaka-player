@@ -42,7 +42,7 @@ describe('Queue manager', () => {
 
   it('fire itemsInserted', () => {
     const itemsInserted = jasmine.createSpy('itemsInserted');
-    queueManager.addEventListener('itemsInserted', Util.spyFunc(itemsInserted));
+    queueManager.addEventListener(shaka.util.FakeEvent.ItemsInserted, Util.spyFunc(itemsInserted));
     queueManager.insertItems([queueItem]);
     expect(itemsInserted).toHaveBeenCalledTimes(1);
     queueManager.insertItems([queueItem]);
