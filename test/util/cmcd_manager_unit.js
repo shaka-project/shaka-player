@@ -112,7 +112,7 @@ describe('CmcdManager', () => {
 
     /** @type {shaka.net.NetworkingEngine.OnRequest} */
     function onRequest(type, request, context) {
-      cmcd.applyData(type, request, context);
+      cmcd.applyRequestData(type, request, context);
     }
 
     return new NetworkingEngine(undefined, undefined, undefined, undefined,
@@ -199,7 +199,7 @@ describe('CmcdManager', () => {
         cmcdManager.applyManifestData(r, manifestInfo);
         expect(r.uris[0]).toBe(request.uris[0]);
 
-        cmcdManager.applySegmentData(r, segmentInfo);
+        cmcdManager.applyRequestSegmentData(r, segmentInfo);
         expect(r.uris[0]).toBe(request.uris[0]);
       });
 
@@ -266,7 +266,7 @@ describe('CmcdManager', () => {
 
         // modifies segment request uris
         r = createRequest();
-        cmcdManager.applySegmentData(r, segmentInfo);
+        cmcdManager.applyRequestSegmentData(r, segmentInfo);
         uri =
           `https://test.com/test.mpd?CMCD=bl%3D21200%2Cbr%3D5234%2Ccid%3D%22testing%22%2Cd%3D3330%2Cdl%3D21200%2Cmtp%3D10000%2Cot%3Dv%2Csf%3Dd%2Csid%3D%22${sessionId}%22%2Cst%3Dv%2Csu%2Ctb%3D4000`;
         expect(r.uris[0]).toBe(uri);
@@ -299,7 +299,7 @@ describe('CmcdManager', () => {
 
         // modifies segment request headers
         r = createRequest();
-        cmcdManager.applySegmentData(r, segmentInfo);
+        cmcdManager.applyRequestSegmentData(r, segmentInfo);
         expect(r.headers).toEqual({
           'testing': '1234',
           'CMCD-Object': 'br=5234,d=3330,ot=v,tb=4000',
@@ -310,7 +310,7 @@ describe('CmcdManager', () => {
 
         // modifies segment request headers
         r = createRequest();
-        cmcdManager.applySegmentData(r, segmentInfo);
+        cmcdManager.applyRequestSegmentData(r, segmentInfo);
         expect(r.headers).toEqual({
           'testing': '1234',
           'CMCD-Object': 'br=5234,d=3330,ot=v,tb=4000',
@@ -364,26 +364,26 @@ describe('CmcdManager', () => {
 
       it('sends bs only once', () => {
         let r = createRequest();
-        cmcdManager.applySegmentData(r, segmentInfo);
+        cmcdManager.applyRequestSegmentData(r, segmentInfo);
         expect(r.headers['CMCD-Status']).toContain('bs');
 
         r = createRequest();
-        cmcdManager.applySegmentData(r, segmentInfo);
+        cmcdManager.applyRequestSegmentData(r, segmentInfo);
         expect(r.headers['CMCD-Status']).not.toContain('bs');
       });
 
       it('sends su until buffering is complete', () => {
         let r = createRequest();
-        cmcdManager.applySegmentData(r, segmentInfo);
+        cmcdManager.applyRequestSegmentData(r, segmentInfo);
         expect(r.headers['CMCD-Request']).toContain(',su');
 
         r = createRequest();
-        cmcdManager.applySegmentData(r, segmentInfo);
+        cmcdManager.applyRequestSegmentData(r, segmentInfo);
         expect(r.headers['CMCD-Request']).toContain(',su');
 
         cmcdManager.setBuffering(false);
         r = createRequest();
-        cmcdManager.applySegmentData(r, segmentInfo);
+        cmcdManager.applyRequestSegmentData(r, segmentInfo);
         expect(r.headers['CMCD-Request']).not.toContain(',su');
       });
 
