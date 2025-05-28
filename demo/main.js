@@ -456,6 +456,10 @@ shakaDemo.Main = class {
       }
     });
 
+    this.player_.addEventListener('unloading', () => {
+      this.video_.poster = shakaDemo.Main.mainPoster_;
+    });
+
     // Listen to events on controls.
     this.controls_ = ui.getControls();
     this.controls_.addEventListener('error', onErrorEvent);
