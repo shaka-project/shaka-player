@@ -71,13 +71,13 @@ describe('Queue manager', () => {
   });
 
   it('not return anything if not using', () => {
-    expect(queueManager.getCurrentItem()).toBe(-1);
-    expect(queueManager.getCurrentItemIndex()).toBeNull();
+    expect(queueManager.getCurrentItem()).toBeNull();
+    expect(queueManager.getCurrentItemIndex()).toBe(-1);
   });
 
   it('not return anything if not playing', () => {
     queueManager.insertItems([queueItem]);
-    expect(queueManager.getCurrentItem()).toBe(-1);
-    expect(queueManager.getCurrentItemIndex()).toBeNull();
+    expect(queueManager.getCurrentItem()).toBeNull();
+    expect(queueManager.getCurrentItemIndex()).toBe(-1);
   });
 });
