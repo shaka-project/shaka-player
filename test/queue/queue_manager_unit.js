@@ -5,8 +5,6 @@
  */
 
 describe('Queue manager', () => {
-  const Util = shaka.test.Util;
-
   /** @type {!shaka.test.FakeVideo} */
   let mockVideo;
   /** @type {!shaka.Player} */
@@ -42,7 +40,9 @@ describe('Queue manager', () => {
 
   it('fire itemsInserted', () => {
     const itemsInserted = jasmine.createSpy('itemsInserted');
-    queueManager.addEventListener(shaka.util.FakeEvent.ItemsInserted, Util.spyFunc(itemsInserted));
+    queueManager.addEventListener(
+        shaka.util.FakeEvent.EventName.ItemsInserted,
+        shaka.test.Util.spyFunc(itemsInserted));
     queueManager.insertItems([queueItem]);
     expect(itemsInserted).toHaveBeenCalledTimes(1);
     queueManager.insertItems([queueItem]);
@@ -53,7 +53,9 @@ describe('Queue manager', () => {
 
   it('fire itemsRemoved', () => {
     const itemsRemoved = jasmine.createSpy('itemsRemoved');
-    queueManager.addEventListener(shaka.util.FakeEvent.ItemsRemoved, Util.spyFunc(itemsRemoved));
+    queueManager.addEventListener(
+        shaka.util.FakeEvent.EventName.ItemsRemoved,
+        shaka.test.Util.spyFunc(itemsRemoved));
     queueManager.insertItems([queueItem]);
     queueManager.removeAllItems();
     expect(itemsRemoved).toHaveBeenCalledTimes(1);
@@ -69,13 +71,13 @@ describe('Queue manager', () => {
   });
 
   it('not return anything if not using', () => {
-    expect(queueManager.getCurrentItem()).toBeNull();
+    expect(queueManager.getCurrentItem()).toBe(-1);
     expect(queueManager.getCurrentItemIndex()).toBeNull();
   });
 
   it('not return anything if not playing', () => {
     queueManager.insertItems([queueItem]);
-    expect(queueManager.getCurrentItem()).toBeNull();
+    expect(queueManager.getCurrentItem()).toBe(-1);
     expect(queueManager.getCurrentItemIndex()).toBeNull();
   });
 });

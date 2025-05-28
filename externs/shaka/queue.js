@@ -70,7 +70,7 @@ shaka.extern.IQueueManager = class extends EventTarget {
   /**
    * Returns the index of the current playing item.
    *
-   * @return {?number}
+   * @return {number}
    */
   getCurrentItemIndex() {}
 
