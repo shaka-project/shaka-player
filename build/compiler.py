@@ -22,7 +22,6 @@ import re
 import shutil
 import subprocess
 import sys
-import tempfile
 
 import generateLocalizations
 import shakaBuildHelpers
@@ -144,8 +143,9 @@ class ClosureCompiler(object):
       if self.add_wrapper:
         output_options += self._prepare_wrapper()
 
-    # Write a temp file with the file list as quoted strings
-    with tempfile.NamedTemporaryFile(delete=False) as fp:
+    # Write a temp file with the file list as quoted strings.
+    # This will be deleted only when exiting the context manager.
+    with shakaBuildHelpers.NamedTemporaryFile() as fp:
       normal_flags = output_options + options
       quoted_files = '\n'.join(
           [shakaBuildHelpers.quote_argument(x) for x in self.source_files]) + '\n'
