@@ -2483,13 +2483,31 @@ shaka.extern.AdvancedAbrConfiguration;
 
 /**
  * @typedef {{
+ *   mode: string,
+ *   useHeaders: boolean,
+ *   url: string
+ * }}
+ *
+ * @description
+ *  Common Media Client Data (CMCD) Target Configuration
+ *
+ * @property {string} mode
+ * @property {boolean} useHeaders
+ * @property {string} url
+ * @exportDoc
+ */
+shaka.extern.CmcdTarget;
+
+/**
+ * @typedef {{
  *   enabled: boolean,
  *   useHeaders: boolean,
  *   sessionId: string,
  *   contentId: string,
  *   rtpSafetyFactor: number,
  *   includeKeys: !Array<string>,
- *   version: number
+ *   version: number,
+ *   targets: ?Array<shaka.extern.CmcdTarget>
  * }}
  *
  * @description
@@ -2534,6 +2552,9 @@ shaka.extern.AdvancedAbrConfiguration;
  *   and CMCD v2 specifications, respectively.
  *   <br>
  *   Defaults to <code>1</code>.
+* @property {Array<shaka.extern.CmcdTarget>=} targets
+ *   The event/response mode targets.
+ *   <br>
  * @exportDoc
  */
 shaka.extern.CmcdConfiguration;
