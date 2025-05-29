@@ -14,6 +14,7 @@ canupdatestarttime
 captionselectionupdated
 caststatuschanged
 clearlead
+currentitemchanged
 customwarning
 defaultselected
 describedby
@@ -29,6 +30,8 @@ firstquartile
 fontfaceonload
 gapjumped
 hidingui
+itemsinserted
+itemsremoved
 keyadded
 keymessage
 keystatuschanged

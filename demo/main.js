@@ -445,6 +445,22 @@ shakaDemo.Main = class {
     const onErrorEvent = (event) => this.onErrorEvent_(event);
     this.player_.addEventListener('error', onErrorEvent);
 
+    this.player_.addEventListener('loaded', () => {
+      if (this.player_.isAudioOnly()) {
+        if (this.video_.poster == shakaDemo.Main.mainPoster_) {
+          this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
+        }
+      } else {
+        if (this.video_.poster == shakaDemo.Main.audioOnlyPoster_) {
+          this.video_.poster = shakaDemo.Main.mainPoster_;
+        }
+      }
+    });
+
+    this.player_.addEventListener('unloading', () => {
+      this.video_.poster = shakaDemo.Main.mainPoster_;
+    });
+
     // Listen to events on controls.
     this.controls_ = ui.getControls();
     this.controls_.addEventListener('error', onErrorEvent);
@@ -1274,6 +1290,9 @@ shakaDemo.Main = class {
     }
     this.player_.unload();
 
+    const queueManager = this.player_.getQueueManager();
+    queueManager.removeAllItems();
+
     // The currently-selected asset changed, so update asset cards.
     this.dispatchEventWithName_('shaka-main-selected-asset-changed');
 
@@ -1284,6 +1303,14 @@ shakaDemo.Main = class {
 
     // Remake hash, to change the current asset.
     this.remakeHash();
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isPlaying() {
+    const videoBar = document.getElementById('video-bar');
+    return !videoBar.classList.contains('hidden');
   }
 
   /**
@@ -1474,52 +1501,37 @@ shakaDemo.Main = class {
         }
       }
 
+      const queueManager = this.player_.getQueueManager();
+      queueManager.removeAllItems();
+
       // Finally, the asset can be loaded.
       if (asset.preloadManager) {
         const preloadManager = asset.preloadManager;
         asset.preloadManager = null;
         await this.player_.load(preloadManager);
-      } else {
-        const manifestUri = await this.getManifestUri_(asset);
-        let mimeType = undefined;
-        if (asset.mimeType &&
-            manifestUri && !manifestUri.startsWith('offline:')) {
-          mimeType = asset.mimeType;
-        }
-        await this.player_.load(
-            manifestUri,
-            /* startTime= */ null,
-            mimeType);
-      }
 
-      if (this.player_.isAudioOnly() &&
-          this.video_.poster == shakaDemo.Main.mainPoster_) {
-        this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
-      }
-
-      if (!(asset.storedContent && asset.storedContent.offlineUri)) {
-        for (const extraText of asset.extraText) {
-          if (extraText.mime) {
-            this.player_.addTextTrackAsync(extraText.uri, extraText.language,
-                extraText.kind, extraText.mime, extraText.codecs);
-          } else {
-            this.player_.addTextTrackAsync(extraText.uri, extraText.language,
-                extraText.kind);
+        if (!(asset.storedContent && asset.storedContent.offlineUri)) {
+          for (const extraText of asset.extraText) {
+            if (extraText.mime) {
+              this.player_.addTextTrackAsync(extraText.uri, extraText.language,
+                  extraText.kind, extraText.mime, extraText.codecs);
+            } else {
+              this.player_.addTextTrackAsync(extraText.uri, extraText.language,
+                  extraText.kind);
+            }
+          }
+          for (const extraThumbnail of asset.extraThumbnail) {
+            this.player_.addThumbnailsTrack(extraThumbnail);
           }
         }
-        for (const extraThumbnail of asset.extraThumbnail) {
-          this.player_.addThumbnailsTrack(extraThumbnail);
-        }
-      }
-
-      for (const extraChapter of asset.extraChapter) {
-        if (extraChapter.mime) {
+        for (const extraChapter of asset.extraChapter) {
           this.player_.addChaptersTrack(
               extraChapter.uri, extraChapter.language, extraChapter.mime);
-        } else {
-          this.player_.addChaptersTrack(
-              extraChapter.uri, extraChapter.language);
         }
+      } else {
+        const queueItem = await this.getQueueItem_(asset);
+        queueManager.insertItems([queueItem]);
+        await queueManager.playItem(0);
       }
 
       // Set media session title, but only if the browser supports that API.
@@ -1548,6 +1560,44 @@ shakaDemo.Main = class {
 
     // Remake hash, to change the current asset.
     this.remakeHash();
+  }
+
+  /**
+   * @param {ShakaDemoAssetInfo} asset
+   */
+  async addToQueue(asset) {
+    const queueManager = this.player_.getQueueManager();
+    const queueItem = await this.getQueueItem_(asset);
+    queueManager.insertItems([queueItem]);
+  }
+
+  /**
+   * @param {ShakaDemoAssetInfo} asset
+   * @return {!Promise<shaka.extern.QueueItem>}
+   * @private
+   */
+  async getQueueItem_(asset) {
+    const manifestUri = await this.getManifestUri_(asset);
+    let mimeType = null;
+    if (asset.mimeType &&
+        manifestUri && !manifestUri.startsWith('offline:')) {
+      mimeType = asset.mimeType;
+    }
+    const itemConfig = asset.getConfiguration();
+    shaka.util.PlayerConfiguration.mergeConfigObjects(
+        itemConfig, this.desiredConfig_, this.defaultConfig_);
+    const isOffline = asset.storedContent && asset.storedContent.offlineUri;
+    /** @type {shaka.extern.QueueItem} */
+    const queueItem = {
+      manifestUri: manifestUri,
+      startTime: null,
+      mimeType: mimeType,
+      config: itemConfig,
+      extraText: isOffline ? null : asset.extraText,
+      extraThumbnail: isOffline ? null : asset.extraThumbnail,
+      extraChapter: asset.extraChapter,
+    };
+    return queueItem;
   }
 
   /** Remakes the location's hash. */

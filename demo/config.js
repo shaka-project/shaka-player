@@ -100,6 +100,7 @@ shakaDemo.Config = class {
     this.addCmsdSection_();
     this.addLcevcSection_();
     this.addAdsSection_();
+    this.addQueueManagerSection_();
   }
 
   /**
@@ -417,6 +418,27 @@ shakaDemo.Config = class {
             'ads.allowPreloadOnDomElements')
         .addBoolInput_('Allow start in the middle of an interstitial',
             'ads.allowStartInMiddleOfInterstitial');
+  }
+
+  /** @private */
+  addQueueManagerSection_() {
+    const repeatModeOptions = shaka.config.RepeatMode;
+    const repeatModeOptionNames = {
+      'OFF': 'Off',
+      'ALL': 'All',
+      'SINGLE': 'Single',
+    };
+
+    const docLink = this.resolveExternLink_('.QueueConfiguration');
+    this.addSection_('Queue Manager', docLink)
+        .addNumberInput_('Time window at end to preload next Queue item',
+            'queue.preloadNextUrlWindow',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addSelectInput_('Repeat mode',
+            'queue.repeatMode',
+            repeatModeOptions,
+            repeatModeOptionNames);
   }
 
   /**
