@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.13.24](https://github.com/shaka-project/shaka-player/compare/v4.13.23...v4.13.24) (2025-05-29)
+
+
+### Bug Fixes
+
+* Disable translate of cues when using UITextDisplayer ([#8636](https://github.com/shaka-project/shaka-player/issues/8636)) ([66a61a8](https://github.com/shaka-project/shaka-player/commit/66a61a87aceded7e3a22f52684016eddae1891f9))
+* Fix dispatch complete event when the percentage is greater than 100 ([#8643](https://github.com/shaka-project/shaka-player/issues/8643)) ([27ed102](https://github.com/shaka-project/shaka-player/commit/27ed102e7dfb8d7353ade1daf5f9c55363759ebb))
+* Fix metadata timestamp when using raw segments ([#8654](https://github.com/shaka-project/shaka-player/issues/8654)) ([a7081a2](https://github.com/shaka-project/shaka-player/commit/a7081a2101394d3d4fa99628079ee698d6e50d33))
+* **HLS:** Fix disableAudio and disableVideo when loading a media playlist ([#8642](https://github.com/shaka-project/shaka-player/issues/8642)) ([503a2ab](https://github.com/shaka-project/shaka-player/commit/503a2ab53e183d44b3281e586c88f48b07ea5258))
+* **net:** Fix "Payload length does not match range requested bytes" when using open end ([#8651](https://github.com/shaka-project/shaka-player/issues/8651)) ([8be2097](https://github.com/shaka-project/shaka-player/commit/8be209730701885395f04c52defc27f4e346ae65))
+* Use proper method for checking is object an array ([#8644](https://github.com/shaka-project/shaka-player/issues/8644)) ([6b15f3d](https://github.com/shaka-project/shaka-player/commit/6b15f3df4c47fa576e8ecd8a8deea1a0623e3246))
+
+
+### Performance Improvements
+
+* Init source buffers synchronously ([#8646](https://github.com/shaka-project/shaka-player/issues/8646)) ([dc1d6d7](https://github.com/shaka-project/shaka-player/commit/dc1d6d757162e2888d67a1bf33de99efee775ac4))
+* Optimize DRM compatibility check across streams ([#8652](https://github.com/shaka-project/shaka-player/issues/8652)) ([f5c05a8](https://github.com/shaka-project/shaka-player/commit/f5c05a895461a2929cbb37643d92eb44c503baac))
+* Remove redundant collection in Streaming Engine ([#8645](https://github.com/shaka-project/shaka-player/issues/8645)) ([b3f4d53](https://github.com/shaka-project/shaka-player/commit/b3f4d53e16d0132ec44b7b936c71c11e32396cdd))
+
 ## [4.13.23](https://github.com/shaka-project/shaka-player/compare/v4.13.22...v4.13.23) (2025-05-22)
 
 
