@@ -1502,7 +1502,7 @@ shakaDemo.Main = class {
       }
 
       const queueManager = this.player_.getQueueManager();
-      queueManager.removeAllItems();
+      await queueManager.removeAllItems();
 
       // Finally, the asset can be loaded.
       if (asset.preloadManager) {
