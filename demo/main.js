@@ -392,7 +392,8 @@ shakaDemo.Main = class {
           index, 1, 'rewind', 'play_pause', 'fast_forward');
     }
     if (!uiConfig.controlPanelElements.includes('close')) {
-      uiConfig.controlPanelElements.push('close');
+      uiConfig.controlPanelElements.splice(
+          uiConfig.controlPanelElements.length - 1, 0, 'close');
     }
     if (!uiConfig.overflowMenuButtons.includes('visualizer')) {
       uiConfig.overflowMenuButtons.push('visualizer');
