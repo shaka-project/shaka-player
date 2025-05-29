@@ -27,6 +27,7 @@ v4.15 - 2025 Q2
  - New NativeTextDisplayer to allow selecting subtitles via native API and controls
  - UI: Support thumbnails while casting
  - Transfer side-loaded text/thumbnail/chapter tracks when casting
+ - New API: Queue Manager
 
 =====
 

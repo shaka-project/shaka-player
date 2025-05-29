@@ -159,6 +159,10 @@
     "description": "Label for a button used to skip ahead to the live broadcast.",
     "message": "Skip ahead to live"
   },
+  "SKIP_NEXT": {
+    "description": "Label for a button used to skip next.",
+    "message": "Next"
+  },
   "STATISTICS": {
     "description": "Label for a button that displays statistics of the video.",
     "message": "Statistics"

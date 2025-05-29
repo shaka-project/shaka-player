@@ -259,6 +259,18 @@ shakaDemo.AssetCard = class {
       await shakaDemoMain.loadAsset(this.asset_);
       this.remakeButtons();
     });
+    this.addButton('Add to queue', async () => {
+      if (disableButtons) {
+        return;
+      }
+      disableButtons = true;
+      if (shakaDemoMain.isPlaying()) {
+        await shakaDemoMain.addToQueue(this.asset_);
+      } else {
+        await shakaDemoMain.loadAsset(this.asset_);
+      }
+      this.remakeButtons();
+    });
     let preloadName = 'Start Preload';
     if (this.asset_.preloadManager) {
       preloadName = this.asset_.preloaded ? 'Preloaded!' : 'Preloading...';
