@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('Queue manager', () => {
+describe('QueueManager', () => {
   /** @type {!shaka.test.FakeVideo} */
   let mockVideo;
   /** @type {!shaka.Player} */
