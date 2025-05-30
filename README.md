@@ -321,7 +321,7 @@ Subtitles are rendered by the browser by default. Applications can create a
 attributes.
 
 [cueing data]: https://www.webmproject.org/docs/container/#cueing-data
-[text display plugin]: https://nightly-dot-shaka-player-demo.appspot.com/docs/api/shaka.extern.TextDisplayer.html
+[text display plugin]: https://shaka-project.github.io/shaka-player/docs/api/shaka.extern.TextDisplayer.html
 <!-- TODO: replace with a link to a TextDisplayer tutorial -->
 
 
@@ -409,7 +409,7 @@ Shaka currently provides the following versions:
 ## Documentation & Important Links ##
 
  * [Demo](https://shaka-player-demo.appspot.com)([sources](demo/))
- * [Nightly Demo](https://nightly-dot-shaka-player-demo.appspot.com)
+ * [Nightly Demo](https://shaka-project.github.io/shaka-player/)
  * [Demo index](https://index-dot-shaka-player-demo.appspot.com)
  * [API documentation](https://shaka-player-demo.appspot.com/docs/api/index.html)
  * [Tutorials](https://shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html)
