@@ -143,12 +143,27 @@ class ClosureCompiler(object):
       if self.add_wrapper:
         output_options += self._prepare_wrapper()
 
-    cmd_line = ['java', '-jar', jar] + output_options + options
-    cmd_line += self.source_files
+    # Write a temp file with the file list as quoted strings.
+    # This will be deleted only when exiting the context manager.
+    with shakaBuildHelpers.NamedTemporaryFile() as fp:
+      normal_flags = output_options + options
+      quoted_files = '\n'.join(
+          [shakaBuildHelpers.quote_argument(x) for x in self.source_files]) + '\n'
 
-    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
-      logging.error('Build failed')
-      return False
+      if os.environ.get('PRINT_ARGUMENTS'):
+        logging.info('Compiling these files:\n' + quoted_files)
+
+      fp.write(quoted_files.encode('utf8'))
+      fp.close()
+
+      # To avoid command line length limits on Windows, the list of files are
+      # read from the temp file.  We still put normal command line flags in the
+      # command line.
+      # cspell: disable-next-line
+      cmd_line = ['java', '-jar', jar] + normal_flags + ['--flagfile', fp.name]
+      if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+        logging.error('Build failed')
+        return False
 
     if self.output_compiled_bundle and self.add_source_map:
       # Add a special source-mapping comment so that Chrome and Firefox can map
