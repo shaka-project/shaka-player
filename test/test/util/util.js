@@ -398,6 +398,9 @@ shaka.test.Util = class {
       const codecs = StreamUtils.getCorrectVideoCodecs(
           MimeUtils.getCodecs(mimetype));
       const baseMimeType = MimeUtils.getBasicType(mimetype);
+      if (codecs.startsWith('hvc1.') && deviceDetected.disableHEVCSupport()) {
+        return false;
+      }
       // VideoConfiguration
       mediaDecodingConfig.video = {
         contentType: MimeUtils.getFullOrConvertedType(
