@@ -173,9 +173,10 @@ describe('Playhead', () => {
 
   function calculateGap(time) {
     let jumpTo = time;
-    if (shaka.util.Platform.isLegacyEdge() ||
-        shaka.util.Platform.isXboxOne() ||
-        shaka.util.Platform.isTizen()) {
+    if (deviceDetected.getBrowserEngine() ===
+        shaka.device.IDevice.BrowserEngine.EDGE ||
+        deviceDetected.getDeviceName() === 'Xbox' ||
+        deviceDetected.getDeviceName() === 'Tizen') {
       const gapPadding = shaka.util.PlayerConfiguration.createDefault()
           .streaming.gapPadding;
       jumpTo = Math.ceil((jumpTo + gapPadding) * 100) / 100;
@@ -695,7 +696,7 @@ describe('Playhead', () => {
   });  // does not clamp playhead if setLiveSeekableRange is used
 
   it('doesn\'t repeatedly re-seek in seeking slow platforms', () => {
-    if (!shaka.util.Platform.isSeekingSlow()) {
+    if (!deviceDetected.seekDelay()) {
       pending('No seeking slow platform');
     }
     video.readyState = HTMLMediaElement.HAVE_METADATA;

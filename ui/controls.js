@@ -11,6 +11,8 @@ goog.provide('shaka.ui.ControlsPanel');
 goog.require('goog.asserts');
 goog.require('shaka.ads.Utils');
 goog.require('shaka.cast.CastProxy');
+goog.require('shaka.device.DeviceFactory');
+goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
 goog.require('shaka.ui.AdInfo');
 goog.require('shaka.ui.BigPlayButton');
@@ -28,7 +30,6 @@ goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IDestroyable');
-goog.require('shaka.util.Platform');
 goog.require('shaka.util.Timer');
 
 goog.requireType('shaka.Player');
@@ -641,9 +642,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // When the preferVideoFullScreenInVisionOS configuration value applies,
     // we avoid using document fullscreen, even if it is available.
     const video = /** @type {HTMLVideoElement} */(this.localVideo_);
-    if (video.webkitSupportsFullscreen) {
-      if (this.config_.preferVideoFullScreenInVisionOS &&
-          shaka.util.Platform.isVisionOS()) {
+    if (video.webkitSupportsFullscreen &&
+        this.config_.preferVideoFullScreenInVisionOS) {
+      const device = shaka.device.DeviceFactory.getDevice();
+      if (device.getDeviceType() == shaka.device.IDevice.DeviceType.VR) {
         return false;
       }
     }

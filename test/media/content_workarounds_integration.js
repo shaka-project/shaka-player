@@ -108,7 +108,8 @@ describe('ContentWorkarounds', () => {
       if (!shakaSupport.drm[keySystem]) {
         pending('Needed DRM is not supported on this platform');
       }
-      if (shaka.util.Platform.isTizen3()) {
+      if (deviceDetected.getDeviceName() === 'Tizen' &&
+          deviceDetected.getVersion() === 3) {
         pending('Tizen 3 currently does not support mixed clear ' +
             'encrypted content');
       }

@@ -379,8 +379,14 @@ function configureJasmineEnvironment() {
     });
   }
 
-  // Reset decoding config cache after each test.
+  const originalDevice = shaka.device.DeviceFactory.getDevice();
+  goog.asserts.assert(originalDevice, 'device must be non-null');
+  window.deviceDetected = originalDevice;
+
   afterEach(/** @suppress {accessControls} */ () => {
+    goog.asserts.assert(originalDevice, 'device must be non-null');
+    window.deviceDetected = originalDevice;
+    // Reset decoding config cache after each test.
     shaka.util.StreamUtils.clearDecodingConfigCache();
     shaka.media.Capabilities.MediaSourceTypeSupportMap.clear();
   });

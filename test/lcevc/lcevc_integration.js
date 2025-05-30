@@ -104,7 +104,7 @@ describe('LCEVC Integration', () => {
 
   describe('SEI Integration', () => {
     it('Should decode LCEVC in FMP4 DASH manifest', async () => {
-      if (shaka.util.Platform.isTizen() || shaka.util.Platform.isChromecast()) {
+      if (isPlatformUnsupported()) {
         pending('Disabled on unsupported platform.');
       }
 
@@ -117,7 +117,7 @@ describe('LCEVC Integration', () => {
     });
 
     it('Should decode LCEVC in FMP4 HLS manifest', async () => {
-      if (shaka.util.Platform.isTizen() || shaka.util.Platform.isChromecast()) {
+      if (isPlatformUnsupported()) {
         pending('Disabled on unsupported platform.');
       }
 
@@ -130,7 +130,7 @@ describe('LCEVC Integration', () => {
     });
 
     it('Should decode LCEVC in TS HLS manifest', async () => {
-      if (shaka.util.Platform.isTizen() || shaka.util.Platform.isChromecast()) {
+      if (isPlatformUnsupported()) {
         pending('Disabled on unsupported platform.');
       }
 
@@ -142,4 +142,12 @@ describe('LCEVC Integration', () => {
       await testPlayback(seiManifests.TS_HLS);
     });
   });
+
+  /** @return {boolean} */
+  function isPlatformUnsupported() {
+    const DeviceType = shaka.device.IDevice.DeviceType;
+    return deviceDetected.getDeviceType() === DeviceType.CAST ||
+        (deviceDetected.getDeviceType() === DeviceType.TV &&
+            deviceDetected.getDeviceName() === 'Tizen');
+  }
 });

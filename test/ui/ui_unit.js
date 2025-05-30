@@ -404,9 +404,10 @@ describe('UI', () => {
 
         UiUtils.confirmElementFound(videoContainer, 'shaka-seek-bar');
 
-        // The default settings vary in mobile/desktop/SmartTV context.
-        if (shaka.util.Platform.isMobile() ||
-            shaka.util.Platform.isSmartTV()) {
+        // The default settings vary in mobile/desktop context.
+        const deviceType = deviceDetected.getDeviceType();
+        if (deviceType == shaka.device.IDevice.DeviceType.MOBILE ||
+            deviceType == shaka.device.IDevice.DeviceType.TV) {
           UiUtils.confirmElementFound(videoContainer,
               'shaka-play-button-container');
           UiUtils.confirmElementFound(videoContainer, 'shaka-play-button');
