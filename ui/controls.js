@@ -124,6 +124,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      */
     this.fadeControlsTimer_ = new shaka.util.Timer(() => {
       this.controlsContainer_.removeAttribute('shown');
+      this.dispatchVisibilityEvent_();
       this.computeShakaTextContainerSize_();
 
       if (this.contextMenu_) {
@@ -136,8 +137,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // the menus.
       this.hideSettingsMenusTimer_.tickAfter(
           /* seconds= */ this.config_.closeMenusDelay);
-
-      this.dispatchVisibilityEvent_();
     });
 
     /**
@@ -1213,6 +1212,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       for (const menu of this.menus_) {
         menu.classList.add('shaka-low-position');
       }
+      // Tooltips need to be positioned lower if the seekbar is absent.
+      const controlsButtonPanel = this.controlsButtonPanel_;
+      if (controlsButtonPanel.classList.contains('shaka-tooltips-on')) {
+        controlsButtonPanel.classList.add('shaka-tooltips-low-position');
+      }
     }
   }
 
@@ -1596,8 +1600,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // this right before making it visible.
       this.updateTimeAndSeekRange_();
       this.computeOpacity();
-
-      this.dispatchVisibilityEvent_();
     }
 
     // Hide the cursor when the mouse stops moving.
@@ -1696,7 +1698,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // Make sure the state is up-to-date before showing it.
       this.updateTimeAndSeekRange_();
 
-      this.controlsContainer_.setAttribute('shown', 'true');
+      if (this.controlsContainer_.getAttribute('shown') == null) {
+        this.controlsContainer_.setAttribute('shown', 'true');
+        this.dispatchVisibilityEvent_();
+      }
       this.computeShakaTextContainerSize_();
       this.fadeControlsTimer_.stop();
     } else {
@@ -1753,11 +1758,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         'caststatuschanged', (new Map()).set('newStatus', isCasting)));
 
     if (isCasting) {
-      this.controlsContainer_.setAttribute('casting', 'true');
+      if (this.controlsContainer_.getAttribute('casting') == null) {
+        this.controlsContainer_.setAttribute('casting', 'true');
+        this.dispatchVisibilityEvent_();
+      }
     } else {
-      this.controlsContainer_.removeAttribute('casting');
+      if (this.controlsContainer_.getAttribute('casting') != null) {
+        this.controlsContainer_.removeAttribute('casting');
+        this.dispatchVisibilityEvent_();
+      }
     }
-    this.dispatchVisibilityEvent_();
   }
 
   /** @private */
@@ -1941,9 +1951,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         for (const menu of this.menus_) {
           menu.classList.remove('shaka-low-position');
         }
+        const controlsButtonPanel = this.controlsButtonPanel_;
+        if (controlsButtonPanel.classList.contains('shaka-tooltips-on')) {
+          controlsButtonPanel.classList.remove('shaka-tooltips-low-position');
+        }
       } else {
         for (const menu of this.menus_) {
           menu.classList.add('shaka-low-position');
+        }
+        const controlsButtonPanel = this.controlsButtonPanel_;
+        if (controlsButtonPanel.classList.contains('shaka-tooltips-on')) {
+          controlsButtonPanel.classList.add('shaka-tooltips-low-position');
         }
       }
     }

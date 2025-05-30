@@ -2738,6 +2738,7 @@ shaka.extern.TextDisplayerConfiguration;
  *   preferredDecodingAttributes: !Array<string>,
  *   preferForcedSubs: boolean,
  *   preferSpatialAudio: boolean,
+ *   queue: shaka.extern.QueueConfiguration,
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
@@ -2864,6 +2865,8 @@ shaka.extern.TextDisplayerConfiguration;
  *   If true, a spatial audio track is preferred.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {shaka.extern.QueueConfiguration} queue
+ *   Queue manager configuration and settings.
  * @property {shaka.extern.Restrictions} restrictions
  *   The application restrictions to apply to the tracks.  These are "hard"
  *   restrictions.  Any track that fails to meet these restrictions will not
@@ -2887,6 +2890,30 @@ shaka.extern.TextDisplayerConfiguration;
  * @exportDoc
  */
 shaka.extern.PlayerConfiguration;
+
+
+/**
+ * @typedef {{
+ *   preloadNextUrlWindow: number,
+ *   repeatMode: shaka.config.RepeatMode
+ * }}
+ *
+ * @description
+ * The Queue Manager's configuration options.
+ *
+ * @property {number} preloadNextUrlWindow
+ *   The window of time at the end of the presentation to begin preloading the
+ *   next item. Measured in seconds. If the value is 0, the next URL will not
+ *   be preloaded at all.
+ *   <br>
+ *   Defaults to <code>30</code>.
+ * @property {shaka.config.RepeatMode} repeatMode
+ *   Controls behavior of the queue when all items have been played.
+ *   <br>
+ *   Defaults to {@link shaka.config.RepeatMode#OFF}.
+ * @exportDoc
+ */
+shaka.extern.QueueConfiguration;
 
 
 /**
@@ -3010,3 +3037,20 @@ shaka.extern.Chapter;
  * @exportDoc
  */
 shaka.extern.ExtraText;
+
+
+/**
+ * @typedef {{
+ *   uri: string,
+ *   language: string,
+ *   mime: string
+ * }}
+ *
+ * @property {string} uri
+ *   The URI of the chapter.
+ * @property {string} language
+ *   The language of the chapter (e.g. 'en').
+ * @property {string} mime
+ *   The MIME type of the chapter (e.g. 'text/vtt')
+ */
+shaka.extern.ExtraChapter;

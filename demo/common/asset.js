@@ -44,7 +44,7 @@ const ShakaDemoAssetInfo = class {
     this.extraText = [];
     /** @type {!Array<string>} */
     this.extraThumbnail = [];
-    /** @type {!Array<!shakaAssets.ExtraChapter>} */
+    /** @type {!Array<!shaka.extern.ExtraChapter>} */
     this.extraChapter = [];
     /** @type {?string} */
     this.certificateUri = null;
@@ -403,7 +403,7 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * @param {shakaAssets.ExtraChapter} extraChapter
+   * @param {shaka.extern.ExtraChapter} extraChapter
    * @return {!ShakaDemoAssetInfo}
    */
   addExtraChapter(extraChapter) {

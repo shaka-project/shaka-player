@@ -104,10 +104,6 @@ shaka.ui.SaveVideoFrameButton = class extends shaka.ui.Element {
       this.checkAvailability_();
     });
 
-    this.eventManager.listen(this.player, 'loaded', () => {
-      this.checkAvailability_();
-    });
-
     this.eventManager.listen(this.video, 'play', () => {
       this.checkAvailability_();
     });

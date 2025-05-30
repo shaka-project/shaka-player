@@ -182,23 +182,6 @@ shakaAssets.Feature = {
   // Set if the asset has Common Media Server Data.
   CMSD: 'Common Media Server Data',
 };
-
-
-/**
- * @typedef {{
- *   uri: string,
- *   language: string,
- *   mime: string
- * }}
- *
- * @property {string} uri
- *   The URI of the chapter.
- * @property {string} language
- *   The language of the chapter (e.g. 'en').
- * @property {string} mime
- *   The MIME type of the chapter (e.g. 'text/vtt')
- */
-shakaAssets.ExtraChapter;
 // End types and enums }}}
 
 
