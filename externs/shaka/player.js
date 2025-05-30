@@ -2552,7 +2552,7 @@ shaka.extern.CmcdTarget;
  *   and CMCD v2 specifications, respectively.
  *   <br>
  *   Defaults to <code>1</code>.
-* @property {Array<shaka.extern.CmcdTarget>=} targets
+ * @property {Array<shaka.extern.CmcdTarget>=} targets
  *   The event/response mode targets.
  *   <br>
  * @exportDoc
