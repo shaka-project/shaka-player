@@ -1004,7 +1004,11 @@ shakaDemo.Main = class {
       const config = this.player_.getConfiguration();
       shakaDemo.Utils.runThroughHashParams(readParam, config);
       const advanced = this.getCurrentConfigValue('drm.advanced');
-      if (advanced) {
+      let isAvailable = !!advanced;
+      if (isAvailable && typeof advanced == 'object') {
+        isAvailable = Object.keys(/** @type {!Object} */(advanced)).length > 0;
+      }
+      if (isAvailable) {
         for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
           if (!advanced[drmSystem]) {
             advanced[drmSystem] = shakaDemo.Main.defaultAdvancedDrmConfig();
