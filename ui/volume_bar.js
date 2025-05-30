@@ -13,6 +13,7 @@ goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.RangeElement');
+goog.require('shaka.ui.Utils');
 
 
 /**
@@ -44,6 +45,18 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
         'loading',
         () => this.onPresentationVolumeChange_());
 
+    this.eventManager.listen(this.player,
+        'loaded',
+        () => this.checkAvailability_());
+
+    this.eventManager.listen(this.player,
+        'unloading',
+        () => this.checkAvailability_());
+
+    this.eventManager.listen(this.player,
+        'trackschanged',
+        () => this.checkAvailability_());
+
     this.eventManager.listen(this.controls,
         'caststatuschanged',
         () => this.onPresentationVolumeChange_());
@@ -57,8 +70,14 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
         () => this.onAdVolumeChange_());
 
     this.eventManager.listen(this.adManager,
-        shaka.ads.Utils.AD_STOPPED,
-        () => this.onPresentationVolumeChange_());
+        shaka.ads.Utils.AD_STARTED,
+        () => this.checkAvailability_());
+
+    this.eventManager.listen(this.adManager,
+        shaka.ads.Utils.AD_STOPPED, () => {
+          this.checkAvailability_();
+          this.onPresentationVolumeChange_();
+        });
 
     this.eventManager.listen(this.localization,
         shaka.ui.Localization.LOCALE_UPDATED,
@@ -68,6 +87,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
         shaka.ui.Localization.LOCALE_CHANGED,
         () => this.updateAriaLabel_());
 
+
     // Initialize volume display and label.
     this.onPresentationVolumeChange_();
     this.updateAriaLabel_();
@@ -76,6 +96,8 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
       // There was already an ad.
       this.onChange();
     }
+
+    this.checkAvailability_();
   }
 
   /**
@@ -131,6 +153,18 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
   /** @private */
   updateAriaLabel_() {
     this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.VOLUME);
+  }
+
+  /** @private */
+  checkAvailability_() {
+    let available = true;
+    if (this.ad && this.ad.isLinear()) {
+      // We can't tell if the Ad has audio or not.
+      available = true;
+    } else if (this.player.isVideoOnly()) {
+      available = false;
+    }
+    shaka.ui.Utils.setDisplay(this.container, available);
   }
 };
 

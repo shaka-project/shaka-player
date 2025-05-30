@@ -7,7 +7,6 @@
 
 goog.provide('shaka.ui.BigPlayButton');
 
-goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.PlayButton');
 goog.requireType('shaka.ui.Controls');
 
@@ -27,27 +26,17 @@ shaka.ui.BigPlayButton = class extends shaka.ui.PlayButton {
 
     this.button.classList.add('shaka-play-button');
     this.button.classList.add('shaka-no-propagation');
-
-    this.updateIcon();
-    this.updateAriaLabel();
   }
 
 
   /** @override */
   updateIcon() {
-    if (this.isPaused()) {
+    if (this.isEnded()) {
+      this.button.setAttribute('icon', 'replay');
+    } else if (this.isPaused()) {
       this.button.setAttribute('icon', 'play');
     } else {
       this.button.setAttribute('icon', 'pause');
     }
-  }
-
-
-  /** @override */
-  updateAriaLabel() {
-    const LocIds = shaka.ui.Locales.Ids;
-    const label = this.isPaused() ? LocIds.PLAY : LocIds.PAUSE;
-
-    this.button.ariaLabel = this.localization.resolve(label);
   }
 };

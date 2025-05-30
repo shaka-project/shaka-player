@@ -15,6 +15,7 @@ describe('CastUtils', () => {
     const ignoredMembers = [
       'constructor',  // JavaScript added field
       'getAdManager',  // Handled specially
+      'getQueueManager',  // Handled specially
       'getSharedConfiguration',  // Handled specially
       'getNetworkingEngine',  // Handled specially
       'getDrmEngine',  // Handled specially

@@ -15,6 +15,7 @@ goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 
 
@@ -96,6 +97,18 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
       this.updateIcon_();
     });
 
+    this.eventManager.listen(this.player, 'loaded', () => {
+      this.checkAvailability_();
+    });
+
+    this.eventManager.listen(this.player, 'unloading', () => {
+      this.checkAvailability_();
+    });
+
+    this.eventManager.listen(this.player, 'trackschanged', () => {
+      this.checkAvailability_();
+    });
+
     this.eventManager.listen(this.controls, 'caststatuschanged', () => {
       this.updateLocalizedStrings_();
       this.updateIcon_();
@@ -114,6 +127,11 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.adManager,
+        shaka.ads.Utils.AD_STARTED, () => {
+          this.checkAvailability_();
+        });
+
+    this.eventManager.listen(this.adManager,
         shaka.ads.Utils.AD_STOPPED, () => {
           // The base class also listens for this event and sets this.ad
           // to null. This is a safeguard in case of a race condition as
@@ -122,7 +140,10 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
           this.ad = null;
           this.updateLocalizedStrings_();
           this.updateIcon_();
+          this.checkAvailability_();
         });
+
+    this.checkAvailability_();
   }
 
   /**
@@ -155,6 +176,18 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
           Icons.UNMUTE : Icons.MUTE;
     }
     this.icon_.textContent = icon;
+  }
+
+  /** @private */
+  checkAvailability_() {
+    let available = true;
+    if (this.ad && this.ad.isLinear()) {
+      // We can't tell if the Ad has audio or not.
+      available = true;
+    } else if (this.player.isVideoOnly()) {
+      available = false;
+    }
+    shaka.ui.Utils.setDisplay(this.button_, available);
   }
 };
 

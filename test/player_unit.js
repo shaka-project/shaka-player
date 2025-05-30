@@ -4451,6 +4451,45 @@ describe('Player', () => {
     });
   });
 
+  describe('isVideoOnly', () => {
+    it('detects video-only content', async () => {
+      // False before we've loaded anything.
+      expect(player.isAudioOnly()).toBe(false);
+
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(0);
+          variant.addAudio(1);
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      // We have audio & video tracks, so this is not video-only.
+      expect(player.isVideoOnly()).toBe(false);
+
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addAudio(1);
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      // We have audio-only tracks, so this is not video-only.
+      expect(player.isVideoOnly()).toBe(false);
+
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(0);
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      // We have video-only tracks, so this is video-only.
+      expect(player.isVideoOnly()).toBe(true);
+
+      await player.unload();
+      // When we have nothing loaded, we go back to not video-only status.
+      expect(player.isVideoOnly()).toBe(false);
+    });
+  });
+
   describe('load', () => {
     it('tolerates bandwidth of NaN, undefined, or 0', async () => {
       // Regression test for https://github.com/shaka-project/shaka-player/issues/938

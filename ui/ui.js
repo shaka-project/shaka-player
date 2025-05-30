@@ -253,6 +253,7 @@ shaka.ui.Overlay = class {
   defaultConfig_() {
     const controlPanelElements = [
       'play_pause',
+      'skip_next',
       'mute',
       'volume',
       'time_and_duration',
@@ -390,6 +391,7 @@ shaka.ui.Overlay = class {
       config.doubleClickForFullscreen = false;
       const filterElements = [
         'play_pause',
+        'skip_next',
         'volume',
       ];
       config.controlPanelElements = config.controlPanelElements.filter(
