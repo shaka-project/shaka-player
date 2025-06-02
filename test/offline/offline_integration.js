@@ -85,7 +85,8 @@ filterDescribe('Offline', supportsStorage, () => {
           pending('Widevine persistent licenses are not supported');
           return;
         }
-        if (shaka.util.Platform.isAndroid()) {
+        if (deviceDetected.getDeviceType() ===
+            shaka.device.IDevice.DeviceType.MOBILE) {
           pending('Skipping offline DRM tests on Android - crbug.com/1108158');
           return;
         }
@@ -121,12 +122,13 @@ filterDescribe('Offline', supportsStorage, () => {
           pending('Widevine and PlayReady are not supported');
           return;
         }
-        if (shaka.util.Platform.isAndroid()) {
+        if (deviceDetected.getDeviceType() ===
+            shaka.device.IDevice.DeviceType.MOBILE) {
           pending('Skipping offline DRM tests on Android - crbug.com/1108158');
           return;
         }
 
-        if (shaka.util.Platform.isXboxOne()) {
+        if (deviceDetected.getDeviceName() === 'Xbox') {
           // Axinom won't issue a license for an Xbox One.  The error message
           // from the license server says "Your DRM client's security level is
           // 150, but the entitlement message requires 2000 or higher."

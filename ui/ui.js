@@ -11,6 +11,8 @@ goog.provide('shaka.ui.Overlay.TrackLabelFormat');
 
 goog.require('goog.asserts');
 goog.require('shaka.Player');
+goog.require('shaka.device.DeviceFactory');
+goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
 goog.require('shaka.polyfill');
 goog.require('shaka.ui.Controls');
@@ -19,7 +21,6 @@ goog.require('shaka.util.ConfigUtils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.IDestroyable');
-goog.require('shaka.util.Platform');
 
 /**
  * @implements {shaka.util.IDestroyable}
@@ -125,7 +126,8 @@ shaka.ui.Overlay = class {
    * @export
    */
   isMobile() {
-    return shaka.util.Platform.isMobile();
+    const device = shaka.device.DeviceFactory.getDevice();
+    return device.getDeviceType() == shaka.device.IDevice.DeviceType.MOBILE;
   }
 
 
@@ -137,7 +139,8 @@ shaka.ui.Overlay = class {
    * @export
    */
   isSmartTV() {
-    return shaka.util.Platform.isSmartTV();
+    const device = shaka.device.DeviceFactory.getDevice();
+    return device.getDeviceType() == shaka.device.IDevice.DeviceType.TV;
   }
 
 
