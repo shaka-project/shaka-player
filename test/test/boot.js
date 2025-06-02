@@ -381,6 +381,7 @@ function configureJasmineEnvironment() {
 
   const originalDevice = shaka.device.DeviceFactory.getDevice();
   goog.asserts.assert(originalDevice, 'device must be non-null');
+  window.dump(originalDevice.toString());
   window.deviceDetected = originalDevice;
 
   afterEach(/** @suppress {accessControls} */ () => {
