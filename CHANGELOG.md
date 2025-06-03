@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.14.16](https://github.com/shaka-project/shaka-player/compare/v4.14.15...v4.14.16) (2025-06-03)
+
+
+### Bug Fixes
+
+* **DASH:** Fix infinite buffering on end of content ([#8677](https://github.com/shaka-project/shaka-player/issues/8677)) ([e089751](https://github.com/shaka-project/shaka-player/commit/e089751d07dfcac226efc840d92962f75ca5bdb6)), closes [#8672](https://github.com/shaka-project/shaka-player/issues/8672)
+
 ## [4.14.15](https://github.com/shaka-project/shaka-player/compare/v4.14.14...v4.14.15) (2025-05-29)
 
 
