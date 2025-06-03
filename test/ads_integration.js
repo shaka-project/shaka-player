@@ -34,7 +34,9 @@ describe('Ads', () => {
     document.body.appendChild(video);
     adContainer =
       /** @type {!HTMLElement} */ (document.createElement('div'));
-    adContainer.style.position = 'relative';
+    adContainer.style.position = 'absolute';
+    adContainer.style.top = '0px';
+    adContainer.style.left = '0px';
     adContainer.style.width = '600px';
     adContainer.style.height = '400px';
     document.body.appendChild(adContainer);
