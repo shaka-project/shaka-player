@@ -468,6 +468,7 @@ TARGETDURATION
 
 # other
 autoglottonym
+avinfo
 awesomplete
 axinom
 beatle
@@ -492,6 +493,7 @@ malform
 masterlist
 mbps
 msdk
+onservicecallback
 productinfo
 servernum
 sintel
