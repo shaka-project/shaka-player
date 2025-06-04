@@ -2485,7 +2485,8 @@ shaka.extern.AdvancedAbrConfiguration;
  * @typedef {{
  *   mode: string,
  *   useHeaders: boolean,
- *   url: string
+ *   url: string,
+ *   includeKeys: !Array<string>
  * }}
  *
  * @description
@@ -2494,6 +2495,11 @@ shaka.extern.AdvancedAbrConfiguration;
  * @property {string} mode
  * @property {boolean} useHeaders
  * @property {string} url
+ * @property {!Array<string>} includeKeys
+ *   An array of keys to include in the CMCD data. If not provided, all keys
+ *   will be included.
+ *   <br>
+ *   Defaults to <code>[]</code>.
  * @exportDoc
  */
 shaka.extern.CmcdTarget;
