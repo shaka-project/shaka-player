@@ -788,6 +788,14 @@ shakaDemo.Main = class {
     if (asset.features.includes(shakaAssets.Feature.CONTAINERLESS)) {
       mimeTypes.push('audio/aac');
     }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P8_1)) {
+      mimeTypes.push('video/mp4; codecs="hvc1.2.4.L120.b0"');
+      mimeTypes.push('video/mp4; codecs="dvh1.08.03"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P8_4)) {
+      mimeTypes.push('video/mp4; codecs="hvc1.2.4.L123.b0"');
+      mimeTypes.push('video/mp4; codecs="dvh1.08.03"');
+    }
     if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P5)) {
       mimeTypes.push('video/mp4; codecs="dvh1.05.01"');
     }

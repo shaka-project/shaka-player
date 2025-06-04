@@ -132,8 +132,14 @@ shakaAssets.Feature = {
   // Set if the asset has at least one containerless stream (AAC, etc).
   CONTAINERLESS: 'Containerless',
 
+  // Set if the asset requires Dolby Vision support.
+  DOLBY_VISION: 'Dolby Vision',
   // Set if the asset requires Dolby Vision Profile 5 support.
   DOLBY_VISION_P5: 'Dolby Vision P5',
+  // Set if the asset requires Dolby Vision Profile 8.1 support.
+  DOLBY_VISION_P8_1: 'Dolby Vision P8.1',
+  // Set if the asset requires Dolby Vision Profile 8.4 support.
+  DOLBY_VISION_P8_4: 'Dolby Vision P8.4',
   // Set if the asset requires Dolby Vision with MV-HEVC (for 3D) support.
   DOLBY_VISION_3D: 'Dolby Vision 3D',
 
@@ -1497,6 +1503,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.APPLE)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
       .addFeature(shakaAssets.Feature.DOLBY_VISION_3D)
       .addFeature(shakaAssets.Feature.OFFLINE),
   // }}}
@@ -2086,6 +2093,7 @@ shakaAssets.testAssets = [
       .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
       .addFeature(shakaAssets.Feature.DOLBY_VISION_P5)
       .setExtraConfig({
         drm: {
@@ -2105,6 +2113,28 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P8.1 DASH (PlayReady)',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://chromium.dolby.link/oss-kit/dolby-vision/playready/color_pattern_24_dvh1_081_1920x1080_cenc.mpd',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P8_1),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P8.4 DASH (PlayReady)',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://chromium.dolby.link/oss-kit/dolby-vision/playready/color_pattern_24_dvh1_084_1920x1080_cenc.mpd',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P8_4),
   // }}}
 ];
 /* eslint-enable @stylistic/max-len */
