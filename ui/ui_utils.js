@@ -105,7 +105,8 @@ shaka.ui.Utils = class {
    * @return {string}
    */
   static buildTimeString(displayTime, showHour) {
-    const h = Math.floor(displayTime / 3600);
+    const d = Math.floor(displayTime / 86400);
+    const h = Math.floor((displayTime % 86400) / 3600);
     const m = Math.floor((displayTime / 60) % 60);
     let s = Math.floor(displayTime % 60);
     if (s < 10) {
@@ -117,6 +118,12 @@ shaka.ui.Utils = class {
         text = '0' + text;
       }
       text = h + ':' + text;
+      if (d > 0) {
+        if (h < 10) {
+          text = '0' + text;
+        }
+        text = d + ':' + text;
+      }
     }
     return text;
   }
