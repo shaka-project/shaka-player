@@ -287,6 +287,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-text-offset/*', included: false},
       {pattern: 'test/test/assets/hls-ts-aac/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ac3/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-b-frames/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ec3/*', included: false},
       {pattern: 'test/test/assets/hls-ts-h264/*', included: false},
       {pattern: 'test/test/assets/hls-ts-h265/*', included: false},
