@@ -253,6 +253,17 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
+    it('H.264 in TS with b-frames', async () => {
+      await player.load('/base/test/test/assets/hls-ts-b-frames/index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Play for 30 seconds, but stop early if the video ends.
+      await waiter.waitForEndOrTimeout(video, 30);
+
+      await player.unload();
+    });
+
     it('H.265 in TS', async () => {
       if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L123.B0"',
           /* width= */ 640, /* height= */ 360)) {
