@@ -151,6 +151,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     /** @private {!Array<!shaka.extern.AdCuePoint>} */
     this.adCuePoints_ = [];
 
+    this.eventManager.listen(this.bar, 'input', () => {
+      this.controls.hideSettingsMenus();
+    });
+
     this.eventManager.listen(this.localization,
         shaka.ui.Localization.LOCALE_UPDATED,
         () => this.updateAriaLabel_());
