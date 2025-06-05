@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.14.17](https://github.com/shaka-project/shaka-player/compare/v4.14.16...v4.14.17) (2025-06-05)
+
+
+### Bug Fixes
+
+* **Ads:** Fix interstitials when not using multiple media elements ([#8681](https://github.com/shaka-project/shaka-player/issues/8681)) ([27ef2d0](https://github.com/shaka-project/shaka-player/commit/27ef2d0f0b8d2cba69acbb64474a170c93603059))
+* Fix ts parser when using B-frames ([#8696](https://github.com/shaka-project/shaka-player/issues/8696)) ([fdf66ee](https://github.com/shaka-project/shaka-player/commit/fdf66eefc2fead06b9db191438c8e64bef74b123))
+
+
+### Performance Improvements
+
+* Simplify selectAudioTrack internally ([#8687](https://github.com/shaka-project/shaka-player/issues/8687)) ([b0371b6](https://github.com/shaka-project/shaka-player/commit/b0371b6f6ef56b357f27e1a34a2265fcb927fa7f))
+
 ## [4.14.16](https://github.com/shaka-project/shaka-player/compare/v4.14.15...v4.14.16) (2025-06-03)
 
 
