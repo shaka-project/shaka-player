@@ -153,6 +153,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       for (const menu of this.menus_) {
         shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
       }
+      if (this.config_.enableTooltips) {
+        this.controlsButtonPanel_.classList.add('shaka-tooltips-on');
+      }
     });
 
     /**
@@ -1708,6 +1711,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.fadeControlsTimer_.stop();
     } else {
       this.fadeControlsTimer_.tickAfter(/* seconds= */ this.config_.fadeDelay);
+    }
+    if (this.anySettingsMenusAreOpen()) {
+      this.controlsButtonPanel_.classList.remove('shaka-tooltips-on');
     }
   }
 
