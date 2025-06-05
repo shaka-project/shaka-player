@@ -360,8 +360,8 @@ shaka.ui.Overlay = class {
       doubleClickForFullscreen: true,
       singleClickForPlayAndPause: true,
       enableKeyboardPlaybackControls: true,
-      enableFullscreenOnRotation: true,
-      forceLandscapeOnFullscreen: true,
+      enableFullscreenOnRotation: false,
+      forceLandscapeOnFullscreen: false,
       enableTooltips: true,
       keyboardSeekDistance: 5,
       keyboardLargeSeekDistance: 60,
@@ -389,6 +389,8 @@ shaka.ui.Overlay = class {
       config.seekOnTaps = true;
       config.enableTooltips = false;
       config.doubleClickForFullscreen = false;
+      config.enableFullscreenOnRotation = true;
+      config.forceLandscapeOnFullscreen = true;
       const filterElements = [
         'play_pause',
         'skip_next',
@@ -400,9 +402,7 @@ shaka.ui.Overlay = class {
           (name) => !filterElements.includes(name));
       config.contextMenuElements = config.contextMenuElements.filter(
           (name) => !filterElements.includes(name));
-    }
-
-    if (this.isSmartTV()) {
+    } else if (this.isSmartTV()) {
       config.addBigPlayButton = true;
       config.singleClickForPlayAndPause = false;
       config.enableTooltips = false;
