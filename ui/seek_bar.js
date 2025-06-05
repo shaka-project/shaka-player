@@ -193,6 +193,11 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         });
 
     this.eventManager.listen(this.bar, 'mousemove', (event) => {
+      if (this.controls.anySettingsMenusAreOpen()) {
+        this.hideTime_();
+        this.hideThumbnail_();
+        return;
+      }
       const rect = this.bar.getBoundingClientRect();
       const min = parseFloat(this.bar.min);
       const max = parseFloat(this.bar.max);
@@ -280,7 +285,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // and start the new one.
     this.seekTimer_.tickAfter(/* seconds= */ 0.125);
 
-    if (this.player.getImageTracks().length) {
+    if (this.player.getImageTracks().length &&
+        !this.controls.anySettingsMenusAreOpen()) {
       const min = parseFloat(this.bar.min);
       const max = parseFloat(this.bar.max);
       const rect = this.bar.getBoundingClientRect();
