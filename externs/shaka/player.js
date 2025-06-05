@@ -2484,6 +2484,7 @@ shaka.extern.AdvancedAbrConfiguration;
 /**
  * @typedef {{
  *   mode: string,
+ *   enabled: boolean,
  *   useHeaders: boolean,
  *   url: string,
  *   includeKeys: !Array<string>
@@ -2493,6 +2494,7 @@ shaka.extern.AdvancedAbrConfiguration;
  *  Common Media Client Data (CMCD) Target Configuration
  *
  * @property {string} mode
+ * @property {boolean} enabled
  * @property {boolean} useHeaders
  * @property {string} url
  * @property {!Array<string>} includeKeys
