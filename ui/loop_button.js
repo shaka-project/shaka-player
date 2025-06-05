@@ -14,6 +14,7 @@ goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Timer');
 goog.requireType('shaka.ui.Controls');
@@ -103,6 +104,22 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     });
 
     this.timer_.tickEvery(1);
+
+    this.eventManager.listen(this.player, 'unloading', () => {
+      this.checkAvailability_();
+    });
+
+    this.eventManager.listen(this.player, 'loaded', () => {
+      this.checkAvailability_();
+    });
+
+    this.eventManager.listen(this.player, 'manifestupdated', () => {
+      this.checkAvailability_();
+    });
+
+    this.eventManager.listen(this.video, 'durationchange', () => {
+      this.checkAvailability_();
+    });
   }
 
   /**
@@ -156,6 +173,14 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
         LocIds.EXIT_LOOP_MODE : LocIds.ENTER_LOOP_MODE;
 
     this.button_.ariaLabel = this.localization.resolve(ariaText);
+  }
+
+
+  /**
+   * @private
+   */
+  checkAvailability_() {
+    shaka.ui.Utils.setDisplay(this.button_, !this.player.isLive());
   }
 };
 
