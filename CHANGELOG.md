@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.15.1](https://github.com/shaka-project/shaka-player/compare/v4.15.0...v4.15.1) (2025-06-05)
+
+
+### Bug Fixes
+
+* **Ads:** Fix interstitials when not using multiple media elements ([#8681](https://github.com/shaka-project/shaka-player/issues/8681)) ([eb957e1](https://github.com/shaka-project/shaka-player/commit/eb957e14a31a639fab7172315aec78d64577cda7))
+* Fix PlayReady support on Chromium Windows ([#8683](https://github.com/shaka-project/shaka-player/issues/8683)) ([1fdf939](https://github.com/shaka-project/shaka-player/commit/1fdf939d35783f5016b9ac4ce25cb4cde83e6536))
+* Fix ts parser when using B-frames ([#8696](https://github.com/shaka-project/shaka-player/issues/8696)) ([ef6300a](https://github.com/shaka-project/shaka-player/commit/ef6300a8945a5cf14838d90fd53ffd98ad655bdd))
+* **UI:** Fix missing style for shaka-tooltip-status ([#8699](https://github.com/shaka-project/shaka-player/issues/8699)) ([1573a73](https://github.com/shaka-project/shaka-player/commit/1573a7366f5a230d55820aba49c96646bea5dcf7))
+* **UI:** Handle video duration greater than 24 hours ([#8692](https://github.com/shaka-project/shaka-player/issues/8692)) ([92338c5](https://github.com/shaka-project/shaka-player/commit/92338c55bd4ffbc49a8424b8404d7bf5ae2c03a3))
+* **UI:** Hide player labels when More Settings menu is open ([#8694](https://github.com/shaka-project/shaka-player/issues/8694)) ([3d70461](https://github.com/shaka-project/shaka-player/commit/3d70461e6be55017abfa3833f8ef3014ea359094))
+* **UI:** Hide settings menus when the user changes the current time ([#8693](https://github.com/shaka-project/shaka-player/issues/8693)) ([2ed405f](https://github.com/shaka-project/shaka-player/commit/2ed405fba9a0a3e1a0d9061b72aa1107db3c15ad))
+
+
+### Performance Improvements
+
+* Simplify selectAudioTrack internally ([#8687](https://github.com/shaka-project/shaka-player/issues/8687)) ([5bcaa20](https://github.com/shaka-project/shaka-player/commit/5bcaa2055e36151c72eb11b4b725f9da45319432))
+
 ## [4.15.0](https://github.com/shaka-project/shaka-player/compare/v4.14.0...v4.15.0) (2025-06-03)
 
 
