@@ -151,21 +151,38 @@ shaka.extern.UIQualityMarks;
  *   The ordered list of ad statistics present in the ad statistics container.
  * @property {!Array<number>} playbackRates
  *   The ordered list of rates for playback selection.
+ *   <br>
+ *   Defaults to <code>[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]</code>.
  * @property {!Array<number>} fastForwardRates
  *   The ordered list of rates for fast forward selection.
+ *   <br>
+ *   Defaults to <code>[2, 4, 8, 1]</code>.
  * @property {!Array<number>} rewindRates
  *   The ordered list of rates for rewind selection.
+ *   <br>
+ *   Defaults to <code>[-1, -2, -4, -8]</code>.
  * @property {boolean} addSeekBar
  *   Whether or not a seek bar should be part of the UI.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {boolean} addBigPlayButton
  *   Whether or not a big play button in the center of the video
  *   should be part of the UI.
+ *   <br>
+ *   Defaults to <code>false</code> except on mobile where the default value
+ *   is <code>true</code>
  * @property {boolean} customContextMenu
  *   Whether or not a custom context menu replaces the default.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @property {string} castReceiverAppId
  *   Receiver app id to use for the Chromecast support.
+ *   <br>
+ *   Defaults to <code>''</code>.
  * @property {boolean} castAndroidReceiverCompatible
  *   Indicates if the app is compatible with an Android Cast Receiver.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @property {boolean} clearBufferOnQualityChange
  *   Only applicable if the resolution selection is part of the UI.
  *   Whether buffer should be cleared when changing resolution
@@ -174,6 +191,8 @@ shaka.extern.UIQualityMarks;
  *   resolution is being buffered. Not clearing the buffer will mean
  *   we play the content in the previously selected resolution that we
  *   already have buffered before switching to the new resolution.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {boolean} showUnbufferedStart
  *   If true, color any unbuffered region at the start of the seek bar as
  *   unbuffered (using the "base" color).  If false, color any unbuffered region
@@ -184,7 +203,7 @@ shaka.extern.UIQualityMarks;
  *   <br>
  *   A value of true matches the default behavior of Shaka Player v2.5.
  *   <br>
- *   Defaults to false.
+ *   Defaults to <code>false</code>.
  * @property {shaka.extern.UISeekBarColors} seekBarColors
  *   The CSS colors applied to the seek bar.  This allows you to override the
  *   colors used in the linear gradient constructed in JavaScript, since you
@@ -204,7 +223,8 @@ shaka.extern.UIQualityMarks;
  *   there is no role.
  *   LABEL means the non-standard DASH "label" attribute or the standard DASH
  *   "Label" element or the HLS "NAME" attribute are shown.
- *   Defaults to LANGUAGE.
+ *   <br>
+ *   Defaults to <code>LANGUAGE</code>.
  * @property {shaka.ui.Overlay.TrackLabelFormat} textTrackLabelFormat
  *   An enum that determines what is shown in the labels for text track
  *   selection.
@@ -214,108 +234,138 @@ shaka.extern.UIQualityMarks;
  *   there is no role.
  *   LABEL means the non-standard DASH "label" attribute or the standard DASH
  *   "Label" element or the HLS "NAME" attribute are shown.
- *   Defaults to LANGUAGE.
+ *   <br>
+ *   Defaults to <code>LANGUAGE</code>.
  * @property {number} fadeDelay
  *   The delay (in seconds) before fading out the controls once the user stops
  *   interacting with them.  We recommend setting this to 3 on your cast
  *   receiver UI.
- *   Defaults to 0.
+ *   <br>
+ *   Defaults to <code>0</code>.
  * @property {number} closeMenusDelay
  *   The delay (in seconds) before close the opened menus when the UI is hidden.
- *   Defaults to 2.
+ *   <br>
+ *   Defaults to <code>2</code>.
  * @property {boolean} doubleClickForFullscreen
  *   Whether or not double-clicking on the UI should cause it to enter
  *   fullscreen.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>true</code> except on mobile and smart TV whose default
+ *   value is <code>false</code>.
  * @property {boolean} singleClickForPlayAndPause
  *   Whether or not clicking on the video should cause it to play or pause.
  *   It does not work in VR mode.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>true</code> except on mobile and smart TV whose default
+ *   value is <code>false</code>.
  * @property {boolean} enableKeyboardPlaybackControls
  *   Whether or not playback controls via keyboard is enabled, such as seek
  *   forward, seek backward, jump to the beginning/end of the video.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {boolean} enableFullscreenOnRotation
  *   Whether or not to enter/exit fullscreen mode when the screen is rotated.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>false</code> except on mobile where the default value
+ *   is <code>true</code>
  * @property {boolean} forceLandscapeOnFullscreen
  *   Whether or not the device should rotate to landscape mode when the video
  *   enters fullscreen.  Note that this behavior is based on an experimental
  *   browser API, and may not work on all platforms.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>false</code> except on mobile where the default value
+ *   is <code>true</code>
  * @property {boolean} enableTooltips
  *   Whether or not buttons in the control panel display tooltips that contain
  *   information about their function.
- *   Defaults to false.
+ *   <br>
+ *   Defaults to <code>true</code> except on mobile and smart TV whose default
+ *   value is <code>false</code>.
  * @property {number} keyboardSeekDistance
  *   The time interval, in seconds, to seek when the user presses the left or
  *   right keyboard keys when the video is selected. If less than or equal to 0,
  *   no seeking will occur.
- *   Defaults to 5 seconds.
+ *   <br>
+ *   Defaults to <code>5</code>.
  * @property {number} keyboardLargeSeekDistance
  *   The time interval, in seconds, to seek when the user presses the page up or
  *   page down keyboard keys when the video is selected. If less than or equal
  *   to 0, no seeking will occur.
- *   Defaults to 60 seconds.
+ *   <br>
+ *   Defaults to <code>60</code>.
  * @property {HTMLElement} fullScreenElement
  *   DOM element on which fullscreen will be done.
- *   Defaults to Shaka Player Container.
+ *   <br>
+ *   Defaults to <code>Shaka Player Container</code>.
  * @property {boolean} preferDocumentPictureInPicture
  *   Indicates whether the Document Picture in Picture API is preferred or the
  *   Video Element Picture in Picture API is preferred.
  *   Changing this property in mid-playback may produce undesired behavior if
  *   you are already in PiP.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {boolean} showAudioChannelCountVariants
  *   Indicates whether the combination of language and channel count should be
  *   displayed or if, on the contrary, only the language should be displayed
  *   regardless of the channel count.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {boolean} seekOnTaps
  *   Indicates whether or not a fast-forward and rewind tap button that seeks
  *   video some seconds.
- *   Defaults to true if the browser <code>navigator.maxTouchPoints > 0</code>
- *   is true.
+ *   <br>
+ *   Defaults to <code>false</code> except on mobile where the default value
+ *   is <code>true</code>
  * @property {number} tapSeekDistance
  *   The time interval, in seconds, to seek when the user presses the left or
  *   right part of the video. If less than or equal to 0,
  *   no seeking will occur.
- *   Defaults to 10 seconds.
+ *   <br>
+ *   Defaults to <code>10</code>.
  * @property {number} refreshTickInSeconds
  *   The time interval, in seconds, to update the seek bar.
- *   Defaults to 0.125 seconds.
+ *   <br>
+ *   Defaults to <code>0.125</code>.
  * @property {boolean} displayInVrMode
  *   If true, the content will be treated as VR.
  *   If false, it will only be treated as VR if we automatically detect it as
  *   such. (See the Enabling VR section in docs/tutorials/ui.md)
- *   Defaults to false.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @property {string} defaultVrProjectionMode
  *   Indicate the default VR projection mode.
  *   Possible values: <code>'equirectangular'</code> or
  *   <code>'halfequirectangular'</code> or <code>'cubemap'</code>.
+ *   <br>
  *   Defaults to <code>'equirectangular'</code>.
  * @property {boolean} setupMediaSession
  *   If true, MediaSession controls will be managed by the UI. It will also use
  *   the ID3 APIC and TIT2 as image and title in Media Session, and ID3 APIC
  *   will also be used to change video poster.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {boolean} preferVideoFullScreenInVisionOS
  *   If true, we will use the fullscreen API of the video element itself if it
  *   is available in Vision OS. This is useful to be able to access 3D
  *   experiences that are only allowed with the fullscreen of the video element
  *   itself.
- *   Defaults to false.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @property {boolean} showAudioCodec
  *   Show the audio codec if the language has more than one audio codec.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {boolean} showVideoCodec
  *   Show the video codec if the resolution has more than one video codec.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {string} castSenderUrl
  *   URL to load the cast sender if your platform supports it. This URL does not
  *   apply to Smart TVs.
  *   Note: This URL is only used if the cast sender is not previously loaded.
- *   Defaults to 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js'.
+ *   <br>
+ *   Defaults to
+ *   <code>'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js'</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;
