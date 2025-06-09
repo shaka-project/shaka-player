@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.15.2](https://github.com/shaka-project/shaka-player/compare/v4.15.1...v4.15.2) (2025-06-09)
+
+
+### Bug Fixes
+
+* Don't sort TS samples ([#8708](https://github.com/shaka-project/shaka-player/issues/8708)) ([656195b](https://github.com/shaka-project/shaka-player/commit/656195b786567c77c1f6a7699eb9eb9b6a3733c3))
+* Fix bad assert on DeviceFactory ([#8705](https://github.com/shaka-project/shaka-player/issues/8705)) ([b5246dc](https://github.com/shaka-project/shaka-player/commit/b5246dc9311704c5d90cac657d3bc98efc53153c))
+* Fix chopped playback in some DASH multiperiod streams ([#8717](https://github.com/shaka-project/shaka-player/issues/8717)) ([23830dd](https://github.com/shaka-project/shaka-player/commit/23830dd27352b1f481a1382fbd4ec86114ebcf05))
+* NativeTextDisplayer.remove() not following the spec ([#8714](https://github.com/shaka-project/shaka-player/issues/8714)) ([0d3a1c8](https://github.com/shaka-project/shaka-player/commit/0d3a1c8a610a2352bb6bd3e96d572d568d0417f6))
+* Only change appendWindowStart and appendWindowEnd when necessary ([#8716](https://github.com/shaka-project/shaka-player/issues/8716)) ([82ce1c9](https://github.com/shaka-project/shaka-player/commit/82ce1c9dfca5d48916cab3b61c3369288fdeb6d7))
+* **UI:** Don't show loop button for live streams ([#8700](https://github.com/shaka-project/shaka-player/issues/8700)) ([202dc3d](https://github.com/shaka-project/shaka-player/commit/202dc3d3cebcda928a2c2213ebc597d8810f435f))
+* **UI:** Only enable enableFullscreenOnRotation and forceLandscapeOnFullscreen on mobile ([#8701](https://github.com/shaka-project/shaka-player/issues/8701)) ([d2af28c](https://github.com/shaka-project/shaka-player/commit/d2af28c90014aac5950f42d707665cacbe8619a2))
+
+
+### Performance Improvements
+
+* **net:** Do not parse headers twice in XHR plugin ([#8710](https://github.com/shaka-project/shaka-player/issues/8710)) ([af085dd](https://github.com/shaka-project/shaka-player/commit/af085dd58a0e16d75b15c7d5cc9f0bbfaef66320))
+* Simplify getAudioTracks internally when using src= ([#8703](https://github.com/shaka-project/shaka-player/issues/8703)) ([1181ce5](https://github.com/shaka-project/shaka-player/commit/1181ce524548d36402d7e9e3dc88c807c2974df2))
+
 ## [4.15.1](https://github.com/shaka-project/shaka-player/compare/v4.15.0...v4.15.1) (2025-06-05)
 
 
