@@ -546,6 +546,14 @@ const ShakaDemoAssetInfo = class {
       config.drm.servers = config.drm.servers || {};
       licenseServers.forEach((value, key) => {
         config.drm.servers[key] = value;
+        if (this.certificateUri) {
+          if (!config.drm.advanced[key]) {
+            config.drm.advanced[key] = config.drm.advanced[key] ||
+                ShakaDemoAssetInfo.defaultAdvancedDrmConfig();
+            config.drm.advanced[key].serverCertificateUri =
+                this.certificateUri;
+          }
+        }
       });
     }
 
@@ -643,5 +651,22 @@ const ShakaDemoAssetInfo = class {
       return ShakaDemoAssetInfo.fromJSON(dataAsJson);
     } catch (e) {}
     return null;
+  }
+
+  /**
+   * @return {!shaka.extern.AdvancedDrmConfiguration}
+   */
+  static defaultAdvancedDrmConfig() {
+    return {
+      distinctiveIdentifierRequired: false,
+      persistentStateRequired: false,
+      videoRobustness: [],
+      audioRobustness: [],
+      sessionType: '',
+      serverCertificate: new Uint8Array(0),
+      serverCertificateUri: '',
+      individualizationServer: '',
+      headers: {},
+    };
   }
 };
