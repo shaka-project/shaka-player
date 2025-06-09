@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.14.18](https://github.com/shaka-project/shaka-player/compare/v4.14.17...v4.14.18) (2025-06-09)
+
+
+### Bug Fixes
+
+* Don't sort TS samples ([#8708](https://github.com/shaka-project/shaka-player/issues/8708)) ([e204afd](https://github.com/shaka-project/shaka-player/commit/e204afd035826d255eef721daa0bc7dc5d73e61b))
+* Fix chopped playback in some DASH multiperiod streams ([#8717](https://github.com/shaka-project/shaka-player/issues/8717)) ([dc02716](https://github.com/shaka-project/shaka-player/commit/dc027167198e9262bfb15da405095bc95ccfbff3))
+* Only change appendWindowStart and appendWindowEnd when necessary ([#8716](https://github.com/shaka-project/shaka-player/issues/8716)) ([b870568](https://github.com/shaka-project/shaka-player/commit/b870568395dedc4913d5ecb9d06f066d188e7378))
+* **UI:** Don't show loop button for live streams ([#8700](https://github.com/shaka-project/shaka-player/issues/8700)) ([dd5ae18](https://github.com/shaka-project/shaka-player/commit/dd5ae18e6087fe2edf5b2368f70227d1d4fd7b4f))
+
+
+### Performance Improvements
+
+* **net:** Do not parse headers twice in XHR plugin ([#8710](https://github.com/shaka-project/shaka-player/issues/8710)) ([8369af0](https://github.com/shaka-project/shaka-player/commit/8369af0f18e1ac33670ee4056183b80d4008e4a5))
+
 ## [4.14.17](https://github.com/shaka-project/shaka-player/compare/v4.14.16...v4.14.17) (2025-06-05)
 
 
