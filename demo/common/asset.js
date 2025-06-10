@@ -548,7 +548,8 @@ const ShakaDemoAssetInfo = class {
         config.drm.servers[key] = value;
         if (this.certificateUri) {
           if (!config.drm.advanced[key]) {
-            config.drm.advanced[key] = ShakaDemoAssetInfo.defaultAdvancedDrmConfig();
+            config.drm.advanced[key] =
+                ShakaDemoAssetInfo.defaultAdvancedDrmConfig();
             config.drm.advanced[key].serverCertificateUri =
                 this.certificateUri;
           }
