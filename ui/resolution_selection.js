@@ -476,7 +476,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     if (track.hdr == 'PQ' || track.hdr == 'HLG') {
       text += ' HDR';
     }
-    if (track.videoLayout == 'CH-STEREO') {
+    const videoLayout = track.videoLayout || '';
+    if (videoLayout.includes('CH-STEREO')) {
       text += ' 3D';
     }
     const basicResolutionComparison = (firstTrack, secondTrack) => {
