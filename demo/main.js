@@ -812,15 +812,7 @@ shakaDemo.Main = class {
       mimeTypes.push('audio/mp4; codecs="apac.31.00"');
     }
     let hasSupportedMimeType = mimeTypes.some((type) => {
-      if (type in this.support_.media) {
-        return this.support_.media[type];
-      } else {
-        const mediaSource = window.ManagedMediaSource || window.MediaSource;
-        if (mediaSource) {
-          return mediaSource.isTypeSupported(type);
-        }
-        return false;
-      }
+      return this.support_.media[type];
     });
     if (!hasSupportedMimeType &&
         !(window.ManagedMediaSource || window.MediaSource) &&
