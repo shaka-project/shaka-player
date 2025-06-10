@@ -432,6 +432,7 @@ centery
 centerz
 coef
 cubemap
+equi
 equirectangular
 eyex
 eyey

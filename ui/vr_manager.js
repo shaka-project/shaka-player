@@ -94,6 +94,13 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       const spatialInfo = event['detail'];
       let unsupported = false;
       switch (spatialInfo.projection) {
+        case 'rect':
+          // Rectilinear content is the flat rectangular media.
+          this.vrAsset_ = null;
+          break;
+        case 'equi':
+          this.vrAsset_ = 'equirectangular';
+          break;
         case 'hequ':
           switch (spatialInfo.hfov) {
             case 360:
@@ -103,16 +110,23 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
               this.vrAsset_ = 'halfequirectangular';
               break;
             default:
-              unsupported = true;
+              if (spatialInfo.hfov == null) {
+                this.vrAsset_ = 'halfequirectangular';
+              } else {
+                this.vrAsset_ = null;
+                unsupported = true;
+              }
               break;
           }
           break;
         case 'fish':
-          this.vrAsset_ = 'equirectangular';
-          unsupported = true;
+          // It's not really the same thing, but the difference is very subtle
+          // and allows us to tolerate it.
+          this.vrAsset_ = 'halfequirectangular';
           break;
         default:
           this.vrAsset_ = null;
+          unsupported = true;
           break;
       }
       if (unsupported) {
