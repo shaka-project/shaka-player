@@ -805,8 +805,22 @@ shakaDemo.Main = class {
     if (asset.features.includes(shakaAssets.Feature.AV1)) {
       mimeTypes.push('video/mp4; codecs="av01.0.01M.08"');
     }
+    if (asset.features.includes(shakaAssets.Feature.MV_HEVC)) {
+      mimeTypes.push('video/mp4; codecs="hvc1.2.20000000.L153.B0"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.APAC)) {
+      mimeTypes.push('audio/mp4; codecs="apac.31.00"');
+    }
     let hasSupportedMimeType = mimeTypes.some((type) => {
-      return this.support_.media[type];
+      if (type in this.support_.media) {
+        return this.support_.media[type];
+      } else {
+        const mediaSource = window.ManagedMediaSource || window.MediaSource;
+        if (mediaSource) {
+          return mediaSource.isTypeSupported(type);
+        }
+        return false;
+      }
     });
     if (!hasSupportedMimeType &&
         !(window.ManagedMediaSource || window.MediaSource) &&
