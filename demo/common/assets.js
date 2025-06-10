@@ -145,6 +145,10 @@ shakaAssets.Feature = {
 
   // Set if the asset requires AV1 support.
   AV1: 'AV1',
+  // Set if the asset requires MV-HEVC support.
+  MV_HEVC: 'MV-HEVC',
+  // Set if the asset requires APAC support.
+  APAC: 'APAC',
 
   // Set if the asset has at least one stream that is at least 720p.
   HIGH_DEFINITION: 'High definition',
@@ -1505,6 +1509,54 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.DOLBY_VISION)
       .addFeature(shakaAssets.Feature.DOLBY_VISION_3D)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Spatial video stream',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://devstreaming-cdn.apple.com/videos/streaming/examples/immersive-media/spatialLighthouseFlowersWaves/mvp.m3u8',
+      /* source= */ shakaAssets.Source.APPLE)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MV_HEVC)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Apple Immersive Video stream',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://devstreaming-cdn.apple.com/videos/streaming/examples/immersive-media/apple-immersive-video/primary.m3u8',
+      /* source= */ shakaAssets.Source.APPLE)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.APAC)
+      .addFeature(shakaAssets.Feature.VR)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'View 180°',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://devstreaming-cdn.apple.com/videos/streaming/examples/immersive-media/180Lighthouse/mvp.m3u8',
+      /* source= */ shakaAssets.Source.APPLE)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MV_HEVC)
+      .addFeature(shakaAssets.Feature.VR)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'View 360°',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://devstreaming-cdn.apple.com/videos/streaming/examples/immersive-media/360Lighthouse/mvp.m3u8',
+      /* source= */ shakaAssets.Source.APPLE)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MV_HEVC)
+      .addFeature(shakaAssets.Feature.VR)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'View wide fov',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://devstreaming-cdn.apple.com/videos/streaming/examples/immersive-media/wfovCausewayWalk/mvp.m3u8',
+      /* source= */ shakaAssets.Source.APPLE)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MV_HEVC)
+      .addFeature(shakaAssets.Feature.VR)
       .addFeature(shakaAssets.Feature.OFFLINE),
   // }}}
 
