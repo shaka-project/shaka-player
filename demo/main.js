@@ -610,7 +610,7 @@ shakaDemo.Main = class {
         return;
       }
       try {
-        await this.drmConfiguration_(asset, storage);
+        this.drmConfiguration_(asset, storage);
         const metadata = {
           'identifier': this.getIdentifierFromAsset_(asset),
           'downloaded': new Date(),
@@ -1241,19 +1241,6 @@ shakaDemo.Main = class {
     return this.desiredConfig_;
   }
 
-  /**
-   * @param {string} uri
-   * @param {!shaka.net.NetworkingEngine} netEngine
-   * @return {!Promise<!ArrayBuffer>}
-   * @private
-   */
-  async requestCertificate_(uri, netEngine) {
-    const requestType = shaka.net.NetworkingEngine.RequestType.APP;
-    const request = /** @type {shaka.extern.Request} */ ({uris: [uri]});
-    const response = await netEngine.request(requestType, request).promise;
-    return response.data;
-  }
-
   /** @return {boolean} */
   getIsVisualizerActive() {
     if (this.visualizer_) {
@@ -1328,10 +1315,9 @@ shakaDemo.Main = class {
   /**
    * @param {ShakaDemoAssetInfo} asset
    * @param {shaka.offline.Storage=} storage
-   * @return {!Promise}
    * @private
    */
-  async drmConfiguration_(asset, storage) {
+  drmConfiguration_(asset, storage) {
     const netEngine = storage ?
                       storage.getNetworkingEngine() :
                       this.player_.getNetworkingEngine();
@@ -1348,36 +1334,6 @@ shakaDemo.Main = class {
       this.player_.resetConfiguration();
       this.readHash_();
       this.player_.configure(assetConfig);
-    }
-
-    const config = storage ?
-                   storage.getConfiguration() :
-                   this.player_.getConfiguration();
-
-    // Change the config's serverCertificate fields based on
-    // asset.certificateUri.
-    if (asset.certificateUri) {
-      // Fetch the certificate, and apply it to the configuration.
-      const certificate = await this.requestCertificate_(
-          asset.certificateUri, netEngine);
-      const certArray = shaka.util.BufferUtils.toUint8(certificate);
-      for (const drmSystem of asset.licenseServers.keys()) {
-        config.drm.advanced[drmSystem] = config.drm.advanced[drmSystem] || {};
-        config.drm.advanced[drmSystem].serverCertificate = certArray;
-      }
-    } else {
-      // Remove any server certificates.
-      for (const drmSystem of asset.licenseServers.keys()) {
-        if (config.drm.advanced[drmSystem]) {
-          delete config.drm.advanced[drmSystem].serverCertificate;
-        }
-      }
-    }
-
-    if (storage) {
-      storage.configure(config);
-    } else {
-      this.player_.configure('drm.advanced', config.drm.advanced);
     }
     this.remakeHash();
   }
@@ -1404,7 +1360,7 @@ shakaDemo.Main = class {
    * @param {ShakaDemoAssetInfo} asset
    */
   async preloadAsset(asset) {
-    await this.drmConfiguration_(asset);
+    this.drmConfiguration_(asset);
     const manifestUri = await this.getManifestUri_(asset);
     asset.preloadManager = await this.player_.preload(manifestUri);
   }
@@ -1459,7 +1415,7 @@ shakaDemo.Main = class {
         this.player_.setVideoContainer(this.container_);
       }
 
-      await this.drmConfiguration_(asset);
+      this.drmConfiguration_(asset);
       this.controls_.getCastProxy().setAppData({'asset': asset});
       const ui = this.video_['ui'];
       if (asset.extraUiConfig) {
