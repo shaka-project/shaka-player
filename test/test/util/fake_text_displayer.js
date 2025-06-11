@@ -13,7 +13,7 @@ shaka.test.FakeTextDisplayer = class {
     let isVisible = false;
 
     /** @type {!jasmine.Spy} */
-    this.destroySpy = jasmine.createSpy('destroy');
+    this.destroySpy = jasmine.createSpy('destroy').and.resolveTo();
     /** @type {!jasmine.Spy} */
     this.appendSpy = jasmine.createSpy('append');
     /** @type {!jasmine.Spy} */
