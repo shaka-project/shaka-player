@@ -40,6 +40,9 @@ describe('CmcdManager', () => {
         {start: 35, end: 40},
       ],
     }),
+    getNetworkingEngine: /** @return {shaka.net.NetworkingEngine} */ () => {
+      return createNetworkingEngine(createCmcdConfig());
+    },
     getCurrentTime: () => 10,
     getPlaybackRate: () => 1,
     getVariantTracks: () => /** @type {Array<shaka.extern.Track>} */([
