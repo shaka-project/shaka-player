@@ -58,6 +58,11 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
       this.updateIcon();
     });
 
+    this.eventManager.listen(this.player, 'loaded', () => {
+      this.updateAriaLabel();
+      this.updateIcon();
+    });
+
     this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_PAUSED, () => {
       this.updateAriaLabel();
       this.updateIcon();
