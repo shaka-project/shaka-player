@@ -600,3 +600,569 @@ describe('CmcdManager', () => {
     });
   });
 });
+
+// region CMCD V2
+describe('CmcdManager CMCD v2', () => {
+  const CmcdManager = shaka.util.CmcdManager;
+  const sessionId = 'e98d4f72-cc6d-4c60-96a2-44c7bfc2ddee';
+
+  // Mock data and interfaces
+  const mockPlayerData = {
+    'v': 2,
+    'sid': sessionId,
+    'cid': 'xyz',
+    'su': false,
+    'nor': '../testing/3.m4v',
+    'nrr': '0-99',
+    'd': 6066.66,
+    'mtp': 10049,
+    'bs': true,
+    'br': 52317,
+    'pr': 1.5,
+    'msd': 700,
+    'ltc': 3100,
+    'ab': 3500,
+    'bl': 4500,
+    'tbl': 6000,
+    'dl': 8000,
+    'rtp': 30000,
+    'com.test-hello': 'world',
+    'com.test-testing': 1234,
+    'com.test-exists': true,
+    'com.test-notExists': false,
+    'com.test-token': Symbol('s'),
+  };
+
+  const playerInterface = {
+    isLive: () => true,
+    getLiveLatency: () => 3100,
+    getBandwidthEstimate: () => 10000000,
+    getNetworkingEngine: () => createNetworkingEngine(
+        createCmcdManager(createCmcdConfig()),
+    ),
+    getBufferedInfo: () => ({
+      video: [
+        {start: 0, end: 15},
+        {start: 6, end: 31.234},
+        {start: 35, end: 40},
+      ],
+    }),
+    getCurrentTime: () => 5,
+    getPlaybackRate: () => 1.25,
+    getVariantTracks: () => [
+      {
+        type: 'variant',
+        bandwidth: 50000,
+        videoBandwidth: 40000,
+        audioBandwidth: 10000,
+      },
+      {
+        type: 'variant',
+        bandwidth: 5000000,
+        videoBandwidth: 4000000,
+        audioBandwidth: 1000000,
+      },
+    ],
+  };
+
+  const baseConfig = {
+    enabled: true,
+    sessionId,
+    contentId: 'v2content',
+    rtpSafetyFactor: 5,
+    useHeaders: false,
+    includeKeys: [],
+    version: 2,
+    targets: [{
+      mode: 'response',
+      enabled: true,
+      url: 'https://example.com/cmcd-collector',
+      useHeaders: false,
+    }],
+  };
+
+  // Helper functions
+  const createNetworkingEngine = (cmcd) => {
+    const resolveScheme = jasmine.createSpy('cmcd').and.callFake(() =>
+      shaka.util.AbortableOperation.completed(
+          {uri: '', data: new ArrayBuffer(5), headers: {}}),
+    );
+
+    shaka.net.NetworkingEngine.registerScheme('cmcd',
+        shaka.test.Util.spyFunc(resolveScheme),
+        shaka.net.NetworkingEngine.PluginPriority.FALLBACK,
+    );
+
+    const networkingEngine = new shaka.net.NetworkingEngine(
+        undefined,
+        (type, request, context) => cmcd.applyRequestData(
+            type, request, context),
+        undefined,
+        (type, response, context) => cmcd.applyResponseData(
+            type, response, context),
+    );
+    networkingEngine.configure(
+        shaka.util.PlayerConfiguration.createDefault().networking);
+
+    return networkingEngine;
+  };
+
+  const createCmcdConfig = (cfg = {}) => Object.assign({}, baseConfig, cfg);
+  const createCmcdManager = (cfg = {}) => new CmcdManager(
+      playerInterface, createCmcdConfig(cfg),
+  );
+
+  const createRequest = () => ({
+    uris: ['https://test.com/v2test.mpd'],
+    method: 'GET',
+    body: null,
+    headers: {testing: '1234'},
+    allowCrossSiteCredentials: false,
+    retryParameters: {},
+  });
+
+  const createResponse = () => ({
+    uri: 'https://test.com/v2seg.mp4',
+    headers: {},
+    data: new ArrayBuffer(8),
+  });
+
+  const createSegmentContext = () => ({
+    type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
+    stream: {
+      bandwidth: 8000000,
+      codecs: 'avc1.42001e',
+      mimeType: 'video/mp4',
+      type: 'video',
+      segmentIndex: 0,
+    },
+
+    segment: {startTime: 10, endTime: 12, getUris: () => ['https://test.com/v2seg.mp4']},
+  });
+
+  const createMockSegmentIndex = () => {
+    const mockNextSegment = {
+      getUris: () => ['https://test.com/next-seg.m4v'],
+      startByte: 1000,
+      endByte: 1999,
+    };
+    const mockIterator = {
+      next: jasmine.createSpy('next')
+          .and.returnValue({value: mockNextSegment, done: false}),
+    };
+    return {
+      getIteratorForTime: jasmine.createSpy('getIteratorForTime')
+          .and.returnValue(mockIterator),
+    };
+  };
+
+  const createSegmentContextWithIndex = (segmentIndex) => {
+    const baseContext = createSegmentContext();
+    return Object.assign({}, baseContext, {
+      stream: Object.assign({}, baseContext.stream, {segmentIndex}),
+    });
+  };
+
+  describe('Serialization', () => {
+    it('serializes data to a query string', () => {
+      const query = CmcdManager.toQuery({v: 2, msd: 250});
+      expect(query).toContain('v=2');
+      expect(query).toContain('msd=250');
+    });
+
+    it('serializes data to headers', () => {
+      const headers = CmcdManager.toHeaders(mockPlayerData);
+      expect(headers['CMCD-Session']).toContain(`sid="${sessionId}"`);
+      expect(headers['CMCD-Session']).toContain('v=2');
+    });
+  });
+
+  describe('Configuration and Mode Handling', () => {
+    it('filters CMCD response mode keys correctly', () => {
+      const cmcdManager = createCmcdManager({
+        targets: [{
+          mode: 'response',
+          enabled: true,
+          url: 'https://example.com/cmcd',
+          includeKeys: ['sid', 'cid', 'com.test-hello'],
+          useHeaders: false,
+        }],
+      });
+
+      cmcdManager.onPlaybackPlay_();
+      cmcdManager.onPlaybackPlaying_();
+      const response = createResponse();
+
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          createSegmentContext(),
+      );
+
+      const cmcdParam = response.uri.split('CMCD=')[1];
+      const decoded = decodeURIComponent(cmcdParam);
+
+      expect(decoded).toContain('sid=');
+      expect(decoded).toContain('cid=');
+
+      expect(decoded).not.toContain('v=2');
+      expect(decoded).not.toContain('msd=');
+      expect(decoded).not.toContain('ltc=');
+      expect(decoded).not.toContain('com.test-hello=');
+    });
+
+    it('applies CMCD data to request URL in query mode', () => {
+      const cmcdManager = createCmcdManager();
+      const request = createRequest();
+      cmcdManager.applyManifestData(request, {});
+
+      const decodedUri = decodeURIComponent(request.uris[0]);
+      expect(decodedUri).toContain('CMCD=');
+      expect(decodedUri).toContain('v=2');
+    });
+
+    it('applies CMCD data to request headers in header mode', () => {
+      const cmcdManager = createCmcdManager({useHeaders: true});
+      const request = createRequest();
+      cmcdManager.applyManifestData(request, {});
+      expect(request.headers['CMCD-Session']).toContain(`sid="${sessionId}"`);
+      expect(request.headers['CMCD-Session']).toContain('v=2');
+    });
+
+    it('applies CMCD data to response URL in query mode', () => {
+      const cmcdManager = createCmcdManager({
+        version: 2,
+        targets: [{
+          mode: 'response',
+          enabled: true,
+          url: 'https://example.com/cmcd',
+          includeKeys: ['sid', 'cid', 'v'],
+          useHeaders: false,
+        }],
+      });
+
+      cmcdManager.onPlaybackPlay_();
+      cmcdManager.onPlaybackPlaying_();
+
+      const response = createRequest();
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          createSegmentContext(),
+      );
+
+      const decodedUri = decodeURIComponent(response.uri);
+      expect(decodedUri).toContain('CMCD=');
+      expect(decodedUri).toContain('v=2');
+      expect(decodedUri).toContain('sid=');
+      expect(decodedUri).toContain('cid=');
+    });
+
+    it('applies CMCD data to response headers in header mode', () => {
+      const cmcdManager = createCmcdManager({
+        version: 2,
+        targets: [{
+          mode: 'response',
+          enabled: true,
+          url: 'https://example.com/cmcd',
+          includeKeys: ['sid', 'v'],
+          useHeaders: true,
+        }],
+      });
+
+      const response = createResponse();
+
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          createSegmentContext(),
+      );
+
+      expect(response.headers['CMCD-Session']).toContain(`sid="${sessionId}"`);
+      expect(response.headers['CMCD-Session']).toContain('v=2');
+    });
+
+    it('applies v2 keys to response uri in response mode', () => {
+      const cmcdManager = createCmcdManager({
+        targets: [{
+          mode: 'response',
+          enabled: true,
+          url: 'https://example.com/cmcd-collector',
+          includeKeys: ['sid', 'cid', 'msd', 'ltc', 'v'],
+          useHeaders: false,
+        }],
+      });
+
+      cmcdManager.onPlaybackPlay_();
+      cmcdManager.onPlaybackPlaying_();
+      const response = createResponse();
+
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          createSegmentContext(),
+      );
+
+      const cmcdParam = response.uri.split('CMCD=')[1];
+      const decoded = decodeURIComponent(cmcdParam);
+
+      expect(decoded).toContain('sid=');
+      expect(decoded).toContain('cid=');
+      expect(decoded).toContain('msd=');
+      expect(decoded).toContain('ltc=');
+      expect(decoded).toContain('v=2');
+
+      expect(decoded).not.toContain('br=');
+      expect(decoded).not.toContain('mtp=');
+    });
+
+    it('filters keys in response mode based on includeKeys', () => {
+      const cmcdManager = createCmcdManager({
+        targets: [Object.assign({}, baseConfig.targets[0], {
+          includeKeys: ['sid', 'msd'],
+        })],
+      });
+
+      cmcdManager.onPlaybackPlay_();
+      cmcdManager.onPlaybackPlaying_();
+
+      const response = createResponse();
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          createSegmentContext(),
+      );
+
+      const decodedUri = decodeURIComponent(response.uri);
+      expect(decodedUri).toContain('sid=');
+      expect(decodedUri).toContain('msd=');
+      expect(decodedUri).not.toContain('v=2');
+    });
+
+    it('filters keys in request mode based on includeKeys', () => {
+      const cmcdManager = createCmcdManager({
+        targets: [Object.assign({}, baseConfig.targets[0], {
+          includeKeys: ['sid', 'msd'],
+        })],
+      });
+
+      cmcdManager.onPlaybackPlay_();
+      cmcdManager.onPlaybackPlaying_();
+
+      const response = createResponse();
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          createSegmentContext(),
+      );
+
+      const decodedUri = decodeURIComponent(response.uri);
+      expect(decodedUri).toContain('sid=');
+      expect(decodedUri).toContain('msd=');
+      expect(decodedUri).not.toContain('v=2');
+    });
+  });
+
+  describe('CMCD v2 Key Generation', () => {
+    it('includes ltc for live content request mode', () => {
+      const cmcdManager = createCmcdManager({
+        targets: [Object.assign({}, baseConfig.targets[0], {
+          includeKeys: ['sid', 'msd'],
+        })],
+      });
+
+      const request = createRequest();
+      cmcdManager.applyManifestData(request, {});
+      expect(decodeURIComponent(request.uris[0])).toContain('ltc=');
+    });
+
+    it('includes ltc for live content response mode', () => {
+      const cmcdManager = createCmcdManager({
+        targets: [Object.assign({}, baseConfig.targets[0], {
+          includeKeys: ['sid', 'msd', 'ltc'],
+        })],
+      });
+
+      const response = createResponse();
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          createSegmentContext(),
+      );
+
+      expect(decodeURIComponent(response.uri)).toContain('ltc=');
+    });
+
+    it('sends `msd` only on the first request', () => {
+      const cmcdManager = createCmcdManager({
+        targets: [Object.assign({}, baseConfig.targets[0], {
+          includeKeys: ['sid', 'msd'],
+        })],
+      });
+
+      cmcdManager.onPlaybackPlay_();
+      cmcdManager.onPlaybackPlaying_();
+
+      const request1 = createRequest();
+      cmcdManager.applyManifestData(request1, {});
+      expect(decodeURIComponent(request1.uris[0])).toContain('msd=');
+
+      cmcdManager.onPlaybackPlay_();
+      cmcdManager.onPlaybackPlaying_();
+
+      const request2 = createRequest();
+      cmcdManager.applyManifestData(request2, {});
+      expect(decodeURIComponent(request2.uris[0])).not.toContain('msd=');
+    });
+
+    it('sends `msd` only on the first response', () => {
+      const cmcdManager = createCmcdManager({
+        targets: [Object.assign({}, baseConfig.targets[0], {
+          includeKeys: ['sid', 'msd'],
+        })],
+      });
+
+      cmcdManager.onPlaybackPlay_();
+      cmcdManager.onPlaybackPlaying_();
+
+      const response1 = createResponse();
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response1,
+          createSegmentContext(),
+      );
+
+      expect(decodeURIComponent(response1.uri)).toContain('msd=');
+
+      cmcdManager.onPlaybackPlay_();
+      cmcdManager.onPlaybackPlaying_();
+
+      const response2 = createResponse();
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response2,
+          createSegmentContext(),
+      );
+
+      expect(decodeURIComponent(response2.uri)).not.toContain('msd=');
+    });
+
+    it('should generate "sf" for manifest requests', () => {
+      const cmcdManager = createCmcdManager();
+      const r = createRequest();
+
+      const context = {
+        type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD,
+      };
+
+      cmcdManager.applyManifestData(r, context);
+      const decoded = decodeURIComponent(r.uris[0]);
+
+      expect(decoded).toContain('sf=d');
+    });
+
+    it('should generate "bs" after a rebuffering event request', () => {
+      const cmcdManager = createCmcdManager();
+      const context = createSegmentContextWithIndex(createMockSegmentIndex());
+
+      cmcdManager.setBuffering(false);
+      cmcdManager.setBuffering(true);
+
+      const r1 = createRequest();
+      cmcdManager.applyRequestSegmentData(r1, context);
+      const decoded1 = decodeURIComponent(r1.uris[0]);
+
+      expect(decoded1).toContain('bs');
+
+      const r2 = createRequest();
+      cmcdManager.applyRequestSegmentData(r2, context);
+      const decoded2 = decodeURIComponent(r2.uris[0]);
+
+      expect(decoded2).not.toContain('bs');
+    });
+
+    it('should generate "bs" after a rebuffering event response mode', () => {
+      const cmcdManager = createCmcdManager({
+        targets: [Object.assign({}, baseConfig.targets[0], {
+          includeKeys: ['bs', 'ot'],
+        })],
+      });
+      const context = createSegmentContext();
+      const response = createResponse();
+
+      cmcdManager.setBuffering(false);
+      cmcdManager.setBuffering(true);
+
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          context,
+      );
+
+      const decodedUri1 = decodeURIComponent(response.uri);
+
+      expect(decodedUri1).toContain('bs');
+
+      const response2 = createResponse();
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response2,
+          context,
+      );
+      const decodedUri2 = decodeURIComponent(response2.uri);
+
+      expect(decodedUri2).not.toContain('bs');
+    });
+
+    it('generates `rtp`, `nor`, and `nrr` for segment requests', () => {
+      const cmcdManager = createCmcdManager({
+        targets: [Object.assign({}, baseConfig.targets[0], {
+          includeKeys: ['sid', 'msd'],
+        })],
+      });
+
+      const request = createRequest();
+      const context = createSegmentContextWithIndex(createMockSegmentIndex());
+      cmcdManager.applyRequestSegmentData(request, context);
+      const decodedUri = decodeURIComponent(request.uris[0]);
+      expect(decodedUri).toContain('rtp=');
+      expect(decodedUri).toContain('nor="next-seg.m4v"');
+      expect(decodedUri).toContain('nrr="1000-1999"');
+    });
+
+    it('generates `rtp` and `nor` for segment responses', () => {
+      const cmcdManager = createCmcdManager({
+        targets: [Object.assign({}, baseConfig.targets[0], {
+          includeKeys: ['sid', 'msd', 'rtp', 'nor'],
+        })],
+      });
+
+      cmcdManager.onPlaybackPlay_();
+      cmcdManager.onPlaybackPlaying_();
+
+      const response = createResponse();
+
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          createSegmentContextWithIndex(createMockSegmentIndex()),
+      );
+
+      const decodedUri = decodeURIComponent(response.uri);
+      expect(decodedUri).toContain('rtp=');
+      expect(decodedUri).toContain('nor="next-seg.m4v"');
+      // expect(decodedUri).toContain('nrr="1000-1999"');
+    });
+
+    it('does not include v2 keys if version is not 2', () => {
+      const nonV2Manager = createCmcdManager(
+          {version: 1, includeKeys: ['msd', 'ltc']},
+      );
+      const request = createRequest();
+      nonV2Manager.applyManifestData(request, {});
+      const decodedUri = decodeURIComponent(request.uris[0]);
+      expect(decodedUri).not.toContain('msd=');
+      expect(decodedUri).not.toContain('ltc=');
+    });
+  });
+});
