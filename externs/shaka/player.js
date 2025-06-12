@@ -2864,8 +2864,11 @@ shaka.extern.TextDisplayerConfiguration;
  * @property {shaka.extern.TextDisplayerConfiguration} textDisplayer
  *   Text displayer configuration and settings.
  * @property {shaka.extern.TextDisplayer.Factory} textDisplayFactory
- *   A factory to construct a text displayer. Note that, if this is changed
- *   during playback, it will cause the text tracks to be reloaded.
+ *   A factory to construct a text displayer. If this is changed during
+ *   playback, it will cause the text tracks to be reloaded. During playback it
+ *   may be called automatically if a change in
+ *   <code>webkitPresentationMode</code> is detected and
+ *   <code>setVideoContainer</code> has been called.
  * @exportDoc
  */
 shaka.extern.PlayerConfiguration;
