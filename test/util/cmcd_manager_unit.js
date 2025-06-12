@@ -1061,6 +1061,30 @@ describe('CmcdManager CMCD v2', () => {
       expect(decoded).toContain('sf=d');
     });
 
+    it('should generate "sf" for segment responses', () => {
+      const cmcdManager = createCmcdManager({
+        targets: [Object.assign({}, baseConfig.targets[0], {
+          includeKeys: ['sf'],
+        })],
+      });
+
+      const manifestContext = {
+        type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD,
+      };
+
+      cmcdManager.applyManifestData(createRequest(), manifestContext);
+
+      const response = createResponse();
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          createSegmentContext(),
+      );
+      const decoded = decodeURIComponent(response.uri);
+
+      expect(decoded).toContain('sf=d');
+    });
+
     it('should generate "bs" after a rebuffering event request', () => {
       const cmcdManager = createCmcdManager();
       const context = createSegmentContextWithIndex(createMockSegmentIndex());
