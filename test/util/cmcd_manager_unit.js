@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// region CMCD V1
 describe('CmcdManager', () => {
   const CmcdManager = shaka.util.CmcdManager;
   const uuidRegex =
@@ -41,7 +42,7 @@ describe('CmcdManager', () => {
       ],
     }),
     getNetworkingEngine: /** @return {shaka.net.NetworkingEngine} */ () => {
-      return createNetworkingEngine(createCmcdConfig());
+      return createNetworkingEngine(createCmcdManager(createCmcdConfig()));
     },
     getCurrentTime: () => 10,
     getPlaybackRate: () => 1,
