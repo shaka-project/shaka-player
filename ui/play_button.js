@@ -126,7 +126,7 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
    */
   updateAriaLabel() {
     const LocIds = shaka.ui.Locales.Ids;
-    if (this.isEnded()) {
+    if (this.isEnded() && this.video_.duration) {
       this.button.ariaLabel = this.localization.resolve(LocIds.REPLAY);
     } else {
       const label = this.isPaused() ? LocIds.PLAY : LocIds.PAUSE;
@@ -140,7 +140,7 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
    */
   updateIcon() {
     const Icons = shaka.ui.Enums.MaterialDesignIcons;
-    if (this.isEnded()) {
+    if (this.isEnded() && this.video_.duration) {
       this.button.textContent = Icons.REPLAY;
     } else {
       this.button.textContent = this.isPaused() ? Icons.PLAY : Icons.PAUSE;
