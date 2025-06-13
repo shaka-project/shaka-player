@@ -2494,14 +2494,32 @@ shaka.extern.AdvancedAbrConfiguration;
  *  Common Media Client Data (CMCD) Target Configuration
  *
  * @property {string} mode
+ * Specifies the transmission strategy for the CMCD data.
+ * <br>
+ * Possible values are:
+ * <ul><li><b>'response'</b>: This mode reports data to one or more alternate
+ * destinations after either the full response or an error has been received
+ * to a media object request, using one of the Data Transmission Modes
+ * (header, query parameters, json object)
+ * </li></ul>
+ * <br>
  * @property {boolean} enabled
+ * If <code>true</code>, enable CMCD data to be sent with media requests.
+ * <br>
+ * Defaults to <code>false</code>.
  * @property {boolean} useHeaders
+ * If <code>true</code>, the CMCD data is sent as HTTP request headers.
+ * If <code>false</code>, it is sent as query parameters in the URL.
+ * <br>
+ * Defaults to <code>false</code>.
  * @property {string} url
+ * A specific URL to which the CMCD data will be sent.
+ * <br>
  * @property {!Array<string>} includeKeys
- *   An array of keys to include in the CMCD data. If not provided, all keys
- *   will be included.
- *   <br>
- *   Defaults to <code>[]</code>.
+ * An array of keys to include in the CMCD data.
+ * If not provided, all keys will be included.
+ * <br>
+ * Defaults to <code>[]</code>.
  * @exportDoc
  */
 shaka.extern.CmcdTarget;
