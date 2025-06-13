@@ -2502,7 +2502,6 @@ shaka.extern.AdvancedAbrConfiguration;
  * to a media object request, using one of the Data Transmission Modes
  * (header, query parameters, json object)
  * </li></ul>
- * <br>
  * @property {boolean} enabled
  * If <code>true</code>, enable CMCD data to be sent with media requests.
  * <br>
@@ -2514,7 +2513,6 @@ shaka.extern.AdvancedAbrConfiguration;
  * Defaults to <code>false</code>.
  * @property {string} url
  * A specific URL to which the CMCD data will be sent.
- * <br>
  * @property {!Array<string>} includeKeys
  * An array of keys to include in the CMCD data.
  * If not provided, all keys will be included.
