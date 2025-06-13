@@ -466,6 +466,13 @@ QUERYPARAM
 streamingkeydelivery
 TARGETDURATION
 
+# CMCD
+ttfb
+ttfbb
+ttlb
+cmsdd
+cmsds
+
 # other
 autoglottonym
 awesomplete
@@ -500,11 +507,6 @@ systeminfo
 templatized
 vaage
 webapis
-ttfb
-ttfbb
-ttlb
-cmsdd
-cmsds
 
 # banned words
 !timmer
