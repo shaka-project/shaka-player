@@ -1,5 +1,28 @@
 # Changelog
 
+## [4.15.3](https://github.com/shaka-project/shaka-player/compare/v4.15.2...v4.15.3) (2025-06-16)
+
+
+### Bug Fixes
+
+* Allow change NativeTextDisplayer on runtime ([#8735](https://github.com/shaka-project/shaka-player/issues/8735)) ([51cc07d](https://github.com/shaka-project/shaka-player/commit/51cc07d399386d4503837f0ae704812469ed55cc))
+* Avoid reset or changeType in MSE when not necessary ([#8744](https://github.com/shaka-project/shaka-player/issues/8744)) ([a5c5135](https://github.com/shaka-project/shaka-player/commit/a5c5135198c44b6a92570363b533be1c18791b8b))
+* **CEA:** INVALID_MP4_CEA error being thrown when shouldn't be ([#8748](https://github.com/shaka-project/shaka-player/issues/8748)) ([4a231ff](https://github.com/shaka-project/shaka-player/commit/4a231ffe641ddb2a623023d33a1024b21ca2e775))
+* Fix Apple Vision Pro detection ([#8732](https://github.com/shaka-project/shaka-player/issues/8732)) ([d7a1293](https://github.com/shaka-project/shaka-player/commit/d7a1293b8379f91426bea41f8612ae4b01507ec5))
+* **HLS:** Fix APAC detection ([#8724](https://github.com/shaka-project/shaka-player/issues/8724)) ([7708fb2](https://github.com/shaka-project/shaka-player/commit/7708fb2e503fcca8be4a4362c24de8112bd87b08))
+* **HLS:** Fix reset media source when using muxed content ([#8738](https://github.com/shaka-project/shaka-player/issues/8738)) ([d024e30](https://github.com/shaka-project/shaka-player/commit/d024e30076586fbeb252e9baf3d54bfab3c92814))
+* **HLS:** Fix switching between muxed and alternate audios ([#8741](https://github.com/shaka-project/shaka-player/issues/8741)) ([381505c](https://github.com/shaka-project/shaka-player/commit/381505c14c5042f7573dd19f15e1f83009cc65ec))
+* **UI:** Fix 3D detection ([#8725](https://github.com/shaka-project/shaka-player/issues/8725)) ([a693fb3](https://github.com/shaka-project/shaka-player/commit/a693fb34abeaf9a2c9fa82331486a5ab2ffc7770))
+* **UI:** Fix detection of some VR formats ([#8727](https://github.com/shaka-project/shaka-player/issues/8727)) ([26ff3e2](https://github.com/shaka-project/shaka-player/commit/26ff3e2c6546f06de0748eb539fd7bc3ce163f63))
+* **UI:** Only show replay button when there is a duration in the media element ([#8740](https://github.com/shaka-project/shaka-player/issues/8740)) ([ae61481](https://github.com/shaka-project/shaka-player/commit/ae614818ecb0052d6a15bfd43c8d3468cdc07302))
+* **UI:** Resize overflow and settings menus when necessary ([#8742](https://github.com/shaka-project/shaka-player/issues/8742)) ([052ce48](https://github.com/shaka-project/shaka-player/commit/052ce488c1a052178a77e6d78edc4aa05fd061c1))
+* **UI:** Update play button state when the player is loaded ([#8739](https://github.com/shaka-project/shaka-player/issues/8739)) ([ba73b80](https://github.com/shaka-project/shaka-player/commit/ba73b8062066b69f26aee12d50d5dc5ad5d39fee))
+
+
+### Performance Improvements
+
+* Only parse spatialVideoInfo for video segments ([#8726](https://github.com/shaka-project/shaka-player/issues/8726)) ([0fba2b6](https://github.com/shaka-project/shaka-player/commit/0fba2b600b1ff9580f6be2b875a2a4a6d80048d1))
+
 ## [4.15.2](https://github.com/shaka-project/shaka-player/compare/v4.15.1...v4.15.2) (2025-06-09)
 
 
