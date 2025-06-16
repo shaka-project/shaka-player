@@ -1557,9 +1557,12 @@ shakaDemo.Main = class {
         manifestUri && !manifestUri.startsWith('offline:')) {
       mimeType = asset.mimeType;
     }
-    const itemConfig = asset.getConfiguration();
+    const itemConfig = this.defaultConfig_;
+    const assetConfig = asset.getConfiguration();
     shaka.util.PlayerConfiguration.mergeConfigObjects(
-        itemConfig, this.desiredConfig_, this.defaultConfig_);
+        itemConfig, this.desiredConfig_, itemConfig);
+    shaka.util.PlayerConfiguration.mergeConfigObjects(
+        itemConfig, assetConfig, itemConfig);
     const isOffline = asset.storedContent && asset.storedContent.offlineUri;
     /** @type {shaka.extern.QueueItem} */
     const queueItem = {
