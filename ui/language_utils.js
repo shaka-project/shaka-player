@@ -23,8 +23,9 @@ shaka.ui.LanguageUtils = class {
   /**
    * @param {!Array<shaka.extern.AudioTrack>} tracks
    * @return {boolean}
+   * @private
    */
-  static areAudioTracksEqualExceptLabel(tracks) {
+  static areAudioTracksEqualExceptLabel_(tracks) {
     const basicTrack = (track) => {
       return {
         codecs: track.codecs,
@@ -64,7 +65,7 @@ shaka.ui.LanguageUtils = class {
 
     if (tracks.length > 1 && tracks[0].label &&
         trackLabelFormat != shaka.ui.Overlay.TrackLabelFormat.LABEL &&
-        shaka.ui.LanguageUtils.areAudioTracksEqualExceptLabel(tracks)) {
+        shaka.ui.LanguageUtils.areAudioTracksEqualExceptLabel_(tracks)) {
       trackLabelFormat = shaka.ui.Overlay.TrackLabelFormat.LABEL;
     }
 
