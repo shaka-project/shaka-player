@@ -1308,11 +1308,27 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(this.videoContainer_, 'keydown', (e) => {
-      this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
+      if (!this.config_.enableKeyboardPlaybackControlsInWindow) {
+        this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
+      }
     });
 
     this.eventManager_.listen(this.videoContainer_, 'keyup', (e) => {
-      this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
+      if (!this.config_.enableKeyboardPlaybackControlsInWindow) {
+        this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
+      }
+    });
+
+    this.eventManager_.listen(window, 'keydown', (e) => {
+      if (this.config_.enableKeyboardPlaybackControlsInWindow) {
+        this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
+      }
+    });
+
+    this.eventManager_.listen(window, 'keyup', (e) => {
+      if (this.config_.enableKeyboardPlaybackControlsInWindow) {
+        this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
+      }
     });
 
     this.eventManager_.listen(

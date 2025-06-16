@@ -136,7 +136,8 @@ shaka.extern.UIQualityMarks;
  *   preferVideoFullScreenInVisionOS: boolean,
  *   showAudioCodec: boolean,
  *   showVideoCodec: boolean,
- *   castSenderUrl: string
+ *   castSenderUrl: string,
+ *   enableKeyboardPlaybackControlsInWindow: boolean
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -366,6 +367,13 @@ shaka.extern.UIQualityMarks;
  *   <br>
  *   Defaults to
  *   <code>'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js'</code>.
+ * @property {boolean} enableKeyboardPlaybackControlsInWindow
+ *   Enable event listening on the window instead of video container for
+ *   keyboard controls.
+ *   Note: only taken into account when
+ *   <code>enableKeyboardPlaybackControls</code> is true.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;
