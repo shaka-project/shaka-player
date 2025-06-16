@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.14.19](https://github.com/shaka-project/shaka-player/compare/v4.14.18...v4.14.19) (2025-06-16)
+
+
+### Bug Fixes
+
+* **CEA:** INVALID_MP4_CEA error being thrown when shouldn't be ([#8748](https://github.com/shaka-project/shaka-player/issues/8748)) ([410ac5a](https://github.com/shaka-project/shaka-player/commit/410ac5ae53e9c2eadc097002be5caba94dd200b5))
+* **HLS:** Fix APAC detection ([#8724](https://github.com/shaka-project/shaka-player/issues/8724)) ([1f2f384](https://github.com/shaka-project/shaka-player/commit/1f2f3842e0ddf407c11f0644b3a33ff04e65cfcb))
+* **UI:** Fix detection of some VR formats ([#8727](https://github.com/shaka-project/shaka-player/issues/8727)) ([28c7187](https://github.com/shaka-project/shaka-player/commit/28c71876b3a1ae6fee7a82e7e01353837652717f))
+* **UI:** Only show replay button when there is a duration in the media element ([#8740](https://github.com/shaka-project/shaka-player/issues/8740)) ([c785599](https://github.com/shaka-project/shaka-player/commit/c785599492c32e01cde04aa9b7980cfdd7d04df3))
+* **UI:** Update play button state when the player is loaded ([#8739](https://github.com/shaka-project/shaka-player/issues/8739)) ([843e07d](https://github.com/shaka-project/shaka-player/commit/843e07de324f2a6eab40c679f5f75246b53f3d73))
+
+
+### Performance Improvements
+
+* Only parse spatialVideoInfo for video segments ([#8726](https://github.com/shaka-project/shaka-player/issues/8726)) ([9055996](https://github.com/shaka-project/shaka-player/commit/90559964428528a705f24081a82a4788af4a3241))
+
 ## [4.14.18](https://github.com/shaka-project/shaka-player/compare/v4.14.17...v4.14.18) (2025-06-09)
 
 
