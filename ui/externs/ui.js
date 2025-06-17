@@ -266,7 +266,7 @@ shaka.extern.UIQualityMarks;
  * @property {boolean} enableFullscreenOnRotation
  *   Whether or not to enter/exit fullscreen mode when the screen is rotated.
  *   <br>
- *   Defaults to <code>false</code> except on mobile where the default value
+ *   Defaults to <code>false</code> except on Android where the default value
  *   is <code>true</code>
  * @property {boolean} forceLandscapeOnFullscreen
  *   Whether or not the device should rotate to landscape mode when the video
