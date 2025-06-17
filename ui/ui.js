@@ -390,7 +390,9 @@ shaka.ui.Overlay = class {
       config.seekOnTaps = true;
       config.enableTooltips = false;
       config.doubleClickForFullscreen = false;
-      config.enableFullscreenOnRotation = true;
+      const device = shaka.device.DeviceFactory.getDevice();
+      config.enableFullscreenOnRotation = device.getBrowserEngine() !==
+          shaka.device.IDevice.BrowserEngine.WEBKIT;
       config.forceLandscapeOnFullscreen = true;
       const filterElements = [
         'play_pause',
