@@ -695,21 +695,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @private
    */
   timeFormatter_(totalSeconds) {
-    const secondsNumber = Math.round(totalSeconds);
-    const hours = Math.floor(secondsNumber / 3600);
-    let minutes = Math.floor((secondsNumber - (hours * 3600)) / 60);
-    let seconds = secondsNumber - (hours * 3600) - (minutes * 60);
-    if (seconds < 10) {
-      seconds = '0' + seconds;
-    }
-    if (hours > 0) {
-      if (minutes < 10) {
-        minutes = '0' + minutes;
-      }
-      return hours + ':' + minutes + ':' + seconds;
-    } else {
-      return minutes + ':' + seconds;
-    }
+    return shaka.ui.Utils.buildTimeString(totalSeconds, totalSeconds >= 3600);
   }
 };
 
