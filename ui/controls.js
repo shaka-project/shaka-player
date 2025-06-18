@@ -1763,7 +1763,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onMouseMove_(event);
     }
 
-    if (!this.config_.enableKeyboardPlaybackControls) {
+    if (!this.config_.enableKeyboardPlaybackControls ||
+        !this.player_.getAssetUri()) {
       return;
     }
 
