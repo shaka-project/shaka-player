@@ -6,9 +6,10 @@
 
 // region CMCD Manager Setup
 describe('CmcdManager Setup', () => {
-  beforeAll(() => {
-    const resolveScheme = () => shaka.util.AbortableOperation.completed(
-        {uri: '', data: new ArrayBuffer(5), headers: {}});
+  beforeEach(() => {
+    const resolveScheme = jasmine.createSpy('cmcd').and.callFake(() =>
+      shaka.util.AbortableOperation.completed(
+          {uri: '', data: new ArrayBuffer(5), headers: {}}));
 
     shaka.net.NetworkingEngine.registerScheme('cmcd',
         shaka.test.Util.spyFunc(resolveScheme),
