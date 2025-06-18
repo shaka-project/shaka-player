@@ -1886,6 +1886,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.togglePiP();
         }
         break;
+      case 'c':
+        this.player_.setTextTrackVisibility(!this.player_.isTextTrackVisible());
+        break
       // Pause or play by pressing space on the seek bar.
       case ' ':
         if (isSeekBar) {
