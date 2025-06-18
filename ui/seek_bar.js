@@ -202,15 +202,37 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         this.hideThumbnail_();
         return;
       }
+      // Get the bounding rectangle of the range input element
       const rect = this.bar.getBoundingClientRect();
+
+      // Parse the min, max, and step attributes from the input element
       const min = parseFloat(this.bar.min);
       const max = parseFloat(this.bar.max);
+      const step = parseFloat(this.bar.step) || 1;
+
+      // Define the effective range of the thumb movement
+      const thumbWidth = 12;
+      const minX = rect.left + thumbWidth / 2;
+      const maxX = rect.right - thumbWidth / 2;
+
+      // Clamp the mouse X position to stay within the thumb's movement range
+      const clampedX = Math.max(minX, Math.min(maxX, event.clientX));
+
+      // Calculate the percentage of the track that the clamped X represents
+      const percent = (clampedX - minX) / (maxX - minX);
+
+      // Convert the percentage into a value within the input's range
+      let value = min + percent * (max - min);
+
+      // Round the value to the nearest step
+      value = Math.round((value - min) / step) * step + min;
+
+      // Ensure the value stays within the min and max bounds
+      value = Math.min(max, Math.max(min, value));
+
       // Pixels from the left of the range element
       const mousePosition = Math.max(0, event.clientX - rect.left);
-      // Pixels per unit value of the range element.
-      const scale = (max - min) / rect.width;
-      // Mouse position in units, which may be outside the allowed range.
-      const value = Math.min(max, Math.round(min + scale * mousePosition));
+
       if (!this.player.getImageTracks().length) {
         this.hideThumbnail_();
         this.showTime_(mousePosition, value);
