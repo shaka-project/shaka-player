@@ -11,9 +11,6 @@ so the exact milestone for future features is not pre-determined.
 Candidate features for future release cycles:
  - Background fetch for offline storage
    https://github.com/shaka-project/shaka-player/issues/879
- - A method to stitch together clips
-   https://github.com/shaka-project/shaka-player/issues/764
- - CMCD v2
 
 v5.0
  - Conversion to Typescript (Smaller, more modular binary)
