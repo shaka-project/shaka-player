@@ -6,6 +6,7 @@
 
 // region CMCD Manager Setup
 describe('CmcdManager Setup', () => {
+
   beforeEach(() => {
     const resolveScheme = jasmine.createSpy('cmcd').and.callFake(() =>
       shaka.util.AbortableOperation.completed(
@@ -489,13 +490,11 @@ describe('CmcdManager Setup', () => {
 
           it('media segment requests', async () => {
             const request = NetworkingEngine.makeRequest([uri], retry);
-            await networkingEngine.request(RequestType.SEGMENT, request,
-                {
-                  type: AdvancedRequestType.MEDIA_SEGMENT,
-                  stream: {
-                    type: 'video',
-                  },
-                });
+            await networkingEngine.request(
+                RequestType.SEGMENT,
+                request,
+                manifestInfo,
+            );
 
             const result = request.uris[0];
             expect(result).toContain(encodeURIComponent('ot=v'));
