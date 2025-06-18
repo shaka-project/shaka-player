@@ -265,6 +265,8 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     const step = parseFloat(this.bar.step) || 1;
 
     // Define the effective range of the thumb movement
+    // 12 is the value of @thumb-size in range_elements.less. Note: for
+    // everything to work, this value has to be synchronized.
     const thumbWidth = 12;
     const minX = rect.left + thumbWidth / 2;
     const maxX = rect.right - thumbWidth / 2;
