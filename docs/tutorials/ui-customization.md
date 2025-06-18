@@ -333,16 +333,3 @@ localization.addEventListener('unknown-locales', async (e) => {
   }
 });
 ```
-
-#### Supported shortcuts
-
-* Spacebar: Play/Pause when the seek bar is selected.
-* Left/Right arrow on the seek bar: Seek backward/forward 5 seconds.
-* PageDown/PageUp on the seek bar: Seek backward/forward 60 seconds.
-* Home/End: Seek to the beginning/last seconds of the video.
-* c: Activate closed captions and subtitles if available. To hide captions and subtitles, activate C again.
-* f: Activate full screen. If full screen mode is enabled, activate F again or press escape to exit full screen mode.
-* m: Mute/unmute the video.
-* p: Activate picture in picture. If picture in picture mode is enabled, activate P again.
-* \>: Speed up the video playback rate.
-* \<: Slow down the video playback rate.
