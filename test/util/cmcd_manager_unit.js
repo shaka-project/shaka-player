@@ -22,6 +22,7 @@ describe('CmcdManager Setup', () => {
    * @return {shaka.net.NetworkingEngine}
    */
   function createNetworkingEngine(cmcd) {
+    /** @type {shaka.net.NetworkingEngine} */
     const networkingEngine = new shaka.net.NetworkingEngine(
         /* onStart= */ undefined,
         /* onProgress= */ undefined,
@@ -424,6 +425,7 @@ describe('CmcdManager Setup', () => {
         });
 
         describe('applies core CMCD params to net engine requests', () => {
+          /** @type {shaka.net.NetworkingEngine} */
           let networkingEngine;
           const uri = 'cmcd://foo';
           const retry = NetworkingEngine.defaultRetryParameters();
