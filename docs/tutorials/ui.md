@@ -272,6 +272,7 @@ See it live at [https://bbbcm-if.org/watch/](https://bbbcm-if.org/watch/), and
 override the UI language with the lang= parameter.
 (ex: [https://bbbcm-if.org/watch/?lang=sjn](https://bbbcm-if.org/watch/?lang=sjn))
 
+
 #### Supported shortcuts
 
 * Spacebar: Play/Pause when the seek bar is selected.
