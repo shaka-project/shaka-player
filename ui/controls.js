@@ -1844,7 +1844,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case 'PageDown':
         // PageDown is like ArrowLeft, but has a larger jump distance, and does
         // nothing to volume.
-        if (this.seekBar_ && isSeekBar && keyboardSeekDistance > 0) {
+        if (this.seekBar_ && isSeekBar && keyboardLargeSeekDistance > 0) {
           event.preventDefault();
           this.seek_(this.seekBar_.getValue() - keyboardLargeSeekDistance);
         }
@@ -1852,7 +1852,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case 'PageUp':
         // PageDown is like ArrowRight, but has a larger jump distance, and does
         // nothing to volume.
-        if (this.seekBar_ && isSeekBar && keyboardSeekDistance > 0) {
+        if (this.seekBar_ && isSeekBar && keyboardLargeSeekDistance > 0) {
           event.preventDefault();
           this.seek_(this.seekBar_.getValue() + keyboardLargeSeekDistance);
         }
