@@ -41,12 +41,12 @@ describe('CmcdManager', () => {
         {start: 35, end: 40},
       ],
     }),
-    getNetworkingEngine: /** @return {shaka.net.NetworkingEngine} */ () => {
-      return createNetworkingEngine(createCmcdManager(createCmcdConfig()));
-    },
+    getNetworkingEngine: () => createNetworkingEngine(
+        createCmcdManager(playerInterface, createCmcdConfig()),
+    ),
     getCurrentTime: () => 10,
     getPlaybackRate: () => 1,
-    getVariantTracks: () => /** @type {Array<shaka.extern.Track>} */([
+    getVariantTracks: () => /** @type {Array<shaka.extern.Track>} */ ([
       {
         type: 'variant',
         bandwidth: 50000,
@@ -76,8 +76,8 @@ describe('CmcdManager', () => {
     return Object.assign({}, config, cfg);
   }
 
-  function createCmcdManager(cfg = {}) {
-    return new CmcdManager(playerInterface, createCmcdConfig(cfg));
+  function createCmcdManager(player, cfg = {}) {
+    return new CmcdManager(player, createCmcdConfig(cfg));
   }
 
   function createRequest() {
@@ -89,7 +89,7 @@ describe('CmcdManager', () => {
         testing: '1234',
       },
       allowCrossSiteCredentials: false,
-      retryParameters: /** @type {shaka.extern.RetryParameters} */({}),
+      retryParameters: /** @type {shaka.extern.RetryParameters} */ ({}),
       licenseRequestType: null,
       sessionId: null,
       drmInfo: null,
@@ -175,7 +175,7 @@ describe('CmcdManager', () => {
     const ObjectUtils = shaka.util.ObjectUtils;
 
     /** @type shaka.util.CmcdManager */
-    let cmcdManager = createCmcdManager();
+    let cmcdManager = createCmcdManager(playerInterface);
 
     const createContext = (type) => {
       return {
@@ -199,9 +199,12 @@ describe('CmcdManager', () => {
 
     describe('configuration', () => {
       it('does not modify requests when disabled', () => {
-        cmcdManager = createCmcdManager({
-          enabled: false,
-        });
+        cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              enabled: false,
+            },
+        );
 
         const r = createRequest();
         cmcdManager.applyManifestData(r, manifestInfo);
@@ -212,9 +215,12 @@ describe('CmcdManager', () => {
       });
 
       it('generates a session id if not provided', () => {
-        cmcdManager = createCmcdManager({
-          sessionId: '',
-        });
+        cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              sessionId: '',
+            },
+        );
 
         const r = ObjectUtils.cloneObject(request);
 
@@ -224,7 +230,7 @@ describe('CmcdManager', () => {
       });
 
       it('generates a session id via configure', () => {
-        cmcdManager = createCmcdManager();
+        cmcdManager = createCmcdManager(playerInterface);
 
         const r = createRequest();
         cmcdManager.applyManifestData(r, manifestInfo);
@@ -248,9 +254,12 @@ describe('CmcdManager', () => {
       });
 
       it('filters keys if includeKeys is provided', () => {
-        cmcdManager = createCmcdManager({
-          includeKeys: ['sid', 'cid'],
-        });
+        cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              includeKeys: ['sid', 'cid'],
+            },
+        );
 
         const r = createRequest();
         cmcdManager.applyManifestData(r, manifestInfo);
@@ -263,7 +272,7 @@ describe('CmcdManager', () => {
     describe('query mode', () => {
       it('modifies all request uris', () => {
         // modifies manifest request uris
-        cmcdManager = createCmcdManager();
+        cmcdManager = createCmcdManager(playerInterface);
 
         let r = createRequest();
         cmcdManager.applyManifestData(r, manifestInfo);
@@ -290,9 +299,12 @@ describe('CmcdManager', () => {
 
     describe('header mode', () => {
       it('modifies all request headers', () => {
-        cmcdManager = createCmcdManager({
-          useHeaders: true,
-        });
+        cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              useHeaders: true,
+            },
+        );
 
         // modifies manifest request headers
         let r = createRequest();
@@ -331,7 +343,7 @@ describe('CmcdManager', () => {
 
     describe('src= mode', () => {
       beforeEach(() => {
-        cmcdManager = createCmcdManager();
+        cmcdManager = createCmcdManager(playerInterface);
       });
 
       it('modifies media stream uris', () => {
@@ -363,9 +375,12 @@ describe('CmcdManager', () => {
 
     describe('adheres to the spec', () => {
       beforeEach(() => {
-        cmcdManager = createCmcdManager({
-          useHeaders: true,
-        });
+        cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              useHeaders: true,
+            },
+        );
         cmcdManager.setBuffering(false);
         cmcdManager.setBuffering(true);
       });
@@ -401,7 +416,7 @@ describe('CmcdManager', () => {
         const retry = NetworkingEngine.defaultRetryParameters();
 
         beforeEach(() => {
-          cmcdManager = createCmcdManager();
+          cmcdManager = createCmcdManager(playerInterface);
           networkingEngine = createNetworkingEngine(cmcdManager);
         });
 
@@ -504,9 +519,12 @@ describe('CmcdManager', () => {
         });
 
         it('not when enabled is false', async () => {
-          cmcdManager = createCmcdManager({
-            enabled: false,
-          });
+          cmcdManager = createCmcdManager(
+              playerInterface,
+              {
+                enabled: false,
+              },
+          );
           networkingEngine = createNetworkingEngine(cmcdManager);
 
           const request = NetworkingEngine.makeRequest([uri], retry);
@@ -519,10 +537,13 @@ describe('CmcdManager', () => {
         it('returns cmcd v2 data in query if version is 2', async () => {
           // Set live to true to enable ltc
           playerInterface.isLive = () => true;
-          cmcdManager = createCmcdManager({
-            version: 2,
-            includeKeys: ['ltc', 'msd', 'v'],
-          });
+          cmcdManager = createCmcdManager(
+              playerInterface,
+              {
+                version: 2,
+                includeKeys: ['ltc', 'msd', 'v'],
+              },
+          );
           networkingEngine = createNetworkingEngine(cmcdManager);
 
           // Trigger Play and Playing events
@@ -542,10 +563,13 @@ describe('CmcdManager', () => {
               // Set live to true to enable ltc
               playerInterface.isLive = () => true;
 
-              const cmcdManagerTmp = createCmcdManager({
-                version: 1,
-                includeKeys: ['ltc', 'msd'],
-              });
+              const cmcdManagerTmp = createCmcdManager(
+                  playerInterface,
+                  {
+                    version: 1,
+                    includeKeys: ['ltc', 'msd'],
+                  },
+              );
               networkingEngine = createNetworkingEngine(cmcdManagerTmp);
 
               // Trigger Play and Playing events
@@ -562,11 +586,14 @@ describe('CmcdManager', () => {
 
         it('returns cmcd v2 data in header if version is 2', async () => {
           playerInterface.isLive = () => true;
-          cmcdManager = createCmcdManager({
-            version: 2,
-            includeKeys: ['ltc', 'msd'],
-            useHeaders: true,
-          });
+          cmcdManager = createCmcdManager(
+              playerInterface,
+              {
+                version: 2,
+                includeKeys: ['ltc', 'msd'],
+                useHeaders: true,
+              },
+          );
           networkingEngine = createNetworkingEngine(cmcdManager);
 
           // Trigger Play and Playing events
@@ -582,11 +609,14 @@ describe('CmcdManager', () => {
         it('doesn\'t return cmcd v2 data in headers if version is not 2',
             async () => {
               playerInterface.isLive = () => true;
-              cmcdManager = createCmcdManager({
-                version: 1,
-                includeKeys: ['ltc', 'msd'],
-                useHeaders: true,
-              });
+              cmcdManager = createCmcdManager(
+                  playerInterface,
+                  {
+                    version: 1,
+                    includeKeys: ['ltc', 'msd'],
+                    useHeaders: true,
+                  },
+              );
               networkingEngine = createNetworkingEngine(cmcdManager);
               cmcdManager.onPlaybackPlay_();
               cmcdManager.onPlaybackPlaying_();
