@@ -1889,6 +1889,24 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.togglePiP();
         }
         break;
+      case '>': {
+        const index =
+            this.config_.playbackRates.indexOf(this.player_.getPlaybackRate());
+        if (index > -1 && (index + 1) < this.config_.playbackRates.length) {
+          this.player_.trickPlay(this.config_.playbackRates[index + 1],
+              /* useTrickPlayTrack= */ false);
+        }
+        break;
+      }
+      case '<': {
+        const index =
+            this.config_.playbackRates.indexOf(this.player_.getPlaybackRate());
+        if (index > -1 && (index - 1) >= 0) {
+          this.player_.trickPlay(this.config_.playbackRates[index - 1],
+              /* useTrickPlayTrack= */ false);
+        }
+        break;
+      }
       // Pause or play by pressing space on the seek bar.
       case ' ':
         if (isSeekBar) {
