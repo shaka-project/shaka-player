@@ -668,7 +668,7 @@ describe('CmcdManager CMCD v2', () => {
     getLiveLatency: () => 3100,
     getBandwidthEstimate: () => 10000000,
     getNetworkingEngine: () => createNetworkingEngine(
-        createCmcdManager(createCmcdConfig()),
+        createCmcdManager(playerInterface, createCmcdConfig()),
     ),
     getBufferedInfo: () => ({
       video: [
@@ -738,8 +738,8 @@ describe('CmcdManager CMCD v2', () => {
   };
 
   const createCmcdConfig = (cfg = {}) => Object.assign({}, baseConfig, cfg);
-  const createCmcdManager = (cfg = {}) => new CmcdManager(
-      playerInterface, createCmcdConfig(cfg),
+  const createCmcdManager = (player, cfg = {}) => new CmcdManager(
+      player, createCmcdConfig(cfg),
   );
 
   const createRequest = () => ({
@@ -809,15 +809,18 @@ describe('CmcdManager CMCD v2', () => {
 
   describe('Configuration and Mode Handling', () => {
     it('filters CMCD response mode keys correctly', () => {
-      const cmcdManager = createCmcdManager({
-        targets: [{
-          mode: 'response',
-          enabled: true,
-          url: 'https://example.com/cmcd',
-          includeKeys: ['sid', 'cid', 'com.test-hello'],
-          useHeaders: false,
-        }],
-      });
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [{
+              mode: 'response',
+              enabled: true,
+              url: 'https://example.com/cmcd',
+              includeKeys: ['sid', 'cid', 'com.test-hello'],
+              useHeaders: false,
+            }],
+          },
+      );
 
       cmcdManager.onPlaybackPlay_();
       cmcdManager.onPlaybackPlaying_();
@@ -842,7 +845,7 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('applies CMCD data to request URL in query mode', () => {
-      const cmcdManager = createCmcdManager();
+      const cmcdManager = createCmcdManager(playerInterface);
       const request = createRequest();
       cmcdManager.applyManifestData(request, {});
 
@@ -852,7 +855,11 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('applies CMCD data to request headers in header mode', () => {
-      const cmcdManager = createCmcdManager({useHeaders: true});
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {useHeaders: true},
+      );
+
       const request = createRequest();
       cmcdManager.applyManifestData(request, {});
       expect(request.headers['CMCD-Session']).toContain(`sid="${sessionId}"`);
@@ -860,16 +867,19 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('applies CMCD data to response URL in query mode', () => {
-      const cmcdManager = createCmcdManager({
-        version: 2,
-        targets: [{
-          mode: 'response',
-          enabled: true,
-          url: 'https://example.com/cmcd',
-          includeKeys: ['sid', 'cid', 'v'],
-          useHeaders: false,
-        }],
-      });
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            version: 2,
+            targets: [{
+              mode: 'response',
+              enabled: true,
+              url: 'https://example.com/cmcd',
+              includeKeys: ['sid', 'cid', 'v'],
+              useHeaders: false,
+            }],
+          },
+      );
 
       cmcdManager.onPlaybackPlay_();
       cmcdManager.onPlaybackPlaying_();
@@ -889,16 +899,19 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('applies CMCD data to response headers in header mode', () => {
-      const cmcdManager = createCmcdManager({
-        version: 2,
-        targets: [{
-          mode: 'response',
-          enabled: true,
-          url: 'https://example.com/cmcd',
-          includeKeys: ['sid', 'v'],
-          useHeaders: true,
-        }],
-      });
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            version: 2,
+            targets: [{
+              mode: 'response',
+              enabled: true,
+              url: 'https://example.com/cmcd',
+              includeKeys: ['sid', 'v'],
+              useHeaders: true,
+            }],
+          },
+      );
 
       const response = createResponse();
 
@@ -913,15 +926,18 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('applies v2 keys to response uri in response mode', () => {
-      const cmcdManager = createCmcdManager({
-        targets: [{
-          mode: 'response',
-          enabled: true,
-          url: 'https://example.com/cmcd-collector',
-          includeKeys: ['sid', 'cid', 'msd', 'ltc', 'v'],
-          useHeaders: false,
-        }],
-      });
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [{
+              mode: 'response',
+              enabled: true,
+              url: 'https://example.com/cmcd-collector',
+              includeKeys: ['sid', 'cid', 'msd', 'ltc', 'v'],
+              useHeaders: false,
+            }],
+          },
+      );
 
       cmcdManager.onPlaybackPlay_();
       cmcdManager.onPlaybackPlaying_();
@@ -947,11 +963,14 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('filters keys in response mode based on includeKeys', () => {
-      const cmcdManager = createCmcdManager({
-        targets: [Object.assign({}, baseConfig.targets[0], {
-          includeKeys: ['sid', 'msd'],
-        })],
-      });
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [Object.assign({}, baseConfig.targets[0], {
+              includeKeys: ['sid', 'msd'],
+            })],
+          },
+      );
 
       cmcdManager.onPlaybackPlay_();
       cmcdManager.onPlaybackPlaying_();
@@ -970,11 +989,14 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('filters keys in request mode based on includeKeys', () => {
-      const cmcdManager = createCmcdManager({
-        targets: [Object.assign({}, baseConfig.targets[0], {
-          includeKeys: ['sid', 'msd'],
-        })],
-      });
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [Object.assign({}, baseConfig.targets[0], {
+              includeKeys: ['sid', 'msd'],
+            })],
+          },
+      );
 
       cmcdManager.onPlaybackPlay_();
       cmcdManager.onPlaybackPlaying_();
@@ -995,11 +1017,14 @@ describe('CmcdManager CMCD v2', () => {
 
   describe('CMCD v2 Key Generation', () => {
     it('includes ltc for live content request mode', () => {
-      const cmcdManager = createCmcdManager({
-        targets: [Object.assign({}, baseConfig.targets[0], {
-          includeKeys: ['sid', 'msd'],
-        })],
-      });
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [Object.assign({}, baseConfig.targets[0], {
+              includeKeys: ['sid', 'msd'],
+            })],
+          },
+      );
 
       const request = createRequest();
       cmcdManager.applyManifestData(request, {});
@@ -1007,11 +1032,14 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('includes ltc for live content response mode', () => {
-      const cmcdManager = createCmcdManager({
-        targets: [Object.assign({}, baseConfig.targets[0], {
-          includeKeys: ['sid', 'msd', 'ltc'],
-        })],
-      });
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [Object.assign({}, baseConfig.targets[0], {
+              includeKeys: ['sid', 'msd', 'ltc'],
+            })],
+          },
+      );
 
       const response = createResponse();
       cmcdManager.applyResponseData(
@@ -1024,11 +1052,14 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('sends `msd` only on the first request', () => {
-      const cmcdManager = createCmcdManager({
-        targets: [Object.assign({}, baseConfig.targets[0], {
-          includeKeys: ['sid', 'msd'],
-        })],
-      });
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [Object.assign({}, baseConfig.targets[0], {
+              includeKeys: ['sid', 'msd'],
+            })],
+          },
+      );
 
       cmcdManager.onPlaybackPlay_();
       cmcdManager.onPlaybackPlaying_();
@@ -1046,11 +1077,14 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('sends `msd` only on the first response', () => {
-      const cmcdManager = createCmcdManager({
-        targets: [Object.assign({}, baseConfig.targets[0], {
-          includeKeys: ['sid', 'msd'],
-        })],
-      });
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [Object.assign({}, baseConfig.targets[0], {
+              includeKeys: ['sid', 'msd'],
+            })],
+          },
+      );
 
       cmcdManager.onPlaybackPlay_();
       cmcdManager.onPlaybackPlaying_();
@@ -1078,7 +1112,7 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('should generate "sf" for manifest requests', () => {
-      const cmcdManager = createCmcdManager();
+      const cmcdManager = createCmcdManager(playerInterface);
       const r = createRequest();
 
       const context = {
@@ -1092,11 +1126,14 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('should generate "sf" for segment responses', () => {
-      const cmcdManager = createCmcdManager({
-        targets: [Object.assign({}, baseConfig.targets[0], {
-          includeKeys: ['sf'],
-        })],
-      });
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [Object.assign({}, baseConfig.targets[0], {
+              includeKeys: ['sf'],
+            })],
+          },
+      );
 
       const manifestContext = {
         type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD,
@@ -1116,7 +1153,7 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('should generate "bs" after a rebuffering event request', () => {
-      const cmcdManager = createCmcdManager();
+      const cmcdManager = createCmcdManager(playerInterface);
       const context = createSegmentContextWithIndex(createMockSegmentIndex());
 
       cmcdManager.setBuffering(false);
@@ -1136,11 +1173,14 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('should generate "bs" after a rebuffering event response mode', () => {
-      const cmcdManager = createCmcdManager({
-        targets: [Object.assign({}, baseConfig.targets[0], {
-          includeKeys: ['bs', 'ot'],
-        })],
-      });
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [Object.assign({}, baseConfig.targets[0], {
+              includeKeys: ['bs', 'ot'],
+            })],
+          },
+      );
       const context = createSegmentContext();
       const response = createResponse();
 
@@ -1169,11 +1209,14 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('generates `rtp`, `nor`, and `nrr` for segment requests', () => {
-      const cmcdManager = createCmcdManager({
-        targets: [Object.assign({}, baseConfig.targets[0], {
-          includeKeys: ['sid', 'msd'],
-        })],
-      });
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [Object.assign({}, baseConfig.targets[0], {
+              includeKeys: ['sid', 'msd'],
+            })],
+          },
+      );
 
       const request = createRequest();
       const context = createSegmentContextWithIndex(createMockSegmentIndex());
@@ -1185,11 +1228,14 @@ describe('CmcdManager CMCD v2', () => {
     });
 
     it('generates `rtp` and `nor` for segment responses', () => {
-      const cmcdManager = createCmcdManager({
-        targets: [Object.assign({}, baseConfig.targets[0], {
-          includeKeys: ['sid', 'msd', 'rtp', 'nor'],
-        })],
-      });
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [Object.assign({}, baseConfig.targets[0], {
+              includeKeys: ['sid', 'msd', 'rtp', 'nor'],
+            })],
+          },
+      );
 
       cmcdManager.onPlaybackPlay_();
       cmcdManager.onPlaybackPlaying_();
@@ -1210,6 +1256,7 @@ describe('CmcdManager CMCD v2', () => {
 
     it('does not include v2 keys if version is not 2', () => {
       const nonV2Manager = createCmcdManager(
+          playerInterface,
           {version: 1, includeKeys: ['msd', 'ltc']},
       );
       const request = createRequest();
