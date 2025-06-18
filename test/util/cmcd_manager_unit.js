@@ -28,9 +28,7 @@ describe('CmcdManager Setup', () => {
         /* onStart= */ undefined,
         /* onProgress= */ undefined,
         /* onEnd= */ undefined,
-        /* onResponse= */ (type, response, context) => {
-          cmcd.applyResponseData(type, response, context);
-        },
+        /* onResponse= */ undefined,
         /* onRequest= */ (type, request, context) => {
           cmcd.applyRequestData(type, request, context);
         },
