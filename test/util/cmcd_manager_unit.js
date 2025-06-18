@@ -6,7 +6,6 @@
 
 // region CMCD Manager Setup
 describe('CmcdManager Setup', () => {
-
   beforeEach(() => {
     const resolveScheme = jasmine.createSpy('cmcd').and.callFake(() =>
       shaka.util.AbortableOperation.completed(
