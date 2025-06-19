@@ -202,15 +202,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         this.hideThumbnail_();
         return;
       }
+      const value = this.getValueFromPosition(event.clientX);
       const rect = this.bar.getBoundingClientRect();
-      const min = parseFloat(this.bar.min);
-      const max = parseFloat(this.bar.max);
       // Pixels from the left of the range element
       const mousePosition = Math.max(0, event.clientX - rect.left);
-      // Pixels per unit value of the range element.
-      const scale = (max - min) / rect.width;
-      // Mouse position in units, which may be outside the allowed range.
-      const value = Math.min(max, Math.round(min + scale * mousePosition));
       if (!this.player.getImageTracks().length) {
         this.hideThumbnail_();
         this.showTime_(mousePosition, value);
