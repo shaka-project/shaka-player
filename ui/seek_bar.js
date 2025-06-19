@@ -202,35 +202,11 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         this.hideThumbnail_();
         return;
       }
+
+      const value = this.getValueFromPosition(event.clientX);
+
       // Get the bounding rectangle of the range input element
       const rect = this.bar.getBoundingClientRect();
-
-      // Parse the min, max, and step attributes from the input element
-      const min = parseFloat(this.bar.min);
-      const max = parseFloat(this.bar.max);
-      const step = parseFloat(this.bar.step) || 1;
-
-      // Define the effective range of the thumb movement
-      // 12 is the value of @thumb-size in range_elements.less. Note: for
-      // everything to work, this value has to be synchronized.
-      const thumbWidth = 12;
-      const minX = rect.left + thumbWidth / 2;
-      const maxX = rect.right - thumbWidth / 2;
-
-      // Clamp the mouse X position to stay within the thumb's movement range
-      const clampedX = Math.max(minX, Math.min(maxX, event.clientX));
-
-      // Calculate the percentage of the track that the clamped X represents
-      const percent = (clampedX - minX) / (maxX - minX);
-
-      // Convert the percentage into a value within the input's range
-      let value = min + percent * (max - min);
-
-      // Round the value to the nearest step
-      value = Math.round((value - min) / step) * step + min;
-
-      // Ensure the value stays within the min and max bounds
-      value = Math.min(max, Math.max(min, value));
 
       // Pixels from the left of the range element
       const mousePosition = Math.max(0, event.clientX - rect.left);

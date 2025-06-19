@@ -245,17 +245,10 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   }
 
   /**
-   * Synchronize the touch position with the range value.
-   * Comes in handy on iOS, where users have to grab the handle in order
-   * to start seeking.
-   * @param {Event} event
-   * @private
+   * @param {number} clientX
+   * @return {number}
    */
-  setBarValueForTouch_(event) {
-    event.preventDefault();
-
-    const changedTouch = /** @type {TouchEvent} */ (event).changedTouches[0];
-
+  getValueFromPosition(clientX) {
     // Get the bounding rectangle of the range input element
     const rect = this.bar.getBoundingClientRect();
 
@@ -272,7 +265,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     const maxX = rect.right - thumbWidth / 2;
 
     // Clamp the touch X position to stay within the thumb's movement range
-    const clampedX = Math.max(minX, Math.min(maxX, changedTouch.clientX));
+    const clampedX = Math.max(minX, Math.min(maxX, clientX));
 
     // Calculate the percentage of the track that the clamped X represents
     const percent = (clampedX - minX) / (maxX - minX);
@@ -286,6 +279,21 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     // Ensure the value stays within the min and max bounds
     value = Math.min(max, Math.max(min, value));
 
-    this.bar.value = value;
+    return value;
+  }
+
+  /**
+   * Synchronize the touch position with the range value.
+   * Comes in handy on iOS, where users have to grab the handle in order
+   * to start seeking.
+   * @param {Event} event
+   * @private
+   */
+  setBarValueForTouch_(event) {
+    event.preventDefault();
+
+    const changedTouch = /** @type {TouchEvent} */ (event).changedTouches[0];
+
+    this.bar.value = this.getValueFromPosition(changedTouch.clientX);
   }
 };
