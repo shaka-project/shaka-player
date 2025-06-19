@@ -282,6 +282,6 @@ override the UI language with the lang= parameter.
 * c: Activate closed captions and subtitles if available. To hide captions and subtitles, activate C again.
 * f: Activate full screen. If full screen mode is enabled, activate F again or press escape to exit full screen mode.
 * m: Mute/unmute the video.
-* p: Activate picture in picture. If picture in picture mode is enabled, activate P again.
+* p: Activate picture in picture. If picture in picture mode is enabled, press P again.
 * \>: Speed up the video playback rate.
 * \<: Slow down the video playback rate.
