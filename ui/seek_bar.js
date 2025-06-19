@@ -203,7 +203,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         return;
       }
       const value = this.getValueFromPosition(event.clientX);
-      // Get the bounding rectangle of the range input element
       const rect = this.bar.getBoundingClientRect();
       // Pixels from the left of the range element
       const mousePosition = Math.max(0, event.clientX - rect.left);
