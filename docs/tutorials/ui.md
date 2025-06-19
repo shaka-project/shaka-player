@@ -276,7 +276,7 @@ override the UI language with the lang= parameter.
 #### Supported shortcuts
 
 * Spacebar: Play/Pause when the seek bar is selected.
-* Left/Right arrow on the seek bar: Seek backward/forward 5 seconds.
+* Left/Right arrow on the seek bar: Seek backward/forward 5 seconds. This seek distance can be configured with `keyboardSeekDistance`.
 * PageDown/PageUp on the seek bar: Seek backward/forward 60 seconds. This seek distance can be configured with `keyboardLargeSeekDistance`.
 * Home/End: Seek to the beginning/last seconds of the video.
 * c: Activate closed captions and subtitles if available. To hide captions and subtitles, activate C again.
