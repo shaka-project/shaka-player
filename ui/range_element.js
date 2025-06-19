@@ -286,13 +286,6 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     // Ensure the value stays within the min and max bounds
     value = Math.min(max, Math.max(min, value));
 
-    // Keep value within bounds.
-    if (value < min) {
-      value = min;
-    } else if (value > max) {
-      value = max;
-    }
-
     this.bar.value = value;
   }
 };
