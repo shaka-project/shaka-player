@@ -2860,6 +2860,7 @@ describe('Player', () => {
 
     it('chooses the configured text language and role at start', async () => {
       player.configure({
+        autoShowText: shaka.config.AutoShowText.IF_PREFERRED_TEXT_LANGUAGE,
         preferredTextLanguage: 'en',
         preferredTextRole: 'commentary',
       });
