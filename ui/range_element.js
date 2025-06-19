@@ -245,6 +245,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   }
 
   /**
+   * Converts an X position within the element into a range input value.
    * @param {number} clientX
    * @return {number}
    */
