@@ -1551,7 +1551,9 @@ shakaDemo.Main = class {
         manifestUri && !manifestUri.startsWith('offline:')) {
       mimeType = asset.mimeType;
     }
-    const itemConfig = this.defaultConfig_;
+    const itemConfig = /** @type {shaka.extern.PlayerConfiguration} */(
+      Object.assign({}, this.defaultConfig_)
+    );
     const assetConfig = asset.getConfiguration();
     shaka.util.PlayerConfiguration.mergeConfigObjects(
         itemConfig, this.desiredConfig_, itemConfig);
