@@ -607,7 +607,7 @@ describe('DashParser SegmentTemplate', () => {
       expect(firstSegment(variants[0]).getUris()).toEqual(
           ['http://example.com/segment-test1-1.m4s']);
 
-      expect(firstSegment(variants[0]).initSegmentReference.getUris()).toEqual(
+      expect(firstSegment(variants[1]).initSegmentReference.getUris()).toEqual(
           ['http://example.com/init-test1.mp4']);
       expect(firstSegment(variants[1]).getUris()).toEqual(
           ['http://example.com/segment-test1-1.m4s']);
@@ -652,7 +652,7 @@ describe('DashParser SegmentTemplate', () => {
       expect(firstSegment(variants[0]).getUris()).toEqual(
           ['http://example.com/segment-test1-1.m4s']);
 
-      expect(firstSegment(variants[0]).initSegmentReference.getUris()).toEqual(
+      expect(firstSegment(variants[1]).initSegmentReference.getUris()).toEqual(
           ['http://example.com/init-test1.mp4']);
       expect(firstSegment(variants[1]).getUris()).toEqual(
           ['http://example.com/segment-test1-1.m4s']);
