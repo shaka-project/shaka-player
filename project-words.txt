@@ -466,6 +466,13 @@ QUERYPARAM
 streamingkeydelivery
 TARGETDURATION
 
+# CMCD
+ttfb
+ttfbb
+ttlb
+cmsdd
+cmsds
+
 # other
 autoglottonym
 awesomplete
