@@ -93,7 +93,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         if (!this.controls.isOpaque()) {
           return;
         }
-        this.video.remote.prompt();
+        this.video.remote.prompt().catch(() => {});
       });
 
       this.eventManager.listen(this.video.remote, 'connect', () => {
