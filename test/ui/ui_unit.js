@@ -710,7 +710,7 @@ describe('UI', () => {
             });
             manifest.addVariant(1, (variant) => {
               variant.addAudio(1);
-              variant.bandwidth = 200000;
+              variant.bandwidth = 2500000;
             });
           });
 
@@ -725,7 +725,7 @@ describe('UI', () => {
         const qualityOptions =
             Array.from(qualityButtons).map((btn) => btn.innerText);
 
-        expect(qualityOptions).toEqual(['200 kbits/s', '100 kbits/s']);
+        expect(qualityOptions).toEqual(['2.5 Mbps', '100 Kbps']);
       });
 
       /**
