@@ -173,6 +173,7 @@ linksource
 longname
 
 # 3rd party
+apac
 APPSTB
 Bitcodin
 Brightcove
@@ -431,6 +432,7 @@ centery
 centerz
 coef
 cubemap
+equi
 equirectangular
 eyex
 eyey
@@ -475,6 +477,7 @@ cmsds
 
 # other
 autoglottonym
+avinfo
 awesomplete
 axinom
 beatle
@@ -499,6 +502,7 @@ malform
 masterlist
 mbps
 msdk
+onservicecallback
 productinfo
 servernum
 sintel

@@ -39,3 +39,13 @@ webapis.productinfo.is8KPanelSupported = function() {};
  */
 webapis.productinfo.isUdPanelSupported = function() {};
 
+
+/** @const */
+webapis.avinfo = {};
+
+
+/**
+ * @return {boolean}
+ */
+webapis.avinfo.isHdrTvSupport = function() {};
+

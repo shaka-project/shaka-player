@@ -81,7 +81,7 @@ describe('Transmuxer Player', () => {
         pending('Codec MP3 is not supported by the platform.');
       }
       // This tests is flaky in some Tizen devices, so we need omit it for now.
-      if (shaka.util.Platform.isTizen()) {
+      if (deviceDetected.getDeviceName() === 'Tizen') {
         pending('Disabled on Tizen.');
       }
       await player.load('/base/test/test/assets/hls-raw-mp3/playlist.m3u8');
@@ -177,7 +177,7 @@ describe('Transmuxer Player', () => {
         pending('Codec MP3 is not supported by the platform.');
       }
       // This tests is flaky in some Tizen devices, so we need omit it for now.
-      if (shaka.util.Platform.isTizen()) {
+      if (deviceDetected.getDeviceName() === 'Tizen') {
         pending('Disabled on Tizen.');
       }
       await player.load('/base/test/test/assets/hls-ts-mp3/manifest.m3u8');
@@ -249,6 +249,17 @@ describe('Transmuxer Player', () => {
       // Play for 8 seconds, but stop early if the video ends.  If it takes
       // longer than 45 seconds, fail the test.
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 45);
+
+      await player.unload();
+    });
+
+    it('H.264 in TS with b-frames', async () => {
+      await player.load('/base/test/test/assets/hls-ts-b-frames/index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Play for 30 seconds, but stop early if the video ends.
+      await waiter.waitForEndOrTimeout(video, 30);
 
       await player.unload();
     });
@@ -375,7 +386,7 @@ describe('Transmuxer Player', () => {
         pending('Codec MP3 is not supported by the platform.');
       }
       // This tests is flaky in some Tizen devices, so we need omit it for now.
-      if (shaka.util.Platform.isTizen()) {
+      if (deviceDetected.getDeviceName() === 'Tizen') {
         pending('Disabled on Tizen.');
       }
 
@@ -400,7 +411,7 @@ describe('Transmuxer Player', () => {
         pending('Codec AC-3 is not supported by the platform.');
       }
       // This tests is flaky in some Tizen devices, so we need omit it for now.
-      if (shaka.util.Platform.isTizen()) {
+      if (deviceDetected.getDeviceName() === 'Tizen') {
         pending('Disabled on Tizen.');
       }
 

@@ -22,6 +22,27 @@ goog.requireType('shaka.ui.Localization');
 shaka.ui.LanguageUtils = class {
   /**
    * @param {!Array<shaka.extern.AudioTrack>} tracks
+   * @return {boolean}
+   * @private
+   */
+  static areAudioTracksEqualExceptLabel_(tracks) {
+    const basicTrack = (track) => {
+      return {
+        codecs: track.codecs,
+        channelCount: track.channelCount,
+        language: track.language,
+        roles: track.roles,
+        spatialAudio: track.spatialAudio,
+      };
+    };
+    const reference = basicTrack(tracks[0]);
+    return tracks.every((track) => {
+      return JSON.stringify(basicTrack(track)) === JSON.stringify(reference);
+    });
+  }
+
+  /**
+   * @param {!Array<shaka.extern.AudioTrack>} tracks
    * @param {!HTMLElement} langMenu
    * @param {function(!shaka.extern.AudioTrack)} onTrackSelected
    * @param {boolean} updateChosen
@@ -41,6 +62,12 @@ shaka.ui.LanguageUtils = class {
     const selectedTrack = tracks.find((track) => {
       return track.active == true;
     });
+
+    if (tracks.length > 1 && tracks[0].label &&
+        trackLabelFormat != shaka.ui.Overlay.TrackLabelFormat.LABEL &&
+        shaka.ui.LanguageUtils.areAudioTracksEqualExceptLabel_(tracks)) {
+      trackLabelFormat = shaka.ui.Overlay.TrackLabelFormat.LABEL;
+    }
 
     /** @type {!Map<string, !Set<string>>} */
     const codecsByLanguage = new Map();
