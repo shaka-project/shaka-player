@@ -1,5 +1,27 @@
 # Changelog
 
+## [4.15.4](https://github.com/shaka-project/shaka-player/compare/v4.15.3...v4.15.4) (2025-06-23)
+
+
+### Bug Fixes
+
+* Avoid throw BUFFER_READ_OUT_OF_BOUNDS when not necessary ([#8753](https://github.com/shaka-project/shaka-player/issues/8753)) ([9931bea](https://github.com/shaka-project/shaka-player/commit/9931bea25e1f4a2a50e3160c9b09c9380f75be3a))
+* Close segment index when calling to unloadTextStream ([#8754](https://github.com/shaka-project/shaka-player/issues/8754)) ([72fd217](https://github.com/shaka-project/shaka-player/commit/72fd21799fb2464b321d7053e5f94b24643f0079))
+* **DASH:** Fix L3D streams (with k parameter) without $SubNumber$ ([#8770](https://github.com/shaka-project/shaka-player/issues/8770)) ([105c800](https://github.com/shaka-project/shaka-player/commit/105c8000ac12d2b91ac1ee9a49e03566551d1744))
+* **DASH:** Use the correct Representation ID for Uri substitution of media segments ([#8760](https://github.com/shaka-project/shaka-player/issues/8760)) ([6e8f434](https://github.com/shaka-project/shaka-player/commit/6e8f434646377cf20e0fc4736b1add1d77fa3921))
+* **Demo:** Fix keep custom config on page reload ([#8776](https://github.com/shaka-project/shaka-player/issues/8776)) ([5c5efb5](https://github.com/shaka-project/shaka-player/commit/5c5efb5083eecb4dfd44db5fed0d650f45feff4f))
+* **Demo:** Fix keep custom config on page reload ([#8777](https://github.com/shaka-project/shaka-player/issues/8777)) ([7d67366](https://github.com/shaka-project/shaka-player/commit/7d67366be594dda08e9d28bcff09b40b7394b0ac))
+* Don't cancel trick play near to live edge if rate is less than 1 ([#8772](https://github.com/shaka-project/shaka-player/issues/8772)) ([5d65576](https://github.com/shaka-project/shaka-player/commit/5d655766e333cc6f972172a86bbed5f2da520f1f))
+* Fix 4k stream support within browser env on Tizen ([#8764](https://github.com/shaka-project/shaka-player/issues/8764)) ([3eecf28](https://github.com/shaka-project/shaka-player/commit/3eecf284bd6e26d0c6fe75eac3b6c663367d6355))
+* **HLS:** mediaSequenceToStartTime isn't maintained correctly for AUDIO manifest ([#8784](https://github.com/shaka-project/shaka-player/issues/8784)) ([f8712a4](https://github.com/shaka-project/shaka-player/commit/f8712a481e0aacf839dde502ca717a6f2633a723))
+* Reset text visibility on unload ([#8775](https://github.com/shaka-project/shaka-player/issues/8775)) ([5e0c0e8](https://github.com/shaka-project/shaka-player/commit/5e0c0e86120eb7af3185e1240ceff1141f68e15a))
+* **UI:** Disable keyboard controls when there is not asset loaded ([#8766](https://github.com/shaka-project/shaka-player/issues/8766)) ([64bbde5](https://github.com/shaka-project/shaka-player/commit/64bbde5ea0246d084b72003382724f8e9946d216))
+* **UI:** Fix fullscreen doesn’t work on iPad (Edge/Chrome) ([#8757](https://github.com/shaka-project/shaka-player/issues/8757)) ([5dbac62](https://github.com/shaka-project/shaka-player/commit/5dbac6216738fef5aaa400f36c2e94448c9418ed))
+* **UI:** Fix PageDown and PageUp shortcuts ([#8769](https://github.com/shaka-project/shaka-player/issues/8769)) ([49b86ff](https://github.com/shaka-project/shaka-player/commit/49b86ff8e3b1c9120a21c3e9acadd37e9197b19d))
+* **UI:** Fix unhandled rejection on remote button ([#8778](https://github.com/shaka-project/shaka-player/issues/8778)) ([bf2f22c](https://github.com/shaka-project/shaka-player/commit/bf2f22cd62ab0977b354ff00b661c8089d916e64))
+* **UI:** Make the overflow menu visually smoother ([#8773](https://github.com/shaka-project/shaka-player/issues/8773)) ([14f93ba](https://github.com/shaka-project/shaka-player/commit/14f93ba274ed8336d4caaba9d30182771a499e93))
+* **UI:** The playback time displayed in the seek bar is different from currentTime when click ([#8758](https://github.com/shaka-project/shaka-player/issues/8758)) ([11f0b1f](https://github.com/shaka-project/shaka-player/commit/11f0b1f4cb3d20ef3a48ad1469d1f9884f9d6258))
+
 ## [4.15.3](https://github.com/shaka-project/shaka-player/compare/v4.15.2...v4.15.3) (2025-06-16)
 
 
