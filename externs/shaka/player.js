@@ -1385,6 +1385,7 @@ shaka.extern.xml.Node;
  *   manifestPreprocessor: function(!Element),
  *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
+ *   enableAudioGroups: boolean,
  *   multiTypeVariantsAllowed: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
  *   enableFastSwitching: boolean
@@ -1457,6 +1458,11 @@ shaka.extern.xml.Node;
  *   "sequence mode" (ignoring their internal timestamps).
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} enableAudioGroups * @property {boolean} enableAudioGroups
+ *   If set, audio streams will be grouped and filtered by their parent
+ *   adaptation set ID.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {boolean} multiTypeVariantsAllowed
  *   If true, the manifest parser will create variants that have multiple
  *   mimeTypes or codecs for video or for audio if there is no other choice.
