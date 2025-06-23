@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.14.20](https://github.com/shaka-project/shaka-player/compare/v4.14.19...v4.14.20) (2025-06-23)
+
+
+### Bug Fixes
+
+* Avoid throw BUFFER_READ_OUT_OF_BOUNDS when not necessary ([#8753](https://github.com/shaka-project/shaka-player/issues/8753)) ([c2affac](https://github.com/shaka-project/shaka-player/commit/c2afface3c2b7b45a7af7ff0b2c2656000dd53a5))
+* Close segment index when calling to unloadTextStream ([#8754](https://github.com/shaka-project/shaka-player/issues/8754)) ([7500d45](https://github.com/shaka-project/shaka-player/commit/7500d459eb412e446c0addaa7e0db1b16e8780c2))
+* **DASH:** Fix L3D streams (with k parameter) without $SubNumber$ ([#8770](https://github.com/shaka-project/shaka-player/issues/8770)) ([34c5ad7](https://github.com/shaka-project/shaka-player/commit/34c5ad7e01fc71feb8e7494900ae2d350e49bb39))
+* Don't cancel trick play near to live edge if rate is less than 1 ([#8772](https://github.com/shaka-project/shaka-player/issues/8772)) ([c427d0c](https://github.com/shaka-project/shaka-player/commit/c427d0c73d621631c8ea731a06acb9d640277f3c))
+* **HLS:** mediaSequenceToStartTime isn't maintained correctly for AUDIO manifest ([#8784](https://github.com/shaka-project/shaka-player/issues/8784)) ([073d37a](https://github.com/shaka-project/shaka-player/commit/073d37a9adeb94736db0cf2ec01e24e4dbde0126))
+* Reset text visibility on unload ([#8775](https://github.com/shaka-project/shaka-player/issues/8775)) ([94c9671](https://github.com/shaka-project/shaka-player/commit/94c9671bad062ec55e7d10397bb5ad71473f8b91))
+* **UI:** Disable keyboard controls when there is not asset loaded ([#8766](https://github.com/shaka-project/shaka-player/issues/8766)) ([36cefa0](https://github.com/shaka-project/shaka-player/commit/36cefa0136842f6ef01cd553b0402502fd7a0b25))
+* **UI:** Fix PageDown and PageUp shortcuts ([#8769](https://github.com/shaka-project/shaka-player/issues/8769)) ([19c99d2](https://github.com/shaka-project/shaka-player/commit/19c99d2d0236d81fbbaeca6b1c9caa9d4cc84f95))
+* **UI:** Fix unhandled rejection on remote button ([#8778](https://github.com/shaka-project/shaka-player/issues/8778)) ([8910819](https://github.com/shaka-project/shaka-player/commit/8910819588a1f8eed9defd8ae87d59e35648703a))
+
 ## [4.14.19](https://github.com/shaka-project/shaka-player/compare/v4.14.18...v4.14.19) (2025-06-16)
 
 
