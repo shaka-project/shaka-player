@@ -560,16 +560,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
    * @private
    */
   getTextFromBandwidth_(bandwidth) {
-    if (bandwidth > 1e6) {
-      const whole = Math.floor(bandwidth / 1e6);
-      const decimal = Math.floor((bandwidth / 1e5) % 10);
-
-      let bandwidthText = whole;
-      if (bandwidth < 1e7 && decimal > 0) {
-        bandwidthText += '.' + decimal;
-      }
-      bandwidthText += ' Mbps';
-      return bandwidthText;
+    if (bandwidth >= 1e6) {
+      return (bandwidth / 1e6).toFixed(1) + ' Mbps';
     } else {
       return Math.floor(bandwidth / 1e3) + ' Kbps';
     }
