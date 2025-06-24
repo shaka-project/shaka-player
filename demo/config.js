@@ -231,7 +231,8 @@ shakaDemo.Config = class {
             'manifest.ignoreSupplementalCodecs')
         .addNumberInput_('Override the Update time of the manifest',
             'manifest.updatePeriod')
-        .addBoolInput_('Ignore DRM Info', 'manifest.ignoreDrmInfo');
+        .addBoolInput_('Ignore DRM Info', 'manifest.ignoreDrmInfo')
+        .addBoolInput_('Enable Audio Groups', 'manifest.enableAudioGroups');
   }
 
   /** @private */

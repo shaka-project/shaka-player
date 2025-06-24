@@ -1643,7 +1643,8 @@ shaka.extern.MssManifestConfiguration;
  *   continueLoadingWhenPaused: boolean,
  *   ignoreSupplementalCodecs: boolean,
  *   updatePeriod: number,
- *   ignoreDrmInfo: boolean
+ *   ignoreDrmInfo: boolean,
+ *   enableAudioGroups: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1730,6 +1731,11 @@ shaka.extern.MssManifestConfiguration;
  *   system and contained no init data.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} enableAudioGroups
+ *   If set, audio streams will be grouped and filtered by their parent
+ *   adaptation set ID.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.ManifestConfiguration;
