@@ -379,6 +379,7 @@ shaka.ui.Overlay = class {
       showVideoCodec: true,
       castSenderUrl: 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
       enableKeyboardPlaybackControlsInWindow: false,
+      showVolumeBarAlways: false,
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause

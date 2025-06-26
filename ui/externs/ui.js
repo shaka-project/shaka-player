@@ -137,7 +137,8 @@ shaka.extern.UIQualityMarks;
  *   showAudioCodec: boolean,
  *   showVideoCodec: boolean,
  *   castSenderUrl: string,
- *   enableKeyboardPlaybackControlsInWindow: boolean
+ *   enableKeyboardPlaybackControlsInWindow: boolean,
+ *   showVolumeBarAlways: boolean
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -372,6 +373,11 @@ shaka.extern.UIQualityMarks;
  *   keyboard controls.
  *   Note: only taken into account when
  *   <code>enableKeyboardPlaybackControls</code> is true.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} showVolumeBarAlways
+ *   Always show the volume bar, even when the volume and mute bars are next to
+ *   each other.
  *   <br>
  *   Defaults to <code>false</code>.
  * @exportDoc
