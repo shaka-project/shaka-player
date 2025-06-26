@@ -33,7 +33,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.controls.getConfig();
 
-    if (!this.config_.showVolumeBarAlways) {
+    if (!this.config_.alwaysShowVolumeBar) {
       this.container.classList.add('shaka-volume-bar-container-allow-hiding');
     }
 
