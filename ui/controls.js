@@ -648,7 +648,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (video.webkitSupportsFullscreen &&
         this.config_.preferVideoFullScreenInVisionOS) {
       const device = shaka.device.DeviceFactory.getDevice();
-      if (device.getDeviceType() == shaka.device.IDevice.DeviceType.VR) {
+      if (device.getDeviceType() == shaka.device.IDevice.DeviceType.APPLE_VR) {
         return false;
       }
     }
