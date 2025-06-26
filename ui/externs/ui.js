@@ -351,7 +351,7 @@ shaka.extern.UIQualityMarks;
  *   experiences that are only allowed with the fullscreen of the video element
  *   itself.
  *   <br>
- *   Defaults to <code>false</code>.
+ *   Defaults to <code>true</code>.
  * @property {boolean} showAudioCodec
  *   Show the audio codec if the language has more than one audio codec.
  *   <br>

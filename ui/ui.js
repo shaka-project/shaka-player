@@ -374,7 +374,7 @@ shaka.ui.Overlay = class {
       displayInVrMode: false,
       defaultVrProjectionMode: 'equirectangular',
       setupMediaSession: true,
-      preferVideoFullScreenInVisionOS: false,
+      preferVideoFullScreenInVisionOS: true,
       showAudioCodec: true,
       showVideoCodec: true,
       castSenderUrl: 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
