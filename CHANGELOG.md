@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.14.21](https://github.com/shaka-project/shaka-player/compare/v4.14.20...v4.14.21) (2025-06-27)
+
+
+### Bug Fixes
+
+* **Demo:** Assign valid regex to asset name input ([#8815](https://github.com/shaka-project/shaka-player/issues/8815)) ([12b8396](https://github.com/shaka-project/shaka-player/commit/12b83969283b3524e2763bb026c388239dd722b4))
+* Fix reloadTextStream function when using text with init segments ([#8811](https://github.com/shaka-project/shaka-player/issues/8811)) ([3da6eb9](https://github.com/shaka-project/shaka-player/commit/3da6eb959891f3c0ed63e5a274020bd2b2a4dac0))
+* **HLS:** Fix presentation delay when there are not enough segments ([#8793](https://github.com/shaka-project/shaka-player/issues/8793)) ([e4b47b5](https://github.com/shaka-project/shaka-player/commit/e4b47b52c648af899c6741df418c862fdaf3ca8c))
+* **HLS:** Fix resync issues on Safari ([#8808](https://github.com/shaka-project/shaka-player/issues/8808)) ([dcd3ac2](https://github.com/shaka-project/shaka-player/commit/dcd3ac217338875847164bd05c2ff043fbf01c99))
+* **HLS:** Reset PTS/DTS reference at discontinuities when using TS ([#8794](https://github.com/shaka-project/shaka-player/issues/8794)) ([45fb3cb](https://github.com/shaka-project/shaka-player/commit/45fb3cb427ba2fe17a476c4ccc0500eb7909cfc7))
+* **UI:** Not show thumbnails over ad periods ([#8800](https://github.com/shaka-project/shaka-player/issues/8800)) ([24c3ff5](https://github.com/shaka-project/shaka-player/commit/24c3ff5852d92970ab0d8e140d34c4a8f0c4dce4))
+* **UI:** Prevent override box-sizing style on range elements ([#8810](https://github.com/shaka-project/shaka-player/issues/8810)) ([6a90272](https://github.com/shaka-project/shaka-player/commit/6a902722b627b536d8d9cc382d834490972a0a6b))
+
 ## [4.14.20](https://github.com/shaka-project/shaka-player/compare/v4.14.19...v4.14.20) (2025-06-23)
 
 
