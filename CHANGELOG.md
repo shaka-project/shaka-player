@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.15.5](https://github.com/shaka-project/shaka-player/compare/v4.15.4...v4.15.5) (2025-06-27)
+
+
+### Bug Fixes
+
+* Another Sony Bravia TV Playready Failure ([#8791](https://github.com/shaka-project/shaka-player/issues/8791)) ([3f6aaa3](https://github.com/shaka-project/shaka-player/commit/3f6aaa391379621046c634f59a2ed2afb15b62e3))
+* **Demo:** Assign valid regex to asset name input ([#8815](https://github.com/shaka-project/shaka-player/issues/8815)) ([075ee5d](https://github.com/shaka-project/shaka-player/commit/075ee5d263340dc9849165e6384522867c5fdbf9))
+* Fix Apple Vision Pro (Vision OS) detection and other VR devices detection ([#8805](https://github.com/shaka-project/shaka-player/issues/8805)) ([c9e878e](https://github.com/shaka-project/shaka-player/commit/c9e878e39a890f6b2d723cb258b3254dedefbc51))
+* Fix end-of-stream detection for VOD ([#8813](https://github.com/shaka-project/shaka-player/issues/8813)) ([f376d91](https://github.com/shaka-project/shaka-player/commit/f376d914b4f316d72b34e9d29707bbbaed653828))
+* Fix reloadTextStream function when using text with init segments ([#8811](https://github.com/shaka-project/shaka-player/issues/8811)) ([a71277a](https://github.com/shaka-project/shaka-player/commit/a71277a9f767f2b52da918c1656fe8905871406e))
+* **HLS:** Fix presentation delay when there are not enough segments ([#8793](https://github.com/shaka-project/shaka-player/issues/8793)) ([2f1c0ce](https://github.com/shaka-project/shaka-player/commit/2f1c0ce000a4b2ef647b507c7e44b8e83e365c49))
+* **HLS:** Fix resync issues on Safari ([#8808](https://github.com/shaka-project/shaka-player/issues/8808)) ([d27fc6c](https://github.com/shaka-project/shaka-player/commit/d27fc6c2740773f68e0ada024c82cd2c8e150f21))
+* **HLS:** Reset PTS/DTS reference at discontinuities when using TS ([#8794](https://github.com/shaka-project/shaka-player/issues/8794)) ([bc087d3](https://github.com/shaka-project/shaka-player/commit/bc087d3db0d3ff0433e3d4bddb61490cf1e56e2c))
+* **UI:** Fix volume slider control is not accessible by keyboard ([#8809](https://github.com/shaka-project/shaka-player/issues/8809)) ([d92b954](https://github.com/shaka-project/shaka-player/commit/d92b954d174e51dbc4b9eb0603099f2a52044236))
+* **UI:** Not show thumbnails over ad periods ([#8800](https://github.com/shaka-project/shaka-player/issues/8800)) ([e010290](https://github.com/shaka-project/shaka-player/commit/e010290c8e6647a48d806d3ae854bcb26cd98de9))
+* **UI:** Prevent override box-sizing style on range elements ([#8810](https://github.com/shaka-project/shaka-player/issues/8810)) ([9b6491c](https://github.com/shaka-project/shaka-player/commit/9b6491c10a30525f82ead57eebf5e36bb16ed0e6))
+
 ## [4.15.4](https://github.com/shaka-project/shaka-player/compare/v4.15.3...v4.15.4) (2025-06-23)
 
 
