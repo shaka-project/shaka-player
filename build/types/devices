@@ -8,3 +8,4 @@
 +../../lib/device/webkit_stb.js
 +../../lib/device/webos.js
 +../../lib/device/xbox.js
++../../lib/device/tivo_auto.js

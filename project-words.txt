@@ -173,6 +173,7 @@ linksource
 longname
 
 # 3rd party
+Andr0id
 apac
 APPSTB
 Bitcodin
@@ -201,6 +202,7 @@ Kaltura
 Livesim
 muxjs
 Nagra
+Optimus
 Playready
 Quicktime
 teppeis
