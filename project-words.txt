@@ -504,6 +504,7 @@ mbps
 msdk
 onservicecallback
 productinfo
+RMKSA
 servernum
 sintel
 stardate

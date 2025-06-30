@@ -218,14 +218,6 @@ module.exports = (config) => {
       },
       'node_modules/lcevc_dec.js/dist/lcevc_dec.min.js',
 
-      // EME encryption scheme polyfill, compiled into Shaka Player, but outside
-      // of the Closure deps system, so not in shaka-player.uncompiled.js.  This
-      // is specifically the compiled, minified, cross-browser build of it.  It
-      // is necessary to use the compiled version to avoid problems on older
-      // TVs.
-      // eslint-disable-next-line @stylistic/max-len
-      'node_modules/eme-encryption-scheme-polyfill/dist/eme-encryption-scheme-polyfill.js',
-
       // load closure base, the deps tree, and the uncompiled library
       'test/test/closure-boot.js',
       'node_modules/google-closure-library/closure/goog/base.js',
