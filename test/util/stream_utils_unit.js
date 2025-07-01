@@ -487,7 +487,7 @@ describe('StreamUtils', () => {
             /* usePersistentLicenses= */ false, /* srcEquals= */ false,
             /* preferredKeySystems= */ []);
         expect(decodingInfoSpy.calls.argsFor(0)[0].video.transferFunction)
-            .toBe('srgb');
+            .toBeUndefined();
         expect(decodingInfoSpy.calls.argsFor(1)[0].video.transferFunction)
             .toBe('pq');
         expect(decodingInfoSpy.calls.argsFor(2)[0].video.transferFunction)
