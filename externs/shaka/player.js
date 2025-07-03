@@ -2425,7 +2425,7 @@ shaka.extern.AdsConfiguration;
  *   Indicates the value in milliseconds from which a request is not
  *   considered cached.
  *   <br>
- *   Defaults to <code>20</code>.
+ *   Defaults to <code>5</code>.
  * @property {number} minTimeToSwitch
  *   Indicates the minimum time to change quality once the real bandwidth is
  *   available, in seconds. This time is only used on the first load.
