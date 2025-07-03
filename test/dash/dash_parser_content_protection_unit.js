@@ -1222,4 +1222,50 @@ describe('DashParser ContentProtection', () => {
       expect(actual).toBe('');
     });
   });
+
+  describe('getServerCertificateUri', () => {
+    it('valid dashif:Certurl node', () => {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        encryptionScheme: null,
+        node: strToXml([
+          '<test xmlns:dashif="https://dashif.org/CPS">',
+          '  <dashif:Certurl>www.example.com</dashif:Certurl>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getServerCertificateUri(input);
+      expect(actual).toBe('www.example.com');
+    });
+
+    it('dashif:Certurl without license url', () => {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        encryptionScheme: null,
+        node: strToXml([
+          '<test xmlns:dashif="https://dashif.org/CPS">',
+          '  <dashif:Certurl></dashif:Certurl>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getServerCertificateUri(input);
+      expect(actual).toBe('');
+    });
+
+    it('no dashif:Certurl node', () => {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        encryptionScheme: null,
+        node: strToXml('<test></test>'),
+      };
+      const actual = ContentProtection.getServerCertificateUri(input);
+      expect(actual).toBe('');
+    });
+  });
 });

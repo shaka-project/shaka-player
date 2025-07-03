@@ -202,15 +202,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         this.hideThumbnail_();
         return;
       }
+      const value = this.getValueFromPosition(event.clientX);
       const rect = this.bar.getBoundingClientRect();
-      const min = parseFloat(this.bar.min);
-      const max = parseFloat(this.bar.max);
       // Pixels from the left of the range element
       const mousePosition = Math.max(0, event.clientX - rect.left);
-      // Pixels per unit value of the range element.
-      const scale = (max - min) / rect.width;
-      // Mouse position in units, which may be outside the allowed range.
-      const value = Math.min(max, Math.round(min + scale * mousePosition));
       if (!this.player.getImageTracks().length) {
         this.hideThumbnail_();
         this.showTime_(mousePosition, value);
@@ -552,6 +547,20 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     if (value < 0) {
       value = 0;
     }
+    let isAdValue = false;
+    if (this.adCuePoints_.length) {
+      isAdValue = this.adCuePoints_.some((cuePoint) => {
+        if (!cuePoint.end) {
+          return false;
+        }
+        return value >= cuePoint.start && value <= cuePoint.end;
+      });
+    }
+    if (isAdValue) {
+      this.hideThumbnail_();
+      this.showTime_(pixelPosition, value);
+      return;
+    }
     const seekRange = this.player.seekRange();
     const playerValue = Math.max(Math.ceil(seekRange.start),
         Math.min(Math.floor(seekRange.end), value));
@@ -695,21 +704,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @private
    */
   timeFormatter_(totalSeconds) {
-    const secondsNumber = Math.round(totalSeconds);
-    const hours = Math.floor(secondsNumber / 3600);
-    let minutes = Math.floor((secondsNumber - (hours * 3600)) / 60);
-    let seconds = secondsNumber - (hours * 3600) - (minutes * 60);
-    if (seconds < 10) {
-      seconds = '0' + seconds;
-    }
-    if (hours > 0) {
-      if (minutes < 10) {
-        minutes = '0' + minutes;
-      }
-      return hours + ':' + minutes + ':' + seconds;
-    } else {
-      return minutes + ':' + seconds;
-    }
+    return shaka.ui.Utils.buildTimeString(totalSeconds, totalSeconds >= 3600);
   }
 };
 

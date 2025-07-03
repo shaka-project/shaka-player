@@ -1650,6 +1650,11 @@ describe('DrmEngine', () => {
               category: shaka.util.Error.Category.NETWORK,
               code: shaka.util.Error.Code.BAD_HTTP_STATUS,
               data: ['http://abc.drm/license', 403],
+            }),
+            jasmine.objectContaining({
+              sessionId: undefined,
+              sessionType: 'temporary',
+              initDataType: 'cenc',
             })));
       });
 
@@ -2569,7 +2574,8 @@ describe('DrmEngine', () => {
 
       const expected = Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.DRM,
-          shaka.util.Error.Code.LICENSE_REQUEST_FAILED, networkError));
+          shaka.util.Error.Code.LICENSE_REQUEST_FAILED, networkError,
+          containing({sessionType: 'persistent-license'})));
       await expectAsync(drmEngine.removeSession('abc'))
           .toBeRejectedWith(expected);
       expect(session1.update).not.toHaveBeenCalled();

@@ -137,7 +137,8 @@ shaka.extern.UIQualityMarks;
  *   showAudioCodec: boolean,
  *   showVideoCodec: boolean,
  *   castSenderUrl: string,
- *   enableKeyboardPlaybackControlsInWindow: boolean
+ *   enableKeyboardPlaybackControlsInWindow: boolean,
+ *   alwaysShowVolumeBar: boolean
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -351,7 +352,7 @@ shaka.extern.UIQualityMarks;
  *   experiences that are only allowed with the fullscreen of the video element
  *   itself.
  *   <br>
- *   Defaults to <code>false</code>.
+ *   Defaults to <code>true</code>.
  * @property {boolean} showAudioCodec
  *   Show the audio codec if the language has more than one audio codec.
  *   <br>
@@ -372,6 +373,11 @@ shaka.extern.UIQualityMarks;
  *   keyboard controls.
  *   Note: only taken into account when
  *   <code>enableKeyboardPlaybackControls</code> is true.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} alwaysShowVolumeBar
+ *   Always show the volume bar, even when the volume and mute bars are next to
+ *   each other.
  *   <br>
  *   Defaults to <code>false</code>.
  * @exportDoc

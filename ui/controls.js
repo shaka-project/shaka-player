@@ -648,7 +648,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (video.webkitSupportsFullscreen &&
         this.config_.preferVideoFullScreenInVisionOS) {
       const device = shaka.device.DeviceFactory.getDevice();
-      if (device.getDeviceType() == shaka.device.IDevice.DeviceType.VR) {
+      if (device.getDeviceType() == shaka.device.IDevice.DeviceType.APPLE_VR) {
         return false;
       }
     }
@@ -1815,7 +1815,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onMouseMove_(event);
     }
 
-    if (!this.config_.enableKeyboardPlaybackControls) {
+    if (!this.config_.enableKeyboardPlaybackControls ||
+        !this.player_.getAssetUri()) {
       return;
     }
 
@@ -1844,7 +1845,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case 'PageDown':
         // PageDown is like ArrowLeft, but has a larger jump distance, and does
         // nothing to volume.
-        if (this.seekBar_ && isSeekBar && keyboardSeekDistance > 0) {
+        if (this.seekBar_ && isSeekBar && keyboardLargeSeekDistance > 0) {
           event.preventDefault();
           this.seek_(this.seekBar_.getValue() - keyboardLargeSeekDistance);
         }
@@ -1852,7 +1853,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case 'PageUp':
         // PageDown is like ArrowRight, but has a larger jump distance, and does
         // nothing to volume.
-        if (this.seekBar_ && isSeekBar && keyboardSeekDistance > 0) {
+        if (this.seekBar_ && isSeekBar && keyboardLargeSeekDistance > 0) {
           event.preventDefault();
           this.seek_(this.seekBar_.getValue() + keyboardLargeSeekDistance);
         }
@@ -1868,6 +1869,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (this.seekBar_) {
           this.seek_(this.player_.seekRange().end);
         }
+        break;
+      case 'c':
+        this.player_.setTextTrackVisibility(!this.player_.isTextTrackVisible());
         break;
       case 'f':
         if (this.isFullScreenSupported()) {
@@ -1886,6 +1890,24 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.togglePiP();
         }
         break;
+      case '>': {
+        const index =
+            this.config_.playbackRates.indexOf(this.player_.getPlaybackRate());
+        if (index > -1 && (index + 1) < this.config_.playbackRates.length) {
+          this.player_.trickPlay(this.config_.playbackRates[index + 1],
+              /* useTrickPlayTrack= */ false);
+        }
+        break;
+      }
+      case '<': {
+        const index =
+            this.config_.playbackRates.indexOf(this.player_.getPlaybackRate());
+        if (index > -1 && (index - 1) >= 0) {
+          this.player_.trickPlay(this.config_.playbackRates[index - 1],
+              /* useTrickPlayTrack= */ false);
+        }
+        break;
+      }
       // Pause or play by pressing space on the seek bar.
       case ' ':
         if (isSeekBar) {

@@ -120,6 +120,7 @@ application:
     - `streaming.forceHTTP` has been renamed to `networking.forceHTTP` (deprecated in v4.15.0)
     - `streaming.forceHTTPS` has been renamed to `networking.forceHTTPS` (deprecated in v4.15.0)
     - `streaming.minBytesForProgressEvents` has been renamed to `networking.minBytesForProgressEvents` (deprecated in v4.15.0)
+    - `manifest.dash.enableAudioGroups` has been renamed to `manifest.enableAudioGroups`
 
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.

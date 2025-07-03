@@ -245,6 +245,45 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   }
 
   /**
+   * Converts an X position within the element into a range input value.
+   * @param {number} clientX
+   * @return {number}
+   */
+  getValueFromPosition(clientX) {
+    // Get the bounding rectangle of the range input element
+    const rect = this.bar.getBoundingClientRect();
+
+    // Parse the min, max, and step attributes from the input element
+    const min = parseFloat(this.bar.min);
+    const max = parseFloat(this.bar.max);
+    const step = parseFloat(this.bar.step) || 1;
+
+    // Define the effective range of the thumb movement
+    // 12 is the value of @thumb-size in range_elements.less. Note: for
+    // everything to work, this value has to be synchronized.
+    const thumbWidth = 12;
+    const minX = rect.left + thumbWidth / 2;
+    const maxX = rect.right - thumbWidth / 2;
+
+    // Clamp the touch X position to stay within the thumb's movement range
+    const clampedX = Math.max(minX, Math.min(maxX, clientX));
+
+    // Calculate the percentage of the track that the clamped X represents
+    const percent = (clampedX - minX) / (maxX - minX);
+
+    // Convert the percentage into a value within the input's range
+    let value = min + percent * (max - min);
+
+    // Round the value to the nearest step
+    value = Math.round((value - min) / step) * step + min;
+
+    // Ensure the value stays within the min and max bounds
+    value = Math.min(max, Math.max(min, value));
+
+    return value;
+  }
+
+  /**
    * Synchronize the touch position with the range value.
    * Comes in handy on iOS, where users have to grab the handle in order
    * to start seeking.
@@ -255,28 +294,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     event.preventDefault();
 
     const changedTouch = /** @type {TouchEvent} */ (event).changedTouches[0];
-    const rect = this.bar.getBoundingClientRect();
-    const min = parseFloat(this.bar.min);
-    const max = parseFloat(this.bar.max);
 
-    // Calculate the range value based on the touch position.
-
-    // Pixels from the left of the range element
-    const touchPosition = changedTouch.clientX - rect.left;
-
-    // Pixels per unit value of the range element.
-    const scale = (max - min) / rect.width;
-
-    // Touch position in units, which may be outside the allowed range.
-    let value = min + scale * touchPosition;
-
-    // Keep value within bounds.
-    if (value < min) {
-      value = min;
-    } else if (value > max) {
-      value = max;
-    }
-
-    this.bar.value = value;
+    this.bar.value = this.getValueFromPosition(changedTouch.clientX);
   }
 };

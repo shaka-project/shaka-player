@@ -832,7 +832,7 @@ shakaDemo.Custom = class {
 
       // Make a regex that will detect duplicates.
       input.required = true;
-      input.pattern = '^(?!( *';
+      let pattern = '^(?!( *';
       for (const asset of this.assets_) {
         if (asset == assetInProgress) {
           // If editing an existing asset, it's okay if the name doesn't change.
@@ -841,9 +841,10 @@ shakaDemo.Custom = class {
         const escape = (input) => {
           return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         };
-        input.pattern += '|' + escape(asset.name);
+        pattern += '|' + escape(asset.name);
       }
-      input.pattern += ')$).*$';
+      pattern += ')$).*$';
+      input.pattern = pattern;
     };
     const nameOnChange = (input) => {
       assetInProgress.name = input.value;
