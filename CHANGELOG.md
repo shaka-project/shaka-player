@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.14.22](https://github.com/shaka-project/shaka-player/compare/v4.14.21...v4.14.22) (2025-07-07)
+
+
+### Bug Fixes
+
+* Bail out on other decodingInfos when we found a preferred and supported one. ([#8829](https://github.com/shaka-project/shaka-player/issues/8829)) ([903fddc](https://github.com/shaka-project/shaka-player/commit/903fddc69a2c69cc5f39d2b260be10c0bb74bb83))
+* **DASH:** Always fit segments to period boundaries on VOD ([#8825](https://github.com/shaka-project/shaka-player/issues/8825)) ([ed222f5](https://github.com/shaka-project/shaka-player/commit/ed222f55c7b94f02c00e705db85cf37a71582e6a)), closes [#8774](https://github.com/shaka-project/shaka-player/issues/8774)
+* **DASH:** Consider codec profile when matching multi-period renditions ([#8842](https://github.com/shaka-project/shaka-player/issues/8842)) ([32a07e6](https://github.com/shaka-project/shaka-player/commit/32a07e6fdb95d4b9e47342acd4b43aaf36f11627))
+* Fix disable captions after load using src= on Safari ([#8841](https://github.com/shaka-project/shaka-player/issues/8841)) ([e238c90](https://github.com/shaka-project/shaka-player/commit/e238c904dc652475680b8385a37bf9035875af96))
+* **HLS:** Fix disableVideo when the context has muxed audio ([#8831](https://github.com/shaka-project/shaka-player/issues/8831)) ([93a29b8](https://github.com/shaka-project/shaka-player/commit/93a29b83e7fefc1b19d04bd21ceaa3a922980b27))
+* **LCEVC:** Create segmentIndex on makeAbortDecision_ ([#8838](https://github.com/shaka-project/shaka-player/issues/8838)) ([287901f](https://github.com/shaka-project/shaka-player/commit/287901f5ad9397b5914d6ecc4f9171cfca1684a1))
+* MCap improvements in order to support more MCap implementations ([#8821](https://github.com/shaka-project/shaka-player/issues/8821)) ([a844c20](https://github.com/shaka-project/shaka-player/commit/a844c20a843a5cae073f651d22dac7beba02015a))
+
+
+### Performance Improvements
+
+* Close media source only on audio/video updates ([#8826](https://github.com/shaka-project/shaka-player/issues/8826)) ([eafbd98](https://github.com/shaka-project/shaka-player/commit/eafbd9882a0d6e79f903b365b3319f897f19822f))
+
 ## [4.14.21](https://github.com/shaka-project/shaka-player/compare/v4.14.20...v4.14.21) (2025-06-27)
 
 
