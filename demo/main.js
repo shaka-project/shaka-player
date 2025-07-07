@@ -1280,19 +1280,6 @@ shakaDemo.Main = class {
     this.hideElement_(videoBar);
     this.video_.poster = shakaDemo.Main.mainPoster_;
 
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
-    if (this.video_.webkitDisplayingFullscreen) {
-      this.video_.webkitExitFullscreen();
-    }
-    if (document.pictureInPictureElement) {
-      document.exitPictureInPicture();
-    }
-    if (window.documentPictureInPicture &&
-        window.documentPictureInPicture.window) {
-      window.documentPictureInPicture.window.close();
-    }
     this.player_.unload();
 
     const queueManager = this.player_.getQueueManager();
@@ -1300,11 +1287,6 @@ shakaDemo.Main = class {
 
     // The currently-selected asset changed, so update asset cards.
     this.dispatchEventWithName_('shaka-main-selected-asset-changed');
-
-    // Unset media session title, but only if the browser supports that API.
-    if (navigator.mediaSession) {
-      navigator.mediaSession.metadata = null;
-    }
 
     // Remake hash, to change the current asset.
     this.remakeHash();
