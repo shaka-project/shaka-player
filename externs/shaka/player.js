@@ -2033,9 +2033,10 @@ shaka.extern.LiveSyncConfiguration;
  * @property {boolean} lowLatencyMode
  *   If <code>true</code>, low latency streaming mode is enabled. If
  *   lowLatencyMode is set to true, it changes the default config values for
- *   other things, see: docs/tutorials/config.md
+ *   other things, only on streams that supports low latency,
+ *   see: docs/tutorials/config.md
  *   <br>
- *   Defaults to <code>false</code>.
+ *   Defaults to <code>true</code>.
  * @property {boolean} preferNativeDash
  *   If true, prefer native DASH playback when possible, regardless of platform.
  *   <br>
