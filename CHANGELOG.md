@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.15.6](https://github.com/shaka-project/shaka-player/compare/v4.15.5...v4.15.6) (2025-07-07)
+
+
+### Bug Fixes
+
+* **ABR:** Fix abr switching in some cases ([#8836](https://github.com/shaka-project/shaka-player/issues/8836)) ([6c81c23](https://github.com/shaka-project/shaka-player/commit/6c81c2379589cfa1b1d65dedcf7c4c8946ad498d))
+* Bail out on other decodingInfos when we found a preferred and supported one. ([#8829](https://github.com/shaka-project/shaka-player/issues/8829)) ([aea55d3](https://github.com/shaka-project/shaka-player/commit/aea55d34edf30bfb0f2ae31b57f9759e896ac0d6))
+* **DASH:** Always fit segments to period boundaries on VOD ([#8825](https://github.com/shaka-project/shaka-player/issues/8825)) ([63719e6](https://github.com/shaka-project/shaka-player/commit/63719e6fb5e654cb0d3043e7db40e23bc8d10a2b)), closes [#8774](https://github.com/shaka-project/shaka-player/issues/8774)
+* **DASH:** Consider codec profile when matching multi-period renditions ([#8842](https://github.com/shaka-project/shaka-player/issues/8842)) ([9226511](https://github.com/shaka-project/shaka-player/commit/92265110a64923fc79013121a9e13d46debf4023))
+* Fix disable captions after load using src= on Safari ([#8841](https://github.com/shaka-project/shaka-player/issues/8841)) ([21d773d](https://github.com/shaka-project/shaka-player/commit/21d773de215a5b1c0dfeb49b795f046d8aff062b))
+* **HLS:** Fix disableVideo when the context has muxed audio ([#8831](https://github.com/shaka-project/shaka-player/issues/8831)) ([fd1a35e](https://github.com/shaka-project/shaka-player/commit/fd1a35e5dfd0292064c5438d99ee80035449de60))
+* **HLS:** Fix playback of content with mixed containers (mp4 and ts) ([#8837](https://github.com/shaka-project/shaka-player/issues/8837)) ([d503e88](https://github.com/shaka-project/shaka-player/commit/d503e8800fa126235e345257d05027c8150f064e))
+* **HLS:** Fix preload initial variant ([#8835](https://github.com/shaka-project/shaka-player/issues/8835)) ([c56c350](https://github.com/shaka-project/shaka-player/commit/c56c350402f72df45c1e86fbfcd335ed3c5f8f72)), closes [#8830](https://github.com/shaka-project/shaka-player/issues/8830)
+* **LCEVC:** Create segmentIndex on makeAbortDecision_ ([#8838](https://github.com/shaka-project/shaka-player/issues/8838)) ([844e7ce](https://github.com/shaka-project/shaka-player/commit/844e7ce7b82725865bd009d1706d2e84aa54ee68))
+* MCap improvements in order to support more MCap implementations ([#8821](https://github.com/shaka-project/shaka-player/issues/8821)) ([e8d544e](https://github.com/shaka-project/shaka-player/commit/e8d544ee2c3ca1f9ae26882fbd8c41ea3ee4c295))
+
+
+### Performance Improvements
+
+* Close media source only on audio/video updates ([#8826](https://github.com/shaka-project/shaka-player/issues/8826)) ([f78e6ae](https://github.com/shaka-project/shaka-player/commit/f78e6ae60b97b8dca91bdb8f9a4fb93718fbad7d))
+
 ## [4.15.5](https://github.com/shaka-project/shaka-player/compare/v4.15.4...v4.15.5) (2025-06-27)
 
 
