@@ -4157,7 +4157,8 @@ describe('Player', () => {
 
       await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(abrManager.setVariants).toHaveBeenCalled();
-      const variants = abrManager.setVariants.calls.argsFor(0)[0];
+      const lastCallIndex = abrManager.setVariants.calls.count() - 1;
+      const variants = abrManager.setVariants.calls.argsFor(lastCallIndex)[0];
       // We've already chosen codecs, so only 3 tracks should remain.
       expect(variants.length).toBe(3);
       // They should be the low-bandwidth ones.
