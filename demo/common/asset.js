@@ -502,16 +502,6 @@ const ShakaDemoAssetInfo = class {
     networkingEngine.clearAllRequestFilters();
     networkingEngine.clearAllResponseFilters();
 
-    if (this.licenseRequestHeaders.size) {
-      /** @type {!shaka.extern.RequestFilter} */
-      const filter = (requestType, request, context) => {
-        return this.addLicenseRequestHeaders_(this.licenseRequestHeaders,
-            requestType,
-            request);
-      };
-      networkingEngine.registerRequestFilter(filter);
-    }
-
     if (this.requestFilter) {
       networkingEngine.registerRequestFilter(this.requestFilter);
     }
@@ -546,12 +536,19 @@ const ShakaDemoAssetInfo = class {
       config.drm.servers = config.drm.servers || {};
       licenseServers.forEach((value, key) => {
         config.drm.servers[key] = value;
-        if (this.certificateUri) {
+        if (this.certificateUri || this.licenseRequestHeaders.size) {
           if (!config.drm.advanced[key]) {
             config.drm.advanced[key] =
                 ShakaDemoAssetInfo.defaultAdvancedDrmConfig();
+          }
+          if (this.certificateUri) {
             config.drm.advanced[key].serverCertificateUri =
                 this.certificateUri;
+          }
+          if (this.licenseRequestHeaders.size) {
+            this.licenseRequestHeaders.forEach((headerValue, headerName) => {
+              config.drm.advanced[key].headers[headerName] = headerValue;
+            });
           }
         }
       });
@@ -576,24 +573,6 @@ const ShakaDemoAssetInfo = class {
     }
 
     return config;
-  }
-
-  /**
-   * @param {!Map<string, string>} headers
-   * @param {shaka.net.NetworkingEngine.RequestType} requestType
-   * @param {shaka.extern.Request} request
-   * @private
-   */
-  addLicenseRequestHeaders_(headers, requestType, request) {
-    if (requestType != shaka.net.NetworkingEngine.RequestType.LICENSE) {
-      return;
-    }
-
-    // Add these to the existing headers.  Do not clobber them!
-    // For PlayReady, there will already be headers in the request.
-    headers.forEach((value, key) => {
-      request.headers[key] = value;
-    });
   }
 
   /** @return {boolean} */
