@@ -122,6 +122,7 @@ goog.require('shaka.ui.RewindButton');
 goog.require('shaka.ui.SaveVideoFrameButton');
 goog.require('shaka.ui.SkipAdButton');
 goog.require('shaka.ui.SkipNextButton');
+goog.require('shaka.ui.SkipPreviousButton');
 goog.require('shaka.ui.SmallPlayButton');
 goog.require('shaka.ui.Spacer');
 goog.require('shaka.ui.StatisticsButton');

@@ -163,6 +163,10 @@
     "description": "Label for a button used to skip next.",
     "message": "Next"
   },
+  "SKIP_PREVIOUS": {
+    "description": "Label for a button used to skip previous.",
+    "message": "Previous"
+  },
   "STATISTICS": {
     "description": "Label for a button that displays statistics of the video.",
     "message": "Statistics"
