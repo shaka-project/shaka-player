@@ -564,10 +564,6 @@ const ShakaDemoAssetInfo = class {
       });
     }
 
-    if (this.features.includes(shakaAssets.Feature.LOW_LATENCY)) {
-      config.streaming.lowLatencyMode = true;
-    }
-
     // Windows Edge only support persistent licenses with
     // `com.microsoft.playready.recommendation` keySystem.
     if (forStorage &&
