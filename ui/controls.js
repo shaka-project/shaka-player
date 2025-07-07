@@ -231,9 +231,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       if (this.isPiPEnabled()) {
         this.togglePiP();
       }
-      if (this.config_.setupMediaSession && navigator.mediaSession) {
-        navigator.mediaSession.metadata = null;
-      }
     });
   }
 
