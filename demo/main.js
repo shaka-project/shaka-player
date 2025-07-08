@@ -907,44 +907,8 @@ shakaDemo.Main = class {
   getLastAssetFromHash_() {
     const params = this.getParams_();
 
-    const manifest = params.get('asset');
     const assetBase64 = params.get('assetBase64');
-    if (manifest) {
-      const adTagUri = params.get('adTagUri');
-      // See if it's a default asset.
-      for (const asset of shakaAssets.testAssets) {
-        if (asset.manifestUri == manifest && asset.adTagUri == adTagUri) {
-          return asset;
-        }
-      }
-
-      // See if it's a custom asset saved here.
-      for (const asset of shakaDemoCustom.assets()) {
-        if (asset.manifestUri == manifest) {
-          return asset;
-        }
-      }
-
-      // Construct a new asset.
-      const asset = new ShakaDemoAssetInfo(
-          /* name= */ 'loaded asset',
-          /* iconUri= */ '',
-          /* manifestUri= */ manifest,
-          /* source= */ shakaAssets.Source.CUSTOM);
-      if (params.has('license')) {
-        let drmSystems = shakaDemo.Main.commonDrmSystems;
-        if (params.has('drmSystem')) {
-          drmSystems = [params.get('drmSystem')];
-        }
-        for (const drmSystem of drmSystems) {
-          asset.addLicenseServer(drmSystem, params.get('license'));
-        }
-      }
-      if (params.has('certificate')) {
-        asset.addCertificateUri(params.get('certificate'));
-      }
-      return asset;
-    } else if (assetBase64) {
+    if (assetBase64) {
       // See if it's a default asset.
       for (const asset of shakaAssets.testAssets) {
         if (asset.toBase64() == assetBase64) {
