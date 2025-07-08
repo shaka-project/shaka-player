@@ -1238,19 +1238,6 @@ shakaDemo.Main = class {
     this.hideElement_(videoBar);
     this.video_.poster = shakaDemo.Main.mainPoster_;
 
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
-    if (this.video_.webkitDisplayingFullscreen) {
-      this.video_.webkitExitFullscreen();
-    }
-    if (document.pictureInPictureElement) {
-      document.exitPictureInPicture();
-    }
-    if (window.documentPictureInPicture &&
-        window.documentPictureInPicture.window) {
-      window.documentPictureInPicture.window.close();
-    }
     this.player_.unload();
 
     const queueManager = this.player_.getQueueManager();

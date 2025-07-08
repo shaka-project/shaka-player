@@ -223,6 +223,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.eventManager_.listen(this.player_, 'texttrackvisibility', () => {
       this.computeShakaTextContainerSize_();
     });
+
+    this.eventManager_.listen(this.player_, 'unloading', () => {
+      if (this.isFullScreenEnabled()) {
+        this.exitFullScreen_();
+      }
+      if (this.isPiPEnabled()) {
+        this.togglePiP();
+      }
+    });
   }
 
   /**
