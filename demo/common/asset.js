@@ -120,15 +120,6 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * @param {string} certificateUri
-   * @return {!ShakaDemoAssetInfo}
-   */
-  addCertificateUri(certificateUri) {
-    this.certificateUri = certificateUri;
-    return this;
-  }
-
-  /**
    * A sort comparator for comparing two messages, ignoring case.
    * @param {string} a
    * @param {string} b
