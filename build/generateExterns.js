@@ -496,7 +496,7 @@ function createExternMethod(node) {
     assert.equal(
         node.key.type, 'MemberExpression',
         'Unexpected exported member name in exported class!');
-    methodString += `['${id}']`;
+    methodString += `[${id}]`;
   }
   methodString += '(' + params.join(', ') + ') {}';
   return methodString;
