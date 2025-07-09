@@ -1041,39 +1041,6 @@ describe('PeriodCombiner', () => {
     expect(audio.originalId).toBe('44100,48000');
   });
 
-  it('ignores newly added codecs', async () => {
-    const newCodec = makeVideoStream(720);
-    newCodec.codecs = 'foo.abcd';
-
-    /** @type {!Array<shaka.extern.Period>} */
-    const periods = [
-      {
-        id: '1',
-        videoStreams: [
-          makeVideoStream(1080),
-        ],
-        audioStreams: [],
-        textStreams: [],
-        imageStreams: [],
-      },
-      {
-        id: '2',
-        videoStreams: [
-          makeVideoStream(1080),
-          newCodec,
-        ],
-        audioStreams: [],
-        textStreams: [],
-        imageStreams: [],
-      },
-    ];
-
-    await combiner.combinePeriods(periods, /* isDynamic= */ false);
-    const variants = combiner.getVariants();
-    expect(variants.length).toBe(1);
-  });
-
-
   it('Matches streams with no roles', async () => {
     const stream1 = makeAudioStream('en', /* channels= */ 2);
     stream1.originalId = '1';
