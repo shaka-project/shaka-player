@@ -53,7 +53,10 @@ shaka.extern.Transmuxer = class {
    *   null for init segments
    * @param {number} duration
    * @param {string} contentType
-   * @return {!Promise<(!Uint8Array|!shaka.extern.TransmuxerOutput)>}
+   * @return {!Promise<(!Uint8Array|!shaka.extern.TransmuxerOutput)>} If you
+   * only want to return the result, use Uint8Array, if you want to separate
+   * the initialization segment and the data segment, you have to use
+   * shaka.extern.TransmuxerOutput
    */
   transmux(data, stream, reference, duration, contentType) {}
 };
