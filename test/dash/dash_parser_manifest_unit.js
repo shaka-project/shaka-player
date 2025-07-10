@@ -3076,22 +3076,22 @@ describe('DashParser Manifest', () => {
       expect(firstPartialReference.startTime).toBe(0);
       expect(firstPartialReference.endTime).toBe(0.5);
       expect(firstPartialReference.getUris())
-          .toEqual(['dummy://foo/l-1-p1.mp4']);
+          .toEqual(['dummy://foo/l-1-p0.mp4']);
       const secondPartialReference = firstReference.partialReferences[1];
       expect(secondPartialReference.startTime).toBe(0.5);
       expect(secondPartialReference.endTime).toBe(1);
       expect(secondPartialReference.getUris())
-          .toEqual(['dummy://foo/l-1-p2.mp4']);
+          .toEqual(['dummy://foo/l-1-p1.mp4']);
       const thirdPartialReference = firstReference.partialReferences[2];
       expect(thirdPartialReference.startTime).toBe(1);
       expect(thirdPartialReference.endTime).toBe(1.5);
       expect(thirdPartialReference.getUris())
-          .toEqual(['dummy://foo/l-1-p3.mp4']);
+          .toEqual(['dummy://foo/l-1-p2.mp4']);
       const fourthPartialReference = firstReference.partialReferences[3];
       expect(fourthPartialReference.startTime).toBe(1.5);
       expect(fourthPartialReference.endTime).toBe(2);
       expect(fourthPartialReference.getUris())
-          .toEqual(['dummy://foo/l-1-p4.mp4']);
+          .toEqual(['dummy://foo/l-1-p3.mp4']);
     });
 
     it('with cadence equal to 1', async () => {
