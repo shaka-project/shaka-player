@@ -5,6 +5,8 @@
  */
 
 describe('Player Cross Boundary', () => {
+  const Util = shaka.test.Util;
+
   /** @type {!HTMLVideoElement} */
   let video;
   /** @type {!shaka.Player} */
@@ -136,6 +138,49 @@ describe('Player Cross Boundary', () => {
       // When we seek back and we still have a readyState > 0, we did not
       // reset MSE.
       expect(video.readyState).toBeGreaterThan(0);
+    });
+
+    it('supports Live to VOD', async () => {
+      if (!await Util.isTypeSupported('video/mp4; codecs="avc1.64001f"',
+          /* width= */ 1280, /* height= */ 720)) {
+        pending('Codec avc1.64001f is not supported by the platform.');
+      }
+      const netEngine = player.getNetworkingEngine();
+      const startTime = Date.now();
+      netEngine.registerRequestFilter((type, request) => {
+        if (type != shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+          return;
+        }
+        // Simulate a live stream by providing different manifests over time.
+        const time = (Date.now() - startTime) / 1000;
+        const manifestNumber = Math.min(5, Math.floor(0.5 + time / 2));
+        request.uris = [
+          '/base/test/test/assets/7401/dash_' + manifestNumber + '.mpd',
+        ];
+        console.log('getting manifest', request.uris);
+      });
+      player.configure('streaming.bufferBehind', 1);
+      player.configure('streaming.bufferBehind', 1);
+      player.configure('streaming.evictionGoal', 1);
+      // Play the stream .
+      await player.load('/base/test/test/assets/7401/dash_0.mpd', 1020);
+      await video.play();
+      video.pause();
+      // Wait for the stream to be over.
+      /** @type {shaka.test.Waiter} */
+      const waiter = new shaka.test.Waiter(eventManager)
+          .setPlayer(player)
+          .timeoutAfter(40)
+          .failOnTimeout(true);
+      // wait for Dynamic to static
+      await waiter.waitUntilVodTransition(video);
+      expect(player.isLive()).toBe(false);
+      // set the playback to 1020 in middle of the second period
+      video.currentTime = 1020;
+      await video.play();
+      await waiter.waitForEnd(video);
+      // The stream should have transitioned to VOD by now.
+      expect(player.isLive()).toBe(false);
     });
   });
 });
