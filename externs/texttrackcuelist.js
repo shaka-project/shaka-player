@@ -24,3 +24,6 @@
  * @suppress {duplicate}
  */
 var TextTrackCueList = function() {};
+
+/** @override */
+TextTrackCueList.prototype[Symbol.iterator] = function() {};

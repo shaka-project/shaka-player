@@ -490,7 +490,15 @@ function createExternMethod(node) {
   if (node.static) {
     methodString += 'static ';
   }
-  methodString += id + '(' + params.join(', ') + ') {}';
+  if (node.key.type === 'Identifier') {
+    methodString += id;
+  } else {
+    assert.equal(
+        node.key.type, 'MemberExpression',
+        'Unexpected exported member name in exported class!');
+    methodString += `[${id}]`;
+  }
+  methodString += '(' + params.join(', ') + ') {}';
   return methodString;
 }
 
@@ -566,6 +574,11 @@ function createExternAssignment(name, node, alwaysIncludeConstructor) {
           // constructor in some situations.
           if (member.key.name == 'constructor' && alwaysIncludeConstructor) {
             // Fall through and generate externs.
+          } else if (member.key.type === 'MemberExpression' &&
+               getIdentifierString(member.key) === 'Symbol.iterator') {
+            // Symbol.iterator is needed to implement the Iterable interface for
+            // Closure Compiler, so always assume it is exported.
+            // Closure Compiler does not allow putting an explicit @export.
           } else {
             // Skip extern generation.
             continue;
