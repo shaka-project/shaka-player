@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd" xmlns:cenc="urn:mpeg:cenc:2013" profiles="urn:mpeg:dash:profile:isoff-on-demand:2011" minBufferTime="PT2S" type="static">
+  <Period id="0" duration="PT2.06874S">
+    <AdaptationSet id="00" contentType="video" maxWidth="192" maxHeight="144" frameRate="1000000/33000" par="4:3">
+      <Representation id="01" bandwidth="78658" codecs="vp9" mimeType="video/webm" sar="1:1" width="192" height="144">
+        <BaseURL>first-period.webm</BaseURL>
+        <SegmentBase indexRange="294-312" timescale="1000000">
+          <Initialization range="0-293"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+  <Period id="1" duration="PT2.13539S">
+    <AdaptationSet id="11" contentType="video" maxWidth="192" maxHeight="144" frameRate="11988/400" subsegmentAlignment="true" par="4:3">
+      <Representation id="15" bandwidth="71954" codecs="avc1.42c01e" mimeType="video/mp4" sar="1:1" width="192" height="144">
+        <BaseURL>second-period.mp4</BaseURL>
+        <SegmentBase indexRange="806-849" timescale="11988">
+          <Initialization range="0-805"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+  <Period id="2" duration="PT0.700701S">
+    <AdaptationSet id="21" contentType="video" maxWidth="192" maxHeight="144" frameRate="1000000/33000" par="4:3">
+      <Representation id="23" bandwidth="122332" codecs="vp9" mimeType="video/webm" sar="1:1" width="192" height="144">
+        <BaseURL>third-period.webm</BaseURL>
+        <SegmentBase indexRange="294-312" timescale="1000000">
+          <Initialization range="0-293"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>
