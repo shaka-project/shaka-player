@@ -100,7 +100,7 @@ describe('DashParser', () => {
     await player.unload();
   });
 
-  it('support multi type variants', async() => {
+  it('support multi type variants', async () => {
     if (!await Util.isTypeSupported('video/webm; codecs="vp9"')) {
       pending('Codec VP9 is not supported by the platform.');
     }
@@ -111,5 +111,5 @@ describe('DashParser', () => {
     await waiter.timeoutAfter(30).waitForEnd(video);
 
     await player.unload();
-  })
+  });
 });
