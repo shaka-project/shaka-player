@@ -5,8 +5,6 @@
  */
 
 describe('Player Cross Boundary', () => {
-  const Util = shaka.test.Util;
-
   /** @type {!HTMLVideoElement} */
   let video;
   /** @type {!shaka.Player} */
