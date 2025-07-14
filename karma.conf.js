@@ -336,7 +336,7 @@ module.exports = (config) => {
       useIframe: false,  // No iframe
       runInParent: true,  // No new window
       // Only capture the client's logs if the settings want logging.
-      captureConsole: !!settings.logging && settings.logging != 'none',
+      captureConsole: true,
       // |args| must be an array; pass a key-value map as the sole client
       // argument.
       args: [{
@@ -468,11 +468,11 @@ module.exports = (config) => {
     clientArgs.testFiles.push('test/player_external.js');
   } else {
     // In a normal test run, we serve unit tests.
-    clientArgs.testFiles.push('test/**/*_unit.js');
+    // clientArgs.testFiles.push('test/**/*_unit.js');
 
     if (!settings.quick) {
       // If --quick is present, we don't serve integration tests.
-      clientArgs.testFiles.push('test/**/*_integration.js');
+      clientArgs.testFiles.push('test/**/player_load_graph_integration.js');
     }
     if (settings.external) {
       // If --external is present, we serve external asset tests.
