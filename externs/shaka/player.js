@@ -1385,7 +1385,6 @@ shaka.extern.xml.Node;
  *   manifestPreprocessor: function(!Element),
  *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
- *   multiTypeVariantsAllowed: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
  *   enableFastSwitching: boolean
  * }}
@@ -1457,17 +1456,6 @@ shaka.extern.xml.Node;
  *   "sequence mode" (ignoring their internal timestamps).
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {boolean} multiTypeVariantsAllowed
- *   If true, the manifest parser will create variants that have multiple
- *   mimeTypes or codecs for video or for audio if there is no other choice.
- *   Meant for content where some periods are only available in one mimeType or
- *   codec, and other periods are only available in a different mimeType or
- *   codec. For example, a stream with baked-in ads where the audio codec does
- *   not match the main content.
- *   Might result in undesirable behavior if mediaSource.codecSwitchingStrategy
- *   is not set to SMOOTH.
- *   <br>
- *   Defaults to true if SMOOTH codec switching is supported, RELOAD overwise.
  * @property {boolean} useStreamOnceInPeriodFlattening
  *   If period combiner is used, this option ensures every stream is used
  *   only once in period flattening. It speeds up underlying algorithm
