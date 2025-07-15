@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.15.7](https://github.com/shaka-project/shaka-player/compare/v4.15.6...v4.15.7) (2025-07-15)
+
+
+### Bug Fixes
+
+* Allow preload segments when we discard the reference by cross boundary logic ([#8862](https://github.com/shaka-project/shaka-player/issues/8862)) ([1c1bffe](https://github.com/shaka-project/shaka-player/commit/1c1bffe78786f80dbead774306aaf5ffb08f84c6))
+* **DASH:** Change start number for SubNumber templating, based on DASH 6th edition ([#8860](https://github.com/shaka-project/shaka-player/issues/8860)) ([8c6f41b](https://github.com/shaka-project/shaka-player/commit/8c6f41b93068e0e8c269025934bddd33cc15707b)), closes [#8859](https://github.com/shaka-project/shaka-player/issues/8859)
+* **DASH:** Update timeline on PTO change ([#8869](https://github.com/shaka-project/shaka-player/issues/8869)) ([6850b43](https://github.com/shaka-project/shaka-player/commit/6850b434772f18a16d36baf1d4db53d2eaa48120))
+* Fix selectAudioTrack when using src= ([#8857](https://github.com/shaka-project/shaka-player/issues/8857)) ([996cdd8](https://github.com/shaka-project/shaka-player/commit/996cdd8c6135a7afe27de83f180cd41d92777603))
+* Fix Tizen 3 default cross-boundary strategy ([#8850](https://github.com/shaka-project/shaka-player/issues/8850)) ([d5aa1e0](https://github.com/shaka-project/shaka-player/commit/d5aa1e0c0dd789b3969c28b300d2786458c43ff9))
+* Live to VOD discards the wrong segments when crossBoundaryStrategy is not KEEP ([#8863](https://github.com/shaka-project/shaka-player/issues/8863)) ([6664fef](https://github.com/shaka-project/shaka-player/commit/6664fefe182ee28e2ac29e7e5cf1002f179c99cf))
+* **UI:** Exit from Fullscreen and PiP when unloading ([#8848](https://github.com/shaka-project/shaka-player/issues/8848)) ([86ce3ee](https://github.com/shaka-project/shaka-player/commit/86ce3ee16cace11e62845313500c679063161db5))
+
+
+### Performance Improvements
+
+* **DRM:** Run expiration timer only when EME is in use ([#8853](https://github.com/shaka-project/shaka-player/issues/8853)) ([0568e61](https://github.com/shaka-project/shaka-player/commit/0568e6145fdb3e08c0e152a2f0cc93ea813f74fa))
+
 ## [4.15.6](https://github.com/shaka-project/shaka-player/compare/v4.15.5...v4.15.6) (2025-07-07)
 
 
