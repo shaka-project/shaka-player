@@ -46,8 +46,10 @@ describe('SegmentPrefetch', () => {
               bytes,
           ),
         );
+    const shouldPrefetchNextSegment = () => true;
     segmentPrefetch = new shaka.media.SegmentPrefetch(
-        3, stream, Util.spyFunc(fetchDispatcher), /* reverse= */ false);
+        3, stream, Util.spyFunc(fetchDispatcher), /* reverse= */ false,
+        shouldPrefetchNextSegment);
   });
 
   describe('prefetchSegmentsByTime', () => {
