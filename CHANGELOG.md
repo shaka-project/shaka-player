@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.14.23](https://github.com/shaka-project/shaka-player/compare/v4.14.22...v4.14.23) (2025-07-15)
+
+
+### Bug Fixes
+
+* Allow preload segments when we discard the reference by cross boundary logic ([#8862](https://github.com/shaka-project/shaka-player/issues/8862)) ([be5e6d5](https://github.com/shaka-project/shaka-player/commit/be5e6d5322ea15abe9fcb75ae5be7fcb59eb2f53))
+* **DASH:** Update timeline on PTO change ([#8869](https://github.com/shaka-project/shaka-player/issues/8869)) ([83d22a3](https://github.com/shaka-project/shaka-player/commit/83d22a339d50d555fbea6392537bc1682efd74db))
+* Fix selectAudioTrack when using src= ([#8857](https://github.com/shaka-project/shaka-player/issues/8857)) ([be22585](https://github.com/shaka-project/shaka-player/commit/be2258510ed71197e8b4aefb8f56c80d8408d7d5))
+* Live to VOD discards the wrong segments when crossBoundaryStrategy is not KEEP ([#8863](https://github.com/shaka-project/shaka-player/issues/8863)) ([20feb0f](https://github.com/shaka-project/shaka-player/commit/20feb0fc332f34a47978a8b0fa5b4ac8e1e9e4b7))
+
+
+### Performance Improvements
+
+* **DRM:** Run expiration timer only when EME is in use ([#8853](https://github.com/shaka-project/shaka-player/issues/8853)) ([de03da5](https://github.com/shaka-project/shaka-player/commit/de03da54fe1b7b5d1948a274e23fdfed2920ae56))
+
 ## [4.14.22](https://github.com/shaka-project/shaka-player/compare/v4.14.21...v4.14.22) (2025-07-07)
 
 
