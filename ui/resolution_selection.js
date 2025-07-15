@@ -159,7 +159,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
         this.autoQuality.textContent = this.getResolutionLabel_(track, tracks);
       } else if (track.bandwidth) {
         this.autoQuality.textContent =
-            Math.round(track.bandwidth / 1000) + ' kbits/s';
+            this.getTextFromBandwidth_(track.bandwidth);
       } else {
         this.autoQuality.textContent = 'Unknown';
       }
@@ -414,7 +414,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       if (track.height && track.width) {
         span.textContent = this.getResolutionLabel_(track, tracks);
       } else if (track.bandwidth) {
-        span.textContent = Math.round(track.bandwidth / 1000) + ' kbits/s';
+        span.textContent = this.getTextFromBandwidth_(track.bandwidth);
       } else {
         span.textContent = 'Unknown';
       }
@@ -476,7 +476,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     if (track.hdr == 'PQ' || track.hdr == 'HLG') {
       text += ' HDR';
     }
-    if (track.videoLayout == 'CH-STEREO') {
+    const videoLayout = track.videoLayout || '';
+    if (videoLayout.includes('CH-STEREO')) {
       text += ' 3D';
     }
     const basicResolutionComparison = (firstTrack, secondTrack) => {
@@ -495,8 +496,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
             otherTrack.bandwidth == track.bandwidth;
       });
       if (!hasDuplicateBandwidth) {
-        const bandwidth = track.bandwidth;
-        text += ' (' + Math.round(bandwidth / 1000) + ' kbits/s)';
+        text += ' (' + this.getTextFromBandwidth_(track.bandwidth) + ')';
       }
 
       if (this.controls.getConfig().showVideoCodec) {
@@ -533,7 +533,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
    * @private
    */
   getQualityLabel_(track, tracks) {
-    let text = Math.round(track.bandwidth / 1000) + ' kbits/s';
+    let text = this.getTextFromBandwidth_(track.bandwidth);
     if (this.controls.getConfig().showAudioCodec) {
       const getCodecName = (codecs) => {
         let name = '';
@@ -551,6 +551,20 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       }
     }
     return text;
+  }
+
+
+  /**
+   * @param {number} bandwidth
+   * @return {string}
+   * @private
+   */
+  getTextFromBandwidth_(bandwidth) {
+    if (bandwidth >= 1e6) {
+      return (bandwidth / 1e6).toFixed(1) + ' Mbps';
+    } else {
+      return Math.floor(bandwidth / 1e3) + ' Kbps';
+    }
   }
 
 

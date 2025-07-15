@@ -405,6 +405,8 @@ shakaDemo.Search = class {
         'Filters for assets that have MPD Chaining');
     this.makeBooleanInput_(specialContainer, Feature.CMSD, FEATURE,
         'Filters for assets that have Common Media Server Data.');
+    this.makeBooleanInput_(specialContainer, Feature.DOLBY_VISION, FEATURE,
+        'Filters for assets that use Dolby Vision.');
 
     container.appendChild(this.resultsDiv_);
   }

@@ -1385,7 +1385,6 @@ shaka.extern.xml.Node;
  *   manifestPreprocessor: function(!Element),
  *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
- *   multiTypeVariantsAllowed: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
  *   enableFastSwitching: boolean
  * }}
@@ -1457,17 +1456,6 @@ shaka.extern.xml.Node;
  *   "sequence mode" (ignoring their internal timestamps).
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {boolean} multiTypeVariantsAllowed
- *   If true, the manifest parser will create variants that have multiple
- *   mimeTypes or codecs for video or for audio if there is no other choice.
- *   Meant for content where some periods are only available in one mimeType or
- *   codec, and other periods are only available in a different mimeType or
- *   codec. For example, a stream with baked-in ads where the audio codec does
- *   not match the main content.
- *   Might result in undesirable behavior if mediaSource.codecSwitchingStrategy
- *   is not set to SMOOTH.
- *   <br>
- *   Defaults to true if SMOOTH codec switching is supported, RELOAD overwise.
  * @property {boolean} useStreamOnceInPeriodFlattening
  *   If period combiner is used, this option ensures every stream is used
  *   only once in period flattening. It speeds up underlying algorithm
@@ -1643,7 +1631,8 @@ shaka.extern.MssManifestConfiguration;
  *   continueLoadingWhenPaused: boolean,
  *   ignoreSupplementalCodecs: boolean,
  *   updatePeriod: number,
- *   ignoreDrmInfo: boolean
+ *   ignoreDrmInfo: boolean,
+ *   enableAudioGroups: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1730,6 +1719,11 @@ shaka.extern.MssManifestConfiguration;
  *   system and contained no init data.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} enableAudioGroups
+ *   If set, audio streams will be grouped and filtered by their parent
+ *   adaptation set ID.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.ManifestConfiguration;
@@ -2027,9 +2021,10 @@ shaka.extern.LiveSyncConfiguration;
  * @property {boolean} lowLatencyMode
  *   If <code>true</code>, low latency streaming mode is enabled. If
  *   lowLatencyMode is set to true, it changes the default config values for
- *   other things, see: docs/tutorials/config.md
+ *   other things, only on streams that supports low latency,
+ *   see: docs/tutorials/config.md
  *   <br>
- *   Defaults to <code>false</code>.
+ *   Defaults to <code>true</code>.
  * @property {boolean} preferNativeDash
  *   If true, prefer native DASH playback when possible, regardless of platform.
  *   <br>
@@ -2419,7 +2414,7 @@ shaka.extern.AdsConfiguration;
  *   Indicates the value in milliseconds from which a request is not
  *   considered cached.
  *   <br>
- *   Defaults to <code>20</code>.
+ *   Defaults to <code>5</code>.
  * @property {number} minTimeToSwitch
  *   Indicates the minimum time to change quality once the real bandwidth is
  *   available, in seconds. This time is only used on the first load.
@@ -2484,16 +2479,40 @@ shaka.extern.AdvancedAbrConfiguration;
 /**
  * @typedef {{
  *   mode: string,
+ *   enabled: boolean,
  *   useHeaders: boolean,
- *   url: string
+ *   url: string,
+ *   includeKeys: !Array<string>
  * }}
  *
  * @description
  *  Common Media Client Data (CMCD) Target Configuration
  *
  * @property {string} mode
+ * Specifies the transmission strategy for the CMCD data.
+ * <br>
+ * Possible values are:
+ * <ul><li><b>'response'</b>: This mode reports data to one or more alternate
+ * destinations after either the full response or an error has been received
+ * to a media object request, using one of the Data Transmission Modes
+ * (header, query parameters, json object)
+ * </li></ul>
+ * @property {boolean} enabled
+ * If <code>true</code>, enable CMCD data to be sent with media requests.
+ * <br>
+ * Defaults to <code>false</code>.
  * @property {boolean} useHeaders
+ * If <code>true</code>, the CMCD data is sent as HTTP request headers.
+ * If <code>false</code>, it is sent as query parameters in the URL.
+ * <br>
+ * Defaults to <code>false</code>.
  * @property {string} url
+ * A specific URL to which the CMCD data will be sent.
+ * @property {!Array<string>} includeKeys
+ * An array of keys to include in the CMCD data.
+ * If not provided, all keys will be included.
+ * <br>
+ * Defaults to <code>[]</code>.
  * @exportDoc
  */
 shaka.extern.CmcdTarget;
@@ -2885,8 +2904,11 @@ shaka.extern.TextDisplayerConfiguration;
  * @property {shaka.extern.TextDisplayerConfiguration} textDisplayer
  *   Text displayer configuration and settings.
  * @property {shaka.extern.TextDisplayer.Factory} textDisplayFactory
- *   A factory to construct a text displayer. Note that, if this is changed
- *   during playback, it will cause the text tracks to be reloaded.
+ *   A factory to construct a text displayer. If this is changed during
+ *   playback, it will cause the text tracks to be reloaded. During playback it
+ *   may be called automatically if a change in
+ *   <code>webkitPresentationMode</code> is detected and
+ *   <code>setVideoContainer</code> has been called.
  * @exportDoc
  */
 shaka.extern.PlayerConfiguration;

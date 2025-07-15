@@ -101,6 +101,20 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
       // There was already an ad.
       shaka.ui.Utils.setDisplay(this.overflowMenuButton_, false);
     }
+
+    /** @private {ResizeObserver} */
+    this.resizeObserver_ = null;
+
+    const resize = () => this.computeMaxHeight_();
+
+    // Use ResizeObserver if available, fallback to window resize event
+    if (window.ResizeObserver) {
+      this.resizeObserver_ = new ResizeObserver(resize);
+      this.resizeObserver_.observe(this.controls.getVideoContainer());
+    } else {
+      // Fallback for older browsers
+      this.eventManager.listen(window, 'resize', resize);
+    }
   }
 
   /** @override */
@@ -112,6 +126,11 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     }
 
     this.children_ = [];
+
+    if (this.resizeObserver_) {
+      this.resizeObserver_.disconnect();
+      this.resizeObserver_ = null;
+    }
     super.release();
   }
 

@@ -33,6 +33,10 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.controls.getConfig();
 
+    if (!this.config_.alwaysShowVolumeBar) {
+      this.container.classList.add('shaka-volume-bar-container-allow-hiding');
+    }
+
     // We use a range of 100 to avoid problems with Firefox.
     // See https://github.com/shaka-project/shaka-player/issues/3987
     this.setRange(0, 100);

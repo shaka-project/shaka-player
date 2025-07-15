@@ -43,6 +43,7 @@ shaka.ui.Enums.MaterialDesignIcons = {
   'AIRPLAY': 'airplay',
   'REPLAY': 'replay',
   'SKIP_NEXT': 'skip_next',
+  'SKIP_PREVIOUS': 'skip_previous',
   'STATISTICS_ON': 'insert_chart_outlined',
   'STATISTICS_OFF': 'insert_chart',
   'RECENTER_VR': 'control_camera',

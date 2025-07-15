@@ -11,6 +11,8 @@ goog.provide('shaka.ui.ControlsPanel');
 goog.require('goog.asserts');
 goog.require('shaka.ads.Utils');
 goog.require('shaka.cast.CastProxy');
+goog.require('shaka.device.DeviceFactory');
+goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
 goog.require('shaka.ui.AdInfo');
 goog.require('shaka.ui.BigPlayButton');
@@ -28,7 +30,6 @@ goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IDestroyable');
-goog.require('shaka.util.Platform');
 goog.require('shaka.util.Timer');
 
 goog.requireType('shaka.Player');
@@ -152,6 +153,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       for (const menu of this.menus_) {
         shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
       }
+      if (this.config_.enableTooltips) {
+        this.controlsButtonPanel_.classList.add('shaka-tooltips-on');
+      }
     });
 
     /**
@@ -218,6 +222,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.eventManager_.listen(this.player_, 'texttrackvisibility', () => {
       this.computeShakaTextContainerSize_();
+    });
+
+    this.eventManager_.listen(this.player_, 'unloading', () => {
+      if (this.isFullScreenEnabled()) {
+        this.exitFullScreen_();
+      }
+      if (this.isPiPEnabled()) {
+        this.togglePiP();
+      }
     });
   }
 
@@ -641,9 +654,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // When the preferVideoFullScreenInVisionOS configuration value applies,
     // we avoid using document fullscreen, even if it is available.
     const video = /** @type {HTMLVideoElement} */(this.localVideo_);
-    if (video.webkitSupportsFullscreen) {
-      if (this.config_.preferVideoFullScreenInVisionOS &&
-          shaka.util.Platform.isVisionOS()) {
+    if (video.webkitSupportsFullscreen &&
+        this.config_.preferVideoFullScreenInVisionOS) {
+      const device = shaka.device.DeviceFactory.getDevice();
+      if (device.getDeviceType() == shaka.device.IDevice.DeviceType.APPLE_VR) {
         return false;
       }
     }
@@ -1303,11 +1317,27 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(this.videoContainer_, 'keydown', (e) => {
-      this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
+      if (!this.config_.enableKeyboardPlaybackControlsInWindow) {
+        this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
+      }
     });
 
     this.eventManager_.listen(this.videoContainer_, 'keyup', (e) => {
-      this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
+      if (!this.config_.enableKeyboardPlaybackControlsInWindow) {
+        this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
+      }
+    });
+
+    this.eventManager_.listen(window, 'keydown', (e) => {
+      if (this.config_.enableKeyboardPlaybackControlsInWindow) {
+        this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
+      }
+    });
+
+    this.eventManager_.listen(window, 'keyup', (e) => {
+      if (this.config_.enableKeyboardPlaybackControlsInWindow) {
+        this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
+      }
     });
 
     this.eventManager_.listen(
@@ -1707,6 +1737,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     } else {
       this.fadeControlsTimer_.tickAfter(/* seconds= */ this.config_.fadeDelay);
     }
+    if (this.anySettingsMenusAreOpen()) {
+      this.controlsButtonPanel_.classList.remove('shaka-tooltips-on');
+    }
   }
 
   /**
@@ -1791,7 +1824,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onMouseMove_(event);
     }
 
-    if (!this.config_.enableKeyboardPlaybackControls) {
+    if (!this.config_.enableKeyboardPlaybackControls ||
+        !this.player_.getAssetUri()) {
       return;
     }
 
@@ -1820,7 +1854,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case 'PageDown':
         // PageDown is like ArrowLeft, but has a larger jump distance, and does
         // nothing to volume.
-        if (this.seekBar_ && isSeekBar && keyboardSeekDistance > 0) {
+        if (this.seekBar_ && isSeekBar && keyboardLargeSeekDistance > 0) {
           event.preventDefault();
           this.seek_(this.seekBar_.getValue() - keyboardLargeSeekDistance);
         }
@@ -1828,7 +1862,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case 'PageUp':
         // PageDown is like ArrowRight, but has a larger jump distance, and does
         // nothing to volume.
-        if (this.seekBar_ && isSeekBar && keyboardSeekDistance > 0) {
+        if (this.seekBar_ && isSeekBar && keyboardLargeSeekDistance > 0) {
           event.preventDefault();
           this.seek_(this.seekBar_.getValue() + keyboardLargeSeekDistance);
         }
@@ -1844,6 +1878,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (this.seekBar_) {
           this.seek_(this.player_.seekRange().end);
         }
+        break;
+      case 'c':
+        this.player_.setTextTrackVisibility(!this.player_.isTextTrackVisible());
         break;
       case 'f':
         if (this.isFullScreenSupported()) {
@@ -1862,6 +1899,24 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.togglePiP();
         }
         break;
+      case '>': {
+        const index =
+            this.config_.playbackRates.indexOf(this.player_.getPlaybackRate());
+        if (index > -1 && (index + 1) < this.config_.playbackRates.length) {
+          this.player_.trickPlay(this.config_.playbackRates[index + 1],
+              /* useTrickPlayTrack= */ false);
+        }
+        break;
+      }
+      case '<': {
+        const index =
+            this.config_.playbackRates.indexOf(this.player_.getPlaybackRate());
+        if (index > -1 && (index - 1) >= 0) {
+          this.player_.trickPlay(this.config_.playbackRates[index - 1],
+              /* useTrickPlayTrack= */ false);
+        }
+        break;
+      }
       // Pause or play by pressing space on the seek bar.
       case ' ':
         if (isSeekBar) {

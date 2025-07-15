@@ -271,3 +271,17 @@ full-window watch page, and lazy-loads translations as needed.
 See it live at [https://bbbcm-if.org/watch/](https://bbbcm-if.org/watch/), and
 override the UI language with the lang= parameter.
 (ex: [https://bbbcm-if.org/watch/?lang=sjn](https://bbbcm-if.org/watch/?lang=sjn))
+
+
+#### Supported shortcuts
+
+* Spacebar: Play/Pause when the seek bar is selected.
+* Left/Right arrow on the seek bar: Seek backward/forward 5 seconds. This seek distance can be configured with `keyboardSeekDistance`.
+* PageDown/PageUp on the seek bar: Seek backward/forward 60 seconds. This seek distance can be configured with `keyboardLargeSeekDistance`.
+* Home/End: Seek to the beginning/last seconds of the video.
+* c: Activate closed captions and subtitles if available. To hide captions and subtitles, press C again.
+* f: Activate full screen. If full screen mode is enabled, press F again or press escape to exit full screen mode.
+* m: Mute/unmute the video.
+* p: Activate picture in picture. If picture in picture mode is enabled, press P again.
+* \>: Speed up the video playback rate.
+* \<: Slow down the video playback rate.

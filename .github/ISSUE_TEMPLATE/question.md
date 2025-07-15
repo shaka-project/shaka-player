@@ -21,7 +21,7 @@ assignees: ''
 
 
 **If the question is related to FairPlay, have you read the tutorial?**
-<!-- NOTE: https://shaka-player-demo.appspot.com/docs/api/tutorial-fairplay.html -->
+<!-- NOTE: https://shaka-project.github.io/shaka-player/docs/api/tutorial-fairplay.html -->
 
 
 **What version of Shaka Player are you using?**

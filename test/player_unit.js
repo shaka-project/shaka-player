@@ -752,8 +752,8 @@ describe('Player', () => {
 
       it('only applies to DASH streams', async () => {
         video.canPlayType.and.returnValue('maybe');
-        spyOn(shaka.util.Platform, 'anyMediaElement').and.returnValue(video);
-        spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
+        spyOn(shaka.util.Dom, 'anyMediaElement').and.returnValue(video);
+        spyOn(deviceDetected, 'supportsMediaSource').and.returnValue(true);
         // Make sure player.load() resolves for src=
         spyOn(shaka.util.MediaReadyState, 'waitForReadyState').and.callFake(
             (mediaElement, readyState, eventManager, callback) => {
@@ -773,7 +773,7 @@ describe('Player', () => {
 
       it('does not apply to non-DASH streams', async () => {
         video.canPlayType.and.returnValue('maybe');
-        spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
+        spyOn(deviceDetected, 'supportsMediaSource').and.returnValue(true);
 
         player.configure({
           streaming: {
@@ -808,9 +808,9 @@ describe('Player', () => {
 
       it('only applies to HLS streams', async () => {
         video.canPlayType.and.returnValue('maybe');
-        spyOn(shaka.util.Platform, 'anyMediaElement').and.returnValue(video);
-        spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
-        spyOn(shaka.util.Platform, 'isApple').and.returnValue(false);
+        spyOn(shaka.util.Dom, 'anyMediaElement').and.returnValue(video);
+        spyOn(deviceDetected, 'supportsMediaSource').and.returnValue(true);
+        spyOn(deviceDetected, 'getBrowserEngine').and.returnValue('UNKNOWN');
         // Make sure player.load() resolves for src=
         spyOn(shaka.util.MediaReadyState, 'waitForReadyState').and.callFake(
             (mediaElement, readyState, eventManager, callback) => {
@@ -830,8 +830,8 @@ describe('Player', () => {
 
       it('does not apply to non-HLS streams', async () => {
         video.canPlayType.and.returnValue('maybe');
-        spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
-        spyOn(shaka.util.Platform, 'isApple').and.returnValue(false);
+        spyOn(deviceDetected, 'supportsMediaSource').and.returnValue(true);
+        spyOn(deviceDetected, 'getBrowserEngine').and.returnValue('UNKNOWN');
 
         player.configure({
           streaming: {
@@ -2809,6 +2809,7 @@ describe('Player', () => {
 
     it('chooses the configured text language and role at start', async () => {
       player.configure({
+        autoShowText: shaka.config.AutoShowText.IF_PREFERRED_TEXT_LANGUAGE,
         preferredTextLanguage: 'en',
         preferredTextRole: 'commentary',
       });
@@ -4156,7 +4157,8 @@ describe('Player', () => {
 
       await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(abrManager.setVariants).toHaveBeenCalled();
-      const variants = abrManager.setVariants.calls.argsFor(0)[0];
+      const lastCallIndex = abrManager.setVariants.calls.count() - 1;
+      const variants = abrManager.setVariants.calls.argsFor(lastCallIndex)[0];
       // We've already chosen codecs, so only 3 tracks should remain.
       expect(variants.length).toBe(3);
       // They should be the low-bandwidth ones.

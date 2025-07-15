@@ -10,7 +10,9 @@ which can be used to render & style content subtitles.
 {@link shaka.text.NativeTextDisplayer} which uses browser's native cue
 renderer. Shaka Player creates corresponding text tracks for text streams on
 the video element and provides necessary data so video element can render it.
-This is the default displayer when shaka UI is **not** used.
+This is the default displayer when shaka UI is **not** used, we also use
+NativeTextDisplayer when using PiP and Fullscreen API of the video element
+itself.
 
 #### UITextDisplayer
 

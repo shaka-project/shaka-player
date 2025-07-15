@@ -49,6 +49,9 @@
 
   /* Until we set a gradient background in JS, this will be the track color. */
   background: @track-default-color;
+
+  /* Override box-sizing to avoid other box-sizing rules break this element */
+  box-sizing: content-box;
 }
 
 /* The "track" is the pseudo-element inside the range element which represents
@@ -161,19 +164,20 @@
     }
   }
 
-  .shaka-mute-button:hover + .shaka-volume-bar-container {
+  .shaka-mute-button:hover + .shaka-volume-bar-container-allow-hiding {
     width: 50px;
     opacity: 1;
   }
 }
 
-.shaka-mute-button + .shaka-volume-bar-container {
+/* stylelint-disable-next-line max-line-length */
+.shaka-mute-button + .shaka-volume-bar-container-allow-hiding:not(:focus-within) {
   width: 0;
   opacity: 0;
 }
 
 @media (min-width: 475px) {
-  .shaka-mute-button:hover + .shaka-volume-bar-container {
+  .shaka-mute-button:hover + .shaka-volume-bar-container-allow-hiding {
     width: 100px;
     opacity: 1;
   }

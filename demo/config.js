@@ -231,7 +231,8 @@ shakaDemo.Config = class {
             'manifest.ignoreSupplementalCodecs')
         .addNumberInput_('Override the Update time of the manifest',
             'manifest.updatePeriod')
-        .addBoolInput_('Ignore DRM Info', 'manifest.ignoreDrmInfo');
+        .addBoolInput_('Ignore DRM Info', 'manifest.ignoreDrmInfo')
+        .addBoolInput_('Enable Audio Groups', 'manifest.enableAudioGroups');
   }
 
   /** @private */
@@ -250,8 +251,6 @@ shakaDemo.Config = class {
             'manifest.dash.ignoreEmptyAdaptationSet')
         .addBoolInput_('Ignore DASH maxSegmentDuration',
             'manifest.dash.ignoreMaxSegmentDuration')
-        .addBoolInput_('Allow DASH multi type variants',
-            'manifest.dash.multiTypeVariantsAllowed')
         .addTextInput_('Clock Sync URI', 'manifest.dash.clockSyncUri')
         .addBoolInput_('Ignore Min Buffer Time',
             'manifest.dash.ignoreMinBufferTime')

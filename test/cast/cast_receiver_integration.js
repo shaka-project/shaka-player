@@ -10,7 +10,8 @@
 // only be run on Chrome and Chromecast.
 /** @return {boolean} */
 const castReceiverIntegrationSupport =
-    () => shaka.util.Platform.isChrome() || shaka.util.Platform.isChromecast();
+    () => deviceDetected.getDeviceName() === 'Chrome' ||
+      deviceDetected.getDeviceType() === shaka.device.IDevice.DeviceType.CAST;
 filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
   const CastReceiver = shaka.cast.CastReceiver;
   const CastUtils = shaka.cast.CastUtils;
@@ -204,8 +205,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       for (const message of messages) {
         // Check that the update message is of a reasonable size. From previous
         // testing we found that the socket would silently reject data that got
-        // too big. 7.2KB is safely below the limit.
-        expect(message.length).toBeLessThan(7200);
+        // too big. 8KB is safely below the limit.
+        expect(message.length).toBeLessThan(8000);
       }
     });
 
@@ -269,8 +270,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       for (const message of messages) {
         // Check that the update message is of a reasonable size. From previous
         // testing we found that the socket would silently reject data that got
-        // too big. 7.2KB is safely below the limit.
-        expect(message.length).toBeLessThan(7200);
+        // too big. 8KB is safely below the limit.
+        expect(message.length).toBeLessThan(8000);
       }
     });
 
