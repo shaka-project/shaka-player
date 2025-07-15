@@ -256,6 +256,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/clear-encrypted-hls/*', included: false},
       {pattern: 'test/test/assets/dash-multi-codec/*', included: false},
       {pattern: 'test/test/assets/dash-multi-codec-ec3/*', included: false},
+      {pattern: 'test/test/assets/dash-multitype-variant/*', included: false},
       {pattern: 'test/test/assets/3675/*', included: false},
       {pattern: 'test/test/assets/7401/*', included: false},
       {pattern: 'test/test/assets/6339/*', included: false},

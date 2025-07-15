@@ -131,6 +131,7 @@ lessc
 lintstamp
 metadatas
 multimap
+multitype
 myapp
 nodrm
 nondisplayed
