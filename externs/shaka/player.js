@@ -2482,7 +2482,8 @@ shaka.extern.AdvancedAbrConfiguration;
  *   enabled: boolean,
  *   useHeaders: boolean,
  *   url: string,
- *   includeKeys: !Array<string>
+ *   includeKeys: !Array<string>,
+ *   events: !Array<string>
  * }}
  *
  * @description
