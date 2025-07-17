@@ -613,6 +613,50 @@ describe('UITextDisplayer', () => {
     expect(childrenOfTwo.length).toBe(3);
   });
 
+  it('correctly displays styles for cues when configured overrides', () => {
+    textDisplayer.configure({
+      fontScaleFactor: 1.75,
+      textColor: 'red',
+      captionsUpdatePeriod: 0.25,
+      backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    });
+
+    /** @type {!shaka.text.Cue} */
+    const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
+    cue.color = 'green';
+    cue.backgroundColor = 'black';
+    cue.direction = shaka.text.Cue.direction.HORIZONTAL_LEFT_TO_RIGHT;
+    cue.fontSize = '10px';
+    cue.fontWeight = shaka.text.Cue.fontWeight.NORMAL;
+    cue.fontStyle = shaka.text.Cue.fontStyle.NORMAL;
+    cue.lineHeight = '2';
+    cue.nestedCues = [];
+    cue.textAlign = shaka.text.Cue.textAlign.CENTER;
+    cue.writingMode = shaka.text.Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM;
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    updateCaptions();
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    const captions = textContainer.querySelector('div');
+    const cssObj = parseCssText(captions.style.cssText);
+
+    const expectCssObj = {
+      'color': 'red',
+      'direction': 'ltr',
+      'font-size': '17.5px',
+      'font-style': 'normal',
+      'font-weight': 400,
+      'text-align': 'center',
+    };
+
+    expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
+    expect(parseCssText(textContainer.querySelector('span').style.cssText))
+        .toEqual(jasmine.objectContaining(
+            {'background-color': 'rgba(255,255,255,0.5)'}));
+  });
+
   it('textDisplayer does not crash if destroy is called more than once', () => {
     textDisplayer.setTextVisibility(true);
 
