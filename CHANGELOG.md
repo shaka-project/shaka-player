@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.15.8](https://github.com/shaka-project/shaka-player/compare/v4.15.7...v4.15.8) (2025-07-21)
+
+
+### Bug Fixes
+
+* **Ads:** Fix AD_STARTED delayed when using the base video ([#8880](https://github.com/shaka-project/shaka-player/issues/8880)) ([3a73574](https://github.com/shaka-project/shaka-player/commit/3a73574d1cf13903b5fa1f42378eef6202fa8c3e))
+* **Ads:** Fix interstitials support when using PiP on Safari ([#8875](https://github.com/shaka-project/shaka-player/issues/8875)) ([9fa0591](https://github.com/shaka-project/shaka-player/commit/9fa05913be3f03445505802bf560708d3223552f))
+* Cancel update before schedule an update after fetchAndAppend ([#8878](https://github.com/shaka-project/shaka-player/issues/8878)) ([442aaa8](https://github.com/shaka-project/shaka-player/commit/442aaa85715904871e1347d9b5a61d3a20807df3))
+* **DASH:** Fix segmentSequenceCadence default value ([#8877](https://github.com/shaka-project/shaka-player/issues/8877)) ([b2d4369](https://github.com/shaka-project/shaka-player/commit/b2d43699e05465eab5322d08eb977176e0a49c46))
+* **DASH:** Prevent memory leak in uncompiled mode ([#8884](https://github.com/shaka-project/shaka-player/issues/8884)) ([f0d6474](https://github.com/shaka-project/shaka-player/commit/f0d647414f9fc0b92e8a5bb0e120f432164157be))
+* **HLS:** Fix preload initial variant on Tizen ([#8873](https://github.com/shaka-project/shaka-player/issues/8873)) ([f0a93d9](https://github.com/shaka-project/shaka-player/commit/f0a93d941783013e2290ddf03a6291e97f5c0b9f))
+* **UI:** Don't exit Fullscreen and PiP when unloading an ad ([#8879](https://github.com/shaka-project/shaka-player/issues/8879)) ([0550d29](https://github.com/shaka-project/shaka-player/commit/0550d29f235241537887d9c4ca58960265d28a07))
+
 ## [4.15.7](https://github.com/shaka-project/shaka-player/compare/v4.15.6...v4.15.7) (2025-07-15)
 
 
