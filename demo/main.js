@@ -1384,6 +1384,9 @@ shakaDemo.Main = class {
         ui.configure(uiConfig);
       }
 
+      const queueManager = this.player_.getQueueManager();
+      await queueManager.removeAllItems();
+
       if (asset.hasAds()) {
         // The player internally, if another stream is loaded, calls
         // adManager.onAssetUnload and this would prevent the initial preloading
@@ -1425,9 +1428,6 @@ shakaDemo.Main = class {
           }
         }
       }
-
-      const queueManager = this.player_.getQueueManager();
-      await queueManager.removeAllItems();
 
       // Finally, the asset can be loaded.
       if (asset.preloadManager) {
