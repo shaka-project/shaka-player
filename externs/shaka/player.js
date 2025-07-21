@@ -1324,12 +1324,14 @@ shaka.extern.PersistentSessionMetadata;
  *   Specify the default audio security level for Widevine when audio robustness
  *   is not specified.
  *   <br>
- *   Defaults to <code>'SW_SECURE_CRYPTO'</code>.
+ *   Defaults to <code>'SW_SECURE_CRYPTO'</code> except on Android where the
+ *   default value <code>''</code>.
  * @property {string} defaultVideoRobustnessForWidevine
  *   Specify the default video security level for Widevine when video robustness
  *   is not specified.
  *   <br>
- *   Defaults to <code>'SW_SECURE_DECODE'</code>.
+ *   Defaults to <code>'SW_SECURE_DECODE'</code> except on Android where the
+ *   default value <code>''</code>.
  * @exportDoc
  */
 shaka.extern.DrmConfiguration;
