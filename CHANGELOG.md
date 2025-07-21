@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.14.24](https://github.com/shaka-project/shaka-player/compare/v4.14.23...v4.14.24) (2025-07-21)
+
+
+### Bug Fixes
+
+* **Ads:** Fix interstitials support when using PiP on Safari ([#8875](https://github.com/shaka-project/shaka-player/issues/8875)) ([0d3aa6b](https://github.com/shaka-project/shaka-player/commit/0d3aa6b3c118f284f3c0e1f5277d81a927071005))
+* Cancel update before schedule an update after fetchAndAppend ([#8878](https://github.com/shaka-project/shaka-player/issues/8878)) ([1a7054d](https://github.com/shaka-project/shaka-player/commit/1a7054defc6f410de404061c280b1d7d1e806ec1))
+* **DASH:** Fix segmentSequenceCadence default value ([#8877](https://github.com/shaka-project/shaka-player/issues/8877)) ([d4120cf](https://github.com/shaka-project/shaka-player/commit/d4120cfe97965d0c915e22297ed40b1d5eeb39bd))
+* **DASH:** Prevent memory leak in uncompiled mode ([#8884](https://github.com/shaka-project/shaka-player/issues/8884)) ([d69d2a7](https://github.com/shaka-project/shaka-player/commit/d69d2a74c6ac035917644e22510b8aba5870f279))
+
 ## [4.14.23](https://github.com/shaka-project/shaka-player/compare/v4.14.22...v4.14.23) (2025-07-15)
 
 
