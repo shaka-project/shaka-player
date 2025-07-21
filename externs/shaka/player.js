@@ -2483,7 +2483,8 @@ shaka.extern.AdvancedAbrConfiguration;
  *   useHeaders: boolean,
  *   url: string,
  *   includeKeys: !Array<string>,
- *   events: !Array<string>
+ *   events: !Array<string>,
+ *   timeInterval: number,
  * }}
  *
  * @description
@@ -2519,6 +2520,10 @@ shaka.extern.AdvancedAbrConfiguration;
  * If not provided, all events will be included.
  * <br>
  * Defaults to <code>[]</code>.
+ * @property {number} timeInterval
+ *   Time Interval config in seconds
+ *   <br>
+ *   Defaults to <code>0</code>.
  * @exportDoc
  */
 shaka.extern.CmcdTarget;
