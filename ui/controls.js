@@ -225,6 +225,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(this.player_, 'unloading', () => {
+      if (this.ad_) {
+        return;
+      }
       if (this.isFullScreenEnabled()) {
         this.exitFullScreen_();
       }
