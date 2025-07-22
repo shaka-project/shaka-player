@@ -355,7 +355,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -410,7 +410,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -461,7 +461,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -512,7 +512,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -563,7 +563,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -614,7 +614,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -665,7 +665,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -716,7 +716,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -777,7 +777,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -947,7 +947,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1062,7 +1062,7 @@ describe('Interstitial Ad manager', () => {
           },
         },
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1152,7 +1152,7 @@ describe('Interstitial Ad manager', () => {
           },
         },
         background: 'red',
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1183,7 +1183,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       await interstitialAdManager.addInterstitials([interstitial]);
 
@@ -1226,7 +1226,7 @@ describe('Interstitial Ad manager', () => {
           displayOnBackground: false,
           currentVideo: null,
           background: null,
-          clickThrough: null,
+          clickThroughUrl: null,
         },
         {
           id: null,
@@ -1250,7 +1250,7 @@ describe('Interstitial Ad manager', () => {
           displayOnBackground: false,
           currentVideo: null,
           background: null,
-          clickThrough: null,
+          clickThroughUrl: null,
         },
       ];
       await interstitialAdManager.addInterstitials(interstitials);
@@ -1297,7 +1297,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       const interstitials = [interstitial, interstitial];
       await interstitialAdManager.addInterstitials(interstitials);
@@ -1341,7 +1341,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       await interstitialAdManager.addInterstitials([interstitial]);
 
@@ -1458,7 +1458,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThrough: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1766,7 +1766,7 @@ describe('Interstitial Ad manager', () => {
       displayOnBackground: false,
       currentVideo: null,
       background: null,
-      clickThrough: null,
+      clickThroughUrl: null,
     };
     await interstitialAdManager.addInterstitials([interstitial]);
 
