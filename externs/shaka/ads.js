@@ -82,7 +82,8 @@ shaka.extern.AdCuePoint;
  *   overlay: ?shaka.extern.AdPositionInfo,
  *   displayOnBackground: boolean,
  *   currentVideo: ?shaka.extern.AdPositionInfo,
- *   background: ?string
+ *   background: ?string,
+ *   clickThroughUrl: ?string,
  * }}
  *
  * @description
@@ -145,6 +146,8 @@ shaka.extern.AdCuePoint;
  * @property {?string} background
  *   Specifies the background, the value can be any value of the CSS background
  *   property.
+ * @property {?string} clickThroughUrl
+ *   Indicate the URL when the ad is clicked.
  * @exportDoc
  */
 shaka.extern.AdInterstitial;
