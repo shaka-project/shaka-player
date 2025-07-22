@@ -1439,6 +1439,9 @@ describe('Interstitial Ad manager', () => {
         '<StaticResource creativeType="image/png">',
         '<![CDATA[test.png]]>',
         '</StaticResource>',
+        '<NonLinearClickThrough>',
+        '<![CDATA[foo.bar]]>',
+        '</NonLinearClickThrough>',
         '</NonLinear>',
         '</NonLinearAds>',
         '</Creative>',
@@ -1492,7 +1495,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
-        clickThroughUrl: null,
+        clickThroughUrl: 'foo.bar',
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
