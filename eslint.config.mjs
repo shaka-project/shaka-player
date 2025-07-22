@@ -298,6 +298,13 @@ export default [
       'jsdoc/check-values': 'off',
       // This should be checked by the compiler
       'jsdoc/no-undefined-types': 'off',
+      'jsdoc/require-jsdoc': ['error', {
+        exemptEmptyConstructors: true,
+        require: {
+          ClassDeclaration: true,
+          MethodDefinition: true,
+        },
+      }],
       // Some params/props/returns are self-explanatory
       'jsdoc/require-param-description': 'off',
       'jsdoc/require-property-description': 'off',
