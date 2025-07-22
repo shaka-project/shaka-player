@@ -1360,6 +1360,11 @@ describe('Interstitial Ad manager', () => {
         '<Creative id="138381721867" sequence="1">',
         '<Linear>',
         '<Duration>00:00:10</Duration>',
+        '<VideoClicks>',
+        '<ClickThrough id="1">',
+        '<![CDATA[ foo.bar ]]>',
+        '</ClickThrough>',
+        '</VideoClicks>',
         '<MediaFiles>',
         '<MediaFile bitrate="140" delivery="progressive" ',
         'height="360" type="video/mp4" width="640">',
@@ -1390,6 +1395,35 @@ describe('Interstitial Ad manager', () => {
       };
       expect(onEventSpy).toHaveBeenCalledWith(
           jasmine.objectContaining(eventValue1));
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
+      const expectedInterstitial = {
+        id: null,
+        groupId: null,
+        startTime: 0,
+        endTime: null,
+        uri: 'test.mp4',
+        mimeType: 'video/mp4',
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: false,
+        resumeOffset: 0,
+        playoutLimit: null,
+        once: true,
+        pre: true,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: null,
+        displayOnBackground: false,
+        currentVideo: null,
+        background: null,
+        clickThroughUrl: 'foo.bar',
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
     });
 
     it('supports non-linear ads', async () => {
