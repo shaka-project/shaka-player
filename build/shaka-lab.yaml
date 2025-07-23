@@ -239,6 +239,9 @@ ChromecastUltra:
 ChromecastGTV:
   browser: chromecast
   version: GTV
+  # Currently broken in some unknown manner.  Joey is trying to fix and/or
+  # replace it.
+  disabled: true
 
 ChromecastHub:
   browser: chromecast

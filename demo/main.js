@@ -790,11 +790,11 @@ shakaDemo.Main = class {
     }
     if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P8_1)) {
       mimeTypes.push('video/mp4; codecs="hvc1.2.4.L120.b0"');
-      mimeTypes.push('video/mp4; codecs="dvh1.08.03"');
+      mimeTypes.push('video/mp4; codecs="dvh1.08.01"');
     }
     if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P8_4)) {
       mimeTypes.push('video/mp4; codecs="hvc1.2.4.L123.b0"');
-      mimeTypes.push('video/mp4; codecs="dvh1.08.03"');
+      mimeTypes.push('video/mp4; codecs="dvh1.08.01"');
     }
     if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P5)) {
       mimeTypes.push('video/mp4; codecs="dvh1.05.01"');
@@ -1384,6 +1384,9 @@ shakaDemo.Main = class {
         ui.configure(uiConfig);
       }
 
+      const queueManager = this.player_.getQueueManager();
+      await queueManager.removeAllItems();
+
       if (asset.hasAds()) {
         // The player internally, if another stream is loaded, calls
         // adManager.onAssetUnload and this would prevent the initial preloading
@@ -1425,9 +1428,6 @@ shakaDemo.Main = class {
           }
         }
       }
-
-      const queueManager = this.player_.getQueueManager();
-      await queueManager.removeAllItems();
 
       // Finally, the asset can be loaded.
       if (asset.preloadManager) {
