@@ -15,6 +15,7 @@ describe('QueueManager', () => {
   /** @type {shaka.extern.QueueItem} */
   const queueItem = {
     manifestUri: '/base/test/test/assets/small.mp4',
+    preloadManager: null,
     startTime: null,
     mimeType: null,
     config: null,
