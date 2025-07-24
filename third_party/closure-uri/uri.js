@@ -190,7 +190,7 @@ goog.Uri.prototype.toString = function() {
     out.push('#', goog.Uri.encodeSpecialChars_(
         fragment, goog.Uri.reDisallowedInFragment_));
   }
-  return out.join('');
+  return out.join('').replace(/%20/g, '+');
 };
 
 
@@ -879,7 +879,7 @@ goog.Uri.QueryData.prototype.toString = function() {
  * @return {string} Decoded query string.
  */
 goog.Uri.QueryData.prototype.toDecodedString = function() {
-  return goog.Uri.decodeOrEmpty_(this.toString());
+  return goog.Uri.decodeOrEmpty_(this.toString()).replace(/ /g, '+');
 };
 
 
