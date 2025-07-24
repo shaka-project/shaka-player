@@ -1667,6 +1667,92 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('mtp=');
         expect(decodedUri).toContain('cid="v2-event-content"');
       });
+
+      it('does not send events if the target is disabled', () => {
+        const eventTarget = new shaka.util.FakeEventTarget();
+        const playerInterfaceWithNE =
+        Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const config = {
+          version: 2,
+          enabled: true,
+          targets: [{
+            mode: 'event',
+            enabled: false, // Target is disabled
+            url: 'https://example.com/cmcd',
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(playerInterfaceWithNE, config);
+        cmcdManager.setMediaElement(eventTarget);
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
+
+        expect(requestSpy).not.toHaveBeenCalled();
+      });
+
+      it('does not send events if CMCD version is 1', () => {
+        const eventTarget = new shaka.util.FakeEventTarget();
+        const playerInterfaceWithNE =
+        Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const config = {
+          version: 1, // CMCD v1
+          enabled: true,
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(playerInterfaceWithNE, config);
+        cmcdManager.setMediaElement(eventTarget);
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
+
+        expect(requestSpy).not.toHaveBeenCalled();
+      });
+
+      it('filters out keys that are not valid for event mode', () => {
+        const eventTarget = new shaka.util.FakeEventTarget();
+        const playerInterfaceWithNE =
+        Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const config = {
+          version: 2,
+          enabled: true,
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            // d and rtp are not valid for event mode
+            includeKeys: ['e', 'sta', 'bl', 'd', 'rtp'],
+            events: ['p'],
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(playerInterfaceWithNE, config);
+        cmcdManager.setMediaElement(eventTarget);
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
+
+        expect(requestSpy).toHaveBeenCalled();
+        const request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
+
+        expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="p"');
+        expect(decodedUri).not.toContain('d=');
+        expect(decodedUri).not.toContain('rtp=');
+      });
     });
   });
 });
