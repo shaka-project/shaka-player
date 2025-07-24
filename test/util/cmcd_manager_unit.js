@@ -1790,7 +1790,8 @@ describe('CmcdManager Setup', () => {
 
         expect(requestSpy).toHaveBeenCalledTimes(2);
 
-        const request1 = requestSpy.calls.argsFor(0)[1];
+        const request1 = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.argsFor(0)[1];
         const decodedUri1 = decodeURIComponent(request1.uris[0]);
         expect(request1.uris[0].startsWith('https://example.com/cmcd1'))
             .toBe(true);
@@ -1798,7 +1799,8 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri1).toContain('sta="p"');
         expect(decodedUri1).not.toContain('v=2');
 
-        const request2 = requestSpy.calls.argsFor(1)[1];
+        const request2 = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.argsFor(1)[1];
         const decodedUri2 = decodeURIComponent(request2.uris[0]);
         expect(request2.uris[0].startsWith('https://example.com/cmcd2'))
             .toBe(true);
