@@ -58,10 +58,6 @@ common_closure_opts = [
     '--jscomp_error=*',
 
     # Turn off complaints like:
-    #   "Private property foo_ is never modified, use the @const annotation"
-    '--jscomp_off=jsdocMissingConst',
-
-    # Turn off complaints like:
     #   "Object is a reference type with no nullability modifier that is
     #   explicitly set to null."
     # and:
