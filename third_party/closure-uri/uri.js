@@ -748,9 +748,9 @@ goog.Uri.QueryData.prototype.ensureKeyMapInitialized_ = function() {
         } else {
           name = pairs[i];
         }
-        name = decodeURIComponent(name.replace(/\+/g, ' '));
+        name = decodeURIComponent(name);
         value = value || '';
-        this.add(name, decodeURIComponent(value.replace(/\+/g, ' ')));
+        this.add(name, decodeURIComponent(value));
       }
     }
   }
