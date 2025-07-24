@@ -434,6 +434,8 @@ shakaDemo.Config = class {
             'queue.preloadNextUrlWindow',
             /* canBeDecimal= */ true,
             /* canBeZero= */ true)
+        .addBoolInput_('Allow preload prev item',
+            'queue.preloadPrevItem')
         .addSelectInput_('Repeat mode',
             'queue.repeatMode',
             repeatModeOptions,

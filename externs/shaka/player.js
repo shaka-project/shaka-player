@@ -2919,6 +2919,7 @@ shaka.extern.PlayerConfiguration;
 /**
  * @typedef {{
  *   preloadNextUrlWindow: number,
+ *   preloadPrevItem: boolean,
  *   repeatMode: shaka.config.RepeatMode
  * }}
  *
@@ -2930,7 +2931,9 @@ shaka.extern.PlayerConfiguration;
  *   next item. Measured in seconds. If the value is 0, the next URL will not
  *   be preloaded at all.
  *   <br>
- *   Defaults to <code>30</code>.
+ *   Defaults to <code>Infinity</code>.
+ * @property {boolean} preloadPrevItem
+ *   Defaults to <code>true</code>.
  * @property {shaka.config.RepeatMode} repeatMode
  *   Controls behavior of the queue when all items have been played.
  *   <br>
