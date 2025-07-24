@@ -1407,5 +1407,147 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).not.toContain('ltc=');
       });
     });
+
+    describe('Event Mode', () => {
+      let networkingEngine;
+      let requestSpy;
+
+      beforeEach(() => {
+        requestSpy = jasmine.createSpy('request');
+        networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+      });
+
+      it('sends player events', () => {
+        const eventTarget = new shaka.util.FakeEventTarget();
+        const playerInterfaceWithNE =
+        Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const config = {
+          version: 2,
+          enabled: true,
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            includeKeys: ['e', 'sta', 'v'],
+            events: ['p', 'a', 'k', 'e', 'm'],
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(
+            playerInterfaceWithNE,
+            config,
+        );
+        cmcdManager.setMediaElement(eventTarget);
+        cmcdManager.configure(config);
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
+        let request = requestSpy.calls.mostRecent().args[1];
+        let decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="p"');
+        expect(decodedUri).toContain('v=2');
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('pause'));
+        request = requestSpy.calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="a"');
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('seeking'));
+        request = requestSpy.calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="k"');
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('ended'));
+        request = requestSpy.calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="e"');
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('volumechange'));
+        request = requestSpy.calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="m"');
+      });
+
+      it('sends time interval events', () => {
+        jasmine.clock().install();
+        const eventTarget = new shaka.util.FakeEventTarget();
+        const playerInterfaceWithNE =
+        Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const config = {
+          version: 2,
+          enabled: true,
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            timeInterval: 1,
+            includeKeys: ['e', 'v'],
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(
+            playerInterfaceWithNE,
+            config,
+        );
+        cmcdManager.setMediaElement(eventTarget);
+        cmcdManager.configure(config);
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
+
+        jasmine.clock().tick(1001);
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="t"');
+        expect(decodedUri).toContain('v=2');
+        jasmine.clock().uninstall();
+      });
+
+      it('sends `msd` only on the first event', () => {
+        const eventTarget = new shaka.util.FakeEventTarget();
+        const playerInterfaceWithNE =
+        Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const cmcdManager = createCmcdManager(
+            playerInterfaceWithNE,
+            {
+              targets: [{
+                mode: 'event',
+                enabled: true,
+                url: 'https://example.com/cmcd',
+                includeKeys: ['e', 'sta', 'msd'],
+                events: ['p', 'a'],
+              }],
+            },
+        );
+        cmcdManager.setMediaElement(eventTarget);
+        cmcdManager.onPlaybackPlay_();
+        cmcdManager.onPlaybackPlaying_();
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
+        let request = requestSpy.calls.mostRecent().args[1];
+        let decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('msd=');
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('pause'));
+        request = requestSpy.calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).not.toContain('msd=');
+      });
+    });
   });
 });
