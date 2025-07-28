@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.14.25](https://github.com/shaka-project/shaka-player/compare/v4.14.24...v4.14.25) (2025-07-28)
+
+
+### Bug Fixes
+
+* **Ads:** Fix pre-roll identification when using VMAP ([#8898](https://github.com/shaka-project/shaka-player/issues/8898)) ([04d5b06](https://github.com/shaka-project/shaka-player/commit/04d5b06652b6d5f19951bb289ec65d3682aa0248))
+* **DASH:** Update SegmentSequenceProperties according to latest spec ([#8909](https://github.com/shaka-project/shaka-player/issues/8909)) ([c0e802e](https://github.com/shaka-project/shaka-player/commit/c0e802e2192bb2003069125cd7830ceaed26283e))
+* Fix isAudioMuxedInVideo check on StreamingEngine ([#8893](https://github.com/shaka-project/shaka-player/issues/8893)) ([f34b0be](https://github.com/shaka-project/shaka-player/commit/f34b0be04c8be5eca1f147fa775bbb421c2ca50f))
+* Fix URI encoding with plus characters ([#8916](https://github.com/shaka-project/shaka-player/issues/8916)) ([b3b7a02](https://github.com/shaka-project/shaka-player/commit/b3b7a02b3db5277f5264d56d0cad9075fbc90dad)), closes [#8713](https://github.com/shaka-project/shaka-player/issues/8713)
+* **Offline:** Fix persistent session removal ([#8895](https://github.com/shaka-project/shaka-player/issues/8895)) ([037253e](https://github.com/shaka-project/shaka-player/commit/037253ebb1244c34f5cc6e0cddb58661f63a3f48))
+* Session Update Error Handling For Youview Platform ([#8918](https://github.com/shaka-project/shaka-player/issues/8918)) ([c6bfa94](https://github.com/shaka-project/shaka-player/commit/c6bfa948ec36dfff87c53a9e41fc9d39366eb8d6))
+
+
+### Performance Improvements
+
+* **Ads:** Reduce VMAP processing time ([#8897](https://github.com/shaka-project/shaka-player/issues/8897)) ([f651e78](https://github.com/shaka-project/shaka-player/commit/f651e7838ff3cb7dd34efadda0b6273415d873ac))
+* Simplify region timeline buffer management ([#8921](https://github.com/shaka-project/shaka-player/issues/8921)) ([adec6f9](https://github.com/shaka-project/shaka-player/commit/adec6f94fb48d1d00acdc8b659e790ef92498ed5))
+
 ## [4.14.24](https://github.com/shaka-project/shaka-player/compare/v4.14.23...v4.14.24) (2025-07-21)
 
 
