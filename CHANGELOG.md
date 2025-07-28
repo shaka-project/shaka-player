@@ -1,5 +1,28 @@
 # Changelog
 
+## [4.15.9](https://github.com/shaka-project/shaka-player/compare/v4.15.8...v4.15.9) (2025-07-28)
+
+
+### Bug Fixes
+
+* **Ads:** Fix pre-roll identification when using VMAP ([#8898](https://github.com/shaka-project/shaka-player/issues/8898)) ([3ecfc20](https://github.com/shaka-project/shaka-player/commit/3ecfc2081c5173f01f58fcc090b188e953f5f2b4))
+* **DASH:** Update SegmentSequenceProperties according to latest spec ([#8909](https://github.com/shaka-project/shaka-player/issues/8909)) ([5a67f1e](https://github.com/shaka-project/shaka-player/commit/5a67f1ea1b622d93c327db44f0dfb65cb72270d7))
+* **Demo:** Interact with queueManager before do any adManager operation ([#8894](https://github.com/shaka-project/shaka-player/issues/8894)) ([54aba90](https://github.com/shaka-project/shaka-player/commit/54aba90d953400ebede7cd02f4d34a6f92852a5d))
+* Fix default value of defaultAudioRobustnessForWidevine and defaultVideoRobustnessForWidevine on Android ([#8896](https://github.com/shaka-project/shaka-player/issues/8896)) ([725ff4e](https://github.com/shaka-project/shaka-player/commit/725ff4e9fbaa16f79a6ae70b6ab0282d6327b0bf))
+* Fix isAudioMuxedInVideo check on StreamingEngine ([#8893](https://github.com/shaka-project/shaka-player/issues/8893)) ([8e90d6b](https://github.com/shaka-project/shaka-player/commit/8e90d6b8c1aad87998f315a7e2b85b9222ce2f0d))
+* Fix URI encoding with plus characters ([#8916](https://github.com/shaka-project/shaka-player/issues/8916)) ([e488e0e](https://github.com/shaka-project/shaka-player/commit/e488e0e760d0e998fd77d3ea00024306afad1ed9)), closes [#8713](https://github.com/shaka-project/shaka-player/issues/8713)
+* **Offline:** Fix persistent session removal ([#8895](https://github.com/shaka-project/shaka-player/issues/8895)) ([4bf7468](https://github.com/shaka-project/shaka-player/commit/4bf74689379f4c5bc7078a76c9d1abdc8427b979))
+* Save current variant when using unloadAndSavePreload ([#8907](https://github.com/shaka-project/shaka-player/issues/8907)) ([2535b8d](https://github.com/shaka-project/shaka-player/commit/2535b8da25b88f865fc5098cb5f03ecff830f5a5))
+* Session Update Error Handling For Youview Platform ([#8918](https://github.com/shaka-project/shaka-player/issues/8918)) ([cdad9b5](https://github.com/shaka-project/shaka-player/commit/cdad9b5862aac44782901437c4b7c482ce24a0c8))
+
+
+### Performance Improvements
+
+* **Ads:** Improve the startup of interstitials when the starttime is 0 ([#8899](https://github.com/shaka-project/shaka-player/issues/8899)) ([1f80634](https://github.com/shaka-project/shaka-player/commit/1f8063405a0a45a2a7e3258ad794d90f808400fd))
+* **Ads:** Reduce VMAP processing time ([#8897](https://github.com/shaka-project/shaka-player/issues/8897)) ([97f76dc](https://github.com/shaka-project/shaka-player/commit/97f76dc0762c7cf97469a3f932f653088febc628))
+* **Mp4Generator:** Lazy initialize static buffers ([#8919](https://github.com/shaka-project/shaka-player/issues/8919)) ([97cd655](https://github.com/shaka-project/shaka-player/commit/97cd6558bf8be86bc612b00cf8703b9831ced35e))
+* Simplify region timeline buffer management ([#8921](https://github.com/shaka-project/shaka-player/issues/8921)) ([c9dfe78](https://github.com/shaka-project/shaka-player/commit/c9dfe784dc93d2a34604d21d755797b0fb5df3dc))
+
 ## [4.15.8](https://github.com/shaka-project/shaka-player/compare/v4.15.7...v4.15.8) (2025-07-21)
 
 
