@@ -1592,7 +1592,6 @@ describe('CmcdManager Setup', () => {
         decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).not.toContain('msd=');
 
-
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
         request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
