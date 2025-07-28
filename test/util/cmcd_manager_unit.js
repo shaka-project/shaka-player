@@ -1437,7 +1437,7 @@ describe('CmcdManager Setup', () => {
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta', 'v'],
-            events: ['p', 'a', 'k', 'e'],
+            events: ['ps'],
           }],
         };
 
@@ -1492,7 +1492,7 @@ describe('CmcdManager Setup', () => {
             mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
-            includeKeys: ['e', 'v'],
+            includeKeys: ['e', 'sta', 'v'],
             events: ['m', 'um'],
           }],
         };
@@ -1568,8 +1568,7 @@ describe('CmcdManager Setup', () => {
                 mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
-                includeKeys: ['e', 'sta', 'msd'],
-                events: ['p', 'a'],
+                includeKeys: ['msd', 'e', 'sta'],
               }],
             },
         );
@@ -1580,12 +1579,25 @@ describe('CmcdManager Setup', () => {
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
         let request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
+        expect(requestSpy).toHaveBeenCalled();
+
         let decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('msd=');
 
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('pause'));
         request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
+        expect(requestSpy).toHaveBeenCalled();
+
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).not.toContain('msd=');
+
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
+        request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+        expect(requestSpy).toHaveBeenCalled();
+
         decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).not.toContain('msd=');
       });
@@ -1605,7 +1617,7 @@ describe('CmcdManager Setup', () => {
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta'],
-            events: ['p'],
+            events: ['m'],
           }],
         };
 
@@ -1613,20 +1625,29 @@ describe('CmcdManager Setup', () => {
         cmcdManager.setMediaElement(eventTarget);
 
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
-        expect(requestSpy).toHaveBeenCalled();
-        const request = /** @type {!jasmine.Spy} */ (requestSpy)
-            .calls.mostRecent().args[1];
-        const decodedUri = decodeURIComponent(request.uris[0]);
-        expect(decodedUri).toContain('sta="p"');
-        expect(decodedUri).not.toContain('sta="a"');
-        expect(decodedUri).not.toContain('sta="k"');
 
+        expect(requestSpy).not.toHaveBeenCalled();
 
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('pause'));
         // Should not have been called again for 'pause'
-        expect(requestSpy).toHaveBeenCalledTimes(1);
+        expect(requestSpy).not.toHaveBeenCalled();
 
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('seeking'));
+        // Should not have been called again for 'seeking'
+        expect(requestSpy).not.toHaveBeenCalled();
+
+        // Mute
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('volumechange'));
+        const request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+
+        const decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="m"');
+        expect(decodedUri).not.toContain('e="ps"');
+        expect(decodedUri).not.toContain('sta="p"');
+        expect(decodedUri).not.toContain('sta="a"');
+        expect(decodedUri).not.toContain('sta="k"');
+
         // Should not have been called again for 'seeking'
         expect(requestSpy).toHaveBeenCalledTimes(1);
       });
@@ -1648,7 +1669,7 @@ describe('CmcdManager Setup', () => {
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta', 'bl', 'mtp', 'cid'],
-            events: ['p'],
+            events: ['ps'],
           }],
         };
 
@@ -1734,7 +1755,7 @@ describe('CmcdManager Setup', () => {
             url: 'https://example.com/cmcd',
             // d and rtp are not valid for event mode
             includeKeys: ['e', 'sta', 'bl', 'd', 'rtp'],
-            events: ['p'],
+            events: ['ps'],
           }],
         };
 
@@ -1770,14 +1791,14 @@ describe('CmcdManager Setup', () => {
               enabled: true,
               url: 'https://example.com/cmcd1',
               includeKeys: ['e', 'sta'],
-              events: ['p'],
+              events: ['ps'],
             },
             {
               mode: 'event',
               enabled: true,
               url: 'https://example.com/cmcd2',
               includeKeys: ['e', 'sta', 'v'],
-              events: ['p'],
+              events: ['ps'],
             },
           ],
         };
@@ -1825,7 +1846,7 @@ describe('CmcdManager Setup', () => {
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta', 'v', 'sid'],
-            events: ['p'],
+            events: ['ps'],
             useHeaders: true,
           }],
         };
@@ -1858,8 +1879,8 @@ describe('CmcdManager Setup', () => {
             mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
-            includeKeys: ['e', 'ts'],
-            events: ['p'],
+            includeKeys: ['e', 'sta', 'ts'],
+            events: ['ps'],
           }],
         };
 
