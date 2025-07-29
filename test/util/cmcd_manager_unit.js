@@ -1992,7 +1992,9 @@ describe('CmcdManager Setup', () => {
 
         mockMediaElement.dispatchEvent(new shaka.util.FakeEvent('play'));
         expect(requestSpy).toHaveBeenCalledTimes(1);
-        let request = requestSpy.calls.mostRecent().args[1];
+        let request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+
         let decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('e="ps"');
         expect(decodedUri).toContain('sta="p"');
@@ -2001,7 +2003,8 @@ describe('CmcdManager Setup', () => {
         mockMediaElement.dispatchEvent(
             new shaka.util.FakeEvent('volumechange'));
         expect(requestSpy).toHaveBeenCalledTimes(2);
-        request = requestSpy.calls.mostRecent().args[1];
+        request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
         decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('e="m"');
 
@@ -2009,7 +2012,8 @@ describe('CmcdManager Setup', () => {
         mockMediaElement.dispatchEvent(
             new shaka.util.FakeEvent('volumechange'));
         expect(requestSpy).toHaveBeenCalledTimes(3);
-        request = requestSpy.calls.mostRecent().args[1];
+        request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
         decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('e="um"');
       });
@@ -2040,7 +2044,8 @@ describe('CmcdManager Setup', () => {
 
         mockMediaElement.dispatchEvent(new shaka.util.FakeEvent('play'));
         expect(requestSpy).toHaveBeenCalledTimes(1);
-        let request = requestSpy.calls.mostRecent().args[1];
+        let request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
         let decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('e="ps"');
         expect(decodedUri).toContain('sta="p"');
@@ -2053,12 +2058,92 @@ describe('CmcdManager Setup', () => {
         mockMediaElement.dispatchEvent(
             new shaka.util.FakeEvent('volumechange'));
         expect(requestSpy).toHaveBeenCalledTimes(2);
-        request = requestSpy.calls.mostRecent().args[1];
+        request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
         decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('e="m"');
         expect(decodedUri).toContain(`sid="${sessionId}"`);
         expect(decodedUri).toContain(`cid="v2-event-content-all"`);
         expect(decodedUri).toContain('v=2');
+      });
+
+      it('does not send time interval events when timeInterval is 0', () => {
+        jasmine.clock().install();
+        const eventTarget = new shaka.util.FakeEventTarget();
+        const playerInterfaceWithNE =
+        Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const config = {
+          version: 2,
+          enabled: true,
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            timeInterval: 0,
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(
+            playerInterfaceWithNE,
+            config,
+        );
+        cmcdManager.setMediaElement(eventTarget);
+        cmcdManager.configure(config);
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
+        expect(requestSpy).toHaveBeenCalledTimes(1);
+
+        jasmine.clock().tick(20000);
+
+        expect(requestSpy).toHaveBeenCalledTimes(1);
+
+        jasmine.clock().uninstall();
+      });
+
+      it('uses default time interval when not specified', () => {
+        jasmine.clock().install();
+        const eventTarget = new shaka.util.FakeEventTarget();
+        const playerInterfaceWithNE =
+        Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const config = {
+          version: 2,
+          enabled: true,
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            // timeInterval is not defined, should default to 10s.
+            includeKeys: ['e', 'v'],
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(
+            playerInterfaceWithNE,
+            config,
+        );
+        cmcdManager.setMediaElement(eventTarget);
+        cmcdManager.configure(config);
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
+        expect(requestSpy).not.toHaveBeenCalled();
+
+        // Default time interval is 10 seconds.
+        jasmine.clock().tick(10001);
+
+        expect(requestSpy).toHaveBeenCalledTimes(1);
+        const request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="t"');
+        expect(decodedUri).toContain('v=2');
+
+        jasmine.clock().uninstall();
       });
     });
   });
