@@ -166,6 +166,11 @@ jobs:
           state: pending
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
       - name: Build Player
         run: python3 build/all.py
 
@@ -257,7 +262,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: zulu
-          java-version: 11
+          java-version: 21
 
       - name: Cache dependencies
         uses: actions/cache@v4

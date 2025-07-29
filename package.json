@@ -43,7 +43,7 @@
     "esprima": "^4.0.1",
     "fontfaceonload": "^1.0.2",
     "globals": "^15.14.0",
-    "google-closure-compiler-java": "^20240317.0.0",
+    "google-closure-compiler-java": "^20250723.0.0",
     "google-closure-deps": "^20230802.0.0",
     "google-closure-library": "^20221102.0.0",
     "htmlhint": "^1.1.3",
