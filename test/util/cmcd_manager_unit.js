@@ -1924,6 +1924,142 @@ describe('CmcdManager Setup', () => {
         const decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toMatch(/ts=\d+/);
       });
+
+      it('sends all allowed keys when includeKeys is empty', () => {
+        const eventTarget = new shaka.util.FakeEventTarget();
+        const playerInterfaceWithNE =
+            Object.assign({}, playerInterface, {
+              getNetworkingEngine: () => networkingEngine,
+            });
+
+        const config = {
+          version: 2,
+          enabled: true,
+          sessionId: sessionId,
+          contentId: 'v2-event-content',
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            includeKeys: [],
+            events: ['ps'],
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(playerInterfaceWithNE, config);
+        cmcdManager.setMediaElement(eventTarget);
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
+
+        expect(requestSpy).toHaveBeenCalled();
+        const request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
+
+        // Check for essential event keys
+        expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="p"');
+
+        // Check for other common keys that should be included by default
+        expect(decodedUri).toContain(`sid="${sessionId}"`);
+        expect(decodedUri).toContain('cid="v2-event-content"');
+        expect(decodedUri).toContain('v=2');
+        expect(decodedUri).toContain('mtp=');
+        expect(decodedUri).toMatch(/ts=\d+/);
+      });
+
+      it('sends all event types when events array is empty', () => {
+        const mockMediaElement = new MockMediaElement();
+        const playerInterfaceWithNE =
+            Object.assign({}, playerInterface, {
+              getNetworkingEngine: () => networkingEngine,
+            });
+
+        const config = {
+          version: 2,
+          enabled: true,
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            includeKeys: ['e', 'sta'],
+            events: [],
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(playerInterfaceWithNE, config);
+        cmcdManager.setMediaElement(mockMediaElement);
+
+        mockMediaElement.dispatchEvent(new shaka.util.FakeEvent('play'));
+        expect(requestSpy).toHaveBeenCalledTimes(1);
+        let request = requestSpy.calls.mostRecent().args[1];
+        let decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="p"');
+
+        mockMediaElement.muted = true;
+        mockMediaElement.dispatchEvent(
+            new shaka.util.FakeEvent('volumechange'));
+        expect(requestSpy).toHaveBeenCalledTimes(2);
+        request = requestSpy.calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="m"');
+
+        mockMediaElement.muted = false;
+        mockMediaElement.dispatchEvent(
+            new shaka.util.FakeEvent('volumechange'));
+        expect(requestSpy).toHaveBeenCalledTimes(3);
+        request = requestSpy.calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="um"');
+      });
+
+      it('sends all keys for all events when both arrays are empty', () => {
+        const mockMediaElement = new MockMediaElement();
+        const playerInterfaceWithNE =
+            Object.assign({}, playerInterface, {
+              getNetworkingEngine: () => networkingEngine,
+            });
+
+        const config = {
+          version: 2,
+          enabled: true,
+          sessionId: sessionId,
+          contentId: 'v2-event-content-all',
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            includeKeys: [],
+            events: [],
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(playerInterfaceWithNE, config);
+        cmcdManager.setMediaElement(mockMediaElement);
+
+        mockMediaElement.dispatchEvent(new shaka.util.FakeEvent('play'));
+        expect(requestSpy).toHaveBeenCalledTimes(1);
+        let request = requestSpy.calls.mostRecent().args[1];
+        let decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="p"');
+        expect(decodedUri).toContain(`sid="${sessionId}"`);
+        expect(decodedUri).toContain(`cid="v2-event-content-all"`);
+        expect(decodedUri).toContain('v=2');
+        expect(decodedUri).toMatch(/ts=\d+/);
+
+        mockMediaElement.muted = true;
+        mockMediaElement.dispatchEvent(
+            new shaka.util.FakeEvent('volumechange'));
+        expect(requestSpy).toHaveBeenCalledTimes(2);
+        request = requestSpy.calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="m"');
+        expect(decodedUri).toContain(`sid="${sessionId}"`);
+        expect(decodedUri).toContain(`cid="v2-event-content-all"`);
+        expect(decodedUri).toContain('v=2');
+      });
     });
   });
 });
