@@ -1878,7 +1878,8 @@ describe('CmcdManager Setup', () => {
         // After 'play', two requests should have been sent
         expect(requestSpy).toHaveBeenCalledTimes(2);
 
-        const playCalls = requestSpy.calls.all().map((call) => call.args[1]);
+        const playCalls = /** @type {!jasmine.Spy} */
+            (requestSpy).calls.all().map((call) => call.args[1]);
         const playCall1 = playCalls.find((req) => req.uris[0].startsWith('https://example.com/cmcd1'));
         const playCall2 = playCalls.find((req) => req.uris[0].startsWith('https://example.com/cmcd2'));
 
@@ -1894,7 +1895,7 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri2).toContain('v=2');
 
         // Reset the spy before the next event to have clean calls
-        requestSpy.calls.reset();
+        /** @type {!jasmine.Spy} */ (requestSpy).calls.reset();
 
         // Dispatch 'playing' event
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('playing'));
@@ -1902,7 +1903,8 @@ describe('CmcdManager Setup', () => {
         // After 'playing', two more requests should have been sent
         expect(requestSpy).toHaveBeenCalledTimes(2);
 
-        const playingCalls = requestSpy.calls.all().map((call) => call.args[1]);
+        const playingCalls = /** @type {!jasmine.Spy} */
+          (requestSpy).calls.all().map((call) => call.args[1]);
         const playingCall1 = playingCalls.find((req) => req.uris[0].startsWith('https://example.com/cmcd1'));
         const playingCall2 = playingCalls.find((req) => req.uris[0].startsWith('https://example.com/cmcd2'));
 
