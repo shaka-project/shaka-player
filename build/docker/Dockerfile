@@ -5,7 +5,7 @@
 # Run tests with:
 #   docker run -v /path/to/shaka-player:/usr/src --user $(id -u):$(id -g) shaka-player-build python3 build/test.py --quick --browsers ChromeHeadless
 
-FROM alpine:3.18
+FROM alpine:3.19
 
 # Install dependencies
 RUN apk add --update --no-cache \
