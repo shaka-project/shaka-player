@@ -2247,6 +2247,47 @@ describe('CmcdManager Setup', () => {
 
         jasmine.clock().uninstall();
       });
+
+      it('sends rebuffering play state change event', () => {
+        const playerInterfaceWithNE =
+        Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const config = {
+          version: 2,
+          enabled: true,
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            includeKeys: ['e', 'sta', 'v'],
+            events: ['ps'],
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(
+            playerInterfaceWithNE,
+            config,
+        );
+        cmcdManager.setMediaElement(new shaka.util.FakeEventTarget());
+        cmcdManager.configure(config);
+
+        // Simulate playback start
+        cmcdManager.setBuffering(false);
+        (/** @type {!jasmine.Spy} */ (requestSpy)).calls.reset();
+
+        // Simulate rebuffering
+        cmcdManager.setBuffering(true);
+
+        expect(requestSpy).toHaveBeenCalledTimes(1);
+        const request = (/** @type {!jasmine.Spy} */ (requestSpy))
+            .calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="r"');
+        expect(decodedUri).toContain('v=2');
+      });
     });
   });
 });
