@@ -1466,6 +1466,14 @@ describe('CmcdManager Setup', () => {
             .calls.mostRecent().args[1];
         let decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="s"');
+        expect(decodedUri).toContain('v=2');
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('playing'));
+        request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="ps"');
         expect(decodedUri).toContain('sta="p"');
         expect(decodedUri).toContain('v=2');
 
@@ -1602,6 +1610,12 @@ describe('CmcdManager Setup', () => {
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
         let request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
+
+        expect(requestSpy).toHaveBeenCalled();
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('playing'));
+        request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
         expect(requestSpy).toHaveBeenCalled();
 
         let decodedUri = decodeURIComponent(request.uris[0]);
@@ -1706,11 +1720,21 @@ describe('CmcdManager Setup', () => {
         cmcdManager.setMediaElement(eventTarget);
 
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
+        let request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+        let decodedUri = decodeURIComponent(request.uris[0]);
+
+        expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="s"');
+        expect(decodedUri).toContain('mtp=');
+        expect(decodedUri).toContain('cid="v2-event-content"');
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('playing'));
 
         expect(requestSpy).toHaveBeenCalled();
-        const request = /** @type {!jasmine.Spy} */ (requestSpy)
+        request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
-        const decodedUri = decodeURIComponent(request.uris[0]);
+        decodedUri = decodeURIComponent(request.uris[0]);
 
         expect(decodedUri).toContain('e="ps"');
         expect(decodedUri).toContain('sta="p"');
@@ -1794,9 +1818,21 @@ describe('CmcdManager Setup', () => {
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
 
         expect(requestSpy).toHaveBeenCalled();
-        const request = /** @type {!jasmine.Spy} */ (requestSpy)
+        let request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
-        const decodedUri = decodeURIComponent(request.uris[0]);
+        let decodedUri = decodeURIComponent(request.uris[0]);
+
+        expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="s"');
+        expect(decodedUri).not.toContain('d=');
+        expect(decodedUri).not.toContain('rtp=');
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('playing'));
+
+        expect(requestSpy).toHaveBeenCalled();
+        request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
 
         expect(decodedUri).toContain('e="ps"');
         expect(decodedUri).toContain('sta="p"');
@@ -1837,26 +1873,36 @@ describe('CmcdManager Setup', () => {
         cmcdManager.configure(config);
 
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
-
-        expect(requestSpy).toHaveBeenCalledTimes(2);
-
         const request1 = /** @type {!jasmine.Spy} */ (requestSpy)
-            .calls.argsFor(0)[1];
+            .calls.mostRecent().args[1];
         const decodedUri1 = decodeURIComponent(request1.uris[0]);
         expect(request1.uris[0].startsWith('https://example.com/cmcd1'))
             .toBe(true);
         expect(decodedUri1).toContain('e="ps"');
-        expect(decodedUri1).toContain('sta="p"');
+        expect(decodedUri1).toContain('sta="s"');
         expect(decodedUri1).not.toContain('v=2');
 
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('playing'));
+
+        expect(requestSpy).toHaveBeenCalledTimes(2);
+
         const request2 = /** @type {!jasmine.Spy} */ (requestSpy)
-            .calls.argsFor(1)[1];
+            .calls.mostRecent().args[1];
         const decodedUri2 = decodeURIComponent(request2.uris[0]);
-        expect(request2.uris[0].startsWith('https://example.com/cmcd2'))
+        expect(request2.uris[0].startsWith('https://example.com/cmcd1'))
             .toBe(true);
         expect(decodedUri2).toContain('e="ps"');
         expect(decodedUri2).toContain('sta="p"');
-        expect(decodedUri2).toContain('v=2');
+        expect(decodedUri2).not.toContain('v=2');
+
+        const request3 = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+        const decodedUri3 = decodeURIComponent(request3.uris[0]);
+        expect(request3.uris[0].startsWith('https://example.com/cmcd2'))
+            .toBe(true);
+        expect(decodedUri3).toContain('e="ps"');
+        expect(decodedUri3).toContain('sta="p"');
+        expect(decodedUri3).toContain('v=2');
       });
 
       it('sends events using headers', () => {
@@ -1885,9 +1931,18 @@ describe('CmcdManager Setup', () => {
         cmcdManager.configure(config);
 
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
-
-        const request = /** @type {!jasmine.Spy} */ (requestSpy)
+        let request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
+
+        expect(request.uris[0]).toBe('https://example.com/cmcd');
+        expect(request.headers['CMCD-Request']).toBe('e="ps",sta="s"');
+        expect(request.headers['CMCD-Session']).toContain('v=2');
+        expect(request.headers['CMCD-Session']).toContain(`sid="${sessionId}"`);
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('playing'));
+        request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+
         expect(request.uris[0]).toBe('https://example.com/cmcd');
         expect(request.headers['CMCD-Request']).toBe('e="ps",sta="p"');
         expect(request.headers['CMCD-Session']).toContain('v=2');
@@ -1952,9 +2007,20 @@ describe('CmcdManager Setup', () => {
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
 
         expect(requestSpy).toHaveBeenCalled();
-        const request = /** @type {!jasmine.Spy} */ (requestSpy)
+        let request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
-        const decodedUri = decodeURIComponent(request.uris[0]);
+        let decodedUri = decodeURIComponent(request.uris[0]);
+
+        // Check for essential event keys
+        expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="s"');
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('playing'));
+
+        expect(requestSpy).toHaveBeenCalled();
+        request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
 
         // Check for essential event keys
         expect(decodedUri).toContain('e="ps"');
@@ -1997,12 +2063,21 @@ describe('CmcdManager Setup', () => {
 
         let decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="s"');
+
+        mockMediaElement.dispatchEvent(new shaka.util.FakeEvent('playing'));
+        expect(requestSpy).toHaveBeenCalledTimes(2);
+        request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="ps"');
         expect(decodedUri).toContain('sta="p"');
 
         mockMediaElement.muted = true;
         mockMediaElement.dispatchEvent(
             new shaka.util.FakeEvent('volumechange'));
-        expect(requestSpy).toHaveBeenCalledTimes(2);
+        expect(requestSpy).toHaveBeenCalledTimes(3);
         request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
         decodedUri = decodeURIComponent(request.uris[0]);
@@ -2011,7 +2086,7 @@ describe('CmcdManager Setup', () => {
         mockMediaElement.muted = false;
         mockMediaElement.dispatchEvent(
             new shaka.util.FakeEvent('volumechange'));
-        expect(requestSpy).toHaveBeenCalledTimes(3);
+        expect(requestSpy).toHaveBeenCalledTimes(4);
         request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
         decodedUri = decodeURIComponent(request.uris[0]);
@@ -2048,6 +2123,18 @@ describe('CmcdManager Setup', () => {
             .calls.mostRecent().args[1];
         let decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="s"');
+        expect(decodedUri).toContain(`sid="${sessionId}"`);
+        expect(decodedUri).toContain(`cid="v2-event-content-all"`);
+        expect(decodedUri).toContain('v=2');
+        expect(decodedUri).toMatch(/ts=\d+/);
+
+        mockMediaElement.dispatchEvent(new shaka.util.FakeEvent('playing'));
+        expect(requestSpy).toHaveBeenCalledTimes(2);
+        request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="ps"');
         expect(decodedUri).toContain('sta="p"');
         expect(decodedUri).toContain(`sid="${sessionId}"`);
         expect(decodedUri).toContain(`cid="v2-event-content-all"`);
@@ -2057,7 +2144,7 @@ describe('CmcdManager Setup', () => {
         mockMediaElement.muted = true;
         mockMediaElement.dispatchEvent(
             new shaka.util.FakeEvent('volumechange'));
-        expect(requestSpy).toHaveBeenCalledTimes(2);
+        expect(requestSpy).toHaveBeenCalledTimes(3);
         request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
         decodedUri = decodeURIComponent(request.uris[0]);
