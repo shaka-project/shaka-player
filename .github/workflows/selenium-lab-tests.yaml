@@ -166,6 +166,11 @@ jobs:
           state: pending
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
       - name: Build Player
         run: python3 build/all.py
 
