@@ -1410,6 +1410,19 @@ describe('CmcdManager Setup', () => {
 
     // region CMCD V2 Event mode
     describe('Event Mode', () => {
+      /**
+       * A mock media element that extends FakeEventTarget and adds properties
+       * for testing CMCD event mode.
+       * @extends {shaka.util.FakeEventTarget}
+       */
+      class MockMediaElement extends shaka.util.FakeEventTarget {
+        constructor() {
+          super();
+          /** @type {boolean} */
+          this.muted = false;
+        }
+      }
+
       let networkingEngine;
       let requestSpy;
 
@@ -1479,7 +1492,9 @@ describe('CmcdManager Setup', () => {
       });
 
       it('sends mute and unmute events', () => {
-        const eventTarget = new shaka.util.FakeEventTarget();
+        const mockMediaElement = /** @type {!MockMediaElement} */ (
+          new MockMediaElement());
+
         const playerInterfaceWithNE =
         Object.assign({}, playerInterface, {
           getNetworkingEngine: () => networkingEngine,
@@ -1498,10 +1513,14 @@ describe('CmcdManager Setup', () => {
         };
 
         const cmcdManager = createCmcdManager(playerInterfaceWithNE, config);
-        cmcdManager.setMediaElement(eventTarget);
+        cmcdManager.setMediaElement(mockMediaElement);
 
         // Mute
-        eventTarget.dispatchEvent(new shaka.util.FakeEvent('volumechange'));
+        mockMediaElement.muted = true;
+        mockMediaElement.dispatchEvent(
+            new shaka.util.FakeEvent('volumechange'),
+        );
+
         let request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
         let decodedUri = decodeURIComponent(request.uris[0]);
@@ -1509,7 +1528,11 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('v=2');
 
         // Unmute
-        eventTarget.dispatchEvent(new shaka.util.FakeEvent('volumechange'));
+        mockMediaElement.muted = false;
+        mockMediaElement.dispatchEvent(
+            new shaka.util.FakeEvent('volumechange'),
+        );
+
         request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
         decodedUri = decodeURIComponent(request.uris[0]);
@@ -1602,7 +1625,9 @@ describe('CmcdManager Setup', () => {
       });
 
       it('filters events based on the target configuration', () => {
-        const eventTarget = new shaka.util.FakeEventTarget();
+        const mockMediaElement = /** @type {!MockMediaElement} */ (
+          new MockMediaElement());
+
         const playerInterfaceWithNE =
         Object.assign({}, playerInterface, {
           getNetworkingEngine: () => networkingEngine,
@@ -1621,22 +1646,27 @@ describe('CmcdManager Setup', () => {
         };
 
         const cmcdManager = createCmcdManager(playerInterfaceWithNE, config);
-        cmcdManager.setMediaElement(eventTarget);
+        cmcdManager.setMediaElement(mockMediaElement);
 
-        eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
+        mockMediaElement.dispatchEvent(new shaka.util.FakeEvent('play'));
 
         expect(requestSpy).not.toHaveBeenCalled();
 
-        eventTarget.dispatchEvent(new shaka.util.FakeEvent('pause'));
+        mockMediaElement.dispatchEvent(new shaka.util.FakeEvent('pause'));
         // Should not have been called again for 'pause'
         expect(requestSpy).not.toHaveBeenCalled();
 
-        eventTarget.dispatchEvent(new shaka.util.FakeEvent('seeking'));
+        mockMediaElement.dispatchEvent(new shaka.util.FakeEvent('seeking'));
         // Should not have been called again for 'seeking'
         expect(requestSpy).not.toHaveBeenCalled();
 
         // Mute
-        eventTarget.dispatchEvent(new shaka.util.FakeEvent('volumechange'));
+        /** @type boolean */
+        mockMediaElement.muted = true;
+        mockMediaElement.dispatchEvent(
+            new shaka.util.FakeEvent('volumechange'),
+        );
+
         const request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
 
