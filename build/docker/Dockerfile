@@ -9,7 +9,7 @@ FROM alpine:3.19
 
 # Install dependencies
 RUN apk add --update --no-cache \
-  bash chromium chromium-chromedriver git nodejs npm openjdk11-jre-headless python3
+  bash chromium chromium-chromedriver git nodejs npm openjdk21-jre-headless python3
 
 WORKDIR /usr/src
 ENV HOME /tmp

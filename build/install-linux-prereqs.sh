@@ -3,7 +3,7 @@
 # Installs prerequisites for Shaka Player development on Linux:
 #  - Git v1.9+ (to check out the code)
 #  - Python v3.5+ (to run the build scripts)
-#  - Java Runtime Environment v11+ (to run the Closure compiler)
+#  - Java Runtime Environment v21+ (to run the Closure compiler)
 #  - Apache (to serve the Shaka Player demo)
 #  - NodeJS v18+ (to run some build deps, such as jsdoc, karma, etc)
 
@@ -55,7 +55,7 @@ sudo apt -y update
 sudo apt -y install apache2 curl extrepo git python3
 sudo extrepo enable zulu-openjdk
 sudo apt -y update
-sudo apt -y install zulu11-jre
+sudo apt -y install zulu21-jre
 
 # NodeJS in Ubuntu and Debian is often out of date, so we may need to grab a
 # newer version.  We require v18+.
