@@ -26,6 +26,11 @@ jobs:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
       - uses: ./.github/workflows/custom-actions/prep-for-appspot
 
       - uses: google-github-actions/auth@v2
