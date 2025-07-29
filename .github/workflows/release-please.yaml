@@ -143,6 +143,11 @@ jobs:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
       - name: Compute appspot subdomain and promotion
         run: |
           # This is the same as the version tag, but with dots replaced by
