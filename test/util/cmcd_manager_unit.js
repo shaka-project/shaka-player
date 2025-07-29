@@ -2330,6 +2330,65 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('e="ps"');
         expect(decodedUri).toContain('sta="d"');
       });
+
+      it('sends player expand and collapse events', () => {
+        const eventTarget = new shaka.util.FakeEventTarget();
+        const playerInterfaceWithNE =
+        Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const config = {
+          version: 2,
+          enabled: true,
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            includeKeys: ['e'],
+            events: ['pe', 'pc'],
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(
+            playerInterfaceWithNE,
+            config,
+        );
+        cmcdManager.setMediaElement(eventTarget);
+        cmcdManager.configure(config);
+
+        // Mock fullscreenElement to simulate entering fullscreen
+        Object.defineProperty(document, 'fullscreenElement', {
+          value: eventTarget,
+          writable: true,
+        });
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('fullscreenchange'));
+
+        expect(requestSpy).toHaveBeenCalledTimes(1);
+        let request = (/** @type {!jasmine.Spy} */ (requestSpy))
+            .calls.mostRecent().args[1];
+        let decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="pe"');
+
+        // Mock fullscreenElement to simulate exiting fullscreen
+        Object.defineProperty(document, 'fullscreenElement', {
+          value: null,
+          writable: true,
+        });
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('fullscreenchange'));
+
+        expect(requestSpy).toHaveBeenCalledTimes(2);
+        request = (/** @type {!jasmine.Spy} */ (requestSpy))
+            .calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="pc"');
+
+        // Restore original property
+        Object.defineProperty(document, 'fullscreenElement', {
+          value: null,
+          writable: false,
+        });
+      });
     });
   });
 });
