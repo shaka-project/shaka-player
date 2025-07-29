@@ -1843,9 +1843,9 @@ describe('CmcdManager Setup', () => {
       it('sends events to multiple targets', () => {
         const eventTarget = new shaka.util.FakeEventTarget();
         const playerInterfaceWithNE =
-        Object.assign({}, playerInterface, {
-          getNetworkingEngine: () => networkingEngine,
-        });
+          Object.assign({}, playerInterface, {
+            getNetworkingEngine: () => networkingEngine,
+          });
 
         const config = {
           version: 2,
@@ -1872,37 +1872,50 @@ describe('CmcdManager Setup', () => {
         cmcdManager.setMediaElement(eventTarget);
         cmcdManager.configure(config);
 
+        // Dispatch 'play' event
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
-        const request1 = /** @type {!jasmine.Spy} */ (requestSpy)
-            .calls.mostRecent().args[1];
-        const decodedUri1 = decodeURIComponent(request1.uris[0]);
-        expect(request1.uris[0].startsWith('https://example.com/cmcd1'))
-            .toBe(true);
+
+        // After 'play', two requests should have been sent
+        expect(requestSpy).toHaveBeenCalledTimes(2);
+
+        const playCalls = requestSpy.calls.all().map((call) => call.args[1]);
+        const playCall1 = playCalls.find((req) => req.uris[0].startsWith('https://example.com/cmcd1'));
+        const playCall2 = playCalls.find((req) => req.uris[0].startsWith('https://example.com/cmcd2'));
+
+        // Assertions for the 'play' event
+        const decodedUri1 = decodeURIComponent(playCall1.uris[0]);
         expect(decodedUri1).toContain('e="ps"');
         expect(decodedUri1).toContain('sta="s"');
         expect(decodedUri1).not.toContain('v=2');
 
+        const decodedUri2 = decodeURIComponent(playCall2.uris[0]);
+        expect(decodedUri2).toContain('e="ps"');
+        expect(decodedUri2).toContain('sta="s"');
+        expect(decodedUri2).toContain('v=2');
+
+        // Reset the spy before the next event to have clean calls
+        requestSpy.calls.reset();
+
+        // Dispatch 'playing' event
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('playing'));
 
+        // After 'playing', two more requests should have been sent
         expect(requestSpy).toHaveBeenCalledTimes(2);
 
-        const request2 = /** @type {!jasmine.Spy} */ (requestSpy)
-            .calls.mostRecent().args[1];
-        const decodedUri2 = decodeURIComponent(request2.uris[0]);
-        expect(request2.uris[0].startsWith('https://example.com/cmcd1'))
-            .toBe(true);
-        expect(decodedUri2).toContain('e="ps"');
-        expect(decodedUri2).toContain('sta="p"');
-        expect(decodedUri2).not.toContain('v=2');
+        const playingCalls = requestSpy.calls.all().map((call) => call.args[1]);
+        const playingCall1 = playingCalls.find((req) => req.uris[0].startsWith('https://example.com/cmcd1'));
+        const playingCall2 = playingCalls.find((req) => req.uris[0].startsWith('https://example.com/cmcd2'));
 
-        const request3 = /** @type {!jasmine.Spy} */ (requestSpy)
-            .calls.mostRecent().args[1];
-        const decodedUri3 = decodeURIComponent(request3.uris[0]);
-        expect(request3.uris[0].startsWith('https://example.com/cmcd2'))
-            .toBe(true);
+        // Assertions for the 'playing' event
+        const decodedUri3 = decodeURIComponent(playingCall1.uris[0]);
         expect(decodedUri3).toContain('e="ps"');
         expect(decodedUri3).toContain('sta="p"');
-        expect(decodedUri3).toContain('v=2');
+        expect(decodedUri3).not.toContain('v=2');
+
+        const decodedUri4 = decodeURIComponent(playingCall2.uris[0]);
+        expect(decodedUri4).toContain('e="ps"');
+        expect(decodedUri4).toContain('sta="p"');
+        expect(decodedUri4).toContain('v=2');
       });
 
       it('sends events using headers', () => {
