@@ -1484,6 +1484,13 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('e="ps"');
         expect(decodedUri).toContain('sta="a"');
 
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('waiting'));
+        request = (/** @type {!jasmine.Spy} */ (requestSpy))
+            .calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="w"');
+
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('seeking'));
         request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
