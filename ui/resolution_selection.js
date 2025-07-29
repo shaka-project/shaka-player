@@ -569,7 +569,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
    */
   getTextFromBandwidth_(bandwidth) {
     if (bandwidth >= 1e6) {
-      return (bandwidth / 1e6).toFixed(1) + ' Mbps';
+      return (bandwidth / 1e6).toFixed(1).replace('.0', '') + ' Mbps';
     } else {
       return Math.floor(bandwidth / 1e3) + ' Kbps';
     }
