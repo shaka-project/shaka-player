@@ -64,6 +64,9 @@ shaka.test.FakeMediaSourceEngine = class {
     this.ended = jasmine.createSpy('ended').and.returnValue(false);
 
     /** @type {!jasmine.Spy} */
+    this.closed = jasmine.createSpy('closed').and.returnValue(false);
+
+    /** @type {!jasmine.Spy} */
     this.endOfStream =
         jasmine.createSpy('endOfStream').and.returnValue(Promise.resolve());
 
