@@ -430,7 +430,7 @@ shaka.extern.IUIElement = class {
     this.adManager;
 
     /**
-     * @protected {shaka.extern.IAd}
+     * @protected {?shaka.extern.IAd}
      * @exportDoc
      */
     this.ad;
