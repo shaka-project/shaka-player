@@ -2008,7 +2008,7 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('ts=');
       });
 
-      it('does not include rc or url key', () => {
+      it('does not include rc, url, ttfb or ttlb key', () => {
         const eventTarget = new shaka.util.FakeEventTarget();
         const playerInterfaceWithNE =
         Object.assign({}, playerInterface, {
@@ -2022,8 +2022,8 @@ describe('CmcdManager Setup', () => {
             mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
-            // rc and url are not valid for event mode
-            includeKeys: ['e', 'sta', 'rc', 'url'],
+            // rc, url, ttfb and ttlb are not valid for event mode
+            includeKeys: ['e', 'sta', 'rc', 'url', 'ttfb', 'ttlb'],
             events: ['ps'],
           }],
         };
@@ -2042,6 +2042,8 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('sta="s"');
         expect(decodedUri).not.toContain('rc=');
         expect(decodedUri).not.toContain('url=');
+        expect(decodedUri).not.toContain('ttfb=');
+        expect(decodedUri).not.toContain('ttlb=');
       });
 
       it('always includes timestamp (ts) in event reports', () => {
