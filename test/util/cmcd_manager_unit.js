@@ -1957,7 +1957,10 @@ describe('CmcdManager Setup', () => {
             .calls.mostRecent().args[1];
 
         expect(request.uris[0]).toBe('https://example.com/cmcd');
-        expect(request.headers['CMCD-Request']).toBe('e="ps",sta="s"');
+        expect(request.headers['CMCD-Request']).toContain('e="ps"');
+        expect(request.headers['CMCD-Request']).toContain('sta="s"');
+        expect(request.headers['CMCD-Request']).toContain('ts=');
+
         expect(request.headers['CMCD-Session']).toContain('v=2');
         expect(request.headers['CMCD-Session']).toContain(`sid="${sessionId}"`);
 
@@ -1966,9 +1969,42 @@ describe('CmcdManager Setup', () => {
             .calls.mostRecent().args[1];
 
         expect(request.uris[0]).toBe('https://example.com/cmcd');
-        expect(request.headers['CMCD-Request']).toBe('e="ps",sta="p"');
+        expect(request.headers['CMCD-Request']).toContain('e="ps"');
+        expect(request.headers['CMCD-Request']).toContain('sta="p"');
+        expect(request.headers['CMCD-Request']).toContain('ts=');
         expect(request.headers['CMCD-Session']).toContain('v=2');
         expect(request.headers['CMCD-Session']).toContain(`sid="${sessionId}"`);
+      });
+
+      it('includes timestamp (ts) in event reports', () => {
+        const eventTarget = new shaka.util.FakeEventTarget();
+        const playerInterfaceWithNE =
+        Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const config = {
+          version: 2,
+          enabled: true,
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            includeKeys: ['e', 'sta', 'ts'],
+            events: ['ps'],
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(playerInterfaceWithNE, config);
+        cmcdManager.setMediaElement(eventTarget);
+
+        eventTarget.dispatchEvent(new shaka.util.FakeEvent('play'));
+
+        expect(requestSpy).toHaveBeenCalled();
+        const request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toMatch(/ts=\d+/);
       });
 
       it('always includes timestamp (ts) in event reports', () => {
@@ -1985,7 +2021,7 @@ describe('CmcdManager Setup', () => {
             mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
-            includeKeys: ['e', 'sta', 'ts'],
+            includeKeys: ['e', 'sta'], // ts is omitted
             events: ['ps'],
           }],
         };
