@@ -252,6 +252,7 @@ shaka.extern.BufferedInfo;
  *
  *   language: string,
  *   label: ?string,
+ *   videoLabel: ?string,
  *   kind: ?string,
  *   width: ?number,
  *   height: ?number,
@@ -312,6 +313,9 @@ shaka.extern.BufferedInfo;
  *   i.e. <code>'en-US'</code>.
  * @property {?string} label
  *   The track label, which is unique text that should describe the track.
+ * @property {?string} videoLabel
+ *   The video track label, which is unique text that should describe the video
+ *   track.
  * @property {?string} kind
  *   (only for text tracks) The kind of text track, either
  *   <code>'caption'</code> or <code>'subtitle'</code>.
@@ -559,6 +563,7 @@ shaka.extern.TextTrack;
  *   mimeType: ?string,
  *   codecs: ?string,
  *   roles: !Array<string>,
+ *   label: ?string,
  * }}
  *
  * @description
@@ -590,6 +595,8 @@ shaka.extern.TextTrack;
  *   The video codecs string provided in the manifest, if present.
  * @property {!Array<string>} roles
  *   The roles of the track, e.g. <code>'main'</code>, <code>'sign'</code>.
+ * @property {?string} label
+ *   The track label, which is unique text that should describe the track.
  * @exportDoc
  */
 shaka.extern.VideoTrack;
