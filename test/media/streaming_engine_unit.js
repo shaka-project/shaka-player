@@ -459,6 +459,7 @@ describe('StreamingEngine', () => {
       // We don't want to evict segments in tests where there is no need to
       // test them.
       config.evictionGoal = 30;
+      config.crossBoundaryStrategy = shaka.config.CrossBoundaryStrategy.KEEP;
     }
 
     if (defaultConfig.segmentPrefetchLimit == config.segmentPrefetchLimit) {
@@ -481,6 +482,7 @@ describe('StreamingEngine', () => {
       onInitSegmentAppended: () => {},
       beforeAppendSegment: Util.spyFunc(beforeAppendSegment),
       disableStream: Util.spyFunc(disableStream),
+      shouldPrefetchNextSegment: () => true,
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface);

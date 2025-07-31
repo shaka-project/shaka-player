@@ -269,6 +269,7 @@ shaka.extern.BufferedInfo;
  *   primary: boolean,
  *   roles: !Array<string>,
  *   audioRoles: Array<string>,
+ *   videoRoles: Array<string>,
  *   accessibilityPurpose: ?shaka.media.ManifestParser.AccessibilityPurpose,
  *   forced: boolean,
  *   videoId: ?number,
@@ -353,6 +354,10 @@ shaka.extern.BufferedInfo;
  *   The roles of the audio in the track, e.g. <code>'main'</code> or
  *   <code>'commentary'</code>. Will be null for text tracks or variant tracks
  *   without audio.
+ * @property {Array<string>} videoRoles
+ *   The roles of the video in the track, e.g. <code>'main'</code> or
+ *   <code>'sign'</code>. Will be null for text tracks or variant tracks
+ *   without video.
  * @property {?shaka.media.ManifestParser.AccessibilityPurpose
  *           } accessibilityPurpose
  *   The DASH accessibility descriptor, if one was provided for this track.
@@ -552,7 +557,8 @@ shaka.extern.TextTrack;
  *   colorGamut: ?string,
  *   videoLayout: ?string,
  *   mimeType: ?string,
- *   codecs: ?string
+ *   codecs: ?string,
+ *   roles: !Array<string>,
  * }}
  *
  * @description
@@ -582,6 +588,8 @@ shaka.extern.TextTrack;
  *   The video MIME type of the content provided in the manifest.
  * @property {?string} codecs
  *   The video codecs string provided in the manifest, if present.
+ * @property {!Array<string>} roles
+ *   The roles of the track, e.g. <code>'main'</code>, <code>'sign'</code>.
  * @exportDoc
  */
 shaka.extern.VideoTrack;
@@ -1324,12 +1332,14 @@ shaka.extern.PersistentSessionMetadata;
  *   Specify the default audio security level for Widevine when audio robustness
  *   is not specified.
  *   <br>
- *   Defaults to <code>'SW_SECURE_CRYPTO'</code>.
+ *   Defaults to <code>'SW_SECURE_CRYPTO'</code> except on Android where the
+ *   default value <code>''</code>.
  * @property {string} defaultVideoRobustnessForWidevine
  *   Specify the default video security level for Widevine when video robustness
  *   is not specified.
  *   <br>
- *   Defaults to <code>'SW_SECURE_DECODE'</code>.
+ *   Defaults to <code>'SW_SECURE_DECODE'</code> except on Android where the
+ *   default value <code>''</code>.
  * @exportDoc
  */
 shaka.extern.DrmConfiguration;
@@ -1385,7 +1395,6 @@ shaka.extern.xml.Node;
  *   manifestPreprocessor: function(!Element),
  *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
- *   multiTypeVariantsAllowed: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
  *   enableFastSwitching: boolean
  * }}
@@ -1457,17 +1466,6 @@ shaka.extern.xml.Node;
  *   "sequence mode" (ignoring their internal timestamps).
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {boolean} multiTypeVariantsAllowed
- *   If true, the manifest parser will create variants that have multiple
- *   mimeTypes or codecs for video or for audio if there is no other choice.
- *   Meant for content where some periods are only available in one mimeType or
- *   codec, and other periods are only available in a different mimeType or
- *   codec. For example, a stream with baked-in ads where the audio codec does
- *   not match the main content.
- *   Might result in undesirable behavior if mediaSource.codecSwitchingStrategy
- *   is not set to SMOOTH.
- *   <br>
- *   Defaults to true if SMOOTH codec switching is supported, RELOAD overwise.
  * @property {boolean} useStreamOnceInPeriodFlattening
  *   If period combiner is used, this option ensures every stream is used
  *   only once in period flattening. It speeds up underlying algorithm
@@ -2757,7 +2755,8 @@ shaka.extern.TextDisplayerConfiguration;
  *   preferredAudioLanguage: string,
  *   preferredAudioLabel: string,
  *   preferredTextLanguage: string,
- *   preferredVariantRole: string,
+ *   preferredAudioRole: string,
+ *   preferredVideoRole: string,
  *   preferredTextRole: string,
  *   preferredVideoCodecs: !Array<string>,
  *   preferredAudioCodecs: !Array<string>,
@@ -2836,8 +2835,12 @@ shaka.extern.TextDisplayerConfiguration;
  *   Changing this during playback will not affect the current playback.
  *   <br>
  *   Defaults to <code>''</code>.
- * @property {string} preferredVariantRole
- *   The preferred role to use for variants.
+ * @property {string} preferredAudioRole
+ *   The preferred audio role to use for variants.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {string} preferredVideoRole
+ *   The preferred video role to use for variants.
  *   <br>
  *   Defaults to <code>''</code>.
  * @property {string} preferredTextRole
@@ -2929,6 +2932,7 @@ shaka.extern.PlayerConfiguration;
 /**
  * @typedef {{
  *   preloadNextUrlWindow: number,
+ *   preloadPrevItem: boolean,
  *   repeatMode: shaka.config.RepeatMode
  * }}
  *
@@ -2940,7 +2944,9 @@ shaka.extern.PlayerConfiguration;
  *   next item. Measured in seconds. If the value is 0, the next URL will not
  *   be preloaded at all.
  *   <br>
- *   Defaults to <code>30</code>.
+ *   Defaults to <code>Infinity</code>.
+ * @property {boolean} preloadPrevItem
+ *   Defaults to <code>true</code>.
  * @property {shaka.config.RepeatMode} repeatMode
  *   Controls behavior of the queue when all items have been played.
  *   <br>

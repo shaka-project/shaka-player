@@ -207,8 +207,8 @@ var ISOBoxerUtils;
  * @property {number} default_sample_flags
  * @property {number} baseMediaDecodeTime
  * @property {string|null|undefined} usertype
- * @property {Array<number} offset
- * @property {Array<number} sample_info_size
+ * @property {Array<number>} offset
+ * @property {Array<number>} sample_info_size
  * @property {number} data_offset
  * @const
  */

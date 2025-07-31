@@ -13,6 +13,7 @@
 /**
  * @typedef {{
  *   manifestUri: string,
+ *   preloadManager: ?shaka.media.PreloadManager,
  *   startTime: ?(number|Date),
  *   mimeType: ?string,
  *   config: ?shaka.extern.PlayerConfiguration,
@@ -22,6 +23,7 @@
  * }}
  *
  * @property {string} manifestUri
+ * @property {?shaka.media.PreloadManager} preloadManager
  * @property {?(number|Date)} startTime
  * @property {?string} mimeType
  * @property {?shaka.extern.PlayerConfiguration} config
