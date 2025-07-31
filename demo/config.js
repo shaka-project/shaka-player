@@ -751,7 +751,8 @@ shakaDemo.Config = class {
         .addTextInput_('Preferred Audio Language', 'preferredAudioLanguage')
         .addTextInput_('Preferred Audio Label', 'preferredAudioLabel')
         .addTextInput_('Preferred Video Label', 'preferredVideoLabel')
-        .addTextInput_('Preferred Variant Role', 'preferredVariantRole')
+        .addTextInput_('Preferred Audio Role', 'preferredAudioRole')
+        .addTextInput_('Preferred Video Role', 'preferredVideoRole')
         .addTextInput_('Preferred Text Language', 'preferredTextLanguage')
         .addTextInput_('Preferred Text Role', 'preferredTextRole')
         .addSelectInput_('Auto-Show Text',
