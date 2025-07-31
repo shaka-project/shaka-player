@@ -2755,7 +2755,8 @@ shaka.extern.TextDisplayerConfiguration;
  *   preferredAudioLanguage: string,
  *   preferredAudioLabel: string,
  *   preferredTextLanguage: string,
- *   preferredVariantRole: string,
+ *   preferredAudioRole: string,
+ *   preferredVideoRole: string,
  *   preferredTextRole: string,
  *   preferredVideoCodecs: !Array<string>,
  *   preferredAudioCodecs: !Array<string>,
@@ -2834,8 +2835,12 @@ shaka.extern.TextDisplayerConfiguration;
  *   Changing this during playback will not affect the current playback.
  *   <br>
  *   Defaults to <code>''</code>.
- * @property {string} preferredVariantRole
- *   The preferred role to use for variants.
+ * @property {string} preferredAudioRole
+ *   The preferred audio role to use for variants.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {string} preferredVideoRole
+ *   The preferred video role to use for variants.
  *   <br>
  *   Defaults to <code>''</code>.
  * @property {string} preferredTextRole

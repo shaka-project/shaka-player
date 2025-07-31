@@ -1685,7 +1685,7 @@ describe('Player', () => {
       variantTracks = [
         {
           id: 100,
-          active: true,
+          active: false,
           type: 'variant',
           bandwidth: 1300,
           language: 'en',
@@ -1727,7 +1727,7 @@ describe('Player', () => {
         },
         {
           id: 101,
-          active: false,
+          active: true,
           type: 'variant',
           bandwidth: 2300,
           language: 'en',
@@ -2180,7 +2180,7 @@ describe('Player', () => {
 
       videoTracks = [
         {
-          active: true,
+          active: false,
           bandwidth: 1000,
           width: 100,
           height: 200,
@@ -2194,7 +2194,7 @@ describe('Player', () => {
           roles: ['main'],
         },
         {
-          active: false,
+          active: true,
           bandwidth: 2000,
           width: 200,
           height: 400,
@@ -2423,10 +2423,11 @@ describe('Player', () => {
 
     it('selectAudioLanguage() applies role only to audio', () => {
       expect(getActiveVariantTrack().roles).not.toContain('commentary');
+      const videoRoles = getActiveVariantTrack().videoRoles;
       player.selectAudioLanguage('en', 'commentary');
       let args = streamingEngine.switchVariant.calls.argsFor(0);
       expect(args[0].audio.roles).toContain('commentary');
-      expect(args[0].video.roles).toContain('main');
+      expect(args[0].video.roles).toBe(videoRoles);
 
       // Switch audio role from 'commentary' to 'main'.
       streamingEngine.switchVariant.calls.reset();
@@ -2434,7 +2435,7 @@ describe('Player', () => {
       expect(streamingEngine.switchVariant).toHaveBeenCalled();
       args = streamingEngine.switchVariant.calls.argsFor(0);
       expect(args[0].audio.roles).toContain('main');
-      expect(args[0].video.roles).toContain('main');
+      expect(args[0].video.roles).toBe(videoRoles);
     });
 
     it('selectAudioLanguage() does not change selected text track', () => {
