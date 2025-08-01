@@ -2525,7 +2525,7 @@ shaka.extern.AdvancedAbrConfiguration;
  * @property {number} timeInterval
  *   Time Interval config in seconds
  *   <br>
- *   Defaults to <code>0</code>.
+ *   Defaults to <code>10</code>.
  * @exportDoc
  */
 shaka.extern.CmcdTarget;
