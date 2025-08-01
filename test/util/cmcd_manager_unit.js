@@ -2008,6 +2008,66 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('ts=');
       });
 
+      it('should return only enabled event targets', () => {
+        const targets = [
+          {mode: 'event', enabled: true, url: 'url1'},
+          {mode: 'event', enabled: false, url: 'url2'},
+          {mode: 'request', enabled: true, url: 'url3'},
+          {mode: 'event', enabled: true, url: 'url4'},
+        ];
+        const cmcdManager = createCmcdManager(playerInterface, {targets});
+        const enabledEventTargets = cmcdManager.getEventModeEnabledTargets_();
+        expect(enabledEventTargets.length).toBe(2);
+        expect(enabledEventTargets[0].url).toBe('url1');
+        expect(enabledEventTargets[1].url).toBe('url4');
+      });
+
+      it('should return an empty array if no targets are configured', () => {
+        const cmcdManager = createCmcdManager(playerInterface, {targets: []});
+        const enabledEventTargets = cmcdManager.getEventModeEnabledTargets_();
+        expect(enabledEventTargets.length).toBe(0);
+      });
+
+      it('should return an empty array if no event targets are enabled', () => {
+        const targets = [
+          {mode: 'event', enabled: false, url: 'url1'},
+          {mode: 'request', enabled: true, url: 'url2'},
+        ];
+        const cmcdManager = createCmcdManager(playerInterface, {targets});
+        const enabledEventTargets = cmcdManager.getEventModeEnabledTargets_();
+        expect(enabledEventTargets.length).toBe(0);
+      });
+
+      it('should return only enabled event targets', () => {
+        const targets = [
+          {mode: 'event', enabled: true, url: 'url1'},
+          {mode: 'event', enabled: false, url: 'url2'},
+          {mode: 'request', enabled: true, url: 'url3'},
+          {mode: 'event', enabled: true, url: 'url4'},
+        ];
+        const cmcdManager = createCmcdManager(playerInterface, {targets});
+        const enabledEventTargets = cmcdManager.getEventModeEnabledTargets_();
+        expect(enabledEventTargets.length).toBe(2);
+        expect(enabledEventTargets[0].url).toBe('url1');
+        expect(enabledEventTargets[1].url).toBe('url4');
+      });
+
+      it('should return an empty array if no targets are configured', () => {
+        const cmcdManager = createCmcdManager(playerInterface, {targets: []});
+        const enabledEventTargets = cmcdManager.getEventModeEnabledTargets_();
+        expect(enabledEventTargets.length).toBe(0);
+      });
+
+      it('should return an empty array if no event targets are enabled', () => {
+        const targets = [
+          {mode: 'event', enabled: false, url: 'url1'},
+          {mode: 'request', enabled: true, url: 'url2'},
+        ];
+        const cmcdManager = createCmcdManager(playerInterface, {targets});
+        const enabledEventTargets = cmcdManager.getEventModeEnabledTargets_();
+        expect(enabledEventTargets.length).toBe(0);
+      });
+
       it('does not include rc, url, ttfb or ttlb key', () => {
         const eventTarget = new shaka.util.FakeEventTarget();
         const playerInterfaceWithNE =
