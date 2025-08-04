@@ -1002,58 +1002,6 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('msd=');
         expect(decodedUri).not.toContain('v=2');
       });
-
-      it('includes ts for segment requests', () => {
-        const cmcdManager = createCmcdManager(playerInterface, {version: 2});
-        const request = createRequest();
-        const context = createSegmentContext();
-        cmcdManager.applyRequestSegmentData(request, context);
-        const decodedUri = decodeURIComponent(request.uris[0]);
-        expect(decodedUri).toContain('ts=');
-      });
-
-      it('includes ts for segment responses', () => {
-        const cmcdManager = createCmcdManager(playerInterface, {
-          version: 2,
-          targets: [{
-            mode: 'response',
-            enabled: true,
-            url: 'https://example.com/cmcd',
-            includeKeys: ['ts'],
-            useHeaders: false,
-          }],
-        });
-        const response = createResponse();
-        const context = createSegmentContext();
-        cmcdManager.applyResponseData(
-            shaka.net.NetworkingEngine.RequestType.SEGMENT,
-            response,
-            context,
-        );
-        const decodedUri = decodeURIComponent(response.uri);
-        expect(decodedUri).toContain('ts=');
-      });
-
-      it('includes ts for segment responses in headers', () => {
-        const cmcdManager = createCmcdManager(playerInterface, {
-          version: 2,
-          targets: [{
-            mode: 'response',
-            enabled: true,
-            url: 'https://example.com/cmcd',
-            includeKeys: ['ts'],
-            useHeaders: true,
-          }],
-        });
-        const response = createResponse();
-        const context = createSegmentContext();
-        cmcdManager.applyResponseData(
-            shaka.net.NetworkingEngine.RequestType.SEGMENT,
-            response,
-            context,
-        );
-        expect(response.headers['CMCD-Request']).toContain('ts=');
-      });
     });
 
     describe('CMCD v2 Key Generation', () => {
@@ -1293,6 +1241,58 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('rtp=');
         expect(decodedUri).toContain('nor="next-seg.m4v"');
         // expect(decodedUri).toContain('nrr="1000-1999"');
+      });
+
+      it('includes ts for segment requests', () => {
+        const cmcdManager = createCmcdManager(playerInterface, {version: 2});
+        const request = createRequest();
+        const context = createSegmentContext();
+        cmcdManager.applyRequestSegmentData(request, context);
+        const decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('ts=');
+      });
+
+      it('includes ts for segment responses', () => {
+        const cmcdManager = createCmcdManager(playerInterface, {
+          version: 2,
+          targets: [{
+            mode: 'response',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            includeKeys: ['ts'],
+            useHeaders: false,
+          }],
+        });
+        const response = createResponse();
+        const context = createSegmentContext();
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            context,
+        );
+        const decodedUri = decodeURIComponent(response.uri);
+        expect(decodedUri).toContain('ts=');
+      });
+
+      it('includes ts for segment responses in headers', () => {
+        const cmcdManager = createCmcdManager(playerInterface, {
+          version: 2,
+          targets: [{
+            mode: 'response',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            includeKeys: ['ts'],
+            useHeaders: true,
+          }],
+        });
+        const response = createResponse();
+        const context = createSegmentContext();
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            context,
+        );
+        expect(response.headers['CMCD-Request']).toContain('ts=');
       });
 
       it('does not include v2 keys if version is not 2', () => {
