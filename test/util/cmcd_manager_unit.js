@@ -1407,6 +1407,52 @@ describe('CmcdManager Setup', () => {
             .not.toContain('ts=9876543210000');
       });
 
+      it('includes timestamp in response mode when request is disabled', () => {
+        const networkingEngine = createNetworkingEngine(null);
+        const networkingEngineSpy = spyOn(networkingEngine, 'request')
+            .and.callFake(
+                () => shaka.util.AbortableOperation.completed(
+                    {uri: '', data: new ArrayBuffer(5), headers: {}}));
+
+        const playerInterfaceWithSpy = Object.assign({}, playerInterface);
+        playerInterfaceWithSpy.getNetworkingEngine = () => networkingEngine;
+
+        const cmcdManager = createCmcdManager(playerInterfaceWithSpy, {
+          enabled: false,
+          version: 2,
+          targets: [{
+            mode: 'response',
+            enabled: true,
+            url: 'https://example.com/cmcd-query',
+            includeKeys: ['ts'],
+            useHeaders: false,
+          }],
+        });
+
+        const request = createRequest();
+        const response = createResponse();
+        const context = createSegmentContext();
+
+        cmcdManager.applyRequestSegmentData(request, context);
+        expect(request.uris[0]).toBe('https://test.com/v2test.mpd');
+
+        const fakeTimestamp = 1234567890000;
+        spyOn(Date, 'now').and.callFake(() => fakeTimestamp);
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            context,
+        );
+
+        expect(networkingEngineSpy).toHaveBeenCalledTimes(1);
+
+        const queryTargetCall = networkingEngineSpy.calls.first();
+        const queryRequest = queryTargetCall.args[1];
+        const decodedQueryUri = decodeURIComponent(queryRequest.uris[0]);
+        expect(decodedQueryUri).toContain('ts=1234567890000');
+      });
+
       it('does not include v2 keys if version is not 2', () => {
         const nonV2Manager = createCmcdManager(
             playerInterface,
