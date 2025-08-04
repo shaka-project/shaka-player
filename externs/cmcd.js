@@ -34,6 +34,7 @@
  *   rtp: (number|undefined),
  *   msd: (number|undefined),
  *   ltc: (number|undefined),
+ *   ts: (number|undefined)
  * }}
  *
  * @description
@@ -197,5 +198,12 @@
  *   the origin and when it was rendered by the client. The accuracy of this
  *   estimate is dependent on synchronization between the packager and the
  *   player clocks.
+ * @property {number} ts
+ *   Timestamp
+ *
+ *   The timestamp at which the associated event occurred,
+ *   expressed as milliseconds since the UNIX epoch.
+ *   When the event is a request for a media object the time
+ *   SHOULD reference when the request was first initiated.
  */
 var CmcdData;

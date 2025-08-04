@@ -1295,6 +1295,45 @@ describe('CmcdManager Setup', () => {
         expect(response.headers['CMCD-Request']).toContain('ts=');
       });
 
+      it('reuses request timestamp for response mode', () => {
+        const cmcdManager = createCmcdManager(playerInterface, {
+          version: 2,
+          targets: [{
+            mode: 'response',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            includeKeys: ['ts'],
+            useHeaders: false,
+          }],
+        });
+
+        const request = createRequest();
+        const response = createResponse();
+        const context = createSegmentContext();
+
+        // Spy on Date.now to control the timestamp
+        let fakeTimestamp = 1234567890000;
+        spyOn(Date, 'now').and.callFake(() => fakeTimestamp);
+
+        // Apply to request first
+        cmcdManager.applyRequestSegmentData(request, context);
+
+        // Change the timestamp for the next call
+        fakeTimestamp = 9876543210000;
+
+        // Apply to response
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            context,
+        );
+
+        const decodedUri = decodeURIComponent(response.uri);
+        // The timestamp in the response should be the one from the request
+        expect(decodedUri).toContain('ts=1234567890000');
+        expect(decodedUri).not.toContain('ts=9876543210000');
+      });
+
       it('does not include v2 keys if version is not 2', () => {
         const nonV2Manager = createCmcdManager(
             playerInterface,
