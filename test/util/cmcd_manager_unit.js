@@ -1002,6 +1002,15 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('msd=');
         expect(decodedUri).not.toContain('v=2');
       });
+
+      it('includes ts for segment requests', () => {
+        const cmcdManager = createCmcdManager(playerInterface, {version: 2});
+        const request = createRequest();
+        const context = createSegmentContext();
+        cmcdManager.applyRequestSegmentData(request, context);
+        const decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('ts=');
+      });
     });
 
     describe('CMCD v2 Key Generation', () => {
