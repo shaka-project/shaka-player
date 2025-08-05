@@ -473,8 +473,19 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
         text += Math.round(track.frameRate);
       }
     }
+    const isDolbyVision = (t) => {
+      if (!t.codecs) {
+        return false;
+      }
+      const codec = shaka.util.MimeUtils.getNormalizedCodec(t.codecs);
+      return codec.startsWith('dovi-');
+    };
     if (track.hdr == 'PQ' || track.hdr == 'HLG') {
-      text += ' HDR';
+      if (isDolbyVision(track)) {
+        text += ' Dolby Vision';
+      } else {
+        text += ' HDR';
+      }
     }
     const videoLayout = track.videoLayout || '';
     if (videoLayout.includes('CH-STEREO')) {
@@ -484,6 +495,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       return firstTrack != secondTrack &&
           firstTrack.height == secondTrack.height &&
           firstTrack.hdr == secondTrack.hdr &&
+          isDolbyVision(firstTrack) == isDolbyVision(secondTrack) &&
           Math.round(firstTrack.frameRate || 0) ==
           Math.round(secondTrack.frameRate || 0);
     };
@@ -504,11 +516,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           let name = '';
           if (codecs) {
             const codec = shaka.util.MimeUtils.getNormalizedCodec(codecs);
-            if (codec.startsWith('dovi-')) {
-              name = 'Dolby Vision';
-            } else {
-              name = codec.toUpperCase();
-            }
+            name = codec.toUpperCase();
           }
           return name ? ' ' + name : name;
         };
@@ -561,7 +569,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
    */
   getTextFromBandwidth_(bandwidth) {
     if (bandwidth >= 1e6) {
-      return (bandwidth / 1e6).toFixed(1) + ' Mbps';
+      return (bandwidth / 1e6).toFixed(1).replace('.0', '') + ' Mbps';
     } else {
       return Math.floor(bandwidth / 1e3) + ' Kbps';
     }

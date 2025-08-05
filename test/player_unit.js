@@ -1685,12 +1685,13 @@ describe('Player', () => {
       variantTracks = [
         {
           id: 100,
-          active: true,
+          active: false,
           type: 'variant',
           bandwidth: 1300,
           language: 'en',
           originalLanguage: 'en',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 100,
           height: 200,
@@ -1708,6 +1709,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          videoRoles: ['main'],
           forced: false,
           videoId: 1,
           audioId: 3,
@@ -1726,12 +1728,13 @@ describe('Player', () => {
         },
         {
           id: 101,
-          active: false,
+          active: true,
           type: 'variant',
           bandwidth: 2300,
           language: 'en',
           originalLanguage: 'en',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 200,
           height: 400,
@@ -1749,6 +1752,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          videoRoles: [],
           forced: false,
           videoId: 2,
           audioId: 3,
@@ -1773,6 +1777,7 @@ describe('Player', () => {
           language: 'en',
           originalLanguage: 'en',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 100,
           height: 200,
@@ -1790,6 +1795,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          videoRoles: ['main'],
           forced: false,
           videoId: 1,
           audioId: 4,
@@ -1814,6 +1820,7 @@ describe('Player', () => {
           language: 'en',
           originalLanguage: 'en',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 200,
           height: 400,
@@ -1831,6 +1838,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          videoRoles: [],
           forced: false,
           videoId: 2,
           audioId: 4,
@@ -1855,6 +1863,7 @@ describe('Player', () => {
           language: 'en',
           originalLanguage: 'en',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 100,
           height: 200,
@@ -1872,6 +1881,7 @@ describe('Player', () => {
           primary: false,
           roles: ['commentary', 'main'],
           audioRoles: ['commentary'],
+          videoRoles: ['main'],
           forced: false,
           videoId: 1,
           audioId: 5,
@@ -1896,6 +1906,7 @@ describe('Player', () => {
           language: 'en',
           originalLanguage: 'en',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 200,
           height: 400,
@@ -1913,6 +1924,7 @@ describe('Player', () => {
           primary: false,
           roles: ['commentary'],
           audioRoles: ['commentary'],
+          videoRoles: [],
           forced: false,
           videoId: 2,
           audioId: 5,
@@ -1936,6 +1948,7 @@ describe('Player', () => {
           bandwidth: 1100,
           language: 'es',
           label: 'es-label',
+          videoLabel: null,
           originalLanguage: 'es',
           kind: null,
           width: 100,
@@ -1954,6 +1967,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: [],
+          videoRoles: ['main'],
           forced: false,
           videoId: 1,
           audioId: 6,
@@ -1977,6 +1991,7 @@ describe('Player', () => {
           bandwidth: 2100,
           language: 'es',
           label: 'es-label',
+          videoLabel: null,
           originalLanguage: 'es',
           kind: null,
           width: 200,
@@ -1995,6 +2010,7 @@ describe('Player', () => {
           primary: false,
           roles: [],
           audioRoles: [],
+          videoRoles: [],
           forced: false,
           videoId: 2,
           audioId: 6,
@@ -2019,6 +2035,7 @@ describe('Player', () => {
           language: 'es',
           originalLanguage: 'es',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 100,
           height: 200,
@@ -2036,6 +2053,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: [],
+          videoRoles: ['main'],
           forced: false,
           videoId: 1,
           audioId: 7,
@@ -2060,6 +2078,7 @@ describe('Player', () => {
           language: 'es',
           originalLanguage: 'es',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 200,
           height: 400,
@@ -2077,6 +2096,7 @@ describe('Player', () => {
           primary: false,
           roles: [],
           audioRoles: [],
+          videoRoles: [],
           forced: false,
           videoId: 2,
           audioId: 7,
@@ -2170,7 +2190,7 @@ describe('Player', () => {
 
       videoTracks = [
         {
-          active: true,
+          active: false,
           bandwidth: 1000,
           width: 100,
           height: 200,
@@ -2181,9 +2201,11 @@ describe('Player', () => {
           videoLayout: null,
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f',
+          roles: ['main'],
+          label: null,
         },
         {
-          active: false,
+          active: true,
           bandwidth: 2000,
           width: 200,
           height: 400,
@@ -2194,6 +2216,8 @@ describe('Player', () => {
           videoLayout: null,
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f',
+          roles: [],
+          label: null,
         },
       ];
 
@@ -2411,10 +2435,11 @@ describe('Player', () => {
 
     it('selectAudioLanguage() applies role only to audio', () => {
       expect(getActiveVariantTrack().roles).not.toContain('commentary');
+      const videoRoles = getActiveVariantTrack().videoRoles;
       player.selectAudioLanguage('en', 'commentary');
       let args = streamingEngine.switchVariant.calls.argsFor(0);
       expect(args[0].audio.roles).toContain('commentary');
-      expect(args[0].video.roles).toContain('main');
+      expect(args[0].video.roles).toBe(videoRoles);
 
       // Switch audio role from 'commentary' to 'main'.
       streamingEngine.switchVariant.calls.reset();
@@ -2422,7 +2447,7 @@ describe('Player', () => {
       expect(streamingEngine.switchVariant).toHaveBeenCalled();
       args = streamingEngine.switchVariant.calls.argsFor(0);
       expect(args[0].audio.roles).toContain('main');
-      expect(args[0].video.roles).toContain('main');
+      expect(args[0].video.roles).toBe(videoRoles);
     });
 
     it('selectAudioLanguage() does not change selected text track', () => {
