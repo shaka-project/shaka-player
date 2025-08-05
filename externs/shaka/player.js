@@ -2484,7 +2484,9 @@ shaka.extern.AdvancedAbrConfiguration;
  *   enabled: boolean,
  *   useHeaders: boolean,
  *   url: string,
- *   includeKeys: !Array<string>
+ *   includeKeys: !Array<string>,
+ *   batchSize: number,
+ *   batchTimer: number
  * }}
  *
  * @description
@@ -2515,6 +2517,10 @@ shaka.extern.AdvancedAbrConfiguration;
  * If not provided, all keys will be included.
  * <br>
  * Defaults to <code>[]</code>.
+ * @property {number} batchSize
+ * Maximum number of CMCD reports to batch before sending
+ * @property {number} batchTimer
+ * Time interval in seconds to send batched reports.
  * @exportDoc
  */
 shaka.extern.CmcdTarget;
