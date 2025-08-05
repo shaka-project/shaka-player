@@ -1476,17 +1476,14 @@ describe('CmcdManager Setup', () => {
         const response = createResponse();
         const context = createSegmentContext();
 
-        // Spy on Date.now to control the timestamp
+        response.originalRequest = request;
+
         let fakeTimestamp = 1234567890000;
         spyOn(Date, 'now').and.callFake(() => fakeTimestamp);
 
-        // Apply to request first
         cmcdManager.applyRequestSegmentData(request, context);
 
-        // Change the timestamp for the next call
         fakeTimestamp = 9876543210000;
-
-        // Apply to response
         cmcdManager.applyResponseData(
             shaka.net.NetworkingEngine.RequestType.SEGMENT,
             response,
@@ -1494,7 +1491,6 @@ describe('CmcdManager Setup', () => {
         );
 
         const decodedUri = decodeURIComponent(response.uri);
-        // The timestamp in the response should be the one from the request
         expect(decodedUri).toContain('ts=1234567890000');
         expect(decodedUri).not.toContain('ts=9876543210000');
       });
@@ -1534,6 +1530,8 @@ describe('CmcdManager Setup', () => {
         const request = createRequest();
         const response = createResponse();
         const context = createSegmentContext();
+
+        response.originalRequest = request;
 
         let fakeTimestamp = 1234567890000;
         spyOn(Date, 'now').and.callFake(() => fakeTimestamp);
