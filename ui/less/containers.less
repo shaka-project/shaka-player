@@ -25,6 +25,11 @@
   font-family: @general-font-family;
   font-weight: normal;
   -webkit-font-smoothing: antialiased;
+
+  /* prevent text caret from showing when 'Navigate pages with a text cursor'
+   * setting is enabled on chromium-based browsers */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Each browser has a different prefixed pseudo-class for fullscreened elements.
