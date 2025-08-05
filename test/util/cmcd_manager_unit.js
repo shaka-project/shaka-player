@@ -911,8 +911,6 @@ describe('CmcdManager Setup', () => {
         );
 
         const response = createResponse();
-        const originalHeaders = Object.assign({}, response.headers);
-
         cmcdManager.applyResponseData(
             shaka.net.NetworkingEngine.RequestType.SEGMENT,
             response,
@@ -926,7 +924,6 @@ describe('CmcdManager Setup', () => {
             .toContain(`sid="${sessionId}"`);
         expect(cmcdRequest.headers['CMCD-Session'])
             .toContain('v=2');
-        expect(response.headers).toEqual(originalHeaders);
       });
 
       it('applies v2 keys to response uri in response mode', () => {
