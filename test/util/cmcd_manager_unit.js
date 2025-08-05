@@ -6,6 +6,62 @@
 
 // region CMCD Manager Setup
 describe('CmcdManager Setup', () => {
+  const createSegmentContextWithIndex = (segmentIndex) => {
+    const baseContext = createSegmentContext();
+    return Object.assign({}, baseContext, {
+      stream: Object.assign({}, baseContext.stream, {segmentIndex}),
+    });
+  };
+
+  const createSegmentContext = () => ({
+    type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
+    stream: {
+      bandwidth: 8000000,
+      codecs: 'avc1.42001e',
+      mimeType: 'video/mp4',
+      type: 'video',
+      segmentIndex: 0,
+    },
+
+    segment: {startTime: 10, endTime: 12, getUris: () => ['https://test.com/v2seg.mp4']},
+  });
+
+  const createMockSegmentIndex = () => {
+    const mockNextSegment = {
+      getUris: () => ['https://test.com/next-seg.m4v'],
+      startByte: 1000,
+      endByte: 1999,
+    };
+    const mockIterator = {
+      next: jasmine.createSpy('next')
+          .and.returnValue({value: mockNextSegment, done: false}),
+    };
+    return {
+      getIteratorForTime: jasmine.createSpy('getIteratorForTime')
+          .and.returnValue(mockIterator),
+    };
+  };
+
+  const createMockNextSegment = (withByteRange) => {
+    const mockNextSegment = {
+      getUris: () => ['https://test.com/next-seg.m4v'],
+    };
+
+    if (withByteRange) {
+      mockNextSegment.startByte = 1000;
+      mockNextSegment.endByte = 1999;
+    }
+
+    const mockIterator = {
+      next: jasmine.createSpy('next')
+          .and.returnValue({value: mockNextSegment, done: false}),
+    };
+    return {
+      getIteratorForTime: jasmine.createSpy('getIteratorForTime')
+          .and.returnValue(mockIterator),
+    };
+  };
+
   beforeEach(() => {
     const resolveScheme = jasmine.createSpy('cmcd').and.callFake(() =>
       shaka.util.AbortableOperation.completed(
@@ -637,7 +693,61 @@ describe('CmcdManager Setup', () => {
                     {type: AdvancedRequestType.MPD});
                 expect(request.headers['CMCD-Request']).not.toContain('ltc');
                 expect(request.headers['CMCD-Session']).not.toContain('msd');
-              });
+              },
+          );
+
+          it('generates `nrr` for CMCD V1 segment requests', () => {
+            cmcdManager = createCmcdManager(
+                playerInterface,
+                {
+                  version: 1,
+                  includeKeys: ['ltc', 'msd', 'nrr'],
+                  useHeaders: false,
+                },
+            );
+
+            const request = createRequest();
+            const context = createSegmentContextWithIndex(
+                createMockSegmentIndex(),
+            );
+
+            cmcdManager.applyRequestSegmentData(request, context);
+            const decodedUri = decodeURIComponent(request.uris[0]);
+
+            expect(decodedUri).toContain('nrr="1000-1999"');
+          });
+
+          it('generates `nor` for URL-based segment requests', () => {
+            const cmcdManager = createCmcdManager(
+                playerInterface,
+            );
+            const request = createRequest();
+
+            const context =
+                createSegmentContextWithIndex(createMockNextSegment(false));
+
+            cmcdManager.applyRequestSegmentData(request, context);
+            const decodedUri = decodeURIComponent(request.uris[0]);
+
+            expect(decodedUri).toContain('nor="next-seg.m4v"');
+            expect(decodedUri).not.toContain('nrr=');
+          });
+
+          it('generates `nrr` for byte-range segment requests', () => {
+            const cmcdManager = createCmcdManager(
+                playerInterface,
+            );
+            const request = createRequest();
+            // Create a context where the next segment HAS a byte range
+            const context =
+                createSegmentContextWithIndex(createMockNextSegment(true));
+
+            cmcdManager.applyRequestSegmentData(request, context);
+            const decodedUri = decodeURIComponent(request.uris[0]);
+
+            expect(decodedUri).toContain('nrr="1000-1999"');
+            expect(decodedUri).toContain('nor=');
+          });
         });
       });
     });
@@ -742,42 +852,6 @@ describe('CmcdManager Setup', () => {
       headers: {},
       data: new ArrayBuffer(8),
     });
-
-    const createSegmentContext = () => ({
-      type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
-      stream: {
-        bandwidth: 8000000,
-        codecs: 'avc1.42001e',
-        mimeType: 'video/mp4',
-        type: 'video',
-        segmentIndex: 0,
-      },
-
-      segment: {startTime: 10, endTime: 12, getUris: () => ['https://test.com/v2seg.mp4']},
-    });
-
-    const createMockSegmentIndex = () => {
-      const mockNextSegment = {
-        getUris: () => ['https://test.com/next-seg.m4v'],
-        startByte: 1000,
-        endByte: 1999,
-      };
-      const mockIterator = {
-        next: jasmine.createSpy('next')
-            .and.returnValue({value: mockNextSegment, done: false}),
-      };
-      return {
-        getIteratorForTime: jasmine.createSpy('getIteratorForTime')
-            .and.returnValue(mockIterator),
-      };
-    };
-
-    const createSegmentContextWithIndex = (segmentIndex) => {
-      const baseContext = createSegmentContext();
-      return Object.assign({}, baseContext, {
-        stream: Object.assign({}, baseContext.stream, {segmentIndex}),
-      });
-    };
 
     describe('Serialization', () => {
       it('serializes data to a query string', () => {
@@ -885,19 +959,8 @@ describe('CmcdManager Setup', () => {
       });
 
       it('applies CMCD data to response headers in header mode', () => {
-        const networkingEngine = createNetworkingEngine(null);
-        const networkingEngineSpy = spyOn(networkingEngine, 'request')
-            .and.callFake(
-                () => shaka.util.AbortableOperation.completed(
-                    {uri: '', data: new ArrayBuffer(5), headers: {}}),
-            );
-
-        const playerInterfaceWithSpy = Object.assign({}, playerInterface, {
-          getNetworkingEngine: () => networkingEngine,
-        });
-
         const cmcdManager = createCmcdManager(
-            playerInterfaceWithSpy,
+            playerInterface,
             {
               version: 2,
               targets: [{
@@ -911,18 +974,17 @@ describe('CmcdManager Setup', () => {
         );
 
         const response = createResponse();
+
         cmcdManager.applyResponseData(
             shaka.net.NetworkingEngine.RequestType.SEGMENT,
             response,
             createSegmentContext(),
         );
 
-        expect(networkingEngineSpy).toHaveBeenCalledTimes(1);
-        const cmcdRequest = networkingEngineSpy.calls.first().args[1];
-
-        expect(cmcdRequest.headers['CMCD-Session'])
+        expect(response.headers['CMCD-Session'])
             .toContain(`sid="${sessionId}"`);
-        expect(cmcdRequest.headers['CMCD-Session'])
+
+        expect(response.headers['CMCD-Session'])
             .toContain('v=2');
       });
 
@@ -1209,12 +1271,12 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri2).not.toContain('bs');
       });
 
-      it('generates `rtp`, `nor`, and `nrr` for segment requests', () => {
+      it('generates `rtp` for segment requests', () => {
         const cmcdManager = createCmcdManager(
             playerInterface,
             {
               targets: [Object.assign({}, baseConfig.targets[0], {
-                includeKeys: ['sid', 'msd'],
+                includeKeys: ['sid', 'msd', 'rtp'],
               })],
             },
         );
@@ -1224,11 +1286,39 @@ describe('CmcdManager Setup', () => {
         cmcdManager.applyRequestSegmentData(request, context);
         const decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('rtp=');
-        expect(decodedUri).toContain('nor="next-seg.m4v"');
-        expect(decodedUri).toContain('nrr="1000-1999"');
       });
 
-      it('generates `rtp` and `nor` for segment responses', () => {
+      it('request excludes `nrr` key for v2, even if requested', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              includeKeys: ['nrr', 'rtp'],
+            },
+        );
+        const request = createRequest();
+        const context = createSegmentContextWithIndex(createMockSegmentIndex());
+
+        cmcdManager.applyRequestSegmentData(request, context);
+        const decodedUri = decodeURIComponent(request.uris[0]);
+
+        expect(decodedUri).not.toContain('nrr=');
+        expect(decodedUri).toContain('rtp=');
+      });
+
+      it('generates `nor` for URL-based segment requests', () => {
+        const cmcdManager = createCmcdManager(playerInterface);
+        const request = createRequest();
+        const context =
+            createSegmentContextWithIndex(createMockNextSegment(false));
+
+        cmcdManager.applyRequestSegmentData(request, context);
+        const decodedUri = decodeURIComponent(request.uris[0]);
+
+        expect(decodedUri).toContain('nor="next-seg.m4v"');
+        expect(decodedUri).not.toContain('nrr=');
+      });
+
+      it('generates `rtp` for segment responses', () => {
         const cmcdManager = createCmcdManager(
             playerInterface,
             {
@@ -1251,8 +1341,57 @@ describe('CmcdManager Setup', () => {
 
         const decodedUri = decodeURIComponent(response.uri);
         expect(decodedUri).toContain('rtp=');
+      });
+
+      it('generates `nor` for URL-based segment responses', () => {
+        const cmcdManager = createCmcdManager(playerInterface);
+        const response = createResponse();
+        const context =
+            createSegmentContextWithIndex(createMockNextSegment(false));
+
+        cmcdManager.applyResponseSegmentData(response, context);
+        const decodedUri = decodeURIComponent(response.uri);
+
         expect(decodedUri).toContain('nor="next-seg.m4v"');
-        // expect(decodedUri).toContain('nrr="1000-1999"');
+        expect(decodedUri).not.toContain('nrr=');
+      });
+
+      it('response excludes `nrr` key for v2, even if requested', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              targets: [Object.assign({}, baseConfig.targets[0], {
+                includeKeys: ['sid', 'msd', 'rtp', 'nor', 'nrr'],
+              })],
+            },
+        );
+
+        cmcdManager.onPlaybackPlay_();
+        cmcdManager.onPlaybackPlaying_();
+
+        const response = createResponse();
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContextWithIndex(createMockSegmentIndex()),
+        );
+
+        const decodedUri = decodeURIComponent(response.uri);
+        expect(decodedUri).toContain('rtp=');
+        expect(decodedUri).not.toContain('nrr=');
+      });
+
+      it('request does not include v2 keys if version is not 2', () => {
+        const nonV2Manager = createCmcdManager(
+            playerInterface,
+            {version: 1, includeKeys: ['msd', 'ltc']},
+        );
+        const request = createRequest();
+        nonV2Manager.applyManifestData(request, {});
+        const decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).not.toContain('msd=');
+        expect(decodedUri).not.toContain('ltc=');
       });
 
       it('includes ts for segment requests', () => {
@@ -1481,14 +1620,15 @@ describe('CmcdManager Setup', () => {
         expect(decodedQueryUri).toContain('ts=1234567890000');
       });
 
-      it('does not include v2 keys if version is not 2', () => {
+      it('response does not include v2 keys if version is not 2', () => {
         const nonV2Manager = createCmcdManager(
             playerInterface,
             {version: 1, includeKeys: ['msd', 'ltc']},
         );
-        const request = createRequest();
-        nonV2Manager.applyManifestData(request, {});
-        const decodedUri = decodeURIComponent(request.uris[0]);
+        const response = createResponse();
+        nonV2Manager.applyResponseData(response, {});
+
+        const decodedUri = decodeURIComponent(response.uri);
         expect(decodedUri).not.toContain('msd=');
         expect(decodedUri).not.toContain('ltc=');
       });
