@@ -624,7 +624,7 @@ describe('HlsParser live', () => {
       expect(manifest.startTime).toBe(0);
     });
 
-    it('sets 1 times target duration as presentation delay if there are not enough segments', async () => { // eslint-disable-line @stylistic/max-len
+    it('sets 2 times target duration as presentation delay if there are not enough segments', async () => { // eslint-disable-line @stylistic/max-len
       const media = [
         '#EXTM3U\n',
         '#EXT-X-TARGETDURATION:2\n',
@@ -636,7 +636,7 @@ describe('HlsParser live', () => {
         'main.mp4\n',
       ].join('');
       const manifest = await testInitialManifest(master, media);
-      expect(manifest.presentationTimeline.getDelay()).toBe(2);
+      expect(manifest.presentationTimeline.getDelay()).toBe(4);
     });
 
     it('sets presentation delay if defined', async () => {

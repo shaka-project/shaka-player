@@ -787,6 +787,61 @@ shakaDemo.Custom = class {
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
    * @param {!Array<!HTMLInputElement>} inputsToCheck
+   * @return {!Element} div
+   * @private
+   */
+  makeAssetDialogContentsUIExtra_(assetInProgress, inputsToCheck) {
+    const extraUIConfigDiv = document.createElement('div');
+    const containerStyle = shakaDemo.InputContainer.Style.FLEX;
+    const container = new shakaDemo.InputContainer(
+        extraUIConfigDiv, /* headerText= */ null, containerStyle,
+        /* docLink= */ null);
+    container.getClassList().add('wide-input');
+    container.setDefaultRowClass('wide-input');
+
+    const extraSetup = (input, container) => {
+      input.setAttribute('rows', 10);
+
+      if (assetInProgress.extraUiConfig) {
+        // Pretty-print the extra config.
+        input.value = JSON.stringify(
+            assetInProgress.extraUiConfig,
+            /* replacer= */ null, /* spacing= */ 2);
+      }
+
+      inputsToCheck.push(input);
+
+      // Make an error that shows up if you did not provide valid JSON.
+      const error = document.createElement('span');
+      error.classList.add('mdl-textfield__error');
+      error.textContent = 'Invalid JSON configuration';
+
+      container.appendChild(error);
+    };
+    const extraOnChange = (inputElement, inputWrapper) => {
+      try {
+        if (!inputElement.value) {
+          assetInProgress.extraUiConfig = null;
+        } else {
+          const config = /** @type {!Object} */(JSON.parse(inputElement.value));
+          assetInProgress.extraUiConfig = config;
+        }
+        inputWrapper.setValid(true);
+      } catch (exception) {
+        inputWrapper.setValid(false);
+      }
+    };
+    const extraUIConfigLabel = 'Extra Shaka Player UI configuration (JSON)';
+    this.makeField_(
+        container, extraUIConfigLabel, extraSetup, extraOnChange,
+        /* isTextArea= */ true);
+
+    return extraUIConfigDiv;
+  }
+
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @param {!Array<!HTMLInputElement>} inputsToCheck
    * @param {!Element} iconDiv
    * @return {!Element} div
    * @private
@@ -832,7 +887,7 @@ shakaDemo.Custom = class {
 
       // Make a regex that will detect duplicates.
       input.required = true;
-      input.pattern = '^(?!( *';
+      let pattern = '^(?!( *';
       for (const asset of this.assets_) {
         if (asset == assetInProgress) {
           // If editing an existing asset, it's okay if the name doesn't change.
@@ -841,9 +896,10 @@ shakaDemo.Custom = class {
         const escape = (input) => {
           return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         };
-        input.pattern += '|' + escape(asset.name);
+        pattern += '|' + escape(asset.name);
       }
-      input.pattern += ')$).*$';
+      pattern += ')$).*$';
+      input.pattern = pattern;
     };
     const nameOnChange = (input) => {
       assetInProgress.name = input.value;
@@ -962,6 +1018,8 @@ shakaDemo.Custom = class {
         assetInProgress, inputsToCheck);
     const extraConfigDiv = this.makeAssetDialogContentsExtra_(
         assetInProgress, inputsToCheck);
+    const extraUIConfigDiv = this.makeAssetDialogContentsUIExtra_(
+        assetInProgress, inputsToCheck);
     const finishDiv = this.makeAssetDialogContentsFinish_(
         assetInProgress, inputsToCheck);
 
@@ -996,6 +1054,7 @@ shakaDemo.Custom = class {
     addTabButton('Ads', adsDiv, /* startOn= */ false);
     addTabButton('Extra Tracks', extraTracksDiv, /* startOn= */ false);
     addTabButton('Extra Config', extraConfigDiv, /* startOn= */ false);
+    addTabButton('Extra UI Config', extraUIConfigDiv, /* startOn= */ false);
 
     // Append the divs in the desired order.
     this.dialog_.appendChild(tabDiv);
@@ -1005,6 +1064,7 @@ shakaDemo.Custom = class {
     this.dialog_.appendChild(adsDiv);
     this.dialog_.appendChild(extraTracksDiv);
     this.dialog_.appendChild(extraConfigDiv);
+    this.dialog_.appendChild(extraUIConfigDiv);
     this.dialog_.appendChild(finishDiv);
     this.dialog_.appendChild(iconDiv);
 

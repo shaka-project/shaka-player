@@ -118,6 +118,7 @@ adManager.addCustomInterstitial({
   displayOnBackground: false,
   currentVideo: null,
   background: null,
+  clickThroughUrl: null,
 });
 ```
 
@@ -159,6 +160,7 @@ player.addEventListener('timelineregionadded', (e) => {
     displayOnBackground: false,
     currentVideo: null,
     background: null,
+    clickThroughUrl: null,
   });
 });
 ```
@@ -215,6 +217,7 @@ adManager.addCustomInterstitial({
   displayOnBackground: false,
   currentVideo: null,
   background: null,
+  clickThroughUrl: null,
 });
 ```
 
@@ -276,6 +279,7 @@ adManager.addCustomInterstitial({
     },
   },
   background: null,
+  clickThroughUrl: null,
 });
 ```
 
@@ -337,6 +341,7 @@ adManager.addCustomInterstitial({
     },
   },
   background: 'content-box radial-gradient(crimson, skyblue)',
+  clickThroughUrl: null,
 });
 ```
 

@@ -1,7 +1,9 @@
 # Polyfills used to emulate missing browsers features.
 
-+../../node_modules/eme-encryption-scheme-polyfill/index.js
-+../../lib/polyfill/encryption_scheme.js
++../../lib/polyfill/eme_encryption_scheme.js
++../../lib/polyfill/encryption_scheme_media_key_system_access.js
++../../lib/polyfill/encryption_scheme_utils.js
++../../lib/polyfill/mcap_encryption_scheme.js
 +../../lib/polyfill/mediasource.js
 +../../lib/polyfill/media_capabilities.js
 +../../lib/polyfill/patchedmediakeys_cert.js

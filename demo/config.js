@@ -231,7 +231,8 @@ shakaDemo.Config = class {
             'manifest.ignoreSupplementalCodecs')
         .addNumberInput_('Override the Update time of the manifest',
             'manifest.updatePeriod')
-        .addBoolInput_('Ignore DRM Info', 'manifest.ignoreDrmInfo');
+        .addBoolInput_('Ignore DRM Info', 'manifest.ignoreDrmInfo')
+        .addBoolInput_('Enable Audio Groups', 'manifest.enableAudioGroups');
   }
 
   /** @private */
@@ -250,8 +251,6 @@ shakaDemo.Config = class {
             'manifest.dash.ignoreEmptyAdaptationSet')
         .addBoolInput_('Ignore DASH maxSegmentDuration',
             'manifest.dash.ignoreMaxSegmentDuration')
-        .addBoolInput_('Allow DASH multi type variants',
-            'manifest.dash.multiTypeVariantsAllowed')
         .addTextInput_('Clock Sync URI', 'manifest.dash.clockSyncUri')
         .addBoolInput_('Ignore Min Buffer Time',
             'manifest.dash.ignoreMinBufferTime')
@@ -435,6 +434,8 @@ shakaDemo.Config = class {
             'queue.preloadNextUrlWindow',
             /* canBeDecimal= */ true,
             /* canBeZero= */ true)
+        .addBoolInput_('Allow preload prev item',
+            'queue.preloadPrevItem')
         .addSelectInput_('Repeat mode',
             'queue.repeatMode',
             repeatModeOptions,
@@ -750,7 +751,8 @@ shakaDemo.Config = class {
         .addTextInput_('Preferred Audio Language', 'preferredAudioLanguage')
         .addTextInput_('Preferred Audio Label', 'preferredAudioLabel')
         .addTextInput_('Preferred Video Label', 'preferredVideoLabel')
-        .addTextInput_('Preferred Variant Role', 'preferredVariantRole')
+        .addTextInput_('Preferred Audio Role', 'preferredAudioRole')
+        .addTextInput_('Preferred Video Role', 'preferredVideoRole')
         .addTextInput_('Preferred Text Language', 'preferredTextLanguage')
         .addTextInput_('Preferred Text Role', 'preferredTextRole')
         .addSelectInput_('Auto-Show Text',

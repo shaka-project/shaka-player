@@ -1,7 +1,7 @@
 {
   "name": "shaka-player",
   "description": "DASH/EME video player library",
-  "version": "4.14.0",
+  "version": "4.15.0",
   "homepage": "https://github.com/shaka-project/shaka-player",
   "author": "Google",
   "maintainers": [
@@ -43,19 +43,19 @@
     "esprima": "^4.0.1",
     "fontfaceonload": "^1.0.2",
     "globals": "^15.14.0",
-    "google-closure-compiler-java": "^20240317.0.0",
+    "google-closure-compiler-java": "^20250723.0.0",
     "google-closure-deps": "^20230802.0.0",
-    "google-closure-library": "^20221102.0.0",
+    "google-closure-library": "github:joeyparrish/closure-library#74db0395",
     "htmlhint": "^1.1.3",
     "jasmine-ajax": "^4.0.0",
     "jimp": "^0.22.12",
     "js-yaml": "^4.1.0",
-    "jsdoc": "github:joeyparrish/jsdoc#2ca85bb6",
+    "jsdoc": "github:joeyparrish/jsdoc#a1e61a4e",
     "karma": "github:joeyparrish/karma#shaka-fixes",
     "karma-coverage": "^2.2.0",
     "karma-jasmine": "^4.0.1",
     "karma-jasmine-ajax": "^0.1.13",
-    "karma-local-wd-launcher": "^1.7.1",
+    "karma-local-wd-launcher": "^1.7.2",
     "karma-opera-launcher": "^1.0.0",
     "karma-sourcemap-loader": "^0.3.8",
     "karma-spec-reporter": "^0.0.34",
@@ -88,7 +88,6 @@
       "codem-isoboxer/dist/iso_boxer.min.js",
       "dialog-polyfill/dialog-polyfill.css",
       "dialog-polyfill/dist/dialog-polyfill.js",
-      "eme-encryption-scheme-polyfill/index.js",
       "es6-promise-polyfill/promise.min.js",
       "google-closure-library/closure/goog/base.js",
       "lcevc_dec.js/dist/lcevc_dec.min.js",
@@ -116,9 +115,6 @@
     "prepack": "clean-package",
     "postpack": "clean-package restore",
     "prepublishOnly": "python build/checkversion.py && python build/all.py --force"
-  },
-  "dependencies": {
-    "eme-encryption-scheme-polyfill": "^2.2.3"
   },
   "engines": {
     "node": ">=18"

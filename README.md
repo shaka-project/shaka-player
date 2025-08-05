@@ -22,7 +22,7 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 [MediaSource Extensions]: https://www.w3.org/TR/media-source/
 [Encrypted Media Extensions]: https://www.w3.org/TR/encrypted-media/
 [IndexedDB]: https://www.w3.org/TR/IndexedDB-2/
-[offline storage and playback]: https://shaka-player-demo.appspot.com/docs/api/tutorial-offline.html
+[offline storage and playback]: https://shaka-project.github.io/shaka-player/docs/api/tutorial-offline.html
 
 
 ## Maintained branches
@@ -85,7 +85,7 @@ NOTES for iOS and iPadOS:
 You can also create a [manifest parser plugin][] to support custom manifest
 formats.
 
-[manifest parser plugin]: https://shaka-player-demo.appspot.com/docs/api/tutorial-manifest-parser.html
+[manifest parser plugin]: https://shaka-project.github.io/shaka-player/docs/api/tutorial-manifest-parser.html
 
 
 ## DASH features
@@ -411,8 +411,8 @@ Shaka currently provides the following versions:
  * [Demo](https://shaka-player-demo.appspot.com)([sources](demo/))
  * [Nightly Demo](https://shaka-project.github.io/shaka-player/)
  * [Demo index](https://index-dot-shaka-player-demo.appspot.com)
- * [API documentation](https://shaka-player-demo.appspot.com/docs/api/index.html)
- * [Tutorials](https://shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html)
+ * [API documentation](https://shaka-project.github.io/shaka-player/docs/api/index.html)
+ * [Tutorials](https://shaka-project.github.io/shaka-player/docs/api/tutorial-welcome.html)
  * [Hosted builds on Google Hosted Libraries](https://developers.google.com/speed/libraries/#shaka-player)
  * [Hosted builds on jsDelivr](https://www.jsdelivr.com/package/npm/shaka-player)
  * [Development roadmap](roadmap.md)

@@ -3076,22 +3076,22 @@ describe('DashParser Manifest', () => {
       expect(firstPartialReference.startTime).toBe(0);
       expect(firstPartialReference.endTime).toBe(0.5);
       expect(firstPartialReference.getUris())
-          .toEqual(['dummy://foo/l-1-p1.mp4']);
+          .toEqual(['dummy://foo/l-1-p0.mp4']);
       const secondPartialReference = firstReference.partialReferences[1];
       expect(secondPartialReference.startTime).toBe(0.5);
       expect(secondPartialReference.endTime).toBe(1);
       expect(secondPartialReference.getUris())
-          .toEqual(['dummy://foo/l-1-p2.mp4']);
+          .toEqual(['dummy://foo/l-1-p1.mp4']);
       const thirdPartialReference = firstReference.partialReferences[2];
       expect(thirdPartialReference.startTime).toBe(1);
       expect(thirdPartialReference.endTime).toBe(1.5);
       expect(thirdPartialReference.getUris())
-          .toEqual(['dummy://foo/l-1-p3.mp4']);
+          .toEqual(['dummy://foo/l-1-p2.mp4']);
       const fourthPartialReference = firstReference.partialReferences[3];
       expect(fourthPartialReference.startTime).toBe(1.5);
       expect(fourthPartialReference.endTime).toBe(2);
       expect(fourthPartialReference.getUris())
-          .toEqual(['dummy://foo/l-1-p4.mp4']);
+          .toEqual(['dummy://foo/l-1-p3.mp4']);
     });
 
     it('with cadence equal to 1', async () => {
@@ -3108,9 +3108,7 @@ describe('DashParser Manifest', () => {
         '              <S d="100" k="4"/>',
         '            </SegmentTimeline>',
         '        </SegmentTemplate>',
-        '        <SegmentSequenceProperties>',
-        '          <SAP type="1" cadence="1" />',
-        '        </SegmentSequenceProperties>',
+        '        <SegmentSequenceProperties sapType="1" cadence="1"/>',
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
@@ -3140,6 +3138,7 @@ describe('DashParser Manifest', () => {
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet id="1" mimeType="video/mp4">',
+        '      <SegmentSequenceProperties sapType="1" cadence="2"/>',
         '      <Representation bandwidth="1" codecs="avc1.4d401f">',
         '        <SegmentTemplate startNumber="1"',
         '          media="l-$Number$-p$SubNumber$.mp4"',
@@ -3149,9 +3148,6 @@ describe('DashParser Manifest', () => {
         '              <S d="100" k="4"/>',
         '            </SegmentTimeline>',
         '        </SegmentTemplate>',
-        '        <SegmentSequenceProperties>',
-        '          <SAP type="1" cadence="2" />',
-        '        </SegmentSequenceProperties>',
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
@@ -3186,9 +3182,7 @@ describe('DashParser Manifest', () => {
         '          media="l-$Number$-p$SubNumber$.mp4"',
         '          initialization="init.mp4" timescale="50" duration="100">',
         '        </SegmentTemplate>',
-        '        <SegmentSequenceProperties>',
-        '          <SAP type="1" cadence="1" />',
-        '        </SegmentSequenceProperties>',
+        '        <SegmentSequenceProperties sapType="1" cadence="1"/>',
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',

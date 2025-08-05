@@ -131,6 +131,7 @@ lessc
 lintstamp
 metadatas
 multimap
+multitype
 myapp
 nodrm
 nondisplayed
@@ -173,6 +174,7 @@ linksource
 longname
 
 # 3rd party
+apac
 APPSTB
 Bitcodin
 Brightcove
@@ -233,6 +235,7 @@ cabac
 cbcs
 cdna
 cenc
+certurl
 cicp
 cmaf
 cmcd
@@ -431,6 +434,7 @@ centery
 centerz
 coef
 cubemap
+equi
 equirectangular
 eyex
 eyey
@@ -475,6 +479,7 @@ cmsds
 
 # other
 autoglottonym
+avinfo
 awesomplete
 axinom
 beatle
@@ -499,7 +504,9 @@ malform
 masterlist
 mbps
 msdk
+onservicecallback
 productinfo
+RMKSA
 servernum
 sintel
 stardate

@@ -120,15 +120,6 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * @param {string} certificateUri
-   * @return {!ShakaDemoAssetInfo}
-   */
-  addCertificateUri(certificateUri) {
-    this.certificateUri = certificateUri;
-    return this;
-  }
-
-  /**
    * A sort comparator for comparing two messages, ignoring case.
    * @param {string} a
    * @param {string} b
@@ -502,16 +493,6 @@ const ShakaDemoAssetInfo = class {
     networkingEngine.clearAllRequestFilters();
     networkingEngine.clearAllResponseFilters();
 
-    if (this.licenseRequestHeaders.size) {
-      /** @type {!shaka.extern.RequestFilter} */
-      const filter = (requestType, request, context) => {
-        return this.addLicenseRequestHeaders_(this.licenseRequestHeaders,
-            requestType,
-            request);
-      };
-      networkingEngine.registerRequestFilter(filter);
-    }
-
     if (this.requestFilter) {
       networkingEngine.registerRequestFilter(this.requestFilter);
     }
@@ -546,6 +527,21 @@ const ShakaDemoAssetInfo = class {
       config.drm.servers = config.drm.servers || {};
       licenseServers.forEach((value, key) => {
         config.drm.servers[key] = value;
+        if (this.certificateUri || this.licenseRequestHeaders.size) {
+          if (!config.drm.advanced[key]) {
+            config.drm.advanced[key] =
+                ShakaDemoAssetInfo.defaultAdvancedDrmConfig();
+          }
+          if (this.certificateUri) {
+            config.drm.advanced[key].serverCertificateUri =
+                this.certificateUri;
+          }
+          if (this.licenseRequestHeaders.size) {
+            this.licenseRequestHeaders.forEach((headerValue, headerName) => {
+              config.drm.advanced[key].headers[headerName] = headerValue;
+            });
+          }
+        }
       });
     }
 
@@ -554,10 +550,6 @@ const ShakaDemoAssetInfo = class {
       this.clearKeys.forEach((value, key) => {
         config.drm.clearKeys[key] = value;
       });
-    }
-
-    if (this.features.includes(shakaAssets.Feature.LOW_LATENCY)) {
-      config.streaming.lowLatencyMode = true;
     }
 
     // Windows Edge only support persistent licenses with
@@ -572,24 +564,6 @@ const ShakaDemoAssetInfo = class {
     }
 
     return config;
-  }
-
-  /**
-   * @param {!Map<string, string>} headers
-   * @param {shaka.net.NetworkingEngine.RequestType} requestType
-   * @param {shaka.extern.Request} request
-   * @private
-   */
-  addLicenseRequestHeaders_(headers, requestType, request) {
-    if (requestType != shaka.net.NetworkingEngine.RequestType.LICENSE) {
-      return;
-    }
-
-    // Add these to the existing headers.  Do not clobber them!
-    // For PlayReady, there will already be headers in the request.
-    headers.forEach((value, key) => {
-      request.headers[key] = value;
-    });
   }
 
   /** @return {boolean} */
@@ -643,5 +617,22 @@ const ShakaDemoAssetInfo = class {
       return ShakaDemoAssetInfo.fromJSON(dataAsJson);
     } catch (e) {}
     return null;
+  }
+
+  /**
+   * @return {!shaka.extern.AdvancedDrmConfiguration}
+   */
+  static defaultAdvancedDrmConfig() {
+    return {
+      distinctiveIdentifierRequired: false,
+      persistentStateRequired: false,
+      videoRobustness: [],
+      audioRobustness: [],
+      sessionType: '',
+      serverCertificate: new Uint8Array(0),
+      serverCertificateUri: '',
+      individualizationServer: '',
+      headers: {},
+    };
   }
 };

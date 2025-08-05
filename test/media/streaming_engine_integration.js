@@ -274,6 +274,7 @@ describe('StreamingEngine', () => {
       onInitSegmentAppended: () => {},
       beforeAppendSegment: () => Promise.resolve(),
       disableStream: (stream, time) => false,
+      shouldPrefetchNextSegment: () => true,
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
@@ -302,7 +303,7 @@ describe('StreamingEngine', () => {
       // Experimentally, we find that playback rates above 2x in this test seem
       // to cause decoder failures on Tizen 3.  This is out of our control, and
       // seems to be a Tizen bug, so this test is skipped on Tizen completely.
-      if (shaka.util.Platform.isTizen()) {
+      if (deviceDetected.getDeviceName() === 'Tizen') {
         pending('High playbackRate tests cause decoder errors on Tizen 3.');
       }
 

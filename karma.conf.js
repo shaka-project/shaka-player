@@ -218,14 +218,6 @@ module.exports = (config) => {
       },
       'node_modules/lcevc_dec.js/dist/lcevc_dec.min.js',
 
-      // EME encryption scheme polyfill, compiled into Shaka Player, but outside
-      // of the Closure deps system, so not in shaka-player.uncompiled.js.  This
-      // is specifically the compiled, minified, cross-browser build of it.  It
-      // is necessary to use the compiled version to avoid problems on older
-      // TVs.
-      // eslint-disable-next-line @stylistic/max-len
-      'node_modules/eme-encryption-scheme-polyfill/dist/eme-encryption-scheme-polyfill.js',
-
       // load closure base, the deps tree, and the uncompiled library
       'test/test/closure-boot.js',
       'node_modules/google-closure-library/closure/goog/base.js',
@@ -264,6 +256,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/clear-encrypted-hls/*', included: false},
       {pattern: 'test/test/assets/dash-multi-codec/*', included: false},
       {pattern: 'test/test/assets/dash-multi-codec-ec3/*', included: false},
+      {pattern: 'test/test/assets/dash-multitype-variant/*', included: false},
       {pattern: 'test/test/assets/3675/*', included: false},
       {pattern: 'test/test/assets/7401/*', included: false},
       {pattern: 'test/test/assets/6339/*', included: false},
@@ -272,7 +265,8 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/dash-clearkey/*', included: false},
       {pattern: 'test/test/assets/dash-mpd-alternate/*', included: false},
       {pattern: 'test/test/assets/dash-vr/*', included: false},
-      {pattern: 'test/test/assets/dv-p8-hevc/*', included: false},
+      {pattern: 'test/test/assets/dv-p8-1-hevc/*', included: false},
+      {pattern: 'test/test/assets/dv-p8-4-hevc/*', included: false},
       {pattern: 'test/test/assets/dv-p10-av1/*', included: false},
       {pattern: 'test/test/assets/hls-aes-256/*', included: false},
       {pattern: 'test/test/assets/hls-interstitial/*', included: false},
@@ -287,6 +281,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-text-offset/*', included: false},
       {pattern: 'test/test/assets/hls-ts-aac/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ac3/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-b-frames/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ec3/*', included: false},
       {pattern: 'test/test/assets/hls-ts-h264/*', included: false},
       {pattern: 'test/test/assets/hls-ts-h265/*', included: false},

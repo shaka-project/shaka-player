@@ -5789,12 +5789,8 @@ describe('HlsParser', () => {
 
     await actualVideo0.createSegmentIndex();
 
-    // After loading just ONE stream, all MIME types agree again, and have been
-    // updated to reflect the TS content found inside the loaded playlist.
-    // This is how we avoid having the unloaded tracks filtered out during
-    // startup.
     expect(actualVideo0.mimeType).toBe('video/mp2t');
-    expect(actualVideo1.mimeType).toBe('video/mp2t');
+    expect(actualVideo1.mimeType).toBe('video/mp4');
   });
 
   it('lazy-loads AAC content without filtering it out', async () => {
@@ -5849,13 +5845,9 @@ describe('HlsParser', () => {
 
     await actualAudio0.createSegmentIndex();
 
-    // After loading just ONE stream, all MIME types agree again, and have been
-    // updated to reflect the AAC content found inside the loaded playlist.
-    // This is how we avoid having the unloaded tracks filtered out during
-    // startup.
     expect(actualAudio0.mimeType).toBe('audio/aac');
     expect(actualAudio0.codecs).toBe('mp4a');
-    expect(actualAudio1.mimeType).toBe('audio/aac');
+    expect(actualAudio1.mimeType).toBe('audio/mp4');
     expect(actualAudio1.codecs).toBe('mp4a');
   });
 

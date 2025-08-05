@@ -38,6 +38,7 @@
 +../../ui/small_play_button.js
 +../../ui/skip_ad_button.js
 +../../ui/skip_next_button.js
++../../ui/skip_previous_button.js
 +../../ui/spacer.js
 +../../ui/statistics_button.js
 +../../ui/text_selection.js
