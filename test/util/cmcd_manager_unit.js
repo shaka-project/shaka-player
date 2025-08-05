@@ -885,8 +885,19 @@ describe('CmcdManager Setup', () => {
       });
 
       it('applies CMCD data to response headers in header mode', () => {
+        const networkingEngine = createNetworkingEngine(null);
+        const networkingEngineSpy = spyOn(networkingEngine, 'request')
+            .and.callFake(
+                () => shaka.util.AbortableOperation.completed(
+                    {uri: '', data: new ArrayBuffer(5), headers: {}}),
+            );
+
+        const playerInterfaceWithSpy = Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            playerInterface,
+            playerInterfaceWithSpy,
             {
               version: 2,
               targets: [{
@@ -900,6 +911,7 @@ describe('CmcdManager Setup', () => {
         );
 
         const response = createResponse();
+        const originalHeaders = Object.assign({}, response.headers);
 
         cmcdManager.applyResponseData(
             shaka.net.NetworkingEngine.RequestType.SEGMENT,
@@ -907,11 +919,14 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        expect(response.headers['CMCD-Session'])
-            .toContain(`sid="${sessionId}"`);
+        expect(networkingEngineSpy).toHaveBeenCalledTimes(1);
+        const cmcdRequest = networkingEngineSpy.calls.first().args[1];
 
-        expect(response.headers['CMCD-Session'])
+        expect(cmcdRequest.headers['CMCD-Session'])
+            .toContain(`sid="${sessionId}"`);
+        expect(cmcdRequest.headers['CMCD-Session'])
             .toContain('v=2');
+        expect(response.headers).toEqual(originalHeaders);
       });
 
       it('applies v2 keys to response uri in response mode', () => {
@@ -1275,7 +1290,18 @@ describe('CmcdManager Setup', () => {
       });
 
       it('includes ts for segment responses in headers', () => {
-        const cmcdManager = createCmcdManager(playerInterface, {
+        const networkingEngine = createNetworkingEngine(null);
+        const networkingEngineSpy = spyOn(networkingEngine, 'request')
+            .and.callFake(
+                () => shaka.util.AbortableOperation.completed(
+                    {uri: '', data: new ArrayBuffer(5), headers: {}}),
+            );
+
+        const playerInterfaceWithSpy = Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const cmcdManager = createCmcdManager(playerInterfaceWithSpy, {
           version: 2,
           targets: [{
             mode: 'response',
@@ -1292,7 +1318,10 @@ describe('CmcdManager Setup', () => {
             response,
             context,
         );
-        expect(response.headers['CMCD-Request']).toContain('ts=');
+
+        expect(networkingEngineSpy).toHaveBeenCalledTimes(1);
+        const cmcdRequest = networkingEngineSpy.calls.first().args[1];
+        expect(cmcdRequest.headers['CMCD-Request']).toContain('ts=');
       });
 
       it('reuses request timestamp for response mode', () => {
@@ -1342,8 +1371,9 @@ describe('CmcdManager Setup', () => {
                     {uri: '', data: new ArrayBuffer(5), headers: {}}),
             );
 
-        const playerInterfaceWithSpy = Object.assign({}, playerInterface);
-        playerInterfaceWithSpy.getNetworkingEngine = () => networkingEngine;
+        const playerInterfaceWithSpy = Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
 
         const cmcdManager = createCmcdManager(
             playerInterfaceWithSpy,
@@ -1414,8 +1444,9 @@ describe('CmcdManager Setup', () => {
                 () => shaka.util.AbortableOperation.completed(
                     {uri: '', data: new ArrayBuffer(5), headers: {}}));
 
-        const playerInterfaceWithSpy = Object.assign({}, playerInterface);
-        playerInterfaceWithSpy.getNetworkingEngine = () => networkingEngine;
+        const playerInterfaceWithSpy = Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
 
         const cmcdManager = createCmcdManager(playerInterfaceWithSpy, {
           enabled: false,
