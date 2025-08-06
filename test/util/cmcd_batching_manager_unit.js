@@ -8,8 +8,6 @@ describe('CmcdBatchingManager', () => {
   const CmcdBatchingManager = shaka.util.CmcdBatchingManager;
 
   /** @type {!jasmine.Spy} */
-  let mockNetworkingEngine;
-  /** @type {!jasmine.Spy} */
   let mockRequest;
   /** @type {shaka.util.CmcdBatchingManager.PlayerInterface} */
   let mockPlayerInterface;
@@ -48,9 +46,8 @@ describe('CmcdBatchingManager', () => {
       }),
     });
 
-    const mockEngine = {request: mockRequest};
-    mockNetworkingEngine = jasmine.createSpy('getNetworkingEngine')
-        .and.returnValue(mockEngine);
+    const mockEngine = /** @type {shaka.net.NetworkingEngine} */ (
+      {request: mockRequest});
 
     mockPlayerInterface =
       /** @type {shaka.util.CmcdBatchingManager.PlayerInterface} */ ({
