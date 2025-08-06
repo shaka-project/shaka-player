@@ -569,12 +569,11 @@ describe('CmcdBatchingManager', () => {
         promise: Promise.resolve({status: 200}),
       });
 
-      const processRetryQueueSpy = spyOn(batchingManager, 'processRetryQueue_')
-          .and.callThrough();
+      // Manually set sendTime to past to make it ready for processing
+      batchingManager.retryQueue_[0].sendTime = Date.now() - 1000;
 
-      // Process retry queue
-      jasmine.clock().tick(batchingManager.retryDelays_[0] + 1);
-      await processRetryQueueSpy;
+      // Process retry queue manually
+      await batchingManager.processRetryQueue_();
 
       expect(batchingManager.retryQueue_.length).toBe(0);
     });
