@@ -52,9 +52,10 @@ describe('CmcdBatchingManager', () => {
     mockNetworkingEngine = jasmine.createSpy('getNetworkingEngine')
         .and.returnValue(mockEngine);
 
-    mockPlayerInterface = /** @type {shaka.util.CmcdBatchingManager.PlayerInterface} */ ({
-      getNetworkingEngine: () => mockEngine,
-    });
+    mockPlayerInterface =
+      /** @type {shaka.util.CmcdBatchingManager.PlayerInterface} */ ({
+        getNetworkingEngine: () => mockEngine,
+      });
 
     batchingManager = new CmcdBatchingManager(mockPlayerInterface);
   });
