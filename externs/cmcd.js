@@ -34,6 +34,7 @@
  *   rtp: (number|undefined),
  *   msd: (number|undefined),
  *   ltc: (number|undefined),
+ *   url: (string|undefined)
  * }}
  *
  * @description
@@ -197,5 +198,13 @@
  *   the origin and when it was rendered by the client. The accuracy of this
  *   estimate is dependent on synchronization between the packager and the
  *   player clocks.
+ *
+ * @property {string} url
+ *  url
+ *
+ *  The URL used to request the media object.
+ *  This key MUST NOT be used with Request Modereporting mode #1.
+ *  If the request is redirected, this key MUST report the initial
+ *  requested URL.
  */
 var CmcdData;

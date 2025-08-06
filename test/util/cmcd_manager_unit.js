@@ -1356,6 +1356,40 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).not.toContain('nrr=');
       });
 
+      it('includes the original request URL in response mode', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              version: 2,
+              targets: [{
+                mode: 'response',
+                enabled: true,
+                url: 'https://example.com/cmcd',
+                useHeaders: false,
+              }],
+            },
+        );
+
+        const response = createResponse();
+        response.uri = 'https://redirected.com/v2seg.mp4';
+        response.originalUri = 'https://initial.com/v2seg.mp4';
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        // The response.uri is modified by applyResponseData to become the
+        // beacon URL. We decode it to check the CMCD payload.
+        const decodedUri = decodeURIComponent(response.uri);
+
+        // The spec requires the URL to be a string, which gets quoted.
+        const expectedUrlParam = `url="${response.originalUri}"`;
+
+        expect(decodedUri).toContain(expectedUrlParam);
+      });
+
       it('response excludes `nrr` key for v2, even if requested', () => {
         const cmcdManager = createCmcdManager(
             playerInterface,
