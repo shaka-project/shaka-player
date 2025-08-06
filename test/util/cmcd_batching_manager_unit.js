@@ -105,7 +105,7 @@ describe('CmcdBatchingManager', () => {
     });
 
     it('sets up batch timer when configured', async () => {
-      const target = createMockTarget({batchTimer: 5000});
+      const target = createMockTarget({batchTimer: 5});
       const flushSpy = spyOn(batchingManager, 'flushByTargetKey_')
           .and.callThrough();
 
@@ -515,7 +515,7 @@ describe('CmcdBatchingManager', () => {
   describe('Integration Tests', () => {
     it('handles complete batch lifecycle with timer', async () => {
       const target = createMockTarget({
-        batchTimer: 1000,
+        batchTimer: 1,
         batchSize: 3,
       });
 
@@ -537,7 +537,7 @@ describe('CmcdBatchingManager', () => {
 
     it('handles batch size limit before timer', () => {
       const target = createMockTarget({
-        batchTimer: 10000,
+        batchTimer: 1,
         batchSize: 2,
       });
 
