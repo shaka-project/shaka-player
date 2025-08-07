@@ -1928,28 +1928,22 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     switch (event.key) {
       case 'ArrowLeft':
-        // If it's not focused on the volume bar, or if both bars aren't
-        // focused in fullscreen, move the seek time backward for a few sec.
+        // If it's not focused on the volume bar, or if it's in fullscreen,
+        // move the seek time backward for a few sec.
         // Otherwise, the volume will be adjusted automatically.
         if (this.seekBar_ && keyboardSeekDistance > 0) {
-          if (
-            (isSeekBar && !isVolumeBar) ||
-            (isFullscreen && !isSeekBar && !isVolumeBar)
-          ) {
+          if ((isSeekBar || isFullscreen) && !isVolumeBar) {
             event.preventDefault();
             this.seek_(this.seekBar_.getValue() - keyboardSeekDistance);
           }
         }
         break;
       case 'ArrowRight':
-        // If it's not focused on the volume bar, or if both bars aren't
-        // focused in fullscreen, move the seek time forward for a few sec.
+        // If it's not focused on the volume bar, or if it's in fullscreen,
+        // move the seek time forward for a few sec.
         // Otherwise, the volume will be adjusted automatically.
         if (this.seekBar_ && keyboardSeekDistance > 0) {
-          if (
-            (isSeekBar && !isVolumeBar) ||
-            (isFullscreen && !isSeekBar && !isVolumeBar)
-          ) {
+          if ((isSeekBar || isFullscreen) && !isVolumeBar) {
             event.preventDefault();
             this.seek_(this.seekBar_.getValue() + keyboardSeekDistance);
           }
