@@ -1555,6 +1555,35 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).not.toContain('msd=');
         expect(decodedUri).not.toContain('ltc=');
       });
+
+      it('cmcd does not include the url parameter for CMCD v1', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface, {
+              // Explicitly set version to 1
+              version: 1,
+              targets: [{
+                mode: 'response',
+                enabled: true,
+                url: 'https://example.com/cmcd',
+                useHeaders: false,
+              }],
+            },
+        );
+
+        const response = createResponse();
+        response.uri = 'https://redirected.com/v2seg.mp4';
+        response.originalUri = 'https://initial.com/v2seg.mp4?CMCD=br%3D5234';
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        const decodedUri = decodeURIComponent(response.uri);
+
+        expect(decodedUri).not.toContain('url=');
+      });
     });
   });
 });
