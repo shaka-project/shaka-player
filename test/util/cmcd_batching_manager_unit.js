@@ -178,8 +178,8 @@ describe('CmcdBatchingManager', () => {
         }),
       });
 
-      // Advance time to trigger retry (first delay is 1000ms)
-      jasmine.clock().tick(1001);
+      // Advance time to trigger retry (first delay is 100ms)
+      jasmine.clock().tick(101);
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Should have made the retry request
@@ -249,7 +249,7 @@ describe('CmcdBatchingManager', () => {
   describe('flushBatch', () => {
     it('flushes pending batches for specific URL', async () => {
       const url = 'https://example.com/cmcd';
-      const target = createMockTarget({url, batchTimer: 1000}); // Long timer
+      const target = createMockTarget({url, batchTimer: 10}); // Long timer
 
       batchingManager.addReport(target, mockCmcdData);
       expect(mockRequest).not.toHaveBeenCalled();
@@ -266,8 +266,8 @@ describe('CmcdBatchingManager', () => {
     });
 
     it('does not affect batches for different URLs', async () => {
-      const target1 = createMockTarget({url: 'https://a.com/cmcd', batchTimer: 1000});
-      const target2 = createMockTarget({url: 'https://b.com/cmcd', batchTimer: 1000});
+      const target1 = createMockTarget({url: 'https://a.com/cmcd', batchTimer: 1});
+      const target2 = createMockTarget({url: 'https://b.com/cmcd', batchTimer: 1});
 
       batchingManager.addReport(target1, mockCmcdData);
       batchingManager.addReport(target2, mockCmcdData);
@@ -288,7 +288,7 @@ describe('CmcdBatchingManager', () => {
 
   describe('reset', () => {
     it('cancels pending timers and prevents future reports', async () => {
-      const target = createMockTarget({batchTimer: 1000});
+      const target = createMockTarget({batchTimer: 1});
 
       batchingManager.addReport(target, mockCmcdData);
       batchingManager.reset();
