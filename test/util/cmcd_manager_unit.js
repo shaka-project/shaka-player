@@ -1356,7 +1356,7 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).not.toContain('nrr=');
       });
 
-      it('includes the original request URL in response mode', () => {
+      it('includes the request URL, without CMCD in response mode', () => {
         const cmcdManager = createCmcdManager(
             playerInterface,
             {
@@ -1372,7 +1372,7 @@ describe('CmcdManager Setup', () => {
 
         const response = createResponse();
         response.uri = 'https://redirected.com/v2seg.mp4';
-        response.originalUri = 'https://initial.com/v2seg.mp4';
+        response.originalUri = 'https://initial.com/v2seg.mp4?CMCD=br%3D5234%2Cot%3Dv';
 
         cmcdManager.applyResponseData(
             shaka.net.NetworkingEngine.RequestType.SEGMENT,
@@ -1380,14 +1380,14 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        // The response.uri is modified by applyResponseData to become the
-        // beacon URL. We decode it to check the CMCD payload.
         const decodedUri = decodeURIComponent(response.uri);
 
-        // The spec requires the URL to be a string, which gets quoted.
-        const expectedUrlParam = `url="${response.originalUri}"`;
+        const expectedCleanUrl = 'https://initial.com/v2seg.mp4';
+        const expectedUrlParam = `url="${expectedCleanUrl}"`;
+        const unexpectedUrlParam = `url="${response.originalUri}"`;
 
         expect(decodedUri).toContain(expectedUrlParam);
+        expect(decodedUri).not.toContain(unexpectedUrlParam);
       });
 
       it('response excludes `nrr` key for v2, even if requested', () => {
