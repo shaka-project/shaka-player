@@ -34,6 +34,7 @@
  *   rtp: (number|undefined),
  *   msd: (number|undefined),
  *   ltc: (number|undefined),
+ *   bg: (boolean|undefined),
  * }}
  *
  * @description
@@ -197,5 +198,13 @@
  *   the origin and when it was rendered by the client. The accuracy of this
  *   estimate is dependent on synchronization between the packager and the
  *   player clocks.
+ *
+ *  @property {boolean} bg
+ * Backgrounded
+ *
+ * All players in a session are currently in a state that is not visible to
+ * the user due to a user interaction. This key SHOULD only be
+ * sent if it is TRUE.
+ *
  */
 var CmcdData;
