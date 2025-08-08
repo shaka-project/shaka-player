@@ -851,6 +851,7 @@ describe('CmcdManager Setup', () => {
       uri: 'https://test.com/v2seg.mp4',
       headers: {},
       data: new ArrayBuffer(8),
+      status: 200,
     });
 
     describe('Serialization', () => {
@@ -944,7 +945,7 @@ describe('CmcdManager Setup', () => {
         cmcdManager.onPlaybackPlay_();
         cmcdManager.onPlaybackPlaying_();
 
-        const response = createRequest();
+        const response = createResponse();
         cmcdManager.applyResponseData(
             shaka.net.NetworkingEngine.RequestType.SEGMENT,
             response,
@@ -956,6 +957,91 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('v=2');
         expect(decodedUri).toContain('sid=');
         expect(decodedUri).toContain('cid=');
+      });
+
+      it('includes response code in response mode (query)', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              version: 2,
+              targets: [{
+                mode: 'response',
+                enabled: true,
+                url: 'https://example.com/cmcd',
+                includeKeys: ['rc'],
+                useHeaders: false,
+              }],
+            },
+        );
+
+        const response = createResponse();
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        const cmcdParam = response.uri.split('CMCD=')[1];
+        const decodedUri = decodeURIComponent(cmcdParam);
+
+        expect(decodedUri).toContain('rc=200');
+      });
+
+      it('includes response code in response headers', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              version: 2,
+              targets: [{
+                mode: 'response',
+                enabled: true,
+                url: 'https://example.com/cmcd',
+                includeKeys: ['rc'],
+                useHeaders: true,
+              }],
+            },
+        );
+
+        const response = createResponse();
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        expect(response.headers['CMCD-Request']).toContain('rc=200');
+      });
+
+      it('does not include response code if not provided', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              version: 2,
+              targets: [{
+                mode: 'response',
+                enabled: true,
+                url: 'https://example.com/cmcd',
+                includeKeys: ['rc', 'v'],
+                useHeaders: false,
+              }],
+            },
+        );
+
+        const response = {
+          uri: 'https://test.com/v2seg.mp4',
+          headers: {},
+          data: new ArrayBuffer(8),
+        };
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        const decodedUri = decodeURIComponent(response.uri);
+        expect(decodedUri).toContain('v=2');
+        expect(decodedUri).toContain('rc=0');
       });
 
       it('applies CMCD data to response headers in header mode', () => {
