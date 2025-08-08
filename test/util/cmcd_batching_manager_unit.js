@@ -209,28 +209,36 @@ describe('CmcdBatchingManager', () => {
       expect(mockRequest).toHaveBeenCalledTimes(2);
     });
 
-    // it('handles network errors gracefully', async () => {
-    //   const target = createMockTarget({batchSize: 1});
+    it('handles network errors gracefully', async () => {
+      const target = createMockTarget({batchSize: 1});
 
-    //   mockRequest.and.returnValue({
-    //     promise: Promise.reject(new Error('Network error')),
-    //   });
+      // Create a promise we can control for the network error
+      let rejectErrorPromise;
+      const controlledErrorPromise = new Promise((_resolve, reject) => {
+        rejectErrorPromise = reject;
+      });
 
-    //   spyOn(shaka.log, 'warning');
+      mockRequest.and.returnValue({
+        promise: controlledErrorPromise,
+      });
 
-    //   batchingManager.addReport(target, mockCmcdData);
+      spyOn(shaka.log, 'warning');
 
-    //   // Use a proper async wait for error handling
-    //   await new Promise((resolve) => {
-    //     setTimeout(() => {
-    //       expect(shaka.log.warning).toHaveBeenCalledWith(
-    //           'Failed to send CMCD batch report:',
-    //           jasmine.any(Error),
-    //       );
-    //       resolve();
-    //     }, 10);
-    //   });
-    // });
+      batchingManager.addReport(target, mockCmcdData);
+
+      // Now reject the promise with a network error
+      const networkError = new Error('Network error');
+      rejectErrorPromise(networkError);
+
+      // Wait for the promise rejection to be handled
+      await expectAsync(controlledErrorPromise).toBeRejected();
+      await Promise.resolve(); // Wait for microtask queue to process
+
+      expect(shaka.log.warning).toHaveBeenCalledWith(
+          'Failed to send CMCD batch report:',
+          networkError,
+      );
+    });
 
     it('sends separate requests for different URLs', () => {
       const target1 = createMockTarget({url: 'https://a.com/cmcd', batchSize: 1});
