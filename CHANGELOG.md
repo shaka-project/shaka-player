@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.14.26](https://github.com/shaka-project/shaka-player/compare/v4.14.25...v4.14.26) (2025-08-08)
+
+
+### Bug Fixes
+
+* avoid calling new Date(null * 1000) ([#8963](https://github.com/shaka-project/shaka-player/issues/8963)) ([fc73ed4](https://github.com/shaka-project/shaka-player/commit/fc73ed4e50db9ffb72083880d59eaa5d0a14d54d))
+* **DASH:** Fix Playback Fails on Widevine L1/L3 Streams ([#8936](https://github.com/shaka-project/shaka-player/issues/8936)) ([714c51c](https://github.com/shaka-project/shaka-player/commit/714c51c4aab7ca69eae6a346459297e1b281aa2d))
+* Prevent text caret from showing with certain browser settings ([#8953](https://github.com/shaka-project/shaka-player/issues/8953)) ([eb71d3f](https://github.com/shaka-project/shaka-player/commit/eb71d3f0aad0d5d33c926e2360baf8cc3cc040e7)), closes [#8950](https://github.com/shaka-project/shaka-player/issues/8950)
+* Reset MSE when the current readyState is closed ([#8930](https://github.com/shaka-project/shaka-player/issues/8930)) ([e8cb08b](https://github.com/shaka-project/shaka-player/commit/e8cb08ba1ce0752416dc54beca4a5234c41de754))
+* Separate gap jumping seeks from user seeks ([#8911](https://github.com/shaka-project/shaka-player/issues/8911)) ([44d2225](https://github.com/shaka-project/shaka-player/commit/44d2225d243de2041e08621198228d2152576995))
+
 ## [4.14.25](https://github.com/shaka-project/shaka-player/compare/v4.14.24...v4.14.25) (2025-07-28)
 
 
