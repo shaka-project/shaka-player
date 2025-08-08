@@ -36,6 +36,8 @@ describe('CmcdBatchingManager', () => {
 
   beforeEach(() => {
     jasmine.clock().install();
+    // Mock Date.now to work with fake clock
+    spyOn(Date, 'now').and.returnValue(0);
 
     // Mock networking engine
     mockRequest = jasmine.createSpy('request').and.returnValue({
@@ -159,38 +161,53 @@ describe('CmcdBatchingManager', () => {
       expect(mockRequest).not.toHaveBeenCalled();
     });
 
-    // it('handles 429 Rate Limited response with retry', async () => {
-    //   const target = createMockTarget({batchSize: 1});
+    it('handles 429 Rate Limited response with retry', async () => {
+      const target = createMockTarget({batchSize: 1});
 
-    //   // First request returns 429 Rate Limited
-    //   mockRequest.and.returnValue({
-    //     promise: Promise.resolve({
-    //       status: 429,
-    //       headers: {},
-    //       data: new ArrayBuffer(0),
-    //     }),
-    //   });
+      // Create a promise we can control for the 429 response
+      let resolve429Promise;
+      const controlled429Promise = new Promise((resolve) => {
+        resolve429Promise = resolve;
+      });
 
-    //   batchingManager.addReport(target, mockCmcdData);
-    //   expect(mockRequest).toHaveBeenCalledTimes(1);
+      // First request returns 429 Rate Limited
+      mockRequest.and.returnValue({
+        promise: controlled429Promise,
+      });
 
-    //   // Wait for async .then() to process 429 and set up retry
-    //   await new Promise((resolve) => setTimeout(resolve, 0));
+      batchingManager.addReport(target, mockCmcdData);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
 
-    //   // Mock successful retry
-    //   mockRequest.and.returnValue({
-    //     promise: Promise.resolve({
-    //       status: 200,
-    //       headers: {},
-    //       data: new ArrayBuffer(0),
-    //     }),
-    //   });
+      // Now resolve the promise with 429 status
+      resolve429Promise({
+        status: 429,
+        headers: {},
+        data: new ArrayBuffer(0),
+      });
 
-    //   // Advance time to trigger retry (first delay is 100ms)
-    //   jasmine.clock().tick(101);
-    //   // Should have made the retry request
-    //   expect(mockRequest).toHaveBeenCalledTimes(2);
-    // });
+      // Wait for the promise and the .then() callback to execute
+      await controlled429Promise;
+      await Promise.resolve(); // Wait for microtask queue to process
+
+      // Mock successful retry
+      mockRequest.and.returnValue({
+        promise: Promise.resolve({
+          status: 200,
+          headers: {},
+          data: new ArrayBuffer(0),
+        }),
+      });
+
+      // Advance time to trigger retry (first delay is 100ms)
+      Date.now.and.returnValue(101); // Advance Date.now to match
+      jasmine.clock().tick(101);
+
+      // Wait for the retry timer callback to execute
+      await Promise.resolve();
+
+      // Should have made the retry request
+      expect(mockRequest).toHaveBeenCalledTimes(2);
+    });
 
     // it('handles network errors gracefully', async () => {
     //   const target = createMockTarget({batchSize: 1});
