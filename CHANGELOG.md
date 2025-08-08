@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.15.10](https://github.com/shaka-project/shaka-player/compare/v4.15.9...v4.15.10) (2025-08-08)
+
+
+### Bug Fixes
+
+* Add Orange STB Back To `requiresEncryptionInfoInAllInitSegments` ([#8966](https://github.com/shaka-project/shaka-player/issues/8966)) ([05d930b](https://github.com/shaka-project/shaka-player/commit/05d930b4f08145ef52520fa209f6696513037c46)), closes [#8965](https://github.com/shaka-project/shaka-player/issues/8965)
+* avoid calling new Date(null * 1000) ([#8963](https://github.com/shaka-project/shaka-player/issues/8963)) ([4fc5f9a](https://github.com/shaka-project/shaka-player/commit/4fc5f9a6bb7aa386ab2af1274dd4c8d9fd1552d8))
+* **DASH:** Fix Playback Fails on Widevine L1/L3 Streams ([#8936](https://github.com/shaka-project/shaka-player/issues/8936)) ([ca36c2d](https://github.com/shaka-project/shaka-player/commit/ca36c2d98654418abba40e1ddad19f12f459b72b))
+* Prevent text caret from showing with certain browser settings ([#8953](https://github.com/shaka-project/shaka-player/issues/8953)) ([ec72432](https://github.com/shaka-project/shaka-player/commit/ec72432b75e7ec1b4dd2db2aa64a06486ed7309f)), closes [#8950](https://github.com/shaka-project/shaka-player/issues/8950)
+* Reset MSE when the current readyState is closed ([#8930](https://github.com/shaka-project/shaka-player/issues/8930)) ([036973f](https://github.com/shaka-project/shaka-player/commit/036973f064f69f28209f463321e70efb29f6aa4a))
+* Separate gap jumping seeks from user seeks ([#8911](https://github.com/shaka-project/shaka-player/issues/8911)) ([1a67bef](https://github.com/shaka-project/shaka-player/commit/1a67bef9f39957bf827600fff763088908609b58))
+
 ## [4.15.9](https://github.com/shaka-project/shaka-player/compare/v4.15.8...v4.15.9) (2025-07-28)
 
 
