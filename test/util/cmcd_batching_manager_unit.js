@@ -9,6 +9,8 @@ describe('CmcdBatchingManager', () => {
 
   /** @type {!jasmine.Spy} */
   let mockRequest;
+  /** @type {!jasmine.Spy} */
+  let mockDateNow;
   /** @type {shaka.util.CmcdBatchingManager.PlayerInterface} */
   let mockPlayerInterface;
   /** @type {shaka.util.CmcdBatchingManager} */
@@ -37,7 +39,7 @@ describe('CmcdBatchingManager', () => {
   beforeEach(() => {
     jasmine.clock().install();
     // Mock Date.now to work with fake clock
-    spyOn(Date, 'now').and.returnValue(0);
+    mockDateNow = spyOn(Date, 'now').and.returnValue(0);
 
     // Mock networking engine
     mockRequest = jasmine.createSpy('request').and.returnValue({
@@ -199,7 +201,7 @@ describe('CmcdBatchingManager', () => {
       });
 
       // Advance time to trigger retry (first delay is 100ms)
-      Date.now.and.returnValue(101); // Advance Date.now to match
+      mockDateNow.and.returnValue(101); // Advance Date.now to match
       jasmine.clock().tick(101);
 
       // Wait for the retry timer callback to execute
