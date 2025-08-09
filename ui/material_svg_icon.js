@@ -6,24 +6,19 @@
 
 goog.provide('shaka.ui.MaterialSVGIcon');
 
-goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.util.Dom');
 
-goog.requireType('shaka.ui.Controls');
-
 /**
- * @extends {shaka.ui.Element}
  * @final
  * @export
  */
-shaka.ui.MaterialSVGIcon = class extends shaka.ui.Element {
+shaka.ui.MaterialSVGIcon = class {
   /**
    * @param {!HTMLElement} parent
-   * @param {!shaka.ui.Controls} controls
    */
-  constructor(parent, controls) {
-    super(parent, controls);
+  constructor(parent) {
+    this.parent = parent;
 
     /** @private {!SVGElement} */
     this.svg_ = shaka.util.Dom.createSVGElement('svg');
