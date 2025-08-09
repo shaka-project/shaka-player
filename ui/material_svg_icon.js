@@ -1,0 +1,47 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+goog.provide('shaka.ui.MaterialSVGIcon');
+
+goog.require('shaka.ui.Element');
+goog.require('shaka.ui.Enums');
+goog.require('shaka.util.Dom');
+
+goog.requireType('shaka.ui.Controls');
+
+/**
+ * @extends {shaka.ui.Element}
+ * @final
+ * @export
+ */
+shaka.ui.MaterialSVGIcon = class extends shaka.ui.Element {
+  /**
+   * @param {!HTMLElement} parent
+   * @param {!shaka.ui.Controls} controls
+   */
+  constructor(parent, controls) {
+    super(parent, controls);
+
+    /** @private {!SVGElement} */
+    this.svg_ = shaka.util.Dom.createSVGElement('svg');
+
+    /** @private {!SVGElement} */
+    this.path_ = shaka.util.Dom.createSVGElement('path');
+
+    this.svg_.classList.add('material-svg-icon');
+    this.svg_.setAttribute('viewBox', '0 -960 960 960');
+
+    this.svg_.appendChild(this.path_);
+    parent.appendChild(this.svg_);
+  }
+
+  /**
+   * @param {shaka.ui.Enums.MaterialDesignSVGIcons} icon
+   */
+  use(icon) {
+    this.path_.setAttribute('d', icon);
+  }
+};
