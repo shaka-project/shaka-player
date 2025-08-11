@@ -34,8 +34,8 @@
  *   rtp: (number|undefined),
  *   msd: (number|undefined),
  *   ltc: (number|undefined),
- *  ttfb: (number|undefined),
- *  ttlb: (number|undefined),
+ *   ttfb: (number|undefined),
+ *   ttlb: (number|undefined),
  * }}
  *
  * @description
