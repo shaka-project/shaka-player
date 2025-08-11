@@ -35,8 +35,17 @@ shaka.ui.MaterialSVGIcon = class {
 
   /**
    * @param {shaka.ui.Enums.MaterialDesignSVGIcons} icon
+   * @export
    */
   use(icon) {
     this.path_.setAttribute('d', icon);
+  }
+
+  /**
+   * @return {SVGElement}
+   * @export
+   */
+  getSvgElement() {
+    return this.svg_;
   }
 };
