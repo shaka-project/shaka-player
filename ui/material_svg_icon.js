@@ -6,7 +6,6 @@
 
 goog.provide('shaka.ui.MaterialSVGIcon');
 
-goog.require('shaka.ui.Enums');
 goog.require('shaka.util.Dom');
 
 /**
@@ -37,7 +36,7 @@ shaka.ui.MaterialSVGIcon = class {
   }
 
   /**
-   * @param {shaka.ui.Enums.MaterialDesignSVGIcons} icon
+   * @param {string} icon
    * @export
    */
   use(icon) {
