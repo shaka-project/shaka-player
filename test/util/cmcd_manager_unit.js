@@ -853,6 +853,16 @@ describe('CmcdManager Setup', () => {
       data: new ArrayBuffer(8),
     });
 
+    const createResponseWithRealTiming = () => ({
+      uri: 'https://test.com/v2seg.mp4',
+      headers: {},
+      data: new ArrayBuffer(8),
+      timeMs: 400, // This is the TTLB
+      originalRequest: {
+        timeToFirstByte: 150, // This is the TTFB
+      },
+    });
+
     describe('Serialization', () => {
       it('serializes data to a query string', () => {
         const query = CmcdManager.toQuery({v: 2, msd: 250});
@@ -1341,6 +1351,91 @@ describe('CmcdManager Setup', () => {
 
         const decodedUri = decodeURIComponent(response.uri);
         expect(decodedUri).toContain('rtp=');
+      });
+
+      it('sends ttfb and ttlb query', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              version: 2,
+              targets: [{
+                mode: 'response',
+                enabled: true,
+                url: 'https://example.com/cmcd',
+                includeKeys: ['ttfb', 'ttlb'],
+                useHeaders: false,
+              }],
+            },
+        );
+
+        const response = createResponseWithRealTiming();
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        expect(response.uri).toContain('https://example.com/cmcd?CMCD=');
+        const cmcdParam = response.uri.split('CMCD=')[1];
+        const decodedUri = decodeURIComponent(cmcdParam);
+
+        expect(decodedUri).toContain('ttfb=150');
+        expect(decodedUri).toContain('ttlb=400');
+      });
+
+      it('sends ttfb and ttlb in headers', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              version: 2,
+              targets: [{
+                mode: 'response',
+                enabled: true,
+                url: 'https://example.com/cmcd',
+                includeKeys: ['ttfb', 'ttlb'],
+                useHeaders: true,
+              }],
+            },
+        );
+
+        const response = createResponseWithRealTiming();
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        expect(response.headers['CMCD-Request']).toContain('ttfb=150');
+        expect(response.headers['CMCD-Request']).toContain('ttlb=400');
+      });
+
+      it('does not generate ttfb or ttlb if timing info is missing', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              version: 2,
+              targets: [{
+                mode: 'response',
+                enabled: true,
+                url: 'https://example.com/cmcd',
+                includeKeys: ['ttfb', 'ttlb'],
+                useHeaders: false,
+              }],
+            },
+        );
+
+        const response = createResponse();
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        const cmcdParam = response.uri.split('CMCD=')[1];
+        const decodedUri = decodeURIComponent(cmcdParam);
+
+        expect(decodedUri).not.toContain('ttfb');
+        expect(decodedUri).not.toContain('ttlb');
       });
 
       it('generates `nor` for URL-based segment responses', () => {
