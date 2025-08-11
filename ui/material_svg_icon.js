@@ -15,7 +15,7 @@ goog.require('shaka.util.Dom');
  */
 shaka.ui.MaterialSVGIcon = class {
   /**
-   * @param {!HTMLElement} parent
+   * @param {?HTMLElement} parent
    */
   constructor(parent) {
     this.parent = parent;
@@ -30,7 +30,10 @@ shaka.ui.MaterialSVGIcon = class {
     this.svg_.setAttribute('viewBox', '0 -960 960 960');
 
     this.svg_.appendChild(this.path_);
-    parent.appendChild(this.svg_);
+
+    if (this.parent) {
+      parent.appendChild(this.svg_);
+    }
   }
 
   /**
@@ -42,7 +45,7 @@ shaka.ui.MaterialSVGIcon = class {
   }
 
   /**
-   * @return {SVGElement}
+   * @return {!SVGElement}
    * @export
    */
   getSvgElement() {
