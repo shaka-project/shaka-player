@@ -34,6 +34,7 @@
  *   rtp: (number|undefined),
  *   msd: (number|undefined),
  *   ltc: (number|undefined),
+ *   cmsdd: (number|undefined),
  * }}
  *
  * @description
@@ -197,5 +198,10 @@
  *   the origin and when it was rendered by the client. The accuracy of this
  *   estimate is dependent on synchronization between the packager and the
  *   player clocks.
+ *
+ * @property {number} cmsdd
+ * The media segment download duration in milliseconds.
+ * This is the duration from the request to the last byte of the response.
+ *
  */
 var CmcdData;
