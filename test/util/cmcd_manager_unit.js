@@ -1356,6 +1356,43 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).not.toContain('nrr=');
       });
 
+      it('should generate "cmsdd" from response header', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              targets: [Object.assign({}, baseConfig.targets[0], {
+                includeKeys: ['cmsdd'],
+              })],
+            },
+        );
+
+        const response = createResponse();
+        const cmsddData = `
+          "CDNB-3ak1";
+          etp=96;
+          rtt=8,"CDNB-w35k";
+          etp=76;
+          rtt=32,"CDNA987.343";
+          etp=48;
+          rtt=30,"CDNA-312.663";
+          etp=115;rtt=16;
+          mb=5000'`;
+
+        response.headers['CMSD-Dynamic'] = cmsddData;
+
+        const spy = spyOn(cmcdManager, 'sendCmcdRequest_').and.callThrough();
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        expect(spy).toHaveBeenCalled();
+        const sentCmcdData = spy.calls.argsFor(0)[0];
+        expect(sentCmcdData.cmsdd).toBe(cmsddData);
+      });
+
       it('response excludes `nrr` key for v2, even if requested', () => {
         const cmcdManager = createCmcdManager(
             playerInterface,

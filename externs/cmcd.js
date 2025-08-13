@@ -34,7 +34,7 @@
  *   rtp: (number|undefined),
  *   msd: (number|undefined),
  *   ltc: (number|undefined),
- *   cmsdd: (number|undefined),
+ *   cmsdd: (string|undefined),
  * }}
  *
  * @description
