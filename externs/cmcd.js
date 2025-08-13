@@ -200,8 +200,11 @@
  *   player clocks.
  *
  * @property {string} cmsdd
- * The media segment download duration in milliseconds.
- * This is the duration from the request to the last byte of the response.
+ *   CMSD Dynamic Header
+ *
+ *   Holds a `Base64 [base64]` encoded copy of the CMSD data
+ *   received on the CMSD-Dynamic response header.
+ *   This key MUST only be used in RESPONSE mode.
  *
  */
 var CmcdData;
