@@ -1393,6 +1393,29 @@ describe('CmcdManager Setup', () => {
         expect(sentCmcdData.cmsdd).toBe(cmsddData);
       });
 
+      it('should not include "cmsdd" if header is not present', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              targets: [Object.assign({}, baseConfig.targets[0], {
+                includeKeys: ['cmsdd'],
+              })],
+            },
+        );
+
+        const response = createResponse();
+
+        const spy = spyOn(cmcdManager, 'sendCmcdRequest_').and.callThrough();
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext());
+
+        const sentCmcdData = spy.calls.argsFor(0)[0];
+        expect(sentCmcdData.cmsdd).toBeUndefined();
+      });
+
       it('response excludes `nrr` key for v2, even if requested', () => {
         const cmcdManager = createCmcdManager(
             playerInterface,
