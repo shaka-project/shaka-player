@@ -1389,7 +1389,7 @@ describe('CmcdManager Setup', () => {
 
         const cmcdManager = createCmcdManager(playerInterface,
             {useHeaders: false});
-        cmcdManager.onVisibilityChange_();
+
         const request = createRequest();
         cmcdManager.applyManifestData(request, {});
         const decodedUri = decodeURIComponent(request.uris[0]);
@@ -1403,7 +1403,7 @@ describe('CmcdManager Setup', () => {
 
         const cmcdManager = createCmcdManager(playerInterface,
             {useHeaders: true});
-        cmcdManager.onVisibilityChange_();
+
         const request = createRequest();
         cmcdManager.applyManifestData(request, {});
         expect(request.headers['CMCD-Status']).toContain('bg');
@@ -1416,7 +1416,7 @@ describe('CmcdManager Setup', () => {
         const cmcdManager = createCmcdManager(playerInterface,
             {useHeaders: true});
 
-        cmcdManager.onVisibilityChange_();
+
         const request = createRequest();
         cmcdManager.applyManifestData(request, {});
         if (request.headers['CMCD-Status']) {
@@ -1438,7 +1438,6 @@ describe('CmcdManager Setup', () => {
               }],
             });
 
-        cmcdManager.onVisibilityChange_();
         const response = createResponse();
         cmcdManager.applyResponseData(
             shaka.net.NetworkingEngine.RequestType.SEGMENT,
@@ -1454,7 +1453,6 @@ describe('CmcdManager Setup', () => {
         const cmcdManager = createCmcdManager(playerInterface,
             {useHeaders: true});
 
-        cmcdManager.onVisibilityChange_();
         const request = createRequest();
         cmcdManager.applyRequestSegmentData(request, createSegmentContext());
         expect(request.headers['CMCD-Status']).toBeDefined();
