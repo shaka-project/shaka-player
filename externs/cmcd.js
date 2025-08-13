@@ -199,7 +199,7 @@
  *   estimate is dependent on synchronization between the packager and the
  *   player clocks.
  *
- * @property {number} cmsdd
+ * @property {string} cmsdd
  * The media segment download duration in milliseconds.
  * This is the duration from the request to the last byte of the response.
  *
