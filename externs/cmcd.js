@@ -199,7 +199,7 @@
  *   estimate is dependent on synchronization between the packager and the
  *   player clocks.
  *
- * @property {number} cmsds
+ * @property {string} cmsds
  *   CMSD Static Header
  *
  *  Holds a `Base64 [base64]` encoded copy of the CMSD data received on
