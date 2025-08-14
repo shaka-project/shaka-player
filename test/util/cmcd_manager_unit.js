@@ -1380,6 +1380,8 @@ describe('CmcdManager Setup', () => {
 
         response.headers['CMSD-Dynamic'] = cmsddData;
 
+        const encodedCmsddData = btoa(cmsddData);
+
         const spy = spyOn(cmcdManager, 'sendCmcdRequest_').and.callThrough();
 
         cmcdManager.applyResponseData(
@@ -1390,7 +1392,94 @@ describe('CmcdManager Setup', () => {
 
         expect(spy).toHaveBeenCalled();
         const sentCmcdData = spy.calls.argsFor(0)[0];
-        expect(sentCmcdData.cmsdd).toBe(cmsddData);
+        expect(sentCmcdData.cmsdd.toString())
+            .toBe(encodedCmsddData.toString());
+      });
+
+      it('cmsdd value should be Base64 encoded', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              targets: [Object.assign({}, baseConfig.targets[0], {
+                includeKeys: ['cmsdd'],
+              })],
+            },
+        );
+
+        const response = createResponse();
+        const cmsddData = `
+          "CDNB-3ak1";
+          etp=96;
+          rtt=8,"CDNB-w35k";
+          etp=76;
+          rtt=32,"CDNA987.343";
+          etp=48;
+          rtt=30,"CDNA-312.663";
+          etp=115;rtt=16;
+          mb=5000'`;
+
+        response.headers['CMSD-Dynamic'] = cmsddData;
+        const encodedCmsddData = btoa(cmsddData);
+
+        const spy = spyOn(cmcdManager, 'sendCmcdRequest_').and.callThrough();
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        expect(spy).toHaveBeenCalled();
+        const sentCmcdData = spy.calls.argsFor(0)[0];
+        expect(sentCmcdData.cmsdd.toString())
+            .toBe(encodedCmsddData.toString());
+      });
+
+      it('should send "cmsdd" in headers mode', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              targets: [Object.assign({}, baseConfig.targets[0], {
+                includeKeys: ['cmsdd'],
+                useHeaders: true,
+              })],
+            },
+        );
+
+        const cmsddData = `
+          "CDNB-3ak1";
+          etp=96;
+          rtt=8,"CDNB-w35k";
+          etp=76;
+          rtt=32,"CDNA987.343";
+          etp=48;
+          rtt=30,"CDNA-312.663";
+          etp=115;rtt=16;
+          mb=5000'`;
+
+        const encodedCmsddData = btoa(cmsddData);
+
+        const response = createResponse();
+        response.headers['CMSD-Dynamic'] = cmsddData;
+
+        const spy = spyOn(cmcdManager, 'sendCmcdRequest_').and.callThrough();
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        expect(spy).toHaveBeenCalled();
+
+        expect(response.headers['CMCD-Request'])
+            .toBe(`cmsdd="${encodedCmsddData.toString()}"`);
       });
 
       it('should not include "cmsdd" if header is not present', () => {
