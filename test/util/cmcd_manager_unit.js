@@ -2546,13 +2546,15 @@ describe('CmcdManager Setup', () => {
 
         const cmcdManager = new CmcdManager(
             playerInterfaceWithNE,
-            config,
+            createCmcdConfig(config),
             player,
         );
-        cmcdManager.setMediaElement(new shaka.util.FakeEventTarget());
+
+        cmcdManager.setMediaElement(player);
         cmcdManager.configure(config);
 
         player.dispatchEvent(new shaka.util.FakeEvent('complete'));
+
         const request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
         const decodedUri = decodeURIComponent(request.uris[0]);
