@@ -34,6 +34,7 @@
  *   rtp: (number|undefined),
  *   msd: (number|undefined),
  *   ltc: (number|undefined),
+ *   cmsds: (string|undefined),
  * }}
  *
  * @description
@@ -197,5 +198,13 @@
  *   the origin and when it was rendered by the client. The accuracy of this
  *   estimate is dependent on synchronization between the packager and the
  *   player clocks.
+ *
+ * @property {number} cmsds
+ *   CMSD Static Header
+ *
+ *  Holds a `Base64 [base64]` encoded copy of the CMSD data received on
+ *  the CMSD-Static response header.
+ *  This key MUST only be used in RESPONSE mode.
+ *
  */
 var CmcdData;
