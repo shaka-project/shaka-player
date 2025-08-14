@@ -1407,5 +1407,126 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).not.toContain('ltc=');
       });
     });
+
+    it('should generate "cmsds" from response header', () => {
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [Object.assign({}, baseConfig.targets[0], {
+              includeKeys: ['cmsds'],
+            })],
+          },
+      );
+
+      const response = createResponse();
+      const cmsdsData = `ot=v,sf=h,st=v,d=5000,br=2000,n="OriginProviderA"`;
+
+      response.headers['CMSD-Static'] = cmsdsData;
+
+      const encodedCmsdsData = btoa(cmsdsData);
+
+      const spy = spyOn(cmcdManager, 'sendCmcdRequest_').and.callThrough();
+
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          createSegmentContext(),
+      );
+
+      expect(spy).toHaveBeenCalled();
+      const sentCmcdData = spy.calls.argsFor(0)[0];
+      expect(sentCmcdData.cmsds.toString())
+          .toBe(encodedCmsdsData.toString());
+    });
+
+    it('cmsds value should be Base64 encoded', () => {
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [Object.assign({}, baseConfig.targets[0], {
+              includeKeys: ['cmsds'],
+            })],
+          },
+      );
+
+      const response = createResponse();
+      const cmsdsData = `ot=v,sf=h,st=v,d=5000,br=2000,n="OriginProviderA"`;
+
+      response.headers['CMSD-Static'] = cmsdsData;
+      const encodedCmsdsData = btoa(cmsdsData);
+
+      const spy = spyOn(cmcdManager, 'sendCmcdRequest_').and.callThrough();
+
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          createSegmentContext(),
+      );
+
+      expect(spy).toHaveBeenCalled();
+      const sentCmcdData = spy.calls.argsFor(0)[0];
+      expect(sentCmcdData.cmsds.toString())
+          .toBe(encodedCmsdsData.toString());
+    });
+
+    it('should send "cmsds" in headers mode', () => {
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [Object.assign({}, baseConfig.targets[0], {
+              includeKeys: ['cmsds'],
+              useHeaders: true,
+            })],
+          },
+      );
+
+      const cmsdsData = `ot=v,sf=h,st=v,d=5000,br=2000,n="OriginProviderA"`;
+      const encodedCmsdsData = btoa(cmsdsData);
+
+      const response = createResponse();
+      response.headers['CMSD-Static'] = cmsdsData;
+
+      const spy = spyOn(cmcdManager, 'sendCmcdRequest_').and.callThrough();
+
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          createSegmentContext(),
+      );
+
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          createSegmentContext(),
+      );
+
+      expect(spy).toHaveBeenCalled();
+
+      expect(response.headers['CMCD-Request'])
+          .toBe(`cmsds="${encodedCmsdsData.toString()}"`);
+    });
+
+    it('should not include "cmsds" if header is not present', () => {
+      const cmcdManager = createCmcdManager(
+          playerInterface,
+          {
+            targets: [Object.assign({}, baseConfig.targets[0], {
+              includeKeys: ['cmsds'],
+            })],
+          },
+      );
+
+      const response = createResponse();
+
+      const spy = spyOn(cmcdManager, 'sendCmcdRequest_').and.callThrough();
+
+      cmcdManager.applyResponseData(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          response,
+          createSegmentContext());
+
+      const sentCmcdData = spy.calls.argsFor(0)[0];
+      expect(sentCmcdData.cmsds).toBeUndefined();
+    });
   });
 });
