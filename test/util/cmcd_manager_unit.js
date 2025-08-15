@@ -2532,7 +2532,7 @@ describe('CmcdManager Setup', () => {
           getNetworkingEngine: () => networkingEngine,
         });
 
-        const config = {
+        const completeConfig = createCmcdConfig({
           version: 2,
           enabled: true,
           targets: [{
@@ -2542,16 +2542,18 @@ describe('CmcdManager Setup', () => {
             includeKeys: ['e', 'sta', 'v'],
             events: ['ps'],
           }],
-        };
+        });
 
         const cmcdManager = new CmcdManager(
-            playerInterfaceWithNE,
-            createCmcdConfig(config),
-            player,
+            /** @type {shaka.util.CmcdManager.PlayerInterface} */
+            (playerInterfaceWithNE),
+            completeConfig,
+            /** @type {shaka.Player} */ (/** @type {*} */ (player)),
         );
 
-        cmcdManager.setMediaElement(player);
-        cmcdManager.configure(config);
+        cmcdManager.setMediaElement(
+            /** @type {!HTMLMediaElement} */ (/** @type {*} */ (player)));
+        cmcdManager.configure(completeConfig);
 
         player.dispatchEvent(new shaka.util.FakeEvent('complete'));
 
