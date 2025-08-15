@@ -2548,11 +2548,14 @@ describe('CmcdManager Setup', () => {
             /** @type {shaka.util.CmcdManager.PlayerInterface} */
             (playerInterfaceWithNE),
             completeConfig,
-            /** @type {shaka.Player} */ (/** @type {*} */ (player)),
+            /** @type {shaka.Player} */ (player),
         );
 
         cmcdManager.setMediaElement(
-            /** @type {!HTMLMediaElement} */ (/** @type {*} */ (player)));
+            /** @type {!HTMLMediaElement} */
+            (/** @type {*} */ (player)),
+        );
+
         cmcdManager.configure(completeConfig);
 
         player.dispatchEvent(new shaka.util.FakeEvent('complete'));
