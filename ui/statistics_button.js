@@ -249,10 +249,10 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     closeElement.classList.add('shaka-statistics-close');
     const icon = new shaka.ui.MaterialSVGIcon(closeElement,
         shaka.ui.Enums.MaterialDesignSVGIcons.CLOSE);
-    icon.getSvgElement().classList.add('material-icons');
-    icon.getSvgElement().classList.add('notranslate');
+    const iconElement = icon.getSvgElement();
+    iconElement.classList.add('material-icons', 'notranslate');
     this.container_.appendChild(closeElement);
-    this.eventManager.listen(icon.getSvgElement(), 'click', () => {
+    this.eventManager.listen(iconElement, 'click', () => {
       this.onClick_();
     });
     for (const name of this.controls.getConfig().statisticsList) {

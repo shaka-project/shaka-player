@@ -198,9 +198,10 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
     closeElement.classList.add('shaka-statistics-close');
     const icon = new shaka.ui.MaterialSVGIcon(closeElement,
         shaka.ui.Enums.MaterialDesignSVGIcons.CLOSE);
+    const iconElement = icon.getSvgElement();
 
     this.container_.appendChild(closeElement);
-    this.eventManager.listen(icon.getSvgElement(), 'click', () => {
+    this.eventManager.listen(iconElement, 'click', () => {
       this.onClick_();
     });
     for (const name of this.controls.getConfig().adStatisticsList) {

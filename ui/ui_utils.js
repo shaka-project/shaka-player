@@ -71,7 +71,7 @@ shaka.ui.Utils = class {
     iconElement.classList.add('shaka-chosen-item');
     // Screen reader should ignore icon text.
     iconElement.ariaHidden = 'true';
-    return icon.getSvgElement();
+    return iconElement;
   }
 
 
