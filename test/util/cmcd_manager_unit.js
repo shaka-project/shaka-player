@@ -944,7 +944,7 @@ describe('CmcdManager Setup', () => {
         cmcdManager.onPlaybackPlay_();
         cmcdManager.onPlaybackPlaying_();
 
-        const response = createRequest();
+        const response = createResponse();
         cmcdManager.applyResponseData(
             shaka.net.NetworkingEngine.RequestType.SEGMENT,
             response,
