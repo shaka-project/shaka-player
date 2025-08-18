@@ -35,6 +35,7 @@
  *   msd: (number|undefined),
  *   ltc: (number|undefined),
  *   rc: (number|undefined),
+ *   ts: (number|undefined),
  * }}
  *
  * @description
@@ -205,5 +206,12 @@
  *   The response code received when requesting a media object.
  *   In a redirect scenario, this would be the final response code received.
  *   A value of 0 SHOULD be used to indicate that a response was not received.
+ * @property {number} ts
+ *   Timestamp
+ *
+ *   The timestamp at which the associated event occurred,
+ *   expressed as milliseconds since the UNIX epoch.
+ *   When the event is a request for a media object the time
+ *   SHOULD reference when the request was first initiated.
  */
 var CmcdData;
