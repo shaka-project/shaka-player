@@ -34,6 +34,7 @@
  *   rtp: (number|undefined),
  *   msd: (number|undefined),
  *   ltc: (number|undefined),
+ *   rc: (number|undefined),
  *   url: (string|undefined),
  *   ts: (number|undefined),
  * }}
@@ -199,6 +200,13 @@
  *   the origin and when it was rendered by the client. The accuracy of this
  *   estimate is dependent on synchronization between the packager and the
  *   player clocks.
+ *
+ * @property {number} rc
+ *   Response code
+ *
+ *   The response code received when requesting a media object.
+ *   In a redirect scenario, this would be the final response code received.
+ *   A value of 0 SHOULD be used to indicate that a response was not received.
  *
  * @property {string} url
  *  url
