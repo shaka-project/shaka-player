@@ -34,6 +34,7 @@
  *   rtp: (number|undefined),
  *   msd: (number|undefined),
  *   ltc: (number|undefined),
+ *   cmsdd: (string|undefined),
  *   ttfb: (number|undefined),
  *   ttlb: (number|undefined),
  *   rc: (number|undefined),
@@ -202,6 +203,13 @@
  *   the origin and when it was rendered by the client. The accuracy of this
  *   estimate is dependent on synchronization between the packager and the
  *   player clocks.
+ *
+ * @property {string} cmsdd
+ *   CMSD Dynamic Header
+ *
+ *   Holds a `Base64 [base64]` encoded copy of the CMSD data
+ *   received on the CMSD-Dynamic response header.
+ *   This key MUST only be used in RESPONSE mode.
  *
  * @property {number} ttfb
  * Elapsed time between when the request was first initiated (captured in ts)

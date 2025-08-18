@@ -476,6 +476,7 @@ ttfbb
 ttlb
 cmsdd
 cmsds
+cdnb
 
 # other
 autoglottonym
