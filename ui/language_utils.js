@@ -230,7 +230,8 @@ shaka.ui.LanguageUtils = class {
       }
 
       if (updateChosen && (combinationName == selectedCombination)) {
-        button.prepend(shaka.ui.Utils.checkmarkIcon());
+        button.insertAdjacentElement('afterbegin',
+            shaka.ui.Utils.checkmarkIcon());
         span.classList.add('shaka-chosen-item');
         button.ariaSelected = 'true';
         currentSelectionElement.textContent = span.textContent;
@@ -357,7 +358,8 @@ shaka.ui.LanguageUtils = class {
       }
 
       if (updateChosen && (combinationName == selectedCombination)) {
-        button.prepend(shaka.ui.Utils.checkmarkIcon());
+        button.insertAdjacentElement('afterbegin',
+            shaka.ui.Utils.checkmarkIcon());
         span.classList.add('shaka-chosen-item');
         button.ariaSelected = 'true';
         currentSelectionElement.textContent = span.textContent;

@@ -110,7 +110,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     off.ariaSelected = 'true';
     this.menu.appendChild(off);
 
-    off.prepend(shaka.ui.Utils.checkmarkIcon());
+    off.insertAdjacentElement('afterbegin', shaka.ui.Utils.checkmarkIcon());
 
     /** @private {!HTMLElement} */
     this.captionsOffSpan_ = shaka.util.Dom.createHTMLElement('span');
@@ -161,7 +161,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     if (!this.player.isTextTrackVisible()) {
       offButton.ariaSelected = 'true';
-      offButton.prepend(shaka.ui.Utils.checkmarkIcon());
+      offButton.insertAdjacentElement('afterbegin',
+          shaka.ui.Utils.checkmarkIcon());
       this.captionsOffSpan_.classList.add('shaka-chosen-item');
       this.currentSelection.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.OFF);
