@@ -134,3 +134,4 @@ shaka.ui.FullscreenButton.Factory = class {
 
 shaka.ui.Controls.registerElement(
     'fullscreen', new shaka.ui.FullscreenButton.Factory());
+

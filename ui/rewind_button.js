@@ -120,3 +120,4 @@ shaka.ui.RewindButton.Factory = class {
 
 shaka.ui.Controls.registerElement(
     'rewind', new shaka.ui.RewindButton.Factory());
+
