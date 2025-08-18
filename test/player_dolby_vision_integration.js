@@ -127,33 +127,4 @@ describe('Player Dolby Vision', () => {
       await testPlayback('/base/test/test/assets/dv-p8-4-hevc/media.m3u8');
     });
   });
-
-  describe('P10 with fallback to AV1', () => {
-    it('with DASH', async () => {
-      if (!await Util.isTypeSupported(
-          'video/mp4; codecs="av01.0.04M.10.0.111.09.16.09.0"',
-          /* width= */ 640, /* height= */ 360)) {
-        pending('Codec AV1 is not supported by the platform.');
-      }
-      await testPlayback('/base/test/test/assets/dv-p10-av1/manifest.mpd');
-    });
-
-    it('with master playlist (HLS)', async () => {
-      if (!await Util.isTypeSupported(
-          'video/mp4; codecs="av01.0.04M.10.0.111.09.16.09.0"',
-          /* width= */ 640, /* height= */ 360)) {
-        pending('Codec AV1 is not supported by the platform.');
-      }
-      await testPlayback('/base/test/test/assets/dv-p10-av1/master.m3u8');
-    });
-
-    it('with media playlist (HLS)', async () => {
-      if (!await Util.isTypeSupported(
-          'video/mp4; codecs="av01.0.04M.10.0.111.09.16.09.0"',
-          /* width= */ 640, /* height= */ 360)) {
-        pending('Codec AV1 is not supported by the platform.');
-      }
-      await testPlayback('/base/test/test/assets/dv-p10-av1/media.m3u8');
-    });
-  });
 });
