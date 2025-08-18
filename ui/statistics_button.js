@@ -40,8 +40,8 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-statistics-button');
 
     /** @private {!shaka.ui.MaterialSVGIcon} */
-    this.icon_ = new shaka.ui.MaterialSVGIcon(this.button_);
-    this.icon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.STATISTICS_ON);
+    this.icon_ = new shaka.ui.MaterialSVGIcon(this.button_,
+        shaka.ui.Enums.MaterialDesignSVGIcons.STATISTICS_ON);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -247,10 +247,10 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     const closeElement = shaka.util.Dom.createHTMLElement('div');
     closeElement.classList.add('shaka-no-propagation');
     closeElement.classList.add('shaka-statistics-close');
-    const icon = new shaka.ui.MaterialSVGIcon(closeElement);
+    const icon = new shaka.ui.MaterialSVGIcon(closeElement,
+        shaka.ui.Enums.MaterialDesignSVGIcons.CLOSE);
     icon.getSvgElement().classList.add('material-icons');
     icon.getSvgElement().classList.add('notranslate');
-    icon.use(shaka.ui.Enums.MaterialDesignSVGIcons.CLOSE);
     this.container_.appendChild(closeElement);
     this.eventManager.listen(icon.getSvgElement(), 'click', () => {
       this.onClick_();

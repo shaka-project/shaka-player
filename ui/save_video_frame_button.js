@@ -44,8 +44,8 @@ shaka.ui.SaveVideoFrameButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-tooltip');
 
     /** @private {!shaka.ui.MaterialSVGIcon} */
-    this.icon_ = new shaka.ui.MaterialSVGIcon(this.button_);
-    this.icon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.DOWNLOAD);
+    this.icon_ = new shaka.ui.MaterialSVGIcon(this.button_,
+        shaka.ui.Enums.MaterialDesignSVGIcons.DOWNLOAD);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');

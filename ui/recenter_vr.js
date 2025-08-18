@@ -39,8 +39,8 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
     this.recenterVRButton_.ariaPressed = 'false';
 
     /** @private {!shaka.ui.MaterialSVGIcon} */
-    this.recenterVRIcon_ = new shaka.ui.MaterialSVGIcon(this.recenterVRButton_);
-    this.recenterVRIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.RECENTER_VR);
+    this.recenterVRIcon_ = new shaka.ui.MaterialSVGIcon(this.recenterVRButton_,
+        shaka.ui.Enums.MaterialDesignSVGIcons.RECENTER_VR);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');

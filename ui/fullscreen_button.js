@@ -39,8 +39,8 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-tooltip');
 
     /** @private {shaka.ui.MaterialSVGIcon} */
-    this.icon_ = new shaka.ui.MaterialSVGIcon(this.button_);
-    this.icon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.FULLSCREEN);
+    this.icon_ = new shaka.ui.MaterialSVGIcon(this.button_,
+        shaka.ui.Enums.MaterialDesignSVGIcons.FULLSCREEN);
 
     this.checkSupport_();
 

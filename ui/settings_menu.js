@@ -82,8 +82,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     this.button.classList.add('shaka-overflow-button');
 
     /** @protected {!shaka.ui.MaterialSVGIcon}*/
-    this.icon = new shaka.ui.MaterialSVGIcon(this.button);
-    this.icon.use(iconText);
+    this.icon = new shaka.ui.MaterialSVGIcon(this.button, iconText);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -122,8 +121,8 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     });
 
     /** @private {shaka.ui.MaterialSVGIcon} */
-    this.backIcon_ = new shaka.ui.MaterialSVGIcon(this.backButton);
-    this.backIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.CLOSE);
+    this.backIcon_ = new shaka.ui.MaterialSVGIcon(this.backButton,
+        shaka.ui.Enums.MaterialDesignSVGIcons.CLOSE);
 
     /** @protected {!HTMLElement}*/
     this.backSpan = shaka.util.Dom.createHTMLElement('span');

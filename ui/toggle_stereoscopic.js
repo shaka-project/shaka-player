@@ -41,8 +41,7 @@ shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
 
     /** @private {!shaka.ui.MaterialSVGIcon} */
     this.toggleStereoscopicIcon_ = new shaka.ui.MaterialSVGIcon(
-        this.toggleStereoscopicButton_);
-    this.toggleStereoscopicIcon_.use(
+        this.toggleStereoscopicButton_,
         shaka.ui.Enums.MaterialDesignSVGIcons.TOGGLE_STEREOSCOPIC);
 
     const label = shaka.util.Dom.createHTMLElement('label');

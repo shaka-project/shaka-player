@@ -44,10 +44,10 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     this.remoteButton_.ariaPressed = 'false';
 
     /** @private {!shaka.ui.MaterialSVGIcon} */
-    this.remoteIcon_ = new shaka.ui.MaterialSVGIcon(this.remoteButton_);
-    this.remoteIcon_.use(this.isAirPlay_ ?
-        shaka.ui.Enums.MaterialDesignSVGIcons.AIRPLAY :
-        shaka.ui.Enums.MaterialDesignSVGIcons.CAST);
+    this.remoteIcon_ = new shaka.ui.MaterialSVGIcon(this.remoteButton_,
+        this.isAirPlay_ ?
+          shaka.ui.Enums.MaterialDesignSVGIcons.AIRPLAY :
+          shaka.ui.Enums.MaterialDesignSVGIcons.CAST);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');

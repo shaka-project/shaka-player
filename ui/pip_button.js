@@ -46,8 +46,8 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     this.pipButton_.classList.add('shaka-tooltip');
 
     /** @private {!shaka.ui.MaterialSVGIcon} */
-    this.pipIcon_ = new shaka.ui.MaterialSVGIcon(this.pipButton_);
-    this.pipIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.PIP);
+    this.pipIcon_ = new shaka.ui.MaterialSVGIcon(this.pipButton_,
+        shaka.ui.Enums.MaterialDesignSVGIcons.PIP);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
