@@ -34,6 +34,8 @@
  *   rtp: (number|undefined),
  *   msd: (number|undefined),
  *   ltc: (number|undefined),
+ *   ttfb: (number|undefined),
+ *   ttlb: (number|undefined),
  *   rc: (number|undefined),
  *   url: (string|undefined),
  *   ts: (number|undefined),
@@ -200,6 +202,19 @@
  *   the origin and when it was rendered by the client. The accuracy of this
  *   estimate is dependent on synchronization between the packager and the
  *   player clocks.
+ *
+ * @property {number} ttfb
+ * Elapsed time between when the request was first initiated (captured in ts)
+ * and the time when the first byte of the response was received.
+ * This value should only be reported if it is known.
+ * Absence of this key does not indicate that the response was not received.
+ *
+ * @property {number} ttlb
+ * Elapsed time between when the request was first initiated (captured in ts)
+ * and the time the response body is fully received.
+ * This value should only be reported if it is known.
+ * Absence of this key does not indicate that the response was not
+ * fully received.
  *
  * @property {number} rc
  *   Response code
