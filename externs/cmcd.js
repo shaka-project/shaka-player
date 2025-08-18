@@ -36,6 +36,9 @@
  *   ltc: (number|undefined),
  *   ttfb: (number|undefined),
  *   ttlb: (number|undefined),
+ *   rc: (number|undefined),
+ *   url: (string|undefined),
+ *   ts: (number|undefined),
  * }}
  *
  * @description
@@ -213,5 +216,27 @@
  * Absence of this key does not indicate that the response was not
  * fully received.
  *
+ * @property {number} rc
+ *   Response code
+ *
+ *   The response code received when requesting a media object.
+ *   In a redirect scenario, this would be the final response code received.
+ *   A value of 0 SHOULD be used to indicate that a response was not received.
+ *
+ * @property {string} url
+ *  url
+ *
+ *  The URL used to request the media object.
+ *  This key MUST NOT be used with Request Modereporting mode #1.
+ *  If the request is redirected, this key MUST report the initial
+ *  requested URL.
+ *
+ * @property {number} ts
+ *  Timestamp
+ *
+ *  The timestamp at which the associated event occurred,
+ *  expressed as milliseconds since the UNIX epoch.
+ *  When the event is a request for a media object the time
+ *  SHOULD reference when the request was first initiated.
  */
 var CmcdData;
