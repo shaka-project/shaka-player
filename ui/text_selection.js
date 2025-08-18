@@ -32,7 +32,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
    */
   constructor(parent, controls) {
     super(parent,
-        controls, shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS);
+        controls, shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS);
 
     this.button.classList.add('shaka-caption-button');
     this.button.classList.add('shaka-tooltip-status');
@@ -110,7 +110,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     off.ariaSelected = 'true';
     this.menu.appendChild(off);
 
-    off.appendChild(shaka.ui.Utils.checkmarkIcon());
+    off.prepend(shaka.ui.Utils.checkmarkIcon());
 
     /** @private {!HTMLElement} */
     this.captionsOffSpan_ = shaka.util.Dom.createHTMLElement('span');
@@ -122,12 +122,10 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
   /** @private */
   onCaptionStateChange_() {
     if (this.player.isTextTrackVisible()) {
-      this.icon.textContent =
-          shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS;
+      this.icon.use(shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS);
       this.button.ariaPressed = 'true';
     } else {
-      this.icon.textContent =
-          shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS_OFF;
+      this.icon.use(shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS_OFF);
       this.button.ariaPressed = 'false';
     }
 
@@ -163,7 +161,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     if (!this.player.isTextTrackVisible()) {
       offButton.ariaSelected = 'true';
-      offButton.appendChild(shaka.ui.Utils.checkmarkIcon());
+      offButton.prepend(shaka.ui.Utils.checkmarkIcon());
       this.captionsOffSpan_.classList.add('shaka-chosen-item');
       this.currentSelection.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.OFF);

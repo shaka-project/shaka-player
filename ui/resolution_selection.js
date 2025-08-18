@@ -34,7 +34,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
-    super(parent, controls, shaka.ui.Enums.MaterialDesignIcons.RESOLUTION);
+    super(parent, controls, shaka.ui.Enums.MaterialDesignSVGIcons.RESOLUTION);
 
     this.button.classList.add('shaka-resolution-button');
     this.button.classList.add('shaka-tooltip-status');
@@ -254,7 +254,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     // If abr is enabled reflect it by marking 'Auto' as selected.
     if (this.player.getConfiguration().abr.enabled) {
       autoButton.ariaSelected = 'true';
-      autoButton.appendChild(shaka.ui.Utils.checkmarkIcon());
+      autoButton.prepend(shaka.ui.Utils.checkmarkIcon());
 
       this.abrOnSpan_.classList.add('shaka-chosen-item');
 
@@ -354,7 +354,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       if (!abrEnabled && track == selectedTrack) {
         // If abr is disabled, mark the selected track's resolution.
         button.ariaSelected = 'true';
-        button.appendChild(shaka.ui.Utils.checkmarkIcon());
+        button.prepend(shaka.ui.Utils.checkmarkIcon());
         span.classList.add('shaka-chosen-item');
         this.currentSelection.textContent = span.textContent;
       }
@@ -431,7 +431,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       if (!abrEnabled && track == selectedTrack) {
         // If abr is disabled, mark the selected track's resolution.
         button.ariaSelected = 'true';
-        button.appendChild(shaka.ui.Utils.checkmarkIcon());
+        button.prepend(shaka.ui.Utils.checkmarkIcon());
         span.classList.add('shaka-chosen-item');
         this.currentSelection.textContent = span.textContent;
       }
