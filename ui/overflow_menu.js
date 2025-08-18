@@ -265,3 +265,4 @@ shaka.ui.Controls.registerElement(
 
 /** @private {!Map<string, !shaka.extern.IUIElement.Factory>} */
 shaka.ui.OverflowMenu.elementNamesToFactories_ = new Map();
+
