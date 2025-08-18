@@ -14,7 +14,7 @@ goog.require('shaka.util.Dom');
  */
 shaka.ui.MaterialSVGIcon = class {
   /**
-   * @param {?HTMLElement} parent
+   * @param {?Element} parent
    * @param {?string=} icon
    */
   constructor(parent, icon) {
