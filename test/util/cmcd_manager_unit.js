@@ -1537,6 +1537,155 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).not.toContain('nrr=');
       });
 
+      it('includes the request URL, without CMCD in response mode', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              version: 2,
+              targets: [{
+                mode: 'response',
+                enabled: true,
+                url: 'https://example.com/cmcd',
+                useHeaders: false,
+              }],
+            },
+        );
+
+        const response = createResponse();
+        response.uri = 'https://redirected.com/v2seg.mp4';
+        response.originalUri = 'https://initial.com/v2seg.mp4?CMCD=br%3D5234%2Cot%3Dv';
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        const decodedUri = decodeURIComponent(response.uri);
+
+        const expectedCleanUrl = 'https://initial.com/v2seg.mp4';
+        const expectedUrlParam = `url="${expectedCleanUrl}"`;
+        const unexpectedUrlParam = `url="${response.originalUri}"`;
+
+        expect(decodedUri).toContain(expectedUrlParam);
+        expect(decodedUri).not.toContain(unexpectedUrlParam);
+      });
+
+      it('cmcd url key preserves other query parameters', () => {
+        const cmcdManager = createCmcdManager(playerInterface, {
+          version: 2,
+          targets: [{
+            mode: 'response',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            useHeaders: false,
+          }]},
+        );
+
+        const response = createResponse();
+        response.uri = 'https://redirected.com/v2seg.mp4';
+
+        response.originalUri = 'https://initial.com/v2seg.mp4?foo=bar&CMCD=br%3D5234&baz=qux';
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        const decodedUri = decodeURIComponent(response.uri);
+
+        const expectedCleanUrl = 'https://initial.com/v2seg.mp4?foo=bar&baz=qux';
+        const expectedUrlParam = `url="${expectedCleanUrl}"`;
+
+        expect(decodedUri).toContain(expectedUrlParam);
+      });
+
+      it('cmcd url key does not modify URL if no CMCD param is present', () => {
+        const cmcdManager = createCmcdManager(playerInterface, {
+          version: 2,
+          targets: [{
+            mode: 'response',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            useHeaders: false,
+          }]},
+        );
+
+        const response = createResponse();
+        const originalUrl = 'https://initial.com/v2seg.mp4?foo=bar';
+        response.uri = 'https://redirected.com/v2seg.mp4';
+        response.originalUri = originalUrl;
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        const decodedUri = decodeURIComponent(response.uri);
+        const expectedUrlParam = `url="${originalUrl}"`;
+
+        expect(decodedUri).toContain(expectedUrlParam);
+      });
+
+      it('cmcd url key preserves URL fragments (hash)', () => {
+        const cmcdManager = createCmcdManager(playerInterface, {
+          version: 2,
+          targets: [{
+            mode: 'response',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            useHeaders: false,
+          }]},
+        );
+
+        const response = createResponse();
+        response.uri = 'https://redirected.com/v2seg.mp4';
+        response.originalUri = 'https://initial.com/v2seg.mp4?CMCD=br%3D5234#t=10';
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        const decodedUri = decodeURIComponent(response.uri);
+
+        const expectedCleanUrl = 'https://initial.com/v2seg.mp4#t=10';
+        const expectedUrlParam = `url="${expectedCleanUrl}"`;
+
+        expect(decodedUri).toContain(expectedUrlParam);
+      });
+
+      it('cmcd url key handles an empty CMCD parameter', () => {
+        const cmcdManager = createCmcdManager(playerInterface, {
+          version: 2,
+          targets: [{
+            mode: 'response',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            useHeaders: false,
+          }]},
+        );
+
+        const response = createResponse();
+        response.uri = 'https://redirected.com/v2seg.mp4';
+        response.originalUri = 'https://initial.com/v2seg.mp4?CMCD=';
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response,
+            createSegmentContext(),
+        );
+
+        const decodedUri = decodeURIComponent(response.uri);
+        const expectedCleanUrl = 'https://initial.com/v2seg.mp4';
+        const expectedUrlParam = `url="${expectedCleanUrl}"`;
+
+        expect(decodedUri).toContain(expectedUrlParam);
+      });
+
       it('should generate "cmsdd" from response header', () => {
         const cmcdManager = createCmcdManager(
             playerInterface,
