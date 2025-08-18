@@ -199,6 +199,7 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
     const icon = new shaka.ui.MaterialSVGIcon(closeElement,
         shaka.ui.Enums.MaterialDesignSVGIcons.CLOSE);
     const iconElement = icon.getSvgElement();
+    iconElement.classList.add('material-icons', 'notranslate');
 
     this.container_.appendChild(closeElement);
     this.eventManager.listen(iconElement, 'click', () => {
