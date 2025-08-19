@@ -195,7 +195,9 @@
     transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 100ms;
     text-shadow: 0 0 2px @general-background-color;
 
-    /* Use a bit larger icons for play, pause and skip buttons */
+    /* Use a bit larger icons for some buttons */
+    &.shaka-fast-forward-button,
+    &.shaka-rewind-button,
     &.shaka-small-play-button,
     &.shaka-skip-next-button {
       .material-svg-icon {
