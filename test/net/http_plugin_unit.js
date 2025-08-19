@@ -378,6 +378,7 @@ function httpPluginTests(usingFetch) {
     const uri = 'https://foo.bar/';
     const request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
+    // cspell: ignore Żółć
     request.headers['Invalid-Header'] = 'Żółć';
     const p = plugin(
         uri, request, requestType, progressUpdated, headersReceived, {})
