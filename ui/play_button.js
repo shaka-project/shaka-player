@@ -12,6 +12,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.util.Dom');
 goog.requireType('shaka.ui.Controls');
 
@@ -32,6 +33,9 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     /** @protected {!HTMLButtonElement} */
     this.button = shaka.util.Dom.createButton();
     this.parent.appendChild(this.button);
+
+    /** @private {!shaka.ui.MaterialSVGIcon} */
+    this.icon_ = new shaka.ui.MaterialSVGIcon(this.button);
 
     const LOCALE_UPDATED = shaka.ui.Localization.LOCALE_UPDATED;
     this.eventManager.listen(this.localization, LOCALE_UPDATED, () => {
@@ -139,11 +143,11 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
    * To be overridden by subclasses.
    */
   updateIcon() {
-    const Icons = shaka.ui.Enums.MaterialDesignIcons;
+    const Icons = shaka.ui.Enums.MaterialDesignSVGIcons;
     if (this.isEnded() && this.video.duration) {
-      this.button.textContent = Icons.REPLAY;
+      this.icon_.use(Icons.REPLAY);
     } else {
-      this.button.textContent = this.isPaused() ? Icons.PLAY : Icons.PAUSE;
+      this.icon_.use(this.isPaused() ? Icons.PLAY : Icons.PAUSE);
     }
   }
 };

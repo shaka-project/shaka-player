@@ -12,6 +12,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 
@@ -38,9 +39,9 @@ shaka.ui.SkipPreviousButton = class extends shaka.ui.Element {
     /** @private {!HTMLButtonElement} */
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-skip-previous-button');
-    this.button_.classList.add('material-icons-round');
     this.button_.classList.add('shaka-tooltip');
-    this.button_.textContent = shaka.ui.Enums.MaterialDesignIcons.SKIP_PREVIOUS;
+    new shaka.ui.MaterialSVGIcon(this.button_).use(
+        shaka.ui.Enums.MaterialDesignSVGIcons.SKIP_PREVIOUS);
     this.parent.appendChild(this.button_);
 
     this.updateAriaLabel_();
