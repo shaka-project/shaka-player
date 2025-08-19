@@ -15,6 +15,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Iterables');
@@ -166,10 +167,9 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     this.overflowMenuButton_ = shaka.util.Dom.createButton();
     this.overflowMenuButton_.classList.add('shaka-overflow-menu-button');
     this.overflowMenuButton_.classList.add('shaka-no-propagation');
-    this.overflowMenuButton_.classList.add('material-icons-round');
     this.overflowMenuButton_.classList.add('shaka-tooltip');
-    this.overflowMenuButton_.textContent =
-      shaka.ui.Enums.MaterialDesignIcons.OPEN_OVERFLOW;
+    new shaka.ui.MaterialSVGIcon(this.overflowMenuButton_).use(
+        shaka.ui.Enums.MaterialDesignSVGIcons.OPEN_OVERFLOW);
     const markEl = shaka.util.Dom.createHTMLElement('span');
     markEl.classList.add('shaka-overflow-quality-mark');
     markEl.style.display = 'none';

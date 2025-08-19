@@ -21,7 +21,6 @@ goog.require('shakaDemo.VisualizerButton');
  * configuration, etc).
  */
 shakaDemo.Main = class {
-  /** */
   constructor() {
     /** @private {HTMLVideoElement} */
     this.video_ = null;
@@ -1430,34 +1429,11 @@ shakaDemo.Main = class {
       }
 
       // Finally, the asset can be loaded.
-      if (asset.preloadManager) {
-        const preloadManager = asset.preloadManager;
-        asset.preloadManager = null;
-        await this.player_.load(preloadManager);
+      const queueItem = await this.getQueueItem_(asset);
+      queueManager.insertItems([queueItem]);
+      await queueManager.playItem(0);
 
-        if (!(asset.storedContent && asset.storedContent.offlineUri)) {
-          for (const extraText of asset.extraText) {
-            if (extraText.mime) {
-              this.player_.addTextTrackAsync(extraText.uri, extraText.language,
-                  extraText.kind, extraText.mime, extraText.codecs);
-            } else {
-              this.player_.addTextTrackAsync(extraText.uri, extraText.language,
-                  extraText.kind);
-            }
-          }
-          for (const extraThumbnail of asset.extraThumbnail) {
-            this.player_.addThumbnailsTrack(extraThumbnail);
-          }
-        }
-        for (const extraChapter of asset.extraChapter) {
-          this.player_.addChaptersTrack(
-              extraChapter.uri, extraChapter.language, extraChapter.mime);
-        }
-      } else {
-        const queueItem = await this.getQueueItem_(asset);
-        queueManager.insertItems([queueItem]);
-        await queueManager.playItem(0);
-      }
+      asset.preloadManager = null;
 
       // Set media session title, but only if the browser supports that API.
       if (navigator.mediaSession) {
@@ -1518,6 +1494,7 @@ shakaDemo.Main = class {
     /** @type {shaka.extern.QueueItem} */
     const queueItem = {
       manifestUri: manifestUri,
+      preloadManager: asset.preloadManager,
       startTime: null,
       mimeType: mimeType,
       config: itemConfig,

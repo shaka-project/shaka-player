@@ -444,7 +444,7 @@ shaka.extern.IUIElement = class {
     this.adManager;
 
     /**
-     * @protected {shaka.extern.IAd}
+     * @protected {?shaka.extern.IAd}
      * @exportDoc
      */
     this.ad;
@@ -562,7 +562,7 @@ shaka.extern.IUISettingsMenu = class {
     this.button;
 
     /**
-     * @protected {!HTMLElement}
+     * @protected {!shaka.ui.MaterialSVGIcon}
      * @exportDoc
      */
     this.icon;

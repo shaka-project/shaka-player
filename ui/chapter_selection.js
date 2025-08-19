@@ -28,7 +28,7 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
-    super(parent, controls, shaka.ui.Enums.MaterialDesignIcons.CHAPTER);
+    super(parent, controls, shaka.ui.Enums.MaterialDesignSVGIcons.CHAPTER);
 
     this.button.classList.add('shaka-chapter-button');
     this.menu.classList.add('shaka-chapters');

@@ -12,6 +12,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.util.Dom');
 
 
@@ -30,13 +31,15 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
 
     /** @private {!HTMLButtonElement} */
     this.button_ = shaka.util.Dom.createButton();
-    this.button_.classList.add('material-icons-round');
     this.button_.classList.add('shaka-rewind-button');
     this.button_.classList.add('shaka-tooltip-status');
     this.button_.setAttribute('shaka-status',
         this.localization.resolve(shaka.ui.Locales.Ids.OFF));
-    this.button_.textContent =
-      shaka.ui.Enums.MaterialDesignIcons.REWIND;
+
+    new shaka.ui.MaterialSVGIcon(this.button_).use(
+        shaka.ui.Enums.MaterialDesignSVGIcons.REWIND,
+    );
+
     this.parent.appendChild(this.button_);
     this.updateAriaLabel_();
 
