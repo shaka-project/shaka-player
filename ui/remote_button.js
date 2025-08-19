@@ -14,6 +14,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -42,13 +43,11 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     this.remoteButton_.classList.add('shaka-tooltip');
     this.remoteButton_.ariaPressed = 'false';
 
-    /** @private {!HTMLElement} */
-    this.remoteIcon_ = shaka.util.Dom.createHTMLElement('i');
-    this.remoteIcon_.classList.add('material-icons-round');
-    this.remoteIcon_.textContent = this.isAirPlay_ ?
-        shaka.ui.Enums.MaterialDesignIcons.AIRPLAY :
-        shaka.ui.Enums.MaterialDesignIcons.CAST;
-    this.remoteButton_.appendChild(this.remoteIcon_);
+    /** @private {!shaka.ui.MaterialSVGIcon} */
+    this.remoteIcon_ = new shaka.ui.MaterialSVGIcon(this.remoteButton_,
+        this.isAirPlay_ ?
+          shaka.ui.Enums.MaterialDesignSVGIcons.AIRPLAY :
+          shaka.ui.Enums.MaterialDesignSVGIcons.CAST);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -207,11 +206,9 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
       return;
     }
     if (this.video.remote.state == 'disconnected') {
-      this.remoteIcon_.textContent =
-          shaka.ui.Enums.MaterialDesignIcons.CAST;
+      this.remoteIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.CAST);
     } else {
-      this.remoteIcon_.textContent =
-          shaka.ui.Enums.MaterialDesignIcons.EXIT_CAST;
+      this.remoteIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.EXIT_CAST);
     }
   }
 };

@@ -12,6 +12,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -38,12 +39,10 @@ shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
     this.toggleStereoscopicButton_.classList.add('shaka-tooltip');
     this.toggleStereoscopicButton_.ariaPressed = 'false';
 
-    /** @private {!HTMLElement} */
-    this.toggleStereoscopicIcon_ = shaka.util.Dom.createHTMLElement('i');
-    this.toggleStereoscopicIcon_.classList.add('material-icons-round');
-    this.toggleStereoscopicIcon_.textContent =
-        shaka.ui.Enums.MaterialDesignIcons.TOGGLE_STEREOSCOPIC;
-    this.toggleStereoscopicButton_.appendChild(this.toggleStereoscopicIcon_);
+    /** @private {!shaka.ui.MaterialSVGIcon} */
+    this.toggleStereoscopicIcon_ = new shaka.ui.MaterialSVGIcon(
+        this.toggleStereoscopicButton_,
+        shaka.ui.Enums.MaterialDesignSVGIcons.TOGGLE_STEREOSCOPIC);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');

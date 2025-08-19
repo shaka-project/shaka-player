@@ -15,6 +15,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -42,11 +43,9 @@ shaka.ui.SaveVideoFrameButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-save.video-frame-button');
     this.button_.classList.add('shaka-tooltip');
 
-    /** @private {!HTMLElement} */
-    this.icon_ = shaka.util.Dom.createHTMLElement('i');
-    this.icon_.classList.add('material-icons-round');
-    this.icon_.textContent = shaka.ui.Enums.MaterialDesignIcons.DOWNLOAD;
-    this.button_.appendChild(this.icon_);
+    /** @private {!shaka.ui.MaterialSVGIcon} */
+    this.icon_ = new shaka.ui.MaterialSVGIcon(this.button_,
+        shaka.ui.Enums.MaterialDesignSVGIcons.DOWNLOAD);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');

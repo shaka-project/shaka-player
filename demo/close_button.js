@@ -21,11 +21,16 @@ shakaDemo.CloseButton = class extends shaka.ui.Element {
    */
   constructor(parent, controls) {
     super(parent, controls);
+
     this.button_ = document.createElement('button');
-    this.button_.classList.add('material-icons-round');
     this.button_.classList.add('shaka-no-propagation');
     this.button_.classList.add('close-button');
-    this.button_.textContent = 'close'; // Close icon.
+
+    new shaka.ui.MaterialSVGIcon(this.button_).use(
+        // eslint-disable-next-line @stylistic/max-len
+        'M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z',
+    );
+
     this.parent.appendChild(this.button_);
 
     this.button_.addEventListener('click', () => {

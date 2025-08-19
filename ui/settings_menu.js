@@ -9,6 +9,7 @@ goog.provide('shaka.ui.SettingsMenu');
 
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.FakeEvent');
@@ -80,11 +81,8 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     this.button = shaka.util.Dom.createButton();
     this.button.classList.add('shaka-overflow-button');
 
-    /** @protected {!HTMLElement}*/
-    this.icon = shaka.util.Dom.createHTMLElement('i');
-    this.icon.classList.add('material-icons-round');
-    this.icon.textContent = iconText;
-    this.button.appendChild(this.icon);
+    /** @protected {!shaka.ui.MaterialSVGIcon}*/
+    this.icon = new shaka.ui.MaterialSVGIcon(this.button, iconText);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -122,10 +120,9 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
       this.controls.hideSettingsMenus();
     });
 
-    const backIcon = shaka.util.Dom.createHTMLElement('i');
-    backIcon.classList.add('material-icons-round');
-    backIcon.textContent = shaka.ui.Enums.MaterialDesignIcons.CLOSE;
-    this.backButton.appendChild(backIcon);
+    /** @private {shaka.ui.MaterialSVGIcon} */
+    this.backIcon_ = new shaka.ui.MaterialSVGIcon(this.backButton,
+        shaka.ui.Enums.MaterialDesignSVGIcons.CLOSE);
 
     /** @protected {!HTMLElement}*/
     this.backSpan = shaka.util.Dom.createHTMLElement('span');
@@ -141,8 +138,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     // inside of the overflow menu, that option must be replaced with a
     // "Back" arrow that returns the user to the main menu.
     if (this.parent.classList.contains('shaka-overflow-menu')) {
-      this.backButton.firstChild.textContent =
-            shaka.ui.Enums.MaterialDesignIcons.BACK;
+      this.backIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.BACK);
 
       this.eventManager.listen(this.menu, 'click', () => {
         shaka.ui.Utils.setDisplay(this.menu, false);

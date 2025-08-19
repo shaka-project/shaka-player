@@ -13,6 +13,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.util.Dom');
 
 
@@ -35,12 +36,14 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     /** @private {!HTMLButtonElement} */
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-fullscreen-button');
-    this.button_.classList.add('material-icons-round');
     this.button_.classList.add('shaka-tooltip');
+
+    /** @private {shaka.ui.MaterialSVGIcon} */
+    this.icon_ = new shaka.ui.MaterialSVGIcon(this.button_,
+        shaka.ui.Enums.MaterialDesignSVGIcons.FULLSCREEN);
 
     this.checkSupport_();
 
-    this.button_.textContent = shaka.ui.Enums.MaterialDesignIcons.FULLSCREEN;
     this.parent.appendChild(this.button_);
     this.updateAriaLabel_();
 
@@ -110,10 +113,10 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
    * @private
    */
   updateIcon_() {
-    this.button_.textContent =
-      this.controls.isFullScreenEnabled() ?
-      shaka.ui.Enums.MaterialDesignIcons.EXIT_FULLSCREEN :
-      shaka.ui.Enums.MaterialDesignIcons.FULLSCREEN;
+    this.icon_.use(this.controls.isFullScreenEnabled() ?
+      shaka.ui.Enums.MaterialDesignSVGIcons.EXIT_FULLSCREEN :
+      shaka.ui.Enums.MaterialDesignSVGIcons.FULLSCREEN,
+    );
   }
 };
 
