@@ -92,7 +92,9 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
       previouslySelectedButton.removeAttribute('aria-selected');
       const previouslySelectedSpan =
           previouslySelectedButton.getElementsByTagName('span')[0];
-      previouslySelectedSpan.classList.remove('shaka-chosen-item');
+      if (previouslySelectedSpan) {
+        previouslySelectedSpan.classList.remove('shaka-chosen-item');
+      }
       previouslySelectedButton.removeChild(checkmarkIcon);
     }
     // Find the button that represents the newly selected playback rate.
