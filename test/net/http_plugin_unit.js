@@ -57,6 +57,7 @@ function httpPluginTests(usingFetch) {
       // eslint-disable-next-line no-restricted-syntax
       const MockXHR = function() {
         const instance = new JasmineXHRMock();
+        // eslint-disable-next-line no-restricted-syntax
         const setRequestHeader = instance.setRequestHeader.bind(instance);
         instance.setRequestHeader = (key, value) => {
           if ([...value].some((c) => c.charCodeAt(0) > 255)) {
