@@ -1999,6 +1999,83 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).not.toContain('nrr=');
       });
 
+
+      it('includes `bg` in request query when page is hidden', () => {
+        Object.defineProperty(document, 'hidden',
+            {value: true, configurable: true});
+
+        const cmcdManager = createCmcdManager(playerInterface,
+            {useHeaders: false});
+
+        const request = createRequest();
+        cmcdManager.applyManifestData(request, {});
+        const decodedUri = decodeURIComponent(request.uris[0]);
+        const cmcdQuery = decodedUri.split('CMCD=')[1];
+        expect(`,${cmcdQuery},`).toContain(',bg,');
+      });
+
+      it('includes `bg` in request headers when page is hidden', () => {
+        Object.defineProperty(document, 'hidden',
+            {value: true, configurable: true});
+
+        const cmcdManager = createCmcdManager(playerInterface,
+            {useHeaders: true});
+
+        const request = createRequest();
+        cmcdManager.applyManifestData(request, {});
+        expect(request.headers['CMCD-Status']).toContain('bg');
+      });
+
+      it('does not include `bg` in request mode when page is visible', () => {
+        Object.defineProperty(document, 'hidden',
+            {value: false, configurable: true});
+
+        const cmcdManager = createCmcdManager(playerInterface,
+            {useHeaders: true});
+
+
+        const request = createRequest();
+        cmcdManager.applyManifestData(request, {});
+        if (request.headers['CMCD-Status']) {
+          expect(request.headers['CMCD-Status']).not.toContain('bg');
+        } else {
+          expect(request.headers['CMCD-Status']).toBeUndefined();
+        }
+      });
+
+      it('includes `bg` in response mode when page is hidden', () => {
+        Object.defineProperty(document, 'hidden', {value: true});
+        const cmcdManager = createCmcdManager(
+            playerInterface, {
+              targets: [{
+                mode: 'response',
+                enabled: true,
+                url: 'https://example.com/cmcd-collector',
+                includeKeys: ['bg'],
+              }],
+            });
+
+        const response = createResponse();
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response, createSegmentContext());
+        const decodedUri = decodeURIComponent(response.uri);
+        expect(decodedUri).toContain('bg');
+      });
+
+      it('assigns `bg` to the CMCD-Status header in request mode', () => {
+        Object.defineProperty(document, 'hidden',
+            {value: true, configurable: true});
+
+        const cmcdManager = createCmcdManager(playerInterface,
+            {useHeaders: true});
+
+        const request = createRequest();
+        cmcdManager.applyRequestSegmentData(request, createSegmentContext());
+        expect(request.headers['CMCD-Status']).toBeDefined();
+        expect(request.headers['CMCD-Status']).toContain('bg');
+      });
+
       it('request does not include v2 keys if version is not 2', () => {
         const nonV2Manager = createCmcdManager(
             playerInterface,
