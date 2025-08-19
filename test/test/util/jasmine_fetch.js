@@ -271,6 +271,9 @@ jasmine.Fetch.Headers = class {
    * @param {string} value
    */
   append(name, value) {
+    if ([...value].some((c) => c.charCodeAt(0) > 255)) {
+      throw new Error('Invalid character in header value');
+    }
     // Normalize name before setting.
     const normalized = name.toLowerCase();
     this.contents[normalized] = value;
