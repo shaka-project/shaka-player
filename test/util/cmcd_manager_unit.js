@@ -1175,6 +1175,144 @@ describe('CmcdManager Setup', () => {
     });
 
     describe('CMCD v2 Key Generation', () => {
+      it('sn increments sequence number for each request', () => {
+        const cmcdManager = createCmcdManager(playerInterface, {
+          includeKeys: ['sn'],
+        });
+        const request1 = createRequest();
+        cmcdManager.applyManifestData(request1, {});
+        expect(decodeURIComponent(request1.uris[0])).toContain('sn=1');
+
+        const request2 = createRequest();
+        cmcdManager.applyManifestData(request2, {});
+        expect(decodeURIComponent(request2.uris[0])).toContain('sn=2');
+      });
+
+      it('sn increments sequence number for each response', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              targets: [Object.assign({}, baseConfig.targets[0], {
+                includeKeys: ['sn'],
+              })],
+            },
+        );
+
+        const response1 = createResponse();
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response1,
+            createSegmentContext(),
+        );
+        expect(decodeURIComponent(response1.uri)).toContain('sn=1');
+
+        const response2 = createResponse();
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            response2,
+            createSegmentContext(),
+        );
+        expect(decodeURIComponent(response2.uri)).toContain('sn=2');
+      });
+
+      it('sn increments sequence numbers across multiple targets', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              targets: [
+                {
+                  mode: 'response',
+                  enabled: true,
+                  url: 'https://a.collector.com/cmcd',
+                  useHeaders: true,
+                  includeKeys: ['sn'],
+                },
+                {
+                  mode: 'response',
+                  enabled: true,
+                  url: 'https://b.collector.com/cmcd',
+                  useHeaders: false,
+                  includeKeys: ['sn'],
+                },
+              ],
+            },
+        );
+        const spy = spyOn(cmcdManager, 'sendCmcdRequest_').and.callThrough();
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            createResponse(),
+            createSegmentContext(),
+        );
+
+        expect(spy).toHaveBeenCalledTimes(2);
+
+        const firstCallForTargetA = spy.calls.all()
+            .find((call) => call.args[1].url === 'https://a.collector.com/cmcd');
+        const firstCallForTargetB = spy.calls.all()
+            .find((call) => call.args[1].url === 'https://b.collector.com/cmcd');
+
+        expect(firstCallForTargetA.args[0].sn).toBe(1);
+        expect(firstCallForTargetB.args[0].sn).toBe(1);
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            createResponse(),
+            createSegmentContext(),
+        );
+
+        expect(spy).toHaveBeenCalledTimes(4);
+
+        // Collect all calls for each target.
+        const allCallsForTargetA = spy.calls.all()
+            .filter((call) => call.args[1].url === 'https://a.collector.com/cmcd');
+        const allCallsForTargetB = spy.calls.all()
+            .filter((call) => call.args[1].url === 'https://b.collector.com/cmcd');
+
+        expect(allCallsForTargetA.length).toBe(2);
+        expect(allCallsForTargetB.length).toBe(2);
+
+        expect(allCallsForTargetA[0].args[0].sn).toBe(1);
+        expect(allCallsForTargetA[1].args[0].sn).toBe(2);
+
+        expect(allCallsForTargetB[0].args[0].sn).toBe(1);
+        expect(allCallsForTargetB[1].args[0].sn).toBe(2);
+      });
+
+      it('sn ignores disabled response targets', () => {
+        const cmcdManager = createCmcdManager(
+            playerInterface,
+            {
+              targets: [
+                {
+                  mode: 'response',
+                  enabled: true,
+                  url: 'https://enabled.collector.com/cmcd',
+                  includeKeys: ['sn'],
+                },
+                {
+                  mode: 'response',
+                  enabled: false,
+                  url: 'https://disabled.collector.com/cmcd',
+                  includeKeys: ['sn'],
+                },
+              ],
+            },
+        );
+        const spy = spyOn(cmcdManager, 'sendCmcdRequest_').and.callThrough();
+
+        // 2. Trigger the response data processing.
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            createResponse(),
+            createSegmentContext(),
+        );
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        const calledTarget = spy.calls.first().args[1];
+        expect(calledTarget.url).toBe('https://enabled.collector.com/cmcd');
+      });
+
       it('includes ltc for live content request mode', () => {
         const cmcdManager = createCmcdManager(
             playerInterface,

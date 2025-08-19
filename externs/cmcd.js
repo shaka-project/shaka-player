@@ -34,6 +34,7 @@
  *   rtp: (number|undefined),
  *   msd: (number|undefined),
  *   ltc: (number|undefined),
+ *   sn: (number|undefined),
  *   cmsds: (string|undefined),
  *   cmsdd: (string|undefined),
  *   ttfb: (number|undefined),
@@ -204,6 +205,15 @@
  *   the origin and when it was rendered by the client. The accuracy of this
  *   estimate is dependent on synchronization between the packager and the
  *   player clocks.
+ *
+ * @property {number} sn
+ *  Sequence Number
+ *
+ *  A monotonically increasing integer to identify the sequence
+ *  of a CMCD report to a target within a session.
+ *  This MUST be reset to zero on the start of a new session-id.
+ *  Sequence numbers increase independently per each combination
+ *  of mode and target.
  *
  * @property {string} cmsds
  *   CMSD Static Header
