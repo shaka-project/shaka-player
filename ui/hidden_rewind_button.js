@@ -25,8 +25,7 @@ shaka.ui.HiddenRewindButton = class extends shaka.ui.HiddenSeekButton {
     super(parent, controls);
 
     this.seekContainer.classList.add('shaka-rewind-container');
-    this.seekIcon.textContent =
-        shaka.ui.Enums.MaterialDesignIcons.REWIND;
+    this.seekIcon.use(shaka.ui.Enums.MaterialDesignSVGIcons.REWIND);
     this.isRewind = true;
   }
 };

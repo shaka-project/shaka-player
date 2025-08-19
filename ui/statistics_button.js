@@ -14,6 +14,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -38,12 +39,9 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-statistics-button');
 
-    /** @private {!HTMLElement} */
-    this.icon_ = shaka.util.Dom.createHTMLElement('i');
-    this.icon_.classList.add('material-icons-round');
-    this.icon_.textContent =
-      shaka.ui.Enums.MaterialDesignIcons.STATISTICS_ON;
-    this.button_.appendChild(this.icon_);
+    /** @private {!shaka.ui.MaterialSVGIcon} */
+    this.icon_ = new shaka.ui.MaterialSVGIcon(this.button_,
+        shaka.ui.Enums.MaterialDesignSVGIcons.STATISTICS_ON);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -199,13 +197,11 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
   /** @private */
   onClick_() {
     if (this.container_.classList.contains('shaka-hidden')) {
-      this.icon_.textContent =
-          shaka.ui.Enums.MaterialDesignIcons.STATISTICS_OFF;
+      this.icon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.STATISTICS_OFF);
       this.timer_.tickEvery(0.1);
       shaka.ui.Utils.setDisplay(this.container_, true);
     } else {
-      this.icon_.textContent =
-          shaka.ui.Enums.MaterialDesignIcons.STATISTICS_ON;
+      this.icon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.STATISTICS_ON);
       this.timer_.stop();
       shaka.ui.Utils.setDisplay(this.container_, false);
     }
@@ -251,15 +247,12 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     const closeElement = shaka.util.Dom.createHTMLElement('div');
     closeElement.classList.add('shaka-no-propagation');
     closeElement.classList.add('shaka-statistics-close');
-    const icon = shaka.util.Dom.createHTMLElement('i');
-    icon.classList.add('material-icons');
-    icon.classList.add('notranslate');
-    icon.classList.add('material-icons-round');
-    icon.textContent =
-      shaka.ui.Enums.MaterialDesignIcons.CLOSE;
-    closeElement.appendChild(icon);
+    const icon = new shaka.ui.MaterialSVGIcon(closeElement,
+        shaka.ui.Enums.MaterialDesignSVGIcons.CLOSE);
+    const iconElement = icon.getSvgElement();
+    iconElement.classList.add('material-icons', 'notranslate');
     this.container_.appendChild(closeElement);
-    this.eventManager.listen(icon, 'click', () => {
+    this.eventManager.listen(iconElement, 'click', () => {
       this.onClick_();
     });
     for (const name of this.controls.getConfig().statisticsList) {

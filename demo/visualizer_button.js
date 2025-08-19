@@ -27,12 +27,10 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-pip-button');
     this.button_.classList.add('shaka-tooltip');
 
-    /** @private {!HTMLElement} */
-    this.icon_ = /** @type {!HTMLElement} */ (
-      document.createElement('i'));
-    this.icon_.classList.add('material-icons-round');
+    /** @private {!shaka.ui.MaterialSVGIcon} */
+    this.icon_ = /** @type {!shaka.ui.MaterialSVGIcon} */ (
+      new shaka.ui.MaterialSVGIcon(this.button_));
     this.setIcon_();
-    this.button_.appendChild(this.icon_);
 
     const label = document.createElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -80,9 +78,11 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
   /** @private */
   setIcon_() {
     if (shakaDemoMain.getIsVisualizerActive()) {
-      this.icon_.textContent = 'bar_chart';
+      // eslint-disable-next-line @stylistic/max-len
+      this.icon_.use('M680-160q-17 0-28.5-11.5T640-200v-200q0-17 11.5-28.5T680-440h80q17 0 28.5 11.5T800-400v200q0 17-11.5 28.5T760-160h-80Zm-240 0q-17 0-28.5-11.5T400-200v-560q0-17 11.5-28.5T440-800h80q17 0 28.5 11.5T560-760v560q0 17-11.5 28.5T520-160h-80Zm-240 0q-17 0-28.5-11.5T160-200v-360q0-17 11.5-28.5T200-600h80q17 0 28.5 11.5T320-560v360q0 17-11.5 28.5T280-160h-80Z');
     } else {
-      this.icon_.textContent = 'add_chart';
+      // eslint-disable-next-line @stylistic/max-len
+      this.icon_.use('M320-280q17 0 28.5-11.5T360-320v-200q0-17-11.5-28.5T320-560q-17 0-28.5 11.5T280-520v200q0 17 11.5 28.5T320-280Zm160 0q17 0 28.5-11.5T520-320v-320q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640v320q0 17 11.5 28.5T480-280Zm160 0q17 0 28.5-11.5T680-320v-80q0-17-11.5-28.5T640-440q-17 0-28.5 11.5T600-400v80q0 17 11.5 28.5T640-280Zm80-320q-17 0-28.5-11.5T680-640v-40h-40q-17 0-28.5-11.5T600-720q0-17 11.5-28.5T640-760h40v-40q0-17 11.5-28.5T720-840q17 0 28.5 11.5T760-800v40h40q17 0 28.5 11.5T840-720q0 17-11.5 28.5T800-680h-40v40q0 17-11.5 28.5T720-600ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h320q17 0 28.5 11.5T560-800v160q0 33 23.5 56.5T640-560h160q17 0 28.5 11.5T840-520v320q0 33-23.5 56.5T760-120H200Z');
     }
   }
 

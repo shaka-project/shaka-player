@@ -14,6 +14,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -38,11 +39,9 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-mute-button');
     this.button_.classList.add('shaka-tooltip');
 
-    /** @private {!HTMLElement} */
-    this.icon_ = shaka.util.Dom.createHTMLElement('i');
-    this.icon_.classList.add('material-icons-round');
-    this.icon_.textContent = shaka.ui.Enums.MaterialDesignIcons.MUTE;
-    this.button_.appendChild(this.icon_);
+    /** @private {!shaka.ui.MaterialSVGIcon} */
+    this.icon_ = new shaka.ui.MaterialSVGIcon(this.button_,
+        shaka.ui.Enums.MaterialDesignSVGIcons.MUTE);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -167,7 +166,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
    * @private
    */
   updateIcon_() {
-    const Icons = shaka.ui.Enums.MaterialDesignIcons;
+    const Icons = shaka.ui.Enums.MaterialDesignSVGIcons;
     let icon;
     if (this.ad) {
       icon = this.ad.isMuted() ? Icons.UNMUTE : Icons.MUTE;
@@ -175,7 +174,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
       icon = (this.video.muted || this.video.volume == 0) ?
           Icons.UNMUTE : Icons.MUTE;
     }
-    this.icon_.textContent = icon;
+    this.icon_.use(icon);
   }
 
   /** @private */
