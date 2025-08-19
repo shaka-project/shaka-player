@@ -57,6 +57,14 @@ function httpPluginTests(usingFetch) {
       // eslint-disable-next-line no-restricted-syntax
       const MockXHR = function() {
         const instance = new JasmineXHRMock();
+        // eslint-disable-next-line no-restricted-syntax
+        const setRequestHeader = instance.setRequestHeader.bind(instance);
+        instance.setRequestHeader = (key, value) => {
+          if ([...value].some((c) => c.charCodeAt(0) > 255)) {
+            throw new Error('Invalid character in header value');
+          }
+          setRequestHeader(key, value);
+        };
 
         const events = ['abort', 'load', 'error', 'timeout', 'progress'];
         for (const eventName of events) {
@@ -365,6 +373,23 @@ function httpPluginTests(usingFetch) {
     await expectAsync(requestPromise).toBeRejectedWith(expected);
 
     shaka.net.HttpXHRPlugin['Xhr_'] = oldXHRMock;
+  });
+
+  it('throws an error on invalid header', async () => {
+    const uri = 'https://foo.bar/';
+    const request = shaka.net.NetworkingEngine.makeRequest(
+        [uri], retryParameters);
+    // cspell: ignore Żółć
+    request.headers['Invalid-Header'] = 'Żółć';
+    const p = plugin(
+        uri, request, requestType, progressUpdated, headersReceived, {})
+        .promise;
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.RECOVERABLE,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.HTTP_ERROR,
+        uri, jasmine.anything(), requestType));
+    await expectAsync(p).toBeRejectedWith(expected);
   });
 
   /**

@@ -25,7 +25,6 @@ shaka.ui.SmallPlayButton = class extends shaka.ui.PlayButton {
     super(parent, controls);
 
     this.button.classList.add('shaka-small-play-button');
-    this.button.classList.add('material-icons-round');
     this.button.classList.add('shaka-tooltip');
   }
 };

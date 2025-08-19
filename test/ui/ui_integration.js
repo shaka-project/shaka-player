@@ -50,22 +50,37 @@ describe('UI', () => {
 
     // Create UI
     // Add all of the buttons we have
+    const controlPanelElements = [
+      'play_pause',
+      'skip_previous',
+      'skip_next',
+      'mute',
+      'volume',
+      'time_and_duration',
+      'spacer',
+      'overflow_menu',
+    ];
+    if (window.chrome) {
+      controlPanelElements.push('cast');
+    }
+    // eslint-disable-next-line no-restricted-syntax
+    if ('remote' in HTMLMediaElement.prototype) {
+      controlPanelElements.push('remote');
+    } else if (window.WebKitPlaybackTargetAvailabilityEvent) {
+      controlPanelElements.push('airplay');
+    }
+    controlPanelElements.push('fullscreen');
     const config = {
-      controlPanelElements: [
-        'time_and_duration',
-        'mute',
-        'volume',
-        'fullscreen',
-        'overflow_menu',
-        'fast_forward',
-        'rewind',
-      ],
+      controlPanelElements: controlPanelElements,
       overflowMenuButtons: [
         'captions',
         'quality',
         'language',
+        'chapter',
         'picture_in_picture',
-        'cast',
+        'playback_rate',
+        'recenter_vr',
+        'toggle_stereoscopic',
       ],
       // TODO: Cast receiver id to test chromecast integration
     };
