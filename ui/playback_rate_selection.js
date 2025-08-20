@@ -86,7 +86,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     const rate = this.player.getPlaybackRate();
     // Remove the old checkmark icon and related tags and classes if it exists.
     const checkmarkIcon = shaka.ui.Utils.getDescendantIfExists(
-        this.menu, 'shaka-chosen-item');
+        this.menu, 'material-svg-icon shaka-chosen-item');
     if (checkmarkIcon) {
       const previouslySelectedButton = checkmarkIcon.parentElement;
       previouslySelectedButton.removeAttribute('aria-selected');
