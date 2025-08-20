@@ -103,7 +103,6 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
    * @private
    */
   onTouchStart_(event) {
-
     // If multiple touches, handle or ignore as needed. Here, we assume
     // single-touch.
     if (event.touches.length > 0) {
