@@ -30,7 +30,6 @@ goog.require('shaka.drm.FairPlay');
 goog.require('shaka.hls.HlsParser');
 goog.require('shaka.mss.MssParser');
 goog.require('shaka.log');
-goog.require('shaka.media.AdaptationSetCriteria');
 goog.require('shaka.media.InitSegmentReference');
 goog.require('shaka.media.ManifestParser');
 goog.require('shaka.media.PreferenceBasedCriteria');
