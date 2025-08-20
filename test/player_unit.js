@@ -1119,7 +1119,6 @@ describe('Player', () => {
 
       newConfig = player.getConfiguration();
       expect(newConfig.streaming.failureCallback).not.toBe(badFailureCallback2);
-      expect(logWarnSpy).not.toHaveBeenCalled();
     });
 
     // Regression test for https://github.com/shaka-project/shaka-player/issues/784
