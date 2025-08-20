@@ -52,8 +52,11 @@ shaka.extern.AbrManager = class {
 
   /**
    * Updates manager's variants collection.
+   * Returns true if the variants are updated. Returns false if the variants
+   * are equal.
    *
    * @param {!Array<!shaka.extern.Variant>} variants
+   * @return {boolean}
    * @exportDoc
    */
   setVariants(variants) {}
