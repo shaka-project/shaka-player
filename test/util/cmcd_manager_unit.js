@@ -2555,13 +2555,6 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('e="ps"');
         expect(decodedUri).toContain('sta="a"');
 
-        eventTarget.dispatchEvent(new shaka.util.FakeEvent('waiting'));
-        request = (/** @type {!jasmine.Spy} */ (requestSpy))
-            .calls.mostRecent().args[1];
-        decodedUri = decodeURIComponent(request.uris[0]);
-        expect(decodedUri).toContain('e="ps"');
-        expect(decodedUri).toContain('sta="w"');
-
         eventTarget.dispatchEvent(new shaka.util.FakeEvent('seeking'));
         request = /** @type {!jasmine.Spy} */ (requestSpy)
             .calls.mostRecent().args[1];
@@ -3633,6 +3626,49 @@ describe('CmcdManager Setup', () => {
         const decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('e="ps"');
         expect(decodedUri).toContain('sta="e"');
+        expect(decodedUri).toContain('v=2');
+      });
+
+      it('sends waiting event', () => {
+        const player = new shaka.util.FakeEventTarget();
+        const playerInterfaceWithNE =
+        Object.assign({}, playerInterface, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const completeConfig = createCmcdConfig({
+          version: 2,
+          enabled: true,
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            includeKeys: ['e', 'sta', 'v'],
+            events: ['ps'],
+          }],
+        });
+
+        const cmcdManager = new CmcdManager(
+            /** @type {shaka.util.CmcdManager.PlayerInterface} */
+            (playerInterfaceWithNE),
+            completeConfig,
+            /** @type {shaka.Player} */ (player),
+        );
+
+        cmcdManager.setMediaElement(
+            /** @type {!HTMLMediaElement} */
+            (/** @type {*} */ (player)),
+        );
+
+        cmcdManager.configure(completeConfig);
+
+        player.dispatchEvent(new shaka.util.FakeEvent('buffering'));
+
+        const request = /** @type {!jasmine.Spy} */ (requestSpy)
+            .calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="ps"');
+        expect(decodedUri).toContain('sta="w"');
         expect(decodedUri).toContain('v=2');
       });
     });
