@@ -2829,10 +2829,12 @@ shaka.extern.TextDisplayerConfiguration;
  *   Defaults to <code>''</code>.
  * @property {string} preferredAudioLabel
  *   The preferred label to use for audio tracks.
+ *   Changing this during playback will not affect the current playback.
  *   <br>
  *   Defaults to <code>''</code>.
  * @property {string} preferredVideoLabel
  *   The preferred label to use for video tracks.
+ *   Changing this during playback will not affect the current playback.
  *   <br>
  *   Defaults to <code>''</code>.
  * @property {string} preferredTextLanguage
@@ -2844,6 +2846,7 @@ shaka.extern.TextDisplayerConfiguration;
  *   Defaults to <code>''</code>.
  * @property {string} preferredAudioRole
  *   The preferred audio role to use for variants.
+ *   Changing this during playback will not affect the current playback.
  *   <br>
  *   Defaults to <code>''</code>.
  * @property {string} preferredVideoRole
@@ -2852,25 +2855,30 @@ shaka.extern.TextDisplayerConfiguration;
  *   Defaults to <code>''</code>.
  * @property {string} preferredTextRole
  *   The preferred role to use for text tracks.
+ *   Changing this during playback will not affect the current playback.
  *   <br>
  *   Defaults to <code>''</code>.
  * @property {!Array<string>} preferredVideoCodecs
  *   The list of preferred video codecs, in order of highest to lowest priority.
  *   This is used to do a filtering of the variants available for the player.
+ *   Changing this during playback will not affect the current playback.
  *   <br>
  *   Defaults to <code>[]</code>.
  * @property {!Array<string>} preferredAudioCodecs
  *   The list of preferred audio codecs, in order of highest to lowest priority.
  *   This is used to do a filtering of the variants available for the player.
+ *   Changing this during playback will not affect the current playback.
  *   <br>
  *   Defaults to <code>[]</code>.
  * @property {!Array<string>} preferredTextFormats
  *   The list of preferred text formats, in order of highest to lowest priority.
  *   This is used to do a filtering of the text tracks available for the player.
+ *   Changing this during playback will not affect the current playback.
  *   <br>
  *   Defaults to <code>[]</code>.
  * @property {number} preferredAudioChannelCount
  *   The preferred number of audio channels.
+ *   Changing this during playback will not affect the current playback.
  *   <br>
  *   Defaults to <code>2</code>.
  * @property {string} preferredVideoHdrLevel
