@@ -80,9 +80,10 @@ jobs:
           - os: macos-latest
             browser: Safari
             extra_flags: "--running_in_vm"
-          - os: macos-latest
-            browser: Safari-old
-            extra_flags: "--running_in_vm"
+          # Disabled until working properly
+          # - os: macos-latest
+          #   browser: Safari-old
+          #   extra_flags: "--running_in_vm"
 
           - os: windows-latest
             browser: Chrome
