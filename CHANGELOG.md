@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.14.27](https://github.com/shaka-project/shaka-player/compare/v4.14.26...v4.14.27) (2025-08-21)
+
+
+### Bug Fixes
+
+* **ABR:** Only update the variants if they are different ([#8999](https://github.com/shaka-project/shaka-player/issues/8999)) ([ad64f19](https://github.com/shaka-project/shaka-player/commit/ad64f191f538970a684189b2d9a2ec0119556419))
+* Don't filter video streams with different roles ([#8991](https://github.com/shaka-project/shaka-player/issues/8991)) ([92f4cf6](https://github.com/shaka-project/shaka-player/commit/92f4cf6bfc025200f3bf2fbb17b5c3202e7d7835))
+* **EMSG:** Fix memory leak in EMSG handling ([#9004](https://github.com/shaka-project/shaka-player/issues/9004)) ([6afa521](https://github.com/shaka-project/shaka-player/commit/6afa521a283074e97ca1a2f10a4193751ce18a7e))
+* **HLS:** Fix display stpp subtitles ([#8995](https://github.com/shaka-project/shaka-player/issues/8995)) ([5ed5dfa](https://github.com/shaka-project/shaka-player/commit/5ed5dfa0caad11245aa0107244a15514233ebbb9))
+* **HLS:** Fix HLS audio only stream does not play when URI field is omitted from #EXT-X-MEDIA ([#8988](https://github.com/shaka-project/shaka-player/issues/8988)) ([bb4f9f5](https://github.com/shaka-project/shaka-player/commit/bb4f9f5ad84f838a343a083a7de3f343d7b4b58f))
+* **net:** Throw HTTP_ERROR if request header is not valid ([#8990](https://github.com/shaka-project/shaka-player/issues/8990)) ([d391083](https://github.com/shaka-project/shaka-player/commit/d391083d2228911b76d9cf5ea83f3ef916cb8555))
+* **Transmuxer:** Fix bad generation of silence frames ([#8983](https://github.com/shaka-project/shaka-player/issues/8983)) ([f362170](https://github.com/shaka-project/shaka-player/commit/f362170db33ebe821055cb552bd64786ba8f27a4))
+* **UI:** Avoid useless exception ([#8992](https://github.com/shaka-project/shaka-player/issues/8992)) ([bf11e5d](https://github.com/shaka-project/shaka-player/commit/bf11e5d74009d62089093c36a174ce7378369bb1))
+* **UI:** Seek on double-tap regardless of player controls visibility ([#8998](https://github.com/shaka-project/shaka-player/issues/8998)) ([dc0965e](https://github.com/shaka-project/shaka-player/commit/dc0965e554f79ea9c9994d4973a4ae9afc49c434)), closes [#8949](https://github.com/shaka-project/shaka-player/issues/8949)
+
+
+### Performance Improvements
+
+* **DASH:** Simplify multiperiod eviction ([#9007](https://github.com/shaka-project/shaka-player/issues/9007)) ([c37c288](https://github.com/shaka-project/shaka-player/commit/c37c288b254ccbb5327758a16c0d08bd047c5ca8))
+* **HLS:** Do not store duplicated pssh data buffers ([#9009](https://github.com/shaka-project/shaka-player/issues/9009)) ([c9518ab](https://github.com/shaka-project/shaka-player/commit/c9518ab97bd9f0738dbb839e80735091105c95db))
+
 ## [4.14.26](https://github.com/shaka-project/shaka-player/compare/v4.14.25...v4.14.26) (2025-08-08)
 
 
