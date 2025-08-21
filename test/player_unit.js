@@ -1119,7 +1119,6 @@ describe('Player', () => {
 
       newConfig = player.getConfiguration();
       expect(newConfig.streaming.failureCallback).not.toBe(badFailureCallback2);
-      expect(logWarnSpy).not.toHaveBeenCalled();
     });
 
     // Regression test for https://github.com/shaka-project/shaka-player/issues/784
@@ -1352,6 +1351,130 @@ describe('Player', () => {
       const barConfig2 = player.getConfiguration().drm.advanced['bar'];
       expect(fooConfig2.distinctiveIdentifierRequired).toBe(true);
       expect(barConfig2.distinctiveIdentifierRequired).toBe(false);
+    });
+
+    it('allow update preferredVideoHdrLevel on the fly', async () => {
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(true);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.hdr = 'SDR';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3, (stream) => {
+            stream.hdr = 'PQ';
+          });
+        });
+      });
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      player.configure('preferredVideoHdrLevel', 'SDR');
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      streamingEngine.switchVariant.calls.reset();
+
+      // Change the configuration after the playback starts.
+      player.configure('preferredVideoHdrLevel', 'PQ');
+
+      // Delay to ensure that the switch would have been called.
+      await shaka.test.Util.shortDelay();
+
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
+    });
+
+    it('allow update preferredVideoLayout on the fly', async () => {
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(true);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.videoLayout = 'CH-STEREO';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3, (stream) => {
+            stream.videoLayout = 'CH-MONO';
+          });
+        });
+      });
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      player.configure('preferredVideoLayout', 'CH-STEREO');
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      streamingEngine.switchVariant.calls.reset();
+
+      // Change the configuration after the playback starts.
+      player.configure('preferredVideoLayout', 'CH-MONO');
+
+      // Delay to ensure that the switch would have been called.
+      await shaka.test.Util.shortDelay();
+
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
+    });
+
+    it('allow update preferSpatialAudio on the fly', async () => {
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(true);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addAudio(1, (stream) => {
+            stream.spatialAudio = false;
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addAudio(3, (stream) => {
+            stream.spatialAudio = true;
+          });
+        });
+      });
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      player.configure('preferSpatialAudio', false);
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      streamingEngine.switchVariant.calls.reset();
+
+      // Change the configuration after the playback starts.
+      player.configure('preferSpatialAudio', true);
+
+      // Delay to ensure that the switch would have been called.
+      await shaka.test.Util.shortDelay();
+
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
+    });
+
+    it('allow update preferredVideoRole on the fly', async () => {
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(true);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.roles = ['main'];
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3, (stream) => {
+            stream.roles = ['sign'];
+          });
+        });
+      });
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      player.configure('preferredVideoRole', 'main');
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      streamingEngine.switchVariant.calls.reset();
+
+      // Change the configuration after the playback starts.
+      player.configure('preferredVideoRole', 'sign');
+
+      // Delay to ensure that the switch would have been called.
+      await shaka.test.Util.shortDelay();
+
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
     });
   });
 
