@@ -169,8 +169,11 @@ describe('CmcdManager Setup', () => {
 
     function createCmcdManager(player, cfg = {}) {
       const cmcdManager = new CmcdManager(player, createCmcdConfig(cfg));
-      // Mock video element for time calculations
-      cmcdManager.video_ = {currentTime: 10};
+      const mockMediaElement = /** @type {!HTMLMediaElement} */ (
+        ({currentTime: 10})
+      );
+
+      cmcdManager.setMediaElement(mockMediaElement);
       return cmcdManager;
     }
 
@@ -851,8 +854,10 @@ describe('CmcdManager Setup', () => {
     const createCmcdConfig = (cfg = {}) => Object.assign({}, baseConfig, cfg);
     const createCmcdManager = (player, cfg = {}) => {
       const cmcdManager = new CmcdManager(player, createCmcdConfig(cfg));
-      // Mock video element for time calculations
-      cmcdManager.video_ = {currentTime: 5};
+      const mockMediaElement = /** @type {!HTMLMediaElement} */ (
+        ({currentTime: 5})
+      );
+      cmcdManager.setMediaElement(mockMediaElement);
       return cmcdManager;
     };
 
