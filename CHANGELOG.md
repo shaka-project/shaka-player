@@ -1,5 +1,28 @@
 # Changelog
 
+## [4.15.11](https://github.com/shaka-project/shaka-player/compare/v4.15.10...v4.15.11) (2025-08-21)
+
+
+### Bug Fixes
+
+* Don't filter video streams with different roles ([#8991](https://github.com/shaka-project/shaka-player/issues/8991)) ([1ba1645](https://github.com/shaka-project/shaka-player/commit/1ba16458351b6db459c1783ab8a5a1190386ed01))
+* **EMSG:** Fix memory leak in EMSG handling ([#9004](https://github.com/shaka-project/shaka-player/issues/9004)) ([5980904](https://github.com/shaka-project/shaka-player/commit/5980904b7a83a7cf2788dfaa7b81383e24bc54ec))
+* Fix probeSupport when testing opus and flac codecs ([#8987](https://github.com/shaka-project/shaka-player/issues/8987)) ([6bc0945](https://github.com/shaka-project/shaka-player/commit/6bc09456b4969a4bb0b6c7f5aaaaef8c72e55d7f))
+* Fix QuickTime and MOV formats playback on Chromium ([#8989](https://github.com/shaka-project/shaka-player/issues/8989)) ([debc56d](https://github.com/shaka-project/shaka-player/commit/debc56d77d32bf53885f30a60e1bf90d45699729))
+* **HLS:** Fix display stpp subtitles ([#8995](https://github.com/shaka-project/shaka-player/issues/8995)) ([46d2477](https://github.com/shaka-project/shaka-player/commit/46d2477d866509d2f6b73802db9ddf03e37ac5a0))
+* **HLS:** Fix getAudioTracks in some HLS streams ([#8996](https://github.com/shaka-project/shaka-player/issues/8996)) ([4c38afc](https://github.com/shaka-project/shaka-player/commit/4c38afcac7dc0d740397429b07a0077a55eeaeb2))
+* **HLS:** Fix HLS audio only stream does not play when URI field is omitted from #EXT-X-MEDIA ([#8988](https://github.com/shaka-project/shaka-player/issues/8988)) ([065e0fe](https://github.com/shaka-project/shaka-player/commit/065e0fe28a5abf156db7ba931e7f009472916f3f))
+* **net:** Throw HTTP_ERROR if request header is not valid ([#8990](https://github.com/shaka-project/shaka-player/issues/8990)) ([3e77990](https://github.com/shaka-project/shaka-player/commit/3e779908f42f28919c69e1ecb5f567baaf10babb))
+* **Transmuxer:** Fix bad generation of silence frames ([#8983](https://github.com/shaka-project/shaka-player/issues/8983)) ([8f5b9f7](https://github.com/shaka-project/shaka-player/commit/8f5b9f7de655c47ab18a1e525bd51e198fe85498))
+* **UI:** Seek on double-tap regardless of player controls visibility ([#8998](https://github.com/shaka-project/shaka-player/issues/8998)) ([25bfde1](https://github.com/shaka-project/shaka-player/commit/25bfde1dca6e52c70c3fe6ae610c8b02b01427d7)), closes [#8949](https://github.com/shaka-project/shaka-player/issues/8949)
+
+
+### Performance Improvements
+
+* **DASH:** Do not store duplicated pssh data buffers ([#9006](https://github.com/shaka-project/shaka-player/issues/9006)) ([bc9a846](https://github.com/shaka-project/shaka-player/commit/bc9a8460f849a72bed1171f2d1a3473aabf4e082))
+* **DASH:** Simplify multiperiod eviction ([#9007](https://github.com/shaka-project/shaka-player/issues/9007)) ([d624bcd](https://github.com/shaka-project/shaka-player/commit/d624bcd2b3ef88af81f82bafa939b22dd43b14c8))
+* **HLS:** Do not store duplicated pssh data buffers ([#9009](https://github.com/shaka-project/shaka-player/issues/9009)) ([9f58d52](https://github.com/shaka-project/shaka-player/commit/9f58d52becfb87934f785aae6bdaff55fde04501))
+
 ## [4.15.10](https://github.com/shaka-project/shaka-player/compare/v4.15.9...v4.15.10) (2025-08-08)
 
 
