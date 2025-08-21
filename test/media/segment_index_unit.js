@@ -1050,10 +1050,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       expect(Array.from(metaIndex)).toEqual(
           inputRefs0.concat(inputRefs1, inputRefs2));
       expect(metaIndex.getNumEvicted()).toBe(0);
-      index0.evict(75);
-      index1.evict(75);
-      index2.evict(75);
-      metaIndex.evictEmpty();
+      metaIndex.evict(75);
       expect(Array.from(metaIndex)).toEqual(inputRefs2.slice(1));
       expect(release0).toHaveBeenCalled();
       expect(release1).toHaveBeenCalled();
