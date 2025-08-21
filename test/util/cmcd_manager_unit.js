@@ -6,6 +6,19 @@
 
 // region CMCD Manager Setup
 describe('CmcdManager Setup', () => {
+  /**
+   * @extends {shaka.util.FakeEventTarget}
+   */
+  class MockCmcdVideo extends shaka.util.FakeEventTarget {
+    constructor() {
+      super();
+      /** @type {number} */
+      this.currentTime = 0;
+      /** @type {boolean} */
+      this.muted = false;
+    }
+  }
+
   const createSegmentContextWithIndex = (segmentIndex) => {
     const baseContext = createSegmentContext();
     return Object.assign({}, baseContext, {
@@ -122,7 +135,8 @@ describe('CmcdManager Setup', () => {
       'com.test-token': Symbol('s'),
     };
 
-    const mockPlayer = {
+    const mockPlayer = new shaka.util.FakeEventTarget();
+    Object.assign(mockPlayer, {
       isLive: () => false,
       getLiveLatency: () => 0,
       getBandwidthEstimate: () => 10000000,
@@ -151,7 +165,7 @@ describe('CmcdManager Setup', () => {
           audioBandWidth: 1000000,
         },
       ]),
-    };
+    });
 
     const config = {
       enabled: true,
@@ -170,7 +184,11 @@ describe('CmcdManager Setup', () => {
     function createCmcdManager(player, cfg = {}) {
       const cmcdManager = new CmcdManager(player, createCmcdConfig(cfg));
       // Mock video element for time calculations
-      cmcdManager.video_ = {currentTime: 10};
+      const video = new MockCmcdVideo();
+      video.currentTime = 10;
+      cmcdManager.setMediaElement(
+          /** @type {!HTMLMediaElement} */ (/** @type {*} */ (video)));
+
       return cmcdManager;
     }
 
@@ -605,11 +623,11 @@ describe('CmcdManager Setup', () => {
           });
 
           it('returns cmcd v2 data in query if version is 2', async () => {
-            const livePlayer = {
-              ...mockPlayer,
+            const livePlayer = new shaka.util.FakeEventTarget();
+            Object.assign(livePlayer, mockPlayer, {
               isLive: () => true,
               getLiveLatency: () => 3100,
-            };
+            });
             cmcdManager = createCmcdManager(
                 livePlayer,
                 {
@@ -633,11 +651,11 @@ describe('CmcdManager Setup', () => {
 
           it('doesn\'t return cmcd v2 data in query if version is not 2',
               async () => {
-                const livePlayer = {
-                  ...mockPlayer,
+                const livePlayer = new shaka.util.FakeEventTarget();
+                Object.assign(livePlayer, mockPlayer, {
                   isLive: () => true,
                   getLiveLatency: () => 3100,
-                };
+                });
 
                 const cmcdManagerTmp = createCmcdManager(
                     livePlayer,
@@ -661,11 +679,11 @@ describe('CmcdManager Setup', () => {
               });
 
           it('returns cmcd v2 data in header if version is 2', async () => {
-            const livePlayer = {
-              ...mockPlayer,
+            const livePlayer = new shaka.util.FakeEventTarget();
+            Object.assign(livePlayer, mockPlayer, {
               isLive: () => true,
               getLiveLatency: () => 3100,
-            };
+            });
             cmcdManager = createCmcdManager(
                 livePlayer,
                 {
@@ -688,11 +706,11 @@ describe('CmcdManager Setup', () => {
 
           it('doesn\'t return cmcd v2 data in headers if version is not 2',
               async () => {
-                const livePlayer = {
-                  ...mockPlayer,
+                const livePlayer = new shaka.util.FakeEventTarget();
+                Object.assign(livePlayer, mockPlayer, {
                   isLive: () => true,
                   getLiveLatency: () => 3100,
-                };
+                });
                 cmcdManager = createCmcdManager(
                     livePlayer,
                     {
@@ -801,7 +819,8 @@ describe('CmcdManager Setup', () => {
       'com.test-token': Symbol('s'),
     };
 
-    const mockPlayer = {
+    const mockPlayer = new shaka.util.FakeEventTarget();
+    Object.assign(mockPlayer, {
       isLive: () => true,
       getLiveLatency: () => 3100,
       getBandwidthEstimate: () => 10000000,
@@ -830,7 +849,7 @@ describe('CmcdManager Setup', () => {
           audioBandwidth: 1000000,
         },
       ],
-    };
+    });
 
     const baseConfig = {
       enabled: true,
@@ -852,7 +871,11 @@ describe('CmcdManager Setup', () => {
     const createCmcdManager = (player, cfg = {}) => {
       const cmcdManager = new CmcdManager(player, createCmcdConfig(cfg));
       // Mock video element for time calculations
-      cmcdManager.video_ = {currentTime: 5};
+      const video = new MockCmcdVideo();
+      video.currentTime = 5;
+      cmcdManager.setMediaElement(
+          /** @type {!HTMLMediaElement} */ (/** @type {*} */ (video)));
+
       return cmcdManager;
     };
 
@@ -2145,10 +2168,10 @@ describe('CmcdManager Setup', () => {
                     {uri: '', data: new ArrayBuffer(5), headers: {}}),
             );
 
-        const playerWithSpy = {
-          ...mockPlayer,
+        const playerWithSpy = new shaka.util.FakeEventTarget();
+        Object.assign(playerWithSpy, mockPlayer, {
           getNetworkingEngine: () => networkingEngine,
-        };
+        });
 
         const cmcdManager = createCmcdManager(playerWithSpy, {
           version: 2,
@@ -2216,10 +2239,10 @@ describe('CmcdManager Setup', () => {
                     {uri: '', data: new ArrayBuffer(5), headers: {}}),
             );
 
-        const playerWithSpy = {
-          ...mockPlayer,
+        const playerWithSpy = new shaka.util.FakeEventTarget();
+        Object.assign(playerWithSpy, mockPlayer, {
           getNetworkingEngine: () => networkingEngine,
-        };
+        });
 
         const cmcdManager = createCmcdManager(
             playerWithSpy,
@@ -2292,10 +2315,10 @@ describe('CmcdManager Setup', () => {
                 () => shaka.util.AbortableOperation.completed(
                     {uri: '', data: new ArrayBuffer(5), headers: {}}));
 
-        const playerWithSpy = {
-          ...mockPlayer,
+        const playerWithSpy = new shaka.util.FakeEventTarget();
+        Object.assign(playerWithSpy, mockPlayer, {
           getNetworkingEngine: () => networkingEngine,
-        };
+        });
 
         const cmcdManager = createCmcdManager(playerWithSpy, {
           enabled: false,
@@ -2514,6 +2537,7 @@ describe('CmcdManager Setup', () => {
 
       let networkingEngine;
       let requestSpy;
+      /** @type {shaka.util.FakeEventTarget} */
       let mockPlayerWithNE;
 
       beforeEach(() => {
@@ -2524,8 +2548,7 @@ describe('CmcdManager Setup', () => {
           registerScheme: () => {},
         };
         mockPlayerWithNE = new shaka.util.FakeEventTarget();
-        Object.assign(mockPlayerWithNE, {
-          ...mockPlayer,
+        Object.assign(mockPlayerWithNE, mockPlayer, {
           getNetworkingEngine: () => networkingEngine,
         });
       });
