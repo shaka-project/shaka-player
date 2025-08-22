@@ -3633,8 +3633,17 @@ describe('CmcdManager Setup', () => {
       });
 
       it('sends webkit presentation mode change events', () => {
-        const mockVideo = new shaka.util.FakeEventTarget();
-        mockVideo.webkitPresentationMode = 'inline';
+        /**
+         * @extends {shaka.util.FakeEventTarget}
+         */
+        class MockWebKitVideo extends shaka.util.FakeEventTarget {
+          constructor() {
+            super();
+            /** @type {string} */
+            this.webkitPresentationMode = 'inline';
+          }
+        }
+        const mockVideo = new MockWebKitVideo();
 
         const config = {
           version: 2,
@@ -3655,6 +3664,7 @@ describe('CmcdManager Setup', () => {
         cmcdManager.setMediaElement(mockVideo);
         cmcdManager.configure(config);
 
+        // Simulate entering fullscreen via webkit presentation mode
         mockVideo.webkitPresentationMode = 'fullscreen';
         mockVideo.dispatchEvent(
             new shaka.util.FakeEvent('webkitpresentationmodechanged'));
@@ -3665,9 +3675,10 @@ describe('CmcdManager Setup', () => {
         let decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('e="pe"');
 
+        // Simulate exiting fullscreen via webkit presentation mode
         mockVideo.webkitPresentationMode = 'inline';
-        mockVideo.dispatchEvent(new shaka.util.FakeEvent(
-            'webkitpresentationmodechanged'));
+        mockVideo.dispatchEvent(
+            new shaka.util.FakeEvent('webkitpresentationmodechanged'));
 
         expect(requestSpy).toHaveBeenCalledTimes(2);
         request = (/** @type {!jasmine.Spy} */ (requestSpy))
