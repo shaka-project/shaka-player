@@ -4,11 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.media.AdaptationSetCriteria');
-
-goog.require('shaka.media.AdaptationSet');
-goog.require('shaka.config.CodecSwitchingStrategy');
-
+/**
+ * @externs
+ */
 
 /**
  * An adaptation set criteria is a unit of logic that can take a set of
@@ -16,32 +14,32 @@ goog.require('shaka.config.CodecSwitchingStrategy');
  * adapted between.
  *
  * @interface
- * @export
+ * @exportDoc
  */
-shaka.media.AdaptationSetCriteria = class {
+shaka.extern.AdaptationSetCriteria = class {
   /**
    * Take a set of variants, and return a subset of variants that can be
    * adapted between.
    *
    * @param {!Array<shaka.extern.Variant>} variants
    * @return {!shaka.media.AdaptationSet}
-   * @exportInterface
+   * @exportDoc
    */
   create(variants) {}
 
   /**
    * Sets the AdaptationSetCriteria configuration.
    *
-   * @param {shaka.media.AdaptationSetCriteria.Configuration} config
-   * @exportInterface
+   * @param {shaka.extern.AdaptationSetCriteria.Configuration} config
+   * @exportDoc
    */
   configure(config) {}
 
   /**
    * Gets the current AdaptationSetCriteria configuration.
    *
-   * @return {?shaka.media.AdaptationSetCriteria.Configuration}
-   * @exportInterface
+   * @return {?shaka.extern.AdaptationSetCriteria.Configuration}
+   * @exportDoc
    */
   getConfiguration() {}
 };
@@ -49,10 +47,10 @@ shaka.media.AdaptationSetCriteria = class {
 /**
  * A factory for creating the AdaptationSetCriteria.
  *
- * @typedef {function():!shaka.media.AdaptationSetCriteria}
- * @export
+ * @typedef {function():!shaka.extern.AdaptationSetCriteria}
+ * @exportDoc
  */
-shaka.media.AdaptationSetCriteria.Factory;
+shaka.extern.AdaptationSetCriteria.Factory;
 
 /**
  * @typedef {{
@@ -103,6 +101,6 @@ shaka.media.AdaptationSetCriteria.Factory;
  *   The ordered list of audio codecs to filter variants.
  * @property {number} preferredAudioChannelCount
  *   The preferred audio channel count to filter variants.
- * @export
+ * @exportDoc
  */
-shaka.media.AdaptationSetCriteria.Configuration;
+shaka.extern.AdaptationSetCriteria.Configuration;
