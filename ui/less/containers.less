@@ -16,8 +16,7 @@
   display: flex;
 
   /* Set a special font for material design icons. */
-  .material-icons-round {
-    font-family: "Material Icons Round";
+  .material-svg-icon {
     font-size: 24px;
   }
 
@@ -25,6 +24,11 @@
   font-family: @general-font-family;
   font-weight: normal;
   -webkit-font-smoothing: antialiased;
+
+  /* prevent text caret from showing when 'Navigate pages with a text cursor'
+   * setting is enabled on chromium-based browsers */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Each browser has a different prefixed pseudo-class for fullscreened elements.
@@ -191,17 +195,29 @@
     transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 100ms;
     text-shadow: 0 0 2px @general-background-color;
 
-    &.material-icons-round {
-      font-size: 34px;
+    /* Use a bit larger icons for some buttons */
+    &.shaka-fast-forward-button,
+    &.shaka-rewind-button,
+    &.shaka-small-play-button,
+    &.shaka-skip-previous-button,
+    &.shaka-skip-next-button {
+      .material-svg-icon {
+        font-size: 32px;
+      }
     }
 
-    &.shaka-mute-button {
-      font-size: 28px;
+    &.shaka-fullscreen-button {
+      .material-svg-icon {
+        font-size: 24px;
+      }
     }
 
     &.shaka-overflow-menu-button {
-      font-size: 24px !important;
       position: relative;
+
+      .material-svg-icon {
+        font-size: 24px;
+      }
     }
 
     &:hover {

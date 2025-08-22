@@ -28,7 +28,8 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
-    super(parent, controls, shaka.ui.Enums.MaterialDesignIcons.PLAYBACK_RATE);
+    super(parent, controls,
+        shaka.ui.Enums.MaterialDesignSVGIcons.PLAYBACK_RATE);
 
     this.button.classList.add('shaka-playbackrate-button');
     this.menu.classList.add('shaka-playback-rates');
@@ -85,13 +86,15 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     const rate = this.player.getPlaybackRate();
     // Remove the old checkmark icon and related tags and classes if it exists.
     const checkmarkIcon = shaka.ui.Utils.getDescendantIfExists(
-        this.menu, 'material-icons-round shaka-chosen-item');
+        this.menu, 'material-svg-icon shaka-chosen-item');
     if (checkmarkIcon) {
       const previouslySelectedButton = checkmarkIcon.parentElement;
       previouslySelectedButton.removeAttribute('aria-selected');
       const previouslySelectedSpan =
           previouslySelectedButton.getElementsByTagName('span')[0];
-      previouslySelectedSpan.classList.remove('shaka-chosen-item');
+      if (previouslySelectedSpan) {
+        previouslySelectedSpan.classList.remove('shaka-chosen-item');
+      }
       previouslySelectedButton.removeChild(checkmarkIcon);
     }
     // Find the button that represents the newly selected playback rate.

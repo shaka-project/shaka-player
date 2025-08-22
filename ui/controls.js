@@ -1404,25 +1404,29 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(this.videoContainer_, 'keydown', (e) => {
-      if (!this.config_.enableKeyboardPlaybackControlsInWindow) {
+      if (!this.config_.enableKeyboardPlaybackControlsInWindow &&
+        !this.isFullScreenEnabled()) {
         this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
       }
     });
 
     this.eventManager_.listen(this.videoContainer_, 'keyup', (e) => {
-      if (!this.config_.enableKeyboardPlaybackControlsInWindow) {
+      if (!this.config_.enableKeyboardPlaybackControlsInWindow &&
+        !this.isFullScreenEnabled()) {
         this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
       }
     });
 
     this.eventManager_.listen(window, 'keydown', (e) => {
-      if (this.config_.enableKeyboardPlaybackControlsInWindow) {
+      if (this.config_.enableKeyboardPlaybackControlsInWindow ||
+        this.isFullScreenEnabled()) {
         this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
       }
     });
 
     this.eventManager_.listen(window, 'keyup', (e) => {
-      if (this.config_.enableKeyboardPlaybackControlsInWindow) {
+      if (this.config_.enableKeyboardPlaybackControlsInWindow ||
+        this.isFullScreenEnabled()) {
         this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
       }
     });
@@ -1906,8 +1910,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         activeElement.classList.contains('shaka-volume-bar') : false;
     const isSeekBar = activeElement && activeElement.classList &&
         activeElement.classList.contains('shaka-seek-bar');
+    const isFullscreen = this.isFullScreenEnabled();
+    const isControlsFocused = this.controlsContainer_.contains(activeElement);
+    const isFullscreenOrControlsInWindow = isFullscreen ||
+        this.config_.enableKeyboardPlaybackControlsInWindow;
+
     // Show the control panel if it is on focus or any button is pressed.
-    if (this.controlsContainer_.contains(activeElement)) {
+    if (isControlsFocused) {
       this.onMouseMove_(event);
     }
 
@@ -1921,37 +1930,47 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     switch (event.key) {
       case 'ArrowLeft':
-        // If it's not focused on the volume bar, move the seek time backward
-        // for a few sec. Otherwise, the volume will be adjusted automatically.
-        if (this.seekBar_ && isSeekBar && !isVolumeBar &&
-            keyboardSeekDistance > 0) {
-          event.preventDefault();
-          this.seek_(this.seekBar_.getValue() - keyboardSeekDistance);
+        // If it's not focused on the volume bar, or if it's in fullscreen,
+        // move the seek time backward for a few sec.
+        // Otherwise, the volume will be adjusted automatically.
+        if (this.seekBar_ && keyboardSeekDistance > 0) {
+          if ((isSeekBar || isFullscreenOrControlsInWindow) &&
+              !isVolumeBar) {
+            event.preventDefault();
+            this.seek_(this.seekBar_.getValue() - keyboardSeekDistance);
+          }
         }
         break;
       case 'ArrowRight':
-        // If it's not focused on the volume bar, move the seek time forward
-        // for a few sec. Otherwise, the volume will be adjusted automatically.
-        if (this.seekBar_ && isSeekBar && !isVolumeBar &&
-            keyboardSeekDistance > 0) {
-          event.preventDefault();
-          this.seek_(this.seekBar_.getValue() + keyboardSeekDistance);
+        // If it's not focused on the volume bar, or if it's in fullscreen,
+        // move the seek time forward for a few sec.
+        // Otherwise, the volume will be adjusted automatically.
+        if (this.seekBar_ && keyboardSeekDistance > 0) {
+          if ((isSeekBar || isFullscreenOrControlsInWindow) &&
+              !isVolumeBar) {
+            event.preventDefault();
+            this.seek_(this.seekBar_.getValue() + keyboardSeekDistance);
+          }
         }
         break;
       case 'PageDown':
         // PageDown is like ArrowLeft, but has a larger jump distance, and does
         // nothing to volume.
-        if (this.seekBar_ && isSeekBar && keyboardLargeSeekDistance > 0) {
-          event.preventDefault();
-          this.seek_(this.seekBar_.getValue() - keyboardLargeSeekDistance);
+        if (this.seekBar_ && keyboardLargeSeekDistance > 0) {
+          if (isSeekBar || isFullscreenOrControlsInWindow) {
+            event.preventDefault();
+            this.seek_(this.seekBar_.getValue() - keyboardLargeSeekDistance);
+          }
         }
         break;
       case 'PageUp':
         // PageDown is like ArrowRight, but has a larger jump distance, and does
         // nothing to volume.
-        if (this.seekBar_ && isSeekBar && keyboardLargeSeekDistance > 0) {
-          event.preventDefault();
-          this.seek_(this.seekBar_.getValue() + keyboardLargeSeekDistance);
+        if (this.seekBar_ && keyboardLargeSeekDistance > 0) {
+          if (isSeekBar || isFullscreenOrControlsInWindow) {
+            event.preventDefault();
+            this.seek_(this.seekBar_.getValue() + keyboardLargeSeekDistance);
+          }
         }
         break;
       // Jump to the beginning of the video's seek range.
@@ -2006,7 +2025,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
       // Pause or play by pressing space on the seek bar.
       case ' ':
-        if (isSeekBar) {
+        if (
+          isSeekBar ||
+          (isFullscreenOrControlsInWindow && !isControlsFocused)
+        ) {
           this.playPausePresentation();
         }
         break;

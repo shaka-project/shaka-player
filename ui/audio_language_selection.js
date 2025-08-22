@@ -29,7 +29,7 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
-    super(parent, controls, shaka.ui.Enums.MaterialDesignIcons.LANGUAGE);
+    super(parent, controls, shaka.ui.Enums.MaterialDesignSVGIcons.LANGUAGE);
 
     this.button.classList.add('shaka-language-button');
     this.button.classList.add('shaka-tooltip-status');

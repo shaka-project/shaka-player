@@ -17,6 +17,7 @@ goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Overlay.TrackLabelFormat');
 goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
+goog.require('shaka.util.ArrayUtils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.MimeUtils');
@@ -34,7 +35,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
-    super(parent, controls, shaka.ui.Enums.MaterialDesignIcons.RESOLUTION);
+    super(parent, controls, shaka.ui.Enums.MaterialDesignSVGIcons.RESOLUTION);
 
     this.button.classList.add('shaka-resolution-button');
     this.button.classList.add('shaka-tooltip-status');
@@ -382,7 +383,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
             t.bandwidth == track.bandwidth &&
             t.frameRate == track.frameRate &&
             t.hdr == track.hdr &&
-            t.videoLayout == track.videoLayout;
+            t.videoLayout == track.videoLayout &&
+            shaka.util.ArrayUtils.equal(t.roles, track.roles);
         if (ret && this.controls.getConfig().showVideoCodec &&
             t.codecs && track.codecs) {
           ret = shaka.util.MimeUtils.getNormalizedCodec(t.codecs) ==

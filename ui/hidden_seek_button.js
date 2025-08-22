@@ -7,6 +7,7 @@
 goog.provide('shaka.ui.HiddenSeekButton');
 
 goog.require('shaka.ui.Element');
+goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.util.Timer');
 goog.require('shaka.util.Dom');
 
@@ -70,11 +71,10 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     this.seekValue_.textContent = '0s';
     this.seekContainer.appendChild(this.seekValue_);
 
-    /** @protected {!HTMLElement} */
-    this.seekIcon = shaka.util.Dom.createHTMLElement('span');
-    this.seekIcon.classList.add(
+    /** @protected {!shaka.ui.MaterialSVGIcon} */
+    this.seekIcon = new shaka.ui.MaterialSVGIcon(this.seekContainer);
+    this.seekIcon.getSvgElement().classList.add(
         'shaka-forward-rewind-container-icon');
-    this.seekContainer.appendChild(this.seekIcon);
 
     /** @protected {boolean} */
     this.isRewind = false;
@@ -103,11 +103,6 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
    * @private
    */
   onTouchStart_(event) {
-    // Only proceed if controls are visible.
-    if (!this.controls.isOpaque()) {
-      return;
-    }
-
     // If multiple touches, handle or ignore as needed. Here, we assume
     // single-touch.
     if (event.touches.length > 0) {
@@ -143,11 +138,6 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
    * @private
    */
   onTouchEnd_(event) {
-    // Only proceed if controls are visible.
-    if (!this.controls.isOpaque()) {
-      return;
-    }
-
     // If user scrolled, don't handle as a tap.
     if (this.hasMoved_) {
       return;

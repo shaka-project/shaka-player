@@ -32,7 +32,6 @@
 +../../lib/drm/playready.js
 
 +../../lib/media/adaptation_set.js
-+../../lib/media/adaptation_set_criteria.js
 +../../lib/media/buffering_observer.js
 +../../lib/media/closed_caption_parser.js
 +../../lib/media/content_workarounds.js
