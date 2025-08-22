@@ -3590,6 +3590,47 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('sta="w"');
         expect(decodedUri).toContain('v=2');
       });
+
+      it('sends Picture-in-Picture events', () => {
+        const mockVideo = new shaka.util.FakeEventTarget();
+        const config = {
+          version: 2,
+          enabled: true,
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            includeKeys: ['e'],
+            events: ['pe', 'pc'],
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(
+            mockPlayerWithNE,
+            config,
+        );
+        cmcdManager.setMediaElement(mockVideo);
+        cmcdManager.configure(config);
+
+        mockVideo.dispatchEvent(
+            new shaka.util.FakeEvent('enterpictureinpicture'));
+
+        expect(requestSpy).toHaveBeenCalledTimes(1);
+        let request = (/** @type {!jasmine.Spy} */ (requestSpy))
+            .calls.mostRecent().args[1];
+        let decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="pe"');
+
+        // Simulate leaving Picture-in-Picture
+        mockVideo.dispatchEvent(new shaka.util.FakeEvent(
+            'leavepictureinpicture'));
+
+        expect(requestSpy).toHaveBeenCalledTimes(2);
+        request = (/** @type {!jasmine.Spy} */ (requestSpy))
+            .calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="pc"');
+      });
     });
   });
 });
