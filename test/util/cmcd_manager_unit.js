@@ -3631,6 +3631,50 @@ describe('CmcdManager Setup', () => {
         decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('e="pc"');
       });
+
+      it('sends webkit presentation mode change events', () => {
+        const mockVideo = new shaka.util.FakeEventTarget();
+        mockVideo.webkitPresentationMode = 'inline';
+
+        const config = {
+          version: 2,
+          enabled: true,
+          targets: [{
+            mode: 'event',
+            enabled: true,
+            url: 'https://example.com/cmcd',
+            includeKeys: ['e'],
+            events: ['pe', 'pc'],
+          }],
+        };
+
+        const cmcdManager = createCmcdManager(
+            mockPlayerWithNE,
+            config,
+        );
+        cmcdManager.setMediaElement(mockVideo);
+        cmcdManager.configure(config);
+
+        mockVideo.webkitPresentationMode = 'fullscreen';
+        mockVideo.dispatchEvent(
+            new shaka.util.FakeEvent('webkitpresentationmodechanged'));
+
+        expect(requestSpy).toHaveBeenCalledTimes(1);
+        let request = (/** @type {!jasmine.Spy} */ (requestSpy))
+            .calls.mostRecent().args[1];
+        let decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="pe"');
+
+        mockVideo.webkitPresentationMode = 'inline';
+        mockVideo.dispatchEvent(new shaka.util.FakeEvent(
+            'webkitpresentationmodechanged'));
+
+        expect(requestSpy).toHaveBeenCalledTimes(2);
+        request = (/** @type {!jasmine.Spy} */ (requestSpy))
+            .calls.mostRecent().args[1];
+        decodedUri = decodeURIComponent(request.uris[0]);
+        expect(decodedUri).toContain('e="pc"');
+      });
     });
   });
 });
