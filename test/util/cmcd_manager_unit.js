@@ -1717,6 +1717,11 @@ describe('CmcdManager Setup', () => {
       });
 
       it('includes the request URL, without CMCD in response mode', () => {
+        // toContain is not working properly on Tizen 3.
+        if (deviceDetected.getDeviceName() === 'Tizen') {
+          pending('Disabled on Tizen.');
+        }
+
         const cmcdManager = createCmcdManager(
             mockPlayer,
             {
@@ -1751,6 +1756,11 @@ describe('CmcdManager Setup', () => {
       });
 
       it('cmcd url key preserves other query parameters', () => {
+        // toContain is not working properly on Tizen 3.
+        if (deviceDetected.getDeviceName() === 'Tizen') {
+          pending('Disabled on Tizen.');
+        }
+
         const cmcdManager = createCmcdManager(mockPlayer, {
           version: 2,
           targets: [{
@@ -1809,6 +1819,11 @@ describe('CmcdManager Setup', () => {
       });
 
       it('cmcd url key preserves URL fragments (hash)', () => {
+        // toContain is not working properly on Tizen 3.
+        if (deviceDetected.getDeviceName() === 'Tizen') {
+          pending('Disabled on Tizen.');
+        }
+
         const cmcdManager = createCmcdManager(mockPlayer, {
           version: 2,
           targets: [{
@@ -1838,6 +1853,11 @@ describe('CmcdManager Setup', () => {
       });
 
       it('cmcd url key handles an empty CMCD parameter', () => {
+        // toContain is not working properly on Tizen 3.
+        if (deviceDetected.getDeviceName() === 'Tizen') {
+          pending('Disabled on Tizen.');
+        }
+
         const cmcdManager = createCmcdManager(mockPlayer, {
           version: 2,
           targets: [{
@@ -3468,6 +3488,9 @@ describe('CmcdManager Setup', () => {
       });
 
       it('sends player expand and collapse events', () => {
+        if (!document.fullscreenEnabled) {
+          pending('This test requires fullscreen support.');
+        }
         const mockVideo = new shaka.util.FakeEventTarget();
         const config = {
           version: 2,
