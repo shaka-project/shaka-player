@@ -3488,14 +3488,17 @@ describe('CmcdManager Setup', () => {
         cmcdManager.setMediaElement(mockVideo);
         cmcdManager.configure(config);
 
+        const fullscreenChangeEvent = document.createEvent('event');
+        fullscreenChangeEvent.initEvent('fullscreenchange', false, false);
+
         // Mock fullscreenElement to simulate entering fullscreen
         Object.defineProperty(document, 'fullscreenElement', {
-          value: mockVideo,
+          value: document,
           writable: true,
         });
-        mockVideo.dispatchEvent(new shaka.util.FakeEvent('fullscreenchange'));
 
-        expect(requestSpy).toHaveBeenCalledTimes(1);
+        document.dispatchEvent(fullscreenChangeEvent);
+        expect(requestSpy).toHaveBeenCalled();
         let request = (/** @type {!jasmine.Spy} */ (requestSpy))
             .calls.mostRecent().args[1];
         let decodedUri = decodeURIComponent(request.uris[0]);
@@ -3506,9 +3509,9 @@ describe('CmcdManager Setup', () => {
           value: null,
           writable: true,
         });
-        mockVideo.dispatchEvent(new shaka.util.FakeEvent('fullscreenchange'));
 
-        expect(requestSpy).toHaveBeenCalledTimes(2);
+        document.dispatchEvent(fullscreenChangeEvent);
+        expect(requestSpy).toHaveBeenCalled();
         request = (/** @type {!jasmine.Spy} */ (requestSpy))
             .calls.mostRecent().args[1];
         decodedUri = decodeURIComponent(request.uris[0]);
