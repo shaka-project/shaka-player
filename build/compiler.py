@@ -72,6 +72,23 @@ def _update_timestamp(path):
   # does.
   open(path, 'wb').close()
 
+def _get_java_major_version():
+  obj = shakaBuildHelpers.execute_subprocess(
+      ['java', '-version'], stderr=subprocess.PIPE)
+  # This will block until the process terminates, storing stderr in a string
+  stderr = obj.communicate()[1]
+
+  first_line = stderr.decode('utf-8').split('\n')[0]
+  # Example: openjdk version "24.0.1" 2025-04-15
+  # Example: java version "24.0.2" 2025-07-15
+  major_version_match = re.match(r'.*"(\d+)\..*?".*', first_line)
+  major_version_string = major_version_match.group(1)
+
+  try:
+    return int(major_version_string)
+  except:
+    return 0
+
 
 class ClosureCompiler(object):
   def __init__(self, source_files, build_name):
@@ -93,6 +110,21 @@ class ClosureCompiler(object):
     # timestamp file after compilation.
     self.timestamp_file = None
 
+    # Arguments passed to the Java interpreter before launching a jar.
+    self.java_opts = []
+
+    java_major_version = _get_java_major_version()
+    if java_major_version >= 23:
+      # Silence warnings caused by using the Closure Compiler with newer
+      # versions of Java.  See https://openjdk.org/jeps/498
+      self.java_opts.append('--sun-misc-unsafe-memory-access=allow')
+
+    jar = _get_source_path(
+        'node_modules/google-closure-compiler-java/compiler.jar')
+
+    # Full compiler command.
+    self.compiler_command = ['java'] + self.java_opts + ['-jar', jar]
+
   def compile(self, options, force=False):
     """Builds the files in |self.source_files| using the given Closure
     command-line options.
@@ -111,9 +143,6 @@ class ClosureCompiler(object):
       else:
         if not _must_build(self.compiled_js_path, self.source_files):
           return True
-
-    jar = _get_source_path(
-        'node_modules/google-closure-compiler-java/compiler.jar')
 
     output_options = []
     if self.output_compiled_bundle:
@@ -160,7 +189,7 @@ class ClosureCompiler(object):
       # read from the temp file.  We still put normal command line flags in the
       # command line.
       # cspell: disable-next-line
-      cmd_line = ['java', '-jar', jar] + normal_flags + ['--flagfile', fp.name]
+      cmd_line = self.compiler_command + normal_flags + ['--flagfile', fp.name]
       if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
         logging.error('Build failed')
         return False
@@ -191,9 +220,7 @@ class ClosureCompiler(object):
     with shakaBuildHelpers.open_file(wrapper_input_path, 'r') as f:
       wrapper_code = f.read().replace('%output%', '"%output%"')
 
-    jar = _get_source_path(
-        'node_modules/google-closure-compiler-java/compiler.jar')
-    cmd_line = ['java', '-jar', jar, '-O', 'WHITESPACE_ONLY']
+    cmd_line = self.compiler_command + ['-O', 'WHITESPACE_ONLY']
 
     proc = shakaBuildHelpers.execute_subprocess(
         cmd_line, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
