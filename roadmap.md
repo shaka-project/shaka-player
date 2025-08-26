@@ -15,6 +15,11 @@ Candidate features for future release cycles:
 v5.0
  - Conversion to Typescript (Smaller, more modular binary)
 
+v4.17 - 2025 Q4
+ - TBD
+
+=====
+
 v4.16 - 2025 Q3
  - CMCDv2
    https://github.com/shaka-project/shaka-player/issues/8660
@@ -22,8 +27,8 @@ v4.16 - 2025 Q3
    https://github.com/shaka-project/shaka-player/issues/8441
  - DASH: Add support for certificate acquisition URL
    https://github.com/shaka-project/shaka-player/issues/8823
-
-=====
+ - UI: Replace Material Design Icon font with SVG
+   https://github.com/shaka-project/shaka-player/issues/2467
 
 v4.15 - 2025 Q2
  - Modernization of the UI
