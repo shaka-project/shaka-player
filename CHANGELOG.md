@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.14.28](https://github.com/shaka-project/shaka-player/compare/v4.14.27...v4.14.28) (2025-08-26)
+
+
+### Bug Fixes
+
+* Fix videoBandwidth when using LCEVC dual track ([#9013](https://github.com/shaka-project/shaka-player/issues/9013)) ([1c1ed77](https://github.com/shaka-project/shaka-player/commit/1c1ed77c5da5c4f737ffaafa659462bd2bd40e37))
+* Fix WebVTT position handling in UITextDisplayer ([#9017](https://github.com/shaka-project/shaka-player/issues/9017)) ([3fa4dba](https://github.com/shaka-project/shaka-player/commit/3fa4dba3acba1cfda2ff8903e11d7af5c87af65e))
+
 ## [4.14.27](https://github.com/shaka-project/shaka-player/compare/v4.14.26...v4.14.27) (2025-08-21)
 
 
