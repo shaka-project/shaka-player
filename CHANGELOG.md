@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.15.12](https://github.com/shaka-project/shaka-player/compare/v4.15.11...v4.15.12) (2025-08-26)
+
+
+### Bug Fixes
+
+* **Ads:** html unescape node attributes with urls ([#9024](https://github.com/shaka-project/shaka-player/issues/9024)) ([2136291](https://github.com/shaka-project/shaka-player/commit/2136291d3b38e245f2b906d87a7ecb5febe1cf3f))
+* Fix buffering states when rebuffering goal is 0 ([#9018](https://github.com/shaka-project/shaka-player/issues/9018)) ([2005c03](https://github.com/shaka-project/shaka-player/commit/2005c032267fab591ccbba52edfd94d5877d7322))
+* Fix videoBandwidth when using LCEVC dual track ([#9013](https://github.com/shaka-project/shaka-player/issues/9013)) ([5159814](https://github.com/shaka-project/shaka-player/commit/51598149125e0443177177eb57624b1cb336f7be))
+* Fix WebVTT position handling in UITextDisplayer ([#9017](https://github.com/shaka-project/shaka-player/issues/9017)) ([453694c](https://github.com/shaka-project/shaka-player/commit/453694cdafd3547a657d204ef66c685d6dc7d5cd))
+
 ## [4.15.11](https://github.com/shaka-project/shaka-player/compare/v4.15.10...v4.15.11) (2025-08-21)
 
 
