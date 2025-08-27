@@ -2501,7 +2501,7 @@ shaka.extern.AdvancedAbrConfiguration;
  *   url: string,
  *   includeKeys: !Array<string>,
  *   batchSize: number,
- *   batchTimer: number
+ *   batchTimer: number,
  *   events: !Array<string>,
  *   timeInterval: number,
  * }}

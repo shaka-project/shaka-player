@@ -11,8 +11,8 @@ describe('CmcdBatchingManager', () => {
   let mockRequest;
   /** @type {!jasmine.Spy} */
   let mockDateNow;
-  /** @type {shaka.util.CmcdBatchingManager.PlayerInterface} */
-  let mockPlayerInterface;
+  /** @type {shaka.Player} */
+  let mockPlayer;
   /** @type {shaka.util.CmcdBatchingManager} */
   let batchingManager;
 
@@ -53,12 +53,12 @@ describe('CmcdBatchingManager', () => {
     const mockEngine = /** @type {shaka.net.NetworkingEngine} */ (
       {request: mockRequest});
 
-    mockPlayerInterface =
-      /** @type {shaka.util.CmcdBatchingManager.PlayerInterface} */ ({
+    mockPlayer =
+      /** @type {shaka.Player} */ ({
         getNetworkingEngine: () => mockEngine,
       });
 
-    batchingManager = new CmcdBatchingManager(mockPlayerInterface);
+    batchingManager = new CmcdBatchingManager(mockPlayer);
   });
 
   afterEach(() => {
