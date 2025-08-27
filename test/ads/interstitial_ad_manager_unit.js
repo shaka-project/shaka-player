@@ -781,6 +781,220 @@ describe('Interstitial Ad manager', () => {
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
+
+    it('supports overlay events with L-Shape format', async () => {
+      const metadata = {
+        startTime: 0,
+        endTime: 1,
+        values: [
+          {
+            key: 'X-OVERLAY-ID',
+            data: 'OVERLAY',
+          },
+          {
+            key: 'X-ASSET-URI',
+            data: 'test.m3u8',
+          },
+          {
+            key: 'X-ASSET-MIMETYPE',
+            data: 'application/vnd.apple.mpegurl',
+          },
+          {
+            key: 'X-DEPTH',
+            data: '-1',
+          },
+          {
+            key: 'X-LOOP',
+            data: 'NO',
+          },
+          {
+            key: 'X-VIEWPORT',
+            data: '1920x1080',
+          },
+          {
+            key: 'X-OVERLAY-SIZE',
+            data: '1920x1080',
+          },
+          {
+            key: 'X-OVERLAY-POSITION',
+            data: '0x0',
+          },
+          {
+            key: 'X-SQUEEZECURRENT',
+            data: '0.5',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      expect(onEventSpy).not.toHaveBeenCalled();
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
+      const expectedInterstitial = {
+        id: 'OVERLAY',
+        groupId: null,
+        startTime: 0,
+        endTime: 1,
+        uri: 'test.m3u8',
+        mimeType: 'application/vnd.apple.mpegurl',
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: true,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: false,
+        pre: false,
+        post: false,
+        timelineRange: true,
+        loop: false,
+        overlay: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 0,
+            y: 0,
+          },
+          size: {
+            x: 1920,
+            y: 1080,
+          },
+        },
+        displayOnBackground: true,
+        currentVideo: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 0,
+            y: 0,
+          },
+          size: {
+            x: 960,
+            y: 540,
+          },
+        },
+        background: null,
+        clickThroughUrl: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
+    it('supports overlay events double box format', async () => {
+      const metadata = {
+        startTime: 0,
+        endTime: 1,
+        values: [
+          {
+            key: 'X-OVERLAY-ID',
+            data: 'OVERLAY',
+          },
+          {
+            key: 'X-ASSET-URI',
+            data: 'test.m3u8',
+          },
+          {
+            key: 'X-ASSET-MIMETYPE',
+            data: 'application/vnd.apple.mpegurl',
+          },
+          {
+            key: 'X-DEPTH',
+            data: '-1',
+          },
+          {
+            key: 'X-LOOP',
+            data: 'NO',
+          },
+          {
+            key: 'X-VIEWPORT',
+            data: '1920x1080',
+          },
+          {
+            key: 'X-OVERLAY-SIZE',
+            data: '864x486',
+          },
+          {
+            key: 'X-OVERLAY-POSITION',
+            data: '864x297',
+          },
+          {
+            key: 'X-SQUEEZECURRENT',
+            data: '0.3',
+          },
+          {
+            key: 'X-SQUEEZECURRENT-POSITION',
+            data: '192x378',
+          },
+          {
+            key: 'X-BACKGROUND',
+            data: 'red',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      expect(onEventSpy).not.toHaveBeenCalled();
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
+      const expectedInterstitial = {
+        id: 'OVERLAY',
+        groupId: null,
+        startTime: 0,
+        endTime: 1,
+        uri: 'test.m3u8',
+        mimeType: 'application/vnd.apple.mpegurl',
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: true,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: false,
+        pre: false,
+        post: false,
+        timelineRange: true,
+        loop: false,
+        overlay: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 864,
+            y: 297,
+          },
+          size: {
+            x: 864,
+            y: 486,
+          },
+        },
+        displayOnBackground: true,
+        currentVideo: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 192,
+            y: 378,
+          },
+          size: {
+            x: 576,
+            y: 324,
+          },
+        },
+        background: 'red',
+        clickThroughUrl: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
   });
 
   describe('DASH', () => {

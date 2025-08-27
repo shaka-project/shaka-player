@@ -2502,6 +2502,8 @@ shaka.extern.AdvancedAbrConfiguration;
  *   includeKeys: !Array<string>,
  *   batchSize: number,
  *   batchTimer: number
+ *   events: !Array<string>,
+ *   timeInterval: number,
  * }}
  *
  * @description
@@ -2536,6 +2538,15 @@ shaka.extern.AdvancedAbrConfiguration;
  * Maximum number of CMCD reports to batch before sending
  * @property {number} batchTimer
  * Time interval in seconds to send batched reports.
+ * @property {!Array<string>} events
+ * An array of events to include as part of ps and sta in the CMCD data.
+ * If not provided, all events will be included.
+ * <br>
+ * Defaults to <code>[]</code>.
+ * @property {number} timeInterval
+ *   Time Interval config in seconds
+ *   <br>
+ *   Defaults to <code>10</code>.
  * @exportDoc
  */
 shaka.extern.CmcdTarget;
@@ -2590,6 +2601,9 @@ shaka.extern.CmcdTarget;
  *   Defaults to <code>[]</code>.
  * @property {number} version
  *   The CMCD version.
+ *   CMCD version 1 is fully supported. CMCD version 2 is an unfinished,
+ *   work-in-progress draft, with features being added as the specification
+ *   evolves towards finalization. Use v2 at your own risk.
  *   Valid values are <code>1</code> or <code>2</code>, corresponding to CMCD v1
  *   and CMCD v2 specifications, respectively.
  *   <br>
