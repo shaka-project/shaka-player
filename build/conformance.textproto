@@ -138,6 +138,7 @@ requirement: {
     "function template(a) { new Float64Array(a) }"
   error_message: "Use shaka.util.BufferUtils.view* instead."
   whitelist_regexp: "lib/util/buffer_utils.js"
+  whitelist_regexp: "lib/util/data_view_reader.js"
 }
 
 requirement: {
