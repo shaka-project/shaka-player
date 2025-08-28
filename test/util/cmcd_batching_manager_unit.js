@@ -82,7 +82,7 @@ describe('CmcdBatchingManager', () => {
             method: 'POST',
             body: jasmine.any(ArrayBuffer),
             headers: jasmine.objectContaining({
-              'Content-Type': 'application/cmcd+json',
+              'Content-Type': 'txt/cmcd',
             }),
           }),
       );
@@ -104,7 +104,7 @@ describe('CmcdBatchingManager', () => {
             method: 'POST',
             body: jasmine.any(ArrayBuffer),
             headers: jasmine.objectContaining({
-              'Content-Type': 'application/cmcd+json',
+              'Content-Type': 'txt/cmcd',
             }),
           }),
       );
