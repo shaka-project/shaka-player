@@ -2760,6 +2760,7 @@ shaka.extern.TextDisplayerConfiguration;
  * @typedef {{
  *   ads: shaka.extern.AdsConfiguration,
  *   autoShowText: shaka.config.AutoShowText,
+ *   autoRetryOnLiveHttpError: boolean,
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
  *   streaming: shaka.extern.StreamingConfiguration,
@@ -2804,6 +2805,8 @@ shaka.extern.TextDisplayerConfiguration;
  *   <br>
  *   Defaults to
  *   {@link shaka.config.AutoShowText#IF_SUBTITLES_MAY_BE_NEEDED}.
+ * @property {boolean} autoRetryOnLiveHttpError
+ *   Whether to automatically retry on certain http errors while playing live streams.
  * @property {shaka.extern.DrmConfiguration} drm
  *   DRM configuration and settings.
  * @property {shaka.extern.ManifestConfiguration} manifest
