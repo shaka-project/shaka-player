@@ -2806,7 +2806,7 @@ shaka.extern.TextDisplayerConfiguration;
  *   Defaults to
  *   {@link shaka.config.AutoShowText#IF_SUBTITLES_MAY_BE_NEEDED}.
  * @property {boolean} autoRetryOnLiveHttpError
- *   Whether to automatically retry on certain http errors while playing live streams.
+ *   Whether to automatically retry on certain http errors for live streams.
  * @property {shaka.extern.DrmConfiguration} drm
  *   DRM configuration and settings.
  * @property {shaka.extern.ManifestConfiguration} manifest
