@@ -2500,6 +2500,8 @@ shaka.extern.AdvancedAbrConfiguration;
  *   useHeaders: boolean,
  *   url: string,
  *   includeKeys: !Array<string>,
+ *   batchSize: number,
+ *   batchTimer: number,
  *   events: !Array<string>,
  *   timeInterval: number,
  * }}
@@ -2532,6 +2534,10 @@ shaka.extern.AdvancedAbrConfiguration;
  * If not provided, all keys will be included.
  * <br>
  * Defaults to <code>[]</code>.
+ * @property {number} batchSize
+ * Maximum number of CMCD reports to batch before sending
+ * @property {number} batchTimer
+ * Time interval in seconds to send batched reports.
  * @property {!Array<string>} events
  * An array of events to include as part of ps and sta in the CMCD data.
  * If not provided, all events will be included.
