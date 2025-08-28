@@ -79,6 +79,7 @@ describe('Demo', () => {
     function checkConfig(checkValueNameFn) {
       const configPrimitives = new Set(['number', 'string', 'boolean']);
       const exceptions = new Set()
+          .add('autoRetryOnLiveHttpError')
           .add('ignoreHardwareResolution')
           .add('playRangeStart')
           .add('playRangeEnd')
