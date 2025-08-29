@@ -48,7 +48,8 @@ shaka.extern.InitDataOverride;
  *   serverCertificateUri: string,
  *   sessionType: string,
  *   initData: Array<!shaka.extern.InitDataOverride>,
- *   keyIds: Set<string>
+ *   keyIds: Set<string>,
+ *   contentType: (!string|undefined)
  * }}
  *
  * @description
@@ -103,6 +104,9 @@ shaka.extern.InitDataOverride;
  *   <i>Defaults to the empty Set</i> <br>
  *   If not empty, contains the default key IDs for this key system, as
  *   lowercase hex strings.
+ * @property {!string=} contentType
+ *   An optional field indicating whether this DrmInfo is associated with a
+ *   particular content type (e.g., audio, video).
  * @exportDoc
  */
 shaka.extern.DrmInfo;
