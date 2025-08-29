@@ -432,6 +432,10 @@ shakaDemo.Main = class {
     this.player_.configure(
         'manifest.dash.clockSyncUri', 'https://time.akamai.com/?ms&iso');
 
+    this.player_.configure({
+      autoRetryOnLiveHttpError: true
+    });
+
     // Get default config.
     this.defaultConfig_ = this.player_.getConfiguration();
     this.desiredConfig_ = this.player_.getConfiguration();
