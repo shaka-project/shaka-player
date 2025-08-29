@@ -2800,7 +2800,7 @@ shaka.extern.TextDisplayerConfiguration;
  *
  * @property {shaka.extern.AdsConfiguration} ads
  *   Ads configuration and settings.
- * @property {boolean} autoRetryOnLiveHttpError
+ * @property {?boolean} autoRetryOnLiveHttpError
  *   Whether to automatically retry on certain http errors for live streams.
  * @property {shaka.config.AutoShowText} autoShowText
  *   Controls behavior of auto-showing text tracks on load().
