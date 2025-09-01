@@ -21,7 +21,6 @@ goog.require('shakaDemo.VisualizerButton');
  * configuration, etc).
  */
 shakaDemo.Main = class {
-  /** */
   constructor() {
     /** @private {HTMLVideoElement} */
     this.video_ = null;
@@ -790,11 +789,11 @@ shakaDemo.Main = class {
     }
     if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P8_1)) {
       mimeTypes.push('video/mp4; codecs="hvc1.2.4.L120.b0"');
-      mimeTypes.push('video/mp4; codecs="dvh1.08.03"');
+      mimeTypes.push('video/mp4; codecs="dvh1.08.01"');
     }
     if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P8_4)) {
       mimeTypes.push('video/mp4; codecs="hvc1.2.4.L123.b0"');
-      mimeTypes.push('video/mp4; codecs="dvh1.08.03"');
+      mimeTypes.push('video/mp4; codecs="dvh1.08.01"');
     }
     if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P5)) {
       mimeTypes.push('video/mp4; codecs="dvh1.05.01"');
@@ -936,44 +935,8 @@ shakaDemo.Main = class {
   getLastAssetFromHash_() {
     const params = this.getParams_();
 
-    const manifest = params.get('asset');
     const assetBase64 = params.get('assetBase64');
-    if (manifest) {
-      const adTagUri = params.get('adTagUri');
-      // See if it's a default asset.
-      for (const asset of shakaAssets.testAssets) {
-        if (asset.manifestUri == manifest && asset.adTagUri == adTagUri) {
-          return asset;
-        }
-      }
-
-      // See if it's a custom asset saved here.
-      for (const asset of shakaDemoCustom.assets()) {
-        if (asset.manifestUri == manifest) {
-          return asset;
-        }
-      }
-
-      // Construct a new asset.
-      const asset = new ShakaDemoAssetInfo(
-          /* name= */ 'loaded asset',
-          /* iconUri= */ '',
-          /* manifestUri= */ manifest,
-          /* source= */ shakaAssets.Source.CUSTOM);
-      if (params.has('license')) {
-        let drmSystems = shakaDemo.Main.commonDrmSystems;
-        if (params.has('drmSystem')) {
-          drmSystems = [params.get('drmSystem')];
-        }
-        for (const drmSystem of drmSystems) {
-          asset.addLicenseServer(drmSystem, params.get('license'));
-        }
-      }
-      if (params.has('certificate')) {
-        asset.addCertificateUri(params.get('certificate'));
-      }
-      return asset;
-    } else if (assetBase64) {
+    if (assetBase64) {
       // See if it's a default asset.
       for (const asset of shakaAssets.testAssets) {
         if (asset.toBase64() == assetBase64) {
@@ -1280,19 +1243,6 @@ shakaDemo.Main = class {
     this.hideElement_(videoBar);
     this.video_.poster = shakaDemo.Main.mainPoster_;
 
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
-    if (this.video_.webkitDisplayingFullscreen) {
-      this.video_.webkitExitFullscreen();
-    }
-    if (document.pictureInPictureElement) {
-      document.exitPictureInPicture();
-    }
-    if (window.documentPictureInPicture &&
-        window.documentPictureInPicture.window) {
-      window.documentPictureInPicture.window.close();
-    }
     this.player_.unload();
 
     const queueManager = this.player_.getQueueManager();
@@ -1433,6 +1383,9 @@ shakaDemo.Main = class {
         ui.configure(uiConfig);
       }
 
+      const queueManager = this.player_.getQueueManager();
+      await queueManager.removeAllItems();
+
       if (asset.hasAds()) {
         // The player internally, if another stream is loaded, calls
         // adManager.onAssetUnload and this would prevent the initial preloading
@@ -1475,38 +1428,12 @@ shakaDemo.Main = class {
         }
       }
 
-      const queueManager = this.player_.getQueueManager();
-      await queueManager.removeAllItems();
-
       // Finally, the asset can be loaded.
-      if (asset.preloadManager) {
-        const preloadManager = asset.preloadManager;
-        asset.preloadManager = null;
-        await this.player_.load(preloadManager);
+      const queueItem = await this.getQueueItem_(asset);
+      queueManager.insertItems([queueItem]);
+      await queueManager.playItem(0);
 
-        if (!(asset.storedContent && asset.storedContent.offlineUri)) {
-          for (const extraText of asset.extraText) {
-            if (extraText.mime) {
-              this.player_.addTextTrackAsync(extraText.uri, extraText.language,
-                  extraText.kind, extraText.mime, extraText.codecs);
-            } else {
-              this.player_.addTextTrackAsync(extraText.uri, extraText.language,
-                  extraText.kind);
-            }
-          }
-          for (const extraThumbnail of asset.extraThumbnail) {
-            this.player_.addThumbnailsTrack(extraThumbnail);
-          }
-        }
-        for (const extraChapter of asset.extraChapter) {
-          this.player_.addChaptersTrack(
-              extraChapter.uri, extraChapter.language, extraChapter.mime);
-        }
-      } else {
-        const queueItem = await this.getQueueItem_(asset);
-        queueManager.insertItems([queueItem]);
-        await queueManager.playItem(0);
-      }
+      asset.preloadManager = null;
 
       // Set media session title, but only if the browser supports that API.
       if (navigator.mediaSession) {
@@ -1567,6 +1494,7 @@ shakaDemo.Main = class {
     /** @type {shaka.extern.QueueItem} */
     const queueItem = {
       manifestUri: manifestUri,
+      preloadManager: asset.preloadManager,
       startTime: null,
       mimeType: mimeType,
       config: itemConfig,

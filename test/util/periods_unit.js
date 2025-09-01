@@ -1041,39 +1041,6 @@ describe('PeriodCombiner', () => {
     expect(audio.originalId).toBe('44100,48000');
   });
 
-  it('ignores newly added codecs', async () => {
-    const newCodec = makeVideoStream(720);
-    newCodec.codecs = 'foo.abcd';
-
-    /** @type {!Array<shaka.extern.Period>} */
-    const periods = [
-      {
-        id: '1',
-        videoStreams: [
-          makeVideoStream(1080),
-        ],
-        audioStreams: [],
-        textStreams: [],
-        imageStreams: [],
-      },
-      {
-        id: '2',
-        videoStreams: [
-          makeVideoStream(1080),
-          newCodec,
-        ],
-        audioStreams: [],
-        textStreams: [],
-        imageStreams: [],
-      },
-    ];
-
-    await combiner.combinePeriods(periods, /* isDynamic= */ false);
-    const variants = combiner.getVariants();
-    expect(variants.length).toBe(1);
-  });
-
-
   it('Matches streams with no roles', async () => {
     const stream1 = makeAudioStream('en', /* channels= */ 2);
     stream1.originalId = '1';
@@ -1847,6 +1814,48 @@ describe('PeriodCombiner', () => {
     await combiner.combinePeriods(periods, /* isDynamic= */ true);
     const variantsAfterAllPeriods = combiner.getVariants();
     expect(variantsAfter4Periods).toEqual(variantsAfterAllPeriods);
+  });
+
+  it('prefers matching by profile', async () => {
+    const videoStream1 = makeVideoStream(1080);
+    videoStream1.codecs = 'avc1.640028';
+    videoStream1.bandwidth = 5500000;
+    videoStream1.originalId = 'V1';
+    const videoStream2 = makeVideoStream(1080);
+    videoStream2.codecs = 'avc1.4d4028';
+    videoStream2.bandwidth = 4500000;
+    videoStream2.originalId = 'V2';
+    const videoStream3 = makeVideoStream(1080);
+    videoStream3.codecs = 'avc1.640028';
+    videoStream3.bandwidth = 6263174;
+    videoStream3.originalId = 'V3';
+    const videoStream4 = makeVideoStream(1080);
+    videoStream4.codecs = 'avc1.4d4028';
+    videoStream4.bandwidth = 4864350;
+    videoStream4.originalId = 'V4';
+    const periods = [
+      {
+        id: '0',
+        videoStreams: [videoStream1, videoStream2],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '1',
+        videoStreams: [videoStream3, videoStream4],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ false);
+
+    const variants = combiner.getVariants();
+    expect(variants.length).toBe(2);
+    expect(variants[0].video.originalId).toBe('V1,V3');
+    expect(variants[1].video.originalId).toBe('V2,V4');
   });
 
   it('creates 4k content streams with a pre-roll 1080p ad', async () => {

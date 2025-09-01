@@ -253,6 +253,7 @@ shaka.ui.Overlay = class {
   defaultConfig_() {
     const controlPanelElements = [
       'play_pause',
+      'skip_previous',
       'skip_next',
       'mute',
       'volume',
@@ -283,7 +284,6 @@ shaka.ui.Overlay = class {
         'playback_rate',
         'recenter_vr',
         'toggle_stereoscopic',
-        'save_video_frame',
       ],
       statisticsList: [
         'width',
@@ -397,6 +397,7 @@ shaka.ui.Overlay = class {
       config.forceLandscapeOnFullscreen = true;
       const filterElements = [
         'play_pause',
+        'skip_previous',
         'skip_next',
         'volume',
       ];

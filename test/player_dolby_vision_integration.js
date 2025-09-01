@@ -76,73 +76,55 @@ describe('Player Dolby Vision', () => {
     await player.unload();
   }
 
-  describe('P8 with fallback to HEVC', () => {
+  describe('P8.1 with fallback to HEVC', () => {
     it('with DASH', async () => {
-      // This tests is flaky in Safari, so we need omit it for now.
-      if (deviceDetected.getBrowserEngine() ===
-          shaka.device.IDevice.BrowserEngine.WEBKIT) {
-        pending('Disabled on Safari.');
-      }
-      if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.90"',
-          /* width= */ 640, /* height= */ 360)) {
+      if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.b0"',
+          /* width= */ 854, /* height= */ 480)) {
         pending('Codec HEVC is not supported by the platform.');
       }
-      await testPlayback('/base/test/test/assets/dv-p8-hevc/manifest.mpd');
+      await testPlayback('/base/test/test/assets/dv-p8-1-hevc/manifest.mpd');
     });
 
     it('with master playlist (HLS)', async () => {
-      // This tests is flaky in Safari, so we need omit it for now.
-      if (deviceDetected.getBrowserEngine() ===
-          shaka.device.IDevice.BrowserEngine.WEBKIT) {
-        pending('Disabled on Safari.');
-      }
-      if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.90"',
-          /* width= */ 640, /* height= */ 360)) {
+      if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.b0"',
+          /* width= */ 854, /* height= */ 480)) {
         pending('Codec HEVC is not supported by the platform.');
       }
-      await testPlayback('/base/test/test/assets/dv-p8-hevc/master.m3u8');
+      await testPlayback('/base/test/test/assets/dv-p8-1-hevc/master.m3u8');
     });
 
     it('with media playlist (HLS)', async () => {
-      // This tests is flaky in Safari, so we need omit it for now.
-      if (deviceDetected.getBrowserEngine() ===
-          shaka.device.IDevice.BrowserEngine.WEBKIT) {
-        pending('Disabled on Safari.');
-      }
-      if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.90"',
-          /* width= */ 640, /* height= */ 360)) {
+      if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.b0"',
+          /* width= */ 854, /* height= */ 480)) {
         pending('Codec HEVC is not supported by the platform.');
       }
-      await testPlayback('/base/test/test/assets/dv-p8-hevc/media.m3u8');
+      await testPlayback('/base/test/test/assets/dv-p8-1-hevc/media.m3u8');
     });
   });
 
-  describe('P10 with fallback to AV1', () => {
+  describe('P8.4 with fallback to HEVC', () => {
     it('with DASH', async () => {
-      if (!await Util.isTypeSupported(
-          'video/mp4; codecs="av01.0.04M.10.0.111.09.16.09.0"',
-          /* width= */ 640, /* height= */ 360)) {
-        pending('Codec AV1 is not supported by the platform.');
+      if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.b0"',
+          /* width= */ 854, /* height= */ 480)) {
+        pending('Codec HEVC is not supported by the platform.');
       }
-      await testPlayback('/base/test/test/assets/dv-p10-av1/manifest.mpd');
+      await testPlayback('/base/test/test/assets/dv-p8-4-hevc/manifest.mpd');
     });
 
     it('with master playlist (HLS)', async () => {
-      if (!await Util.isTypeSupported(
-          'video/mp4; codecs="av01.0.04M.10.0.111.09.16.09.0"',
-          /* width= */ 640, /* height= */ 360)) {
-        pending('Codec AV1 is not supported by the platform.');
+      if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.b0"',
+          /* width= */ 854, /* height= */ 480)) {
+        pending('Codec HEVC is not supported by the platform.');
       }
-      await testPlayback('/base/test/test/assets/dv-p10-av1/master.m3u8');
+      await testPlayback('/base/test/test/assets/dv-p8-4-hevc/master.m3u8');
     });
 
     it('with media playlist (HLS)', async () => {
-      if (!await Util.isTypeSupported(
-          'video/mp4; codecs="av01.0.04M.10.0.111.09.16.09.0"',
-          /* width= */ 640, /* height= */ 360)) {
-        pending('Codec AV1 is not supported by the platform.');
+      if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L90.b0"',
+          /* width= */ 854, /* height= */ 480)) {
+        pending('Codec HEVC is not supported by the platform.');
       }
-      await testPlayback('/base/test/test/assets/dv-p10-av1/media.m3u8');
+      await testPlayback('/base/test/test/assets/dv-p8-4-hevc/media.m3u8');
     });
   });
 });

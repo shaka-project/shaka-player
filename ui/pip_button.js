@@ -13,6 +13,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -44,11 +45,9 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     this.pipButton_.classList.add('shaka-pip-button');
     this.pipButton_.classList.add('shaka-tooltip');
 
-    /** @private {!HTMLElement} */
-    this.pipIcon_ = shaka.util.Dom.createHTMLElement('i');
-    this.pipIcon_.classList.add('material-icons-round');
-    this.pipIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.PIP;
-    this.pipButton_.appendChild(this.pipIcon_);
+    /** @private {!shaka.ui.MaterialSVGIcon} */
+    this.pipIcon_ = new shaka.ui.MaterialSVGIcon(this.pipButton_,
+        shaka.ui.Enums.MaterialDesignSVGIcons.PIP);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -127,7 +126,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
   /** @private */
   onEnterPictureInPicture_() {
     const LocIds = shaka.ui.Locales.Ids;
-    this.pipIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.EXIT_PIP;
+    this.pipIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.EXIT_PIP);
     this.pipButton_.ariaLabel =
         this.localization.resolve(LocIds.EXIT_PICTURE_IN_PICTURE);
     this.currentPipState_.textContent =
@@ -138,7 +137,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
   /** @private */
   onLeavePictureInPicture_() {
     const LocIds = shaka.ui.Locales.Ids;
-    this.pipIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.PIP;
+    this.pipIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.PIP);
     this.pipButton_.ariaLabel =
         this.localization.resolve(LocIds.ENTER_PICTURE_IN_PICTURE);
     this.currentPipState_.textContent =

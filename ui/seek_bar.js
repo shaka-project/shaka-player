@@ -627,7 +627,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
                 .box('mdat', shaka.util.Mp4Parser.allData((data) => {
                   const blob = new Blob([data], {type: 'image/jpeg'});
                   uri = URL.createObjectURL(blob);
-                }));
+                  // Free up the rest of the segment and just clone the mdat.
+                }, /* clone= */ true));
             parser.parse(response.data, /* partialOkay= */ false);
           } else {
             const mimeType = thumbnail.mimeType || 'image/jpeg';

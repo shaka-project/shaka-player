@@ -131,6 +131,7 @@ lessc
 lintstamp
 metadatas
 multimap
+multitype
 myapp
 nodrm
 nondisplayed
@@ -468,6 +469,7 @@ KEYID
 QUERYPARAM
 streamingkeydelivery
 TARGETDURATION
+SQUEEZECURRENT
 
 # CMCD
 ttfb
@@ -475,6 +477,7 @@ ttfbb
 ttlb
 cmsdd
 cmsds
+cdnb
 
 # other
 autoglottonym

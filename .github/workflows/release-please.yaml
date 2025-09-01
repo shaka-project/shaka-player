@@ -70,6 +70,11 @@ jobs:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
       - name: Compute NPM tags
         run: |
           # NPM publish always sets a tag.  If you don't provide an explicit
@@ -142,6 +147,11 @@ jobs:
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
 
       - name: Compute appspot subdomain and promotion
         run: |

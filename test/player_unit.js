@@ -1119,7 +1119,6 @@ describe('Player', () => {
 
       newConfig = player.getConfiguration();
       expect(newConfig.streaming.failureCallback).not.toBe(badFailureCallback2);
-      expect(logWarnSpy).not.toHaveBeenCalled();
     });
 
     // Regression test for https://github.com/shaka-project/shaka-player/issues/784
@@ -1352,6 +1351,130 @@ describe('Player', () => {
       const barConfig2 = player.getConfiguration().drm.advanced['bar'];
       expect(fooConfig2.distinctiveIdentifierRequired).toBe(true);
       expect(barConfig2.distinctiveIdentifierRequired).toBe(false);
+    });
+
+    it('allow update preferredVideoHdrLevel on the fly', async () => {
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(true);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.hdr = 'SDR';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3, (stream) => {
+            stream.hdr = 'PQ';
+          });
+        });
+      });
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      player.configure('preferredVideoHdrLevel', 'SDR');
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      streamingEngine.switchVariant.calls.reset();
+
+      // Change the configuration after the playback starts.
+      player.configure('preferredVideoHdrLevel', 'PQ');
+
+      // Delay to ensure that the switch would have been called.
+      await shaka.test.Util.shortDelay();
+
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
+    });
+
+    it('allow update preferredVideoLayout on the fly', async () => {
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(true);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.videoLayout = 'CH-STEREO';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3, (stream) => {
+            stream.videoLayout = 'CH-MONO';
+          });
+        });
+      });
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      player.configure('preferredVideoLayout', 'CH-STEREO');
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      streamingEngine.switchVariant.calls.reset();
+
+      // Change the configuration after the playback starts.
+      player.configure('preferredVideoLayout', 'CH-MONO');
+
+      // Delay to ensure that the switch would have been called.
+      await shaka.test.Util.shortDelay();
+
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
+    });
+
+    it('allow update preferSpatialAudio on the fly', async () => {
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(true);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addAudio(1, (stream) => {
+            stream.spatialAudio = false;
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addAudio(3, (stream) => {
+            stream.spatialAudio = true;
+          });
+        });
+      });
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      player.configure('preferSpatialAudio', false);
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      streamingEngine.switchVariant.calls.reset();
+
+      // Change the configuration after the playback starts.
+      player.configure('preferSpatialAudio', true);
+
+      // Delay to ensure that the switch would have been called.
+      await shaka.test.Util.shortDelay();
+
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
+    });
+
+    it('allow update preferredVideoRole on the fly', async () => {
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(true);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.roles = ['main'];
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3, (stream) => {
+            stream.roles = ['sign'];
+          });
+        });
+      });
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      player.configure('preferredVideoRole', 'main');
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      streamingEngine.switchVariant.calls.reset();
+
+      // Change the configuration after the playback starts.
+      player.configure('preferredVideoRole', 'sign');
+
+      // Delay to ensure that the switch would have been called.
+      await shaka.test.Util.shortDelay();
+
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
     });
   });
 
@@ -1685,12 +1808,13 @@ describe('Player', () => {
       variantTracks = [
         {
           id: 100,
-          active: true,
+          active: false,
           type: 'variant',
           bandwidth: 1300,
           language: 'en',
           originalLanguage: 'en',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 100,
           height: 200,
@@ -1708,6 +1832,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          videoRoles: ['main'],
           forced: false,
           videoId: 1,
           audioId: 3,
@@ -1726,12 +1851,13 @@ describe('Player', () => {
         },
         {
           id: 101,
-          active: false,
+          active: true,
           type: 'variant',
           bandwidth: 2300,
           language: 'en',
           originalLanguage: 'en',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 200,
           height: 400,
@@ -1749,6 +1875,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          videoRoles: [],
           forced: false,
           videoId: 2,
           audioId: 3,
@@ -1773,6 +1900,7 @@ describe('Player', () => {
           language: 'en',
           originalLanguage: 'en',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 100,
           height: 200,
@@ -1790,6 +1918,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          videoRoles: ['main'],
           forced: false,
           videoId: 1,
           audioId: 4,
@@ -1814,6 +1943,7 @@ describe('Player', () => {
           language: 'en',
           originalLanguage: 'en',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 200,
           height: 400,
@@ -1831,6 +1961,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          videoRoles: [],
           forced: false,
           videoId: 2,
           audioId: 4,
@@ -1855,6 +1986,7 @@ describe('Player', () => {
           language: 'en',
           originalLanguage: 'en',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 100,
           height: 200,
@@ -1872,6 +2004,7 @@ describe('Player', () => {
           primary: false,
           roles: ['commentary', 'main'],
           audioRoles: ['commentary'],
+          videoRoles: ['main'],
           forced: false,
           videoId: 1,
           audioId: 5,
@@ -1896,6 +2029,7 @@ describe('Player', () => {
           language: 'en',
           originalLanguage: 'en',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 200,
           height: 400,
@@ -1913,6 +2047,7 @@ describe('Player', () => {
           primary: false,
           roles: ['commentary'],
           audioRoles: ['commentary'],
+          videoRoles: [],
           forced: false,
           videoId: 2,
           audioId: 5,
@@ -1936,6 +2071,7 @@ describe('Player', () => {
           bandwidth: 1100,
           language: 'es',
           label: 'es-label',
+          videoLabel: null,
           originalLanguage: 'es',
           kind: null,
           width: 100,
@@ -1954,6 +2090,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: [],
+          videoRoles: ['main'],
           forced: false,
           videoId: 1,
           audioId: 6,
@@ -1977,6 +2114,7 @@ describe('Player', () => {
           bandwidth: 2100,
           language: 'es',
           label: 'es-label',
+          videoLabel: null,
           originalLanguage: 'es',
           kind: null,
           width: 200,
@@ -1995,6 +2133,7 @@ describe('Player', () => {
           primary: false,
           roles: [],
           audioRoles: [],
+          videoRoles: [],
           forced: false,
           videoId: 2,
           audioId: 6,
@@ -2019,6 +2158,7 @@ describe('Player', () => {
           language: 'es',
           originalLanguage: 'es',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 100,
           height: 200,
@@ -2036,6 +2176,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: [],
+          videoRoles: ['main'],
           forced: false,
           videoId: 1,
           audioId: 7,
@@ -2060,6 +2201,7 @@ describe('Player', () => {
           language: 'es',
           originalLanguage: 'es',
           label: null,
+          videoLabel: null,
           kind: null,
           width: 200,
           height: 400,
@@ -2077,6 +2219,7 @@ describe('Player', () => {
           primary: false,
           roles: [],
           audioRoles: [],
+          videoRoles: [],
           forced: false,
           videoId: 2,
           audioId: 7,
@@ -2170,7 +2313,7 @@ describe('Player', () => {
 
       videoTracks = [
         {
-          active: true,
+          active: false,
           bandwidth: 1000,
           width: 100,
           height: 200,
@@ -2181,9 +2324,11 @@ describe('Player', () => {
           videoLayout: null,
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f',
+          roles: ['main'],
+          label: null,
         },
         {
-          active: false,
+          active: true,
           bandwidth: 2000,
           width: 200,
           height: 400,
@@ -2194,6 +2339,8 @@ describe('Player', () => {
           videoLayout: null,
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f',
+          roles: [],
+          label: null,
         },
       ];
 
@@ -2411,10 +2558,11 @@ describe('Player', () => {
 
     it('selectAudioLanguage() applies role only to audio', () => {
       expect(getActiveVariantTrack().roles).not.toContain('commentary');
+      const videoRoles = getActiveVariantTrack().videoRoles;
       player.selectAudioLanguage('en', 'commentary');
       let args = streamingEngine.switchVariant.calls.argsFor(0);
       expect(args[0].audio.roles).toContain('commentary');
-      expect(args[0].video.roles).toContain('main');
+      expect(args[0].video.roles).toBe(videoRoles);
 
       // Switch audio role from 'commentary' to 'main'.
       streamingEngine.switchVariant.calls.reset();
@@ -2422,7 +2570,7 @@ describe('Player', () => {
       expect(streamingEngine.switchVariant).toHaveBeenCalled();
       args = streamingEngine.switchVariant.calls.argsFor(0);
       expect(args[0].audio.roles).toContain('main');
-      expect(args[0].video.roles).toContain('main');
+      expect(args[0].video.roles).toBe(videoRoles);
     });
 
     it('selectAudioLanguage() does not change selected text track', () => {
@@ -4157,7 +4305,8 @@ describe('Player', () => {
 
       await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(abrManager.setVariants).toHaveBeenCalled();
-      const variants = abrManager.setVariants.calls.argsFor(0)[0];
+      const lastCallIndex = abrManager.setVariants.calls.count() - 1;
+      const variants = abrManager.setVariants.calls.argsFor(lastCallIndex)[0];
       // We've already chosen codecs, so only 3 tracks should remain.
       expect(variants.length).toBe(3);
       // They should be the low-bandwidth ones.

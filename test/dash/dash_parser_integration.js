@@ -99,4 +99,26 @@ describe('DashParser', () => {
 
     await player.unload();
   });
+
+  it('support multi type variants', async () => {
+    const DeviceType = shaka.device.IDevice.DeviceType;
+    if (deviceDetected.getDeviceType() === DeviceType.TV &&
+            deviceDetected.getDeviceName() === 'Tizen') {
+      pending('Disabled on Tizen.');
+    }
+    const BrowserEngine = shaka.device.IDevice.BrowserEngine;
+    if (deviceDetected.getBrowserEngine() === BrowserEngine.WEBKIT) {
+      pending('Disabled on Safari.');
+    }
+    if (!await Util.isTypeSupported('video/webm; codecs="vp9"')) {
+      pending('Codec VP9 is not supported by the platform.');
+    }
+    await player.load('/base/test/test/assets/dash-multitype-variant/dash.mpd');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    await waiter.timeoutAfter(30).waitForEnd(video);
+
+    await player.unload();
+  });
 });

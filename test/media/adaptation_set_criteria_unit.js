@@ -23,6 +23,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'en',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -60,6 +61,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'en',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -122,6 +124,7 @@ describe('AdaptationSetCriteria', () => {
         builder.configure({
           language: 'en',
           role: '',
+          videoRole: '',
           channelCount: 0,
           hdrLevel: '',
           spatialAudio: false,
@@ -177,6 +180,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'en',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -221,6 +225,46 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'en',
         role: 'main',
+        videoRole: '',
+        channelCount: 0,
+        hdrLevel: '',
+        spatialAudio: false,
+        videoLayout: '',
+        audioLabel: '',
+        videoLabel: '',
+        codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
+        audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
+      });
+      const set = builder.create(manifest.variants);
+
+      checkSet(set, [
+        manifest.variants[0],
+      ]);
+    });
+
+    it('chooses variants in preferred video role', () => {
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(10, (stream) => {
+            stream.roles = ['sign'];
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(20, (stream) => {
+            stream.roles = ['main'];
+          });
+        });
+      });
+
+      const builder = new shaka.media.PreferenceBasedCriteria();
+      builder.configure({
+        language: 'en',
+        role: 'main',
+        videoRole: 'sign',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -286,6 +330,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'en',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -360,6 +405,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'zh',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -412,6 +458,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'zh',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -484,6 +531,7 @@ describe('AdaptationSetCriteria', () => {
           builder.configure({
             language: 'zh',
             role: '',
+            videoRole: '',
             channelCount: 0,
             hdrLevel: '',
             spatialAudio: false,
@@ -557,6 +605,7 @@ describe('AdaptationSetCriteria', () => {
           builder.configure({
             language: 'zh',
             role: '',
+            videoRole: '',
             channelCount: 0,
             hdrLevel: '',
             spatialAudio: false,
@@ -601,6 +650,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: '',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: 'PQ',
         spatialAudio: false,
@@ -645,6 +695,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: '',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -689,6 +740,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: '',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -732,6 +784,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: '',
         role: '',
+        videoRole: '',
         channelCount: 2,
         hdrLevel: '',
         spatialAudio: false,
@@ -782,6 +835,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: '',
         role: '',
+        videoRole: '',
         channelCount: 6,
         hdrLevel: '',
         spatialAudio: false,
@@ -827,6 +881,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: '',
         role: '',
+        videoRole: '',
         channelCount: 2,
         hdrLevel: '',
         spatialAudio: false,
@@ -872,6 +927,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: '',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -917,6 +973,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: '',
         role: '',
+        videoRole: '',
         channelCount: 6,
         hdrLevel: '',
         spatialAudio: false,
@@ -961,6 +1018,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: '',
         role: '',
+        videoRole: '',
         channelCount: 6,
         hdrLevel: '',
         spatialAudio: false,
@@ -1004,6 +1062,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: '',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -1043,6 +1102,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: '',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: true,
@@ -1081,6 +1141,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: '',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -1137,6 +1198,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'zh',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -1181,6 +1243,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: '',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -1231,6 +1294,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'en',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -1270,6 +1334,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'en',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -1308,6 +1373,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'en',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -1346,6 +1412,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'en',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -1385,6 +1452,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'en',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -1424,6 +1492,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'en',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -1463,6 +1532,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'en',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,
@@ -1502,6 +1572,7 @@ describe('AdaptationSetCriteria', () => {
       builder.configure({
         language: 'en',
         role: '',
+        videoRole: '',
         channelCount: 0,
         hdrLevel: '',
         spatialAudio: false,

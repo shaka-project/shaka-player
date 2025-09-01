@@ -355,6 +355,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -409,6 +410,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -459,6 +461,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -509,6 +512,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -559,6 +563,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -609,6 +614,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -659,6 +665,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -709,6 +716,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -769,6 +777,221 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
+        clickThroughUrl: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
+    it('supports overlay events with L-Shape format', async () => {
+      const metadata = {
+        startTime: 0,
+        endTime: 1,
+        values: [
+          {
+            key: 'X-OVERLAY-ID',
+            data: 'OVERLAY',
+          },
+          {
+            key: 'X-ASSET-URI',
+            data: 'test.m3u8',
+          },
+          {
+            key: 'X-ASSET-MIMETYPE',
+            data: 'application/vnd.apple.mpegurl',
+          },
+          {
+            key: 'X-DEPTH',
+            data: '-1',
+          },
+          {
+            key: 'X-LOOP',
+            data: 'NO',
+          },
+          {
+            key: 'X-VIEWPORT',
+            data: '1920x1080',
+          },
+          {
+            key: 'X-OVERLAY-SIZE',
+            data: '1920x1080',
+          },
+          {
+            key: 'X-OVERLAY-POSITION',
+            data: '0x0',
+          },
+          {
+            key: 'X-SQUEEZECURRENT',
+            data: '0.5',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      expect(onEventSpy).not.toHaveBeenCalled();
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
+      const expectedInterstitial = {
+        id: 'OVERLAY',
+        groupId: null,
+        startTime: 0,
+        endTime: 1,
+        uri: 'test.m3u8',
+        mimeType: 'application/vnd.apple.mpegurl',
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: true,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: false,
+        pre: false,
+        post: false,
+        timelineRange: true,
+        loop: false,
+        overlay: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 0,
+            y: 0,
+          },
+          size: {
+            x: 1920,
+            y: 1080,
+          },
+        },
+        displayOnBackground: true,
+        currentVideo: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 0,
+            y: 0,
+          },
+          size: {
+            x: 960,
+            y: 540,
+          },
+        },
+        background: null,
+        clickThroughUrl: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
+    it('supports overlay events double box format', async () => {
+      const metadata = {
+        startTime: 0,
+        endTime: 1,
+        values: [
+          {
+            key: 'X-OVERLAY-ID',
+            data: 'OVERLAY',
+          },
+          {
+            key: 'X-ASSET-URI',
+            data: 'test.m3u8',
+          },
+          {
+            key: 'X-ASSET-MIMETYPE',
+            data: 'application/vnd.apple.mpegurl',
+          },
+          {
+            key: 'X-DEPTH',
+            data: '-1',
+          },
+          {
+            key: 'X-LOOP',
+            data: 'NO',
+          },
+          {
+            key: 'X-VIEWPORT',
+            data: '1920x1080',
+          },
+          {
+            key: 'X-OVERLAY-SIZE',
+            data: '864x486',
+          },
+          {
+            key: 'X-OVERLAY-POSITION',
+            data: '864x297',
+          },
+          {
+            key: 'X-SQUEEZECURRENT',
+            data: '0.3',
+          },
+          {
+            key: 'X-SQUEEZECURRENT-POSITION',
+            data: '192x378',
+          },
+          {
+            key: 'X-BACKGROUND',
+            data: 'red',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      expect(onEventSpy).not.toHaveBeenCalled();
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
+      const expectedInterstitial = {
+        id: 'OVERLAY',
+        groupId: null,
+        startTime: 0,
+        endTime: 1,
+        uri: 'test.m3u8',
+        mimeType: 'application/vnd.apple.mpegurl',
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: true,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: false,
+        pre: false,
+        post: false,
+        timelineRange: true,
+        loop: false,
+        overlay: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 864,
+            y: 297,
+          },
+          size: {
+            x: 864,
+            y: 486,
+          },
+        },
+        displayOnBackground: true,
+        currentVideo: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 192,
+            y: 378,
+          },
+          size: {
+            x: 576,
+            y: 324,
+          },
+        },
+        background: 'red',
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -938,6 +1161,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1052,6 +1276,7 @@ describe('Interstitial Ad manager', () => {
           },
         },
         background: null,
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1141,6 +1366,7 @@ describe('Interstitial Ad manager', () => {
           },
         },
         background: 'red',
+        clickThroughUrl: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1171,6 +1397,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
+        clickThroughUrl: null,
       };
       await interstitialAdManager.addInterstitials([interstitial]);
 
@@ -1213,6 +1440,7 @@ describe('Interstitial Ad manager', () => {
           displayOnBackground: false,
           currentVideo: null,
           background: null,
+          clickThroughUrl: null,
         },
         {
           id: null,
@@ -1236,6 +1464,7 @@ describe('Interstitial Ad manager', () => {
           displayOnBackground: false,
           currentVideo: null,
           background: null,
+          clickThroughUrl: null,
         },
       ];
       await interstitialAdManager.addInterstitials(interstitials);
@@ -1282,6 +1511,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
+        clickThroughUrl: null,
       };
       const interstitials = [interstitial, interstitial];
       await interstitialAdManager.addInterstitials(interstitials);
@@ -1325,6 +1555,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
+        clickThroughUrl: null,
       };
       await interstitialAdManager.addInterstitials([interstitial]);
 
@@ -1343,6 +1574,11 @@ describe('Interstitial Ad manager', () => {
         '<Creative id="138381721867" sequence="1">',
         '<Linear>',
         '<Duration>00:00:10</Duration>',
+        '<VideoClicks>',
+        '<ClickThrough id="1">',
+        '<![CDATA[ foo.bar ]]>',
+        '</ClickThrough>',
+        '</VideoClicks>',
         '<MediaFiles>',
         '<MediaFile bitrate="140" delivery="progressive" ',
         'height="360" type="video/mp4" width="640">',
@@ -1373,6 +1609,35 @@ describe('Interstitial Ad manager', () => {
       };
       expect(onEventSpy).toHaveBeenCalledWith(
           jasmine.objectContaining(eventValue1));
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
+      const expectedInterstitial = {
+        id: null,
+        groupId: null,
+        startTime: 0,
+        endTime: null,
+        uri: 'test.mp4',
+        mimeType: 'video/mp4',
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: false,
+        resumeOffset: 0,
+        playoutLimit: null,
+        once: true,
+        pre: true,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: null,
+        displayOnBackground: false,
+        currentVideo: null,
+        background: null,
+        clickThroughUrl: 'foo.bar',
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
     });
 
     it('supports non-linear ads', async () => {
@@ -1388,6 +1653,9 @@ describe('Interstitial Ad manager', () => {
         '<StaticResource creativeType="image/png">',
         '<![CDATA[test.png]]>',
         '</StaticResource>',
+        '<NonLinearClickThrough>',
+        '<![CDATA[foo.bar]]>',
+        '</NonLinearClickThrough>',
         '</NonLinear>',
         '</NonLinearAds>',
         '</Creative>',
@@ -1441,6 +1709,7 @@ describe('Interstitial Ad manager', () => {
         displayOnBackground: false,
         currentVideo: null,
         background: null,
+        clickThroughUrl: 'foo.bar',
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1466,9 +1735,25 @@ describe('Interstitial Ad manager', () => {
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<vmap:VMAP xmlns:vmap="http://www.iab.net/videosuite/vmap"',
         ' version="1.0">',
+        '<vmap:AdBreak timeOffset="start" breakType="linear"',
+        ' breakId="midroll-1">',
+        '<vmap:AdSource id="preroll-ad-1" allowMultipleAds="false"',
+        ' followRedirects="true">',
+        '<vmap:AdTagURI templateType="vast3"><![CDATA[test:/vast]]>',
+        '</vmap:AdTagURI>',
+        '</vmap:AdSource>',
+        '</vmap:AdBreak>',
         '<vmap:AdBreak timeOffset="00:00:15.000" breakType="linear"',
         ' breakId="midroll-1">',
         '<vmap:AdSource id="midroll-1-ad-1" allowMultipleAds="false"',
+        ' followRedirects="true">',
+        '<vmap:AdTagURI templateType="vast3"><![CDATA[test:/vast]]>',
+        '</vmap:AdTagURI>',
+        '</vmap:AdSource>',
+        '</vmap:AdBreak>',
+        '<vmap:AdBreak timeOffset="end" breakType="linear"',
+        ' breakId="midroll-1">',
+        '<vmap:AdSource id="postroll-ad-1" allowMultipleAds="false"',
         ' followRedirects="true">',
         '<vmap:AdTagURI templateType="vast3"><![CDATA[test:/vast]]>',
         '</vmap:AdTagURI>',
@@ -1511,7 +1796,15 @@ describe('Interstitial Ad manager', () => {
         type: 'ad-cue-points-changed',
         cuepoints: [
           {
+            start: 0,
+            end: null,
+          },
+          {
             start: 15,
+            end: null,
+          },
+          {
+            start: -1,
             end: null,
           },
         ],
@@ -1724,6 +2017,7 @@ describe('Interstitial Ad manager', () => {
       displayOnBackground: false,
       currentVideo: null,
       background: null,
+      clickThroughUrl: null,
     };
     await interstitialAdManager.addInterstitials([interstitial]);
 
