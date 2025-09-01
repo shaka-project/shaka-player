@@ -97,6 +97,16 @@
     }
   }
 }
+.shaka-controls-container button:focus,
+.shaka-controls-container input:focus {
+  /* Use an explicit outline color, rather than the browser default.
+   * 2px thick for better visibility vs 1px.
+   * A negative offset so that it sits inside the video frame
+   * instead of overflowing it, since the button itself runs right
+   * up to the edge of the frame. */
+  outline: 2px solid #0073ff;
+  outline-offset: -4px;
+}
 
 /* A container for all canvas for LCEVC decoding
  * Sits inside .shaka-video-container, on top of (Z axis) .shaka-video, and
@@ -379,10 +389,10 @@
   .shrinkable();
   .show-when-controls-shown();
 
-  height: 61px;
+  height: 75px;
 
-  /* A black gradient at the bottom, behind the controls, but only so high. */
-  background: linear-gradient(rgba(0, 0, 0, 0%) 0, rgba(0, 0, 0, 50%) 100%);
+  /* Darken the scrim for better contrast. */
+  background: linear-gradient(rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 1) 100%);
 }
 
 .shaka-text-container {
