@@ -2595,6 +2595,9 @@ shaka.extern.CmcdTarget;
  *   Defaults to <code>[]</code>.
  * @property {number} version
  *   The CMCD version.
+ *   CMCD version 1 is fully supported. CMCD version 2 is an unfinished,
+ *   work-in-progress draft, with features being added as the specification
+ *   evolves towards finalization. Use v2 at your own risk.
  *   Valid values are <code>1</code> or <code>2</code>, corresponding to CMCD v1
  *   and CMCD v2 specifications, respectively.
  *   <br>

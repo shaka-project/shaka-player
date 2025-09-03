@@ -231,7 +231,7 @@ describe('Mp4Parser', () => {
           .box('b001', shaka.util.Mp4Parser.allData(
               (data) => {
                 payload = data;
-              })).parse(boxData);
+              }, /* clone= */ false)).parse(boxData);
 
       expect(payload.length).toBe(4);
       expect(payload[0]).toBe(0x00);
