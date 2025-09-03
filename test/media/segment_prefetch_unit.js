@@ -123,6 +123,21 @@ describe('SegmentPrefetch', () => {
       // this is 6 to account for the init segments,
       // which is not part of the prefetch limit
       expect(fetchDispatcher).toHaveBeenCalledTimes(6);
+
+      // When an evict is made and there are no segments, the init segment
+      // must be kept.
+      segmentPrefetch.evict(1000);
+
+      for (let i = 0; i < 3; i++) {
+        const op = segmentPrefetch.getPrefetchedSegment(references[i]);
+        expect(op).toBeNull();
+      }
+
+      for (let i = 0; i < 3; i++) {
+        const op = segmentPrefetch.getPrefetchedSegment(
+            references[i].initSegmentReference);
+        expect(op).not.toBeNull();
+      }
     });
 
     it('changes fetch direction', async () => {
