@@ -151,7 +151,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     const offButton = shaka.util.Dom.createButton();
     offButton.classList.add('shaka-turn-captions-off-button');
     this.eventManager.listen(offButton, 'click', () => {
-      this.player.setTextTrackVisibility(false);
+      this.player.selectTextTrack(null);
       this.updateTextLanguages_();
     });
 
@@ -186,13 +186,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
    * @private
    */
   async onTextTrackSelected_(track) {
-    // setTextTrackVisibility should be called after selectTextTrack.
-    // selectTextTrack sets a text stream, and setTextTrackVisibility(true)
-    // will set a text stream if it isn't already set. Consequently, reversing
-    // the order of these calls makes two languages display simultaneously
-    // if captions are turned off -> on in a different language.
     this.player.selectTextTrack(track);
-    await this.player.setTextTrackVisibility(true);
 
     // Set text preference for when reloading the stream (e.g. casting), keep
     // this selection.
