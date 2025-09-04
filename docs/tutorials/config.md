@@ -74,7 +74,6 @@ player.getConfiguration();
        durationBackoff: 1
        failureCallback: Function
        ignoreTextStreamFailures: false
-       alwaysStreamText: false
        rebufferingGoal: 0
        retryParameters: Object
        startAtSegmentBoundary: false

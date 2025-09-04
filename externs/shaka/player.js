@@ -1870,7 +1870,6 @@ shaka.extern.LiveSyncConfiguration;
  *   bufferBehind: number,
  *   evictionGoal: number,
  *   ignoreTextStreamFailures: boolean,
- *   alwaysStreamText: boolean,
  *   startAtSegmentBoundary: boolean,
  *   gapDetectionThreshold: number,
  *   gapPadding: number,
@@ -1948,12 +1947,6 @@ shaka.extern.LiveSyncConfiguration;
  *   If <code>true</code>, the player will ignore text stream failures and
  *   continue playing other streams.
  *   <br>
- *   Defaults to <code>false</code>.
- * @property {boolean} alwaysStreamText
- *   If <code>true</code>, always stream text tracks, regardless of whether or
- *   not they are shown.  This is necessary when using the browser's built-in
- *   controls, which are not capable of signaling display state changes back to
- *   Shaka Player.
  *   Defaults to <code>false</code>.
  * @property {boolean} startAtSegmentBoundary
  *   If <code>true</code>, adjust the start time backwards so it is at the start

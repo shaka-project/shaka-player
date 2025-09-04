@@ -3512,10 +3512,12 @@ describe('StreamingEngine', () => {
         return time >= 0 && time < bufferEnd[type];
       });
 
+      const textDisplayer = mediaSourceEngine.getTextDisplayer();
+      textDisplayer.setTextVisibility(true);
+
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
       config.rebufferingGoal = 20;
       config.bufferingGoal = 20;
-      config.alwaysStreamText = true;
       config.ignoreTextStreamFailures = true;
 
       playing = false;

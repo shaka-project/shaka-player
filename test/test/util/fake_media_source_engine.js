@@ -128,11 +128,6 @@ shaka.test.FakeMediaSourceEngine = class {
         jasmine.createSpy('clearSelectedClosedCaptionId');
 
     /** @type {!jasmine.Spy} */
-    this.getTextDisplayer =
-        jasmine.createSpy('getTextDisplayer')
-            .and.returnValue(new shaka.test.FakeTextDisplayer());
-
-    /** @type {!jasmine.Spy} */
     this.setSegmentRelativeVttTiming =
         jasmine.createSpy('setSegmentRelativeVttTiming').and.stub();
 
@@ -151,6 +146,8 @@ shaka.test.FakeMediaSourceEngine = class {
     /** @type {!jasmine.Spy} */
     this.clearLiveSeekableRange =
         jasmine.createSpy('clearLiveSeekableRange').and.stub();
+
+    this.textDisplayer = new shaka.test.FakeTextDisplayer();
   }
 
   /** @override */
@@ -161,6 +158,11 @@ shaka.test.FakeMediaSourceEngine = class {
   /** @override */
   isStreamingAllowed() {
     return true;
+  }
+
+  /** @override */
+  getTextDisplayer() {
+    return this.textDisplayer;
   }
 
   /**
