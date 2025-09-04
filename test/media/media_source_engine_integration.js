@@ -8,7 +8,6 @@
 
 describe('MediaSourceEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
-  const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
   const Cue = shaka.text.Cue;
   const Util = shaka.test.Util;
   const presentationDuration = 840;
@@ -158,10 +157,6 @@ describe('MediaSourceEngine', () => {
   let onMetadata;
   /** @type {!jasmine.Spy} */
   let onEmsg;
-  /** @type {!jasmine.Spy} */
-  let onEvent;
-  /** @type {!jasmine.Spy} */
-  let onManifestUpdate;
 
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
@@ -176,8 +171,6 @@ describe('MediaSourceEngine', () => {
 
     onMetadata = jasmine.createSpy('onMetadata');
     onEmsg = jasmine.createSpy('onEmsg');
-    onEvent = jasmine.createSpy('onEvent');
-    onManifestUpdate = jasmine.createSpy('onManifestUpdate');
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
@@ -187,8 +180,7 @@ describe('MediaSourceEngine', () => {
           getKeySystem: () => null,
           onMetadata: Util.spyFunc(onMetadata),
           onEmsg: Util.spyFunc(onEmsg),
-          onEvent: Util.spyFunc(onEvent),
-          onManifestUpdate: Util.spyFunc(onManifestUpdate),
+          onEvent: () => {},
         },
         config);
 
@@ -740,6 +732,7 @@ describe('MediaSourceEngine', () => {
 
     expect(onMetadata).toHaveBeenCalled();
   });
+<<<<<<< HEAD
 
   describe('embedded emsg boxes', () => {
     // V0 box format
@@ -963,4 +956,6 @@ describe('MediaSourceEngine', () => {
       expect(emsgInfo).toEqual(emsgObj);
     });
   });
+=======
+>>>>>>> parent of cb66f471a (perf: Improve performance when parsing EMSG (#7557))
 });

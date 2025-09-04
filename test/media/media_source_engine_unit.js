@@ -261,9 +261,9 @@ describe('MediaSourceEngine', () => {
           onMetadata: () => {},
           onEmsg: () => {},
           onEvent: () => {},
-          onManifestUpdate: () => {},
         },
         config);
+
     mediaSourceEngine.getCaptionParser = () => {
       return mockClosedCaptionParser;
     };
@@ -338,7 +338,6 @@ describe('MediaSourceEngine', () => {
             onMetadata: () => {},
             onEmsg: () => {},
             onEvent: () => {},
-            onManifestUpdate: () => {},
           },
           config);
 
@@ -365,7 +364,6 @@ describe('MediaSourceEngine', () => {
             onMetadata: () => {},
             onEmsg: () => {},
             onEvent: () => {},
-            onManifestUpdate: () => {},
           },
           config);
 

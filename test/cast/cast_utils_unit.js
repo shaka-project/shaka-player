@@ -233,7 +233,6 @@ describe('CastUtils', () => {
               onMetadata: () => {},
               onEmsg: () => {},
               onEvent: () => {},
-              onManifestUpdate: () => {},
             },
             config);
 

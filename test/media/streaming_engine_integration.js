@@ -67,7 +67,7 @@ describe('StreamingEngine', () => {
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
 
-    const mediaSourceConfig =
+   const mediaSourceConfig =
         shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
@@ -80,6 +80,7 @@ describe('StreamingEngine', () => {
           onManifestUpdate: () => {},
         },
         mediaSourceConfig);
+
     waiter.setMediaSourceEngine(mediaSourceEngine);
   });
 
@@ -270,9 +271,11 @@ describe('StreamingEngine', () => {
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
       onError: Util.spyFunc(onError),
       onEvent: Util.spyFunc(onEvent),
+      onManifestUpdate: () => {},
       onSegmentAppended: () => playhead.notifyOfBufferingChange(),
       onInitSegmentAppended: () => {},
       beforeAppendSegment: () => Promise.resolve(),
+      onMetadata: () => {},
       disableStream: (stream, time) => false,
       shouldPrefetchNextSegment: () => true,
     };

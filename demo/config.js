@@ -543,6 +543,8 @@ shakaDemo.Config = class {
         .addNumberInput_('Update interval seconds',
             'streaming.updateIntervalSeconds',
             /* canBeDecimal= */ true)
+        .addBoolInput_('Dispatch all emsg boxes',
+            'streaming.dispatchAllEmsgBoxes')
         .addBoolInput_('Observe media quality changes',
             'streaming.observeQualityChanges')
         .addNumberInput_('Max Variant Disabled Time',
@@ -727,8 +729,6 @@ shakaDemo.Config = class {
             'mediaSource.codecSwitchingStrategy',
             strategyOptions,
             strategyOptionsNames)
-        .addBoolInput_('Dispatch all emsg boxes',
-            'mediaSource.dispatchAllEmsgBoxes')
         .addBoolInput_('Uses source elements',
             'mediaSource.useSourceElements')
         .addBoolInput_('Expect updateEnd when duration is truncated',

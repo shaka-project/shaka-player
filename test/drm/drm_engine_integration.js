@@ -125,7 +125,6 @@ describe('DrmEngine', () => {
           onMetadata: () => {},
           onEmsg: () => {},
           onEvent: () => {},
-          onManifestUpdate: () => {},
         },
         mediaSourceConfig);
 
