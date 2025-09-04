@@ -117,10 +117,7 @@ shaka.extern.TextParserPlugin;
  * <p>
  * This should only change whether it is displaying the cues through the
  * <code>setTextVisibility</code> function; the app should not change the text
- * visibility outside the top-level Player methods.  If you really want to
- * control text visibility outside the Player methods, you must set the
- * <code>streaming.alwaysStreamText</code> Player configuration value to
- * <code>true</code>.
+ * visibility outside the top-level Player methods.
  *
  * @interface
  * @extends {shaka.util.IDestroyable}

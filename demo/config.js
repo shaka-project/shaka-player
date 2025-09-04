@@ -577,17 +577,6 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addBoolInput_('Clear decodingInfo cache on unload',
             'streaming.clearDecodingCache');
-    if (!shakaDemoMain.getNativeControlsEnabled()) {
-      this.addBoolInput_('Always Stream Text', 'streaming.alwaysStreamText');
-    } else {
-      // Add a fake custom fixed "input" that warns the users not to change it.
-      const noop = (input) => {};
-      this.addCustomBoolInput_('Always Stream Text', noop,
-          'Text must always be streamed while native controls are enabled, ' +
-          'for captions to work.');
-      this.latestInput_.input().disabled = true;
-      this.latestInput_.input().checked = true;
-    }
 
     const hdrLevels = {
       '': '',
@@ -790,11 +779,6 @@ shakaDemo.Config = class {
 
     this.addCustomBoolInput_('Shaka Controls', (input) => {
       shakaDemoMain.setNativeControlsEnabled(!input.checked);
-      if (input.checked) {
-        // Forcibly set |streaming.alwaysStreamText| to true.
-        shakaDemoMain.configure('streaming.alwaysStreamText', true);
-        shakaDemoMain.remakeHash();
-      }
       // Enabling/disabling Shaka Controls will change how other controls in
       // the config work, so reload the page.
       this.reloadAndSaveState_();

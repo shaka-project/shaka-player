@@ -710,25 +710,6 @@ describe('Player', () => {
         expect(shaka.test.Util.invokeSpy(streamingEngine.getCurrentTextStream))
             .toBe(null);
       });
-
-      it('loads text stream if alwaysStreamText is set', async () => {
-        await player.setTextTrackVisibility(false);
-        player.configure({streaming: {alwaysStreamText: true}});
-
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-        expect(streamingEngine.switchTextStream).toHaveBeenCalled();
-        expect(shaka.test.Util.invokeSpy(streamingEngine.getCurrentTextStream))
-            .not.toBe(null);
-        streamingEngine.switchTextStream.calls.reset();
-
-        await player.setTextTrackVisibility(true);
-        expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
-        expect(streamingEngine.unloadTextStream).not.toHaveBeenCalled();
-
-        await player.setTextTrackVisibility(false);
-        expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
-        expect(streamingEngine.unloadTextStream).not.toHaveBeenCalled();
-      });
     });
 
     describe('when config.streaming.preferNativeDash is set to true', () => {
