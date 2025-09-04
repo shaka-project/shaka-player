@@ -182,10 +182,9 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
   /**
    * @param {!shaka.extern.TextTrack} track
-   * @return {!Promise}
    * @private
    */
-  async onTextTrackSelected_(track) {
+  onTextTrackSelected_(track) {
     this.player.selectTextTrack(track);
 
     // Set text preference for when reloading the stream (e.g. casting), keep
