@@ -70,6 +70,10 @@
 
       /* The tooltip is also translated 50% to appear centered */
       .translateX(-0.5);
+
+      @media (prefers-reduced-transparency) {
+        background-color: @general-background-color-mostly-opaque;
+      }
     }
   }
 
