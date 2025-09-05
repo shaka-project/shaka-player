@@ -1,5 +1,33 @@
 # Changelog
 
+## [4.17.0](https://github.com/shaka-project/shaka-player/compare/v4.16.0...v4.17.0) (2025-09-05)
+
+
+### Features
+
+* Remove alwaysStreamText config ([#9053](https://github.com/shaka-project/shaka-player/issues/9053)) ([dc235fc](https://github.com/shaka-project/shaka-player/commit/dc235fc5012700ef3311a20028bb06938c02fd6f))
+
+
+### Bug Fixes
+
+* **Ads:** Fix overlays when the base stream is live ([#9040](https://github.com/shaka-project/shaka-player/issues/9040)) ([b65f685](https://github.com/shaka-project/shaka-player/commit/b65f685fd30ee18ef63d2962c8f061619a7b7aff))
+* Audit all usage of readBytes for memory leaks ([#9027](https://github.com/shaka-project/shaka-player/issues/9027)) ([849bff1](https://github.com/shaka-project/shaka-player/commit/849bff1db3a8391b007956efe2b8345266647a17))
+* Avoid download init segments again when not necessary ([#9042](https://github.com/shaka-project/shaka-player/issues/9042)) ([f5fa1da](https://github.com/shaka-project/shaka-player/commit/f5fa1da3d721b1979c580156a311b5ea32369fb7))
+* **DASH:** Fix can't access property "delete", unusedStreamsPerPeriod[(i - periodsMissing)] is undefined ([#9038](https://github.com/shaka-project/shaka-player/issues/9038)) ([2ca6810](https://github.com/shaka-project/shaka-player/commit/2ca68105e5e04d186f24ba6d0385182875bc3f97))
+* **DASH:** Fix stall on multiperiod streams ([#9030](https://github.com/shaka-project/shaka-player/issues/9030)) ([bc6a7f2](https://github.com/shaka-project/shaka-player/commit/bc6a7f20ab94bf32c308e52e71587177f36d3611))
+* Fix getAudioTracks for HLS with multiplexed streams ([#9047](https://github.com/shaka-project/shaka-player/issues/9047)) ([948a5f7](https://github.com/shaka-project/shaka-player/commit/948a5f7836884685f141e1d1ef2c84e2dfc6ab0e))
+* **HLS:** Allow get better segment size estimations ([#9043](https://github.com/shaka-project/shaka-player/issues/9043)) ([06d92a5](https://github.com/shaka-project/shaka-player/commit/06d92a5e56e7fd8fa04a06a0cc1b8918d3e6af4f))
+* **HLS:** Fix playback of EVENT playlist when transition from live to vod ([#9054](https://github.com/shaka-project/shaka-player/issues/9054)) ([830b863](https://github.com/shaka-project/shaka-player/commit/830b8632abcc09d5123305aa164feaa95db0e245))
+* **HLS:** Improve abort decision logic ([#9041](https://github.com/shaka-project/shaka-player/issues/9041)) ([3205235](https://github.com/shaka-project/shaka-player/commit/3205235aff1d273beef5bf1f2c91c3d24fb410d1))
+* Make sure that all variants are either: audio-only, video-only, or audio-video when preload ([#9046](https://github.com/shaka-project/shaka-player/issues/9046)) ([288c247](https://github.com/shaka-project/shaka-player/commit/288c247fe6806d84e03851870564355005c253a9))
+* **UI:** Respect prefers-reduced-transparency for tooltips and seekbar times ([#9057](https://github.com/shaka-project/shaka-player/issues/9057)) ([cd2b6d4](https://github.com/shaka-project/shaka-player/commit/cd2b6d417dc3cb6a79db10a10a8a8994c75cfe46))
+
+
+### Performance Improvements
+
+* Remove unnecessary ABR update during load ([#9029](https://github.com/shaka-project/shaka-player/issues/9029)) ([d465feb](https://github.com/shaka-project/shaka-player/commit/d465feb922fa1bbc22fda9878883d3604b5ff3f1))
+* **UI:** Combine consecutive configure calls ([#9049](https://github.com/shaka-project/shaka-player/issues/9049)) ([f8db982](https://github.com/shaka-project/shaka-player/commit/f8db98276173545f1ed230dcc1671a97eb5dbea8))
+
 ## [4.16.0](https://github.com/shaka-project/shaka-player/compare/v4.15.0...v4.16.0) (2025-08-26)
 
 
