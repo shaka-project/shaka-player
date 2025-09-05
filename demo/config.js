@@ -358,7 +358,9 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_('Font scale factor',
             'textDisplayer.fontScaleFactor',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addTextInput_('Text Color', 'textDisplayer.textColor')
+        .addTextInput_('Background Color', 'textDisplayer.backgroundColor');
   }
 
   /** @private */
