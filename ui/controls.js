@@ -1985,9 +1985,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.seek_(this.player_.seekRange().end);
         }
         break;
-      case 'c':
-        this.player_.setTextTrackVisibility(!this.player_.isTextTrackVisible());
+      case 'c': {
+        const textTrack = this.player_.getTextTracks()[0];
+        if (textTrack) {
+          if (this.player_.isTextTrackVisible()) {
+            this.player_.selectTextTrack(null);
+          } else {
+            this.player_.selectTextTrack(textTrack);
+          }
+        }
         break;
+      }
       case 'f':
         if (this.isFullScreenSupported()) {
           this.toggleFullScreen();
