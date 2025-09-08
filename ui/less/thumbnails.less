@@ -28,6 +28,10 @@
       color: @general-font-color;
       font-size: @general-font-size;
       padding: 0 5px;
+
+      @media (prefers-reduced-transparency) {
+        background-color: @general-background-color-mostly-opaque;
+      }
     }
   }
 
@@ -49,4 +53,8 @@
   position: absolute;
   visibility: hidden;
   z-index: 1;
+
+  @media (prefers-reduced-transparency) {
+    background-color: @general-background-color-mostly-opaque;
+  }
 }
