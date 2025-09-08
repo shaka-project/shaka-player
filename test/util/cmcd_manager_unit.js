@@ -1413,7 +1413,7 @@ describe('CmcdManager Setup', () => {
         expect(calledTarget.url).toBe('https://enabled.collector.com/cmcd');
       });
 
-      it('skips applyResponse_ when response targets are disabled', () => {
+      it('skips applyResponseSegmentData when targets are disabled', () => {
         const cmcdManager = createCmcdManager(
             mockPlayer,
             {
@@ -1426,7 +1426,8 @@ describe('CmcdManager Setup', () => {
               ],
             },
         );
-        const spy = spyOn(cmcdManager, 'applyResponse_').and.callThrough();
+        const spy = spyOn(cmcdManager, 'applyResponseSegmentData')
+            .and.callThrough();
 
         cmcdManager.applyResponseData(
             shaka.net.NetworkingEngine.RequestType.SEGMENT,
