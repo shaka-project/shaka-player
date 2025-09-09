@@ -1413,6 +1413,31 @@ describe('CmcdManager Setup', () => {
         expect(calledTarget.url).toBe('https://enabled.collector.com/cmcd');
       });
 
+      it('skips applyResponseSegmentData when targets are disabled', () => {
+        const cmcdManager = createCmcdManager(
+            mockPlayer,
+            {
+              targets: [
+                {
+                  mode: 'response',
+                  enabled: false,
+                  url: 'https://disabled.collector.com/cmcd',
+                },
+              ],
+            },
+        );
+        const spy = spyOn(cmcdManager, 'applyResponseSegmentData')
+            .and.callThrough();
+
+        cmcdManager.applyResponseData(
+            shaka.net.NetworkingEngine.RequestType.SEGMENT,
+            createResponse(),
+            createSegmentContext(),
+        );
+
+        expect(spy).not.toHaveBeenCalled();
+      });
+
       it('includes ltc for live content request mode', () => {
         const cmcdManager = createCmcdManager(
             mockPlayer,
