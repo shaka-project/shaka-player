@@ -1316,7 +1316,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * Adds several an ads containers.
+   * Adds several ads containers.
    *
    * @private
    */
