@@ -14,7 +14,8 @@
   }
 }
 
-.shaka-client-side-ad-container, .shaka-server-side-ad-container {
+.shaka-client-side-ad-container,
+.shaka-server-side-ad-container {
   .absolute-position();
 
   /* IMA SDK adds their own ad UI into an iframe element.
@@ -26,15 +27,6 @@
        * doesn't operlap with our controls. */
       height: 90%;
     }
-  }
-}
-
-.shaka-server-side-ad-container {
-  .fill-container();
-  .shrinkable();
-
-  &:not([ad-active="true"]) {
-    pointer-events: none;
   }
 }
 

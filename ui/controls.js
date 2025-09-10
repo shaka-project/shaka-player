@@ -382,9 +382,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.spinnerContainer_ = null;
     }
 
-    if (this.clientAdContainer_) {
-      this.videoContainer_.removeChild(this.clientAdContainer_);
-      this.clientAdContainer_ = null;
+    if (this.clientSideAdContainer_) {
+      this.videoContainer_.removeChild(this.clientSideAdContainer_);
+      this.clientSideAdContainer_ = null;
+    }
+
+    if (this.serverSideAdContainer_) {
+      this.videoContainer_.removeChild(this.serverSideAdContainer_);
+      this.serverSideAdContainer_ = null;
     }
 
     if (this.localPlayer_) {
@@ -487,10 +492,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.releaseChildElements_();
     } else {
       this.addControlsContainer_();
-      // The client-side ad container is only created once, and is never
+      // The ad container is only created once, and is never
       // re-created or uprooted in the DOM, even when the DOM is re-created,
       // since that seemingly breaks the IMA SDK.
-      this.addClientAdContainer_();
+      this.addAdContainers_();
 
       goog.asserts.assert(
           this.controlsContainer_, 'Should have a controlsContainer_!');
@@ -649,7 +654,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   getServerSideAdContainer() {
-    return this.daiAdContainer_;
+    goog.asserts.assert(this.serverSideAdContainer_,
+        'No server side ad container after destruction!');
+    return this.serverSideAdContainer_;
   }
 
   /**
@@ -657,9 +664,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   getClientSideAdContainer() {
-    goog.asserts.assert(
-        this.clientAdContainer_, 'No client ad container after destruction!');
-    return this.clientAdContainer_;
+    goog.asserts.assert(this.clientSideAdContainer_,
+        'No client side ad container after destruction!');
+    return this.clientSideAdContainer_;
   }
 
   /**
@@ -989,7 +996,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   showAdUI() {
     shaka.ui.Utils.setDisplay(this.adPanel_, true);
-    shaka.ui.Utils.setDisplay(this.clientAdContainer_, true);
+    shaka.ui.Utils.setDisplay(this.clientSideAdContainer_, true);
+    shaka.ui.Utils.setDisplay(this.serverSideAdContainer_, true);
     if (this.ad_.hasCustomClick()) {
       this.controlsContainer_.setAttribute('ad-active', 'true');
     } else {
@@ -1000,7 +1008,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   hideAdUI() {
     shaka.ui.Utils.setDisplay(this.adPanel_, false);
-    shaka.ui.Utils.setDisplay(this.clientAdContainer_, false);
+    shaka.ui.Utils.setDisplay(this.clientSideAdContainer_, false);
+    shaka.ui.Utils.setDisplay(this.serverSideAdContainer_, false);
     this.controlsContainer_.removeAttribute('ad-active');
   }
 
@@ -1082,8 +1091,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.addFastForwardButtonOnControlsContainer_();
       this.addRewindButtonOnControlsContainer_();
     }
-
-    this.addDaiAdContainer_();
 
     this.addControlsButtonPanel_();
 
@@ -1283,19 +1290,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 
   /**
-   * Adds a container for server side ad UI with IMA SDK.
-   *
-   * @private
-   */
-  addDaiAdContainer_() {
-    /** @private {!HTMLElement} */
-    this.daiAdContainer_ = shaka.util.Dom.createHTMLElement('div');
-    this.daiAdContainer_.classList.add('shaka-server-side-ad-container');
-    this.controlsContainer_.appendChild(this.daiAdContainer_);
-  }
-
-
-  /**
    * Adds a seekbar depending on the configuration.
    * By default an instance of shaka.ui.SeekBar is created
    * This behaviour can be overridden by providing a SeekBar factory using the
@@ -1321,21 +1315,30 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
   }
 
-
   /**
-   * Adds a container for client side ad UI with IMA SDK.
+   * Adds several ads containers.
    *
    * @private
    */
-  addClientAdContainer_() {
+  addAdContainers_() {
     /** @private {HTMLElement} */
-    this.clientAdContainer_ = shaka.util.Dom.createHTMLElement('div');
-    this.clientAdContainer_.classList.add('shaka-client-side-ad-container');
-    shaka.ui.Utils.setDisplay(this.clientAdContainer_, false);
-    this.eventManager_.listen(this.clientAdContainer_, 'click', () => {
+    this.clientSideAdContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.clientSideAdContainer_.classList.add('shaka-client-side-ad-container');
+    shaka.ui.Utils.setDisplay(this.clientSideAdContainer_, false);
+    this.eventManager_.listen(this.clientSideAdContainer_, 'click', () => {
       this.onContainerClick();
     });
-    this.videoContainer_.appendChild(this.clientAdContainer_);
+    this.videoContainer_.appendChild(this.clientSideAdContainer_);
+
+
+    /** @private {HTMLElement} */
+    this.serverSideAdContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.serverSideAdContainer_.classList.add('shaka-server-side-ad-container');
+    shaka.ui.Utils.setDisplay(this.serverSideAdContainer_, false);
+    this.eventManager_.listen(this.serverSideAdContainer_, 'click', () => {
+      this.onContainerClick();
+    });
+    this.videoContainer_.appendChild(this.serverSideAdContainer_);
   }
 
   /**
