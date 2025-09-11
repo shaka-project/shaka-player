@@ -35,86 +35,86 @@ describe('NetworkingUtils', () => {
     });
   });
 
-  describe('getExtension', function () {
-    it('should return the extension in lowercase', function () {
+  describe('getExtension', () => {
+    it('should return the extension in lowercase', () => {
       const uri = 'https://example.com/file.TXT';
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('txt');
     });
 
-    it('should return empty string if there is no extension', function () {
+    it('should return empty string if there is no extension', () => {
       const uri = 'https://example.com/file';
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('');
     });
 
-    it('should handle multiple dots correctly', function () {
+    it('should handle multiple dots correctly', () => {
       const uri = 'https://example.com/archive.tar.gz';
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('gz');
     });
 
-    it('should return empty string for trailing slash', function () {
+    it('should return empty string for trailing slash', () => {
       const uri = 'https://example.com/path/';
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('');
     });
 
-    it('should return empty string for empty path', function () {
+    it('should return empty string for empty path', () => {
       const uri = 'https://example.com/';
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('');
     });
 
-    it('should return correct extension for local file path', function () {
+    it('should return correct extension for local file path', () => {
       const uri = 'file:///C:/Users/Alvaro/Documents/report.pdf';
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('pdf');
     });
 
-    it('should ignore query parameters when extracting extension', function () {
+    it('should ignore query parameters when extracting extension', () => {
       const uri = 'https://example.com/image.jpeg?size=large';
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('jpeg');
     });
 
-    it('should ignore hash fragments when extracting extension', function () {
+    it('should ignore hash fragments when extracting extension', () => {
       const uri = 'https://example.com/video.mp4#section1';
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('mp4');
     });
 
-    it('should handle both query and hash together', function () {
+    it('should handle both query and hash together', () => {
       const uri = 'https://example.com/document.docx?download=true#top';
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('docx');
     });
 
-    it('should return extension from relative URL with filename', function () {
+    it('should return extension from relative URL with filename', () => {
       const uri = './assets/image.PNG';
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('png');
     });
 
-    it('should return extension from relative URL with nested path', function () {
+    it('should return extension from relative URL with nested path', () => {
       const uri = '../downloads/archive.zip';
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('zip');
     });
 
-    it('should return empty string from relative URL without extension', function () {
+    it('should return empty string from relative URL without extension', () => {
       const uri = './scripts/run';
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('');
     });
 
-    it('should return extension from relative URL with query params', function () {
+    it('should return extension from relative URL with query params', () => {
       const uri = './data/file.json?version=2';
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('json');
     });
 
-    it('should return extension from relative URL with hash', function () {
+    it('should return extension from relative URL with hash', () => {
       const uri = './docs/manual.pdf#page=3';
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('pdf');
