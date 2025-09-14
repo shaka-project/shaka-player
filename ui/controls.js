@@ -182,6 +182,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!Array<!HTMLElement>} */
     this.menus_ = [];
 
+    /** @private {?shaka.extern.TextTrack} */
+    this.lastSelectedTextTrack_ = null;
+
     /**
      * Individual controls which, when hovered or tab-focused, will force the
      * controls to be shown.
@@ -304,8 +307,18 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.adManager_.initInterstitial(
         this.getClientSideAdContainer(), this.localPlayer_, this.localVideo_);
 
-    this.eventManager_.listen(this.player_, 'texttrackvisibility', () => {
+    this.eventManager_.listen(this.player_, 'textchanged', () => {
       this.computeShakaTextContainerSize_();
+
+      const tracks = this.player_.getTextTracks();
+      const selectedTrack = tracks.find((track) => {
+        return track.active == true;
+      });
+      if (selectedTrack) {
+        // Store the most recently active track to restore selection
+        // when the user toggles visibility.
+        this.lastSelectedTextTrack_ = selectedTrack;
+      }
     });
 
     this.eventManager_.listen(this.player_, 'unloading', () => {
@@ -1986,13 +1999,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         }
         break;
       case 'c': {
-        const textTrack = this.player_.getTextTracks()[0];
-        if (textTrack) {
-          if (this.player_.isTextTrackVisible()) {
-            this.player_.selectTextTrack(null);
-          } else {
-            this.player_.selectTextTrack(textTrack);
-          }
+        if (!this.lastSelectedTextTrack_) {
+          break;
+        }
+        const tracks = this.player_.getTextTracks();
+        const selectedTrack = tracks.find((track) => {
+          return track.active == true;
+        });
+        if (!selectedTrack) {
+          this.player_.selectTextTrack(this.lastSelectedTextTrack_);
+        } else {
+          this.player_.selectTextTrack(null);
         }
         break;
       }
