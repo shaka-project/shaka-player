@@ -63,6 +63,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-raw-aac/manifest.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -87,6 +89,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-raw-mp3/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -107,6 +111,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-raw-ac3/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -127,6 +133,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-raw-ec3/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -143,6 +151,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-raw-aac/index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -159,6 +169,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-aac/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -183,6 +195,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-mp3/manifest.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -203,6 +217,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-ac3/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -223,6 +239,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-ec3/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -241,6 +259,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-h264/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(0);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -257,6 +277,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-b-frames/index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(0);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Play for 30 seconds, but stop early if the video ends.
       await waiter.waitForEndOrTimeout(video, 30);
@@ -272,6 +294,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-h265/hevc.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(0);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -291,6 +315,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -307,6 +333,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-rollover/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -329,6 +357,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264-with-overflow-samples/media.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -346,6 +376,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264-with-overflow-nalus/media.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -368,6 +400,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-muxed-aac-h265/media.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -394,6 +428,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-muxed-mp3-h264/index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -419,6 +455,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-muxed-ac3-h264/media.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -440,6 +478,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-muxed-ec3-h264/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -461,6 +501,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-muxed-opus-h264/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.

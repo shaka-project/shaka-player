@@ -366,7 +366,6 @@ describe('Player', () => {
 
     // https://github.com/shaka-project/shaka-player/issues/2553
     it('does not change the selected track', async () => {
-      player.configure('streaming.alwaysStreamText', false);
       await player.load('test:forced_subs_simulation_compiled');
 
       // In this content, both text tracks have the same language and role, and
