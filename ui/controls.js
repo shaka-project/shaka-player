@@ -311,9 +311,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.computeShakaTextContainerSize_();
 
       const tracks = this.player_.getTextTracks();
-      const selectedTrack = tracks.find((track) => {
-        return track.active == true;
-      });
+      const selectedTrack = tracks.find((track) => track.active);
       if (selectedTrack) {
         // Store the most recently active track to restore selection
         // when the user toggles visibility.
@@ -2003,13 +2001,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           break;
         }
         const tracks = this.player_.getTextTracks();
-        const selectedTrack = tracks.find((track) => {
-          return track.active == true;
-        });
-        if (!selectedTrack) {
-          this.player_.selectTextTrack(this.lastSelectedTextTrack_);
-        } else {
+        const hasTrack = tracks.some((track) => track.active);
+        if (hasTrack) {
           this.player_.selectTextTrack(null);
+        } else {
+          this.player_.selectTextTrack(this.lastSelectedTextTrack_);
         }
         break;
       }
