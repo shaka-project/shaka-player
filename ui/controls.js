@@ -182,6 +182,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!Array<!HTMLElement>} */
     this.menus_ = [];
 
+    /** @private {?shaka.extern.TextTrack} */
+    this.lastSelectedTextTrack_ = null;
+
     /**
      * Individual controls which, when hovered or tab-focused, will force the
      * controls to be shown.
@@ -304,8 +307,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.adManager_.initInterstitial(
         this.getClientSideAdContainer(), this.localPlayer_, this.localVideo_);
 
-    this.eventManager_.listen(this.player_, 'texttrackvisibility', () => {
+    this.eventManager_.listen(this.player_, 'textchanged', () => {
       this.computeShakaTextContainerSize_();
+
+      const tracks = this.player_.getTextTracks();
+      const selectedTrack = tracks.find((track) => track.active);
+      if (selectedTrack) {
+        // Store the most recently active track to restore selection
+        // when the user toggles visibility.
+        this.lastSelectedTextTrack_ = selectedTrack;
+      }
     });
 
     this.eventManager_.listen(this.player_, 'unloading', () => {
@@ -1988,9 +1999,19 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.seek_(this.player_.seekRange().end);
         }
         break;
-      case 'c':
-        this.player_.setTextTrackVisibility(!this.player_.isTextTrackVisible());
+      case 'c': {
+        if (!this.lastSelectedTextTrack_) {
+          break;
+        }
+        const tracks = this.player_.getTextTracks();
+        const hasTrack = tracks.some((track) => track.active);
+        if (hasTrack) {
+          this.player_.selectTextTrack(null);
+        } else {
+          this.player_.selectTextTrack(this.lastSelectedTextTrack_);
+        }
         break;
+      }
       case 'f':
         if (this.isFullScreenSupported()) {
           this.toggleFullScreen();

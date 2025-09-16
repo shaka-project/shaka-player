@@ -38,7 +38,13 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     this.button.classList.add('shaka-tooltip-status');
     this.menu.classList.add('shaka-text-languages');
 
-    if (this.player && this.player.isTextTrackVisible()) {
+    let hasTrack = false;
+    if (this.player) {
+      const tracks = this.player.getTextTracks();
+      hasTrack = tracks.some((track) => track.active);
+    }
+
+    if (hasTrack) {
       this.button.ariaPressed = 'true';
     } else {
       this.button.ariaPressed = 'false';
@@ -79,12 +85,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
       this.updateTextLanguages_();
     });
 
-    this.eventManager.listen(this.player, 'texttrackvisibility', () => {
-      this.onCaptionStateChange_();
-      this.updateTextLanguages_();
-    });
-
     this.eventManager.listen(this.player, 'textchanged', () => {
+      this.onCaptionStateChange_();
       this.updateTextLanguages_();
     });
 
@@ -121,7 +123,10 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
   /** @private */
   onCaptionStateChange_() {
-    if (this.player.isTextTrackVisible()) {
+    const hasTrack = this.player.getTextTracks()
+        .some((track) => track.active);
+
+    if (hasTrack) {
       this.icon.use(shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS);
       this.button.ariaPressed = 'true';
     } else {
@@ -136,13 +141,14 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
   /** @private */
   updateTextLanguages_() {
     const tracks = this.player.getTextTracks() || [];
+    const hasTrack = tracks.some((track) => track.active);
 
     shaka.ui.LanguageUtils.updateTextTracks(tracks, this.menu,
         (track) => this.onTextTrackSelected_(track),
 
         // Don't mark current text language as chosen unless captions are
         // enabled
-        this.player.isTextTrackVisible(),
+        hasTrack,
         this.currentSelection,
         this.localization,
         this.controls.getConfig().textTrackLabelFormat);
@@ -151,15 +157,14 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     const offButton = shaka.util.Dom.createButton();
     offButton.classList.add('shaka-turn-captions-off-button');
     this.eventManager.listen(offButton, 'click', () => {
-      this.player.setTextTrackVisibility(false);
-      this.updateTextLanguages_();
+      this.player.selectTextTrack(null);
     });
 
     offButton.appendChild(this.captionsOffSpan_);
 
     this.menu.appendChild(offButton);
 
-    if (!this.player.isTextTrackVisible()) {
+    if (!hasTrack) {
       offButton.ariaSelected = 'true';
       offButton.appendChild(shaka.ui.Utils.checkmarkIcon());
       this.captionsOffSpan_.classList.add('shaka-chosen-item');
@@ -182,17 +187,10 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
   /**
    * @param {!shaka.extern.TextTrack} track
-   * @return {!Promise}
    * @private
    */
-  async onTextTrackSelected_(track) {
-    // setTextTrackVisibility should be called after selectTextTrack.
-    // selectTextTrack sets a text stream, and setTextTrackVisibility(true)
-    // will set a text stream if it isn't already set. Consequently, reversing
-    // the order of these calls makes two languages display simultaneously
-    // if captions are turned off -> on in a different language.
+  onTextTrackSelected_(track) {
     this.player.selectTextTrack(track);
-    await this.player.setTextTrackVisibility(true);
 
     // Set text preference for when reloading the stream (e.g. casting), keep
     // this selection.
