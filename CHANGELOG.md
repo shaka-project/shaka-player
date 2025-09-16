@@ -1,5 +1,30 @@
 # Changelog
 
+## [4.16.2](https://github.com/shaka-project/shaka-player/compare/v4.16.1...v4.16.2) (2025-09-16)
+
+
+### Bug Fixes
+
+* **Ads:** Fix playback of overlays ads on mobile devices ([#9078](https://github.com/shaka-project/shaka-player/issues/9078)) ([ab72993](https://github.com/shaka-project/shaka-player/commit/ab72993d6b937bce276c9445eb91ef3e72358c31))
+* Allow calculate the segment size from partials segments ([#9094](https://github.com/shaka-project/shaka-player/issues/9094)) ([2147bdb](https://github.com/shaka-project/shaka-player/commit/2147bdbe48c994f42ca4663a7d20ceef87eacae6))
+* Avoid null pointer exception on MSE reset ([#9089](https://github.com/shaka-project/shaka-player/issues/9089)) ([273f42e](https://github.com/shaka-project/shaka-player/commit/273f42ebe4c43571f21aaa27901d931a160a813a))
+* Bad init segment size calculation when using byte ranges ([#9092](https://github.com/shaka-project/shaka-player/issues/9092)) ([58b86e6](https://github.com/shaka-project/shaka-player/commit/58b86e62420432596753d1679d07a59bc24323a1))
+* Bad segment size calculation when using byte ranges ([#9090](https://github.com/shaka-project/shaka-player/issues/9090)) ([d1580fe](https://github.com/shaka-project/shaka-player/commit/d1580fe03352175cf45e7a12fb22beadf5bff139))
+* Fix audio/video bandwidth calculation when only one of them is provided ([#9091](https://github.com/shaka-project/shaka-player/issues/9091)) ([166fab7](https://github.com/shaka-project/shaka-player/commit/166fab7a2207ccd52042407e478890550c147320))
+* Fix blink subtitles when using NativeTextDisplayer in Safari ([#9082](https://github.com/shaka-project/shaka-player/issues/9082)) ([b039572](https://github.com/shaka-project/shaka-player/commit/b039572e67006674eb7fc85905b43a79c96f7bd7))
+* Fix getLiveLatency when using Apple's native HLS ([#9083](https://github.com/shaka-project/shaka-player/issues/9083)) ([7e14075](https://github.com/shaka-project/shaka-player/commit/7e1407566dbbe3b6ed25ce1c5baeb2c1338ec3d3))
+* **HLS:** Allow calculate stream bandwidth using segment size ([#9093](https://github.com/shaka-project/shaka-player/issues/9093)) ([b9db5d2](https://github.com/shaka-project/shaka-player/commit/b9db5d206dd549ed929c2c10f282b74356064f7e))
+* **UI:** Fix position of ad containers ([#9077](https://github.com/shaka-project/shaka-player/issues/9077)) ([d0f0ad1](https://github.com/shaka-project/shaka-player/commit/d0f0ad1263ddab4b16643008dd1a0de3654bd03c))
+
+
+### Performance Improvements
+
+* **Ads:** Improve back to live performance when using interstitials and low latency ([#9079](https://github.com/shaka-project/shaka-player/issues/9079)) ([310503a](https://github.com/shaka-project/shaka-player/commit/310503a37308da68bf7f421c5233744f1d57ebaf))
+* **HLS:** Assume that partial segments have the same mimetype as full segments ([#9080](https://github.com/shaka-project/shaka-player/issues/9080)) ([510c305](https://github.com/shaka-project/shaka-player/commit/510c305cece4e13e7b2e826fe847ef05ec1a0543))
+* **HLS:** Optimize mimetype resolution during parsing ([#9088](https://github.com/shaka-project/shaka-player/issues/9088)) ([1f8c850](https://github.com/shaka-project/shaka-player/commit/1f8c850ba9e9a4ebecea0c6c4e8e6f5260ad5f3f))
+* **HLS:** Reduce redundant parser calls ([#9066](https://github.com/shaka-project/shaka-player/issues/9066)) ([7176e95](https://github.com/shaka-project/shaka-player/commit/7176e95297df37271a3caa15291ee9c8ab8521d4))
+* Speed up `shaka.Player.probeSupport()` ([#9095](https://github.com/shaka-project/shaka-player/issues/9095)) ([27638b1](https://github.com/shaka-project/shaka-player/commit/27638b11134c93cc7e82334be9a658e347d89c72))
+
 ## [4.16.1](https://github.com/shaka-project/shaka-player/compare/v4.16.0...v4.16.1) (2025-09-09)
 
 
