@@ -295,7 +295,8 @@ describe('ContentWorkarounds', () => {
 
     describe('remove dvvC box', () => {
       const initSegmentUri =
-          '/base/test/test/assets/dv-p8-1-hevc/media-video-hvc1-dvh1-db1p-1.mp4';
+          '/base/test/test/assets/' +
+          'dv-p8-1-hevc/media-video-hvc1-dvh1-db1p-1.mp4';
       /** @type {!ArrayBuffer} */
       let initSegmentData;
 
