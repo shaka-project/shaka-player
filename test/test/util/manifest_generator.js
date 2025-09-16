@@ -560,6 +560,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.mimeType = defaultMimeType;
       /** @type {string} */
       this.codecs = defaultCodecs;
+      /** @type {string} */
+      this.supplementalCodecs = '';
       /** @type {(number|undefined)} */
       this.frameRate = undefined;
       /** @type {(string|undefined)} */

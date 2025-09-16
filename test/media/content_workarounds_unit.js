@@ -292,6 +292,43 @@ describe('ContentWorkarounds', () => {
         expect(getChannelCount(modified)).toBe(2);
       });
     });
+
+    describe('remove dvvC box', () => {
+      const initSegmentUri =
+          '/base/test/test/assets/dv-p8-1-hevc/media-video-hvc1-dvh1-db1p-1.mp4';
+      /** @type {!ArrayBuffer} */
+      let initSegmentData;
+
+      const getBox = (initSegment, type) => {
+        let box = null;
+        new shaka.util.Mp4Parser()
+            .box('moov', shaka.util.Mp4Parser.children)
+            .box('trak', shaka.util.Mp4Parser.children)
+            .box('mdia', shaka.util.Mp4Parser.children)
+            .box('minf', shaka.util.Mp4Parser.children)
+            .box('stbl', shaka.util.Mp4Parser.children)
+            .fullBox('stsd', shaka.util.Mp4Parser.sampleDescription)
+            .box('hvc1', shaka.util.Mp4Parser.visualSampleEntry)
+            .box(type, (_box) => {
+              box = _box;
+            }).parse(initSegment);
+        return box;
+      };
+
+      beforeEach(async () => {
+        initSegmentData = await shaka.test.Util.fetch(initSegmentUri);
+      });
+
+      it('should replace the dvvC box type with free', () => {
+        const ContentWorkarounds = shaka.media.ContentWorkarounds;
+        expect(getBox(initSegmentData, 'dvvC')).not.toBeNull();
+        expect(getBox(initSegmentData, 'free')).toBeNull();
+
+        const modified = ContentWorkarounds.freeDvvcBox(initSegmentData);
+        expect(getBox(modified, 'dvvC')).toBeNull();
+        expect(getBox(modified, 'free')).not.toBeNull();
+      });
+    });
   });
 
   /**
