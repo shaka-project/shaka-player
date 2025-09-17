@@ -220,6 +220,7 @@ describe('AdaptationSet', () => {
       spatialAudio,
       closedCaptions: null,
       codecs: codecs.join(','),
+      supplementalCodecs: '',
       createSegmentIndex: () => Promise.resolve(),
       emsgSchemeIdUris: null,
       encrypted: false,

@@ -348,6 +348,7 @@ shaka.extern.SegmentIndex = class {
  *   segmentIndex: shaka.media.SegmentIndex,
  *   mimeType: string,
  *   codecs: string,
+ *   supplementalCodecs: string,
  *   frameRate: (number|undefined),
  *   pixelAspectRatio: (string|undefined),
  *   hdr: (string|undefined),
@@ -423,6 +424,9 @@ shaka.extern.SegmentIndex = class {
  *   In the case of a stream that adapts between different periods with
  *   different codecs, this represents only the first period.
  *   See {@link https://tools.ietf.org/html/rfc6381}
+ * @property {string} supplementalCodecs
+ *   <i>Defaults to '' (i.e., unknown / not needed).</i> <br>
+ *   The Stream's supplemental codecs, e.g., 'dvhe'.
  * @property {(number|undefined)} frameRate
  *   <i>Video streams only.</i> <br>
  *   The Stream's framerate in frames per second
