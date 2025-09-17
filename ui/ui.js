@@ -378,7 +378,7 @@ shaka.ui.Overlay = class {
       showAudioCodec: true,
       showVideoCodec: true,
       castSenderUrl: 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
-      enableKeyboardPlaybackControlsInWindow: true,
+      enableKeyboardPlaybackControlsInWindow: false,
       alwaysShowVolumeBar: false,
       shortcuts: {
         small_rewind: 'ArrowLeft',
