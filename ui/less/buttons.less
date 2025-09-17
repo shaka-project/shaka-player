@@ -70,6 +70,12 @@
   &[icon="replay"] {
     background-image: data-uri("images/replay.svg");
   }
+
+  @media (prefers-reduced-transparency: no-preference) {
+    .shaka-controls-container[shown="true"] & {
+      opacity: 0.75;
+    }
+  }
 }
 
 /* This button contains the current time and duration of the video.
