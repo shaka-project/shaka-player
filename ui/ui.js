@@ -378,8 +378,26 @@ shaka.ui.Overlay = class {
       showAudioCodec: true,
       showVideoCodec: true,
       castSenderUrl: 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
-      enableKeyboardPlaybackControlsInWindow: false,
+      enableKeyboardPlaybackControlsInWindow: true,
       alwaysShowVolumeBar: false,
+      shortcuts: {
+        small_rewind: 'ArrowLeft',
+        small_fast_forward: 'ArrowRight',
+        large_rewind: 'PageDown',
+        large_fast_forward: 'PageUp',
+        home: 'Home',
+        end: 'End',
+        captions: 'c',
+        fullscreen: 'f',
+        mute: 'm',
+        picture_in_picture: 'p',
+        increase_video_speed: '>',
+        decrease_video_speed: '<',
+        play: 'k',
+        take_screenshot: 'u',
+        last_frame: ',',
+        next_frame: '.',
+      },
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause

@@ -77,7 +77,7 @@ shaka.ui.SaveVideoFrameButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.button_, 'click', () => {
-      this.onClick_();
+      this.controls.takeScreenshot();
     });
 
     const vr = this.controls.getVR();
@@ -123,54 +123,11 @@ shaka.ui.SaveVideoFrameButton = class extends shaka.ui.Element {
   }
 
 
-  /** @private */
-  onClick_() {
-    const canvas = /** @type {!HTMLCanvasElement}*/ (
-      document.createElement('canvas'));
-    const context = /** @type {CanvasRenderingContext2D} */ (
-      canvas.getContext('2d'));
-
-    const video = /** @type {!HTMLVideoElement} */ (
-      this.controls.getLocalVideo());
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const dataURL = canvas.toDataURL('image/png');
-
-    const downloadLink = /** @type {!HTMLAnchorElement}*/ (
-      document.createElement('a'));
-    downloadLink.href = dataURL;
-    downloadLink.download =
-        'videoframe_' + video.currentTime.toFixed(3) + '.png';
-    downloadLink.click();
-  }
-
-
   /**
    * @private
    */
   checkAvailability_() {
-    let available = true;
-    if (this.controls.isPlayingVR()) {
-      available = false;
-    }
-    if (available && this.castProxy_.isCasting()) {
-      available = false;
-    }
-    if (available &&
-        (this.player.drmInfo() || this.player.isAudioOnly())) {
-      available = false;
-    }
-    if (available && this.ad) {
-      available = false;
-    }
-    if (available &&
-        this.video.remote && this.video.remote.state != 'disconnected') {
-      available = false;
-    }
-    shaka.ui.Utils.setDisplay(this.button_, available);
+    shaka.ui.Utils.setDisplay(this.button_, this.controls.canTakeScreenshot());
   }
 
 
