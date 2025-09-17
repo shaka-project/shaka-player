@@ -2215,9 +2215,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (!videoTrack || !videoTrack.frameRate) {
       return;
     }
-    this.video_.pause();
+    if (!this.video_.paused) {
+      this.video_.pause();
+    }
     const frameTime = 1 / videoTrack.frameRate;
-    this.seek_(this.seekBar_.getValue() + frameTime * step);
+    const newTime = this.seekBar_.getValue() + frameTime * step;
+    if (newTime >= 0 && newTime <= this.player_.seekRange().end &&
+        this.video_.currentTime !== newTime) {
+      this.seek_(newTime);
+    }
   }
 
   /**
