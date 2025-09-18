@@ -47,10 +47,12 @@ shaka.ui.UIIcon = class {
    */
   use(icon) {
     // check if it is empty string or null or undefined
-    if (!icon) return;
+    if (!icon) {
+      return;
+    }
 
     if (typeof icon == 'string') {
-      this._applyInlinedSVG(icon, null);
+      this.applyInlinedSVG_(icon, null);
     } else if (typeof icon == 'object') {
       const url = icon['url'];
       const path = icon['path'];
@@ -61,7 +63,7 @@ shaka.ui.UIIcon = class {
         this.svg_.style.setProperty('background-color', '');
         this.svg_.style.setProperty('mask-image', `url("${url}")`);
       } else if (path) {
-        this._applyInlinedSVG(path, viewBox);
+        this.applyInlinedSVG_(path, viewBox);
       }
     }
   }
@@ -78,21 +80,22 @@ shaka.ui.UIIcon = class {
   /**
    * @param {string | Array<string>} path
    * @param {?string} viewBox
+   * @private
    */
-  _applyInlinedSVG(path, viewBox) {
+  applyInlinedSVG_(path, viewBox) {
     // do not need a background color if mask-image isn't using
     this.svg_.style.setProperty('background-color', 'transparent');
     this.svg_.setAttribute('viewBox', viewBox || '0 -960 960 960');
 
     // remove all previous path elements
-    this._emptyChildNodes();
+    this.emptyChildNodes_();
 
     if (Array.isArray(path)) {
       for (let i = 0, l = path.length; i < l; i++) {
-        this._addPath(path[i]);
+        this.addPath_(path[i]);
       }
     } else if (path) {
-      this._addPath(path);
+      this.addPath_(path);
     }
   }
 
@@ -102,7 +105,7 @@ shaka.ui.UIIcon = class {
    * @param {string} path
    * @private
    */
-  _addPath(path) {
+  addPath_(path) {
     const el = shaka.util.Dom.createSVGElement('path');
     el.setAttribute('d', path);
     this.svg_.appendChild(el);
@@ -112,11 +115,13 @@ shaka.ui.UIIcon = class {
    * Remove all the child nodes from svg element
    * @private
    */
-  _emptyChildNodes() {
+  emptyChildNodes_() {
     const childNodes = this.svg_.childNodes;
     for (let i = 0, l = childNodes.length, child; i < l; i++) {
       child = childNodes[i];
-      if (child instanceof SVGPathElement) child.remove()
+      if (child instanceof SVGPathElement) {
+        child.remove();
+      }
     }
   }
 };
