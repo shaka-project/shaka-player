@@ -46,6 +46,7 @@
 +../../ui/toggle_stereoscopic.js
 +../../ui/ui.js
 +../../ui/ui_utils.js
++../../ui/video_type_selection.js
 +../../ui/volume_bar.js
 +../../ui/vr_manager.js
 +../../ui/vr_utils.js
