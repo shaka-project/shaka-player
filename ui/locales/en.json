@@ -47,5 +47,8 @@
   "UNDETERMINED_LANGUAGE": "Undetermined",
   "UNMUTE": "Unmute",
   "UNRECOGNIZED_LANGUAGE": "Unrecognized",
+  "VIDEO_MAIN": "Main",
+  "VIDEO_SIGN": "Sign language",
+  "VIDEO_TYPE": "Video type",
   "VOLUME": "Volume"
 }
