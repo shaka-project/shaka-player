@@ -15,6 +15,7 @@ goog.require('shaka.ui.Enums');
 shaka.ui.IconRegistry = class IconRegistry {
   /**
    * Register custom icon for UI control elements
+   * If a single string is passed, it is treated as an SVG path
    * @param {string} name
    * @param {shaka.extern.UIIcon | string} icon
    * @export
