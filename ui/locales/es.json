@@ -47,5 +47,8 @@
   "UNDETERMINED_LANGUAGE": "Sin especificar",
   "UNMUTE": "Activar sonido",
   "UNRECOGNIZED_LANGUAGE": "No reconocida",
+  "VIDEO_MAIN": "Principal",
+  "VIDEO_SIGN": "Lenguaje de signos",
+  "VIDEO_TYPE": "Tipo de vídeo",
   "VOLUME": "Volumen"
 }

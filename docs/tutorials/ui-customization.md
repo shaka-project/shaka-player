@@ -71,6 +71,7 @@ The following elements can be added to the UI bar using this configuration value
 * remote: adds a button that opens a Remote Playback dialog. The button is visible only if the
   browser supports Remote Playback API.
 * quality: adds a button that controls enabling/disabling of abr and video resolution selection.
+* video_type: adds a button that controls video role selection.
 * language: adds a button that controls audio language selection.
 * playback_rate: adds a button that controls the playback rate selection.
 * captions: adds a button that controls the current text track selection (including turning it off).
@@ -90,6 +91,7 @@ The following buttons can be added to the overflow menu:
 * cast: adds a button that opens a Chromecast dialog. The button is visible only if there is
   at least one Chromecast device on the same network available for casting.
 * quality: adds a button that controls enabling/disabling of abr and video resolution selection.
+* video_type: adds a button that controls video role selection.
 * language: adds a button that controls audio language selection.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
   that support it. Button is invisible on other browsers. Note that it will use the 
