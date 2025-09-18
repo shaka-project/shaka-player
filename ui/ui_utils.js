@@ -9,7 +9,7 @@ goog.provide('shaka.ui.Utils');
 
 goog.require('goog.asserts');
 goog.require('shaka.ui.Enums');
-goog.require('shaka.ui.MaterialSVGIcon');
+goog.require('shaka.ui.UIIcon');
 
 
 shaka.ui.Utils = class {
@@ -65,7 +65,7 @@ shaka.ui.Utils = class {
    * @return {!SVGElement}
    */
   static checkmarkIcon() {
-    const icon = new shaka.ui.MaterialSVGIcon(null,
+    const icon = new shaka.ui.UIIcon(null,
         shaka.ui.Enums.MaterialDesignSVGIcons.CHECKMARK);
     const iconElement = icon.getSvgElement();
     iconElement.classList.add('shaka-chosen-item');

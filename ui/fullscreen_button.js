@@ -13,7 +13,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.MaterialSVGIcon');
+goog.require('shaka.ui.UIIcon');
 goog.require('shaka.util.Dom');
 
 
@@ -38,8 +38,8 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-fullscreen-button');
     this.button_.classList.add('shaka-tooltip');
 
-    /** @private {shaka.ui.MaterialSVGIcon} */
-    this.icon_ = new shaka.ui.MaterialSVGIcon(this.button_,
+    /** @private {shaka.ui.UIIcon} */
+    this.icon_ = new shaka.ui.UIIcon(this.button_,
         shaka.ui.Enums.MaterialDesignSVGIcons.FULLSCREEN);
 
     this.checkSupport_();

@@ -9,7 +9,7 @@ goog.provide('shaka.ui.SettingsMenu');
 
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
-goog.require('shaka.ui.MaterialSVGIcon');
+goog.require('shaka.ui.UIIcon');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.FakeEvent');
@@ -26,7 +26,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
-   * @param {string} iconText
+   * @param {shaka.extern.UIIcon | string} iconText
    */
   constructor(parent, controls, iconText) {
     super(parent, controls);
@@ -73,7 +73,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
 
 
   /**
-   * @param {string} iconText
+   * @param {shaka.extern.UIIcon | string} iconText
    * @private
    */
   addButton_(iconText) {
@@ -81,8 +81,8 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     this.button = shaka.util.Dom.createButton();
     this.button.classList.add('shaka-overflow-button');
 
-    /** @protected {!shaka.ui.MaterialSVGIcon}*/
-    this.icon = new shaka.ui.MaterialSVGIcon(this.button, iconText);
+    /** @protected {!shaka.ui.UIIcon}*/
+    this.icon = new shaka.ui.UIIcon(this.button, iconText);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -120,8 +120,8 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
       this.controls.hideSettingsMenus();
     });
 
-    /** @private {shaka.ui.MaterialSVGIcon} */
-    this.backIcon_ = new shaka.ui.MaterialSVGIcon(this.backButton,
+    /** @private {shaka.ui.UIIcon} */
+    this.backIcon_ = new shaka.ui.UIIcon(this.backButton,
         shaka.ui.Enums.MaterialDesignSVGIcons.CLOSE);
 
     /** @protected {!HTMLElement}*/

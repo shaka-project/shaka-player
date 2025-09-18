@@ -19,10 +19,10 @@
 +../../ui/hidden_fast_forward_button.js
 +../../ui/hidden_rewind_button.js
 +../../ui/hidden_seek_button.js
++../../ui/icon_registry.js
 +../../ui/language_utils.js
 +../../ui/localization.js
 +../../ui/loop_button.js
-+../../ui/material_svg_icon.js
 +../../ui/mute_button.js
 +../../ui/overflow_menu.js
 +../../ui/pip_button.js
@@ -45,6 +45,7 @@
 +../../ui/text_selection.js
 +../../ui/toggle_stereoscopic.js
 +../../ui/ui.js
++../../ui/ui_icon.js
 +../../ui/ui_utils.js
 +../../ui/volume_bar.js
 +../../ui/vr_manager.js

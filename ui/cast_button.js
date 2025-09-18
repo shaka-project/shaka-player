@@ -13,7 +13,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.MaterialSVGIcon');
+goog.require('shaka.ui.UIIcon');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -45,8 +45,8 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     this.castButton_.classList.add('shaka-tooltip');
     this.castButton_.ariaPressed = 'false';
 
-    /** @private {!shaka.ui.MaterialSVGIcon} */
-    this.castIcon_ = new shaka.ui.MaterialSVGIcon(this.castButton_,
+    /** @private {!shaka.ui.UIIcon} */
+    this.castIcon_ = new shaka.ui.UIIcon(this.castButton_,
         shaka.ui.Enums.MaterialDesignSVGIcons.CAST);
 
     const label = shaka.util.Dom.createHTMLElement('label');

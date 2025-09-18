@@ -562,7 +562,7 @@ shaka.extern.IUISettingsMenu = class {
     this.button;
 
     /**
-     * @protected {!shaka.ui.MaterialSVGIcon}
+     * @protected {!shaka.ui.UIIcon}
      * @exportDoc
      */
     this.icon;
@@ -664,3 +664,19 @@ shaka.extern.IUIPlayButton = class {
   /** @return {boolean} */
   isEnded() {}
 };
+
+/**
+ * @typedef {{
+ *   path: ?(string | Array<string>),
+ *   viewBox: ?string,
+ *   url: ?string,
+ *   size: ?number,
+ * }}
+ *
+ * @property {?(string | Array<string>)} path
+ * @property {?string} viewBox
+ * @property {?string} url
+ * @property {?number} size
+ * @exportDoc
+ */
+shaka.extern.UIIcon;

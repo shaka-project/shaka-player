@@ -14,7 +14,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.MaterialSVGIcon');
+goog.require('shaka.ui.UIIcon');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -39,8 +39,8 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-statistics-button');
 
-    /** @private {!shaka.ui.MaterialSVGIcon} */
-    this.icon_ = new shaka.ui.MaterialSVGIcon(this.button_,
+    /** @private {!shaka.ui.UIIcon} */
+    this.icon_ = new shaka.ui.UIIcon(this.button_,
         shaka.ui.Enums.MaterialDesignSVGIcons.STATISTICS_ON);
 
     const label = shaka.util.Dom.createHTMLElement('label');
@@ -247,7 +247,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     const closeElement = shaka.util.Dom.createHTMLElement('div');
     closeElement.classList.add('shaka-no-propagation');
     closeElement.classList.add('shaka-statistics-close');
-    const icon = new shaka.ui.MaterialSVGIcon(closeElement,
+    const icon = new shaka.ui.UIIcon(closeElement,
         shaka.ui.Enums.MaterialDesignSVGIcons.CLOSE);
     const iconElement = icon.getSvgElement();
     iconElement.classList.add('material-icons', 'notranslate');
