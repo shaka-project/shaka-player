@@ -195,6 +195,18 @@
     "description": "Label for a button used to select an audio language whose language code we do not recognize.  This will be followed by the language code in parentheses.  For example, \"Unrecognized (sjn)\".",
     "message": "Unrecognized"
   },
+  "VIDEO_MAIN": {
+    "description": "Label used to identify that it is the main video.",
+    "message": "Main"
+  },
+  "VIDEO_SIGN": {
+    "description": "Label used to identify that it is the sign language video.",
+    "message": "Sign language"
+  },
+  "VIDEO_TYPE": {
+    "description": "Label for a button used to change the video type in the video player.",
+    "message": "Video type"
+  },
   "VOLUME": {
     "description": "Label for a slider used to set the volume level of the video player.",
     "message": "Volume"

@@ -377,6 +377,10 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     const selectedTrack = tracks.find((track) => track.active);
 
     tracks = tracks.filter((track, idx) => {
+      const ArrayUtils = shaka.util.ArrayUtils;
+      if (!ArrayUtils.hasSameElements(selectedTrack.roles, track.roles)) {
+        return false;
+      }
       // Keep the first one with the same height and framerate or bandwidth.
       const otherIdx = tracks.findIndex((t) => {
         let ret = t.height == track.height &&
@@ -384,7 +388,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
             t.frameRate == track.frameRate &&
             t.hdr == track.hdr &&
             t.videoLayout == track.videoLayout &&
-            shaka.util.ArrayUtils.equal(t.roles, track.roles);
+            shaka.util.ArrayUtils.hasSameElements(t.roles, track.roles);
         if (ret && this.controls.getConfig().showVideoCodec &&
             t.codecs && track.codecs) {
           ret = shaka.util.MimeUtils.getNormalizedCodec(t.codecs) ==

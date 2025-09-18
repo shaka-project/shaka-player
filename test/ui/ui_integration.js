@@ -75,6 +75,7 @@ describe('UI', () => {
       overflowMenuButtons: [
         'captions',
         'quality',
+        'video_type',
         'language',
         'chapter',
         'picture_in_picture',
