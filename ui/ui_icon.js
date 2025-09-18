@@ -41,6 +41,7 @@ shaka.ui.UIIcon = class {
   }
 
   /**
+   * If a single string is passed, it is treated as an SVG path
    * @param {shaka.extern.UIIcon | string} icon
    * @export
    */
