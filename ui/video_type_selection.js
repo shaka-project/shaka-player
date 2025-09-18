@@ -32,14 +32,8 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
         shaka.ui.Enums.MaterialDesignSVGIcons.VIDEO_TYPE);
 
     this.button.classList.add('shaka-playbackrate-button');
-    this.menu.classList.add('shaka-playback-rates');
+    this.menu.classList.add('shaka-video-type');
     this.button.classList.add('shaka-tooltip-status');
-
-    if (!Array.from(parent.classList).includes('shaka-overflow-menu')) {
-      this.playbackRateMark = shaka.util.Dom.createHTMLElement('span');
-      this.playbackRateMark.classList.add('shaka-overflow-playback-rate-mark');
-      this.button.appendChild(this.playbackRateMark);
-    }
 
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
