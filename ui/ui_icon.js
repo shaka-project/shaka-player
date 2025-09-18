@@ -23,17 +23,12 @@ shaka.ui.UIIcon = class {
     /** @private {!SVGElement} */
     this.svg_ = shaka.util.Dom.createSVGElement('svg');
 
-    /** @private {!SVGElement} */
-    this.path_ = shaka.util.Dom.createSVGElement('path');
-
     this.svg_.classList.add('shaka-ui-icon');
     this.svg_.setAttribute('viewBox', '0 -960 960 960');
 
     if (icon) {
       this.use(icon);
     }
-
-    this.svg_.appendChild(this.path_);
 
     if (this.parent) {
       parent.appendChild(this.svg_);
