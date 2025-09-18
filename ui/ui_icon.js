@@ -46,6 +46,9 @@ shaka.ui.UIIcon = class {
       return;
     }
 
+    // remove all previous path elements
+    this.emptyChildNodes_();
+
     if (typeof icon == 'string') {
       this.applyInlinedSVG_(icon, null);
     } else if (typeof icon == 'object') {
@@ -80,10 +83,8 @@ shaka.ui.UIIcon = class {
   applyInlinedSVG_(path, viewBox) {
     // do not need a background color if mask-image isn't using
     this.svg_.style.setProperty('background-color', 'transparent');
+    this.svg_.style.setAttribute('mask-image', '');
     this.svg_.setAttribute('viewBox', viewBox || '0 -960 960 960');
-
-    // remove all previous path elements
-    this.emptyChildNodes_();
 
     if (Array.isArray(path)) {
       for (let i = 0, l = path.length; i < l; i++) {
