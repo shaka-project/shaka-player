@@ -29,7 +29,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
    */
   constructor(parent, controls) {
     super(parent, controls,
-        shaka.ui.Enums.MaterialDesignSVGIcons.PLAYBACK_RATE);
+        shaka.ui.Enums.MaterialDesignSVGIcons['PLAYBACK_RATE']);
 
     this.button.classList.add('shaka-playbackrate-button');
     this.menu.classList.add('shaka-playback-rates');

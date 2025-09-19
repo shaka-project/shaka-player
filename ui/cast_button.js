@@ -47,7 +47,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
 
     /** @private {!shaka.ui.UIIcon} */
     this.castIcon_ = new shaka.ui.UIIcon(this.castButton_,
-        shaka.ui.Enums.MaterialDesignSVGIcons.CAST);
+        shaka.ui.Enums.MaterialDesignSVGIcons['CAST']);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -121,7 +121,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     const isCasting = this.castProxy_.isCasting();
     const Icons = shaka.ui.Enums.MaterialDesignSVGIcons;
     shaka.ui.Utils.setDisplay(this.castButton_, canCast);
-    this.castIcon_.use(isCasting ? Icons.EXIT_CAST : Icons.CAST);
+    this.castIcon_.use(isCasting ? Icons['EXIT_CAST'] : Icons['CAST']);
 
     // Aria-pressed set to true when casting, set to false otherwise.
     if (canCast) {

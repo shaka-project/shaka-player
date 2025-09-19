@@ -46,8 +46,8 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     /** @private {!shaka.ui.UIIcon} */
     this.remoteIcon_ = new shaka.ui.UIIcon(this.remoteButton_,
         this.isAirPlay_ ?
-          shaka.ui.Enums.MaterialDesignSVGIcons.AIRPLAY :
-          shaka.ui.Enums.MaterialDesignSVGIcons.CAST);
+          shaka.ui.Enums.MaterialDesignSVGIcons['AIRPLAY'] :
+          shaka.ui.Enums.MaterialDesignSVGIcons['CAST']);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -206,9 +206,9 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
       return;
     }
     if (this.video.remote.state == 'disconnected') {
-      this.remoteIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.CAST);
+      this.remoteIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['CAST']);
     } else {
-      this.remoteIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.EXIT_CAST);
+      this.remoteIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['EXIT_CAST']);
     }
   }
 };

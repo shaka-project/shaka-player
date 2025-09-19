@@ -37,7 +37,7 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
         this.localization.resolve(shaka.ui.Locales.Ids.OFF));
 
     new shaka.ui.UIIcon(this.button_).use(
-        shaka.ui.Enums.MaterialDesignSVGIcons.REWIND,
+        shaka.ui.Enums.MaterialDesignSVGIcons['REWIND'],
     );
 
     this.parent.appendChild(this.button_);

@@ -122,7 +122,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
 
     /** @private {shaka.ui.UIIcon} */
     this.backIcon_ = new shaka.ui.UIIcon(this.backButton,
-        shaka.ui.Enums.MaterialDesignSVGIcons.CLOSE);
+        shaka.ui.Enums.MaterialDesignSVGIcons['CLOSE']);
 
     /** @protected {!HTMLElement}*/
     this.backSpan = shaka.util.Dom.createHTMLElement('span');
@@ -138,7 +138,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     // inside of the overflow menu, that option must be replaced with a
     // "Back" arrow that returns the user to the main menu.
     if (this.parent.classList.contains('shaka-overflow-menu')) {
-      this.backIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.BACK);
+      this.backIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['BACK']);
 
       this.eventManager.listen(this.menu, 'click', () => {
         shaka.ui.Utils.setDisplay(this.menu, false);

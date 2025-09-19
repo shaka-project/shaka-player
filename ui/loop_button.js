@@ -42,7 +42,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
 
     /** @private {!shaka.ui.UIIcon} */
     this.icon_ = new shaka.ui.UIIcon(this.button_,
-        shaka.ui.Enums.MaterialDesignSVGIcons.LOOP);
+        shaka.ui.Enums.MaterialDesignSVGIcons['LOOP']);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -165,7 +165,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
 
     this.currentState_.textContent = this.localization.resolve(labelText);
 
-    this.icon_.use(this.video.loop ? Icons.UNLOOP : Icons.LOOP);
+    this.icon_.use(this.video.loop ? Icons['UNLOOP'] : Icons['LOOP']);
 
     const ariaText = this.video.loop ?
         LocIds.EXIT_LOOP_MODE : LocIds.ENTER_LOOP_MODE;
