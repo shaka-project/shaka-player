@@ -130,7 +130,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
       this.icon.use(shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS);
       this.button.ariaPressed = 'true';
     } else {
-      this.icon.use(shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS_OFF);
+      this.icon.use(
+          shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS_OFF);
       this.button.ariaPressed = 'false';
     }
 

@@ -169,10 +169,10 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     const Icons = shaka.ui.Enums.MaterialDesignSVGIcons;
     let icon;
     if (this.ad) {
-      icon = this.ad.isMuted() ? Icons.UNMUTE : Icons.MUTE;
+      icon = this.ad.isMuted() ? Icons['UNMUTE'] : Icons['MUTE'];
     } else {
       icon = (this.video.muted || this.video.volume == 0) ?
-          Icons.UNMUTE : Icons.MUTE;
+          Icons['UNMUTE'] : Icons['MUTE'];
     }
     this.icon_.use(icon);
   }

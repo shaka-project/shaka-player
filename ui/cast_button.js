@@ -121,7 +121,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     const isCasting = this.castProxy_.isCasting();
     const Icons = shaka.ui.Enums.MaterialDesignSVGIcons;
     shaka.ui.Utils.setDisplay(this.castButton_, canCast);
-    this.castIcon_.use(isCasting ? Icons.EXIT_CAST : Icons.CAST);
+    this.castIcon_.use(isCasting ? Icons['EXIT_CAST'] : Icons['CAST']);
 
     // Aria-pressed set to true when casting, set to false otherwise.
     if (canCast) {
