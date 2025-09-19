@@ -27,7 +27,3 @@ shaka.ui.IconRegistry = class IconRegistry {
   }
 };
 
-/**
- * @export
- */
-shaka.ui.IconRegistry.registeredIcons = {};
