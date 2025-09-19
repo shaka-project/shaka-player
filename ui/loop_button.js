@@ -165,7 +165,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
 
     this.currentState_.textContent = this.localization.resolve(labelText);
 
-    this.icon_.use(this.video.loop ? Icons['UNLOOP'] : Icons['LOOP']);
+    this.icon_.use(this.video.loop ? Icons.UNLOOP : Icons.LOOP);
 
     const ariaText = this.video.loop ?
         LocIds.EXIT_LOOP_MODE : LocIds.ENTER_LOOP_MODE;
