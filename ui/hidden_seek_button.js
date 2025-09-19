@@ -7,7 +7,7 @@
 goog.provide('shaka.ui.HiddenSeekButton');
 
 goog.require('shaka.ui.Element');
-goog.require('shaka.ui.UIIcon');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.util.Timer');
 goog.require('shaka.util.Dom');
 
@@ -71,8 +71,8 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     this.seekValue_.textContent = '0s';
     this.seekContainer.appendChild(this.seekValue_);
 
-    /** @protected {!shaka.ui.UIIcon} */
-    this.seekIcon = new shaka.ui.UIIcon(this.seekContainer);
+    /** @protected {!shaka.ui.Icon} */
+    this.seekIcon = new shaka.ui.Icon(this.seekContainer);
     this.seekIcon.getSvgElement().classList.add(
         'shaka-forward-rewind-container-icon');
 

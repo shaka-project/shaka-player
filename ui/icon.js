@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.ui.UIIcon');
+goog.provide('shaka.ui.Icon');
 
 goog.require('shaka.util.Dom');
 
@@ -12,7 +12,7 @@ goog.require('shaka.util.Dom');
  * @final
  * @export
  */
-shaka.ui.UIIcon = class {
+shaka.ui.Icon = class {
   /**
    * @param {?Element} parent
    * @param {?(shaka.extern.UIIcon | string)=} icon

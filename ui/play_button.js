@@ -10,9 +10,9 @@ goog.provide('shaka.ui.PlayButton');
 goog.require('shaka.ads.Utils');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.UIIcon');
 goog.require('shaka.util.Dom');
 goog.requireType('shaka.ui.Controls');
 
@@ -34,8 +34,8 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     this.button = shaka.util.Dom.createButton();
     this.parent.appendChild(this.button);
 
-    /** @private {!shaka.ui.UIIcon} */
-    this.icon_ = new shaka.ui.UIIcon(this.button);
+    /** @private {!shaka.ui.Icon} */
+    this.icon_ = new shaka.ui.Icon(this.button);
 
     const LOCALE_UPDATED = shaka.ui.Localization.LOCALE_UPDATED;
     this.eventManager.listen(this.localization, LOCALE_UPDATED, () => {

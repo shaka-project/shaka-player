@@ -12,9 +12,9 @@ goog.require('shaka.device.DeviceFactory');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.UIIcon');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -43,8 +43,8 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     this.remoteButton_.classList.add('shaka-tooltip');
     this.remoteButton_.ariaPressed = 'false';
 
-    /** @private {!shaka.ui.UIIcon} */
-    this.remoteIcon_ = new shaka.ui.UIIcon(this.remoteButton_,
+    /** @private {!shaka.ui.Icon} */
+    this.remoteIcon_ = new shaka.ui.Icon(this.remoteButton_,
         this.isAirPlay_ ?
           shaka.ui.Enums.MaterialDesignSVGIcons.AIRPLAY :
           shaka.ui.Enums.MaterialDesignSVGIcons.CAST);

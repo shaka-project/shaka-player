@@ -10,9 +10,9 @@ goog.provide('shaka.ui.ToggleStereoscopicButton');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.UIIcon');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -39,8 +39,8 @@ shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
     this.toggleStereoscopicButton_.classList.add('shaka-tooltip');
     this.toggleStereoscopicButton_.ariaPressed = 'false';
 
-    /** @private {!shaka.ui.UIIcon} */
-    this.toggleStereoscopicIcon_ = new shaka.ui.UIIcon(
+    /** @private {!shaka.ui.Icon} */
+    this.toggleStereoscopicIcon_ = new shaka.ui.Icon(
         this.toggleStereoscopicButton_,
         shaka.ui.Enums.MaterialDesignSVGIcons.TOGGLE_STEREOSCOPIC);
 

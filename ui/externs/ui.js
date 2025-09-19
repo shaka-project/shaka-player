@@ -562,7 +562,7 @@ shaka.extern.IUISettingsMenu = class {
     this.button;
 
     /**
-     * @protected {!shaka.ui.UIIcon}
+     * @protected {!shaka.ui.Icon}
      * @exportDoc
      */
     this.icon;

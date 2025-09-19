@@ -11,9 +11,9 @@ goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.UIIcon');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -40,8 +40,8 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-loop-button');
     this.button_.classList.add('shaka-tooltip');
 
-    /** @private {!shaka.ui.UIIcon} */
-    this.icon_ = new shaka.ui.UIIcon(this.button_,
+    /** @private {!shaka.ui.Icon} */
+    this.icon_ = new shaka.ui.Icon(this.button_,
         shaka.ui.Enums.MaterialDesignSVGIcons.LOOP);
 
     const label = shaka.util.Dom.createHTMLElement('label');

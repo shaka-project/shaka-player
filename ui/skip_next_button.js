@@ -10,9 +10,9 @@ goog.provide('shaka.ui.SkipNextButton');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.UIIcon');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 
@@ -40,7 +40,7 @@ shaka.ui.SkipNextButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-skip-next-button');
     this.button_.classList.add('shaka-tooltip');
-    new shaka.ui.UIIcon(this.button_).use(
+    new shaka.ui.Icon(this.button_).use(
         shaka.ui.Enums.MaterialDesignSVGIcons.SKIP_NEXT);
     this.parent.appendChild(this.button_);
 
