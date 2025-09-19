@@ -50,11 +50,15 @@ shaka.ui.UIIcon = class {
     this.emptyChildNodes_();
 
     if (typeof icon == 'string') {
+      this.svg_.style.setProperty('font-size', '');
       this.applyInlinedSVG_(icon, null);
     } else if (typeof icon == 'object') {
       const url = icon['url'];
       const path = icon['path'];
       const viewBox = icon['viewBox'];
+      const size = icon['size'];
+
+      this.svg_.style.setProperty('font-size', size ? size + 'px': '');
 
       if (url) {
         // let handle the background-color (icon color) by CSS
@@ -83,7 +87,7 @@ shaka.ui.UIIcon = class {
   applyInlinedSVG_(path, viewBox) {
     // do not need a background color if mask-image isn't using
     this.svg_.style.setProperty('background-color', 'transparent');
-    this.svg_.style.setAttribute('mask-image', '');
+    this.svg_.style.setProperty('mask-image', '');
     this.svg_.setAttribute('viewBox', viewBox || '0 -960 960 960');
 
     if (Array.isArray(path)) {
