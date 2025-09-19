@@ -40,7 +40,7 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
 
     /** @private {shaka.ui.UIIcon} */
     this.icon_ = new shaka.ui.UIIcon(this.button_,
-        shaka.ui.Enums.MaterialDesignSVGIcons['FULLSCREEN']);
+        shaka.ui.Enums.MaterialDesignSVGIcons.FULLSCREEN);
 
     this.checkSupport_();
 
@@ -114,8 +114,8 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
    */
   updateIcon_() {
     this.icon_.use(this.controls.isFullScreenEnabled() ?
-      shaka.ui.Enums.MaterialDesignSVGIcons['EXIT_FULLSCREEN'] :
-      shaka.ui.Enums.MaterialDesignSVGIcons['FULLSCREEN'],
+      shaka.ui.Enums.MaterialDesignSVGIcons.EXIT_FULLSCREEN :
+      shaka.ui.Enums.MaterialDesignSVGIcons.FULLSCREEN,
     );
   }
 };

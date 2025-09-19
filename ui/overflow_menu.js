@@ -169,7 +169,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     this.overflowMenuButton_.classList.add('shaka-no-propagation');
     this.overflowMenuButton_.classList.add('shaka-tooltip');
     new shaka.ui.UIIcon(this.overflowMenuButton_).use(
-        shaka.ui.Enums.MaterialDesignSVGIcons['OPEN_OVERFLOW']);
+        shaka.ui.Enums.MaterialDesignSVGIcons.OPEN_OVERFLOW);
     const markEl = shaka.util.Dom.createHTMLElement('span');
     markEl.classList.add('shaka-overflow-quality-mark');
     markEl.style.display = 'none';

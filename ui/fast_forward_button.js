@@ -36,7 +36,7 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
     this.button_.setAttribute('shaka-status', '1x');
 
     new shaka.ui.UIIcon(this.button_).use(
-        shaka.ui.Enums.MaterialDesignSVGIcons['FAST_FORWARD']);
+        shaka.ui.Enums.MaterialDesignSVGIcons.FAST_FORWARD);
 
     this.parent.appendChild(this.button_);
     this.updateAriaLabel_();

@@ -32,7 +32,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
    */
   constructor(parent, controls) {
     super(parent,
-        controls, shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS']);
+        controls, shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS);
 
     this.button.classList.add('shaka-caption-button');
     this.button.classList.add('shaka-tooltip-status');
@@ -127,11 +127,11 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
         .some((track) => track.active);
 
     if (hasTrack) {
-      this.icon.use(shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS']);
+      this.icon.use(shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS);
       this.button.ariaPressed = 'true';
     } else {
       this.icon.use(
-          shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS_OFF']);
+          shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS_OFF);
       this.button.ariaPressed = 'false';
     }
 

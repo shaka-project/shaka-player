@@ -14,7 +14,7 @@ goog.provide('shaka.ui.Enums');
  * Url used to fetch following svg icons
  * https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/<icon>/fill1/24px.svg
  *
- * @enum {string}
+ * @enum {shaka.extern.UIIcon | string}
  * @export
  */
 /* eslint @stylistic/max-len: ["error", { "code": 1000 }] */

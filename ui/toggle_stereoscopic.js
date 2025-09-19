@@ -42,7 +42,7 @@ shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
     /** @private {!shaka.ui.UIIcon} */
     this.toggleStereoscopicIcon_ = new shaka.ui.UIIcon(
         this.toggleStereoscopicButton_,
-        shaka.ui.Enums.MaterialDesignSVGIcons['TOGGLE_STEREOSCOPIC']);
+        shaka.ui.Enums.MaterialDesignSVGIcons.TOGGLE_STEREOSCOPIC);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');

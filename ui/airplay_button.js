@@ -41,7 +41,7 @@ shaka.ui.AirPlayButton = class extends shaka.ui.Element {
     this.airplayButton_.ariaPressed = 'false';
 
     new shaka.ui.UIIcon(this.airplayButton_).use(
-        shaka.ui.Enums.MaterialDesignSVGIcons['AIRPLAY']);
+        shaka.ui.Enums.MaterialDesignSVGIcons.AIRPLAY);
 
     // Don't show the button if AirPlay is not supported.
     if (!window.WebKitPlaybackTargetAvailabilityEvent) {

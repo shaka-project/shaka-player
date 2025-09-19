@@ -41,7 +41,7 @@ shaka.ui.SkipNextButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-skip-next-button');
     this.button_.classList.add('shaka-tooltip');
     new shaka.ui.UIIcon(this.button_).use(
-        shaka.ui.Enums.MaterialDesignSVGIcons['SKIP_NEXT']);
+        shaka.ui.Enums.MaterialDesignSVGIcons.SKIP_NEXT);
     this.parent.appendChild(this.button_);
 
     this.updateAriaLabel_();

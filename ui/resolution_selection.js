@@ -36,7 +36,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
    */
   constructor(parent, controls) {
     super(parent, controls,
-        shaka.ui.Enums.MaterialDesignSVGIcons['RESOLUTION']);
+        shaka.ui.Enums.MaterialDesignSVGIcons.RESOLUTION);
 
     this.button.classList.add('shaka-resolution-button');
     this.button.classList.add('shaka-tooltip-status');
