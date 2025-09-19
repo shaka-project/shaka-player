@@ -105,6 +105,7 @@ goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.FastForwardButton');
 goog.require('shaka.ui.FullscreenButton');
+goog.require('shaka.ui.IconRegistry');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.LoopButton');
 goog.require('shaka.ui.Matrix4x4');
