@@ -323,6 +323,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       if (this.ad_) {
         return;
       }
+      this.lastSelectedTextTrack_ = null;
       if (this.isFullScreenEnabled()) {
         this.exitFullScreen_();
       }
@@ -1801,14 +1802,25 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   computeShakaTextContainerSize_() {
+    const elements = [];
     const shakaTextContainer = this.videoContainer_.getElementsByClassName(
         'shaka-text-container')[0];
+    const shakaSpeechToTextContainer =
+        this.videoContainer_.getElementsByClassName(
+            'shaka-speech-to-text-container')[0];
     if (shakaTextContainer) {
+      elements.push(shakaTextContainer);
+    }
+    if (shakaSpeechToTextContainer) {
+      elements.push(shakaSpeechToTextContainer);
+    }
+    if (elements.length) {
+      let bottom = '0px';
       if (this.isOpaque()) {
-        shakaTextContainer.style.bottom =
-            this.bottomControls_.clientHeight + 'px';
-      } else {
-        shakaTextContainer.style.bottom = '0px';
+        bottom = this.bottomControls_.clientHeight + 'px';
+      }
+      for (const element of elements) {
+        element.style.bottom = bottom;
       }
     }
   }
@@ -1919,6 +1931,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   onControlsKeyDown_(event) {
+    if (event.ctrlKey || event.metaKey) {
+      return;
+    }
+
+    if (!this.config_.enableKeyboardPlaybackControls ||
+        !this.player_.getAssetUri()) {
+      return;
+    }
+
     const activeElement = document.activeElement;
     const isVolumeBar = activeElement && activeElement.classList ?
         activeElement.classList.contains('shaka-volume-bar') : false;
@@ -1934,16 +1955,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onMouseMove_(event);
     }
 
-    if (!this.config_.enableKeyboardPlaybackControls ||
-        !this.player_.getAssetUri()) {
-      return;
-    }
-
     const keyboardSeekDistance = this.config_.keyboardSeekDistance;
     const keyboardLargeSeekDistance = this.config_.keyboardLargeSeekDistance;
 
-    switch (event.key) {
-      case 'ArrowLeft':
+    switch (event.key.toLowerCase()) {
+      case this.config_.shortcuts.small_rewind.toLowerCase():
         // If it's not focused on the volume bar, or if it's in fullscreen,
         // move the seek time backward for a few sec.
         // Otherwise, the volume will be adjusted automatically.
@@ -1955,7 +1971,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           }
         }
         break;
-      case 'ArrowRight':
+      case this.config_.shortcuts.small_fast_forward.toLowerCase():
         // If it's not focused on the volume bar, or if it's in fullscreen,
         // move the seek time forward for a few sec.
         // Otherwise, the volume will be adjusted automatically.
@@ -1967,7 +1983,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           }
         }
         break;
-      case 'PageDown':
+      case this.config_.shortcuts.large_rewind.toLowerCase():
         // PageDown is like ArrowLeft, but has a larger jump distance, and does
         // nothing to volume.
         if (this.seekBar_ && keyboardLargeSeekDistance > 0) {
@@ -1977,7 +1993,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           }
         }
         break;
-      case 'PageUp':
+      case this.config_.shortcuts.large_fast_forward.toLowerCase():
         // PageDown is like ArrowRight, but has a larger jump distance, and does
         // nothing to volume.
         if (this.seekBar_ && keyboardLargeSeekDistance > 0) {
@@ -1988,18 +2004,18 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         }
         break;
       // Jump to the beginning of the video's seek range.
-      case 'Home':
+      case this.config_.shortcuts.home.toLowerCase():
         if (this.seekBar_) {
           this.seek_(this.player_.seekRange().start);
         }
         break;
       // Jump to the end of the video's seek range.
-      case 'End':
+      case this.config_.shortcuts.end.toLowerCase():
         if (this.seekBar_) {
           this.seek_(this.player_.seekRange().end);
         }
         break;
-      case 'c': {
+      case this.config_.shortcuts.captions.toLowerCase(): {
         if (!this.lastSelectedTextTrack_) {
           break;
         }
@@ -2012,24 +2028,24 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         }
         break;
       }
-      case 'f':
+      case this.config_.shortcuts.fullscreen.toLowerCase():
         if (this.isFullScreenSupported()) {
           this.toggleFullScreen();
         }
         break;
-      case 'm':
+      case this.config_.shortcuts.mute.toLowerCase():
         if (this.ad_ && this.ad_.isLinear()) {
           this.ad_.setMuted(!this.ad_.isMuted());
         } else {
           this.localVideo_.muted = !this.localVideo_.muted;
         }
         break;
-      case 'p':
+      case this.config_.shortcuts.picture_in_picture.toLowerCase():
         if (this.isPiPAllowed()) {
           this.togglePiP();
         }
         break;
-      case '>': {
+      case this.config_.shortcuts.increase_video_speed.toLowerCase(): {
         const index =
             this.config_.playbackRates.indexOf(this.player_.getPlaybackRate());
         if (index > -1 && (index + 1) < this.config_.playbackRates.length) {
@@ -2038,7 +2054,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         }
         break;
       }
-      case '<': {
+      case this.config_.shortcuts.decrease_video_speed.toLowerCase(): {
         const index =
             this.config_.playbackRates.indexOf(this.player_.getPlaybackRate());
         if (index > -1 && (index - 1) >= 0) {
@@ -2049,13 +2065,46 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
       // Pause or play by pressing space on the seek bar.
       case ' ':
-        if (
-          isSeekBar ||
-          (isFullscreenOrControlsInWindow && !isControlsFocused)
-        ) {
+      // older browsers might return spacebar instead of a space character
+      case 'spacebar':
+      case this.config_.shortcuts.play.toLowerCase():
+        if (isSeekBar ||
+            (isFullscreenOrControlsInWindow && !isControlsFocused)) {
           this.playPausePresentation();
         }
         break;
+      case this.config_.shortcuts.take_screenshot.toLowerCase():
+        this.takeScreenshot();
+        break;
+      case this.config_.shortcuts.last_frame.toLowerCase():
+        // Return to previous frame
+        this.frameByFrame_(-1);
+        break;
+      case this.config_.shortcuts.next_frame.toLowerCase():
+        // Advance to next frame
+        this.frameByFrame_(1);
+        break;
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9': {
+        // Jump to percentage in the video
+        if (!this.ad_) {
+          const seekRange = this.player_.seekRange();
+          const length = seekRange.end - seekRange.start;
+          if (length > 0) {
+            const percentage = parseInt(event.key, 10) / 10;
+            this.seek_(seekRange.start + (length * percentage));
+          }
+        }
+        break;
+      }
     }
   }
 
@@ -2102,6 +2151,58 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @return {boolean}
+   * @export
+   */
+  canTakeScreenshot() {
+    let available = true;
+    if (this.isPlayingVR()) {
+      available = false;
+    }
+    if (available && this.castProxy_.isCasting()) {
+      available = false;
+    }
+    if (available && (this.player_.drmInfo() || this.player_.isAudioOnly())) {
+      available = false;
+    }
+    if (available && this.ad_) {
+      available = false;
+    }
+    if (available && this.player_.isRemotePlayback()) {
+      available = false;
+    }
+    return available;
+  }
+
+  /**
+   * @export
+   */
+  takeScreenshot() {
+    if (!this.canTakeScreenshot()) {
+      return;
+    }
+    const canvas = /** @type {!HTMLCanvasElement}*/ (
+      document.createElement('canvas'));
+    const context = /** @type {CanvasRenderingContext2D} */ (
+      canvas.getContext('2d'));
+
+    const video = /** @type {!HTMLVideoElement} */ (this.localVideo_);
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const dataURL = canvas.toDataURL('image/png');
+
+    const downloadLink = /** @type {!HTMLAnchorElement}*/ (
+      document.createElement('a'));
+    downloadLink.href = dataURL;
+    downloadLink.download =
+        'videoframe_' + video.currentTime.toFixed(3) + '.png';
+    downloadLink.click();
+  }
+
+  /**
    * @private
    */
   dispatchVisibilityEvent_() {
@@ -2109,6 +2210,30 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.dispatchEvent(new shaka.util.FakeEvent('showingui'));
     } else {
       this.dispatchEvent(new shaka.util.FakeEvent('hidingui'));
+    }
+  }
+
+  /**
+   * @param {number} step
+   * @private
+   */
+  frameByFrame_(step) {
+    if ((this.ad_ && this.ad_.isLinear()) ||
+        this.player_.isAudioOnly()) {
+      return;
+    }
+    const videoTrack = this.player_.getVideoTracks().find((t) => t.active);
+    if (!videoTrack || !videoTrack.frameRate) {
+      return;
+    }
+    if (!this.video_.paused) {
+      this.video_.pause();
+    }
+    const frameTime = 1 / videoTrack.frameRate;
+    const newTime = this.seekBar_.getValue() + frameTime * step;
+    if (newTime >= 0 && newTime <= this.player_.seekRange().end &&
+        this.video_.currentTime !== newTime) {
+      this.seek_(newTime);
     }
   }
 

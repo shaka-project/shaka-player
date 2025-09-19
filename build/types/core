@@ -72,6 +72,7 @@
 +../../lib/text/cue_region.js
 +../../lib/text/native_text_displayer.js
 +../../lib/text/simple_text_displayer.js
++../../lib/text/speech_to_text.js
 +../../lib/text/stub_text_displayer.js
 +../../lib/text/text_engine.js
 +../../lib/text/text_utils.js

@@ -641,7 +641,9 @@ shakaDemo.Config = class {
             strategyOptions, strategyOptionsNames)
         .addBoolInput_(
             'Return to end of live window when outside of live window',
-            'streaming.returnToEndOfLiveWindowWhenOutside');
+            'streaming.returnToEndOfLiveWindowWhenOutside')
+        .addBoolInput_('Enable speech to text',
+            'streaming.enableSpeechToText');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
   }

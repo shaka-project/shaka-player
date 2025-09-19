@@ -167,6 +167,10 @@
     "description": "Label for a button used to skip previous.",
     "message": "Previous"
   },
+  "SPEECH_TO_TEXT": {
+    "description": "Label for a button used to select an audio track for speech to text.",
+    "message": "Speech to text"
+  },
   "STATISTICS": {
     "description": "Label for a button that displays statistics of the video.",
     "message": "Statistics"

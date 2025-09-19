@@ -42,7 +42,8 @@
 
   background-color: @general-background-color-opaque;
 
-  .shaka-text-container {
+  .shaka-text-container,
+  .shaka-speech-to-text-container {
     /* In fullscreen mode, the text displayer's font size should be relative to
      * the either window height or width (whichever is smaller), instead of a
      * fixed size. */
@@ -403,7 +404,8 @@
   background: linear-gradient(rgba(0, 0, 0, 0%) 0, rgba(0, 0, 0, 50%) 100%);
 }
 
-.shaka-text-container {
+.shaka-text-container,
+.shaka-speech-to-text-container {
   .absolute-position();
 
   /* Make sure the text container doesn't steal pointer events from another
@@ -436,7 +438,8 @@
   }
 }
 
-.shaka-controls-container[shown="true"] ~ .shaka-text-container {
+.shaka-controls-container[shown="true"] ~ .shaka-text-container,
+.shaka-controls-container[shown="true"] ~ .shaka-speech-to-text-container {
   /* Disable the transition delay when moving the captions up, so that the
    * controls don't appear over the captions. */
   transition-delay: 0ms;

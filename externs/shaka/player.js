@@ -1906,7 +1906,8 @@ shaka.extern.LiveSyncConfiguration;
  *   shouldFixTimestampOffset: boolean,
  *   avoidEvictionOnQuotaExceededError: boolean,
  *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy,
- *   returnToEndOfLiveWindowWhenOutside: boolean
+ *   returnToEndOfLiveWindowWhenOutside: boolean,
+ *   enableSpeechToText: boolean,
  * }}
  *
  * @description
@@ -2151,6 +2152,12 @@ shaka.extern.LiveSyncConfiguration;
  * @property {boolean} returnToEndOfLiveWindowWhenOutside
  *   If true, when the playhead is behind the start of the live window,
  *   it will be moved to the end of the live window, instead of the start.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} enableSpeechToText
+ *   If true, creates a new text track that allows speech to text if
+ *   supported by the browser.
+ *   This feature is experimental and may not work properly.
  *   <br>
  *   Defaults to <code>false</code>.
  * @exportDoc
