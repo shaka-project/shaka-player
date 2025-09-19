@@ -29,7 +29,7 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
    */
   constructor(parent, controls) {
     super(parent, controls,
-        shaka.ui.Enums.MaterialDesignSVGIcons.VIDEO_TYPE);
+        shaka.ui.Enums.MaterialDesignSVGIcons['VIDEO_TYPE']);
 
     this.button.classList.add('shaka-playbackrate-button');
     this.menu.classList.add('shaka-video-type');

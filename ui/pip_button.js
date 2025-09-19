@@ -47,7 +47,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
 
     /** @private {!shaka.ui.Icon} */
     this.pipIcon_ = new shaka.ui.Icon(this.pipButton_,
-        shaka.ui.Enums.MaterialDesignSVGIcons.PIP);
+        shaka.ui.Enums.MaterialDesignSVGIcons['PIP']);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -126,7 +126,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
   /** @private */
   onEnterPictureInPicture_() {
     const LocIds = shaka.ui.Locales.Ids;
-    this.pipIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.EXIT_PIP);
+    this.pipIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['EXIT_PIP']);
     this.pipButton_.ariaLabel =
         this.localization.resolve(LocIds.EXIT_PICTURE_IN_PICTURE);
     this.currentPipState_.textContent =
@@ -137,7 +137,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
   /** @private */
   onLeavePictureInPicture_() {
     const LocIds = shaka.ui.Locales.Ids;
-    this.pipIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons.PIP);
+    this.pipIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['PIP']);
     this.pipButton_.ariaLabel =
         this.localization.resolve(LocIds.ENTER_PICTURE_IN_PICTURE);
     this.currentPipState_.textContent =

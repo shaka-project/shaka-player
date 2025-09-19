@@ -66,7 +66,7 @@ shaka.ui.Utils = class {
    */
   static checkmarkIcon() {
     const icon = new shaka.ui.Icon(null,
-        shaka.ui.Enums.MaterialDesignSVGIcons.CHECKMARK);
+        shaka.ui.Enums.MaterialDesignSVGIcons['CHECKMARK']);
     const iconElement = icon.getSvgElement();
     iconElement.classList.add('shaka-chosen-item');
     // Screen reader should ignore icon text.

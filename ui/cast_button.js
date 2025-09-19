@@ -47,7 +47,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
 
     /** @private {!shaka.ui.Icon} */
     this.castIcon_ = new shaka.ui.Icon(this.castButton_,
-        shaka.ui.Enums.MaterialDesignSVGIcons.CAST);
+        shaka.ui.Enums.MaterialDesignSVGIcons['CAST']);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
