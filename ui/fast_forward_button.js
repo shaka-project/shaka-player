@@ -10,9 +10,9 @@ goog.provide('shaka.ui.FastForwardButton');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.util.Dom');
 
 
@@ -35,8 +35,8 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-tooltip-status');
     this.button_.setAttribute('shaka-status', '1x');
 
-    new shaka.ui.MaterialSVGIcon(this.button_).use(
-        shaka.ui.Enums.MaterialDesignSVGIcons.FAST_FORWARD);
+    new shaka.ui.Icon(this.button_).use(
+        shaka.ui.Enums.MaterialDesignSVGIcons['FAST_FORWARD']);
 
     this.parent.appendChild(this.button_);
     this.updateAriaLabel_();

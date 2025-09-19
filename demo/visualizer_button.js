@@ -27,9 +27,9 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-pip-button');
     this.button_.classList.add('shaka-tooltip');
 
-    /** @private {!shaka.ui.MaterialSVGIcon} */
-    this.icon_ = /** @type {!shaka.ui.MaterialSVGIcon} */ (
-      new shaka.ui.MaterialSVGIcon(this.button_));
+    /** @private {!shaka.ui.Icon} */
+    this.icon_ = /** @type {!shaka.ui.Icon} */ (
+      new shaka.ui.Icon(this.button_));
     this.setIcon_();
 
     const label = document.createElement('label');

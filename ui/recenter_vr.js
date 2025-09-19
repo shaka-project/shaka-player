@@ -10,9 +10,9 @@ goog.provide('shaka.ui.RecenterVRButton');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -38,9 +38,9 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
     this.recenterVRButton_.classList.add('shaka-tooltip');
     this.recenterVRButton_.ariaPressed = 'false';
 
-    /** @private {!shaka.ui.MaterialSVGIcon} */
-    this.recenterVRIcon_ = new shaka.ui.MaterialSVGIcon(this.recenterVRButton_,
-        shaka.ui.Enums.MaterialDesignSVGIcons.RECENTER_VR);
+    /** @private {!shaka.ui.Icon} */
+    this.recenterVRIcon_ = new shaka.ui.Icon(this.recenterVRButton_,
+        shaka.ui.Enums.MaterialDesignSVGIcons['RECENTER_VR']);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');

@@ -11,9 +11,9 @@ goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -40,9 +40,9 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-loop-button');
     this.button_.classList.add('shaka-tooltip');
 
-    /** @private {!shaka.ui.MaterialSVGIcon} */
-    this.icon_ = new shaka.ui.MaterialSVGIcon(this.button_,
-        shaka.ui.Enums.MaterialDesignSVGIcons.LOOP);
+    /** @private {!shaka.ui.Icon} */
+    this.icon_ = new shaka.ui.Icon(this.button_,
+        shaka.ui.Enums.MaterialDesignSVGIcons['LOOP']);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -165,7 +165,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
 
     this.currentState_.textContent = this.localization.resolve(labelText);
 
-    this.icon_.use(this.video.loop ? Icons.UNLOOP : Icons.LOOP);
+    this.icon_.use(this.video.loop ? Icons['UNLOOP'] : Icons['LOOP']);
 
     const ariaText = this.video.loop ?
         LocIds.EXIT_LOOP_MODE : LocIds.ENTER_LOOP_MODE;

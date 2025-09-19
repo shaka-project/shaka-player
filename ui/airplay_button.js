@@ -12,9 +12,9 @@ goog.require('shaka.Player');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.MaterialSVGIcon');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -40,8 +40,8 @@ shaka.ui.AirPlayButton = class extends shaka.ui.Element {
     this.airplayButton_.classList.add('shaka-tooltip');
     this.airplayButton_.ariaPressed = 'false';
 
-    new shaka.ui.MaterialSVGIcon(this.airplayButton_).use(
-        shaka.ui.Enums.MaterialDesignSVGIcons.AIRPLAY);
+    new shaka.ui.Icon(this.airplayButton_).use(
+        shaka.ui.Enums.MaterialDesignSVGIcons['AIRPLAY']);
 
     // Don't show the button if AirPlay is not supported.
     if (!window.WebKitPlaybackTargetAvailabilityEvent) {
