@@ -62,7 +62,7 @@ shaka.ui.Icon = class {
 
       if (url) {
         // let handle the background-color (icon color) by CSS
-        this.svg_.style.setProperty('background-color', '');
+        this.svg_.style.setProperty('background-color', 'currentColor');
         this.svg_.style.setProperty('mask-image', `url("${url}")`);
       } else if (path) {
         this.applyInlinedSVG_(path, viewBox);
