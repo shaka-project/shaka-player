@@ -1876,8 +1876,7 @@ shaka.extern.LiveSyncConfiguration;
  *   If true, creates a new text track that allows speech to text if
  *   supported by the browser.
  *   <br>
- *   This can be useful if your stream doesn't
- *   have subtitles and you want them.
+ *   This can be useful if your stream doesn't have subtitles and you want them.
  *   <br>
  *   This feature creates a text track that works like any other, but only
  *   renders when a <code>videoContainer</code> is provided to the player.
