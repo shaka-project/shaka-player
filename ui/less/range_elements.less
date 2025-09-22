@@ -195,12 +195,15 @@
   .show-when-controls-shown();
   top: 5px;
   height: 5px;
-  margin-bottom: 0;
+
+  /* add spacing between seek-bar-container and controls-button-panel */
+  margin-bottom: @track-height;
+
   background-clip: padding-box !important;
   border-top: 4px solid transparent;
   border-bottom: 4px solid transparent;
 
-  /* Decrease the z-index of shaka-seek-bar to prevent convering the
+  /* Decrease the z-index of shaka-seek-bar-container to prevent convering the
    * controls button panel */
   z-index: -1;
 
