@@ -31,6 +31,10 @@
 @thumb-size: 12px;
 @track-height: 4px;
 
+/* The range element has a larger interactive area than its visible size.
+ * This value should always be greater than @thumb-size. */
+@touchable-size: 40px;
+
 /* The range container is the div that contains a range element.
  * This div will act as a virtual track to allow us to style the track space.
  * An actual track still exists inside the range element, but is transparent. */
@@ -106,14 +110,14 @@
   /* Overlay and fill the container div. */
   .overlay-child();
 
-  /* The range element should be big enough to contain the thumb without
-   * clipping it.  It is very tricky to make the thumb show outside the track
-   * on IE 11. */
-  height: @thumb-size;
+  /* The range element should have a minimum touchable height for
+   * accessibility. */
+  height: @touchable-size;
 
   /* Position the top of the range element so that it is centered on the
-   * container. Note that the container is actually smaller than the thumb. */
-  top: calc((@track-height - @thumb-size) / 2);
+   * container. Note that the container is actually smaller than the
+   * touchable-size. */
+  top: calc((@track-height - @touchable-size) / 2);
 
   /* Make sure clicking at the very top of the bar still takes effect and is not
    * confused with clicking the video to play/pause it. */
