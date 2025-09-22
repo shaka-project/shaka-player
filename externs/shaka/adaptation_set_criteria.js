@@ -42,6 +42,14 @@ shaka.extern.AdaptationSetCriteria = class {
    * @exportDoc
    */
   getConfiguration() {}
+
+  /**
+   * Return the result of last create call.
+   *
+   * @return {?shaka.media.AdaptationSet}
+   * @exportDoc
+   */
+  getLastAdaptationSet() {}
 };
 
 /**

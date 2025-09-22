@@ -37,12 +37,17 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[1],
         manifest.variants[2],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('prefers primary variants', () => {
@@ -75,12 +80,17 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[0],
         manifest.variants[3],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('should not filter variants when codec switching strategy is smooth '+
@@ -138,9 +148,14 @@ describe('AdaptationSetCriteria', () => {
           preferredAudioCodecs: [],
           preferredAudioChannelCount: 0,
         });
+
+        expect(builder.getLastAdaptationSet()).toBeNull();
+
         const set = builder.create(manifest.variants);
 
         expect(Array.from(set.values()).length).toBe(3);
+
+        expect(set).toBe(builder.getLastAdaptationSet());
       } finally {
         shaka.media.Capabilities
             .isChangeTypeSupported = originalIsChangeTypeSupported;
@@ -194,9 +209,14 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       expect(Array.from(set.values()).length).toBe(1);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants in preferred language and role', () => {
@@ -239,11 +259,16 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[0],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants in preferred video role', () => {
@@ -278,11 +303,16 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[0],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses only one role, even if none is preferred', () => {
@@ -344,6 +374,9 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       // Which role is chosen is an implementation detail.
@@ -352,6 +385,8 @@ describe('AdaptationSetCriteria', () => {
         manifest.variants[0],
         manifest.variants[1],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses only one role, even if all are primary', () => {
@@ -419,6 +454,9 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       // Which role is chosen is an implementation detail.
@@ -427,6 +465,8 @@ describe('AdaptationSetCriteria', () => {
         manifest.variants[0],
         manifest.variants[1],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses only one language, even if all are primary', () => {
@@ -472,6 +512,9 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       // Which language is chosen is an implementation detail.
@@ -480,6 +523,8 @@ describe('AdaptationSetCriteria', () => {
         manifest.variants[0],
         manifest.variants[1],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses a role from among primary variants without language match',
@@ -545,6 +590,9 @@ describe('AdaptationSetCriteria', () => {
             preferredAudioCodecs: [],
             preferredAudioChannelCount: 0,
           });
+
+          expect(builder.getLastAdaptationSet()).toBeNull();
+
           const set = builder.create(manifest.variants);
 
           // Which role is chosen is an implementation detail. Each role is
@@ -554,6 +602,8 @@ describe('AdaptationSetCriteria', () => {
             manifest.variants[0],
             manifest.variants[1],
           ]);
+
+          expect(set).toBe(builder.getLastAdaptationSet());
         });
 
     it('chooses a role from best language match, in spite of primary',
@@ -619,12 +669,17 @@ describe('AdaptationSetCriteria', () => {
             preferredAudioCodecs: [],
             preferredAudioChannelCount: 0,
           });
+
+          expect(builder.getLastAdaptationSet()).toBeNull();
+
           const set = builder.create(manifest.variants);
 
           checkSet(set, [
             manifest.variants[2],
             manifest.variants[3],
           ]);
+
+          expect(set).toBe(builder.getLastAdaptationSet());
         });
 
     it('chooses variants with preferred hdr level', () => {
@@ -664,12 +719,17 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[0],
         manifest.variants[2],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with preferred video layout (CH-STEREO)', () => {
@@ -709,12 +769,17 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[0],
         manifest.variants[2],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with preferred video layout (CH-MONO)', () => {
@@ -754,11 +819,16 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[1],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with provided audio channels count', () => {
@@ -798,12 +868,17 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[0],
         manifest.variants[2],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with largest audio channel count less than config' +
@@ -849,12 +924,17 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[1],
         manifest.variants[3],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with fewest audio channels when none fit in the ' +
@@ -895,12 +975,17 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[0],
         manifest.variants[2],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with preferred audio channels count when channel ' +
@@ -941,12 +1026,17 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 2,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[0],
         manifest.variants[2],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with provided audio channel count over ' +
@@ -987,11 +1077,16 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[1],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with provided audio channel count over ' +
@@ -1032,11 +1127,16 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 2,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[1],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with preferred audio label', () => {
@@ -1076,12 +1176,17 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[0],
         manifest.variants[2],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with prefer spatial audio', () => {
@@ -1116,11 +1221,16 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[1],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with not prefer spatial audio', () => {
@@ -1155,11 +1265,16 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[0],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with preferred audio label and language', () => {
@@ -1212,12 +1327,17 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[0],
         manifest.variants[2],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with preferred video label', () => {
@@ -1257,12 +1377,17 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[0],
         manifest.variants[2],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('filters by audio group if enabled', () => {
@@ -1308,12 +1433,17 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[0],
         manifest.variants[2],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with preferred audio codec', () => {
@@ -1348,11 +1478,16 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[1],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with audio codec over active audio codec', () => {
@@ -1387,11 +1522,16 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[1],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with audio codec over preferred audio codecs', () => {
@@ -1426,11 +1566,16 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: ['mp4a.40.2'],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[1],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with active audio codec over preferred ' +
@@ -1466,11 +1611,16 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: ['mp4a.40.2'],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[1],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('chooses variants with the ordered preferred audio ' +
@@ -1506,11 +1656,16 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: ['ec-3', 'mp4a.40.2'],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[1],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('falls back to active audio codec when no matches are ' +
@@ -1546,11 +1701,16 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[1],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
 
     it('falls back to preferred audio codecs when no matches are ' +
@@ -1586,11 +1746,16 @@ describe('AdaptationSetCriteria', () => {
         preferredAudioCodecs: ['ec-3'],
         preferredAudioChannelCount: 0,
       });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
       const set = builder.create(manifest.variants);
 
       checkSet(set, [
         manifest.variants[1],
       ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
     });
   });
 
