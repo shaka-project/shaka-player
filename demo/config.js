@@ -641,11 +641,10 @@ shakaDemo.Config = class {
             strategyOptions, strategyOptionsNames)
         .addBoolInput_(
             'Return to end of live window when outside of live window',
-            'streaming.returnToEndOfLiveWindowWhenOutside')
-        .addBoolInput_('Enable speech to text',
-            'streaming.enableSpeechToText');
+            'streaming.returnToEndOfLiveWindowWhenOutside');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
+    this.addSpeechToTextSection_();
   }
 
   /** @private */
@@ -685,6 +684,19 @@ shakaDemo.Config = class {
             'streaming.liveSync.dynamicTargetLatency.maxLatency')
         .addNumberInput_('Dynamic Target Latency Min Latency',
             'streaming.liveSync.dynamicTargetLatency.minLatency');
+  }
+
+  /** @private */
+  addSpeechToTextSection_() {
+    const docLink = this.resolveExternLink_('.SpeechToTextConfiguration');
+    this.addSection_('Speech to text', docLink);
+    this.addBoolInput_('Speech to text', 'streaming.speechToText.enabled')
+        .addNumberInput_('Max number of words before truncate',
+            'streaming.speechToText.maxNumberOfWordsBeforeTruncate')
+        .addNumberInput_('Max number of words after truncate',
+            'streaming.speechToText.maxNumberOfWordsAfterTruncate')
+        .addBoolInput_('Performed locally on the user’s device',
+            'streaming.speechToText.processLocally');
   }
 
   /** @private */

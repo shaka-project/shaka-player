@@ -1863,6 +1863,44 @@ shaka.extern.LiveSyncConfiguration;
 
 /**
  * @typedef {{
+ *   enabled: boolean,
+ *   maxNumberOfWordsBeforeTruncate: number,
+ *   maxNumberOfWordsAfterTruncate: number,
+ *   processLocally: boolean,
+ * }}
+ *
+ * @description
+ * Speech to text configuration options.
+ *
+ * @property {boolean} enabled
+ *   If true, creates a new text track that allows speech to text if
+ *   supported by the browser.
+ *   This feature is experimental and may not work properly.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {number} maxNumberOfWordsBeforeTruncate
+ *   Indicates the maximum number of words to be displayed. If this number
+ *   is exceeded, the number of words to be displayed will be truncated.
+ *   <br>
+ *   Defaults to <code>30</code>.
+ * @property {number} maxNumberOfWordsAfterTruncate
+ *   Specifies the maximum number of words to display when truncating.
+ *   <br>
+ *   Defaults to <code>20</code>.
+ * @property {boolean} processLocally
+ *   When set to true, indicates a requirement that the speech recognition
+ *   process MUST be performed locally on the user’s device. If set to false,
+ *   the user agent can choose between local and remote processing.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ *
+ * @exportDoc
+ */
+shaka.extern.SpeechToTextConfiguration;
+
+
+/**
+ * @typedef {{
  *   retryParameters: shaka.extern.RetryParameters,
  *   failureCallback: function(!shaka.util.Error),
  *   rebufferingGoal: number,
@@ -1907,7 +1945,7 @@ shaka.extern.LiveSyncConfiguration;
  *   avoidEvictionOnQuotaExceededError: boolean,
  *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy,
  *   returnToEndOfLiveWindowWhenOutside: boolean,
- *   enableSpeechToText: boolean,
+ *   speechToText: shaka.extern.SpeechToTextConfiguration,
  * }}
  *
  * @description
@@ -2154,12 +2192,8 @@ shaka.extern.LiveSyncConfiguration;
  *   it will be moved to the end of the live window, instead of the start.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {boolean} enableSpeechToText
- *   If true, creates a new text track that allows speech to text if
- *   supported by the browser.
- *   This feature is experimental and may not work properly.
- *   <br>
- *   Defaults to <code>false</code>.
+ * @property {shaka.extern.SpeechToTextConfiguration} speechToText
+ *   The speech to text configuration.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
