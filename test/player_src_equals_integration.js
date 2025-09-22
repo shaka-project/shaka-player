@@ -332,13 +332,23 @@ describe('Player Src Equals', () => {
   });
 
   it('plays with external text tracks', async () => {
+    /** @type {!jasmine.Spy} */
+    const textchanged = jasmine.createSpy('listener');
+
+    player.addEventListener('textchanged',
+        shaka.test.Util.spyFunc(textchanged));
+
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
+
+    textchanged.calls.reset();
 
     const locationUri = new goog.Uri(location.href);
     const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
     const absoluteUri = locationUri.resolve(partialUri);
     const newTrack = await player.addTextTrackAsync(
         absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
+
+    expect(textchanged).toHaveBeenCalledTimes(1);
 
     expect(newTrack).toBeTruthy();
     await player.unload();

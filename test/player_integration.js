@@ -397,8 +397,15 @@ describe('Player', () => {
 
     // https://github.com/shaka-project/shaka-player/issues/4821
     it('loads a single text stream', async () => {
+      /** @type {!jasmine.Spy} */
+      const textchanged = jasmine.createSpy('listener');
+
+      player.addEventListener('textchanged', Util.spyFunc(textchanged));
+
       player.configure({preferredTextLanguage: 'en'});
       await player.load('test:sintel_no_text_compiled');
+
+      textchanged.calls.reset();
 
       // Add preferred language text track.
       const locationUri = new goog.Uri(location.href);
@@ -406,6 +413,8 @@ describe('Player', () => {
       const absoluteUri = locationUri.resolve(partialUri);
       await player.addTextTrackAsync(
           absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
+
+      expect(textchanged).toHaveBeenCalledTimes(1);
 
       // Add alternate language text track.
       // Two text tracks with same timings but different text
@@ -415,6 +424,8 @@ describe('Player', () => {
       const absoluteUri2 = locationUri.resolve(partialUri2);
       await player.addTextTrackAsync(
           absoluteUri2.toString(), 'fr', 'subtitles', 'text/vtt');
+
+      expect(textchanged).toHaveBeenCalledTimes(2);
 
       const textTracks = player.getTextTracks();
       expect(textTracks.length).toBe(2);
