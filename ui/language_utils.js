@@ -410,7 +410,7 @@ shaka.ui.LanguageUtils = class {
       case 'zxx':
         return resolve(shaka.ui.Locales.Ids.NOT_APPLICABLE);
       case 'speech-to-text':
-        return resolve(shaka.ui.Locales.Ids.SPEECH_TO_TEXT);
+        return resolve(shaka.ui.Locales.Ids.AUTO_GENERATED);
     }
 
     // Extract the base language from the locale as a fallback step.
