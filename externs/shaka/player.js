@@ -1866,6 +1866,7 @@ shaka.extern.LiveSyncConfiguration;
  *   enabled: boolean,
  *   maxTextLength: number,
  *   processLocally: boolean,
+ *   languagesToTranslate: !Array<string>,
  * }}
  *
  * @description
@@ -1902,6 +1903,13 @@ shaka.extern.LiveSyncConfiguration;
  *   over what 3rd parties are involved.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {!Array<string>} languagesToTranslate
+ *   List of languages to translate into if the browser supports translation
+ *   APIs.
+ *   <br>
+ *   Each language in this list will create a new track.
+ *   <br>
+ *   Defaults to <code>[]</code>.
  *
  * @exportDoc
  */
