@@ -691,10 +691,8 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.SpeechToTextConfiguration');
     this.addSection_('Speech to text', docLink);
     this.addBoolInput_('Speech to text', 'streaming.speechToText.enabled')
-        .addNumberInput_('Max number of words before truncate',
-            'streaming.speechToText.maxNumberOfWordsBeforeTruncate')
-        .addNumberInput_('Max number of words after truncate',
-            'streaming.speechToText.maxNumberOfWordsAfterTruncate')
+        .addNumberInput_('Max text length',
+            'streaming.speechToText.maxTextLength')
         .addBoolInput_('Performed locally on the user’s device',
             'streaming.speechToText.processLocally');
   }

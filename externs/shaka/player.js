@@ -1864,8 +1864,7 @@ shaka.extern.LiveSyncConfiguration;
 /**
  * @typedef {{
  *   enabled: boolean,
- *   maxNumberOfWordsBeforeTruncate: number,
- *   maxNumberOfWordsAfterTruncate: number,
+ *   maxTextLength: number,
  *   processLocally: boolean,
  * }}
  *
@@ -1888,15 +1887,12 @@ shaka.extern.LiveSyncConfiguration;
  *   This feature is experimental and may not work properly.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {number} maxNumberOfWordsBeforeTruncate
- *   Indicates the maximum number of words to be displayed. If this number
- *   is exceeded, the number of words to be displayed will be truncated.
+ * @property {number} maxTextLength
+ *   Indicates the of `limit` characters in the text rendered, ensuring that
+ *   only complete words are included. If a word is cut at the limit, it is
+ *   included in text rendered. Adds '...' at the start if truncation occurs.
  *   <br>
- *   Defaults to <code>30</code>.
- * @property {number} maxNumberOfWordsAfterTruncate
- *   Specifies the maximum number of words to display when truncating.
- *   <br>
- *   Defaults to <code>20</code>.
+ *   Defaults to <code>140</code>.
  * @property {boolean} processLocally
  *   When set to true, indicates a requirement that the speech recognition
  *   process MUST be performed locally on the user’s device. If set to false,
