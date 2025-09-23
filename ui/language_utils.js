@@ -315,8 +315,21 @@ shaka.ui.LanguageUtils = class {
       const span = shaka.util.Dom.createHTMLElement('span');
       button.appendChild(span);
 
-      span.textContent =
-          shaka.ui.LanguageUtils.getLanguageName(language, localization);
+      if (track.originalLanguage == 'speech-to-text') {
+        span.textContent =
+            localization.resolve(shaka.ui.Locales.Ids.AUTO_GENERATED);
+        // Necessary when there are multiple speech-to-text tracks and they
+        // translate into different languages.
+        if (language) {
+          span.textContent +=
+              ' (' +
+              shaka.ui.LanguageUtils.getLanguageName(language, localization) +
+              ')';
+        }
+      } else {
+        span.textContent =
+            shaka.ui.LanguageUtils.getLanguageName(language, localization);
+      }
       switch (trackLabelFormat) {
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
           if (forced) {
@@ -409,8 +422,6 @@ shaka.ui.LanguageUtils = class {
         return resolve(shaka.ui.Locales.Ids.UNDETERMINED_LANGUAGE);
       case 'zxx':
         return resolve(shaka.ui.Locales.Ids.NOT_APPLICABLE);
-      case 'speech-to-text':
-        return resolve(shaka.ui.Locales.Ids.AUTO_GENERATED);
     }
 
     // Extract the base language from the locale as a fallback step.

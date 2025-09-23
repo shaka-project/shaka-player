@@ -1879,7 +1879,8 @@ shaka.extern.LiveSyncConfiguration;
  *   <br>
  *   This feature creates a text track that works like any other, but only
  *   renders when a <code>videoContainer</code> is provided to the player.
- *   You can recognize this track by its language which is 'speech-to-text'.
+ *   You can recognize this track by its originalLanguage which is
+ *   'speech-to-text'.
  *   <br>
  *   This functionality might work with SW DRM, but it will never work with
  *   HW DRM.
