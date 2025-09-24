@@ -269,6 +269,9 @@ shaka.extern.RequestContext;
  * provide additional information about the request. A request filter can run
  * asynchronously by returning a promise; in this case, the request will not be
  * sent until the promise is resolved.
+ * If a request is attempted multiple times, this filter will be called for each
+ * attempt. You can check the attempt parameter on the request object to see
+ * which attempt this filter is being called on.
  *
  * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
  *                     shaka.extern.Request,
