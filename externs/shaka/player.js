@@ -1890,7 +1890,7 @@ shaka.extern.LiveSyncConfiguration;
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {number} maxTextLength
- *   Indicates the of `limit` characters in the text rendered, ensuring that
+ *   Indicates the limit of characters in the text rendered, ensuring that
  *   only complete words are included. If a word is cut at the limit, it is
  *   included in text rendered. Adds '...' at the start if truncation occurs.
  *   <br>
