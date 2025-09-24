@@ -86,6 +86,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         stallTimeout: 0,
         connectionTimeout: 0,
       });
+      expect(request.attempt).toBe(0);
       rejectScheme.and.callFake(() => {
         if (rejectScheme.calls.count() == 1) {
           return shaka.util.AbortableOperation.failed(error);
@@ -95,6 +96,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       });
       await networkingEngine.request(requestType, request).promise;
       expect(rejectScheme).toHaveBeenCalledTimes(2);
+      expect(request.attempt).toBe(1);
     });
 
     it('will retry twice', async () => {
@@ -625,6 +627,30 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     it('causes no errors to remove an unused filter', () => {
       const unusedFilter = jasmine.createSpy('unused filter');
       networkingEngine.unregisterRequestFilter(Util.spyFunc(unusedFilter));
+    });
+
+    it('called several times on retry', async () => {
+      const request = createRequest('reject://foo', {
+        maxAttempts: 2,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      });
+      expect(request.attempt).toBe(0);
+      rejectScheme.and.callFake(() => {
+        if (rejectScheme.calls.count() == 1) {
+          return shaka.util.AbortableOperation.failed(error);
+        } else {
+          return shaka.util.AbortableOperation.completed(createResponse());
+        }
+      });
+      await networkingEngine.request(requestType, request).promise;
+      expect(rejectScheme).toHaveBeenCalledTimes(2);
+      expect(request.attempt).toBe(1);
+      expect(filter).toHaveBeenCalledTimes(2);
     });
   });  // describe('request filter')
 

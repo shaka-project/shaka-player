@@ -68,7 +68,8 @@ shaka.extern.RetryParameters;
  *   requestStartTime: (?number|undefined),
  *   timeToFirstByte: (?number|undefined),
  *   packetNumber: (?number|undefined),
- *   contentType: (?string|undefined)
+ *   contentType: (?string|undefined),
+ *   attempt: number,
  * }}
  *
  * @description
@@ -117,6 +118,8 @@ shaka.extern.RetryParameters;
  *   A number representing the order the packet within the request.
  * @property {(?string|undefined)} contentType
  *   Content type (e.g. 'video', 'audio' or 'text', 'image')
+ * @property {number} attempt
+ *   Current request attempt, 0-based.
  * @exportDoc
  */
 shaka.extern.Request;
@@ -266,6 +269,9 @@ shaka.extern.RequestContext;
  * provide additional information about the request. A request filter can run
  * asynchronously by returning a promise; in this case, the request will not be
  * sent until the promise is resolved.
+ * If a request is attempted multiple times, this filter will be called for each
+ * attempt. You can check the attempt parameter on the request object to see
+ * which attempt this filter is being called on.
  *
  * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
  *                     shaka.extern.Request,
