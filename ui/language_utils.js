@@ -316,15 +316,18 @@ shaka.ui.LanguageUtils = class {
       button.appendChild(span);
 
       if (track.originalLanguage == 'speech-to-text') {
-        span.textContent =
-            localization.resolve(shaka.ui.Locales.Ids.AUTO_GENERATED);
         // Necessary when there are multiple speech-to-text tracks and they
         // translate into different languages.
         if (language) {
-          span.textContent +=
-              ' (' +
-              shaka.ui.LanguageUtils.getLanguageName(language, localization) +
-              ')';
+          span.textContent = [
+            shaka.ui.LanguageUtils.getLanguageName(language, localization),
+            ' (',
+            localization.resolve(shaka.ui.Locales.Ids.AUTO_GENERATED),
+            ')',
+          ].join('');
+        } else {
+          span.textContent =
+              localization.resolve(shaka.ui.Locales.Ids.AUTO_GENERATED);
         }
       } else {
         span.textContent =
