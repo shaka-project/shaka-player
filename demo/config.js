@@ -695,7 +695,7 @@ shakaDemo.Config = class {
             'streaming.speechToText.maxTextLength')
         .addBoolInput_('Performed locally on the user’s device',
             'streaming.speechToText.processLocally')
-        .addArrayStringInput_('languages to translate',
+        .addArrayStringInput_('Languages to translate into',
             'streaming.speechToText.languagesToTranslate');
   }
 
