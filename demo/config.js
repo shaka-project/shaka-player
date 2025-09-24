@@ -691,7 +691,7 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.SpeechToTextConfiguration');
     this.addSection_('Speech to text', docLink);
     this.addBoolInput_('Speech to text', 'streaming.speechToText.enabled')
-        .addNumberInput_('Max text length',
+        .addNumberInput_('Max text length (characters)',
             'streaming.speechToText.maxTextLength')
         .addBoolInput_('Performed locally on the user’s device',
             'streaming.speechToText.processLocally')
