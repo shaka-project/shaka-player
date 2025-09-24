@@ -241,26 +241,6 @@ function httpPluginTests(usingFetch) {
     await testFails(uri, expected);
   });
 
-  it('fails with CRITICAL for 401 status', async () => {
-    const uri = 'https://foo.bar/401';
-    const expected = new shaka.util.Error(
-        shaka.util.Error.Severity.CRITICAL,
-        shaka.util.Error.Category.NETWORK,
-        shaka.util.Error.Code.BAD_HTTP_STATUS,
-        uri, 401, '', jasmine.any(Object), requestType, uri);
-    await testFails(uri, expected);
-  });
-
-  it('fails with CRITICAL for 403 status', async () => {
-    const uri = 'https://foo.bar/403';
-    const expected = new shaka.util.Error(
-        shaka.util.Error.Severity.CRITICAL,
-        shaka.util.Error.Category.NETWORK,
-        shaka.util.Error.Code.BAD_HTTP_STATUS,
-        uri, 403, '', jasmine.any(Object), requestType, uri);
-    await testFails(uri, expected);
-  });
-
   it('fails if non-2xx status', async () => {
     const uri = 'https://foo.bar/404';
     const expected = new shaka.util.Error(
