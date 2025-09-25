@@ -22,7 +22,7 @@ There are two options here, depending on the configuration:
 When this module is activated, only Speech to Text is used by default. If you need it to be translated, you must specify the languages in the configuration.
 
 
-### Why don't I see the clues that the translations should have?
+### Why don't I see the text track that the translations should have?
 
 The browser must support [Translator API][], if it does not support it, the tracks will not be created since it is not possible to use this part of this module.
 
