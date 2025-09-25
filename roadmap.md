@@ -16,8 +16,7 @@ v5.0
  - Conversion to Typescript (Smaller, more modular binary)
 
 v4.17 - 2025 Q4
- - Add automatic subtitles (Experimental and disabled by default)
-   https://github.com/shaka-project/shaka-player/issues/9110
+ - TBD
 
 =====
 
