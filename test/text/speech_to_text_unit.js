@@ -5,26 +5,31 @@
  */
 
 describe('SpeechToText', () => {
+  /** @type {!HTMLVideoElement} */
+  let video;
   /** @type {!shaka.Player} */
   let player;
-
   /** @type {shaka.extern.SpeechToTextConfiguration} */
   let config;
-
   /** @type {shaka.text.SpeechToText} */
   let speechToText;
 
   const originalSpeechRecognition = window.SpeechRecognition;
-
   const originalTranslator = window.Translator;
 
   // eslint-disable-next-line no-restricted-syntax
   const originalAppendChild = Node.prototype.appendChild;
 
-  beforeEach(() => {
+  beforeAll(() => {
+    video = shaka.test.UiUtils.createVideoElement();
+    document.body.appendChild(video);
+  });
+
+  beforeEach(async () => {
     shaka.text.SpeechToText.isMediaStreamTrackSupported.reset();
 
     player = new shaka.Player();
+    await player.attach(video);
 
     const defaultConfig = shaka.util.PlayerConfiguration.createDefault();
 
@@ -39,7 +44,12 @@ describe('SpeechToText', () => {
     if (speechToText) {
       speechToText.release();
     }
+    await player.unload();
     await player.destroy();
+  });
+
+  afterAll(() => {
+    document.body.removeChild(video);
   });
 
   describe('when no SpeechRecognition support', () => {
@@ -156,6 +166,20 @@ describe('SpeechToText', () => {
       elements =
           container.getElementsByClassName('shaka-speech-to-text-container');
       expect(elements.length).toBe(0);
+    });
+
+    it('enable and disable work', () => {
+      speechToText = new shaka.text.SpeechToText(player);
+      let tracks = speechToText.getTextTracks();
+      expect(tracks.length).toBe(1);
+      expect(tracks[0].active).toBe(false);
+      speechToText.enable(tracks[0]);
+      expect(speechToText.isEnabled()).toBe(true);
+      tracks = speechToText.getTextTracks();
+      expect(tracks.length).toBe(1);
+      expect(tracks[0].active).toBe(true);
+      speechToText.disable();
+      expect(speechToText.isEnabled()).toBe(false);
     });
   });
 });
