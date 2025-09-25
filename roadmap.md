@@ -16,7 +16,12 @@ v5.0
  - Conversion to Typescript (Smaller, more modular binary)
 
 v4.17 - 2025 Q4
- - TBD
+ - Add automatic subtitles (Experimental and disabled by default)
+   https://github.com/shaka-project/shaka-player/issues/9110
+ - Change dvvC box to free box for Dolby Vision workarounds
+   https://github.com/shaka-project/shaka-player/issues/9101
+ - Allow request filters to be called multiple times
+   https://github.com/shaka-project/shaka-player/issues/9129
 
 =====
 
