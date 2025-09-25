@@ -22,6 +22,8 @@ v4.17 - 2025 Q4
    https://github.com/shaka-project/shaka-player/issues/9101
  - Allow request filters to be called multiple times
    https://github.com/shaka-project/shaka-player/issues/9129
+ - Unify text track selection and visibility by allowing null to disable text
+   https://github.com/shaka-project/shaka-player/issues/9048
 
 =====
 
