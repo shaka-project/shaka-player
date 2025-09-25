@@ -106,6 +106,12 @@ describe('SpeechToText', () => {
       expect(speechToText.isSupported()).toBe(true);
     });
 
+    it('isSupported returns false if not videoContainer', () => {
+      player.setVideoContainer(null);
+      speechToText = new shaka.text.SpeechToText(player);
+      expect(speechToText.isSupported()).toBe(false);
+    });
+
     it('getTextTracks returns the correct result', () => {
       speechToText = new shaka.text.SpeechToText(player);
       const tracks = speechToText.getTextTracks();
@@ -132,6 +138,24 @@ describe('SpeechToText', () => {
       speechToText.configure(config);
       const tracks = speechToText.getTextTracks();
       expect(tracks.length).toBe(1);
+    });
+
+    it('create shaka-speech-to-text-container', () => {
+      speechToText = new shaka.text.SpeechToText(player);
+      const elements =
+          container.getElementsByClassName('shaka-speech-to-text-container');
+      expect(elements.length).toBe(1);
+    });
+
+    it('release remove shaka-speech-to-text-container', () => {
+      speechToText = new shaka.text.SpeechToText(player);
+      let elements =
+          container.getElementsByClassName('shaka-speech-to-text-container');
+      expect(elements.length).toBe(1);
+      speechToText.release();
+      elements =
+          container.getElementsByClassName('shaka-speech-to-text-container');
+      expect(elements.length).toBe(0);
     });
   });
 });
