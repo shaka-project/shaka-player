@@ -1,5 +1,81 @@
 # Changelog
 
+## [4.17.0](https://github.com/shaka-project/shaka-player/compare/v4.16.0...v4.17.0) (2025-09-26)
+
+
+### Features
+
+* Add automatic subtitles ([#9123](https://github.com/shaka-project/shaka-player/issues/9123)) ([61d80f6](https://github.com/shaka-project/shaka-player/commit/61d80f6e595325795e0f4fe3ca3d27072851c2c0))
+* Change dvvC box to free box for Dolby Vision workarounds ([#9101](https://github.com/shaka-project/shaka-player/issues/9101)) ([729cea8](https://github.com/shaka-project/shaka-player/commit/729cea8fc4e41b8594e98738880aaa07fa2734df))
+* Disable streams from MSE errors ([#9097](https://github.com/shaka-project/shaka-player/issues/9097)) ([57229da](https://github.com/shaka-project/shaka-player/commit/57229dafc0255c7334a8cc26da7590c6ad80a51d))
+* **net:** Allow request filters to be called multiple times ([#9129](https://github.com/shaka-project/shaka-player/issues/9129)) ([6d04f7f](https://github.com/shaka-project/shaka-player/commit/6d04f7f2255c122808482f1b000868ce41d98073))
+* Remove alwaysStreamText config ([#9053](https://github.com/shaka-project/shaka-player/issues/9053)) ([dc235fc](https://github.com/shaka-project/shaka-player/commit/dc235fc5012700ef3311a20028bb06938c02fd6f))
+* **UI:** Add video type button ([#9107](https://github.com/shaka-project/shaka-player/issues/9107)) ([c0b85c7](https://github.com/shaka-project/shaka-player/commit/c0b85c7efb073e1e419c47ae8f6134d553d5475a))
+* **UI:** Allow configure the key name for shortcuts and add some new ones ([#9105](https://github.com/shaka-project/shaka-player/issues/9105)) ([9d7b37b](https://github.com/shaka-project/shaka-player/commit/9d7b37ba6d7f4bcd68f383ba194fa81e3e384bc8))
+* **UI:** Increase interactive area of seek bar and volume bar ([#9124](https://github.com/shaka-project/shaka-player/issues/9124)) ([e9afbba](https://github.com/shaka-project/shaka-player/commit/e9afbba781d7d7297ef730716cb51aa60db8640c)), closes [#9120](https://github.com/shaka-project/shaka-player/issues/9120)
+* Unify text track selection and visibility by allowing null to disable text. ([#9048](https://github.com/shaka-project/shaka-player/issues/9048)) ([48b1f09](https://github.com/shaka-project/shaka-player/commit/48b1f092f41b6dedf789de7a3065adf4577c4449))
+
+
+### Bug Fixes
+
+* Add cue fontSize fallback when using fontScaleFactor ([#9117](https://github.com/shaka-project/shaka-player/issues/9117)) ([badaafc](https://github.com/shaka-project/shaka-player/commit/badaafc8c2b4808c39c48fa5f62f4a23ab0a473d))
+* **Ads:** Fix overlays when the base stream is live ([#9040](https://github.com/shaka-project/shaka-player/issues/9040)) ([b65f685](https://github.com/shaka-project/shaka-player/commit/b65f685fd30ee18ef63d2962c8f061619a7b7aff))
+* **Ads:** Fix playback of overlays ads on mobile devices ([#9078](https://github.com/shaka-project/shaka-player/issues/9078)) ([2179c6a](https://github.com/shaka-project/shaka-player/commit/2179c6a5db979a03d98b0ddc8deee19c49cbea53))
+* **Ads:** Fix TypeError: null is not an object (evaluating 'b.mimeType.startsWith') ([#9060](https://github.com/shaka-project/shaka-player/issues/9060)) ([45a82ac](https://github.com/shaka-project/shaka-player/commit/45a82ac18a8ba24b4120f137c88af57d7b535c74))
+* **Ads:** Populate getTimeOffset for insterstitials ([#9140](https://github.com/shaka-project/shaka-player/issues/9140)) ([468b84f](https://github.com/shaka-project/shaka-player/commit/468b84fffad0dcbf4534df145814580970bed7e3))
+* Allow calculate the segment size from partials segments ([#9094](https://github.com/shaka-project/shaka-player/issues/9094)) ([81344a8](https://github.com/shaka-project/shaka-player/commit/81344a84d4f16da983ad0944b0974fc8be5fd5ca))
+* Always detect framerate as positive ([#9133](https://github.com/shaka-project/shaka-player/issues/9133)) ([75dc75e](https://github.com/shaka-project/shaka-player/commit/75dc75eb644761f301926fbc5d4a729194bf7128))
+* Attach mediaKeys when the device does not force us to wait for the encrypted event ([#9059](https://github.com/shaka-project/shaka-player/issues/9059)) ([4e1e9e6](https://github.com/shaka-project/shaka-player/commit/4e1e9e66ec63fbaa4706e0f237c97d195eb1c604))
+* Audit all usage of readBytes for memory leaks ([#9027](https://github.com/shaka-project/shaka-player/issues/9027)) ([849bff1](https://github.com/shaka-project/shaka-player/commit/849bff1db3a8391b007956efe2b8345266647a17))
+* Avoid download init segments again when not necessary ([#9042](https://github.com/shaka-project/shaka-player/issues/9042)) ([f5fa1da](https://github.com/shaka-project/shaka-player/commit/f5fa1da3d721b1979c580156a311b5ea32369fb7))
+* Avoid null pointer exception on MSE reset ([#9089](https://github.com/shaka-project/shaka-player/issues/9089)) ([5726c6a](https://github.com/shaka-project/shaka-player/commit/5726c6a7531194ec3f2efac0dfa8c9830561152d))
+* Bad init segment size calculation when using byte ranges ([#9092](https://github.com/shaka-project/shaka-player/issues/9092)) ([8dbd074](https://github.com/shaka-project/shaka-player/commit/8dbd074435bd14585d69a3c9493277c7a3fbe7d8))
+* Bad segment size calculation when using byte ranges ([#9090](https://github.com/shaka-project/shaka-player/issues/9090)) ([26c4b0d](https://github.com/shaka-project/shaka-player/commit/26c4b0dd660bd994a88cf73171ac27adf309858e))
+* **CEA:** Remove closed captions only on video update ([#9125](https://github.com/shaka-project/shaka-player/issues/9125)) ([98fc330](https://github.com/shaka-project/shaka-player/commit/98fc3309457795e2f73bf8f65b7f533a3d1319a3))
+* **CMCDv2:** Prevent processing when target is disabled in response mode ([#9065](https://github.com/shaka-project/shaka-player/issues/9065)) ([c79b66b](https://github.com/shaka-project/shaka-player/commit/c79b66b2e3f0f2829079f50de0c890be4cefe21b))
+* **DASH:** Fix can't access property "delete", unusedStreamsPerPeriod[(i - periodsMissing)] is undefined ([#9038](https://github.com/shaka-project/shaka-player/issues/9038)) ([2ca6810](https://github.com/shaka-project/shaka-player/commit/2ca68105e5e04d186f24ba6d0385182875bc3f97))
+* **DASH:** Fix stall on multiperiod streams ([#9030](https://github.com/shaka-project/shaka-player/issues/9030)) ([bc6a7f2](https://github.com/shaka-project/shaka-player/commit/bc6a7f20ab94bf32c308e52e71587177f36d3611))
+* Fix audio/video bandwidth calculation when only one of them is provided ([#9091](https://github.com/shaka-project/shaka-player/issues/9091)) ([cd8285f](https://github.com/shaka-project/shaka-player/commit/cd8285f9fd39509e60c081f9d3e9e58c86d3ecbf))
+* Fix blink subtitles when using NativeTextDisplayer in Safari ([#9082](https://github.com/shaka-project/shaka-player/issues/9082)) ([2d8056a](https://github.com/shaka-project/shaka-player/commit/2d8056a81c229c8aaca1729964a40b427fcfeb77))
+* Fix CANNOT_ADD_EXTERNAL_CHAPTERS_TO_LIVE_STREAM error code ([#9138](https://github.com/shaka-project/shaka-player/issues/9138)) ([c94a34f](https://github.com/shaka-project/shaka-player/commit/c94a34f5d5c271ed8d82b0ba3811c1e398ec52a4))
+* Fix getAudioTracks for HLS with multiplexed streams ([#9047](https://github.com/shaka-project/shaka-player/issues/9047)) ([948a5f7](https://github.com/shaka-project/shaka-player/commit/948a5f7836884685f141e1d1ef2c84e2dfc6ab0e))
+* Fix getLiveLatency when using Apple's native HLS ([#9083](https://github.com/shaka-project/shaka-player/issues/9083)) ([5bd55ce](https://github.com/shaka-project/shaka-player/commit/5bd55ce1ab3ac05dccd88b1f04a4fa98a6d2a2aa))
+* Fix selectAudioTrack doesn't keep the same video stream when ABR is disabled ([#9116](https://github.com/shaka-project/shaka-player/issues/9116)) ([fca4df7](https://github.com/shaka-project/shaka-player/commit/fca4df7e8262038e7ff4cdd90a568a17ba79ee51))
+* Fix some EMSG events missing ([#9064](https://github.com/shaka-project/shaka-player/issues/9064)) ([e2f8254](https://github.com/shaka-project/shaka-player/commit/e2f825454cdf95dda22213b94f00cf8abdba7cc0))
+* **HLS:** Allow calculate stream bandwidth using segment size ([#9093](https://github.com/shaka-project/shaka-player/issues/9093)) ([bfec94d](https://github.com/shaka-project/shaka-player/commit/bfec94dc9e98d2deef1f5049da891adf5b980a86))
+* **HLS:** Allow get better segment size estimations ([#9043](https://github.com/shaka-project/shaka-player/issues/9043)) ([06d92a5](https://github.com/shaka-project/shaka-player/commit/06d92a5e56e7fd8fa04a06a0cc1b8918d3e6af4f))
+* **HLS:** closeSegmentIndex of EXT-X-IMAGE-STREAM-INF when not necessary ([#9070](https://github.com/shaka-project/shaka-player/issues/9070)) ([9a6cba1](https://github.com/shaka-project/shaka-player/commit/9a6cba116ad1d2cb5561ad4a1b059e0f479a29cc))
+* **HLS:** Fix playback of EVENT playlist when transition from live to vod ([#9054](https://github.com/shaka-project/shaka-player/issues/9054)) ([830b863](https://github.com/shaka-project/shaka-player/commit/830b8632abcc09d5123305aa164feaa95db0e245))
+* **HLS:** Improve abort decision logic ([#9041](https://github.com/shaka-project/shaka-player/issues/9041)) ([3205235](https://github.com/shaka-project/shaka-player/commit/3205235aff1d273beef5bf1f2c91c3d24fb410d1))
+* **HLS:** Keep syncTime continuous by using previous value, if available ([#9135](https://github.com/shaka-project/shaka-player/issues/9135)) ([d9e9da3](https://github.com/shaka-project/shaka-player/commit/d9e9da3f08bbf2b74fa92737e937954a535ff495)), closes [#9086](https://github.com/shaka-project/shaka-player/issues/9086)
+* Improve quota exceeded handler ([#9130](https://github.com/shaka-project/shaka-player/issues/9130)) ([99d4a1e](https://github.com/shaka-project/shaka-player/commit/99d4a1e36da1d5e365dfbfba86e6c8e9fec87a57))
+* Make sure that all variants are either: audio-only, video-only, or audio-video when preload ([#9046](https://github.com/shaka-project/shaka-player/issues/9046)) ([288c247](https://github.com/shaka-project/shaka-player/commit/288c247fe6806d84e03851870564355005c253a9))
+* **MSS:** Fix originalId creation in order to avoid duplicated originalId ([#9126](https://github.com/shaka-project/shaka-player/issues/9126)) ([0ff4062](https://github.com/shaka-project/shaka-player/commit/0ff40621a8f5ab38f0f57a82942ea018f07264fd))
+* prevent infinite loop when constructing CMCD relative urls ([#9055](https://github.com/shaka-project/shaka-player/issues/9055)) ([89d12a8](https://github.com/shaka-project/shaka-player/commit/89d12a86e81098e0a18f062b6af93b16cab73288)), closes [#9050](https://github.com/shaka-project/shaka-player/issues/9050)
+* Support use addTextTrackAsync with NativeTextDisplayer ([#9122](https://github.com/shaka-project/shaka-player/issues/9122)) ([cad470c](https://github.com/shaka-project/shaka-player/commit/cad470cdc569162408003cd1702032d61e12bc8a))
+* **UI:** apply background color only for configured icons ([#9121](https://github.com/shaka-project/shaka-player/issues/9121)) ([07462f8](https://github.com/shaka-project/shaka-player/commit/07462f8ff041b7d59c39ab27f112aa6dc6b415f3))
+* **UI:** Change AirPlay icon to unfilled variant ([#9113](https://github.com/shaka-project/shaka-player/issues/9113)) ([0c93128](https://github.com/shaka-project/shaka-player/commit/0c93128416b427f72bd28ff2d588537f04c03c26))
+* **UI:** Change PiP icon to be consistent with YT ([#9118](https://github.com/shaka-project/shaka-player/issues/9118)) ([fd0b5d2](https://github.com/shaka-project/shaka-player/commit/fd0b5d271b7799489b91942a53a91865f4a24fbc))
+* **UI:** Change PiP icons to non filled variant ([#9106](https://github.com/shaka-project/shaka-player/issues/9106)) ([da7ceb8](https://github.com/shaka-project/shaka-player/commit/da7ceb834469495a6add89dbc22cf5150b301680)), closes [#9102](https://github.com/shaka-project/shaka-player/issues/9102)
+* **UI:** Fix position of ad containers ([#9077](https://github.com/shaka-project/shaka-player/issues/9077)) ([ea0ce82](https://github.com/shaka-project/shaka-player/commit/ea0ce823bf6c1c30c7353371204a67c0e6ecab1c))
+* **UI:** Respect prefers-reduced-transparency for big play button ([#9104](https://github.com/shaka-project/shaka-player/issues/9104)) ([17c2b0b](https://github.com/shaka-project/shaka-player/commit/17c2b0b49e25b0344c9b44a9fde014abfb7d5428))
+* **UI:** Respect prefers-reduced-transparency for tooltips and seekbar times ([#9057](https://github.com/shaka-project/shaka-player/issues/9057)) ([cd2b6d4](https://github.com/shaka-project/shaka-player/commit/cd2b6d417dc3cb6a79db10a10a8a8994c75cfe46))
+* **WebVTT:** Fix lines starting with spaces don't break correctly ([#9069](https://github.com/shaka-project/shaka-player/issues/9069)) ([f2b5034](https://github.com/shaka-project/shaka-player/commit/f2b5034b64ea2a66a333d931b330ed61c1e93bf1))
+* **WebVTT:** Fix lines starting with spaces don't break correctly ([#9100](https://github.com/shaka-project/shaka-player/issues/9100)) ([2eb3b0a](https://github.com/shaka-project/shaka-player/commit/2eb3b0a9c8166eaab73ed210cd3c82fb6f1ceb99))
+
+
+### Performance Improvements
+
+* **Ads:** Improve back to live performance when using interstitials and low latency ([#9079](https://github.com/shaka-project/shaka-player/issues/9079)) ([f2aca29](https://github.com/shaka-project/shaka-player/commit/f2aca29f3b0395611749baf7ac0363d78d4843d9))
+* **CEA:** Remove captions attached to removed segments ([#9068](https://github.com/shaka-project/shaka-player/issues/9068)) ([f128e22](https://github.com/shaka-project/shaka-player/commit/f128e2261aa33ec82e154575af08f8c1c667b039))
+* Close segment index after 5 seconds without usage of getThumbnails ([#9071](https://github.com/shaka-project/shaka-player/issues/9071)) ([a503034](https://github.com/shaka-project/shaka-player/commit/a503034f454c8a46d1751eb683485446621b4b90))
+* **HLS:** Assume that partial segments have the same mimetype as full segments ([#9080](https://github.com/shaka-project/shaka-player/issues/9080)) ([a2b936f](https://github.com/shaka-project/shaka-player/commit/a2b936f0f79fa088dffd34e69b04dafd1812bdae))
+* **HLS:** Optimize mimetype resolution during parsing ([#9088](https://github.com/shaka-project/shaka-player/issues/9088)) ([72a9fdb](https://github.com/shaka-project/shaka-player/commit/72a9fdb2dac1e5ea0411a7616e11e3136872f150))
+* **HLS:** Reduce redundant parser calls ([#9066](https://github.com/shaka-project/shaka-player/issues/9066)) ([a36fb32](https://github.com/shaka-project/shaka-player/commit/a36fb323bcb298559265083e002721dd17e1f225))
+* Remove unnecessary ABR update during load ([#9029](https://github.com/shaka-project/shaka-player/issues/9029)) ([d465feb](https://github.com/shaka-project/shaka-player/commit/d465feb922fa1bbc22fda9878883d3604b5ff3f1))
+* Speed up `shaka.Player.probeSupport()` ([#9095](https://github.com/shaka-project/shaka-player/issues/9095)) ([3c0e932](https://github.com/shaka-project/shaka-player/commit/3c0e9323dccb3e23fd0f598961cc4d151a43b036))
+* **UI:** Combine consecutive configure calls ([#9049](https://github.com/shaka-project/shaka-player/issues/9049)) ([f8db982](https://github.com/shaka-project/shaka-player/commit/f8db98276173545f1ed230dcc1671a97eb5dbea8))
+
 ## [4.16.0](https://github.com/shaka-project/shaka-player/compare/v4.15.0...v4.16.0) (2025-08-26)
 
 
