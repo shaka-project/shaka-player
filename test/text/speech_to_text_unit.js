@@ -116,7 +116,7 @@ describe('SpeechToText', () => {
       expect(speechToText.isSupported()).toBe(true);
     });
 
-    it('isSupported returns false if not videoContainer', () => {
+    it('isSupported returns false if no videoContainer', () => {
       player.setVideoContainer(null);
       speechToText = new shaka.text.SpeechToText(player);
       expect(speechToText.isSupported()).toBe(false);
