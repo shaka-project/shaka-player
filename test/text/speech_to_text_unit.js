@@ -215,7 +215,8 @@ class MockSpeechRecognition {
    * @param {!MediaStreamTrack=} mediaStreamTrack
    */
   start(mediaStreamTrack) {
-    if (mediaStreamTrack !== null && typeof mediaStreamTrack !== 'object') {
+    if (mediaStreamTrack !== undefined &&
+        typeof mediaStreamTrack !== 'object') {
       throw new TypeError();
     }
     if (this.onstart) {
