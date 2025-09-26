@@ -1802,14 +1802,25 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   computeShakaTextContainerSize_() {
+    const elements = [];
     const shakaTextContainer = this.videoContainer_.getElementsByClassName(
         'shaka-text-container')[0];
+    const shakaSpeechToTextContainer =
+        this.videoContainer_.getElementsByClassName(
+            'shaka-speech-to-text-container')[0];
     if (shakaTextContainer) {
+      elements.push(shakaTextContainer);
+    }
+    if (shakaSpeechToTextContainer) {
+      elements.push(shakaSpeechToTextContainer);
+    }
+    if (elements.length) {
+      let bottom = '0px';
       if (this.isOpaque()) {
-        shakaTextContainer.style.bottom =
-            this.bottomControls_.clientHeight + 'px';
-      } else {
-        shakaTextContainer.style.bottom = '0px';
+        bottom = this.bottomControls_.clientHeight + 'px';
+      }
+      for (const element of elements) {
+        element.style.bottom = bottom;
       }
     }
   }

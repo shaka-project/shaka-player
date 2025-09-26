@@ -26,6 +26,7 @@ describe('CastUtils', () => {
       'getManifest', // Too large to proxy
       'getManifestParserFactory',  // Would not serialize.
       'setVideoContainer',
+      'getVideoContainer',
       'getActiveSessionsMetadata',
       'releaseAllMutexes', // Very specific to the inner workings of the player.
       'detachAndSavePreload',

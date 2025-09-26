@@ -315,8 +315,24 @@ shaka.ui.LanguageUtils = class {
       const span = shaka.util.Dom.createHTMLElement('span');
       button.appendChild(span);
 
-      span.textContent =
-          shaka.ui.LanguageUtils.getLanguageName(language, localization);
+      if (track.originalLanguage == 'speech-to-text') {
+        // Necessary when there are multiple speech-to-text tracks and they
+        // translate into different languages.
+        if (language) {
+          span.textContent = [
+            shaka.ui.LanguageUtils.getLanguageName(language, localization),
+            ' (',
+            localization.resolve(shaka.ui.Locales.Ids.AUTO_GENERATED),
+            ')',
+          ].join('');
+        } else {
+          span.textContent =
+              localization.resolve(shaka.ui.Locales.Ids.AUTO_GENERATED);
+        }
+      } else {
+        span.textContent =
+            shaka.ui.LanguageUtils.getLanguageName(language, localization);
+      }
       switch (trackLabelFormat) {
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
           if (forced) {

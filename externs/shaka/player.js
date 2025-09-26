@@ -1863,6 +1863,61 @@ shaka.extern.LiveSyncConfiguration;
 
 /**
  * @typedef {{
+ *   enabled: boolean,
+ *   maxTextLength: number,
+ *   processLocally: boolean,
+ *   languagesToTranslate: !Array<string>,
+ * }}
+ *
+ * @description
+ * Speech to text configuration options.
+ *
+ * @property {boolean} enabled
+ *   If true, creates a new text track that allows speech to text if
+ *   supported by the browser.
+ *   <br>
+ *   This can be useful if your stream doesn't have subtitles and you want them.
+ *   <br>
+ *   This feature creates a text track that works like any other, but only
+ *   renders when a <code>videoContainer</code> is provided to the player.
+ *   You can recognize this track by its originalLanguage which is
+ *   'speech-to-text'.
+ *   <br>
+ *   This functionality might work with SW DRM, but it will never work with
+ *   HW DRM.
+ *   <br>
+ *   This feature is experimental and may not work properly.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {number} maxTextLength
+ *   Indicates the limit of characters in the text rendered, ensuring that
+ *   only complete words are included. If a word is cut at the limit, it is
+ *   included in text rendered. Adds '...' at the start if truncation occurs.
+ *   <br>
+ *   Defaults to <code>140</code>.
+ * @property {boolean} processLocally
+ *   When set to true, indicates a requirement that the speech recognition
+ *   process MUST be performed locally on the user’s device. If set to false,
+ *   the user agent can choose between local and remote processing.
+ *   Note: remote processing is done by the browser and we have no control
+ *   over what 3rd parties are involved.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {!Array<string>} languagesToTranslate
+ *   List of languages to translate into if the browser supports translation
+ *   APIs.
+ *   <br>
+ *   Each language in this list will create a new track.
+ *   <br>
+ *   Defaults to <code>[]</code>.
+ *
+ * @exportDoc
+ */
+shaka.extern.SpeechToTextConfiguration;
+
+
+/**
+ * @typedef {{
  *   retryParameters: shaka.extern.RetryParameters,
  *   failureCallback: function(!shaka.util.Error),
  *   rebufferingGoal: number,
@@ -1906,7 +1961,8 @@ shaka.extern.LiveSyncConfiguration;
  *   shouldFixTimestampOffset: boolean,
  *   avoidEvictionOnQuotaExceededError: boolean,
  *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy,
- *   returnToEndOfLiveWindowWhenOutside: boolean
+ *   returnToEndOfLiveWindowWhenOutside: boolean,
+ *   speechToText: shaka.extern.SpeechToTextConfiguration,
  * }}
  *
  * @description
@@ -2153,6 +2209,8 @@ shaka.extern.LiveSyncConfiguration;
  *   it will be moved to the end of the live window, instead of the start.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {shaka.extern.SpeechToTextConfiguration} speechToText
+ *   The speech to text configuration.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

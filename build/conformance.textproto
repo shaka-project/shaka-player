@@ -324,6 +324,8 @@ requirement: {
     "Using \"AbortController\" directly is not allowed; "
     "use PendingRequest.abort instead."
   whitelist_regexp: "lib/net/http_fetch_plugin.js"
+  whitelist_regexp: "lib/text/speech_to_text.js"
+  whitelist_regexp: "test/text/speech_to_text_unit.js"
 }
 
 # Disallow the use of generators, which are a major performance issue.  See
