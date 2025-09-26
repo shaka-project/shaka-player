@@ -168,7 +168,7 @@ describe('SpeechToText', () => {
       expect(elements.length).toBe(0);
     });
 
-    it('enable and disable work', () => {
+    it('enable and disable works', () => {
       speechToText = new shaka.text.SpeechToText(player);
       let tracks = speechToText.getTextTracks();
       expect(tracks.length).toBe(1);
