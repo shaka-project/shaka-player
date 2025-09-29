@@ -84,6 +84,7 @@ shaka.extern.AdCuePoint;
  *   currentVideo: ?shaka.extern.AdPositionInfo,
  *   background: ?string,
  *   clickThroughUrl: ?string,
+ *   tracking: ?shaka.extern.AdTrackingEvent,
  * }}
  *
  * @description
@@ -148,6 +149,8 @@ shaka.extern.AdCuePoint;
  *   property.
  * @property {?string} clickThroughUrl
  *   Indicate the URL when the ad is clicked.
+ * @property {?shaka.extern.AdTrackingEvent} tracking
+ *   Contains the tracking events that should be sent.
  * @exportDoc
  */
 shaka.extern.AdInterstitial;
@@ -172,6 +175,58 @@ shaka.extern.AdInterstitial;
  * @exportDoc
  */
 shaka.extern.AdPositionInfo;
+
+
+/**
+ * @typedef {{
+ *   impression: ?Array<string>,
+ *   clickTracking: ?Array<string>,
+ *   start: ?Array<string>,
+ *   firstQuartile: ?Array<string>,
+ *   midpoint: ?Array<string>,
+ *   thirdQuartile: ?Array<string>,
+ *   complete: ?Array<string>,
+ *   skip: ?Array<string>,
+ *   error: ?Array<string>,
+ *   resume: ?Array<string>,
+ *   pause: ?Array<string>,
+ *   mute: ?Array<string>,
+ *   unmute: ?Array<string>,
+ * }}
+ *
+ * @description
+ * Contains the Ad tracking events.
+ *
+ * @property {?Array<string>} impression
+ *   When the impression of the ad occurs.
+ * @property {?Array<string>} clickTracking
+ *   When the click through component of an ad is activated.
+ * @property {?Array<string>} start
+ *   When the start of the ad occurs.
+ * @property {?Array<string>} firstQuartile
+ *   When 25% of the ad was played.
+ * @property {?Array<string>} midpoint
+ *   When 50% of the ad was played.
+ * @property {?Array<string>} thirdQuartile
+ *   When 75% of the ad was played.
+ * @property {?Array<string>} complete
+ *   When 100% of the ad was played to the end.
+ * @property {?Array<string>} skip
+ *   When a user action has caused the ad to be skipped.
+ * @property {?Array<string>} error
+ *  When an error has occurred during the presentation of an ad.
+ * @property {?Array<string>} resume
+ *  When a user action has caused the ad to begin again after previously being
+ *  paused or stopped.
+ * @property {?Array<string>} pause
+ *  When a user action has caused the ad to be paused.
+ * @property {?Array<string>} mute
+ *  When a user action has caused the ad to be muted.
+ * @property {?Array<string>} unmute
+ *  When a user action has caused the ad to be unmuted.
+ * @exportDoc
+ */
+shaka.extern.AdTrackingEvent;
 
 
 /**

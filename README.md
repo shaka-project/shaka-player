@@ -363,7 +363,7 @@ Shaka Player supports:
 - HLS interstitials
 - DASH Media Presentation Insertion (MPD alternate)
 - Custom Interstitials
-- Basic support of VAST and VMAP without IMA (playback without tracking)
+- Basic support of VAST and VMAP without IMA
 
 
 ## Content Steering support

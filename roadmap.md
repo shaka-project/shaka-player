@@ -24,6 +24,7 @@ v4.17 - 2025 Q4
    https://github.com/shaka-project/shaka-player/issues/9129
  - Unify text track selection and visibility by allowing null to disable text
    https://github.com/shaka-project/shaka-player/issues/9048
+ - Support tracking events on VAST and VMAP without IMA
 
 =====
 

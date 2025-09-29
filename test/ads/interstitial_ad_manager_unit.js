@@ -356,6 +356,7 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -411,6 +412,7 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -462,6 +464,7 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -513,6 +516,7 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -564,6 +568,7 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -615,6 +620,7 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -666,6 +672,7 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -717,6 +724,7 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -778,6 +786,7 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -881,6 +890,7 @@ describe('Interstitial Ad manager', () => {
         },
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -992,6 +1002,7 @@ describe('Interstitial Ad manager', () => {
         },
         background: 'red',
         clickThroughUrl: null,
+        tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1162,6 +1173,7 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1277,6 +1289,7 @@ describe('Interstitial Ad manager', () => {
         },
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1367,6 +1380,7 @@ describe('Interstitial Ad manager', () => {
         },
         background: 'red',
         clickThroughUrl: null,
+        tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1398,6 +1412,7 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       await interstitialAdManager.addInterstitials([interstitial]);
 
@@ -1441,6 +1456,7 @@ describe('Interstitial Ad manager', () => {
           currentVideo: null,
           background: null,
           clickThroughUrl: null,
+          tracking: null,
         },
         {
           id: null,
@@ -1465,6 +1481,7 @@ describe('Interstitial Ad manager', () => {
           currentVideo: null,
           background: null,
           clickThroughUrl: null,
+          tracking: null,
         },
       ];
       await interstitialAdManager.addInterstitials(interstitials);
@@ -1512,6 +1529,7 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       const interstitials = [interstitial, interstitial];
       await interstitialAdManager.addInterstitials(interstitials);
@@ -1556,6 +1574,7 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: null,
+        tracking: null,
       };
       await interstitialAdManager.addInterstitials([interstitial]);
 
@@ -1570,10 +1589,14 @@ describe('Interstitial Ad manager', () => {
         '<VAST version="3.0">',
         '<Ad id="5925573263">',
         '<InLine>',
+        '<Impression>impression_url</Impression>',
         '<Creatives>',
         '<Creative id="138381721867" sequence="1">',
         '<Linear>',
         '<Duration>00:00:10</Duration>',
+        '<TrackingEvents>',
+        '<Tracking event="complete">complete_url</Tracking>',
+        '</TrackingEvents>',
         '<VideoClicks>',
         '<ClickThrough id="1">',
         '<![CDATA[ foo.bar ]]>',
@@ -1636,6 +1659,21 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: 'foo.bar',
+        tracking: {
+          impression: ['impression_url'],
+          clickTracking: null,
+          start: null,
+          firstQuartile: null,
+          midpoint: null,
+          thirdQuartile: null,
+          complete: ['complete_url'],
+          skip: null,
+          error: null,
+          resume: null,
+          pause: null,
+          mute: null,
+          unmute: null,
+        },
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1646,9 +1684,13 @@ describe('Interstitial Ad manager', () => {
         '<VAST version="3.0">',
         '<Ad id="5925573263">',
         '<InLine>',
+        '<Impression>impression_url</Impression>',
         '<Creatives>',
         '<Creative id="138381721867" sequence="1">',
         '<NonLinearAds>',
+        '<TrackingEvents>',
+        '<Tracking event="complete">complete_url</Tracking>',
+        '</TrackingEvents>',
         '<NonLinear width="535" height="80" minSuggestedDuration="00:00:05">',
         '<StaticResource creativeType="image/png">',
         '<![CDATA[test.png]]>',
@@ -1710,6 +1752,21 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: 'foo.bar',
+        tracking: {
+          impression: ['impression_url'],
+          clickTracking: null,
+          start: null,
+          firstQuartile: null,
+          midpoint: null,
+          thirdQuartile: null,
+          complete: ['complete_url'],
+          skip: null,
+          error: null,
+          resume: null,
+          pause: null,
+          mute: null,
+          unmute: null,
+        },
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -1858,7 +1915,7 @@ describe('Interstitial Ad manager', () => {
 
     await shaka.test.Util.shortDelay();
 
-    expect(onEventSpy).toHaveBeenCalledTimes(2);
+    expect(onEventSpy).toHaveBeenCalledTimes(3);
     const eventValue1 = {
       type: 'ad-cue-points-changed',
       cuepoints: [
@@ -1871,10 +1928,15 @@ describe('Interstitial Ad manager', () => {
     expect(onEventSpy).toHaveBeenCalledWith(
         jasmine.objectContaining(eventValue1));
     const eventValue2 = {
-      type: 'ad-started',
+      type: 'ad-impression',
     };
     expect(onEventSpy).toHaveBeenCalledWith(
         jasmine.objectContaining(eventValue2));
+    const eventValue3 = {
+      type: 'ad-started',
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValue3));
   });
 
   it('dispatch skip event correctly', async () => {
@@ -1902,7 +1964,7 @@ describe('Interstitial Ad manager', () => {
 
     await shaka.test.Util.shortDelay();
 
-    expect(onEventSpy).toHaveBeenCalledTimes(3);
+    expect(onEventSpy).toHaveBeenCalledTimes(4);
     const eventValue1 = {
       type: 'ad-cue-points-changed',
       cuepoints: [
@@ -1915,15 +1977,20 @@ describe('Interstitial Ad manager', () => {
     expect(onEventSpy).toHaveBeenCalledWith(
         jasmine.objectContaining(eventValue1));
     const eventValue2 = {
-      type: 'ad-started',
+      type: 'ad-impression',
     };
     expect(onEventSpy).toHaveBeenCalledWith(
         jasmine.objectContaining(eventValue2));
     const eventValue3 = {
-      type: 'ad-skip-state-changed',
+      type: 'ad-started',
     };
     expect(onEventSpy).toHaveBeenCalledWith(
         jasmine.objectContaining(eventValue3));
+    const eventValue4 = {
+      type: 'ad-skip-state-changed',
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValue4));
   });
 
   it('jumping a mid-roll with JUMP restriction is not allowed', async () => {
@@ -1971,12 +2038,17 @@ describe('Interstitial Ad manager', () => {
     await shaka.test.Util.delay(0.25);
 
     if (video.currentTime == 20) {
-      expect(onEventSpy).toHaveBeenCalledTimes(2);
+      expect(onEventSpy).toHaveBeenCalledTimes(3);
       const eventValue2 = {
-        type: 'ad-started',
+        type: 'ad-impression',
       };
       expect(onEventSpy).toHaveBeenCalledWith(
           jasmine.objectContaining(eventValue2));
+      const eventValue3 = {
+        type: 'ad-started',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValue3));
     }
   });
 
@@ -2018,6 +2090,7 @@ describe('Interstitial Ad manager', () => {
       currentVideo: null,
       background: null,
       clickThroughUrl: null,
+      tracking: null,
     };
     await interstitialAdManager.addInterstitials([interstitial]);
 

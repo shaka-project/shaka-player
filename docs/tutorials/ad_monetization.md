@@ -67,8 +67,8 @@ Shaka Player supports different types of interstitials:
  - HLS Interstitials
  - DASH Media Presentation Insertion
  - Custom Interstitials
- - VAST (playback without tracking)
- - VMAP (playback without tracking)
+ - VAST
+ - VMAP
 
 
 ##### HLS Interstitials
@@ -119,6 +119,21 @@ adManager.addCustomInterstitial({
   currentVideo: null,
   background: null,
   clickThroughUrl: null,
+  tracking: {
+    impression: ['YOUR_TRACKING_URL'],
+    clickTracking: ['YOUR_TRACKING_URL'],
+    start: ['YOUR_TRACKING_URL'],
+    firstQuartile: ['YOUR_TRACKING_URL'],
+    midpoint: ['YOUR_TRACKING_URL'],
+    thirdQuartile: ['YOUR_TRACKING_URL'],
+    complete: ['YOUR_TRACKING_URL'],
+    skip: ['YOUR_TRACKING_URL'],
+    error: ['YOUR_TRACKING_URL'],
+    resume: ['YOUR_TRACKING_URL'],
+    pause: ['YOUR_TRACKING_URL'],
+    mute: ['YOUR_TRACKING_URL'],
+    unmute: ['YOUR_TRACKING_URL'],
+  },
 });
 ```
 
@@ -161,6 +176,7 @@ player.addEventListener('timelineregionadded', (e) => {
     currentVideo: null,
     background: null,
     clickThroughUrl: null,
+    tracking: null,
   });
 });
 ```
@@ -218,6 +234,7 @@ adManager.addCustomInterstitial({
   currentVideo: null,
   background: null,
   clickThroughUrl: null,
+  tracking: null,
 });
 ```
 
@@ -280,6 +297,7 @@ adManager.addCustomInterstitial({
   },
   background: null,
   clickThroughUrl: null,
+  tracking: null,
 });
 ```
 
@@ -342,11 +360,12 @@ adManager.addCustomInterstitial({
   },
   background: 'content-box radial-gradient(crimson, skyblue)',
   clickThroughUrl: null,
+  tracking: null,
 });
 ```
 
 
-##### VAST/VMAP (playback without tracking)
+##### VAST/VMAP
 
 Example:
 
