@@ -1,5 +1,31 @@
 # Changelog
 
+## [4.16.3](https://github.com/shaka-project/shaka-player/compare/v4.16.2...v4.16.3) (2025-09-29)
+
+
+### Bug Fixes
+
+* Add cue fontSize fallback when using fontScaleFactor ([#9117](https://github.com/shaka-project/shaka-player/issues/9117)) ([50ad065](https://github.com/shaka-project/shaka-player/commit/50ad0657b4a3ec99ffb242d2959beceeb787031d))
+* **Ads:** Populate getTimeOffset for insterstitials ([#9140](https://github.com/shaka-project/shaka-player/issues/9140)) ([86b962b](https://github.com/shaka-project/shaka-player/commit/86b962b409c5bef75ff6564568662d1f21eaa34d))
+* Always detect framerate as positive ([#9133](https://github.com/shaka-project/shaka-player/issues/9133)) ([0265cb8](https://github.com/shaka-project/shaka-player/commit/0265cb8f6ef8298a1cc5fc064579a05830af1041))
+* **CEA:** Remove closed captions only on video update ([#9125](https://github.com/shaka-project/shaka-player/issues/9125)) ([ff3bd67](https://github.com/shaka-project/shaka-player/commit/ff3bd679ae3a599b76db9e9c54cf6c4401a1ce2b))
+* Fix CANNOT_ADD_EXTERNAL_CHAPTERS_TO_LIVE_STREAM error code ([#9138](https://github.com/shaka-project/shaka-player/issues/9138)) ([ae7b3e9](https://github.com/shaka-project/shaka-player/commit/ae7b3e96100794cd4aee1c68372c7a39915fc91f))
+* Fix selectAudioTrack doesn't keep the same video stream when ABR is disabled ([#9116](https://github.com/shaka-project/shaka-player/issues/9116)) ([5f37db1](https://github.com/shaka-project/shaka-player/commit/5f37db143f2de8a3d8e37091db7c520bb8cb27bc))
+* **HLS:** Keep syncTime continuous by using previous value, if available ([#9135](https://github.com/shaka-project/shaka-player/issues/9135)) ([64a6a09](https://github.com/shaka-project/shaka-player/commit/64a6a094631534878e7a5d97b2c6baf30bd86ecb)), closes [#9086](https://github.com/shaka-project/shaka-player/issues/9086)
+* Improve quota exceeded handler ([#9130](https://github.com/shaka-project/shaka-player/issues/9130)) ([873de9e](https://github.com/shaka-project/shaka-player/commit/873de9e00af1d550f158cb370efd9815ac486981))
+* **MSS:** Fix originalId creation in order to avoid duplicated originalId ([#9126](https://github.com/shaka-project/shaka-player/issues/9126)) ([f2b4327](https://github.com/shaka-project/shaka-player/commit/f2b43277b647502a116f3466b6e0c5f902dc97bc))
+* Support use addTextTrackAsync with NativeTextDisplayer ([#9122](https://github.com/shaka-project/shaka-player/issues/9122)) ([ba1e81b](https://github.com/shaka-project/shaka-player/commit/ba1e81b2e787d4b879b9f217dde51317371f6f1b))
+* **UI:** Change AirPlay icon to unfilled variant ([#9113](https://github.com/shaka-project/shaka-player/issues/9113)) ([6924a72](https://github.com/shaka-project/shaka-player/commit/6924a7237fc49d41c6f7cc4f41d5db509856c791))
+* **UI:** Change PiP icon to be consistent with YT ([#9118](https://github.com/shaka-project/shaka-player/issues/9118)) ([0794326](https://github.com/shaka-project/shaka-player/commit/0794326fa672e441096c479b599a443fa4335597))
+* **UI:** Change PiP icons to non filled variant ([#9106](https://github.com/shaka-project/shaka-player/issues/9106)) ([8583ee6](https://github.com/shaka-project/shaka-player/commit/8583ee647ec6d8eab3ba47b76c1590e29fd63030)), closes [#9102](https://github.com/shaka-project/shaka-player/issues/9102)
+* **UI:** Respect prefers-reduced-transparency for big play button ([#9104](https://github.com/shaka-project/shaka-player/issues/9104)) ([50590c9](https://github.com/shaka-project/shaka-player/commit/50590c95e7553d99a6e7c006fa60840a4e014160))
+* **WebVTT:** Fix lines starting with spaces don't break correctly ([#9100](https://github.com/shaka-project/shaka-player/issues/9100)) ([de1b220](https://github.com/shaka-project/shaka-player/commit/de1b2203049547c9e9565d6946f643d0826e73d1))
+
+
+### Performance Improvements
+
+* **HLS:** Optimise manifest text parser ([#9131](https://github.com/shaka-project/shaka-player/issues/9131)) ([8036543](https://github.com/shaka-project/shaka-player/commit/8036543c5aefdd46098d2f74f7a891ea3ec20257))
+
 ## [4.16.2](https://github.com/shaka-project/shaka-player/compare/v4.16.1...v4.16.2) (2025-09-16)
 
 
