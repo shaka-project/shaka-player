@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.15.15](https://github.com/shaka-project/shaka-player/compare/v4.15.14...v4.15.15) (2025-09-29)
+
+
+### Bug Fixes
+
+* Add cue fontSize fallback when using fontScaleFactor ([#9117](https://github.com/shaka-project/shaka-player/issues/9117)) ([24441c8](https://github.com/shaka-project/shaka-player/commit/24441c83033e6e55256464be0ed29c8b4a4bc369))
+* **Ads:** Populate getTimeOffset for insterstitials ([#9140](https://github.com/shaka-project/shaka-player/issues/9140)) ([45fdb1f](https://github.com/shaka-project/shaka-player/commit/45fdb1fb8a27d14bdd945905bf1e47d27c3af009))
+* Always detect framerate as positive ([#9133](https://github.com/shaka-project/shaka-player/issues/9133)) ([2e9a763](https://github.com/shaka-project/shaka-player/commit/2e9a7637d5965c0796e9ae13fd3e4f734deb4241))
+* **CEA:** Remove closed captions only on video update ([#9125](https://github.com/shaka-project/shaka-player/issues/9125)) ([bdd7a04](https://github.com/shaka-project/shaka-player/commit/bdd7a04ef97303e99bc9f649e41c993efed28bd7))
+* Fix CANNOT_ADD_EXTERNAL_CHAPTERS_TO_LIVE_STREAM error code ([#9138](https://github.com/shaka-project/shaka-player/issues/9138)) ([fc0660f](https://github.com/shaka-project/shaka-player/commit/fc0660f089084dc7cf3298ca8e53d657d4fe3c21))
+* **HLS:** Keep syncTime continuous by using previous value, if available ([#9135](https://github.com/shaka-project/shaka-player/issues/9135)) ([f07af38](https://github.com/shaka-project/shaka-player/commit/f07af3870f7c9d3dceeac6c4ce958336e416d7ee)), closes [#9086](https://github.com/shaka-project/shaka-player/issues/9086)
+* Improve quota exceeded handler ([#9130](https://github.com/shaka-project/shaka-player/issues/9130)) ([1da82fb](https://github.com/shaka-project/shaka-player/commit/1da82fba4e9eb891a8b22d29fc41bde31f642885))
+* **MSS:** Fix originalId creation in order to avoid duplicated originalId ([#9126](https://github.com/shaka-project/shaka-player/issues/9126)) ([1a55c79](https://github.com/shaka-project/shaka-player/commit/1a55c7938c5c5842343d11d97656d621750a831e))
+* Support use addTextTrackAsync with NativeTextDisplayer ([#9122](https://github.com/shaka-project/shaka-player/issues/9122)) ([b5e1d21](https://github.com/shaka-project/shaka-player/commit/b5e1d21e5c4f500b3adadd5a98e25439dc0a72b8))
+* **WebVTT:** Fix lines starting with spaces don't break correctly ([#9100](https://github.com/shaka-project/shaka-player/issues/9100)) ([1bd9bf0](https://github.com/shaka-project/shaka-player/commit/1bd9bf0b5647c2e41007e06468c4c561ed6c2172))
+
+
+### Performance Improvements
+
+* **HLS:** Optimise manifest text parser ([#9131](https://github.com/shaka-project/shaka-player/issues/9131)) ([1d9af1d](https://github.com/shaka-project/shaka-player/commit/1d9af1d7cb0cbf70f82015503ecd4a36f11aba57))
+
 ## [4.15.14](https://github.com/shaka-project/shaka-player/compare/v4.15.13...v4.15.14) (2025-09-16)
 
 
