@@ -2336,7 +2336,8 @@ shaka.extern.MediaSourceConfiguration;
  *   disableHLSInterstitial: boolean,
  *   disableDASHInterstitial: boolean,
  *   allowPreloadOnDomElements: boolean,
- *   allowStartInMiddleOfInterstitial: boolean
+ *   allowStartInMiddleOfInterstitial: boolean,
+ *   disableInterstitialTrackingEvents: boolean,
  * }}
  *
  * @description
@@ -2379,6 +2380,10 @@ shaka.extern.MediaSourceConfiguration;
  *   If this is true, we will allow start in the middle of an interstitial.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {boolean} disableInterstitialTrackingEvents
+ *   If this is true, we ignore interstitial tracking events.
+ *   <br>
+ *   Defaults to <code>false</code>.
  *
  * @exportDoc
  */
