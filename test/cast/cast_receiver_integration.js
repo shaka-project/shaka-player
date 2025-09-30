@@ -11,6 +11,7 @@
 /** @return {boolean} */
 const castReceiverIntegrationSupport =
     () => deviceDetected.getDeviceName() === 'Chrome' ||
+      deviceDetected.getDeviceName() === 'Edge' ||
       deviceDetected.getDeviceType() === shaka.device.IDevice.DeviceType.CAST;
 filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
   const CastReceiver = shaka.cast.CastReceiver;
