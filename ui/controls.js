@@ -996,8 +996,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   showAdUI() {
     shaka.ui.Utils.setDisplay(this.adPanel_, true);
-    shaka.ui.Utils.setDisplay(this.clientSideAdContainer_, true);
-    shaka.ui.Utils.setDisplay(this.serverSideAdContainer_, true);
+    if (this.clientSideAdContainer_ &&
+        this.clientSideAdContainer_.hasChildNodes()) {
+      shaka.ui.Utils.setDisplay(this.clientSideAdContainer_, true);
+    }
+    if (this.serverSideAdContainer_ &&
+        this.serverSideAdContainer_.hasChildNodes()) {
+      shaka.ui.Utils.setDisplay(this.serverSideAdContainer_, true);
+    }
     if (this.ad_.hasCustomClick()) {
       this.controlsContainer_.setAttribute('ad-active', 'true');
     } else {
