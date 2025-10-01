@@ -476,9 +476,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         this.adBreaksTimer_.tickEvery(/* seconds= */ 0.25);
       }
     };
-    if (this.player.isFullyLoaded()) {
-      action();
-    } else {
+    action();
+    if (!this.player.isFullyLoaded()) {
       this.eventManager.listenOnce(this.player, 'loaded', action);
     }
   }
