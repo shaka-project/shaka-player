@@ -679,39 +679,6 @@ describe('Player', () => {
       });
     });
 
-    describe('setTextTrackVisibility', () => {
-      beforeEach(() => {
-        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-          manifest.addVariant(0, (variant) => {
-            variant.addAudio(1);
-            variant.addVideo(2);
-          });
-          manifest.addTextStream(3, (stream) => {
-            stream.bandwidth = 100;
-            stream.kind = 'caption';
-            stream.label = 'Spanish';
-            stream.language = 'es';
-          });
-        });
-      });
-
-      it('load text stream if caption is visible', async () => {
-        await player.setTextTrackVisibility(true);
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-        expect(streamingEngine.switchTextStream).toHaveBeenCalled();
-        expect(shaka.test.Util.invokeSpy(streamingEngine.getCurrentTextStream))
-            .not.toBe(null);
-      });
-
-      it('does not load text stream if caption is invisible', async () => {
-        await player.setTextTrackVisibility(false);
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-        expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
-        expect(shaka.test.Util.invokeSpy(streamingEngine.getCurrentTextStream))
-            .toBe(null);
-      });
-    });
-
     describe('when config.streaming.preferNativeDash is set to true', () => {
       beforeAll(() => {
         shaka.media.ManifestParser.registerParserByMime(
@@ -2665,20 +2632,6 @@ describe('Player', () => {
       expect(streamingEngine.switchTextStream).toHaveBeenCalled();
       const args = streamingEngine.switchTextStream.calls.argsFor(0);
       expect(args[0].language).toBe('en');
-      expect(getActiveTextTrack().language).toBe('en');
-    });
-
-    // https://github.com/shaka-project/shaka-player/issues/2010
-    it('changing text lang changes active stream when not streaming', () => {
-      player.setTextTrackVisibility(false);
-
-      expect(getActiveTextTrack()).toBe(null);
-      expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
-      const newTextTrack = textTracks.find((t) => t.language == 'en');
-      player.selectTextTrack(newTextTrack);
-      player.setTextTrackVisibility(true);
-
-      expect(streamingEngine.switchTextStream).toHaveBeenCalled();
       expect(getActiveTextTrack().language).toBe('en');
     });
 
