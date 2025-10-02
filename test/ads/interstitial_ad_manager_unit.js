@@ -1024,7 +1024,6 @@ describe('Interstitial Ad manager', () => {
         id: 'PREROLL',
         schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:insert:2025',
         eventNode,
-        eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
         timescale: 1,
       };
@@ -1059,7 +1058,6 @@ describe('Interstitial Ad manager', () => {
         id: 'PREROLL',
         schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:replace:2025',
         eventNode,
-        eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
         timescale: 1,
       };
@@ -1096,7 +1094,6 @@ describe('Interstitial Ad manager', () => {
         id: 'PREROLL',
         schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:insert:2025',
         eventNode,
-        eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
         timescale: 1,
       };
@@ -1126,7 +1123,6 @@ describe('Interstitial Ad manager', () => {
         id: 'OVERLAY',
         schemeIdUri: 'urn:mpeg:dash:event:2012',
         eventNode,
-        eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
         timescale: 1,
       };
@@ -1199,7 +1195,6 @@ describe('Interstitial Ad manager', () => {
         id: 'OVERLAY',
         schemeIdUri: 'urn:mpeg:dash:event:2012',
         eventNode,
-        eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
         timescale: 1,
       };
@@ -1229,7 +1224,6 @@ describe('Interstitial Ad manager', () => {
         id: 'OVERLAY',
         schemeIdUri: 'urn:scte:dash:scte214-events',
         eventNode,
-        eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
         timescale: 1,
       };
@@ -1320,7 +1314,6 @@ describe('Interstitial Ad manager', () => {
         id: 'OVERLAY',
         schemeIdUri: 'urn:scte:dash:scte214-events',
         eventNode,
-        eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
         timescale: 1,
       };

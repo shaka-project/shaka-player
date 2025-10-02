@@ -327,7 +327,8 @@ describe('Player', () => {
       await video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 4, 20);
 
-      expect(player.isTextTrackVisible()).toBe(true);
+      const activeTextTrack = player.getTextTracks().find((t) => t.active);
+      expect(activeTextTrack).toBeDefined();
       expect(displayer.isTextVisible()).toBe(true);
       expect(cues.length).toBeGreaterThan(0);
     });
@@ -359,7 +360,8 @@ describe('Player', () => {
       await video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 4, 20);
 
-      expect(player.isTextTrackVisible()).toBe(true);
+      const activeTextTrack = player.getTextTracks().find((t) => t.active);
+      expect(activeTextTrack).toBeDefined();
       expect(displayer.isTextVisible()).toBe(true);
       expect(cues.length).toBeGreaterThan(0);
     });
@@ -435,7 +437,7 @@ describe('Player', () => {
       // Only one set of cues should be active.
       // Cues should be of the selected language track.
       player.setTextTrackVisibility(true);
-      player.selectTextLanguage('fr');
+      player.selectTextTrack(textTracks[1]);
       video.currentTime = 5;
       await video.play();
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
@@ -519,17 +521,20 @@ describe('Player', () => {
 
       it('enables text if text matches and audio does not', async () => {
         await textMatchesAudioDoesNot();
-        expect(player.isTextTrackVisible()).toBe(true);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeDefined();
       });
 
       it('disables text if text does not match', async () => {
         await textDoesNotMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeUndefined();
       });
 
       it('disables text if both text and audio match', async () => {
         await textAndAudioMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeUndefined();
       });
     });  // IF_SUBTITLES_MAY_BE_NEEDED
 
@@ -542,17 +547,20 @@ describe('Player', () => {
 
       it('enables text if text matches and audio does not', async () => {
         await textMatchesAudioDoesNot();
-        expect(player.isTextTrackVisible()).toBe(true);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeDefined();
       });
 
       it('disables text if text does not match', async () => {
         await textDoesNotMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeUndefined();
       });
 
       it('enables text if both text and audio match', async () => {
         await textAndAudioMatch();
-        expect(player.isTextTrackVisible()).toBe(true);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeDefined();
       });
     });  // IF_PREFERRED_TEXT_LANGUAGE
 
@@ -563,17 +571,20 @@ describe('Player', () => {
 
       it('enables text if text matches and audio does not', async () => {
         await textMatchesAudioDoesNot();
-        expect(player.isTextTrackVisible()).toBe(true);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeDefined();
       });
 
       it('enables text if text does not match', async () => {
         await textDoesNotMatch();
-        expect(player.isTextTrackVisible()).toBe(true);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeDefined();
       });
 
       it('enables text if both text and audio match', async () => {
         await textAndAudioMatch();
-        expect(player.isTextTrackVisible()).toBe(true);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeDefined();
       });
     });  // ALWAYS
 
@@ -584,17 +595,20 @@ describe('Player', () => {
 
       it('disables text if text matches and audio does not', async () => {
         await textMatchesAudioDoesNot();
-        expect(player.isTextTrackVisible()).toBe(false);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeUndefined();
       });
 
       it('disables text if text does not match', async () => {
         await textDoesNotMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeUndefined();
       });
 
       it('disables text if both text and audio match', async () => {
         await textAndAudioMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeUndefined();
       });
     });  // NEVER
   });  // AutoShowText
@@ -723,20 +737,6 @@ describe('Player', () => {
       expect(textDisplayer.destroySpy).toHaveBeenCalled();
     });
   });  // describe('TextDisplayer plugin')
-
-  describe('TextAndRoles', () => {
-    // Regression Test. Makes sure that the language and role fields have been
-    // properly exported from the player.
-    it('exports language and roles fields', async () => {
-      await player.load('test:sintel_compiled');
-      const languagesAndRoles = player.getTextLanguagesAndRoles();
-      expect(languagesAndRoles.length).toBeTruthy();
-      for (const languageAndRole of languagesAndRoles) {
-        expect(languageAndRole.language).not.toBeUndefined();
-        expect(languageAndRole.role).not.toBeUndefined();
-      }
-    });
-  });  // describe('TextAndRoles')
 
   describe('streaming event', () => {
     // Calling switch early during load() caused a failed assertion in Player
