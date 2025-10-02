@@ -233,7 +233,7 @@ describe('UI', () => {
         // Find and click the 'Off' button
         getOffButton().click();
         // Wait for the change to take effect
-        await waiter.waitForEvent(player, 'texttrackvisibility');
+        await waiter.waitForEvent(player, 'textchanged');
 
         textTracks = player.getTextTracks();
         activeTrack = textTracks.find((t) => t.active);
