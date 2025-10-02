@@ -241,8 +241,7 @@ describe('UI', () => {
       });
 
       it('turning captions off through API has effect on UI', async () => {
-        // This test is invalid if the text is not initially visible, because
-        // setTextTrackVisibility() does nothing if there are no changes.
+        // This test is invalid if the text is not initially visible.
         let textTracks = player.getTextTracks();
         player.selectTextTrack(textTracks[0]);
         textTracks = player.getTextTracks();

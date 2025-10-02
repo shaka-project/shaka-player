@@ -348,13 +348,15 @@ shaka.test.NativeTextLayoutTests = class extends shaka.test.TextLayoutTests {
       getMediaElement: () => this.video,
       getLoadMode: () => shaka.Player.LoadMode.MEDIA_SOURCE,
       getTextTracks: () => textTracks,
-      selectTextTrack: ({id}) => {
-        const track = textTracks.find((t) => t.id === id);
-        expect(track).toBeTruthy();
-        track.active = true;
+      selectTextTrack: (track) => {
+        if (track) {
+          const activeTrack = textTracks.find((t) => t.id === track.id);
+          expect(activeTrack).toBeTruthy();
+          this.textDisplayer.setTextVisibility(true);
+        } else {
+          this.textDisplayer.setTextVisibility(false);
+        }
       },
-      setTextTrackVisibility: (visible) =>
-        this.textDisplayer.setTextVisibility(visible),
     };
 
     this.video = shaka.test.UiUtils.createVideoElement();
