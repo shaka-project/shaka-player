@@ -309,6 +309,163 @@ describe('Interstitial Ad manager', () => {
           jasmine.objectContaining(eventValue1));
     });
 
+    it('supports X-ASSET-LIST with X-AD-CREATIVE-SIGNALING', async () => {
+      const assetsList = JSON.stringify({
+        ASSETS: [
+          {
+            'URI': 'ad.m3u8',
+            'X-AD-CREATIVE-SIGNALING': {
+              version: 2,
+              type: 'slot',
+              payload: [
+                {
+                  type: 'linear',
+                  start: 0,
+                  duration: 8,
+                  media: [],
+                  identifiers: [],
+                  tracking: [
+                    {
+                      type: 'impression',
+                      urls: ['impression'],
+                    },
+                    {
+                      type: 'clickTracking',
+                      urls: ['clickTracking'],
+                    },
+                    {
+                      type: 'start',
+                      urls: ['start'],
+                    },
+                    {
+                      type: 'firstQuartile',
+                      urls: ['firstQuartile'],
+                    },
+                    {
+                      type: 'firstQuartile',
+                      urls: ['firstQuartile_alt'],
+                    },
+                    {
+                      type: 'midpoint',
+                      urls: ['midpoint', 'midpoint_alt'],
+                    },
+                    {
+                      type: 'thirdQuartile',
+                      urls: ['thirdQuartile'],
+                    },
+                    {
+                      type: 'complete',
+                      urls: ['complete'],
+                    },
+                    {
+                      type: 'skip',
+                      urls: ['skip'],
+                    },
+                    {
+                      type: 'error',
+                      urls: ['error'],
+                    },
+                    {
+                      type: 'resume',
+                      urls: ['resume'],
+                    },
+                    {
+                      type: 'pause',
+                      urls: ['pause'],
+                    },
+                    {
+                      type: 'mute',
+                      urls: ['mute'],
+                    },
+                    {
+                      type: 'unmute',
+                      urls: ['unmute'],
+                    },
+                  ],
+                  verifications: [],
+                  clickThrough: 'clickThrough',
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      networkingEngine.setResponseText('test:/test.json', assetsList);
+
+      const metadata = {
+        startTime: 0,
+        endTime: null,
+        values: [
+          {
+            key: 'ID',
+            data: 'PREROLL',
+          },
+          {
+            key: 'CUE',
+            data: 'PRE',
+          },
+          {
+            key: 'X-ASSET-LIST',
+            data: 'test:/test.json',
+          },
+          {
+            key: 'X-RESUME-OFFSET',
+            data: '0.0',
+          },
+          {
+            key: 'X-RESTRICT',
+            data: 'SKIP,JUMP',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
+      const expectedInterstitial = {
+        id: 'PREROLL_shaka_asset_0',
+        groupId: 'PREROLL',
+        startTime: 0,
+        endTime: null,
+        uri: 'ad.m3u8',
+        mimeType: 'application/x-mpegurl',
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: false,
+        resumeOffset: 0,
+        playoutLimit: null,
+        once: false,
+        pre: true,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: null,
+        displayOnBackground: false,
+        currentVideo: null,
+        background: null,
+        clickThroughUrl: 'clickThrough',
+        tracking: {
+          impression: ['impression'],
+          clickTracking: ['clickTracking'],
+          start: ['start'],
+          firstQuartile: ['firstQuartile', 'firstQuartile_alt'],
+          midpoint: ['midpoint', 'midpoint_alt'],
+          thirdQuartile: ['thirdQuartile'],
+          complete: ['complete'],
+          skip: ['skip'],
+          error: ['error'],
+          resume: ['resume'],
+          pause: ['pause'],
+          mute: ['mute'],
+          unmute: ['unmute'],
+        },
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
     it('supports X-RESTRICT', async () => {
       const metadata = {
         startTime: 0,
