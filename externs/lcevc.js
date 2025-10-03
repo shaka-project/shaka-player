@@ -44,6 +44,14 @@ LCEVCdec.LCEVCdec = class {
   appendBuffer(data, type, variantId, timestampOffset, isMuxed) {}
 
   /**
+   * Flush (remove) the video buffers from the LCEVC decoder.
+   *
+   * @param {number} startTime The start time of the data to be removed.
+   * @param {number} endTime The end time of the data to be removed.
+   */
+  flushBuffer(startTime, endTime) {}
+
+  /**
    * Set current variant as variantId to the LCEVC decoder
    * @param {!number} variantId
    * @param {!boolean} autoBufferSwitch is lcevcDec mode that switches variant
