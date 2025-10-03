@@ -284,6 +284,7 @@ shakaDemo.Main = class {
    */
   async loadText_(url) {
     const netEngine = new shaka.net.NetworkingEngine();
+    netEngine.configure(this.defaultConfig_.networking);
     const retryParams = shaka.net.NetworkingEngine.defaultRetryParameters();
     const request = shaka.net.NetworkingEngine.makeRequest([url], retryParams);
     const requestType = shaka.net.NetworkingEngine.RequestType.APP;
