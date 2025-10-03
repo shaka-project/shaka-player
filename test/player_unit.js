@@ -679,39 +679,6 @@ describe('Player', () => {
       });
     });
 
-    describe('setTextTrackVisibility', () => {
-      beforeEach(() => {
-        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-          manifest.addVariant(0, (variant) => {
-            variant.addAudio(1);
-            variant.addVideo(2);
-          });
-          manifest.addTextStream(3, (stream) => {
-            stream.bandwidth = 100;
-            stream.kind = 'caption';
-            stream.label = 'Spanish';
-            stream.language = 'es';
-          });
-        });
-      });
-
-      it('load text stream if caption is visible', async () => {
-        await player.setTextTrackVisibility(true);
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-        expect(streamingEngine.switchTextStream).toHaveBeenCalled();
-        expect(shaka.test.Util.invokeSpy(streamingEngine.getCurrentTextStream))
-            .not.toBe(null);
-      });
-
-      it('does not load text stream if caption is invisible', async () => {
-        await player.setTextTrackVisibility(false);
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-        expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
-        expect(shaka.test.Util.invokeSpy(streamingEngine.getCurrentTextStream))
-            .toBe(null);
-      });
-    });
-
     describe('when config.streaming.preferNativeDash is set to true', () => {
       beforeAll(() => {
         shaka.media.ManifestParser.registerParserByMime(
@@ -2494,13 +2461,15 @@ describe('Player', () => {
       expect(getActiveTextTrack().id).toBe(englishTextTrack.id);
     });
 
-    it('selectAudioLanguage() takes precedence over ' +
+    it('selectAudioTrack() takes precedence over ' +
        'preferredAudioLanguage', () => {
       // This preference is set in beforeEach, before load().
       expect(player.getConfiguration().preferredAudioLanguage).toBe('en');
       expect(getActiveVariantTrack().language).toBe('en');
 
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
 
       expect(streamingEngine.switchVariant).toHaveBeenCalled();
       const args = streamingEngine.switchVariant.calls.argsFor(0);
@@ -2509,10 +2478,13 @@ describe('Player', () => {
       expect(getActiveVariantTrack().language).toBe('es');
     });
 
-    it('selectAudioLanguage() respects selected role', () => {
+    it('selectAudioTrack() respects selected role', () => {
       expect(getActiveVariantTrack().roles).not.toContain('commentary');
 
-      player.selectAudioLanguage('en', 'commentary');
+      const newAudioTrack = audioTracks.find((t) =>
+        t.language == 'en' && t.roles.includes('commentary'));
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
 
       expect(streamingEngine.switchVariant).toHaveBeenCalled();
       const args = streamingEngine.switchVariant.calls.argsFor(0);
@@ -2521,115 +2493,61 @@ describe('Player', () => {
       expect(getActiveVariantTrack().roles).toContain('commentary');
     });
 
-    it('selectAudioLanguage() ignores unplayable variants', () => {
-      player.configure({
-        restrictions: {minChannelsCount: 6},
-      });
-      player.selectAudioLanguage('es');
-      expect(getActiveVariantTrack().channelsCount).toBe(6);
-    });
-
-    it('selectAudioLanguage() respects selected audio codec', () => {
-      player.selectAudioLanguage('es', '', 0, 0, 'mp4a.40.2');
+    it('selectAudioTrack() respects selected audio codec', () => {
+      let newAudioTrack = audioTracks.find((t) =>
+        t.language == 'es' && t.codecs == 'mp4a.40.2');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       expect(getActiveVariantTrack().audioCodec).toBe('mp4a.40.2');
 
-      player.selectAudioLanguage('es', '', 0, 0, 'ec-3');
+      newAudioTrack = audioTracks.find((t) =>
+        t.language == 'es' && t.codecs == 'ec-3');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       expect(getActiveVariantTrack().audioCodec).toBe('ec-3');
     });
 
-    it('selectAudioLanguage() applies role only to audio', () => {
+    it('selectAudioTrack() applies role only to audio', () => {
       expect(getActiveVariantTrack().roles).not.toContain('commentary');
       const videoRoles = getActiveVariantTrack().videoRoles;
-      player.selectAudioLanguage('en', 'commentary');
+      let newAudioTrack = audioTracks.find((t) =>
+        t.language == 'en' && t.roles.includes('commentary'));
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       let args = streamingEngine.switchVariant.calls.argsFor(0);
       expect(args[0].audio.roles).toContain('commentary');
       expect(args[0].video.roles).toBe(videoRoles);
 
       // Switch audio role from 'commentary' to 'main'.
       streamingEngine.switchVariant.calls.reset();
-      player.selectAudioLanguage('en', 'main');
+      newAudioTrack = audioTracks.find((t) =>
+        t.language == 'en' && t.roles.includes('main'));
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       expect(streamingEngine.switchVariant).toHaveBeenCalled();
       args = streamingEngine.switchVariant.calls.argsFor(0);
       expect(args[0].audio.roles).toContain('main');
       expect(args[0].video.roles).toBe(videoRoles);
     });
 
-    it('selectAudioLanguage() does not change selected text track', () => {
+    it('selectAudioTrack() does not change selected text track', () => {
       // This came up in a custom application that allows to select
       // from all tracks regardless of selected language.
-      // We imitate this behavior by calling selectTextLanguage()
+      // We imitate this behavior by calling selectTextTrack()
       // with one language and then selecting a track in a different
       // language.
-      player.selectTextLanguage('en');
-      const spanishTextTrack = textTracks.filter((t) => t.language == 'es')[0];
-      player.selectTextTrack(spanishTextTrack);
-      player.selectAudioLanguage('es');
-      expect(getActiveTextTrack().id).toBe(spanishTextTrack.id);
-    });
-
-    // Regression test for https://github.com/shaka-project/shaka-player/issues/2906
-    // and https://github.com/shaka-project/shaka-player/issues/2909.
-    it('selectAudioLanguage() can choose role-less tracks', async () => {
-      // For this test, we use a different (and simpler) manifest.
-      // Both audio tracks are English; one has a role, and one has no roles.
-      // The role=description track comes first to reproduce the conditions in
-      // #2909.
-      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        manifest.addVariant(100, (variant) => {
-          variant.bandwidth = 1300;
-          variant.language = 'en';
-          variant.addVideo(1, (stream) => {
-            stream.originalId = 'video';
-            stream.bandwidth = 1000;
-            stream.width = 100;
-            stream.height = 200;
-            stream.frameRate = 1000000 / 42000;
-            stream.pixelAspectRatio = '59:54';
-            stream.roles = [];
-          });
-          variant.addAudio(2, (stream) => {
-            stream.originalId = 'audio-en-description';
-            stream.bandwidth = 100;
-            stream.channelsCount = 2;
-            stream.audioSamplingRate = 48000;
-            stream.roles = ['description'];
-          });
-        });
-        manifest.addVariant(101, (variant) => {
-          variant.bandwidth = 2300;
-          variant.language = 'en';
-          variant.addExistingStream(1);  // video
-          variant.addAudio(3, (stream) => {
-            stream.originalId = 'audio-en';
-            stream.bandwidth = 100;
-            stream.channelsCount = 2;
-            stream.audioSamplingRate = 48000;
-            stream.roles = [];
-          });
-        });
-      });
-
-      // No explicit preferred audio language is also part of #2909.
-      player.configure('preferredAudioLanguage', undefined);
-
-      // Load again to get this test-specific manifest loaded.
-      await player.load(fakeManifestUri, 0, fakeMimeType);
-
-      // #2909: The initial choice should be for the role-less track, even
-      // though it is second in the manifest.
-      expect(getActiveVariantTrack().audioRoles).toEqual([]);
-
-      player.selectAudioLanguage('en', 'description');
-      expect(getActiveVariantTrack().audioRoles).toEqual(['description']);
-
-      // #2906: Selecting no particular role should prefer the track without any
-      // roles.
-      player.selectAudioLanguage('en');
-      expect(getActiveVariantTrack().audioRoles).toEqual([]);
+      let newTextTrack = textTracks.find((t) => t.language == 'en');
+      player.selectTextTrack(newTextTrack);
+      newTextTrack = textTracks.find((t) => t.language == 'es');
+      player.selectTextTrack(newTextTrack);
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
+      expect(getActiveTextTrack().id).toBe(newTextTrack.id);
     });
 
     // https://github.com/shaka-project/shaka-player/issues/3262
-    it('selectAudioLanguage() doesn\'t change resolution', () => {
+    it('selectAudioTrack() doesn\'t change resolution', () => {
       player.configure('abr.enabled', false);
       abrManager.chooseIndex = 1;
       const lowResEn =
@@ -2638,33 +2556,39 @@ describe('Player', () => {
 
       // Switching to 'es' should keep the low-res stream and not choose the
       // high-res version.
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       const lowResEs =
           variantTracks.filter((t) => t.language == 'es' && t.height == 200)[0];
       expect(getActiveVariantTrack().id).toBe(lowResEs.id);
     });
 
-    it('selectTextLanguage() does not change selected variant track', () => {
+    it('selectTextTrack() does not change selected variant track', () => {
       // This came up in a custom application that allows to select
       // from all tracks regardless of selected language.
-      // We imitate this behavior by calling selectAudioLanguage()
+      // We imitate this behavior by calling selectAudioTrack()
       // with one language and then selecting a track in a different
       // language.
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       const englishVariantTrack =
           variantTracks.filter((t) => t.language == 'en')[0];
       player.selectVariantTrack(englishVariantTrack);
-      player.selectTextLanguage('es');
+      const newTextTrack = textTracks.find((t) => t.language == 'es');
+      player.selectTextTrack(newTextTrack);
       expect(getActiveVariantTrack().id).toBe(englishVariantTrack.id);
     });
 
-    it('selectTextLanguage() takes precedence over ' +
+    it('selectTextTrack() takes precedence over ' +
        'preferredTextLanguage', () => {
       // This preference is set in beforeEach, before load().
       expect(player.getConfiguration().preferredTextLanguage).toBe('es');
       expect(getActiveTextTrack().language).toBe('es');
 
-      player.selectTextLanguage('en');
+      const newTextTrack = textTracks.find((t) => t.language == 'en');
+      player.selectTextTrack(newTextTrack);
 
       expect(streamingEngine.switchTextStream).toHaveBeenCalled();
       const args = streamingEngine.switchTextStream.calls.argsFor(0);
@@ -2672,10 +2596,12 @@ describe('Player', () => {
       expect(getActiveTextTrack().language).toBe('en');
     });
 
-    it('selectTextLanguage() respects selected role', () => {
+    it('selectTextTrack() respects selected role', () => {
       expect(getActiveTextTrack().roles).not.toContain('commentary');
 
-      player.selectTextLanguage('en', 'commentary');
+      const newTextTrack = textTracks.find((t) =>
+        t.language == 'en' && t.roles.includes('commentary'));
+      player.selectTextTrack(newTextTrack);
 
       expect(streamingEngine.switchTextStream).toHaveBeenCalled();
       const args = streamingEngine.switchTextStream.calls.argsFor(0);
@@ -2686,7 +2612,9 @@ describe('Player', () => {
     it('changing current audio language changes active stream', () => {
       expect(getActiveVariantTrack().language).not.toBe('es');
       expect(streamingEngine.switchVariant).not.toHaveBeenCalled();
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
 
       expect(streamingEngine.switchVariant).toHaveBeenCalled();
       const args = streamingEngine.switchVariant.calls.argsFor(0);
@@ -2698,24 +2626,12 @@ describe('Player', () => {
     it('changing current text language changes active stream', () => {
       expect(getActiveTextTrack().language).not.toBe('en');
       expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
-      player.selectTextLanguage('en');
+      const newTextTrack = textTracks.find((t) => t.language == 'en');
+      player.selectTextTrack(newTextTrack);
 
       expect(streamingEngine.switchTextStream).toHaveBeenCalled();
       const args = streamingEngine.switchTextStream.calls.argsFor(0);
       expect(args[0].language).toBe('en');
-      expect(getActiveTextTrack().language).toBe('en');
-    });
-
-    // https://github.com/shaka-project/shaka-player/issues/2010
-    it('changing text lang changes active stream when not streaming', () => {
-      player.setTextTrackVisibility(false);
-
-      expect(getActiveTextTrack()).toBe(null);
-      expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
-      player.selectTextLanguage('en');
-      player.setTextTrackVisibility(true);
-
-      expect(streamingEngine.switchTextStream).toHaveBeenCalled();
       expect(getActiveTextTrack().language).toBe('en');
     });
 
@@ -2875,48 +2791,6 @@ describe('Player', () => {
         expect(variantChanged).not.toHaveBeenCalled();
       });
 
-      it('in selectTextLanguage', async () => {
-        // The current text language.
-        const currentLanguage = player.getTextTracks()
-            .filter((t) => t.active)[0].language;
-        const newLanguage = player.getTextTracks()
-            .filter((t) => t.language != currentLanguage)[0].language;
-
-        // Call selectTextLanguage with a new language.  Expect an event to
-        // fire.
-        player.selectTextLanguage(newLanguage);
-        await shaka.test.Util.shortDelay();
-        expect(textChanged).toHaveBeenCalled();
-        textChanged.calls.reset();
-
-        // Call again with the same language, and expect no event to fire,
-        // since nothing changed this time.
-        player.selectTextLanguage(newLanguage);
-        await shaka.test.Util.shortDelay();
-        expect(textChanged).not.toHaveBeenCalled();
-      });
-
-      it('in selectAudioLanguage', async () => {
-        // The current audio language.
-        const currentLanguage = player.getVariantTracks()
-            .filter((t) => t.active)[0].language;
-        const newLanguage = player.getVariantTracks()
-            .filter((t) => t.language != currentLanguage)[0].language;
-
-        // Call selectAudioLanguage with a new language.  Expect an event to
-        // fire.
-        player.selectAudioLanguage(newLanguage);
-        await shaka.test.Util.shortDelay();
-        expect(variantChanged).toHaveBeenCalled();
-        variantChanged.calls.reset();
-
-        // Call again with the same language, and expect no event to fire,
-        // since nothing changed this time.
-        player.selectAudioLanguage(newLanguage);
-        await shaka.test.Util.shortDelay();
-        expect(variantChanged).not.toHaveBeenCalled();
-      });
-
       it('in selectAudioTrack', async () => {
         // New audio track.
         const newAudioTrack = player.getAudioTracks().find((t) => !t.active);
@@ -2946,8 +2820,6 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
 
       // Text was turned on during startup.
-      expect(player.isTextTrackVisible()).toBe(true);
-
       expect(getActiveTextTrack()).toEqual(jasmine.objectContaining({
         id: 52,
         language: 'en',
@@ -2991,48 +2863,6 @@ describe('Player', () => {
 
     it('chooses other sub tags if base language does not exist', async () => {
       await runTest(['en', 'es', 'pt-BR'], 'pt-PT', 2);
-    });
-
-    it('enables text if its language differs from audio at start', async () => {
-      // A manifest we can use to test text visibility.
-      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        manifest.addVariant(0, (variant) => {
-          variant.language = 'pt';
-          variant.addAudio(0);
-        });
-        manifest.addVariant(1, (variant) => {
-          variant.language = 'en';
-          variant.addAudio(1);
-        });
-        manifest.addTextStream(2, (stream) => {
-          stream.language = 'pt';
-        });
-        manifest.addTextStream(3, (stream) => {
-          stream.language = 'fr';
-        });
-      });
-
-      player.configure({
-        preferredAudioLanguage: 'en',
-        preferredTextLanguage: 'fr',
-      });
-
-      expect(player.isTextTrackVisible()).toBe(false);
-
-      await player.load(fakeManifestUri, 0, fakeMimeType);
-
-      // Text was turned on during startup.
-      expect(player.isTextTrackVisible()).toBe(true);
-
-      // Turn text back off.
-      await player.setTextTrackVisibility(false);
-      expect(player.isTextTrackVisible()).toBe(false);
-
-      // Change text languages after startup.
-      player.selectTextLanguage('pt');
-
-      // This should not turn text back on.
-      expect(player.isTextTrackVisible()).toBe(false);
     });
 
     it('chooses an arbitrary language when none given', async () => {
@@ -4531,18 +4361,6 @@ describe('Player', () => {
     abrManager.switchCallback(manifest.variants[2]);
   });
 
-  describe('isTextTrackVisible', () => {
-    it('does not throw before load', () => {
-      player.isTextTrackVisible();
-    });
-  });
-
-  describe('setTextTrackVisibility', () => {
-    it('does not throw before load', async () => {
-      await player.setTextTrackVisibility(true);
-    });
-  });
-
   describe('isAudioOnly', () => {
     it('detects audio-only content', async () => {
       // False before we've loaded anything.
@@ -4697,8 +4515,6 @@ describe('Player', () => {
   });
 
   describe('language methods', () => {
-    let videoOnlyManifest;
-
     beforeEach(() => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(1, (variant) => {
@@ -4752,125 +4568,6 @@ describe('Player', () => {
           stream.kind = 'subtitle';
           stream.roles = ['main', 'subtitle'];
         });
-      });
-
-      videoOnlyManifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        manifest.addVariant(1, (variant) => {
-          variant.bandwidth = 400;
-          variant.addVideo(1);
-        });
-        manifest.addVariant(2, (variant) => {
-          variant.bandwidth = 800;
-          variant.addVideo(2);
-        });
-      });
-    });
-
-    describe('get*Languages', () => {
-      it('returns a list of languages', async () => {
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-        expect(player.getAudioLanguages()).toEqual(['fr', 'en', 'de']);
-        expect(player.getTextLanguages()).toEqual(['es', 'en']);
-      });
-
-      it('returns "und" for video-only tracks', async () => {
-        manifest = videoOnlyManifest;
-
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-        expect(player.getAudioLanguages()).toEqual(['und']);
-        expect(player.getTextLanguages()).toEqual([]);
-      });
-    });
-
-    describe('getAudioLanguagesAndRoles', () => {
-      it('ignores video roles and labels', async () => {
-        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-          manifest.addVariant(0, (variant) => {
-            variant.language = 'en';
-            variant.addVideo(1, (stream) => {
-              stream.roles = ['video-only-role'];
-              stream.label = 'should not show up';
-            });
-            variant.addAudio(2, (stream) => {
-              stream.roles = ['audio-only-role'];
-              stream.language = 'en';
-            });
-          });
-        });
-
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-
-        expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'en', role: 'audio-only-role', label: null},
-        ]);
-      });
-
-      it('lists all language-role combinations', async () => {
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-        expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'fr', role: '', label: null},
-          {language: 'en', role: 'main', label: null},
-          {language: 'en', role: 'commentary', label: null},
-          {language: 'de', role: 'foo', label: null},
-          {language: 'de', role: 'bar', label: null},
-        ]);
-      });
-
-      it('associates audio streams with their labels', async () => {
-        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-          manifest.addVariant(0, (variant) => {
-            variant.language = 'en';
-            variant.addAudio(1, (stream) => {
-              stream.roles = ['role-1'];
-              stream.language = 'en';
-              stream.label = 'english';
-            });
-          });
-          manifest.addVariant(0, (variant) => {
-            variant.language = 'es';
-            variant.addAudio(2, (stream) => {
-              stream.roles = ['role-2', 'role-3'];
-              stream.language = 'es';
-              stream.label = 'spanish';
-            });
-          });
-        });
-
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-
-        expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'en', role: 'role-1', label: 'english'},
-          {language: 'es', role: 'role-2', label: 'spanish'},
-          {language: 'es', role: 'role-3', label: 'spanish'},
-        ]);
-      });
-
-      it('uses "und" for video-only tracks', async () => {
-        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-          manifest.addVariant(0, (variant) => {
-            variant.addVideo(1, (stream) => {
-              stream.roles = ['video-only-role'];
-            });
-          });
-        });
-
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-        expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'und', role: '', label: null},
-        ]);
-      });
-    });
-
-    describe('getTextLanguageAndRoles', () => {
-      it('lists all language-role combinations', async () => {
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-        expect(player.getTextLanguagesAndRoles()).toEqual([
-          {language: 'es', role: 'baz', label: null},
-          {language: 'es', role: 'qwerty', label: null},
-          {language: 'en', role: 'main', label: null},
-          {language: 'en', role: 'caption', label: null},
-          {language: 'en', role: 'subtitle', label: null},
-        ]);
       });
     });
 

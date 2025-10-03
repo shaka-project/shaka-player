@@ -35,8 +35,6 @@ describe('NativeTextDisplayer', () => {
         expect(track).toBeTruthy();
         track.active = true;
       },
-      setTextTrackVisibility: (visible) =>
-        displayer.setTextVisibility(visible),
     };
     video = new shaka.test.FakeVideo();
     /** @suppress {checkTypes} */

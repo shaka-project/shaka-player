@@ -277,19 +277,13 @@ describe('Player Src Equals', () => {
     // On platforms with audioTracks, such as Safari, we get one track, with
     // language set to whatever is in the mp4.
     if (video.audioTracks) {
-      expect(player.getAudioLanguages()).toEqual(['en']);
-      // Note that some browsers, such as Safari, say this is the 'main'
-      // role, while others, such as Edge, do not.  For the purposes of this
-      // test, it doesn't matter what the role is.
-      expect(player.getAudioLanguagesAndRoles()).toEqual(
-          [{language: 'en', role: jasmine.any(String), label: null}]);
+      expect(player.getAudioTracks())
+          .toEqual([jasmine.objectContaining({language: 'en'})]);
     } else {
-      expect(player.getAudioLanguages()).toEqual([]);
-      expect(player.getAudioLanguagesAndRoles()).toEqual([]);
+      expect(player.getAudioTracks()).toEqual([]);
     }
 
-    expect(player.getTextLanguages()).toEqual([]);
-    expect(player.getTextLanguagesAndRoles()).toEqual([]);
+    expect(player.getTextTracks()).toEqual([]);
   });
 
   // Even though we loaded content using |src=| we should still be able to get

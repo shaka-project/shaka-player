@@ -23,6 +23,9 @@ describe('TextEngine', () => {
   let mockSetSequenceMode;
 
   /** @type {!jasmine.Spy} */
+  let mockSetManifestType;
+
+  /** @type {!jasmine.Spy} */
   let mockParseMedia;
 
   /** @type {!shaka.text.TextEngine} */
@@ -31,12 +34,14 @@ describe('TextEngine', () => {
   beforeEach(() => {
     mockParseInit = jasmine.createSpy('mockParseInit');
     mockSetSequenceMode = jasmine.createSpy('mockSetSequenceMode');
+    mockSetManifestType = jasmine.createSpy('mockSetManifestType');
     mockParseMedia = jasmine.createSpy('mockParseMedia');
     // eslint-disable-next-line no-restricted-syntax
     mockParserPlugIn = function() {
       return {
         parseInit: mockParseInit,
         setSequenceMode: mockSetSequenceMode,
+        setManifestType: mockSetManifestType,
         parseMedia: mockParseMedia,
       };
     };

@@ -158,7 +158,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     const offButton = shaka.util.Dom.createButton();
     offButton.classList.add('shaka-turn-captions-off-button');
     this.eventManager.listen(offButton, 'click', () => {
-      this.player.selectTextTrack(null);
+      this.player.selectTextTrack();
     });
 
     offButton.appendChild(this.captionsOffSpan_);

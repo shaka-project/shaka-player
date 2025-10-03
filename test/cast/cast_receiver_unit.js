@@ -249,9 +249,6 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
         player: {
           configure: fakeConfig,
         },
-        playerAfterLoad: {
-          setTextTrackVisibility: true,
-        },
         video: {
           loop: true,
           playbackRate: 5,
@@ -275,14 +272,11 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       // App data next:
       expect(mockAppDataCallback).toHaveBeenCalledWith(fakeAppData);
       // Nothing else yet:
-      expect(mockPlayer.setTextTrackVisibility).not.toHaveBeenCalled();
       expect(mockVideo.loop).toBe(false);
       expect(mockVideo.playbackRate).toBe(1);
 
       // The rest is done async:
       await shaka.test.Util.shortDelay();
-      expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
-          fakeInitState.playerAfterLoad.setTextTrackVisibility);
       expect(mockVideo.loop).toBe(fakeInitState.video.loop);
       expect(mockVideo.playbackRate).toBe(fakeInitState.video.playbackRate);
     });
@@ -392,8 +386,6 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       expect(mockVideo.play).not.toHaveBeenCalled();
 
       // State was still transferred, though:
-      expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
-          fakeInitState.playerAfterLoad.setTextTrackVisibility);
       expect(mockVideo.loop).toBe(fakeInitState.video.loop);
       expect(mockVideo.playbackRate).toBe(fakeInitState.video.playbackRate);
     });

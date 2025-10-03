@@ -65,11 +65,6 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   replaceServerSideAdTagParameters(adTagParameters) {}
 
   /** @override */
-  getServerSideCuePoints() {
-    return [];
-  }
-
-  /** @override */
   getCuePoints() {
     return [];
   }

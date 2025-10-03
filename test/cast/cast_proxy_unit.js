@@ -316,7 +316,6 @@ describe('CastProxy', () => {
         // Local values that will be ignored:
         const fakeConfig = {key: 'value'};
         mockPlayer.getConfiguration.and.returnValue(fakeConfig);
-        mockPlayer.isTextTrackVisible.and.returnValue(false);
 
         // Set up the sender in casting mode:
         mockSender.isCasting.and.returnValue(true);
@@ -326,7 +325,6 @@ describe('CastProxy', () => {
         const fakeConfig2 = {key2: 'value2'};
         const cache = {player: {
           getConfiguration: fakeConfig2,
-          isTextTrackVisible: true,
           trickPlay: jasmine.createSpy('trickPlay'),
         }};
         mockSender.get.and.callFake((targetName, property) => {
@@ -342,7 +340,6 @@ describe('CastProxy', () => {
         });
 
         expect(proxy.getPlayer().getConfiguration()).toEqual(fakeConfig2);
-        expect(proxy.getPlayer().isTextTrackVisible()).toBe(true);
 
         // Call a method:
         expect(mockPlayer.trickPlay).not.toHaveBeenCalled();
@@ -355,7 +352,6 @@ describe('CastProxy', () => {
       it('returns local values when we have no remote values yet', () => {
         const fakeConfig = {key: 'value'};
         mockPlayer.getConfiguration.and.returnValue(fakeConfig);
-        mockPlayer.isTextTrackVisible.and.returnValue(true);
 
         // Set up the sender in casting mode, but without any remote values:
         mockSender.isCasting.and.returnValue(true);
@@ -371,7 +367,6 @@ describe('CastProxy', () => {
 
         // Without remote values, we should still return the local ones.
         expect(proxy.getPlayer().getConfiguration()).toEqual(fakeConfig);
-        expect(proxy.getPlayer().isTextTrackVisible()).toBe(true);
 
         // Call a method:
         expect(mockPlayer.trickPlay).not.toHaveBeenCalled();
@@ -494,7 +489,6 @@ describe('CastProxy', () => {
         },
         player: {
           getConfiguration: {key: 'value'},
-          isTextTrackVisible: true,
         },
       };
       mockSender.get.and.callFake((targetName, property) => {
@@ -509,7 +503,6 @@ describe('CastProxy', () => {
     it('transfers remote state back to local objects', async () => {
       // Nothing has been set yet:
       expect(mockPlayer.configure).not.toHaveBeenCalled();
-      expect(mockPlayer.setTextTrackVisibility).not.toHaveBeenCalled();
       expect(mockVideo.loop).toBe(false);
       expect(mockVideo.playbackRate).toBe(1);
 
@@ -520,14 +513,11 @@ describe('CastProxy', () => {
       expect(mockPlayer.configure).toHaveBeenCalledWith(
           cache.player.getConfiguration);
       // Nothing else yet:
-      expect(mockPlayer.setTextTrackVisibility).not.toHaveBeenCalled();
       expect(mockVideo.loop).toBe(false);
       expect(mockVideo.playbackRate).toBe(1);
 
       // The rest is done async:
       await shaka.test.Util.shortDelay();
-      expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
-          cache.player.isTextTrackVisible);
       expect(mockVideo.loop).toBe(cache.video.loop);
       expect(mockVideo.playbackRate).toBe(cache.video.playbackRate);
     });
@@ -580,8 +570,6 @@ describe('CastProxy', () => {
       expect(mockVideo.play).not.toHaveBeenCalled();
 
       // State was still transferred, though:
-      expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
-          cache.player.isTextTrackVisible);
       expect(mockVideo.loop).toBe(cache.video.loop);
       expect(mockVideo.playbackRate).toBe(cache.video.playbackRate);
     });
@@ -674,8 +662,7 @@ describe('CastProxy', () => {
       getAssetUri: jasmine.createSpy('getAssetUri'),
       getConfiguration: jasmine.createSpy('getConfiguration'),
       configure: jasmine.createSpy('configure'),
-      isTextTrackVisible: jasmine.createSpy('isTextTrackVisible'),
-      setTextTrackVisibility: jasmine.createSpy('setTextTrackVisibility'),
+      selectTextTrack: jasmine.createSpy('selectTextTrack'),
       trickPlay: jasmine.createSpy('trickPlay'),
       destroy: jasmine.createSpy('destroy'),
       addEventListener: (eventName, listener) => {

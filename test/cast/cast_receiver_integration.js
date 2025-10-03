@@ -99,9 +99,6 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       player: {
         configure: {},
       },
-      playerAfterLoad: {
-        setTextTrackVisibility: true,
-      },
       video: {
         loop: true,
         playbackRate: 5,
