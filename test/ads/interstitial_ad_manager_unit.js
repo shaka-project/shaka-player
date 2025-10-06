@@ -309,6 +309,163 @@ describe('Interstitial Ad manager', () => {
           jasmine.objectContaining(eventValue1));
     });
 
+    it('supports X-ASSET-LIST with X-AD-CREATIVE-SIGNALING', async () => {
+      const assetsList = JSON.stringify({
+        ASSETS: [
+          {
+            'URI': 'ad.m3u8',
+            'X-AD-CREATIVE-SIGNALING': {
+              version: 2,
+              type: 'slot',
+              payload: [
+                {
+                  type: 'linear',
+                  start: 0,
+                  duration: 8,
+                  media: [],
+                  identifiers: [],
+                  tracking: [
+                    {
+                      type: 'impression',
+                      urls: ['impression'],
+                    },
+                    {
+                      type: 'clickTracking',
+                      urls: ['clickTracking'],
+                    },
+                    {
+                      type: 'start',
+                      urls: ['start'],
+                    },
+                    {
+                      type: 'firstQuartile',
+                      urls: ['firstQuartile'],
+                    },
+                    {
+                      type: 'firstQuartile',
+                      urls: ['firstQuartile_alt'],
+                    },
+                    {
+                      type: 'midpoint',
+                      urls: ['midpoint', 'midpoint_alt'],
+                    },
+                    {
+                      type: 'thirdQuartile',
+                      urls: ['thirdQuartile'],
+                    },
+                    {
+                      type: 'complete',
+                      urls: ['complete'],
+                    },
+                    {
+                      type: 'skip',
+                      urls: ['skip'],
+                    },
+                    {
+                      type: 'error',
+                      urls: ['error'],
+                    },
+                    {
+                      type: 'resume',
+                      urls: ['resume'],
+                    },
+                    {
+                      type: 'pause',
+                      urls: ['pause'],
+                    },
+                    {
+                      type: 'mute',
+                      urls: ['mute'],
+                    },
+                    {
+                      type: 'unmute',
+                      urls: ['unmute'],
+                    },
+                  ],
+                  verifications: [],
+                  clickThrough: 'clickThrough',
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      networkingEngine.setResponseText('test:/test.json', assetsList);
+
+      const metadata = {
+        startTime: 0,
+        endTime: null,
+        values: [
+          {
+            key: 'ID',
+            data: 'PREROLL',
+          },
+          {
+            key: 'CUE',
+            data: 'PRE',
+          },
+          {
+            key: 'X-ASSET-LIST',
+            data: 'test:/test.json',
+          },
+          {
+            key: 'X-RESUME-OFFSET',
+            data: '0.0',
+          },
+          {
+            key: 'X-RESTRICT',
+            data: 'SKIP,JUMP',
+          },
+        ],
+      };
+      await interstitialAdManager.addMetadata(metadata);
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
+      const expectedInterstitial = {
+        id: 'PREROLL_shaka_asset_0',
+        groupId: 'PREROLL',
+        startTime: 0,
+        endTime: null,
+        uri: 'ad.m3u8',
+        mimeType: 'application/x-mpegurl',
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: false,
+        resumeOffset: 0,
+        playoutLimit: null,
+        once: false,
+        pre: true,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: null,
+        displayOnBackground: false,
+        currentVideo: null,
+        background: null,
+        clickThroughUrl: 'clickThrough',
+        tracking: {
+          impression: ['impression'],
+          clickTracking: ['clickTracking'],
+          start: ['start'],
+          firstQuartile: ['firstQuartile', 'firstQuartile_alt'],
+          midpoint: ['midpoint', 'midpoint_alt'],
+          thirdQuartile: ['thirdQuartile'],
+          complete: ['complete'],
+          skip: ['skip'],
+          error: ['error'],
+          resume: ['resume'],
+          pause: ['pause'],
+          mute: ['mute'],
+          unmute: ['unmute'],
+        },
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
     it('supports X-RESTRICT', async () => {
       const metadata = {
         startTime: 0,
@@ -1583,13 +1740,16 @@ describe('Interstitial Ad manager', () => {
         '<Ad id="5925573263">',
         '<InLine>',
         '<Error>error_url</Error>',
+        '<Error>error_url2</Error>',
         '<Impression>impression_url</Impression>',
+        '<Impression>impression_url2</Impression>',
         '<Creatives>',
         '<Creative id="138381721867" sequence="1">',
         '<Linear>',
         '<Duration>00:00:10</Duration>',
         '<TrackingEvents>',
         '<Tracking event="start">start_url</Tracking>',
+        '<Tracking event="start">start_url2</Tracking>',
         '<Tracking event="firstQuartile">firstQuartile_url</Tracking>',
         '<Tracking event="midpoint">midpoint_url</Tracking>',
         '<Tracking event="thirdQuartile">thirdQuartile_url</Tracking>',
@@ -1604,6 +1764,7 @@ describe('Interstitial Ad manager', () => {
         '<ClickThrough id="1">',
         '<![CDATA[ foo.bar ]]>',
         '</ClickThrough>',
+        '<ClickTracking id="1">click_tracking</ClickTracking>',
         '</VideoClicks>',
         '<MediaFiles>',
         '<MediaFile bitrate="140" delivery="progressive" ',
@@ -1663,15 +1824,15 @@ describe('Interstitial Ad manager', () => {
         background: null,
         clickThroughUrl: 'foo.bar',
         tracking: {
-          impression: ['impression_url'],
-          clickTracking: null,
-          start: ['start_url'],
+          impression: ['impression_url', 'impression_url2'],
+          clickTracking: ['click_tracking'],
+          start: ['start_url', 'start_url2'],
           firstQuartile: ['firstQuartile_url'],
           midpoint: ['midpoint_url'],
           thirdQuartile: ['thirdQuartile_url'],
           complete: ['complete_url'],
           skip: ['skip_url'],
-          error: ['error_url'],
+          error: ['error_url', 'error_url2'],
           resume: ['resume_url'],
           pause: ['pause_url'],
           mute: ['mute_url'],
@@ -1711,6 +1872,7 @@ describe('Interstitial Ad manager', () => {
         '<NonLinearClickThrough>',
         '<![CDATA[foo.bar]]>',
         '</NonLinearClickThrough>',
+        '<NonLinearClickTracking>click_tracking</NonLinearClickTracking>',
         '</NonLinear>',
         '</NonLinearAds>',
         '</Creative>',
@@ -1767,7 +1929,7 @@ describe('Interstitial Ad manager', () => {
         clickThroughUrl: 'foo.bar',
         tracking: {
           impression: ['impression_url'],
-          clickTracking: null,
+          clickTracking: ['click_tracking'],
           start: ['start_url'],
           firstQuartile: ['firstQuartile_url'],
           midpoint: ['midpoint_url'],
