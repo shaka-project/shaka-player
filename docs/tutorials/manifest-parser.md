@@ -75,9 +75,8 @@ destroyed.
 #### registration
 
 At the end of the file, you should register the parser with the library.  This
-will allow it to be used by the `Player`.  There is one method:
-`registerParserByMime`.  They both add parsers
-to a registry of manifest parsers.  When the Player gets a URI, it will
+will allow it to be used by the `Player`.  Use `registerParserByMime` to add the
+parser to the registry of manifest parsers.  When the Player gets a URI, it will
 determine which parser to use.  It will first try based on the file extension,
 then it will make a HEAD request to the URI to get back a MIME type.
 
