@@ -179,6 +179,33 @@ shaka.extern.AdPositionInfo;
 
 /**
  * @typedef {{
+ *   startTime: number,
+ *   endTime: ?number,
+ *   tracking: ?shaka.extern.AdTrackingEvent,
+ *   position: number,
+ *   sequenceLength: number,
+ * }}
+ *
+ * @description
+ * Contains the Tracking info.
+ *
+ * @property {number} startTime
+ *   The start time of the tracking info.
+ * @property {?number} endTime
+ *   The end time of the tracking info.
+ * @property {?shaka.extern.AdTrackingEvent} tracking
+ *   Contains the tracking events that should be sent.
+ * @property {number} position
+ *   Returns the position of the tracking.
+ * @property {number} sequenceLength
+ *   The total number of trackings.
+ * @exportDoc
+ */
+shaka.extern.AdTrackingInfo;
+
+
+/**
+ * @typedef {{
  *   impression: ?Array<string>,
  *   clickTracking: ?Array<string>,
  *   start: ?Array<string>,
@@ -386,7 +413,7 @@ shaka.extern.IAdManager = class extends EventTarget {
 /**
  * A factory for creating the ad manager.
  *
- * @typedef {function():!shaka.extern.IAdManager}
+ * @typedef {function(shaka.Player):!shaka.extern.IAdManager}
  * @exportDoc
  */
 shaka.extern.IAdManager.Factory;

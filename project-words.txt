@@ -203,6 +203,7 @@ muxjs
 Nagra
 Playready
 Quicktime
+svta
 teppeis
 Tizen
 Uplynk
