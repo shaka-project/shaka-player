@@ -137,5 +137,4 @@ goog.require('shaka.ui.VRWebgl');
 goog.require('shaka.ui.Watermark');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Error');
-goog.require('shaka.util.FairPlayUtils');
 goog.require('shaka.util.Iterables');

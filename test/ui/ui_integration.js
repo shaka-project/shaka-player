@@ -147,7 +147,10 @@ describe('UI', () => {
         newLanguage = 'es';
         languageMenu = shaka.util.Dom.getElementByClassName(
             'shaka-audio-languages', videoContainer);
-        setupLanguageTests(player.getAudioLanguagesAndRoles());
+        const audioTracks = player.getAudioTracks();
+        const uniqueLanguages =
+            [...new Set(audioTracks.map((track) => track.language))];
+        setupLanguageTests(uniqueLanguages);
       });
 
       it('contains all the languages', () => {
@@ -160,10 +163,18 @@ describe('UI', () => {
       });
 
       it('choosing language through API has effect on UI', async () => {
+        const selectAudioLanguage = (language) => {
+          const audioTracks = player.getAudioTracks();
+          const track = audioTracks.find((t) => t.language == language);
+          if (track) {
+            player.selectAudioTrack(track);
+          }
+        };
+
         await verifyLanguageChangeViaAPI(
             'languageselectionupdated',
             () => player.getVariantTracks(),
-            (language) => player.selectAudioLanguage(language));
+            (language) => selectAudioLanguage(language));
       });
     });  // describe('audio')
 
@@ -173,7 +184,10 @@ describe('UI', () => {
         newLanguage = 'fr';
         languageMenu = shaka.util.Dom.getElementByClassName(
             'shaka-text-languages', videoContainer);
-        setupLanguageTests(player.getTextLanguagesAndRoles());
+        const textTracks = player.getTextTracks();
+        const uniqueLanguages =
+            [...new Set(textTracks.map((track) => track.language))];
+        setupLanguageTests(uniqueLanguages);
       });
 
       it('contains all the languages', () => {
@@ -189,39 +203,58 @@ describe('UI', () => {
       it('choosing language through API has effect on UI', async () => {
         // Enable & verify the text, or else the text won't be streamed and the
         // language selection won't do anything.
-        await player.setTextTrackVisibility(true);
-        expect(player.isTextTrackVisible()).toBe(true);
+        let textTracks = player.getTextTracks();
+        player.selectTextTrack(textTracks[0]);
+        textTracks = player.getTextTracks();
+        const activeTrack = textTracks.find((t) => t.active);
+        expect(activeTrack).toBeDefined();
+
+        const selectTextLanguage = (language) => {
+          const textTracks = player.getTextTracks();
+          const track = textTracks.find((t) => t.language == language);
+          if (track) {
+            player.selectTextTrack(track);
+          }
+        };
 
         await verifyLanguageChangeViaAPI(
             'captionselectionupdated',
             () => player.getTextTracks(),
-            (language) => player.selectTextLanguage(language));
+            (language) => selectTextLanguage(language));
       });
 
       it('turning captions off through UI has effect on player', async () => {
         // Enable & verify the text.
-        await player.setTextTrackVisibility(true);
-        expect(player.isTextTrackVisible()).toBe(true);
-
+        let textTracks = player.getTextTracks();
+        player.selectTextTrack(textTracks[0]);
+        textTracks = player.getTextTracks();
+        let activeTrack = textTracks.find((t) => t.active);
+        expect(activeTrack).toBeDefined();
         // Find and click the 'Off' button
         getOffButton().click();
         // Wait for the change to take effect
-        await waiter.waitForEvent(player, 'texttrackvisibility');
+        await waiter.waitForEvent(player, 'textchanged');
 
-        expect(player.isTextTrackVisible()).toBe(false);
+        textTracks = player.getTextTracks();
+        activeTrack = textTracks.find((t) => t.active);
+        expect(activeTrack).toBeUndefined();
       });
 
       it('turning captions off through API has effect on UI', async () => {
-        // This test is invalid if the text is not initially visible, because
-        // setTextTrackVisibility() does nothing if there are no changes.
-        await player.setTextTrackVisibility(true);
-        expect(player.isTextTrackVisible()).toBe(true);
+        // This test is invalid if the text is not initially visible.
+        let textTracks = player.getTextTracks();
+        player.selectTextTrack(textTracks[0]);
+        textTracks = player.getTextTracks();
+        let activeTrack = textTracks.find((t) => t.active);
+        expect(activeTrack).toBeDefined();
 
         const p = waiter.waitForEvent(controls, 'captionselectionupdated');
 
         // Disable & verify the text.
-        await player.setTextTrackVisibility(false);
-        expect(player.isTextTrackVisible()).toBe(false);
+        player.selectTextTrack();
+        textTracks = player.getTextTracks();
+        activeTrack = textTracks.find((t) => t.active);
+        expect(activeTrack).toBeUndefined();
 
         // Wait for the change to take effect
         await p;
@@ -244,12 +277,10 @@ describe('UI', () => {
     });  // describe('caption selection')
 
     /**
-     * @param {!Array<shaka.extern.LanguageRole>} languagesAndRoles
+     * @param {!Array<string>} langs
      */
-    function setupLanguageTests(languagesAndRoles) {
-      langsFromContent = languagesAndRoles.map((langAndRole) => {
-        return langAndRole.language;
-      });
+    function setupLanguageTests(langs) {
+      langsFromContent = langs;
 
       languageButtons = filterButtons(languageMenu.childNodes,
           ['shaka-back-to-overflow-button', 'shaka-turn-captions-off-button']);
@@ -360,8 +391,12 @@ describe('UI', () => {
       const selectedLanguage =
           getSelectedTrack(player.getVariantTracks()).language;
       if (selectedLanguage != preferredLanguage) {
-        player.selectAudioLanguage(preferredLanguage);
-        await waiter.waitForEvent(player, 'variantchanged');
+        const audioTracks = player.getAudioTracks();
+        const track = audioTracks.find((t) => t.language == preferredLanguage);
+        if (track) {
+          player.selectAudioTrack(track);
+          await waiter.waitForEvent(player, 'variantchanged');
+        }
       }
 
       resolutionsMenu = shaka.util.Dom.getElementByClassName(

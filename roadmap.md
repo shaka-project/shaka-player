@@ -12,10 +12,10 @@ Candidate features for future release cycles:
  - Background fetch for offline storage
    https://github.com/shaka-project/shaka-player/issues/879
 
-v5.0
+v6.0
  - Conversion to Typescript (Smaller, more modular binary)
 
-v4.17 - 2025 Q4
+v5.0 - 2025 Q4
  - Add automatic subtitles with translations (Experimental and disabled by default)
    https://github.com/shaka-project/shaka-player/issues/9110
  - Change dvvC box to free box for Dolby Vision workarounds

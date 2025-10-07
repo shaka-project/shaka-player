@@ -306,145 +306,6 @@ describe('Player', () => {
     });
   });  // describe('getStats')
 
-  describe('setTextTrackVisibility', () => {
-    // Repro for https://github.com/shaka-project/shaka-player/issues/1879.
-    it('appends cues when enabled initially', async () => {
-      let cues = [];
-      /** @const {!shaka.test.FakeTextDisplayer} */
-      const displayer = new shaka.test.FakeTextDisplayer();
-      displayer.appendSpy.and.callFake((added) => {
-        cues = cues.concat(added);
-      });
-
-      player.configure('textDisplayFactory', () => displayer);
-
-      const preferredTextLanguage = 'fa';  // The same as in the content itself
-      player.configure({preferredTextLanguage: preferredTextLanguage});
-
-      await player.load('test:sintel_realistic_compiled');
-
-      // Play until a time at which the external cues would be on screen.
-      await video.play();
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 4, 20);
-
-      expect(player.isTextTrackVisible()).toBe(true);
-      expect(displayer.isTextVisible()).toBe(true);
-      expect(cues.length).toBeGreaterThan(0);
-    });
-
-    it('appends cues for external text', async () => {
-      let cues = [];
-      /** @const {!shaka.test.FakeTextDisplayer} */
-      const displayer = new shaka.test.FakeTextDisplayer();
-      displayer.appendSpy.and.callFake((added) => {
-        cues = cues.concat(added);
-      });
-
-      player.configure('textDisplayFactory', () => displayer);
-
-      await player.load('test:sintel_no_text_compiled');
-      const locationUri = new goog.Uri(location.href);
-      const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
-      const absoluteUri = locationUri.resolve(partialUri);
-      const newTrack = await player.addTextTrackAsync(
-          absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
-
-      expect(player.getTextTracks()).toEqual([newTrack]);
-
-      player.selectTextTrack(newTrack);
-      player.setTextTrackVisibility(true);
-      await waiter.waitForEvent(player, 'texttrackvisibility');
-
-      // Play until a time at which the external cues would be on screen.
-      await video.play();
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 4, 20);
-
-      expect(player.isTextTrackVisible()).toBe(true);
-      expect(displayer.isTextVisible()).toBe(true);
-      expect(cues.length).toBeGreaterThan(0);
-    });
-
-    // https://github.com/shaka-project/shaka-player/issues/2553
-    it('does not change the selected track', async () => {
-      await player.load('test:forced_subs_simulation_compiled');
-
-      // In this content, both text tracks have the same language and role, and
-      // so should look identical in terms of choosing one to match a
-      // preference.  This is important to the test, so verify it first.
-      const tracks = player.getTextTracks();
-      expect(tracks[0].language).toBe(tracks[1].language);
-      expect(tracks[0].roles).toEqual(tracks[1].roles);
-
-      const getTracksActive = () => player.getTextTracks().map((t) => t.active);
-
-      // If we choose a track first, then turn on text, the track should not
-      // change.  Try this with both tracks.
-      player.setTextTrackVisibility(false);
-
-      player.selectTextTrack(tracks[0]);
-      expect(getTracksActive()).toEqual([true, false]);
-      player.setTextTrackVisibility(true);
-      expect(getTracksActive()).toEqual([true, false]);
-
-      player.setTextTrackVisibility(false);
-
-      player.selectTextTrack(tracks[1]);
-      expect(getTracksActive()).toEqual([false, true]);
-      player.setTextTrackVisibility(true);
-      expect(getTracksActive()).toEqual([false, true]);
-    });
-
-    // https://github.com/shaka-project/shaka-player/issues/4821
-    it('loads a single text stream', async () => {
-      /** @type {!jasmine.Spy} */
-      const textchanged = jasmine.createSpy('listener');
-
-      player.addEventListener('textchanged', Util.spyFunc(textchanged));
-
-      player.configure({preferredTextLanguage: 'en'});
-      await player.load('test:sintel_no_text_compiled');
-
-      textchanged.calls.reset();
-
-      // Add preferred language text track.
-      const locationUri = new goog.Uri(location.href);
-      const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
-      const absoluteUri = locationUri.resolve(partialUri);
-      await player.addTextTrackAsync(
-          absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
-
-      expect(textchanged).toHaveBeenCalledTimes(1);
-
-      // Add alternate language text track.
-      // Two text tracks with same timings but different text
-      // are necessary for test.
-      const partialUri2 =
-      new goog.Uri('/base/test/test/assets/text-clip-alt.vtt');
-      const absoluteUri2 = locationUri.resolve(partialUri2);
-      await player.addTextTrackAsync(
-          absoluteUri2.toString(), 'fr', 'subtitles', 'text/vtt');
-
-      expect(textchanged).toHaveBeenCalledTimes(2);
-
-      const textTracks = player.getTextTracks();
-      expect(textTracks.length).toBe(2);
-      expect(textTracks[0].language).toBe('en');
-      expect(textTracks[1].language).toBe('fr');
-
-      // Enable text visibility and immediately change language.
-      // Only one set of cues should be active.
-      // Cues should be of the selected language track.
-      player.setTextTrackVisibility(true);
-      player.selectTextLanguage('fr');
-      video.currentTime = 5;
-      await video.play();
-      await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-      expect(video.textTracks[1].activeCues.length).toBe(1);
-      expect(player.getTextTracks()[1].active).toBe(true);
-    });
-  });  // describe('setTextTrackVisibility')
-
   describe('autoShowText', () => {
     async function textMatchesAudioDoesNot() {
       const preferredTextLanguage = 'fa';  // The same as in the content
@@ -519,17 +380,20 @@ describe('Player', () => {
 
       it('enables text if text matches and audio does not', async () => {
         await textMatchesAudioDoesNot();
-        expect(player.isTextTrackVisible()).toBe(true);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeDefined();
       });
 
       it('disables text if text does not match', async () => {
         await textDoesNotMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeUndefined();
       });
 
       it('disables text if both text and audio match', async () => {
         await textAndAudioMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeUndefined();
       });
     });  // IF_SUBTITLES_MAY_BE_NEEDED
 
@@ -542,17 +406,20 @@ describe('Player', () => {
 
       it('enables text if text matches and audio does not', async () => {
         await textMatchesAudioDoesNot();
-        expect(player.isTextTrackVisible()).toBe(true);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeDefined();
       });
 
       it('disables text if text does not match', async () => {
         await textDoesNotMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeUndefined();
       });
 
       it('enables text if both text and audio match', async () => {
         await textAndAudioMatch();
-        expect(player.isTextTrackVisible()).toBe(true);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeDefined();
       });
     });  // IF_PREFERRED_TEXT_LANGUAGE
 
@@ -563,17 +430,20 @@ describe('Player', () => {
 
       it('enables text if text matches and audio does not', async () => {
         await textMatchesAudioDoesNot();
-        expect(player.isTextTrackVisible()).toBe(true);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeDefined();
       });
 
       it('enables text if text does not match', async () => {
         await textDoesNotMatch();
-        expect(player.isTextTrackVisible()).toBe(true);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeDefined();
       });
 
       it('enables text if both text and audio match', async () => {
         await textAndAudioMatch();
-        expect(player.isTextTrackVisible()).toBe(true);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeDefined();
       });
     });  // ALWAYS
 
@@ -584,17 +454,20 @@ describe('Player', () => {
 
       it('disables text if text matches and audio does not', async () => {
         await textMatchesAudioDoesNot();
-        expect(player.isTextTrackVisible()).toBe(false);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeUndefined();
       });
 
       it('disables text if text does not match', async () => {
         await textDoesNotMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeUndefined();
       });
 
       it('disables text if both text and audio match', async () => {
         await textAndAudioMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
+        const activeTextTrack = player.getTextTracks().find((t) => t.active);
+        expect(activeTextTrack).toBeUndefined();
       });
     });  // NEVER
   });  // AutoShowText
@@ -723,20 +596,6 @@ describe('Player', () => {
       expect(textDisplayer.destroySpy).toHaveBeenCalled();
     });
   });  // describe('TextDisplayer plugin')
-
-  describe('TextAndRoles', () => {
-    // Regression Test. Makes sure that the language and role fields have been
-    // properly exported from the player.
-    it('exports language and roles fields', async () => {
-      await player.load('test:sintel_compiled');
-      const languagesAndRoles = player.getTextLanguagesAndRoles();
-      expect(languagesAndRoles.length).toBeTruthy();
-      for (const languageAndRole of languagesAndRoles) {
-        expect(languageAndRole.language).not.toBeUndefined();
-        expect(languageAndRole.role).not.toBeUndefined();
-      }
-    });
-  });  // describe('TextAndRoles')
 
   describe('streaming event', () => {
     // Calling switch early during load() caused a failed assertion in Player
