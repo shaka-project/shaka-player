@@ -354,16 +354,16 @@ shaka.extern.IAdManager = class extends EventTarget {
   /**
    * @param {!shaka.Player} basePlayer
    * @param {!HTMLMediaElement} baseVideo
-   * @param {shaka.extern.HLSInterstitial} interstitial
+   * @param {shaka.extern.HLSMetadata} metadata
    */
-  onHLSInterstitialMetadata(basePlayer, baseVideo, interstitial) {}
+  onHLSMetadata(basePlayer, baseVideo, metadata) {}
 
   /**
    * @param {!shaka.Player} basePlayer
    * @param {!HTMLMediaElement} baseVideo
    * @param {shaka.extern.TimelineRegionInfo} region
    */
-  onDASHInterstitialMetadata(basePlayer, baseVideo, region) {}
+  onDASHMetadata(basePlayer, baseVideo, region) {}
 
   /**
    * @param {shaka.extern.AdInterstitial} interstitial

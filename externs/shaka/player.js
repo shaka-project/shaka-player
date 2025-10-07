@@ -900,17 +900,19 @@ shaka.extern.PlaybackStreamInfo;
 
 /**
  * @typedef {{
+ *   type: string,
  *   startTime: number,
  *   endTime: ?number,
  *   values: !Array<shaka.extern.MetadataFrame>
  * }}
  *
+ * @property {string} type
  * @property {number} startTime
  * @property {?number} endTime
  * @property {!Array<shaka.extern.MetadataFrame>} values
  * @exportDoc
  */
-shaka.extern.HLSInterstitial;
+shaka.extern.HLSMetadata;
 
 
 /**
