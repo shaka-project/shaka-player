@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.16.4](https://github.com/shaka-project/shaka-player/compare/v4.16.3...v4.16.4) (2025-10-08)
+
+
+### Bug Fixes
+
+* **Ads:** Avoid duplicated HLS interstitials request when using ASSET-LIST ([#9168](https://github.com/shaka-project/shaka-player/issues/9168)) ([acd9eaf](https://github.com/shaka-project/shaka-player/commit/acd9eaf12e543065f909a1b6bce2d8633fcb553e))
+* **Ads:** Fix bad detection of support multiple media elements on interstitials ([#9145](https://github.com/shaka-project/shaka-player/issues/9145)) ([78be70f](https://github.com/shaka-project/shaka-player/commit/78be70fc08867149ab4cf3706a95a1d1b72b9265))
+* **Ads:** Fix wrong interstitial id when deleting old interstitials ([#9146](https://github.com/shaka-project/shaka-player/issues/9146)) ([26ebb84](https://github.com/shaka-project/shaka-player/commit/26ebb84857b1e2a0f35b03d5779f355ac1f83f71))
+* **Demo:** Fix report bug button ([#9161](https://github.com/shaka-project/shaka-player/issues/9161)) ([d15349e](https://github.com/shaka-project/shaka-player/commit/d15349ed61a5add6afad548029629a4f3b6af375))
+* **HLS:** Determine the duration of an HLS content when it ends live ([#9153](https://github.com/shaka-project/shaka-player/issues/9153)) ([18e28ee](https://github.com/shaka-project/shaka-player/commit/18e28ee49d51f23fa8e8f64bd6b704f6e646b68a))
+* **HLS:** Fix infinite buffering instead of end of stream for live ([#9150](https://github.com/shaka-project/shaka-player/issues/9150)) ([d7ea2c5](https://github.com/shaka-project/shaka-player/commit/d7ea2c59dce91fa1d30675eaf1bf045bd50a5f8b))
+* **LCEVC:** Add remove buffer functionality for LCEVCdecJS ([#9163](https://github.com/shaka-project/shaka-player/issues/9163)) ([a0ebcae](https://github.com/shaka-project/shaka-player/commit/a0ebcae8ee9c4a5278353affb70a70cf12d98e78))
+* **UI:** Fix show seek bar ad markers ([#9155](https://github.com/shaka-project/shaka-player/issues/9155)) ([bf3393d](https://github.com/shaka-project/shaka-player/commit/bf3393d768b03a4a38eb8bea3952433c36d6b112))
+* **UI:** Only show ad containers if they have child nodes ([#9156](https://github.com/shaka-project/shaka-player/issues/9156)) ([b2f4b6f](https://github.com/shaka-project/shaka-player/commit/b2f4b6f5f6a63d6dcaeed4ff0e2a0313cf24d99e))
+
+
+### Performance Improvements
+
+* Close media source only on audio(not muxed)/video  updates ([#9152](https://github.com/shaka-project/shaka-player/issues/9152)) ([e082ec7](https://github.com/shaka-project/shaka-player/commit/e082ec7d74381e149ea728cd613b82a63d8f2551))
+
 ## [4.16.3](https://github.com/shaka-project/shaka-player/compare/v4.16.2...v4.16.3) (2025-09-29)
 
 
