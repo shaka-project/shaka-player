@@ -225,7 +225,6 @@ describe('Ads', () => {
   });
 
   describe('support SVTA2053-2', () => {
-
     it('HLS', async () => {
       /** @type {string} */
       const streamUri = '/base/test/test/assets/hls-svta-2053-2/main.m3u8';
@@ -233,6 +232,8 @@ describe('Ads', () => {
       await player.load(streamUri);
       video.play();
       expect(player.isLive()).toBe(false);
+
+      goog.asserts.assert(adManager, 'adManager must be non-null');
 
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
@@ -260,6 +261,8 @@ describe('Ads', () => {
       await player.load(streamUri);
       video.play();
       expect(player.isLive()).toBe(false);
+
+      goog.asserts.assert(adManager, 'adManager must be non-null');
 
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
