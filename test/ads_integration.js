@@ -223,4 +223,61 @@ describe('Ads', () => {
       await player.unload();
     });
   });
+
+  describe('support SVTA2053-2', () => {
+
+    it('HLS', async () => {
+      /** @type {string} */
+      const streamUri = '/base/test/test/assets/hls-svta-2053-2/main.m3u8';
+
+      await player.load(streamUri);
+      video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait a maximum of 10 seconds before the ad starts playing.
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_FIRST_QUARTILE);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_MIDPOINT);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_THIRD_QUARTILE);
+      await waiter.timeoutAfter(20)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_COMPLETE);
+
+      // Play for 5 seconds, but stop early if the video ends.  If it takes
+      // longer than 30 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 30);
+
+      await player.unload();
+    });
+
+    it('DASH', async () => {
+      /** @type {string} */
+      const streamUri = '/base/test/test/assets/dash-svta-2053-2/dash.mpd';
+
+      await player.load(streamUri);
+      video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait a maximum of 10 seconds before the ad starts playing.
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_FIRST_QUARTILE);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_MIDPOINT);
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_THIRD_QUARTILE);
+      await waiter.timeoutAfter(20)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_COMPLETE);
+
+      // Play for 5 seconds, but stop early if the video ends.  If it takes
+      // longer than 30 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 30);
+
+      await player.unload();
+    });
+  });
 });

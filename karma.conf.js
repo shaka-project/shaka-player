@@ -257,6 +257,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/dash-multi-codec/*', included: false},
       {pattern: 'test/test/assets/dash-multi-codec-ec3/*', included: false},
       {pattern: 'test/test/assets/dash-multitype-variant/*', included: false},
+      {pattern: 'test/test/assets/dash-svta-2053-2/*', included: false},
       {pattern: 'test/test/assets/3675/*', included: false},
       {pattern: 'test/test/assets/7401/*', included: false},
       {pattern: 'test/test/assets/6339/*', included: false},
@@ -275,6 +276,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-raw-ec3/*', included: false},
       {pattern: 'test/test/assets/hls-raw-mp3/*', included: false},
       {pattern: 'test/test/assets/hls-sample-aes/*', included: false},
+      {pattern: 'test/test/assets/hls-svta-2053-2/*', included: false},
       // eslint-disable-next-line @stylistic/max-len
       {pattern: 'test/test/assets/hls-text-no-discontinuity/*', included: false},
       {pattern: 'test/test/assets/hls-text-offset/*', included: false},
