@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.15.16](https://github.com/shaka-project/shaka-player/compare/v4.15.15...v4.15.16) (2025-10-08)
+
+
+### Bug Fixes
+
+* **Ads:** Avoid duplicated HLS interstitials request when using ASSET-LIST ([#9168](https://github.com/shaka-project/shaka-player/issues/9168)) ([992e247](https://github.com/shaka-project/shaka-player/commit/992e247e94c9d9a93360656f291821cb907696a9))
+* **Ads:** Fix bad detection of support multiple media elements on interstitials ([#9145](https://github.com/shaka-project/shaka-player/issues/9145)) ([9e43a26](https://github.com/shaka-project/shaka-player/commit/9e43a26df69f7add72412b232af9ce30805e0a92))
+* **Ads:** Fix wrong interstitial id when deleting old interstitials ([#9146](https://github.com/shaka-project/shaka-player/issues/9146)) ([ab3598c](https://github.com/shaka-project/shaka-player/commit/ab3598c70204f285479d299bbdbc16d6b0ed9718))
+* **Demo:** Fix report bug button ([#9161](https://github.com/shaka-project/shaka-player/issues/9161)) ([8069fd0](https://github.com/shaka-project/shaka-player/commit/8069fd0a83d40d82feeeb0a77814de8fa1c88268))
+* **HLS:** Determine the duration of an HLS content when it ends live ([#9153](https://github.com/shaka-project/shaka-player/issues/9153)) ([8680d52](https://github.com/shaka-project/shaka-player/commit/8680d52f96bdd46eca1d10556e185bba80ab1bec))
+* **HLS:** Fix infinite buffering instead of end of stream for live ([#9150](https://github.com/shaka-project/shaka-player/issues/9150)) ([d7a9906](https://github.com/shaka-project/shaka-player/commit/d7a9906da4fdcc356e036b02e7bf42524e0ce5ef))
+* **LCEVC:** Add remove buffer functionality for LCEVCdecJS ([#9163](https://github.com/shaka-project/shaka-player/issues/9163)) ([b7afe45](https://github.com/shaka-project/shaka-player/commit/b7afe45a4a5a1edd51afa8bffd2b6d881e51d479))
+* **UI:** Fix show seek bar ad markers ([#9155](https://github.com/shaka-project/shaka-player/issues/9155)) ([3d84dbf](https://github.com/shaka-project/shaka-player/commit/3d84dbf72e04ca1a6f46ccfdc05bad56f3e097e1))
+
+
+### Performance Improvements
+
+* Close media source only on audio(not muxed)/video  updates ([#9152](https://github.com/shaka-project/shaka-player/issues/9152)) ([818e868](https://github.com/shaka-project/shaka-player/commit/818e86895a3ca7ed02bb0b8b8b41159116dc0baf))
+
 ## [4.15.15](https://github.com/shaka-project/shaka-player/compare/v4.15.14...v4.15.15) (2025-09-29)
 
 
