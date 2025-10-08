@@ -2028,7 +2028,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         const tracks = this.player_.getTextTracks();
         const hasTrack = tracks.some((track) => track.active);
         if (hasTrack) {
-          this.player_.selectTextTrack(null);
+          this.player_.selectTextTrack();
         } else {
           this.player_.selectTextTrack(this.lastSelectedTextTrack_);
         }

@@ -77,7 +77,6 @@ submenuopen
 textchanged
 textlang
 textrole
-texttrackvisibility
 thirdquartile
 timeandseekrangeupdated
 timelineregionadded

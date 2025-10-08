@@ -110,7 +110,7 @@ describe('Player Src Equals', () => {
 
     player.configure('preferredAudioLanguage', 'de');
     player.configure('preferredTextLanguage', 'el');
-    player.setTextTrackVisibility(true);
+    player.configure('autoShowText', shaka.config.AutoShowText.ALWAYS);
 
     await loadWithSrcEquals(HLS_CONTENT_URI);
 

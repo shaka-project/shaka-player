@@ -45,6 +45,9 @@ shaka.test.FakeAbrManager = class {
     this.disable = jasmine.createSpy('disable');
 
     /** @type {!jasmine.Spy} */
+    this.trySuggestStreams = jasmine.createSpy('trySuggestStreams');
+
+    /** @type {!jasmine.Spy} */
     this.segmentDownloaded = jasmine.createSpy('segmentDownloaded');
 
     /** @type {!jasmine.Spy} */
@@ -62,6 +65,12 @@ shaka.test.FakeAbrManager = class {
 
     /** @type {!jasmine.Spy} */
     this.playbackRateChanged = jasmine.createSpy('playbackRateChanged');
+
+    /** @type {!jasmine.Spy} */
+    this.setMediaElement = jasmine.createSpy('setMediaElement');
+
+    /** @type {!jasmine.Spy} */
+    this.setCmsdManager = jasmine.createSpy('setCmsdManager');
 
     /** @type {!jasmine.Spy} */
     this.configure = jasmine.createSpy('configure');

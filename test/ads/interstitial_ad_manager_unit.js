@@ -56,6 +56,7 @@ describe('Interstitial Ad manager', () => {
   describe('HLS', () => {
     it('basic interstitial support', async () => {
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -99,6 +100,7 @@ describe('Interstitial Ad manager', () => {
 
     it('supports multiple interstitials', async () => {
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -127,6 +129,7 @@ describe('Interstitial Ad manager', () => {
       await interstitialAdManager.addMetadata(metadata);
 
       const metadata2 = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -185,6 +188,7 @@ describe('Interstitial Ad manager', () => {
 
     it('ignore duplicate interstitials', async () => {
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -230,6 +234,7 @@ describe('Interstitial Ad manager', () => {
     it('ignore invalid interstitial', async () => {
       // It is not valid because it does not have an interstitial URL
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -268,6 +273,7 @@ describe('Interstitial Ad manager', () => {
       networkingEngine.setResponseText('test:/test.json', assetsList);
 
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -394,6 +400,7 @@ describe('Interstitial Ad manager', () => {
       networkingEngine.setResponseText('test:/test.json', assetsList);
 
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -468,6 +475,7 @@ describe('Interstitial Ad manager', () => {
 
     it('supports X-RESTRICT', async () => {
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -520,6 +528,7 @@ describe('Interstitial Ad manager', () => {
 
     it('supports X-ENABLE-SKIP-AFTER and X-ENABLE-SKIP-FOR', async () => {
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -576,6 +585,7 @@ describe('Interstitial Ad manager', () => {
 
     it('supports X-RESUME-OFFSET', async () => {
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -628,6 +638,7 @@ describe('Interstitial Ad manager', () => {
 
     it('supports X-PLAYOUT-LIMIT', async () => {
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -680,6 +691,7 @@ describe('Interstitial Ad manager', () => {
 
     it('supports CUE-ONCE', async () => {
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -732,6 +744,7 @@ describe('Interstitial Ad manager', () => {
 
     it('supports CUE-PRE', async () => {
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -784,6 +797,7 @@ describe('Interstitial Ad manager', () => {
 
     it('supports CUE-POST', async () => {
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -836,6 +850,7 @@ describe('Interstitial Ad manager', () => {
 
     it('supports X-TIMELINE-OCCUPIES', async () => {
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 100,
         endTime: 130,
         values: [
@@ -902,6 +917,7 @@ describe('Interstitial Ad manager', () => {
       networkingEngine.setResponseText('test:/test.json', assetsList);
 
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: null,
         values: [
@@ -950,6 +966,7 @@ describe('Interstitial Ad manager', () => {
 
     it('supports overlay events with L-Shape format', async () => {
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: 1,
         values: [
@@ -1054,6 +1071,7 @@ describe('Interstitial Ad manager', () => {
 
     it('supports overlay events double box format', async () => {
       const metadata = {
+        type: 'com.apple.quicktime.HLS',
         startTime: 0,
         endTime: 1,
         values: [
@@ -1181,7 +1199,6 @@ describe('Interstitial Ad manager', () => {
         id: 'PREROLL',
         schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:insert:2025',
         eventNode,
-        eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
         timescale: 1,
       };
@@ -1216,7 +1233,6 @@ describe('Interstitial Ad manager', () => {
         id: 'PREROLL',
         schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:replace:2025',
         eventNode,
-        eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
         timescale: 1,
       };
@@ -1253,7 +1269,6 @@ describe('Interstitial Ad manager', () => {
         id: 'PREROLL',
         schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:insert:2025',
         eventNode,
-        eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
         timescale: 1,
       };
@@ -1283,7 +1298,6 @@ describe('Interstitial Ad manager', () => {
         id: 'OVERLAY',
         schemeIdUri: 'urn:mpeg:dash:event:2012',
         eventNode,
-        eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
         timescale: 1,
       };
@@ -1356,7 +1370,6 @@ describe('Interstitial Ad manager', () => {
         id: 'OVERLAY',
         schemeIdUri: 'urn:mpeg:dash:event:2012',
         eventNode,
-        eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
         timescale: 1,
       };
@@ -1386,7 +1399,6 @@ describe('Interstitial Ad manager', () => {
         id: 'OVERLAY',
         schemeIdUri: 'urn:scte:dash:scte214-events',
         eventNode,
-        eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
         timescale: 1,
       };
@@ -1477,7 +1489,6 @@ describe('Interstitial Ad manager', () => {
         id: 'OVERLAY',
         schemeIdUri: 'urn:scte:dash:scte214-events',
         eventNode,
-        eventElement: TXml.txmlNodeToDomElement(eventNode),
         value: '',
         timescale: 1,
       };
@@ -2070,6 +2081,7 @@ describe('Interstitial Ad manager', () => {
 
   it('plays pre-roll correctly', async () => {
     const metadata = {
+      type: 'com.apple.quicktime.HLS',
       startTime: 0,
       endTime: null,
       values: [
@@ -2123,6 +2135,7 @@ describe('Interstitial Ad manager', () => {
 
   it('dispatch skip event correctly', async () => {
     const metadata = {
+      type: 'com.apple.quicktime.HLS',
       startTime: 0,
       endTime: null,
       values: [
@@ -2177,6 +2190,7 @@ describe('Interstitial Ad manager', () => {
 
   it('jumping a mid-roll with JUMP restriction is not allowed', async () => {
     const metadata = {
+      type: 'com.apple.quicktime.HLS',
       startTime: 10,
       endTime: null,
       values: [

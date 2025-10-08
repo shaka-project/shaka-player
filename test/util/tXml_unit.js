@@ -527,31 +527,6 @@ describe('tXml', () => {
     ]);
   });
 
-  it('txmlNodeToDomElement', () => {
-    const node = {
-      tagName: 'Event',
-      parent: null,
-      attributes: {
-        'presentationTime': '0',
-      },
-      children: [
-        {
-          tagName: 'scte35:Signal',
-          parent: null,
-          attributes: {},
-          children: [],
-        },
-      ],
-    };
-    node.children[0].parent = node;
-
-    const element = TXml.txmlNodeToDomElement(node);
-    expect(element.tagName).toBe('Event');
-    expect(element.getAttribute('presentationTime')).toBe('0');
-    const signal = element.firstElementChild;
-    expect(signal.tagName).toBe('scte35:Signal');
-  });
-
   it('cloneNode', () => {
     expect(TXml.cloneNode(null)).toBe(null);
     const root = {
