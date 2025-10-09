@@ -487,7 +487,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       const codec = shaka.util.MimeUtils.getNormalizedCodec(t.codecs);
       return codec.startsWith('dovi-');
     };
-    const isDualTrackLCEVC = (t) => {
+    const isLCEVC = (t) => {
       if (!t.codecs) {
         return false;
       }
@@ -501,7 +501,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
         text += ' HDR';
       }
     }
-    if (isDualTrackLCEVC(track)) {
+    if (isLCEVC(track)) {
       text += ' LCEVC';
     }
     const videoLayout = track.videoLayout || '';
@@ -513,7 +513,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           firstTrack.height == secondTrack.height &&
           firstTrack.hdr == secondTrack.hdr &&
           isDolbyVision(firstTrack) == isDolbyVision(secondTrack) &&
-          isDualTrackLCEVC(firstTrack) == isDualTrackLCEVC(secondTrack) &&
+          isLCEVC(firstTrack) == isLCEVC(secondTrack) &&
           Math.round(firstTrack.frameRate || 0) ==
           Math.round(secondTrack.frameRate || 0);
     };
