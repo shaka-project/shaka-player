@@ -137,7 +137,7 @@ shaka.extern.ManifestParser = class {
  *   onManifestUpdated: function(),
  *   getBandwidthEstimate: function():number,
  *   onMetadata: function(string, number, ?number,
- *                        !Array<shaka.extern.MetadataFrame>),
+ *                        !Array<shaka.extern.MetadataFrame>):!Promise,
  *   disableStream: function(!shaka.extern.Stream),
  *   addFont: function(string, string)
  * }}
@@ -175,7 +175,7 @@ shaka.extern.ManifestParser = class {
  * @property {function():number} getBandwidthEstimate
  *   Get the estimated bandwidth in bits per second.
  * @property {function(string, number, ?number,
- *                     !Array<shaka.extern.MetadataFrame>)} onMetadata
+ *                     !Array<shaka.extern.MetadataFrame>):!Promise} onMetadata
  *   Called when an metadata is found in the manifest.
  * @property {function(!shaka.extern.Stream)} disableStream
  *   Called to temporarily disable a stream i.e. disabling all variant
