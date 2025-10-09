@@ -71,6 +71,8 @@ describe('MimeUtils', () => {
 
     expect(getNormalizedCodec('dvc1.05')).toBe('dovi-vvc');
     expect(getNormalizedCodec('dvi1.05')).toBe('dovi-vvc');
+
+    expect(getNormalizedCodec('lvc1')).toBe('lcevc');
   });
 
   it('isHlsType', () => {
