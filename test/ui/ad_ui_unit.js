@@ -22,7 +22,9 @@ describe('Ad UI', () => {
     // Add css file
     cssLink = /** @type {!HTMLLinkElement} */(document.createElement('link'));
     await UiUtils.setupCSS(cssLink);
-    shaka.Player.setAdManagerFactory(() => new shaka.test.FakeAdManager());
+    shaka.Player.setAdManagerFactory((player) => {
+      return new shaka.test.FakeAdManager();
+    });
   });
 
   beforeEach(async () => {
@@ -42,7 +44,9 @@ describe('Ad UI', () => {
 
   afterAll(() => {
     document.head.removeChild(cssLink);
-    shaka.Player.setAdManagerFactory(() => new shaka.ads.AdManager());
+    shaka.Player.setAdManagerFactory((player) => {
+      return new shaka.ads.AdManager(player);
+    });
   });
 
   it('is invisible if no ad is playing', () => {
