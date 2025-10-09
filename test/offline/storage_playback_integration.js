@@ -187,4 +187,86 @@ filterDescribe('Storage', checkStorageSupport, () => {
 
     await player.unload();
   });
+
+  it('supports ClearKey with raw single key', async () => {
+    if (!checkClearKeySupport()) {
+      pending('ClearKey is not supported');
+    }
+
+    storage.configure({
+      drm: {
+        clearKeys: {
+          // cspell: disable-next-line
+          'nrQFDeRLSAKTLifXUIPiZg': 'FmY0xnWCPCNaSpRG-tUuTQ',
+        },
+      },
+    });
+
+    const url = '/base/test/test/assets/dash-clearkey/dash.mpd';
+    const metadata = {
+      'title': 'ClearKey with raw single key',
+      'downloaded': new Date(),
+    };
+
+    const result = await storage.store(url, metadata).promise;
+
+    await player.load(result.offlineUri);
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 2 seconds, but stop early if the video ends.  If it takes
+    // longer than 10 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 10);
+
+    await player.unload();
+  });
+
+  it('supports ClearKey with fake single key', async () => {
+    if (!checkClearKeySupport()) {
+      pending('ClearKey is not supported');
+    }
+
+    storage.configure({
+      drm: {
+        clearKeys: {
+          '0000000000000000000000': '0000000000000000000000',
+        },
+      },
+    });
+
+    const url = '/base/test/test/assets/dash-clearkey/dash.mpd';
+    const metadata = {
+      'title': 'ClearKey with fake single key',
+      'downloaded': new Date(),
+    };
+
+    const result = await storage.store(url, metadata).promise;
+
+    player.configure({
+      drm: {
+        clearKeys: {
+          // cspell: disable-next-line
+          'nrQFDeRLSAKTLifXUIPiZg': 'FmY0xnWCPCNaSpRG-tUuTQ',
+        },
+      },
+    });
+
+    await player.load(result.offlineUri);
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 2 seconds, but stop early if the video ends.  If it takes
+    // longer than 10 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 10);
+
+    await player.unload();
+  });
 });

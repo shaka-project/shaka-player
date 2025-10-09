@@ -382,6 +382,7 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @param {!shaka.Player} basePlayer
    * @param {!HTMLMediaElement} baseVideo
    * @param {shaka.extern.HLSMetadata} metadata
+   * @return {!Promise}
    */
   onHLSMetadata(basePlayer, baseVideo, metadata) {}
 
