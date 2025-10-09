@@ -492,7 +492,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
         return false;
       }
       const codec = shaka.util.MimeUtils.getNormalizedCodec(t.codecs);
-      return codec.startsWith('lvc');
+      return codec.startsWith('lcevc');
     };
     if (track.hdr == 'PQ' || track.hdr == 'HLG') {
       if (isDolbyVision(track)) {
