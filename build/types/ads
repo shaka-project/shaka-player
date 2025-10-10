@@ -1,5 +1,6 @@
 # Ad Insertion Functionality
 
++../../lib/ads/abstract_ad.js
 +../../lib/ads/ad_manager.js
 +../../lib/ads/ad_utils.js
 +../../lib/ads/ads_stats.js
