@@ -418,7 +418,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Allow start in the middle of an interstitial',
             'ads.allowStartInMiddleOfInterstitial')
         .addBoolInput_('Ignore Interstitial tracking events',
-            'ads.disableInterstitialTrackingEvents');
+            'ads.disableInterstitialTrackingEvents')
+        .addBoolInput_('Disable Snapback',
+            'ads.disableSnapback');
   }
 
   /** @private */
