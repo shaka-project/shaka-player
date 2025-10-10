@@ -152,7 +152,8 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     }
 
     // Normal tap logic (single vs double tap).
-    if (this.controls.getConfig().tapSeekDistance > 0) {
+    if (this.controls.getConfig().tapSeekDistance > 0 &&
+        (!this.ad || !this.ad.isLinear())) {
       event.preventDefault();
       this.onSeekButtonClick_();
     }
