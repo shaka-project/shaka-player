@@ -2324,6 +2324,7 @@ shaka.extern.MediaSourceConfiguration;
  *   allowPreloadOnDomElements: boolean,
  *   allowStartInMiddleOfInterstitial: boolean,
  *   disableInterstitialTrackingEvents: boolean,
+ *   disableSnapback: boolean,
  * }}
  *
  * @description
@@ -2368,6 +2369,14 @@ shaka.extern.MediaSourceConfiguration;
  *   Defaults to <code>true</code>.
  * @property {boolean} disableInterstitialTrackingEvents
  *   If this is true, we ignore interstitial tracking events.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disableSnapback
+ *   If true, disables snapback behavior when seeking over ad breaks.
+ *   Normally, if a user seeks past an unplayed ad break, playback will
+ *   automatically return to the start of the ad break to ensure ads are shown.
+ *   When this flag is set, the player will not rewind to show skipped ads,
+ *   and playback will continue from the user's seek position.
  *   <br>
  *   Defaults to <code>false</code>.
  *
