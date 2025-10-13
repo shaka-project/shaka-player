@@ -422,7 +422,7 @@ shaka.test.ManifestGenerator.DrmInfo = class {
     this.serverCertificateUri = '';
     /** @type {(Set<string> | undefined)} */
     this.keySystemUris;
-    /** @type {!Array<string> | undefined)} */
+    /** @type {(!Array<string> | undefined)} */
     this.mediaTypes;
 
     /** @type {shaka.extern.DrmInfo} */
@@ -488,9 +488,9 @@ shaka.test.ManifestGenerator.DrmInfo = class {
 
   /**
    * Adds a new mediaTypes to the current DRM info.
-   * @param {!Array<string>} mediaTypes
+   * @param {!Array<string>=} mediaTypes
    */
-  addMediaTypes(mediaTypes) {
+  addMediaTypes(mediaTypes = undefined) {
     this.mediaTypes = mediaTypes;
   }
 };
