@@ -3944,7 +3944,7 @@ describe('HlsParser', () => {
       '#EXT-X-KEY:METHOD=SAMPLE-AES-CTR,',
       'KEYID=0X' + keyId + ',',
       'KEYFORMAT="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",',
-      'URI="data:text/plain;base64,',
+      'URI="data:text/plain;charset=UTF-8;base64,',
       initDataBase64, '",\n',
       '#EXT-X-MAP:URI="init.mp4"\n',
       '#EXTINF:5,\n',
@@ -3961,6 +3961,7 @@ describe('HlsParser', () => {
             drmInfo.addCencInitData(initDataBase64);
             drmInfo.keyIds.add(keyId);
             drmInfo.encryptionScheme = 'cenc';
+            drmInfo.mediaTypes = ['text/plain', 'charset=UTF-8'];
           });
         });
       });
@@ -4009,6 +4010,7 @@ describe('HlsParser', () => {
             drmInfo.addCencInitData(initDataBase64);
             drmInfo.keyIds.add(keyId);
             drmInfo.encryptionScheme = 'cenc';
+            drmInfo.mediaTypes = ['text/plain'];
           });
         });
       });
@@ -4052,6 +4054,7 @@ describe('HlsParser', () => {
           stream.addDrmInfo('com.microsoft.playready', (drmInfo) => {
             drmInfo.addCencInitData(initDataBase64);
             drmInfo.encryptionScheme = 'cenc';
+            drmInfo.mediaTypes = ['text/plain'];
           });
         });
       });
@@ -4095,6 +4098,7 @@ describe('HlsParser', () => {
             drmInfo.keyIds.add('f93d4e700d7ddde90529a27735d9e7cb');
             drmInfo.addKeySystemUris(new Set(
                 ['skd://f93d4e700d7ddde90529a27735d9e7cb']));
+            drmInfo.mediaTypes = undefined;
           });
         });
       });
@@ -4265,7 +4269,7 @@ describe('HlsParser', () => {
         '#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES-CTR,',
         'KEYID=0X' + keyId + ',',
         'KEYFORMAT="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",',
-        'URI="data:text/plain;base64,',
+        'URI="data:text/plain;charset=UTF-8;base64,',
         initDataBase64, '",\n',
       ].join('');
 
@@ -4277,6 +4281,7 @@ describe('HlsParser', () => {
               drmInfo.addCencInitData(initDataBase64);
               drmInfo.keyIds.add(keyId);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.mediaTypes = ['text/plain', 'charset=UTF-8'];
             });
           });
         });
@@ -4286,6 +4291,7 @@ describe('HlsParser', () => {
               drmInfo.addCencInitData(initDataBase64);
               drmInfo.keyIds.add(keyId);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.mediaTypes = ['text/plain', 'charset=UTF-8'];
             });
           });
         });
@@ -4328,6 +4334,7 @@ describe('HlsParser', () => {
               drmInfo.addCencInitData(initDataBase64);
               drmInfo.keyIds.add(keyId);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.mediaTypes = ['text/plain'];
             });
           });
         });
@@ -4337,6 +4344,7 @@ describe('HlsParser', () => {
               drmInfo.addCencInitData(initDataBase64);
               drmInfo.keyIds.add(keyId);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.mediaTypes = ['text/plain'];
             });
           });
         });
@@ -4374,6 +4382,7 @@ describe('HlsParser', () => {
             stream.addDrmInfo('com.microsoft.playready', (drmInfo) => {
               drmInfo.addCencInitData(initDataBase64);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.mediaTypes = ['text/plain'];
             });
           });
         });
@@ -4382,6 +4391,7 @@ describe('HlsParser', () => {
             stream.addDrmInfo('com.microsoft.playready', (drmInfo) => {
               drmInfo.addCencInitData(initDataBase64);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.mediaTypes = ['text/plain'];
             });
           });
         });
@@ -4419,6 +4429,7 @@ describe('HlsParser', () => {
               drmInfo.keyIds.add('f93d4e700d7ddde90529a27735d9e7cb');
               drmInfo.addKeySystemUris(new Set(
                   ['skd://f93d4e700d7ddde90529a27735d9e7cb']));
+              drmInfo.mediaTypes = undefined;
             });
           });
         });
@@ -4430,6 +4441,7 @@ describe('HlsParser', () => {
               drmInfo.keyIds.add('f93d4e700d7ddde90529a27735d9e7cb');
               drmInfo.addKeySystemUris(new Set(
                   ['skd://f93d4e700d7ddde90529a27735d9e7cb']));
+              drmInfo.mediaTypes = undefined;
             });
           });
         });

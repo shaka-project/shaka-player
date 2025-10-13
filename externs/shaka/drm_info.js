@@ -48,7 +48,8 @@ shaka.extern.InitDataOverride;
  *   serverCertificateUri: string,
  *   sessionType: string,
  *   initData: Array<!shaka.extern.InitDataOverride>,
- *   keyIds: Set<string>
+ *   keyIds: Set<string>,
+ *   mediaTypes: (!Array<string>|undefined)
  * }}
  *
  * @description
@@ -103,6 +104,10 @@ shaka.extern.InitDataOverride;
  *   <i>Defaults to the empty Set</i> <br>
  *   If not empty, contains the default key IDs for this key system, as
  *   lowercase hex strings.
+ * @property {!Array<string>=} mediaTypes
+ *   An optional list specifying each component in a media type:
+ *   https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/data#media-type
+ *   included in a <code>data:</code> scheme URI, separated by semicolon.
  * @exportDoc
  */
 shaka.extern.DrmInfo;
