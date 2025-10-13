@@ -243,7 +243,8 @@ shaka.extern.StreamDB;
  *   dataKey: number,
  *   mimeType: ?string,
  *   codecs: ?string,
- *   thumbnailSprite: ?shaka.extern.ThumbnailSprite
+ *   thumbnailSprite: ?shaka.extern.ThumbnailSprite,
+ *   chapterTitle: ?string,
  * }}
  *
  * @property {?number} initSegmentKey
@@ -282,6 +283,8 @@ shaka.extern.StreamDB;
  *   The codecs of the segment.
  * @property {?shaka.extern.ThumbnailSprite} thumbnailSprite
  *   The segment's thumbnail sprite.
+ * @property {?string} chapterTitle
+ *   The chapter title.
  */
 shaka.extern.SegmentDB;
 

@@ -142,6 +142,7 @@ describe('Playhead', () => {
       variants: [],
       textStreams: [],
       imageStreams: [],
+      chapterStreams: [],
       presentationTimeline: timeline,
       offlineSessionIds: [],
       sequenceMode: false,
