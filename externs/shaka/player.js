@@ -2368,7 +2368,7 @@ shaka.extern.MediaSourceConfiguration;
  *   <br>
  *   Defaults to <code>true</code>.
  * @property {boolean} disableTrackingEvents
- *   If this is true, we disable tracking events if it is possible.
+ *   If this is true, we disable tracking events except when using IMA SDK.
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {boolean} disableSnapback
