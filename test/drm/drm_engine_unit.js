@@ -1668,7 +1668,9 @@ describe('DrmEngine', () => {
        * @return {!Promise}
        */
       async function sendMessageTest(
-          expectedUrl, messageType = 'license-request', mediaTypes = undefined) {
+          expectedUrl,
+          messageType = 'license-request',
+          mediaTypes = undefined) {
         if (mediaTypes) {
           tweakDrmInfos((drmInfos) => {
             drmInfos[0].mediaTypes = mediaTypes;
