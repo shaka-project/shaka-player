@@ -2910,8 +2910,12 @@ describe('HlsParser', () => {
       '    "duration": 102.0,',
       '    "titles": [',
       '      {',
-      '        "language": "und",',
+      '        "language": "en",',
       '        "title": "One"',
+      '      },',
+      '      {',
+      '        "language": "es",',
+      '        "title": "Uno"',
       '      }',
       '    ]',
       '  },',
@@ -2921,8 +2925,12 @@ describe('HlsParser', () => {
       '    "duration": 182.0,',
       '    "titles": [',
       '      {',
-      '        "language": "und",',
+      '        "language": "en",',
       '        "title": "Two"',
+      '      },',
+      '      {',
+      '        "language": "es",',
+      '        "title": "Dos"',
       '      }',
       '    ]',
       '  }',
@@ -2943,7 +2951,7 @@ describe('HlsParser', () => {
     const actual = await parser.start('test:/master', playerInterface);
     await loadAllStreamsFor(actual);
 
-    expect(actual.chapterStreams.length).toBe(1);
+    expect(actual.chapterStreams.length).toBe(2);
     expect(actual.imageStreams.length).toBe(1);
     expect(actual.textStreams.length).toBe(1);
     expect(actual.variants.length).toBe(1);
