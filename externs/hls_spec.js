@@ -39,7 +39,7 @@ HlsSpec.Title;
  *   "image-category": string,
  *   "pixel-width": number,
  *   "pixel-height": number,
- *   url: string
+ *   url: string,
  * }}
  */
 HlsSpec.Image;
