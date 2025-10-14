@@ -1591,7 +1591,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         metadata.title = title;
       }
       navigator.mediaSession.metadata = new MediaMetadata(metadata);
-    }
+    };
 
     const playerLoaded = () => {
       if (this.player_.isLive() || this.player_.seekRange().start != 0) {
