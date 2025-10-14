@@ -31,6 +31,7 @@ goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Timer');
+goog.require('shaka.util.TXml');
 
 goog.requireType('shaka.Player');
 
