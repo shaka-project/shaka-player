@@ -620,6 +620,7 @@ describe('StreamingEngine', () => {
         offlineSessionIds: [],
         textStreams: [],
         imageStreams: [],
+        chapterStreams: [],
         sequenceMode: false,
         ignoreManifestTimestampsInSegmentsMode: false,
         type: 'UNKNOWN',
