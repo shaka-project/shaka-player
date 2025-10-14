@@ -29,7 +29,7 @@ HlsSpec.Chapter;
 /**
  * @typedef {{
  *   language: string,
- *   title: string
+ *   title: string,
  * }}
  */
 HlsSpec.Title;
