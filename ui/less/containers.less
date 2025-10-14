@@ -125,6 +125,23 @@
   pointer-events: none;
 }
 
+/* Container for controls positioned at the top of the video container:
+ * controls button panel. */
+.shaka-top-controls {
+  width: @bottom-controls-width;
+  padding: 0;
+
+  position: absolute;
+  top: 0;
+
+  /* Position the bottom panel in front of other controls (play button and
+   * spinner containers).
+   * TODO: A different layout arrangement might be a better solution for this.
+   * Need to experiment.
+   */
+  z-index: 1;
+}
+
 /* Container for controls positioned at the bottom of the video container:
  * controls button panel and the seek bar. */
 .shaka-bottom-controls {
@@ -142,7 +159,8 @@
 /* This is the container for the horizontal row of controls above the seek bar.
  * It sits above (Y axis) the seek bar, and below (Y axis) the giant play button
  * in the middle. */
-.shaka-controls-button-panel {
+.shaka-controls-button-panel,
+.shaka-controls-top-button-panel {
   /* Fill the space horizontally, with no extra padding or margin. */
   padding: 0;
   margin: 0;
@@ -228,7 +246,8 @@
 }
 
 /* Buttons hide certain items if they are found inside the control panel */
-.shaka-controls-button-panel .shaka-overflow-menu-only {
+.shaka-controls-button-panel .shaka-overflow-menu-only,
+.shaka-controls-top-button-panel .shaka-overflow-menu-only {
   display: none;
 }
 

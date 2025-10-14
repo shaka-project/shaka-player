@@ -179,6 +179,7 @@ shaka.extern.UIShortcuts;
  *
  * @typedef {{
  *   controlPanelElements: !Array<string>,
+ *   topControlPanelElements: !Array<string>,
  *   overflowMenuButtons: !Array<string>,
  *   contextMenuElements: !Array<string>,
  *   statisticsList: !Array<string>,
@@ -228,6 +229,8 @@ shaka.extern.UIShortcuts;
  *
  * @property {!Array<string>} controlPanelElements
  *   The ordered list of control panel elements of the UI.
+ * @property {!Array<string>} topControlPanelElements
+ *   The ordered list of top control panel elements of the UI.
  * @property {!Array<string>} overflowMenuButtons
  *   The ordered list of the overflow menu buttons.
  * @property {!Array<string>} contextMenuElements
