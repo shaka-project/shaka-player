@@ -140,6 +140,7 @@ playhead
 preflighted
 preloaders
 prio
+programinformation
 seekbar
 statelessly
 stringifiers

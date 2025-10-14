@@ -1819,7 +1819,7 @@ describe('Interstitial Ad manager', () => {
       expect(interstitials.length).toBe(1);
       /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
-        id: null,
+        id: '5925573263',
         groupId: null,
         startTime: 0,
         endTime: null,
@@ -1910,7 +1910,7 @@ describe('Interstitial Ad manager', () => {
       expect(interstitials.length).toBe(1);
       /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
-        id: null,
+        id: '5925573263',
         groupId: null,
         startTime: 0,
         endTime: null,
@@ -2015,7 +2015,7 @@ describe('Interstitial Ad manager', () => {
       const vast = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<VAST version="3.0">',
-        '<Ad id="5925573263">',
+        '<Ad>',
         '<InLine>',
         '<Creatives>',
         '<Creative id="138381721867" sequence="1">',
