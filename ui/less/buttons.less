@@ -94,6 +94,20 @@
   }
 }
 
+.shaka-content-title {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+
+  font-size: @content-title-font-size;
+  color: @general-font-color;
+  width: auto;
+  padding: 0 5px;
+
+  /* This shadow allows good visibility with any type of background. */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 80%), 0 2px 6px rgba(0, 0, 0, 60%);
+}
+
 /* Use a consistent outline focus style across browsers. */
 .shaka-controls-container {
   button:focus, input:focus {

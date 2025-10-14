@@ -244,6 +244,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       if (this.config_.enableTooltips) {
         this.controlsButtonPanel_.classList.add('shaka-tooltips-on');
       }
+      if (this.config_.enableTooltips) {
+        this.topControlsButtonPanel_.classList.add('shaka-tooltips-on');
+      }
     });
 
     /**
@@ -1258,6 +1261,42 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   addControlsButtonPanel_() {
     /** @private {!HTMLElement} */
+    this.topControls_ = shaka.util.Dom.createHTMLElement('div');
+    this.topControls_.classList.add('shaka-top-controls');
+    this.topControls_.classList.add('shaka-no-propagation');
+    this.controlsContainer_.appendChild(this.topControls_);
+
+    /** @private {!HTMLElement} */
+    this.topControlsButtonPanel_ = shaka.util.Dom.createHTMLElement('div');
+    this.topControlsButtonPanel_.classList.add(
+        'shaka-controls-top-button-panel');
+    this.topControlsButtonPanel_.classList.add(
+        'shaka-show-controls-on-mouse-over');
+    if (this.config_.enableTooltips) {
+      this.topControlsButtonPanel_.classList.add('shaka-tooltips-on');
+      this.topControlsButtonPanel_.classList.add('shaka-tooltips-bottom');
+    }
+    this.topControls_.appendChild(this.topControlsButtonPanel_);
+
+    // Create the elements specified by topControlPanelElements
+    for (const name of this.config_.topControlPanelElements) {
+      if (shaka.ui.ControlsPanel.elementNamesToFactories_.get(name)) {
+        const factory =
+            shaka.ui.ControlsPanel.elementNamesToFactories_.get(name);
+        const element = factory.create(this.topControlsButtonPanel_, this);
+        this.elements_.push(element);
+        if (name == 'time_and_duration') {
+          const adInfo =
+              new shaka.ui.AdInfo(this.topControlsButtonPanel_, this);
+          this.elements_.push(adInfo);
+        }
+      } else {
+        shaka.log.alwaysWarn(
+            'Unrecognized top control panel element requested:', name);
+      }
+    }
+
+    /** @private {!HTMLElement} */
     this.bottomControls_ = shaka.util.Dom.createHTMLElement('div');
     this.bottomControls_.classList.add('shaka-bottom-controls');
     this.bottomControls_.classList.add('shaka-no-propagation');
@@ -1594,6 +1633,22 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       navigator.mediaSession.metadata = new MediaMetadata(metadata);
     };
 
+    const setupPoster = (imageUrl) => {
+      const video = /** @type {HTMLVideoElement} */ (this.localVideo_);
+      if (imageUrl != video.poster) {
+        video.poster = imageUrl;
+      }
+      let metadata = {
+        title: '',
+        artwork: [{src: imageUrl}],
+      };
+      if (navigator.mediaSession.metadata) {
+        metadata = navigator.mediaSession.metadata;
+        metadata.artwork = [{src: imageUrl}];
+      }
+      navigator.mediaSession.metadata = new MediaMetadata(metadata);
+    };
+
     const playerLoaded = () => {
       if (this.player_.isLive() || this.player_.seekRange().start != 0) {
         updatePositionState();
@@ -1630,28 +1685,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         setupTitle(title);
       }
       if (imageUrl) {
-        const video = /** @type {HTMLVideoElement} */ (this.localVideo_);
-        if (imageUrl != video.poster) {
-          video.poster = imageUrl;
-        }
-        let metadata = {
-          title: '',
-          artwork: [{src: imageUrl}],
-        };
-        if (navigator.mediaSession.metadata) {
-          metadata = navigator.mediaSession.metadata;
-          metadata.artwork = [{src: imageUrl}];
-        }
-        navigator.mediaSession.metadata = new MediaMetadata(metadata);
+        setupPoster(imageUrl);
       }
     });
     this.eventManager_.listen(this.player_, 'sessiondata', (event) => {
-      if (event['id'] != 'com.apple.hls.title') {
-        return;
-      }
-      const title = event['value'];
-      if (title) {
-        setupTitle(title);
+      if (event['id'] == 'com.apple.hls.title') {
+        const title = event['value'];
+        if (title) {
+          setupTitle(title);
+        }
       }
     });
     this.eventManager_.listen(this.player_, 'programinformation', (event) => {
@@ -1890,6 +1932,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.fadeControlsTimer_.tickAfter(/* seconds= */ this.config_.fadeDelay);
     }
     if (this.anySettingsMenusAreOpen()) {
+      this.topControlsButtonPanel_.classList.remove('shaka-tooltips-on');
       this.controlsButtonPanel_.classList.remove('shaka-tooltips-on');
     }
   }
