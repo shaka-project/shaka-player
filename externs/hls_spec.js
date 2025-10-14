@@ -48,7 +48,7 @@ HlsSpec.Image;
  * @typedef {{
  *   key: string,
  *   value: (string|number|boolean|!Array<*>|Object),
- *   language: (string|undefined)
+ *   language: (string|undefined),
  * }}
  */
 HlsSpec.Metadata;
