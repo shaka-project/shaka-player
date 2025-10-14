@@ -31,6 +31,7 @@ goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Timer');
+goog.require('shaka.util.TXml');
 
 goog.requireType('shaka.Player');
 
@@ -1581,6 +1582,18 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       addMediaSessionHandler('enterpictureinpicture', commonHandler);
     }
 
+    const setupTitle = (title) => {
+      let metadata = {
+        title: title,
+        artwork: [],
+      };
+      if (navigator.mediaSession.metadata) {
+        metadata = navigator.mediaSession.metadata;
+        metadata.title = title;
+      }
+      navigator.mediaSession.metadata = new MediaMetadata(metadata);
+    };
+
     const playerLoaded = () => {
       if (this.player_.isLive() || this.player_.seekRange().start != 0) {
         updatePositionState();
@@ -1614,15 +1627,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         imageUrl = payload['data'];
       }
       if (title) {
-        let metadata = {
-          title: title,
-          artwork: [],
-        };
-        if (navigator.mediaSession.metadata) {
-          metadata = navigator.mediaSession.metadata;
-          metadata.title = title;
-        }
-        navigator.mediaSession.metadata = new MediaMetadata(metadata);
+        setupTitle(title);
       }
       if (imageUrl) {
         const video = /** @type {HTMLVideoElement} */ (this.localVideo_);
@@ -1638,6 +1643,30 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           metadata.artwork = [{src: imageUrl}];
         }
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
+      }
+    });
+    this.eventManager_.listen(this.player_, 'sessiondata', (event) => {
+      if (event['id'] != 'com.apple.hls.title') {
+        return;
+      }
+      const title = event['value'];
+      if (title) {
+        setupTitle(title);
+      }
+    });
+    this.eventManager_.listen(this.player_, 'programinformation', (event) => {
+      if (!event['detail']) {
+        return;
+      }
+      const TXml = shaka.util.TXml;
+      /** @type {!shaka.extern.xml.Node} */
+      const detail = /** @type {!shaka.extern.xml.Node} */(event['detail']);
+      const titleNode = TXml.findChild(detail, 'Title');
+      if (titleNode) {
+        const title = TXml.getContents(titleNode);
+        if (title) {
+          setupTitle(title);
+        }
       }
     });
   }
