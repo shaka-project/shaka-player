@@ -21,7 +21,7 @@ var HlsSpec = {};
  *   duration: (number|undefined),
  *   titles: (!Array<!HlsSpec.Title>|undefined),
  *   images: (!Array<!HlsSpec.Image>|undefined),
- *   metadata: (!Array<!HlsSpec.Metadata>|undefined)
+ *   metadata: (!Array<!HlsSpec.Metadata>|undefined),
  * }}
  */
 HlsSpec.Chapter;
