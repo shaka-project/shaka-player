@@ -2902,40 +2902,38 @@ describe('HlsParser', () => {
       'image.jpg\n',
     ].join('');
 
-    const chaptersJson = [
-      '[',
-      '  {',
-      '    "chapter": 1,',
-      '    "start-time": 0.0,',
-      '    "duration": 102.0,',
-      '    "titles": [',
-      '      {',
-      '        "language": "en",',
-      '        "title": "One"',
-      '      },',
-      '      {',
-      '        "language": "es",',
-      '        "title": "Uno"',
-      '      }',
-      '    ]',
-      '  },',
-      '  {',
-      '    "chapter": 2,',
-      '    "start-time": 102.0,',
-      '    "duration": 182.0,',
-      '    "titles": [',
-      '      {',
-      '        "language": "en",',
-      '        "title": "Two"',
-      '      },',
-      '      {',
-      '        "language": "es",',
-      '        "title": "Dos"',
-      '      }',
-      '    ]',
-      '  }',
-      ']',
-    ].join('');
+    const chaptersJson = JSON.stringify([
+      {
+        'chapter': 1,
+        'start-time': 0.0,
+        'duration': 102.0,
+        'titles': [
+          {
+            language: 'en',
+            title: 'One',
+          },
+          {
+            language: 'es',
+            title: 'Uno',
+          },
+        ],
+      },
+      {
+        'chapter': 2,
+        'start-time': 102.0,
+        'duration': 182.0,
+        'titles': [
+          {
+            language: 'en',
+            title: 'Two',
+          },
+          {
+            language: 'es',
+            title: 'Dos',
+          },
+        ],
+      },
+    ]);
 
     fakeNetEngine
         .setResponseText('test:/master', master)
