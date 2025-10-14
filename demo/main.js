@@ -391,9 +391,9 @@ shakaDemo.Main = class {
       uiConfig.controlPanelElements.splice(
           index, 1, 'rewind', 'play_pause', 'fast_forward');
     }
-    if (!uiConfig.controlPanelElements.includes('close')) {
-      uiConfig.controlPanelElements.splice(
-          uiConfig.controlPanelElements.length - 1, 0, 'close');
+    if (!uiConfig.topControlPanelElements.includes('close')) {
+      uiConfig.topControlPanelElements.splice(
+          uiConfig.topControlPanelElements.length, 0, 'close');
     }
     if (!uiConfig.overflowMenuButtons.includes('visualizer')) {
       uiConfig.overflowMenuButtons.push('visualizer');
@@ -1434,13 +1434,6 @@ shakaDemo.Main = class {
         }
       }
 
-      // Finally, the asset can be loaded.
-      const queueItem = await this.getQueueItem_(asset);
-      queueManager.insertItems([queueItem]);
-      await queueManager.playItem(0);
-
-      asset.preloadManager = null;
-
       // Set media session title, but only if the browser supports that API.
       if (navigator.mediaSession) {
         const icon = asset.iconUri || shakaDemo.Main.logo_;
@@ -1451,6 +1444,13 @@ shakaDemo.Main = class {
         };
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
       }
+
+      // Finally, the asset can be loaded.
+      const queueItem = await this.getQueueItem_(asset);
+      queueManager.insertItems([queueItem]);
+      await queueManager.playItem(0);
+
+      asset.preloadManager = null;
 
       if (this.visualizer_ && this.visualizer_.active) {
         this.visualizer_.start();

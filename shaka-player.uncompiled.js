@@ -102,6 +102,7 @@ goog.require('shaka.ui.AirPlayButton');
 goog.require('shaka.ui.BigPlayButton');
 goog.require('shaka.ui.CastButton');
 goog.require('shaka.ui.ChapterSelection');
+goog.require('shaka.ui.ContentTitle');
 goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.FastForwardButton');

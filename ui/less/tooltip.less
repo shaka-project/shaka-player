@@ -78,6 +78,17 @@
   }
 
   // If the seekbar is missing, this is positioned lower.
+  &.shaka-tooltips-bottom {
+    & > .shaka-tooltip {
+      &:hover:after,
+      &:focus-visible:after,
+      &:active:after {
+        bottom: -@general-font-size;
+      }
+    }
+  }
+
+  // If the seekbar is missing, this is positioned lower.
   &.shaka-tooltips-low-position {
     & > .shaka-tooltip {
       &:hover:after,

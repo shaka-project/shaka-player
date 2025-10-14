@@ -275,6 +275,10 @@ shaka.ui.Overlay = class {
 
     const config = {
       controlPanelElements,
+      topControlPanelElements: [
+        'content_title',
+        'spacer',
+      ],
       overflowMenuButtons: [
         'captions',
         'quality',
