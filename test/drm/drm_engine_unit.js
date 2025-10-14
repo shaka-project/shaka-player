@@ -1592,7 +1592,10 @@ describe('DrmEngine', () => {
       });
 
       it('triggers a license request', async () => {
-        await sendMessageTest('http://abc.drm/license');
+        await sendMessageTest(
+            'http://abc.drm/license',
+            /* messageType= */ undefined,
+            /* mediaTypes= */ ['text/plain']);
       });
 
       it('prefers a license server URI from configuration', async () => {
@@ -1656,10 +1659,18 @@ describe('DrmEngine', () => {
       /**
        * @param {string=} expectedUrl
        * @param {string=} messageType
+       * @param {!Array<string>=} mediaTypes
        * @return {!Promise}
        */
       async function sendMessageTest(
-          expectedUrl, messageType = 'license-request') {
+          expectedUrl,
+          messageType = 'license-request',
+          mediaTypes = undefined) {
+        if (mediaTypes) {
+          tweakDrmInfos((drmInfos) => {
+            drmInfos[0].mediaTypes = mediaTypes;
+          });
+        }
         await initAndAttach();
         await sendEncryptedEvent();
 
@@ -1676,7 +1687,9 @@ describe('DrmEngine', () => {
               method: 'POST',
               body: message,
               licenseRequestType: messageType,
+              drmInfo: drmEngine.getDrmInfo(),
             }), jasmine.anything());
+        expect(drmEngine.getDrmInfo().mediaTypes).toEqual(mediaTypes);
       }
     });  // describe('message')
 
@@ -2454,6 +2467,7 @@ describe('DrmEngine', () => {
         sessionType: 'temporary',
         initData: [],
         keyIds: new Set(['deadbeefdeadbeefdeadbeefdeadbeef']),
+        mediaTypes: undefined,
       });
     });
   });  // describe('getDrmInfo')
