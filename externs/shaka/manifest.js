@@ -16,6 +16,7 @@
  *   variants: !Array<shaka.extern.Variant>,
  *   textStreams: !Array<shaka.extern.Stream>,
  *   imageStreams: !Array<shaka.extern.Stream>,
+ *   chapterStreams: !Array<shaka.extern.Stream>,
  *   offlineSessionIds: !Array<string>,
  *   sequenceMode: boolean,
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
@@ -72,6 +73,9 @@
  * @property {!Array<shaka.extern.Stream>} imageStreams
  *   <i>Required.</i> <br>
  *   The presentation's image streams
+ * @property {!Array<shaka.extern.Stream>} chapterStreams
+ *   <i>Required.</i> <br>
+ *   The presentation's chapter streams
  * @property {!Array<string>} offlineSessionIds
  *   <i>Defaults to [].</i> <br>
  *   An array of EME sessions to load for offline playback.

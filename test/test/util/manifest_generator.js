@@ -85,6 +85,9 @@ shaka.test.ManifestGenerator.Manifest = class {
     /** @type {!Array<shaka.extern.Stream>} */
     this.imageStreams = [];
 
+    /** @type {!Array<shaka.extern.Stream>} */
+    this.chapterStreams = [];
+
     const timeline = new this.shaka_.media.PresentationTimeline(0, 0);
     timeline.setSegmentAvailabilityDuration(Infinity);
     timeline.notifyMaxSegmentDuration(10);

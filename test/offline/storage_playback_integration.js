@@ -269,4 +269,30 @@ filterDescribe('Storage', checkStorageSupport, () => {
 
     await player.unload();
   });
+
+  it('supports HLS chapters download and playback', async () => {
+    const url = '/base/test/test/assets/hls-chapters/index.m3u8';
+    const metadata = {
+      'title': 'HLS Chapters',
+      'downloaded': new Date(),
+    };
+
+    const result = await storage.store(url, metadata).promise;
+
+    await player.load(result.offlineUri);
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    expect(player.getChaptersTracks().length).toBe(1);
+
+    const chapters = await player.getChaptersAsync('und');
+
+    expect(chapters.length).toBe(7);
+
+    // Play for 2 seconds, but stop early if the video ends.  If it takes
+    // longer than 10 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 10);
+
+    await player.unload();
+  });
 });

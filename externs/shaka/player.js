@@ -302,7 +302,7 @@ shaka.extern.BufferedInfo;
  *
  * @property {string} type
  *   The type of track, either <code>'variant'</code> or <code>'text'</code>
- *   or <code>'image'</code>.
+ *   or <code>'image'</code> or <code>'chapter'</code>.
  * @property {number} bandwidth
  *   The bandwidth required to play the track, in bits/sec.
  *
@@ -505,7 +505,7 @@ shaka.extern.AudioTrack;
  *   visible in the buffer).
  * @property {string} type
  *   The type of track, either <code>'variant'</code> or <code>'text'</code>
- *   or <code>'image'</code>.
+ *   or <code>'image'</code> or <code>'chapter'</code>.
  * @property {number} bandwidth
  *   The bandwidth required to play the track, in bits/sec.
  * @property {string} language
@@ -623,7 +623,7 @@ shaka.extern.VideoTrack;
  *   The unique ID of the track.
  * @property {string} type
  *   The type of track, either <code>'variant'</code> or <code>'text'</code>
- *   or <code>'image'</code>.
+ *   or <code>'image'</code> or <code>'chapter'</code>.
  * @property {number} bandwidth
  *   The bandwidth required to play the track, in bits/sec.
  * @property {?number} width
@@ -644,6 +644,35 @@ shaka.extern.VideoTrack;
  * @exportDoc
  */
 shaka.extern.ImageTrack;
+
+
+/**
+ * @typedef {{
+ *   id: number,
+ *   type: string,
+ *   bandwidth: number,
+ *   language: string,
+ * }}
+ *
+ * @description
+ * An object describing a chapter track.  This object should be treated as
+ * read-only as changing any values does not have any effect.
+ *
+ * @property {number} id
+ *   The unique ID of the track.
+ * @property {string} type
+ *   The type of track, either <code>'variant'</code> or <code>'text'</code>
+ *   or <code>'image'</code> or <code>'chapter'</code>.
+ * @property {number} bandwidth
+ *   The bandwidth required to play the track, in bits/sec.
+ * @property {string} language
+ *   The language of the track, or <code>'und'</code> if not given.  This value
+ *   is normalized as follows - language part is always lowercase and translated
+ *   to ISO-639-1 when possible, locale part is always uppercase,
+ *   i.e. <code>'en-US'</code>.
+ * @exportDoc
+ */
+shaka.extern.ChapterTrack;
 
 
 /**
@@ -1625,6 +1654,7 @@ shaka.extern.MssManifestConfiguration;
  *   disableText: boolean,
  *   disableThumbnails: boolean,
  *   disableIFrames: boolean,
+ *   disableChapters: boolean,
  *   defaultPresentationDelay: number,
  *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
@@ -1665,6 +1695,10 @@ shaka.extern.MssManifestConfiguration;
  *   Defaults to <code>false</code>.
  * @property {boolean} disableIFrames
  *   If <code>true</code>, the I-Frames tracks are ignored.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disableChapters
+ *   If <code>true</code>, the chapter tracks are ignored.
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {number} defaultPresentationDelay

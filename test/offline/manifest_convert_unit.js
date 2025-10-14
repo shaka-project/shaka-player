@@ -350,6 +350,7 @@ describe('ManifestConverter', () => {
       mimeType,
       codecs,
       thumbnailSprite: null,
+      chapterTitle: null,
     };
 
     return segment;
