@@ -1526,13 +1526,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
     const addMediaSessionHandler = (type, callback) => {
       try {
-        if (callback) {
-          navigator.mediaSession.setActionHandler(type, (details) => {
-            callback(details);
-          });
-        } else {
-          navigator.mediaSession.setActionHandler(type, null);
-        }
+        navigator.mediaSession.setActionHandler(type, callback);
       } catch (error) {
         shaka.log.debug(
             `The "${type}" media session action is not supported.`);
