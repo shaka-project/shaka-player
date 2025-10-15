@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.15.18](https://github.com/shaka-project/shaka-player/compare/v4.15.17...v4.15.18) (2025-10-15)
+
+
+### Bug Fixes
+
+* **build:** Fix build compat with mac homebrew java ([#9225](https://github.com/shaka-project/shaka-player/issues/9225)) ([ce44ed8](https://github.com/shaka-project/shaka-player/commit/ce44ed8320a6706c3ae32ad3912dc0b35502d773))
+
 ## [4.15.17](https://github.com/shaka-project/shaka-player/compare/v4.15.16...v4.15.17) (2025-10-15)
 
 
