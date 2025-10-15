@@ -379,7 +379,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     tracks = tracks.filter((track, idx) => {
       const ArrayUtils = shaka.util.ArrayUtils;
-      if (!ArrayUtils.hasSameElements(selectedTrack.roles, track.roles)) {
+      if (selectedTrack &&
+          !ArrayUtils.hasSameElements(selectedTrack.roles, track.roles)) {
         return false;
       }
       // Keep the first one with the same height and framerate or bandwidth.
