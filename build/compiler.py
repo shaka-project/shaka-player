@@ -79,9 +79,10 @@ def _get_java_major_version():
   stderr = obj.communicate()[1]
 
   first_line = stderr.decode('utf-8').split('\n')[0]
+  # Example: openjdk version "25" 2025-09-16
   # Example: openjdk version "24.0.1" 2025-04-15
   # Example: java version "24.0.2" 2025-07-15
-  major_version_match = re.match(r'.*"(\d+)\..*?".*', first_line)
+  major_version_match = re.match(r'.*"(\d+).*?".*', first_line)
   major_version_string = major_version_match.group(1)
 
   try:
