@@ -85,6 +85,9 @@ shaka.test.ManifestGenerator.Manifest = class {
     /** @type {!Array<shaka.extern.Stream>} */
     this.imageStreams = [];
 
+    /** @type {!Array<shaka.extern.Stream>} */
+    this.chapterStreams = [];
+
     const timeline = new this.shaka_.media.PresentationTimeline(0, 0);
     timeline.setSegmentAvailabilityDuration(Infinity);
     timeline.notifyMaxSegmentDuration(10);
@@ -422,6 +425,8 @@ shaka.test.ManifestGenerator.DrmInfo = class {
     this.serverCertificateUri = '';
     /** @type {(Set<string> | undefined)} */
     this.keySystemUris;
+    /** @type {(!Array<string> | undefined)} */
+    this.mediaTypes;
 
     /** @type {shaka.extern.DrmInfo} */
     const foo = this;
@@ -482,6 +487,14 @@ shaka.test.ManifestGenerator.DrmInfo = class {
    */
   addKeySystemUris(keySystemUris) {
     this.keySystemUris = keySystemUris;
+  }
+
+  /**
+   * Adds a new mediaTypes to the current DRM info.
+   * @param {!Array<string>=} mediaTypes
+   */
+  addMediaTypes(mediaTypes = undefined) {
+    this.mediaTypes = mediaTypes;
   }
 };
 

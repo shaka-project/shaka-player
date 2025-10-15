@@ -179,4 +179,18 @@ describe('HlsParser', () => {
 
     await player.unload();
   });
+
+  it('supports com.apple.hls.chapters', async () => {
+    await player.load('/base/test/test/assets/hls-chapters/index.m3u8');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    expect(player.getChaptersTracks().length).toBe(1);
+
+    const chapters = await player.getChaptersAsync('und');
+
+    expect(chapters.length).toBe(7);
+
+    await player.unload();
+  });
 });

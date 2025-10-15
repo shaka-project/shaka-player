@@ -151,6 +151,9 @@ describe('HlsParser', () => {
     for (const image of manifest.imageStreams) {
       promises.push(image.createSegmentIndex());
     }
+    for (const chapter of manifest.chapterStreams) {
+      promises.push(chapter.createSegmentIndex());
+    }
     await Promise.all(promises);
   }
 
@@ -2839,6 +2842,213 @@ describe('HlsParser', () => {
     expect(stream).toBeUndefined();
   });
 
+  it('parse chapter streams', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
+      'URI="text"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="2",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
+      'video\n',
+      '#EXT-X-IMAGE-STREAM-INF:RESOLUTION=240×135,CODECS="jpeg",',
+      'URI="image"\n',
+      '#EXT-X-SESSION-DATA:DATA-ID="com.apple.hls.chapters",',
+      'URI="chapters.json"\n',
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const text = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.vtt',
+    ].join('');
+
+    const image = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-TILES:RESOLUTION=640x360,LAYOUT=5x2,DURATION=6.006\n',
+      'image.jpg\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+    ].join('');
+
+    const chaptersJson = JSON.stringify([
+      {
+        'chapter': 1,
+        'start-time': 0.0,
+        'duration': 102.0,
+        'titles': [
+          {
+            language: 'en',
+            title: 'One',
+          },
+          {
+            language: 'es',
+            title: 'Uno',
+          },
+        ],
+      },
+      {
+        'chapter': 2,
+        'start-time': 102.0,
+        'duration': 182.0,
+        'titles': [
+          {
+            language: 'en',
+            title: 'Two',
+          },
+          {
+            language: 'es',
+            title: 'Dos',
+          },
+        ],
+      },
+    ]);
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/video', video)
+        .setResponseText('test:/text', text)
+        .setResponseText('test:/image', image)
+        .setResponseText('test:/main.vtt', vttText)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData)
+        .setResponseText('test:/chapters.json', chaptersJson);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
+
+    expect(actual.chapterStreams.length).toBe(2);
+    expect(actual.imageStreams.length).toBe(1);
+    expect(actual.textStreams.length).toBe(1);
+    expect(actual.variants.length).toBe(1);
+
+    const chapters = actual.chapterStreams[0];
+
+    await chapters.createSegmentIndex();
+    goog.asserts.assert(chapters.segmentIndex != null, 'Null segmentIndex!');
+
+    const firstChapterReference = chapters.segmentIndex.get(0);
+    const secondChapterReference = chapters.segmentIndex.get(1);
+
+    expect(firstChapterReference).not.toBe(null);
+    expect(secondChapterReference).not.toBe(null);
+    if (firstChapterReference) {
+      expect(firstChapterReference.getUris()[0]).toBe('One');
+    }
+    if (secondChapterReference) {
+      expect(secondChapterReference.getUris()[0]).toBe('Two');
+    }
+  });
+
+  it('Disable chapters does not create chapter streams', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
+      'URI="text"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="2",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
+      'video\n',
+      '#EXT-X-IMAGE-STREAM-INF:RESOLUTION=240×135,CODECS="jpeg",',
+      'URI="image"\n',
+      '#EXT-X-SESSION-DATA:DATA-ID="com.apple.hls.chapters",',
+      'URI="chapters.json"\n',
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const text = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.vtt',
+    ].join('');
+
+    const image = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/video', video)
+        .setResponseText('test:/text', text)
+        .setResponseText('test:/image', image)
+        .setResponseText('test:/main.vtt', vttText)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.disableChapters = true;
+    parser.configure(config);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
+    const stream = actual.chapterStreams[0];
+    expect(stream).toBeUndefined();
+  });
+
   it('parses manifest with MP4+TTML streams', async () => {
     const master = [
       '#EXTM3U\n',
@@ -3944,7 +4154,7 @@ describe('HlsParser', () => {
       '#EXT-X-KEY:METHOD=SAMPLE-AES-CTR,',
       'KEYID=0X' + keyId + ',',
       'KEYFORMAT="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",',
-      'URI="data:text/plain;base64,',
+      'URI="data:text/plain;charset=UTF-8;base64,',
       initDataBase64, '",\n',
       '#EXT-X-MAP:URI="init.mp4"\n',
       '#EXTINF:5,\n',
@@ -3961,6 +4171,7 @@ describe('HlsParser', () => {
             drmInfo.addCencInitData(initDataBase64);
             drmInfo.keyIds.add(keyId);
             drmInfo.encryptionScheme = 'cenc';
+            drmInfo.addMediaTypes(['text/plain', 'charset=UTF-8']);
           });
         });
       });
@@ -4009,6 +4220,7 @@ describe('HlsParser', () => {
             drmInfo.addCencInitData(initDataBase64);
             drmInfo.keyIds.add(keyId);
             drmInfo.encryptionScheme = 'cenc';
+            drmInfo.addMediaTypes(['text/plain']);
           });
         });
       });
@@ -4052,6 +4264,7 @@ describe('HlsParser', () => {
           stream.addDrmInfo('com.microsoft.playready', (drmInfo) => {
             drmInfo.addCencInitData(initDataBase64);
             drmInfo.encryptionScheme = 'cenc';
+            drmInfo.addMediaTypes(['text/plain']);
           });
         });
       });
@@ -4095,6 +4308,7 @@ describe('HlsParser', () => {
             drmInfo.keyIds.add('f93d4e700d7ddde90529a27735d9e7cb');
             drmInfo.addKeySystemUris(new Set(
                 ['skd://f93d4e700d7ddde90529a27735d9e7cb']));
+            drmInfo.addMediaTypes(undefined);
           });
         });
       });
@@ -4265,7 +4479,7 @@ describe('HlsParser', () => {
         '#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES-CTR,',
         'KEYID=0X' + keyId + ',',
         'KEYFORMAT="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",',
-        'URI="data:text/plain;base64,',
+        'URI="data:text/plain;charset=UTF-8;base64,',
         initDataBase64, '",\n',
       ].join('');
 
@@ -4277,6 +4491,7 @@ describe('HlsParser', () => {
               drmInfo.addCencInitData(initDataBase64);
               drmInfo.keyIds.add(keyId);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.addMediaTypes(['text/plain', 'charset=UTF-8']);
             });
           });
         });
@@ -4286,6 +4501,7 @@ describe('HlsParser', () => {
               drmInfo.addCencInitData(initDataBase64);
               drmInfo.keyIds.add(keyId);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.addMediaTypes(['text/plain', 'charset=UTF-8']);
             });
           });
         });
@@ -4328,6 +4544,7 @@ describe('HlsParser', () => {
               drmInfo.addCencInitData(initDataBase64);
               drmInfo.keyIds.add(keyId);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.addMediaTypes(['text/plain']);
             });
           });
         });
@@ -4337,6 +4554,7 @@ describe('HlsParser', () => {
               drmInfo.addCencInitData(initDataBase64);
               drmInfo.keyIds.add(keyId);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.addMediaTypes(['text/plain']);
             });
           });
         });
@@ -4374,6 +4592,7 @@ describe('HlsParser', () => {
             stream.addDrmInfo('com.microsoft.playready', (drmInfo) => {
               drmInfo.addCencInitData(initDataBase64);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.addMediaTypes(['text/plain']);
             });
           });
         });
@@ -4382,6 +4601,7 @@ describe('HlsParser', () => {
             stream.addDrmInfo('com.microsoft.playready', (drmInfo) => {
               drmInfo.addCencInitData(initDataBase64);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.addMediaTypes(['text/plain']);
             });
           });
         });
@@ -4419,6 +4639,7 @@ describe('HlsParser', () => {
               drmInfo.keyIds.add('f93d4e700d7ddde90529a27735d9e7cb');
               drmInfo.addKeySystemUris(new Set(
                   ['skd://f93d4e700d7ddde90529a27735d9e7cb']));
+              drmInfo.addMediaTypes(undefined);
             });
           });
         });
@@ -4430,6 +4651,7 @@ describe('HlsParser', () => {
               drmInfo.keyIds.add('f93d4e700d7ddde90529a27735d9e7cb');
               drmInfo.addKeySystemUris(new Set(
                   ['skd://f93d4e700d7ddde90529a27735d9e7cb']));
+              drmInfo.addMediaTypes(undefined);
             });
           });
         });
