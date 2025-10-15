@@ -1689,10 +1689,24 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     });
     this.eventManager_.listen(this.player_, 'sessiondata', (event) => {
-      if (event['id'] == 'com.apple.hls.title') {
-        const title = event['value'];
-        if (title) {
-          setupTitle(title);
+      const id = event['id'];
+      switch (id) {
+        case 'com.apple.hls.title': {
+          const title = event['value'];
+          if (title) {
+            setupTitle(title);
+          }
+          break;
+        }
+        case 'com.apple.hls.poster': {
+          let imageUrl = event['value'];
+          if (imageUrl) {
+            imageUrl = imageUrl.replace('{w}', '192')
+                .replace('{h}', '192')
+                .replace('{f}', 'jpeg');
+            setupPoster(imageUrl);
+          }
+          break;
         }
       }
     });
