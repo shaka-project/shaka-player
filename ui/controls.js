@@ -171,6 +171,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {shaka.extern.IAdManager} */
     this.adManager_ = this.player_.getAdManager();
 
+    /** @private {shaka.extern.IQueueManager} */
+    this.queueManager_ = this.player_.getQueueManager();
+
     /** @private {?shaka.extern.IAd} */
     this.ad_ = null;
 
@@ -1523,9 +1526,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
     const addMediaSessionHandler = (type, callback) => {
       try {
-        navigator.mediaSession.setActionHandler(type, (details) => {
-          callback(details);
-        });
+        if (callback) {
+          navigator.mediaSession.setActionHandler(type, (details) => {
+            callback(details);
+          });
+        } else {
+          navigator.mediaSession.setActionHandler(type, null);
+        }
       } catch (error) {
         shaka.log.debug(
             `The "${type}" media session action is not supported.`);
@@ -1605,6 +1612,19 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         case 'enterpictureinpicture':
           if (!this.ad_ || !this.ad_.isLinear()) {
             this.togglePiP();
+          }
+          break;
+        case 'nexttrack':
+          this.queueManager_.playItem(
+              this.queueManager_.getCurrentItemIndex() + 1);
+          break;
+        case 'previoustrack':
+          this.queueManager_.playItem(
+              this.queueManager_.getCurrentItemIndex() - 1);
+          break;
+        case 'skipad':
+          if (this.ad_) {
+            this.ad_.skip();
           }
           break;
       }
@@ -1725,6 +1745,49 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         }
       }
     });
+
+    const checkQueueItems = () => {
+      const itemsLength = this.queueManager_.getItems().length;
+      const currentIndex = this.queueManager_.getCurrentItemIndex();
+      if (itemsLength <= 1 || currentIndex == -1) {
+        addMediaSessionHandler('previoustrack', null);
+        addMediaSessionHandler('nexttrack', null);
+        return;
+      }
+      if (currentIndex > 0) {
+        addMediaSessionHandler('previoustrack', commonHandler);
+      } else {
+        addMediaSessionHandler('previoustrack', null);
+      }
+      if ((currentIndex + 1) < itemsLength) {
+        addMediaSessionHandler('nexttrack', commonHandler);
+      } else {
+        addMediaSessionHandler('nexttrack', null);
+      }
+    };
+
+    this.eventManager_.listen(
+        this.queueManager_, 'currentitemchanged', checkQueueItems);
+    this.eventManager_.listen(
+        this.queueManager_, 'itemsinserted', checkQueueItems);
+    this.eventManager_.listen(
+        this.queueManager_, 'itemsremoved', checkQueueItems);
+    this.eventManager_.listen(this.player_, 'loading', checkQueueItems);
+
+    const checkSkipAd = () => {
+      if (!this.ad_ || !this.ad_.isSkippable() || !this.ad_.canSkipNow()) {
+        addMediaSessionHandler('skipad', null);
+      } else {
+        addMediaSessionHandler('skipad', commonHandler);
+      }
+    };
+
+    this.eventManager_.listen(
+        this.adManager_, shaka.ads.Utils.AD_STARTED, checkSkipAd);
+    this.eventManager_.listen(
+        this.adManager_, shaka.ads.Utils.AD_SKIP_STATE_CHANGED, checkSkipAd);
+    this.eventManager_.listen(
+        this.adManager_, shaka.ads.Utils.AD_STOPPED, checkSkipAd);
   }
 
 
