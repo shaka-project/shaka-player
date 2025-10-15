@@ -896,6 +896,47 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  it('handles multiple audio groups', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="stereo",LANGUAGE="en",',
+      'URI="128kbit.m3u8"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="stereo",LANGUAGE="dubbing",',
+      'URI="none.m3u8"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="surround",LANGUAGE="en",',
+      'URI="320kbit.m3u8"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="surround",LANGUAGE="dubbing",',
+      'URI="none.m3u8"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=258157,CODECS="avc1.4d400d,mp4a.40.2",',
+      'AUDIO="stereo",RESOLUTION=422x180\n',
+      '250kbit.m3u8\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=1144430,CODECS="avc1.4d401f,mp4a.40.2",',
+      'AUDIO="surround",RESOLUTION=958x408\n',
+      '1100kbit.m3u8\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/128kbit.m3u8', media)
+        .setResponseText('test:/none.m3u8', media)
+        .setResponseText('test:/320kbit.m3u8', media)
+        .setResponseText('test:/250kbit.m3u8', media)
+        .setResponseText('test:/1100kbit.m3u8', media);
+
+    const manifest = await parser.start('test:/master', playerInterface);
+
+    expect(manifest.variants.length).toBe(4);
+  });
+
   it('handles audio tags on audio streams', async () => {
     const master = [
       '#EXTM3U\n',
