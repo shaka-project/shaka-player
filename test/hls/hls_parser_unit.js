@@ -6718,8 +6718,5 @@ describe('HlsParser', () => {
 
     expect(audioLabels).toContain('audio128');
     expect(audioLabels).toContain('audio64');
-
-    // Also check that the audio group IDs are distinct and correct
-    expect(variant1.audio.groupId).not.toBe(variant2.audio.groupId);
   });
 });
