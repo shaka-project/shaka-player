@@ -1230,7 +1230,7 @@ shakaDemo.Main = class {
       const wasActive = this.visualizer_.active;
       this.visualizer_.active = active;
       if (wasActive != active) {
-        if (active) {
+        if (active && this.player_.getAssetUri()) {
           this.visualizer_.start();
         } else {
           this.visualizer_.stop();
