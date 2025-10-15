@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.16.5](https://github.com/shaka-project/shaka-player/compare/v4.16.4...v4.16.5) (2025-10-15)
+
+
+### Bug Fixes
+
+* **ABR:** Check for the existence of variables ([#9201](https://github.com/shaka-project/shaka-player/issues/9201)) ([38fb81c](https://github.com/shaka-project/shaka-player/commit/38fb81c223ea9a1633e5e4050e0b44f77356e46a))
+* **CMCDv2:** Memory leaks with ts param on request mode ([#9193](https://github.com/shaka-project/shaka-player/issues/9193)) ([97b3975](https://github.com/shaka-project/shaka-player/commit/97b39751e0e4a042bbeb048f34d88bf1973351fa))
+* Fix HDR detection on WebOS on compiled builds ([#9185](https://github.com/shaka-project/shaka-player/issues/9185)) ([e73b149](https://github.com/shaka-project/shaka-player/commit/e73b1498ce934fc230efd077e385b162b807a285))
+* **HLS:** Remove label for video streams ([#9176](https://github.com/shaka-project/shaka-player/issues/9176)) ([0ea35ed](https://github.com/shaka-project/shaka-player/commit/0ea35edbc3648def05eab968dac41a74d7960d19))
+* Return the correct getAudioTracks when only differs the codec ([#9178](https://github.com/shaka-project/shaka-player/issues/9178)) ([de5940a](https://github.com/shaka-project/shaka-player/commit/de5940abd7804db6d5976ef2c5bbd2a4f54a8e22))
+* Return the correct getVideoTracks when only differs the audioId ([#9179](https://github.com/shaka-project/shaka-player/issues/9179)) ([920186e](https://github.com/shaka-project/shaka-player/commit/920186e400992b6d8a694a6d8940c605f56a3a96))
+* **UI:** Add LCEVC label in resolution menu ([#9186](https://github.com/shaka-project/shaka-player/issues/9186)) ([8740b35](https://github.com/shaka-project/shaka-player/commit/8740b35edf5db845f69be14a0fc90c328a109b5d))
+* **UI:** Don't allow seek with seek on taps when there is a linear ad ([#9191](https://github.com/shaka-project/shaka-player/issues/9191)) ([f84ec6a](https://github.com/shaka-project/shaka-player/commit/f84ec6a842ef619d6ddf168c021381a4639db030))
+* **UI:** Fix seek on taps position in CSS ([#9192](https://github.com/shaka-project/shaka-player/issues/9192)) ([646c9a2](https://github.com/shaka-project/shaka-player/commit/646c9a2586dbbc5349f868bbd4814056bcf4b30b))
+
+
+### Performance Improvements
+
+* **ABR:** Try to suggest new streams after enable ([#9177](https://github.com/shaka-project/shaka-player/issues/9177)) ([430ee60](https://github.com/shaka-project/shaka-player/commit/430ee60b67eb169979e7161600a60cb7a319070b))
+* **Chapters:** Check does parser exist before fetching chapters track ([#9204](https://github.com/shaka-project/shaka-player/issues/9204)) ([581cb56](https://github.com/shaka-project/shaka-player/commit/581cb5603a76536ad9af2e48e386a5fd23af3cf7))
+
 ## [4.16.4](https://github.com/shaka-project/shaka-player/compare/v4.16.3...v4.16.4) (2025-10-08)
 
 
