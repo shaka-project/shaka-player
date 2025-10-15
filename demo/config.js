@@ -232,8 +232,7 @@ shakaDemo.Config = class {
             'manifest.ignoreSupplementalCodecs')
         .addNumberInput_('Override the Update time of the manifest',
             'manifest.updatePeriod')
-        .addBoolInput_('Ignore DRM Info', 'manifest.ignoreDrmInfo')
-        .addBoolInput_('Enable Audio Groups', 'manifest.enableAudioGroups');
+        .addBoolInput_('Ignore DRM Info', 'manifest.ignoreDrmInfo');
   }
 
   /** @private */
@@ -265,7 +264,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Use stream once in period flattening',
             'manifest.dash.useStreamOnceInPeriodFlattening')
         .addBoolInput_('Enable fast switching',
-            'manifest.dash.enableFastSwitching');
+            'manifest.dash.enableFastSwitching')
+        .addBoolInput_('Enable Audio Groups',
+            'manifest.dash.enableAudioGroups');
   }
 
   /** @private */
@@ -294,7 +295,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Allow LL-HLS byterange optimization',
             'manifest.hls.allowLowLatencyByteRangeOptimization')
         .addBoolInput_('Allow range request to guess mime type',
-            'manifest.hls.allowRangeRequestsToGuessMimeType');
+            'manifest.hls.allowRangeRequestsToGuessMimeType')
+        .addBoolInput_('Enable Audio Groups',
+            'manifest.hls.enableAudioGroups');
   }
 
   /** @private */

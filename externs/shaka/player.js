@@ -1429,7 +1429,8 @@ shaka.extern.xml.Node;
  *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
- *   enableFastSwitching: boolean
+ *   enableFastSwitching: boolean,
+ *   enableAudioGroups: boolean,
  * }}
  *
  * @property {string} clockSyncUri
@@ -1505,6 +1506,11 @@ shaka.extern.xml.Node;
  *   If false, disables fast switching track recognition.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {boolean} enableAudioGroups
+ *   If set, audio streams will be grouped and filtered by their parent
+ *   adaptation set ID.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -1525,7 +1531,8 @@ shaka.extern.DashManifestConfiguration;
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
  *   allowLowLatencyByteRangeOptimization: boolean,
- *   allowRangeRequestsToGuessMimeType: boolean
+ *   allowRangeRequestsToGuessMimeType: boolean,
+ *   enableAudioGroups: boolean,
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -1616,6 +1623,11 @@ shaka.extern.DashManifestConfiguration;
  *   guess the mime type.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} enableAudioGroups
+ *   If set, audio streams will be grouped and filtered by their parent
+ *   adaptation set ID.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
@@ -1665,7 +1677,6 @@ shaka.extern.MssManifestConfiguration;
  *   ignoreSupplementalCodecs: boolean,
  *   updatePeriod: number,
  *   ignoreDrmInfo: boolean,
- *   enableAudioGroups: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1756,11 +1767,6 @@ shaka.extern.MssManifestConfiguration;
  *   system and contained no init data.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {boolean} enableAudioGroups
- *   If set, audio streams will be grouped and filtered by their parent
- *   adaptation set ID.
- *   <br>
- *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.ManifestConfiguration;
