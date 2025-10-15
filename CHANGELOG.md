@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.15.17](https://github.com/shaka-project/shaka-player/compare/v4.15.16...v4.15.17) (2025-10-15)
+
+
+### Bug Fixes
+
+* **ABR:** Check for the existence of variables ([#9201](https://github.com/shaka-project/shaka-player/issues/9201)) ([4fa0108](https://github.com/shaka-project/shaka-player/commit/4fa01083e88ea3bc6cd3614f3a4eca274926f75d))
+* **HLS:** Remove label for video streams ([#9176](https://github.com/shaka-project/shaka-player/issues/9176)) ([beea2be](https://github.com/shaka-project/shaka-player/commit/beea2be29f79b5fa0a92e6ba96ec841470c9ed21))
+* Return the correct getAudioTracks when only differs the codec ([#9178](https://github.com/shaka-project/shaka-player/issues/9178)) ([fc0fd63](https://github.com/shaka-project/shaka-player/commit/fc0fd63608f695f843e65f3ce4fbeef93fc8acd4))
+* **UI:** Don't allow seek with seek on taps when there is a linear ad ([#9191](https://github.com/shaka-project/shaka-player/issues/9191)) ([9fdc5dc](https://github.com/shaka-project/shaka-player/commit/9fdc5dcd136990bacce170a6b4efa45d16441aaf))
+
+
+### Performance Improvements
+
+* **ABR:** Try to suggest new streams after enable ([#9177](https://github.com/shaka-project/shaka-player/issues/9177)) ([c689001](https://github.com/shaka-project/shaka-player/commit/c689001754b6da0ecbf835939bc36b0c639d577f))
+* **Chapters:** Check does parser exist before fetching chapters track ([#9204](https://github.com/shaka-project/shaka-player/issues/9204)) ([5737506](https://github.com/shaka-project/shaka-player/commit/5737506af7aedd515b5f15d4959b2f9de226bb17))
+
 ## [4.15.16](https://github.com/shaka-project/shaka-player/compare/v4.15.15...v4.15.16) (2025-10-08)
 
 
