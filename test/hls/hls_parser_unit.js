@@ -371,10 +371,10 @@ describe('HlsParser', () => {
     expect(actual).toEqual(manifest);
   });
 
-  it('prioritize AVERAGE-BANDWIDTH to BANDWIDTH', async () => {
+  it('fallback to AVERAGE-BANDWIDTH', async () => {
     const master = [
       '#EXTM3U\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      '#EXT-X-STREAM-INF:BANDWIDTH=0,CODECS="avc1",',
       'RESOLUTION=960x540,FRAME-RATE=60,',
       'AVERAGE-BANDWIDTH=100\n',
       'video\n',
