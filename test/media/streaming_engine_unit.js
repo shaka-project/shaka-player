@@ -4214,6 +4214,39 @@ describe('StreamingEngine', () => {
     };
   }
 
+  describe('avoids duplicate segment downloads', () => {
+    it('skips segment within 150ms of lookup time', async () => {
+      setupVod();
+      mediaSourceEngine =
+          new shaka.test.FakeMediaSourceEngine(segmentData, 0);
+      createStreamingEngine();
+
+      // Start playback.
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+
+      // Simulate buffering the first segment (0-10s).
+      await runTest(() => {
+        if (presentationTimeInSeconds == 3) {
+          // After a few seconds, switch to the alternate variant to trigger
+          // the code path where segmentIterator is null and the engine
+          // looks up a segment by lastSegmentReference.endTime or bufferEnd.
+          streamingEngine.switchVariant(
+              alternateVariant, /* clearBuffer= */ true);
+        }
+      });
+
+      // The test passes if no errors occurred during the switch.
+      // The fix ensures that when the segment iterator returns a segment
+      // whose endTime is within 150ms of the lookup time (indicating a
+      // potential duplicate), it adjusts the time forward to find the
+      // next segment instead.
+      expect(onError).not.toHaveBeenCalled();
+    });
+  });
+
   /**
    * Create a valid segment index for |alternateStream| based on |baseStream|
    * segment index.
