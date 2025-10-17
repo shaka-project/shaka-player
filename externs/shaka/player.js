@@ -2136,7 +2136,8 @@ shaka.extern.SpeechToTextConfiguration;
  *   Defaults to <code>30</code>.
  * @property {number} segmentPrefetchLimit
  *   The maximum number of segments for each active stream to be prefetched
- *   ahead of playhead in parallel.
+ *   ahead of playhead in parallel. This value will be multiplied by the
+ *   playback rate if it is different from 1.
  *   If <code>0</code>, the segments will be fetched sequentially.
  *   <br>
  *   Defaults to <code>1</code>.
