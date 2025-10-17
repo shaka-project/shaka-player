@@ -29,6 +29,12 @@
    * setting is enabled on chromium-based browsers */
   user-select: none;
   -webkit-user-select: none;
+
+  *,
+  :after,
+  :before {
+    box-sizing: initial;
+  }
 }
 
 /* Each browser has a different prefixed pseudo-class for fullscreened elements.
