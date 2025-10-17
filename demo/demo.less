@@ -66,13 +66,14 @@ main.mdl-layout__content {
 }
 
 .shaka-controls-top-button-panel > .close-button {
-  height: 32px;
-  width: 32px;
-
   /* Give the button a round background, meant to look like the play button. */
-  border-radius: 50%;
   color: #000;
-  background: rgba(255, 255, 255, 85%);
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 85%) 16px,
+      transparent 16px
+    );
 }
 
 html, body {
