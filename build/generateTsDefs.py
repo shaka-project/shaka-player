@@ -67,6 +67,11 @@ def GenerateTsDefs(inputs, output):
   # "Promise | null | undefined" doesn't work in TypeScript.  We need to use
   # "Promise | void" instead.
   contents = contents.replace(b'| null | undefined', b'| void')
+  # Fix chained 'extends' syntax like 'extends A extends B' to 'extends A, B'
+  contents = re.sub(
+      br'extends\s+([^\s]+)\s+extends\s+([^\s]+)',
+      br'extends \1, \2',
+      contents, flags=re.MULTILINE)
   # shaka.util.Error extends Error and implements shaka.extern.Error, but this
   # confuses TypeScript when both are called "Error" in context of the namespace
   # declaration for "shaka.util".  Therefore we need to declare this
