@@ -31,7 +31,7 @@ shaka.ui.BigPlayButton = class extends shaka.ui.PlayButton {
 
   /** @override */
   updateIcon() {
-    if (this.isEnded()) {
+    if (this.isEnded() && this.video.duration) {
       this.button.setAttribute('icon', 'replay');
     } else if (this.isPaused()) {
       this.button.setAttribute('icon', 'play');
