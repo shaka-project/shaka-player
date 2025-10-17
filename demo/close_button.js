@@ -23,8 +23,9 @@ shakaDemo.CloseButton = class extends shaka.ui.Element {
     super(parent, controls);
 
     this.button_ = document.createElement('button');
-    this.button_.classList.add('shaka-no-propagation');
     this.button_.classList.add('close-button');
+    this.button_.classList.add('shaka-tooltip');
+    this.button_.ariaLabel = 'Close';
 
     new shaka.ui.Icon(this.button_).use(
         // eslint-disable-next-line @stylistic/max-len
