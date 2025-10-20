@@ -8,8 +8,9 @@
   /* While showing an ad, pass pointer events through to the ad container. */
   pointer-events: none;
 
-  /* Except in the bottom controls, which should still be clickable. */
-  .shaka-bottom-controls {
+  /* Except in the bottom/top controls, which should still be clickable. */
+  .shaka-bottom-controls,
+  .shaka-top-controls {
     pointer-events: auto;
   }
 }
