@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.15.18](https://github.com/shaka-project/shaka-player/compare/v4.15.17...v4.15.18) (2025-10-20)
+
+
+### Bug Fixes
+
+* **Ads:** Only support mutipleMediaElements when not using native controls ([#9217](https://github.com/shaka-project/shaka-player/issues/9217)) ([7d5c8b4](https://github.com/shaka-project/shaka-player/commit/7d5c8b44ad686fa15b650810c06f32c989288708))
+* **build:** Fix build compat with mac homebrew java ([#9225](https://github.com/shaka-project/shaka-player/issues/9225)) ([ce44ed8](https://github.com/shaka-project/shaka-player/commit/ce44ed8320a6706c3ae32ad3912dc0b35502d773))
+* Don't cancel trick play on VOD end ([#9239](https://github.com/shaka-project/shaka-player/issues/9239)) ([d61cc38](https://github.com/shaka-project/shaka-player/commit/d61cc3811d7fa7dbed470043bd6d7625b8b11f14))
+* **HLS:** Fix bandwidth detection ([#9230](https://github.com/shaka-project/shaka-player/issues/9230)) ([c2f57c3](https://github.com/shaka-project/shaka-player/commit/c2f57c3ae687fff0e418d1b8cb91c2cf883137c7))
+* **HLS:** Fix handling of multiple audio groups ([#9220](https://github.com/shaka-project/shaka-player/issues/9220)) ([9030283](https://github.com/shaka-project/shaka-player/commit/90302833435b419ad6022c1bbe43acf14e24d38f))
+* **Offline:** Fix playback of streams with audio muxed in video ([#9229](https://github.com/shaka-project/shaka-player/issues/9229)) ([d895e0c](https://github.com/shaka-project/shaka-player/commit/d895e0ca66e85a1a7355bd4d030e1ff7c7c0dc16))
+* **Queue:** Fix start time when go to previous item ([#9222](https://github.com/shaka-project/shaka-player/issues/9222)) ([d8539f7](https://github.com/shaka-project/shaka-player/commit/d8539f776ec9be218ed9845692b47cfb92769e18))
+* **UI:** Fix show Replay button on big play when there is not loaded video ([#9234](https://github.com/shaka-project/shaka-player/issues/9234)) ([f401663](https://github.com/shaka-project/shaka-player/commit/f4016639c83ddf2885240b0862186d48355e6c4c))
+
 ## [4.15.17](https://github.com/shaka-project/shaka-player/compare/v4.15.16...v4.15.17) (2025-10-15)
 
 
