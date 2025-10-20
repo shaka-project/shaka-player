@@ -1298,6 +1298,30 @@ describe('Player', () => {
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
   });
 
+  it('preload allow update text track', async () => {
+    player.configure('autoShowText', shaka.config.AutoShowText.NEVER);
+    player.configure('preferredTextLanguage', 'zh');
+    const preloadManager =
+        await player.preload('test:sintel_multi_lingual_multi_res_compiled');
+    await preloadManager.waitForFinish();
+    let prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();
+    expect(prefetchedTextTrack).toBeNull();
+
+    preloadManager.configure('autoShowText', shaka.config.AutoShowText.ALWAYS);
+
+    await shaka.test.Util.shortDelay();
+    prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();
+    expect(prefetchedTextTrack).not.toBeNull();
+    expect(prefetchedTextTrack.language).toBe('zh');
+
+    preloadManager.configure('preferredTextLanguage', 'fr');
+
+    await shaka.test.Util.shortDelay();
+    prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();
+    expect(prefetchedTextTrack).not.toBeNull();
+    expect(prefetchedTextTrack.language).toBe('fr');
+  });
+
   it('detachAndSavePreload', async () => {
     await player.load('test:sintel_compiled');
     await video.play();
