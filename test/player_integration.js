@@ -1298,6 +1298,24 @@ describe('Player', () => {
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
   });
 
+  it('preload allow update audio track', async () => {
+    player.configure('autoShowText', shaka.config.AutoShowText.NEVER);
+    player.configure('preferredAudioLanguage', 'en');
+    const preloadManager =
+        await player.preload('test:sintel_multi_lingual_multi_res_compiled');
+    await preloadManager.waitForFinish();
+    let prefetchedVariantTrack = preloadManager.getPrefetchedVariantTrack();
+    expect(prefetchedVariantTrack).not.toBeNull();
+    expect(prefetchedVariantTrack.language).toBe('en');
+
+    preloadManager.configure('preferredAudioLanguage', 'es');
+
+    await shaka.test.Util.shortDelay();
+    prefetchedVariantTrack = preloadManager.getPrefetchedVariantTrack();
+    expect(prefetchedVariantTrack).not.toBeNull();
+    expect(prefetchedVariantTrack.language).toBe('es');
+  });
+
   it('preload allow update text track', async () => {
     player.configure('autoShowText', shaka.config.AutoShowText.NEVER);
     player.configure('preferredTextLanguage', 'zh');
