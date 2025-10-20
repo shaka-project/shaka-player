@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.16.6](https://github.com/shaka-project/shaka-player/compare/v4.16.5...v4.16.6) (2025-10-20)
+
+
+### Bug Fixes
+
+* **Ads:** Only support mutipleMediaElements when not using native controls ([#9217](https://github.com/shaka-project/shaka-player/issues/9217)) ([3fc539a](https://github.com/shaka-project/shaka-player/commit/3fc539a7430401434730d3d3ea441b7a465b5bad))
+* **build:** Fix build compat with mac homebrew java ([#9225](https://github.com/shaka-project/shaka-player/issues/9225)) ([12ebb9a](https://github.com/shaka-project/shaka-player/commit/12ebb9a7fb3a05ca260b1b19c238fefd085386ea))
+* Don't cancel trick play on VOD end ([#9239](https://github.com/shaka-project/shaka-player/issues/9239)) ([e81d5c1](https://github.com/shaka-project/shaka-player/commit/e81d5c11aee41cdfd91626a5f2020c86390d1369))
+* **HLS:** Fix bandwidth detection ([#9230](https://github.com/shaka-project/shaka-player/issues/9230)) ([02c0ee5](https://github.com/shaka-project/shaka-player/commit/02c0ee5da63ed5e2f82b5c14b10f49bcb865aeac))
+* **HLS:** Fix handling of multiple audio groups ([#9220](https://github.com/shaka-project/shaka-player/issues/9220)) ([d02d73c](https://github.com/shaka-project/shaka-player/commit/d02d73c390d7fa19d4969899f3bdd0911bf23896))
+* Make selectVideoTrack more resilient when using HLS with audio groups ([#9232](https://github.com/shaka-project/shaka-player/issues/9232)) ([bd5675a](https://github.com/shaka-project/shaka-player/commit/bd5675af33a33bf1afd41efc24f4bfb3bed5e8e1))
+* **Offline:** Fix playback of streams with audio muxed in video ([#9229](https://github.com/shaka-project/shaka-player/issues/9229)) ([8190b0b](https://github.com/shaka-project/shaka-player/commit/8190b0b4d333cef186f9889bb221c7a9b13cd73f))
+* **Queue:** Fix start time when go to previous item ([#9222](https://github.com/shaka-project/shaka-player/issues/9222)) ([55bb9fc](https://github.com/shaka-project/shaka-player/commit/55bb9fcaee2bb4a7344158ba84b7f5c2af9b04c8))
+* **UI:** Fix show Replay button on big play when there is not loaded video ([#9234](https://github.com/shaka-project/shaka-player/issues/9234)) ([a9cc7b3](https://github.com/shaka-project/shaka-player/commit/a9cc7b36d21e8b901c2389cd2b23a303881cb9d2))
+* Validate prefetched variant in preload manager ([#9213](https://github.com/shaka-project/shaka-player/issues/9213)) ([e0e8ce7](https://github.com/shaka-project/shaka-player/commit/e0e8ce706961b61728a2519e17c6b00ee83e732b))
+
 ## [4.16.5](https://github.com/shaka-project/shaka-player/compare/v4.16.4...v4.16.5) (2025-10-15)
 
 
