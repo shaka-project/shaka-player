@@ -1585,6 +1585,7 @@ describe('Interstitial Ad manager', () => {
     };
     await interstitialAdManager.addMetadata(metadata);
 
+    video.play();
     video.dispatchEvent(new Event('timeupdate'));
 
     await shaka.test.Util.shortDelay();
@@ -1629,6 +1630,7 @@ describe('Interstitial Ad manager', () => {
     };
     await interstitialAdManager.addMetadata(metadata);
 
+    video.play();
     video.dispatchEvent(new Event('timeupdate'));
 
     await shaka.test.Util.shortDelay();
@@ -1679,6 +1681,7 @@ describe('Interstitial Ad manager', () => {
     await interstitialAdManager.addMetadata(metadata);
 
     video.currentTime = 0;
+    video.play();
     video.dispatchEvent(new Event('timeupdate'));
 
     await shaka.test.Util.shortDelay();
