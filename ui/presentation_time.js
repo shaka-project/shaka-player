@@ -34,6 +34,9 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
     this.setValue_('0:00');
     this.parent.appendChild(this.currentTime_);
 
+    this.showProgress_ =
+        !this.controls.getConfig().showRemainingTimeInPresentationTime;
+
     this.eventManager.listen(this.currentTime_, 'click', () => {
       if (!this.controls.isOpaque()) {
         return;
@@ -41,6 +44,9 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
       // Jump to LIVE if the user clicks on the current time.
       if (this.player.isLive()) {
         this.video.currentTime = this.player.seekRange().end;
+      } else {
+        this.showProgress_ = !this.showProgress_;
+        this.updateTime_();
       }
     });
 
@@ -116,11 +122,16 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
 
       const currentTime = Math.max(0, displayTime - seekRange.start);
       let value = Utils.buildTimeString(currentTime, showHour);
+      if (!this.showProgress_ && seekRangeSize) {
+        const remainingTime = seekRangeSize - currentTime;
+        value = '-' + Utils.buildTimeString(remainingTime, showHour);
+      }
       if (seekRangeSize) {
         value += ' / ' + Utils.buildTimeString(seekRangeSize, showHour);
       }
       this.setValue_(value);
-      this.currentTime_.disabled = true;
+      this.currentTime_.disabled =
+          !this.controls.getConfig().allowTogglePresentationTime;
     }
   }
 
