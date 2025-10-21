@@ -215,6 +215,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * @private {shaka.util.Timer}
      */
     this.fadeControlsTimer_ = new shaka.util.Timer(() => {
+      if (this.config_.menuOpenUntilUserClosesIt &&
+          this.anySettingsMenusAreOpen()) {
+        return;
+      }
       this.controlsContainer_.removeAttribute('shown');
       this.dispatchVisibilityEvent_();
       this.computeShakaTextContainerSize_();
@@ -2549,6 +2553,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   hideUI() {
+    if (this.config_.menuOpenUntilUserClosesIt &&
+        this.anySettingsMenusAreOpen()) {
+      this.hideSettingsMenusTimer_.tickNow();
+    }
     // Stop the timer and invoke the callback now to hide the controls.  If we
     // don't, the opacity style we set in onMouseMove_ will continue to override
     // the opacity in CSS and force the controls to stay visible.

@@ -225,6 +225,7 @@ shaka.extern.UIShortcuts;
  *   enableKeyboardPlaybackControlsInWindow: boolean,
  *   alwaysShowVolumeBar: boolean,
  *   shortcuts: shaka.extern.UIShortcuts,
+ *   menuOpenUntilUserClosesIt: boolean,
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -470,6 +471,10 @@ shaka.extern.UIShortcuts;
  *   Defaults to <code>false</code>.
  * @property {shaka.extern.UIShortcuts} shortcuts
  *   The UI shortcuts.
+ * @property {boolean} menuOpenUntilUserClosesIt
+ *   If true, prevent the UI from being hidden if any menu is open.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

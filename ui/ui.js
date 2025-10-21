@@ -403,6 +403,7 @@ shaka.ui.Overlay = class {
         last_frame: ',',
         next_frame: '.',
       },
+      menuOpenUntilUserClosesIt: true,
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause
