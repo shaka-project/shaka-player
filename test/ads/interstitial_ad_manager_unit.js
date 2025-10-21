@@ -1218,6 +1218,70 @@ describe('Interstitial Ad manager', () => {
           jasmine.objectContaining(eventValue1));
     });
 
+    it('supports alternative MPD with noJump and skipAfter', async () => {
+      const eventString = [
+        '<Event duration="1" id="TEST" presentationTime="1">',
+        '<InsertPresentation url="test.mpd" noJump="1" skipAfter="PT0S"/>',
+        '</Event>',
+      ].join('');
+      const eventNode = TXml.parseXmlString(eventString);
+      goog.asserts.assert(eventNode, 'Should have a event node!');
+      /** @type {shaka.extern.TimelineRegionInfo} */
+      const region = {
+        startTime: 1,
+        endTime: 2,
+        id: 'TEST',
+        schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:insert:2025',
+        eventNode,
+        value: '',
+        timescale: 1,
+      };
+      await interstitialAdManager.addRegion(region);
+
+      expect(onEventSpy).toHaveBeenCalledTimes(1);
+      const eventValue1 = {
+        type: 'ad-cue-points-changed',
+        cuepoints: [
+          {
+            start: 1,
+            end: null,
+          },
+        ],
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValue1));
+
+      const interstitials = interstitialAdManager.getInterstitials();
+      expect(interstitials.length).toBe(1);
+      /** @type {!shaka.extern.AdInterstitial} */
+      const expectedInterstitial = {
+        id: 'TEST',
+        groupId: null,
+        startTime: 1,
+        endTime: 2,
+        uri: 'test.mpd',
+        mimeType: 'application/dash+xml',
+        isSkippable: true,
+        skipOffset: 0,
+        skipFor: null,
+        canJump: false,
+        resumeOffset: 0,
+        playoutLimit: null,
+        once: false,
+        pre: false,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: null,
+        displayOnBackground: false,
+        currentVideo: null,
+        background: null,
+        clickThroughUrl: null,
+        tracking: null,
+      };
+      expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
     it('ignore duplicate alternative MPD', async () => {
       const eventString = [
         '<Event duration="1" id="PREROLL" presentationTime="0">',
