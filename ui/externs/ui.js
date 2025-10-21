@@ -226,6 +226,8 @@ shaka.extern.UIShortcuts;
  *   alwaysShowVolumeBar: boolean,
  *   shortcuts: shaka.extern.UIShortcuts,
  *   menuOpenUntilUserClosesIt: boolean,
+ *   allowTogglePresentationTime: boolean,
+ *   showRemainingTimeInPresentationTime: boolean,
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -471,10 +473,15 @@ shaka.extern.UIShortcuts;
  *   Defaults to <code>false</code>.
  * @property {shaka.extern.UIShortcuts} shortcuts
  *   The UI shortcuts.
- * @property {boolean} menuOpenUntilUserClosesIt
- *   If true, prevent the UI from being hidden if any menu is open.
+ * @property {boolean} allowTogglePresentationTime
+ *   Allow change between show progress or remaining time on presentation time,
+ *   when playing a VOD.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {boolean} showRemainingTimeInPresentationTime
+ *   Show remaining time of presentation time by default, when playing a VOD.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;
