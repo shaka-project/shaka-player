@@ -1652,7 +1652,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     };
 
     const setupPoster = (imageUrl) => {
-      const video = /** @type {HTMLVideoElement} */ (this.localVideo_);
+      const video = /** @type {HTMLVideoElement} */ (this.video_);
       if (imageUrl != video.poster) {
         video.poster = imageUrl;
       }

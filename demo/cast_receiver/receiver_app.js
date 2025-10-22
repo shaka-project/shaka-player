@@ -113,8 +113,10 @@ class ShakaReceiverApp {
 
       // Set a special poster for audio-only assets.
       if (this.video_.readyState != 0 && this.player_.isAudioOnly()) {
-        this.video_.poster =
-            'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
+        if (!this.video_.poster) {
+          this.video_.poster =
+              'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
+        }
       } else {
         // The cast receiver never shows the poster for assets with video
         // streams.
