@@ -174,6 +174,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {shaka.extern.IQueueManager} */
     this.queueManager_ = this.player_.getQueueManager();
 
+    this.queueManager_.setCustomPlayer(this.player_);
+
     /** @private {?shaka.extern.IAd} */
     this.ad_ = null;
 
