@@ -36,7 +36,6 @@ describe('CastUtils', () => {
       'addFont',
       'getFetchedPlaybackInfo',
       'getLiveLatency',
-      'isRemotePlayback',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
