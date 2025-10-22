@@ -61,6 +61,58 @@ class ShakaReceiverApp {
     this.receiver_.addEventListener(
         'caststatuschanged', () => this.checkIdle_());
 
+    // Delete the poster when loading new content or unloading the current one.
+    this.player_.addEventListener('loading', () => {
+      this.video_.removeAttribute('poster');
+    });
+    this.player_.addEventListener('unloading', () => {
+      this.video_.removeAttribute('poster');
+    });
+
+    // Setup content image and title
+    this.player_.addEventListener('metadata', (event) => {
+      const payload = event['payload'];
+      if (!payload) {
+        return;
+      }
+      let title;
+      if (payload['key'] == 'TIT2' && payload['data']) {
+        title = payload['data'];
+      }
+      let imageUrl;
+      if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
+        imageUrl = payload['data'];
+      }
+      if (title) {
+        this.receiver_.setContentTitle(title);
+      }
+      if (imageUrl) {
+        this.receiver_.setContentImage(imageUrl);
+      }
+    });
+    this.player_.addEventListener('sessiondata', (event) => {
+      const id = event['id'];
+      switch (id) {
+        case 'com.apple.hls.title': {
+          const title = event['value'];
+          if (title) {
+            this.receiver_.setContentTitle(title);
+          }
+          break;
+        }
+        case 'com.apple.hls.poster': {
+          let imageUrl = event['value'];
+          if (imageUrl) {
+            imageUrl = imageUrl.replace('{w}', '192')
+                .replace('{h}', '192')
+                .replace('{f}', 'jpeg');
+            this.receiver_.setContentImage(imageUrl);
+          }
+          break;
+        }
+      }
+    });
+
     this.startIdleTimer_();
   }
 
@@ -100,15 +152,10 @@ class ShakaReceiverApp {
       this.cancelIdleTimer_();
 
       // Set a special poster for audio-only assets.
-      if (this.video_.readyState != 0 && this.player_.isAudioOnly()) {
-        if (!this.video_.poster) {
-          this.video_.poster =
-              'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
-        }
-      } else {
-        // The cast receiver never shows the poster for assets with video
-        // streams.
-        this.video_.removeAttribute('poster');
+      if (!this.video_.poster && this.video_.readyState != 0 &&
+          this.player_.isAudioOnly()) {
+        this.video_.poster =
+            'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
       }
     }
   }
