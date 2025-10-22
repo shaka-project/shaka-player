@@ -64,6 +64,14 @@ shaka.extern.IQueueManager = class extends EventTarget {
   getConfiguration() {}
 
   /**
+   * Set a custom player for preloading, event management and autoplay next.
+   * This is useful when using a CastProxy.
+   *
+   * @param {shaka.Player} player
+   */
+  setCustomPlayer(player) {}
+
+  /**
    * Returns the current item.
    *
    * @return {?shaka.extern.QueueItem}
