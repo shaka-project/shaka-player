@@ -575,6 +575,18 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     } else {
       this.thumbnailTime_.textContent = this.timeFormatter_(value);
     }
+
+    // Set the thumbnail position before getting the thumbnail because the
+    // operation may take some time.
+    const offsetTop = -10;
+    const width = this.thumbnailContainer_.clientWidth;
+    let height = Math.floor(width * 9 / 16);
+    this.thumbnailContainer_.style.height = height + 'px';
+    this.thumbnailContainer_.style.top = -(height - offsetTop) + 'px';
+    const leftPosition = Math.min(this.bar.offsetWidth - width,
+        Math.max(0, pixelPosition - (width / 2)));
+    this.thumbnailContainer_.style.left = leftPosition + 'px';
+
     const thumbnail =
         await this.player.getThumbnails(/* trackId= */ null, playerValue);
     if (!thumbnail || !thumbnail.uris || !thumbnail.uris.length) {
@@ -587,14 +599,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     } else {
       this.thumbnailContainer_.classList.remove('portrait-thumbnail');
     }
-    const offsetTop = -10;
-    const width = this.thumbnailContainer_.clientWidth;
-    let height = Math.floor(width * 9 / 16);
-    this.thumbnailContainer_.style.height = height + 'px';
-    this.thumbnailContainer_.style.top = -(height - offsetTop) + 'px';
-    const leftPosition = Math.min(this.bar.offsetWidth - width,
-        Math.max(0, pixelPosition - (width / 2)));
-    this.thumbnailContainer_.style.left = leftPosition + 'px';
     this.thumbnailContainer_.style.visibility = 'visible';
     let uri = thumbnail.uris[0].split('#xywh=')[0];
     if (!this.lastThumbnail_ ||
