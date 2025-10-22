@@ -64,6 +64,13 @@ shaka.extern.IQueueManager = class extends EventTarget {
   getConfiguration() {}
 
   /**
+   * Set a custom player.
+   *
+   * @param {shaka.Player} player
+   */
+  setCustomPlayer(player) {}
+
+  /**
    * Returns the current item.
    *
    * @return {?shaka.extern.QueueItem}
