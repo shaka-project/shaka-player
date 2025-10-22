@@ -64,7 +64,7 @@ shaka.extern.IQueueManager = class extends EventTarget {
   getConfiguration() {}
 
   /**
-   * Set a custom player.
+   * Set a custom player for preloading, event management and autoplay next.
    *
    * @param {shaka.Player} player
    */
