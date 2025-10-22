@@ -132,6 +132,19 @@ shaka.ui.Overlay = class {
 
 
   /**
+   * Detects if this is a Cast platform, in case you want to choose a
+   * different UI configuration on cast devices.
+   *
+   * @return {boolean}
+   * @export
+   */
+  isCast() {
+    const device = shaka.device.DeviceFactory.getDevice();
+    return device.getDeviceType() == shaka.device.IDevice.DeviceType.CAST;
+  }
+
+
+  /**
    * Detects if this is a smart tv platform, in case you want to choose a
    * different UI configuration on smart tv devices.
    *
@@ -433,6 +446,16 @@ shaka.ui.Overlay = class {
           (name) => !filterElements.includes(name));
       config.contextMenuElements = config.contextMenuElements.filter(
           (name) => !filterElements.includes(name));
+    } else if (this.isCast()) {
+      config.fadeDelay = 3;
+      config.singleClickForPlayAndPause = false;
+      config.enableTooltips = false;
+      config.doubleClickForFullscreen = false;
+      config.controlPanelElements = [
+        'play_pause',
+        'time_and_duration',
+        'spacer',
+      ];
     } else if (this.isSmartTV()) {
       config.addBigPlayButton = true;
       config.singleClickForPlayAndPause = false;

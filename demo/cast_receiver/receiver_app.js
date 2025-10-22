@@ -43,18 +43,6 @@ class ShakaReceiverApp {
     goog.asserts.assert(
         ui instanceof shaka.ui.Overlay, 'UI not present or wrong type!');
 
-    // Make sure we don't show extra UI elements we don't need on the TV.
-    ui.configure({
-      fadeDelay: 3,
-      addBigPlayButton: false,
-      addSeekBar: true,
-      controlPanelElements: [
-        'play_pause',
-        'time_and_duration',
-        'spacer',
-      ],
-    });
-
     // We use the UI library on both sender and receiver, to get a consistent UI
     // in both contexts.  The controls, therefore, have both a proxy player
     // (getPlayer) and a local player (getLocalPlayer).  The proxy player is

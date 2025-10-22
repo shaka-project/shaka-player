@@ -334,7 +334,8 @@ shaka.extern.UIShortcuts;
  *   interacting with them.  We recommend setting this to 3 on your cast
  *   receiver UI.
  *   <br>
- *   Defaults to <code>0</code>.
+ *   Defaults to <code>0</code> except on cast whose default value is
+ *   <code>3</code>.
  * @property {number} closeMenusDelay
  *   The delay (in seconds) before close the opened menus when the UI is hidden.
  *   <br>
@@ -343,14 +344,14 @@ shaka.extern.UIShortcuts;
  *   Whether or not double-clicking on the UI should cause it to enter
  *   fullscreen.
  *   <br>
- *   Defaults to <code>true</code> except on mobile and smart TV whose default
- *   value is <code>false</code>.
+ *   Defaults to <code>true</code> except on mobile, cast and smart TV whose
+ *   default value is <code>false</code>.
  * @property {boolean} singleClickForPlayAndPause
  *   Whether or not clicking on the video should cause it to play or pause.
  *   It does not work in VR mode.
  *   <br>
- *   Defaults to <code>true</code> except on mobile and smart TV whose default
- *   value is <code>false</code>.
+ *   Defaults to <code>true</code> except on mobile, cast and smart TV whose
+ *   default value is <code>false</code>.
  * @property {boolean} enableKeyboardPlaybackControls
  *   Whether or not playback controls via keyboard is enabled, such as seek
  *   forward, seek backward, jump to the beginning/end of the video.
@@ -372,8 +373,8 @@ shaka.extern.UIShortcuts;
  *   Whether or not buttons in the control panel display tooltips that contain
  *   information about their function.
  *   <br>
- *   Defaults to <code>true</code> except on mobile and smart TV whose default
- *   value is <code>false</code>.
+ *   Defaults to <code>true</code> except on mobile, cast and smart TV whose
+ *   default value is <code>false</code>.
  * @property {number} keyboardSeekDistance
  *   The time interval, in seconds, to seek when the user presses the left or
  *   right keyboard keys when the video is selected. If less than or equal to 0,
