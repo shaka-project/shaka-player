@@ -40,7 +40,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     let hasTrack = false;
     if (this.player) {
-      const tracks = this.player.getTextTracks();
+      const tracks = this.player.getTextTracks() || [];
       hasTrack = tracks.some((track) => track.active);
     }
 
@@ -123,8 +123,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
   /** @private */
   onCaptionStateChange_() {
-    const hasTrack = this.player.getTextTracks()
-        .some((track) => track.active);
+    const tracks = this.player.getTextTracks() || [];
+    const hasTrack = tracks.some((track) => track.active);
 
     if (hasTrack) {
       this.icon.use(shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS']);
