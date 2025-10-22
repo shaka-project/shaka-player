@@ -1052,6 +1052,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     const player = {
       destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
       setMaxHardwareResolution: jasmine.createSpy('setMaxHardwareResolution'),
+      getAdManager: () => null,
 
       addEventListener: (eventName, listener) => {
         player.listeners[eventName] = listener;

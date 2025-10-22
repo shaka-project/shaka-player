@@ -665,6 +665,7 @@ describe('CastProxy', () => {
       selectTextTrack: jasmine.createSpy('selectTextTrack'),
       trickPlay: jasmine.createSpy('trickPlay'),
       destroy: jasmine.createSpy('destroy'),
+      getAdManager: () => null,
       addEventListener: (eventName, listener) => {
         player.listeners[eventName] = listener;
       },
