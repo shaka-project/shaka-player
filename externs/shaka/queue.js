@@ -65,6 +65,7 @@ shaka.extern.IQueueManager = class extends EventTarget {
 
   /**
    * Set a custom player for preloading, event management and autoplay next.
+   * This is useful when using a CastProxy.
    *
    * @param {shaka.Player} player
    */
