@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.15.19](https://github.com/shaka-project/shaka-player/compare/v4.15.18...v4.15.19) (2025-10-23)
+
+
+### Bug Fixes
+
+* Add usage of AccessibilityPurpose.VISUALLY_IMPAIRED when using src= ([#9255](https://github.com/shaka-project/shaka-player/issues/9255)) ([6b2c574](https://github.com/shaka-project/shaka-player/commit/6b2c5745cb1358b761cf0e910aee2fef4e24a8c0))
+* **Ads:** Do not start interstitials when the main video paused ([#9242](https://github.com/shaka-project/shaka-player/issues/9242)) ([035db3d](https://github.com/shaka-project/shaka-player/commit/035db3d8c0ce39e1e3d8605ca4f916e2da58c4cc))
+* **UI:** Always show thumbnail position in the correct place ([#9264](https://github.com/shaka-project/shaka-player/issues/9264)) ([b48f85d](https://github.com/shaka-project/shaka-player/commit/b48f85dacec86c8d029d88fa4e65bc7bbcb3b83a))
+* **webOS:** Disable smooth codec switch on webOS ([#9273](https://github.com/shaka-project/shaka-player/issues/9273)) ([4573785](https://github.com/shaka-project/shaka-player/commit/457378523b782707423f1f4ee983559c995b64e8))
+* **Xbox:** Implement requiresClearAndEncryptedInitSegments method for xbox ([#9254](https://github.com/shaka-project/shaka-player/issues/9254)) ([d922439](https://github.com/shaka-project/shaka-player/commit/d92243906920e7d26f9bfe755b19392432265c7c))
+
+
+### Performance Improvements
+
+* Optimize restrictions check ([#9261](https://github.com/shaka-project/shaka-player/issues/9261)) ([131f183](https://github.com/shaka-project/shaka-player/commit/131f1839f6f5eb9488d20988af55d14d38c5b73f))
+
 ## [4.15.18](https://github.com/shaka-project/shaka-player/compare/v4.15.17...v4.15.18) (2025-10-20)
 
 
