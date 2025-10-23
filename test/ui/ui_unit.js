@@ -406,48 +406,66 @@ describe('UI', () => {
         const deviceType = deviceDetected.getDeviceType();
         if (deviceType == shaka.device.IDevice.DeviceType.MOBILE ||
             deviceType == shaka.device.IDevice.DeviceType.TV) {
+          // Mute button
           UiUtils.confirmElementFound(controlsButtonPanel,
               'shaka-mute-button');
+          // Fullscreen button
           UiUtils.confirmElementFound(controlsButtonPanel,
               'shaka-fullscreen-button');
+          // Overflow button
           UiUtils.confirmElementFound(controlsButtonPanel,
               'shaka-overflow-menu-button');
+          // Big play button
           UiUtils.confirmElementFound(videoContainer,
               'shaka-play-button-container');
           UiUtils.confirmElementFound(videoContainer,
               'shaka-play-button');
+          // Small play button
           UiUtils.confirmElementMissing(videoContainer,
               'shaka-small-play-button');
+          // Volume bar
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-volume-bar');
         } else if (deviceType == shaka.device.IDevice.DeviceType.CAST) {
+          // Mute button
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-mute-button');
+          // Fullscreen button
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-fullscreen-button');
+          // Overflow button
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-overflow-menu-button');
+          // Big play button
           UiUtils.confirmElementMissing(videoContainer,
               'shaka-play-button-container');
           UiUtils.confirmElementMissing(videoContainer,
               'shaka-play-button');
+          // Small play button
           UiUtils.confirmElementFound(videoContainer,
               'shaka-small-play-button');
+          // Volume bar
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-volume-bar');
         } else {
+          // Mute button
           UiUtils.confirmElementFound(controlsButtonPanel,
               'shaka-mute-button');
+          // Fullscreen button
           UiUtils.confirmElementFound(controlsButtonPanel,
               'shaka-fullscreen-button');
+          // Overflow button
           UiUtils.confirmElementFound(controlsButtonPanel,
               'shaka-overflow-menu-button');
+          // Big play button
           UiUtils.confirmElementMissing(videoContainer,
               'shaka-play-button-container');
           UiUtils.confirmElementMissing(videoContainer,
               'shaka-play-button');
+          // Small play button
           UiUtils.confirmElementFound(videoContainer,
               'shaka-small-play-button');
+          // Volume bar
           UiUtils.confirmElementFound(controlsButtonPanel,
               'shaka-volume-bar');
         }
