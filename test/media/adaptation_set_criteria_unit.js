@@ -122,11 +122,11 @@ describe('AdaptationSetCriteria', () => {
         });
       });
 
-      const originalIsChangeTypeSupported = shaka.media.Capabilities
-          .isChangeTypeSupported;
+      const originalSupportsSmoothCodecSwitching =
+        deviceDetected.supportsSmoothCodecSwitching;
 
       try {
-        shaka.media.Capabilities.isChangeTypeSupported = () => {
+        deviceDetected.supportsSmoothCodecSwitching = () => {
           return true;
         };
 
@@ -157,8 +157,8 @@ describe('AdaptationSetCriteria', () => {
 
         expect(set).toBe(builder.getLastAdaptationSet());
       } finally {
-        shaka.media.Capabilities
-            .isChangeTypeSupported = originalIsChangeTypeSupported;
+        deviceDetected.supportsSmoothCodecSwitching =
+          originalSupportsSmoothCodecSwitching;
       }
     });
 

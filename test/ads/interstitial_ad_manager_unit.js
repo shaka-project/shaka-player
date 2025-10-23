@@ -526,7 +526,7 @@ describe('Interstitial Ad manager', () => {
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
 
-    it('supports X-ENABLE-SKIP-AFTER and X-ENABLE-SKIP-FOR', async () => {
+    it('supports X-SKIP-CONTROL-OFFSET, X-SKIP-CONTROL-DURATION', async () => {
       const metadata = {
         type: 'com.apple.quicktime.HLS',
         startTime: 0,
@@ -541,11 +541,11 @@ describe('Interstitial Ad manager', () => {
             data: 'test.m3u8',
           },
           {
-            key: 'X-ENABLE-SKIP-AFTER',
+            key: 'X-SKIP-CONTROL-OFFSET',
             data: 5,
           },
           {
-            key: 'X-ENABLE-SKIP-FOR',
+            key: 'X-SKIP-CONTROL-DURATION',
             data: 10,
           },
         ],
@@ -901,7 +901,7 @@ describe('Interstitial Ad manager', () => {
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
 
-    it('supports ENABLE-SKIP-AFTER and ENABLE-SKIP-FOR', async () => {
+    it('supports SKIP-CONTROL OFFSET and DURATION', async () => {
       const assetsList = JSON.stringify({
         'ASSETS': [
           {
@@ -909,8 +909,8 @@ describe('Interstitial Ad manager', () => {
           },
         ],
         'SKIP-CONTROL': {
-          'ENABLE-SKIP-AFTER': 5,
-          'ENABLE-SKIP-FOR': 10,
+          OFFSET: 5,
+          DURATION: 10,
         },
       });
 
