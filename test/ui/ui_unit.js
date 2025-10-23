@@ -416,6 +416,8 @@ describe('UI', () => {
               'shaka-play-button-container');
           UiUtils.confirmElementFound(videoContainer,
               'shaka-play-button');
+          UiUtils.confirmElementMissing(videoContainer,
+              'shaka-small-play-button');
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-volume-bar');
         } else if (deviceType == shaka.device.IDevice.DeviceType.CAST) {
@@ -429,6 +431,8 @@ describe('UI', () => {
               'shaka-play-button-container');
           UiUtils.confirmElementMissing(videoContainer,
               'shaka-play-button');
+          UiUtils.confirmElementFound(videoContainer,
+              'shaka-small-play-button');
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-volume-bar');
         } else {
@@ -442,6 +446,8 @@ describe('UI', () => {
               'shaka-play-button-container');
           UiUtils.confirmElementMissing(videoContainer,
               'shaka-play-button');
+          UiUtils.confirmElementFound(videoContainer,
+              'shaka-small-play-button');
           UiUtils.confirmElementFound(controlsButtonPanel,
               'shaka-volume-bar');
         }
