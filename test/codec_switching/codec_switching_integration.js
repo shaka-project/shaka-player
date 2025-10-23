@@ -93,12 +93,8 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!shaka.media.Capabilities.isChangeTypeSupported()) {
-        pending('SourceBuffer.changeType is not supported');
-      }
       if (!deviceDetected.supportsSmoothCodecSwitching()) {
-        pending('SourceBuffer.changeType is not considered ' +
-          'reliable on this device');
+        pending('SourceBuffer.changeType is not supported');
       }
       if (!await Util.isTypeSupported('audio/webm; codecs="opus"')) {
         pending('Codec OPUS in WEBM is not supported by the platform.');
@@ -169,12 +165,8 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!shaka.media.Capabilities.isChangeTypeSupported()) {
-        pending('SourceBuffer.changeType is not supported');
-      }
       if (!deviceDetected.supportsSmoothCodecSwitching()) {
-        pending('SourceBuffer.changeType is not considered ' +
-          'reliable on this device');
+        pending('SourceBuffer.changeType is not supported');
       }
       if (!await Util.isTypeSupported('audio/webm; codecs="opus"')) {
         pending('Codec OPUS in WEBM is not supported by the platform.');
@@ -245,12 +237,8 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!shaka.media.Capabilities.isChangeTypeSupported()) {
-        pending('SourceBuffer.changeType is not supported');
-      }
       if (!deviceDetected.supportsSmoothCodecSwitching()) {
-        pending('SourceBuffer.changeType is not considered ' +
-          'reliable on this device');
+        pending('SourceBuffer.changeType is not supported');
       }
       if (!await Util.isTypeSupported('audio/mp4; codecs="ec-3"')) {
         pending('Codec EC3 in MP4 is not supported by the platform.');
@@ -322,12 +310,8 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!shaka.media.Capabilities.isChangeTypeSupported()) {
-        pending('SourceBuffer.changeType is not supported');
-      }
       if (!deviceDetected.supportsSmoothCodecSwitching()) {
-        pending('SourceBuffer.changeType is not considered ' +
-          'reliable on this device');
+        pending('SourceBuffer.changeType is not supported');
       }
       if (!await Util.isTypeSupported('audio/mp4; codecs="ec-3"')) {
         pending('Codec EC3 in MP4 is not supported by the platform.');
