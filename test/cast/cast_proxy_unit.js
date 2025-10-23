@@ -27,6 +27,8 @@ describe('CastProxy', () => {
 
   beforeEach(() => {
     window['chrome'] = originalWindowChrome || {};
+    spyOn(deviceDetected, 'getDeviceType').and
+        .returnValue(shaka.device.IDevice.DeviceType.DESKTOP);
 
     mockCastSenderConstructor = jasmine.createSpy('CastSender constructor');
     mockCastSenderConstructor.and.callFake(createMockCastSender);

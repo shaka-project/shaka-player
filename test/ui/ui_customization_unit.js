@@ -54,7 +54,10 @@ describe('UI Customization', () => {
   });
 
   it('only the specified overflow menu buttons are created', async () => {
-    const config = {overflowMenuButtons: ['loop']};
+    const config = {
+      controlPanelElements: ['overflow_menu'],
+      overflowMenuButtons: ['loop'],
+    };
     await UiUtils.createUIThroughAPI(container, video, config, canvas);
 
     UiUtils.confirmElementFound(container, 'shaka-loop-button');

@@ -251,6 +251,9 @@ describe('Ad UI', () => {
     });
 
     it('is hidden when an ad is playing', async () => {
+      if (!overflowMenuButton) {
+        pending('There is no overflow menu button on this device.');
+      }
       const eventManager = new shaka.util.EventManager();
       const waiter = new shaka.test.Waiter(eventManager);
       const p = waiter.waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
@@ -265,6 +268,9 @@ describe('Ad UI', () => {
     });
 
     it('is displayed when an ad stops playing', async () => {
+      if (!overflowMenuButton) {
+        pending('There is no overflow menu button on this device.');
+      }
       const eventManager = new shaka.util.EventManager();
       const waiter = new shaka.test.Waiter(eventManager);
       const pStart =
