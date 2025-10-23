@@ -71,6 +71,47 @@ describe('CastUtils', () => {
         .toEqual([]);
   });
 
+  it('includes every AdManager member', () => {
+    const ignoredMembers = [
+      'constructor', // JavaScript added field
+      'release', // Handled by Player
+      'onAssetUnload', // Handled by Player
+      'initInterstitial',
+      'initClientSide',
+      'initMediaTailor',
+      'initServerSide',
+      'onDashTimedMetadata', // Handled by Player
+      'onManifestUpdated', // Handled by Player
+      'onHlsTimedMetadata', // Handled by Player
+      'onCueMetadataChange', // Handled by Player
+      'onHLSMetadata', // Handled by Player
+      'onDASHMetadata', // Handled by Player
+      'getInterstitialPlayer',
+    ];
+
+    const castMembers = CastUtils.AdManagerVoidMethods
+        .concat(CastUtils.AdManagerPromiseMethods)
+        .concat(Array.from(CastUtils.LargeAdManagerGetterMethods.keys()));
+
+    const allAdMembers =
+        // eslint-disable-next-line no-restricted-syntax
+        Object.getOwnPropertyNames(shaka.ads.AdManager.prototype);
+    expect(
+        ignoredMembers.filter((member) => !allAdMembers.includes(member)))
+        .toEqual([]);
+    const adMembers = allAdMembers.filter((name) => {
+      // Private members end with _.
+      return !ignoredMembers.includes(name) && !name.endsWith('_');
+    });
+
+    // To make debugging easier, don't check that they are equal; instead check
+    // that neither has any extra entries.
+    expect(castMembers.filter((name) => !adMembers.includes(name)))
+        .toEqual([]);
+    expect(adMembers.filter((name) => !castMembers.includes(name)))
+        .toEqual([]);
+  });
+
   describe('serialize/deserialize', () => {
     it('transfers infinite values and NaN', () => {
       const orig = {

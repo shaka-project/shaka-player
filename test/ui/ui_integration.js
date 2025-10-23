@@ -591,6 +591,7 @@ describe('UI', () => {
         getPlayer: () => player,
         getVideo: () => null,
         getAd: () => null,
+        getAdManager: () => player.getAdManager(),
       });
 
       /** @extends {shaka.ui.Element} */

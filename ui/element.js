@@ -65,7 +65,7 @@ shaka.ui.Element = class {
      * @protected {shaka.extern.IAdManager}
      * @exportInterface
      */
-    this.adManager = this.player.getAdManager();
+    this.adManager = this.controls.getAdManager();
 
     /**
      * @protected {?shaka.extern.IAd}
