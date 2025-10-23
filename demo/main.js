@@ -1405,7 +1405,7 @@ shakaDemo.Main = class {
       }
 
       // If the asset has an ad tag attached to it, load the ads
-      const adManager = this.player_.getAdManager();
+      const adManager = this.controls_.getAdManager();
       if (adManager && asset.adTagUri) {
         const adTagUri = asset.adTagUri + Date.now();
         if (asset.useIMA) {
@@ -1700,7 +1700,7 @@ shakaDemo.Main = class {
    * @private
    */
   async getManifestUriFromAdManager_(asset) {
-    const adManager = this.player_.getAdManager();
+    const adManager = this.controls_.getAdManager();
     const container = this.controls_.getServerSideAdContainer();
     try {
       // If IMA is blocked by an AdBlocker, init() will throw.
@@ -1753,7 +1753,7 @@ shakaDemo.Main = class {
    * @private
    */
   async getManifestUriFromMediaTailorAdManager_(asset) {
-    const adManager = this.player_.getAdManager();
+    const adManager = this.controls_.getAdManager();
     const container = this.controls_.getServerSideAdContainer();
     try {
       goog.asserts.assert(this.video_ != null, 'Video should not be null!');

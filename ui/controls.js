@@ -169,7 +169,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.vrCanvas_ = vrCanvas;
 
     /** @private {shaka.extern.IAdManager} */
-    this.adManager_ = this.player_.getAdManager();
+    this.adManager_ = this.castProxy_.getAdManager();
 
     /** @private {shaka.extern.IQueueManager} */
     this.queueManager_ = this.player_.getQueueManager();
@@ -662,6 +662,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   getLocalPlayer() {
     return this.localPlayer_;
+  }
+
+  /**
+   * @return {shaka.extern.IAdManager}
+   * @export
+   */
+  getAdManager() {
+    return this.adManager_;
   }
 
   /**
