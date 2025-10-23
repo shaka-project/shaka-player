@@ -289,6 +289,9 @@ describe('UI', () => {
       it('stay visible if overflow menuButton is open', () => {
         const overflowMenus =
             videoContainer.getElementsByClassName('shaka-overflow-menu');
+        if (!overflowMenus.length) {
+          pending('There is no overflow menu button on this device.');
+        }
         expect(overflowMenus.length).toBe(1);
         const overflowMenu = /** @type {!HTMLElement} */ (overflowMenus[0]);
 
@@ -396,11 +399,6 @@ describe('UI', () => {
           /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
 
         UiUtils.confirmElementFound(controlsButtonPanel, 'shaka-current-time');
-        UiUtils.confirmElementFound(controlsButtonPanel, 'shaka-mute-button');
-        UiUtils.confirmElementFound(controlsButtonPanel,
-            'shaka-fullscreen-button');
-        UiUtils.confirmElementFound(controlsButtonPanel,
-            'shaka-overflow-menu-button');
 
         UiUtils.confirmElementFound(videoContainer, 'shaka-seek-bar');
 
@@ -408,16 +406,44 @@ describe('UI', () => {
         const deviceType = deviceDetected.getDeviceType();
         if (deviceType == shaka.device.IDevice.DeviceType.MOBILE ||
             deviceType == shaka.device.IDevice.DeviceType.TV) {
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-mute-button');
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-fullscreen-button');
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-overflow-menu-button');
           UiUtils.confirmElementFound(videoContainer,
               'shaka-play-button-container');
-          UiUtils.confirmElementFound(videoContainer, 'shaka-play-button');
+          UiUtils.confirmElementFound(videoContainer,
+              'shaka-play-button');
+          UiUtils.confirmElementMissing(controlsButtonPanel,
+              'shaka-volume-bar');
+        } else if (deviceType == shaka.device.IDevice.DeviceType.CAST) {
+          UiUtils.confirmElementMissing(controlsButtonPanel,
+              'shaka-mute-button');
+          UiUtils.confirmElementMissing(controlsButtonPanel,
+              'shaka-fullscreen-button');
+          UiUtils.confirmElementMissing(controlsButtonPanel,
+              'shaka-overflow-menu-button');
+          UiUtils.confirmElementMissing(videoContainer,
+              'shaka-play-button-container');
+          UiUtils.confirmElementMissing(videoContainer,
+              'shaka-play-button');
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-volume-bar');
         } else {
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-mute-button');
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-fullscreen-button');
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-overflow-menu-button');
           UiUtils.confirmElementMissing(videoContainer,
               'shaka-play-button-container');
-          UiUtils.confirmElementMissing(videoContainer, 'shaka-play-button');
-          UiUtils.confirmElementFound(controlsButtonPanel, 'shaka-volume-bar');
+          UiUtils.confirmElementMissing(videoContainer,
+              'shaka-play-button');
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-volume-bar');
         }
       });
 
@@ -964,7 +990,12 @@ describe('UI', () => {
     expect(videos.length).not.toBe(0);
 
     UiUtils.confirmElementFound(container, 'shaka-spinner');
-    UiUtils.confirmElementFound(container, 'shaka-overflow-menu');
+    const deviceType = deviceDetected.getDeviceType();
+    if (deviceType == shaka.device.IDevice.DeviceType.CAST) {
+      UiUtils.confirmElementMissing(container, 'shaka-overflow-menu');
+    } else {
+      UiUtils.confirmElementFound(container, 'shaka-overflow-menu');
+    }
     UiUtils.confirmElementFound(container, 'shaka-controls-button-panel');
   }
 });
