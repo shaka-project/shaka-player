@@ -3679,12 +3679,12 @@ describe('StreamingEngine', () => {
     });
 
     async function runTest() {
-      spyOn(window.crypto.subtle, 'decrypt').and.callThrough();
+      spyOn(window.crypto.subtle, 'decrypt')
+          .and.callFake((algorithm, key, data) => Promise.resolve(data));
 
       await streamingEngine.start();
       playing = true;
-      await Util.fakeEventLoop(10);
-
+      await Util.fakeEventLoop(2);
       expect(mediaSourceEngine.appendBuffer).toHaveBeenCalledTimes(2);
       expect(window.crypto.subtle.decrypt).toHaveBeenCalledTimes(2);
       expect(window.crypto.subtle.decrypt).toHaveBeenCalledWith(
