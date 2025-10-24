@@ -178,14 +178,14 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.Utils.CUEPOINTS_CHANGED, (e) => {
-          this.adCuePoints_ = (e)['cuepoints'];
+        this.adManager, shaka.ads.Utils.CUEPOINTS_CHANGED, () => {
+          this.adCuePoints_ = this.controls.getAdCuePoints();
           this.onAdCuePointsChanged_();
         });
 
     this.eventManager.listen(
         this.player, 'unloading', () => {
-          this.adCuePoints_ = [];
+          this.adCuePoints_ = this.controls.getAdCuePoints();
           this.onAdCuePointsChanged_();
           if (this.lastThumbnailPendingRequest_) {
             this.lastThumbnailPendingRequest_.abort();

@@ -15,6 +15,7 @@ goog.require('shaka.device.DeviceFactory');
 goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
 goog.require('shaka.ui.AdInfo');
+goog.require('shaka.ui.BasicAd');
 goog.require('shaka.ui.BigPlayButton');
 goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.HiddenFastForwardButton');
@@ -179,6 +180,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {?shaka.extern.IAd} */
     this.ad_ = null;
 
+    /** @private {!Array<!shaka.extern.AdCuePoint>} */
+    this.adCuePoints_ = [];
+
     /** @private {?shaka.extern.IUISeekBar} */
     this.seekBar_ = null;
 
@@ -336,6 +340,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       if (this.ad_) {
         return;
       }
+      this.adCuePoints_ = [];
       this.lastSelectedTextTrack_ = null;
       if (this.isFullScreenEnabled()) {
         this.exitFullScreen_();
@@ -606,6 +611,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   getAd() {
     return this.ad_;
+  }
+
+  /**
+   * @export
+   * @return {!Array<!shaka.extern.AdCuePoint>}
+   */
+  getAdCuePoints() {
+    return this.adCuePoints_;
   }
 
   /**
@@ -1512,6 +1525,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.eventManager_.listen(
         this.adManager_, shaka.ads.Utils.AD_STARTED, (e) => {
           this.ad_ = (/** @type {!Object} */ (e))['ad'];
+          if (!this.ad_) {
+            const currentTime = this.video_.currentTime;
+            const cuePoint = this.adCuePoints_.find((c) => {
+              return currentTime >= c.start &&
+                currentTime <= (c.end || Infinity);
+            });
+            const start = cuePoint ? cuePoint.start : null;
+            const end = cuePoint ? cuePoint.end : null;
+            // Note: We assume the ad uses the base video.
+            this.ad_ = new shaka.ui.BasicAd(this.video_, start, end);
+          }
           this.showAdUI();
           this.onBufferingStateChange_();
         });
@@ -1521,6 +1545,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.ad_ = null;
           this.hideAdUI();
           this.onBufferingStateChange_();
+        });
+
+    this.eventManager_.listen(
+        this.adManager_, shaka.ads.Utils.CUEPOINTS_CHANGED, (e) => {
+          this.adCuePoints_ = (e)['cuepoints'] || [];
         });
 
     if (screen.orientation) {
