@@ -74,8 +74,8 @@ shaka.ui.Element = class {
     this.ad = controls.getAd();
 
     const AD_STARTED = shaka.ads.Utils.AD_STARTED;
-    this.eventManager.listen(this.adManager, AD_STARTED, (e) => {
-      this.ad = (/** @type {!Object} */ (e))['ad'];
+    this.eventManager.listen(this.adManager, AD_STARTED, () => {
+      this.ad = controls.getAd();
     });
 
     const AD_STOPPED = shaka.ads.Utils.AD_STOPPED;
