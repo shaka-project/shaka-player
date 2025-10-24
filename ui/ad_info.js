@@ -117,7 +117,8 @@ shaka.ui.AdInfo = class extends shaka.ui.Element {
 
     const secondsLeft = Math.round(this.ad.getRemainingTime());
     const adDuration = this.ad.getDuration();
-    if (secondsLeft == -1 || adDuration == -1) {
+    if (secondsLeft == -1 || adDuration == -1 ||
+        !isFinite(secondsLeft) || !isFinite(adDuration)) {
       this.adInfo_.textContent = text;
       shaka.ui.Utils.setDisplay(this.adInfo_, text != '');
       return;
