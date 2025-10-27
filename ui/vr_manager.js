@@ -18,6 +18,7 @@ goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IReleasable');
 
 goog.requireType('shaka.Player');
+goog.requireType('shaka.ui.Controls');
 
 
 /**
@@ -30,8 +31,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @param {!HTMLMediaElement} video
    * @param {!shaka.Player} player
    * @param {shaka.extern.UIConfiguration} config
+   * @param {!shaka.ui.Controls} controls
    */
-  constructor(container, canvas, video, player, config) {
+  constructor(container, canvas, video, player, config, controls) {
     super();
 
     /** @private {!HTMLElement} */
@@ -48,6 +50,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
 
     /** @private {shaka.extern.UIConfiguration} */
     this.config_ = config;
+
+    /** @private {!shaka.ui.Controls} */
+    this.controls_ = controls;
 
     /** @private {shaka.util.EventManager} */
     this.loadEventManager_ = new shaka.util.EventManager();
@@ -142,6 +147,10 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
 
     this.loadEventManager_.listen(player, 'unloading', () => {
       this.vrAsset_ = null;
+      this.checkVrStatus_();
+    });
+
+    this.loadEventManager_.listen(this.controls_, 'caststatuschanged', () => {
       this.checkVrStatus_();
     });
 
@@ -327,7 +336,8 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @private
    */
   checkVrStatus_() {
-    if ((this.config_.displayInVrMode || this.vrAsset_)) {
+    const isCasting = this.controls_.getCastProxy().isCasting();
+    if ((this.config_.displayInVrMode || this.vrAsset_) && !isCasting) {
       if (!this.canvas_) {
         this.canvas_ = shaka.util.Dom.asHTMLCanvasElement(
             document.createElement('canvas'));
@@ -353,8 +363,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
           // Re-initialization the status does not change.
         }
       }
-    } else if (!this.config_.displayInVrMode && !this.vrAsset_ &&
-        this.canvas_ && this.vrWebgl_) {
+    } else if (this.canvas_ && this.vrWebgl_) {
       this.canvas_.style.display = 'none';
       this.eventManager_.removeAll();
       this.vrWebgl_.release();
