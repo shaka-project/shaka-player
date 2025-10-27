@@ -1,5 +1,27 @@
 # Changelog
 
+## [4.15.19](https://github.com/shaka-project/shaka-player/compare/v4.15.18...v4.15.19) (2025-10-27)
+
+
+### Bug Fixes
+
+* Add usage of AccessibilityPurpose.VISUALLY_IMPAIRED when using src= ([#9255](https://github.com/shaka-project/shaka-player/issues/9255)) ([6b2c574](https://github.com/shaka-project/shaka-player/commit/6b2c5745cb1358b761cf0e910aee2fef4e24a8c0))
+* **Ads:** Do not start interstitials when the main video paused ([#9242](https://github.com/shaka-project/shaka-player/issues/9242)) ([035db3d](https://github.com/shaka-project/shaka-player/commit/035db3d8c0ce39e1e3d8605ca4f916e2da58c4cc))
+* **Cast:** Allow serialize arrays ([#9277](https://github.com/shaka-project/shaka-player/issues/9277)) ([0907686](https://github.com/shaka-project/shaka-player/commit/0907686d263f25cb6a04014c54f7ef01edf72195))
+* **Cast:** Allow serialize nested events ([#9281](https://github.com/shaka-project/shaka-player/issues/9281)) ([57c4cee](https://github.com/shaka-project/shaka-player/commit/57c4ceee8eb8bb21c7197e54fe4432f045db9308))
+* Make sure the player is attached when loading a new stream ([#9292](https://github.com/shaka-project/shaka-player/issues/9292)) ([50c92bd](https://github.com/shaka-project/shaka-player/commit/50c92bd89ceee2ba94a64c167c05106cbf1c27b1))
+* **UI:** Allow play in VR in all compatible devices ([#9297](https://github.com/shaka-project/shaka-player/issues/9297)) ([139bb7a](https://github.com/shaka-project/shaka-player/commit/139bb7ae80029a4669f0dfc53db67f814a6f25ad))
+* **UI:** Always show thumbnail position in the correct place ([#9264](https://github.com/shaka-project/shaka-player/issues/9264)) ([b48f85d](https://github.com/shaka-project/shaka-player/commit/b48f85dacec86c8d029d88fa4e65bc7bbcb3b83a))
+* **UI:** Avoid show NaN in ad info ([#9284](https://github.com/shaka-project/shaka-player/issues/9284)) ([c2a644b](https://github.com/shaka-project/shaka-player/commit/c2a644b95c53abba51bad5b50fb821a4e89a07fe))
+* **UI:** Disable VR mode while casting ([#9296](https://github.com/shaka-project/shaka-player/issues/9296)) ([3f21ecc](https://github.com/shaka-project/shaka-player/commit/3f21eccd813634d5b0903882165269975d37fc4d))
+* **webOS:** Disable smooth codec switch on webOS ([#9273](https://github.com/shaka-project/shaka-player/issues/9273)) ([4573785](https://github.com/shaka-project/shaka-player/commit/457378523b782707423f1f4ee983559c995b64e8))
+* **Xbox:** Implement requiresClearAndEncryptedInitSegments method for xbox ([#9254](https://github.com/shaka-project/shaka-player/issues/9254)) ([d922439](https://github.com/shaka-project/shaka-player/commit/d92243906920e7d26f9bfe755b19392432265c7c))
+
+
+### Performance Improvements
+
+* Optimize restrictions check ([#9261](https://github.com/shaka-project/shaka-player/issues/9261)) ([131f183](https://github.com/shaka-project/shaka-player/commit/131f1839f6f5eb9488d20988af55d14d38c5b73f))
+
 ## [4.15.18](https://github.com/shaka-project/shaka-player/compare/v4.15.17...v4.15.18) (2025-10-20)
 
 
