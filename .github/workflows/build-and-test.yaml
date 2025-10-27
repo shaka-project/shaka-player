@@ -39,7 +39,7 @@ jobs:
           java-version: 21
 
       - name: Lint
-        run: python build/check.py
+        run: python3 build/check.py
 
   build_and_test:
     # Don't waste time doing a full matrix of test runs when there was an
@@ -165,7 +165,7 @@ jobs:
 
       - name: Build Player
         timeout-minutes: 20
-        run: python build/all.py
+        run: python3 build/all.py
 
       - name: Test Player
         timeout-minutes: 15
@@ -173,7 +173,7 @@ jobs:
         run: |
           browser=${{ matrix.browser }}
 
-          python build/test.py \
+          python3 build/test.py \
             --browsers "$browser" \
             --reporters spec --spec-hide-passed \
             ${{ matrix.extra_flags }}
