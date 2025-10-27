@@ -919,10 +919,11 @@ describe('CmcdManager Setup', () => {
       includeKeys: [],
       version: 2,
       targets: [{
-        mode: 'response',
+        mode: 'event',
         enabled: true,
         url: 'https://example.com/cmcd-collector',
         useHeaders: false,
+        events: ['rr'],
       }],
     };
 
@@ -980,15 +981,30 @@ describe('CmcdManager Setup', () => {
 
     describe('Configuration and Mode Handling', () => {
       it('filters CMCD response mode keys correctly', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
+              version: 2,
+              enabled: true,
               targets: [{
-                mode: 'response',
+                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['sid', 'cid', 'com.test-hello'],
                 useHeaders: false,
+                events: ['rr'],
               }],
             },
         );
@@ -1003,16 +1019,21 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        const cmcdParam = response.uri.split('CMCD=')[1];
-        const decoded = decodeURIComponent(cmcdParam);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
 
-        expect(decoded).toContain('sid=');
-        expect(decoded).toContain('cid=');
 
-        expect(decoded).not.toContain('v=2');
-        expect(decoded).not.toContain('msd=');
-        expect(decoded).not.toContain('ltc=');
-        expect(decoded).not.toContain('com.test-hello=');
+        // Check that allowed keys are present
+        expect(decodedUri).toContain('sid=');
+        expect(decodedUri).toContain('cid=');
+
+        // Check that disallowed keys for event mode are not present
+        expect(decodedUri).not.toContain('v=2');
+        expect(decodedUri).not.toContain('msd=');
+        expect(decodedUri).not.toContain('ltc=');
+        expect(decodedUri).not.toContain('com.test-hello=');
       });
 
       it('applies CMCD data to request URL in query mode', () => {
@@ -1038,16 +1059,30 @@ describe('CmcdManager Setup', () => {
       });
 
       it('applies CMCD data to response URL in query mode', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
               version: 2,
+              enabled: true,
               targets: [{
-                mode: 'response',
+                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['sid', 'cid', 'v'],
                 useHeaders: false,
+                events: ['rr'],
               }],
             },
         );
@@ -1062,7 +1097,11 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        const decodedUri = decodeURIComponent(response.uri);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
+
         expect(decodedUri).toContain('CMCD=');
         expect(decodedUri).toContain('v=2');
         expect(decodedUri).toContain('sid=');
@@ -1070,16 +1109,30 @@ describe('CmcdManager Setup', () => {
       });
 
       it('includes response code in response mode (query)', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
               version: 2,
+              enabled: true,
               targets: [{
-                mode: 'response',
+                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['rc'],
                 useHeaders: false,
+                events: ['rr'],
               }],
             },
         );
@@ -1091,23 +1144,39 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        const cmcdParam = response.uri.split('CMCD=')[1];
-        const decodedUri = decodeURIComponent(cmcdParam);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
 
         expect(decodedUri).toContain('rc=200');
       });
 
       it('includes response code in response headers', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
               version: 2,
+              enabled: true,
               targets: [{
-                mode: 'response',
+                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['rc'],
                 useHeaders: true,
+                events: ['rr'],
               }],
             },
         );
@@ -1119,20 +1188,38 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        expect(response.headers['CMCD-Request']).toContain('rc=200');
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+
+        expect(request.headers['CMCD-Request']).toContain('rc=200');
       });
 
       it('does not include response code if not provided', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
               version: 2,
+              enabled: true,
               targets: [{
-                mode: 'response',
+                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['rc', 'v'],
                 useHeaders: false,
+                events: ['rr'],
               }],
             },
         );
@@ -1149,22 +1236,40 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        const decodedUri = decodeURIComponent(response.uri);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
+
         expect(decodedUri).toContain('v=2');
         expect(decodedUri).toContain('rc=0');
       });
 
       it('applies CMCD data to response headers in header mode', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
               version: 2,
+              enabled: true,
               targets: [{
-                mode: 'response',
+                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['sid', 'v'],
                 useHeaders: true,
+                events: ['rr'],
               }],
             },
         );
@@ -1177,23 +1282,42 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        expect(response.headers['CMCD-Session'])
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+
+        expect(request.headers['CMCD-Session'])
             .toContain(`sid="${sessionId}"`);
 
-        expect(response.headers['CMCD-Session'])
+        expect(request.headers['CMCD-Session'])
             .toContain('v=2');
       });
 
       it('applies v2 keys to response uri in response mode', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
+              version: 2,
+              enabled: true,
               targets: [{
-                mode: 'response',
+                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd-collector',
                 includeKeys: ['sid', 'cid', 'msd', 'ltc', 'v'],
                 useHeaders: false,
+                events: ['rr'],
               }],
             },
         );
@@ -1208,26 +1332,47 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        const cmcdParam = response.uri.split('CMCD=')[1];
-        const decoded = decodeURIComponent(cmcdParam);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
 
-        expect(decoded).toContain('sid=');
-        expect(decoded).toContain('cid=');
-        expect(decoded).toContain('msd=');
-        expect(decoded).toContain('ltc=');
-        expect(decoded).toContain('v=2');
+        expect(decodedUri).toContain('sid=');
+        expect(decodedUri).toContain('cid=');
+        expect(decodedUri).toContain('msd=');
+        expect(decodedUri).toContain('ltc=');
+        expect(decodedUri).toContain('v=2');
 
-        expect(decoded).not.toContain('br=');
-        expect(decoded).not.toContain('mtp=');
+        expect(decodedUri).not.toContain('br=');
+        expect(decodedUri).not.toContain('mtp=');
       });
 
       it('filters keys in response mode based on includeKeys', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
-              targets: [Object.assign({}, baseConfig.targets[0], {
+              version: 2,
+              enabled: true,
+              targets: [{
+                mode: 'event',
+                enabled: true,
+                url: 'https://example.com/cmcd-collector',
                 includeKeys: ['sid', 'msd'],
-              })],
+                useHeaders: false,
+                events: ['rr'],
+              }],
             },
         );
 
@@ -1241,7 +1386,11 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        const decodedUri = decodeURIComponent(response.uri);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
+
         expect(decodedUri).toContain('sid=');
         expect(decodedUri).toContain('msd=');
         expect(decodedUri).not.toContain('v=2');
@@ -1289,12 +1438,31 @@ describe('CmcdManager Setup', () => {
       });
 
       it('sn increments sequence number for each response', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
-              targets: [Object.assign({}, baseConfig.targets[0], {
+              version: 2,
+              enabled: true,
+              targets: [{
+                mode: 'event',
+                enabled: true,
+                url: 'https://example.com/cmcd-collector',
                 includeKeys: ['sn'],
-              })],
+                useHeaders: false,
+                events: ['rr'],
+              }],
             },
         );
 
@@ -1304,7 +1472,11 @@ describe('CmcdManager Setup', () => {
             response1,
             createSegmentContext(),
         );
-        expect(decodeURIComponent(response1.uri)).toContain('sn=1');
+
+        // Verify first request was made
+        expect(requestSpy).toHaveBeenCalledTimes(1);
+        const request1 = requestSpy.calls.argsFor(0)[1];
+        expect(decodeURIComponent(request1.uris[0])).toContain('sn=1');
 
         const response2 = createResponse();
         cmcdManager.applyResponseData(
@@ -1312,27 +1484,47 @@ describe('CmcdManager Setup', () => {
             response2,
             createSegmentContext(),
         );
-        expect(decodeURIComponent(response2.uri)).toContain('sn=2');
+
+        // Verify second request was made
+        expect(requestSpy).toHaveBeenCalledTimes(2);
+        const request2 = requestSpy.calls.argsFor(1)[1];
+        expect(decodeURIComponent(request2.uris[0])).toContain('sn=2');
       });
 
       it('sn increments sequence numbers across multiple targets', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
+              version: 2,
+              enabled: true,
               targets: [
                 {
-                  mode: 'response',
+                  mode: 'event',
                   enabled: true,
                   url: 'https://a.collector.com/cmcd',
                   useHeaders: true,
                   includeKeys: ['sn'],
+                  events: ['rr'],
                 },
                 {
-                  mode: 'response',
+                  mode: 'event',
                   enabled: true,
                   url: 'https://b.collector.com/cmcd',
                   useHeaders: false,
                   includeKeys: ['sn'],
+                  events: ['rr'],
                 },
               ],
             },
@@ -1380,21 +1572,37 @@ describe('CmcdManager Setup', () => {
       });
 
       it('sn ignores disabled response targets', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
+              version: 2,
+              enabled: true,
               targets: [
                 {
-                  mode: 'response',
+                  mode: 'event',
                   enabled: true,
                   url: 'https://enabled.collector.com/cmcd',
                   includeKeys: ['sn'],
+                  events: ['rr'],
                 },
                 {
-                  mode: 'response',
+                  mode: 'event',
                   enabled: false,
                   url: 'https://disabled.collector.com/cmcd',
                   includeKeys: ['sn'],
+                  events: ['rr'],
                 },
               ],
             },
@@ -1419,9 +1627,10 @@ describe('CmcdManager Setup', () => {
             {
               targets: [
                 {
-                  mode: 'response',
+                  mode: 'event',
                   enabled: false,
                   url: 'https://disabled.collector.com/cmcd',
+                  events: ['rr'],
                 },
               ],
             },
@@ -1703,16 +1912,29 @@ describe('CmcdManager Setup', () => {
       });
 
       it('sends ttfb and ttlb query', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
               version: 2,
               targets: [{
-                mode: 'response',
+                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['ttfb', 'ttlb'],
                 useHeaders: false,
+                events: ['rr'],
               }],
             },
         );
@@ -1724,25 +1946,39 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        expect(response.uri).toContain('https://example.com/cmcd?CMCD=');
-        const cmcdParam = response.uri.split('CMCD=')[1];
-        const decodedUri = decodeURIComponent(cmcdParam);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
 
         expect(decodedUri).toContain('ttfb=150');
         expect(decodedUri).toContain('ttlb=400');
       });
 
       it('sends ttfb and ttlb in headers', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
               version: 2,
               targets: [{
-                mode: 'response',
+                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['ttfb', 'ttlb'],
                 useHeaders: true,
+                events: ['rr'],
               }],
             },
         );
@@ -1754,21 +1990,37 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        expect(response.headers['CMCD-Request']).toContain('ttfb=150');
-        expect(response.headers['CMCD-Request']).toContain('ttlb=400');
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        expect(request.headers['CMCD-Request']).toContain('ttfb=150');
+        expect(request.headers['CMCD-Request']).toContain('ttlb=400');
       });
 
       it('does not generate ttfb or ttlb if timing info is missing', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
               version: 2,
               targets: [{
-                mode: 'response',
+                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['ttfb', 'ttlb'],
                 useHeaders: false,
+                events: ['rr'],
               }],
             },
         );
@@ -1780,8 +2032,10 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        const cmcdParam = response.uri.split('CMCD=')[1];
-        const decodedUri = decodeURIComponent(cmcdParam);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
 
         expect(decodedUri).not.toContain('ttfb');
         expect(decodedUri).not.toContain('ttlb');
@@ -1800,21 +2054,35 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).not.toContain('nrr=');
       });
 
-      it('includes the request URL, without CMCD in response mode', () => {
+      it('includes the request URL, without CMCD in event mode', () => {
         // toContain is not working properly on Tizen 3.
         if (deviceDetected.getDeviceName() === 'Tizen') {
           pending('Disabled on Tizen.');
         }
 
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer,
+            mockPlayerWithNE,
             {
               version: 2,
               targets: [{
-                mode: 'response',
+                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
+                includeKeys: ['url'],
                 useHeaders: false,
+                events: ['rr'],
               }],
             },
         );
@@ -1829,7 +2097,10 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        const decodedUri = decodeURIComponent(response.uri);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
 
         const expectedCleanUrl = 'https://initial.com/v2seg.mp4';
         const expectedUrlParam = `url="${expectedCleanUrl}"`;
@@ -1845,13 +2116,27 @@ describe('CmcdManager Setup', () => {
           pending('Disabled on Tizen.');
         }
 
-        const cmcdManager = createCmcdManager(mockPlayer, {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const cmcdManager = createCmcdManager(mockPlayerWithNE, {
           version: 2,
           targets: [{
-            mode: 'response',
+            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
+            includeKeys: ['url'],
             useHeaders: false,
+            events: ['rr'],
           }]},
         );
 
@@ -1866,7 +2151,10 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        const decodedUri = decodeURIComponent(response.uri);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
 
         const expectedCleanUrl = 'https://initial.com/v2seg.mp4?foo=bar&baz=qux';
         const expectedUrlParam = `url="${expectedCleanUrl}"`;
@@ -1875,13 +2163,27 @@ describe('CmcdManager Setup', () => {
       });
 
       it('cmcd url key does not modify URL if no CMCD param is present', () => {
-        const cmcdManager = createCmcdManager(mockPlayer, {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const cmcdManager = createCmcdManager(mockPlayerWithNE, {
           version: 2,
           targets: [{
-            mode: 'response',
+            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
+            includeKeys: ['url'],
             useHeaders: false,
+            events: ['rr'],
           }]},
         );
 
@@ -1896,7 +2198,10 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        const decodedUri = decodeURIComponent(response.uri);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
         const expectedUrlParam = `url="${originalUrl}"`;
 
         expect(decodedUri).toContain(expectedUrlParam);
@@ -1908,13 +2213,27 @@ describe('CmcdManager Setup', () => {
           pending('Disabled on Tizen.');
         }
 
-        const cmcdManager = createCmcdManager(mockPlayer, {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const cmcdManager = createCmcdManager(mockPlayerWithNE, {
           version: 2,
           targets: [{
-            mode: 'response',
+            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
+            includeKeys: ['url'],
             useHeaders: false,
+            events: ['rr'],
           }]},
         );
 
@@ -1928,7 +2247,10 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        const decodedUri = decodeURIComponent(response.uri);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
 
         const expectedCleanUrl = 'https://initial.com/v2seg.mp4#t=10';
         const expectedUrlParam = `url="${expectedCleanUrl}"`;
@@ -1942,13 +2264,27 @@ describe('CmcdManager Setup', () => {
           pending('Disabled on Tizen.');
         }
 
-        const cmcdManager = createCmcdManager(mockPlayer, {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const cmcdManager = createCmcdManager(mockPlayerWithNE, {
           version: 2,
           targets: [{
-            mode: 'response',
+            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
+            includeKeys: ['url'],
             useHeaders: false,
+            events: ['rr'],
           }]},
         );
 
@@ -1962,7 +2298,10 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        const decodedUri = decodeURIComponent(response.uri);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
         const expectedCleanUrl = 'https://initial.com/v2seg.mp4';
         const expectedUrlParam = `url="${expectedCleanUrl}"`;
 
@@ -2188,25 +2527,6 @@ describe('CmcdManager Setup', () => {
         }
       });
 
-      it('includes `bg` in response mode when page is hidden', () => {
-        Object.defineProperty(document, 'hidden', {value: true});
-        const cmcdManager = createCmcdManager(
-            mockPlayer, {
-              targets: [{
-                mode: 'response',
-                enabled: true,
-                url: 'https://example.com/cmcd-collector',
-                includeKeys: ['bg'],
-              }],
-            });
-
-        const response = createResponse();
-        cmcdManager.applyResponseData(
-            shaka.net.NetworkingEngine.RequestType.SEGMENT,
-            response, createSegmentContext());
-        const decodedUri = decodeURIComponent(response.uri);
-        expect(decodedUri).toContain('bg');
-      });
 
       it('assigns `bg` to the CMCD-Status header in request mode', () => {
         Object.defineProperty(document, 'hidden',
@@ -2243,14 +2563,27 @@ describe('CmcdManager Setup', () => {
       });
 
       it('includes ts for segment responses', () => {
-        const cmcdManager = createCmcdManager(mockPlayer, {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const cmcdManager = createCmcdManager(mockPlayerWithNE, {
           version: 2,
           targets: [{
-            mode: 'response',
+            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['ts'],
             useHeaders: false,
+            events: ['rr'],
           }],
         });
         const response = createResponse();
@@ -2260,7 +2593,11 @@ describe('CmcdManager Setup', () => {
             response,
             context,
         );
-        const decodedUri = decodeURIComponent(response.uri);
+
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('ts=');
       });
 
@@ -2280,11 +2617,12 @@ describe('CmcdManager Setup', () => {
         const cmcdManager = createCmcdManager(playerWithSpy, {
           version: 2,
           targets: [{
-            mode: 'response',
+            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['ts'],
             useHeaders: true,
+            events: ['rr'],
           }],
         });
         const response = createResponse();
@@ -2300,15 +2638,28 @@ describe('CmcdManager Setup', () => {
         expect(cmcdRequest.headers['CMCD-Request']).toContain('ts=');
       });
 
-      it('reuses request timestamp for response mode', () => {
-        const cmcdManager = createCmcdManager(mockPlayer, {
+      it('reuses request timestamp for event mode', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
+        const cmcdManager = createCmcdManager(mockPlayerWithNE, {
           version: 2,
           targets: [{
-            mode: 'response',
+            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['ts'],
             useHeaders: false,
+            events: ['rr'],
           }],
         });
 
@@ -2330,12 +2681,15 @@ describe('CmcdManager Setup', () => {
             context,
         );
 
-        const decodedUri = decodeURIComponent(response.uri);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const cmcdRequest = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(cmcdRequest.uris[0]);
         expect(decodedUri).toContain('ts=1234567890000');
         expect(decodedUri).not.toContain('ts=9876543210000');
       });
 
-      it('sends the same timestamp to multiple response mode targets', () => {
+      it('sends the same timestamp to multiple event mode targets', () => {
         const networkingEngine = createNetworkingEngine(null);
         const networkingEngineSpy = spyOn(networkingEngine, 'request')
             .and.callFake(
@@ -2353,17 +2707,19 @@ describe('CmcdManager Setup', () => {
             {
               version: 2,
               targets: [{
-                mode: 'response',
+                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd-query',
                 includeKeys: ['ts'],
                 useHeaders: false,
+                events: ['rr'],
               }, {
-                mode: 'response',
+                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd-header',
                 includeKeys: ['ts'],
                 useHeaders: true,
+                events: ['rr'],
               }],
             },
         );
@@ -2412,7 +2768,7 @@ describe('CmcdManager Setup', () => {
             .not.toContain('ts=9876543210000');
       });
 
-      it('includes timestamp in response mode when request is disabled', () => {
+      it('includes timestamp in event mode when request is disabled', () => {
         const networkingEngine = createNetworkingEngine(null);
         const networkingEngineSpy = spyOn(networkingEngine, 'request')
             .and.callFake(
@@ -2428,11 +2784,12 @@ describe('CmcdManager Setup', () => {
           enabled: false,
           version: 2,
           targets: [{
-            mode: 'response',
+            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd-query',
             includeKeys: ['ts'],
             useHeaders: false,
+            events: ['rr'],
           }],
         });
 
@@ -2474,15 +2831,28 @@ describe('CmcdManager Setup', () => {
       });
 
       it('cmcd does not include the url parameter for CMCD v1', () => {
+        // Set up spy for CMCD requests in event mode
+        const requestSpy = jasmine.createSpy('request');
+        const networkingEngine = {
+          request: requestSpy,
+          configure: () => {},
+          registerScheme: () => {},
+        };
+        const mockPlayerWithNE = new shaka.util.FakeEventTarget();
+        Object.assign(mockPlayerWithNE, mockPlayer, {
+          getNetworkingEngine: () => networkingEngine,
+        });
+
         const cmcdManager = createCmcdManager(
-            mockPlayer, {
-              // Explicitly set version to 1
+            mockPlayerWithNE, {
+              // Explicitly set version to 1 (edge case: v1 with event mode)
               version: 1,
               targets: [{
-                mode: 'response',
+                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 useHeaders: false,
+                events: ['rr'],
               }],
             },
         );
@@ -2497,7 +2867,10 @@ describe('CmcdManager Setup', () => {
             createSegmentContext(),
         );
 
-        const decodedUri = decodeURIComponent(response.uri);
+        // Verify that a CMCD request was made
+        expect(requestSpy).toHaveBeenCalled();
+        const request = requestSpy.calls.mostRecent().args[1];
+        const decodedUri = decodeURIComponent(request.uris[0]);
 
         expect(decodedUri).not.toContain('url=');
       });
