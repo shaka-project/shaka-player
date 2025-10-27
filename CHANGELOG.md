@@ -1,5 +1,32 @@
 # Changelog
 
+## [4.16.7](https://github.com/shaka-project/shaka-player/compare/v4.16.6...v4.16.7) (2025-10-27)
+
+
+### Bug Fixes
+
+* Add usage of AccessibilityPurpose.VISUALLY_IMPAIRED when using src= ([#9255](https://github.com/shaka-project/shaka-player/issues/9255)) ([3238df3](https://github.com/shaka-project/shaka-player/commit/3238df341a475e429dc86295f57f3f2cc26f1bae))
+* **Ads:** Do not start interstitials when the main video paused ([#9242](https://github.com/shaka-project/shaka-player/issues/9242)) ([8100a20](https://github.com/shaka-project/shaka-player/commit/8100a20f4f71b1bd4b3fb5e30557b00642589a77))
+* Avoid create a cast sender on Cast devices ([#9258](https://github.com/shaka-project/shaka-player/issues/9258)) ([af9c1ad](https://github.com/shaka-project/shaka-player/commit/af9c1ad8cd4857fa1964ea425cb273cba3f9842c))
+* **Cast:** Allow serialize arrays ([#9277](https://github.com/shaka-project/shaka-player/issues/9277)) ([29b3ccf](https://github.com/shaka-project/shaka-player/commit/29b3ccf21155507fa76ef52d9cb9b452bba7858d))
+* **Cast:** Allow serialize nested events ([#9281](https://github.com/shaka-project/shaka-player/issues/9281)) ([d4512ca](https://github.com/shaka-project/shaka-player/commit/d4512cab8a15c645c784313c0d51a4ea7009764b))
+* **Cast:** Allow serialize nested events ([#9283](https://github.com/shaka-project/shaka-player/issues/9283)) ([64310c3](https://github.com/shaka-project/shaka-player/commit/64310c37d90a0ad7f57024889aa7053d30ad9489))
+* Delay position change during codec switch ([#9293](https://github.com/shaka-project/shaka-player/issues/9293)) ([72b09b0](https://github.com/shaka-project/shaka-player/commit/72b09b0d7a1cedf0a5c957428b4dbebeef97d8aa))
+* Fix usage of isRemotePlayback when casting ([#9251](https://github.com/shaka-project/shaka-player/issues/9251)) ([e6ca347](https://github.com/shaka-project/shaka-player/commit/e6ca347fd2e551268d84ba549de178c23abd685d))
+* Make sure the player is attached when loading a new stream ([#9292](https://github.com/shaka-project/shaka-player/issues/9292)) ([2f87297](https://github.com/shaka-project/shaka-player/commit/2f87297d9d4d6f8f2d5f71ef3c6740af368fb680))
+* **UI:** Allow play in VR in all compatible devices ([#9297](https://github.com/shaka-project/shaka-player/issues/9297)) ([149de1c](https://github.com/shaka-project/shaka-player/commit/149de1c494483a6c2466da6b94bc46313c0a71b1))
+* **UI:** Always show thumbnail position in the correct place ([#9264](https://github.com/shaka-project/shaka-player/issues/9264)) ([6a9c675](https://github.com/shaka-project/shaka-player/commit/6a9c67593f6e9cc0994b157fc72708ee96d41560))
+* **UI:** Avoid show NaN in ad info ([#9284](https://github.com/shaka-project/shaka-player/issues/9284)) ([19e6122](https://github.com/shaka-project/shaka-player/commit/19e61221fee0f68b909baaa607db805705b6c18a))
+* **UI:** Change Cast icon to unfilled variant ([#9250](https://github.com/shaka-project/shaka-player/issues/9250)) ([7a9344b](https://github.com/shaka-project/shaka-player/commit/7a9344bc4a4cda1d55ce07490e67059d1cb93142))
+* **UI:** Disable VR mode while casting ([#9296](https://github.com/shaka-project/shaka-player/issues/9296)) ([9832a60](https://github.com/shaka-project/shaka-player/commit/9832a60fa6a9091c21711361ef3fddfe4f1ef4ec))
+* **webOS:** Disable smooth codec switch on webOS ([#9273](https://github.com/shaka-project/shaka-player/issues/9273)) ([f1feb9f](https://github.com/shaka-project/shaka-player/commit/f1feb9f2bdc0d5dbd000240911b820fce488b209))
+* **Xbox:** Implement requiresClearAndEncryptedInitSegments method for xbox ([#9254](https://github.com/shaka-project/shaka-player/issues/9254)) ([ed748bb](https://github.com/shaka-project/shaka-player/commit/ed748bb49d28daf14019547f26db4c9ff537a846))
+
+
+### Performance Improvements
+
+* Optimize restrictions check ([#9261](https://github.com/shaka-project/shaka-player/issues/9261)) ([1868185](https://github.com/shaka-project/shaka-player/commit/18681855161a3d7d5312cfc98b6ede34c637fab2))
+
 ## [4.16.6](https://github.com/shaka-project/shaka-player/compare/v4.16.5...v4.16.6) (2025-10-20)
 
 
