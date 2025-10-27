@@ -34,13 +34,13 @@ just a few small guidelines you need to follow.
 
 7. Test all changes in both the compiler and linter with:
 ```sh
-   python build/all.py
+   python3 build/all.py
 ```
    Patches that do not compile or pass linter checks will not be accepted.
 
 8. Test all changes in the unit and integration tests with:
 ```sh
-   python build/test.py
+   python3 build/test.py
 ```
    Patches that do not pass unit and integration tests will not be accepted.
 

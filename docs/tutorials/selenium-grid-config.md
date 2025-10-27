@@ -10,7 +10,7 @@ our lab at [build/shaka-lab.yaml](https://github.com/shaka-project/shaka-player/
 ## Usage
 
 ```sh
-python build/test.py \
+python3 build/test.py \
     --grid-config grid-config.yaml \
     --grid-address selenium-hub-hostname:4444
 ```
