@@ -87,6 +87,7 @@ describe('CastUtils', () => {
       'onHLSMetadata', // Handled by Player
       'onDASHMetadata', // Handled by Player
       'getInterstitialPlayer',
+      'getCurrentAd',
     ];
 
     const castMembers = CastUtils.AdManagerVoidMethods

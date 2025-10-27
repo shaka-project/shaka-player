@@ -408,6 +408,11 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @return {shaka.Player}
    */
   getInterstitialPlayer() {}
+
+  /**
+   * @return {?shaka.extern.IAd}
+   */
+  getCurrentAd() {}
 };
 
 
