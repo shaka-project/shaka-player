@@ -307,7 +307,7 @@ shaka.extern.IAdManager = class extends EventTarget {
   updateClientSideAdsRenderingSettings(adsRenderingSettings) {}
 
   /**
-   * @param {!HTMLElement} adContainer
+   * @param {?HTMLElement} adContainer
    * @param {!shaka.net.NetworkingEngine} networkingEngine
    * @param {!HTMLMediaElement} video
    */
