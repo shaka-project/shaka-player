@@ -7,8 +7,6 @@
 
 goog.provide('shaka.ui.VRManager');
 
-goog.require('shaka.device.DeviceFactory');
-goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
 goog.require('shaka.ui.VRWebgl');
 goog.require('shaka.util.Dom');
