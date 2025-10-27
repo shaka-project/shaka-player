@@ -7,8 +7,6 @@
 
 goog.provide('shaka.ui.VRManager');
 
-goog.require('shaka.device.DeviceFactory');
-goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
 goog.require('shaka.ui.VRWebgl');
 goog.require('shaka.util.Dom');
@@ -392,16 +390,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @private
    */
   getGL_(canvas) {
-    if (!canvas) {
-      return null;
-    }
-    // The user interface is not intended for devices that are controlled with
-    // a remote control, and WebGL may run slowly on these devices.
-    const device = shaka.device.DeviceFactory.getDevice();
-    const deviceType = device.getDeviceType();
-    if (deviceType == shaka.device.IDevice.DeviceType.TV ||
-        deviceType == shaka.device.IDevice.DeviceType.CONSOLE ||
-        deviceType == shaka.device.IDevice.DeviceType.CAST) {
+    if (!canvas || !window.WebGLRenderingContext) {
       return null;
     }
     const webglContexts = [
