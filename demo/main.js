@@ -726,6 +726,13 @@ shakaDemo.Main = class {
       return 'This asset cannot be downloaded.';
     }
 
+    // Assume all content is available when casting. This isn't true, but
+    // sometimes you want to test content with a mimetype or DRM that isn't
+    // supported on the sender but is supported on the receiver.
+    if (this.controls_.getCastProxy().isCasting()) {
+      return null;
+    }
+
     if (!asset.isClear() && !asset.isAes128()) {
       const hasSupportedDRM = asset.drm.some((drm) => {
         for (const identifier of shakaAssets.identifiersForKeySystem(drm)) {
