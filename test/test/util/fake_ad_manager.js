@@ -101,6 +101,9 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   /** @override */
   getInterstitialPlayer() {}
 
+  /** @override */
+  getCurrentAd() {}
+
   /**
    * @param {!shaka.test.FakeAd} ad
    */

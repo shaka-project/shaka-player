@@ -108,11 +108,18 @@ describe('Ads', () => {
       video.play();
       expect(player.isLive()).toBe(false);
 
+      expect(adManager.getCurrentAd()).toBeNull();
+
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+
+      expect(adManager.getCurrentAd()).not.toBeNull();
+
       await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
+
+      expect(adManager.getCurrentAd()).toBeNull();
 
       await shaka.test.Util.delay(1);
       expect(video.currentTime).toBeLessThanOrEqual(3);
@@ -120,8 +127,13 @@ describe('Ads', () => {
       // Wait a maximum of 10 seconds before the ad starts playing.
       await waiter.timeoutAfter(10)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+
+      expect(adManager.getCurrentAd()).not.toBeNull();
+
       await waiter.timeoutAfter(20)
           .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
+
+      expect(adManager.getCurrentAd()).toBeNull();
 
       // Play for 10 seconds, but stop early if the video ends.  If it takes
       // longer than 30 seconds, fail the test.
