@@ -13,7 +13,7 @@ runs:
 
     - name: Build Shaka Player
       shell: bash
-      run: python build/all.py
+      run: python3 build/all.py
 
     - name: Extract git version
       shell: bash

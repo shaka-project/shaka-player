@@ -61,7 +61,7 @@ cd shaka-player
 #### Compile the library and generate the docs
 
 ```sh
-python build/all.py
+python3 build/all.py
 ```
 
 Alternatively you can use a docker container:

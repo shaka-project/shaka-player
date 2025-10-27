@@ -28,7 +28,7 @@ jobs:
         # parses it, compares it to the changed lines in the PR, and computes
         # the incremental code coverage.
         run: |
-          python .github/workflows/compute-incremental-coverage.py \
+          python3 .github/workflows/compute-incremental-coverage.py \
               --repo ${{ github.repository }} \
               --run-id ${{ github.event.workflow_run.id }}
 

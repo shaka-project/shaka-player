@@ -98,16 +98,16 @@ You can start with the complete library (`+@complete`) and exclude any
 individual source file with a minus sign and a path:
 
 ```sh
-python build/build.py +@complete -lib/text/mp4_ttml_parser.js
+python3 build/build.py +@complete -lib/text/mp4_ttml_parser.js
 ```
 
 You can also exclude an entire category of plugins:
 
 ```sh
 # Build without polyfills:
-python build/build.py +@complete -@polyfill
+python3 build/build.py +@complete -@polyfill
 # Build without polyfills or text parsers:
-python build/build.py +@complete -@polyfill -@text
+python3 build/build.py +@complete -@polyfill -@text
 ```
 
 To see the complete list of categories, its in [`build/types/`](https://github.com/shaka-project/shaka-player/tree/main/build/types)
@@ -137,13 +137,13 @@ the bottom of the source file.
 To add a single source file, prefix it with a plus sign:
 
 ```sh
-python build/build.py +@complete +my_plugin.js
+python3 build/build.py +@complete +my_plugin.js
 ```
 
 You can add multiple sources as well:
 
 ```sh
-python build/build.py +@complete +my_plugin.js +/path/to/my_other_plugin.js
+python3 build/build.py +@complete +my_plugin.js +/path/to/my_other_plugin.js
 ```
 
 
