@@ -497,7 +497,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       goog.asserts.assert(this.localVideo_, 'Should have a localVideo_!');
       goog.asserts.assert(this.player_, 'Should have a player_!');
       this.vr_ = new shaka.ui.VRManager(this.controlsContainer_, this.vrCanvas_,
-          this.localVideo_, this.player_, this.config_);
+          this.localVideo_, this.player_, this.config_, this);
     }
 
     // Create the new layout
