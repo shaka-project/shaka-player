@@ -228,6 +228,7 @@ shaka.extern.UIShortcuts;
  *   menuOpenUntilUserClosesIt: boolean,
  *   allowTogglePresentationTime: boolean,
  *   showRemainingTimeInPresentationTime: boolean,
+ *   enableVrDeviceMotion: boolean,
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -483,6 +484,11 @@ shaka.extern.UIShortcuts;
  *   Show remaining time of presentation time by default, when playing a VOD.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} enableVrDeviceMotion
+ *   Enables or disables the device motion for VR videos.
+ *   <br>
+ *   Defaults to <code>true</code> except on Vision OS where the default value
+ *   is <code>false</code>
  * @exportDoc
  */
 shaka.extern.UIConfiguration;
