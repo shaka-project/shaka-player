@@ -15,7 +15,6 @@ goog.require('shaka.device.DeviceFactory');
 goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
 goog.require('shaka.ui.AdInfo');
-goog.require('shaka.ui.BasicAd');
 goog.require('shaka.ui.BigPlayButton');
 goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.HiddenFastForwardButton');
@@ -178,7 +177,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.queueManager_.setCustomPlayer(this.player_);
 
     /** @private {?shaka.extern.IAd} */
-    this.ad_ = null;
+    this.ad_ = this.adManager_.getCurrentAd();
 
     /** @private {!Array<!shaka.extern.AdCuePoint>} */
     this.adCuePoints_ = [];
@@ -1523,19 +1522,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(
-        this.adManager_, shaka.ads.Utils.AD_STARTED, (e) => {
-          this.ad_ = (/** @type {!Object} */ (e))['ad'];
-          if (!this.ad_) {
-            const currentTime = this.video_.currentTime;
-            const cuePoint = this.adCuePoints_.find((c) => {
-              return currentTime >= c.start &&
-                currentTime <= (c.end || Infinity);
-            });
-            const start = cuePoint ? cuePoint.start : null;
-            const end = cuePoint ? cuePoint.end : null;
-            // Note: We assume the ad uses the base video.
-            this.ad_ = new shaka.ui.BasicAd(this.video_, start, end);
-          }
+        this.adManager_, shaka.ads.Utils.AD_STARTED, () => {
+          this.ad_ = this.adManager_.getCurrentAd();
           this.showAdUI();
           this.onBufferingStateChange_();
         });

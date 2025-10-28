@@ -8,7 +8,6 @@
 goog.provide('shaka.ui.Element');
 
 goog.require('shaka.ads.Utils');
-goog.require('shaka.ui.BasicAd');
 goog.require('shaka.util.EventManager');
 goog.requireType('shaka.Player');
 goog.requireType('shaka.ui.Controls');
@@ -72,22 +71,11 @@ shaka.ui.Element = class {
      * @protected {?shaka.extern.IAd}
      * @exportInterface
      */
-    this.ad = controls.getAd();
+    this.ad = this.adManager.getCurrentAd(); ;
 
     const AD_STARTED = shaka.ads.Utils.AD_STARTED;
-    this.eventManager.listen(this.adManager, AD_STARTED, (e) => {
-      this.ad = (/** @type {!Object} */ (e))['ad'];
-      if (!this.ad) {
-        const currentTime = this.video.currentTime;
-        const cuePoint = this.controls.getAdCuePoints().find((c) => {
-          return currentTime >= c.start &&
-            currentTime <= (c.end || Infinity);
-        });
-        const start = cuePoint ? cuePoint.start : null;
-        const end = cuePoint ? cuePoint.end : null;
-        // Note: We assume the ad uses the base video.
-        this.ad = new shaka.ui.BasicAd(this.video, start, end);
-      }
+    this.eventManager.listen(this.adManager, AD_STARTED, () => {
+      this.ad = this.adManager.getCurrentAd();
     });
 
     const AD_STOPPED = shaka.ads.Utils.AD_STOPPED;
