@@ -467,8 +467,8 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     }
 
     // Detect device movement
-    let deviceOrientationListener = false;
-    if (window.DeviceOrientationEvent) {
+    if (this.config_.enableVrDeviceMotion && window.DeviceOrientationEvent) {
+      let deviceOrientationListener = false;
       // See: https://dev.to/li/how-to-requestpermission-for-devicemotion-and-deviceorientation-events-in-ios-13-46g2
       if (typeof DeviceMotionEvent.requestPermission == 'function') {
         const userGestureListener = () => {
