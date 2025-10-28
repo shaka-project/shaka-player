@@ -282,7 +282,7 @@ way.
 ### Error handling
 
 In some scenarios, it is possible that the credentials used to authenticate have
-expired. The request filter is called on every request attempt since v4.17, so
+expired. The request filter is called on every request attempt since v5.0, so
 you can update the credentials if needed. See the example below.
 
 <!--cSpell:disable -->
