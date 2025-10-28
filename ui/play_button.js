@@ -145,7 +145,7 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
   updateIcon() {
     const Icons = shaka.ui.Enums.MaterialDesignSVGIcons;
     if (this.isEnded() && this.video.duration) {
-      this.icon_.use(Icons.REPLAY);
+      this.icon_.use(Icons['REPLAY']);
     } else {
       this.icon_.use(this.isPaused() ? Icons['PLAY'] : Icons['PAUSE']);
     }
