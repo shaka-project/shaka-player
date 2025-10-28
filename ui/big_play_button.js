@@ -36,7 +36,7 @@ shaka.ui.BigPlayButton = class extends shaka.ui.PlayButton {
     const Icons = shaka.ui.Enums.MaterialDesignSVGIcons;
     const icon = new shaka.ui.Icon(/* parent= */ null);
     if (this.isEnded() && this.video.duration) {
-      icon.use(Icons.REPLAY);
+      icon.use(Icons['REPLAY']);
     } else {
       icon.use(this.isPaused() ? Icons['PLAY'] : Icons['PAUSE']);
     }
