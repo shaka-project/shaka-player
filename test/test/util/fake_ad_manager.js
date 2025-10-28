@@ -14,6 +14,9 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
 
     /** @private {shaka.ads.AdsStats} */
     this.stats_ = new shaka.ads.AdsStats();
+
+    /** @private {?shaka.extern.IAd} */
+    this.currentAd_ = null;
   }
 
   /** @override */
@@ -102,12 +105,15 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   getInterstitialPlayer() {}
 
   /** @override */
-  getCurrentAd() {}
+  getCurrentAd() {
+    return this.currentAd_;
+  }
 
   /**
    * @param {!shaka.test.FakeAd} ad
    */
   startAd(ad) {
+    this.currentAd_ = ad;
     const event = new shaka.util.FakeEvent(shaka.ads.Utils.AD_STARTED,
         (new Map()).set('ad', ad));
 
@@ -116,6 +122,7 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
 
   /** @public */
   finishAd() {
+    this.currentAd_ = null;
     const event = new shaka.util.FakeEvent(shaka.ads.Utils.AD_STOPPED);
     this.dispatchEvent(event);
   }
