@@ -7,8 +7,6 @@
 
 goog.provide('shaka.ui.VRManager');
 
-goog.require('shaka.device.DeviceFactory');
-goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
 goog.require('shaka.ui.VRWebgl');
 goog.require('shaka.util.Dom');
@@ -18,6 +16,7 @@ goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IReleasable');
 
 goog.requireType('shaka.Player');
+goog.requireType('shaka.ui.Controls');
 
 
 /**
@@ -30,8 +29,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @param {!HTMLMediaElement} video
    * @param {!shaka.Player} player
    * @param {shaka.extern.UIConfiguration} config
+   * @param {!shaka.ui.Controls} controls
    */
-  constructor(container, canvas, video, player, config) {
+  constructor(container, canvas, video, player, config, controls) {
     super();
 
     /** @private {!HTMLElement} */
@@ -48,6 +48,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
 
     /** @private {shaka.extern.UIConfiguration} */
     this.config_ = config;
+
+    /** @private {!shaka.ui.Controls} */
+    this.controls_ = controls;
 
     /** @private {shaka.util.EventManager} */
     this.loadEventManager_ = new shaka.util.EventManager();
@@ -142,6 +145,10 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
 
     this.loadEventManager_.listen(player, 'unloading', () => {
       this.vrAsset_ = null;
+      this.checkVrStatus_();
+    });
+
+    this.loadEventManager_.listen(this.controls_, 'caststatuschanged', () => {
       this.checkVrStatus_();
     });
 
@@ -327,7 +334,8 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @private
    */
   checkVrStatus_() {
-    if ((this.config_.displayInVrMode || this.vrAsset_)) {
+    const isCasting = this.controls_.getCastProxy().isCasting();
+    if ((this.config_.displayInVrMode || this.vrAsset_) && !isCasting) {
       if (!this.canvas_) {
         this.canvas_ = shaka.util.Dom.asHTMLCanvasElement(
             document.createElement('canvas'));
@@ -353,8 +361,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
           // Re-initialization the status does not change.
         }
       }
-    } else if (!this.config_.displayInVrMode && !this.vrAsset_ &&
-        this.canvas_ && this.vrWebgl_) {
+    } else if (this.canvas_ && this.vrWebgl_) {
       this.canvas_.style.display = 'none';
       this.eventManager_.removeAll();
       this.vrWebgl_.release();
@@ -383,16 +390,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @private
    */
   getGL_(canvas) {
-    if (!canvas) {
-      return null;
-    }
-    // The user interface is not intended for devices that are controlled with
-    // a remote control, and WebGL may run slowly on these devices.
-    const device = shaka.device.DeviceFactory.getDevice();
-    const deviceType = device.getDeviceType();
-    if (deviceType == shaka.device.IDevice.DeviceType.TV ||
-        deviceType == shaka.device.IDevice.DeviceType.CONSOLE ||
-        deviceType == shaka.device.IDevice.DeviceType.CAST) {
+    if (!canvas || !window.WebGLRenderingContext) {
       return null;
     }
     const webglContexts = [
