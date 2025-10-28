@@ -55,22 +55,6 @@
 
   .show-when-controls-shown();
 
-  /* Actual icon images for the two states this could be in.
-   * These will be inlined as data URIs when compiled, and so do not need to be
-   * deployed separately from the compiled CSS.
-   * Note that these URIs should relative to ui/controls.less, not this file. */
-  &[icon="play"] {
-    background-image: data-uri("images/play_arrow.svg");
-  }
-
-  &[icon="pause"] {
-    background-image: data-uri("images/pause.svg");
-  }
-
-  &[icon="replay"] {
-    background-image: data-uri("images/replay.svg");
-  }
-
   @media (prefers-reduced-transparency: no-preference) {
     .shaka-controls-container[shown="true"] & {
       opacity: 0.75;

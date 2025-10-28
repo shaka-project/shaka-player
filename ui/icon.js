@@ -78,6 +78,17 @@ shaka.ui.Icon = class {
     return this.svg_;
   }
 
+  /**
+   * @return {string}
+   * @export
+   */
+  getDataUrl() {
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(this.svg_);
+    const encoded = window.btoa(svgString);
+    return `url("data:image/svg+xml;base64,${encoded}")`;
+  }
+
 
   /**
    * @param {string | Array<string>} path
