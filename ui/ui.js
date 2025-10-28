@@ -419,6 +419,7 @@ shaka.ui.Overlay = class {
       menuOpenUntilUserClosesIt: true,
       allowTogglePresentationTime: true,
       showRemainingTimeInPresentationTime: false,
+      enableVrDeviceMotion: true,
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause
@@ -475,6 +476,11 @@ shaka.ui.Overlay = class {
           (name) => !filterElements.includes(name));
       config.contextMenuElements = config.contextMenuElements.filter(
           (name) => !filterElements.includes(name));
+    }
+
+    const device = shaka.device.DeviceFactory.getDevice();
+    if (device.getDeviceType() == shaka.device.IDevice.DeviceType.APPLE_VR) {
+      config.enableVrDeviceMotion = false;
     }
 
     return config;
