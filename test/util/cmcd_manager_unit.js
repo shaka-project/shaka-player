@@ -919,7 +919,6 @@ describe('CmcdManager Setup', () => {
       includeKeys: [],
       version: 2,
       targets: [{
-        mode: 'event',
         enabled: true,
         url: 'https://example.com/cmcd-collector',
         useHeaders: false,
@@ -998,7 +997,6 @@ describe('CmcdManager Setup', () => {
               version: 2,
               enabled: true,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['rc', 'url'],
@@ -1069,7 +1067,6 @@ describe('CmcdManager Setup', () => {
               version: 2,
               enabled: true,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['sid', 'cid', 'v'],
@@ -1118,7 +1115,6 @@ describe('CmcdManager Setup', () => {
               version: 2,
               enabled: true,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['rc'],
@@ -1161,7 +1157,6 @@ describe('CmcdManager Setup', () => {
               version: 2,
               enabled: true,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['rc'],
@@ -1203,7 +1198,6 @@ describe('CmcdManager Setup', () => {
               version: 2,
               enabled: true,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['rc', 'v'],
@@ -1252,7 +1246,6 @@ describe('CmcdManager Setup', () => {
               version: 2,
               enabled: true,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['sid', 'v'],
@@ -1299,7 +1292,6 @@ describe('CmcdManager Setup', () => {
               version: 2,
               enabled: true,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd-collector',
                 includeKeys: ['sid', 'cid', 'msd', 'ltc', 'v'],
@@ -1352,7 +1344,6 @@ describe('CmcdManager Setup', () => {
               version: 2,
               enabled: true,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd-collector',
                 includeKeys: ['sid', 'msd'],
@@ -1439,7 +1430,6 @@ describe('CmcdManager Setup', () => {
               version: 2,
               enabled: true,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd-collector',
                 includeKeys: ['sn'],
@@ -1493,7 +1483,6 @@ describe('CmcdManager Setup', () => {
               enabled: true,
               targets: [
                 {
-                  mode: 'event',
                   enabled: true,
                   url: 'https://a.collector.com/cmcd',
                   useHeaders: true,
@@ -1501,7 +1490,6 @@ describe('CmcdManager Setup', () => {
                   events: ['rr'],
                 },
                 {
-                  mode: 'event',
                   enabled: true,
                   url: 'https://b.collector.com/cmcd',
                   useHeaders: false,
@@ -1572,14 +1560,12 @@ describe('CmcdManager Setup', () => {
               enabled: true,
               targets: [
                 {
-                  mode: 'event',
                   enabled: true,
                   url: 'https://enabled.collector.com/cmcd',
                   includeKeys: ['sn'],
                   events: ['rr'],
                 },
                 {
-                  mode: 'event',
                   enabled: false,
                   url: 'https://disabled.collector.com/cmcd',
                   includeKeys: ['sn'],
@@ -1607,7 +1593,6 @@ describe('CmcdManager Setup', () => {
             {
               targets: [
                 {
-                  mode: 'event',
                   enabled: false,
                   url: 'https://disabled.collector.com/cmcd',
                   events: ['rr'],
@@ -1657,7 +1642,6 @@ describe('CmcdManager Setup', () => {
             {
               version: 2,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['sid', 'msd', 'ltc'],
@@ -1988,7 +1972,6 @@ describe('CmcdManager Setup', () => {
             {
               version: 2,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['ttfb', 'ttlb'],
@@ -2031,7 +2014,6 @@ describe('CmcdManager Setup', () => {
             {
               version: 2,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['ttfb', 'ttlb'],
@@ -2072,7 +2054,6 @@ describe('CmcdManager Setup', () => {
             {
               version: 2,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['ttfb', 'ttlb'],
@@ -2149,7 +2130,6 @@ describe('CmcdManager Setup', () => {
             {
               version: 2,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['url'],
@@ -2203,7 +2183,6 @@ describe('CmcdManager Setup', () => {
         const cmcdManager = createCmcdManager(mockPlayerWithNE, {
           version: 2,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['url'],
@@ -2250,7 +2229,6 @@ describe('CmcdManager Setup', () => {
         const cmcdManager = createCmcdManager(mockPlayerWithNE, {
           version: 2,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['url'],
@@ -2300,7 +2278,6 @@ describe('CmcdManager Setup', () => {
         const cmcdManager = createCmcdManager(mockPlayerWithNE, {
           version: 2,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['url'],
@@ -2351,7 +2328,6 @@ describe('CmcdManager Setup', () => {
         const cmcdManager = createCmcdManager(mockPlayerWithNE, {
           version: 2,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['url'],
@@ -2675,7 +2651,6 @@ describe('CmcdManager Setup', () => {
         const cmcdManager = createCmcdManager(mockPlayerWithNE, {
           version: 2,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['ts'],
@@ -2714,7 +2689,6 @@ describe('CmcdManager Setup', () => {
         const cmcdManager = createCmcdManager(playerWithSpy, {
           version: 2,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['ts'],
@@ -2750,7 +2724,6 @@ describe('CmcdManager Setup', () => {
         const cmcdManager = createCmcdManager(mockPlayerWithNE, {
           version: 2,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['ts'],
@@ -2803,14 +2776,12 @@ describe('CmcdManager Setup', () => {
             {
               version: 2,
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd-query',
                 includeKeys: ['ts'],
                 useHeaders: false,
                 events: ['rr'],
               }, {
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd-header',
                 includeKeys: ['ts'],
@@ -2880,7 +2851,6 @@ describe('CmcdManager Setup', () => {
           enabled: false,
           version: 2,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd-query',
             includeKeys: ['ts'],
@@ -3121,7 +3091,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta', 'v'],
@@ -3175,7 +3144,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta', 'v'],
@@ -3220,7 +3188,6 @@ describe('CmcdManager Setup', () => {
             version: 2,
             enabled: true,
             targets: [{
-              mode: 'event',
               enabled: true,
               url: 'https://example.com/cmcd',
               timeInterval: 1,
@@ -3251,7 +3218,6 @@ describe('CmcdManager Setup', () => {
             version: 2,
             enabled: true,
             targets: [{
-              mode: 'event',
               enabled: true,
               url: 'https://example.com/cmcd',
               timeInterval: 0,
@@ -3279,7 +3245,6 @@ describe('CmcdManager Setup', () => {
             version: 2,
             enabled: true,
             targets: [{
-              mode: 'event',
               enabled: true,
               url: 'https://example.com/cmcd',
               // timeInterval is not defined, should default to 10s.
@@ -3315,7 +3280,6 @@ describe('CmcdManager Setup', () => {
             mockPlayerWithNE,
             {
               targets: [{
-                mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
                 includeKeys: ['msd', 'e', 'sta'],
@@ -3365,7 +3329,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta'],
@@ -3418,7 +3381,6 @@ describe('CmcdManager Setup', () => {
           sessionId: sessionId,
           contentId: 'v2-event-content',
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta', 'bl', 'mtp', 'cid'],
@@ -3458,7 +3420,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: false, // Target is disabled
             url: 'https://example.com/cmcd',
           }],
@@ -3478,7 +3439,6 @@ describe('CmcdManager Setup', () => {
           version: 1, // CMCD v1
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
           }],
@@ -3498,7 +3458,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             // d and rtp are not valid for event mode
@@ -3542,14 +3501,12 @@ describe('CmcdManager Setup', () => {
           enabled: true,
           targets: [
             {
-              mode: 'event',
               enabled: true,
               url: 'https://example.com/cmcd1',
               includeKeys: ['e', 'sta'],
               events: ['ps'],
             },
             {
-              mode: 'event',
               enabled: true,
               url: 'https://example.com/cmcd2',
               includeKeys: ['e', 'sta', 'v'],
@@ -3617,7 +3574,6 @@ describe('CmcdManager Setup', () => {
           enabled: true,
           sessionId: sessionId,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta', 'v', 'sid'],
@@ -3660,7 +3616,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta', 'ts'],
@@ -3683,8 +3638,8 @@ describe('CmcdManager Setup', () => {
 
       it('should return only enabled event targets', () => {
         const targets = [
-          {mode: 'event', enabled: true, url: 'url1'},
-          {mode: 'event', enabled: false, url: 'url2'},
+          {enabled: true, url: 'url1'},
+          {enabled: false, url: 'url2'},
         ];
         const cmcdManager = createCmcdManager(mockPlayer, {targets});
         const enabledEventTargets = cmcdManager.getEventModeEnabledTargets_();
@@ -3700,7 +3655,7 @@ describe('CmcdManager Setup', () => {
 
       it('should return an empty array if no event targets are enabled', () => {
         const targets = [
-          {mode: 'event', enabled: false, url: 'url1'},
+          {enabled: false, url: 'url1'},
         ];
         const cmcdManager = createCmcdManager(mockPlayer, {targets});
         const enabledEventTargets = cmcdManager.getEventModeEnabledTargets_();
@@ -3713,7 +3668,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             // rc, url, ttfb and ttlb are not valid for event mode
@@ -3746,7 +3700,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta'], // ts is omitted
@@ -3774,7 +3727,6 @@ describe('CmcdManager Setup', () => {
           sessionId: sessionId,
           contentId: 'v2-event-content',
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: [],
@@ -3821,7 +3773,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta'],
@@ -3877,7 +3828,6 @@ describe('CmcdManager Setup', () => {
           sessionId: sessionId,
           contentId: 'v2-event-content-all',
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: [],
@@ -3934,7 +3884,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta', 'v'],
@@ -3970,7 +3919,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta'],
@@ -4004,7 +3952,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e'],
@@ -4060,7 +4007,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta', 'v'],
@@ -4095,7 +4041,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e', 'sta', 'v'],
@@ -4131,7 +4076,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e'],
@@ -4183,7 +4127,6 @@ describe('CmcdManager Setup', () => {
           version: 2,
           enabled: true,
           targets: [{
-            mode: 'event',
             enabled: true,
             url: 'https://example.com/cmcd',
             includeKeys: ['e'],
