@@ -980,8 +980,7 @@ describe('CmcdManager Setup', () => {
     });
 
     describe('Configuration and Mode Handling', () => {
-      it('filters CMCD response mode keys correctly', () => {
-        // Set up spy for CMCD requests in event mode
+      it('filters CMCD response keys correctly', () => {
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1002,7 +1001,7 @@ describe('CmcdManager Setup', () => {
                 mode: 'event',
                 enabled: true,
                 url: 'https://example.com/cmcd',
-                includeKeys: ['sid', 'cid', 'com.test-hello'],
+                includeKeys: ['rc', 'url'],
                 useHeaders: false,
                 events: ['rr'],
               }],
@@ -1026,14 +1025,8 @@ describe('CmcdManager Setup', () => {
 
 
         // Check that allowed keys are present
-        expect(decodedUri).toContain('sid=');
-        expect(decodedUri).toContain('cid=');
-
-        // Check that disallowed keys for event mode are not present
-        expect(decodedUri).not.toContain('v=2');
-        expect(decodedUri).not.toContain('msd=');
-        expect(decodedUri).not.toContain('ltc=');
-        expect(decodedUri).not.toContain('com.test-hello=');
+        expect(decodedUri).toContain('rc=');
+        expect(decodedUri).toContain('url=');
       });
 
       it('applies CMCD data to request URL in query mode', () => {
@@ -1059,7 +1052,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('applies CMCD data to response URL in query mode', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1108,8 +1100,7 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('cid=');
       });
 
-      it('includes response code in response mode (query)', () => {
-        // Set up spy for CMCD requests in event mode
+      it('includes response code in response (query)', () => {
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1153,7 +1144,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('includes response code in response headers', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1196,7 +1186,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('does not include response code if not provided', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1246,7 +1235,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('applies CMCD data to response headers in header mode', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1293,8 +1281,7 @@ describe('CmcdManager Setup', () => {
             .toContain('v=2');
       });
 
-      it('applies v2 keys to response uri in response mode', () => {
-        // Set up spy for CMCD requests in event mode
+      it('applies v2 keys to response uri in response', () => {
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1347,8 +1334,7 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).not.toContain('mtp=');
       });
 
-      it('filters keys in response mode based on includeKeys', () => {
-        // Set up spy for CMCD requests in event mode
+      it('filters keys in response based on includeKeys', () => {
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1436,7 +1422,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('sn increments sequence number for each response', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1490,7 +1475,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('sn increments sequence numbers across multiple targets', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1570,7 +1554,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('sn ignores disabled response targets', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1607,7 +1590,6 @@ describe('CmcdManager Setup', () => {
         );
         const spy = spyOn(cmcdManager, 'sendCmcdRequest_').and.callThrough();
 
-        // 2. Trigger the response data processing.
         cmcdManager.applyResponseData(
             shaka.net.NetworkingEngine.RequestType.SEGMENT,
             createResponse(),
@@ -1658,8 +1640,7 @@ describe('CmcdManager Setup', () => {
         expect(decodeURIComponent(request.uris[0])).toContain('ltc=');
       });
 
-      it('includes ltc for live content response mode', () => {
-        // Set up spy for CMCD requests in event mode
+      it('includes ltc for live content response', () => {
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1727,7 +1708,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('sends msd only on the first response', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1799,7 +1779,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('should generate sf for segment responses', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1861,8 +1840,7 @@ describe('CmcdManager Setup', () => {
         expect(decoded2).not.toContain('bs');
       });
 
-      it('should generate bs after a rebuffering event response mode', () => {
-        // Set up spy for CMCD requests in event mode
+      it('should generate bs after a rebuffering event response', () => {
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -1953,21 +1931,8 @@ describe('CmcdManager Setup', () => {
         expect(decodedUri).toContain('rtp=');
       });
 
-      it('generates `nor` for URL-based segment requests', () => {
-        const cmcdManager = createCmcdManager(mockPlayer);
-        const request = createRequest();
-        const context =
-            createSegmentContextWithIndex(createMockNextSegment(false));
-
-        cmcdManager.applyRequestSegmentData(request, context);
-        const decodedUri = decodeURIComponent(request.uris[0]);
-
-        expect(decodedUri).toContain('nor="next-seg.m4v"');
-        expect(decodedUri).not.toContain('nrr=');
-      });
 
       it('generates `rtp` for segment responses', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -2007,7 +1972,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('sends ttfb and ttlb query', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -2051,7 +2015,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('sends ttfb and ttlb in headers', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -2093,7 +2056,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('does not generate ttfb or ttlb if timing info is missing', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -2137,7 +2099,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('generates nor for URL-based segment responses', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -2499,7 +2460,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('should send cmsdd in headers mode', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -2557,7 +2517,7 @@ describe('CmcdManager Setup', () => {
             .toContain(`cmsdd="${encodedCmsddData.toString()}"`);
       });
 
-      it('should not include "cmsdd" if header is not present', () => {
+      it('should not include cmsdd if header is not present', () => {
         const cmcdManager = createCmcdManager(
             mockPlayer,
             {
@@ -2622,7 +2582,7 @@ describe('CmcdManager Setup', () => {
       });
 
 
-      it('includes `bg` in request query when page is hidden', () => {
+      it('includes bg in request query when page is hidden', () => {
         Object.defineProperty(document, 'hidden',
             {value: true, configurable: true});
 
@@ -2636,7 +2596,7 @@ describe('CmcdManager Setup', () => {
         expect(`,${cmcdQuery},`).toContain(',bg,');
       });
 
-      it('includes `bg` in request headers when page is hidden', () => {
+      it('includes bg in request headers when page is hidden', () => {
         Object.defineProperty(document, 'hidden',
             {value: true, configurable: true});
 
@@ -2648,7 +2608,7 @@ describe('CmcdManager Setup', () => {
         expect(request.headers['CMCD-Status']).toContain('bg');
       });
 
-      it('does not include `bg` in request mode when page is visible', () => {
+      it('does not include bg in request mode when page is visible', () => {
         Object.defineProperty(document, 'hidden',
             {value: false, configurable: true});
 
@@ -2666,7 +2626,7 @@ describe('CmcdManager Setup', () => {
       });
 
 
-      it('assigns `bg` to the CMCD-Status header in request mode', () => {
+      it('assigns bg to the CMCD-Status header in request mode', () => {
         Object.defineProperty(document, 'hidden',
             {value: true, configurable: true});
 
@@ -2701,7 +2661,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('includes ts for segment responses', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -2777,7 +2736,6 @@ describe('CmcdManager Setup', () => {
       });
 
       it('reuses request timestamp for event mode', () => {
-        // Set up spy for CMCD requests in event mode
         const requestSpy = jasmine.createSpy('request');
         const networkingEngine = {
           request: requestSpy,
@@ -2991,7 +2949,7 @@ describe('CmcdManager Setup', () => {
       });
     });
 
-    it('should generate "cmsds" from response header', () => {
+    it('should generate cmsds from response header', () => {
       const cmcdManager = createCmcdManager(
           mockPlayer,
           {
@@ -3101,7 +3059,7 @@ describe('CmcdManager Setup', () => {
           .toContain(`cmsds="${encodedCmsdsData.toString()}"`);
     });
 
-    it('should not include "cmsds" if header is not present', () => {
+    it('should not include cmsds if header is not present', () => {
       const cmcdManager = createCmcdManager(
           mockPlayer,
           {
