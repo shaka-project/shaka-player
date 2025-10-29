@@ -461,7 +461,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     let trackWidth = track.width || 0;
     let hasSquarePixels = true;
 
-    if (track.pixelAspectRatio && track.pixelAspectRatio !== '') {
+    if (track.pixelAspectRatio) {
       // Convert pixel aspect ratio string into two integers '2:1' -> 2 and 1
       const parts = track.pixelAspectRatio
           .split(':').map((value) => Number(value));
