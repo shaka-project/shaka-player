@@ -4163,6 +4163,155 @@ describe('CmcdManager Setup', () => {
         decodedUri = decodeURIComponent(request.uris[0]);
         expect(decodedUri).toContain('e="pc"');
       });
+
+      it('sends separate reports with correct keys for multiple targets',
+          () => {
+            // Create fresh spy to avoid interference from other tests
+            const freshRequestSpy = jasmine.createSpy('request');
+            const freshNetworkingEngine = {
+              request: freshRequestSpy,
+              configure: () => {},
+              registerScheme: () => {},
+            };
+            const freshMockPlayerWithNE = new shaka.util.FakeEventTarget();
+            Object.assign(freshMockPlayerWithNE, mockPlayer, {
+              getNetworkingEngine: () => freshNetworkingEngine,
+            });
+
+            const mockVideo = new shaka.util.FakeEventTarget();
+            const config = {
+              version: 2,
+              enabled: true,
+              targets: [
+                {
+                  enabled: true,
+                  url: 'https://target1.com/cmcd',
+                  includeKeys: ['ts', 'rc', 'url'],
+                  events: ['rr'], // Response events
+                },
+                {
+                  enabled: true,
+                  url: 'https://target2.com/cmcd',
+                  includeKeys: ['e', 'sta', 'ts'],
+                  events: ['ps'], // Playstate events
+                },
+              ],
+            };
+
+            const cmcdManager = createCmcdManager(
+                freshMockPlayerWithNE, config);
+
+            cmcdManager.setMediaElement(mockVideo);
+
+            // Reset spy call count after setup
+            freshRequestSpy.calls.reset();
+
+            // Trigger first event type (rr event)
+            cmcdManager.applyResponseSegmentData(
+                {uri: 'https://example.com/segment.mp4', headers: {}},
+                createResponseWithRealTiming(),
+                {});
+
+            // Trigger second event type (ps event)
+            mockVideo.dispatchEvent(new shaka.util.FakeEvent('play'));
+
+            // Should have called request spy twice, once for each target
+            expect(freshRequestSpy).toHaveBeenCalledTimes(2);
+
+            const firstRequest = freshRequestSpy.calls.argsFor(0)[1];
+            const secondRequest = freshRequestSpy.calls.argsFor(1)[1];
+
+            const firstDecodedUri = decodeURIComponent(firstRequest.uris[0]);
+            const secondDecodedUri = decodeURIComponent(secondRequest.uris[0]);
+
+            expect(firstRequest.uris[0]).toContain('target1.com');
+            expect(firstDecodedUri).toContain('ts=');
+            expect(firstDecodedUri).toContain('e="rr"');
+            expect(firstDecodedUri).toContain('rc');
+            expect(firstDecodedUri).toContain('url');
+            expect(firstDecodedUri).not.toContain('sta=');
+
+            expect(secondRequest.uris[0]).toContain('target2.com');
+            expect(secondDecodedUri).toContain('e="ps"');
+            expect(secondDecodedUri).toContain('sta="s"');
+            expect(secondDecodedUri).toContain('ts=');
+            expect(secondDecodedUri).not.toContain('rc=');
+            expect(secondDecodedUri).not.toContain('url=');
+          });
+
+      it('maintains separate state between targets processing same event',
+          () => {
+            // Create fresh spy to avoid interference from other tests
+            const freshRequestSpy = jasmine.createSpy('request');
+            const freshNetworkingEngine = {
+              request: freshRequestSpy,
+              configure: () => {},
+              registerScheme: () => {},
+            };
+            const freshMockPlayerWithNE = new shaka.util.FakeEventTarget();
+            Object.assign(freshMockPlayerWithNE, mockPlayer, {
+              getNetworkingEngine: () => freshNetworkingEngine,
+            });
+
+            const mockVideo = new shaka.util.FakeEventTarget();
+            const config = {
+              version: 2,
+              enabled: true,
+              targets: [
+                {
+                  enabled: true,
+                  url: 'https://target1.com/cmcd',
+                  includeKeys: ['sn'],
+                  events: ['rr'],
+                },
+                {
+                  enabled: true,
+                  url: 'https://target2.com/cmcd',
+                  includeKeys: ['sn'],
+                  events: ['rr'], // Same event type to trigger contamination
+                },
+              ],
+            };
+
+            const cmcdManager = createCmcdManager(
+                freshMockPlayerWithNE, config);
+            cmcdManager.setMediaElement(mockVideo);
+
+            // Reset spy call count after setup
+            freshRequestSpy.calls.reset();
+
+            // Trigger single event that should affect both targets
+            cmcdManager.applyResponseSegmentData(
+                {uri: 'https://example.com/segment.mp4', headers: {}},
+                createResponseWithRealTiming(),
+                {});
+
+            // Should have called request spy twice, once for each target
+            expect(freshRequestSpy).toHaveBeenCalledTimes(2);
+
+            const firstRequest = freshRequestSpy.calls.argsFor(0)[1];
+            const secondRequest = freshRequestSpy.calls.argsFor(1)[1];
+
+            const firstDecodedUri = decodeURIComponent(firstRequest.uris[0]);
+            const secondDecodedUri = decodeURIComponent(secondRequest.uris[0]);
+
+            const firstSnMatch = firstDecodedUri.match(/sn=(\d+)/);
+            const secondSnMatch = secondDecodedUri.match(/sn=(\d+)/);
+
+            expect(firstSnMatch).not.toBeNull();
+            expect(secondSnMatch).not.toBeNull();
+
+            const firstSn = firstSnMatch ? parseInt(firstSnMatch[1], 10) : -1;
+            const secondSn = secondSnMatch ?
+                parseInt(secondSnMatch[1], 10) : -1;
+
+            // Both targets should have independent sequence numbers = 1
+            expect(firstSn).toBe(1);
+            expect(secondSn).toBe(1);
+
+            expect(firstRequest.uris[0]).toContain('target1.com');
+            expect(secondRequest.uris[0]).toContain('target2.com');
+          });
     });
   });
 });
