@@ -4193,7 +4193,7 @@ describe('CmcdManager Setup', () => {
                   enabled: true,
                   url: 'https://target2.com/cmcd',
                   includeKeys: ['e', 'sta', 'ts'],
-                  events: ['ps'], // Playstate events
+                  events: ['ps'], // Player state events
                 },
               ],
             };
