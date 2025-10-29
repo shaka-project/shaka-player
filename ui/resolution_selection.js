@@ -453,7 +453,19 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
   getResolutionLabel_(track, tracks) {
     let trackHeight = track.height || 0;
     let trackWidth = track.width || 0;
-    if (trackHeight > trackWidth) {
+    let hasSquarePixels = true;
+
+    if (track.pixelAspectRatio) {
+      // Convert pixel aspect ratio string into two integers '2:1' -> 2 and 1
+      const parts = track.pixelAspectRatio
+          .split(':').map((value) => Number(value));
+      if (parts.length === 2) {
+        hasSquarePixels = parts[0] === parts[1];
+      } else if (parts.length === 1) {
+        hasSquarePixels = parts[0] === 1;
+      }
+    }
+    if (trackHeight > trackWidth && hasSquarePixels) {
       // Vertical video.
       [trackWidth, trackHeight] = [trackHeight, trackWidth];
     }
