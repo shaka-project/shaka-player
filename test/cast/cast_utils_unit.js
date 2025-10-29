@@ -20,7 +20,6 @@ describe('CastUtils', () => {
       'getNetworkingEngine',  // Handled specially
       'getDrmEngine',  // Handled specially
       'getMediaElement',  // Handled specially
-      'setMaxHardwareResolution',
       'destroy',  // Should use CastProxy.destroy instead
       'drmInfo',  // Too large to proxy
       'getManifest', // Too large to proxy
@@ -33,10 +32,7 @@ describe('CastUtils', () => {
       'unloadAndSavePreload',
       'preload',
       'destroyAllPreloads',
-      'getNonDefaultConfiguration',
       'addFont',
-      'getFetchedPlaybackInfo',
-      'getLiveLatency',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
