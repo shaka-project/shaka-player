@@ -189,13 +189,6 @@ shaka.extern.TextDisplayer = class {
    * @exportDoc
    */
   setTextLanguage(language) {}
-
-  /**
-   * Enable the current text displayer.
-   *
-   * @exportDoc
-   */
-  enableTextDisplayer() {}
 };
 
 

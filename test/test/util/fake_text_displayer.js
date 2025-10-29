@@ -68,7 +68,4 @@ shaka.test.FakeTextDisplayer = class {
     const func = shaka.test.Util.spyFunc(this.setTextLanguageSpy);
     return func(language);
   }
-
-  /** @override */
-  enableTextDisplayer() {}
 };

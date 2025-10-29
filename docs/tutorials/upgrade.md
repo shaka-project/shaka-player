@@ -127,6 +127,7 @@ application:
     - `TextDisplayer` plugins must implement the `configure()` method.
     - `TextParser` plugins must implement the `setManifestType()` and `setSequenceMode()` methods.
     - `Transmuxer` plugins now has three new parameters in `transmux()` method.
+    - Removed `enableTextDisplayer` from `TextDisplayer` plugins
 
   - Player API Changes:
     - The constructor no longer takes `mediaElement` as a parameter; use the `attach` method to attach to a media element instead. (Deprecated in v4.6)
