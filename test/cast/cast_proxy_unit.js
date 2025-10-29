@@ -491,6 +491,7 @@ describe('CastProxy', () => {
         },
         player: {
           getConfiguration: {key: 'value'},
+          getNonDefaultConfiguration: {key: 'value'},
         },
       };
       mockSender.get.and.callFake((targetName, property) => {
@@ -513,7 +514,7 @@ describe('CastProxy', () => {
 
       // Initial Player state first:
       expect(mockPlayer.configure).toHaveBeenCalledWith(
-          cache.player.getConfiguration);
+          cache.player.getNonDefaultConfiguration);
       // Nothing else yet:
       expect(mockVideo.loop).toBe(false);
       expect(mockVideo.playbackRate).toBe(1);
@@ -663,6 +664,8 @@ describe('CastProxy', () => {
       getNetworkingEngine: jasmine.createSpy('getNetworkingEngine'),
       getAssetUri: jasmine.createSpy('getAssetUri'),
       getConfiguration: jasmine.createSpy('getConfiguration'),
+      getNonDefaultConfiguration:
+          jasmine.createSpy('getNonDefaultConfiguration'),
       configure: jasmine.createSpy('configure'),
       selectTextTrack: jasmine.createSpy('selectTextTrack'),
       trickPlay: jasmine.createSpy('trickPlay'),
