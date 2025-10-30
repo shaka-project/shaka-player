@@ -79,7 +79,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
         this.ad.setMuted(!this.ad.isMuted());
       } else {
         if (!this.video.muted && this.video.volume == 0) {
-          this.video.volume = 1;
+          this.video.volume = 1 * Number(this.player.getMaxAudioVolume());
         } else {
           this.video.muted = !this.video.muted;
         }

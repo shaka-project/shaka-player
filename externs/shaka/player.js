@@ -93,6 +93,8 @@ shaka.extern.StateChange;
  *   manifestPeriodCount: number,
  *   manifestGapCount: number,
  *
+ *   audioNormalization: string,
+ *
  *   switchHistory: !Array<shaka.extern.TrackChoice>,
  *   stateHistory: !Array<shaka.extern.StateChange>
  * }}
@@ -189,6 +191,9 @@ shaka.extern.StateChange;
  *   discontinuities found between periods. For HLS, it is a number of EXT-X-GAP
  *   and GAP=YES occurrences. For MSS, it is always set to 0.
  *   If in src= mode or nothing is loaded, NaN.
+ *
+ * @property {string} audioNormalization
+ *   The audio normalization expressed as %.
  *
  * @property {!Array<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.
@@ -2880,7 +2885,8 @@ shaka.extern.TextDisplayerConfiguration;
  *   playRangeStart: number,
  *   playRangeEnd: number,
  *   textDisplayer: shaka.extern.TextDisplayerConfiguration,
- *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
+ *   textDisplayFactory: shaka.extern.TextDisplayer.Factory,
+ *   maxAudioVolume: number,
  * }}
  *
  * @property {shaka.extern.AdsConfiguration} ads
@@ -3039,6 +3045,11 @@ shaka.extern.TextDisplayerConfiguration;
  *   may be called automatically if a change in
  *   <code>webkitPresentationMode</code> is detected and
  *   <code>setVideoContainer</code> has been called.
+ * @property {number} maxAudioVolume
+ *   This represents the maximum audio volume. The value must be between
+ *   0 and 1. This is used to externally normalize the audio.
+ *   <br>
+ *   Defaults to <code>1</code>.
  * @exportDoc
  */
 shaka.extern.PlayerConfiguration;

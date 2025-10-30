@@ -903,7 +903,11 @@ describe('UI', () => {
       });
 
       it('displays all the available statistics', () => {
-        const skippedStats = ['stateHistory', 'switchHistory'];
+        const skippedStats = [
+          'stateHistory',
+          'switchHistory',
+          'audioNormalization',
+        ];
         const nodes = statisticsContainer.childNodes;
         // First index is close button.
         let nodeIndex = 1;
