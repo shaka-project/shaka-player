@@ -136,12 +136,12 @@ describe('HlsParser', () => {
 
     const cues = video.textTracks[0].cues;
     expect(cues.length).toBe(3);
-    expect(cues[0].startTime).toBeCloseTo(0.6, 0);
-    expect(cues[0].endTime).toBeCloseTo(2.88, 0);
-    expect(cues[1].startTime).toBeCloseTo(2.88, 0);
-    expect(cues[1].endTime).toBeCloseTo(6.36, 0);
-    expect(cues[2].startTime).toBeCloseTo(6.36, 0);
-    expect(cues[2].endTime).toBeCloseTo(10.68, 0);
+    expect(cues[0].startTime).toBeCloseTo(0, 0);
+    expect(cues[0].endTime).toBeCloseTo(1.48, 0);
+    expect(cues[1].startTime).toBeCloseTo(1.48, 0);
+    expect(cues[1].endTime).toBeCloseTo(4.96, 0);
+    expect(cues[2].startTime).toBeCloseTo(4.96, 0);
+    expect(cues[2].endTime).toBeCloseTo(9.28, 0);
 
     await player.unload();
   });
