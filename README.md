@@ -465,3 +465,11 @@ Shaka + Angular integration:
 
 If you have published Shaka Integration code/tutorials, please feel free to submit PRs
 to add them to this list, we will gladly approve!
+
+## Maintained by ##
+
+[<img src="docs/logos/ateme.png" alt="Ateme" height="55">](https://www.ateme.com/)
+&nbsp;&nbsp;
+[<img src="docs/logos/google.png" alt="Google" height="55">](https://www.google.com/)
+&nbsp;&nbsp;
+[<img src="docs/logos/paramount.png" alt="Paramount" height="55">](https://www.paramount.com/)
