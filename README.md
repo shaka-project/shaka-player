@@ -143,6 +143,7 @@ HLS features supported:
  - #EXT-X-IMAGE-STREAM-INF for thumbnails
  - Interstitials
  - Container change during the playback (eg: MP4 to TS, or AAC to TS)
+ - Chapters (`#EXT-X-SESSION-DATA` tag with the ID `com.apple.hls.chapters`)
 
 HLS features **not** supported:
  - X-SNAP attribute in interstitials
