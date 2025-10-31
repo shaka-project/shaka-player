@@ -116,7 +116,9 @@ def main(args):
 
   build_args_with_ui = ['--name', 'ui', '+@complete']
   build_args_with_ui += ['--locales'] + parsed_args.locales
-  build_args_without_ui = ['--name', 'compiled', '+@complete', '-@ui']
+  build_args_without_ui = [
+    '--name', 'compiled', '+@complete', '-@ui', '-@polyfillForUI',
+  ]
   build_args_only_dash_without_ui = [
     '--name', 'dash',
     '+@complete', '-@ui', '-@polyfillForUI', '-@queue',
