@@ -46,13 +46,6 @@ shaka.extern.TextParser = class {
   parseMedia(data, timeContext, uri, images) {}
 
   /**
-   * Notifies the stream if the manifest is in sequence mode or not.
-   *
-   * @param {boolean} sequenceMode
-   */
-  setSequenceMode(sequenceMode) {}
-
-  /**
    * Notifies the manifest type.
    *
    * @param {string} manifestType
