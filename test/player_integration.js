@@ -271,6 +271,8 @@ describe('Player', () => {
         manifestPeriodCount: jasmine.any(Number),
         manifestGapCount: jasmine.any(Number),
 
+        audioNormalization: jasmine.any(String),
+
         // We should have loaded the first Period by now, so we should have a
         // history.
         switchHistory: jasmine.arrayContaining([{

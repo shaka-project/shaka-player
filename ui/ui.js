@@ -327,6 +327,7 @@ shaka.ui.Overlay = class {
         'nonFatalErrorCount',
         'manifestPeriodCount',
         'manifestGapCount',
+        'audioNormalization',
       ],
       adStatisticsList: [
         'loadTimes',

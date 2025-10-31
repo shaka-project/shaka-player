@@ -167,7 +167,8 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
         .set('bytesDownloaded', parseBytes)
         .set('nonFatalErrorCount', parseErrors)
         .set('manifestPeriodCount', parsePeriods)
-        .set('manifestGapCount', parseGaps);
+        .set('manifestGapCount', parseGaps)
+        .set('audioNormalization', parseString);
 
     /** @private {shaka.util.Timer} */
     this.timer_ = new shaka.util.Timer(() => {
@@ -230,7 +231,11 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     const section = shaka.util.Dom.createHTMLElement('div');
 
     const label = shaka.util.Dom.createHTMLElement('label');
-    label.textContent = name + ':';
+    if (name === 'audioNormalization') {
+      label.textContent = 'Volume / Normalized:';
+    } else {
+      label.textContent = name + ':';
+    }
     section.appendChild(label);
 
     const value = shaka.util.Dom.createHTMLElement('span');

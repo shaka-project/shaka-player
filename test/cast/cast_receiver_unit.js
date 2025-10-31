@@ -1081,6 +1081,8 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       player[name] = jasmine.createSpy(name).and.returnValue(Promise.resolve());
     }
 
+    player.getMaxAudioVolume = () => 1;
+
     return player;
   }
 
