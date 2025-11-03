@@ -29,7 +29,6 @@ __Manifest parsers__
   - Default manifest parser plugins:
     - DASH: {@linksource shaka.dash.DashParser}
     - HLS: {@linksource shaka.hls.HlsParser}
-    - MSS: {@linksource shaka.mss.MssParser}
 
 __Subtitle/caption parsers__
   - Selected by MIME type

@@ -302,8 +302,6 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-ts-rollover/*', included: false},
       {pattern: 'test/test/assets/lcevc-sei/*', included: false},
       {pattern: 'test/test/assets/lcevc-sei-ts/*', included: false},
-      {pattern: 'test/test/assets/mss-clear/*', included: false},
-      {pattern: 'test/test/assets/mss-playready/*', included: false},
       {pattern: 'dist/shaka-player.ui.js', included: false},
       {pattern: 'dist/locales.js', included: false},
       {pattern: 'demo/**/*.js', included: false},
