@@ -1,4 +1,10 @@
-# ![Shaka Player](docs/shaka-player-logo.png)
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/logos/shaka-player-logo-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="docs/logos/shaka-player-logo-light.png">
+    <img alt="Kinetoscope Logo" src="docs/logos/shaka-player-logo-light.png">
+  </picture>
+</h1>
 
 Shaka Player is an open-source JavaScript library for adaptive media.  It plays
 adaptive media formats (such as [DASH][], [HLS][] and [MSS][]) in a browser,
