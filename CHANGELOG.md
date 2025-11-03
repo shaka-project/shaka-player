@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.16.8](https://github.com/shaka-project/shaka-player/compare/v4.16.7...v4.16.8) (2025-11-03)
+
+
+### Bug Fixes
+
+* Fix default modifyCueCallback config ([#9322](https://github.com/shaka-project/shaka-player/issues/9322)) ([eda1e29](https://github.com/shaka-project/shaka-player/commit/eda1e29e26c04e68426a637e54d4384b8c8c9fe7))
+* Fix infinite evict loop on text unload ([#9331](https://github.com/shaka-project/shaka-player/issues/9331)) ([b8a1823](https://github.com/shaka-project/shaka-player/commit/b8a1823f2fe044f3ebd81855170aaf410998c730))
+* **UI:** Support non-square pixels in getResolutionLabel_ ([#9300](https://github.com/shaka-project/shaka-player/issues/9300)) ([724bcdc](https://github.com/shaka-project/shaka-player/commit/724bcdc99aaf1417c9e22705a41f530efec2b868))
+* **WebVTT:** Fix times when using HLS without X-TIMESTAMP-MAP ([#9313](https://github.com/shaka-project/shaka-player/issues/9313)) ([d952a2c](https://github.com/shaka-project/shaka-player/commit/d952a2cdfbd7957502d4e9671db860abd86dddc8))
+
 ## [4.16.7](https://github.com/shaka-project/shaka-player/compare/v4.16.6...v4.16.7) (2025-10-27)
 
 
