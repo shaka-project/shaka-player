@@ -1427,7 +1427,6 @@ shaka.extern.xml.Node;
  *   ignoreMaxSegmentDuration: boolean,
  *   keySystemsByURI: !Object<string, string>,
  *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
- *   sequenceMode: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
  *   enableFastSwitching: boolean
  * }}
@@ -1489,11 +1488,6 @@ shaka.extern.xml.Node;
  *   Called immediately after the DASH manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
- * @property {boolean} sequenceMode
- *   If true, the media segments are appended to the SourceBuffer in
- *   "sequence mode" (ignoring their internal timestamps).
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {boolean} useStreamOnceInPeriodFlattening
  *   If period combiner is used, this option ensures every stream is used
  *   only once in period flattening. It speeds up underlying algorithm
@@ -1520,7 +1514,6 @@ shaka.extern.DashManifestConfiguration;
  *   ignoreManifestProgramDateTimeForTypes: !Array<string>,
  *   mediaPlaylistFullMimeType: string,
  *   liveSegmentsDelay: number,
- *   sequenceMode: boolean,
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
@@ -1577,18 +1570,11 @@ shaka.extern.DashManifestConfiguration;
  *   This is the number of segments for this calculation.
  *   <br>
  *   Defaults to <code>3</code>.
- * @property {boolean} sequenceMode
- *   If true, the media segments are appended to the SourceBuffer in
- *   "sequence mode" (ignoring their internal timestamps).
- *   <br>
- *   Defaults to <code>true</code> except on WebOS 3, Tizen 2,
- *   Tizen 3 and PlayStation 4 whose default value is <code>false</code>.
  * @property {boolean} ignoreManifestTimestampsInSegmentsMode
  *   If true, don't adjust the timestamp offset to account for manifest
  *   segment durations being out of sync with segment durations. In other
  *   words, assume that there are no gaps in the segments when appending
  *   to the SourceBuffer, even if the manifest and segment times disagree.
- *   Only applies when sequenceMode is <code>false</code>.
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {boolean} disableCodecGuessing
@@ -1624,7 +1610,6 @@ shaka.extern.HlsManifestConfiguration;
 /**
  * @typedef {{
  *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
- *   sequenceMode: boolean,
  *   keySystemsBySystemId: !Object<string, string>
  * }}
  *
@@ -1632,11 +1617,6 @@ shaka.extern.HlsManifestConfiguration;
  *   Called immediately after the MSS manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
- * @property {boolean} sequenceMode
- *   If true, the media segments are appended to the SourceBuffer in
- *   "sequence mode" (ignoring their internal timestamps).
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {Object<string, string>} keySystemsBySystemId
  *   A map of system id to key system name. Defaults to default key systems
  *   mapping handled by Shaka.
@@ -2271,7 +2251,6 @@ shaka.extern.NetworkingConfiguration;
  * @typedef {{
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   addExtraFeaturesToSourceBuffer: function(string): string,
- *   forceTransmux: boolean,
  *   insertFakeEncryptionInInit: boolean,
  *   correctEc3Enca: boolean,
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback,
@@ -2295,11 +2274,6 @@ shaka.extern.NetworkingConfiguration;
  *   sourceBuffer.
  *   This string is ultimately appended to a MIME type in addSourceBuffer() &
  *   changeType().
- * @property {boolean} forceTransmux
- *   If this is <code>true</code>, we will transmux AAC and TS content even if
- *   not strictly necessary for the assets to be played.
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {boolean} insertFakeEncryptionInInit
  *   If true, will apply a work-around for non-encrypted init segments on
  *   encrypted content for some platforms.

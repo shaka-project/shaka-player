@@ -113,8 +113,8 @@ shaka.test.FakeMediaSourceEngine = class {
 
     /** @type {!jasmine.Spy} */
     this.setStreamProperties = jasmine.createSpy('setStreamProperties')
-        .and.callFake((type, offset, end, sequenceMode) =>
-          this.setStreamPropertiesImpl_(type, offset, end, sequenceMode));
+        .and.callFake((type, offset, ended) =>
+          this.setStreamPropertiesImpl_(type, offset, ended));
 
     /** @type {!jasmine.Spy} */
     this.remove = jasmine.createSpy('remove')
@@ -396,17 +396,14 @@ shaka.test.FakeMediaSourceEngine = class {
    * @param {string} type
    * @param {number} offset
    * @param {number} appendWindowEnd
-   * @param {boolean} sequenceMode
    * @return {!Promise}
    * @private
    */
-  setStreamPropertiesImpl_(type, offset, appendWindowEnd, sequenceMode) {
+  setStreamPropertiesImpl_(type, offset, appendWindowEnd) {
     if (!this.segments[type]) {
       throw new Error('unexpected type');
     }
-    if (!sequenceMode) {
-      this.timestampOffsets_[type] = offset;
-    }
+    this.timestampOffsets_[type] = offset;
     // Don't use |appendWindowEnd|.
     return Promise.resolve();
   }

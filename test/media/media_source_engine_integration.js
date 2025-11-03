@@ -194,7 +194,7 @@ describe('MediaSourceEngine', () => {
 
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];
     expect(video.getElementsByTagName('source').length).toBe(1);
-    await mediaSourceEngine.init(new Map(), false);
+    await mediaSourceEngine.init(new Map());
   });
 
   afterEach(async () => {
@@ -319,7 +319,7 @@ describe('MediaSourceEngine', () => {
   it('buffers MP4 video', async () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
-    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.init(initObject);
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInit(ContentType.VIDEO);
     expect(buffered(ContentType.VIDEO, 0)).toBe(0);
@@ -334,7 +334,7 @@ describe('MediaSourceEngine', () => {
   it('removes segments', async () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
-    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.init(initObject);
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInit(ContentType.VIDEO);
     await Promise.all([
@@ -356,7 +356,7 @@ describe('MediaSourceEngine', () => {
   it('extends the duration', async () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
-    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.init(initObject);
     await mediaSourceEngine.setDuration(0);
     await appendInit(ContentType.VIDEO);
     await mediaSourceEngine.setDuration(20);
@@ -378,7 +378,7 @@ describe('MediaSourceEngine', () => {
   it('ends the stream, truncating the duration', async () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
-    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.init(initObject);
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInit(ContentType.VIDEO);
     await append(ContentType.VIDEO, 0);
@@ -391,7 +391,7 @@ describe('MediaSourceEngine', () => {
   it('does not throw if endOfStream called more than once', async () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
-    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.init(initObject);
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInit(ContentType.VIDEO);
     await append(ContentType.VIDEO, 0);
@@ -415,7 +415,7 @@ describe('MediaSourceEngine', () => {
 
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
-    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.init(initObject);
     checkOrder(mediaSourceEngine.setDuration(presentationDuration));
     checkOrder(appendInit(ContentType.VIDEO));
     checkOrder(append(ContentType.VIDEO, 0));
@@ -430,7 +430,7 @@ describe('MediaSourceEngine', () => {
   it('buffers MP4 audio', async () => {
     const initObject = new Map();
     initObject.set(ContentType.AUDIO, getFakeStream(metadata.audio));
-    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.init(initObject);
     await mediaSourceEngine.setDuration(presentationDuration);
     // NOTE: For some reason, this appendInit never resolves on my Windows VM.
     // The test operates correctly on real hardware.
@@ -449,7 +449,7 @@ describe('MediaSourceEngine', () => {
     initObject.set(ContentType.AUDIO, getFakeStream(metadata.audio));
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
 
-    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.init(initObject);
     await mediaSourceEngine.setDuration(presentationDuration);
 
     const audioStreaming = async () => {
@@ -492,36 +492,14 @@ describe('MediaSourceEngine', () => {
   it('trims content at the append window', async () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
-    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.init(initObject);
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInit(ContentType.VIDEO);
     await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 5,
         /* appendWindowEnd= */ 18,
-        /* sequenceMode= */ false,
-        fakeStream.mimeType,
-        fakeStream.codecs,
-        /* streamsByType= */ new Map());
-    expect(buffered(ContentType.VIDEO, 0)).toBe(0);
-    await append(ContentType.VIDEO, 0);
-    expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(5, 1);
-    expect(buffered(ContentType.VIDEO, 5)).toBeCloseTo(5, 1);
-    await append(ContentType.VIDEO, 1);
-    expect(buffered(ContentType.VIDEO, 5)).toBeCloseTo(13, 1);
-  });
-
-  it('does not initialize timestamp offset in sequence mode', async () => {
-    const initObject = new Map();
-    initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
-    await mediaSourceEngine.init(initObject, false);
-    await mediaSourceEngine.setDuration(presentationDuration);
-    await appendInit(ContentType.VIDEO);
-    await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
-        /* timestampOffset= */ 100,
-        /* appendWindowStart= */ 5,
-        /* appendWindowEnd= */ 18,
-        /* sequenceMode= */ true,
+        /* ignoreTimestampOffset= */ false,
         fakeStream.mimeType,
         fakeStream.codecs,
         /* streamsByType= */ new Map());
@@ -536,7 +514,7 @@ describe('MediaSourceEngine', () => {
   it('does not remove when overlap is outside append window', async () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
-    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.init(initObject);
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInit(ContentType.VIDEO);
     // Simulate period 1, with 20 seconds of content, no timestamp offset
@@ -544,7 +522,7 @@ describe('MediaSourceEngine', () => {
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ 20,
-        /* sequenceMode= */ false,
+        /* ignoreTimestampOffset= */ false,
         fakeStream.mimeType,
         fakeStream.codecs,
         /* streamsByType= */ new Map());
@@ -560,7 +538,7 @@ describe('MediaSourceEngine', () => {
         /* timestampOffset= */ 15,
         /* appendWindowStart= */ 20,
         /* appendWindowEnd= */ 35,
-        /* sequenceMode= */ false,
+        /* ignoreTimestampOffset= */ false,
         fakeStream.mimeType,
         fakeStream.codecs,
         /* streamsByType= */ new Map());
@@ -578,9 +556,6 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
     initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
-    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
-    config.forceTransmux = true;
-    mediaSourceEngine.configure(config);
     await mediaSourceEngine.init(initObject);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
 
@@ -600,9 +575,6 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
     initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
-    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
-    config.forceTransmux = true;
-    mediaSourceEngine.configure(config);
     await mediaSourceEngine.init(initObject);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
 
@@ -622,7 +594,7 @@ describe('MediaSourceEngine', () => {
     expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue2]);
   });
 
-  it('buffers partial TS video segments in sequence mode', async () => {
+  it('buffers partial TS video segments', async () => {
     metadata = shaka.test.TestScheme.DATA['cea-708_ts'];
     generators = shaka.test.TestScheme.GENERATORS['cea-708_ts'];
 
@@ -630,14 +602,14 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(videoType, getFakeStream(metadata.video));
 
-    await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
+    await mediaSourceEngine.init(initObject);
     await mediaSourceEngine.setDuration(presentationDuration);
     await mediaSourceEngine.setStreamProperties(
         videoType,
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ Infinity,
-        /* sequenceMode= */ true,
+        /* ignoreTimestampOffset= */ true,
         fakeTsStream.mimeType,
         fakeTsStream.codecs,
         /* streamsByType= */ new Map());
@@ -692,49 +664,13 @@ describe('MediaSourceEngine', () => {
     expect(onMetadata).toHaveBeenCalled();
   });
 
-  it('extracts ID3 metadata from TS when transmuxing', async () => {
-    metadata = shaka.test.TestScheme.DATA['id3-metadata_ts'];
-    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_ts'];
-
-    const audioType = ContentType.AUDIO;
-    const initObject = new Map();
-    initObject.set(audioType, getFakeStream(metadata.audio));
-    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
-    config.forceTransmux = true;
-    mediaSourceEngine.configure(config);
-    await mediaSourceEngine.init(initObject);
-    await append(ContentType.AUDIO, 0);
-
-    expect(onMetadata).toHaveBeenCalled();
-  });
-
   it('extracts ID3 metadata from AAC', async () => {
-    if (!MediaSource.isTypeSupported('audio/aac') ||
-        !deviceDetected.supportsSequenceMode()) {
-      pending('Raw AAC codec is not supported by the platform.');
-    }
     metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
     generators = shaka.test.TestScheme.GENERATORS['id3-metadata_aac'];
 
     const audioType = ContentType.AUDIO;
     const initObject = new Map();
     initObject.set(audioType, getFakeStream(metadata.audio));
-    await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
-    await append(ContentType.AUDIO, 0);
-
-    expect(onMetadata).toHaveBeenCalled();
-  });
-
-  it('extracts ID3 metadata from AAC when transmuxing', async () => {
-    metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
-    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_aac'];
-
-    const audioType = ContentType.AUDIO;
-    const initObject = new Map();
-    initObject.set(audioType, getFakeStream(metadata.audio));
-    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
-    config.forceTransmux = true;
-    mediaSourceEngine.configure(config);
     await mediaSourceEngine.init(initObject);
     await append(ContentType.AUDIO, 0);
 

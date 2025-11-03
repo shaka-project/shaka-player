@@ -617,8 +617,6 @@ describe('VttTextParser', () => {
   // A mock-up of HLS live subs as seen in b/253104251.
   it('handles timestamp rollover and negative offset in HLS live', () => {
     // Similar to values seen in b/253104251, for a realistic regression test.
-    // When using sequence mode on live HLS, we get negative offsets that
-    // represent the timestamp of our first append in sequence mode.
     verifyHelper(
         [
           {startTime: 3600, endTime: 3602, payload: 'Test'},

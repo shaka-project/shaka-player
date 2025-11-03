@@ -97,8 +97,6 @@ shaka.test.ManifestGenerator.Manifest = class {
     /** @type {!Array<string>} */
     this.offlineSessionIds = [];
     /** @type {boolean} */
-    this.sequenceMode = false;
-    /** @type {boolean} */
     this.ignoreManifestTimestampsInSegmentsMode = false;
     /** @type {string} */
     this.type = 'UNKNOWN';

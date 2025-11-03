@@ -334,7 +334,6 @@ shaka.test.StreamingEngineUtil = class {
       textStreams: [],
       imageStreams: [],
       chapterStreams: [],
-      sequenceMode: false,
       ignoreManifestTimestampsInSegmentsMode: false,
       type: 'UNKNOWN',
       serviceDescription: null,

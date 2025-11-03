@@ -92,7 +92,6 @@ shakaDemo.Config = class {
     this.addManifestSection_();
     this.addDashManifestSection_();
     this.addHlsManifestSection_();
-    this.addMssManifestSection_();
     this.addRetrySection_('manifest', 'Manifest Retry Parameters');
     this.addRestrictionsSection_('', 'Restrictions');
     this.addTextDisplayerSection_();
@@ -260,8 +259,6 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ false,
             /* canBeZero= */ false,
             /* canBeUnset= */ true)
-        .addBoolInput_('Enable DASH sequence mode',
-            'manifest.dash.sequenceMode')
         .addBoolInput_('Use stream once in period flattening',
             'manifest.dash.useStreamOnceInPeriodFlattening')
         .addBoolInput_('Enable fast switching',
@@ -284,7 +281,6 @@ shakaDemo.Config = class {
             'manifest.hls.ignoreManifestProgramDateTime')
         .addNumberInput_('Live segments delay',
             'manifest.hls.liveSegmentsDelay')
-        .addBoolInput_('Enable HLS sequence mode', 'manifest.hls.sequenceMode')
         .addBoolInput_('Ignore Manifest Timestamps in Segments Mode',
             'manifest.hls.ignoreManifestTimestampsInSegmentsMode')
         .addBoolInput_('Disable codec guessing',
@@ -295,13 +291,6 @@ shakaDemo.Config = class {
             'manifest.hls.allowLowLatencyByteRangeOptimization')
         .addBoolInput_('Allow range request to guess mime type',
             'manifest.hls.allowRangeRequestsToGuessMimeType');
-  }
-
-  /** @private */
-  addMssManifestSection_() {
-    const docLink = this.resolveExternLink_('.ManifestConfiguration');
-    this.addSection_('MSS Manifest', docLink)
-        .addBoolInput_('Enable MSS sequence mode', 'manifest.mss.sequenceMode');
   }
 
   /** @private */
@@ -725,7 +714,6 @@ shakaDemo.Config = class {
     };
 
     this.addSection_('Media source', docLink)
-        .addBoolInput_('Force Transmux', 'mediaSource.forceTransmux')
         .addBoolInput_('Insert fake encryption in init segments when needed ' +
             'by the platform.', 'mediaSource.insertFakeEncryptionInInit')
         .addBoolInput_('Force enca.ChannelCount to 2 for EC-3 audio if ' +

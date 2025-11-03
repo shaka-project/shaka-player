@@ -131,94 +131,9 @@ describe('DashParser Manifest', () => {
     });
   }
 
-  describe('parses and inherits attributes with sequenceMode', () => {
+  describe('parses and inherits attributes', () => {
     beforeEach(() => {
       const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-      config.dash.sequenceMode = true;
-      parser.configure(config);
-    });
-
-    makeTestsForEach(
-        [
-          '<MPD minBufferTime="PT75S">',
-          '  <Period id="1" duration="PT30S">',
-          '    <BaseURL>http://example.com</BaseURL>',
-        ],
-        [
-          '    <AdaptationSet contentType="video" mimeType="video/mp4"',
-          '        codecs="avc1.4d401f" frameRate="1000000/42000">',
-          '      <Representation bandwidth="100" width="768" height="576" />',
-          '      <Representation bandwidth="50" width="576" height="432" />',
-          '    </AdaptationSet>',
-          '    <AdaptationSet mimeType="text/vtt"',
-          '        lang="spa" label="spanish">',
-          '      <Role value="caption" />',
-          '      <Role value="main" />',
-          '      <Representation bandwidth="100" />',
-          '    </AdaptationSet>',
-          '    <AdaptationSet mimeType="audio/mp4" lang="en" ',
-          '                             codecs="mp4a.40.29">',
-          '      <Role value="main" />',
-          '      <Representation bandwidth="100" />',
-          '    </AdaptationSet>',
-          '  </Period>',
-          '</MPD>',
-        ],
-        shaka.test.ManifestGenerator.generate((manifest) => {
-          manifest.sequenceMode = true;
-          manifest.type = shaka.media.ManifestParser.DASH;
-          manifest.anyTimeline();
-          manifest.addPartialVariant((variant) => {
-            variant.language = 'en';
-            variant.bandwidth = 200;
-            variant.primary = true;
-            variant.addPartialStream(ContentType.VIDEO, (stream) => {
-              stream.bandwidth = 100;
-              stream.frameRate = 1000000 / 42000;
-              stream.size(768, 576);
-              stream.mime('video/mp4', 'avc1.4d401f');
-            });
-            variant.addPartialStream(ContentType.AUDIO, (stream) => {
-              stream.bandwidth = 100;
-              stream.primary = true;
-              stream.roles = ['main'];
-              stream.mime('audio/mp4', 'mp4a.40.29');
-            });
-          });
-          manifest.addPartialVariant((variant) => {
-            variant.language = 'en';
-            variant.bandwidth = 150;
-            variant.primary = true;
-            variant.addPartialStream(ContentType.VIDEO, (stream) => {
-              stream.bandwidth = 50;
-              stream.frameRate = 1000000 / 42000;
-              stream.size(576, 432);
-              stream.mime('video/mp4', 'avc1.4d401f');
-            });
-            variant.addPartialStream(ContentType.AUDIO, (stream) => {
-              stream.bandwidth = 100;
-              stream.primary = true;
-              stream.roles = ['main'];
-              stream.mime('audio/mp4', 'mp4a.40.29');
-            });
-          });
-          manifest.addPartialTextStream((stream) => {
-            stream.language = 'es';
-            stream.originalLanguage = 'spa';
-            stream.label = 'spanish';
-            stream.primary = true;
-            stream.mimeType = 'text/vtt';
-            stream.bandwidth = 100;
-            stream.kind = 'caption';
-            stream.roles = ['caption', 'main'];
-          });
-        }));
-  });
-
-  describe('parses and inherits attributes without sequenceMode', () => {
-    beforeEach(() => {
-      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-      config.dash.sequenceMode = false;
       parser.configure(config);
     });
 
@@ -250,7 +165,6 @@ describe('DashParser Manifest', () => {
           '</MPD>',
         ],
         shaka.test.ManifestGenerator.generate((manifest) => {
-          manifest.sequenceMode = false;
           manifest.type = shaka.media.ManifestParser.DASH;
           manifest.anyTimeline();
           manifest.addPartialVariant((variant) => {

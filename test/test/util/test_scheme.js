@@ -53,7 +53,6 @@ let ExtraMetadataType;
  *   licenseServers: (!Object<string, string>|undefined),
  *   licenseRequestHeaders: (!Object<string, string>|undefined),
  *   customizeStream: (function(shaka.test.ManifestGenerator.Stream)|undefined),
- *   sequenceMode: (boolean|undefined),
  *   nextUrl: (string|undefined)
  * }}
  */
@@ -299,7 +298,6 @@ shaka.test.TestScheme = class {
 
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.presentationTimeline.setDuration(data.duration);
-        manifest.sequenceMode = data.sequenceMode || false;
         if (data.nextUrl) {
           manifest.nextUrl = data.nextUrl + suffix;
         }
@@ -548,15 +546,6 @@ shaka.test.TestScheme.DATA = {
     duration: 30,
   },
 
-  // Like 'sintel', but flagged as sequence mode.
-  'sintel_sequence': {
-    video: sintelVideoSegment,
-    audio: sintelAudioSegment,
-    text: vttSegment,
-    duration: 30,
-    sequenceMode: true,
-  },
-
   // Like 'sintel', but much longer to test buffering and seeking.
   'sintel_long': {
     video: sintelVideoSegment,
@@ -633,7 +622,6 @@ shaka.test.TestScheme.DATA = {
     video: sintelEncryptedVideo,
     audio: sintelEncryptedAudio,
     duration: 30,
-    sequenceMode: true,
     customizeStream: (stream) => {
       stream.encrypted = true;
       stream.addDrmInfo('org.w3.clearkey');

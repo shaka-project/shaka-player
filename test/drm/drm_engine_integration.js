@@ -132,7 +132,7 @@ describe('DrmEngine', () => {
     const expectedObject = new Map();
     expectedObject.set(ContentType.AUDIO, audioStream);
     expectedObject.set(ContentType.VIDEO, videoStream);
-    await mediaSourceEngine.init(expectedObject, false);
+    await mediaSourceEngine.init(expectedObject);
   });
 
   afterEach(async () => {

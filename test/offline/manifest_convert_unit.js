@@ -108,7 +108,6 @@ describe('ManifestConverter', () => {
         },
         appMetadata: null,
         creationTime: 0,
-        sequenceMode: false,
       };
 
       const manifest = createConverter().fromManifestDB(manifestDb);
@@ -145,7 +144,6 @@ describe('ManifestConverter', () => {
           createVideoStreamDB(1, [0]),
           createVideoStreamDB(2, [1]),
         ],
-        sequenceMode: false,
       };
 
       const manifest = createConverter().fromManifestDB(manifestDb);
@@ -173,7 +171,6 @@ describe('ManifestConverter', () => {
           createAudioStreamDB(1, [0]),
           createAudioStreamDB(2, [1]),
         ],
-        sequenceMode: false,
       };
 
       const manifest = createConverter().fromManifestDB(manifestDb);
@@ -201,11 +198,9 @@ describe('ManifestConverter', () => {
           createVideoStreamDB(1, [0]),
           createAudioStreamDB(2, [0]),
         ],
-        sequenceMode: true,
       };
 
       const manifest = createConverter().fromManifestDB(manifestDb);
-      expect(manifest.sequenceMode).toBe(true);
       expect(manifest.variants.length).toBe(1);
     });
 
@@ -224,7 +219,6 @@ describe('ManifestConverter', () => {
           createVideoStreamDB(1, [0]),
           createTextStreamDB(2),
         ],
-        sequenceMode: false,
       };
 
       const manifest = createConverter().fromManifestDB(manifestDb);
@@ -263,7 +257,6 @@ describe('ManifestConverter', () => {
           createVideoStreamDB(video1, [variant1]),
           createVideoStreamDB(video2, [variant2, variant3]),
         ],
-        sequenceMode: false,
       };
 
       const manifest = createConverter().fromManifestDB(manifestDb);

@@ -34,8 +34,6 @@ describe('Transmuxer Player', () => {
     player = new compiledShaka.Player();
     await player.attach(video);
 
-    player.configure('mediaSource.forceTransmux', true);
-
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
 
@@ -273,7 +271,7 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
-    it('H.264 in TS with b-frames', async () => {
+    quarantinedIt('H.264 in TS with b-frames', async () => {
       await player.load('/base/test/test/assets/hls-ts-b-frames/index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);

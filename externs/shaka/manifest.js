@@ -18,7 +18,6 @@
  *   imageStreams: !Array<shaka.extern.Stream>,
  *   chapterStreams: !Array<shaka.extern.Stream>,
  *   offlineSessionIds: !Array<string>,
- *   sequenceMode: boolean,
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   type: string,
  *   serviceDescription: ?shaka.extern.ServiceDescription,
@@ -79,16 +78,12 @@
  * @property {!Array<string>} offlineSessionIds
  *   <i>Defaults to [].</i> <br>
  *   An array of EME sessions to load for offline playback.
- * @property {boolean} sequenceMode
- *   If true, we will append the media segments using sequence mode; that is to
- *   say, ignoring any timestamps inside the media files.
  * @property {boolean} ignoreManifestTimestampsInSegmentsMode
  *   If true, don't adjust the timestamp offset to account for manifest
  *   segment durations being out of sync with segment durations. In other
  *   words, assume that there are no gaps in the segments when appending
  *   to the SourceBuffer, even if the manifest and segment times disagree.
- *   Only applies when sequenceMode is <code>false</code>, and only for HLS
- *   streams.
+ *   Only for HLS streams.
  *   <i>Defaults to <code>false</code>.</i>
  * @property {string} type
  *   Indicates the type of the manifest. It can be <code>'HLS'</code> or

@@ -307,7 +307,7 @@ describe('CastUtils', () => {
         const initObject = new Map();
         initObject.set(ContentType.VIDEO, fakeVideoStream);
 
-        await mediaSourceEngine.init(initObject, false);
+        await mediaSourceEngine.init(initObject);
         const data = await shaka.test.Util.fetch(initSegmentUrl);
         await mediaSourceEngine.appendBuffer(
             ContentType.VIDEO, data, null, fakeStream,
