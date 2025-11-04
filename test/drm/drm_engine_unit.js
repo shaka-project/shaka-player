@@ -1199,6 +1199,24 @@ describe('DrmEngine', () => {
       expect(session1.generateRequest).toHaveBeenCalledWith('cenc', initData);
     });
 
+    it('updates mediaTypes from updateCurrentDrmInfo', async () => {
+      let expectedMediaTypes = ['text/plain'];
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].mediaTypes = expectedMediaTypes;
+      });
+      await drmEngine.initForPlayback(
+          manifest.variants, manifest.offlineSessionIds);
+      expect(drmEngine.getDrmInfo().mediaTypes).toEqual(expectedMediaTypes);
+
+      await drmEngine.attach(mockVideo);
+      expectedMediaTypes = ['image/jpeg'];
+      const expectedDrmInfo = drmEngine.getDrmInfo();
+      expectedDrmInfo.mediaTypes = expectedMediaTypes;
+      drmEngine.updateCurrentDrmInfo(expectedDrmInfo);
+
+      expect(drmEngine.getDrmInfo().mediaTypes).toEqual(expectedMediaTypes);
+    });
+
     it('uses clearKeys config to override DrmInfo', async () => {
       tweakDrmInfos((drmInfos) => {
         drmInfos[0].keySystem = 'com.fake.NOT.clearkey';
