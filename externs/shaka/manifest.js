@@ -106,8 +106,7 @@
  * @property {number} gapCount
  *   The amount of gaps found in a manifest. For DASH, it represents number of
  *   discontinuities found between periods. For HLS, it is a number of EXT-X-GAP
- *   and GAP=YES occurrences. For MSS, it is always set to 0.
- *   If in src= mode or nothing is loaded, NaN.
+ *   and GAP=YES occurrences.
  * @property {boolean} isLowLatency
  *   If true, the manifest is Low Latency.
  * @property {?number} startTime
@@ -384,7 +383,6 @@ shaka.extern.SegmentIndex = class {
  *   matchedStreams:
  *      (!Array<shaka.extern.Stream>|!Array<shaka.extern.StreamDB>|
  *      undefined),
- *   mssPrivateData: (shaka.extern.MssPrivateData|undefined),
  *   external: boolean,
  *   fastSwitching: boolean,
  *   fullMimeTypes: !Set<string>,
@@ -530,9 +528,6 @@ shaka.extern.SegmentIndex = class {
  * @property {(!Array<shaka.extern.Stream>|!Array<shaka.extern.StreamDB>|
  *   undefined)} matchedStreams
  *   The streams in all periods which match the stream. Used for Dash.
- * @property {(shaka.extern.MssPrivateData|undefined)} mssPrivateData
- *   <i>Microsoft Smooth Streaming only.</i> <br>
- *   Private MSS data that is necessary to be able to do transmuxing.
  * @property {boolean} external
  *   Indicate if the stream was added externally.
  *   Eg: external text tracks.
@@ -554,30 +549,6 @@ shaka.extern.SegmentIndex = class {
  * @exportDoc
  */
 shaka.extern.Stream;
-
-
-/**
- * @typedef {{
- *   duration: number,
- *   timescale: number,
- *   codecPrivateData: ?string
- * }}
- *
- * @description
- * Private MSS data that is necessary to be able to do transmuxing.
- *
- * @property {number} duration
- *   <i>Required.</i> <br>
- *   MSS Stream duration.
- * @property {number} timescale
- *   <i>Required.</i> <br>
- *   MSS timescale.
- * @property {?string} codecPrivateData
- *   MSS codecPrivateData.
- *
- * @exportDoc
- */
-shaka.extern.MssPrivateData;
 
 
 /**
