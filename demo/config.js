@@ -467,7 +467,11 @@ shakaDemo.Config = class {
         .addNumberInput_('Min Bandwidth', prefix + 'minBandwidth')
         .addNumberInput_('Max Bandwidth', prefix + 'maxBandwidth')
         .addNumberInput_('Min Channels Count', prefix + 'minChannelsCount')
-        .addNumberInput_('Max Channels Count', prefix + 'maxChannelsCount');
+        .addNumberInput_('Max Channels Count', prefix + 'maxChannelsCount')
+        .addArrayStringInput_(
+            'Restricted video codecs', prefix + 'restrictedVideoCodecs')
+        .addArrayStringInput_(
+            'Restricted audio codecs', prefix + 'restrictedAudioCodecs');
   }
 
   /**
