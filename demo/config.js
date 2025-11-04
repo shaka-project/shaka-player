@@ -265,7 +265,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Use stream once in period flattening',
             'manifest.dash.useStreamOnceInPeriodFlattening')
         .addBoolInput_('Enable fast switching',
-            'manifest.dash.enableFastSwitching');
+            'manifest.dash.enableFastSwitching')
+        .addBoolInput_('Enable period caching',
+            'manifest.dash.enablePeriodCaching');
   }
 
   /** @private */
