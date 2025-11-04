@@ -4023,10 +4023,10 @@ describe('Player', () => {
       player.configure({
         restrictions: {
           restrictedVideoCodecs: [
-              'avc1.640028',
-              'avc1.640029',
-          ]
-        }
+            'avc1.640028',
+            'avc1.640029',
+          ],
+        },
       });
 
       const tracks = player.getVariantTracks();
@@ -4054,8 +4054,8 @@ describe('Player', () => {
 
       player.configure({
         restrictions: {
-          restrictedAudioCodecs: ['mp4a.40.5']
-        }
+          restrictedAudioCodecs: ['mp4a.40.5'],
+        },
       });
 
       const tracks = player.getVariantTracks();
