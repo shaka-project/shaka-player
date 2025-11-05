@@ -469,3 +469,21 @@ Shaka + Angular integration:
 
 If you have published Shaka Integration code/tutorials, please feel free to submit PRs
 to add them to this list, we will gladly approve!
+
+## Maintained by ##
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/logos/ateme-logo-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/logos/ateme-logo-light.png">
+  <img alt="Ateme" src="docs/logos/ateme-logo-light.png" height="55">
+</picture>
+&nbsp;&nbsp;
+<picture>
+  <img alt="Google" src="docs/logos/google.png" height="55">
+</picture>
+&nbsp;&nbsp;
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/logos/paramout-logo-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/logos/paramout-logo-light.svg">
+  <img alt="Paramount" src="docs/logos/paramout-logo-light.svg" height="55">
+</picture>
