@@ -776,10 +776,6 @@ shakaDemo.Main = class {
         !this.support_.manifest['application/x-mpegurl']) {
       return 'Your browser does not support HLS manifests.';
     }
-    if (asset.features.includes(shakaAssets.Feature.MSS) &&
-        !this.support_.manifest['application/vnd.ms-sstr+xml']) {
-      return 'Your browser does not support MSS manifests.';
-    }
 
     // Does the asset contain a playable mime type?
     const mimeTypes = [];
