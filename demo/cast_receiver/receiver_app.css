@@ -57,7 +57,7 @@ body {
   z-index: 99;
   background-color: white;
 
-  background-image: url("shaka-player-logo.png");
+  background-image: url("shaka-player-logo-light.png");
   background-repeat: no-repeat;
   background-position: center;
 }
