@@ -450,8 +450,18 @@ to add them to this list, we will gladly approve!
 
 ## Maintained by ##
 
-[<img src="docs/logos/ateme.png" alt="Ateme" height="55">](https://www.ateme.com/)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/logos/ateme-logo-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/logos/ateme-logo-light.png">
+  <img alt="Ateme" src="docs/logos/ateme-logo-light.png" height="55">
+</picture>
 &nbsp;&nbsp;
-[<img src="docs/logos/google.png" alt="Google" height="55">](https://www.google.com/)
+<picture>
+  <img alt="Google" src="docs/logos/google.png" height="55">
+</picture>
 &nbsp;&nbsp;
-[<img src="docs/logos/paramount.png" alt="Paramount" height="55">](https://www.paramount.com/)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/logos/paramout-logo-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/logos/paramout-logo-light.svg">
+  <img alt="Paramount" src="docs/logos/paramout-logo-light.svg" height="55">
+</picture>
