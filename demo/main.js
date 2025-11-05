@@ -1415,10 +1415,7 @@ shakaDemo.Main = class {
           try {
             // If IMA is blocked by an AdBlocker, init() will throw.
             // If that happens, just proceed to load.
-            goog.asserts.assert(
-                this.video_ != null, 'this.video should exist!');
-            adManager.initClientSide(
-                this.controls_.getClientSideAdContainer(), this.video_,
+            adManager.initClientSide(this.controls_.getClientSideAdContainer(),
                 /** adsRenderingSettings= */ null);
             const adRequest = new google.ima.AdsRequest();
             adRequest.adTagUrl = adTagUri;
@@ -1704,12 +1701,10 @@ shakaDemo.Main = class {
    */
   async getManifestUriFromAdManager_(asset) {
     const adManager = this.controls_.getAdManager();
-    const container = this.controls_.getServerSideAdContainer();
     try {
       // If IMA is blocked by an AdBlocker, init() will throw.
       // If that happens, return our backup uri.
-      goog.asserts.assert(this.video_ != null, 'Video should not be null!');
-      adManager.initServerSide(container, this.video_);
+      adManager.initServerSide(this.controls_.getServerSideAdContainer());
       let request;
       if (asset.imaAssetKey != null) {
         // LIVE stream
@@ -1757,16 +1752,9 @@ shakaDemo.Main = class {
    */
   async getManifestUriFromMediaTailorAdManager_(asset) {
     const adManager = this.controls_.getAdManager();
-    const container = this.controls_.getServerSideAdContainer();
     try {
       goog.asserts.assert(asset.mediaTailorUrl != null,
           'Media Tailor info not be null!');
-      if (adManager.initMediaTailor) {
-        goog.asserts.assert(this.video_ != null, 'Video should not be null!');
-        const netEngine = this.player_.getNetworkingEngine();
-        goog.asserts.assert(netEngine, 'There should be a net engine.');
-        adManager.initMediaTailor(container, netEngine, this.video_);
-      }
       const uri = await adManager.requestMediaTailorStream(
           asset.mediaTailorUrl, asset.mediaTailorAdsParams,
           /* backupUri= */ asset.manifestUri);

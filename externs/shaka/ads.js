@@ -270,6 +270,12 @@ shaka.extern.IAdManager = class extends EventTarget {
   setLocale(locale) {}
 
   /**
+   * @param {!HTMLElement} clientSideAdContainer
+   * @param {!HTMLElement} serverSideAdContainer
+   */
+  setContainers(clientSideAdContainer, serverSideAdContainer) {}
+
+  /**
    * Called by the Player to provide an updated configuration any time it
    * changes.
    * Must be called at least once before init*().
@@ -284,17 +290,14 @@ shaka.extern.IAdManager = class extends EventTarget {
 
   /**
    * @param {?HTMLElement} adContainer
-   * @param {!shaka.Player} basePlayer
-   * @param {!HTMLMediaElement} baseVideo
    */
-  initInterstitial(adContainer, basePlayer, baseVideo) {}
+  initInterstitial(adContainer) {}
 
   /**
    * @param {!HTMLElement} adContainer
-   * @param {!HTMLMediaElement} video
    * @param {?google.ima.AdsRenderingSettings} adsRenderingSettings
    */
-  initClientSide(adContainer, video, adsRenderingSettings) {}
+  initClientSide(adContainer, adsRenderingSettings) {}
 
   /**
    * @param {!google.ima.AdsRequest} imaRequest
@@ -308,10 +311,8 @@ shaka.extern.IAdManager = class extends EventTarget {
 
   /**
    * @param {?HTMLElement} adContainer
-   * @param {!shaka.net.NetworkingEngine} networkingEngine
-   * @param {!HTMLMediaElement} video
    */
-  initMediaTailor(adContainer, networkingEngine, video) {}
+  initMediaTailor(adContainer) {}
 
   /**
    * @param {string} url
@@ -328,9 +329,8 @@ shaka.extern.IAdManager = class extends EventTarget {
 
   /**
    * @param {!HTMLElement} adContainer
-   * @param {!HTMLMediaElement} video
    */
-  initServerSide(adContainer, video) {}
+  initServerSide(adContainer) {}
 
   /**
    * @param {!google.ima.dai.api.StreamRequest} imaRequest
@@ -379,19 +379,15 @@ shaka.extern.IAdManager = class extends EventTarget {
   onCueMetadataChange(value) {}
 
   /**
-   * @param {!shaka.Player} basePlayer
-   * @param {!HTMLMediaElement} baseVideo
    * @param {shaka.extern.HLSMetadata} metadata
    * @return {!Promise}
    */
-  onHLSMetadata(basePlayer, baseVideo, metadata) {}
+  onHLSMetadata(metadata) {}
 
   /**
-   * @param {!shaka.Player} basePlayer
-   * @param {!HTMLMediaElement} baseVideo
    * @param {shaka.extern.TimelineRegionInfo} region
    */
-  onDASHMetadata(basePlayer, baseVideo, region) {}
+  onDASHMetadata(region) {}
 
   /**
    * @param {shaka.extern.AdInterstitial} interstitial

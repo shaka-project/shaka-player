@@ -46,7 +46,7 @@ describe('Ad manager', () => {
           shaka.util.Error.Code.CS_IMA_SDK_MISSING);
 
       expect(() => adManager.initClientSide(
-          adContainer, mockVideo, adsRenderingSettings)).toThrow(error);
+          adContainer, adsRenderingSettings)).toThrow(error);
     });
 
     it('doesn\'t request ads until CS is initialized', () => {
@@ -161,7 +161,7 @@ describe('Ad manager', () => {
       });
 
       // Set up the ad manager.
-      adManager.initClientSide(adContainer, mockVideo, adsRenderingSettings);
+      adManager.initClientSide(adContainer, adsRenderingSettings);
       goog.asserts.assert(loadEvent != null, 'loadEvent exists');
       mockAdsLoaderInstance.dispatchEvent(/** @type {!Event} */ (loadEvent));
       expect(loaded).toBe(true);
@@ -189,8 +189,7 @@ describe('Ad manager', () => {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Code.SS_IMA_SDK_MISSING);
 
-      expect(() => adManager.initServerSide(
-          adContainer, mockVideo)).toThrow(error);
+      expect(() => adManager.initServerSide(adContainer)).toThrow(error);
     });
 
     it('doesn\'t request streams until SS is initialized', () => {

@@ -72,6 +72,7 @@ describe('CastUtils', () => {
       'constructor', // JavaScript added field
       'release', // Handled by Player
       'onAssetUnload', // Handled by Player
+      'setContainers',
       'initInterstitial',
       'initClientSide',
       'initMediaTailor',

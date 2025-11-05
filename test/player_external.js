@@ -270,7 +270,7 @@ describe('Player', () => {
    */
   async function getManifestUriFromAdManager(asset) {
     try {
-      adManager.initServerSide(adContainer, video);
+      adManager.initServerSide(adContainer);
       let request;
       if (asset.imaAssetKey != null) {
         // LIVE stream
@@ -315,9 +315,7 @@ describe('Player', () => {
    */
   async function getManifestUriFromMediaTailorAdManager(asset) {
     try {
-      const netEngine = player.getNetworkingEngine();
-      goog.asserts.assert(netEngine, 'There should be a net engine.');
-      adManager.initMediaTailor(adContainer, netEngine, video);
+      adManager.initMediaTailor(adContainer);
       goog.asserts.assert(asset.mediaTailorUrl != null,
           'Media Tailor info not be null!');
       const uri = await adManager.requestMediaTailorStream(

@@ -26,13 +26,16 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   setLocale(locale) {}
 
   /** @override */
+  setContainers(clientSideAdContainer, serverSideAdContainer) {}
+
+  /** @override */
   configure(config) {}
 
   /** @override */
-  initInterstitial(adContainer, basePlayer, baseVideo) {}
+  initInterstitial(adContainer) {}
 
   /** @override */
-  initClientSide(adContainer, video, adsRenderingSettings) {}
+  initClientSide(adContainer, adsRenderingSettings) {}
 
   /** @override */
   onAssetUnload() {}
@@ -46,7 +49,7 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   updateClientSideAdsRenderingSettings(adsRenderingSettings) {}
 
   /** @override */
-  initMediaTailor(networkingEngine, video) {}
+  initMediaTailor(adContainer) {}
 
   /** @override */
   requestMediaTailorStream(url, adsParams, backupUrl) {
@@ -57,7 +60,7 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   addMediaTailorTrackingUrl(url) {}
 
   /** @override */
-  initServerSide(adContainer, video) {}
+  initServerSide(adContainer) {}
 
   /** @override */
   requestServerSideStream(imaRequest, backupUrl = '') {
@@ -90,10 +93,10 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   onCueMetadataChange(data) {}
 
   /** @override */
-  onHLSMetadata(basePlayer, baseVideo, metadata) {}
+  onHLSMetadata(metadata) {}
 
   /** @override */
-  onDASHMetadata(basePlayer, baseVideo, region) {}
+  onDASHMetadata(region) {}
 
   /** @override */
   addCustomInterstitial(interstitial) {}

@@ -102,7 +102,7 @@ describe('Ads', () => {
       }
       player.configure('ads.supportsMultipleMediaElements', true);
 
-      adManager.initInterstitial(adContainer, player, video);
+      adManager.initInterstitial(adContainer);
 
       await player.load(streamUri);
       video.play();
@@ -145,7 +145,7 @@ describe('Ads', () => {
     it('without support for multiple media elements', async () => {
       player.configure('ads.supportsMultipleMediaElements', false);
 
-      adManager.initInterstitial(adContainer, player, video);
+      adManager.initInterstitial(adContainer);
 
       await player.load(streamUri);
       video.play();
@@ -210,7 +210,7 @@ describe('Ads', () => {
     it('without support for multiple media elements', async () => {
       player.configure('ads.supportsMultipleMediaElements', false);
 
-      adManager.initInterstitial(adContainer, player, video);
+      adManager.initInterstitial(adContainer);
 
       await player.load(streamUri);
       video.play();

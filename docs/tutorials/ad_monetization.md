@@ -32,9 +32,8 @@ const controls = video.ui.getControls();
 // for your layout.
 const container = controls.getServerSideAdContainer();
 const player = controls.getPlayer();
-const netEngine = player.getNetworkingEngine();
 const adManager = player.getAdManager();
-adManager.initMediaTailor(container, netEngine, video);
+adManager.initMediaTailor(container);
 ```
 
 Requesting a Client Side stream:
@@ -95,7 +94,7 @@ const ui = video['ui'];
 // for your layout.  The ad manager will clear this div, when it unloads, so
 // don't pass in a div that contains non-ad elements.
 const container = video.ui.getControls().getClientSideAdContainer();
-adManager.initInterstitial(container, player, video);
+adManager.initInterstitial(container);
 adManager.addCustomInterstitial({
   id: null,
   groupId: null,
@@ -147,7 +146,7 @@ const ui = video['ui'];
 // for your layout.  The ad manager will clear this div, when it unloads, so
 // don't pass in a div that contains non-ad elements.
 const container = video.ui.getControls().getClientSideAdContainer();
-adManager.initInterstitial(container, player, video);
+adManager.initInterstitial(container);
 player.addEventListener('timelineregionadded', (e) => {
   const event = e.detail;
   if (event.schemeIdUri != 'urn:scte:scte35:2014:xml+bin') {
@@ -197,7 +196,7 @@ const ui = video['ui'];
 // for your layout.  The ad manager will clear this div, when it unloads, so
 // don't pass in a div that contains non-ad elements.
 const container = video.ui.getControls().getClientSideAdContainer();
-adManager.initInterstitial(container, player, video);
+adManager.initInterstitial(container);
 adManager.addCustomInterstitial({
   id: null,
   groupId: null,
@@ -247,7 +246,7 @@ const ui = video['ui'];
 // for your layout.  The ad manager will clear this div, when it unloads, so
 // don't pass in a div that contains non-ad elements.
 const container = video.ui.getControls().getClientSideAdContainer();
-adManager.initInterstitial(container, player, video);
+adManager.initInterstitial(container);
 adManager.addCustomInterstitial({
   id: null,
   groupId: null,
@@ -310,7 +309,7 @@ const ui = video['ui'];
 // for your layout.  The ad manager will clear this div, when it unloads, so
 // don't pass in a div that contains non-ad elements.
 const container = video.ui.getControls().getClientSideAdContainer();
-adManager.initInterstitial(container, player, video);
+adManager.initInterstitial(container);
 adManager.addCustomInterstitial({
   id: null,
   groupId: null,
@@ -377,7 +376,7 @@ const ui = video['ui'];
 // for your layout.  The ad manager will clear this div, when it unloads, so
 // don't pass in a div that contains non-ad elements.
 const container = video.ui.getControls().getClientSideAdContainer();
-adManager.initInterstitial(container, player, video);
+adManager.initInterstitial(container);
 const url = 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
 adManager.addAdUrlInterstitial(url);
 ```
@@ -436,7 +435,7 @@ const ui = video['ui'];
 // for your layout.  The ad manager will clear this div, when it unloads, so
 // don't pass in a div that contains non-ad elements.
 const container = video.ui.getControls().getClientSideAdContainer();
-adManager.initClientSide(container, video);
+adManager.initClientSide(container);
 ```
 
 With the client side logic initialized, you can request ads at any time during
@@ -489,7 +488,7 @@ const ui = video['ui'];
 // If you're using a non-UI build, this is the div you'll need to create
 // for your layout.
 const container = video.ui.getControls().getServerSideAdContainer();
-adManager.initServerSide(container, video);
+adManager.initServerSide(container);
 ```
 
 With server side logic initialized, you can request and load streams with
