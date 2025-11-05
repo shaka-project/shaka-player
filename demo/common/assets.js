@@ -162,8 +162,6 @@ shakaAssets.Feature = {
   DASH: 'DASH',
   // Set if the asset is an HLS manifest.
   HLS: 'HLS',
-  // Set if the asset is an MSS manifest.
-  MSS: 'MSS',
 
   // Set if the asset has at least one image stream.
   THUMBNAILS: 'Thumbnails',
@@ -1574,49 +1572,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addLicenseServer('com.microsoft.playready', 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,ck:W31bfVt9W31bfVt9W31bfQ==,ckt:aescbc)'),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Super Speedway Trailer (MSS - Clear)',
-      /* iconUri= */ 'https://reference.dashif.org/dash.js/latest/samples/lib/img/mss-1.jpg',
-      /* manifestUri= */ 'https://test.playready.microsoft.com/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest',
-      /* source= */ shakaAssets.Source.MICROSOFT)
-      .addFeature(shakaAssets.Feature.MSS)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.OFFLINE),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Super Speedway Trailer (MSS - PlayReady)',
-      /* iconUri= */ 'https://reference.dashif.org/dash.js/latest/samples/lib/img/mss-1.jpg',
-      /* manifestUri= */ 'https://test.playready.microsoft.com/smoothstreaming/SSWSS720H264PR/SuperSpeedway_720.ism/Manifest',
-      /* source= */ shakaAssets.Source.MICROSOFT)
-      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
-      .addFeature(shakaAssets.Feature.MSS)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)')
-      .addOfflineLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:true,sl:150)')
-      .setMimeType('application/vnd.ms-sstr+xml'),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Taxi3 soundtrack (MSS - Clear)',
-      /* iconUri= */ '',
-      /* manifestUri= */ 'https://test.playready.microsoft.com/media/profficialsite/Taxi3_AACHE.ism/manifest',
-      /* source= */ shakaAssets.Source.MICROSOFT)
-      .addFeature(shakaAssets.Feature.MSS)
-      .addFeature(shakaAssets.Feature.AUDIO_ONLY)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.OFFLINE),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Taxi3 soundtrack (MSS - PlayReady)',
-      /* iconUri= */ '',
-      /* manifestUri= */ 'https://test.playready.microsoft.com/media/profficialsite/Taxi3_AACHEPR.ism/manifest',
-      /* source= */ shakaAssets.Source.MICROSOFT)
-      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
-      .addFeature(shakaAssets.Feature.MSS)
-      .addFeature(shakaAssets.Feature.AUDIO_ONLY)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)')
-      .addOfflineLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:true,sl:150)'),
-  new ShakaDemoAssetInfo(
       /* name= */ 'Big Buck Bunny CBCS AV1 (DASH - PlayReady)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
       /* manifestUri= */ 'https://test.playready.microsoft.com/media/dash/BBBAV1CBC/manifest.mpd',
@@ -1659,18 +1614,6 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.MICROSOFT)
       .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
       .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)')
-      .addOfflineLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:true,sl:150)'),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Tears of Steel (MSS - PlayReady)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
-      /* manifestUri= */ 'https://test.playready.microsoft.com/media/profficialsite/tearsofsteel_4k.ism.smoothstreaming/manifest',
-      /* source= */ shakaAssets.Source.MICROSOFT)
-      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
-      .addFeature(shakaAssets.Feature.MSS)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.OFFLINE)

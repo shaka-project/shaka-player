@@ -527,7 +527,7 @@ describe('VttTextParser', () => {
         '00:00:40.000 --> 00:00:50.000 line:-1\n' +
         'Test2',
         {periodStart: 0, segmentStart: 25, segmentEnd: 65, vttOffset: 0},
-        /* hls= */ true, /* sequenceMode= */ true);
+        /* hls= */ true);
   });
 
   it('ignores X-TIMESTAMP-MAP header if not HLS', () => {
@@ -543,7 +543,7 @@ describe('VttTextParser', () => {
         '00:00:40.000 --> 00:00:50.000 line:-1\n' +
         'Test2',
         {periodStart: 0, segmentStart: 25, segmentEnd: 65, vttOffset: 0},
-        /* hls= */ false, /* sequenceMode= */ false);
+        /* hls= */ false);
   });
 
   it('parses X-TIMESTAMP-MAP header with non-zero local base', () => {
@@ -562,7 +562,7 @@ describe('VttTextParser', () => {
         '01:00:20.000 --> 01:00:30.000 line:-1\n' +
         'Test2',
         {periodStart: 0, segmentStart: 25, segmentEnd: 65, vttOffset: 0},
-        /* hls= */ true, /* sequenceMode= */ true);
+        /* hls= */ true);
   });
 
   it('combines X-TIMESTAMP-MAP header with periodStart', () => {
@@ -580,7 +580,7 @@ describe('VttTextParser', () => {
         '00:00:40.000 --> 00:00:50.000 line:-1\n' +
         'Test2',
         {periodStart: 100, segmentStart: 25, segmentEnd: 65, vttOffset: 0},
-        /* hls= */ true, /* sequenceMode= */ true);
+        /* hls= */ true);
   });
 
   it('handles timestamp rollover with X-TIMESTAMP-MAP header', () => {
@@ -597,7 +597,7 @@ describe('VttTextParser', () => {
         // Non-null segmentStart takes precedence over X-TIMESTAMP-MAP.
         // This protects us from rollover in the MPEGTS field.
         {periodStart: 0, segmentStart: 95440, segmentEnd: 95550, vttOffset: 0},
-        /* hls= */ true, /* sequenceMode= */ true);
+        /* hls= */ true);
 
     verifyHelper(
         [
@@ -611,7 +611,7 @@ describe('VttTextParser', () => {
         '00:00:00.000 --> 00:00:02.000 line:0\n' +
         'Test2',
         {periodStart: 0, segmentStart: 95550, segmentEnd: 95560, vttOffset: 0},
-        /* hls= */ true, /* sequenceMode= */ true);
+        /* hls= */ true);
   });
 
   // A mock-up of HLS live subs as seen in b/253104251.
@@ -633,7 +633,7 @@ describe('VttTextParser', () => {
           segmentEnd: 3610,
           vttOffset: -1234567,
         },
-        /* hls= */ true, /* sequenceMode= */ true);
+        /* hls= */ true);
   });
 
   it('supports global style blocks', () => {
@@ -1415,9 +1415,8 @@ describe('VttTextParser', () => {
    * @param {string} text
    * @param {shaka.extern.TextParser.TimeContext} time
    * @param {boolean=} hls
-   * @param {boolean=} sequenceMode
    */
-  function verifyHelper(cues, text, time, hls = false, sequenceMode = false) {
+  function verifyHelper(cues, text, time, hls = false) {
     const data =
         shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
 
@@ -1425,7 +1424,6 @@ describe('VttTextParser', () => {
     if (hls) {
       parser.setManifestType(shaka.media.ManifestParser.HLS);
     }
-    parser.setSequenceMode(sequenceMode);
 
     const result = parser.parseMedia(data, time);
 

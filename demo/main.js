@@ -776,10 +776,6 @@ shakaDemo.Main = class {
         !this.support_.manifest['application/x-mpegurl']) {
       return 'Your browser does not support HLS manifests.';
     }
-    if (asset.features.includes(shakaAssets.Feature.MSS) &&
-        !this.support_.manifest['application/vnd.ms-sstr+xml']) {
-      return 'Your browser does not support MSS manifests.';
-    }
 
     // Does the asset contain a playable mime type?
     const mimeTypes = [];
@@ -1763,12 +1759,14 @@ shakaDemo.Main = class {
     const adManager = this.controls_.getAdManager();
     const container = this.controls_.getServerSideAdContainer();
     try {
-      goog.asserts.assert(this.video_ != null, 'Video should not be null!');
       goog.asserts.assert(asset.mediaTailorUrl != null,
           'Media Tailor info not be null!');
-      const netEngine = this.player_.getNetworkingEngine();
-      goog.asserts.assert(netEngine, 'There should be a net engine.');
-      adManager.initMediaTailor(container, netEngine, this.video_);
+      if (adManager.initMediaTailor) {
+        goog.asserts.assert(this.video_ != null, 'Video should not be null!');
+        const netEngine = this.player_.getNetworkingEngine();
+        goog.asserts.assert(netEngine, 'There should be a net engine.');
+        adManager.initMediaTailor(container, netEngine, this.video_);
+      }
       const uri = await adManager.requestMediaTailorStream(
           asset.mediaTailorUrl, asset.mediaTailorAdsParams,
           /* backupUri= */ asset.manifestUri);

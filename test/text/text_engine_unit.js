@@ -20,9 +20,6 @@ describe('TextEngine', () => {
   let mockParseInit;
 
   /** @type {!jasmine.Spy} */
-  let mockSetSequenceMode;
-
-  /** @type {!jasmine.Spy} */
   let mockSetManifestType;
 
   /** @type {!jasmine.Spy} */
@@ -33,14 +30,12 @@ describe('TextEngine', () => {
 
   beforeEach(() => {
     mockParseInit = jasmine.createSpy('mockParseInit');
-    mockSetSequenceMode = jasmine.createSpy('mockSetSequenceMode');
     mockSetManifestType = jasmine.createSpy('mockSetManifestType');
     mockParseMedia = jasmine.createSpy('mockParseMedia');
     // eslint-disable-next-line no-restricted-syntax
     mockParserPlugIn = function() {
       return {
         parseInit: mockParseInit,
-        setSequenceMode: mockSetSequenceMode,
         setManifestType: mockSetManifestType,
         parseMedia: mockParseMedia,
       };
@@ -53,7 +48,6 @@ describe('TextEngine', () => {
     textEngine = new TextEngine(mockDisplayer);
     textEngine.initParser(
         dummyMimeType,
-        /* sequenceMode= */ false,
         /* segmentRelativeVttTiming= */ false,
         shaka.media.ManifestParser.UNKNOWN);
   });
@@ -319,7 +313,6 @@ describe('TextEngine', () => {
     it('vttOffset when segmentRelativeVttTiming is set', async () => {
       textEngine.initParser(
           dummyMimeType,
-          /* sequenceMode= */ false,
           /* segmentRelativeVttTiming= */ true,
           shaka.media.ManifestParser.UNKNOWN);
 

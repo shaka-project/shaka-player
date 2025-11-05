@@ -125,7 +125,7 @@ application:
 
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.
-    - `TextParser` plugins must implement the `setManifestType()` and `setSequenceMode()` methods.
+    - `TextParser` plugins must implement the `setManifestType()` method.
     - `Transmuxer` plugins now has three new parameters in `transmux()` method.
     - Removed `enableTextDisplayer` from `TextDisplayer` plugins
 
