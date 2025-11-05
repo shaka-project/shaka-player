@@ -9,6 +9,7 @@ goog.provide('shaka.ui.SeekBar');
 
 goog.require('shaka.ads.Utils');
 goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.net.NetworkingUtils');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.RangeElement');
@@ -16,7 +17,6 @@ goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Error');
 goog.require('shaka.util.Mp4Parser');
-goog.require('shaka.util.Networking');
 goog.require('shaka.util.Timer');
 goog.requireType('shaka.ui.Controls');
 
@@ -616,7 +616,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           const requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
           const type =
               shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT;
-          const request = shaka.util.Networking.createSegmentRequest(
+          const request = shaka.net.NetworkingUtils.createSegmentRequest(
               thumbnail.uris,
               thumbnail.startByte,
               thumbnail.endByte,
