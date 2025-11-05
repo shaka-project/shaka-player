@@ -112,6 +112,10 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     this.menu.classList.add('shaka-settings-menu');
     this.menu.classList.add('shaka-hidden');
 
+    if (this.controls.getConfig().showMenuOnTheLeft) {
+      this.menu.classList.add('left-position');
+    }
+
     /** @protected {!HTMLButtonElement}*/
     this.backButton = shaka.util.Dom.createButton();
     this.backButton.classList.add('shaka-back-to-overflow-button');

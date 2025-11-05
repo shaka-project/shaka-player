@@ -229,6 +229,7 @@ shaka.extern.UIShortcuts;
  *   allowTogglePresentationTime: boolean,
  *   showRemainingTimeInPresentationTime: boolean,
  *   enableVrDeviceMotion: boolean,
+ *   showMenuOnTheLeft: boolean,
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -489,6 +490,10 @@ shaka.extern.UIShortcuts;
  *   <br>
  *   Defaults to <code>true</code> except on Vision OS where the default value
  *   is <code>false</code>
+ * @property {boolean} showMenuOnTheLeft
+ *   Show overflow and settings menu on the left.
+ *   <br>
+ *   Defaults to <code>false</code>
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

@@ -155,6 +155,9 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     this.overflowMenu_.classList.add('shaka-no-propagation');
     this.overflowMenu_.classList.add('shaka-show-controls-on-mouse-over');
     this.overflowMenu_.classList.add('shaka-hidden');
+    if (this.controls.getConfig().showMenuOnTheLeft) {
+      this.overflowMenu_.classList.add('left-position');
+    }
     this.controlsContainer_.appendChild(this.overflowMenu_);
   }
 
