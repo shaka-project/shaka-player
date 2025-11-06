@@ -217,6 +217,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
         /** @type {!HTMLElement} */ (visibleElements[0]).focus();
       }
       this.computeOverFlowMenuPos_();
+      this.computeOverFlowMenuPos_();
     }
   }
 
