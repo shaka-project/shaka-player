@@ -21,7 +21,7 @@ describe('Interstitial Ad manager', () => {
   /** @type {!shaka.ads.InterstitialAdManager} */
   let interstitialAdManager;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Allows us to use a timer instead of requestVideoFrameCallback
     // (which doesn't work well in all platform tests)
     spyOn(deviceDetected, 'getDeviceType')
@@ -38,9 +38,10 @@ describe('Interstitial Ad manager', () => {
       /** @type {!HTMLElement} */ (document.createElement('div'));
     player = new shaka.Player(null, null, dependencyInjector);
     video = shaka.test.UiUtils.createVideoElement();
+    await player.attach(video);
     onEventSpy = jasmine.createSpy('onEvent');
     interstitialAdManager = new shaka.ads.InterstitialAdManager(
-        adContainer, player, video, shaka.test.Util.spyFunc(onEventSpy));
+        adContainer, player, shaka.test.Util.spyFunc(onEventSpy));
     const config = shaka.util.PlayerConfiguration.createDefault().ads;
     // We always support multiple video elements so that we can properly
     // control timing in unit tests.

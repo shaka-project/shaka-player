@@ -33,6 +33,8 @@ describe('Ad manager', () => {
 
     adContainer =
       /** @type {!HTMLElement} */ (document.createElement('div'));
+
+    adManager.setContainers(adContainer, adContainer);
   });
 
   afterEach(() => {
@@ -40,27 +42,6 @@ describe('Ad manager', () => {
   });
 
   describe('client side', () => {
-    it('doesn\'t init if CS IMA is missing', () => {
-      const error = createError(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Code.CS_IMA_SDK_MISSING);
-
-      expect(() => adManager.initClientSide(
-          adContainer, mockVideo, adsRenderingSettings)).toThrow(error);
-    });
-
-    it('doesn\'t request ads until CS is initialized', () => {
-      setupFakeIMA();
-      const error = createError(
-          shaka.util.Error.Severity.RECOVERABLE,
-          shaka.util.Error.Code.CS_AD_MANAGER_NOT_INITIALIZED);
-
-      const request = new google.ima.AdsRequest();
-      request.adTagUrl = 'fakeTag';
-
-      expect(() => adManager.requestClientSideAds(request)).toThrow(error);
-    });
-
     it('doesn\'t request ads if CS events return no ad', () => {
       setupFakeIMA();
 
@@ -161,13 +142,14 @@ describe('Ad manager', () => {
       });
 
       // Set up the ad manager.
-      adManager.initClientSide(adContainer, mockVideo, adsRenderingSettings);
+
+      // Request an ad, but create an event with no ad.
+      adManager.requestClientSideAds(request, adsRenderingSettings);
+
       goog.asserts.assert(loadEvent != null, 'loadEvent exists');
       mockAdsLoaderInstance.dispatchEvent(/** @type {!Event} */ (loadEvent));
       expect(loaded).toBe(true);
 
-      // Request an ad, but create an event with no ad.
-      adManager.requestClientSideAds(request);
       expect(numAdsRequested).toBe(1);
       mockAdsManagerInstance.dispatchEvent(/** @type {!Event} */ (
         startedEventA));
@@ -175,33 +157,11 @@ describe('Ad manager', () => {
 
       // Request another ad. This time, the IMA event has an ad, so the ad
       // manager should fire a started event.
-      adManager.requestClientSideAds(request);
+      adManager.requestClientSideAds(request, null);
       expect(numAdsRequested).toBe(2);
       mockAdsManagerInstance.dispatchEvent(/** @type {!Event} */ (
         startedEventB));
       expect(numAdStarted).toBe(1);
-    });
-  });
-
-  describe('server side', () => {
-    it('doesn\'t init if SS IMA is missing', () => {
-      const error = createError(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Code.SS_IMA_SDK_MISSING);
-
-      expect(() => adManager.initServerSide(
-          adContainer, mockVideo)).toThrow(error);
-    });
-
-    it('doesn\'t request streams until SS is initialized', () => {
-      setupFakeIMA();
-      const error = createError(
-          shaka.util.Error.Severity.RECOVERABLE,
-          shaka.util.Error.Code.SS_AD_MANAGER_NOT_INITIALIZED);
-
-      const request = new google.ima.dai.api.StreamRequest();
-
-      expect(() => adManager.requestServerSideStream(request)).toThrow(error);
     });
   });
 

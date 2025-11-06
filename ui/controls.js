@@ -320,8 +320,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.videoContainer_.setAttribute('lang', locale);
         });
 
-    this.adManager_.initInterstitial(
-        this.getClientSideAdContainer(), this.localPlayer_, this.localVideo_);
+    this.adManager_.setContainers(
+        this.getClientSideAdContainer(), this.getServerSideAdContainer());
 
     this.eventManager_.listen(this.player_, 'textchanged', () => {
       this.computeShakaTextContainerSize_();
