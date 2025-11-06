@@ -216,7 +216,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
           Iterables.filter(this.overflowMenu_.childNodes, isDisplayed);
         /** @type {!HTMLElement} */ (visibleElements[0]).focus();
       }
-      this.computeMaxHeight_();
+      this.computeOverFlowMenuPos_();
     }
   }
 
@@ -230,6 +230,13 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
         this.localization.resolve(LocIds.MORE_SETTINGS);
   }
 
+  /**
+   * @private
+   */
+  computeOverFlowMenuPos_(){
+    this.computeMaxHeight_();
+    this.computeHorizontalPosition_();
+  }
 
   /**
    * @private
@@ -244,6 +251,36 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
         rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom;
 
     this.overflowMenu_.style.maxHeight = heightIntersection + 'px';
+  }
+
+  /**
+   * @private
+   */
+  computeHorizontalPosition_(){
+    const bottomControlsPos = this.controlsContainer_.getBoundingClientRect();  
+    const overflowMenuButtonPos = this.overflowMenuButton_.getBoundingClientRect();
+    const leftGap = overflowMenuButtonPos.left - bottomControlsPos.left;
+    const rightGap = bottomControlsPos.right - overflowMenuButtonPos.right;
+    console.log('leftGap', leftGap, 'rightGap', rightGap);
+    // Overflow menu button is either placed to the left or center
+    if(leftGap<rightGap){
+      let overflowMenuLeftEdge  = leftGap - 15;
+      // if the overflow menu's left edge is less than 15px from the left edge of the video container
+      if(overflowMenuLeftEdge - bottomControlsPos.left <15)
+      {
+        overflowMenuLeftEdge = 15;
+      }
+      this.overflowMenu_.style.left = overflowMenuLeftEdge + 'px';
+      this.overflowMenu_.style.right = 'auto';
+    }
+    else{
+      let overFlowMenuRightEdge  = rightGap - 15;
+      if(bottomControlsPos.right - overFlowMenuRightEdge < 15)
+      {
+        overFlowMenuRightEdge = bottomControlsPos.right - 15;
+      }
+      this.overflowMenu_.style.right = overFlowMenuRightEdge + 'px';
+    }
   }
 };
 
