@@ -1415,11 +1415,10 @@ shakaDemo.Main = class {
           try {
             // If IMA is blocked by an AdBlocker, init() will throw.
             // If that happens, just proceed to load.
-            adManager.initClientSide(this.controls_.getClientSideAdContainer(),
-                /** adsRenderingSettings= */ null);
             const adRequest = new google.ima.AdsRequest();
             adRequest.adTagUrl = adTagUri;
-            adManager.requestClientSideAds(adRequest);
+            adManager.requestClientSideAds(adRequest,
+                /** adsRenderingSettings= */ null);
           } catch (error) {
             console.log(error);
             console.warn('Ads code has been prevented from running. ' +
@@ -1704,7 +1703,6 @@ shakaDemo.Main = class {
     try {
       // If IMA is blocked by an AdBlocker, init() will throw.
       // If that happens, return our backup uri.
-      adManager.initServerSide(this.controls_.getServerSideAdContainer());
       let request;
       if (asset.imaAssetKey != null) {
         // LIVE stream

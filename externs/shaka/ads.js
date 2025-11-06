@@ -291,15 +291,10 @@ shaka.extern.IAdManager = class extends EventTarget {
   // IMA SDK Client Side
 
   /**
-   * @param {!HTMLElement} adContainer
+   * @param {!google.ima.AdsRequest} imaRequest
    * @param {?google.ima.AdsRenderingSettings} adsRenderingSettings
    */
-  initClientSide(adContainer, adsRenderingSettings) {}
-
-  /**
-   * @param {!google.ima.AdsRequest} imaRequest
-   */
-  requestClientSideAds(imaRequest) {}
+  requestClientSideAds(imaRequest, adsRenderingSettings) {}
 
   /**
    * @param {!google.ima.AdsRenderingSettings} adsRenderingSettings
@@ -307,11 +302,6 @@ shaka.extern.IAdManager = class extends EventTarget {
   updateClientSideAdsRenderingSettings(adsRenderingSettings) {}
 
   // IMA DAI SDK Server Side
-
-  /**
-   * @param {!HTMLElement} adContainer
-   */
-  initServerSide(adContainer) {}
 
   /**
    * @param {!google.ima.dai.api.StreamRequest} imaRequest

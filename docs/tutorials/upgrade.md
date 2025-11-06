@@ -139,5 +139,5 @@ application:
   - Ad Manager API Changes:
     - Added `setContainers` to set the CS and SS containers.
     - Removed `video` and `player` params on all methods.
-    - Removed `initMediaTailor` and `initInterstitial` since now are auto-initialized when necessary.
+    - Removed `initClientSide`, `initServerSide`, `initMediaTailor` and `initInterstitial` since now are auto-initialized when necessary.
     - `onDashTimedMetadata` has been removed.

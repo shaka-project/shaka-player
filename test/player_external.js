@@ -270,7 +270,7 @@ describe('Player', () => {
    */
   async function getManifestUriFromAdManager(asset) {
     try {
-      adManager.initServerSide(adContainer);
+      adManager.setContainers(adContainer, adContainer);
       let request;
       if (asset.imaAssetKey != null) {
         // LIVE stream

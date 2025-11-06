@@ -73,8 +73,6 @@ describe('CastUtils', () => {
       'release', // Handled by Player
       'onAssetUnload', // Handled by Player
       'setContainers',
-      'initClientSide',
-      'initServerSide',
       'onManifestUpdated', // Handled by Player
       'onHlsTimedMetadata', // Handled by Player
       'onCueMetadataChange', // Handled by Player
