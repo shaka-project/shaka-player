@@ -315,7 +315,7 @@ describe('Player', () => {
    */
   async function getManifestUriFromMediaTailorAdManager(asset) {
     try {
-      adManager.initMediaTailor(adContainer);
+      adManager.setContainers(adContainer, adContainer);
       goog.asserts.assert(asset.mediaTailorUrl != null,
           'Media Tailor info not be null!');
       const uri = await adManager.requestMediaTailorStream(

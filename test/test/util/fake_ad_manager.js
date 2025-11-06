@@ -20,9 +20,6 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   }
 
   /** @override */
-  release() {}
-
-  /** @override */
   setLocale(locale) {}
 
   /** @override */
@@ -32,13 +29,13 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   configure(config) {}
 
   /** @override */
-  initInterstitial(adContainer) {}
-
-  /** @override */
-  initClientSide(adContainer, adsRenderingSettings) {}
+  release() {}
 
   /** @override */
   onAssetUnload() {}
+
+  /** @override */
+  initClientSide(adContainer, adsRenderingSettings) {}
 
   /** @override */
   requestClientSideAds(imaRequest) {
@@ -47,17 +44,6 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
 
   /** @override */
   updateClientSideAdsRenderingSettings(adsRenderingSettings) {}
-
-  /** @override */
-  initMediaTailor(adContainer) {}
-
-  /** @override */
-  requestMediaTailorStream(url, adsParams, backupUrl) {
-    return Promise.resolve('fake:url');
-  }
-
-  /** @override */
-  addMediaTailorTrackingUrl(url) {}
 
   /** @override */
   initServerSide(adContainer) {}
@@ -69,6 +55,23 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
 
   /** @override */
   replaceServerSideAdTagParameters(adTagParameters) {}
+
+  /** @override */
+  requestMediaTailorStream(url, adsParams, backupUrl) {
+    return Promise.resolve('fake:url');
+  }
+
+  /** @override */
+  addMediaTailorTrackingUrl(url) {}
+
+  /** @override */
+  addCustomInterstitial(interstitial) {}
+
+  /** @override */
+  addAdUrlInterstitial(url) {}
+
+  /** @override */
+  getInterstitialPlayer() {}
 
   /** @override */
   getCuePoints() {
@@ -84,9 +87,6 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   onManifestUpdated(isLive) {}
 
   /** @override */
-  onDashTimedMetadata(region) {}
-
-  /** @override */
   onHlsTimedMetadata(metadata) {}
 
   /** @override */
@@ -97,15 +97,6 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
 
   /** @override */
   onDASHMetadata(region) {}
-
-  /** @override */
-  addCustomInterstitial(interstitial) {}
-
-  /** @override */
-  addAdUrlInterstitial(url) {}
-
-  /** @override */
-  getInterstitialPlayer() {}
 
   /** @override */
   getCurrentAd() {

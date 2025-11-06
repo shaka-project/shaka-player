@@ -288,10 +288,7 @@ shaka.extern.IAdManager = class extends EventTarget {
 
   onAssetUnload() {}
 
-  /**
-   * @param {?HTMLElement} adContainer
-   */
-  initInterstitial(adContainer) {}
+  // IMA SDK Client Side
 
   /**
    * @param {!HTMLElement} adContainer
@@ -309,23 +306,7 @@ shaka.extern.IAdManager = class extends EventTarget {
    */
   updateClientSideAdsRenderingSettings(adsRenderingSettings) {}
 
-  /**
-   * @param {?HTMLElement} adContainer
-   */
-  initMediaTailor(adContainer) {}
-
-  /**
-   * @param {string} url
-   * @param {Object} adsParams
-   * @param {string=} backupUrl
-   * @return {!Promise<string>}
-   */
-  requestMediaTailorStream(url, adsParams, backupUrl) {}
-
-  /**
-   * @param {string} url
-   */
-  addMediaTailorTrackingUrl(url) {}
+  // IMA DAI SDK Server Side
 
   /**
    * @param {!HTMLElement} adContainer
@@ -344,6 +325,42 @@ shaka.extern.IAdManager = class extends EventTarget {
    */
   replaceServerSideAdTagParameters(adTagParameters) {}
 
+
+  // Media Tailor
+
+  /**
+   * @param {string} url
+   * @param {Object} adsParams
+   * @param {string=} backupUrl
+   * @return {!Promise<string>}
+   */
+  requestMediaTailorStream(url, adsParams, backupUrl) {}
+
+  /**
+   * @param {string} url
+   */
+  addMediaTailorTrackingUrl(url) {}
+
+  // Interstitials
+
+  /**
+   * @param {shaka.extern.AdInterstitial} interstitial
+   */
+  addCustomInterstitial(interstitial) {}
+
+  /**
+   * @param {string} url
+   * @return {!Promise}
+   */
+  addAdUrlInterstitial(url) {}
+
+  /**
+   * @return {shaka.Player}
+   */
+  getInterstitialPlayer() {}
+
+  // Utils
+
   /**
    * @return {!Array<!shaka.extern.AdCuePoint>}
    */
@@ -354,11 +371,6 @@ shaka.extern.IAdManager = class extends EventTarget {
    * playing content, this will return an empty stats object.
    */
   getStats() {}
-
-  /**
-   * @param {shaka.extern.TimelineRegionInfo} region
-   */
-  onDashTimedMetadata(region) {}
 
   /**
    * Fired when the manifest is updated.
@@ -388,22 +400,6 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @param {shaka.extern.TimelineRegionInfo} region
    */
   onDASHMetadata(region) {}
-
-  /**
-   * @param {shaka.extern.AdInterstitial} interstitial
-   */
-  addCustomInterstitial(interstitial) {}
-
-  /**
-   * @param {string} url
-   * @return {!Promise}
-   */
-  addAdUrlInterstitial(url) {}
-
-  /**
-   * @return {shaka.Player}
-   */
-  getInterstitialPlayer() {}
 
   /**
    * @return {?shaka.extern.IAd}
