@@ -1746,8 +1746,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         case 'com.apple.hls.poster': {
           let imageUrl = event['value'];
           if (imageUrl) {
-            imageUrl = imageUrl.replace('{w}', '192')
-                .replace('{h}', '192')
+            imageUrl = imageUrl.replace('{w}', '512')
+                .replace('{h}', '512')
                 .replace('{f}', 'jpeg');
             setupPoster(imageUrl);
           }
