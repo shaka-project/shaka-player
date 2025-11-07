@@ -235,7 +235,18 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
    * @private
    */
   computeOverFlowMenuPos_() {
+<<<<<<< HEAD
     // Compute max height
+=======
+    this.computeMaxHeight_();
+    this.computeHorizontalPosition_();
+  }
+
+  /**
+   * @private
+   */
+  computeMaxHeight_() {
+>>>>>>> 8769b4ce1 (fix: fix lint issues)
     const rectMenu = this.overflowMenu_.getBoundingClientRect();
     const styleMenu = window.getComputedStyle(this.overflowMenu_);
     const paddingTop = parseFloat(styleMenu.paddingTop);
@@ -246,6 +257,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 
     this.overflowMenu_.style.maxHeight = heightIntersection + 'px';
 
+<<<<<<< HEAD
     // Compute horizontal position
     const bottomControlsPos = this.controlsContainer_.getBoundingClientRect();
     const overflowMenuButtonPos =
@@ -253,6 +265,17 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     const leftGap = overflowMenuButtonPos.left - bottomControlsPos.left;
     const rightGap = bottomControlsPos.right - overflowMenuButtonPos.right;
 
+=======
+  /**
+   * @private
+   */
+  computeHorizontalPosition_() {
+    const bottomControlsPos = this.controlsContainer_.getBoundingClientRect();
+    const overflowMenuButtonPos =
+    this.overflowMenuButton_.getBoundingClientRect();
+    const leftGap = overflowMenuButtonPos.left - bottomControlsPos.left;
+    const rightGap = bottomControlsPos.right - overflowMenuButtonPos.right;
+>>>>>>> 8769b4ce1 (fix: fix lint issues)
     // Overflow menu button is either placed to the left or center
     if (leftGap < rightGap) {
       let overflowMenuLeftEdge = leftGap - 15;
@@ -263,7 +286,12 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
       }
       this.overflowMenu_.style.left = overflowMenuLeftEdge + 'px';
       this.overflowMenu_.style.right = 'auto';
+<<<<<<< HEAD
     } else {
+=======
+    } 
+    else {
+>>>>>>> 8769b4ce1 (fix: fix lint issues)
       let overFlowMenuRightEdge = rightGap - 15;
       if (bottomControlsPos.right - overFlowMenuRightEdge < 15) {
         overFlowMenuRightEdge = bottomControlsPos.right - 15;
