@@ -106,7 +106,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     /** @private {ResizeObserver} */
     this.resizeObserver_ = null;
 
-    const resize = () => this.computeMaxHeight_();
+  const resize = () => this.computeOverFlowMenuPos_();
 
     // Use ResizeObserver if available, fallback to window resize event
     if (window.ResizeObserver) {
@@ -234,14 +234,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
    * @private
    */
   computeOverFlowMenuPos_() {
-    this.computeMaxHeight_();
-    this.computeHorizontalPosition_();
-  }
-
-  /**
-   * @private
-   */
-  computeMaxHeight_() {
+    // Compute max height
     const rectMenu = this.overflowMenu_.getBoundingClientRect();
     const styleMenu = window.getComputedStyle(this.overflowMenu_);
     const paddingTop = parseFloat(styleMenu.paddingTop);
@@ -251,17 +244,14 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
         rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom;
 
     this.overflowMenu_.style.maxHeight = heightIntersection + 'px';
-  }
 
-  /**
-   * @private
-   */
-  computeHorizontalPosition_() {
+    // Compute horizontal position
     const bottomControlsPos = this.controlsContainer_.getBoundingClientRect();
     const overflowMenuButtonPos =
-    this.overflowMenuButton_.getBoundingClientRect();
+        this.overflowMenuButton_.getBoundingClientRect();
     const leftGap = overflowMenuButtonPos.left - bottomControlsPos.left;
     const rightGap = bottomControlsPos.right - overflowMenuButtonPos.right;
+
     // Overflow menu button is either placed to the left or center
     if (leftGap < rightGap) {
       let overflowMenuLeftEdge = leftGap - 15;
@@ -272,13 +262,13 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
       }
       this.overflowMenu_.style.left = overflowMenuLeftEdge + 'px';
       this.overflowMenu_.style.right = 'auto';
-    } 
-    else {
+    } else {
       let overFlowMenuRightEdge = rightGap - 15;
       if (bottomControlsPos.right - overFlowMenuRightEdge < 15) {
         overFlowMenuRightEdge = bottomControlsPos.right - 15;
       }
       this.overflowMenu_.style.right = overFlowMenuRightEdge + 'px';
+      this.overflowMenu_.style.left = 'auto';
     }
   }
 };
