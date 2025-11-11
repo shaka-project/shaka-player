@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.15.21](https://github.com/shaka-project/shaka-player/compare/v4.15.20...v4.15.21) (2025-11-11)
+
+
+### Bug Fixes
+
+* **Ads:** Remove duplicate listener on IMA CS integration ([#9367](https://github.com/shaka-project/shaka-player/issues/9367)) ([9ca0aeb](https://github.com/shaka-project/shaka-player/commit/9ca0aeb969c1de0f44937bb56625fae48f41eecd))
+* Ensure that the ABR has all the updated variants after making the initial selection ([#9344](https://github.com/shaka-project/shaka-player/issues/9344)) ([4f1c47f](https://github.com/shaka-project/shaka-player/commit/4f1c47f5fdea22fd50543c08a4ebb4523dfbee7c))
+* Fix infinity initial loop when no autoplay and there is a initial gap ([#9372](https://github.com/shaka-project/shaka-player/issues/9372)) ([d152935](https://github.com/shaka-project/shaka-player/commit/d152935e598e89f385ec19a8ef1623e8a15ca0e9))
+* Increase tolerance of completion ratio calculation ([#9366](https://github.com/shaka-project/shaka-player/issues/9366)) ([88d2f7a](https://github.com/shaka-project/shaka-player/commit/88d2f7a839d5985d08906cc2550e56ae51a8ad1f)), closes [#9365](https://github.com/shaka-project/shaka-player/issues/9365)
+* **UI:** Fix constructed through DOM auto-setup ([#9352](https://github.com/shaka-project/shaka-player/issues/9352)) ([3df172e](https://github.com/shaka-project/shaka-player/commit/3df172ed1530907f221dadd88aead39a14540118))
+* **Xbox:** Enable little-endian PlayReady key IDs to resolve DRM error ([#9348](https://github.com/shaka-project/shaka-player/issues/9348)) ([918c42d](https://github.com/shaka-project/shaka-player/commit/918c42d2bfe1e5ecf69a9d390b96ab640ba9f6b6))
+
 ## [4.15.20](https://github.com/shaka-project/shaka-player/compare/v4.15.19...v4.15.20) (2025-11-03)
 
 
