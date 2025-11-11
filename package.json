@@ -102,6 +102,7 @@
     ]
   },
   "main": "dist/shaka-player.compiled.js",
+  "types": "dist/shaka-player.compiled.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/shaka-project/shaka-player.git"
