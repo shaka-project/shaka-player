@@ -2383,6 +2383,53 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @return {boolean}
+   * @export
+   */
+  canCopyVideoFrameToClipboard() {
+    let available = this.canTakeScreenshot();
+    if (!navigator.clipboard || !navigator.clipboard.write) {
+      available = false;
+    }
+    return available;
+  }
+
+  /**
+   * Copy the current video frame to the clipboard as an image.
+   *
+   * If the browser lacks support for the Clipboard API, no action will be
+   * taken.
+   *
+   * @param {string=} format
+   * @export
+   */
+  copyVideoFrameToClipboard(format = 'image/png') {
+    if (!this.canCopyVideoFrameToClipboard()) {
+      return;
+    }
+    const canvas = /** @type {!HTMLCanvasElement}*/ (
+      document.createElement('canvas'));
+    const context = /** @type {CanvasRenderingContext2D} */ (
+      canvas.getContext('2d'));
+
+    const video = /** @type {!HTMLVideoElement} */ (this.localVideo_);
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert canvas to blob and copy to clipboard
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const item = new ClipboardItem({'image/png': blob});
+        navigator.clipboard.write([item]).catch((error) => {
+          shaka.log.error('Failed to copy image to clipboard:', error);
+        });
+      }
+    }, format);
+  }
+
+  /**
    * @private
    */
   dispatchVisibilityEvent_() {

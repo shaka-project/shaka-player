@@ -99,6 +99,7 @@ goog.require('shaka.ui.CastButton');
 goog.require('shaka.ui.ChapterSelection');
 goog.require('shaka.ui.ContentTitle');
 goog.require('shaka.ui.ContextMenu');
+goog.require('shaka.ui.CopyVideoFrameButton');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.FastForwardButton');
 goog.require('shaka.ui.FullscreenButton');

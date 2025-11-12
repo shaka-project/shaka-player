@@ -340,6 +340,7 @@ shaka.ui.Overlay = class {
       contextMenuElements: [
         'loop',
         'picture_in_picture',
+        'copy_video_frame',
         'save_video_frame',
         'statistics',
         'ad_statistics',
