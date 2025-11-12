@@ -1336,4 +1336,287 @@ describe('StreamUtils', () => {
       expect(manifest.variants[3].video.codecs).toBe('hvc1.05.03');
     });
   });
+
+  describe('html5TextTrackToTrack', () => {
+    it('should convert a TextTrack to a Shaka TextTrack', () => {
+      /** @type {!TextTrack} */
+      const textTrack = /** @type {!TextTrack} */ ({
+        id: 'tt1',
+        mode: 'showing',
+        language: 'en',
+        label: 'English Subtitles',
+        kind: 'subtitles',
+      });
+      const result = StreamUtils.html5TextTrackToTrack(textTrack);
+      expect(result).toEqual(jasmine.objectContaining({
+        id: jasmine.any(Number),
+        type: 'text',
+        language: 'en',
+        label: 'English Subtitles',
+        kind: 'subtitles',
+        mimeType: 'text/vtt',
+        forced: false,
+        originalTextId: 'tt1',
+      }));
+    });
+
+    it('should handle kind "subtitles"', () => {
+      /** @type {!TextTrack} */
+      const textTrack = /** @type {!TextTrack} */ ({
+        id: 'sub1',
+        mode: 'showing',
+        language: 'en',
+        label: 'English Subtitles',
+        kind: 'subtitles',
+      });
+      const result = StreamUtils.html5TextTrackToTrack(textTrack);
+      expect(result).toEqual(jasmine.objectContaining({
+        mimeType: 'text/vtt',
+        roles: ['subtitles'],
+        originalTextId: 'sub1',
+      }));
+    });
+
+    it('should handle kind "captions"', () => {
+      /** @type {!TextTrack} */
+      const textTrack = /** @type {!TextTrack} */ ({
+        id: 'cap1',
+        mode: 'showing',
+        language: 'en',
+        label: 'English Captions',
+        kind: 'captions',
+      });
+      const result = StreamUtils.html5TextTrackToTrack(textTrack);
+      expect(result).toEqual(jasmine.objectContaining({
+        mimeType: 'unknown',
+        roles: ['captions'],
+        originalTextId: 'cap1',
+      }));
+    });
+
+    it('should normalize ISO 639-3 language code', () => {
+      /** @type {!TextTrack} */
+      const textTrack = /** @type {!TextTrack} */ ({
+        id: 'tt6393',
+        mode: 'showing',
+        language: 'eng',
+        label: 'English ENG',
+        kind: 'subtitles',
+      });
+      const result = StreamUtils.html5TextTrackToTrack(textTrack);
+      expect(result).toEqual(jasmine.objectContaining({
+        language: 'en',
+        originalLanguage: 'eng',
+        originalTextId: 'tt6393',
+      }));
+    });
+  });
+
+  describe('html5TextTrackToChapterTrack', () => {
+    it('should convert a TextTrack to a ChapterTrack', () => {
+      /** @type {!TextTrack} */
+      const textTrack = /** @type {!TextTrack} */ ({
+        id: 'chap1',
+        language: 'es',
+      });
+      const result = StreamUtils.html5TextTrackToChapterTrack(textTrack);
+      expect(result).toEqual(jasmine.objectContaining({
+        id: jasmine.any(Number),
+        type: 'chapter',
+        language: 'es',
+        bandwidth: 0,
+      }));
+    });
+  });
+
+  describe('html5AudioTrackToTrack', () => {
+    it('should convert an AudioTrack to a Shaka AudioTrack', () => {
+      /** @type {!AudioTrack} */
+      const audioTrack = /** @type {!AudioTrack} */ ({
+        id: 'a1',
+        enabled: true,
+        language: 'fr',
+        label: 'French Audio',
+        kind: 'main',
+        configuration: {
+          codec: 'aac',
+          sampleRate: 48000,
+          numberOfChannels: 2,
+        },
+      });
+      const result = StreamUtils.html5AudioTrackToTrack(audioTrack);
+      expect(result).toEqual(jasmine.objectContaining({
+        language: 'fr',
+        label: 'French Audio',
+        codecs: 'aac',
+        channelsCount: 2,
+        audioSamplingRate: 48000,
+        primary: true,
+        originalLanguage: 'fr',
+      }));
+    });
+
+    it('should handle kind "description"', () => {
+      /** @type {!AudioTrack} */
+      const audioTrack = /** @type {!AudioTrack} */ ({
+        id: 'a2',
+        enabled: true,
+        language: 'en',
+        label: 'Descriptive Audio',
+        kind: 'description',
+        configuration: {
+          codec: 'aac',
+          sampleRate: 44100,
+          numberOfChannels: 2,
+        },
+      });
+      const result = StreamUtils.html5AudioTrackToTrack(audioTrack);
+      expect(result).toEqual(jasmine.objectContaining({
+        accessibilityPurpose:
+            shaka.media.ManifestParser.AccessibilityPurpose.VISUALLY_IMPAIRED,
+        roles: ['description'],
+        originalLanguage: 'en',
+        primary: false,
+      }));
+    });
+
+    it('should handle missing configuration gracefully', () => {
+      /** @type {!AudioTrack} */
+      const audioTrack = /** @type {!AudioTrack} */ ({
+        id: 'a3',
+        enabled: true,
+        language: 'de',
+        label: 'German Audio',
+        kind: 'main',
+      });
+      const result = StreamUtils.html5AudioTrackToTrack(audioTrack);
+      expect(result).toEqual(jasmine.objectContaining({
+        codecs: null,
+        channelsCount: null,
+        audioSamplingRate: null,
+        originalLanguage: 'de',
+        primary: true,
+      }));
+    });
+
+    it('should normalize ISO 639-1 with locale', () => {
+      /** @type {!AudioTrack} */
+      const audioTrack = /** @type {!AudioTrack} */ ({
+        id: 'a6391',
+        enabled: true,
+        language: 'en-us',
+        label: 'English US',
+        kind: 'main',
+        configuration: {
+          codec: 'aac',
+          sampleRate: 48000,
+          numberOfChannels: 2,
+        },
+      });
+      const result = StreamUtils.html5AudioTrackToTrack(audioTrack);
+      expect(result).toEqual(jasmine.objectContaining({
+        language: 'en-US',
+        originalLanguage: 'en-us',
+        primary: true,
+      }));
+    });
+  });
+
+  describe('html5TrackToShakaTrack', () => {
+    it('should convert audio and video tracks to a Shaka Track', () => {
+      /** @type {!AudioTrack} */
+      const audioTrack = /** @type {!AudioTrack} */ ({
+        id: 'a4',
+        enabled: true,
+        language: 'en',
+        label: 'English',
+        kind: 'main',
+        configuration: {
+          codec: 'aac',
+          bitrate: 128000,
+          sampleRate: 44100,
+          numberOfChannels: 2,
+        },
+      });
+      /** @type {!VideoTrack} */
+      const videoTrack = /** @type {!VideoTrack} */ ({
+        id: 'v4',
+        selected: true,
+        configuration: {
+          codec: 'avc1.42E01E',
+          bitrate: 1000000,
+          framerate: 30,
+          width: 1920,
+          height: 1080,
+          colorSpace: {
+            transfer: 'bt709',
+          },
+        },
+      });
+      const result = StreamUtils.html5TrackToShakaTrack(audioTrack, videoTrack);
+      expect(result).toEqual(jasmine.objectContaining({
+        originalAudioId: 'a4',
+        originalVideoId: 'v4',
+        audioCodec: 'aac',
+        videoCodec: 'avc1.42E01E',
+        bandwidth: 1128000,
+        width: 1920,
+        height: 1080,
+        frameRate: 30,
+        hdr: 'SDR',
+        primary: true,
+      }));
+    });
+
+    it('should convert only audio track to Shaka Track', () => {
+      /** @type {!AudioTrack} */
+      const audioTrack = /** @type {!AudioTrack} */ ({
+        id: 'a5',
+        enabled: true,
+        language: 'es',
+        label: 'Spanish Audio',
+        kind: 'commentary',
+        configuration: {
+          codec: 'mp3',
+          bitrate: 96000,
+          sampleRate: 44100,
+          numberOfChannels: 2,
+        },
+      });
+      const result = StreamUtils.html5TrackToShakaTrack(audioTrack, null);
+      expect(result).toEqual(jasmine.objectContaining({
+        originalAudioId: 'a5',
+        originalVideoId: null,
+        audioCodec: 'mp3',
+        videoCodec: null,
+        bandwidth: 96000,
+        primary: false,
+      }));
+    });
+
+    it('should handle missing configuration in audio and video tracks', () => {
+      /** @type {!AudioTrack} */
+      const audioTrack = /** @type {!AudioTrack} */ ({
+        id: 'a6',
+        enabled: true,
+        language: 'it',
+        label: 'Italian Audio',
+        kind: 'main',
+      });
+      /** @type {!VideoTrack} */
+      const videoTrack = /** @type {!VideoTrack} */ ({
+        id: 'v6',
+        selected: true,
+      });
+      const result = StreamUtils.html5TrackToShakaTrack(audioTrack, videoTrack);
+      expect(result).toEqual(jasmine.objectContaining({
+        originalAudioId: 'a6',
+        originalVideoId: 'v6',
+        audioCodec: null,
+        videoCodec: null,
+        bandwidth: 0,
+        primary: true,
+      }));
+    });
+  });
 });
