@@ -1516,7 +1516,7 @@ describe('StreamUtils', () => {
       const result = StreamUtils.html5AudioTrackToTrack(audioTrack);
       expect(result).toEqual(jasmine.objectContaining({
         language: 'en-US',
-        originalLanguage: 'en-US',
+        originalLanguage: 'en-us',
         primary: true,
       }));
     });
