@@ -1476,6 +1476,7 @@ describe('StreamUtils', () => {
             shaka.media.ManifestParser.AccessibilityPurpose.VISUALLY_IMPAIRED,
         roles: ['description'],
         originalLanguage: 'en',
+        primary: false,
       }));
     });
 
@@ -1494,6 +1495,7 @@ describe('StreamUtils', () => {
         channelsCount: null,
         audioSamplingRate: null,
         originalLanguage: 'de',
+        primary: true,
       }));
     });
 
@@ -1515,6 +1517,7 @@ describe('StreamUtils', () => {
       expect(result).toEqual(jasmine.objectContaining({
         language: 'en-US',
         originalLanguage: 'en-US',
+        primary: true,
       }));
     });
   });
@@ -1561,6 +1564,7 @@ describe('StreamUtils', () => {
         height: 1080,
         frameRate: 30,
         hdr: 'SDR',
+        primary: true,
       }));
     });
 
@@ -1571,7 +1575,7 @@ describe('StreamUtils', () => {
         enabled: true,
         language: 'es',
         label: 'Spanish Audio',
-        kind: 'main',
+        kind: 'commentary',
         configuration: {
           codec: 'mp3',
           bitrate: 96000,
@@ -1586,6 +1590,7 @@ describe('StreamUtils', () => {
         audioCodec: 'mp3',
         videoCodec: null,
         bandwidth: 96000,
+        primary: false,
       }));
     });
 
@@ -1610,6 +1615,7 @@ describe('StreamUtils', () => {
         audioCodec: null,
         videoCodec: null,
         bandwidth: 0,
+        primary: true,
       }));
     });
   });
