@@ -1502,7 +1502,7 @@ describe('StreamUtils', () => {
       const audioTrack = /** @type {!AudioTrack} */ ({
         id: 'a6391',
         enabled: true,
-        language: 'en-US',
+        language: 'en-us',
         label: 'English US',
         kind: 'main',
         configuration: {
