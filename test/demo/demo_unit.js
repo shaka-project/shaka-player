@@ -38,6 +38,10 @@ describe('Demo', () => {
       const exceptions = new Set()
           .add('preferredAudioCodecs')
           .add('preferredVideoCodecs')
+          .add('restrictions.restrictedAudioCodecs')
+          .add('restrictions.restrictedVideoCodecs')
+          .add('abr.restrictions.restrictedAudioCodecs')
+          .add('abr.restrictions.restrictedVideoCodecs')
           .add('preferredTextFormats')
           .add('streaming.speechToText.languagesToTranslate');
       // We determine whether a config option has been made or not by looking at

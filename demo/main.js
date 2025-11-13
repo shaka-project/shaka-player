@@ -1029,9 +1029,19 @@ shakaDemo.Main = class {
           params.get('preferredVideoCodecs').split(','));
     }
 
+    if (params.has('restrictedVideoCodecs')) {
+      this.configure('restrictedVideoCodecs',
+          params.get('restrictedVideoCodecs').split(','));
+    }
+
     if (params.has('preferredAudioCodecs')) {
       this.configure('preferredAudioCodecs',
           params.get('preferredAudioCodecs').split(','));
+    }
+
+    if (params.has('restrictedAudioCodecs')) {
+      this.configure('restrictedAudioCodecs',
+          params.get('restrictedAudioCodecs').split(','));
     }
 
     if (params.has('preferredTextFormats')) {
@@ -1565,7 +1575,9 @@ shakaDemo.Main = class {
 
     const preferredArray = [
       'preferredVideoCodecs',
+      'restrictedVideoCodecs',
       'preferredAudioCodecs',
+      'restrictedAudioCodecs',
       'preferredTextFormats',
       'streaming.speechToText.languagesToTranslate',
     ];

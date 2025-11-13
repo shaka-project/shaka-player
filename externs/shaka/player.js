@@ -696,7 +696,10 @@ shaka.extern.TrackList;
  *   maxBandwidth: number,
  *
  *   minChannelsCount: number,
- *   maxChannelsCount: number
+ *   maxChannelsCount: number,
+ *
+ *   restrictedVideoCodecs: !Array<string>,
+ *   restrictedAudioCodecs: !Array<string>,
  * }}
  *
  * @description
@@ -762,6 +765,21 @@ shaka.extern.TrackList;
  *   The maximum channels count of a variant track.
  *   <br>
  *   Defaults to <code>Infinity</code>.
+ *
+ * @property {!Array<string>} restrictedAudioCodecs
+ *   The list of restricted audio codecs. This is used to do a filtering of the
+ *   variants available for the player.
+ *   Changing this during playback will not affect the current playback.
+ *   This restriction should <b>NOT</b> be set at the ABR level.
+ *   <br>
+ *   Defaults to <code>[]</code>.
+ * @property {!Array<string>} restrictedVideoCodecs
+ *   The list of restricted video codecs. This is used to do a filtering of the
+ *   variants available for the player.
+ *   Changing this during playback will not affect the current playback.
+ *   This restriction should <b>NOT</b> be set at the ABR level.
+ *   <br>
+ *   Defaults to <code>[]</code>.
  * @exportDoc
  */
 shaka.extern.Restrictions;
