@@ -220,6 +220,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * @private {shaka.util.Timer}
      */
     this.fadeControlsTimer_ = new shaka.util.Timer(() => {
+      if (this.config_.showUIAlwaysOnAudioOnly && this.player_.isAudioOnly()) {
+        return;
+      }
       if (this.config_.menuOpenUntilUserClosesIt &&
           this.anySettingsMenusAreOpen()) {
         return;
@@ -1953,6 +1956,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   onMouseStill_() {
+    if (this.config_.showUIAlwaysOnAudioOnly && this.player_.isAudioOnly()) {
+      return;
+    }
     // Hide the cursor.
     this.videoContainer_.classList.add('no-cursor');
     this.recentMouseMovement_ = false;
