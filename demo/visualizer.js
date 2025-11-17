@@ -75,7 +75,10 @@ shakaDemo.Visualizer = class {
       const end = /** @type {number} */ (event['end']);
       const contentType = /** @type {string} */ (event['contentType']);
       const isMuxed = /** @type {boolean} */ (event['isMuxed']);
-      this.updates_.push({start, end, contentType, isMuxed});
+      const isDependency = /** @type {boolean} */ (event['isDependency']);
+      if (!isDependency) {
+        this.updates_.push({start, end, contentType, isMuxed});
+      }
     });
 
     player.addEventListener('unloading', () => {

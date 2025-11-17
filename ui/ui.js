@@ -340,6 +340,7 @@ shaka.ui.Overlay = class {
       contextMenuElements: [
         'loop',
         'picture_in_picture',
+        'copy_video_frame',
         'save_video_frame',
         'statistics',
         'ad_statistics',
@@ -420,6 +421,7 @@ shaka.ui.Overlay = class {
       allowTogglePresentationTime: true,
       showRemainingTimeInPresentationTime: false,
       enableVrDeviceMotion: true,
+      showUIAlwaysOnAudioOnly: true,
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause
