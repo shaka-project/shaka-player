@@ -197,6 +197,7 @@ Expressplay
 EZDRM
 Fairplay
 gstreamer
+Gumlet
 GPAC
 Hisense
 isoboxer
