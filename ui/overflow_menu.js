@@ -106,7 +106,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     /** @private {ResizeObserver} */
     this.resizeObserver_ = null;
 
-  const resize = () => this.computeOverFlowMenuPos_();
+    const resize = () => this.computeMaxHeightAndPosition_();
 
     // Use ResizeObserver if available, fallback to window resize event
     if (window.ResizeObserver) {
@@ -216,8 +216,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
           Iterables.filter(this.overflowMenu_.childNodes, isDisplayed);
         /** @type {!HTMLElement} */ (visibleElements[0]).focus();
       }
-      this.computeOverFlowMenuPos_();
-      this.computeOverFlowMenuPos_();
+      this.computeMaxHeightAndPosition_();
     }
   }
 
@@ -231,10 +230,11 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
         this.localization.resolve(LocIds.MORE_SETTINGS);
   }
 
+
   /**
    * @private
    */
-  computeOverFlowMenuPos_() {
+  computeMaxHeightAndPosition_() {
     // Compute max height
     const rectMenu = this.overflowMenu_.getBoundingClientRect();
     const styleMenu = window.getComputedStyle(this.overflowMenu_);
