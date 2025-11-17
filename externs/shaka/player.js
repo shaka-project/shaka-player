@@ -172,7 +172,7 @@ shaka.extern.StateChange;
  *   NaN.
  *
  * @property {number} manifestSizeBytes
- *   Size of the manifest payload. For DASH & MSS it will match the latest
+ *   Size of the manifest payload. For DASH it will match the latest
  *   downloaded manifest. For HLS, it will match the lastly downloaded playlist.
  *   If nothing is loaded or in src= mode, NaN.
  * @property {number} bytesDownloaded
@@ -182,13 +182,12 @@ shaka.extern.StateChange;
  *   The amount of non fatal errors that occurred.  If nothing is loaded, NaN.
  * @property {number} manifestPeriodCount
  *   The amount of periods occurred in the manifest. For DASH it represents
- *   number of Period elements in a manifest. For HLS & MSS it is always 1.
+ *   number of Period elements in a manifest. For HLS it is always 1.
  *   In src= mode or if nothing is loaded, NaN.
  * @property {number} manifestGapCount
  *   The amount of gaps found in a manifest. For DASH, it represents number of
  *   discontinuities found between periods. For HLS, it is a number of EXT-X-GAP
- *   and GAP=YES occurrences. For MSS, it is always set to 0.
- *   If in src= mode or nothing is loaded, NaN.
+ *   and GAP=YES occurrences. If in src= mode or nothing is loaded, NaN.
  *
  * @property {!Array<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.
@@ -1623,30 +1622,6 @@ shaka.extern.HlsManifestConfiguration;
 
 /**
  * @typedef {{
- *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
- *   sequenceMode: boolean,
- *   keySystemsBySystemId: !Object<string, string>
- * }}
- *
- * @property {function(!shaka.extern.xml.Node)} manifestPreprocessorTXml
- *   Called immediately after the MSS manifest has been parsed into an
- *   XMLDocument. Provides a way for applications to perform efficient
- *   preprocessing of the manifest.
- * @property {boolean} sequenceMode
- *   If true, the media segments are appended to the SourceBuffer in
- *   "sequence mode" (ignoring their internal timestamps).
- *   <br>
- *   Defaults to <code>false</code>.
- * @property {Object<string, string>} keySystemsBySystemId
- *   A map of system id to key system name. Defaults to default key systems
- *   mapping handled by Shaka.
- * @exportDoc
- */
-shaka.extern.MssManifestConfiguration;
-
-
-/**
- * @typedef {{
  *   retryParameters: shaka.extern.RetryParameters,
  *   availabilityWindowOverride: number,
  *   disableAudio: boolean,
@@ -1659,7 +1634,6 @@ shaka.extern.MssManifestConfiguration;
  *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration,
- *   mss: shaka.extern.MssManifestConfiguration,
  *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean,
  *   continueLoadingWhenPaused: boolean,
  *   ignoreSupplementalCodecs: boolean,
@@ -1720,8 +1694,6 @@ shaka.extern.MssManifestConfiguration;
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls
  *   Advanced parameters used by the HLS manifest parser.
- * @property {shaka.extern.MssManifestConfiguration} mss
- *   Advanced parameters used by the MSS manifest parser.
  * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
  *   If true, manifest update request failures will cause a fatal error.
  *   <br>

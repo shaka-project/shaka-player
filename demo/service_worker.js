@@ -93,9 +93,6 @@ const OPTIONAL_RESOURCES = [
   'https://shaka-player-demo.appspot.com/assets/poster.jpg',
   'https://shaka-player-demo.appspot.com/assets/audioOnly.gif',
 
-  // The codem-isoboxer library for MSS support.
-  '../node_modules/codem-isoboxer/dist/iso_boxer.min.js',
-
   // The cast sender SDK.
   'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
 

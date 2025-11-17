@@ -220,6 +220,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * @private {shaka.util.Timer}
      */
     this.fadeControlsTimer_ = new shaka.util.Timer(() => {
+      if (this.config_.showUIAlwaysOnAudioOnly && this.player_.isAudioOnly()) {
+        return;
+      }
       if (this.config_.menuOpenUntilUserClosesIt &&
           this.anySettingsMenusAreOpen()) {
         return;
@@ -320,8 +323,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.videoContainer_.setAttribute('lang', locale);
         });
 
-    this.adManager_.initInterstitial(
-        this.getClientSideAdContainer(), this.localPlayer_, this.localVideo_);
+    this.adManager_.setContainers(
+        this.getClientSideAdContainer(), this.getServerSideAdContainer());
 
     this.eventManager_.listen(this.player_, 'textchanged', () => {
       this.computeShakaTextContainerSize_();
@@ -1746,8 +1749,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         case 'com.apple.hls.poster': {
           let imageUrl = event['value'];
           if (imageUrl) {
-            imageUrl = imageUrl.replace('{w}', '192')
-                .replace('{h}', '192')
+            imageUrl = imageUrl.replace('{w}', '512')
+                .replace('{h}', '512')
                 .replace('{f}', 'jpeg');
             setupPoster(imageUrl);
           }
@@ -1953,6 +1956,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   onMouseStill_() {
+    if (this.config_.showUIAlwaysOnAudioOnly && this.player_.isAudioOnly()) {
+      return;
+    }
     // Hide the cursor.
     this.videoContainer_.classList.add('no-cursor');
     this.recentMouseMovement_ = false;
@@ -2380,6 +2386,53 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     downloadLink.download =
         'videoframe_' + video.currentTime.toFixed(3) + '.png';
     downloadLink.click();
+  }
+
+  /**
+   * @return {boolean}
+   * @export
+   */
+  canCopyVideoFrameToClipboard() {
+    let available = this.canTakeScreenshot();
+    if (!navigator.clipboard || !navigator.clipboard.write) {
+      available = false;
+    }
+    return available;
+  }
+
+  /**
+   * Copy the current video frame to the clipboard as an image.
+   *
+   * If the browser lacks support for the Clipboard API, no action will be
+   * taken.
+   *
+   * @param {string=} format
+   * @export
+   */
+  copyVideoFrameToClipboard(format = 'image/png') {
+    if (!this.canCopyVideoFrameToClipboard()) {
+      return;
+    }
+    const canvas = /** @type {!HTMLCanvasElement}*/ (
+      document.createElement('canvas'));
+    const context = /** @type {CanvasRenderingContext2D} */ (
+      canvas.getContext('2d'));
+
+    const video = /** @type {!HTMLVideoElement} */ (this.localVideo_);
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert canvas to blob and copy to clipboard
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const item = new ClipboardItem({'image/png': blob});
+        navigator.clipboard.write([item]).catch((error) => {
+          shaka.log.error('Failed to copy image to clipboard:', error);
+        });
+      }
+    }, format);
   }
 
   /**

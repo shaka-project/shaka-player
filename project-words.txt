@@ -10,6 +10,7 @@ audiotrackchanged
 audiotrackschanged
 autoplaying
 boundarycrossed
+bufferappending
 canupdatestarttime
 captionselectionupdated
 caststatuschanged
