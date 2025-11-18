@@ -78,7 +78,7 @@ describe('SegmentUtils', () => {
     tsCaptions = responses[11];
   });
 
-  it ('getBasicInfoFromMp4', async () => {
+  it('getBasicInfoFromMp4', async () => {
     let basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
         videoInitSegment, videoInitSegment, false);
     let expected = {
@@ -193,7 +193,7 @@ describe('SegmentUtils', () => {
               initData: jasmine.any(Uint8Array),
             },
           ],
-          mediaTypes: undefined ,
+          mediaTypes: undefined,
           keyIds: (new Set()).add('4060a865887842679cbf91ae5bae1e72'),
         },
         {
@@ -213,7 +213,7 @@ describe('SegmentUtils', () => {
               initData: jasmine.any(Uint8Array),
             },
           ],
-          mediaTypes: undefined ,
+          mediaTypes: undefined,
           keyIds: (new Set()).add('4060a865887842679cbf91ae5bae1e72'),
         },
       ],
@@ -294,7 +294,7 @@ describe('SegmentUtils', () => {
               initData: jasmine.any(Uint8Array),
             },
           ],
-          mediaTypes: undefined ,
+          mediaTypes: undefined,
           keyIds: (new Set()).add('22948c3bdd675d3fa4695dacab59e819'),
         },
         {
@@ -314,7 +314,7 @@ describe('SegmentUtils', () => {
               initData: jasmine.any(Uint8Array),
             },
           ],
-          mediaTypes: undefined ,
+          mediaTypes: undefined,
           keyIds: (new Set()).add('22948c3bdd675d3fa4695dacab59e819'),
         },
       ],
@@ -387,11 +387,11 @@ describe('SegmentUtils', () => {
   it('getDefaultKID', () => {
     let defaultKID =
         shaka.media.SegmentUtils.getDefaultKID(h265CeaInitSegment);
-    expect(defaultKID).toBe('22948c3bdd675d3fa4695dacab59e819')
+    expect(defaultKID).toBe('22948c3bdd675d3fa4695dacab59e819');
     defaultKID = shaka.media.SegmentUtils.getDefaultKID(videoInitSegment);
     expect(defaultKID).toBeNull();
     defaultKID =
         shaka.media.SegmentUtils.getDefaultKID(multidrmVideoInitSegment);
-    expect(defaultKID).toBe('4060a865887842679cbf91ae5bae1e72')
-  })
+    expect(defaultKID).toBe('4060a865887842679cbf91ae5bae1e72');
+  });
 });
