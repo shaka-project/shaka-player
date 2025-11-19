@@ -300,7 +300,7 @@ describe('SegmentUtils', () => {
         {
           keySystem: 'com.microsoft.playready',
           encryptionScheme: 'cenc',
-          licenseServerUri: '',
+          licenseServerUri: 'https://twc.live.ott.irdeto.com/playready/rightsmanager.asmx?CrmId=twc&AccountId=twc&contentId=329',
           distinctiveIdentifierRequired: false,
           persistentStateRequired: false,
           audioRobustness: '',
