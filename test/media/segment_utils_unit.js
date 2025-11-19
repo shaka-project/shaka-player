@@ -14,6 +14,9 @@ describe('SegmentUtils', () => {
   const multidrmVideoInitSegmentUri =
       '/base/test/test/assets/multidrm-video-init.mp4';
 
+  const multidrmAudioInitSegmentUri =
+      '/base/test/test/assets/multidrm-audio-init.mp4';
+
   const ceaInitSegmentUri = '/base/test/test/assets/cea-init.mp4';
   const ceaSegmentUri = '/base/test/test/assets/cea-segment.mp4';
 
@@ -34,6 +37,8 @@ describe('SegmentUtils', () => {
   let audioInitSegmentAC4;
   /** @type {!ArrayBuffer} */
   let multidrmVideoInitSegment;
+  /** @type {!ArrayBuffer} */
+  let multidrmAudioInitSegment;
   /** @type {!ArrayBuffer} */
   let ceaInitSegment;
   /** @type {!ArrayBuffer} */
@@ -56,6 +61,7 @@ describe('SegmentUtils', () => {
       shaka.test.Util.fetch(audioInitSegmentXheAacUri),
       shaka.test.Util.fetch(audioInitSegmentAC4Uri),
       shaka.test.Util.fetch(multidrmVideoInitSegmentUri),
+      shaka.test.Util.fetch(multidrmAudioInitSegmentUri),
       shaka.test.Util.fetch(ceaInitSegmentUri),
       shaka.test.Util.fetch(ceaSegmentUri),
       shaka.test.Util.fetch(h265CeaInitSegmentUri),
@@ -69,13 +75,14 @@ describe('SegmentUtils', () => {
     audioInitSegmentXheAac = responses[2];
     audioInitSegmentAC4 = responses[3];
     multidrmVideoInitSegment = responses[4];
-    ceaInitSegment = responses[5];
-    ceaSegment = responses[6];
-    h265CeaInitSegment = responses[7];
-    h265CeaSegment = responses[8];
-    tsVideo = responses[9];
-    tsAudio = responses[10];
-    tsCaptions = responses[11];
+    multidrmAudioInitSegment = responses[5];
+    ceaInitSegment = responses[6];
+    ceaSegment = responses[7];
+    h265CeaInitSegment = responses[8];
+    h265CeaSegment = responses[9];
+    tsVideo = responses[10];
+    tsAudio = responses[11];
+    tsCaptions = responses[12];
   });
 
   it('getBasicInfoFromMp4', async () => {
@@ -166,8 +173,8 @@ describe('SegmentUtils', () => {
       mimeType: 'video/mp4',
       codecs: 'avc1.42E01E',
       language: 'und',
-      height: null,
-      width: null,
+      height: '288',
+      width: '512',
       channelCount: null,
       sampleRate: null,
       closedCaptions: new Map(),
@@ -175,6 +182,67 @@ describe('SegmentUtils', () => {
       colorGamut: null,
       frameRate: null,
       timescale: 24,
+      drmInfos: [
+        {
+          keySystem: 'com.microsoft.playready',
+          encryptionScheme: 'cenc',
+          licenseServerUri: '',
+          distinctiveIdentifierRequired: false,
+          persistentStateRequired: false,
+          audioRobustness: '',
+          videoRobustness: '',
+          serverCertificate: null,
+          serverCertificateUri: '',
+          sessionType: '',
+          initData: [
+            {
+              initDataType: 'cenc',
+              initData: jasmine.any(Uint8Array),
+            },
+          ],
+          mediaTypes: undefined,
+          keyIds: (new Set()).add('4060a865887842679cbf91ae5bae1e72'),
+        },
+        {
+          keySystem: 'com.widevine.alpha',
+          encryptionScheme: 'cenc',
+          licenseServerUri: '',
+          distinctiveIdentifierRequired: false,
+          persistentStateRequired: false,
+          audioRobustness: '',
+          videoRobustness: '',
+          serverCertificate: null,
+          serverCertificateUri: '',
+          sessionType: '',
+          initData: [
+            {
+              initDataType: 'cenc',
+              initData: jasmine.any(Uint8Array),
+            },
+          ],
+          mediaTypes: undefined,
+          keyIds: (new Set()).add('4060a865887842679cbf91ae5bae1e72'),
+        },
+      ],
+    };
+    expect(basicInfo).toEqual(expected);
+
+    basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
+        multidrmAudioInitSegment, multidrmAudioInitSegment, false);
+    expected = {
+      type: 'audio',
+      mimeType: 'audio/mp4',
+      codecs: 'mp4a.40.2',
+      language: 'eng',
+      height: null,
+      width: null,
+      channelCount: 2,
+      sampleRate: 44100,
+      closedCaptions: new Map(),
+      videoRange: null,
+      colorGamut: null,
+      frameRate: null,
+      timescale: 44100,
       drmInfos: [
         {
           keySystem: 'com.microsoft.playready',
@@ -267,8 +335,8 @@ describe('SegmentUtils', () => {
       mimeType: 'video/mp4',
       codecs: 'hvc1.1.6.L93.90',
       language: 'und',
-      height: null,
-      width: null,
+      height: '180',
+      width: '320',
       channelCount: null,
       sampleRate: null,
       closedCaptions: (new Map()).set('CC1', 'CC1').set('svc1', 'svc1'),
