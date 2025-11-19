@@ -300,7 +300,6 @@ describe('SegmentUtils', () => {
         {
           keySystem: 'com.microsoft.playready',
           encryptionScheme: 'cenc',
-          // eslint-disable-next-line @stylistic/max-len
           licenseServerUri: 'https://twc.live.ott.irdeto.com/playready/rightsmanager.asmx?CrmId=twc&AccountId=twc&contentId=329',
           distinctiveIdentifierRequired: false,
           persistentStateRequired: false,
