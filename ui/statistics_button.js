@@ -109,8 +109,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
 
     const parseTime = (name) => {
       const value = this.currentStats_[name];
-      return shaka.ui.Utils.buildTimeString(
-          value, value > 3600) + ' (m)';
+      return shaka.ui.Utils.buildTimeString(value, value > 3600);
     };
 
     const parseGaps = (name) => {
