@@ -11,6 +11,9 @@ describe('Mp4BoxParsers', () => {
   const audioInitSegmentXheAacUri = '/base/test/test/assets/audio-xhe-aac.mp4';
   const audioInitSegmentAC4Uri = '/base/test/test/assets/audio-ac-4.mp4';
 
+  const multidrmVideoInitSegmentUri =
+      '/base/test/test/assets/multidrm-video-init.mp4';
+
   /** @type {!ArrayBuffer} */
   let videoInitSegment;
   /** @type {!ArrayBuffer} */
@@ -19,6 +22,8 @@ describe('Mp4BoxParsers', () => {
   let audioInitSegmentXheAac;
   /** @type {!ArrayBuffer} */
   let audioInitSegmentAC4;
+  /** @type {!ArrayBuffer} */
+  let multidrmVideoInitSegment;
 
   beforeAll(async () => {
     const responses = await Promise.all([
@@ -26,11 +31,13 @@ describe('Mp4BoxParsers', () => {
       shaka.test.Util.fetch(videoSegmentUri),
       shaka.test.Util.fetch(audioInitSegmentXheAacUri),
       shaka.test.Util.fetch(audioInitSegmentAC4Uri),
+      shaka.test.Util.fetch(multidrmVideoInitSegmentUri),
     ]);
     videoInitSegment = responses[0];
     videoSegment = responses[1];
     audioInitSegmentXheAac = responses[2];
     audioInitSegmentAC4 = responses[3];
+    multidrmVideoInitSegment = responses[4];
   });
 
   it('parses init segment', () => {
@@ -270,5 +277,27 @@ describe('Mp4BoxParsers', () => {
     expect(parsedTkhd.trackId).toBe(1);
     expect(parsedTkhd.width).toBe(64);
     expect(parsedTkhd.height).toBe(64);
+  });
+
+  it('parses SCHM box', () => {
+    let encryptionScheme;
+
+    const Mp4Parser = shaka.util.Mp4Parser;
+    new Mp4Parser()
+        .box('moov', Mp4Parser.children)
+        .box('trak', Mp4Parser.children)
+        .box('mdia', Mp4Parser.children)
+        .box('minf', Mp4Parser.children)
+        .box('stbl', Mp4Parser.children)
+        .fullBox('stsd', Mp4Parser.sampleDescription)
+        .box('encv', Mp4Parser.visualSampleEntry)
+        .box('sinf', Mp4Parser.children)
+        .fullBox('schm', (box) => {
+          const parsedSCHMBox =
+              shaka.util.Mp4BoxParsers.parseSCHM(box.reader);
+          encryptionScheme = parsedSCHMBox.encryptionScheme;
+        })
+        .parse(multidrmVideoInitSegment, /* partialOkay= */ false);
+    expect(encryptionScheme).toBe('cenc');
   });
 });
