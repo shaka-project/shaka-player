@@ -114,23 +114,28 @@ def main(args):
   if not compile_less('demo', 'demo', parsed_args):
     return 1
 
-  build_args_with_ui = ['--name', 'ui', '+@complete']
+  complete_non_experimental = ['+@complete', '-@moqt']
+
+  build_args_experimental = ['--name', 'experimental', '+@complete']
+  build_args_experimental += ['--locales'] + parsed_args.locales
+  build_args_with_ui = ['--name', 'ui', *complete_non_experimental]
   build_args_with_ui += ['--locales'] + parsed_args.locales
   build_args_without_ui = [
-    '--name', 'compiled', '+@complete', '-@ui', '-@polyfillForUI',
+    '--name', 'compiled', *complete_non_experimental, '-@ui', '-@polyfillForUI',
   ]
   build_args_only_dash_without_ui = [
     '--name', 'dash',
-    '+@complete', '-@ui', '-@polyfillForUI', '-@queue',
+    *complete_non_experimental, '-@ui', '-@polyfillForUI', '-@queue',
     '-@hls', '-@transmuxer', '-@offline', '-@cast', '-@optionalText', '-@ads',
   ]
   build_args_only_hls_without_ui = [
     '--name', 'hls',
-    '+@complete', '-@ui', '-@polyfillForUI', '-@queue',
+    *complete_non_experimental, '-@ui', '-@polyfillForUI', '-@queue',
     '-@dash', '-@offline', '-@cast', '-@optionalText', '-@ads',
   ]
 
   if parsed_args.force:
+    build_args_experimental += ['--force']
     build_args_with_ui += ['--force']
     build_args_without_ui += ['--force']
     build_args_only_dash_without_ui += ['--force']
@@ -147,6 +152,7 @@ def main(args):
     modes += ['debug', 'release']
 
   builds = [
+    build_args_experimental,
     build_args_with_ui,
     build_args_without_ui,
     build_args_only_dash_without_ui,
