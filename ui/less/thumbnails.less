@@ -1,24 +1,37 @@
 #shaka-player-ui-thumbnail-container {
-  background-color: @general-background-color-opaque;
-  border: 1px solid @general-background-color-opaque;
-  box-shadow: 0 8px 8px 0 @general-background-color;
-  min-width: 150px;
-  overflow: hidden;
+  bottom: 15px;
+  pointer-events: none;
   position: absolute;
   visibility: hidden;
-  width: 15%;
   z-index: 1;
-  pointer-events: none;
 
-  #shaka-player-ui-thumbnail-image {
-    position: absolute;
+  // Position of child elements
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+
+  #shaka-player-ui-thumbnail-image-container {
+    background-color: @general-background-color-opaque;
+    border: 1px solid @general-background-color-opaque;
+    box-shadow: 0 8px 8px 0 @general-background-color;
+    min-width: 150px;
+    overflow: hidden;
+    position: relative;
+    width: 15%;
+
+    #shaka-player-ui-thumbnail-image {
+      position: absolute;
+    }
+
+    &.portrait-thumbnail {
+      min-width: 75px;
+      width: 7.5%;
+    }
   }
 
   #shaka-player-ui-thumbnail-time-container {
-    bottom: 0;
-    left: 0;
-    position: absolute;
-    right: 0;
     display: flex;
     justify-content: center;
 
@@ -33,29 +46,5 @@
         background-color: @general-background-color-mostly-opaque;
       }
     }
-  }
-
-  &.portrait-thumbnail {
-    min-width: 75px;
-    width: 7.5%;
-  }
-}
-
-#shaka-player-ui-time-container {
-  background-color: @general-background-color;
-  border-radius: 5px;
-  color: @general-font-color;
-  display: flex;
-  font-size: @general-font-size;
-  justify-content: center;
-  overflow: hidden;
-  padding: 0 3px;
-  position: absolute;
-  pointer-events: none;
-  visibility: hidden;
-  z-index: 1;
-
-  @media (prefers-reduced-transparency) {
-    background-color: @general-background-color-mostly-opaque;
   }
 }

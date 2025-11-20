@@ -1321,36 +1321,54 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Art of Motion (DASH) (external thumbnails)',
+      /* name= */ 'Art of Motion (DASH) (external thumbnails and chapters)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
       /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
       /* source= */ shakaAssets.Source.BITCODIN)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.THUMBNAILS)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt'),
+      .addFeature(shakaAssets.Feature.THUMBNAILS)
+      .addFeature(shakaAssets.Feature.CHAPTERS)
+      .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt')
+      .addExtraChapter({
+        uri: 'data:text/vtt;base64,V0VCVlRUCgoxCjAwOjAwOjI0LjAwMCAtLT4gMDA6MDE6MDkuMDAwClNhbHRvIG9uIHRoZSBlZGdlCgoyCjAwOjAxOjA5LjAwMCAtLT4gMDA6MDE6NDUuMDAwCkludGVydmlldyAtIE1hcmN1cyBHdXN0YWZzc29uCgozCjAwOjAxOjQ1LjAwMCAtLT4gMDA6MDM6MDguMDAwClBhcmNvdXIgcmF0aW5nIGV4cGxhaW5lZAoKNAowMDowMzowOC4wMDAgLS0+IDAwOjAzOjE5LjAwMApBbmQgd2UgaGF2ZSBhIHdpbm5lciE=',
+        language: 'und',
+        mime: 'text/vtt',
+      }),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Art of Motion (HLS) (external thumbnails)',
+      /* name= */ 'Art of Motion (HLS) (external thumbnails and chapters)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
       /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
       /* source= */ shakaAssets.Source.BITCODIN)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP2TS)
-      .addFeature(shakaAssets.Feature.THUMBNAILS)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt'),
+      .addFeature(shakaAssets.Feature.THUMBNAILS)
+      .addFeature(shakaAssets.Feature.CHAPTERS)
+      .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt')
+      .addExtraChapter({
+        uri: 'data:text/vtt;base64,V0VCVlRUCgoxCjAwOjAwOjI0LjAwMCAtLT4gMDA6MDE6MDkuMDAwClNhbHRvIG9uIHRoZSBlZGdlCgoyCjAwOjAxOjA5LjAwMCAtLT4gMDA6MDE6NDUuMDAwCkludGVydmlldyAtIE1hcmN1cyBHdXN0YWZzc29uCgozCjAwOjAxOjQ1LjAwMCAtLT4gMDA6MDM6MDguMDAwClBhcmNvdXIgcmF0aW5nIGV4cGxhaW5lZAoKNAowMDowMzowOC4wMDAgLS0+IDAwOjAzOjE5LjAwMApBbmQgd2UgaGF2ZSBhIHdpbm5lciE=',
+        language: 'und',
+        mime: 'text/vtt',
+      }),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Art of Motion (MP4) (external thumbnails)',
+      /* name= */ 'Art of Motion (MP4) (external thumbnails and chapters)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
       /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/MI201109210084_mpeg-4_hd_high_1080p25_10mbits.mp4',
       /* source= */ shakaAssets.Source.BITCODIN)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.THUMBNAILS)
-      .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt'),
+      .addFeature(shakaAssets.Feature.CHAPTERS)
+      .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt')
+      .addExtraChapter({
+        uri: 'data:text/vtt;base64,V0VCVlRUCgoxCjAwOjAwOjI0LjAwMCAtLT4gMDA6MDE6MDkuMDAwClNhbHRvIG9uIHRoZSBlZGdlCgoyCjAwOjAxOjA5LjAwMCAtLT4gMDA6MDE6NDUuMDAwCkludGVydmlldyAtIE1hcmN1cyBHdXN0YWZzc29uCgozCjAwOjAxOjQ1LjAwMCAtLT4gMDA6MDM6MDguMDAwClBhcmNvdXIgcmF0aW5nIGV4cGxhaW5lZAoKNAowMDowMzowOC4wMDAgLS0+IDAwOjAzOjE5LjAwMApBbmQgd2UgaGF2ZSBhIHdpbm5lciE=',
+        language: 'und',
+        mime: 'text/vtt',
+      }),
   new ShakaDemoAssetInfo(
       /* name= */ 'VR Playhouse (DASH, VR equirectangular)',
       /* iconUri= */ 'https://cdn.bitmovin.com/content/assets/playhouse-vr/poster.jpg',
