@@ -23,9 +23,7 @@ describe('ManifestParser', () => {
 
 
       // Skip test if MediaSource is not supported (native playback mode)
-      const device = shaka.device.DeviceFactory.getDevice();
-
-      if (!device.supportsMediaSource()) {
+      if (!deviceDetected.supportsMediaSource()) {
         pending('MediaSource not supported on this platform');
       }
     });
