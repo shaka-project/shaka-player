@@ -96,28 +96,29 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     /** @private {!HTMLElement} */
     this.thumbnailContainer_ = shaka.util.Dom.createHTMLElement('div');
-    this.thumbnailContainer_.id = 'shaka-player-ui-thumbnail-container';
+    this.thumbnailContainer_.classList.add(
+        'shaka-player-ui-thumbnail-container');
 
     /** @private {!HTMLElement} */
     this.thumbnailImageContainer_ = shaka.util.Dom.createHTMLElement('div');
-    this.thumbnailImageContainer_.id =
-        'shaka-player-ui-thumbnail-image-container';
+    this.thumbnailImageContainer_.classList.add(
+        'shaka-player-ui-thumbnail-image-container');
 
     /** @private {!HTMLImageElement} */
     this.thumbnailImage_ = /** @type {!HTMLImageElement} */ (
       shaka.util.Dom.createHTMLElement('img'));
-    this.thumbnailImage_.id = 'shaka-player-ui-thumbnail-image';
+    this.thumbnailImage_.classList.add('shaka-player-ui-thumbnail-image');
     this.thumbnailImage_.draggable = false;
     this.thumbnailImageContainer_.appendChild(this.thumbnailImage_);
 
     /** @private {!HTMLElement} */
     this.thumbnailTimeContainer_ = shaka.util.Dom.createHTMLElement('div');
-    this.thumbnailTimeContainer_.id =
-        'shaka-player-ui-thumbnail-time-container';
+    this.thumbnailTimeContainer_.classList.add(
+        'shaka-player-ui-thumbnail-time-container');
 
     /** @private {!HTMLElement} */
     this.thumbnailTime_ = shaka.util.Dom.createHTMLElement('div');
-    this.thumbnailTime_.id = 'shaka-player-ui-thumbnail-time';
+    this.thumbnailTime_.classList.add('shaka-player-ui-thumbnail-time');
     this.thumbnailTimeContainer_.appendChild(this.thumbnailTime_);
 
     this.thumbnailContainer_.appendChild(this.thumbnailImageContainer_);
@@ -631,7 +632,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       }
       this.thumbnailImage_ = /** @type {!HTMLImageElement} */ (
         shaka.util.Dom.createHTMLElement('img'));
-      this.thumbnailImage_.id = 'shaka-player-ui-thumbnail-image';
+      this.thumbnailImage_.classList.add('shaka-player-ui-thumbnail-image');
       this.thumbnailImage_.draggable = false;
       this.thumbnailImage_.src = uri;
       this.thumbnailImage_.onload = () => {
