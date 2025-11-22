@@ -1619,6 +1619,20 @@ shaka.extern.DashManifestConfiguration;
  */
 shaka.extern.HlsManifestConfiguration;
 
+/**
+ * @typedef {{
+ *   fingerprintUri: string,
+ * }}
+ *
+ * @property {string} fingerprintUri
+ *   A fingerprint URI. If set, the server fingerprint will be fetched from
+ *   this URL. This is required to use self-signed certificates with Chromium.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @exportDoc
+ */
+shaka.extern.MoqtManifestConfiguration;
+
 
 /**
  * @typedef {{
@@ -1634,6 +1648,7 @@ shaka.extern.HlsManifestConfiguration;
  *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration,
+ *   moqt: shaka.extern.MoqtManifestConfiguration,
  *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean,
  *   continueLoadingWhenPaused: boolean,
  *   ignoreSupplementalCodecs: boolean,
@@ -1694,6 +1709,8 @@ shaka.extern.HlsManifestConfiguration;
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls
  *   Advanced parameters used by the HLS manifest parser.
+ * @property {shaka.extern.MoqtManifestConfiguration} moqt
+ *   Advanced parameters used by the MoQT.
  * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
  *   If true, manifest update request failures will cause a fatal error.
  *   <br>
