@@ -142,9 +142,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
      */
     this.isMoving_ = false;
 
-    /** @type {!Array<shaka.extern.Chapter>} */
-    this.chapters_ = [];
-
     /**
      * The timer is activated to hide the thumbnail.
      *
@@ -164,13 +161,11 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
           this.updateAriaLabel_();
-          this.updateChapters_();
         });
 
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
           this.updateAriaLabel_();
-          this.updateChapters_();
         });
 
     this.eventManager.listen(
@@ -195,7 +190,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     this.eventManager.listen(
         this.player, 'unloading', () => {
-          this.chapters_ = [];
           this.adCuePoints_ = this.controls.getAdCuePoints();
           this.onAdCuePointsChanged_();
           if (this.lastThumbnailPendingRequest_) {
@@ -205,10 +199,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           this.lastThumbnail_ = null;
           this.hideThumbnailTimeContainer_();
         });
-
-    this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.updateChapters_();
-    });
 
     this.eventManager.listen(this.bar, 'mousemove', (event) => {
       if (this.controls.anySettingsMenusAreOpen()) {
@@ -231,8 +221,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.setValue(this.video.currentTime);
     this.update();
     this.updateAriaLabel_();
-
-    this.updateChapters_();
 
     if (this.ad) {
       // There was already an ad.
@@ -684,43 +672,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     return shaka.ui.Utils.buildTimeString(totalSeconds, totalSeconds >= 3600);
   }
 
-  /**
-   * @private
-   */
-  async updateChapters_() {
-    /** @type {!Array<shaka.extern.Chapter>} */
-    let nextChapters = [];
-
-    const currentLocales = this.localization.getCurrentLocales();
-    for (const locale of Array.from(currentLocales)) {
-      // If player is a proxy, and the cast receiver doesn't support this
-      // method, you get back undefined.
-      if (this.player) {
-        // eslint-disable-next-line no-await-in-loop
-        nextChapters = (await this.player.getChaptersAsync(locale)) || [];
-      }
-      if (nextChapters.length) {
-        break;
-      }
-    }
-    if (!nextChapters.length && this.player) {
-      // If player is a proxy, and the cast receiver doesn't support this
-      // method, you get back undefined.
-      nextChapters = (await this.player.getChaptersAsync('und')) || [];
-    }
-    if (!nextChapters.length && this.player) {
-      // If player is a proxy, and the cast receiver doesn't support this
-      // method, you get back undefined.
-      const chaptersTracks = this.player.getChaptersTracks() || [];
-      if (chaptersTracks.length == 1) {
-        const language = chaptersTracks[0].language;
-        nextChapters = (await this.player.getChaptersAsync(language)) || [];
-      }
-    }
-
-    this.chapters_ = nextChapters;
-  }
-
 
   /**
    * @param {number} totalSeconds
@@ -728,7 +679,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @private
    */
   getChapterName_(totalSeconds) {
-    for (const chapter of this.chapters_) {
+    for (const chapter of this.controls.getChapters()) {
       if (chapter.startTime <= totalSeconds &&
           chapter.endTime >= totalSeconds) {
         return chapter.title;

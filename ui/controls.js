@@ -182,6 +182,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!Array<!shaka.extern.AdCuePoint>} */
     this.adCuePoints_ = [];
 
+    /** @private {!Array<!shaka.extern.Chapter>} */
+    this.chapters_ = [];
+
     /** @private {?shaka.extern.IUISeekBar} */
     this.seekBar_ = null;
 
@@ -317,10 +320,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.timeAndSeekRangeTimer_.tickEvery(this.config_.refreshTickInSeconds);
 
     this.eventManager_.listen(this.localization_,
+        shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateChapters_();
+        });
+
+    this.eventManager_.listen(this.localization_,
         shaka.ui.Localization.LOCALE_CHANGED, (e) => {
           const locale = e['locales'][0];
           this.adManager_.setLocale(locale);
           this.videoContainer_.setAttribute('lang', locale);
+          this.updateChapters_();
         });
 
     this.adManager_.setContainers(
@@ -338,10 +347,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     });
 
+    this.eventManager_.listen(this.player_, 'trackschanged', () => {
+      this.updateChapters_();
+    });
+
     this.eventManager_.listen(this.player_, 'unloading', () => {
       if (this.ad_) {
         return;
       }
+      this.chapters_ = [];
       this.adCuePoints_ = [];
       this.lastSelectedTextTrack_ = null;
       if (this.isFullScreenEnabled()) {
@@ -621,6 +635,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   getAdCuePoints() {
     return this.adCuePoints_;
+  }
+
+  /**
+   * @export
+   * @return {!Array<!shaka.extern.Chapter>}
+   */
+  getChapters() {
+    return this.chapters_;
   }
 
   /**
@@ -1669,15 +1691,34 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       addMediaSessionHandler('enterpictureinpicture', commonHandler);
     }
 
-    const setupTitle = (title) => {
-      let metadata = {
-        title: title,
+    // eslint-disable-next-line no-restricted-syntax
+    const supportsChapterInfo = 'chapterInfo' in MediaMetadata.prototype;
+
+    const getMediaMetadata = () => {
+      const metadata = {
+        title: '',
+        artist: '',
+        album: '',
         artwork: [],
       };
-      if (navigator.mediaSession.metadata) {
-        metadata = navigator.mediaSession.metadata;
-        metadata.title = title;
+      if (supportsChapterInfo) {
+        metadata.chapterInfo = [];
       }
+      if (navigator.mediaSession.metadata) {
+        metadata.title = navigator.mediaSession.metadata.title;
+        metadata.artist = navigator.mediaSession.metadata.artist;
+        metadata.album = navigator.mediaSession.metadata.album;
+        metadata.artwork = navigator.mediaSession.metadata.artwork;
+        if (supportsChapterInfo) {
+          metadata.chapterInfo = navigator.mediaSession.metadata.chapterInfo;
+        }
+      }
+      return metadata;
+    };
+
+    const setupTitle = (title) => {
+      const metadata = getMediaMetadata();
+      metadata.title = title;
       navigator.mediaSession.metadata = new MediaMetadata(metadata);
     };
 
@@ -1686,14 +1727,25 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       if (imageUrl != video.poster) {
         video.poster = imageUrl;
       }
-      let metadata = {
-        title: '',
-        artwork: [{src: imageUrl}],
-      };
-      if (navigator.mediaSession.metadata) {
-        metadata = navigator.mediaSession.metadata;
-        metadata.artwork = [{src: imageUrl}];
+      const metadata = getMediaMetadata();
+      metadata.artwork = [{src: imageUrl}];
+      navigator.mediaSession.metadata = new MediaMetadata(metadata);
+    };
+
+    const setupChapters = () => {
+      if (!supportsChapterInfo) {
+        return;
       }
+      const chapterInfo = [];
+      for (const chapter of this.chapters_) {
+        chapterInfo.push({
+          title: chapter.title,
+          startTime: chapter.startTime,
+          artwork: [],
+        });
+      }
+      const metadata = getMediaMetadata();
+      metadata.chapterInfo = chapterInfo;
       navigator.mediaSession.metadata = new MediaMetadata(metadata);
     };
 
@@ -1709,6 +1761,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     const playerUnloading = () => {
       this.eventManager_.unlisten(
           this.video_, 'timeupdate', updatePositionState);
+      navigator.mediaSession.metadata = new MediaMetadata({});
     };
 
     if (this.player_.isFullyLoaded()) {
@@ -1716,6 +1769,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
     this.eventManager_.listen(this.player_, 'loaded', playerLoaded);
     this.eventManager_.listen(this.player_, 'unloading', playerUnloading);
+    this.eventManager_.listen(this.player_, 'trackschanged', setupChapters);
     this.eventManager_.listen(this.player_, 'metadata', (event) => {
       const payload = event['payload'];
       if (!payload) {
@@ -2769,6 +2823,43 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   incrementRoll(angle) {
     goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
     this.vr_.incrementRoll(angle);
+  }
+
+  /**
+   * @private
+   */
+  async updateChapters_() {
+    /** @type {!Array<!shaka.extern.Chapter>} */
+    let chapters = [];
+
+    const currentLocales = this.localization_.getCurrentLocales();
+    for (const locale of Array.from(currentLocales)) {
+      // If player is a proxy, and the cast receiver doesn't support this
+      // method, you get back undefined.
+      if (this.player_) {
+        // eslint-disable-next-line no-await-in-loop
+        chapters = (await this.player_.getChaptersAsync(locale)) || [];
+      }
+      if (chapters.length) {
+        break;
+      }
+    }
+    if (!chapters.length && this.player_) {
+      // If player is a proxy, and the cast receiver doesn't support this
+      // method, you get back undefined.
+      chapters = (await this.player_.getChaptersAsync('und')) || [];
+    }
+    if (!chapters.length && this.player_) {
+      // If player is a proxy, and the cast receiver doesn't support this
+      // method, you get back undefined.
+      const chaptersTracks = this.player_.getChaptersTracks() || [];
+      if (chaptersTracks.length == 1) {
+        const language = chaptersTracks[0].language;
+        chapters = (await this.player_.getChaptersAsync(language)) || [];
+      }
+    }
+
+    this.chapters_ = chapters;
   }
 
   /**
