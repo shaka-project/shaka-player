@@ -1428,7 +1428,8 @@ shaka.extern.xml.Node;
  *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
  *   sequenceMode: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
- *   enableFastSwitching: boolean
+ *   enableFastSwitching: boolean,
+ *   enablePeriodCaching: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -1504,6 +1505,11 @@ shaka.extern.xml.Node;
  *   If false, disables fast switching track recognition.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {boolean} enablePeriodCaching
+ *   If true, enables caching of unchanged Period elements between manifest
+ *   updates.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
