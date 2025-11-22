@@ -396,4 +396,58 @@ describe('SimpleAbrManager', () => {
     chosen = abrManager.chooseVariant();
     expect(chosen.id).toBe(10);
   });
+
+  it('rejects restrictions on audio codecs', () => {
+    manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.addVariant(10, (variant) => {
+        variant.bandwidth = 1e5;
+        variant.addAudio(0, (stream) => {
+          stream.codecs = 'mp4a.40.2';
+        });
+      });
+      manifest.addVariant(11, (variant) => {
+        variant.bandwidth = 2e5;
+        variant.addAudio(1, (stream) => {
+          stream.codecs = 'mp4a.40.5';
+        });
+      });
+    });
+
+    abrManager.setVariants(manifest.variants);
+    let chosen = abrManager.chooseVariant();
+    expect(chosen.id).toBe(11);
+
+    config.restrictions.restrictedAudioCodecs = ['mp4a.40.5'];
+    abrManager.configure(config);
+
+    chosen = abrManager.chooseVariant();
+    expect(chosen.id).toBe(11);
+  });
+
+  it('rejects restrictions on video codecs', () => {
+    manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.addVariant(10, (variant) => {
+        variant.bandwidth = 1e5;
+        variant.addVideo(0, (stream) => {
+          stream.codecs = 'avc1.640029';
+        });
+      });
+      manifest.addVariant(11, (variant) => {
+        variant.bandwidth = 2e5;
+        variant.addVideo(1, (stream) => {
+          stream.codecs = 'avc1.64002A';
+        });
+      });
+    });
+
+    abrManager.setVariants(manifest.variants);
+    let chosen = abrManager.chooseVariant();
+    expect(chosen.id).toBe(11);
+
+    config.restrictions.restrictedVideoCodecs = ['avc1.64002A'];
+    abrManager.configure(config);
+
+    chosen = abrManager.chooseVariant();
+    expect(chosen.id).toBe(11);
+  });
 });
