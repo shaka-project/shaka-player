@@ -298,22 +298,25 @@ describe('HlsParser live', () => {
 
       it('converts presentation to VOD when it is finished', async () => {
         const manifest = await testInitialManifest(master, media);
-        expect(manifest.presentationTimeline.isLive()).toBe(true);
+        expect(manifest.presentationTimeline.isLive()).toBe(false);
+        expect(manifest.presentationTimeline.isInProgress()).toBe(true);
 
         await testUpdate(
             manifest, mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n');
-        expect(manifest.presentationTimeline.isLive()).toBe(false);
+        expect(manifest.presentationTimeline.isInProgress()).toBe(false);
       });
 
       it('starts presentation as VOD when ENDLIST is present', async () => {
         const manifest = await testInitialManifest(
             master, media + '#EXT-X-ENDLIST');
         expect(manifest.presentationTimeline.isLive()).toBe(false);
+        expect(manifest.presentationTimeline.isInProgress()).toBe(false);
       });
 
       it('does not throw when interrupted by stop', async () => {
         const manifest = await testInitialManifest(master, media);
-        expect(manifest.presentationTimeline.isLive()).toBe(true);
+        expect(manifest.presentationTimeline.isLive()).toBe(false);
+        expect(manifest.presentationTimeline.isInProgress()).toBe(true);
 
         // Block the next request so that update() is still happening when we
         // call stop().
@@ -389,26 +392,28 @@ describe('HlsParser live', () => {
         const mediaWithEndList = media + '#EXT-X-ENDLIST';
 
         const manifest = await testInitialManifest(master, media);
-        expect(manifest.presentationTimeline.isLive()).toBe(true);
+        expect(manifest.presentationTimeline.isLive()).toBe(false);
+        expect(manifest.presentationTimeline.isInProgress()).toBe(true);
 
         // Update video only.
         fakeNetEngine.setResponseText('test:/video', mediaWithEndList);
         await delayForUpdatePeriod();
 
-        // Audio hasn't "ended" yet, so we're still live.
-        expect(manifest.presentationTimeline.isLive()).toBe(true);
+        // Audio hasn't "ended" yet, so we're still in progress.
+        expect(manifest.presentationTimeline.isInProgress()).toBe(true);
 
         // Update audio.
         fakeNetEngine.setResponseText('test:/audio', mediaWithEndList);
         await delayForUpdatePeriod();
 
-        // Now both have "ended", so we're no longer live.
-        expect(manifest.presentationTimeline.isLive()).toBe(false);
+        // Now both have "ended", so we're no longer in progress.
+        expect(manifest.presentationTimeline.isInProgress()).toBe(false);
       });
 
       it('stops updating after all playlists end', async () => {
         const manifest = await testInitialManifest(master, media);
-        expect(manifest.presentationTimeline.isLive()).toBe(true);
+        expect(manifest.presentationTimeline.isLive()).toBe(false);
+        expect(manifest.presentationTimeline.isInProgress()).toBe(true);
 
         fakeNetEngine.request.calls.reset();
         await testUpdate(
@@ -422,7 +427,7 @@ describe('HlsParser live', () => {
             'test:/video',
             shaka.net.NetworkingEngine.RequestType.MANIFEST,
             {type});
-        expect(manifest.presentationTimeline.isLive()).toBe(false);
+        expect(manifest.presentationTimeline.isInProgress()).toBe(false);
 
         fakeNetEngine.request.calls.reset();
         await delayForUpdatePeriod();
