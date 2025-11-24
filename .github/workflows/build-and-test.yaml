@@ -3,26 +3,16 @@ name: Build and Test
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    branches:
-      - main
-      - v[0-9]*
   workflow_dispatch:
-    inputs:
-      ref:
-        description: "The ref to build and test."
-        required: false
-  schedule:
-    - cron: '0 8 * * *'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || inputs.ref }}
   cancel-in-progress: true
 
 jobs:
-  docker_job:
-    name: Run Docker Build
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,8 +20,28 @@ jobs:
           ref: ${{ inputs.ref || github.ref }}
           persist-credentials: false
 
-      - name: Build Docker Image
-        run: docker build . -t myimage:latest
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
 
-      - name: Run Docker Container
-        run: docker run --rm myimage:latest
+      - name: Lint
+        run: python3 build/check.py
+
+  docker_job:
+    needs: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout correct branch (fork-safe)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Docker
+        run: |
+          docker build -t shaka-player-build build/docker
+          docker run -v $(pwd):/usr/src --user $(id -u):$(id -g) shaka-player-build
