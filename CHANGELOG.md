@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.16.10](https://github.com/shaka-project/shaka-player/compare/v4.16.9...v4.16.10) (2025-11-24)
+
+
+### Bug Fixes
+
+* **DASH:** Memory leak on DASH streams ([#9369](https://github.com/shaka-project/shaka-player/issues/9369)) ([a543b7a](https://github.com/shaka-project/shaka-player/commit/a543b7ac4498c8ed02dc9f4c3e28dd65fea89285))
+* **DRM:** Apply initDataTransform before deduping ([#9393](https://github.com/shaka-project/shaka-player/issues/9393)) ([720d6f6](https://github.com/shaka-project/shaka-player/commit/720d6f694c76fa893fd2f032de9eb250de592936))
+* **DRM:** Fix cache keys to include encryption scheme ([#9392](https://github.com/shaka-project/shaka-player/issues/9392)) ([518aabe](https://github.com/shaka-project/shaka-player/commit/518aabe6b0b4e058e9e9e582d8d6032d938ce90a))
+* Fire segmentappended event when adding a dependency data ([#9382](https://github.com/shaka-project/shaka-player/issues/9382)) ([4bf2e33](https://github.com/shaka-project/shaka-player/commit/4bf2e3386d370947fde565e6c2c475d9918544db))
+* Fix case-insensitive MIME type matching in ManifestParser ([#9416](https://github.com/shaka-project/shaka-player/issues/9416)) ([df541bc](https://github.com/shaka-project/shaka-player/commit/df541bca66596f2f96191be4483d812489a609cb))
+* Fix playback of muxed(audio+video) mp4 ([#9412](https://github.com/shaka-project/shaka-player/issues/9412)) ([1b6830d](https://github.com/shaka-project/shaka-player/commit/1b6830d48c4cc7bf71db0aa86a8b3f7c0c9e514c))
+* **Preload:** Do not fetch license if delayLicenseRequestUntilPlayed is set ([#9388](https://github.com/shaka-project/shaka-player/issues/9388)) ([48950cc](https://github.com/shaka-project/shaka-player/commit/48950cc484365f3a89867a80a3037b8dd4c55899))
+* **UI:** Show hours in time statistics ([#9410](https://github.com/shaka-project/shaka-player/issues/9410)) ([2267ee5](https://github.com/shaka-project/shaka-player/commit/2267ee5fb37e204c8f928aba73d49bbfd97b4ec0))
+* **Xbox:** Report buffer satisfied if time is progressing ([#9397](https://github.com/shaka-project/shaka-player/issues/9397)) ([03ecb8c](https://github.com/shaka-project/shaka-player/commit/03ecb8c4715e1d8994b4ee9e5ebe207559289879))
+
+
+### Performance Improvements
+
+* Allow update the segments on streaming engine more often ([#9398](https://github.com/shaka-project/shaka-player/issues/9398)) ([4dccf35](https://github.com/shaka-project/shaka-player/commit/4dccf35f7aa262eefa32ecf6c00285ac819d92a3))
+* **HLS:** Use find instead of filter to get attributes ([#9405](https://github.com/shaka-project/shaka-player/issues/9405)) ([8d1445e](https://github.com/shaka-project/shaka-player/commit/8d1445e9047be8165e5df63e9713ac82b8aa27fa))
+
 ## [4.16.9](https://github.com/shaka-project/shaka-player/compare/v4.16.8...v4.16.9) (2025-11-11)
 
 
