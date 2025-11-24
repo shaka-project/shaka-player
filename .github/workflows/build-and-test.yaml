@@ -41,20 +41,6 @@ jobs:
           persist-credentials: false
           fetch-depth: 1
 
-      - name: Debug directory
-        run: |
-          echo "Working directory:"
-          pwd
-          echo "Contents:"
-          ls -la
-
-      - name: Debug variables
-        run: |
-          echo "github.sha: ${{ github.sha }}"
-          echo "PR head sha: ${{ github.event.pull_request.head.sha }}"
-          echo "github.ref: ${{ github.ref }}"
-          echo "github.event: ${{ toJson(github.event) }}"
-
       - name: Docker
         run: |
           docker build -t shaka-player-build build/docker
