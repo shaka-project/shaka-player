@@ -2,88 +2,37 @@ name: Report Bundle Size
 
 on:
   workflow_run:
-    workflows: [Build and Test]   # Reuse your main build job
-    types: [completed]
+    workflows: ["Build and Test"]
+    types:
+      - completed
 
 jobs:
   report:
-    if: ${{ github.event.workflow_run.event == 'pull_request' }}
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      - name: Checkout PR branch
-      - uses: actions/checkout@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v3
         with:
-          persist-credentials: false
-          ref: ${{ github.event.workflow_run.head_branch }}
+          name: bundle-size
+          path: bundle
 
-      - name: Install dependencies
+      - name: Read PR info
         run: |
-          npm ci
+          echo "PR_NUMBER=${{ github.event.workflow_run.pull_requests[0].number }}" >> $GITHUB_ENV
 
-      - name: Build bundles for PR
+      - name: Compute bundle size
+        id: size
         run: |
-          npm run build
-          mkdir -p bundle-report/pr
-          cp -r dist/* bundle-report/pr/
+          SIZE=$(du -k bundle/main.js | cut -f1)
+          echo "PR_SIZE=$SIZE" >> $GITHUB_ENV
 
-      # --- Build main branch for comparison ---
-      - name: Checkout main branch
-        uses: actions/checkout@v4
+      - name: Comment on PR
+        uses: mshick/add-pr-comment@v2
         with:
-          persist-credentials: false
-          ref: main
-
-      - name: Install dependencies (main)
-        run: |
-          npm ci
-
-      - name: Build bundles for main
-        run: |
-          npm run build
-          mkdir -p bundle-report/main
-          cp -r dist/* bundle-report/main/
-
-      # --- Compute Sizes ---
-      - name: Compute bundle sizes
-        id: compute
-        run: |
-          echo "PR_SIZE=$(du -sk bundle-report/pr | cut -f1)" >> $GITHUB_OUTPUT
-          echo "MAIN_SIZE=$(du -sk bundle-report/main | cut -f1)" >> $GITHUB_OUTPUT
-          echo "DIFF=$(($(du -sk bundle-report/pr | cut -f1) - $(du -sk bundle-report/main | cut -f1)))" >> $GITHUB_OUTPUT
-
-      # --- Comment on PR ---
-      - name: Report bundle sizes on PR
-        env:
-          GITHUB_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
-          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
-          PR_SIZE: ${{ steps.compute.outputs.PR_SIZE }}
-          MAIN_SIZE: ${{ steps.compute.outputs.MAIN_SIZE }}
-          DIFF: ${{ steps.compute.outputs.DIFF }}
-          COMMENT_INCLUDES: "Bundle size report:"
-          COMMENT_USER: "Shaun420"
-        run: |
-          MESSAGE="Bundle size report:
-
-          **PR size:** ${PR_SIZE} KB
-          **Main size:** ${MAIN_SIZE} KB
-          **Difference:** ${DIFF} KB
-          "
-
-          # Look for previous bot comment
-          jq_filter=".[] | select((.user.login == \"$COMMENT_USER\") and (.body | startswith(\"$COMMENT_INCLUDES\"))) | .id"
-          gh api \
-            /repos/${{ github.repository }}/issues/$PR_NUMBER/comments \
-            | jq "$jq_filter" > old-comment-id
-
-          if [[ -z "$(cat old-comment-id)" ]]; then
-            gh api \
-              --method POST \
-              /repos/${{ github.repository }}/issues/$PR_NUMBER/comments \
-              -F "body=$MESSAGE"
-          else
-            gh api \
-              --method PATCH \
-              /repos/${{ github.repository }}/issues/comments/$(cat old-comment-id) \
-              -F "body=$MESSAGE"
-          fi
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          issue: ${{ env.PR_NUMBER }}
+          message: |
+            "**Bundle Size Report**  
+            🧩 **New bundle size:** ${{ env.PR_SIZE }} KB"
