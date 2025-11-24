@@ -67,6 +67,25 @@ shakaAssets.AdTag = {
   AD_POD_PREROLL_MIDROLL_POSTROLL: 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostpod&cmsid=496&vid=short_onecue&correlator=',
 };
 
+/** @enum {shaka.extern.ExtraChapter} */
+shakaAssets.ExternalChapters = {
+  SINTEL: {
+    uri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-chapters.vtt',
+    language: 'und',
+    mime: 'text/vtt',
+  },
+  ART_OF_MOTION: {
+    // eslint-disable-next-line @stylistic/max-len
+    uri: 'data:text/vtt;base64,V0VCVlRUCgoxCjAwOjAwOjI0LjAwMCAtLT4gMDA6MDE6MDkuMDAwClNhbHRvIG9uIHRoZSBlZGdlCgoyCjAwOjAxOjA5LjAwMCAtLT4gMDA6MDE6NDUuMDAwCkludGVydmlldyAtIE1hcmN1cyBHdXN0YWZzc29uCgozCjAwOjAxOjQ1LjAwMCAtLT4gMDA6MDM6MDguMDAwClBhcmNvdXIgcmF0aW5nIGV4cGxhaW5lZAoKNAowMDowMzowOC4wMDAgLS0+IDAwOjAzOjE5LjAwMApBbmQgd2UgaGF2ZSBhIHdpbm5lciE=',
+    language: 'und',
+    mime: 'text/vtt',
+  },
+};
+
+/** @enum {string} */
+shakaAssets.ExternalThumbnail = {
+  ART_OF_MOTION: 'https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt',
+};
 
 /**
  * @param {!shakaAssets.KeySystem} keySystem
@@ -408,7 +427,8 @@ shakaAssets.testAssets = [
       .addKeySystem(shakaAssets.KeySystem.AES128)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP2TS)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel (HLS, FMP4, AES-128)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -417,7 +437,8 @@ shakaAssets.testAssets = [
       .addKeySystem(shakaAssets.KeySystem.AES128)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (multicodec)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -429,12 +450,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addFeature(shakaAssets.Feature.CHAPTERS)
-      .addExtraChapter({
-        uri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-chapters.vtt',
-        language: 'und',
-        mime: 'text/vtt',
-      }),
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel w/ trick mode (MP4 only, 720p)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -444,7 +460,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.TRICK_MODE)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   // NOTE: hanging in Firefox
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1291451
   new ShakaDemoAssetInfo(
@@ -456,7 +473,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (MP4 only)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -466,7 +484,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (multicodec, Widevine)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -488,7 +507,8 @@ shakaAssets.testAssets = [
             },
           },
         },
-      }),
+      })
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (multicodec, Widevine, ads)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -505,7 +525,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
+      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth')
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (MP4, VTT in MP4)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -515,7 +536,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel w/ 44 subtitle languages',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -525,7 +547,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.SURROUND)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (multiperiod, mixed encryption, encrypted first)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -547,7 +570,8 @@ shakaAssets.testAssets = [
             },
           },
         },
-      }),
+      })
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (multiperiod, mixed encryption, clear first)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -569,7 +593,8 @@ shakaAssets.testAssets = [
             },
           },
         },
-      }),
+      })
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Heliocentrism (multicodec, multiperiod)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/heliocentricism.png',
@@ -1330,9 +1355,9 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.THUMBNAILS)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt'),
+      .addExtraThumbnail(shakaAssets.ExternalThumbnail.ART_OF_MOTION)
+      .addExtraChapter(shakaAssets.ExternalChapters.ART_OF_MOTION),
   new ShakaDemoAssetInfo(
       /* name= */ 'Art of Motion (HLS) (external thumbnails)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
@@ -1341,9 +1366,9 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP2TS)
-      .addFeature(shakaAssets.Feature.THUMBNAILS)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt'),
+      .addExtraThumbnail(shakaAssets.ExternalThumbnail.ART_OF_MOTION)
+      .addExtraChapter(shakaAssets.ExternalChapters.ART_OF_MOTION),
   new ShakaDemoAssetInfo(
       /* name= */ 'Art of Motion (MP4) (external thumbnails)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
@@ -1351,8 +1376,8 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.BITCODIN)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.THUMBNAILS)
-      .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt'),
+      .addExtraThumbnail(shakaAssets.ExternalThumbnail.ART_OF_MOTION)
+      .addExtraChapter(shakaAssets.ExternalChapters.ART_OF_MOTION),
   new ShakaDemoAssetInfo(
       /* name= */ 'VR Playhouse (DASH, VR equirectangular)',
       /* iconUri= */ 'https://cdn.bitmovin.com/content/assets/playhouse-vr/poster.jpg',
