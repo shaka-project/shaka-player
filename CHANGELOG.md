@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.15.22](https://github.com/shaka-project/shaka-player/compare/v4.15.21...v4.15.22) (2025-11-24)
+
+
+### Bug Fixes
+
+* **DASH:** Memory leak on DASH streams ([#9369](https://github.com/shaka-project/shaka-player/issues/9369)) ([1579345](https://github.com/shaka-project/shaka-player/commit/1579345cb2e832cb5fb85ef47b062db98d37eb23))
+* **DRM:** Apply initDataTransform before deduping ([#9393](https://github.com/shaka-project/shaka-player/issues/9393)) ([eef2a97](https://github.com/shaka-project/shaka-player/commit/eef2a97ad189954f5f95f72e1eec44abf34d8617))
+* **DRM:** Fix cache keys to include encryption scheme ([#9392](https://github.com/shaka-project/shaka-player/issues/9392)) ([2203517](https://github.com/shaka-project/shaka-player/commit/2203517ab16845e653b51599bff56c610a6e92fc))
+* Fix case-insensitive MIME type matching in ManifestParser ([#9416](https://github.com/shaka-project/shaka-player/issues/9416)) ([afc1a8f](https://github.com/shaka-project/shaka-player/commit/afc1a8f901f52546445a2e32c0163da563f48889))
+* **Preload:** Do not fetch license if delayLicenseRequestUntilPlayed is set ([#9388](https://github.com/shaka-project/shaka-player/issues/9388)) ([0d82a75](https://github.com/shaka-project/shaka-player/commit/0d82a75ba284ed62d7ab1aa0e8e774182186cf8f))
+* **UI:** Show hours in time statistics ([#9410](https://github.com/shaka-project/shaka-player/issues/9410)) ([f97af5f](https://github.com/shaka-project/shaka-player/commit/f97af5fbede232035c50ad2c3c4bd8779b0e4463))
+* **Xbox:** Report buffer satisfied if time is progressing ([#9397](https://github.com/shaka-project/shaka-player/issues/9397)) ([161b866](https://github.com/shaka-project/shaka-player/commit/161b866476012d9de65dafbbbf4bce997467cb07))
+
+
+### Performance Improvements
+
+* Allow update the segments on streaming engine more often ([#9398](https://github.com/shaka-project/shaka-player/issues/9398)) ([37e5d68](https://github.com/shaka-project/shaka-player/commit/37e5d682b3cff0d63e79a1a19a047dad98eec69e))
+* **HLS:** Use find instead of filter to get attributes ([#9405](https://github.com/shaka-project/shaka-player/issues/9405)) ([39687e4](https://github.com/shaka-project/shaka-player/commit/39687e4ee5b4765de51d0228ed5ae271555df63b))
+
 ## [4.15.21](https://github.com/shaka-project/shaka-player/compare/v4.15.20...v4.15.21) (2025-11-11)
 
 
