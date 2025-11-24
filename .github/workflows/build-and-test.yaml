@@ -45,3 +45,17 @@ jobs:
         run: |
           docker build -t shaka-player-build build/docker
           docker run -v $(pwd):/usr/src --user $(id -u):$(id -g) shaka-player-build
+
+      # -----------------------------------------------
+      #  NEW: Upload Coverage Artifact
+      # -----------------------------------------------
+      - name: Ensure coverage directory exists
+        run: |
+          mkdir -p coverage
+
+      - name: Upload coverage output
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          if-no-files-found: warn
