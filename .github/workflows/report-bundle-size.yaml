@@ -54,7 +54,7 @@ jobs:
           RAW: ${{ steps.size.outputs.raw_kb }}
           GZIP: ${{ steps.size.outputs.gzip_kb }}
           COMMENT_INCLUDES: "Bundle Size Report"
-          COMMENT_USER: "Shaun420"
+          COMMENT_USER: "shaka-bot"
         run: |
           MESSAGE="Bundle Size Report
           **Built file:** \`shaka-player.compiled.js\`
