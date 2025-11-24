@@ -5,8 +5,31 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || inputs.ref }}
+  cancel-in-progress: true
+
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          persist-credentials: false
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - name: Lint
+        run: python3 build/check.py
+
   docker_job:
+    needs: lint
     runs-on: ubuntu-latest
 
     steps:
@@ -32,8 +55,7 @@ jobs:
           echo "github.ref: ${{ github.ref }}"
           echo "github.event: ${{ toJson(github.event) }}"
 
-      - name: Build Docker Image
-        run: docker build . -t myimage:latest
-
-      - name: Run Docker Container
-        run: docker run --rm myimage:latest
+      - name: Docker
+        run: |
+          docker build -t shaka-player-build build/docker
+          docker run -v $(pwd):/usr/src --user $(id -u):$(id -g) shaka-player-build
