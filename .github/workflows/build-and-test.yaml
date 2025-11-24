@@ -12,7 +12,7 @@ on:
         description: "The ref to build and test."
         required: false
   schedule:
-    - cron: '0 8 * * *'
+    - cron: "0 8 * * *"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || inputs.ref }}
@@ -24,14 +24,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      #
+      # FORK-SAFE CHECKOUT
+      #
+      - name: Checkout correct source
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.ref || github.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || inputs.ref || github.ref }}
           persist-credentials: false
+          fetch-depth: 1
 
+      - name: Debug directory tree
+        run: ls -R .
+
+      #
+      # Build
+      #
       - name: Build Docker Image
         run: docker build . -t myimage:latest
 
+      #
+      # Test
+      #
       - name: Run Docker Container
         run: docker run --rm myimage:latest
