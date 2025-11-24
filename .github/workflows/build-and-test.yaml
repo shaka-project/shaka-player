@@ -25,6 +25,13 @@ jobs:
           echo "Contents:"
           ls -la
 
+      - name: Debug variables
+        run: |
+          echo "github.sha: ${{ github.sha }}"
+          echo "PR head sha: ${{ github.event.pull_request.head.sha }}"
+          echo "github.ref: ${{ github.ref }}"
+          echo "github.event: ${{ toJson(github.event) }}"
+
       - name: Build Docker Image
         run: docker build . -t myimage:latest
 
