@@ -1,38 +1,86 @@
 name: Report Bundle Size
 
 on:
-  workflow_run:
-    workflows: ["Build and Test"]
-    types:
-      - completed
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
-  report:
+  bundle-size:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
         with:
-          name: bundle-size
-          path: bundle
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
-      - name: Read PR info
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - name: Install dependencies
         run: |
-          echo "PR_NUMBER=${{ github.event.workflow_run.pull_requests[0].number }}" >> $GITHUB_ENV
+          sudo apt update
+          sudo apt install -y python3 jq gzip ffmpeg
+
+      - name: Build bundle
+        run: python3 build/all.py
 
       - name: Compute bundle size
         id: size
         run: |
-          SIZE=$(du -k bundle/main.js | cut -f1)
-          echo "PR_SIZE=$SIZE" >> $GITHUB_ENV
+          FILE="dist/shaka-player.compiled.js"
 
-      - name: Comment on PR
-        uses: mshick/add-pr-comment@v2
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          issue: ${{ env.PR_NUMBER }}
-          message: |
-            "**Bundle Size Report**  
-            🧩 **New bundle size:** ${{ env.PR_SIZE }} KB"
+          if [ ! -f "$FILE" ]; then
+            echo "Bundle not found: $FILE"
+            exit 1
+          fi
+
+          RAW_KB=$(du -k "$FILE" | cut -f1)
+          GZIP_B=$(gzip -c "$FILE" | wc -c)
+          GZIP_KB=$(echo "$GZIP_B / 1024" | bc)
+
+          echo "raw_kb=$RAW_KB" >> $GITHUB_OUTPUT
+          echo "gzip_kb=$GZIP_KB" >> $GITHUB_OUTPUT
+
+      - name: Add or Update PR Comment
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RAW: ${{ steps.size.outputs.raw_kb }}
+          GZIP: ${{ steps.size.outputs.gzip_kb }}
+          COMMENT_INCLUDES: "Bundle Size Report"
+          COMMENT_USER: "Shaun420"
+        run: |
+          MESSAGE="Bundle Size Report
+          **Built file:** \`shaka-player.compiled.js\`
+
+          | Type | Size |
+          |------|------|
+          | Raw | **${RAW} KB** |
+          | Gzip | **${GZIP} KB** |"
+
+          # Find existing bot comment
+          jq_filter=".[] | select((.user.login == \"$COMMENT_USER\") and (.body | startswith(\"$COMMENT_INCLUDES\"))) | .id"
+
+          gh api \
+            /repos/${{ github.repository }}/issues/$PR_NUMBER/comments \
+            | jq "$jq_filter" > old-comment-id
+
+          if [[ -z "$(cat old-comment-id)" ]]; then
+            echo "Creating new bundle size comment"
+            gh api \
+              --method POST \
+              /repos/${{ github.repository }}/issues/$PR_NUMBER/comments \
+              -f "body=$MESSAGE"
+          else
+            echo "Updating existing bundle size comment"
+            gh api \
+              --method PATCH \
+              /repos/${{ github.repository }}/issues/comments/$(cat old-comment-id) \
+              -f "body=$MESSAGE"
+          fi
