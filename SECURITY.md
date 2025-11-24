@@ -24,4 +24,3 @@ The Google Security Team will process your report within a day, and respond with
 
  * Vulnerabilities in NPM modules will be reported to NPM so that they show up in `npm audit`.
 
-
