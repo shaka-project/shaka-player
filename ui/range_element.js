@@ -48,6 +48,9 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     /** @private {boolean} */
     this.isChanging_ = false;
 
+    /** @private {?number} */
+    this.lastPointerClientX_ = null;
+
     /** @protected {!HTMLInputElement} */
     this.bar =
       /** @type {!HTMLInputElement} */ (document.createElement('input'));
@@ -85,8 +88,12 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
 
     this.eventManager.listen(this.bar, 'mousedown', (e) => {
       if (!this.bar.disabled) {
+        const mouseEvent = /** @type {!MouseEvent} */ (e);
+        this.lastPointerClientX_ = mouseEvent.clientX;
         this.isChanging_ = true;
+        this.setBarValueForMouse_(mouseEvent);
         this.onChangeStart();
+        this.onChange();
         e.stopPropagation();
       }
     });
@@ -101,7 +108,20 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(this.bar, 'input', () => {
+      if (this.lastPointerClientX_ != null) {
+        this.bar.value = this.getValueFromPosition(this.lastPointerClientX_);
+      }
       this.onChange();
+    });
+
+    this.eventManager.listen(this.bar, 'mousemove', (e) => {
+      if (this.isChanging_) {
+        const mouseEvent = /** @type {!MouseEvent} */ (e);
+        this.lastPointerClientX_ = mouseEvent.clientX;
+        this.setBarValueForMouse_(mouseEvent);
+        this.onChange();
+        e.stopPropagation();
+      }
     });
 
     this.eventManager.listen(this.bar, 'touchmove', (e) => {
@@ -133,6 +153,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     this.eventManager.listen(this.bar, 'mouseup', (e) => {
       if (this.isChanging_) {
         this.isChanging_ = false;
+        this.lastPointerClientX_ = null;
         this.onChangeEnd();
         e.stopPropagation();
       }
@@ -141,6 +162,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     this.eventManager.listen(this.bar, 'blur', () => {
       if (this.isChanging_) {
         this.isChanging_ = false;
+        this.lastPointerClientX_ = null;
         this.onChangeEnd();
       }
     });
@@ -256,26 +278,21 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     // Parse the min, max, and step attributes from the input element
     const min = parseFloat(this.bar.min);
     const max = parseFloat(this.bar.max);
-    const step = parseFloat(this.bar.step) || 1;
+    const step = parseFloat(this.bar.step);
 
-    // Define the effective range of the thumb movement
-    // 12 is the value of @thumb-size in range_elements.less. Note: for
-    // everything to work, this value has to be synchronized.
-    const thumbWidth = 12;
-    const minX = rect.left + thumbWidth / 2;
-    const maxX = rect.right - thumbWidth / 2;
+    // Clamp the touch X position to stay within the bar.
+    const clampedX = Math.max(rect.left, Math.min(rect.right, clientX));
 
-    // Clamp the touch X position to stay within the thumb's movement range
-    const clampedX = Math.max(minX, Math.min(maxX, clientX));
-
-    // Calculate the percentage of the track that the clamped X represents
-    const percent = (clampedX - minX) / (maxX - minX);
+    // Calculate the percentage of the track that the clamped X represents.
+    const percent = rect.width ? (clampedX - rect.left) / rect.width : 0;
 
     // Convert the percentage into a value within the input's range
     let value = min + percent * (max - min);
 
-    // Round the value to the nearest step
-    value = Math.round((value - min) / step) * step + min;
+    // Round the value to the nearest step when a numeric step is set.
+    if (Number.isFinite(step) && step > 0) {
+      value = Math.round((value - min) / step) * step + min;
+    }
 
     // Ensure the value stays within the min and max bounds
     value = Math.min(max, Math.max(min, value));
@@ -296,5 +313,14 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     const changedTouch = /** @type {TouchEvent} */ (event).changedTouches[0];
 
     this.bar.value = this.getValueFromPosition(changedTouch.clientX);
+  }
+
+  /**
+   * Synchronize the mouse position with the range value.
+   * @param {MouseEvent} event
+   * @private
+   */
+  setBarValueForMouse_(event) {
+    this.bar.value = this.getValueFromPosition(event.clientX);
   }
 };
