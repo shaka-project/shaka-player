@@ -104,6 +104,9 @@ describe('UI', () => {
     eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
     eventManager.listen(controls, 'error', Util.spyFunc(onErrorSpy));
 
+    // These tests expect a default text track to be selected.
+    player.configure('preferredTextLanguage', 'en');
+
     await player.load('test:sintel_multi_lingual_multi_res_compiled');
     // For this event, we ignore a timeout, since we sometimes miss this event
     // on Tizen.  But expect that the video is ready anyway.
