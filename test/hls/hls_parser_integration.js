@@ -105,6 +105,7 @@ describe('HlsParser', () => {
   });
 
   it('supports text discontinuity', async () => {
+    player.configure('preferredTextLanguage', 'en');
     await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
     await video.play();
 
