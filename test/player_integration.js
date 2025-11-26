@@ -306,7 +306,7 @@ describe('Player', () => {
     });
   });  // describe('getStats')
 
-  describe('autoShowText', () => {
+  describe('might need subtitles', () => {
     async function textMatchesAudioDoesNot() {
       const preferredTextLanguage = 'fa';  // The same as in the content
       player.configure({preferredTextLanguage: preferredTextLanguage});
@@ -371,106 +371,24 @@ describe('Player', () => {
       expect(variantTrack.language).toBe(textTrack.language);
     }
 
-    describe('IF_SUBTITLES_MAY_BE_NEEDED', () => {
-      beforeEach(() => {
-        player.configure(
-            'autoShowText',
-            shaka.config.AutoShowText.IF_SUBTITLES_MAY_BE_NEEDED);
-      });
+    it('enables text if text matches and audio does not', async () => {
+      await textMatchesAudioDoesNot();
+      const activeTextTrack = player.getTextTracks().find((t) => t.active);
+      expect(activeTextTrack).toBeDefined();
+    });
 
-      it('enables text if text matches and audio does not', async () => {
-        await textMatchesAudioDoesNot();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeDefined();
-      });
+    it('disables text if text does not match', async () => {
+      await textDoesNotMatch();
+      const activeTextTrack = player.getTextTracks().find((t) => t.active);
+      expect(activeTextTrack).toBeUndefined();
+    });
 
-      it('disables text if text does not match', async () => {
-        await textDoesNotMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeUndefined();
-      });
-
-      it('disables text if both text and audio match', async () => {
-        await textAndAudioMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeUndefined();
-      });
-    });  // IF_SUBTITLES_MAY_BE_NEEDED
-
-    describe('IF_PREFERRED_TEXT_LANGUAGE', () => {
-      beforeEach(() => {
-        player.configure(
-            'autoShowText',
-            shaka.config.AutoShowText.IF_PREFERRED_TEXT_LANGUAGE);
-      });
-
-      it('enables text if text matches and audio does not', async () => {
-        await textMatchesAudioDoesNot();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeDefined();
-      });
-
-      it('disables text if text does not match', async () => {
-        await textDoesNotMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeUndefined();
-      });
-
-      it('enables text if both text and audio match', async () => {
-        await textAndAudioMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeDefined();
-      });
-    });  // IF_PREFERRED_TEXT_LANGUAGE
-
-    describe('ALWAYS', () => {
-      beforeEach(() => {
-        player.configure('autoShowText', shaka.config.AutoShowText.ALWAYS);
-      });
-
-      it('enables text if text matches and audio does not', async () => {
-        await textMatchesAudioDoesNot();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeDefined();
-      });
-
-      it('enables text if text does not match', async () => {
-        await textDoesNotMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeDefined();
-      });
-
-      it('enables text if both text and audio match', async () => {
-        await textAndAudioMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeDefined();
-      });
-    });  // ALWAYS
-
-    describe('NEVER', () => {
-      beforeEach(() => {
-        player.configure('autoShowText', shaka.config.AutoShowText.NEVER);
-      });
-
-      it('disables text if text matches and audio does not', async () => {
-        await textMatchesAudioDoesNot();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeUndefined();
-      });
-
-      it('disables text if text does not match', async () => {
-        await textDoesNotMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeUndefined();
-      });
-
-      it('disables text if both text and audio match', async () => {
-        await textAndAudioMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeUndefined();
-      });
-    });  // NEVER
-  });  // AutoShowText
+    it('disables text if both text and audio match', async () => {
+      await textAndAudioMatch();
+      const activeTextTrack = player.getTextTracks().find((t) => t.active);
+      expect(activeTextTrack).toBeUndefined();
+    });
+  });
 
   describe('plays', () => {
     it('with external text tracks', async () => {
@@ -1299,7 +1217,6 @@ describe('Player', () => {
   });
 
   it('preload allow update audio track', async () => {
-    player.configure('autoShowText', shaka.config.AutoShowText.NEVER);
     player.configure('preferredAudioLanguage', 'en');
     const preloadManager =
         await player.preload('test:sintel_multi_lingual_multi_res_compiled');
@@ -1317,15 +1234,12 @@ describe('Player', () => {
   });
 
   it('preload allow update text track', async () => {
-    player.configure('autoShowText', shaka.config.AutoShowText.NEVER);
     player.configure('preferredTextLanguage', 'zh');
     const preloadManager =
         await player.preload('test:sintel_multi_lingual_multi_res_compiled');
     await preloadManager.waitForFinish();
     let prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();
     expect(prefetchedTextTrack).toBeNull();
-
-    preloadManager.configure('autoShowText', shaka.config.AutoShowText.ALWAYS);
 
     await shaka.test.Util.shortDelay();
     prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();

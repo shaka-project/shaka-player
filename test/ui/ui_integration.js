@@ -104,9 +104,6 @@ describe('UI', () => {
     eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
     eventManager.listen(controls, 'error', Util.spyFunc(onErrorSpy));
 
-    // These tests expect text to be streaming upfront, so always stream text.
-    player.configure('autoShowText', shaka.config.AutoShowText.ALWAYS);
-
     await player.load('test:sintel_multi_lingual_multi_res_compiled');
     // For this event, we ignore a timeout, since we sometimes miss this event
     // on Tizen.  But expect that the video is ready anyway.
