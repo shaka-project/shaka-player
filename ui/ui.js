@@ -422,6 +422,7 @@ shaka.ui.Overlay = class {
       showRemainingTimeInPresentationTime: false,
       enableVrDeviceMotion: true,
       showUIAlwaysOnAudioOnly: true,
+      preferIntlDisplayNames: true,
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause
