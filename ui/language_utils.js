@@ -48,14 +48,16 @@ shaka.ui.LanguageUtils = class {
    * @param {boolean} updateChosen
    * @param {!HTMLElement} currentSelectionElement
    * @param {shaka.ui.Localization} localization
-   * @param {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
-   * @param {boolean} showAudioChannelCountVariants
-   * @param {boolean} showAudioCodec
+   * @param {!shaka.extern.UIConfiguration} config
    */
   static updateAudioTracks(tracks, langMenu, onTrackSelected, updateChosen,
-      currentSelectionElement, localization, trackLabelFormat,
-      showAudioChannelCountVariants, showAudioCodec) {
+      currentSelectionElement, localization, config) {
     const LocIds = shaka.ui.Locales.Ids;
+
+    let trackLabelFormat = config.trackLabelFormat;
+    const showAudioChannelCountVariants = config.showAudioChannelCountVariants;
+    const showAudioCodec = config.showAudioCodec;
+    const preferIntlDisplayNames = config.preferIntlDisplayNames;
 
     // TODO: Do the benefits of having this common code in a method still
     // outweigh the complexity of the parameter list?
@@ -180,8 +182,8 @@ shaka.ui.LanguageUtils = class {
       const span = shaka.util.Dom.createHTMLElement('span');
       button.appendChild(span);
 
-      span.textContent =
-          shaka.ui.LanguageUtils.getLanguageName(language, localization);
+      span.textContent = shaka.ui.LanguageUtils.getLanguageName(
+          language, localization, preferIntlDisplayNames);
       let basicInfo = '';
       if (showAudioCodec && showAudioChannelCountVariants &&
           spatialAudio && (audioCodec == 'ec-3' || audioCodec == 'ac-4')) {
@@ -247,11 +249,14 @@ shaka.ui.LanguageUtils = class {
    * @param {boolean} updateChosen
    * @param {!HTMLElement} currentSelectionElement
    * @param {shaka.ui.Localization} localization
-   * @param {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
+   * @param {!shaka.extern.UIConfiguration} config
    */
   static updateTextTracks(tracks, langMenu, onTrackSelected, updateChosen,
-      currentSelectionElement, localization, trackLabelFormat) {
+      currentSelectionElement, localization, config) {
     const LocIds = shaka.ui.Locales.Ids;
+
+    const trackLabelFormat = config.textTrackLabelFormat;
+    const preferIntlDisplayNames = config.preferIntlDisplayNames;
 
     // TODO: Do the benefits of having this common code in a method still
     // outweigh the complexity of the parameter list?
@@ -320,7 +325,8 @@ shaka.ui.LanguageUtils = class {
         // translate into different languages.
         if (language) {
           span.textContent = [
-            shaka.ui.LanguageUtils.getLanguageName(language, localization),
+            shaka.ui.LanguageUtils.getLanguageName(
+                language, localization, preferIntlDisplayNames),
             ' (',
             localization.resolve(shaka.ui.Locales.Ids.AUTO_GENERATED),
             ')',
@@ -331,7 +337,8 @@ shaka.ui.LanguageUtils = class {
         }
       } else {
         span.textContent =
-            shaka.ui.LanguageUtils.getLanguageName(language, localization);
+            shaka.ui.LanguageUtils.getLanguageName(
+                language, localization, preferIntlDisplayNames);
       }
       switch (trackLabelFormat) {
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
@@ -405,10 +412,11 @@ shaka.ui.LanguageUtils = class {
    *
    * @param {string} locale
    * @param {shaka.ui.Localization} localization
+   * @param {boolean} preferIntlDisplayNames
    * @return {string} The language's name for itself in its own script, or as
    *   close as we can get with the information we have.
    */
-  static getLanguageName(locale, localization) {
+  static getLanguageName(locale, localization, preferIntlDisplayNames) {
     if (!locale && !localization) {
       return '';
     }
@@ -429,6 +437,23 @@ shaka.ui.LanguageUtils = class {
 
     // Extract the base language from the locale as a fallback step.
     const language = shaka.util.LanguageUtils.getBase(locale);
+
+    // If Intl.DisplayNames is supported we prefer it, because the list of
+    // languages is up to date.
+    if (preferIntlDisplayNames && window.Intl && 'DisplayNames' in Intl) {
+      try {
+        const languageNames =
+            new Intl.DisplayNames([locale], {type: 'language'});
+        const languageName = languageNames.of(locale);
+        // Only prefer it when it's reliable
+        if (languageName &&
+            languageName.toLowerCase() != locale.toLowerCase()) {
+          return languageName.charAt(0).toUpperCase() + languageName.slice(1);
+        }
+      } catch (e) {
+        // Ignore errors and try the fallback
+      }
+    }
 
     // First try to resolve the full language name.
     // If that fails, try the base.
