@@ -280,10 +280,11 @@ shaka.ui.LanguageUtils = class {
       return track.roles.join(', ');
     };
 
-    const getCombination = (language, rolesString, label) => {
+    const getCombination = (language, rolesString, label, forced) => {
       const keys = [
         language,
         rolesString,
+        forced,
       ];
       if (label &&
           trackLabelFormat == shaka.ui.Overlay.TrackLabelFormat.LABEL) {
@@ -297,7 +298,7 @@ shaka.ui.LanguageUtils = class {
     const combinationsMade = new Set();
     const selectedCombination = selectedTrack ? getCombination(
         selectedTrack.language, getRolesString(selectedTrack),
-        selectedTrack.label) : '';
+        selectedTrack.label, selectedTrack.forced) : '';
 
     for (const track of tracks) {
       const language = track.language;
@@ -306,7 +307,7 @@ shaka.ui.LanguageUtils = class {
       const rolesString = getRolesString(track);
       const label = track.label;
       const combinationName =
-          getCombination(language, rolesString, label);
+          getCombination(language, rolesString, label, forced);
       if (combinationsMade.has(combinationName)) {
         continue;
       }
