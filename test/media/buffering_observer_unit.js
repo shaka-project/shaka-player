@@ -170,9 +170,9 @@ describe('BufferingObserver', () => {
   it('reports satisfied state when timeline progresses', () => {
     controller.reportEvent(shaka.util.MediaElementEvent.WAITING, 0);
     expect(controller.getState()).toBe(State.STARVING);
-    controller.reportEvent(shaka.util.MediaElementEvent.PROGRESS, 0);
+    controller.reportEvent(shaka.util.MediaElementEvent.TIME_UPDATE, 0);
     expect(controller.getState()).toBe(State.STARVING);
-    controller.reportEvent(shaka.util.MediaElementEvent.PROGRESS, 1);
+    controller.reportEvent(shaka.util.MediaElementEvent.TIME_UPDATE, 1);
     expect(controller.getState()).toBe(State.SATISFIED);
   });
 });
