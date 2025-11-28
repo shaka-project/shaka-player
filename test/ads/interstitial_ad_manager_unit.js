@@ -2137,11 +2137,11 @@ describe('Interstitial Ad manager', () => {
       await interstitialAdManager.addAdUrlInterstitial('test:/vmap');
 
       expect(onEventSpy).toHaveBeenCalledTimes(2);
-        const eventValuePreload = {
-          type: 'ad-interstitial-preload',
-        };
-        expect(onEventSpy).toHaveBeenCalledWith(
-            jasmine.objectContaining(eventValuePreload));
+      const eventValuePreload = {
+        type: 'ad-interstitial-preload',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValuePreload));
       const eventValue1 = {
         type: 'ad-cue-points-changed',
         cuepoints: [
