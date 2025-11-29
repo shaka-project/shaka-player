@@ -31,7 +31,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
         run: |
-          RELEASE_URL=$(gh api /repos/${{ github.repository }}/releases/latest | jq ".assets.[0].browser_download_url")
+          RELEASE_URL=$(gh api /repos/${{ github.repository }}/releases/latest | jq -r ".assets.[0].browser_download_url")
           echo "RELEASE_URL: $RELEASE_URL"
           wget -O latest_release.tgz ${RELEASE_URL}
           tar -xvf latest_release.tgz
