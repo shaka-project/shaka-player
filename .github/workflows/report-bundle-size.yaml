@@ -63,7 +63,7 @@ jobs:
           COMMENT_INCLUDES: "Bundle Size Report"
           COMMENT_USER: "shaka-bot"
         run: |
-          MESSAGE=$(python3 .github/workflows/compute-bundle-size.py compare --head head_json.json --base base_json.json)
+          MESSAGE=$(python3 head-source/.github/workflows/compute-bundle-size.py compare --head head_json.json --base base_json.json)
           echo "$MESSAGE"
 
           # Find existing bot comment
