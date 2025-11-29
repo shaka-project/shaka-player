@@ -27,6 +27,23 @@ jobs:
           sudo apt update
           sudo apt install -y python3 jq gzip ffmpeg wget
 
+      - name: Download latest release
+        env:
+          GITHUB_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
+        run: |
+          RELEASE_URL=$(gh api /repos/${{ github.repository }}/releases/latest | jq ".assets.[0].browser_download_url")
+          echo "RELEASE_URL: $RELEASE_URL"
+          wget -O latest_release.tgz ${RELEASE_URL}
+          tar -xvf latest_release.tgz
+          pwd
+          ls -lh
+        
+      - name: Measure latest release
+        run: |
+          python3 head-source/.github/workflows/compute-bundle-size.py measure \
+              --dir package/dist \
+              --out base-sizes.json
+
       - name: Build head source
         working-directory: head-source
         run: python3 build/all.py
@@ -37,18 +54,6 @@ jobs:
           python3 .github/workflows/compute-bundle-size.py measure \
               --dir dist \
               --out ../head-sizes.json
-
-      - name: Download latest release
-        run: |
-          RELEASE_URL=$(gh api /repos/${{ github.repository }}/releases/latest | jq ".assets.[0].browser_download_url")
-          wget -O latest_release.tgz ${RELEASE_URL}
-          tar -xvf latest_release.tgz
-        
-      - name: Measure latest release
-        run: |
-          python3 head-source/.github/workflows/compute-bundle-size.py measure \
-              --dir package/dist \
-              --out base-sizes.json
 
       - name: Add or Update PR Comment
         shell: bash
