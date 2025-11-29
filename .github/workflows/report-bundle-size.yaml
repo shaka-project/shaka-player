@@ -34,10 +34,10 @@ jobs:
       - name: Measure head bundles
         working-directory: head-source
         run: |
-          python3 .github/workflows/compute-build-size.py measure \
+          python3 .github/workflows/compute-bundle-size.py measure \
               --dir dist \
               --out ../head-sizes.json
-      
+
       - name: Download latest release
         run: |
           RELEASE_URL=$(gh api /repos/${{ github.repository }}/releases/latest | jq ".assets.[0].browser_download_url")
@@ -46,7 +46,7 @@ jobs:
         
       - name: Measure latest release
         run: |
-          python3 head-source/.github/workflows/compute-build-size.py measure \
+          python3 head-source/.github/workflows/compute-bundle-size.py measure \
               --dir package/dist \
               --out base-sizes.json
 
