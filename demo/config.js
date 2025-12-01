@@ -92,7 +92,7 @@ shakaDemo.Config = class {
     this.addManifestSection_();
     this.addDashManifestSection_();
     this.addHlsManifestSection_();
-    this.addMoqtManifestSection_();
+    this.addMsfManifestSection_();
     this.addRetrySection_('manifest', 'Manifest Retry Parameters');
     this.addRestrictionsSection_('', 'Restrictions');
     this.addTextDisplayerSection_();
@@ -298,11 +298,11 @@ shakaDemo.Config = class {
   }
 
   /** @private */
-  addMoqtManifestSection_() {
+  addMsfManifestSection_() {
     const docLink = this.resolveExternLink_('.ManifestConfiguration');
-    this.addSection_('MoQT', docLink)
+    this.addSection_('MSF', docLink)
         .addTextInput_('Fingerprint URI',
-            'manifest.moqt.fingerprintUri');
+            'manifest.msf.fingerprintUri');
   }
 
   /** @private */

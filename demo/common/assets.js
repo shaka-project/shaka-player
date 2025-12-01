@@ -163,8 +163,8 @@ shakaAssets.Feature = {
   DASH: 'DASH',
   // Set if the asset is an HLS manifest.
   HLS: 'HLS',
-  // Set if the asset is an MOQT.
-  MOQT: 'MOQT',
+  // Set if the asset is an MSF.
+  MSF: 'MSF',
 
   // Set if the asset has at least one image stream.
   THUMBNAILS: 'Thumbnails',
@@ -2364,9 +2364,9 @@ shakaAssets.testAssets = [
       /* iconUri= */ '',
       /* manifestUri= */ 'https://moqlivemock.demo.osaas.io/moq',
       /* source= */ shakaAssets.Source.EYEVINN)
-      .addFeature(shakaAssets.Feature.MOQT)
+      .addFeature(shakaAssets.Feature.MSF)
       .addFeature(shakaAssets.Feature.MP4)
-      .setMimeType('application/moqt'),
+      .setMimeType('application/msf'),
   // }}}
 ];
 /* eslint-enable @stylistic/max-len */

@@ -35,7 +35,7 @@ goog.require('shaka.media.PreferenceBasedCriteria');
 goog.require('shaka.media.PresentationTimeline');
 goog.require('shaka.media.SegmentIndex');
 goog.require('shaka.media.SegmentReference');
-goog.require('shaka.moqt.MoqtParser');
+goog.require('shaka.msf.MSFParser');
 goog.require('shaka.net.DataUriPlugin');
 goog.require('shaka.net.HttpFetchPlugin');
 goog.require('shaka.net.HttpXHRPlugin');

@@ -199,11 +199,11 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 
 </details>
 
-## Media over QUIC (Experimental)
+## MOQT Streaming Format (MSF) (Experimental)
 
 Features supported:
  - Media over QUIC Transport [draft-11](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/11/)
- - WARP Streaming Format [draft-01](https://datatracker.ietf.org/doc/draft-ietf-moq-warp/01/)
+ - MOQT Streaming Format [draft-01](https://datatracker.ietf.org/doc/draft-ietf-moq-warp/01/)
  - Audio and Video
  - ABR (only navigator.connection change event)
  - Encrypted content with PSSH in the initData
@@ -213,7 +213,7 @@ Features supported:
 
 Features **not** supported:
  - VOD
- - WARP catalog updates
+ - MOQT Streaming Format catalog updates
 
 Note: This module is experimental and is only included in the experimental build.
 

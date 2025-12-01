@@ -1,7 +1,0 @@
-# The MoQT (Media over QUIC Transport) manifest parser plugin.
-
-+../../lib/moqt/buffer_control_writer.js
-+../../lib/moqt/moqt_classes.js
-+../../lib/moqt/moqt_parser.js
-+../../lib/moqt/moqt_transport.js
-+../../lib/moqt/moqt_utils.js

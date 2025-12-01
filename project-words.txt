@@ -479,8 +479,9 @@ streamingkeydelivery
 TARGETDURATION
 SQUEEZECURRENT
 
-# MoQT (Media over QUIC Transport)
+# MSF (Media over QUIC Transport Streaming format)
 moqt
+msf
 WEBTRANSPORT
 Unannounce
 

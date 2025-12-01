@@ -181,7 +181,7 @@ requirement: {
   whitelist_regexp: "lib/util/buffer_utils.js"
   whitelist_regexp: "lib/util/object_utils.js"
   whitelist_regexp: "test/util/buffer_utils_unit.js"
-  whitelist_regexp: "lib/moqt/moqt_classes.js"
+  whitelist_regexp: "lib/msf/msf_classes.js"
 }
 
 # Disallow Element.innerHTML and outerHTML.

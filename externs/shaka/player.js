@@ -1631,7 +1631,7 @@ shaka.extern.HlsManifestConfiguration;
  *   Defaults to <code>''</code>.
  * @exportDoc
  */
-shaka.extern.MoqtManifestConfiguration;
+shaka.extern.MsfManifestConfiguration;
 
 
 /**
@@ -1648,7 +1648,7 @@ shaka.extern.MoqtManifestConfiguration;
  *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration,
- *   moqt: shaka.extern.MoqtManifestConfiguration,
+ *   msf: shaka.extern.MsfManifestConfiguration,
  *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean,
  *   continueLoadingWhenPaused: boolean,
  *   ignoreSupplementalCodecs: boolean,
@@ -1709,8 +1709,8 @@ shaka.extern.MoqtManifestConfiguration;
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls
  *   Advanced parameters used by the HLS manifest parser.
- * @property {shaka.extern.MoqtManifestConfiguration} moqt
- *   Advanced parameters used by the MoQT.
+ * @property {shaka.extern.MsfManifestConfiguration} msf
+ *   Advanced parameters used by the MSF.
  * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
  *   If true, manifest update request failures will cause a fatal error.
  *   <br>
