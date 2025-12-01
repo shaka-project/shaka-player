@@ -1167,7 +1167,7 @@ describe('Player', () => {
     expect(prefetchedTextTrack.language).toBe('fr');
   });
 
-  it('should not preload a text track if none is prefered', async () => {
+  it('should not preload a text track if none is preferred', async () => {
     const preloadManager =
         await player.preload('test:sintel_multi_lingual_multi_res_compiled');
     await preloadManager.waitForFinish();
