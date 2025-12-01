@@ -1151,14 +1151,11 @@ describe('Player', () => {
 
   it('preload allow update text track', async () => {
     player.configure('preferredTextLanguage', 'zh');
+
     const preloadManager =
         await player.preload('test:sintel_multi_lingual_multi_res_compiled');
     await preloadManager.waitForFinish();
     let prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();
-    expect(prefetchedTextTrack).toBeNull();
-
-    await shaka.test.Util.shortDelay();
-    prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();
     expect(prefetchedTextTrack).not.toBeNull();
     expect(prefetchedTextTrack.language).toBe('zh');
 
