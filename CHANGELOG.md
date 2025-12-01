@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.16.11](https://github.com/shaka-project/shaka-player/compare/v4.16.10...v4.16.11) (2025-12-01)
+
+
+### Bug Fixes
+
+* **Ads:** Fix playback of post roll-ads when using interstitials ([#9428](https://github.com/shaka-project/shaka-player/issues/9428)) ([3c27e00](https://github.com/shaka-project/shaka-player/commit/3c27e00814cbd5c74e853b057c7a7bdff3506e81))
+* Avoid InvalidStateError when getting buffering when MSE is closed ([#9437](https://github.com/shaka-project/shaka-player/issues/9437)) ([812adfb](https://github.com/shaka-project/shaka-player/commit/812adfb46c14b977df495feb0048a7f48f8da4d2))
+* **DRM:** Fix multikey playback on devices with SW DRM only ([#9443](https://github.com/shaka-project/shaka-player/issues/9443)) ([8566d57](https://github.com/shaka-project/shaka-player/commit/8566d5714cd0af1f1398713929b4b0c8c4263172))
+* **FairPlay:** Fix FairPlay compatibility with DASH ([#9436](https://github.com/shaka-project/shaka-player/issues/9436)) ([76c44c7](https://github.com/shaka-project/shaka-player/commit/76c44c7d1da8577f5df0460c8643f1746678042c))
+* **HLS:** Support PATHWAY-ID (Content Steering) for subtitles ([#9442](https://github.com/shaka-project/shaka-player/issues/9442)) ([e4ffa1a](https://github.com/shaka-project/shaka-player/commit/e4ffa1a72146773ef206c14fc223fe1d509d1dab))
+* **UI:** Show forced subtitles in subtitle selector ([#9441](https://github.com/shaka-project/shaka-player/issues/9441)) ([5252464](https://github.com/shaka-project/shaka-player/commit/5252464ea63b3f60ee111fb2ca213f021527d36c))
+* Use timeupdate event for buffering states ([#9445](https://github.com/shaka-project/shaka-player/issues/9445)) ([095680e](https://github.com/shaka-project/shaka-player/commit/095680e2bca5e28b48dfb8334b3e251f06f6edf6)), closes [#9438](https://github.com/shaka-project/shaka-player/issues/9438)
+
+
+### Reverts
+
+* Revert "fix(HLS): Keep syncTime continuous by using previous value, if available ([#9135](https://github.com/shaka-project/shaka-player/issues/9135))" ([#9425](https://github.com/shaka-project/shaka-player/issues/9425)) ([2e1af59](https://github.com/shaka-project/shaka-player/commit/2e1af5973cc67c6d0790f53b0ea4e960e6e50421))
+
 ## [4.16.10](https://github.com/shaka-project/shaka-player/compare/v4.16.9...v4.16.10) (2025-11-24)
 
 
