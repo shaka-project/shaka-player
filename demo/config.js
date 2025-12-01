@@ -92,7 +92,6 @@ shakaDemo.Config = class {
     this.addManifestSection_();
     this.addDashManifestSection_();
     this.addHlsManifestSection_();
-    this.addMssManifestSection_();
     this.addRetrySection_('manifest', 'Manifest Retry Parameters');
     this.addRestrictionsSection_('', 'Restrictions');
     this.addTextDisplayerSection_();
@@ -295,13 +294,6 @@ shakaDemo.Config = class {
             'manifest.hls.allowLowLatencyByteRangeOptimization')
         .addBoolInput_('Allow range request to guess mime type',
             'manifest.hls.allowRangeRequestsToGuessMimeType');
-  }
-
-  /** @private */
-  addMssManifestSection_() {
-    const docLink = this.resolveExternLink_('.ManifestConfiguration');
-    this.addSection_('MSS Manifest', docLink)
-        .addBoolInput_('Enable MSS sequence mode', 'manifest.mss.sequenceMode');
   }
 
   /** @private */

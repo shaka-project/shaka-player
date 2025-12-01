@@ -135,3 +135,9 @@ application:
     - New API for audio: `getAudioTracks` and `selectAudioTrack`, we also deprecated in v4.14 `getAudioLanguages`, `getAudioLanguagesAndRoles` and `selectAudioLanguage`.
     - `shaka.util.FairPlayUtils` is moved to `shaka.drm.FairPlay` (Deprecated in v4.14)
     - `getChapters` is replaced by `getChaptersAsync` (Deprecated in v4.15)
+
+  - Ad Manager API Changes:
+    - Added `setContainers` to set the CS and SS containers.
+    - Removed `video` and `player` params on all methods.
+    - Removed `initClientSide`, `initServerSide`, `initMediaTailor` and `initInterstitial` since now are auto-initialized when necessary.
+    - `onDashTimedMetadata` has been removed.

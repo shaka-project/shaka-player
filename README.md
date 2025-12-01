@@ -1,7 +1,13 @@
-# ![Shaka Player](docs/shaka-player-logo.png)
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/logos/shaka-player-logo-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="docs/logos/shaka-player-logo-light.png">
+    <img alt="Kinetoscope Logo" src="docs/logos/shaka-player-logo-light.png">
+  </picture>
+</h1>
 
 Shaka Player is an open-source JavaScript library for adaptive media.  It plays
-adaptive media formats (such as [DASH][], [HLS][] and [MSS][]) in a browser,
+adaptive media formats (such as [DASH][] and [HLS][]) in a browser,
 without using plugins or Flash.  Instead, Shaka Player uses the open web
 standards [MediaSource Extensions][] and [Encrypted Media Extensions][].
 
@@ -18,7 +24,6 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 
 [DASH]: http://dashif.org/
 [HLS]: https://developer.apple.com/streaming/
-[MSS]: https://learn.microsoft.com/en-us/iis/media/smooth-streaming/smooth-streaming-transport-protocol
 [MediaSource Extensions]: https://www.w3.org/TR/media-source/
 [Encrypted Media Extensions]: https://www.w3.org/TR/encrypted-media/
 [IndexedDB]: https://www.w3.org/TR/IndexedDB-2/
@@ -80,7 +85,6 @@ NOTES for iOS and iPadOS:
 |:----:|:-------------:|:---:|:---:|:-------------------:|
 |DASH  |**Y**          |**Y**| -   |**Y**                |
 |HLS   |**Y**          |**Y**|**Y**| -                   |
-|MSS   |**Y**          | -   | -   | -                   |
 
 You can also create a [manifest parser plugin][] to support custom manifest
 formats.
@@ -211,20 +215,6 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 [MPEG-5 Part2 LCEVC]: https://www.lcevc.org
 
 
-## MSS features
-
-MSS features supported:
- - VOD
- - AAC and H.264
- - Encrypted content (PlayReady)
- - TTML/DFXP
- - Only supported with [codem-isoboxer][]
-
-MSS features **not** supported:
- - Live
-
-[codem-isoboxer]: https://github.com/Dash-Industry-Forum/codem-isoboxer
-
 ## DRM support matrix
 
 |Browser       |Widevine  |PlayReady|FairPlay |WisePlay |ClearKey⁶ |
@@ -263,7 +253,6 @@ NOTES:
 |:--------:|:--------:|:-------:|:-------:|:-------:|:--------:|
 |DASH      |**Y**     |**Y**    |**Y**    |**Y**    |**Y**     |
 |HLS       |**Y**     |**Y**    |**Y** ¹  |**Y**    |**Y**     |
-|MSS       | -        |**Y**    | -       | -       | -        |
 
 NOTES:
  - ¹: By default, FairPlay is handled using Apple's native HLS player, when on
@@ -279,7 +268,6 @@ Shaka Player supports:
     - Can parse "sidx" box for DASH's SegmentBase@indexRange and
       SegmentTemplate@index
     - Can find and parse "tfdt" box to find segment start time in HLS
-    - For MSS, [codem-isoboxer][] v0.3.7+ is required
   - WebM
     - Depends on browser support for the container via MediaSource
     - Can parse [cueing data][] elements for DASH's SegmentBase@indexRange and
@@ -309,12 +297,6 @@ Shaka Player supports:
     - Supported in raw EC-3 container and transmuxing to EC-3 in MP4 container
       (depends on browser support via MediaSource).
   - SubRip (SRT)
-    - UTF-8 encoding only
-  - LyRiCs (LRC)
-    - UTF-8 encoding only
-  - SubStation Alpha (SSA, ASS)
-    - UTF-8 encoding only
-  - SubViewer (SBV)
     - UTF-8 encoding only
 
 Subtitles are rendered by the browser by default. Applications can create a
@@ -465,3 +447,21 @@ Shaka + Angular integration:
 
 If you have published Shaka Integration code/tutorials, please feel free to submit PRs
 to add them to this list, we will gladly approve!
+
+## Maintained by ##
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/logos/ateme-logo-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/logos/ateme-logo-light.png">
+  <img alt="Ateme" src="docs/logos/ateme-logo-light.png" height="55">
+</picture>
+&nbsp;&nbsp;
+<picture>
+  <img alt="Google" src="docs/logos/google.png" height="55">
+</picture>
+&nbsp;&nbsp;
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/logos/paramout-logo-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/logos/paramout-logo-light.svg">
+  <img alt="Paramount" src="docs/logos/paramout-logo-light.svg" height="55">
+</picture>

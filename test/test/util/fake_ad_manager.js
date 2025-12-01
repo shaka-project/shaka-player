@@ -20,25 +20,22 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   }
 
   /** @override */
-  release() {}
+  setLocale(locale) {}
 
   /** @override */
-  setLocale(locale) {}
+  setContainers(clientSideAdContainer, serverSideAdContainer) {}
 
   /** @override */
   configure(config) {}
 
   /** @override */
-  initInterstitial(adContainer, basePlayer, baseVideo) {}
-
-  /** @override */
-  initClientSide(adContainer, video, adsRenderingSettings) {}
+  release() {}
 
   /** @override */
   onAssetUnload() {}
 
   /** @override */
-  requestClientSideAds(imaRequest) {
+  requestClientSideAds(imaRequest, adsRenderingSettings) {
     return Promise.resolve('fake:url');
   }
 
@@ -46,7 +43,12 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   updateClientSideAdsRenderingSettings(adsRenderingSettings) {}
 
   /** @override */
-  initMediaTailor(networkingEngine, video) {}
+  requestServerSideStream(imaRequest, backupUrl = '') {
+    return Promise.resolve('fake:url');
+  }
+
+  /** @override */
+  replaceServerSideAdTagParameters(adTagParameters) {}
 
   /** @override */
   requestMediaTailorStream(url, adsParams, backupUrl) {
@@ -57,15 +59,13 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   addMediaTailorTrackingUrl(url) {}
 
   /** @override */
-  initServerSide(adContainer, video) {}
+  addCustomInterstitial(interstitial) {}
 
   /** @override */
-  requestServerSideStream(imaRequest, backupUrl = '') {
-    return Promise.resolve('fake:url');
-  }
+  addAdUrlInterstitial(url) {}
 
   /** @override */
-  replaceServerSideAdTagParameters(adTagParameters) {}
+  getInterstitialPlayer() {}
 
   /** @override */
   getCuePoints() {
@@ -81,28 +81,16 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   onManifestUpdated(isLive) {}
 
   /** @override */
-  onDashTimedMetadata(region) {}
-
-  /** @override */
   onHlsTimedMetadata(metadata) {}
 
   /** @override */
   onCueMetadataChange(data) {}
 
   /** @override */
-  onHLSMetadata(basePlayer, baseVideo, metadata) {}
+  onHLSMetadata(metadata) {}
 
   /** @override */
-  onDASHMetadata(basePlayer, baseVideo, region) {}
-
-  /** @override */
-  addCustomInterstitial(interstitial) {}
-
-  /** @override */
-  addAdUrlInterstitial(url) {}
-
-  /** @override */
-  getInterstitialPlayer() {}
+  onDASHMetadata(region) {}
 
   /** @override */
   getCurrentAd() {

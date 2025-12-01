@@ -157,37 +157,6 @@ filterDescribe('Storage', checkStorageSupport, () => {
     await player.unload();
   });
 
-  it('supports MSS download and playback', async () => {
-    // This tests is flaky in some Chromecast devices, so we need omit it
-    // for now.
-    if (deviceDetected.getDeviceType() ===
-        shaka.device.IDevice.DeviceType.CAST) {
-      pending('Disabled on Chromecast.');
-    }
-    const url = '/base/test/test/assets/mss-clear/Manifest';
-    const metadata = {
-      'title': 'MSS',
-      'downloaded': new Date(),
-    };
-
-    const result = await storage.store(
-        url, metadata, /* mimeType= */ 'application/vnd.ms-sstr+xml').promise;
-
-    await player.load(result.offlineUri);
-    await video.play();
-    expect(player.isLive()).toBe(false);
-
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-    // Play for 2 seconds, but stop early if the video ends.  If it takes
-    // longer than 10 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 10);
-
-    await player.unload();
-  });
-
   it('supports ClearKey with raw single key', async () => {
     if (!checkClearKeySupport()) {
       pending('ClearKey is not supported');

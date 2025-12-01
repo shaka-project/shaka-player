@@ -229,6 +229,8 @@ shaka.extern.UIShortcuts;
  *   allowTogglePresentationTime: boolean,
  *   showRemainingTimeInPresentationTime: boolean,
  *   enableVrDeviceMotion: boolean,
+ *   showUIAlwaysOnAudioOnly: boolean,
+ *   preferIntlDisplayNames: boolean,
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -489,6 +491,15 @@ shaka.extern.UIShortcuts;
  *   <br>
  *   Defaults to <code>true</code> except on Vision OS where the default value
  *   is <code>false</code>
+ * @property {boolean} showUIAlwaysOnAudioOnly
+ *   If true, keep the UI always visible if the content is audio only.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} preferIntlDisplayNames
+ *   Prefer <code>Intl.DisplayNames</code> to display language names if the API
+ *   is available.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

@@ -45,6 +45,10 @@
     "description": "Label for a button used to open a submenu to choose a chapter.",
     "message": "Chapters"
   },
+  "COPY_VIDEO_FRAME": {
+    "description": "Label for a button used to copy the current video frame to the clipboard.",
+    "message": "Copy video frame"
+  },
   "DOWNLOAD_VIDEO_FRAME": {
     "description": "Label for a button used to download the current video frame.",
     "message": "Save video frame"

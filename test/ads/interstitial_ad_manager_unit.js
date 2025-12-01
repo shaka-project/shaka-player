@@ -21,7 +21,7 @@ describe('Interstitial Ad manager', () => {
   /** @type {!shaka.ads.InterstitialAdManager} */
   let interstitialAdManager;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Allows us to use a timer instead of requestVideoFrameCallback
     // (which doesn't work well in all platform tests)
     spyOn(deviceDetected, 'getDeviceType')
@@ -38,9 +38,10 @@ describe('Interstitial Ad manager', () => {
       /** @type {!HTMLElement} */ (document.createElement('div'));
     player = new shaka.Player(null, null, dependencyInjector);
     video = shaka.test.UiUtils.createVideoElement();
+    await player.attach(video);
     onEventSpy = jasmine.createSpy('onEvent');
     interstitialAdManager = new shaka.ads.InterstitialAdManager(
-        adContainer, player, video, shaka.test.Util.spyFunc(onEventSpy));
+        adContainer, player, shaka.test.Util.spyFunc(onEventSpy));
     const config = shaka.util.PlayerConfiguration.createDefault().ads;
     // We always support multiple video elements so that we can properly
     // control timing in unit tests.
@@ -84,7 +85,12 @@ describe('Interstitial Ad manager', () => {
       };
       await interstitialAdManager.addMetadata(metadata);
 
-      expect(onEventSpy).toHaveBeenCalledTimes(1);
+      expect(onEventSpy).toHaveBeenCalledTimes(2);
+      const eventValuePreload = {
+        type: 'ad-interstitial-preload',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValuePreload));
       const eventValue1 = {
         type: 'ad-cue-points-changed',
         cuepoints: [
@@ -157,7 +163,12 @@ describe('Interstitial Ad manager', () => {
       };
       await interstitialAdManager.addMetadata(metadata2);
 
-      expect(onEventSpy).toHaveBeenCalledTimes(2);
+      expect(onEventSpy).toHaveBeenCalledTimes(4);
+      const eventValuePreload = {
+        type: 'ad-interstitial-preload',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValuePreload));
       const eventValue1 = {
         type: 'ad-cue-points-changed',
         cuepoints: [
@@ -217,7 +228,12 @@ describe('Interstitial Ad manager', () => {
       await interstitialAdManager.addMetadata(metadata);
       await interstitialAdManager.addMetadata(metadata);
 
-      expect(onEventSpy).toHaveBeenCalledTimes(1);
+      expect(onEventSpy).toHaveBeenCalledTimes(2);
+      const eventValuePreload = {
+        type: 'ad-interstitial-preload',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValuePreload));
       const eventValue1 = {
         type: 'ad-cue-points-changed',
         cuepoints: [
@@ -301,7 +317,12 @@ describe('Interstitial Ad manager', () => {
       };
       await interstitialAdManager.addMetadata(metadata);
 
-      expect(onEventSpy).toHaveBeenCalledTimes(1);
+      expect(onEventSpy).toHaveBeenCalledTimes(2);
+      const eventValuePreload = {
+        type: 'ad-interstitial-preload',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValuePreload));
       const eventValue1 = {
         type: 'ad-cue-points-changed',
         cuepoints: [
@@ -1718,7 +1739,12 @@ describe('Interstitial Ad manager', () => {
       ];
       await interstitialAdManager.addInterstitials(interstitials);
 
-      expect(onEventSpy).toHaveBeenCalledTimes(1);
+      expect(onEventSpy).toHaveBeenCalledTimes(2);
+      const eventValuePreload = {
+        type: 'ad-interstitial-preload',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValuePreload));
       const eventValue1 = {
         type: 'ad-cue-points-changed',
         cuepoints: [
@@ -1866,7 +1892,12 @@ describe('Interstitial Ad manager', () => {
 
       await interstitialAdManager.addAdUrlInterstitial('test:/vast');
 
-      expect(onEventSpy).toHaveBeenCalledTimes(1);
+      expect(onEventSpy).toHaveBeenCalledTimes(2);
+      const eventValuePreload = {
+        type: 'ad-interstitial-preload',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValuePreload));
       const eventValue1 = {
         type: 'ad-cue-points-changed',
         cuepoints: [
@@ -2105,7 +2136,12 @@ describe('Interstitial Ad manager', () => {
 
       await interstitialAdManager.addAdUrlInterstitial('test:/vmap');
 
-      expect(onEventSpy).toHaveBeenCalledTimes(1);
+      expect(onEventSpy).toHaveBeenCalledTimes(2);
+      const eventValuePreload = {
+        type: 'ad-interstitial-preload',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValuePreload));
       const eventValue1 = {
         type: 'ad-cue-points-changed',
         cuepoints: [
@@ -2174,7 +2210,17 @@ describe('Interstitial Ad manager', () => {
 
     await shaka.test.Util.shortDelay();
 
-    expect(onEventSpy).toHaveBeenCalledTimes(3);
+    expect(onEventSpy).toHaveBeenCalledTimes(5);
+    const eventValuePreload = {
+      type: 'ad-interstitial-preload',
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValuePreload));
+    const eventValueAdBreakStarted = {
+      type: 'ad-break-started',
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValueAdBreakStarted));
     const eventValue1 = {
       type: 'ad-cue-points-changed',
       cuepoints: [
@@ -2225,7 +2271,7 @@ describe('Interstitial Ad manager', () => {
 
     await shaka.test.Util.shortDelay();
 
-    expect(onEventSpy).toHaveBeenCalledTimes(4);
+    expect(onEventSpy).toHaveBeenCalledTimes(6);
     const eventValue1 = {
       type: 'ad-cue-points-changed',
       cuepoints: [
@@ -2235,6 +2281,16 @@ describe('Interstitial Ad manager', () => {
         },
       ],
     };
+    const eventValuePreload = {
+      type: 'ad-interstitial-preload',
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValuePreload));
+    const eventValueAdBreakStarted = {
+      type: 'ad-break-started',
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValueAdBreakStarted));
     expect(onEventSpy).toHaveBeenCalledWith(
         jasmine.objectContaining(eventValue1));
     const eventValue2 = {
@@ -2301,7 +2357,12 @@ describe('Interstitial Ad manager', () => {
     await shaka.test.Util.delay(0.25);
 
     if (video.currentTime == 20) {
-      expect(onEventSpy).toHaveBeenCalledTimes(3);
+      expect(onEventSpy).toHaveBeenCalledTimes(4);
+      const eventValueAdBreakStarted = {
+        type: 'ad-break-started',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValueAdBreakStarted));
       const eventValue2 = {
         type: 'ad-impression',
       };

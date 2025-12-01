@@ -352,13 +352,6 @@ function configureJasmineEnvironment() {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = Number(timeout);
   }
 
-  const logLevel = getClientArg('logLevel');
-  if (logLevel) {
-    shaka.log.setLevel(Number(logLevel));
-  } else {
-    shaka.log.setLevel(shaka.log.Level.INFO);
-  }
-
   beforeAll(async () => {
     // Ensure node modules are loaded before any tests execute.
     await loadNodeModules();
@@ -535,6 +528,13 @@ async function setupTestEnvironment() {
   disableScrollbars();
   workAroundLegacyEdgePromiseIssues();
   workAroundLabCrashes();
+
+  const logLevel = getClientArg('logLevel');
+  if (logLevel) {
+    shaka.log.setLevel(Number(logLevel));
+  } else {
+    shaka.log.setLevel(shaka.log.Level.INFO);
+  }
 
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly
