@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.16.12](https://github.com/shaka-project/shaka-player/compare/v4.16.11...v4.16.12) (2025-12-01)
+
+
+### Bug Fixes
+
+* **HLS:** Add a `mediaTypes` field to `shaka.extern.DrmInfo` ([#9198](https://github.com/shaka-project/shaka-player/issues/9198)) ([4f9c751](https://github.com/shaka-project/shaka-player/commit/4f9c75177c46c5c93748c655a317acf2519dbc20))
+* Properly assign shaka.extern.DrmInfo#mediaTypes ([#9340](https://github.com/shaka-project/shaka-player/issues/9340)) ([5af18c6](https://github.com/shaka-project/shaka-player/commit/5af18c6d1b5243bc245b7d72747c1083c019843a))
+
 ## [4.16.11](https://github.com/shaka-project/shaka-player/compare/v4.16.10...v4.16.11) (2025-12-01)
 
 
