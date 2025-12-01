@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.15.23](https://github.com/shaka-project/shaka-player/compare/v4.15.22...v4.15.23) (2025-12-01)
+
+
+### Bug Fixes
+
+* **Ads:** Fix playback of post roll-ads when using interstitials ([#9428](https://github.com/shaka-project/shaka-player/issues/9428)) ([15a4a52](https://github.com/shaka-project/shaka-player/commit/15a4a52bcc146a8ed93428cbac88445ac68eafe6))
+* Avoid InvalidStateError when getting buffering when MSE is closed ([#9437](https://github.com/shaka-project/shaka-player/issues/9437)) ([5a9511d](https://github.com/shaka-project/shaka-player/commit/5a9511d76d50af4e34f69b54aef28c82cca2d19a))
+* **DRM:** Fix multikey playback on devices with SW DRM only ([#9443](https://github.com/shaka-project/shaka-player/issues/9443)) ([d5852d0](https://github.com/shaka-project/shaka-player/commit/d5852d056ab135da5508800348022f1d3ed537d4))
+* **HLS:** Support PATHWAY-ID (Content Steering) for subtitles ([#9442](https://github.com/shaka-project/shaka-player/issues/9442)) ([3b95600](https://github.com/shaka-project/shaka-player/commit/3b9560003b89a546474327a5b1aeb8aba2e94f5e))
+* **UI:** Show forced subtitles in subtitle selector ([#9441](https://github.com/shaka-project/shaka-player/issues/9441)) ([ea75797](https://github.com/shaka-project/shaka-player/commit/ea7579769519cf0b52a6ffc270601440e20f3d8a))
+* Use timeupdate event for buffering states ([#9445](https://github.com/shaka-project/shaka-player/issues/9445)) ([1797b52](https://github.com/shaka-project/shaka-player/commit/1797b527c22a7266cf5e1767338ec2dba95e1c5f)), closes [#9438](https://github.com/shaka-project/shaka-player/issues/9438)
+
+
+### Reverts
+
+* Revert "fix(HLS): Keep syncTime continuous by using previous value, if available ([#9135](https://github.com/shaka-project/shaka-player/issues/9135))" ([#9425](https://github.com/shaka-project/shaka-player/issues/9425)) ([1fea7c2](https://github.com/shaka-project/shaka-player/commit/1fea7c286b5088cafca17e5f4bd29900fec6521f))
+
 ## [4.15.22](https://github.com/shaka-project/shaka-player/compare/v4.15.21...v4.15.22) (2025-11-24)
 
 
