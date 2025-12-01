@@ -3173,18 +3173,10 @@ describe('Player', () => {
           bandwidth: 200,
         };
 
-        const textPrefix = {
-          timestamp: jasmine.any(Number),
-          id: 4,
-          type: 'text',
-          fromAdaptation: true,
-          bandwidth: null,
-        };
         const switchHistory = player.getStats().switchHistory;
 
         expect(switchHistory[0]).toEqual(variantPrefix);
-        expect(switchHistory[1]).toEqual(textPrefix);
-        expect(switchHistory.slice(2)).toEqual(additional);
+        expect(switchHistory.slice(1)).toEqual(additional);
       }
 
       /**
