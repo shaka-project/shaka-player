@@ -201,8 +201,15 @@ describe('HlsParser', () => {
   // CAF level.
   drmIt('filters multilingual variants with preferredKeySystems', async () => {
     if (!checkWidevineSupport()) {
-      pending('Widevine is not supported');
+      pending('Widevine is not supported by the platform.');
     }
+    if (!await Util.isTypeSupported('video/mp4; codecs="av01.0.05M.08"')) {
+      pending('AV1 is not supported by the platform.');
+    }
+    if (!await Util.isTypeSupported('audio/mp4; codecs="opus"')) {
+      pending('Opus is not supported by the platform.');
+    }
+
     player.configure('drm.servers', {
       'com.widevine.alpha': 'https://proxy.uat.widevine.com/proxy',
     });
