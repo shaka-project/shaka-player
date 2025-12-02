@@ -125,7 +125,7 @@ describe('HlsParser', () => {
   });
 
   it('supports text without discontinuity', async () => {
-    player.configure('preferredTextLanguage', 'en');
+    player.configure('preferredTextLanguage', 'de');
     // eslint-disable-next-line @stylistic/max-len
     await player.load('/base/test/test/assets/hls-text-no-discontinuity/index.m3u8');
     await video.play();
