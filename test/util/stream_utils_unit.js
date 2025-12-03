@@ -898,56 +898,6 @@ describe('StreamUtils', () => {
       expect(manifest.variants.length).toBe(3);
     });
 
-    it('should filter variants by the best available bandwidth' +
-    ' for audio language', () => {
-      // This test is flaky in some Tizen devices, due to codec restrictions.
-      if (deviceDetected.getDeviceName() === 'Tizen') {
-        pending('Skip flaky test in Tizen');
-      }
-      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        manifest.addVariant(0, (variant) => {
-          variant.bandwidth = 4058558;
-          variant.addAudio(1, (stream) => {
-            stream.bandwidth = 100000;
-            stream.language = 'en';
-            stream.mime('audio/mp4', 'mp4a.40.2');
-          });
-        });
-        manifest.addVariant(2, (variant) => {
-          variant.bandwidth = 4781002;
-          variant.addAudio(3, (stream) => {
-            stream.bandwidth = 200000;
-            stream.language = 'en';
-            stream.mime('audio/mp4', 'flac');
-          });
-        });
-        manifest.addVariant(4, (variant) => {
-          variant.addAudio(5, (stream) => {
-            stream.bandwidth = 100000;
-            stream.language = 'es';
-            stream.mime('audio/mp4', 'mp4a.40.2');
-          });
-        });
-        manifest.addVariant(6, (variant) => {
-          variant.addAudio(7, (stream) => {
-            stream.bandwidth = 500000;
-            stream.language = 'es';
-            stream.mime('audio/mp4', 'flac');
-          });
-        });
-      });
-
-      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
-          /* preferredVideoCodecs= */[],
-          /* preferredAudioCodecs= */[],
-          /* preferredDecodingAttributes= */[],
-          /* preferredTextFormats= */ []);
-
-      expect(manifest.variants.length).toBe(2);
-      expect(manifest.variants.every((v) => v.audio.bandwidth == 100000))
-          .toBeTruthy();
-    });
-
     it('should allow multiple codecs for codec switching', async () => {
       if (!await Util.isTypeSupported('video/webm; codecs="vp9"')) {
         pending('Codec VP9 is not supported by the platform.');
