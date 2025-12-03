@@ -2333,6 +2333,7 @@ shaka.extern.MediaSourceConfiguration;
  *   allowStartInMiddleOfInterstitial: boolean,
  *   disableTrackingEvents: boolean,
  *   disableSnapback: boolean,
+ *   interstitialPreloadAheadTime: number,
  * }}
  *
  * @description
@@ -2387,6 +2388,10 @@ shaka.extern.MediaSourceConfiguration;
  *   and playback will continue from the user's seek position.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {number} interstitialPreloadAheadTime
+ *   Interstitial preload ahead time.
+ *   <br>
+ *   Defaults to <code>10</code>.
  *
  * @exportDoc
  */
