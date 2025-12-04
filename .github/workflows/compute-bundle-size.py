@@ -5,6 +5,8 @@ import json
 import os
 import gzip
 
+BOLD_THRESHOLD = 102
+
 def get_file_size(path):
   """Returns raw size and gzipped size in bytes."""
   if not os.path.exists(path):
@@ -23,7 +25,7 @@ def fmt_kb(size):
 def fmt_diff(head, base):
   diff = head - base
   sign = "+" if diff > 0 else ""
-  if abs(diff) > 102:
+  if abs(diff) > BOLD_THRESHOLD:
     return f"**{sign}{fmt_kb(diff)}**"
   else:
     return f"{sign}{fmt_kb(diff)}"
@@ -86,16 +88,6 @@ def compare(args):
   
   print("\n".join(lines))
 
-def set_output(name, value):
-  path = os.environ.get("GITHUB_OUTPUT")
-  if path:
-    # Inside GitHub Actions, output the data to a special file GitHub provides.
-    with open(path, "a") as f:
-      f.write("{}={}\n".format(name, value))
-  else:
-    # Outside of GitHub Actions, just print the data.
-    print("OUTPUT {}={}".format(name, value))
-
 def main():
   parser = argparse.ArgumentParser(description="Measure and compare build sizes")
   subparsers = parser.add_subparsers(dest="command", required=True)
@@ -105,10 +97,10 @@ def main():
   parser_measure.add_argument("--out", required=True, help="Output JSON file path")
   parser_measure.set_defaults(func=measure)
 
-  parser_measure = subparsers.add_parser(name="compare", help="Generate Markdown report from two JSON files")
-  parser_measure.add_argument("--base", required=True, help="Base branch JSON file")
-  parser_measure.add_argument("--head", required=True, help="Head branch JSON file")
-  parser_measure.set_defaults(func=compare)
+  parser_compare = subparsers.add_parser(name="compare", help="Generate Markdown report from two JSON files")
+  parser_compare.add_argument("--base", required=True, help="Base branch JSON file")
+  parser_compare.add_argument("--head", required=True, help="Head branch JSON file")
+  parser_compare.set_defaults(func=compare)
 
   args = parser.parse_args()
   args.func(args)
