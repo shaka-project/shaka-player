@@ -77,6 +77,7 @@ shaka.extern.AdaptationSetCriteria.Factory;
  *   activeAudioChannelCount: number,
  *   preferredAudioCodecs: !Array<string>,
  *   preferredAudioChannelCount: number,
+ *   preferredVideoCodecs: !Array<string>,
  * }}
  *
  * @property {string} language
@@ -109,6 +110,8 @@ shaka.extern.AdaptationSetCriteria.Factory;
  *   The ordered list of audio codecs to filter variants.
  * @property {number} preferredAudioChannelCount
  *   The preferred audio channel count to filter variants.
+ * @property {!Array<string>} preferredVideoCodecs
+ *   The ordered list of video codecs to filter variants.
  * @exportDoc
  */
 shaka.extern.AdaptationSetCriteria.Configuration;

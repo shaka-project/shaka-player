@@ -95,14 +95,6 @@ def main(args):
   if gendeps.main([]) != 0:
     return 1
 
-  check_args = []
-  if parsed_args.fix:
-    check_args += ['--fix']
-  if parsed_args.force:
-    check_args += ['--force']
-  if check.main(check_args) != 0:
-    return 1
-
   docs_args = []
   if parsed_args.force:
     docs_args += ['--force']

@@ -1,0 +1,19 @@
+diff a/test/hls/hls_parser_integration.js b/test/hls/hls_parser_integration.js	(rejected hunks)
+@@ -176,8 +168,6 @@ describe('HlsParser', () => {
+     player.selectVariantTrack(nonActiveVariant, /* clearBuffer= */ true);
+ 
+     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 30);
+-
+-    await player.unload();
+   });
+ 
+   it('supports com.apple.hls.chapters', async () => {
+@@ -190,8 +180,6 @@ describe('HlsParser', () => {
+     const chapters = await player.getChaptersAsync('und');
+ 
+     expect(chapters.length).toBe(7);
+-
+-    await player.unload();
+   });
+ 
+   it('supports mp4 muxed with AAC and H.264', async () => {

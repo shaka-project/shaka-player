@@ -78,8 +78,6 @@ describe('HlsParser', () => {
     // longer than 30 seconds, fail the test.
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
 
-    await player.unload();
-
     // The stream has 6 #EXT-X-KEY but only 5 different keys.
     expect(keyRequests).toBe(5);
   });
@@ -100,8 +98,6 @@ describe('HlsParser', () => {
     // Play for 8 seconds, but stop early if the video ends.  If it takes
     // longer than 30 seconds, fail the test.
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
-
-    await player.unload();
   });
 
   it('supports text discontinuity', async () => {
@@ -121,8 +117,6 @@ describe('HlsParser', () => {
     expect(cues[1].endTime).toBeCloseTo(4, 0);
     expect(cues[2].startTime).toBeCloseTo(6, 0);
     expect(cues[2].endTime).toBeCloseTo(8, 0);
-
-    await player.unload();
   });
 
   it('supports text without discontinuity', async () => {
@@ -144,8 +138,6 @@ describe('HlsParser', () => {
     expect(cues[1].endTime).toBeCloseTo(4.96, 0);
     expect(cues[2].startTime).toBeCloseTo(4.96, 0);
     expect(cues[2].endTime).toBeCloseTo(9.28, 0);
-
-    await player.unload();
   });
 
   it('allow switch between mp4 muxed and ts muxed', async () => {
@@ -192,7 +184,31 @@ describe('HlsParser', () => {
     // Play for 8 seconds, but stop early if the video ends.  If it takes
     // longer than 30 seconds, fail the test.
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
+  });
 
-    await player.unload();
+  // We used to have a bug in preferredKeySystems-specific filtering where
+  // variants went missing at the Shaka level and languages went missing at the
+  // CAF level.
+  drmIt('filters multilingual variants with preferredKeySystems', async () => {
+    if (!checkWidevineSupport()) {
+      pending('Widevine is not supported');
+    }
+    player.configure('drm.servers', {
+      'com.widevine.alpha': 'https://proxy.uat.widevine.com/proxy',
+    });
+    player.configure('drm.preferredKeySystems', [
+      'com.widevine.alpha',
+    ]);
+
+    await player.load('/base/test/test/assets/hls-track-filtering/hls.m3u8');
+    await video.play();
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // In the original issue, this would be 3 due to buggy filtering in a path
+    // specific to the preferredKeySystems config.
+    expect(player.getVariantTracks().length).toBe(4);
   });
 });
