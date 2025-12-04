@@ -1453,12 +1453,16 @@ describe('HlsParser', () => {
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
         stream.kind = TextStreamKind.SUBTITLE;
-        stream.mime('application/mp4', '');
+        // This codec doesn't make sense for text, but we're reusing the same
+        // media playlist for everything.
+        stream.mime('application/mp4', 'avc1.42C01E');
       });
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
         stream.kind = TextStreamKind.SUBTITLE;
-        stream.mime('application/mp4', '');
+        // This codec doesn't make sense for text, but we're reusing the same
+        // media playlist for everything.
+        stream.mime('application/mp4', 'avc1.42C01E');
         stream.roles = [
           'public.accessibility.describes-spoken-dialog',
           'public.accessibility.describes-music-and-sound',
@@ -6218,10 +6222,10 @@ describe('HlsParser', () => {
       'URI="audio/a/media.m3u8"\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="b",LANGUAGE="eng",',
       'URI="audio/b/media.m3u8"\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc,mp4a",',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc,mp4a,stpp",',
       'AUDIO="a",PATHWAY-ID="a",CLOSED-CAPTIONS=NONE,SUBTITLES="subsA"\n',
       'a/media.m3u8\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc,mp4a",',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc,mp4a,stpp",',
       'AUDIO="b",PATHWAY-ID="b",CLOSED-CAPTIONS=NONE,SUBTITLES="subsB"\n',
       'b/media.m3u8',
     ].join('');
