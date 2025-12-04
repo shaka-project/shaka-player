@@ -63,7 +63,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
      */
     this.seekTimer_ = new shaka.util.Timer(() => {
       let newCurrentTime = this.getValue();
-      if (!this.player.isLive()) {
+      if (!this.player.isDynamic()) {
         if (newCurrentTime == this.video.duration) {
           newCurrentTime -= 0.001;
         }
@@ -467,7 +467,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       // it later.
       // If we have a LIVE seekable content, keep checking for ad breaks
       // every second.
-      if (this.player.isLive() && seekRangeSize > minSeekBarWindow) {
+      if (this.player.isDynamic() && seekRangeSize > minSeekBarWindow) {
         this.adBreaksTimer_.tickEvery(/* seconds= */ 0.25);
       }
     };
@@ -488,7 +488,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
 
-    if (this.player.isLive() &&
+    if (this.player.isDynamic() &&
         (seekRangeSize < shaka.ui.SeekBar.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_ ||
         !isFinite(seekRangeSize))) {
       return false;
@@ -522,7 +522,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const seekRange = this.player.seekRange();
     const playerValue = Math.max(Math.ceil(seekRange.start),
         Math.min(Math.floor(seekRange.end), value));
-    if (this.player.isLive()) {
+    if (this.player.isDynamic()) {
       const totalSeconds = seekRange.end - value;
       if (totalSeconds < 1) {
         this.thumbnailTime_.textContent =

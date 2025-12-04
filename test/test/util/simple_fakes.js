@@ -398,6 +398,9 @@ shaka.test.FakePresentationTimeline = class {
     this.isLive = jasmine.createSpy('isLive');
 
     /** @type {!jasmine.Spy} */
+    this.isDynamic = jasmine.createSpy('isDynamic');
+
+    /** @type {!jasmine.Spy} */
     this.isInProgress = jasmine.createSpy('isInProgress');
 
     /** @type {!jasmine.Spy} */
