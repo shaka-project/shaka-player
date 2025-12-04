@@ -398,3 +398,39 @@ requirement: {
     "Using \"Object.fromEntries\" is not allowed because is not supported on "
     "Tizen 3."
 }
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: "Uint8Array.prototype.fromBase64"
+  error_message:
+    "Using \"Uint8Array.prototype.fromBase64\" directly is not allowed; "
+    "use shaka.util.Uint8ArrayUtils instead."
+  whitelist_regexp: "lib/util/uint8array_utils.js"
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: "Uint8Array.prototype.toBase64"
+  error_message:
+    "Using \"Uint8Array.prototype.toBase64\" directly is not allowed; "
+    "use shaka.util.Uint8ArrayUtils instead."
+  whitelist_regexp: "lib/util/uint8array_utils.js"
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: "Uint8Array.prototype.fromHex"
+  error_message:
+    "Using \"Uint8Array.prototype.fromHex\" directly is not allowed; "
+    "use shaka.util.Uint8ArrayUtils instead."
+  whitelist_regexp: "lib/util/uint8array_utils.js"
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: "Uint8Array.prototype.toHex"
+  error_message:
+    "Using \"Uint8Array.prototype.toHex\" directly is not allowed; "
+    "use shaka.util.Uint8ArrayUtils instead."
+  whitelist_regexp: "lib/util/uint8array_utils.js"
+}
