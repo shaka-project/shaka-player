@@ -279,6 +279,7 @@ module.exports = (config) => {
       // eslint-disable-next-line @stylistic/max-len
       {pattern: 'test/test/assets/hls-text-no-discontinuity/*', included: false},
       {pattern: 'test/test/assets/hls-text-offset/*', included: false},
+      {pattern: 'test/test/assets/hls-track-filtering/*', included: false},
       {pattern: 'test/test/assets/hls-ts-aac/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ac3/*', included: false},
       {pattern: 'test/test/assets/hls-ts-b-frames/*', included: false},
