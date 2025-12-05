@@ -20,7 +20,7 @@ def get_file_size(path):
   return size, len(compress)
 
 def fmt_kb(size):
-  return f"{size / 1024:.2f} KiB"
+  return f"{size / 1024:.1f} KiB"
 
 def fmt_diff(head, base):
   diff = head - base
