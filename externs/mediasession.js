@@ -21,8 +21,14 @@ const MediaMetadata = class {
     /** @type {string} */
     this.artist;
 
+    /** @type {string} */
+    this.album;
+
     /** @type {!Object} */
     this.artwork;
+
+    /** @type {!Object} */
+    this.chapterInfo;
   }
 };
 

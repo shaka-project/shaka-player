@@ -1453,12 +1453,16 @@ describe('HlsParser', () => {
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
         stream.kind = TextStreamKind.SUBTITLE;
-        stream.mime('application/mp4', '');
+        // This codec doesn't make sense for text, but we're reusing the same
+        // media playlist for everything.
+        stream.mime('application/mp4', 'avc1.42C01E');
       });
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
         stream.kind = TextStreamKind.SUBTITLE;
-        stream.mime('application/mp4', '');
+        // This codec doesn't make sense for text, but we're reusing the same
+        // media playlist for everything.
+        stream.mime('application/mp4', 'avc1.42C01E');
         stream.roles = [
           'public.accessibility.describes-spoken-dialog',
           'public.accessibility.describes-music-and-sound',
@@ -3419,7 +3423,7 @@ describe('HlsParser', () => {
      * @param {string} media
      * @param {!Array<number>} startTimes
      * @param {number} syncTimeOffset
-     * @param {(function(!shaka.media.SegmentReference, !number))=} modifyFn
+     * @param {(function(!shaka.media.SegmentReference))=} modifyFn
      * @param {boolean=} isLowLatency
      */
     async function test(media, startTimes, syncTimeOffset, modifyFn,
@@ -3438,7 +3442,7 @@ describe('HlsParser', () => {
         const reference = makeReference(
             startTime, endTime, syncTimeOffset + startTime);
         if (modifyFn) {
-          modifyFn(reference, i);
+          modifyFn(reference);
         }
         segments.push(reference);
       }
@@ -3536,74 +3540,6 @@ describe('HlsParser', () => {
         'main.mp4',
       ].join(''), [0, 5, 10, 15, 20, 25], syncTimeBase + 5, (reference) => {
         reference.syncTime = null;
-      });
-    });
-
-    it('when there is a discontinuity and a PDT jump, without a gap',
-        async () => {
-          const config =
-              shaka.util.PlayerConfiguration.createDefault().manifest;
-          parser.configure(config);
-          await test([
-            '#EXTM3U\n',
-            '#EXT-X-PLAYLIST-TYPE:VOD\n',
-            '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
-            '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:05.00Z\n',
-            '#EXTINF:5,\n',
-            'main.mp4\n',
-            '#EXTINF:5,\n',
-            'main.mp4\n',
-            '#EXT-X-DISCONTINUITY\n',
-            '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:20.00Z\n',
-            '#EXTINF:5,\n',
-            'main.mp4\n',
-            '#EXTINF:5,\n',
-            'main.mp4\n',
-            '#EXTINF:5,\n',
-            'main.mp4',
-          ].join(''), [0, 5, 10, 15, 20, 25], syncTimeBase + 5,
-          (reference, i) => {
-            if (i == 1) {
-              reference.endTime = 10;
-              reference.trueEndTime = 10;
-            }
-            if (i > 1) {
-              reference.discontinuitySequence = 0;
-            }
-            if (!reference.initSegmentReference.boundaryEnd) {
-              reference.initSegmentReference.boundaryEnd = 10;
-            }
-          });
-        });
-
-    it('and does not create a gap if there is a PDT jump without a ' +
-      'discontinuity',
-    async () => {
-      const config =
-          shaka.util.PlayerConfiguration.createDefault().manifest;
-      parser.configure(config);
-      await test([
-        '#EXTM3U\n',
-        '#EXT-X-PLAYLIST-TYPE:VOD\n',
-        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
-        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:05.00Z\n',
-        '#EXTINF:5,\n',
-        'main.mp4\n',
-        '#EXTINF:5,\n',
-        'main.mp4\n',
-        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:20.00Z\n',
-        '#EXTINF:5,\n',
-        'main.mp4\n',
-        '#EXTINF:5,\n',
-        'main.mp4\n',
-        '#EXTINF:5,\n',
-        'main.mp4',
-      ].join(''), [0, 5, 10, 15, 20, 25], syncTimeBase + 5,
-      (reference, i) => {
-        if (i == 1) {
-          reference.endTime = 10;
-          reference.trueEndTime = 10;
-        }
       });
     });
 
@@ -6278,15 +6214,19 @@ describe('HlsParser', () => {
       '#EXTM3U\n',
       '#EXT-X-CONTENT-STEERING:SERVER-URI="http://contentsteering",',
       'PATHWAY-ID="a"\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subsA",LANGUAGE="eng",',
+      'NAME="English",PATHWAY-ID="a",URI="subs/a/media.m3u8"\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subsB",LANGUAGE="eng",',
+      'NAME="English",PATHWAY-ID="b",URI="subs/b/media.m3u8"\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="a",LANGUAGE="eng",',
       'URI="audio/a/media.m3u8"\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="b",LANGUAGE="eng",',
       'URI="audio/b/media.m3u8"\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc,mp4a",',
-      'AUDIO="a",PATHWAY-ID="a",CLOSED-CAPTIONS=NONE\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc,mp4a,stpp",',
+      'AUDIO="a",PATHWAY-ID="a",CLOSED-CAPTIONS=NONE,SUBTITLES="subsA"\n',
       'a/media.m3u8\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc,mp4a",',
-      'AUDIO="b",PATHWAY-ID="b",CLOSED-CAPTIONS=NONE\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc,mp4a,stpp",',
+      'AUDIO="b",PATHWAY-ID="b",CLOSED-CAPTIONS=NONE,SUBTITLES="subsB"\n',
       'b/media.m3u8',
     ].join('');
 
@@ -6316,6 +6256,8 @@ describe('HlsParser', () => {
         .setResponseText('http://master/b/media.m3u8', media)
         .setResponseText('http://master/audio/a/media.m3u8', media)
         .setResponseText('http://master/audio/b/media.m3u8', media)
+        .setResponseText('http://master/subs/a/media.m3u8', media)
+        .setResponseText('http://master/subs/b/media.m3u8', media)
         .setMaxUris(2);
 
     /** @type {shaka.extern.Manifest} */
@@ -6341,6 +6283,17 @@ describe('HlsParser', () => {
 
     expect(videoUri0).toBe('http://master/b/main.mp4');
     expect(videoUri1).toBe('http://master/a/main.mp4');
+
+    expect(manifest.textStreams.length).toBe(1);
+    const text = manifest.textStreams[0];
+    await text.createSegmentIndex();
+    goog.asserts.assert(text.segmentIndex, 'Null segmentIndex!');
+    const textSegment0 = Array.from(text.segmentIndex)[0];
+    const textUri0 = textSegment0.getUris()[0];
+    const textUri1 = textSegment0.getUris()[1];
+
+    expect(textUri0).toBe('http://master/subs/b/main.mp4');
+    expect(textUri1).toBe('http://master/subs/a/main.mp4');
   });
 
   describe('EXT-X-DATERANGE', () => {

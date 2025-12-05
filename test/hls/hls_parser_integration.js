@@ -193,4 +193,20 @@ describe('HlsParser', () => {
 
     await player.unload();
   });
+
+  it('supports mp4 muxed with AAC and H.264', async () => {
+    await player.load('/base/test/test/assets/hls-mp4-muxed-aac-h264/hls.m3u8');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 8 seconds, but stop early if the video ends.  If it takes
+    // longer than 30 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
+
+    await player.unload();
+  });
 });
