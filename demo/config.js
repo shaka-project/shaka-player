@@ -743,14 +743,6 @@ shakaDemo.Config = class {
   addLanguageSection_() {
     const docLink = this.resolveExternLink_('.PlayerConfiguration');
 
-    const autoShowTextOptions = shaka.config.AutoShowText;
-    const autoShowTextOptionNames = {
-      'NEVER': 'Never',
-      'ALWAYS': 'Always',
-      'IF_PREFERRED_TEXT_LANGUAGE': 'If preferred text language',
-      'IF_SUBTITLES_MAY_BE_NEEDED': 'If subtitles may be needed',
-    };
-
     this.addSection_('Language', docLink)
         .addTextInput_('Preferred Audio Language', 'preferredAudioLanguage')
         .addTextInput_('Preferred Audio Label', 'preferredAudioLabel')
@@ -758,11 +750,7 @@ shakaDemo.Config = class {
         .addTextInput_('Preferred Audio Role', 'preferredAudioRole')
         .addTextInput_('Preferred Video Role', 'preferredVideoRole')
         .addTextInput_('Preferred Text Language', 'preferredTextLanguage')
-        .addTextInput_('Preferred Text Role', 'preferredTextRole')
-        .addSelectInput_('Auto-Show Text',
-            'autoShowText',
-            autoShowTextOptions,
-            autoShowTextOptionNames);
+        .addTextInput_('Preferred Text Role', 'preferredTextRole');
     const onChange = (input) => {
       shakaDemoMain.setUILocale(input.value);
       shakaDemoMain.remakeHash();
