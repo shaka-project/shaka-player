@@ -80,7 +80,7 @@ jobs:
       - name: Generate report
         run: |
           python3 base-source/.github/workflows/compute-bundle-size.py compare \
-            --head head-sizes.json
+            --head head-sizes.json \
             --base base-sizes.json > report.md
           
           cat report.md
