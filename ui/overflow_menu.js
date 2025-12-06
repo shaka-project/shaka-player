@@ -106,7 +106,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     /** @private {ResizeObserver} */
     this.resizeObserver_ = null;
 
-    const resize = () => this.computeMaxHeight_();
+    const resize = () => this.computeMaxHeightAndPosition_();
 
     // Use ResizeObserver if available, fallback to window resize event
     if (window.ResizeObserver) {
@@ -216,7 +216,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
           Iterables.filter(this.overflowMenu_.childNodes, isDisplayed);
         /** @type {!HTMLElement} */ (visibleElements[0]).focus();
       }
-      this.computeMaxHeight_();
+      this.computeMaxHeightAndPosition_();
     }
   }
 
@@ -234,7 +234,8 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
   /**
    * @private
    */
-  computeMaxHeight_() {
+  computeMaxHeightAndPosition_() {
+    // Compute max height
     const rectMenu = this.overflowMenu_.getBoundingClientRect();
     const styleMenu = window.getComputedStyle(this.overflowMenu_);
     const paddingTop = parseFloat(styleMenu.paddingTop);
@@ -244,6 +245,24 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
         rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom;
 
     this.overflowMenu_.style.maxHeight = heightIntersection + 'px';
+
+    // Compute horizontal position
+    const bottomControlsPos = this.controlsContainer_.getBoundingClientRect();
+    const overflowMenuButtonPos =
+        this.overflowMenuButton_.getBoundingClientRect();
+    const leftGap = overflowMenuButtonPos.left - bottomControlsPos.left;
+    const rightGap = bottomControlsPos.right - overflowMenuButtonPos.right;
+    const EDGE_PADDING = 15;
+    // Overflow menu button is either placed to the left or center
+    if (leftGap < rightGap) {
+      const left = Math.max(leftGap, EDGE_PADDING);
+      this.overflowMenu_.style.left = left + 'px';
+      this.overflowMenu_.style.right = 'auto';
+    } else {
+      const right = Math.max(rightGap, EDGE_PADDING);
+      this.overflowMenu_.style.right = right + 'px';
+      this.overflowMenu_.style.left = 'auto';
+    }
   }
 };
 
