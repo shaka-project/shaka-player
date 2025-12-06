@@ -2440,7 +2440,7 @@ shaka.extern.AdsConfiguration;
  *   If true, we remove the latency from first packet time. This time is
  *   used to calculate the real bandwidth.
  *   <br>
- *   Defaults to <code>true</code>.
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
