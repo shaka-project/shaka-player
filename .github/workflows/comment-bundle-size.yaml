@@ -1,0 +1,58 @@
+name: Comment Bundle Size
+
+# Runs when Measure Bundle Size workflow completes.
+# This will run with full privileges.
+on:
+  workflow_run:
+    workflows: [Measure Bundle Size]
+    types: [completed]
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Download report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: bundle-report
+          path: .
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.SHAKA_BOT_TOKEN }}
+    
+      - name: Add or Update PR Comment
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
+          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+          COMMENT_INCLUDES: "Bundle Size Report"
+          COMMENT_USER: "shaka-bot"
+        run: |
+          if [ -z "$PR_NUMBER" ]; then
+            echo "No PR found."
+            exit 0
+          fi
+
+          MESSAGE=$(cat report.md)
+          echo "$MESSAGE"
+
+          # Find existing bot comment
+          jq_filter=".[] | select((.user.login == \"$COMMENT_USER\") and (.body | startswith(\"$COMMENT_INCLUDES\"))) | .id"
+
+          gh api \
+            /repos/${{ github.repository }}/issues/$PR_NUMBER/comments \
+            | jq "$jq_filter" > old-comment-id
+
+          if [[ -z "$(cat old-comment-id)" ]]; then
+            echo "Creating new bundle size comment"
+            gh api \
+              --method POST \
+              /repos/${{ github.repository }}/issues/$PR_NUMBER/comments \
+              -f "body=$MESSAGE"
+          else
+            echo "Updating existing bundle size comment"
+            gh api \
+              --method PATCH \
+              /repos/${{ github.repository }}/issues/comments/$(cat old-comment-id) \
+              -f "body=$MESSAGE"
+          fi
