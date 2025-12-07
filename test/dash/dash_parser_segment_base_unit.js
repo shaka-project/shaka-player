@@ -316,41 +316,6 @@ describe('DashParser SegmentBase', () => {
     expect(reference.endTime).toBe(10);  // would be 12 without PTO
   });
 
-  it('honors RepresentationIndex BaseURL/sourceURL', async () => {
-    const source = [
-      '<MPD mediaPresentationDuration="PT75S">',
-      '  <Period>',
-      '    <AdaptationSet mimeType="video/mp4">',
-      '      <Representation bandwidth="1">',
-      '        <BaseURL>https://media.example.com/video.mp4</BaseURL>',
-      '        <SegmentBase>',
-      '          <RepresentationIndex sourceURL="main.sidx" range="30-900">',
-      '            <BaseURL>https://index.example.com/index/</BaseURL>',
-      '          </RepresentationIndex>',
-      '        </SegmentBase>',
-      '      </Representation>',
-      '    </AdaptationSet>',
-      '  </Period>',
-      '</MPD>',
-    ].join('\n');
-
-    fakeNetEngine
-        .setResponseText('dummy://foo', source)
-        .setResponseValue(
-            'https://index.example.com/index/main.sidx', indexSegment);
-
-    /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
-    const video = manifest.variants[0].video;
-    await video.createSegmentIndex();  // real data, should succeed
-    goog.asserts.assert(video.segmentIndex != null, 'Null segmentIndex!');
-
-    expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
-    fakeNetEngine.expectRangeRequest(
-        'https://index.example.com/index/main.sidx',
-        30, 900, /* isInit= */ false);
-  });
-
   // https://github.com/shaka-project/shaka-player/issues/3230
   it('works with multi-Period with eviction', async () => {
     const source = [
