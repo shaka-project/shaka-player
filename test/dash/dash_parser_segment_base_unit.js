@@ -350,7 +350,7 @@ describe('DashParser SegmentBase', () => {
         'https://index.example.com/index/main.sidx',
         30, 900, /* isInit= */ false);
   });
-  
+
   // https://github.com/shaka-project/shaka-player/issues/3230
   it('works with multi-Period with eviction', async () => {
     const source = [
