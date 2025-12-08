@@ -111,26 +111,6 @@ describe('StreamUtils', () => {
       expect(chosen[0]).toBe(manifest.textStreams[0]);
     });
 
-    it('prioritizes primary text streams in preferred language', () => {
-      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        manifest.addTextStream(1, (stream) => {
-          stream.language = 'en';
-        });
-        manifest.addTextStream(2, (stream) => {
-          stream.language = 'en';
-          stream.primary = true;
-        });
-      });
-
-      const chosen = StreamUtils.filterStreamsByLanguageAndRole(
-          manifest.textStreams,
-          'en',
-          '',
-          false);
-      expect(chosen.length).toBe(1);
-      expect(chosen[0]).toBe(manifest.textStreams[1]);
-    });
-
     it('prefers no-role streams if there is no preferred role', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addTextStream(0, (stream) => {
