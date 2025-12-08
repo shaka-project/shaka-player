@@ -114,8 +114,7 @@ describe('StreamUtils', () => {
     it('prioritizes primary text streams in preferred language', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addTextStream(1, (stream) => {
-          stream.language = 'es';
-          stream.primary = true;
+          stream.language = 'en';
         });
         manifest.addTextStream(2, (stream) => {
           stream.language = 'en';
