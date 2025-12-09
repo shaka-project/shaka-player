@@ -17,7 +17,9 @@ jobs:
         with:
           name: bundle-report
           path: artifact
-    
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.SHAKA_BOT_TOKEN }}
+
       - name: Add or Update PR Comment
         shell: bash
         env:
