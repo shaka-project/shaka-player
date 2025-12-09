@@ -580,6 +580,11 @@ describe('UI', () => {
         languageMenuButton.click();
 
         expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
+        expect(languageMenu.classList.contains('shaka-hidden')).toBe(true);
+
+        languageMenuButton.click();
+
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
         expect(languageMenu.classList.contains('shaka-hidden')).toBe(false);
       });
     });
