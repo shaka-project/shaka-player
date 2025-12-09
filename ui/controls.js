@@ -1739,149 +1739,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       addMediaSessionHandler('enterpictureinpicture', commonHandler);
     }
 
-    // eslint-disable-next-line no-restricted-syntax
-    const supportsChapterInfo = 'chapterInfo' in MediaMetadata.prototype;
-
-    const getMediaMetadata = () => {
-      const metadata = {
-        title: '',
-        artist: '',
-        album: '',
-        artwork: [],
-      };
-      if (supportsChapterInfo) {
-        metadata.chapterInfo = [];
-      }
-      if (navigator.mediaSession.metadata) {
-        metadata.title = navigator.mediaSession.metadata.title;
-        metadata.artist = navigator.mediaSession.metadata.artist;
-        metadata.album = navigator.mediaSession.metadata.album;
-        metadata.artwork = navigator.mediaSession.metadata.artwork;
-        if (supportsChapterInfo) {
-          metadata.chapterInfo = navigator.mediaSession.metadata.chapterInfo;
-        }
-      }
-      return metadata;
-    };
-
-    const setupTitle = (title) => {
-      const metadata = getMediaMetadata();
-      metadata.title = title;
-      navigator.mediaSession.metadata = new MediaMetadata(metadata);
-    };
-
-    const setupPoster = (imageUrl) => {
-      const video = /** @type {HTMLVideoElement} */ (this.localVideo_);
-      if (imageUrl != video.poster) {
-        video.poster = imageUrl;
-      }
-      const metadata = getMediaMetadata();
-      metadata.artwork = [{src: imageUrl}];
-      navigator.mediaSession.metadata = new MediaMetadata(metadata);
-    };
-
-    const setupChapters = () => {
-      if (!supportsChapterInfo) {
-        return;
-      }
-      const chapterInfo = [];
-      for (const chapter of this.chapters_) {
-        chapterInfo.push({
-          title: chapter.title,
-          startTime: chapter.startTime,
-          artwork: [],
-        });
-      }
-      const metadata = getMediaMetadata();
-      metadata.chapterInfo = chapterInfo;
-      navigator.mediaSession.metadata = new MediaMetadata(metadata);
-    };
-
-    const playerLoaded = () => {
-      if (this.player_.isLive() || this.player_.seekRange().start != 0) {
-        updatePositionState();
-        this.eventManager_.listen(
-            this.video_, 'timeupdate', updatePositionState);
-      } else {
-        clearPositionState();
-      }
-    };
-    const playerUnloading = () => {
-      this.mediaSessionEventManager_.unlisten(
-          this.video_, 'timeupdate', updatePositionState);
-      navigator.mediaSession.metadata = new MediaMetadata({});
-    };
-
-    if (this.player_.isFullyLoaded()) {
-      playerLoaded();
-    }
-    this.mediaSessionEventManager_.listen(
-        this.player_, 'loaded', playerLoaded);
-    this.mediaSessionEventManager_.listen(
-        this.player_, 'unloading', playerUnloading);
-    this.mediaSessionEventManager_.listen(
-        this.player_, 'trackschanged', setupChapters);
-    this.mediaSessionEventManager_.listen(
-        this.player_, 'metadata', (event) => {
-          const payload = event['payload'];
-          if (!payload) {
-            return;
-          }
-          let title;
-          if (payload['key'] == 'TIT2' && payload['data']) {
-            title = payload['data'];
-          }
-          let imageUrl;
-          if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
-            imageUrl = payload['data'];
-          }
-          if (title) {
-            setupTitle(title);
-          }
-          if (imageUrl) {
-            setupPoster(imageUrl);
-          }
-        });
-    this.mediaSessionEventManager_.listen(
-        this.player_, 'sessiondata', (event) => {
-          const id = event['id'];
-          switch (id) {
-            case 'com.apple.hls.title': {
-              const title = event['value'];
-              if (title) {
-                setupTitle(title);
-              }
-              break;
-            }
-            case 'com.apple.hls.poster': {
-              let imageUrl = event['value'];
-              if (imageUrl) {
-                imageUrl = imageUrl.replace('{w}', '512')
-                    .replace('{h}', '512')
-                    .replace('{f}', 'jpeg');
-                setupPoster(imageUrl);
-              }
-              break;
-            }
-          }
-        });
-    this.mediaSessionEventManager_.listen(
-        this.player_, 'programinformation', (event) => {
-          if (!event['detail']) {
-            return;
-          }
-          const TXml = shaka.util.TXml;
-          /** @type {!shaka.extern.xml.Node} */
-          const detail = /** @type {!shaka.extern.xml.Node} */(event['detail']);
-          const titleNode = TXml.findChild(detail, 'Title');
-          if (titleNode) {
-            const title = TXml.getContents(titleNode);
-            if (title) {
-              setupTitle(title);
-            }
-          }
-        });
-
     const checkQueueItems = () => {
       const itemsLength = this.queueManager_.getItems().length;
       const currentIndex = this.queueManager_.getCurrentItemIndex();
@@ -1925,6 +1782,155 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.adManager_, shaka.ads.Utils.AD_SKIP_STATE_CHANGED, checkSkipAd);
     this.mediaSessionEventManager_.listen(
         this.adManager_, shaka.ads.Utils.AD_STOPPED, checkSkipAd);
+
+    if (this.config_.setupMediaSessionMetadata) {
+      // eslint-disable-next-line no-restricted-syntax
+      const supportsChapterInfo = 'chapterInfo' in MediaMetadata.prototype;
+
+      const getMediaMetadata = () => {
+        const metadata = {
+          title: '',
+          artist: '',
+          album: '',
+          artwork: [],
+        };
+        if (supportsChapterInfo) {
+          metadata.chapterInfo = [];
+        }
+        if (navigator.mediaSession.metadata) {
+          metadata.title = navigator.mediaSession.metadata.title;
+          metadata.artist = navigator.mediaSession.metadata.artist;
+          metadata.album = navigator.mediaSession.metadata.album;
+          metadata.artwork = navigator.mediaSession.metadata.artwork;
+          if (supportsChapterInfo) {
+            metadata.chapterInfo = navigator.mediaSession.metadata.chapterInfo;
+          }
+        }
+        return metadata;
+      };
+
+      const setupTitle = (title) => {
+        const metadata = getMediaMetadata();
+        metadata.title = title;
+        navigator.mediaSession.metadata = new MediaMetadata(metadata);
+      };
+
+      const setupPoster = (imageUrl) => {
+        const video = /** @type {HTMLVideoElement} */ (this.localVideo_);
+        if (imageUrl != video.poster) {
+          video.poster = imageUrl;
+        }
+        const metadata = getMediaMetadata();
+        metadata.artwork = [{src: imageUrl}];
+        navigator.mediaSession.metadata = new MediaMetadata(metadata);
+      };
+
+      const setupChapters = () => {
+        if (!supportsChapterInfo) {
+          return;
+        }
+        const chapterInfo = [];
+        for (const chapter of this.chapters_) {
+          chapterInfo.push({
+            title: chapter.title,
+            startTime: chapter.startTime,
+            artwork: [],
+          });
+        }
+        const metadata = getMediaMetadata();
+        metadata.chapterInfo = chapterInfo;
+        navigator.mediaSession.metadata = new MediaMetadata(metadata);
+      };
+
+      this.mediaSessionEventManager_.listen(
+          this.player_, 'trackschanged', setupChapters);
+
+      this.mediaSessionEventManager_.listen(
+          this.player_, 'metadata', (event) => {
+            const payload = event['payload'];
+            if (!payload) {
+              return;
+            }
+            let title;
+            if (payload['key'] == 'TIT2' && payload['data']) {
+              title = payload['data'];
+            }
+            let imageUrl;
+            if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
+              imageUrl = payload['data'];
+            }
+            if (title) {
+              setupTitle(title);
+            }
+            if (imageUrl) {
+              setupPoster(imageUrl);
+            }
+          });
+      this.mediaSessionEventManager_.listen(
+          this.player_, 'sessiondata', (event) => {
+            const id = event['id'];
+            switch (id) {
+              case 'com.apple.hls.title': {
+                const title = event['value'];
+                if (title) {
+                  setupTitle(title);
+                }
+                break;
+              }
+              case 'com.apple.hls.poster': {
+                let imageUrl = event['value'];
+                if (imageUrl) {
+                  imageUrl = imageUrl.replace('{w}', '512')
+                      .replace('{h}', '512')
+                      .replace('{f}', 'jpeg');
+                  setupPoster(imageUrl);
+                }
+                break;
+              }
+            }
+          });
+      this.mediaSessionEventManager_.listen(
+          this.player_, 'programinformation', (event) => {
+            if (!event['detail']) {
+              return;
+            }
+            const TXml = shaka.util.TXml;
+            /** @type {!shaka.extern.xml.Node} */
+            const detail =
+            /** @type {!shaka.extern.xml.Node} */(event['detail']);
+            const titleNode = TXml.findChild(detail, 'Title');
+            if (titleNode) {
+              const title = TXml.getContents(titleNode);
+              if (title) {
+                setupTitle(title);
+              }
+            }
+          });
+    }
+    if (this.config_.setupMediaSessionPosition) {
+      const playerLoaded = () => {
+        if (this.player_.isLive() || this.player_.seekRange().start != 0) {
+          updatePositionState();
+          this.eventManager_.listen(
+              this.video_, 'timeupdate', updatePositionState);
+        } else {
+          clearPositionState();
+        }
+      };
+      const playerUnloading = () => {
+        this.mediaSessionEventManager_.unlisten(
+            this.video_, 'timeupdate', updatePositionState);
+        navigator.mediaSession.metadata = new MediaMetadata({});
+      };
+
+      if (this.player_.isFullyLoaded()) {
+        playerLoaded();
+      }
+      this.mediaSessionEventManager_.listen(
+          this.player_, 'loaded', playerLoaded);
+      this.mediaSessionEventManager_.listen(
+          this.player_, 'unloading', playerUnloading);
+    }
   }
 
 

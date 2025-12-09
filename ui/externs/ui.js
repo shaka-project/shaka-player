@@ -218,6 +218,8 @@ shaka.extern.UIShortcuts;
  *   displayInVrMode: boolean,
  *   defaultVrProjectionMode: string,
  *   setupMediaSession: boolean,
+ *   setupMediaSessionMetadata: boolean,
+ *   setupMediaSessionPosition: boolean,
  *   mediaSessionActions: !Array<string>,
  *   preferVideoFullScreenInVisionOS: boolean,
  *   showAudioCodec: boolean,
@@ -437,9 +439,17 @@ shaka.extern.UIShortcuts;
  *   <br>
  *   Defaults to <code>'equirectangular'</code>.
  * @property {boolean} setupMediaSession
- *   If true, MediaSession controls will be managed by the UI. It will also use
- *   the ID3 APIC and TIT2 as image and title in Media Session, and ID3 APIC
- *   will also be used to change video poster.
+ *   If true, MediaSession controls will be managed by the UI.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} setupMediaSessionMetadata
+ *   Setup MediaSession metadata with ID3 APIC and TIT2 as image and title,
+ *   com.apple.hls.title and com.apple.hls.poster from HLS or
+ *   ProgramInformation in DASH.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} setupMediaSessionPosition
+ *   If true, MediaSession position will be managed by the UI.
  *   <br>
  *   Defaults to <code>true</code>.
  * @property {!Array<string>} mediaSessionActions

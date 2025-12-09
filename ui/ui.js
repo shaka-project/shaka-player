@@ -414,6 +414,8 @@ shaka.ui.Overlay = class {
       displayInVrMode: false,
       defaultVrProjectionMode: 'equirectangular',
       setupMediaSession: true,
+      setupMediaSessionMetadata: true,
+      setupMediaSessionPosition: true,
       mediaSessionActions: mediaSessionActions,
       preferVideoFullScreenInVisionOS: true,
       showAudioCodec: true,
