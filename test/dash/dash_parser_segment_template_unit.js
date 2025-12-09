@@ -986,7 +986,7 @@ describe('DashParser SegmentTemplate', () => {
 
         // The last segment is the new one, based on the cached
         // presentationTimeOffset.
-        expect(timeline[timeline.length - 1]).toBe({
+        expect(timeline[timeline.length - 1]).toEqual({
           start: 20,
           unscaledStart: 1710000,
           end: 22,
