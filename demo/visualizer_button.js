@@ -72,14 +72,11 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
       this.checkAvailability_();
     });
 
-    this.isSubMenuOpened = false;
     if (this.isSubMenu) {
       this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.isSubMenuOpened = true;
         this.checkAvailability_();
       });
       this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.isSubMenuOpened = false;
         this.checkAvailability_();
       });
     }

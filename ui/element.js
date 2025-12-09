@@ -89,7 +89,12 @@ shaka.ui.Element = class {
      */
     this.isSubMenu = this.parent.classList.contains('shaka-overflow-menu');
 
+    /**
+     * @protected {boolean}
+     * @exportInterface
+     */
     this.isSubMenuOpened = false;
+
     if (this.isSubMenu) {
       this.eventManager.listen(this.controls, 'submenuopen', () => {
         this.isSubMenuOpened = true;
