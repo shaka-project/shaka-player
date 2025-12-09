@@ -32,8 +32,9 @@ shaka.ui.Overlay = class {
    * @param {!HTMLElement} videoContainer
    * @param {!HTMLMediaElement} video
    * @param {?HTMLCanvasElement=} vrCanvas
+   * @param {?Object=} config
    */
-  constructor(player, videoContainer, video, vrCanvas = null) {
+  constructor(player, videoContainer, video, vrCanvas = null, config = null) {
     /** @private {shaka.Player} */
     this.player_ = player;
 
@@ -42,6 +43,9 @@ shaka.ui.Overlay = class {
 
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.defaultConfig_();
+    if (config) {
+      this.configure(config);
+    }
 
     // Get and configure cast app id.
     let castAppId = '';
@@ -206,9 +210,10 @@ shaka.ui.Overlay = class {
 
     this.config_ = newConfig;
 
-    this.controls_.configure(this.config_);
-
-    this.controls_.dispatchEvent(new shaka.util.FakeEvent('uiupdated'));
+    if (this.controls_) {
+      this.controls_.configure(this.config_);
+      this.controls_.dispatchEvent(new shaka.util.FakeEvent('uiupdated'));
+    }
 
     this.setupCastSenderUrl_();
   }
