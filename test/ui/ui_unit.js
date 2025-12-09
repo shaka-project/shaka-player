@@ -377,10 +377,10 @@ describe('UI', () => {
           });
 
       it('is accessible', () => {
-        for (const button of overflowMenu.childNodes) {
+        for (const node of overflowMenu.childNodes) {
+          const button = /** @type {!HTMLElement} */ (node);
           if (button.tagName.toLowerCase() == 'button') {
-            expect(/** @type {!HTMLElement} */ (button)
-                .hasAttribute('aria-label')).toBe(true);
+            expect(button.hasAttribute('aria-label')).toBe(true);
           }
         }
       });
