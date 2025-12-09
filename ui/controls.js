@@ -207,6 +207,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {boolean} */
     this.recentMouseMovement_ = false;
 
+    /** @private {Set<string>} */
+    this.mediaSessionActionsHandled_ = new Set();
+
     /**
      * This timer is used to detect when the user has stopped moving the mouse
      * and we should fade out the ui.
@@ -1593,8 +1596,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     const addMediaSessionHandler = (type, callback) => {
       try {
-        if (callback && !this.config_.mediaSessionActions.includes(type)) {
-          return;
+        if (callback) {
+          if (!this.config_.mediaSessionActions.includes(type)) {
+            return;
+          }
+          this.mediaSessionActionsHandled_.add(type);
+        } else {
+          if (!this.mediaSessionActionsHandled_.has(type)) {
+            return;
+          }
+          this.mediaSessionActionsHandled_.delete(type);
         }
         navigator.mediaSession.setActionHandler(type, callback);
       } catch (error) {
