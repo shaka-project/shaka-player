@@ -286,6 +286,22 @@ shaka.ui.Overlay = class {
     }
     controlPanelElements.push('fullscreen');
 
+    const mediaSessionActions = [
+      'pause',
+      'play',
+      'seekbackward',
+      'seekforward',
+      'seekto',
+      'stop',
+      'skipad',
+      'previoustrack',
+      'nexttrack',
+    ];
+    if ('documentPictureInPicture' in window ||
+        document.pictureInPictureEnabled) {
+      mediaSessionActions.push('enterpictureinpicture');
+    }
+
     const config = {
       controlPanelElements,
       topControlPanelElements: [
@@ -393,6 +409,7 @@ shaka.ui.Overlay = class {
       displayInVrMode: false,
       defaultVrProjectionMode: 'equirectangular',
       setupMediaSession: true,
+      mediaSessionActions: mediaSessionActions,
       preferVideoFullScreenInVisionOS: true,
       showAudioCodec: true,
       showVideoCodec: true,

@@ -218,6 +218,7 @@ shaka.extern.UIShortcuts;
  *   displayInVrMode: boolean,
  *   defaultVrProjectionMode: string,
  *   setupMediaSession: boolean,
+ *   mediaSessionActions: !Array<string>,
  *   preferVideoFullScreenInVisionOS: boolean,
  *   showAudioCodec: boolean,
  *   showVideoCodec: boolean,
@@ -441,6 +442,8 @@ shaka.extern.UIShortcuts;
  *   will also be used to change video poster.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {!Array<string>} mediaSessionActions
+ *   List of allowed MediaSession actions.
  * @property {boolean} preferVideoFullScreenInVisionOS
  *   If true, we will use the fullscreen API of the video element itself if it
  *   is available in Vision OS. This is useful to be able to access 3D

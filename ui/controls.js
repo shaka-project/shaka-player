@@ -295,13 +295,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {shaka.util.EventManager} */
     this.eventManager_ = new shaka.util.EventManager();
 
+    /** @private {shaka.util.EventManager} */
+    this.mediaSessionEventManager_ = new shaka.util.EventManager();
+
     /** @private {?shaka.ui.VRManager} */
     this.vr_ = null;
 
     // Configure and create the layout of the controls
     this.configure(this.config_);
     this.addEventListeners_();
-    this.setupMediaSession_();
 
     /**
      * The pressed keys set is used to record which keys are currently pressed
@@ -381,6 +383,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.eventManager_) {
       this.eventManager_.release();
       this.eventManager_ = null;
+    }
+
+    if (this.mediaSessionEventManager_) {
+      this.mediaSessionEventManager_.release();
+      this.mediaSessionEventManager_ = null;
     }
 
     if (this.mouseStillTimer_) {
@@ -574,6 +581,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.eventManager_.listen(element, 'touchend', touchCb);
       }
     }
+
+    // Setup Media Session
+    this.setupMediaSession_();
   }
 
   /**
@@ -1577,17 +1587,22 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   setupMediaSession_() {
-    if (!this.config_.setupMediaSession || !navigator.mediaSession) {
+    if (!navigator.mediaSession) {
       return;
     }
+
     const addMediaSessionHandler = (type, callback) => {
       try {
+        if (callback && !this.config_.mediaSessionActions.includes(type)) {
+          return;
+        }
         navigator.mediaSession.setActionHandler(type, callback);
       } catch (error) {
         shaka.log.debug(
             `The "${type}" media session action is not supported.`);
       }
     };
+
     const updatePositionState = () => {
       if (this.ad_ && this.ad_.isLinear()) {
         clearPositionState();
@@ -1613,6 +1628,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
             'setPositionState in media session is not supported.');
       }
     };
+
     const clearPositionState = () => {
       try {
         navigator.mediaSession.setPositionState();
@@ -1621,6 +1637,27 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
             'setPositionState in media session is not supported.');
       }
     };
+
+    addMediaSessionHandler('pause', null);
+    addMediaSessionHandler('play', null);
+    addMediaSessionHandler('seekbackward', null);
+    addMediaSessionHandler('seekforward', null);
+    addMediaSessionHandler('seekto', null);
+    addMediaSessionHandler('stop', null);
+    if ('documentPictureInPicture' in window ||
+        document.pictureInPictureEnabled) {
+      addMediaSessionHandler('enterpictureinpicture', null);
+    }
+    addMediaSessionHandler('skipad', null);
+    addMediaSessionHandler('previoustrack', null);
+    addMediaSessionHandler('nexttrack', null);
+    clearPositionState();
+    this.mediaSessionEventManager_.removeAll();
+
+    if (!this.config_.setupMediaSession) {
+      return;
+    }
+
     const commonHandler = (details) => {
       const keyboardSeekDistance = this.config_.keyboardSeekDistance;
       switch (details.action) {
@@ -1759,7 +1796,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     };
     const playerUnloading = () => {
-      this.eventManager_.unlisten(
+      this.mediaSessionEventManager_.unlisten(
           this.video_, 'timeupdate', updatePositionState);
       navigator.mediaSession.metadata = new MediaMetadata({});
     };
@@ -1767,66 +1804,72 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.player_.isFullyLoaded()) {
       playerLoaded();
     }
-    this.eventManager_.listen(this.player_, 'loaded', playerLoaded);
-    this.eventManager_.listen(this.player_, 'unloading', playerUnloading);
-    this.eventManager_.listen(this.player_, 'trackschanged', setupChapters);
-    this.eventManager_.listen(this.player_, 'metadata', (event) => {
-      const payload = event['payload'];
-      if (!payload) {
-        return;
-      }
-      let title;
-      if (payload['key'] == 'TIT2' && payload['data']) {
-        title = payload['data'];
-      }
-      let imageUrl;
-      if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
-        imageUrl = payload['data'];
-      }
-      if (title) {
-        setupTitle(title);
-      }
-      if (imageUrl) {
-        setupPoster(imageUrl);
-      }
-    });
-    this.eventManager_.listen(this.player_, 'sessiondata', (event) => {
-      const id = event['id'];
-      switch (id) {
-        case 'com.apple.hls.title': {
-          const title = event['value'];
+    this.mediaSessionEventManager_.listen(
+        this.player_, 'loaded', playerLoaded);
+    this.mediaSessionEventManager_.listen(
+        this.player_, 'unloading', playerUnloading);
+    this.mediaSessionEventManager_.listen(
+        this.player_, 'trackschanged', setupChapters);
+    this.mediaSessionEventManager_.listen(
+        this.player_, 'metadata', (event) => {
+          const payload = event['payload'];
+          if (!payload) {
+            return;
+          }
+          let title;
+          if (payload['key'] == 'TIT2' && payload['data']) {
+            title = payload['data'];
+          }
+          let imageUrl;
+          if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
+            imageUrl = payload['data'];
+          }
           if (title) {
             setupTitle(title);
           }
-          break;
-        }
-        case 'com.apple.hls.poster': {
-          let imageUrl = event['value'];
           if (imageUrl) {
-            imageUrl = imageUrl.replace('{w}', '512')
-                .replace('{h}', '512')
-                .replace('{f}', 'jpeg');
             setupPoster(imageUrl);
           }
-          break;
-        }
-      }
-    });
-    this.eventManager_.listen(this.player_, 'programinformation', (event) => {
-      if (!event['detail']) {
-        return;
-      }
-      const TXml = shaka.util.TXml;
-      /** @type {!shaka.extern.xml.Node} */
-      const detail = /** @type {!shaka.extern.xml.Node} */(event['detail']);
-      const titleNode = TXml.findChild(detail, 'Title');
-      if (titleNode) {
-        const title = TXml.getContents(titleNode);
-        if (title) {
-          setupTitle(title);
-        }
-      }
-    });
+        });
+    this.mediaSessionEventManager_.listen(
+        this.player_, 'sessiondata', (event) => {
+          const id = event['id'];
+          switch (id) {
+            case 'com.apple.hls.title': {
+              const title = event['value'];
+              if (title) {
+                setupTitle(title);
+              }
+              break;
+            }
+            case 'com.apple.hls.poster': {
+              let imageUrl = event['value'];
+              if (imageUrl) {
+                imageUrl = imageUrl.replace('{w}', '512')
+                    .replace('{h}', '512')
+                    .replace('{f}', 'jpeg');
+                setupPoster(imageUrl);
+              }
+              break;
+            }
+          }
+        });
+    this.mediaSessionEventManager_.listen(
+        this.player_, 'programinformation', (event) => {
+          if (!event['detail']) {
+            return;
+          }
+          const TXml = shaka.util.TXml;
+          /** @type {!shaka.extern.xml.Node} */
+          const detail = /** @type {!shaka.extern.xml.Node} */(event['detail']);
+          const titleNode = TXml.findChild(detail, 'Title');
+          if (titleNode) {
+            const title = TXml.getContents(titleNode);
+            if (title) {
+              setupTitle(title);
+            }
+          }
+        });
 
     const checkQueueItems = () => {
       const itemsLength = this.queueManager_.getItems().length;
@@ -1848,13 +1891,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     };
 
-    this.eventManager_.listen(
+    this.mediaSessionEventManager_.listen(
         this.queueManager_, 'currentitemchanged', checkQueueItems);
-    this.eventManager_.listen(
+    this.mediaSessionEventManager_.listen(
         this.queueManager_, 'itemsinserted', checkQueueItems);
-    this.eventManager_.listen(
+    this.mediaSessionEventManager_.listen(
         this.queueManager_, 'itemsremoved', checkQueueItems);
-    this.eventManager_.listen(this.player_, 'loading', checkQueueItems);
+    this.mediaSessionEventManager_.listen(
+        this.player_, 'loading', checkQueueItems);
 
     const checkSkipAd = () => {
       if (!this.ad_ || !this.ad_.isSkippable() || !this.ad_.canSkipNow()) {
@@ -1864,11 +1908,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     };
 
-    this.eventManager_.listen(
+    this.mediaSessionEventManager_.listen(
         this.adManager_, shaka.ads.Utils.AD_STARTED, checkSkipAd);
-    this.eventManager_.listen(
+    this.mediaSessionEventManager_.listen(
         this.adManager_, shaka.ads.Utils.AD_SKIP_STATE_CHANGED, checkSkipAd);
-    this.eventManager_.listen(
+    this.mediaSessionEventManager_.listen(
         this.adManager_, shaka.ads.Utils.AD_STOPPED, checkSkipAd);
   }
 
