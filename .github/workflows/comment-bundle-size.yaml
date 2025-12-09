@@ -16,9 +16,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: bundle-report
-          path: .
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.SHAKA_BOT_TOKEN }}
+          path: artifact
     
       - name: Add or Update PR Comment
         shell: bash
@@ -33,7 +31,7 @@ jobs:
             exit 0
           fi
 
-          MESSAGE=$(cat report.md)
+          MESSAGE=$(cat artifact/report.md)
           echo "$MESSAGE"
 
           # Find existing bot comment
