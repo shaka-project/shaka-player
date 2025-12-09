@@ -727,6 +727,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @return {shaka.ui.MediaSession}
+   * @export
+   */
+  getMediaSession() {
+    return this.mediaSession_;
+  }
+
+  /**
    * @return {!HTMLElement}
    * @export
    */
