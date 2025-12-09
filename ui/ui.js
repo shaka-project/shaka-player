@@ -413,10 +413,6 @@ shaka.ui.Overlay = class {
       refreshTickInSeconds: 0.125,
       displayInVrMode: false,
       defaultVrProjectionMode: 'equirectangular',
-      setupMediaSession: true,
-      setupMediaSessionMetadata: true,
-      setupMediaSessionPosition: true,
-      mediaSessionActions: mediaSessionActions,
       preferVideoFullScreenInVisionOS: true,
       showAudioCodec: true,
       showVideoCodec: true,
@@ -447,6 +443,13 @@ shaka.ui.Overlay = class {
       enableVrDeviceMotion: true,
       showUIAlwaysOnAudioOnly: true,
       preferIntlDisplayNames: true,
+      mediaSession: {
+        enabled: true,
+        handleMetadata: true,
+        handleActions: true,
+        handlePosition: true,
+        supportedActions: mediaSessionActions,
+      },
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause
