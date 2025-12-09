@@ -961,6 +961,38 @@ describe('DashParser SegmentTemplate', () => {
         expect(index.find(0)).toBe(0);
         expect(index.find(newEnd - 1.0)).toBe(9);
       });
+
+      it('shifts timeline on presentationTimeOffset change', async () => {
+        const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
+        info.unscaledPresentationTimeOffset = 0;
+        const index = await makeTimelineSegmentIndex(info, false);
+
+        // The initial template should contain a timeline of 5
+        // initial ranges.
+        expect(index.getTimeline().length).toBe(10);
+
+        // The same 5 ranges are now shifted by PTO and not by
+        // their internal timestamps.
+        // cached: |--|--|--|--|--|
+        // next:      |--|--|--|--|--|
+        //         shift is 1x the timescale = 1 range.
+        //         the last range shall be added to the cache.
+        const nextInfo = makeTemplateInfo(makeRanges(0, 2.0, 10));
+        nextInfo.unscaledPresentationTimeOffset = 90000;
+        index.appendTemplateInfo(nextInfo, 0, 30);
+
+        const timeline = index.getTimeline();
+        expect(timeline.length).toBe(11);
+
+        // The last segment is the new one, based on the cached
+        // presentationTimeOffset.
+        expect(timeline[timeline.length - 1]).toBe({
+          start: 20,
+          unscaledStart: 1710000,
+          end: 22,
+          unscaledEnd: 1890000,
+        });
+      });
     });
 
     describe('evict', () => {
@@ -1052,8 +1084,9 @@ function makeRanges(start, duration, num) {
   for (let i = 0; i < num; i += 1) {
     ranges.push({
       start: currentPos,
-      end: currentPos + duration,
       unscaledStart: currentPos * 90000,
+      end: currentPos + duration,
+      unscaledEnd: (currentPos + duration) * 90000,
     });
     currentPos += duration;
   }
