@@ -71,7 +71,7 @@ shaka.ui.Element = class {
      * @protected {?shaka.extern.IAd}
      * @exportInterface
      */
-    this.ad = this.adManager.getCurrentAd(); ;
+    this.ad = this.adManager.getCurrentAd();
 
     const AD_STARTED = shaka.ads.Utils.AD_STARTED;
     this.eventManager.listen(this.adManager, AD_STARTED, () => {
@@ -82,6 +82,22 @@ shaka.ui.Element = class {
     this.eventManager.listen(this.adManager, AD_STOPPED, () => {
       this.ad = null;
     });
+
+    /**
+     * @protected {boolean}
+     * @exportInterface
+     */
+    this.isSubMenu = this.parent.classList.contains('shaka-overflow-menu');
+
+    this.isSubMenuOpened = false;
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.isSubMenuOpened = true;
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.isSubMenuOpened = false;
+      });
+    }
   }
 
   /**

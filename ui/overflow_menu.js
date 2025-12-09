@@ -18,6 +18,7 @@ goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.Iterables');
 
 
@@ -74,15 +75,6 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
           shaka.ui.Utils.setDisplay(this.overflowMenuButton_, true);
         });
 
-
-    this.eventManager.listen(
-        this.controls, 'submenuopen', () => {
-        // Hide the main overflow menu if one of the sub menus has
-        // been opened.
-          shaka.ui.Utils.setDisplay(this.overflowMenu_, false);
-        });
-
-
     this.eventManager.listen(
         this.overflowMenu_, 'touchstart', (event) => {
           this.controls.setLastTouchEventTime(Date.now());
@@ -106,7 +98,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     /** @private {ResizeObserver} */
     this.resizeObserver_ = null;
 
-    const resize = () => this.computeMaxHeight_();
+    const resize = () => this.computeCustomStyle_();
 
     // Use ResizeObserver if available, fallback to window resize event
     if (window.ResizeObserver) {
@@ -201,6 +193,9 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     if (this.controls.anySettingsMenusAreOpen()) {
       this.controls.hideSettingsMenus();
     } else {
+      // Force to close any submenu.
+      this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
+
       shaka.ui.Utils.setDisplay(this.overflowMenu_, true);
       this.controls.computeOpacity();
 
@@ -216,7 +211,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
           Iterables.filter(this.overflowMenu_.childNodes, isDisplayed);
         /** @type {!HTMLElement} */ (visibleElements[0]).focus();
       }
-      this.computeMaxHeight_();
+      this.computeCustomStyle_();
     }
   }
 
@@ -234,7 +229,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
   /**
    * @private
    */
-  computeMaxHeight_() {
+  computeCustomStyle_() {
     const rectMenu = this.overflowMenu_.getBoundingClientRect();
     const styleMenu = window.getComputedStyle(this.overflowMenu_);
     const paddingTop = parseFloat(styleMenu.paddingTop);

@@ -114,6 +114,17 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       this.updateLabels_();
     });
 
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.updateSelection_();
+        this.updateLabels_();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.updateSelection_();
+        this.updateLabels_();
+      });
+    }
+
     this.updateSelection_();
   }
 
@@ -273,7 +284,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     this.updateLocalizedStrings_();
 
-    shaka.ui.Utils.setDisplay(this.button, numberOfTracks > 0);
+    shaka.ui.Utils.setDisplay(
+        this.button, numberOfTracks > 0 && !this.isSubMenuOpened);
   }
 
   /**

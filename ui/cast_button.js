@@ -90,6 +90,15 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     this.eventManager.listen(this.controls, 'caststatuschanged', () => {
       this.onCastStatusChange_();
     });
+
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        shaka.ui.Utils.setDisplay(this.castButton_, false);
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        shaka.ui.Utils.setDisplay(this.castButton_, true);
+      });
+    }
   }
 
 

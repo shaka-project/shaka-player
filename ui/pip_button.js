@@ -102,12 +102,21 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(this.controls, 'caststatuschanged', () => {
-      this.onTracksChanged_();
+      this.checkAvailability_();
     });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.onTracksChanged_();
+      this.checkAvailability_();
     });
+
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.checkAvailability_();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.checkAvailability_();
+      });
+    }
 
     if ('documentPictureInPicture' in window) {
       this.eventManager.listen(window.documentPictureInPicture, 'enter',
@@ -121,6 +130,8 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
             });
           });
     }
+
+    this.checkAvailability_();
   }
 
   /** @private */
@@ -175,7 +186,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
    * @return {!Promise}
    * @private
    */
-  async onTracksChanged_() {
+  async checkAvailability_() {
     if (!this.controls.isPiPAllowed()) {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
       if (this.controls.isPiPEnabled()) {
@@ -187,7 +198,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
         await this.controls.togglePiP();
       }
     } else {
-      shaka.ui.Utils.setDisplay(this.pipButton_, true);
+      shaka.ui.Utils.setDisplay(this.pipButton_, !this.isSubMenuOpened);
     }
   }
 };

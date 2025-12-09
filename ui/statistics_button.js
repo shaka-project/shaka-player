@@ -192,6 +192,15 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       this.onClick_();
       this.updateLocalizedStrings_();
     });
+
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        shaka.ui.Utils.setDisplay(this.button_, false);
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        shaka.ui.Utils.setDisplay(this.button_, true);
+      });
+    }
   }
 
   /** @private */

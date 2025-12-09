@@ -65,14 +65,26 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
           shakaDemoMain.getIsVisualizerActive()) {
         shakaDemoMain.setIsVisualizerActive(false);
       }
-      this.setDisplay_(!this.castProxy_.isCasting());
+      this.checkAvailability_();
     });
 
     this.eventManager.listen(document, 'fullscreenchange', () => {
-      this.setDisplay_(!this.controls.isFullScreenEnabled());
+      this.checkAvailability_();
     });
 
-    this.setDisplay_(!this.controls.isFullScreenEnabled());
+    this.isSubMenuOpened = false;
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.isSubMenuOpened = true;
+        this.checkAvailability_();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.isSubMenuOpened = false;
+        this.checkAvailability_();
+      });
+    }
+
+    this.checkAvailability_();
   }
 
   /** @private */
@@ -88,11 +100,12 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
 
 
   /**
-   * @param {boolean} display
    * @private
    */
-  setDisplay_(display) {
-    if (display) {
+  checkAvailability_() {
+    if (!this.castProxy_.isCasting() &&
+        !this.controls.isFullScreenEnabled() &&
+        !this.isSubMenuOpened) {
       // Removing a non-existent class doesn't throw, so, even if
       // the element is not hidden, this should be fine.
       this.button_.classList.remove('shaka-hidden');
