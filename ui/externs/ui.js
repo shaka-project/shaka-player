@@ -187,9 +187,19 @@ shaka.extern.UIShortcuts;
  *   <br>
  *   Defaults to <code>true</code>.
  * @property {boolean} handleMetadata
- *   Setup MediaSession metadata from ID3 APIC and TIT2 as image and title,
- *   com.apple.hls.title and com.apple.hls.poster from HLS or
- *   ProgramInformation in DASH.
+ *   Setup MediaSession metadata from the following sources:
+ *   <br>
+ *   - ID3 with the `TIT2` tag for title
+ *   <br>
+ *   - ID3 with the `APIC` tag for image
+ *   <br>
+ *   - HLS with the `#EXT-X-SESSION-DATA` tag with the ID
+ *     `com.apple.hls.title` for title
+ *   <br>
+ *   - HLS with the `#EXT-X-SESSION-DATA` tag with the ID
+ *     `com.apple.hls.poster` for image
+ *   <br>
+ *   - DASH with `ProgramInformation` element and child `Title` field for title.
  *   <br>
  *   Defaults to <code>true</code>.
  * @property {boolean} handleActions
@@ -202,8 +212,6 @@ shaka.extern.UIShortcuts;
  *   Defaults to <code>true</code>.
  * @property {!Array<string>} supportedActions
  *   List of supported MediaSession actions.
- *   <br>
- *   Defaults to '8K'.
  * @exportDoc
  */
 shaka.extern.UIMediaSession;
