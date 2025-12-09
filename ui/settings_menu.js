@@ -163,6 +163,9 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
       let prevHidden = this.parent.classList.contains('shaka-hidden');
 
       this.mutationObserver_ = new MutationObserver((mutations) => {
+        if (!this.parent) {
+          return;
+        }
         for (const m of mutations) {
           if (m.type === 'attributes' && m.attributeName === 'class') {
             const newHidden = this.parent.classList.contains('shaka-hidden');
