@@ -266,6 +266,8 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/dash-clearkey/*', included: false},
       {pattern: 'test/test/assets/dash-mpd-alternate/*', included: false},
       {pattern: 'test/test/assets/dash-vr/*', included: false},
+      {pattern: 'test/test/assets/dv-p10-1-av1/*', included: false},
+      {pattern: 'test/test/assets/dv-p10-4-av1/*', included: false},
       {pattern: 'test/test/assets/dv-p8-1-hevc/*', included: false},
       {pattern: 'test/test/assets/dv-p8-4-hevc/*', included: false},
       {pattern: 'test/test/assets/hls-aes-256/*', included: false},
