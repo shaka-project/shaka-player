@@ -501,12 +501,10 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       const codec = shaka.util.MimeUtils.getNormalizedCodec(t.codecs);
       return codec.startsWith('lcevc');
     };
-    if (track.hdr == 'PQ' || track.hdr == 'HLG') {
-      if (isDolbyVision(track)) {
-        text += ' Dolby Vision';
-      } else {
-        text += ' HDR';
-      }
+    if (isDolbyVision(track)) {
+      text += ' Dolby Vision';
+    } else if (track.hdr == 'PQ' || track.hdr == 'HLG') {
+      text += ' HDR';
     }
     if (isLCEVC(track)) {
       text += ' LCEVC';
