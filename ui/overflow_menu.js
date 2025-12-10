@@ -98,7 +98,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     /** @private {ResizeObserver} */
     this.resizeObserver_ = null;
 
-    const resize = () => this.computeCustomStyle_();
+    const resize = () => this.adjustCustomStyle_();
 
     // Use ResizeObserver if available, fallback to window resize event
     if (window.ResizeObserver) {
@@ -211,7 +211,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
           Iterables.filter(this.overflowMenu_.childNodes, isDisplayed);
         /** @type {!HTMLElement} */ (visibleElements[0]).focus();
       }
-      this.computeCustomStyle_();
+      this.adjustCustomStyle_();
     }
   }
 
@@ -229,7 +229,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
   /**
    * @private
    */
-  computeCustomStyle_() {
+  adjustCustomStyle_() {
     const rectMenu = this.overflowMenu_.getBoundingClientRect();
     const styleMenu = window.getComputedStyle(this.overflowMenu_);
     const paddingTop = parseFloat(styleMenu.paddingTop);

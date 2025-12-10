@@ -52,7 +52,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     /** @private {MutationObserver} */
     this.mutationObserver_ = null;
 
-    const resize = () => this.computeCustomStyle_();
+    const resize = () => this.adjustCustomStyle_();
 
     // Use ResizeObserver if available, fallback to window resize event
     if (window.ResizeObserver) {
@@ -199,7 +199,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
         }
         shaka.ui.Utils.setDisplay(this.menu, true);
         shaka.ui.Utils.focusOnTheChosenItem(this.menu);
-        this.computeCustomStyle_();
+        this.adjustCustomStyle_();
       } else {
         shaka.ui.Utils.setDisplay(this.menu, false);
       }
@@ -210,7 +210,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
   /**
    * @private
    */
-  computeCustomStyle_() {
+  adjustCustomStyle_() {
     if (this.isSubMenu) {
       // Submenus take up the maximum size of the overflow element.
       return;
