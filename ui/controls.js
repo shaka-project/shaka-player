@@ -34,6 +34,7 @@ goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Timer');
 
 goog.requireType('shaka.Player');
+goog.requireType('shaka.cast.CastReceiver');
 
 
 /**
@@ -146,6 +147,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.castProxy_ = new shaka.cast.CastProxy(
         video, player, this.config_.castReceiverAppId,
         this.config_.castAndroidReceiverCompatible);
+
+    /** @private {?shaka.cast.CastReceiver} */
+    this.castReceiver_ = null;
 
     /** @private {boolean} */
     this.castAllowed_ = true;
@@ -631,6 +635,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @param {!shaka.cast.CastReceiver} receiver
+   * @export
+   */
+  setCastReceiver(receiver) {
+    this.castReceiver_ = receiver;
+  }
+
+  /**
    * @export
    * @return {?shaka.extern.IAd}
    */
@@ -660,6 +672,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   getCastProxy() {
     return this.castProxy_;
+  }
+
+  /**
+   * @export
+   * @return {?shaka.cast.CastReceiver}
+   */
+  getCastReceiver() {
+    return this.castReceiver_;
   }
 
   /**

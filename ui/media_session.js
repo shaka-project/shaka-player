@@ -168,12 +168,15 @@ shaka.ui.MediaSession = class {
    * @export
    */
   setupTitle(title) {
-    if (!this.supported_) {
-      return;
+    const castReceiver = this.controls_.getCastReceiver();
+    if (castReceiver) {
+      castReceiver.setContentTitle(title);
     }
-    const metadata = this.getMediaMetadata();
-    metadata.title = title;
-    navigator.mediaSession.metadata = new MediaMetadata(metadata);
+    if (this.supported_) {
+      const metadata = this.getMediaMetadata();
+      metadata.title = title;
+      navigator.mediaSession.metadata = new MediaMetadata(metadata);
+    }
   }
 
   /**
@@ -185,12 +188,15 @@ shaka.ui.MediaSession = class {
     if (imageUrl != video.poster) {
       video.poster = imageUrl;
     }
-    if (!this.supported_) {
-      return;
+    const castReceiver = this.controls_.getCastReceiver();
+    if (castReceiver) {
+      castReceiver.setContentImage(imageUrl);
     }
-    const metadata = this.getMediaMetadata();
-    metadata.artwork = [{src: imageUrl}];
-    navigator.mediaSession.metadata = new MediaMetadata(metadata);
+    if (this.supported_) {
+      const metadata = this.getMediaMetadata();
+      metadata.artwork = [{src: imageUrl}];
+      navigator.mediaSession.metadata = new MediaMetadata(metadata);
+    }
   }
 
   /**
