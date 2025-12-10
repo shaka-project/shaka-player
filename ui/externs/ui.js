@@ -174,6 +174,49 @@ shaka.extern.UIQualityMarks;
 shaka.extern.UIShortcuts;
 
 /**
+ * @typedef {{
+ *   enabled: boolean,
+ *   handleMetadata: boolean,
+ *   handleActions: boolean,
+ *   handlePosition: boolean,
+ *   supportedActions: !Array<string>,
+ * }}
+ *
+ * @property {boolean} enabled
+ *   If true, MediaSession controls will be managed by the UI.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} handleMetadata
+ *   Setup MediaSession metadata from the following sources:
+ *   <br>
+ *   - ID3 with the `TIT2` tag for title
+ *   <br>
+ *   - ID3 with the `APIC` tag for image
+ *   <br>
+ *   - HLS with the `#EXT-X-SESSION-DATA` tag with the ID
+ *     `com.apple.hls.title` for title
+ *   <br>
+ *   - HLS with the `#EXT-X-SESSION-DATA` tag with the ID
+ *     `com.apple.hls.poster` for image
+ *   <br>
+ *   - DASH with `ProgramInformation` element and child `Title` field for title.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} handleActions
+ *   If true, MediaSession actions supported will be managed by the UI.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} handlePosition
+ *   If true, MediaSession position will be managed by the UI.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {!Array<string>} supportedActions
+ *   List of supported MediaSession actions.
+ * @exportDoc
+ */
+shaka.extern.UIMediaSession;
+
+/**
  * @description
  * The UI's configuration options.
  *
@@ -217,7 +260,6 @@ shaka.extern.UIShortcuts;
  *   refreshTickInSeconds: number,
  *   displayInVrMode: boolean,
  *   defaultVrProjectionMode: string,
- *   setupMediaSession: boolean,
  *   preferVideoFullScreenInVisionOS: boolean,
  *   showAudioCodec: boolean,
  *   showVideoCodec: boolean,
@@ -231,6 +273,7 @@ shaka.extern.UIShortcuts;
  *   enableVrDeviceMotion: boolean,
  *   showUIAlwaysOnAudioOnly: boolean,
  *   preferIntlDisplayNames: boolean,
+ *   mediaSession: shaka.extern.UIMediaSession,
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -435,12 +478,6 @@ shaka.extern.UIShortcuts;
  *   <code>'halfequirectangular'</code> or <code>'cubemap'</code>.
  *   <br>
  *   Defaults to <code>'equirectangular'</code>.
- * @property {boolean} setupMediaSession
- *   If true, MediaSession controls will be managed by the UI. It will also use
- *   the ID3 APIC and TIT2 as image and title in Media Session, and ID3 APIC
- *   will also be used to change video poster.
- *   <br>
- *   Defaults to <code>true</code>.
  * @property {boolean} preferVideoFullScreenInVisionOS
  *   If true, we will use the fullscreen API of the video element itself if it
  *   is available in Vision OS. This is useful to be able to access 3D
@@ -500,6 +537,8 @@ shaka.extern.UIShortcuts;
  *   is available.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {shaka.extern.UIMediaSession} mediaSession
+ *   Media Session config.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;
