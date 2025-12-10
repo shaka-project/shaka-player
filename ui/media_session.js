@@ -466,11 +466,7 @@ shaka.ui.MediaSession = class {
     this.addMediaSessionHandler('seekforward', actionHandler);
     this.addMediaSessionHandler('seekto', actionHandler);
     this.addMediaSessionHandler('stop', actionHandler);
-    if ('documentPictureInPicture' in window ||
-        document.pictureInPictureEnabled) {
-      this.addMediaSessionHandler(
-          'enterpictureinpicture', actionHandler);
-    }
+    this.addMediaSessionHandler('enterpictureinpicture', actionHandler);
 
     const checkQueueItems = () => {
       const itemsLength = this.queueManager_.getItems().length;
