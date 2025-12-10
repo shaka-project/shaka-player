@@ -1274,7 +1274,7 @@ shakaDemo.Main = class {
 
     this.player_.unload();
 
-    const queueManager = this.player_.getQueueManager();
+    const queueManager = this.controls_.getQueueManager();
     queueManager.removeAllItems();
 
     // The currently-selected asset changed, so update asset cards.
@@ -1412,7 +1412,7 @@ shakaDemo.Main = class {
         ui.configure(uiConfig);
       }
 
-      const queueManager = this.player_.getQueueManager();
+      const queueManager = this.controls_.getQueueManager();
       await queueManager.removeAllItems();
 
       if (asset.hasAds()) {
@@ -1492,7 +1492,7 @@ shakaDemo.Main = class {
    * @param {ShakaDemoAssetInfo} asset
    */
   async addToQueue(asset) {
-    const queueManager = this.player_.getQueueManager();
+    const queueManager = this.controls_.getQueueManager();
     const queueItem = await this.getQueueItem_(asset);
     queueManager.insertItems([queueItem]);
   }
