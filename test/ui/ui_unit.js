@@ -378,9 +378,9 @@ describe('UI', () => {
 
       it('is accessible', () => {
         for (const node of overflowMenu.childNodes) {
-          const button = /** @type {!HTMLElement} */ (node);
-          if (button.tagName.toLowerCase() == 'button') {
-            expect(button.hasAttribute('aria-label')).toBe(true);
+          const element = /** @type {!HTMLElement} */ (node);
+          if (element.tagName.toLowerCase() == 'button') {
+            expect(element.hasAttribute('aria-label')).toBe(true);
           }
         }
       });
