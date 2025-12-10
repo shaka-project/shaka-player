@@ -403,7 +403,7 @@ shaka.ui.MediaSession = class {
    * @private
    */
   setupMediaSessionPosition_() {
-    if (this.config_.mediaSession.handlePosition) {
+    if (!this.config_.mediaSession.handlePosition) {
       return;
     }
     const updatePositionState = () => {
@@ -454,19 +454,22 @@ shaka.ui.MediaSession = class {
 
   /** @private */
   setupMediaSessionActions_() {
-    if (this.config_.mediaSession.handleActions) {
+    if (!this.config_.mediaSession.handleActions) {
       return;
     }
-    this.addMediaSessionHandler('pause', this.commonActionHandler);
-    this.addMediaSessionHandler('play', this.commonActionHandler);
-    this.addMediaSessionHandler('seekbackward', this.commonActionHandler);
-    this.addMediaSessionHandler('seekforward', this.commonActionHandler);
-    this.addMediaSessionHandler('seekto', this.commonActionHandler);
-    this.addMediaSessionHandler('stop', this.commonActionHandler);
+    const actionHandler = (details) => {
+      this.commonActionHandler(details);
+    };
+    this.addMediaSessionHandler('pause', actionHandler);
+    this.addMediaSessionHandler('play', actionHandler);
+    this.addMediaSessionHandler('seekbackward', actionHandler);
+    this.addMediaSessionHandler('seekforward', actionHandler);
+    this.addMediaSessionHandler('seekto', actionHandler);
+    this.addMediaSessionHandler('stop', actionHandler);
     if ('documentPictureInPicture' in window ||
         document.pictureInPictureEnabled) {
       this.addMediaSessionHandler(
-          'enterpictureinpicture', this.commonActionHandler);
+          'enterpictureinpicture', actionHandler);
     }
 
     const checkQueueItems = () => {
@@ -478,12 +481,12 @@ shaka.ui.MediaSession = class {
         return;
       }
       if (currentIndex > 0) {
-        this.addMediaSessionHandler('previoustrack', this.commonActionHandler);
+        this.addMediaSessionHandler('previoustrack', actionHandler);
       } else {
         this.addMediaSessionHandler('previoustrack', null);
       }
       if ((currentIndex + 1) < itemsLength) {
-        this.addMediaSessionHandler('nexttrack', this.commonActionHandler);
+        this.addMediaSessionHandler('nexttrack', actionHandler);
       } else {
         this.addMediaSessionHandler('nexttrack', null);
       }
@@ -498,12 +501,14 @@ shaka.ui.MediaSession = class {
     this.eventManager_.listen(
         this.player_, 'loading', checkQueueItems);
 
+    checkQueueItems();
+
     const checkSkipAd = () => {
       const ad = this.controls_.getAd();
       if (!ad || !ad.isSkippable() || !ad.canSkipNow()) {
         this.addMediaSessionHandler('skipad', null);
       } else {
-        this.addMediaSessionHandler('skipad', this.commonActionHandler);
+        this.addMediaSessionHandler('skipad', actionHandler);
       }
     };
 
@@ -513,5 +518,7 @@ shaka.ui.MediaSession = class {
         this.adManager_, shaka.ads.Utils.AD_SKIP_STATE_CHANGED, checkSkipAd);
     this.eventManager_.listen(
         this.adManager_, shaka.ads.Utils.AD_STOPPED, checkSkipAd);
+
+    checkSkipAd();
   }
 };
