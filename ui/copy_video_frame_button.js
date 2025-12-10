@@ -119,6 +119,15 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
       this.checkAvailability_();
     });
 
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.checkAvailability_();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.checkAvailability_();
+      });
+    }
+
     this.checkAvailability_();
   }
 
@@ -127,8 +136,8 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
    * @private
    */
   checkAvailability_() {
-    shaka.ui.Utils.setDisplay(
-        this.button_, this.controls.canCopyVideoFrameToClipboard());
+    shaka.ui.Utils.setDisplay(this.button_,
+        this.controls.canCopyVideoFrameToClipboard() && !this.isSubMenuOpened);
   }
 
 

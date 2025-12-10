@@ -77,6 +77,7 @@ spacebar
 stalldetected
 startstreaming
 statechanged
+submenuclose
 submenuopen
 textchanged
 textlang

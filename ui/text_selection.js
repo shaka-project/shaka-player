@@ -94,6 +94,15 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
       this.updateTextLanguages_();
     });
 
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.updateTextLanguages_();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.updateTextLanguages_();
+      });
+    }
+
     // Initialize caption state with a fake event.
     this.onCaptionStateChange_();
 
@@ -182,7 +191,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     this.controls.dispatchEvent(
         new shaka.util.FakeEvent('captionselectionupdated'));
 
-    shaka.ui.Utils.setDisplay(this.button, tracks.length > 0);
+    shaka.ui.Utils.setDisplay(
+        this.button, tracks.length > 0 && !this.isSubMenuOpened);
   }
 
 

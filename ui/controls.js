@@ -61,6 +61,16 @@ goog.requireType('shaka.cast.CastReceiver');
 
 
 /**
+ * @event shaka.ui.Controls.SubMenuCloseEvent
+ * @description Fired when one of the overflow submenus is closed
+ *    (e. g. language/resolution/subtitle selection).
+ * @property {string} type
+ *   'submenuclose'
+ * @exportDoc
+ */
+
+
+/**
  * @event shaka.ui.Controls.CaptionSelectionUpdatedEvent
  * @description Fired when the captions/subtitles menu has finished updating.
  * @property {string} type
@@ -1520,12 +1530,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Listen for click events to dismiss the settings menus.
     this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
-
-    // Avoid having multiple submenus open at the same time.
-    this.eventManager_.listen(
-        this, 'submenuopen', () => {
-          this.hideSettingsMenus();
-        });
 
     this.eventManager_.listen(this.video_, 'play', () => {
       this.onPlayStateChange_();

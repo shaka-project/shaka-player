@@ -607,6 +607,18 @@ shaka.extern.IUIElement = class {
      * @exportDoc
      */
     this.ad;
+
+    /**
+     * @protected {boolean}
+     * @exportInterface
+     */
+    this.isSubMenu;
+
+    /**
+     * @protected {boolean}
+     * @exportInterface
+     */
+    this.isSubMenuOpened;
   }
 
   /**
