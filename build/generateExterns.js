@@ -36,7 +36,7 @@ if (assert.strict) {
   // The "strict" mode was added in v9.9, use that if available.
   assert = assert.strict;
 }
-const esprima = require('esprima');
+const babelParser = require('@babel/parser');
 const fs = require('fs');
 
 // The annotations we will consider "exporting" a symbol.
@@ -205,8 +205,8 @@ function getLeadingBlockComment(node) {
   //   type: 'ExpressionStatement',
   //   expression: { ... },
   //   leadingComments: [
-  //     { type: 'Block', value: '* @summary blah ' },
-  //     { type: 'Block', value: '* @export ' },
+  //     { type: 'CommentBlock', value: '* @summary blah ' },
+  //     { type: 'CommentBlock', value: '* @export ' },
   //   ],
   // }
   if (!node.leadingComments || !node.leadingComments.length) {
@@ -215,7 +215,7 @@ function getLeadingBlockComment(node) {
 
   // Ignore non-block comments, since those are not jsdoc/Closure comments.
   const blockComments = node.leadingComments.filter((comment) => {
-    return comment.type == 'Block';
+    return comment.type == 'CommentBlock';
   });
   if (!blockComments.length) {
     return null;
@@ -740,7 +740,14 @@ function createExternsFromConstructor(className, constructorNode) {
 function generateExterns(names, inputPath) {
   // Load and parse the code, with comments attached to the nodes.
   const code = fs.readFileSync(inputPath, 'utf-8');
-  const program = esprima.parse(code, {attachComment: true});
+  const ast = babelParser.parse(code, {
+    sourceType: 'script',
+    attachComment: true,
+    plugins: ['estree'],
+  });
+  assert.equal(ast.type, 'File', 'Root AST must be a Babel File node');
+  const program = ast.program;
+
   assert.equal(program.type, 'Program');
 
   const body = program.body;
