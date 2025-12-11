@@ -62,7 +62,10 @@ export default [
   {
     languageOptions: {
       globals: globals.browser,
-      ecmaVersion: 2017,
+      // See:
+      // https://eslint.org/docs/latest/use/configure/language-options
+      // https://github.com/google/closure-compiler/wiki/Supported-features
+      ecmaVersion: 2021,
     },
     linterOptions: {
       reportUnusedDisableDirectives: 'error',

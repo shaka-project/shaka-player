@@ -20,6 +20,7 @@
   ],
   "devDependencies": {
     "@babel/core": "^7.17.5",
+    "@babel/parser": "^7.28.5",
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.16.11",
     "@joeyparrish/karma-babel-preprocessor": "^8.2.0",
@@ -40,7 +41,6 @@
     "eslint-config-google": "github:google/eslint-config-google#3ae571a",
     "eslint-plugin-jsdoc": "^50.6.1",
     "eslint-plugin-shaka-rules": "file:./build/eslint-plugin-shaka-rules",
-    "esprima": "^4.0.1",
     "fontfaceonload": "^1.0.2",
     "globals": "^15.14.0",
     "google-closure-compiler-java": "^20251027.0.0",
