@@ -408,7 +408,7 @@ shaka.ui.MediaSession = class {
     }
     const updatePositionState = () => {
       const ad = this.controls_.getAd();
-      if (ad && ad.isLinear()) {
+      if (ad?.isLinear()) {
         this.clearPositionState_();
         return;
       }

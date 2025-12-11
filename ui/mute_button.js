@@ -75,7 +75,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
       if (!this.controls.isOpaque()) {
         return;
       }
-      if (this.ad && this.ad.isLinear()) {
+      if (this.ad?.isLinear()) {
         this.ad.setMuted(!this.ad.isMuted());
       } else {
         if (!this.video.muted && this.video.volume == 0) {
@@ -180,7 +180,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
   /** @private */
   checkAvailability_() {
     let available = true;
-    if (this.ad && this.ad.isLinear()) {
+    if (this.ad?.isLinear()) {
       // We can't tell if the Ad has audio or not.
       available = true;
     } else if (this.player.isVideoOnly()) {

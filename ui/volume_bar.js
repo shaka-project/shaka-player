@@ -111,7 +111,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
    * @override
    */
   onChange() {
-    if (this.ad && this.ad.isLinear()) {
+    if (this.ad?.isLinear()) {
       this.ad.setVolume(this.getValue() / 100);
     } else {
       this.video.volume = this.getValue() / 100;
@@ -162,7 +162,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
   /** @private */
   checkAvailability_() {
     let available = true;
-    if (this.ad && this.ad.isLinear()) {
+    if (this.ad?.isLinear()) {
       // We can't tell if the Ad has audio or not.
       available = true;
     } else if (this.player.isVideoOnly()) {

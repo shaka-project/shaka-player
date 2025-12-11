@@ -1996,7 +1996,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         }
         break;
       case this.config_.shortcuts.mute.toLowerCase():
-        if (this.ad_ && this.ad_.isLinear()) {
+        if (this.ad_?.isLinear()) {
           this.ad_.setMuted(!this.ad_.isMuted());
         } else {
           this.localVideo_.muted = !this.localVideo_.muted;
@@ -2227,8 +2227,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   frameByFrame_(step) {
-    if ((this.ad_ && this.ad_.isLinear()) ||
-        this.player_.isAudioOnly()) {
+    if (this.ad_?.isLinear() || this.player_.isAudioOnly()) {
       return;
     }
     const videoTrack = this.player_.getVideoTracks().find((t) => t.active);

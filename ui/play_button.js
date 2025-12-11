@@ -104,7 +104,7 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
    * @override
    */
   isPaused() {
-    if (this.ad && this.ad.isLinear()) {
+    if (this.ad?.isLinear()) {
       return this.ad.isPaused();
     }
 
@@ -117,7 +117,7 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
    * @override
    */
   isEnded() {
-    if (this.ad && this.ad.isLinear()) {
+    if (this.ad?.isLinear()) {
       return false;
     }
 

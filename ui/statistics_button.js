@@ -282,7 +282,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     for (const name of this.statisticsList_) {
       const element = this.displayedElements_.get(name);
       element.textContent = this.parseFrom_.get(name)(name);
-      if (element && element.parentElement) {
+      if (element?.parentElement) {
         const value = this.currentStats_[name];
         if (typeof value == 'string') {
           shaka.ui.Utils.setDisplay(element.parentElement, value != '');
