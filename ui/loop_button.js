@@ -120,6 +120,17 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     this.eventManager.listen(this.video, 'durationchange', () => {
       this.checkAvailability_();
     });
+
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.checkAvailability_();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.checkAvailability_();
+      });
+    }
+
+    this.checkAvailability_();
   }
 
   /**
@@ -178,7 +189,8 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
    * @private
    */
   checkAvailability_() {
-    shaka.ui.Utils.setDisplay(this.button_, !this.player.isLive());
+    shaka.ui.Utils.setDisplay(
+        this.button_, !this.player.isLive() && !this.isSubMenuOpened);
   }
 };
 

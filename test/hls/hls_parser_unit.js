@@ -1453,12 +1453,16 @@ describe('HlsParser', () => {
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
         stream.kind = TextStreamKind.SUBTITLE;
-        stream.mime('application/mp4', '');
+        // This codec doesn't make sense for text, but we're reusing the same
+        // media playlist for everything.
+        stream.mime('application/mp4', 'avc1.42C01E');
       });
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
         stream.kind = TextStreamKind.SUBTITLE;
-        stream.mime('application/mp4', '');
+        // This codec doesn't make sense for text, but we're reusing the same
+        // media playlist for everything.
+        stream.mime('application/mp4', 'avc1.42C01E');
         stream.roles = [
           'public.accessibility.describes-spoken-dialog',
           'public.accessibility.describes-music-and-sound',
@@ -6210,15 +6214,19 @@ describe('HlsParser', () => {
       '#EXTM3U\n',
       '#EXT-X-CONTENT-STEERING:SERVER-URI="http://contentsteering",',
       'PATHWAY-ID="a"\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subsA",LANGUAGE="eng",',
+      'NAME="English",PATHWAY-ID="a",URI="subs/a/media.m3u8"\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subsB",LANGUAGE="eng",',
+      'NAME="English",PATHWAY-ID="b",URI="subs/b/media.m3u8"\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="a",LANGUAGE="eng",',
       'URI="audio/a/media.m3u8"\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="b",LANGUAGE="eng",',
       'URI="audio/b/media.m3u8"\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc,mp4a",',
-      'AUDIO="a",PATHWAY-ID="a",CLOSED-CAPTIONS=NONE\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc,mp4a,stpp",',
+      'AUDIO="a",PATHWAY-ID="a",CLOSED-CAPTIONS=NONE,SUBTITLES="subsA"\n',
       'a/media.m3u8\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc,mp4a",',
-      'AUDIO="b",PATHWAY-ID="b",CLOSED-CAPTIONS=NONE\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc,mp4a,stpp",',
+      'AUDIO="b",PATHWAY-ID="b",CLOSED-CAPTIONS=NONE,SUBTITLES="subsB"\n',
       'b/media.m3u8',
     ].join('');
 
@@ -6248,6 +6256,8 @@ describe('HlsParser', () => {
         .setResponseText('http://master/b/media.m3u8', media)
         .setResponseText('http://master/audio/a/media.m3u8', media)
         .setResponseText('http://master/audio/b/media.m3u8', media)
+        .setResponseText('http://master/subs/a/media.m3u8', media)
+        .setResponseText('http://master/subs/b/media.m3u8', media)
         .setMaxUris(2);
 
     /** @type {shaka.extern.Manifest} */
@@ -6273,6 +6283,17 @@ describe('HlsParser', () => {
 
     expect(videoUri0).toBe('http://master/b/main.mp4');
     expect(videoUri1).toBe('http://master/a/main.mp4');
+
+    expect(manifest.textStreams.length).toBe(1);
+    const text = manifest.textStreams[0];
+    await text.createSegmentIndex();
+    goog.asserts.assert(text.segmentIndex, 'Null segmentIndex!');
+    const textSegment0 = Array.from(text.segmentIndex)[0];
+    const textUri0 = textSegment0.getUris()[0];
+    const textUri1 = textSegment0.getUris()[1];
+
+    expect(textUri0).toBe('http://master/subs/b/main.mp4');
+    expect(textUri1).toBe('http://master/subs/a/main.mp4');
   });
 
   describe('EXT-X-DATERANGE', () => {

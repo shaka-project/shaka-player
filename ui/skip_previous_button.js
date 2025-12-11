@@ -30,7 +30,7 @@ shaka.ui.SkipPreviousButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    this.queueManager_ = this.player.getQueueManager();
+    this.queueManager_ = this.controls.getQueueManager();
 
     if (!this.queueManager_) {
       return;

@@ -119,6 +119,15 @@ shaka.ui.SaveVideoFrameButton = class extends shaka.ui.Element {
       this.checkAvailability_();
     });
 
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.checkAvailability_();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.checkAvailability_();
+      });
+    }
+
     this.checkAvailability_();
   }
 
@@ -127,7 +136,8 @@ shaka.ui.SaveVideoFrameButton = class extends shaka.ui.Element {
    * @private
    */
   checkAvailability_() {
-    shaka.ui.Utils.setDisplay(this.button_, this.controls.canTakeScreenshot());
+    shaka.ui.Utils.setDisplay(this.button_,
+        this.controls.canTakeScreenshot() && !this.isSubMenuOpened);
   }
 
 

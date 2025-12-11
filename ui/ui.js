@@ -286,6 +286,22 @@ shaka.ui.Overlay = class {
     }
     controlPanelElements.push('fullscreen');
 
+    const mediaSessionActions = [
+      'pause',
+      'play',
+      'seekbackward',
+      'seekforward',
+      'seekto',
+      'stop',
+      'skipad',
+      'previoustrack',
+      'nexttrack',
+    ];
+    if ('documentPictureInPicture' in window ||
+        document.pictureInPictureEnabled) {
+      mediaSessionActions.push('enterpictureinpicture');
+    }
+
     const config = {
       controlPanelElements,
       topControlPanelElements: [
@@ -392,7 +408,6 @@ shaka.ui.Overlay = class {
       refreshTickInSeconds: 0.125,
       displayInVrMode: false,
       defaultVrProjectionMode: 'equirectangular',
-      setupMediaSession: true,
       preferVideoFullScreenInVisionOS: true,
       showAudioCodec: true,
       showVideoCodec: true,
@@ -422,6 +437,14 @@ shaka.ui.Overlay = class {
       showRemainingTimeInPresentationTime: false,
       enableVrDeviceMotion: true,
       showUIAlwaysOnAudioOnly: true,
+      preferIntlDisplayNames: true,
+      mediaSession: {
+        enabled: true,
+        handleMetadata: true,
+        handleActions: true,
+        handlePosition: true,
+        supportedActions: mediaSessionActions,
+      },
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause

@@ -54,6 +54,15 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
       this.updateChapters_();
     });
 
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.updateChapters_();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.updateChapters_();
+      });
+    }
+
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
 
@@ -104,7 +113,7 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
 
         this.menu.appendChild(button);
       }
-      shaka.ui.Utils.setDisplay(this.button, true);
+      shaka.ui.Utils.setDisplay(this.button, !this.isSubMenuOpened);
       shaka.ui.Utils.focusOnTheChosenItem(this.menu);
     } else {
       shaka.ui.Utils.setDisplay(this.button, false);

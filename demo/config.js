@@ -413,7 +413,11 @@ shakaDemo.Config = class {
         .addBoolInput_('Disable tracking events',
             'ads.disableTrackingEvents')
         .addBoolInput_('Disable Snapback',
-            'ads.disableSnapback');
+            'ads.disableSnapback')
+        .addNumberInput_('Interstitial preload ahead time',
+            'ads.interstitialPreloadAheadTime',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true);
   }
 
   /** @private */

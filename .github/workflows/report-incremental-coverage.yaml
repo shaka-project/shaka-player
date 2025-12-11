@@ -52,11 +52,11 @@ jobs:
             gh api \
               --method POST \
               /repos/${{ github.repository }}/issues/$PR_NUMBER/comments \
-              -F "body=$MESSAGE"
+              -f "body=$MESSAGE"
           else
             # Update an old comment
             gh api \
               --method PATCH \
               /repos/${{ github.repository }}/issues/comments/$(cat old-comment-id) \
-              -F "body=$MESSAGE"
+              -f "body=$MESSAGE"
           fi

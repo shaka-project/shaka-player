@@ -2295,6 +2295,7 @@ shaka.extern.NetworkingConfiguration;
  *    A callback called for each cue after it is parsed, but right before it
  *    is appended to the presentation.
  *    Gives a chance for client-side editing of cue text, cue timing, etc.
+ *    This works for MSE always and for src= only when you use UITextDisplayer.
  * @property {boolean} dispatchAllEmsgBoxes
  *   If true, all emsg boxes are parsed and dispatched.
  *   <br>
@@ -2332,13 +2333,14 @@ shaka.extern.MediaSourceConfiguration;
  *   allowStartInMiddleOfInterstitial: boolean,
  *   disableTrackingEvents: boolean,
  *   disableSnapback: boolean,
+ *   interstitialPreloadAheadTime: number,
  * }}
  *
  * @description
  *   Ads configuration.
  *
  * @property {boolean} customPlayheadTracker
- *   If this is <code>true</code>, we create a custom playhead tracker for
+ *   If this is <code>true</code>, we create a custom playhead tracker for IMA
  *   Client Side. This is useful because it allows you to implement the use of
  *   IMA on platforms that do not support multiple video elements.
  *   <br>
@@ -2346,14 +2348,15 @@ shaka.extern.MediaSourceConfiguration;
  *   Hisense, PlayStation 4, PlayStation5, Xbox, Vizio whose default value is
  *   <code>true</code>.
  * @property {boolean} skipPlayDetection
- *   If this is true, we will load Client Side ads without waiting for a play
- *   event.
+ *   If this is true, we will load IMA Client Side ads without waiting for a
+ *   play event.
  *   <br>
  *   Defaults to <code>false</code> except on Tizen, WebOS, Chromecast,
  *   Hisense, PlayStation 4, PlayStation5, Xbox, Vizio whose default value is
  *   <code>true</code>.
  * @property {boolean} supportsMultipleMediaElements
- *   If this is true, the browser supports multiple media elements.
+ *   If this is true, the browser supports multiple media elements, the ad
+ *   manager will use another video element to render the ad.
  *   <br>
  *   Defaults to <code>true</code> except on Tizen, WebOS, Chromecast,
  *   Hisense, PlayStation 4, PlayStation5, Xbox, Vizio whose default value is
@@ -2386,6 +2389,10 @@ shaka.extern.MediaSourceConfiguration;
  *   and playback will continue from the user's seek position.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {number} interstitialPreloadAheadTime
+ *   Interstitial preload ahead time, in seconds.
+ *   <br>
+ *   Defaults to <code>10</code>.
  *
  * @exportDoc
  */
@@ -2507,7 +2514,7 @@ shaka.extern.AdsConfiguration;
  *   If true, we remove the latency from first packet time. This time is
  *   used to calculate the real bandwidth.
  *   <br>
- *   Defaults to <code>true</code>.
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
