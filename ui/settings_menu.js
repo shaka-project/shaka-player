@@ -234,16 +234,16 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     const leftGap = settingsMenuButtonPos.left - bottomControlsPos.left;
     const rightGap = bottomControlsPos.right - settingsMenuButtonPos.right;
     const EDGE_PADDING = 15;
+    const MIN_GAP = 60;
     // Settings menu button is either placed to the left or center
     if (leftGap < rightGap) {
-      const left = Math.max(leftGap, EDGE_PADDING);
+      const left = leftGap < MIN_GAP ? 
+          EDGE_PADDING : Math.max(leftGap, EDGE_PADDING);
       this.menu.style.left = left + 'px';
       this.menu.style.right = 'auto';
     } else {
-      let right = Math.max(rightGap, EDGE_PADDING);
-      if (right < 60) {
-        right = EDGE_PADDING;
-      }
+      const right = rightGap < MIN_GAP ? 
+          EDGE_PADDING : Math.max(rightGap, EDGE_PADDING);
       this.menu.style.right = right + 'px';
       this.menu.style.left = 'auto';
     }
