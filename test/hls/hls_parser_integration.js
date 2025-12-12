@@ -105,8 +105,7 @@ describe('HlsParser', () => {
   });
 
   it('supports text discontinuity', async () => {
-    player.configure('autoShowText', shaka.config.AutoShowText.ALWAYS);
-
+    player.configure('preferredTextLanguage', 'en');
     await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
     await video.play();
 
@@ -126,8 +125,7 @@ describe('HlsParser', () => {
   });
 
   it('supports text without discontinuity', async () => {
-    player.configure('autoShowText', shaka.config.AutoShowText.ALWAYS);
-
+    player.configure('preferredTextLanguage', 'de');
     // eslint-disable-next-line @stylistic/max-len
     await player.load('/base/test/test/assets/hls-text-no-discontinuity/index.m3u8');
     await video.play();
