@@ -129,6 +129,7 @@ describe('Player Dolby Vision', () => {
   });
 
   describe('P10.1 with fallback to AV1', () => {
+    it('with DASH', async () => {
       if (!await Util.isTypeSupported(
           'video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"',
           /* width= */ 854, /* height= */ 480) &&
@@ -167,6 +168,7 @@ describe('Player Dolby Vision', () => {
   });
 
   describe('P10.4 with fallback to AV1', () => {
+    it('with DASH', async () => {
       if (!await Util.isTypeSupported(
           'video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"',
           /* width= */ 854, /* height= */ 480) &&
