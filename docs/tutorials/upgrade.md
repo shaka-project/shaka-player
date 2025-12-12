@@ -123,6 +123,7 @@ application:
     - `manifest.dash.enableAudioGroups` has been renamed to `manifest.enableAudioGroups`
     - `preferredVariantRole` has been renamed to `preferredAudioRole` (deprecated in v4.16.0)
     - `autoShowText` is removed.
+    - `removeLatencyFromFirstPacketTime` has been removed.
 
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.
