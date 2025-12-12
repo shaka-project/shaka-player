@@ -791,6 +791,17 @@ shakaDemo.Main = class {
     if (asset.features.includes(shakaAssets.Feature.CONTAINERLESS)) {
       mimeTypes.push('audio/aac');
     }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P10)) {
+      mimeTypes.push('video/mp4; codecs="dav1.10.01"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P10_1)) {
+      mimeTypes.push('video/mp4; codecs="av01.0.31M.10.0.111.09.16.09.0"');
+      mimeTypes.push('video/mp4; codecs="dav1.10.01"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P10_4)) {
+      mimeTypes.push('video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"');
+      mimeTypes.push('video/mp4; codecs="dav1.10.01"');
+    }
     if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P8_1)) {
       mimeTypes.push('video/mp4; codecs="hvc1.2.4.L120.b0"');
       mimeTypes.push('video/mp4; codecs="dvh1.08.01"');
@@ -813,6 +824,15 @@ shakaDemo.Main = class {
     }
     if (asset.features.includes(shakaAssets.Feature.APAC)) {
       mimeTypes.push('audio/mp4; codecs="apac.31.00"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.APAC)) {
+      mimeTypes.push('audio/mp4; codecs="apac.31.00"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_DIGITAL_PLUS)) {
+      mimeTypes.push('audio/mp4; codecs="ec-3"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.AC_4)) {
+      mimeTypes.push('audio/mp4; codecs="ac-4.02.01.03"');
     }
     let hasSupportedMimeType = mimeTypes.some((type) => {
       return this.support_.media[type];
@@ -1254,7 +1274,7 @@ shakaDemo.Main = class {
 
     this.player_.unload();
 
-    const queueManager = this.player_.getQueueManager();
+    const queueManager = this.controls_.getQueueManager();
     queueManager.removeAllItems();
 
     // The currently-selected asset changed, so update asset cards.
@@ -1392,7 +1412,7 @@ shakaDemo.Main = class {
         ui.configure(uiConfig);
       }
 
-      const queueManager = this.player_.getQueueManager();
+      const queueManager = this.controls_.getQueueManager();
       await queueManager.removeAllItems();
 
       if (asset.hasAds()) {
@@ -1472,7 +1492,7 @@ shakaDemo.Main = class {
    * @param {ShakaDemoAssetInfo} asset
    */
   async addToQueue(asset) {
-    const queueManager = this.player_.getQueueManager();
+    const queueManager = this.controls_.getQueueManager();
     const queueItem = await this.getQueueItem_(asset);
     queueManager.insertItems([queueItem]);
   }

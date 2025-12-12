@@ -59,6 +59,15 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
       this.updatePlaybackRateSelection_();
     });
 
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        shaka.ui.Utils.setDisplay(this.button, false);
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        shaka.ui.Utils.setDisplay(this.button, true);
+      });
+    }
+
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
     this.addPlaybackRates_();

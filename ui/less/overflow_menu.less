@@ -4,6 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+.shaka-sub-menu {
+  /* Where the menu appears. */
+  position: relative;
+
+  /* When displayed as a flex container, elements inside will flow in a
+   * vertical column. */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
 /* The overflow menu and all settings submenus.  These appear on top of all
  * other controls (Z axis) when the overflow button is clicked. */
 .shaka-overflow-menu,
@@ -102,6 +113,10 @@
   text-align: left;
 }
 
+.shaka-overflow-button {
+  position: relative;
+}
+
 /* This contains span elements with single lines of text, and appears to the
  * right of MD icons. */
 .shaka-overflow-button-label {
@@ -175,7 +190,8 @@
 }
 
 /* The submenus have somewhat different margins inside them. */
-.shaka-settings-menu {
+.shaka-settings-menu,
+.shaka-sub-menu {
   span {
     /* TODO(b/116651454): eliminate hard-coded offsets */
     margin-left: 28px;

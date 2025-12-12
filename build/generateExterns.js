@@ -36,11 +36,13 @@ if (assert.strict) {
   // The "strict" mode was added in v9.9, use that if available.
   assert = assert.strict;
 }
-const esprima = require('esprima');
+const babelParser = require('@babel/parser');
 const fs = require('fs');
 
 // The annotations we will consider "exporting" a symbol.
 const EXPORT_REGEX = /@(?:export|exportInterface|expose)\b/;
+
+const RETURN_AND_OVERRIDE_REGEX = /@(?:return|override)\b/;
 
 // TODO: revisit this when Closure Compiler supports partially-exported classes.
 let partiallyExportedClassesDetected = false;
@@ -205,8 +207,8 @@ function getLeadingBlockComment(node) {
   //   type: 'ExpressionStatement',
   //   expression: { ... },
   //   leadingComments: [
-  //     { type: 'Block', value: '* @summary blah ' },
-  //     { type: 'Block', value: '* @export ' },
+  //     { type: 'CommentBlock', value: '* @summary blah ' },
+  //     { type: 'CommentBlock', value: '* @export ' },
   //   ],
   // }
   if (!node.leadingComments || !node.leadingComments.length) {
@@ -215,7 +217,7 @@ function getLeadingBlockComment(node) {
 
   // Ignore non-block comments, since those are not jsdoc/Closure comments.
   const blockComments = node.leadingComments.filter((comment) => {
-    return comment.type == 'Block';
+    return comment.type == 'CommentBlock';
   });
   if (!blockComments.length) {
     return null;
@@ -326,6 +328,59 @@ function removeExportAnnotationsFromComment(comment) {
   comment = comment.split('\n')
       .filter((line) => !/^ *\*? *$/.test(line))
       .join('\n');
+
+  return comment;
+}
+
+/**
+ * @param {ASTNode} nodeBody The body node of a method node
+ * from the abstract syntax tree.
+ * @return {boolean}
+ */
+function methodContainsNonEmptyReturn(nodeBody) {
+  assert(nodeBody.body);
+
+  for (const childNode of nodeBody.body) {
+    if (childNode.type === 'ReturnStatement' && childNode.argument !== null) {
+      return true;
+    } else if (childNode.body) {
+      if (methodContainsNonEmptyReturn(childNode.body)) {
+        return true;
+      }
+    } else if (childNode.consequent) {
+      if (methodContainsNonEmptyReturn(childNode.consequent)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * When a method is missing a `@return` annotation and doesn't have a
+ * `return` statement the compiler treats it as returning `undefined` but clutz
+ * generates a return value of `any` in the TypeScript definitions.
+ * This adds `@return {void}` where necessary to fix that.
+ * Overload methods (with `@override`) inherit their return type from
+ * the interface or parent class, so get skipped by this function.
+ *
+ * @param {ASTNode} node A method node from the abstract syntax tree.
+ * @param {string} comment
+ * @return {string}
+ */
+function addMissingReturnAnnotationToComment(node, comment) {
+  if (RETURN_AND_OVERRIDE_REGEX.test(comment) || node.generator || node.async) {
+    return comment;
+  }
+
+  if (!comment || node.key.name === 'constructor') {
+    return comment;
+  }
+
+  if (!methodContainsNonEmptyReturn(node.value.body)) {
+    return comment.replace(/^(\s*)\*\//m, '$1* @return {undefined}\n$1*/');
+  }
 
   return comment;
 }
@@ -483,6 +538,7 @@ function createExternMethod(node) {
     }
   }
   comment = removeExportAnnotationsFromComment(comment);
+  comment = addMissingReturnAnnotationToComment(node, comment);
 
   const params = getFunctionParameters(node.value);
 
@@ -740,7 +796,14 @@ function createExternsFromConstructor(className, constructorNode) {
 function generateExterns(names, inputPath) {
   // Load and parse the code, with comments attached to the nodes.
   const code = fs.readFileSync(inputPath, 'utf-8');
-  const program = esprima.parse(code, {attachComment: true});
+  const ast = babelParser.parse(code, {
+    sourceType: 'script',
+    attachComment: true,
+    plugins: ['estree'],
+  });
+  assert.equal(ast.type, 'File', 'Root AST must be a Babel File node');
+  const program = ast.program;
+
   assert.equal(program.type, 'Program');
 
   const body = program.body;

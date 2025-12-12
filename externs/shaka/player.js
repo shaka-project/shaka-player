@@ -2824,7 +2824,6 @@ shaka.extern.TextDisplayerConfiguration;
 /**
  * @typedef {{
  *   ads: shaka.extern.AdsConfiguration,
- *   autoShowText: shaka.config.AutoShowText,
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
  *   streaming: shaka.extern.StreamingConfiguration,
@@ -2864,11 +2863,6 @@ shaka.extern.TextDisplayerConfiguration;
  *
  * @property {shaka.extern.AdsConfiguration} ads
  *   Ads configuration and settings.
- * @property {shaka.config.AutoShowText} autoShowText
- *   Controls behavior of auto-showing text tracks on load().
- *   <br>
- *   Defaults to
- *   {@link shaka.config.AutoShowText#IF_SUBTITLES_MAY_BE_NEEDED}.
  * @property {shaka.extern.DrmConfiguration} drm
  *   DRM configuration and settings.
  * @property {shaka.extern.ManifestConfiguration} manifest
