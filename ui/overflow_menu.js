@@ -254,7 +254,10 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
       this.overflowMenu_.style.left = left + 'px';
       this.overflowMenu_.style.right = 'auto';
     } else {
-      const right = Math.max(rightGap, EDGE_PADDING);
+      let right = Math.max(rightGap, EDGE_PADDING);
+      if (right < 60) {
+        right = EDGE_PADDING;
+      }
       this.overflowMenu_.style.right = right + 'px';
       this.overflowMenu_.style.left = 'auto';
     }
