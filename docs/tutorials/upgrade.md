@@ -122,6 +122,7 @@ application:
     - `streaming.minBytesForProgressEvents` has been renamed to `networking.minBytesForProgressEvents` (deprecated in v4.15.0)
     - `manifest.dash.enableAudioGroups` has been renamed to `manifest.enableAudioGroups`
     - `preferredVariantRole` has been renamed to `preferredAudioRole` (deprecated in v4.16.0)
+    - `removeLatencyFromFirstPacketTime` has been removed.
 
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.

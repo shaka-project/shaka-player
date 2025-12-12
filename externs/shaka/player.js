@@ -2417,7 +2417,6 @@ shaka.extern.AdsConfiguration;
  *   cacheLoadThreshold: number,
  *   minTimeToSwitch: number,
  *   preferNetworkInformationBandwidth: boolean,
- *   removeLatencyFromFirstPacketTime: boolean
  * }}
  *
  * @property {boolean} enabled
@@ -2508,11 +2507,6 @@ shaka.extern.AdsConfiguration;
  *   current AbrManager, if it is available in the browser environment. This
  *   way Shaka Player will never estimate the bandwidth and we will always
  *   trust the information provided by the browser.
- *   <br>
- *   Defaults to <code>false</code>.
- * @property {boolean} removeLatencyFromFirstPacketTime
- *   If true, we remove the latency from first packet time. This time is
- *   used to calculate the real bandwidth.
  *   <br>
  *   Defaults to <code>false</code>.
  * @exportDoc
