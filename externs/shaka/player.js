@@ -1955,6 +1955,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy,
  *   returnToEndOfLiveWindowWhenOutside: boolean,
  *   speechToText: shaka.extern.SpeechToTextConfiguration,
+ *   handleForcedSubtitlesAutomatically: boolean,
  * }}
  *
  * @description
@@ -2204,6 +2205,16 @@ shaka.extern.SpeechToTextConfiguration;
  *   Defaults to <code>false</code>.
  * @property {shaka.extern.SpeechToTextConfiguration} speechToText
  *   The speech to text configuration.
+ * @property {boolean} handleForcedSubtitlesAutomatically
+ *   Handle forced subtitles automatically. Cases:
+ *   <br>
+ *   - In the initial selection when the user's preference does not match
+ *   anything.
+ *   <br>
+ *   - When changing the audio language when the previous subtitle is either
+ *   not present or is forced from the previous language.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
