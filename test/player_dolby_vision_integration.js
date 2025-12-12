@@ -127,4 +127,64 @@ describe('Player Dolby Vision', () => {
       await testPlayback('/base/test/test/assets/dv-p8-4-hevc/media.m3u8');
     });
   });
+
+  describe('P10.1 with fallback to AV1', () => {
+    it('with DASH', async () => {
+      if (!await Util.isTypeSupported(
+          'video/mp4; codecs="av01.0.31M.10.0.111.09.16.09.0"',
+          /* width= */ 854, /* height= */ 480)) {
+        pending('Codec AV-1 is not supported by the platform.');
+      }
+      await testPlayback('/base/test/test/assets/dv-p10-1-av1/dash.mpd');
+    });
+
+    it('with master playlist (HLS)', async () => {
+      if (!await Util.isTypeSupported(
+          'video/mp4; codecs="av01.0.31M.10.0.111.09.16.09.0"',
+          /* width= */ 854, /* height= */ 480)) {
+        pending('Codec AV-1 is not supported by the platform.');
+      }
+      await testPlayback('/base/test/test/assets/dv-p10-1-av1/master.m3u8');
+    });
+
+    it('with media playlist (HLS)', async () => {
+      if (!await Util.isTypeSupported(
+          'video/mp4; codecs="av01.0.31M.10.0.111.09.16.09.0"',
+          /* width= */ 854, /* height= */ 480)) {
+        pending('Codec AV-1 is not supported by the platform.');
+      }
+      await testPlayback(
+          '/base/test/test/assets/dv-p10-1-av1/video-av01-dav1-db1p-1.m3u8');
+    });
+  });
+
+  describe('P10.4 with fallback to AV1', () => {
+    it('with DASH', async () => {
+      if (!await Util.isTypeSupported(
+          'video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"',
+          /* width= */ 854, /* height= */ 480)) {
+        pending('Codec AV-1 is not supported by the platform.');
+      }
+      await testPlayback('/base/test/test/assets/dv-p10-4-av1/dash.mpd');
+    });
+
+    it('with master playlist (HLS)', async () => {
+      if (!await Util.isTypeSupported(
+          'video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"',
+          /* width= */ 854, /* height= */ 480)) {
+        pending('Codec AV-1 is not supported by the platform.');
+      }
+      await testPlayback('/base/test/test/assets/dv-p10-4-av1/master.m3u8');
+    });
+
+    it('with media playlist (HLS)', async () => {
+      if (!await Util.isTypeSupported(
+          'video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"',
+          /* width= */ 854, /* height= */ 480)) {
+        pending('Codec AV-1 is not supported by the platform.');
+      }
+      await testPlayback(
+          '/base/test/test/assets/dv-p10-4-av1/video-av01-dav1-db4h-1.m3u8');
+    });
+  });
 });

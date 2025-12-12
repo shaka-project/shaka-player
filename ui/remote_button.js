@@ -119,6 +119,15 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         this.updateRemoteState_();
       });
 
+      if (this.isSubMenu) {
+        this.eventManager.listen(this.controls, 'submenuopen', () => {
+          this.updateRemoteState_(/* force= */ true);
+        });
+        this.eventManager.listen(this.controls, 'submenuclose', () => {
+          this.updateRemoteState_(/* force= */ true);
+        });
+      }
+
       this.updateRemoteState_(/* force= */ true);
       this.updateIcon_();
     }
@@ -159,8 +168,9 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
               canCast = false;
             }
           }
-          shaka.ui.Utils.setDisplay(
-              this.remoteButton_, canCast && availability && !disableRemote);
+          const display = canCast && availability && !disableRemote &&
+              !this.isSubMenuOpened;
+          shaka.ui.Utils.setDisplay(this.remoteButton_, display);
         } else {
           shaka.ui.Utils.setDisplay(this.remoteButton_, false);
         }
@@ -181,7 +191,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         handleAvailabilityChange(/* availability= */ true);
       }
     } else {
-      shaka.ui.Utils.setDisplay(this.remoteButton_, true);
+      shaka.ui.Utils.setDisplay(this.remoteButton_, !this.isSubMenuOpened);
       if (this.callbackId_ != -1) {
         // If remote device is connecting or connected, we should stop
         // watching remote device availability to save power.

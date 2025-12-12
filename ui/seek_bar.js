@@ -555,8 +555,15 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     // Set the thumbnail height before getting the thumbnail because the
     // operation may take some time.
-    let height = Math.floor(width * 9 / 16);
-    this.thumbnailImageContainer_.style.height = height + 'px';
+    if (!this.thumbnailImageContainer_.style.height) {
+      let aspectRatio = 16 / 9;
+      const videoTrack = this.player.getVideoTracks().find((t) => t.active);
+      if (videoTrack && videoTrack.width && videoTrack.height) {
+        aspectRatio = videoTrack.width / videoTrack.height;
+      }
+      const height = Math.floor(width / aspectRatio);
+      this.thumbnailImageContainer_.style.height = height + 'px';
+    }
 
     const thumbnail =
         await this.player.getThumbnails(/* trackId= */ null, playerValue);
@@ -650,9 +657,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.thumbnailImage_.style.transform = 'scale(' + scale + ')';
     this.thumbnailImage_.style.transformOrigin = 'left top';
     // Update container height
-    height =
+    const finalHeight =
         Math.floor(widthImageContainer * thumbnail.height / thumbnail.width);
-    this.thumbnailImageContainer_.style.height = height + 'px';
+    this.thumbnailImageContainer_.style.height = finalHeight + 'px';
   }
 
 

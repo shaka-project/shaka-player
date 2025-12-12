@@ -2417,7 +2417,6 @@ shaka.extern.AdsConfiguration;
  *   cacheLoadThreshold: number,
  *   minTimeToSwitch: number,
  *   preferNetworkInformationBandwidth: boolean,
- *   removeLatencyFromFirstPacketTime: boolean
  * }}
  *
  * @property {boolean} enabled
@@ -2510,11 +2509,6 @@ shaka.extern.AdsConfiguration;
  *   trust the information provided by the browser.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {boolean} removeLatencyFromFirstPacketTime
- *   If true, we remove the latency from first packet time. This time is
- *   used to calculate the real bandwidth.
- *   <br>
- *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
@@ -2824,7 +2818,6 @@ shaka.extern.TextDisplayerConfiguration;
 /**
  * @typedef {{
  *   ads: shaka.extern.AdsConfiguration,
- *   autoShowText: shaka.config.AutoShowText,
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
  *   streaming: shaka.extern.StreamingConfiguration,
@@ -2864,11 +2857,6 @@ shaka.extern.TextDisplayerConfiguration;
  *
  * @property {shaka.extern.AdsConfiguration} ads
  *   Ads configuration and settings.
- * @property {shaka.config.AutoShowText} autoShowText
- *   Controls behavior of auto-showing text tracks on load().
- *   <br>
- *   Defaults to
- *   {@link shaka.config.AutoShowText#IF_SUBTITLES_MAY_BE_NEEDED}.
  * @property {shaka.extern.DrmConfiguration} drm
  *   DRM configuration and settings.
  * @property {shaka.extern.ManifestConfiguration} manifest

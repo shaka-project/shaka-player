@@ -306,172 +306,6 @@ describe('Player', () => {
     });
   });  // describe('getStats')
 
-  describe('autoShowText', () => {
-    async function textMatchesAudioDoesNot() {
-      const preferredTextLanguage = 'fa';  // The same as in the content
-      player.configure({preferredTextLanguage: preferredTextLanguage});
-
-      // NOTE: This is also a regression test for #1696, in which a change to
-      // this feature broke StreamingEngine initialization.
-
-      // Now load a version of Sintel with delayed setup of video & audio
-      // streams and wait for completion.
-      await player.load('test:sintel_realistic_compiled');
-      // By this point, a MediaSource error would be thrown in a repro of bug
-      // #1696.
-
-      // Make sure the content we tested with has text tracks, that the config
-      // we used matches the text language, and that the audio language differs.
-      // These will catch any changes to the underlying content that would
-      // invalidate the test setup.
-      expect(player.getTextTracks().length).not.toBe(0);
-      const textTrack = player.getTextTracks()[0];
-      expect(textTrack.language).toBe(preferredTextLanguage);
-
-      const variantTrack = player.getVariantTracks()[0];
-      expect(variantTrack.language).not.toBe(textTrack.language);
-    }
-
-    async function textDoesNotMatch() {
-      const preferredTextLanguage = 'xx';  // Differs from the content
-      player.configure({preferredTextLanguage: preferredTextLanguage});
-
-      // Now load the content and wait for completion.
-      await player.load('test:sintel_realistic_compiled');
-
-      // Make sure the content we tested with has text tracks, that the config
-      // we used does not match the text language, and that the text and audio
-      // languages do not match each other (to keep this distinct from the next
-      // test case).  This will catch any changes to the underlying content that
-      // would invalidate the test setup.
-      expect(player.getTextTracks().length).not.toBe(0);
-      const textTrack = player.getTextTracks()[0];
-      expect(textTrack.language).not.toBe(preferredTextLanguage);
-
-      const variantTrack = player.getVariantTracks()[0];
-      expect(variantTrack.language).not.toBe(textTrack.language);
-    }
-
-    async function textAndAudioMatch() {
-      const preferredTextLanguage = 'und';  // The same as in the content
-      player.configure({preferredTextLanguage: preferredTextLanguage});
-
-      // Now load the content and wait for completion.
-      await player.load('test:sintel_compiled');
-
-      // Make sure the content we tested with has text tracks, that the config
-      // we used matches the content, and that the text and audio languages
-      // match each other.  This will catch any changes to the underlying
-      // content that would invalidate the test setup.
-      expect(player.getTextTracks().length).not.toBe(0);
-      const textTrack = player.getTextTracks()[0];
-      expect(textTrack.language).toBe(preferredTextLanguage);
-
-      const variantTrack = player.getVariantTracks()[0];
-      expect(variantTrack.language).toBe(textTrack.language);
-    }
-
-    describe('IF_SUBTITLES_MAY_BE_NEEDED', () => {
-      beforeEach(() => {
-        player.configure(
-            'autoShowText',
-            shaka.config.AutoShowText.IF_SUBTITLES_MAY_BE_NEEDED);
-      });
-
-      it('enables text if text matches and audio does not', async () => {
-        await textMatchesAudioDoesNot();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeDefined();
-      });
-
-      it('disables text if text does not match', async () => {
-        await textDoesNotMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeUndefined();
-      });
-
-      it('disables text if both text and audio match', async () => {
-        await textAndAudioMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeUndefined();
-      });
-    });  // IF_SUBTITLES_MAY_BE_NEEDED
-
-    describe('IF_PREFERRED_TEXT_LANGUAGE', () => {
-      beforeEach(() => {
-        player.configure(
-            'autoShowText',
-            shaka.config.AutoShowText.IF_PREFERRED_TEXT_LANGUAGE);
-      });
-
-      it('enables text if text matches and audio does not', async () => {
-        await textMatchesAudioDoesNot();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeDefined();
-      });
-
-      it('disables text if text does not match', async () => {
-        await textDoesNotMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeUndefined();
-      });
-
-      it('enables text if both text and audio match', async () => {
-        await textAndAudioMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeDefined();
-      });
-    });  // IF_PREFERRED_TEXT_LANGUAGE
-
-    describe('ALWAYS', () => {
-      beforeEach(() => {
-        player.configure('autoShowText', shaka.config.AutoShowText.ALWAYS);
-      });
-
-      it('enables text if text matches and audio does not', async () => {
-        await textMatchesAudioDoesNot();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeDefined();
-      });
-
-      it('enables text if text does not match', async () => {
-        await textDoesNotMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeDefined();
-      });
-
-      it('enables text if both text and audio match', async () => {
-        await textAndAudioMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeDefined();
-      });
-    });  // ALWAYS
-
-    describe('NEVER', () => {
-      beforeEach(() => {
-        player.configure('autoShowText', shaka.config.AutoShowText.NEVER);
-      });
-
-      it('disables text if text matches and audio does not', async () => {
-        await textMatchesAudioDoesNot();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeUndefined();
-      });
-
-      it('disables text if text does not match', async () => {
-        await textDoesNotMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeUndefined();
-      });
-
-      it('disables text if both text and audio match', async () => {
-        await textAndAudioMatch();
-        const activeTextTrack = player.getTextTracks().find((t) => t.active);
-        expect(activeTextTrack).toBeUndefined();
-      });
-    });  // NEVER
-  });  // AutoShowText
-
   describe('plays', () => {
     it('with external text tracks', async () => {
       await player.load('test:sintel_no_text_compiled');
@@ -1299,7 +1133,6 @@ describe('Player', () => {
   });
 
   it('preload allow update audio track', async () => {
-    player.configure('autoShowText', shaka.config.AutoShowText.NEVER);
     player.configure('preferredAudioLanguage', 'en');
     const preloadManager =
         await player.preload('test:sintel_multi_lingual_multi_res_compiled');
@@ -1317,18 +1150,12 @@ describe('Player', () => {
   });
 
   it('preload allow update text track', async () => {
-    player.configure('autoShowText', shaka.config.AutoShowText.NEVER);
     player.configure('preferredTextLanguage', 'zh');
     const preloadManager =
         await player.preload('test:sintel_multi_lingual_multi_res_compiled');
     await preloadManager.waitForFinish();
+
     let prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();
-    expect(prefetchedTextTrack).toBeNull();
-
-    preloadManager.configure('autoShowText', shaka.config.AutoShowText.ALWAYS);
-
-    await shaka.test.Util.shortDelay();
-    prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();
     expect(prefetchedTextTrack).not.toBeNull();
     expect(prefetchedTextTrack.language).toBe('zh');
 
@@ -1338,6 +1165,14 @@ describe('Player', () => {
     prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();
     expect(prefetchedTextTrack).not.toBeNull();
     expect(prefetchedTextTrack.language).toBe('fr');
+  });
+
+  it('should not preload a text track if none is preferred', async () => {
+    const preloadManager =
+        await player.preload('test:sintel_multi_lingual_multi_res_compiled');
+    await preloadManager.waitForFinish();
+    const prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();
+    expect(prefetchedTextTrack).toBeNull();
   });
 
   it('detachAndSavePreload', async () => {
