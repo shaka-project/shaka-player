@@ -251,12 +251,12 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     const MIN_GAP = 60;
     // Overflow menu button is either placed to the left or center
     if (leftGap < rightGap) {
-      const left = leftGap < MIN_GAP ? 
+      const left = leftGap < MIN_GAP ?
           EDGE_PADDING : Math.max(leftGap, EDGE_PADDING);
       this.overflowMenu_.style.left = left + 'px';
       this.overflowMenu_.style.right = 'auto';
     } else {
-      const right = rightGap < MIN_GAP ? 
+      const right = rightGap < MIN_GAP ?
           EDGE_PADDING : Math.max(rightGap, EDGE_PADDING);
       this.overflowMenu_.style.right = right + 'px';
       this.overflowMenu_.style.left = 'auto';
