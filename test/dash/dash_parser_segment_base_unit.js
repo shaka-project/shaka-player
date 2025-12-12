@@ -316,6 +316,72 @@ describe('DashParser SegmentBase', () => {
     expect(reference.endTime).toBe(10);  // would be 12 without PTO
   });
 
+  it('fetch RepresentationIndex from init, media from BaseURL', async () => {
+    // Matches the pattern seen in the wild: Representation points to media,
+    // but RepresentationIndex/Initialization live in a shared init file.
+    const source = [
+      '<MPD mediaPresentationDuration="PT10S">',
+      '  <Period>',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation bandwidth="1">',
+      '        <BaseURL>https://media.example.com/video_1.mp4</BaseURL>',
+      '        <SegmentBase timescale="24000">',
+      '          <Initialization range="80-751" sourceURL="video_init.mp4"/>',
+      '          <RepresentationIndex range="0-79"' +
+      ' sourceURL="video_init.mp4"/>',
+      '        </SegmentBase>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    // Minimal SIDX with one ref starting at byte 0, size 1000.
+    const makeSidx = () => {
+      const size = 44;
+      const buffer = new ArrayBuffer(size);
+      const dv = new DataView(buffer);
+      dv.setUint32(0, size);
+      dv.setUint8(4, 's'.charCodeAt(0));
+      dv.setUint8(5, 'i'.charCodeAt(0));
+      dv.setUint8(6, 'd'.charCodeAt(0));
+      dv.setUint8(7, 'x'.charCodeAt(0));
+      dv.setUint32(8, 0);     // version/flags
+      dv.setUint32(12, 0);    // reference_ID
+      dv.setUint32(16, 24000);// timescale
+      dv.setUint32(20, 0);    // earliestPresentationTime
+      dv.setUint32(24, 0);    // firstOffset
+      dv.setUint16(28, 0);    // reserved
+      dv.setUint16(30, 1);    // referenceCount
+      dv.setUint32(32, 1000); // referenceSize
+      dv.setUint32(36, 24000);// subsegmentDuration (1s)
+      dv.setUint32(40, 0);    // SAP
+      return buffer;
+    };
+
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseValue(
+            'https://media.example.com/video_init.mp4', makeSidx());
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const video = manifest.variants[0].video;
+    await video.createSegmentIndex();
+    goog.asserts.assert(video.segmentIndex != null, 'Null segmentIndex!');
+
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
+    fakeNetEngine.expectRangeRequest(
+        'https://media.example.com/video_init.mp4',
+        0, 79, /* isInit= */ false);
+
+    const reference = Array.from(video.segmentIndex)[0];
+    expect(reference.getUris()).toEqual(
+        ['https://media.example.com/video_1.mp4']);
+    expect(reference.startByte).toBe(0);
+    expect(reference.endByte).toBe(999);
+  });
+
   // https://github.com/shaka-project/shaka-player/issues/3230
   it('works with multi-Period with eviction', async () => {
     const source = [
