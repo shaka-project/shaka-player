@@ -438,7 +438,6 @@ shakaDemo.Main = class {
     this.desiredConfig_ = this.player_.getConfiguration();
     const languages = navigator.languages || ['en-us'];
     this.configure('preferredAudioLanguage', languages[0]);
-    this.configure('preferredTextLanguage', languages[0]);
     this.uiLocale_ = languages[0];
     // TODO(#1591): Support multiple language preferences
 
