@@ -42,6 +42,8 @@ const fs = require('fs');
 // The annotations we will consider "exporting" a symbol.
 const EXPORT_REGEX = /@(?:export|exportInterface|expose)\b/;
 
+const RETURN_AND_OVERRIDE_REGEX = /@(?:return|override)\b/;
+
 // TODO: revisit this when Closure Compiler supports partially-exported classes.
 let partiallyExportedClassesDetected = false;
 
@@ -330,6 +332,59 @@ function removeExportAnnotationsFromComment(comment) {
   return comment;
 }
 
+/**
+ * @param {ASTNode} nodeBody The body node of a method node
+ * from the abstract syntax tree.
+ * @return {boolean}
+ */
+function methodContainsNonEmptyReturn(nodeBody) {
+  assert(nodeBody.body);
+
+  for (const childNode of nodeBody.body) {
+    if (childNode.type === 'ReturnStatement' && childNode.argument !== null) {
+      return true;
+    } else if (childNode.body) {
+      if (methodContainsNonEmptyReturn(childNode.body)) {
+        return true;
+      }
+    } else if (childNode.consequent) {
+      if (methodContainsNonEmptyReturn(childNode.consequent)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * When a method is missing a `@return` annotation and doesn't have a
+ * `return` statement the compiler treats it as returning `undefined` but clutz
+ * generates a return value of `any` in the TypeScript definitions.
+ * This adds `@return {void}` where necessary to fix that.
+ * Overload methods (with `@override`) inherit their return type from
+ * the interface or parent class, so get skipped by this function.
+ *
+ * @param {ASTNode} node A method node from the abstract syntax tree.
+ * @param {string} comment
+ * @return {string}
+ */
+function addMissingReturnAnnotationToComment(node, comment) {
+  if (RETURN_AND_OVERRIDE_REGEX.test(comment) || node.generator || node.async) {
+    return comment;
+  }
+
+  if (!comment || node.key.name === 'constructor') {
+    return comment;
+  }
+
+  if (!methodContainsNonEmptyReturn(node.value.body)) {
+    return comment.replace(/^(\s*)\*\//m, '$1* @return {undefined}\n$1*/');
+  }
+
+  return comment;
+}
+
 
 /**
  * Recursively find all expression statements in all block nodes.
@@ -483,6 +538,7 @@ function createExternMethod(node) {
     }
   }
   comment = removeExportAnnotationsFromComment(comment);
+  comment = addMissingReturnAnnotationToComment(node, comment);
 
   const params = getFunctionParameters(node.value);
 
