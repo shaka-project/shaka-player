@@ -131,7 +131,7 @@ describe('Player Dolby Vision', () => {
   describe('P10.1 with fallback to AV1', () => {
     it('with DASH', async () => {
       if (!await Util.isTypeSupported(
-          'video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"',
+          'video/mp4; codecs="av01.0.31M.10.0.111.09.16.09.0"',
           /* width= */ 854, /* height= */ 480) &&
           !await Util.isTypeSupported(
           'video/mp4; codecs="dav1.10.01"',
@@ -143,7 +143,7 @@ describe('Player Dolby Vision', () => {
 
     it('with master playlist (HLS)', async () => {
       if (!await Util.isTypeSupported(
-          'video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"',
+          'video/mp4; codecs="av01.0.31M.10.0.111.09.16.09.0"',
           /* width= */ 854, /* height= */ 480) &&
           !await Util.isTypeSupported(
           'video/mp4; codecs="dav1.10.01"',
@@ -155,7 +155,7 @@ describe('Player Dolby Vision', () => {
 
     it('with media playlist (HLS)', async () => {
       if (!await Util.isTypeSupported(
-          'video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"',
+          'video/mp4; codecs="av01.0.31M.10.0.111.09.16.09.0"',
           /* width= */ 854, /* height= */ 480) &&
           !await Util.isTypeSupported(
           'video/mp4; codecs="dav1.10.01"',
