@@ -134,8 +134,8 @@ describe('Player Dolby Vision', () => {
           'video/mp4; codecs="av01.0.31M.10.0.111.09.16.09.0"',
           /* width= */ 854, /* height= */ 480) &&
           !await Util.isTypeSupported(
-          'video/mp4; codecs="dav1.10.01"',
-          /* width= */ 854, /* height= */ 480)) {
+              'video/mp4; codecs="dav1.10.01"',
+              /* width= */ 854, /* height= */ 480)) {
         pending('Codec AV-1 is not supported by the platform.');
       }
       await testPlayback('/base/test/test/assets/dv-p10-1-av1/dash.mpd');
@@ -146,8 +146,8 @@ describe('Player Dolby Vision', () => {
           'video/mp4; codecs="av01.0.31M.10.0.111.09.16.09.0"',
           /* width= */ 854, /* height= */ 480) &&
           !await Util.isTypeSupported(
-          'video/mp4; codecs="dav1.10.01"',
-          /* width= */ 854, /* height= */ 480)) {
+              'video/mp4; codecs="dav1.10.01"',
+              /* width= */ 854, /* height= */ 480)) {
         pending('Codec AV-1 is not supported by the platform.');
       }
       await testPlayback('/base/test/test/assets/dv-p10-1-av1/master.m3u8');
@@ -158,8 +158,8 @@ describe('Player Dolby Vision', () => {
           'video/mp4; codecs="av01.0.31M.10.0.111.09.16.09.0"',
           /* width= */ 854, /* height= */ 480) &&
           !await Util.isTypeSupported(
-          'video/mp4; codecs="dav1.10.01"',
-          /* width= */ 854, /* height= */ 480)) {
+              'video/mp4; codecs="dav1.10.01"',
+              /* width= */ 854, /* height= */ 480)) {
         pending('Codec AV-1 is not supported by the platform.');
       }
       await testPlayback(
@@ -173,8 +173,8 @@ describe('Player Dolby Vision', () => {
           'video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"',
           /* width= */ 854, /* height= */ 480) &&
           !await Util.isTypeSupported(
-          'video/mp4; codecs="dav1.10.01"',
-          /* width= */ 854, /* height= */ 480)) {
+              'video/mp4; codecs="dav1.10.01"',
+              /* width= */ 854, /* height= */ 480)) {
         pending('Codec AV-1 is not supported by the platform.');
       }
       await testPlayback('/base/test/test/assets/dv-p10-4-av1/dash.mpd');
@@ -185,8 +185,8 @@ describe('Player Dolby Vision', () => {
           'video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"',
           /* width= */ 854, /* height= */ 480) &&
           !await Util.isTypeSupported(
-          'video/mp4; codecs="dav1.10.01"',
-          /* width= */ 854, /* height= */ 480)) {
+              'video/mp4; codecs="dav1.10.01"',
+              /* width= */ 854, /* height= */ 480)) {
         pending('Codec AV-1 is not supported by the platform.');
       }
       await testPlayback('/base/test/test/assets/dv-p10-4-av1/master.m3u8');
@@ -197,8 +197,8 @@ describe('Player Dolby Vision', () => {
           'video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"',
           /* width= */ 854, /* height= */ 480) &&
           !await Util.isTypeSupported(
-          'video/mp4; codecs="dav1.10.01"',
-          /* width= */ 854, /* height= */ 480)) {
+              'video/mp4; codecs="dav1.10.01"',
+              /* width= */ 854, /* height= */ 480)) {
         pending('Codec AV-1 is not supported by the platform.');
       }
       await testPlayback(
