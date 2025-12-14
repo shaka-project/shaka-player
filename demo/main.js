@@ -1029,13 +1029,6 @@ shakaDemo.Main = class {
         }
       }
     }
-    if (params.has('lang')) {
-      // Load the legacy 'lang' hash value.
-      const lang = params.get('lang');
-      this.configure('preferredAudioLanguage', lang);
-      this.configure('preferredTextLanguage', lang);
-      this.setUILocale(lang);
-    }
     if (params.has('uilang')) {
       this.setUILocale(params.get('uilang'));
       // TODO(#1591): Support multiple language preferences
