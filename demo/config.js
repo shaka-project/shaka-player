@@ -448,7 +448,7 @@ shakaDemo.Config = class {
     this.addSection_('Accessibility', docLink)
         .addBoolInput_(
             'Handle forced subtitles automatically',
-            'accessibility.handleForcedSubtitlesAutomatically'); ;
+            'accessibility.handleForcedSubtitlesAutomatically');
   }
 
   /**
