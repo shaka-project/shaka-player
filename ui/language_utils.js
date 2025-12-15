@@ -430,6 +430,10 @@ shaka.ui.LanguageUtils = class {
     switch (locale) {
       case 'mul':
         return resolve(shaka.ui.Locales.Ids.MULTIPLE_LANGUAGES);
+      case 'qaa':
+        return resolve(shaka.ui.Locales.Ids.ORIGINAL_VERSION);
+      case 'qad':
+        return resolve(shaka.ui.Locales.Ids.AUDIO_DESCRIPTION);
       case 'und':
         return resolve(shaka.ui.Locales.Ids.UNDETERMINED_LANGUAGE);
       case 'zxx':
