@@ -427,6 +427,11 @@ shaka.ui.LanguageUtils = class {
 
     // Handle some special cases first.  These are reserved language tags that
     // are used to indicate something that isn't one specific language.
+    // About qaa and qad:
+    // https://mailman.videolan.org/pipermail/vlc-devel/2007-February/029773.html
+    // https://www.etsi.org/deliver/etsi_en/300400_300499/300468/01.17.01_20/en_300468v011701a.pdf
+    // qaa: defined in DVB, ETSI EN 300 468 V1.17.1 (2022-07), Annex F.
+    // qad: defined in DVB, ETSI EN 300 468 V1.17.1 (2022-07), Annex J, J.3.2.
     switch (locale) {
       case 'mul':
         return resolve(shaka.ui.Locales.Ids.MULTIPLE_LANGUAGES);
