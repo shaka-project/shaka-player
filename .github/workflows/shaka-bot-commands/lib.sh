@@ -30,13 +30,13 @@ function check_required_variable() {
 # Leaving a comment requires a token with "repo" scope.
 function reply() {
   echo "@$COMMENTER: $@" | \
-      gh issue comment "$PR_NUMBER" -R "$THIS_REPO" -f -
+      gh issue comment "$PR_NUMBER" -R "$THIS_REPO" -F -
 }
 
 # Leaving a comment requires a token with "repo" scope.
 function reply_from_pipe() {
   (echo -n "@$COMMENTER: "; cat /dev/stdin) | \
-      gh issue comment "$PR_NUMBER" -R "$THIS_REPO" -f -
+      gh issue comment "$PR_NUMBER" -R "$THIS_REPO" -F -
 }
 
 # Checking permissions requires a token with "repo" and "org:read" scopes, and
