@@ -7,7 +7,7 @@ Accessibility in media playback ensures that all users, including those with hea
 Forced text tracks are subtitles or captions that appear automatically for specific parts of the content, such as foreign language dialogue or critical on-screen text. They are not full subtitles but provide essential context.
 
 ### Fallback behavior
-When the config `accessibility.forcedTextTrackAsFallback` is **true**, the player will select a forced text track under two scenarios:
+When the config `accessibility.handleForcedSubtitlesAutomatically` is **true**, the player will select a forced text track under two scenarios:
 
 1. **Initial Selection**
    - If the user’s preferred subtitle language or role does not match any available tracks, the system will ignore `preferredTextLanguage` and `preferredTextRole`.
