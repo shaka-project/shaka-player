@@ -19,7 +19,7 @@ When the config `accessibility.handleForcedSubtitlesAutomatically` is **true**, 
 ### Default behavior
 By default, this config is **true**, meaning the player will always attempt to provide essential subtitles when no other suitable track is available.
 
-## Why is this important for accessibility?
+### Why is this important for accessibility?
 - **Inclusivity:** Ensures critical information is conveyed even when full subtitles are unavailable.
 - **User Experience:** Prevents confusion during foreign language scenes or when switching audio tracks.
 - **Compliance:** Helps meet accessibility standards for multimedia content (eg: European Accessibility Act).
