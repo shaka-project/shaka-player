@@ -9,6 +9,7 @@
 +@polyfill
 +@polyfillForUI
 +@queue
++@sync
 +@text
 +@optionalText
 +@transmuxer

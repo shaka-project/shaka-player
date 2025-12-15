@@ -39,6 +39,7 @@ goog.require('shaka.net.DataUriPlugin');
 goog.require('shaka.net.HttpFetchPlugin');
 goog.require('shaka.net.HttpXHRPlugin');
 goog.require('shaka.queue.QueueManager');
+goog.require('shaka.sync.SyncManager');
 goog.require('shaka.offline.OfflineManifestParser');
 goog.require('shaka.offline.OfflineScheme');
 goog.require('shaka.offline.Storage');

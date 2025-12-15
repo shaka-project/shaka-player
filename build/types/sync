@@ -1,0 +1,4 @@
+# PubNub-powered playback sync module
+
++../../lib/sync/sync_manager.js
+

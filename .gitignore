@@ -8,3 +8,8 @@ coverage/
 .vscode
 .babel-cache
 .idea/
+
+# Local config files (for PubNub keys, etc.)
+*.local.js
+.env
+.env.local

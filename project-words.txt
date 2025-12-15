@@ -163,7 +163,7 @@ unconfigured
 unfuzzed
 unregisters
 unstore
-unviewed
+userjoinedunviewed
 vint
 vints
 xywh
@@ -350,7 +350,8 @@ prft
 prji
 pssh
 psshs
-qpprime
+pubnub
+publishabilityqpprime
 radl
 rbsp
 regionanchor
@@ -396,7 +397,8 @@ tfrf
 tfxd
 timecode
 timecodes
-timepoint
+timetoken
+timetokenstimepoint
 timepoints
 tkhd
 traf
