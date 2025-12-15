@@ -10,7 +10,7 @@ Forced text tracks are subtitles or captions that appear automatically for speci
 When the config `accessibility.handleForcedSubtitlesAutomatically` is **true**, the player will select a forced text track under two scenarios:
 
 1. **Initial Selection**
-   - If the user’s preferred subtitle language or role does not match any available tracks, the system will ignore `preferredTextLanguage` and `preferredTextRole`.
+   - If the user’s preferred subtitle language or role does not match any available tracks, the player will ignore `preferredTextLanguage` and `preferredTextRole`.
    - Instead, it will choose a forced text track based on the initial audio variant.
 
 2. **Changing Audio Language**
