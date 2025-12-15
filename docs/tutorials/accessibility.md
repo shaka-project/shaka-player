@@ -14,7 +14,7 @@ When the config `accessibility.handleForcedSubtitlesAutomatically` is **true**, 
    - Instead, it will choose a forced text track based on the initial audio variant.
 
 2. **Changing Audio Language**
-   - If the user switches the audio language and the previous subtitle track is either missing or was a forced track from the previous language, the system will select a forced text track for the new language.
+   - If the user switches the audio language and the previous subtitle track is either missing or was a forced track from the previous language, the player will select a forced text track for the new language.
 
 ### Default behavior
 By default, this config is **true**, meaning the player will always attempt to provide essential subtitles when no other suitable track is available.
