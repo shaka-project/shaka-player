@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.16.12](https://github.com/shaka-project/shaka-player/compare/v4.16.11...v4.16.12) (2025-12-15)
+
+
+### Bug Fixes
+
+* **Ads:** Don't allow change supportsMultipleMediaElements while an ad is playing ([#9460](https://github.com/shaka-project/shaka-player/issues/9460)) ([fc07f80](https://github.com/shaka-project/shaka-player/commit/fc07f80477b61b919ee5e26e9e590407c31300dc))
+* **Ads:** Fix start time of the interstitial when playing a pre/post-roll ([#9459](https://github.com/shaka-project/shaka-player/issues/9459)) ([25dbc5f](https://github.com/shaka-project/shaka-player/commit/25dbc5f8ad7b77fcec798503816e39f230542e7b))
+* Avoid audio streams filtering and use AdaptationSetCriteria instead ([#9457](https://github.com/shaka-project/shaka-player/issues/9457)) ([4809a92](https://github.com/shaka-project/shaka-player/commit/4809a92cbb27afc7a395033bae06b5e44a894e1e))
+* **DASH:** Handle external SegmentBase BaseURL and SIDX offset fallback ([#9477](https://github.com/shaka-project/shaka-player/issues/9477)) ([26edcf7](https://github.com/shaka-project/shaka-player/commit/26edcf758babffc86b014840580b9c32713e2378))
+* **DASH:** Shift segment timeline with cached presentationTimeOffset ([#9481](https://github.com/shaka-project/shaka-player/issues/9481)) ([9505d6d](https://github.com/shaka-project/shaka-player/commit/9505d6d16b6ebfdc0853721ec1249394499fdd90))
+* Do not exclude time to first byte from measurements by default ([#9476](https://github.com/shaka-project/shaka-player/issues/9476)) ([c65cf46](https://github.com/shaka-project/shaka-player/commit/c65cf465952510a910aa21b3ebd9a3cb3f724ba9))
+* Fix exception reading audio-only content ([#9465](https://github.com/shaka-project/shaka-player/issues/9465)) ([d8c2efc](https://github.com/shaka-project/shaka-player/commit/d8c2efc46a4f80547f5f0138a5f9b5f8a79fbcca))
+* **HLS:** Add a `mediaTypes` field to `shaka.extern.DrmInfo` ([#9198](https://github.com/shaka-project/shaka-player/issues/9198)) ([4f9c751](https://github.com/shaka-project/shaka-player/commit/4f9c75177c46c5c93748c655a317acf2519dbc20))
+* Properly assign shaka.extern.DrmInfo#mediaTypes ([#9340](https://github.com/shaka-project/shaka-player/issues/9340)) ([5af18c6](https://github.com/shaka-project/shaka-player/commit/5af18c6d1b5243bc245b7d72747c1083c019843a))
+* **UI:** Show Dolby Vision text for any DV codec ([#9487](https://github.com/shaka-project/shaka-player/issues/9487)) ([c48a3ee](https://github.com/shaka-project/shaka-player/commit/c48a3eea5227f352250ad59ac74de76680d65421))
+
+
+### Performance Improvements
+
+* Prefer Uint8Array's {to,from}{Base64,Hex} methods ([#9472](https://github.com/shaka-project/shaka-player/issues/9472)) ([9eb3c2c](https://github.com/shaka-project/shaka-player/commit/9eb3c2c183a15169ea74a264e3c5f00e52c5b725))
+
 ## [4.16.11](https://github.com/shaka-project/shaka-player/compare/v4.16.10...v4.16.11) (2025-12-01)
 
 
