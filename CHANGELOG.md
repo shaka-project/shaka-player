@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.15.24](https://github.com/shaka-project/shaka-player/compare/v4.15.23...v4.15.24) (2025-12-15)
+
+
+### Bug Fixes
+
+* **Ads:** Don't allow change supportsMultipleMediaElements while an ad is playing ([#9460](https://github.com/shaka-project/shaka-player/issues/9460)) ([e545564](https://github.com/shaka-project/shaka-player/commit/e545564bce63bd4a93eacfda6c66e31c0accafc5))
+* **Ads:** Fix start time of the interstitial when playing a pre/post-roll ([#9459](https://github.com/shaka-project/shaka-player/issues/9459)) ([c4c9f92](https://github.com/shaka-project/shaka-player/commit/c4c9f92c82d9613af811bee1e0b4df0129caef9d))
+* **DASH:** Handle external SegmentBase BaseURL and SIDX offset fallback ([#9477](https://github.com/shaka-project/shaka-player/issues/9477)) ([25d30e7](https://github.com/shaka-project/shaka-player/commit/25d30e7b867b2132f9bbc053ab031c45dc41039b))
+* **DASH:** Shift segment timeline with cached presentationTimeOffset ([#9481](https://github.com/shaka-project/shaka-player/issues/9481)) ([851986b](https://github.com/shaka-project/shaka-player/commit/851986bd39ac9413a104487cf9f9d3cc75503464))
+* Do not exclude time to first byte from measurements by default ([#9476](https://github.com/shaka-project/shaka-player/issues/9476)) ([6c97eb5](https://github.com/shaka-project/shaka-player/commit/6c97eb52447d3df6d3de8ad10466da2f7363fddf))
+* Fix exception reading audio-only content ([#9465](https://github.com/shaka-project/shaka-player/issues/9465)) ([1ddc54e](https://github.com/shaka-project/shaka-player/commit/1ddc54e5a994d4f7e3808e694381c67433e58713))
+* **HLS:** Add a `mediaTypes` field to `shaka.extern.DrmInfo` ([#9198](https://github.com/shaka-project/shaka-player/issues/9198)) ([198a457](https://github.com/shaka-project/shaka-player/commit/198a457e71031f494fc1da403ff048d4e3c38875))
+* Properly assign shaka.extern.DrmInfo#mediaTypes ([#9340](https://github.com/shaka-project/shaka-player/issues/9340)) ([043142d](https://github.com/shaka-project/shaka-player/commit/043142d2ffe5204688989f7fe8ffef853d480739))
+
+
+### Performance Improvements
+
+* Prefer Uint8Array's {to,from}{Base64,Hex} methods ([#9472](https://github.com/shaka-project/shaka-player/issues/9472)) ([14ebd8e](https://github.com/shaka-project/shaka-player/commit/14ebd8e658dea1473b02013d026965932e6f15f0))
+
 ## [4.15.23](https://github.com/shaka-project/shaka-player/compare/v4.15.22...v4.15.23) (2025-12-01)
 
 
