@@ -710,6 +710,9 @@
           subscribeKey: subscribeKey,
         });
 
+        // Set up event listeners before connecting
+        setupSyncManagerListeners();
+
         // Connect to the room
         await syncManager.connect(roomId);
 
@@ -746,6 +749,25 @@
         updateRoleUI('follower');
         log('You are now a FOLLOWER - waiting for sync commands', 'info');
       }
+    }
+
+    function setupSyncManagerListeners() {
+      if (!syncManager) return;
+
+      // Listen for master changes (when another client claims master)
+      syncManager.addEventListener('masterchanged', (event) => {
+        const newMasterId = event.detail.get('newMasterId');
+        const previousRole = event.detail.get('previousRole');
+
+        if (previousRole === 'master') {
+          // We were the master but someone else claimed it
+          updateRoleUI('follower');
+          log(`Another user (${newMasterId}) claimed master - you are now a follower`, 'warning');
+        } else {
+          // We're a follower and someone became master
+          log(`User ${newMasterId} is now the master`, 'info');
+        }
+      });
     }
 
     // ============================================
