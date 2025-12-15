@@ -82,6 +82,7 @@ shakaDemo.Config = class {
 
     this.addMetaSection_();
     this.addLanguageSection_();
+    this.addAccessibilitySection_();
     this.addCodecPreferenceSection_();
     this.addAbrSection_();
     this.addOfflineSection_();
@@ -441,6 +442,15 @@ shakaDemo.Config = class {
             repeatModeOptionNames);
   }
 
+  /** @private */
+  addAccessibilitySection_() {
+    const docLink = this.resolveExternLink_('.AccessibilityConfiguration');
+    this.addSection_('Accessibility', docLink)
+        .addBoolInput_(
+            'Handle forced subtitles automatically',
+            'accessibility.handleForcedSubtitlesAutomatically'); ;
+  }
+
   /**
    * @param {string} category
    * @param {string} sectionName
@@ -640,10 +650,7 @@ shakaDemo.Config = class {
             strategyOptions, strategyOptionsNames)
         .addBoolInput_(
             'Return to end of live window when outside of live window',
-            'streaming.returnToEndOfLiveWindowWhenOutside')
-        .addBoolInput_(
-            'Handle forced subtitles automatically',
-            'streaming.handleForcedSubtitlesAutomatically');
+            'streaming.returnToEndOfLiveWindowWhenOutside');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
     this.addSpeechToTextSection_();
