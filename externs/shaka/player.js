@@ -1954,7 +1954,6 @@ shaka.extern.SpeechToTextConfiguration;
  *   avoidEvictionOnQuotaExceededError: boolean,
  *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy,
  *   returnToEndOfLiveWindowWhenOutside: boolean,
- *   speechToText: shaka.extern.SpeechToTextConfiguration,
  * }}
  *
  * @description
@@ -2202,8 +2201,6 @@ shaka.extern.SpeechToTextConfiguration;
  *   it will be moved to the end of the live window, instead of the start.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {shaka.extern.SpeechToTextConfiguration} speechToText
- *   The speech to text configuration.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -2325,6 +2322,7 @@ shaka.extern.MediaSourceConfiguration;
 /**
  * @typedef {{
  *   handleForcedSubtitlesAutomatically: boolean,
+ *   speechToText: shaka.extern.SpeechToTextConfiguration,
  * }}
  *
  * @description
@@ -2342,6 +2340,8 @@ shaka.extern.MediaSourceConfiguration;
  *   not present or is forced from the previous language.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {shaka.extern.SpeechToTextConfiguration} speechToText
+ *   The speech to text configuration.
  * @exportDoc
  */
 shaka.extern.AccessibilityConfiguration;

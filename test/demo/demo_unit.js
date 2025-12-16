@@ -39,7 +39,7 @@ describe('Demo', () => {
           .add('preferredAudioCodecs')
           .add('preferredVideoCodecs')
           .add('preferredTextFormats')
-          .add('streaming.speechToText.languagesToTranslate');
+          .add('accessibility.speechToText.languagesToTranslate');
       // We determine whether a config option has been made or not by looking at
       // which config values have been queried (via the fake main object's
       // |getCurrentConfigValue| method).
