@@ -2006,7 +2006,8 @@ shaka.extern.SpeechToTextConfiguration;
  *   The maximum distance (in seconds) before a gap when we'll automatically
  *   jump.
  *   <br>
- *   Defaults to <code>0.5</code>.
+ *   Defaults to <code>0.5</code> except on desktop whose default value is
+ *   <code>0.1</code>.
  * @property {number} gapPadding
  *   Padding added only for Xbox, Legacy Edge and Tizen.
  *   Based on our research (specific to Tizen), the gapPadding value must be
