@@ -270,6 +270,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/dv-p8-1-hevc/*', included: false},
       {pattern: 'test/test/assets/dv-p8-4-hevc/*', included: false},
       {pattern: 'test/test/assets/hls-aes-256/*', included: false},
+      {pattern: 'test/test/assets/hls-gap/*', included: false},
       {pattern: 'test/test/assets/hls-interstitial/*', included: false},
       {pattern: 'test/test/assets/hls-mp4-muxed-aac-h264/*', included: false},
       {pattern: 'test/test/assets/hls-muxed-mp4-ts/*', included: false},
