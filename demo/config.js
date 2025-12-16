@@ -82,6 +82,7 @@ shakaDemo.Config = class {
 
     this.addMetaSection_();
     this.addLanguageSection_();
+    this.addAccessibilitySection_();
     this.addCodecPreferenceSection_();
     this.addAbrSection_();
     this.addOfflineSection_();
@@ -439,6 +440,15 @@ shakaDemo.Config = class {
             'queue.repeatMode',
             repeatModeOptions,
             repeatModeOptionNames);
+  }
+
+  /** @private */
+  addAccessibilitySection_() {
+    const docLink = this.resolveExternLink_('.AccessibilityConfiguration');
+    this.addSection_('Accessibility', docLink)
+        .addBoolInput_(
+            'Handle forced subtitles automatically',
+            'accessibility.handleForcedSubtitlesAutomatically');
   }
 
   /**

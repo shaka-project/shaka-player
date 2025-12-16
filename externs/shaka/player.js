@@ -2324,6 +2324,31 @@ shaka.extern.MediaSourceConfiguration;
 
 /**
  * @typedef {{
+ *   handleForcedSubtitlesAutomatically: boolean,
+ * }}
+ *
+ * @description
+ *   Accessibility configuration.
+ *
+ * @property {boolean} handleForcedSubtitlesAutomatically
+ *   If true, a forced text track will be chosen as a fallback if no other track
+ *   is chosen, in two scenarios:
+ *   <br>
+ *   - In the initial selection, if the regular preference filters match no
+ *   tracks. In this case, the preferredTextLanguage and preferredTextRole will
+ *   be ignored, and the language will be chosen based on the initial variant.
+ *   <br>
+ *   - When changing the audio language, if the previous subtitle is either
+ *   not present or is forced from the previous language.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @exportDoc
+ */
+shaka.extern.AccessibilityConfiguration;
+
+
+/**
+ * @typedef {{
  *   customPlayheadTracker: boolean,
  *   skipPlayDetection: boolean,
  *   supportsMultipleMediaElements: boolean,
@@ -2817,6 +2842,7 @@ shaka.extern.TextDisplayerConfiguration;
 
 /**
  * @typedef {{
+ *   accessibility: shaka.extern.AccessibilityConfiguration,
  *   ads: shaka.extern.AdsConfiguration,
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
@@ -2855,6 +2881,8 @@ shaka.extern.TextDisplayerConfiguration;
  *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
+ * @property {shaka.extern.AccessibilityConfiguration} accessibility
+ *   Accessibility configuration and settings.
  * @property {shaka.extern.AdsConfiguration} ads
  *   Ads configuration and settings.
  * @property {shaka.extern.DrmConfiguration} drm
