@@ -118,6 +118,12 @@ shaka.extern.TextParserPlugin;
  */
 shaka.extern.TextDisplayer = class {
   /**
+   * @param {shaka.Player} player
+   * @exportDoc
+   */
+  constructor(player) {}
+
+  /**
    * @override
    * @exportDoc
    */
@@ -188,7 +194,7 @@ shaka.extern.TextDisplayer = class {
 /**
  * A factory for creating a TextDisplayer.
  *
- * @typedef {function():!shaka.extern.TextDisplayer}
+ * @typedef {function(!shaka.Player):!shaka.extern.TextDisplayer}
  * @exportDoc
  */
 shaka.extern.TextDisplayer.Factory;

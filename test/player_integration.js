@@ -411,11 +411,11 @@ describe('Player', () => {
         return false;
       });
       textDisplayer.destroySpy.and.returnValue(Promise.resolve());
-      player.configure('textDisplayFactory', () => textDisplayer);
+      player.configure('textDisplayFactory', (player) => textDisplayer);
 
       // Make sure the configuration was taken.
       const configuredFactory = player.getConfiguration().textDisplayFactory;
-      const configuredTextDisplayer = configuredFactory();
+      const configuredTextDisplayer = configuredFactory(player);
       expect(configuredTextDisplayer).toBe(textDisplayer);
     });
 
