@@ -364,6 +364,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.updateChapters_();
     });
 
+    this.eventManager_.listen(this.player_, 'manifestupdated', () => {
+      this.updateChapters_();
+    });
+
     this.eventManager_.listen(this.player_, 'unloading', () => {
       if (this.ad_) {
         return;
