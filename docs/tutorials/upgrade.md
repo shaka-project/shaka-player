@@ -124,6 +124,8 @@ application:
     - `preferredVariantRole` has been renamed to `preferredAudioRole` (deprecated in v4.16.0)
     - `autoShowText` is removed.
     - `removeLatencyFromFirstPacketTime` has been removed.
+    - `removeLatencyFromFirstPacketTime` has been removed.
+    - `streaming.speechToText` moved to `accessibility.speechToText`
 
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.

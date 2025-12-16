@@ -449,6 +449,20 @@ shakaDemo.Config = class {
         .addBoolInput_(
             'Handle forced subtitles automatically',
             'accessibility.handleForcedSubtitlesAutomatically');
+    this.addSpeechToTextSection_();
+  }
+
+  /** @private */
+  addSpeechToTextSection_() {
+    const docLink = this.resolveExternLink_('.SpeechToTextConfiguration');
+    this.addSection_('Speech to text', docLink);
+    this.addBoolInput_('Speech to text', 'accessibility.speechToText.enabled')
+        .addNumberInput_('Max text length (characters)',
+            'accessibility.speechToText.maxTextLength')
+        .addBoolInput_('Performed locally on the user’s device',
+            'accessibility.speechToText.processLocally')
+        .addArrayStringInput_('Languages to translate into',
+            'accessibility.speechToText.languagesToTranslate');
   }
 
   /**
@@ -653,7 +667,6 @@ shakaDemo.Config = class {
             'streaming.returnToEndOfLiveWindowWhenOutside');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
-    this.addSpeechToTextSection_();
   }
 
   /** @private */
@@ -693,19 +706,6 @@ shakaDemo.Config = class {
             'streaming.liveSync.dynamicTargetLatency.maxLatency')
         .addNumberInput_('Dynamic Target Latency Min Latency',
             'streaming.liveSync.dynamicTargetLatency.minLatency');
-  }
-
-  /** @private */
-  addSpeechToTextSection_() {
-    const docLink = this.resolveExternLink_('.SpeechToTextConfiguration');
-    this.addSection_('Speech to text', docLink);
-    this.addBoolInput_('Speech to text', 'streaming.speechToText.enabled')
-        .addNumberInput_('Max text length (characters)',
-            'streaming.speechToText.maxTextLength')
-        .addBoolInput_('Performed locally on the user’s device',
-            'streaming.speechToText.processLocally')
-        .addArrayStringInput_('Languages to translate into',
-            'streaming.speechToText.languagesToTranslate');
   }
 
   /** @private */

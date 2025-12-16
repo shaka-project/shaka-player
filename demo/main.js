@@ -1051,9 +1051,10 @@ shakaDemo.Main = class {
           params.get('preferredTextFormats').split(','));
     }
 
-    if (params.has('streaming.speechToText.languagesToTranslate')) {
-      this.configure('streaming.speechToText.languagesToTranslate',
-          params.get('streaming.speechToText.languagesToTranslate').split(','));
+    if (params.has('accessibility.speechToText.languagesToTranslate')) {
+      this.configure('accessibility.speechToText.languagesToTranslate',
+          params.get('accessibility.speechToText.languagesToTranslate')
+              .split(','));
     }
 
     // Add compiled/uncompiled links.
@@ -1579,7 +1580,7 @@ shakaDemo.Main = class {
       'preferredVideoCodecs',
       'preferredAudioCodecs',
       'preferredTextFormats',
-      'streaming.speechToText.languagesToTranslate',
+      'accessibility.speechToText.languagesToTranslate',
     ];
 
     for (const key of preferredArray) {
