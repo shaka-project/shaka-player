@@ -48,6 +48,7 @@ describe('TextEngine', () => {
     textEngine = new TextEngine(mockDisplayer);
     textEngine.initParser(
         dummyMimeType,
+        /* external= */ false,
         /* segmentRelativeVttTiming= */ false,
         shaka.media.ManifestParser.UNKNOWN);
   });
@@ -313,6 +314,7 @@ describe('TextEngine', () => {
     it('vttOffset when segmentRelativeVttTiming is set', async () => {
       textEngine.initParser(
           dummyMimeType,
+          /* external= */ false,
           /* segmentRelativeVttTiming= */ true,
           shaka.media.ManifestParser.UNKNOWN);
 
