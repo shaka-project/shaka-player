@@ -2821,7 +2821,8 @@ shaka.extern.OfflineConfiguration;
 /**
  * @typedef {{
  *   captionsUpdatePeriod: number,
- *   fontScaleFactor: number
+ *   fontScaleFactor: number,
+ *   positionArea: shaka.config.PositionArea,
  * }}
  *
  * @description
@@ -2835,6 +2836,13 @@ shaka.extern.OfflineConfiguration;
  *   The font scale factor used to increase or decrease the font size.
  *   <br>
  *   Defaults to <code>1</code>.
+ * @property {shaka.config.PositionArea} positionArea
+ *   The region within the viewing area where the subtitles are to be
+ *   positioned. The default value indicates that they are positioned where
+ *   the subtitle defines it, otherwise they are overwritten with the given
+ *   position.
+ *   <br>
+ *   Defaults to <code>''</code>.
  * @exportDoc
  */
 shaka.extern.TextDisplayerConfiguration;

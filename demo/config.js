@@ -343,6 +343,20 @@ shakaDemo.Config = class {
 
   /** @private */
   addTextDisplayerSection_() {
+    const positionAreaOptions = shaka.config.PositionArea;
+    const positionAreaOptionNames = {
+      'DEFAULT': 'Default',
+      'TOP_LEFT': 'top left',
+      'TOP_CENTER': 'top center',
+      'TOP_RIGHT': 'top right',
+      'CENTER_LEFT': 'center left',
+      'CENTER_CENTER': 'center center',
+      'CENTER_RIGHT': 'center right',
+      'BOTTOM_LEFT': 'bottom left',
+      'BOTTOM_CENTER': 'bottom center',
+      'BOTTOM_RIGHT': 'bottom right',
+    };
+
     const docLink = this.resolveExternLink_('.TextDisplayerConfiguration');
     this.addSection_('Text displayer', docLink)
         .addNumberInput_('Captions update period',
@@ -350,7 +364,11 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_('Font scale factor',
             'textDisplayer.fontScaleFactor',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addSelectInput_('Position area',
+            'textDisplayer.positionArea',
+            positionAreaOptions,
+            positionAreaOptionNames);
   }
 
   /** @private */
