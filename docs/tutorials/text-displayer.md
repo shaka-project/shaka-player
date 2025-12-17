@@ -60,7 +60,7 @@ To do that you need to implement {@link shaka.extern.TextDisplayer} interface
 and pass your custom displayer to shaka by calling:
 ```js
 player.configure({
-   textDisplayFactory: () => new CustomTextDisplayer(),
+   textDisplayFactory: (player) => new CustomTextDisplayer(player),
 });
 ```
 

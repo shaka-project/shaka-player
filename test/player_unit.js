@@ -168,7 +168,7 @@ describe('Player', () => {
       // Ensures we don't get a warning about missing preference.
       preferredAudioLanguage: 'en',
       abrFactory: () => abrManager,
-      textDisplayFactory: () => textDisplayer,
+      textDisplayFactory: (player) => textDisplayer,
     });
 
     onError = jasmine.createSpy('error event');
