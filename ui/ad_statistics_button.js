@@ -147,7 +147,7 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
         shaka.ui.Utils.setDisplay(this.button_, false);
       });
       this.eventManager.listen(this.controls, 'submenuclose', () => {
-        shaka.ui.Utils.setDisplay(this.button_, true);
+        shaka.ui.Utils.setDisplay(this.button_, this.currentStats_.started > 0);
       });
     }
   }
