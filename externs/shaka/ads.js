@@ -270,6 +270,12 @@ shaka.extern.IAdManager = class extends EventTarget {
   setLocale(locale) {}
 
   /**
+   * @param {!HTMLElement} clientSideAdContainer
+   * @param {!HTMLElement} serverSideAdContainer
+   */
+  setContainers(clientSideAdContainer, serverSideAdContainer) {}
+
+  /**
    * Called by the Player to provide an updated configuration any time it
    * changes.
    * Must be called at least once before init*().
@@ -282,36 +288,35 @@ shaka.extern.IAdManager = class extends EventTarget {
 
   onAssetUnload() {}
 
-  /**
-   * @param {?HTMLElement} adContainer
-   * @param {!shaka.Player} basePlayer
-   * @param {!HTMLMediaElement} baseVideo
-   */
-  initInterstitial(adContainer, basePlayer, baseVideo) {}
-
-  /**
-   * @param {!HTMLElement} adContainer
-   * @param {!HTMLMediaElement} video
-   * @param {?google.ima.AdsRenderingSettings} adsRenderingSettings
-   */
-  initClientSide(adContainer, video, adsRenderingSettings) {}
+  // IMA SDK Client Side
 
   /**
    * @param {!google.ima.AdsRequest} imaRequest
+   * @param {?google.ima.AdsRenderingSettings} adsRenderingSettings
    */
-  requestClientSideAds(imaRequest) {}
+  requestClientSideAds(imaRequest, adsRenderingSettings) {}
 
   /**
    * @param {!google.ima.AdsRenderingSettings} adsRenderingSettings
    */
   updateClientSideAdsRenderingSettings(adsRenderingSettings) {}
 
+  // IMA DAI SDK Server Side
+
   /**
-   * @param {?HTMLElement} adContainer
-   * @param {!shaka.net.NetworkingEngine} networkingEngine
-   * @param {!HTMLMediaElement} video
+   * @param {!google.ima.dai.api.StreamRequest} imaRequest
+   * @param {string=} backupUrl
+   * @return {!Promise<string>}
    */
-  initMediaTailor(adContainer, networkingEngine, video) {}
+  requestServerSideStream(imaRequest, backupUrl) {}
+
+  /**
+   * @param {Object} adTagParameters
+   */
+  replaceServerSideAdTagParameters(adTagParameters) {}
+
+
+  // Media Tailor
 
   /**
    * @param {string} url
@@ -326,23 +331,25 @@ shaka.extern.IAdManager = class extends EventTarget {
    */
   addMediaTailorTrackingUrl(url) {}
 
-  /**
-   * @param {!HTMLElement} adContainer
-   * @param {!HTMLMediaElement} video
-   */
-  initServerSide(adContainer, video) {}
+  // Interstitials
 
   /**
-   * @param {!google.ima.dai.api.StreamRequest} imaRequest
-   * @param {string=} backupUrl
-   * @return {!Promise<string>}
+   * @param {shaka.extern.AdInterstitial} interstitial
    */
-  requestServerSideStream(imaRequest, backupUrl) {}
+  addCustomInterstitial(interstitial) {}
 
   /**
-   * @param {Object} adTagParameters
+   * @param {string} url
+   * @return {!Promise}
    */
-  replaceServerSideAdTagParameters(adTagParameters) {}
+  addAdUrlInterstitial(url) {}
+
+  /**
+   * @return {shaka.Player}
+   */
+  getInterstitialPlayer() {}
+
+  // Utils
 
   /**
    * @return {!Array<!shaka.extern.AdCuePoint>}
@@ -354,11 +361,6 @@ shaka.extern.IAdManager = class extends EventTarget {
    * playing content, this will return an empty stats object.
    */
   getStats() {}
-
-  /**
-   * @param {shaka.extern.TimelineRegionInfo} region
-   */
-  onDashTimedMetadata(region) {}
 
   /**
    * Fired when the manifest is updated.
@@ -379,35 +381,15 @@ shaka.extern.IAdManager = class extends EventTarget {
   onCueMetadataChange(value) {}
 
   /**
-   * @param {!shaka.Player} basePlayer
-   * @param {!HTMLMediaElement} baseVideo
    * @param {shaka.extern.HLSMetadata} metadata
    * @return {!Promise}
    */
-  onHLSMetadata(basePlayer, baseVideo, metadata) {}
+  onHLSMetadata(metadata) {}
 
   /**
-   * @param {!shaka.Player} basePlayer
-   * @param {!HTMLMediaElement} baseVideo
    * @param {shaka.extern.TimelineRegionInfo} region
    */
-  onDASHMetadata(basePlayer, baseVideo, region) {}
-
-  /**
-   * @param {shaka.extern.AdInterstitial} interstitial
-   */
-  addCustomInterstitial(interstitial) {}
-
-  /**
-   * @param {string} url
-   * @return {!Promise}
-   */
-  addAdUrlInterstitial(url) {}
-
-  /**
-   * @return {shaka.Player}
-   */
-  getInterstitialPlayer() {}
+  onDASHMetadata(region) {}
 
   /**
    * @return {?shaka.extern.IAd}

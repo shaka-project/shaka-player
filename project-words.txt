@@ -10,6 +10,7 @@ audiotrackchanged
 audiotrackschanged
 autoplaying
 boundarycrossed
+bufferappending
 canupdatestarttime
 captionselectionupdated
 caststatuschanged
@@ -76,6 +77,7 @@ spacebar
 stalldetected
 startstreaming
 statechanged
+submenuclose
 submenuopen
 textchanged
 textlang
@@ -197,6 +199,7 @@ Expressplay
 EZDRM
 Fairplay
 gstreamer
+Gumlet
 GPAC
 Hisense
 isoboxer

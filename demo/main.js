@@ -438,7 +438,6 @@ shakaDemo.Main = class {
     this.desiredConfig_ = this.player_.getConfiguration();
     const languages = navigator.languages || ['en-us'];
     this.configure('preferredAudioLanguage', languages[0]);
-    this.configure('preferredTextLanguage', languages[0]);
     this.uiLocale_ = languages[0];
     // TODO(#1591): Support multiple language preferences
 
@@ -776,10 +775,6 @@ shakaDemo.Main = class {
         !this.support_.manifest['application/x-mpegurl']) {
       return 'Your browser does not support HLS manifests.';
     }
-    if (asset.features.includes(shakaAssets.Feature.MSS) &&
-        !this.support_.manifest['application/vnd.ms-sstr+xml']) {
-      return 'Your browser does not support MSS manifests.';
-    }
 
     // Does the asset contain a playable mime type?
     const mimeTypes = [];
@@ -794,6 +789,17 @@ shakaDemo.Main = class {
     }
     if (asset.features.includes(shakaAssets.Feature.CONTAINERLESS)) {
       mimeTypes.push('audio/aac');
+    }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P10)) {
+      mimeTypes.push('video/mp4; codecs="dav1.10.01"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P10_1)) {
+      mimeTypes.push('video/mp4; codecs="av01.0.31M.10.0.111.09.16.09.0"');
+      mimeTypes.push('video/mp4; codecs="dav1.10.01"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P10_4)) {
+      mimeTypes.push('video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"');
+      mimeTypes.push('video/mp4; codecs="dav1.10.01"');
     }
     if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P8_1)) {
       mimeTypes.push('video/mp4; codecs="hvc1.2.4.L120.b0"');
@@ -817,6 +823,15 @@ shakaDemo.Main = class {
     }
     if (asset.features.includes(shakaAssets.Feature.APAC)) {
       mimeTypes.push('audio/mp4; codecs="apac.31.00"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.APAC)) {
+      mimeTypes.push('audio/mp4; codecs="apac.31.00"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_DIGITAL_PLUS)) {
+      mimeTypes.push('audio/mp4; codecs="ec-3"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.AC_4)) {
+      mimeTypes.push('audio/mp4; codecs="ac-4.02.01.03"');
     }
     let hasSupportedMimeType = mimeTypes.some((type) => {
       return this.support_.media[type];
@@ -1013,13 +1028,6 @@ shakaDemo.Main = class {
         }
       }
     }
-    if (params.has('lang')) {
-      // Load the legacy 'lang' hash value.
-      const lang = params.get('lang');
-      this.configure('preferredAudioLanguage', lang);
-      this.configure('preferredTextLanguage', lang);
-      this.setUILocale(lang);
-    }
     if (params.has('uilang')) {
       this.setUILocale(params.get('uilang'));
       // TODO(#1591): Support multiple language preferences
@@ -1043,9 +1051,10 @@ shakaDemo.Main = class {
           params.get('preferredTextFormats').split(','));
     }
 
-    if (params.has('streaming.speechToText.languagesToTranslate')) {
-      this.configure('streaming.speechToText.languagesToTranslate',
-          params.get('streaming.speechToText.languagesToTranslate').split(','));
+    if (params.has('accessibility.speechToText.languagesToTranslate')) {
+      this.configure('accessibility.speechToText.languagesToTranslate',
+          params.get('accessibility.speechToText.languagesToTranslate')
+              .split(','));
     }
 
     // Add compiled/uncompiled links.
@@ -1258,7 +1267,7 @@ shakaDemo.Main = class {
 
     this.player_.unload();
 
-    const queueManager = this.player_.getQueueManager();
+    const queueManager = this.controls_.getQueueManager();
     queueManager.removeAllItems();
 
     // The currently-selected asset changed, so update asset cards.
@@ -1396,7 +1405,7 @@ shakaDemo.Main = class {
         ui.configure(uiConfig);
       }
 
-      const queueManager = this.player_.getQueueManager();
+      const queueManager = this.controls_.getQueueManager();
       await queueManager.removeAllItems();
 
       if (asset.hasAds()) {
@@ -1419,14 +1428,10 @@ shakaDemo.Main = class {
           try {
             // If IMA is blocked by an AdBlocker, init() will throw.
             // If that happens, just proceed to load.
-            goog.asserts.assert(
-                this.video_ != null, 'this.video should exist!');
-            adManager.initClientSide(
-                this.controls_.getClientSideAdContainer(), this.video_,
-                /** adsRenderingSettings= */ null);
             const adRequest = new google.ima.AdsRequest();
             adRequest.adTagUrl = adTagUri;
-            adManager.requestClientSideAds(adRequest);
+            adManager.requestClientSideAds(adRequest,
+                /** adsRenderingSettings= */ null);
           } catch (error) {
             console.log(error);
             console.warn('Ads code has been prevented from running. ' +
@@ -1480,7 +1485,7 @@ shakaDemo.Main = class {
    * @param {ShakaDemoAssetInfo} asset
    */
   async addToQueue(asset) {
-    const queueManager = this.player_.getQueueManager();
+    const queueManager = this.controls_.getQueueManager();
     const queueItem = await this.getQueueItem_(asset);
     queueManager.insertItems([queueItem]);
   }
@@ -1575,7 +1580,7 @@ shakaDemo.Main = class {
       'preferredVideoCodecs',
       'preferredAudioCodecs',
       'preferredTextFormats',
-      'streaming.speechToText.languagesToTranslate',
+      'accessibility.speechToText.languagesToTranslate',
     ];
 
     for (const key of preferredArray) {
@@ -1708,12 +1713,9 @@ shakaDemo.Main = class {
    */
   async getManifestUriFromAdManager_(asset) {
     const adManager = this.controls_.getAdManager();
-    const container = this.controls_.getServerSideAdContainer();
     try {
       // If IMA is blocked by an AdBlocker, init() will throw.
       // If that happens, return our backup uri.
-      goog.asserts.assert(this.video_ != null, 'Video should not be null!');
-      adManager.initServerSide(container, this.video_);
       let request;
       if (asset.imaAssetKey != null) {
         // LIVE stream
@@ -1761,14 +1763,9 @@ shakaDemo.Main = class {
    */
   async getManifestUriFromMediaTailorAdManager_(asset) {
     const adManager = this.controls_.getAdManager();
-    const container = this.controls_.getServerSideAdContainer();
     try {
-      goog.asserts.assert(this.video_ != null, 'Video should not be null!');
       goog.asserts.assert(asset.mediaTailorUrl != null,
           'Media Tailor info not be null!');
-      const netEngine = this.player_.getNetworkingEngine();
-      goog.asserts.assert(netEngine, 'There should be a net engine.');
-      adManager.initMediaTailor(container, netEngine, this.video_);
       const uri = await adManager.requestMediaTailorStream(
           asset.mediaTailorUrl, asset.mediaTailorAdsParams,
           /* backupUri= */ asset.manifestUri);

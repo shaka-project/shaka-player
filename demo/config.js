@@ -82,6 +82,7 @@ shakaDemo.Config = class {
 
     this.addMetaSection_();
     this.addLanguageSection_();
+    this.addAccessibilitySection_();
     this.addCodecPreferenceSection_();
     this.addAbrSection_();
     this.addOfflineSection_();
@@ -92,7 +93,6 @@ shakaDemo.Config = class {
     this.addManifestSection_();
     this.addDashManifestSection_();
     this.addHlsManifestSection_();
-    this.addMssManifestSection_();
     this.addRetrySection_('manifest', 'Manifest Retry Parameters');
     this.addRestrictionsSection_('', 'Restrictions');
     this.addTextDisplayerSection_();
@@ -300,13 +300,6 @@ shakaDemo.Config = class {
   }
 
   /** @private */
-  addMssManifestSection_() {
-    const docLink = this.resolveExternLink_('.ManifestConfiguration');
-    this.addSection_('MSS Manifest', docLink)
-        .addBoolInput_('Enable MSS sequence mode', 'manifest.mss.sequenceMode');
-  }
-
-  /** @private */
   addAbrSection_() {
     const docLink = this.resolveExternLink_('.AbrConfiguration');
     this.addSection_('Adaptation', docLink)
@@ -346,9 +339,7 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true,
             /* canBeZero= */ true)
         .addBoolInput_('Prefer Network Information bandwidth',
-            'abr.preferNetworkInformationBandwidth')
-        .addBoolInput_('Remove latency from first packet time',
-            'abr.removeLatencyFromFirstPacketTime');
+            'abr.preferNetworkInformationBandwidth');
     this.addRestrictionsSection_('abr', 'Adaptation Restrictions');
   }
 
@@ -423,7 +414,11 @@ shakaDemo.Config = class {
         .addBoolInput_('Disable tracking events',
             'ads.disableTrackingEvents')
         .addBoolInput_('Disable Snapback',
-            'ads.disableSnapback');
+            'ads.disableSnapback')
+        .addNumberInput_('Interstitial preload ahead time',
+            'ads.interstitialPreloadAheadTime',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true);
   }
 
   /** @private */
@@ -447,6 +442,29 @@ shakaDemo.Config = class {
             'queue.repeatMode',
             repeatModeOptions,
             repeatModeOptionNames);
+  }
+
+  /** @private */
+  addAccessibilitySection_() {
+    const docLink = this.resolveExternLink_('.AccessibilityConfiguration');
+    this.addSection_('Accessibility', docLink)
+        .addBoolInput_(
+            'Handle forced subtitles automatically',
+            'accessibility.handleForcedSubtitlesAutomatically');
+    this.addSpeechToTextSection_();
+  }
+
+  /** @private */
+  addSpeechToTextSection_() {
+    const docLink = this.resolveExternLink_('.SpeechToTextConfiguration');
+    this.addSection_('Speech to text', docLink);
+    this.addBoolInput_('Speech to text', 'accessibility.speechToText.enabled')
+        .addNumberInput_('Max text length (characters)',
+            'accessibility.speechToText.maxTextLength')
+        .addBoolInput_('Performed locally on the user’s device',
+            'accessibility.speechToText.processLocally')
+        .addArrayStringInput_('Languages to translate into',
+            'accessibility.speechToText.languagesToTranslate');
   }
 
   /**
@@ -651,7 +669,6 @@ shakaDemo.Config = class {
             'streaming.returnToEndOfLiveWindowWhenOutside');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
-    this.addSpeechToTextSection_();
   }
 
   /** @private */
@@ -691,19 +708,6 @@ shakaDemo.Config = class {
             'streaming.liveSync.dynamicTargetLatency.maxLatency')
         .addNumberInput_('Dynamic Target Latency Min Latency',
             'streaming.liveSync.dynamicTargetLatency.minLatency');
-  }
-
-  /** @private */
-  addSpeechToTextSection_() {
-    const docLink = this.resolveExternLink_('.SpeechToTextConfiguration');
-    this.addSection_('Speech to text', docLink);
-    this.addBoolInput_('Speech to text', 'streaming.speechToText.enabled')
-        .addNumberInput_('Max text length (characters)',
-            'streaming.speechToText.maxTextLength')
-        .addBoolInput_('Performed locally on the user’s device',
-            'streaming.speechToText.processLocally')
-        .addArrayStringInput_('Languages to translate into',
-            'streaming.speechToText.languagesToTranslate');
   }
 
   /** @private */
@@ -749,14 +753,6 @@ shakaDemo.Config = class {
   addLanguageSection_() {
     const docLink = this.resolveExternLink_('.PlayerConfiguration');
 
-    const autoShowTextOptions = shaka.config.AutoShowText;
-    const autoShowTextOptionNames = {
-      'NEVER': 'Never',
-      'ALWAYS': 'Always',
-      'IF_PREFERRED_TEXT_LANGUAGE': 'If preferred text language',
-      'IF_SUBTITLES_MAY_BE_NEEDED': 'If subtitles may be needed',
-    };
-
     this.addSection_('Language', docLink)
         .addTextInput_('Preferred Audio Language', 'preferredAudioLanguage')
         .addTextInput_('Preferred Audio Label', 'preferredAudioLabel')
@@ -764,11 +760,7 @@ shakaDemo.Config = class {
         .addTextInput_('Preferred Audio Role', 'preferredAudioRole')
         .addTextInput_('Preferred Video Role', 'preferredVideoRole')
         .addTextInput_('Preferred Text Language', 'preferredTextLanguage')
-        .addTextInput_('Preferred Text Role', 'preferredTextRole')
-        .addSelectInput_('Auto-Show Text',
-            'autoShowText',
-            autoShowTextOptions,
-            autoShowTextOptionNames);
+        .addTextInput_('Preferred Text Role', 'preferredTextRole');
     const onChange = (input) => {
       shakaDemoMain.setUILocale(input.value);
       shakaDemoMain.remakeHash();

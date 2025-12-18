@@ -405,6 +405,7 @@ describe('Playhead', () => {
     // See: https://github.com/shaka-project/shaka-player/issues/1105
     it('does not change once the initial position is set', () => {
       timeline.isLive.and.returnValue(true);
+      timeline.isDynamic.and.returnValue(true);
       timeline.getDuration.and.returnValue(Infinity);
       timeline.getSeekRangeStart.and.returnValue(0);
       timeline.getSeekRangeEnd.and.returnValue(60);

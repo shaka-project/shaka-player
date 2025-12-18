@@ -13,7 +13,6 @@ goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.FakeEvent');
-goog.require('shaka.util.Iterables');
 goog.requireType('shaka.ui.Controls');
 
 
@@ -50,7 +49,10 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     /** @private {ResizeObserver} */
     this.resizeObserver_ = null;
 
-    const resize = () => this.computeMaxHeight_();
+    /** @private {MutationObserver} */
+    this.mutationObserver_ = null;
+
+    const resize = () => this.adjustCustomStyle_();
 
     // Use ResizeObserver if available, fallback to window resize event
     if (window.ResizeObserver) {
@@ -67,6 +69,10 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     if (this.resizeObserver_) {
       this.resizeObserver_.disconnect();
       this.resizeObserver_ = null;
+    }
+    if (this.mutationObserver_) {
+      this.mutationObserver_.disconnect();
+      this.mutationObserver_ = null;
     }
     super.release();
   }
@@ -109,7 +115,11 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     this.menu = shaka.util.Dom.createHTMLElement('div');
     this.menu.classList.add('shaka-no-propagation');
     this.menu.classList.add('shaka-show-controls-on-mouse-over');
-    this.menu.classList.add('shaka-settings-menu');
+    if (this.isSubMenu) {
+      this.menu.classList.add('shaka-sub-menu');
+    } else {
+      this.menu.classList.add('shaka-settings-menu');
+    }
     this.menu.classList.add('shaka-hidden');
 
     /** @protected {!HTMLButtonElement}*/
@@ -128,8 +138,12 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     this.backSpan = shaka.util.Dom.createHTMLElement('span');
     this.backButton.appendChild(this.backSpan);
 
-    const controlsContainer = this.controls.getControlsContainer();
-    controlsContainer.appendChild(this.menu);
+    if (this.isSubMenu) {
+      this.parent.appendChild(this.menu);
+    } else {
+      const controlsContainer = this.controls.getControlsContainer();
+      controlsContainer.appendChild(this.menu);
+    }
   }
 
   /** @private */
@@ -137,28 +151,38 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     // Initially, submenus are created with a "Close" option. When present
     // inside of the overflow menu, that option must be replaced with a
     // "Back" arrow that returns the user to the main menu.
-    if (this.parent.classList.contains('shaka-overflow-menu')) {
+    if (this.isSubMenu) {
       this.backIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['BACK']);
 
       this.eventManager.listen(this.menu, 'click', () => {
+        this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
         shaka.ui.Utils.setDisplay(this.menu, false);
         shaka.ui.Utils.setDisplay(this.parent, true);
+      });
 
-        const isDisplayed =
-        (element) => element.classList.contains('shaka-hidden') == false;
+      let prevHidden = this.parent.classList.contains('shaka-hidden');
 
-        const Iterables = shaka.util.Iterables;
-        if (Iterables.some(this.parent.childNodes, isDisplayed)) {
-          // Focus on the first visible child of the overflow menu
-          const visibleElements =
-            Iterables.filter(this.parent.childNodes, isDisplayed);
-          /** @type {!HTMLElement} */ (visibleElements[0]).focus();
+      this.mutationObserver_ = new MutationObserver((mutations) => {
+        if (!this.parent) {
+          return;
         }
+        for (const m of mutations) {
+          if (m.type === 'attributes' && m.attributeName === 'class') {
+            const newHidden = this.parent.classList.contains('shaka-hidden');
+            if (newHidden && prevHidden != newHidden) {
+              this.controls.dispatchEvent(
+                  new shaka.util.FakeEvent('submenuclose'));
+              shaka.ui.Utils.setDisplay(this.menu, false);
+            }
+            prevHidden = newHidden;
+          }
+        }
+      });
 
-        // Make sure controls are displayed
-        this.controls.computeOpacity();
-
-        this.computeMaxHeight_();
+      this.mutationObserver_.observe(this.parent, {
+        attributes: true,
+        attributeFilter: ['class'],
+        attributeOldValue: true,
       });
     }
   }
@@ -166,13 +190,19 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
 
   /** @private */
   onButtonClick_() {
-    if (this.menu.classList.contains('shaka-hidden')) {
-      this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuopen'));
-      shaka.ui.Utils.setDisplay(this.menu, true);
-      shaka.ui.Utils.focusOnTheChosenItem(this.menu);
-      this.computeMaxHeight_();
+    if (!this.isSubMenu && this.controls.anySettingsMenusAreOpen()) {
+      this.controls.hideSettingsMenus();
     } else {
-      shaka.ui.Utils.setDisplay(this.menu, false);
+      if (this.menu.classList.contains('shaka-hidden')) {
+        if (this.isSubMenu) {
+          this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuopen'));
+        }
+        shaka.ui.Utils.setDisplay(this.menu, true);
+        shaka.ui.Utils.focusOnTheChosenItem(this.menu);
+        this.adjustCustomStyle_();
+      } else {
+        shaka.ui.Utils.setDisplay(this.menu, false);
+      }
     }
   }
 
@@ -180,7 +210,12 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
   /**
    * @private
    */
-  computeMaxHeight_() {
+  adjustCustomStyle_() {
+    if (this.isSubMenu) {
+      // Submenus take up the style of the overflow element.
+      return;
+    }
+    // Compute max height
     const rectMenu = this.menu.getBoundingClientRect();
     const styleMenu = window.getComputedStyle(this.menu);
     const paddingTop = parseFloat(styleMenu.paddingTop);
@@ -190,5 +225,27 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
         rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom;
 
     this.menu.style.maxHeight = heightIntersection + 'px';
+
+    // Compute horizontal position
+    const bottomControlsPos =
+        this.controls.getControlsContainer().getBoundingClientRect();
+    const settingsMenuButtonPos =
+        this.button.getBoundingClientRect();
+    const leftGap = settingsMenuButtonPos.left - bottomControlsPos.left;
+    const rightGap = bottomControlsPos.right - settingsMenuButtonPos.right;
+    const EDGE_PADDING = 15;
+    const MIN_GAP = 60;
+    // Settings menu button is either placed to the left or center
+    if (leftGap < rightGap) {
+      const left = leftGap < MIN_GAP ?
+          EDGE_PADDING : Math.max(leftGap, EDGE_PADDING);
+      this.menu.style.left = left + 'px';
+      this.menu.style.right = 'auto';
+    } else {
+      const right = rightGap < MIN_GAP ?
+          EDGE_PADDING : Math.max(rightGap, EDGE_PADDING);
+      this.menu.style.right = right + 'px';
+      this.menu.style.left = 'auto';
+    }
   }
 };

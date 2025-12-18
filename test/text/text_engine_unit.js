@@ -48,6 +48,7 @@ describe('TextEngine', () => {
     textEngine = new TextEngine(mockDisplayer);
     textEngine.initParser(
         dummyMimeType,
+        /* external= */ false,
         /* segmentRelativeVttTiming= */ false,
         shaka.media.ManifestParser.UNKNOWN);
   });
@@ -313,6 +314,7 @@ describe('TextEngine', () => {
     it('vttOffset when segmentRelativeVttTiming is set', async () => {
       textEngine.initParser(
           dummyMimeType,
+          /* external= */ false,
           /* segmentRelativeVttTiming= */ true,
           shaka.media.ManifestParser.UNKNOWN);
 
@@ -341,6 +343,43 @@ describe('TextEngine', () => {
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
         {periodStart: 8, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
+        undefined,
+        [],
+      ]);
+    });
+
+    it('periodStart is 0 when external is set', async () => {
+      textEngine.initParser(
+          dummyMimeType,
+          /* external= */ true,
+          /* segmentRelativeVttTiming= */ false,
+          shaka.media.ManifestParser.UNKNOWN);
+
+      mockParseMedia.and.callFake((data, time) => {
+        return [
+          createFakeCue(time.periodStart + 0,
+              time.periodStart + 1),
+          createFakeCue(time.periodStart + 2,
+              time.periodStart + 3),
+        ];
+      });
+
+      await textEngine.appendBuffer(dummyData, 0, 3);
+
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        dummyData,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+        undefined,
+        [],
+      ]);
+
+      textEngine.setTimestampOffset(8);
+      await textEngine.appendBuffer(dummyData, 4, 7);
+
+      // periodStart should equal 0 instead of timestampOffset
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        dummyData,
+        {periodStart: 0, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
         undefined,
         [],
       ]);

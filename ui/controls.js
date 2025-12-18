@@ -21,6 +21,7 @@ goog.require('shaka.ui.HiddenFastForwardButton');
 goog.require('shaka.ui.HiddenRewindButton');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.MediaSession');
 goog.require('shaka.ui.SeekBar');
 goog.require('shaka.ui.SkipAdButton');
 goog.require('shaka.ui.Utils');
@@ -31,9 +32,9 @@ goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Timer');
-goog.require('shaka.util.TXml');
 
 goog.requireType('shaka.Player');
+goog.requireType('shaka.cast.CastReceiver');
 
 
 /**
@@ -55,6 +56,16 @@ goog.requireType('shaka.Player');
  *    (e. g. language/resolution/subtitle selection).
  * @property {string} type
  *   'submenuopen'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls.SubMenuCloseEvent
+ * @description Fired when one of the overflow submenus is closed
+ *    (e. g. language/resolution/subtitle selection).
+ * @property {string} type
+ *   'submenuclose'
  * @exportDoc
  */
 
@@ -147,6 +158,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         video, player, this.config_.castReceiverAppId,
         this.config_.castAndroidReceiverCompatible);
 
+    /** @private {?shaka.cast.CastReceiver} */
+    this.castReceiver_ = null;
+
     /** @private {boolean} */
     this.castAllowed_ = true;
 
@@ -181,6 +195,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @private {!Array<!shaka.extern.AdCuePoint>} */
     this.adCuePoints_ = [];
+
+    /** @private {!Array<!shaka.extern.Chapter>} */
+    this.chapters_ = [];
 
     /** @private {?shaka.extern.IUISeekBar} */
     this.seekBar_ = null;
@@ -220,6 +237,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * @private {shaka.util.Timer}
      */
     this.fadeControlsTimer_ = new shaka.util.Timer(() => {
+      if (this.config_.showUIAlwaysOnAudioOnly && this.player_.isAudioOnly()) {
+        return;
+      }
       if (this.config_.menuOpenUntilUserClosesIt &&
           this.anySettingsMenusAreOpen()) {
         return;
@@ -295,7 +315,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Configure and create the layout of the controls
     this.configure(this.config_);
     this.addEventListeners_();
-    this.setupMediaSession_();
 
     /**
      * The pressed keys set is used to record which keys are currently pressed
@@ -314,14 +333,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.timeAndSeekRangeTimer_.tickEvery(this.config_.refreshTickInSeconds);
 
     this.eventManager_.listen(this.localization_,
+        shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateChapters_();
+        });
+
+    this.eventManager_.listen(this.localization_,
         shaka.ui.Localization.LOCALE_CHANGED, (e) => {
           const locale = e['locales'][0];
           this.adManager_.setLocale(locale);
           this.videoContainer_.setAttribute('lang', locale);
+          this.updateChapters_();
         });
 
-    this.adManager_.initInterstitial(
-        this.getClientSideAdContainer(), this.localPlayer_, this.localVideo_);
+    this.adManager_.setContainers(
+        this.getClientSideAdContainer(), this.getServerSideAdContainer());
 
     this.eventManager_.listen(this.player_, 'textchanged', () => {
       this.computeShakaTextContainerSize_();
@@ -335,10 +360,19 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     });
 
+    this.eventManager_.listen(this.player_, 'trackschanged', () => {
+      this.updateChapters_();
+    });
+
+    this.eventManager_.listen(this.player_, 'manifestupdated', () => {
+      this.updateChapters_();
+    });
+
     this.eventManager_.listen(this.player_, 'unloading', () => {
       if (this.ad_) {
         return;
       }
+      this.chapters_ = [];
       this.adCuePoints_ = [];
       this.lastSelectedTextTrack_ = null;
       if (this.isFullScreenEnabled()) {
@@ -348,6 +382,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.togglePiP();
       }
     });
+
+    /** @private {shaka.ui.MediaSession} */
+    this.mediaSession_ = new shaka.ui.MediaSession(this);
   }
 
   /**
@@ -433,7 +470,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.localization_ = null;
     this.pressedKeys_.clear();
 
-    this.removeMediaSession_();
+    if (this.mediaSession_) {
+      this.mediaSession_.release();
+      this.mediaSession_ = null;
+    }
 
     // FakeEventTarget implements IReleasable
     super.release();
@@ -557,6 +597,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.eventManager_.listen(element, 'touchend', touchCb);
       }
     }
+
+    if (this.mediaSession_) {
+      this.mediaSession_.configure(this.config_);
+    }
   }
 
   /**
@@ -605,6 +649,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @param {!shaka.cast.CastReceiver} receiver
+   * @export
+   */
+  setCastReceiver(receiver) {
+    this.castReceiver_ = receiver;
+  }
+
+  /**
    * @export
    * @return {?shaka.extern.IAd}
    */
@@ -622,10 +674,26 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @export
+   * @return {!Array<!shaka.extern.Chapter>}
+   */
+  getChapters() {
+    return this.chapters_;
+  }
+
+  /**
+   * @export
    * @return {shaka.cast.CastProxy}
    */
   getCastProxy() {
     return this.castProxy_;
+  }
+
+  /**
+   * @export
+   * @return {?shaka.cast.CastReceiver}
+   */
+  getCastReceiver() {
+    return this.castReceiver_;
   }
 
   /**
@@ -682,6 +750,22 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   getAdManager() {
     return this.adManager_;
+  }
+
+  /**
+   * @return {shaka.extern.IQueueManager}
+   * @export
+   */
+  getQueueManager() {
+    return this.queueManager_;
+  }
+
+  /**
+   * @return {shaka.ui.MediaSession}
+   * @export
+   */
+  getMediaSession() {
+    return this.mediaSession_;
   }
 
   /**
@@ -1451,12 +1535,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Listen for click events to dismiss the settings menus.
     this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
 
-    // Avoid having multiple submenus open at the same time.
-    this.eventManager_.listen(
-        this, 'submenuopen', () => {
-          this.hideSettingsMenus();
-        });
-
     this.eventManager_.listen(this.video_, 'play', () => {
       this.onPlayStateChange_();
     });
@@ -1545,301 +1623,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         await this.onScreenRotation_();
       });
     }
-  }
-
-
-  /**
-   * @private
-   */
-  setupMediaSession_() {
-    if (!this.config_.setupMediaSession || !navigator.mediaSession) {
-      return;
-    }
-    const addMediaSessionHandler = (type, callback) => {
-      try {
-        navigator.mediaSession.setActionHandler(type, callback);
-      } catch (error) {
-        shaka.log.debug(
-            `The "${type}" media session action is not supported.`);
-      }
-    };
-    const updatePositionState = () => {
-      if (this.ad_ && this.ad_.isLinear()) {
-        clearPositionState();
-        return;
-      }
-      const seekRange = this.player_.seekRange();
-      let duration = seekRange.end - seekRange.start;
-      const position = parseFloat(
-          (this.video_.currentTime - seekRange.start).toFixed(2));
-      if (this.player_.isLive() && Math.abs(duration - position) < 1) {
-        // Positive infinity indicates media without a defined end, such as a
-        // live stream.
-        duration = Infinity;
-      }
-      try {
-        navigator.mediaSession.setPositionState({
-          duration: Math.max(0, duration),
-          playbackRate: this.video_.playbackRate,
-          position: Math.max(0, position),
-        });
-      } catch (error) {
-        shaka.log.v2(
-            'setPositionState in media session is not supported.');
-      }
-    };
-    const clearPositionState = () => {
-      try {
-        navigator.mediaSession.setPositionState();
-      } catch (error) {
-        shaka.log.v2(
-            'setPositionState in media session is not supported.');
-      }
-    };
-    const commonHandler = (details) => {
-      const keyboardSeekDistance = this.config_.keyboardSeekDistance;
-      switch (details.action) {
-        case 'pause':
-          this.playPausePresentation();
-          break;
-        case 'play':
-          this.playPausePresentation();
-          break;
-        case 'seekbackward':
-          if (details.seekOffset && !isFinite(details.seekOffset)) {
-            break;
-          }
-          if (!this.ad_ || !this.ad_.isLinear()) {
-            this.seek_(this.seekBar_.getValue() -
-                (details.seekOffset || keyboardSeekDistance));
-          }
-          break;
-        case 'seekforward':
-          if (details.seekOffset && !isFinite(details.seekOffset)) {
-            break;
-          }
-          if (!this.ad_ || !this.ad_.isLinear()) {
-            this.seek_(this.seekBar_.getValue() +
-                (details.seekOffset || keyboardSeekDistance));
-          }
-          break;
-        case 'seekto':
-          if (details.seekTime && !isFinite(details.seekTime)) {
-            break;
-          }
-          if (!this.ad_ || !this.ad_.isLinear()) {
-            this.seek_(this.player_.seekRange().start + details.seekTime);
-          }
-          break;
-        case 'stop':
-          this.player_.unload();
-          break;
-        case 'enterpictureinpicture':
-          if (!this.ad_ || !this.ad_.isLinear()) {
-            this.togglePiP();
-          }
-          break;
-        case 'nexttrack':
-          this.queueManager_.playItem(
-              this.queueManager_.getCurrentItemIndex() + 1);
-          break;
-        case 'previoustrack':
-          this.queueManager_.playItem(
-              this.queueManager_.getCurrentItemIndex() - 1);
-          break;
-        case 'skipad':
-          if (this.ad_) {
-            this.ad_.skip();
-          }
-          break;
-      }
-    };
-
-    addMediaSessionHandler('pause', commonHandler);
-    addMediaSessionHandler('play', commonHandler);
-    addMediaSessionHandler('seekbackward', commonHandler);
-    addMediaSessionHandler('seekforward', commonHandler);
-    addMediaSessionHandler('seekto', commonHandler);
-    addMediaSessionHandler('stop', commonHandler);
-    if ('documentPictureInPicture' in window ||
-        document.pictureInPictureEnabled) {
-      addMediaSessionHandler('enterpictureinpicture', commonHandler);
-    }
-
-    const setupTitle = (title) => {
-      let metadata = {
-        title: title,
-        artwork: [],
-      };
-      if (navigator.mediaSession.metadata) {
-        metadata = navigator.mediaSession.metadata;
-        metadata.title = title;
-      }
-      navigator.mediaSession.metadata = new MediaMetadata(metadata);
-    };
-
-    const setupPoster = (imageUrl) => {
-      const video = /** @type {HTMLVideoElement} */ (this.localVideo_);
-      if (imageUrl != video.poster) {
-        video.poster = imageUrl;
-      }
-      let metadata = {
-        title: '',
-        artwork: [{src: imageUrl}],
-      };
-      if (navigator.mediaSession.metadata) {
-        metadata = navigator.mediaSession.metadata;
-        metadata.artwork = [{src: imageUrl}];
-      }
-      navigator.mediaSession.metadata = new MediaMetadata(metadata);
-    };
-
-    const playerLoaded = () => {
-      if (this.player_.isLive() || this.player_.seekRange().start != 0) {
-        updatePositionState();
-        this.eventManager_.listen(
-            this.video_, 'timeupdate', updatePositionState);
-      } else {
-        clearPositionState();
-      }
-    };
-    const playerUnloading = () => {
-      this.eventManager_.unlisten(
-          this.video_, 'timeupdate', updatePositionState);
-    };
-
-    if (this.player_.isFullyLoaded()) {
-      playerLoaded();
-    }
-    this.eventManager_.listen(this.player_, 'loaded', playerLoaded);
-    this.eventManager_.listen(this.player_, 'unloading', playerUnloading);
-    this.eventManager_.listen(this.player_, 'metadata', (event) => {
-      const payload = event['payload'];
-      if (!payload) {
-        return;
-      }
-      let title;
-      if (payload['key'] == 'TIT2' && payload['data']) {
-        title = payload['data'];
-      }
-      let imageUrl;
-      if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
-        imageUrl = payload['data'];
-      }
-      if (title) {
-        setupTitle(title);
-      }
-      if (imageUrl) {
-        setupPoster(imageUrl);
-      }
-    });
-    this.eventManager_.listen(this.player_, 'sessiondata', (event) => {
-      const id = event['id'];
-      switch (id) {
-        case 'com.apple.hls.title': {
-          const title = event['value'];
-          if (title) {
-            setupTitle(title);
-          }
-          break;
-        }
-        case 'com.apple.hls.poster': {
-          let imageUrl = event['value'];
-          if (imageUrl) {
-            imageUrl = imageUrl.replace('{w}', '192')
-                .replace('{h}', '192')
-                .replace('{f}', 'jpeg');
-            setupPoster(imageUrl);
-          }
-          break;
-        }
-      }
-    });
-    this.eventManager_.listen(this.player_, 'programinformation', (event) => {
-      if (!event['detail']) {
-        return;
-      }
-      const TXml = shaka.util.TXml;
-      /** @type {!shaka.extern.xml.Node} */
-      const detail = /** @type {!shaka.extern.xml.Node} */(event['detail']);
-      const titleNode = TXml.findChild(detail, 'Title');
-      if (titleNode) {
-        const title = TXml.getContents(titleNode);
-        if (title) {
-          setupTitle(title);
-        }
-      }
-    });
-
-    const checkQueueItems = () => {
-      const itemsLength = this.queueManager_.getItems().length;
-      const currentIndex = this.queueManager_.getCurrentItemIndex();
-      if (itemsLength <= 1 || currentIndex == -1) {
-        addMediaSessionHandler('previoustrack', null);
-        addMediaSessionHandler('nexttrack', null);
-        return;
-      }
-      if (currentIndex > 0) {
-        addMediaSessionHandler('previoustrack', commonHandler);
-      } else {
-        addMediaSessionHandler('previoustrack', null);
-      }
-      if ((currentIndex + 1) < itemsLength) {
-        addMediaSessionHandler('nexttrack', commonHandler);
-      } else {
-        addMediaSessionHandler('nexttrack', null);
-      }
-    };
-
-    this.eventManager_.listen(
-        this.queueManager_, 'currentitemchanged', checkQueueItems);
-    this.eventManager_.listen(
-        this.queueManager_, 'itemsinserted', checkQueueItems);
-    this.eventManager_.listen(
-        this.queueManager_, 'itemsremoved', checkQueueItems);
-    this.eventManager_.listen(this.player_, 'loading', checkQueueItems);
-
-    const checkSkipAd = () => {
-      if (!this.ad_ || !this.ad_.isSkippable() || !this.ad_.canSkipNow()) {
-        addMediaSessionHandler('skipad', null);
-      } else {
-        addMediaSessionHandler('skipad', commonHandler);
-      }
-    };
-
-    this.eventManager_.listen(
-        this.adManager_, shaka.ads.Utils.AD_STARTED, checkSkipAd);
-    this.eventManager_.listen(
-        this.adManager_, shaka.ads.Utils.AD_SKIP_STATE_CHANGED, checkSkipAd);
-    this.eventManager_.listen(
-        this.adManager_, shaka.ads.Utils.AD_STOPPED, checkSkipAd);
-  }
-
-
-  /**
-   * @private
-   */
-  removeMediaSession_() {
-    if (!this.config_.setupMediaSession || !navigator.mediaSession) {
-      return;
-    }
-    try {
-      navigator.mediaSession.setPositionState();
-    } catch (error) {}
-
-    const disableMediaSessionHandler = (type) => {
-      try {
-        navigator.mediaSession.setActionHandler(type, null);
-      } catch (error) {}
-    };
-
-    disableMediaSessionHandler('pause');
-    disableMediaSessionHandler('play');
-    disableMediaSessionHandler('seekbackward');
-    disableMediaSessionHandler('seekforward');
-    disableMediaSessionHandler('seekto');
-    disableMediaSessionHandler('stop');
-    disableMediaSessionHandler('enterpictureinpicture');
   }
 
 
@@ -1953,6 +1736,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   onMouseStill_() {
+    if (this.config_.showUIAlwaysOnAudioOnly && this.player_.isAudioOnly()) {
+      return;
+    }
     // Hide the cursor.
     this.videoContainer_.classList.add('no-cursor');
     this.recentMouseMovement_ = false;
@@ -2383,6 +2169,53 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @return {boolean}
+   * @export
+   */
+  canCopyVideoFrameToClipboard() {
+    let available = this.canTakeScreenshot();
+    if (!navigator.clipboard || !navigator.clipboard.write) {
+      available = false;
+    }
+    return available;
+  }
+
+  /**
+   * Copy the current video frame to the clipboard as an image.
+   *
+   * If the browser lacks support for the Clipboard API, no action will be
+   * taken.
+   *
+   * @param {string=} format
+   * @export
+   */
+  copyVideoFrameToClipboard(format = 'image/png') {
+    if (!this.canCopyVideoFrameToClipboard()) {
+      return;
+    }
+    const canvas = /** @type {!HTMLCanvasElement}*/ (
+      document.createElement('canvas'));
+    const context = /** @type {CanvasRenderingContext2D} */ (
+      canvas.getContext('2d'));
+
+    const video = /** @type {!HTMLVideoElement} */ (this.localVideo_);
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert canvas to blob and copy to clipboard
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const item = new ClipboardItem({'image/png': blob});
+        navigator.clipboard.write([item]).catch((error) => {
+          shaka.log.error('Failed to copy image to clipboard:', error);
+        });
+      }
+    }, format);
+  }
+
+  /**
    * @private
    */
   dispatchVisibilityEvent_() {
@@ -2429,6 +2262,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.video_.currentTime = currentTime;
     this.updateTimeAndSeekRange_();
+  }
+
+  /**
+   * @param {number} increment
+   */
+  seekIncrement(increment) {
+    this.seek_(this.seekBar_.getValue() + increment);
+  }
+
+  /**
+   * @param {number} value
+   */
+  seekTo(value) {
+    this.seek_(value);
   }
 
   /**
@@ -2716,6 +2563,43 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   incrementRoll(angle) {
     goog.asserts.assert(this.vr_ != null, 'Should have a VR manager!');
     this.vr_.incrementRoll(angle);
+  }
+
+  /**
+   * @private
+   */
+  async updateChapters_() {
+    /** @type {!Array<!shaka.extern.Chapter>} */
+    let chapters = [];
+
+    const currentLocales = this.localization_.getCurrentLocales();
+    for (const locale of Array.from(currentLocales)) {
+      // If player is a proxy, and the cast receiver doesn't support this
+      // method, you get back undefined.
+      if (this.player_) {
+        // eslint-disable-next-line no-await-in-loop
+        chapters = (await this.player_.getChaptersAsync(locale)) || [];
+      }
+      if (chapters.length) {
+        break;
+      }
+    }
+    if (!chapters.length && this.player_) {
+      // If player is a proxy, and the cast receiver doesn't support this
+      // method, you get back undefined.
+      chapters = (await this.player_.getChaptersAsync('und')) || [];
+    }
+    if (!chapters.length && this.player_) {
+      // If player is a proxy, and the cast receiver doesn't support this
+      // method, you get back undefined.
+      const chaptersTracks = this.player_.getChaptersTracks() || [];
+      if (chaptersTracks.length == 1) {
+        const language = chaptersTracks[0].language;
+        chapters = (await this.player_.getChaptersAsync(language)) || [];
+      }
+    }
+
+    this.chapters_ = chapters;
   }
 
   /**

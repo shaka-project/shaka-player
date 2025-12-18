@@ -34,8 +34,10 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
+    const device = shaka.device.DeviceFactory.getDevice();
+
     /** @private {boolean} */
-    this.isAirPlay_ = shaka.device.DeviceFactory.getDevice().supportsAirPlay();
+    this.isAirPlay_ = device.supportsAirPlay();
 
     /** @private {!HTMLButtonElement} */
     this.remoteButton_ = shaka.util.Dom.createButton();
@@ -71,7 +73,10 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
 
     shaka.ui.Utils.setDisplay(this.remoteButton_, false);
 
-    if (!this.video.remote) {
+    /** @private {?RemotePlayback} */
+    this.remote_ = device.getRemote(this.video);
+
+    if (!this.remote_) {
       this.remoteButton_.classList.add('shaka-hidden');
     } else {
       this.eventManager.listen(
@@ -92,20 +97,20 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         if (!this.controls.isOpaque()) {
           return;
         }
-        this.video.remote.prompt().catch(() => {});
+        this.remote_.prompt().catch(() => {});
       });
 
-      this.eventManager.listen(this.video.remote, 'connect', () => {
+      this.eventManager.listen(this.remote_, 'connect', () => {
         this.updateRemoteState_();
         this.updateIcon_();
       });
 
-      this.eventManager.listen(this.video.remote, 'connecting', () => {
+      this.eventManager.listen(this.remote_, 'connecting', () => {
         this.updateRemoteState_();
         this.updateIcon_();
       });
 
-      this.eventManager.listen(this.video.remote, 'disconnect', () => {
+      this.eventManager.listen(this.remote_, 'disconnect', () => {
         this.updateRemoteState_();
         this.updateIcon_();
       });
@@ -114,6 +119,15 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         this.updateRemoteState_();
       });
 
+      if (this.isSubMenu) {
+        this.eventManager.listen(this.controls, 'submenuopen', () => {
+          this.updateRemoteState_(/* force= */ true);
+        });
+        this.eventManager.listen(this.controls, 'submenuclose', () => {
+          this.updateRemoteState_(/* force= */ true);
+        });
+      }
+
       this.updateRemoteState_(/* force= */ true);
       this.updateIcon_();
     }
@@ -121,8 +135,8 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
 
   /** @override */
   release() {
-    if (this.video.remote && this.callbackId_ != -1) {
-      this.video.remote.cancelWatchAvailability(this.callbackId_).catch(() => {
+    if (this.remote_ && this.callbackId_ != -1) {
+      this.remote_.cancelWatchAvailability(this.callbackId_).catch(() => {
         // Ignore this error.
       });
     }
@@ -136,13 +150,13 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
    */
   async updateRemoteState_(force = false) {
     if ((this.controls.getCastProxy().canCast() &&
-        this.controls.isCastAllowed()) || !this.video.remote) {
+        this.controls.isCastAllowed()) || !this.remote_) {
       shaka.ui.Utils.setDisplay(this.remoteButton_, false);
       if (this.callbackId_ != -1) {
-        this.video.remote.cancelWatchAvailability(this.callbackId_);
+        this.remote_.cancelWatchAvailability(this.callbackId_);
         this.callbackId_ = -1;
       }
-    } else if (this.video.remote.state == 'disconnected' || force) {
+    } else if (this.remote_.state == 'disconnected' || force) {
       const handleAvailabilityChange = (availability) => {
         if (this.player) {
           const disableRemote = this.video.disableRemotePlayback;
@@ -154,33 +168,34 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
               canCast = false;
             }
           }
-          shaka.ui.Utils.setDisplay(
-              this.remoteButton_, canCast && availability && !disableRemote);
+          const display = canCast && availability && !disableRemote &&
+              !this.isSubMenuOpened;
+          shaka.ui.Utils.setDisplay(this.remoteButton_, display);
         } else {
           shaka.ui.Utils.setDisplay(this.remoteButton_, false);
         }
       };
       try {
         if (this.callbackId_ != -1) {
-          await this.video.remote.cancelWatchAvailability(this.callbackId_);
+          await this.remote_.cancelWatchAvailability(this.callbackId_);
           this.callbackId_ = -1;
         }
       } catch (e) {
         // Ignore this error.
       }
       try {
-        const id = await this.video.remote.watchAvailability(
+        const id = await this.remote_.watchAvailability(
             handleAvailabilityChange);
         this.callbackId_ = id;
       } catch (e) {
         handleAvailabilityChange(/* availability= */ true);
       }
     } else {
-      shaka.ui.Utils.setDisplay(this.remoteButton_, true);
+      shaka.ui.Utils.setDisplay(this.remoteButton_, !this.isSubMenuOpened);
       if (this.callbackId_ != -1) {
         // If remote device is connecting or connected, we should stop
         // watching remote device availability to save power.
-        await this.video.remote.cancelWatchAvailability(this.callbackId_);
+        await this.remote_.cancelWatchAvailability(this.callbackId_);
         this.callbackId_ = -1;
       }
     }
@@ -205,7 +220,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     if (this.isAirPlay_) {
       return;
     }
-    if (this.video.remote.state == 'disconnected') {
+    if (this.remote_.state == 'disconnected') {
       this.remoteIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['CAST']);
     } else {
       this.remoteIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['EXIT_CAST']);

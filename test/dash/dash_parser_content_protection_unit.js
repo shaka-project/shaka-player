@@ -167,6 +167,14 @@ describe('DashParser ContentProtection', () => {
    */
   function buildDrmInfo(keySystem, keyIds = [], initData = [],
       encryptionScheme = 'cenc') {
+    if (!initData.length && shaka.drm.DrmUtils.isFairPlayKeySystem(keySystem)) {
+      initData.push({
+        initDataType: 'sinf',
+        initData: new Uint8Array(0),
+        keyId: keyIds[0] || null,
+      });
+    }
+
     return jasmine.objectContaining({
       keySystem,
       encryptionScheme,

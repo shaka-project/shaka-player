@@ -58,6 +58,9 @@ class ShakaReceiverApp {
     this.receiver_ = new shaka.cast.CastReceiver(
         this.video_, this.player_,
         (appData) => this.appDataCallback_(appData));
+
+    ui.getControls().setCastReceiver(this.receiver_);
+
     this.receiver_.addEventListener(
         'caststatuschanged', () => this.checkIdle_());
 
@@ -67,50 +70,6 @@ class ShakaReceiverApp {
     });
     this.player_.addEventListener('unloading', () => {
       this.video_.removeAttribute('poster');
-    });
-
-    // Setup content image and title
-    this.player_.addEventListener('metadata', (event) => {
-      const payload = event['payload'];
-      if (!payload) {
-        return;
-      }
-      let title;
-      if (payload['key'] == 'TIT2' && payload['data']) {
-        title = payload['data'];
-      }
-      let imageUrl;
-      if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
-        imageUrl = payload['data'];
-      }
-      if (title) {
-        this.receiver_.setContentTitle(title);
-      }
-      if (imageUrl) {
-        this.receiver_.setContentImage(imageUrl);
-      }
-    });
-    this.player_.addEventListener('sessiondata', (event) => {
-      const id = event['id'];
-      switch (id) {
-        case 'com.apple.hls.title': {
-          const title = event['value'];
-          if (title) {
-            this.receiver_.setContentTitle(title);
-          }
-          break;
-        }
-        case 'com.apple.hls.poster': {
-          let imageUrl = event['value'];
-          if (imageUrl) {
-            imageUrl = imageUrl.replace('{w}', '192')
-                .replace('{h}', '192')
-                .replace('{f}', 'jpeg');
-            this.receiver_.setContentImage(imageUrl);
-          }
-          break;
-        }
-      }
     });
 
     this.startIdleTimer_();

@@ -1324,7 +1324,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     it('does not add range headers to requests for the whole segment', () => {
       // You had _one_ job, createSegmentRequest!
 
-      const request = shaka.util.Networking.createSegmentRequest(
+      const request = shaka.net.NetworkingUtils.createSegmentRequest(
           /* uris= */ ['/foo.mp4'],
           /* start= */ 0,
           /* end= */ null,

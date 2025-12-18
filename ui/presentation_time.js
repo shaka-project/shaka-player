@@ -42,7 +42,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
         return;
       }
       // Jump to LIVE if the user clicks on the current time.
-      if (this.player.isLive()) {
+      if (this.player.isDynamic()) {
         this.video.currentTime = this.player.seekRange().end;
       } else {
         this.showProgress_ = !this.showProgress_;
@@ -98,7 +98,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
     if (!isFinite(seekRangeSize)) {
       this.setValue_(this.localization.resolve(shaka.ui.Locales.Ids.LIVE));
       this.currentTime_.disabled = true;
-    } else if (this.player.isLive()) {
+    } else if (this.player.isDynamic()) {
       // The amount of time we are behind the live edge.
       const behindLive = Math.floor(seekRange.end - displayTime);
       displayTime = Math.max(0, behindLive);
@@ -140,7 +140,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
    * @private
    */
   onTracksChanged_() {
-    if (this.player.isLive()) {
+    if (this.player.isDynamic()) {
       const ariaLabel = shaka.ui.Locales.Ids.SKIP_TO_LIVE;
       this.currentTime_.ariaLabel = this.localization.resolve(ariaLabel);
     }

@@ -168,7 +168,7 @@ describe('Player', () => {
       // Ensures we don't get a warning about missing preference.
       preferredAudioLanguage: 'en',
       abrFactory: () => abrManager,
-      textDisplayFactory: () => textDisplayer,
+      textDisplayFactory: (player) => textDisplayer,
     });
 
     onError = jasmine.createSpy('error event');
@@ -2812,7 +2812,6 @@ describe('Player', () => {
 
     it('chooses the configured text language and role at start', async () => {
       player.configure({
-        autoShowText: shaka.config.AutoShowText.IF_PREFERRED_TEXT_LANGUAGE,
         preferredTextLanguage: 'en',
         preferredTextRole: 'commentary',
       });
@@ -3174,18 +3173,10 @@ describe('Player', () => {
           bandwidth: 200,
         };
 
-        const textPrefix = {
-          timestamp: jasmine.any(Number),
-          id: 4,
-          type: 'text',
-          fromAdaptation: true,
-          bandwidth: null,
-        };
         const switchHistory = player.getStats().switchHistory;
 
         expect(switchHistory[0]).toEqual(variantPrefix);
-        expect(switchHistory[1]).toEqual(textPrefix);
-        expect(switchHistory.slice(2)).toEqual(additional);
+        expect(switchHistory.slice(1)).toEqual(additional);
       }
 
       /**

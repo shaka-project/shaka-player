@@ -30,3 +30,37 @@ var ChromeSpeechRecognition = class extends SpeechRecognition {};
  * @param {MediaStreamTrack=} mediaStreamTrack
  */
 ChromeSpeechRecognition.prototype.start = function(mediaStreamTrack) {};
+
+
+/**
+ * @fileoverview Externs for Web Speech API (SpeechRecognition).
+ * @externs
+ */
+
+
+/**
+ * @fileoverview Externs for Web Speech API (SpeechRecognition).
+ * @externs
+ */
+
+/**
+ * @typedef {{
+ *   langs: !Array<string>,
+ *   processLocally: boolean,
+ * }}
+ */
+var SpeechRecognitionOptions;
+
+/**
+ * @param {!SpeechRecognitionOptions} options
+ * @return {!Promise<string>}
+ */
+ChromeSpeechRecognition.available = function(options) {};
+
+/**
+ * @param {!SpeechRecognitionOptions} options
+ * @return {!Promise<boolean>}
+ */
+ChromeSpeechRecognition.install = function(options) {};
+
+

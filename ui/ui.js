@@ -286,6 +286,22 @@ shaka.ui.Overlay = class {
     }
     controlPanelElements.push('fullscreen');
 
+    const mediaSessionActions = [
+      'pause',
+      'play',
+      'seekbackward',
+      'seekforward',
+      'seekto',
+      'stop',
+      'skipad',
+      'previoustrack',
+      'nexttrack',
+    ];
+    if ('documentPictureInPicture' in window ||
+        document.pictureInPictureEnabled) {
+      mediaSessionActions.push('enterpictureinpicture');
+    }
+
     const config = {
       controlPanelElements,
       topControlPanelElements: [
@@ -340,6 +356,7 @@ shaka.ui.Overlay = class {
       contextMenuElements: [
         'loop',
         'picture_in_picture',
+        'copy_video_frame',
         'save_video_frame',
         'statistics',
         'ad_statistics',
@@ -391,7 +408,6 @@ shaka.ui.Overlay = class {
       refreshTickInSeconds: 0.125,
       displayInVrMode: false,
       defaultVrProjectionMode: 'equirectangular',
-      setupMediaSession: true,
       preferVideoFullScreenInVisionOS: true,
       showAudioCodec: true,
       showVideoCodec: true,
@@ -420,6 +436,15 @@ shaka.ui.Overlay = class {
       allowTogglePresentationTime: true,
       showRemainingTimeInPresentationTime: false,
       enableVrDeviceMotion: true,
+      showUIAlwaysOnAudioOnly: true,
+      preferIntlDisplayNames: true,
+      mediaSession: {
+        enabled: true,
+        handleMetadata: true,
+        handleActions: true,
+        handlePosition: true,
+        supportedActions: mediaSessionActions,
+      },
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause
@@ -575,8 +600,18 @@ shaka.ui.Overlay = class {
         const {lcevcCanvas, vrCanvas} =
             shaka.ui.Overlay.findOrMakeSpecialCanvases_(
                 container, canvases, vrCanvases);
-        shaka.ui.Overlay.setupUIandAutoLoad_(
-            container, video, lcevcCanvas, vrCanvas);
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          await shaka.ui.Overlay.setupUIandAutoLoad_(
+              container, video, lcevcCanvas, vrCanvas);
+        } catch (e) {
+          // This can fail if, for example, not every player file has loaded.
+          // Ad-block is a likely cause for this sort of failure.
+          shaka.log.error('Error setting up Shaka Player', e);
+          shaka.ui.Overlay.dispatchLoadedEvent_('shaka-ui-load-failed',
+              shaka.ui.Overlay.FailReasonCode.PLAYER_FAILED_TO_LOAD);
+          return;
+        }
       }
     } else {
       for (const container of containers) {
@@ -655,17 +690,6 @@ shaka.ui.Overlay = class {
   static async setupUIandAutoLoad_(container, video, lcevcCanvas, vrCanvas) {
     // Create the UI
     const player = new shaka.Player();
-    const ui = new shaka.ui.Overlay(player,
-        shaka.util.Dom.asHTMLElement(container),
-        shaka.util.Dom.asHTMLMediaElement(video),
-        vrCanvas ? shaka.util.Dom.asHTMLCanvasElement(vrCanvas) : null);
-
-    // Attach Canvas used for LCEVC Decoding
-    player.attachCanvas(/** @type {HTMLCanvasElement} */(lcevcCanvas));
-
-    if (shaka.util.Dom.asHTMLMediaElement(video).controls) {
-      ui.getControls().setEnabledNativeControls(true);
-    }
 
     // Get the source and load it
     // Source can be specified either on the video element:
@@ -688,6 +712,18 @@ shaka.ui.Overlay = class {
     }
 
     await player.attach(shaka.util.Dom.asHTMLMediaElement(video));
+
+    // Attach Canvas used for LCEVC Decoding
+    player.attachCanvas(/** @type {HTMLCanvasElement} */(lcevcCanvas));
+
+    const ui = new shaka.ui.Overlay(player,
+        shaka.util.Dom.asHTMLElement(container),
+        shaka.util.Dom.asHTMLMediaElement(video),
+        vrCanvas ? shaka.util.Dom.asHTMLCanvasElement(vrCanvas) : null);
+
+    if (shaka.util.Dom.asHTMLMediaElement(video).controls) {
+      ui.getControls().setEnabledNativeControls(true);
+    }
 
     for (const url of urls) {
       try { // eslint-disable-next-line no-await-in-loop

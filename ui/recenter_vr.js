@@ -82,6 +82,15 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
       this.checkAvailability_();
     });
 
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.checkAvailability_();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.checkAvailability_();
+      });
+    }
+
     this.checkAvailability_();
   }
 
@@ -91,7 +100,7 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
    */
   checkAvailability_() {
     shaka.ui.Utils.setDisplay(this.recenterVRButton_,
-        this.controls.isPlayingVR());
+        this.controls.isPlayingVR() && !this.isSubMenuOpened);
   }
 
 

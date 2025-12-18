@@ -243,6 +243,9 @@ shaka.test.DomTextLayoutTests = class extends shaka.test.TextLayoutTests {
 
     /** @type {number} */
     this.minSimilarity = MIN_SIMILARITY_UI;
+
+    /** @type {Object} **/
+    this.player = null;
   }
 
   /** @override */
@@ -270,6 +273,11 @@ shaka.test.DomTextLayoutTests = class extends shaka.test.TextLayoutTests {
     // tests.
     this.videoContainer.classList.add('shaka-video-container');
 
+    this.player = {
+      getMediaElement: () => /** @type {!HTMLMediaElement} */(this.mockVideo),
+      getVideoContainer: () => this.videoContainer,
+    };
+
     await this.waitForFont('Roboto');
   }
 
@@ -282,8 +290,8 @@ shaka.test.DomTextLayoutTests = class extends shaka.test.TextLayoutTests {
 
   /** @override */
   recreateTextDisplayer() {
-    this.textDisplayer = new shaka.text.UITextDisplayer(
-        /** @type {!HTMLMediaElement} */(this.mockVideo), this.videoContainer);
+    /** @suppress {checkTypes} */
+    this.textDisplayer = new shaka.text.UITextDisplayer(this.player);
     this.textDisplayer.setTextVisibility(true);
   }
 

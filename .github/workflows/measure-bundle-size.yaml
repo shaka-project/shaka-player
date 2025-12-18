@@ -1,0 +1,76 @@
+name: Measure Bundle Size
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  bundle-size:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          path: head-source
+
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+          path: base-source
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y python3 jq gzip ffmpeg wget
+
+      - name: Build head source
+        working-directory: head-source
+        run: python3 build/all.py
+      
+      - name: Measure head bundles
+        working-directory: head-source
+        run: |
+          python3 .github/workflows/compute-bundle-size.py measure \
+              --dir dist \
+              --out ../head-sizes.json
+          echo "Head json:"
+          cat ../head-sizes.json
+
+      - name: Build base source
+        working-directory: base-source
+        run: python3 build/all.py
+      
+      - name: Measure base bundles
+        working-directory: base-source
+        run: |
+          python3 .github/workflows/compute-bundle-size.py measure \
+              --dir dist \
+              --out ../base-sizes.json
+          echo "Base json:"
+          cat ../base-sizes.json
+      
+      - name: Generate report
+        run: |
+          python3 base-source/.github/workflows/compute-bundle-size.py compare \
+            --head head-sizes.json \
+            --base base-sizes.json > report.md
+          
+          cat report.md
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-report
+          path: report.md
+          retention-days: 1

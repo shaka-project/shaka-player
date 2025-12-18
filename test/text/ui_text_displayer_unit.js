@@ -13,6 +13,8 @@ describe('UITextDisplayer', () => {
   let textDisplayer;
   /** @type {number} */
   const videoContainerHeight = 450;
+  /** @type {Object} **/
+  let player;
 
   /**
    * Transform a cssText to an object.
@@ -47,11 +49,16 @@ describe('UITextDisplayer', () => {
     videoContainer.style.height = `${videoContainerHeight}px`;
     document.body.appendChild(videoContainer);
     video = new shaka.test.FakeVideo();
+    player = {
+      getMediaElement: () => video,
+      getVideoContainer: () => videoContainer,
+    };
   });
 
   beforeEach(() => {
     video.currentTime = 0;
-    textDisplayer = new shaka.text.UITextDisplayer(video, videoContainer);
+    /** @suppress {checkTypes} */
+    textDisplayer = new shaka.text.UITextDisplayer(player);
   });
 
   afterEach(async () => {
@@ -622,12 +629,5 @@ describe('UITextDisplayer', () => {
     textDisplayer.destroy();
 
     expect(videoContainer.childNodes.length).toBe(0);
-  });
-
-  it('Backward compatible UITextDisplayer constructor', () => {
-    // The third argument to UITextDisplayer constructor is new in v4.8.0.
-    // Test without, to support existing applications.
-    /** @suppress {checkTypes} */
-    textDisplayer = new shaka.text.UITextDisplayer(video, videoContainer);
   });
 });

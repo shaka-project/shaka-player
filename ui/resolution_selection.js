@@ -114,6 +114,17 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       this.updateLabels_();
     });
 
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.updateSelection_();
+        this.updateLabels_();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.updateSelection_();
+        this.updateLabels_();
+      });
+    }
+
     this.updateSelection_();
   }
 
@@ -273,7 +284,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     this.updateLocalizedStrings_();
 
-    shaka.ui.Utils.setDisplay(this.button, numberOfTracks > 0);
+    shaka.ui.Utils.setDisplay(
+        this.button, numberOfTracks > 0 && !this.isSubMenuOpened);
   }
 
   /**
@@ -507,12 +519,10 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       const codec = shaka.util.MimeUtils.getNormalizedCodec(t.codecs);
       return codec.startsWith('lcevc');
     };
-    if (track.hdr == 'PQ' || track.hdr == 'HLG') {
-      if (isDolbyVision(track)) {
-        text += ' Dolby Vision';
-      } else {
-        text += ' HDR';
-      }
+    if (isDolbyVision(track)) {
+      text += ' Dolby Vision';
+    } else if (track.hdr == 'PQ' || track.hdr == 'HLG') {
+      text += ' HDR';
     }
     if (isLCEVC(track)) {
       text += ' LCEVC';

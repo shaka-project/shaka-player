@@ -5,7 +5,6 @@
 +../../lib/abr/ewma_bandwidth_estimator.js
 +../../lib/abr/simple_abr_manager.js
 
-+../../lib/config/auto_show_text.js
 +../../lib/config/codec_switching_strategy.js
 +../../lib/config/cross_boundary_strategy.js
 +../../lib/config/repeat_mode.js
@@ -13,8 +12,6 @@
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
 +../../lib/debug/running_in_lab.js
-
-+../../lib/dependencies/all.js
 
 +../../lib/deprecate/deprecate.js
 +../../lib/deprecate/enforcer.js
@@ -114,7 +111,6 @@
 +../../lib/util/mp4_parser.js
 +../../lib/util/multi_map.js
 +../../lib/util/mutex.js
-+../../lib/util/networking.js
 +../../lib/util/number_utils.js
 +../../lib/util/object_utils.js
 +../../lib/util/operation_manager.js
