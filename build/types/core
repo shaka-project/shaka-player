@@ -97,6 +97,7 @@
 +../../lib/util/fake_event.js
 +../../lib/util/fake_event_target.js
 +../../lib/util/functional.js
++../../lib/util/hash_utils.js
 +../../lib/util/i_destroyable.js
 +../../lib/util/i_releasable.js
 +../../lib/util/id3_utils.js
