@@ -12,6 +12,7 @@ goog.require('shaka.log');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.Iterables');
 goog.requireType('shaka.ui.Controls');
 
 
@@ -53,6 +54,7 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
             this.controlsContainer_.getBoundingClientRect();
         this.contextMenu_.style.left = `${e.clientX - controlsLocation.left}px`;
         this.contextMenu_.style.top = `${e.clientY - controlsLocation.top}px`;
+        this.contextMenu_.style.bottom = 'auto';
 
         shaka.ui.Utils.setDisplay(this.contextMenu_, true);
       } else {
@@ -61,11 +63,18 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(window, 'click', () => {
-      shaka.ui.Utils.setDisplay(this.contextMenu_, false);
+      this.closeMenu();
     });
 
     this.eventManager.listen(this.contextMenu_, 'click', () => {
-      shaka.ui.Utils.setDisplay(this.contextMenu_, false);
+      const isSubMenuDisplayed = (element) => {
+        return !element.classList.contains('shaka-hidden') &&
+            element.classList.contains('shaka-sub-menu');
+      };
+      const Iterables = shaka.util.Iterables;
+      if (!Iterables.some(this.contextMenu_.childNodes, isSubMenuDisplayed)) {
+        this.closeMenu();
+      }
     });
 
     this.createChildren_();
