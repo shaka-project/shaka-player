@@ -35,7 +35,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     this.menu.classList.add('shaka-playback-rates');
     this.button.classList.add('shaka-tooltip-status');
 
-    if (!Array.from(parent.classList).includes('shaka-overflow-menu')) {
+    if (!this.isSubMenu) {
       this.playbackRateMark = shaka.util.Dom.createHTMLElement('span');
       this.playbackRateMark.classList.add('shaka-overflow-playback-rate-mark');
       this.button.appendChild(this.playbackRateMark);
