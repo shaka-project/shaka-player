@@ -6729,6 +6729,6 @@ describe('HlsParser', () => {
 
     expect(manifest.variants.length).toBe(1);
     expect(manifest.variants[0].audio).toBeTruthy();
-    expect(manifest.variants[0].audio.label).toBe('');
+    expect(manifest.variants[0].audio.label).toBeNull();
   });
 });
