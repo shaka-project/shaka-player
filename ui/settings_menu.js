@@ -190,6 +190,9 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
 
   /** @private */
   onButtonClick_() {
+    if (!this.parent.classList.contains('shaka-context-menu')) {
+      this.controls.hideContextMenus();
+    }
     if (!this.isSubMenu && this.controls.anySettingsMenusAreOpen()) {
       this.controls.hideSettingsMenus();
     } else {

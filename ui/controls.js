@@ -208,6 +208,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!Array<!HTMLElement>} */
     this.menus_ = [];
 
+    /** @private {!Array<!HTMLElement>} */
+    this.contextMenus_ = [];
+
     /** @private {?shaka.extern.TextTrack} */
     this.lastSelectedTextTrack_ = null;
 
@@ -868,6 +871,22 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @return {boolean}
+   * @export
+   */
+  anyContextMenusAreOpen() {
+    return this.contextMenus_.some(
+        (menu) => !menu.classList.contains('shaka-hidden'));
+  }
+
+  /** @export */
+  hideContextMenus() {
+    for (const menu of this.contextMenus_) {
+      shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
+    }
+  }
+
+  /**
+   * @return {boolean}
    * @private
    */
   shouldUseDocumentFullscreen_() {
@@ -1233,6 +1252,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.videoContainer_.getElementsByClassName('shaka-settings-menu'));
     this.menus_.push(...Array.from(
         this.videoContainer_.getElementsByClassName('shaka-overflow-menu')));
+
+    this.contextMenus_ = Array.from(
+        this.videoContainer_.getElementsByClassName('shaka-context-menu'));
 
     this.showOnHoverControls_ = Array.from(
         this.videoContainer_.getElementsByClassName(
@@ -1858,7 +1880,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
-    if (this.anySettingsMenusAreOpen()) {
+    if (this.anyContextMenusAreOpen()) {
+      this.hideContextMenus();
+    } else if (this.anySettingsMenusAreOpen()) {
       this.hideSettingsMenusTimer_.tickNow();
     } else if (this.config_.singleClickForPlayAndPause) {
       this.playPausePresentation();
