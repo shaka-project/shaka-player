@@ -350,7 +350,7 @@ shakaDemo.Config = class {
       'TOP_CENTER': 'top center',
       'TOP_RIGHT': 'top right',
       'CENTER_LEFT': 'center left',
-      'CENTER_CENTER': 'center center',
+      'CENTER': 'center',
       'CENTER_RIGHT': 'center right',
       'BOTTOM_LEFT': 'bottom left',
       'BOTTOM_CENTER': 'bottom center',

@@ -198,8 +198,8 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
         return this.localization.resolve(LocIds.TOP_RIGHT);
       case shaka.config.PositionArea.CENTER_LEFT:
         return this.localization.resolve(LocIds.CENTER_LEFT);
-      case shaka.config.PositionArea.CENTER_CENTER:
-        return this.localization.resolve(LocIds.CENTER_CENTER);
+      case shaka.config.PositionArea.CENTER:
+        return this.localization.resolve(LocIds.CENTER);
       case shaka.config.PositionArea.CENTER_RIGHT:
         return this.localization.resolve(LocIds.CENTER_RIGHT);
       case shaka.config.PositionArea.BOTTOM_LEFT:

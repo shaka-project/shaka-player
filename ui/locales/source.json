@@ -57,7 +57,7 @@
     "description": "Label for a button used to open the native Cast dialog in the browser and select a destination to Cast to.",
     "message": "Cast..."
   },
-  "CENTER_CENTER": {
+  "CENTER": {
     "description": "Label for a button used to indicate a subtitle position.",
     "message": "Center"
   },

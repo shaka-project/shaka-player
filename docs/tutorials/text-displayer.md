@@ -64,7 +64,7 @@ The following enum defines the supported subtitle placement areas:
 | `TOP_CENTER` | Top center |
 | `TOP_RIGHT` | Top right |
 | `CENTER_LEFT` | Center left |
-| `CENTER_CENTER` | Center of the screen |
+| `CENTER` | Center of the screen |
 | `CENTER_RIGHT` | Center right |
 | `BOTTOM_LEFT` | Bottom left |
 | `BOTTOM_CENTER` | Bottom center |
