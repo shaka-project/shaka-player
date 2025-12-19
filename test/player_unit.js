@@ -849,7 +849,18 @@ describe('Player', () => {
   });
 
   describe('configure', () => {
+    /** @type {jasmine.Spy} */
+    let onConfigurationChanged;
+
+    beforeEach(() => {
+      onConfigurationChanged = jasmine.createSpy('onConfigurationChanged');
+      player.addEventListener('configurationchanged',
+          Util.spyFunc(onConfigurationChanged));
+    });
+
     it('overwrites defaults', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       const defaultConfig = player.getConfiguration();
       // Make sure the default differs from our test value:
       expect(defaultConfig.drm.retryParameters.backoffFactor).not.toBe(5);
@@ -861,6 +872,8 @@ describe('Player', () => {
         },
       });
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
+
       const newConfig = player.getConfiguration();
       // Make sure we changed the backoff for DRM, but not for manifests:
       expect(newConfig.drm.retryParameters.backoffFactor).toBe(5);
@@ -868,12 +881,16 @@ describe('Player', () => {
     });
 
     it('reverts to defaults when undefined is given', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       player.configure({
         streaming: {
           retryParameters: {backoffFactor: 5},
           bufferBehind: 7,
         },
       });
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
 
       let newConfig = player.getConfiguration();
       expect(newConfig.streaming.retryParameters.backoffFactor).toBe(5);
@@ -885,6 +902,8 @@ describe('Player', () => {
         },
       });
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
+
       newConfig = player.getConfiguration();
       expect(newConfig.streaming.retryParameters.backoffFactor).not.toBe(5);
       expect(newConfig.streaming.bufferBehind).toBe(7);
@@ -892,9 +911,13 @@ describe('Player', () => {
       player.configure({streaming: undefined});
       newConfig = player.getConfiguration();
       expect(newConfig.streaming.bufferBehind).not.toBe(7);
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(3);
     });
 
     it('restricts the types of config values', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       logErrorSpy.and.stub();
       const defaultConfig = player.getConfiguration();
 
@@ -902,6 +925,8 @@ describe('Player', () => {
       player.configure({
         streaming: {bufferBehind: '77'},
       });
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
 
       let newConfig = player.getConfiguration();
       expect(newConfig).toEqual(defaultConfig);
@@ -914,6 +939,8 @@ describe('Player', () => {
         drm: 5,
       });
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
+
       newConfig = player.getConfiguration();
       expect(newConfig).toEqual(defaultConfig);
       expect(logErrorSpy).toHaveBeenCalledWith(
@@ -921,6 +948,8 @@ describe('Player', () => {
     });
 
     it('accepts synchronous function values for async function fields', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       const defaultConfig = player.getConfiguration();
 
       // Make sure the default is async, or the test is invalid.
@@ -931,12 +960,18 @@ describe('Player', () => {
       // Try a synchronous callback.
       player.configure('offline.trackSelectionCallback', () => {});
       // If this fails, an error log will trigger test failure.
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
     });
 
     it('expands dictionaries that allow arbitrary keys', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       player.configure({
         drm: {servers: {'com.widevine.alpha': 'http://foo/widevine'}},
       });
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
 
       let newConfig = player.getConfiguration();
       expect(newConfig.drm.servers).toEqual({
@@ -947,6 +982,8 @@ describe('Player', () => {
         drm: {servers: {'com.microsoft.playready': 'http://foo/playready'}},
       });
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
+
       newConfig = player.getConfiguration();
       expect(newConfig.drm.servers).toEqual({
         'com.widevine.alpha': 'http://foo/widevine',
@@ -955,11 +992,15 @@ describe('Player', () => {
     });
 
     it('expands dictionaries but still restricts their values', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       // Try a bogus server value (number instead of string)
       logErrorSpy.and.stub();
       player.configure({
         drm: {servers: {'com.widevine.alpha': 7}},
       });
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
 
       let newConfig = player.getConfiguration();
       expect(newConfig.drm.servers).toEqual({});
@@ -971,6 +1012,8 @@ describe('Player', () => {
       player.configure({
         drm: {advanced: {'ks1': {distinctiveIdentifierRequired: true}}},
       });
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
 
       newConfig = player.getConfiguration();
       expect(newConfig.drm.advanced).toEqual({
@@ -984,6 +1027,8 @@ describe('Player', () => {
         drm: {advanced: {'ks1': {bogus: true}}},
       });
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(3);
+
       newConfig = player.getConfiguration();
       expect(newConfig).toEqual(lastGoodConfig);
       expect(logErrorSpy).toHaveBeenCalledWith(
@@ -991,6 +1036,8 @@ describe('Player', () => {
     });
 
     it('removes dictionary entries when undefined is given', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       player.configure({
         drm: {
           servers: {
@@ -999,6 +1046,8 @@ describe('Player', () => {
           },
         },
       });
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
 
       let newConfig = player.getConfiguration();
       expect(newConfig.drm.servers).toEqual({
@@ -1010,6 +1059,8 @@ describe('Player', () => {
         drm: {servers: {'com.widevine.alpha': undefined}},
       });
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
+
       newConfig = player.getConfiguration();
       expect(newConfig.drm.servers).toEqual({
         'com.microsoft.playready': 'http://foo/playready',
@@ -1019,11 +1070,15 @@ describe('Player', () => {
         drm: {servers: undefined},
       });
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(3);
+
       newConfig = player.getConfiguration();
       expect(newConfig.drm.servers).toEqual({});
     });
 
     it('checks the number of arguments to functions', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       const goodFailureCallback = (error) => {};
       const badFailureCallback1 = () => {};  // too few args
       const badFailureCallback2 = (x, y) => {};  // too many args
@@ -1032,6 +1087,8 @@ describe('Player', () => {
       player.configure({
         streaming: {failureCallback: goodFailureCallback},
       });
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
 
       let newConfig = player.getConfiguration();
       expect(newConfig.streaming.failureCallback).toBe(goodFailureCallback);
@@ -1042,6 +1099,8 @@ describe('Player', () => {
       player.configure({
         streaming: {failureCallback: badFailureCallback1},
       });
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
 
       newConfig = player.getConfiguration();
       expect(newConfig.streaming.failureCallback).toBe(badFailureCallback1);
@@ -1054,6 +1113,8 @@ describe('Player', () => {
         streaming: {failureCallback: badFailureCallback2},
       });
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(3);
+
       newConfig = player.getConfiguration();
       expect(newConfig.streaming.failureCallback).toBe(badFailureCallback2);
       expect(logWarnSpy).toHaveBeenCalledWith(
@@ -1065,12 +1126,16 @@ describe('Player', () => {
         streaming: {failureCallback: undefined},
       });
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(4);
+
       newConfig = player.getConfiguration();
       expect(newConfig.streaming.failureCallback).not.toBe(badFailureCallback2);
     });
 
     // Regression test for https://github.com/shaka-project/shaka-player/issues/784
     it('does not throw when overwriting serverCertificate', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       player.configure({
         drm: {
           advanced: {
@@ -1081,6 +1146,8 @@ describe('Player', () => {
         },
       });
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
+
       player.configure({
         drm: {
           advanced: {
@@ -1090,9 +1157,13 @@ describe('Player', () => {
           },
         },
       });
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
     });
 
     it('checks the type of serverCertificate', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       logErrorSpy.and.stub();
 
       player.configure({
@@ -1104,6 +1175,8 @@ describe('Player', () => {
           },
         },
       });
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
 
       expect(logErrorSpy).toHaveBeenCalledWith(
           stringContaining('.serverCertificate'));
@@ -1119,22 +1192,30 @@ describe('Player', () => {
         },
       });
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
+
       expect(logErrorSpy).toHaveBeenCalledWith(
           stringContaining('.serverCertificate'));
     });
 
     it('does not throw when null appears instead of an object', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       logErrorSpy.and.stub();
 
       player.configure({
         drm: {advanced: null},
       });
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
+
       expect(logErrorSpy).toHaveBeenCalledWith(
           stringContaining('.drm.advanced'));
     });
 
     it('configures play and seek range for VOD', async () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       const timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(true);
       timeline.setDuration(300);
@@ -1149,6 +1230,8 @@ describe('Player', () => {
       player.configure({playRangeStart: 5, playRangeEnd: 10});
       await player.load(fakeManifestUri, 0, fakeMimeType);
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
+
       const seekRange = player.seekRange();
       expect(seekRange.start).toBe(5);
       expect(seekRange.end).toBe(10);
@@ -1156,6 +1239,8 @@ describe('Player', () => {
 
     // Test for https://github.com/shaka-project/shaka-player/issues/4026
     it('configures play and seek range with notifySegments', async () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       const timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(true);
       // This duration is used by useSegmentTemplate below to decide how many
@@ -1185,12 +1270,16 @@ describe('Player', () => {
       player.configure({playRangeStart: 5, playRangeEnd: 10});
       await player.load(fakeManifestUri, 0, fakeMimeType);
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
+
       const seekRange = player.seekRange();
       expect(seekRange.start).toBe(5);
       expect(seekRange.end).toBe(10);
     });
 
     it('configures play and seek range after playback starts', async () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       const timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(true);
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -1207,17 +1296,24 @@ describe('Player', () => {
 
       // Change the configuration after the playback starts.
       player.configure({playRangeStart: 5, playRangeEnd: 10});
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
+
       const seekRange2 = player.seekRange();
       expect(seekRange2.start).toBe(5);
       expect(seekRange2.end).toBe(10);
     });
 
     it('does not switch for plain configuration changes', async () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       await player.load(fakeManifestUri, 0, fakeMimeType);
       streamingEngine.switchVariant.calls.reset();
 
       player.configure({abr: {enabled: false}});
       player.configure({streaming: {bufferingGoal: 9001}});
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
 
       // Delay to ensure that the switch would have been called.
       await shaka.test.Util.shortDelay();
@@ -1226,6 +1322,8 @@ describe('Player', () => {
     });
 
     it('accepts parameters in a (fieldName, value) format', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       const oldConfig = player.getConfiguration();
       const oldDelayLicense = oldConfig.drm.delayLicenseRequestUntilPlayed;
       const oldSwitchInterval = oldConfig.abr.switchInterval;
@@ -1239,6 +1337,8 @@ describe('Player', () => {
       player.configure('abr.switchInterval', 10);
       player.configure('preferredAudioLanguage', 'fr');
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(3);
+
       const newConfig = player.getConfiguration();
       const newDelayLicense = newConfig.drm.delayLicenseRequestUntilPlayed;
       const newSwitchInterval = newConfig.abr.switchInterval;
@@ -1250,6 +1350,8 @@ describe('Player', () => {
     });
 
     it('accepts escaped "." in names', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       const convert = (name, value) => {
         return shaka.util.ConfigUtils.convertToConfigObject(name, value);
       };
@@ -1267,12 +1369,18 @@ describe('Player', () => {
     });
 
     it('returns whether the config was valid', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       logErrorSpy.and.stub();
       expect(player.configure({streaming: {bufferBehind: '77'}})).toBe(false);
       expect(player.configure({streaming: {bufferBehind: 77}})).toBe(true);
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
     });
 
     it('still sets other fields when there are errors', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       logErrorSpy.and.stub();
 
       const changes = {
@@ -1283,10 +1391,14 @@ describe('Player', () => {
 
       const newConfig = player.getConfiguration();
       expect(newConfig.streaming.bufferBehind).toBe(77);
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
     });
 
     // https://github.com/shaka-project/shaka-player/issues/1524
     it('does not pollute other advanced DRM configs', () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       player.configure('drm.advanced.foo', {});
       player.configure('drm.advanced.bar', {});
       const fooConfig1 = player.getConfiguration().drm.advanced['foo'];
@@ -1299,9 +1411,13 @@ describe('Player', () => {
       const barConfig2 = player.getConfiguration().drm.advanced['bar'];
       expect(fooConfig2.distinctiveIdentifierRequired).toBe(true);
       expect(barConfig2.distinctiveIdentifierRequired).toBe(false);
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(3);
     });
 
     it('allow update preferredVideoHdrLevel on the fly', async () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       const timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(true);
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -1321,10 +1437,14 @@ describe('Player', () => {
       player.configure('preferredVideoHdrLevel', 'SDR');
       await player.load(fakeManifestUri, 0, fakeMimeType);
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
+
       streamingEngine.switchVariant.calls.reset();
 
       // Change the configuration after the playback starts.
       player.configure('preferredVideoHdrLevel', 'PQ');
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
 
       // Delay to ensure that the switch would have been called.
       await shaka.test.Util.shortDelay();
@@ -1333,6 +1453,8 @@ describe('Player', () => {
     });
 
     it('allow update preferredVideoLayout on the fly', async () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       const timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(true);
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -1352,10 +1474,14 @@ describe('Player', () => {
       player.configure('preferredVideoLayout', 'CH-STEREO');
       await player.load(fakeManifestUri, 0, fakeMimeType);
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
+
       streamingEngine.switchVariant.calls.reset();
 
       // Change the configuration after the playback starts.
       player.configure('preferredVideoLayout', 'CH-MONO');
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
 
       // Delay to ensure that the switch would have been called.
       await shaka.test.Util.shortDelay();
@@ -1364,6 +1490,8 @@ describe('Player', () => {
     });
 
     it('allow update preferSpatialAudio on the fly', async () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       const timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(true);
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -1383,10 +1511,14 @@ describe('Player', () => {
       player.configure('preferSpatialAudio', false);
       await player.load(fakeManifestUri, 0, fakeMimeType);
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
+
       streamingEngine.switchVariant.calls.reset();
 
       // Change the configuration after the playback starts.
       player.configure('preferSpatialAudio', true);
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
 
       // Delay to ensure that the switch would have been called.
       await shaka.test.Util.shortDelay();
@@ -1395,6 +1527,8 @@ describe('Player', () => {
     });
 
     it('allow update preferredVideoRole on the fly', async () => {
+      expect(onConfigurationChanged).not.toHaveBeenCalled();
+
       const timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(true);
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -1414,10 +1548,14 @@ describe('Player', () => {
       player.configure('preferredVideoRole', 'main');
       await player.load(fakeManifestUri, 0, fakeMimeType);
 
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
+
       streamingEngine.switchVariant.calls.reset();
 
       // Change the configuration after the playback starts.
       player.configure('preferredVideoRole', 'sign');
+
+      expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
 
       // Delay to ensure that the switch would have been called.
       await shaka.test.Util.shortDelay();
