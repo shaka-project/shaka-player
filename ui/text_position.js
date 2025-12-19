@@ -52,17 +52,12 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
       this.checkAvailability_();
     });
 
-    this.eventManager.listen(this.player, 'loaded', () => {
-      this.updateTextPositionSelection_();
-      this.checkAvailability_();
-    });
-
     this.eventManager.listen(this.player, 'unloading', () => {
       this.updateTextPositionSelection_();
       this.checkAvailability_();
     });
 
-    this.eventManager.listen(this.player, 'textchanged', () => {
+    this.eventManager.listen(this.player, 'configurationchanged', () => {
       this.updateTextPositionSelection_();
       this.checkAvailability_();
     });
