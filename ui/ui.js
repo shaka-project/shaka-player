@@ -355,6 +355,8 @@ shaka.ui.Overlay = class {
         'errors',
       ],
       contextMenuElements: [
+        'captions-position',
+        'captions-size',
         'loop',
         'picture_in_picture',
         'copy_video_frame',
@@ -446,6 +448,8 @@ shaka.ui.Overlay = class {
         handlePosition: true,
         supportedActions: mediaSessionActions,
       },
+      captionsStyles: true,
+      captionsFontScaleFactors: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause
