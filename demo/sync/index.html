@@ -540,11 +540,8 @@
   <!-- Local keys file (gitignored) - create keys.local.js with your keys -->
   <script src="keys.local.js" onerror="console.log('No local keys file found, using demo keys')"></script>
 
-  <!-- Shaka Player - Use uncompiled for development -->
-  <script src="../../node_modules/google-closure-library/closure/goog/base.js"></script>
-  <script src="../../dist/deps.js"></script>
-  <script src="../../lib/debug/asserts.js"></script>
-  <script src="../../shaka-player.uncompiled.js"></script>
+  <!-- Shaka Player - Use compiled version for production/GitHub Pages -->
+  <script src="../../dist/shaka-player.ui.js"></script>
 
   <script>
     // ============================================
