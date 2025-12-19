@@ -1159,7 +1159,7 @@ shakaDemo.Main = class {
     const combined = fields.concat(fragments);
     const params = new Map();
     for (const line of combined) {
-      const kv = line.split('=');
+      const kv = decodeURIComponent(line).split('=');
       params.set(kv[0], kv.slice(1).join('='));
     }
     return params;
@@ -1800,7 +1800,7 @@ shakaDemo.Main = class {
     // Determine if the element is selected.
     const params = this.getParams_();
     let selected =
-        params.get('panel') == encodeURI(button.getAttribute('tab-identifier'));
+        params.get('panel') == button.getAttribute('tab-identifier');
     if (selected) {
       // Re-apply any saved data from hash.
       const hashValues = params.get('panelData');
