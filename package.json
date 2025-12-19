@@ -1,10 +1,14 @@
 {
-  "name": "shaka-player",
+  "name": "@pubnub/shaka-player",
   "description": "DASH/EME video player library",
   "version": "4.16.0",
   "homepage": "https://github.com/shaka-project/shaka-player",
   "author": "Google",
   "maintainers": [
+    {
+        "name": "Markus Kohler",
+        "email": "markus.kohler@pubnub.com"
+    },
     {
       "name": "Joey Parrish",
       "email": "joeyparrish@google.com"
