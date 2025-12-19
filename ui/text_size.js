@@ -51,17 +51,12 @@ shaka.ui.TextSize = class extends shaka.ui.SettingsMenu {
       this.checkAvailability_();
     });
 
-    this.eventManager.listen(this.player, 'loaded', () => {
-      this.updateTextSizeSelection_();
-      this.checkAvailability_();
-    });
-
     this.eventManager.listen(this.player, 'unloading', () => {
       this.updateTextSizeSelection_();
       this.checkAvailability_();
     });
 
-    this.eventManager.listen(this.player, 'textchanged', () => {
+    this.eventManager.listen(this.player, 'configurationchanged', () => {
       this.updateTextSizeSelection_();
       this.checkAvailability_();
     });

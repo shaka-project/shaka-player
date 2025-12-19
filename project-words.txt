@@ -15,6 +15,7 @@ canupdatestarttime
 captionselectionupdated
 caststatuschanged
 clearlead
+configurationchanged
 currentitemchanged
 customwarning
 defaultselected
