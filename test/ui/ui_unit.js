@@ -785,6 +785,90 @@ describe('UI', () => {
         expect(qualityOptions).toEqual(['2.5 Mbps', '100 Kbps']);
       });
 
+      it('shows "HDR" when hdr = "PQ"', async () => {
+        const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.size(960, 540);
+              stream.hdr = 'PQ';
+            });
+            variant.addAudio(2);
+          });
+        });
+
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+
+        const getResolutions = () => {
+          const resolutionButtons = videoContainer.querySelectorAll(
+              'button.explicit-resolution > span');
+          return Array.from(resolutionButtons)
+              .map((btn) => btn.innerText)
+              .sort();
+        };
+
+        expect(getResolutions()).toEqual(['540p HDR']);
+      });
+
+      it('shows "HDR" when hdr = "HLG"', async () => {
+        const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.size(960, 540);
+              stream.hdr = 'HLG';
+            });
+            variant.addAudio(2);
+          });
+        });
+
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+
+        const getResolutions = () => {
+          const resolutionButtons = videoContainer.querySelectorAll(
+              'button.explicit-resolution > span');
+          return Array.from(resolutionButtons)
+              .map((btn) => btn.innerText)
+              .sort();
+        };
+
+        expect(getResolutions()).toEqual(['540p HDR']);
+      });
+
+      it('shows "3D" when videoLayout contains "CH-STEREO"', async () => {
+        const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.size(960, 540);
+              stream.videoLayout = 'CH-STEREO';
+            });
+            variant.addAudio(2);
+          });
+        });
+
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+
+        const getResolutions = () => {
+          const resolutionButtons = videoContainer.querySelectorAll(
+              'button.explicit-resolution > span');
+          return Array.from(resolutionButtons)
+              .map((btn) => btn.innerText)
+              .sort();
+        };
+
+        expect(getResolutions()).toEqual(['540p 3D']);
+      });
+
       /**
        * Use internals to update the resolution menu.  Our fake manifest can
        * cause problems with startup where the Player will get stuck using
