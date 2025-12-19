@@ -630,4 +630,58 @@ describe('UITextDisplayer', () => {
 
     expect(videoContainer.childNodes.length).toBe(0);
   });
+
+  it('positions cue at top-left when positionArea=TOP_LEFT', () => {
+    /** @type {!shaka.text.Cue} */
+    const cue = new shaka.text.Cue(0, 100, 'Top-Left');
+
+    textDisplayer.setTextVisibility(true);
+    const player = new shaka.Player();
+    const config = player.getConfiguration().textDisplayer;
+    config.positionArea = shaka.config.PositionArea.TOP_LEFT;
+    textDisplayer.configure(config);
+
+    textDisplayer.append([cue]);
+    updateCaptions();
+
+    /** @type {Element} */
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+
+    // Top-level cue should be a DIV
+    const cueElement = textContainer.querySelector('div');
+
+    // The custom region (CustomRegion) should be created and wrap the cue
+    const regionElement = textContainer.querySelector('.shaka-text-region');
+
+    // --- Region validations (CustomRegion: 90% x 90% at top/left 5%) ---
+    const regionCss = parseCssText(regionElement.style.cssText);
+    expect(regionCss).toEqual(jasmine.objectContaining({
+      'position': 'absolute',
+      'height': '90%',
+      'width': '90%',
+      'top': '5%',
+      'left': '5%',
+      'display': 'flex',
+      'flex-direction': 'column',
+      'align-items': 'center',
+      // displayAlign BEFORE => justifyContent 'flex-start'
+      'justify-content': 'flex-start',
+    }));
+
+    // --- Cue validations (LEFT + BEFORE) ---
+    const cueCss = parseCssText(cueElement.style.cssText);
+    expect(cueCss).toEqual(jasmine.objectContaining({
+      'display': 'flex',
+      'flex-direction': 'column',
+      // textAlign LEFT => alignItems 'start' and width 100% (setCaptionStyles_)
+      'align-items': 'start',
+      'width': '100%',
+      // displayAlign BEFORE => justifyContent 'flex-start'
+      'justify-content': 'flex-start',
+      'text-align': 'left',
+    }));
+
+    // Text content should be present
+    expect(cueElement.textContent).toBe('Top-Left');
+  });
 });
