@@ -43,6 +43,8 @@ player.configure({
 });
 ```
 
+Note: Only supported on UITextDisplayer.
+
 ##### Overriding Subtitle Position
 
 Shaka Player allows applications to override the default subtitle placement and render captions in predefined regions of the video viewport. This is useful when subtitles need to avoid UI overlays, follow accessibility guidelines, or provide a consistent layout across different content.
@@ -77,6 +79,8 @@ player.configure({
   },
 });
 ```
+
+Note: Only supported on UITextDisplayer.
 
 ### Text displayer configuration
 
