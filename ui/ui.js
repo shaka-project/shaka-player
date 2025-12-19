@@ -310,6 +310,7 @@ shaka.ui.Overlay = class {
       ],
       overflowMenuButtons: [
         'captions',
+        'captions-position',
         'quality',
         'video_type',
         'language',

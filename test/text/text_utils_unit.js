@@ -83,4 +83,102 @@ describe('TextUtils', () => {
           .toBe(shaka.text.CueRegion.units.PERCENTAGE);
     });
   });
+
+  describe('shaka.text.Cue.resetCuePositioning', () => {
+    /** @type {shaka.text.Cue} */
+    let defaultCue;
+
+    beforeEach(() => {
+      defaultCue = new shaka.text.Cue(0, 0, '');
+    });
+
+    /**
+     * @return {!shaka.text.Cue}
+     */
+    const createPositionedCue = () => {
+      const cue = new shaka.text.Cue(5, 10, 'text');
+
+      cue.line = 5;
+      cue.lineAlign = shaka.text.Cue.lineAlign.END;
+      cue.position = 75;
+      cue.positionAlign = shaka.text.Cue.positionAlign.RIGHT;
+      cue.size = 50;
+      cue.displayAlign = shaka.text.Cue.displayAlign.AFTER;
+
+      cue.region = new shaka.text.CueRegion();
+      cue.region.id = 'region';
+
+      return cue;
+    };
+
+    it('resets positioning properties to default values', () => {
+      const cue = createPositionedCue();
+
+      shaka.text.Utils.resetCuePositioning(cue);
+
+      expect(cue.line).toBe(defaultCue.line);
+      expect(cue.lineAlign).toBe(defaultCue.lineAlign);
+      expect(cue.position).toBe(defaultCue.position);
+      expect(cue.positionAlign).toBe(defaultCue.positionAlign);
+      expect(cue.size).toBe(defaultCue.size);
+      expect(cue.displayAlign).toBe(defaultCue.displayAlign);
+      expect(cue.region).toEqual(defaultCue.region);
+    });
+
+    it('does not modify non-positioning properties', () => {
+      const cue = createPositionedCue();
+
+      cue.startTime = 123;
+      cue.endTime = 456;
+      cue.payload = 'original text';
+
+      shaka.text.Utils.resetCuePositioning(cue);
+
+      expect(cue.startTime).toBe(123);
+      expect(cue.endTime).toBe(456);
+      expect(cue.payload).toBe('original text');
+    });
+
+    it('resets positioning recursively for nested cues', () => {
+      const parent = createPositionedCue();
+      const child1 = createPositionedCue();
+      const child2 = createPositionedCue();
+
+      parent.nestedCues.push(child1);
+      child1.nestedCues.push(child2);
+
+      shaka.text.Utils.resetCuePositioning(parent);
+
+      // Parent
+      expect(parent.line).toBe(defaultCue.line);
+      expect(parent.position).toBe(defaultCue.position);
+
+      // First level
+      expect(child1.line).toBe(defaultCue.line);
+      expect(child1.position).toBe(defaultCue.position);
+
+      // Second level
+      expect(child2.line).toBe(defaultCue.line);
+      expect(child2.position).toBe(defaultCue.position);
+    });
+
+    it('resets region to the default cue region', () => {
+      const cue = createPositionedCue();
+
+      shaka.text.Utils.resetCuePositioning(cue);
+
+      expect(cue.region).toEqual(defaultCue.region);
+    });
+
+    it('handles cues without nested cues', () => {
+      const cue = createPositionedCue();
+
+      expect(cue.nestedCues.length).toBe(0);
+
+      shaka.text.Utils.resetCuePositioning(cue);
+
+      expect(cue.line).toBe(defaultCue.line);
+      expect(cue.positionAlign).toBe(defaultCue.positionAlign);
+    });
+  });
 });
