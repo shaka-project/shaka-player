@@ -114,12 +114,13 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
         run: |
           # Publish with an explicit tag.
-          npm publish --tag "$NPM_TAG"
+          # --access public is required for scoped packages (@pubnub/...)
+          npm publish --access public --tag "$NPM_TAG"
 
           # Add the "latest" tag if needed.
           if [[ "$NPM_LATEST" == "true" ]]; then
-            NPM_VERSION=$(npm version --json | jq -r '."shaka-player"')
-            npm dist-tag add "shaka-player@$NPM_VERSION" latest
+            NPM_VERSION=$(npm version --json | jq -r '."@pubnub/shaka-player"')
+            npm dist-tag add "@pubnub/shaka-player@$NPM_VERSION" latest
           fi
 
       - run: npm pack
@@ -129,7 +130,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
         run: |
           gh release upload \
-              ${{ needs.release.outputs.tag_name }} shaka-player-*.tgz \
+              ${{ needs.release.outputs.tag_name }} pubnub-shaka-player-*.tgz \
               --clobber
 
   auto-branch:
