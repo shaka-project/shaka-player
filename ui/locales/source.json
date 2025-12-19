@@ -223,6 +223,10 @@
     "description": "Label for a button used to indicate a subtitle position.",
     "message": "Subtitle position"
   },
+  "SUBTITLE_SIZE": {
+    "description": "Label for a button used to indicate a subtitle size.",
+    "message": "Subtitle size"
+  },
   "SURROUND": {
     "description": "Label used to identify a audio track that has surround audio.",
     "message": "Surround"

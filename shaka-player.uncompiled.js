@@ -126,6 +126,7 @@ goog.require('shaka.ui.Spacer');
 goog.require('shaka.ui.StatisticsButton');
 goog.require('shaka.ui.TextPosition');
 goog.require('shaka.ui.TextSelection');
+goog.require('shaka.ui.TextSize');
 goog.require('shaka.ui.ToggleStereoscopicButton');
 goog.require('shaka.ui.VideoTypeSelection');
 goog.require('shaka.ui.VolumeBar');

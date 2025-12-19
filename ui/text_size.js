@@ -5,9 +5,8 @@
  */
 
 
-goog.provide('shaka.ui.TextPosition');
+goog.provide('shaka.ui.TextSize');
 
-goog.require('shaka.config.PositionArea');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
@@ -24,16 +23,16 @@ goog.requireType('shaka.ui.Controls');
  * @final
  * @export
  */
-shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
+shaka.ui.TextSize = class extends shaka.ui.SettingsMenu {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
     super(parent, controls,
-        shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS_POSITION']);
+        shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS_SIZE']);
 
-    this.button.classList.add('shaka-caption-position-button');
+    this.button.classList.add('shaka-caption-size-button');
     this.button.classList.add('shaka-tooltip-status');
     this.menu.classList.add('shaka-text-positions');
 
@@ -48,27 +47,27 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
         });
 
     this.eventManager.listen(this.player, 'loading', () => {
-      this.updateTextPositionSelection_();
+      this.updateTextSizeSelection_();
       this.checkAvailability_();
     });
 
     this.eventManager.listen(this.player, 'loaded', () => {
-      this.updateTextPositionSelection_();
+      this.updateTextSizeSelection_();
       this.checkAvailability_();
     });
 
     this.eventManager.listen(this.player, 'unloading', () => {
-      this.updateTextPositionSelection_();
+      this.updateTextSizeSelection_();
       this.checkAvailability_();
     });
 
     this.eventManager.listen(this.player, 'textchanged', () => {
-      this.updateTextPositionSelection_();
+      this.updateTextSizeSelection_();
       this.checkAvailability_();
     });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.updateTextPositionSelection_();
+      this.updateTextSizeSelection_();
       this.checkAvailability_();
     });
 
@@ -85,8 +84,8 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
     this.updateLocalizedStrings_();
 
     this.checkAvailability_();
-    this.addTextPositions_();
-    this.updateTextPositionSelection_();
+    this.addTextSizes_();
+    this.updateTextSizeSelection_();
   }
 
   /** @private */
@@ -109,18 +108,16 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.button.ariaLabel = this.localization.resolve(LocIds.SUBTITLE_POSITION);
+    this.button.ariaLabel = this.localization.resolve(LocIds.SUBTITLE_SIZE);
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
     this.nameSpan.textContent =
-        this.localization.resolve(LocIds.SUBTITLE_POSITION);
+        this.localization.resolve(LocIds.SUBTITLE_SIZE);
     this.backSpan.textContent =
-        this.localization.resolve(LocIds.SUBTITLE_POSITION);
-
-    this.addTextPositions_();
+        this.localization.resolve(LocIds.SUBTITLE_SIZE);
   }
 
   /** @private */
-  addTextPositions_() {
+  addTextSizes_() {
     // Remove old shaka-resolutions
     // 1. Save the back to menu button
     const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
@@ -133,25 +130,26 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
     this.menu.appendChild(backButton);
 
     // 4. Add new items
-    for (const position of Object.values(shaka.config.PositionArea)) {
+    for (const fontScaleFactor of
+      this.controls.getConfig().captionsFontScaleFactors) {
       const button = shaka.util.Dom.createButton();
       const span = shaka.util.Dom.createHTMLElement('span');
-      span.textContent = this.getNameOfPosition_(position);
+      span.textContent = fontScaleFactor * 100 + '%';
       button.appendChild(span);
 
       this.eventManager.listen(button, 'click', () => {
-        this.player.configure('textDisplayer.positionArea', position);
-        this.updateTextPositionSelection_();
+        this.player.configure('textDisplayer.fontScaleFactor', fontScaleFactor);
+        this.updateTextSizeSelection_();
       });
 
       this.menu.appendChild(button);
     }
-    this.updateTextPositionSelection_();
+    this.updateTextSizeSelection_();
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);
   }
 
   /** @private */
-  updateTextPositionSelection_() {
+  updateTextSizeSelection_() {
     // Remove the old checkmark icon and related tags and classes if it exists.
     const checkmarkIcon = shaka.ui.Utils.getDescendantIfExists(
         this.menu, 'shaka-ui-icon shaka-chosen-item');
@@ -165,13 +163,13 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
       }
       previouslySelectedButton.removeChild(checkmarkIcon);
     }
-    const positionArea =
-        this.player.getConfiguration().textDisplayer.positionArea;
-    const positionAreaName = this.getNameOfPosition_(positionArea);
+    const fontScaleFactor =
+        this.player.getConfiguration().textDisplayer.fontScaleFactor;
+    const fontScaleFactorName = fontScaleFactor * 100 + '%'; ;
     // Add the checkmark icon, related tags and classes to the newly selected
     // button.
     const span = Array.from(this.menu.querySelectorAll('span')).find((el) => {
-      return el.textContent === positionAreaName;
+      return el.textContent === fontScaleFactorName;
     });
     if (span) {
       const button = span.parentElement;
@@ -179,39 +177,7 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
       button.ariaSelected = 'true';
       span.classList.add('shaka-chosen-item');
     }
-    this.currentSelection.textContent = positionAreaName;
-  }
-
-  /**
-   * @param {!shaka.config.PositionArea} position
-   * @return {string}
-   * @private
-   */
-  getNameOfPosition_(position) {
-    const LocIds = shaka.ui.Locales.Ids;
-    switch (position) {
-      case shaka.config.PositionArea.DEFAULT:
-        return this.localization.resolve(LocIds.DEFAULT);
-      case shaka.config.PositionArea.TOP_LEFT:
-        return this.localization.resolve(LocIds.TOP_LEFT);
-      case shaka.config.PositionArea.TOP_CENTER:
-        return this.localization.resolve(LocIds.TOP_CENTER);
-      case shaka.config.PositionArea.TOP_RIGHT:
-        return this.localization.resolve(LocIds.TOP_RIGHT);
-      case shaka.config.PositionArea.CENTER_LEFT:
-        return this.localization.resolve(LocIds.CENTER_LEFT);
-      case shaka.config.PositionArea.CENTER:
-        return this.localization.resolve(LocIds.CENTER);
-      case shaka.config.PositionArea.CENTER_RIGHT:
-        return this.localization.resolve(LocIds.CENTER_RIGHT);
-      case shaka.config.PositionArea.BOTTOM_LEFT:
-        return this.localization.resolve(LocIds.BOTTOM_LEFT);
-      case shaka.config.PositionArea.BOTTOM_CENTER:
-        return this.localization.resolve(LocIds.BOTTOM_CENTER);
-      case shaka.config.PositionArea.BOTTOM_RIGHT:
-        return this.localization.resolve(LocIds.BOTTOM_RIGHT);
-    }
-    return '';
+    this.currentSelection.textContent = fontScaleFactorName;
   }
 };
 
@@ -220,15 +186,15 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
  * @implements {shaka.extern.IUIElement.Factory}
  * @final
  */
-shaka.ui.TextPosition.Factory = class {
+shaka.ui.TextSize.Factory = class {
   /** @override */
   create(rootElement, controls) {
-    return new shaka.ui.TextPosition(rootElement, controls);
+    return new shaka.ui.TextSize(rootElement, controls);
   }
 };
 
 shaka.ui.OverflowMenu.registerElement(
-    'captions-position', new shaka.ui.TextPosition.Factory());
+    'captions-size', new shaka.ui.TextSize.Factory());
 
 shaka.ui.Controls.registerElement(
-    'captions-position', new shaka.ui.TextPosition.Factory());
+    'captions-size', new shaka.ui.TextSize.Factory());
