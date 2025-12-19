@@ -87,7 +87,8 @@ shaka.ui.Element = class {
      * @protected {boolean}
      * @exportInterface
      */
-    this.isSubMenu = this.parent.classList.contains('shaka-overflow-menu');
+    this.isSubMenu = this.parent.classList.contains('shaka-overflow-menu') ||
+        this.parent.classList.contains('shaka-context-menu');
 
     /**
      * @protected {boolean}

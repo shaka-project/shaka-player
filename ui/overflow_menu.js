@@ -10,6 +10,7 @@ goog.provide('shaka.ui.OverflowMenu');
 goog.require('goog.asserts');
 goog.require('shaka.ads.Utils');
 goog.require('shaka.log');
+goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -130,10 +131,14 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
   /**
    * @param {string} name
    * @param {!shaka.extern.IUIElement.Factory} factory
+   * @param {boolean=} registerInContext
    * @export
    */
-  static registerElement(name, factory) {
+  static registerElement(name, factory, registerInContext = true) {
     shaka.ui.OverflowMenu.elementNamesToFactories_.set(name, factory);
+    if (registerInContext) {
+      shaka.ui.ContextMenu.registerElement(name, factory);
+    }
   }
 
 
@@ -190,6 +195,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 
   /** @private */
   onOverflowMenuButtonClick_() {
+    this.controls.hideContextMenus();
     if (this.controls.anySettingsMenusAreOpen()) {
       this.controls.hideSettingsMenus();
     } else {

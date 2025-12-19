@@ -6713,4 +6713,22 @@ describe('HlsParser', () => {
     expect(audioLabels).toContain('audio128');
     expect(audioLabels).toContain('audio64');
   });
+
+  it('don\'t set label for audio if no name', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=64377,AVERAGE-BANDWIDTH=64124,',
+      'CODECS="mp4a.40.2"\n',
+      'https://example.com/0.m3u8\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master);
+
+    const manifest = await parser.start('test:/master', playerInterface);
+
+    expect(manifest.variants.length).toBe(1);
+    expect(manifest.variants[0].audio).toBeTruthy();
+    expect(manifest.variants[0].audio.label).toBeNull();
+  });
 });
