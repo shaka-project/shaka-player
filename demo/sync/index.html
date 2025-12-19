@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2016 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shaka Player - Playback Sync Demo</title>
+
+  <style>
+    /* ============================================
+       CSS Variables & Base Styles
+       ============================================ */
+    :root {
+      --primary-color: #6366f1;
+      --primary-hover: #4f46e5;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border-color: #334155;
+      --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: var(--bg-color);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ============================================
+       Layout
+       ============================================ */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--primary-color), #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      color: var(--text-secondary);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ============================================
+       Video Container
+       ============================================ */
+    .video-section {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      background: #000;
+    }
+
+    video {
+      width: 100%;
+      display: block;
+    }
+
+    .video-info {
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .video-title {
+      font-weight: 600;
+    }
+
+    .video-time {
+      color: var(--text-secondary);
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+
+    /* ============================================
+       Control Panel
+       ============================================ */
+    .control-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ============================================
+       Form Elements
+       ============================================ */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    input[type="text"]::placeholder {
+      color: var(--text-secondary);
+    }
+
+    /* ============================================
+       Buttons
+       ============================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-success {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background: #059669;
+    }
+
+    .btn-warning {
+      background: var(--warning-color);
+      color: #1e293b;
+    }
+
+    .btn-warning:hover:not(:disabled) {
+      background: #d97706;
+    }
+
+    .btn-danger {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: #dc2626;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+
+    .btn-outline:hover:not(:disabled) {
+      background: var(--bg-color);
+      border-color: var(--text-secondary);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-group .btn {
+      flex: 1;
+    }
+
+    /* ============================================
+       Status Indicators
+       ============================================ */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .status-badge.disconnected {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger-color);
+    }
+
+    .status-badge.connected {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success-color);
+    }
+
+    .status-badge.master {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning-color);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* ============================================
+       Log Panel
+       ============================================ */
+    .log-panel {
+      background: var(--bg-color);
+      border-radius: 8px;
+      padding: 1rem;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      font-size: 0.8rem;
+      line-height: 1.8;
+    }
+
+    .log-entry {
+      color: var(--text-secondary);
+    }
+
+    .log-entry.info {
+      color: var(--primary-color);
+    }
+
+    .log-entry.success {
+      color: var(--success-color);
+    }
+
+    .log-entry.warning {
+      color: var(--warning-color);
+    }
+
+    .log-entry.error {
+      color: var(--danger-color);
+    }
+
+    .log-time {
+      color: var(--text-secondary);
+      margin-right: 0.5rem;
+    }
+
+    /* ============================================
+       Instructions
+       ============================================ */
+    .instructions {
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .instructions h3 {
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+      color: var(--primary-color);
+    }
+
+    .instructions ol {
+      margin-left: 1.25rem;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .instructions li {
+      margin-bottom: 0.5rem;
+    }
+
+    .instructions code {
+      background: var(--bg-color);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    /* ============================================
+       Users List
+       ============================================ */
+    .users-list {
+      list-style: none;
+    }
+
+    .users-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    .users-list li:last-child {
+      border-bottom: none;
+    }
+
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      background: var(--primary-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .user-you {
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <h1>🎬 Playback Sync Demo</h1>
+      <p>Synchronize video playback across multiple clients using PubNub</p>
+    </header>
+
+    <div class="main-grid">
+      <!-- Video Section -->
+      <div class="video-section">
+        <div class="video-container" id="video-container">
+          <video id="video"
+                 poster="https://shaka-player-demo.appspot.com/assets/poster.jpg"
+                 controls>
+          </video>
+        </div>
+        <div class="video-info">
+          <span class="video-title" id="video-title">No video loaded</span>
+          <span class="video-time" id="video-time">00:00 / 00:00</span>
+        </div>
+      </div>
+
+      <!-- Control Panel -->
+      <div class="control-panel">
+        <!-- Connection Status -->
+        <div class="card">
+          <h2>Connection Status</h2>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="status-badge disconnected" id="connection-status">
+              <span class="status-dot"></span>
+              Disconnected
+            </span>
+            <span class="status-badge" id="role-status" style="display: none;">
+              Follower
+            </span>
+          </div>
+        </div>
+
+        <!-- PubNub Configuration -->
+        <div class="card">
+          <h2>PubNub Keys</h2>
+          <div class="form-group">
+            <label for="publish-key">Publish Key</label>
+            <input type="text" id="publish-key" placeholder="pub-c-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" value="demo">
+          </div>
+          <div class="form-group">
+            <label for="subscribe-key">Subscribe Key</label>
+            <input type="text" id="subscribe-key" placeholder="sub-c-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" value="demo">
+          </div>
+          <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">
+            Using "demo" keys for testing. Replace with your own keys from
+            <a href="https://admin.pubnub.com" target="_blank" style="color: var(--primary-color);">PubNub Admin</a>.
+          </p>
+        </div>
+
+        <!-- Room Controls -->
+        <div class="card">
+          <h2>Sync Room</h2>
+          <div class="form-group">
+            <label for="room-id">Room ID</label>
+            <input type="text" id="room-id" placeholder="watch-party-123" value="demo-room">
+          </div>
+          <div class="btn-group" style="margin-top: 1rem;">
+            <button class="btn btn-primary" id="btn-connect">Connect</button>
+            <button class="btn btn-danger" id="btn-disconnect" disabled>Disconnect</button>
+          </div>
+        </div>
+
+        <!-- Role Controls -->
+        <div class="card" id="role-controls" style="display: none;">
+          <h2>Role Control</h2>
+          <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1rem;">
+            The <strong>Master</strong> controls playback for everyone. Followers receive sync commands.
+          </p>
+          <div class="btn-group">
+            <button class="btn btn-warning" id="btn-master">Become Master</button>
+            <button class="btn btn-outline" id="btn-follower">Become Follower</button>
+          </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="card">
+          <h2>Activity Log</h2>
+          <div class="log-panel" id="log-panel">
+            <div class="log-entry">Ready to connect...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="instructions">
+      <h3>📋 How to Test</h3>
+      <ol>
+        <li>Open this page in <strong>two browser windows</strong> (or different devices)</li>
+        <li>Enter the same <strong>Room ID</strong> in both windows</li>
+        <li>Click <strong>Connect</strong> in both windows</li>
+        <li>In one window, click <strong>Become Master</strong></li>
+        <li>Play, pause, or seek the video in the Master window</li>
+        <li>Watch the other window sync automatically!</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- PubNub SDK -->
+  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.8.0.0.min.js"></script>
+
+  <!-- Local keys file (gitignored) - create keys.local.js with your keys -->
+  <script src="keys.local.js" onerror="console.log('No local keys file found, using demo keys')"></script>
+
+  <!-- Shaka Player - Use uncompiled for development -->
+  <script src="../../node_modules/google-closure-library/closure/goog/base.js"></script>
+  <script src="../../dist/deps.js"></script>
+  <script src="../../lib/debug/asserts.js"></script>
+  <script src="../../shaka-player.uncompiled.js"></script>
+
+  <script>
+    // ============================================
+    // Demo Application
+    // ============================================
+
+    // Load keys from local file if available
+    const localKeys = window.PUBNUB_KEYS || null;
+
+    // DOM Elements
+    const videoElement = document.getElementById('video');
+    const videoContainer = document.getElementById('video-container');
+    const videoTitle = document.getElementById('video-title');
+    const videoTime = document.getElementById('video-time');
+    const connectionStatus = document.getElementById('connection-status');
+    const roleStatus = document.getElementById('role-status');
+    const roleControls = document.getElementById('role-controls');
+    const logPanel = document.getElementById('log-panel');
+
+    const publishKeyInput = document.getElementById('publish-key');
+    const subscribeKeyInput = document.getElementById('subscribe-key');
+    const roomIdInput = document.getElementById('room-id');
+
+    const btnConnect = document.getElementById('btn-connect');
+    const btnDisconnect = document.getElementById('btn-disconnect');
+    const btnMaster = document.getElementById('btn-master');
+    const btnFollower = document.getElementById('btn-follower');
+
+    // App State
+    let player = null;
+    let syncManager = null;
+
+    // Sample video for testing
+    const sampleVideo = {
+      title: 'Big Buck Bunny',
+      url: 'https://storage.googleapis.com/shaka-demo-assets/bbb-dark-truths/dash.mpd'
+    };
+
+    // ============================================
+    // Logging
+    // ============================================
+    function log(message, type = 'info') {
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
+      logPanel.appendChild(entry);
+      logPanel.scrollTop = logPanel.scrollHeight;
+      console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+
+    // ============================================
+    // UI Updates
+    // ============================================
+    function updateConnectionUI(connected) {
+      if (connected) {
+        connectionStatus.className = 'status-badge connected';
+        connectionStatus.innerHTML = '<span class="status-dot"></span> Connected';
+        btnConnect.disabled = true;
+        btnDisconnect.disabled = false;
+        roleControls.style.display = 'block';
+        roleStatus.style.display = 'inline-flex';
+      } else {
+        connectionStatus.className = 'status-badge disconnected';
+        connectionStatus.innerHTML = '<span class="status-dot"></span> Disconnected';
+        btnConnect.disabled = false;
+        btnDisconnect.disabled = true;
+        roleControls.style.display = 'none';
+        roleStatus.style.display = 'none';
+      }
+    }
+
+    function updateRoleUI(role) {
+      if (role === 'master') {
+        roleStatus.className = 'status-badge master';
+        roleStatus.textContent = '👑 Master';
+        btnMaster.disabled = true;
+        btnFollower.disabled = false;
+      } else {
+        roleStatus.className = 'status-badge connected';
+        roleStatus.textContent = '👥 Follower';
+        btnMaster.disabled = false;
+        btnFollower.disabled = true;
+      }
+    }
+
+    function updateVideoTime() {
+      if (!videoElement.duration) return;
+
+      const current = formatTime(videoElement.currentTime);
+      const duration = formatTime(videoElement.duration);
+      videoTime.textContent = `${current} / ${duration}`;
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // ============================================
+    // Shaka Player Setup
+    // ============================================
+    async function initPlayer() {
+      // Install polyfills
+      shaka.polyfill.installAll();
+
+      // Check browser support
+      if (!shaka.Player.isBrowserSupported()) {
+        log('Browser not supported!', 'error');
+        return false;
+      }
+
+      // Create player
+      player = new shaka.Player();
+      await player.attach(videoElement);
+
+      // Error handling
+      player.addEventListener('error', (event) => {
+        log(`Player error: ${event.detail.message}`, 'error');
+      });
+
+      // Load sample video
+      try {
+        await player.load(sampleVideo.url);
+        videoTitle.textContent = sampleVideo.title;
+        log(`Loaded: ${sampleVideo.title}`, 'success');
+      } catch (error) {
+        log(`Failed to load video: ${error.message}`, 'error');
+        return false;
+      }
+
+      // Update time display
+      videoElement.addEventListener('timeupdate', updateVideoTime);
+
+      return true;
+    }
+
+    // ============================================
+    // Sync Manager Setup
+    // ============================================
+    async function connect() {
+      const publishKey = publishKeyInput.value.trim();
+      const subscribeKey = subscribeKeyInput.value.trim();
+      const roomId = roomIdInput.value.trim();
+
+      if (!publishKey || !subscribeKey) {
+        log('Please enter PubNub keys', 'error');
+        return;
+      }
+
+      if (!roomId) {
+        log('Please enter a Room ID', 'error');
+        return;
+      }
+
+      try {
+        log(`Connecting to room: ${roomId}...`);
+
+        // Create SyncManager
+        syncManager = new shaka.sync.SyncManager(player, {
+          publishKey: publishKey,
+          subscribeKey: subscribeKey,
+        });
+
+        // Set up event listeners before connecting
+        setupSyncManagerListeners();
+
+        // Connect to the room
+        await syncManager.connect(roomId);
+
+        updateConnectionUI(true);
+        updateRoleUI('follower');
+        log(`Connected to room: ${roomId}`, 'success');
+        log(`Your ID: ${syncManager.getUserId()}`);
+
+      } catch (error) {
+        log(`Connection failed: ${error.message}`, 'error');
+      }
+    }
+
+    async function disconnect() {
+      if (syncManager) {
+        await syncManager.disconnect();
+        syncManager = null;
+      }
+      updateConnectionUI(false);
+      log('Disconnected from room', 'warning');
+    }
+
+    function becomeMaster() {
+      if (syncManager) {
+        syncManager.becomeMaster();
+        updateRoleUI('master');
+        log('You are now the MASTER - your playback controls everyone!', 'success');
+      }
+    }
+
+    function becomeFollower() {
+      if (syncManager) {
+        syncManager.becomeFollower();
+        updateRoleUI('follower');
+        log('You are now a FOLLOWER - waiting for sync commands', 'info');
+      }
+    }
+
+    function setupSyncManagerListeners() {
+      if (!syncManager) return;
+
+      // Listen for master changes (when another client claims master)
+      syncManager.addEventListener('masterchanged', (event) => {
+        // FakeEvent sets Map entries as direct properties on the event
+        const newMasterId = event.newMasterId;
+        const previousRole = event.previousRole;
+
+        if (previousRole === 'master') {
+          // We were the master but someone else claimed it
+          updateRoleUI('follower');
+          log(`Another user (${newMasterId}) claimed master - you are now a follower`, 'warning');
+        } else {
+          // We're a follower and someone became master
+          log(`User ${newMasterId} is now the master`, 'info');
+        }
+      });
+    }
+
+    // ============================================
+    // Event Listeners
+    // ============================================
+    btnConnect.addEventListener('click', connect);
+    btnDisconnect.addEventListener('click', disconnect);
+    btnMaster.addEventListener('click', becomeMaster);
+    btnFollower.addEventListener('click', becomeFollower);
+
+    // ============================================
+    // Initialize
+    // ============================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Load local keys if available (from keys.local.js)
+      if (localKeys) {
+        publishKeyInput.value = localKeys.publishKey || 'demo';
+        subscribeKeyInput.value = localKeys.subscribeKey || 'demo';
+        log('Loaded keys from keys.local.js', 'success');
+      }
+
+      log('Initializing Shaka Player...');
+      const success = await initPlayer();
+      if (success) {
+        log('Ready! Enter room details and click Connect.', 'success');
+      }
+    });
+  </script>
+</body>
+</html>
+
