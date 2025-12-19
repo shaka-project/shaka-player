@@ -756,8 +756,9 @@
 
       // Listen for master changes (when another client claims master)
       syncManager.addEventListener('masterchanged', (event) => {
-        const newMasterId = event.detail.get('newMasterId');
-        const previousRole = event.detail.get('previousRole');
+        // FakeEvent sets Map entries as direct properties on the event
+        const newMasterId = event.newMasterId;
+        const previousRole = event.previousRole;
 
         if (previousRole === 'master') {
           // We were the master but someone else claimed it
