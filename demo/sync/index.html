@@ -540,8 +540,312 @@
   <!-- Local keys file (gitignored) - create keys.local.js with your keys -->
   <script src="keys.local.js" onerror="console.log('No local keys file found, using demo keys')"></script>
 
-  <!-- Shaka Player - Use compiled version for production/GitHub Pages -->
-  <script src="../../dist/shaka-player.ui.js"></script>
+  <!-- Shaka Player from CDN + local sync module -->
+  <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.14.5/dist/shaka-player.ui.js"></script>
+  
+  <!-- Load the sync module separately (inline for GitHub Pages compatibility) -->
+  <script>
+    // SyncManager - PubNub-powered playback synchronization
+    (function() {
+      'use strict';
+      
+      /**
+       * SyncManager enables real-time playback synchronization between multiple
+       * clients using PubNub as the messaging layer.
+       */
+      shaka.sync = shaka.sync || {};
+      
+      shaka.sync.SyncManager = class extends shaka.util.FakeEventTarget {
+        constructor(player, config) {
+          super();
+          this.player_ = player;
+          this.video_ = player.getMediaElement();
+          this.config_ = config;
+          this.pubnub_ = null;
+          this.subscription_ = null;
+          this.channelName_ = '';
+          this.userId_ = config.userId || ('shaka-user-' + Math.random().toString(36).substr(2, 9));
+          this.role_ = 'follower';
+          this.isProcessingRemoteCommand_ = false;
+          this.isConnected_ = false;
+          this.syncTimer_ = null;
+          this.maxDriftThreshold_ = config.maxDriftThreshold || 0.5;
+          this.syncIntervalMs_ = config.syncIntervalMs || 5000;
+          this.boundHandlers_ = {
+            onPlay: () => this.onLocalPlay_(),
+            onPause: () => this.onLocalPause_(),
+            onSeeked: () => this.onLocalSeeked_(),
+            onRateChange: () => this.onLocalRateChange_(),
+          };
+          console.log('SyncManager created with userId:', this.userId_);
+        }
+
+        connect(roomId) {
+          if (typeof PubNub === 'undefined') {
+            throw new Error('PubNub SDK not found. Include it via script tag.');
+          }
+          if (!this.config_.publishKey || !this.config_.subscribeKey) {
+            throw new Error('PubNub publishKey and subscribeKey are required.');
+          }
+          if (!this.video_) {
+            throw new Error('No video element attached to player.');
+          }
+
+          this.channelName_ = roomId;
+          console.log('Connecting to sync room:', this.channelName_);
+
+          this.pubnub_ = new PubNub({
+            publishKey: this.config_.publishKey,
+            subscribeKey: this.config_.subscribeKey,
+            userId: this.userId_,
+            enableEventEngine: true,
+          });
+
+          this.pubnub_.addListener({
+            status: (statusEvent) => this.onPubNubStatus_(statusEvent),
+          });
+
+          const channel = this.pubnub_.channel(this.channelName_);
+          this.subscription_ = channel.subscription({ receivePresenceEvents: true });
+          this.subscription_.onMessage = (event) => this.onPubNubMessage_(event);
+          this.subscription_.onPresence = (event) => this.onPubNubPresence_(event);
+          this.subscription_.subscribe();
+          this.attachVideoListeners_();
+          this.isConnected_ = true;
+          console.log('Successfully connected to sync room:', roomId);
+        }
+
+        disconnect() {
+          console.log('Disconnecting from sync room:', this.channelName_);
+          if (this.syncTimer_) {
+            clearInterval(this.syncTimer_);
+            this.syncTimer_ = null;
+          }
+          this.detachVideoListeners_();
+          if (this.subscription_) {
+            this.subscription_.unsubscribe();
+            this.subscription_ = null;
+          }
+          if (this.pubnub_) {
+            this.pubnub_.removeAllListeners();
+            this.pubnub_.destroy();
+            this.pubnub_ = null;
+          }
+          this.isConnected_ = false;
+          this.role_ = 'follower';
+          this.channelName_ = '';
+          console.log('Disconnected from sync room');
+        }
+
+        becomeMaster() {
+          console.log('This client is now the MASTER controller');
+          this.role_ = 'master';
+          this.broadcastMasterClaim_();
+          this.broadcastFullState_();
+          this.startSyncInterval_();
+        }
+
+        becomeFollower() {
+          console.log('This client is now a FOLLOWER');
+          this.role_ = 'follower';
+          if (this.syncTimer_) {
+            clearInterval(this.syncTimer_);
+            this.syncTimer_ = null;
+          }
+        }
+
+        getRole() { return this.role_; }
+        isConnected() { return this.isConnected_; }
+        getRoomId() { return this.channelName_; }
+        getUserId() { return this.userId_; }
+
+        async destroy() {
+          await this.disconnect();
+          this.player_ = null;
+          this.video_ = null;
+          this.config_ = null;
+          this.boundHandlers_ = null;
+        }
+
+        attachVideoListeners_() {
+          if (!this.video_) return;
+          this.video_.addEventListener('play', this.boundHandlers_.onPlay);
+          this.video_.addEventListener('pause', this.boundHandlers_.onPause);
+          this.video_.addEventListener('seeked', this.boundHandlers_.onSeeked);
+          this.video_.addEventListener('ratechange', this.boundHandlers_.onRateChange);
+        }
+
+        detachVideoListeners_() {
+          if (!this.video_) return;
+          this.video_.removeEventListener('play', this.boundHandlers_.onPlay);
+          this.video_.removeEventListener('pause', this.boundHandlers_.onPause);
+          this.video_.removeEventListener('seeked', this.boundHandlers_.onSeeked);
+          this.video_.removeEventListener('ratechange', this.boundHandlers_.onRateChange);
+        }
+
+        onLocalPlay_() {
+          if (this.isProcessingRemoteCommand_ || this.role_ !== 'master') return;
+          this.broadcastCommand_('play', { currentTime: this.video_.currentTime });
+        }
+
+        onLocalPause_() {
+          if (this.isProcessingRemoteCommand_ || this.role_ !== 'master') return;
+          this.broadcastCommand_('pause', { currentTime: this.video_.currentTime });
+        }
+
+        onLocalSeeked_() {
+          if (this.isProcessingRemoteCommand_ || this.role_ !== 'master') return;
+          this.broadcastCommand_('seek', { currentTime: this.video_.currentTime });
+        }
+
+        onLocalRateChange_() {
+          if (this.isProcessingRemoteCommand_ || this.role_ !== 'master') return;
+          this.broadcastCommand_('ratechange', { playbackRate: this.video_.playbackRate });
+        }
+
+        async broadcastCommand_(command, payload) {
+          if (!this.pubnub_ || !this.isConnected_) return;
+          const message = {
+            type: 'SYNC_COMMAND',
+            command: command,
+            payload: Object.assign({}, payload, {
+              timestamp: Date.now(),
+              senderId: this.userId_,
+              isPaused: this.video_.paused,
+            }),
+          };
+          try {
+            await this.pubnub_.publish({ channel: this.channelName_, message: message });
+          } catch (error) {
+            console.error('Failed to broadcast command:', error);
+          }
+        }
+
+        async broadcastMasterClaim_() {
+          if (!this.pubnub_ || !this.isConnected_) return;
+          const message = {
+            type: 'MASTER_CLAIM',
+            payload: { timestamp: Date.now(), senderId: this.userId_ },
+          };
+          try {
+            await this.pubnub_.publish({ channel: this.channelName_, message: message });
+          } catch (error) {
+            console.error('Failed to broadcast master claim:', error);
+          }
+        }
+
+        broadcastFullState_() {
+          this.broadcastCommand_('sync', {
+            currentTime: this.video_.currentTime,
+            playbackRate: this.video_.playbackRate,
+            isPaused: this.video_.paused,
+          });
+        }
+
+        startSyncInterval_() {
+          if (this.syncTimer_) clearInterval(this.syncTimer_);
+          this.syncTimer_ = setInterval(() => {
+            if (this.role_ === 'master' && this.video_ && !this.video_.paused) {
+              this.broadcastFullState_();
+            }
+          }, this.syncIntervalMs_);
+        }
+
+        onPubNubMessage_(event) {
+          const message = event.message;
+          if (message.payload && message.payload.senderId === this.userId_) return;
+          
+          if (message.type === 'MASTER_CLAIM') {
+            this.handleMasterClaim_(message.payload);
+            return;
+          }
+          
+          if (message.type !== 'SYNC_COMMAND' || this.role_ !== 'follower') return;
+          this.applyRemoteCommand_(message.command, message.payload);
+        }
+
+        handleMasterClaim_(payload) {
+          if (this.role_ === 'master') {
+            console.log('Another user claimed master role:', payload.senderId);
+            this.becomeFollower();
+            this.dispatchEvent(new shaka.util.FakeEvent('masterchanged', new Map([
+              ['newMasterId', payload.senderId],
+              ['previousRole', 'master'],
+            ])));
+          } else {
+            this.dispatchEvent(new shaka.util.FakeEvent('masterchanged', new Map([
+              ['newMasterId', payload.senderId],
+              ['previousRole', 'follower'],
+            ])));
+          }
+        }
+
+        applyRemoteCommand_(command, payload) {
+          this.isProcessingRemoteCommand_ = true;
+          const latencyMs = Date.now() - payload.timestamp;
+          const latencySec = latencyMs / 1000;
+
+          switch (command) {
+            case 'play':
+              if (payload.currentTime !== undefined) {
+                this.video_.currentTime = payload.currentTime + latencySec;
+              }
+              this.video_.play().catch(e => console.warn('Play failed:', e));
+              break;
+            case 'pause':
+              this.video_.pause();
+              if (payload.currentTime !== undefined) {
+                this.video_.currentTime = payload.currentTime;
+              }
+              break;
+            case 'seek':
+              if (payload.currentTime !== undefined) {
+                this.video_.currentTime = payload.currentTime + latencySec;
+              }
+              break;
+            case 'ratechange':
+              if (payload.playbackRate !== undefined) {
+                this.video_.playbackRate = payload.playbackRate;
+              }
+              break;
+            case 'sync':
+              this.handleSyncPulse_(payload, latencySec);
+              break;
+          }
+
+          setTimeout(() => { this.isProcessingRemoteCommand_ = false; }, 100);
+        }
+
+        handleSyncPulse_(payload, latencySec) {
+          if (payload.currentTime !== undefined) {
+            const expectedTime = payload.currentTime + latencySec;
+            const drift = Math.abs(this.video_.currentTime - expectedTime);
+            if (drift > this.maxDriftThreshold_) {
+              this.video_.currentTime = expectedTime;
+            }
+          }
+          if (payload.playbackRate !== undefined && this.video_.playbackRate !== payload.playbackRate) {
+            this.video_.playbackRate = payload.playbackRate;
+          }
+          if (payload.isPaused && !this.video_.paused) {
+            this.video_.pause();
+          } else if (!payload.isPaused && this.video_.paused) {
+            this.video_.play().catch(e => console.warn('Play failed during sync:', e));
+          }
+        }
+
+        onPubNubStatus_(statusEvent) {
+          console.log('PubNub status:', statusEvent.category);
+        }
+
+        onPubNubPresence_(presenceEvent) {
+          console.log('Presence event:', presenceEvent.action, presenceEvent.uuid);
+        }
+      };
+      
+      console.log('SyncManager module loaded');
+    })();
+  </script>
 
   <script>
     // ============================================
