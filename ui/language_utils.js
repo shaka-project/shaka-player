@@ -10,6 +10,7 @@ goog.provide('shaka.ui.LanguageUtils');
 
 goog.require('mozilla.LanguageMapping');
 goog.require('shaka.log');
+goog.require('shaka.media.ManifestParser');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Overlay.TrackLabelFormat');
 goog.require('shaka.ui.Utils');
@@ -52,6 +53,8 @@ shaka.ui.LanguageUtils = class {
    */
   static updateAudioTracks(tracks, langMenu, onTrackSelected, updateChosen,
       currentSelectionElement, localization, config) {
+    const AccessibilityPurpose =
+        shaka.media.ManifestParser.AccessibilityPurpose;
     const LocIds = shaka.ui.Locales.Ids;
 
     let trackLabelFormat = config.trackLabelFormat;
@@ -102,11 +105,12 @@ shaka.ui.LanguageUtils = class {
       return track.roles.join(', ');
     };
 
-    const getCombination = (language, rolesString, label, channelsCount,
-        audioCodec, spatialAudio) => {
+    const getCombination = (language, rolesString, accessibilityPurpose, label,
+        channelsCount, audioCodec, spatialAudio) => {
       const keys = [
         language,
         rolesString,
+        accessibilityPurpose,
         spatialAudio,
       ];
       if (showAudioChannelCountVariants && channelsCount != null) {
@@ -153,6 +157,7 @@ shaka.ui.LanguageUtils = class {
     const combinationsMade = new Set();
     const selectedCombination = selectedTrack ? getCombination(
         selectedTrack.language, getRolesString(selectedTrack),
+        selectedTrack.accessibilityPurpose,
         selectedTrack.label, selectedTrack.channelsCount,
         selectedTrack.codecs &&
         shaka.util.MimeUtils.getNormalizedCodec(selectedTrack.codecs),
@@ -163,12 +168,13 @@ shaka.ui.LanguageUtils = class {
       const rolesString = getRolesString(track);
       const label = track.label;
       const channelsCount = track.channelsCount;
+      const accessibilityPurpose = track.accessibilityPurpose;
       const audioCodec = track.codecs &&
           shaka.util.MimeUtils.getNormalizedCodec(track.codecs);
       const spatialAudio = track.spatialAudio;
       const combinationName =
-          getCombination(language, rolesString, label, channelsCount,
-              audioCodec, spatialAudio);
+          getCombination(language, rolesString, accessibilityPurpose, label,
+              channelsCount, audioCodec, spatialAudio);
       if (combinationsMade.has(combinationName)) {
         continue;
       }
@@ -199,6 +205,10 @@ shaka.ui.LanguageUtils = class {
       switch (trackLabelFormat) {
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
           span.textContent += basicInfo;
+          if (accessibilityPurpose == AccessibilityPurpose.VISUALLY_IMPAIRED) {
+            span.textContent += ' - ' +
+                localization.resolve(shaka.ui.Locales.Ids.AUDIO_DESCRIPTION);
+          }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.ROLE:
           span.textContent += basicInfo;
