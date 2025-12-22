@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.15.25](https://github.com/shaka-project/shaka-player/compare/v4.15.24...v4.15.25) (2025-12-22)
+
+
+### Bug Fixes
+
+* Fix external text track timing when using HLS ([#9511](https://github.com/shaka-project/shaka-player/issues/9511)) ([5d2b11f](https://github.com/shaka-project/shaka-player/commit/5d2b11fa434b5876dfc30a4c02774494ccbc65e6))
+* **HLS:** Support playback with gaps ([#9506](https://github.com/shaka-project/shaka-player/issues/9506)) ([01f261f](https://github.com/shaka-project/shaka-player/commit/01f261f967411061483ac2e33acb3ef86951e0ae))
+* Prefer disableStream over create a gap when a segment is missing ([#9516](https://github.com/shaka-project/shaka-player/issues/9516)) ([bdaf1bb](https://github.com/shaka-project/shaka-player/commit/bdaf1bbeb2fd94ee0a9b138e050ab8dd66e0659e))
+
 ## [4.15.24](https://github.com/shaka-project/shaka-player/compare/v4.15.23...v4.15.24) (2025-12-15)
 
 
