@@ -262,6 +262,20 @@ describe('TextEngine', () => {
       expect(mockDisplayer.removeSpy).toHaveBeenCalledWith(0, 1);
     });
 
+    it('calls displayer.remove() if displaying CC and removing CC',
+        async () => {
+          textEngine.setSelectedClosedCaptionId('CC1', 1);
+          await textEngine.remove(0, 1, /* removeCC= */ true);
+          expect(mockDisplayer.removeSpy).toHaveBeenCalledWith(0, 1);
+        });
+
+    it('does not call displayer.remove() if not displaying CC and removing CC',
+        async () => {
+          textEngine.setSelectedClosedCaptionId('', 0);
+          await textEngine.remove(0, 1, /* removeCC= */ true);
+          expect(mockDisplayer.removeSpy).not.toHaveBeenCalled();
+        });
+
     it('does not throw if called right before destroy', async () => {
       const p = textEngine.remove(0, 1);
       textEngine.destroy();
