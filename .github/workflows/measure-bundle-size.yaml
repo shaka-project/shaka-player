@@ -88,7 +88,7 @@ jobs:
       - name: Add or Update PR Comment
         shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
+          GH_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           COMMENT_INCLUDES: "Bundle Size Report"
           COMMENT_USER: "shaka-bot"
