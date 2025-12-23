@@ -93,11 +93,6 @@ jobs:
           COMMENT_INCLUDES: "Bundle Size Report"
           COMMENT_USER: "shaka-bot"
         run: |
-          if [ -z "$PR_NUMBER" ]; then
-            echo "No PR found."
-            exit 0
-          fi
-
           MESSAGE=$(cat artifact/report.md)
           echo "$MESSAGE"
 
