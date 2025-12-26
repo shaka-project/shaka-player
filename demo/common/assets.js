@@ -45,6 +45,7 @@ shakaAssets.Source = {
   JWPLAYER: 'JW Player',
   BBC: 'BBC',
   DOLBY: 'Dolby',
+  EYEVINN: 'Eyevinn',
 };
 
 
@@ -192,6 +193,8 @@ shakaAssets.Feature = {
   DASH: 'DASH',
   // Set if the asset is an HLS manifest.
   HLS: 'HLS',
+  // Set if the asset is an MSF.
+  MSF: 'MSF',
 
   // Set if the asset has at least one image stream.
   THUMBNAILS: 'Thumbnails',
@@ -2580,6 +2583,18 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.OFFLINE),
+  // }}}
+
+  // Eyevinn assets {{{
+  /* Eyevinn Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqlivemock',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://moqlivemock.demo.osaas.io/moq',
+      /* source= */ shakaAssets.Source.EYEVINN)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .setMimeType('application/msf'),
   // }}}
 ];
 /* eslint-enable @stylistic/max-len */
