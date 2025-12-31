@@ -166,7 +166,7 @@ describe('Player', () => {
     await player.attach(video);
     player.configure({
       // Ensures we don't get a warning about missing preference.
-      preferredAudioLanguage: 'en',
+      preferredAudioLanguages: ['en'],
       abrFactory: () => abrManager,
       textDisplayFactory: (player) => textDisplayer,
     });
@@ -1327,26 +1327,26 @@ describe('Player', () => {
       const oldConfig = player.getConfiguration();
       const oldDelayLicense = oldConfig.drm.delayLicenseRequestUntilPlayed;
       const oldSwitchInterval = oldConfig.abr.switchInterval;
-      const oldPreferredLang = oldConfig.preferredAudioLanguage;
+      const oldPreferredLang = oldConfig.preferredAudioLanguages;
 
       expect(oldDelayLicense).toBe(false);
       expect(oldSwitchInterval).toBe(8);
-      expect(oldPreferredLang).toBe('en');
+      expect(oldPreferredLang).toEqual(['en']);
 
       player.configure('drm.delayLicenseRequestUntilPlayed', true);
       player.configure('abr.switchInterval', 10);
-      player.configure('preferredAudioLanguage', 'fr');
+      player.configure('preferredAudioLanguages', ['fr']);
 
       expect(onConfigurationChanged).toHaveBeenCalledTimes(3);
 
       const newConfig = player.getConfiguration();
       const newDelayLicense = newConfig.drm.delayLicenseRequestUntilPlayed;
       const newSwitchInterval = newConfig.abr.switchInterval;
-      const newPreferredLang = newConfig.preferredAudioLanguage;
+      const newPreferredLang = newConfig.preferredAudioLanguages;
 
       expect(newDelayLicense).toBe(true);
       expect(newSwitchInterval).toBe(10);
-      expect(newPreferredLang).toBe('fr');
+      expect(newPreferredLang).toEqual(['fr']);
     });
 
     it('accepts escaped "." in names', () => {
@@ -2503,8 +2503,8 @@ describe('Player', () => {
       // Language/channel prefs must be set before load.  Used in
       // select*Language() tests.
       player.configure({
-        preferredAudioLanguage: 'en',
-        preferredTextLanguage: 'es',
+        preferredAudioLanguages: ['en'],
+        preferredTextLanguages: ['es'],
         preferredAudioChannelCount: 6,
       });
 
@@ -2578,7 +2578,7 @@ describe('Player', () => {
 
     it('switching audio doesn\'t change selected text track', () => {
       player.configure({
-        preferredTextLanguage: 'es',
+        preferredTextLanguages: ['es'],
       });
 
       // We will manually switch from Spanish to English.
@@ -2600,9 +2600,9 @@ describe('Player', () => {
     });
 
     it('selectAudioTrack() takes precedence over ' +
-       'preferredAudioLanguage', () => {
+       'preferredAudioLanguages', () => {
       // This preference is set in beforeEach, before load().
-      expect(player.getConfiguration().preferredAudioLanguage).toBe('en');
+      expect(player.getConfiguration().preferredAudioLanguages).toEqual(['en']);
       expect(getActiveVariantTrack().language).toBe('en');
 
       const newAudioTrack = audioTracks.find((t) => t.language == 'es');
@@ -2720,9 +2720,9 @@ describe('Player', () => {
     });
 
     it('selectTextTrack() takes precedence over ' +
-       'preferredTextLanguage', () => {
+       'preferredTextLanguages', () => {
       // This preference is set in beforeEach, before load().
-      expect(player.getConfiguration().preferredTextLanguage).toBe('es');
+      expect(player.getConfiguration().preferredTextLanguages).toEqual(['es']);
       expect(getActiveTextTrack().language).toBe('es');
 
       const newTextTrack = textTracks.find((t) => t.language == 'en');
@@ -2950,7 +2950,7 @@ describe('Player', () => {
 
     it('chooses the configured text language and role at start', async () => {
       player.configure({
-        preferredTextLanguage: 'en',
+        preferredTextLanguages: ['en'],
         preferredTextRole: 'commentary',
       });
 
@@ -2968,7 +2968,7 @@ describe('Player', () => {
       expect(getActiveVariantTrack().label).toBe(null);
 
       player.configure({
-        preferredAudioLanguage: '',
+        preferredAudioLanguages: [],
         preferredAudioLabel: 'es-label',
       });
 
@@ -3017,7 +3017,7 @@ describe('Player', () => {
       });
 
       player.configure({
-        preferredAudioLanguage: undefined,
+        preferredAudioLanguages: [],
       });
 
       await player.load(fakeManifestUri, 0, fakeMimeType);
@@ -3058,7 +3058,7 @@ describe('Player', () => {
 
       // Set the user preferences, which must happen before load().
       player.configure({
-        preferredAudioLanguage: preference,
+        preferredAudioLanguages: [preference],
       });
 
       await player.load(fakeManifestUri, 0, fakeMimeType);

@@ -1133,7 +1133,7 @@ describe('Player', () => {
   });
 
   it('preload allow update audio track', async () => {
-    player.configure('preferredAudioLanguage', 'en');
+    player.configure('preferredAudioLanguages', ['en']);
     const preloadManager =
         await player.preload('test:sintel_multi_lingual_multi_res_compiled');
     await preloadManager.waitForFinish();
@@ -1141,7 +1141,7 @@ describe('Player', () => {
     expect(prefetchedVariantTrack).not.toBeNull();
     expect(prefetchedVariantTrack.language).toBe('en');
 
-    preloadManager.configure('preferredAudioLanguage', 'es');
+    preloadManager.configure('preferredAudioLanguages', ['es']);
 
     await shaka.test.Util.shortDelay();
     prefetchedVariantTrack = preloadManager.getPrefetchedVariantTrack();
@@ -1150,7 +1150,7 @@ describe('Player', () => {
   });
 
   it('preload allow update text track', async () => {
-    player.configure('preferredTextLanguage', 'zh');
+    player.configure('preferredTextLanguages', ['zh']);
     const preloadManager =
         await player.preload('test:sintel_multi_lingual_multi_res_compiled');
     await preloadManager.waitForFinish();
@@ -1159,7 +1159,7 @@ describe('Player', () => {
     expect(prefetchedTextTrack).not.toBeNull();
     expect(prefetchedTextTrack.language).toBe('zh');
 
-    preloadManager.configure('preferredTextLanguage', 'fr');
+    preloadManager.configure('preferredTextLanguages', ['fr']);
 
     await shaka.test.Util.shortDelay();
     prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();

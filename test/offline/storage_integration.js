@@ -266,7 +266,7 @@ filterDescribe('Storage', storageSupport, () => {
       ];
 
       const selected =
-          PlayerConfiguration.defaultTrackSelect(tracks, englishUS, 'SDR');
+          PlayerConfiguration.defaultTrackSelect(tracks, [englishUS], 'SDR');
       expect(selected).toBeTruthy();
       expect(selected.length).toBe(1);
       expect(selected[0]).toBeTruthy();
@@ -282,7 +282,7 @@ filterDescribe('Storage', storageSupport, () => {
       ];
 
       const selected =
-          PlayerConfiguration.defaultTrackSelect(tracks, englishUS, 'SDR');
+          PlayerConfiguration.defaultTrackSelect(tracks, [englishUS], 'SDR');
       expect(selected).toBeTruthy();
       expect(selected.length).toBe(2);
       for (const track of tracks) {
@@ -299,7 +299,7 @@ filterDescribe('Storage', storageSupport, () => {
         ];
 
         const selected =
-            PlayerConfiguration.defaultTrackSelect(tracks, 'eng-us', 'SDR');
+            PlayerConfiguration.defaultTrackSelect(tracks, ['eng-us'], 'SDR');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -315,7 +315,7 @@ filterDescribe('Storage', storageSupport, () => {
         ];
 
         const selected =
-            PlayerConfiguration.defaultTrackSelect(tracks, 'eng', 'SDR');
+            PlayerConfiguration.defaultTrackSelect(tracks, ['eng'], 'SDR');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -330,7 +330,7 @@ filterDescribe('Storage', storageSupport, () => {
         ];
 
         const selected =
-            PlayerConfiguration.defaultTrackSelect(tracks, 'fr', 'SDR');
+            PlayerConfiguration.defaultTrackSelect(tracks, ['fr'], 'SDR');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -345,7 +345,7 @@ filterDescribe('Storage', storageSupport, () => {
         ];
 
         const selected =
-            PlayerConfiguration.defaultTrackSelect(tracks, 'fr-uk', 'SDR');
+            PlayerConfiguration.defaultTrackSelect(tracks, ['fr-uk'], 'SDR');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -362,7 +362,7 @@ filterDescribe('Storage', storageSupport, () => {
         tracks[0].primary = true;
 
         const selected =
-            PlayerConfiguration.defaultTrackSelect(tracks, 'de', 'SDR');
+            PlayerConfiguration.defaultTrackSelect(tracks, ['de'], 'SDR');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
