@@ -2333,7 +2333,7 @@ shaka.extern.MediaSourceConfiguration;
  *   is chosen, in two scenarios:
  *   <br>
  *   - In the initial selection, if the regular preference filters match no
- *   tracks. In this case, the preferredTextLanguage and preferredTextRole will
+ *   tracks. In this case, the preferredTextLanguages and preferredTextRole will
  *   be ignored, and the language will be chosen based on the initial variant.
  *   <br>
  *   - When changing the audio language, if the previous subtitle is either
@@ -2865,9 +2865,9 @@ shaka.extern.TextDisplayerConfiguration;
  *   lcevc: shaka.extern.LcevcConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
  *   ignoreHardwareResolution: boolean,
- *   preferredAudioLanguage: string,
+ *   preferredAudioLanguages: !Array<string>,
  *   preferredAudioLabel: string,
- *   preferredTextLanguage: string,
+ *   preferredTextLanguages: !Array<string>,
  *   preferredAudioRole: string,
  *   preferredVideoRole: string,
  *   preferredTextRole: string,
@@ -2924,12 +2924,12 @@ shaka.extern.TextDisplayerConfiguration;
  *   is only available at resolutions beyond the device's native resolution,
  *   and you are confident it can be decoded and downscaled, this flag can
  *   allow playback when it would otherwise fail.
- * @property {string} preferredAudioLanguage
- *   The preferred language to use for audio tracks.  If not given it will use
- *   the <code>'main'</code> track.
+ * @property {!Array<string>} preferredAudioLanguages
+ *   The list of preferred languages to use for audio tracks, in order of
+ *   preference.  If not given it will use the <code>'main'</code> track.
  *   Changing this during playback will not affect the current playback.
  *   <br>
- *   Defaults to <code>''</code>.
+ *   Defaults to <code>[]</code>.
  * @property {string} preferredAudioLabel
  *   The preferred label to use for audio tracks.
  *   Changing this during playback will not affect the current playback.
@@ -2940,13 +2940,13 @@ shaka.extern.TextDisplayerConfiguration;
  *   Changing this during playback will not affect the current playback.
  *   <br>
  *   Defaults to <code>''</code>.
- * @property {string} preferredTextLanguage
- *   The preferred language to use for text tracks.  If a matching text track
- *   is found, and the selected audio and text tracks have different languages,
- *   the text track will be shown.
+ * @property {!Array<string>} preferredTextLanguages
+ *   The list of preferred languages to use for text tracks, in order of
+ *   preference.  If a matching text track is found, and the selected audio
+ *   and text tracks have different languages, the text track will be shown.
  *   Changing this during playback will not affect the current playback.
  *   <br>
- *   Defaults to <code>''</code>.
+ *   Defaults to <code>[]</code>.
  * @property {string} preferredAudioRole
  *   The preferred audio role to use for variants.
  *   Changing this during playback will not affect the current playback.

@@ -62,7 +62,7 @@ shaka.extern.AdaptationSetCriteria.Factory;
 
 /**
  * @typedef {{
- *   language: string,
+ *   languages: !Array<string>,
  *   role: string,
  *   videoRole: string,
  *   channelCount: number,
@@ -79,8 +79,9 @@ shaka.extern.AdaptationSetCriteria.Factory;
  *   preferredAudioChannelCount: number,
  * }}
  *
- * @property {string} language
- *   The language used to filter variants.
+ * @property {!Array<string>} languages
+ *   The list of preferred languages used to filter variants, in order of
+ *   preference.
  * @property {string} role
  *   The adaptation audio role used to filter variants.
  * @property {string} videoRole
