@@ -108,7 +108,7 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
     // Set audio preference for when reloading the stream (e.g. casting), keep
     // this selection.
     const config = {
-      preferredAudioLanguage: audioTrack.language,
+      preferredAudioLanguages: [audioTrack.language],
       preferSpatialAudio: audioTrack.spatialAudio,
     };
 
