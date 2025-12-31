@@ -36,8 +36,8 @@ shakaDemo.Utils = class {
     };
 
     // Override config values with custom names.
-    configOverride('audiolang', 'preferredAudioLanguage');
-    configOverride('textlang', 'preferredTextLanguage');
+    configOverride('audiolang', 'preferredAudioLanguages');
+    configOverride('textlang', 'preferredTextLanguages');
     configOverride('textrole', 'preferredTextRole');
     configOverride('channels', 'preferredAudioChannelCount');
 

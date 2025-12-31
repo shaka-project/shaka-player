@@ -770,12 +770,14 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.PlayerConfiguration');
 
     this.addSection_('Language', docLink)
-        .addTextInput_('Preferred Audio Language', 'preferredAudioLanguage')
+        .addArrayStringInput_('Preferred Audio Languages',
+            'preferredAudioLanguages')
         .addTextInput_('Preferred Audio Label', 'preferredAudioLabel')
         .addTextInput_('Preferred Video Label', 'preferredVideoLabel')
         .addTextInput_('Preferred Audio Role', 'preferredAudioRole')
         .addTextInput_('Preferred Video Role', 'preferredVideoRole')
-        .addTextInput_('Preferred Text Language', 'preferredTextLanguage')
+        .addArrayStringInput_('Preferred Text Languages',
+            'preferredTextLanguages')
         .addTextInput_('Preferred Text Role', 'preferredTextRole');
     const onChange = (input) => {
       shakaDemoMain.setUILocale(input.value);

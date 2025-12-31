@@ -437,9 +437,8 @@ shakaDemo.Main = class {
     this.defaultConfig_ = this.player_.getConfiguration();
     this.desiredConfig_ = this.player_.getConfiguration();
     const languages = navigator.languages || ['en-us'];
-    this.configure('preferredAudioLanguage', languages[0]);
+    this.configure('preferredAudioLanguages', languages);
     this.uiLocale_ = languages[0];
-    // TODO(#1591): Support multiple language preferences
 
     const onErrorEvent = (event) => this.onErrorEvent_(event);
     this.player_.addEventListener('error', onErrorEvent);
@@ -1051,6 +1050,16 @@ shakaDemo.Main = class {
           params.get('preferredTextFormats').split(','));
     }
 
+    if (params.has('preferredAudioLanguages')) {
+      this.configure('preferredAudioLanguages',
+          params.get('preferredAudioLanguages').split(','));
+    }
+
+    if (params.has('preferredTextLanguages')) {
+      this.configure('preferredTextLanguages',
+          params.get('preferredTextLanguages').split(','));
+    }
+
     if (params.has('accessibility.speechToText.languagesToTranslate')) {
       this.configure('accessibility.speechToText.languagesToTranslate',
           params.get('accessibility.speechToText.languagesToTranslate')
@@ -1580,6 +1589,8 @@ shakaDemo.Main = class {
       'preferredVideoCodecs',
       'preferredAudioCodecs',
       'preferredTextFormats',
+      'preferredAudioLanguages',
+      'preferredTextLanguages',
       'accessibility.speechToText.languagesToTranslate',
     ];
 
