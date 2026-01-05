@@ -2739,6 +2739,82 @@ describe('DrmEngine', () => {
     });
   });
 
+  describe('MediaKeySessionClosedReason', () => {
+    it('recreates session after hardware-context-reset', async () => {
+      await initAndAttach();
+
+      const closedPromise = new shaka.util.PublicPromise();
+      session1.closed = closedPromise;
+
+      mockMediaKeys.createSession.calls.reset();
+
+      await sendEncryptedEvent('webm');
+      expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
+
+      closedPromise.resolve('hardware-context-reset');
+      await shaka.test.Util.shortDelay();
+
+      expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(2);
+    });
+
+    it('handles internal-error correctly', async () => {
+      let capturedError = null;
+      onErrorSpy.and.callFake((error) => {
+        capturedError = error;
+      });
+      logErrorSpy.and.stub();
+
+      await initAndAttach();
+
+      const closedPromise = new shaka.util.PublicPromise();
+      session1.closed = closedPromise;
+
+      await sendEncryptedEvent('webm');
+
+      closedPromise.resolve('internal-error');
+      await shaka.test.Util.shortDelay();
+
+      expect(onErrorSpy).toHaveBeenCalled();
+      expect(capturedError).toBeTruthy();
+      expect(capturedError.severity).toBe(shaka.util.Error.Severity.CRITICAL);
+      expect(capturedError.category).toBe(shaka.util.Error.Category.DRM);
+    });
+
+    it('logs closed-by-application normally', async () => {
+      await initAndAttach();
+
+      const closedPromise = new shaka.util.PublicPromise();
+      session1.closed = closedPromise;
+
+      mockMediaKeys.createSession.calls.reset();
+
+      await sendEncryptedEvent('webm');
+      expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
+
+      closedPromise.resolve('closed-by-application');
+      await shaka.test.Util.shortDelay();
+
+      expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
+    });
+
+    it('logs resource-evicted as warning', async () => {
+      await initAndAttach();
+
+      const closedPromise = new shaka.util.PublicPromise();
+      session1.closed = closedPromise;
+
+      mockMediaKeys.createSession.calls.reset();
+
+      await sendEncryptedEvent('webm');
+      expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
+
+      closedPromise.resolve('resource-evicted');
+      await shaka.test.Util.shortDelay();
+
+      expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
+    });
+  });
+
   async function initAndAttach() {
     const variants = manifest.variants;
     await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
