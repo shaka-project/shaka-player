@@ -673,8 +673,8 @@ describe('UITextDisplayer', () => {
     expect(cueCss).toEqual(jasmine.objectContaining({
       'display': 'flex',
       'flex-direction': 'column',
-      // textAlign LEFT => alignItems 'start' and width 100% (setCaptionStyles_)
-      'align-items': 'start',
+      // textAlign LEFT => alignItems 'self-start' and width 100%
+      'align-items': 'self-start',
       'width': '100%',
       // displayAlign BEFORE => justifyContent 'flex-start'
       'justify-content': 'flex-start',
