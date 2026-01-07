@@ -33,3 +33,27 @@ Map.prototype.getOrInsert = function(key, defaultValue) {};
  */
 // eslint-disable-next-line no-extend-native
 Map.prototype.getOrInsertComputed = function(key, callbackFunction) {};
+
+/**
+ * Returns the value for the given key if present; otherwise inserts
+ * the default value, and returns that.
+ * @param {K} key
+ * @param {V} defaultValue
+ * @return {V}
+ * @this {WeakMap<K, V>}
+ * @template K, V
+ */
+// eslint-disable-next-line no-extend-native
+WeakMap.prototype.getOrInsert = function(key, defaultValue) {};
+
+/**
+ * Returns the value for the given key if present; otherwise calls
+ * the callback with the key, inserts the returned value, and returns that.
+ * @param {K} key
+ * @param {function(K): V} callbackFunction
+ * @return {V}
+ * @this {WeakMap<K, V>}
+ * @template K, V
+ */
+// eslint-disable-next-line no-extend-native
+WeakMap.prototype.getOrInsertComputed = function(key, callbackFunction) {};
