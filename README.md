@@ -393,7 +393,6 @@ VR modes supported:
 - Half equirectangular projection with 180 degrees of horizontal field of view.
 - Cubemap projection with 360 degrees of horizontal field of view.
 
-
 NOTES:
   - VR is only supported for clear streams or HLS-AES stream. DRM prevents
     access to the video pixels for transformation.

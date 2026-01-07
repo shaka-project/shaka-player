@@ -255,3 +255,15 @@ player.configure('drm.initDataTransform',
                  shaka.drm.FairPlay.muxInitDataTransform);
 ```
 
+#### Gumlet (legacy Apple Media Keys)
+
+For integration with Gumlet the following can be used:
+
+```js
+shaka.polyfill.installAll();
+player.getNetworkingEngine()
+    .registerRequestFilter(shaka.drm.FairPlay.gumletFairPlayRequest);
+player.getNetworkingEngine()
+    .registerResponseFilter(shaka.drm.FairPlay.commonFairPlayResponse);
+```
+

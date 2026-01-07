@@ -76,6 +76,15 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
       this.updateVideoRoles_();
     });
 
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.updateVideoRoles_();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.updateVideoRoles_();
+      });
+    }
+
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
     this.updateVideoRoles_();
@@ -123,30 +132,28 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
       }
     };
 
-    if (roles.size <= 1) {
-      shaka.ui.Utils.setDisplay(this.button, false);
-      return;
-    }
+    if (roles.size > 1) {
+      for (const role of roles) {
+        const button = shaka.util.Dom.createButton();
+        this.eventManager.listen(button, 'click',
+            () => this.onVideoRoleSelected_(role));
 
-    for (const role of roles) {
-      const button = shaka.util.Dom.createButton();
-      this.eventManager.listen(button, 'click',
-          () => this.onVideoRoleSelected_(role));
+        const span = shaka.util.Dom.createHTMLElement('span');
+        span.textContent = this.getRoleLabel_(role);
+        button.appendChild(span);
 
-      const span = shaka.util.Dom.createHTMLElement('span');
-      span.textContent = this.getRoleLabel_(role);
-      button.appendChild(span);
-
-      if (selectedTrack.roles.includes(role)) {
-        button.ariaSelected = 'true';
-        button.appendChild(shaka.ui.Utils.checkmarkIcon());
-        span.classList.add('shaka-chosen-item');
-        this.currentSelection.textContent = span.textContent;
+        if (selectedTrack.roles.includes(role)) {
+          button.ariaSelected = 'true';
+          button.appendChild(shaka.ui.Utils.checkmarkIcon());
+          span.classList.add('shaka-chosen-item');
+          this.currentSelection.textContent = span.textContent;
+        }
+        this.menu.appendChild(button);
       }
-      this.menu.appendChild(button);
     }
 
-    shaka.ui.Utils.setDisplay(this.button, true);
+    shaka.ui.Utils.setDisplay(
+        this.button, roles.size > 1 && !this.isSubMenuOpened);
   }
 
   /**

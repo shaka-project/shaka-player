@@ -122,6 +122,10 @@ application:
     - `streaming.minBytesForProgressEvents` has been renamed to `networking.minBytesForProgressEvents` (deprecated in v4.15.0)
     - `manifest.dash.enableAudioGroups` has been renamed to `manifest.enableAudioGroups`
     - `preferredVariantRole` has been renamed to `preferredAudioRole` (deprecated in v4.16.0)
+    - `autoShowText` is removed.
+    - `removeLatencyFromFirstPacketTime` has been removed.
+    - `removeLatencyFromFirstPacketTime` has been removed.
+    - `streaming.speechToText` moved to `accessibility.speechToText`
 
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.
@@ -141,3 +145,7 @@ application:
     - Removed `video` and `player` params on all methods.
     - Removed `initClientSide`, `initServerSide`, `initMediaTailor` and `initInterstitial` since now are auto-initialized when necessary.
     - `onDashTimedMetadata` has been removed.
+
+  - Initial track selection:
+    - With the removal of `autoShowText`, initial text track selection will now solely be based on `preferredTextLanguage` and additionally the roles you may prefer.
+    - The app may choose not to pass preferences and instead rely on the tracks API (`getTextTracks`, `getAudioTracks`) along with its own business logic.

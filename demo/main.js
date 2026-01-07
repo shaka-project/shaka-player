@@ -438,7 +438,6 @@ shakaDemo.Main = class {
     this.desiredConfig_ = this.player_.getConfiguration();
     const languages = navigator.languages || ['en-us'];
     this.configure('preferredAudioLanguage', languages[0]);
-    this.configure('preferredTextLanguage', languages[0]);
     this.uiLocale_ = languages[0];
     // TODO(#1591): Support multiple language preferences
 
@@ -791,6 +790,17 @@ shakaDemo.Main = class {
     if (asset.features.includes(shakaAssets.Feature.CONTAINERLESS)) {
       mimeTypes.push('audio/aac');
     }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P10)) {
+      mimeTypes.push('video/mp4; codecs="dav1.10.01"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P10_1)) {
+      mimeTypes.push('video/mp4; codecs="av01.0.31M.10.0.111.09.16.09.0"');
+      mimeTypes.push('video/mp4; codecs="dav1.10.01"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P10_4)) {
+      mimeTypes.push('video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"');
+      mimeTypes.push('video/mp4; codecs="dav1.10.01"');
+    }
     if (asset.features.includes(shakaAssets.Feature.DOLBY_VISION_P8_1)) {
       mimeTypes.push('video/mp4; codecs="hvc1.2.4.L120.b0"');
       mimeTypes.push('video/mp4; codecs="dvh1.08.01"');
@@ -813,6 +823,15 @@ shakaDemo.Main = class {
     }
     if (asset.features.includes(shakaAssets.Feature.APAC)) {
       mimeTypes.push('audio/mp4; codecs="apac.31.00"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.APAC)) {
+      mimeTypes.push('audio/mp4; codecs="apac.31.00"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_DIGITAL_PLUS)) {
+      mimeTypes.push('audio/mp4; codecs="ec-3"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.AC_4)) {
+      mimeTypes.push('audio/mp4; codecs="ac-4.02.01.03"');
     }
     let hasSupportedMimeType = mimeTypes.some((type) => {
       return this.support_.media[type];
@@ -1009,13 +1028,6 @@ shakaDemo.Main = class {
         }
       }
     }
-    if (params.has('lang')) {
-      // Load the legacy 'lang' hash value.
-      const lang = params.get('lang');
-      this.configure('preferredAudioLanguage', lang);
-      this.configure('preferredTextLanguage', lang);
-      this.setUILocale(lang);
-    }
     if (params.has('uilang')) {
       this.setUILocale(params.get('uilang'));
       // TODO(#1591): Support multiple language preferences
@@ -1039,9 +1051,10 @@ shakaDemo.Main = class {
           params.get('preferredTextFormats').split(','));
     }
 
-    if (params.has('streaming.speechToText.languagesToTranslate')) {
-      this.configure('streaming.speechToText.languagesToTranslate',
-          params.get('streaming.speechToText.languagesToTranslate').split(','));
+    if (params.has('accessibility.speechToText.languagesToTranslate')) {
+      this.configure('accessibility.speechToText.languagesToTranslate',
+          params.get('accessibility.speechToText.languagesToTranslate')
+              .split(','));
     }
 
     // Add compiled/uncompiled links.
@@ -1146,7 +1159,7 @@ shakaDemo.Main = class {
     const combined = fields.concat(fragments);
     const params = new Map();
     for (const line of combined) {
-      const kv = line.split('=');
+      const kv = decodeURIComponent(line).split('=');
       params.set(kv[0], kv.slice(1).join('='));
     }
     return params;
@@ -1254,7 +1267,7 @@ shakaDemo.Main = class {
 
     this.player_.unload();
 
-    const queueManager = this.player_.getQueueManager();
+    const queueManager = this.controls_.getQueueManager();
     queueManager.removeAllItems();
 
     // The currently-selected asset changed, so update asset cards.
@@ -1392,7 +1405,7 @@ shakaDemo.Main = class {
         ui.configure(uiConfig);
       }
 
-      const queueManager = this.player_.getQueueManager();
+      const queueManager = this.controls_.getQueueManager();
       await queueManager.removeAllItems();
 
       if (asset.hasAds()) {
@@ -1472,7 +1485,7 @@ shakaDemo.Main = class {
    * @param {ShakaDemoAssetInfo} asset
    */
   async addToQueue(asset) {
-    const queueManager = this.player_.getQueueManager();
+    const queueManager = this.controls_.getQueueManager();
     const queueItem = await this.getQueueItem_(asset);
     queueManager.insertItems([queueItem]);
   }
@@ -1567,7 +1580,7 @@ shakaDemo.Main = class {
       'preferredVideoCodecs',
       'preferredAudioCodecs',
       'preferredTextFormats',
-      'streaming.speechToText.languagesToTranslate',
+      'accessibility.speechToText.languagesToTranslate',
     ];
 
     for (const key of preferredArray) {
@@ -1787,7 +1800,7 @@ shakaDemo.Main = class {
     // Determine if the element is selected.
     const params = this.getParams_();
     let selected =
-        params.get('panel') == encodeURI(button.getAttribute('tab-identifier'));
+        params.get('panel') == button.getAttribute('tab-identifier');
     if (selected) {
       // Re-apply any saved data from hash.
       const hashValues = params.get('panelData');

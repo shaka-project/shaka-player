@@ -68,6 +68,25 @@ shakaAssets.AdTag = {
   AD_POD_PREROLL_MIDROLL_POSTROLL: 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostpod&cmsid=496&vid=short_onecue&correlator=',
 };
 
+/** @enum {shaka.extern.ExtraChapter} */
+shakaAssets.ExternalChapters = {
+  SINTEL: {
+    uri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-chapters.vtt',
+    language: 'und',
+    mime: 'text/vtt',
+  },
+  ART_OF_MOTION: {
+    // eslint-disable-next-line @stylistic/max-len
+    uri: 'data:text/vtt;base64,V0VCVlRUCgoxCjAwOjAwOjI0LjAwMCAtLT4gMDA6MDE6MDkuMDAwClNhbHRvIG9uIHRoZSBlZGdlCgoyCjAwOjAxOjA5LjAwMCAtLT4gMDA6MDE6NDUuMDAwCkludGVydmlldyAtIE1hcmN1cyBHdXN0YWZzc29uCgozCjAwOjAxOjQ1LjAwMCAtLT4gMDA6MDM6MDguMDAwClBhcmNvdXIgcmF0aW5nIGV4cGxhaW5lZAoKNAowMDowMzowOC4wMDAgLS0+IDAwOjAzOjE5LjAwMApBbmQgd2UgaGF2ZSBhIHdpbm5lciE=',
+    language: 'und',
+    mime: 'text/vtt',
+  },
+};
+
+/** @enum {string} */
+shakaAssets.ExternalThumbnail = {
+  ART_OF_MOTION: 'https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt',
+};
 
 /**
  * @param {!shakaAssets.KeySystem} keySystem
@@ -141,6 +160,12 @@ shakaAssets.Feature = {
   DOLBY_VISION_P8_1: 'Dolby Vision P8.1',
   // Set if the asset requires Dolby Vision Profile 8.4 support.
   DOLBY_VISION_P8_4: 'Dolby Vision P8.4',
+  // Set if the asset requires Dolby Vision Profile 10 support.
+  DOLBY_VISION_P10: 'Dolby Vision P10',
+  // Set if the asset requires Dolby Vision Profile 10.1 support.
+  DOLBY_VISION_P10_1: 'Dolby Vision P10.1',
+  // Set if the asset requires Dolby Vision Profile 10.4 support.
+  DOLBY_VISION_P10_4: 'Dolby Vision P10.4',
   // Set if the asset requires Dolby Vision with MV-HEVC (for 3D) support.
   DOLBY_VISION_3D: 'Dolby Vision 3D',
 
@@ -148,8 +173,13 @@ shakaAssets.Feature = {
   AV1: 'AV1',
   // Set if the asset requires MV-HEVC support.
   MV_HEVC: 'MV-HEVC',
+
   // Set if the asset requires APAC support.
   APAC: 'APAC',
+  // Set if the asset requires DD+ support.
+  DOLBY_DIGITAL_PLUS: 'DD+',
+  // Set if the asset requires AC-4 support.
+  AC_4: 'AC-4',
 
   // Set if the asset has at least one stream that is at least 720p.
   HIGH_DEFINITION: 'High definition',
@@ -409,7 +439,8 @@ shakaAssets.testAssets = [
       .addKeySystem(shakaAssets.KeySystem.AES128)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP2TS)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel (HLS, FMP4, AES-128)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -418,7 +449,8 @@ shakaAssets.testAssets = [
       .addKeySystem(shakaAssets.KeySystem.AES128)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (multicodec)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -430,12 +462,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addFeature(shakaAssets.Feature.CHAPTERS)
-      .addExtraChapter({
-        uri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-chapters.vtt',
-        language: 'und',
-        mime: 'text/vtt',
-      }),
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel w/ trick mode (MP4 only, 720p)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -445,7 +472,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.TRICK_MODE)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   // NOTE: hanging in Firefox
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1291451
   new ShakaDemoAssetInfo(
@@ -457,7 +485,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (MP4 only)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -467,7 +496,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (multicodec, Widevine)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -489,7 +519,8 @@ shakaAssets.testAssets = [
             },
           },
         },
-      }),
+      })
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (multicodec, Widevine, ads)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -506,7 +537,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
+      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth')
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (MP4, VTT in MP4)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -516,7 +548,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel w/ 44 subtitle languages',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -526,7 +559,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.SURROUND)
-      .addFeature(shakaAssets.Feature.OFFLINE),
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (multiperiod, mixed encryption, encrypted first)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -548,7 +582,8 @@ shakaAssets.testAssets = [
             },
           },
         },
-      }),
+      })
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (multiperiod, mixed encryption, clear first)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -570,7 +605,8 @@ shakaAssets.testAssets = [
             },
           },
         },
-      }),
+      })
+      .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Heliocentrism (multicodec, multiperiod)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/heliocentricism.png',
@@ -1324,36 +1360,36 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Art of Motion (DASH) (external thumbnails)',
+      /* name= */ 'Art of Motion (DASH) (external thumbnails and chapters)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
       /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
       /* source= */ shakaAssets.Source.BITCODIN)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.THUMBNAILS)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt'),
+      .addExtraThumbnail(shakaAssets.ExternalThumbnail.ART_OF_MOTION)
+      .addExtraChapter(shakaAssets.ExternalChapters.ART_OF_MOTION),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Art of Motion (HLS) (external thumbnails)',
+      /* name= */ 'Art of Motion (HLS) (external thumbnails and chapters)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
       /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
       /* source= */ shakaAssets.Source.BITCODIN)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP2TS)
-      .addFeature(shakaAssets.Feature.THUMBNAILS)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt'),
+      .addExtraThumbnail(shakaAssets.ExternalThumbnail.ART_OF_MOTION)
+      .addExtraChapter(shakaAssets.ExternalChapters.ART_OF_MOTION),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Art of Motion (MP4) (external thumbnails)',
+      /* name= */ 'Art of Motion (MP4) (external thumbnails and chapters)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
       /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/MI201109210084_mpeg-4_hd_high_1080p25_10mbits.mp4',
       /* source= */ shakaAssets.Source.BITCODIN)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.THUMBNAILS)
-      .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt'),
+      .addExtraThumbnail(shakaAssets.ExternalThumbnail.ART_OF_MOTION)
+      .addExtraChapter(shakaAssets.ExternalChapters.ART_OF_MOTION),
   new ShakaDemoAssetInfo(
       /* name= */ 'VR Playhouse (DASH, VR equirectangular)',
       /* iconUri= */ 'https://cdn.bitmovin.com/content/assets/playhouse-vr/poster.jpg',
@@ -2161,6 +2197,102 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DOLBY_VISION)
       .addFeature(shakaAssets.Feature.DOLBY_VISION_P8_4),
   new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10 DASH + AAC',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_25/dash.mpd',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10.1 DASH + AAC',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_1_25/dash.mpd',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10_1),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10.4 DASH + AAC',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_4_25/dash.mpd',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10_4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10 DASH + DD+',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_25/dash_ec3.mpd',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10)
+      .addFeature(shakaAssets.Feature.DOLBY_DIGITAL_PLUS),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10.1 DASH + DD+',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_1_25/dash_ec3.mpd',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10_1)
+      .addFeature(shakaAssets.Feature.DOLBY_DIGITAL_PLUS),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10.4 DASH + DD+',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_4_25/dash_ec3.mpd',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10_4)
+      .addFeature(shakaAssets.Feature.DOLBY_DIGITAL_PLUS),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10 DASH + AC-4',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_25/dash_ac4.mpd',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10)
+      .addFeature(shakaAssets.Feature.AC_4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10.1 DASH + AC-4',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_1_25/dash_ac4.mpd',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10_1)
+      .addFeature(shakaAssets.Feature.AC_4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10.4 DASH + AC-4',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_4_25/dash_ac4.mpd',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10_4)
+      .addFeature(shakaAssets.Feature.AC_4),
+  new ShakaDemoAssetInfo(
       /* name= */ 'Dolby Vision P5 HLS',
       /* iconUri= */ '',
       /* manifestUri= */ 'https://ott.dolby.com/browser_test_kit/clear/p5/24/master.m3u8',
@@ -2190,6 +2322,102 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SURROUND)
       .addFeature(shakaAssets.Feature.DOLBY_VISION)
       .addFeature(shakaAssets.Feature.DOLBY_VISION_P8_4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10 HLS + AAC',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_25/master.m3u8',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10.1 HLS + AAC',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_1_25/master.m3u8',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10_1),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10.4 HLS + AAC',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_4_25/master.m3u8',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10_4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10 HLS + DD+',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_25/master_ec3.m3u8',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10)
+      .addFeature(shakaAssets.Feature.DOLBY_DIGITAL_PLUS),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10.1 HLS + DD+',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_1_25/master_ec3.m3u8',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10_1)
+      .addFeature(shakaAssets.Feature.DOLBY_DIGITAL_PLUS),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10.4 HLS + DD+',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_4_25/master_ec3.m3u8',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10_4)
+      .addFeature(shakaAssets.Feature.DOLBY_DIGITAL_PLUS),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10 HLS + AC-4',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_25/master_ac4.m3u8',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10)
+      .addFeature(shakaAssets.Feature.AC_4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10.1 HLS + AC-4',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_1_25/master_ac4.m3u8',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10_1)
+      .addFeature(shakaAssets.Feature.AC_4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Dolby Vision P10.4 HLS + AC-4',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ott.dolby.com/OnDelKits/Dolby_Vision_Online_Delivery_Kit_1.0/Test_Signals/clear/P10_4_25/master_ac4.m3u8',
+      /* source= */ shakaAssets.Source.DOLBY)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION)
+      .addFeature(shakaAssets.Feature.DOLBY_VISION_P10_4)
+      .addFeature(shakaAssets.Feature.AC_4),
   new ShakaDemoAssetInfo(
       /* name= */ 'Dolby Vision P5 DASH (Multi-DRM CENC)',
       /* iconUri= */ '',

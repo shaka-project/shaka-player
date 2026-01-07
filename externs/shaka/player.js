@@ -1971,7 +1971,6 @@ shaka.extern.SpeechToTextConfiguration;
  *   avoidEvictionOnQuotaExceededError: boolean,
  *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy,
  *   returnToEndOfLiveWindowWhenOutside: boolean,
- *   speechToText: shaka.extern.SpeechToTextConfiguration,
  * }}
  *
  * @description
@@ -2219,8 +2218,6 @@ shaka.extern.SpeechToTextConfiguration;
  *   it will be moved to the end of the live window, instead of the start.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {shaka.extern.SpeechToTextConfiguration} speechToText
- *   The speech to text configuration.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -2312,6 +2309,7 @@ shaka.extern.NetworkingConfiguration;
  *    A callback called for each cue after it is parsed, but right before it
  *    is appended to the presentation.
  *    Gives a chance for client-side editing of cue text, cue timing, etc.
+ *    This works for MSE always and for src= only when you use UITextDisplayer.
  * @property {boolean} dispatchAllEmsgBoxes
  *   If true, all emsg boxes are parsed and dispatched.
  *   <br>
@@ -2340,6 +2338,34 @@ shaka.extern.MediaSourceConfiguration;
 
 /**
  * @typedef {{
+ *   handleForcedSubtitlesAutomatically: boolean,
+ *   speechToText: shaka.extern.SpeechToTextConfiguration,
+ * }}
+ *
+ * @description
+ *   Accessibility configuration.
+ *
+ * @property {boolean} handleForcedSubtitlesAutomatically
+ *   If true, a forced text track will be chosen as a fallback if no other track
+ *   is chosen, in two scenarios:
+ *   <br>
+ *   - In the initial selection, if the regular preference filters match no
+ *   tracks. In this case, the preferredTextLanguage and preferredTextRole will
+ *   be ignored, and the language will be chosen based on the initial variant.
+ *   <br>
+ *   - When changing the audio language, if the previous subtitle is either
+ *   not present or is forced from the previous language.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {shaka.extern.SpeechToTextConfiguration} speechToText
+ *   The speech to text configuration.
+ * @exportDoc
+ */
+shaka.extern.AccessibilityConfiguration;
+
+
+/**
+ * @typedef {{
  *   customPlayheadTracker: boolean,
  *   skipPlayDetection: boolean,
  *   supportsMultipleMediaElements: boolean,
@@ -2349,13 +2375,14 @@ shaka.extern.MediaSourceConfiguration;
  *   allowStartInMiddleOfInterstitial: boolean,
  *   disableTrackingEvents: boolean,
  *   disableSnapback: boolean,
+ *   interstitialPreloadAheadTime: number,
  * }}
  *
  * @description
  *   Ads configuration.
  *
  * @property {boolean} customPlayheadTracker
- *   If this is <code>true</code>, we create a custom playhead tracker for
+ *   If this is <code>true</code>, we create a custom playhead tracker for IMA
  *   Client Side. This is useful because it allows you to implement the use of
  *   IMA on platforms that do not support multiple video elements.
  *   <br>
@@ -2363,14 +2390,15 @@ shaka.extern.MediaSourceConfiguration;
  *   Hisense, PlayStation 4, PlayStation5, Xbox, Vizio whose default value is
  *   <code>true</code>.
  * @property {boolean} skipPlayDetection
- *   If this is true, we will load Client Side ads without waiting for a play
- *   event.
+ *   If this is true, we will load IMA Client Side ads without waiting for a
+ *   play event.
  *   <br>
  *   Defaults to <code>false</code> except on Tizen, WebOS, Chromecast,
  *   Hisense, PlayStation 4, PlayStation5, Xbox, Vizio whose default value is
  *   <code>true</code>.
  * @property {boolean} supportsMultipleMediaElements
- *   If this is true, the browser supports multiple media elements.
+ *   If this is true, the browser supports multiple media elements, the ad
+ *   manager will use another video element to render the ad.
  *   <br>
  *   Defaults to <code>true</code> except on Tizen, WebOS, Chromecast,
  *   Hisense, PlayStation 4, PlayStation5, Xbox, Vizio whose default value is
@@ -2403,6 +2431,10 @@ shaka.extern.MediaSourceConfiguration;
  *   and playback will continue from the user's seek position.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {number} interstitialPreloadAheadTime
+ *   Interstitial preload ahead time, in seconds.
+ *   <br>
+ *   Defaults to <code>10</code>.
  *
  * @exportDoc
  */
@@ -2427,7 +2459,6 @@ shaka.extern.AdsConfiguration;
  *   cacheLoadThreshold: number,
  *   minTimeToSwitch: number,
  *   preferNetworkInformationBandwidth: boolean,
- *   removeLatencyFromFirstPacketTime: boolean
  * }}
  *
  * @property {boolean} enabled
@@ -2520,11 +2551,6 @@ shaka.extern.AdsConfiguration;
  *   trust the information provided by the browser.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {boolean} removeLatencyFromFirstPacketTime
- *   If true, we remove the latency from first packet time. This time is
- *   used to calculate the real bandwidth.
- *   <br>
- *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
@@ -2812,7 +2838,8 @@ shaka.extern.OfflineConfiguration;
 /**
  * @typedef {{
  *   captionsUpdatePeriod: number,
- *   fontScaleFactor: number
+ *   fontScaleFactor: number,
+ *   positionArea: shaka.config.PositionArea,
  * }}
  *
  * @description
@@ -2826,6 +2853,13 @@ shaka.extern.OfflineConfiguration;
  *   The font scale factor used to increase or decrease the font size.
  *   <br>
  *   Defaults to <code>1</code>.
+ * @property {shaka.config.PositionArea} positionArea
+ *   The region within the viewing area where the subtitles are to be
+ *   positioned. The default value indicates that they are positioned where
+ *   the subtitle defines it, otherwise they are overwritten with the given
+ *   position.
+ *   <br>
+ *   Defaults to <code>''</code>.
  * @exportDoc
  */
 shaka.extern.TextDisplayerConfiguration;
@@ -2833,8 +2867,8 @@ shaka.extern.TextDisplayerConfiguration;
 
 /**
  * @typedef {{
+ *   accessibility: shaka.extern.AccessibilityConfiguration,
  *   ads: shaka.extern.AdsConfiguration,
- *   autoShowText: shaka.config.AutoShowText,
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
  *   streaming: shaka.extern.StreamingConfiguration,
@@ -2872,13 +2906,10 @@ shaka.extern.TextDisplayerConfiguration;
  *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
+ * @property {shaka.extern.AccessibilityConfiguration} accessibility
+ *   Accessibility configuration and settings.
  * @property {shaka.extern.AdsConfiguration} ads
  *   Ads configuration and settings.
- * @property {shaka.config.AutoShowText} autoShowText
- *   Controls behavior of auto-showing text tracks on load().
- *   <br>
- *   Defaults to
- *   {@link shaka.config.AutoShowText#IF_SUBTITLES_MAY_BE_NEEDED}.
  * @property {shaka.extern.DrmConfiguration} drm
  *   DRM configuration and settings.
  * @property {shaka.extern.ManifestConfiguration} manifest

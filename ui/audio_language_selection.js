@@ -62,6 +62,15 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
       this.onAudioTracksChanged_();
     });
 
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.onAudioTracksChanged_();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.onAudioTracksChanged_();
+      });
+    }
+
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
 
@@ -76,9 +85,7 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
     shaka.ui.LanguageUtils.updateAudioTracks(audioTracks, this.menu,
         (track) => this.onAudioTrackSelected_(track),
         /* updateChosen= */ true, this.currentSelection, this.localization,
-        this.controls.getConfig().trackLabelFormat,
-        this.controls.getConfig().showAudioChannelCountVariants,
-        this.controls.getConfig().showAudioCodec);
+        this.controls.getConfig());
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);
 
     this.controls.dispatchEvent(
@@ -87,7 +94,8 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
     this.button.setAttribute('shaka-status', this.currentSelection.innerText);
 
     const numberOfItems = this.menu.getElementsByTagName('button').length;
-    shaka.ui.Utils.setDisplay(this.button, numberOfItems > 2);
+    shaka.ui.Utils.setDisplay(
+        this.button, numberOfItems > 2 && !this.isSubMenuOpened);
   }
 
   /**

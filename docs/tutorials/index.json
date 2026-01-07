@@ -29,5 +29,5 @@
   { "upgrade": { "title": "Upgrade Guide" } },
   { "upgrade-manifest": { "title": "ManifestParser Upgrade Guide" } },
   { "lcevc": { "title": "LCEVC Quick Start" } },
-  { "speech-to-text": { "title": "Speech to text" } }
+  { "accessibility": { "title": "Accessibility" } }
 ]

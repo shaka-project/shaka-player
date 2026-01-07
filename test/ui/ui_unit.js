@@ -377,9 +377,11 @@ describe('UI', () => {
           });
 
       it('is accessible', () => {
-        for (const button of overflowMenu.childNodes) {
-          expect(/** @type {!HTMLElement} */ (button)
-              .hasAttribute('aria-label')).toBe(true);
+        for (const node of overflowMenu.childNodes) {
+          const element = /** @type {!HTMLElement} */ (node);
+          if (element.tagName.toLowerCase() == 'button') {
+            expect(element.hasAttribute('aria-label')).toBe(true);
+          }
         }
       });
     });
@@ -575,6 +577,11 @@ describe('UI', () => {
 
       it('a menu becomes hidden if another one is opened', () => {
         resolutionMenuButton.click();
+        languageMenuButton.click();
+
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
+        expect(languageMenu.classList.contains('shaka-hidden')).toBe(true);
+
         languageMenuButton.click();
 
         expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
@@ -837,8 +844,6 @@ describe('UI', () => {
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
         UiUtils.simulateEvent(controlsContainer, 'contextmenu');
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
-        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
-        expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
       });
 
       it('hides on click event', () => {
@@ -846,7 +851,7 @@ describe('UI', () => {
         UiUtils.simulateEvent(controlsContainer, 'click');
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
         UiUtils.simulateEvent(controlsContainer, 'contextmenu');
-        UiUtils.simulateEvent(window, 'click');
+        UiUtils.simulateEvent(controlsContainer, 'click');
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
       });
 

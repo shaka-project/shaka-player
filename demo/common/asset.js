@@ -184,6 +184,36 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
+   * @private
+   */
+  checkChaptersFeature_() {
+    if (this.extraChapter.length) {
+      if (!this.features.includes(shakaAssets.Feature.CHAPTERS)) {
+        this.addFeature(shakaAssets.Feature.CHAPTERS);
+      }
+    } else {
+      if (this.features.includes(shakaAssets.Feature.CHAPTERS)) {
+        this.removeFeature(shakaAssets.Feature.CHAPTERS);
+      }
+    }
+  }
+
+  /**
+   * @private
+   */
+  checkThumbnailsFeature_() {
+    if (this.extraThumbnail.length) {
+      if (!this.features.includes(shakaAssets.Feature.THUMBNAILS)) {
+        this.addFeature(shakaAssets.Feature.THUMBNAILS);
+      }
+    } else {
+      if (this.features.includes(shakaAssets.Feature.THUMBNAILS)) {
+        this.removeFeature(shakaAssets.Feature.THUMBNAILS);
+      }
+    }
+  }
+
+  /**
    * @param {shakaAssets.KeySystem} keySystem
    * @return {!ShakaDemoAssetInfo}
    */
@@ -390,6 +420,7 @@ const ShakaDemoAssetInfo = class {
    */
   addExtraThumbnail(uri) {
     this.extraThumbnail.push(uri);
+    this.checkThumbnailsFeature_();
     return this;
   }
 
@@ -399,6 +430,7 @@ const ShakaDemoAssetInfo = class {
    */
   addExtraChapter(extraChapter) {
     this.extraChapter.push(extraChapter);
+    this.checkChaptersFeature_();
     return this;
   }
 
@@ -410,6 +442,7 @@ const ShakaDemoAssetInfo = class {
     this.extraChapter = this.extraChapter.filter((extraChapter) => {
       return extraChapter.uri != chapterUri;
     });
+    this.checkChaptersFeature_();
     return this;
   }
 

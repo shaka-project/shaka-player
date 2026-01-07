@@ -80,6 +80,10 @@ The following elements can be added to the UI bar using this configuration value
 * toggle_stereoscopic: adds a button that toggle between monoscopic and stereoscopic. The button
   is visible only if playing a VR content.
 * chapter: adds a button that controls the chapter selection.
+* captions-position: adds a button that controls the position of the captions.
+  The button is visible only if the content has at least one text track.
+* captions-size: adds a button that controls the size of the captions.
+  The button is visible only if the content has at least one text track.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 [Document Picture-in-Picture API]: https://developer.chrome.com/docs/web-platform/document-picture-in-picture/
 
@@ -111,6 +115,10 @@ The following buttons can be added to the overflow menu:
 * save_video_frame: adds a button to save the current video frame.
 * chapter: adds a button that controls the chapter selection.
 * mute: adds a button that mutes/unmutes the video on click.
+* captions-position: adds a button that controls the position of the captions.
+  The button is visible only if the content has at least one text track.
+* captions-size: adds a button that controls the size of the captions.
+  The button is visible only if the content has at least one text track.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:

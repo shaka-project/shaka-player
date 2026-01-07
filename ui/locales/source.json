@@ -19,6 +19,10 @@
     "description": "Label for a button used to open the native AirPlay dialog in the browser and select a destination to AirPlay to.",
     "message": "AirPlay"
   },
+  "AUDIO_DESCRIPTION": {
+    "description": "Label for a button used to select an audio track which contains audio description.",
+    "message": "Audio description"
+  },
   "AUTO_GENERATED": {
     "description": "Label for a button used to select an auto generated text track.",
     "message": "Auto generated"
@@ -33,6 +37,18 @@
     "meaning": "Return to previous menu",
     "message": "Back"
   },
+  "BOTTOM_CENTER": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Bottom center"
+  },
+  "BOTTOM_LEFT": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Bottom left"
+  },
+  "BOTTOM_RIGHT": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Bottom right"
+  },
   "CAPTIONS": {
     "description": "Label for a button used to navigate to a submenu to choose captions/subtitles in the video player.",
     "message": "Captions"
@@ -41,6 +57,18 @@
     "description": "Label for a button used to open the native Cast dialog in the browser and select a destination to Cast to.",
     "message": "Cast..."
   },
+  "CENTER": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Center"
+  },
+  "CENTER_LEFT": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Center left"
+  },
+  "CENTER_RIGHT": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Center right"
+  },
   "CHAPTERS": {
     "description": "Label for a button used to open a submenu to choose a chapter.",
     "message": "Chapters"
@@ -48,6 +76,10 @@
   "COPY_VIDEO_FRAME": {
     "description": "Label for a button used to copy the current video frame to the clipboard.",
     "message": "Copy video frame"
+  },
+  "DEFAULT": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Default"
   },
   "DOWNLOAD_VIDEO_FRAME": {
     "description": "Label for a button used to download the current video frame.",
@@ -117,6 +149,10 @@
     "description": "Title beneath a button showing that this feature of the video player is current enabled.  Currently used for Picture-in-Picture, but could apply to other features in the future.",
     "message": "On"
   },
+  "ORIGINAL_VERSION": {
+    "description": "Label for a button used to select an audio track which contains audio in original version.",
+    "message": "Original version"
+  },
   "PAUSE": {
     "description": "Label for a button used to pause a video in the video player.",
     "message": "Pause"
@@ -183,6 +219,14 @@
     "description": "Label used to identify a subtitle track that is forced to be shown.",
     "message": "Forced"
   },
+  "SUBTITLE_POSITION": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Subtitle position"
+  },
+  "SUBTITLE_SIZE": {
+    "description": "Label for a button used to indicate a subtitle size.",
+    "message": "Subtitle size"
+  },
   "SURROUND": {
     "description": "Label used to identify a audio track that has surround audio.",
     "message": "Surround"
@@ -190,6 +234,18 @@
   "TOGGLE_STEREOSCOPIC": {
     "description": "Label for a button that toggle between monoscopic and stereoscopic.",
     "message": "Toggle stereoscopic"
+  },
+  "TOP_CENTER": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Top center"
+  },
+  "TOP_LEFT": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Top left"
+  },
+  "TOP_RIGHT": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Top right"
   },
   "UNDETERMINED_LANGUAGE": {
     "description": "Label for a button used to select an audio track whose language is undetermined or unknown.",

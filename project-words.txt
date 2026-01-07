@@ -15,6 +15,7 @@ canupdatestarttime
 captionselectionupdated
 caststatuschanged
 clearlead
+configurationchanged
 currentitemchanged
 customwarning
 defaultselected
@@ -77,6 +78,7 @@ spacebar
 stalldetected
 startstreaming
 statechanged
+submenuclose
 submenuopen
 textchanged
 textlang
@@ -199,6 +201,7 @@ Eyevinn
 EZDRM
 Fairplay
 gstreamer
+Gumlet
 GPAC
 Hisense
 isoboxer

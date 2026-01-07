@@ -9,7 +9,6 @@ goog.provide('shaka.ui.CopyVideoFrameButton');
 
 goog.require('shaka.ads.Utils');
 goog.require('shaka.cast.CastProxy');
-goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -119,6 +118,15 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
       this.checkAvailability_();
     });
 
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.checkAvailability_();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.checkAvailability_();
+      });
+    }
+
     this.checkAvailability_();
   }
 
@@ -127,8 +135,8 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
    * @private
    */
   checkAvailability_() {
-    shaka.ui.Utils.setDisplay(
-        this.button_, this.controls.canCopyVideoFrameToClipboard());
+    shaka.ui.Utils.setDisplay(this.button_,
+        this.controls.canCopyVideoFrameToClipboard() && !this.isSubMenuOpened);
   }
 
 
@@ -159,7 +167,4 @@ shaka.ui.CopyVideoFrameButton.Factory = class {
 
 
 shaka.ui.OverflowMenu.registerElement(
-    'copy_video_frame', new shaka.ui.CopyVideoFrameButton.Factory());
-
-shaka.ui.ContextMenu.registerElement(
     'copy_video_frame', new shaka.ui.CopyVideoFrameButton.Factory());

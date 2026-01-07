@@ -10,6 +10,7 @@ goog.provide('shaka.ui.LanguageUtils');
 
 goog.require('mozilla.LanguageMapping');
 goog.require('shaka.log');
+goog.require('shaka.media.ManifestParser');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Overlay.TrackLabelFormat');
 goog.require('shaka.ui.Utils');
@@ -48,14 +49,18 @@ shaka.ui.LanguageUtils = class {
    * @param {boolean} updateChosen
    * @param {!HTMLElement} currentSelectionElement
    * @param {shaka.ui.Localization} localization
-   * @param {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
-   * @param {boolean} showAudioChannelCountVariants
-   * @param {boolean} showAudioCodec
+   * @param {!shaka.extern.UIConfiguration} config
    */
   static updateAudioTracks(tracks, langMenu, onTrackSelected, updateChosen,
-      currentSelectionElement, localization, trackLabelFormat,
-      showAudioChannelCountVariants, showAudioCodec) {
+      currentSelectionElement, localization, config) {
+    const AccessibilityPurpose =
+        shaka.media.ManifestParser.AccessibilityPurpose;
     const LocIds = shaka.ui.Locales.Ids;
+
+    let trackLabelFormat = config.trackLabelFormat;
+    const showAudioChannelCountVariants = config.showAudioChannelCountVariants;
+    const showAudioCodec = config.showAudioCodec;
+    const preferIntlDisplayNames = config.preferIntlDisplayNames;
 
     // TODO: Do the benefits of having this common code in a method still
     // outweigh the complexity of the parameter list?
@@ -100,11 +105,12 @@ shaka.ui.LanguageUtils = class {
       return track.roles.join(', ');
     };
 
-    const getCombination = (language, rolesString, label, channelsCount,
-        audioCodec, spatialAudio) => {
+    const getCombination = (language, rolesString, accessibilityPurpose, label,
+        channelsCount, audioCodec, spatialAudio) => {
       const keys = [
         language,
         rolesString,
+        accessibilityPurpose,
         spatialAudio,
       ];
       if (showAudioChannelCountVariants && channelsCount != null) {
@@ -151,6 +157,7 @@ shaka.ui.LanguageUtils = class {
     const combinationsMade = new Set();
     const selectedCombination = selectedTrack ? getCombination(
         selectedTrack.language, getRolesString(selectedTrack),
+        selectedTrack.accessibilityPurpose,
         selectedTrack.label, selectedTrack.channelsCount,
         selectedTrack.codecs &&
         shaka.util.MimeUtils.getNormalizedCodec(selectedTrack.codecs),
@@ -161,12 +168,13 @@ shaka.ui.LanguageUtils = class {
       const rolesString = getRolesString(track);
       const label = track.label;
       const channelsCount = track.channelsCount;
+      const accessibilityPurpose = track.accessibilityPurpose;
       const audioCodec = track.codecs &&
           shaka.util.MimeUtils.getNormalizedCodec(track.codecs);
       const spatialAudio = track.spatialAudio;
       const combinationName =
-          getCombination(language, rolesString, label, channelsCount,
-              audioCodec, spatialAudio);
+          getCombination(language, rolesString, accessibilityPurpose, label,
+              channelsCount, audioCodec, spatialAudio);
       if (combinationsMade.has(combinationName)) {
         continue;
       }
@@ -180,8 +188,8 @@ shaka.ui.LanguageUtils = class {
       const span = shaka.util.Dom.createHTMLElement('span');
       button.appendChild(span);
 
-      span.textContent =
-          shaka.ui.LanguageUtils.getLanguageName(language, localization);
+      span.textContent = shaka.ui.LanguageUtils.getLanguageName(
+          language, localization, preferIntlDisplayNames);
       let basicInfo = '';
       if (showAudioCodec && showAudioChannelCountVariants &&
           spatialAudio && (audioCodec == 'ec-3' || audioCodec == 'ac-4')) {
@@ -197,6 +205,10 @@ shaka.ui.LanguageUtils = class {
       switch (trackLabelFormat) {
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
           span.textContent += basicInfo;
+          if (accessibilityPurpose == AccessibilityPurpose.VISUALLY_IMPAIRED) {
+            span.textContent += ' - ' +
+                localization.resolve(shaka.ui.Locales.Ids.AUDIO_DESCRIPTION);
+          }
           break;
         case shaka.ui.Overlay.TrackLabelFormat.ROLE:
           span.textContent += basicInfo;
@@ -247,11 +259,14 @@ shaka.ui.LanguageUtils = class {
    * @param {boolean} updateChosen
    * @param {!HTMLElement} currentSelectionElement
    * @param {shaka.ui.Localization} localization
-   * @param {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
+   * @param {!shaka.extern.UIConfiguration} config
    */
   static updateTextTracks(tracks, langMenu, onTrackSelected, updateChosen,
-      currentSelectionElement, localization, trackLabelFormat) {
+      currentSelectionElement, localization, config) {
     const LocIds = shaka.ui.Locales.Ids;
+
+    const trackLabelFormat = config.textTrackLabelFormat;
+    const preferIntlDisplayNames = config.preferIntlDisplayNames;
 
     // TODO: Do the benefits of having this common code in a method still
     // outweigh the complexity of the parameter list?
@@ -275,10 +290,11 @@ shaka.ui.LanguageUtils = class {
       return track.roles.join(', ');
     };
 
-    const getCombination = (language, rolesString, label) => {
+    const getCombination = (language, rolesString, label, forced) => {
       const keys = [
         language,
         rolesString,
+        forced,
       ];
       if (label &&
           trackLabelFormat == shaka.ui.Overlay.TrackLabelFormat.LABEL) {
@@ -292,7 +308,7 @@ shaka.ui.LanguageUtils = class {
     const combinationsMade = new Set();
     const selectedCombination = selectedTrack ? getCombination(
         selectedTrack.language, getRolesString(selectedTrack),
-        selectedTrack.label) : '';
+        selectedTrack.label, selectedTrack.forced) : '';
 
     for (const track of tracks) {
       const language = track.language;
@@ -301,7 +317,7 @@ shaka.ui.LanguageUtils = class {
       const rolesString = getRolesString(track);
       const label = track.label;
       const combinationName =
-          getCombination(language, rolesString, label);
+          getCombination(language, rolesString, label, forced);
       if (combinationsMade.has(combinationName)) {
         continue;
       }
@@ -320,7 +336,8 @@ shaka.ui.LanguageUtils = class {
         // translate into different languages.
         if (language) {
           span.textContent = [
-            shaka.ui.LanguageUtils.getLanguageName(language, localization),
+            shaka.ui.LanguageUtils.getLanguageName(
+                language, localization, preferIntlDisplayNames),
             ' (',
             localization.resolve(shaka.ui.Locales.Ids.AUTO_GENERATED),
             ')',
@@ -331,7 +348,8 @@ shaka.ui.LanguageUtils = class {
         }
       } else {
         span.textContent =
-            shaka.ui.LanguageUtils.getLanguageName(language, localization);
+            shaka.ui.LanguageUtils.getLanguageName(
+                language, localization, preferIntlDisplayNames);
       }
       switch (trackLabelFormat) {
         case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
@@ -405,10 +423,11 @@ shaka.ui.LanguageUtils = class {
    *
    * @param {string} locale
    * @param {shaka.ui.Localization} localization
+   * @param {boolean} preferIntlDisplayNames
    * @return {string} The language's name for itself in its own script, or as
    *   close as we can get with the information we have.
    */
-  static getLanguageName(locale, localization) {
+  static getLanguageName(locale, localization, preferIntlDisplayNames) {
     if (!locale && !localization) {
       return '';
     }
@@ -418,9 +437,18 @@ shaka.ui.LanguageUtils = class {
 
     // Handle some special cases first.  These are reserved language tags that
     // are used to indicate something that isn't one specific language.
+    // About qaa and qad:
+    // https://mailman.videolan.org/pipermail/vlc-devel/2007-February/029773.html
+    // https://www.etsi.org/deliver/etsi_en/300400_300499/300468/01.17.01_20/en_300468v011701a.pdf
+    // qaa: defined in DVB, ETSI EN 300 468 V1.17.1 (2022-07), Annex F.
+    // qad: defined in DVB, ETSI EN 300 468 V1.17.1 (2022-07), Annex J, J.3.2.
     switch (locale) {
       case 'mul':
         return resolve(shaka.ui.Locales.Ids.MULTIPLE_LANGUAGES);
+      case 'qaa':
+        return resolve(shaka.ui.Locales.Ids.ORIGINAL_VERSION);
+      case 'qad':
+        return resolve(shaka.ui.Locales.Ids.AUDIO_DESCRIPTION);
       case 'und':
         return resolve(shaka.ui.Locales.Ids.UNDETERMINED_LANGUAGE);
       case 'zxx':
@@ -429,6 +457,23 @@ shaka.ui.LanguageUtils = class {
 
     // Extract the base language from the locale as a fallback step.
     const language = shaka.util.LanguageUtils.getBase(locale);
+
+    // If Intl.DisplayNames is supported we prefer it, because the list of
+    // languages is up to date.
+    if (preferIntlDisplayNames && window.Intl && 'DisplayNames' in Intl) {
+      try {
+        const languageNames =
+            new Intl.DisplayNames([locale], {type: 'language'});
+        const languageName = languageNames.of(locale);
+        // Only prefer it when it's reliable
+        if (languageName &&
+            languageName.toLowerCase() != locale.toLowerCase()) {
+          return languageName.charAt(0).toUpperCase() + languageName.slice(1);
+        }
+      } catch (e) {
+        // Ignore errors and try the fallback
+      }
+    }
 
     // First try to resolve the full language name.
     // If that fails, try the base.

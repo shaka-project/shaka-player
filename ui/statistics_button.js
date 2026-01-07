@@ -8,7 +8,6 @@
 goog.provide('shaka.ui.StatisticsButton');
 
 goog.require('shaka.log');
-goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -108,8 +107,8 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     };
 
     const parseTime = (name) => {
-      return shaka.ui.Utils.buildTimeString(
-          this.currentStats_[name], false) + ' (m)';
+      const value = this.currentStats_[name];
+      return shaka.ui.Utils.buildTimeString(value, value > 3600);
     };
 
     const parseGaps = (name) => {
@@ -192,6 +191,15 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       this.onClick_();
       this.updateLocalizedStrings_();
     });
+
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        shaka.ui.Utils.setDisplay(this.button_, false);
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        shaka.ui.Utils.setDisplay(this.button_, true);
+      });
+    }
   }
 
   /** @private */
@@ -306,7 +314,4 @@ shaka.ui.StatisticsButton.Factory = class {
 
 
 shaka.ui.OverflowMenu.registerElement(
-    'statistics', new shaka.ui.StatisticsButton.Factory());
-
-shaka.ui.ContextMenu.registerElement(
     'statistics', new shaka.ui.StatisticsButton.Factory());

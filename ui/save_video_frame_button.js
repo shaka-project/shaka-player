@@ -9,7 +9,6 @@ goog.provide('shaka.ui.SaveVideoFrameButton');
 
 goog.require('shaka.ads.Utils');
 goog.require('shaka.cast.CastProxy');
-goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -119,6 +118,15 @@ shaka.ui.SaveVideoFrameButton = class extends shaka.ui.Element {
       this.checkAvailability_();
     });
 
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.checkAvailability_();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.checkAvailability_();
+      });
+    }
+
     this.checkAvailability_();
   }
 
@@ -127,7 +135,8 @@ shaka.ui.SaveVideoFrameButton = class extends shaka.ui.Element {
    * @private
    */
   checkAvailability_() {
-    shaka.ui.Utils.setDisplay(this.button_, this.controls.canTakeScreenshot());
+    shaka.ui.Utils.setDisplay(this.button_,
+        this.controls.canTakeScreenshot() && !this.isSubMenuOpened);
   }
 
 
@@ -158,7 +167,4 @@ shaka.ui.SaveVideoFrameButton.Factory = class {
 
 
 shaka.ui.OverflowMenu.registerElement(
-    'save_video_frame', new shaka.ui.SaveVideoFrameButton.Factory());
-
-shaka.ui.ContextMenu.registerElement(
     'save_video_frame', new shaka.ui.SaveVideoFrameButton.Factory());

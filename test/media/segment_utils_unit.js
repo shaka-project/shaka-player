@@ -27,6 +27,9 @@ describe('SegmentUtils', () => {
   const tsAudioUri = '/base/test/test/assets/audio.ts';
   const tsCaptionsUri = '/base/test/test/assets/captions-test.ts';
 
+  const ttmlMp4Uri = '/base/test/test/assets/ttml-init.mp4';
+  const webvttMp4Uri = '/base/test/test/assets/vtt-init.mp4';
+
   /** @type {!ArrayBuffer} */
   let videoInitSegment;
   /** @type {!ArrayBuffer} */
@@ -53,6 +56,10 @@ describe('SegmentUtils', () => {
   let tsAudio;
   /** @type {!ArrayBuffer} */
   let tsCaptions;
+  /** @type {!ArrayBuffer} */
+  let ttml;
+  /** @type {!ArrayBuffer} */
+  let webvtt;
 
   beforeAll(async () => {
     const responses = await Promise.all([
@@ -69,6 +76,8 @@ describe('SegmentUtils', () => {
       shaka.test.Util.fetch(tsVideoUri),
       shaka.test.Util.fetch(tsAudioUri),
       shaka.test.Util.fetch(tsCaptionsUri),
+      shaka.test.Util.fetch(ttmlMp4Uri),
+      shaka.test.Util.fetch(webvttMp4Uri),
     ]);
     videoInitSegment = responses[0];
     audioInitSegment = responses[1];
@@ -83,6 +92,8 @@ describe('SegmentUtils', () => {
     tsVideo = responses[10];
     tsAudio = responses[11];
     tsCaptions = responses[12];
+    ttml = responses[13];
+    webvtt = responses[14];
   });
 
   it('getBasicInfoFromMp4', async () => {
@@ -386,6 +397,46 @@ describe('SegmentUtils', () => {
           keyIds: (new Set()).add('22948c3bdd675d3fa4695dacab59e819'),
         },
       ],
+    };
+    expect(basicInfo).toEqual(expected);
+
+    basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
+        ttml, ttml, true);
+    expected = {
+      type: 'text',
+      mimeType: 'application/mp4',
+      codecs: 'stpp',
+      language: 'eng',
+      height: null,
+      width: null,
+      channelCount: null,
+      sampleRate: null,
+      closedCaptions: new Map(),
+      videoRange: null,
+      colorGamut: null,
+      frameRate: null,
+      timescale: 1000,
+      drmInfos: [],
+    };
+    expect(basicInfo).toEqual(expected);
+
+    basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
+        webvtt, webvtt, true);
+    expected = {
+      type: 'text',
+      mimeType: 'application/mp4',
+      codecs: 'wvtt',
+      language: 'eng',
+      height: null,
+      width: null,
+      channelCount: null,
+      sampleRate: null,
+      closedCaptions: new Map(),
+      videoRange: null,
+      colorGamut: null,
+      frameRate: null,
+      timescale: 1000,
+      drmInfos: [],
     };
     expect(basicInfo).toEqual(expected);
   });
