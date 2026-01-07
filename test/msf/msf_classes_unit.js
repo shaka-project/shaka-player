@@ -17,6 +17,9 @@ describe('shaka.msf.Reader', () => {
   };
 
   it('should initialize with empty buffer', () => {
+    if (typeof ReadableStream === 'undefined') {
+      pending('ReadableStream is not supported by the platform.');
+    }
     const buffer = new Uint8Array([]);
     const stream = createTestStream([]);
     reader = new shaka.msf.Reader(buffer, stream);
@@ -25,6 +28,9 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('should read bytes correctly', async () => {
+    if (typeof ReadableStream === 'undefined') {
+      pending('ReadableStream is not supported by the platform.');
+    }
     const stream = createTestStream([new Uint8Array([1, 2, 3, 4, 5])]);
     reader = new shaka.msf.Reader(new Uint8Array([]), stream);
 
@@ -36,6 +42,9 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('should read u8 and u8Bool correctly', async () => {
+    if (typeof ReadableStream === 'undefined') {
+      pending('ReadableStream is not supported by the platform.');
+    }
     const stream = createTestStream([new Uint8Array([0x01, 0x00])]);
     reader = new shaka.msf.Reader(new Uint8Array([]), stream);
 
@@ -44,6 +53,9 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('should read string correctly', async () => {
+    if (typeof ReadableStream === 'undefined') {
+      pending('ReadableStream is not supported by the platform.');
+    }
     const stream = createTestStream([new Uint8Array([0x02, 72, 105])]);
     reader = new shaka.msf.Reader(new Uint8Array([]), stream);
 
@@ -52,6 +64,9 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('should throw if string exceeds maxLength', async () => {
+    if (typeof ReadableStream === 'undefined') {
+      pending('ReadableStream is not supported by the platform.');
+    }
     const stream = createTestStream([new Uint8Array([0x02, 65, 66])]);
     reader = new shaka.msf.Reader(new Uint8Array([]), stream);
 
@@ -63,6 +78,9 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('should read tuple correctly', async () => {
+    if (typeof ReadableStream === 'undefined') {
+      pending('ReadableStream is not supported by the platform.');
+    }
     const stream = createTestStream([
       new Uint8Array([0x02, 0x01, 65, 0x01, 66]),
     ]);
@@ -73,6 +91,9 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('done() should reflect buffer and stream state', async () => {
+    if (typeof ReadableStream === 'undefined') {
+      pending('ReadableStream is not supported by the platform.');
+    }
     const stream = createTestStream([new Uint8Array([1, 2])]);
     reader = new shaka.msf.Reader(new Uint8Array([]), stream);
 
@@ -82,6 +103,9 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('release() and close() should not throw', async () => {
+    if (typeof ReadableStream === 'undefined') {
+      pending('ReadableStream is not supported by the platform.');
+    }
     const stream = createTestStream([new Uint8Array([1])]);
     reader = new shaka.msf.Reader(new Uint8Array([]), stream);
 
@@ -91,6 +115,9 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('should read keyValuePairs correctly', async () => {
+    if (typeof ReadableStream === 'undefined') {
+      pending('ReadableStream is not supported by the platform.');
+    }
     const bytes = new Uint8Array([0x02, 0x02, 0x03, 0x01, 0x01, 65]);
     reader = new shaka.msf.Reader(
         new Uint8Array([]), createTestStream([bytes]));
@@ -128,6 +155,9 @@ describe('shaka.msf.Writer', () => {
   });
 
   it('should write a single Uint8Array chunk', async () => {
+    if (typeof WritableStream === 'undefined') {
+      pending('WritableStream is not supported by the platform.');
+    }
     const data = new Uint8Array([10, 20]);
     await writer.write(data);
     expect(writtenChunks.length).toBe(1);
@@ -135,6 +165,9 @@ describe('shaka.msf.Writer', () => {
   });
 
   it('should write multiple chunks sequentially', async () => {
+    if (typeof WritableStream === 'undefined') {
+      pending('WritableStream is not supported by the platform.');
+    }
     const data1 = new Uint8Array([1]);
     const data2 = new Uint8Array([2]);
     await writer.write(data1);
@@ -254,6 +287,9 @@ describe('shaka.msf.Sender', () => {
   }
 
   it('should send client setup message', async () => {
+    if (typeof WritableStream === 'undefined') {
+      pending('WritableStream is not supported by the platform.');
+    }
     const writable = createMockWritableStream();
     const writer = new shaka.msf.Writer(writable);
     sender = new shaka.msf.Sender(writer);
