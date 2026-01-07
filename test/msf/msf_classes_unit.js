@@ -142,3 +142,133 @@ describe('shaka.msf.Writer', () => {
     expect(writtenChunks).toEqual([data1, data2]);
   });
 });
+
+describe('shaka.msf.Receiver', () => {
+  let reader;
+  let receiver;
+
+  function createReader(values) {
+    const buffer = shaka.util.BufferUtils.toUint8(values);
+    let offset = 0;
+    return {
+      u53: () => {
+        if (offset >= buffer.length) {
+          throw new Error('unexpected end of stream');
+        }
+        return buffer[offset++];
+      },
+      u53WithSize: () => {
+        if (offset >= buffer.length) {
+          throw new Error('unexpected end of stream');
+        }
+        const value = buffer[offset++];
+        return {value, bytesRead: 1};
+      },
+      u62WithSize: () => {
+        if (offset >= buffer.length) {
+          throw new Error('unexpected end of stream');
+        }
+        const value = buffer[offset++];
+        return {value, bytesRead: 1};
+      },
+      read: (length) => {
+        const result = buffer.subarray(offset, offset + length);
+        offset += length;
+        return result;
+      },
+      getByteLength: () => offset,
+    };
+  }
+
+  it('should decode a server setup with no parameters', async () => {
+    const SetupType = shaka.msf.Utils.SetupType;
+
+    // type = SERVER, length = 1, version = 1, param count = 0
+    const readerValues = [
+      SetupType.SERVER, // type
+      0x00, 0x01,       // message length = 1 byte
+      0x01,             // version
+      0x00,              // param count = 0
+    ];
+
+    reader = createReader(readerValues);
+    receiver = new shaka.msf.Receiver(reader);
+
+    const result = await receiver.server();
+    expect(result.version).toBe(1);
+    expect(result.params).toBeUndefined();
+  });
+
+  it('should decode server setup with numeric parameter', async () => {
+    const SetupType = shaka.msf.Utils.SetupType;
+
+    // type = SERVER, length = 3 bytes, version = 1
+    // param count = 1, param type = 2 (even), param value = 42
+    const readerValues = [
+      SetupType.SERVER, // type
+      0x00, 0x03,       // message length
+      0x01,             // version
+      0x01,             // param count
+      0x02,             // param type
+      0x2A,              // param value
+    ];
+
+    reader = createReader(readerValues);
+    receiver = new shaka.msf.Receiver(reader);
+
+    const result = await receiver.server();
+    expect(result.version).toBe(1);
+    expect(result.params.length).toBe(1);
+    expect(result.params[0].type).toBe(2);
+    expect(result.params[0].value).toBe(42);
+  });
+
+  it('should throw error if server type is invalid', async () => {
+    const readerValues = [
+      0x00, 0x00, 0x01, 0x01, // invalid type
+    ];
+
+    reader = createReader(readerValues);
+    receiver = new shaka.msf.Receiver(reader);
+
+    await expectAsync(receiver.server()).toBeRejectedWith(
+        jasmine.objectContaining({
+          message: jasmine.stringMatching(/Server SETUP type must be/),
+        }),
+    );
+  });
+});
+
+describe('shaka.msf.Sender', () => {
+  let sender;
+  /** @type {!Array<!Uint8Array>} */
+  let writtenChunks;
+
+  function createMockWritableStream() {
+    writtenChunks = [];
+    return new WritableStream({
+      write: (chunk) => {
+        writtenChunks.push(shaka.util.BufferUtils.toUint8(chunk));
+      },
+    });
+  }
+
+  it('should send client setup message', async () => {
+    const writable = createMockWritableStream();
+    const writer = new shaka.msf.Writer(writable);
+    sender = new shaka.msf.Sender(writer);
+
+    const clientSetup = {
+      versions: [1],
+      params: [
+        {type: 2, value: 42},
+        {type: 3, value: new Uint8Array([0xde, 0xad])},
+      ],
+    };
+
+    await sender.client(clientSetup);
+
+    expect(writtenChunks.length).toBeGreaterThan(0);
+    expect(writtenChunks.some((chunk) => chunk.length > 0)).toBe(true);
+  });
+});
