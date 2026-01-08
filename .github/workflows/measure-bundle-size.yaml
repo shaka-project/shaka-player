@@ -53,8 +53,6 @@ jobs:
       
       - name: Measure base bundles
         working-directory: base-source
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           python3 .github/workflows/compute-bundle-size.py measure \
               --dir dist \
@@ -63,6 +61,8 @@ jobs:
           cat ../base-sizes.json
       
       - name: Generate report
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           python3 head-source/.github/workflows/compute-bundle-size.py compare \
             --pr-number $PR_NUMBER \
