@@ -73,6 +73,9 @@ def compare(args):
     "|---|---|---|---|"
   ]
 
+  if args.pr_number:
+    lines[0] += " for PR #%s" % args.pr_number
+
   for f in all_files:
     b = base_json.get(f, {"raw": 0, "gzip": 0})
     h = head_json.get(f, {"raw": 0, "gzip": 0})
@@ -98,6 +101,7 @@ def main():
   parser_measure.set_defaults(func=measure)
 
   parser_compare = subparsers.add_parser(name="compare", help="Generate Markdown report from two JSON files")
+  parser_compare.add_argument("--pr-number", required=False, help="Pull request number")
   parser_compare.add_argument("--base", required=True, help="Base branch JSON file")
   parser_compare.add_argument("--head", required=True, help="Head branch JSON file")
   parser_compare.set_defaults(func=compare)
