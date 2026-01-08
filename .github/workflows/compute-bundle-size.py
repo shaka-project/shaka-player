@@ -74,7 +74,7 @@ def compare(args):
   ]
 
   if args.pr_number:
-    lines[0] += " for PR #{args.pr_number}"
+    lines[0] += " for PR #%s" % args.pr_number
 
   for f in all_files:
     b = base_json.get(f, {"raw": 0, "gzip": 0})
