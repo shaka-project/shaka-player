@@ -12,8 +12,6 @@ describe('StringUtils', () => {
   });
 
   describe('without TextDecoder', () => {
-    let originalTextDecoder;
-
     beforeEach(() => {
       spyOn(deviceDetected, 'shouldAvoidUseTextDecoderEncoder')
           .and.returnValue(true);
