@@ -33,12 +33,17 @@ def fmt_diff(head, base):
 def measure(args):
   """Scans a directory and saves size data to JSON file."""
   results = {}
+  excluded_suffixes = (".map", ".d.ts", ".externs.js")
 
   if os.path.exists(args.dir):
     for filename in os.listdir(args.dir):
       filepath = os.path.join(args.dir, filename)
-      # Ignore directories and hidden files
-      if os.path.isfile(filepath) and not filename.startswith("."):
+      # Ignore directories, hidden files and excluded extensions
+      if (
+        os.path.isfile(filepath)
+        and not filename.startswith(".")
+        and not filename.endswith(excluded_suffixes)
+      ):
         raw, gzip = get_file_size(filepath)
         results[filename] = {"raw": raw, "gzip": gzip}
   else:
