@@ -16,8 +16,24 @@ describe('shaka.msf.Reader', () => {
     });
   };
 
+  const isReadableStreamSupported = () => {
+    // On Edge, ReadableStream exists, but attempting to construct it results in
+    // an error. See https://bit.ly/2zwaFLL
+    // So this has to check that ReadableStream is present AND usable.
+    if (window.ReadableStream) {
+      try {
+        new ReadableStream({}); // eslint-disable-line no-new
+      } catch (e) { // eslint-disable-line no-restricted-syntax
+        return false;
+      }
+    } else {
+      return false;
+    }
+    return true;
+  };
+
   it('should initialize with empty buffer', () => {
-    if (typeof ReadableStream === 'undefined') {
+    if (!isReadableStreamSupported()) {
       pending('ReadableStream is not supported by the platform.');
     }
     const buffer = new Uint8Array([]);
@@ -28,7 +44,7 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('should read bytes correctly', async () => {
-    if (typeof ReadableStream === 'undefined') {
+    if (!isReadableStreamSupported()) {
       pending('ReadableStream is not supported by the platform.');
     }
     const stream = createTestStream([new Uint8Array([1, 2, 3, 4, 5])]);
@@ -42,7 +58,7 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('should read u8 and u8Bool correctly', async () => {
-    if (typeof ReadableStream === 'undefined') {
+    if (!isReadableStreamSupported()) {
       pending('ReadableStream is not supported by the platform.');
     }
     const stream = createTestStream([new Uint8Array([0x01, 0x00])]);
@@ -53,7 +69,7 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('should read string correctly', async () => {
-    if (typeof ReadableStream === 'undefined') {
+    if (!isReadableStreamSupported()) {
       pending('ReadableStream is not supported by the platform.');
     }
     const stream = createTestStream([new Uint8Array([0x02, 72, 105])]);
@@ -64,7 +80,7 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('should throw if string exceeds maxLength', async () => {
-    if (typeof ReadableStream === 'undefined') {
+    if (!isReadableStreamSupported()) {
       pending('ReadableStream is not supported by the platform.');
     }
     const stream = createTestStream([new Uint8Array([0x02, 65, 66])]);
@@ -78,7 +94,7 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('should read tuple correctly', async () => {
-    if (typeof ReadableStream === 'undefined') {
+    if (!isReadableStreamSupported()) {
       pending('ReadableStream is not supported by the platform.');
     }
     const stream = createTestStream([
@@ -91,7 +107,7 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('done() should reflect buffer and stream state', async () => {
-    if (typeof ReadableStream === 'undefined') {
+    if (!isReadableStreamSupported()) {
       pending('ReadableStream is not supported by the platform.');
     }
     const stream = createTestStream([new Uint8Array([1, 2])]);
@@ -103,7 +119,7 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('release() and close() should not throw', async () => {
-    if (typeof ReadableStream === 'undefined') {
+    if (!isReadableStreamSupported()) {
       pending('ReadableStream is not supported by the platform.');
     }
     const stream = createTestStream([new Uint8Array([1])]);
@@ -115,7 +131,7 @@ describe('shaka.msf.Reader', () => {
   });
 
   it('should read keyValuePairs correctly', async () => {
-    if (typeof ReadableStream === 'undefined') {
+    if (!isReadableStreamSupported()) {
       pending('ReadableStream is not supported by the platform.');
     }
     const bytes = new Uint8Array([0x02, 0x02, 0x03, 0x01, 0x01, 65]);
