@@ -163,6 +163,7 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
         table.set(id, value);
       }
     });
+    this.localizations_.set(locale, table);
 
     // The data we use to make our map may have changed, update the map we pull
     // data from.
