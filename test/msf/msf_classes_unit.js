@@ -16,22 +16,6 @@ describe('shaka.msf.Reader', () => {
     });
   };
 
-  const isReadableStreamSupported = () => {
-    // On Edge, ReadableStream exists, but attempting to construct it results in
-    // an error. See https://bit.ly/2zwaFLL
-    // So this has to check that ReadableStream is present AND usable.
-    if (window.ReadableStream) {
-      try {
-        new ReadableStream({}); // eslint-disable-line no-new
-      } catch (e) { // eslint-disable-line no-restricted-syntax
-        return false;
-      }
-    } else {
-      return false;
-    }
-    return true;
-  };
-
   it('should initialize with empty buffer', () => {
     if (!isReadableStreamSupported()) {
       pending('ReadableStream is not supported by the platform.');
@@ -171,7 +155,7 @@ describe('shaka.msf.Writer', () => {
   });
 
   it('should write a single Uint8Array chunk', async () => {
-    if (typeof WritableStream === 'undefined') {
+    if (!isWritableStreamSupported()) {
       pending('WritableStream is not supported by the platform.');
     }
     const data = new Uint8Array([10, 20]);
@@ -181,7 +165,7 @@ describe('shaka.msf.Writer', () => {
   });
 
   it('should write multiple chunks sequentially', async () => {
-    if (typeof WritableStream === 'undefined') {
+    if (!isWritableStreamSupported()) {
       pending('WritableStream is not supported by the platform.');
     }
     const data1 = new Uint8Array([1]);
@@ -303,7 +287,7 @@ describe('shaka.msf.Sender', () => {
   }
 
   it('should send client setup message', async () => {
-    if (typeof WritableStream === 'undefined') {
+    if (!isWritableStreamSupported()) {
       pending('WritableStream is not supported by the platform.');
     }
     const writable = createMockWritableStream();
