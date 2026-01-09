@@ -39,7 +39,6 @@ describe('shaka.msf.BufferControlWriter', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE,
         requestId: 1,
-        trackAlias: 2,
         namespace: ['ns1', 'ns2'],
         name: 'track1',
         subscriberPriority: 1,
@@ -57,7 +56,6 @@ describe('shaka.msf.BufferControlWriter', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE,
         requestId: 1,
-        trackAlias: 2,
         namespace: [],
         name: 'track1',
         subscriberPriority: 1,
@@ -75,6 +73,7 @@ describe('shaka.msf.BufferControlWriter', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE_OK,
         requestId: 1,
+        trackAlias: 2,
         expires: 100,
         groupOrder: shaka.msf.Utils.GroupOrder.ASCENDING,
         contentExists: true,
@@ -89,6 +88,7 @@ describe('shaka.msf.BufferControlWriter', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE_OK,
         requestId: 1,
+        trackAlias: 2,
         expires: 100,
         groupOrder: shaka.msf.Utils.GroupOrder.ASCENDING,
         contentExists: true,
@@ -113,41 +113,41 @@ describe('shaka.msf.BufferControlWriter', () => {
     });
   });
 
-  describe('marshalSubscribeDone', () => {
-    it('should marshal a SubscribeDone message', () => {
+  describe('marshalPublishDone', () => {
+    it('should marshal a PublishDone message', () => {
       const msg = {
-        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_DONE,
+        kind: shaka.msf.Utils.MessageType.PUBLISH_DONE,
         requestId: 1,
         code: 0,
         reason: 'Done',
         streamCount: 3,
       };
-      writer.marshalSubscribeDone(msg);
+      writer.marshalPublishDone(msg);
       expect(writer.getBytes().length).toBeGreaterThan(0);
     });
   });
 
-  describe('marshalAnnounce', () => {
-    it('should marshal an Announce message', () => {
+  describe('marshalPublishNamespace', () => {
+    it('should marshal an PublishNamespace message', () => {
       const msg = {
-        kind: shaka.msf.Utils.MessageType.ANNOUNCE,
+        kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE,
         requestId: 1,
         namespace: ['ns'],
         params: [],
       };
-      writer.marshalAnnounce(msg);
+      writer.marshalPublishNamespace(msg);
       expect(writer.getBytes().length).toBeGreaterThan(0);
     });
   });
 
-  describe('marshalAnnounceOk', () => {
-    it('should marshal an AnnounceOk message', () => {
+  describe('marshalPublishNamespaceOk', () => {
+    it('should marshal an PublishNamespaceOk message', () => {
       const msg = {
-        kind: shaka.msf.Utils.MessageType.ANNOUNCE_OK,
+        kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_OK,
         requestId: 1,
         namespace: ['ns'],
       };
-      writer.marshalAnnounceOk(msg);
+      writer.marshalPublishNamespaceOk(msg);
       expect(writer.getBytes().length).toBeGreaterThan(0);
     });
   });
@@ -163,26 +163,26 @@ describe('shaka.msf.BufferControlWriter', () => {
     });
   });
 
-  describe('marshalAnnounceError', () => {
-    it('should marshal an AnnounceError message', () => {
+  describe('marshalPublishNamespaceError', () => {
+    it('should marshal an PublishNamespaceError message', () => {
       const msg = {
-        kind: shaka.msf.Utils.MessageType.ANNOUNCE_ERROR,
+        kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_ERROR,
         requestId: 1,
         code: 500,
         reason: 'Server error'}
         ;
-      writer.marshalAnnounceError(msg);
+      writer.marshalPublishNamespaceError(msg);
       expect(writer.getBytes().length).toBeGreaterThan(0);
     });
   });
 
-  describe('marshalUnannounce', () => {
-    it('should marshal an Unannounce message', () => {
+  describe('marshalUnpublishNamespace', () => {
+    it('should marshal an UnpublishNamespace message', () => {
       const msg = {
-        kind: shaka.msf.Utils.MessageType.UNANNOUNCE,
+        kind: shaka.msf.Utils.MessageType.UNPUBLISH_NAMESPACE,
         namespace: ['ns'],
       };
-      writer.marshalUnannounce(msg);
+      writer.marshalUnpublishNamespace(msg);
       expect(writer.getBytes().length).toBeGreaterThan(0);
     });
   });
@@ -237,6 +237,7 @@ describe('shaka.msf.BufferControlWriter', () => {
     const msg = {
       kind: shaka.msf.Utils.MessageType.SUBSCRIBE_OK,
       requestId: 5,
+      trackAlias: 2,
       expires: 1234,
       groupOrder: shaka.msf.Utils.GroupOrder.DESCENDING,
       contentExists: true,

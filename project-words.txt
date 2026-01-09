@@ -486,7 +486,6 @@ SQUEEZECURRENT
 moqt
 msf
 WEBTRANSPORT
-Unannounce
 
 # CMCD
 ttfb

@@ -49,9 +49,9 @@ describe('shaka.msf.ControlStream', () => {
       },
     },
     {
-      kind: shaka.msf.Utils.MessageType.SUBSCRIBE_DONE,
+      kind: shaka.msf.Utils.MessageType.PUBLISH_DONE,
       msg: {
-        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_DONE,
+        kind: shaka.msf.Utils.MessageType.PUBLISH_DONE,
         requestId: 1,
         code: 0,
         streamCount: 5,
@@ -66,35 +66,35 @@ describe('shaka.msf.ControlStream', () => {
       },
     },
     {
-      kind: shaka.msf.Utils.MessageType.ANNOUNCE,
+      kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE,
       msg: {
-        kind: shaka.msf.Utils.MessageType.ANNOUNCE,
+        kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE,
         requestId: 1,
         namespace: ['ns'],
         params: [],
       },
     },
     {
-      kind: shaka.msf.Utils.MessageType.ANNOUNCE_OK,
+      kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_OK,
       msg: {
-        kind: shaka.msf.Utils.MessageType.ANNOUNCE_OK,
+        kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_OK,
         requestId: 1,
         namespace: ['ns'],
       },
     },
     {
-      kind: shaka.msf.Utils.MessageType.ANNOUNCE_ERROR,
+      kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_ERROR,
       msg: {
-        kind: shaka.msf.Utils.MessageType.ANNOUNCE_ERROR,
+        kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_ERROR,
         requestId: 1,
         code: 500,
         reason: 'Server error',
       },
     },
     {
-      kind: shaka.msf.Utils.MessageType.UNANNOUNCE,
+      kind: shaka.msf.Utils.MessageType.UNPUBLISH_NAMESPACE,
       msg: {
-        kind: shaka.msf.Utils.MessageType.UNANNOUNCE,
+        kind: shaka.msf.Utils.MessageType.UNPUBLISH_NAMESPACE,
         namespace: ['ns'],
       },
     },
@@ -190,9 +190,9 @@ describe('shaka.msf.ControlStreamEncoder', () => {
       },
     },
     {
-      kind: shaka.msf.Utils.MessageType.SUBSCRIBE_DONE,
+      kind: shaka.msf.Utils.MessageType.PUBLISH_DONE,
       msg: {
-        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_DONE,
+        kind: shaka.msf.Utils.MessageType.PUBLISH_DONE,
         requestId: 1,
         code: 0,
         streamCount: 5,
@@ -207,35 +207,35 @@ describe('shaka.msf.ControlStreamEncoder', () => {
       },
     },
     {
-      kind: shaka.msf.Utils.MessageType.ANNOUNCE,
+      kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE,
       msg: {
-        kind: shaka.msf.Utils.MessageType.ANNOUNCE,
+        kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE,
         requestId: 1,
         namespace: ['ns'],
         params: [],
       },
     },
     {
-      kind: shaka.msf.Utils.MessageType.ANNOUNCE_OK,
+      kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_OK,
       msg: {
-        kind: shaka.msf.Utils.MessageType.ANNOUNCE_OK,
+        kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_OK,
         requestId: 1,
         namespace: ['ns'],
       },
     },
     {
-      kind: shaka.msf.Utils.MessageType.ANNOUNCE_ERROR,
+      kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_ERROR,
       msg: {
-        kind: shaka.msf.Utils.MessageType.ANNOUNCE_ERROR,
+        kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_ERROR,
         requestId: 1,
         code: 500,
         reason: 'Server error',
       },
     },
     {
-      kind: shaka.msf.Utils.MessageType.UNANNOUNCE,
+      kind: shaka.msf.Utils.MessageType.UNPUBLISH_NAMESPACE,
       msg: {
-        kind: shaka.msf.Utils.MessageType.UNANNOUNCE,
+        kind: shaka.msf.Utils.MessageType.UNPUBLISH_NAMESPACE,
         namespace: ['ns'],
       },
     },
