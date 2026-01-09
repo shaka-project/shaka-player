@@ -129,6 +129,12 @@ describe('shaka.msf.ControlStream', () => {
 
   for (const {kind, msg} of messages) {
     it(`send() should write a ${kind} message`, async () => {
+      if (!isReadableStreamSupported()) {
+        pending('ReadableStream is not supported by the platform.');
+      }
+      if (!isWritableStreamSupported()) {
+        pending('WritableStream is not supported by the platform.');
+      }
       await controlStream.send(msg);
       expect(writtenChunks.length).toBe(1);
       expect(writtenChunks[0].length).toBeGreaterThan(0);
@@ -252,6 +258,9 @@ describe('shaka.msf.ControlStreamEncoder', () => {
 
   for (const {kind, msg} of messages) {
     it(`message() should encode a ${kind} message`, async () => {
+      if (!isWritableStreamSupported()) {
+        pending('WritableStream is not supported by the platform.');
+      }
       await encoder.message(msg);
       expect(writtenChunks.length).toBe(1);
       expect(writtenChunks[0].length).toBeGreaterThan(0);
