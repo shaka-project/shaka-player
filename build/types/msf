@@ -4,6 +4,8 @@
 +../../lib/msf/msf_classes.js
 +../../lib/msf/msf_control_stream.js
 +../../lib/msf/msf_parser.js
++../../lib/msf/msf_receiver.js
++../../lib/msf/msf_sender.js
 +../../lib/msf/msf_tracks_manager.js
 +../../lib/msf/msf_transport.js
 +../../lib/msf/msf_utils.js
