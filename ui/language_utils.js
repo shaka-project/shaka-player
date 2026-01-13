@@ -48,10 +48,7 @@ shaka.ui.LanguageUtils = class {
       if (!track.codecs) {
         continue;
       }
-      if (!codecsByLanguage.has(track.language)) {
-        codecsByLanguage.set(track.language, new Set());
-      }
-      codecsByLanguage.get(track.language).add(
+      codecsByLanguage.getOrInsertComputed(track.language, () => new Set()).add(
           shaka.util.MimeUtils.getNormalizedCodec(track.codecs));
     }
     const hasDifferentAudioCodecs = (language) =>
