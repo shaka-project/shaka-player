@@ -54,6 +54,10 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
       this.updateChapters_();
     });
 
+    this.eventManager.listen(this.player, 'manifestupdated', () => {
+      this.updateChapters_();
+    });
+
     if (this.isSubMenu) {
       this.eventManager.listen(this.controls, 'submenuopen', () => {
         this.updateChapters_();
