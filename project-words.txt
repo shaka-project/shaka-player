@@ -197,6 +197,7 @@ Conax
 cvox
 expressjs
 Expressplay
+Eyevinn
 EZDRM
 Fairplay
 gstreamer
@@ -207,6 +208,7 @@ isoboxer
 Jwplayer
 Kaltura
 Livesim
+moqlivemock
 muxjs
 Nagra
 Playready
@@ -235,6 +237,7 @@ arib
 assetid
 atsc
 avcc
+audiodescription
 bipred
 bmff
 bsid
@@ -478,6 +481,11 @@ QUERYPARAM
 streamingkeydelivery
 TARGETDURATION
 SQUEEZECURRENT
+
+# MSF (Media over QUIC Transport Streaming format)
+moqt
+msf
+WEBTRANSPORT
 
 # CMCD
 ttfb

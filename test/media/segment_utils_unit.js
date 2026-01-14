@@ -6,7 +6,9 @@
 
 describe('SegmentUtils', () => {
   const videoInitSegmentUri = '/base/test/test/assets/sintel-video-init.mp4';
+  const videoSegmentUri = '/base/test/test/assets/sintel-video-segment.mp4';
   const audioInitSegmentUri = '/base/test/test/assets/sintel-audio-init.mp4';
+  const audioSegmentUri = '/base/test/test/assets/sintel-audio-segment.mp4';
 
   const audioInitSegmentXheAacUri = '/base/test/test/assets/audio-xhe-aac.mp4';
   const audioInitSegmentAC4Uri = '/base/test/test/assets/audio-ac-4.mp4';
@@ -33,7 +35,11 @@ describe('SegmentUtils', () => {
   /** @type {!ArrayBuffer} */
   let videoInitSegment;
   /** @type {!ArrayBuffer} */
+  let videoSegment;
+  /** @type {!ArrayBuffer} */
   let audioInitSegment;
+  /** @type {!ArrayBuffer} */
+  let audioSegment;
   /** @type {!ArrayBuffer} */
   let audioInitSegmentXheAac;
   /** @type {!ArrayBuffer} */
@@ -64,7 +70,9 @@ describe('SegmentUtils', () => {
   beforeAll(async () => {
     const responses = await Promise.all([
       shaka.test.Util.fetch(videoInitSegmentUri),
+      shaka.test.Util.fetch(videoSegmentUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
+      shaka.test.Util.fetch(audioSegmentUri),
       shaka.test.Util.fetch(audioInitSegmentXheAacUri),
       shaka.test.Util.fetch(audioInitSegmentAC4Uri),
       shaka.test.Util.fetch(multidrmVideoInitSegmentUri),
@@ -80,20 +88,22 @@ describe('SegmentUtils', () => {
       shaka.test.Util.fetch(webvttMp4Uri),
     ]);
     videoInitSegment = responses[0];
-    audioInitSegment = responses[1];
-    audioInitSegmentXheAac = responses[2];
-    audioInitSegmentAC4 = responses[3];
-    multidrmVideoInitSegment = responses[4];
-    multidrmAudioInitSegment = responses[5];
-    ceaInitSegment = responses[6];
-    ceaSegment = responses[7];
-    h265CeaInitSegment = responses[8];
-    h265CeaSegment = responses[9];
-    tsVideo = responses[10];
-    tsAudio = responses[11];
-    tsCaptions = responses[12];
-    ttml = responses[13];
-    webvtt = responses[14];
+    videoSegment = responses[1];
+    audioInitSegment = responses[2];
+    audioSegment = responses[3];
+    audioInitSegmentXheAac = responses[4];
+    audioInitSegmentAC4 = responses[5];
+    multidrmVideoInitSegment = responses[6];
+    multidrmAudioInitSegment = responses[7];
+    ceaInitSegment = responses[8];
+    ceaSegment = responses[9];
+    h265CeaInitSegment = responses[10];
+    h265CeaSegment = responses[11];
+    tsVideo = responses[12];
+    tsAudio = responses[13];
+    tsCaptions = responses[14];
+    ttml = responses[15];
+    webvtt = responses[16];
   });
 
   it('getBasicInfoFromMp4', async () => {
@@ -512,5 +522,27 @@ describe('SegmentUtils', () => {
     defaultKID =
         shaka.media.SegmentUtils.getDefaultKID(multidrmVideoInitSegment);
     expect(defaultKID).toBe('4060a865887842679cbf91ae5bae1e72');
+  });
+
+  it('getStartTimeAndDurationFromMp4', () => {
+    let result = shaka.media.SegmentUtils.getStartTimeAndDurationFromMp4(
+        videoSegment, 12288);
+    expect(result.startTime).toBeCloseTo(40, 0);
+    expect(result.duration).toBeCloseTo(10, 0);
+
+    result = shaka.media.SegmentUtils.getStartTimeAndDurationFromMp4(
+        audioSegment, 48000);
+    expect(result.startTime).toBeCloseTo(40.021, 0);
+    expect(result.duration).toBeCloseTo(10.005, 0);
+
+    result = shaka.media.SegmentUtils.getStartTimeAndDurationFromMp4(
+        ceaSegment, 90000);
+    expect(result.startTime).toBeCloseTo(0, 0);
+    expect(result.duration).toBeCloseTo(2, 0);
+
+    result = shaka.media.SegmentUtils.getStartTimeAndDurationFromMp4(
+        h265CeaSegment, 60000);
+    expect(result.startTime).toBeCloseTo(1685548363.50405, 0);
+    expect(result.duration).toBeCloseTo(2.002, 0);
   });
 });
