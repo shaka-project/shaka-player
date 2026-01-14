@@ -522,23 +522,22 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const seekRange = this.player.seekRange();
     const playerValue = Math.max(Math.ceil(seekRange.start),
         Math.min(Math.floor(seekRange.end), value));
+    let time;
     if (this.player.isDynamic()) {
       const totalSeconds = seekRange.end - value;
       if (totalSeconds < 1) {
-        this.thumbnailTime_.textContent =
-            this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
+        time = this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
       } else {
-        this.thumbnailTime_.textContent =
-            '-' + this.timeFormatter_(totalSeconds);
+        time = '-' + this.timeFormatter_(totalSeconds);
       }
     } else {
-      const time = this.timeFormatter_(value);
-      const chapterName = this.getChapterName_(value);
-      if (chapterName) {
-        this.thumbnailTime_.textContent = time + ' · ' + chapterName;
-      } else {
-        this.thumbnailTime_.textContent = time;
-      }
+      time = this.timeFormatter_(value);
+    }
+    const chapterName = this.getChapterName_(value);
+    if (chapterName) {
+      this.thumbnailTime_.textContent = time + ' · ' + chapterName;
+    } else {
+      this.thumbnailTime_.textContent = time;
     }
 
     const width = this.thumbnailContainer_.clientWidth;
