@@ -47,6 +47,8 @@ describe('HlsParser', () => {
   let selfInitializingSegmentData;
   /** @type {!Uint8Array} */
   let aesKey;
+  /** @type {!Uint8Array} */
+  let aes256GcmKey;
   /** @type {!boolean} */
   let sequenceMode;
 
@@ -72,6 +74,17 @@ describe('HlsParser', () => {
     aesKey = new Uint8Array([
       0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
       0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+    ]);
+
+    aes256GcmKey = new Uint8Array([
+      0x00, 0x01, 0x02, 0x03,
+      0x04, 0x05, 0x06, 0x07,
+      0x08, 0x09, 0x0a, 0x0b,
+      0x0c, 0x0d, 0x0e, 0x0f,
+      0x10, 0x11, 0x12, 0x13,
+      0x14, 0x15, 0x16, 0x17,
+      0x18, 0x19, 0x1a, 0x1b,
+      0x1c, 0x1d, 0x1e, 0x1f,
     ]);
 
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
@@ -4059,6 +4072,143 @@ describe('HlsParser', () => {
           shaka.util.Error.Code.NO_WEB_CRYPTO_API));
       const actual = await parser.start('test:/master', playerInterface);
       await expectAsync(loadAllStreamsFor(actual))
+          .toBeRejectedWith(expectedError);
+    } finally {
+      Object.defineProperty(window, 'crypto', {
+        configurable: true,
+        value: originalWebCrypto,
+      });
+    }
+  });
+
+  it('parses variants encrypted with AES-256-GCM', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",CLOSED-CAPTIONS=NONE\n',
+      'video\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'URI="audio"\n',
+    ].join('');
+
+    const mediaWithGcmEncryption = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-KEY:METHOD=AES-256-GCM,',
+      'URI="256gcm.key"\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', mediaWithGcmEncryption)
+        .setResponseText('test:/video', mediaWithGcmEncryption)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData)
+        .setResponseValue('test:/256gcm.key', aes256GcmKey);
+
+    const manifest = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(manifest);
+
+    const video = manifest.variants[0].video;
+    await video.createSegmentIndex();
+    goog.asserts.assert(video.segmentIndex != null, 'Null segmentIndex!');
+
+    const firstSegment = video.segmentIndex.get(0);
+    expect(firstSegment.aesKey).toBeDefined();
+
+    const aesKey = firstSegment.aesKey;
+    expect(aesKey.bitsKey).toBe(256);
+    expect(aesKey.blockCipherMode).toBe('GCM');
+  });
+
+  it('fails on AES-256-GCM if IV is provided', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",CLOSED-CAPTIONS=NONE\n',
+      'video\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'URI="audio"\n',
+    ].join('');
+
+    const mediaWithGcmEncryption = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-KEY:METHOD=AES-256-GCM,',
+      'URI="256gcm.key",IV=0x1234567890abcdef1234567890abcdef\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', mediaWithGcmEncryption)
+        .setResponseText('test:/video', mediaWithGcmEncryption)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData)
+        .setResponseValue('test:/256gcm.key', aes256GcmKey);
+
+    const expectedError = shaka.test.Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.MANIFEST,
+        shaka.util.Error.Code.HLS_INVALID_KEY_IV_FOR_GCM,
+    ));
+
+    const manifestPromise = parser.start('test:/master', playerInterface);
+    await expectAsync(loadAllStreamsFor(await manifestPromise))
+        .toBeRejectedWith(expectedError);
+  });
+
+  it('fails on AES-256-GCM if WebCrypto APIs are not available', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",CLOSED-CAPTIONS=NONE\n',
+      'video\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'URI="audio"\n',
+    ].join('');
+
+    const mediaWithGcmEncryption = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-KEY:METHOD=AES-256-GCM,',
+      'URI="256gcm.key"\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', mediaWithGcmEncryption)
+        .setResponseText('test:/video', mediaWithGcmEncryption)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData)
+        .setResponseValue('test:/256gcm.key', aes256GcmKey);
+
+    let originalWebCrypto = null;
+    try {
+      originalWebCrypto = window.crypto;
+      Object.defineProperty(window, 'crypto', {
+        configurable: true,
+        value: null,
+      });
+
+      const expectedError = shaka.test.Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.NO_WEB_CRYPTO_API));
+
+      const manifestPromise = parser.start('test:/master', playerInterface);
+      await expectAsync(loadAllStreamsFor(await manifestPromise))
           .toBeRejectedWith(expectedError);
     } finally {
       Object.defineProperty(window, 'crypto', {

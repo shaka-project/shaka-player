@@ -545,4 +545,136 @@ describe('SegmentUtils', () => {
     expect(result.startTime).toBeCloseTo(1685548363.50405, 0);
     expect(result.duration).toBeCloseTo(2.002, 0);
   });
+
+  describe('AES decryption for different key types', () => {
+    const SegmentUtils = shaka.media.SegmentUtils;
+    const plaintext = shaka.util.StringUtils.toUTF8('Shaka AES test segment');
+
+    const aes128Key = shaka.util.BufferUtils.toUint8(
+        new Uint8Array([...Array(16).keys()]));
+    const aes256Key = shaka.util.BufferUtils.toUint8(
+        new Uint8Array([...Array(32).keys()]));
+
+    const iv16 = new Uint8Array(16).map((_, i) => i);
+
+    async function encryptSegmentCBC(keyBuffer, iv) {
+      const cryptoKey = await window.crypto.subtle.importKey(
+          'raw', keyBuffer, {name: 'AES-CBC'}, false, ['encrypt']);
+      return window.crypto.subtle.encrypt(
+          {name: 'AES-CBC', iv}, cryptoKey, plaintext);
+    }
+
+    async function encryptSegmentCTR(keyBuffer, counter) {
+      const cryptoKey = await window.crypto.subtle.importKey(
+          'raw', keyBuffer, {name: 'AES-CTR'}, false, ['encrypt']);
+      return window.crypto.subtle.encrypt(
+          {name: 'AES-CTR', counter, length: 64}, cryptoKey, plaintext);
+    }
+
+    async function encryptSegmentGCM(keyBuffer, iv) {
+      const cryptoKey = await window.crypto.subtle.importKey(
+          'raw', keyBuffer, {name: 'AES-GCM'}, false, ['encrypt']);
+      const ciphertext = await window.crypto.subtle.encrypt(
+          {name: 'AES-GCM', iv, tagLength: 128}, cryptoKey, plaintext);
+
+      // Concatenate IV + ciphertext (ciphertext includes tag)
+      return shaka.util.Uint8ArrayUtils.concat(
+          iv, shaka.util.BufferUtils.toUint8(ciphertext));
+    }
+
+    function runCBCDecryptTest(name, keyBuffer, iv) {
+      it(`decrypts ${name} segments correctly`, async () => {
+        const cryptoKey = await window.crypto.subtle.importKey(
+            'raw', keyBuffer, {name: 'AES-CBC'}, false, ['decrypt']);
+        const ciphertext = await encryptSegmentCBC(keyBuffer, iv);
+        const aesKey = {
+          bitsKey: keyBuffer.byteLength * 8,
+          blockCipherMode: 'CBC',
+          cryptoKey,
+          iv,
+          firstMediaSequenceNumber: 0,
+        };
+        const decrypted = await SegmentUtils.aesDecrypt(ciphertext, aesKey, 0);
+        expect(shaka.util.StringUtils.fromUTF8(decrypted))
+            .toBe('Shaka AES test segment');
+      });
+    }
+
+    function runCTRDecryptTest(name, keyBuffer, counter) {
+      it(`decrypts ${name} segments correctly`, async () => {
+        const cryptoKey = await window.crypto.subtle.importKey(
+            'raw', keyBuffer, {name: 'AES-CTR'}, false, ['decrypt']);
+        const ciphertext = await encryptSegmentCTR(keyBuffer, counter);
+        const aesKey = {
+          bitsKey: keyBuffer.byteLength * 8,
+          blockCipherMode: 'CTR',
+          cryptoKey,
+          iv: counter,
+          firstMediaSequenceNumber: 0,
+        };
+        const decrypted = await SegmentUtils.aesDecrypt(ciphertext, aesKey, 0);
+        expect(shaka.util.StringUtils.fromUTF8(decrypted))
+            .toBe('Shaka AES test segment');
+      });
+    }
+
+    function runGCMDecryptTest(name, keyBuffer) {
+      it(`decrypts ${name} segments correctly`, async () => {
+        const iv = iv16;
+        const cryptoKey = await window.crypto.subtle.importKey(
+            'raw', keyBuffer, {name: 'AES-GCM'}, false, ['decrypt']);
+        const ciphertext = await encryptSegmentGCM(keyBuffer, iv);
+        const aesKey = {
+          bitsKey: keyBuffer.byteLength * 8,
+          blockCipherMode: 'GCM',
+          cryptoKey,
+          iv: undefined,
+          firstMediaSequenceNumber: 0,
+        };
+        const decrypted = await SegmentUtils.aesDecrypt(ciphertext, aesKey, 0);
+        expect(shaka.util.StringUtils.fromUTF8(decrypted))
+            .toBe('Shaka AES test segment');
+      });
+    }
+
+    runCBCDecryptTest('AES-128-CBC', aes128Key, iv16);
+    runCBCDecryptTest('AES-256-CBC', aes256Key, iv16);
+    runCTRDecryptTest('AES-256-CTR', aes256Key, iv16);
+    runGCMDecryptTest('AES-256-GCM', aes256Key);
+
+    it('throws HLS_INVALID_GCM_SEGMENT if GCM segment too short', async () => {
+      const aesKey = {
+        bitsKey: 256,
+        blockCipherMode: 'GCM',
+        cryptoKey: await window.crypto.subtle.importKey(
+            'raw', aes256Key, {name: 'AES-GCM'}, false, ['decrypt']),
+        iv: undefined,
+        firstMediaSequenceNumber: 0,
+      };
+      const shortBuffer = shaka.util.BufferUtils.toUint8(new Uint8Array(10));
+      await expectAsync(SegmentUtils.aesDecrypt(shortBuffer, aesKey, 0))
+          .toBeRejectedWith(jasmine.objectContaining({
+            severity: shaka.util.Error.Severity.CRITICAL,
+            category: shaka.util.Error.Category.MANIFEST,
+            code: shaka.util.Error.Code.HLS_INVALID_GCM_SEGMENT,
+          }));
+    });
+
+    it('calls fetchKey if cryptoKey is missing', async () => {
+      const aesKey = {
+        bitsKey: 256,
+        blockCipherMode: 'GCM',
+        fetchKey: async () => {
+          aesKey.cryptoKey = await window.crypto.subtle.importKey(
+              'raw', aes256Key, {name: 'AES-GCM'}, false, ['decrypt']);
+        },
+        iv: undefined,
+        firstMediaSequenceNumber: 0,
+      };
+      const ciphertext = await encryptSegmentGCM(aes256Key, iv16);
+      const decrypted = await SegmentUtils.aesDecrypt(ciphertext, aesKey, 0);
+      expect(shaka.util.StringUtils.fromUTF8(decrypted))
+          .toBe('Shaka AES test segment');
+    });
+  });
 });

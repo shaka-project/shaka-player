@@ -266,7 +266,7 @@ shaka.extern.CreateSegmentIndexFunction;
  * @property {number} bitsKey
  *   The number of the bit key (eg: 128, 256).
  * @property {string} blockCipherMode
- *   The block cipher mode of operation. Possible values: 'CTR' or 'CBC'.
+ *   The block cipher mode of operation. Possible values: 'CTR', 'CBC' or 'GCM'.
  * @property {webCrypto.CryptoKey|undefined} cryptoKey
  *   Web crypto key object of the AES key. If unset, the "fetchKey"
  *   property should be provided.
