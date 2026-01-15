@@ -460,7 +460,6 @@ shaka.ui.Overlay = class {
       config.singleClickForPlayAndPause = false;
       config.seekOnTaps = true;
       config.enableTooltips = false;
-      config.doubleClickForFullscreen = false;
       const device = shaka.device.DeviceFactory.getDevice();
       config.enableFullscreenOnRotation = device.getBrowserEngine() !==
           shaka.device.IDevice.BrowserEngine.WEBKIT;
