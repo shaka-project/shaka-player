@@ -139,7 +139,7 @@ HLS features supported:
  - CEA-608/708 captions
  - Encrypted content with PlayReady, Widevine and WisePlay
  - Encrypted content with FairPlay (Safari on macOS and iOS only)
- - AES-128, AES-256 and AES-256-CTR support on browsers with Web Crypto API support
+ - AES-128, AES-256, AES-256-CTR and AES-256-GCM support on browsers with Web Crypto API support
  - SAMPLE-AES and SAMPLE-AES-CTR (identity) support on browsers with ClearKey support
  - Key rotation
  - Raw AAC, MP3, AC-3 and EC-3 (without an MP4 container)
