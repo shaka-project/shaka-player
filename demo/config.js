@@ -295,7 +295,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Allow LL-HLS byterange optimization',
             'manifest.hls.allowLowLatencyByteRangeOptimization')
         .addBoolInput_('Allow range request to guess mime type',
-            'manifest.hls.allowRangeRequestsToGuessMimeType');
+            'manifest.hls.allowRangeRequestsToGuessMimeType')
+        .addTextInput_('Chapter URI',
+            'manifest.hls.chaptersUri');
   }
 
   /** @private */

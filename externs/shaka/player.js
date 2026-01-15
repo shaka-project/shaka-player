@@ -1524,7 +1524,8 @@ shaka.extern.DashManifestConfiguration;
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
  *   allowLowLatencyByteRangeOptimization: boolean,
- *   allowRangeRequestsToGuessMimeType: boolean
+ *   allowRangeRequestsToGuessMimeType: boolean,
+ *   chaptersUri: string,
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -1615,6 +1616,17 @@ shaka.extern.DashManifestConfiguration;
  *   guess the mime type.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {string} chaptersUri
+ *   A URI pointing to a JSON resource that defines media chapters for HLS
+ *   playback.  When provided, Shaka Player will fetch and process this resource
+ *   to extract chapter metadata and expose it as timeline chapters during
+ *   playback. The JSON document must follow Apple’s HLS JSON Chapters
+ *   specification,  as described in Providing JSON Chapters for HTTP Live
+ *   Streaming. More info in
+ *   https://developer.apple.com/documentation/http-live-streaming/providing-javascript-object-notation-json-chapters
+ *   <br>
+ *   Defaults to <code>''</code>.
+ *
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
