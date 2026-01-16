@@ -392,7 +392,7 @@ shaka.extern.UIMediaSession;
  *   Whether or not double-clicking on the UI should cause it to enter
  *   fullscreen.
  *   <br>
- *   Defaults to <code>true</code> except on mobile, cast and smart TV whose
+ *   Defaults to <code>true</code> except on cast and smart TV whose
  *   default value is <code>false</code>.
  * @property {boolean} singleClickForPlayAndPause
  *   Whether or not clicking on the video should cause it to play or pause.

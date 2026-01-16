@@ -127,6 +127,9 @@ application:
     - `removeLatencyFromFirstPacketTime` has been removed.
     - `streaming.speechToText` moved to `accessibility.speechToText`
 
+  - UI Configuration changes:
+    - `doubleClickForFullscreen` enabled by default for mobile.
+
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.
     - `TextParser` plugins must implement the `setManifestType()` method.

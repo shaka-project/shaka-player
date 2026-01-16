@@ -1858,7 +1858,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     if (this.isOpaque()) {
-      this.lastTouchEventTime_ = Date.now();
       // The controls are showing.
       this.onContainerClick(/* fromTouchEvent= */ true);
       // Stop this event from becoming a click event.
@@ -1869,6 +1868,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // Stop this event from becoming a click event.
       event.cancelable && event.preventDefault();
     }
+    this.lastTouchEventTime_ = Date.now();
   }
 
   /**
@@ -1887,7 +1887,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     } else if (this.config_.singleClickForPlayAndPause) {
       this.playPausePresentation();
     } else if (fromTouchEvent && this.isOpaque()) {
-      this.hideUI();
+      if (this.config_.doubleClickForFullscreen &&
+          this.isFullScreenSupported() && this.lastTouchEventTime_ &&
+          Date.now() - this.lastTouchEventTime_ < 1000) {
+        this.toggleFullScreen();
+      } else {
+        this.hideUI();
+      }
     }
   }
 
