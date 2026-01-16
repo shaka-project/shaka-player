@@ -1983,6 +1983,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   avoidEvictionOnQuotaExceededError: boolean,
  *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy,
  *   returnToEndOfLiveWindowWhenOutside: boolean,
+ *   stopFetchingOnPause: boolean,
  * }}
  *
  * @description
@@ -2228,6 +2229,12 @@ shaka.extern.SpeechToTextConfiguration;
  * @property {boolean} returnToEndOfLiveWindowWhenOutside
  *   If true, when the playhead is behind the start of the live window,
  *   it will be moved to the end of the live window, instead of the start.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} stopFetchingOnPause
+ *   If true, stop fetching new segments on pause. This applies as long as
+ *   there is something in the buffer; if there is nothing, we will allow the
+ *   loading of the current segment.
  *   <br>
  *   Defaults to <code>false</code>.
  * @exportDoc
