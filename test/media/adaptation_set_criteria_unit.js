@@ -21,7 +21,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'en',
+        languages: ['en'],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -64,7 +64,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'en',
+        languages: ['en'],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -132,7 +132,7 @@ describe('AdaptationSetCriteria', () => {
 
         const builder = new shaka.media.PreferenceBasedCriteria();
         builder.configure({
-          language: 'en',
+          languages: ['en'],
           role: '',
           videoRole: '',
           channelCount: 0,
@@ -193,7 +193,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'en',
+        languages: ['en'],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -243,7 +243,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'en',
+        languages: ['en'],
         role: 'main',
         videoRole: '',
         channelCount: 0,
@@ -287,7 +287,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'en',
+        languages: ['en'],
         role: 'main',
         videoRole: 'sign',
         channelCount: 0,
@@ -358,7 +358,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'en',
+        languages: ['en'],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -438,7 +438,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'zh',
+        languages: ['zh'],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -496,7 +496,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'zh',
+        languages: ['zh'],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -574,7 +574,7 @@ describe('AdaptationSetCriteria', () => {
 
           const builder = new shaka.media.PreferenceBasedCriteria();
           builder.configure({
-            language: 'zh',
+            languages: ['zh'],
             role: '',
             videoRole: '',
             channelCount: 0,
@@ -653,7 +653,7 @@ describe('AdaptationSetCriteria', () => {
 
           const builder = new shaka.media.PreferenceBasedCriteria();
           builder.configure({
-            language: 'zh',
+            languages: ['zh'],
             role: '',
             videoRole: '',
             channelCount: 0,
@@ -703,7 +703,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: '',
+        languages: [],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -753,7 +753,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: '',
+        languages: [],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -803,7 +803,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: '',
+        languages: [],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -852,7 +852,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: '',
+        languages: [],
         role: '',
         videoRole: '',
         channelCount: 2,
@@ -908,7 +908,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: '',
+        languages: [],
         role: '',
         videoRole: '',
         channelCount: 6,
@@ -959,7 +959,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: '',
+        languages: [],
         role: '',
         videoRole: '',
         channelCount: 2,
@@ -1010,7 +1010,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: '',
+        languages: [],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -1061,7 +1061,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: '',
+        languages: [],
         role: '',
         videoRole: '',
         channelCount: 6,
@@ -1111,7 +1111,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: '',
+        languages: [],
         role: '',
         videoRole: '',
         channelCount: 6,
@@ -1160,7 +1160,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: '',
+        languages: [],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -1205,7 +1205,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: '',
+        languages: [],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -1249,7 +1249,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: '',
+        languages: [],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -1311,7 +1311,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'zh',
+        languages: ['zh'],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -1361,7 +1361,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: '',
+        languages: [],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -1417,7 +1417,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'en',
+        languages: ['en'],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -1462,7 +1462,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'en',
+        languages: ['en'],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -1506,7 +1506,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'en',
+        languages: ['en'],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -1550,7 +1550,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'en',
+        languages: ['en'],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -1595,7 +1595,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'en',
+        languages: ['en'],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -1640,7 +1640,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'en',
+        languages: ['en'],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -1685,7 +1685,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'en',
+        languages: ['en'],
         role: '',
         videoRole: '',
         channelCount: 0,
@@ -1730,7 +1730,7 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        language: 'en',
+        languages: ['en'],
         role: '',
         videoRole: '',
         channelCount: 0,
