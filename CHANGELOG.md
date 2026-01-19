@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.15.26](https://github.com/shaka-project/shaka-player/compare/v4.15.25...v4.15.26) (2026-01-19)
+
+
+### Bug Fixes
+
+* **ABR:** Safeguard calls to this.switch_ ([#9565](https://github.com/shaka-project/shaka-player/issues/9565)) ([40a5e8d](https://github.com/shaka-project/shaka-player/commit/40a5e8d72f669feb920d2d902117d50340ea6904))
+* don't clear text displayer cache for vtt if we're clearing cea cache ([#9538](https://github.com/shaka-project/shaka-player/issues/9538)) ([646d117](https://github.com/shaka-project/shaka-player/commit/646d1174521149e160ddd86c61dd7a4fdbb39dcd))
+* Fix alignItems usage on old devices ([#9544](https://github.com/shaka-project/shaka-player/issues/9544)) ([04b9b39](https://github.com/shaka-project/shaka-player/commit/04b9b391f64e0f5fa403360333487289d82790c6))
+* **Thumbnails:** Fix thumbnails precision issues ([#9536](https://github.com/shaka-project/shaka-player/issues/9536)) ([ea9f88b](https://github.com/shaka-project/shaka-player/commit/ea9f88b4076408d55f105d8d22805bc9452eef4a))
+* **Transmuxer:** Keep stream width/height if it already exists ([#9553](https://github.com/shaka-project/shaka-player/issues/9553)) ([b9f3891](https://github.com/shaka-project/shaka-player/commit/b9f38911486f37da4167fdc22395a522050c352d))
+* **TTML:** Fix MP4 TTML Parser producing invalid image subtitles ([#9559](https://github.com/shaka-project/shaka-player/issues/9559)) ([a1bb5c1](https://github.com/shaka-project/shaka-player/commit/a1bb5c16b357f31bd26054d1221919c1b924b51e))
+
+
+### Performance Improvements
+
+* Use Map.getOrInsert/getOrInsertComputed native methods ([#9546](https://github.com/shaka-project/shaka-player/issues/9546)) ([ec9226b](https://github.com/shaka-project/shaka-player/commit/ec9226b4d4aa5e25d004eac3ad95a710cd7b5c50))
+
 ## [4.15.25](https://github.com/shaka-project/shaka-player/compare/v4.15.24...v4.15.25) (2025-12-22)
 
 
