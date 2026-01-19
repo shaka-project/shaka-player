@@ -1,8 +1,7 @@
 # Welcome to Shaka Player
 
-Shaka Player is a JavaScript library for adaptive video streaming.
-It plays [DASH][] content without browser plugins using
-[MediaSource Extensions][] and [Encrypted Media Extensions][].
+Shaka Player is an open-source JavaScript library for adaptive media streaming.
+It plays adaptive media formats such as [DASH][] and [HLS][] in a browser without plugins, using the open web standards [MediaSource Extensions][] and [Encrypted Media Extensions][].
 
 Shaka Player is meant to be deployed after being compiled. The tools you need
 to compile the sources and documentation are included in the sources:
@@ -15,6 +14,7 @@ If you installed Shaka Player via npm, the source has been compiled and the
 externs have been generated.
 
 [DASH]: http://dashif.org/
+[HLS]: https://datatracker.ietf.org/doc/html/rfc8216
 [MediaSource Extensions]: http://w3c.github.io/media-source/
 [Encrypted Media Extensions]: https://w3c.github.io/encrypted-media/
 
