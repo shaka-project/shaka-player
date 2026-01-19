@@ -132,6 +132,15 @@ goog.requireType('shaka.cast.CastReceiver');
 
 
 /**
+ * @event shaka.ui.Controls.ChaptersUpdatedEvent
+ * @description Fired when the chapters has finished updating.
+ * @property {string} type
+ *   'chaptersupdated'
+ * @exportDoc
+ */
+
+
+/**
  * A container for custom video controls.
  * @implements {shaka.util.IDestroyable}
  * @export
@@ -2602,34 +2611,41 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @type {!Array<!shaka.extern.Chapter>} */
     let chapters = [];
 
-    const currentLocales = this.localization_.getCurrentLocales();
-    for (const locale of Array.from(currentLocales)) {
-      // If player is a proxy, and the cast receiver doesn't support this
-      // method, you get back undefined.
-      if (this.player_) {
-        // eslint-disable-next-line no-await-in-loop
-        chapters = (await this.player_.getChaptersAsync(locale)) || [];
-      }
-      if (chapters.length) {
-        break;
-      }
-    }
-    if (!chapters.length && this.player_) {
-      // If player is a proxy, and the cast receiver doesn't support this
-      // method, you get back undefined.
-      chapters = (await this.player_.getChaptersAsync('und')) || [];
-    }
-    if (!chapters.length && this.player_) {
-      // If player is a proxy, and the cast receiver doesn't support this
-      // method, you get back undefined.
-      const chaptersTracks = this.player_.getChaptersTracks() || [];
+    // If player is a proxy, and the cast receiver doesn't support this
+    // method, you get back undefined.
+    const chaptersTracks = this.player_.getChaptersTracks() || [];
+
+    if (chaptersTracks.length) {
       if (chaptersTracks.length == 1) {
         const language = chaptersTracks[0].language;
-        chapters = (await this.player_.getChaptersAsync(language)) || [];
+        if (this.player_) {
+          chapters = (await this.player_.getChaptersAsync(language)) || [];
+        }
+      }
+
+      if (!chapters.length && this.player_) {
+        const currentLocales = this.localization_.getCurrentLocales();
+        for (const locale of Array.from(currentLocales)) {
+          // If player is a proxy, and the cast receiver doesn't support this
+          // method, you get back undefined.
+          if (this.player_) {
+            // eslint-disable-next-line no-await-in-loop
+            chapters = (await this.player_.getChaptersAsync(locale)) || [];
+          }
+          if (chapters.length) {
+            break;
+          }
+        }
+      }
+      if (!chapters.length && this.player_) {
+        // If player is a proxy, and the cast receiver doesn't support this
+        // method, you get back undefined.
+        chapters = (await this.player_.getChaptersAsync('und')) || [];
       }
     }
 
     this.chapters_ = chapters;
+    this.dispatchEvent(new shaka.util.FakeEvent('chaptersupdated'));
   }
 
   /**
@@ -2742,6 +2758,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
  *    updating.
  * @property {string} type
  *   'uiupdated'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#ChaptersUpdatedEvent
+ * @description Fired when the chapters has finished updating.
+ * @property {string} type
+ *   'chaptersupdated'
  * @exportDoc
  */
 
