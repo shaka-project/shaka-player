@@ -132,6 +132,15 @@ goog.requireType('shaka.cast.CastReceiver');
 
 
 /**
+ * @event shaka.ui.Controls.ChaptersUpdatedEvent
+ * @description Fired when the chapters has finished updating.
+ * @property {string} type
+ *   'chaptersupdated'
+ * @exportDoc
+ */
+
+
+/**
  * A container for custom video controls.
  * @implements {shaka.util.IDestroyable}
  * @export
@@ -2630,6 +2639,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     this.chapters_ = chapters;
+    this.dispatchEvent(new shaka.util.FakeEvent('chaptersupdated'));
   }
 
   /**
@@ -2742,6 +2752,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
  *    updating.
  * @property {string} type
  *   'uiupdated'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#ChaptersUpdatedEvent
+ * @description Fired when the chapters have finished updating.
+ * @property {string} type
+ *   'chaptersupdated'
  * @exportDoc
  */
 
