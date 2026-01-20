@@ -278,6 +278,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports X-ASSET-LIST', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const assetsList = JSON.stringify({
         ASSETS: [
           {
@@ -286,7 +288,8 @@ describe('Interstitial Ad manager', () => {
         ],
       });
 
-      networkingEngine.setResponseText('test:/test.json', assetsList);
+      networkingEngine.setResponseText(
+          'test:/test.json?_HLS_primary_id=1', assetsList);
 
       const metadata = {
         type: 'com.apple.quicktime.HLS',
@@ -337,6 +340,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports X-ASSET-LIST with X-AD-CREATIVE-SIGNALING', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const assetsList = JSON.stringify({
         ASSETS: [
           {
@@ -418,7 +423,8 @@ describe('Interstitial Ad manager', () => {
         ],
       });
 
-      networkingEngine.setResponseText('test:/test.json', assetsList);
+      networkingEngine.setResponseText(
+          'test:/test.json?_HLS_primary_id=1', assetsList);
 
       const metadata = {
         type: 'com.apple.quicktime.HLS',
@@ -923,6 +929,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports SKIP-CONTROL OFFSET and DURATION', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const assetsList = JSON.stringify({
         'ASSETS': [
           {
@@ -935,7 +943,8 @@ describe('Interstitial Ad manager', () => {
         },
       });
 
-      networkingEngine.setResponseText('test:/test.json', assetsList);
+      networkingEngine.setResponseText(
+          'test:/test.json?_HLS_primary_id=1', assetsList);
 
       const metadata = {
         type: 'com.apple.quicktime.HLS',
