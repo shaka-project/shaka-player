@@ -222,6 +222,7 @@ aacl
 aacp
 abgr
 apic
+appl
 apos
 arib
 assetid
@@ -308,6 +309,7 @@ mdats
 mdhd
 mdia
 mfhd
+mhlr
 midroll
 midrow
 minf
