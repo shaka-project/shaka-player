@@ -300,4 +300,64 @@ describe('Mp4BoxParsers', () => {
         .parse(multidrmVideoInitSegment, /* partialOkay= */ false);
     expect(encryptionScheme).toBe('cenc');
   });
+
+  /**
+   * Tests for parseHDLR box parsing.
+   *
+   * HDLR box structure (after version/flags):
+   * - 4 bytes: pre_defined (ISO) / component_type (QuickTime)
+   * - 4 bytes: handler_type (e.g. 'soun', 'vide')
+   * - 12 bytes: reserved (ISO) / manufacturer + flags (QuickTime)
+   * - variable: name string
+   */
+  describe('parseHDLR', () => {
+    it('parses ISO BMFF hdlr box', () => {
+      // ISO BMFF format: pre_defined=0, handler_type='soun', reserved=0
+      const hdlrBox = new Uint8Array([
+        0x00, 0x00, 0x00, 0x00, // pre_defined (zeros)
+        0x73, 0x6F, 0x75, 0x6E, // handler_type 'soun'
+        0x00, 0x00, 0x00, 0x00, // reserved (zeros)
+        0x00, 0x00, 0x00, 0x00, // reserved (zeros)
+        0x00, 0x00, 0x00, 0x00, // reserved (zeros)
+        0x00, // name (empty, null-terminated)
+      ]);
+      const reader = new shaka.util.DataViewReader(
+          hdlrBox, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+      const parsedHdlr = shaka.util.Mp4BoxParsers.parseHDLR(reader);
+      expect(parsedHdlr.handlerType).toBe('soun');
+    });
+
+    it('parses Apple QuickTime hdlr box', () => {
+      // Apple QuickTime format: component_type='mhlr', handler_type='soun',
+      // manufacturer='appl'
+      const hdlrBox = new Uint8Array([
+        0x6D, 0x68, 0x6C, 0x72, // component_type 'mhlr'
+        0x73, 0x6F, 0x75, 0x6E, // handler_type 'soun'
+        0x61, 0x70, 0x70, 0x6C, // manufacturer 'appl'
+        0x00, 0x00, 0x00, 0x00, // component_flags
+        0x00, 0x00, 0x00, 0x00, // component_flags_mask
+        0x00, // name (empty, null-terminated)
+      ]);
+      const reader = new shaka.util.DataViewReader(
+          hdlrBox, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+      const parsedHdlr = shaka.util.Mp4BoxParsers.parseHDLR(reader);
+      expect(parsedHdlr.handlerType).toBe('soun');
+    });
+
+    it('parses video handler type', () => {
+      // ISO BMFF format with 'vide' handler
+      const hdlrBox = new Uint8Array([
+        0x00, 0x00, 0x00, 0x00, // pre_defined (zeros)
+        0x76, 0x69, 0x64, 0x65, // handler_type 'vide'
+        0x00, 0x00, 0x00, 0x00, // reserved
+        0x00, 0x00, 0x00, 0x00, // reserved
+        0x00, 0x00, 0x00, 0x00, // reserved
+        0x00, // name
+      ]);
+      const reader = new shaka.util.DataViewReader(
+          hdlrBox, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+      const parsedHdlr = shaka.util.Mp4BoxParsers.parseHDLR(reader);
+      expect(parsedHdlr.handlerType).toBe('vide');
+    });
+  });
 });
