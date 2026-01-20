@@ -6348,6 +6348,85 @@ describe('HlsParser', () => {
       expect(onMetadataSpy).toHaveBeenCalledTimes(1);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 5, 35, values);
     });
+
+    it('supports 1970-01-01T00:00:00.000Z', async () => {
+      const mediaPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PROGRAM-DATE-TIME:1970-01-01T00:00:00.000Z\n',
+        '#EXTINF:5,\n',
+        'video1.ts\n',
+        '#EXT-X-DATERANGE:ID="0",START-DATE="1970-01-01T00:00:00.000",',
+        'DURATION=1,X-SHAKA="FOREVER"\n',
+        '#EXT-X-DATERANGE:ID="1",START-DATE="1970-01-01T00:00:05.000Z",',
+        'END-DATE="1970-01-01T00:00:06.00Z",X-SHAKA="FOREVER"\n',
+        '#EXT-X-DATERANGE:ID="2",START-DATE="1970-01-01T00:00:10.000Z",',
+        'PLANNED-DURATION=1,X-SHAKA="FOREVER"\n',
+        '#EXT-X-DATERANGE:ID="3",START-DATE="1970-01-01T00:00:15.000Z",',
+        'X-SHAKA="FOREVER"\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', mediaPlaylist)
+          .setResponseValue('test:/video1.ts', tsSegmentData);
+
+      await parser.start('test:/master', playerInterface);
+
+      const metadataType = 'com.apple.quicktime.HLS';
+      const firstValues = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '0',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
+      const secondValues = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '1',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
+      const thirdValues = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '2',
+        }),
+        jasmine.objectContaining({
+          key: 'PLANNED-DURATION',
+          data: '1',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
+      const forthValues = [
+        jasmine.objectContaining({
+          key: 'ID',
+          data: '3',
+        }),
+        jasmine.objectContaining({
+          key: 'X-SHAKA',
+          data: 'FOREVER',
+        }),
+      ];
+      expect(onMetadataSpy).toHaveBeenCalledTimes(4);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 0, 1,
+          firstValues);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 5, 6,
+          secondValues);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 10, 11,
+          thirdValues);
+      expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 15, null,
+          forthValues);
+    });
   });
 
   it('supports SUPPLEMENTAL-CODECS', async () => {
