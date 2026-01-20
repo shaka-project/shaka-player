@@ -2764,7 +2764,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 /**
  * @event shaka.ui.Controls#ChaptersUpdatedEvent
- * @description Fired when the chapters has finished updating.
+ * @description Fired when the chapters have finished updating.
  * @property {string} type
  *   'chaptersupdated'
  * @exportDoc
