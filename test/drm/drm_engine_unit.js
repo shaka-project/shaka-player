@@ -2727,6 +2727,7 @@ describe('DrmEngine', () => {
       drmInfo.keySystem = 'com.microsoft.playready';
 
       // Set initData for renewal request
+      /** @suppress {accessControls} */
       const metadata = drmEngine.activeSessions_.get(session1);
       metadata.initData = new Uint8Array([1, 2, 3]);
       metadata.initDataType = 'cenc';
