@@ -32,6 +32,8 @@ describe('SegmentUtils', () => {
   const ttmlMp4Uri = '/base/test/test/assets/ttml-init.mp4';
   const webvttMp4Uri = '/base/test/test/assets/vtt-init.mp4';
 
+  const initFairPlayUri = '/base/test/test/assets/init-fairplay.mp4';
+
   /** @type {!ArrayBuffer} */
   let videoInitSegment;
   /** @type {!ArrayBuffer} */
@@ -66,6 +68,8 @@ describe('SegmentUtils', () => {
   let ttml;
   /** @type {!ArrayBuffer} */
   let webvtt;
+  /** @type {!ArrayBuffer} */
+  let initFairPlay;
 
   beforeAll(async () => {
     const responses = await Promise.all([
@@ -86,6 +90,7 @@ describe('SegmentUtils', () => {
       shaka.test.Util.fetch(tsCaptionsUri),
       shaka.test.Util.fetch(ttmlMp4Uri),
       shaka.test.Util.fetch(webvttMp4Uri),
+      shaka.test.Util.fetch(initFairPlayUri),
     ]);
     videoInitSegment = responses[0];
     videoSegment = responses[1];
@@ -104,6 +109,7 @@ describe('SegmentUtils', () => {
     tsCaptions = responses[14];
     ttml = responses[15];
     webvtt = responses[16];
+    initFairPlay = responses[17];
   });
 
   it('getBasicInfoFromMp4', async () => {
@@ -449,6 +455,48 @@ describe('SegmentUtils', () => {
       drmInfos: [],
     };
     expect(basicInfo).toEqual(expected);
+
+    basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
+        initFairPlay, initFairPlay, false);
+    expected = {
+      type: 'video',
+      mimeType: 'video/mp4',
+      codecs: 'avc1.42E01E',
+      language: 'und',
+      height: '720',
+      width: '1280',
+      channelCount: null,
+      sampleRate: null,
+      closedCaptions: new Map(),
+      videoRange: null,
+      colorGamut: null,
+      frameRate: null,
+      timescale: 90000,
+      drmInfos: [
+        {
+          keySystem: 'com.apple.fps',
+          encryptionScheme: 'cbcs',
+          licenseServerUri: '',
+          distinctiveIdentifierRequired: false,
+          persistentStateRequired: false,
+          audioRobustness: '',
+          videoRobustness: '',
+          serverCertificate: null,
+          serverCertificateUri: '',
+          sessionType: '',
+          initData: [
+            {
+              initDataType: 'sinf',
+              initData: jasmine.any(Uint8Array),
+              keyId: null,
+            },
+          ],
+          mediaTypes: undefined,
+          keyIds: (new Set()).add('b99ed9e5c64149d1bfa843692b686ddb'),
+        },
+      ],
+    };
+    expect(basicInfo).toEqual(expected);
   });
 
   it('getBasicInfoFromTs', () => {
@@ -522,6 +570,9 @@ describe('SegmentUtils', () => {
     defaultKID =
         shaka.media.SegmentUtils.getDefaultKID(multidrmVideoInitSegment);
     expect(defaultKID).toBe('4060a865887842679cbf91ae5bae1e72');
+    defaultKID =
+        shaka.media.SegmentUtils.getDefaultKID(initFairPlay);
+    expect(defaultKID).toBe('b99ed9e5c64149d1bfa843692b686ddb');
   });
 
   it('getStartTimeAndDurationFromMp4', () => {
