@@ -2686,6 +2686,102 @@ describe('DrmEngine', () => {
     }
   });
 
+  describe('license renewal', () => {
+    beforeEach(async () => {
+      session1.sessionId = 'abc';
+      session1.expiration = NaN;
+      session1.update.and.returnValue(Promise.resolve());
+
+      setDecodingInfoSpy(['drm.abc']);
+      await initAndAttach();
+      await sendEncryptedEvent();
+
+      const message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+      await Util.shortDelay();
+    });
+
+    it('triggers manual renewal and dispatches event', () => {
+      drmEngine.renewLicense(session1.sessionId);
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({'type': 'licenserenewal'}));
+    });
+
+    it('sends "renew" message for FairPlay', () => {
+      /** @suppress {accessControls} */
+      const drmInfo = drmEngine.getDrmInfo();
+      drmInfo.keySystem = 'com.apple.fps';
+      session1.update.calls.reset();
+
+      drmEngine.renewLicense();
+
+      expect(session1.update).toHaveBeenCalled();
+      const args = session1.update.calls.mostRecent().args[0];
+      const message = shaka.util.StringUtils.fromUTF8(args);
+      expect(message).toBe('renew');
+    });
+
+    it('re-requests license for PlayReady', async () => {
+      /** @suppress {accessControls} */
+      const drmInfo = drmEngine.getDrmInfo();
+      drmInfo.keySystem = 'com.microsoft.playready';
+
+      // Set initData for renewal request
+      const metadata = drmEngine.activeSessions_.get(session1);
+      metadata.initData = new Uint8Array([1, 2, 3]);
+      metadata.initDataType = 'cenc';
+
+      onEventSpy.calls.reset();
+
+      drmEngine.renewLicense();
+
+      // Should dispatch the licenserenewal event
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({'type': 'licenserenewal'}));
+
+      // Should make a network request for license renewal
+      await Util.shortDelay();
+      expect(fakeNetEngine.request).toHaveBeenCalled();
+    });
+
+    it('dispatches event without update for Widevine', () => {
+      /** @suppress {accessControls} */
+      const drmInfo = drmEngine.getDrmInfo();
+      drmInfo.keySystem = 'com.widevine.alpha';
+      session1.update.calls.reset();
+      onEventSpy.calls.reset();
+
+      drmEngine.renewLicense();
+
+      expect(session1.update).not.toHaveBeenCalled();
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({'type': 'licenserenewal'}));
+    });
+
+    it('triggers auto renewal when interval passes', async () => {
+      config.enableAutoRenewal = true;
+      config.renewalIntervalSec = 10;
+      drmEngine.configure(config);
+
+      const now = Date.now();
+      const spy = spyOn(Date, 'now').and.returnValue(now + 15000);
+      onEventSpy.calls.reset();
+
+      /** @suppress {accessControls} */
+      function forcePoll() {
+        drmEngine.pollExpiration_();
+      }
+      forcePoll();
+
+      await Util.shortDelay();
+
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({'type': 'licenserenewal'}));
+
+      spy.and.callThrough();
+    });
+  });
+
   describe('parseInbandPssh', () => {
     const WIDEVINE_PSSH =
         '00000028' +                          // atom size
