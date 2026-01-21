@@ -2759,7 +2759,6 @@ describe('DrmEngine', () => {
     });
 
     it('triggers auto renewal when interval passes', async () => {
-      config.enableAutoRenewal = true;
       config.renewalIntervalSec = 10;
       drmEngine.configure(config);
 

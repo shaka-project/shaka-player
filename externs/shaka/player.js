@@ -1278,7 +1278,6 @@ shaka.extern.PersistentSessionMetadata;
  *   ignoreDuplicateInitData: boolean,
  *   defaultAudioRobustnessForWidevine: string,
  *   defaultVideoRobustnessForWidevine: string,
- *   enableAutoRenewal: boolean,
  *   renewalIntervalSec: number
  * }}
  *
@@ -1375,13 +1374,9 @@ shaka.extern.PersistentSessionMetadata;
  *   <br>
  *   Defaults to <code>'SW_SECURE_DECODE'</code> except on Android where the
  *   default value <code>''</code>.
- * @property {boolean} enableAutoRenewal
- *   If true, the player will attempt to renew licenses automatically.
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {number} renewalIntervalSec
- *   The interval in seconds at which the player will check if a license
- *   renewal is required.
+ *   The interval in seconds at which the player will attempt to renew
+ *   licenses automatically. Set to 0 to disable automatic renewal.
  *   <br>
  *   Defaults to <code>0</code> (disabled).
  * @exportDoc
