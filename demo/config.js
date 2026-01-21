@@ -305,7 +305,9 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.ManifestConfiguration');
     this.addSection_('MSF', docLink)
         .addTextInput_('Fingerprint URI',
-            'manifest.msf.fingerprintUri');
+            'manifest.msf.fingerprintUri')
+        .addArrayStringInput_('Namespaces',
+            'manifest.msf.namespaces');
   }
 
   /** @private */

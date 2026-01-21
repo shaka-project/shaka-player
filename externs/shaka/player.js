@@ -1634,6 +1634,7 @@ shaka.extern.HlsManifestConfiguration;
 /**
  * @typedef {{
  *   fingerprintUri: string,
+ *   namespaces: !Array<string>,
  * }}
  *
  * @property {string} fingerprintUri
@@ -1641,6 +1642,11 @@ shaka.extern.HlsManifestConfiguration;
  *   this URL. This is required to use self-signed certificates with Chromium.
  *   <br>
  *   Defaults to <code>''</code>.
+ * @property {string} namespaces
+ *   List of namespaces to use for playback. If empty, namespaces are discovered
+ *   via PublishNamespace messages.
+ *   <br>
+ *   Defaults to <code>[]</code>.
  * @exportDoc
  */
 shaka.extern.MsfManifestConfiguration;
