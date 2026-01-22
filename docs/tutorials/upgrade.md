@@ -152,3 +152,6 @@ application:
   - Initial track selection:
     - With the removal of `autoShowText`, initial text track selection will now solely be based on `preferredTextLanguage` and additionally the roles you may prefer.
     - The app may choose not to pass preferences and instead rely on the tracks API (`getTextTracks`, `getAudioTracks`) along with its own business logic.
+
+  - Error API changes:
+    - `MEDIA_SOURCE_OPERATION_THREW` error now includes object with details from media element error in `error.data[1]` or string with brief explanation.
