@@ -5132,6 +5132,11 @@ describe('Player', () => {
 
     expect(player.getMimeType()).toBe(fakeMimeType);
     expect(player.getAssetUri()).toBe(fakeManifestUri);
+
+    await player.unload();
+
+    expect(player.getMimeType()).toBeNull();
+    expect(player.getAssetUri()).toBeNull();
   });
 
   /**
