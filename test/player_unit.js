@@ -5123,6 +5123,17 @@ describe('Player', () => {
     });
   });
 
+  it('getAssetUri and getMimeType', async () => {
+    // null before we've loaded anything.
+    expect(player.getMimeType()).toBeNull();
+    expect(player.getAssetUri()).toBeNull();
+
+    await player.load(fakeManifestUri, 0, fakeMimeType);
+
+    expect(player.getMimeType()).toBe(fakeMimeType);
+    expect(player.getAssetUri()).toBe(fakeManifestUri);
+  });
+
   /**
    * Gets the currently active variant track.
    * @return {shaka.extern.Track}
