@@ -1057,6 +1057,11 @@ shakaDemo.Main = class {
               .split(','));
     }
 
+    if (params.has('manifest.msf.namespaces')) {
+      this.configure('manifest.msf.namespaces',
+          params.get('manifest.msf.namespaces').split(','));
+    }
+
     // Add compiled/uncompiled links.
     this.makeVersionLinks_();
 
@@ -1581,6 +1586,7 @@ shakaDemo.Main = class {
       'preferredAudioCodecs',
       'preferredTextFormats',
       'accessibility.speechToText.languagesToTranslate',
+      'manifest.msf.namespaces',
     ];
 
     for (const key of preferredArray) {
