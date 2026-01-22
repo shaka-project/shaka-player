@@ -1378,6 +1378,9 @@ shaka.extern.PersistentSessionMetadata;
  *   The interval in seconds at which the player will attempt to renew
  *   licenses automatically. Set to 0 to disable automatic renewal.
  *   <br>
+ *   Note: Only supported for PlayReady and FairPlay. Other key systems
+ *   (e.g., Widevine) are not supported.
+ *   <br>
  *   Defaults to <code>0</code>.
  * @exportDoc
  */
