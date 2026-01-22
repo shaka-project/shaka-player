@@ -226,9 +226,13 @@ class ClosureCompiler(object):
     proc = shakaBuildHelpers.execute_subprocess(
         cmd_line, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
-    stripped_wrapper_code = proc.communicate(wrapper_code.encode('utf8'))[0]
+    stripped_wrapper_code, stderr = proc.communicate(wrapper_code.encode('utf8'))
 
     if proc.returncode != 0:
+      # Print stderr to help diagnose the failure (e.g., Java version errors)
+      if stderr:
+        stderr_text = stderr.decode('utf-8', errors='replace')
+        logging.error('Closure Compiler failed with stderr:\n%s', stderr_text)
       raise RuntimeError('Failed to strip whitespace from wrapper!')
 
     with shakaBuildHelpers.open_file(wrapper_output_path, 'w') as f:
