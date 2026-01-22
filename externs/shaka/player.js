@@ -1278,7 +1278,7 @@ shaka.extern.PersistentSessionMetadata;
  *   ignoreDuplicateInitData: boolean,
  *   defaultAudioRobustnessForWidevine: string,
  *   defaultVideoRobustnessForWidevine: string,
- *   renewalIntervalSec: number
+ *   renewalIntervalSec: number,
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
