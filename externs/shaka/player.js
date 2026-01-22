@@ -1378,7 +1378,7 @@ shaka.extern.PersistentSessionMetadata;
  *   The interval in seconds at which the player will attempt to renew
  *   licenses automatically. Set to 0 to disable automatic renewal.
  *   <br>
- *   Defaults to <code>0</code> (disabled).
+ *   Defaults to <code>0</code>.
  * @exportDoc
  */
 shaka.extern.DrmConfiguration;
