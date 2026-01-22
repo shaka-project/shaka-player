@@ -27,6 +27,10 @@ import generateLocalizations
 import shakaBuildHelpers
 
 
+_force_hint_shown = False
+_skip_messages_shown = set()
+
+
 def _canonicalize_source_files(source_files):
   """Canonicalize a set or list of source files.
 
@@ -45,6 +49,8 @@ def _get_source_path(path):
 def _must_build(output, source_files):
   """Returns True if any of the |source_files| have changed since |output| was
      built, or if |output| does not exist yet."""
+  global _force_hint_shown, _skip_messages_shown
+
   if not os.path.isfile(output):
     # Nothing built, so we should build the output.
     return True
@@ -64,7 +70,18 @@ def _must_build(output, source_files):
     if path and os.path.exists(path) and os.path.getmtime(path) > build_time:
       return True
 
-  logging.warning('No changes detected, skipping. Use --force to override.')
+  # Inform about the --force flag once (if something is skipped)
+  if not _force_hint_shown:
+    logging.warning('Detected output files that do not need to be rebuilt. Use --force to override.')
+    _force_hint_shown = True
+
+  # Log skip message once per output file
+  output_basename = os.path.basename(output)
+  if output_basename not in _skip_messages_shown:
+    logging.info('Skipping %s (already built)', output_basename)
+    _skip_messages_shown.add(output_basename)
+
+
   return False
 
 def _update_timestamp(path):
