@@ -62,6 +62,15 @@ body {
   background-position: center;
 }
 
+.version-string {
+  position: absolute;
+  bottom: 2.5%;
+  right: 2.5%;
+
+  font-size: 2vh;
+  color: black;
+}
+
 /* Preload the background images for idle mode */
 body:after {
   position: absolute;
