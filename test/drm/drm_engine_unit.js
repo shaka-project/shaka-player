@@ -2701,10 +2701,24 @@ describe('DrmEngine', () => {
       await Util.shortDelay();
     });
 
-    it('triggers manual renewal and dispatches event', () => {
+    it('triggers manual renewal and dispatches event', async () => {
+      /** @suppress {accessControls} */
+      const drmInfo = drmEngine.getDrmInfo();
+      drmInfo.keySystem = 'com.apple.fps';
       drmEngine.renewLicense(session1.sessionId);
+
+      await shaka.test.Util.shortDelay();
+
       expect(onEventSpy).toHaveBeenCalledWith(
-          jasmine.objectContaining({'type': 'licenserenewal'}));
+          jasmine.objectContaining({
+            'type': 'licenserenewal',
+            'oldSessionMetadata': jasmine.objectContaining({
+              sessionId: session1.sessionId,
+            }),
+            'newSessionMetadata': jasmine.objectContaining({
+              sessionId: session1.sessionId,
+            }),
+          }));
     });
 
     it('sends "renew" message for FairPlay', () => {
@@ -2736,16 +2750,22 @@ describe('DrmEngine', () => {
 
       drmEngine.renewLicense();
 
-      // Should dispatch the licenserenewal event
-      expect(onEventSpy).toHaveBeenCalledWith(
-          jasmine.objectContaining({'type': 'licenserenewal'}));
-
       // Should make a network request for license renewal
       await Util.shortDelay();
       expect(fakeNetEngine.request).toHaveBeenCalled();
+
+      // Should dispatch the licenserenewal event
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            'type': 'licenserenewal',
+            'oldSessionMetadata': jasmine.objectContaining({
+              sessionId: session1.sessionId,
+            }),
+            'newSessionMetadata': jasmine.any(Object), // New session object
+          }));
     });
 
-    it('dispatches event without update for Widevine', () => {
+    it('does not dispatch event for Widevine', () => {
       /** @suppress {accessControls} */
       const drmInfo = drmEngine.getDrmInfo();
       drmInfo.keySystem = 'com.widevine.alpha';
@@ -2755,11 +2775,15 @@ describe('DrmEngine', () => {
       drmEngine.renewLicense();
 
       expect(session1.update).not.toHaveBeenCalled();
-      expect(onEventSpy).toHaveBeenCalledWith(
-          jasmine.objectContaining({'type': 'licenserenewal'}));
+      expect(onEventSpy).not.toHaveBeenCalled();
     });
 
     it('triggers auto renewal when interval passes', async () => {
+      // Must use a supported key system for auto-renewal to trigger
+      /** @suppress {accessControls} */
+      const drmInfo = drmEngine.getDrmInfo();
+      drmInfo.keySystem = 'com.apple.fps';
+
       config.renewalIntervalSec = 10;
       drmEngine.configure(config);
 
