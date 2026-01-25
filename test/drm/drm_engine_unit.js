@@ -2692,6 +2692,9 @@ describe('DrmEngine', () => {
       session1.expiration = NaN;
       session1.update.and.returnValue(Promise.resolve());
 
+      session2.sessionId = 'def';
+      session2.update.and.returnValue(Promise.resolve());
+
       setDecodingInfoSpy(['drm.abc']);
       await initAndAttach();
       await sendEncryptedEvent();
@@ -2747,12 +2750,22 @@ describe('DrmEngine', () => {
       metadata.initDataType = 'cenc';
 
       onEventSpy.calls.reset();
+      fakeNetEngine.request.calls.reset();
 
       drmEngine.renewLicense();
+
+      await Util.shortDelay();
+
+      const message = new Uint8Array(0);
+      session2.on['message']({target: session2, message: message});
 
       // Should make a network request for license renewal
       await Util.shortDelay();
       expect(fakeNetEngine.request).toHaveBeenCalled();
+
+      const requestCall = fakeNetEngine.request.calls.mostRecent();
+      const request = requestCall.args[1];
+      expect(request.licenseRequestType).toBe('license-renewal');
 
       // Should dispatch the licenserenewal event
       expect(onEventSpy).toHaveBeenCalledWith(
