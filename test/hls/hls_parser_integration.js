@@ -105,8 +105,7 @@ describe('HlsParser', () => {
   });
 
   it('supports text discontinuity', async () => {
-    player.configure('autoShowText', shaka.config.AutoShowText.ALWAYS);
-
+    player.configure('preferredTextLanguage', 'en');
     await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
     await video.play();
 
@@ -126,8 +125,7 @@ describe('HlsParser', () => {
   });
 
   it('supports text without discontinuity', async () => {
-    player.configure('autoShowText', shaka.config.AutoShowText.ALWAYS);
-
+    player.configure('preferredTextLanguage', 'de');
     // eslint-disable-next-line @stylistic/max-len
     await player.load('/base/test/test/assets/hls-text-no-discontinuity/index.m3u8');
     await video.play();
@@ -195,6 +193,10 @@ describe('HlsParser', () => {
   });
 
   it('supports mp4 muxed with AAC and H.264', async () => {
+    if (deviceDetected.getDeviceName() === 'Tizen' &&
+        deviceDetected.getVersion() === 3) {
+      pending('Tizen 3 currently does not support mp4 muxed content');
+    }
     await player.load('/base/test/test/assets/hls-mp4-muxed-aac-h264/hls.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);
@@ -206,6 +208,24 @@ describe('HlsParser', () => {
     // Play for 8 seconds, but stop early if the video ends.  If it takes
     // longer than 30 seconds, fail the test.
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
+
+    await player.unload();
+  });
+
+  it('supports playback with gaps', async () => {
+    await player.load('/base/test/test/assets/hls-gap/playlist.m3u8');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    expect(player.getStats().manifestGapCount).toBe(2);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 15 seconds, but stop early if the video ends.  If it takes
+    // longer than 45 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
     await player.unload();
   });

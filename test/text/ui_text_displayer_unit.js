@@ -13,6 +13,8 @@ describe('UITextDisplayer', () => {
   let textDisplayer;
   /** @type {number} */
   const videoContainerHeight = 450;
+  /** @type {Object} **/
+  let player;
 
   /**
    * Transform a cssText to an object.
@@ -47,11 +49,16 @@ describe('UITextDisplayer', () => {
     videoContainer.style.height = `${videoContainerHeight}px`;
     document.body.appendChild(videoContainer);
     video = new shaka.test.FakeVideo();
+    player = {
+      getMediaElement: () => video,
+      getVideoContainer: () => videoContainer,
+    };
   });
 
   beforeEach(() => {
     video.currentTime = 0;
-    textDisplayer = new shaka.text.UITextDisplayer(video, videoContainer);
+    /** @suppress {checkTypes} */
+    textDisplayer = new shaka.text.UITextDisplayer(player);
   });
 
   afterEach(async () => {
@@ -624,10 +631,57 @@ describe('UITextDisplayer', () => {
     expect(videoContainer.childNodes.length).toBe(0);
   });
 
-  it('Backward compatible UITextDisplayer constructor', () => {
-    // The third argument to UITextDisplayer constructor is new in v4.8.0.
-    // Test without, to support existing applications.
-    /** @suppress {checkTypes} */
-    textDisplayer = new shaka.text.UITextDisplayer(video, videoContainer);
+  it('positions cue at top-left when positionArea=TOP_LEFT', () => {
+    /** @type {!shaka.text.Cue} */
+    const cue = new shaka.text.Cue(0, 100, 'Top-Left');
+
+    textDisplayer.setTextVisibility(true);
+    const player = new shaka.Player();
+    const config = player.getConfiguration().textDisplayer;
+    config.positionArea = shaka.config.PositionArea.TOP_LEFT;
+    textDisplayer.configure(config);
+
+    textDisplayer.append([cue]);
+    updateCaptions();
+
+    /** @type {Element} */
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+
+    // Top-level cue should be a DIV
+    const cueElement = textContainer.querySelector('div');
+
+    // The custom region (CustomRegion) should be created and wrap the cue
+    const regionElement = textContainer.querySelector('.shaka-text-region');
+
+    // --- Region validations (CustomRegion: 90% x 90% at top/left 5%) ---
+    const regionCss = parseCssText(regionElement.style.cssText);
+    expect(regionCss).toEqual(jasmine.objectContaining({
+      'position': 'absolute',
+      'height': '90%',
+      'width': '90%',
+      'top': '5%',
+      'left': '5%',
+      'display': 'flex',
+      'flex-direction': 'column',
+      'align-items': 'center',
+      // displayAlign BEFORE => justifyContent 'flex-start'
+      'justify-content': 'flex-start',
+    }));
+
+    // --- Cue validations (LEFT + BEFORE) ---
+    const cueCss = parseCssText(cueElement.style.cssText);
+    expect(cueCss).toEqual(jasmine.objectContaining({
+      'display': 'flex',
+      'flex-direction': 'column',
+      // textAlign LEFT => alignItems 'flex-start' and width 100%
+      'align-items': 'flex-start',
+      'width': '100%',
+      // displayAlign BEFORE => justifyContent 'flex-start'
+      'justify-content': 'flex-start',
+      'text-align': 'left',
+    }));
+
+    // Text content should be present
+    expect(cueElement.textContent).toBe('Top-Left');
   });
 });

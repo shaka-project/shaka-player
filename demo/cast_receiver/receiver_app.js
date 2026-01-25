@@ -34,6 +34,8 @@ class ShakaReceiverApp {
    * Initialize the application.
    */
   init() {
+    this.setUpVersionStrings_();
+
     const video = document.getElementById('video');
     goog.asserts.assert(
         video instanceof HTMLVideoElement, 'Wrong element type!');
@@ -133,6 +135,35 @@ class ShakaReceiverApp {
     if (this.idleTimerId_ != null) {
       window.clearTimeout(this.idleTimerId_);
       this.idleTimerId_ = null;
+    }
+  }
+
+  /**
+   * Sets the "version-string" divs to a version string.
+   * For example, "v2.5.4-main (uncompiled)".
+   * @private
+   */
+  setUpVersionStrings_() {
+    const version = shaka.Player.version;
+    let split = version.split('-');
+    const inParen = [];
+
+    // Separate out some special terms into parentheses after the rest of the
+    // version, to make them stand out visually.
+    for (const whitelisted of ['debug', 'uncompiled']) {
+      if (split.includes(whitelisted)) {
+        inParen.push(whitelisted);
+        split = split.filter((term) => term != whitelisted);
+      }
+    }
+
+    // Put the version into the version string div.
+    const versionStringDivs = document.getElementsByClassName('version-string');
+    for (const div of versionStringDivs) {
+      div.textContent = split.join('-');
+      if (inParen.length > 0) {
+        div.textContent += ' (' + inParen.join(', ') + ')';
+      }
     }
   }
 }  // class ShakaReceiverApp

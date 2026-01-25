@@ -8,7 +8,6 @@
 goog.provide('shaka.ui.MuteButton');
 
 goog.require('shaka.ads.Utils');
-goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -206,7 +205,4 @@ shaka.ui.OverflowMenu.registerElement(
     'mute', new shaka.ui.MuteButton.Factory());
 
 shaka.ui.Controls.registerElement(
-    'mute', new shaka.ui.MuteButton.Factory());
-
-shaka.ui.ContextMenu.registerElement(
     'mute', new shaka.ui.MuteButton.Factory());

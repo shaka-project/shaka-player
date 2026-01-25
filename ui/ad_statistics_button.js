@@ -9,7 +9,6 @@ goog.provide('shaka.ui.AdStatisticsButton');
 
 goog.require('shaka.log');
 goog.require('shaka.ads.Utils');
-goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -147,7 +146,7 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
         shaka.ui.Utils.setDisplay(this.button_, false);
       });
       this.eventManager.listen(this.controls, 'submenuclose', () => {
-        shaka.ui.Utils.setDisplay(this.button_, true);
+        shaka.ui.Utils.setDisplay(this.button_, this.currentStats_.started > 0);
       });
     }
   }
@@ -256,7 +255,4 @@ shaka.ui.AdStatisticsButton.Factory = class {
 
 
 shaka.ui.OverflowMenu.registerElement(
-    'ad_statistics', new shaka.ui.AdStatisticsButton.Factory());
-
-shaka.ui.ContextMenu.registerElement(
     'ad_statistics', new shaka.ui.AdStatisticsButton.Factory());

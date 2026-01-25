@@ -46,7 +46,9 @@
 +../../ui/skip_previous_button.js
 +../../ui/spacer.js
 +../../ui/statistics_button.js
++../../ui/text_position.js
 +../../ui/text_selection.js
++../../ui/text_size.js
 +../../ui/toggle_stereoscopic.js
 +../../ui/ui.js
 +../../ui/ui_utils.js

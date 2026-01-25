@@ -438,7 +438,6 @@ shakaDemo.Main = class {
     this.desiredConfig_ = this.player_.getConfiguration();
     const languages = navigator.languages || ['en-us'];
     this.configure('preferredAudioLanguage', languages[0]);
-    this.configure('preferredTextLanguage', languages[0]);
     this.uiLocale_ = languages[0];
     // TODO(#1591): Support multiple language preferences
 
@@ -1029,13 +1028,6 @@ shakaDemo.Main = class {
         }
       }
     }
-    if (params.has('lang')) {
-      // Load the legacy 'lang' hash value.
-      const lang = params.get('lang');
-      this.configure('preferredAudioLanguage', lang);
-      this.configure('preferredTextLanguage', lang);
-      this.setUILocale(lang);
-    }
     if (params.has('uilang')) {
       this.setUILocale(params.get('uilang'));
       // TODO(#1591): Support multiple language preferences
@@ -1059,9 +1051,15 @@ shakaDemo.Main = class {
           params.get('preferredTextFormats').split(','));
     }
 
-    if (params.has('streaming.speechToText.languagesToTranslate')) {
-      this.configure('streaming.speechToText.languagesToTranslate',
-          params.get('streaming.speechToText.languagesToTranslate').split(','));
+    if (params.has('accessibility.speechToText.languagesToTranslate')) {
+      this.configure('accessibility.speechToText.languagesToTranslate',
+          params.get('accessibility.speechToText.languagesToTranslate')
+              .split(','));
+    }
+
+    if (params.has('manifest.msf.namespaces')) {
+      this.configure('manifest.msf.namespaces',
+          params.get('manifest.msf.namespaces').split(','));
     }
 
     // Add compiled/uncompiled links.
@@ -1166,7 +1164,7 @@ shakaDemo.Main = class {
     const combined = fields.concat(fragments);
     const params = new Map();
     for (const line of combined) {
-      const kv = line.split('=');
+      const kv = decodeURIComponent(line).split('=');
       params.set(kv[0], kv.slice(1).join('='));
     }
     return params;
@@ -1587,7 +1585,8 @@ shakaDemo.Main = class {
       'preferredVideoCodecs',
       'preferredAudioCodecs',
       'preferredTextFormats',
-      'streaming.speechToText.languagesToTranslate',
+      'accessibility.speechToText.languagesToTranslate',
+      'manifest.msf.namespaces',
     ];
 
     for (const key of preferredArray) {
@@ -1807,7 +1806,7 @@ shakaDemo.Main = class {
     // Determine if the element is selected.
     const params = this.getParams_();
     let selected =
-        params.get('panel') == encodeURI(button.getAttribute('tab-identifier'));
+        params.get('panel') == button.getAttribute('tab-identifier');
     if (selected) {
       // Re-apply any saved data from hash.
       const hashValues = params.get('panelData');

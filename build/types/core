@@ -5,9 +5,9 @@
 +../../lib/abr/ewma_bandwidth_estimator.js
 +../../lib/abr/simple_abr_manager.js
 
-+../../lib/config/auto_show_text.js
 +../../lib/config/codec_switching_strategy.js
 +../../lib/config/cross_boundary_strategy.js
++../../lib/config/position_area.js
 +../../lib/config/repeat_mode.js
 
 +../../lib/debug/asserts.js
@@ -86,6 +86,7 @@
 +../../lib/util/config_utils.js
 +../../lib/util/content_steering_manager.js
 +../../lib/util/data_view_reader.js
++../../lib/util/data_view_writer.js
 +../../lib/util/delayed_tick.js
 +../../lib/util/destroyer.js
 +../../lib/util/dom_utils.js

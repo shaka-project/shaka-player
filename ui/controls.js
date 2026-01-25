@@ -132,6 +132,15 @@ goog.requireType('shaka.cast.CastReceiver');
 
 
 /**
+ * @event shaka.ui.Controls.ChaptersUpdatedEvent
+ * @description Fired when the chapters has finished updating.
+ * @property {string} type
+ *   'chaptersupdated'
+ * @exportDoc
+ */
+
+
+/**
  * A container for custom video controls.
  * @implements {shaka.util.IDestroyable}
  * @export
@@ -207,6 +216,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @private {!Array<!HTMLElement>} */
     this.menus_ = [];
+
+    /** @private {!Array<!HTMLElement>} */
+    this.contextMenus_ = [];
 
     /** @private {?shaka.extern.TextTrack} */
     this.lastSelectedTextTrack_ = null;
@@ -361,6 +373,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(this.player_, 'trackschanged', () => {
+      this.updateChapters_();
+    });
+
+    this.eventManager_.listen(this.player_, 'manifestupdated', () => {
       this.updateChapters_();
     });
 
@@ -864,6 +880,22 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @return {boolean}
+   * @export
+   */
+  anyContextMenusAreOpen() {
+    return this.contextMenus_.some(
+        (menu) => !menu.classList.contains('shaka-hidden'));
+  }
+
+  /** @export */
+  hideContextMenus() {
+    for (const menu of this.contextMenus_) {
+      shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
+    }
+  }
+
+  /**
+   * @return {boolean}
    * @private
    */
   shouldUseDocumentFullscreen_() {
@@ -1229,6 +1261,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.videoContainer_.getElementsByClassName('shaka-settings-menu'));
     this.menus_.push(...Array.from(
         this.videoContainer_.getElementsByClassName('shaka-overflow-menu')));
+
+    this.contextMenus_ = Array.from(
+        this.videoContainer_.getElementsByClassName('shaka-context-menu'));
 
     this.showOnHoverControls_ = Array.from(
         this.videoContainer_.getElementsByClassName(
@@ -1832,7 +1867,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     if (this.isOpaque()) {
-      this.lastTouchEventTime_ = Date.now();
       // The controls are showing.
       this.onContainerClick(/* fromTouchEvent= */ true);
       // Stop this event from becoming a click event.
@@ -1843,6 +1877,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // Stop this event from becoming a click event.
       event.cancelable && event.preventDefault();
     }
+    this.lastTouchEventTime_ = Date.now();
   }
 
   /**
@@ -1854,12 +1889,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
-    if (this.anySettingsMenusAreOpen()) {
+    if (this.anyContextMenusAreOpen()) {
+      this.hideContextMenus();
+    } else if (this.anySettingsMenusAreOpen()) {
       this.hideSettingsMenusTimer_.tickNow();
     } else if (this.config_.singleClickForPlayAndPause) {
       this.playPausePresentation();
     } else if (fromTouchEvent && this.isOpaque()) {
-      this.hideUI();
+      if (this.config_.doubleClickForFullscreen &&
+          this.isFullScreenSupported() && this.lastTouchEventTime_ &&
+          Date.now() - this.lastTouchEventTime_ < 1000) {
+        this.toggleFullScreen();
+      } else {
+        this.hideUI();
+      }
     }
   }
 
@@ -2596,6 +2639,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     this.chapters_ = chapters;
+    this.dispatchEvent(new shaka.util.FakeEvent('chaptersupdated'));
   }
 
   /**
@@ -2708,6 +2752,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
  *    updating.
  * @property {string} type
  *   'uiupdated'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#ChaptersUpdatedEvent
+ * @description Fired when the chapters have finished updating.
+ * @property {string} type
+ *   'chaptersupdated'
  * @exportDoc
  */
 

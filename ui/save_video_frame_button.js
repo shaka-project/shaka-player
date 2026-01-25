@@ -9,7 +9,6 @@ goog.provide('shaka.ui.SaveVideoFrameButton');
 
 goog.require('shaka.ads.Utils');
 goog.require('shaka.cast.CastProxy');
-goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -168,7 +167,4 @@ shaka.ui.SaveVideoFrameButton.Factory = class {
 
 
 shaka.ui.OverflowMenu.registerElement(
-    'save_video_frame', new shaka.ui.SaveVideoFrameButton.Factory());
-
-shaka.ui.ContextMenu.registerElement(
     'save_video_frame', new shaka.ui.SaveVideoFrameButton.Factory());

@@ -43,6 +43,45 @@ player.configure({
 });
 ```
 
+Note: Only supported on UITextDisplayer.
+
+##### Overriding Subtitle Position
+
+Shaka Player allows applications to override the default subtitle placement and render captions in predefined regions of the video viewport. This is useful when subtitles need to avoid UI overlays, follow accessibility guidelines, or provide a consistent layout across different content.
+
+By setting the `textDisplayer.positionArea` configuration option, applications can:
+
+- Explicitly control where subtitles are rendered on the screen
+- Override the automatic or cue-defined positioning
+- Update subtitle placement dynamically at runtime
+
+The following enum defines the supported subtitle placement areas:
+
+| Value | Screen Position |
+|------|-----------------|
+| `DEFAULT` | Default player behavior |
+| `TOP_LEFT` | Top left |
+| `TOP_CENTER` | Top center |
+| `TOP_RIGHT` | Top right |
+| `CENTER_LEFT` | Center left |
+| `CENTER` | Center of the screen |
+| `CENTER_RIGHT` | Center right |
+| `BOTTOM_LEFT` | Bottom left |
+| `BOTTOM_CENTER` | Bottom center |
+| `BOTTOM_RIGHT` | Bottom right |
+
+Example configuration:
+
+```js
+player.configure({
+  textDisplayer: {
+    positionArea: shaka.config.PositionArea.BOTTOM_CENTER,
+  },
+});
+```
+
+Note: Only supported on UITextDisplayer.
+
 ### Text displayer configuration
 
 Additional configuration for the text displayer can be passed by calling:
@@ -60,7 +99,7 @@ To do that you need to implement {@link shaka.extern.TextDisplayer} interface
 and pass your custom displayer to shaka by calling:
 ```js
 player.configure({
-   textDisplayFactory: () => new CustomTextDisplayer(),
+   textDisplayFactory: (player) => new CustomTextDisplayer(player),
 });
 ```
 

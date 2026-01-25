@@ -50,7 +50,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     this.qualityMark.classList.add('shaka-current-quality-mark');
     this.qualityMark.style.display = 'none';
 
-    if (!Array.from(parent.classList).includes('shaka-overflow-menu')) {
+    if (!this.isSubMenu) {
       this.overflowQualityMark = shaka.util.Dom.createHTMLElement('span');
       this.overflowQualityMark.classList.add(
           'shaka-overflow-playback-rate-mark');

@@ -33,7 +33,7 @@ describe('SpeechToText', () => {
 
     const defaultConfig = shaka.util.PlayerConfiguration.createDefault();
 
-    config = defaultConfig.streaming.speechToText;
+    config = defaultConfig.accessibility.speechToText;
   });
 
   afterEach(async () => {

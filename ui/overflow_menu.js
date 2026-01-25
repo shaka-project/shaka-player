@@ -10,6 +10,7 @@ goog.provide('shaka.ui.OverflowMenu');
 goog.require('goog.asserts');
 goog.require('shaka.ads.Utils');
 goog.require('shaka.log');
+goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -130,10 +131,14 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
   /**
    * @param {string} name
    * @param {!shaka.extern.IUIElement.Factory} factory
+   * @param {boolean=} registerInContext
    * @export
    */
-  static registerElement(name, factory) {
+  static registerElement(name, factory, registerInContext = true) {
     shaka.ui.OverflowMenu.elementNamesToFactories_.set(name, factory);
+    if (registerInContext) {
+      shaka.ui.ContextMenu.registerElement(name, factory);
+    }
   }
 
 
@@ -190,6 +195,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 
   /** @private */
   onOverflowMenuButtonClick_() {
+    this.controls.hideContextMenus();
     if (this.controls.anySettingsMenusAreOpen()) {
       this.controls.hideSettingsMenus();
     } else {
@@ -230,6 +236,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
    * @private
    */
   adjustCustomStyle_() {
+    // Compute max height
     const rectMenu = this.overflowMenu_.getBoundingClientRect();
     const styleMenu = window.getComputedStyle(this.overflowMenu_);
     const paddingTop = parseFloat(styleMenu.paddingTop);
@@ -239,6 +246,27 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
         rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom;
 
     this.overflowMenu_.style.maxHeight = heightIntersection + 'px';
+
+    // Compute horizontal position
+    const bottomControlsPos = this.controlsContainer_.getBoundingClientRect();
+    const overflowMenuButtonPos =
+        this.overflowMenuButton_.getBoundingClientRect();
+    const leftGap = overflowMenuButtonPos.left - bottomControlsPos.left;
+    const rightGap = bottomControlsPos.right - overflowMenuButtonPos.right;
+    const EDGE_PADDING = 15;
+    const MIN_GAP = 60;
+    // Overflow menu button is either placed to the left or center
+    if (leftGap < rightGap) {
+      const left = leftGap < MIN_GAP ?
+          EDGE_PADDING : Math.max(leftGap, EDGE_PADDING);
+      this.overflowMenu_.style.left = left + 'px';
+      this.overflowMenu_.style.right = 'auto';
+    } else {
+      const right = rightGap < MIN_GAP ?
+          EDGE_PADDING : Math.max(rightGap, EDGE_PADDING);
+      this.overflowMenu_.style.right = right + 'px';
+      this.overflowMenu_.style.left = 'auto';
+    }
   }
 };
 

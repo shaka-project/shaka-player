@@ -190,6 +190,9 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
 
   /** @private */
   onButtonClick_() {
+    if (!this.parent.classList.contains('shaka-context-menu')) {
+      this.controls.hideContextMenus();
+    }
     if (!this.isSubMenu && this.controls.anySettingsMenusAreOpen()) {
       this.controls.hideSettingsMenus();
     } else {
@@ -212,9 +215,10 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
    */
   adjustCustomStyle_() {
     if (this.isSubMenu) {
-      // Submenus take up the maximum size of the overflow element.
+      // Submenus take up the style of the overflow element.
       return;
     }
+    // Compute max height
     const rectMenu = this.menu.getBoundingClientRect();
     const styleMenu = window.getComputedStyle(this.menu);
     const paddingTop = parseFloat(styleMenu.paddingTop);
@@ -224,5 +228,27 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
         rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom;
 
     this.menu.style.maxHeight = heightIntersection + 'px';
+
+    // Compute horizontal position
+    const bottomControlsPos =
+        this.controls.getControlsContainer().getBoundingClientRect();
+    const settingsMenuButtonPos =
+        this.button.getBoundingClientRect();
+    const leftGap = settingsMenuButtonPos.left - bottomControlsPos.left;
+    const rightGap = bottomControlsPos.right - settingsMenuButtonPos.right;
+    const EDGE_PADDING = 15;
+    const MIN_GAP = 60;
+    // Settings menu button is either placed to the left or center
+    if (leftGap < rightGap) {
+      const left = leftGap < MIN_GAP ?
+          EDGE_PADDING : Math.max(leftGap, EDGE_PADDING);
+      this.menu.style.left = left + 'px';
+      this.menu.style.right = 'auto';
+    } else {
+      const right = rightGap < MIN_GAP ?
+          EDGE_PADDING : Math.max(rightGap, EDGE_PADDING);
+      this.menu.style.right = right + 'px';
+      this.menu.style.left = 'auto';
+    }
   }
 };

@@ -18,6 +18,7 @@
 /* The overflow menu and all settings submenus.  These appear on top of all
  * other controls (Z axis) when the overflow button is clicked. */
 .shaka-overflow-menu,
+.shaka-context-menu,
 .shaka-settings-menu {
   /* It's okay to add a vertical scroll if there are too many items, but
    * horizontal scrolling is not allowed. */
@@ -49,7 +50,6 @@
   /* Where the menu appears. */
   position: absolute;
   z-index: 2;
-  right: 15px;
   bottom: @material-icons-width + 14px;
 
   /* The buttons inside the menu. */

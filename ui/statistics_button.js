@@ -8,7 +8,6 @@
 goog.provide('shaka.ui.StatisticsButton');
 
 goog.require('shaka.log');
-goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -315,7 +314,4 @@ shaka.ui.StatisticsButton.Factory = class {
 
 
 shaka.ui.OverflowMenu.registerElement(
-    'statistics', new shaka.ui.StatisticsButton.Factory());
-
-shaka.ui.ContextMenu.registerElement(
     'statistics', new shaka.ui.StatisticsButton.Factory());

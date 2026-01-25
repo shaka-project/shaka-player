@@ -351,62 +351,7 @@
 }
 
 .shaka-context-menu {
-  /* It's okay to add a vertical scroll if there are too many items, but
-   * horizontal scrolling is not allowed. */
-  overflow-x: hidden;
-  overflow-y: auto;
-
-  /* Don't wrap text to the next line. */
-  white-space: nowrap;
-
-  /* Styles for the menu itself. */
-  background: rgba(28, 28, 28, 90%);
-  border-radius: 2px;
-  min-width: 190px;
-
-  /* The menus fade out with the other controls. */
-  .show-when-controls-shown();
-
-  /* When displayed as a flex container, elements inside will flow in a
-   * vertical column. */
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-
-  /* Where the menu appears. */
-  position: absolute;
-  z-index: 3;
-
   button {
-    font-size: @general-font-size;
-    background: transparent;
-    color: @general-font-color;
-    border: none;
-    min-height: 30px;
-    padding: 10px;
-
-    /* The button itself is a flex container, with children center-aligned. */
-    display: flex;
-    align-items: center;
-
-    /* When hovered, the button's background is highlighted. */
-    &:hover {
-      background: rgba(255, 255, 255, 10%);
-    }
-
-    /* The button is clickable, showing cursor pointer */
-    cursor: pointer;
-
-    /* The label inside button is also showing cursor pointer  */
-    label {
-      cursor: pointer;
-      margin-left: 5px;
-    }
-
-    .shaka-keyboard-navigation &:focus {
-      background: rgba(255, 255, 255, 10%);
-    }
-
     .shaka-current-selection-span {
       display: none;
     }

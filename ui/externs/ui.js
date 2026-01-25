@@ -274,6 +274,8 @@ shaka.extern.UIMediaSession;
  *   showUIAlwaysOnAudioOnly: boolean,
  *   preferIntlDisplayNames: boolean,
  *   mediaSession: shaka.extern.UIMediaSession,
+ *   captionsStyles: boolean,
+ *   captionsFontScaleFactors: !Array<number>,
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -390,7 +392,7 @@ shaka.extern.UIMediaSession;
  *   Whether or not double-clicking on the UI should cause it to enter
  *   fullscreen.
  *   <br>
- *   Defaults to <code>true</code> except on mobile, cast and smart TV whose
+ *   Defaults to <code>true</code> except on cast and smart TV whose
  *   default value is <code>false</code>.
  * @property {boolean} singleClickForPlayAndPause
  *   Whether or not clicking on the video should cause it to play or pause.
@@ -539,6 +541,14 @@ shaka.extern.UIMediaSession;
  *   Defaults to <code>true</code>.
  * @property {shaka.extern.UIMediaSession} mediaSession
  *   Media Session config.
+ * @property {boolean} captionsStyles
+ *   If true, displays buttons to change caption styles.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {!Array<number>} captionsFontScaleFactors
+ *   The ordered list of font scale factor selection.
+ *   <br>
+ *   Defaults to <code>[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

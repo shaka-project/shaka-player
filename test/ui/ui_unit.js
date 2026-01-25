@@ -844,8 +844,6 @@ describe('UI', () => {
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
         UiUtils.simulateEvent(controlsContainer, 'contextmenu');
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
-        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
-        expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
       });
 
       it('hides on click event', () => {
@@ -853,7 +851,7 @@ describe('UI', () => {
         UiUtils.simulateEvent(controlsContainer, 'click');
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
         UiUtils.simulateEvent(controlsContainer, 'contextmenu');
-        UiUtils.simulateEvent(window, 'click');
+        UiUtils.simulateEvent(controlsContainer, 'click');
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
       });
 
