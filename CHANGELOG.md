@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.16.15](https://github.com/shaka-project/shaka-player/compare/v4.16.14...v4.16.15) (2026-01-26)
+
+
+### Bug Fixes
+
+* add guards to prevent errors removing already detached media sources ([#9599](https://github.com/shaka-project/shaka-player/issues/9599)) ([6dcc4c8](https://github.com/shaka-project/shaka-player/commit/6dcc4c8c7726a97385929a047b0f7ef28da44d30))
+* **ContentWorkarounds:** Insert PSSH boxes for fake init encryption ([#9600](https://github.com/shaka-project/shaka-player/issues/9600)) ([9f827ef](https://github.com/shaka-project/shaka-player/commit/9f827efa71e82dde6d22a9c58167d06faa83a006))
+* Disable smooth codec switching for Hisense VIDAA ([#9601](https://github.com/shaka-project/shaka-player/issues/9601)) ([4f2b95a](https://github.com/shaka-project/shaka-player/commit/4f2b95a63f8b861d360b81c1e393310f58eec3c6))
+* Fix getAudioTracks() return twice the same track ([#9588](https://github.com/shaka-project/shaka-player/issues/9588)) ([87455f9](https://github.com/shaka-project/shaka-player/commit/87455f9d35d45a2cdb705f902c878da89d3b7c04))
+* Fix HDLR box parsing ([#9582](https://github.com/shaka-project/shaka-player/issues/9582)) ([5bddde6](https://github.com/shaka-project/shaka-player/commit/5bddde682d141ecb0a832b481f1a490a16b261e0))
+* **HLS:** Fix support DATERANGE from 1970-01-01T00:00:00.000Z ([#9580](https://github.com/shaka-project/shaka-player/issues/9580)) ([53f6a07](https://github.com/shaka-project/shaka-player/commit/53f6a07fb589eb5f41b30d55db02afa7e1a56a2c))
+* parseHDLR for Apple QuickTime hdlr box compatibility ([#9577](https://github.com/shaka-project/shaka-player/issues/9577)) ([4ca3a77](https://github.com/shaka-project/shaka-player/commit/4ca3a775eda66b9edd2b74a6abe1e0e5283a226c))
+* **WebOS:** Script-errors on WebOS when detecting HDR support ([#9604](https://github.com/shaka-project/shaka-player/issues/9604)) ([490c1e2](https://github.com/shaka-project/shaka-player/commit/490c1e2414629bb04c4069f632fc6f2b5ab0180c))
+
+
+### Performance Improvements
+
+* **boundary:** Call MSE reset only on leading content type. ([#9598](https://github.com/shaka-project/shaka-player/issues/9598)) ([77f0111](https://github.com/shaka-project/shaka-player/commit/77f0111b5e42d321b0958df05712e5f8137312aa))
+
 ## [4.16.14](https://github.com/shaka-project/shaka-player/compare/v4.16.13...v4.16.14) (2026-01-19)
 
 
