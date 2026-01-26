@@ -1277,7 +1277,8 @@ shaka.extern.PersistentSessionMetadata;
  *   minHdcpVersion: string,
  *   ignoreDuplicateInitData: boolean,
  *   defaultAudioRobustnessForWidevine: string,
- *   defaultVideoRobustnessForWidevine: string
+ *   defaultVideoRobustnessForWidevine: string,
+ *   renewalIntervalSec: number,
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1373,6 +1374,14 @@ shaka.extern.PersistentSessionMetadata;
  *   <br>
  *   Defaults to <code>'SW_SECURE_DECODE'</code> except on Android where the
  *   default value <code>''</code>.
+ * @property {number} renewalIntervalSec
+ *   The interval in seconds at which the player will attempt to renew
+ *   licenses automatically. Set to 0 to disable automatic renewal.
+ *   <br>
+ *   Note: Only supported for PlayReady and FairPlay. Other key systems
+ *   (e.g., Widevine) are not supported.
+ *   <br>
+ *   Defaults to <code>0</code>.
  * @exportDoc
  */
 shaka.extern.DrmConfiguration;

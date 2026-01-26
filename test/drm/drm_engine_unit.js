@@ -2686,6 +2686,139 @@ describe('DrmEngine', () => {
     }
   });
 
+  describe('license renewal', () => {
+    beforeEach(async () => {
+      session1.sessionId = 'abc';
+      session1.expiration = NaN;
+      session1.update.and.returnValue(Promise.resolve());
+
+      session2.sessionId = 'def';
+      session2.update.and.returnValue(Promise.resolve());
+
+      setDecodingInfoSpy(['drm.abc']);
+      await initAndAttach();
+      await sendEncryptedEvent();
+
+      const message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+      await Util.shortDelay();
+    });
+
+    it('triggers manual renewal and dispatches event', async () => {
+      /** @suppress {accessControls} */
+      const drmInfo = drmEngine.getDrmInfo();
+      drmInfo.keySystem = 'com.apple.fps';
+      drmEngine.renewLicense(session1.sessionId);
+
+      await shaka.test.Util.shortDelay();
+
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            'type': 'licenserenewal',
+            'oldSessionMetadata': jasmine.objectContaining({
+              sessionId: session1.sessionId,
+            }),
+            'newSessionMetadata': jasmine.objectContaining({
+              sessionId: session1.sessionId,
+            }),
+          }));
+    });
+
+    it('sends "renew" message for FairPlay', () => {
+      /** @suppress {accessControls} */
+      const drmInfo = drmEngine.getDrmInfo();
+      drmInfo.keySystem = 'com.apple.fps';
+      session1.update.calls.reset();
+
+      drmEngine.renewLicense();
+
+      expect(session1.update).toHaveBeenCalled();
+      const args = session1.update.calls.mostRecent().args[0];
+      const message = shaka.util.StringUtils.fromUTF8(args);
+      expect(message).toBe('renew');
+    });
+
+    it('re-requests license for PlayReady', async () => {
+      /** @suppress {accessControls} */
+      const drmInfo = drmEngine.getDrmInfo();
+      drmInfo.keySystem = 'com.microsoft.playready';
+
+      // Set initData for renewal request
+      /** @suppress {accessControls} */
+      const metadata = drmEngine.activeSessions_.get(session1);
+      metadata.initData = new Uint8Array([1, 2, 3]);
+      metadata.initDataType = 'cenc';
+
+      onEventSpy.calls.reset();
+      fakeNetEngine.request.calls.reset();
+
+      drmEngine.renewLicense();
+
+      await Util.shortDelay();
+
+      const message = new Uint8Array(0);
+      session2.on['message']({target: session2, message: message});
+
+      // Should make a network request for license renewal
+      await Util.shortDelay();
+      expect(fakeNetEngine.request).toHaveBeenCalled();
+
+      const requestCall = fakeNetEngine.request.calls.mostRecent();
+      const request = requestCall.args[1];
+      expect(request.licenseRequestType).toBe('license-renewal');
+
+      // Should dispatch the licenserenewal event
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            'type': 'licenserenewal',
+            'oldSessionMetadata': jasmine.objectContaining({
+              sessionId: session1.sessionId,
+            }),
+            'newSessionMetadata': jasmine.any(Object), // New session object
+          }));
+    });
+
+    it('does not dispatch event for Widevine', () => {
+      /** @suppress {accessControls} */
+      const drmInfo = drmEngine.getDrmInfo();
+      drmInfo.keySystem = 'com.widevine.alpha';
+      session1.update.calls.reset();
+      onEventSpy.calls.reset();
+
+      drmEngine.renewLicense();
+
+      expect(session1.update).not.toHaveBeenCalled();
+      expect(onEventSpy).not.toHaveBeenCalled();
+    });
+
+    it('triggers auto renewal when interval passes', async () => {
+      // Must use a supported key system for auto-renewal to trigger
+      /** @suppress {accessControls} */
+      const drmInfo = drmEngine.getDrmInfo();
+      drmInfo.keySystem = 'com.apple.fps';
+
+      config.renewalIntervalSec = 10;
+      drmEngine.configure(config);
+
+      const now = Date.now();
+      const spy = spyOn(Date, 'now').and.returnValue(now + 15000);
+      onEventSpy.calls.reset();
+
+      /** @suppress {accessControls} */
+      function forcePoll() {
+        drmEngine.pollExpiration_();
+      }
+      forcePoll();
+
+      await Util.shortDelay();
+
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({'type': 'licenserenewal'}));
+
+      spy.and.callThrough();
+    });
+  });
+
   describe('parseInbandPssh', () => {
     const WIDEVINE_PSSH =
         '00000028' +                          // atom size
