@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.15.27](https://github.com/shaka-project/shaka-player/compare/v4.15.26...v4.15.27) (2026-01-26)
+
+
+### Bug Fixes
+
+* add guards to prevent errors removing already detached media sources ([#9599](https://github.com/shaka-project/shaka-player/issues/9599)) ([2134c96](https://github.com/shaka-project/shaka-player/commit/2134c9645206fc67531e9ba038306479c0c29548))
+* **ContentWorkarounds:** Insert PSSH boxes for fake init encryption ([#9600](https://github.com/shaka-project/shaka-player/issues/9600)) ([4051a01](https://github.com/shaka-project/shaka-player/commit/4051a01dd7e67a42367df8276673616e76c5536e))
+* Disable smooth codec switching for Hisense VIDAA ([#9601](https://github.com/shaka-project/shaka-player/issues/9601)) ([d770091](https://github.com/shaka-project/shaka-player/commit/d7700917a911196132cfdd631120391d38955e5e))
+* Fix getAudioTracks() return twice the same track ([#9588](https://github.com/shaka-project/shaka-player/issues/9588)) ([16e5f98](https://github.com/shaka-project/shaka-player/commit/16e5f988113032aa2371d2248578ec7de82efbd5))
+* Fix HDLR box parsing ([#9582](https://github.com/shaka-project/shaka-player/issues/9582)) ([dda59d7](https://github.com/shaka-project/shaka-player/commit/dda59d7ab654fb747bd015d1aacc6854c5f340c2))
+* **HLS:** Fix support DATERANGE from 1970-01-01T00:00:00.000Z ([#9580](https://github.com/shaka-project/shaka-player/issues/9580)) ([77e8634](https://github.com/shaka-project/shaka-player/commit/77e8634047ce8b355a332646be47b3e27b7f693b))
+* parseHDLR for Apple QuickTime hdlr box compatibility ([#9577](https://github.com/shaka-project/shaka-player/issues/9577)) ([a66cf7c](https://github.com/shaka-project/shaka-player/commit/a66cf7c1e6abd6ec242e6bfb7a0281bfa94dd9d2))
+
 ## [4.15.26](https://github.com/shaka-project/shaka-player/compare/v4.15.25...v4.15.26) (2026-01-19)
 
 
