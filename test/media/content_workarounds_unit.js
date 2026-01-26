@@ -8,7 +8,13 @@ describe('ContentWorkarounds', () => {
   const Util = shaka.test.Util;
 
   describe('fakeEncryption', () => {
-    const fakeStream = shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+    /** @type {!shaka.extern.Stream} */
+    let fakeStream;
+
+    beforeEach(() => {
+      fakeStream = shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+      fakeStream.encrypted = true;
+    });
 
     const encryptionBoxes = {
       'encv': [
@@ -90,6 +96,70 @@ describe('ContentWorkarounds', () => {
       expect(stsdSpy).toHaveBeenCalledTimes(2);
       // but only one encrypted
       expect(encvSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('inserts PSSH boxes', () => {
+      const initData = {
+        initDataType: 'cenc',
+        initData: new Uint8Array([
+          0x00, 0x00, 0x00, 0x10, // size
+          0x70, 0x73, 0x73, 0x68, // pssh
+          0x00, 0x00, 0x00, 0x00, // version & flags
+          0x00, 0x00, 0x00, 0x00, // system id
+        ]),
+      };
+      fakeStream.drmInfos.push(shaka.util.ManifestParserUtils.createDrmInfo(
+          'com.widevine.alpha', 'cenc', [initData]));
+      const initSegment = new Uint8Array([
+        0x00, 0x00, 0x00, 0x28, // size
+        0x6d, 0x6f, 0x6f, 0x76, // moov
+        0x00, 0x00, 0x00, 0x20, // size
+        0x73, 0x74, 0x73, 0x64, // stsd
+        0x01,                   // version
+        0x12, 0x34, 0x56,       // flags
+        0x00, 0x00, 0x00, 0x01, // count
+        0x00, 0x00, 0x00, 0x10, // size
+        0x61, 0x76, 0x63, 0x31, // avc1
+        0x01,                   // version
+        0x12, 0x34, 0x56,       // flags
+        0x00, 0x11, 0x22, 0x33, // payload
+      ]);
+
+      const faked = shaka.media.ContentWorkarounds.fakeEncryption(
+          fakeStream, initSegment, null);
+      const psshSpy = jasmine.createSpy('psshCallback');
+      new shaka.util.Mp4Parser()
+          .box('moov', shaka.util.Mp4Parser.children)
+          .fullBox('pssh', Util.spyFunc(psshSpy))
+          .parse(faked);
+      expect(psshSpy).toHaveBeenCalled();
+    });
+
+    it('does not insert PSSH box when it is not available', () => {
+      fakeStream.drmInfos = [];
+      const initSegment = new Uint8Array([
+        0x00, 0x00, 0x00, 0x28, // size
+        0x6d, 0x6f, 0x6f, 0x76, // moov
+        0x00, 0x00, 0x00, 0x20, // size
+        0x73, 0x74, 0x73, 0x64, // stsd
+        0x01,                   // version
+        0x12, 0x34, 0x56,       // flags
+        0x00, 0x00, 0x00, 0x01, // count
+        0x00, 0x00, 0x00, 0x10, // size
+        0x61, 0x76, 0x63, 0x31, // avc1
+        0x01,                   // version
+        0x12, 0x34, 0x56,       // flags
+        0x00, 0x11, 0x22, 0x33, // payload
+      ]);
+
+      const faked = shaka.media.ContentWorkarounds.fakeEncryption(
+          fakeStream, initSegment, null);
+      const psshSpy = jasmine.createSpy('psshCallback');
+      new shaka.util.Mp4Parser()
+          .box('moov', shaka.util.Mp4Parser.children)
+          .fullBox('pssh', Util.spyFunc(psshSpy))
+          .parse(faked);
+      expect(psshSpy).not.toHaveBeenCalled();
     });
   });
 
