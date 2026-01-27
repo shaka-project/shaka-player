@@ -42,6 +42,8 @@ Examples:
 """
 
 import argparse
+import hashlib
+import json
 import logging
 import os
 import re
@@ -384,8 +386,9 @@ def main(args):
 
   # Make the dist/ folder, ignore errors.
   base = shakaBuildHelpers.get_source_base()
+  dist_path = os.path.join(base, 'dist')
   try:
-    os.mkdir(os.path.join(base, 'dist'))
+    os.mkdir(dist_path)
   except OSError:
     pass
 
@@ -405,16 +408,56 @@ def main(args):
   if not custom_build.parse_build(commands, os.getcwd()):
     return 1
 
+  hash_file_path = os.path.join(dist_path, 'build_state.json')
+
+  def compute_build_hash(include, exclude, commands, mode, locales, skip_ts):
+    state = {
+      'include': sorted(include),
+      'exclude': sorted(exclude),
+      'commands': commands,
+      'mode': mode,
+      'locales': locales,
+      'skip_ts': skip_ts,
+    }
+    state_json = json.dumps(state, sort_keys=True)
+    return hashlib.sha256(state_json.encode('utf-8')).hexdigest()
+
+  current_hash = compute_build_hash(
+    custom_build.include,
+    custom_build.exclude,
+    commands,
+    parsed_args.mode,
+    parsed_args.locales,
+    parsed_args.skip_ts
+  )
+
+  build_key = f"{parsed_args.name}_{parsed_args.mode}"
+
+  force = parsed_args.force
+
+  if os.path.isfile(hash_file_path):
+    with open(hash_file_path, 'r') as f:
+      previous_state = json.load(f)
+    previous_hash = previous_state.get(build_key)
+    if previous_hash != current_hash:
+      logging.info('Build parameters changed for "%s"; forcing rebuild.', parsed_args.name)
+      force = True
+  else:
+    previous_state = {}
+
   name = parsed_args.name
   langout = parsed_args.langout
   locales = parsed_args.locales
-  force = parsed_args.force
   is_debug = parsed_args.mode == 'debug'
   skip_ts = parsed_args.skip_ts
 
   if not custom_build.build_library(name, langout, locales, force, is_debug,
       skip_ts):
     return 1
+
+  previous_state[build_key] = current_hash
+  with open(hash_file_path, 'w') as f:
+    json.dump(previous_state, f, indent=2, sort_keys=True)
 
   return 0
 
