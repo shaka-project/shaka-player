@@ -203,7 +203,7 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 
 Features supported:
  - Media over QUIC Transport [draft-14](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/14/)
- - MOQT Streaming Format [draft-01](https://datatracker.ietf.org/doc/draft-ietf-moq-warp/01/)
+ - MOQT Streaming Format [draft-0](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/00/) and CMSF [draft-0](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/00/)
  - Audio, Video and Text
  - ABR (only navigator.connection change event)
  - Encrypted content with PSSH in the initData
