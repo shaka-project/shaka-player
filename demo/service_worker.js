@@ -54,7 +54,7 @@ const CRITICAL_RESOURCES = [
   'shaka_logo_trans.png',
 
   'load.js',
-  '../dist/shaka-player.ui.js',
+  '../dist/shaka-player.experimental.js',
   '../dist/demo.compiled.js',
   '../dist/controls.css',
   '../dist/demo.css',
