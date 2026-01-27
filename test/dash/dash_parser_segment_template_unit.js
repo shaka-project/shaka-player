@@ -1108,6 +1108,7 @@ function makeTemplateInfo(timeline) {
     'segmentDuration': null,
     'timescale': 90000,
     'startNumber': 1,
+    'endNumber': null,
     'scaledPresentationTimeOffset': 0,
     'unscaledPresentationTimeOffset': 0,
     'timeline': timeline,
