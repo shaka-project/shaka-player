@@ -154,7 +154,11 @@ shakaDemo.Config = class {
             widevineRobustnessLevels, widevineRobustnessLevels)
         .addSelectInput_('Default video robustness for Widevine',
             'drm.defaultVideoRobustnessForWidevine',
-            widevineRobustnessLevels, widevineRobustnessLevels);
+            widevineRobustnessLevels, widevineRobustnessLevels)
+        .addNumberInput_('Renewal Interval (sec)',
+            'drm.renewalIntervalSec',
+            /* canBeDecimal= */ false,
+            /* canBeZero= */ true);
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const addDRMAdvancedField = (name, valueName, suggestions,
         arrayString = false) => {

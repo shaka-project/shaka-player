@@ -275,6 +275,7 @@ describe('StreamingEngine', () => {
       beforeAppendSegment: () => Promise.resolve(),
       disableStream: (stream, time) => false,
       shouldPrefetchNextSegment: () => true,
+      getKeySystem: () => '',
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
