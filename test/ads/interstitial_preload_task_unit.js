@@ -28,7 +28,7 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
 
   afterEach(() => {
     if (task) {
-      task.destroy();
+      task.release();
     }
   });
 
@@ -74,7 +74,7 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
     expect(task.getPreloadManager()).toBeNull();
   });
 
-  it('destroys preloadManager on destroy()', async () => {
+  it('destroys preloadManager on release()', async () => {
     const preloadManager = createFakePreloadManager();
     const player = createFakePlayer(Promise.resolve(preloadManager));
 
@@ -82,13 +82,13 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
 
     await shaka.test.Util.shortDelay();
 
-    task.destroy();
+    task.release();
 
     expect(preloadManager.destroy).toHaveBeenCalled();
     expect(task.getPreloadManager()).toBeNull();
   });
 
-  it('destroys preloadManager if preload finishes after destroy', async () => {
+  it('destroys preloadManager if preload finishes after release', async () => {
     let resolvePreload;
     const preloadPromise = new Promise((resolve) => {
       resolvePreload = resolve;
@@ -99,7 +99,7 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
 
     task = new shaka.ads.InterstitialPreloadTask(player, fakeUri, fakeMimeType);
 
-    task.destroy();
+    task.release();
 
     resolvePreload(preloadManager);
 
@@ -109,7 +109,7 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
     expect(task.getPreloadManager()).toBeNull();
   });
 
-  it('destroy() is idempotent', async () => {
+  it('release() is idempotent', async () => {
     const preloadManager = createFakePreloadManager();
     const player = createFakePlayer(Promise.resolve(preloadManager));
 
@@ -118,8 +118,8 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
 
     await shaka.test.Util.shortDelay();
 
-    task.destroy();
-    task.destroy();
+    task.release();
+    task.release();
 
     expect(preloadManager.destroy).toHaveBeenCalledTimes(1);
   });
@@ -134,7 +134,5 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
 
     expect(player.preload).toHaveBeenCalledWith(
         fakeUri, null, undefined);
-
-    task.destroy();
   });
 });
