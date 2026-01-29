@@ -415,6 +415,7 @@ describe('SegmentUtils', () => {
       ],
     };
     expect(basicInfo).toEqual(expected);
+    expect(basicInfo.frameRate).toBeCloseTo(29.97, 2);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
         ttml, null, true);
@@ -559,6 +560,7 @@ describe('SegmentUtils', () => {
       drmInfos: [],
     };
     expect(basicInfo).toEqual(expected);
+    expect(basicInfo.frameRate).toBeCloseTo(7.49, 2);
   });
 
   it('getDefaultKID', () => {
