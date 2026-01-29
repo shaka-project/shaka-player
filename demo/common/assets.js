@@ -2156,7 +2156,7 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'Multiple Dolby audio formats',
       /* iconUri= */ '',
-      /* manifestUri= */ 'https://webapi.streaming.dolby.com/v0_9/sources/media/v01/dash/lesson_8.mpd',
+      /* manifestUri= */ 'https://ott.dolby.com/webapi/testasset_dashjs/multiAudio.mpd',
       /* source= */ shakaAssets.Source.DOLBY)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
