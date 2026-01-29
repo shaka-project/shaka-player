@@ -217,6 +217,37 @@ shaka.extern.UIShortcuts;
 shaka.extern.UIMediaSession;
 
 /**
+ * @typedef {{
+ *   enabled: boolean,
+ *   preferInitialWindowPlacement: boolean,
+ *   disallowReturnToOpener: boolean
+ * }}
+ *
+ * @property {boolean} enabled
+ *   If true, the Document Picture-in-Picture API is preferred.
+ *   <br>
+ *   Changing this property mid-playback may produce undesired behavior if
+ *   you are already in PiP.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} preferInitialWindowPlacement
+ *   If true, the PiP window will always appear at the position and size it
+ *   initially opened at when closed and reopened.
+ *   <br>
+ *   If false, the PiP window's size and position will be remembered when closed
+ *   and reopened (for example, as set by the user).
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disallowReturnToOpener
+ *   When true, hints the browser not to display a UI control that allows the
+ *   user to return to the originating tab when the PiP window is closed.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @exportDoc
+ */
+shaka.extern.UIDocumentPictureInPicture;
+
+/**
  * @description
  * The UI's configuration options.
  *
@@ -253,7 +284,6 @@ shaka.extern.UIMediaSession;
  *   keyboardSeekDistance: number,
  *   keyboardLargeSeekDistance: number,
  *   fullScreenElement: HTMLElement,
- *   preferDocumentPictureInPicture: boolean,
  *   showAudioChannelCountVariants: boolean,
  *   seekOnTaps: boolean,
  *   tapSeekDistance: number,
@@ -276,6 +306,7 @@ shaka.extern.UIMediaSession;
  *   mediaSession: shaka.extern.UIMediaSession,
  *   captionsStyles: boolean,
  *   captionsFontScaleFactors: !Array<number>,
+ *   documentPictureInPicture: shaka.extern.UIDocumentPictureInPicture,
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -439,13 +470,6 @@ shaka.extern.UIMediaSession;
  *   DOM element on which fullscreen will be done.
  *   <br>
  *   Defaults to <code>Shaka Player Container</code>.
- * @property {boolean} preferDocumentPictureInPicture
- *   Indicates whether the Document Picture in Picture API is preferred or the
- *   Video Element Picture in Picture API is preferred.
- *   Changing this property in mid-playback may produce undesired behavior if
- *   you are already in PiP.
- *   <br>
- *   Defaults to <code>true</code>.
  * @property {boolean} showAudioChannelCountVariants
  *   Indicates whether the combination of language and channel count should be
  *   displayed or if, on the contrary, only the language should be displayed
@@ -549,6 +573,12 @@ shaka.extern.UIMediaSession;
  *   The ordered list of font scale factor selection.
  *   <br>
  *   Defaults to <code>[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]</code>.
+ * @property {shaka.extern.UIDocumentPictureInPicture} documentPictureInPicture
+ *   Document Picture-in-Picture configuration.
+ *   <br>
+ *   Enables using the Document Picture-in-Picture API, with options to control
+ *   initial window placement and whether the PiP window can return focus to
+ *   the originating tab.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

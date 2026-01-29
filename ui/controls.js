@@ -921,7 +921,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   shouldUseDocumentPictureInPicture_() {
     return 'documentPictureInPicture' in window &&
-        this.config_.preferDocumentPictureInPicture;
+        this.config_.documentPictureInPicture.enabled;
   }
 
   /**
@@ -1095,6 +1095,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     const pipWindow = await window.documentPictureInPicture.requestWindow({
       width: rectPipPlayer.width,
       height: rectPipPlayer.height,
+      disallowReturnToOpener:
+          this.config_.documentPictureInPicture.disallowReturnToOpener,
+      preferInitialWindowPlacement:
+          this.config_.documentPictureInPicture.preferInitialWindowPlacement,
     });
 
     // Copy style sheets to the Picture-in-Picture window.
