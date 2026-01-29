@@ -500,6 +500,7 @@ cmsds
 cdnb
 
 # other
+Aegisub
 autoglottonym
 avinfo
 awesomplete
