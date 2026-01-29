@@ -7,8 +7,6 @@
 
 goog.provide('shaka.ui.BigPlayButton');
 
-goog.require('shaka.ui.Enums');
-goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.PlayButton');
 goog.requireType('shaka.ui.Controls');
 
@@ -28,18 +26,5 @@ shaka.ui.BigPlayButton = class extends shaka.ui.PlayButton {
 
     this.button.classList.add('shaka-play-button');
     this.button.classList.add('shaka-no-propagation');
-  }
-
-
-  /** @override */
-  updateIcon() {
-    const Icons = shaka.ui.Enums.MaterialDesignSVGIcons;
-    const icon = new shaka.ui.Icon(/* parent= */ null);
-    if (this.isEnded() && this.video.duration) {
-      icon.use(Icons['REPLAY']);
-    } else {
-      icon.use(this.isPaused() ? Icons['PLAY'] : Icons['PAUSE']);
-    }
-    this.button.style.backgroundImage = icon.getDataUrl();
   }
 };

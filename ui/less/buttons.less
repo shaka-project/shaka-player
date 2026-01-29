@@ -18,48 +18,41 @@
 
 /* The giant play button, which sits inside .shaka-player-button-container. */
 .shaka-play-button {
-  /* Set width & height in a round-about way.  By using padding, we can keep
-   * a 1:1 aspect ratio and size the button relative to the container width.
-   *
-   * Since padding is applied equally to top, bottom, left, and right, only use
-   * half of the intended percentage for each.
-   *
-   * Based on tips from https://stackoverflow.com/a/12925343 */
-  box-sizing: border-box;
-  padding: calc(@play-button-size-percentage / 2);
-  width: 0;
-  height: 0;
-
-  /* To be properly positioned in the center, this should have no margin.
-   * This might have been set for buttons generally by the app or user-agent. */
-  margin: 0;
-
-  /* This makes the button a circle. */
+  width: @play-button-size-percentage;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
-
-  /* A small drop shadow below the button. */
-  box-shadow: rgba(0, 0, 0, 10%) 0 0 20px 0;
-
-  /* No border. */
   border: none;
+  margin: 0;
+  padding: 0;
 
-  /* The play arrow is a picture. It is treated a background image.
-   * The following settings ensure it shows only once and in the
-   * center of the button. */
-  background-size: 50%;
-  background-repeat: no-repeat;
-  background-position: center center;
+  .center-children();
 
-  /* A background color behind the play arrow. */
-  background-color: rgba(255, 255, 255, 90%);
+  color: @general-font-color;
+  background-color: @general-background-color;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 35%);
+  cursor: pointer;
+
+  transition: transform 0.18s ease-out, background-color 0.18s ease-out;
+
+  .shaka-ui-icon {
+    width: 75%;
+    height: 75%;
+  }
+
+  &:hover {
+    transform: scale(1.06);
+    background-color: @general-background-color-hover;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 
   .show-when-controls-shown();
-
-  @media (prefers-reduced-transparency: no-preference) {
-    .shaka-controls-container[shown="true"] & {
-      opacity: 0.75;
-    }
-  }
 }
 
 /* This button contains the current time and duration of the video.
