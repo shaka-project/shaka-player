@@ -329,7 +329,7 @@ describe('SegmentUtils', () => {
       closedCaptions: (new Map()).set('CC1', 'CC1').set('CC3', 'CC3'),
       videoRange: null,
       colorGamut: null,
-      frameRate: '30',
+      frameRate: 30,
       timescale: 90000,
       drmInfos: [],
     };
@@ -349,7 +349,7 @@ describe('SegmentUtils', () => {
       closedCaptions: new Map(),
       videoRange: null,
       colorGamut: null,
-      frameRate: '30',
+      frameRate: 30,
       timescale: 90000,
       drmInfos: [],
     };
@@ -369,7 +369,7 @@ describe('SegmentUtils', () => {
       closedCaptions: (new Map()).set('CC1', 'CC1').set('svc1', 'svc1'),
       videoRange: null,
       colorGamut: null,
-      frameRate: '29.97002997002997',
+      frameRate: 29.97002997002997,
       timescale: 60000,
       drmInfos: [
         {
@@ -514,7 +514,7 @@ describe('SegmentUtils', () => {
       closedCaptions: new Map(),
       videoRange: null,
       colorGamut: null,
-      frameRate: '24',
+      frameRate: 24,
       timescale: null,
       drmInfos: [],
     };
@@ -554,7 +554,7 @@ describe('SegmentUtils', () => {
       closedCaptions: (new Map()).set('CC1', 'CC1').set('svc1', 'svc1'),
       videoRange: null,
       colorGamut: null,
-      frameRate: jasmine.any(String),
+      frameRate: jasmine.any(Number),
       timescale: null,
       drmInfos: [],
     };
