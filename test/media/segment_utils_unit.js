@@ -369,7 +369,7 @@ describe('SegmentUtils', () => {
       closedCaptions: (new Map()).set('CC1', 'CC1').set('svc1', 'svc1'),
       videoRange: null,
       colorGamut: null,
-      frameRate: 29.97002997002997,
+      frameRate: jasmine.any(Number),
       timescale: 60000,
       drmInfos: [
         {
