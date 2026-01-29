@@ -404,7 +404,6 @@ shaka.ui.Overlay = class {
       keyboardSeekDistance: 5,
       keyboardLargeSeekDistance: 60,
       fullScreenElement: this.videoContainer_,
-      preferDocumentPictureInPicture: true,
       showAudioChannelCountVariants: true,
       seekOnTaps: false,
       tapSeekDistance: 10,
@@ -450,6 +449,11 @@ shaka.ui.Overlay = class {
       },
       captionsStyles: true,
       captionsFontScaleFactors: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      documentPictureInPicture: {
+        enabled: true,
+        preferInitialWindowPlacement: false,
+        disallowReturnToOpener: false,
+      },
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause
