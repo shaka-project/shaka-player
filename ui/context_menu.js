@@ -55,11 +55,39 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
       // Force to close any submenu.
       this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
 
-      const controlsLocation =
-          this.controlsContainer_.getBoundingClientRect();
-      this.contextMenu_.style.left = `${e.clientX - controlsLocation.left}px`;
-      this.contextMenu_.style.top = `${e.clientY - controlsLocation.top}px`;
-      this.contextMenu_.style.bottom = 'auto';
+      const controlsRect = this.controlsContainer_.getBoundingClientRect();
+
+      const clickX = e.clientX;
+      const clickY = e.clientY;
+
+      const middleX = controlsRect.left + controlsRect.width / 2;
+      const openLeftwards = clickX > middleX;
+
+      if (openLeftwards) {
+        this.contextMenu_.style.left = 'auto';
+        this.contextMenu_.style.right = `${controlsRect.right - clickX}px`;
+      } else {
+        this.contextMenu_.style.left = `${clickX - controlsRect.left}px`;
+        this.contextMenu_.style.right = 'auto';
+      }
+
+      const middleY = controlsRect.top + controlsRect.height / 2;
+      const openUpwards = clickY > middleY;
+
+      let availableHeight;
+      if (openUpwards) {
+        this.contextMenu_.style.bottom = `${controlsRect.bottom - clickY}px`;
+        this.contextMenu_.style.top = 'auto';
+        availableHeight = clickY - controlsRect.top;
+      } else {
+        this.contextMenu_.style.bottom = 'auto';
+        this.contextMenu_.style.top = `${clickY - controlsRect.top}px`;
+        availableHeight = controlsRect.bottom - clickY;
+      }
+
+      if (availableHeight > 0) {
+        this.contextMenu_.style.maxHeight = `${availableHeight}px`;
+      }
 
       shaka.ui.Utils.setDisplay(this.contextMenu_, true);
     });
