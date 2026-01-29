@@ -35,6 +35,18 @@
   :before {
     box-sizing: revert;
   }
+
+  /* stylelint-disable max-line-length, declaration-block-no-duplicate-properties, unit-no-unknown, unit-allowed-list */
+  &.pip-mode {
+    background: black;
+    // Old browsers
+    width: 100vw;
+    height: 100vh;
+    // Modern browsers
+    width: 100dvw;
+    height: 100dvh;
+  }
+  /* stylelint-enable max-line-length, declaration-block-no-duplicate-properties, unit-no-unknown, unit-allowed-list */
 }
 
 /* Each browser has a different prefixed pseudo-class for fullscreened elements.
