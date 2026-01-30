@@ -1120,8 +1120,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Move player to the Picture-in-Picture window.
     pipWindow.document.body.append(pipPlayer);
 
+    pipPlayer.classList.add('pip-mode');
+
     // Listen for the PiP closing event to move the player back.
     this.eventManager_.listenOnce(pipWindow, 'pagehide', () => {
+      pipPlayer.classList.remove('pip-mode');
       placeholder.replaceWith(/** @type {!Node} */(pipPlayer));
     });
   }
