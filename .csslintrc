@@ -19,7 +19,7 @@
       "selector-list-comma-newline-after": "always-multi-line",
       "selector-no-vendor-prefix": null,
       "selector-pseudo-element-colon-notation": "single",
-      "unit-allowed-list": ["em", "%", "px", "s", "deg", "vmin", "ms", "vh", "vw"],
+      "unit-allowed-list": ["em", "%", "px", "s", "deg", "vmin", "ms", "vh", "vw", "dvh", "dvw"],
       "color-function-notation": "legacy"
     }
 }
