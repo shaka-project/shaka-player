@@ -346,7 +346,8 @@ shaka.extern.UIDocumentPictureInPicture;
  * @property {boolean} customContextMenu
  *   Whether or not a custom context menu replaces the default.
  *   <br>
- *   Defaults to <code>false</code>.
+ *   Defaults to <code>true</code> except on mobile, cast and smart TV whose
+ *   default value is <code>false</code>.
  * @property {string} castReceiverAppId
  *   Receiver app id to use for the Chromecast support.
  *   <br>

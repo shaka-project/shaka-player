@@ -57,6 +57,7 @@ describe('UI Customization', () => {
     const config = {
       controlPanelElements: ['overflow_menu'],
       overflowMenuButtons: ['loop'],
+      customContextMenu: false,
     };
     await UiUtils.createUIThroughAPI(container, video, config, canvas);
 

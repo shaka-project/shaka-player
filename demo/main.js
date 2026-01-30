@@ -412,6 +412,8 @@ shakaDemo.Main = class {
     const ui = video['ui'];
     this.player_ = ui.getControls().getPlayer();
 
+    this.customContextMenu_ = ui.getConfiguration().customContextMenu;
+
     if (!this.noInput_) {
       // Don't add the close button if in noInput mode; it doesn't make much
       // sense to stop playing a video if you can't start playing other videos.
