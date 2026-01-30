@@ -1246,10 +1246,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.addPlayButton_();
     }
 
-    if (this.config_.customContextMenu) {
-      this.addContextMenu_();
-    }
-
     if (!this.spinnerContainer_) {
       this.addBufferingSpinner_();
     }
@@ -1260,6 +1256,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     this.addControlsButtonPanel_();
+
+    if (this.config_.customContextMenu) {
+      this.addContextMenu_();
+    }
 
     this.menus_ = Array.from(
         this.videoContainer_.getElementsByClassName('shaka-settings-menu'));
