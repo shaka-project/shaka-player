@@ -38,6 +38,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-loop-button');
     this.button_.classList.add('shaka-tooltip');
+    this.button_.classList.add('shaka-no-propagation');
 
     /** @private {!shaka.ui.Icon} */
     this.icon_ = new shaka.ui.Icon(this.button_,
@@ -209,4 +210,7 @@ shaka.ui.OverflowMenu.registerElement(
     'loop', new shaka.ui.LoopButton.Factory());
 
 shaka.ui.Controls.registerElement(
+    'loop', new shaka.ui.LoopButton.Factory());
+
+shaka.ui.Controls.registerBigElement(
     'loop', new shaka.ui.LoopButton.Factory());

@@ -33,6 +33,7 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-fast-forward-button');
     this.button_.classList.add('shaka-tooltip-status');
+    this.button_.classList.add('shaka-no-propagation');
     this.button_.setAttribute('shaka-status', '1x');
 
     new shaka.ui.Icon(this.button_).use(
@@ -117,4 +118,7 @@ shaka.ui.FastForwardButton.Factory = class {
 };
 
 shaka.ui.Controls.registerElement(
+    'fast_forward', new shaka.ui.FastForwardButton.Factory());
+
+shaka.ui.Controls.registerBigElement(
     'fast_forward', new shaka.ui.FastForwardButton.Factory());

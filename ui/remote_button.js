@@ -43,6 +43,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     this.remoteButton_ = shaka.util.Dom.createButton();
     this.remoteButton_.classList.add('shaka-remote-button');
     this.remoteButton_.classList.add('shaka-tooltip');
+    this.remoteButton_.classList.add('shaka-no-propagation');
     this.remoteButton_.ariaPressed = 'false';
 
     /** @private {!shaka.ui.Icon} */
@@ -244,4 +245,7 @@ shaka.ui.OverflowMenu.registerElement(
     'remote', new shaka.ui.RemoteButton.Factory());
 
 shaka.ui.Controls.registerElement(
+    'remote', new shaka.ui.RemoteButton.Factory());
+
+shaka.ui.Controls.registerBigElement(
     'remote', new shaka.ui.RemoteButton.Factory());

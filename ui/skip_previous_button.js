@@ -40,6 +40,7 @@ shaka.ui.SkipPreviousButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-skip-previous-button');
     this.button_.classList.add('shaka-tooltip');
+    this.button_.classList.add('shaka-no-propagation');
     new shaka.ui.Icon(this.button_).use(
         shaka.ui.Enums.MaterialDesignSVGIcons['SKIP_PREVIOUS']);
     this.parent.appendChild(this.button_);
@@ -110,4 +111,7 @@ shaka.ui.SkipPreviousButton.Factory = class {
 };
 
 shaka.ui.Controls.registerElement(
+    'skip_previous', new shaka.ui.SkipPreviousButton.Factory());
+
+shaka.ui.Controls.registerBigElement(
     'skip_previous', new shaka.ui.SkipPreviousButton.Factory());

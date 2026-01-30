@@ -6,53 +6,12 @@
 
 /* The main buttons in the UI controls. */
 
-@play-button-size-percentage: 15%;
-
 .disabled-button() {
   /* Set the background and the color, otherwise it might be overwritten by
    * the css styles in demo. */
   background-color: transparent;
   color: @general-font-color;
   cursor: default;
-}
-
-/* The giant play button, which sits inside .shaka-player-button-container. */
-.shaka-play-button {
-  width: @play-button-size-percentage;
-  aspect-ratio: 1 / 1;
-  border-radius: 50%;
-  border: none;
-  margin: 0;
-  padding: 0;
-
-  .center-children();
-
-  color: @general-font-color;
-  background-color: @general-background-color;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 35%);
-  cursor: pointer;
-
-  transition: transform 0.18s ease-out, background-color 0.18s ease-out;
-
-  .shaka-ui-icon {
-    width: 75%;
-    height: 75%;
-  }
-
-  &:hover {
-    transform: scale(1.06);
-    background-color: @general-background-color-hover;
-  }
-
-  &:active {
-    transform: scale(0.96);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
-  }
-
-  .show-when-controls-shown();
 }
 
 /* This button contains the current time and duration of the video.
