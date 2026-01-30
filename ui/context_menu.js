@@ -48,12 +48,20 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
     this.controlsContainer_.appendChild(this.contextMenu_);
 
     this.eventManager.listen(this.controlsContainer_, 'contextmenu', (e) => {
-      e.preventDefault();
       if (this.controls.anySettingsMenusAreOpen()) {
         this.controls.hideSettingsMenus();
       }
       // Force to close any submenu.
       this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
+
+      const isDisplayed =
+          (element) => element.classList.contains('shaka-hidden') == false;
+      const Iterables = shaka.util.Iterables;
+      if (!Iterables.some(this.contextMenu_.childNodes, isDisplayed)) {
+        return;
+      }
+
+      e.preventDefault();
 
       const controlsLocation =
           this.controlsContainer_.getBoundingClientRect();
