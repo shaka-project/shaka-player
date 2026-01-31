@@ -921,7 +921,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   shouldUseDocumentPictureInPicture_() {
     return 'documentPictureInPicture' in window &&
-        this.config_.preferDocumentPictureInPicture;
+        this.config_.documentPictureInPicture.enabled;
   }
 
   /**
@@ -1095,6 +1095,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     const pipWindow = await window.documentPictureInPicture.requestWindow({
       width: rectPipPlayer.width,
       height: rectPipPlayer.height,
+      disallowReturnToOpener:
+          this.config_.documentPictureInPicture.disallowReturnToOpener,
+      preferInitialWindowPlacement:
+          this.config_.documentPictureInPicture.preferInitialWindowPlacement,
     });
 
     // Copy style sheets to the Picture-in-Picture window.
@@ -1116,8 +1120,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Move player to the Picture-in-Picture window.
     pipWindow.document.body.append(pipPlayer);
 
+    pipPlayer.classList.add('pip-mode');
+
     // Listen for the PiP closing event to move the player back.
     this.eventManager_.listenOnce(pipWindow, 'pagehide', () => {
+      pipPlayer.classList.remove('pip-mode');
       placeholder.replaceWith(/** @type {!Node} */(pipPlayer));
     });
   }
@@ -1242,10 +1249,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.addPlayButton_();
     }
 
-    if (this.config_.customContextMenu) {
-      this.addContextMenu_();
-    }
-
     if (!this.spinnerContainer_) {
       this.addBufferingSpinner_();
     }
@@ -1256,6 +1259,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     this.addControlsButtonPanel_();
+
+    if (this.config_.customContextMenu) {
+      this.addContextMenu_();
+    }
 
     this.menus_ = Array.from(
         this.videoContainer_.getElementsByClassName('shaka-settings-menu'));

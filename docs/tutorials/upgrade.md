@@ -129,6 +129,8 @@ application:
 
   - UI Configuration changes:
     - `doubleClickForFullscreen` enabled by default for mobile.
+    - `preferDocumentPictureInPicture` has been renamed to `documentPictureInPicture.enabled`.
+    - `customContextMenu` enabled by default for desktop browsers.
 
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.

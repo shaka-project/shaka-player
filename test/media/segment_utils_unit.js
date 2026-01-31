@@ -114,7 +114,7 @@ describe('SegmentUtils', () => {
 
   it('getBasicInfoFromMp4', async () => {
     let basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        videoInitSegment, videoInitSegment, false);
+        videoInitSegment, null, false);
     let expected = {
       type: 'video',
       mimeType: 'video/mp4',
@@ -134,7 +134,7 @@ describe('SegmentUtils', () => {
     expect(basicInfo).toEqual(expected);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        audioInitSegment, audioInitSegment, false);
+        audioInitSegment, null, false);
     expected = {
       type: 'audio',
       mimeType: 'audio/mp4',
@@ -154,7 +154,7 @@ describe('SegmentUtils', () => {
     expect(basicInfo).toEqual(expected);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        audioInitSegmentXheAac, audioInitSegmentXheAac, false);
+        audioInitSegmentXheAac, null, false);
     expected = {
       type: 'audio',
       mimeType: 'audio/mp4',
@@ -174,7 +174,7 @@ describe('SegmentUtils', () => {
     expect(basicInfo).toEqual(expected);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        audioInitSegmentAC4, audioInitSegmentAC4, false);
+        audioInitSegmentAC4, null, false);
     expected = {
       type: 'audio',
       mimeType: 'audio/mp4',
@@ -194,7 +194,7 @@ describe('SegmentUtils', () => {
     expect(basicInfo).toEqual(expected);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        multidrmVideoInitSegment, multidrmVideoInitSegment, false);
+        multidrmVideoInitSegment, null, false);
     expected = {
       type: 'video',
       mimeType: 'video/mp4',
@@ -255,7 +255,7 @@ describe('SegmentUtils', () => {
     expect(basicInfo).toEqual(expected);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        multidrmAudioInitSegment, multidrmAudioInitSegment, false);
+        multidrmAudioInitSegment, null, false);
     expected = {
       type: 'audio',
       mimeType: 'audio/mp4',
@@ -329,7 +329,7 @@ describe('SegmentUtils', () => {
       closedCaptions: (new Map()).set('CC1', 'CC1').set('CC3', 'CC3'),
       videoRange: null,
       colorGamut: null,
-      frameRate: null,
+      frameRate: 30,
       timescale: 90000,
       drmInfos: [],
     };
@@ -349,7 +349,7 @@ describe('SegmentUtils', () => {
       closedCaptions: new Map(),
       videoRange: null,
       colorGamut: null,
-      frameRate: null,
+      frameRate: 30,
       timescale: 90000,
       drmInfos: [],
     };
@@ -369,7 +369,7 @@ describe('SegmentUtils', () => {
       closedCaptions: (new Map()).set('CC1', 'CC1').set('svc1', 'svc1'),
       videoRange: null,
       colorGamut: null,
-      frameRate: null,
+      frameRate: jasmine.any(Number),
       timescale: 60000,
       drmInfos: [
         {
@@ -415,9 +415,10 @@ describe('SegmentUtils', () => {
       ],
     };
     expect(basicInfo).toEqual(expected);
+    expect(basicInfo.frameRate).toBeCloseTo(29.97, 2);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        ttml, ttml, true);
+        ttml, null, true);
     expected = {
       type: 'text',
       mimeType: 'application/mp4',
@@ -437,7 +438,7 @@ describe('SegmentUtils', () => {
     expect(basicInfo).toEqual(expected);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        webvtt, webvtt, true);
+        webvtt, null, true);
     expected = {
       type: 'text',
       mimeType: 'application/mp4',
@@ -457,7 +458,7 @@ describe('SegmentUtils', () => {
     expect(basicInfo).toEqual(expected);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        initFairPlay, initFairPlay, false);
+        initFairPlay, null, false);
     expected = {
       type: 'video',
       mimeType: 'video/mp4',
@@ -514,7 +515,7 @@ describe('SegmentUtils', () => {
       closedCaptions: new Map(),
       videoRange: null,
       colorGamut: null,
-      frameRate: '24',
+      frameRate: 24,
       timescale: null,
       drmInfos: [],
     };
@@ -554,11 +555,12 @@ describe('SegmentUtils', () => {
       closedCaptions: (new Map()).set('CC1', 'CC1').set('svc1', 'svc1'),
       videoRange: null,
       colorGamut: null,
-      frameRate: jasmine.any(String),
+      frameRate: jasmine.any(Number),
       timescale: null,
       drmInfos: [],
     };
     expect(basicInfo).toEqual(expected);
+    expect(basicInfo.frameRate).toBeCloseTo(7.49, 2);
   });
 
   it('getDefaultKID', () => {

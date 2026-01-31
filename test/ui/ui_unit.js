@@ -315,6 +315,7 @@ describe('UI', () => {
           controlPanelElements: [
             'overflow_menu',
           ],
+          customContextMenu: false,
         };
         const ui = await UiUtils.createUIThroughAPI(
             videoContainer, video, config);
@@ -525,6 +526,7 @@ describe('UI', () => {
             'quality',
             'language',
           ],
+          customContextMenu: false,
         };
         const ui = await UiUtils.createUIThroughAPI(
             videoContainer, video, config);
