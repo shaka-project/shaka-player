@@ -418,14 +418,12 @@ describe('UI', () => {
           // Overflow button
           UiUtils.confirmElementFound(controlsButtonPanel,
               'shaka-overflow-menu-button');
-          // Big play button
+          // Big buttons
           UiUtils.confirmElementFound(videoContainer,
-              'shaka-play-button-container');
-          UiUtils.confirmElementFound(videoContainer,
-              'shaka-play-button');
+              'shaka-big-buttons-container');
           // Small play button
           UiUtils.confirmElementMissing(videoContainer,
-              'shaka-small-play-button');
+              'shaka-play-button');
           // Volume bar
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-volume-bar');
@@ -439,14 +437,12 @@ describe('UI', () => {
           // Overflow button
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-overflow-menu-button');
-          // Big play button
+          // Big buttons
           UiUtils.confirmElementMissing(videoContainer,
-              'shaka-play-button-container');
-          UiUtils.confirmElementMissing(videoContainer,
-              'shaka-play-button');
+              'shaka-big-buttons-container');
           // Small play button
           UiUtils.confirmElementFound(videoContainer,
-              'shaka-small-play-button');
+              'shaka-play-button');
           // Volume bar
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-volume-bar');
@@ -460,14 +456,12 @@ describe('UI', () => {
           // Overflow button
           UiUtils.confirmElementFound(controlsButtonPanel,
               'shaka-overflow-menu-button');
-          // Big play button
+          // Big buttons
           UiUtils.confirmElementMissing(videoContainer,
-              'shaka-play-button-container');
-          UiUtils.confirmElementMissing(videoContainer,
-              'shaka-play-button');
+              'shaka-big-buttons-container');
           // Small play button
           UiUtils.confirmElementFound(videoContainer,
-              'shaka-small-play-button');
+              'shaka-play-button');
           // Volume bar
           UiUtils.confirmElementFound(controlsButtonPanel,
               'shaka-volume-bar');

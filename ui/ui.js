@@ -308,6 +308,7 @@ shaka.ui.Overlay = class {
         'content_title',
         'spacer',
       ],
+      bigButtons: [],
       overflowMenuButtons: [
         'captions',
         'captions-position',
@@ -366,7 +367,6 @@ shaka.ui.Overlay = class {
       fastForwardRates: [2, 4, 8, 1],
       rewindRates: [-1, -2, -4, -8],
       addSeekBar: true,
-      addBigPlayButton: false,
       customContextMenu: true,
       castReceiverAppId: '',
       castAndroidReceiverCompatible: false,
@@ -463,7 +463,11 @@ shaka.ui.Overlay = class {
     // button and show the big play/pause button in the center.
     // This is in line with default styles in Chrome.
     if (this.isMobile()) {
-      config.addBigPlayButton = true;
+      config.bigButtons = [
+        'skip_previous',
+        'play_pause',
+        'skip_next',
+      ];
       config.customContextMenu = false;
       config.singleClickForPlayAndPause = false;
       config.seekOnTaps = true;
@@ -496,7 +500,9 @@ shaka.ui.Overlay = class {
         'spacer',
       ];
     } else if (this.isSmartTV()) {
-      config.addBigPlayButton = true;
+      config.bigButtons = [
+        'play_pause',
+      ];
       config.customContextMenu = false;
       config.singleClickForPlayAndPause = false;
       config.enableTooltips = false;
