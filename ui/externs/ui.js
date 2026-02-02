@@ -21,7 +21,8 @@ shaka.extern = {};
  *   base: string,
  *   buffered: string,
  *   played: string,
- *   adBreaks: string
+ *   adBreaks: string,
+ *   chapters: string,
  * }}
  *
  * @property {string} base
@@ -36,6 +37,9 @@ shaka.extern = {};
  * @property {string} adBreaks
  *   The CSS background color applied to the portion of the seek bar showing
  *   when the ad breaks are scheduled to occur on the timeline.
+ * @property {string} chapters
+ *   The CSS background color applied to the portion of the seek bar showing
+ *   when a chapter appears on the timeline.
  * @exportDoc
  */
 shaka.extern.UISeekBarColors;
