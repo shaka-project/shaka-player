@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.16.16](https://github.com/shaka-project/shaka-player/compare/v4.16.15...v4.16.16) (2026-02-02)
+
+
+### Bug Fixes
+
+* **demo:** Fix assets metadata ([#9609](https://github.com/shaka-project/shaka-player/issues/9609)) ([7108fac](https://github.com/shaka-project/shaka-player/commit/7108fac74194f4551533481233e12b459a142f32))
+* Dispatch metadata events when stream is paused and the user seeks ([#9628](https://github.com/shaka-project/shaka-player/issues/9628)) ([2001993](https://github.com/shaka-project/shaka-player/commit/2001993574c43abbc592c0e9c222e02cd02e6c24))
+* Fix startAtSegmentBoundary config when using a live stream ([#9640](https://github.com/shaka-project/shaka-player/issues/9640)) ([84925ed](https://github.com/shaka-project/shaka-player/commit/84925ed712158724c120871022970ab7531aaf34))
+* **LCEVC:** Return early if playerInterface object is destroyed ([#9621](https://github.com/shaka-project/shaka-player/issues/9621)) ([e93e02e](https://github.com/shaka-project/shaka-player/commit/e93e02e5d884feb140128e7b59057ca3d374ea2c))
+
+
+### Performance Improvements
+
+* **ABR:** Minor performance optimization in EWMA alpha calculation ([#9623](https://github.com/shaka-project/shaka-player/issues/9623)) ([046c657](https://github.com/shaka-project/shaka-player/commit/046c657c21fd26893acdd6a645915b472c14c57e))
+* Minor performance optimizations in TXml text processing and root lookup ([#9622](https://github.com/shaka-project/shaka-player/issues/9622)) ([c3cebbc](https://github.com/shaka-project/shaka-player/commit/c3cebbcd095d751cdbf41d11813d3a5e74762e40))
+
 ## [4.16.15](https://github.com/shaka-project/shaka-player/compare/v4.16.14...v4.16.15) (2026-01-26)
 
 
