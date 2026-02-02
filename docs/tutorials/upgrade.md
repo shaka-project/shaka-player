@@ -131,6 +131,7 @@ application:
     - `doubleClickForFullscreen` enabled by default for mobile.
     - `preferDocumentPictureInPicture` has been renamed to `documentPictureInPicture.enabled`.
     - `customContextMenu` enabled by default for desktop browsers.
+    - `addBigPlayButton` has been removed. Similar feature on `bigButtons` config.
 
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.

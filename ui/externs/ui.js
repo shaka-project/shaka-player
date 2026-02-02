@@ -254,6 +254,7 @@ shaka.extern.UIDocumentPictureInPicture;
  * @typedef {{
  *   controlPanelElements: !Array<string>,
  *   topControlPanelElements: !Array<string>,
+ *   bigButtons: !Array<string>,
  *   overflowMenuButtons: !Array<string>,
  *   contextMenuElements: !Array<string>,
  *   statisticsList: !Array<string>,
@@ -262,7 +263,6 @@ shaka.extern.UIDocumentPictureInPicture;
  *   fastForwardRates: !Array<number>,
  *   rewindRates: !Array<number>,
  *   addSeekBar: boolean,
- *   addBigPlayButton: boolean,
  *   customContextMenu: boolean,
  *   castReceiverAppId: string,
  *   castAndroidReceiverCompatible: boolean,
@@ -313,6 +313,8 @@ shaka.extern.UIDocumentPictureInPicture;
  *   The ordered list of control panel elements of the UI.
  * @property {!Array<string>} topControlPanelElements
  *   The ordered list of top control panel elements of the UI.
+ * @property {!Array<string>} bigButtons
+ *   The ordered list of big buttons elements of the UI.
  * @property {!Array<string>} overflowMenuButtons
  *   The ordered list of the overflow menu buttons.
  * @property {!Array<string>} contextMenuElements
@@ -337,12 +339,6 @@ shaka.extern.UIDocumentPictureInPicture;
  *   Whether or not a seek bar should be part of the UI.
  *   <br>
  *   Defaults to <code>true</code>.
- * @property {boolean} addBigPlayButton
- *   Whether or not a big play button in the center of the video
- *   should be part of the UI.
- *   <br>
- *   Defaults to <code>false</code> except on mobile where the default value
- *   is <code>true</code>
  * @property {boolean} customContextMenu
  *   Whether or not a custom context menu replaces the default.
  *   <br>
@@ -851,30 +847,6 @@ shaka.extern.IUISeekBar.Factory = class {
    * @return {!shaka.extern.IUISeekBar}
    */
   create(rootElement, controls) {}
-};
-
-/**
- * @interface
- * @exportDoc
- */
-shaka.extern.IUIPlayButton = class {
-  /**
-   * @param {!HTMLElement} parent
-   * @param {!shaka.ui.Controls} controls
-   */
-  constructor(parent, controls) {
-    /**
-     * @protected {!HTMLButtonElement}
-     * @exportDoc
-     */
-    this.button;
-  }
-
-  /** @return {boolean} */
-  isPaused() {}
-
-  /** @return {boolean} */
-  isEnded() {}
 };
 
 /**

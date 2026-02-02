@@ -43,6 +43,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     this.pipButton_ = shaka.util.Dom.createButton();
     this.pipButton_.classList.add('shaka-pip-button');
     this.pipButton_.classList.add('shaka-tooltip');
+    this.pipButton_.classList.add('shaka-no-propagation');
 
     /** @private {!shaka.ui.Icon} */
     this.pipIcon_ = new shaka.ui.Icon(this.pipButton_,
@@ -218,4 +219,7 @@ shaka.ui.OverflowMenu.registerElement(
     'picture_in_picture', new shaka.ui.PipButton.Factory());
 
 shaka.ui.Controls.registerElement(
+    'picture_in_picture', new shaka.ui.PipButton.Factory());
+
+shaka.ui.Controls.registerBigElement(
     'picture_in_picture', new shaka.ui.PipButton.Factory());

@@ -37,6 +37,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-mute-button');
     this.button_.classList.add('shaka-tooltip');
+    this.button_.classList.add('shaka-no-propagation');
 
     /** @private {!shaka.ui.Icon} */
     this.icon_ = new shaka.ui.Icon(this.button_,
@@ -205,4 +206,7 @@ shaka.ui.OverflowMenu.registerElement(
     'mute', new shaka.ui.MuteButton.Factory());
 
 shaka.ui.Controls.registerElement(
+    'mute', new shaka.ui.MuteButton.Factory());
+
+shaka.ui.Controls.registerBigElement(
     'mute', new shaka.ui.MuteButton.Factory());

@@ -15,7 +15,6 @@ goog.require('shaka.device.DeviceFactory');
 goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
 goog.require('shaka.ui.AdInfo');
-goog.require('shaka.ui.BigPlayButton');
 goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.HiddenFastForwardButton');
 goog.require('shaka.ui.HiddenRewindButton');
@@ -511,6 +510,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @param {string} name
+   * @param {!shaka.extern.IUIElement.Factory} factory
+   * @export
+   */
+  static registerBigElement(name, factory) {
+    shaka.ui.ControlsPanel.bigElementNamesToFactories_.set(name, factory);
+  }
+
+  /**
    * @param {!shaka.extern.IUISeekBar.Factory} factory
    * @export
    */
@@ -554,10 +562,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Deconstruct the old layout if applicable
     if (this.seekBar_) {
       this.seekBar_ = null;
-    }
-
-    if (this.playButton_) {
-      this.playButton_ = null;
     }
 
     if (this.contextMenu_) {
@@ -1245,8 +1249,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.addScrimContainer_();
 
-    if (this.config_.addBigPlayButton) {
-      this.addPlayButton_();
+    if (this.config_.bigButtons.length) {
+      this.addBigButtons_();
     }
 
     if (!this.spinnerContainer_) {
@@ -1305,15 +1309,24 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /** @private */
-  addPlayButton_() {
-    const playButtonContainer = shaka.util.Dom.createHTMLElement('div');
-    playButtonContainer.classList.add('shaka-play-button-container');
-    this.controlsContainer_.appendChild(playButtonContainer);
+  addBigButtons_() {
+    const bigButtonsContainer = shaka.util.Dom.createHTMLElement('div');
+    bigButtonsContainer.classList.add('shaka-big-buttons-container');
+    this.controlsContainer_.appendChild(bigButtonsContainer);
 
-    /** @private {shaka.ui.BigPlayButton} */
-    this.playButton_ =
-        new shaka.ui.BigPlayButton(playButtonContainer, this);
-    this.elements_.push(this.playButton_);
+    const elementNamesToFactories =
+        shaka.ui.ControlsPanel.bigElementNamesToFactories_;
+
+    for (const name of this.config_.bigButtons) {
+      if (elementNamesToFactories.has(name)) {
+        const factory = elementNamesToFactories.get(name);
+        const element = factory.create(bigButtonsContainer, this);
+        this.elements_.push(element);
+      } else {
+        shaka.log.alwaysWarn(
+            'Unrecognized big button element requested:', name);
+      }
+    }
   }
 
   /** @private */
@@ -1431,7 +1444,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Create the elements specified by topControlPanelElements
     for (const name of this.config_.topControlPanelElements) {
-      if (shaka.ui.ControlsPanel.elementNamesToFactories_.get(name)) {
+      if (shaka.ui.ControlsPanel.elementNamesToFactories_.has(name)) {
         const factory =
             shaka.ui.ControlsPanel.elementNamesToFactories_.get(name);
         const element = factory.create(this.topControlsButtonPanel_, this);
@@ -1481,7 +1494,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Create the elements specified by controlPanelElements
     for (const name of this.config_.controlPanelElements) {
-      if (shaka.ui.ControlsPanel.elementNamesToFactories_.get(name)) {
+      if (shaka.ui.ControlsPanel.elementNamesToFactories_.has(name)) {
         const factory =
             shaka.ui.ControlsPanel.elementNamesToFactories_.get(name);
         const element = factory.create(this.controlsButtonPanel_, this);
@@ -2773,6 +2786,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 /** @private {!Map<string, !shaka.extern.IUIElement.Factory>} */
 shaka.ui.ControlsPanel.elementNamesToFactories_ = new Map();
+
+/** @private {!Map<string, !shaka.extern.IUIElement.Factory>} */
+shaka.ui.ControlsPanel.bigElementNamesToFactories_ = new Map();
 
 /** @private {?shaka.extern.IUISeekBar.Factory} */
 shaka.ui.ControlsPanel.seekBarFactory_ = new shaka.ui.SeekBar.Factory();

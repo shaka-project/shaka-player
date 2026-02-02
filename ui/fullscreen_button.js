@@ -37,6 +37,7 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-fullscreen-button');
     this.button_.classList.add('shaka-tooltip');
+    this.button_.classList.add('shaka-no-propagation');
 
     /** @private {shaka.ui.Icon} */
     this.icon_ = new shaka.ui.Icon(this.button_,
@@ -135,3 +136,5 @@ shaka.ui.FullscreenButton.Factory = class {
 shaka.ui.Controls.registerElement(
     'fullscreen', new shaka.ui.FullscreenButton.Factory());
 
+shaka.ui.Controls.registerBigElement(
+    'fullscreen', new shaka.ui.FullscreenButton.Factory());

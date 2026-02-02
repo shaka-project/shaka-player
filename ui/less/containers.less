@@ -82,9 +82,9 @@
    * the size of the container for some applications. */
 }
 
-/* A container for all controls, including the giant play button, seek bar, etc.
+/* A container for all controls, including the giant buttons, seek bar, etc.
  * Sits inside .shaka-video-container, on top of (Z axis) .shaka-video, and
- * below (Y axis) .shaka-play-button-container. */
+ * below (Y axis) .shaka-big-buttons-container. */
 .shaka-controls-container {
   .overlay-child();
 
@@ -123,7 +123,7 @@
 
 /* A container for all canvas for LCEVC decoding
  * Sits inside .shaka-video-container, on top of (Z axis) .shaka-video, and
- * below (Y axis) .shaka-play-button-container. */
+ * below (Y axis) .shaka-big-buttons-container. */
 .shaka-canvas-container {
   .overlay-child();
 
@@ -134,7 +134,7 @@
 
 /* A container for VR
  * Sits inside .shaka-video-container, on top of (Z axis) .shaka-video, and
- * below (Y axis) .shaka-play-button-container. */
+ * below (Y axis) .shaka-big-buttons-container. */
 .shaka-vr-canvas-container {
   .overlay-child();
 
@@ -174,8 +174,75 @@
   z-index: 1;
 }
 
+.shaka-context-menu {
+  button {
+    .shaka-current-selection-span {
+      display: none;
+    }
+  }
+}
+
+/* The container for the giant buttons.  Sits above (Y axis) the
+ * other video controls and seek bar, in the middle of the video frame, on top
+ * of (Z axis) the video. */
+.shaka-big-buttons-container {
+  /* Take up as much space as possible, but shrink (vertically) to accomodate
+   * the controls at the bottom. */
+  margin: 0;
+  .fill-container();
+  .shrinkable();
+  .absolute-position();
+
+  /* Keep the play button in the middle of this container. */
+  .center-children();
+
+  gap: 2.5%;
+
+  z-index: 1;
+
+  @big-button-size-percentage: 15%;
+
+  .shaka-ui-icon {
+    width: 75%;
+    height: 75%;
+  }
+
+  button {
+    width: @big-button-size-percentage;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    border: none;
+    margin: 0;
+    padding: 0;
+
+    .center-children();
+
+    color: @general-font-color;
+    background-color: @general-background-color;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 35%);
+    cursor: pointer;
+
+    transition: transform 0.18s ease-out, background-color 0.18s ease-out;
+
+    &:hover {
+      transform: scale(1.06);
+      background-color: @general-background-color-hover;
+    }
+
+    &:active {
+      transform: scale(0.96);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+
+    .show-when-controls-shown();
+  }
+}
+
 /* This is the container for the horizontal row of controls above the seek bar.
- * It sits above (Y axis) the seek bar, and below (Y axis) the giant play button
+ * It sits above (Y axis) the seek bar, and below (Y axis) the giant buttons
  * in the middle. */
 .shaka-controls-button-panel,
 .shaka-controls-top-button-panel {
@@ -235,7 +302,7 @@
     /* Use a bit larger icons for some buttons */
     &.shaka-fast-forward-button,
     &.shaka-rewind-button,
-    &.shaka-small-play-button,
+    &.shaka-play-button,
     &.shaka-skip-previous-button,
     &.shaka-skip-next-button {
       .shaka-ui-icon {
@@ -265,27 +332,9 @@
 
 /* Buttons hide certain items if they are found inside the control panel */
 .shaka-controls-button-panel .shaka-overflow-menu-only,
-.shaka-controls-top-button-panel .shaka-overflow-menu-only {
+.shaka-controls-top-button-panel .shaka-overflow-menu-only,
+.shaka-big-buttons-container .shaka-overflow-menu-only {
   display: none;
-}
-
-/* The container for the giant play button.  Sits above (Y axis) the
- * other video controls and seek bar, in the middle of the video frame, on top
- * of (Z axis) the video. */
-.shaka-play-button-container {
-  /* Take up as much space as possible, but shrink (vertically) to accomodate
-   * the controls at the bottom. */
-  margin: 0;
-  .fill-container();
-  .shrinkable();
-  .absolute-position();
-
-  /* Keep the play button in the middle of this container. */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  z-index: 1;
 }
 
 .shaka-statistics-container {
@@ -359,14 +408,6 @@
 
   span {
     color: rgb(150, 150, 150);
-  }
-}
-
-.shaka-context-menu {
-  button {
-    .shaka-current-selection-span {
-      display: none;
-    }
   }
 }
 
