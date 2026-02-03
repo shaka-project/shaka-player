@@ -272,7 +272,6 @@ shaka.ui.Overlay = class {
       'volume',
       'time_and_duration',
       'spacer',
-      'overflow_menu',
     ];
 
     if (window.chrome) {
@@ -284,6 +283,7 @@ shaka.ui.Overlay = class {
     } else if (window.WebKitPlaybackTargetAvailabilityEvent) {
       controlPanelElements.push('airplay');
     }
+    controlPanelElements.push('overflow_menu');
     controlPanelElements.push('fullscreen');
 
     const mediaSessionActions = [
