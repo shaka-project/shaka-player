@@ -155,7 +155,7 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
 
     // Make sure we have an entry for the locale because we are about to
     // write to it.
-    const table = this.localizations_.getOrInsert(locale, new Map());
+    const table = this.localizations_.get(locale) || new Map();
     localizations.forEach((value, id) => {
       // Set the value if we don't have an old value or if we are to replace
       // the old value with the new value.
@@ -163,6 +163,7 @@ shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
         table.set(id, value);
       }
     });
+    this.localizations_.set(locale, table);
 
     // The data we use to make our map may have changed, update the map we pull
     // data from.
