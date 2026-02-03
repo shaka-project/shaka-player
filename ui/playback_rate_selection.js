@@ -41,23 +41,23 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
       this.button.appendChild(this.playbackRateMark);
     }
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
         });
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateLocalizedStrings_();
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'loaded',
+          'ratechange',
+        ], () => {
+          this.updatePlaybackRateSelection_();
         });
-
-    this.eventManager.listen(this.player, 'loaded', () => {
-      this.updatePlaybackRateSelection_();
-    });
-
-    this.eventManager.listen(this.player, 'ratechange', () => {
-      this.updatePlaybackRateSelection_();
-    });
 
     if (this.isSubMenu) {
       this.eventManager.listen(this.controls, 'submenuopen', () => {

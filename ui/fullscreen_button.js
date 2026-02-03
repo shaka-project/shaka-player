@@ -48,13 +48,12 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     this.parent.appendChild(this.button_);
     this.updateAriaLabel_();
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateAriaLabel_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateAriaLabel_();
         });
 
@@ -70,21 +69,23 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
       this.updateAriaLabel_();
     });
 
-    this.eventManager.listen(this.localVideo_, 'loadedmetadata', () => {
-      this.checkSupport_();
-    });
+    this.eventManager.listenMulti(
+        this.localVideo_,
+        [
+          'loadedmetadata',
+          'loadeddata',
+        ], () => {
+          this.checkSupport_();
+        });
 
-    this.eventManager.listen(this.localVideo_, 'loadeddata', () => {
-      this.checkSupport_();
-    });
-
-    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_STARTED, () => {
-      this.checkSupport_();
-    });
-
-    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_STOPPED, () => {
-      this.checkSupport_();
-    });
+    this.eventManager.listenMulti(
+        this.adManager,
+        [
+          shaka.ads.Utils.AD_STARTED,
+          shaka.ads.Utils.AD_STOPPED,
+        ], () => {
+          this.checkSupport_();
+        });
   }
 
   /**

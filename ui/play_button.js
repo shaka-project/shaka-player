@@ -40,55 +40,42 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     /** @private {!shaka.ui.Icon} */
     this.icon_ = new shaka.ui.Icon(this.button_);
 
-    const LOCALE_UPDATED = shaka.ui.Localization.LOCALE_UPDATED;
-    this.eventManager.listen(this.localization, LOCALE_UPDATED, () => {
-      this.updateAriaLabel_();
-    });
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
+          this.updateAriaLabel_();
+        });
 
-    const LOCALE_CHANGED = shaka.ui.Localization.LOCALE_CHANGED;
-    this.eventManager.listen(this.localization, LOCALE_CHANGED, () => {
-      this.updateAriaLabel_();
-    });
-
-    this.eventManager.listen(this.video, 'play', () => {
-      this.updateAriaLabel_();
-      this.updateIcon_();
-    });
-
-    this.eventManager.listen(this.video, 'pause', () => {
-      this.updateAriaLabel_();
-      this.updateIcon_();
-    });
-
-    this.eventManager.listen(this.video, 'seeking', () => {
-      this.updateAriaLabel_();
-      this.updateIcon_();
-    });
+    this.eventManager.listenMulti(
+        this.video,
+        [
+          'play',
+          'pause',
+          'seeking',
+        ], () => {
+          this.updateAriaLabel_();
+          this.updateIcon_();
+        });
 
     this.eventManager.listen(this.player, 'loaded', () => {
       this.updateAriaLabel_();
       this.updateIcon_();
     });
 
-    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_PAUSED, () => {
-      this.updateAriaLabel_();
-      this.updateIcon_();
-    });
-
-    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_RESUMED, () => {
-      this.updateAriaLabel_();
-      this.updateIcon_();
-    });
-
-    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_STARTED, () => {
-      this.updateAriaLabel_();
-      this.updateIcon_();
-    });
-
-    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_STOPPED, () => {
-      this.updateAriaLabel_();
-      this.updateIcon_();
-    });
+    this.eventManager.listenMulti(
+        this.adManager,
+        [
+          shaka.ads.Utils.AD_PAUSED,
+          shaka.ads.Utils.AD_RESUMED,
+          shaka.ads.Utils.AD_STARTED,
+          shaka.ads.Utils.AD_STOPPED,
+        ], () => {
+          this.updateAriaLabel_();
+          this.updateIcon_();
+        });
 
     this.eventManager.listen(this.button_, 'click', () => {
       if (!this.controls.isOpaque()) {
