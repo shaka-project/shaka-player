@@ -198,9 +198,11 @@
 
   gap: 2.5%;
 
-  z-index: 1;
+  z-index: 2;
 
-  @big-button-size-percentage: 15%;
+  pointer-events: none;
+
+  @big-button-size-percentage: 12.5%;
 
   .shaka-ui-icon {
     width: 75%;
@@ -214,6 +216,8 @@
     border: none;
     margin: 0;
     padding: 0;
+
+    pointer-events: initial;
 
     .center-children();
 
