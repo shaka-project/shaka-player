@@ -64,12 +64,10 @@ The following elements can be added to the UI bar using this configuration value
   that support it. Button is invisible on other browsers. Note that it will use the
   [Document Picture-in-Picture API]() if supported.
 * loop: adds a button that controls if the currently selected video is played in a loop.
-* airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
-  supports AirPlay.
 * cast: adds a button that opens a Chromecast dialog. The button is visible only if there is
   at least one Chromecast device on the same network available for casting.
 * remote: adds a button that opens a Remote Playback dialog. The button is visible only if the
-  browser supports Remote Playback API.
+  browser supports Remote Playback API. This works with AirPlay and Cast.
 * quality: adds a button that controls enabling/disabling of abr and video resolution selection.
 * video_type: adds a button that controls video role selection.
 * language: adds a button that controls audio language selection.
@@ -106,10 +104,8 @@ The following buttons can be added to the overflow menu:
   [Document Picture-in-Picture API]() if supported.
 * loop: adds a button that controls if the currently selected video is played in a loop.
 * playback_rate: adds a button that controls the playback rate selection.
-* airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
-  supports AirPlay.
 * remote: adds a button that opens a Remote Playback dialog. The button is visible only if the
-  browser supports Remote Playback API.
+  browser supports Remote Playback API. This works with AirPlay and Cast.
 * statistics: adds a button that displays statistics of the video.
 * recenter_vr: adds a button that recenter the VR view to the initial view. The button is visible
   only if playing a VR content.

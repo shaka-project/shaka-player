@@ -280,8 +280,6 @@ shaka.ui.Overlay = class {
     // eslint-disable-next-line no-restricted-syntax
     if ('remote' in HTMLMediaElement.prototype) {
       controlPanelElements.push('remote');
-    } else if (window.WebKitPlaybackTargetAvailabilityEvent) {
-      controlPanelElements.push('airplay');
     }
     controlPanelElements.push('overflow_menu');
     controlPanelElements.push('fullscreen');
@@ -513,7 +511,6 @@ shaka.ui.Overlay = class {
         'play_pause',
         'cast',
         'remote',
-        'airplay',
         'volume',
         'save_video_frame',
       ];
