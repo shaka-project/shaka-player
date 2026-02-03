@@ -553,7 +553,7 @@ shaka.extern.UIDocumentPictureInPicture;
  *   Defaults to <code>true</code> except on Vision OS where the default value
  *   is <code>false</code>
  * @property {boolean} showUIAlways
- *   If true, keep the UI always visible for all contents.
+ *   If true, always keep the UI visible for all content.
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {boolean} showUIAlwaysOnAudioOnly
