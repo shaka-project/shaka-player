@@ -15,6 +15,7 @@ goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.MediaElementEvent');
 
 
 /**
@@ -52,9 +53,9 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     this.eventManager.listenMulti(
         this.video,
         [
-          'play',
-          'pause',
-          'seeking',
+          shaka.util.MediaElementEvent.PLAY,
+          shaka.util.MediaElementEvent.PAUSE,
+          shaka.util.MediaElementEvent.SEEKING,
         ], () => {
           this.updateAriaLabel_();
           this.updateIcon_();

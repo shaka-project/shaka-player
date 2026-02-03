@@ -15,6 +15,7 @@ goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.MediaElementEvent');
 
 
 /**
@@ -72,8 +73,8 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     this.eventManager.listenMulti(
         this.localVideo_,
         [
-          'loadedmetadata',
-          'loadeddata',
+          shaka.util.MediaElementEvent.LOADED_METADATA,
+          shaka.util.MediaElementEvent.LOADED_DATA,
         ], () => {
           this.checkSupport_();
         });

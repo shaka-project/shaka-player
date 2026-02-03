@@ -18,6 +18,7 @@ goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.MediaElementEvent');
 
 
 /**
@@ -104,9 +105,9 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
     this.eventManager.listenMulti(
         this.video,
         [
-          'play',
-          'pause',
-          'seeking',
+          shaka.util.MediaElementEvent.PLAY,
+          shaka.util.MediaElementEvent.PAUSE,
+          shaka.util.MediaElementEvent.SEEKING,
         ], () => {
           this.checkAvailability_();
         });
