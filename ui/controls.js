@@ -16,6 +16,8 @@ goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
 goog.require('shaka.ui.AdInfo');
 goog.require('shaka.ui.ContextMenu');
+goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.HiddenFastForwardButton');
 goog.require('shaka.ui.HiddenRewindButton');
 goog.require('shaka.ui.Locales');
@@ -1110,9 +1112,33 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Add placeholder for the player.
     const parentPlayer = pipPlayer.parentNode || document.body;
-    const placeholder = this.videoContainer_.cloneNode(true);
-    placeholder.style.visibility = 'hidden';
-    placeholder.style.height = getComputedStyle(pipPlayer).height;
+    const placeholder = shaka.util.Dom.createHTMLElement('div');
+    placeholder.classList.add('shaka-video-container');
+    placeholder.classList.add('pip-placeholder');
+    const video = /** @type {HTMLVideoElement} */ (this.video_);
+    if (video?.poster) {
+      const posterDiv = document.createElement('div');
+      posterDiv.classList.add('pip-poster');
+      posterDiv.style.backgroundImage = `url("${video.poster}")`;
+      const videoWidth = video.videoWidth || video.clientWidth;
+      const videoHeight = video.videoHeight || video.clientHeight;
+
+      if (videoWidth && videoHeight) {
+        posterDiv.style.setProperty('aspect-ratio',
+            `${videoWidth} / ${videoHeight}`);
+        placeholder.appendChild(posterDiv);
+      }
+    }
+    const iconWrapper = document.createElement('div');
+    iconWrapper.classList.add('pip-icon-wrapper');
+    placeholder.appendChild(iconWrapper);
+    const pipIcon = (new shaka.ui.Icon(iconWrapper,
+        shaka.ui.Enums.MaterialDesignSVGIcons['EXIT_PIP'])).getSvgElement();
+    const pipAction = () => this.togglePiP();
+    this.eventManager_.listenOnce(pipIcon, 'click', pipAction);
+
+    const style = getComputedStyle(pipPlayer);
+    placeholder.style.height = style.height;
     parentPlayer.appendChild(placeholder);
 
     // Make sure player fits in the Picture-in-Picture window.
@@ -1128,6 +1154,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Listen for the PiP closing event to move the player back.
     this.eventManager_.listenOnce(pipWindow, 'pagehide', () => {
+      this.eventManager_.unlisten(pipIcon, 'click', pipAction);
       pipPlayer.classList.remove('pip-mode');
       placeholder.replaceWith(/** @type {!Node} */(pipPlayer));
     });
