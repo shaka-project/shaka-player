@@ -248,7 +248,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * @private {shaka.util.Timer}
      */
     this.fadeControlsTimer_ = new shaka.util.Timer(() => {
-      if (this.config_.showUIAlwaysOnAudioOnly && this.player_.isAudioOnly()) {
+      if (this.shouldShowUIAlways_()) {
         return;
       }
       if (this.config_.menuOpenUntilUserClosesIt &&
@@ -1787,7 +1787,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   onMouseStill_() {
-    if (this.config_.showUIAlwaysOnAudioOnly && this.player_.isAudioOnly()) {
+    if (this.shouldShowUIAlways_()) {
       return;
     }
     // Hide the cursor.
@@ -2660,6 +2660,22 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.chapters_ = chapters;
     this.dispatchEvent(new shaka.util.FakeEvent('chaptersupdated'));
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  shouldShowUIAlways_() {
+    goog.asserts.assert(this.config_, 'Config must not be null!');
+    if (this.config_.showUIAlways) {
+      return true;
+    }
+    goog.asserts.assert(this.player_, 'Player must not be null!');
+    if (this.config_.showUIAlwaysOnAudioOnly && this.player_.isAudioOnly()) {
+      return true;
+    }
+    return false;
   }
 
   /**

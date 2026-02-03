@@ -436,6 +436,7 @@ shaka.ui.Overlay = class {
       allowTogglePresentationTime: true,
       showRemainingTimeInPresentationTime: false,
       enableVrDeviceMotion: true,
+      showUIAlways: false,
       showUIAlwaysOnAudioOnly: true,
       preferIntlDisplayNames: true,
       mediaSession: {
