@@ -95,7 +95,7 @@ application:
 
   - Configuration changes:
     - `streaming.forceTransmuxTS` has been renamed to `streaming.forceTransmux`,
-      and now also applies to AAC (deprecated in v4.3.0)
+      and now also applies to AAC, MP3, AC-3, and EC-3 (deprecated in v4.3.0)
     - `manifest.dash.manifestPreprocessor` and `manifest.mss.manifestPreprocessor`
       have been replaced with `manifest.dash.manifestPreprocessorTXml` and
       `manifest.mss.manifestPreprocessorTXml` callbacks. These new callbacks now
