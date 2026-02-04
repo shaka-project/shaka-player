@@ -955,6 +955,56 @@ describe('Player', () => {
     });
   });  // describe('unloading')
 
+  describe('retryLicensing', () => {
+    drmIt('retries license request after failure', async () => {
+      if (!checkTrueDrmSupport()) {
+        pending('Skipping retry test, only runs with real DRM');
+      }
+
+      let failureCount = 0;
+      let retryAttempted = false;
+      let firstRequestFailed = false;
+
+      // Intercept the first license request to simulate a failure.
+      player.getNetworkingEngine().registerRequestFilter((type, request) => {
+        if (type == shaka.net.NetworkingEngine.RequestType.LICENSE &&
+            !firstRequestFailed) {
+          firstRequestFailed = true;
+          request.uris = ['http://foo/invalid'];
+        }
+      });
+
+      // Handle the failure and retry with the same session metadata.
+      player.configure('drm.failureCallback', (error) => {
+        failureCount++;
+        if (failureCount === 1 && !retryAttempted) {
+          retryAttempted = true;
+          const sessionMetadata = error.data[1];
+          player.retryLicensing(sessionMetadata, 0.1);
+          error.handled = true;
+        }
+      });
+
+      player.configure('drm.servers', {
+        'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+      });
+
+      await player.load('test:sintel-enc_compiled');
+      await video.play();
+
+      const waiter = new shaka.test.Waiter(eventManager)
+          .setPlayer(player)
+          .timeoutAfter(30)
+          .failOnTimeout(true);
+      await waiter.waitForMovement(video);
+
+      expect(failureCount).toBeGreaterThan(0);
+      expect(retryAttempted).toBe(true);
+      expect(video.currentTime).toBeGreaterThan(0);
+      expect(video.readyState).toBeGreaterThan(1);
+    });
+  });
+
   describe('addChaptersTrack', () => {
     it('adds external chapters in vtt format', async () => {
       await player.load('test:sintel_no_text_compiled');
