@@ -160,4 +160,4 @@ application:
     - `MEDIA_SOURCE_OPERATION_THREW` error now includes object with details from media element error in `error.data[1]` or string with brief explanation.
 
   - UI:
-    - `airplay` button removed. Similar feature on `remote` button.
+    - `airplay` button has been removed; use the `remote` button instead
