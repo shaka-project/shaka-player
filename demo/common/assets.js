@@ -1319,7 +1319,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH),
   // End DASH-IF Assets }}}
 
-  // BITMOVIN assets {{{
+  // Bitmovin assets {{{
   // Src: http://www.dash-player.com/demo/streaming-server-and-encoder-support/
   // Src: https://bitmovin.com/mpeg-dash-hls-examples-sample-streams/
   new ShakaDemoAssetInfo(
@@ -1404,7 +1404,7 @@ shakaAssets.testAssets = [
         displayInVrMode: true,
         defaultVrProjectionMode: 'equirectangular',
       }),
-  // End BITMOVIN assets }}}
+  // End Bitmovin assets }}}
 
   // Nimble Streamer assets {{{
   // Src: https://wmspanel.com/nimble/demo
