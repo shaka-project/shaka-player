@@ -61,14 +61,12 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
       this.onTimerTick_();
     });
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateAriaLabel_();
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateAriaLabel_();
           this.updateLocalizedStrings_();
         });

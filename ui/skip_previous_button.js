@@ -48,13 +48,12 @@ shaka.ui.SkipPreviousButton = class extends shaka.ui.Element {
     this.updateAriaLabel_();
     this.checkAvailability_();
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateAriaLabel_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateAriaLabel_();
         });
 
@@ -65,17 +64,15 @@ shaka.ui.SkipPreviousButton = class extends shaka.ui.Element {
       this.queueManager_.playItem(this.queueManager_.getCurrentItemIndex() - 1);
     });
 
-    this.eventManager.listen(this.queueManager_, 'currentitemchanged', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.queueManager_, 'itemsinserted', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.queueManager_, 'itemsremoved', () => {
-      this.checkAvailability_();
-    });
+    this.eventManager.listenMulti(
+        this.queueManager_,
+        [
+          'currentitemchanged',
+          'itemsinserted',
+          'itemsremoved',
+        ], () => {
+          this.checkAvailability_();
+        });
 
     this.eventManager.listen(this.player, 'loading', () => {
       this.checkAvailability_();

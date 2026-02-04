@@ -68,13 +68,12 @@ shaka.ui.AirPlayButton = class extends shaka.ui.Element {
     // Setup button display and state according to the current airplay status
     this.onAirPlayStatusChange_();
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
         });
 
