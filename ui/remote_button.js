@@ -80,13 +80,12 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     if (!this.remote_) {
       this.remoteButton_.classList.add('shaka-hidden');
     } else {
-      this.eventManager.listen(
-          this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-            this.updateLocalizedStrings_();
-          });
-
-      this.eventManager.listen(
-          this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+      this.eventManager.listenMulti(
+          this.localization,
+          [
+            shaka.ui.Localization.LOCALE_UPDATED,
+            shaka.ui.Localization.LOCALE_CHANGED,
+          ], () => {
             this.updateLocalizedStrings_();
           });
 
@@ -101,32 +100,30 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         this.remote_.prompt().catch(() => {});
       });
 
-      this.eventManager.listen(this.remote_, 'connect', () => {
-        this.updateRemoteState_();
-        this.updateIcon_();
-      });
-
-      this.eventManager.listen(this.remote_, 'connecting', () => {
-        this.updateRemoteState_();
-        this.updateIcon_();
-      });
-
-      this.eventManager.listen(this.remote_, 'disconnect', () => {
-        this.updateRemoteState_();
-        this.updateIcon_();
-      });
+      this.eventManager.listenMulti(
+          this.remote_,
+          [
+            'connect',
+            'connecting',
+            'disconnect',
+          ], () => {
+            this.updateRemoteState_();
+            this.updateIcon_();
+          });
 
       this.eventManager.listen(this.player, 'loaded', () => {
         this.updateRemoteState_();
       });
 
       if (this.isSubMenu) {
-        this.eventManager.listen(this.controls, 'submenuopen', () => {
-          this.updateRemoteState_(/* force= */ true);
-        });
-        this.eventManager.listen(this.controls, 'submenuclose', () => {
-          this.updateRemoteState_(/* force= */ true);
-        });
+        this.eventManager.listenMulti(
+            this.controls,
+            [
+              'submenuopen',
+              'submenuclose',
+            ], () => {
+              this.updateRemoteState_(/* force= */ true);
+            });
       }
 
       this.updateRemoteState_(/* force= */ true);

@@ -52,8 +52,12 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     this.addOffOption_();
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
           // If captions/subtitles are off, this string needs localization.
           // TODO: is there a more efficient way of updating just the strings
@@ -61,46 +65,31 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
           this.updateTextLanguages_();
         });
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateLocalizedStrings_();
-          // If captions/subtitles are off, this string needs localization.
-          // TODO: is there a more efficient way of updating just the strings
-          // we need instead of running the whole language update?
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'loading',
+          'loaded',
+          'unloading',
+          'textchanged',
+        ], () => {
+          this.onCaptionStateChange_();
           this.updateTextLanguages_();
         });
-
-    this.eventManager.listen(this.player, 'loading', () => {
-      this.onCaptionStateChange_();
-      this.updateTextLanguages_();
-    });
-
-    this.eventManager.listen(this.player, 'loaded', () => {
-      this.onCaptionStateChange_();
-      this.updateTextLanguages_();
-    });
-
-    this.eventManager.listen(this.player, 'unloading', () => {
-      this.onCaptionStateChange_();
-      this.updateTextLanguages_();
-    });
-
-    this.eventManager.listen(this.player, 'textchanged', () => {
-      this.onCaptionStateChange_();
-      this.updateTextLanguages_();
-    });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
       this.updateTextLanguages_();
     });
 
     if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.updateTextLanguages_();
-      });
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.updateTextLanguages_();
-      });
+      this.eventManager.listenMulti(
+          this.controls,
+          [
+            'submenuopen',
+            'submenuclose',
+          ], () => {
+            this.updateTextLanguages_();
+          });
     }
 
     // Initialize caption state with a fake event.
