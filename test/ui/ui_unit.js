@@ -422,7 +422,7 @@ describe('UI', () => {
           UiUtils.confirmElementFound(videoContainer,
               'shaka-big-buttons-container');
           // Small play button
-          UiUtils.confirmElementMissing(videoContainer,
+          UiUtils.confirmElementFound(videoContainer,
               'shaka-play-button');
           // Volume bar
           UiUtils.confirmElementMissing(controlsButtonPanel,
