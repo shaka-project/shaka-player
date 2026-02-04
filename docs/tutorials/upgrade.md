@@ -145,6 +145,7 @@ application:
     - New API for audio: `getAudioTracks` and `selectAudioTrack`, we also deprecated in v4.14 `getAudioLanguages`, `getAudioLanguagesAndRoles` and `selectAudioLanguage`.
     - `shaka.util.FairPlayUtils` is moved to `shaka.drm.FairPlay` (Deprecated in v4.14)
     - `getChapters` is replaced by `getChaptersAsync` (Deprecated in v4.15)
+    - The `setTextTrackVisibility` method has been removed, along with the previous distinction between selecting a text track and toggling its visibility. Selecting a text track automatically makes it visible, there is no separate visibility control.
 
   - Ad Manager API Changes:
     - Added `setContainers` to set the CS and SS containers.
@@ -153,7 +154,7 @@ application:
     - `onDashTimedMetadata` has been removed.
 
   - Initial track selection:
-    - With the removal of `autoShowText`, initial text track selection will now solely be based on `preferredTextLanguage` and additionally the roles you may prefer.
+    - With `autoShowText` removed, the player now determines the initial text track exclusively using `preferredTextLanguage` and `preferredTextRole`.
     - The app may choose not to pass preferences and instead rely on the tracks API (`getTextTracks`, `getAudioTracks`) along with its own business logic.
 
   - Error API changes:
