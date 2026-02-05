@@ -146,7 +146,7 @@ application:
     - `selectAudioLanguage` has been removed; instead, use the new `selectAudioTrack` API (Deprecated in v4.14)
     - `shaka.util.FairPlayUtils` has been moved to `shaka.drm.FairPlay` (Deprecated in v4.14)
     - `getChapters` is replaced by `getChaptersAsync` (Deprecated in v4.15)
-    - Require apps to call `updateStartTime` instead of setting media element currentTime directly during startup.
+    - Apps must call `updateStartTime` instead of setting the media element's `currentTime` directly during startup.
 
   - Ad Manager API Changes:
     - Added `setContainers` to set the CS and SS containers.
