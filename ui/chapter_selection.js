@@ -34,37 +34,35 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
     this.menu.classList.add('shaka-chapters');
     this.button.classList.add('shaka-tooltip-status');
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
           this.updateChapters_();
         });
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateLocalizedStrings_();
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'unloading',
+          'trackschanged',
+          'chaptersupdated',
+        ], () => {
           this.updateChapters_();
         });
-
-    this.eventManager.listen(this.player, 'unloading', () => {
-      this.updateChapters_();
-    });
-
-    this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.updateChapters_();
-    });
-
-    this.eventManager.listen(this.controls, 'chaptersupdated', () => {
-      this.updateChapters_();
-    });
 
     if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.updateChapters_();
-      });
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.updateChapters_();
-      });
+      this.eventManager.listenMulti(
+          this.controls,
+          [
+            'submenuopen',
+            'submenuclose',
+          ], () => {
+            this.updateChapters_();
+          });
     }
 
     // Set up all the strings in the user's preferred language.

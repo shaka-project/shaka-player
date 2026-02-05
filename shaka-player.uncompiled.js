@@ -95,7 +95,6 @@ goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.AudioLanguageSelection');
 goog.require('shaka.ui.AdInfo');
 goog.require('shaka.ui.AdStatisticsButton');
-goog.require('shaka.ui.AirPlayButton');
 goog.require('shaka.ui.CastButton');
 goog.require('shaka.ui.ChapterSelection');
 goog.require('shaka.ui.ContentTitle');

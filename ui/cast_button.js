@@ -70,13 +70,12 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     // Setup button display and state according to the current cast status
     this.onCastStatusChange_();
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
         });
 

@@ -76,13 +76,12 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
     }
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
         });
 
@@ -110,12 +109,14 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     });
 
     if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.checkAvailability_();
-      });
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.checkAvailability_();
-      });
+      this.eventManager.listenMulti(
+          this.controls,
+          [
+            'submenuopen',
+            'submenuclose',
+          ], () => {
+            this.checkAvailability_();
+          });
     }
 
     if ('documentPictureInPicture' in window) {

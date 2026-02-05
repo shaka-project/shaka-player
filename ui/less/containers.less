@@ -198,9 +198,11 @@
 
   gap: 2.5%;
 
-  z-index: 1;
+  z-index: 2;
 
-  @big-button-size-percentage: 15%;
+  pointer-events: none;
+
+  @big-button-size-percentage: 12.5%;
 
   .shaka-ui-icon {
     width: 75%;
@@ -214,6 +216,8 @@
     border: none;
     margin: 0;
     padding: 0;
+
+    pointer-events: initial;
 
     .center-children();
 
@@ -238,6 +242,53 @@
     }
 
     .show-when-controls-shown();
+  }
+}
+
+.shaka-video-container.pip-placeholder {
+  .center-children();
+
+  .pip-poster {
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+  }
+
+  .shaka-ui-icon {
+    width: 75%;
+    height: 75%;
+  }
+
+  .pip-icon-wrapper {
+    width: 15%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+
+    .center-children();
+
+    color: @general-font-color;
+    background-color: @general-background-color;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 35%);
+    cursor: pointer;
+
+    transition: transform 0.18s ease-out, background-color 0.18s ease-out;
+
+    z-index: 1;
+
+    &:hover {
+      transform: scale(1.06);
+      background-color: @general-background-color-hover;
+    }
+
+    &:active {
+      transform: scale(0.96);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
   }
 }
 

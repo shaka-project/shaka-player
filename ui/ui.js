@@ -272,7 +272,6 @@ shaka.ui.Overlay = class {
       'volume',
       'time_and_duration',
       'spacer',
-      'overflow_menu',
     ];
 
     if (window.chrome) {
@@ -281,9 +280,8 @@ shaka.ui.Overlay = class {
     // eslint-disable-next-line no-restricted-syntax
     if ('remote' in HTMLMediaElement.prototype) {
       controlPanelElements.push('remote');
-    } else if (window.WebKitPlaybackTargetAvailabilityEvent) {
-      controlPanelElements.push('airplay');
     }
+    controlPanelElements.push('overflow_menu');
     controlPanelElements.push('fullscreen');
 
     const mediaSessionActions = [
@@ -377,6 +375,7 @@ shaka.ui.Overlay = class {
         buffered: 'rgba(255, 255, 255, 0.54)',
         played: 'rgb(255, 255, 255)',
         adBreaks: 'rgb(255, 204, 0)',
+        chapters: 'rgba(255, 0, 0, 0.8)',
       },
       volumeBarColors: {
         base: 'rgba(255, 255, 255, 0.54)',
@@ -436,6 +435,7 @@ shaka.ui.Overlay = class {
       allowTogglePresentationTime: true,
       showRemainingTimeInPresentationTime: false,
       enableVrDeviceMotion: true,
+      showUIAlways: false,
       showUIAlwaysOnAudioOnly: true,
       preferIntlDisplayNames: true,
       mediaSession: {
@@ -511,7 +511,6 @@ shaka.ui.Overlay = class {
         'play_pause',
         'cast',
         'remote',
-        'airplay',
         'volume',
         'save_video_frame',
       ];

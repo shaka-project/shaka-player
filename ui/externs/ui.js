@@ -21,7 +21,8 @@ shaka.extern = {};
  *   base: string,
  *   buffered: string,
  *   played: string,
- *   adBreaks: string
+ *   adBreaks: string,
+ *   chapters: string,
  * }}
  *
  * @property {string} base
@@ -36,6 +37,9 @@ shaka.extern = {};
  * @property {string} adBreaks
  *   The CSS background color applied to the portion of the seek bar showing
  *   when the ad breaks are scheduled to occur on the timeline.
+ * @property {string} chapters
+ *   The CSS background color applied to the portion of the seek bar showing
+ *   when a chapter appears on the timeline.
  * @exportDoc
  */
 shaka.extern.UISeekBarColors;
@@ -301,6 +305,7 @@ shaka.extern.UIDocumentPictureInPicture;
  *   allowTogglePresentationTime: boolean,
  *   showRemainingTimeInPresentationTime: boolean,
  *   enableVrDeviceMotion: boolean,
+ *   showUIAlways: boolean,
  *   showUIAlwaysOnAudioOnly: boolean,
  *   preferIntlDisplayNames: boolean,
  *   mediaSession: shaka.extern.UIMediaSession,
@@ -551,6 +556,10 @@ shaka.extern.UIDocumentPictureInPicture;
  *   <br>
  *   Defaults to <code>true</code> except on Vision OS where the default value
  *   is <code>false</code>
+ * @property {boolean} showUIAlways
+ *   If true, always keep the UI visible for all content.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @property {boolean} showUIAlwaysOnAudioOnly
  *   If true, keep the UI always visible if the content is audio only.
  *   <br>

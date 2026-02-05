@@ -61,13 +61,12 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     this.updateLocalizedStrings_();
     this.updateIcon_();
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
         });
 
@@ -96,31 +95,27 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
       this.updateIcon_();
     });
 
-    this.eventManager.listen(this.player, 'loaded', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.player, 'unloading', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.checkAvailability_();
-    });
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'loaded',
+          'unloading',
+          'trackschanged',
+        ], () => {
+          this.checkAvailability_();
+        });
 
     this.eventManager.listen(this.controls, 'caststatuschanged', () => {
       this.updateLocalizedStrings_();
       this.updateIcon_();
     });
 
-    this.eventManager.listen(this.adManager,
-        shaka.ads.Utils.AD_VOLUME_CHANGED, () => {
-          this.updateLocalizedStrings_();
-          this.updateIcon_();
-        });
-
-    this.eventManager.listen(this.adManager,
-        shaka.ads.Utils.AD_MUTED, () => {
+    this.eventManager.listenMulti(
+        this.adManager,
+        [
+          shaka.ads.Utils.AD_VOLUME_CHANGED,
+          shaka.ads.Utils.AD_MUTED,
+        ], () => {
           this.updateLocalizedStrings_();
           this.updateIcon_();
         });

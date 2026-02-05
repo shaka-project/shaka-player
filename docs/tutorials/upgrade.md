@@ -94,11 +94,11 @@ application:
 ## v5.0 (unreleased)
 
   - Configuration changes:
-    - `streaming.forceTransmuxTS` has been renamed to `streaming.forceTransmux`
-      (deprecated in v4.3.0)
+    - `streaming.forceTransmuxTS` has been renamed to `streaming.forceTransmux`,
+      and now also applies to AAC, MP3, AC-3, and EC-3 (deprecated in v4.3.0)
     - `manifest.dash.manifestPreprocessor` and `manifest.mss.manifestPreprocessor`
       have been replaced with `manifest.dash.manifestPreprocessorTXml` and
-      `manifest.mss.manifestPreprocessorTXml` callbacks. This new callbacks now
+      `manifest.mss.manifestPreprocessorTXml` callbacks. These new callbacks now
       accept `shaka.externs.xml.Node`. `getAttribute()` and `textContent` results
       must now be decoded if they might contain escape sequences. You can use
       `shaka.util.StringUtils.htmlUnescape` for this purpose.
@@ -117,21 +117,21 @@ application:
     - `useSafariBehaviorForLive` has been removed.
     - `parsePrftBox` has been removed.
     - `videoRobustness` and `audioRobustness` are now only an array of strings. (deprecated in v4.13.0)
-    - `streaming.forceHTTP` has been renamed to `networking.forceHTTP` (deprecated in v4.15.0)
-    - `streaming.forceHTTPS` has been renamed to `networking.forceHTTPS` (deprecated in v4.15.0)
-    - `streaming.minBytesForProgressEvents` has been renamed to `networking.minBytesForProgressEvents` (deprecated in v4.15.0)
-    - `manifest.dash.enableAudioGroups` has been renamed to `manifest.enableAudioGroups`
+    - `streaming.forceHTTP` has been moved to `networking.forceHTTP` (deprecated in v4.15.0)
+    - `streaming.forceHTTPS` has been moved to `networking.forceHTTPS` (deprecated in v4.15.0)
+    - `streaming.minBytesForProgressEvents` has been moved to `networking.minBytesForProgressEvents` (deprecated in v4.15.0)
+    - `manifest.dash.enableAudioGroups` has been moved to `manifest.enableAudioGroups`
     - `preferredVariantRole` has been renamed to `preferredAudioRole` (deprecated in v4.16.0)
-    - `autoShowText` is removed.
+    - `autoShowText` has been removed.
     - `removeLatencyFromFirstPacketTime` has been removed.
     - `removeLatencyFromFirstPacketTime` has been removed.
     - `streaming.speechToText` moved to `accessibility.speechToText`
 
   - UI Configuration changes:
-    - `doubleClickForFullscreen` enabled by default for mobile.
+    - `doubleClickForFullscreen` is now enabled by default for mobile.
     - `preferDocumentPictureInPicture` has been renamed to `documentPictureInPicture.enabled`.
-    - `customContextMenu` enabled by default for desktop browsers.
-    - `addBigPlayButton` has been removed. Similar feature on `bigButtons` config.
+    - `customContextMenu` is now enabled by default for desktop browsers.
+    - `addBigPlayButton` has been removed; use the `bigButtons` config instead.
 
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.
@@ -142,14 +142,15 @@ application:
   - Player API Changes:
     - The constructor no longer takes `mediaElement` as a parameter; use the `attach` method to attach to a media element instead. (Deprecated in v4.6)
     - The `TimelineRegionInfo.eventElement` has been replaced with `TimelineRegionInfo.eventNode` property, the new property type is `shaka.externs.xml.Node` instead of `Element`
-    - New API for audio: `getAudioTracks` and `selectAudioTrack`, we also deprecated in v4.14 `getAudioLanguages`, `getAudioLanguagesAndRoles` and `selectAudioLanguage`.
-    - `shaka.util.FairPlayUtils` is moved to `shaka.drm.FairPlay` (Deprecated in v4.14)
+    - `getAudioLanguages` and `getAudioLanguagesAndRoles` have been removed; instead, use the new `getAudioTracks` API (Deprecated in v4.14)
+    - `selectAudioLanguage` has been removed; instead, use the new `selectAudioTrack` API (Deprecated in v4.14)
+    - `shaka.util.FairPlayUtils` has been moved to `shaka.drm.FairPlay` (Deprecated in v4.14)
     - `getChapters` is replaced by `getChaptersAsync` (Deprecated in v4.15)
 
   - Ad Manager API Changes:
     - Added `setContainers` to set the CS and SS containers.
     - Removed `video` and `player` params on all methods.
-    - Removed `initClientSide`, `initServerSide`, `initMediaTailor` and `initInterstitial` since now are auto-initialized when necessary.
+    - Removed `initClientSide`, `initServerSide`, `initMediaTailor` and `initInterstitial`, since those things are now auto-initialized when necessary.
     - `onDashTimedMetadata` has been removed.
 
   - Initial track selection:
@@ -158,3 +159,6 @@ application:
 
   - Error API changes:
     - `MEDIA_SOURCE_OPERATION_THREW` error now includes object with details from media element error in `error.data[1]` or string with brief explanation.
+
+  - UI:
+    - `airplay` button has been removed; use the `remote` button instead

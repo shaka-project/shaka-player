@@ -7,7 +7,6 @@
 +../../ui/externs/ui.js
 +../../ui/externs/watermark.js
 +../../ui/play_button.js
-+../../ui/airplay_button.js
 +../../ui/cast_button.js
 +../../ui/chapter_selection.js
 +../../ui/context_menu.js

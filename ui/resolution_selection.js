@@ -68,61 +68,40 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     spanWrapper.appendChild(this.autoQuality);
     spanWrapper.appendChild(this.qualityMark);
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
         });
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateLocalizedStrings_();
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'loading',
+          'loaded',
+          'unloading',
+          'variantchanged',
+          'trackschanged',
+          'abrstatuschanged',
+          'adaptation',
+        ], () => {
+          this.updateSelection_();
+          this.updateLabels_();
         });
-
-
-    this.eventManager.listen(this.player, 'loading', () => {
-      this.updateSelection_();
-      this.updateLabels_();
-    });
-
-    this.eventManager.listen(this.player, 'loaded', () => {
-      this.updateSelection_();
-      this.updateLabels_();
-    });
-
-    this.eventManager.listen(this.player, 'unloading', () => {
-      this.updateSelection_();
-      this.updateLabels_();
-    });
-
-    this.eventManager.listen(this.player, 'variantchanged', () => {
-      this.updateSelection_();
-      this.updateLabels_();
-    });
-
-    this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.updateSelection_();
-      this.updateLabels_();
-    });
-
-    this.eventManager.listen(this.player, 'abrstatuschanged', () => {
-      this.updateSelection_();
-      this.updateLabels_();
-    });
-
-    this.eventManager.listen(this.player, 'adaptation', () => {
-      this.updateSelection_();
-      this.updateLabels_();
-    });
 
     if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.updateSelection_();
-        this.updateLabels_();
-      });
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.updateSelection_();
-        this.updateLabels_();
-      });
+      this.eventManager.listenMulti(
+          this.controls,
+          [
+            'submenuopen',
+            'submenuclose',
+          ], () => {
+            this.updateSelection_();
+            this.updateLabels_();
+          });
     }
 
     this.updateSelection_();
