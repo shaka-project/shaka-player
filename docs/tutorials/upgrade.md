@@ -147,6 +147,7 @@ application:
     - `shaka.util.FairPlayUtils` has been moved to `shaka.drm.FairPlay` (Deprecated in v4.14)
     - `getChapters` is replaced by `getChaptersAsync` (Deprecated in v4.15)
     - The `setTextTrackVisibility` method has been removed, along with the previous distinction between selecting a text track and toggling its visibility. Selecting a text track automatically makes it visible, there is no separate visibility control.
+    - Apps must call `updateStartTime` instead of setting the media element's `currentTime` directly during startup.
 
   - Ad Manager API Changes:
     - Added `setContainers` to set the CS and SS containers.
