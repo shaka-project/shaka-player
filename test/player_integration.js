@@ -957,7 +957,7 @@ describe('Player', () => {
 
   describe('retryLicensing', () => {
     drmIt('retries license request after failure', async () => {
-      if (!checkTrueDrmSupport()) {
+      if (!checkWidevineSupport()) {
         pending('Skipping retry test, only runs with real DRM');
       }
 
