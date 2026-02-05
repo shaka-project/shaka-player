@@ -167,13 +167,14 @@ describe('TextEngine', () => {
           expect(mockDisplayer.appendSpy).not.toHaveBeenCalled();
 
           textEngine.setTimestampOffset(0, 1);
-          // re-adding deferred appeds is async
+          // re-adding deferred appends is async
           await shaka.test.Util.shortDelay();
 
           expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
             dummyData,
             {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
             'subs.vtt',
+            [],
           ]);
 
           expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
@@ -189,13 +190,14 @@ describe('TextEngine', () => {
           expect(mockDisplayer.appendSpy).not.toHaveBeenCalled();
 
           textEngine.setTimestampOffset(0, 2);
-          // re-adding deferred appeds is async
+          // re-adding deferred appends is async
           await shaka.test.Util.shortDelay();
 
           expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
             dummyData,
             {periodStart: 0, segmentStart: 3, segmentEnd: 5, vttOffset: 0},
             'subs2.vtt',
+            [],
           ]);
 
           expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
@@ -211,6 +213,7 @@ describe('TextEngine', () => {
             dummyData,
             {periodStart: 0, segmentStart: 5, segmentEnd: 7, vttOffset: 0},
             'subs3.vtt',
+            [],
           ]);
 
           expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
@@ -401,6 +404,7 @@ describe('TextEngine', () => {
         ];
       });
 
+      textEngine.setTimestampOffset(0, 0);
       textEngine.setTimestampOffset(0, 1);
       textEngine.setTimestampOffset(4, 2);
       await textEngine.appendBuffer(dummyData, 0, 3, 'subs.vtt', 0);
@@ -409,6 +413,7 @@ describe('TextEngine', () => {
         dummyData,
         {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
         'subs.vtt',
+        [],
       ]);
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [
@@ -423,6 +428,7 @@ describe('TextEngine', () => {
         dummyData,
         {periodStart: 4, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
         'subs2.vtt',
+        [],
       ]);
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [

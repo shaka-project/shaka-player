@@ -788,7 +788,7 @@ describe('MediaSourceEngine', () => {
           ContentType.TEXT, data, reference, fakeStream,
           /* hasClosedCaptions= */ false);
       expect(mockTextEngine.appendBuffer).toHaveBeenCalledWith(
-          data, 0, 10, 'foo://bar', 0);
+          data, 0, 10, 'foo://bar', -1);
     });
 
     it('forwards to TextEngine HLS discontinuity sequence', async () => {
