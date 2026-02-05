@@ -1279,6 +1279,7 @@ shaka.extern.PersistentSessionMetadata;
  *   defaultAudioRobustnessForWidevine: string,
  *   defaultVideoRobustnessForWidevine: string,
  *   renewalIntervalSec: number,
+ *   failureCallback: function(!shaka.util.Error),
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1382,6 +1383,14 @@ shaka.extern.PersistentSessionMetadata;
  *   (e.g., Widevine) are not supported.
  *   <br>
  *   Defaults to <code>0</code>.
+ * @property {function(!shaka.util.Error)} failureCallback
+ *   A callback function that is called when a DRM error occurs, such as
+ *   LICENSE_REQUEST_FAILED. The callback receives a shaka.util.Error object.
+ *   Set error.handled to true in the callback to prevent the error from
+ *   being propagated as a fatal error. This allows the application to
+ *   handle the error and retry licensing manually using retryLicensing().
+ *   <br>
+ *   Defaults to a no-op function.
  * @exportDoc
  */
 shaka.extern.DrmConfiguration;

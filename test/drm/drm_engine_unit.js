@@ -2819,6 +2819,131 @@ describe('DrmEngine', () => {
     });
   });
 
+  describe('retryLicensing', () => {
+    beforeEach(async () => {
+      session1.sessionId = 'abc';
+      session1.expiration = NaN;
+      session1.update.and.returnValue(Promise.resolve());
+
+      setDecodingInfoSpy(['drm.abc']);
+      await initAndAttach();
+      await sendEncryptedEvent();
+
+      const message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+      await Util.shortDelay();
+    });
+
+    it('retries licensing by recreating session', async () => {
+      const sessionMetadata = {
+        sessionId: session1.sessionId,
+        sessionType: 'temporary',
+        initData: new Uint8Array(5),
+        initDataType: 'webm',
+      };
+
+      const result = await drmEngine.retryLicensing(sessionMetadata);
+
+      expect(result).toBe(true);
+      expect(session1.close).toHaveBeenCalled();
+    });
+
+    it('returns false for non-existent session', async () => {
+      const sessionMetadata = {
+        sessionId: 'non-existent-session-id',
+        sessionType: 'temporary',
+        initData: new Uint8Array(5),
+        initDataType: 'webm',
+      };
+
+      const result = await drmEngine.retryLicensing(sessionMetadata);
+
+      expect(result).toBe(false);
+    });
+
+    it('handles retry delay', async () => {
+      const sessionMetadata = {
+        sessionId: session1.sessionId,
+        sessionType: 'temporary',
+        initData: new Uint8Array(5),
+        initDataType: 'webm',
+      };
+
+      const startTime = Date.now();
+      await drmEngine.retryLicensing(sessionMetadata, 0.1);
+      const endTime = Date.now();
+
+      // Should have waited at least 90ms (allowing some margin)
+      expect(endTime - startTime).toBeGreaterThanOrEqual(90);
+    });
+  });
+
+  describe('failureCallback', () => {
+    beforeEach(() => {
+      session1.sessionId = 'test-session';
+      session1.update.and.returnValue(Promise.resolve());
+      // Allow errors for these tests since we're testing error handling
+      onErrorSpy.and.stub();
+    });
+
+    it('calls failureCallback on LICENSE_REQUEST_FAILED', async () => {
+      const failureCallback = jasmine.createSpy('failureCallback');
+      config.failureCallback = /** @type {?} */ (failureCallback);
+      drmEngine.configure(config);
+
+      await initAndAttach();
+      await sendEncryptedEvent();
+
+      const netError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS,
+          'http://abc.drm/license', 404);
+      const operation = shaka.util.AbortableOperation.failed(netError);
+      fakeNetEngine.request.and.returnValue(operation);
+
+      const message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+
+      await Util.shortDelay();
+
+      expect(failureCallback).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            category: shaka.util.Error.Category.DRM,
+            code: shaka.util.Error.Code.LICENSE_REQUEST_FAILED,
+          }));
+    });
+
+    it('prevents error propagation when handled is set', async () => {
+      const failureCallback = jasmine.createSpy('failureCallback')
+          .and.callFake((error) => {
+            error.handled = true;
+          });
+      config.failureCallback = /** @type {?} */ (failureCallback);
+      drmEngine.configure(config);
+
+      await initAndAttach();
+      await sendEncryptedEvent();
+
+      const netError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS,
+          'http://abc.drm/license', 404);
+      const operation = shaka.util.AbortableOperation.failed(netError);
+      fakeNetEngine.request.and.returnValue(operation);
+
+      const message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+
+      await Util.shortDelay();
+
+      expect(failureCallback).toHaveBeenCalled();
+      // onError should not be called when error.handled is true
+      expect(onErrorSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('parseInbandPssh', () => {
     const WIDEVINE_PSSH =
         '00000028' +                          // atom size
