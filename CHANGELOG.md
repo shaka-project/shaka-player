@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.16.17](https://github.com/shaka-project/shaka-player/compare/v4.16.16...v4.16.17) (2026-02-05)
+
+
+### Reverts
+
+* **perf:** Use Map.getOrInsert/getOrInsertComputed native methods ([#9655](https://github.com/shaka-project/shaka-player/issues/9655)) ([1961ab6](https://github.com/shaka-project/shaka-player/commit/1961ab6982600f3370ad29892ea162af5c1135c6))
+
 ## [4.16.16](https://github.com/shaka-project/shaka-player/compare/v4.16.15...v4.16.16) (2026-02-02)
 
 
