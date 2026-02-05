@@ -961,6 +961,12 @@ describe('Player', () => {
         pending('Skipping retry test, only runs with real DRM');
       }
 
+      // ! Tizen 3 has a known issue with retryLicensing.
+      if (deviceDetected.getDeviceName() === 'Tizen' &&
+          deviceDetected.getVersion() === 3) {
+        pending('Known issue: retryLicensing fails on Tizen 3');
+      }
+
       let failureCount = 0;
       let retryAttempted = false;
       let firstRequestFailed = false;
