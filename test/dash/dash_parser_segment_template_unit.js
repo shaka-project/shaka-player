@@ -1014,7 +1014,7 @@ describe('DashParser SegmentTemplate', () => {
         <MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
              type="static"
              minBufferTime="PT1S">
-          <Period duration="PT11S">
+          <Period duration="PT7S">
             <AdaptationSet mimeType="audio/mp4">
               <Representation id="1" bandwidth="128000">
                 <SegmentTemplate timescale="1" media="s$Time$.m4s">
@@ -1023,7 +1023,7 @@ describe('DashParser SegmentTemplate', () => {
                       <P d="2" r="1"/>
                       <P d="3"/>
                     </Pattern>
-                    <S t="0" r="4" p="1"/>
+                    <S t="0" r="2" p="1"/>
                   </SegmentTimeline>
                 </SegmentTemplate>
               </Representation>
@@ -1039,12 +1039,12 @@ describe('DashParser SegmentTemplate', () => {
       goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
       const references = Array.from(stream.segmentIndex);
 
-      // Pattern durations: [2,2,3] repeated
-      // r=4 => 5 segments
-      const expectedDurations = [2, 2, 3, 2, 2];
-      const expectedStartTimes = [0, 2, 4, 7, 9];
+      // Pattern durations: [2, 2, 3]
+      // r=2 => 3 segments
+      const expectedDurations = [2, 2, 3];
+      const expectedStartTimes = [0, 2, 4];
 
-      expect(references.length).toBe(5);
+      expect(references.length).toBe(3);
 
       for (let i = 0; i < references.length; i++) {
         expect(references[i].startTime).toBe(expectedStartTimes[i]);
@@ -1058,7 +1058,7 @@ describe('DashParser SegmentTemplate', () => {
         <MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
              type="static"
              minBufferTime="PT1S">
-          <Period duration="PT18S">
+          <Period duration="PT5S">
             <AdaptationSet mimeType="audio/mp4">
               <Representation id="1" bandwidth="128000">
                 <SegmentTemplate timescale="1" media="s$Time$.m4s">
@@ -1068,7 +1068,7 @@ describe('DashParser SegmentTemplate', () => {
                       <P d="2"/>
                       <P d="3"/>
                     </Pattern>
-                    <S t="0" r="2" p="1" pE="1"/>
+                    <S t="0" r="1" p="1" pE="1"/>
                   </SegmentTimeline>
                 </SegmentTemplate>
               </Representation>
@@ -1084,24 +1084,12 @@ describe('DashParser SegmentTemplate', () => {
       goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
       const references = Array.from(stream.segmentIndex);
 
-      // Original pattern from <Pattern>: [1, 2, 3]
-      // pE=1 rotates the pattern to start at index 1 → [2, 3, 1]
-      // S.r=2 repeats the rotated pattern 2 additional times → full sequence:
-      // [2, 3, 1] (first repetition) + [2, 3, 1] (second) + [2, 3, 1] (third)
-      // Start times are cumulative: 0, 2, 5, 6, 8, 11, 12, 14, 17
       const expected = [
         {start: 0, dur: 2},
         {start: 2, dur: 3},
-        {start: 5, dur: 1},
-        {start: 6, dur: 2},
-        {start: 8, dur: 3},
-        {start: 11, dur: 1},
-        {start: 12, dur: 2},
-        {start: 14, dur: 3},
-        {start: 17, dur: 1},
       ];
 
-      expect(references.length).toBe(9);
+      expect(references.length).toBe(2);
 
       for (let i = 0; i < references.length; i++) {
         expect(references[i].startTime).toBe(expected[i].start);
@@ -1115,52 +1103,7 @@ describe('DashParser SegmentTemplate', () => {
         <MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
              type="static"
              minBufferTime="PT1S">
-          <Period duration="PT12S">
-            <AdaptationSet mimeType="audio/mp4">
-              <Representation id="1" bandwidth="128000">
-                <SegmentTemplate timescale="1"
-                                 media="s$Time$.m4s">
-                  <SegmentTimeline>
-                    <Pattern id="1">
-                      <P d="2"/>
-                      <P d="2"/>
-                      <P d="2"/>
-                    </Pattern>
-                    <S t="0" r="1" p="1"/>
-                  </SegmentTimeline>
-                </SegmentTemplate>
-              </Representation>
-            </AdaptationSet>
-          </Period>
-        </MPD>`;
-
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
-
-      const stream = manifest.variants[0].audio;
-      await stream.createSegmentIndex();
-      goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
-      const references = Array.from(stream.segmentIndex);
-
-      // Pattern durations: [2,2,2], repeated r=1 → [2,2,2,2,2,2]
-      const expectedStartTimes = [0, 2, 4, 6, 8, 10];
-      const expectedDurations = [2, 2, 2, 2, 2, 2];
-
-      expect(references.length).toBe(6);
-
-      for (let i = 0; i < references.length; i++) {
-        expect(references[i].startTime).toBe(expectedStartTimes[i]);
-        expect(references[i].endTime)
-            .toBe(expectedStartTimes[i] + expectedDurations[i]);
-      }
-    });
-
-    it('expands multiple S elements referencing the same pattern', async () => {
-      const source = `
-        <MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
-             type="static"
-             minBufferTime="PT1S">
-          <Period duration="PT9S">
+          <Period duration="PT3S">
             <AdaptationSet mimeType="audio/mp4">
               <Representation id="1" bandwidth="128000">
                 <SegmentTemplate timescale="1"
@@ -1169,9 +1112,9 @@ describe('DashParser SegmentTemplate', () => {
                     <Pattern id="1">
                       <P d="1"/>
                       <P d="2"/>
+                      <P d="3"/>
                     </Pattern>
                     <S t="0" r="1" p="1"/>
-                    <S t="6" p="1"/>
                   </SegmentTimeline>
                 </SegmentTemplate>
               </Representation>
@@ -1187,12 +1130,55 @@ describe('DashParser SegmentTemplate', () => {
       goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
       const references = Array.from(stream.segmentIndex);
 
-      // First S: t=0, pattern [1,2], r=1 → [1,2,1,2]
-      // Second S: t=3, pattern [1,2], r=0 → [1,2]
-      const expectedStartTimes = [0, 1, 3, 4, 6, 7];
-      const expectedDurations = [1, 2, 1, 2, 1, 2];
+      const expectedStartTimes = [0, 1];
+      const expectedDurations = [1, 2];
 
-      expect(references.length).toBe(6);
+      expect(references.length).toBe(2);
+
+      for (let i = 0; i < references.length; i++) {
+        expect(references[i].startTime).toBe(expectedStartTimes[i]);
+        expect(references[i].endTime)
+            .toBe(expectedStartTimes[i] + expectedDurations[i]);
+      }
+    });
+
+    it('expands S elements referencing a pattern correctly', async () => {
+      const source = `
+        <MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
+             type="static"
+             minBufferTime="PT1S">
+          <Period duration="PT6S">
+            <AdaptationSet mimeType="audio/mp4">
+              <Representation id="1" bandwidth="128000">
+                <SegmentTemplate timescale="1"
+                                 media="s$Time$.m4s">
+                  <SegmentTimeline>
+                    <Pattern id="p1">
+                      <P d="1"/>
+                      <P d="2"/>
+                      <P d="3"/>
+                    </Pattern>
+                    <S t="0" r="1" p="p1" pE="0"/>
+                    <S t="3" r="0" p="p1" pE="2"/>
+                  </SegmentTimeline>
+                </SegmentTemplate>
+              </Representation>
+            </AdaptationSet>
+          </Period>
+        </MPD>`;
+
+      fakeNetEngine.setResponseText('dummy://foo', source);
+      const manifest = await parser.start('dummy://foo', playerInterface);
+
+      const stream = manifest.variants[0].audio;
+      await stream.createSegmentIndex();
+      goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+      const references = Array.from(stream.segmentIndex);
+
+      const expectedStartTimes = [0, 1, 3];
+      const expectedDurations = [1, 2, 3];
+
+      expect(references.length).toBe(3);
 
       for (let i = 0; i < references.length; i++) {
         expect(references[i].startTime).toBe(expectedStartTimes[i]);
@@ -1206,7 +1192,7 @@ describe('DashParser SegmentTemplate', () => {
         <MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
              type="static"
              minBufferTime="PT1S">
-          <Period duration="PT10S">
+          <Period duration="PT5S">
             <AdaptationSet mimeType="audio/mp4">
               <Representation id="1" bandwidth="128000">
                 <SegmentTemplate timescale="2"
@@ -1232,12 +1218,68 @@ describe('DashParser SegmentTemplate', () => {
       goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
       const references = Array.from(stream.segmentIndex);
 
-      // timescale=2 → duration in seconds = d / timescale
-      // pattern: [4,6] → seconds: [2,3], repeated r=1 → [2,3,2,3]
-      const expectedStartTimes = [0, 2, 5, 7];
-      const expectedDurations = [2, 3, 2, 3];
+      const expectedStartTimes = [0, 2];
+      const expectedDurations = [2, 3];
 
-      expect(references.length).toBe(4);
+      expect(references.length).toBe(2);
+
+      for (let i = 0; i < references.length; i++) {
+        expect(references[i].startTime).toBe(expectedStartTimes[i]);
+        expect(references[i].endTime)
+            .toBe(expectedStartTimes[i] + expectedDurations[i]);
+      }
+    });
+
+    // eslint-disable-next-line @stylistic/max-len
+    it('expands a single S with large r and pE using pattern rotation', async () => {
+      const source = `
+        <MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
+             type="static"
+             minBufferTime="PT1S">
+          <Period duration="PT14S">
+            <AdaptationSet mimeType="audio/mp4">
+              <Representation id="1" bandwidth="128000">
+                <SegmentTemplate timescale="1" media="s$Time$.m4s">
+                  <SegmentTimeline>
+                    <Pattern id="rot">
+                      <P d="1"/>
+                      <P d="2"/>
+                      <P d="3"/>
+                    </Pattern>
+                    <S t="0" r="6" p="rot" pE="1"/>
+                  </SegmentTimeline>
+                </SegmentTemplate>
+              </Representation>
+            </AdaptationSet>
+          </Period>
+        </MPD>`;
+
+      fakeNetEngine.setResponseText('dummy://foo', source);
+      const manifest = await parser.start('dummy://foo', playerInterface);
+
+      const stream = manifest.variants[0].audio;
+      await stream.createSegmentIndex();
+      goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+      const references = Array.from(stream.segmentIndex);
+
+      // Pattern = [1,2,3], pE=1 → start at 2
+      // r= → need 7 segments: [2,3,1,2,3,1,2]
+      const pattern = [1, 2, 3];
+      const pE = 1;
+      const r = 6;
+      const expectedDurations = [];
+      for (let i = 0; i <= r; i++) {
+        expectedDurations.push(pattern[(pE + i) % pattern.length]);
+      }
+
+      const expectedStartTimes = [];
+      let currentTime = 0;
+      for (const d of expectedDurations) {
+        expectedStartTimes.push(currentTime);
+        currentTime += d;
+      }
+
+      expect(references.length).toBe(expectedDurations.length);
 
       for (let i = 0; i < references.length; i++) {
         expect(references[i].startTime).toBe(expectedStartTimes[i]);
