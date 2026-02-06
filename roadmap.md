@@ -15,7 +15,12 @@ Candidate features for future release cycles:
 v6.0
  - Conversion to Typescript (Smaller, more modular binary)
 
-v5.0 - 2025 Q4
+v5.1 - 2026 Q2
+ - TBD
+
+=====
+
+v5.0 - 2026 Q1
  - Add automatic subtitles with translations (Experimental and disabled by default)
    https://github.com/shaka-project/shaka-player/issues/9110
  - Change dvvC box to free box for Dolby Vision workarounds
@@ -25,8 +30,14 @@ v5.0 - 2025 Q4
  - Unify text track selection and visibility by allowing null to disable text
    https://github.com/shaka-project/shaka-player/issues/9048
  - Support tracking events on VAST and VMAP without IMA
-
-=====
+ - DASH: SegmentTimeline@Pattern
+   https://github.com/shaka-project/shaka-player/pull/9669
+ - Implement MediaKeySessionClosedReason handling
+   https://github.com/shaka-project/shaka-player/issues/3446
+ - HLS: AES-256-GCM support
+ - Media Over QUIC + CMSF/MSF (experimental build)
+ - Modernization of the UI, more configs and minor style adjustments
+ - Remove MSS support
 
 v4.16 - 2025 Q3
  - CMCDv2
