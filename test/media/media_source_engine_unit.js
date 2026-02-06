@@ -1585,7 +1585,9 @@ describe('MediaSourceEngine', () => {
 
       audioSourceBuffer.updateend();
       await expectAsync(p1).toBeResolved();
-      await expectAsync(p2).toBeRejected();
+      // Note: Canceling a blocking operation means doing nothing more about
+      // the operation.
+      await expectAsync(p2).toBeResolved();
       await d;
     });
 
