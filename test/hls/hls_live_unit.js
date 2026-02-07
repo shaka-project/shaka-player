@@ -1214,6 +1214,77 @@ describe('HlsParser live', () => {
               shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST});
       });
 
+      // eslint-disable-next-line @stylistic/max-len
+      it('request playlist delta updates to skip segments and EXT-X-DATERANGE', async () => {
+        const mediaWithDeltaUpdates = [
+          '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:LIVE\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=60.0,',
+          'CAN-SKIP-DATERANGES=YES\n',
+          '#EXTINF:2,\n',
+          'main0.mp4\n',
+          '#EXTINF:2,\n',
+          'main1.mp4\n',
+        ].join('');
+
+        const mediaWithSkippedSegments1 = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-MEDIA-SEQUENCE:1\n',
+          '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=60.0,',
+          'CAN-SKIP-DATERANGES=YES\n',
+          '#EXT-X-SKIP:SKIPPED-SEGMENTS=1\n',
+          '#EXTINF:2,\n',
+          'main1.mp4\n',
+          '#EXTINF:2,\n',
+          'main2.mp4\n',
+        ].join('');
+
+        const mediaWithSkippedSegments2 = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-MEDIA-SEQUENCE:2\n',
+          '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=60.0,',
+          'CAN-SKIP-DATERANGES=YES\n',
+          '#EXT-X-SKIP:SKIPPED-SEGMENTS=1\n',
+          '#EXTINF:2,\n',
+          'main2.mp4\n',
+          '#EXTINF:2,\n',
+          'main3.mp4\n',
+        ].join('');
+
+        fakeNetEngine.setResponseText(
+            'test:/video?_HLS_msn=2&_HLS_skip=v2', mediaWithSkippedSegments1);
+
+        fakeNetEngine.setResponseText(
+            'test:/video?_HLS_msn=4&_HLS_skip=v2', mediaWithSkippedSegments2);
+
+        playerInterface.isLowLatencyMode = () => true;
+
+        await testInitialManifest(master, mediaWithDeltaUpdates);
+
+        fakeNetEngine.request.calls.reset();
+
+        await delayForUpdatePeriod();
+        fakeNetEngine.expectRequest(
+            'test:/video?_HLS_msn=2&_HLS_skip=v2',
+            shaka.net.NetworkingEngine.RequestType.MANIFEST,
+            {type:
+              shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST});
+
+        await delayForUpdatePeriod();
+        fakeNetEngine.expectRequest(
+            'test:/video?_HLS_msn=4&_HLS_skip=v2',
+            shaka.net.NetworkingEngine.RequestType.MANIFEST,
+            {type:
+              shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST});
+      });
+
       it('skips older segments', async () => {
         const mediaWithSkippedSegments = [
           '#EXTM3U\n',
