@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.15.29](https://github.com/shaka-project/shaka-player/compare/v4.15.28...v4.15.29) (2026-02-09)
+
+
+### Bug Fixes
+
+* **ci:** Fix Firefox tests running on Windows ([#9670](https://github.com/shaka-project/shaka-player/issues/9670)) ([f419123](https://github.com/shaka-project/shaka-player/commit/f419123a3acdde024ce4756b0f44b0f4a965eafe))
+* Correctly destroy enqueue blocking operations ([#9677](https://github.com/shaka-project/shaka-player/issues/9677)) ([aec50c3](https://github.com/shaka-project/shaka-player/commit/aec50c303bd91b9eb66f41ea97cb4d4f20c989fa))
+* Setup correct video codecs on MSE ([#9667](https://github.com/shaka-project/shaka-player/issues/9667)) ([549a157](https://github.com/shaka-project/shaka-player/commit/549a157247aa6034b7633eca50abc57f69c113a2))
+
+
+### Reverts
+
+* **perf:** Use Map.getOrInsert/getOrInsertComputed native methods ([#9656](https://github.com/shaka-project/shaka-player/issues/9656)) ([c69445a](https://github.com/shaka-project/shaka-player/commit/c69445abb5836ae0fa386988d5007b4c23280833))
+
 ## [4.15.28](https://github.com/shaka-project/shaka-player/compare/v4.15.27...v4.15.28) (2026-02-02)
 
 
