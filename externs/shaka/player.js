@@ -2008,6 +2008,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy,
  *   returnToEndOfLiveWindowWhenOutside: boolean,
  *   stopFetchingOnPause: boolean,
+ *   limitBufferToPresentationDuration: boolean,
  * }}
  *
  * @description
@@ -2259,6 +2260,13 @@ shaka.extern.SpeechToTextConfiguration;
  *   If true, stop fetching new segments on pause. This applies as long as
  *   there is something in the buffer; if there is nothing, we will allow the
  *   loading of the current segment.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} limitBufferToPresentationDuration
+ *   If true, limit the buffer to the presentation duration (cap append window
+ *   at it) so the buffer never extends past it (e.g. HLS when one track is
+ *   longer). Otherwise MediaSource.duration can grow and video never reaches
+ *   "ended" when seeking to end.
  *   <br>
  *   Defaults to <code>false</code>.
  * @exportDoc
