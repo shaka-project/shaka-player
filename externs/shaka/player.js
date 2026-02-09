@@ -1534,6 +1534,7 @@ shaka.extern.DashManifestConfiguration;
  *   disableClosedCaptionsDetection: boolean,
  *   allowLowLatencyByteRangeOptimization: boolean,
  *   allowRangeRequestsToGuessMimeType: boolean,
+ *   endTimeTolerance: number,
  *   chaptersUri: string,
  * }}
  *
@@ -1625,6 +1626,12 @@ shaka.extern.DashManifestConfiguration;
  *   guess the mime type.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {number} endTimeTolerance
+ *   Tolerance in seconds past the last segment's end time when looking up a
+ *   segment. Used so that seeking to the end works when HLS EXTINF duration
+ *   differs slightly from the actual segment duration. Set to 0 to disable.
+ *   <br>
+ *   Defaults to <code>1</code>.
  * @property {string} chaptersUri
  *   A URI pointing to a JSON resource that defines media chapters for HLS
  *   playback.  When provided, Shaka Player will fetch and process this resource

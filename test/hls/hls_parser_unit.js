@@ -2522,6 +2522,50 @@ describe('HlsParser', () => {
     }
   });
 
+  it('uses config manifest.hls.endTimeTolerance when creating segment index',
+      async () => {
+        const master = [
+          '#EXTM3U\n',
+          '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+          'CHANNELS="2",URI="audio"\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+          'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+          'video\n',
+        ].join('');
+
+        const media = [
+          '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:VOD\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXTINF:5,\n',
+          'main.mp4\n',
+        ].join('');
+
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/audio', media)
+            .setResponseText('test:/video', media)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
+
+        const manifest = await parser.start('test:/master', playerInterface);
+        await manifest.variants[0].video.createSegmentIndex();
+
+        const segmentIndex = manifest.variants[0].video.segmentIndex;
+        goog.asserts.assert(segmentIndex != null, 'Null segmentIndex!');
+
+        // Default config has endTimeTolerance: 1. Last segment ends at 5.
+        // find(5.5) is within 1s past end, so should return last segment.
+        const posWithinTolerance = segmentIndex.find(5.5);
+        expect(posWithinTolerance).not.toBeNull();
+        const posNum = /** @type {number} */ (posWithinTolerance);
+        const refWithin = segmentIndex.get(posNum);
+        expect(refWithin.endTime).toBe(5);
+
+        // find(6.5) is beyond 1s past end, so should return null.
+        expect(segmentIndex.find(6.5)).toBeNull();
+      });
+
   it('ignore segments with #EXTINF:0', async () => {
     const master = [
       '#EXTM3U\n',

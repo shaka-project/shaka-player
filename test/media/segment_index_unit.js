@@ -101,6 +101,62 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const pos = index.find(21);
       expect(pos).toBeNull();
     });
+
+    describe('endTimeTolerance', () => {
+      it('returns null when time is past last end and endTimeTolerance is 0',
+          () => {
+            const actual = makeReference(uri(10), 10, 20);
+            const index = new shaka.media.SegmentIndex([actual],
+                {endTimeTolerance: 0});
+
+            expect(index.find(20)).toBeNull();
+            expect(index.find(20.5)).toBeNull();
+            expect(index.find(21)).toBeNull();
+          });
+
+      it('returns last segment when time is within endTimeTolerance past end',
+          () => {
+            const actual = makeReference(uri(10), 10, 20);
+            const index = new shaka.media.SegmentIndex([actual],
+                {endTimeTolerance: 1});
+
+            // At end time and within 1s past end: last segment is returned.
+            const posEnd = index.find(20);
+            expect(posEnd).not.toBeNull();
+            const posEndNum = /** @type {number} */ (posEnd);
+            expect(index.get(posEndNum)).toBe(actual);
+            const posHalf = index.find(20.5);
+            expect(posHalf).not.toBeNull();
+            const posHalfNum = /** @type {number} */ (posHalf);
+            expect(index.get(posHalfNum)).toBe(actual);
+            const posOne = index.find(21);
+            expect(posOne).not.toBeNull();
+            const posOneNum = /** @type {number} */ (posOne);
+            expect(index.get(posOneNum)).toBe(actual);
+          });
+
+      it('returns null when time is beyond endTimeTolerance past last end',
+          () => {
+            const actual = makeReference(uri(10), 10, 20);
+            const index = new shaka.media.SegmentIndex([actual],
+                {endTimeTolerance: 1});
+
+            expect(index.find(21.1)).toBeNull();
+            expect(index.find(22)).toBeNull();
+          });
+
+      it('uses custom endTimeTolerance value', () => {
+        const actual = makeReference(uri(10), 10, 20);
+        const index = new shaka.media.SegmentIndex([actual],
+            {endTimeTolerance: 5});
+
+        const pos24 = index.find(24);
+        expect(pos24).not.toBeNull();
+        const pos24Num = /** @type {number} */ (pos24);
+        expect(index.get(pos24Num)).toBe(actual);
+        expect(index.find(25.1)).toBeNull();
+      });
+    });
   });
 
   describe('get', () => {
