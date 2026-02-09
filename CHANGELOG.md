@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.1](https://github.com/shaka-project/shaka-player/compare/v5.0.0...v5.0.1) (2026-02-09)
+
+
+### Bug Fixes
+
+* Allow MSE ended in canPerformOperations_ ([#9683](https://github.com/shaka-project/shaka-player/issues/9683)) ([6f6fedc](https://github.com/shaka-project/shaka-player/commit/6f6fedc97ed30ab2facf925eb954e89b7ed5f458))
+
 ## [5.0.0](https://github.com/shaka-project/shaka-player/compare/v4.16.0...v5.0.0) (2026-02-06)
 
 
