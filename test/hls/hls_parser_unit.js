@@ -3508,7 +3508,9 @@ describe('HlsParser', () => {
         manifest.anyTimeline();
         manifest.addPartialVariant((variant) => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
-            stream.segmentIndex = new shaka.media.SegmentIndex(segments);
+            // VOD uses default endTimeTolerance (1) to match parser output.
+            stream.segmentIndex = new shaka.media.SegmentIndex(segments,
+                {endTimeTolerance: 1});
           });
         });
         manifest.sequenceMode = sequenceMode;
