@@ -85,7 +85,6 @@ describe('Demo', () => {
           .add('playRangeStart')
           .add('playRangeEnd')
           .add('manifest.dash.keySystemsByURI')
-          .add('manifest.hls.endTimeTolerance')
           .add('manifest.hls.ignoreManifestProgramDateTimeForTypes')
           .add('drm.keySystemsMapping')
           .add('manifest.raiseFatalErrorOnManifestUpdateRequestFailure')
