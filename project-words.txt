@@ -183,7 +183,7 @@ longname
 # 3rd party
 apac
 APPSTB
-Bitcodin
+Bitmovin
 Brightcove
 Broadpeak
 Chromecast
@@ -473,6 +473,7 @@ Xlinks
 AUTOSELECT
 BYTERANGE
 DATERANGE
+DATERANGES
 ENDLIST
 EXTINF
 EXTM

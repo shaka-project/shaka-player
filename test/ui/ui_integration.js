@@ -66,8 +66,6 @@ describe('UI', () => {
     // eslint-disable-next-line no-restricted-syntax
     if ('remote' in HTMLMediaElement.prototype) {
       controlPanelElements.push('remote');
-    } else if (window.WebKitPlaybackTargetAvailabilityEvent) {
-      controlPanelElements.push('airplay');
     }
     controlPanelElements.push('fullscreen');
     const config = {

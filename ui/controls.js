@@ -33,6 +33,7 @@ goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Timer');
+goog.require('shaka.util.Functional');
 
 goog.requireType('shaka.Player');
 goog.requireType('shaka.cast.CastReceiver');
@@ -974,9 +975,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           if (this.shouldUseDocumentPictureInPicture_()) {
             // This is necessary because we need a small delay when
             // executing actions when returning from document PiP.
-            await new Promise((resolve) => {
-              new shaka.util.Timer(resolve).tickAfter(0.05);
-            });
+            await shaka.util.Functional.delay(0.05);
           }
         }
         const fullScreenElement = this.config_.fullScreenElement;

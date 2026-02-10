@@ -30,7 +30,7 @@ shakaAssets.Source = {
   SHAKA: 'Shaka',
   AXINOM: 'Axinom',
   DASH_IF: 'DASH-IF',
-  BITCODIN: 'Bitcodin',
+  BITMOVIN: 'Bitmovin',
   NIMBLE_STREAMER: 'Nimble Streamer',
   GPAC: 'GPAC',
   UPLYNK: 'Verizon Digital Media Services',
@@ -1317,16 +1317,32 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.DASH),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live sim SegmentTimeline w/ $Time$ using Pattern for audio',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/segtimeline_pattern/testpic_2s/Manifest.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live sim SegmentTimeline w/ $Number$ using Pattern for audio',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/segtimelinenr_pattern/testpic_2s/Manifest.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MP4),
   // End DASH-IF Assets }}}
 
-  // bitcodin assets {{{
+  // Bitmovin assets {{{
   // Src: http://www.dash-player.com/demo/streaming-server-and-encoder-support/
   // Src: https://bitmovin.com/mpeg-dash-hls-examples-sample-streams/
   new ShakaDemoAssetInfo(
       /* name= */ 'Art of Motion (DASH)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
-      /* manifestUri= */ 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
-      /* source= */ shakaAssets.Source.BITCODIN)
+      /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/MI201109210084/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
+      /* source= */ shakaAssets.Source.BITMOVIN)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
@@ -1334,8 +1350,8 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'Art of Motion (HLS, TS)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
-      /* manifestUri= */ 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
-      /* source= */ shakaAssets.Source.BITCODIN)
+      /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/MI201109210084/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
+      /* source= */ shakaAssets.Source.BITMOVIN)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP2TS)
@@ -1343,8 +1359,8 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'Art of Motion (HLS, TS, AES-128)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
-      /* manifestUri= */ 'https://bitmovin-a.akamaihd.net/content/art-of-motion_drm/m3u8s/11331.m3u8',
-      /* source= */ shakaAssets.Source.BITCODIN)
+      /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/art-of-motion_drm/m3u8s/11331.m3u8',
+      /* source= */ shakaAssets.Source.BITMOVIN)
       .addKeySystem(shakaAssets.KeySystem.AES128)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.HLS)
@@ -1354,7 +1370,7 @@ shakaAssets.testAssets = [
       /* name= */ 'Art of Motion (HLS, MP4, AES-256)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
       /* manifestUri= */ 'https://jvaryhlstests.blob.core.windows.net/hlstestdata/playlist_encrypted.m3u8',
-      /* source= */ shakaAssets.Source.BITCODIN)
+      /* source= */ shakaAssets.Source.BITMOVIN)
       .addKeySystem(shakaAssets.KeySystem.AES128)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP4)
@@ -1363,7 +1379,7 @@ shakaAssets.testAssets = [
       /* name= */ 'Art of Motion (DASH) (external thumbnails and chapters)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
       /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
-      /* source= */ shakaAssets.Source.BITCODIN)
+      /* source= */ shakaAssets.Source.BITMOVIN)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
@@ -1374,7 +1390,7 @@ shakaAssets.testAssets = [
       /* name= */ 'Art of Motion (HLS) (external thumbnails and chapters)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
       /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
-      /* source= */ shakaAssets.Source.BITCODIN)
+      /* source= */ shakaAssets.Source.BITMOVIN)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP2TS)
@@ -1385,7 +1401,7 @@ shakaAssets.testAssets = [
       /* name= */ 'Art of Motion (MP4) (external thumbnails and chapters)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
       /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/MI201109210084_mpeg-4_hd_high_1080p25_10mbits.mp4',
-      /* source= */ shakaAssets.Source.BITCODIN)
+      /* source= */ shakaAssets.Source.BITMOVIN)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addExtraThumbnail(shakaAssets.ExternalThumbnail.ART_OF_MOTION)
@@ -1394,7 +1410,7 @@ shakaAssets.testAssets = [
       /* name= */ 'VR Playhouse (DASH, VR equirectangular)',
       /* iconUri= */ 'https://cdn.bitmovin.com/content/assets/playhouse-vr/poster.jpg',
       /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/playhouse-vr/mpds/105560.mpd',
-      /* source= */ shakaAssets.Source.BITCODIN)
+      /* source= */ shakaAssets.Source.BITMOVIN)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
@@ -1404,7 +1420,7 @@ shakaAssets.testAssets = [
         displayInVrMode: true,
         defaultVrProjectionMode: 'equirectangular',
       }),
-  // End bitcodin assets }}}
+  // End Bitmovin assets }}}
 
   // Nimble Streamer assets {{{
   // Src: https://wmspanel.com/nimble/demo

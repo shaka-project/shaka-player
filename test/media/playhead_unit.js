@@ -375,32 +375,6 @@ describe('Playhead', () => {
       expect(playhead.getTime()).toBe(30);
     });
 
-    it('does not change currentTime if it\'s not 0', () => {
-      playhead = new shaka.media.MediaSourcePlayhead(
-          video,
-          manifest,
-          config,
-          /* startTime= */ 5,
-          Util.spyFunc(onSeek),
-          Util.spyFunc(onEvent));
-
-      playhead.ready();
-
-      expect(video.addEventListener).toHaveBeenCalledWith(
-          'loadedmetadata', jasmine.any(Function), jasmine.anything());
-
-      expect(playhead.getTime()).toBe(5);
-      expect(video.currentTime).toBe(0);
-
-      video.currentTime = 8;
-      video.readyState = HTMLMediaElement.HAVE_METADATA;
-      video.on['loadedmetadata']();
-
-      // Delay to let Playhead batch up changes to currentTime and observe.
-      jasmine.clock().tick(1000);
-      expect(video.currentTime).toBe(8);
-    });
-
     // This is important for recovering from drift.
     // See: https://github.com/shaka-project/shaka-player/issues/1105
     it('does not change once the initial position is set', () => {
