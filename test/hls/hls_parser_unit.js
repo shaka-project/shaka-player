@@ -2524,6 +2524,9 @@ describe('HlsParser', () => {
 
   it('uses config manifest.hls.endTimeTolerance when creating segment index',
       async () => {
+        config.hls.endTimeTolerance = 1;
+        parser.configure(config);
+
         const master = [
           '#EXTM3U\n',
           '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
@@ -2554,7 +2557,7 @@ describe('HlsParser', () => {
         const segmentIndex = manifest.variants[0].video.segmentIndex;
         goog.asserts.assert(segmentIndex != null, 'Null segmentIndex!');
 
-        // Default config has endTimeTolerance: 1. Last segment ends at 5.
+        // With endTimeTolerance: 1, last segment ends at 5.
         // find(5.5) is within 1s past end, so should return last segment.
         const posWithinTolerance = segmentIndex.find(5.5);
         expect(posWithinTolerance).not.toBeNull();
@@ -3508,9 +3511,8 @@ describe('HlsParser', () => {
         manifest.anyTimeline();
         manifest.addPartialVariant((variant) => {
           variant.addPartialStream(ContentType.VIDEO, (stream) => {
-            // VOD uses default endTimeTolerance (1) to match parser output.
-            stream.segmentIndex = new shaka.media.SegmentIndex(segments,
-                {endTimeTolerance: 1});
+            // Default endTimeTolerance is 0; match parser output.
+            stream.segmentIndex = new shaka.media.SegmentIndex(segments);
           });
         });
         manifest.sequenceMode = sequenceMode;

@@ -1640,7 +1640,7 @@ shaka.extern.DashManifestConfiguration;
  *   segment. Used so that seeking to the end works when HLS EXTINF duration
  *   differs slightly from the actual segment duration. Set to 0 to disable.
  *   <br>
- *   Defaults to <code>1</code>.
+ *   Defaults to <code>0</code>.
  * @property {string} chaptersUri
  *   A URI pointing to a JSON resource that defines media chapters for HLS
  *   playback.  When provided, Shaka Player will fetch and process this resource
