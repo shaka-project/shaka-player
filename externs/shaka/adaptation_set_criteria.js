@@ -62,43 +62,19 @@ shaka.extern.AdaptationSetCriteria.Factory;
 
 /**
  * @typedef {{
- *   languages: !Array<string>,
- *   role: string,
- *   videoRole: string,
- *   channelCount: number,
- *   hdrLevel: string,
- *   spatialAudio: boolean,
- *   videoLayout: string,
- *   audioLabel: string,
- *   videoLabel: string,
+ *   preferredAudio: !Array<!shaka.extern.AudioPreference>,
+ *   preferredVideo: !Array<!shaka.extern.VideoPreference>,
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   audioCodec: string,
  *   activeAudioCodec: string,
  *   activeAudioChannelCount: number,
- *   preferredAudioCodecs: !Array<string>,
- *   preferredAudioChannelCount: number,
  *   keySystem: string,
  * }}
  *
- * @property {!Array<string>} languages
- *   The list of preferred languages used to filter variants, in order of
- *   preference.
- * @property {string} role
- *   The adaptation audio role used to filter variants.
- * @property {string} videoRole
- *   The adaptation video role used to filter variants.
- * @property {string} channelCount
- *   The audio channel count used to filter variants.
- * @property {string} hdrLevel
- *   The HDR level used to filter variants.
- * @property {boolean} spatialAudio
- *   Whether should prefer audio tracks with spatial audio.
- * @property {string} videoLayout
- *   The video layout used to filter variants.
- * @property {string} audioLabel
- *   The audio label used to filter variants.
- * @property {string} videoLabel
- *   The video label used to filter variants.
+ * @property {!Array<!shaka.extern.AudioPreference>} preferredAudio
+ *   An ordered list of audio preferences used to filter variants.
+ * @property {!Array<!shaka.extern.VideoPreference>} preferredVideo
+ *   An ordered list of video preferences used to filter variants.
  * @property {shaka.config.CodecSwitchingStrategy} codecSwitchingStrategy
  *   The codec switching strategy used to filter variants.
  * @property {string} audioCodec
@@ -107,11 +83,7 @@ shaka.extern.AdaptationSetCriteria.Factory;
  *   The active audio codec used to filter variants.
  * @property {number} activeAudioChannelCount
  *   The active audio channel count used to filter variants.
- * @property {!Array<string>} preferredAudioCodecs
- *   The ordered list of audio codecs to filter variants.
- * @property {number} preferredAudioChannelCount
- *   The preferred audio channel count to filter variants.
- * @property {number} keySystem
+ * @property {string} keySystem
  *   Current used key system or empty if not used.
  * @exportDoc
  */
