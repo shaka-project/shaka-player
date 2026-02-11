@@ -55,6 +55,7 @@ for the up-to-date list of maintained branches of Shaka Player.
 |Xbox One      | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Playstation 4⁷| -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Playstation 5⁷| -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
+|Titan OS⁷     | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 
 NOTES:
  - ²: The latest stable Chromecast firmware is tested. Both sender and receiver
@@ -252,6 +253,7 @@ Note: This module is experimental and is only included in the experimental build
 |Playstation 4⁷| -        |untested⁷| -       | -       |untested⁷ |
 |Playstation 5⁷| -        |untested⁷| -       | -       |untested⁷ |
 |Huawei⁷       | -        | -       | -       |untested⁷|untested⁷ |
+|Titan OS⁷     |untested⁷ |untested⁷| -       | -       |untested⁷ |
 
 Other DRM systems should work out of the box if they are interoperable and
 compliant to the EME spec.
