@@ -412,6 +412,8 @@ shakaDemo.Main = class {
     const ui = video['ui'];
     this.player_ = ui.getControls().getPlayer();
 
+    this.customContextMenu_ = ui.getConfiguration().customContextMenu;
+
     if (!this.noInput_) {
       // Don't add the close button if in noInput mode; it doesn't make much
       // sense to stop playing a video if you can't start playing other videos.
@@ -1066,6 +1068,11 @@ shakaDemo.Main = class {
               .split(','));
     }
 
+    if (params.has('manifest.msf.namespaces')) {
+      this.configure('manifest.msf.namespaces',
+          params.get('manifest.msf.namespaces').split(','));
+    }
+
     // Add compiled/uncompiled links.
     this.makeVersionLinks_();
 
@@ -1103,15 +1110,17 @@ shakaDemo.Main = class {
       uncompiledLink.title = 'requires a newer browser';
     }
 
-    if (shaka.log) {
+    // shaka.log only exists in debug/uncompiled builds.
+    const log = shaka['log'];
+    if (log) {
       if (params.has('vv')) {
-        shaka.log.setLevel(shaka.log.Level.V2);
+        log.setLevel(log.Level.V2);
       } else if (params.has('v')) {
-        shaka.log.setLevel(shaka.log.Level.V1);
+        log.setLevel(log.Level.V1);
       } else if (params.has('debug')) {
-        shaka.log.setLevel(shaka.log.Level.DEBUG);
+        log.setLevel(log.Level.DEBUG);
       } else if (params.has('info')) {
-        shaka.log.setLevel(shaka.log.Level.INFO);
+        log.setLevel(log.Level.INFO);
       }
     }
   }
@@ -1592,6 +1601,7 @@ shakaDemo.Main = class {
       'preferredAudioLanguages',
       'preferredTextLanguages',
       'accessibility.speechToText.languagesToTranslate',
+      'manifest.msf.namespaces',
     ];
 
     for (const key of preferredArray) {
@@ -1654,18 +1664,20 @@ shakaDemo.Main = class {
 
     // MAX_LOG_LEVEL is the default starting log level. Only save the log level
     // if it's different from this default.
-    if (shaka.log && shaka.log.currentLevel != shaka.log.MAX_LOG_LEVEL) {
-      switch (shaka.log.currentLevel) {
-        case shaka.log.Level.INFO:
+    // shaka.log only exists in debug/uncompiled builds.
+    const log = shaka['log'];
+    if (log && log.currentLevel != log.MAX_LOG_LEVEL) {
+      switch (log.currentLevel) {
+        case log.Level.INFO:
           params.push('info');
           break;
-        case shaka.log.Level.DEBUG:
+        case log.Level.DEBUG:
           params.push('debug');
           break;
-        case shaka.log.Level.V2:
+        case log.Level.V2:
           params.push('vv');
           break;
-        case shaka.log.Level.V1:
+        case log.Level.V1:
           params.push('v');
           break;
       }

@@ -49,17 +49,15 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
         'loading',
         () => this.onPresentationVolumeChange_());
 
-    this.eventManager.listen(this.player,
-        'loaded',
-        () => this.checkAvailability_());
-
-    this.eventManager.listen(this.player,
-        'unloading',
-        () => this.checkAvailability_());
-
-    this.eventManager.listen(this.player,
-        'trackschanged',
-        () => this.checkAvailability_());
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'loaded',
+          'unloading',
+          'trackschanged',
+        ], () => {
+          this.checkAvailability_();
+        });
 
     this.eventManager.listen(this.controls,
         'caststatuschanged',
@@ -83,14 +81,14 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
           this.onPresentationVolumeChange_();
         });
 
-    this.eventManager.listen(this.localization,
-        shaka.ui.Localization.LOCALE_UPDATED,
-        () => this.updateAriaLabel_());
-
-    this.eventManager.listen(this.localization,
-        shaka.ui.Localization.LOCALE_CHANGED,
-        () => this.updateAriaLabel_());
-
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
+          this.updateAriaLabel_();
+        });
 
     // Initialize volume display and label.
     this.onPresentationVolumeChange_();

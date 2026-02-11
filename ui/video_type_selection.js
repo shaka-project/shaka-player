@@ -35,54 +35,39 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
     this.menu.classList.add('shaka-video-type');
     this.button.classList.add('shaka-tooltip-status');
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
           this.updateVideoRoles_();
         });
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateLocalizedStrings_();
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'loading',
+          'loaded',
+          'unloading',
+          'variantchanged',
+          'trackschanged',
+          'abrstatuschanged',
+          'adaptation',
+        ], () => {
           this.updateVideoRoles_();
         });
-
-
-    this.eventManager.listen(this.player, 'loading', () => {
-      this.updateVideoRoles_();
-    });
-
-    this.eventManager.listen(this.player, 'loaded', () => {
-      this.updateVideoRoles_();
-    });
-
-    this.eventManager.listen(this.player, 'unloading', () => {
-      this.updateVideoRoles_();
-    });
-
-    this.eventManager.listen(this.player, 'variantchanged', () => {
-      this.updateVideoRoles_();
-    });
-
-    this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.updateVideoRoles_();
-    });
-
-    this.eventManager.listen(this.player, 'abrstatuschanged', () => {
-      this.updateVideoRoles_();
-    });
-
-    this.eventManager.listen(this.player, 'adaptation', () => {
-      this.updateVideoRoles_();
-    });
 
     if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.updateVideoRoles_();
-      });
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.updateVideoRoles_();
-      });
+      this.eventManager.listenMulti(
+          this.controls,
+          [
+            'submenuopen',
+            'submenuclose',
+          ], () => {
+            this.updateVideoRoles_();
+          });
     }
 
     // Set up all the strings in the user's preferred language.

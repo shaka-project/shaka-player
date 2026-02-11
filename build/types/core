@@ -86,6 +86,7 @@
 +../../lib/util/config_utils.js
 +../../lib/util/content_steering_manager.js
 +../../lib/util/data_view_reader.js
++../../lib/util/data_view_writer.js
 +../../lib/util/delayed_tick.js
 +../../lib/util/destroyer.js
 +../../lib/util/dom_utils.js
@@ -129,7 +130,6 @@
 +../../lib/util/ts_parser.js
 +../../lib/util/tXml.js
 +../../lib/util/uint8array_utils.js
-+../../lib/util/xml_utils.js
 
 +../../third_party/closure-uri/uri.js
 +../../third_party/closure-uri/utils.js

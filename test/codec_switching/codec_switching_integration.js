@@ -93,7 +93,7 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!deviceDetected.supportsSmoothCodecSwitching()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching('')) {
         pending('SourceBuffer.changeType is not supported');
       }
       if (!await Util.isTypeSupported('audio/webm; codecs="opus"')) {
@@ -165,7 +165,7 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!deviceDetected.supportsSmoothCodecSwitching()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching('')) {
         pending('SourceBuffer.changeType is not supported');
       }
       if (!await Util.isTypeSupported('audio/webm; codecs="opus"')) {
@@ -237,7 +237,7 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!deviceDetected.supportsSmoothCodecSwitching()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching('')) {
         pending('SourceBuffer.changeType is not supported');
       }
       if (!await Util.isTypeSupported('audio/mp4; codecs="ec-3"')) {
@@ -310,7 +310,7 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!deviceDetected.supportsSmoothCodecSwitching()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching('')) {
         pending('SourceBuffer.changeType is not supported');
       }
       if (!await Util.isTypeSupported('audio/mp4; codecs="ec-3"')) {

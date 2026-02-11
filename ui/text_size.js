@@ -36,43 +36,36 @@ shaka.ui.TextSize = class extends shaka.ui.SettingsMenu {
     this.button.classList.add('shaka-tooltip-status');
     this.menu.classList.add('shaka-text-positions');
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
         });
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateLocalizedStrings_();
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'loading',
+          'unloading',
+          'configurationchanged',
+          'trackschanged',
+        ], () => {
+          this.updateTextSizeSelection_();
+          this.checkAvailability_();
         });
-
-    this.eventManager.listen(this.player, 'loading', () => {
-      this.updateTextSizeSelection_();
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.player, 'unloading', () => {
-      this.updateTextSizeSelection_();
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.player, 'configurationchanged', () => {
-      this.updateTextSizeSelection_();
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.updateTextSizeSelection_();
-      this.checkAvailability_();
-    });
 
     if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.checkAvailability_();
-      });
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.checkAvailability_();
-      });
+      this.eventManager.listenMulti(
+          this.controls,
+          [
+            'submenuopen',
+            'submenuclose',
+          ], () => {
+            this.checkAvailability_();
+          });
     }
 
     // Set up all the strings in the user's preferred language.

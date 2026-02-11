@@ -12,15 +12,9 @@ describe('StringUtils', () => {
   });
 
   describe('without TextDecoder', () => {
-    let originalTextDecoder;
-
-    beforeAll(() => {
-      originalTextDecoder = window.TextDecoder;
-      window['TextDecoder'] = null;
-    });
-
-    afterAll(() => {
-      window.TextDecoder = originalTextDecoder;
+    beforeEach(() => {
+      spyOn(deviceDetected, 'shouldAvoidUseTextDecoderEncoder')
+          .and.returnValue(true);
     });
 
     defineStringUtilTests();

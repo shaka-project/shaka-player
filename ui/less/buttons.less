@@ -6,60 +6,12 @@
 
 /* The main buttons in the UI controls. */
 
-@play-button-size-percentage: 15%;
-
 .disabled-button() {
   /* Set the background and the color, otherwise it might be overwritten by
    * the css styles in demo. */
   background-color: transparent;
   color: @general-font-color;
   cursor: default;
-}
-
-/* The giant play button, which sits inside .shaka-player-button-container. */
-.shaka-play-button {
-  /* Set width & height in a round-about way.  By using padding, we can keep
-   * a 1:1 aspect ratio and size the button relative to the container width.
-   *
-   * Since padding is applied equally to top, bottom, left, and right, only use
-   * half of the intended percentage for each.
-   *
-   * Based on tips from https://stackoverflow.com/a/12925343 */
-  box-sizing: border-box;
-  padding: calc(@play-button-size-percentage / 2);
-  width: 0;
-  height: 0;
-
-  /* To be properly positioned in the center, this should have no margin.
-   * This might have been set for buttons generally by the app or user-agent. */
-  margin: 0;
-
-  /* This makes the button a circle. */
-  border-radius: 50%;
-
-  /* A small drop shadow below the button. */
-  box-shadow: rgba(0, 0, 0, 10%) 0 0 20px 0;
-
-  /* No border. */
-  border: none;
-
-  /* The play arrow is a picture. It is treated a background image.
-   * The following settings ensure it shows only once and in the
-   * center of the button. */
-  background-size: 50%;
-  background-repeat: no-repeat;
-  background-position: center center;
-
-  /* A background color behind the play arrow. */
-  background-color: rgba(255, 255, 255, 90%);
-
-  .show-when-controls-shown();
-
-  @media (prefers-reduced-transparency: no-preference) {
-    .shaka-controls-container[shown="true"] & {
-      opacity: 0.75;
-    }
-  }
 }
 
 /* This button contains the current time and duration of the video.

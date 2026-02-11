@@ -93,6 +93,7 @@ shakaDemo.Config = class {
     this.addManifestSection_();
     this.addDashManifestSection_();
     this.addHlsManifestSection_();
+    this.addMsfManifestSection_();
     this.addRetrySection_('manifest', 'Manifest Retry Parameters');
     this.addRestrictionsSection_('', 'Restrictions');
     this.addTextDisplayerSection_();
@@ -153,7 +154,11 @@ shakaDemo.Config = class {
             widevineRobustnessLevels, widevineRobustnessLevels)
         .addSelectInput_('Default video robustness for Widevine',
             'drm.defaultVideoRobustnessForWidevine',
-            widevineRobustnessLevels, widevineRobustnessLevels);
+            widevineRobustnessLevels, widevineRobustnessLevels)
+        .addNumberInput_('Renewal Interval (sec)',
+            'drm.renewalIntervalSec',
+            /* canBeDecimal= */ false,
+            /* canBeZero= */ true);
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const addDRMAdvancedField = (name, valueName, suggestions,
         arrayString = false) => {
@@ -294,7 +299,19 @@ shakaDemo.Config = class {
         .addBoolInput_('Allow LL-HLS byterange optimization',
             'manifest.hls.allowLowLatencyByteRangeOptimization')
         .addBoolInput_('Allow range request to guess mime type',
-            'manifest.hls.allowRangeRequestsToGuessMimeType');
+            'manifest.hls.allowRangeRequestsToGuessMimeType')
+        .addTextInput_('Chapter URI',
+            'manifest.hls.chaptersUri');
+  }
+
+  /** @private */
+  addMsfManifestSection_() {
+    const docLink = this.resolveExternLink_('.ManifestConfiguration');
+    this.addSection_('MSF', docLink)
+        .addTextInput_('Fingerprint URI',
+            'manifest.msf.fingerprintUri')
+        .addArrayStringInput_('Namespaces',
+            'manifest.msf.namespaces');
   }
 
   /** @private */
@@ -682,7 +699,10 @@ shakaDemo.Config = class {
             strategyOptions, strategyOptionsNames)
         .addBoolInput_(
             'Return to end of live window when outside of live window',
-            'streaming.returnToEndOfLiveWindowWhenOutside');
+            'streaming.returnToEndOfLiveWindowWhenOutside')
+        .addBoolInput_(
+            'Stop fetching new segments on pause',
+            'streaming.stopFetchingOnPause');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
   }

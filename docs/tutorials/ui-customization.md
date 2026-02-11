@@ -64,12 +64,10 @@ The following elements can be added to the UI bar using this configuration value
   that support it. Button is invisible on other browsers. Note that it will use the
   [Document Picture-in-Picture API]() if supported.
 * loop: adds a button that controls if the currently selected video is played in a loop.
-* airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
-  supports AirPlay.
 * cast: adds a button that opens a Chromecast dialog. The button is visible only if there is
   at least one Chromecast device on the same network available for casting.
 * remote: adds a button that opens a Remote Playback dialog. The button is visible only if the
-  browser supports Remote Playback API.
+  browser supports Remote Playback API. This works with AirPlay and Cast.
 * quality: adds a button that controls enabling/disabling of abr and video resolution selection.
 * video_type: adds a button that controls video role selection.
 * language: adds a button that controls audio language selection.
@@ -84,6 +82,10 @@ The following elements can be added to the UI bar using this configuration value
   The button is visible only if the content has at least one text track.
 * captions-size: adds a button that controls the size of the captions.
   The button is visible only if the content has at least one text track.
+* skip_next: adds a button to skip to next element in the queue. The button
+  is visible only if there is next.
+* skip_previous: adds a button to skip to previous element in the queue. The button
+  is visible only if there is previous.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 [Document Picture-in-Picture API]: https://developer.chrome.com/docs/web-platform/document-picture-in-picture/
 
@@ -102,10 +104,8 @@ The following buttons can be added to the overflow menu:
   [Document Picture-in-Picture API]() if supported.
 * loop: adds a button that controls if the currently selected video is played in a loop.
 * playback_rate: adds a button that controls the playback rate selection.
-* airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
-  supports AirPlay.
 * remote: adds a button that opens a Remote Playback dialog. The button is visible only if the
-  browser supports Remote Playback API.
+  browser supports Remote Playback API. This works with AirPlay and Cast.
 * statistics: adds a button that displays statistics of the video.
 * recenter_vr: adds a button that recenter the VR view to the initial view. The button is visible
   only if playing a VR content.
@@ -132,6 +132,31 @@ ui.configure(config);
 
 An important note: the 'overflow_menu' button needs to be part of the 'controlPanelElements'
 layout for the overflow menu to be available to the user.
+
+The following elements can be added as big buttons using this configuration value:
+* play_pause: adds a button that plays/pauses the video on click.
+* mute: adds a button that mutes/unmutes the video on click.
+* fullscreen: adds a button that toggles full screen mode on click.
+* rewind: adds a button that rewinds the presentation on click; that is, it starts playing
+  the presentation backwards.
+* fast_forward: adds a button that fast forwards the presentation on click; that is, it
+  starts playing the presentation at an increased speed
+* picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
+* remote: adds a button that opens a Remote Playback dialog. The button is visible only if the
+  browser supports Remote Playback API.
+* loop: adds a button that controls if the currently selected video is played in a loop.
+* skip_next: adds a button to skip to next element in the queue. The button
+  is visible only if there is next.
+* skip_previous: adds a button to skip to previous element in the queue. The button
+  is visible only if there is previous.
+
+Example:
+```js
+const config = {
+  'bigButtons' : ['play_pause']
+}
+ui.configure(config);
+```
 
 #### Adding tooltips to control panel buttons
 
@@ -198,7 +223,7 @@ ui.configure(config);
 ```
 
 The presence of the seek bar and the big play button in the center of the video element can be
-customized with `addSeekBar` and `addBigPlayButton` booleans in the config.
+customized with `addSeekBar` boolean and `bigButtons` in the config.
 
 UI layout can be reconfigured at any point after it's been created.
 Please note that custom layouts might need CSS adjustments to look good.

@@ -37,6 +37,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-mute-button');
     this.button_.classList.add('shaka-tooltip');
+    this.button_.classList.add('shaka-no-propagation');
 
     /** @private {!shaka.ui.Icon} */
     this.icon_ = new shaka.ui.Icon(this.button_,
@@ -60,13 +61,12 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     this.updateLocalizedStrings_();
     this.updateIcon_();
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
         });
 
@@ -95,31 +95,27 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
       this.updateIcon_();
     });
 
-    this.eventManager.listen(this.player, 'loaded', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.player, 'unloading', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.checkAvailability_();
-    });
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'loaded',
+          'unloading',
+          'trackschanged',
+        ], () => {
+          this.checkAvailability_();
+        });
 
     this.eventManager.listen(this.controls, 'caststatuschanged', () => {
       this.updateLocalizedStrings_();
       this.updateIcon_();
     });
 
-    this.eventManager.listen(this.adManager,
-        shaka.ads.Utils.AD_VOLUME_CHANGED, () => {
-          this.updateLocalizedStrings_();
-          this.updateIcon_();
-        });
-
-    this.eventManager.listen(this.adManager,
-        shaka.ads.Utils.AD_MUTED, () => {
+    this.eventManager.listenMulti(
+        this.adManager,
+        [
+          shaka.ads.Utils.AD_VOLUME_CHANGED,
+          shaka.ads.Utils.AD_MUTED,
+        ], () => {
           this.updateLocalizedStrings_();
           this.updateIcon_();
         });
@@ -205,4 +201,7 @@ shaka.ui.OverflowMenu.registerElement(
     'mute', new shaka.ui.MuteButton.Factory());
 
 shaka.ui.Controls.registerElement(
+    'mute', new shaka.ui.MuteButton.Factory());
+
+shaka.ui.Controls.registerBigElement(
     'mute', new shaka.ui.MuteButton.Factory());

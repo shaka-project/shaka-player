@@ -51,6 +51,11 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.container.insertBefore(
         this.adMarkerContainer_, this.container.childNodes[0]);
 
+    /** @private {!HTMLElement} */
+    this.chapterMarkerContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.chapterMarkerContainer_.classList.add('shaka-chapter-markers');
+    this.container.insertBefore(
+        this.chapterMarkerContainer_, this.container.childNodes[0]);
 
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.controls.getConfig();
@@ -82,6 +87,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.markAdBreaks_();
     });
 
+    /** @private {shaka.util.Timer} */
+    this.chaptersTimer_ = new shaka.util.Timer(() => {
+      this.markChapters_();
+    });
 
     /**
      * When user is scrubbing the seek bar - we should pause the video - see
@@ -158,13 +167,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.controls.hideSettingsMenus();
     });
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateAriaLabel_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateAriaLabel_();
         });
 
@@ -217,6 +225,13 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.hideThumbnailTimer_.tickAfter(/* seconds= */ 0.25);
     });
 
+    this.eventManager.listen(this.controls, 'chaptersupdated', () => {
+      this.markChapters_();
+      if (this.player.isDynamic()) {
+        this.chaptersTimer_.tickEvery(/* seconds= */ 0.25);
+      }
+    });
+
     // Initialize seek state and label.
     this.setValue(this.video.currentTime);
     this.update();
@@ -230,12 +245,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
   /** @override */
   release() {
-    if (this.seekTimer_) {
-      this.seekTimer_.stop();
-      this.seekTimer_ = null;
-      this.adBreaksTimer_.stop();
-      this.adBreaksTimer_ = null;
-    }
+    this.seekTimer_?.stop();
+    this.seekTimer_ = null;
+    this.adBreaksTimer_?.stop();
+    this.adBreaksTimer_ = null;
+    this.chaptersTimer_?.stop();
+    this.chaptersTimer_ = null;
 
     super.release();
   }
@@ -440,6 +455,67 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
             'linear-gradient(' + gradient.join(',') + ')';
   }
 
+  /**
+   * @private
+   */
+  markChapters_() {
+    const gradient = ['to right'];
+    const chapterColor = this.config_.seekBarColors.chapters;
+
+    const chapters = this.controls.getChapters();
+
+    if (!chapters.length || !chapterColor || chapterColor === 'transparent') {
+      this.chapterMarkerContainer_.style.background = 'transparent';
+      this.chaptersTimer_?.stop();
+      return;
+    }
+
+    const seekRange = this.player.seekRange();
+    const seekRangeSize = seekRange.end - seekRange.start;
+    const minSeekBarWindow =
+        shaka.ui.SeekBar.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_;
+    if (seekRangeSize < minSeekBarWindow) {
+      this.chapterMarkerContainer_.style.background = 'transparent';
+      this.chaptersTimer_?.stop();
+      return;
+    }
+
+    /** @type {!Set<number>} */
+    const points = new Set();
+
+    for (const chapter of chapters) {
+      if (chapter.startTime < seekRange.start ||
+          chapter.startTime > seekRange.end) {
+        continue;
+      }
+      points.add(chapter.startTime);
+      if (chapter.endTime && chapter.endTime < seekRange.end) {
+        points.add(chapter.endTime);
+      }
+    }
+
+    if (!points.size) {
+      this.chapterMarkerContainer_.style.background = 'transparent';
+      this.chaptersTimer_?.stop();
+      return;
+    }
+
+    const sortedPoints = Array.from(points).sort((a, b) => a - b);
+    for (const point of sortedPoints) {
+      const start = (point - seekRange.start) / seekRangeSize || 0;
+      // We used a small width to simulate the 2px line
+      const end = start + 2 / this.bar.offsetWidth;
+
+      gradient.push(this.makeColor_('transparent', start));
+      gradient.push(this.makeColor_(chapterColor, start));
+      gradient.push(this.makeColor_(chapterColor, end));
+      gradient.push(this.makeColor_('transparent', end));
+    }
+
+    this.chapterMarkerContainer_.style.background =
+        'linear-gradient(' + gradient.join(',') + ')';
+  }
+
 
   /**
    * @param {string} color
@@ -522,23 +598,22 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const seekRange = this.player.seekRange();
     const playerValue = Math.max(Math.ceil(seekRange.start),
         Math.min(Math.floor(seekRange.end), value));
+    let time;
     if (this.player.isDynamic()) {
       const totalSeconds = seekRange.end - value;
       if (totalSeconds < 1) {
-        this.thumbnailTime_.textContent =
-            this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
+        time = this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
       } else {
-        this.thumbnailTime_.textContent =
-            '-' + this.timeFormatter_(totalSeconds);
+        time = '-' + this.timeFormatter_(totalSeconds);
       }
     } else {
-      const time = this.timeFormatter_(value);
-      const chapterName = this.getChapterName_(value);
-      if (chapterName) {
-        this.thumbnailTime_.textContent = time + ' · ' + chapterName;
-      } else {
-        this.thumbnailTime_.textContent = time;
-      }
+      time = this.timeFormatter_(value);
+    }
+    const chapterName = this.getChapterName_(value);
+    if (chapterName) {
+      this.thumbnailTime_.textContent = time + ' · ' + chapterName;
+    } else {
+      this.thumbnailTime_.textContent = time;
     }
 
     const width = this.thumbnailContainer_.clientWidth;

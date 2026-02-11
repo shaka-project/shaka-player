@@ -254,7 +254,7 @@ shaka.extern.CreateSegmentIndexFunction;
  * @typedef {{
  *   bitsKey: number,
  *   blockCipherMode: string,
- *   cryptoKey: (webCrypto.CryptoKey|undefined),
+ *   cryptoKey: (CryptoKey|undefined),
  *   fetchKey: (shaka.extern.CreateSegmentIndexFunction|undefined),
  *   iv: (!Uint8Array|undefined),
  *   firstMediaSequenceNumber: number
@@ -266,8 +266,8 @@ shaka.extern.CreateSegmentIndexFunction;
  * @property {number} bitsKey
  *   The number of the bit key (eg: 128, 256).
  * @property {string} blockCipherMode
- *   The block cipher mode of operation. Possible values: 'CTR' or 'CBC'.
- * @property {webCrypto.CryptoKey|undefined} cryptoKey
+ *   The block cipher mode of operation. Possible values: 'CTR', 'CBC' or 'GCM'.
+ * @property {CryptoKey|undefined} cryptoKey
  *   Web crypto key object of the AES key. If unset, the "fetchKey"
  *   property should be provided.
  * @property {shaka.extern.FetchCryptoKeysFunction|undefined} fetchKey

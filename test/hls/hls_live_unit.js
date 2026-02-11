@@ -1214,6 +1214,77 @@ describe('HlsParser live', () => {
               shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST});
       });
 
+      // eslint-disable-next-line @stylistic/max-len
+      it('request playlist delta updates to skip segments and EXT-X-DATERANGE', async () => {
+        const mediaWithDeltaUpdates = [
+          '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:LIVE\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=60.0,',
+          'CAN-SKIP-DATERANGES=YES\n',
+          '#EXTINF:2,\n',
+          'main0.mp4\n',
+          '#EXTINF:2,\n',
+          'main1.mp4\n',
+        ].join('');
+
+        const mediaWithSkippedSegments1 = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-MEDIA-SEQUENCE:1\n',
+          '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=60.0,',
+          'CAN-SKIP-DATERANGES=YES\n',
+          '#EXT-X-SKIP:SKIPPED-SEGMENTS=1\n',
+          '#EXTINF:2,\n',
+          'main1.mp4\n',
+          '#EXTINF:2,\n',
+          'main2.mp4\n',
+        ].join('');
+
+        const mediaWithSkippedSegments2 = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-MEDIA-SEQUENCE:2\n',
+          '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=60.0,',
+          'CAN-SKIP-DATERANGES=YES\n',
+          '#EXT-X-SKIP:SKIPPED-SEGMENTS=1\n',
+          '#EXTINF:2,\n',
+          'main2.mp4\n',
+          '#EXTINF:2,\n',
+          'main3.mp4\n',
+        ].join('');
+
+        fakeNetEngine.setResponseText(
+            'test:/video?_HLS_msn=2&_HLS_skip=v2', mediaWithSkippedSegments1);
+
+        fakeNetEngine.setResponseText(
+            'test:/video?_HLS_msn=4&_HLS_skip=v2', mediaWithSkippedSegments2);
+
+        playerInterface.isLowLatencyMode = () => true;
+
+        await testInitialManifest(master, mediaWithDeltaUpdates);
+
+        fakeNetEngine.request.calls.reset();
+
+        await delayForUpdatePeriod();
+        fakeNetEngine.expectRequest(
+            'test:/video?_HLS_msn=2&_HLS_skip=v2',
+            shaka.net.NetworkingEngine.RequestType.MANIFEST,
+            {type:
+              shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST});
+
+        await delayForUpdatePeriod();
+        fakeNetEngine.expectRequest(
+            'test:/video?_HLS_msn=4&_HLS_skip=v2',
+            shaka.net.NetworkingEngine.RequestType.MANIFEST,
+            {type:
+              shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST});
+      });
+
       it('skips older segments', async () => {
         const mediaWithSkippedSegments = [
           '#EXTM3U\n',
@@ -1428,6 +1499,252 @@ describe('HlsParser live', () => {
       });
     });  // describe('createSegmentIndex')
   });  // describe('playlist type LIVE')
+
+  it('Live updates: adds new chapter when new segments arrive', async () => {
+    async function loadAllStreamsFor(manifest) {
+      const promises = [];
+      for (const stream of [
+        ...(manifest.videoStreams || []),
+        ...(manifest.audioStreams || []),
+        ...(manifest.textStreams || []),
+        ...(manifest.chapterStreams || []),
+      ]) {
+        if (!stream.segmentIndex) {
+          promises.push(stream.createSegmentIndex());
+        }
+      }
+      await Promise.all(promises);
+    }
+
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",URI="text"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",CHANNELS="2",',
+      'URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'AUDIO="aud1",SUBTITLES="sub1"\n',
+      'video\n',
+      '#EXT-X-SESSION-DATA:DATA-ID="com.apple.hls.chapters",',
+      'URI="chapters.json"\n',
+    ].join('');
+
+    const videoLive1 = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXTINF:5,\n',
+      'main1.mp4\n',
+    ].join('');
+
+    const videoLive2 = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXTINF:5,\n',
+      'main1.mp4\n',
+      '#EXTINF:5,\n',
+      'main2.mp4\n',
+    ].join('');
+
+    const audioLive = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXTINF:5,\n',
+      'audio1.mp4\n',
+    ].join('');
+
+    const textLive = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXTINF:5,\n',
+      'main.vtt\n',
+    ].join('');
+
+    const chaptersJson1 = JSON.stringify([
+      {
+        'chapter': 1,
+        'start-time': 0,
+        'duration': 5,
+        'titles': [
+          {
+            language: 'en',
+            title: 'Intro',
+          },
+        ],
+      },
+    ]);
+
+    const chaptersJson2 = JSON.stringify([
+      {
+        'chapter': 1,
+        'start-time': 0,
+        'duration': 5,
+        'titles': [
+          {
+            language: 'en',
+            title: 'Intro',
+          },
+        ],
+      },
+      {
+        'chapter': 2,
+        'start-time': 5,
+        'duration': 5,
+        'titles': [
+          {
+            language: 'en',
+            title: 'Live Part 1',
+          },
+        ],
+      },
+    ]);
+
+    /** @type {!jasmine.Spy} */
+    const onEvent = jasmine.createSpy('onEvent');
+    playerInterface.onEvent = shaka.test.Util.spyFunc(onEvent);
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', videoLive1)
+        .setResponseText('test:/audio', audioLive)
+        .setResponseText('test:/text', textLive)
+        .setResponseText('test:/chapters.json', chaptersJson1)
+        .setResponseValue('test:/main1.mp4', segmentData)
+        .setResponseValue('test:/main2.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+
+    await loadAllStreamsFor(actual);
+    expect(actual.chapterStreams.length).toBe(1);
+    const chapters = actual.chapterStreams[0];
+    expect(chapters).toBeDefined();
+
+    await chapters.createSegmentIndex();
+    expect(chapters.segmentIndex.getNumReferences()).toBe(1);
+    expect(chapters.segmentIndex.get(0).getUris()[0]).toBe('Intro');
+
+    fakeNetEngine.setResponseText('test:/video', videoLive2);
+    fakeNetEngine.setResponseText('test:/chapters.json', chaptersJson2);
+
+    await parser.update();
+
+    expect(chapters.segmentIndex.getNumReferences()).toBe(2);
+    expect(chapters.segmentIndex.get(0).getUris()[0]).toBe('Intro');
+    expect(chapters.segmentIndex.get(1).getUris()[0]).toBe('Live Part 1');
+  });
+
+  it('Live updates: adds new chapter streams', async () => {
+    async function loadAllStreamsFor(manifest) {
+      const promises = [];
+      for (const stream of [
+        ...(manifest.videoStreams || []),
+        ...(manifest.audioStreams || []),
+        ...(manifest.textStreams || []),
+        ...(manifest.chapterStreams || []),
+      ]) {
+        if (!stream.segmentIndex) {
+          promises.push(stream.createSegmentIndex());
+        }
+      }
+      await Promise.all(promises);
+    }
+
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",URI="text"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",CHANNELS="2",',
+      'URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'AUDIO="aud1",SUBTITLES="sub1"\n',
+      'video\n',
+      '#EXT-X-SESSION-DATA:DATA-ID="com.apple.hls.chapters",',
+      'URI="chapters.json"\n',
+    ].join('');
+
+    const videoLive1 = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXTINF:5,\n',
+      'main1.mp4\n',
+    ].join('');
+
+    const videoLive2 = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXTINF:5,\n',
+      'main1.mp4\n',
+      '#EXTINF:5,\n',
+      'main2.mp4\n',
+    ].join('');
+
+    const audioLive = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXTINF:5,\n',
+      'audio1.mp4\n',
+    ].join('');
+
+    const textLive = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXTINF:5,\n',
+      'main.vtt\n',
+    ].join('');
+
+    const chaptersJson1 = JSON.stringify([]);
+
+    const chaptersJson2 = JSON.stringify([
+      {
+        'chapter': 1,
+        'start-time': 0,
+        'duration': 5,
+        'titles': [
+          {
+            language: 'en',
+            title: 'Intro',
+          },
+        ],
+      },
+    ]);
+
+    /** @type {!jasmine.Spy} */
+    const onEvent = jasmine.createSpy('onEvent');
+    playerInterface.onEvent = shaka.test.Util.spyFunc(onEvent);
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', videoLive1)
+        .setResponseText('test:/audio', audioLive)
+        .setResponseText('test:/text', textLive)
+        .setResponseText('test:/chapters.json', chaptersJson1)
+        .setResponseValue('test:/main1.mp4', segmentData)
+        .setResponseValue('test:/main2.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+
+    await loadAllStreamsFor(actual);
+    expect(actual.chapterStreams.length).toBe(0);
+
+    fakeNetEngine.setResponseText('test:/video', videoLive2);
+    fakeNetEngine.setResponseText('test:/chapters.json', chaptersJson2);
+
+    await parser.update();
+
+    await loadAllStreamsFor(actual);
+    expect(actual.chapterStreams.length).toBe(1);
+    const chapters = actual.chapterStreams[0];
+    expect(chapters).toBeDefined();
+
+    await chapters.createSegmentIndex();
+    expect(chapters.segmentIndex.getNumReferences()).toBe(1);
+    expect(chapters.segmentIndex.get(0).getUris()[0]).toBe('Intro');
+  });
 
   /**
    * @param {string | Array<string>} uri A relative URI to http://example.com

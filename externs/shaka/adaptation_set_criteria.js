@@ -77,6 +77,7 @@ shaka.extern.AdaptationSetCriteria.Factory;
  *   activeAudioChannelCount: number,
  *   preferredAudioCodecs: !Array<string>,
  *   preferredAudioChannelCount: number,
+ *   keySystem: string,
  * }}
  *
  * @property {!Array<string>} languages
@@ -110,6 +111,8 @@ shaka.extern.AdaptationSetCriteria.Factory;
  *   The ordered list of audio codecs to filter variants.
  * @property {number} preferredAudioChannelCount
  *   The preferred audio channel count to filter variants.
+ * @property {number} keySystem
+ *   Current used key system or empty if not used.
  * @exportDoc
  */
 shaka.extern.AdaptationSetCriteria.Configuration;

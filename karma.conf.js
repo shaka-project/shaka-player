@@ -208,9 +208,6 @@ module.exports = (config) => {
       //   Babel polyfill, required for async/await
       'node_modules/@babel/polyfill/dist/polyfill.js',
 
-      // codem-isoboxer module next
-      'node_modules/codem-isoboxer/dist/iso_boxer.min.js',
-
       // LCEVC decoder libraries (.wasm & .js)
       {
         pattern: 'node_modules/lcevc_dec.js/dist/liblcevc_dpi.wasm',
@@ -306,7 +303,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-ts-rollover/*', included: false},
       {pattern: 'test/test/assets/lcevc-sei/*', included: false},
       {pattern: 'test/test/assets/lcevc-sei-ts/*', included: false},
-      {pattern: 'dist/shaka-player.ui.js', included: false},
+      {pattern: 'dist/shaka-player.experimental.js', included: false},
       {pattern: 'dist/locales.js', included: false},
       {pattern: 'demo/**/*.js', included: false},
       {pattern: 'demo/locales/en.json', included: false},

@@ -1277,7 +1277,9 @@ shaka.extern.PersistentSessionMetadata;
  *   minHdcpVersion: string,
  *   ignoreDuplicateInitData: boolean,
  *   defaultAudioRobustnessForWidevine: string,
- *   defaultVideoRobustnessForWidevine: string
+ *   defaultVideoRobustnessForWidevine: string,
+ *   renewalIntervalSec: number,
+ *   failureCallback: function(!shaka.util.Error),
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1373,6 +1375,22 @@ shaka.extern.PersistentSessionMetadata;
  *   <br>
  *   Defaults to <code>'SW_SECURE_DECODE'</code> except on Android where the
  *   default value <code>''</code>.
+ * @property {number} renewalIntervalSec
+ *   The interval in seconds at which the player will attempt to renew
+ *   licenses automatically. Set to 0 to disable automatic renewal.
+ *   <br>
+ *   Note: Only supported for PlayReady and FairPlay. Other key systems
+ *   (e.g., Widevine) are not supported.
+ *   <br>
+ *   Defaults to <code>0</code>.
+ * @property {function(!shaka.util.Error)} failureCallback
+ *   A callback function that is called when a DRM error occurs, such as
+ *   LICENSE_REQUEST_FAILED. The callback receives a shaka.util.Error object.
+ *   Set error.handled to true in the callback to prevent the error from
+ *   being propagated as a fatal error. This allows the application to
+ *   handle the error and retry licensing manually using retryLicensing().
+ *   <br>
+ *   Defaults to a no-op function.
  * @exportDoc
  */
 shaka.extern.DrmConfiguration;
@@ -1524,7 +1542,8 @@ shaka.extern.DashManifestConfiguration;
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
  *   allowLowLatencyByteRangeOptimization: boolean,
- *   allowRangeRequestsToGuessMimeType: boolean
+ *   allowRangeRequestsToGuessMimeType: boolean,
+ *   chaptersUri: string,
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -1615,9 +1634,40 @@ shaka.extern.DashManifestConfiguration;
  *   guess the mime type.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {string} chaptersUri
+ *   A URI pointing to a JSON resource that defines media chapters for HLS
+ *   playback.  When provided, Shaka Player will fetch and process this resource
+ *   to extract chapter metadata and expose it as timeline chapters during
+ *   playback. The JSON document must follow Apple’s HLS JSON Chapters
+ *   specification,  as described in Providing JSON Chapters for HTTP Live
+ *   Streaming. More info in
+ *   https://developer.apple.com/documentation/http-live-streaming/providing-javascript-object-notation-json-chapters
+ *   <br>
+ *   Defaults to <code>''</code>.
+ *
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
+
+/**
+ * @typedef {{
+ *   fingerprintUri: string,
+ *   namespaces: !Array<string>,
+ * }}
+ *
+ * @property {string} fingerprintUri
+ *   A fingerprint URI. If set, the server fingerprint will be fetched from
+ *   this URL. This is required to use self-signed certificates with Chromium.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {string} namespaces
+ *   List of namespaces to use for playback. If empty, namespaces are discovered
+ *   via PublishNamespace messages.
+ *   <br>
+ *   Defaults to <code>[]</code>.
+ * @exportDoc
+ */
+shaka.extern.MsfManifestConfiguration;
 
 
 /**
@@ -1634,6 +1684,7 @@ shaka.extern.HlsManifestConfiguration;
  *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration,
+ *   msf: shaka.extern.MsfManifestConfiguration,
  *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean,
  *   continueLoadingWhenPaused: boolean,
  *   ignoreSupplementalCodecs: boolean,
@@ -1694,6 +1745,8 @@ shaka.extern.HlsManifestConfiguration;
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls
  *   Advanced parameters used by the HLS manifest parser.
+ * @property {shaka.extern.MsfManifestConfiguration} msf
+ *   Advanced parameters used by the MSF.
  * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
  *   If true, manifest update request failures will cause a fatal error.
  *   <br>
@@ -1954,6 +2007,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   avoidEvictionOnQuotaExceededError: boolean,
  *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy,
  *   returnToEndOfLiveWindowWhenOutside: boolean,
+ *   stopFetchingOnPause: boolean,
  * }}
  *
  * @description
@@ -2199,6 +2253,12 @@ shaka.extern.SpeechToTextConfiguration;
  * @property {boolean} returnToEndOfLiveWindowWhenOutside
  *   If true, when the playhead is behind the start of the live window,
  *   it will be moved to the end of the live window, instead of the start.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} stopFetchingOnPause
+ *   If true, stop fetching new segments on pause. This applies as long as
+ *   there is something in the buffer; if there is nothing, we will allow the
+ *   loading of the current segment.
  *   <br>
  *   Defaults to <code>false</code>.
  * @exportDoc

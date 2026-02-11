@@ -272,7 +272,6 @@ shaka.ui.Overlay = class {
       'volume',
       'time_and_duration',
       'spacer',
-      'overflow_menu',
     ];
 
     if (window.chrome) {
@@ -281,9 +280,8 @@ shaka.ui.Overlay = class {
     // eslint-disable-next-line no-restricted-syntax
     if ('remote' in HTMLMediaElement.prototype) {
       controlPanelElements.push('remote');
-    } else if (window.WebKitPlaybackTargetAvailabilityEvent) {
-      controlPanelElements.push('airplay');
     }
+    controlPanelElements.push('overflow_menu');
     controlPanelElements.push('fullscreen');
 
     const mediaSessionActions = [
@@ -308,6 +306,7 @@ shaka.ui.Overlay = class {
         'content_title',
         'spacer',
       ],
+      bigButtons: [],
       overflowMenuButtons: [
         'captions',
         'captions-position',
@@ -361,15 +360,12 @@ shaka.ui.Overlay = class {
         'picture_in_picture',
         'copy_video_frame',
         'save_video_frame',
-        'statistics',
-        'ad_statistics',
       ],
       playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
       fastForwardRates: [2, 4, 8, 1],
       rewindRates: [-1, -2, -4, -8],
       addSeekBar: true,
-      addBigPlayButton: false,
-      customContextMenu: false,
+      customContextMenu: true,
       castReceiverAppId: '',
       castAndroidReceiverCompatible: false,
       clearBufferOnQualityChange: true,
@@ -379,6 +375,7 @@ shaka.ui.Overlay = class {
         buffered: 'rgba(255, 255, 255, 0.54)',
         played: 'rgb(255, 255, 255)',
         adBreaks: 'rgb(255, 204, 0)',
+        chapters: 'rgba(255, 0, 0, 0.8)',
       },
       volumeBarColors: {
         base: 'rgba(255, 255, 255, 0.54)',
@@ -404,7 +401,6 @@ shaka.ui.Overlay = class {
       keyboardSeekDistance: 5,
       keyboardLargeSeekDistance: 60,
       fullScreenElement: this.videoContainer_,
-      preferDocumentPictureInPicture: true,
       showAudioChannelCountVariants: true,
       seekOnTaps: false,
       tapSeekDistance: 10,
@@ -439,6 +435,7 @@ shaka.ui.Overlay = class {
       allowTogglePresentationTime: true,
       showRemainingTimeInPresentationTime: false,
       enableVrDeviceMotion: true,
+      showUIAlways: false,
       showUIAlwaysOnAudioOnly: true,
       preferIntlDisplayNames: true,
       mediaSession: {
@@ -450,17 +447,31 @@ shaka.ui.Overlay = class {
       },
       captionsStyles: true,
       captionsFontScaleFactors: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      documentPictureInPicture: {
+        enabled: true,
+        preferInitialWindowPlacement: false,
+        disallowReturnToOpener: false,
+      },
     };
+
+    if (goog.DEBUG) {
+      config.contextMenuElements.push('statistics');
+      config.contextMenuElements.push('ad_statistics');
+    }
 
     // On mobile, by default, hide the volume slide and the small play/pause
     // button and show the big play/pause button in the center.
     // This is in line with default styles in Chrome.
     if (this.isMobile()) {
-      config.addBigPlayButton = true;
+      config.bigButtons = [
+        'skip_previous',
+        'play_pause',
+        'skip_next',
+      ];
+      config.customContextMenu = false;
       config.singleClickForPlayAndPause = false;
       config.seekOnTaps = true;
       config.enableTooltips = false;
-      config.doubleClickForFullscreen = false;
       const device = shaka.device.DeviceFactory.getDevice();
       config.enableFullscreenOnRotation = device.getBrowserEngine() !==
           shaka.device.IDevice.BrowserEngine.WEBKIT;
@@ -478,6 +489,7 @@ shaka.ui.Overlay = class {
       config.contextMenuElements = config.contextMenuElements.filter(
           (name) => !filterElements.includes(name));
     } else if (this.isCast()) {
+      config.customContextMenu = false;
       config.fadeDelay = 3;
       config.singleClickForPlayAndPause = false;
       config.enableTooltips = false;
@@ -488,7 +500,10 @@ shaka.ui.Overlay = class {
         'spacer',
       ];
     } else if (this.isSmartTV()) {
-      config.addBigPlayButton = true;
+      config.bigButtons = [
+        'play_pause',
+      ];
+      config.customContextMenu = false;
       config.singleClickForPlayAndPause = false;
       config.enableTooltips = false;
       config.doubleClickForFullscreen = false;
@@ -496,7 +511,6 @@ shaka.ui.Overlay = class {
         'play_pause',
         'cast',
         'remote',
-        'airplay',
         'volume',
         'save_video_frame',
       ];

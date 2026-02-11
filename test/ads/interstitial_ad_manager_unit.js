@@ -278,6 +278,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports X-ASSET-LIST', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const assetsList = JSON.stringify({
         ASSETS: [
           {
@@ -286,7 +288,8 @@ describe('Interstitial Ad manager', () => {
         ],
       });
 
-      networkingEngine.setResponseText('test:/test.json', assetsList);
+      networkingEngine.setResponseText(
+          'test:/test.json?_HLS_primary_id=1', assetsList);
 
       const metadata = {
         type: 'com.apple.quicktime.HLS',
@@ -337,6 +340,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports X-ASSET-LIST with X-AD-CREATIVE-SIGNALING', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const assetsList = JSON.stringify({
         ASSETS: [
           {
@@ -418,7 +423,8 @@ describe('Interstitial Ad manager', () => {
         ],
       });
 
-      networkingEngine.setResponseText('test:/test.json', assetsList);
+      networkingEngine.setResponseText(
+          'test:/test.json?_HLS_primary_id=1', assetsList);
 
       const metadata = {
         type: 'com.apple.quicktime.HLS',
@@ -457,7 +463,7 @@ describe('Interstitial Ad manager', () => {
         groupId: 'PREROLL',
         startTime: 0,
         endTime: null,
-        uri: 'ad.m3u8',
+        uri: 'ad.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: false,
         skipOffset: null,
@@ -495,6 +501,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports X-RESTRICT', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const metadata = {
         type: 'com.apple.quicktime.HLS',
         startTime: 0,
@@ -524,7 +532,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: null,
-        uri: 'test.m3u8',
+        uri: 'test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: false,
         skipOffset: null,
@@ -548,6 +556,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports X-SKIP-CONTROL-OFFSET, X-SKIP-CONTROL-DURATION', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const metadata = {
         type: 'com.apple.quicktime.HLS',
         startTime: 0,
@@ -581,7 +591,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: null,
-        uri: 'test.m3u8',
+        uri: 'test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 5,
@@ -605,6 +615,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports X-RESUME-OFFSET', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const metadata = {
         type: 'com.apple.quicktime.HLS',
         startTime: 0,
@@ -634,7 +646,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: null,
-        uri: 'test.m3u8',
+        uri: 'test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 0,
@@ -658,6 +670,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports X-PLAYOUT-LIMIT', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const metadata = {
         type: 'com.apple.quicktime.HLS',
         startTime: 0,
@@ -687,7 +701,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: null,
-        uri: 'test.m3u8',
+        uri: 'test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 0,
@@ -711,6 +725,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports CUE-ONCE', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const metadata = {
         type: 'com.apple.quicktime.HLS',
         startTime: 0,
@@ -740,7 +756,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: null,
-        uri: 'test.m3u8',
+        uri: 'test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 0,
@@ -764,6 +780,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports CUE-PRE', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const metadata = {
         type: 'com.apple.quicktime.HLS',
         startTime: 0,
@@ -793,7 +811,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: null,
-        uri: 'test.m3u8',
+        uri: 'test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 0,
@@ -817,6 +835,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports CUE-POST', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const metadata = {
         type: 'com.apple.quicktime.HLS',
         startTime: 0,
@@ -846,7 +866,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: null,
-        uri: 'test.m3u8',
+        uri: 'test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 0,
@@ -870,6 +890,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports X-TIMELINE-OCCUPIES', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const metadata = {
         type: 'com.apple.quicktime.HLS',
         startTime: 100,
@@ -899,7 +921,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 100,
         endTime: 130,
-        uri: 'test.m3u8',
+        uri: 'test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 0,
@@ -923,6 +945,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports SKIP-CONTROL OFFSET and DURATION', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const assetsList = JSON.stringify({
         'ASSETS': [
           {
@@ -935,7 +959,8 @@ describe('Interstitial Ad manager', () => {
         },
       });
 
-      networkingEngine.setResponseText('test:/test.json', assetsList);
+      networkingEngine.setResponseText(
+          'test:/test.json?_HLS_primary_id=1', assetsList);
 
       const metadata = {
         type: 'com.apple.quicktime.HLS',
@@ -962,7 +987,7 @@ describe('Interstitial Ad manager', () => {
         groupId: 'TEST',
         startTime: 0,
         endTime: null,
-        uri: 'ad.m3u8',
+        uri: 'ad.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 5,
@@ -986,6 +1011,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports overlay events with L-Shape format', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const metadata = {
         type: 'com.apple.quicktime.HLS',
         startTime: 0,
@@ -1041,7 +1068,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: 1,
-        uri: 'test.m3u8',
+        uri: 'test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/vnd.apple.mpegurl',
         isSkippable: false,
         skipOffset: null,
@@ -1091,6 +1118,8 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('supports overlay events double box format', async () => {
+      spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+
       const metadata = {
         type: 'com.apple.quicktime.HLS',
         startTime: 0,
@@ -1154,7 +1183,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: 1,
-        uri: 'test.m3u8',
+        uri: 'test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/vnd.apple.mpegurl',
         isSkippable: false,
         skipOffset: null,

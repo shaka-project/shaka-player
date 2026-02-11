@@ -7,8 +7,6 @@
 +../../ui/externs/ui.js
 +../../ui/externs/watermark.js
 +../../ui/play_button.js
-+../../ui/big_play_button.js
-+../../ui/airplay_button.js
 +../../ui/cast_button.js
 +../../ui/chapter_selection.js
 +../../ui/context_menu.js
@@ -40,7 +38,6 @@
 +../../ui/save_video_frame_button.js
 +../../ui/seek_bar.js
 +../../ui/settings_menu.js
-+../../ui/small_play_button.js
 +../../ui/skip_ad_button.js
 +../../ui/skip_next_button.js
 +../../ui/skip_previous_button.js

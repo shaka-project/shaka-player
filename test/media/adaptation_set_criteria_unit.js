@@ -36,6 +36,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -79,6 +80,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -147,6 +149,7 @@ describe('AdaptationSetCriteria', () => {
           activeAudioChannelCount: 0,
           preferredAudioCodecs: [],
           preferredAudioChannelCount: 0,
+          keySystem: '',
         });
 
         expect(builder.getLastAdaptationSet()).toBeNull();
@@ -208,6 +211,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -258,6 +262,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -302,6 +307,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -373,6 +379,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -453,6 +460,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -511,6 +519,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -589,6 +598,7 @@ describe('AdaptationSetCriteria', () => {
             activeAudioChannelCount: 0,
             preferredAudioCodecs: [],
             preferredAudioChannelCount: 0,
+            keySystem: '',
           });
 
           expect(builder.getLastAdaptationSet()).toBeNull();
@@ -668,6 +678,7 @@ describe('AdaptationSetCriteria', () => {
             activeAudioChannelCount: 0,
             preferredAudioCodecs: [],
             preferredAudioChannelCount: 0,
+            keySystem: '',
           });
 
           expect(builder.getLastAdaptationSet()).toBeNull();
@@ -718,6 +729,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -768,6 +780,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -818,6 +831,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -867,6 +881,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -923,6 +938,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -974,6 +990,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1025,6 +1042,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 2,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1076,6 +1094,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 2,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1126,6 +1145,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 2,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1175,6 +1195,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1220,6 +1241,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1264,6 +1286,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1326,6 +1349,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1376,6 +1400,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1432,6 +1457,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1477,6 +1503,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1521,6 +1548,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1565,6 +1593,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: ['mp4a.40.2'],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1610,6 +1639,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: ['mp4a.40.2'],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1655,6 +1685,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: ['ec-3', 'mp4a.40.2'],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1700,6 +1731,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: [],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();
@@ -1745,6 +1777,7 @@ describe('AdaptationSetCriteria', () => {
         activeAudioChannelCount: 0,
         preferredAudioCodecs: ['ec-3'],
         preferredAudioChannelCount: 0,
+        keySystem: '',
       });
 
       expect(builder.getLastAdaptationSet()).toBeNull();

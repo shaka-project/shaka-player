@@ -55,6 +55,7 @@ for the up-to-date list of maintained branches of Shaka Player.
 |Xbox One      | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Playstation 4⁷| -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Playstation 5⁷| -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
+|Titan OS⁷     | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 
 NOTES:
  - ²: The latest stable Chromecast firmware is tested. Both sender and receiver
@@ -139,7 +140,7 @@ HLS features supported:
  - CEA-608/708 captions
  - Encrypted content with PlayReady, Widevine and WisePlay
  - Encrypted content with FairPlay (Safari on macOS and iOS only)
- - AES-128, AES-256 and AES-256-CTR support on browsers with Web Crypto API support
+ - AES-128, AES-256, AES-256-CTR and AES-256-GCM support on browsers with Web Crypto API support
  - SAMPLE-AES and SAMPLE-AES-CTR (identity) support on browsers with ClearKey support
  - Key rotation
  - Raw AAC, MP3, AC-3 and EC-3 (without an MP4 container)
@@ -199,6 +200,24 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 
 </details>
 
+## MOQT Streaming Format (MSF) (Experimental)
+
+Features supported:
+ - Media over QUIC Transport [draft-14](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/14/)
+ - MOQT Streaming Format [draft-0](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/00/) and CMSF [draft-0](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/00/)
+ - Audio, Video and Text
+ - ABR (only navigator.connection change event)
+ - Encrypted content with PSSH in the initData
+ - MP4 / CMAF support
+ - Live
+ - For browsers that support WebTransport certificate fingerprints (e.g., Chrome), you can use self-signed certificates without installing them.
+
+Features **not** supported:
+ - VOD
+ - MOQT Streaming Format catalog updates
+
+Note: This module is experimental and is only included in the experimental build.
+
 
 ## MPEG-5 Part2 LCEVC Support
 
@@ -234,6 +253,7 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 |Playstation 4⁷| -        |untested⁷| -       | -       |untested⁷ |
 |Playstation 5⁷| -        |untested⁷| -       | -       |untested⁷ |
 |Huawei⁷       | -        | -       | -       |untested⁷|untested⁷ |
+|Titan OS⁷     |untested⁷ |untested⁷| -       | -       |untested⁷ |
 
 Other DRM systems should work out of the box if they are interoperable and
 compliant to the EME spec.
@@ -383,6 +403,7 @@ NOTES:
 ## Builds
 
 Shaka currently provides the following versions:
+- Complete build with UI + Experimental features (`shaka-player.experimental.js`)
 - Complete build with UI (`shaka-player.ui.js`)
 - Complete build without UI (`shaka-player.compiled.js`)
 - DASH build without UI, Cast and Offline (`shaka-player.dash.js`)

@@ -57,6 +57,7 @@ describe('UI Customization', () => {
     const config = {
       controlPanelElements: ['overflow_menu'],
       overflowMenuButtons: ['loop'],
+      customContextMenu: false,
     };
     await UiUtils.createUIThroughAPI(container, video, config, canvas);
 
@@ -76,17 +77,19 @@ describe('UI Customization', () => {
     UiUtils.confirmElementFound(container, 'shaka-seek-bar');
   });
 
-  it('big play button only created when configured', async () => {
+  it('big buttons only created when configured', async () => {
+    const config = {
+      bigButtons: [],
+    };
     const ui = await UiUtils.createUIThroughAPI(
-        container, video, {addBigPlayButton: false}, canvas);
-    UiUtils.confirmElementMissing(container, 'shaka-play-button-container');
-    UiUtils.confirmElementMissing(container, 'shaka-play-button');
+        container, video, config, canvas);
+    UiUtils.confirmElementMissing(container, 'shaka-big-buttons-container');
     await ui.destroy();
 
+    config.bigButtons.push('play_pause');
     await UiUtils.createUIThroughAPI(
-        container, video, {addBigPlayButton: true}, canvas);
-    UiUtils.confirmElementFound(container, 'shaka-play-button-container');
-    UiUtils.confirmElementFound(container, 'shaka-play-button');
+        container, video, config, canvas);
+    UiUtils.confirmElementFound(container, 'shaka-big-buttons-container');
   });
 
   it('controls are created in specified order', async () => {
