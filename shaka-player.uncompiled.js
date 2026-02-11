@@ -21,6 +21,7 @@ goog.require('shaka.device.Chromecast');
 goog.require('shaka.device.DefaultBrowser');
 goog.require('shaka.device.Hisense');
 goog.require('shaka.device.PlayStation');
+goog.require('shaka.device.TitanOS');
 goog.require('shaka.device.Tizen');
 goog.require('shaka.device.Vizio');
 goog.require('shaka.device.WebKitSTB');
