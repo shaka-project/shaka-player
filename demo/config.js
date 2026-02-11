@@ -49,6 +49,12 @@ shakaDemo.Config = class {
      */
     this.latestInput_ = null;
 
+    /** @private {?HTMLInputElement} */
+    this.hdrLevelSelect_ = null;
+
+    /** @private {?HTMLInputElement} */
+    this.videoLayoutSelect_ = null;
+
     this.reload_();
 
     // Listen to external config changes (i.e. from hash changes).
@@ -650,8 +656,24 @@ shakaDemo.Config = class {
       'HLG': 'HLG',
       '': 'No Preference',
     };
-    this.addSelectInput_('Preferred HDR Level', 'preferredVideoHdrLevel',
-        hdrLevels, hdrLevelNames);
+    this.addCustomSelectInput_('Preferred HDR Level', hdrLevelNames,
+        (input) => {
+          this.hdrLevelSelect_ = input;
+          if (this.buildVideoPrefs_) {
+            this.buildVideoPrefs_();
+          }
+        });
+    {
+      const curVideoPrefsHdr = /** @type {!Array} */(
+        shakaDemoMain.getCurrentConfigValue('preferredVideo'));
+      const firstVP = curVideoPrefsHdr[0] || {};
+      for (const key in hdrLevels) {
+        if (hdrLevels[key] == (firstVP.hdrLevel || '')) {
+          this.latestInput_.input().value = key;
+        }
+      }
+      this.hdrLevelSelect_ = this.latestInput_.input();
+    }
 
     const videoLayouts = {
       '': '',
@@ -663,8 +685,24 @@ shakaDemo.Config = class {
       'CH-MONO': 'Monoscopic',
       '': 'No Preference',
     };
-    this.addSelectInput_('Preferred video layout', 'preferredVideoLayout',
-        videoLayouts, videoLayoutsNames);
+    this.addCustomSelectInput_('Preferred video layout', videoLayoutsNames,
+        (input) => {
+          this.videoLayoutSelect_ = input;
+          if (this.buildVideoPrefs_) {
+            this.buildVideoPrefs_();
+          }
+        });
+    {
+      const curVideoPrefsLayout = /** @type {!Array} */(
+        shakaDemoMain.getCurrentConfigValue('preferredVideo'));
+      const firstVP = curVideoPrefsLayout[0] || {};
+      for (const key in videoLayouts) {
+        if (videoLayouts[key] == (firstVP.layout || '')) {
+          this.latestInput_.input().value = key;
+        }
+      }
+      this.videoLayoutSelect_ = this.latestInput_.input();
+    }
 
     const strategyOptions = shaka.config.CrossBoundaryStrategy;
     const strategyOptionsNames = {
@@ -789,39 +827,203 @@ shakaDemo.Config = class {
   addLanguageSection_() {
     const docLink = this.resolveExternLink_('.PlayerConfiguration');
 
-    this.addSection_('Language', docLink)
-        .addArrayStringInput_('Preferred Audio Languages',
-            'preferredAudioLanguages')
-        .addTextInput_('Preferred Audio Label', 'preferredAudioLabel')
-        .addTextInput_('Preferred Video Label', 'preferredVideoLabel')
-        .addTextInput_('Preferred Audio Role', 'preferredAudioRole')
-        .addTextInput_('Preferred Video Role', 'preferredVideoRole')
-        .addArrayStringInput_('Preferred Text Languages',
-            'preferredTextLanguages')
-        .addTextInput_('Preferred Text Role', 'preferredTextRole');
-    const onChange = (input) => {
+    this.addSection_('Language', docLink);
+
+    // Audio preferences - build preferredAudio array from individual inputs
+    const buildAudioPrefs = () => {
+      const langs = (audioLangsInput.value || '').split(',').filter(Boolean);
+      const role = audioRoleInput.value || '';
+      const label = audioLabelInput.value || '';
+      const channelCount = Number(audioChannelInput.value) || 0;
+      const spatialAudio = spatialAudioInput.checked || undefined;
+      if (!langs.length) {
+        const pref = {language: '', role, label, channelCount, codecs: '',
+          spatialAudio};
+        shakaDemoMain.configure('preferredAudio',
+            (role || label || channelCount || spatialAudio !== undefined) ?
+              [pref] : []);
+      } else {
+        shakaDemoMain.configure('preferredAudio', langs.map((lang) =>
+          ({language: lang, role, label, channelCount, codecs: '',
+            spatialAudio})));
+      }
+      shakaDemoMain.remakeHash();
+    };
+
+    const curAudioPrefs = /** @type {!Array} */(
+      shakaDemoMain.getCurrentConfigValue('preferredAudio'));
+    const firstAudioPref = curAudioPrefs[0] || {};
+
+    this.addCustomTextInput_('Preferred Audio Languages', (input) => {
+      buildAudioPrefs();
+    });
+    const audioLangsInput = this.latestInput_.input();
+    audioLangsInput.value =
+        curAudioPrefs.map((p) => p.language).filter(Boolean).join(',');
+
+    this.addCustomTextInput_('Preferred Audio Label', (input) => {
+      buildAudioPrefs();
+    });
+    const audioLabelInput = this.latestInput_.input();
+    audioLabelInput.value = firstAudioPref.label || '';
+
+    this.addCustomTextInput_('Preferred Audio Role', (input) => {
+      buildAudioPrefs();
+    });
+    const audioRoleInput = this.latestInput_.input();
+    audioRoleInput.value = firstAudioPref.role || '';
+
+    // Video preferences
+    const curVideoPrefs = /** @type {!Array} */(
+      shakaDemoMain.getCurrentConfigValue('preferredVideo'));
+    const firstVideoPref = curVideoPrefs[0] || {};
+
+    this.addCustomTextInput_('Preferred Video Label', (input) => {
+      this.buildVideoPrefs_();
+    });
+    /** @private {!HTMLInputElement} */
+    this.videoLabelInput_ = this.latestInput_.input();
+    this.videoLabelInput_.value = firstVideoPref.label || '';
+
+    this.addCustomTextInput_('Preferred Video Role', (input) => {
+      this.buildVideoPrefs_();
+    });
+    /** @private {!HTMLInputElement} */
+    this.videoRoleInput_ = this.latestInput_.input();
+    this.videoRoleInput_.value = firstVideoPref.role || '';
+
+    // Text preferences
+    const buildTextPrefs = () => {
+      const langs = (textLangsInput.value || '').split(',').filter(Boolean);
+      const role = textRoleInput.value || '';
+      if (!langs.length) {
+        shakaDemoMain.configure('preferredText',
+            role ? [{language: '', role, format: ''}] : []);
+      } else {
+        shakaDemoMain.configure('preferredText',
+            langs.map((lang) => ({language: lang, role, format: ''})));
+      }
+      shakaDemoMain.remakeHash();
+    };
+
+    const curTextPrefs = /** @type {!Array} */(
+      shakaDemoMain.getCurrentConfigValue('preferredText'));
+    const firstTextPref = curTextPrefs[0] || {};
+
+    this.addCustomTextInput_('Preferred Text Languages', (input) => {
+      buildTextPrefs();
+    });
+    const textLangsInput = this.latestInput_.input();
+    textLangsInput.value =
+        curTextPrefs.map((p) => p.language).filter(Boolean).join(',');
+
+    this.addCustomTextInput_('Preferred Text Role', (input) => {
+      buildTextPrefs();
+    });
+    const textRoleInput = this.latestInput_.input();
+    textRoleInput.value = firstTextPref.role || '';
+
+    const onLocaleChange = (input) => {
       shakaDemoMain.setUILocale(input.value);
       shakaDemoMain.remakeHash();
     };
-    this.addCustomTextInput_('Preferred UI Locale', onChange);
+    this.addCustomTextInput_('Preferred UI Locale', onLocaleChange);
     this.latestInput_.input().value = shakaDemoMain.getUILocale();
-    this.addNumberInput_('Preferred Audio Channel Count',
-        'preferredAudioChannelCount');
-    this.addBoolInput_('Prefer Spatial Audio', 'preferSpatialAudio');
+
+    this.createRow_('Preferred Audio Channel Count');
+    this.latestInput_ = new shakaDemo.NumberInput(
+        this.getLatestSection_(), 'Preferred Audio Channel Count',
+        (input) => buildAudioPrefs(), false, true, false);
+    const audioChannelInput = this.latestInput_.input();
+    audioChannelInput.value = String(firstAudioPref.channelCount || 2);
+
+    this.createRow_('Prefer Spatial Audio');
+    this.latestInput_ = new shakaDemo.BoolInput(
+        this.getLatestSection_(), 'Prefer Spatial Audio',
+        (input) => buildAudioPrefs());
+    const spatialAudioInput = this.latestInput_.input();
+    spatialAudioInput.checked = firstAudioPref.spatialAudio || false;
+
     this.addBoolInput_('Prefer Forced Subs', 'preferForcedSubs');
+  }
+
+  /**
+   * Build and apply the current video preference from all video-related inputs.
+   * @private
+   */
+  buildVideoPrefs_() {
+    const role = this.videoRoleInput_ ? this.videoRoleInput_.value : '';
+    const label = this.videoLabelInput_ ? this.videoLabelInput_.value : '';
+    const hdrLevels = {
+      'Auto Detect': 'AUTO', 'SDR': 'SDR', 'PQ': 'PQ', 'HLG': 'HLG',
+      'No Preference': '',
+    };
+    const hdrLevel = this.hdrLevelSelect_ ?
+      (hdrLevels[this.hdrLevelSelect_.value] || this.hdrLevelSelect_.value ||
+          'AUTO') : 'AUTO';
+    const videoLayouts = {
+      'Stereoscopic': 'CH-STEREO', 'Monoscopic': 'CH-MONO',
+      'No Preference': '',
+    };
+    const layout = this.videoLayoutSelect_ ?
+      (videoLayouts[this.videoLayoutSelect_.value] ||
+          this.videoLayoutSelect_.value || '') : '';
+    shakaDemoMain.configure('preferredVideo',
+        [{role, label, codec: '', hdrLevel, layout}]);
+    shakaDemoMain.remakeHash();
   }
 
   /** @private */
   addCodecPreferenceSection_() {
     const docLink = this.resolveExternLink_('.PlayerConfiguration');
+    this.addSection_('Codec preference', docLink);
 
-    this.addSection_('Codec preference', docLink)
-        .addArrayStringInput_('Preferred video codecs',
-            'preferredVideoCodecs')
-        .addArrayStringInput_('Preferred audio codecs',
-            'preferredAudioCodecs')
-        .addArrayStringInput_('Preferred text formats',
-            'preferredTextFormats');
+    // Video codecs - stored as separate preferredVideo entries
+    const curVideoPrefs = /** @type {!Array} */(
+      shakaDemoMain.getCurrentConfigValue('preferredVideo'));
+    this.addCustomTextInput_('Preferred video codecs', (input) => {
+      const codecs = input.value.split(',').filter(Boolean);
+      if (codecs.length) {
+        shakaDemoMain.configure('preferredVideo',
+            codecs.map((codec) => ({
+              role: '', label: '', codec, hdrLevel: 'AUTO', layout: '',
+            })));
+      }
+      shakaDemoMain.remakeHash();
+    });
+    this.latestInput_.input().value =
+        curVideoPrefs.map((p) => p.codec).filter(Boolean).join(',');
+
+    // Audio codecs - stored as separate preferredAudio entries
+    const curAudioPrefs = /** @type {!Array} */(
+      shakaDemoMain.getCurrentConfigValue('preferredAudio'));
+    this.addCustomTextInput_('Preferred audio codecs', (input) => {
+      const codecs = input.value.split(',').filter(Boolean);
+      if (codecs.length) {
+        shakaDemoMain.configure('preferredAudio',
+            codecs.map((codec) => ({
+              language: '', role: '', label: '',
+              channelCount: 0, codecs: codec,
+            })));
+      }
+      shakaDemoMain.remakeHash();
+    });
+    this.latestInput_.input().value =
+        curAudioPrefs.map((p) => p.codecs).filter(Boolean).join(',');
+
+    // Text formats
+    const curTextPrefs = /** @type {!Array} */(
+      shakaDemoMain.getCurrentConfigValue('preferredText'));
+    this.addCustomTextInput_('Preferred text formats', (input) => {
+      const formats = input.value.split(',').filter(Boolean);
+      if (formats.length) {
+        shakaDemoMain.configure('preferredText',
+            formats.map((format) => ({language: '', role: '', format})));
+      }
+      shakaDemoMain.remakeHash();
+    });
+    this.latestInput_.input().value =
+        curTextPrefs.map((p) => p.format).filter(Boolean).join(',');
   }
 
   /** @private */

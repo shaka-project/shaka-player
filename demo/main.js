@@ -439,7 +439,10 @@ shakaDemo.Main = class {
     this.defaultConfig_ = this.player_.getConfiguration();
     this.desiredConfig_ = this.player_.getConfiguration();
     const languages = navigator.languages || ['en-us'];
-    this.configure('preferredAudioLanguages', languages);
+    this.configure('preferredAudio',
+        languages.map((l) => ({
+          language: l, role: '', label: '', channelCount: 0, codecs: '',
+        })));
     this.uiLocale_ = languages[0];
 
     const onErrorEvent = (event) => this.onErrorEvent_(event);
@@ -1038,28 +1041,33 @@ shakaDemo.Main = class {
     }
 
     if (params.has('preferredVideoCodecs')) {
-      this.configure('preferredVideoCodecs',
-          params.get('preferredVideoCodecs').split(','));
+      this.configure('preferredVideo',
+          params.get('preferredVideoCodecs').split(',').map((codec) =>
+            ({role: '', label: '', codec, hdrLevel: 'AUTO', layout: ''})));
     }
 
     if (params.has('preferredAudioCodecs')) {
-      this.configure('preferredAudioCodecs',
-          params.get('preferredAudioCodecs').split(','));
+      this.configure('preferredAudio',
+          params.get('preferredAudioCodecs').split(',').map((codecs) =>
+            ({language: '', role: '', label: '', channelCount: 0, codecs})));
     }
 
     if (params.has('preferredTextFormats')) {
-      this.configure('preferredTextFormats',
-          params.get('preferredTextFormats').split(','));
+      this.configure('preferredText',
+          params.get('preferredTextFormats').split(',').map((format) =>
+            ({language: '', role: '', format})));
     }
 
     if (params.has('preferredAudioLanguages')) {
-      this.configure('preferredAudioLanguages',
-          params.get('preferredAudioLanguages').split(','));
+      this.configure('preferredAudio',
+          params.get('preferredAudioLanguages').split(',').map((language) =>
+            ({language, role: '', label: '', channelCount: 0, codecs: ''})));
     }
 
     if (params.has('preferredTextLanguages')) {
-      this.configure('preferredTextLanguages',
-          params.get('preferredTextLanguages').split(','));
+      this.configure('preferredText',
+          params.get('preferredTextLanguages').split(',').map((language) =>
+            ({language, role: '', format: ''})));
     }
 
     if (params.has('accessibility.speechToText.languagesToTranslate')) {
@@ -1594,17 +1602,42 @@ shakaDemo.Main = class {
     }
     params.push('uilang=' + this.getUILocale());
 
-    const preferredArray = [
-      'preferredVideoCodecs',
-      'preferredAudioCodecs',
-      'preferredTextFormats',
-      'preferredAudioLanguages',
-      'preferredTextLanguages',
+    // Serialize structured preferences back to legacy hash param names
+    const prefAudio = /** @type {!Array} */(
+      this.getCurrentConfigValue('preferredAudio'));
+    const audioLangs = prefAudio.map((p) => p.language).filter(Boolean);
+    if (audioLangs.length) {
+      params.push('preferredAudioLanguages=' + audioLangs.join(','));
+    }
+    const audioCodecs = prefAudio.map((p) => p.codecs).filter(Boolean);
+    if (audioCodecs.length) {
+      params.push('preferredAudioCodecs=' + audioCodecs.join(','));
+    }
+
+    const prefText = /** @type {!Array} */(
+      this.getCurrentConfigValue('preferredText'));
+    const textLangs = prefText.map((p) => p.language).filter(Boolean);
+    if (textLangs.length) {
+      params.push('preferredTextLanguages=' + textLangs.join(','));
+    }
+    const textFormats = prefText.map((p) => p.format).filter(Boolean);
+    if (textFormats.length) {
+      params.push('preferredTextFormats=' + textFormats.join(','));
+    }
+
+    const prefVideo = /** @type {!Array} */(
+      this.getCurrentConfigValue('preferredVideo'));
+    const videoCodecs = prefVideo.map((p) => p.codec).filter(Boolean);
+    if (videoCodecs.length) {
+      params.push('preferredVideoCodecs=' + videoCodecs.join(','));
+    }
+
+    const otherArrays = [
       'accessibility.speechToText.languagesToTranslate',
       'manifest.msf.namespaces',
     ];
 
-    for (const key of preferredArray) {
+    for (const key of otherArrays) {
       const array = /** @type {!Array<string>} */(
         this.getCurrentConfigValue(key));
       if (array.length) {

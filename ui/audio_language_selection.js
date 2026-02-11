@@ -102,18 +102,16 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
 
     // Set audio preference for when reloading the stream (e.g. casting), keep
     // this selection.
-    const config = {
-      preferredAudioLanguages: [audioTrack.language],
-      preferSpatialAudio: audioTrack.spatialAudio,
+    /** @type {shaka.extern.AudioPreference} */
+    const pref = {
+      language: audioTrack.language,
+      role: '',
+      label: audioTrack.label || '',
+      channelCount: audioTrack.channelsCount || 0,
+      codecs: '',
+      spatialAudio: audioTrack.spatialAudio,
     };
-
-    if (audioTrack.label) {
-      config.preferredAudioLabel = audioTrack.label;
-    }
-    if (audioTrack.channelsCount) {
-      config.preferredAudioChannelCount = audioTrack.channelsCount;
-    }
-    this.player.configure(config);
+    this.player.configure({preferredAudio: [pref]});
   }
 
 
