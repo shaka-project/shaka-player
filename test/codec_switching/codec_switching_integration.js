@@ -65,7 +65,8 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguages: [preferredAudioLanguage]});
+      // eslint-disable-next-line @stylistic/max-len
+      player.configure({preferredAudio: [{language: preferredAudioLanguage, role: '', label: '', channelCount: 0, codecs: ''}]});
       player.configure('manifest.disableVideo', true);
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
@@ -102,7 +103,8 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguages: [preferredAudioLanguage]});
+      // eslint-disable-next-line @stylistic/max-len
+      player.configure({preferredAudio: [{language: preferredAudioLanguage, role: '', label: '', channelCount: 0, codecs: ''}]});
       player.configure('manifest.disableVideo', true);
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
@@ -138,7 +140,8 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguages: [preferredAudioLanguage]});
+      // eslint-disable-next-line @stylistic/max-len
+      player.configure({preferredAudio: [{language: preferredAudioLanguage, role: '', label: '', channelCount: 0, codecs: ''}]});
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
 
@@ -174,7 +177,8 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguages: [preferredAudioLanguage]});
+      // eslint-disable-next-line @stylistic/max-len
+      player.configure({preferredAudio: [{language: preferredAudioLanguage, role: '', label: '', channelCount: 0, codecs: ''}]});
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 
@@ -209,7 +213,8 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguages: [preferredAudioLanguage]});
+      // eslint-disable-next-line @stylistic/max-len
+      player.configure({preferredAudio: [{language: preferredAudioLanguage, role: '', label: '', channelCount: 0, codecs: ''}]});
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
 
@@ -246,7 +251,8 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguages: [preferredAudioLanguage]});
+      // eslint-disable-next-line @stylistic/max-len
+      player.configure({preferredAudio: [{language: preferredAudioLanguage, role: '', label: '', channelCount: 0, codecs: ''}]});
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 
@@ -282,7 +288,8 @@ describe('Codec Switching', () => {
 
       // Spanish is EC3.
       const preferredAudioLanguage = 'es';
-      player.configure({preferredAudioLanguages: [preferredAudioLanguage]});
+      // eslint-disable-next-line @stylistic/max-len
+      player.configure({preferredAudio: [{language: preferredAudioLanguage, role: '', label: '', channelCount: 0, codecs: ''}]});
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
 
@@ -319,7 +326,8 @@ describe('Codec Switching', () => {
 
       // Spanish is EC3.
       const preferredAudioLanguage = 'es';
-      player.configure({preferredAudioLanguages: [preferredAudioLanguage]});
+      // eslint-disable-next-line @stylistic/max-len
+      player.configure({preferredAudio: [{language: preferredAudioLanguage, role: '', label: '', channelCount: 0, codecs: ''}]});
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 

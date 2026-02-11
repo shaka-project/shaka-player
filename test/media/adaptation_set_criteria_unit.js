@@ -21,21 +21,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['en'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'en', role: '', label: '', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -65,21 +59,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['en'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'en', role: '', label: '', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -134,21 +122,15 @@ describe('AdaptationSetCriteria', () => {
 
         const builder = new shaka.media.PreferenceBasedCriteria();
         builder.configure({
-          languages: ['en'],
-          role: '',
-          videoRole: '',
-          channelCount: 0,
-          hdrLevel: '',
-          spatialAudio: false,
-          videoLayout: '',
-          audioLabel: '',
-          videoLabel: '',
+          preferredAudio: [{
+            language: 'en', role: '', label: '', channelCount: 0,
+            codecs: '', spatialAudio: false,
+          }],
+          preferredVideo: [],
           codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.SMOOTH,
           audioCodec: '',
           activeAudioCodec: '',
           activeAudioChannelCount: 0,
-          preferredAudioCodecs: [],
-          preferredAudioChannelCount: 0,
           keySystem: '',
         });
 
@@ -196,21 +178,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['en'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'en', role: '', label: '', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -247,21 +223,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['en'],
-        role: 'main',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'en', role: 'main', label: '', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -292,21 +262,17 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['en'],
-        role: 'main',
-        videoRole: 'sign',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'en', role: 'main', label: '', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [{
+          role: 'sign', label: '', codec: '', hdrLevel: '', layout: '',
+        }],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -364,21 +330,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['en'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'en', role: '', label: '', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -445,21 +405,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['zh'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'zh', role: '', label: '', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -504,21 +458,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['zh'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'zh', role: '', label: '', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -583,21 +531,15 @@ describe('AdaptationSetCriteria', () => {
 
           const builder = new shaka.media.PreferenceBasedCriteria();
           builder.configure({
-            languages: ['zh'],
-            role: '',
-            videoRole: '',
-            channelCount: 0,
-            hdrLevel: '',
-            spatialAudio: false,
-            videoLayout: '',
-            audioLabel: '',
-            videoLabel: '',
+            preferredAudio: [{
+              language: 'zh', role: '', label: '', channelCount: 0,
+              codecs: '', spatialAudio: false,
+            }],
+            preferredVideo: [],
             codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
             audioCodec: '',
             activeAudioCodec: '',
             activeAudioChannelCount: 0,
-            preferredAudioCodecs: [],
-            preferredAudioChannelCount: 0,
             keySystem: '',
           });
 
@@ -663,21 +605,15 @@ describe('AdaptationSetCriteria', () => {
 
           const builder = new shaka.media.PreferenceBasedCriteria();
           builder.configure({
-            languages: ['zh'],
-            role: '',
-            videoRole: '',
-            channelCount: 0,
-            hdrLevel: '',
-            spatialAudio: false,
-            videoLayout: '',
-            audioLabel: '',
-            videoLabel: '',
+            preferredAudio: [{
+              language: 'zh', role: '', label: '', channelCount: 0,
+              codecs: '', spatialAudio: false,
+            }],
+            preferredVideo: [],
             codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
             audioCodec: '',
             activeAudioCodec: '',
             activeAudioChannelCount: 0,
-            preferredAudioCodecs: [],
-            preferredAudioChannelCount: 0,
             keySystem: '',
           });
 
@@ -714,21 +650,14 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: [],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: 'PQ',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [],
+        preferredVideo: [{
+          role: '', label: '', codec: '', hdrLevel: 'PQ', layout: '',
+        }],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -765,21 +694,14 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: [],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: 'CH-STEREO',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [],
+        preferredVideo: [{
+          role: '', label: '', codec: '', hdrLevel: '', layout: 'CH-STEREO',
+        }],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -816,21 +738,14 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: [],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: 'CH-MONO',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [],
+        preferredVideo: [{
+          role: '', label: '', codec: '', hdrLevel: '', layout: 'CH-MONO',
+        }],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -866,21 +781,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: [],
-        role: '',
-        videoRole: '',
-        channelCount: 2,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: '', role: '', label: '', channelCount: 2,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -923,21 +832,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: [],
-        role: '',
-        videoRole: '',
-        channelCount: 6,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: '', role: '', label: '', channelCount: 6,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -975,21 +878,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: [],
-        role: '',
-        videoRole: '',
-        channelCount: 2,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: '', role: '', label: '', channelCount: 2,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -1027,21 +924,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: [],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: '', role: '', label: '', channelCount: 2,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 2,
         keySystem: '',
       });
 
@@ -1079,21 +970,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: [],
-        role: '',
-        videoRole: '',
-        channelCount: 6,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: '', role: '', label: '', channelCount: 6,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 2,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -1130,21 +1015,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: [],
-        role: '',
-        videoRole: '',
-        channelCount: 6,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: '', role: '', label: '', channelCount: 6,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 2,
         keySystem: '',
       });
 
@@ -1180,21 +1059,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: [],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: 'preferredLabel',
-        videoLabel: '',
+        preferredAudio: [{
+          language: '', role: '', label: 'preferredLabel', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -1226,21 +1099,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: [],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: true,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: '', role: '', label: '', channelCount: 0,
+          codecs: '', spatialAudio: true,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -1271,21 +1138,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: [],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: '', role: '', label: '', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -1334,21 +1195,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['zh'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: 'preferredLabel',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'zh', role: '', label: 'preferredLabel', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -1385,21 +1240,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: [],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: 'preferredLabel',
+        preferredAudio: [],
+        preferredVideo: [{
+          role: '', label: 'preferredLabel',
+          codec: '', hdrLevel: '', layout: '',
+        }],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -1442,21 +1291,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['en'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'en', role: '', label: '', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -1488,21 +1331,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['en'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'en', role: '', label: '', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: 'ec-3',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -1533,21 +1370,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['en'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'en', role: '', label: '', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: 'ec-3',
         activeAudioCodec: 'mp4a.40.2',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -1578,21 +1409,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['en'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'en', role: '', label: '', channelCount: 0,
+          codecs: 'mp4a.40.2', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: 'ec-3',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: ['mp4a.40.2'],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -1624,21 +1449,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['en'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'en', role: '', label: '', channelCount: 0,
+          codecs: 'mp4a.40.2', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: 'ec-3',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: ['mp4a.40.2'],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -1670,21 +1489,21 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['en'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [
+          {
+            language: '', role: '', label: '', channelCount: 0,
+            codecs: 'ec-3', spatialAudio: undefined,
+          },
+          {
+            language: '', role: '', label: '', channelCount: 0,
+            codecs: 'mp4a.40.2', spatialAudio: undefined,
+          },
+        ],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: '',
         activeAudioCodec: '',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: ['ec-3', 'mp4a.40.2'],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -1716,21 +1535,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['en'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: 'en', role: '', label: '', channelCount: 0,
+          codecs: '', spatialAudio: false,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: 'mp4a.42.2',
         activeAudioCodec: 'ec-3',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: [],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 
@@ -1762,21 +1575,15 @@ describe('AdaptationSetCriteria', () => {
 
       const builder = new shaka.media.PreferenceBasedCriteria();
       builder.configure({
-        languages: ['en'],
-        role: '',
-        videoRole: '',
-        channelCount: 0,
-        hdrLevel: '',
-        spatialAudio: false,
-        videoLayout: '',
-        audioLabel: '',
-        videoLabel: '',
+        preferredAudio: [{
+          language: '', role: '', label: '', channelCount: 0,
+          codecs: 'ec-3', spatialAudio: undefined,
+        }],
+        preferredVideo: [],
         codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
         audioCodec: 'mp4a.42.2',
         activeAudioCodec: 'ec-4',
         activeAudioChannelCount: 0,
-        preferredAudioCodecs: ['ec-3'],
-        preferredAudioChannelCount: 0,
         keySystem: '',
       });
 

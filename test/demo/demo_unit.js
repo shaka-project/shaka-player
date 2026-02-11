@@ -36,9 +36,9 @@ describe('Demo', () => {
   describe('config', () => {
     it('does not have entries for invalid config options', () => {
       const exceptions = new Set()
-          .add('preferredAudioCodecs')
-          .add('preferredVideoCodecs')
-          .add('preferredTextFormats')
+          .add('preferredAudio')
+          .add('preferredVideo')
+          .add('preferredText')
           .add('accessibility.speechToText.languagesToTranslate')
           .add('manifest.msf.namespaces');
       // We determine whether a config option has been made or not by looking at
@@ -90,7 +90,10 @@ describe('Demo', () => {
           .add('manifest.raiseFatalErrorOnManifestUpdateRequestFailure')
           .add('drm.persistentSessionOnlinePlayback')
           .add('drm.persistentSessionsMetadata')
-          .add('mediaSource.modifyCueCallback');
+          .add('mediaSource.modifyCueCallback')
+          .add('preferredAudio')
+          .add('preferredVideo')
+          .add('preferredText');
 
       /**
        * @param {!Object} section

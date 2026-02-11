@@ -108,8 +108,10 @@ describe('Player Src Equals', () => {
       pending('No native HLS support!');
     }
 
-    player.configure('preferredAudioLanguages', ['de']);
-    player.configure('preferredTextLanguages', ['el']);
+    player.configure('preferredAudio',
+        [{language: 'de', role: '', label: '', channelCount: 0, codecs: ''}]);
+    player.configure('preferredText',
+        [{language: 'el', role: '', format: ''}]);
 
     await loadWithSrcEquals(HLS_CONTENT_URI);
 
