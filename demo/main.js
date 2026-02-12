@@ -441,7 +441,11 @@ shakaDemo.Main = class {
     const languages = navigator.languages || ['en-us'];
     this.configure('preferredAudio',
         languages.map((l) => ({
-          language: l, role: '', label: '', channelCount: 0, codecs: '',
+          language: l,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codecs: '',
         })));
     this.uiLocale_ = languages[0];
 
@@ -1043,31 +1047,57 @@ shakaDemo.Main = class {
     if (params.has('preferredVideoCodecs')) {
       this.configure('preferredVideo',
           params.get('preferredVideoCodecs').split(',').map((codec) =>
-            ({role: '', label: '', codec, hdrLevel: 'AUTO', layout: ''})));
+            ({
+              role: '',
+              label: '',
+              codec,
+              hdrLevel: 'AUTO',
+              layout: '',
+            })));
     }
 
     if (params.has('preferredAudioCodecs')) {
       this.configure('preferredAudio',
           params.get('preferredAudioCodecs').split(',').map((codecs) =>
-            ({language: '', role: '', label: '', channelCount: 0, codecs})));
+            ({
+              language: '',
+              role: '',
+              label: '',
+              channelCount: 0,
+              codecs,
+            })));
     }
 
     if (params.has('preferredTextFormats')) {
       this.configure('preferredText',
-          params.get('preferredTextFormats').split(',').map((format) =>
-            ({language: '', role: '', format})));
+          params.get('preferredTextFormats').split(',').map((codec) =>
+            ({
+              language: '',
+              role: '',
+              codec,
+            })));
     }
 
     if (params.has('preferredAudioLanguages')) {
       this.configure('preferredAudio',
           params.get('preferredAudioLanguages').split(',').map((language) =>
-            ({language, role: '', label: '', channelCount: 0, codecs: ''})));
+            ({
+              language,
+              role: '',
+              label: '',
+              channelCount: 0,
+              codecs: '',
+            })));
     }
 
     if (params.has('preferredTextLanguages')) {
       this.configure('preferredText',
           params.get('preferredTextLanguages').split(',').map((language) =>
-            ({language, role: '', format: ''})));
+            ({
+              language,
+              role: '',
+              codec: '',
+            })));
     }
 
     if (params.has('accessibility.speechToText.languagesToTranslate')) {
@@ -1620,7 +1650,7 @@ shakaDemo.Main = class {
     if (textLangs.length) {
       params.push('preferredTextLanguages=' + textLangs.join(','));
     }
-    const textFormats = prefText.map((p) => p.format).filter(Boolean);
+    const textFormats = prefText.map((p) => p.codec).filter(Boolean);
     if (textFormats.length) {
       params.push('preferredTextFormats=' + textFormats.join(','));
     }
