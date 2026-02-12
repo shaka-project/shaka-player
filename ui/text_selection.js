@@ -198,7 +198,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
       preferredText: [{
         language: track.language,
         role: '',
-        codec: '',
+        format: '',
       }],
       preferForcedSubs: track.forced,
     });

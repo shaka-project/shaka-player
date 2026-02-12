@@ -2954,7 +2954,7 @@ shaka.extern.AudioPreference;
  * @typedef {{
  *   language: string,
  *   role: string,
- *   codec: string
+ *   format: string
  * }}
  *
  * @property {string} language
@@ -2966,8 +2966,8 @@ shaka.extern.AudioPreference;
  *   The preferred role for text tracks.
  *   <br>
  *   Defaults to <code>''</code>.
- * @property {string} codec
- *   The preferred codec or MIME type of the subtitles, e.g. 'vtt', 'ttml',
+ * @property {string} format
+ *   The preferred text format, e.g. 'vtt', 'ttml',
  *   'text/vtt', 'application/ttml+xml'.
  *   <br>
  *   Defaults to <code>''</code>.

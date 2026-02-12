@@ -898,10 +898,10 @@ shakaDemo.Config = class {
       const role = textRoleInput.value || '';
       if (!langs.length) {
         shakaDemoMain.configure('preferredText',
-            role ? [{language: '', role, codec: ''}] : []);
+            role ? [{language: '', role, format: ''}] : []);
       } else {
         shakaDemoMain.configure('preferredText',
-            langs.map((lang) => ({language: lang, role, codec: ''})));
+            langs.map((lang) => ({language: lang, role, format: ''})));
       }
       shakaDemoMain.remakeHash();
     };
@@ -1018,12 +1018,12 @@ shakaDemo.Config = class {
       const formats = input.value.split(',').filter(Boolean);
       if (formats.length) {
         shakaDemoMain.configure('preferredText',
-            formats.map((codec) => ({language: '', role: '', codec})));
+            formats.map((format) => ({language: '', role: '', format})));
       }
       shakaDemoMain.remakeHash();
     });
     this.latestInput_.input().value =
-        curTextPrefs.map((p) => p.codec).filter(Boolean).join(',');
+        curTextPrefs.map((p) => p.format).filter(Boolean).join(',');
   }
 
   /** @private */

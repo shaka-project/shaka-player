@@ -104,7 +104,7 @@ describe('UI', () => {
 
     // These tests expect a default text track to be selected.
     player.configure('preferredText',
-        [{language: 'zh', role: '', codec: ''}]);
+        [{language: 'zh', role: '', format: ''}]);
 
     await player.load('test:sintel_multi_lingual_multi_res_compiled');
     // For this event, we ignore a timeout, since we sometimes miss this event

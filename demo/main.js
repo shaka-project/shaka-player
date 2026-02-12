@@ -1070,11 +1070,11 @@ shakaDemo.Main = class {
 
     if (params.has('preferredTextFormats')) {
       this.configure('preferredText',
-          params.get('preferredTextFormats').split(',').map((codec) =>
+          params.get('preferredTextFormats').split(',').map((format) =>
             ({
               language: '',
               role: '',
-              codec,
+              format,
             })));
     }
 
@@ -1096,7 +1096,7 @@ shakaDemo.Main = class {
             ({
               language,
               role: '',
-              codec: '',
+              format: '',
             })));
     }
 
@@ -1650,7 +1650,7 @@ shakaDemo.Main = class {
     if (textLangs.length) {
       params.push('preferredTextLanguages=' + textLangs.join(','));
     }
-    const textFormats = prefText.map((p) => p.codec).filter(Boolean);
+    const textFormats = prefText.map((p) => p.format).filter(Boolean);
     if (textFormats.length) {
       params.push('preferredTextFormats=' + textFormats.join(','));
     }
