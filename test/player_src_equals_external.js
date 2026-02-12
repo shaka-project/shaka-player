@@ -109,9 +109,19 @@ describe('Player Src Equals', () => {
     }
 
     player.configure('preferredAudio',
-        [{language: 'de', role: '', label: '', channelCount: 0, codecs: ''}]);
+        [{
+          language: 'de',
+          role: '',
+          label: '',
+          channelCount: 0,
+          codecs: '',
+        }]);
     player.configure('preferredText',
-        [{language: 'el', role: '', format: ''}]);
+        [{
+          language: 'el',
+          role: '',
+          codec: '',
+        }]);
 
     await loadWithSrcEquals(HLS_CONTENT_URI);
 

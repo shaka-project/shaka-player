@@ -106,7 +106,11 @@ describe('HlsParser', () => {
 
   it('supports text discontinuity', async () => {
     player.configure('preferredText',
-        [{language: 'en', role: '', format: ''}]);
+        [{
+          language: 'en',
+          role: '',
+          codec: '',
+        }]);
     await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
     await video.play();
 
@@ -127,7 +131,11 @@ describe('HlsParser', () => {
 
   it('supports text without discontinuity', async () => {
     player.configure('preferredText',
-        [{language: 'de', role: '', format: ''}]);
+        [{
+          language: 'de',
+          role: '',
+          codec: '',
+        }]);
     // eslint-disable-next-line @stylistic/max-len
     await player.load('/base/test/test/assets/hls-text-no-discontinuity/index.m3u8');
     await video.play();
