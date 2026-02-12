@@ -165,7 +165,13 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
    */
   onVideoRoleSelected_(role) {
     this.player.configure({
-      preferredVideo: [{role, label: '', codec: '', hdrLevel: '', layout: ''}],
+      preferredVideo: [{
+        role,
+        label: '',
+        codec: '',
+        hdrLevel: '',
+        layout: '',
+      }],
     });
   }
 };
