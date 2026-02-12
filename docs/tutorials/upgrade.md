@@ -91,7 +91,7 @@ application:
     - `IUIElement` plugins must have a `release()` method (not `destroy()`)
       (deprecated in v3.0.0)
 
-## v5.0 (unreleased)
+## v5.0
 
   - Configuration changes:
     - `streaming.forceTransmuxTS` has been renamed to `streaming.forceTransmux`,
