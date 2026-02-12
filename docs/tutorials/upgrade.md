@@ -164,3 +164,39 @@ application:
 
   - UI:
     - `airplay` button has been removed; use the `remote` button instead
+
+
+## v5.1
+
+  - Configuration changes:
+    - Individual preference config fields have been replaced by structured
+      preference arrays. The old fields still work with a deprecation warning
+      but will be removed in the next major version.
+    - `preferredAudioLanguage`, `preferredAudioRole`, `preferredAudioLabel`,
+      `preferredAudioChannelCount`, and `preferSpatialAudio` have been replaced
+      by `preferredAudio`, an array of `shaka.extern.AudioPreference` objects.
+    - `preferredAudioCodecs` has been replaced by `preferredAudio` with the
+      `codecs` field in each entry.
+    - `preferredTextLanguage` and `preferredTextRole` have been replaced by
+      `preferredText`, an array of `shaka.extern.TextPreference` objects.
+    - `preferredTextFormats` has been replaced by `preferredText` with the
+      `format` field in each entry.
+    - `preferredVideoLabel`, `preferredVideoRole`, `preferredVideoHdrLevel`,
+      and `preferredVideoLayout` have been replaced by `preferredVideo`, an
+      array of `shaka.extern.VideoPreference` objects.
+    - `preferredVideoCodecs` has been replaced by `preferredVideo` with the
+      `codec` field in each entry.
+    - The new structured arrays allow specifying multiple preference sets in
+      priority order. For example:
+      ```js
+      // Old way (deprecated, still works with a warning):
+      player.configure('preferredAudioLanguage', 'ko');
+      player.configure('preferredAudioChannelCount', 6);
+
+      // New way:
+      player.configure('preferredAudio', [
+        {language: 'ko', channelCount: 6},
+        {language: 'ko'},
+        {language: 'en'},
+      ]);
+      ```
