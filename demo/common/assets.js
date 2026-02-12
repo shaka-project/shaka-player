@@ -1089,7 +1089,7 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'Live sim (CBCS single key)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
-      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/drm_EZDRM-1-key-pr-cbcs/testpic_2s/Manifest.mpd',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/drm_EZDRM-1-key-cbcs/testpic_2s/Manifest.mpd',
       /* source= */ shakaAssets.Source.DASH_IF)
       .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
       .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
