@@ -926,7 +926,7 @@ shakaDemo.Config = class {
       role: '',
       label: '',
       channelCount: 0,
-      codecs: '',
+      codec: '',
     }), (container, entry, index) => {
       this.addPrefTextField_(container, 'Language', entry['language'] || '',
           (v) => makeChange(index, 'language', v));
@@ -937,8 +937,8 @@ shakaDemo.Config = class {
       this.addPrefNumberField_(container, 'Channel Count',
           entry['channelCount'] || 0,
           (v) => makeChange(index, 'channelCount', v));
-      this.addPrefTextField_(container, 'Codecs', entry['codecs'] || '',
-          (v) => makeChange(index, 'codecs', v));
+      this.addPrefTextField_(container, 'Codec', entry['codec'] || '',
+          (v) => makeChange(index, 'codec', v));
       this.addPrefBoolField_(container, 'Spatial Audio',
           entry['spatialAudio'] || false,
           (v) => makeChange(index, 'spatialAudio', v || undefined));

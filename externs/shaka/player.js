@@ -2914,7 +2914,7 @@ shaka.extern.TextDisplayerConfiguration;
  *   role: string,
  *   label: string,
  *   channelCount: number,
- *   codecs: string,
+ *   codec: string,
  *   spatialAudio: (boolean|undefined)
  * }}
  *
@@ -2935,7 +2935,7 @@ shaka.extern.TextDisplayerConfiguration;
  *   The preferred number of audio channels. A value of 0 means no preference.
  *   <br>
  *   Defaults to <code>0</code>.
- * @property {string} codecs
+ * @property {string} codec
  *   The preferred audio codec, e.g. 'opus', 'mp4a.40.2'.
  *   <br>
  *   Defaults to <code>''</code>.

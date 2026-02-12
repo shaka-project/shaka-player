@@ -445,7 +445,7 @@ shakaDemo.Main = class {
           role: '',
           label: '',
           channelCount: 0,
-          codecs: '',
+          codec: '',
         })));
     this.uiLocale_ = languages[0];
 
@@ -1061,18 +1061,18 @@ shakaDemo.Main = class {
               role: '',
               label: '',
               channelCount: 0,
-              codecs: '',
+              codec: '',
             })));
     } else if (params.has('preferredAudioCodecs')) {
       // Legacy fallback
       this.configure('preferredAudio',
-          params.get('preferredAudioCodecs').split(',').map((codecs) =>
+          params.get('preferredAudioCodecs').split(',').map((codec) =>
             ({
               language: '',
               role: '',
               label: '',
               channelCount: 0,
-              codecs,
+              codec,
             })));
     }
 

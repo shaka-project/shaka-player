@@ -176,7 +176,7 @@ application:
       `preferredAudioChannelCount`, and `preferSpatialAudio` have been replaced
       by `preferredAudio`, an array of `shaka.extern.AudioPreference` objects.
     - `preferredAudioCodecs` has been replaced by `preferredAudio` with the
-      `codecs` field in each entry.
+      `codec` field in each entry.
     - `preferredTextLanguage` and `preferredTextRole` have been replaced by
       `preferredText`, an array of `shaka.extern.TextPreference` objects.
     - `preferredTextFormats` has been replaced by `preferredText` with the

@@ -114,7 +114,7 @@ describe('Player Src Equals', () => {
           role: '',
           label: '',
           channelCount: 0,
-          codecs: '',
+          codec: '',
         }]);
     player.configure('preferredText',
         [{

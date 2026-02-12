@@ -71,7 +71,7 @@ describe('Codec Switching', () => {
           role: '',
           label: '',
           channelCount: 0,
-          codecs: '',
+          codec: '',
         }],
       });
       player.configure('manifest.disableVideo', true);
@@ -116,7 +116,7 @@ describe('Codec Switching', () => {
           role: '',
           label: '',
           channelCount: 0,
-          codecs: '',
+          codec: '',
         }],
       });
       player.configure('manifest.disableVideo', true);
@@ -160,7 +160,7 @@ describe('Codec Switching', () => {
           role: '',
           label: '',
           channelCount: 0,
-          codecs: '',
+          codec: '',
         }],
       });
       player.configure('mediaSource.codecSwitchingStrategy',
@@ -204,7 +204,7 @@ describe('Codec Switching', () => {
           role: '',
           label: '',
           channelCount: 0,
-          codecs: '',
+          codec: '',
         }],
       });
       player.configure('mediaSource.codecSwitchingStrategy',
@@ -247,7 +247,7 @@ describe('Codec Switching', () => {
           role: '',
           label: '',
           channelCount: 0,
-          codecs: '',
+          codec: '',
         }],
       });
       player.configure('mediaSource.codecSwitchingStrategy',
@@ -292,7 +292,7 @@ describe('Codec Switching', () => {
           role: '',
           label: '',
           channelCount: 0,
-          codecs: '',
+          codec: '',
         }],
       });
       player.configure('mediaSource.codecSwitchingStrategy',
@@ -336,7 +336,7 @@ describe('Codec Switching', () => {
           role: '',
           label: '',
           channelCount: 0,
-          codecs: '',
+          codec: '',
         }],
       });
       player.configure('mediaSource.codecSwitchingStrategy',
@@ -381,7 +381,7 @@ describe('Codec Switching', () => {
           role: '',
           label: '',
           channelCount: 0,
-          codecs: '',
+          codec: '',
         }],
       });
       player.configure('mediaSource.codecSwitchingStrategy',

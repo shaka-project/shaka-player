@@ -172,7 +172,7 @@ describe('Player', () => {
           role: '',
           label: '',
           channelCount: 0,
-          codecs: '',
+          codec: '',
         },
       ],
       abrFactory: () => abrManager,
@@ -1349,7 +1349,7 @@ describe('Player', () => {
           role: '',
           label: '',
           channelCount: 0,
-          codecs: '',
+          codec: '',
         },
       ]);
 
@@ -1562,7 +1562,7 @@ describe('Player', () => {
           role: '',
           label: '',
           channelCount: 0,
-          codecs: '',
+          codec: '',
           spatialAudio: false,
         },
       ]);
@@ -1579,7 +1579,7 @@ describe('Player', () => {
           role: '',
           label: '',
           channelCount: 0,
-          codecs: '',
+          codec: '',
           spatialAudio: true,
         },
       ]);
@@ -2591,7 +2591,7 @@ describe('Player', () => {
             role: '',
             label: '',
             channelCount: 6,
-            codecs: '',
+            codec: '',
           },
         ],
         preferredText: [
@@ -3082,7 +3082,7 @@ describe('Player', () => {
             role: '',
             label: 'es-label',
             channelCount: 0,
-            codecs: '',
+            codec: '',
           },
         ],
       });
@@ -3179,7 +3179,7 @@ describe('Player', () => {
             role: '',
             label: '',
             channelCount: 0,
-            codecs: '',
+            codec: '',
           },
         ],
       });
@@ -4442,7 +4442,7 @@ describe('Player', () => {
             role: '',
             label: '',
             channelCount: 6,
-            codecs: '',
+            codec: '',
           },
         ],
       });
