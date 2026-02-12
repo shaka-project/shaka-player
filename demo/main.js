@@ -1044,19 +1044,27 @@ shakaDemo.Main = class {
       this.configure('abr.enabled', false);
     }
 
-    if (params.has('preferredVideoCodecs')) {
-      this.configure('preferredVideo',
-          params.get('preferredVideoCodecs').split(',').map((codec) =>
+    // Read structured preferences from JSON params (new format)
+    if (params.has('preferredAudio')) {
+      try {
+        const parsed = JSON.parse(params.get('preferredAudio'));
+        if (Array.isArray(parsed)) {
+          this.configure('preferredAudio', parsed);
+        }
+      } catch (e) {}
+    } else if (params.has('preferredAudioLanguages')) {
+      // Legacy fallback
+      this.configure('preferredAudio',
+          params.get('preferredAudioLanguages').split(',').map((language) =>
             ({
+              language,
               role: '',
               label: '',
-              codec,
-              hdrLevel: 'AUTO',
-              layout: '',
+              channelCount: 0,
+              codecs: '',
             })));
-    }
-
-    if (params.has('preferredAudioCodecs')) {
+    } else if (params.has('preferredAudioCodecs')) {
+      // Legacy fallback
       this.configure('preferredAudio',
           params.get('preferredAudioCodecs').split(',').map((codecs) =>
             ({
@@ -1068,7 +1076,24 @@ shakaDemo.Main = class {
             })));
     }
 
-    if (params.has('preferredTextFormats')) {
+    if (params.has('preferredText')) {
+      try {
+        const parsed = JSON.parse(params.get('preferredText'));
+        if (Array.isArray(parsed)) {
+          this.configure('preferredText', parsed);
+        }
+      } catch (e) {}
+    } else if (params.has('preferredTextLanguages')) {
+      // Legacy fallback
+      this.configure('preferredText',
+          params.get('preferredTextLanguages').split(',').map((language) =>
+            ({
+              language,
+              role: '',
+              format: '',
+            })));
+    } else if (params.has('preferredTextFormats')) {
+      // Legacy fallback
       this.configure('preferredText',
           params.get('preferredTextFormats').split(',').map((format) =>
             ({
@@ -1078,25 +1103,23 @@ shakaDemo.Main = class {
             })));
     }
 
-    if (params.has('preferredAudioLanguages')) {
-      this.configure('preferredAudio',
-          params.get('preferredAudioLanguages').split(',').map((language) =>
+    if (params.has('preferredVideo')) {
+      try {
+        const parsed = JSON.parse(params.get('preferredVideo'));
+        if (Array.isArray(parsed)) {
+          this.configure('preferredVideo', parsed);
+        }
+      } catch (e) {}
+    } else if (params.has('preferredVideoCodecs')) {
+      // Legacy fallback
+      this.configure('preferredVideo',
+          params.get('preferredVideoCodecs').split(',').map((codec) =>
             ({
-              language,
               role: '',
               label: '',
-              channelCount: 0,
-              codecs: '',
-            })));
-    }
-
-    if (params.has('preferredTextLanguages')) {
-      this.configure('preferredText',
-          params.get('preferredTextLanguages').split(',').map((language) =>
-            ({
-              language,
-              role: '',
-              format: '',
+              codec,
+              hdrLevel: 'AUTO',
+              layout: '',
             })));
     }
 
@@ -1632,34 +1655,26 @@ shakaDemo.Main = class {
     }
     params.push('uilang=' + this.getUILocale());
 
-    // Serialize structured preferences back to legacy hash param names
+    // Serialize structured preferences as JSON
     const prefAudio = /** @type {!Array} */(
       this.getCurrentConfigValue('preferredAudio'));
-    const audioLangs = prefAudio.map((p) => p.language).filter(Boolean);
-    if (audioLangs.length) {
-      params.push('preferredAudioLanguages=' + audioLangs.join(','));
-    }
-    const audioCodecs = prefAudio.map((p) => p.codecs).filter(Boolean);
-    if (audioCodecs.length) {
-      params.push('preferredAudioCodecs=' + audioCodecs.join(','));
+    if (prefAudio.length) {
+      params.push('preferredAudio=' +
+          encodeURIComponent(JSON.stringify(prefAudio)));
     }
 
     const prefText = /** @type {!Array} */(
       this.getCurrentConfigValue('preferredText'));
-    const textLangs = prefText.map((p) => p.language).filter(Boolean);
-    if (textLangs.length) {
-      params.push('preferredTextLanguages=' + textLangs.join(','));
-    }
-    const textFormats = prefText.map((p) => p.format).filter(Boolean);
-    if (textFormats.length) {
-      params.push('preferredTextFormats=' + textFormats.join(','));
+    if (prefText.length) {
+      params.push('preferredText=' +
+          encodeURIComponent(JSON.stringify(prefText)));
     }
 
     const prefVideo = /** @type {!Array} */(
       this.getCurrentConfigValue('preferredVideo'));
-    const videoCodecs = prefVideo.map((p) => p.codec).filter(Boolean);
-    if (videoCodecs.length) {
-      params.push('preferredVideoCodecs=' + videoCodecs.join(','));
+    if (prefVideo.length) {
+      params.push('preferredVideo=' +
+          encodeURIComponent(JSON.stringify(prefVideo)));
     }
 
     const otherArrays = [
