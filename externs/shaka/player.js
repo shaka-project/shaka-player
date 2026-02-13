@@ -2939,12 +2939,10 @@ shaka.extern.TextDisplayerConfiguration;
  *   The preferred audio codec, e.g. 'opus', 'mp4a.40.2'.
  *   <br>
  *   Defaults to <code>''</code>.
- * @property {(boolean|undefined)} spatialAudio
- *   Whether spatial audio is preferred. <code>undefined</code> means no
- *   preference, <code>true</code> or <code>false</code> means an explicit
- *   preference.
+ * @property {boolean} spatialAudio
+ *   Whether spatial audio is preferred.
  *   <br>
- *   Defaults to <code>undefined</code>.
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.AudioPreference;
@@ -2972,12 +2970,10 @@ shaka.extern.AudioPreference;
  *   'text/vtt', 'application/ttml+xml'.
  *   <br>
  *   Defaults to <code>''</code>.
- * @property {(boolean|undefined)} forced
- *   Whether forced subtitles are preferred. <code>undefined</code> means no
- *   preference, <code>true</code> or <code>false</code> means an explicit
- *   preference.
+ * @property {boolean} forced
+ *   Whether forced subtitles are preferred.
  *   <br>
- *   Defaults to <code>undefined</code>.
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.TextPreference;
