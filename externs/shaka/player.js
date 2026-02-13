@@ -2915,7 +2915,7 @@ shaka.extern.TextDisplayerConfiguration;
  *   label: string,
  *   channelCount: number,
  *   codec: string,
- *   spatialAudio: (boolean|undefined)
+ *   spatialAudio: boolean
  * }}
  *
  * @property {string} language
@@ -2955,7 +2955,7 @@ shaka.extern.AudioPreference;
  *   language: string,
  *   role: string,
  *   format: string,
- *   forced: (boolean|undefined)
+ *   forced: boolean
  * }}
  *
  * @property {string} language
