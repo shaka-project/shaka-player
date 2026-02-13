@@ -925,7 +925,7 @@ shakaDemo.Config = class {
       language: '',
       role: '',
       label: '',
-      channelCount: 0,
+      channelCount: 2,
       codec: '',
     }), (container, entry, index) => {
       this.addPrefTextField_(container, 'Language', entry['language'] || '',

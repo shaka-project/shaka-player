@@ -444,7 +444,7 @@ shakaDemo.Main = class {
           language: l,
           role: '',
           label: '',
-          channelCount: 0,
+          channelCount: 2,
           codec: '',
         })));
     this.uiLocale_ = languages[0];
@@ -1060,7 +1060,7 @@ shakaDemo.Main = class {
               language,
               role: '',
               label: '',
-              channelCount: 0,
+              channelCount: 2,
               codec: '',
             })));
     } else if (params.has('preferredAudioCodecs')) {
@@ -1071,7 +1071,7 @@ shakaDemo.Main = class {
               language: '',
               role: '',
               label: '',
-              channelCount: 0,
+              channelCount: 2,
               codec,
             })));
     }
