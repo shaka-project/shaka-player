@@ -222,7 +222,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     this.eventManager.listen(this.container, 'mouseleave', () => {
       this.hideThumbnailTimer_.stop();
-      this.hideThumbnailTimer_.tickAfter(/* seconds= */ 0.25);
+      this.hideThumbnailTimer_.tickNow();
     });
 
     this.eventManager.listen(this.controls, 'chaptersupdated', () => {
