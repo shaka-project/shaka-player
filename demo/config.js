@@ -943,13 +943,6 @@ shakaDemo.Config = class {
           entry['spatialAudio'] || false,
           (v) => makeChange(index, 'spatialAudio', v || undefined));
     });
-
-    const onLocaleChange = (input) => {
-      shakaDemoMain.setUILocale(input.value);
-      shakaDemoMain.remakeHash();
-    };
-    this.addCustomTextInput_('Preferred UI Locale', onLocaleChange);
-    this.latestInput_.input().value = shakaDemoMain.getUILocale();
   }
 
   /** @private */
@@ -977,9 +970,9 @@ shakaDemo.Config = class {
           (v) => makeChange(index, 'role', v));
       this.addPrefTextField_(container, 'Format', entry['format'] || '',
           (v) => makeChange(index, 'format', v));
+      this.addPrefBoolField_(container, 'Forced', entry['forced'] || false,
+          (v) => makeChange(index, 'forced', v || undefined));
     });
-
-    this.addBoolInput_('Prefer Forced Subs', 'preferForcedSubs');
   }
 
   /** @private */
@@ -1071,6 +1064,13 @@ shakaDemo.Config = class {
       shakaDemoMain.setWatermarkText(input.value);
     });
     this.latestInput_.input().value = shakaDemoMain.getWatermarkText();
+
+    const onLocaleChange = (input) => {
+      shakaDemoMain.setUILocale(input.value);
+      shakaDemoMain.remakeHash();
+    };
+    this.addCustomTextInput_('Preferred UI Locale', onLocaleChange);
+    this.latestInput_.input().value = shakaDemoMain.getUILocale();
 
     // shaka.log is not set if logging isn't enabled.
     // I.E. if using the release version of shaka.
