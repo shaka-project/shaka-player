@@ -109,7 +109,8 @@ describe('HlsParser', () => {
         [{
           language: 'en',
           role: '',
-          codec: '',
+          format: '',
+          forced: false,
         }]);
     await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
     await video.play();
@@ -134,7 +135,8 @@ describe('HlsParser', () => {
         [{
           language: 'de',
           role: '',
-          codec: '',
+          format: '',
+          forced: false,
         }]);
     // eslint-disable-next-line @stylistic/max-len
     await player.load('/base/test/test/assets/hls-text-no-discontinuity/index.m3u8');

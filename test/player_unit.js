@@ -2599,6 +2599,7 @@ describe('Player', () => {
             language: 'es',
             role: '',
             format: '',
+            forced: false,
           },
         ],
       });
@@ -2678,6 +2679,7 @@ describe('Player', () => {
             language: 'es',
             role: '',
             format: '',
+            forced: false,
           },
         ],
       });
@@ -3058,6 +3060,7 @@ describe('Player', () => {
             language: 'en',
             role: 'commentary',
             format: '',
+            forced: false,
           },
         ],
       });

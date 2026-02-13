@@ -120,7 +120,8 @@ describe('Player Src Equals', () => {
         [{
           language: 'el',
           role: '',
-          codec: '',
+          format: '',
+          forced: false,
         }]);
 
     await loadWithSrcEquals(HLS_CONTENT_URI);
