@@ -77,7 +77,8 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 
     this.eventManager.listen(
         this.overflowMenu_, 'touchstart', (event) => {
-          this.controls.setLastTouchEventTime(Date.now());
+          this.controls.setLastTouchEventTime(
+              Date.now(), /* container= */ false);
           event.stopPropagation();
         });
 

@@ -314,6 +314,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {?number} */
     this.lastTouchEventTime_ = null;
 
+    /** @private {?number} */
+    this.lastContainerTouchEventTime_ = null;
+
     /** @private {!Array<!shaka.extern.IUIElement>} */
     this.elements_ = [];
 
@@ -865,10 +868,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @param {?number} time
+   * @param {boolean} container
    * @export
    */
-  setLastTouchEventTime(time) {
+  setLastTouchEventTime(time, container) {
     this.lastTouchEventTime_ = time;
+    if (container) {
+      this.lastContainerTouchEventTime_ = time;
+    }
   }
 
   /**
@@ -1924,6 +1931,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       event.cancelable && event.preventDefault();
     }
     this.lastTouchEventTime_ = Date.now();
+    this.lastContainerTouchEventTime_ = Date.now();
   }
 
   /**
@@ -1943,8 +1951,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.playPausePresentation();
     } else if (fromTouchEvent && this.isOpaque()) {
       if (this.config_.doubleClickForFullscreen &&
-          this.isFullScreenSupported() && this.lastTouchEventTime_ &&
-          Date.now() - this.lastTouchEventTime_ < 1000) {
+          this.isFullScreenSupported() && this.lastContainerTouchEventTime_ &&
+          Date.now() - this.lastContainerTouchEventTime_ < 1000) {
         this.toggleFullScreen();
       } else {
         this.hideUI();

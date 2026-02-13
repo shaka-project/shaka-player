@@ -93,7 +93,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     this.eventManager.listen(this.seekContainer, 'touchend', (e) => {
       const event = /** @type {!TouchEvent} */(e);
       this.onTouchEnd_(event);
-      this.controls.setLastTouchEventTime(Date.now());
+      this.controls.setLastTouchEventTime(Date.now(), /* container= */ true);
     });
   }
 
