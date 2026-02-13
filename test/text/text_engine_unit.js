@@ -49,8 +49,7 @@ describe('TextEngine', () => {
     textEngine.initParser(
         dummyMimeType,
         /* external= */ false,
-        /* segmentRelativeVttTiming= */ false,
-        shaka.media.ManifestParser.UNKNOWN);
+        /* segmentRelativeVttTiming= */ false);
   });
 
   afterEach(() => {
@@ -442,8 +441,7 @@ describe('TextEngine', () => {
       textEngine.initParser(
           dummyMimeType,
           /* external= */ false,
-          /* segmentRelativeVttTiming= */ true,
-          shaka.media.ManifestParser.UNKNOWN);
+          /* segmentRelativeVttTiming= */ true);
 
       mockParseMedia.and.callFake((data, time) => {
         return [
@@ -479,8 +477,7 @@ describe('TextEngine', () => {
       textEngine.initParser(
           dummyMimeType,
           /* external= */ true,
-          /* segmentRelativeVttTiming= */ false,
-          shaka.media.ManifestParser.UNKNOWN);
+          /* segmentRelativeVttTiming= */ false);
 
       mockParseMedia.and.callFake((data, time) => {
         return [
