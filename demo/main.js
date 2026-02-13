@@ -1109,7 +1109,7 @@ shakaDemo.Main = class {
       const current = /** @type {!Array} */(
         this.getCurrentConfigValue('preferredText'));
       if (current.length) {
-        current[0]['forced'] = forced || undefined;
+        current[0]['forced'] = forced;
       } else {
         current.push({language: '', role: '', format: '', forced});
       }
