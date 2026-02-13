@@ -199,8 +199,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
         language: track.language,
         role: '',
         format: '',
+        forced: track.forced || undefined,
       }],
-      preferForcedSubs: track.forced,
     });
   }
 

@@ -181,6 +181,9 @@ application:
       `preferredText`, an array of `shaka.extern.TextPreference` objects.
     - `preferredTextFormats` has been replaced by `preferredText` with the
       `format` field in each entry.
+    - `preferForcedSubs` has been replaced by the `forced` field in
+      `preferredText` entries (e.g.
+      `player.configure('preferredText', [{language: 'en', forced: true}])`).
     - `preferredVideoLabel`, `preferredVideoRole`, `preferredVideoHdrLevel`,
       and `preferredVideoLayout` have been replaced by `preferredVideo`, an
       array of `shaka.extern.VideoPreference` objects.

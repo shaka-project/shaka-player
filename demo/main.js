@@ -1103,6 +1103,19 @@ shakaDemo.Main = class {
             })));
     }
 
+    if (params.has('preferForcedSubs')) {
+      // Legacy fallback: merge forced into preferredText[0]
+      const forced = params.get('preferForcedSubs') == 'true';
+      const current = /** @type {!Array} */(
+        this.getCurrentConfigValue('preferredText'));
+      if (current.length) {
+        current[0]['forced'] = forced || undefined;
+      } else {
+        current.push({language: '', role: '', format: '', forced});
+      }
+      this.configure('preferredText', current);
+    }
+
     if (params.has('preferredVideo')) {
       try {
         const parsed = JSON.parse(params.get('preferredVideo'));

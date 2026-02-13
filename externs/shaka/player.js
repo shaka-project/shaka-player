@@ -2954,7 +2954,8 @@ shaka.extern.AudioPreference;
  * @typedef {{
  *   language: string,
  *   role: string,
- *   format: string
+ *   format: string,
+ *   forced: (boolean|undefined)
  * }}
  *
  * @property {string} language
@@ -2971,6 +2972,12 @@ shaka.extern.AudioPreference;
  *   'text/vtt', 'application/ttml+xml'.
  *   <br>
  *   Defaults to <code>''</code>.
+ * @property {(boolean|undefined)} forced
+ *   Whether forced subtitles are preferred. <code>undefined</code> means no
+ *   preference, <code>true</code> or <code>false</code> means an explicit
+ *   preference.
+ *   <br>
+ *   Defaults to <code>undefined</code>.
  * @exportDoc
  */
 shaka.extern.TextPreference;
@@ -3034,7 +3041,6 @@ shaka.extern.VideoPreference;
  *   preferredText: !Array<!shaka.extern.TextPreference>,
  *   preferredVideo: !Array<!shaka.extern.VideoPreference>,
  *   preferredDecodingAttributes: !Array<string>,
- *   preferForcedSubs: boolean,
  *   queue: shaka.extern.QueueConfiguration,
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
@@ -3105,13 +3111,6 @@ shaka.extern.VideoPreference;
  *   This is used to do a filtering of the variants available for the player.
  *   <br>
  *   Defaults to <code>[]</code>.
- * @property {boolean} preferForcedSubs
- *   If true, a forced text track is preferred.
- *   If the content has no forced captions and the value is true,
- *   no text track is chosen.
- *   Changing this during playback will not affect the current playback.
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {shaka.extern.QueueConfiguration} queue
  *   Queue manager configuration and settings.
  * @property {shaka.extern.Restrictions} restrictions
