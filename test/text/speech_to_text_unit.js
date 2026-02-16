@@ -160,7 +160,7 @@ describe('SpeechToText', () => {
     it('release remove shaka-speech-to-text-container', () => {
       speechToText = new shaka.text.SpeechToText(player);
       expect(speechToText.isSupported()).toBe(true);
-      let tracks = speechToText.getTextTracks();
+      const tracks = speechToText.getTextTracks();
       expect(tracks.length).toBe(1);
       expect(tracks[0].active).toBe(false);
       speechToText.enable(tracks[0]);
