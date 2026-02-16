@@ -56,6 +56,7 @@ shaka.ui.LanguageUtils = class {
     const AccessibilityPurpose =
         shaka.media.ManifestParser.AccessibilityPurpose;
     const LocIds = shaka.ui.Locales.Ids;
+    const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat;
 
     let trackLabelFormat = config.trackLabelFormat;
     const showAudioChannelCountVariants = config.showAudioChannelCountVariants;
@@ -69,9 +70,9 @@ shaka.ui.LanguageUtils = class {
     });
 
     if (tracks.length > 1 && tracks[0].label &&
-        trackLabelFormat != shaka.ui.Overlay.TrackLabelFormat.LABEL &&
+        trackLabelFormat != TrackLabelFormat.LABEL &&
         shaka.ui.LanguageUtils.areAudioTracksEqualExceptLabel_(tracks)) {
-      trackLabelFormat = shaka.ui.Overlay.TrackLabelFormat.LABEL;
+      trackLabelFormat = TrackLabelFormat.LABEL;
     }
 
     /** @type {!Map<string, !Set<string>>} */
@@ -116,8 +117,7 @@ shaka.ui.LanguageUtils = class {
       if (showAudioCodec && hasDifferentAudioCodecs(language) && audioCodec) {
         keys.push(audioCodec);
       }
-      if (label &&
-          trackLabelFormat == shaka.ui.Overlay.TrackLabelFormat.LABEL) {
+      if (label && trackLabelFormat == TrackLabelFormat.LABEL) {
         keys.push(label);
       }
       return keys.join(': ');
@@ -199,15 +199,23 @@ shaka.ui.LanguageUtils = class {
           basicInfo += getChannelsCountName(channelsCount);
         }
       }
-      switch (trackLabelFormat) {
-        case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
+      let labelFormat = trackLabelFormat;
+      if (labelFormat === TrackLabelFormat.LABEL_OR_LANGUAGE) {
+        labelFormat = label ?
+            TrackLabelFormat.LABEL : TrackLabelFormat.LANGUAGE;
+      } else if (labelFormat === TrackLabelFormat.LANGUAGE_OR_LABEL) {
+        labelFormat = (language && language !== 'und') ?
+            TrackLabelFormat.LANGUAGE : TrackLabelFormat.LABEL;
+      }
+      switch (labelFormat) {
+        case TrackLabelFormat.LANGUAGE:
           span.textContent += basicInfo;
           if (accessibilityPurpose == AccessibilityPurpose.VISUALLY_IMPAIRED) {
             span.textContent += ' - ' +
                 localization.resolve(shaka.ui.Locales.Ids.AUDIO_DESCRIPTION);
           }
           break;
-        case shaka.ui.Overlay.TrackLabelFormat.ROLE:
+        case TrackLabelFormat.ROLE:
           span.textContent += basicInfo;
           if (!rolesString) {
             // Fallback behavior. This probably shouldn't happen.
@@ -219,13 +227,13 @@ shaka.ui.LanguageUtils = class {
             span.textContent = rolesString;
           }
           break;
-        case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE_ROLE:
+        case TrackLabelFormat.LANGUAGE_ROLE:
           span.textContent += basicInfo;
           if (rolesString) {
             span.textContent += ': ' + rolesString;
           }
           break;
-        case shaka.ui.Overlay.TrackLabelFormat.LABEL:
+        case TrackLabelFormat.LABEL:
           if (label) {
             span.textContent = label + basicInfo;
           } else {
@@ -261,6 +269,7 @@ shaka.ui.LanguageUtils = class {
   static updateTextTracks(tracks, langMenu, onTrackSelected, updateChosen,
       currentSelectionElement, localization, config) {
     const LocIds = shaka.ui.Locales.Ids;
+    const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat;
 
     const trackLabelFormat = config.textTrackLabelFormat;
     const preferIntlDisplayNames = config.preferIntlDisplayNames;
@@ -293,8 +302,7 @@ shaka.ui.LanguageUtils = class {
         rolesString,
         forced,
       ];
-      if (label &&
-          trackLabelFormat == shaka.ui.Overlay.TrackLabelFormat.LABEL) {
+      if (label && trackLabelFormat == TrackLabelFormat.LABEL) {
         keys.push(label);
       }
       return keys.join(': ');
@@ -348,13 +356,21 @@ shaka.ui.LanguageUtils = class {
             shaka.ui.LanguageUtils.getLanguageName(
                 language, localization, preferIntlDisplayNames);
       }
-      switch (trackLabelFormat) {
-        case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
+      let labelFormat = trackLabelFormat;
+      if (labelFormat === TrackLabelFormat.LABEL_OR_LANGUAGE) {
+        labelFormat = label ?
+            TrackLabelFormat.LABEL : TrackLabelFormat.LANGUAGE;
+      } else if (labelFormat === TrackLabelFormat.LANGUAGE_OR_LABEL) {
+        labelFormat = (language && language !== 'und') ?
+            TrackLabelFormat.LANGUAGE : TrackLabelFormat.LABEL;
+      }
+      switch (labelFormat) {
+        case TrackLabelFormat.LANGUAGE:
           if (forced) {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
-        case shaka.ui.Overlay.TrackLabelFormat.ROLE:
+        case TrackLabelFormat.ROLE:
           if (!rolesString) {
             // Fallback behavior. This probably shouldn't happen.
             shaka.log.alwaysWarn('Track #' + track.id + ' does not have a ' +
@@ -367,7 +383,7 @@ shaka.ui.LanguageUtils = class {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
-        case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE_ROLE:
+        case TrackLabelFormat.LANGUAGE_ROLE:
           if (rolesString) {
             span.textContent += ': ' + rolesString;
           }
@@ -375,7 +391,7 @@ shaka.ui.LanguageUtils = class {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
-        case shaka.ui.Overlay.TrackLabelFormat.LABEL:
+        case TrackLabelFormat.LABEL:
           if (label) {
             span.textContent = label;
           } else {

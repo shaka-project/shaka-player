@@ -805,6 +805,8 @@ shaka.ui.Overlay.TrackLabelFormat = {
   'ROLE': 1,
   'LANGUAGE_ROLE': 2,
   'LABEL': 3,
+  'LABEL_OR_LANGUAGE': 4,
+  'LANGUAGE_OR_LABEL': 4,
 };
 
 /**
