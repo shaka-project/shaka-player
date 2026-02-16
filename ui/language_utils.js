@@ -227,7 +227,7 @@ shaka.ui.LanguageUtils = class {
           break;
         case shaka.ui.Overlay.TrackLabelFormat.LABEL:
           if (label) {
-            span.textContent = label;
+            span.textContent = label + basicInfo;
           } else {
             // Fallback behavior. This probably shouldn't happen.
             shaka.log.alwaysWarn('Track #' + JSON.stringify(track) +
