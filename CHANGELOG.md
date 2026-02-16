@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.0.2](https://github.com/shaka-project/shaka-player/compare/v5.0.1...v5.0.2) (2026-02-16)
+
+
+### Bug Fixes
+
+* Fix CryptoKey definition ([#9686](https://github.com/shaka-project/shaka-player/issues/9686)) ([bf934f6](https://github.com/shaka-project/shaka-player/commit/bf934f6f31614a198e4a54ec106d5c337a94c085))
+* Fix usage of mediaElement in shaka.Player constructor ([#9698](https://github.com/shaka-project/shaka-player/issues/9698)) ([8896313](https://github.com/shaka-project/shaka-player/commit/88963131433ca7c2ee9af92f8cc8625f82125e7d))
+* Fix video freezes when seeking to the end when the audio and video duration are slightly different ([#9695](https://github.com/shaka-project/shaka-player/issues/9695)) ([9686f28](https://github.com/shaka-project/shaka-player/commit/9686f282bdde14e14a3114526936677b96df0b2f))
+* **MSF:** Fix CMSF catalog parsing ([#9710](https://github.com/shaka-project/shaka-player/issues/9710)) ([dd650fb](https://github.com/shaka-project/shaka-player/commit/dd650fb3a5c60b9a366188d22b624437a92b73ea))
+* **UI:** Fix chapter marker issues ([#9708](https://github.com/shaka-project/shaka-player/issues/9708)) ([fc10d6b](https://github.com/shaka-project/shaka-player/commit/fc10d6bafb52d0b40d5f18aba1576d0af23f658c))
+* **UI:** fix presentation time display when display time is larger than duration ([#9712](https://github.com/shaka-project/shaka-player/issues/9712)) ([887da7f](https://github.com/shaka-project/shaka-player/commit/887da7fd1db5f9cf3c4f94238b98e829b8e97726)), closes [#9711](https://github.com/shaka-project/shaka-player/issues/9711)
+* **UI:** Player automatically enters fullscreen on single tap on mobile ([#9709](https://github.com/shaka-project/shaka-player/issues/9709)) ([302ee45](https://github.com/shaka-project/shaka-player/commit/302ee45387e16c26841a4d7671d57dec1121e238))
+* **UI:** Slight delay in removing chapter title labeling ([#9707](https://github.com/shaka-project/shaka-player/issues/9707)) ([c97b50c](https://github.com/shaka-project/shaka-player/commit/c97b50c424d361ae6c48eedc8f34370bf2a8ecae))
+* Validate that mediaElement.getStartDate returns a Date ([#9701](https://github.com/shaka-project/shaka-player/issues/9701)) ([0a1dfc4](https://github.com/shaka-project/shaka-player/commit/0a1dfc4d6984e9a5e76012f4321e8147938db200))
+
 ## [5.0.1](https://github.com/shaka-project/shaka-player/compare/v5.0.0...v5.0.1) (2026-02-09)
 
 
