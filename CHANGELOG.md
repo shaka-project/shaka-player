@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.15.30](https://github.com/shaka-project/shaka-player/compare/v4.15.29...v4.15.30) (2026-02-16)
+
+
+### Bug Fixes
+
+* Fix CryptoKey definition ([#9686](https://github.com/shaka-project/shaka-player/issues/9686)) ([c846b37](https://github.com/shaka-project/shaka-player/commit/c846b3738eaba469b9dcbfb45ce03f043d6d595d))
+* Fix video freezes when seeking to the end when the audio and video duration are slightly different ([#9695](https://github.com/shaka-project/shaka-player/issues/9695)) ([0046f52](https://github.com/shaka-project/shaka-player/commit/0046f5217c0e30a73d1005077172a7cc898ccc15))
+* **UI:** fix presentation time display when display time is larger than duration ([#9712](https://github.com/shaka-project/shaka-player/issues/9712)) ([1827710](https://github.com/shaka-project/shaka-player/commit/182771045823ac4e7d1388f6918b404cd73f3262)), closes [#9711](https://github.com/shaka-project/shaka-player/issues/9711)
+* Validate that mediaElement.getStartDate returns a Date ([#9701](https://github.com/shaka-project/shaka-player/issues/9701)) ([a3dfe32](https://github.com/shaka-project/shaka-player/commit/a3dfe3291c267b01922bf74ff128eb92fb2cc4cc))
+
 ## [4.15.29](https://github.com/shaka-project/shaka-player/compare/v4.15.28...v4.15.29) (2026-02-09)
 
 
