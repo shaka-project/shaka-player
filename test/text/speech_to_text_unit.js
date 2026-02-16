@@ -150,15 +150,20 @@ describe('SpeechToText', () => {
       expect(tracks.length).toBe(1);
     });
 
-    it('create shaka-speech-to-text-container', () => {
+    it('create shaka-speech-to-text-container on demand only', () => {
       speechToText = new shaka.text.SpeechToText(player);
       const elements =
           container.getElementsByClassName('shaka-speech-to-text-container');
-      expect(elements.length).toBe(1);
+      expect(elements.length).toBe(0);
     });
 
     it('release remove shaka-speech-to-text-container', () => {
       speechToText = new shaka.text.SpeechToText(player);
+      expect(speechToText.isSupported()).toBe(true);
+      let tracks = speechToText.getTextTracks();
+      expect(tracks.length).toBe(1);
+      expect(tracks[0].active).toBe(false);
+      speechToText.enable(tracks[0]);
       let elements =
           container.getElementsByClassName('shaka-speech-to-text-container');
       expect(elements.length).toBe(1);
