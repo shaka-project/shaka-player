@@ -2393,8 +2393,7 @@ shaka.extern.MediaSourceConfiguration;
  *   is chosen, in two scenarios:
  *   <br>
  *   - In the initial selection, if the regular preference filters match no
- *   tracks. In this case, the preferredText settings will be ignored, and the
- *   language will be chosen based on the initial variant.
+ *   text tracks, a text track will be chosen based on the initial audio track.
  *   <br>
  *   - When changing the audio language, if the previous subtitle is either
  *   not present or is forced from the previous language.
