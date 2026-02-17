@@ -397,6 +397,10 @@ shaka.extern.UIDocumentPictureInPicture;
  *   there is no role.
  *   LABEL means the non-standard DASH "label" attribute or the standard DASH
  *   "Label" element or the HLS "NAME" attribute are shown.
+ *   LABEL_OR_LANGUAGE means that LABEL is preferred; if it does not exist,
+ *   LANGUAGE is used.
+ *   LANGUAGE_OR_LABEL means that LANGUAGE is preferred; if it does not exist
+ *   or is "und" (undefined), LABEL is used instead.
  *   <br>
  *   Defaults to <code>LANGUAGE</code>.
  * @property {shaka.ui.Overlay.TrackLabelFormat} textTrackLabelFormat
@@ -408,6 +412,10 @@ shaka.extern.UIDocumentPictureInPicture;
  *   there is no role.
  *   LABEL means the non-standard DASH "label" attribute or the standard DASH
  *   "Label" element or the HLS "NAME" attribute are shown.
+ *   LABEL_OR_LANGUAGE means that LABEL is preferred; if it does not exist,
+ *   LANGUAGE is used.
+ *   LANGUAGE_OR_LABEL means that LANGUAGE is preferred; if it does not exist
+ *   or is "und" (undefined), LABEL is used instead.
  *   <br>
  *   Defaults to <code>LANGUAGE</code>.
  * @property {number} fadeDelay
