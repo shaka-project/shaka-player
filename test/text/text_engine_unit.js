@@ -46,6 +46,7 @@ describe('TextEngine', () => {
 
     TextEngine.registerParser(dummyMimeType, mockParserPlugIn);
     textEngine = new TextEngine(mockDisplayer);
+    textEngine.setTimestampOffset(0);
     textEngine.initParser(
         dummyMimeType,
         /* external= */ false,
@@ -149,6 +150,36 @@ describe('TextEngine', () => {
           cue1, 'uri', jasmine.objectContaining({periodStart: 0}));
       expect(modifyCueCallback).toHaveBeenCalledWith(
           cue2, 'uri', jasmine.objectContaining({periodStart: 0}));
+    });
+
+    it('delays appending til after a timestamp offset is set', async () => {
+      textEngine = new TextEngine(mockDisplayer);
+      textEngine.initParser(
+          dummyMimeType,
+          /* external= */ false,
+          /* segmentRelativeVttTiming= */ false);
+      const cue1 = createFakeCue(1, 2);
+
+      mockParseMedia.and.returnValue([cue1]);
+      await textEngine.appendBuffer(dummyData, 0, 3, 'subs.vtt');
+
+      expect(mockParseMedia).not.toHaveBeenCalled();
+      expect(mockDisplayer.appendSpy).not.toHaveBeenCalled();
+
+      textEngine.setTimestampOffset(0);
+      // re-adding deferred appends is async
+      await shaka.test.Util.shortDelay();
+
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        dummyData,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+        'subs.vtt',
+        [],
+      ]);
+
+      expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
+        [cue1],
+      ]);
     });
 
     it('defers append to displayer if no timestamp offset for disco',
