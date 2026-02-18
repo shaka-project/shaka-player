@@ -4,6 +4,12 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
+# If another instance of this workflow is started for the same PR, cancel the
+# old one.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || inputs.ref }}
+  cancel-in-progress: true
+
 jobs:
   bundle-size:
     runs-on: ubuntu-latest
