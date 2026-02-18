@@ -34,17 +34,29 @@ shaka.extern.ICeaParser = class {
 /**
  * @typedef {{
  *   packet: !Uint8Array,
- *   pts: number
+ *   pts: number,
+ *   isSeiFormat: boolean
  * }}
  *
  * @description Parsed Caption Packet.
  * @property {!Uint8Array} packet
- * Caption packet. More specifically, it contains a "User data
- * registered by Recommendation ITU-T T.35 SEI message", from section D.1.6
- * and section D.2.6 of Rec. ITU-T H.264 (06/2019).
+ * The raw caption bytes. Depending on the source, it can be:
+ *   - A "User data registered by Recommendation ITU-T T.35 SEI message"
+ *     (sections D.1.6 and D.2.6 of Rec. ITU-T H.264, 06/2019), when
+ *     `isSeiFormat` is true.
+ *   - Raw CEA-608 byte pairs from a dedicated 'c608' MP4 track sample,
+ *     when `isSeiFormat` is false. In this case, the data does **not**
+ *     include NAL units, length prefixes, or SEI headers.
+ *
  * @property {number} pts
- * The presentation timestamp (pts) at which the ITU-T T.35 data shows up.
- * in seconds.
+ * The presentation timestamp (PTS) of this caption packet in seconds.
+ * For SEI-based captions, this corresponds to the PTS of the containing
+ * video sample. For raw CEA-608 track samples, it corresponds to the PTS
+ * of the 'c608' sample.
+ *
+ * @property {boolean} isSeiFormat
+ * True if the packet comes from an SEI message (ITU-T T.35). False if
+ * the packet comes from a raw CEA-608 MP4 track sample.
  * @exportDoc
  */
 shaka.extern.ICeaParser.CaptionPacket;
@@ -68,6 +80,28 @@ shaka.extern.ICaptionDecoder = class {
    * @exportDoc
    */
   extract(userDataSeiMessage, pts) {}
+
+  /**
+   * Extracts raw CEA-608 caption bytes from a dedicated MP4 'c608' track
+   * and prepares them for decoding. In a given media fragment, all the
+   * CEA-608 samples found in the track should be extracted by successive
+   * calls to extractRaw608(), followed by a single call to decode().
+   *
+   * Unlike extract(), this method does not process SEI messages or
+   * ITU-T T.35 user data. The input is raw CEA-608 byte pairs as stored
+   * directly in the MP4 sample payload of a 'c608' track (Apple-style
+   * fragmented MP4).
+   *
+   * Each call provides the full sample payload for a single caption
+   * sample. The payload typically consists of one or more CEA-608
+   * cc_data byte pairs.
+   *
+   * @param {!Uint8Array} raw608Data
+   * Raw CEA-608 data bytes from a 'c608' MP4 track sample.
+   * @param {number} pts PTS when this sample was received, in seconds.
+   * @exportDoc
+   */
+  extractRaw608(raw608Data, pts) {}
 
   /**
    * Decodes all currently extracted packets and then clears them.
