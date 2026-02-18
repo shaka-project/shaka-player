@@ -120,7 +120,10 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
     } else {
       const showHour = seekRangeSize >= 3600;
 
-      const currentTime = Math.max(0, displayTime - seekRange.start);
+      let currentTime = Math.max(0, displayTime - seekRange.start);
+      if (seekRangeSize) {
+        currentTime = Math.min(currentTime, seekRangeSize);
+      }
       let value = Utils.buildTimeString(currentTime, showHour);
       if (!this.showProgress_ && seekRangeSize) {
         const remainingTime = seekRangeSize - currentTime;

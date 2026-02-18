@@ -222,7 +222,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     this.eventManager.listen(this.container, 'mouseleave', () => {
       this.hideThumbnailTimer_.stop();
-      this.hideThumbnailTimer_.tickAfter(/* seconds= */ 0.25);
+      this.hideThumbnailTimer_.tickNow();
     });
 
     this.eventManager.listen(this.controls, 'chaptersupdated', () => {
@@ -488,8 +488,11 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           chapter.startTime > seekRange.end) {
         continue;
       }
-      points.add(chapter.startTime);
-      if (chapter.endTime && chapter.endTime < seekRange.end) {
+      if (chapter.startTime > seekRange.start) {
+        points.add(chapter.startTime);
+      }
+      // We use minus 1 to avoid inaccuracies
+      if (chapter.endTime && chapter.endTime < (seekRange.end - 1)) {
         points.add(chapter.endTime);
       }
     }
@@ -500,11 +503,14 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       return;
     }
 
+    // We used a small width to simulate the 2px line or at least 0.1% length.
+    const chapterPointSize = Math.max(0.001, 2 / this.bar.offsetWidth);
+
     const sortedPoints = Array.from(points).sort((a, b) => a - b);
     for (const point of sortedPoints) {
       const start = (point - seekRange.start) / seekRangeSize || 0;
       // We used a small width to simulate the 2px line
-      const end = start + 2 / this.bar.offsetWidth;
+      const end = start + chapterPointSize;
 
       gradient.push(this.makeColor_('transparent', start));
       gradient.push(this.makeColor_(chapterColor, start));
