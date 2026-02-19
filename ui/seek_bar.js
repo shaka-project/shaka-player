@@ -503,19 +503,15 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       return;
     }
 
-    // We used a small width to simulate the 2px line or at least 0.1% length.
-    const chapterPointSize = Math.max(0.001, 2 / this.bar.offsetWidth);
-
     const sortedPoints = Array.from(points).sort((a, b) => a - b);
     for (const point of sortedPoints) {
-      const start = (point - seekRange.start) / seekRangeSize || 0;
-      // We used a small width to simulate the 2px line
-      const end = start + chapterPointSize;
+      const start = ((point - seekRange.start) / seekRangeSize) * 100 + '%';
+      const end = `calc(${start} + 2px)`;
 
-      gradient.push(this.makeColor_('transparent', start));
-      gradient.push(this.makeColor_(chapterColor, start));
-      gradient.push(this.makeColor_(chapterColor, end));
-      gradient.push(this.makeColor_('transparent', end));
+      gradient.push(`transparent ${start}`);
+      gradient.push(`${chapterColor} ${start}`);
+      gradient.push(`${chapterColor} ${end}`);
+      gradient.push(`transparent ${end}`);
     }
 
     this.chapterMarkerContainer_.style.background =
