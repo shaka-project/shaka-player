@@ -13,6 +13,8 @@ describe('PlayRateController', () => {
   let setPlayRateSpy;
   /** @type {!jasmine.Spy} */
   let movePlayheadSpy;
+  /** @type {!jasmine.Spy} */
+  let isPausedSpy;
 
   /** @type {number} */
   let playRate;
@@ -25,6 +27,7 @@ describe('PlayRateController', () => {
     getDefaultPlayRateSpy = jasmine.createSpy('getDefaultPlaybackRate');
     setPlayRateSpy = jasmine.createSpy('setPlaybackRate');
     movePlayheadSpy = jasmine.createSpy('movePlayhead');
+    isPausedSpy = jasmine.createSpy('isPaused');
 
     playRate = 1;
 
@@ -32,12 +35,14 @@ describe('PlayRateController', () => {
     setPlayRateSpy.and.callFake((rate) => {
       playRate = rate;
     });
+    isPausedSpy.and.callFake(() => false);
 
     const harness = {
       getRate: shaka.test.Util.spyFunc(getPlayRateSpy),
       getDefaultRate: shaka.test.Util.spyFunc(getDefaultPlayRateSpy),
       setRate: shaka.test.Util.spyFunc(setPlayRateSpy),
       movePlayhead: shaka.test.Util.spyFunc(movePlayheadSpy),
+      isPaused: shaka.test.Util.spyFunc(isPausedSpy),
     };
 
     controller = new shaka.media.PlayRateController(harness);
