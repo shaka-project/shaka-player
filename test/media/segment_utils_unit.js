@@ -34,6 +34,11 @@ describe('SegmentUtils', () => {
 
   const initFairPlayUri = '/base/test/test/assets/init-fairplay.mp4';
 
+  const cea608TrackInitSegmentUri =
+      '/base/test/test/assets/cea608-track-init.mp4';
+  const cea608TrackSegmentUri =
+      '/base/test/test/assets/cea608-track-segment.mp4';
+
   /** @type {!ArrayBuffer} */
   let videoInitSegment;
   /** @type {!ArrayBuffer} */
@@ -70,9 +75,34 @@ describe('SegmentUtils', () => {
   let webvtt;
   /** @type {!ArrayBuffer} */
   let initFairPlay;
+  /** @type {!ArrayBuffer} */
+  let cea608TrackInitSegment;
+  /** @type {!ArrayBuffer} */
+  let cea608TrackSegment;
 
   beforeAll(async () => {
-    const responses = await Promise.all([
+    [
+      videoInitSegment,
+      videoSegment,
+      audioInitSegment,
+      audioSegment,
+      audioInitSegmentXheAac,
+      audioInitSegmentAC4,
+      multidrmVideoInitSegment,
+      multidrmAudioInitSegment,
+      ceaInitSegment,
+      ceaSegment,
+      h265CeaInitSegment,
+      h265CeaSegment,
+      tsVideo,
+      tsAudio,
+      tsCaptions,
+      ttml,
+      webvtt,
+      initFairPlay,
+      cea608TrackInitSegment,
+      cea608TrackSegment,
+    ] = await Promise.all([
       shaka.test.Util.fetch(videoInitSegmentUri),
       shaka.test.Util.fetch(videoSegmentUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
@@ -91,25 +121,9 @@ describe('SegmentUtils', () => {
       shaka.test.Util.fetch(ttmlMp4Uri),
       shaka.test.Util.fetch(webvttMp4Uri),
       shaka.test.Util.fetch(initFairPlayUri),
+      shaka.test.Util.fetch(cea608TrackInitSegmentUri),
+      shaka.test.Util.fetch(cea608TrackSegmentUri),
     ]);
-    videoInitSegment = responses[0];
-    videoSegment = responses[1];
-    audioInitSegment = responses[2];
-    audioSegment = responses[3];
-    audioInitSegmentXheAac = responses[4];
-    audioInitSegmentAC4 = responses[5];
-    multidrmVideoInitSegment = responses[6];
-    multidrmAudioInitSegment = responses[7];
-    ceaInitSegment = responses[8];
-    ceaSegment = responses[9];
-    h265CeaInitSegment = responses[10];
-    h265CeaSegment = responses[11];
-    tsVideo = responses[12];
-    tsAudio = responses[13];
-    tsCaptions = responses[14];
-    ttml = responses[15];
-    webvtt = responses[16];
-    initFairPlay = responses[17];
   });
 
   it('getBasicInfoFromMp4', async () => {
@@ -498,6 +512,27 @@ describe('SegmentUtils', () => {
       ],
     };
     expect(basicInfo).toEqual(expected);
+
+    basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
+        cea608TrackInitSegment, cea608TrackSegment, false);
+    expected = {
+      type: 'video',
+      mimeType: 'video/mp4',
+      codecs: 'avc1.64001F',
+      language: 'eng',
+      height: '306',
+      width: '544',
+      channelCount: null,
+      sampleRate: null,
+      closedCaptions: (new Map()).set('CC1', 'CC1'),
+      videoRange: null,
+      colorGamut: null,
+      frameRate: jasmine.any(Number),
+      timescale: 24000,
+      drmInfos: [],
+    };
+    expect(basicInfo).toEqual(expected);
+    expect(basicInfo.frameRate).toBeCloseTo(23.976, 2);
   });
 
   it('getBasicInfoFromTs', () => {
