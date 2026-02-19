@@ -265,7 +265,8 @@ describe('MediaSourceEngine', () => {
         },
         config);
     mediaSourceEngine.getCaptionParser = () => {
-      return mockClosedCaptionParser;
+      return /** @type {!shaka.media.ClosedCaptionParser} */(
+        mockClosedCaptionParser);
     };
   });
 
