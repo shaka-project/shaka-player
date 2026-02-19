@@ -35,7 +35,7 @@ shaka.extern.ICeaParser = class {
  * @typedef {{
  *   packet: !Uint8Array,
  *   pts: number,
- *   isSeiFormat: boolean
+ *   format: string,
  * }}
  *
  * @description Parsed Caption Packet.
@@ -43,9 +43,9 @@ shaka.extern.ICeaParser = class {
  * The raw caption bytes. Depending on the source, it can be:
  *   - A "User data registered by Recommendation ITU-T T.35 SEI message"
  *     (sections D.1.6 and D.2.6 of Rec. ITU-T H.264, 06/2019), when
- *     `isSeiFormat` is true.
+ *     `format` is `sei.
  *   - Raw CEA-608 byte pairs from a dedicated 'c608' MP4 track sample,
- *     when `isSeiFormat` is false. In this case, the data does **not**
+ *     when `format` is `raw608`. In this case, the data does **not**
  *     include NAL units, length prefixes, or SEI headers.
  *
  * @property {number} pts
@@ -54,9 +54,10 @@ shaka.extern.ICeaParser = class {
  * video sample. For raw CEA-608 track samples, it corresponds to the PTS
  * of the 'c608' sample.
  *
- * @property {boolean} isSeiFormat
- * True if the packet comes from an SEI message (ITU-T T.35). False if
- * the packet comes from a raw CEA-608 MP4 track sample.
+ * @property {string} format
+ * The origin format of the caption packet:
+ *   - `sei` for ITU-T T.35 SEI messages embedded in video samples.
+ *   - `raw608` for raw CEA-608 samples from a dedicated MP4 track.
  * @exportDoc
  */
 shaka.extern.ICeaParser.CaptionPacket;
