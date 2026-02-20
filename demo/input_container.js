@@ -208,6 +208,14 @@ shakaDemo.InputContainer = class {
       this.latestRow_.classList.add('borderless');
     }
   }
+
+  /**
+   * Appends a custom DOM element directly to this container's table.
+   * @param {!Element} element
+   */
+  appendEntry(element) {
+    this.table_.appendChild(element);
+  }
 };
 
 /** @enum {string} */

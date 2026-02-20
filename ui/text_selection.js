@@ -195,8 +195,12 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     // Set text preference for when reloading the stream (e.g. casting), keep
     // this selection.
     this.player.configure({
-      preferredTextLanguage: track.language,
-      preferForcedSubs: track.forced,
+      preferredText: [{
+        language: track.language,
+        role: '',
+        format: '',
+        forced: track.forced || false,
+      }],
     });
   }
 

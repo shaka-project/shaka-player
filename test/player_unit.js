@@ -166,7 +166,15 @@ describe('Player', () => {
     await player.attach(video);
     player.configure({
       // Ensures we don't get a warning about missing preference.
-      preferredAudioLanguage: 'en',
+      preferredAudio: [
+        {
+          language: 'en',
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        },
+      ],
       abrFactory: () => abrManager,
       textDisplayFactory: (player) => textDisplayer,
     });
@@ -1327,26 +1335,34 @@ describe('Player', () => {
       const oldConfig = player.getConfiguration();
       const oldDelayLicense = oldConfig.drm.delayLicenseRequestUntilPlayed;
       const oldSwitchInterval = oldConfig.abr.switchInterval;
-      const oldPreferredLang = oldConfig.preferredAudioLanguage;
+      const oldPreferredAudio = oldConfig.preferredAudio;
 
       expect(oldDelayLicense).toBe(false);
       expect(oldSwitchInterval).toBe(8);
-      expect(oldPreferredLang).toBe('en');
+      expect(oldPreferredAudio.map((p) => p.language)).toEqual(['en']);
 
       player.configure('drm.delayLicenseRequestUntilPlayed', true);
       player.configure('abr.switchInterval', 10);
-      player.configure('preferredAudioLanguage', 'fr');
+      player.configure('preferredAudio', [
+        {
+          language: 'fr',
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        },
+      ]);
 
       expect(onConfigurationChanged).toHaveBeenCalledTimes(3);
 
       const newConfig = player.getConfiguration();
       const newDelayLicense = newConfig.drm.delayLicenseRequestUntilPlayed;
       const newSwitchInterval = newConfig.abr.switchInterval;
-      const newPreferredLang = newConfig.preferredAudioLanguage;
+      const newPreferredAudio = newConfig.preferredAudio;
 
       expect(newDelayLicense).toBe(true);
       expect(newSwitchInterval).toBe(10);
-      expect(newPreferredLang).toBe('fr');
+      expect(newPreferredAudio.map((p) => p.language)).toEqual(['fr']);
     });
 
     it('accepts escaped "." in names', () => {
@@ -1415,7 +1431,7 @@ describe('Player', () => {
       expect(onConfigurationChanged).toHaveBeenCalledTimes(3);
     });
 
-    it('allow update preferredVideoHdrLevel on the fly', async () => {
+    it('allow update preferredVideo hdrLevel on the fly', async () => {
       expect(onConfigurationChanged).not.toHaveBeenCalled();
 
       const timeline = new shaka.media.PresentationTimeline(300, 0);
@@ -1434,7 +1450,15 @@ describe('Player', () => {
         });
       });
       goog.asserts.assert(manifest, 'manifest must be non-null');
-      player.configure('preferredVideoHdrLevel', 'SDR');
+      player.configure('preferredVideo', [
+        {
+          role: '',
+          label: '',
+          codec: '',
+          hdrLevel: 'SDR',
+          layout: '',
+        },
+      ]);
       await player.load(fakeManifestUri, 0, fakeMimeType);
 
       expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
@@ -1442,7 +1466,15 @@ describe('Player', () => {
       streamingEngine.switchVariant.calls.reset();
 
       // Change the configuration after the playback starts.
-      player.configure('preferredVideoHdrLevel', 'PQ');
+      player.configure('preferredVideo', [
+        {
+          role: '',
+          label: '',
+          codec: '',
+          hdrLevel: 'PQ',
+          layout: '',
+        },
+      ]);
 
       expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
 
@@ -1452,7 +1484,7 @@ describe('Player', () => {
       expect(streamingEngine.switchVariant).toHaveBeenCalled();
     });
 
-    it('allow update preferredVideoLayout on the fly', async () => {
+    it('allow update preferredVideo layout on the fly', async () => {
       expect(onConfigurationChanged).not.toHaveBeenCalled();
 
       const timeline = new shaka.media.PresentationTimeline(300, 0);
@@ -1471,7 +1503,15 @@ describe('Player', () => {
         });
       });
       goog.asserts.assert(manifest, 'manifest must be non-null');
-      player.configure('preferredVideoLayout', 'CH-STEREO');
+      player.configure('preferredVideo', [
+        {
+          role: '',
+          label: '',
+          codec: '',
+          hdrLevel: '',
+          layout: 'CH-STEREO',
+        },
+      ]);
       await player.load(fakeManifestUri, 0, fakeMimeType);
 
       expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
@@ -1479,7 +1519,15 @@ describe('Player', () => {
       streamingEngine.switchVariant.calls.reset();
 
       // Change the configuration after the playback starts.
-      player.configure('preferredVideoLayout', 'CH-MONO');
+      player.configure('preferredVideo', [
+        {
+          role: '',
+          label: '',
+          codec: '',
+          hdrLevel: '',
+          layout: 'CH-MONO',
+        },
+      ]);
 
       expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
 
@@ -1489,7 +1537,7 @@ describe('Player', () => {
       expect(streamingEngine.switchVariant).toHaveBeenCalled();
     });
 
-    it('allow update preferSpatialAudio on the fly', async () => {
+    it('allow update preferredAudio spatialAudio on the fly', async () => {
       expect(onConfigurationChanged).not.toHaveBeenCalled();
 
       const timeline = new shaka.media.PresentationTimeline(300, 0);
@@ -1508,7 +1556,16 @@ describe('Player', () => {
         });
       });
       goog.asserts.assert(manifest, 'manifest must be non-null');
-      player.configure('preferSpatialAudio', false);
+      player.configure('preferredAudio', [
+        {
+          language: '',
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+          spatialAudio: false,
+        },
+      ]);
       await player.load(fakeManifestUri, 0, fakeMimeType);
 
       expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
@@ -1516,7 +1573,16 @@ describe('Player', () => {
       streamingEngine.switchVariant.calls.reset();
 
       // Change the configuration after the playback starts.
-      player.configure('preferSpatialAudio', true);
+      player.configure('preferredAudio', [
+        {
+          language: '',
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+          spatialAudio: true,
+        },
+      ]);
 
       expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
 
@@ -1526,7 +1592,7 @@ describe('Player', () => {
       expect(streamingEngine.switchVariant).toHaveBeenCalled();
     });
 
-    it('allow update preferredVideoRole on the fly', async () => {
+    it('allow update preferredVideo role on the fly', async () => {
       expect(onConfigurationChanged).not.toHaveBeenCalled();
 
       const timeline = new shaka.media.PresentationTimeline(300, 0);
@@ -1545,7 +1611,15 @@ describe('Player', () => {
         });
       });
       goog.asserts.assert(manifest, 'manifest must be non-null');
-      player.configure('preferredVideoRole', 'main');
+      player.configure('preferredVideo', [
+        {
+          role: 'main',
+          label: '',
+          codec: '',
+          hdrLevel: '',
+          layout: '',
+        },
+      ]);
       await player.load(fakeManifestUri, 0, fakeMimeType);
 
       expect(onConfigurationChanged).toHaveBeenCalledTimes(1);
@@ -1553,7 +1627,15 @@ describe('Player', () => {
       streamingEngine.switchVariant.calls.reset();
 
       // Change the configuration after the playback starts.
-      player.configure('preferredVideoRole', 'sign');
+      player.configure('preferredVideo', [
+        {
+          role: 'sign',
+          label: '',
+          codec: '',
+          hdrLevel: '',
+          layout: '',
+        },
+      ]);
 
       expect(onConfigurationChanged).toHaveBeenCalledTimes(2);
 
@@ -1894,7 +1976,7 @@ describe('Player', () => {
       variantTracks = [
         {
           id: 100,
-          active: false,
+          active: true,
           type: 'variant',
           bandwidth: 1300,
           language: 'en',
@@ -1937,7 +2019,7 @@ describe('Player', () => {
         },
         {
           id: 101,
-          active: true,
+          active: false,
           type: 'variant',
           bandwidth: 2300,
           language: 'en',
@@ -2399,7 +2481,7 @@ describe('Player', () => {
 
       videoTracks = [
         {
-          active: false,
+          active: true,
           bandwidth: 1000,
           width: 100,
           height: 200,
@@ -2414,7 +2496,7 @@ describe('Player', () => {
           label: null,
         },
         {
-          active: true,
+          active: false,
           bandwidth: 2000,
           width: 200,
           height: 400,
@@ -2503,9 +2585,23 @@ describe('Player', () => {
       // Language/channel prefs must be set before load.  Used in
       // select*Language() tests.
       player.configure({
-        preferredAudioLanguage: 'en',
-        preferredTextLanguage: 'es',
-        preferredAudioChannelCount: 6,
+        preferredAudio: [
+          {
+            language: 'en',
+            role: '',
+            label: '',
+            channelCount: 6,
+            codec: '',
+          },
+        ],
+        preferredText: [
+          {
+            language: 'es',
+            role: '',
+            format: '',
+            forced: false,
+          },
+        ],
       });
 
       await player.load(fakeManifestUri, 0, fakeMimeType);
@@ -2578,7 +2674,14 @@ describe('Player', () => {
 
     it('switching audio doesn\'t change selected text track', () => {
       player.configure({
-        preferredTextLanguage: 'es',
+        preferredText: [
+          {
+            language: 'es',
+            role: '',
+            format: '',
+            forced: false,
+          },
+        ],
       });
 
       // We will manually switch from Spanish to English.
@@ -2600,9 +2703,10 @@ describe('Player', () => {
     });
 
     it('selectAudioTrack() takes precedence over ' +
-       'preferredAudioLanguage', () => {
+       'preferredAudio', () => {
       // This preference is set in beforeEach, before load().
-      expect(player.getConfiguration().preferredAudioLanguage).toBe('en');
+      expect(player.getConfiguration().preferredAudio.map((p) => p.language))
+          .toEqual(['en']);
       expect(getActiveVariantTrack().language).toBe('en');
 
       const newAudioTrack = audioTracks.find((t) => t.language == 'es');
@@ -2720,9 +2824,10 @@ describe('Player', () => {
     });
 
     it('selectTextTrack() takes precedence over ' +
-       'preferredTextLanguage', () => {
+       'preferredText', () => {
       // This preference is set in beforeEach, before load().
-      expect(player.getConfiguration().preferredTextLanguage).toBe('es');
+      expect(player.getConfiguration().preferredText.map((p) => p.language))
+          .toEqual(['es']);
       expect(getActiveTextTrack().language).toBe('es');
 
       const newTextTrack = textTracks.find((t) => t.language == 'en');
@@ -2775,7 +2880,7 @@ describe('Player', () => {
 
     it('remembers the channel count when ABR is reenabled', () => {
       // We prefer 6 channels, and we are currently playing 6 channels.
-      expect(player.getConfiguration().preferredAudioChannelCount).toBe(6);
+      expect(player.getConfiguration().preferredAudio[0].channelCount).toBe(6);
       expect(getActiveVariantTrack().channelsCount).toBe(6);
 
       // Manually turn off ABR and select a 2-channel track.
@@ -2817,7 +2922,7 @@ describe('Player', () => {
       }
 
       // We prefer 6 channels, and we are currently playing 6 channels.
-      expect(player.getConfiguration().preferredAudioChannelCount).toBe(6);
+      expect(player.getConfiguration().preferredAudio[0].channelCount).toBe(6);
       expect(getActiveVariantTrack().channelsCount).toBe(6);
 
       // Manually select a 2-channel track.
@@ -2950,8 +3055,14 @@ describe('Player', () => {
 
     it('chooses the configured text language and role at start', async () => {
       player.configure({
-        preferredTextLanguage: 'en',
-        preferredTextRole: 'commentary',
+        preferredText: [
+          {
+            language: 'en',
+            role: 'commentary',
+            format: '',
+            forced: false,
+          },
+        ],
       });
 
       await player.load(fakeManifestUri, 0, fakeMimeType);
@@ -2968,8 +3079,15 @@ describe('Player', () => {
       expect(getActiveVariantTrack().label).toBe(null);
 
       player.configure({
-        preferredAudioLanguage: '',
-        preferredAudioLabel: 'es-label',
+        preferredAudio: [
+          {
+            language: '',
+            role: '',
+            label: 'es-label',
+            channelCount: 0,
+            codec: '',
+          },
+        ],
       });
 
       await player.load(fakeManifestUri, 0, fakeMimeType);
@@ -3017,7 +3135,7 @@ describe('Player', () => {
       });
 
       player.configure({
-        preferredAudioLanguage: undefined,
+        preferredAudio: [],
       });
 
       await player.load(fakeManifestUri, 0, fakeMimeType);
@@ -3058,7 +3176,15 @@ describe('Player', () => {
 
       // Set the user preferences, which must happen before load().
       player.configure({
-        preferredAudioLanguage: preference,
+        preferredAudio: [
+          {
+            language: preference,
+            role: '',
+            label: '',
+            channelCount: 0,
+            codec: '',
+          },
+        ],
       });
 
       await player.load(fakeManifestUri, 0, fakeMimeType);
@@ -4313,7 +4439,15 @@ describe('Player', () => {
 
       // Configure for 6 channels.
       player.configure({
-        preferredAudioChannelCount: 6,
+        preferredAudio: [
+          {
+            language: '',
+            role: '',
+            label: '',
+            channelCount: 6,
+            codec: '',
+          },
+        ],
       });
       await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(abrManager.setVariants).toHaveBeenCalled();
