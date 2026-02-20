@@ -611,9 +611,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     } else {
       time = this.timeFormatter_(value);
     }
-    const chapterName = this.getChapterName_(value);
-    if (chapterName) {
-      this.thumbnailTime_.textContent = time + ' · ' + chapterName;
+    const chapter = this.getChapter_(value);
+    if (chapter) {
+      this.thumbnailTime_.textContent = time + ' · ' + chapter.title;
     } else {
       this.thumbnailTime_.textContent = time;
     }
@@ -624,7 +624,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.thumbnailContainer_.style.left = leftPosition + 'px';
     this.thumbnailContainer_.style.visibility = 'visible';
 
-    if (isAdValue || !this.player.getImageTracks().length) {
+    const hasImageTracks = this.player.getImageTracks().length > 0;
+    const hasChapterThumbnails = chapter && chapter.images.length > 0;
+
+    if (isAdValue || !(hasImageTracks || hasChapterThumbnails)) {
       this.thumbnailImageContainer_.style.display = 'none';
       return;
     }
@@ -642,9 +645,15 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.thumbnailImageContainer_.style.height = height + 'px';
     }
 
-    const thumbnail =
-        await this.player.getThumbnails(/* trackId= */ null, playerValue);
-    if (!thumbnail || !thumbnail.uris || !thumbnail.uris.length) {
+    let thumbnail;
+    if (hasChapterThumbnails) {
+      thumbnail = this.convertChapterToThumbnail_(chapter);
+    }
+    if (hasImageTracks) {
+      thumbnail = await this.player.getThumbnails(
+          /* trackId= */ null, playerValue) ?? thumbnail;
+    }
+    if (!thumbnail) {
       return;
     }
     if (thumbnail.width < thumbnail.height) {
@@ -729,14 +738,20 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.thumbnailImage_.style.width = '100%';
       this.thumbnailImage_.style.objectFit = 'contain';
     }
-    this.thumbnailImage_.style.left = '-' + scale * thumbnail.positionX + 'px';
-    this.thumbnailImage_.style.top = '-' + scale * thumbnail.positionY + 'px';
-    this.thumbnailImage_.style.transform = 'scale(' + scale + ')';
-    this.thumbnailImage_.style.transformOrigin = 'left top';
+    if (!isNaN(scale) && isFinite(scale)) {
+      this.thumbnailImage_.style.left =
+          '-' + scale * thumbnail.positionX + 'px';
+      this.thumbnailImage_.style.top =
+          '-' + scale * thumbnail.positionY + 'px';
+      this.thumbnailImage_.style.transform = 'scale(' + scale + ')';
+      this.thumbnailImage_.style.transformOrigin = 'left top';
+    }
     // Update container height
     const finalHeight =
         Math.floor(widthImageContainer * thumbnail.height / thumbnail.width);
-    this.thumbnailImageContainer_.style.height = finalHeight + 'px';
+    if (!isNaN(finalHeight) && isFinite(finalHeight)) {
+      this.thumbnailImageContainer_.style.height = finalHeight + 'px';
+    }
   }
 
 
@@ -759,17 +774,49 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
   /**
    * @param {number} totalSeconds
-   * @return {string}
+   * @return {?shaka.extern.Chapter}
    * @private
    */
-  getChapterName_(totalSeconds) {
+  getChapter_(totalSeconds) {
     for (const chapter of this.controls.getChapters()) {
       if (chapter.startTime <= totalSeconds &&
           chapter.endTime >= totalSeconds) {
-        return chapter.title;
+        return chapter;
       }
     }
-    return '';
+    return null;
+  }
+
+
+  /**
+   * @param {?shaka.extern.Chapter} chapter
+   * @return {?shaka.extern.Thumbnail}
+   * @private
+   */
+  convertChapterToThumbnail_(chapter) {
+    if (!chapter || !chapter.images.length) {
+      return null;
+    }
+    const image = chapter.images[0];
+    /** @type {shaka.extern.Thumbnail} */
+    const thumbnail = {
+      segment: null,
+      imageHeight: image.height || 0,
+      imageWidth: image.width || 0,
+      height: image.height || 0,
+      positionX: 0,
+      positionY: 0,
+      startTime: chapter.startTime,
+      duration: chapter.endTime - chapter.startTime,
+      uris: [image.url],
+      startByte: 0,
+      endByte: null,
+      width: image.width || 0,
+      sprite: false,
+      mimeType: '',
+      codecs: '',
+    };
+    return thumbnail;
   }
 };
 
