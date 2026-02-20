@@ -3246,7 +3246,8 @@ shaka.extern.Thumbnail;
  *   id: string,
  *   title: string,
  *   startTime: number,
- *   endTime: number
+ *   endTime: number,
+ *   images: !Array<string>,
  * }}
  *
  * @property {string} id
@@ -3257,6 +3258,8 @@ shaka.extern.Thumbnail;
  *    The time that describes the beginning of the range of the chapter.
  * @property {number} endTime
  *    The time that describes the end of the range of chapter.
+ * @property {!Array<string>} images
+ *    The list of images associated with the chapter.
  * @exportDoc
  */
 shaka.extern.Chapter;

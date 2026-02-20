@@ -2990,6 +2990,20 @@ describe('HlsParser', () => {
             title: 'Dos',
           },
         ],
+        'images': [
+          {
+            'image-category': 'thumbnail',
+            'pixel-width': 320,
+            'pixel-height': 180,
+            'url': 'images/foo.jpg',
+          },
+          {
+            'image-category': 'thumbnail',
+            'pixel-width': 480,
+            'pixel-height': 200,
+            'url': 'test:/foo.jpg',
+          },
+        ],
       },
     ]);
 
@@ -3026,11 +3040,15 @@ describe('HlsParser', () => {
       const metadata = firstChapterReference.getMetadata();
       expect(metadata).not.toBe(null);
       expect(metadata.title).toBe('One');
+      expect(metadata.images.length).toBe(0);
     }
     if (secondChapterReference) {
       const metadata = secondChapterReference.getMetadata();
       expect(metadata).not.toBe(null);
       expect(metadata.title).toBe('Two');
+      expect(metadata.images.length).toBe(2);
+      expect(metadata.images[0]).toBe('test:/images/foo.jpg');
+      expect(metadata.images[1]).toBe('test:/foo.jpg');
     }
   });
 
