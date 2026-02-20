@@ -3023,10 +3023,14 @@ describe('HlsParser', () => {
     expect(firstChapterReference).not.toBe(null);
     expect(secondChapterReference).not.toBe(null);
     if (firstChapterReference) {
-      expect(firstChapterReference.getUris()[0]).toBe('One');
+      const metadata = firstChapterReference.getMetadata();
+      expect(metadata).not.toBe(null);
+      expect(metadata.title).toBe('One');
     }
     if (secondChapterReference) {
-      expect(secondChapterReference.getUris()[0]).toBe('Two');
+      const metadata = secondChapterReference.getMetadata();
+      expect(metadata).not.toBe(null);
+      expect(metadata.title).toBe('Two');
     }
   });
 
