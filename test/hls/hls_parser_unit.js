@@ -3000,7 +3000,7 @@ describe('HlsParser', () => {
           {
             'image-category': 'thumbnail',
             'pixel-width': 480,
-            'pixel-height': 200,
+            'pixel-height': 270,
             'url': 'test:/foo.jpg',
           },
         ],
@@ -3047,8 +3047,14 @@ describe('HlsParser', () => {
       expect(metadata).not.toBe(null);
       expect(metadata.title).toBe('Two');
       expect(metadata.images.length).toBe(2);
-      expect(metadata.images[0]).toBe('test:/images/foo.jpg');
-      expect(metadata.images[1]).toBe('test:/foo.jpg');
+      expect(metadata.images[0].type).toBe('thumbnail');
+      expect(metadata.images[0].width).toBe(320);
+      expect(metadata.images[0].height).toBe(180);
+      expect(metadata.images[0].url).toBe('test:/images/foo.jpg');
+      expect(metadata.images[1].type).toBe('thumbnail');
+      expect(metadata.images[1].width).toBe(480);
+      expect(metadata.images[1].height).toBe(270);
+      expect(metadata.images[1].url).toBe('test:/foo.jpg');
     }
   });
 
