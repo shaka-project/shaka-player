@@ -3246,7 +3246,8 @@ shaka.extern.Thumbnail;
  *   id: string,
  *   title: string,
  *   startTime: number,
- *   endTime: number
+ *   endTime: number,
+ *   images: !Array<shaka.extern.ImageInfo>,
  * }}
  *
  * @property {string} id
@@ -3257,9 +3258,32 @@ shaka.extern.Thumbnail;
  *    The time that describes the beginning of the range of the chapter.
  * @property {number} endTime
  *    The time that describes the end of the range of chapter.
+ * @property {!Array<shaka.extern.ImageInfo>} images
+ *    The list of images associated with the chapter.
  * @exportDoc
  */
 shaka.extern.Chapter;
+
+
+/**
+ * @typedef {{
+ *   type: ?string,
+ *   width: ?number,
+ *   height: ?number,
+ *   url: string,
+ * }}
+ *
+ * @property {string} type
+ *    The image type. Eg: 'thumbnail', 'poster', etc.
+ * @property {string} width
+ *    The image width.
+ * @property {number} height
+ *    The image height.
+ * @property {string} url
+ *    The image url.
+ * @exportDoc
+ */
+shaka.extern.ImageInfo;
 
 
 /**
