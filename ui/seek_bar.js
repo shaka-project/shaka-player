@@ -227,7 +227,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     this.eventManager.listen(this.controls, 'chaptersupdated', () => {
       this.markChapters_();
-      if (this.player.isDynamic()) {
+      if (this.controls.getChapters().length > 0 && this.player.isDynamic()) {
         this.chaptersTimer_.tickEvery(/* seconds= */ 0.25);
       }
     });
