@@ -789,7 +789,19 @@ describe('MediaSourceEngine', () => {
           ContentType.TEXT, data, reference, fakeStream,
           /* hasClosedCaptions= */ false);
       expect(mockTextEngine.appendBuffer).toHaveBeenCalledWith(
-          data, 0, 10, 'foo://bar');
+          data, 0, 10, 'foo://bar', -1);
+    });
+
+    it('forwards to TextEngine HLS discontinuity sequence', async () => {
+      const data = new ArrayBuffer(0);
+      expect(mockTextEngine.appendBuffer).not.toHaveBeenCalled();
+      const reference = dummyReference(0, 10);
+      reference.discontinuitySequence = 1;
+      await mediaSourceEngine.appendBuffer(
+          ContentType.TEXT, data, reference, fakeStream,
+          /* hasClosedCaptions= */ false);
+      expect(mockTextEngine.appendBuffer).toHaveBeenCalledWith(
+          data, 0, 10, 'foo://bar', 1);
     });
 
     it('appends transmuxed data', async () => {

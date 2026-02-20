@@ -20,6 +20,7 @@ configurationchanged
 currentitemchanged
 customwarning
 defaultselected
+deferreds
 describedby
 disableonfail
 downloadcompleted

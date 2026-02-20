@@ -46,11 +46,11 @@ describe('TextEngine', () => {
 
     TextEngine.registerParser(dummyMimeType, mockParserPlugIn);
     textEngine = new TextEngine(mockDisplayer);
+    textEngine.setTimestampOffset(0);
     textEngine.initParser(
         dummyMimeType,
         /* external= */ false,
-        /* segmentRelativeVttTiming= */ false,
-        shaka.media.ManifestParser.UNKNOWN);
+        /* segmentRelativeVttTiming= */ false);
   });
 
   afterEach(() => {
@@ -151,6 +151,158 @@ describe('TextEngine', () => {
       expect(modifyCueCallback).toHaveBeenCalledWith(
           cue2, 'uri', jasmine.objectContaining({periodStart: 0}));
     });
+
+    it('delays appending til after a timestamp offset is set', async () => {
+      textEngine = new TextEngine(mockDisplayer);
+      textEngine.initParser(
+          dummyMimeType,
+          /* external= */ false,
+          /* segmentRelativeVttTiming= */ false);
+      const cue1 = createFakeCue(1, 2);
+
+      mockParseMedia.and.returnValue([cue1]);
+      await textEngine.appendBuffer(dummyData, 0, 3, 'subs.vtt');
+
+      expect(mockParseMedia).not.toHaveBeenCalled();
+      expect(mockDisplayer.appendSpy).not.toHaveBeenCalled();
+
+      textEngine.setTimestampOffset(0);
+      // re-adding deferred appends is async
+      await shaka.test.Util.shortDelay();
+
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        dummyData,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+        'subs.vtt',
+        [],
+      ]);
+
+      expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
+        [cue1],
+      ]);
+    });
+
+    it('doesn\'t delays appending if external', async () => {
+      textEngine = new TextEngine(mockDisplayer);
+      textEngine.initParser(
+          dummyMimeType,
+          /* external= */ true,
+          /* segmentRelativeVttTiming= */ false);
+      const cue1 = createFakeCue(1, 2);
+
+      mockParseMedia.and.returnValue([cue1]);
+      await textEngine.appendBuffer(dummyData, 0, 3, 'subs.vtt');
+
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        dummyData,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+        'subs.vtt',
+        [],
+      ]);
+
+      expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
+        [cue1],
+      ]);
+    });
+
+    it('delays appending for segmentRelativeVttTiming', async () => {
+      textEngine = new TextEngine(mockDisplayer);
+      textEngine.initParser(
+          dummyMimeType,
+          /* external= */ false,
+          /* segmentRelativeVttTiming= */ true);
+      const cue1 = createFakeCue(1, 2);
+
+      mockParseMedia.and.returnValue([cue1]);
+      await textEngine.appendBuffer(dummyData, 0, 3, 'subs.vtt');
+
+      expect(mockParseMedia).not.toHaveBeenCalled();
+      expect(mockDisplayer.appendSpy).not.toHaveBeenCalled();
+
+      textEngine.setTimestampOffset(0);
+      // re-adding deferred appends is async
+      await shaka.test.Util.shortDelay();
+
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        dummyData,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+        'subs.vtt',
+        [],
+      ]);
+
+      expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
+        [cue1],
+      ]);
+    });
+
+    it('defers append to displayer if no timestamp offset for disco',
+        async () => {
+          const cue1 = createFakeCue(1, 2);
+          const cue2 = createFakeCue(2, 3);
+          const cue3 = createFakeCue(3, 4);
+          const cue4 = createFakeCue(4, 5);
+          const cue5 = createFakeCue(5, 6);
+          const cue6 = createFakeCue(6, 7);
+          mockParseMedia.and.returnValue([cue1, cue2]);
+
+          await textEngine.appendBuffer(dummyData, 0, 3, 'subs.vtt', 1);
+          expect(mockParseMedia).not.toHaveBeenCalled();
+          expect(mockDisplayer.appendSpy).not.toHaveBeenCalled();
+
+          textEngine.setTimestampOffset(0, 1);
+          // re-adding deferred appends is async
+          await shaka.test.Util.shortDelay();
+
+          expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+            dummyData,
+            {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+            'subs.vtt',
+            [],
+          ]);
+
+          expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
+            [cue1, cue2],
+          ]);
+
+          expect(mockDisplayer.removeSpy).not.toHaveBeenCalled();
+
+          mockParseMedia.and.returnValue([cue3, cue4]);
+
+          await textEngine.appendBuffer(dummyData, 3, 5, 'subs2.vtt', 2);
+          expect(mockParseMedia).not.toHaveBeenCalled();
+          expect(mockDisplayer.appendSpy).not.toHaveBeenCalled();
+
+          textEngine.setTimestampOffset(0, 2);
+          // re-adding deferred appends is async
+          await shaka.test.Util.shortDelay();
+
+          expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+            dummyData,
+            {periodStart: 0, segmentStart: 3, segmentEnd: 5, vttOffset: 0},
+            'subs2.vtt',
+            [],
+          ]);
+
+          expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
+            [cue3, cue4],
+          ]);
+
+          mockParseMedia.and.returnValue([cue5, cue6]);
+
+          // this append wouldn't get deferred
+          await textEngine.appendBuffer(dummyData, 5, 7, 'subs3.vtt', 2);
+
+          expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+            dummyData,
+            {periodStart: 0, segmentStart: 5, segmentEnd: 7, vttOffset: 0},
+            'subs3.vtt',
+            [],
+          ]);
+
+          expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
+            [cue5, cue6],
+          ]);
+        });
   });
 
   describe('storeAndAppendClosedCaptions', () => {
@@ -325,12 +477,55 @@ describe('TextEngine', () => {
       ]);
     });
 
+    it('respects discontinuity sequence', async () => {
+      mockParseMedia.and.callFake((data, time) => {
+        return [
+          createFakeCue(time.periodStart + 0,
+              time.periodStart + 1),
+          createFakeCue(time.periodStart + 2,
+              time.periodStart + 3),
+        ];
+      });
+
+      textEngine.setTimestampOffset(0, 0);
+      textEngine.setTimestampOffset(0, 1);
+      textEngine.setTimestampOffset(4, 2);
+      await textEngine.appendBuffer(dummyData, 0, 3, 'subs.vtt', 0);
+
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        dummyData,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+        'subs.vtt',
+        [],
+      ]);
+      expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
+        [
+          createFakeCue(0, 1),
+          createFakeCue(2, 3),
+        ],
+      ]);
+
+      await textEngine.appendBuffer(dummyData, 4, 7, 'subs2.vtt', 2);
+
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        dummyData,
+        {periodStart: 4, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
+        'subs2.vtt',
+        [],
+      ]);
+      expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
+        [
+          createFakeCue(4, 5),
+          createFakeCue(6, 7),
+        ],
+      ]);
+    });
+
     it('vttOffset when segmentRelativeVttTiming is set', async () => {
       textEngine.initParser(
           dummyMimeType,
           /* external= */ false,
-          /* segmentRelativeVttTiming= */ true,
-          shaka.media.ManifestParser.UNKNOWN);
+          /* segmentRelativeVttTiming= */ true);
 
       mockParseMedia.and.callFake((data, time) => {
         return [
@@ -366,8 +561,7 @@ describe('TextEngine', () => {
       textEngine.initParser(
           dummyMimeType,
           /* external= */ true,
-          /* segmentRelativeVttTiming= */ false,
-          shaka.media.ManifestParser.UNKNOWN);
+          /* segmentRelativeVttTiming= */ false);
 
       mockParseMedia.and.callFake((data, time) => {
         return [
