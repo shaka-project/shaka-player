@@ -27,11 +27,13 @@ goog.require('shaka.ui.SeekBar');
 goog.require('shaka.ui.SkipAdButton');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.ui.VRManager');
+goog.require('shaka.util.ArrayUtils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IDestroyable');
+goog.require('shaka.util.LanguageUtils');
 goog.require('shaka.util.Timer');
 goog.require('shaka.util.Functional');
 
@@ -377,19 +379,22 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     });
 
-    this.eventManager_.listen(this.player_, 'trackschanged', () => {
-      this.updateChapters_();
-    });
-
-    this.eventManager_.listen(this.player_, 'manifestupdated', () => {
-      this.updateChapters_();
-    });
+    this.eventManager_.listenMulti(
+        this.player_,
+        [
+          'trackschanged',
+          'manifestupdated',
+          'loaded',
+        ], () => {
+          if (this.player_.isFullyLoaded()) {
+            this.updateChapters_();
+          }
+        });
 
     this.eventManager_.listen(this.player_, 'unloading', () => {
       if (this.ad_) {
         return;
       }
-      this.chapters_ = [];
       this.adCuePoints_ = [];
       this.lastSelectedTextTrack_ = null;
       if (this.isFullScreenEnabled()) {
@@ -397,6 +402,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
       if (this.isPiPEnabled()) {
         this.togglePiP();
+      }
+      if (this.chapters_.length) {
+        this.chapters_ = [];
+        this.dispatchEvent(new shaka.util.FakeEvent('chaptersupdated'));
       }
     });
 
@@ -2665,35 +2674,51 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @type {!Array<!shaka.extern.Chapter>} */
     let chapters = [];
 
-    const currentLocales = this.localization_.getCurrentLocales();
-    for (const locale of Array.from(currentLocales)) {
+    const chaptersTracks = this.player_.getChaptersTracks() || [];
+    const availableLanguages = new Set(chaptersTracks.map((t) =>
+      shaka.util.LanguageUtils.normalize(t.language)));
+
+    const candidates = [];
+    for (const locale of this.localization_.getCurrentLocales()) {
+      const normalized =
+          shaka.util.LanguageUtils.normalize(locale);
+
+      if (availableLanguages.has(normalized)) {
+        candidates.push(locale);
+      }
+    }
+    if (availableLanguages.has('und')) {
+      candidates.push('und');
+    }
+    if (chaptersTracks.length === 1) {
+      const onlyLanguage = chaptersTracks[0].language;
+      const normalized = shaka.util.LanguageUtils.normalize(onlyLanguage);
+      if (availableLanguages.has(normalized)) {
+        candidates.push(onlyLanguage);
+      }
+    }
+
+    for (const language of candidates) {
       // If player is a proxy, and the cast receiver doesn't support this
       // method, you get back undefined.
       if (this.player_) {
         // eslint-disable-next-line no-await-in-loop
-        chapters = (await this.player_.getChaptersAsync(locale)) || [];
+        chapters = (await this.player_.getChaptersAsync(language)) || [];
       }
       if (chapters.length) {
         break;
       }
     }
-    if (!chapters.length && this.player_) {
-      // If player is a proxy, and the cast receiver doesn't support this
-      // method, you get back undefined.
-      chapters = (await this.player_.getChaptersAsync('und')) || [];
-    }
-    if (!chapters.length && this.player_) {
-      // If player is a proxy, and the cast receiver doesn't support this
-      // method, you get back undefined.
-      const chaptersTracks = this.player_.getChaptersTracks() || [];
-      if (chaptersTracks.length == 1) {
-        const language = chaptersTracks[0].language;
-        chapters = (await this.player_.getChaptersAsync(language)) || [];
-      }
-    }
 
-    this.chapters_ = chapters;
-    this.dispatchEvent(new shaka.util.FakeEvent('chaptersupdated'));
+    const chaptersAreEqualById = (a, b) => {
+      return a.id === b.id;
+    };
+
+    if (!shaka.util.ArrayUtils.hasSameElements(
+        this.chapters_, chapters, chaptersAreEqualById)) {
+      this.chapters_ = chapters;
+      this.dispatchEvent(new shaka.util.FakeEvent('chaptersupdated'));
+    }
   }
 
   /**

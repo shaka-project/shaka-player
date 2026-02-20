@@ -44,15 +44,9 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
           this.updateChapters_();
         });
 
-    this.eventManager.listenMulti(
-        this.player,
-        [
-          'unloading',
-          'trackschanged',
-          'chaptersupdated',
-        ], () => {
-          this.updateChapters_();
-        });
+    this.eventManager.listen(this.controls, 'chaptersupdated', () => {
+      this.updateChapters_();
+    });
 
     if (this.isSubMenu) {
       this.eventManager.listenMulti(
@@ -61,7 +55,9 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
             'submenuopen',
             'submenuclose',
           ], () => {
-            this.updateChapters_();
+            const hasChapters = this.controls.getChapters().length > 0;
+            shaka.ui.Utils.setDisplay(this.button,
+                hasChapters && !this.isSubMenuOpened);
           });
     }
 
