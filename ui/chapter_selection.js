@@ -95,12 +95,22 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
 
     const chapters = this.controls.getChapters();
     if (chapters.length) {
-      for (const chapter of this.controls.getChapters()) {
+      for (const chapter of chapters) {
         const button = shaka.util.Dom.createButton();
+        button.classList.add('shaka-chapter-item');
         const span = shaka.util.Dom.createHTMLElement('span');
         span.classList.add('shaka-chapter');
         span.textContent = chapter.title;
         button.appendChild(span);
+
+        if (chapter.images.length) {
+          this.loadChapterThumbnail_(chapter.images)
+              .then((img) => {
+                if (img && this.menu.contains(button)) {
+                  button.insertBefore(img, span);
+                }
+              });
+        }
 
         this.eventManager.listen(button, 'click', () => {
           if (!this.controls.isOpaque()) {
@@ -112,10 +122,39 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
         this.menu.appendChild(button);
       }
       shaka.ui.Utils.setDisplay(this.button, !this.isSubMenuOpened);
-      shaka.ui.Utils.focusOnTheChosenItem(this.menu);
     } else {
       shaka.ui.Utils.setDisplay(this.button, false);
     }
+  }
+
+  /**
+   * @param {!Array<shaka.extern.ImageInfo>} images
+   * @return {!Promise<?HTMLImageElement>}
+   * @private
+   */
+  loadChapterThumbnail_(images) {
+    return new Promise((resolve) => {
+      let index = 0;
+      const tryNext = () => {
+        if (index >= images.length) {
+          resolve();
+          return;
+        }
+
+        const img = new Image();
+        img.classList.add('shaka-chapter-thumbnail');
+        img.alt = '';
+        img.onload = () => {
+          resolve(img);
+        };
+        img.onerror = () => {
+          index++;
+          tryNext();
+        };
+        img.src = images[index].url;
+      };
+      tryNext();
+    });
   }
 };
 
