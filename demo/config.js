@@ -635,7 +635,9 @@ shakaDemo.Config = class {
             'streaming.vodDynamicPlaybackRateBufferRatio',
             /* canBeDecimal= */ true)
         .addBoolInput_('Clear decodingInfo cache on unload',
-            'streaming.clearDecodingCache');
+            'streaming.clearDecodingCache')
+        .addBoolInput_('Limit the buffer to the presentation duration',
+            'streaming.limitBufferToPresentationDuration');
 
     const strategyOptions = shaka.config.CrossBoundaryStrategy;
     const strategyOptionsNames = {
