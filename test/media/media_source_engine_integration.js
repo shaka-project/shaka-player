@@ -827,6 +827,18 @@ describe('MediaSourceEngine', () => {
       messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74]),
     };
 
+    const emsgObjWithOffsetHls = {
+      startTime: 8,
+      endTime: 0xffff + 8,
+      schemeIdUri: 'foo:bar:customdatascheme',
+      value: '1',
+      timescale: 1,
+      presentationTimeDelta: 6,
+      eventDuration: 0xffff,
+      id: 1,
+      messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74]),
+    };
+
     const initSegmentReference = new shaka.media.InitSegmentReference(
         /* uris= */ () => [],
         /* startByte= */ 0,
@@ -841,6 +853,17 @@ describe('MediaSourceEngine', () => {
         /* endByte= */ null,
         initSegmentReference,
         /* timestampOffset= */ -10,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
+
+    const hlsReference = new shaka.media.SegmentReference(
+        /* startTime= */ 2,
+        /* endTime= */ 3,
+        /* uris= */ () => [],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        initSegmentReference,
+        /* timestampOffset= */ 0,
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ Infinity);
 
@@ -878,6 +901,27 @@ describe('MediaSourceEngine', () => {
 
       const emsgInfo = onEmsg.calls.argsFor(0)[0];
       expect(emsgInfo).toEqual(emsgObjWithOffset);
+    });
+
+    it('uses segment reference times for embedded emsg in HLS', async () => {
+      const videoStream =
+          shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+      videoStream.emsgSchemeIdUris = [emsgObjWithOffsetHls.schemeIdUri];
+
+      await mediaSourceEngine.init(new Map(), /* sequenceMode= */ true,
+          shaka.media.ManifestParser.HLS);
+
+      mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO,
+          emsgSegmentV1,
+          hlsReference,
+          videoStream,
+          /* mimeType= */ 'video/mp4');
+
+      expect(onEmsg).toHaveBeenCalledTimes(1);
+
+      const emsgInfo = onEmsg.calls.argsFor(0)[0];
+      expect(emsgInfo).toEqual(emsgObjWithOffsetHls);
     });
 
     it('raises multiple events', () => {
