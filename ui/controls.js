@@ -883,8 +883,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   setLastTouchEventTime(time, container) {
     shaka.Deprecate.deprecateFeature(6,
-          'setLastTouchEventTime',
-          'This method is no longer used.');
+        'setLastTouchEventTime',
+        'This method is no longer used.');
   }
 
   /**
