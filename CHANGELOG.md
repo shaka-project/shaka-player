@@ -1,5 +1,24 @@
 # Changelog
 
+## [5.0.3](https://github.com/shaka-project/shaka-player/compare/v5.0.2...v5.0.3) (2026-02-23)
+
+
+### Bug Fixes
+
+* Do not update the player position with negative playback rates if the video is paused ([#9732](https://github.com/shaka-project/shaka-player/issues/9732)) ([5ac6539](https://github.com/shaka-project/shaka-player/commit/5ac6539d8c90c7af803d87d8d55a5e09697d4ca1))
+* **HLS:** Support external chapters (chaptersUri config) when load a Media Playlist ([#9720](https://github.com/shaka-project/shaka-player/issues/9720)) ([3b809ab](https://github.com/shaka-project/shaka-player/commit/3b809abf596a73b65c0b9cd46e3899e5d5af9207))
+* **net:** Avoid duplicate progressUpdated in HttpXHRPlugin onload ([#9726](https://github.com/shaka-project/shaka-player/issues/9726)) ([0eb32ba](https://github.com/shaka-project/shaka-player/commit/0eb32bae73599b1d8d2547f13b20f492b3017c47))
+* **TTML:** Update position alignment map ([#9735](https://github.com/shaka-project/shaka-player/issues/9735)) ([e8243b5](https://github.com/shaka-project/shaka-player/commit/e8243b5bdc404b60256eaf97d78317487481d1a2))
+* **UI:** Fix chapters markers size ([#9728](https://github.com/shaka-project/shaka-player/issues/9728)) ([3e31e74](https://github.com/shaka-project/shaka-player/commit/3e31e74cdaa603db06e00cc3d842e5e810ddc704))
+* **UI:** Prevent hidden seek button from interfering with double-tap ([#9748](https://github.com/shaka-project/shaka-player/issues/9748)) ([a0163d5](https://github.com/shaka-project/shaka-player/commit/a0163d509a4ba96933bf75792f84f700f32da9c0)), closes [#9705](https://github.com/shaka-project/shaka-player/issues/9705)
+* **UITextDisplayer:** avoid ResizeObserver loop warning ([#9722](https://github.com/shaka-project/shaka-player/issues/9722)) ([1ef2f1d](https://github.com/shaka-project/shaka-player/commit/1ef2f1db5a9c6726dffd62ea7495bc8358c2d1d7))
+
+
+### Performance Improvements
+
+* **S2T:** Improve SpeechToText code ([#9718](https://github.com/shaka-project/shaka-player/issues/9718)) ([87ec570](https://github.com/shaka-project/shaka-player/commit/87ec570ae77b67f2eb63ef4837ddb7da13506d43))
+* **UI:** Optimization of chapter operations ([#9739](https://github.com/shaka-project/shaka-player/issues/9739)) ([c87258e](https://github.com/shaka-project/shaka-player/commit/c87258e03901f86baa3f05259075ec5a2f9c0c42))
+
 ## [5.0.2](https://github.com/shaka-project/shaka-player/compare/v5.0.1...v5.0.2) (2026-02-16)
 
 
