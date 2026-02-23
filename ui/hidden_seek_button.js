@@ -155,6 +155,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     // play/seek.
     if (this.controls.anySettingsMenusAreOpen()) {
       event.preventDefault();
+      event.stopPropagation();
       this.controls.hideSettingsMenus();
       return;
     }
@@ -163,6 +164,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     if (this.controls.getConfig().tapSeekDistance > 0 &&
         (!this.ad || !this.ad.isLinear())) {
       event.preventDefault();
+      event.stopPropagation();
       this.onSeekButtonClick_();
     }
   }
