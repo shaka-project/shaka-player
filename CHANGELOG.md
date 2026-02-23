@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.15.31](https://github.com/shaka-project/shaka-player/compare/v4.15.30...v4.15.31) (2026-02-23)
+
+
+### Bug Fixes
+
+* Do not update the player position with negative playback rates if the video is paused ([#9732](https://github.com/shaka-project/shaka-player/issues/9732)) ([fe67ad2](https://github.com/shaka-project/shaka-player/commit/fe67ad2961c002c3ee1d37ba2c32ed7a7719b310))
+* **net:** Avoid duplicate progressUpdated in HttpXHRPlugin onload ([#9726](https://github.com/shaka-project/shaka-player/issues/9726)) ([a6f9595](https://github.com/shaka-project/shaka-player/commit/a6f9595ff13604177b488390a6f13f93dee16d67))
+* **TTML:** Update position alignment map ([#9735](https://github.com/shaka-project/shaka-player/issues/9735)) ([f2e653b](https://github.com/shaka-project/shaka-player/commit/f2e653badef34d5d4bbcf6056dadd5253d763259))
+* **UITextDisplayer:** avoid ResizeObserver loop warning ([#9722](https://github.com/shaka-project/shaka-player/issues/9722)) ([bd10d3b](https://github.com/shaka-project/shaka-player/commit/bd10d3b705b549a53e656f980ac484180d07a18f))
+
 ## [4.15.30](https://github.com/shaka-project/shaka-player/compare/v4.15.29...v4.15.30) (2026-02-16)
 
 
