@@ -452,6 +452,7 @@ shaka.ui.Overlay = class {
         preferInitialWindowPlacement: false,
         disallowReturnToOpener: false,
       },
+      showUIOnPaused: true,
     };
 
     if (goog.DEBUG) {

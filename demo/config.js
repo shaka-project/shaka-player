@@ -81,9 +81,10 @@ shakaDemo.Config = class {
     this.sections_ = [];
 
     this.addMetaSection_();
-    this.addLanguageSection_();
+    this.addAudioPreferenceSection_();
+    this.addTextPreferenceSection_();
+    this.addVideoPreferenceSection_();
     this.addAccessibilitySection_();
-    this.addCodecPreferenceSection_();
     this.addAbrSection_();
     this.addOfflineSection_();
     this.addDrmSection_();
@@ -636,36 +637,6 @@ shakaDemo.Config = class {
         .addBoolInput_('Clear decodingInfo cache on unload',
             'streaming.clearDecodingCache');
 
-    const hdrLevels = {
-      '': '',
-      'AUTO': 'AUTO',
-      'SDR': 'SDR',
-      'PQ': 'PQ',
-      'HLG': 'HLG',
-    };
-    const hdrLevelNames = {
-      'AUTO': 'Auto Detect',
-      'SDR': 'SDR',
-      'PQ': 'PQ',
-      'HLG': 'HLG',
-      '': 'No Preference',
-    };
-    this.addSelectInput_('Preferred HDR Level', 'preferredVideoHdrLevel',
-        hdrLevels, hdrLevelNames);
-
-    const videoLayouts = {
-      '': '',
-      'CH-STEREO': 'CH-STEREO',
-      'CH-MONO': 'CH-MONO',
-    };
-    const videoLayoutsNames = {
-      'CH-STEREO': 'Stereoscopic',
-      'CH-MONO': 'Monoscopic',
-      '': 'No Preference',
-    };
-    this.addSelectInput_('Preferred video layout', 'preferredVideoLayout',
-        videoLayouts, videoLayoutsNames);
-
     const strategyOptions = shaka.config.CrossBoundaryStrategy;
     const strategyOptionsNames = {
       'KEEP': 'Keep',
@@ -785,41 +756,270 @@ shakaDemo.Config = class {
             'mediaSource.durationReductionEmitsUpdateEnd');
   }
 
-  /** @private */
-  addLanguageSection_() {
-    const docLink = this.resolveExternLink_('.PlayerConfiguration');
+  /**
+   * Builds a reusable inline expandable preference list UI.
+   * @param {string} configKey The config key (e.g. 'preferredAudio').
+   * @param {function():!Object} makeDefault Creates a default entry object.
+   * @param {function(!shakaDemo.InputContainer, !Object, number)} renderEntry
+   *   Renders fields for a single entry into the given container.
+   * @private
+   */
+  addPreferenceList_(configKey, makeDefault, renderEntry) {
+    const section = this.getLatestSection_();
+    const currentArray = /** @type {!Array<!Object>} */(
+      shakaDemoMain.getCurrentConfigValue(configKey));
 
-    this.addSection_('Language', docLink)
-        .addTextInput_('Preferred Audio Language', 'preferredAudioLanguage')
-        .addTextInput_('Preferred Audio Label', 'preferredAudioLabel')
-        .addTextInput_('Preferred Video Label', 'preferredVideoLabel')
-        .addTextInput_('Preferred Audio Role', 'preferredAudioRole')
-        .addTextInput_('Preferred Video Role', 'preferredVideoRole')
-        .addTextInput_('Preferred Text Language', 'preferredTextLanguage')
-        .addTextInput_('Preferred Text Role', 'preferredTextRole');
-    const onChange = (input) => {
-      shakaDemoMain.setUILocale(input.value);
+    for (let i = 0; i < currentArray.length; i++) {
+      const entry = currentArray[i];
+      const entryDiv = document.createElement('div');
+      entryDiv.classList.add('pref-entry');
+
+      // Header with number and delete button
+      const header = document.createElement('div');
+      header.classList.add('pref-entry-header');
+      const number = document.createElement('span');
+      number.classList.add('pref-entry-number');
+      number.textContent = '#' + (i + 1);
+      header.appendChild(number);
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.classList.add(
+          'pref-entry-delete', 'mdl-button', 'mdl-js-button',
+          'mdl-button--icon');
+      const deleteIcon = document.createElement('i');
+      deleteIcon.classList.add('material-icons-round');
+      deleteIcon.textContent = 'close';
+      deleteBtn.appendChild(deleteIcon);
+      const indexForDelete = i;
+      deleteBtn.addEventListener('click', () => {
+        const arr = /** @type {!Array} */(
+          shakaDemoMain.getCurrentConfigValue(configKey));
+        arr.splice(indexForDelete, 1);
+        shakaDemoMain.configure(configKey, arr);
+        shakaDemoMain.remakeHash();
+        this.reloadAndSaveState_();
+      });
+      header.appendChild(deleteBtn);
+      entryDiv.appendChild(header);
+
+      // Fields container
+      const fieldsDiv = document.createElement('div');
+      fieldsDiv.classList.add('pref-entry-fields');
+      entryDiv.appendChild(fieldsDiv);
+
+      // Create a mini InputContainer for this entry's fields
+      const miniContainer = new shakaDemo.InputContainer(
+          fieldsDiv, null, shakaDemo.InputContainer.Style.VERTICAL, null);
+
+      renderEntry(miniContainer, entry, i);
+      section.appendEntry(entryDiv);
+    }
+
+    // Add button
+    const addContainer = document.createElement('div');
+    addContainer.classList.add('pref-add-container');
+    const addBtn = document.createElement('button');
+    addBtn.classList.add(
+        'mdl-button', 'mdl-js-button', 'mdl-js-ripple-effect',
+        'mdl-button--colored');
+    addBtn.textContent = '+ Add';
+    addBtn.addEventListener('click', () => {
+      const arr = /** @type {!Array} */(
+        shakaDemoMain.getCurrentConfigValue(configKey));
+      arr.push(makeDefault());
+      shakaDemoMain.configure(configKey, arr);
       shakaDemoMain.remakeHash();
-    };
-    this.addCustomTextInput_('Preferred UI Locale', onChange);
-    this.latestInput_.input().value = shakaDemoMain.getUILocale();
-    this.addNumberInput_('Preferred Audio Channel Count',
-        'preferredAudioChannelCount');
-    this.addBoolInput_('Prefer Spatial Audio', 'preferSpatialAudio');
-    this.addBoolInput_('Prefer Forced Subs', 'preferForcedSubs');
+      this.reloadAndSaveState_();
+    });
+    addContainer.appendChild(addBtn);
+    section.appendEntry(addContainer);
+  }
+
+  /**
+   * Helper: add a text field to a preference entry.
+   * @param {!shakaDemo.InputContainer} container
+   * @param {string} label
+   * @param {string} value
+   * @param {function(string)} onChange
+   * @private
+   */
+  addPrefTextField_(container, label, value, onChange) {
+    container.addRow(label, null);
+    const input = new shakaDemo.TextInput(container, label, (inputEl) => {
+      onChange(inputEl.value);
+    });
+    input.input().value = value;
+  }
+
+  /**
+   * Helper: add a number field to a preference entry.
+   * @param {!shakaDemo.InputContainer} container
+   * @param {string} label
+   * @param {number} value
+   * @param {function(number)} onChange
+   * @private
+   */
+  addPrefNumberField_(container, label, value, onChange) {
+    container.addRow(label, null);
+    const input = new shakaDemo.NumberInput(
+        container, label, (inputEl) => {
+          onChange(Number(inputEl.value) || 0);
+        }, false, true, false);
+    input.input().value = String(value);
+  }
+
+  /**
+   * Helper: add a select field to a preference entry.
+   * @param {!shakaDemo.InputContainer} container
+   * @param {string} label
+   * @param {!Object<string, string>} optionNames
+   * @param {string} currentValue
+   * @param {function(string)} onChange
+   * @private
+   */
+  addPrefSelectField_(container, label, optionNames, currentValue, onChange) {
+    container.addRow(label, null);
+    const input = new shakaDemo.SelectInput(
+        container, null, (inputEl) => {
+          onChange(inputEl.value);
+        }, optionNames);
+    for (const key in optionNames) {
+      if (key === currentValue) {
+        input.input().value = key;
+        break;
+      }
+    }
+  }
+
+  /**
+   * Helper: add a bool field to a preference entry.
+   * @param {!shakaDemo.InputContainer} container
+   * @param {string} label
+   * @param {boolean} value
+   * @param {function(boolean)} onChange
+   * @private
+   */
+  addPrefBoolField_(container, label, value, onChange) {
+    container.addRow(label, null);
+    const input = new shakaDemo.BoolInput(container, label, (inputEl) => {
+      onChange(inputEl.checked);
+    });
+    input.input().checked = value;
   }
 
   /** @private */
-  addCodecPreferenceSection_() {
-    const docLink = this.resolveExternLink_('.PlayerConfiguration');
+  addAudioPreferenceSection_() {
+    const docLink = this.resolveExternLink_('.AudioPreference');
+    this.addSection_('Audio Preferences', docLink);
 
-    this.addSection_('Codec preference', docLink)
-        .addArrayStringInput_('Preferred video codecs',
-            'preferredVideoCodecs')
-        .addArrayStringInput_('Preferred audio codecs',
-            'preferredAudioCodecs')
-        .addArrayStringInput_('Preferred text formats',
-            'preferredTextFormats');
+    const configKey = 'preferredAudio';
+    const makeChange = (index, field, value) => {
+      const arr = /** @type {!Array} */(
+        shakaDemoMain.getCurrentConfigValue(configKey));
+      arr[index][field] = value;
+      shakaDemoMain.configure(configKey, arr);
+      shakaDemoMain.remakeHash();
+    };
+
+    this.addPreferenceList_(configKey, () => ({
+      language: '',
+      role: '',
+      label: '',
+      channelCount: 2,
+      codec: '',
+    }), (container, entry, index) => {
+      this.addPrefTextField_(container, 'Language', entry['language'] || '',
+          (v) => makeChange(index, 'language', v));
+      this.addPrefTextField_(container, 'Role', entry['role'] || '',
+          (v) => makeChange(index, 'role', v));
+      this.addPrefTextField_(container, 'Label', entry['label'] || '',
+          (v) => makeChange(index, 'label', v));
+      this.addPrefNumberField_(container, 'Channel Count',
+          entry['channelCount'] || 0,
+          (v) => makeChange(index, 'channelCount', v));
+      this.addPrefTextField_(container, 'Codec', entry['codec'] || '',
+          (v) => makeChange(index, 'codec', v));
+      this.addPrefBoolField_(container, 'Spatial Audio',
+          entry['spatialAudio'] || false,
+          (v) => makeChange(index, 'spatialAudio', v || undefined));
+    });
+  }
+
+  /** @private */
+  addTextPreferenceSection_() {
+    const docLink = this.resolveExternLink_('.TextPreference');
+    this.addSection_('Text Preferences', docLink);
+
+    const configKey = 'preferredText';
+    const makeChange = (index, field, value) => {
+      const arr = /** @type {!Array} */(
+        shakaDemoMain.getCurrentConfigValue(configKey));
+      arr[index][field] = value;
+      shakaDemoMain.configure(configKey, arr);
+      shakaDemoMain.remakeHash();
+    };
+
+    this.addPreferenceList_(configKey, () => ({
+      language: '',
+      role: '',
+      format: '',
+    }), (container, entry, index) => {
+      this.addPrefTextField_(container, 'Language', entry['language'] || '',
+          (v) => makeChange(index, 'language', v));
+      this.addPrefTextField_(container, 'Role', entry['role'] || '',
+          (v) => makeChange(index, 'role', v));
+      this.addPrefTextField_(container, 'Format', entry['format'] || '',
+          (v) => makeChange(index, 'format', v));
+      this.addPrefBoolField_(container, 'Forced', entry['forced'] || false,
+          (v) => makeChange(index, 'forced', v || undefined));
+    });
+  }
+
+  /** @private */
+  addVideoPreferenceSection_() {
+    const docLink = this.resolveExternLink_('.VideoPreference');
+    this.addSection_('Video Preferences', docLink);
+
+    const configKey = 'preferredVideo';
+    const hdrLevelNames = {
+      'AUTO': 'Auto Detect',
+      'SDR': 'SDR',
+      'PQ': 'PQ',
+      'HLG': 'HLG',
+      '': 'No Preference',
+    };
+    const videoLayoutNames = {
+      'CH-STEREO': 'Stereoscopic',
+      'CH-MONO': 'Monoscopic',
+      '': 'No Preference',
+    };
+
+    const makeChange = (index, field, value) => {
+      const arr = /** @type {!Array} */(
+        shakaDemoMain.getCurrentConfigValue(configKey));
+      arr[index][field] = value;
+      shakaDemoMain.configure(configKey, arr);
+      shakaDemoMain.remakeHash();
+    };
+
+    this.addPreferenceList_(configKey, () => ({
+      label: '',
+      role: '',
+      codec: '',
+      hdrLevel: 'AUTO',
+      layout: '',
+    }), (container, entry, index) => {
+      this.addPrefTextField_(container, 'Label', entry['label'] || '',
+          (v) => makeChange(index, 'label', v));
+      this.addPrefTextField_(container, 'Role', entry['role'] || '',
+          (v) => makeChange(index, 'role', v));
+      this.addPrefTextField_(container, 'Codec', entry['codec'] || '',
+          (v) => makeChange(index, 'codec', v));
+      this.addPrefSelectField_(container, 'HDR Level', hdrLevelNames,
+          entry['hdrLevel'] || '', (v) => makeChange(index, 'hdrLevel', v));
+      this.addPrefSelectField_(container, 'Video Layout', videoLayoutNames,
+          entry['layout'] || '', (v) => makeChange(index, 'layout', v));
+    });
   }
 
   /** @private */
@@ -864,6 +1064,13 @@ shakaDemo.Config = class {
       shakaDemoMain.setWatermarkText(input.value);
     });
     this.latestInput_.input().value = shakaDemoMain.getWatermarkText();
+
+    const onLocaleChange = (input) => {
+      shakaDemoMain.setUILocale(input.value);
+      shakaDemoMain.remakeHash();
+    };
+    this.addCustomTextInput_('Preferred UI Locale', onLocaleChange);
+    this.latestInput_.input().value = shakaDemoMain.getUILocale();
 
     // shaka.log is not set if logging isn't enabled.
     // I.E. if using the release version of shaka.
