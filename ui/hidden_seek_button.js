@@ -154,6 +154,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     // If any settings menus are open, this tap closes them instead of toggling
     // play/seek.
     if (this.controls.anySettingsMenusAreOpen()) {
+      event.preventDefault();
       this.controls.hideSettingsMenus();
       return;
     }
@@ -161,6 +162,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     // Normal tap logic (single vs double tap).
     if (this.controls.getConfig().tapSeekDistance > 0 &&
         (!this.ad || !this.ad.isLinear())) {
+      event.preventDefault();
       this.onSeekButtonClick_();
     }
   }
