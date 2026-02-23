@@ -312,6 +312,7 @@ shaka.extern.UIDocumentPictureInPicture;
  *   captionsStyles: boolean,
  *   captionsFontScaleFactors: !Array<number>,
  *   documentPictureInPicture: shaka.extern.UIDocumentPictureInPicture,
+ *   showUIOnPaused: boolean,
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -593,6 +594,10 @@ shaka.extern.UIDocumentPictureInPicture;
  *   Enables using the Document Picture-in-Picture API, with options to control
  *   initial window placement and whether the PiP window can return focus to
  *   the originating tab.
+ * @property {boolean} showUIOnPaused
+ *   Whether to show the UI whenever the video is paused.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

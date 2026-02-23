@@ -1888,7 +1888,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   computeOpacity() {
     const adIsPaused = this.ad_ ? this.ad_.isPaused() : false;
-    const videoIsPaused = this.video_.paused && !this.isSeeking_;
+    const videoIsPaused = this.video_.paused && !this.isSeeking_ &&
+        this.config_.showUIOnPaused;
     const keyboardNavigationMode = this.controlsContainer_.classList.contains(
         'shaka-keyboard-navigation');
 
