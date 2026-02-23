@@ -876,18 +876,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * @param {?number} time
-   * @param {boolean} container
-   * @export
-   */
-  setLastTouchEventTime(time, container) {
-    this.lastTouchEventTime_ = time;
-    if (container) {
-      this.lastContainerTouchEventTime_ = time;
-    }
-  }
-
-  /**
    * @return {boolean}
    * @export
    */

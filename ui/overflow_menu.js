@@ -75,13 +75,6 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
           shaka.ui.Utils.setDisplay(this.overflowMenuButton_, true);
         });
 
-    this.eventManager.listen(
-        this.overflowMenu_, 'touchstart', (event) => {
-          this.controls.setLastTouchEventTime(
-              Date.now(), /* container= */ false);
-          event.stopPropagation();
-        });
-
     this.eventManager.listen(this.overflowMenuButton_, 'click', () => {
       if (!this.controls.isOpaque()) {
         return;
