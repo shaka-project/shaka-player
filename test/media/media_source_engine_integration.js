@@ -856,6 +856,17 @@ describe('MediaSourceEngine', () => {
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ Infinity);
 
+    const hlsReference = new shaka.media.SegmentReference(
+        /* startTime= */ 2,
+        /* endTime= */ 3,
+        /* uris= */ () => [],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        initSegmentReference,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
+
     it('raises an event for registered embedded emsg boxes', () => {
       const videoStream =
           shaka.test.StreamingEngineUtil.createMockVideoStream(1);
@@ -896,17 +907,6 @@ describe('MediaSourceEngine', () => {
       const videoStream =
           shaka.test.StreamingEngineUtil.createMockVideoStream(1);
       videoStream.emsgSchemeIdUris = [emsgObjWithOffsetHls.schemeIdUri];
-
-      const hlsReference = new shaka.media.SegmentReference(
-          /* startTime= */ 2,
-          /* endTime= */ 3,
-          /* uris= */ () => [],
-          /* startByte= */ 0,
-          /* endByte= */ null,
-          initSegmentReference,
-          /* timestampOffset= */ 0,
-          /* appendWindowStart= */ 0,
-          /* appendWindowEnd= */ Infinity);
 
       await mediaSourceEngine.init(new Map(), /* sequenceMode= */ true,
           shaka.media.ManifestParser.HLS);
