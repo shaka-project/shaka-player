@@ -11,6 +11,7 @@ goog.provide('shaka.ui.ControlsPanel');
 goog.require('goog.asserts');
 goog.require('shaka.ads.Utils');
 goog.require('shaka.cast.CastProxy');
+goog.require('shaka.Deprecate');
 goog.require('shaka.device.DeviceFactory');
 goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
@@ -881,10 +882,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   setLastTouchEventTime(time, container) {
-    this.lastTouchEventTime_ = time;
-    if (container) {
-      this.lastContainerTouchEventTime_ = time;
-    }
+    shaka.Deprecate.deprecateFeature(6,
+        'setLastTouchEventTime',
+        'This method is no longer used.');
   }
 
   /**
