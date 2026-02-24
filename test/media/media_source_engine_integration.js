@@ -801,6 +801,35 @@ describe('MediaSourceEngine', () => {
       '53 68 61 6b  61 33 44 49   03 00 40 00  00 00 1b'
     ).replace(/\s/g, ''));
 
+    const emsgSegmentV0ID3WithoutDuration = Uint8ArrayUtils.fromHex((
+      // 105 bytes  emsg box     v0, flags 0
+      '00 00 00 69  65 6d 73 67  00 00 00 00' +
+
+      // scheme id uri (13 bytes) 'https://aomedia.org/emsg/ID3'
+      '68 74 74 70  73 3a 2f 2f   61 6f 6d 65  64 69 61 2e' +
+      '6f 72 67 2f  65 6d 73 67   2f 49 44 33  00' +
+
+      // value (1 byte) ''
+      '00' +
+
+      // timescale (4 bytes) 1
+      '00 00 00 01' +
+
+      // presentation time delta (4 bytes) 8
+      '00 00 00 08' +
+
+      // event duration (4 bytes) 255
+      'ff ff ff ff' +
+
+      // id (4 bytes) 51
+      '00 00 00 33' +
+
+      // message data (47 bytes)
+      '49 44 33 03  00 40 00 00   00 1b 00 00  00 06 00 00' +
+      '00 00 00 02  54 58 58 58   00 00 00 07  e0 00 03 00' +
+      '53 68 61 6b  61 33 44 49   03 00 40 00  00 00 1b'
+    ).replace(/\s/g, ''));
+
     const id3SchemeUri = 'https://aomedia.org/emsg/ID3';
 
     const emsgObj = {
@@ -837,6 +866,18 @@ describe('MediaSourceEngine', () => {
       eventDuration: 0xffff,
       id: 1,
       messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74]),
+    };
+
+    const emsgObjSegmentV0ID3WithoutDuration = {
+      startTime: 8,
+      endTime: 8,
+      schemeIdUri: 'https://aomedia.org/emsg/ID3',
+      value: '',
+      timescale: 1,
+      presentationTimeDelta: 8,
+      eventDuration: 4294967295,
+      id: 51,
+      messageData: jasmine.any(Uint8Array),
     };
 
     const initSegmentReference = new shaka.media.InitSegmentReference(
@@ -986,6 +1027,29 @@ describe('MediaSourceEngine', () => {
           /* mimeType= */ 'video/mp4');
 
       expect(onEmsg).toHaveBeenCalled();
+      expect(onMetadata).toHaveBeenCalled();
+    });
+
+    // eslint-disable-next-line @stylistic/max-len
+    it('triggers both emsg event and metadata event for ID3 without duration', () => {
+      const videoStream =
+          shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+      videoStream.emsgSchemeIdUris = [id3SchemeUri];
+
+      onEvent.and.callFake((emsgEvent) => {
+        expect(emsgEvent.type).toBe('emsg');
+      });
+
+      mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO,
+          emsgSegmentV0ID3WithoutDuration,
+          reference,
+          videoStream,
+          /* mimeType= */ 'video/mp4');
+
+      expect(onEmsg).toHaveBeenCalledTimes(1);
+      const emsgInfo = onEmsg.calls.argsFor(0)[0];
+      expect(emsgInfo).toEqual(emsgObjSegmentV0ID3WithoutDuration);
       expect(onMetadata).toHaveBeenCalled();
     });
 
