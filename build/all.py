@@ -18,6 +18,8 @@
 
 import argparse
 
+import concurrent.futures
+
 import apps
 import build
 import check
@@ -29,6 +31,8 @@ import shakaBuildHelpers
 
 import os
 import re
+import subprocess
+import sys
 
 def compile_less(path_name, main_file_name, parsed_args):
   match = re.compile(r'.*\.less$')
@@ -81,6 +85,12 @@ def main(args):
       help='If set, only compile ECMASCRIPT5 builds.',
       action='store_true',
       default=False)
+
+  parser.add_argument(
+      '--jobs', '-j',
+      type=int,
+      default=(os.cpu_count() or 1),
+      help='Number of parallel builds (defaults to number of CPUs).')
 
   parsed_args = parser.parse_args(args)
 
@@ -175,22 +185,81 @@ def main(args):
       ('ECMASCRIPT_2021', 'es2021'),
     ]
 
+  # Run library builds in parallel per mode.
   for mode in modes:
-    # Complete build includes the UI library, but it is optional and player lib
-    # should build and work without it as well.
-    # First, build the full build (UI included) and then build excluding UI.
+    tasks = []
+
     for lang_out, suffix in language_variants:
       for build_args in builds:
         args = list(build_args)
+        # If the build has a --name, append a suffix (e.g., -es2021) for clarity.
         if '--name' in args and suffix:
           idx = args.index('--name')
           original_name = args[idx + 1]
           args[idx + 1] = f"{original_name}-{suffix}"
+        # Add language and mode flags.
         args += ['--langout', lang_out]
         args += ['--mode', mode]
-        if build.main(args) != 0:
-          return 1
 
+        # Prepare environment and command for a separate process.
+        env = os.environ.copy()
+        cmd = [sys.executable, os.path.join(base, 'build', 'build.py')] + args
+        tasks.append((cmd, env))
+
+    def run_task(task):
+      """Run a build subprocess and stream its output live."""
+      cmd, env = task
+
+      proc = subprocess.Popen(
+          cmd,
+          env=env,
+          stdout=subprocess.PIPE,
+          stderr=subprocess.PIPE,
+          text=True
+      )
+
+      # Build a readable prefix for logs
+      try:
+          name_index = cmd.index("--name") + 1
+          name = cmd[name_index]
+      except ValueError:
+          name = "unknown"
+
+      try:
+          mode_index = cmd.index("--mode") + 1
+          mode = cmd[mode_index]
+      except ValueError:
+          mode = "unknown"
+
+      prefix = f"[build:{name}-{mode}]"
+
+      # Stream stdout
+      for line in proc.stdout:
+          print(f"{prefix} {line}", end='')
+
+      # Stream stderr
+      for line in proc.stderr:
+          print(f"{prefix} [ERR] {line}", end='')
+
+      proc.wait()
+      return proc.returncode, cmd, "", ""
+
+    failures = []
+    # ThreadPool is fine because each task spawns an external process (no GIL bottleneck).
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, parsed_args.jobs)) as executor:
+      for rc, cmd, out, err in executor.map(run_task, tasks):
+        if rc != 0:
+          failures.append((rc, cmd, out, err))
+
+    if failures:
+      # Print the first failure for quick diagnosis and abort.
+      rc, cmd, out, err = failures[0]
+      print("ERROR running build:", cmd)
+      print("STDOUT:\n", out)
+      print("STDERR:\n", err, file=sys.stderr)
+      return 1
+
+    # Build the demo/apps once per mode, after all library builds succeed.
     is_debug = mode == 'debug'
     if not apps.build_all(parsed_args.force, is_debug):
       return 1
