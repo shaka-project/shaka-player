@@ -33,7 +33,7 @@ def fmt_diff(head, base):
 def measure(args):
   """Scans a directory and saves size data to JSON file."""
   results = {}
-  excluded_suffixes = (".map", ".d.ts", ".externs.js", "wrapper.js", "deps.js", "cast-boot.js")
+  excluded_suffixes = (".map", ".d.ts", ".externs.js", "wrapper.js", "deps.js", "cast-boot.js", ".json")
 
   if os.path.exists(args.dir):
     for filename in os.listdir(args.dir):
