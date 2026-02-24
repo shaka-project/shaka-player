@@ -78,7 +78,11 @@ def run_task(task):
 
   # Stream stderr
   for line in proc.stderr:
-      print(f"{prefix} [ERR] {line}", end='')
+      # Do not mark INFO lines as errors
+      if line.startswith("[INFO]"):
+          print(f"{prefix} {line}", end='')
+      else:
+          print(f"{prefix} [ERR] {line}", end='')
 
   proc.wait()
   return proc.returncode, cmd, "", ""
@@ -245,7 +249,7 @@ def main(args):
         tasks.append((cmd, env))
 
     failures = []
-    with concurrent.futures.ProcessPoolExecutor(max_workers=max(1, parsed_args.jobs)) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, parsed_args.jobs)) as executor:
       for rc, cmd, out, err in executor.map(run_task, tasks):
         if rc != 0:
           failures.append((rc, cmd, out, err))
