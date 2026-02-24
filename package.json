@@ -42,7 +42,7 @@
     "eslint-plugin-shaka-rules": "file:./build/eslint-plugin-shaka-rules",
     "fontfaceonload": "^1.0.2",
     "globals": "^15.14.0",
-    "google-closure-compiler-java": "^20251027.0.0",
+    "google-closure-compiler-java": "^20260218.0.0",
     "google-closure-deps": "^20230802.0.0",
     "google-closure-library": "github:joeyparrish/closure-library#74db0395",
     "htmlhint": "^1.1.3",
