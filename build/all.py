@@ -45,6 +45,44 @@ def compile_less(path_name, main_file_name, parsed_args):
   less = compiler.Less(main_less_src, all_less_srcs, output)
   return less.compile(parsed_args.force)
 
+def run_task(task):
+  """Run a build subprocess and stream its output live."""
+  cmd, env = task
+
+  proc = subprocess.Popen(
+      cmd,
+      env=env,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.PIPE,
+      text=True
+  )
+
+  # Build a readable prefix for logs
+  try:
+      name_index = cmd.index("--name") + 1
+      name = cmd[name_index]
+  except ValueError:
+      name = "unknown"
+
+  try:
+      mode_index = cmd.index("--mode") + 1
+      mode = cmd[mode_index]
+  except ValueError:
+      mode = "unknown"
+
+  prefix = f"[build:{name}-{mode}]"
+
+  # Stream stdout
+  for line in proc.stdout:
+      print(f"{prefix} {line}", end='')
+
+  # Stream stderr
+  for line in proc.stderr:
+      print(f"{prefix} [ERR] {line}", end='')
+
+  proc.wait()
+  return proc.returncode, cmd, "", ""
+
 def main(args):
   parser = argparse.ArgumentParser(
       description='User facing build script for building the Shaka'
@@ -206,47 +244,8 @@ def main(args):
         cmd = [sys.executable, os.path.join(base, 'build', 'build.py')] + args
         tasks.append((cmd, env))
 
-    def run_task(task):
-      """Run a build subprocess and stream its output live."""
-      cmd, env = task
-
-      proc = subprocess.Popen(
-          cmd,
-          env=env,
-          stdout=subprocess.PIPE,
-          stderr=subprocess.PIPE,
-          text=True
-      )
-
-      # Build a readable prefix for logs
-      try:
-          name_index = cmd.index("--name") + 1
-          name = cmd[name_index]
-      except ValueError:
-          name = "unknown"
-
-      try:
-          mode_index = cmd.index("--mode") + 1
-          mode = cmd[mode_index]
-      except ValueError:
-          mode = "unknown"
-
-      prefix = f"[build:{name}-{mode}]"
-
-      # Stream stdout
-      for line in proc.stdout:
-          print(f"{prefix} {line}", end='')
-
-      # Stream stderr
-      for line in proc.stderr:
-          print(f"{prefix} [ERR] {line}", end='')
-
-      proc.wait()
-      return proc.returncode, cmd, "", ""
-
     failures = []
-    # ThreadPool is fine because each task spawns an external process (no GIL bottleneck).
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, parsed_args.jobs)) as executor:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=max(1, parsed_args.jobs)) as executor:
       for rc, cmd, out, err in executor.map(run_task, tasks):
         if rc != 0:
           failures.append((rc, cmd, out, err))
