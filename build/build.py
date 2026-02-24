@@ -418,6 +418,7 @@ def main(args):
       'mode': mode,
       'locales': locales,
       'skip_ts': skip_ts,
+      'langout': parsed_args.langout,
     }
     state_json = json.dumps(state, sort_keys=True)
     return hashlib.sha256(state_json.encode('utf-8')).hexdigest()

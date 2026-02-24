@@ -76,6 +76,12 @@ def main(args):
            'release version.',
       action='store_true')
 
+  parser.add_argument(
+     '--only-es5',
+      help='If set, only compile ECMASCRIPT5 builds.',
+      action='store_true',
+      default=False)
+
   parsed_args = parser.parse_args(args)
 
   # Make the dist/ folder, ignore errors.
@@ -159,13 +165,31 @@ def main(args):
     build_args_only_hls_without_ui,
   ]
 
+  if parsed_args.only_es5:
+    language_variants = [
+      ('ECMASCRIPT5', ''),
+    ]
+  else:
+    language_variants = [
+      ('ECMASCRIPT5', ''),
+      ('ECMASCRIPT_2021', 'es2021'),
+    ]
+
   for mode in modes:
     # Complete build includes the UI library, but it is optional and player lib
     # should build and work without it as well.
     # First, build the full build (UI included) and then build excluding UI.
-    for build_args in builds:
-      if build.main(build_args + ['--mode', mode]) != 0:
-        return 1
+    for lang_out, suffix in language_variants:
+      for build_args in builds:
+        args = list(build_args)
+        if '--name' in args and suffix:
+          idx = args.index('--name')
+          original_name = args[idx + 1]
+          args[idx + 1] = f"{original_name}-{suffix}"
+        args += ['--langout', lang_out]
+        args += ['--mode', mode]
+        if build.main(args) != 0:
+          return 1
 
     is_debug = mode == 'debug'
     if not apps.build_all(parsed_args.force, is_debug):

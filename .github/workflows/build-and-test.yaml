@@ -165,7 +165,7 @@ jobs:
 
       - name: Build Player
         timeout-minutes: 20
-        run: python3 build/all.py
+        run: python3 build/all.py --only-es5
 
       - name: Test Player
         timeout-minutes: 15
