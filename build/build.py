@@ -48,6 +48,9 @@ import logging
 import os
 import re
 import shutil
+import sys
+
+from contextlib import contextmanager
 
 import compiler
 import generateLocalizations
@@ -408,6 +411,7 @@ def main(args):
   if not custom_build.parse_build(commands, os.getcwd()):
     return 1
 
+  # Global shared state file; parallel processes will serialize access via locks.
   hash_file_path = os.path.join(dist_path, 'build_state.json')
 
   def compute_build_hash(include, exclude, commands, mode, locales, skip_ts):
@@ -418,6 +422,7 @@ def main(args):
       'mode': mode,
       'locales': locales,
       'skip_ts': skip_ts,
+      'langout': parsed_args.langout,
     }
     state_json = json.dumps(state, sort_keys=True)
     return hashlib.sha256(state_json.encode('utf-8')).hexdigest()
@@ -435,15 +440,60 @@ def main(args):
 
   force = parsed_args.force
 
-  if os.path.isfile(hash_file_path):
-    with open(hash_file_path, 'r') as f:
-      previous_state = json.load(f)
-    previous_hash = previous_state.get(build_key)
-    if previous_hash != current_hash:
-      logging.info('Build parameters changed for "%s"; forcing rebuild.', parsed_args.name)
-      force = True
+  # --- Cross‑platform file lock helpers (defined inline to keep changes local) ---
+  if os.name == "posix":
+    import fcntl
+
+    @contextmanager
+    def locked_file_rw(path, create=False):
+      """Open file for read/write and acquire an exclusive advisory lock (POSIX)."""
+      mode = 'r+' if os.path.isfile(path) or not create else 'w+'
+      with open(path, mode) as f:
+        # Acquire exclusive lock on the entire file.
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+        try:
+          yield f
+        finally:
+          fcntl.flock(f.fileno(), fcntl.LOCK_UN)
   else:
-    previous_state = {}
+    import msvcrt
+
+    @contextmanager
+    def locked_file_rw(path, create=False):
+      """Open file for read/write and acquire an exclusive lock (Windows).
+      This uses msvcrt.locking over the first byte as a process‑wide mutex.
+      """
+      mode = 'r+' if os.path.isfile(path) or not create else 'w+'
+      with open(path, mode) as f:
+        # Always lock the first byte as a mutex region.
+        f.seek(0, os.SEEK_SET)
+        msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
+        try:
+          yield f
+        finally:
+          f.seek(0, os.SEEK_SET)
+          msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+
+  # --- Safe read of the global state under lock (if the file exists) ---
+  previous_state = {}
+  if os.path.isfile(hash_file_path):
+    try:
+      with locked_file_rw(hash_file_path):
+        # Re-opened with lock: parse safely
+        with open(hash_file_path, 'r') as f:
+          try:
+            previous_state = json.load(f)
+          except json.JSONDecodeError:
+            logging.warning("Detected a corrupted build_state.json; continuing with empty state.")
+            previous_state = {}
+    except OSError as e:
+      logging.warning("Could not lock/read build_state.json (%s); proceeding with empty state.", e)
+      previous_state = {}
+
+  previous_hash = previous_state.get(build_key)
+  if previous_hash != current_hash:
+    logging.info('Build parameters changed for "%s"; forcing rebuild.', parsed_args.name)
+    force = True
 
   name = parsed_args.name
   langout = parsed_args.langout
@@ -455,9 +505,31 @@ def main(args):
       skip_ts):
     return 1
 
-  previous_state[build_key] = current_hash
-  with open(hash_file_path, 'w') as f:
-    json.dump(previous_state, f, indent=2, sort_keys=True)
+  # Persist (merge) the updated state under lock so we don't clobber parallel updates.
+  # Use create=True so the file is created if it didn't exist.
+  try:
+    with locked_file_rw(hash_file_path, create=True) as f:
+      # Read current on-disk state (may have been updated by other processes)
+      try:
+        f.seek(0, os.SEEK_SET)
+        on_disk = json.load(f)
+      except json.JSONDecodeError:
+        on_disk = {}
+      except Exception:
+        on_disk = {}
+      # Merge and write back atomically under the same lock
+      on_disk[build_key] = current_hash
+      f.seek(0, os.SEEK_SET)
+      f.truncate()
+      json.dump(on_disk, f, indent=2, sort_keys=True)
+      f.flush()
+      try:
+        os.fsync(f.fileno())
+      except Exception:
+        # fsync may be unavailable on some platforms; ignore safely.
+        pass
+  except OSError as e:
+    logging.warning("Failed to persist build_state.json safely: %s", e)
 
   return 0
 
