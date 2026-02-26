@@ -44,9 +44,13 @@ shaka-player/
 │   ├── build.py          # Closure compilation
 │   ├── check.py          # Style/type checking
 │   ├── test.py           # Test runner wrapper
+│   ├── generateExterns.js  # Generates .externs.js from compiled output
+│   ├── generateLocalizations.py  # Generates localization JS from JSON
+│   ├── generateTsDefs.py # Generates .d.ts from compiled externs
 │   ├── types/            # Build variant definition files (+@complete, -@networking, etc.)
 │   ├── wrapper.template.js # IIFE wrapper for compiled output (see below)
-│   └── generateTsDefs.py # Generates .d.ts from compiled externs
+│   └── *.py              # Other helper scripts (compiler, stats, docs, etc.)
+├── conditional/          # Conditional build helpers (e.g. dummy Cast proxy)
 ├── demo/                 # Demo app (Closure-based)
 ├── test/                 # Jasmine unit + integration tests (Karma)
 ├── dist/                 # Build output (compiled JS, source maps, .d.ts, externs)
@@ -104,12 +108,16 @@ Build variant definitions live in `build/types/`. The default build is
 
 ### Output artifacts (`dist/`)
 
-| File | Description |
-|------|-------------|
-| `shaka-player.compiled.js` | Minified production bundle |
-| `shaka-player.compiled.debug.js` | Unminified bundle with source maps |
-| `shaka-player.compiled.d.ts` | TypeScript declarations |
-| `shaka-player.compiled.externs.js` | Closure externs for downstream Closure users |
+Each build variant produces a family of files. The variants are:
+`compiled` (default, no UI), `ui`, `dash`, `hls`, `experimental`.
+
+| Pattern | Description |
+|---------|-------------|
+| `shaka-player.{variant}.js` | Minified production bundle |
+| `shaka-player.{variant}.debug.js` | Unminified bundle with source maps |
+| `shaka-player.{variant}.d.ts` | TypeScript declarations |
+| `shaka-player.{variant}.externs.js` | Closure externs for downstream Closure users |
+| `shaka-player.{variant}-es2021.js` | ES2021 target variant (same family) |
 | `controls.css` | UI stylesheet |
 
 ## Closure Compiler & Module System
@@ -160,6 +168,7 @@ Run via `python3 build/check.py` or directly with `npx eslint`.
 
 - `externs/*.js` — browser/platform API externs
 - `externs/shaka/*.js` — Shaka's own interface/typedef definitions
+- `ui/externs/*.js` — UI layer interface/typedef definitions (same pattern as `externs/shaka/`)
 
 ## Node Version Requirement
 
