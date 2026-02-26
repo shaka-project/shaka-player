@@ -53,6 +53,48 @@ just a few small guidelines you need to follow.
 [pull request]: https://help.github.com/articles/creating-a-pull-request
 
 
+## AI-Assisted Contributions ##
+
+We welcome contributions that were written or assisted by AI coding agents (such
+as Claude Code, GitHub Copilot, Cursor, or similar tools).  However, any commit
+that involved AI assistance must say so clearly.
+
+The preferred convention is a **git trailer** in the commit message:
+
+```
+Co-authored-by: Claude Code <noreply@anthropic.com>
+```
+
+Git trailers are lines at the end of the commit message body, separated from the
+body by a blank line, in `Key: Value` format.  GitHub renders `Co-authored-by`
+trailers natively, showing the tool as a co-author on the commit and pull
+request.
+
+Other tools have their own canonical addresses — use whatever the tool provides,
+or follow the same pattern:
+
+```
+Co-authored-by: GitHub Copilot <copilot@github.com>
+Co-authored-by: Cursor <cursor@anysphere.com>
+```
+
+If you used multiple tools or a tool doesn't have a canonical address, a
+`Co-authored-by` line with a descriptive name is fine:
+
+```
+Co-authored-by: Claude Code (claude-sonnet-4-6) <noreply@anthropic.com>
+```
+
+**Why this matters:** Attribution helps reviewers calibrate their review effort,
+gives the project an honest record of how the code was produced, and keeps us
+compliant with the CLA requirement that contributions be your own original work
+(or clearly attributed when they are not).
+
+Note that the CLA still applies to AI-assisted contributions: by submitting a
+pull request you are attesting that you reviewed the AI-generated code, that you
+take responsibility for it, and that you have the right to submit it under the
+project's license.
+
 ## Contributor License Agreement ##
 
 Contributions to any Google project must be accompanied by a Contributor
