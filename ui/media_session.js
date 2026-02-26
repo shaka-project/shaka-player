@@ -199,7 +199,7 @@ shaka.ui.MediaSession = class {
         src: imageUrl,
       };
       const mimeType =
-          shaka.net.NetworkingUtils.getMimeTypeByExtension(imageUrl);
+          shaka.net.NetworkingUtils.getMimeTypeFromUri(imageUrl);
       if (mimeType) {
         artwork.type = mimeType;
       }
@@ -231,7 +231,7 @@ shaka.ui.MediaSession = class {
           artwork.sizes = `${imageInfo.width}x${imageInfo.height}`;
         }
         const mimeType =
-            shaka.net.NetworkingUtils.getMimeTypeByExtension(imageInfo.url);
+            shaka.net.NetworkingUtils.getMimeTypeFromUri(imageInfo.url);
         if (mimeType) {
           artwork.type = mimeType;
         }
