@@ -468,7 +468,6 @@ describe('MpdUtils', () => {
   });
 
   describe('hasXlinks', () => {
-
     function parse(xmlString) {
       return /** @type {shaka.extern.xml.Node} */ (
         shaka.util.TXml.parseXmlString(xmlString));
@@ -507,7 +506,7 @@ describe('MpdUtils', () => {
               '<SegmentList xlink:href="https://deep" ' +
               'xlink:actuate="onLoad" />' +
             '</Representation>' +
-          '</AdaptationSet>'
+          '</AdaptationSet>',
       ));
 
       expect(MpdUtils.hasXlinks(xml)).toBe(true);
@@ -518,7 +517,7 @@ describe('MpdUtils', () => {
           '<SegmentTimeline>' +
             '<S xlink:href="https://shouldIgnore" ' +
             'xlink:actuate="onLoad" />' +
-          '</SegmentTimeline>'
+          '</SegmentTimeline>',
       ));
 
       expect(MpdUtils.hasXlinks(xml)).toBe(false);
@@ -530,7 +529,7 @@ describe('MpdUtils', () => {
             '<Representation />' +
           '</AdaptationSet>' +
           '<AdaptationSet xlink:href="https://branch" ' +
-          'xlink:actuate="onLoad" />'
+          'xlink:actuate="onLoad" />',
       ));
 
       expect(MpdUtils.hasXlinks(xml)).toBe(true);
@@ -586,7 +585,8 @@ describe('MpdUtils', () => {
       const xlinkXMLString =
           '<AdaptationSet variable="1"><Contents /></AdaptationSet>';
       const desiredXMLString = inBaseContainer(
-          '<AdaptationSet otherVariable="q" variable="1"><Contents /></AdaptationSet>');
+          '<AdaptationSet otherVariable="q" variable="1"><Contents />' +
+          '</AdaptationSet>');
 
       fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testSucceeds(baseXMLString, desiredXMLString, 1);
@@ -648,7 +648,8 @@ describe('MpdUtils', () => {
       const baseXMLString = inBaseContainer(
           '<AdaptationSet xlink:href="https://xlink1?parameter" ' +
           'xlink:actuate="onLoad" />');
-      const xlinkXMLString = '<AdaptationSet variable="1"><Contents /></AdaptationSet>';
+      const xlinkXMLString =
+          '<AdaptationSet variable="1"><Contents /></AdaptationSet>';
       const desiredXMLString = inBaseContainer(
           '<AdaptationSet variable="1"><Contents /></AdaptationSet>');
 
@@ -661,7 +662,8 @@ describe('MpdUtils', () => {
       const baseXMLString = inBaseContainer(
           '<AdaptationSet xlink:href="https://xlink1" xlink:actuate="onLoad">' +
           '<Unwanted /></AdaptationSet>');
-      const xlinkXMLString = '<AdaptationSet variable="1"><Contents /></AdaptationSet>';
+      const xlinkXMLString =
+          '<AdaptationSet variable="1"><Contents /></AdaptationSet>';
       const desiredXMLString = inBaseContainer(
           '<AdaptationSet variable="1"><Contents /></AdaptationSet>');
 
