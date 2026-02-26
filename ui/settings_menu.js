@@ -224,8 +224,9 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     const paddingTop = parseFloat(styleMenu.paddingTop);
     const paddingBottom = parseFloat(styleMenu.paddingBottom);
     const rectContainer = this.videoContainer_.getBoundingClientRect();
+    const gap = 5;
     const heightIntersection =
-        rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom;
+        rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom - gap;
 
     this.menu.style.maxHeight = heightIntersection + 'px';
 
