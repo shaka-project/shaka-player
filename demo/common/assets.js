@@ -634,14 +634,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.XLINK)
-      .addFeature(shakaAssets.Feature.OFFLINE)
-      .setExtraConfig({
-        manifest: {
-          dash: {
-            disableXlinkProcessing: false,
-          },
-        },
-      }),
+      .addFeature(shakaAssets.Feature.OFFLINE),
   // From: http://dig.ccmixter.org/files/JeffSpeed68/53327
   // Licensed under Creative Commons BY-NC 3.0.
   // Free for non-commercial use with attribution.

@@ -248,8 +248,6 @@ shakaDemo.Config = class {
     this.addSection_('DASH Manifest', docLink)
         .addBoolInput_('Auto-Correct DASH Drift',
             'manifest.dash.autoCorrectDrift')
-        .addBoolInput_('Disable Xlink processing',
-            'manifest.dash.disableXlinkProcessing')
         .addBoolInput_('Xlink Should Fail Gracefully',
             'manifest.dash.xlinkFailGracefully')
         .addBoolInput_('Ignore DASH suggestedPresentationDelay',

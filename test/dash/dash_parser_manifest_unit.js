@@ -932,7 +932,6 @@ describe('DashParser Manifest', () => {
           shaka.util.Error.Code.DASH_UNSUPPORTED_XLINK_ACTUATE);
 
       const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-      config.dash.disableXlinkProcessing = false;
 
       await Dash.testFails(source, error, config);
     });
