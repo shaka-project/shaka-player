@@ -915,13 +915,10 @@ describe('DashParser Manifest', () => {
     it('xlink problems when xlinkFailGracefully is false', async () => {
       const source = [
         '<MPD minBufferTime="PT75S" xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
-            'xmlns:xlink="http://www.w3.org/1999/xlink">',
+        '  xmlns:xlink="http://www.w3.org/1999/xlink">',
         '  <Period id="1" duration="PT30S">',
-        '    <AdaptationSet mimeType="video/mp4">',
-        '      <Representation bandwidth="1" xlink:href="https://xlink1" ' +
-            'xlink:actuate="onInvalid">', // Incorrect actuate
-        '        <SegmentBase indexRange="100-200" />',
-        '      </Representation>',
+        '    <AdaptationSet mimeType="video/mp4" xlink:href="https://xlink1" ' +
+        '      xlink:actuate="onInvalid">', // Incorrect actuate
         '    </AdaptationSet>',
         '  </Period>',
         '</MPD>',
@@ -931,10 +928,7 @@ describe('DashParser Manifest', () => {
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_UNSUPPORTED_XLINK_ACTUATE);
 
-      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-      config.dash.disableXlinkProcessing = false;
-
-      await Dash.testFails(source, error, config);
+      await Dash.testFails(source, error);
     });
 
     it('failed network requests', async () => {

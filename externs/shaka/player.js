@@ -1434,7 +1434,6 @@ shaka.extern.xml.Node;
 /**
  * @typedef {{
  *   clockSyncUri: string,
- *   disableXlinkProcessing: boolean,
  *   xlinkFailGracefully: boolean,
  *   ignoreMinBufferTime: boolean,
  *   autoCorrectDrift: boolean,
@@ -1455,10 +1454,6 @@ shaka.extern.xml.Node;
  *   URI will be used to determine the current time.
  *   <br>
  *   Defaults to <code>''</code>.
- * @property {boolean} disableXlinkProcessing
- *   If true, xlink-related processing will be disabled.
- *   <br>
- *   Defaults to <code>true</code>.
  * @property {boolean} xlinkFailGracefully
  *   If true, xlink-related errors will result in a fallback to the tag's
  *   existing contents. If false, xlink-related errors will be propagated
