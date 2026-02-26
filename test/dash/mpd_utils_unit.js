@@ -467,6 +467,90 @@ describe('MpdUtils', () => {
     }
   });
 
+  describe('hasXlinks', () => {
+
+    function parse(xmlString) {
+      return /** @type {shaka.extern.xml.Node} */ (
+        shaka.util.TXml.parseXmlString(xmlString));
+    }
+
+    function wrapInMpd(inner = '') {
+      return (
+        '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
+        'xmlns:xlink="http://www.w3.org/1999/xlink">' +
+          '<Period>' +
+            inner +
+          '</Period>' +
+        '</MPD>'
+      );
+    }
+
+    it('returns false when no xlink is present', () => {
+      const xml = parse(wrapInMpd(
+          '<AdaptationSet><Representation /></AdaptationSet>'));
+
+      expect(MpdUtils.hasXlinks(xml)).toBe(false);
+    });
+
+    it('returns true when child has xlink:href', () => {
+      const xml = parse(wrapInMpd(
+          '<AdaptationSet xlink:href="https://xlink1" ' +
+          'xlink:actuate="onLoad" />'));
+
+      expect(MpdUtils.hasXlinks(xml)).toBe(true);
+    });
+
+    it('returns true for deeply nested xlink', () => {
+      const xml = parse(wrapInMpd(
+          '<AdaptationSet>' +
+            '<Representation>' +
+              '<SegmentList xlink:href="https://deep" ' +
+              'xlink:actuate="onLoad" />' +
+            '</Representation>' +
+          '</AdaptationSet>'
+      ));
+
+      expect(MpdUtils.hasXlinks(xml)).toBe(true);
+    });
+
+    it('returns false when xlink is inside SegmentTimeline', () => {
+      const xml = parse(wrapInMpd(
+          '<SegmentTimeline>' +
+            '<S xlink:href="https://shouldIgnore" ' +
+            'xlink:actuate="onLoad" />' +
+          '</SegmentTimeline>'
+      ));
+
+      expect(MpdUtils.hasXlinks(xml)).toBe(false);
+    });
+
+    it('returns true when one of multiple branches has xlink', () => {
+      const xml = parse(wrapInMpd(
+          '<AdaptationSet>' +
+            '<Representation />' +
+          '</AdaptationSet>' +
+          '<AdaptationSet xlink:href="https://branch" ' +
+          'xlink:actuate="onLoad" />'
+      ));
+
+      expect(MpdUtils.hasXlinks(xml)).toBe(true);
+    });
+
+    it('does not require xlink:actuate to detect xlink', () => {
+      const xml = parse(wrapInMpd(
+          '<AdaptationSet xlink:href="https://xlink1" />'));
+
+      expect(MpdUtils.hasXlinks(xml)).toBe(true);
+    });
+
+    it('handles empty document safely', () => {
+      const xml = parse(
+          '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011"></MPD>');
+
+      expect(MpdUtils.hasXlinks(xml)).toBe(false);
+    });
+  });
+
   describe('processXlinks', () => {
     const Error = shaka.util.Error;
 
