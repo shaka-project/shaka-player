@@ -1001,7 +1001,7 @@ describe('Interstitial Ad manager', () => {
     it('supports alternative MPD', async () => {
       const eventString = [
         '<Event duration="1" id="PREROLL" presentationTime="0">',
-        '<InsertPresentation url="test.mpd"/>',
+        '<InsertPresentation uri="test.mpd"/>',
         '</Event>',
       ].join('');
       const eventNode = TXml.parseXmlString(eventString);
@@ -1036,7 +1036,7 @@ describe('Interstitial Ad manager', () => {
     it('ignore duplicate alternative MPD', async () => {
       const eventString = [
         '<Event duration="1" id="PREROLL" presentationTime="0">',
-        '<ReplacePresentation url="test.mpd" returnOffset="1"/>',
+        '<ReplacePresentation uri="test.mpd" returnOffset="1"/>',
         '</Event>',
       ].join('');
       const eventNode = TXml.parseXmlString(eventString);
