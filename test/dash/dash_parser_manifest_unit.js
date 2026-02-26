@@ -928,9 +928,7 @@ describe('DashParser Manifest', () => {
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_UNSUPPORTED_XLINK_ACTUATE);
 
-      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-
-      await Dash.testFails(source, error, config);
+      await Dash.testFails(source, error);
     });
 
     it('failed network requests', async () => {
