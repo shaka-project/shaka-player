@@ -20,6 +20,7 @@ configurationchanged
 currentitemchanged
 customwarning
 defaultselected
+deferreds
 describedby
 disableonfail
 downloadcompleted
@@ -536,6 +537,7 @@ sintel
 stardate
 systeminfo
 templatized
+UNLCK
 vaage
 webapis
 

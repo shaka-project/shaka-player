@@ -30,16 +30,11 @@ shakaDemo.Utils = class {
     // values set to names that did not match the names of their corresponding
     // config object name.
     const overridden = [];
-    const configOverride = (hashName, configName) => {
-      overridden.push(configName);
-      callback(hashName, configName);
-    };
 
-    // Override config values with custom names.
-    configOverride('audiolang', 'preferredAudioLanguage');
-    configOverride('textlang', 'preferredTextLanguage');
-    configOverride('textrole', 'preferredTextRole');
-    configOverride('channels', 'preferredAudioChannelCount');
+    // These are structured arrays handled manually in main.js.
+    overridden.push('preferredAudio');
+    overridden.push('preferredText');
+    overridden.push('preferredVideo');
 
     // Override config values that are handled manually.
     overridden.push('abr.enabled');

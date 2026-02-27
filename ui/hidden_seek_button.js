@@ -93,7 +93,6 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     this.eventManager.listen(this.seekContainer, 'touchend', (e) => {
       const event = /** @type {!TouchEvent} */(e);
       this.onTouchEnd_(event);
-      this.controls.setLastTouchEventTime(Date.now(), /* container= */ true);
     });
   }
 
@@ -139,6 +138,14 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
    * @private
    */
   onTouchEnd_(event) {
+    // Ignore this event if the controls are transparent.
+    // Double-tapping the hidden seek button when the controls are hidden
+    // should cause the player to go fullscreen, not cause it to
+    // rewind/fast-forward.
+    if (!this.controls.isOpaque()) {
+      return;
+    }
+
     // If user scrolled, don't handle as a tap.
     if (this.hasMoved_) {
       return;
@@ -148,6 +155,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     // play/seek.
     if (this.controls.anySettingsMenusAreOpen()) {
       event.preventDefault();
+      event.stopPropagation();
       this.controls.hideSettingsMenus();
       return;
     }
@@ -156,6 +164,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     if (this.controls.getConfig().tapSeekDistance > 0 &&
         (!this.ad || !this.ad.isLinear())) {
       event.preventDefault();
+      event.stopPropagation();
       this.onSeekButtonClick_();
     }
   }

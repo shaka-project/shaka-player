@@ -439,9 +439,15 @@ shakaDemo.Main = class {
     this.defaultConfig_ = this.player_.getConfiguration();
     this.desiredConfig_ = this.player_.getConfiguration();
     const languages = navigator.languages || ['en-us'];
-    this.configure('preferredAudioLanguage', languages[0]);
+    this.configure('preferredAudio',
+        languages.map((l) => ({
+          language: l,
+          role: '',
+          label: '',
+          channelCount: 2,
+          codec: '',
+        })));
     this.uiLocale_ = languages[0];
-    // TODO(#1591): Support multiple language preferences
 
     const onErrorEvent = (event) => this.onErrorEvent_(event);
     this.player_.addEventListener('error', onErrorEvent);
@@ -1038,19 +1044,96 @@ shakaDemo.Main = class {
       this.configure('abr.enabled', false);
     }
 
-    if (params.has('preferredVideoCodecs')) {
-      this.configure('preferredVideoCodecs',
-          params.get('preferredVideoCodecs').split(','));
+    // Read structured preferences from JSON params (new format)
+    if (params.has('preferredAudio')) {
+      try {
+        const parsed = JSON.parse(params.get('preferredAudio'));
+        if (Array.isArray(parsed)) {
+          this.configure('preferredAudio', parsed);
+        }
+      } catch (e) {}
+    } else if (params.has('preferredAudioLanguages')) {
+      // Legacy fallback
+      this.configure('preferredAudio',
+          params.get('preferredAudioLanguages').split(',').map((language) =>
+            ({
+              language,
+              role: '',
+              label: '',
+              channelCount: 2,
+              codec: '',
+            })));
+    } else if (params.has('preferredAudioCodecs')) {
+      // Legacy fallback
+      this.configure('preferredAudio',
+          params.get('preferredAudioCodecs').split(',').map((codec) =>
+            ({
+              language: '',
+              role: '',
+              label: '',
+              channelCount: 2,
+              codec,
+            })));
     }
 
-    if (params.has('preferredAudioCodecs')) {
-      this.configure('preferredAudioCodecs',
-          params.get('preferredAudioCodecs').split(','));
+    if (params.has('preferredText')) {
+      try {
+        const parsed = JSON.parse(params.get('preferredText'));
+        if (Array.isArray(parsed)) {
+          this.configure('preferredText', parsed);
+        }
+      } catch (e) {}
+    } else if (params.has('preferredTextLanguages')) {
+      // Legacy fallback
+      this.configure('preferredText',
+          params.get('preferredTextLanguages').split(',').map((language) =>
+            ({
+              language,
+              role: '',
+              format: '',
+            })));
+    } else if (params.has('preferredTextFormats')) {
+      // Legacy fallback
+      this.configure('preferredText',
+          params.get('preferredTextFormats').split(',').map((format) =>
+            ({
+              language: '',
+              role: '',
+              format,
+            })));
     }
 
-    if (params.has('preferredTextFormats')) {
-      this.configure('preferredTextFormats',
-          params.get('preferredTextFormats').split(','));
+    if (params.has('preferForcedSubs')) {
+      // Legacy fallback: merge forced into preferredText[0]
+      const forced = params.get('preferForcedSubs') == 'true';
+      const current = /** @type {!Array} */(
+        this.getCurrentConfigValue('preferredText'));
+      if (current.length) {
+        current[0]['forced'] = forced;
+      } else {
+        current.push({language: '', role: '', format: '', forced});
+      }
+      this.configure('preferredText', current);
+    }
+
+    if (params.has('preferredVideo')) {
+      try {
+        const parsed = JSON.parse(params.get('preferredVideo'));
+        if (Array.isArray(parsed)) {
+          this.configure('preferredVideo', parsed);
+        }
+      } catch (e) {}
+    } else if (params.has('preferredVideoCodecs')) {
+      // Legacy fallback
+      this.configure('preferredVideo',
+          params.get('preferredVideoCodecs').split(',').map((codec) =>
+            ({
+              role: '',
+              label: '',
+              codec,
+              hdrLevel: 'AUTO',
+              layout: '',
+            })));
     }
 
     if (params.has('accessibility.speechToText.languagesToTranslate')) {
@@ -1585,15 +1668,34 @@ shakaDemo.Main = class {
     }
     params.push('uilang=' + this.getUILocale());
 
-    const preferredArray = [
-      'preferredVideoCodecs',
-      'preferredAudioCodecs',
-      'preferredTextFormats',
+    // Serialize structured preferences as JSON
+    const prefAudio = /** @type {!Array} */(
+      this.getCurrentConfigValue('preferredAudio'));
+    if (prefAudio.length) {
+      params.push('preferredAudio=' +
+          encodeURIComponent(JSON.stringify(prefAudio)));
+    }
+
+    const prefText = /** @type {!Array} */(
+      this.getCurrentConfigValue('preferredText'));
+    if (prefText.length) {
+      params.push('preferredText=' +
+          encodeURIComponent(JSON.stringify(prefText)));
+    }
+
+    const prefVideo = /** @type {!Array} */(
+      this.getCurrentConfigValue('preferredVideo'));
+    if (prefVideo.length) {
+      params.push('preferredVideo=' +
+          encodeURIComponent(JSON.stringify(prefVideo)));
+    }
+
+    const otherArrays = [
       'accessibility.speechToText.languagesToTranslate',
       'manifest.msf.namespaces',
     ];
 
-    for (const key of preferredArray) {
+    for (const key of otherArrays) {
       const array = /** @type {!Array<string>} */(
         this.getCurrentConfigValue(key));
       if (array.length) {

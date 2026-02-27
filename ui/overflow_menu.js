@@ -75,13 +75,6 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
           shaka.ui.Utils.setDisplay(this.overflowMenuButton_, true);
         });
 
-    this.eventManager.listen(
-        this.overflowMenu_, 'touchstart', (event) => {
-          this.controls.setLastTouchEventTime(
-              Date.now(), /* container= */ false);
-          event.stopPropagation();
-        });
-
     this.eventManager.listen(this.overflowMenuButton_, 'click', () => {
       if (!this.controls.isOpaque()) {
         return;
@@ -242,8 +235,9 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     const paddingTop = parseFloat(styleMenu.paddingTop);
     const paddingBottom = parseFloat(styleMenu.paddingBottom);
     const rectContainer = this.videoContainer_.getBoundingClientRect();
+    const gap = 5;
     const heightIntersection =
-        rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom;
+        rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom - gap;
 
     this.overflowMenu_.style.maxHeight = heightIntersection + 'px';
 
