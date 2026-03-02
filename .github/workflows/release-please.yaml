@@ -99,16 +99,12 @@ jobs:
           # NPM publish always sets a tag.  If you don't provide an explicit
           # tag, you get the "latest" tag by default, but we want "latest" to
           # always point to the highest version number.  So we set an explicit
-          # tag on every "publish" command, then follow up with a command to
-          # set "latest" only if this release was the highest version yet.
-
-          # The explicit tag is based on the branch.  If the git tag is v4.4.1,
-          # the branch was v4.4.x, and the explicit NPM tag should be
-          # v4.4-latest.
-          GIT_TAG_NAME=${{ needs.release.outputs.tag_name }}
+          # tag on every "publish" command, either "latest" for the latest, or
+          # a dummy tag otherwise.
 
           # We only tag the NPM package as "latest" if this release is the
           # highest version to date.
+          GIT_TAG_NAME=${{ needs.release.outputs.tag_name }}
           RELEASE_TAGS=$(git tag | grep ^v[0-9] | grep -Ev -- '-(master|main)')
           LATEST_RELEASE=$(echo "$RELEASE_TAGS" | sort --version-sort | tail -1)
 
