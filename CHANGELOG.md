@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.15.32](https://github.com/shaka-project/shaka-player/compare/v4.15.31...v4.15.32) (2026-03-02)
+
+
+### Bug Fixes
+
+* **Ads:** Synchronize the audio between ad and main content when using interstitials ([#9767](https://github.com/shaka-project/shaka-player/issues/9767)) ([52e1ccc](https://github.com/shaka-project/shaka-player/commit/52e1cccc4035da317daecb339c210d996335d33d))
+* Check end time when getting next segment reference ([#9752](https://github.com/shaka-project/shaka-player/issues/9752)) ([cfaa9db](https://github.com/shaka-project/shaka-player/commit/cfaa9db5bd58efaaf19ef64ec3e27c9bf5eb1538))
+* **ci:** Update release for trusted publishing ([#9768](https://github.com/shaka-project/shaka-player/issues/9768)) ([ce4acaf](https://github.com/shaka-project/shaka-player/commit/ce4acaf10468310d364ebab2aecb55cfd1e21b23)), closes [#9132](https://github.com/shaka-project/shaka-player/issues/9132)
+* Handle ID3 EMSG duration according to AOM spec ([#9757](https://github.com/shaka-project/shaka-player/issues/9757)) ([3e7901a](https://github.com/shaka-project/shaka-player/commit/3e7901a7c3edf0aaa6116176885e450323d6cfc8))
+* **HLS:** Fix timing of EMSG boxes when using HLS ([#9744](https://github.com/shaka-project/shaka-player/issues/9744)) ([51a7247](https://github.com/shaka-project/shaka-player/commit/51a7247df72257dd99590ac0c362468736d84238))
+* **UI:** Add a gap to settings menu to avoid overlapping with the edge of the video ([#9765](https://github.com/shaka-project/shaka-player/issues/9765)) ([b89f8de](https://github.com/shaka-project/shaka-player/commit/b89f8de7d57474ee87f26e0f886611aee1565346))
+
+
+### Performance Improvements
+
+* **hls:** optimize playlist newline parsing to reduce memory overhead in text parser ([#9775](https://github.com/shaka-project/shaka-player/issues/9775)) ([a1b6121](https://github.com/shaka-project/shaka-player/commit/a1b6121e40c0cd22295f036422ca6b9c18ddd9f7))
+
 ## [4.15.31](https://github.com/shaka-project/shaka-player/compare/v4.15.30...v4.15.31) (2026-02-23)
 
 
