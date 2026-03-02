@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.16.20](https://github.com/shaka-project/shaka-player/compare/v4.16.19...v4.16.20) (2026-03-02)
+
+
+### Bug Fixes
+
+* **Ads:** Fix getting uri of InsertPresentation and ReplacePresentation ([#9766](https://github.com/shaka-project/shaka-player/issues/9766)) ([45ca6fd](https://github.com/shaka-project/shaka-player/commit/45ca6fd073c7f4c4b60d8c23ff970faedb3a87ce))
+* **Ads:** Synchronize the audio between ad and main content when using interstitials ([#9767](https://github.com/shaka-project/shaka-player/issues/9767)) ([b943c61](https://github.com/shaka-project/shaka-player/commit/b943c61b0419e67f656c79d11d7a0e0e60cee53e))
+* Check end time when getting next segment reference ([#9752](https://github.com/shaka-project/shaka-player/issues/9752)) ([f0f993a](https://github.com/shaka-project/shaka-player/commit/f0f993a0ea3303ff2c88a88f9f3c5197a0f2ff83))
+* **ci:** Update release for trusted publishing ([#9768](https://github.com/shaka-project/shaka-player/issues/9768)) ([48d578a](https://github.com/shaka-project/shaka-player/commit/48d578a7d2763e489a4cb6854f22955c487f88ff)), closes [#9132](https://github.com/shaka-project/shaka-player/issues/9132)
+* Handle ID3 EMSG duration according to AOM spec ([#9757](https://github.com/shaka-project/shaka-player/issues/9757)) ([1cc926d](https://github.com/shaka-project/shaka-player/commit/1cc926dc86aa43497bd77ee011458db93c2d7c0d))
+* **HLS:** Fix timing of EMSG boxes when using HLS ([#9744](https://github.com/shaka-project/shaka-player/issues/9744)) ([d494398](https://github.com/shaka-project/shaka-player/commit/d4943981777e20dbd13d76fd7b81d07949ccd22b))
+* **UI:** Add a gap to settings menu to avoid overlapping with the edge of the video ([#9765](https://github.com/shaka-project/shaka-player/issues/9765)) ([0ed60de](https://github.com/shaka-project/shaka-player/commit/0ed60de1db5b5fc97465627e33e10a30d886fcb0))
+
+
+### Performance Improvements
+
+* **hls:** optimize playlist newline parsing to reduce memory overhead in text parser ([#9775](https://github.com/shaka-project/shaka-player/issues/9775)) ([c28af21](https://github.com/shaka-project/shaka-player/commit/c28af21ead7033b4d51a4c2431272c79e1c6b78d))
+
 ## [4.16.19](https://github.com/shaka-project/shaka-player/compare/v4.16.18...v4.16.19) (2026-02-23)
 
 
