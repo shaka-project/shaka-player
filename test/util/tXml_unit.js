@@ -172,6 +172,11 @@ describe('tXml', () => {
       goog.asserts.assert(root, 'findChild should find element');
       expect(TXml.parseAttr(root, 'd', TXml.parseInt, 9)).toBe(9);
     });
+
+    it('returns default value for empty string attributes', () => {
+      const root = xml;
+      expect(TXml.parseAttr(root, 'c', TXml.parseInt, 42)).toBe(42);
+    });
   });
 
   describe('parseXmlString', () => {
