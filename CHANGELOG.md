@@ -1,5 +1,24 @@
 # Changelog
 
+## [5.0.4](https://github.com/shaka-project/shaka-player/compare/v5.0.3...v5.0.4) (2026-03-02)
+
+
+### Bug Fixes
+
+* **Ads:** Fix getting uri of InsertPresentation and ReplacePresentation ([#9766](https://github.com/shaka-project/shaka-player/issues/9766)) ([6891571](https://github.com/shaka-project/shaka-player/commit/68915712224db1983b4ac485fc143b2897322e85))
+* **Ads:** Synchronize the audio between ad and main content when using interstitials ([#9767](https://github.com/shaka-project/shaka-player/issues/9767)) ([0138809](https://github.com/shaka-project/shaka-player/commit/0138809d3a91b98f8c16bdfcd1dd1ee6483c3ece))
+* Check end time when getting next segment reference ([#9752](https://github.com/shaka-project/shaka-player/issues/9752)) ([862440f](https://github.com/shaka-project/shaka-player/commit/862440fc4397922b538be78aa3f7d6970582d8aa))
+* **ci:** Update release for trusted publishing ([#9768](https://github.com/shaka-project/shaka-player/issues/9768)) ([281c694](https://github.com/shaka-project/shaka-player/commit/281c69424d26476e283192ea3b0cc6da6bffd742)), closes [#9132](https://github.com/shaka-project/shaka-player/issues/9132)
+* delay appending vtt subtitles depending on presence of discontinuity sequence and timestamp offset ([#9676](https://github.com/shaka-project/shaka-player/issues/9676)) ([6f086be](https://github.com/shaka-project/shaka-player/commit/6f086bec7f5b667b505f592413da6b6931ce77bf)), closes [#9470](https://github.com/shaka-project/shaka-player/issues/9470)
+* Handle ID3 EMSG duration according to AOM spec ([#9757](https://github.com/shaka-project/shaka-player/issues/9757)) ([7574850](https://github.com/shaka-project/shaka-player/commit/757485060ed2a9f3ea0ef435077b3449bf87aaa5))
+* **HLS:** Fix timing of EMSG boxes when using HLS ([#9744](https://github.com/shaka-project/shaka-player/issues/9744)) ([688c503](https://github.com/shaka-project/shaka-player/commit/688c503c84fb70782e73b49a4a3732374c89245b))
+* **UI:** Add a gap to settings menu to avoid overlapping with the edge of the video ([#9765](https://github.com/shaka-project/shaka-player/issues/9765)) ([f5f636a](https://github.com/shaka-project/shaka-player/commit/f5f636abb6647987a06396399bbdd848a68db950))
+
+
+### Performance Improvements
+
+* **hls:** optimize playlist newline parsing to reduce memory overhead in text parser ([#9775](https://github.com/shaka-project/shaka-player/issues/9775)) ([d9de525](https://github.com/shaka-project/shaka-player/commit/d9de525ad399cf0fba79baae1733e4bd7a7db119))
+
 ## [5.0.3](https://github.com/shaka-project/shaka-player/compare/v5.0.2...v5.0.3) (2026-02-23)
 
 
