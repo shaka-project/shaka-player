@@ -28,8 +28,8 @@ by the given file.  So "-@networking" will remove all the networking plugins,
 and "-@ui" will remove the UI.
 
 The core library is always included so does not have to be listed.  The default
-is to use the name 'ui'; if no commands are given, it will build the complete
-build, including the UI.
+is to use the name 'experimental'; if no commands are given, it will build the
+complete build, including the UI.
 
 Examples:
   # Equivalent to +@complete
@@ -372,7 +372,7 @@ def main(args):
       '--name',
       help='Set the name of the build. Uses "ui" if not given.',
       type=str,
-      default='ui')
+      default='experimental')
 
   parser.add_argument(
       '--langout',
