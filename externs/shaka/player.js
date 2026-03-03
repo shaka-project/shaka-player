@@ -2008,7 +2008,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy,
  *   returnToEndOfLiveWindowWhenOutside: boolean,
  *   stopFetchingOnPause: boolean,
- *   limitBufferToPresentationDuration: boolean,
+ *   clampAppendWindowToDuration: boolean,
  * }}
  *
  * @description
@@ -2262,7 +2262,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   loading of the current segment.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {boolean} limitBufferToPresentationDuration
+ * @property {boolean} clampAppendWindowToDuration
  *   If true, limit the buffer to the presentation duration (cap append window
  *   at it) so the buffer never extends past it (e.g. HLS when one track is
  *   longer). Otherwise MediaSource.duration can grow and video never reaches

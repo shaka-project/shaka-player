@@ -970,7 +970,7 @@ describe('StreamingEngine', () => {
     expect(mediaSourceEngine.appendBuffer).toHaveBeenCalled();
   });
 
-  describe('limitBufferToPresentationDuration', () => {
+  describe('clampAppendWindowToDuration', () => {
     it('caps appendWindowEnd at presentation duration when on', async () => {
       setupVod();
       const presentationDuration = 40;
@@ -1006,7 +1006,7 @@ describe('StreamingEngine', () => {
       config.segmentPrefetchLimit = 0;
       config.crossBoundaryStrategy =
           shaka.config.CrossBoundaryStrategy.KEEP;
-      config.limitBufferToPresentationDuration = true;
+      config.clampAppendWindowToDuration = true;
       createStreamingEngine(config);
 
       streamingEngine.switchVariant(variant);
@@ -1057,7 +1057,7 @@ describe('StreamingEngine', () => {
           config.segmentPrefetchLimit = 0;
           config.crossBoundaryStrategy =
               shaka.config.CrossBoundaryStrategy.KEEP;
-          config.limitBufferToPresentationDuration = false;
+          config.clampAppendWindowToDuration = false;
           createStreamingEngine(config);
 
           streamingEngine.switchVariant(variant);

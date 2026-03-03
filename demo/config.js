@@ -636,7 +636,7 @@ shakaDemo.Config = class {
         .addBoolInput_('Clear decodingInfo cache on unload',
             'streaming.clearDecodingCache')
         .addBoolInput_('Limit the buffer to the presentation duration',
-            'streaming.limitBufferToPresentationDuration');
+            'streaming.clampAppendWindowToDuration');
 
     const hdrLevels = {
       '': '',
