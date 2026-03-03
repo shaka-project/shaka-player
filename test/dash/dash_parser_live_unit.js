@@ -1707,17 +1707,6 @@ describe('DashParser Live', () => {
     }
 
     /**
-     * Enables period caching on the parser.
-     * @param {!boolean} value
-     * @suppress {accessControls}
-     */
-    function setEnablePeriodCaching(value) {
-      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-      config.dash.enablePeriodCaching = value;
-      parser.configure(config);
-    }
-
-    /**
      * Returns a spy on parsePeriod_ that still calls the real implementation.
      * @return {!jasmine.Spy}
      * @suppress {accessControls}
@@ -1727,7 +1716,6 @@ describe('DashParser Live', () => {
     }
 
     it('parses all periods on the first manifest fetch', async () => {
-      setEnablePeriodCaching(true);
       const mpd = makeMpd([
         makePeriodXml('1', 0, 10),
         makePeriodXml('2', 10, 10),
@@ -1755,7 +1743,6 @@ describe('DashParser Live', () => {
       //   i=4 P6  → not inner by position (last), re-parsed
       //
       // So only P3 and P4 come from cache; P2, P5, P6 are re-parsed → 3 calls.
-      setEnablePeriodCaching(true);
       const mpd1 = makeMpd([
         makePeriodXml('1', 0, 10),
         makePeriodXml('2', 10, 10),
@@ -1786,39 +1773,10 @@ describe('DashParser Live', () => {
       expect(parsedIds).toEqual(['2', '5', '6']);
     });
 
-    it('re-parses all periods when caching is disabled', async () => {
-      // caching OFF → every update re-parses everything.
-      setEnablePeriodCaching(false);
-      const mpd1 = makeMpd([
-        makePeriodXml('1', 0, 10),
-        makePeriodXml('2', 10, 10),
-        makePeriodXml('3', 20, 10),
-        makePeriodXml('4', 30, 10),
-        makePeriodXml('5', 40, 10),
-      ]);
-      const mpd2 = makeMpd([
-        makePeriodXml('2', 10, 10),
-        makePeriodXml('3', 20, 10),
-        makePeriodXml('4', 30, 10),
-        makePeriodXml('5', 40, 10),
-        makePeriodXml('6', 50, 10),
-      ]);
-
-      fakeNetEngine.setResponseText('dummy://foo', mpd1);
-      await parser.start('dummy://foo', playerInterface);
-
-      const spy = spyOnParsePeriod();
-      fakeNetEngine.setResponseText('dummy://foo', mpd2);
-      await updateManifest();
-
-      expect(spy).toHaveBeenCalledTimes(5);
-    });
-
     it('caches periods without an id attribute using their start time',
         async () => {
           // Periods with no @id fall back to '__shaka_period_<start>' as key.
           // The same sliding-window logic should apply.
-          setEnablePeriodCaching(true);
 
           // Build periods without id attribute.
           function makePeriodWithoutId(startSec, durationSec) {
@@ -1876,7 +1834,6 @@ describe('DashParser Live', () => {
         async () => {
           // If the new manifest shares no periods with the old one, nothing
           // can be served from cache.
-          setEnablePeriodCaching(true);
           const mpd1 = makeMpd([
             makePeriodXml('1', 0, 10),
             makePeriodXml('2', 10, 10),
