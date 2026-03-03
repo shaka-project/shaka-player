@@ -1666,4 +1666,238 @@ describe('DashParser Live', () => {
     await updateManifest();
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
   });
+
+  describe('period caching', () => {
+    /**
+     * Builds the XML for a single period with a fixed SegmentTemplate.
+     *
+     * @param {string} id
+     * @param {number} startSec
+     * @param {number} durationSec
+     * @return {string}
+     */
+    function makePeriodXml(id, startSec, durationSec) {
+      return [
+        `  <Period id="${id}" start="PT${startSec}S"`,
+        `         duration="PT${durationSec}S">`,
+        '    <AdaptationSet mimeType="video/mp4">',
+        `      <Representation id="0" bandwidth="500">`,
+        '        <BaseURL>http://example.com</BaseURL>',
+        `        <SegmentTemplate media="s$Number$.mp4" duration="2" />`,
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+      ].join('\n');
+    }
+
+    /**
+     * Builds a dynamic MPD containing the given period XML strings.
+     *
+     * @param {!Array<string>} periodXmls
+     * @return {string}
+     */
+    function makeMpd(periodXmls) {
+      return [
+        '<MPD type="dynamic"',
+        '    availabilityStartTime="1970-01-01T00:00:00Z"',
+        `    minimumUpdatePeriod="PT${updateTime}S">`,
+        ...periodXmls,
+        '</MPD>',
+      ].join('\n');
+    }
+
+    /**
+     * Enables period caching on the parser.
+     * @param {!boolean} value
+     * @suppress {accessControls}
+     */
+    function setEnablePeriodCaching(value) {
+      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+      config.dash.enablePeriodCaching = value;
+      parser.configure(config);
+    }
+
+    /**
+     * Returns a spy on parsePeriod_ that still calls the real implementation.
+     * @return {!jasmine.Spy}
+     * @suppress {accessControls}
+     */
+    function spyOnParsePeriod() {
+      return spyOn(parser, 'parsePeriod_').and.callThrough();
+    }
+
+    it('parses all periods on the first manifest fetch', async () => {
+      setEnablePeriodCaching(true);
+      const mpd = makeMpd([
+        makePeriodXml('1', 0, 10),
+        makePeriodXml('2', 10, 10),
+        makePeriodXml('3', 20, 10),
+      ]);
+      fakeNetEngine.setResponseText('dummy://foo', mpd);
+
+      const spy = spyOnParsePeriod();
+      await parser.start('dummy://foo', playerInterface);
+
+      expect(spy).toHaveBeenCalledTimes(3);
+    });
+
+    it('reuses inner periods and re-parses boundaries on update', async () => {
+      // Update 1: [P1, P2, P3, P4, P5]
+      // Update 2: [P2, P3, P4, P5, P6]
+      //
+      // oldInnerIds (from slice(1,-1) of update 1) = {P2, P3, P4}
+      //
+      // On update 2:
+      //   i=0 P2  → not inner by position (i==0), re-parsed
+      //   i=1 P3  → inner, in oldInnerIds → CACHED
+      //   i=2 P4  → inner, in oldInnerIds → CACHED
+      //   i=3 P5  → inner, NOT in oldInnerIds (was last in update 1), re-parsed
+      //   i=4 P6  → not inner by position (last), re-parsed
+      //
+      // So only P3 and P4 come from cache; P2, P5, P6 are re-parsed → 3 calls.
+      setEnablePeriodCaching(true);
+      const mpd1 = makeMpd([
+        makePeriodXml('1', 0, 10),
+        makePeriodXml('2', 10, 10),
+        makePeriodXml('3', 20, 10),
+        makePeriodXml('4', 30, 10),
+        makePeriodXml('5', 40, 10),
+      ]);
+      const mpd2 = makeMpd([
+        makePeriodXml('2', 10, 10),
+        makePeriodXml('3', 20, 10),
+        makePeriodXml('4', 30, 10),
+        makePeriodXml('5', 40, 10),
+        makePeriodXml('6', 50, 10),
+      ]);
+
+      fakeNetEngine.setResponseText('dummy://foo', mpd1);
+      const manifest = await parser.start('dummy://foo', playerInterface);
+      expect(manifest.periodCount).toBe(5);
+
+      const spy = spyOnParsePeriod();
+      fakeNetEngine.setResponseText('dummy://foo', mpd2);
+      await updateManifest();
+
+      // P3 and P4 are served from cache; P2, P5, P6 must be re-parsed.
+      expect(spy).toHaveBeenCalledTimes(3);
+      const parsedIds = spy.calls.all().map((c) =>
+        c.args[2].node.attributes['id']);
+      expect(parsedIds).toEqual(['2', '5', '6']);
+    });
+
+    it('re-parses all periods when caching is disabled', async () => {
+      // caching OFF → every update re-parses everything.
+      setEnablePeriodCaching(false);
+      const mpd1 = makeMpd([
+        makePeriodXml('1', 0, 10),
+        makePeriodXml('2', 10, 10),
+        makePeriodXml('3', 20, 10),
+        makePeriodXml('4', 30, 10),
+        makePeriodXml('5', 40, 10),
+      ]);
+      const mpd2 = makeMpd([
+        makePeriodXml('2', 10, 10),
+        makePeriodXml('3', 20, 10),
+        makePeriodXml('4', 30, 10),
+        makePeriodXml('5', 40, 10),
+        makePeriodXml('6', 50, 10),
+      ]);
+
+      fakeNetEngine.setResponseText('dummy://foo', mpd1);
+      await parser.start('dummy://foo', playerInterface);
+
+      const spy = spyOnParsePeriod();
+      fakeNetEngine.setResponseText('dummy://foo', mpd2);
+      await updateManifest();
+
+      expect(spy).toHaveBeenCalledTimes(5);
+    });
+
+    it('caches periods without an id attribute using their start time',
+        async () => {
+          // Periods with no @id fall back to '__shaka_period_<start>' as key.
+          // The same sliding-window logic should apply.
+          setEnablePeriodCaching(true);
+
+          // Build periods without id attribute.
+          function makePeriodWithoutId(startSec, durationSec) {
+            return [
+              `  <Period start="PT${startSec}S" duration="PT${durationSec}S">`,
+              '    <AdaptationSet mimeType="video/mp4">',
+              `      <Representation id="0" bandwidth="500">`,
+              '        <BaseURL>http://example.com</BaseURL>',
+              `        <SegmentTemplate media="s$Number$.mp4"`,
+              '            duration="2" />',
+              '      </Representation>',
+              '    </AdaptationSet>',
+              '  </Period>',
+            ].join('\n');
+          }
+
+          // Update 1: starts at 0, 10, 20, 30, 40
+          // Update 2: starts at 10, 20, 30, 40, 50
+          // oldInnerIds = {
+          //   __shaka_period_10,
+          //   __shaka_period_20,
+          //   __shaka_period_30
+          // }
+          // On update 2: start=20 (i=1) and start=30 (i=2) reused;
+          // others re-parsed.
+          const mpd1 = makeMpd([
+            makePeriodWithoutId(0, 10),
+            makePeriodWithoutId(10, 10),
+            makePeriodWithoutId(20, 10),
+            makePeriodWithoutId(30, 10),
+            makePeriodWithoutId(40, 10),
+          ]);
+          const mpd2 = makeMpd([
+            makePeriodWithoutId(10, 10),
+            makePeriodWithoutId(20, 10),
+            makePeriodWithoutId(30, 10),
+            makePeriodWithoutId(40, 10),
+            makePeriodWithoutId(50, 10),
+          ]);
+
+          fakeNetEngine.setResponseText('dummy://foo', mpd1);
+          await parser.start('dummy://foo', playerInterface);
+
+          const spy = spyOnParsePeriod();
+          fakeNetEngine.setResponseText('dummy://foo', mpd2);
+          await updateManifest();
+
+          // start=20 and start=30 come from cache → 3 calls for 10, 40, 50.
+          expect(spy).toHaveBeenCalledTimes(3);
+          expect(spy.calls.all().map((c) => c.args[2].start))
+              .toEqual([10, 40, 50]);
+        });
+
+    it('re-parses all periods when there is no overlap with the previous list',
+        async () => {
+          // If the new manifest shares no periods with the old one, nothing
+          // can be served from cache.
+          setEnablePeriodCaching(true);
+          const mpd1 = makeMpd([
+            makePeriodXml('1', 0, 10),
+            makePeriodXml('2', 10, 10),
+            makePeriodXml('3', 20, 10),
+          ]);
+          const mpd2 = makeMpd([
+            makePeriodXml('4', 30, 10),
+            makePeriodXml('5', 40, 10),
+            makePeriodXml('6', 50, 10),
+          ]);
+
+          fakeNetEngine.setResponseText('dummy://foo', mpd1);
+          await parser.start('dummy://foo', playerInterface);
+
+          const spy = spyOnParsePeriod();
+          fakeNetEngine.setResponseText('dummy://foo', mpd2);
+          await updateManifest();
+
+          expect(spy).toHaveBeenCalledTimes(3);
+          expect(spy.calls.all().map((c) => c.args[2].start))
+              .toEqual([30, 40, 50]);
+        });
+  });
 });
