@@ -8,7 +8,6 @@
 goog.provide('shaka.ui.StatisticsButton');
 
 goog.require('shaka.log');
-goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -178,13 +177,12 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
 
     this.loadContainer_();
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
         });
 
@@ -315,7 +313,4 @@ shaka.ui.StatisticsButton.Factory = class {
 
 
 shaka.ui.OverflowMenu.registerElement(
-    'statistics', new shaka.ui.StatisticsButton.Factory());
-
-shaka.ui.ContextMenu.registerElement(
     'statistics', new shaka.ui.StatisticsButton.Factory());

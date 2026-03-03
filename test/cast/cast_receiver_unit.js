@@ -246,6 +246,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       fakeInitState = {
         manifest: null,
         startTime: null,
+        mimeType: null,
         player: {
           configure: fakeConfig,
         },
@@ -342,6 +343,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     it('loads the manifest', () => {
       fakeInitState.startTime = 12;
       fakeInitState.manifest = 'foo://bar';
+      fakeInitState.mimeType = 'foo';
       expect(mockPlayer.load).not.toHaveBeenCalled();
 
       fakeIncomingMessage({
@@ -350,7 +352,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
         appData: fakeAppData,
       }, mockShakaMessageBus);
 
-      expect(mockPlayer.load).toHaveBeenCalledWith('foo://bar', 12);
+      expect(mockPlayer.load).toHaveBeenCalledWith('foo://bar', 12, 'foo');
     });
 
     it('plays the video after loading', async () => {

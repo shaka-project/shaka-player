@@ -23,8 +23,16 @@ vars:
         media.eme.enabled: true
         # Disable GPU acceleration to avoid contention for hardware resources
         # during parallel testing and to create more stability for screenshots.
+        media.gpu-process-decoder: false
         media.hardware-video-decoding.enabled: false
         media.hardware-video-decoding.force-enabled: false
+
+  firefox_windows_config: &firefox_windows_config
+    moz:firefoxOptions:
+      # Since Firefox 145(-ish), our lab can no longer run Firefox in a Windows
+      # service without an explicit headless mode.
+      args:
+        - "-headless"
 
   basic_chrome_config: &basic_chrome_config
     goog:chromeOptions:
@@ -192,6 +200,7 @@ FirefoxWindows:
   os: Windows
   extra_configs:
     - *basic_firefox_config
+    - *firefox_windows_config
 
 Edge:
   browser: msedge

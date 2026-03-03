@@ -21,7 +21,8 @@ shaka.extern = {};
  *   base: string,
  *   buffered: string,
  *   played: string,
- *   adBreaks: string
+ *   adBreaks: string,
+ *   chapters: string,
  * }}
  *
  * @property {string} base
@@ -36,6 +37,9 @@ shaka.extern = {};
  * @property {string} adBreaks
  *   The CSS background color applied to the portion of the seek bar showing
  *   when the ad breaks are scheduled to occur on the timeline.
+ * @property {string} chapters
+ *   The CSS background color applied to the portion of the seek bar showing
+ *   when a chapter appears on the timeline.
  * @exportDoc
  */
 shaka.extern.UISeekBarColors;
@@ -217,12 +221,44 @@ shaka.extern.UIShortcuts;
 shaka.extern.UIMediaSession;
 
 /**
+ * @typedef {{
+ *   enabled: boolean,
+ *   preferInitialWindowPlacement: boolean,
+ *   disallowReturnToOpener: boolean
+ * }}
+ *
+ * @property {boolean} enabled
+ *   If true, the Document Picture-in-Picture API is preferred.
+ *   <br>
+ *   Changing this property mid-playback may produce undesired behavior if
+ *   you are already in PiP.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} preferInitialWindowPlacement
+ *   If true, the PiP window will always appear at the position and size it
+ *   initially opened at when closed and reopened.
+ *   <br>
+ *   If false, the PiP window's size and position will be remembered when closed
+ *   and reopened (for example, as set by the user).
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disallowReturnToOpener
+ *   When true, hints the browser not to display a UI control that allows the
+ *   user to return to the originating tab when the PiP window is closed.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @exportDoc
+ */
+shaka.extern.UIDocumentPictureInPicture;
+
+/**
  * @description
  * The UI's configuration options.
  *
  * @typedef {{
  *   controlPanelElements: !Array<string>,
  *   topControlPanelElements: !Array<string>,
+ *   bigButtons: !Array<string>,
  *   overflowMenuButtons: !Array<string>,
  *   contextMenuElements: !Array<string>,
  *   statisticsList: !Array<string>,
@@ -231,7 +267,6 @@ shaka.extern.UIMediaSession;
  *   fastForwardRates: !Array<number>,
  *   rewindRates: !Array<number>,
  *   addSeekBar: boolean,
- *   addBigPlayButton: boolean,
  *   customContextMenu: boolean,
  *   castReceiverAppId: string,
  *   castAndroidReceiverCompatible: boolean,
@@ -253,7 +288,6 @@ shaka.extern.UIMediaSession;
  *   keyboardSeekDistance: number,
  *   keyboardLargeSeekDistance: number,
  *   fullScreenElement: HTMLElement,
- *   preferDocumentPictureInPicture: boolean,
  *   showAudioChannelCountVariants: boolean,
  *   seekOnTaps: boolean,
  *   tapSeekDistance: number,
@@ -271,15 +305,22 @@ shaka.extern.UIMediaSession;
  *   allowTogglePresentationTime: boolean,
  *   showRemainingTimeInPresentationTime: boolean,
  *   enableVrDeviceMotion: boolean,
+ *   showUIAlways: boolean,
  *   showUIAlwaysOnAudioOnly: boolean,
  *   preferIntlDisplayNames: boolean,
  *   mediaSession: shaka.extern.UIMediaSession,
+ *   captionsStyles: boolean,
+ *   captionsFontScaleFactors: !Array<number>,
+ *   documentPictureInPicture: shaka.extern.UIDocumentPictureInPicture,
+ *   showUIOnPaused: boolean,
  * }}
  *
  * @property {!Array<string>} controlPanelElements
  *   The ordered list of control panel elements of the UI.
  * @property {!Array<string>} topControlPanelElements
  *   The ordered list of top control panel elements of the UI.
+ * @property {!Array<string>} bigButtons
+ *   The ordered list of big buttons elements of the UI.
  * @property {!Array<string>} overflowMenuButtons
  *   The ordered list of the overflow menu buttons.
  * @property {!Array<string>} contextMenuElements
@@ -304,16 +345,11 @@ shaka.extern.UIMediaSession;
  *   Whether or not a seek bar should be part of the UI.
  *   <br>
  *   Defaults to <code>true</code>.
- * @property {boolean} addBigPlayButton
- *   Whether or not a big play button in the center of the video
- *   should be part of the UI.
- *   <br>
- *   Defaults to <code>false</code> except on mobile where the default value
- *   is <code>true</code>
  * @property {boolean} customContextMenu
  *   Whether or not a custom context menu replaces the default.
  *   <br>
- *   Defaults to <code>false</code>.
+ *   Defaults to <code>true</code> except on mobile, cast and smart TV whose
+ *   default value is <code>false</code>.
  * @property {string} castReceiverAppId
  *   Receiver app id to use for the Chromecast support.
  *   <br>
@@ -362,6 +398,10 @@ shaka.extern.UIMediaSession;
  *   there is no role.
  *   LABEL means the non-standard DASH "label" attribute or the standard DASH
  *   "Label" element or the HLS "NAME" attribute are shown.
+ *   LABEL_OR_LANGUAGE means that LABEL is preferred; if it does not exist,
+ *   LANGUAGE is used.
+ *   LANGUAGE_OR_LABEL means that LANGUAGE is preferred; if it does not exist
+ *   or is "und" (undefined), LABEL is used instead.
  *   <br>
  *   Defaults to <code>LANGUAGE</code>.
  * @property {shaka.ui.Overlay.TrackLabelFormat} textTrackLabelFormat
@@ -373,6 +413,10 @@ shaka.extern.UIMediaSession;
  *   there is no role.
  *   LABEL means the non-standard DASH "label" attribute or the standard DASH
  *   "Label" element or the HLS "NAME" attribute are shown.
+ *   LABEL_OR_LANGUAGE means that LABEL is preferred; if it does not exist,
+ *   LANGUAGE is used.
+ *   LANGUAGE_OR_LABEL means that LANGUAGE is preferred; if it does not exist
+ *   or is "und" (undefined), LABEL is used instead.
  *   <br>
  *   Defaults to <code>LANGUAGE</code>.
  * @property {number} fadeDelay
@@ -390,7 +434,7 @@ shaka.extern.UIMediaSession;
  *   Whether or not double-clicking on the UI should cause it to enter
  *   fullscreen.
  *   <br>
- *   Defaults to <code>true</code> except on mobile, cast and smart TV whose
+ *   Defaults to <code>true</code> except on cast and smart TV whose
  *   default value is <code>false</code>.
  * @property {boolean} singleClickForPlayAndPause
  *   Whether or not clicking on the video should cause it to play or pause.
@@ -437,13 +481,6 @@ shaka.extern.UIMediaSession;
  *   DOM element on which fullscreen will be done.
  *   <br>
  *   Defaults to <code>Shaka Player Container</code>.
- * @property {boolean} preferDocumentPictureInPicture
- *   Indicates whether the Document Picture in Picture API is preferred or the
- *   Video Element Picture in Picture API is preferred.
- *   Changing this property in mid-playback may produce undesired behavior if
- *   you are already in PiP.
- *   <br>
- *   Defaults to <code>true</code>.
  * @property {boolean} showAudioChannelCountVariants
  *   Indicates whether the combination of language and channel count should be
  *   displayed or if, on the contrary, only the language should be displayed
@@ -528,6 +565,10 @@ shaka.extern.UIMediaSession;
  *   <br>
  *   Defaults to <code>true</code> except on Vision OS where the default value
  *   is <code>false</code>
+ * @property {boolean} showUIAlways
+ *   If true, always keep the UI visible for all content.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @property {boolean} showUIAlwaysOnAudioOnly
  *   If true, keep the UI always visible if the content is audio only.
  *   <br>
@@ -539,6 +580,24 @@ shaka.extern.UIMediaSession;
  *   Defaults to <code>true</code>.
  * @property {shaka.extern.UIMediaSession} mediaSession
  *   Media Session config.
+ * @property {boolean} captionsStyles
+ *   If true, displays buttons to change caption styles.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {!Array<number>} captionsFontScaleFactors
+ *   The ordered list of font scale factor selection.
+ *   <br>
+ *   Defaults to <code>[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]</code>.
+ * @property {shaka.extern.UIDocumentPictureInPicture} documentPictureInPicture
+ *   Document Picture-in-Picture configuration.
+ *   <br>
+ *   Enables using the Document Picture-in-Picture API, with options to control
+ *   initial window placement and whether the PiP window can return focus to
+ *   the originating tab.
+ * @property {boolean} showUIOnPaused
+ *   Whether to show the UI whenever the video is paused.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;
@@ -810,30 +869,6 @@ shaka.extern.IUISeekBar.Factory = class {
    * @return {!shaka.extern.IUISeekBar}
    */
   create(rootElement, controls) {}
-};
-
-/**
- * @interface
- * @exportDoc
- */
-shaka.extern.IUIPlayButton = class {
-  /**
-   * @param {!HTMLElement} parent
-   * @param {!shaka.ui.Controls} controls
-   */
-  constructor(parent, controls) {
-    /**
-     * @protected {!HTMLButtonElement}
-     * @exportDoc
-     */
-    this.button;
-  }
-
-  /** @return {boolean} */
-  isPaused() {}
-
-  /** @return {boolean} */
-  isEnded() {}
 };
 
 /**

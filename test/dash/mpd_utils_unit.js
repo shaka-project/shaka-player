@@ -467,6 +467,89 @@ describe('MpdUtils', () => {
     }
   });
 
+  describe('hasXlinks', () => {
+    function parse(xmlString) {
+      return /** @type {shaka.extern.xml.Node} */ (
+        shaka.util.TXml.parseXmlString(xmlString));
+    }
+
+    function wrapInMpd(inner = '') {
+      return (
+        '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
+        'xmlns:xlink="http://www.w3.org/1999/xlink">' +
+          '<Period>' +
+            inner +
+          '</Period>' +
+        '</MPD>'
+      );
+    }
+
+    it('returns false when no xlink is present', () => {
+      const xml = parse(wrapInMpd(
+          '<AdaptationSet><Representation /></AdaptationSet>'));
+
+      expect(MpdUtils.hasXlinks(xml)).toBe(false);
+    });
+
+    it('returns true when child has xlink:href', () => {
+      const xml = parse(wrapInMpd(
+          '<AdaptationSet xlink:href="https://xlink1" ' +
+          'xlink:actuate="onLoad" />'));
+
+      expect(MpdUtils.hasXlinks(xml)).toBe(true);
+    });
+
+    it('returns true for deeply nested xlink', () => {
+      const xml = parse(wrapInMpd(
+          '<AdaptationSet>' +
+            '<Representation>' +
+              '<SegmentList xlink:href="https://deep" ' +
+              'xlink:actuate="onLoad" />' +
+            '</Representation>' +
+          '</AdaptationSet>',
+      ));
+
+      expect(MpdUtils.hasXlinks(xml)).toBe(true);
+    });
+
+    it('returns false when xlink is inside SegmentTimeline', () => {
+      const xml = parse(wrapInMpd(
+          '<SegmentTimeline>' +
+            '<S xlink:href="https://shouldIgnore" ' +
+            'xlink:actuate="onLoad" />' +
+          '</SegmentTimeline>',
+      ));
+
+      expect(MpdUtils.hasXlinks(xml)).toBe(false);
+    });
+
+    it('returns true when one of multiple branches has xlink', () => {
+      const xml = parse(wrapInMpd(
+          '<AdaptationSet>' +
+            '<Representation />' +
+          '</AdaptationSet>' +
+          '<AdaptationSet xlink:href="https://branch" ' +
+          'xlink:actuate="onLoad" />',
+      ));
+
+      expect(MpdUtils.hasXlinks(xml)).toBe(true);
+    });
+
+    it('does not require xlink:actuate to detect xlink', () => {
+      const xml = parse(wrapInMpd(
+          '<AdaptationSet xlink:href="https://xlink1" />'));
+
+      expect(MpdUtils.hasXlinks(xml)).toBe(true);
+    });
+
+    it('handles empty document safely', () => {
+      const xml = parse(
+          '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011"></MPD>');
+
+      expect(MpdUtils.hasXlinks(xml)).toBe(false);
+    });
+  });
+
   describe('processXlinks', () => {
     const Error = shaka.util.Error;
 
@@ -485,10 +568,11 @@ describe('MpdUtils', () => {
 
     it('will replace elements and children', async () => {
       const baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
-      const xlinkXMLString = '<ToReplace variable="1"><Contents /></ToReplace>';
+          '<AdaptationSet xlink:href="https://xlink1" xlink:actuate="onLoad" />');
+      const xlinkXMLString =
+          '<AdaptationSet variable="1"><Contents /></AdaptationSet>';
       const desiredXMLString = inBaseContainer(
-          '<ToReplace variable="1"><Contents /></ToReplace>');
+          '<AdaptationSet variable="1"><Contents /></AdaptationSet>');
 
       fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testSucceeds(baseXMLString, desiredXMLString, 1);
@@ -496,11 +580,13 @@ describe('MpdUtils', () => {
 
     it('preserves non-xlink attributes', async () => {
       const baseXMLString = inBaseContainer(
-          '<ToReplace otherVariable="q" xlink:href="https://xlink1" ' +
+          '<AdaptationSet otherVariable="q" xlink:href="https://xlink1" ' +
           'xlink:actuate="onLoad" />');
-      const xlinkXMLString = '<ToReplace variable="1"><Contents /></ToReplace>';
+      const xlinkXMLString =
+          '<AdaptationSet variable="1"><Contents /></AdaptationSet>';
       const desiredXMLString = inBaseContainer(
-          '<ToReplace otherVariable="q" variable="1"><Contents /></ToReplace>');
+          '<AdaptationSet otherVariable="q" variable="1"><Contents />' +
+          '</AdaptationSet>');
 
       fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testSucceeds(baseXMLString, desiredXMLString, 1);
@@ -508,11 +594,11 @@ describe('MpdUtils', () => {
 
     it('preserves text', async () => {
       const baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
+          '<AdaptationSet xlink:href="https://xlink1" xlink:actuate="onLoad" />');
       const xlinkXMLString =
-          '<ToReplace variable="1">TEXT CONTAINED WITHIN</ToReplace>';
+          '<AdaptationSet variable="1">TEXT CONTAINED WITHIN</AdaptationSet>';
       const desiredXMLString = inBaseContainer(
-          '<ToReplace variable="1">TEXT CONTAINED WITHIN</ToReplace>');
+          '<AdaptationSet variable="1">TEXT CONTAINED WITHIN</AdaptationSet>');
 
       fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testSucceeds(baseXMLString, desiredXMLString, 1);
@@ -520,17 +606,17 @@ describe('MpdUtils', () => {
 
     it('supports multiple replacements', async () => {
       const baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />',
-          '<ToReplace xlink:href="https://xlink2" xlink:actuate="onLoad" />');
+          '<AdaptationSet xlink:href="https://xlink1" xlink:actuate="onLoad" />',
+          '<AdaptationSet xlink:href="https://xlink2" xlink:actuate="onLoad" />');
       const xlinkXMLString1 = makeRecursiveXMLString(1, 'https://xlink3');
       const xlinkXMLString2 =
-          '<ToReplace variable="2"><Contents /></ToReplace>';
-      const xlinkXMLString3 = '<ToReplace otherVariable="blue" />';
+          '<AdaptationSet variable="2"><Contents /></AdaptationSet>';
+      const xlinkXMLString3 = '<AdaptationSet otherVariable="blue" />';
       const desiredXMLString = inBaseContainer(
-          '<ToReplace xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
+          '<AdaptationSet xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
           'xmlns:xlink="http://www.w3.org/1999/xlink" variable="1">' +
-          '<ToReplace otherVariable="blue" /></ToReplace>',
-          '<ToReplace variable="2"><Contents /></ToReplace>');
+          '<AdaptationSet otherVariable="blue" /></AdaptationSet>',
+          '<AdaptationSet variable="2"><Contents /></AdaptationSet>');
 
       fakeNetEngine
           .setResponseText('https://xlink1', xlinkXMLString1)
@@ -542,7 +628,7 @@ describe('MpdUtils', () => {
 
     it('fails if it recurses too many times', async () => {
       const baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="https://xlink0" xlink:actuate="onLoad" />');
+          '<AdaptationSet xlink:href="https://xlink0" xlink:actuate="onLoad" />');
       // Create a large but finite number of links, so this won't
       // infinitely recurse if there isn't a depth limit.
       for (let i = 0; i < 20; i++) {
@@ -560,11 +646,12 @@ describe('MpdUtils', () => {
 
     it('preserves url parameters', async () => {
       const baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="https://xlink1?parameter" ' +
+          '<AdaptationSet xlink:href="https://xlink1?parameter" ' +
           'xlink:actuate="onLoad" />');
-      const xlinkXMLString = '<ToReplace variable="1"><Contents /></ToReplace>';
+      const xlinkXMLString =
+          '<AdaptationSet variable="1"><Contents /></AdaptationSet>';
       const desiredXMLString = inBaseContainer(
-          '<ToReplace variable="1"><Contents /></ToReplace>');
+          '<AdaptationSet variable="1"><Contents /></AdaptationSet>');
 
       fakeNetEngine.setResponseText(
           'https://xlink1?parameter', xlinkXMLString);
@@ -573,11 +660,12 @@ describe('MpdUtils', () => {
 
     it('replaces existing contents', async () => {
       const baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad">' +
-          '<Unwanted /></ToReplace>');
-      const xlinkXMLString = '<ToReplace variable="1"><Contents /></ToReplace>';
+          '<AdaptationSet xlink:href="https://xlink1" xlink:actuate="onLoad">' +
+          '<Unwanted /></AdaptationSet>');
+      const xlinkXMLString =
+          '<AdaptationSet variable="1"><Contents /></AdaptationSet>';
       const desiredXMLString = inBaseContainer(
-          '<ToReplace variable="1"><Contents /></ToReplace>');
+          '<AdaptationSet variable="1"><Contents /></AdaptationSet>');
 
       fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testSucceeds(baseXMLString, desiredXMLString, 1);
@@ -585,33 +673,34 @@ describe('MpdUtils', () => {
 
     it('handles relative links', async () => {
       const baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="xlink1" xlink:actuate="onLoad" />',
-          '<ToReplace xlink:href="xlink2" xlink:actuate="onLoad" />');
+          '<AdaptationSet xlink:href="xlink1" xlink:actuate="onLoad" />',
+          '<AdaptationSet xlink:href="xlink2" xlink:actuate="onLoad" />');
       const xlinkXMLString1 = // This is loaded relative to base.
           makeRecursiveXMLString(1, 'xlink3');
       const xlinkXMLString2 = // This is loaded relative to base.
-          '<ToReplace variable="2"><Contents /></ToReplace>';
+          '<AdaptationSet variable="2"><Contents /></AdaptationSet>';
       const xlinkXMLString3 = // This is loaded relative to string1.
-          '<ToReplace variable="3" />';
+          '<AdaptationSet variable="3" />';
       fakeNetEngine
           .setResponseText('https://base/xlink1', xlinkXMLString1)
           .setResponseText('https://base/xlink2', xlinkXMLString2)
           .setResponseText('https://base/xlink3', xlinkXMLString3);
 
       const desiredXMLString = inBaseContainer(
-          '<ToReplace xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
+          '<AdaptationSet xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
           'xmlns:xlink="http://www.w3.org/1999/xlink" variable="1">' +
-          '<ToReplace variable="3" /></ToReplace>',
-          '<ToReplace variable="2"><Contents /></ToReplace>');
+          '<AdaptationSet variable="3" /></AdaptationSet>',
+          '<AdaptationSet variable="2"><Contents /></AdaptationSet>');
 
       await testSucceeds(baseXMLString, desiredXMLString, 3);
     });
 
     it('fails for actuate=onRequest', async () => {
       const baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="https://xlink1" ' +
+          '<AdaptationSet xlink:href="https://xlink1" ' +
           'xlink:actuate="onRequest" />');
-      const xlinkXMLString = '<ToReplace variable="1"><Contents /></ToReplace>';
+      const xlinkXMLString =
+          '<AdaptationSet variable="1"><Contents /></AdaptationSet>';
       const expectedError = new shaka.util.Error(
           Error.Severity.CRITICAL, Error.Category.MANIFEST,
           Error.Code.DASH_UNSUPPORTED_XLINK_ACTUATE);
@@ -622,8 +711,9 @@ describe('MpdUtils', () => {
 
     it('fails for no actuate', async () => {
       const baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="https://xlink1" />');
-      const xlinkXMLString = '<ToReplace variable="1"><Contents /></ToReplace>';
+          '<AdaptationSet xlink:href="https://xlink1" />');
+      const xlinkXMLString =
+          '<AdaptationSet variable="1"><Contents /></AdaptationSet>';
       const expectedError = new shaka.util.Error(
           Error.Severity.CRITICAL, Error.Category.MANIFEST,
           Error.Code.DASH_UNSUPPORTED_XLINK_ACTUATE);
@@ -634,7 +724,7 @@ describe('MpdUtils', () => {
 
     it('removes elements with resolve-to-zero', async () => {
       const baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="urn:mpeg:dash:resolve-to-zero:2013" />');
+          '<AdaptationSet xlink:href="urn:mpeg:dash:resolve-to-zero:2013" />');
       const desiredXMLString = inBaseContainer();
 
       await testSucceeds(baseXMLString, desiredXMLString, 0);
@@ -642,7 +732,7 @@ describe('MpdUtils', () => {
 
     it('needs the top-level to match the link\'s tagName', async () => {
       const baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
+          '<AdaptationSet xlink:href="https://xlink1" xlink:actuate="onLoad" />');
       const xlinkXMLString = '<BadTagName</BadTagName>';
 
       fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
@@ -652,12 +742,12 @@ describe('MpdUtils', () => {
     it('doesn\'t error when set to fail gracefully', async () => {
       failGracefully = true;
       const baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad">' +
+          '<AdaptationSet xlink:href="https://xlink1" xlink:actuate="onLoad">' +
           '<DefaultContents />' +
-          '</ToReplace>');
+          '</AdaptationSet>');
       const xlinkXMLString = '<BadTagName</BadTagName>';
       const desiredXMLString = inBaseContainer(
-          '<ToReplace><DefaultContents /></ToReplace>');
+          '<AdaptationSet><DefaultContents /></AdaptationSet>');
 
       fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testSucceeds(baseXMLString, desiredXMLString, 1);
@@ -665,7 +755,7 @@ describe('MpdUtils', () => {
 
     it('interrupts requests on abort', async () => {
       const baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="https://xlink0" xlink:actuate="onLoad" />');
+          '<AdaptationSet xlink:href="https://xlink0" xlink:actuate="onLoad" />');
       // Create a few links.  This is few enough that it would succeed if we
       // didn't abort it.
       for (let i = 0; i < 4; i++) {
@@ -708,7 +798,7 @@ describe('MpdUtils', () => {
     it('ignores SegmentTimeline children', async () => {
       const baseXMLString = inBaseContainer(
           '<SegmentTimeline>' +
-          '  <ToReplace xlink:href="https://xlink1" ' +
+          '  <Ignore xlink:href="https://xlink1" ' +
           '     xlink:actuate="onRequest" />' +
           '</SegmentTimeline>');
       await testSucceeds(baseXMLString, baseXMLString, 0);
@@ -743,10 +833,10 @@ describe('MpdUtils', () => {
      */
     function makeRecursiveXMLString(variable, link) {
       const format =
-          '<ToReplace xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
+          '<AdaptationSet xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
           'xmlns:xlink="http://www.w3.org/1999/xlink" variable="%(let)s">' +
-          '<ToReplace xlink:href="%(link)s" xlink:actuate="onLoad" />' +
-          '</ToReplace>';
+          '<AdaptationSet xlink:href="%(link)s" xlink:actuate="onLoad" />' +
+          '</AdaptationSet>';
       return sprintf(format, {'let': variable, 'link': link});
     }
 
@@ -758,13 +848,15 @@ describe('MpdUtils', () => {
      */
     function inBaseContainer(toReplaceOne = '', toReplaceTwo = '') {
       const format =
-          '<Container xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
+          '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
           'xmlns:xlink="http://www.w3.org/1999/xlink">' +
-          '<Thing>' +
+          '<Period>' +
           '%(toReplaceOne)s' +
-          '</Thing>' +
+          '</Period>' +
+          '<Period>' +
           '%(toReplaceTwo)s' +
-          '</Container>';
+          '</Period>' +
+          '</MPD>';
       return sprintf(format, {
         toReplaceOne: toReplaceOne,
         toReplaceTwo: toReplaceTwo});

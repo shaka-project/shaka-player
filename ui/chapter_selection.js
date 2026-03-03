@@ -34,33 +34,31 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
     this.menu.classList.add('shaka-chapters');
     this.button.classList.add('shaka-tooltip-status');
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
           this.updateChapters_();
         });
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateLocalizedStrings_();
-          this.updateChapters_();
-        });
-
-    this.eventManager.listen(this.player, 'unloading', () => {
-      this.updateChapters_();
-    });
-
-    this.eventManager.listen(this.player, 'trackschanged', () => {
+    this.eventManager.listen(this.controls, 'chaptersupdated', () => {
       this.updateChapters_();
     });
 
     if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.updateChapters_();
-      });
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.updateChapters_();
-      });
+      this.eventManager.listenMulti(
+          this.controls,
+          [
+            'submenuopen',
+            'submenuclose',
+          ], () => {
+            const hasChapters = this.controls.getChapters().length > 0;
+            shaka.ui.Utils.setDisplay(this.button,
+                hasChapters && !this.isSubMenuOpened);
+          });
     }
 
     // Set up all the strings in the user's preferred language.
@@ -97,12 +95,22 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
 
     const chapters = this.controls.getChapters();
     if (chapters.length) {
-      for (const chapter of this.controls.getChapters()) {
+      for (const chapter of chapters) {
         const button = shaka.util.Dom.createButton();
+        button.classList.add('shaka-chapter-item');
         const span = shaka.util.Dom.createHTMLElement('span');
         span.classList.add('shaka-chapter');
         span.textContent = chapter.title;
         button.appendChild(span);
+
+        if (chapter.images.length) {
+          this.loadChapterThumbnail_(chapter.images)
+              .then((img) => {
+                if (img && this.menu.contains(button)) {
+                  button.insertBefore(img, span);
+                }
+              });
+        }
 
         this.eventManager.listen(button, 'click', () => {
           if (!this.controls.isOpaque()) {
@@ -114,10 +122,39 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
         this.menu.appendChild(button);
       }
       shaka.ui.Utils.setDisplay(this.button, !this.isSubMenuOpened);
-      shaka.ui.Utils.focusOnTheChosenItem(this.menu);
     } else {
       shaka.ui.Utils.setDisplay(this.button, false);
     }
+  }
+
+  /**
+   * @param {!Array<shaka.extern.ImageInfo>} images
+   * @return {!Promise<?HTMLImageElement>}
+   * @private
+   */
+  loadChapterThumbnail_(images) {
+    return new Promise((resolve) => {
+      let index = 0;
+      const tryNext = () => {
+        if (index >= images.length) {
+          resolve();
+          return;
+        }
+
+        const img = new Image();
+        img.classList.add('shaka-chapter-thumbnail');
+        img.alt = '';
+        img.onload = () => {
+          resolve(img);
+        };
+        img.onerror = () => {
+          index++;
+          tryNext();
+        };
+        img.src = images[index].url;
+      };
+      tryNext();
+    });
   }
 };
 

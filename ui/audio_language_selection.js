@@ -35,40 +35,35 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
     this.button.classList.add('shaka-tooltip-status');
     this.menu.classList.add('shaka-audio-languages');
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
         });
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateLocalizedStrings_();
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'loading',
+          'loaded',
+          'unloading',
+          'audiotrackschanged',
+        ], () => {
+          this.onAudioTracksChanged_();
         });
-
-
-    this.eventManager.listen(this.player, 'loading', () => {
-      this.onAudioTracksChanged_();
-    });
-
-    this.eventManager.listen(this.player, 'loaded', () => {
-      this.onAudioTracksChanged_();
-    });
-
-    this.eventManager.listen(this.player, 'unloading', () => {
-      this.onAudioTracksChanged_();
-    });
-
-    this.eventManager.listen(this.player, 'audiotrackschanged', () => {
-      this.onAudioTracksChanged_();
-    });
 
     if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.onAudioTracksChanged_();
-      });
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.onAudioTracksChanged_();
-      });
+      this.eventManager.listenMulti(
+          this.controls,
+          [
+            'submenuopen',
+            'submenuclose',
+          ], () => {
+            this.onAudioTracksChanged_();
+          });
     }
 
     // Set up all the strings in the user's preferred language.
@@ -107,18 +102,16 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
 
     // Set audio preference for when reloading the stream (e.g. casting), keep
     // this selection.
-    const config = {
-      preferredAudioLanguage: audioTrack.language,
-      preferSpatialAudio: audioTrack.spatialAudio,
+    /** @type {shaka.extern.AudioPreference} */
+    const pref = {
+      language: audioTrack.language,
+      role: '',
+      label: audioTrack.label || '',
+      channelCount: audioTrack.channelsCount || 0,
+      codec: '',
+      spatialAudio: audioTrack.spatialAudio,
     };
-
-    if (audioTrack.label) {
-      config.preferredAudioLabel = audioTrack.label;
-    }
-    if (audioTrack.channelsCount) {
-      config.preferredAudioChannelCount = audioTrack.channelsCount;
-    }
-    this.player.configure(config);
+    this.player.configure({preferredAudio: [pref]});
   }
 
 

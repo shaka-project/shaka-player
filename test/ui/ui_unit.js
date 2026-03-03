@@ -315,6 +315,7 @@ describe('UI', () => {
           controlPanelElements: [
             'overflow_menu',
           ],
+          customContextMenu: false,
         };
         const ui = await UiUtils.createUIThroughAPI(
             videoContainer, video, config);
@@ -417,14 +418,12 @@ describe('UI', () => {
           // Overflow button
           UiUtils.confirmElementFound(controlsButtonPanel,
               'shaka-overflow-menu-button');
-          // Big play button
+          // Big buttons
           UiUtils.confirmElementFound(videoContainer,
-              'shaka-play-button-container');
+              'shaka-big-buttons-container');
+          // Small play button
           UiUtils.confirmElementFound(videoContainer,
               'shaka-play-button');
-          // Small play button
-          UiUtils.confirmElementMissing(videoContainer,
-              'shaka-small-play-button');
           // Volume bar
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-volume-bar');
@@ -438,14 +437,12 @@ describe('UI', () => {
           // Overflow button
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-overflow-menu-button');
-          // Big play button
+          // Big buttons
           UiUtils.confirmElementMissing(videoContainer,
-              'shaka-play-button-container');
-          UiUtils.confirmElementMissing(videoContainer,
-              'shaka-play-button');
+              'shaka-big-buttons-container');
           // Small play button
           UiUtils.confirmElementFound(videoContainer,
-              'shaka-small-play-button');
+              'shaka-play-button');
           // Volume bar
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-volume-bar');
@@ -459,14 +456,12 @@ describe('UI', () => {
           // Overflow button
           UiUtils.confirmElementFound(controlsButtonPanel,
               'shaka-overflow-menu-button');
-          // Big play button
+          // Big buttons
           UiUtils.confirmElementMissing(videoContainer,
-              'shaka-play-button-container');
-          UiUtils.confirmElementMissing(videoContainer,
-              'shaka-play-button');
+              'shaka-big-buttons-container');
           // Small play button
           UiUtils.confirmElementFound(videoContainer,
-              'shaka-small-play-button');
+              'shaka-play-button');
           // Volume bar
           UiUtils.confirmElementFound(controlsButtonPanel,
               'shaka-volume-bar');
@@ -525,6 +520,7 @@ describe('UI', () => {
             'quality',
             'language',
           ],
+          customContextMenu: false,
         };
         const ui = await UiUtils.createUIThroughAPI(
             videoContainer, video, config);
@@ -844,8 +840,6 @@ describe('UI', () => {
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
         UiUtils.simulateEvent(controlsContainer, 'contextmenu');
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
-        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
-        expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
       });
 
       it('hides on click event', () => {
@@ -853,7 +847,7 @@ describe('UI', () => {
         UiUtils.simulateEvent(controlsContainer, 'click');
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
         UiUtils.simulateEvent(controlsContainer, 'contextmenu');
-        UiUtils.simulateEvent(window, 'click');
+        UiUtils.simulateEvent(controlsContainer, 'click');
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
       });
 

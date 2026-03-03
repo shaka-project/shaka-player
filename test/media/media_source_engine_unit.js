@@ -265,7 +265,8 @@ describe('MediaSourceEngine', () => {
         },
         config);
     mediaSourceEngine.getCaptionParser = () => {
-      return mockClosedCaptionParser;
+      return /** @type {!shaka.media.ClosedCaptionParser} */(
+        mockClosedCaptionParser);
     };
   });
 
@@ -621,7 +622,7 @@ describe('MediaSourceEngine', () => {
           shaka.util.Error.Category.MEDIA,
           shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW,
           jasmine.objectContaining({message: 'fail!'}),
-          {code: 5, message: 'something failed'},
+          jasmine.objectContaining({code: 5, message: 'something failed'}),
           reference.getUris()[0]));
       await expectAsync(
           mediaSourceEngine.appendBuffer(
@@ -788,7 +789,19 @@ describe('MediaSourceEngine', () => {
           ContentType.TEXT, data, reference, fakeStream,
           /* hasClosedCaptions= */ false);
       expect(mockTextEngine.appendBuffer).toHaveBeenCalledWith(
-          data, 0, 10, 'foo://bar');
+          data, 0, 10, 'foo://bar', -1);
+    });
+
+    it('forwards to TextEngine HLS discontinuity sequence', async () => {
+      const data = new ArrayBuffer(0);
+      expect(mockTextEngine.appendBuffer).not.toHaveBeenCalled();
+      const reference = dummyReference(0, 10);
+      reference.discontinuitySequence = 1;
+      await mediaSourceEngine.appendBuffer(
+          ContentType.TEXT, data, reference, fakeStream,
+          /* hasClosedCaptions= */ false);
+      expect(mockTextEngine.appendBuffer).toHaveBeenCalledWith(
+          data, 0, 10, 'foo://bar', 1);
     });
 
     it('appends transmuxed data', async () => {
@@ -995,7 +1008,7 @@ describe('MediaSourceEngine', () => {
           shaka.util.Error.Category.MEDIA,
           shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW,
           jasmine.objectContaining({message: 'fail!'}),
-          {code: 5},
+          jasmine.objectContaining({code: 5}),
           null));
       await expectAsync(mediaSourceEngine.remove(ContentType.AUDIO, 1, 5))
           .toBeRejectedWith(expected);
@@ -1585,7 +1598,9 @@ describe('MediaSourceEngine', () => {
 
       audioSourceBuffer.updateend();
       await expectAsync(p1).toBeResolved();
-      await expectAsync(p2).toBeRejected();
+      // Note: Canceling a blocking operation means doing nothing more about
+      // the operation.
+      await expectAsync(p2).toBeResolved();
       await d;
     });
 

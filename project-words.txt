@@ -14,10 +14,13 @@ bufferappending
 canupdatestarttime
 captionselectionupdated
 caststatuschanged
+chaptersupdated
 clearlead
+configurationchanged
 currentitemchanged
 customwarning
 defaultselected
+deferreds
 describedby
 disableonfail
 downloadcompleted
@@ -181,7 +184,7 @@ longname
 # 3rd party
 apac
 APPSTB
-Bitcodin
+Bitmovin
 Brightcove
 Broadpeak
 Chromecast
@@ -196,6 +199,7 @@ Conax
 cvox
 expressjs
 Expressplay
+Eyevinn
 EZDRM
 Fairplay
 gstreamer
@@ -206,6 +210,7 @@ isoboxer
 Jwplayer
 Kaltura
 Livesim
+moqlivemock
 muxjs
 Nagra
 Playready
@@ -229,11 +234,13 @@ aacl
 aacp
 abgr
 apic
+appl
 apos
 arib
 assetid
 atsc
 avcc
+audiodescription
 bipred
 bmff
 bsid
@@ -315,6 +322,7 @@ mdats
 mdhd
 mdia
 mfhd
+mhlr
 midroll
 midrow
 minf
@@ -466,6 +474,7 @@ Xlinks
 AUTOSELECT
 BYTERANGE
 DATERANGE
+DATERANGES
 ENDLIST
 EXTINF
 EXTM
@@ -478,6 +487,12 @@ streamingkeydelivery
 TARGETDURATION
 SQUEEZECURRENT
 
+# MSF (Media over QUIC Transport Streaming format)
+moqt
+msf
+QUIC
+WEBTRANSPORT
+
 # CMCD
 ttfb
 ttfbb
@@ -487,6 +502,7 @@ cmsds
 cdnb
 
 # other
+Aegisub
 autoglottonym
 avinfo
 awesomplete
@@ -521,6 +537,7 @@ sintel
 stardate
 systeminfo
 templatized
+UNLCK
 vaage
 webapis
 

@@ -506,7 +506,6 @@ shaka.test.FakeTextTrack = class {
  * provide behaviours for the underlying spies. If no behaviour is provided all
  * calls to the parser will act as NO-OPs.
  *
- * @implements {shaka.media.IClosedCaptionParser}
  * @final
  */
 shaka.test.FakeClosedCaptionParser = class {

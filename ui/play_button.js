@@ -8,18 +8,19 @@
 goog.provide('shaka.ui.PlayButton');
 
 goog.require('shaka.ads.Utils');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.util.Dom');
-goog.requireType('shaka.ui.Controls');
+goog.require('shaka.util.MediaElementEvent');
 
 
 /**
  * @extends {shaka.ui.Element}
- * @implements {shaka.extern.IUIPlayButton}
+ * @final
  * @export
  */
 shaka.ui.PlayButton = class extends shaka.ui.Element {
@@ -31,79 +32,68 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     super(parent, controls);
 
     /** @protected {!HTMLButtonElement} */
-    this.button = shaka.util.Dom.createButton();
-    this.parent.appendChild(this.button);
+    this.button_ = shaka.util.Dom.createButton();
+    this.button_.classList.add('shaka-play-button');
+    this.button_.classList.add('shaka-tooltip');
+    this.button_.classList.add('shaka-no-propagation');
+    this.parent.appendChild(this.button_);
 
     /** @private {!shaka.ui.Icon} */
-    this.icon_ = new shaka.ui.Icon(this.button);
+    this.icon_ = new shaka.ui.Icon(this.button_);
 
-    const LOCALE_UPDATED = shaka.ui.Localization.LOCALE_UPDATED;
-    this.eventManager.listen(this.localization, LOCALE_UPDATED, () => {
-      this.updateAriaLabel();
-    });
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
+          this.updateAriaLabel_();
+        });
 
-    const LOCALE_CHANGED = shaka.ui.Localization.LOCALE_CHANGED;
-    this.eventManager.listen(this.localization, LOCALE_CHANGED, () => {
-      this.updateAriaLabel();
-    });
-
-    this.eventManager.listen(this.video, 'play', () => {
-      this.updateAriaLabel();
-      this.updateIcon();
-    });
-
-    this.eventManager.listen(this.video, 'pause', () => {
-      this.updateAriaLabel();
-      this.updateIcon();
-    });
-
-    this.eventManager.listen(this.video, 'seeking', () => {
-      this.updateAriaLabel();
-      this.updateIcon();
-    });
+    this.eventManager.listenMulti(
+        this.video,
+        [
+          shaka.util.MediaElementEvent.PLAY,
+          shaka.util.MediaElementEvent.PAUSE,
+          shaka.util.MediaElementEvent.SEEKING,
+        ], () => {
+          this.updateAriaLabel_();
+          this.updateIcon_();
+        });
 
     this.eventManager.listen(this.player, 'loaded', () => {
-      this.updateAriaLabel();
-      this.updateIcon();
+      this.updateAriaLabel_();
+      this.updateIcon_();
     });
 
-    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_PAUSED, () => {
-      this.updateAriaLabel();
-      this.updateIcon();
-    });
+    this.eventManager.listenMulti(
+        this.adManager,
+        [
+          shaka.ads.Utils.AD_PAUSED,
+          shaka.ads.Utils.AD_RESUMED,
+          shaka.ads.Utils.AD_STARTED,
+          shaka.ads.Utils.AD_STOPPED,
+        ], () => {
+          this.updateAriaLabel_();
+          this.updateIcon_();
+        });
 
-    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_RESUMED, () => {
-      this.updateAriaLabel();
-      this.updateIcon();
-    });
-
-    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_STARTED, () => {
-      this.updateAriaLabel();
-      this.updateIcon();
-    });
-
-    this.eventManager.listen(this.adManager, shaka.ads.Utils.AD_STOPPED, () => {
-      this.updateAriaLabel();
-      this.updateIcon();
-    });
-
-    this.eventManager.listen(this.button, 'click', () => {
+    this.eventManager.listen(this.button_, 'click', () => {
       if (!this.controls.isOpaque()) {
         return;
       }
       this.controls.playPausePresentation();
     });
 
-    this.updateAriaLabel();
-    this.updateIcon();
+    this.updateAriaLabel_();
+    this.updateIcon_();
   }
 
   /**
    * @return {boolean}
-   * @protected
-   * @override
+   * @private
    */
-  isPaused() {
+  isPaused_() {
     if (this.ad && this.ad.isLinear()) {
       return this.ad.isPaused();
     }
@@ -113,10 +103,9 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
 
   /**
    * @return {boolean}
-   * @protected
-   * @override
+   * @private
    */
-  isEnded() {
+  isEnded_() {
     if (this.ad && this.ad.isLinear()) {
       return false;
     }
@@ -125,29 +114,46 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
   }
 
   /**
-   * Called when the button's aria label needs to change.
-   * To be overridden by subclasses, if necessary
+   * @private
    */
-  updateAriaLabel() {
+  updateAriaLabel_() {
     const LocIds = shaka.ui.Locales.Ids;
-    if (this.isEnded() && this.video.duration) {
-      this.button.ariaLabel = this.localization.resolve(LocIds.REPLAY);
+    if (this.isEnded_() && this.video.duration) {
+      this.button_.ariaLabel = this.localization.resolve(LocIds.REPLAY);
     } else {
-      const label = this.isPaused() ? LocIds.PLAY : LocIds.PAUSE;
-      this.button.ariaLabel = this.localization.resolve(label);
+      const label = this.isPaused_() ? LocIds.PLAY : LocIds.PAUSE;
+      this.button_.ariaLabel = this.localization.resolve(label);
     }
   }
 
+
   /**
-   * Called when the button's icon needs to change.
-   * To be overridden by subclasses.
+   * @private
    */
-  updateIcon() {
+  updateIcon_() {
     const Icons = shaka.ui.Enums.MaterialDesignSVGIcons;
-    if (this.isEnded() && this.video.duration) {
+    if (this.isEnded_() && this.video.duration) {
       this.icon_.use(Icons['REPLAY']);
     } else {
-      this.icon_.use(this.isPaused() ? Icons['PLAY'] : Icons['PAUSE']);
+      this.icon_.use(this.isPaused_() ? Icons['PLAY'] : Icons['PAUSE']);
     }
   }
 };
+
+
+/**
+ * @implements {shaka.extern.IUIElement.Factory}
+ * @final
+ */
+shaka.ui.PlayButton.Factory = class {
+  /** @override */
+  create(rootElement, controls) {
+    return new shaka.ui.PlayButton(rootElement, controls);
+  }
+};
+
+shaka.ui.Controls.registerElement(
+    'play_pause', new shaka.ui.PlayButton.Factory());
+
+shaka.ui.Controls.registerBigElement(
+    'play_pause', new shaka.ui.PlayButton.Factory());

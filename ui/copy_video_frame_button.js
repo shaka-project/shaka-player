@@ -9,7 +9,6 @@ goog.provide('shaka.ui.CopyVideoFrameButton');
 
 goog.require('shaka.ads.Utils');
 goog.require('shaka.cast.CastProxy');
-goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -19,6 +18,7 @@ goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.MediaElementEvent');
 
 
 /**
@@ -66,13 +66,12 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
 
     this.parent.appendChild(this.button_);
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateLocalizedStrings_();
         });
 
@@ -85,47 +84,47 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
       this.checkAvailability_();
     });
 
-    this.eventManager.listen(
-        this.adManager, shaka.ads.Utils.AD_STARTED, () => {
+    this.eventManager.listenMulti(
+        this.adManager,
+        [
+          shaka.ads.Utils.AD_STARTED,
+          shaka.ads.Utils.AD_STOPPED,
+        ], () => {
           this.checkAvailability_();
         });
 
-    this.eventManager.listen(
-        this.adManager, shaka.ads.Utils.AD_STOPPED, () => {
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'unloading',
+          'loaded',
+        ], () => {
           this.checkAvailability_();
         });
 
-    this.eventManager.listen(this.player, 'unloading', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.player, 'loaded', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.video, 'play', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.video, 'pause', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.video, 'seeking', () => {
-      this.checkAvailability_();
-    });
+    this.eventManager.listenMulti(
+        this.video,
+        [
+          shaka.util.MediaElementEvent.PLAY,
+          shaka.util.MediaElementEvent.PAUSE,
+          shaka.util.MediaElementEvent.SEEKING,
+        ], () => {
+          this.checkAvailability_();
+        });
 
     this.eventManager.listen(this.controls, 'caststatuschanged', () => {
       this.checkAvailability_();
     });
 
     if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.checkAvailability_();
-      });
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.checkAvailability_();
-      });
+      this.eventManager.listenMulti(
+          this.controls,
+          [
+            'submenuopen',
+            'submenuclose',
+          ], () => {
+            this.checkAvailability_();
+          });
     }
 
     this.checkAvailability_();
@@ -168,7 +167,4 @@ shaka.ui.CopyVideoFrameButton.Factory = class {
 
 
 shaka.ui.OverflowMenu.registerElement(
-    'copy_video_frame', new shaka.ui.CopyVideoFrameButton.Factory());
-
-shaka.ui.ContextMenu.registerElement(
     'copy_video_frame', new shaka.ui.CopyVideoFrameButton.Factory());

@@ -24,17 +24,13 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
-          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
           COMMENT_INCLUDES: "Bundle Size Report"
           COMMENT_USER: "shaka-bot"
         run: |
-          if [ -z "$PR_NUMBER" ]; then
-            echo "No PR found."
-            exit 0
-          fi
-
           MESSAGE=$(cat artifact/report.md)
           echo "$MESSAGE"
+          PR_NUMBER=$(echo "$MESSAGE" | head -1 | grep -oE "[0-9]+")
+          echo "PR_NUMBER: $PR_NUMBER"
 
           # Find existing bot comment
           jq_filter=".[] | select((.user.login == \"$COMMENT_USER\") and (.body | startswith(\"$COMMENT_INCLUDES\"))) | .id"

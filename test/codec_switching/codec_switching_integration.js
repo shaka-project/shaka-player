@@ -65,7 +65,15 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('manifest.disableVideo', true);
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
@@ -93,7 +101,7 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!deviceDetected.supportsSmoothCodecSwitching()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching('')) {
         pending('SourceBuffer.changeType is not supported');
       }
       if (!await Util.isTypeSupported('audio/webm; codecs="opus"')) {
@@ -102,7 +110,15 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('manifest.disableVideo', true);
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
@@ -138,7 +154,15 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
 
@@ -165,7 +189,7 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!deviceDetected.supportsSmoothCodecSwitching()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching('')) {
         pending('SourceBuffer.changeType is not supported');
       }
       if (!await Util.isTypeSupported('audio/webm; codecs="opus"')) {
@@ -174,7 +198,15 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 
@@ -209,7 +241,15 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
 
@@ -237,7 +277,7 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!deviceDetected.supportsSmoothCodecSwitching()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching('')) {
         pending('SourceBuffer.changeType is not supported');
       }
       if (!await Util.isTypeSupported('audio/mp4; codecs="ec-3"')) {
@@ -246,7 +286,15 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 
@@ -282,7 +330,15 @@ describe('Codec Switching', () => {
 
       // Spanish is EC3.
       const preferredAudioLanguage = 'es';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
 
@@ -310,7 +366,7 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!deviceDetected.supportsSmoothCodecSwitching()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching('')) {
         pending('SourceBuffer.changeType is not supported');
       }
       if (!await Util.isTypeSupported('audio/mp4; codecs="ec-3"')) {
@@ -319,7 +375,15 @@ describe('Codec Switching', () => {
 
       // Spanish is EC3.
       const preferredAudioLanguage = 'es';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 

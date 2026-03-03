@@ -124,6 +124,160 @@ describe('EventManager', () => {
     });
   });
 
+  describe('listenMulti', () => {
+    it('listens to multiple event types on the same target', () => {
+      const listener = jasmine.createSpy('listener');
+
+      eventManager.listenMulti(
+          target1,
+          ['eventtype1', 'eventtype2'],
+          Util.spyFunc(listener));
+
+      target1.dispatchEvent(event1);
+      target1.dispatchEvent(event2);
+
+      expect(listener).toHaveBeenCalledTimes(2);
+    });
+
+    it('listens to multiple event types from multiple targets', () => {
+      const listener1 = jasmine.createSpy('listener1');
+      const listener2 = jasmine.createSpy('listener2');
+
+      eventManager.listenMulti(
+          target1,
+          ['eventtype1', 'eventtype2'],
+          Util.spyFunc(listener1));
+      eventManager.listenMulti(
+          target2,
+          ['eventtype1', 'eventtype2'],
+          Util.spyFunc(listener2));
+
+      target1.dispatchEvent(event1);
+      target2.dispatchEvent(event2);
+
+      expect(listener1).toHaveBeenCalled();
+      expect(listener2).toHaveBeenCalled();
+    });
+
+    it('can coexist with normal listen calls', () => {
+      const listener1 = jasmine.createSpy('listener1');
+      const listener2 = jasmine.createSpy('listener2');
+
+      eventManager.listen(
+          target1, 'eventtype1', Util.spyFunc(listener1));
+      eventManager.listenMulti(
+          target1, ['eventtype1', 'eventtype2'], Util.spyFunc(listener2));
+
+      target1.dispatchEvent(event1);
+      target1.dispatchEvent(event2);
+
+      expect(listener1).toHaveBeenCalledTimes(1);
+      expect(listener2).toHaveBeenCalledTimes(2);
+    });
+
+    it('is removed by removeAll()', () => {
+      const listener = jasmine.createSpy('listener');
+
+      eventManager.listenMulti(
+          target1,
+          ['eventtype1', 'eventtype2'],
+          Util.spyFunc(listener));
+
+      eventManager.removeAll();
+
+      target1.dispatchEvent(event1);
+      target1.dispatchEvent(event2);
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listenOnceMulti', () => {
+    it('listens only once across multiple event types', () => {
+      const listener = jasmine.createSpy('listener');
+
+      eventManager.listenOnceMulti(
+          target1,
+          ['eventtype1', 'eventtype2'],
+          Util.spyFunc(listener));
+
+      target1.dispatchEvent(event1);
+      expect(listener).toHaveBeenCalledTimes(1);
+
+      listener.calls.reset();
+
+      target1.dispatchEvent(event2);
+      target1.dispatchEvent(event1);
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it('triggers on the first event type that fires', () => {
+      const listener = jasmine.createSpy('listener');
+
+      eventManager.listenOnceMulti(
+          target1,
+          ['eventtype1', 'eventtype2'],
+          Util.spyFunc(listener));
+
+      target1.dispatchEvent(event2);
+
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    it('removes all listeners after the first event', () => {
+      const listener = jasmine.createSpy('listener');
+
+      eventManager.listenOnceMulti(
+          target1,
+          ['eventtype1', 'eventtype2'],
+          Util.spyFunc(listener));
+
+      target1.dispatchEvent(event1);
+      listener.calls.reset();
+
+      target1.dispatchEvent(event1);
+      target1.dispatchEvent(event2);
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it('supports multiple listenOnceMulti listeners', () => {
+      const listener1 = jasmine.createSpy('listener1');
+      const listener2 = jasmine.createSpy('listener2');
+
+      eventManager.listenOnceMulti(
+          target1,
+          ['eventtype1', 'eventtype2'],
+          Util.spyFunc(listener1));
+      eventManager.listenOnceMulti(
+          target1,
+          ['eventtype1', 'eventtype2'],
+          Util.spyFunc(listener2));
+
+      target1.dispatchEvent(event1);
+
+      expect(listener1).toHaveBeenCalled();
+      expect(listener2).toHaveBeenCalled();
+    });
+
+    it('is removed by removeAll()', () => {
+      const listener = jasmine.createSpy('listener');
+
+      eventManager.listenOnceMulti(
+          target1,
+          ['eventtype1', 'eventtype2'],
+          Util.spyFunc(listener));
+
+      eventManager.removeAll();
+
+      target1.dispatchEvent(event1);
+      target1.dispatchEvent(event2);
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+  });
+
   describe('unlisten', () => {
     it('stops listening to an event', () => {
       const listener = jasmine.createSpy('listener');

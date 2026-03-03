@@ -105,7 +105,13 @@ describe('HlsParser', () => {
   });
 
   it('supports text discontinuity', async () => {
-    player.configure('preferredTextLanguage', 'en');
+    player.configure('preferredText',
+        [{
+          language: 'en',
+          role: '',
+          format: '',
+          forced: false,
+        }]);
     await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
     await video.play();
 
@@ -125,7 +131,13 @@ describe('HlsParser', () => {
   });
 
   it('supports text without discontinuity', async () => {
-    player.configure('preferredTextLanguage', 'de');
+    player.configure('preferredText',
+        [{
+          language: 'de',
+          role: '',
+          format: '',
+          forced: false,
+        }]);
     // eslint-disable-next-line @stylistic/max-len
     await player.load('/base/test/test/assets/hls-text-no-discontinuity/index.m3u8');
     await video.play();
@@ -193,6 +205,10 @@ describe('HlsParser', () => {
   });
 
   it('supports mp4 muxed with AAC and H.264', async () => {
+    if (deviceDetected.getDeviceName() === 'Tizen' &&
+        deviceDetected.getVersion() === 3) {
+      pending('Tizen 3 currently does not support mp4 muxed content');
+    }
     await player.load('/base/test/test/assets/hls-mp4-muxed-aac-h264/hls.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);

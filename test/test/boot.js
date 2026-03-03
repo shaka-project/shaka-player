@@ -518,6 +518,34 @@ function checkTrueDrmSupport() {
 }
 
 /**
+ * Check if ReadableStream is supported.
+ * @return {boolean}
+ */
+function isReadableStreamSupported() {
+  // On Edge, ReadableStream exists, but attempting to construct it results in
+  // an error. See https://bit.ly/2zwaFLL
+  // So this has to check that ReadableStream is present AND usable.
+  if (window.ReadableStream) {
+    try {
+      new ReadableStream({}); // eslint-disable-line no-new
+    } catch (e) { // eslint-disable-line no-restricted-syntax
+      return false;
+    }
+  } else {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Check if WritableStream is supported.
+ * @return {boolean}
+ */
+function isWritableStreamSupported() {
+  return typeof WritableStream !== 'undefined';
+}
+
+/**
  * Set up the Shaka Player test environment.
  * @return {!Promise}
  */

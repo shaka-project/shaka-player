@@ -3,6 +3,7 @@
 +../../lib/device/chromecast.js
 +../../lib/device/hisense.js
 +../../lib/device/playstation.js
++../../lib/device/titan_os.js
 +../../lib/device/tizen.js
 +../../lib/device/vizio.js
 +../../lib/device/webkit_stb.js

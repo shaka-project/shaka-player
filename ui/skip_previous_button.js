@@ -40,6 +40,7 @@ shaka.ui.SkipPreviousButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-skip-previous-button');
     this.button_.classList.add('shaka-tooltip');
+    this.button_.classList.add('shaka-no-propagation');
     new shaka.ui.Icon(this.button_).use(
         shaka.ui.Enums.MaterialDesignSVGIcons['SKIP_PREVIOUS']);
     this.parent.appendChild(this.button_);
@@ -47,13 +48,12 @@ shaka.ui.SkipPreviousButton = class extends shaka.ui.Element {
     this.updateAriaLabel_();
     this.checkAvailability_();
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateAriaLabel_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateAriaLabel_();
         });
 
@@ -64,17 +64,15 @@ shaka.ui.SkipPreviousButton = class extends shaka.ui.Element {
       this.queueManager_.playItem(this.queueManager_.getCurrentItemIndex() - 1);
     });
 
-    this.eventManager.listen(this.queueManager_, 'currentitemchanged', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.queueManager_, 'itemsinserted', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.queueManager_, 'itemsremoved', () => {
-      this.checkAvailability_();
-    });
+    this.eventManager.listenMulti(
+        this.queueManager_,
+        [
+          'currentitemchanged',
+          'itemsinserted',
+          'itemsremoved',
+        ], () => {
+          this.checkAvailability_();
+        });
 
     this.eventManager.listen(this.player, 'loading', () => {
       this.checkAvailability_();
@@ -110,4 +108,7 @@ shaka.ui.SkipPreviousButton.Factory = class {
 };
 
 shaka.ui.Controls.registerElement(
+    'skip_previous', new shaka.ui.SkipPreviousButton.Factory());
+
+shaka.ui.Controls.registerBigElement(
     'skip_previous', new shaka.ui.SkipPreviousButton.Factory());

@@ -58,7 +58,7 @@ shaka.test.Loader = class {
     } else {
       // Load the compiled library as a module.
       // All tests in this suite will use the compiled library.
-      require(['/base/dist/shaka-player.ui.js'], (shakaModule) => {
+      require(['/base/dist/shaka-player.experimental.js'], (shakaModule) => {
         try {
           compiledShaka = shakaModule;
           compiledShaka.net.NetworkingEngine.registerScheme(

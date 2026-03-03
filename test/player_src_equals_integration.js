@@ -64,6 +64,11 @@ describe('Player Src Equals', () => {
     expect(player.getAssetUri()).toBe(SMALL_MP4_CONTENT_URI);
   });
 
+  it('can get asset mimeType after loading', async () => {
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
+    expect(player.getMimeType()).toBe('video/mp4');
+  });
+
   // TODO: test an HLS live stream on platforms supporting native HLS
   it('considers simple mp4 content to be VOD"', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);

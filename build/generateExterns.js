@@ -853,6 +853,50 @@ function generateExterns(names, inputPath) {
   };
 }
 
+/**
+ * Generate a typedef for the root shaka namespace based on exported symbols.
+ *
+ * @param {!Set<string>} names
+ * @return {string}
+ */
+function generateShakaNamespaceTypedef(names) {
+  // Collect first-level members under shaka.*
+  const members = new Map();
+
+  for (const name of names) {
+    if (!name.startsWith('shaka.')) {
+      continue;
+    }
+
+    const parts = name.split('.');
+    if (parts.length < 2) {
+      continue;
+    }
+
+    const member = parts[1];
+    if (!members.has(member)) {
+      members.set(member, `shaka.${member}`);
+    }
+  }
+
+  if (!members.size) {
+    return '';
+  }
+
+  const lines = Array.from(members.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, value]) => ` *   ${key}: typeof ${value},`);
+
+  return (
+    '/**\n' +
+    ' * @typedef {{\n' +
+    lines.join('\n') + '\n' +
+    ' * }}\n' +
+    ' * @suppress {duplicate}\n' +
+    ' */\n' +
+    'var shaka;\n\n'
+  );
+}
 
 /**
  * Generate externs from exported code.
@@ -930,6 +974,9 @@ function main(args) {
   // Get license header.
   const licenseHeader = fs.readFileSync(__dirname + '/license-header', 'utf-8');
 
+  // Shaka type definition
+  const shakaTypedef = generateShakaNamespaceTypedef(names);
+
   // Output generated externs, with an appropriate header.
   fs.writeFileSync(outputPath,
       licenseHeader +
@@ -940,7 +987,7 @@ function main(args) {
       ' *   errors with the namespace being declared both here and by\n' +
       ' *   goog.provide in the library.\n' +
       ' */\n\n' +
-      namespaceDeclarations.join('') + '\n' + externs);
+      namespaceDeclarations.join('') + '\n' + shakaTypedef + externs);
 }
 
 

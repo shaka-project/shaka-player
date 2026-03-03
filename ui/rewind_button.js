@@ -33,6 +33,7 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-rewind-button');
     this.button_.classList.add('shaka-tooltip-status');
+    this.button_.classList.add('shaka-no-propagation');
     this.button_.setAttribute('shaka-status',
         this.localization.resolve(shaka.ui.Locales.Ids.OFF));
 
@@ -45,13 +46,12 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
     /** @private {!Array<number>} */
     this.rewindRates_ = this.controls.getConfig().rewindRates;
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateAriaLabel_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateAriaLabel_();
         });
 
@@ -120,3 +120,5 @@ shaka.ui.RewindButton.Factory = class {
 shaka.ui.Controls.registerElement(
     'rewind', new shaka.ui.RewindButton.Factory());
 
+shaka.ui.Controls.registerBigElement(
+    'rewind', new shaka.ui.RewindButton.Factory());

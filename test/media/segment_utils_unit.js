@@ -6,7 +6,9 @@
 
 describe('SegmentUtils', () => {
   const videoInitSegmentUri = '/base/test/test/assets/sintel-video-init.mp4';
+  const videoSegmentUri = '/base/test/test/assets/sintel-video-segment.mp4';
   const audioInitSegmentUri = '/base/test/test/assets/sintel-audio-init.mp4';
+  const audioSegmentUri = '/base/test/test/assets/sintel-audio-segment.mp4';
 
   const audioInitSegmentXheAacUri = '/base/test/test/assets/audio-xhe-aac.mp4';
   const audioInitSegmentAC4Uri = '/base/test/test/assets/audio-ac-4.mp4';
@@ -30,10 +32,21 @@ describe('SegmentUtils', () => {
   const ttmlMp4Uri = '/base/test/test/assets/ttml-init.mp4';
   const webvttMp4Uri = '/base/test/test/assets/vtt-init.mp4';
 
+  const initFairPlayUri = '/base/test/test/assets/init-fairplay.mp4';
+
+  const cea608TrackInitSegmentUri =
+      '/base/test/test/assets/cea608-track-init.mp4';
+  const cea608TrackSegmentUri =
+      '/base/test/test/assets/cea608-track-segment.mp4';
+
   /** @type {!ArrayBuffer} */
   let videoInitSegment;
   /** @type {!ArrayBuffer} */
+  let videoSegment;
+  /** @type {!ArrayBuffer} */
   let audioInitSegment;
+  /** @type {!ArrayBuffer} */
+  let audioSegment;
   /** @type {!ArrayBuffer} */
   let audioInitSegmentXheAac;
   /** @type {!ArrayBuffer} */
@@ -60,11 +73,40 @@ describe('SegmentUtils', () => {
   let ttml;
   /** @type {!ArrayBuffer} */
   let webvtt;
+  /** @type {!ArrayBuffer} */
+  let initFairPlay;
+  /** @type {!ArrayBuffer} */
+  let cea608TrackInitSegment;
+  /** @type {!ArrayBuffer} */
+  let cea608TrackSegment;
 
   beforeAll(async () => {
-    const responses = await Promise.all([
+    [
+      videoInitSegment,
+      videoSegment,
+      audioInitSegment,
+      audioSegment,
+      audioInitSegmentXheAac,
+      audioInitSegmentAC4,
+      multidrmVideoInitSegment,
+      multidrmAudioInitSegment,
+      ceaInitSegment,
+      ceaSegment,
+      h265CeaInitSegment,
+      h265CeaSegment,
+      tsVideo,
+      tsAudio,
+      tsCaptions,
+      ttml,
+      webvtt,
+      initFairPlay,
+      cea608TrackInitSegment,
+      cea608TrackSegment,
+    ] = await Promise.all([
       shaka.test.Util.fetch(videoInitSegmentUri),
+      shaka.test.Util.fetch(videoSegmentUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
+      shaka.test.Util.fetch(audioSegmentUri),
       shaka.test.Util.fetch(audioInitSegmentXheAacUri),
       shaka.test.Util.fetch(audioInitSegmentAC4Uri),
       shaka.test.Util.fetch(multidrmVideoInitSegmentUri),
@@ -78,27 +120,15 @@ describe('SegmentUtils', () => {
       shaka.test.Util.fetch(tsCaptionsUri),
       shaka.test.Util.fetch(ttmlMp4Uri),
       shaka.test.Util.fetch(webvttMp4Uri),
+      shaka.test.Util.fetch(initFairPlayUri),
+      shaka.test.Util.fetch(cea608TrackInitSegmentUri),
+      shaka.test.Util.fetch(cea608TrackSegmentUri),
     ]);
-    videoInitSegment = responses[0];
-    audioInitSegment = responses[1];
-    audioInitSegmentXheAac = responses[2];
-    audioInitSegmentAC4 = responses[3];
-    multidrmVideoInitSegment = responses[4];
-    multidrmAudioInitSegment = responses[5];
-    ceaInitSegment = responses[6];
-    ceaSegment = responses[7];
-    h265CeaInitSegment = responses[8];
-    h265CeaSegment = responses[9];
-    tsVideo = responses[10];
-    tsAudio = responses[11];
-    tsCaptions = responses[12];
-    ttml = responses[13];
-    webvtt = responses[14];
   });
 
   it('getBasicInfoFromMp4', async () => {
     let basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        videoInitSegment, videoInitSegment, false);
+        videoInitSegment, null, false);
     let expected = {
       type: 'video',
       mimeType: 'video/mp4',
@@ -118,7 +148,7 @@ describe('SegmentUtils', () => {
     expect(basicInfo).toEqual(expected);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        audioInitSegment, audioInitSegment, false);
+        audioInitSegment, null, false);
     expected = {
       type: 'audio',
       mimeType: 'audio/mp4',
@@ -138,7 +168,7 @@ describe('SegmentUtils', () => {
     expect(basicInfo).toEqual(expected);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        audioInitSegmentXheAac, audioInitSegmentXheAac, false);
+        audioInitSegmentXheAac, null, false);
     expected = {
       type: 'audio',
       mimeType: 'audio/mp4',
@@ -158,7 +188,7 @@ describe('SegmentUtils', () => {
     expect(basicInfo).toEqual(expected);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        audioInitSegmentAC4, audioInitSegmentAC4, false);
+        audioInitSegmentAC4, null, false);
     expected = {
       type: 'audio',
       mimeType: 'audio/mp4',
@@ -178,7 +208,7 @@ describe('SegmentUtils', () => {
     expect(basicInfo).toEqual(expected);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        multidrmVideoInitSegment, multidrmVideoInitSegment, false);
+        multidrmVideoInitSegment, null, false);
     expected = {
       type: 'video',
       mimeType: 'video/mp4',
@@ -239,7 +269,7 @@ describe('SegmentUtils', () => {
     expect(basicInfo).toEqual(expected);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        multidrmAudioInitSegment, multidrmAudioInitSegment, false);
+        multidrmAudioInitSegment, null, false);
     expected = {
       type: 'audio',
       mimeType: 'audio/mp4',
@@ -313,7 +343,7 @@ describe('SegmentUtils', () => {
       closedCaptions: (new Map()).set('CC1', 'CC1').set('CC3', 'CC3'),
       videoRange: null,
       colorGamut: null,
-      frameRate: null,
+      frameRate: 30,
       timescale: 90000,
       drmInfos: [],
     };
@@ -333,7 +363,7 @@ describe('SegmentUtils', () => {
       closedCaptions: new Map(),
       videoRange: null,
       colorGamut: null,
-      frameRate: null,
+      frameRate: 30,
       timescale: 90000,
       drmInfos: [],
     };
@@ -353,7 +383,7 @@ describe('SegmentUtils', () => {
       closedCaptions: (new Map()).set('CC1', 'CC1').set('svc1', 'svc1'),
       videoRange: null,
       colorGamut: null,
-      frameRate: null,
+      frameRate: jasmine.any(Number),
       timescale: 60000,
       drmInfos: [
         {
@@ -399,9 +429,10 @@ describe('SegmentUtils', () => {
       ],
     };
     expect(basicInfo).toEqual(expected);
+    expect(basicInfo.frameRate).toBeCloseTo(29.97, 2);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        ttml, ttml, true);
+        ttml, null, true);
     expected = {
       type: 'text',
       mimeType: 'application/mp4',
@@ -421,7 +452,7 @@ describe('SegmentUtils', () => {
     expect(basicInfo).toEqual(expected);
 
     basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
-        webvtt, webvtt, true);
+        webvtt, null, true);
     expected = {
       type: 'text',
       mimeType: 'application/mp4',
@@ -439,6 +470,69 @@ describe('SegmentUtils', () => {
       drmInfos: [],
     };
     expect(basicInfo).toEqual(expected);
+
+    basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
+        initFairPlay, null, false);
+    expected = {
+      type: 'video',
+      mimeType: 'video/mp4',
+      codecs: 'avc1.42E01E',
+      language: 'und',
+      height: '720',
+      width: '1280',
+      channelCount: null,
+      sampleRate: null,
+      closedCaptions: new Map(),
+      videoRange: null,
+      colorGamut: null,
+      frameRate: null,
+      timescale: 90000,
+      drmInfos: [
+        {
+          keySystem: 'com.apple.fps',
+          encryptionScheme: 'cbcs',
+          licenseServerUri: '',
+          distinctiveIdentifierRequired: false,
+          persistentStateRequired: false,
+          audioRobustness: '',
+          videoRobustness: '',
+          serverCertificate: null,
+          serverCertificateUri: '',
+          sessionType: '',
+          initData: [
+            {
+              initDataType: 'sinf',
+              initData: jasmine.any(Uint8Array),
+              keyId: null,
+            },
+          ],
+          mediaTypes: undefined,
+          keyIds: (new Set()).add('b99ed9e5c64149d1bfa843692b686ddb'),
+        },
+      ],
+    };
+    expect(basicInfo).toEqual(expected);
+
+    basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
+        cea608TrackInitSegment, cea608TrackSegment, false);
+    expected = {
+      type: 'video',
+      mimeType: 'video/mp4',
+      codecs: 'avc1.64001F',
+      language: 'eng',
+      height: '306',
+      width: '544',
+      channelCount: null,
+      sampleRate: null,
+      closedCaptions: (new Map()).set('CC1', 'CC1'),
+      videoRange: null,
+      colorGamut: null,
+      frameRate: jasmine.any(Number),
+      timescale: 24000,
+      drmInfos: [],
+    };
+    expect(basicInfo).toEqual(expected);
+    expect(basicInfo.frameRate).toBeCloseTo(23.976, 2);
   });
 
   it('getBasicInfoFromTs', () => {
@@ -456,7 +550,7 @@ describe('SegmentUtils', () => {
       closedCaptions: new Map(),
       videoRange: null,
       colorGamut: null,
-      frameRate: '24',
+      frameRate: 24,
       timescale: null,
       drmInfos: [],
     };
@@ -496,11 +590,12 @@ describe('SegmentUtils', () => {
       closedCaptions: (new Map()).set('CC1', 'CC1').set('svc1', 'svc1'),
       videoRange: null,
       colorGamut: null,
-      frameRate: jasmine.any(String),
+      frameRate: jasmine.any(Number),
       timescale: null,
       drmInfos: [],
     };
     expect(basicInfo).toEqual(expected);
+    expect(basicInfo.frameRate).toBeCloseTo(7.49, 2);
   });
 
   it('getDefaultKID', () => {
@@ -512,5 +607,162 @@ describe('SegmentUtils', () => {
     defaultKID =
         shaka.media.SegmentUtils.getDefaultKID(multidrmVideoInitSegment);
     expect(defaultKID).toBe('4060a865887842679cbf91ae5bae1e72');
+    defaultKID =
+        shaka.media.SegmentUtils.getDefaultKID(initFairPlay);
+    expect(defaultKID).toBe('b99ed9e5c64149d1bfa843692b686ddb');
+  });
+
+  it('getStartTimeAndDurationFromMp4', () => {
+    let result = shaka.media.SegmentUtils.getStartTimeAndDurationFromMp4(
+        videoSegment, 12288);
+    expect(result.startTime).toBeCloseTo(40, 0);
+    expect(result.duration).toBeCloseTo(10, 0);
+
+    result = shaka.media.SegmentUtils.getStartTimeAndDurationFromMp4(
+        audioSegment, 48000);
+    expect(result.startTime).toBeCloseTo(40.021, 0);
+    expect(result.duration).toBeCloseTo(10.005, 0);
+
+    result = shaka.media.SegmentUtils.getStartTimeAndDurationFromMp4(
+        ceaSegment, 90000);
+    expect(result.startTime).toBeCloseTo(0, 0);
+    expect(result.duration).toBeCloseTo(2, 0);
+
+    result = shaka.media.SegmentUtils.getStartTimeAndDurationFromMp4(
+        h265CeaSegment, 60000);
+    expect(result.startTime).toBeCloseTo(1685548363.50405, 0);
+    expect(result.duration).toBeCloseTo(2.002, 0);
+  });
+
+  describe('AES decryption for different key types', () => {
+    const SegmentUtils = shaka.media.SegmentUtils;
+    const plaintext = shaka.util.StringUtils.toUTF8('Shaka AES test segment');
+
+    const aes128Key = shaka.util.BufferUtils.toUint8(
+        new Uint8Array([...Array(16).keys()]));
+    const aes256Key = shaka.util.BufferUtils.toUint8(
+        new Uint8Array([...Array(32).keys()]));
+
+    const iv16 = new Uint8Array(16).map((_, i) => i);
+
+    async function encryptSegmentCBC(keyBuffer, iv) {
+      const cryptoKey = await window.crypto.subtle.importKey(
+          'raw', keyBuffer, {name: 'AES-CBC'}, false, ['encrypt']);
+      return window.crypto.subtle.encrypt(
+          {name: 'AES-CBC', iv}, cryptoKey, plaintext);
+    }
+
+    async function encryptSegmentCTR(keyBuffer, counter) {
+      const cryptoKey = await window.crypto.subtle.importKey(
+          'raw', keyBuffer, {name: 'AES-CTR'}, false, ['encrypt']);
+      return window.crypto.subtle.encrypt(
+          {name: 'AES-CTR', counter, length: 64}, cryptoKey, plaintext);
+    }
+
+    async function encryptSegmentGCM(keyBuffer, iv) {
+      const cryptoKey = await window.crypto.subtle.importKey(
+          'raw', keyBuffer, {name: 'AES-GCM'}, false, ['encrypt']);
+      const ciphertext = await window.crypto.subtle.encrypt(
+          {name: 'AES-GCM', iv, tagLength: 128}, cryptoKey, plaintext);
+
+      // Concatenate IV + ciphertext (ciphertext includes tag)
+      return shaka.util.Uint8ArrayUtils.concat(
+          iv, shaka.util.BufferUtils.toUint8(ciphertext));
+    }
+
+    function runCBCDecryptTest(name, keyBuffer, iv) {
+      it(`decrypts ${name} segments correctly`, async () => {
+        const cryptoKey = await window.crypto.subtle.importKey(
+            'raw', keyBuffer, {name: 'AES-CBC'}, false, ['decrypt']);
+        const ciphertext = await encryptSegmentCBC(keyBuffer, iv);
+        const aesKey = {
+          bitsKey: keyBuffer.byteLength * 8,
+          blockCipherMode: 'CBC',
+          cryptoKey,
+          iv,
+          firstMediaSequenceNumber: 0,
+        };
+        const decrypted = await SegmentUtils.aesDecrypt(ciphertext, aesKey, 0);
+        expect(shaka.util.StringUtils.fromUTF8(decrypted))
+            .toBe('Shaka AES test segment');
+      });
+    }
+
+    function runCTRDecryptTest(name, keyBuffer, counter) {
+      it(`decrypts ${name} segments correctly`, async () => {
+        const cryptoKey = await window.crypto.subtle.importKey(
+            'raw', keyBuffer, {name: 'AES-CTR'}, false, ['decrypt']);
+        const ciphertext = await encryptSegmentCTR(keyBuffer, counter);
+        const aesKey = {
+          bitsKey: keyBuffer.byteLength * 8,
+          blockCipherMode: 'CTR',
+          cryptoKey,
+          iv: counter,
+          firstMediaSequenceNumber: 0,
+        };
+        const decrypted = await SegmentUtils.aesDecrypt(ciphertext, aesKey, 0);
+        expect(shaka.util.StringUtils.fromUTF8(decrypted))
+            .toBe('Shaka AES test segment');
+      });
+    }
+
+    function runGCMDecryptTest(name, keyBuffer) {
+      it(`decrypts ${name} segments correctly`, async () => {
+        const iv = iv16;
+        const cryptoKey = await window.crypto.subtle.importKey(
+            'raw', keyBuffer, {name: 'AES-GCM'}, false, ['decrypt']);
+        const ciphertext = await encryptSegmentGCM(keyBuffer, iv);
+        const aesKey = {
+          bitsKey: keyBuffer.byteLength * 8,
+          blockCipherMode: 'GCM',
+          cryptoKey,
+          iv: undefined,
+          firstMediaSequenceNumber: 0,
+        };
+        const decrypted = await SegmentUtils.aesDecrypt(ciphertext, aesKey, 0);
+        expect(shaka.util.StringUtils.fromUTF8(decrypted))
+            .toBe('Shaka AES test segment');
+      });
+    }
+
+    runCBCDecryptTest('AES-128-CBC', aes128Key, iv16);
+    runCBCDecryptTest('AES-256-CBC', aes256Key, iv16);
+    runCTRDecryptTest('AES-256-CTR', aes256Key, iv16);
+    runGCMDecryptTest('AES-256-GCM', aes256Key);
+
+    it('throws HLS_INVALID_GCM_SEGMENT if GCM segment too short', async () => {
+      const aesKey = {
+        bitsKey: 256,
+        blockCipherMode: 'GCM',
+        cryptoKey: await window.crypto.subtle.importKey(
+            'raw', aes256Key, {name: 'AES-GCM'}, false, ['decrypt']),
+        iv: undefined,
+        firstMediaSequenceNumber: 0,
+      };
+      const shortBuffer = shaka.util.BufferUtils.toUint8(new Uint8Array(10));
+      await expectAsync(SegmentUtils.aesDecrypt(shortBuffer, aesKey, 0))
+          .toBeRejectedWith(jasmine.objectContaining({
+            severity: shaka.util.Error.Severity.CRITICAL,
+            category: shaka.util.Error.Category.MANIFEST,
+            code: shaka.util.Error.Code.HLS_INVALID_GCM_SEGMENT,
+          }));
+    });
+
+    it('calls fetchKey if cryptoKey is missing', async () => {
+      const aesKey = {
+        bitsKey: 256,
+        blockCipherMode: 'GCM',
+        fetchKey: async () => {
+          aesKey.cryptoKey = await window.crypto.subtle.importKey(
+              'raw', aes256Key, {name: 'AES-GCM'}, false, ['decrypt']);
+        },
+        iv: undefined,
+        firstMediaSequenceNumber: 0,
+      };
+      const ciphertext = await encryptSegmentGCM(aes256Key, iv16);
+      const decrypted = await SegmentUtils.aesDecrypt(ciphertext, aesKey, 0);
+      expect(shaka.util.StringUtils.fromUTF8(decrypted))
+          .toBe('Shaka AES test segment');
+    });
   });
 });

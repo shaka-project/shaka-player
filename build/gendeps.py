@@ -21,6 +21,7 @@ import os
 import subprocess
 import sys
 
+import compiler
 import shakaBuildHelpers
 
 
@@ -39,6 +40,10 @@ def main(_):
   except OSError:
     pass
   os.chdir(base)
+
+  localizations = compiler.GenerateLocalizations(None)
+  if not localizations.generate():
+    return 1
 
   make_deps = shakaBuildHelpers.get_node_binary(
       'google-closure-deps', 'closure-make-deps')

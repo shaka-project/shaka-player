@@ -1277,7 +1277,9 @@ shaka.extern.PersistentSessionMetadata;
  *   minHdcpVersion: string,
  *   ignoreDuplicateInitData: boolean,
  *   defaultAudioRobustnessForWidevine: string,
- *   defaultVideoRobustnessForWidevine: string
+ *   defaultVideoRobustnessForWidevine: string,
+ *   renewalIntervalSec: number,
+ *   failureCallback: function(!shaka.util.Error),
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1373,6 +1375,22 @@ shaka.extern.PersistentSessionMetadata;
  *   <br>
  *   Defaults to <code>'SW_SECURE_DECODE'</code> except on Android where the
  *   default value <code>''</code>.
+ * @property {number} renewalIntervalSec
+ *   The interval in seconds at which the player will attempt to renew
+ *   licenses automatically. Set to 0 to disable automatic renewal.
+ *   <br>
+ *   Note: Only supported for PlayReady and FairPlay. Other key systems
+ *   (e.g., Widevine) are not supported.
+ *   <br>
+ *   Defaults to <code>0</code>.
+ * @property {function(!shaka.util.Error)} failureCallback
+ *   A callback function that is called when a DRM error occurs, such as
+ *   LICENSE_REQUEST_FAILED. The callback receives a shaka.util.Error object.
+ *   Set error.handled to true in the callback to prevent the error from
+ *   being propagated as a fatal error. This allows the application to
+ *   handle the error and retry licensing manually using retryLicensing().
+ *   <br>
+ *   Defaults to a no-op function.
  * @exportDoc
  */
 shaka.extern.DrmConfiguration;
@@ -1416,7 +1434,6 @@ shaka.extern.xml.Node;
 /**
  * @typedef {{
  *   clockSyncUri: string,
- *   disableXlinkProcessing: boolean,
  *   xlinkFailGracefully: boolean,
  *   ignoreMinBufferTime: boolean,
  *   autoCorrectDrift: boolean,
@@ -1438,10 +1455,6 @@ shaka.extern.xml.Node;
  *   URI will be used to determine the current time.
  *   <br>
  *   Defaults to <code>''</code>.
- * @property {boolean} disableXlinkProcessing
- *   If true, xlink-related processing will be disabled.
- *   <br>
- *   Defaults to <code>true</code>.
  * @property {boolean} xlinkFailGracefully
  *   If true, xlink-related errors will result in a fallback to the tag's
  *   existing contents. If false, xlink-related errors will be propagated
@@ -1530,7 +1543,8 @@ shaka.extern.DashManifestConfiguration;
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
  *   allowLowLatencyByteRangeOptimization: boolean,
- *   allowRangeRequestsToGuessMimeType: boolean
+ *   allowRangeRequestsToGuessMimeType: boolean,
+ *   chaptersUri: string,
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -1621,9 +1635,40 @@ shaka.extern.DashManifestConfiguration;
  *   guess the mime type.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {string} chaptersUri
+ *   A URI pointing to a JSON resource that defines media chapters for HLS
+ *   playback.  When provided, Shaka Player will fetch and process this resource
+ *   to extract chapter metadata and expose it as timeline chapters during
+ *   playback. The JSON document must follow Apple’s HLS JSON Chapters
+ *   specification,  as described in Providing JSON Chapters for HTTP Live
+ *   Streaming. More info in
+ *   https://developer.apple.com/documentation/http-live-streaming/providing-javascript-object-notation-json-chapters
+ *   <br>
+ *   Defaults to <code>''</code>.
+ *
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
+
+/**
+ * @typedef {{
+ *   fingerprintUri: string,
+ *   namespaces: !Array<string>,
+ * }}
+ *
+ * @property {string} fingerprintUri
+ *   A fingerprint URI. If set, the server fingerprint will be fetched from
+ *   this URL. This is required to use self-signed certificates with Chromium.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {string} namespaces
+ *   List of namespaces to use for playback. If empty, namespaces are discovered
+ *   via PublishNamespace messages.
+ *   <br>
+ *   Defaults to <code>[]</code>.
+ * @exportDoc
+ */
+shaka.extern.MsfManifestConfiguration;
 
 
 /**
@@ -1640,6 +1685,7 @@ shaka.extern.HlsManifestConfiguration;
  *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration,
+ *   msf: shaka.extern.MsfManifestConfiguration,
  *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean,
  *   continueLoadingWhenPaused: boolean,
  *   ignoreSupplementalCodecs: boolean,
@@ -1700,6 +1746,8 @@ shaka.extern.HlsManifestConfiguration;
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls
  *   Advanced parameters used by the HLS manifest parser.
+ * @property {shaka.extern.MsfManifestConfiguration} msf
+ *   Advanced parameters used by the MSF.
  * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
  *   If true, manifest update request failures will cause a fatal error.
  *   <br>
@@ -1960,6 +2008,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   avoidEvictionOnQuotaExceededError: boolean,
  *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy,
  *   returnToEndOfLiveWindowWhenOutside: boolean,
+ *   stopFetchingOnPause: boolean,
  * }}
  *
  * @description
@@ -2207,6 +2256,12 @@ shaka.extern.SpeechToTextConfiguration;
  *   it will be moved to the end of the live window, instead of the start.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} stopFetchingOnPause
+ *   If true, stop fetching new segments on pause. This applies as long as
+ *   there is something in the buffer; if there is nothing, we will allow the
+ *   loading of the current segment.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -2339,8 +2394,7 @@ shaka.extern.MediaSourceConfiguration;
  *   is chosen, in two scenarios:
  *   <br>
  *   - In the initial selection, if the regular preference filters match no
- *   tracks. In this case, the preferredTextLanguage and preferredTextRole will
- *   be ignored, and the language will be chosen based on the initial variant.
+ *   text tracks, a text track will be chosen based on the initial audio track.
  *   <br>
  *   - When changing the audio language, if the previous subtitle is either
  *   not present or is forced from the previous language.
@@ -2827,7 +2881,8 @@ shaka.extern.OfflineConfiguration;
 /**
  * @typedef {{
  *   captionsUpdatePeriod: number,
- *   fontScaleFactor: number
+ *   fontScaleFactor: number,
+ *   positionArea: shaka.config.PositionArea,
  * }}
  *
  * @description
@@ -2841,9 +2896,124 @@ shaka.extern.OfflineConfiguration;
  *   The font scale factor used to increase or decrease the font size.
  *   <br>
  *   Defaults to <code>1</code>.
+ * @property {shaka.config.PositionArea} positionArea
+ *   The region within the viewing area where the subtitles are to be
+ *   positioned. The default value indicates that they are positioned where
+ *   the subtitle defines it, otherwise they are overwritten with the given
+ *   position.
+ *   <br>
+ *   Defaults to <code>''</code>.
  * @exportDoc
  */
 shaka.extern.TextDisplayerConfiguration;
+
+
+/**
+ * @typedef {{
+ *   language: string,
+ *   role: string,
+ *   label: string,
+ *   channelCount: number,
+ *   codec: string,
+ *   spatialAudio: boolean
+ * }}
+ *
+ * @property {string} language
+ *   The preferred language for audio tracks. An IETF language tag like
+ *   'en', 'en-US', 'fr', etc.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {string} role
+ *   The preferred role for audio tracks.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {string} label
+ *   The preferred label for audio tracks.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {number} channelCount
+ *   The preferred number of audio channels. A value of 0 means no preference.
+ *   <br>
+ *   Defaults to <code>0</code>.
+ * @property {string} codec
+ *   The preferred audio codec, e.g. 'opus', 'mp4a.40.2'.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {boolean} spatialAudio
+ *   Whether spatial audio is preferred.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @exportDoc
+ */
+shaka.extern.AudioPreference;
+
+
+/**
+ * @typedef {{
+ *   language: string,
+ *   role: string,
+ *   format: string,
+ *   forced: boolean
+ * }}
+ *
+ * @property {string} language
+ *   The preferred language for text tracks. An IETF language tag like
+ *   'en', 'en-US', 'fr', etc.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {string} role
+ *   The preferred role for text tracks.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {string} format
+ *   The preferred text format, e.g. 'vtt', 'ttml',
+ *   'text/vtt', 'application/ttml+xml'.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {boolean} forced
+ *   Whether forced subtitles are preferred.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @exportDoc
+ */
+shaka.extern.TextPreference;
+
+
+/**
+ * @typedef {{
+ *   label: string,
+ *   role: string,
+ *   codec: string,
+ *   hdrLevel: string,
+ *   layout: string
+ * }}
+ *
+ * @property {string} label
+ *   The preferred label for video tracks.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {string} role
+ *   The preferred role for video tracks.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {string} codec
+ *   The preferred video codec, e.g. 'hvc1', 'avc1'.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {string} hdrLevel
+ *   The preferred HDR level.
+ *   Can be 'SDR', 'PQ', 'HLG', 'AUTO' for auto-detect, or '' for no
+ *   preference.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {string} layout
+ *   The preferred video layout.
+ *   Can be 'CH-STEREO', 'CH-MONO', or '' for no preference.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @exportDoc
+ */
+shaka.extern.VideoPreference;
 
 
 /**
@@ -2863,22 +3033,10 @@ shaka.extern.TextDisplayerConfiguration;
  *   lcevc: shaka.extern.LcevcConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
  *   ignoreHardwareResolution: boolean,
- *   preferredAudioLanguage: string,
- *   preferredAudioLabel: string,
- *   preferredTextLanguage: string,
- *   preferredAudioRole: string,
- *   preferredVideoRole: string,
- *   preferredTextRole: string,
- *   preferredVideoCodecs: !Array<string>,
- *   preferredAudioCodecs: !Array<string>,
- *   preferredTextFormats: !Array<string>,
- *   preferredAudioChannelCount: number,
- *   preferredVideoHdrLevel: string,
- *   preferredVideoLayout: string,
- *   preferredVideoLabel: string,
+ *   preferredAudio: !Array<!shaka.extern.AudioPreference>,
+ *   preferredText: !Array<!shaka.extern.TextPreference>,
+ *   preferredVideo: !Array<!shaka.extern.VideoPreference>,
  *   preferredDecodingAttributes: !Array<string>,
- *   preferForcedSubs: boolean,
- *   preferSpatialAudio: boolean,
  *   queue: shaka.extern.QueueConfiguration,
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
@@ -2922,99 +3080,33 @@ shaka.extern.TextDisplayerConfiguration;
  *   is only available at resolutions beyond the device's native resolution,
  *   and you are confident it can be decoded and downscaled, this flag can
  *   allow playback when it would otherwise fail.
- * @property {string} preferredAudioLanguage
- *   The preferred language to use for audio tracks.  If not given it will use
- *   the <code>'main'</code> track.
- *   Changing this during playback will not affect the current playback.
- *   <br>
- *   Defaults to <code>''</code>.
- * @property {string} preferredAudioLabel
- *   The preferred label to use for audio tracks.
- *   Changing this during playback will not affect the current playback.
- *   <br>
- *   Defaults to <code>''</code>.
- * @property {string} preferredVideoLabel
- *   The preferred label to use for video tracks.
- *   Changing this during playback will not affect the current playback.
- *   <br>
- *   Defaults to <code>''</code>.
- * @property {string} preferredTextLanguage
- *   The preferred language to use for text tracks.  If a matching text track
- *   is found, and the selected audio and text tracks have different languages,
- *   the text track will be shown.
- *   Changing this during playback will not affect the current playback.
- *   <br>
- *   Defaults to <code>''</code>.
- * @property {string} preferredAudioRole
- *   The preferred audio role to use for variants.
- *   Changing this during playback will not affect the current playback.
- *   <br>
- *   Defaults to <code>''</code>.
- * @property {string} preferredVideoRole
- *   The preferred video role to use for variants.
- *   <br>
- *   Defaults to <code>''</code>.
- * @property {string} preferredTextRole
- *   The preferred role to use for text tracks.
- *   Changing this during playback will not affect the current playback.
- *   <br>
- *   Defaults to <code>''</code>.
- * @property {!Array<string>} preferredVideoCodecs
- *   The list of preferred video codecs, in order of highest to lowest priority.
- *   This is used to do a filtering of the variants available for the player.
- *   Changing this during playback will not affect the current playback.
+ * @property {!Array<!shaka.extern.AudioPreference>} preferredAudio
+ *   An ordered list of audio track preferences. Each entry specifies a
+ *   combination of desired audio properties. Entries are tried in order;
+ *   the first entry that matches available tracks is used. Within an entry,
+ *   all specified (non-empty/non-zero) fields must match (AND logic).
+ *   Unspecified fields (empty string, 0, or undefined) are ignored
+ *   (match anything).
  *   <br>
  *   Defaults to <code>[]</code>.
- * @property {!Array<string>} preferredAudioCodecs
- *   The list of preferred audio codecs, in order of highest to lowest priority.
- *   This is used to do a filtering of the variants available for the player.
- *   Changing this during playback will not affect the current playback.
+ * @property {!Array<!shaka.extern.TextPreference>} preferredText
+ *   An ordered list of text track preferences. Each entry specifies a
+ *   combination of desired text properties. Entries are tried in order;
+ *   the first entry that matches available tracks is used.
  *   <br>
  *   Defaults to <code>[]</code>.
- * @property {!Array<string>} preferredTextFormats
- *   The list of preferred text formats, in order of highest to lowest priority.
- *   This is used to do a filtering of the text tracks available for the player.
- *   Changing this during playback will not affect the current playback.
+ * @property {!Array<!shaka.extern.VideoPreference>} preferredVideo
+ *   An ordered list of video track preferences. Each entry specifies a
+ *   combination of desired video properties. Entries are tried in order;
+ *   the first entry that matches available tracks is used.
  *   <br>
- *   Defaults to <code>[]</code>.
- * @property {number} preferredAudioChannelCount
- *   The preferred number of audio channels.
- *   Changing this during playback will not affect the current playback.
- *   <br>
- *   Defaults to <code>2</code>.
- * @property {string} preferredVideoHdrLevel
- *   The preferred HDR level of the video. If possible, this will cause the
- *   player to filter to assets that either have that HDR level, or no HDR level
- *   at all.
- *   Can be 'SDR', 'PQ', 'HLG', 'AUTO' for auto-detect, or '' for no preference.
- *   Note that one some platforms, such as Chrome, attempting to play PQ content
- *   may cause problems.
- *   <br>
- *   Defaults to <code>'AUTO'</code>.
- * @property {string} preferredVideoLayout
- *   The preferred video layout of the video.
- *   Can be 'CH-STEREO', 'CH-MONO', or '' for no preference.
- *   If the content is predominantly stereoscopic you should use 'CH-STEREO'.
- *   If the content is predominantly monoscopic you should use 'CH-MONO'.
- *   <br>
- *   Defaults to <code>''</code>.
+ *   Defaults to <code>[{hdrLevel: 'AUTO'}]</code>.
  * @property {!Array<string>} preferredDecodingAttributes
  *   The list of preferred attributes of decodingInfo, in the order of their
  *   priorities.
  *   This is used to do a filtering of the variants available for the player.
  *   <br>
  *   Defaults to <code>[]</code>.
- * @property {boolean} preferForcedSubs
- *   If true, a forced text track is preferred.
- *   If the content has no forced captions and the value is true,
- *   no text track is chosen.
- *   Changing this during playback will not affect the current playback.
- *   <br>
- *   Defaults to <code>false</code>.
- * @property {boolean} preferSpatialAudio
- *   If true, a spatial audio track is preferred.
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {shaka.extern.QueueConfiguration} queue
  *   Queue manager configuration and settings.
  * @property {shaka.extern.Restrictions} restrictions
@@ -3155,7 +3247,8 @@ shaka.extern.Thumbnail;
  *   id: string,
  *   title: string,
  *   startTime: number,
- *   endTime: number
+ *   endTime: number,
+ *   images: !Array<shaka.extern.ImageInfo>,
  * }}
  *
  * @property {string} id
@@ -3166,9 +3259,32 @@ shaka.extern.Thumbnail;
  *    The time that describes the beginning of the range of the chapter.
  * @property {number} endTime
  *    The time that describes the end of the range of chapter.
+ * @property {!Array<shaka.extern.ImageInfo>} images
+ *    The list of images associated with the chapter.
  * @exportDoc
  */
 shaka.extern.Chapter;
+
+
+/**
+ * @typedef {{
+ *   type: ?string,
+ *   width: ?number,
+ *   height: ?number,
+ *   url: string,
+ * }}
+ *
+ * @property {string} type
+ *    The image type. Eg: 'thumbnail', 'poster', etc.
+ * @property {string} width
+ *    The image width.
+ * @property {number} height
+ *    The image height.
+ * @property {string} url
+ *    The image url.
+ * @exportDoc
+ */
+shaka.extern.ImageInfo;
 
 
 /**

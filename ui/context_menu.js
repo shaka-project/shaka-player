@@ -12,6 +12,7 @@ goog.require('shaka.log');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.Iterables');
 goog.requireType('shaka.ui.Controls');
 
@@ -47,23 +48,56 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
     this.controlsContainer_.appendChild(this.contextMenu_);
 
     this.eventManager.listen(this.controlsContainer_, 'contextmenu', (e) => {
-      if (this.contextMenu_.classList.contains('shaka-hidden')) {
-        e.preventDefault();
-
-        const controlsLocation =
-            this.controlsContainer_.getBoundingClientRect();
-        this.contextMenu_.style.left = `${e.clientX - controlsLocation.left}px`;
-        this.contextMenu_.style.top = `${e.clientY - controlsLocation.top}px`;
-        this.contextMenu_.style.bottom = 'auto';
-
-        shaka.ui.Utils.setDisplay(this.contextMenu_, true);
-      } else {
-        shaka.ui.Utils.setDisplay(this.contextMenu_, false);
+      if (this.controls.anySettingsMenusAreOpen()) {
+        this.controls.hideSettingsMenus();
       }
-    });
+      // Force to close any submenu.
+      this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
 
-    this.eventManager.listen(window, 'click', () => {
-      this.closeMenu();
+      const isDisplayed =
+          (element) => element.classList.contains('shaka-hidden') == false;
+      const Iterables = shaka.util.Iterables;
+      if (!Iterables.some(this.contextMenu_.childNodes, isDisplayed)) {
+        return;
+      }
+
+      e.preventDefault();
+
+      const controlsRect = this.controlsContainer_.getBoundingClientRect();
+
+      const clickX = e.clientX;
+      const clickY = e.clientY;
+
+      const middleX = controlsRect.left + controlsRect.width / 2;
+      const openLeftwards = clickX > middleX;
+
+      if (openLeftwards) {
+        this.contextMenu_.style.left = 'auto';
+        this.contextMenu_.style.right = `${controlsRect.right - clickX}px`;
+      } else {
+        this.contextMenu_.style.left = `${clickX - controlsRect.left}px`;
+        this.contextMenu_.style.right = 'auto';
+      }
+
+      const middleY = controlsRect.top + controlsRect.height / 2;
+      const openUpwards = clickY > middleY;
+
+      let availableHeight;
+      if (openUpwards) {
+        this.contextMenu_.style.bottom = `${controlsRect.bottom - clickY}px`;
+        this.contextMenu_.style.top = 'auto';
+        availableHeight = clickY - controlsRect.top;
+      } else {
+        this.contextMenu_.style.bottom = 'auto';
+        this.contextMenu_.style.top = `${clickY - controlsRect.top}px`;
+        availableHeight = controlsRect.bottom - clickY;
+      }
+
+      if (availableHeight > 0) {
+        this.contextMenu_.style.maxHeight = `${availableHeight}px`;
+      }
+
+      shaka.ui.Utils.setDisplay(this.contextMenu_, true);
     });
 
     this.eventManager.listen(this.contextMenu_, 'click', () => {

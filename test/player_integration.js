@@ -955,6 +955,62 @@ describe('Player', () => {
     });
   });  // describe('unloading')
 
+  describe('retryLicensing', () => {
+    drmIt('retries license request after failure', async () => {
+      if (!checkWidevineSupport()) {
+        pending('Skipping retry test, only runs with real DRM');
+      }
+
+      // ! Tizen 3 has a known issue with retryLicensing.
+      if (deviceDetected.getDeviceName() === 'Tizen' &&
+          deviceDetected.getVersion() === 3) {
+        pending('Known issue: retryLicensing fails on Tizen 3');
+      }
+
+      let failureCount = 0;
+      let retryAttempted = false;
+      let firstRequestFailed = false;
+
+      // Intercept the first license request to simulate a failure.
+      player.getNetworkingEngine().registerRequestFilter((type, request) => {
+        if (type == shaka.net.NetworkingEngine.RequestType.LICENSE &&
+            !firstRequestFailed) {
+          firstRequestFailed = true;
+          request.uris = ['http://foo/invalid'];
+        }
+      });
+
+      // Handle the failure and retry with the same session metadata.
+      player.configure('drm.failureCallback', (error) => {
+        failureCount++;
+        if (failureCount === 1 && !retryAttempted) {
+          retryAttempted = true;
+          const sessionMetadata = error.data[1];
+          player.retryLicensing(sessionMetadata, 0.1);
+          error.handled = true;
+        }
+      });
+
+      player.configure('drm.servers', {
+        'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+      });
+
+      await player.load('test:sintel-enc_compiled');
+      await video.play();
+
+      const waiter = new shaka.test.Waiter(eventManager)
+          .setPlayer(player)
+          .timeoutAfter(30)
+          .failOnTimeout(true);
+      await waiter.waitForMovement(video);
+
+      expect(failureCount).toBeGreaterThan(0);
+      expect(retryAttempted).toBe(true);
+      expect(video.currentTime).toBeGreaterThan(0);
+      expect(video.readyState).toBeGreaterThan(1);
+    });
+  });
+
   describe('addChaptersTrack', () => {
     it('adds external chapters in vtt format', async () => {
       await player.load('test:sintel_no_text_compiled');
@@ -1133,7 +1189,15 @@ describe('Player', () => {
   });
 
   it('preload allow update audio track', async () => {
-    player.configure('preferredAudioLanguage', 'en');
+    player.configure('preferredAudio',
+        [{
+          language: 'en',
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+          spatialAudio: false,
+        }]);
     const preloadManager =
         await player.preload('test:sintel_multi_lingual_multi_res_compiled');
     await preloadManager.waitForFinish();
@@ -1141,7 +1205,15 @@ describe('Player', () => {
     expect(prefetchedVariantTrack).not.toBeNull();
     expect(prefetchedVariantTrack.language).toBe('en');
 
-    preloadManager.configure('preferredAudioLanguage', 'es');
+    preloadManager.configure('preferredAudio',
+        [{
+          language: 'es',
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+          spatialAudio: false,
+        }]);
 
     await shaka.test.Util.shortDelay();
     prefetchedVariantTrack = preloadManager.getPrefetchedVariantTrack();
@@ -1150,7 +1222,8 @@ describe('Player', () => {
   });
 
   it('preload allow update text track', async () => {
-    player.configure('preferredTextLanguage', 'zh');
+    player.configure('preferredText',
+        [{language: 'zh', role: '', format: '', forced: false}]);
     const preloadManager =
         await player.preload('test:sintel_multi_lingual_multi_res_compiled');
     await preloadManager.waitForFinish();
@@ -1159,7 +1232,8 @@ describe('Player', () => {
     expect(prefetchedTextTrack).not.toBeNull();
     expect(prefetchedTextTrack.language).toBe('zh');
 
-    preloadManager.configure('preferredTextLanguage', 'fr');
+    preloadManager.configure('preferredText',
+        [{language: 'fr', role: '', format: '', forced: false}]);
 
     await shaka.test.Util.shortDelay();
     prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();

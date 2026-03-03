@@ -59,3 +59,9 @@ By default, the maximum resolution supported is 1920x1080.
 We can detect if the device supports 3840x2160 (4K).
 
 By default, the maximum resolution supported is 1920x1080.
+
+## Titan OS
+
+We can detect if the device supports 1280x720, 1920x1080 or 3840x2160 (4K).
+
+By default, the maximum resolution supported is 1920x1080.

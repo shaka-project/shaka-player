@@ -28,8 +28,8 @@ by the given file.  So "-@networking" will remove all the networking plugins,
 and "-@ui" will remove the UI.
 
 The core library is always included so does not have to be listed.  The default
-is to use the name 'ui'; if no commands are given, it will build the complete
-build, including the UI.
+is to use the name 'experimental'; if no commands are given, it will build the
+complete build, including the UI.
 
 Examples:
   # Equivalent to +@complete
@@ -42,10 +42,15 @@ Examples:
 """
 
 import argparse
+import hashlib
+import json
 import logging
 import os
 import re
 import shutil
+import sys
+
+from contextlib import contextmanager
 
 import compiler
 import generateLocalizations
@@ -367,7 +372,7 @@ def main(args):
       '--name',
       help='Set the name of the build. Uses "ui" if not given.',
       type=str,
-      default='ui')
+      default='experimental')
 
   parser.add_argument(
       '--langout',
@@ -384,8 +389,9 @@ def main(args):
 
   # Make the dist/ folder, ignore errors.
   base = shakaBuildHelpers.get_source_base()
+  dist_path = os.path.join(base, 'dist')
   try:
-    os.mkdir(os.path.join(base, 'dist'))
+    os.mkdir(dist_path)
   except OSError:
     pass
 
@@ -405,16 +411,125 @@ def main(args):
   if not custom_build.parse_build(commands, os.getcwd()):
     return 1
 
+  # Global shared state file; parallel processes will serialize access via locks.
+  hash_file_path = os.path.join(dist_path, 'build_state.json')
+
+  def compute_build_hash(include, exclude, commands, mode, locales, skip_ts):
+    state = {
+      'include': sorted(include),
+      'exclude': sorted(exclude),
+      'commands': commands,
+      'mode': mode,
+      'locales': locales,
+      'skip_ts': skip_ts,
+      'langout': parsed_args.langout,
+    }
+    state_json = json.dumps(state, sort_keys=True)
+    return hashlib.sha256(state_json.encode('utf-8')).hexdigest()
+
+  current_hash = compute_build_hash(
+    custom_build.include,
+    custom_build.exclude,
+    commands,
+    parsed_args.mode,
+    parsed_args.locales,
+    parsed_args.skip_ts
+  )
+
+  build_key = f"{parsed_args.name}_{parsed_args.mode}"
+
+  force = parsed_args.force
+
+  # --- Cross‑platform file lock helpers (defined inline to keep changes local) ---
+  if os.name == "posix":
+    import fcntl
+
+    @contextmanager
+    def locked_file_rw(path, create=False):
+      """Open file for read/write and acquire an exclusive advisory lock (POSIX)."""
+      mode = 'r+' if os.path.isfile(path) or not create else 'w+'
+      with open(path, mode) as f:
+        # Acquire exclusive lock on the entire file.
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+        try:
+          yield f
+        finally:
+          fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+  else:
+    import msvcrt
+
+    @contextmanager
+    def locked_file_rw(path, create=False):
+      """Open file for read/write and acquire an exclusive lock (Windows).
+      This uses msvcrt.locking over the first byte as a process‑wide mutex.
+      """
+      mode = 'r+' if os.path.isfile(path) or not create else 'w+'
+      with open(path, mode) as f:
+        # Always lock the first byte as a mutex region.
+        f.seek(0, os.SEEK_SET)
+        msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
+        try:
+          yield f
+        finally:
+          f.seek(0, os.SEEK_SET)
+          msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+
+  # --- Safe read of the global state under lock (if the file exists) ---
+  previous_state = {}
+  if os.path.isfile(hash_file_path):
+    try:
+      with locked_file_rw(hash_file_path):
+        # Re-opened with lock: parse safely
+        with open(hash_file_path, 'r') as f:
+          try:
+            previous_state = json.load(f)
+          except json.JSONDecodeError:
+            logging.warning("Detected a corrupted build_state.json; continuing with empty state.")
+            previous_state = {}
+    except OSError as e:
+      logging.warning("Could not lock/read build_state.json (%s); proceeding with empty state.", e)
+      previous_state = {}
+
+  previous_hash = previous_state.get(build_key)
+  if previous_hash != current_hash:
+    logging.info('Build parameters changed for "%s"; forcing rebuild.', parsed_args.name)
+    force = True
+
   name = parsed_args.name
   langout = parsed_args.langout
   locales = parsed_args.locales
-  force = parsed_args.force
   is_debug = parsed_args.mode == 'debug'
   skip_ts = parsed_args.skip_ts
 
   if not custom_build.build_library(name, langout, locales, force, is_debug,
       skip_ts):
     return 1
+
+  # Persist (merge) the updated state under lock so we don't clobber parallel updates.
+  # Use create=True so the file is created if it didn't exist.
+  try:
+    with locked_file_rw(hash_file_path, create=True) as f:
+      # Read current on-disk state (may have been updated by other processes)
+      try:
+        f.seek(0, os.SEEK_SET)
+        on_disk = json.load(f)
+      except json.JSONDecodeError:
+        on_disk = {}
+      except Exception:
+        on_disk = {}
+      # Merge and write back atomically under the same lock
+      on_disk[build_key] = current_hash
+      f.seek(0, os.SEEK_SET)
+      f.truncate()
+      json.dump(on_disk, f, indent=2, sort_keys=True)
+      f.flush()
+      try:
+        os.fsync(f.fileno())
+      except Exception:
+        # fsync may be unavailable on some platforms; ignore safely.
+        pass
+  except OSError as e:
+    logging.warning("Failed to persist build_state.json safely: %s", e)
 
   return 0
 

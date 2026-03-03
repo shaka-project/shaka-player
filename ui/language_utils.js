@@ -10,6 +10,7 @@ goog.provide('shaka.ui.LanguageUtils');
 
 goog.require('mozilla.LanguageMapping');
 goog.require('shaka.log');
+goog.require('shaka.media.ManifestParser');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Overlay.TrackLabelFormat');
 goog.require('shaka.ui.Utils');
@@ -52,7 +53,10 @@ shaka.ui.LanguageUtils = class {
    */
   static updateAudioTracks(tracks, langMenu, onTrackSelected, updateChosen,
       currentSelectionElement, localization, config) {
+    const AccessibilityPurpose =
+        shaka.media.ManifestParser.AccessibilityPurpose;
     const LocIds = shaka.ui.Locales.Ids;
+    const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat;
 
     let trackLabelFormat = config.trackLabelFormat;
     const showAudioChannelCountVariants = config.showAudioChannelCountVariants;
@@ -66,9 +70,9 @@ shaka.ui.LanguageUtils = class {
     });
 
     if (tracks.length > 1 && tracks[0].label &&
-        trackLabelFormat != shaka.ui.Overlay.TrackLabelFormat.LABEL &&
+        trackLabelFormat != TrackLabelFormat.LABEL &&
         shaka.ui.LanguageUtils.areAudioTracksEqualExceptLabel_(tracks)) {
-      trackLabelFormat = shaka.ui.Overlay.TrackLabelFormat.LABEL;
+      trackLabelFormat = TrackLabelFormat.LABEL;
     }
 
     /** @type {!Map<string, !Set<string>>} */
@@ -77,10 +81,7 @@ shaka.ui.LanguageUtils = class {
       if (!track.codecs) {
         continue;
       }
-      if (!codecsByLanguage.has(track.language)) {
-        codecsByLanguage.set(track.language, new Set());
-      }
-      codecsByLanguage.get(track.language).add(
+      codecsByLanguage.getOrInsertComputed(track.language, () => new Set()).add(
           shaka.util.MimeUtils.getNormalizedCodec(track.codecs));
     }
     const hasDifferentAudioCodecs = (language) =>
@@ -102,11 +103,12 @@ shaka.ui.LanguageUtils = class {
       return track.roles.join(', ');
     };
 
-    const getCombination = (language, rolesString, label, channelsCount,
-        audioCodec, spatialAudio) => {
+    const getCombination = (language, rolesString, accessibilityPurpose, label,
+        channelsCount, audioCodec, spatialAudio) => {
       const keys = [
         language,
         rolesString,
+        accessibilityPurpose,
         spatialAudio,
       ];
       if (showAudioChannelCountVariants && channelsCount != null) {
@@ -115,8 +117,7 @@ shaka.ui.LanguageUtils = class {
       if (showAudioCodec && hasDifferentAudioCodecs(language) && audioCodec) {
         keys.push(audioCodec);
       }
-      if (label &&
-          trackLabelFormat == shaka.ui.Overlay.TrackLabelFormat.LABEL) {
+      if (label && trackLabelFormat == TrackLabelFormat.LABEL) {
         keys.push(label);
       }
       return keys.join(': ');
@@ -153,6 +154,7 @@ shaka.ui.LanguageUtils = class {
     const combinationsMade = new Set();
     const selectedCombination = selectedTrack ? getCombination(
         selectedTrack.language, getRolesString(selectedTrack),
+        selectedTrack.accessibilityPurpose,
         selectedTrack.label, selectedTrack.channelsCount,
         selectedTrack.codecs &&
         shaka.util.MimeUtils.getNormalizedCodec(selectedTrack.codecs),
@@ -163,12 +165,13 @@ shaka.ui.LanguageUtils = class {
       const rolesString = getRolesString(track);
       const label = track.label;
       const channelsCount = track.channelsCount;
+      const accessibilityPurpose = track.accessibilityPurpose;
       const audioCodec = track.codecs &&
           shaka.util.MimeUtils.getNormalizedCodec(track.codecs);
       const spatialAudio = track.spatialAudio;
       const combinationName =
-          getCombination(language, rolesString, label, channelsCount,
-              audioCodec, spatialAudio);
+          getCombination(language, rolesString, accessibilityPurpose, label,
+              channelsCount, audioCodec, spatialAudio);
       if (combinationsMade.has(combinationName)) {
         continue;
       }
@@ -196,11 +199,23 @@ shaka.ui.LanguageUtils = class {
           basicInfo += getChannelsCountName(channelsCount);
         }
       }
-      switch (trackLabelFormat) {
-        case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
+      let labelFormat = trackLabelFormat;
+      if (labelFormat === TrackLabelFormat.LABEL_OR_LANGUAGE) {
+        labelFormat = label ?
+            TrackLabelFormat.LABEL : TrackLabelFormat.LANGUAGE;
+      } else if (labelFormat === TrackLabelFormat.LANGUAGE_OR_LABEL) {
+        labelFormat = (language && language !== 'und') ?
+            TrackLabelFormat.LANGUAGE : TrackLabelFormat.LABEL;
+      }
+      switch (labelFormat) {
+        case TrackLabelFormat.LANGUAGE:
           span.textContent += basicInfo;
+          if (accessibilityPurpose == AccessibilityPurpose.VISUALLY_IMPAIRED) {
+            span.textContent += ' - ' +
+                localization.resolve(shaka.ui.Locales.Ids.AUDIO_DESCRIPTION);
+          }
           break;
-        case shaka.ui.Overlay.TrackLabelFormat.ROLE:
+        case TrackLabelFormat.ROLE:
           span.textContent += basicInfo;
           if (!rolesString) {
             // Fallback behavior. This probably shouldn't happen.
@@ -212,15 +227,15 @@ shaka.ui.LanguageUtils = class {
             span.textContent = rolesString;
           }
           break;
-        case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE_ROLE:
+        case TrackLabelFormat.LANGUAGE_ROLE:
           span.textContent += basicInfo;
           if (rolesString) {
             span.textContent += ': ' + rolesString;
           }
           break;
-        case shaka.ui.Overlay.TrackLabelFormat.LABEL:
+        case TrackLabelFormat.LABEL:
           if (label) {
-            span.textContent = label;
+            span.textContent = label + basicInfo;
           } else {
             // Fallback behavior. This probably shouldn't happen.
             shaka.log.alwaysWarn('Track #' + JSON.stringify(track) +
@@ -254,6 +269,7 @@ shaka.ui.LanguageUtils = class {
   static updateTextTracks(tracks, langMenu, onTrackSelected, updateChosen,
       currentSelectionElement, localization, config) {
     const LocIds = shaka.ui.Locales.Ids;
+    const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat;
 
     const trackLabelFormat = config.textTrackLabelFormat;
     const preferIntlDisplayNames = config.preferIntlDisplayNames;
@@ -286,8 +302,7 @@ shaka.ui.LanguageUtils = class {
         rolesString,
         forced,
       ];
-      if (label &&
-          trackLabelFormat == shaka.ui.Overlay.TrackLabelFormat.LABEL) {
+      if (label && trackLabelFormat == TrackLabelFormat.LABEL) {
         keys.push(label);
       }
       return keys.join(': ');
@@ -341,13 +356,21 @@ shaka.ui.LanguageUtils = class {
             shaka.ui.LanguageUtils.getLanguageName(
                 language, localization, preferIntlDisplayNames);
       }
-      switch (trackLabelFormat) {
-        case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
+      let labelFormat = trackLabelFormat;
+      if (labelFormat === TrackLabelFormat.LABEL_OR_LANGUAGE) {
+        labelFormat = label ?
+            TrackLabelFormat.LABEL : TrackLabelFormat.LANGUAGE;
+      } else if (labelFormat === TrackLabelFormat.LANGUAGE_OR_LABEL) {
+        labelFormat = (language && language !== 'und') ?
+            TrackLabelFormat.LANGUAGE : TrackLabelFormat.LABEL;
+      }
+      switch (labelFormat) {
+        case TrackLabelFormat.LANGUAGE:
           if (forced) {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
-        case shaka.ui.Overlay.TrackLabelFormat.ROLE:
+        case TrackLabelFormat.ROLE:
           if (!rolesString) {
             // Fallback behavior. This probably shouldn't happen.
             shaka.log.alwaysWarn('Track #' + track.id + ' does not have a ' +
@@ -360,7 +383,7 @@ shaka.ui.LanguageUtils = class {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
-        case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE_ROLE:
+        case TrackLabelFormat.LANGUAGE_ROLE:
           if (rolesString) {
             span.textContent += ': ' + rolesString;
           }
@@ -368,7 +391,7 @@ shaka.ui.LanguageUtils = class {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
-        case shaka.ui.Overlay.TrackLabelFormat.LABEL:
+        case TrackLabelFormat.LABEL:
           if (label) {
             span.textContent = label;
           } else {

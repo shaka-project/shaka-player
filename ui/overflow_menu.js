@@ -10,6 +10,7 @@ goog.provide('shaka.ui.OverflowMenu');
 goog.require('goog.asserts');
 goog.require('shaka.ads.Utils');
 goog.require('shaka.log');
+goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -53,13 +54,12 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 
     this.createChildren_();
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateAriaLabel_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listenMulti(
+        this.localization,
+        [
+          shaka.ui.Localization.LOCALE_UPDATED,
+          shaka.ui.Localization.LOCALE_CHANGED,
+        ], () => {
           this.updateAriaLabel_();
         });
 
@@ -73,12 +73,6 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     this.eventManager.listen(
         this.adManager, shaka.ads.Utils.AD_STOPPED, () => {
           shaka.ui.Utils.setDisplay(this.overflowMenuButton_, true);
-        });
-
-    this.eventManager.listen(
-        this.overflowMenu_, 'touchstart', (event) => {
-          this.controls.setLastTouchEventTime(Date.now());
-          event.stopPropagation();
         });
 
     this.eventManager.listen(this.overflowMenuButton_, 'click', () => {
@@ -130,10 +124,14 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
   /**
    * @param {string} name
    * @param {!shaka.extern.IUIElement.Factory} factory
+   * @param {boolean=} registerInContext
    * @export
    */
-  static registerElement(name, factory) {
+  static registerElement(name, factory, registerInContext = true) {
     shaka.ui.OverflowMenu.elementNamesToFactories_.set(name, factory);
+    if (registerInContext) {
+      shaka.ui.ContextMenu.registerElement(name, factory);
+    }
   }
 
 
@@ -190,6 +188,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 
   /** @private */
   onOverflowMenuButtonClick_() {
+    this.controls.hideContextMenus();
     if (this.controls.anySettingsMenusAreOpen()) {
       this.controls.hideSettingsMenus();
     } else {
@@ -236,8 +235,9 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     const paddingTop = parseFloat(styleMenu.paddingTop);
     const paddingBottom = parseFloat(styleMenu.paddingBottom);
     const rectContainer = this.videoContainer_.getBoundingClientRect();
+    const gap = 5;
     const heightIntersection =
-        rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom;
+        rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom - gap;
 
     this.overflowMenu_.style.maxHeight = heightIntersection + 'px';
 

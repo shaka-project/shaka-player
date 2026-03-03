@@ -66,8 +66,6 @@ describe('UI', () => {
     // eslint-disable-next-line no-restricted-syntax
     if ('remote' in HTMLMediaElement.prototype) {
       controlPanelElements.push('remote');
-    } else if (window.WebKitPlaybackTargetAvailabilityEvent) {
-      controlPanelElements.push('airplay');
     }
     controlPanelElements.push('fullscreen');
     const config = {
@@ -105,7 +103,8 @@ describe('UI', () => {
     eventManager.listen(controls, 'error', Util.spyFunc(onErrorSpy));
 
     // These tests expect a default text track to be selected.
-    player.configure('preferredTextLanguage', 'zh');
+    player.configure('preferredText',
+        [{language: 'zh', role: '', format: '', forced: false}]);
 
     await player.load('test:sintel_multi_lingual_multi_res_compiled');
     // For this event, we ignore a timeout, since we sometimes miss this event
