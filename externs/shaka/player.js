@@ -1522,7 +1522,7 @@ shaka.extern.xml.Node;
  *   If true, enables caching of unchanged Period elements between manifest
  *   updates.
  *   <br>
- *   Defaults to <code>false</code>.
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
