@@ -818,6 +818,27 @@ describe('Player', () => {
     });
   });  // describe('load/unload')
 
+  describe('getAllMetadataRegions and getAllEmsgRegions and getAllTimelineRegions', () => {
+    it('return null when not loaded', () => {
+      expect(player.getAllMetadataRegions()).toBeNull();
+      expect(player.getAllEmsgRegions()).toBeNull();
+      expect(player.getAllTimelineRegions()).toBeNull();
+    });
+
+    it('return timelines when loaded with MSE', async () => {
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      const metadataRegions = player.getAllMetadataRegions();
+      const emsgRegions = player.getAllEmsgRegions();
+      const timelineRegions = player.getAllTimelineRegions();
+      expect(metadataRegions).not.toBeNull();
+      expect(emsgRegions).not.toBeNull();
+      expect(timelineRegions).not.toBeNull();
+      expect(metadataRegions).toEqual([]);
+      expect(emsgRegions).toEqual([]);
+      expect(timelineRegions).toEqual([]);
+    });
+  });
+
   describe('getConfiguration', () => {
     it('returns a copy of the configuration', () => {
       const config1 = player.getConfiguration();
