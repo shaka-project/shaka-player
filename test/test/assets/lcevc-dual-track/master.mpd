@@ -16,7 +16,6 @@ mpd:
   <Period
     id="1"
     duration="PT8S">
-    <BaseURL>dash/</BaseURL>
     <AdaptationSet
       id="1"
       group="1"

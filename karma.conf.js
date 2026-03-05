@@ -304,7 +304,6 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/lcevc-sei/*', included: false},
       {pattern: 'test/test/assets/lcevc-sei-ts/*', included: false},
       {pattern: 'test/test/assets/lcevc-dual-track/*', included: false},
-      {pattern: 'test/test/assets/lcevc-dual-track/dash/*', included: false},
       {pattern: 'dist/shaka-player.experimental.js', included: false},
       {pattern: 'dist/locales.js', included: false},
       {pattern: 'demo/**/*.js', included: false},
