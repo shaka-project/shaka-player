@@ -1,6 +1,7 @@
 # All standard manifest parser plugins.
 
 +@dash
++@dashJson
 +@hls
 +@msf
 +@offline
