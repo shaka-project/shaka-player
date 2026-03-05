@@ -17,33 +17,6 @@ mpd:
     id="1"
     duration="PT8S">
     <AdaptationSet
-      id="1"
-      group="1"
-      contentType="audio"
-      segmentAlignment="true"
-      audioSamplingRate="44100"
-      mimeType="audio/mp4"
-      codecs="mp4a.40.2"
-      startWithSAP="1">
-      <AudioChannelConfiguration
-        schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011"
-        value="2" />
-      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main" />
-      <SegmentTemplate
-        timescale="44100"
-        initialization="out-sorted-$RepresentationID$.dash"
-        media="out-sorted-$RepresentationID$-$Time$.dash">
-        <SegmentTimeline>
-          <S t="0" d="177152" />
-          <S d="176128" />
-        </SegmentTimeline>
-      </SegmentTemplate>
-      <Representation
-        id="audio=64468"
-        bandwidth="64468">
-      </Representation>
-    </AdaptationSet>
-    <AdaptationSet
       id="2"
       group="2"
       contentType="video"
