@@ -95,6 +95,9 @@ describe('LCEVC Integration', () => {
     if (scalable) {
       const tracks = player.getVariantTracks();
       const dualScalableTrack = tracks.find((t) => t.codecs.includes('lvc1'));
+      if (!dualScalableTrack) {
+        throw new Error('Dual scalable track not found but should exist.');
+      }
       player.selectVariantTrack(dualScalableTrack, /* clearBuffer= */ true);
     }
 
