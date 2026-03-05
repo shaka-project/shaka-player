@@ -572,6 +572,7 @@ describe('DashParser Live', () => {
         shaka.util.AbortableOperation.completed({
           uri: redirectedUri,
           data: manifestData,
+          headers: {},
         }));
 
     const manifest = await parser.start(originalUri, playerInterface);
