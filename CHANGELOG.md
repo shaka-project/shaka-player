@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.16.21](https://github.com/shaka-project/shaka-player/compare/v4.16.20...v4.16.21) (2026-03-05)
+
+
+### Bug Fixes
+
+* Improve NativeTextDisplayer robustness, track-kind issues and enhance cleanup logic ([#9776](https://github.com/shaka-project/shaka-player/issues/9776)) ([56e0c64](https://github.com/shaka-project/shaka-player/commit/56e0c641cd2ccc34b03869dc497887c2f916faeb))
+* prevent negative times in Stats ([#9784](https://github.com/shaka-project/shaka-player/issues/9784)) ([f742c4f](https://github.com/shaka-project/shaka-player/commit/f742c4fc3930ecfdb0b64c5103699bde4fb7589e))
+* **tXml:** Return default value for a missing attribute ([#9734](https://github.com/shaka-project/shaka-player/issues/9734)) ([f87e1a8](https://github.com/shaka-project/shaka-player/commit/f87e1a8edff5ba375a5c6a6b8099dae1505d0570))
+
+
+### Performance Improvements
+
+* Eliminate DataViewReader allocation and use native clz32 in ExpGolomb ([#9779](https://github.com/shaka-project/shaka-player/issues/9779)) ([221080d](https://github.com/shaka-project/shaka-player/commit/221080df7fa020f003f64244c51e9ab63b93eb96))
+* Improve performance of TsParser ([#9783](https://github.com/shaka-project/shaka-player/issues/9783)) ([8137611](https://github.com/shaka-project/shaka-player/commit/81376117f5b6c0ddf6005b5431609722343fcc58))
+
 ## [4.16.20](https://github.com/shaka-project/shaka-player/compare/v4.16.19...v4.16.20) (2026-03-02)
 
 
