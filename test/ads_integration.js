@@ -66,6 +66,7 @@ describe('Ads', () => {
 
     onAdErrorSpy = jasmine.createSpy('onAdError');
     onAdErrorSpy.and.callFake((event) => {
+      shaka.log.alwaysWarn('error', event);
       if (!event['originalEvent']) {
         fail(event);
         return;
