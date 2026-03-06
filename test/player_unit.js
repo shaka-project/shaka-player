@@ -828,14 +828,14 @@ describe('Player', () => {
     it('return timelines when loaded with MSE', async () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       const isIterable = (obj) => {
-        return (Symbol.iterator in Object(obj))
-      }
+        return (Symbol.iterator in Object(obj));
+      };
       const metadataRegions = player.getAllMetadataRegions();
       const emsgRegions = player.getAllEmsgRegions();
       const timelineRegions = player.getAllTimelineRegions();
-      expect(isIterable(metadataRegions)).toBeTrue();
-      expect(isIterable(emsgRegions)).toBeTrue();
-      expect(isIterable(timelineRegions)).toBeTrue();
+      expect(isIterable(metadataRegions)).toBeTruthy();
+      expect(isIterable(emsgRegions)).toBeTruthy();
+      expect(isIterable(timelineRegions)).toBeTruthy();
     });
   });
 
