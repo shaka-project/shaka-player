@@ -13,6 +13,7 @@ describe('ContentSteeringManager', () => {
 
   beforeEach(() => {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
+    const config = shaka.util.PlayerConfiguration.createDefault();
     const playerInterface = {
       networkingEngine: fakeNetEngine,
       modifyManifestRequest: fail,
@@ -30,10 +31,10 @@ describe('ContentSteeringManager', () => {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => config.streaming.retryParameters,
     };
-    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     manager = new shaka.util.ContentSteeringManager(playerInterface);
-    manager.configure(config);
+    manager.configure(config.manifest);
     manager.setBaseUris([
       'http://default',
     ]);

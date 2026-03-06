@@ -21,7 +21,8 @@ describe('shaka.msf.MSFParser', () => {
   beforeEach(() => {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
-    config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    const dConfig = shaka.util.PlayerConfiguration.createDefault();
+    config = dConfig.manifest;
     onEventSpy = jasmine.createSpy('onEvent');
     newDrmInfoSpy = jasmine.createSpy('newDrmInfo');
     onMetadataSpy = jasmine.createSpy('onMetadata');
@@ -42,6 +43,7 @@ describe('shaka.msf.MSFParser', () => {
       onMetadata: shaka.test.Util.spyFunc(onMetadataSpy),
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => dConfig.streaming.retryParameters,
     };
 
     parser = new shaka.msf.MSFParser();

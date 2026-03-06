@@ -139,7 +139,8 @@ shaka.extern.ManifestParser = class {
  *   onMetadata: function(string, number, ?number,
  *                        !Array<shaka.extern.MetadataFrame>):!Promise,
  *   disableStream: function(!shaka.extern.Stream),
- *   addFont: function(string, string)
+ *   addFont: function(string, string),
+ *   getStreamingRetryParameters: function():!shaka.extern.RetryParameters,
  * }}
  *
  * @description
@@ -182,6 +183,9 @@ shaka.extern.ManifestParser = class {
  *   containing said stream.
  * @property {function(string, string)} addFont
  *   Called when a new font needs to be added.
+ * @property {function():
+ *            !shaka.extern.RetryParameters} getStreamingRetryParameters
+ *   Return RetryParameters for streaming.
  * @exportDoc
  */
 shaka.extern.ManifestParser.PlayerInterface;

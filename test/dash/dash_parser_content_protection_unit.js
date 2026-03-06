@@ -28,9 +28,10 @@ describe('DashParser ContentProtection', () => {
     netEngine.setDefaultText(manifestText);
     const dashParser = new shaka.dash.DashParser();
 
-    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.ignoreDrmInfo = ignoreDrmInfo || false;
-    dashParser.configure(config);
+    const config = shaka.util.PlayerConfiguration.createDefault();
+    const manifestConfig = config.manifest;
+    manifestConfig.ignoreDrmInfo = ignoreDrmInfo || false;
+    dashParser.configure(manifestConfig);
 
     const playerInterface = {
       networkingEngine: netEngine,
@@ -49,6 +50,7 @@ describe('DashParser ContentProtection', () => {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => config.streaming.retryParameters,
     };
 
     const actual = await dashParser.start(

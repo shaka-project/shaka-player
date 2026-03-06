@@ -336,6 +336,7 @@ describe('DashParser SegmentList', () => {
 
     const dashParser = shaka.test.Dash.makeDashParser();
 
+    const config = shaka.util.PlayerConfiguration.createDefault();
     const playerInterface = {
       networkingEngine: networkingEngine,
       modifyManifestRequest: (request, manifestInfo) => {},
@@ -353,6 +354,7 @@ describe('DashParser SegmentList', () => {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => config.streaming.retryParameters,
     };
     try {
       const manifest = await dashParser.start('dummy://foo', playerInterface);
