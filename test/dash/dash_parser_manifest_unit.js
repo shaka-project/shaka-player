@@ -39,6 +39,7 @@ describe('DashParser Manifest', () => {
   });
 
   beforeEach(() => {
+    const config = shaka.util.PlayerConfiguration.createDefault();
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
     onEventSpy = jasmine.createSpy('onEvent');
@@ -60,6 +61,7 @@ describe('DashParser Manifest', () => {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: shaka.test.Util.spyFunc(addFontSpy),
+      getStreamingRetryParameters: () => config.streaming.retryParameters,
     };
   });
 
