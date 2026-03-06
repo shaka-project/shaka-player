@@ -31,10 +31,11 @@ describe('DashParser Patch', () => {
   let publishTime;
 
   beforeEach(() => {
+    const config = shaka.util.PlayerConfiguration.createDefault();
     publishTime = new Date(2024, 0, 1);
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = new shaka.dash.DashParser();
-    parser.configure(shaka.util.PlayerConfiguration.createDefault().manifest);
+    parser.configure(config.manifest);
     playerInterface = {
       networkingEngine: fakeNetEngine,
       filter: (manifest) => Promise.resolve(),
@@ -50,6 +51,7 @@ describe('DashParser Patch', () => {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => config.streaming.retryParameters,
     };
     Date.now = () => publishTime.getTime() + 10;
 

@@ -66,7 +66,8 @@ describe('HlsParser live', () => {
 
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
-    config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    const dConfig = shaka.util.PlayerConfiguration.createDefault();
+    config = dConfig.manifest;
     playerInterface = {
       filter: () => Promise.resolve(),
       makeTextStreamsForClosedCaptions: (manifest) => {},
@@ -82,6 +83,7 @@ describe('HlsParser live', () => {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => dConfig.streaming.retryParameters,
     };
 
     parser = new shaka.hls.HlsParser();

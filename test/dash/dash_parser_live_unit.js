@@ -23,7 +23,8 @@ describe('DashParser Live', () => {
   beforeEach(() => {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = new shaka.dash.DashParser();
-    parser.configure(shaka.util.PlayerConfiguration.createDefault().manifest);
+    const config = shaka.util.PlayerConfiguration.createDefault();
+    parser.configure(config.manifest);
     playerInterface = {
       networkingEngine: fakeNetEngine,
       filter: (manifest) => Promise.resolve(),
@@ -39,6 +40,7 @@ describe('DashParser Live', () => {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => config.streaming.retryParameters,
     };
   });
 
