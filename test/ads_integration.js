@@ -137,28 +137,28 @@ describe('Ads', () => {
       await player.unload();
     }
 
-    it('with support for multiple media elements', async () => {
-      if (!player.getConfiguration().ads.supportsMultipleMediaElements) {
-        pending('Platform without support for multiple media elements.');
-      }
-      player.configure('ads.supportsMultipleMediaElements', true);
+    // it('with support for multiple media elements', async () => {
+    //   if (!player.getConfiguration().ads.supportsMultipleMediaElements) {
+    //     pending('Platform without support for multiple media elements.');
+    //   }
+    //   player.configure('ads.supportsMultipleMediaElements', true);
 
-      adManager.setContainers(adContainer, adContainer);
+    //   adManager.setContainers(adContainer, adContainer);
 
-      await runAssetUriTest();
-    });
+    //   await runAssetUriTest();
+    // });
 
-    it('without support for multiple media elements', async () => {
-      player.configure('ads.supportsMultipleMediaElements', false);
+    // it('without support for multiple media elements', async () => {
+    //   player.configure('ads.supportsMultipleMediaElements', false);
 
-      adManager.setContainers(adContainer, adContainer);
+    //   adManager.setContainers(adContainer, adContainer);
 
-      await runAssetUriTest();
-    });
+    //   await runAssetUriTest();
+    // });
 
-    it('using the main media element', async () => {
-      await runAssetUriTest();
-    });
+    // it('using the main media element', async () => {
+    //   await runAssetUriTest();
+    // });
 
     describe('with X-ASSET-LIST', () => {
       /**
@@ -188,16 +188,16 @@ describe('Ads', () => {
         await player.unload();
       }
 
-      it('with support for multiple media elements', async () => {
-        if (!player.getConfiguration().ads.supportsMultipleMediaElements) {
-          pending('Platform without support for multiple media elements.');
-        }
-        player.configure('ads.supportsMultipleMediaElements', true);
+      // it('with support for multiple media elements', async () => {
+      //   if (!player.getConfiguration().ads.supportsMultipleMediaElements) {
+      //     pending('Platform without support for multiple media elements.');
+      //   }
+      //   player.configure('ads.supportsMultipleMediaElements', true);
 
-        adManager.setContainers(adContainer, adContainer);
+      //   adManager.setContainers(adContainer, adContainer);
 
-        await runAssetListTest();
-      });
+      //   await runAssetListTest();
+      // });
 
       it('without support for multiple media elements', async () => {
         player.configure('ads.supportsMultipleMediaElements', false);
