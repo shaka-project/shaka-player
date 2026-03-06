@@ -93,8 +93,48 @@ describe('Ads', () => {
   });
 
   describe('support HLS Interstitials', () => {
-    /** @type {string} */
-    const streamUri = '/base/test/test/assets/hls-interstitial/main.m3u8';
+    /**
+     * @return {!Promise}
+     */
+    async function runAssetUriTest() {
+      goog.asserts.assert(adManager, 'Must have adManager');
+      await player.load('/base/test/test/assets/hls-interstitial/main.m3u8');
+      video.play();
+      expect(player.isLive()).toBe(false);
+
+      expect(adManager.getCurrentAd()).toBeNull();
+
+      // Wait a maximum of 10 seconds before the ad starts playing.
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+
+      expect(adManager.getCurrentAd()).not.toBeNull();
+
+      await waiter.timeoutAfter(20)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
+
+      expect(adManager.getCurrentAd()).toBeNull();
+
+      await shaka.test.Util.delay(1);
+      expect(video.currentTime).toBeLessThanOrEqual(3);
+
+      // Wait a maximum of 10 seconds before the ad starts playing.
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+
+      expect(adManager.getCurrentAd()).not.toBeNull();
+
+      await waiter.timeoutAfter(20)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
+
+      expect(adManager.getCurrentAd()).toBeNull();
+
+      // Play for 10 seconds, but stop early if the video ends.  If it takes
+      // longer than 30 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+
+      await player.unload();
+    }
 
     it('with support for multiple media elements', async () => {
       if (!player.getConfiguration().ads.supportsMultipleMediaElements) {
@@ -104,42 +144,7 @@ describe('Ads', () => {
 
       adManager.setContainers(adContainer, adContainer);
 
-      await player.load(streamUri);
-      video.play();
-      expect(player.isLive()).toBe(false);
-
-      expect(adManager.getCurrentAd()).toBeNull();
-
-      // Wait a maximum of 10 seconds before the ad starts playing.
-      await waiter.timeoutAfter(10)
-          .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
-
-      expect(adManager.getCurrentAd()).not.toBeNull();
-
-      await waiter.timeoutAfter(20)
-          .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
-
-      expect(adManager.getCurrentAd()).toBeNull();
-
-      await shaka.test.Util.delay(1);
-      expect(video.currentTime).toBeLessThanOrEqual(3);
-
-      // Wait a maximum of 10 seconds before the ad starts playing.
-      await waiter.timeoutAfter(10)
-          .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
-
-      expect(adManager.getCurrentAd()).not.toBeNull();
-
-      await waiter.timeoutAfter(20)
-          .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
-
-      expect(adManager.getCurrentAd()).toBeNull();
-
-      // Play for 10 seconds, but stop early if the video ends.  If it takes
-      // longer than 30 seconds, fail the test.
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
-
-      await player.unload();
+      await runAssetUriTest();
     });
 
     it('without support for multiple media elements', async () => {
@@ -147,59 +152,63 @@ describe('Ads', () => {
 
       adManager.setContainers(adContainer, adContainer);
 
-      await player.load(streamUri);
-      video.play();
-      expect(player.isLive()).toBe(false);
-
-      // Wait a maximum of 10 seconds before the ad starts playing.
-      await waiter.timeoutAfter(10)
-          .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
-      await waiter.timeoutAfter(20)
-          .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
-
-      await shaka.test.Util.delay(1);
-      expect(video.currentTime).toBeLessThanOrEqual(3);
-
-      // Wait a maximum of 10 seconds before the ad starts playing.
-      await waiter.timeoutAfter(10)
-          .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
-      await waiter.timeoutAfter(20)
-          .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
-
-      // Play for 10 seconds, but stop early if the video ends.  If it takes
-      // longer than 30 seconds, fail the test.
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
-
-      await player.unload();
+      await runAssetUriTest();
     });
 
     it('using the main media element', async () => {
-      goog.asserts.assert(adManager, 'Must have adManager');
+      await runAssetUriTest();
+    });
 
-      await player.load(streamUri);
-      video.play();
-      expect(player.isLive()).toBe(false);
+    describe('with X-ASSET-LIST', () => {
+      /**
+       * @return {!Promise}
+       */
+      async function runAssetListTest() {
+        goog.asserts.assert(adManager, 'Must have adManager');
 
-      // Wait a maximum of 10 seconds before the ad starts playing.
-      await waiter.timeoutAfter(10)
-          .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
-      await waiter.timeoutAfter(20)
-          .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
+        await player.load('/base/test/test/assets/hls-interstitial/list.m3u8');
+        video.play();
+        expect(player.isLive()).toBe(false);
 
-      await shaka.test.Util.delay(1);
-      expect(video.currentTime).toBeLessThanOrEqual(3);
+        // Wait a maximum of 10 seconds before the ad starts playing.
+        await waiter.timeoutAfter(10)
+            .waitForEvent(adManager, shaka.ads.Utils.AD_BREAK_STARTED);
+        await waiter.timeoutAfter(40)
+            .waitForEvent(adManager, shaka.ads.Utils.AD_BREAK_ENDED);
 
-      // Wait a maximum of 10 seconds before the ad starts playing.
-      await waiter.timeoutAfter(10)
-          .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
-      await waiter.timeoutAfter(20)
-          .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
+        // Play for 2 seconds, but stop early if the video ends.  If it takes
+        // longer than 10 seconds, fail the test.
+        await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 10);
 
-      // Play for 10 seconds, but stop early if the video ends.  If it takes
-      // longer than 30 seconds, fail the test.
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+        const stats = adManager.getStats();
+        expect(stats.started).toBe(2);
+        expect(stats.playedCompletely).toBe(2);
 
-      await player.unload();
+        await player.unload();
+      }
+
+      it('with support for multiple media elements', async () => {
+        if (!player.getConfiguration().ads.supportsMultipleMediaElements) {
+          pending('Platform without support for multiple media elements.');
+        }
+        player.configure('ads.supportsMultipleMediaElements', true);
+
+        adManager.setContainers(adContainer, adContainer);
+
+        await runAssetListTest();
+      });
+
+      it('without support for multiple media elements', async () => {
+        player.configure('ads.supportsMultipleMediaElements', false);
+
+        adManager.setContainers(adContainer, adContainer);
+
+        await runAssetListTest();
+      });
+
+      it('using the main media element', async () => {
+        await runAssetListTest();
+      });
     });
   });
 
