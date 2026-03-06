@@ -164,12 +164,6 @@ describe('Ads', () => {
        * @return {!Promise}
        */
       async function runAssetListTest() {
-        // Investigate and fix.
-        if (deviceDetected.getDeviceName() === 'Tizen' &&
-            deviceDetected.getVersion() === 3) {
-          pending('Tizen 3 doesn\'t work with 2 ads in the same position.');
-        }
-
         goog.asserts.assert(adManager, 'Must have adManager');
 
         await player.load('/base/test/test/assets/hls-interstitial/list.m3u8');
