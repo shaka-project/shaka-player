@@ -62,28 +62,33 @@ that involved AI assistance must say so clearly.
 The preferred convention is a **git trailer** in the commit message:
 
 ```
-Co-authored-by: Claude Code <noreply@anthropic.com>
+Co-Authored-By: Claude Code <noreply@anthropic.com>
 ```
 
 Git trailers are lines at the end of the commit message body, separated from the
-body by a blank line, in `Key: Value` format.  GitHub renders `Co-authored-by`
+body by a blank line, in `Key: Value` format.  GitHub renders `Co-Authored-By`
 trailers natively, showing the tool as a co-author on the commit and pull
 request.
 
-Other tools have their own canonical addresses — use whatever the tool provides,
-or follow the same pattern:
+Other tools have their own canonical addresses, and AGENTS.md contains a list
+of addresses that map known tools to GitHub user identities.  Ideally, your
+agent has already read the instructions there and could include the correct
+trailer automatically.
+
+If you used multiple tools, add a line for each.  For example:
 
 ```
-Co-authored-by: GitHub Copilot <copilot@github.com>
-Co-authored-by: Cursor <cursor@anysphere.com>
+Co-Authored-By: GitHub Copilot <198982749+Copilot@users.noreply.github.com>
+Co-Authored-By: Cursor <cursoragent@cursor.com>
 ```
 
-If you used multiple tools or a tool doesn't have a canonical address, a
-`Co-authored-by` line with a descriptive name is fine:
+If a tool doesn't have a canonical address, a `Co-Authored-By` line with a
+descriptive name is fine:
 
 ```
-Co-authored-by: Claude Code (claude-sonnet-4-6) <noreply@anthropic.com>
+Co-Authored-By: Some Coding Tool (v5) <noreply@example.com>
 ```
+
 
 **Why this matters:** Attribution helps reviewers calibrate their review effort,
 gives the project an honest record of how the code was produced, and keeps us
