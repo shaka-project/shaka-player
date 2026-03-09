@@ -134,7 +134,7 @@ describe('Demo', () => {
               checkValueNameFn(name);
             } else if (value !== null && typeof value == 'object') {
               // It's a sub-section.
-              check(value, name);
+              check(/** @type {!Object} */ (value), name);
             }
           }
         }
