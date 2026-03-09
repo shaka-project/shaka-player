@@ -21,6 +21,7 @@ shaka.test.FakeDemoMain = class {
 
     this.config_ = this.player.getConfiguration();
     // Default UI config values mirrored from shaka.ui.Overlay.defaultConfig_().
+    /** @type {!shaka.extern.UIConfiguration} */
     this.uiConfig_ = {
       controlPanelElements: [],
       topControlPanelElements: [],
