@@ -172,7 +172,7 @@ def main(args):
   if not compile_less('demo', 'demo', parsed_args):
     return 1
 
-  complete_non_experimental = ['+@complete', '-@msf']
+  complete_non_experimental = ['+@complete', '-@msf', '-@dashJson']
 
   build_args_experimental = ['--name', 'experimental', '+@complete']
   build_args_experimental += ['--locales'] + parsed_args.locales
