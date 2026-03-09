@@ -211,7 +211,7 @@ def main(args):
 
   builds = [
     build_args_experimental,
-    # build_args_with_ui,
+    build_args_with_ui,
     # build_args_without_ui,
     # build_args_only_dash_without_ui,
     # build_args_only_hls_without_ui,
@@ -224,7 +224,7 @@ def main(args):
   else:
     language_variants = [
       ('ECMASCRIPT5', ''),
-      ('ECMASCRIPT_2021', 'es2021'),
+      # ('ECMASCRIPT_2021', 'es2021'),
     ]
 
   # Run library builds in parallel per mode.
