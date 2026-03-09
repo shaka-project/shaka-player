@@ -81,7 +81,6 @@ shakaDemo.Config = class {
     this.sections_ = [];
 
     this.addMetaSection_();
-    this.addUISection_();
     this.addAudioPreferenceSection_();
     this.addTextPreferenceSection_();
     this.addVideoPreferenceSection_();
@@ -104,6 +103,13 @@ shakaDemo.Config = class {
     this.addLcevcSection_();
     this.addAdsSection_();
     this.addQueueManagerSection_();
+    this.addUISection_();
+    this.addUISeekBarColorsSection_();
+    this.addUIVolumeBarColorsSection_();
+    this.addUIQualityMarksSection_();
+    this.addUIMediaSessionSection_();
+    this.addUIDocumentPiPSection_();
+    this.addUIShortcutsSection_();
   }
 
   /**
@@ -1123,59 +1129,6 @@ shakaDemo.Config = class {
             'castAndroidReceiverCompatible')
         .addUITextInput_('Cast Receiver App ID', 'castReceiverAppId')
         .addUITextInput_('Cast Sender URL', 'castSenderUrl')
-        // seekBarColors
-        .addUITextInput_('Seek Bar Base Color', 'seekBarColors.base')
-        .addUITextInput_('Seek Bar Buffered Color', 'seekBarColors.buffered')
-        .addUITextInput_('Seek Bar Played Color', 'seekBarColors.played')
-        .addUITextInput_('Seek Bar Ad Breaks Color', 'seekBarColors.adBreaks')
-        .addUITextInput_('Seek Bar Chapters Color', 'seekBarColors.chapters')
-        // volumeBarColors
-        .addUITextInput_('Volume Bar Base Color', 'volumeBarColors.base')
-        .addUITextInput_('Volume Bar Level Color', 'volumeBarColors.level')
-        // qualityMarks
-        .addUITextInput_('Quality Mark 720p', 'qualityMarks.720')
-        .addUITextInput_('Quality Mark 1080p', 'qualityMarks.1080')
-        .addUITextInput_('Quality Mark 1440p', 'qualityMarks.1440')
-        .addUITextInput_('Quality Mark 2160p', 'qualityMarks.2160')
-        .addUITextInput_('Quality Mark 4320p', 'qualityMarks.4320')
-        // mediaSession
-        .addUIBoolInput_('Media Session Enabled', 'mediaSession.enabled')
-        .addUIBoolInput_('Media Session Handle Metadata',
-            'mediaSession.handleMetadata')
-        .addUIBoolInput_('Media Session Handle Actions',
-            'mediaSession.handleActions')
-        .addUIBoolInput_('Media Session Handle Position',
-            'mediaSession.handlePosition')
-        // documentPictureInPicture
-        .addUIBoolInput_('Document PiP Enabled',
-            'documentPictureInPicture.enabled')
-        .addUIBoolInput_('Document PiP Prefer Initial Window Placement',
-            'documentPictureInPicture.preferInitialWindowPlacement')
-        .addUIBoolInput_('Document PiP Disallow Return To Opener',
-            'documentPictureInPicture.disallowReturnToOpener')
-        // shortcuts
-        .addUITextInput_('Shortcut: Small Rewind', 'shortcuts.small_rewind')
-        .addUITextInput_('Shortcut: Small Fast Forward',
-            'shortcuts.small_fast_forward')
-        .addUITextInput_('Shortcut: Large Rewind', 'shortcuts.large_rewind')
-        .addUITextInput_('Shortcut: Large Fast Forward',
-            'shortcuts.large_fast_forward')
-        .addUITextInput_('Shortcut: Home', 'shortcuts.home')
-        .addUITextInput_('Shortcut: End', 'shortcuts.end')
-        .addUITextInput_('Shortcut: Captions', 'shortcuts.captions')
-        .addUITextInput_('Shortcut: Fullscreen', 'shortcuts.fullscreen')
-        .addUITextInput_('Shortcut: Mute', 'shortcuts.mute')
-        .addUITextInput_('Shortcut: Picture In Picture',
-            'shortcuts.picture_in_picture')
-        .addUITextInput_('Shortcut: Increase Video Speed',
-            'shortcuts.increase_video_speed')
-        .addUITextInput_('Shortcut: Decrease Video Speed',
-            'shortcuts.decrease_video_speed')
-        .addUITextInput_('Shortcut: Play', 'shortcuts.play')
-        .addUITextInput_('Shortcut: Take Screenshot',
-            'shortcuts.take_screenshot')
-        .addUITextInput_('Shortcut: Last Frame', 'shortcuts.last_frame')
-        .addUITextInput_('Shortcut: Next Frame', 'shortcuts.next_frame')
         // Array types
         .addUIArrayStringInput_('Control Panel Elements',
             'controlPanelElements')
@@ -1191,6 +1144,81 @@ shakaDemo.Config = class {
         .addUIArrayNumberInput_('Rewind Rates', 'rewindRates')
         .addUIArrayNumberInput_('Captions Font Scale Factors',
             'captionsFontScaleFactors');
+  }
+
+  /** @private */
+  addUISeekBarColorsSection_() {
+    const docLink = this.resolveExternLink_('.UISeekBarColors');
+    this.addSection_('UI: Seek Bar Colors', docLink)
+        .addUITextInput_('Base Color', 'seekBarColors.base')
+        .addUITextInput_('Buffered Color', 'seekBarColors.buffered')
+        .addUITextInput_('Played Color', 'seekBarColors.played')
+        .addUITextInput_('Ad Breaks Color', 'seekBarColors.adBreaks')
+        .addUITextInput_('Chapters Color', 'seekBarColors.chapters');
+  }
+
+  /** @private */
+  addUIVolumeBarColorsSection_() {
+    const docLink = this.resolveExternLink_('.UIVolumeBarColors');
+    this.addSection_('UI: Volume Bar Colors', docLink)
+        .addUITextInput_('Base Color', 'volumeBarColors.base')
+        .addUITextInput_('Level Color', 'volumeBarColors.level');
+  }
+
+  /** @private */
+  addUIQualityMarksSection_() {
+    const docLink = this.resolveExternLink_('.UIQualityMarks');
+    this.addSection_('UI: Quality Marks', docLink)
+        .addUITextInput_('720p', 'qualityMarks.720')
+        .addUITextInput_('1080p', 'qualityMarks.1080')
+        .addUITextInput_('1440p', 'qualityMarks.1440')
+        .addUITextInput_('2160p', 'qualityMarks.2160')
+        .addUITextInput_('4320p', 'qualityMarks.4320');
+  }
+
+  /** @private */
+  addUIMediaSessionSection_() {
+    const docLink = this.resolveExternLink_('.UIMediaSession');
+    this.addSection_('UI: Media Session', docLink)
+        .addUIBoolInput_('Enabled', 'mediaSession.enabled')
+        .addUIBoolInput_('Handle Metadata', 'mediaSession.handleMetadata')
+        .addUIBoolInput_('Handle Actions', 'mediaSession.handleActions')
+        .addUIBoolInput_('Handle Position', 'mediaSession.handlePosition');
+  }
+
+  /** @private */
+  addUIDocumentPiPSection_() {
+    const docLink = this.resolveExternLink_('.UIDocumentPictureInPicture');
+    this.addSection_('UI: Document Picture-in-Picture', docLink)
+        .addUIBoolInput_('Enabled', 'documentPictureInPicture.enabled')
+        .addUIBoolInput_('Prefer Initial Window Placement',
+            'documentPictureInPicture.preferInitialWindowPlacement')
+        .addUIBoolInput_('Disallow Return To Opener',
+            'documentPictureInPicture.disallowReturnToOpener');
+  }
+
+  /** @private */
+  addUIShortcutsSection_() {
+    const docLink = this.resolveExternLink_('.UIShortcuts');
+    this.addSection_('UI: Shortcuts', docLink)
+        .addUITextInput_('Small Rewind', 'shortcuts.small_rewind')
+        .addUITextInput_('Small Fast Forward', 'shortcuts.small_fast_forward')
+        .addUITextInput_('Large Rewind', 'shortcuts.large_rewind')
+        .addUITextInput_('Large Fast Forward', 'shortcuts.large_fast_forward')
+        .addUITextInput_('Home', 'shortcuts.home')
+        .addUITextInput_('End', 'shortcuts.end')
+        .addUITextInput_('Captions', 'shortcuts.captions')
+        .addUITextInput_('Fullscreen', 'shortcuts.fullscreen')
+        .addUITextInput_('Mute', 'shortcuts.mute')
+        .addUITextInput_('Picture In Picture', 'shortcuts.picture_in_picture')
+        .addUITextInput_('Increase Video Speed',
+            'shortcuts.increase_video_speed')
+        .addUITextInput_('Decrease Video Speed',
+            'shortcuts.decrease_video_speed')
+        .addUITextInput_('Play', 'shortcuts.play')
+        .addUITextInput_('Take Screenshot', 'shortcuts.take_screenshot')
+        .addUITextInput_('Last Frame', 'shortcuts.last_frame')
+        .addUITextInput_('Next Frame', 'shortcuts.next_frame');
   }
 
   /** @private */

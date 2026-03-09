@@ -77,6 +77,71 @@ describe('Demo', () => {
       });
     });
 
+    it('does not have entries for invalid UI config options', () => {
+      const allUIConfigQueries =
+          shakaDemoMain.getCurrentUIConfigValue.calls.all();
+      const uiConfigQueryData = allUIConfigQueries.map((spyData) => {
+        return spyData.args[0];
+      });
+
+      const knownUIValueNames = new Set();
+      checkUIConfig((valueName) => {
+        knownUIValueNames.add(valueName);
+      });
+      for (const valueName of uiConfigQueryData) {
+        if (!knownUIValueNames.has(valueName)) {
+          fail('Demo has a UI config field for unknown value "' +
+              valueName + '"');
+        }
+      }
+    });
+
+    it('has an entry for every UI config option', () => {
+      const allUIConfigQueries =
+          shakaDemoMain.getCurrentUIConfigValue.calls.all();
+      const uiConfigQueryData = allUIConfigQueries.map((spyData) => {
+        return spyData.args[0];
+      });
+
+      checkUIConfig((valueName) => {
+        if (!uiConfigQueryData.includes(valueName)) {
+          fail('Demo does not have a UI config field for "' + valueName + '"');
+        }
+      });
+    });
+
+    /** @param {function(string)} checkValueNameFn */
+    function checkUIConfig(checkValueNameFn) {
+      const configPrimitives = new Set(['number', 'string', 'boolean']);
+      const exceptions = new Set()
+          .add('customContextMenu')
+          .add('fullScreenElement')
+          .add('mediaSession.supportedActions');
+
+      /**
+       * @param {!Object} section
+       * @param {string} accumulatedName
+       */
+      const check = (section, accumulatedName) => {
+        for (const key in section) {
+          const name = (accumulatedName) ? (accumulatedName + '.' + key) : key;
+          const value = section[key];
+
+          if (!exceptions.has(name)) {
+            if (configPrimitives.has(typeof value)) {
+              checkValueNameFn(name);
+            } else if (Array.isArray(value)) {
+              checkValueNameFn(name);
+            } else if (value !== null && typeof value == 'object') {
+              // It's a sub-section.
+              check(value, name);
+            }
+          }
+        }
+      };
+      check(shakaDemoMain.getUIConfiguration(), '');
+    }
+
     /** @param {function(string)} checkValueNameFn */
     function checkConfig(checkValueNameFn) {
       const configPrimitives = new Set(['number', 'string', 'boolean']);
