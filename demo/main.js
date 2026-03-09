@@ -1324,6 +1324,31 @@ shakaDemo.Main = class {
     return this.desiredConfig_;
   }
 
+  /**
+   * @param {string|!Object} config
+   * @param {*=} value
+   */
+  configureUI(config, value) {
+    const video = /** @type {!HTMLVideoElement} */ (this.video_);
+    const ui = video['ui'];
+    if (ui) {
+      ui.configure(config, value);
+    }
+  }
+
+  /**
+   * @param {string} valueName
+   * @return {*}
+   */
+  getCurrentUIConfigValue(valueName) {
+    const video = /** @type {!HTMLVideoElement} */ (this.video_);
+    const ui = video['ui'];
+    if (ui) {
+      return this.getValueFromGivenConfig_(valueName, ui.getConfiguration());
+    }
+    return undefined;
+  }
+
   /** @return {boolean} */
   getIsVisualizerActive() {
     if (this.visualizer_) {
