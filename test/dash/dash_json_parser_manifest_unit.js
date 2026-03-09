@@ -20,8 +20,8 @@ describe('DashJsonParser Manifest', () => {
   beforeEach(() => {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = new shaka.dash.DashJsonParser();
-    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    parser.configure(config);
+    const config = shaka.util.PlayerConfiguration.createDefault();
+    parser.configure(config.manifest);
     onEventSpy = jasmine.createSpy('onEvent');
     addFontSpy = jasmine.createSpy('addFont');
     playerInterface = {
@@ -41,6 +41,7 @@ describe('DashJsonParser Manifest', () => {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: shaka.test.Util.spyFunc(addFontSpy),
+      getStreamingRetryParameters: () => config.streaming.retryParameters,
     };
   });
 
