@@ -211,10 +211,10 @@ def main(args):
 
   builds = [
     build_args_experimental,
-    build_args_with_ui,
-    build_args_without_ui,
-    build_args_only_dash_without_ui,
-    build_args_only_hls_without_ui,
+    # build_args_with_ui,
+    # build_args_without_ui,
+    # build_args_only_dash_without_ui,
+    # build_args_only_hls_without_ui,
   ]
 
   if parsed_args.only_es5:
