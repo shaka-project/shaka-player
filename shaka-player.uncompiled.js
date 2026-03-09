@@ -15,6 +15,7 @@ goog.require('shaka.abr.SimpleAbrManager');
 goog.require('shaka.ads.AdManager');
 goog.require('shaka.cast.CastProxy');
 goog.require('shaka.cast.CastReceiver');
+goog.require('shaka.dash.DashJsonParser');
 goog.require('shaka.dash.DashParser');
 goog.require('shaka.device.AppleBrowser');
 goog.require('shaka.device.Chromecast');
