@@ -18,7 +18,6 @@ goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Error');
-goog.require('shaka.util.Mp4Parser');
 goog.requireType('shaka.ui.Controls');
 
 /**
@@ -223,20 +222,7 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
 
         const response = await this.player.getNetworkingEngine()
             .request(requestType, request, {type}).promise;
-
-        if (thumbnail.codecs == 'mjpg') {
-          const parser = new shaka.util.Mp4Parser()
-              .box('mdat', shaka.util.Mp4Parser.allData((data) => {
-                const blob = new Blob([data], {type: 'image/jpeg'});
-                uri = URL.createObjectURL(blob);
-              }, /* clone= */ true));
-
-          parser.parse(response.data, false);
-        } else {
-          const mimeType = thumbnail.mimeType || 'image/jpeg';
-          const blob = new Blob([response.data], {type: mimeType});
-          uri = URL.createObjectURL(blob);
-        }
+        uri = shaka.ui.Utils.getUriFromThumbnailResponse(thumbnail, response);
       } catch (error) {
         if (error.code == shaka.util.Error.Code.OPERATION_ABORTED) {
           return null;
