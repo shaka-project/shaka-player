@@ -298,11 +298,12 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
 
   /**
    * Synchronize the mouse position with the range value.
-   * @param {MouseEvent} event
+   * @param {Event} event
    * @private
    */
   setBarValueForMouse_(event) {
-    this.bar.value = this.getValueFromPosition(event.clientX);
+    this.bar.value = this.getValueFromPosition(
+        /** @type {MouseEvent} */ (event).clientX);
   }
 
   /**
