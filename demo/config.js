@@ -1069,6 +1069,7 @@ shakaDemo.Config = class {
             trackLabelFormatOptions,
             trackLabelFormatNames)
         .addUIBoolInput_('Add Seek Bar', 'addSeekBar')
+        .addUIBoolInput_('Enable custom context Menu', 'customContextMenu')
         .addUIBoolInput_('Clear Buffer On Quality Change',
             'clearBufferOnQualityChange')
         .addUIBoolInput_('Show Unbuffered Start', 'showUnbufferedStart')
@@ -1251,12 +1252,6 @@ shakaDemo.Config = class {
           noop, 'Trick Play controls require the Shaka UI.');
       this.latestInput_.input().disabled = true;
       this.latestInput_.input().checked = false;
-    }
-    this.addCustomBoolInput_('Enabled custom context menu', (input) => {
-      shakaDemoMain.setCustomContextMenuEnabled(input.checked);
-    });
-    if (shakaDemoMain.getCustomContextMenuEnabled()) {
-      this.latestInput_.input().checked = true;
     }
 
     this.addCustomTextInput_('Watermark text', (input) => {

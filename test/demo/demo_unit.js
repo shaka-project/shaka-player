@@ -114,7 +114,6 @@ describe('Demo', () => {
     function checkUIConfig(checkValueNameFn) {
       const configPrimitives = new Set(['number', 'string', 'boolean']);
       const exceptions = new Set()
-          .add('customContextMenu')
           .add('fullScreenElement')
           .add('mediaSession.supportedActions');
 
