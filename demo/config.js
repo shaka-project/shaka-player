@@ -1186,7 +1186,9 @@ shakaDemo.Config = class {
         .addUIBoolInput_('Enabled', 'mediaSession.enabled')
         .addUIBoolInput_('Handle Metadata', 'mediaSession.handleMetadata')
         .addUIBoolInput_('Handle Actions', 'mediaSession.handleActions')
-        .addUIBoolInput_('Handle Position', 'mediaSession.handlePosition');
+        .addUIBoolInput_('Handle Position', 'mediaSession.handlePosition')
+        .addUIArrayNumberInput_('Supported actions',
+            'mediaSession.supportedActions');
   }
 
   /** @private */
