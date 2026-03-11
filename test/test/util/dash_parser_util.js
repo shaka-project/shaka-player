@@ -31,6 +31,7 @@ shaka.test.Dash = class {
     const networkingEngine = new shaka.test.FakeNetworkingEngine()
         .setResponseValue('dummy://foo', buffer);
 
+    const config = shaka.util.PlayerConfiguration.createDefault();
     const playerInterface = {
       networkingEngine: networkingEngine,
       modifyManifestRequest: (request, manifestInfo) => {},
@@ -48,6 +49,7 @@ shaka.test.Dash = class {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => config.streaming.retryParameters,
     };
     try {
       const manifest = await dashParser.start('dummy://foo', playerInterface);
@@ -79,6 +81,7 @@ shaka.test.Dash = class {
     const networkingEngine = new shaka.test.FakeNetworkingEngine()
         .setResponseValue('dummy://foo', manifestData);
 
+    const dConfig = shaka.util.PlayerConfiguration.createDefault();
     const playerInterface = {
       networkingEngine: networkingEngine,
       modifyManifestRequest: (request, manifestInfo) => {},
@@ -96,6 +99,7 @@ shaka.test.Dash = class {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => dConfig.streaming.retryParameters,
     };
 
     try {

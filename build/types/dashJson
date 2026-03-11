@@ -1,0 +1,4 @@
+# The DASH JSON manifest parser plugin.
+
++../../lib/dash/dash_json_parser.js
++../../lib/dash/json_utils.js
