@@ -286,8 +286,20 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     const max = parseFloat(this.bar.max);
     const step = parseFloat(this.bar.step) || 1;
 
-    const percent =
-        Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    // The thumb is @thumb-size (12px) wide.  To map click position to value
+    // correctly, we use the thumb's movement range
+    // [rect.left + 6, rect.right - 6] so that clicking at the visual center
+    // of the thumb yields the exact value, and clicking at either extreme
+    // clamps cleanly to min/max.  This matches the Blink engine's own
+    // SetPositionFromPoint() formula in slider_thumb_element.cc:
+    // https://chromium.googlesource.com/chromium/src/+/refs/heads/main/third_party/blink/renderer/core/html/forms/slider_thumb_element.cc
+    // 12 is the value of @thumb-size in range_elements.less.  Note: for
+    // everything to work, this value has to be synchronized.
+    const thumbRadius = 6; // half of @thumb-size in range_elements.less
+    const minX = rect.left + thumbRadius;
+    const maxX = rect.right - thumbRadius;
+    const clampedX = Math.max(minX, Math.min(maxX, clientX));
+    const percent = (clampedX - minX) / (maxX - minX);
 
     let value = min + percent * (max - min);
     value = Math.round((value - min) / step) * step + min;
