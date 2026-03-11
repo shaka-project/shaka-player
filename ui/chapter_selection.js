@@ -7,6 +7,8 @@
 
 goog.provide('shaka.ui.ChapterSelection');
 
+goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.net.NetworkingUtils');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
@@ -15,6 +17,7 @@ goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.Error');
 goog.requireType('shaka.ui.Controls');
 
 /**
@@ -44,8 +47,22 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
           this.updateChapters_();
         });
 
+    let hasImageTracks = this.player.getImageTracks().length;
+
     this.eventManager.listen(this.controls, 'chaptersupdated', () => {
       this.updateChapters_();
+    });
+
+    this.eventManager.listen(this.player, 'trackschanged', () => {
+      const newHasImageTracks = this.player.getImageTracks().length;
+      if (!hasImageTracks && newHasImageTracks) {
+        const hasChaptersImages =
+            this.controls.getChapters().some((c) => c.images.length > 0);
+        if (!hasChaptersImages) {
+          this.updateChapters_();
+        }
+      }
+      hasImageTracks = newHasImageTracks;
     });
 
     if (this.isSubMenu) {
@@ -103,14 +120,12 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
         span.textContent = chapter.title;
         button.appendChild(span);
 
-        if (chapter.images.length) {
-          this.loadChapterThumbnail_(chapter.images)
-              .then((img) => {
-                if (img && this.menu.contains(button)) {
-                  button.insertBefore(img, span);
-                }
-              });
-        }
+        this.loadThumbnailForChapter_(chapter)
+            .then((img) => {
+              if (img && this.menu.contains(button)) {
+                button.insertBefore(img, span);
+              }
+            });
 
         this.eventManager.listen(button, 'click', () => {
           if (!this.controls.isOpaque()) {
@@ -124,6 +139,30 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
       shaka.ui.Utils.setDisplay(this.button, !this.isSubMenuOpened);
     } else {
       shaka.ui.Utils.setDisplay(this.button, false);
+    }
+  }
+
+  /**
+   * @param {!shaka.extern.Chapter} chapter
+   * @return {!Promise<?HTMLElement>}
+   * @private
+   */
+  async loadThumbnailForChapter_(chapter) {
+    if (chapter.images.length) {
+      return this.loadChapterThumbnail_(chapter.images);
+    }
+    try {
+      if (!this.player.getImageTracks().length) {
+        return null;
+      }
+      const thumbnail = await this.player.getThumbnails(
+          /* trackId= */ null, chapter.startTime);
+      if (!thumbnail) {
+        return null;
+      }
+      return this.loadThumbnailFromTrack_(thumbnail);
+    } catch (e) {
+      return null;
     }
   }
 
@@ -145,6 +184,9 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
         img.classList.add('shaka-chapter-thumbnail');
         img.alt = '';
         img.onload = () => {
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'cover';
           resolve(img);
         };
         img.onerror = () => {
@@ -154,6 +196,73 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
         img.src = images[index].url;
       };
       tryNext();
+    });
+  }
+
+  /**
+   * @param {!shaka.extern.Thumbnail} thumbnail
+   * @return {!Promise<?HTMLElement>}
+   * @private
+   */
+  async loadThumbnailFromTrack_(thumbnail) {
+    let uri = thumbnail.uris[0].split('#xywh=')[0];
+    if (thumbnail.codecs == 'mjpg' || uri.startsWith('offline:')) {
+      try {
+        const requestType =
+          shaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+        const type =
+          shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT;
+
+        const request = shaka.net.NetworkingUtils.createSegmentRequest(
+            thumbnail.uris,
+            thumbnail.startByte,
+            thumbnail.endByte,
+            this.player.getConfiguration().streaming.retryParameters);
+
+        const response = await this.player.getNetworkingEngine()
+            .request(requestType, request, {type}).promise;
+        uri = shaka.ui.Utils.getUriFromThumbnailResponse(thumbnail, response);
+      } catch (error) {
+        if (error.code == shaka.util.Error.Code.OPERATION_ABORTED) {
+          return null;
+        }
+        throw error;
+      }
+    }
+
+    return new Promise((resolve) => {
+      const container = shaka.util.Dom.createHTMLElement('div');
+      container.classList.add('shaka-chapter-thumbnail');
+
+      const img = new Image();
+      img.draggable = false;
+
+      img.onload = () => {
+        container.appendChild(img);
+
+        if (!thumbnail.sprite) {
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'cover';
+        } else {
+          const scale = 60 / thumbnail.width;
+
+          img.style.position = 'absolute';
+          img.style.left = '-' + scale * thumbnail.positionX + 'px';
+          img.style.top = '-' + scale * thumbnail.positionY + 'px';
+          img.style.transform = 'scale(' + scale + ')';
+          img.style.transformOrigin = 'left top';
+        }
+
+        resolve(container);
+      };
+
+      img.onerror = () => {
+        resolve();
+      };
+
+      img.src = uri;
     });
   }
 };
