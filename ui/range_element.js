@@ -286,15 +286,12 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     const max = parseFloat(this.bar.max);
     const step = parseFloat(this.bar.step) || 1;
 
-    // The thumb is @thumb-size (12px) wide.  To map click position to value
-    // correctly, we use the thumb's movement range
-    // [rect.left + 6, rect.right - 6] so that clicking at the visual center
-    // of the thumb yields the exact value, and clicking at either extreme
-    // clamps cleanly to min/max.  This matches the Blink engine's own
-    // SetPositionFromPoint() formula in slider_thumb_element.cc:
-    // https://chromium.googlesource.com/chromium/src/+/refs/heads/main/third_party/blink/renderer/core/html/forms/slider_thumb_element.cc
-    // 12 is the value of @thumb-size in range_elements.less.  Note: for
-    // everything to work, this value has to be synchronized.
+    // thumbRadius is half of @thumb-size, as defined in range_elements.less.
+    // The browser renders the thumb only within the movement range
+    // [rect.left + thumbRadius, rect.right - thumbRadius], so we must apply
+    // the same offset when mapping a click position back to a value.
+    // Note: thumbRadius must stay in sync with @thumb-size in
+    // range_elements.less.
     const thumbRadius = 6; // half of @thumb-size in range_elements.less
     const minX = rect.left + thumbRadius;
     const maxX = rect.right - thumbRadius;
