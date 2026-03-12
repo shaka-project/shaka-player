@@ -16,7 +16,6 @@ goog.require('shaka.ui.RangeElement');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Error');
-goog.require('shaka.util.Mp4Parser');
 goog.require('shaka.util.Timer');
 goog.requireType('shaka.ui.Controls');
 
@@ -686,19 +685,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
               .request(requestType, request, {type});
           const response = await this.lastThumbnailPendingRequest_.promise;
           this.lastThumbnailPendingRequest_ = null;
-          if (thumbnail.codecs == 'mjpg') {
-            const parser = new shaka.util.Mp4Parser()
-                .box('mdat', shaka.util.Mp4Parser.allData((data) => {
-                  const blob = new Blob([data], {type: 'image/jpeg'});
-                  uri = URL.createObjectURL(blob);
-                  // Free up the rest of the segment and just clone the mdat.
-                }, /* clone= */ true));
-            parser.parse(response.data, /* partialOkay= */ false);
-          } else {
-            const mimeType = thumbnail.mimeType || 'image/jpeg';
-            const blob = new Blob([response.data], {type: mimeType});
-            uri = URL.createObjectURL(blob);
-          }
+          uri = shaka.ui.Utils.getUriFromThumbnailResponse(thumbnail, response);
         } catch (error) {
           if (error.code == shaka.util.Error.Code.OPERATION_ABORTED) {
             return;
