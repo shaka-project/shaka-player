@@ -48,6 +48,9 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     /** @private {boolean} */
     this.isChanging_ = false;
 
+    /** @private {boolean} */
+    this.isMouseChanging_ = false;
+
     /** @protected {!HTMLInputElement} */
     this.bar =
       /** @type {!HTMLInputElement} */ (document.createElement('input'));
@@ -74,20 +77,45 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
       this.bar.disabled = false;
     });
 
-    this.eventManager.listen(this.controls, 'showingui', (e) => {
+    this.eventManager.listen(this.controls, 'showingui', () => {
       this.showingUITimer_.tickAfter(/* seconds= */ 0);
     });
 
-    this.eventManager.listen(this.controls, 'hidingui', (e) => {
+    this.eventManager.listen(this.controls, 'hidingui', () => {
       this.showingUITimer_.stop();
       this.bar.disabled = true;
     });
 
     this.eventManager.listen(this.bar, 'mousedown', (e) => {
       if (!this.bar.disabled) {
+        // Prevent native range update to use getValueFromPosition()
+        // consistently with the hover preview.
+        e.preventDefault();
+        this.bar.focus();
         this.isChanging_ = true;
+        this.isMouseChanging_ = true;
+        this.setBarValueForMouse_(e);
         this.onChangeStart();
+        this.onChange();
         e.stopPropagation();
+      }
+    });
+
+    this.eventManager.listen(document, 'mousemove', (e) => {
+      if (this.isMouseChanging_) {
+        this.setBarValueForMouse_(e);
+        this.onChange();
+      }
+    });
+
+    this.eventManager.listen(document, 'mouseup', (e) => {
+      if (this.isMouseChanging_) {
+        this.isMouseChanging_ = false;
+        if (this.isChanging_) {
+          this.isChanging_ = false;
+          this.setBarValueForMouse_(e);
+          this.onChangeEnd();
+        }
       }
     });
 
@@ -133,6 +161,8 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     this.eventManager.listen(this.bar, 'mouseup', (e) => {
       if (this.isChanging_) {
         this.isChanging_ = false;
+        this.isMouseChanging_ = false;
+        this.setBarValueForMouse_(e);
         this.onChangeEnd();
         e.stopPropagation();
       }
@@ -141,6 +171,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     this.eventManager.listen(this.bar, 'blur', () => {
       if (this.isChanging_) {
         this.isChanging_ = false;
+        this.isMouseChanging_ = false;
         this.onChangeEnd();
       }
     });
@@ -250,37 +281,38 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
    * @return {number}
    */
   getValueFromPosition(clientX) {
-    // Get the bounding rectangle of the range input element
     const rect = this.bar.getBoundingClientRect();
-
-    // Parse the min, max, and step attributes from the input element
     const min = parseFloat(this.bar.min);
     const max = parseFloat(this.bar.max);
     const step = parseFloat(this.bar.step) || 1;
 
-    // Define the effective range of the thumb movement
-    // 12 is the value of @thumb-size in range_elements.less. Note: for
-    // everything to work, this value has to be synchronized.
-    const thumbWidth = 12;
-    const minX = rect.left + thumbWidth / 2;
-    const maxX = rect.right - thumbWidth / 2;
-
-    // Clamp the touch X position to stay within the thumb's movement range
+    // thumbRadius is half of @thumb-size, as defined in range_elements.less.
+    // The browser renders the thumb only within the movement range
+    // [rect.left + thumbRadius, rect.right - thumbRadius], so we must apply
+    // the same offset when mapping a click position back to a value.
+    // Note: thumbRadius must stay in sync with @thumb-size in
+    // range_elements.less.
+    const thumbRadius = 6; // half of @thumb-size in range_elements.less
+    const minX = rect.left + thumbRadius;
+    const maxX = rect.right - thumbRadius;
     const clampedX = Math.max(minX, Math.min(maxX, clientX));
-
-    // Calculate the percentage of the track that the clamped X represents
     const percent = (clampedX - minX) / (maxX - minX);
 
-    // Convert the percentage into a value within the input's range
     let value = min + percent * (max - min);
-
-    // Round the value to the nearest step
     value = Math.round((value - min) / step) * step + min;
-
-    // Ensure the value stays within the min and max bounds
     value = Math.min(max, Math.max(min, value));
 
     return value;
+  }
+
+  /**
+   * Synchronize the mouse position with the range value.
+   * @param {Event} event
+   * @private
+   */
+  setBarValueForMouse_(event) {
+    this.bar.value = this.getValueFromPosition(
+        /** @type {MouseEvent} */ (event).clientX);
   }
 
   /**
