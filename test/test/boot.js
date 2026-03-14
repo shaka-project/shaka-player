@@ -518,6 +518,38 @@ function checkTrueDrmSupport() {
 }
 
 /**
+ * Check if MSF parser is supported.
+ * @return {boolean}
+ */
+window.isMSFSupported = () => {
+  if (!isBigIntSupported()) {
+    return false;
+  }
+  if (!isWritableStreamSupported()) {
+    return false;
+  }
+  if (!isReadableStreamSupported()) {
+    return false;
+  }
+  return true;
+};
+
+/**
+ * Check if ReadableStream is supported.
+ * @return {boolean}
+ */
+function isBigIntSupported() {
+  let supported = false;
+  try {
+    supported = typeof window.BigInt === 'function';
+    // eslint-disable-next-line no-restricted-syntax
+  } catch (e) {
+    // Ignore errors
+  }
+  return supported;
+}
+
+/**
  * Check if ReadableStream is supported.
  * @return {boolean}
  */
@@ -542,7 +574,14 @@ function isReadableStreamSupported() {
  * @return {boolean}
  */
 function isWritableStreamSupported() {
-  return typeof WritableStream !== 'undefined';
+  let supported = false;
+  try {
+    supported = typeof window.WritableStream === 'function';
+    // eslint-disable-next-line no-restricted-syntax
+  } catch (e) {
+    // Ignore errors
+  }
+  return supported;
 }
 
 /**
