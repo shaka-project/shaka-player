@@ -286,15 +286,15 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     const max = parseFloat(this.bar.max);
     const step = parseFloat(this.bar.step) || 1;
 
-    // thumbRadius is half of @thumb-size, as defined in range_elements.less.
+    // The thumb is @thumb-size wide, as defined in range_elements.less.
     // The browser renders the thumb only within the movement range
-    // [rect.left + thumbRadius, rect.right - thumbRadius], so we must apply
+    // [rect.left + thumbSize/2, rect.right - thumbSize/2], so we must apply
     // the same offset when mapping a click position back to a value.
-    // Note: thumbRadius must stay in sync with @thumb-size in
+    // Note: thumbSize must stay in sync with @thumb-size in
     // range_elements.less.
-    const thumbRadius = 6; // half of @thumb-size in range_elements.less
-    const minX = rect.left + thumbRadius;
-    const maxX = rect.right - thumbRadius;
+    const thumbSize = 12; // @thumb-size in range_elements.less
+    const minX = rect.left + thumbSize / 2;
+    const maxX = rect.right - thumbSize / 2;
     const clampedX = Math.max(minX, Math.min(maxX, clientX));
     const percent = (clampedX - minX) / (maxX - minX);
 
