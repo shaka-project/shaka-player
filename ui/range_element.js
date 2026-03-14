@@ -281,7 +281,10 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
    * @return {number}
    */
   getValueFromPosition(clientX) {
+    // Get the bounding rectangle of the range input element
     const rect = this.bar.getBoundingClientRect();
+
+    // Parse the min, max, and step attributes from the input element
     const min = parseFloat(this.bar.min);
     const max = parseFloat(this.bar.max);
     const step = parseFloat(this.bar.step) || 1;
