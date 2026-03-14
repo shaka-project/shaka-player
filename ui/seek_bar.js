@@ -299,8 +299,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       const max = parseFloat(this.bar.max);
       const rect = this.bar.getBoundingClientRect();
       const value = Math.round(this.getValue());
-      const scale = (max - min) / rect.width;
-      const position = (value - min) / scale;
+      const thumbRadius = 6;
+      const scale = (rect.width - 2 * thumbRadius) / (max - min);
+      const position = (value - min) * scale + thumbRadius;
       this.showThumbnailAndTime_(position, value);
     } else {
       this.hideThumbnailTimeContainer_();
