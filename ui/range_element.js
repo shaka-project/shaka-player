@@ -286,20 +286,26 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     const max = parseFloat(this.bar.max);
     const step = parseFloat(this.bar.step) || 1;
 
-    // The thumb is @thumb-size wide, as defined in range_elements.less.
-    // The browser renders the thumb only within the movement range
-    // [rect.left + thumbSize/2, rect.right - thumbSize/2], so we must apply
-    // the same offset when mapping a click position back to a value.
-    // Note: thumbSize must stay in sync with @thumb-size in
-    // range_elements.less.
-    const thumbSize = 12; // @thumb-size in range_elements.less
-    const minX = rect.left + thumbSize / 2;
-    const maxX = rect.right - thumbSize / 2;
+    // Define the effective range of the thumb movement
+    // 12 is the value of @thumb-size in range_elements.less. Note: for
+    // everything to work, this value has to be synchronized.
+    const thumbWidth = 12;
+    const minX = rect.left + thumbWidth / 2;
+    const maxX = rect.right - thumbWidth / 2;
+
+    // Clamp the touch X position to stay within the thumb's movement range
     const clampedX = Math.max(minX, Math.min(maxX, clientX));
+
+    // Calculate the percentage of the track that the clamped X represents
     const percent = (clampedX - minX) / (maxX - minX);
 
+    // Convert the percentage into a value within the input's range
     let value = min + percent * (max - min);
+
+    // Round the value to the nearest step
     value = Math.round((value - min) / step) * step + min;
+
+    // Ensure the value stays within the min and max bounds
     value = Math.min(max, Math.max(min, value));
 
     return value;
