@@ -1,4 +1,4 @@
-describe('shaka.msf.MSFParser', () => {
+filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
   /** @type {!shaka.test.FakeNetworkingEngine} */
   let fakeNetEngine;
   /** @type {!shaka.msf.MSFParser} */
