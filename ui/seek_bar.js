@@ -300,8 +300,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       const max = parseFloat(this.bar.max);
       const rect = this.bar.getBoundingClientRect();
       const value = Math.round(this.getValue());
-      const scale = (max - min) / rect.width;
-      const position = (value - min) / scale;
+      const thumbSize = 12; // @thumb-size in range_elements.less
+      const scale = (rect.width - thumbSize) / (max - min);
+      const position = (value - min) * scale + thumbSize / 2;
       this.showThumbnailAndTime_(position, value);
     } else {
       this.hideThumbnailTimeContainer_();
