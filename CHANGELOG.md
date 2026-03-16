@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.16.22](https://github.com/shaka-project/shaka-player/compare/v4.16.21...v4.16.22) (2026-03-13)
+
+
+### Bug Fixes
+
+* **UI:** sync seek position with hover timestamp using consistent position calculation ([#9818](https://github.com/shaka-project/shaka-player/issues/9818)) ([56a92bb](https://github.com/shaka-project/shaka-player/commit/56a92bb917d2ea2db2bcdcc8fadf5fca6f6229c0))
+
+
+### Performance Improvements
+
+* **DASH:** Add period caching to speed up manifest parsing ([#9353](https://github.com/shaka-project/shaka-player/issues/9353)) ([6f7129c](https://github.com/shaka-project/shaka-player/commit/6f7129c2cceda04f55ea560d7bccfab616a135ab))
+* **net:** Optimize getExtension URI parsing ([#9816](https://github.com/shaka-project/shaka-player/issues/9816)) ([872f598](https://github.com/shaka-project/shaka-player/commit/872f598af576e817908558d0a33ca99bfb920e1b))
+
 ## [4.16.21](https://github.com/shaka-project/shaka-player/compare/v4.16.20...v4.16.21) (2026-03-09)
 
 
