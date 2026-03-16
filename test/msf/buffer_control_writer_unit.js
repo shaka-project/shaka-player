@@ -1,4 +1,4 @@
-describe('shaka.msf.BufferControlWriter', () => {
+filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
   /** @type {!shaka.msf.BufferControlWriter} */
   let writer;
 
@@ -23,7 +23,7 @@ describe('shaka.msf.BufferControlWriter', () => {
   it('should reset the buffer', () => {
     const msg = {
       kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE,
-      requestId: 123,
+      requestId: BigInt(123),
     };
     writer.marshalUnsubscribe(msg);
     const beforeReset = writer.getBytes().length;
@@ -38,7 +38,7 @@ describe('shaka.msf.BufferControlWriter', () => {
     it('should marshal a valid Subscribe message', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE,
-        requestId: 1,
+        requestId: BigInt(1),
         namespace: ['ns1', 'ns2'],
         name: 'track1',
         subscriberPriority: 1,
@@ -55,7 +55,7 @@ describe('shaka.msf.BufferControlWriter', () => {
     it('should throw if startLocation is missing for absolute filter', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE,
-        requestId: 1,
+        requestId: BigInt(1),
         namespace: [],
         name: 'track1',
         subscriberPriority: 1,
@@ -72,12 +72,12 @@ describe('shaka.msf.BufferControlWriter', () => {
     it('should marshal a SubscribeOk message with content', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE_OK,
-        requestId: 1,
-        trackAlias: 2,
-        expires: 100,
+        requestId: BigInt(1),
+        trackAlias: BigInt(2),
+        expires: BigInt(100),
         groupOrder: shaka.msf.Utils.GroupOrder.ASCENDING,
         contentExists: true,
-        largest: {group: 1, object: 2},
+        largest: {group: BigInt(1), object: BigInt(2)},
         params: [],
       };
       writer.marshalSubscribeOk(msg);
@@ -87,9 +87,9 @@ describe('shaka.msf.BufferControlWriter', () => {
     it('should throw if largest is missing when contentExists is true', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE_OK,
-        requestId: 1,
-        trackAlias: 2,
-        expires: 100,
+        requestId: BigInt(1),
+        trackAlias: BigInt(2),
+        expires: BigInt(100),
         groupOrder: shaka.msf.Utils.GroupOrder.ASCENDING,
         contentExists: true,
         largest: undefined,
@@ -103,10 +103,10 @@ describe('shaka.msf.BufferControlWriter', () => {
     it('should marshal a SubscribeError message', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE_ERROR,
-        requestId: 1,
-        code: 404,
+        requestId: BigInt(1),
+        code: BigInt(404),
         reason: 'Not found',
-        trackAlias: 5,
+        trackAlias: BigInt(5),
       };
       writer.marshalSubscribeError(msg);
       expect(writer.getBytes().length).toBeGreaterThan(0);
@@ -117,8 +117,8 @@ describe('shaka.msf.BufferControlWriter', () => {
     it('should marshal a PublishDone message', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.PUBLISH_DONE,
-        requestId: 1,
-        code: 0,
+        requestId: BigInt(1),
+        code: BigInt(0),
         reason: 'Done',
         streamCount: 3,
       };
@@ -131,7 +131,7 @@ describe('shaka.msf.BufferControlWriter', () => {
     it('should marshal an PublishNamespace message', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE,
-        requestId: 1,
+        requestId: BigInt(1),
         namespace: ['ns'],
         params: [],
       };
@@ -144,7 +144,7 @@ describe('shaka.msf.BufferControlWriter', () => {
     it('should marshal an PublishNamespaceOk message', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_OK,
-        requestId: 1,
+        requestId: BigInt(1),
         namespace: ['ns'],
       };
       writer.marshalPublishNamespaceOk(msg);
@@ -156,7 +156,7 @@ describe('shaka.msf.BufferControlWriter', () => {
     it('should marshal an Unsubscribe message', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE,
-        requestId: 1,
+        requestId: BigInt(1),
       };
       writer.marshalUnsubscribe(msg);
       expect(writer.getBytes().length).toBeGreaterThan(0);
@@ -167,8 +167,8 @@ describe('shaka.msf.BufferControlWriter', () => {
     it('should marshal an PublishNamespaceError message', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_ERROR,
-        requestId: 1,
-        code: 500,
+        requestId: BigInt(1),
+        code: BigInt(500),
         reason: 'Server error'}
         ;
       writer.marshalPublishNamespaceError(msg);
@@ -212,8 +212,8 @@ describe('shaka.msf.BufferControlWriter', () => {
   it('marshalSubscribe writes correct message type and length', () => {
     const msg = {
       kind: shaka.msf.Utils.MessageType.SUBSCRIBE,
-      requestId: 1,
-      trackAlias: 2,
+      requestId: BigInt(1),
+      trackAlias: BigInt(2),
       namespace: ['ns1', 'ns2'],
       name: 'trackName',
       subscriberPriority: 1,
@@ -236,12 +236,12 @@ describe('shaka.msf.BufferControlWriter', () => {
   it('marshalSubscribeOk writes correct message type and largest location', () => {
     const msg = {
       kind: shaka.msf.Utils.MessageType.SUBSCRIBE_OK,
-      requestId: 5,
-      trackAlias: 2,
-      expires: 1234,
+      requestId: BigInt(5),
+      trackAlias: BigInt(2),
+      expires: BigInt(1234),
       groupOrder: shaka.msf.Utils.GroupOrder.DESCENDING,
       contentExists: true,
-      largest: {group: 10, object: 20},
+      largest: {group: BigInt(10), object: BigInt(20)},
       params: [],
     };
 
@@ -265,7 +265,7 @@ describe('shaka.msf.BufferControlWriter', () => {
   it('marshalUnsubscribe writes correct message type and requestId', () => {
     const msg = {
       kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE,
-      requestId: 42,
+      requestId: BigInt(42),
     };
 
     writer.marshalUnsubscribe(msg);

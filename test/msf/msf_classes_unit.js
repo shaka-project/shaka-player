@@ -1,4 +1,4 @@
-describe('shaka.msf.Reader', () => {
+filterDescribe('shaka.msf.Reader', isMSFSupported, () => {
   /** @type {!shaka.msf.Reader} */
   let reader;
 
@@ -124,15 +124,15 @@ describe('shaka.msf.Reader', () => {
 
     const pairs = await reader.keyValuePairs();
     expect(pairs.length).toBe(2);
-    expect(pairs[0]).toEqual({type: 2, value: 3});
-    expect(pairs[1].type).toBe(1);
+    expect(pairs[0]).toEqual({type: BigInt(2), value: BigInt(3)});
+    expect(pairs[1].type).toBe(BigInt(1));
     expect(shaka.util.StringUtils.fromUTF8(
         /** @type {!ArrayBufferView} */ (pairs[1].value),
     )).toBe('A');
   });
 });
 
-describe('shaka.msf.Writer', () => {
+filterDescribe('shaka.msf.Writer', isMSFSupported, () => {
   /** @type {!shaka.msf.Writer} */
   let writer;
 
@@ -176,7 +176,7 @@ describe('shaka.msf.Writer', () => {
   });
 });
 
-describe('shaka.msf.Receiver', () => {
+filterDescribe('shaka.msf.Receiver', isMSFSupported, () => {
   let reader;
   let receiver;
 
@@ -201,7 +201,7 @@ describe('shaka.msf.Receiver', () => {
         if (offset >= buffer.length) {
           throw new Error('unexpected end of stream');
         }
-        const value = buffer[offset++];
+        const value = BigInt(buffer[offset++]);
         return {value, bytesRead: 1};
       },
       read: (length) => {
@@ -252,8 +252,8 @@ describe('shaka.msf.Receiver', () => {
     const result = await receiver.server();
     expect(result.version).toBe(1);
     expect(result.params.length).toBe(1);
-    expect(result.params[0].type).toBe(2);
-    expect(result.params[0].value).toBe(42);
+    expect(result.params[0].type).toBe(BigInt(2));
+    expect(result.params[0].value).toBe(BigInt(42));
   });
 
   it('should throw error if server type is invalid', async () => {
@@ -272,7 +272,7 @@ describe('shaka.msf.Receiver', () => {
   });
 });
 
-describe('shaka.msf.Sender', () => {
+filterDescribe('shaka.msf.Sender', isMSFSupported, () => {
   let sender;
   /** @type {!Array<!Uint8Array>} */
   let writtenChunks;
@@ -297,8 +297,14 @@ describe('shaka.msf.Sender', () => {
     const clientSetup = {
       versions: [1],
       params: [
-        {type: 2, value: 42},
-        {type: 3, value: new Uint8Array([0xde, 0xad])},
+        {
+          type: BigInt(2),
+          value: BigInt(42),
+        },
+        {
+          type: BigInt(3),
+          value: new Uint8Array([0xde, 0xad]),
+        },
       ],
     };
 

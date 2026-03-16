@@ -70,18 +70,27 @@ describe('DataViewWriter', () => {
 
   describe('varInt62', () => {
     it('writes small values with varInt62 using varInt53 path', () => {
-      writer.writeVarInt62(0x1234);
+      if (!isBigIntSupported()) {
+        pending('BigInt is not supported by the platform.');
+      }
+      writer.writeVarInt62(BigInt(0x1234));
       const bytes = writer.getBytes();
       expect(bytes.length).toBe(2);
     });
 
     it('throws on negative values', () => {
-      expect(() => writer.writeVarInt62(-1)).toThrow();
+      if (!isBigIntSupported()) {
+        pending('BigInt is not supported by the platform.');
+      }
+      expect(() => writer.writeVarInt62(BigInt(-1))).toThrow();
     });
 
     it('writes varInt53 values via varInt62 path for numbers <= 53-bit', () => {
+      if (!isBigIntSupported()) {
+        pending('BigInt is not supported by the platform.');
+      }
       const val = Number.MAX_SAFE_INTEGER;
-      writer.writeVarInt62(val);
+      writer.writeVarInt62(BigInt(val));
       const bytes = writer.getBytes();
       expect(bytes.length).toBe(8);
     });
