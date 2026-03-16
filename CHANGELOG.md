@@ -1,5 +1,28 @@
 # Changelog
 
+## [5.0.6](https://github.com/shaka-project/shaka-player/compare/v5.0.5...v5.0.6) (2026-03-16)
+
+
+### Bug Fixes
+
+* **Ads:** Fix ended detection when using supportsMultipleMediaElements = false ([#9798](https://github.com/shaka-project/shaka-player/issues/9798)) ([8a6fccd](https://github.com/shaka-project/shaka-player/commit/8a6fccdeb0b5c7ada87cd9b1e0acbb75090524f6))
+* **Ads:** Improvements to the use of ASSET-LIST on devices with single-element video support ([#9810](https://github.com/shaka-project/shaka-player/issues/9810)) ([1206d0a](https://github.com/shaka-project/shaka-player/commit/1206d0a0e11178f031960d1f9a8c9b16d3a095b2))
+* **MSF:** Add support for moqtail relay ([#9819](https://github.com/shaka-project/shaka-player/issues/9819)) ([adcbe3e](https://github.com/shaka-project/shaka-player/commit/adcbe3e05bbf6f54773277aa8891761b4198f0aa))
+* **MSF:** fall back to session namespace for media subscribes ([#9808](https://github.com/shaka-project/shaka-player/issues/9808)) ([5fb1f37](https://github.com/shaka-project/shaka-player/commit/5fb1f37049a5400f0fbe9076571f31b278f20546))
+* **MSF:** Fix target latency support ([#9825](https://github.com/shaka-project/shaka-player/issues/9825)) ([8860eef](https://github.com/shaka-project/shaka-player/commit/8860eefade95b68cf72d578cc53fae1819d4c0b4))
+* **MSF:** prevent video segment eviction during initial buffering ([#9809](https://github.com/shaka-project/shaka-player/issues/9809)) ([59786ce](https://github.com/shaka-project/shaka-player/commit/59786ce98cd3c96999a29b96d0a48a01eb7cbd64))
+* **MSF:** Remove "Possible encoding problem detected!" ([#9814](https://github.com/shaka-project/shaka-player/issues/9814)) ([d7bf25d](https://github.com/shaka-project/shaka-player/commit/d7bf25d76f324f37e3e82f2de8fed11d1315d8f5))
+* **MSF:** Remove minimum segment availability duration ([#9812](https://github.com/shaka-project/shaka-player/issues/9812)) ([c28bfc8](https://github.com/shaka-project/shaka-player/commit/c28bfc8d06a2198ce8e5af524afe4c438995dc70))
+* **MSF:** Use bigint natively ([#9826](https://github.com/shaka-project/shaka-player/issues/9826)) ([df830fd](https://github.com/shaka-project/shaka-player/commit/df830fdc91b005f5f9ceaab39567b4f955038a51))
+* **UI:** sync seek position with hover and onChange timestamp using consistent position calculation ([#9827](https://github.com/shaka-project/shaka-player/issues/9827)) ([33daa1e](https://github.com/shaka-project/shaka-player/commit/33daa1e04980c086d8e296331355b8180f78eaa7))
+* **UI:** sync seek position with hover timestamp using consistent position calculation ([#9818](https://github.com/shaka-project/shaka-player/issues/9818)) ([af16252](https://github.com/shaka-project/shaka-player/commit/af162529936012d1ae87eadbed237d96940763d9))
+
+
+### Performance Improvements
+
+* **DASH:** Add period caching to speed up manifest parsing ([#9353](https://github.com/shaka-project/shaka-player/issues/9353)) ([4d62ec1](https://github.com/shaka-project/shaka-player/commit/4d62ec1ef6ca3f2bcee99b007454c3c02784e410))
+* **net:** Optimize getExtension URI parsing ([#9816](https://github.com/shaka-project/shaka-player/issues/9816)) ([b7b97af](https://github.com/shaka-project/shaka-player/commit/b7b97affc524eca3f34a3c20da27fa091a9b0aca))
+
 ## [5.0.5](https://github.com/shaka-project/shaka-player/compare/v5.0.4...v5.0.5) (2026-03-09)
 
 
