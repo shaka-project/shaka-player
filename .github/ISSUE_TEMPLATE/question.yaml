@@ -34,10 +34,12 @@ body:
     id: browser_os
     attributes:
       label: What browser and OS are you using?
+    validations:
+      required: false
 
   - type: textarea
     id: question
     attributes:
       label: Please ask your question
     validations:
-      required: false
+      required: true

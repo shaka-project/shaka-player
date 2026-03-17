@@ -76,6 +76,8 @@ body:
     id: device
     attributes:
       label: For embedded devices (smart TVs, etc.), what model and firmware version are you using?
+    validations:
+      required: false
 
   - type: textarea
     id: manifest
