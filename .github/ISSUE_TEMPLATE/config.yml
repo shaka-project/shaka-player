@@ -1,1 +1,11 @@
 blank_issues_enabled: false
+contact_links:
+  - name: FAQ
+    url: https://shaka-project.github.io/shaka-player/docs/api/tutorial-faq.html
+    about: Find answers to frequently asked questions and common issues with Shaka Player.
+  - name: Tutorials
+    url: https://shaka-project.github.io/shaka-player/docs/api/tutorial-welcome.html
+    about: Learn how to use Shaka Player step by step with practical guides and examples.
+  - name: API documentation
+    url: https://shaka-project.github.io/shaka-player/docs/api/index.html
+    about: Explore the full API documentation to integrate and customize Shaka Player in your projects.
