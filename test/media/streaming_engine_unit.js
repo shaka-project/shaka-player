@@ -631,12 +631,13 @@ describe('StreamingEngine', () => {
     await runTest();
 
     // Video should be fully buffered (4 segments).
-    expect(mediaSourceEngine.segments.video).toEqual([true, true, true, true]);
+    expect(mediaSourceEngine.segments[ContentType.VIDEO])
+        .toEqual([true, true, true, true]);
 
     // Audio should NOT be buffered because StreamingEngine skips it when
     // isAudioMuxedInVideo is true (it assumes it's handled by video).
-    expect(mediaSourceEngine.segments.audio).toEqual(
-        [false, false, false, false]);
+    expect(mediaSourceEngine.segments[ContentType.AUDIO])
+        .toEqual([false, false, false, false]);
   });
 
   it('marks muxed audio as endOfStream when video ends', async () => {
