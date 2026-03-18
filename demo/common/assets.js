@@ -1540,8 +1540,9 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'BipBop 16x9 HLS (Muxed Audio)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
-      /* manifestUri= */ 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+      /* manifestUri= */ 'test:hls-bipbop-muxed',
       /* source= */ shakaAssets.Source.APPLE)
+
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)

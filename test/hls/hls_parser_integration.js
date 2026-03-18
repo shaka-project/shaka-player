@@ -242,10 +242,10 @@ describe('HlsParser', () => {
     await player.unload();
   });
 
-  it('plays muxed audio', async () => {
+  it('plays muxed TS audio', async () => {
     // This asset has muxed audio in the video stream (no separate audio URI
     // for the default audio group).
-    const bipBopUrl = 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8';
+    const bipBopUrl = '/base/test/test/assets/hls-bipbop-muxed/master.m3u8';
 
     await player.load(bipBopUrl);
 
@@ -261,4 +261,5 @@ describe('HlsParser', () => {
     // Play for a few seconds.
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 40);
   });
+
 });
