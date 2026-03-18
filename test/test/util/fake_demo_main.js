@@ -122,6 +122,7 @@ shaka.test.FakeDemoMain = class {
         disallowReturnToOpener: false,
       },
       showUIOnPaused: true,
+      showMenusOnTheRight: false,
     };
     this.selectedAsset = null;
 
