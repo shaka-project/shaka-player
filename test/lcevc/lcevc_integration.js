@@ -33,6 +33,8 @@ describe('LCEVC Integration', () => {
 
   const dualTrackScalableManifests = {
     DASH: '/base/test/test/assets/lcevc-dual-track/master.mpd',
+    DASH_MULTI_PERIOD:
+        '/base/test/test/assets/lcevc-dual-track/multi_period.mpd',
   };
 
   beforeAll(async () => {
@@ -128,6 +130,21 @@ describe('LCEVC Integration', () => {
       }
 
       await testPlayback(dualTrackScalableManifests.DASH, /* scalable= */ true);
+    });
+
+    // eslint-disable-next-line @stylistic/max-len
+    it('Should decode LCEVC in Dual-Track Scalable DASH multi period manifest', async () => {
+      if (isPlatformUnsupported()) {
+        pending('Disabled on unsupported platform.');
+      }
+
+      if (!(canvas.getContext('webgl') ||
+          canvas.getContext('experimental-webgl'))) {
+        pending('Current platform does not offer WebGL support.');
+      }
+
+      // eslint-disable-next-line @stylistic/max-len
+      await testPlayback(dualTrackScalableManifests.DASH_MULTI_PERIOD, /* scalable= */ true);
     });
   });
 
