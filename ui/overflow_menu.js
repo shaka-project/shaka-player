@@ -241,6 +241,11 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 
     this.overflowMenu_.style.maxHeight = heightIntersection + 'px';
 
+    if (this.config_.showMenusOnTheRight) {
+      this.overflowMenu_.style.right = '15px';
+      return;
+    }
+
     // Compute horizontal position
     const bottomControlsPos = this.controlsContainer_.getBoundingClientRect();
     const overflowMenuButtonPos =
