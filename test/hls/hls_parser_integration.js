@@ -261,5 +261,4 @@ describe('HlsParser', () => {
     // Play for a few seconds.
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 40);
   });
-
 });
