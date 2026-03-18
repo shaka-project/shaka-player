@@ -1118,6 +1118,7 @@ shakaDemo.Config = class {
         .addUIBoolInput_('Show UI Always On Audio Only',
             'showUIAlwaysOnAudioOnly')
         .addUIBoolInput_('Show UI On Paused', 'showUIOnPaused')
+        .addUIBoolInput_('Show menus on the right', 'showMenusOnTheRight')
         .addUIBoolInput_('Prefer Intl Display Names', 'preferIntlDisplayNames')
         .addUIBoolInput_('Captions Styles', 'captionsStyles')
         .addUIBoolInput_('Display In VR Mode', 'displayInVrMode')
