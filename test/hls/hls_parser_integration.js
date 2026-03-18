@@ -245,7 +245,8 @@ describe('HlsParser', () => {
   it('plays muxed TS audio in video', async () => {
     // This asset has muxed audio in the video stream (no separate audio URI
     // for the default audio group).
-    const url = '/base/test/test/assets/hls-ts-audio-muxed-in-video/master.m3u8';
+    const url =
+        '/base/test/test/assets/hls-ts-audio-muxed-in-video/master.m3u8';
 
     await player.load(url);
 
