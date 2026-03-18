@@ -1538,9 +1538,9 @@ shakaAssets.testAssets = [
   // End Verizon Digital Media Services (VDMS) assets }}}
 
   new ShakaDemoAssetInfo(
-      /* name= */ 'BipBop 16x9 HLS (Muxed Audio)',
+      /* name= */ 'HLS TS (Muxed Audio in Video)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
-      /* manifestUri= */ 'test:hls-bipbop-muxed',
+      /* manifestUri= */ 'test:hls-ts-audio-muxed-in-video',
       /* source= */ shakaAssets.Source.APPLE)
 
       .addFeature(shakaAssets.Feature.HLS)
