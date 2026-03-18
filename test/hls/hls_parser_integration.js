@@ -242,12 +242,12 @@ describe('HlsParser', () => {
     await player.unload();
   });
 
-  it('plays bipbop 16x9 with muxed audio', async () => {
+  it('plays muxed audio', async () => {
     // This asset has muxed audio in the video stream (no separate audio URI
     // for the default audio group).
-    const bipbopUrl = 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8';
+    const bipBopUrl = 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8';
 
-    await player.load(bipbopUrl);
+    await player.load(bipBopUrl);
 
     // Verify that we are using the expected variant.
     const variants = player.getVariantTracks();
