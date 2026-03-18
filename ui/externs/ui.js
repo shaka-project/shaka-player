@@ -313,6 +313,7 @@ shaka.extern.UIDocumentPictureInPicture;
  *   captionsFontScaleFactors: !Array<number>,
  *   documentPictureInPicture: shaka.extern.UIDocumentPictureInPicture,
  *   showUIOnPaused: boolean,
+ *   showMenusOnTheRight: boolean,
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -598,6 +599,11 @@ shaka.extern.UIDocumentPictureInPicture;
  *   Whether to show the UI whenever the video is paused.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {boolean} showMenusOnTheRight
+ *   It always displays the menus on the right side of the container regardless
+ *   of where the button that opens the menu is located.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;
