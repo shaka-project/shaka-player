@@ -215,10 +215,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         return;
       }
       const value = this.getValueFromPosition(event.clientX);
-      const rect = this.bar.getBoundingClientRect();
-      // Pixels from the left of the range element
-      const mousePosition = Math.max(0, event.clientX - rect.left);
-      this.showThumbnailAndTime_(mousePosition, value);
+      this.showThumbnailAtValue_(value);
     });
 
     this.eventManager.listen(this.container, 'mouseleave', () => {
@@ -297,14 +294,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.seekTimer_.tickAfter(/* seconds= */ 0.125);
 
     if (!this.controls.anySettingsMenusAreOpen()) {
-      const min = parseFloat(this.bar.min);
-      const max = parseFloat(this.bar.max);
-      const rect = this.bar.getBoundingClientRect();
-      const value = Math.round(this.getValue());
-      const thumbSize = 12; // @thumb-size in range_elements.less
-      const scale = (rect.width - thumbSize) / (max - min);
-      const position = (value - min) * scale + thumbSize / 2;
-      this.showThumbnailAndTime_(position, value);
+      this.showThumbnailAtValue_(this.getValue());
     } else {
       this.hideThumbnailTimeContainer_();
     }
@@ -580,6 +570,20 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   /** @private */
   updateAriaLabel_() {
     this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.SEEK);
+  }
+
+  /**
+   * @param {number} value
+   * @private
+   */
+  showThumbnailAtValue_(value) {
+    const min = parseFloat(this.bar.min);
+    const max = parseFloat(this.bar.max);
+    const rect = this.bar.getBoundingClientRect();
+    const thumbSize = 12; // @thumb-size in range_elements.less
+    const scale = (rect.width - thumbSize) / (max - min);
+    const position = (value - min) * scale + thumbSize / 2;
+    this.showThumbnailAndTime_(position, value);
   }
 
   /**
