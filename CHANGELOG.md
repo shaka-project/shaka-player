@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.0.7](https://github.com/shaka-project/shaka-player/compare/v5.0.6...v5.0.7) (2026-03-19)
+
+
+### Bug Fixes
+
+* **LCEVC:** Fix live support when using DASH dual track ([#9841](https://github.com/shaka-project/shaka-player/issues/9841)) ([b3cfa4c](https://github.com/shaka-project/shaka-player/commit/b3cfa4c632d5757f3fa7e42d746ec7ee6d435c54))
+* **LCEVC:** Fix multi-period VOD support ([#9837](https://github.com/shaka-project/shaka-player/issues/9837)) ([7d88692](https://github.com/shaka-project/shaka-player/commit/7d88692720c2563dfb085e2ecf8c224e0e6d9b1b))
+* **MSF:** Improve buffer management ([#9831](https://github.com/shaka-project/shaka-player/issues/9831)) ([631369c](https://github.com/shaka-project/shaka-player/commit/631369c7bfc2fadb4a84e971d8a8cd1c26670a33))
+* Prevent live stream infinite buffering when isAudioMuxedInVideo is present ([#9835](https://github.com/shaka-project/shaka-player/issues/9835)) ([924ce61](https://github.com/shaka-project/shaka-player/commit/924ce6143f313da97d10033318846a61a8a34558))
+* **UI:** Close overflow and settings menus when user seeks ([#9834](https://github.com/shaka-project/shaka-player/issues/9834)) ([47f40f4](https://github.com/shaka-project/shaka-player/commit/47f40f4c5dc3df84e0d773204144870c94858b75))
+* **UI:** Fix delay updating the styles after seeks ([#9846](https://github.com/shaka-project/shaka-player/issues/9846)) ([dad983b](https://github.com/shaka-project/shaka-player/commit/dad983be2f2a77476da96b3eb6abb74cbd7864bd))
+* **UI:** sync seekbar on timestamp position value between mousemove and onChange in firefox ([#9840](https://github.com/shaka-project/shaka-player/issues/9840)) ([0b06e89](https://github.com/shaka-project/shaka-player/commit/0b06e89d39eba3596836759809468b8201863a27))
+
 ## [5.0.6](https://github.com/shaka-project/shaka-player/compare/v5.0.5...v5.0.6) (2026-03-16)
 
 
