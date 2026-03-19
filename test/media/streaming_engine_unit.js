@@ -609,6 +609,62 @@ describe('StreamingEngine', () => {
     netEngine.expectRequest('1_text_3', segmentType, segmentContext);
   });
 
+  it('does not wait for muxed audio to buffer', async () => {
+    setupVod();
+
+    // Mark audio as muxed in video.
+    audioStream.isAudioMuxedInVideo = true;
+
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    createStreamingEngine();
+
+    // Here we go!
+    streamingEngine.switchVariant(variant);
+    await streamingEngine.start();
+    playing = true;
+
+    // We expect video to buffer even if audio is not being buffered/updated.
+    // In update_(), isAudioMuxedInVideo streams return null immediately.
+    // And they are skipped in the minTimeNeeded calculation.
+
+    // Run for a bit.
+    await runTest();
+
+    // Video should be fully buffered (4 segments).
+    expect(mediaSourceEngine.segments[ContentType.VIDEO])
+        .toEqual([true, true, true, true]);
+
+    // Audio should NOT be buffered because StreamingEngine skips it when
+    // isAudioMuxedInVideo is true (it assumes it's handled by video).
+    expect(mediaSourceEngine.segments[ContentType.AUDIO])
+        .toEqual([false, false, false, false]);
+  });
+
+  it('marks muxed audio as endOfStream when video ends', async () => {
+    setupVod();
+
+    // Mark audio as muxed in video.
+    audioStream.isAudioMuxedInVideo = true;
+
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    createStreamingEngine();
+
+    // Here we go!
+    streamingEngine.switchVariant(variant);
+    await streamingEngine.start();
+    playing = true;
+
+    // Run until end.
+    await runTest();
+
+    expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+
+    // Both should be marked as endOfStream in StreamingEngine's internal state,
+    // allowing the global endOfStream() call.
+    // We can't easily check internal state, but if endOfStream was called,
+    // it means all mediaStates (video and muxed-audio) had endOfStream=true.
+  });
+
   describe('unloadTextStream', () => {
     it('doesn\'t send requests for text after calling unload', async () => {
       setupVod();
