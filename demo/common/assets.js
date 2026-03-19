@@ -1540,7 +1540,7 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'HLS TS (Muxed Audio in Video)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
-      /* manifestUri= */ 'test:hls-ts-audio-muxed-in-video',
+      /* manifestUri= */ 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
       /* source= */ shakaAssets.Source.APPLE)
 
       .addFeature(shakaAssets.Feature.HLS)
