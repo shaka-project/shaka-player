@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.15.35](https://github.com/shaka-project/shaka-player/compare/v4.15.34...v4.15.35) (2026-03-19)
+
+
+### Bug Fixes
+
+* Prevent live stream infinite buffering when isAudioMuxedInVideo is present ([#9835](https://github.com/shaka-project/shaka-player/issues/9835)) ([3075829](https://github.com/shaka-project/shaka-player/commit/3075829512bdf9ba189110d57b7e1b06205eba49))
+
 ## [4.15.34](https://github.com/shaka-project/shaka-player/compare/v4.15.33...v4.15.34) (2026-03-13)
 
 
