@@ -281,6 +281,8 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-text-no-discontinuity/*', included: false},
       {pattern: 'test/test/assets/hls-text-offset/*', included: false},
       {pattern: 'test/test/assets/hls-ts-aac/*', included: false},
+      // eslint-disable-next-line @stylistic/max-len
+      {pattern: 'test/test/assets/hls-ts-audio-muxed-in-video/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ac3/*', included: false},
       {pattern: 'test/test/assets/hls-ts-b-frames/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ec3/*', included: false},

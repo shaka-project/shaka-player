@@ -1487,10 +1487,20 @@ shakaAssets.testAssets = [
       .setResponseFilter(shakaAssets.UplynkResponseFilter),
   // End Verizon Digital Media Services (VDMS) assets }}}
 
-  // Apple assets {{{
-  // Src: https://developer.apple.com/streaming/examples/
+  new ShakaDemoAssetInfo(
+      /* name= */ 'HLS TS (Muxed Audio in Video)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
+      /* manifestUri= */ 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+      /* source= */ shakaAssets.Source.APPLE)
+
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.CAPTIONS)
+      .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Apple Advanced HLS Stream (fMP4)',
+
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/apple-advanced-stream-fmp4/master.m3u8',
       /* source= */ shakaAssets.Source.APPLE)
