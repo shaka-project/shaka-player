@@ -217,4 +217,25 @@ describe('HlsParser', () => {
 
     await player.unload();
   });
+
+  it('plays muxed TS audio in video', async () => {
+    // This asset has muxed audio in the video stream (no separate audio URI
+    // for the default audio group).
+    const url =
+        '/base/test/test/assets/hls-ts-audio-muxed-in-video/master.m3u8';
+
+    await player.load(url);
+
+    // Verify that we are using the expected variant.
+    const variants = player.getVariantTracks();
+    expect(variants.length).toBeGreaterThan(0);
+
+    await video.play();
+
+    // Wait for the video to start playback.
+    await waiter.waitForMovementOrFailOnTimeout(video, 20);
+
+    // Play for a few seconds.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 40);
+  });
 });
