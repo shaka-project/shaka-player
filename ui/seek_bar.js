@@ -76,6 +76,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.video.currentTime = newCurrentTime;
       this.controls.hideContextMenus();
       this.controls.hideSettingsMenus();
+      this.update();
     });
 
 
