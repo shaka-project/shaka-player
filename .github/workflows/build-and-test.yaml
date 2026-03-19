@@ -93,6 +93,7 @@ jobs:
           # Disabled until working properly
           # - os: windows-latest
           #   browser: Opera
+          #   extra_flags: "--running_in_vm"
 
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
@@ -135,7 +136,11 @@ jobs:
       - name: 'Install Opera on Ubuntu'
         timeout-minutes: 5
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Opera'
-        run: sudo apt -y update && sudo apt -y install snapd && sudo snap install opera
+        run: |
+          wget -O - http://deb.opera.com/archive.key | sudo apt-key add -
+          echo "deb http://deb.opera.com/opera-stable/ stable non-free" | sudo tee /etc/apt/sources.list.d/opera.list
+          sudo apt -y update
+          sudo apt -y install opera-stable
 
       - name: 'Install Opera on Windows'
         timeout-minutes: 5
