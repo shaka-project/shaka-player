@@ -25,6 +25,54 @@ describe('ManifestParserUtils', () => {
           'audio', ['mp2v']);
       expect(result).toBeNull();
     });
+
+    it('recognizes DTS audio codec', () => {
+      const result = ManifestParserUtils.guessCodecsSafe(
+          'audio', ['dts']);
+      expect(result).toBe('dts');
+    });
+
+    it('recognizes DTS-HD (dtsh) audio codec', () => {
+      const result = ManifestParserUtils.guessCodecsSafe(
+          'audio', ['dtsh']);
+      expect(result).toBe('dtsh');
+    });
+
+    it('recognizes DTS Digital Surround (dtsc)', () => {
+      const result = ManifestParserUtils.guessCodecsSafe(
+          'audio', ['dtsc']);
+      expect(result).toBe('dtsc');
+    });
+
+    it('recognizes DTS Express (dtse)', () => {
+      const result = ManifestParserUtils.guessCodecsSafe(
+          'audio', ['dtse']);
+      expect(result).toBe('dtse');
+    });
+
+    it('recognizes DTS:X (dtsx)', () => {
+      const result = ManifestParserUtils.guessCodecsSafe(
+          'audio', ['dtsx']);
+      expect(result).toBe('dtsx');
+    });
+
+    it('returns DTS variant from mixed codec list', () => {
+      const result = ManifestParserUtils.guessCodecsSafe(
+          'audio', ['avc1.42E01E', 'dtsh']);
+      expect(result).toBe('dtsh');
+    });
+
+    it('does not match DTS codecs as video', () => {
+      const result = ManifestParserUtils.guessCodecsSafe(
+          'video', ['dts']);
+      expect(result).toBeNull();
+    });
+
+    it('does not match invalid DTS-like strings', () => {
+      const result = ManifestParserUtils.guessCodecsSafe(
+          'audio', ['dtsz']);
+      expect(result).toBeNull();
+    });
   });
 
   describe('resolveUris', () => {
