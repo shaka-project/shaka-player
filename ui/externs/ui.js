@@ -312,6 +312,8 @@ shaka.extern.UIDocumentPictureInPicture;
  *   captionsStyles: boolean,
  *   captionsFontScaleFactors: !Array<number>,
  *   documentPictureInPicture: shaka.extern.UIDocumentPictureInPicture,
+ *   showUIOnPaused: boolean,
+ *   showMenusOnTheRight: boolean,
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -593,6 +595,15 @@ shaka.extern.UIDocumentPictureInPicture;
  *   Enables using the Document Picture-in-Picture API, with options to control
  *   initial window placement and whether the PiP window can return focus to
  *   the originating tab.
+ * @property {boolean} showUIOnPaused
+ *   Whether to show the UI whenever the video is paused.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} showMenusOnTheRight
+ *   It always displays the menus on the right side of the container regardless
+ *   of where the button that opens the menu is located.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

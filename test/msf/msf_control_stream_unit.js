@@ -1,4 +1,4 @@
-describe('shaka.msf.ControlStream', () => {
+filterDescribe('shaka.msf.ControlStream', isMSFSupported, () => {
   /** @type {!shaka.msf.ControlStream} */
   let controlStream;
 

@@ -463,7 +463,7 @@ describe('Interstitial Ad manager', () => {
         groupId: 'PREROLL',
         startTime: 0,
         endTime: null,
-        uri: 'ad.m3u8?_HLS_primary_id=1',
+        uri: 'test:/ad.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: false,
         skipOffset: null,
@@ -987,7 +987,7 @@ describe('Interstitial Ad manager', () => {
         groupId: 'TEST',
         startTime: 0,
         endTime: null,
-        uri: 'ad.m3u8?_HLS_primary_id=1',
+        uri: 'test:/ad.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 5,
@@ -1237,7 +1237,7 @@ describe('Interstitial Ad manager', () => {
     it('supports alternative MPD', async () => {
       const eventString = [
         '<Event duration="1" id="PREROLL" presentationTime="0">',
-        '<InsertPresentation url="test.mpd"/>',
+        '<InsertPresentation uri="test.mpd"/>',
         '</Event>',
       ].join('');
       const eventNode = TXml.parseXmlString(eventString);
@@ -1271,7 +1271,7 @@ describe('Interstitial Ad manager', () => {
     it('supports alternative MPD with noJump and skipAfter', async () => {
       const eventString = [
         '<Event duration="1" id="TEST" presentationTime="1">',
-        '<InsertPresentation url="test.mpd" noJump="1" skipAfter="PT0S"/>',
+        '<InsertPresentation uri="test.mpd" noJump="1" skipAfter="PT0S"/>',
         '</Event>',
       ].join('');
       const eventNode = TXml.parseXmlString(eventString);
@@ -1335,7 +1335,7 @@ describe('Interstitial Ad manager', () => {
     it('ignore duplicate alternative MPD', async () => {
       const eventString = [
         '<Event duration="1" id="PREROLL" presentationTime="0">',
-        '<ReplacePresentation url="test.mpd" returnOffset="1"/>',
+        '<ReplacePresentation uri="test.mpd" returnOffset="1"/>',
         '</Event>',
       ].join('');
       const eventNode = TXml.parseXmlString(eventString);
@@ -2239,12 +2239,17 @@ describe('Interstitial Ad manager', () => {
 
     await shaka.test.Util.shortDelay();
 
-    expect(onEventSpy).toHaveBeenCalledTimes(5);
+    expect(onEventSpy).toHaveBeenCalledTimes(6);
     const eventValuePreload = {
       type: 'ad-interstitial-preload',
     };
     expect(onEventSpy).toHaveBeenCalledWith(
         jasmine.objectContaining(eventValuePreload));
+    const eventValuePreloaded = {
+      type: 'ad-interstitial-preloaded',
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValuePreloaded));
     const eventValueAdBreakStarted = {
       type: 'ad-break-started',
     };
@@ -2300,7 +2305,7 @@ describe('Interstitial Ad manager', () => {
 
     await shaka.test.Util.shortDelay();
 
-    expect(onEventSpy).toHaveBeenCalledTimes(6);
+    expect(onEventSpy).toHaveBeenCalledTimes(7);
     const eventValue1 = {
       type: 'ad-cue-points-changed',
       cuepoints: [
@@ -2315,6 +2320,11 @@ describe('Interstitial Ad manager', () => {
     };
     expect(onEventSpy).toHaveBeenCalledWith(
         jasmine.objectContaining(eventValuePreload));
+    const eventValuePreloaded = {
+      type: 'ad-interstitial-preloaded',
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValuePreloaded));
     const eventValueAdBreakStarted = {
       type: 'ad-break-started',
     };

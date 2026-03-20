@@ -89,7 +89,8 @@ describe('HlsParser', () => {
 
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
-    config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    const dConfig = shaka.util.PlayerConfiguration.createDefault();
+    config = dConfig.manifest;
     sequenceMode = config.hls.sequenceMode;
     onEventSpy = jasmine.createSpy('onEvent');
     newDrmInfoSpy = jasmine.createSpy('newDrmInfo');
@@ -111,6 +112,7 @@ describe('HlsParser', () => {
       onMetadata: shaka.test.Util.spyFunc(onMetadataSpy),
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => dConfig.streaming.retryParameters,
     };
 
     parser = new shaka.hls.HlsParser();
@@ -2990,6 +2992,20 @@ describe('HlsParser', () => {
             title: 'Dos',
           },
         ],
+        'images': [
+          {
+            'image-category': 'thumbnail',
+            'pixel-width': 320,
+            'pixel-height': 180,
+            'url': 'images/foo.jpg',
+          },
+          {
+            'image-category': 'thumbnail',
+            'pixel-width': 480,
+            'pixel-height': 270,
+            'url': 'test:/foo.jpg',
+          },
+        ],
       },
     ]);
 
@@ -3023,10 +3039,24 @@ describe('HlsParser', () => {
     expect(firstChapterReference).not.toBe(null);
     expect(secondChapterReference).not.toBe(null);
     if (firstChapterReference) {
-      expect(firstChapterReference.getUris()[0]).toBe('One');
+      const metadata = firstChapterReference.getMetadata();
+      expect(metadata).not.toBe(null);
+      expect(metadata.title).toBe('One');
+      expect(metadata.images.length).toBe(0);
     }
     if (secondChapterReference) {
-      expect(secondChapterReference.getUris()[0]).toBe('Two');
+      const metadata = secondChapterReference.getMetadata();
+      expect(metadata).not.toBe(null);
+      expect(metadata.title).toBe('Two');
+      expect(metadata.images.length).toBe(2);
+      expect(metadata.images[0].type).toBe('thumbnail');
+      expect(metadata.images[0].width).toBe(320);
+      expect(metadata.images[0].height).toBe(180);
+      expect(metadata.images[0].url).toBe('test:/images/foo.jpg');
+      expect(metadata.images[1].type).toBe('thumbnail');
+      expect(metadata.images[1].width).toBe(480);
+      expect(metadata.images[1].height).toBe(270);
+      expect(metadata.images[1].url).toBe('test:/foo.jpg');
     }
   });
 

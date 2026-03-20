@@ -48,6 +48,9 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     /** @private {boolean} */
     this.isChanging_ = false;
 
+    /** @private {boolean} */
+    this.isMouseChanging_ = false;
+
     /** @protected {!HTMLInputElement} */
     this.bar =
       /** @type {!HTMLInputElement} */ (document.createElement('input'));
@@ -74,20 +77,45 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
       this.bar.disabled = false;
     });
 
-    this.eventManager.listen(this.controls, 'showingui', (e) => {
+    this.eventManager.listen(this.controls, 'showingui', () => {
       this.showingUITimer_.tickAfter(/* seconds= */ 0);
     });
 
-    this.eventManager.listen(this.controls, 'hidingui', (e) => {
+    this.eventManager.listen(this.controls, 'hidingui', () => {
       this.showingUITimer_.stop();
       this.bar.disabled = true;
     });
 
     this.eventManager.listen(this.bar, 'mousedown', (e) => {
       if (!this.bar.disabled) {
+        // Prevent native range update to use getValueFromPosition()
+        // consistently with the hover preview.
+        e.preventDefault();
+        this.bar.focus();
         this.isChanging_ = true;
+        this.isMouseChanging_ = true;
+        this.setBarValueForMouse_(e);
         this.onChangeStart();
+        this.onChange();
         e.stopPropagation();
+      }
+    });
+
+    this.eventManager.listen(document, 'mousemove', (e) => {
+      if (this.isMouseChanging_) {
+        this.setBarValueForMouse_(e);
+        this.onChange();
+      }
+    });
+
+    this.eventManager.listen(document, 'mouseup', (e) => {
+      if (this.isMouseChanging_) {
+        this.isMouseChanging_ = false;
+        if (this.isChanging_) {
+          this.isChanging_ = false;
+          this.setBarValueForMouse_(e);
+          this.onChangeEnd();
+        }
       }
     });
 
@@ -133,6 +161,8 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     this.eventManager.listen(this.bar, 'mouseup', (e) => {
       if (this.isChanging_) {
         this.isChanging_ = false;
+        this.isMouseChanging_ = false;
+        this.setBarValueForMouse_(e);
         this.onChangeEnd();
         e.stopPropagation();
       }
@@ -141,6 +171,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     this.eventManager.listen(this.bar, 'blur', () => {
       if (this.isChanging_) {
         this.isChanging_ = false;
+        this.isMouseChanging_ = false;
         this.onChangeEnd();
       }
     });
@@ -253,7 +284,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     // Get the bounding rectangle of the range input element
     const rect = this.bar.getBoundingClientRect();
 
-    // Parse the min, max, and step attributes from the input element
+    // Parse the min, max attributes from the input element
     const min = parseFloat(this.bar.min);
     const max = parseFloat(this.bar.max);
     const step = parseFloat(this.bar.step) || 1;
@@ -281,6 +312,16 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     value = Math.min(max, Math.max(min, value));
 
     return value;
+  }
+
+  /**
+   * Synchronize the mouse position with the range value.
+   * @param {Event} event
+   * @private
+   */
+  setBarValueForMouse_(event) {
+    this.bar.value = this.getValueFromPosition(
+        /** @type {MouseEvent} */ (event).clientX);
   }
 
   /**

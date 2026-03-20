@@ -283,6 +283,8 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-text-no-discontinuity/*', included: false},
       {pattern: 'test/test/assets/hls-text-offset/*', included: false},
       {pattern: 'test/test/assets/hls-ts-aac/*', included: false},
+      // eslint-disable-next-line @stylistic/max-len
+      {pattern: 'test/test/assets/hls-ts-audio-muxed-in-video/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ac3/*', included: false},
       {pattern: 'test/test/assets/hls-ts-b-frames/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ec3/*', included: false},
@@ -303,6 +305,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-ts-rollover/*', included: false},
       {pattern: 'test/test/assets/lcevc-sei/*', included: false},
       {pattern: 'test/test/assets/lcevc-sei-ts/*', included: false},
+      {pattern: 'test/test/assets/lcevc-dual-track/*', included: false},
       {pattern: 'dist/shaka-player.experimental.js', included: false},
       {pattern: 'dist/locales.js', included: false},
       {pattern: 'demo/**/*.js', included: false},

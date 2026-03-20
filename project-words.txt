@@ -20,6 +20,7 @@ configurationchanged
 currentitemchanged
 customwarning
 defaultselected
+deferreds
 describedby
 disableonfail
 downloadcompleted
@@ -465,6 +466,7 @@ xyzw
 # DASH
 dashif
 fontdownload
+isoff
 querypart
 startnumber
 Xlinks
@@ -536,6 +538,7 @@ sintel
 stardate
 systeminfo
 templatized
+UNLCK
 vaage
 webapis
 

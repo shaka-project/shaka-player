@@ -31,6 +31,12 @@ describe('LCEVC Integration', () => {
     TS_HLS: '/base/test/test/assets/lcevc-sei-ts/master.m3u8',
   };
 
+  const dualTrackScalableManifests = {
+    DASH: '/base/test/test/assets/lcevc-dual-track/master.mpd',
+    DASH_MULTI_PERIOD:
+        '/base/test/test/assets/lcevc-dual-track/multi_period.mpd',
+  };
+
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     canvas = shaka.test.UiUtils.createCanvasElement();
@@ -78,14 +84,24 @@ describe('LCEVC Integration', () => {
 
   /**
    * @param {string} uri
+   * @param {boolean=} scalable
    * @return {!Promise}
    */
-  async function testPlayback(uri) {
+  async function testPlayback(uri, scalable = false) {
     // Wait for LCEVCdec to finish loading
     await LCEVCdec.ready;
 
     await player.load(uri);
     await video.play();
+
+    if (scalable) {
+      const tracks = player.getVariantTracks();
+      const dualScalableTrack = tracks.find((t) => t.codecs.includes('lvc1'));
+      if (!dualScalableTrack) {
+        throw new Error('Dual scalable track not found but should exist.');
+      }
+      player.selectVariantTrack(dualScalableTrack, /* clearBuffer= */ true);
+    }
 
     // Wait for the video to start playback.  If it takes longer than 10
     // seconds, fail the test.
@@ -101,6 +117,36 @@ describe('LCEVC Integration', () => {
     expect(LCEVCdec.instance.firstLcevcSegmentLoaded).toBe(true);
     expect(LCEVCdec.instance.lcevcDataDetected).toBe(true);
   }
+
+  describe('Dual-Track Scalable Integration', () => {
+    it('Should decode LCEVC in Dual-Track Scalable DASH manifest', async () => {
+      if (isPlatformUnsupported()) {
+        pending('Disabled on unsupported platform.');
+      }
+
+      if (!(canvas.getContext('webgl') ||
+          canvas.getContext('experimental-webgl'))) {
+        pending('Current platform does not offer WebGL support.');
+      }
+
+      await testPlayback(dualTrackScalableManifests.DASH, /* scalable= */ true);
+    });
+
+    // eslint-disable-next-line @stylistic/max-len
+    it('Should decode LCEVC in Dual-Track Scalable DASH multi period manifest', async () => {
+      if (isPlatformUnsupported()) {
+        pending('Disabled on unsupported platform.');
+      }
+
+      if (!(canvas.getContext('webgl') ||
+          canvas.getContext('experimental-webgl'))) {
+        pending('Current platform does not offer WebGL support.');
+      }
+
+      // eslint-disable-next-line @stylistic/max-len
+      await testPlayback(dualTrackScalableManifests.DASH_MULTI_PERIOD, /* scalable= */ true);
+    });
+  });
 
   describe('SEI Integration', () => {
     it('Should decode LCEVC in FMP4 DASH manifest', async () => {

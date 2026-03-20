@@ -62,6 +62,8 @@ shaka.extern.AdaptationSetCriteria.Factory;
 
 /**
  * @typedef {{
+ *   preferredAudio: !Array<!shaka.extern.AudioPreference>,
+ *   preferredVideo: !Array<!shaka.extern.VideoPreference>,
  *   language: string,
  *   role: string,
  *   videoRole: string,
@@ -71,33 +73,63 @@ shaka.extern.AdaptationSetCriteria.Factory;
  *   videoLayout: string,
  *   audioLabel: string,
  *   videoLabel: string,
+ *   preferredAudioCodecs: !Array<string>,
+ *   preferredAudioChannelCount: number,
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   audioCodec: string,
  *   activeAudioCodec: string,
  *   activeAudioChannelCount: number,
- *   preferredAudioCodecs: !Array<string>,
- *   preferredAudioChannelCount: number,
  *   keySystem: string,
  * }}
  *
+ * @property {!Array<!shaka.extern.AudioPreference>} preferredAudio
+ *   An ordered list of audio preferences used to filter variants.
+ * @property {!Array<!shaka.extern.VideoPreference>} preferredVideo
+ *   An ordered list of video preferences used to filter variants.
  * @property {string} language
- *   The language used to filter variants.
+ *   Deprecated. Use preferredAudio instead.
+ *   The language used to filter variants. Populated from
+ *   preferredAudio[0].language.
  * @property {string} role
- *   The adaptation audio role used to filter variants.
+ *   Deprecated. Use preferredAudio instead.
+ *   The adaptation audio role used to filter variants. Populated from
+ *   preferredAudio[0].role.
  * @property {string} videoRole
- *   The adaptation video role used to filter variants.
- * @property {string} channelCount
- *   The audio channel count used to filter variants.
+ *   Deprecated. Use preferredVideo instead.
+ *   The adaptation video role used to filter variants. Populated from
+ *   preferredVideo[0].role.
+ * @property {number} channelCount
+ *   Deprecated. Use preferredAudio instead.
+ *   The audio channel count used to filter variants. Populated from
+ *   preferredAudio[0].channelCount.
  * @property {string} hdrLevel
- *   The HDR level used to filter variants.
+ *   Deprecated. Use preferredVideo instead.
+ *   The HDR level used to filter variants. Populated from
+ *   preferredVideo[0].hdrLevel.
  * @property {boolean} spatialAudio
- *   Whether should prefer audio tracks with spatial audio.
+ *   Deprecated. Use preferredAudio instead.
+ *   Whether should prefer audio tracks with spatial audio. Populated from
+ *   preferredAudio[0].spatialAudio.
  * @property {string} videoLayout
- *   The video layout used to filter variants.
+ *   Deprecated. Use preferredVideo instead.
+ *   The video layout used to filter variants. Populated from
+ *   preferredVideo[0].layout.
  * @property {string} audioLabel
- *   The audio label used to filter variants.
+ *   Deprecated. Use preferredAudio instead.
+ *   The audio label used to filter variants. Populated from
+ *   preferredAudio[0].label.
  * @property {string} videoLabel
- *   The video label used to filter variants.
+ *   Deprecated. Use preferredVideo instead.
+ *   The video label used to filter variants. Populated from
+ *   preferredVideo[0].label.
+ * @property {!Array<string>} preferredAudioCodecs
+ *   Deprecated. Use preferredAudio instead.
+ *   The ordered list of audio codecs to filter variants. Populated from
+ *   preferredAudio[*].codec.
+ * @property {number} preferredAudioChannelCount
+ *   Deprecated. Use preferredAudio instead.
+ *   The preferred audio channel count to filter variants. Populated from
+ *   preferredAudio[0].channelCount.
  * @property {shaka.config.CodecSwitchingStrategy} codecSwitchingStrategy
  *   The codec switching strategy used to filter variants.
  * @property {string} audioCodec
@@ -106,11 +138,7 @@ shaka.extern.AdaptationSetCriteria.Factory;
  *   The active audio codec used to filter variants.
  * @property {number} activeAudioChannelCount
  *   The active audio channel count used to filter variants.
- * @property {!Array<string>} preferredAudioCodecs
- *   The ordered list of audio codecs to filter variants.
- * @property {number} preferredAudioChannelCount
- *   The preferred audio channel count to filter variants.
- * @property {number} keySystem
+ * @property {string} keySystem
  *   Current used key system or empty if not used.
  * @exportDoc
  */

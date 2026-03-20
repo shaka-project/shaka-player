@@ -35,6 +35,7 @@ describe('DashParser SegmentTemplate', () => {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
 
+    const config = shaka.util.PlayerConfiguration.createDefault();
     playerInterface = {
       networkingEngine: fakeNetEngine,
       modifyManifestRequest: (request, manifestInfo) => {},
@@ -52,6 +53,7 @@ describe('DashParser SegmentTemplate', () => {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => config.streaming.retryParameters,
     };
   });
 

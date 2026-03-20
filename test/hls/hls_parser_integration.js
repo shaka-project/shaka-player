@@ -105,7 +105,13 @@ describe('HlsParser', () => {
   });
 
   it('supports text discontinuity', async () => {
-    player.configure('preferredTextLanguage', 'en');
+    player.configure('preferredText',
+        [{
+          language: 'en',
+          role: '',
+          format: '',
+          forced: false,
+        }]);
     await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
     await video.play();
 
@@ -125,7 +131,13 @@ describe('HlsParser', () => {
   });
 
   it('supports text without discontinuity', async () => {
-    player.configure('preferredTextLanguage', 'de');
+    player.configure('preferredText',
+        [{
+          language: 'de',
+          role: '',
+          format: '',
+          forced: false,
+        }]);
     // eslint-disable-next-line @stylistic/max-len
     await player.load('/base/test/test/assets/hls-text-no-discontinuity/index.m3u8');
     await video.play();
@@ -228,5 +240,26 @@ describe('HlsParser', () => {
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
     await player.unload();
+  });
+
+  it('plays muxed TS audio in video', async () => {
+    // This asset has muxed audio in the video stream (no separate audio URI
+    // for the default audio group).
+    const url =
+        '/base/test/test/assets/hls-ts-audio-muxed-in-video/master.m3u8';
+
+    await player.load(url);
+
+    // Verify that we are using the expected variant.
+    const variants = player.getVariantTracks();
+    expect(variants.length).toBeGreaterThan(0);
+
+    await video.play();
+
+    // Wait for the video to start playback.
+    await waiter.waitForMovementOrFailOnTimeout(video, 20);
+
+    // Play for a few seconds.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 40);
   });
 });

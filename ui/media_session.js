@@ -8,6 +8,7 @@ goog.provide('shaka.ui.MediaSession');
 
 goog.require('shaka.log');
 goog.require('shaka.ads.Utils');
+goog.require('shaka.net.NetworkingUtils');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.IReleasable');
 goog.require('shaka.util.TXml');
@@ -194,7 +195,15 @@ shaka.ui.MediaSession = class {
     }
     if (this.supported_) {
       const metadata = this.getMediaMetadata();
-      metadata.artwork = [{src: imageUrl}];
+      const artwork = {
+        src: imageUrl,
+      };
+      const mimeType =
+          shaka.net.NetworkingUtils.getMimeTypeFromUri(imageUrl);
+      if (mimeType) {
+        artwork.type = mimeType;
+      }
+      metadata.artwork = [artwork];
       navigator.mediaSession.metadata = new MediaMetadata(metadata);
     }
   }
@@ -209,11 +218,26 @@ shaka.ui.MediaSession = class {
     }
     const chapterInfo = [];
     for (const chapter of chapters) {
-      chapterInfo.push({
+      const info = {
         title: chapter.title,
         startTime: chapter.startTime,
         artwork: [],
-      });
+      };
+      for (const imageInfo of chapter.images) {
+        const artwork = {
+          src: imageInfo.url,
+        };
+        if (imageInfo.width && imageInfo.height) {
+          artwork.sizes = `${imageInfo.width}x${imageInfo.height}`;
+        }
+        const mimeType =
+            shaka.net.NetworkingUtils.getMimeTypeFromUri(imageInfo.url);
+        if (mimeType) {
+          artwork.type = mimeType;
+        }
+        info.artwork.push(artwork);
+      }
+      chapterInfo.push(info);
     }
     const metadata = this.getMediaMetadata();
     metadata.chapterInfo = chapterInfo;
@@ -333,7 +357,7 @@ shaka.ui.MediaSession = class {
     if (!this.config_.mediaSession.handleMetadata) {
       return;
     }
-    this.eventManager_.listen(this.player_, 'trackschanged', () => {
+    this.eventManager_.listen(this.controls_, 'chaptersupdated', () => {
       this.setupChapters(this.controls_.getChapters());
     });
     this.eventManager_.listen(this.player_, 'metadata', (event) => {

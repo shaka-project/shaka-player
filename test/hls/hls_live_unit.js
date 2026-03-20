@@ -66,7 +66,8 @@ describe('HlsParser live', () => {
 
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
-    config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    const dConfig = shaka.util.PlayerConfiguration.createDefault();
+    config = dConfig.manifest;
     playerInterface = {
       filter: () => Promise.resolve(),
       makeTextStreamsForClosedCaptions: (manifest) => {},
@@ -82,6 +83,7 @@ describe('HlsParser live', () => {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => dConfig.streaming.retryParameters,
     };
 
     parser = new shaka.hls.HlsParser();
@@ -1622,17 +1624,18 @@ describe('HlsParser live', () => {
     expect(chapters).toBeDefined();
 
     await chapters.createSegmentIndex();
-    expect(chapters.segmentIndex.getNumReferences()).toBe(1);
-    expect(chapters.segmentIndex.get(0).getUris()[0]).toBe('Intro');
+    const segmentIndex = chapters.segmentIndex;
+    expect(segmentIndex.getNumReferences()).toBe(1);
+    expect(segmentIndex.get(0).getMetadata().title).toBe('Intro');
 
     fakeNetEngine.setResponseText('test:/video', videoLive2);
     fakeNetEngine.setResponseText('test:/chapters.json', chaptersJson2);
 
     await parser.update();
 
-    expect(chapters.segmentIndex.getNumReferences()).toBe(2);
-    expect(chapters.segmentIndex.get(0).getUris()[0]).toBe('Intro');
-    expect(chapters.segmentIndex.get(1).getUris()[0]).toBe('Live Part 1');
+    expect(segmentIndex.getNumReferences()).toBe(2);
+    expect(segmentIndex.get(0).getMetadata().title).toBe('Intro');
+    expect(segmentIndex.get(1).getMetadata().title).toBe('Live Part 1');
   });
 
   it('Live updates: adds new chapter streams', async () => {
@@ -1742,8 +1745,9 @@ describe('HlsParser live', () => {
     expect(chapters).toBeDefined();
 
     await chapters.createSegmentIndex();
-    expect(chapters.segmentIndex.getNumReferences()).toBe(1);
-    expect(chapters.segmentIndex.get(0).getUris()[0]).toBe('Intro');
+    const segmentIndex = chapters.segmentIndex;
+    expect(segmentIndex.getNumReferences()).toBe(1);
+    expect(segmentIndex.get(0).getMetadata().title).toBe('Intro');
   });
 
   /**

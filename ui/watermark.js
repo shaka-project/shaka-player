@@ -34,10 +34,16 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
     this.canvas_.style.position = 'absolute';
     this.canvas_.style.top = '0';
     this.canvas_.style.left = '0';
+    this.canvas_.style.width = '100%';
+    this.canvas_.style.height = '100%';
+    this.canvas_.style.zIndex = '2';
     this.canvas_.style.pointerEvents = 'none';
 
     this.parent.appendChild(this.canvas_);
     this.resizeCanvas_();
+
+    /** @private {?shaka.ui.Watermark.Options} */
+    this.currentConfig_ = null;
 
     /** @private {number|null} */
     this.animationId_ = null;
@@ -51,7 +57,9 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
       this.resizeObserver_.observe(this.parent);
     } else {
       // Fallback for older browsers
-      window.addEventListener('resize', () => this.resizeCanvas_());
+      this.eventManager.listen(window, 'resize', () => {
+        this.resizeCanvas_();
+      });
     }
   }
 
@@ -74,8 +82,19 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
    * @private
    */
   resizeCanvas_() {
-    this.canvas_.width = this.parent.offsetWidth;
-    this.canvas_.height = this.parent.offsetHeight;
+    const width = this.parent.offsetWidth;
+    const height = this.parent.offsetHeight;
+
+    if (this.canvas_.width === width && this.canvas_.height === height) {
+      return;
+    }
+
+    this.canvas_.width = width;
+    this.canvas_.height = height;
+
+    if (this.currentConfig_) {
+      this.showWatermark_(this.currentConfig_);
+    }
   }
 
   /**
@@ -88,23 +107,35 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
   setTextWatermark(text, options) {
     /** @type {!shaka.ui.Watermark.Options} */
     const defaultOptions = {
-      type: 'static',
+      type: 'dynamic',
       text: text,
       position: 'top-right',
       color: 'rgba(255, 255, 255, 0.7)',
       size: 20,
       alpha: 0.7,
-      interval: 2 * 1000,
-      skip: 0.5 * 1000,
-      displayDuration: 2 * 1000,
-      transitionDuration: 0.5,
+      skip: 5,
+      displayDuration: 10,
+      transitionDuration: 1,
+      jitterSpeed: 0.5,
+      jitterAmount: 1.2,
+      maxRotationDeg: 3,
     };
 
     /** @type {!shaka.ui.Watermark.Options} */
     const config = /** @type {!shaka.ui.Watermark.Options} */ (
-      Object.assign({}, defaultOptions, options || defaultOptions)
-    );
+      Object.assign({}, defaultOptions, options || {}));
 
+    this.currentConfig_ = config;
+
+    this.showWatermark_(this.currentConfig_);
+  }
+
+  /**
+   * @param {!shaka.ui.Watermark.Options} config
+   * @private
+   */
+  showWatermark_(config) {
+    this.removeWatermark();
     if (config.type === 'static') {
       this.drawStaticWatermark_(config);
     } else if (config.type === 'dynamic') {
@@ -165,26 +196,36 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
    * @private
    */
   startDynamicWatermark_(config) {
-    const ctx = /** @type {!CanvasRenderingContext2D} */ (
-      this.canvas_.getContext('2d')
-    );
+    const ctx = this.getContext2D_();
+    if (!ctx) {
+      return;
+    }
+
     let currentPosition = {left: 0, top: 0};
     let currentAlpha = 0;
-    let phase = 'fadeIn'; // States: fadeIn, display, fadeOut, transition
-
-    let displayFrames = Math.round(config.displayDuration * 60); // 60fps
-    const transitionFrames = Math.round(config.transitionDuration * 60);
-    const fadeSpeed = 1 / (transitionFrames / 2); // Smoother fade speed
+    let phase = 'fadeIn'; // States: fadeIn, display, fadeOut, skip
+    let phaseStartTime = null;
 
     /** @private {number} */
     let positionIndex = 0;
+
+    const padding = 20;
+
+    // Subtle effects
+    const maxRotationDeg = config.maxRotationDeg;
+    let jitterSpeed = config.jitterSpeed;
+    let jitterAmount = config.jitterAmount;
+    let currentRotation = 0;
+    let baseOffsetX = 0;
+    let baseOffsetY = 0;
+
+    let jitterPhase = Math.random() * 2 * Math.PI;
 
     const getNextPosition = () => {
       ctx.font = `${config.size}px Arial`;
       const textMetrics = ctx.measureText(config.text);
       const textWidth = textMetrics.width;
       const textHeight = config.size;
-      const padding = 20;
 
       // Define fixed positions
       const positions = [
@@ -218,50 +259,95 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
       // Cycle through positions
       const position = positions[positionIndex];
       positionIndex = (positionIndex + 1) % positions.length;
+
+      // Random rotation per position
+      currentRotation =
+        ((Math.random() * 2 - 1) * maxRotationDeg * Math.PI) / 180;
+
+
+      jitterSpeed = config.jitterSpeed * (0.5 + Math.random());
+      jitterAmount = config.jitterAmount * (0.5 + Math.random());
+      jitterPhase = Math.random() * 2 * Math.PI;
+      baseOffsetX = (Math.random() * 2 - 1) * jitterAmount;
+      baseOffsetY = (Math.random() * 2 - 1) * jitterAmount;
+
       return position;
     };
 
     currentPosition = getNextPosition();
 
-    const updateWatermark = () => {
+    const updateWatermark = (timestamp) => {
       if (!this.animationId_) {
         return;
       }
+
+      if (!phaseStartTime) {
+        phaseStartTime = timestamp;
+      }
+
+      const elapsed = (timestamp - phaseStartTime) / 1000;
+      const transition = Math.max(config.transitionDuration, 0.0001);
 
       const width = this.canvas_.width;
       const height = this.canvas_.height;
       ctx.clearRect(0, 0, width, height);
 
+
+      jitterPhase += 2 * Math.PI * jitterSpeed / 60;
+      const jitterX = Math.sin(jitterPhase) * jitterAmount;
+      const jitterY = Math.cos(jitterPhase) * jitterAmount;
+
       // State machine for watermark phases
       switch (phase) {
         case 'fadeIn':
-          currentAlpha = Math.min(config.alpha, currentAlpha + fadeSpeed);
-          if (currentAlpha >= config.alpha) {
+          currentAlpha = Math.min(config.alpha,
+              (elapsed / transition) * config.alpha);
+          if (elapsed >= transition) {
             phase = 'display';
+            phaseStartTime = timestamp;
           }
           break;
         case 'display':
-          if (--displayFrames <= 0) {
+          currentAlpha = config.alpha;
+          if (elapsed >= config.displayDuration) {
             phase = 'fadeOut';
+            phaseStartTime = timestamp;
           }
           break;
         case 'fadeOut':
-          currentAlpha = Math.max(0, currentAlpha - fadeSpeed);
-          if (currentAlpha <= 0) {
-            phase = 'transition';
+          currentAlpha = Math.max(0,
+              config.alpha * (1 - elapsed / transition));
+          if (elapsed >= transition) {
+            phase = 'skip';
+            phaseStartTime = timestamp;
+          }
+          break;
+        case 'skip':
+          currentAlpha = 0;
+          if (elapsed >= config.skip) {
             currentPosition = getNextPosition();
-            displayFrames = Math.round(config.displayDuration * 60);
             phase = 'fadeIn';
+            phaseStartTime = timestamp;
           }
           break;
       }
 
       // Draw watermark if visible
       if (currentAlpha > 0) {
+        ctx.save();
+
+        const x = currentPosition.left + baseOffsetX + jitterX;
+        const y = currentPosition.top + baseOffsetY + jitterY;
+
+        ctx.translate(x, y);
+        ctx.rotate(currentRotation);
+
         ctx.globalAlpha = currentAlpha;
         ctx.fillStyle = config.color;
         ctx.font = `${config.size}px Arial`;
-        ctx.fillText(config.text, currentPosition.left, currentPosition.top);
+        ctx.fillText(config.text, 0, 0);
+
+        ctx.restore();
       }
 
       // Request next frame if animation is still active
@@ -303,9 +389,6 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
     if (this.resizeObserver_) {
       this.resizeObserver_.disconnect();
       this.resizeObserver_ = null;
-    } else {
-      // Remove window resize listener if we were using that
-      window.removeEventListener('resize', () => this.resizeCanvas_());
     }
 
     super.release();
