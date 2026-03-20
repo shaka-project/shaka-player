@@ -7,6 +7,42 @@
 describe('ArrayUtils', () => {
   const ArrayUtils = shaka.util.ArrayUtils;
 
+  describe('partition', () => {
+    it('splits into matching and non-matching', () => {
+      const [evens, odds] =
+        ArrayUtils.partition([1, 2, 3, 4, 5], (x) => x % 2 === 0);
+      expect(evens).toEqual([2, 4]);
+      expect(odds).toEqual([1, 3, 5]);
+    });
+
+    it('returns empty arrays when nothing matches', () => {
+      const [yes, no] = ArrayUtils.partition([1, 3, 5], (x) => x % 2 === 0);
+      expect(yes).toEqual([]);
+      expect(no).toEqual([1, 3, 5]);
+    });
+
+    it('returns empty arrays when everything matches', () => {
+      const [yes, no] = ArrayUtils.partition([2, 4, 6], (x) => x % 2 === 0);
+      expect(yes).toEqual([2, 4, 6]);
+      expect(no).toEqual([]);
+    });
+
+    it('handles an empty array', () => {
+      const [yes, no] = ArrayUtils.partition([], () => true);
+      expect(yes).toEqual([]);
+      expect(no).toEqual([]);
+    });
+
+    it('works with objects', () => {
+      const a = {trick: true};
+      const b = {trick: false};
+      const c = {trick: true};
+      const [trick, normal] = ArrayUtils.partition([a, b, c], (x) => x.trick);
+      expect(trick).toEqual([a, c]);
+      expect(normal).toEqual([b]);
+    });
+  });
+
   describe('hasSameElements', () => {
     it('determines same elements', () => {
       expectEqual([], []);
