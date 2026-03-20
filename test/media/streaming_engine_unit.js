@@ -4425,4 +4425,70 @@ describe('StreamingEngine', () => {
       return Promise.resolve();
     });
   }
+
+  // Regression test: the duplicate segment detection tolerance should be
+  // 2ms, not 1ms.  Some HLS streams have segment iterator timing
+  // inaccuracies between 1ms and 2ms that cause the same segment to be
+  // re-downloaded, leading to AV sync issues.
+  it('tolerates up to 2ms difference in duplicate segment detection',
+      async () => {
+        setupVod();
+        mediaSourceEngine =
+            new shaka.test.FakeMediaSourceEngine(segmentData);
+        createStreamingEngine();
+
+        // After the first video segment is fetched, modify the segment
+        // index so that position 0 returns a reference with startTime
+        // shifted by 1.5ms.  This simulates an HLS segment list update
+        // where the same logical segment reappears with a slightly
+        // different start time due to floating-point inaccuracy.
+        let firstVideoSegmentAppended = false;
+        onSegmentAppended.and.callFake(
+            (start, end, contentType) => {
+              if (contentType === ContentType.VIDEO &&
+                  !firstVideoSegmentAppended) {
+                firstVideoSegmentAppended = true;
+
+                // Monkey-patch the video segment index's get() so
+                // that position 0 now returns a near-duplicate ref
+                // (startTime shifted by 1.5ms).
+                const idx = videoStream.segmentIndex;
+                const origGet = idx.get;
+                idx.get = (pos) => {
+                  // eslint-disable-next-line no-restricted-syntax
+                  const seg = origGet.call(idx, pos);
+                  if (seg && pos === 0) {
+                    return new shaka.media.SegmentReference(
+                        seg.startTime + 0.0015,
+                        seg.endTime + 0.0015,
+                        seg.getUrisInner,
+                        /* startByte= */ 0,
+                        /* endByte= */ null,
+                        seg.initSegmentReference,
+                        seg.timestampOffset,
+                        seg.appendWindowStart,
+                        seg.appendWindowEnd,
+                    );
+                  }
+                  return seg;
+                };
+              }
+            });
+
+        streamingEngine.switchVariant(variant);
+        streamingEngine.switchTextStream(textStream);
+        await streamingEngine.start();
+        playing = true;
+
+        await runTest();
+
+        // With 2ms tolerance the shifted segment (1.5ms diff) is
+        // detected as a duplicate and skipped.  All four segments
+        // should still be buffered normally.
+        expect(mediaSourceEngine.segments).toEqual({
+          audio: [true, true, true, true],
+          video: [true, true, true, true],
+          text: [true, true, true, true],
+        });
+      });
 });
