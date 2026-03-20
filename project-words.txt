@@ -234,6 +234,7 @@ buffersource
 cabac
 cbcs
 cdna
+cehx
 cenc
 cicp
 cmaf
@@ -258,7 +259,9 @@ dref
 drms
 dtsc
 dtse
+dtsh
 dtsx
+dtsz
 dtvcc
 dvav
 dvcc
