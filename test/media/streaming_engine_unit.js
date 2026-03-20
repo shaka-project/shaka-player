@@ -4491,4 +4491,132 @@ describe('StreamingEngine', () => {
           text: [true, true, true, true],
         });
       });
+
+  describe('avoid duplicate segment downloads', () => {
+    // Regression test: when switching streams, the segment
+    // iterator can return the last segment reference due to
+    // floating point rounding or discontinuous segments.
+    // The fix detects this and searches with a 150ms drift.
+
+    const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+    beforeEach(() => {
+      manifest = shaka.test.ManifestGenerator.generate(
+          (manifest) => {
+            manifest.presentationTimeline.setDuration(60);
+            manifest.addVariant(0, (variant) => {
+              variant.addAudio(10, (stream) => {
+                stream.useSegmentTemplate(
+                    'audio-10-%d.mp4', 10);
+              });
+              variant.addVideo(11, (stream) => {
+                stream.useSegmentTemplate(
+                    'video-11-%d.mp4', 10);
+              });
+            });
+            manifest.addVariant(1, (variant) => {
+              variant.addAudio(12, (stream) => {
+                stream.useSegmentTemplate(
+                    'audio-12-%d.mp4', 10);
+              });
+              variant.addVideo(13, (stream) => {
+                stream.useSegmentTemplate(
+                    'video-13-%d.mp4', 10);
+              });
+            });
+          });
+
+      netEngine = new shaka.test.FakeNetworkingEngine();
+      netEngine.setDefaultValue(new ArrayBuffer(0));
+
+      mediaSourceEngine =
+          new shaka.test.FakeMediaSourceEngine({});
+      const bufferEnd = {audio: 0, video: 0};
+      mediaSourceEngine.clear.and.callFake((type) => {
+        bufferEnd[type] = 0;
+        return Promise.resolve();
+      });
+      mediaSourceEngine.bufferedAheadOf.and.returnValue(0);
+      mediaSourceEngine.bufferStart.and.returnValue(0);
+      mediaSourceEngine.setStreamProperties.and.returnValue(
+          Promise.resolve());
+      mediaSourceEngine.remove.and.returnValue(
+          Promise.resolve());
+
+      mediaSourceEngine.appendBuffer.and.callFake(
+          (type, data, reference) => {
+            bufferEnd[type] =
+                reference && reference.endTime;
+            return Promise.resolve();
+          });
+      mediaSourceEngine.bufferEnd.and.callFake((type) => {
+        return bufferEnd[type];
+      });
+      mediaSourceEngine.bufferedAheadOf.and.callFake(
+          (type, start) => {
+            return Math.max(0, bufferEnd[type] - start);
+          });
+      mediaSourceEngine.isBuffered.and.callFake(
+          (type, time) => {
+            return time >= 0 && time < bufferEnd[type];
+          });
+
+      playing = false;
+      presentationTimeInSeconds = 0;
+      createStreamingEngine();
+    });
+
+    it('does not re-fetch segments after switch', async () => {
+      const initialVariant = manifest.variants[0];
+      const newVariant = manifest.variants[1];
+
+      streamingEngine.switchVariant(initialVariant);
+      await streamingEngine.start();
+      playing = true;
+
+      // Let some segments buffer from the initial variant.
+      await Util.fakeEventLoop(3);
+
+      // Switch variant mid-playback. This nulls the
+      // segmentIterator for the new stream, triggering
+      // the else-if branch in getSegmentReferenceNeeded_.
+      streamingEngine.switchVariant(
+          newVariant, /* clearBuffer= */ true);
+
+      // Let the engine process the switch and buffer.
+      await Util.fakeEventLoop(5);
+
+      // Collect all segment URIs requested across the
+      // entire test run.
+      const segmentType =
+          shaka.net.NetworkingEngine.RequestType.SEGMENT;
+      const requestedUris =
+          netEngine.request.calls.all()
+              .filter((c) => c.args[0] === segmentType)
+              .map((c) => c.args[1].uris[0]);
+
+      // Each segment URI should appear at most once —
+      // no duplicate downloads.
+      const seen = new Set();
+      for (const uri of requestedUris) {
+        expect(seen.has(uri))
+            .withContext(`duplicate request: ${uri}`)
+            .toBe(false);
+        seen.add(uri);
+      }
+
+      // Verify the new variant's segments were actually
+      // requested (the fix didn't suppress all fetches).
+      const hasNewAudio = requestedUris.some(
+          (u) => u.startsWith('audio-12-'));
+      const hasNewVideo = requestedUris.some(
+          (u) => u.startsWith('video-13-'));
+      expect(hasNewAudio)
+          .withContext('new audio segments requested')
+          .toBe(true);
+      expect(hasNewVideo)
+          .withContext('new video segments requested')
+          .toBe(true);
+    });
+  });
 });
