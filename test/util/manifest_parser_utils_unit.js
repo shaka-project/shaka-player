@@ -7,6 +7,26 @@
 describe('ManifestParserUtils', () => {
   const ManifestParserUtils = shaka.util.ManifestParserUtils;
 
+  describe('guessCodecsSafe', () => {
+    it('recognizes MPEG-2 video codec (mp2v)', () => {
+      const result = ManifestParserUtils.guessCodecsSafe(
+          'video', ['mp2v']);
+      expect(result).toBe('mp2v');
+    });
+
+    it('returns mp2v from mixed codec list', () => {
+      const result = ManifestParserUtils.guessCodecsSafe(
+          'video', ['mp4a.40.2', 'mp2v']);
+      expect(result).toBe('mp2v');
+    });
+
+    it('does not match mp2v as audio', () => {
+      const result = ManifestParserUtils.guessCodecsSafe(
+          'audio', ['mp2v']);
+      expect(result).toBeNull();
+    });
+  });
+
   describe('resolveUris', () => {
     it('resolves relative URIs', () => {
       const base = ['http://example.com/'];
