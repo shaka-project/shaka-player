@@ -79,6 +79,7 @@
 +../../lib/text/web_vtt_generator.js
 
 +../../lib/transmuxer/transmuxer_engine.js
++../../lib/transmuxer/transmuxer_utils.js
 
 +../../lib/util/abortable_operation.js
 +../../lib/util/array_utils.js
