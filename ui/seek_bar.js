@@ -334,56 +334,95 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   }
 
   /**
+   * Returns the range of buffered that contains 'time', or null if it does
+   * not exist.
+   *
+   * @param {number} time
+   * @return {?{start:number, end:number}}
+   * @private
+   */
+  getBufferedRangeForTime_(time) {
+    const buffered = this.video.buffered;
+    for (let i = 0; i < buffered.length; i++) {
+      const start = buffered.start(i);
+      const end = buffered.end(i);
+      if (time >= start && time <= end) {
+        return {start, end};
+      }
+    }
+    return null;
+  }
+
+  /**
    * @override
    */
   update() {
+    if (!this.shouldBeDisplayed_()) {
+      shaka.ui.Utils.setDisplay(this.container, false);
+      return;
+    }
     const colors = this.config_.seekBarColors;
     const currentTime = this.getValue();
     const bufferedLength = this.video.buffered.length;
-    const bufferedStart = bufferedLength ? this.video.buffered.start(0) : 0;
-    const bufferedEnd =
-        bufferedLength ? this.video.buffered.end(bufferedLength - 1) : 0;
+    let bufferedStart = 0;
+    let bufferedEnd = 0;
+
+    if (bufferedLength) {
+      if (this.controls.isSeeking()) {
+        // While the user drags, only paint the range that actually contains
+        // the target position (if it exists).
+        const r = this.getBufferedRangeForTime_(currentTime);
+        if (r) {
+          bufferedStart = r.start;
+          bufferedEnd = r.end;
+        } else {
+          // Non-preloaded area: we do not buffered paint beyond the playhead.
+          bufferedStart = currentTime;
+          bufferedEnd = currentTime;
+        }
+      } else {
+        bufferedStart = this.video.buffered.start(0);
+        bufferedEnd = this.video.buffered.end(bufferedLength - 1);
+      }
+    }
+
 
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
 
     this.setRange(seekRange.start, seekRange.end);
 
-    if (!this.shouldBeDisplayed_()) {
-      shaka.ui.Utils.setDisplay(this.container, false);
-    } else {
-      shaka.ui.Utils.setDisplay(this.container, true);
+    const clampedBufferStart = Math.max(bufferedStart, seekRange.start);
+    const clampedBufferEnd = Math.min(bufferedEnd, seekRange.end);
+    const clampedCurrentTime = Math.min(
+        Math.max(currentTime, seekRange.start),
+        seekRange.end);
 
-      const clampedBufferStart = Math.max(bufferedStart, seekRange.start);
-      const clampedBufferEnd = Math.min(bufferedEnd, seekRange.end);
-      const clampedCurrentTime = Math.min(
-          Math.max(currentTime, seekRange.start),
-          seekRange.end);
+    const bufferStartDistance = clampedBufferStart - seekRange.start;
+    const bufferEndDistance = clampedBufferEnd - seekRange.start;
+    const playheadDistance = clampedCurrentTime - seekRange.start;
 
-      const bufferStartDistance = clampedBufferStart - seekRange.start;
-      const bufferEndDistance = clampedBufferEnd - seekRange.start;
-      const playheadDistance = clampedCurrentTime - seekRange.start;
+    // NOTE: the fallback to zero eliminates NaN.
+    const bufferStartFraction = (bufferStartDistance / seekRangeSize) || 0;
+    const bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
+    const playheadFraction = (playheadDistance / seekRangeSize) || 0;
 
-      // NOTE: the fallback to zero eliminates NaN.
-      const bufferStartFraction = (bufferStartDistance / seekRangeSize) || 0;
-      const bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
-      const playheadFraction = (playheadDistance / seekRangeSize) || 0;
+    const unbufferedColor =
+        this.config_.showUnbufferedStart ? colors.base : colors.played;
 
-      const unbufferedColor =
-          this.config_.showUnbufferedStart ? colors.base : colors.played;
+    const gradient = [
+      'to right',
+      this.makeColor_(unbufferedColor, bufferStartFraction),
+      this.makeColor_(colors.played, bufferStartFraction),
+      this.makeColor_(colors.played, playheadFraction),
+      this.makeColor_(colors.buffered, playheadFraction),
+      this.makeColor_(colors.buffered, bufferEndFraction),
+      this.makeColor_(colors.base, bufferEndFraction),
+    ];
+    this.container.style.background =
+        'linear-gradient(' + gradient.join(',') + ')';
 
-      const gradient = [
-        'to right',
-        this.makeColor_(unbufferedColor, bufferStartFraction),
-        this.makeColor_(colors.played, bufferStartFraction),
-        this.makeColor_(colors.played, playheadFraction),
-        this.makeColor_(colors.buffered, playheadFraction),
-        this.makeColor_(colors.buffered, bufferEndFraction),
-        this.makeColor_(colors.base, bufferEndFraction),
-      ];
-      this.container.style.background =
-          'linear-gradient(' + gradient.join(',') + ')';
-    }
+    shaka.ui.Utils.setDisplay(this.container, true);
   }
 
   /**
