@@ -2,6 +2,60 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
   const fakeUri = 'https://example.com/ad.mp4';
   const fakeMimeType = 'video/mp4';
 
+  /** @type {!shaka.extern.AdInterstitial} */
+  const fakeInterstitial = {
+    id: null,
+    groupId: null,
+    startTime: 10,
+    endTime: null,
+    uri: fakeUri,
+    mimeType: fakeMimeType,
+    isSkippable: true,
+    skipOffset: 10,
+    skipFor: null,
+    canJump: false,
+    resumeOffset: null,
+    playoutLimit: null,
+    once: true,
+    pre: false,
+    post: false,
+    timelineRange: false,
+    loop: false,
+    overlay: null,
+    displayOnBackground: false,
+    currentVideo: null,
+    background: null,
+    clickThroughUrl: null,
+    tracking: null,
+  };
+
+  /** @type {!shaka.extern.AdInterstitial} */
+  const fakeInterstitial2 = {
+    id: null,
+    groupId: null,
+    startTime: 10,
+    endTime: null,
+    uri: fakeUri,
+    mimeType: null,
+    isSkippable: true,
+    skipOffset: 10,
+    skipFor: null,
+    canJump: false,
+    resumeOffset: null,
+    playoutLimit: null,
+    once: true,
+    pre: false,
+    post: false,
+    timelineRange: false,
+    loop: false,
+    overlay: null,
+    displayOnBackground: false,
+    currentVideo: null,
+    background: null,
+    clickThroughUrl: null,
+    tracking: null,
+  };
+
   /** @type {!shaka.ads.InterstitialPreloadTask} */
   let task;
 
@@ -36,8 +90,7 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
     const preloadManager = createFakePreloadManager();
     const player = createFakePlayer(Promise.resolve(preloadManager));
 
-    task = new shaka.ads.InterstitialPreloadTask(
-        player, fakeUri, fakeMimeType);
+    task = new shaka.ads.InterstitialPreloadTask(player, fakeInterstitial);
 
     await shaka.test.Util.shortDelay();
 
@@ -55,7 +108,7 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
 
     const player = createFakePlayer(Promise.reject(error));
 
-    task = new shaka.ads.InterstitialPreloadTask(player, fakeUri, fakeMimeType);
+    task = new shaka.ads.InterstitialPreloadTask(player, fakeInterstitial);
 
     await shaka.test.Util.shortDelay();
 
@@ -66,7 +119,7 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
   it('ignores non-shaka errors', async () => {
     const player = createFakePlayer(Promise.reject(new Error('boom')));
 
-    task = new shaka.ads.InterstitialPreloadTask(player, fakeUri, fakeMimeType);
+    task = new shaka.ads.InterstitialPreloadTask(player, fakeInterstitial);
 
     await shaka.test.Util.shortDelay();
 
@@ -78,7 +131,7 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
     const preloadManager = createFakePreloadManager();
     const player = createFakePlayer(Promise.resolve(preloadManager));
 
-    task = new shaka.ads.InterstitialPreloadTask(player, fakeUri, fakeMimeType);
+    task = new shaka.ads.InterstitialPreloadTask(player, fakeInterstitial);
 
     await shaka.test.Util.shortDelay();
 
@@ -97,7 +150,7 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
     const preloadManager = createFakePreloadManager();
     const player = createFakePlayer(preloadPromise);
 
-    task = new shaka.ads.InterstitialPreloadTask(player, fakeUri, fakeMimeType);
+    task = new shaka.ads.InterstitialPreloadTask(player, fakeInterstitial);
 
     task.release();
 
@@ -113,8 +166,7 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
     const preloadManager = createFakePreloadManager();
     const player = createFakePlayer(Promise.resolve(preloadManager));
 
-    task = new shaka.ads.InterstitialPreloadTask(
-        player, fakeUri, fakeMimeType);
+    task = new shaka.ads.InterstitialPreloadTask(player, fakeInterstitial);
 
     await shaka.test.Util.shortDelay();
 
@@ -128,7 +180,7 @@ describe('shaka.ads.InterstitialPreloadTask', () => {
     const preloadManager = createFakePreloadManager();
     const player = createFakePlayer(Promise.resolve(preloadManager));
 
-    task = new shaka.ads.InterstitialPreloadTask(player, fakeUri, null);
+    task = new shaka.ads.InterstitialPreloadTask(player, fakeInterstitial2);
 
     await shaka.test.Util.shortDelay();
 
