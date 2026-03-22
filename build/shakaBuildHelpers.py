@@ -255,7 +255,7 @@ def get_all_js_files(*path_components):
   """Get all JavaScript file paths recursively from the given path components.
 
   Args:
-    *path_components: The components of the path to search.  Joining is handling
+    *path_components: The components of the path to search.  Joining is handled
     internally according to os path semantics.
   Returns:
     An array of absolute paths to all JS files.
