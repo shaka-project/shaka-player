@@ -2239,12 +2239,17 @@ describe('Interstitial Ad manager', () => {
 
     await shaka.test.Util.shortDelay();
 
-    expect(onEventSpy).toHaveBeenCalledTimes(5);
+    expect(onEventSpy).toHaveBeenCalledTimes(6);
     const eventValuePreload = {
       type: 'ad-interstitial-preload',
     };
     expect(onEventSpy).toHaveBeenCalledWith(
         jasmine.objectContaining(eventValuePreload));
+    const eventValuePreloaded = {
+      type: 'ad-interstitial-preloaded',
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValuePreloaded));
     const eventValueAdBreakStarted = {
       type: 'ad-break-started',
     };
@@ -2300,7 +2305,7 @@ describe('Interstitial Ad manager', () => {
 
     await shaka.test.Util.shortDelay();
 
-    expect(onEventSpy).toHaveBeenCalledTimes(6);
+    expect(onEventSpy).toHaveBeenCalledTimes(7);
     const eventValue1 = {
       type: 'ad-cue-points-changed',
       cuepoints: [
@@ -2315,6 +2320,11 @@ describe('Interstitial Ad manager', () => {
     };
     expect(onEventSpy).toHaveBeenCalledWith(
         jasmine.objectContaining(eventValuePreload));
+    const eventValuePreloaded = {
+      type: 'ad-interstitial-preloaded',
+    };
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining(eventValuePreloaded));
     const eventValueAdBreakStarted = {
       type: 'ad-break-started',
     };

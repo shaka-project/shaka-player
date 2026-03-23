@@ -30,6 +30,9 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
   constructor(parent, controls, iconText) {
     super(parent, controls);
 
+    /** @private {!shaka.extern.UIConfiguration} */
+    this.config_ = this.controls.getConfig();
+
     /** @private {HTMLElement } */
     this.videoContainer_ = this.controls.getVideoContainer();
 
@@ -229,6 +232,11 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
         rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom - gap;
 
     this.menu.style.maxHeight = heightIntersection + 'px';
+
+    if (this.config_.showMenusOnTheRight) {
+      this.menu.style.right = '15px';
+      return;
+    }
 
     // Compute horizontal position
     const bottomControlsPos =

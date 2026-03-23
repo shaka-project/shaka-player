@@ -104,7 +104,7 @@ variable declared with `const` but never assigned will hold the value
 
 ### Async and Await
 
-When working with promises, we recommended to use `async` and `await`. We find
+When working with promises, we recommend using `async` and `await`. We find
 they improve readability by making the code more linear than `then` and `catch`
 blocks.
 
