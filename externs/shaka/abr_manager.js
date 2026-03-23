@@ -147,6 +147,14 @@ shaka.extern.AbrManager = class {
   setCmsdManager(cmsdManager) {}
 
   /**
+   * Indicates whether the current stream is LowLatency or not.
+   *
+   * @param {boolean} isLowLatency
+   * @exportDoc
+   */
+  setLowLatency(isLowLatency) {}
+
+  /**
    * Sets the ABR configuration.
    *
    * It is the responsibility of the AbrManager implementation to implement the
