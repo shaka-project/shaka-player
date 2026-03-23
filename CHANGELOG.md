@@ -1,5 +1,29 @@
 # Changelog
 
+## [5.0.8](https://github.com/shaka-project/shaka-player/compare/v5.0.7...v5.0.8) (2026-03-23)
+
+
+### Bug Fixes
+
+* **HLS:** Add support for DTS and DTS-HD audio codec variants ([#9863](https://github.com/shaka-project/shaka-player/issues/9863)) ([1d9c55b](https://github.com/shaka-project/shaka-player/commit/1d9c55b5258e958a9b5beec42c9024dd2afe8793))
+* **HLS:** Prevent infinite manifest update delay ([#9867](https://github.com/shaka-project/shaka-player/issues/9867)) ([fbfedd6](https://github.com/shaka-project/shaka-player/commit/fbfedd6eb29431d093346ea12a674729611b3277))
+* Increase tolerance for duplicate segment detection ([#9865](https://github.com/shaka-project/shaka-player/issues/9865)) ([0156466](https://github.com/shaka-project/shaka-player/commit/0156466ed25847c5be0c0efea11d3cdee7893e93))
+* **MSF:** handle SUBSCRIBE_NAMESPACE (0x11) control message ([#9871](https://github.com/shaka-project/shaka-player/issues/9871)) ([cd384e5](https://github.com/shaka-project/shaka-player/commit/cd384e53f87a48b376780b58dfa728e9cb0d82b8))
+* **UI:** Fix delay updating the styles while seeking ([#9847](https://github.com/shaka-project/shaka-player/issues/9847)) ([31b257f](https://github.com/shaka-project/shaka-player/commit/31b257f018050ea480ae1751ddaaf7df0d871506))
+* **util:** Add support for MPEG-2 video codec ([#9860](https://github.com/shaka-project/shaka-player/issues/9860)) ([ff19f71](https://github.com/shaka-project/shaka-player/commit/ff19f713b08fdb8834a46d29cb6d040f713572ce))
+
+
+### Performance Improvements
+
+* **DASH:** drop array operations on unique IDs when parsing periods ([#9870](https://github.com/shaka-project/shaka-player/issues/9870)) ([25d5550](https://github.com/shaka-project/shaka-player/commit/25d55508feb2eeea9cea0ddb49cf0b55e0ea1d03))
+* **DASH:** loop over adaptation sets using the partition method ([#9862](https://github.com/shaka-project/shaka-player/issues/9862)) ([39b5a4b](https://github.com/shaka-project/shaka-player/commit/39b5a4b6665c5698e0de5702a730726fa56b8f88))
+* **HLS:** parse tag string directly instead of creating an array ([#9856](https://github.com/shaka-project/shaka-player/issues/9856)) ([aa6381b](https://github.com/shaka-project/shaka-player/commit/aa6381bf1de72a2e63383d09b7e9528812610106))
+* **HLS:** reduce GC pressure when parsing HLS manifest tags ([#9857](https://github.com/shaka-project/shaka-player/issues/9857)) ([161178d](https://github.com/shaka-project/shaka-player/commit/161178d7631cdb79a6e33efcfff931a362cba4fd))
+* **net:** avoid array allocations in XHR header parsing to reduce GC pressure ([#9874](https://github.com/shaka-project/shaka-player/issues/9874)) ([ddde3f6](https://github.com/shaka-project/shaka-player/commit/ddde3f680ed3dda034143876776ea8354cf73dc1))
+* **player:** stop recreating functions on video time update ([#9854](https://github.com/shaka-project/shaka-player/issues/9854)) ([971c498](https://github.com/shaka-project/shaka-player/commit/971c498619bb83c330958dc66b69ee5f437e9027))
+* **Transmuxer:** replace identical object literals with named constants ([#9852](https://github.com/shaka-project/shaka-player/issues/9852)) ([f3aad19](https://github.com/shaka-project/shaka-player/commit/f3aad19f2abfc501678b9c99315632483bb6f599))
+* **VTT:** reduce GC pressure in VTT text parser ([#9869](https://github.com/shaka-project/shaka-player/issues/9869)) ([7f2ef51](https://github.com/shaka-project/shaka-player/commit/7f2ef51e8545f77704abd4328ce97f69422b588d))
+
 ## [5.0.7](https://github.com/shaka-project/shaka-player/compare/v5.0.6...v5.0.7) (2026-03-19)
 
 
