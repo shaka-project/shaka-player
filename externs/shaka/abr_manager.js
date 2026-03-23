@@ -56,10 +56,11 @@ shaka.extern.AbrManager = class {
    * are equal.
    *
    * @param {!Array<!shaka.extern.Variant>} variants
+   * @param {boolean} isLowLatency
    * @return {boolean}
    * @exportDoc
    */
-  setVariants(variants) {}
+  setVariants(variants, isLowLatency) {}
 
   /**
    * Chooses one variant to switch to.  Called by the Player.
@@ -145,14 +146,6 @@ shaka.extern.AbrManager = class {
    * @exportDoc
    */
   setCmsdManager(cmsdManager) {}
-
-  /**
-   * Indicates whether the current stream is LowLatency or not.
-   *
-   * @param {boolean} isLowLatency
-   * @exportDoc
-   */
-  setLowLatency(isLowLatency) {}
 
   /**
    * Sets the ABR configuration.
