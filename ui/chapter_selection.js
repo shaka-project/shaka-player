@@ -123,7 +123,12 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
         this.loadThumbnailForChapter_(chapter)
             .then((img) => {
               if (img && this.menu.contains(button)) {
-                button.insertBefore(img, span);
+                img.alt = chapter.title;
+                img.draggable = false;
+                const container = shaka.util.Dom.createHTMLElement('div');
+                container.classList.add('shaka-chapter-thumbnail');
+                container.appendChild(img);
+                button.insertBefore(container, span);
               }
             });
 
@@ -144,7 +149,7 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
 
   /**
    * @param {!shaka.extern.Chapter} chapter
-   * @return {!Promise<?HTMLElement>}
+   * @return {!Promise<?HTMLImageElement>}
    * @private
    */
   async loadThumbnailForChapter_(chapter) {
@@ -181,8 +186,6 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
         }
 
         const img = new Image();
-        img.classList.add('shaka-chapter-thumbnail');
-        img.alt = '';
         img.onload = () => {
           img.style.width = '100%';
           img.style.height = '100%';
@@ -201,7 +204,7 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
 
   /**
    * @param {!shaka.extern.Thumbnail} thumbnail
-   * @return {!Promise<?HTMLElement>}
+   * @return {!Promise<?HTMLImageElement>}
    * @private
    */
   async loadThumbnailFromTrack_(thumbnail) {
@@ -232,15 +235,8 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
     }
 
     return new Promise((resolve) => {
-      const container = shaka.util.Dom.createHTMLElement('div');
-      container.classList.add('shaka-chapter-thumbnail');
-
       const img = new Image();
-      img.draggable = false;
-
       img.onload = () => {
-        container.appendChild(img);
-
         if (!thumbnail.sprite) {
           img.style.width = '100%';
           img.style.height = '100%';
@@ -254,8 +250,7 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
           img.style.transform = 'scale(' + scale + ')';
           img.style.transformOrigin = 'left top';
         }
-
-        resolve(container);
+        resolve(img);
       };
 
       img.onerror = () => {
