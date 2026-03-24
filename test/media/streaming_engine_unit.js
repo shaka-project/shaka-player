@@ -4497,9 +4497,6 @@ describe('StreamingEngine', () => {
     // iterator can return the last segment reference due to
     // floating point rounding or discontinuous segments.
     // The fix detects this and searches with a 150ms drift.
-
-    const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-
     beforeEach(() => {
       manifest = shaka.test.ManifestGenerator.generate(
           (manifest) => {
