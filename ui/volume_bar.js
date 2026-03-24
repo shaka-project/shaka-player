@@ -186,32 +186,13 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
 
     event.preventDefault();
 
-    const direction = this.normalizeWheelDelta_(event);
-
-    let newValue = this.getValue() + (direction > 0 ? 1 : -1);
+    let newValue = this.getValue() + (event.deltaY > 0 ? 1 : -1);
 
     // Clamp value between 0 and 100
     newValue = Math.max(0, Math.min(100, newValue));
 
     this.setValue(newValue);
     this.onChange(); // Apply the volume change
-  }
-
-  /**
-   * Normalize wheel delta across devices.
-   * @param {!WheelEvent} event
-   * @return {number}
-   * @private
-   */
-  normalizeWheelDelta_(event) {
-    // cspell:ignore Trackpads
-    // Trackpads produce small deltas → keep precision
-    if (Math.abs(event.deltaY) <= 5) {
-      return event.deltaY;
-    }
-
-    // Mouse wheel → normalize to steps
-    return event.deltaY > 0 ? 1 : -1;
   }
 };
 
