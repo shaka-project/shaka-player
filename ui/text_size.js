@@ -33,7 +33,7 @@ shaka.ui.TextSize = class extends shaka.ui.SettingsMenu {
         shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS_SIZE']);
 
     this.button.classList.add('shaka-caption-size-button');
-    this.button.classList.add('shaka-tooltip-status');
+    this.button.classList.add('shaka-tooltip');
     this.menu.classList.add('shaka-text-positions');
 
     this.eventManager.listenMulti(
