@@ -319,7 +319,11 @@ shaka.ui.MediaSession = class {
         break;
       case 'enterpictureinpicture':
         if (!ad || !ad.isLinear()) {
-          this.controls_.togglePiP();
+          // cspell:ignore contentoccluded
+          if (details.enterPictureInPictureReason != 'contentoccluded' ||
+              this.config_.mediaSession.allowAutoPiP) {
+            this.controls_.togglePiP();
+          }
         }
         break;
       case 'nexttrack':
