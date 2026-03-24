@@ -970,6 +970,49 @@ describe('StreamingEngine', () => {
     netEngine.expectNoRequest('1_text_3', segmentType, segmentContext);
   });
 
+  // Regression test: when playback is near the end of the presentation and
+  // no segment reference is available, endOfStream should be called instead
+  // of retrying indefinitely.
+  it('calls endOfStream when close to duration with no segment', async () => {
+    setupVod();
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    createStreamingEngine();
+
+    // Here we go!
+    streamingEngine.switchVariant(variant);
+    streamingEngine.switchTextStream(textStream);
+    await streamingEngine.start();
+    playing = true;
+
+    // Let the streaming engine buffer some content first.
+    await runTest(() => {
+      // Once we've buffered a bit, jump the presentation time to just
+      // before the end of the presentation and make the segment index
+      // return null for all future lookups.
+      if (presentationTimeInSeconds >= 5) {
+        // Set time to be within 1 microsecond of the duration (40s).
+        presentationTimeInSeconds = 39.9999999;
+        playing = false;
+
+        // Override the segment index to return null, simulating no
+        // available segment reference near the end.
+        for (const stream of [audioStream, videoStream, textStream]) {
+          if (stream.segmentIndex) {
+            stream.segmentIndex.getIteratorForTime = () => {
+              const iterator = {
+                current: () => null,
+                next: () => ({value: null, done: true}),
+              };
+              return iterator;
+            };
+          }
+        }
+      }
+    });
+
+    expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+  });
+
   it('does not buffer one media type ahead of another', async () => {
     setupVod();
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
