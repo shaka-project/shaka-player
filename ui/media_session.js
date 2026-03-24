@@ -273,8 +273,7 @@ shaka.ui.MediaSession = class {
   }
 
   /**
-   * @param {!{action: string, seekOffset: ?number,
-   *         seekTime: ?number, fastSeek: ?boolean}} details
+   * @param {!MediaSessionActionDetails} details
    * @export
    */
   commonActionHandler(details) {
