@@ -273,8 +273,7 @@ shaka.ui.MediaSession = class {
   }
 
   /**
-   * @param {!{action: string, seekOffset: ?number,
-   *         seekTime: ?number}} details
+   * @param {!MediaSessionActionDetails} details
    * @export
    */
   commonActionHandler(details) {
@@ -310,8 +309,9 @@ shaka.ui.MediaSession = class {
           break;
         }
         if (!ad || !ad.isLinear()) {
+          const fastSeek = details.fastSeek || false;
           this.controls_.seekTo(
-              this.player_.seekRange().start + details.seekTime);
+              this.player_.seekRange().start + details.seekTime, fastSeek);
         }
         break;
       case 'stop':
