@@ -1189,7 +1189,8 @@ shakaDemo.Config = class {
         .addUIBoolInput_('Handle Actions', 'mediaSession.handleActions')
         .addUIBoolInput_('Handle Position', 'mediaSession.handlePosition')
         .addUIArrayNumberInput_('Supported actions',
-            'mediaSession.supportedActions');
+            'mediaSession.supportedActions')
+        .addUIBoolInput_('Allow auto PiP', 'mediaSession.allowAutoPiP');
   }
 
   /** @private */

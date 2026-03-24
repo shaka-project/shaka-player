@@ -184,6 +184,7 @@ shaka.extern.UIShortcuts;
  *   handleActions: boolean,
  *   handlePosition: boolean,
  *   supportedActions: !Array<string>,
+ *   allowAutoPiP: boolean,
  * }}
  *
  * @property {boolean} enabled
@@ -216,6 +217,13 @@ shaka.extern.UIShortcuts;
  *   Defaults to <code>true</code>.
  * @property {!Array<string>} supportedActions
  *   List of supported MediaSession actions.
+ * @property {boolean} allowAutoPiP
+ *   If true, enables handling of browser-initiated Picture-in-Picture (PiP)
+ *   requests via the MediaSession <code>enterpictureinpicture</code> action
+ *   (e.g. when content is occluded). If false, these automatic PiP requests
+ *   will be ignored.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.UIMediaSession;
