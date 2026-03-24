@@ -34,7 +34,7 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
         shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS_POSITION']);
 
     this.button.classList.add('shaka-caption-position-button');
-    this.button.classList.add('shaka-tooltip-status');
+    this.button.classList.add('shaka-tooltip');
     this.menu.classList.add('shaka-text-positions');
 
     this.eventManager.listenMulti(
