@@ -475,8 +475,8 @@ shaka.ui.LanguageUtils = class {
     // languages is up to date.
     if (preferIntlDisplayNames && window.Intl && 'DisplayNames' in Intl) {
       try {
-        const languageNames =
-            new Intl.DisplayNames([locale], {type: 'language'});
+        const languageNames = new Intl.DisplayNames([locale],
+            {type: 'language', languageDisplay: 'standard'});
         const languageName = languageNames.of(locale);
         // Only prefer it when it's reliable
         if (languageName &&
