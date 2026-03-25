@@ -43,6 +43,34 @@ describe('ArrayUtils', () => {
     });
   });
 
+  describe('binarySearch', () => {
+    it('returns 0 for empty array', () => {
+      expect(ArrayUtils.binarySearch([], () => true)).toBe(0);
+    });
+
+    it('returns 0 when predicate is false for all elements', () => {
+      expect(ArrayUtils.binarySearch([1, 2, 3], () => false)).toBe(0);
+    });
+
+    it('returns length when predicate is true for all elements', () => {
+      expect(ArrayUtils.binarySearch([1, 2, 3], () => true)).toBe(3);
+    });
+
+    it('finds the partition point in a sorted array', () => {
+      const arr = [1, 2, 3, 4, 5];
+      // predicate: x < 3  → true for [1,2], false for [3,4,5] → index 2
+      expect(ArrayUtils.binarySearch(arr, (x) => x < 3)).toBe(2);
+    });
+
+    it('returns 1 when only the first element satisfies the predicate', () => {
+      expect(ArrayUtils.binarySearch([1, 2, 3], (x) => x < 2)).toBe(1);
+    });
+
+    it('returns 0 for a single-element array when predicate is false', () => {
+      expect(ArrayUtils.binarySearch([5], (x) => x < 5)).toBe(0);
+    });
+  });
+
   describe('hasSameElements', () => {
     it('determines same elements', () => {
       expectEqual([], []);
