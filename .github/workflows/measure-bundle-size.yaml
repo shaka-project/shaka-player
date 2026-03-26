@@ -35,11 +35,6 @@ jobs:
           distribution: zulu
           java-version: 21
 
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y python3 jq gzip ffmpeg wget
-
       - name: Build head source
         working-directory: head-source
         run: python3 build/all.py
