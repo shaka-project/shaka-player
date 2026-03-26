@@ -1648,6 +1648,7 @@ shaka.extern.HlsManifestConfiguration;
  * @typedef {{
  *   fingerprintUri: string,
  *   namespaces: !Array<string>,
+ *   subscribeFilterType: string,
  * }}
  *
  * @property {string} fingerprintUri
@@ -1660,6 +1661,15 @@ shaka.extern.HlsManifestConfiguration;
  *   via PublishNamespace messages.
  *   <br>
  *   Defaults to <code>[]</code>.
+ * @property {string} subscribeFilterType
+ *   The filter type used in MoQ SUBSCRIBE messages. Controls how the relay
+ *   delivers data to the subscriber.
+ *   <code>'latest_object'</code> starts from the most recent available data
+ *   (best for live low-latency).
+ *   <code>'next_group'</code> waits for the next group boundary before
+ *   delivering (may cause delays on edge relays with gossip routing).
+ *   <br>
+ *   Defaults to <code>'latest_object'</code>.
  * @exportDoc
  */
 shaka.extern.MsfManifestConfiguration;
