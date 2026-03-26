@@ -214,11 +214,11 @@ filterDescribe('shaka.msf.Receiver', isMSFSupported, () => {
   }
 
   it('should decode a server setup with no parameters', async () => {
-    const SetupType = shaka.msf.Utils.SetupType;
+    const SERVER_SETUP = shaka.msf.Utils.MessageTypeId.SERVER_SETUP;
 
     // type = SERVER, length = 1, version = 1, param count = 0
     const readerValues = [
-      SetupType.SERVER, // type
+      SERVER_SETUP, // type
       0x00, 0x01,       // message length = 1 byte
       0x01,             // version
       0x00,              // param count = 0
@@ -233,12 +233,12 @@ filterDescribe('shaka.msf.Receiver', isMSFSupported, () => {
   });
 
   it('should decode server setup with numeric parameter', async () => {
-    const SetupType = shaka.msf.Utils.SetupType;
+    const SERVER_SETUP = shaka.msf.Utils.MessageTypeId.SERVER_SETUP;
 
     // type = SERVER, length = 3 bytes, version = 1
     // param count = 1, param type = 2 (even), param value = 42
     const readerValues = [
-      SetupType.SERVER, // type
+      SERVER_SETUP, // type
       0x00, 0x03,       // message length
       0x01,             // version
       0x01,             // param count
