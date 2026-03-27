@@ -185,8 +185,21 @@ shaka.ui.LanguageUtils = class {
       const span = shaka.util.Dom.createHTMLElement('span');
       button.appendChild(span);
 
-      span.textContent = shaka.ui.LanguageUtils.getLanguageName(
+      let defaultLabel = shaka.ui.LanguageUtils.getLanguageName(
           language, localization, preferIntlDisplayNames);
+      if (config.customTrackLabel) {
+        const customLabel = config.customTrackLabel(
+            defaultLabel, track, 'audio');
+        if (customLabel) {
+          defaultLabel = customLabel;
+        }
+      }
+      if (!defaultLabel) {
+        defaultLabel = localization.resolve(
+            shaka.ui.Locales.Ids.UNRECOGNIZED_LANGUAGE) +
+            ' (' + language + ')';
+      }
+      span.textContent = defaultLabel;
       let basicInfo = '';
       if (showAudioCodec && showAudioChannelCountVariants &&
           spatialAudio && (audioCodec == 'ec-3' || audioCodec == 'ac-4')) {
@@ -336,11 +349,12 @@ shaka.ui.LanguageUtils = class {
       const span = shaka.util.Dom.createHTMLElement('span');
       button.appendChild(span);
 
+      let defaultLabel;
       if (track.originalLanguage == 'speech-to-text') {
         // Necessary when there are multiple speech-to-text tracks and they
         // translate into different languages.
         if (language) {
-          span.textContent = [
+          defaultLabel = [
             shaka.ui.LanguageUtils.getLanguageName(
                 language, localization, preferIntlDisplayNames),
             ' (',
@@ -348,14 +362,27 @@ shaka.ui.LanguageUtils = class {
             ')',
           ].join('');
         } else {
-          span.textContent =
+          defaultLabel =
               localization.resolve(shaka.ui.Locales.Ids.AUTO_GENERATED);
         }
       } else {
-        span.textContent =
+        defaultLabel =
             shaka.ui.LanguageUtils.getLanguageName(
                 language, localization, preferIntlDisplayNames);
       }
+      if (config.customTrackLabel) {
+        const customLabel = config.customTrackLabel(
+            defaultLabel, track, 'text');
+        if (customLabel) {
+          defaultLabel = customLabel;
+        }
+      }
+      if (!defaultLabel) {
+        defaultLabel = localization.resolve(
+            shaka.ui.Locales.Ids.UNRECOGNIZED_LANGUAGE) +
+            ' (' + language + ')';
+      }
+      span.textContent = defaultLabel;
       let labelFormat = trackLabelFormat;
       if (labelFormat === TrackLabelFormat.LABEL_OR_LANGUAGE) {
         labelFormat = label ?
@@ -437,8 +464,9 @@ shaka.ui.LanguageUtils = class {
    * @param {string} locale
    * @param {shaka.ui.Localization} localization
    * @param {boolean} preferIntlDisplayNames
-   * @return {string} The language's name for itself in its own script, or as
-   *   close as we can get with the information we have.
+   * @return {?string} The language's name for itself in its own script, or as
+   *   close as we can get with the information we have.  Returns null if the
+   *   language is not recognized.
    */
   static getLanguageName(locale, localization, preferIntlDisplayNames) {
     if (!locale && !localization) {
@@ -499,8 +527,7 @@ shaka.ui.LanguageUtils = class {
     } else if (language in mozilla.LanguageMapping) {
       return mozilla.LanguageMapping[language] + ' (' + locale + ')';
     } else {
-      return resolve(shaka.ui.Locales.Ids.UNRECOGNIZED_LANGUAGE) +
-          ' (' + locale + ')';
+      return null;
     }
   }
 };
