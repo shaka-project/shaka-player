@@ -68,6 +68,7 @@ describe('Demo', () => {
 
       const raw = asset.toJSON();
 
+      // eslint-disable-next-line no-prototype-builtins
       expect(raw.hasOwnProperty('testPolluted')).toBe(false);
     });
 
