@@ -1,5 +1,27 @@
 # Changelog
 
+## [5.0.9](https://github.com/shaka-project/shaka-player/compare/v5.0.8...v5.0.9) (2026-03-30)
+
+
+### Bug Fixes
+
+* Call endOfStream when no data available close to duration ([#9866](https://github.com/shaka-project/shaka-player/issues/9866)) ([050f5cf](https://github.com/shaka-project/shaka-player/commit/050f5cf366424ba9bb3e0f7ab5217f3f1cd763ce))
+* Fix HDR detection in some devices ([#9908](https://github.com/shaka-project/shaka-player/issues/9908)) ([568afc8](https://github.com/shaka-project/shaka-player/commit/568afc820072ca915b81da49ff21992ea3cb7559))
+* **MSF:** Add PUBLISH_NAMESPACE_OK response to server PUBLISH_NAMESPACE ([#9909](https://github.com/shaka-project/shaka-player/issues/9909)) ([1ca7596](https://github.com/shaka-project/shaka-player/commit/1ca75969e62528e5bab38a59665d33bd9b70bb61))
+* **MSF:** Correct handling of PUBLISH_DONE ([#9893](https://github.com/shaka-project/shaka-player/issues/9893)) ([a2fbefd](https://github.com/shaka-project/shaka-player/commit/a2fbefdafd1796a86422ef20e5af0ed80a396d36))
+* **MSF:** Correct parsing of publishDone message ([#9890](https://github.com/shaka-project/shaka-player/issues/9890)) ([fc3031d](https://github.com/shaka-project/shaka-player/commit/fc3031d7be4410f32b4e47a3dba35ec133b8b2af))
+* **UI:** Ensure consistent language names with languageDisplay 'standard' ([#9887](https://github.com/shaka-project/shaka-player/issues/9887)) ([dbfda09](https://github.com/shaka-project/shaka-player/commit/dbfda0939275922ceb4cc6425b8afc4f229e43e6))
+* **UI:** Fix display "live" label on streams without seek bar ([#9891](https://github.com/shaka-project/shaka-player/issues/9891)) ([3059a18](https://github.com/shaka-project/shaka-player/commit/3059a182e949f9c88087ac8c3f90a3221a8b1a00))
+* **UI:** Fix tooltip text on subtitle position and size buttons ([#9886](https://github.com/shaka-project/shaka-player/issues/9886)) ([66e83ce](https://github.com/shaka-project/shaka-player/commit/66e83ce6c3fb2207552a090f873173606e3e80ca))
+
+
+### Performance Improvements
+
+* **media:** replace filter calls in SegmentIndex with binary search ([#9880](https://github.com/shaka-project/shaka-player/issues/9880)) ([7e198d5](https://github.com/shaka-project/shaka-player/commit/7e198d51f013d3353d333baff9ddc82ae536c769))
+* **MSF:** Improve compatibility with the draft-14 ([#9895](https://github.com/shaka-project/shaka-player/issues/9895)) ([8ffb717](https://github.com/shaka-project/shaka-player/commit/8ffb717120e32e3d4c486371233351377174c707))
+* **MSF:** Reduce startup latency changing the type of subscribe ([#9903](https://github.com/shaka-project/shaka-player/issues/9903)) ([840dc4b](https://github.com/shaka-project/shaka-player/commit/840dc4bcac61073047a5950313f87d97ba9eed81))
+* **TS:** Eliminate per-PES wrapper array allocations in parse loop ([#9883](https://github.com/shaka-project/shaka-player/issues/9883)) ([4355c1c](https://github.com/shaka-project/shaka-player/commit/4355c1ce62893e9b3c017af889483d8b5d543b8c))
+
 ## [5.0.8](https://github.com/shaka-project/shaka-player/compare/v5.0.7...v5.0.8) (2026-03-23)
 
 
