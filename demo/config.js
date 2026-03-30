@@ -642,7 +642,16 @@ shakaDemo.Config = class {
         .addBoolInput_('Clear decodingInfo cache on unload',
             'streaming.clearDecodingCache')
         .addBoolInput_('Limit the buffer to the presentation duration',
-            'streaming.clampAppendWindowToDuration');
+            'streaming.clampAppendWindowToDuration')
+        .addBoolInput_('Dropped Frame Protection Enabled',
+            'streaming.droppedFrameProtection.enabled')
+        .addNumberInput_('Dropped Frame Threshold',
+            'streaming.droppedFrameProtection.dropThreshold',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Dropped Frame Ban Duration',
+            'streaming.droppedFrameProtection.banDuration')
+        .addNumberInput_('Dropped Frame Check Interval',
+            'streaming.droppedFrameProtection.checkInterval');
 
     const strategyOptions = shaka.config.CrossBoundaryStrategy;
     const strategyOptionsNames = {
