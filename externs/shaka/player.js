@@ -1958,6 +1958,44 @@ shaka.extern.SpeechToTextConfiguration;
 
 /**
  * @typedef {{
+ *   enabled: boolean,
+ *   dropThreshold: number,
+ *   banDuration: number,
+ *   checkInterval: number
+ * }}
+ *
+ * @description
+ * Configuration for monitoring dropped frames and temporarily disabling
+ * streams that exceed a threshold.
+ *
+ * @property {boolean} enabled
+ *   Enable or disable dropped frame protection.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {number} dropThreshold
+ *   The dropThreshold represents the fraction of dropped frames relative to
+ *   the total frames rendered during each check interval. For example, a value
+ *   of 0.15 means that if 15% or more of the frames are dropped in that
+ *   interval, the stream will be considered problematic and may be temporarily
+ *   disabled.
+ *   <br>
+ *   Defaults to <code>0.15</code>.
+ * @property {number} banDuration
+ *   Duration in seconds to disable the stream after it exceeds the
+ *   dropped frame threshold.
+ *   <br>
+ *   Defaults to <code>10</code> (10 seconds).
+ * @property {number} checkInterval
+ *   Interval in seconds to measure dropped frames and compare with the
+ *   previous measurement.
+ *   <br>
+ *   Defaults to <code>2</code> (2 seconds).
+ * @exportDoc
+ */
+shaka.extern.DroppedFrameProtectionConfig;
+
+/**
+ * @typedef {{
  *   retryParameters: shaka.extern.RetryParameters,
  *   failureCallback: function(!shaka.util.Error),
  *   rebufferingGoal: number,
@@ -2004,6 +2042,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   returnToEndOfLiveWindowWhenOutside: boolean,
  *   stopFetchingOnPause: boolean,
  *   clampAppendWindowToDuration: boolean,
+ *   droppedFrameProtection: shaka.extern.DroppedFrameProtectionConfig,
  * }}
  *
  * @description
@@ -2264,6 +2303,9 @@ shaka.extern.SpeechToTextConfiguration;
  *   "ended" when seeking to end.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {shaka.extern.DroppedFrameProtectionConfig} droppedFrameProtection
+ *   Configuration for monitoring dropped frames and temporarily disabling
+ *   streams that exceed a threshold.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
