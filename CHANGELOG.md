@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.16.25](https://github.com/shaka-project/shaka-player/compare/v4.16.24...v4.16.25) (2026-03-30)
+
+
+### Bug Fixes
+
+* Fix HDR detection in some devices ([#9908](https://github.com/shaka-project/shaka-player/issues/9908)) ([9736944](https://github.com/shaka-project/shaka-player/commit/97369442f37bad3398694c7464859047ddb39d4a))
+
+
+### Performance Improvements
+
+* **media:** replace filter calls in SegmentIndex with binary search ([#9880](https://github.com/shaka-project/shaka-player/issues/9880)) ([a3a3cc1](https://github.com/shaka-project/shaka-player/commit/a3a3cc16c65311b5fcf183ed2d55a678a2c4bbb8))
+* **TS:** Eliminate per-PES wrapper array allocations in parse loop ([#9883](https://github.com/shaka-project/shaka-player/issues/9883)) ([83c317c](https://github.com/shaka-project/shaka-player/commit/83c317c7b2269a4e955f7a106b0e16ef5c2d29b8))
+
 ## [4.16.24](https://github.com/shaka-project/shaka-player/compare/v4.16.23...v4.16.24) (2026-03-23)
 
 
