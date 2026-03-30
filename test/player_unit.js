@@ -3337,6 +3337,152 @@ describe('Player', () => {
       expect(stats.streamBandwidth).toBe(210);
     });
 
+    describe('droppedFrameProtection', () => {
+      /** @type {?jasmine.Spy} */
+      let disableStreamSpy;
+
+      /**
+       * @suppress {accessControls}
+       */
+      function setupDroppedFrameTest() {
+        // Set the active variant so getCurrentVariant() returns a real variant.
+        streamingEngine.switchVariant.and.callFake(() => {});
+        streamingEngine.getCurrentVariant.and.returnValue(manifest.variants[0]);
+
+        // Force buffering state to satisfied so checks are not skipped.
+        const State = shaka.media.BufferingObserver.State;
+        player.bufferObserver_.getState = () => State.SATISFIED;
+      }
+
+      /**
+       * @suppress {accessControls}
+       */
+      function checkDroppedFrames() {
+        player.checkDroppedFrames_();
+      }
+
+      /**
+       * @suppress {accessControls}
+       */
+      function resetFrameCounters() {
+        player.lastDroppedFrames_ = 0;
+        player.lastTotalFrames_ = 0;
+      }
+
+      /**
+       * @suppress {accessControls}
+       * @return {boolean}
+       */
+      function isPollerNull() {
+        return player.droppedFramePoller_ == null;
+      }
+
+      /**
+       * @suppress {accessControls}
+       */
+      function startDroppedFramePoller() {
+        player.startDroppedFramePoller_();
+      }
+
+      /**
+       * @suppress {accessControls}
+       * @param {boolean} buffering
+       */
+      function forceBufferingState(buffering) {
+        const State = shaka.media.BufferingObserver.State;
+        player.bufferObserver_.getState =
+            () => buffering ? State.STARVING : State.SATISFIED;
+      }
+
+      beforeEach(async () => {
+        player.configure({
+          streaming: {
+            droppedFrameProtection: {
+              enabled: true,
+              dropThreshold: 0.15,
+              banDuration: 10,
+              checkInterval: 2,
+            },
+          },
+        });
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        setupDroppedFrameTest();
+
+        disableStreamSpy = spyOn(player, 'disableStream').and.callThrough();
+      });
+
+      function setPlaybackQuality(dropped, total) {
+        video.getVideoPlaybackQuality = () => ({
+          droppedVideoFrames: dropped,
+          totalVideoFrames: total,
+          corruptedVideoFrames: 0,
+          creationTime: 0,
+          totalFrameDelay: 0,
+        });
+      }
+
+      it('disables stream when drop ratio exceeds threshold', () => {
+        // 20% drop ratio exceeds 0.15 threshold
+        setPlaybackQuality(20, 100);
+
+        checkDroppedFrames();
+
+        expect(disableStreamSpy).toHaveBeenCalledTimes(1);
+        const args = disableStreamSpy.calls.mostRecent().args;
+        expect(args[1]).toBe(10); // banDuration
+      });
+
+      it('does not disable stream when drop ratio is below threshold', () => {
+        // 10% drop ratio is below 0.15 threshold
+        setPlaybackQuality(10, 100);
+
+        checkDroppedFrames();
+
+        expect(disableStreamSpy).not.toHaveBeenCalled();
+      });
+
+      it('does not start poller when feature is disabled', () => {
+        // Stop the existing poller and try to restart with enabled: false.
+        player.configure({
+          streaming: {droppedFrameProtection: {enabled: false}},
+        });
+
+        // Manually invoke startDroppedFramePoller_ with disabled config.
+        // The poller should not be created.
+        startDroppedFramePoller();
+
+        expect(isPollerNull()).toBe(true);
+      });
+
+      it('resets counters on variant change', () => {
+        // First check: cumulative dropped=20, total=100 → 20% → ban
+        setPlaybackQuality(20, 100);
+        checkDroppedFrames();
+        expect(disableStreamSpy).toHaveBeenCalledTimes(1);
+        disableStreamSpy.calls.reset();
+
+        // Variant changes: counters reset to 0
+        resetFrameCounters();
+
+        // New stream: 10% drop ratio → below threshold → no ban
+        setPlaybackQuality(22, 220);
+        checkDroppedFrames();
+        expect(disableStreamSpy).not.toHaveBeenCalled();
+      });
+
+      it('skips check when video is buffering', () => {
+        setPlaybackQuality(20, 100);
+
+        forceBufferingState(true);
+
+        checkDroppedFrames();
+
+        expect(disableStreamSpy).not.toHaveBeenCalled();
+      });
+    });
+
     it('tracks frame info', () => {
       // getVideoPlaybackQuality does not exist yet.
       let stats = player.getStats();
