@@ -52,6 +52,9 @@ describe('Ads', () => {
 
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
+    // Worker transmuxing requires the worker file to be served by Karma, which
+    // is not set up for integration tests.
+    player.configure('mediaSource.useWorkerForTransmux', false);
 
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();

@@ -1,0 +1,6 @@
+# Transmuxer Worker bundle.
+# This build type produces a standalone script to be loaded in a Web Worker.
+# It includes all transmuxer plugins and the worker entry point.
+
++../../lib/transmuxer/transmuxer_worker.js
++@transmuxer

@@ -265,6 +265,76 @@ class Build(object):
 
     return True
 
+  def has_transmuxer_proxy(self):
+    """Returns True if the transmuxer proxy is in the build."""
+    for path in self.include:
+      if path.endswith('transmuxer_proxy.js'):
+        return True
+    return False
+
+  def build_worker_bundle(self, langout, force, is_debug):
+    """Compiles the transmuxer worker bundle.
+
+    Returns the absolute path to the generated JS file, or None on failure.
+    """
+    source_base = shakaBuildHelpers.get_source_base()
+
+    worker_build = Build()
+    if not worker_build.parse_build(['+@transmuxer-worker'], os.getcwd()):
+      return None
+    worker_build.add_closure()
+    if not worker_build.add_core():
+      return None
+
+    build_name = 'shaka-player.transmuxer-worker'
+    closure = compiler.ClosureCompiler(worker_build.include, build_name)
+    closure.add_wrapper = False
+    closure.add_source_map = False
+
+    closure_opts = common_closure_opts + common_closure_defines
+    closure_opts += ['--language_out', langout]
+    if is_debug:
+      closure_opts += debug_closure_opts + debug_closure_defines
+    else:
+      closure_opts += release_closure_opts + release_closure_defines
+
+    closure_opts += [
+        '--dependency_mode=PRUNE',
+        '--entry_point=goog:shaka.transmuxer.TransmuxerWorker',
+        # Each transmuxer plugin registers itself at load time (side effect),
+        # so we must list them as entry points too.
+        '--entry_point=goog:shaka.transmuxer.AacTransmuxer',
+        '--entry_point=goog:shaka.transmuxer.Ac3Transmuxer',
+        '--entry_point=goog:shaka.transmuxer.Ec3Transmuxer',
+        '--entry_point=goog:shaka.transmuxer.Mp3Transmuxer',
+        '--entry_point=goog:shaka.transmuxer.MpegTsTransmuxer',
+        '--entry_point=goog:shaka.transmuxer.TsTransmuxer',
+    ]
+
+    # Suppress type errors caused by dependency pruning; the main build
+    # already validates all types.
+    closure_opts += [
+        '--jscomp_off=checkTypes',
+        '--jscomp_off=unknownDefines',
+    ]
+
+    if not closure.compile(closure_opts, force):
+      return None
+
+    with shakaBuildHelpers.open_file(closure.compiled_js_path, 'r') as f:
+      worker_code = f.read()
+
+    # json.dumps produces a properly escaped JS string literal.
+    worker_code_escaped = json.dumps(worker_code)
+
+    output_path = os.path.join(source_base, 'dist', 'worker_bundle_generated.js')
+    with shakaBuildHelpers.open_file(output_path, 'w') as f:
+      f.write("goog.provide('shaka.transmuxer.WorkerBundle');\n")
+      f.write("/** @const {string} */\n")
+      f.write("shaka.transmuxer.WorkerBundle.CODE = %s;\n" % worker_code_escaped)
+
+    return os.path.abspath(output_path)
+
   def build_library(self, name, langout, locales, force, is_debug, skip_ts):
     """Builds Shaka Player using the files in |self.include|.
 
@@ -288,6 +358,19 @@ class Build(object):
       # dummy cast proxy.
       if not self.has_cast():
         self.include.add(os.path.abspath('conditional/dummy_cast_proxy.js'))
+
+    if self.has_transmuxer_proxy():
+      logging.info('Compiling transmuxer worker bundle...')
+      generated = self.build_worker_bundle(langout, force, is_debug)
+      if generated:
+        empty_bundle = os.path.abspath(
+            'lib/transmuxer/worker_bundle.js')
+        self.include.discard(empty_bundle)
+        self.include.add(generated)
+      else:
+        logging.warning(
+            'Worker bundle compilation failed; '
+            'worker transmuxer will fall back to main thread at runtime.')
 
     if is_debug:
       name += '.debug'

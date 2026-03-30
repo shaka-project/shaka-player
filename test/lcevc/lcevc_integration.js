@@ -55,6 +55,10 @@ describe('LCEVC Integration', () => {
     player.attachCanvas(canvas);
     await player.attach(video);
 
+    // Worker transmuxing requires the worker file to be served by Karma, which
+    // is not set up for integration tests.
+    player.configure('mediaSource.useWorkerForTransmux', false);
+
     // Enable the LCEVC enhancement.
     player.configure('lcevc.enabled', true);
     player.configure('lcevc.drawLogo', true);

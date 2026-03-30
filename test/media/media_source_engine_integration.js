@@ -179,6 +179,7 @@ describe('MediaSourceEngine', () => {
     onEvent = jasmine.createSpy('onEvent');
     onManifestUpdate = jasmine.createSpy('onManifestUpdate');
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    config.useWorkerForTransmux = false;
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
@@ -580,6 +581,7 @@ describe('MediaSourceEngine', () => {
     initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     config.forceTransmux = true;
+    config.useWorkerForTransmux = false;
     mediaSourceEngine.configure(config);
     await mediaSourceEngine.init(initObject);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
@@ -602,6 +604,7 @@ describe('MediaSourceEngine', () => {
     initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     config.forceTransmux = true;
+    config.useWorkerForTransmux = false;
     mediaSourceEngine.configure(config);
     await mediaSourceEngine.init(initObject);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
@@ -701,6 +704,7 @@ describe('MediaSourceEngine', () => {
     initObject.set(audioType, getFakeStream(metadata.audio));
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     config.forceTransmux = true;
+    config.useWorkerForTransmux = false;
     mediaSourceEngine.configure(config);
     await mediaSourceEngine.init(initObject);
     await append(ContentType.AUDIO, 0);
@@ -734,6 +738,7 @@ describe('MediaSourceEngine', () => {
     initObject.set(audioType, getFakeStream(metadata.audio));
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     config.forceTransmux = true;
+    config.useWorkerForTransmux = false;
     mediaSourceEngine.configure(config);
     await mediaSourceEngine.init(initObject);
     await append(ContentType.AUDIO, 0);

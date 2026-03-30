@@ -12,4 +12,5 @@
 +../../lib/transmuxer/mpeg_audio.js
 +../../lib/transmuxer/mpeg_ts_transmuxer.js
 +../../lib/transmuxer/opus.js
++../../lib/transmuxer/transmuxer_worker.js
 +../../lib/transmuxer/ts_transmuxer.js
