@@ -1971,7 +1971,8 @@ shaka.extern.SpeechToTextConfiguration;
  * @property {boolean} enabled
  *   Enable or disable dropped frame protection.
  *   <br>
- *   Defaults to <code>true</code>.
+ *   Defaults to <code>true</code> on devices that do not support
+ *   <code>MediaCapabilities</code>, <code>false</code> otherwise.
  * @property {number} dropThreshold
  *   The dropThreshold represents the fraction of dropped frames relative to
  *   the total frames rendered during each check interval. For example, a value
