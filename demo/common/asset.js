@@ -13,6 +13,15 @@ goog.provide('ShakaDemoAssetInfo');
 
 
 /**
+ * @param {string} key
+ * @return {boolean}
+ */
+function shakaDemoIsBlockedKey_(key) {
+  return key == '__proto__' || key == 'constructor' || key == 'prototype';
+}
+
+
+/**
  * An object that contains information about an asset.
  */
 const ShakaDemoAssetInfo = class {
@@ -488,7 +497,10 @@ const ShakaDemoAssetInfo = class {
     // Construct a generic object with the values of this object, but with the
     // proper formatting.
     const raw = {};
-    for (const key in this) {
+    for (const key of Object.keys(this)) {
+      if (shakaDemoIsBlockedKey_(key)) {
+        continue;
+      }
       if (key.startsWith('preload') || key.startsWith('store') ||
           key.endsWith('Callback')) {
         // These values shouldn't be saved, as they are dynamic.
@@ -501,6 +513,9 @@ const ShakaDemoAssetInfo = class {
         const replacement = {};
         replacement['__type__'] = 'map';
         for (const entry of value.entries()) {
+          if (shakaDemoIsBlockedKey_(entry[0])) {
+            continue;
+          }
           replacement[entry[0]] = entry[1];
         }
         raw[key] = replacement;
@@ -545,7 +560,10 @@ const ShakaDemoAssetInfo = class {
       {drm: {advanced: {}}, manifest: {dash: {}, hls: {}}, streaming: {}});
 
     if (this.extraConfig) {
-      for (const key in this.extraConfig) {
+      for (const key of Object.keys(this.extraConfig)) {
+        if (shakaDemoIsBlockedKey_(key)) {
+          continue;
+        }
         config[key] = this.extraConfig[key];
       }
     }
@@ -620,13 +638,16 @@ const ShakaDemoAssetInfo = class {
   static fromJSON(raw) {
     // This handles the special case for Maps in toJSON.
     const parsed = {};
-    for (const key in raw) {
+    for (const key of Object.keys(raw)) {
+      if (shakaDemoIsBlockedKey_(key)) {
+        continue;
+      }
       const value = raw[key];
       if (value && typeof value == 'object' && value['__type__'] == 'map') {
         const replacement = new Map();
-        for (const key in value) {
-          if (key != '__type__') {
-            replacement.set(key, value[key]);
+        for (const mapKey of Object.keys(value)) {
+          if (mapKey != '__type__' && !shakaDemoIsBlockedKey_(mapKey)) {
+            replacement.set(mapKey, value[mapKey]);
           }
         }
         parsed[key] = replacement;
@@ -635,7 +656,9 @@ const ShakaDemoAssetInfo = class {
       }
     }
     const asset = ShakaDemoAssetInfo.makeBlankAsset();
-    Object.assign(asset, parsed);
+    for (const key of Object.keys(parsed)) {
+      /** @type {!Object} */(asset)[key] = parsed[key];
+    }
     return asset;
   }
 
