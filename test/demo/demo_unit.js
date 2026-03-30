@@ -68,7 +68,8 @@ describe('Demo', () => {
 
       const raw = asset.toJSON();
 
-      expect(Object.hasOwn(raw, 'testPolluted')).toBe(false);
+      // eslint-disable-next-line no-prototype-builtins
+      expect(raw.hasOwnProperty('testPolluted')).toBe(false);
     });
 
     it('does not accept dangerous keys when parsing saved assets', () => {
