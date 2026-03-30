@@ -22,8 +22,10 @@ describe('ConfigUtils', () => {
     expect(valid).toBe(false);
     expect(/** @type {!Object} */(destination.drm.advanced)['testPolluted'])
         .toBe(undefined);
-    expect(Object.getPrototypeOf(/** @type {!Object} */(destination.drm.advanced)))
-        .toBe(Object.getPrototypeOf({}));
+    expect(
+        Object.getPrototypeOf(/** @type {!Object} */(destination.drm.advanced)))
+        .toBe(
+            Object.getPrototypeOf({}));
     expect(destination.drm.advanced['com.widevine.alpha'].videoRobustness)
         .toEqual(['SW_SECURE_DECODE']);
   });
