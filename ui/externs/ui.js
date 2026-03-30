@@ -260,6 +260,20 @@ shaka.extern.UIMediaSession;
 shaka.extern.UIDocumentPictureInPicture;
 
 /**
+ * A callback for customizing track labels in the UI.
+ *
+ * The callback receives the default label (or null if the language was
+ * unrecognized), the track object, and a type string ('audio' or 'text').
+ * Return a string to override the label, or a falsy value to keep the default.
+ *
+ * @typedef {function(?string,
+ *     (shaka.extern.AudioTrack|shaka.extern.TextTrack),
+ *     string): ?string}
+ * @exportDoc
+ */
+shaka.extern.UITrackLabelCallback;
+
+/**
  * @description
  * The UI's configuration options.
  *
@@ -322,6 +336,7 @@ shaka.extern.UIDocumentPictureInPicture;
  *   documentPictureInPicture: shaka.extern.UIDocumentPictureInPicture,
  *   showUIOnPaused: boolean,
  *   showMenusOnTheRight: boolean,
+ *   customTrackLabel: shaka.extern.UITrackLabelCallback,
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -612,6 +627,14 @@ shaka.extern.UIDocumentPictureInPicture;
  *   of where the button that opens the menu is located.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {shaka.extern.UITrackLabelCallback} customTrackLabel
+ *   A callback for customizing track labels in the UI.  The callback receives
+ *   the default label (or <code>null</code> if the language was unrecognized),
+ *   the track object, and a type string (<code>'audio'</code> or
+ *   <code>'text'</code>).  Return a string to override the label, or a falsy
+ *   value to keep the default.
+ *   <br>
+ *   Defaults to a no-op that returns <code>''</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

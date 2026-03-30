@@ -124,6 +124,7 @@ shaka.test.FakeDemoMain = class {
       },
       showUIOnPaused: true,
       showMenusOnTheRight: false,
+      customTrackLabel: (defaultLabel, track, type) => '',
     };
     this.selectedAsset = null;
 
