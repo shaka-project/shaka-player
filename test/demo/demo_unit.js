@@ -68,7 +68,7 @@ describe('Demo', () => {
 
       const raw = asset.toJSON();
 
-      expect(Object.hasOwn(raw, 'testPolluted')).toBe(false);
+      expect(Object.keys(raw).includes('testPolluted')).toBe(false);
     });
 
     it('does not accept dangerous keys when parsing saved assets', () => {
