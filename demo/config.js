@@ -737,7 +737,8 @@ shakaDemo.Config = class {
         .addNumberInput_('Dropped Frame Ban Duration',
             'streaming.droppedFrameProtection.banDuration')
         .addNumberInput_('Dropped Frame Check Interval',
-            'streaming.droppedFrameProtection.checkInterval');
+            'streaming.droppedFrameProtection.checkInterval',
+            /* canBeDecimal= */ true);
   }
 
   /** @private */
