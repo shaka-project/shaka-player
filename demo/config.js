@@ -642,16 +642,7 @@ shakaDemo.Config = class {
         .addBoolInput_('Clear decodingInfo cache on unload',
             'streaming.clearDecodingCache')
         .addBoolInput_('Limit the buffer to the presentation duration',
-            'streaming.clampAppendWindowToDuration')
-        .addBoolInput_('Dropped Frame Protection Enabled',
-            'streaming.droppedFrameProtection.enabled')
-        .addNumberInput_('Dropped Frame Threshold',
-            'streaming.droppedFrameProtection.dropThreshold',
-            /* canBeDecimal= */ true)
-        .addNumberInput_('Dropped Frame Ban Duration',
-            'streaming.droppedFrameProtection.banDuration')
-        .addNumberInput_('Dropped Frame Check Interval',
-            'streaming.droppedFrameProtection.checkInterval');
+            'streaming.clampAppendWindowToDuration');
 
     const strategyOptions = shaka.config.CrossBoundaryStrategy;
     const strategyOptionsNames = {
@@ -692,6 +683,7 @@ shakaDemo.Config = class {
             'streaming.stopFetchingOnPause');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
+    this.addDroppedFrameProtectionSection_();
   }
 
   /** @private */
@@ -731,6 +723,21 @@ shakaDemo.Config = class {
             'streaming.liveSync.dynamicTargetLatency.maxLatency')
         .addNumberInput_('Dynamic Target Latency Min Latency',
             'streaming.liveSync.dynamicTargetLatency.minLatency');
+  }
+
+  /** @private */
+  addDroppedFrameProtectionSection_() {
+    const docLink = this.resolveExternLink_('.DroppedFrameProtectionConfig');
+    this.addSection_('Streaming Dropped Frame Protection', docLink)
+        .addBoolInput_('Dropped Frame Protection Enabled',
+            'streaming.droppedFrameProtection.enabled')
+        .addNumberInput_('Dropped Frame Threshold',
+            'streaming.droppedFrameProtection.dropThreshold',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Dropped Frame Ban Duration',
+            'streaming.droppedFrameProtection.banDuration')
+        .addNumberInput_('Dropped Frame Check Interval',
+            'streaming.droppedFrameProtection.checkInterval');
   }
 
   /** @private */
