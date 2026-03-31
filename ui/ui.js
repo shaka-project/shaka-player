@@ -444,6 +444,7 @@ shaka.ui.Overlay = class {
         handleActions: true,
         handlePosition: true,
         supportedActions: mediaSessionActions,
+        allowAutoPiP: true,
       },
       captionsStyles: true,
       captionsFontScaleFactors: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
@@ -453,6 +454,8 @@ shaka.ui.Overlay = class {
         disallowReturnToOpener: false,
       },
       showUIOnPaused: true,
+      showMenusOnTheRight: false,
+      customTrackLabel: (defaultLabel, track, type) => '',
     };
 
     if (goog.DEBUG) {

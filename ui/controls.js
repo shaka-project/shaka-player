@@ -2357,13 +2357,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * Update the video's current time based on the keyboard operations.
    *
    * @param {number} currentTime
+   * @param {boolean=} fastSeek
    * @private
    */
-  seek_(currentTime) {
+  seek_(currentTime, fastSeek = false) {
     goog.asserts.assert(
         this.seekBar_, 'Caller of seek_ must check for seekBar_ first!');
-
-    this.video_.currentTime = currentTime;
+    if (fastSeek && 'fastSeek' in this.video_) {
+      this.video_.fastSeek(currentTime);
+    } else {
+      this.video_.currentTime = currentTime;
+    }
     this.updateTimeAndSeekRange_();
   }
 
@@ -2376,9 +2380,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @param {number} value
+   * @param {boolean} fastSeek
    */
-  seekTo(value) {
-    this.seek_(value);
+  seekTo(value, fastSeek) {
+    this.seek_(value, fastSeek);
   }
 
   /**

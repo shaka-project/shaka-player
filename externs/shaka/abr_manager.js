@@ -56,10 +56,11 @@ shaka.extern.AbrManager = class {
    * are equal.
    *
    * @param {!Array<!shaka.extern.Variant>} variants
+   * @param {boolean} isLowLatency
    * @return {boolean}
    * @exportDoc
    */
-  setVariants(variants) {}
+  setVariants(variants, isLowLatency) {}
 
   /**
    * Chooses one variant to switch to.  Called by the Player.

@@ -228,7 +228,7 @@ def npm_version(is_dirty=False):
     text = execute_get_output(cmd_line).decode('utf8')
   except subprocess.CalledProcessError as e:
     text = e.output.decode('utf8')
-  match = re.search(r'shaka-player@(.*) ', text)
+  match = re.search(r'shaka-player.*@(.*) ', text)
   if match:
     return match.group(1) + ('-npm-dirty' if is_dirty else '')
   raise RuntimeError('Unable to determine library version!')
@@ -255,7 +255,7 @@ def get_all_js_files(*path_components):
   """Get all JavaScript file paths recursively from the given path components.
 
   Args:
-    *path_components: The components of the path to search.  Joining is handling
+    *path_components: The components of the path to search.  Joining is handled
     internally according to os path semantics.
   Returns:
     An array of absolute paths to all JS files.

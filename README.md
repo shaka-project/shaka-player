@@ -2,7 +2,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/logos/shaka-player-logo-dark.png">
     <source media="(prefers-color-scheme: light)" srcset="docs/logos/shaka-player-logo-light.png">
-    <img alt="Kinetoscope Logo" src="docs/logos/shaka-player-logo-light.png">
+    <img alt="Shaka Player Logo" src="docs/logos/shaka-player-logo-light.png">
   </picture>
 </h1>
 

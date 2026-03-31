@@ -235,10 +235,16 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     const paddingTop = parseFloat(styleMenu.paddingTop);
     const paddingBottom = parseFloat(styleMenu.paddingBottom);
     const rectContainer = this.videoContainer_.getBoundingClientRect();
+    const gap = 5;
     const heightIntersection =
-        rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom;
+        rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom - gap;
 
     this.overflowMenu_.style.maxHeight = heightIntersection + 'px';
+
+    if (this.config_.showMenusOnTheRight) {
+      this.overflowMenu_.style.right = '15px';
+      return;
+    }
 
     // Compute horizontal position
     const bottomControlsPos = this.controlsContainer_.getBoundingClientRect();

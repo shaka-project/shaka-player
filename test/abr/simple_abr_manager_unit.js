@@ -70,7 +70,7 @@ describe('SimpleAbrManager', () => {
     abrManager = new shaka.abr.SimpleAbrManager();
     abrManager.init(shaka.test.Util.spyFunc(switchCallback));
     abrManager.configure(config);
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
   });
 
   afterEach(() => {
@@ -91,7 +91,7 @@ describe('SimpleAbrManager', () => {
   });
 
   it('can handle empty variants', () => {
-    abrManager.setVariants([]);
+    abrManager.setVariants([], false);
     const chosen = abrManager.chooseVariant();
     expect(chosen).toBe(null);
   });
@@ -108,7 +108,7 @@ describe('SimpleAbrManager', () => {
       });
     });
 
-    abrManager.setVariants(manifest.variants);
+    abrManager.setVariants(manifest.variants, false);
     const chosen = abrManager.chooseVariant();
     expect(chosen).not.toBe(null);
     expect(chosen.audio).not.toBe(null);
@@ -127,7 +127,7 @@ describe('SimpleAbrManager', () => {
       });
     });
 
-    abrManager.setVariants(manifest.variants);
+    abrManager.setVariants(manifest.variants, false);
     const chosen = abrManager.chooseVariant();
     expect(chosen).not.toBe(null);
     expect(chosen.audio).toBe(null);
@@ -143,7 +143,7 @@ describe('SimpleAbrManager', () => {
     const description = 'picks correct Variant at ' + bandwidthKbps + ' kbps';
 
     it(description, () => {
-      abrManager.setVariants(variants);
+      abrManager.setVariants(variants, false);
       abrManager.chooseVariant();
 
       abrManager.segmentDownloaded(1000, bytesPerSecond, true);
@@ -170,7 +170,7 @@ describe('SimpleAbrManager', () => {
     const bandwidth = 5e5;
     const bytesPerSecond = sufficientBWMultiplier * bandwidth / 8.0;
 
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
     abrManager.chooseVariant();
 
     // 0 duration segment shouldn't cause us to get stuck on the lowest variant
@@ -187,7 +187,7 @@ describe('SimpleAbrManager', () => {
   it('picks lowest variant when there is insufficient bandwidth', () => {
     const bandwidth = 2e6;
 
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
     abrManager.chooseVariant();
 
     // Simulate some segments being downloaded just above the desired
@@ -213,7 +213,7 @@ describe('SimpleAbrManager', () => {
     const bandwidth = 5e5;
     const bytesPerSecond = sufficientBWMultiplier * bandwidth / 8.0;
 
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
     abrManager.chooseVariant();
 
     // Don't enable AbrManager.
@@ -227,7 +227,7 @@ describe('SimpleAbrManager', () => {
     let bandwidth = 5e5;
     let bytesPerSecond = sufficientBWMultiplier * bandwidth / 8.0;
 
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
     abrManager.chooseVariant();
 
     abrManager.segmentDownloaded(1000, bytesPerSecond, true);
@@ -270,7 +270,7 @@ describe('SimpleAbrManager', () => {
     const bandwidth = 5e5;
     const bytesPerSecond = sufficientBWMultiplier * bandwidth / 8.0;
 
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
     abrManager.chooseVariant();
 
     abrManager.segmentDownloaded(1000, bytesPerSecond, true);
@@ -298,7 +298,7 @@ describe('SimpleAbrManager', () => {
     config.safeMarginSwitch = 4;
     abrManager.configure(config);
 
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
     abrManager.chooseVariant();
 
     abrManager.segmentDownloaded(1000, bytesPerSecond, true);
@@ -325,7 +325,7 @@ describe('SimpleAbrManager', () => {
     config.defaultBandwidthEstimate = 4e6;
     abrManager.configure(config);
 
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
     abrManager.chooseVariant();
 
     abrManager.segmentDownloaded(1000, bytesPerSecond, true);
@@ -358,7 +358,7 @@ describe('SimpleAbrManager', () => {
       });
     });
 
-    abrManager.setVariants(manifest.variants);
+    abrManager.setVariants(manifest.variants, false);
     let chosen = abrManager.chooseVariant();
     expect(chosen.id).toBe(11);
 
@@ -385,7 +385,7 @@ describe('SimpleAbrManager', () => {
       });
     });
 
-    abrManager.setVariants(manifest.variants);
+    abrManager.setVariants(manifest.variants, false);
     let chosen = abrManager.chooseVariant();
     expect(chosen.id).toBe(11);
 

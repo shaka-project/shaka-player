@@ -13,6 +13,18 @@
  */
 
 
+/**
+ * @typedef {{
+ *   action: string,
+ *   seekOffset: (number|undefined),
+ *   seekTime: (number|undefined),
+ *   fastSeek: (boolean|undefined),
+ *   enterPictureInPictureReason: (string|undefined)
+ * }}
+ */
+var MediaSessionActionDetails;
+
+
 const MediaMetadata = class {
   constructor(options) {
     /** @type {string} */
@@ -44,8 +56,7 @@ const MediaSession = class {
     this.type = type;
 
     /**
-     * @type {!function(!{action: string, seekOffset: ?number,
-     *                   seekTime: ?number})}
+     * @type {!function(!MediaSessionActionDetails)}
      */
     this.callback = callback;
   }

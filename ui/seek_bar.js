@@ -16,7 +16,6 @@ goog.require('shaka.ui.RangeElement');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Error');
-goog.require('shaka.util.Mp4Parser');
 goog.require('shaka.util.Timer');
 goog.requireType('shaka.ui.Controls');
 
@@ -74,6 +73,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         }
       }
       this.video.currentTime = newCurrentTime;
+      this.controls.hideContextMenus();
+      this.controls.hideSettingsMenus();
+      this.update();
     });
 
 
@@ -214,10 +216,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         return;
       }
       const value = this.getValueFromPosition(event.clientX);
-      const rect = this.bar.getBoundingClientRect();
-      // Pixels from the left of the range element
-      const mousePosition = Math.max(0, event.clientX - rect.left);
-      this.showThumbnailAndTime_(mousePosition, value);
+      this.showThumbnailAtValue_(value);
     });
 
     this.eventManager.listen(this.container, 'mouseleave', () => {
@@ -296,13 +295,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.seekTimer_.tickAfter(/* seconds= */ 0.125);
 
     if (!this.controls.anySettingsMenusAreOpen()) {
-      const min = parseFloat(this.bar.min);
-      const max = parseFloat(this.bar.max);
-      const rect = this.bar.getBoundingClientRect();
-      const value = Math.round(this.getValue());
-      const scale = (max - min) / rect.width;
-      const position = (value - min) / scale;
-      this.showThumbnailAndTime_(position, value);
+      this.showThumbnailAtValue_(this.getValue());
     } else {
       this.hideThumbnailTimeContainer_();
     }
@@ -340,15 +333,54 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   }
 
   /**
+   * Returns the range of buffered that contains 'time', or null if it does
+   * not exist.
+   *
+   * @param {number} time
+   * @return {?{start:number, end:number}}
+   * @private
+   */
+  getBufferedRangeForTime_(time) {
+    const buffered = this.video.buffered;
+    for (let i = 0; i < buffered.length; i++) {
+      const start = buffered.start(i);
+      const end = buffered.end(i);
+      if (time >= start && time <= end) {
+        return {start, end};
+      }
+    }
+    return null;
+  }
+
+  /**
    * @override
    */
   update() {
     const colors = this.config_.seekBarColors;
     const currentTime = this.getValue();
     const bufferedLength = this.video.buffered.length;
-    const bufferedStart = bufferedLength ? this.video.buffered.start(0) : 0;
-    const bufferedEnd =
-        bufferedLength ? this.video.buffered.end(bufferedLength - 1) : 0;
+    let bufferedStart = 0;
+    let bufferedEnd = 0;
+
+    if (bufferedLength) {
+      if (this.controls.isSeeking()) {
+        // While the user drags, only paint the range that actually contains
+        // the target position (if it exists).
+        const r = this.getBufferedRangeForTime_(currentTime);
+        if (r) {
+          bufferedStart = r.start;
+          bufferedEnd = r.end;
+        } else {
+          // Non-preloaded area: we do not buffered paint beyond the playhead.
+          bufferedStart = currentTime;
+          bufferedEnd = currentTime;
+        }
+      } else {
+        bufferedStart = this.video.buffered.start(0);
+        bufferedEnd = this.video.buffered.end(bufferedLength - 1);
+      }
+    }
+
 
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
@@ -359,7 +391,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       shaka.ui.Utils.setDisplay(this.container, false);
     } else {
       shaka.ui.Utils.setDisplay(this.container, true);
-
       const clampedBufferStart = Math.max(bufferedStart, seekRange.start);
       const clampedBufferEnd = Math.min(bufferedEnd, seekRange.end);
       const clampedCurrentTime = Math.min(
@@ -581,6 +612,20 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   }
 
   /**
+   * @param {number} value
+   * @private
+   */
+  showThumbnailAtValue_(value) {
+    const min = parseFloat(this.bar.min);
+    const max = parseFloat(this.bar.max);
+    const rect = this.bar.getBoundingClientRect();
+    const thumbSize = 12; // @thumb-size in range_elements.less
+    const scale = (rect.width - thumbSize) / (max - min);
+    const position = (value - min) * scale + thumbSize / 2;
+    this.showThumbnailAndTime_(position, value);
+  }
+
+  /**
    * @private
    */
   async showThumbnailAndTime_(pixelPosition, value) {
@@ -686,19 +731,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
               .request(requestType, request, {type});
           const response = await this.lastThumbnailPendingRequest_.promise;
           this.lastThumbnailPendingRequest_ = null;
-          if (thumbnail.codecs == 'mjpg') {
-            const parser = new shaka.util.Mp4Parser()
-                .box('mdat', shaka.util.Mp4Parser.allData((data) => {
-                  const blob = new Blob([data], {type: 'image/jpeg'});
-                  uri = URL.createObjectURL(blob);
-                  // Free up the rest of the segment and just clone the mdat.
-                }, /* clone= */ true));
-            parser.parse(response.data, /* partialOkay= */ false);
-          } else {
-            const mimeType = thumbnail.mimeType || 'image/jpeg';
-            const blob = new Blob([response.data], {type: mimeType});
-            uri = URL.createObjectURL(blob);
-          }
+          uri = shaka.ui.Utils.getUriFromThumbnailResponse(thumbnail, response);
         } catch (error) {
           if (error.code == shaka.util.Error.Code.OPERATION_ABORTED) {
             return;

@@ -248,6 +248,7 @@ buffersource
 cabac
 cbcs
 cdna
+cehx
 cenc
 certurl
 cicp
@@ -273,7 +274,9 @@ dref
 drms
 dtsc
 dtse
+dtsh
 dtsx
+dtsz
 dtvcc
 dvav
 dvcc
@@ -466,6 +469,7 @@ xyzw
 # DASH
 dashif
 fontdownload
+isoff
 querypart
 startnumber
 Xlinks
@@ -537,6 +541,7 @@ sintel
 stardate
 systeminfo
 templatized
+UNLCK
 vaage
 webapis
 

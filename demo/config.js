@@ -103,6 +103,13 @@ shakaDemo.Config = class {
     this.addLcevcSection_();
     this.addAdsSection_();
     this.addQueueManagerSection_();
+    this.addUISection_();
+    this.addUISeekBarColorsSection_();
+    this.addUIVolumeBarColorsSection_();
+    this.addUIQualityMarksSection_();
+    this.addUIMediaSessionSection_();
+    this.addUIDocumentPiPSection_();
+    this.addUIShortcutsSection_();
   }
 
   /**
@@ -248,8 +255,6 @@ shakaDemo.Config = class {
     this.addSection_('DASH Manifest', docLink)
         .addBoolInput_('Auto-Correct DASH Drift',
             'manifest.dash.autoCorrectDrift')
-        .addBoolInput_('Disable Xlink processing',
-            'manifest.dash.disableXlinkProcessing')
         .addBoolInput_('Xlink Should Fail Gracefully',
             'manifest.dash.xlinkFailGracefully')
         .addBoolInput_('Ignore DASH suggestedPresentationDelay',
@@ -635,7 +640,9 @@ shakaDemo.Config = class {
             'streaming.vodDynamicPlaybackRateBufferRatio',
             /* canBeDecimal= */ true)
         .addBoolInput_('Clear decodingInfo cache on unload',
-            'streaming.clearDecodingCache');
+            'streaming.clearDecodingCache')
+        .addBoolInput_('Limit the buffer to the presentation duration',
+            'streaming.clampAppendWindowToDuration');
 
     const strategyOptions = shaka.config.CrossBoundaryStrategy;
     const strategyOptionsNames = {
@@ -1023,6 +1030,205 @@ shakaDemo.Config = class {
   }
 
   /** @private */
+  addUISection_() {
+    const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat;
+    const trackLabelFormatOptions = {
+      'LANGUAGE': TrackLabelFormat.LANGUAGE,
+      'ROLE': TrackLabelFormat.ROLE,
+      'LANGUAGE_ROLE': TrackLabelFormat.LANGUAGE_ROLE,
+      'LABEL': TrackLabelFormat.LABEL,
+      'LABEL_OR_LANGUAGE': TrackLabelFormat.LABEL_OR_LANGUAGE,
+      'LANGUAGE_OR_LABEL': TrackLabelFormat.LANGUAGE_OR_LABEL,
+    };
+    const trackLabelFormatNames = {
+      'LANGUAGE': 'Language',
+      'ROLE': 'Role',
+      'LANGUAGE_ROLE': 'Language + Role',
+      'LABEL': 'Label',
+      'LABEL_OR_LANGUAGE': 'Label or Language',
+      'LANGUAGE_OR_LABEL': 'Language or Label',
+    };
+
+    const vrProjectionModeOptions = {
+      'equirectangular': 'equirectangular',
+      'halfequirectangular': 'halfequirectangular',
+      'cubemap': 'cubemap',
+    };
+    const vrProjectionModeNames = {
+      'equirectangular': 'Equirectangular',
+      'halfequirectangular': 'Half Equirectangular',
+      'cubemap': 'Cubemap',
+    };
+
+    const docLink = this.resolveExternLink_('.UIConfiguration');
+    this.addSection_('UI', docLink)
+        .addUISelectInput_('Audio Track Label Format',
+            'trackLabelFormat',
+            trackLabelFormatOptions,
+            trackLabelFormatNames)
+        .addUISelectInput_('Text Track Label Format',
+            'textTrackLabelFormat',
+            trackLabelFormatOptions,
+            trackLabelFormatNames)
+        .addUIBoolInput_('Add Seek Bar', 'addSeekBar')
+        .addUIBoolInput_('Enable custom context Menu', 'customContextMenu')
+        .addUIBoolInput_('Clear Buffer On Quality Change',
+            'clearBufferOnQualityChange')
+        .addUIBoolInput_('Show Unbuffered Start', 'showUnbufferedStart')
+        .addUINumberInput_('Fade Delay (sec)', 'fadeDelay',
+            /* canBeDecimal= */ true)
+        .addUINumberInput_('Close Menus Delay (sec)', 'closeMenusDelay',
+            /* canBeDecimal= */ true)
+        .addUIBoolInput_('Double Click For Fullscreen',
+            'doubleClickForFullscreen')
+        .addUIBoolInput_('Single Click For Play And Pause',
+            'singleClickForPlayAndPause')
+        .addUIBoolInput_('Enable Keyboard Playback Controls',
+            'enableKeyboardPlaybackControls')
+        .addUIBoolInput_('Enable Keyboard Controls In Window',
+            'enableKeyboardPlaybackControlsInWindow')
+        .addUIBoolInput_('Enable Fullscreen On Rotation',
+            'enableFullscreenOnRotation')
+        .addUIBoolInput_('Force Landscape On Fullscreen',
+            'forceLandscapeOnFullscreen')
+        .addUIBoolInput_('Enable Tooltips', 'enableTooltips')
+        .addUINumberInput_('Keyboard Seek Distance (sec)',
+            'keyboardSeekDistance',
+            /* canBeDecimal= */ false)
+        .addUINumberInput_('Keyboard Large Seek Distance (sec)',
+            'keyboardLargeSeekDistance',
+            /* canBeDecimal= */ false)
+        .addUIBoolInput_('Show Audio Channel Count Variants',
+            'showAudioChannelCountVariants')
+        .addUIBoolInput_('Seek On Taps', 'seekOnTaps')
+        .addUINumberInput_('Tap Seek Distance (sec)', 'tapSeekDistance',
+            /* canBeDecimal= */ false)
+        .addUINumberInput_('Refresh Tick (sec)', 'refreshTickInSeconds',
+            /* canBeDecimal= */ true)
+        .addUIBoolInput_('Show Audio Codec', 'showAudioCodec')
+        .addUIBoolInput_('Show Video Codec', 'showVideoCodec')
+        .addUIBoolInput_('Always Show Volume Bar', 'alwaysShowVolumeBar')
+        .addUIBoolInput_('Menu Open Until User Closes It',
+            'menuOpenUntilUserClosesIt')
+        .addUIBoolInput_('Allow Toggle Presentation Time',
+            'allowTogglePresentationTime')
+        .addUIBoolInput_('Show Remaining Time In Presentation Time',
+            'showRemainingTimeInPresentationTime')
+        .addUIBoolInput_('Show UI Always', 'showUIAlways')
+        .addUIBoolInput_('Show UI Always On Audio Only',
+            'showUIAlwaysOnAudioOnly')
+        .addUIBoolInput_('Show UI On Paused', 'showUIOnPaused')
+        .addUIBoolInput_('Show menus on the right', 'showMenusOnTheRight')
+        .addUIBoolInput_('Prefer Intl Display Names', 'preferIntlDisplayNames')
+        .addUIBoolInput_('Captions Styles', 'captionsStyles')
+        .addUIBoolInput_('Display In VR Mode', 'displayInVrMode')
+        .addUISelectInput_('Default VR Projection Mode',
+            'defaultVrProjectionMode',
+            vrProjectionModeOptions,
+            vrProjectionModeNames)
+        .addUIBoolInput_('Enable VR Device Motion', 'enableVrDeviceMotion')
+        .addUIBoolInput_('Prefer Video Fullscreen In VisionOS',
+            'preferVideoFullScreenInVisionOS')
+        .addUIBoolInput_('Cast Android Receiver Compatible',
+            'castAndroidReceiverCompatible')
+        .addUITextInput_('Cast Receiver App ID', 'castReceiverAppId')
+        .addUITextInput_('Cast Sender URL', 'castSenderUrl')
+        // Array types
+        .addUIArrayStringInput_('Control Panel Elements',
+            'controlPanelElements')
+        .addUIArrayStringInput_('Top Control Panel Elements',
+            'topControlPanelElements')
+        .addUIArrayStringInput_('Big Buttons', 'bigButtons')
+        .addUIArrayStringInput_('Overflow Menu Buttons', 'overflowMenuButtons')
+        .addUIArrayStringInput_('Context Menu Elements', 'contextMenuElements')
+        .addUIArrayStringInput_('Statistics List', 'statisticsList')
+        .addUIArrayStringInput_('Ad Statistics List', 'adStatisticsList')
+        .addUIArrayNumberInput_('Playback Rates', 'playbackRates')
+        .addUIArrayNumberInput_('Fast Forward Rates', 'fastForwardRates')
+        .addUIArrayNumberInput_('Rewind Rates', 'rewindRates')
+        .addUIArrayNumberInput_('Captions Font Scale Factors',
+            'captionsFontScaleFactors');
+  }
+
+  /** @private */
+  addUISeekBarColorsSection_() {
+    const docLink = this.resolveExternLink_('.UISeekBarColors');
+    this.addSection_('UI: Seek Bar Colors', docLink)
+        .addUITextInput_('Base Color', 'seekBarColors.base')
+        .addUITextInput_('Buffered Color', 'seekBarColors.buffered')
+        .addUITextInput_('Played Color', 'seekBarColors.played')
+        .addUITextInput_('Ad Breaks Color', 'seekBarColors.adBreaks')
+        .addUITextInput_('Chapters Color', 'seekBarColors.chapters');
+  }
+
+  /** @private */
+  addUIVolumeBarColorsSection_() {
+    const docLink = this.resolveExternLink_('.UIVolumeBarColors');
+    this.addSection_('UI: Volume Bar Colors', docLink)
+        .addUITextInput_('Base Color', 'volumeBarColors.base')
+        .addUITextInput_('Level Color', 'volumeBarColors.level');
+  }
+
+  /** @private */
+  addUIQualityMarksSection_() {
+    const docLink = this.resolveExternLink_('.UIQualityMarks');
+    this.addSection_('UI: Quality Marks', docLink)
+        .addUITextInput_('720p', 'qualityMarks.720')
+        .addUITextInput_('1080p', 'qualityMarks.1080')
+        .addUITextInput_('1440p', 'qualityMarks.1440')
+        .addUITextInput_('2160p', 'qualityMarks.2160')
+        .addUITextInput_('4320p', 'qualityMarks.4320');
+  }
+
+  /** @private */
+  addUIMediaSessionSection_() {
+    const docLink = this.resolveExternLink_('.UIMediaSession');
+    this.addSection_('UI: Media Session', docLink)
+        .addUIBoolInput_('Enabled', 'mediaSession.enabled')
+        .addUIBoolInput_('Handle Metadata', 'mediaSession.handleMetadata')
+        .addUIBoolInput_('Handle Actions', 'mediaSession.handleActions')
+        .addUIBoolInput_('Handle Position', 'mediaSession.handlePosition')
+        .addUIArrayNumberInput_('Supported actions',
+            'mediaSession.supportedActions')
+        .addUIBoolInput_('Allow auto PiP', 'mediaSession.allowAutoPiP');
+  }
+
+  /** @private */
+  addUIDocumentPiPSection_() {
+    const docLink = this.resolveExternLink_('.UIDocumentPictureInPicture');
+    this.addSection_('UI: Document Picture-in-Picture', docLink)
+        .addUIBoolInput_('Enabled', 'documentPictureInPicture.enabled')
+        .addUIBoolInput_('Prefer Initial Window Placement',
+            'documentPictureInPicture.preferInitialWindowPlacement')
+        .addUIBoolInput_('Disallow Return To Opener',
+            'documentPictureInPicture.disallowReturnToOpener');
+  }
+
+  /** @private */
+  addUIShortcutsSection_() {
+    const docLink = this.resolveExternLink_('.UIShortcuts');
+    this.addSection_('UI: Shortcuts', docLink)
+        .addUITextInput_('Small Rewind', 'shortcuts.small_rewind')
+        .addUITextInput_('Small Fast Forward', 'shortcuts.small_fast_forward')
+        .addUITextInput_('Large Rewind', 'shortcuts.large_rewind')
+        .addUITextInput_('Large Fast Forward', 'shortcuts.large_fast_forward')
+        .addUITextInput_('Home', 'shortcuts.home')
+        .addUITextInput_('End', 'shortcuts.end')
+        .addUITextInput_('Captions', 'shortcuts.captions')
+        .addUITextInput_('Fullscreen', 'shortcuts.fullscreen')
+        .addUITextInput_('Mute', 'shortcuts.mute')
+        .addUITextInput_('Picture In Picture', 'shortcuts.picture_in_picture')
+        .addUITextInput_('Increase Video Speed',
+            'shortcuts.increase_video_speed')
+        .addUITextInput_('Decrease Video Speed',
+            'shortcuts.decrease_video_speed')
+        .addUITextInput_('Play', 'shortcuts.play')
+        .addUITextInput_('Take Screenshot', 'shortcuts.take_screenshot')
+        .addUITextInput_('Last Frame', 'shortcuts.last_frame')
+        .addUITextInput_('Next Frame', 'shortcuts.next_frame');
+  }
+
+  /** @private */
   addMetaSection_() {
     this.addSection_(/* name= */ null, /* docLink= */ null);
 
@@ -1052,12 +1258,6 @@ shakaDemo.Config = class {
           noop, 'Trick Play controls require the Shaka UI.');
       this.latestInput_.input().disabled = true;
       this.latestInput_.input().checked = false;
-    }
-    this.addCustomBoolInput_('Enabled custom context menu', (input) => {
-      shakaDemoMain.setCustomContextMenuEnabled(input.checked);
-    });
-    if (shakaDemoMain.getCustomContextMenuEnabled()) {
-      this.latestInput_.input().checked = true;
     }
 
     this.addCustomTextInput_('Watermark text', (input) => {
@@ -1149,6 +1349,139 @@ shakaDemo.Config = class {
                   shakaDemo.InputContainer.Style.VERTICAL;
     this.sections_.push(new shakaDemo.InputContainer(
         this.container_, name, style, docLink));
+
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addUIBoolInput_(name, valueName, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configureUI(valueName, input.checked);
+    };
+    this.addCustomBoolInput_(name, onChange, tooltipMessage);
+    if (shakaDemoMain.getCurrentUIConfigValue(valueName)) {
+      this.latestInput_.input().checked = true;
+    }
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {boolean=} canBeDecimal
+   * @param {boolean=} canBeZero
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addUINumberInput_(name, valueName, canBeDecimal = false, canBeZero = true,
+      tooltipMessage) {
+    const onChange = (input) => {
+      const valueAsNumber = Number(input.value);
+      if (!isNaN(valueAsNumber)) {
+        shakaDemoMain.configureUI(valueName, valueAsNumber);
+      }
+    };
+    this.createRow_(name, tooltipMessage);
+    this.latestInput_ = new shakaDemo.NumberInput(
+        this.getLatestSection_(), name, onChange, canBeDecimal, canBeZero,
+        /* canBeUnset= */ false);
+    this.latestInput_.input().value =
+        shakaDemoMain.getCurrentUIConfigValue(valueName);
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addUITextInput_(name, valueName, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configureUI(valueName, input.value);
+    };
+    this.addCustomTextInput_(name, onChange, tooltipMessage);
+    this.latestInput_.input().value =
+        shakaDemoMain.getCurrentUIConfigValue(valueName);
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addUIArrayStringInput_(name, valueName, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configureUI(valueName,
+          input.value.split(',').filter(Boolean));
+    };
+    this.addCustomTextInput_(name, onChange, tooltipMessage);
+    const configValue = /** @type {!Array<string>} */ (
+      shakaDemoMain.getCurrentUIConfigValue(valueName));
+    this.latestInput_.input().value = configValue.join(',');
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addUIArrayNumberInput_(name, valueName, tooltipMessage) {
+    const onChange = (input) => {
+      const values = input.value.split(',')
+          .map(Number)
+          .filter((v) => !isNaN(v));
+      shakaDemoMain.configureUI(valueName, values);
+    };
+    this.addCustomTextInput_(name, onChange, tooltipMessage);
+    const configValue = /** @type {!Array<number>} */ (
+      shakaDemoMain.getCurrentUIConfigValue(valueName));
+    this.latestInput_.input().value = configValue.join(',');
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {!Object<string, ?>} options
+   * @param {!Object<string, string>} optionNames
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addUISelectInput_(name, valueName, options, optionNames, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configureUI(valueName, options[input.value]);
+    };
+
+    for (const key in options) {
+      if (!(key in optionNames)) {
+        optionNames[key] = key;
+      }
+    }
+
+    this.addCustomSelectInput_(name, optionNames, onChange, tooltipMessage);
+
+    const initialValue = shakaDemoMain.getCurrentUIConfigValue(valueName);
+    for (const key in options) {
+      if (options[key] == initialValue) {
+        this.latestInput_.input().value = key;
+      }
+    }
 
     return this;
   }

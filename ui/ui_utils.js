@@ -10,6 +10,7 @@ goog.provide('shaka.ui.Utils');
 goog.require('goog.asserts');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
+goog.require('shaka.util.Mp4Parser');
 
 
 shaka.ui.Utils = class {
@@ -126,5 +127,29 @@ shaka.ui.Utils = class {
       }
     }
     return text;
+  }
+
+
+  /**
+   * @param {!shaka.extern.Thumbnail} thumbnail
+   * @param {!shaka.extern.Response} response
+   * @return {string}
+   */
+  static getUriFromThumbnailResponse(thumbnail, response) {
+    let uri = '';
+    if (thumbnail.codecs == 'mjpg') {
+      const parser = new shaka.util.Mp4Parser()
+          .box('mdat', shaka.util.Mp4Parser.allData((data) => {
+            const blob = new Blob([data], {type: 'image/jpeg'});
+            uri = URL.createObjectURL(blob);
+            // Free up the rest of the segment and just clone the mdat.
+          }, /* clone= */ true));
+      parser.parse(response.data, /* partialOkay= */ false);
+    } else {
+      const mimeType = thumbnail.mimeType || 'image/jpeg';
+      const blob = new Blob([response.data], {type: mimeType});
+      uri = URL.createObjectURL(blob);
+    }
+    return uri;
   }
 };

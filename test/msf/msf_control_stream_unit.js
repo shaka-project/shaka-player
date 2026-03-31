@@ -1,4 +1,4 @@
-describe('shaka.msf.ControlStream', () => {
+filterDescribe('shaka.msf.ControlStream', isMSFSupported, () => {
   /** @type {!shaka.msf.ControlStream} */
   let controlStream;
 
@@ -13,11 +13,31 @@ describe('shaka.msf.ControlStream', () => {
 
   const messages = [
     {
+      kind: shaka.msf.Utils.MessageType.GOAWAY,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.GOAWAY,
+        newSessionUri: 'https://new.session',
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.MAX_REQUEST_ID,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.MAX_REQUEST_ID,
+        requestId: 123,
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.REQUESTS_BLOCKED,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.REQUESTS_BLOCKED,
+        maximumRequestId: 456,
+      },
+    },
+    {
       kind: shaka.msf.Utils.MessageType.SUBSCRIBE,
       msg: {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE,
         requestId: 1,
-        trackAlias: 1,
         namespace: ['ns'],
         name: 'track',
         subscriberPriority: 0,
@@ -45,7 +65,29 @@ describe('shaka.msf.ControlStream', () => {
         requestId: 1,
         code: 404,
         reason: 'Not found',
-        trackAlias: 1,
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.SUBSCRIBE_UPDATE,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_UPDATE,
+        requestId: 1,
+        subscriptionRequestId: 2,
+        startLocation: {
+          group: 1,
+          object: 2,
+        },
+        endGroup: 10,
+        subscriberPriority: 0,
+        forward: true,
+        params: [],
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE,
+        requestId: 1,
       },
     },
     {
@@ -59,10 +101,42 @@ describe('shaka.msf.ControlStream', () => {
       },
     },
     {
-      kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE,
+      kind: shaka.msf.Utils.MessageType.PUBLISH,
       msg: {
-        kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE,
+        kind: shaka.msf.Utils.MessageType.PUBLISH,
         requestId: 1,
+        namespace: ['ns'],
+        name: 'track',
+        trackAlias: 1,
+        groupOrder: shaka.msf.Utils.GroupOrder.PUBLISHER,
+        contentExists: true,
+        largestLocation: {
+          group: 1,
+          object: 2,
+        },
+        forward: true,
+        params: [],
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.PUBLISH_OK,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.PUBLISH_OK,
+        requestId: 1,
+        forward: true,
+        subscriberPriority: 0,
+        groupOrder: shaka.msf.Utils.GroupOrder.PUBLISHER,
+        filterType: shaka.msf.Utils.FilterType.NONE,
+        params: [],
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.PUBLISH_ERROR,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.PUBLISH_ERROR,
+        requestId: 1,
+        errorCode: 500,
+        reason: 'Server error',
       },
     },
     {
@@ -79,7 +153,6 @@ describe('shaka.msf.ControlStream', () => {
       msg: {
         kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_OK,
         requestId: 1,
-        namespace: ['ns'],
       },
     },
     {
@@ -92,9 +165,50 @@ describe('shaka.msf.ControlStream', () => {
       },
     },
     {
-      kind: shaka.msf.Utils.MessageType.UNPUBLISH_NAMESPACE,
+      kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_DONE,
       msg: {
-        kind: shaka.msf.Utils.MessageType.UNPUBLISH_NAMESPACE,
+        kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_DONE,
+        namespace: ['ns'],
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_CANCEL,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_CANCEL,
+        namespace: ['ns'],
+        errorCode: 500,
+        reason: 'Server error',
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE,
+        requestId: 1,
+        namespace: ['ns'],
+        params: [],
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE_OK,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE_OK,
+        requestId: 1,
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE_ERROR,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE_ERROR,
+        requestId: 1,
+        errorCode: 500,
+        reason: 'Server error',
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE_NAMESPACE,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE_NAMESPACE,
         namespace: ['ns'],
       },
     },
@@ -154,11 +268,31 @@ describe('shaka.msf.ControlStreamEncoder', () => {
 
   const messages = [
     {
+      kind: shaka.msf.Utils.MessageType.GOAWAY,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.GOAWAY,
+        newSessionUri: 'https://new.session',
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.MAX_REQUEST_ID,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.MAX_REQUEST_ID,
+        requestId: 123,
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.REQUESTS_BLOCKED,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.REQUESTS_BLOCKED,
+        maximumRequestId: 456,
+      },
+    },
+    {
       kind: shaka.msf.Utils.MessageType.SUBSCRIBE,
       msg: {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE,
         requestId: 1,
-        trackAlias: 1,
         namespace: ['ns'],
         name: 'track',
         subscriberPriority: 0,
@@ -186,7 +320,29 @@ describe('shaka.msf.ControlStreamEncoder', () => {
         requestId: 1,
         code: 404,
         reason: 'Not found',
-        trackAlias: 1,
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.SUBSCRIBE_UPDATE,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_UPDATE,
+        requestId: 1,
+        subscriptionRequestId: 2,
+        startLocation: {
+          group: 1,
+          object: 2,
+        },
+        endGroup: 10,
+        subscriberPriority: 0,
+        forward: true,
+        params: [],
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE,
+        requestId: 1,
       },
     },
     {
@@ -200,10 +356,42 @@ describe('shaka.msf.ControlStreamEncoder', () => {
       },
     },
     {
-      kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE,
+      kind: shaka.msf.Utils.MessageType.PUBLISH,
       msg: {
-        kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE,
+        kind: shaka.msf.Utils.MessageType.PUBLISH,
         requestId: 1,
+        namespace: ['ns'],
+        name: 'track',
+        trackAlias: 1,
+        groupOrder: shaka.msf.Utils.GroupOrder.PUBLISHER,
+        contentExists: true,
+        largestLocation: {
+          group: 1,
+          object: 2,
+        },
+        forward: true,
+        params: [],
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.PUBLISH_OK,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.PUBLISH_OK,
+        requestId: 1,
+        forward: true,
+        subscriberPriority: 0,
+        groupOrder: shaka.msf.Utils.GroupOrder.PUBLISHER,
+        filterType: shaka.msf.Utils.FilterType.NONE,
+        params: [],
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.PUBLISH_ERROR,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.PUBLISH_ERROR,
+        requestId: 1,
+        errorCode: 500,
+        reason: 'Server error',
       },
     },
     {
@@ -220,7 +408,6 @@ describe('shaka.msf.ControlStreamEncoder', () => {
       msg: {
         kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_OK,
         requestId: 1,
-        namespace: ['ns'],
       },
     },
     {
@@ -233,9 +420,50 @@ describe('shaka.msf.ControlStreamEncoder', () => {
       },
     },
     {
-      kind: shaka.msf.Utils.MessageType.UNPUBLISH_NAMESPACE,
+      kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_DONE,
       msg: {
-        kind: shaka.msf.Utils.MessageType.UNPUBLISH_NAMESPACE,
+        kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_DONE,
+        namespace: ['ns'],
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_CANCEL,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_CANCEL,
+        namespace: ['ns'],
+        errorCode: 500,
+        reason: 'Server error',
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE,
+        requestId: 1,
+        namespace: ['ns'],
+        params: [],
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE_OK,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE_OK,
+        requestId: 1,
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE_ERROR,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE_ERROR,
+        requestId: 1,
+        errorCode: 500,
+        reason: 'Server error',
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE_NAMESPACE,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE_NAMESPACE,
         namespace: ['ns'],
       },
     },

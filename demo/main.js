@@ -58,9 +58,6 @@ shakaDemo.Main = class {
     /** @private {boolean} */
     this.trickPlayControlsEnabled_ = false;
 
-    /** @private {boolean} */
-    this.customContextMenu_ = false;
-
     /** @private {string} */
     this.watermarkText_ = '';
 
@@ -377,7 +374,6 @@ shakaDemo.Main = class {
     const ui = video['ui'];
 
     const uiConfig = ui.getConfiguration();
-    uiConfig.customContextMenu = this.customContextMenu_;
     // Remove any trick play configurations from a previous config.
     uiConfig.addSeekBar = true;
     uiConfig.controlPanelElements =
@@ -411,8 +407,6 @@ shakaDemo.Main = class {
     const video = /** @type {!HTMLVideoElement} */ (this.video_);
     const ui = video['ui'];
     this.player_ = ui.getControls().getPlayer();
-
-    this.customContextMenu_ = ui.getConfiguration().customContextMenu;
 
     if (!this.noInput_) {
       // Don't add the close button if in noInput mode; it doesn't make much
@@ -883,27 +877,6 @@ shakaDemo.Main = class {
   }
 
   /**
-   * Enable or disable the UI's custom context menu.
-   *
-   * @param {boolean} enabled
-   */
-  setCustomContextMenuEnabled(enabled) {
-    this.customContextMenu_ = enabled;
-    // Configure the UI, to add or remove the controls.
-    this.configureUI_();
-    this.remakeHash();
-  }
-
-  /**
-   * Get if the UI's custom context menu is enabled.
-   *
-   * @return {boolean} enabled
-   */
-  getCustomContextMenuEnabled() {
-    return this.customContextMenu_;
-  }
-
-  /**
    * Set the text for watermark.
    *
    * @param {string} text
@@ -1159,11 +1132,6 @@ shakaDemo.Main = class {
       this.configureUI_();
     }
 
-    if (params.has('customContextMenu')) {
-      this.customContextMenu_ = true;
-      this.configureUI_();
-    }
-
     if (params.has('watermarkText')) {
       this.setWatermarkText(params.get('watermarkText'));
     }
@@ -1322,6 +1290,31 @@ shakaDemo.Main = class {
   /** @return {!shaka.extern.PlayerConfiguration} */
   getConfiguration() {
     return this.desiredConfig_;
+  }
+
+  /**
+   * @param {string|!Object} config
+   * @param {*=} value
+   */
+  configureUI(config, value) {
+    const video = /** @type {!HTMLVideoElement} */ (this.video_);
+    const ui = video['ui'];
+    if (ui) {
+      ui.configure(config, value);
+    }
+  }
+
+  /**
+   * @param {string} valueName
+   * @return {*}
+   */
+  getCurrentUIConfigValue(valueName) {
+    const video = /** @type {!HTMLVideoElement} */ (this.video_);
+    const ui = video['ui'];
+    if (ui) {
+      return this.getValueFromGivenConfig_(valueName, ui.getConfiguration());
+    }
+    return undefined;
   }
 
   /** @return {boolean} */
@@ -1739,10 +1732,6 @@ shakaDemo.Main = class {
 
     if (this.trickPlayControlsEnabled_) {
       params.push('trickplay');
-    }
-
-    if (this.customContextMenu_) {
-      params.push('customContextMenu');
     }
 
     if (this.watermarkText_) {

@@ -818,6 +818,27 @@ describe('Player', () => {
     });
   });  // describe('load/unload')
 
+  describe(`get ID3 related methods`, () => {
+    it('return null when not loaded', () => {
+      expect(player.getAllMetadataRegions()).toEqual([]);
+      expect(player.getAllEmsgRegions()).toEqual([]);
+      expect(player.getAllTimelineRegions()).toEqual([]);
+    });
+
+    it('return timelines when loaded with MSE', async () => {
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      const isIterable = (obj) => {
+        return (Symbol.iterator in Object(obj));
+      };
+      const metadataRegions = player.getAllMetadataRegions();
+      const emsgRegions = player.getAllEmsgRegions();
+      const timelineRegions = player.getAllTimelineRegions();
+      expect(isIterable(metadataRegions)).toBeTruthy();
+      expect(isIterable(emsgRegions)).toBeTruthy();
+      expect(isIterable(timelineRegions)).toBeTruthy();
+    });
+  });
+
   describe('getConfiguration', () => {
     it('returns a copy of the configuration', () => {
       const config1 = player.getConfiguration();

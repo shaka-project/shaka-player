@@ -53,6 +53,53 @@ just a few small guidelines you need to follow.
 [pull request]: https://help.github.com/articles/creating-a-pull-request
 
 
+## AI-Assisted Contributions ##
+
+We welcome contributions that were written or assisted by AI coding agents (such
+as Claude Code, GitHub Copilot, Cursor, or similar tools).  However, any commit
+that involved AI assistance must say so clearly.
+
+The preferred convention is a **git trailer** in the commit message:
+
+```
+Co-Authored-By: Claude Code <noreply@anthropic.com>
+```
+
+Git trailers are lines at the end of the commit message body, separated from the
+body by a blank line, in `Key: Value` format.  GitHub renders `Co-Authored-By`
+trailers natively, showing the tool as a co-author on the commit and pull
+request.
+
+Other tools have their own canonical addresses, and AGENTS.md contains a list
+of addresses that map known tools to GitHub user identities.  Ideally, your
+agent has already read the instructions there and could include the correct
+trailer automatically.
+
+If you used multiple tools, add a line for each.  For example:
+
+```
+Co-Authored-By: GitHub Copilot <198982749+Copilot@users.noreply.github.com>
+Co-Authored-By: Cursor <cursoragent@cursor.com>
+```
+
+If a tool doesn't have a canonical address, a `Co-Authored-By` line with a
+descriptive name is fine:
+
+```
+Co-Authored-By: Some Coding Tool (v5) <noreply@example.com>
+```
+
+
+**Why this matters:** Attribution helps reviewers calibrate their review effort,
+gives the project an honest record of how the code was produced, and keeps us
+compliant with the CLA requirement that contributions be your own original work
+(or clearly attributed when they are not).
+
+Note that the CLA still applies to AI-assisted contributions: by submitting a
+pull request you are attesting that you reviewed the AI-generated code, that you
+take responsibility for it, and that you have the right to submit it under the
+project's license.
+
 ## Contributor License Agreement ##
 
 Contributions to any Google project must be accompanied by a Contributor
