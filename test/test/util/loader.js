@@ -46,8 +46,8 @@ shaka.test.Loader = class {
    * @return {!Promise<shakaNamespaceType>}
    */
   static async loadShaka(loadUncompiled) {
-    /** @type {!shaka.util.PublicPromise} */
-    const loaded = new shaka.util.PublicPromise();
+    /** @type {!Promise.PromiseWithResolvers} */
+    const loaded = Promise.withResolvers();
     /** @type {shakaNamespaceType} */
     let compiledShaka;
 
@@ -82,7 +82,7 @@ shaka.test.Loader = class {
       });
     }
 
-    await loaded;
+    await loaded.promise;
     return compiledShaka;
   }
 };

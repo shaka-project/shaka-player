@@ -119,7 +119,6 @@
 +../../lib/util/periods.js
 +../../lib/util/player_configuration.js
 +../../lib/util/pssh.js
-+../../lib/util/public_promise.js
 +../../lib/util/state_history.js
 +../../lib/util/stats.js
 +../../lib/util/stream_utils.js
