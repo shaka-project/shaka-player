@@ -204,6 +204,7 @@ module.exports = (config) => {
 
       // Polyfills before anything else, primarily for older TVs:
       'node_modules/core-js-bundle/minified.js',
+      'node_modules/regenerator-runtime/runtime.js',
 
       // LCEVC decoder libraries (.wasm & .js)
       {
