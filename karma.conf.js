@@ -203,7 +203,10 @@ module.exports = (config) => {
       'test/test/cast-boot.js',
 
       // Polyfills before anything else, primarily for older TVs:
-      'node_modules/core-js-bundle/minified.js',
+      //   Promise polyfill, required since we test uncompiled code on IE11
+      'node_modules/es6-promise-polyfill/promise.js',
+      //   Babel polyfill, required for async/await
+      'node_modules/@babel/polyfill/dist/polyfill.js',
 
       // LCEVC decoder libraries (.wasm & .js)
       {
