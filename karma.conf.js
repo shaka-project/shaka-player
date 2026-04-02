@@ -223,6 +223,9 @@ module.exports = (config) => {
       // tested in test/demo/demo_unit.js
       'demo/config.js',
 
+      // cajon module (an AMD variant of requirejs) next
+      'node_modules/cajon/cajon.js',
+
       // define the test namespace next (shaka.test)
       'test/test/namespace.js',
 
