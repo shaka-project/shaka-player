@@ -476,7 +476,7 @@ describe('NativeTextDisplayer', () => {
     mockTrack.addCue.calls.reset();
     displayer.append(shakaCues);
     const result = mockTrack.addCue.calls.allArgs().reduce(
-        shaka.util.Functional.collapseArrays, []);
+        (a, b) => a.concat(b), []);
     expect(result).toEqual(vttCues.map((c) => jasmine.objectContaining(c)));
   }
 });
