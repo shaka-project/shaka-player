@@ -27,7 +27,6 @@
     "@teppeis/clutz": "^1.0.29-4c95e12.v20190929",
     "awesomplete": "^1.1.5",
     "babel-plugin-istanbul": "^6.1.1",
-    "cajon": "^0.4.4",
     "clean-package": "^2.2.0",
     "code-prettify": "^0.1.0",
     "color-themes-for-google-code-prettify": "^2.0.4",
