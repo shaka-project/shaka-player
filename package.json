@@ -32,7 +32,7 @@
     "clean-package": "^2.2.0",
     "code-prettify": "^0.1.0",
     "color-themes-for-google-code-prettify": "^2.0.4",
-    "core-js": "^3.49.0",
+    "core-js": "^3.21.1",
     "cspell": "^8.17.1",
     "dialog-polyfill": "^0.5.6",
     "es6-promise-polyfill": "^1.2.0",
