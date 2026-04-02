@@ -88,7 +88,6 @@
 +../../lib/util/content_steering_manager.js
 +../../lib/util/data_view_reader.js
 +../../lib/util/data_view_writer.js
-+../../lib/util/delayed_tick.js
 +../../lib/util/destroyer.js
 +../../lib/util/dom_utils.js
 +../../lib/util/error.js
