@@ -2036,7 +2036,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           if ((isSeekBar || isFullscreenOrControlsInWindow) &&
               !isVolumeBar) {
             event.preventDefault();
-            this.seek_(this.seekBar_.getValue() - keyboardSeekDistance);
+            this.seek_(this.video_.currentTime - keyboardSeekDistance);
           }
         }
         break;
@@ -2048,7 +2048,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           if ((isSeekBar || isFullscreenOrControlsInWindow) &&
               !isVolumeBar) {
             event.preventDefault();
-            this.seek_(this.seekBar_.getValue() + keyboardSeekDistance);
+            this.seek_(this.video_.currentTime + keyboardSeekDistance);
           }
         }
         break;
@@ -2058,7 +2058,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (this.seekBar_ && keyboardLargeSeekDistance > 0) {
           if (isSeekBar || isFullscreenOrControlsInWindow) {
             event.preventDefault();
-            this.seek_(this.seekBar_.getValue() - keyboardLargeSeekDistance);
+            this.seek_(this.video_.currentTime - keyboardLargeSeekDistance);
           }
         }
         break;
@@ -2068,7 +2068,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (this.seekBar_ && keyboardLargeSeekDistance > 0) {
           if (isSeekBar || isFullscreenOrControlsInWindow) {
             event.preventDefault();
-            this.seek_(this.seekBar_.getValue() + keyboardLargeSeekDistance);
+            this.seek_(this.video_.currentTime + keyboardLargeSeekDistance);
           }
         }
         break;
@@ -2346,7 +2346,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.video_.pause();
     }
     const frameTime = 1 / videoTrack.frameRate;
-    const newTime = this.seekBar_.getValue() + frameTime * step;
+    const newTime = this.video_.currentTime + frameTime * step;
     if (newTime >= 0 && newTime <= this.player_.seekRange().end &&
         this.video_.currentTime !== newTime) {
       this.seek_(newTime);
