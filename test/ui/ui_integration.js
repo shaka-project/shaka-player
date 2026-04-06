@@ -377,6 +377,7 @@ describe('UI', () => {
       await player.attach(video);
 
       const config = Object.assign({
+        controlPanelElements: ['overflow_menu'],
         overflowMenuButtons: ['captions', 'language'],
       }, extraConfig);
 
@@ -495,7 +496,7 @@ describe('UI', () => {
           'shaka-audio-languages', videoContainer);
       const buttons = getTrackButtons(audioMenu);
       const fxButton = findButtonWithLabel(buttons, 'Unrecognized (fx)');
-      expect(fxButton).not.toBe(null);
+      expect(fxButton).not.toBeNull();
     });
   });  // describe('customTrackLabel')
 
