@@ -392,16 +392,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           }
         });
 
-    this.eventManager_.listen(this.player_, 'unloading', () => {
+    this.eventManager_.listen(this.player_, 'unloading', (event) => {
       if (this.ad_) {
         return;
       }
+      const isSwitchingContent = event['isSwitchingContent'] || false;
       this.adCuePoints_ = [];
       this.lastSelectedTextTrack_ = null;
-      if (this.isFullScreenEnabled()) {
+      if (this.isFullScreenEnabled() && !isSwitchingContent) {
         this.exitFullScreen_();
       }
-      if (this.isPiPEnabled()) {
+      if (this.isPiPEnabled() && !isSwitchingContent) {
         this.togglePiP();
       }
       if (this.chapters_.length) {
