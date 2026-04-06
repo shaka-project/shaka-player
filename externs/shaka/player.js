@@ -1648,6 +1648,7 @@ shaka.extern.HlsManifestConfiguration;
  * @typedef {{
  *   fingerprintUri: string,
  *   namespaces: !Array<string>,
+ *   subscribeFilterType: shaka.config.MsfFilterType,
  * }}
  *
  * @property {string} fingerprintUri
@@ -1660,6 +1661,11 @@ shaka.extern.HlsManifestConfiguration;
  *   via PublishNamespace messages.
  *   <br>
  *   Defaults to <code>[]</code>.
+ * @property {shaka.config.MsfFilterType} subscribeFilterType
+ *   The filter type used in MoQ SUBSCRIBE messages. Controls how the relay
+ *   delivers data to the subscriber.
+ *   <br>
+ *   Defaults to <code>0x2</code>.
  * @exportDoc
  */
 shaka.extern.MsfManifestConfiguration;

@@ -312,12 +312,25 @@ shakaDemo.Config = class {
 
   /** @private */
   addMsfManifestSection_() {
+    const msfFilterTypeOptions = shaka.config.MsfFilterType;
+    const msfFilterTypeOptionNames = {
+      'NONE': 'NONE',
+      'NEXT_GROUP_START': 'NEXT_GROUP_START',
+      'LARGEST_OBJECT': 'LARGEST_OBJECT',
+      'ABSOLUTE_START': 'ABSOLUTE_START',
+      'ABSOLUTE_RANGE': 'ABSOLUTE_RANGE',
+    };
+
     const docLink = this.resolveExternLink_('.ManifestConfiguration');
     this.addSection_('MSF', docLink)
         .addTextInput_('Fingerprint URI',
             'manifest.msf.fingerprintUri')
         .addArrayStringInput_('Namespaces',
-            'manifest.msf.namespaces');
+            'manifest.msf.namespaces')
+        .addSelectInput_('Position area',
+            'manifest.msf.subscribeFilterType',
+            msfFilterTypeOptions,
+            msfFilterTypeOptionNames);
   }
 
   /** @private */
