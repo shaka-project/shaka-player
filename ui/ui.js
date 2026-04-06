@@ -524,6 +524,8 @@ shaka.ui.Overlay = class {
           (name) => !filterElements.includes(name));
       config.contextMenuElements = config.contextMenuElements.filter(
           (name) => !filterElements.includes(name));
+    } else {
+      config.seekOnTaps = navigator.maxTouchPoints > 0;
     }
 
     const device = shaka.device.DeviceFactory.getDevice();
