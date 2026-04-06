@@ -45,6 +45,29 @@ player.configure({
 
 Note: Only supported on UITextDisplayer.
 
+##### Subtitle timing offset
+
+Shaka Player allows applications to manually adjust subtitle timing using the `textDisplayer.subtitleDelay` configuration option.
+
+This is useful when subtitles are out of sync with the video.
+
+```js
+player.configure({
+  textDisplayer: {
+    subtitleDelay: 2, // Delay subtitles by 2 seconds
+  },
+});
+```
+
+Behavior
+- Positive values delay subtitles (they appear later than the video)
+- Negative values advance subtitles (they appear earlier than the video)
+- Default value is 0 (no offset)
+
+Notes:
+- With UITextDisplayer, the subtitle delay is applied dynamically.
+- With NativeTextDisplayer, the delay is applied by modifying cue timings when they are added to the video element.
+
 ##### Overriding Subtitle Position
 
 Shaka Player allows applications to override the default subtitle placement and render captions in predefined regions of the video viewport. This is useful when subtitles need to avoid UI overlays, follow accessibility guidelines, or provide a consistent layout across different content.

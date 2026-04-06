@@ -2885,6 +2885,7 @@ shaka.extern.OfflineConfiguration;
  *   captionsUpdatePeriod: number,
  *   fontScaleFactor: number,
  *   positionArea: shaka.config.PositionArea,
+ *   subtitleDelay: number,
  * }}
  *
  * @description
@@ -2905,6 +2906,11 @@ shaka.extern.OfflineConfiguration;
  *   position.
  *   <br>
  *   Defaults to <code>''</code>.
+ * @property {number} subtitleDelay
+ *   Manual subtitle timing offset in seconds. Positive values delay subtitles
+ *   (appear later than video); negative values advance them.
+ *   <br>
+ *   Defaults to <code>0</code>.
  * @exportDoc
  */
 shaka.extern.TextDisplayerConfiguration;
