@@ -63,7 +63,6 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
 
     /** @protected {!HTMLElement} */
     this.seekContainer = shaka.util.Dom.createHTMLElement('div');
-    this.seekContainer.classList.add('shaka-no-propagation');
     this.parent.appendChild(this.seekContainer);
 
     /** @private {!HTMLElement} */
@@ -84,14 +83,17 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     // ---------------------------------------------------------------
     this.eventManager.listen(this.seekContainer, 'touchstart', (e) => {
       const event = /** @type {!TouchEvent} */(e);
+      event.stopPropagation();
       this.onTouchStart_(event);
     });
     this.eventManager.listen(this.seekContainer, 'touchmove', (e) => {
       const event = /** @type {!TouchEvent} */(e);
+      event.stopPropagation();
       this.onTouchMove_(event);
     });
     this.eventManager.listen(this.seekContainer, 'touchend', (e) => {
       const event = /** @type {!TouchEvent} */(e);
+      event.stopPropagation();
       this.onTouchEnd_(event);
     });
   }
