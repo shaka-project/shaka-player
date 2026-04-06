@@ -2036,7 +2036,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           if ((isSeekBar || isFullscreenOrControlsInWindow) &&
               !isVolumeBar) {
             event.preventDefault();
-            this.seek_(this.seekBar_.getValue() - keyboardSeekDistance);
+            this.updateTimeAndSeekRange_();
+            this.seek_(this.getDisplayTime() - keyboardSeekDistance);
           }
         }
         break;
@@ -2048,7 +2049,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           if ((isSeekBar || isFullscreenOrControlsInWindow) &&
               !isVolumeBar) {
             event.preventDefault();
-            this.seek_(this.seekBar_.getValue() + keyboardSeekDistance);
+            this.updateTimeAndSeekRange_();
+            this.seek_(this.getDisplayTime() + keyboardSeekDistance);
           }
         }
         break;
@@ -2058,7 +2060,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (this.seekBar_ && keyboardLargeSeekDistance > 0) {
           if (isSeekBar || isFullscreenOrControlsInWindow) {
             event.preventDefault();
-            this.seek_(this.seekBar_.getValue() - keyboardLargeSeekDistance);
+            this.updateTimeAndSeekRange_();
+            this.seek_(this.getDisplayTime() - keyboardLargeSeekDistance);
           }
         }
         break;
@@ -2068,7 +2071,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (this.seekBar_ && keyboardLargeSeekDistance > 0) {
           if (isSeekBar || isFullscreenOrControlsInWindow) {
             event.preventDefault();
-            this.seek_(this.seekBar_.getValue() + keyboardLargeSeekDistance);
+            this.updateTimeAndSeekRange_();
+            this.seek_(this.getDisplayTime() + keyboardLargeSeekDistance);
           }
         }
         break;
@@ -2345,8 +2349,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (!this.video_.paused) {
       this.video_.pause();
     }
+    this.updateTimeAndSeekRange_();
     const frameTime = 1 / videoTrack.frameRate;
-    const newTime = this.seekBar_.getValue() + frameTime * step;
+    const newTime = this.getDisplayTime() + frameTime * step;
     if (newTime >= 0 && newTime <= this.player_.seekRange().end &&
         this.video_.currentTime !== newTime) {
       this.seek_(newTime);
@@ -2375,7 +2380,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @param {number} increment
    */
   seekIncrement(increment) {
-    this.seek_(this.seekBar_.getValue() + increment);
+    this.updateTimeAndSeekRange_();
+    this.seek_(this.getDisplayTime() + increment);
   }
 
   /**
