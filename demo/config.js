@@ -317,7 +317,9 @@ shakaDemo.Config = class {
         .addTextInput_('Fingerprint URI',
             'manifest.msf.fingerprintUri')
         .addArrayStringInput_('Namespaces',
-            'manifest.msf.namespaces');
+            'manifest.msf.namespaces')
+        .addTextInput_('Authorization token',
+            'manifest.msf.authorizationToken');
   }
 
   /** @private */
