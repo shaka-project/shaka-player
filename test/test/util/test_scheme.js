@@ -593,6 +593,15 @@ shaka.test.TestScheme.DATA = {
     duration: 30,
   },
 
+  'sintel_unknown_language': {
+    video: sintelVideoSegment,
+    audio: sintelAudioSegment,
+    text: vttSegment,
+    audioLanguages: ['en', 'fx'],
+    textLanguages: ['en', 'fx'],
+    duration: 30,
+  },
+
   'sintel_audio_only': {
     audio: sintelAudioSegment,
     duration: 30,

@@ -392,16 +392,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           }
         });
 
-    this.eventManager_.listen(this.player_, 'unloading', () => {
+    this.eventManager_.listen(this.player_, 'unloading', (event) => {
       if (this.ad_) {
         return;
       }
+      const isSwitchingContent = event['isSwitchingContent'] || false;
       this.adCuePoints_ = [];
       this.lastSelectedTextTrack_ = null;
-      if (this.isFullScreenEnabled()) {
+      if (this.isFullScreenEnabled() && !isSwitchingContent) {
         this.exitFullScreen_();
       }
-      if (this.isPiPEnabled()) {
+      if (this.isPiPEnabled() && !isSwitchingContent) {
         this.togglePiP();
       }
       if (this.chapters_.length) {
@@ -1957,16 +1958,21 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.hideContextMenus();
     } else if (this.anySettingsMenusAreOpen()) {
       this.hideSettingsMenusTimer_.tickNow();
-    } else if (this.config_.singleClickForPlayAndPause) {
-      this.playPausePresentation();
     } else if (fromTouchEvent && this.isOpaque()) {
       if (this.config_.doubleClickForFullscreen &&
           this.isFullScreenSupported() && this.lastContainerTouchEventTime_ &&
           Date.now() - this.lastContainerTouchEventTime_ < 1000) {
+        if (this.config_.singleClickForPlayAndPause) {
+          this.playPausePresentation();
+        }
         this.toggleFullScreen();
+      } else if (this.config_.singleClickForPlayAndPause) {
+        this.playPausePresentation();
       } else {
         this.hideUI();
       }
+    } else if (this.config_.singleClickForPlayAndPause) {
+      this.playPausePresentation();
     }
   }
 
@@ -2036,7 +2042,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           if ((isSeekBar || isFullscreenOrControlsInWindow) &&
               !isVolumeBar) {
             event.preventDefault();
-            this.seek_(this.seekBar_.getValue() - keyboardSeekDistance);
+            this.updateTimeAndSeekRange_();
+            this.seek_(this.getDisplayTime() - keyboardSeekDistance);
           }
         }
         break;
@@ -2048,7 +2055,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           if ((isSeekBar || isFullscreenOrControlsInWindow) &&
               !isVolumeBar) {
             event.preventDefault();
-            this.seek_(this.seekBar_.getValue() + keyboardSeekDistance);
+            this.updateTimeAndSeekRange_();
+            this.seek_(this.getDisplayTime() + keyboardSeekDistance);
           }
         }
         break;
@@ -2058,7 +2066,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (this.seekBar_ && keyboardLargeSeekDistance > 0) {
           if (isSeekBar || isFullscreenOrControlsInWindow) {
             event.preventDefault();
-            this.seek_(this.seekBar_.getValue() - keyboardLargeSeekDistance);
+            this.updateTimeAndSeekRange_();
+            this.seek_(this.getDisplayTime() - keyboardLargeSeekDistance);
           }
         }
         break;
@@ -2068,7 +2077,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (this.seekBar_ && keyboardLargeSeekDistance > 0) {
           if (isSeekBar || isFullscreenOrControlsInWindow) {
             event.preventDefault();
-            this.seek_(this.seekBar_.getValue() + keyboardLargeSeekDistance);
+            this.updateTimeAndSeekRange_();
+            this.seek_(this.getDisplayTime() + keyboardLargeSeekDistance);
           }
         }
         break;
@@ -2345,8 +2355,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (!this.video_.paused) {
       this.video_.pause();
     }
+    this.updateTimeAndSeekRange_();
     const frameTime = 1 / videoTrack.frameRate;
-    const newTime = this.seekBar_.getValue() + frameTime * step;
+    const newTime = this.getDisplayTime() + frameTime * step;
     if (newTime >= 0 && newTime <= this.player_.seekRange().end &&
         this.video_.currentTime !== newTime) {
       this.seek_(newTime);
@@ -2375,7 +2386,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @param {number} increment
    */
   seekIncrement(increment) {
-    this.seek_(this.seekBar_.getValue() + increment);
+    this.updateTimeAndSeekRange_();
+    this.seek_(this.getDisplayTime() + increment);
   }
 
   /**

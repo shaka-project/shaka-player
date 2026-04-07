@@ -235,6 +235,7 @@ requirement: {
     "shaka.util.Timer instead."
   whitelist_regexp: "demo/"
   whitelist_regexp: "test/"
+  whitelist_regexp: "lib/util/timer.js"
 }
 requirement: {
   type: BANNED_NAME
@@ -246,6 +247,7 @@ requirement: {
     "shaka.util.Timer instead."
   whitelist_regexp: "demo/"
   whitelist_regexp: "test/"
+  whitelist_regexp: "lib/util/timer.js"
 }
 
 # Disallow setTimeout.
@@ -258,7 +260,7 @@ requirement: {
     "shaka.util.Timer instead."
   whitelist_regexp: "demo/"
   whitelist_regexp: "test/"
-  whitelist_regexp: "lib/util/delayed_tick.js"
+  whitelist_regexp: "lib/util/timer.js"
 }
 requirement: {
   type: BANNED_NAME
@@ -269,6 +271,7 @@ requirement: {
     "shaka.util.Timer instead."
   whitelist_regexp: "demo/"
   whitelist_regexp: "test/"
+  whitelist_regexp: "lib/util/timer.js"
 }
 
 # Disallow eval, except when testing for modern JS syntax in demo

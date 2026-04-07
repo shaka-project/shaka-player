@@ -357,6 +357,149 @@ describe('UI', () => {
     }
   });  // describe('language selections')
 
+  describe('customTrackLabel', () => {
+    /**
+     * Rebuilds the UI with a custom config that includes the callback,
+     * then loads the unknown language test manifest.
+     * @param {!Object} extraConfig
+     */
+    async function setupWithConfig(extraConfig) {
+      // Destroy existing UI first
+      await UiUtils.cleanupUI();
+
+      // Create fresh video and container
+      video = shaka.test.UiUtils.createVideoElement();
+      videoContainer = shaka.util.Dom.createHTMLElement('div');
+      videoContainer.appendChild(video);
+      document.body.appendChild(videoContainer);
+
+      player = new compiledShaka.Player();
+      await player.attach(video);
+
+      const config = Object.assign({
+        controlPanelElements: ['overflow_menu'],
+        overflowMenuButtons: ['captions', 'language'],
+      }, extraConfig);
+
+      ui = new compiledShaka.ui.Overlay(player, videoContainer, video);
+      ui.configure(config);
+
+      const tempControls = ui.getControls();
+      goog.asserts.assert(tempControls != null, 'Controls are null!');
+      controls = tempControls;
+      eventManager = new shaka.util.EventManager();
+      waiter = new shaka.test.Waiter(eventManager);
+      eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
+      eventManager.listen(controls, 'error', Util.spyFunc(onErrorSpy));
+
+      await player.load('test:sintel_unknown_language_compiled');
+      await waiter.failOnTimeout(false).waitForEvent(video, 'canplay');
+      expect(video.readyState).not.toBe(0);
+      await waiter.failOnTimeout(true);
+    }
+
+    /**
+     * @param {!Element} menu
+     * @return {!Array<!HTMLElement>}
+     */
+    function getTrackButtons(menu) {
+      return filterButtons(menu.childNodes,
+          ['shaka-back-to-overflow-button', 'shaka-turn-captions-off-button']);
+    }
+
+    /**
+     * @param {!Array<!HTMLElement>} buttons
+     * @param {string} label
+     * @return {?HTMLElement}
+     */
+    function findButtonWithLabel(buttons, label) {
+      for (const button of buttons) {
+        if (button.childNodes.length > 0 &&
+            button.childNodes[0].textContent === label) {
+          return button;
+        }
+      }
+      return null;
+    }
+
+    it('overrides unrecognized audio track labels', async () => {
+      await setupWithConfig({
+        customTrackLabel: (defaultLabel, track, type) => {
+          if (track.language === 'fx') {
+            return 'Sound Effects';
+          }
+          return null;
+        },
+      });
+
+      const audioMenu = shaka.util.Dom.getElementByClassName(
+          'shaka-audio-languages', videoContainer);
+      const buttons = getTrackButtons(audioMenu);
+      expect(findButtonWithLabel(buttons, 'Sound Effects')).not.toBe(null);
+      expect(findButtonWithLabel(buttons, 'English')).not.toBe(null);
+    });
+
+    it('overrides unrecognized text track labels', async () => {
+      await setupWithConfig({
+        customTrackLabel: (defaultLabel, track, type) => {
+          if (track.language === 'fx') {
+            return 'Sound Effects';
+          }
+          return null;
+        },
+      });
+
+      const textMenu = shaka.util.Dom.getElementByClassName(
+          'shaka-text-languages', videoContainer);
+      const buttons = getTrackButtons(textMenu);
+      expect(findButtonWithLabel(buttons, 'Sound Effects')).not.toBe(null);
+      expect(findButtonWithLabel(buttons, 'English')).not.toBe(null);
+    });
+
+    it('passes null for defaultLabel of unrecognized language', async () => {
+      const labelSpy = jasmine.createSpy('customTrackLabel')
+          .and.returnValue(null);
+      await setupWithConfig({customTrackLabel: labelSpy});
+
+      // Should have been called with null for 'fx' and a string for 'en'
+      const calls = labelSpy.calls.allArgs();
+      const fxCalls = calls.filter((args) => args[1].language === 'fx');
+      const enCalls = calls.filter((args) => args[1].language === 'en');
+      expect(fxCalls.length).toBeGreaterThan(0);
+      expect(enCalls.length).toBeGreaterThan(0);
+      for (const args of fxCalls) {
+        expect(args[0]).toBe(null);
+      }
+      for (const args of enCalls) {
+        expect(args[0]).not.toBe(null);
+      }
+    });
+
+    it('passes correct type argument', async () => {
+      const labelSpy = jasmine.createSpy('customTrackLabel')
+          .and.returnValue(null);
+      await setupWithConfig({customTrackLabel: labelSpy});
+
+      const calls = labelSpy.calls.allArgs();
+      const audioCalls = calls.filter((args) => args[2] === 'audio');
+      const textCalls = calls.filter((args) => args[2] === 'text');
+      expect(audioCalls.length).toBeGreaterThan(0);
+      expect(textCalls.length).toBeGreaterThan(0);
+    });
+
+    it('falls back to Unrecognized when callback returns falsy', async () => {
+      await setupWithConfig({
+        customTrackLabel: (defaultLabel, track, type) => null,
+      });
+
+      const audioMenu = shaka.util.Dom.getElementByClassName(
+          'shaka-audio-languages', videoContainer);
+      const buttons = getTrackButtons(audioMenu);
+      const fxButton = findButtonWithLabel(buttons, 'Unrecognized (fx)');
+      expect(fxButton).not.toBeNull();
+    });
+  });  // describe('customTrackLabel')
+
   describe('resolution selection', () => {
     /** @type {!Map<number, !HTMLElement>} */
     let resolutionsToButtons;
