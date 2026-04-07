@@ -1234,13 +1234,14 @@ describe('StreamingEngine', () => {
     it('defers old stream cleanup on switchVariant during update', async () => {
       // Delay the appendBuffer call until later so we are waiting for this to
       // finish when we switch.
-      let p = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      let p = Promise.withResolvers();
       const old = mediaSourceEngine.appendBuffer;
       // Replace the whole spy since we want to call the original.
       mediaSourceEngine.appendBuffer =
           jasmine.createSpy('appendBuffer')
               .and.callFake(async (type, data, reference) => {
-                await p;
+                await p.promise;
                 return Util.invokeSpy(old, type, data, reference);
               });
 
@@ -1261,7 +1262,7 @@ describe('StreamingEngine', () => {
       // Finish the update for 'initialVariant'.
       p.resolve();
       // Create a new promise to delay the appendBuffer for 'differentVariant'.
-      p = new shaka.util.PublicPromise();
+      p = Promise.withResolvers();
       await Util.fakeEventLoop(1);
 
       const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
@@ -1292,12 +1293,12 @@ describe('StreamingEngine', () => {
 
       // Delay the appendBuffer call until later so we are waiting for this to
       // finish when we switch.
-      const p = new shaka.util.PublicPromise();
+      const p = Promise.withResolvers();
       const old = mediaSourceEngine.appendBuffer;
       mediaSourceEngine.appendBuffer =
           jasmine.createSpy('appendBuffer')
               .and.callFake(async (type, data, reference) => {
-                await p;
+                await p.promise;
                 return Util.invokeSpy(old, type, data, reference);
               });
 
@@ -1338,13 +1339,13 @@ describe('StreamingEngine', () => {
     it('works with fast variant switches during update', async () => {
       // Delay the appendBuffer call until later so we are waiting for this to
       // finish when we switch.
-      const p = new shaka.util.PublicPromise();
+      const p = Promise.withResolvers();
       const old = mediaSourceEngine.appendBuffer;
       // Replace the whole spy since we want to call the original.
       mediaSourceEngine.appendBuffer =
           jasmine.createSpy('appendBuffer')
               .and.callFake(async (type, data, reference) => {
-                await p;
+                await p.promise;
                 return Util.invokeSpy(old, type, data, reference);
               });
 
@@ -1364,14 +1365,14 @@ describe('StreamingEngine', () => {
     it('works with fast text stream switches during update', async () => {
       // Delay the appendBuffer call until later so we are waiting for this to
       // finish when we switch.
-      const p = new shaka.util.PublicPromise();
+      const p = Promise.withResolvers();
 
       const old = mediaSourceEngine.appendBuffer;
       // Replace the whole spy since we want to call the original.
       mediaSourceEngine.appendBuffer =
           jasmine.createSpy('appendBuffer')
               .and.callFake(async (type, data, reference) => {
-                await p;
+                await p.promise;
                 return Util.invokeSpy(old, type, data, reference);
               });
 
@@ -1695,9 +1696,9 @@ describe('StreamingEngine', () => {
       streamingEngine.switchTextStream(textStream);
       // ensure init source buffer promise does not resolve before seeked()
       // so mediaState remains in "performingUpdate" state
-      const initSourceBufferPromise = new shaka.util.PublicPromise();
+      const initSourceBufferPromise = Promise.withResolvers();
       mediaSourceEngine.setStreamProperties.and
-          .returnValue(initSourceBufferPromise);
+          .returnValue(initSourceBufferPromise.promise);
       await streamingEngine.start();
       playing = true;
 
@@ -3210,7 +3211,7 @@ describe('StreamingEngine', () => {
     let newVariant;
     /** @type {!Array<string>} */
     let requestUris;
-    /** @type {!Array<shaka.util.PublicPromise>} */
+    /** @type {!Array<Promise.PromiseWithResolvers>} */
     let delayedRequests;
     /** @type {shaka.net.NetworkingEngine.PendingRequest} */
     let lastPendingRequest;
@@ -3256,14 +3257,14 @@ describe('StreamingEngine', () => {
         const bytes = new shaka.net.NetworkingEngine.NumBytesRemainingClass();
         bytes.setBytes(200);
 
-        const delay = new shaka.util.PublicPromise();
+        const delay = Promise.withResolvers();
         delayedRequests.push(delay);
 
         const run = async () => {
           shaka.log.v1('new request', request.uris[0]);
           if (shouldDelayRequests) {
             shaka.log.v1('delaying request', request.uris[0]);
-            await delay;
+            await delay.promise;
           }
           // Only add if the segment was appended; if it was aborted this
           // won't be called.

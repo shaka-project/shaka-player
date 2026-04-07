@@ -509,14 +509,14 @@ filterDescribe('Storage', storageSupport, () => {
       // Use these promises to ensure that the data from networking
       // engine arrives in the correct order.
       const delays = {};
-      delays[audioSegment1Uri] = new shaka.util.PublicPromise();
-      delays[audioSegment2Uri] = new shaka.util.PublicPromise();
-      delays[audioSegment3Uri] = new shaka.util.PublicPromise();
-      delays[audioSegment4Uri] = new shaka.util.PublicPromise();
-      delays[videoSegment1Uri] = new shaka.util.PublicPromise();
-      delays[videoSegment2Uri] = new shaka.util.PublicPromise();
-      delays[videoSegment3Uri] = new shaka.util.PublicPromise();
-      delays[videoSegment4Uri] = new shaka.util.PublicPromise();
+      delays[audioSegment1Uri] = Promise.withResolvers();
+      delays[audioSegment2Uri] = Promise.withResolvers();
+      delays[audioSegment3Uri] = Promise.withResolvers();
+      delays[audioSegment4Uri] = Promise.withResolvers();
+      delays[videoSegment1Uri] = Promise.withResolvers();
+      delays[videoSegment2Uri] = Promise.withResolvers();
+      delays[videoSegment3Uri] = Promise.withResolvers();
+      delays[videoSegment4Uri] = Promise.withResolvers();
 
       /**
        * Since the promise chains will be built so that each stream can be
@@ -530,7 +530,7 @@ filterDescribe('Storage', storageSupport, () => {
       function setResponseFor(segment, dependingOn) {
         fakeResponses.set(segment, async () => {
           if (dependingOn) {
-            await delays[dependingOn];
+            await delays[dependingOn].promise;
           }
 
           // Tell anyone waiting on |segment| that they are clear to execute
@@ -967,7 +967,7 @@ filterDescribe('Storage', storageSupport, () => {
 
     it('can store multiple assets at once', async () => {
       // Block the network so that we won't finish the first store command.
-      /** @type {!shaka.util.PublicPromise} */
+      /** @type {!Promise.PromiseWithResolvers} */
       const hangingPromise = netEngine.delayNextRequest();
       /** @type {!shaka.extern.IAbortableOperation} */
       const storeOperation = storage.store(
@@ -1081,11 +1081,11 @@ filterDescribe('Storage', storageSupport, () => {
       /**
        * Block storage when it goes to parse the manifest. Since we don't want
        * to change the flow, return a valid manifest once it resolves.
-       * @type {shaka.util.PublicPromise}
+       * @type {Promise.PromiseWithResolvers}
        */
-      const stallStorage = new shaka.util.PublicPromise();
+      const stallStorage = Promise.withResolvers();
       storage.parseManifest = async () => {
-        await stallStorage;
+        await stallStorage.promise;
         return manifest;
       };
 
@@ -1124,13 +1124,13 @@ filterDescribe('Storage', storageSupport, () => {
      */
     async function networkCancelTest(interruption) {
       const delays = [];
-      /** @type {!shaka.util.PublicPromise} */
-      const aRequestIsStarted = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const aRequestIsStarted = Promise.withResolvers();
 
       // Set delays for the URIs of the manifest.
       const uris = [segment1Uri, segment2Uri, segment3Uri, segment4Uri];
       for (let i = 0; i < uris.length; i++) {
-        const promise = new shaka.util.PublicPromise();
+        const promise = Promise.withResolvers();
         delays.push(promise);
 
         // The fake networking engine provides a "abortCheck" callback to the
@@ -1138,7 +1138,7 @@ filterDescribe('Storage', storageSupport, () => {
         // has been aborted.
         netEngine.setResponse(uris[i], async (abortCheck) => {
           aRequestIsStarted.resolve();
-          await promise;
+          await promise.promise;
 
           expect(abortCheck()).toBe(true);
 

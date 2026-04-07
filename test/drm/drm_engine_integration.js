@@ -156,8 +156,8 @@ describe('DrmEngine', () => {
       let requestComplete;
       /** @type {!jasmine.Spy} */
       const requestSpy = jasmine.createSpy('request');
-      /** @type {!shaka.util.PublicPromise} */
-      const requestMade = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const requestMade = Promise.withResolvers();
       requestSpy.and.callFake((...args) => {
         requestMade.resolve();
         // eslint-disable-next-line no-restricted-syntax
@@ -166,8 +166,8 @@ describe('DrmEngine', () => {
       });
       networkingEngine.request = shaka.test.Util.spyFunc(requestSpy);
 
-      /** @type {!shaka.util.PublicPromise} */
-      const encryptedEventSeen = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const encryptedEventSeen = Promise.withResolvers();
       eventManager.listen(video, 'encrypted', () => {
         encryptedEventSeen.resolve();
       });
@@ -185,8 +185,8 @@ describe('DrmEngine', () => {
         }
       });
 
-      /** @type {!shaka.util.PublicPromise} */
-      const keyStatusEventSeen = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const keyStatusEventSeen = Promise.withResolvers();
       onKeyStatusSpy.and.callFake(() => {
         keyStatusEventSeen.resolve();
       });
@@ -201,12 +201,12 @@ describe('DrmEngine', () => {
       await mediaSourceEngine.appendBuffer(
           ContentType.AUDIO, audioInitSegment, null, fakeStream,
           /* hasClosedCaptions= */ false);
-      await encryptedEventSeen;
+      await encryptedEventSeen.promise;
 
       // With PlayReady, a persistent license policy can cause a different
       // chain of events.  In particular, the request is bypassed and we
       // get a usable key right away.
-      await Promise.race([requestMade, keyStatusEventSeen]);
+      await Promise.race([requestMade.promise, keyStatusEventSeen.promise]);
 
       if (requestSpy.calls.count()) {
         // We made a license request.
@@ -222,7 +222,7 @@ describe('DrmEngine', () => {
       // Some platforms (notably 2017 Tizen TVs) do not fire key status
       // events.
       const keyStatusTimeout = shaka.test.Util.delay(5);
-      await Promise.race([keyStatusTimeout, keyStatusEventSeen]);
+      await Promise.race([keyStatusTimeout, keyStatusEventSeen.promise]);
 
       const call = onKeyStatusSpy.calls.mostRecent();
       if (call) {
@@ -268,8 +268,8 @@ describe('DrmEngine', () => {
       // The error callback should not be invoked.
       onErrorSpy.and.callFake(fail);
 
-      /** @type {!shaka.util.PublicPromise} */
-      const encryptedEventSeen = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const encryptedEventSeen = Promise.withResolvers();
       eventManager.listen(video, 'encrypted', () => {
         encryptedEventSeen.resolve();
       });
@@ -287,8 +287,8 @@ describe('DrmEngine', () => {
         }
       });
 
-      /** @type {!shaka.util.PublicPromise} */
-      const keyStatusEventSeen = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const keyStatusEventSeen = Promise.withResolvers();
       onKeyStatusSpy.and.callFake(() => {
         keyStatusEventSeen.resolve();
       });
@@ -303,12 +303,12 @@ describe('DrmEngine', () => {
       await mediaSourceEngine.appendBuffer(
           ContentType.AUDIO, audioInitSegment, null, fakeStream,
           /* hasClosedCaptions= */ false);
-      await encryptedEventSeen;
+      await encryptedEventSeen.promise;
 
       // Some platforms (notably 2017 Tizen TVs) do not fire key status
       // events.
       const keyStatusTimeout = shaka.test.Util.delay(5);
-      await Promise.race([keyStatusTimeout, keyStatusEventSeen]);
+      await Promise.race([keyStatusTimeout, keyStatusEventSeen.promise]);
 
       const call = onKeyStatusSpy.calls.mostRecent();
       if (call) {

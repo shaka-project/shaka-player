@@ -86,7 +86,6 @@
       "awesomplete/awesomplete.min.js",
       "dialog-polyfill/dialog-polyfill.css",
       "dialog-polyfill/dist/dialog-polyfill.js",
-      "es6-promise-polyfill/promise.min.js",
       "google-closure-library/closure/goog/base.js",
       "lcevc_dec.js/dist/lcevc_dec.min.js",
       "lcevc_dec.js/dist/liblcevc_dpi.wasm",
