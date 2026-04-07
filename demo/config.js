@@ -375,9 +375,18 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true,
             /* canBeZero= */ true)
         .addBoolInput_('Prefer Network Information bandwidth',
-            'abr.preferNetworkInformationBandwidth');
+            'abr.preferNetworkInformationBandwidth')
+        .addBoolInput_('Dropped Frame Protection Enabled',
+            'abr.droppedFrames')
+        .addNumberInput_('Dropped Frame Threshold',
+            'abr.advanced.droppedFramesThreshold',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Dropped Frame Interval',
+            'abr.advanced.droppedFrameInterval',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Dropped Frame Ban Duration',
+            'abr.advanced.droppedFrameBanDuration');
     this.addRestrictionsSection_('abr', 'Adaptation Restrictions');
-    this.addDroppedFrameProtectionSection_();
   }
 
   /** @private */
@@ -741,22 +750,6 @@ shakaDemo.Config = class {
             'streaming.liveSync.dynamicTargetLatency.maxLatency')
         .addNumberInput_('Dynamic Target Latency Min Latency',
             'streaming.liveSync.dynamicTargetLatency.minLatency');
-  }
-
-  /** @private */
-  addDroppedFrameProtectionSection_() {
-    const docLink = this.resolveExternLink_('.DroppedFrameProtectionConfig');
-    this.addSection_('Dropped Frame Protection', docLink)
-        .addBoolInput_('Dropped Frame Protection Enabled',
-            'abr.droppedFrameProtection.enabled')
-        .addNumberInput_('Dropped Frame Threshold',
-            'abr.droppedFrameProtection.dropThreshold',
-            /* canBeDecimal= */ true)
-        .addNumberInput_('Dropped Frame Ban Duration',
-            'abr.droppedFrameProtection.banDuration')
-        .addNumberInput_('Dropped Frame Check Interval',
-            'abr.droppedFrameProtection.checkInterval',
-            /* canBeDecimal= */ true);
   }
 
   /** @private */

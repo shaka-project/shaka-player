@@ -2523,7 +2523,7 @@ shaka.extern.AdsConfiguration;
  *   cacheLoadThreshold: number,
  *   minTimeToSwitch: number,
  *   preferNetworkInformationBandwidth: boolean,
- *   droppedFrameProtection: shaka.extern.DroppedFrameProtectionConfig,
+ *   droppedFrames: boolean,
  * }}
  *
  * @property {boolean} enabled
@@ -2619,6 +2619,10 @@ shaka.extern.AdsConfiguration;
  * @property {shaka.extern.DroppedFrameProtectionConfig} droppedFrameProtection
  *   Configuration for monitoring dropped frames and temporarily disabling
  *   streams that exceed a threshold.
+ * @property {boolean} droppedFrames
+ *   Enable or disable dropped frame protection.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
@@ -2629,7 +2633,10 @@ shaka.extern.AbrConfiguration;
  *   minTotalBytes: number,
  *   minBytes: number,
  *   fastHalfLife: number,
- *   slowHalfLife: number
+ *   slowHalfLife: number,
+ *   droppedFramesThreshold: number,
+ *   droppedFrameInterval: number,
+ *   droppedFrameBanDuration: number,
  * }}
  *
  * @property {number} minTotalBytes
@@ -2657,28 +2664,7 @@ shaka.extern.AbrConfiguration;
  *   new estimate.
  *   <br>
  *   Defaults to <code>5</code>.
- * @exportDoc
- */
-shaka.extern.AdvancedAbrConfiguration;
-
-
-/**
- * @typedef {{
- *   enabled: boolean,
- *   dropThreshold: number,
- *   banDuration: number,
- *   checkInterval: number
- * }}
- *
- * @description
- * Configuration for monitoring dropped frames and temporarily disabling
- * streams that exceed a threshold.
- *
- * @property {boolean} enabled
- *   Enable or disable dropped frame protection.
- *   <br>
- *   Defaults to <code>true</code>.
- * @property {number} dropThreshold
+ * @property {number} droppedFramesThreshold
  *   The dropThreshold represents the fraction of dropped frames relative to
  *   the total frames rendered during each check interval. For example, a value
  *   of 0.15 means that if 15% or more of the frames are dropped in that
@@ -2686,19 +2672,19 @@ shaka.extern.AdvancedAbrConfiguration;
  *   disabled.
  *   <br>
  *   Defaults to <code>0.15</code>.
- * @property {number} banDuration
- *   Duration in seconds to disable the stream after it exceeds the
- *   dropped frame threshold.
- *   <br>
- *   Defaults to <code>10</code> (10 seconds).
- * @property {number} checkInterval
+ * @property {number} droppedFrameInterval
  *   Interval in seconds to measure dropped frames and compare with the
  *   previous measurement.
  *   <br>
  *   Defaults to <code>2</code> (2 seconds).
+ * @property {number} droppedFrameBanDuration
+ *   Duration in seconds to disable the stream after it exceeds the
+ *   dropped frame threshold.
+ *   <br>
+ *   Defaults to <code>10</code> (10 seconds).
  * @exportDoc
  */
-shaka.extern.DroppedFrameProtectionConfig;
+shaka.extern.AdvancedAbrConfiguration;
 
 
 /**
