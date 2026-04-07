@@ -1957,16 +1957,21 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.hideContextMenus();
     } else if (this.anySettingsMenusAreOpen()) {
       this.hideSettingsMenusTimer_.tickNow();
-    } else if (this.config_.singleClickForPlayAndPause) {
-      this.playPausePresentation();
     } else if (fromTouchEvent && this.isOpaque()) {
       if (this.config_.doubleClickForFullscreen &&
           this.isFullScreenSupported() && this.lastContainerTouchEventTime_ &&
           Date.now() - this.lastContainerTouchEventTime_ < 1000) {
+        if (this.config_.singleClickForPlayAndPause) {
+          this.playPausePresentation();
+        }
         this.toggleFullScreen();
+      } else if (this.config_.singleClickForPlayAndPause) {
+        this.playPausePresentation();
       } else {
         this.hideUI();
       }
+    } else if (this.config_.singleClickForPlayAndPause) {
+      this.playPausePresentation();
     }
   }
 
