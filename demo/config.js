@@ -327,7 +327,9 @@ shakaDemo.Config = class {
             'manifest.msf.fingerprintUri')
         .addArrayStringInput_('Namespaces',
             'manifest.msf.namespaces')
-        .addSelectInput_('Position area',
+        .addTextInput_('Authorization token',
+            'manifest.msf.authorizationToken')
+        .addSelectInput_('Subscribe FilterType',
             'manifest.msf.subscribeFilterType',
             msfFilterTypeOptions,
             msfFilterTypeOptionNames);

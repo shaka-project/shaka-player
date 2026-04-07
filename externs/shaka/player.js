@@ -1648,6 +1648,7 @@ shaka.extern.HlsManifestConfiguration;
  * @typedef {{
  *   fingerprintUri: string,
  *   namespaces: !Array<string>,
+ *   authorizationToken: string,
  *   subscribeFilterType: shaka.config.MsfFilterType,
  * }}
  *
@@ -1661,6 +1662,18 @@ shaka.extern.HlsManifestConfiguration;
  *   via PublishNamespace messages.
  *   <br>
  *   Defaults to <code>[]</code>.
+ * @property {string} authorizationToken
+ *   Authorization token used to authenticate the MOQT session or subsequent
+ *   requests. When provided, this value is sent using the MOQT
+ *   AUTHORIZATION TOKEN setup option during session establishment.
+ *   <br>
+ *   This token may be used by the server to authorize access to streams,
+ *   namespaces, or other protected resources. If empty, no MOQT-level
+ *   authorization token is sent, and authentication (if required) is expected
+ *   to be handled by the underlying transport (e.g., HTTP headers or cookies
+ *   in WebTransport).
+ *   <br>
+ *   Defaults to <code>''</code>.
  * @property {shaka.config.MsfFilterType} subscribeFilterType
  *   The filter type used in MoQ SUBSCRIBE messages. Controls how the relay
  *   delivers data to the subscriber.
