@@ -33,11 +33,11 @@ shaka.extern.AbrManager = class {
    * Initializes the AbrManager.
    *
    * @param {shaka.extern.AbrManager.SwitchCallback} switchCallback
-   * @param {shaka.extern.AbrManager.RestrictVideoCallback} restrictVideoCallback
+   * @param {shaka.extern.AbrManager.DisableStreamCallback} disableStreamCallback
    * @exportDoc
    */
   /* eslint-enable @stylistic/max-len */
-  init(switchCallback, restrictVideoCallback) {}
+  init(switchCallback, disableStreamCallback) {}
 
   /**
    * Stops any background timers and frees any objects held by this instance.
@@ -186,16 +186,18 @@ shaka.extern.AbrManager.SwitchCallback;
 
 /**
  * A callback into the Player that should be called when the AbrManager decides
- * that the currently playing video stream should be temporarily restricted.
+ * that the currently playing stream should be temporarily restricted.
  *
- * The argument specifies the duration of the restriction, in seconds. The
- * exact behavior of the restriction (e.g. temporarily disabling the stream
+ * The first argument specifies the type of stream ('audio' or 'video'),
+ * and the second argument specifies the duration of the restriction in seconds.
+ *
+ * The exact behavior of the restriction (e.g. temporarily disabling the stream
  * or otherwise penalizing it) is implementation-defined by the caller.
  *
- * @typedef {function(number)}
+ * @typedef {function(string, number)}
  * @exportDoc
  */
-shaka.extern.AbrManager.RestrictVideoCallback;
+shaka.extern.AbrManager.DisableStreamCallback;
 
 
 /**
