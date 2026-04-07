@@ -174,6 +174,25 @@ function workAroundLegacyEdgePromiseIssues() {
 }
 
 /**
+ * Install a polyfill for Promise.withResolvers if needed.
+ *
+ * This polyfill is not included in the Babel polyfill, so we need to install it
+ * manually, as we don't want to mess around with current test environment until
+ * we switch to TS.
+ */
+function installPromiseWithResolversPolyfill() {
+  Promise.withResolvers ??= () => {
+    let resolve;
+    let reject;
+    const promise = new Promise((r1, r2) => {
+      resolve = r1;
+      reject = r2;
+    });
+    return {promise, resolve, reject};
+  };
+}
+
+/**
  * Work around lab crashes by flagging if we're running in the lab.  This lets
  * us add lab-specific workarounds for our unique lab environment.  This won't
  * affect local test runs on developer machines or GitHub Actions workflows.
@@ -602,6 +621,8 @@ async function setupTestEnvironment() {
   } else {
     shaka.log.setLevel(shaka.log.Level.INFO);
   }
+
+  installPromiseWithResolversPolyfill();
 
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly

@@ -723,7 +723,7 @@ describe('DashParser Live', () => {
     const tickAfter = updateTickSpy();
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    /** @type {!shaka.util.PublicPromise} */
+    /** @type {!Promise.PromiseWithResolvers} */
     const delay = fakeNetEngine.delayNextRequest();
     const p = parser.start('dummy://foo', playerInterface);
     now += extraWaitTime * 1000;  // Make the update appear to take longer.
@@ -1071,7 +1071,7 @@ describe('DashParser Live', () => {
       fakeNetEngine.expectRequest(
           manifestUri, manifestRequestType, manifestContext);
       fakeNetEngine.request.calls.reset();
-      /** @type {!shaka.util.PublicPromise} */
+      /** @type {!Promise.PromiseWithResolvers} */
       const delay = fakeNetEngine.delayNextRequest();
 
       await updateManifest();
@@ -1090,7 +1090,7 @@ describe('DashParser Live', () => {
     });
 
     it('interrupts UTCTiming requests', async () => {
-      /** @type {!shaka.util.PublicPromise} */
+      /** @type {!Promise.PromiseWithResolvers} */
       let delay = fakeNetEngine.delayNextRequest();
       const expectation =
           expectAsync(parser.start('dummy://foo', playerInterface))

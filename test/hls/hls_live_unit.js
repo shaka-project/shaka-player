@@ -322,7 +322,7 @@ describe('HlsParser live', () => {
 
         // Block the next request so that update() is still happening when we
         // call stop().
-        /** @type {!shaka.util.PublicPromise} */
+        /** @type {!Promise.PromiseWithResolvers} */
         const delay = fakeNetEngine.delayNextRequest();
         // Trigger an update.
         await delayForUpdatePeriod();

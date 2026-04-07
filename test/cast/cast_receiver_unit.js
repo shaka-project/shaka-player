@@ -522,7 +522,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     const fakeSenderId = 'senderId';
     /** @const */
     const fakeCallId = '5';
-    /** @type {!shaka.util.PublicPromise} */
+    /** @type {!Promise.PromiseWithResolvers} */
     let p;
 
     beforeEach(() => {
@@ -530,8 +530,8 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
 
       fakeConnectedSenders(1);
-      p = new shaka.util.PublicPromise();
-      mockPlayer.load.and.returnValue(p);
+      p = Promise.withResolvers();
+      mockPlayer.load.and.returnValue(p.promise);
 
       expect(mockPlayer.load).not.toHaveBeenCalled();
       fakeIncomingMessage({
