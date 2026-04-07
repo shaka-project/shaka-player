@@ -406,7 +406,10 @@ shakaDemo.Config = class {
         .addSelectInput_('Position area',
             'textDisplayer.positionArea',
             positionAreaOptions,
-            positionAreaOptionNames);
+            positionAreaOptionNames)
+        .addNumberInput_('Subtitle delay (seconds)',
+            'textDisplayer.subtitleDelay',
+            /* canBeDecimal= */ true);
   }
 
   /** @private */
