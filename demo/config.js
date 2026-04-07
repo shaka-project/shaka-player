@@ -312,6 +312,15 @@ shakaDemo.Config = class {
 
   /** @private */
   addMsfManifestSection_() {
+    const msfFilterTypeOptions = shaka.config.MsfFilterType;
+    const msfFilterTypeOptionNames = {
+      'NONE': 'NONE',
+      'NEXT_GROUP_START': 'NEXT_GROUP_START',
+      'LARGEST_OBJECT': 'LARGEST_OBJECT',
+      'ABSOLUTE_START': 'ABSOLUTE_START',
+      'ABSOLUTE_RANGE': 'ABSOLUTE_RANGE',
+    };
+
     const docLink = this.resolveExternLink_('.ManifestConfiguration');
     this.addSection_('MSF', docLink)
         .addTextInput_('Fingerprint URI',
@@ -319,7 +328,11 @@ shakaDemo.Config = class {
         .addArrayStringInput_('Namespaces',
             'manifest.msf.namespaces')
         .addTextInput_('Authorization token',
-            'manifest.msf.authorizationToken');
+            'manifest.msf.authorizationToken')
+        .addSelectInput_('Subscribe FilterType',
+            'manifest.msf.subscribeFilterType',
+            msfFilterTypeOptions,
+            msfFilterTypeOptionNames);
   }
 
   /** @private */

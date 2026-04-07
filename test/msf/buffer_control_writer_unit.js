@@ -44,7 +44,7 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
         subscriberPriority: 1,
         groupOrder: shaka.msf.Utils.GroupOrder.ASCENDING,
         forward: true,
-        filterType: shaka.msf.Utils.FilterType.NONE,
+        filterType: shaka.config.MsfFilterType.NONE,
         params: [],
       };
       writer.marshalSubscribe(msg);
@@ -61,7 +61,7 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
         subscriberPriority: 1,
         groupOrder: shaka.msf.Utils.GroupOrder.ASCENDING,
         forward: true,
-        filterType: shaka.msf.Utils.FilterType.ABSOLUTE_START,
+        filterType: shaka.config.MsfFilterType.ABSOLUTE_START,
         params: [],
       };
       expect(() => writer.marshalSubscribe(msg)).toThrow();
@@ -219,7 +219,7 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
       subscriberPriority: 1,
       groupOrder: shaka.msf.Utils.GroupOrder.ASCENDING,
       forward: true,
-      filterType: shaka.msf.Utils.FilterType.NONE,
+      filterType: shaka.config.MsfFilterType.NONE,
       params: [],
     };
 
@@ -582,7 +582,7 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
         subscriberPriority: 1,
         groupOrder: shaka.msf.Utils.GroupOrder.ASCENDING,
         forward: true,
-        filterType: shaka.msf.Utils.FilterType.ABSOLUTE_RANGE,
+        filterType: shaka.config.MsfFilterType.ABSOLUTE_RANGE,
         startLocation: {group: BigInt(1), object: BigInt(2)},
         endGroup: undefined,
         params: [],
