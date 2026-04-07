@@ -4534,4 +4534,74 @@ describe('StreamingEngine', () => {
           text: [true, true, true, true],
         });
       });
+
+  describe('discardReferenceByBoundary_', () => {
+    const MIME_AVC = 'video/mp4; codecs="avc1.42E01E"';
+    const MIME_HEVC = 'video/mp4; codecs="hvc1.1.6.L93.B0"';
+    const MIME_AVC_WEBM = 'video/webm; codecs="avc1.42E01E"';
+
+    beforeEach(() => {
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+    });
+
+    function makeInitRef(mimeType, boundaryEnd) {
+      const ref = new shaka.media.InitSegmentReference(
+          () => ['init.mp4'], 0, null);
+      ref.mimeType = mimeType;
+      ref.boundaryEnd = boundaryEnd;
+      return ref;
+    }
+
+    function makeMediaState(lastInitRef) {
+      return {
+        type: ContentType.VIDEO,
+        stream: {id: 1},
+        lastInitSegmentReference: lastInitRef,
+        seeked: false,
+      };
+    }
+
+    function makeSegmentRef(initRef) {
+      return new shaka.media.SegmentReference(
+          0, 10, () => ['seg.mp4'], 0, null, initRef, 0, 0, 10);
+    }
+
+    it('returns false when KEEP strategy and codec are identical', () => {
+      const lastInitRef = makeInitRef(MIME_AVC, 0);
+      const initRef = makeInitRef(MIME_AVC, 10);
+      const mediaState = makeMediaState(lastInitRef);
+      const segRef = makeSegmentRef(initRef);
+
+      const result = (/** @type {?} */(streamingEngine))[
+          'discardReferenceByBoundary_'](mediaState, segRef);
+
+      expect(result).toBe(false);
+    });
+
+    it('returns true when KEEP strategy and codecs differ', () => {
+      const lastInitRef = makeInitRef(MIME_AVC, 0);
+      const initRef = makeInitRef(MIME_HEVC, 10);
+      const mediaState = makeMediaState(lastInitRef);
+      const segRef = makeSegmentRef(initRef);
+
+      const result = (/** @type {?} */(streamingEngine))[
+          'discardReferenceByBoundary_'](mediaState, segRef);
+
+      expect(result).toBe(true);
+    });
+
+    it('returns true when KEEP strategy and container differs', () => {
+      const lastInitRef = makeInitRef(MIME_AVC, 0);
+      const initRef = makeInitRef(MIME_AVC_WEBM, 10);
+      const mediaState = makeMediaState(lastInitRef);
+      const segRef = makeSegmentRef(initRef);
+
+      const result = (/** @type {?} */(streamingEngine))[
+          'discardReferenceByBoundary_'](mediaState, segRef);
+
+      expect(result).toBe(true);
+    });
+  });
 });
