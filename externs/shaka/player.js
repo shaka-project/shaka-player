@@ -1665,7 +1665,7 @@ shaka.extern.HlsManifestConfiguration;
  *   The filter type used in MoQ SUBSCRIBE messages. Controls how the relay
  *   delivers data to the subscriber.
  *   <br>
- *   Defaults to <code>0x2</code>.
+ *   Defaults to <code>shaka.config.MsfFilterType.LARGEST_OBJECT</code>.
  * @exportDoc
  */
 shaka.extern.MsfManifestConfiguration;
