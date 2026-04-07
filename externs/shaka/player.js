@@ -2676,12 +2676,12 @@ shaka.extern.AbrConfiguration;
  *   Interval in seconds to measure dropped frames and compare with the
  *   previous measurement.
  *   <br>
- *   Defaults to <code>2</code> (2 seconds).
+ *   Defaults to <code>2</code>.
  * @property {number} droppedFrameBanDuration
  *   Duration in seconds to disable the stream after it exceeds the
  *   dropped frame threshold.
  *   <br>
- *   Defaults to <code>10</code> (10 seconds).
+ *   Defaults to <code>30</code>.
  * @exportDoc
  */
 shaka.extern.AdvancedAbrConfiguration;
