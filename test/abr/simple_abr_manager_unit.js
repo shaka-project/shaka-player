@@ -13,6 +13,8 @@ describe('SimpleAbrManager', () => {
   let config;
   /** @type {!jasmine.Spy} */
   let switchCallback;
+  /** @type {!jasmine.Spy} */
+  let restrictVideoCallback;
   /** @type {!shaka.abr.SimpleAbrManager} */
   let abrManager;
   /** @type {shaka.extern.Manifest} */
@@ -23,6 +25,7 @@ describe('SimpleAbrManager', () => {
   beforeEach(() => {
     Date.now = () => 0;
     switchCallback = jasmine.createSpy('switchCallback');
+    restrictVideoCallback = jasmine.createSpy('restrictVideoCallback');
 
     // Keep unsorted.
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -68,7 +71,8 @@ describe('SimpleAbrManager', () => {
     variants = manifest.variants;
 
     abrManager = new shaka.abr.SimpleAbrManager();
-    abrManager.init(shaka.test.Util.spyFunc(switchCallback));
+    abrManager.init(shaka.test.Util.spyFunc(switchCallback),
+        shaka.test.Util.spyFunc(restrictVideoCallback));
     abrManager.configure(config);
     abrManager.setVariants(variants, false);
   });
