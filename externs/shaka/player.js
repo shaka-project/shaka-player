@@ -1974,6 +1974,7 @@ shaka.extern.LiveSyncConfiguration;
  */
 shaka.extern.SpeechToTextConfiguration;
 
+
 /**
  * @typedef {{
  *   retryParameters: shaka.extern.RetryParameters,
