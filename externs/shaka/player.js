@@ -2283,9 +2283,6 @@ shaka.extern.SpeechToTextConfiguration;
  *   "ended" when seeking to end.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {shaka.extern.DroppedFrameProtectionConfig} droppedFrameProtection
- *   Configuration for monitoring dropped frames and temporarily disabling
- *   streams that exceed a threshold.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -2619,6 +2616,9 @@ shaka.extern.AdsConfiguration;
  *   trust the information provided by the browser.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {shaka.extern.DroppedFrameProtectionConfig} droppedFrameProtection
+ *   Configuration for monitoring dropped frames and temporarily disabling
+ *   streams that exceed a threshold.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
@@ -2677,8 +2677,7 @@ shaka.extern.AdvancedAbrConfiguration;
  * @property {boolean} enabled
  *   Enable or disable dropped frame protection.
  *   <br>
- *   Defaults to <code>true</code> on devices that do not support
- *   <code>MediaCapabilities</code>, <code>false</code> otherwise.
+ *   Defaults to <code>true</code>.
  * @property {number} dropThreshold
  *   The dropThreshold represents the fraction of dropped frames relative to
  *   the total frames rendered during each check interval. For example, a value
