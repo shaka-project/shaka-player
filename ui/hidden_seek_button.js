@@ -59,6 +59,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
         this.controls.onContainerClick(/* fromTouchEvent= */ true);
       }
       this.hideSeekButtonContainer_();
+      this.controls.resetLastTouchEventTime();
     });
 
     /** @protected {!HTMLElement} */
@@ -143,6 +144,9 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
     // should cause the player to go fullscreen, not cause it to
     // rewind/fast-forward.
     if (!this.controls.isOpaque()) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.controls.onContainerTouch(event);
       return;
     }
 
@@ -202,6 +206,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
 
       // Restart timer if user might tap again (triple tap).
       this.hideSeekButtonContainerTimer_.tickAfter(doubleTapWindow);
+      this.controls.resetLastTouchEventTime();
     }
   }
 

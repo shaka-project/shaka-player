@@ -298,6 +298,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     });
 
+    /** @private {shaka.util.Timer} */
+    this.hideUITimer_ = new shaka.util.Timer(() => {
+      this.hideUI();
+    });
+
     /**
      * This timer is used to regularly update the time and seek range elements
      * so that we are communicating the current state as accurately as possibly.
@@ -426,35 +431,26 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       await document.exitPictureInPicture();
     }
 
-    if (this.eventManager_) {
-      this.eventManager_.release();
-      this.eventManager_ = null;
-    }
+    this.eventManager_?.release();
+    this.eventManager_ = null;
 
-    if (this.mouseStillTimer_) {
-      this.mouseStillTimer_.stop();
-      this.mouseStillTimer_ = null;
-    }
+    this.mouseStillTimer_?.stop();
+    this.mouseStillTimer_ = null;
 
-    if (this.fadeControlsTimer_) {
-      this.fadeControlsTimer_.stop();
-      this.fadeControlsTimer_ = null;
-    }
+    this.fadeControlsTimer_?.stop();
+    this.fadeControlsTimer_ = null;
 
-    if (this.hideSettingsMenusTimer_) {
-      this.hideSettingsMenusTimer_.stop();
-      this.hideSettingsMenusTimer_ = null;
-    }
+    this.hideSettingsMenusTimer_?.stop();
+    this.hideSettingsMenusTimer_ = null;
 
-    if (this.timeAndSeekRangeTimer_) {
-      this.timeAndSeekRangeTimer_.stop();
-      this.timeAndSeekRangeTimer_ = null;
-    }
+    this.hideUITimer_?.stop();
+    this.hideUITimer_ = null;
 
-    if (this.vr_) {
-      this.vr_.release();
-      this.vr_ = null;
-    }
+    this.timeAndSeekRangeTimer_?.stop();
+    this.timeAndSeekRangeTimer_ = null;
+
+    this.vr_?.release();
+    this.vr_ = null;
 
     // Important!  Release all child elements before destroying the cast proxy
     // or player.  This makes sure those destructions will not trigger event
@@ -1336,7 +1332,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.videoContainer_.setAttribute('shaka-controls', 'true');
 
     this.eventManager_.listen(this.controlsContainer_, 'touchend', (e) => {
-      this.onContainerTouch_(e);
+      this.onContainerTouch(e);
     });
 
     this.eventManager_.listen(this.controlsContainer_, 'click', () => {
@@ -1920,28 +1916,43 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * @param {!Event} event
-   * @private
+   * Reset the timings of the last touch event to prevent current timings from
+   * interfering with future operations
    */
-  onContainerTouch_(event) {
+  resetLastTouchEventTime() {
+    this.lastTouchEventTime_ = null;
+    this.lastContainerTouchEventTime_ = null;
+  }
+
+  /**
+   * @param {!Event} event
+   */
+  onContainerTouch(event) {
     if (!this.video_.duration) {
       // Can't play yet.  Ignore.
       return;
     }
 
+    const hasLastContainerTouchEventTime =
+        this.lastContainerTouchEventTime_ != null;
+
     if (this.isOpaque()) {
       // The controls are showing.
       this.onContainerClick(/* fromTouchEvent= */ true);
-      // Stop this event from becoming a click event.
-      event.cancelable && event.preventDefault();
     } else {
       // The controls are hidden, so show them.
       this.onMouseMove_(event);
-      // Stop this event from becoming a click event.
-      event.cancelable && event.preventDefault();
+      this.resetLastTouchEventTime();
     }
-    this.lastTouchEventTime_ = Date.now();
-    this.lastContainerTouchEventTime_ = Date.now();
+    // Stop this event from becoming a click event.
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+    if (!hasLastContainerTouchEventTime ||
+        this.lastContainerTouchEventTime_ != null) {
+      this.lastTouchEventTime_ = Date.now();
+      this.lastContainerTouchEventTime_ = Date.now();
+    }
   }
 
   /**
@@ -1958,17 +1969,26 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     } else if (this.anySettingsMenusAreOpen()) {
       this.hideSettingsMenusTimer_.tickNow();
     } else if (fromTouchEvent && this.isOpaque()) {
-      if (this.config_.doubleClickForFullscreen &&
-          this.isFullScreenSupported() && this.lastContainerTouchEventTime_ &&
-          Date.now() - this.lastContainerTouchEventTime_ < 1000) {
+      const doubleTapTime = 1000;
+      const supportFullscreen = this.config_.doubleClickForFullscreen &&
+          this.isFullScreenSupported();
+      if (supportFullscreen && this.lastContainerTouchEventTime_ &&
+          Date.now() - this.lastContainerTouchEventTime_ < doubleTapTime) {
         if (this.config_.singleClickForPlayAndPause) {
           this.playPausePresentation();
+        } else {
+          this.hideUITimer_.stop();
         }
         this.toggleFullScreen();
+        this.resetLastTouchEventTime();
       } else if (this.config_.singleClickForPlayAndPause) {
         this.playPausePresentation();
       } else {
-        this.hideUI();
+        if (supportFullscreen) {
+          this.hideUITimer_.tickAfter(doubleTapTime / 1000);
+        } else {
+          this.hideUITimer_.tickNow();
+        }
       }
     } else if (this.config_.singleClickForPlayAndPause) {
       this.playPausePresentation();
@@ -2545,6 +2565,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.anySettingsMenusAreOpen()) {
       this.hideSettingsMenusTimer_.tickNow();
     }
+    this.hideUITimer_?.stop();
     // Stop the timer and invoke the callback now to hide the controls.  If we
     // don't, the opacity style we set in onMouseMove_ will continue to override
     // the opacity in CSS and force the controls to stay visible.
