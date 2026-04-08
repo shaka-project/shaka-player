@@ -2679,7 +2679,7 @@ shaka.extern.AbrConfiguration;
  *   Defaults to <code>2</code>.
  * @property {number} droppedFramesBanDuration
  *   Duration in seconds to disable the stream after it exceeds the
- *   dropped framex threshold.
+ *   dropped frames threshold.
  *   <br>
  *   Defaults to <code>30</code>.
  * @exportDoc
