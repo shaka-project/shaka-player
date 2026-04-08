@@ -422,8 +422,8 @@ describe('SimpleAbrManager', () => {
 
       config.droppedFrames = true;
       config.advanced.droppedFramesThreshold = 0.15;
-      config.advanced.droppedFrameInterval = 2;
-      config.advanced.droppedFrameBanDuration = 30;
+      config.advanced.droppedFramesInterval = 2;
+      config.advanced.droppedFramesBanDuration = 30;
       abrManager.configure(config);
       abrManager.enable();
       abrManager.setMediaElement(mockVideo);

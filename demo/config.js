@@ -376,16 +376,16 @@ shakaDemo.Config = class {
             /* canBeZero= */ true)
         .addBoolInput_('Prefer Network Information bandwidth',
             'abr.preferNetworkInformationBandwidth')
-        .addBoolInput_('Dropped Frame Protection Enabled',
+        .addBoolInput_('Dropped Frames Protection Enabled',
             'abr.droppedFrames')
-        .addNumberInput_('Dropped Frame Threshold',
+        .addNumberInput_('Dropped Frames Threshold',
             'abr.advanced.droppedFramesThreshold',
             /* canBeDecimal= */ true)
-        .addNumberInput_('Dropped Frame Interval',
-            'abr.advanced.droppedFrameInterval',
+        .addNumberInput_('Dropped Frames Interval',
+            'abr.advanced.droppedFramesInterval',
             /* canBeDecimal= */ true)
-        .addNumberInput_('Dropped Frame Ban Duration',
-            'abr.advanced.droppedFrameBanDuration');
+        .addNumberInput_('Dropped Frames Ban Duration',
+            'abr.advanced.droppedFramesBanDuration');
     this.addRestrictionsSection_('abr', 'Adaptation Restrictions');
   }
 

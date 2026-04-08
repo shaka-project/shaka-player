@@ -2620,7 +2620,7 @@ shaka.extern.AdsConfiguration;
  *   Configuration for monitoring dropped frames and temporarily disabling
  *   streams that exceed a threshold.
  * @property {boolean} droppedFrames
- *   Enable or disable dropped frame protection.
+ *   Enable or disable dropped frames protection.
  *   <br>
  *   Defaults to <code>true</code>.
  * @exportDoc
@@ -2635,8 +2635,8 @@ shaka.extern.AbrConfiguration;
  *   fastHalfLife: number,
  *   slowHalfLife: number,
  *   droppedFramesThreshold: number,
- *   droppedFrameInterval: number,
- *   droppedFrameBanDuration: number,
+ *   droppedFramesInterval: number,
+ *   droppedFramesBanDuration: number,
  * }}
  *
  * @property {number} minTotalBytes
@@ -2672,14 +2672,14 @@ shaka.extern.AbrConfiguration;
  *   disabled.
  *   <br>
  *   Defaults to <code>0.15</code>.
- * @property {number} droppedFrameInterval
+ * @property {number} droppedFramesInterval
  *   Interval in seconds to measure dropped frames and compare with the
  *   previous measurement.
  *   <br>
  *   Defaults to <code>2</code>.
- * @property {number} droppedFrameBanDuration
+ * @property {number} droppedFramesBanDuration
  *   Duration in seconds to disable the stream after it exceeds the
- *   dropped frame threshold.
+ *   dropped framex threshold.
  *   <br>
  *   Defaults to <code>30</code>.
  * @exportDoc
