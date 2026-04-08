@@ -122,9 +122,9 @@ describe('CastProxy', () => {
 
   describe('cast', () => {
     it('unloads the local player after casting is complete', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
-      mockSender.cast.and.returnValue(p);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
+      mockSender.cast.and.returnValue(p.promise);
 
       proxy.cast();
       await shaka.test.Util.shortDelay();

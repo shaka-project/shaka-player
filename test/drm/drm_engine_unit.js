@@ -2127,9 +2127,9 @@ describe('DrmEngine', () => {
 
     it('interrupts failing MediaKeys queries', async () => {
       // Hold the MediaKeys query.
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
-      decodingInfoSpy.and.returnValue(p);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
+      decodingInfoSpy.and.returnValue(p.promise);
 
       const variants = manifest.variants;
       const init = drmEngine.initForPlayback(
@@ -2147,9 +2147,9 @@ describe('DrmEngine', () => {
 
     it('interrupts successful MediaKeys queries', async () => {
       // Hold the MediaKeys query:
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
-      decodingInfoSpy.and.returnValue(p);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
+      decodingInfoSpy.and.returnValue(p.promise);
 
       const variants = manifest.variants;
       const init = drmEngine.initForPlayback(
@@ -2167,9 +2167,9 @@ describe('DrmEngine', () => {
 
     it('interrupts successful calls to createMediaKeys', async () => {
       // Hold createMediaKeys:
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
-      mockMediaKeySystemAccess.createMediaKeys.and.returnValue(p);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
+      mockMediaKeySystemAccess.createMediaKeys.and.returnValue(p.promise);
 
       const variants = manifest.variants;
       const init = drmEngine.initForPlayback(
@@ -2187,9 +2187,9 @@ describe('DrmEngine', () => {
 
     it('interrupts failed calls to setMediaKeys', async () => {
       // Hold setMediaKeys:
-      /** @type {!shaka.util.PublicPromise} */
-      const p1 = new shaka.util.PublicPromise();
-      mockVideo.setMediaKeys.and.returnValue(p1);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p1 = Promise.withResolvers();
+      mockVideo.setMediaKeys.and.returnValue(p1.promise);
 
       onErrorSpy.and.stub();
 
@@ -2205,9 +2205,9 @@ describe('DrmEngine', () => {
       // We are now blocked on setMediaKeys:
       expect(mockVideo.setMediaKeys).toHaveBeenCalledTimes(1);
       // DrmEngine.destroy also calls setMediaKeys.
-      /** @type {!shaka.util.PublicPromise} */
-      const p2 = new shaka.util.PublicPromise();
-      mockVideo.setMediaKeys.and.returnValue(p2);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p2 = Promise.withResolvers();
+      mockVideo.setMediaKeys.and.returnValue(p2.promise);
 
       const destroy = drmEngine.destroy();
       const fail = async () => {
@@ -2225,9 +2225,9 @@ describe('DrmEngine', () => {
 
     it('interrupts successful calls to setMediaKeys', async () => {
       // Hold setMediaKeys:
-      /** @type {!shaka.util.PublicPromise} */
-      const p1 = new shaka.util.PublicPromise();
-      mockVideo.setMediaKeys.and.returnValue(p1);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p1 = Promise.withResolvers();
+      mockVideo.setMediaKeys.and.returnValue(p1.promise);
 
       tweakDrmInfos((drmInfos) => {
         drmInfos[0].initData = [
@@ -2241,9 +2241,9 @@ describe('DrmEngine', () => {
       // We are now blocked on setMediaKeys:
       expect(mockVideo.setMediaKeys).toHaveBeenCalledTimes(1);
       // DrmEngine.destroy also calls setMediaKeys.
-      /** @type {!shaka.util.PublicPromise} */
-      const p2 = new shaka.util.PublicPromise();
-      mockVideo.setMediaKeys.and.returnValue(p2);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p2 = Promise.withResolvers();
+      mockVideo.setMediaKeys.and.returnValue(p2.promise);
 
       const destroy = drmEngine.destroy();
       const resolve1 = async () => {
@@ -2266,9 +2266,9 @@ describe('DrmEngine', () => {
       drmEngine.configure(config);
 
       // Hold setServerCertificate:
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
-      mockMediaKeys.setServerCertificate.and.returnValue(p);
+      /** @type {!Promise.PromiseWithResolvers}} */
+      const p = Promise.withResolvers();
+      mockMediaKeys.setServerCertificate.and.returnValue(p.promise);
 
       const init = initAndAttach();
 
@@ -2287,9 +2287,9 @@ describe('DrmEngine', () => {
       drmEngine.configure(config);
 
       // Hold setServerCertificate:
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
-      mockMediaKeys.setServerCertificate.and.returnValue(p);
+      /** @type {!Promise.PromiseWithResolvers}} */
+      const p = Promise.withResolvers();
+      mockMediaKeys.setServerCertificate.and.returnValue(p.promise);
 
       // This chain should still return "success" when DrmEngine is destroyed.
       const init = initAndAttach();
@@ -2307,9 +2307,9 @@ describe('DrmEngine', () => {
     });
 
     it('does not trigger errors if it fails generateRequest', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
-      session1.generateRequest.and.returnValue(p);
+      /** @type {!Promise.PromiseWithResolvers}} */
+      const p = Promise.withResolvers();
+      session1.generateRequest.and.returnValue(p.promise);
 
       await initAndAttach();
       await sendEncryptedEvent();
@@ -2325,9 +2325,9 @@ describe('DrmEngine', () => {
     });
 
     it('interrupts successful license requests', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
-      const operation = shaka.util.AbortableOperation.notAbortable(p);
+      /** @type {!Promise.PromiseWithResolvers}} */
+      const p = Promise.withResolvers();
+      const operation = shaka.util.AbortableOperation.notAbortable(p.promise);
       fakeNetEngine.request.and.returnValue(operation);
 
       await initAndAttach();
@@ -2354,9 +2354,9 @@ describe('DrmEngine', () => {
     });
 
     it('interrupts failed license requests', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
-      const operation = shaka.util.AbortableOperation.notAbortable(p);
+      /** @type {!Promise.PromiseWithResolvers}} */
+      const p = Promise.withResolvers();
+      const operation = shaka.util.AbortableOperation.notAbortable(p.promise);
       fakeNetEngine.request.and.returnValue(operation);
 
       await initAndAttach();
@@ -2383,9 +2383,9 @@ describe('DrmEngine', () => {
     });
 
     it('does not trigger errors if it fails update', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
-      session1.update.and.returnValue(p);
+      /** @type {!Promise.PromiseWithResolvers}} */
+      const p = Promise.withResolvers();
+      session1.update.and.returnValue(p.promise);
 
       await initAndAttach();
       await sendEncryptedEvent();
@@ -2411,8 +2411,8 @@ describe('DrmEngine', () => {
       // should be rejected and destroy() should still succeed.
       // https://github.com/shaka-project/shaka-player/issues/664
       await initAndAttach();
-      session1.closed = new shaka.util.PublicPromise();
-      session2.closed = new shaka.util.PublicPromise();
+      session1.closed = new Promise(() => {});
+      session2.closed = new Promise(() => {});
 
       // Since this won't be attached to anything until much later, we must
       // silence unhandled rejection errors.
@@ -2564,7 +2564,7 @@ describe('DrmEngine', () => {
   }); // describe('configure')
 
   describe('removeSession', () => {
-    /** @type {!shaka.util.PublicPromise} */
+    /** @type {!Promise.PromiseWithResolvers}} */
     let updatePromise;
 
     beforeEach(async () => {
@@ -2573,11 +2573,11 @@ describe('DrmEngine', () => {
       // When remove() is called, it should resolve quickly and raise a
       // 'message' event of type 'license-release'.  The removeSessions method
       // should wait until update() is complete with the response.
-      updatePromise = new shaka.util.PublicPromise();
+      updatePromise = Promise.withResolvers();
       session1.remove.and.callFake(() => {
         // Raise the event synchronously, even though it doesn't normally.
         session1.on['message']({target: session1, message: new ArrayBuffer(0)});
-        session1.update.and.returnValue(updatePromise);
+        session1.update.and.returnValue(updatePromise.promise);
         return Promise.resolve();
       });
 
@@ -3001,8 +3001,8 @@ describe('DrmEngine', () => {
     it('recreates session after hardware-context-reset', async () => {
       await initAndAttach();
 
-      const closedPromise = new shaka.util.PublicPromise();
-      session1.closed = closedPromise;
+      const closedPromise = Promise.withResolvers();
+      session1.closed = closedPromise.promise;
 
       mockMediaKeys.createSession.calls.reset();
 
@@ -3024,8 +3024,8 @@ describe('DrmEngine', () => {
 
       await initAndAttach();
 
-      const closedPromise = new shaka.util.PublicPromise();
-      session1.closed = closedPromise;
+      const closedPromise = Promise.withResolvers();
+      session1.closed = closedPromise.promise;
 
       await sendEncryptedEvent('webm');
 
@@ -3041,8 +3041,8 @@ describe('DrmEngine', () => {
     it('logs closed-by-application normally', async () => {
       await initAndAttach();
 
-      const closedPromise = new shaka.util.PublicPromise();
-      session1.closed = closedPromise;
+      const closedPromise = Promise.withResolvers();
+      session1.closed = closedPromise.promise;
 
       mockMediaKeys.createSession.calls.reset();
 
@@ -3058,8 +3058,8 @@ describe('DrmEngine', () => {
     it('logs resource-evicted as warning', async () => {
       await initAndAttach();
 
-      const closedPromise = new shaka.util.PublicPromise();
-      session1.closed = closedPromise;
+      const closedPromise = Promise.withResolvers();
+      session1.closed = closedPromise.promise;
 
       mockMediaKeys.createSession.calls.reset();
 

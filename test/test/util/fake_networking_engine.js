@@ -27,7 +27,7 @@ shaka.test.FakeNetworkingEngine = class {
     /** @private {?BufferSource} */
     this.defaultResponse_ = null;
 
-    /** @private {?shaka.util.PublicPromise} */
+    /** @private {?Promise.PromiseWithResolvers} */
     this.delayNextRequestPromise_ = null;
 
     /** @type {!jasmine.Spy} */
@@ -104,7 +104,7 @@ shaka.test.FakeNetworkingEngine = class {
     // abortable operation.
     const asyncOp = async () => {
       if (delay) {
-        await delay;
+        await delay.promise;
       }
 
       const result = await resultCallback(abortCheck);
@@ -179,12 +179,12 @@ shaka.test.FakeNetworkingEngine = class {
   }
 
   /**
-   * Delays the next response until the returned PublicPromise resolves.
-   * @return {!shaka.util.PublicPromise}
+   * Delays the next response until the returned Promise resolves.
+   * @return {!Promise.PromiseWithResolvers}
    */
   delayNextRequest() {
     if (!this.delayNextRequestPromise_) {
-      this.delayNextRequestPromise_ = new shaka.util.PublicPromise();
+      this.delayNextRequestPromise_ = Promise.withResolvers();
     }
     return this.delayNextRequestPromise_;
   }

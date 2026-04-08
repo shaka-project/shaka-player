@@ -9,10 +9,11 @@ describe('AbortableOperation', () => {
 
   describe('promise', () => {
     it('is resolved by the constructor argument', async () => {
-      const promise = new shaka.util.PublicPromise();
+      const promise = Promise.withResolvers();
       const abort = () => Promise.resolve();
 
-      const operation = new shaka.util.AbortableOperation(promise, abort);
+      const operation = new shaka.util.AbortableOperation(
+          promise.promise, abort);
       promise.resolve(100);
 
       const value = await operation.promise;
@@ -33,12 +34,12 @@ describe('AbortableOperation', () => {
     });
 
     it('is resolved when the underlying abort() is resolved', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
-      const abort = jasmine.createSpy('abort').and.returnValue(p);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
+      const abort = jasmine.createSpy('abort').and.returnValue(p.promise);
 
       const operation = new shaka.util.AbortableOperation(
-          new shaka.util.PublicPromise(), shaka.test.Util.spyFunc(abort));
+          new Promise(() => {}), shaka.test.Util.spyFunc(abort));
 
       const abortComplete = jasmine.createSpy('abort complete');
       operation.abort().then(shaka.test.Util.spyFunc(abortComplete), fail);
@@ -91,9 +92,10 @@ describe('AbortableOperation', () => {
 
   describe('notAbortable', () => {
     it('creates an operation from the given promise', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const promise = new shaka.util.PublicPromise();
-      const operation = shaka.util.AbortableOperation.notAbortable(promise);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const promise = Promise.withResolvers();
+      const operation = shaka.util.AbortableOperation.notAbortable(
+          promise.promise);
 
       let isAborted = false;
       operation.abort().then(() => {
@@ -125,17 +127,17 @@ describe('AbortableOperation', () => {
 
   describe('all', () => {
     it('creates a successful operation when all succeed', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const p1 = new shaka.util.PublicPromise();
-      const op1 = shaka.util.AbortableOperation.notAbortable(p1);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p1 = Promise.withResolvers();
+      const op1 = shaka.util.AbortableOperation.notAbortable(p1.promise);
 
-      /** @type {!shaka.util.PublicPromise} */
-      const p2 = new shaka.util.PublicPromise();
-      const op2 = shaka.util.AbortableOperation.notAbortable(p2);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p2 = Promise.withResolvers();
+      const op2 = shaka.util.AbortableOperation.notAbortable(p2.promise);
 
-      /** @type {!shaka.util.PublicPromise} */
-      const p3 = new shaka.util.PublicPromise();
-      const op3 = shaka.util.AbortableOperation.notAbortable(p3);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p3 = Promise.withResolvers();
+      const op3 = shaka.util.AbortableOperation.notAbortable(p3.promise);
 
       const all = shaka.util.AbortableOperation.all([op1, op2, op3]);
 
@@ -167,16 +169,16 @@ describe('AbortableOperation', () => {
     });
 
     it('creates a failed operation when any fail', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const p1 = new shaka.util.PublicPromise();
-      const op1 = shaka.util.AbortableOperation.notAbortable(p1);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p1 = Promise.withResolvers();
+      const op1 = shaka.util.AbortableOperation.notAbortable(p1.promise);
 
-      /** @type {!shaka.util.PublicPromise} */
-      const p2 = new shaka.util.PublicPromise();
-      const op2 = shaka.util.AbortableOperation.notAbortable(p2);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p2 = Promise.withResolvers();
+      const op2 = shaka.util.AbortableOperation.notAbortable(p2.promise);
 
-      const p3 = new shaka.util.PublicPromise();
-      const op3 = shaka.util.AbortableOperation.notAbortable(p3);
+      const p3 = Promise.withResolvers();
+      const op3 = shaka.util.AbortableOperation.notAbortable(p3.promise);
 
       const all = shaka.util.AbortableOperation.all([op1, op2, op3]);
 
@@ -203,26 +205,26 @@ describe('AbortableOperation', () => {
     });
 
     it('aborts all operations on abort', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const p1 = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p1 = Promise.withResolvers();
       const abort1Spy = jasmine.createSpy('abort1')
           .and.callFake(() => p1.reject());
       const abort1 = shaka.test.Util.spyFunc(abort1Spy);
-      const op1 = new shaka.util.AbortableOperation(p1, abort1);
+      const op1 = new shaka.util.AbortableOperation(p1.promise, abort1);
 
-      /** @type {!shaka.util.PublicPromise} */
-      const p2 = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p2 = Promise.withResolvers();
       const abort2Spy = jasmine.createSpy('abort2')
           .and.callFake(() => p2.reject());
       const abort2 = shaka.test.Util.spyFunc(abort2Spy);
-      const op2 = new shaka.util.AbortableOperation(p2, abort2);
+      const op2 = new shaka.util.AbortableOperation(p2.promise, abort2);
 
-      /** @type {!shaka.util.PublicPromise} */
-      const p3 = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p3 = Promise.withResolvers();
       const abort3Spy = jasmine.createSpy('abort3')
           .and.callFake(() => p3.reject());
       const abort3 = shaka.test.Util.spyFunc(abort3Spy);
-      const op3 = new shaka.util.AbortableOperation(p3, abort3);
+      const op3 = new shaka.util.AbortableOperation(p3.promise, abort3);
 
       /** @type {!shaka.util.AbortableOperation} */
       const all = shaka.util.AbortableOperation.all([op1, op2, op3]);
@@ -257,13 +259,14 @@ describe('AbortableOperation', () => {
   describe('finally', () => {
     it('executes after the operation is successful', async () => {
       let isDone = false;
-      /** @type {!shaka.util.PublicPromise} */
-      const promise = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const promise = Promise.withResolvers();
 
-      shaka.util.AbortableOperation.notAbortable(promise).finally((ok) => {
-        expect(ok).toBe(true);
-        isDone = true;
-      });
+      shaka.util.AbortableOperation.notAbortable(promise.promise)
+          .finally((ok) => {
+            expect(ok).toBe(true);
+            isDone = true;
+          });
 
       await shaka.test.Util.shortDelay();
       expect(isDone).toBe(false);
@@ -275,13 +278,14 @@ describe('AbortableOperation', () => {
 
     it('executes after the operation fails', async () => {
       let isDone = false;
-      /** @type {!shaka.util.PublicPromise} */
-      const promise = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const promise = Promise.withResolvers();
 
-      shaka.util.AbortableOperation.notAbortable(promise).finally((ok) => {
-        expect(ok).toBe(false);
-        isDone = true;
-      });
+      shaka.util.AbortableOperation.notAbortable(promise.promise)
+          .finally((ok) => {
+            expect(ok).toBe(false);
+            isDone = true;
+          });
 
       await shaka.test.Util.shortDelay();
       expect(isDone).toBe(false);
@@ -293,13 +297,13 @@ describe('AbortableOperation', () => {
 
     it('executes after the chain is successful', async () => {
       let isDone = false;
-      /** @type {!shaka.util.PublicPromise} */
-      const promise1 = new shaka.util.PublicPromise();
-      /** @type {!shaka.util.PublicPromise} */
-      const promise2 = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const promise1 = Promise.withResolvers();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const promise2 = Promise.withResolvers();
 
-      shaka.util.AbortableOperation.notAbortable(promise1).chain(() => {
-        return shaka.util.AbortableOperation.notAbortable(promise2);
+      shaka.util.AbortableOperation.notAbortable(promise1.promise).chain(() => {
+        return shaka.util.AbortableOperation.notAbortable(promise2.promise);
       }).finally((ok) => {
         expect(ok).toBe(true);
         isDone = true;
@@ -319,12 +323,12 @@ describe('AbortableOperation', () => {
 
     it('executes after the chain fails', async () => {
       let isDone = false;
-      /** @type {!shaka.util.PublicPromise} */
-      const promise1 = new shaka.util.PublicPromise();
-      const promise2 = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const promise1 = Promise.withResolvers();
+      const promise2 = Promise.withResolvers();
 
-      shaka.util.AbortableOperation.notAbortable(promise1).chain(() => {
-        return shaka.util.AbortableOperation.notAbortable(promise2);
+      shaka.util.AbortableOperation.notAbortable(promise1.promise).chain(() => {
+        return shaka.util.AbortableOperation.notAbortable(promise2.promise);
       }).finally((ok) => {
         expect(ok).toBe(false);
         isDone = true;
@@ -520,8 +524,8 @@ describe('AbortableOperation', () => {
       // sometimes unbind an abort method from an earlier stage of the chain.
       // Make sure this doesn't happen.
       let innerOperation;
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
       let abortCalled = false;
 
       /**
@@ -542,7 +546,7 @@ describe('AbortableOperation', () => {
       // Since the issue was with the calling of operation.abort, rather than
       // the onAbort_ callback, we make an operation-like thing instead of using
       // the AbortableOperation constructor.
-      innerOperation = {promise: p, abort: abort};
+      innerOperation = {promise: p.promise, abort: abort};
 
       // The second stage of the chain returns innerOperation.  A brief moment
       // later, the outer chain is aborted.
@@ -564,8 +568,8 @@ describe('AbortableOperation', () => {
     });
 
     it('aborts nested AbortableOperation objects', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const promise = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const promise = Promise.withResolvers();
       const abort = jasmine.createSpy('abort');
 
       /** @type {!shaka.util.AbortableOperation} */
@@ -574,7 +578,7 @@ describe('AbortableOperation', () => {
             .chain(() => 2)
             .chain(() => {
               return new shaka.util.AbortableOperation(
-                  promise, Util.spyFunc(abort));
+                  promise.promise, Util.spyFunc(abort));
             })
             .chain(() => 3);
       });
@@ -586,12 +590,12 @@ describe('AbortableOperation', () => {
     });
 
     it('aborts even with a failure callback', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const promise = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const promise = Promise.withResolvers();
 
       /** @type {!shaka.util.AbortableOperation} */
       const operation = shaka.util.AbortableOperation.completed(0)
-          .chain(() => promise)
+          .chain(() => promise.promise)
           .chain(
               () => fail('Promise should be rejected'),
               () => {});
@@ -602,13 +606,13 @@ describe('AbortableOperation', () => {
     });
 
     it('abort waits for plain Promise to be resolved', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const promise = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const promise = Promise.withResolvers();
       const resolved = jasmine.createSpy('resolve');
 
       /** @type {!shaka.util.AbortableOperation} */
       const operation = shaka.util.AbortableOperation.completed(0)
-          .chain(() => promise);
+          .chain(() => promise.promise);
       await Util.shortDelay();  // Ensure we are waiting on the "promise".
       const p = operation.abort().then(
           Util.spyFunc(resolved), Util.spyFunc(resolved));

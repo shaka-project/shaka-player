@@ -34,7 +34,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
   /** @type {HTMLVideoElement} */
   let video;
 
-  /** @type {shaka.util.PublicPromise} */
+  /** @type {Promise.PromiseWithResolvers} */
   let messageWaitPromise;
   /** @type {Array<string>} */
   let pendingMessages = null;
@@ -390,8 +390,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
 
   function waitForUpdateMessages() {
     pendingMessages = [];
-    messageWaitPromise = new shaka.util.PublicPromise();
-    return messageWaitPromise;
+    messageWaitPromise = Promise.withResolvers();
+    return messageWaitPromise.promise;
   }
 
   function createMockReceiverApi() {

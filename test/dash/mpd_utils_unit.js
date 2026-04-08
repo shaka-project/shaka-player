@@ -764,7 +764,7 @@ describe('MpdUtils', () => {
 
         fakeNetEngine.setResponseText(key, value);
       }
-      /** @type {!shaka.util.PublicPromise} */
+      /** @type {!Promise.PromiseWithResolvers} */
       const continuePromise = fakeNetEngine.delayNextRequest();
 
       const xml = /** @type {shaka.extern.xml.Node} */ (
