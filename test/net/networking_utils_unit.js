@@ -119,5 +119,41 @@ describe('NetworkingUtils', () => {
       const result = shaka.net.NetworkingUtils.getExtension(uri);
       expect(result).toBe('pdf');
     });
+
+    it('should ignore dots in query parameter values', () => {
+      const uri =
+          'https://cdn.example.com/media/en.cmft' +
+          '?host=app.example.com&signature=abc.def';
+      const result = shaka.net.NetworkingUtils.getExtension(uri);
+      expect(result).toBe('cmft');
+    });
+
+    it('should handle signed URLs with dots in query params', () => {
+      const uri =
+          'https://cdn.example.com/media/subtitle.vtt' +
+          '?algorithm=HMAC-SHA256&credential=key1234' +
+          '&signed-headers=host&signature=abcdef.1234567890' +
+          '&filename=subtitle.en.vtt';
+      const result = shaka.net.NetworkingUtils.getExtension(uri);
+      expect(result).toBe('vtt');
+    });
+
+    it('should handle query with hostname-like values', () => {
+      const uri = 'https://example.com/video.mp4?origin=cdn.example.co.uk';
+      const result = shaka.net.NetworkingUtils.getExtension(uri);
+      expect(result).toBe('mp4');
+    });
+
+    it('should handle query with dotted filename and no path extension', () => {
+      const uri = 'https://example.com/stream?file=video.mp4';
+      const result = shaka.net.NetworkingUtils.getExtension(uri);
+      expect(result).toBe('');
+    });
+
+    it('should handle fragment with dots', () => {
+      const uri = 'https://example.com/file.mp3#t=1.5';
+      const result = shaka.net.NetworkingUtils.getExtension(uri);
+      expect(result).toBe('mp3');
+    });
   });
 });
