@@ -1946,7 +1946,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.resetLastTouchEventTime();
     }
     // Stop this event from becoming a click event.
-    event.cancelable && event.preventDefault();
+    if (event.cancelable) {
+      event.preventDefault();
+    }
     if (!hasLastContainerTouchEventTime ||
         this.lastContainerTouchEventTime_ != null) {
       this.lastTouchEventTime_ = Date.now();
