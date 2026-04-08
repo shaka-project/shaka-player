@@ -749,7 +749,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Force HTTP', 'networking.forceHTTP')
         .addBoolInput_('Force HTTPS', 'networking.forceHTTPS')
         .addNumberInput_('Min bytes for progress events',
-            'networking.minBytesForProgressEvents');
+            'networking.minBytesForProgressEvents')
+        .addTextInput_('Common Access Token header name',
+            'networking.commonAccessTokenHeaderName');
   }
 
   /** @private */

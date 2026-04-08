@@ -2292,7 +2292,8 @@ shaka.extern.StreamingConfiguration;
  * @typedef {{
  *   forceHTTP: boolean,
  *   forceHTTPS: boolean,
- *   minBytesForProgressEvents: number
+ *   minBytesForProgressEvents: number,
+ *   commonAccessTokenHeaderName: string,
  * }}
  *
  * @description
@@ -2313,6 +2314,10 @@ shaka.extern.StreamingConfiguration;
  *   if possible. To avoid issues around feeding ABR with request history, this
  *   value should be greater than or equal to `abr.advanced.minBytes`.
  *   By default equals 16e3 (the same value as `abr.advanced.minBytes`).
+ * @property {string} commonAccessTokenHeaderName
+ *   CTA-WAVE Common Access Token header name.
+ *   <br>
+ *   Defaults to <code>'cta-common-access-token'</code>.
  * @exportDoc
  */
 shaka.extern.NetworkingConfiguration;
