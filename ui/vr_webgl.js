@@ -230,11 +230,10 @@ shaka.ui.VRWebgl = class {
         this.renderGL_();
       }
 
-      if (this.videoFrameCallbackHandler_) {
-        this.videoFrameCallbackHandler_.start(() => {
-          this.renderGL_();
-        });
-      } else {
+      const usingFrames = this.videoFrameCallbackHandler_.start(() => {
+        this.renderGL_();
+      });
+      if (!usingFrames) {
         let frameRate;
         this.eventManager_.listen(this.video_, 'canplaythrough', () => {
           this.renderGL_();
