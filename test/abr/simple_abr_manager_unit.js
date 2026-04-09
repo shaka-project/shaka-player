@@ -13,6 +13,8 @@ describe('SimpleAbrManager', () => {
   let config;
   /** @type {!jasmine.Spy} */
   let switchCallback;
+  /** @type {!jasmine.Spy} */
+  let restrictVideoCallback;
   /** @type {!shaka.abr.SimpleAbrManager} */
   let abrManager;
   /** @type {shaka.extern.Manifest} */
@@ -23,6 +25,7 @@ describe('SimpleAbrManager', () => {
   beforeEach(() => {
     Date.now = () => 0;
     switchCallback = jasmine.createSpy('switchCallback');
+    restrictVideoCallback = jasmine.createSpy('restrictVideoCallback');
 
     // Keep unsorted.
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -68,7 +71,8 @@ describe('SimpleAbrManager', () => {
     variants = manifest.variants;
 
     abrManager = new shaka.abr.SimpleAbrManager();
-    abrManager.init(shaka.test.Util.spyFunc(switchCallback));
+    abrManager.init(shaka.test.Util.spyFunc(switchCallback),
+        shaka.test.Util.spyFunc(restrictVideoCallback));
     abrManager.configure(config);
     abrManager.setVariants(variants, false);
   });
@@ -395,5 +399,134 @@ describe('SimpleAbrManager', () => {
 
     chosen = abrManager.chooseVariant();
     expect(chosen.id).toBe(10);
+  });
+
+  describe('dropped frame protection', /** @suppress {accessControls} */ () => {
+    /** @type {!HTMLVideoElement} */
+    let mockVideo;
+
+    beforeEach(() => {
+      mockVideo = /** @type {!HTMLVideoElement} */ (
+        document.createElement('video'));
+      Object.defineProperty(mockVideo, 'paused', {
+        get: () => false,
+        configurable: true,
+      });
+      mockVideo.getVideoPlaybackQuality = () => ({
+        droppedVideoFrames: 0,
+        totalVideoFrames: 0,
+        corruptedVideoFrames: 0,
+        creationTime: 0,
+        totalFrameDelay: 0,
+      });
+
+      config.droppedFrames = true;
+      config.advanced.droppedFramesThreshold = 0.15;
+      config.advanced.droppedFramesInterval = 2;
+      config.advanced.droppedFramesBanDuration = 30;
+      abrManager.configure(config);
+      abrManager.enable();
+      abrManager.setMediaElement(mockVideo);
+    });
+
+    /**
+     * @param {number} dropped
+     * @param {number} total
+     * @return {!VideoPlaybackQuality}
+     */
+    function makeQuality(dropped, total) {
+      return /** @type {!VideoPlaybackQuality} */ ({
+        droppedVideoFrames: dropped,
+        totalVideoFrames: total,
+        corruptedVideoFrames: 0,
+        creationTime: 0,
+        totalFrameDelay: 0,
+      });
+    }
+
+    it('calls disableStreamCallback when drop ratio exceeds threshold', () => {
+      // Establish baseline counters.
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(0, 100);
+      abrManager.checkDroppedFrames_();
+
+      // 20/100 new frames dropped = 20% > 15% threshold.
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(20, 200);
+      abrManager.checkDroppedFrames_();
+
+      expect(restrictVideoCallback).toHaveBeenCalledWith('video', 30);
+    });
+
+    it('does not call disableStreamCallback when drop ratio is below threshold',
+        () => {
+          // Establish baseline counters.
+          mockVideo.getVideoPlaybackQuality = () => makeQuality(0, 100);
+          abrManager.checkDroppedFrames_();
+
+          // 10/100 new frames dropped = 10% < 15% threshold.
+          mockVideo.getVideoPlaybackQuality = () => makeQuality(10, 200);
+          abrManager.checkDroppedFrames_();
+
+          expect(restrictVideoCallback).not.toHaveBeenCalled();
+        });
+
+    it('skips ban logic when playbackRate > 1', () => {
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(0, 100);
+      abrManager.checkDroppedFrames_();
+
+      // High drop ratio at 2x speed — ban logic should be skipped.
+      mockVideo.playbackRate = 2;
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(50, 200);
+      abrManager.checkDroppedFrames_();
+
+      expect(restrictVideoCallback).not.toHaveBeenCalled();
+    });
+
+    it('resets counters when playbackRate > 1 and resumes to 1x', () => {
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(0, 100);
+      abrManager.checkDroppedFrames_();
+
+      // 2x speed: counters are reset to current values (50, 200).
+      mockVideo.playbackRate = 2;
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(50, 200);
+      abrManager.checkDroppedFrames_();
+
+      // Back to 1x: 5/100 new drops = 5% < 15% threshold.
+      mockVideo.playbackRate = 1;
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(55, 300);
+      abrManager.checkDroppedFrames_();
+
+      expect(restrictVideoCallback).not.toHaveBeenCalled();
+    });
+
+    it('skips check when paused', () => {
+      Object.defineProperty(mockVideo, 'paused', {
+        get: () => true,
+        configurable: true,
+      });
+
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(0, 100);
+      abrManager.checkDroppedFrames_();
+
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(50, 200);
+      abrManager.checkDroppedFrames_();
+
+      expect(restrictVideoCallback).not.toHaveBeenCalled();
+    });
+
+    it('does not start poller when droppedFrames config is disabled', () => {
+      config.droppedFrames = false;
+      abrManager.configure(config);
+      abrManager.setMediaElement(mockVideo);
+
+      // startDroppedFramePoller_() returns early, so no timer is created.
+      expect(abrManager.droppedFramePoller_).toBeNull();
+    });
+
+    it('skips check when totalVideoFrames is 0', () => {
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(0, 0);
+      abrManager.checkDroppedFrames_();
+
+      expect(restrictVideoCallback).not.toHaveBeenCalled();
+    });
   });
 });
