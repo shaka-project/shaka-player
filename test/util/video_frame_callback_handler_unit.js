@@ -28,10 +28,8 @@ describe('VideoFrameCallbackHandler', () => {
   });
 
   afterEach(() => {
-    if (handler) {
-      handler.release();
-      handler = null;
-    }
+    handler?.release();
+    handler = null;
   });
 
   /**
