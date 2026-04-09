@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.15.38](https://github.com/shaka-project/shaka-player/compare/v4.15.37...v4.15.38) (2026-04-09)
+
+
+### Bug Fixes
+
+* Correctly extract file extension from URLs with dots in query params ([#9946](https://github.com/shaka-project/shaka-player/issues/9946)) ([d551f8a](https://github.com/shaka-project/shaka-player/commit/d551f8af1a44293680b96c4fae9d3abd7105a89c))
+* **TTML:** sanitize backgroundImage URL to prevent CSS injection ([#9929](https://github.com/shaka-project/shaka-player/issues/9929)) ([4f945c1](https://github.com/shaka-project/shaka-player/commit/4f945c1ec908ec29d1e45ce128eecf7c380fdc0a))
+
+
+### Performance Improvements
+
+* replace shift lpop with binary search ([#9936](https://github.com/shaka-project/shaka-player/issues/9936)) ([02d6a62](https://github.com/shaka-project/shaka-player/commit/02d6a62cc51d3b1682ba94da4ac7ea62b8e7c9fd))
+
 ## [4.15.37](https://github.com/shaka-project/shaka-player/compare/v4.15.36...v4.15.37) (2026-03-30)
 
 
