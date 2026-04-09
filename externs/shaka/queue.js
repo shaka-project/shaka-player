@@ -19,7 +19,8 @@
  *   config: ?shaka.extern.PlayerConfiguration,
  *   extraText: ?Array<!shaka.extern.ExtraText>,
  *   extraThumbnail: ?Array<string>,
- *   extraChapter: ?Array<!shaka.extern.ExtraChapter>
+ *   extraChapter: ?Array<!shaka.extern.ExtraChapter>,
+ *   itemMetadata: ?Object,
  * }}
  *
  * @property {string} manifestUri
@@ -30,6 +31,7 @@
  * @property {?Array<!shaka.extern.ExtraText>} extraText
  * @property {?Array<string>} extraThumbnail
  * @property {?Array<!shaka.extern.ExtraChapter>} extraChapter
+ * @property {?Object} itemMetadata
  * @exportDoc
  */
 shaka.extern.QueueItem;
