@@ -126,11 +126,8 @@ shaka.ui.VRWebgl = class {
     this.projectionMode_ = projectionMode;
 
     /** @private {?shaka.util.VideoFrameCallbackHandler} */
-    this.videoFrameCallbackHandler_ = null;
-    if ('requestVideoFrameCallback' in this.video_) {
-      this.videoFrameCallbackHandler_ =
-          new shaka.util.VideoFrameCallbackHandler(this.video_);
-    }
+    this.videoFrameCallbackHandler_ =
+        new shaka.util.VideoFrameCallbackHandler(this.video_);
 
     this.init_();
   }
