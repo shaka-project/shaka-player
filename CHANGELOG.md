@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.16.26](https://github.com/shaka-project/shaka-player/compare/v4.16.25...v4.16.26) (2026-04-09)
+
+
+### Bug Fixes
+
+* Correctly extract file extension from URLs with dots in query params ([#9946](https://github.com/shaka-project/shaka-player/issues/9946)) ([f91692c](https://github.com/shaka-project/shaka-player/commit/f91692c48b857c7e20c0638dd43566148bdd73a9))
+* **StreamingEngine:** correct variable reference in discardReferenceByBoundary_() ([#9943](https://github.com/shaka-project/shaka-player/issues/9943)) ([69636ef](https://github.com/shaka-project/shaka-player/commit/69636efb96ac5f085f832ec0c01697d14e0a8952))
+* **TTML:** sanitize backgroundImage URL to prevent CSS injection ([#9929](https://github.com/shaka-project/shaka-player/issues/9929)) ([f18d2b1](https://github.com/shaka-project/shaka-player/commit/f18d2b18c871ce536ef46ffea1b6893d2c7ad106))
+* wrong variable reference in `discardReferenceByBoundary_()` causing ([69636ef](https://github.com/shaka-project/shaka-player/commit/69636efb96ac5f085f832ec0c01697d14e0a8952))
+
+
+### Performance Improvements
+
+* replace shift lpop with binary search ([#9936](https://github.com/shaka-project/shaka-player/issues/9936)) ([1d2129e](https://github.com/shaka-project/shaka-player/commit/1d2129e843c922223e402ea06c1c953ebb5df4b2))
+
 ## [4.16.25](https://github.com/shaka-project/shaka-player/compare/v4.16.24...v4.16.25) (2026-03-30)
 
 
