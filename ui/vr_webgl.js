@@ -17,6 +17,7 @@ goog.require('shaka.util.EventManager');
 goog.require('shaka.util.IReleasable');
 goog.require('shaka.util.MediaReadyState');
 goog.require('shaka.util.Timer');
+goog.require('shaka.util.VideoFrameCallbackHandler');
 
 
 /**
@@ -124,8 +125,9 @@ shaka.ui.VRWebgl = class {
     /** @private {string} */
     this.projectionMode_ = projectionMode;
 
-    /** @private {number} */
-    this.videoCallbackId_ = -1;
+    /** @private {?shaka.util.VideoFrameCallbackHandler} */
+    this.videoFrameCallbackHandler_ =
+        new shaka.util.VideoFrameCallbackHandler(this.video_);
 
     this.init_();
   }
@@ -134,22 +136,17 @@ shaka.ui.VRWebgl = class {
    * @override
    */
   release() {
-    if (this.videoCallbackId_ != -1) {
-      this.video_.cancelVideoFrameCallback(this.videoCallbackId_);
-      this.videoCallbackId_ = -1;
-    }
-    if (this.eventManager_) {
-      this.eventManager_.release();
-      this.eventManager_ = null;
-    }
-    if (this.activeTimer_) {
-      this.activeTimer_.stop();
-      this.activeTimer_ = null;
-    }
-    if (this.resetTimer_) {
-      this.resetTimer_.stop();
-      this.resetTimer_ = null;
-    }
+    this.videoFrameCallbackHandler_?.release();
+    this.videoFrameCallbackHandler_ = null;
+
+    this.eventManager_?.release();
+    this.eventManager_ = null;
+
+    this.activeTimer_?.stop();
+    this.activeTimer_ = null;
+
+    this.resetTimer_?.stop();
+    this.resetTimer_ = null;
   }
 
   /**
@@ -233,25 +230,10 @@ shaka.ui.VRWebgl = class {
         this.renderGL_();
       }
 
-      if ('requestVideoFrameCallback' in this.video_) {
-        const videoFrameCallback = (now, metadata) => {
-          if (this.videoCallbackId_ == -1) {
-            return;
-          }
-          this.renderGL_();
-          // It is necessary to check this again because this callback can be
-          // executed in another thread by the browser and we have to be sure
-          // again here that we have not cancelled it in the middle of an
-          // execution.
-          if (this.videoCallbackId_ == -1) {
-            return;
-          }
-          this.videoCallbackId_ =
-              this.video_.requestVideoFrameCallback(videoFrameCallback);
-        };
-        this.videoCallbackId_ =
-            this.video_.requestVideoFrameCallback(videoFrameCallback);
-      } else {
+      const usingFrames = this.videoFrameCallbackHandler_.start(() => {
+        this.renderGL_();
+      });
+      if (!usingFrames) {
         let frameRate;
         this.eventManager_.listen(this.video_, 'canplaythrough', () => {
           this.renderGL_();
