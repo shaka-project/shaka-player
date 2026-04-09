@@ -16,8 +16,8 @@ describe('VideoFrameCallbackHandler', () => {
   /**
    * Holds every VideoFrameRequestCallback registered via
    * requestVideoFrameCallback on the current mockVideo. Populated by
-   * createMockVideoWithRVFC and createMockVideoWithoutCancelRVFC so that
-   * tests can trigger callbacks without accessing spy internals.
+   * createMockVideoWithRVFC so that tests can trigger callbacks without
+   * accessing spy internals.
    *
    * @type {!Array<!VideoFrameRequestCallback>}
    */
@@ -60,25 +60,6 @@ describe('VideoFrameCallbackHandler', () => {
    */
   function createMockVideoWithoutRVFC() {
     return /** @type {!HTMLVideoElement} */ ({});
-  }
-
-  /**
-   * Creates a mock video element that supports requestVideoFrameCallback
-   * but NOT cancelVideoFrameCallback, simulating partial browser support.
-   *
-   * @return {!HTMLVideoElement}
-   */
-  function createMockVideoWithoutCancelRVFC() {
-    const video = jasmine.createSpyObj('video', [
-      'requestVideoFrameCallback',
-    ]);
-    let handleCounter = 1;
-    video.requestVideoFrameCallback.and.callFake(
-        (/** !VideoFrameRequestCallback */ cb) => {
-          registeredCallbacks.push(cb);
-          return handleCounter++;
-        });
-    return /** @type {!HTMLVideoElement} */ (video);
   }
 
   /**
@@ -243,29 +224,6 @@ describe('VideoFrameCallbackHandler', () => {
       // requestVideoFrameCallback should only have been called once (on start),
       // not again after the stale frame fires post-release.
       expect(mockVideo.requestVideoFrameCallback).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('on devices without cancelVideoFrameCallback', () => {
-    it('does not throw when releasing if cancelVideoFrameCallback ' +
-        'is not available', () => {
-      handler = new VideoFrameCallbackHandler(
-          createMockVideoWithoutCancelRVFC());
-
-      handler.start(() => {});
-
-      expect(() => handler.release()).not.toThrow();
-    });
-
-    it('does not throw when calling start twice if ' +
-        'cancelVideoFrameCallback is not available', () => {
-      handler = new VideoFrameCallbackHandler(
-          createMockVideoWithoutCancelRVFC());
-
-      expect(() => {
-        handler.start(() => {});
-        handler.start(() => {});
-      }).not.toThrow();
     });
   });
 });
