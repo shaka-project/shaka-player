@@ -1,5 +1,27 @@
 # Changelog
 
+## [5.0.10](https://github.com/shaka-project/shaka-player/compare/v5.0.9...v5.0.10) (2026-04-09)
+
+
+### Bug Fixes
+
+* **Ads:** Fix playback of X-ASSET-LIST with X-PLAYOUT-LIMIT on Live ([#9915](https://github.com/shaka-project/shaka-player/issues/9915)) ([db347c4](https://github.com/shaka-project/shaka-player/commit/db347c4c29e636e005a39d8a31c527525ebea939))
+* Correctly extract file extension from URLs with dots in query params ([#9946](https://github.com/shaka-project/shaka-player/issues/9946)) ([82f8c7a](https://github.com/shaka-project/shaka-player/commit/82f8c7a6e92b878579dbc2c746a60aebb14b97e7))
+* Include isSwitchingContent in UnloadingEvent when load replaces existing content ([#9934](https://github.com/shaka-project/shaka-player/issues/9934)) ([c6fbd49](https://github.com/shaka-project/shaka-player/commit/c6fbd49d07da34783dde44c21c22db5b5630d0f5))
+* Properly clone nested cues and CueRegion in Cue.clone() ([#9940](https://github.com/shaka-project/shaka-player/issues/9940)) ([7a34733](https://github.com/shaka-project/shaka-player/commit/7a3473352d8e97e2e1feaf9baa7df7c84239adcf))
+* **StreamingEngine:** correct variable reference in discardReferenceByBoundary_() ([#9943](https://github.com/shaka-project/shaka-player/issues/9943)) ([8686858](https://github.com/shaka-project/shaka-player/commit/8686858d67a56c12ee6dca9fb1d88169662ff5d9))
+* **TTML:** sanitize backgroundImage URL to prevent CSS injection ([#9929](https://github.com/shaka-project/shaka-player/issues/9929)) ([37dc7e7](https://github.com/shaka-project/shaka-player/commit/37dc7e7ee748a852635d210ca9a59f9f23453a53))
+* **UI:** Fix seek using keyboard when the UI is hidden ([#9933](https://github.com/shaka-project/shaka-player/issues/9933)) ([34dd855](https://github.com/shaka-project/shaka-player/commit/34dd8558a259432049abf097c060ff0b255643f6))
+* **UI:** Improve touch handling for single and double tap actions ([#9937](https://github.com/shaka-project/shaka-player/issues/9937)) ([22322ea](https://github.com/shaka-project/shaka-player/commit/22322ea0965837449432c3c134a3f83b6f3c8b4d))
+* **UI:** Improve touch handling for single and double tap actions ([#9944](https://github.com/shaka-project/shaka-player/issues/9944)) ([0578325](https://github.com/shaka-project/shaka-player/commit/0578325d28b09bb674079a4aadbc79d8856fb2ce))
+* wrong variable reference in `discardReferenceByBoundary_()` causing ([8686858](https://github.com/shaka-project/shaka-player/commit/8686858d67a56c12ee6dca9fb1d88169662ff5d9))
+
+
+### Performance Improvements
+
+* **MSF:** Reduce live latency to one segment ([#9947](https://github.com/shaka-project/shaka-player/issues/9947)) ([2fa803f](https://github.com/shaka-project/shaka-player/commit/2fa803fa7e548bfb89150d6497eee863d3a72ba0))
+* replace shift lpop with binary search ([#9936](https://github.com/shaka-project/shaka-player/issues/9936)) ([bab2b25](https://github.com/shaka-project/shaka-player/commit/bab2b25cc18658a2a647ac433e3ee719f2e3b688))
+
 ## [5.0.9](https://github.com/shaka-project/shaka-player/compare/v5.0.8...v5.0.9) (2026-03-30)
 
 
