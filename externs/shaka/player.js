@@ -2292,7 +2292,8 @@ shaka.extern.StreamingConfiguration;
  * @typedef {{
  *   forceHTTP: boolean,
  *   forceHTTPS: boolean,
- *   minBytesForProgressEvents: number
+ *   minBytesForProgressEvents: number,
+ *   commonAccessTokenHeaderName: string,
  * }}
  *
  * @description
@@ -2313,6 +2314,10 @@ shaka.extern.StreamingConfiguration;
  *   if possible. To avoid issues around feeding ABR with request history, this
  *   value should be greater than or equal to `abr.advanced.minBytes`.
  *   By default equals 16e3 (the same value as `abr.advanced.minBytes`).
+ * @property {string} commonAccessTokenHeaderName
+ *   CTA-WAVE Common Access Token header name.
+ *   <br>
+ *   Defaults to <code>'cta-common-access-token'</code>.
  * @exportDoc
  */
 shaka.extern.NetworkingConfiguration;
@@ -2523,6 +2528,7 @@ shaka.extern.AdsConfiguration;
  *   cacheLoadThreshold: number,
  *   minTimeToSwitch: number,
  *   preferNetworkInformationBandwidth: boolean,
+ *   droppedFrames: boolean,
  * }}
  *
  * @property {boolean} enabled
@@ -2615,6 +2621,13 @@ shaka.extern.AdsConfiguration;
  *   trust the information provided by the browser.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {shaka.extern.DroppedFrameProtectionConfig} droppedFrameProtection
+ *   Configuration for monitoring dropped frames and temporarily disabling
+ *   streams that exceed a threshold.
+ * @property {boolean} droppedFrames
+ *   Enable or disable dropped frames protection.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
@@ -2625,7 +2638,10 @@ shaka.extern.AbrConfiguration;
  *   minTotalBytes: number,
  *   minBytes: number,
  *   fastHalfLife: number,
- *   slowHalfLife: number
+ *   slowHalfLife: number,
+ *   droppedFramesThreshold: number,
+ *   droppedFramesInterval: number,
+ *   droppedFramesBanDuration: number,
  * }}
  *
  * @property {number} minTotalBytes
@@ -2653,6 +2669,24 @@ shaka.extern.AbrConfiguration;
  *   new estimate.
  *   <br>
  *   Defaults to <code>5</code>.
+ * @property {number} droppedFramesThreshold
+ *   The dropThreshold represents the fraction of dropped frames relative to
+ *   the total frames rendered during each check interval. For example, a value
+ *   of 0.15 means that if 15% or more of the frames are dropped in that
+ *   interval, the stream will be considered problematic and may be temporarily
+ *   disabled.
+ *   <br>
+ *   Defaults to <code>0.15</code>.
+ * @property {number} droppedFramesInterval
+ *   Interval in seconds to measure dropped frames and compare with the
+ *   previous measurement.
+ *   <br>
+ *   Defaults to <code>2</code>.
+ * @property {number} droppedFramesBanDuration
+ *   Duration in seconds to disable the stream after it exceeds the
+ *   dropped frames threshold.
+ *   <br>
+ *   Defaults to <code>30</code>.
  * @exportDoc
  */
 shaka.extern.AdvancedAbrConfiguration;

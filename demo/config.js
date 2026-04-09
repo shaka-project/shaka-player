@@ -375,7 +375,17 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true,
             /* canBeZero= */ true)
         .addBoolInput_('Prefer Network Information bandwidth',
-            'abr.preferNetworkInformationBandwidth');
+            'abr.preferNetworkInformationBandwidth')
+        .addBoolInput_('Dropped Frames Protection Enabled',
+            'abr.droppedFrames')
+        .addNumberInput_('Dropped Frames Threshold',
+            'abr.advanced.droppedFramesThreshold',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Dropped Frames Interval',
+            'abr.advanced.droppedFramesInterval',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Dropped Frames Ban Duration',
+            'abr.advanced.droppedFramesBanDuration');
     this.addRestrictionsSection_('abr', 'Adaptation Restrictions');
   }
 
@@ -749,7 +759,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Force HTTP', 'networking.forceHTTP')
         .addBoolInput_('Force HTTPS', 'networking.forceHTTPS')
         .addNumberInput_('Min bytes for progress events',
-            'networking.minBytesForProgressEvents');
+            'networking.minBytesForProgressEvents')
+        .addTextInput_('Common Access Token header name',
+            'networking.commonAccessTokenHeaderName');
   }
 
   /** @private */
