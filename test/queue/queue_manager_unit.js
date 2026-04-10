@@ -35,6 +35,7 @@ describe('QueueManager', () => {
         language: 'en',
       },
     ],
+    metadata: null,
   };
 
   /** @type {shaka.extern.QueueItem} */
@@ -47,6 +48,7 @@ describe('QueueManager', () => {
     extraText: null,
     extraThumbnail: null,
     extraChapter: null,
+    metadata: null,
   };
 
   beforeEach(async () => {

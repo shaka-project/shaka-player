@@ -1358,11 +1358,6 @@ shakaDemo.Main = class {
     // The currently-selected asset changed, so update asset cards.
     this.dispatchEventWithName_('shaka-main-selected-asset-changed');
 
-    // Unset media session title, but only if the browser supports that API.
-    if (navigator.mediaSession) {
-      navigator.mediaSession.metadata = null;
-    }
-
     // Remake hash, to change the current asset.
     this.remakeHash();
   }
@@ -1531,17 +1526,6 @@ shakaDemo.Main = class {
         }
       }
 
-      // Set media session title, but only if the browser supports that API.
-      if (navigator.mediaSession) {
-        const icon = asset.iconUri || shakaDemo.Main.logo_;
-        const metadata = {
-          title: asset.name,
-          artwork: [{src: icon}],
-          artist: asset.source,
-        };
-        navigator.mediaSession.metadata = new MediaMetadata(metadata);
-      }
-
       // Finally, the asset can be loaded.
       const queueItem = await this.getQueueItem_(asset);
       queueManager.insertItems([queueItem]);
@@ -1604,6 +1588,10 @@ shakaDemo.Main = class {
       extraText: isOffline ? null : asset.extraText,
       extraThumbnail: isOffline ? null : asset.extraThumbnail,
       extraChapter: asset.extraChapter,
+      metadata: {
+        title: asset.name,
+        poster: asset.iconUri,
+      },
     };
     return queueItem;
   }

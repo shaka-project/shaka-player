@@ -19,7 +19,8 @@
  *   config: ?shaka.extern.PlayerConfiguration,
  *   extraText: ?Array<!shaka.extern.ExtraText>,
  *   extraThumbnail: ?Array<string>,
- *   extraChapter: ?Array<!shaka.extern.ExtraChapter>
+ *   extraChapter: ?Array<!shaka.extern.ExtraChapter>,
+ *   metadata: ?shaka.extern.QueueItemMetadata,
  * }}
  *
  * @property {string} manifestUri
@@ -30,9 +31,26 @@
  * @property {?Array<!shaka.extern.ExtraText>} extraText
  * @property {?Array<string>} extraThumbnail
  * @property {?Array<!shaka.extern.ExtraChapter>} extraChapter
+ * @property {?shaka.extern.QueueItemMetadata} metadata
  * @exportDoc
  */
 shaka.extern.QueueItem;
+
+/**
+ * @typedef {{
+ *   title: (string|undefined),
+ *   poster: (string|undefined),
+ * }}
+ *
+ * @description
+ * Metadata for a QueueItem. Supports additional arbitrary properties that are
+ * not type-checked.
+ *
+ * @property {(string|undefined)} title
+ * @property {(string|undefined)} poster
+ * @exportDoc
+ */
+shaka.extern.QueueItemMetadata;
 
 /**
  * An object that's responsible for all the queue-related logic
