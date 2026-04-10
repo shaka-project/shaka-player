@@ -536,6 +536,7 @@ msdk
 onservicecallback
 productinfo
 RMKSA
+RVFC
 servernum
 sintel
 stardate
