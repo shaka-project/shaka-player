@@ -1,3 +1,6 @@
+# NOTE: This is a copy synced from:
+#   shaka-project/shaka-github-tools/validate-pr-title/validate-pr-title.yaml
+# Any changes should be made there to be synced across shaka-project repos.
 name: Validate PR Title
 
 on:
@@ -22,6 +25,6 @@ jobs:
     name: Validate PR Title
     runs-on: ubuntu-latest
     steps:
-      - uses: amannn/action-semantic-pull-request@v5
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # 6.1.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
