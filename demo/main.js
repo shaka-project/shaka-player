@@ -1578,7 +1578,6 @@ shakaDemo.Main = class {
     shaka.util.PlayerConfiguration.mergeConfigObjects(
         itemConfig, assetConfig, itemConfig);
     const isOffline = asset.storedContent && asset.storedContent.offlineUri;
-
     /** @type {shaka.extern.QueueItem} */
     const queueItem = {
       manifestUri: manifestUri,
