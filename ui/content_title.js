@@ -28,6 +28,9 @@ shaka.ui.ContentTitle = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
+    /** @private {shaka.extern.IQueueManager} */
+    this.queueManager_ = this.controls.getQueueManager();
+
     /** @type {!HTMLElement} */
     this.title_ = shaka.util.Dom.createHTMLElement('div');
     this.title_.classList.add('shaka-content-title');
@@ -40,6 +43,7 @@ shaka.ui.ContentTitle = class extends shaka.ui.Element {
 
     this.eventManager.listen(this.player, 'loading', () => {
       this.title_.textContent = this.video.title || '';
+      this.setupInfoFromQueue_();
       shaka.ui.Utils.setDisplay(this.title_, true);
     });
 
@@ -92,6 +96,19 @@ shaka.ui.ContentTitle = class extends shaka.ui.Element {
         }
       }
     });
+  }
+
+  /**
+   * @private
+   */
+  setupInfoFromQueue_() {
+    const queueItemMetadata = this.queueManager_.getCurrentItem()?.metadata;
+    if (queueItemMetadata) {
+      const title = queueItemMetadata['title'];
+      if (title) {
+        this.title_.textContent = title;
+      }
+    }
   }
 };
 

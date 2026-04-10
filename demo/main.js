@@ -462,23 +462,6 @@ shakaDemo.Main = class {
       this.video_.poster = shakaDemo.Main.mainPoster_;
     });
 
-    this.player_.addEventListener('loading', () => {
-      const currentItem = this.controls_.getQueueManager().getCurrentItem();
-      const itemMetadata = currentItem?.itemMetadata;
-      if (itemMetadata) {
-        // Set media session title, but only if the browser supports that API.
-        if (navigator.mediaSession) {
-          const icon = itemMetadata['iconUri'] || shakaDemo.Main.logo_;
-          const metadata = {
-            title: itemMetadata['name'],
-            artwork: [{src: icon}],
-            artist: itemMetadata['source'],
-          };
-          navigator.mediaSession.metadata = new MediaMetadata(metadata);
-        }
-      }
-    });
-
     // Listen to events on controls.
     this.controls_ = ui.getControls();
     this.controls_.addEventListener('error', onErrorEvent);
@@ -1375,11 +1358,6 @@ shakaDemo.Main = class {
     // The currently-selected asset changed, so update asset cards.
     this.dispatchEventWithName_('shaka-main-selected-asset-changed');
 
-    // Unset media session title, but only if the browser supports that API.
-    if (navigator.mediaSession) {
-      navigator.mediaSession.metadata = null;
-    }
-
     // Remake hash, to change the current asset.
     this.remakeHash();
   }
@@ -1601,12 +1579,6 @@ shakaDemo.Main = class {
         itemConfig, assetConfig, itemConfig);
     const isOffline = asset.storedContent && asset.storedContent.offlineUri;
 
-    const metadata = {
-      'iconUri': asset.iconUri,
-      'name': asset.name,
-      'source': asset.source,
-    };
-
     /** @type {shaka.extern.QueueItem} */
     const queueItem = {
       manifestUri: manifestUri,
@@ -1617,7 +1589,10 @@ shakaDemo.Main = class {
       extraText: isOffline ? null : asset.extraText,
       extraThumbnail: isOffline ? null : asset.extraThumbnail,
       extraChapter: asset.extraChapter,
-      itemMetadata: metadata,
+      metadata: {
+        title: asset.name,
+        poster: asset.iconUri,
+      },
     };
     return queueItem;
   }

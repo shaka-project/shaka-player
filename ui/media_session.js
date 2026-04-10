@@ -361,6 +361,23 @@ shaka.ui.MediaSession = class {
     if (!this.config_.mediaSession.handleMetadata) {
       return;
     }
+    const setupInfoFromQueue = () => {
+      const queueItemMetadata = this.queueManager_.getCurrentItem()?.metadata;
+      if (queueItemMetadata) {
+        const poster = queueItemMetadata.poster;
+        if (poster) {
+          this.setupPoster(poster);
+        }
+        const title = queueItemMetadata.title;
+        if (title) {
+          this.setupTitle(title);
+        }
+      }
+    };
+    setupInfoFromQueue();
+    this.eventManager_.listen(this.player_, 'loading', () => {
+      setupInfoFromQueue();
+    });
     this.eventManager_.listen(this.controls_, 'chaptersupdated', () => {
       this.setupChapters(this.controls_.getChapters());
     });
