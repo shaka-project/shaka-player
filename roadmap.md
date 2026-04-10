@@ -15,10 +15,18 @@ Candidate features for future release cycles:
 v6.0
  - Conversion to Typescript (Smaller, more modular binary)
 
-v5.1 - 2026 Q2
+v5.2 - 2026 Q3
  - TBD
 
 =====
+
+v5.1 - 2026 Q2
+ - DASH: JSON manifest support (experimental build)
+ - ABR: Improved ABR with dropped frame monitoring
+   https://github.com/shaka-project/shaka-player/issues/745
+ - UI: Chapter images
+ - UI: Volume adjustment via mouse wheel
+ - Expanded platform support (TiVo OS, Titan OS)
 
 v5.0 - 2026 Q1
  - Add automatic subtitles with translations (Experimental and disabled by default)
