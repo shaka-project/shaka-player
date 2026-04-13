@@ -1650,6 +1650,7 @@ shaka.extern.HlsManifestConfiguration;
  *   namespaces: !Array<string>,
  *   authorizationToken: string,
  *   subscribeFilterType: shaka.config.MsfFilterType,
+ *   useFetchCatalog: boolean,
  * }}
  *
  * @property {string} fingerprintUri
@@ -1679,6 +1680,10 @@ shaka.extern.HlsManifestConfiguration;
  *   delivers data to the subscriber.
  *   <br>
  *   Defaults to <code>shaka.config.MsfFilterType.LARGEST_OBJECT</code>.
+ * @property {boolean} useFetchCatalog
+ *   Use FETCH to retrieve the catalog instead of SUBSCRIBE.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.MsfManifestConfiguration;

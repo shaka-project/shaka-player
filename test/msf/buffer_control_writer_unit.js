@@ -127,6 +127,67 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
     });
   });
 
+  describe('marshalFetch', () => {
+    it('should marshal a Fetch message', () => {
+      const msg = {
+        kind: shaka.msf.Utils.MessageType.FETCH,
+        requestId: BigInt(1),
+        subscriberPriority: 1,
+        groupOrder: shaka.msf.Utils.GroupOrder.ASCENDING,
+        fetchType: shaka.msf.Utils.FetchType.STANDALONE,
+        namespace: ['ns1', 'ns2'],
+        trackName: 'trackName',
+        startGroup: BigInt(10),
+        startObject: BigInt(10),
+        endGroup: BigInt(10),
+        endObject: BigInt(10),
+        params: [],
+      };
+      writer.marshalFetch(msg);
+      expect(writer.getBytes().length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('marshalFetchOk', () => {
+    it('should marshal a FetchOk message', () => {
+      const msg = {
+        kind: shaka.msf.Utils.MessageType.FETCH_OK,
+        requestId: BigInt(1),
+        groupOrder: shaka.msf.Utils.GroupOrder.ASCENDING,
+        endOfTrack: 1,
+        endGroup: BigInt(10),
+        endObject: BigInt(10),
+        params: [],
+      };
+      writer.marshalFetchOk(msg);
+      expect(writer.getBytes().length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('marshalFetchError', () => {
+    it('should marshal a FetchError message', () => {
+      const msg = {
+        kind: shaka.msf.Utils.MessageType.FETCH_ERROR,
+        requestId: BigInt(1),
+        errorCode: BigInt(500),
+        reason: 'Error occurred',
+      };
+      writer.marshalFetchError(msg);
+      expect(writer.getBytes().length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('marshalFetchCancel', () => {
+    it('should marshal a FetchCancel message', () => {
+      const msg = {
+        kind: shaka.msf.Utils.MessageType.FETCH_CANCEL,
+        requestId: BigInt(1),
+      };
+      writer.marshalFetchCancel(msg);
+      expect(writer.getBytes().length).toBeGreaterThan(0);
+    });
+  });
+
   describe('marshalPublishNamespace', () => {
     it('should marshal an PublishNamespace message', () => {
       const msg = {
