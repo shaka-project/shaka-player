@@ -1651,6 +1651,7 @@ shaka.extern.HlsManifestConfiguration;
  *   authorizationToken: string,
  *   subscribeFilterType: shaka.config.MsfFilterType,
  *   useFetchCatalog: boolean,
+ *   version: shaka.config.MsfVersion,
  * }}
  *
  * @property {string} fingerprintUri
@@ -1684,6 +1685,10 @@ shaka.extern.HlsManifestConfiguration;
  *   Use FETCH to retrieve the catalog instead of SUBSCRIBE.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {shaka.config.MsfVersion} version
+ *   MoQ version used in the connection.
+ *   <br>
+ *   Defaults to <code>shaka.config.MsfVersion.AUTO</code>.
  * @exportDoc
  */
 shaka.extern.MsfManifestConfiguration;
