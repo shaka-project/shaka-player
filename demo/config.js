@@ -332,7 +332,9 @@ shakaDemo.Config = class {
         .addSelectInput_('Subscribe FilterType',
             'manifest.msf.subscribeFilterType',
             msfFilterTypeOptions,
-            msfFilterTypeOptionNames);
+            msfFilterTypeOptionNames)
+        .addBoolInput_('Use FETCH to retrieve the catalog',
+            'manifest.msf.useFetchCatalog');
   }
 
   /** @private */

@@ -140,6 +140,22 @@ filterDescribe('shaka.msf.ControlStream', isMSFSupported, () => {
       },
     },
     {
+      kind: shaka.msf.Utils.MessageType.FETCH_ERROR,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.FETCH_ERROR,
+        requestId: 1,
+        errorCode: 500,
+        reason: 'Server error',
+      },
+    },
+    {
+      kind: shaka.msf.Utils.MessageType.FETCH_CANCEL,
+      msg: {
+        kind: shaka.msf.Utils.MessageType.FETCH_CANCEL,
+        requestId: 1,
+      },
+    },
+    {
       kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE,
       msg: {
         kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE,
