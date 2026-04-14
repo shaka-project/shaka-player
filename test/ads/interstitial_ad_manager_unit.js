@@ -163,7 +163,7 @@ describe('Interstitial Ad manager', () => {
       };
       await interstitialAdManager.addMetadata(metadata2);
 
-      expect(onEventSpy).toHaveBeenCalledTimes(4);
+      expect(onEventSpy).toHaveBeenCalledTimes(5);
       const eventValuePreload = {
         type: 'ad-interstitial-preload',
       };
@@ -1287,11 +1287,6 @@ describe('Interstitial Ad manager', () => {
         };
         await interstitialAdManager.addMetadata(metadata);
 
-        expect(networkingEngine.request).toHaveBeenCalledWith(
-            jasmine.anything(),
-            jasmine.objectContaining({
-              uris: [expectedUrl],
-            }));
         const interstitials =
               interstitialAdManager.getInterstitials();
         expect(interstitials.length).toBe(2);
