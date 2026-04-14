@@ -209,6 +209,22 @@ describe('tXml', () => {
       const doc = TXml.parseXmlString(xmlString, 'Document');
       expect(doc).toBeNull();
     });
+
+    it('throws on deeply nested XML', () => {
+      // Build XML that is nested 600 levels deep, exceeding the 512 limit.
+      const depth = 600;
+      let xmlString = '<?xml version="1.0"?>';
+      for (let i = 0; i < depth; i++) {
+        xmlString += '<N>';
+      }
+      xmlString += 'deep';
+      for (let i = 0; i < depth; i++) {
+        xmlString += '</N>';
+      }
+      const expected = new Error('XML is too deeply nested');
+      expect(() => TXml.parseXmlString(xmlString, 'N'))
+          .toThrow(expected);
+    });
   });
 
   it('parseDate', () => {
