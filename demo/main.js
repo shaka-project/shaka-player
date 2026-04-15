@@ -1578,6 +1578,8 @@ shakaDemo.Main = class {
     shaka.util.PlayerConfiguration.mergeConfigObjects(
         itemConfig, assetConfig, itemConfig);
     const isOffline = asset.storedContent && asset.storedContent.offlineUri;
+    const poster = this.player_.isAudioOnly ?
+        shakaDemo.Main.audioOnlyPoster_ : asset.iconUri;
     /** @type {shaka.extern.QueueItem} */
     const queueItem = {
       manifestUri: manifestUri,
@@ -1590,7 +1592,7 @@ shakaDemo.Main = class {
       extraChapter: asset.extraChapter,
       metadata: {
         title: asset.name,
-        poster: asset.iconUri,
+        poster,
       },
     };
     return queueItem;
