@@ -208,7 +208,7 @@ Features supported:
  - MOQT Streaming Format [draft-0](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/00/) and CMSF [draft-0](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/00/)
  - Audio, Video and Text
  - ABR (only navigator.connection change event)
- - DRM support for Widevine, PlayReady, FairPlay and ClearKey
+ - DRM support for Widevine, PlayReady, FairPlay and ClearKey, using the CMSF ContentProtection
  - MP4 / CMAF support
  - Live
  - For browsers that support WebTransport certificate fingerprints (e.g., Chrome), you can use self-signed certificates without installing them.
