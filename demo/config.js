@@ -321,6 +321,13 @@ shakaDemo.Config = class {
       'ABSOLUTE_RANGE': 'ABSOLUTE_RANGE',
     };
 
+    const msfVersionOptions = shaka.config.MsfVersion;
+    const msfVersionOptionNames = {
+      'AUTO': 'Auto',
+      'DRAFT_14': 'draft-14',
+      'DRAFT_16': 'draft-16',
+    };
+
     const docLink = this.resolveExternLink_('.ManifestConfiguration');
     this.addSection_('MSF', docLink)
         .addTextInput_('Fingerprint URI',
@@ -334,7 +341,11 @@ shakaDemo.Config = class {
             msfFilterTypeOptions,
             msfFilterTypeOptionNames)
         .addBoolInput_('Use FETCH to retrieve the catalog',
-            'manifest.msf.useFetchCatalog');
+            'manifest.msf.useFetchCatalog')
+        .addSelectInput_('MoQ version used in the connection',
+            'manifest.msf.version',
+            msfVersionOptions,
+            msfVersionOptionNames);
   }
 
   /** @private */

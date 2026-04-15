@@ -225,7 +225,8 @@ filterDescribe('shaka.msf.Receiver', isMSFSupported, () => {
     ];
 
     reader = createReader(readerValues);
-    receiver = new shaka.msf.Receiver(reader);
+    receiver =
+        new shaka.msf.Receiver(reader, shaka.msf.Utils.Version.DRAFT_14);
 
     const result = await receiver.server();
     expect(result.version).toBe(1);
@@ -247,7 +248,8 @@ filterDescribe('shaka.msf.Receiver', isMSFSupported, () => {
     ];
 
     reader = createReader(readerValues);
-    receiver = new shaka.msf.Receiver(reader);
+    receiver =
+        new shaka.msf.Receiver(reader, shaka.msf.Utils.Version.DRAFT_14);
 
     const result = await receiver.server();
     expect(result.version).toBe(1);
@@ -262,7 +264,8 @@ filterDescribe('shaka.msf.Receiver', isMSFSupported, () => {
     ];
 
     reader = createReader(readerValues);
-    receiver = new shaka.msf.Receiver(reader);
+    receiver =
+        new shaka.msf.Receiver(reader, shaka.msf.Utils.Version.DRAFT_14);
 
     await expectAsync(receiver.server()).toBeRejectedWith(
         jasmine.objectContaining({
@@ -292,7 +295,7 @@ filterDescribe('shaka.msf.Sender', isMSFSupported, () => {
     }
     const writable = createMockWritableStream();
     const writer = new shaka.msf.Writer(writable);
-    sender = new shaka.msf.Sender(writer);
+    sender = new shaka.msf.Sender(writer, shaka.msf.Utils.Version.DRAFT_14);
 
     const clientSetup = {
       versions: [1],
