@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.16.27](https://github.com/shaka-project/shaka-player/compare/v4.16.26...v4.16.27) (2026-04-15)
+
+
+### Bug Fixes
+
+* Fix MIME type detection for uppercase types ([#9976](https://github.com/shaka-project/shaka-player/issues/9976)) ([44d0293](https://github.com/shaka-project/shaka-player/commit/44d0293a0510f8c26ebac3d5c94de357ddbc7ac1))
+* include unencrypted decodingConfigs in preferredKeySystems loop ([#9975](https://github.com/shaka-project/shaka-player/issues/9975)) ([718b1b5](https://github.com/shaka-project/shaka-player/commit/718b1b5dd0c5706e9ae3f5904d6d05a094f8aeea))
+* Limit recursion depth in TXml to prevent stack overflow DoS ([#9964](https://github.com/shaka-project/shaka-player/issues/9964)) ([1872957](https://github.com/shaka-project/shaka-player/commit/1872957233aff336306cac9ed4f0e7c89de5f4e4))
+
+
+### Performance Improvements
+
+* **transmuxer:** Reduce allocations in the h264 transmuxer ([#9963](https://github.com/shaka-project/shaka-player/issues/9963)) ([1a6b183](https://github.com/shaka-project/shaka-player/commit/1a6b183700c8ce8fdca1bf27691e57d7cbabfd9b))
+
 ## [4.16.26](https://github.com/shaka-project/shaka-player/compare/v4.16.25...v4.16.26) (2026-04-09)
 
 
