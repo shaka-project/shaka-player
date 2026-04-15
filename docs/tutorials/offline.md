@@ -68,7 +68,6 @@ the end of the tutorial.
 
     <video id="video"
            width="640"
-           poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
            controls autoplay></video>
 
     <table id="content-table" style="width:640px"></table>
@@ -430,7 +429,6 @@ That’s it! For your convenience, here is the completed code:
 
     <video id="video"
            width="640"
-           poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
            controls autoplay></video>
 
     <table id="content-table" style="width:640px"></table>

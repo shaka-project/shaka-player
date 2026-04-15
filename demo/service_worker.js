@@ -90,8 +90,8 @@ const CRITICAL_RESOURCES = [
 const OPTIONAL_RESOURCES = [
   // Optional graphics.  Without these, the site won't be broken.
   'favicon.ico',
-  'https://shaka-player-demo.appspot.com/assets/poster.jpg',
-  'https://shaka-player-demo.appspot.com/assets/audioOnly.gif',
+  'poster.png',
+  'poster-audio.gif',
 
   // The cast sender SDK.
   'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
