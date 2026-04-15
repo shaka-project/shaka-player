@@ -254,4 +254,116 @@ describe('DrmUtils', () => {
       expect(result).toBe(false);
     });
   });
+
+  describe('getUuidMap', () => {
+    it('returns UUIDs with dashes by default', () => {
+      const map = shaka.drm.DrmUtils.getUuidMap();
+
+      expect(map['edef8ba9-79d6-4ace-a3c8-27dcd51d21ed'])
+          .toBe('com.widevine.alpha');
+
+      expect(map['9a04f079-9840-4286-ab92-e65be0885f95'])
+          .toBe('com.microsoft.playready');
+    });
+
+    it('returns UUIDs without dashes when requested', () => {
+      const map = shaka.drm.DrmUtils.getUuidMap(/* withoutDashes= */ true);
+
+      expect(map['edef8ba979d64acea3c827dcd51d21ed'])
+          .toBe('com.widevine.alpha');
+
+      expect(map['9a04f07998404286ab92e65be0885f95'])
+          .toBe('com.microsoft.playready');
+    });
+
+    it('does not include dashed UUIDs when withoutDashes is true', () => {
+      const map = shaka.drm.DrmUtils.getUuidMap(/* withoutDashes= */ true);
+
+      expect(map['edef8ba9-79d6-4ace-a3c8-27dcd51d21ed'])
+          .toBeUndefined();
+    });
+
+    it('returns consistent number of entries in both modes', () => {
+      const withDashes = shaka.drm.DrmUtils.getUuidMap();
+      const withoutDashes =
+          shaka.drm.DrmUtils.getUuidMap(/* withoutDashes= */ true);
+
+      expect(Object.keys(withDashes).length)
+          .toBe(Object.keys(withoutDashes).length);
+    });
+
+    it('correctly normalizes UUIDs by removing all dashes', () => {
+      const withDashes = shaka.drm.DrmUtils.getUuidMap();
+      const withoutDashes =
+          shaka.drm.DrmUtils.getUuidMap(/* withoutDashes= */ true);
+
+      for (const key in withDashes) {
+        const normalized = key.replace(/-/g, '');
+        expect(withoutDashes[normalized]).toBe(withDashes[key]);
+      }
+    });
+
+    it('maps multiple UUIDs to the same key system (ClearKey)', () => {
+      const map = shaka.drm.DrmUtils.getUuidMap();
+
+      expect(map['1077efec-c0b2-4d02-ace3-3c1e52e2fb4b'])
+          .toBe('org.w3.clearkey');
+
+      expect(map['e2719d58-a985-b3c9-781a-b030af78d30e'])
+          .toBe('org.w3.clearkey');
+    });
+
+    it('maps multiple UUIDs to the same key system (PlayReady)', () => {
+      const map = shaka.drm.DrmUtils.getUuidMap();
+
+      expect(map['9a04f079-9840-4286-ab92-e65be0885f95'])
+          .toBe('com.microsoft.playready');
+
+      expect(map['79f0049a-4098-8642-ab92-e65be0885f95'])
+          .toBe('com.microsoft.playready');
+    });
+
+    it('returns UUIDs in URN format when requested', () => {
+      const map = shaka.drm.DrmUtils.getUuidMap(
+          /* withoutDashes= */ false,
+          /* useUrnFormat= */ true);
+
+      expect(map['urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed'])
+          .toBe('com.widevine.alpha');
+
+      expect(map['urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95'])
+          .toBe('com.microsoft.playready');
+    });
+
+    it('does not include non-URN UUIDs when useUrnFormat is true', () => {
+      const map = shaka.drm.DrmUtils.getUuidMap(false, true);
+
+      expect(map['edef8ba9-79d6-4ace-a3c8-27dcd51d21ed'])
+          .toBeUndefined();
+    });
+
+    it('useUrnFormat takes precedence over withoutDashes', () => {
+      const map = shaka.drm.DrmUtils.getUuidMap(
+          /* withoutDashes= */ true,
+          /* useUrnFormat= */ true);
+
+      expect(map['urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed'])
+          .toBe('com.widevine.alpha');
+
+      expect(map['urn:uuid:edef8ba979d64acea3c827dcd51d21ed'])
+          .toBeUndefined();
+    });
+
+    it('useUrnFormat takes precedence over withoutDashes', () => {
+      const map = shaka.drm.DrmUtils.getUuidMap(
+          /* withoutDashes= */ true,
+          /* useUrnFormat= */ true);
+
+      expect(map['urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed'])
+          .toBe('com.widevine.alpha');
+
+      expect(map['urn:uuid:edef8ba979d64acea3c827dcd51d21ed'])
+          .toBeUndefined();
+    });
+  });
 });
