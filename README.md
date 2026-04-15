@@ -204,11 +204,11 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 ## MOQT Streaming Format (MSF) (Experimental)
 
 Features supported:
- - Media over QUIC Transport [draft-14](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/14/)
+ - Media over QUIC Transport [draft-14](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/14/) and [draft-16](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/16/)
  - MOQT Streaming Format [draft-0](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/00/) and CMSF [draft-0](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/00/)
  - Audio, Video and Text
  - ABR (only navigator.connection change event)
- - Encrypted content with PSSH in the initData
+ - DRM support for Widevine, PlayReady, FairPlay and ClearKey, using the CMSF ContentProtection
  - MP4 / CMAF support
  - Live
  - For browsers that support WebTransport certificate fingerprints (e.g., Chrome), you can use self-signed certificates without installing them.
