@@ -55,7 +55,7 @@ describe('Player', () => {
 
     // Make sure that live streams are synced against a good clock.
     player.configure('manifest.dash.clockSyncUri',
-        'https://shaka-player-demo.appspot.com/time.txt');
+        'https://time.akamai.com/?ms&iso');
 
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
