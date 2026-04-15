@@ -1331,9 +1331,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // setEnabledShakaControls:
     this.videoContainer_.setAttribute('shaka-controls', 'true');
 
-    this.eventManager_.listen(this.controlsContainer_, 'touchend', (e) => {
-      this.onContainerTouch(e);
-    });
+    if (navigator.maxTouchPoints > 0) {
+      this.eventManager_.listen(this.controlsContainer_, 'touchend', (e) => {
+        this.onContainerTouch(e);
+      });
+    }
 
     this.eventManager_.listen(this.controlsContainer_, 'click', () => {
       this.onContainerClick();
@@ -1637,13 +1639,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onMouseMove_(e);
     });
 
-    this.eventManager_.listen(this.videoContainer_, 'touchmove', (e) => {
-      this.onMouseMove_(e);
-    }, {passive: true});
+    if (navigator.maxTouchPoints > 0) {
+      this.eventManager_.listen(this.videoContainer_, 'touchmove', (e) => {
+        this.onMouseMove_(e);
+      }, {passive: true});
 
-    this.eventManager_.listen(this.videoContainer_, 'touchend', (e) => {
-      this.onMouseMove_(e);
-    }, {passive: true});
+      this.eventManager_.listen(this.videoContainer_, 'touchend', (e) => {
+        this.onMouseMove_(e);
+      }, {passive: true});
+    }
 
     this.eventManager_.listen(this.videoContainer_, 'mouseleave', () => {
       this.onMouseLeave_();
