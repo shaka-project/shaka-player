@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.0.11](https://github.com/shaka-project/shaka-player/compare/v5.0.10...v5.0.11) (2026-04-15)
+
+
+### Bug Fixes
+
+* Fix MIME type detection for uppercase types ([#9976](https://github.com/shaka-project/shaka-player/issues/9976)) ([3ac9ac2](https://github.com/shaka-project/shaka-player/commit/3ac9ac288f7fb82b6d46c25c5d2dbacf88811a26))
+* Fix suspend caption rendering when captions container is not visible ([#9959](https://github.com/shaka-project/shaka-player/issues/9959)) ([95efa78](https://github.com/shaka-project/shaka-player/commit/95efa7837e6509656144b47a65411ffbf10e516f))
+* include unencrypted decodingConfigs in preferredKeySystems loop ([#9975](https://github.com/shaka-project/shaka-player/issues/9975)) ([1e7295f](https://github.com/shaka-project/shaka-player/commit/1e7295f09d8a97d90d784724bd0c5330fe696d67))
+* Limit recursion depth in TXml to prevent stack overflow DoS ([#9964](https://github.com/shaka-project/shaka-player/issues/9964)) ([62a2035](https://github.com/shaka-project/shaka-player/commit/62a20359429fb6af98c5b2b91273e9971f56d108))
+
+
+### Performance Improvements
+
+* **transmuxer:** Reduce allocations in the h264 transmuxer ([#9963](https://github.com/shaka-project/shaka-player/issues/9963)) ([cedb985](https://github.com/shaka-project/shaka-player/commit/cedb9851c290db79c53a46eb370240e80e645ea1))
+
 ## [5.0.10](https://github.com/shaka-project/shaka-player/compare/v5.0.9...v5.0.10) (2026-04-09)
 
 
