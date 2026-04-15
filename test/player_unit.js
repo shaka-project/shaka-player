@@ -5139,6 +5139,11 @@ describe('Player', () => {
     expect(player.getAssetUri()).toBeNull();
   });
 
+  it('getMimeType case insensitive', async () => {
+    await player.load(fakeManifestUri, 0, fakeMimeType.toUpperCase());
+    expect(player.getMimeType()).toBe(fakeMimeType);
+  });
+
   /**
    * Gets the currently active variant track.
    * @return {shaka.extern.Track}
