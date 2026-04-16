@@ -2615,6 +2615,8 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.EYEVINN)
       .addFeature(shakaAssets.Feature.MSF)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
       .setMimeType('application/msf'),
   new ShakaDemoAssetInfo(
       /* name= */ 'moqlivemock Multi-DRM',
@@ -2626,6 +2628,8 @@ shakaAssets.testAssets = [
       .addKeySystem(shakaAssets.KeySystem.FAIRPLAY)
       .addFeature(shakaAssets.Feature.MSF)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
       .setExtraConfig({
         manifest: {
           msf: {
@@ -2660,6 +2664,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .setExtraConfig({
         manifest: {
           msf: {
@@ -2675,6 +2680,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .setExtraConfig({
         manifest: {
           msf: {
@@ -2690,6 +2696,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .setExtraConfig({
         manifest: {
           msf: {
@@ -2705,6 +2712,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .setExtraConfig({
         manifest: {
           msf: {
@@ -2720,6 +2728,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .setExtraConfig({
         manifest: {
           msf: {
@@ -2735,6 +2744,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .setExtraConfig({
         manifest: {
           msf: {
@@ -2750,6 +2760,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .setExtraConfig({
         manifest: {
           msf: {
