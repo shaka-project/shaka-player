@@ -448,12 +448,12 @@ shakaDemo.Main = class {
 
     this.player_.addEventListener('loaded', () => {
       if (this.player_.isAudioOnly()) {
-        if (this.video_.poster == shakaDemo.Main.mainPoster_) {
-          this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
-        }
-      } else {
-        if (this.video_.poster == shakaDemo.Main.audioOnlyPoster_) {
-          this.video_.poster = shakaDemo.Main.mainPoster_;
+        const queueItemMetadata =
+            this.controls_.getQueueManager().getCurrentItem()?.metadata;
+        if (queueItemMetadata) {
+          if (this.video_.poster == queueItemMetadata.poster) {
+            this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
+          }
         }
       }
     });
