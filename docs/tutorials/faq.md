@@ -273,9 +273,9 @@ is recommended to use the `--create_session_keys` option.
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 [`ManagedMediaSource` W3C spec proposal]: https://github.com/w3c/media-source/issues/320
 [Shaka Player Embedded]: https://github.com/shaka-project/shaka-player-embedded
-[auth]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-server-auth.html
-[buffering]: https://shaka-player-demo.appspot.com/docs/api/tutorial-network-and-buffering-config.html
-[drm_tutorial]: https://shaka-player-demo.appspot.com/docs/api/tutorial-drm-config.html
+[auth]: https://shaka-project.github.io/shaka-player/docs/api/tutorial-license-server-auth.html
+[buffering]: https://shaka-project.github.io/shaka-player/docs/api/tutorial-network-and-buffering-config.html
+[drm_tutorial]: https://shaka-project.github.io/shaka-player/docs/api/tutorial-drm-config.html
 [eme_https]: https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins
-[wrapping]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-wrapping.html
+[wrapping]: https://shaka-project.github.io/shaka-player/docs/api/tutorial-license-wrapping.html
 [including mux.js]: https://github.com/shaka-project/shaka-player/blob/967f3399/demo/index.html#L39
