@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// cspell:ignore playenabler moqtail cmsf testsrc eccp
+// cspell:ignore playenabler moqtail testsrc eccp
 
 /**
  * @fileoverview

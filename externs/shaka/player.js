@@ -1652,6 +1652,7 @@ shaka.extern.HlsManifestConfiguration;
  *   subscribeFilterType: shaka.config.MsfFilterType,
  *   useFetchCatalog: boolean,
  *   version: shaka.config.MsfVersion,
+ *   catalogPreprocessor: function(!msfCatalog.Catalog),
  * }}
  *
  * @property {string} fingerprintUri
@@ -1689,6 +1690,10 @@ shaka.extern.HlsManifestConfiguration;
  *   MoQ version used in the connection.
  *   <br>
  *   Defaults to <code>shaka.config.MsfVersion.AUTO</code>.
+ * @property {function(!msfCatalog.Catalog)} catalogPreprocessor
+ *   Called immediately after the CMSF/MSF catalog has been parsed.
+ *   Provides a way for applications to perform efficient preprocessing of the
+ *   catalog.
  * @exportDoc
  */
 shaka.extern.MsfManifestConfiguration;
