@@ -448,12 +448,12 @@ shakaDemo.Main = class {
 
     this.player_.addEventListener('loaded', () => {
       if (this.player_.isAudioOnly()) {
-        if (this.video_.poster == shakaDemo.Main.mainPoster_) {
-          this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
-        }
-      } else {
-        if (this.video_.poster == shakaDemo.Main.audioOnlyPoster_) {
-          this.video_.poster = shakaDemo.Main.mainPoster_;
+        const queueItemMetadata =
+            this.controls_.getQueueManager().getCurrentItem()?.metadata;
+        if (queueItemMetadata) {
+          if (this.video_.poster == queueItemMetadata.poster) {
+            this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
+          }
         }
       }
     });
@@ -1578,8 +1578,6 @@ shakaDemo.Main = class {
     shaka.util.PlayerConfiguration.mergeConfigObjects(
         itemConfig, assetConfig, itemConfig);
     const isOffline = asset.storedContent && asset.storedContent.offlineUri;
-    const poster = this.player_.isAudioOnly ?
-        shakaDemo.Main.audioOnlyPoster_ : asset.iconUri;
     /** @type {shaka.extern.QueueItem} */
     const queueItem = {
       manifestUri: manifestUri,
@@ -1592,7 +1590,7 @@ shakaDemo.Main = class {
       extraChapter: asset.extraChapter,
       metadata: {
         title: asset.name,
-        poster,
+        poster: asset.iconUri,
       },
     };
     return queueItem;
