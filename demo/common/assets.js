@@ -2615,6 +2615,24 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MSF)
       .addFeature(shakaAssets.Feature.MP4)
       .setMimeType('application/msf'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqlivemock Multi-DRM',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://moqlivemock.demo.osaas.io/moq',
+      /* source= */ shakaAssets.Source.EYEVINN)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
+      .addKeySystem(shakaAssets.KeySystem.FAIRPLAY)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['cmsf/drm-cbcs'],
+          },
+        },
+      })
+      .setMimeType('application/msf'),
   // }}}
 ];
 /* eslint-enable @stylistic/max-len */
