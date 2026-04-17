@@ -104,6 +104,13 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
      */
     this.wasPlaying_ = false;
 
+    /**
+     * True when seek-based trick play scrub mode is active during a drag.
+     *
+     * @private {boolean}
+     */
+    this.isScrubMode_ = false;
+
 
     /** @private {!HTMLElement} */
     this.thumbnailContainer_ = shaka.util.Dom.createHTMLElement('div');
@@ -263,7 +270,16 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   onChangeStart() {
     this.wasPlaying_ = !this.video.paused;
     this.controls.setSeeking(true);
-    this.video.pause();
+
+    const config = this.player.getConfiguration();
+    if (config.streaming && config.streaming.seekBasedTrickPlay &&
+        config.streaming.seekBasedTrickPlay.enabled) {
+      this.isScrubMode_ = true;
+      this.player.startScrub();
+    } else {
+      this.video.pause();
+    }
+
     this.hideThumbnailTimer_.stop();
     this.isMoving_ = true;
   }
@@ -292,7 +308,13 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     //
     // Calling |start| on an already pending timer will cancel the old request
     // and start the new one.
-    this.seekTimer_.tickAfter(/* seconds= */ 0.125);
+    if (this.isScrubMode_) {
+      // In scrub mode the controller handles gating and render-pending
+      // checks, so we can forward every drag position directly.
+      this.player.scrubSeek(this.getValue());
+    } else {
+      this.seekTimer_.tickAfter(/* seconds= */ 0.125);
+    }
 
     if (!this.controls.anySettingsMenusAreOpen()) {
       this.showThumbnailAtValue_(this.getValue());
@@ -308,14 +330,22 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @override
    */
   onChangeEnd() {
-    // They just let go of the seek bar, so cancel the timer and manually
-    // call the event so that we can respond immediately.
-    this.seekTimer_.tickNow();
-    this.controls.setSeeking(false);
+    if (this.isScrubMode_) {
+      // Force a final seek to the bar's exact position, then end scrub.
+      this.player.scrubSeek(this.getValue(), /* force= */ true);
+      this.player.endScrub();
+      this.isScrubMode_ = false;
+    } else {
+      // They just let go of the seek bar, so cancel the timer and manually
+      // call the event so that we can respond immediately.
+      this.seekTimer_.tickNow();
 
-    if (this.wasPlaying_) {
-      this.video.play();
+      if (this.wasPlaying_) {
+        this.video.play();
+      }
     }
+
+    this.controls.setSeeking(false);
 
     if (this.isMoving_) {
       this.isMoving_ = false;

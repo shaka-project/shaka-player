@@ -1977,6 +1977,95 @@ shaka.extern.SpeechToTextConfiguration;
 
 /**
  * @typedef {{
+ *   enabled: boolean,
+ *   seekCadence: number,
+ *   forwardFpsFactor: number,
+ *   reverseFpsFactor: number,
+ *   baseFps: number,
+ *   minFps: number,
+ *   maxFps: number,
+ *   enableOvershootCorrection: boolean,
+ *   downloadAudioDuringTrickPlay: boolean,
+ * }}
+ *
+ * @description
+ * Configuration for seek-based trick play.  When enabled, trick-play is
+ * performed by repeatedly seeking instead of changing the playback rate.
+ * This is more reliable on platforms that do not support non-standard
+ * playback rates (e.g. WebOS, Tizen).
+ *
+ * The frame rate adaptive model is ported from ExoPlayer's Virtual Trick
+ * Play (VTP) system.  The target FPS is computed as
+ * {@code |rate| × fpsFactor + baseFps} where {@code fpsFactor} is
+ * {@code forwardFpsFactor} or {@code reverseFpsFactor} depending on
+ * direction.
+ *
+ * @property {boolean} enabled
+ *   If true, trick-play is performed using repeated seek operations
+ *   instead of changing the playback rate.
+ *   <br>
+ *   Defaults to <code>false</code> except on Tizen and WebOS whose
+ *   default value is <code>true</code>.
+ * @property {number} seekCadence
+ *   The interval in seconds between each seek-position update during
+ *   seek-based trick play.  Smaller values produce smoother visuals
+ *   (more frames per second) at the cost of more frequent seeks.
+ *   <br>
+ *   Defaults to <code>0.1</code> (100 ms).
+ * @property {number} forwardFpsFactor
+ *   Multiplier applied to the absolute trick-play rate to compute the
+ *   target frame rate during forward trick play.  Higher values produce
+ *   more frames per second at a given speed.
+ *   <br>
+ *   Defaults to <code>0.067</code>.
+ * @property {number} reverseFpsFactor
+ *   Multiplier applied to the absolute trick-play rate to compute the
+ *   target frame rate during reverse trick play.  A lower value than
+ *   {@code forwardFpsFactor} accounts for the higher seek latency when
+ *   going backwards.
+ *   <br>
+ *   Defaults to <code>0.043</code>.
+ * @property {number} baseFps
+ *   Base frame rate added to the speed-dependent component.
+ *   <br>
+ *   Defaults to <code>2.5</code>.
+ * @property {number} minFps
+ *   Minimum target frames per second (clamp floor).
+ *   <br>
+ *   Defaults to <code>2</code>.
+ * @property {number} maxFps
+ *   Maximum target frames per second (clamp ceiling).
+ *   <br>
+ *   Defaults to <code>10</code>.
+ * @property {boolean} enableOvershootCorrection
+ *   If true, when trick play is cancelled the player will seek back to
+ *   the position of a recently-rendered frame to compensate for human
+ *   reaction time.  Ported from ExoPlayer VTP's overshoot correction.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} downloadAudioDuringTrickPlay
+ *   If true, audio track segments are downloaded alongside video I-frame
+ *   segments during trick play.  The audio SourceBuffer is kept attached
+ *   to the MediaSource so that {@code HTMLMediaElement.buffered} (which is
+ *   the intersection of all active SourceBuffers) includes the audio range.
+ *   <br>
+ *   Some platforms (e.g. WebOS) require audio data at the seek target for
+ *   the browser to complete seeks and render I-frames.  On those platforms
+ *   this should be set to <code>true</code>.
+ *   <br>
+ *   When false (default), the audio SourceBuffer is detached during trick
+ *   play so that only video data is needed to resolve seeks, and audio
+ *   downloads are suppressed to save bandwidth for I-frame fetching.
+ *   <br>
+ *   Defaults to <code>false</code> except on WebOS whose default value is
+ *   <code>true</code>.
+ * @exportDoc
+ */
+shaka.extern.SeekBasedTrickPlayConfiguration;
+
+
+/**
+ * @typedef {{
  *   retryParameters: shaka.extern.RetryParameters,
  *   failureCallback: function(!shaka.util.Error),
  *   rebufferingGoal: number,
@@ -2023,6 +2112,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   returnToEndOfLiveWindowWhenOutside: boolean,
  *   stopFetchingOnPause: boolean,
  *   clampAppendWindowToDuration: boolean,
+ *   seekBasedTrickPlay: shaka.extern.SeekBasedTrickPlayConfiguration,
  * }}
  *
  * @description
@@ -2283,6 +2373,8 @@ shaka.extern.SpeechToTextConfiguration;
  *   "ended" when seeking to end.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {shaka.extern.SeekBasedTrickPlayConfiguration} seekBasedTrickPlay
+ *   Configuration for seek-based trick play.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

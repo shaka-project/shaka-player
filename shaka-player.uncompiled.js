@@ -35,6 +35,7 @@ goog.require('shaka.media.InitSegmentReference');
 goog.require('shaka.media.ManifestParser');
 goog.require('shaka.media.PreferenceBasedCriteria');
 goog.require('shaka.media.PresentationTimeline');
+goog.require('shaka.media.SeekBasedTrickPlayController');
 goog.require('shaka.media.SegmentIndex');
 goog.require('shaka.media.SegmentReference');
 goog.require('shaka.msf.MSFParser');

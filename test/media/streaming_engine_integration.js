@@ -276,6 +276,9 @@ describe('StreamingEngine', () => {
       disableStream: (stream, time) => false,
       shouldPrefetchNextSegment: () => true,
       getKeySystem: () => '',
+      isSeekBasedTrickPlayActive: () => false,
+      getTrickPlayDirection: () => 'none',
+      shouldDownloadAudioDuringTrickPlay: () => false,
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface);

@@ -51,6 +51,7 @@
 +../../lib/media/segment_index.js
 +../../lib/media/segment_reference.js
 +../../lib/media/streaming_engine.js
++../../lib/media/seek_based_trick_play_controller.js
 +../../lib/media/segment_prefetch.js
 +../../lib/media/segment_utils.js
 +../../lib/media/time_ranges_utils.js

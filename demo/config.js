@@ -711,6 +711,38 @@ shakaDemo.Config = class {
             'streaming.stopFetchingOnPause');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
+    this.addSeekBasedTrickPlaySection_();
+  }
+
+  /** @private */
+  addSeekBasedTrickPlaySection_() {
+    const docLink =
+        this.resolveExternLink_('.SeekBasedTrickPlayConfiguration');
+    this.addSection_('Streaming Seek-Based Trick Play', docLink);
+    this.addBoolInput_('Enabled',
+        'streaming.seekBasedTrickPlay.enabled')
+        .addNumberInput_('Seek Cadence (seconds)',
+            'streaming.seekBasedTrickPlay.seekCadence',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Forward FPS Factor',
+            'streaming.seekBasedTrickPlay.forwardFpsFactor',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Reverse FPS Factor',
+            'streaming.seekBasedTrickPlay.reverseFpsFactor',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Base FPS',
+            'streaming.seekBasedTrickPlay.baseFps',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Min FPS',
+            'streaming.seekBasedTrickPlay.minFps',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Max FPS',
+            'streaming.seekBasedTrickPlay.maxFps',
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Enable Overshoot Correction',
+            'streaming.seekBasedTrickPlay.enableOvershootCorrection')
+        .addBoolInput_('Download Audio During Trick Play',
+            'streaming.seekBasedTrickPlay.downloadAudioDuringTrickPlay');
   }
 
   /** @private */
