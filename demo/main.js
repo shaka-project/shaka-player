@@ -451,7 +451,10 @@ shakaDemo.Main = class {
         const queueItemMetadata =
             this.controls_.getQueueManager().getCurrentItem()?.metadata;
         if (queueItemMetadata) {
-          if (this.video_.poster == queueItemMetadata.poster) {
+          // This prevents the browser from normalizing it.
+          const poster = this.video_.getAttribute('poster');
+          if (poster == queueItemMetadata.poster ||
+              poster == shakaDemo.Main.mainPoster_) {
             this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
           }
         }
