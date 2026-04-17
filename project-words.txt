@@ -492,6 +492,7 @@ TARGETDURATION
 SQUEEZECURRENT
 
 # MSF (Media over QUIC Transport Streaming format)
+cmsf
 moqt
 msf
 QUIC
