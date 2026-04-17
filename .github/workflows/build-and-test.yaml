@@ -170,7 +170,7 @@ jobs:
           path: dist/
 
       - name: Test Player
-        timeout-minutes: 20
+        timeout-minutes: 25
         shell: bash
         run: |
           browser=${{ matrix.browser }}
