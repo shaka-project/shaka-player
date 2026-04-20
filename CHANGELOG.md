@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.16.28](https://github.com/shaka-project/shaka-player/compare/v4.16.27...v4.16.28) (2026-04-20)
+
+
+### Bug Fixes
+
+* Avoid uncaught TypeError when destroying player during DRM key status change ([#9992](https://github.com/shaka-project/shaka-player/issues/9992)) ([3773838](https://github.com/shaka-project/shaka-player/commit/37738381f1d084191ff7dfb395049cc3ec5de49c))
+* Clamp playback rate to 16x and improve playhead movement behavior ([#9996](https://github.com/shaka-project/shaka-player/issues/9996)) ([8d7fa85](https://github.com/shaka-project/shaka-player/commit/8d7fa856f0bde8a1e5f84c5de89de121001b35b7))
+* **HLS:** Fix SAMPLE-AES identity stall at waitingforkey event on track switch ([#10000](https://github.com/shaka-project/shaka-player/issues/10000)) ([6b53fe6](https://github.com/shaka-project/shaka-player/commit/6b53fe65efc2eb1ef22936333e9004d0abdbd87a))
+
 ## [4.16.27](https://github.com/shaka-project/shaka-player/compare/v4.16.26...v4.16.27) (2026-04-15)
 
 
