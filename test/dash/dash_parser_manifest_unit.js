@@ -540,6 +540,31 @@ describe('DashParser Manifest', () => {
     expect(stream.spatialAudio).toBe(true);
   });
 
+  // eslint-disable-next-line @stylistic/max-len
+  it('Detect spatial audio in Dolby AC-4 for immersive stereo content', async () => {
+    const idUri = 'tag:dolby.com,2016:dash:virtualized_content:2016';
+    const source = [
+      '<MPD>',
+      '  <Period duration="PT30M">',
+      '    <AdaptationSet mimeType="audio/mp4" lang="\u2603">',
+      '      <Representation bandwidth="500">',
+      '        <SupplementalProperty schemeIdUri="' + idUri + '" value="1"/>',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', source);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const stream = manifest.variants[0].audio;
+    expect(stream.spatialAudio).toBe(true);
+  });
+
   it('correctly parses CEA-608 closed caption tags without channel numbers',
       async () => {
         const source = [
