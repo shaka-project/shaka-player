@@ -1,5 +1,24 @@
 # Changelog
 
+## [5.1.1](https://github.com/shaka-project/shaka-player/compare/v5.1.0...v5.1.1) (2026-04-20)
+
+
+### Bug Fixes
+
+* Avoid uncaught TypeError when destroying player during DRM key status change ([#9992](https://github.com/shaka-project/shaka-player/issues/9992)) ([0fdced6](https://github.com/shaka-project/shaka-player/commit/0fdced67255e07e4973c9e2e21055a645d9d73f5))
+* Clamp playback rate to 16x and improve playhead movement behavior ([#9996](https://github.com/shaka-project/shaka-player/issues/9996)) ([9692dee](https://github.com/shaka-project/shaka-player/commit/9692dee6066852c6192c8f748ba9b4bde6e7b4c7))
+* **demo:** Fix audio-only animated poster ([#9986](https://github.com/shaka-project/shaka-player/issues/9986)) ([18e5e25](https://github.com/shaka-project/shaka-player/commit/18e5e25e419ee08de27e9472134bad78da82c996))
+* **Demo:** Fix audio-only animated poster on custom content ([#9995](https://github.com/shaka-project/shaka-player/issues/9995)) ([cd2996c](https://github.com/shaka-project/shaka-player/commit/cd2996c67476d6157cfa12de088657c840757e83))
+* **HLS:** Fix SAMPLE-AES identity stall at waitingforkey event on track switch ([#10000](https://github.com/shaka-project/shaka-player/issues/10000)) ([1824679](https://github.com/shaka-project/shaka-player/commit/18246798135803aa35d1d7f85b28a3a2f2ccf850))
+* **MSF:** Fix namespace handling ([#9988](https://github.com/shaka-project/shaka-player/issues/9988)) ([ba21789](https://github.com/shaka-project/shaka-player/commit/ba21789c3d463698f98462367d1afba0e448f8c1))
+* **UI:** Fix wrong wheel directions on volume bar ([#10001](https://github.com/shaka-project/shaka-player/issues/10001)) ([1276f8d](https://github.com/shaka-project/shaka-player/commit/1276f8d6c6852b4fe2d590543019c486e7bc8bbc))
+
+
+### Performance Improvements
+
+* **HLS:** skip merging known segments on live playlist updates ([#9998](https://github.com/shaka-project/shaka-player/issues/9998)) ([9b32a7a](https://github.com/shaka-project/shaka-player/commit/9b32a7a80092ea1e4733a3a0ed7954985c5642c4))
+* **UI:** Skip touch listeners when maxTouchPoints is 0 ([#9981](https://github.com/shaka-project/shaka-player/issues/9981)) ([d27b7c4](https://github.com/shaka-project/shaka-player/commit/d27b7c4f8f50fdef115caeb15a380bed31650fe8))
+
 ## [5.1.0](https://github.com/shaka-project/shaka-player/compare/v5.0.0...v5.1.0) (2026-04-15)
 
 
