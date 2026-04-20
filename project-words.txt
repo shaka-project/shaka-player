@@ -288,6 +288,7 @@ hdlr
 hvcc
 iamf
 imagetype
+imsa
 imsc
 inband
 isom
