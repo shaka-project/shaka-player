@@ -186,7 +186,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
 
     event.preventDefault();
 
-    let newValue = this.getValue() + (event.deltaY > 0 ? 1 : -1);
+    let newValue = this.getValue() + (event.deltaY > 0 ? -1 : 1);
 
     // Clamp value between 0 and 100
     newValue = Math.max(0, Math.min(100, newValue));
