@@ -1,5 +1,7 @@
 # events / html
 abrstatuschanged
+haspopup
+menuitemradio
 adblocker
 audiofocuspaused
 audiofocusgranted
