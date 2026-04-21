@@ -88,6 +88,8 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
   addButton_(iconText) {
     /** @protected {!HTMLButtonElement} */
     this.button = shaka.util.Dom.createButton();
+    this.button.setAttribute('aria-haspopup', 'true');
+    this.button.setAttribute('aria-expanded', 'false');
     this.button.classList.add('shaka-overflow-button');
 
     /** @protected {!shaka.ui.Icon}*/
@@ -118,6 +120,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     this.menu = shaka.util.Dom.createHTMLElement('div');
     this.menu.classList.add('shaka-no-propagation');
     this.menu.classList.add('shaka-show-controls-on-mouse-over');
+    this.menu.setAttribute('role', 'menu');
     if (this.isSubMenu) {
       this.menu.classList.add('shaka-sub-menu');
     } else {
@@ -131,6 +134,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     this.menu.appendChild(this.backButton);
     this.eventManager.listen(this.backButton, 'click', () => {
       this.controls.hideSettingsMenus();
+      this.backButton.focus();
     });
 
     /** @private {shaka.ui.Icon} */
@@ -195,6 +199,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
   onButtonClick_() {
     if (!this.parent.classList.contains('shaka-context-menu')) {
       this.controls.hideContextMenus();
+      this.button.setAttribute('aria-expanded', 'false');
     }
     if (!this.isSubMenu && this.controls.anySettingsMenusAreOpen()) {
       this.controls.hideSettingsMenus();
@@ -206,8 +211,11 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
         shaka.ui.Utils.setDisplay(this.menu, true);
         shaka.ui.Utils.focusOnTheChosenItem(this.menu);
         this.adjustCustomStyle_();
+        this.button.setAttribute('aria-expanded', 'true');
       } else {
         shaka.ui.Utils.setDisplay(this.menu, false);
+        this.button.setAttribute('aria-expanded', 'false');
+        this.button.focus();
       }
     }
   }
