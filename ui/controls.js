@@ -1141,7 +1141,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         placeholder.appendChild(posterDiv);
       }
     }
-    const iconWrapper = document.createElement('div');
+    const iconWrapper = shaka.util.Dom.createHTMLElement('div');
     iconWrapper.classList.add('pip-icon-wrapper');
     placeholder.appendChild(iconWrapper);
     const pipIcon = (new shaka.ui.Icon(iconWrapper,
