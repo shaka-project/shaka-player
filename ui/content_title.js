@@ -34,6 +34,8 @@ shaka.ui.ContentTitle = class extends shaka.ui.Element {
     /** @type {!HTMLElement} */
     this.title_ = shaka.util.Dom.createHTMLElement('div');
     this.title_.classList.add('shaka-content-title');
+    this.title_.setAttribute('role', 'heading');
+    this.title_.setAttribute('aria-level', '2');
     this.parent.appendChild(this.title_);
 
     this.eventManager.listen(this.player, 'unloading', () => {

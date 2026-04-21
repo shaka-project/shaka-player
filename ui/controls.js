@@ -1526,6 +1526,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.controlsButtonPanel_.classList.add('shaka-controls-button-panel');
     this.controlsButtonPanel_.classList.add(
         'shaka-show-controls-on-mouse-over');
+    this.controlsButtonPanel_.setAttribute('role', 'toolbar');
+
     if (this.config_.enableTooltips) {
       this.controlsButtonPanel_.classList.add('shaka-tooltips-on');
     }
