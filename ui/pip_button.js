@@ -44,6 +44,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     this.pipButton_.classList.add('shaka-pip-button');
     this.pipButton_.classList.add('shaka-tooltip');
     this.pipButton_.classList.add('shaka-no-propagation');
+    this.pipButton_.ariaPressed = 'false';
 
     /** @private {!shaka.ui.Icon} */
     this.pipIcon_ = new shaka.ui.Icon(this.pipButton_,
@@ -140,9 +141,10 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     const LocIds = shaka.ui.Locales.Ids;
     this.pipIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['EXIT_PIP']);
     this.pipButton_.ariaLabel =
-        this.localization.resolve(LocIds.EXIT_PICTURE_IN_PICTURE);
+    this.localization.resolve(LocIds.EXIT_PICTURE_IN_PICTURE);
     this.currentPipState_.textContent =
-        this.localization.resolve(LocIds.ON);
+    this.localization.resolve(LocIds.ON);
+    this.pipButton_.ariaPressed = 'true';
   }
 
 
@@ -151,9 +153,10 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     const LocIds = shaka.ui.Locales.Ids;
     this.pipIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['PIP']);
     this.pipButton_.ariaLabel =
-        this.localization.resolve(LocIds.ENTER_PICTURE_IN_PICTURE);
+    this.localization.resolve(LocIds.ENTER_PICTURE_IN_PICTURE);
     this.currentPipState_.textContent =
-        this.localization.resolve(LocIds.OFF);
+    this.localization.resolve(LocIds.OFF);
+    this.pipButton_.ariaPressed = 'false';
   }
 
 

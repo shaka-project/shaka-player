@@ -63,6 +63,7 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
         return;
       }
       await this.controls.toggleFullScreen();
+      this.button_.focus();
     });
 
     this.eventManager.listen(document, 'fullscreenchange', () => {
@@ -110,6 +111,8 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
         LocIds.EXIT_FULL_SCREEN : LocIds.FULL_SCREEN;
 
     this.button_.ariaLabel = this.localization.resolve(label);
+    this.button_.ariaPressed = this.controls.isFullScreenEnabled() ? 'true' :
+    'false';
   }
 
   /**

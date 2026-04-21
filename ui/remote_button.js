@@ -197,7 +197,10 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         this.callbackId_ = -1;
       }
     }
+    this.remoteButton_.ariaPressed = this.remote_.state == 'connected' ?
+    'true' : 'false';
   }
+
 
   /**
    * @private
