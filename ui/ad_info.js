@@ -77,7 +77,8 @@ shaka.ui.AdInfo = class extends shaka.ui.Element {
    * @private
    */
   updateAriaLabel_() {
-    // TODO
+    const LocIds = shaka.ui.Locales.Ids;
+    this.adInfo_.ariaLabel = this.localization.resolve(LocIds.AD_PROGRESS);
   }
 
   /**
