@@ -44,6 +44,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       disableStream: (stream) => {},
       addFont: (name, url) => {},
       getStreamingRetryParameters: () => dConfig.streaming.retryParameters,
+      onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
 
     parser = new shaka.msf.MSFParser();

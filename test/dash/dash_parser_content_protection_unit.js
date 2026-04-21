@@ -51,6 +51,7 @@ describe('DashParser ContentProtection', () => {
       disableStream: (stream) => {},
       addFont: (name, url) => {},
       getStreamingRetryParameters: () => config.streaming.retryParameters,
+      onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
 
     const actual = await dashParser.start(

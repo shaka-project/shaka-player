@@ -113,6 +113,7 @@ describe('HlsParser', () => {
       disableStream: (stream) => {},
       addFont: (name, url) => {},
       getStreamingRetryParameters: () => dConfig.streaming.retryParameters,
+      onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
 
     parser = new shaka.hls.HlsParser();
