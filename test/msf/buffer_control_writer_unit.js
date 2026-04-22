@@ -11,7 +11,8 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
   }
 
   beforeEach(() => {
-    writer = new shaka.msf.BufferControlWriter();
+    writer =
+        new shaka.msf.BufferControlWriter(shaka.msf.Utils.Version.DRAFT_14);
   });
 
   // eslint-disable-next-line @stylistic/max-len
@@ -169,7 +170,7 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.FETCH_ERROR,
         requestId: BigInt(1),
-        errorCode: BigInt(500),
+        code: BigInt(500),
         reason: 'Error occurred',
       };
       writer.marshalFetchError(msg);
@@ -496,7 +497,7 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.PUBLISH_ERROR,
         requestId: BigInt(1),
-        errorCode: BigInt(500),
+        code: BigInt(500),
         reason: 'Error occurred',
       };
       writer.marshalPublishError(msg);
@@ -554,7 +555,7 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_CANCEL,
         namespace: ['ns1'],
-        errorCode: BigInt(404),
+        code: BigInt(404),
         reason: 'Cancelled',
       };
       writer.marshalPublishNamespaceCancel(msg);
@@ -587,7 +588,7 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE_ERROR,
         requestId: BigInt(1),
-        errorCode: BigInt(500),
+        code: BigInt(500),
         reason: 'Error',
       };
       writer.marshalSubscribeNamespaceError(msg);

@@ -1141,7 +1141,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         placeholder.appendChild(posterDiv);
       }
     }
-    const iconWrapper = document.createElement('div');
+    const iconWrapper = shaka.util.Dom.createHTMLElement('div');
     iconWrapper.classList.add('pip-icon-wrapper');
     placeholder.appendChild(iconWrapper);
     const pipIcon = (new shaka.ui.Icon(iconWrapper,
@@ -1331,9 +1331,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // setEnabledShakaControls:
     this.videoContainer_.setAttribute('shaka-controls', 'true');
 
-    this.eventManager_.listen(this.controlsContainer_, 'touchend', (e) => {
-      this.onContainerTouch(e);
-    });
+    if (navigator.maxTouchPoints > 0) {
+      this.eventManager_.listen(this.controlsContainer_, 'touchend', (e) => {
+        this.onContainerTouch(e);
+      });
+    }
 
     this.eventManager_.listen(this.controlsContainer_, 'click', () => {
       this.onContainerClick();
@@ -1639,13 +1641,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onMouseMove_(e);
     });
 
-    this.eventManager_.listen(this.videoContainer_, 'touchmove', (e) => {
-      this.onMouseMove_(e);
-    }, {passive: true});
+    if (navigator.maxTouchPoints > 0) {
+      this.eventManager_.listen(this.videoContainer_, 'touchmove', (e) => {
+        this.onMouseMove_(e);
+      }, {passive: true});
 
-    this.eventManager_.listen(this.videoContainer_, 'touchend', (e) => {
-      this.onMouseMove_(e);
-    }, {passive: true});
+      this.eventManager_.listen(this.videoContainer_, 'touchend', (e) => {
+        this.onMouseMove_(e);
+      }, {passive: true});
+    }
 
     this.eventManager_.listen(this.videoContainer_, 'mouseleave', () => {
       this.onMouseLeave_();
@@ -2276,12 +2280,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @param {string=} format
+   * @param {number=} imageQuality
    * @export
    */
-  takeScreenshot() {
+  takeScreenshot(format = 'png', imageQuality = 1) {
     if (!this.canTakeScreenshot()) {
       return;
     }
+    const mimeType = `image/${format === 'jpg' ? 'jpeg' : format}`;
     const canvas = /** @type {!HTMLCanvasElement}*/ (
       document.createElement('canvas'));
     const context = /** @type {CanvasRenderingContext2D} */ (
@@ -2293,13 +2300,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    const dataURL = canvas.toDataURL('image/png');
+    const dataURL = canvas.toDataURL(mimeType, imageQuality);
 
     const downloadLink = /** @type {!HTMLAnchorElement}*/ (
       document.createElement('a'));
     downloadLink.href = dataURL;
     downloadLink.download =
-        'videoframe_' + video.currentTime.toFixed(3) + '.png';
+        'videoframe_' + video.currentTime.toFixed(3) + '.' + format;
     downloadLink.click();
   }
 
@@ -2320,12 +2327,19 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    *
    * If the browser lacks support for the Clipboard API, no action will be
    * taken.
+   * If the format is not support by the Clipboard API, no action will be
+   * taken.
    *
    * @param {string=} format
+   * @param {number=} imageQuality
    * @export
    */
-  copyVideoFrameToClipboard(format = 'image/png') {
+  copyVideoFrameToClipboard(format = 'png', imageQuality = 1) {
     if (!this.canCopyVideoFrameToClipboard()) {
+      return;
+    }
+    const mimeType = `image/${format === 'jpg' ? 'jpeg' : format}`;
+    if (!ClipboardItem.supports(mimeType)) {
       return;
     }
     const canvas = /** @type {!HTMLCanvasElement}*/ (
@@ -2342,12 +2356,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Convert canvas to blob and copy to clipboard
     canvas.toBlob((blob) => {
       if (blob) {
-        const item = new ClipboardItem({'image/png': blob});
+        const item = new ClipboardItem({[mimeType]: blob});
         navigator.clipboard.write([item]).catch((error) => {
           shaka.log.error('Failed to copy image to clipboard:', error);
         });
       }
-    }, format);
+    }, mimeType, imageQuality);
   }
 
   /**

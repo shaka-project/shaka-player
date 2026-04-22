@@ -22,7 +22,8 @@ shakaDemo.CloseButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    this.button_ = document.createElement('button');
+    this.button_ =
+      /** @type {!HTMLButtonElement} */ (document.createElement('button'));
     this.button_.classList.add('close-button');
     this.button_.classList.add('shaka-tooltip');
     this.button_.ariaLabel = 'Close';

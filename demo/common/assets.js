@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// cspell:ignore playenabler
+// cspell:ignore playenabler moqtail testsrc eccp
 
 /**
  * @fileoverview
@@ -46,6 +46,7 @@ shakaAssets.Source = {
   BBC: 'BBC',
   DOLBY: 'Dolby',
   EYEVINN: 'Eyevinn',
+  MOQTAIL: 'moqtail',
 };
 
 
@@ -2614,6 +2615,193 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.EYEVINN)
       .addFeature(shakaAssets.Feature.MSF)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .setMimeType('application/msf'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqlivemock Multi-DRM',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://moqlivemock.demo.osaas.io/moq',
+      /* source= */ shakaAssets.Source.EYEVINN)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
+      .addKeySystem(shakaAssets.KeySystem.FAIRPLAY)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['cmsf/drm-cbcs'],
+          },
+        },
+      })
+      .setMimeType('application/msf'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqlivemock ClearKey',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://moqlivemock.demo.osaas.io/moq',
+      /* source= */ shakaAssets.Source.EYEVINN)
+      .addKeySystem(shakaAssets.KeySystem.CLEAR_KEY)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['cmsf/eccp-cbcs'],
+          },
+        },
+      })
+      .setMimeType('application/msf'),
+  // }}}
+
+  // moqtail assets {{{
+  /* moqtail Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqtail testsrc',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://relay.moqtail.dev',
+      /* source= */ shakaAssets.Source.MOQTAIL)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['moqtail', 'testsrc'],
+          },
+        },
+      })
+      .setMimeType('application/msf'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqtail HDR',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ord.abr.moqtail.dev',
+      /* source= */ shakaAssets.Source.MOQTAIL)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['moqtail'],
+          },
+        },
+      })
+      .setMimeType('application/msf'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqtail ch00',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://relay.moqtail.dev',
+      /* source= */ shakaAssets.Source.MOQTAIL)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['moqtail', 'ch00'],
+          },
+        },
+      })
+      .setMimeType('application/msf'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqtail ch01',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://relay.moqtail.dev',
+      /* source= */ shakaAssets.Source.MOQTAIL)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['moqtail', 'ch01'],
+          },
+        },
+      })
+      .setMimeType('application/msf'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqtail ch02',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://relay.moqtail.dev',
+      /* source= */ shakaAssets.Source.MOQTAIL)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['moqtail', 'ch02'],
+          },
+        },
+      })
+      .setMimeType('application/msf'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqtail ch03',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://relay.moqtail.dev',
+      /* source= */ shakaAssets.Source.MOQTAIL)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['moqtail', 'ch03'],
+          },
+        },
+      })
+      .setMimeType('application/msf'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqtail ch04',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://relay.moqtail.dev',
+      /* source= */ shakaAssets.Source.MOQTAIL)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['moqtail', 'ch04'],
+          },
+        },
+      })
+      .setMimeType('application/msf'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqtail ch05',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://relay.moqtail.dev',
+      /* source= */ shakaAssets.Source.MOQTAIL)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['moqtail', 'ch05'],
+          },
+        },
+      })
+      .setMimeType('application/msf'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqtail ch06',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://relay.moqtail.dev',
+      /* source= */ shakaAssets.Source.MOQTAIL)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['moqtail', 'ch06'],
+          },
+        },
+      })
       .setMimeType('application/msf'),
   // }}}
 ];

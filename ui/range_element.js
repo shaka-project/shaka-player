@@ -119,44 +119,46 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
       }
     });
 
-    this.eventManager.listen(this.bar, 'touchstart', (e) => {
-      if (!this.bar.disabled) {
-        this.isChanging_ = true;
-        this.setBarValueForTouch_(e);
-        this.onChangeStart();
-        e.stopPropagation();
-      }
-    });
-
     this.eventManager.listen(this.bar, 'input', () => {
       this.onChange();
     });
 
-    this.eventManager.listen(this.bar, 'touchmove', (e) => {
-      if (this.isChanging_) {
-        this.setBarValueForTouch_(e);
-        this.onChange();
-        e.stopPropagation();
-      }
-    });
+    if (navigator.maxTouchPoints > 0) {
+      this.eventManager.listen(this.bar, 'touchstart', (e) => {
+        if (!this.bar.disabled) {
+          this.isChanging_ = true;
+          this.setBarValueForTouch_(e);
+          this.onChangeStart();
+          e.stopPropagation();
+        }
+      });
 
-    this.eventManager.listen(this.bar, 'touchend', (e) => {
-      if (this.isChanging_) {
-        this.isChanging_ = false;
-        this.setBarValueForTouch_(e);
-        this.onChangeEnd();
-        e.stopPropagation();
-      }
-    });
+      this.eventManager.listen(this.bar, 'touchmove', (e) => {
+        if (this.isChanging_) {
+          this.setBarValueForTouch_(e);
+          this.onChange();
+          e.stopPropagation();
+        }
+      });
 
-    this.eventManager.listen(this.bar, 'touchcancel', (e) => {
-      if (this.isChanging_) {
-        this.isChanging_ = false;
-        this.setBarValueForTouch_(e);
-        this.onChangeEnd();
-        e.stopPropagation();
-      }
-    });
+      this.eventManager.listen(this.bar, 'touchend', (e) => {
+        if (this.isChanging_) {
+          this.isChanging_ = false;
+          this.setBarValueForTouch_(e);
+          this.onChangeEnd();
+          e.stopPropagation();
+        }
+      });
+
+      this.eventManager.listen(this.bar, 'touchcancel', (e) => {
+        if (this.isChanging_) {
+          this.isChanging_ = false;
+          this.setBarValueForTouch_(e);
+          this.onChangeEnd();
+          e.stopPropagation();
+        }
+      });
+    }
 
     this.eventManager.listen(this.bar, 'mouseup', (e) => {
       if (this.isChanging_) {

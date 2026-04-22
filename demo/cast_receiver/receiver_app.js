@@ -115,8 +115,7 @@ class ShakaReceiverApp {
       // Set a special poster for audio-only assets.
       if (!this.video_.poster && this.video_.readyState != 0 &&
           this.player_.isAudioOnly()) {
-        this.video_.poster =
-            'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
+        this.video_.poster = '../poster-audio.gif';
       }
     }
   }

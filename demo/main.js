@@ -448,12 +448,15 @@ shakaDemo.Main = class {
 
     this.player_.addEventListener('loaded', () => {
       if (this.player_.isAudioOnly()) {
-        if (this.video_.poster == shakaDemo.Main.mainPoster_) {
-          this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
-        }
-      } else {
-        if (this.video_.poster == shakaDemo.Main.audioOnlyPoster_) {
-          this.video_.poster = shakaDemo.Main.mainPoster_;
+        const queueItemMetadata =
+            this.controls_.getQueueManager().getCurrentItem()?.metadata;
+        if (queueItemMetadata) {
+          // This prevents the browser from normalizing it.
+          const poster = this.video_.getAttribute('poster');
+          if (poster == queueItemMetadata.poster ||
+              poster == shakaDemo.Main.mainPoster_) {
+            this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
+          }
         }
       }
     });
@@ -2110,24 +2113,21 @@ const shakaDemoMain = new shakaDemo.Main();
  * @private
  * @const {string}
  */
-shakaDemo.Main.mainPoster_ =
-    'https://shaka-player-demo.appspot.com/assets/poster.jpg';
+shakaDemo.Main.mainPoster_ = 'poster.png';
 
 
 /**
  * @private
  * @const {string}
  */
-shakaDemo.Main.audioOnlyPoster_ =
-    'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
+shakaDemo.Main.audioOnlyPoster_ = 'poster-audio.gif';
 
 
 /**
  * @private
  * @const {string}
  */
-shakaDemo.Main.logo_ =
-    'https://shaka-player-demo.appspot.com/demo/shaka_logo_trans.png';
+shakaDemo.Main.logo_ = 'shaka_logo_trans.png';
 
 
 // If setup fails and the global error handler does, too, (as happened on IE

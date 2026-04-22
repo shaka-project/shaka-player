@@ -305,6 +305,7 @@ hdlr
 hvcc
 iamf
 imagetype
+imsa
 imsc
 inband
 isom
@@ -494,6 +495,7 @@ TARGETDURATION
 SQUEEZECURRENT
 
 # MSF (Media over QUIC Transport Streaming format)
+cmsf
 moqt
 msf
 QUIC

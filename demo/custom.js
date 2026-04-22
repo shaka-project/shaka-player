@@ -561,7 +561,7 @@ shakaDemo.Custom = class {
         assetInProgress.extraText.push({
           uri: String(textUrl),
           language: String(textLanguage),
-          kind: 'subtitle',
+          kind: 'subtitles',
           mime: '',
         });
         // Eliminate any OTHER subtitles with the same name. Assume this newly

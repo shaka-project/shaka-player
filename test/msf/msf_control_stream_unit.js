@@ -135,7 +135,7 @@ filterDescribe('shaka.msf.ControlStream', isMSFSupported, () => {
       msg: {
         kind: shaka.msf.Utils.MessageType.PUBLISH_ERROR,
         requestId: 1,
-        errorCode: 500,
+        code: 500,
         reason: 'Server error',
       },
     },
@@ -144,7 +144,7 @@ filterDescribe('shaka.msf.ControlStream', isMSFSupported, () => {
       msg: {
         kind: shaka.msf.Utils.MessageType.FETCH_ERROR,
         requestId: 1,
-        errorCode: 500,
+        code: 500,
         reason: 'Server error',
       },
     },
@@ -192,7 +192,7 @@ filterDescribe('shaka.msf.ControlStream', isMSFSupported, () => {
       msg: {
         kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_CANCEL,
         namespace: ['ns'],
-        errorCode: 500,
+        code: 500,
         reason: 'Server error',
       },
     },
@@ -217,7 +217,7 @@ filterDescribe('shaka.msf.ControlStream', isMSFSupported, () => {
       msg: {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE_ERROR,
         requestId: 1,
-        errorCode: 500,
+        code: 500,
         reason: 'Server error',
       },
     },
@@ -254,7 +254,8 @@ filterDescribe('shaka.msf.ControlStream', isMSFSupported, () => {
 
     writer = new shaka.msf.Writer(writable);
 
-    controlStream = new shaka.msf.ControlStream(reader, writer);
+    controlStream = new shaka.msf.ControlStream(
+        reader, writer, shaka.msf.Utils.Version.DRAFT_14);
   });
 
   for (const {kind, msg} of messages) {
@@ -406,7 +407,7 @@ describe('shaka.msf.ControlStreamEncoder', () => {
       msg: {
         kind: shaka.msf.Utils.MessageType.PUBLISH_ERROR,
         requestId: 1,
-        errorCode: 500,
+        code: 500,
         reason: 'Server error',
       },
     },
@@ -447,7 +448,7 @@ describe('shaka.msf.ControlStreamEncoder', () => {
       msg: {
         kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_CANCEL,
         namespace: ['ns'],
-        errorCode: 500,
+        code: 500,
         reason: 'Server error',
       },
     },
@@ -472,7 +473,7 @@ describe('shaka.msf.ControlStreamEncoder', () => {
       msg: {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE_ERROR,
         requestId: 1,
-        errorCode: 500,
+        code: 500,
         reason: 'Server error',
       },
     },
@@ -497,7 +498,8 @@ describe('shaka.msf.ControlStreamEncoder', () => {
 
     writer = new shaka.msf.Writer(writable);
 
-    encoder = new shaka.msf.ControlStreamEncoder(writer);
+    encoder = new shaka.msf.ControlStreamEncoder(
+        writer, shaka.msf.Utils.Version.DRAFT_14);
   });
 
   for (const {kind, msg} of messages) {

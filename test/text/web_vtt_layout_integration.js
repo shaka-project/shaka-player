@@ -510,6 +510,7 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       segmentStart: 0,
       segmentEnd: 100,
       vttOffset: 0,
+      isMpegTs: false,
     };
     const textParser = new shaka.text.VttTextParser();
     const cues = textParser.parseMedia(data, time);

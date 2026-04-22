@@ -14,7 +14,7 @@ goog.require('shaka.util.Dom');
  */
 shaka.ui.Icon = class {
   /**
-   * @param {?Element} parent
+   * @param {?HTMLElement} parent
    * @param {?(shaka.extern.UIIcon | string)=} icon
    */
   constructor(parent, icon) {

@@ -10,7 +10,13 @@ describe('SrtTextParser', () => {
   it('supports no cues', () => {
     verifyHelper([],
         '',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
   });
 
   it('handles a blank line at the end of the file', () => {
@@ -21,7 +27,13 @@ describe('SrtTextParser', () => {
         '1\n' +
         '00:00:20,000 --> 00:00:40,000\n' +
         'Test\n\n',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
   });
 
   it('handles no blank line at the end of the file', () => {
@@ -32,7 +44,13 @@ describe('SrtTextParser', () => {
         '1\n' +
         '00:00:20,000 --> 00:00:40,000\n' +
         'Test\n',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
   });
 
   it('handles no newline after the final text payload', () => {
@@ -43,7 +61,13 @@ describe('SrtTextParser', () => {
         '1\n' +
         '00:00:20,000 --> 00:00:40,000\n' +
         'Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
   });
 
   it('supports multiple cues', () => {
@@ -58,7 +82,13 @@ describe('SrtTextParser', () => {
         '2\n' +
         '00:00:40,000 --> 00:00:50,000\n' +
         'Test2',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
   });
 
   it('supports payload stylized', () => {
@@ -179,7 +209,13 @@ describe('SrtTextParser', () => {
         '8\n' +
         '00:01:20,000 --> 00:01:30,000\n' +
         '{\\pos(960,540)}Positioned cue',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
   });
 
   /**

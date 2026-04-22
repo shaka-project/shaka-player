@@ -474,7 +474,7 @@ describe('SimpleAbrManager', () => {
       abrManager.checkDroppedFrames_();
 
       // High drop ratio at 2x speed — ban logic should be skipped.
-      mockVideo.playbackRate = 2;
+      abrManager.playbackRateChanged(2);
       mockVideo.getVideoPlaybackQuality = () => makeQuality(50, 200);
       abrManager.checkDroppedFrames_();
 
@@ -486,12 +486,12 @@ describe('SimpleAbrManager', () => {
       abrManager.checkDroppedFrames_();
 
       // 2x speed: counters are reset to current values (50, 200).
-      mockVideo.playbackRate = 2;
+      abrManager.playbackRateChanged(2);
       mockVideo.getVideoPlaybackQuality = () => makeQuality(50, 200);
       abrManager.checkDroppedFrames_();
 
       // Back to 1x: 5/100 new drops = 5% < 15% threshold.
-      mockVideo.playbackRate = 1;
+      abrManager.playbackRateChanged(1);
       mockVideo.getVideoPlaybackQuality = () => makeQuality(55, 300);
       abrManager.checkDroppedFrames_();
 

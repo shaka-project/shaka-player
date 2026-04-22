@@ -8,6 +8,7 @@
 +../../lib/config/codec_switching_strategy.js
 +../../lib/config/cross_boundary_strategy.js
 +../../lib/config/msf_filter_type.js
++../../lib/config/msf_version.js
 +../../lib/config/position_area.js
 +../../lib/config/repeat_mode.js
 
