@@ -141,9 +141,9 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     const LocIds = shaka.ui.Locales.Ids;
     this.pipIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['EXIT_PIP']);
     this.pipButton_.ariaLabel =
-    this.localization.resolve(LocIds.EXIT_PICTURE_IN_PICTURE);
+        this.localization.resolve(LocIds.EXIT_PICTURE_IN_PICTURE);
     this.currentPipState_.textContent =
-    this.localization.resolve(LocIds.ON);
+        this.localization.resolve(LocIds.ON);
     this.pipButton_.ariaPressed = 'true';
   }
 
@@ -153,9 +153,9 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     const LocIds = shaka.ui.Locales.Ids;
     this.pipIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['PIP']);
     this.pipButton_.ariaLabel =
-    this.localization.resolve(LocIds.ENTER_PICTURE_IN_PICTURE);
+        this.localization.resolve(LocIds.ENTER_PICTURE_IN_PICTURE);
     this.currentPipState_.textContent =
-    this.localization.resolve(LocIds.OFF);
+        this.localization.resolve(LocIds.OFF);
     this.pipButton_.ariaPressed = 'false';
   }
 
