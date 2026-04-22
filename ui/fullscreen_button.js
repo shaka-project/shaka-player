@@ -111,8 +111,8 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
         LocIds.EXIT_FULL_SCREEN : LocIds.FULL_SCREEN;
 
     this.button_.ariaLabel = this.localization.resolve(label);
-    this.button_.ariaPressed = this.controls.isFullScreenEnabled() ? 'true' :
-    'false';
+    this.button_.ariaPressed =
+        this.controls.isFullScreenEnabled() ? 'true' : 'false';
   }
 
   /**
