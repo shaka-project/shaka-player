@@ -59,8 +59,13 @@ describe('Mp4TtmlParser', () => {
   it('handles media segments with multiple mdats', () => {
     const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
-    const time =
-        {periodStart: 0, segmentStart: 0, segmentEnd: 60, vttOffset: 0};
+    const time = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 60,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
     const ret = parser.parseMedia(ttmlSegmentMultipleMDAT, time, null);
     // Bodies.
     expect(ret.length).toBe(2);
@@ -75,8 +80,13 @@ describe('Mp4TtmlParser', () => {
   it('handles media segments with multiple sample', () => {
     const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
-    const time =
-        {periodStart: 0, segmentStart: 0, segmentEnd: 60, vttOffset: 0};
+    const time = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 60,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
     const ret = parser.parseMedia(ttmlSegmentMultipleSample, time, null);
     // Bodies.
     expect(ret.length).toBe(2);
@@ -89,10 +99,20 @@ describe('Mp4TtmlParser', () => {
   });
 
   it('accounts for offset', () => {
-    const time1 =
-        {periodStart: 0, segmentStart: 0, segmentEnd: 70, vttOffset: 0};
-    const time2 =
-        {periodStart: 7, segmentStart: 0, segmentEnd: 70, vttOffset: 7};
+    const time1 = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 70,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
+    const time2 = {
+      periodStart: 7,
+      segmentStart: 0,
+      segmentEnd: 70,
+      vttOffset: 7,
+      isMpegTs: false,
+    };
 
     const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
@@ -197,8 +217,13 @@ describe('Mp4TtmlParser', () => {
     ];
     const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
-    const time =
-        {periodStart: 0, segmentStart: 0, segmentEnd: 60, vttOffset: 0};
+    const time = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 60,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
     const result = parser.parseMedia(ttmlSegment, time, null);
     shaka.test.TtmlUtils.verifyHelper(
         cues, result, {startTime: 23, endTime: 53.5});
@@ -207,8 +232,13 @@ describe('Mp4TtmlParser', () => {
   it('handles IMSC1 (CMAF) image subtitle', () => {
     const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(imscImageInitSegment);
-    const time =
-        {periodStart: 0, segmentStart: 0, segmentEnd: 60, vttOffset: 0};
+    const time = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 60,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
     const ret = parser.parseMedia(imscImageSegment, time, null);
     // Bodies.
     expect(ret.length).toBe(1);

@@ -104,7 +104,13 @@ describe('TextEngine', () => {
       await textEngine.appendBuffer(dummyData, 0, 3);
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 3,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
         undefined,
         [],
       ]);
@@ -121,7 +127,13 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 3, segmentEnd: 5, vttOffset: 0},
+        {
+          periodStart: 0,
+          segmentStart: 3,
+          segmentEnd: 5,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
         undefined,
         [],
       ]);
@@ -172,7 +184,13 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 3,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
         'subs.vtt',
         [],
       ]);
@@ -195,7 +213,13 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 3,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
         'subs.vtt',
         [],
       ]);
@@ -225,7 +249,13 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 3,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
         'subs.vtt',
         [],
       ]);
@@ -255,7 +285,13 @@ describe('TextEngine', () => {
 
           expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
             dummyData,
-            {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+            {
+              periodStart: 0,
+              segmentStart: 0,
+              segmentEnd: 3,
+              vttOffset: 0,
+              isMpegTs: false,
+            },
             'subs.vtt',
             [],
           ]);
@@ -278,7 +314,13 @@ describe('TextEngine', () => {
 
           expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
             dummyData,
-            {periodStart: 0, segmentStart: 3, segmentEnd: 5, vttOffset: 0},
+            {
+              periodStart: 0,
+              segmentStart: 3,
+              segmentEnd: 5,
+              vttOffset: 0,
+              isMpegTs: false,
+            },
             'subs2.vtt',
             [],
           ]);
@@ -294,7 +336,13 @@ describe('TextEngine', () => {
 
           expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
             dummyData,
-            {periodStart: 0, segmentStart: 5, segmentEnd: 7, vttOffset: 0},
+            {
+              periodStart: 0,
+              segmentStart: 5,
+              segmentEnd: 7,
+              vttOffset: 0,
+              isMpegTs: false,
+            },
             'subs3.vtt',
             [],
           ]);
@@ -449,7 +497,13 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 3,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
         undefined,
         [],
       ]);
@@ -465,7 +519,13 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 4, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
+        {
+          periodStart: 4,
+          segmentStart: 4,
+          segmentEnd: 7,
+          vttOffset: 4,
+          isMpegTs: false,
+        },
         undefined,
         [],
       ]);
@@ -494,7 +554,13 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 3,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
         'subs.vtt',
         [],
       ]);
@@ -509,7 +575,13 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 4, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
+        {
+          periodStart: 4,
+          segmentStart: 4,
+          segmentEnd: 7,
+          vttOffset: 4,
+          isMpegTs: false,
+        },
         'subs2.vtt',
         [],
       ]);
@@ -540,7 +612,13 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 3,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
         undefined,
         [],
       ]);
@@ -551,7 +629,13 @@ describe('TextEngine', () => {
       // vttOffset should equal segmentStart instead of periodStart
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 8, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
+        {
+          periodStart: 8,
+          segmentStart: 4,
+          segmentEnd: 7,
+          vttOffset: 4,
+          isMpegTs: false,
+        },
         undefined,
         [],
       ]);
@@ -576,7 +660,13 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 3,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
         undefined,
         [],
       ]);
@@ -587,7 +677,13 @@ describe('TextEngine', () => {
       // periodStart should equal 0 instead of timestampOffset
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
+        {
+          periodStart: 0,
+          segmentStart: 4,
+          segmentEnd: 7,
+          vttOffset: 4,
+          isMpegTs: false,
+        },
         undefined,
         [],
       ]);
