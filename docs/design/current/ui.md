@@ -28,4 +28,4 @@ castProxy.player == ui.player
 
 For details on adding Shaka UI to your application, see [UI library tutorial].
 
-[UI library tutorial]: https://uipreview-dot-shaka-player-demo.appspot.com/docs/api/tutorial-ui.html
+[UI library tutorial]: https://shaka-project.github.io/shaka-player/docs/api/tutorial-ui.html
