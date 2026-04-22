@@ -201,7 +201,6 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         this.remote_?.state == 'connected' ? 'true' : 'false';
   }
 
-
   /**
    * @private
    */
