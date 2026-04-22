@@ -61,7 +61,8 @@ shaka.extern.TextParser = class {
  *   periodStart: number,
  *   segmentStart: number,
  *   segmentEnd: number,
- *   vttOffset: number
+ *   vttOffset: number,
+ *   isMpegTs: boolean,
  * }}
  *
  * @property {number} periodStart
@@ -73,6 +74,10 @@ shaka.extern.TextParser = class {
  * @property {number} vttOffset
  *     The start time relative to either segment or period start depending
  *     on <code>segmentRelativeVttTiming</code> configuration.
+ * @property {boolean} isMpegTs
+ *     True if the media container type is MPEG-TS (not fMP4)
+ *     needed to know if we should use rollover wrapping when
+ *     calculating offset for webvtt cues in hls streams
  *
  * @exportDoc
  */
