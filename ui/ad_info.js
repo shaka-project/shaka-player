@@ -77,7 +77,7 @@ shaka.ui.AdInfo = class extends shaka.ui.Element {
    * @private
    */
   updateAriaLabel_() {
-    // TODO
+    // arai-label is set dynamically in onTimerTick_().
   }
 
   /**
@@ -119,6 +119,7 @@ shaka.ui.AdInfo = class extends shaka.ui.Element {
     if (secondsLeft == -1 || adDuration == -1 ||
         !isFinite(secondsLeft) || !isFinite(adDuration)) {
       this.adInfo_.textContent = text;
+      this.adInfo_.ariaLabel = text;
       shaka.ui.Utils.setDisplay(this.adInfo_, text != '');
       return;
     }
@@ -141,6 +142,7 @@ shaka.ui.AdInfo = class extends shaka.ui.Element {
             .replace('[AD_TIME]', timeString);
       }
       this.adInfo_.textContent = text;
+      this.adInfo_.ariaLabel = text;
       shaka.ui.Utils.setDisplay(this.adInfo_, text != '');
     } else {
       this.reset_();

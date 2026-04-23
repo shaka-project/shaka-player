@@ -230,6 +230,9 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     // Add the Auto button
     const autoButton = shaka.util.Dom.createButton();
+    // ARIA: single-select menu item
+    autoButton.setAttribute('role', 'menuitemradio');
+    autoButton.setAttribute('aria-checked', 'false');
     autoButton.classList.add('shaka-enable-abr-button');
     this.eventManager.listen(autoButton, 'click', () => {
       const config = {abr: {enabled: true}};
@@ -245,7 +248,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     // If abr is enabled reflect it by marking 'Auto' as selected.
     if (this.player.getConfiguration().abr.enabled) {
-      autoButton.ariaSelected = 'true';
+      autoButton.setAttribute('aria-checked', 'true');
       autoButton.appendChild(shaka.ui.Utils.checkmarkIcon());
 
       this.abrOnSpan_.classList.add('shaka-chosen-item');
@@ -332,6 +335,9 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     // Add new ones
     for (const track of tracks) {
       const button = shaka.util.Dom.createButton();
+      // ARIA: single-select menu item
+      button.setAttribute('role', 'menuitemradio');
+      button.setAttribute('aria-checked', 'false');
       button.classList.add('explicit-resolution');
       this.eventManager.listen(button, 'click',
           () => this.onTrackSelected_(track));
@@ -346,7 +352,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
       if (!abrEnabled && track == selectedTrack) {
         // If abr is disabled, mark the selected track's resolution.
-        button.ariaSelected = 'true';
+        button.setAttribute('aria-checked', 'true');
         button.appendChild(shaka.ui.Utils.checkmarkIcon());
         span.classList.add('shaka-chosen-item');
         this.currentSelection.textContent = span.textContent;
@@ -405,6 +411,9 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     // Add new ones
     for (const track of tracks) {
       const button = shaka.util.Dom.createButton();
+      // ARIA: single-select menu item
+      button.setAttribute('role', 'menuitemradio');
+      button.setAttribute('aria-checked', 'false');
       button.classList.add('explicit-resolution');
       this.eventManager.listen(button, 'click',
           () => this.onVideoTrackSelected_(track));
@@ -429,7 +438,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
       if (!abrEnabled && track == selectedTrack) {
         // If abr is disabled, mark the selected track's resolution.
-        button.ariaSelected = 'true';
+        button.setAttribute('aria-checked', 'true');
         button.appendChild(shaka.ui.Utils.checkmarkIcon());
         span.classList.add('shaka-chosen-item');
         this.currentSelection.textContent = span.textContent;

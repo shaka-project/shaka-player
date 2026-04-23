@@ -77,6 +77,8 @@ shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
         return;
       }
       vr.toggleStereoscopicMode();
+      this.toggleStereoscopicButton_.ariaPressed =
+          vr.isStereoscopicModeEnabled() ? 'true' : 'false';
     });
 
     this.eventManager.listen(vr, 'vrstatuschanged', () => {

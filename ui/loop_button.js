@@ -42,6 +42,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-loop-button');
     this.button_.classList.add('shaka-tooltip');
     this.button_.classList.add('shaka-no-propagation');
+    this.button_.ariaPressed = 'false';
 
     /** @private {!shaka.ui.Icon} */
     this.icon_ = new shaka.ui.Icon(this.button_,
@@ -173,6 +174,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     this.nameSpan_.textContent =
         this.localization.resolve(LocIds.LOOP);
 
+<<<<<<< ui-repeat-mode
     let currentMode = shaka.config.RepeatMode.OFF;
     if (this.video.loop) {
       currentMode = shaka.config.RepeatMode.ALL;
@@ -200,6 +202,19 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
             this.localization.resolve(LocIds.EXIT_LOOP_MODE);
         break;
     }
+=======
+    const labelText = this.video.loop ? LocIds.ON : LocIds.OFF;
+
+    this.currentState_.textContent = this.localization.resolve(labelText);
+
+    this.icon_.use(this.video.loop ? Icons['UNLOOP'] : Icons['LOOP']);
+
+    const ariaText = this.video.loop ?
+        LocIds.EXIT_LOOP_MODE : LocIds.ENTER_LOOP_MODE;
+
+    this.button_.ariaLabel = this.localization.resolve(ariaText);
+    this.button_.ariaPressed = this.video.loop ? 'true' : 'false';
+>>>>>>> main
   }
 
 

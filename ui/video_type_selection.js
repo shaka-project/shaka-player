@@ -120,6 +120,9 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
     if (roles.size > 1) {
       for (const role of roles) {
         const button = shaka.util.Dom.createButton();
+        // ARIA: single-select menu item
+        button.setAttribute('role', 'menuitemradio');
+        button.setAttribute('aria-checked', 'false');
         this.eventManager.listen(button, 'click',
             () => this.onVideoRoleSelected_(role));
 
@@ -128,7 +131,7 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
         button.appendChild(span);
 
         if (selectedTrack.roles.includes(role)) {
-          button.ariaSelected = 'true';
+          button.setAttribute('aria-checked', 'true');
           button.appendChild(shaka.ui.Utils.checkmarkIcon());
           span.classList.add('shaka-chosen-item');
           this.currentSelection.textContent = span.textContent;

@@ -123,6 +123,9 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
     // 4. Add new items
     for (const position of Object.values(shaka.config.PositionArea)) {
       const button = shaka.util.Dom.createButton();
+      // ARIA: single-select menu item
+      button.setAttribute('role', 'menuitemradio');
+      button.setAttribute('aria-checked', 'false');
       const span = shaka.util.Dom.createHTMLElement('span');
       span.textContent = this.getNameOfPosition_(position);
       button.appendChild(span);
@@ -145,7 +148,7 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
         this.menu, 'shaka-ui-icon shaka-chosen-item');
     if (checkmarkIcon) {
       const previouslySelectedButton = checkmarkIcon.parentElement;
-      previouslySelectedButton.removeAttribute('aria-selected');
+      previouslySelectedButton.setAttribute('aria-checked', 'false');
       const previouslySelectedSpan =
           previouslySelectedButton.getElementsByTagName('span')[0];
       if (previouslySelectedSpan) {
@@ -164,7 +167,7 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
     if (span) {
       const button = span.parentElement;
       button.appendChild(shaka.ui.Utils.checkmarkIcon());
-      button.ariaSelected = 'true';
+      button.setAttribute('aria-checked', 'true');
       span.classList.add('shaka-chosen-item');
     }
     this.currentSelection.textContent = positionAreaName;

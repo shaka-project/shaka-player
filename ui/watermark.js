@@ -38,6 +38,7 @@ shaka.ui.Watermark = class extends shaka.ui.Element {
     this.canvas_.style.height = '100%';
     this.canvas_.style.zIndex = '2';
     this.canvas_.style.pointerEvents = 'none';
+    this.canvas_.setAttribute('aria-hidden', 'true');
 
     this.parent.appendChild(this.canvas_);
     this.resizeCanvas_();

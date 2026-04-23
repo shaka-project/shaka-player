@@ -181,6 +181,9 @@ shaka.ui.LanguageUtils = class {
       button.addEventListener('click', () => {
         onTrackSelected(track);
       });
+      // ARIA: single-select menu item
+      button.setAttribute('role', 'menuitemradio');
+      button.setAttribute('aria-checked', 'false');
 
       const span = shaka.util.Dom.createHTMLElement('span');
       button.appendChild(span);
@@ -262,7 +265,7 @@ shaka.ui.LanguageUtils = class {
       if (updateChosen && (combinationName == selectedCombination)) {
         button.appendChild(shaka.ui.Utils.checkmarkIcon());
         span.classList.add('shaka-chosen-item');
-        button.ariaSelected = 'true';
+        button.setAttribute('aria-checked', 'true');
         currentSelectionElement.textContent = span.textContent;
       }
       langMenu.appendChild(button);
@@ -345,6 +348,9 @@ shaka.ui.LanguageUtils = class {
       button.addEventListener('click', () => {
         onTrackSelected(track);
       });
+      // ARIA: single-select menu item
+      button.setAttribute('role', 'menuitemradio');
+      button.setAttribute('aria-checked', 'false');
 
       const span = shaka.util.Dom.createHTMLElement('span');
       button.appendChild(span);
@@ -433,7 +439,7 @@ shaka.ui.LanguageUtils = class {
       if (updateChosen && (combinationName == selectedCombination)) {
         button.appendChild(shaka.ui.Utils.checkmarkIcon());
         span.classList.add('shaka-chosen-item');
-        button.ariaSelected = 'true';
+        button.setAttribute('aria-checked', 'true');
         currentSelectionElement.textContent = span.textContent;
       }
       langMenu.appendChild(button);

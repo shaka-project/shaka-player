@@ -385,6 +385,17 @@ describe('UI', () => {
           }
         }
       });
+
+      it('has correct ARIA roles', () => {
+        expect(overflowMenu.getAttribute('role')).toBe('menu');
+      });
+
+      it('has aria-haspopup and aria-expanded on menu button', () => {
+        const menuButton = videoContainer.getElementsByClassName(
+            'shaka-overflow-menu-button')[0];
+        expect(menuButton.getAttribute('aria-haspopup')).toBe('true');
+        expect(menuButton.getAttribute('aria-expanded')).toBe('false');
+      });
     });
 
     describe('controls-button-panel', () => {
@@ -502,6 +513,39 @@ describe('UI', () => {
         confirmAriaLabel('shaka-fast-forward-button');
         confirmAriaLabel('shaka-rewind-button');
       });
+
+      it('has toolbar role', async () => {
+        await UiUtils.createUIThroughAPI(videoContainer, video);
+        const controlsButtonPanels = videoContainer.getElementsByClassName(
+            'shaka-controls-button-panel');
+        expect(controlsButtonPanels.length).toBe(1);
+        expect(controlsButtonPanels[0].getAttribute('role')).toBe('toolbar');
+      });
+
+      it('has aria-pressed on toggle buttons', async () => {
+        const config = {
+          controlPanelElements: [
+            'mute',
+            'fullscreen',
+          ],
+        };
+
+        await UiUtils.createUIThroughAPI(videoContainer, video, config);
+        const muteButton = videoContainer.getElementsByClassName(
+            'shaka-mute-button')[0];
+        const fullscreenButton = videoContainer.getElementsByClassName(
+            'shaka-fullscreen-button')[0];
+        expect(muteButton.hasAttribute('aria-pressed')).toBe(true);
+        expect(fullscreenButton.hasAttribute('aria-pressed')).toBe(true);
+      });
+
+      it('has aria-hidden on SVG icons', async () => {
+        await UiUtils.createUIThroughAPI(videoContainer, video);
+        const icons = videoContainer.getElementsByClassName('shaka-ui-icon');
+        for (const icon of icons) {
+          expect(icon.getAttribute('aria-hidden')).toBe('true');
+        }
+      });
     });
 
     describe('control panel buttons with submenus', () => {
@@ -582,6 +626,33 @@ describe('UI', () => {
 
         expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
         expect(languageMenu.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('settings menus have ARIA roles', () => {
+        expect(resolutionMenu.getAttribute('role')).toBe('menu');
+        expect(languageMenu.getAttribute('role')).toBe('menu');
+      });
+
+      it('settings menu buttons have aria-haspopup and aria-expanded', () => {
+        expect(resolutionMenuButton.getAttribute('aria-haspopup'))
+            .toBe('true');
+        expect(resolutionMenuButton.getAttribute('aria-expanded'))
+            .toBe('false');
+
+        expect(languageMenuButton.getAttribute('aria-haspopup'))
+            .toBe('true');
+        expect(languageMenuButton.getAttribute('aria-expanded'))
+            .toBe('false');
+      });
+
+      it('aria-expanded updates when menu opens and closes', () => {
+        resolutionMenuButton.click();
+        expect(resolutionMenuButton.getAttribute('aria-expanded'))
+            .toBe('true');
+
+        resolutionMenuButton.click();
+        expect(resolutionMenuButton.getAttribute('aria-expanded'))
+            .toBe('false');
       });
     });
 
@@ -854,8 +925,9 @@ describe('UI', () => {
       it('builds internal elements', () => {
         expect(contextMenu.childNodes.length).toBe(1);
 
-        expect(contextMenu.childNodes[0]['className'])
-            .toBe('shaka-statistics-button');
+        const element = /** @type {!HTMLElement} */ (contextMenu.childNodes[0]);
+        expect(element.classList.contains('shaka-statistics-button'))
+            .toBe(true);
       });
     });
 
