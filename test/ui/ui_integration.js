@@ -29,8 +29,18 @@ describe('UI', () => {
   let controls;
   /** @type {shakaNamespaceType} */
   let compiledShaka;
+  /** @type {!Array<string>|undefined} */
+  let savedLanguages;
 
   beforeAll(async () => {
+    // Force locale to en-US so that localized strings
+    // (e.g. "Unrecognized") are predictable across machines.
+    savedLanguages = navigator.languages;
+    Object.defineProperty(navigator, 'languages', {
+      get: () => ['en-US'],
+      configurable: true,
+    });
+
     cssLink = /** @type {!HTMLLinkElement} */(document.createElement('link'));
     await UiUtils.setupCSS(cssLink);
 
@@ -124,6 +134,12 @@ describe('UI', () => {
 
   afterAll(() => {
     document.head.removeChild(cssLink);
+
+    // Restore the original navigator.languages.
+    Object.defineProperty(navigator, 'languages', {
+      get: () => savedLanguages,
+      configurable: true,
+    });
   });
 
   describe('language selections', () => {
