@@ -52,6 +52,7 @@ describe('DashParser Patch', () => {
       disableStream: (stream) => {},
       addFont: (name, url) => {},
       getStreamingRetryParameters: () => config.streaming.retryParameters,
+      onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
     Date.now = () => publishTime.getTime() + 10;
 
