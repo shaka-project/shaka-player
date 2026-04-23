@@ -42,6 +42,7 @@ describe('DashJsonParser Manifest', () => {
       disableStream: (stream) => {},
       addFont: shaka.test.Util.spyFunc(addFontSpy),
       getStreamingRetryParameters: () => config.streaming.retryParameters,
+      onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
   });
 

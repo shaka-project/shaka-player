@@ -355,6 +355,7 @@ describe('DashParser SegmentList', () => {
       disableStream: (stream) => {},
       addFont: (name, url) => {},
       getStreamingRetryParameters: () => config.streaming.retryParameters,
+      onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
     try {
       const manifest = await dashParser.start('dummy://foo', playerInterface);

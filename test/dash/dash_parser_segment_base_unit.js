@@ -45,6 +45,7 @@ describe('DashParser SegmentBase', () => {
       disableStream: (stream) => {},
       addFont: (name, url) => {},
       getStreamingRetryParameters: () => config.streaming.retryParameters,
+      onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
   });
 

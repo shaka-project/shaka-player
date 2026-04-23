@@ -50,6 +50,7 @@ shaka.test.Dash = class {
       disableStream: (stream) => {},
       addFont: (name, url) => {},
       getStreamingRetryParameters: () => config.streaming.retryParameters,
+      onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
     try {
       const manifest = await dashParser.start('dummy://foo', playerInterface);
@@ -100,6 +101,7 @@ shaka.test.Dash = class {
       disableStream: (stream) => {},
       addFont: (name, url) => {},
       getStreamingRetryParameters: () => dConfig.streaming.retryParameters,
+      onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
 
     try {

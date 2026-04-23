@@ -32,6 +32,7 @@ describe('ContentSteeringManager', () => {
       disableStream: (stream) => {},
       addFont: (name, url) => {},
       getStreamingRetryParameters: () => config.streaming.retryParameters,
+      onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
     manager = new shaka.util.ContentSteeringManager(playerInterface);
     manager.configure(config.manifest);

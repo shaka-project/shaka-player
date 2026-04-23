@@ -141,6 +141,7 @@ shaka.extern.ManifestParser = class {
  *   disableStream: function(!shaka.extern.Stream),
  *   addFont: function(string, string),
  *   getStreamingRetryParameters: function():!shaka.extern.RetryParameters,
+ *   onSegmentReceived: function(number, number),
  * }}
  *
  * @description
@@ -186,6 +187,9 @@ shaka.extern.ManifestParser = class {
  * @property {function():
  *            !shaka.extern.RetryParameters} getStreamingRetryParameters
  *   Return RetryParameters for streaming.
+ * @property {function(number, number)} onSegmentReceived
+ *   Called by manifest parser, to provide to the ABR estimator gets a bandwidth
+ *   sample when the manifest parser doesn't use the Network Engine.
  * @exportDoc
  */
 shaka.extern.ManifestParser.PlayerInterface;
