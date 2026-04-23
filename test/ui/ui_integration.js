@@ -29,8 +29,7 @@ describe('UI', () => {
   let controls;
   /** @type {shakaNamespaceType} */
   let compiledShaka;
-
-  /** @type {?Array<string>} */
+  /** @type {!Array<string>|undefined} */
   let savedLanguages;
 
   beforeAll(async () => {
