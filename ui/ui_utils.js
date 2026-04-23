@@ -70,8 +70,7 @@ shaka.ui.Utils = class {
         shaka.ui.Enums.MaterialDesignSVGIcons['CHECKMARK']);
     const iconElement = icon.getSvgElement();
     iconElement.classList.add('shaka-chosen-item');
-    // Screen reader should ignore icon text.
-    iconElement.ariaHidden = 'true';
+
     return iconElement;
   }
 

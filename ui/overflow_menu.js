@@ -145,6 +145,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     this.overflowMenu_.classList.add('shaka-no-propagation');
     this.overflowMenu_.classList.add('shaka-show-controls-on-mouse-over');
     this.overflowMenu_.classList.add('shaka-hidden');
+    this.overflowMenu_.setAttribute('role', 'menu');
     this.controlsContainer_.appendChild(this.overflowMenu_);
   }
 
@@ -155,6 +156,8 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
   addOverflowMenuButton_() {
     /** @private {!HTMLButtonElement} */
     this.overflowMenuButton_ = shaka.util.Dom.createButton();
+    this.overflowMenuButton_.setAttribute('aria-haspopup', 'true');
+    this.overflowMenuButton_.setAttribute('aria-expanded', 'false');
     this.overflowMenuButton_.classList.add('shaka-overflow-menu-button');
     this.overflowMenuButton_.classList.add('shaka-no-propagation');
     this.overflowMenuButton_.classList.add('shaka-tooltip');
@@ -191,11 +194,14 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     this.controls.hideContextMenus();
     if (this.controls.anySettingsMenusAreOpen()) {
       this.controls.hideSettingsMenus();
+      this.overflowMenuButton_.setAttribute('aria-expanded', 'false');
+      this.overflowMenuButton_.focus();
     } else {
       // Force to close any submenu.
       this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
 
       shaka.ui.Utils.setDisplay(this.overflowMenu_, true);
+      this.overflowMenuButton_.setAttribute('aria-expanded', 'true');
       this.controls.computeOpacity();
 
       // If overflow menu has currently visible buttons, focus on the

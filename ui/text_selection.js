@@ -107,7 +107,9 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
    */
   addOffOption_() {
     const off = shaka.util.Dom.createButton();
-    off.ariaSelected = 'true';
+    // ARIA: single-select menu item
+    off.setAttribute('role', 'menuitemradio');
+    off.setAttribute('aria-checked', 'true');
     this.menu.appendChild(off);
 
     off.appendChild(shaka.ui.Utils.checkmarkIcon());
@@ -164,7 +166,9 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     this.menu.appendChild(offButton);
 
     if (!hasTrack) {
-      offButton.ariaSelected = 'true';
+      // ARIA: single-select menu item
+      offButton.setAttribute('role', 'menuitemradio');
+      offButton.setAttribute('aria-checked', 'true');
       offButton.appendChild(shaka.ui.Utils.checkmarkIcon());
       this.captionsOffSpan_.classList.add('shaka-chosen-item');
       this.currentSelection.textContent =

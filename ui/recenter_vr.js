@@ -36,7 +36,6 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
     this.recenterVRButton_ = shaka.util.Dom.createButton();
     this.recenterVRButton_.classList.add('shaka-recenter-vr-button');
     this.recenterVRButton_.classList.add('shaka-tooltip');
-    this.recenterVRButton_.ariaPressed = 'false';
 
     /** @private {!shaka.ui.Icon} */
     this.recenterVRIcon_ = new shaka.ui.Icon(this.recenterVRButton_,

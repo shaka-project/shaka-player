@@ -114,6 +114,7 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
     if (chapters.length) {
       for (const chapter of chapters) {
         const button = shaka.util.Dom.createButton();
+        button.setAttribute('role', 'menuitem');
         button.classList.add('shaka-chapter-item');
         const span = shaka.util.Dom.createHTMLElement('span');
         span.classList.add('shaka-chapter');

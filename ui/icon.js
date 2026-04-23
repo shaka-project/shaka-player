@@ -24,6 +24,9 @@ shaka.ui.Icon = class {
     this.svg_ = shaka.util.Dom.createSVGElement('svg');
 
     this.svg_.classList.add('shaka-ui-icon');
+    // Screen reader should ignore icon text.
+    // all icons should have this attribute
+    this.svg_.ariaHidden = 'true';
     this.svg_.setAttribute('viewBox', '0 -960 960 960');
 
     if (icon) {

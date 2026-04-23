@@ -746,6 +746,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       }
       this.thumbnailImage_ = /** @type {!HTMLImageElement} */ (
         shaka.util.Dom.createHTMLElement('img'));
+      this.thumbnailImage_.alt = '';
       this.thumbnailImage_.classList.add('shaka-player-ui-thumbnail-image');
       this.thumbnailImage_.draggable = false;
       this.thumbnailImage_.src = uri;
