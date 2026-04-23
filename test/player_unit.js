@@ -5136,6 +5136,66 @@ describe('Player', () => {
           height: 50,
         }));
       });
+
+      it('coordinates concurrent calls on the same track', async () => {
+        const uris = () => ['thumbnail'];
+        const ref = new shaka.media.SegmentReference(
+            0, 60, uris, 0, null, null, 0, 0, Infinity, [],
+        );
+        const index = new shaka.media.SegmentIndex([ref]);
+
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1);
+          });
+          manifest.addImageStream(5, (stream) => {
+            stream.originalId = 'thumbnail';
+            stream.width = 200;
+            stream.height = 150;
+            stream.mimeType = 'image/jpeg';
+            stream.tilesLayout = '2x3';
+          });
+        });
+
+        const imageStream = manifest.imageStreams[0];
+        imageStream.segmentIndex = null;
+
+        /** @type {function()} */
+        let resolveCreate;
+        const createSpy = jasmine.createSpy('createSegmentIndex')
+            .and.callFake(() => new Promise((resolve) => {
+              resolveCreate = () => {
+                imageStream.segmentIndex = index;
+                resolve();
+              };
+            }));
+        const closeSpy = jasmine.createSpy('closeSegmentIndex')
+            .and.callFake(() => {
+              imageStream.segmentIndex = null;
+            });
+        imageStream.createSegmentIndex = shaka.test.Util.spyFunc(createSpy);
+        imageStream.closeSegmentIndex = shaka.test.Util.spyFunc(closeSpy);
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        // Start two concurrent callers before createSegmentIndex resolves.
+        const p1 = player.getAllThumbnails(5);
+        const p2 = player.getAllThumbnails(5);
+
+        // Both callers must share the same in-flight createSegmentIndex call.
+        expect(createSpy).toHaveBeenCalledTimes(1);
+
+        resolveCreate();
+
+        const [thumbs1, thumbs2] = await Promise.all([p1, p2]);
+
+        expect(thumbs1.length).toBe(6);
+        expect(thumbs2.length).toBe(6);
+        expect(createSpy).toHaveBeenCalledTimes(1);
+        // closeSegmentIndex runs once — after the last caller finishes, not
+        // once per caller.
+        expect(closeSpy).toHaveBeenCalledTimes(1);
+      });
     });
   });
 
