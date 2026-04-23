@@ -745,6 +745,7 @@ shakaDemo.Custom = class {
     container.setDefaultRowClass('wide-input');
 
     const extraSetup = (input, container) => {
+      input.classList.add('extra-config-textarea');
       input.setAttribute('rows', 10);
 
       if (assetInProgress.extraConfig) {
@@ -800,6 +801,7 @@ shakaDemo.Custom = class {
     container.setDefaultRowClass('wide-input');
 
     const extraSetup = (input, container) => {
+      input.classList.add('extra-config-textarea');
       input.setAttribute('rows', 10);
 
       if (assetInProgress.extraUiConfig) {
