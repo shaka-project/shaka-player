@@ -174,7 +174,6 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     this.nameSpan_.textContent =
         this.localization.resolve(LocIds.LOOP);
 
-<<<<<<< ui-repeat-mode
     let currentMode = shaka.config.RepeatMode.OFF;
     if (this.video.loop) {
       currentMode = shaka.config.RepeatMode.ALL;
@@ -187,12 +186,14 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
         this.icon_.use(Icons['UNLOOP']);
         this.button_.ariaLabel =
             this.localization.resolve(LocIds.ENTER_LOOP_MODE);
+        this.button_.ariaPressed = 'false';
         break;
       case shaka.config.RepeatMode.ALL:
         this.currentState_.textContent = this.localization.resolve(LocIds.ON);
         this.icon_.use(Icons['LOOP']);
         this.button_.ariaLabel =
             this.localization.resolve(LocIds.EXIT_LOOP_MODE);
+        this.button_.ariaPressed = 'true';
         break;
       case shaka.config.RepeatMode.SINGLE:
       default:
@@ -200,21 +201,9 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
         this.icon_.use(Icons['LOOP_ONE']);
         this.button_.ariaLabel =
             this.localization.resolve(LocIds.EXIT_LOOP_MODE);
+        this.button_.ariaPressed = 'true';
         break;
     }
-=======
-    const labelText = this.video.loop ? LocIds.ON : LocIds.OFF;
-
-    this.currentState_.textContent = this.localization.resolve(labelText);
-
-    this.icon_.use(this.video.loop ? Icons['UNLOOP'] : Icons['LOOP']);
-
-    const ariaText = this.video.loop ?
-        LocIds.EXIT_LOOP_MODE : LocIds.ENTER_LOOP_MODE;
-
-    this.button_.ariaLabel = this.localization.resolve(ariaText);
-    this.button_.ariaPressed = this.video.loop ? 'true' : 'false';
->>>>>>> main
   }
 
 
