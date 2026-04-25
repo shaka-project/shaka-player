@@ -165,6 +165,7 @@ describe('CmcdManager Setup', () => {
           audioBandWidth: 1000000,
         },
       ]),
+      getTopPlayableBandwidth: () => 5000000,
     });
 
     const config = {
@@ -908,6 +909,7 @@ describe('CmcdManager Setup', () => {
           audioBandwidth: 1000000,
         },
       ],
+      getTopPlayableBandwidth: () => 5000000,
     });
 
     const baseConfig = {
@@ -2917,6 +2919,56 @@ describe('CmcdManager Setup', () => {
 
         expect(decodedUri).not.toContain('url=');
       });
+    });
+
+    it('includes tpb in V2 segment requests', () => {
+      const cmcdManager = createCmcdManager(mockPlayer, {
+        useHeaders: true,
+      });
+
+      const request = createRequest();
+      cmcdManager.applyRequestSegmentData(request, createSegmentContext());
+
+      // tpb should appear in CMCD-Object header alongside tb
+      // With getTopPlayableBandwidth() returning 5000000 (same as top
+      // variant), the best matching variant's videoBandwidth is 4000000,
+      // so tpb = 4000000 / 1000 = 4000 (same as tb).
+      expect(request.headers['CMCD-Object']).toContain('tb=4000');
+      expect(request.headers['CMCD-Object']).toContain('tpb=4000');
+    });
+
+    it('tpb reflects restrictions when lower than tb', () => {
+      // Create a player where getTopPlayableBandwidth returns a lower
+      // value than the top variant bandwidth, simulating ABR restrictions.
+      const restrictedPlayer = new shaka.util.FakeEventTarget();
+      Object.assign(restrictedPlayer, mockPlayer, {
+        getTopPlayableBandwidth: () => 50000,
+      });
+
+      const cmcdManager = createCmcdManager(restrictedPlayer, {
+        useHeaders: true,
+      });
+
+      const request = createRequest();
+      cmcdManager.applyRequestSegmentData(request, createSegmentContext());
+
+      // tb should still be 4000 (top variant videoBandwidth / 1000)
+      // tpb should be 40 (50k variant videoBandwidth=40000 / 1000)
+      expect(request.headers['CMCD-Object']).toContain('tb=4000');
+      expect(request.headers['CMCD-Object']).toContain('tpb=40');
+    });
+
+    it('tpb is not included in V1 mode', () => {
+      const cmcdManager = createCmcdManager(mockPlayer, {
+        version: 1,
+        useHeaders: true,
+      });
+
+      const request = createRequest();
+      cmcdManager.applyRequestSegmentData(request, createSegmentContext());
+
+      expect(request.headers['CMCD-Object']).toContain('tb=4000');
+      expect(request.headers['CMCD-Object']).not.toContain('tpb');
     });
 
     it('should generate cmsds from response header', () => {
