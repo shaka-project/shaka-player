@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.1.2](https://github.com/shaka-project/shaka-player/compare/v5.1.1...v5.1.2) (2026-04-27)
+
+
+### Bug Fixes
+
+* **ABR:** Fix playbackRate calculation when using droppedFrames ([#10011](https://github.com/shaka-project/shaka-player/issues/10011)) ([e79bb88](https://github.com/shaka-project/shaka-player/commit/e79bb88c0222bc83961865541387cf8a032a90e0))
+* Allow use preferredText with external tracks ([#10019](https://github.com/shaka-project/shaka-player/issues/10019)) ([6b71b6a](https://github.com/shaka-project/shaka-player/commit/6b71b6aafee3640f35bc1a4f4db102650d4b0a43))
+* avoid pts rollover correction for fmp4/cmaf streams ([#10021](https://github.com/shaka-project/shaka-player/issues/10021)) ([0e2e052](https://github.com/shaka-project/shaka-player/commit/0e2e05259f0c429140a7f0e34c7cbfa80b97d6ea)), closes [#10020](https://github.com/shaka-project/shaka-player/issues/10020)
+* Bail out on initial text preference when a user selected one manually. ([#10010](https://github.com/shaka-project/shaka-player/issues/10010)) ([61685fc](https://github.com/shaka-project/shaka-player/commit/61685fcc4b908a5855f78b6252e933ef6fe0c8dd))
+* handle AC-4 immersive stereo (IMSA) in HLS and DASH spatial audio detection ([#10007](https://github.com/shaka-project/shaka-player/issues/10007)) ([d67dc4b](https://github.com/shaka-project/shaka-player/commit/d67dc4b9cffecf6226877c84ca6ad33d1efaaa3c))
+* **UI:** Fix parent param type in shaka.ui.Icon constructor ([#10014](https://github.com/shaka-project/shaka-player/issues/10014)) ([34b2c21](https://github.com/shaka-project/shaka-player/commit/34b2c21cdced805cfff7779278e496f48c0ee035))
+
+
+### Performance Improvements
+
+* **segments:** use binary search for segment lookup in more hot paths ([#9997](https://github.com/shaka-project/shaka-player/issues/9997)) ([9cfcf89](https://github.com/shaka-project/shaka-player/commit/9cfcf89a264c12b30b27cf3c80edb647dcd0f2af))
+
 ## [5.1.1](https://github.com/shaka-project/shaka-player/compare/v5.1.0...v5.1.1) (2026-04-20)
 
 
