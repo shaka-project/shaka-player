@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.0.13](https://github.com/shaka-project/shaka-player/compare/v5.0.12...v5.0.13) (2026-04-27)
+
+
+### Bug Fixes
+
+* handle AC-4 immersive stereo (IMSA) in HLS and DASH spatial audio detection ([#10007](https://github.com/shaka-project/shaka-player/issues/10007)) ([4ac5d06](https://github.com/shaka-project/shaka-player/commit/4ac5d0611f5768da3f9c977b772ea9abcec9e4a4))
+* **UI:** Fix parent param type in shaka.ui.Icon constructor ([#10014](https://github.com/shaka-project/shaka-player/issues/10014)) ([7a9db59](https://github.com/shaka-project/shaka-player/commit/7a9db5958c6472a11b17b74bc279128152debafb))
+
+
+### Performance Improvements
+
+* **segments:** use binary search for segment lookup in more hot paths ([#9997](https://github.com/shaka-project/shaka-player/issues/9997)) ([6f61177](https://github.com/shaka-project/shaka-player/commit/6f6117708e90932d4bfec9a174e1ce5e24fb501c))
+
 ## [5.0.12](https://github.com/shaka-project/shaka-player/compare/v5.0.11...v5.0.12) (2026-04-20)
 
 
