@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.16.29](https://github.com/shaka-project/shaka-player/compare/v4.16.28...v4.16.29) (2026-04-27)
+
+
+### Bug Fixes
+
+* handle AC-4 immersive stereo (IMSA) in HLS and DASH spatial audio detection ([#10007](https://github.com/shaka-project/shaka-player/issues/10007)) ([fdd5676](https://github.com/shaka-project/shaka-player/commit/fdd567624d9541ea6a0a746c2007de3cb7bef96e))
+
+
+### Performance Improvements
+
+* **segments:** use binary search for segment lookup in more hot paths ([#9997](https://github.com/shaka-project/shaka-player/issues/9997)) ([38ad6cb](https://github.com/shaka-project/shaka-player/commit/38ad6cbfa12ab12a155e8c95d7a6a88592510367))
+
 ## [4.16.28](https://github.com/shaka-project/shaka-player/compare/v4.16.27...v4.16.28) (2026-04-20)
 
 
