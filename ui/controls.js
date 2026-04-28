@@ -1292,7 +1292,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.addBigButtons_();
     }
 
-    if (!this.spinnerContainer_) {
+    if (this.config_.showBufferingSpinner && !this.spinnerContainer_) {
       this.addBufferingSpinner_();
     }
 
