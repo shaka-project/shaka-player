@@ -456,6 +456,7 @@ shaka.ui.Overlay = class {
       showUIOnPaused: true,
       showMenusOnTheRight: false,
       customTrackLabel: (defaultLabel, track, type) => '',
+      showBufferingSpinner: true,
     };
 
     if (goog.DEBUG) {
@@ -469,7 +470,7 @@ shaka.ui.Overlay = class {
     if (this.isMobile()) {
       config.bigButtons = [
         'skip_previous',
-        'play_pause',
+        'play_pause_buffering',
         'skip_next',
       ];
       config.customContextMenu = false;
@@ -505,7 +506,7 @@ shaka.ui.Overlay = class {
       ];
     } else if (this.isSmartTV()) {
       config.bigButtons = [
-        'play_pause',
+        'play_pause_buffering',
       ];
       config.customContextMenu = false;
       config.singleClickForPlayAndPause = false;
@@ -526,6 +527,10 @@ shaka.ui.Overlay = class {
           (name) => !filterElements.includes(name));
     } else {
       config.seekOnTaps = navigator.maxTouchPoints > 0;
+    }
+
+    if (config.bigButtons.some((name) => name === 'play_pause_buffering')) {
+      config.showBufferingSpinner = false;
     }
 
     const device = shaka.device.DeviceFactory.getDevice();
