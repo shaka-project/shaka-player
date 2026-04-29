@@ -36,6 +36,42 @@ jobs:
   # The jobs below are all conditional on a release having been created by
   # someone merging the release PR.  They all run in parallel.
 
+  compute-latest:
+    runs-on: ubuntu-latest
+    needs: release
+    if: needs.release.outputs.release_created
+    outputs:
+      is_latest: ${{ steps.compute.outputs.is_latest }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ needs.release.outputs.tag_name }}
+          persist-credentials: false
+          # Needed to view all tags and correctly compute the latest tag.
+          fetch-depth: 0
+
+      - name: Compute latest release
+        id: compute
+        run: |
+          # We only push the demo to GitHub Pages for the latest release
+          # version from the latest release branch.
+          RELEASE_TAGS=$(git tag | grep ^v[0-9] | grep -Ev -- '-(master|main)')
+          LATEST_RELEASE=$(echo "$RELEASE_TAGS" | sort --version-sort | tail -1)
+          TAG_NAME=${{ needs.release.outputs.tag_name }}
+
+          if [[ "$TAG_NAME" == "$LATEST_RELEASE" ]]; then
+            IS_LATEST=true
+          else
+            IS_LATEST=false
+          fi
+          echo IS_LATEST=$IS_LATEST >> $GITHUB_OUTPUT
+
+          # Debug the decisions made here.
+          echo "Latest release: $LATEST_RELEASE"
+          echo "This release: $TAG_NAME"
+          echo "Is latest: $IS_LATEST"
+
   tag-main:
     runs-on: ubuntu-latest
     needs: release
@@ -77,7 +113,7 @@ jobs:
         with:
           ref: refs/tags/${{ needs.release.outputs.tag_name }}
           persist-credentials: false
-          # Needed to view all tags and correctly compute the latest tag:
+          # Needed to view all tags and correctly compute the latest tag.
           fetch-depth: 0
 
       - uses: actions/setup-java@v4
@@ -157,15 +193,19 @@ jobs:
         # Reads the file name from the file "tarball".
         run: gh release upload --clobber "${{ needs.release.outputs.tag_name }}" "$(cat tarball)"
 
-  appspot:
+  demo-release:
     runs-on: ubuntu-latest
-    needs: release
-    if: needs.release.outputs.release_created
+    needs: [release, compute-latest]
+    if: needs.compute-latest.outputs.is_latest == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out source repo
+        uses: actions/checkout@v4
         with:
+          # Check out the source repo at the release tag.
           ref: refs/tags/${{ needs.release.outputs.tag_name }}
+          # Needed to view all tags.
           fetch-depth: 0
+          # No credentials.
           persist-credentials: false
 
       - uses: actions/setup-node@v4
@@ -178,44 +218,44 @@ jobs:
           distribution: zulu
           java-version: 21
 
-      - name: Compute appspot subdomain and promotion
+      - uses: ./.github/workflows/custom-actions/prep-demo-for-deployment
+
+      - name: Prep demo release commit
         run: |
-          # This is the same as the version tag, but with dots replaced by
-          # dashes.  For example, v3.2.2 would have the subdomain v3-2-2.
-          APPSPOT_SUBDOMAIN=$( echo ${{ needs.release.outputs.tag_name }} | sed -e 's/\./-/g' )
-          echo APPSPOT_SUBDOMAIN=$APPSPOT_SUBDOMAIN >> $GITHUB_ENV
+          # Switch git context over to the demo release repo.
+          git init
+          git remote add origin https://github.com/${{ github.repository }}-release
+          git fetch origin
 
-          # "Promoting" an appspot deployment makes it the default which shows
-          # up on shaka-player-demo.appspot.com (no subdomain).  This should be
-          # done for the latest release version from the latest release branch.
-          RELEASE_TAGS=$(git tag | grep ^v[0-9] | grep -Ev -- '-(master|main)')
-          LATEST_RELEASE=$(echo "$RELEASE_TAGS" | sort --version-sort | tail -1)
-          TAG_NAME=${{ needs.release.outputs.tag_name }}
+          # Reset the tracking state to origin/main without touching the working directory.
+          git reset --soft origin/main
 
-          if [[ "$TAG_NAME" == "$LATEST_RELEASE" ]]; then
-            APPSPOT_PROMOTE=true
-          else
-            APPSPOT_PROMOTE=false
-          fi
-          echo APPSPOT_PROMOTE=$APPSPOT_PROMOTE >> $GITHUB_ENV
+          # Create a simple README for the repo
+          echo "# Shaka Player Demo - Release Version" > README.md
+          echo "" >> README.md
+          echo "Version ${{ needs.release.outputs.tag_name }}" >> README.md
 
-          # Debug the decisions made here.
-          echo "Subdomain: $APPSPOT_SUBDOMAIN"
-          echo "Latest release: $LATEST_RELEASE"
-          echo "This release: $TAG_NAME"
-          echo "Promote: $APPSPOT_PROMOTE"
+          # Prevent pages from processing, manipulating, or excluding anything.
+          touch .nojekyll
 
-      - uses: ./.github/workflows/custom-actions/prep-for-appspot
+          # Create a clean commit for the new demo release.
+          git add -A
+          git config user.email shaka-bot@users.noreply.github.com
+          git config user.name "Shaka Bot"
+          git commit -m 'Release demo ${{ needs.release.outputs.tag_name }}'
 
-      - uses: google-github-actions/auth@v2
-        with:
-          credentials_json: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
+          # Rebase it on top of the existing repo history.
+          git rebase origin/main
 
-      - uses: google-github-actions/deploy-appengine@v2
-        with:
-          project_id: shaka-player-demo
-          version: ${{ env.APPSPOT_SUBDOMAIN }}
-          promote: ${{ env.APPSPOT_PROMOTE }}
+      - name: Push demo release commit
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          # Authenticate with GITHUB_TOKEN.
+          gh auth setup-git
+
+          # Push the changes.
+          git push origin HEAD:main
 
   auto-branch:
     runs-on: ubuntu-latest
@@ -237,10 +277,3 @@ jobs:
           TAG=${{ needs.release.outputs.tag_name }}
           BRANCH=$(echo "$TAG" | sed -e 's/\.0$/.x/')
           git push origin refs/tags/"$TAG"^{commit}:refs/heads/"$BRANCH"
-
-  update-demo-index:
-    name: Deploy Demo Version Index
-    needs: [appspot]
-    uses: ./.github/workflows/demo-version-index.yaml
-    secrets:
-      APPENGINE_DEPLOY_KEY: '${{ secrets.APPENGINE_DEPLOY_KEY }}'

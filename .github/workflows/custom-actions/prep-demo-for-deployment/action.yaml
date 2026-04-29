@@ -1,8 +1,8 @@
-name: Prep Appspot Deployment
+name: Prep Demo Deployment
 
 description: |
-  A reusable action that prepares the sources to deploy the Shaka Player Demo
-  to appspot.  Assumes that the source is already checked out.
+  A reusable action that prepares the sources to deploy the Shaka Player Demo.
+  Assumes that the source is already checked out.
 
 runs:
   using: composite
@@ -41,17 +41,10 @@ runs:
 
     - name: Delete unneeded files
       shell: bash
-      run: rm -rf .git .github build externs test node_modules
+      run: rm -rf .git .gitignore .github build externs test node_modules package.json package-lock.json README.md
 
     - name: Restore demo node modules
       shell: bash
       run: |
         tar xf demo-modules.tar
         rm demo-modules.tar
-
-    - name: Install App Engine code
-      shell: bash
-      run: |
-        mv app-engine/shaka-player-demo/* .
-        rm README.md
-        mv app-engine/gcloudignore .gcloudignore
