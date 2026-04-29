@@ -210,6 +210,7 @@ Features supported:
  - ABR (only navigator.connection change event)
  - DRM support for Widevine, PlayReady, FairPlay and ClearKey, using the CMSF ContentProtection
  - MP4 / CMAF support
+ - LoC support
  - Live
  - For browsers that support WebTransport certificate fingerprints (e.g., Chrome), you can use self-signed certificates without installing them.
 
