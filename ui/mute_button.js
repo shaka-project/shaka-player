@@ -147,7 +147,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
     let label;
-    if (this.ad) {
+    if (this.ad && this.ad.isLinear()) {
       label = this.ad.isMuted() ? LocIds.UNMUTE : LocIds.MUTE;
     } else {
       label = (this.video.muted || this.video.volume == 0) ?
@@ -167,7 +167,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
   updateIcon_() {
     const Icons = shaka.ui.Enums.MaterialDesignSVGIcons;
     let icon;
-    if (this.ad) {
+    if (this.ad && this.ad.isLinear()) {
       icon = this.ad.isMuted() ? Icons['UNMUTE'] : Icons['MUTE'];
     } else {
       icon = (this.video.muted || this.video.volume == 0) ?
