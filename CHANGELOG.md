@@ -1,5 +1,43 @@
 # Changelog
 
+## [5.2.0](https://github.com/shaka-project/shaka-player/compare/v5.1.0...v5.2.0) (2026-04-30)
+
+
+### Features
+
+* **Demo:** Use monospace in extra config text areas ([#10024](https://github.com/shaka-project/shaka-player/issues/10024)) ([3a59de0](https://github.com/shaka-project/shaka-player/commit/3a59de01ba6b7f7261cf28a1e383d77226211302))
+* **MSF:** Add catalogPreprocessor config ([#9990](https://github.com/shaka-project/shaka-player/issues/9990)) ([ef83be2](https://github.com/shaka-project/shaka-player/commit/ef83be209f74ed7c6409604087ddec7d8a73f3f4))
+* **MSF:** Provide a bandwidth estimate for ABR purposes ([#10016](https://github.com/shaka-project/shaka-player/issues/10016)) ([1a845ec](https://github.com/shaka-project/shaka-player/commit/1a845ec353e68760e5b291d7460bce9db1633564))
+* **UI:** Add new play_pause_buffering button ([#10039](https://github.com/shaka-project/shaka-player/issues/10039)) ([64dc709](https://github.com/shaka-project/shaka-player/commit/64dc7097c9251c78bf6fab8d7cbbcb9ac3a15d28))
+* **UI:** Allow custom format and imageQuality in takeScreenshot and copyVideoFrameToClipboard ([#10012](https://github.com/shaka-project/shaka-player/issues/10012)) ([b0e3015](https://github.com/shaka-project/shaka-player/commit/b0e3015962b0d11d5a0021ed9747bb4aadb7288c))
+* **UI:** Improve shaka player UI accessibility ([#10023](https://github.com/shaka-project/shaka-player/issues/10023)) ([f1c0468](https://github.com/shaka-project/shaka-player/commit/f1c0468f70333678bfb7ee73f74846b365bbf796))
+* **UI:** Support repeat modes in loop button when using QueueManager ([#10027](https://github.com/shaka-project/shaka-player/issues/10027)) ([24ab2be](https://github.com/shaka-project/shaka-player/commit/24ab2be1aa2fb44028a29eb389a3350bf49c0e3c))
+* **UI:** Use UI language to display languages names ([#10036](https://github.com/shaka-project/shaka-player/issues/10036)) ([18af32c](https://github.com/shaka-project/shaka-player/commit/18af32c1a2513799333c65e9f47c8091b7a457c4))
+
+
+### Bug Fixes
+
+* **ABR:** Fix playbackRate calculation when using droppedFrames ([#10011](https://github.com/shaka-project/shaka-player/issues/10011)) ([62ea2f6](https://github.com/shaka-project/shaka-player/commit/62ea2f6c5c8f40a75d469a862253c20c55e9f12f))
+* Allow use preferredText with external tracks ([#10019](https://github.com/shaka-project/shaka-player/issues/10019)) ([3d11d75](https://github.com/shaka-project/shaka-player/commit/3d11d75e10dfd16617332cbe539828d9aecfbe74))
+* avoid pts rollover correction for fmp4/cmaf streams ([#10021](https://github.com/shaka-project/shaka-player/issues/10021)) ([c2ad355](https://github.com/shaka-project/shaka-player/commit/c2ad355e28048b15c44e3d768fa9ceb43e69c728)), closes [#10020](https://github.com/shaka-project/shaka-player/issues/10020)
+* Avoid uncaught TypeError when destroying player during DRM key status change ([#9992](https://github.com/shaka-project/shaka-player/issues/9992)) ([281b7c4](https://github.com/shaka-project/shaka-player/commit/281b7c4a024c5cc80697e6340b107aa571da32d4))
+* Bail out on initial text preference when a user selected one manually. ([#10010](https://github.com/shaka-project/shaka-player/issues/10010)) ([09b6c94](https://github.com/shaka-project/shaka-player/commit/09b6c94ad89f2e0a2bf7ce17de75328fd2802ffd))
+* Clamp playback rate to 16x and improve playhead movement behavior ([#9996](https://github.com/shaka-project/shaka-player/issues/9996)) ([9d8b383](https://github.com/shaka-project/shaka-player/commit/9d8b3837eb638f4612fad11f663f3f882f25fbde))
+* **demo:** Fix audio-only animated poster ([#9986](https://github.com/shaka-project/shaka-player/issues/9986)) ([d64ff80](https://github.com/shaka-project/shaka-player/commit/d64ff80eba1f6bbf14d1f96d0dccaf5d0b0dc1a5))
+* **Demo:** Fix audio-only animated poster on custom content ([#9995](https://github.com/shaka-project/shaka-player/issues/9995)) ([b0de223](https://github.com/shaka-project/shaka-player/commit/b0de2238334b0831c004fe13a1b864aa314a0bcd))
+* handle AC-4 immersive stereo (IMSA) in HLS and DASH spatial audio detection ([#10007](https://github.com/shaka-project/shaka-player/issues/10007)) ([b113cad](https://github.com/shaka-project/shaka-player/commit/b113cadd36cd072719437aea89b529312f325d45))
+* **HLS:** Fix SAMPLE-AES identity stall at waitingforkey event on track switch ([#10000](https://github.com/shaka-project/shaka-player/issues/10000)) ([bce50f0](https://github.com/shaka-project/shaka-player/commit/bce50f0c7ab39da884682749e2fdbdc846cf3be0))
+* **MSF:** Fix namespace handling ([#9988](https://github.com/shaka-project/shaka-player/issues/9988)) ([ef2bd7f](https://github.com/shaka-project/shaka-player/commit/ef2bd7f547933a63d4dc1d8eedad6acb8a75c13f))
+* **UI:** Fix parent param type in shaka.ui.Icon constructor ([#10014](https://github.com/shaka-project/shaka-player/issues/10014)) ([82e9147](https://github.com/shaka-project/shaka-player/commit/82e914740c760474e1a25f3bec31217836be9ed8))
+* **UI:** Fix wrong wheel directions on volume bar ([#10001](https://github.com/shaka-project/shaka-player/issues/10001)) ([e0808e7](https://github.com/shaka-project/shaka-player/commit/e0808e7dadfba48a2bca062756533c4bf8a0378e))
+
+
+### Performance Improvements
+
+* **HLS:** skip merging known segments on live playlist updates ([#9998](https://github.com/shaka-project/shaka-player/issues/9998)) ([b460575](https://github.com/shaka-project/shaka-player/commit/b4605750c8b67438f647ba08331b7e2995ff9cbd))
+* **segments:** use binary search for segment lookup in more hot paths ([#9997](https://github.com/shaka-project/shaka-player/issues/9997)) ([44dfab1](https://github.com/shaka-project/shaka-player/commit/44dfab167a3aef14c1d42184aa1682a1ed3f29c6))
+* **UI:** Skip touch listeners when maxTouchPoints is 0 ([#9981](https://github.com/shaka-project/shaka-player/issues/9981)) ([d07037b](https://github.com/shaka-project/shaka-player/commit/d07037bb661481450d9a5a7028c7cbfc43f9a9ba))
+
 ## [5.1.0](https://github.com/shaka-project/shaka-player/compare/v5.0.0...v5.1.0) (2026-04-15)
 
 
