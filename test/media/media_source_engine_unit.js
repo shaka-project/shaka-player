@@ -55,11 +55,9 @@ describe('MediaSourceEngine', () => {
   const originalIsSupported =
       shaka.transmuxer.TransmuxerEngine.isSupported;
 
-  // Jasmine Spies don't handle toHaveBeenCalledWith well with objects, so use
-  // some numbers instead.
-  const buffer = /** @type {!ArrayBuffer} */ (/** @type {?} */ (1));
-  const buffer2 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (2));
-  const buffer3 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (3));
+  const buffer = new Uint8Array([0x01]);
+  const buffer2 = new Uint8Array([0x02]);
+  const buffer3 = new Uint8Array([0x03]);
 
   const makeFakeStream = (mimeType) => {
     const segmentIndex = {
@@ -252,6 +250,10 @@ describe('MediaSourceEngine', () => {
     mockClosedCaptionParser = new shaka.test.FakeClosedCaptionParser();
     mockTextDisplayer = new shaka.test.FakeTextDisplayer();
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    // Unit tests use FakeTransmuxer which is not registered in the worker
+    // bundle, so disable worker transmuxing to keep transmux calls on the
+    // main thread where the fake is visible.
+    config.useWorkerForTransmux = false;
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
@@ -452,6 +454,36 @@ describe('MediaSourceEngine', () => {
       expect(mockMediaSource.addSourceBuffer).not.toHaveBeenCalled();
       expect(shaka.text.TextEngine).toHaveBeenCalled();
     });
+
+    it('does not wrap transmuxer in TransmuxerProxy when ' +
+        'useWorkerForTransmux is false', async () => {
+      const proxySpy = spyOn(shaka.transmuxer, 'TransmuxerProxy')
+          .and.callThrough();
+      const config =
+          shaka.util.PlayerConfiguration.createDefault().mediaSource;
+      config.useWorkerForTransmux = false;
+      mediaSourceEngine.configure(config);
+
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeTransportStream);
+      await mediaSourceEngine.init(initObject, false);
+      expect(proxySpy).not.toHaveBeenCalled();
+    });
+
+    it('wraps transmuxer in TransmuxerProxy when useWorkerForTransmux is true',
+        async () => {
+          const proxySpy = spyOn(shaka.transmuxer, 'TransmuxerProxy')
+              .and.callThrough();
+          const config =
+              shaka.util.PlayerConfiguration.createDefault().mediaSource;
+          config.useWorkerForTransmux = true;
+          mediaSourceEngine.configure(config);
+
+          const initObject = new Map();
+          initObject.set(ContentType.VIDEO, fakeTransportStream);
+          await mediaSourceEngine.init(initObject, false);
+          expect(proxySpy).toHaveBeenCalledOnceWith(mockTransmuxer);
+        });
   });
 
   describe('bufferStart and bufferEnd', () => {
@@ -1269,7 +1301,7 @@ describe('MediaSourceEngine', () => {
       await expectAsync(p1).toBeRejected();
       expect(mockMediaSource.endOfStream).toHaveBeenCalled();
       await Util.shortDelay();
-      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       audioSourceBuffer.updateend();
     });
   });

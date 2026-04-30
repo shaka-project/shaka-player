@@ -38,6 +38,9 @@ describe('HlsParser', () => {
     player.configure('streaming.stallEnabled', false);
     // Disable gapPadding, which can interfere with playback tests.
     player.configure('streaming.gapPadding', 0);
+    // Worker transmuxing requires the worker file to be served by Karma, which
+    // is not set up for integration tests.
+    player.configure('mediaSource.useWorkerForTransmux', false);
 
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();

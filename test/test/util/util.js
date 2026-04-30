@@ -379,7 +379,6 @@ shaka.test.Util = class {
   static async isTypeSupported(mimetype, width, height) {
     const MimeUtils = shaka.util.MimeUtils;
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
-    const StreamUtils = shaka.util.StreamUtils;
 
     /** @type {!MediaDecodingConfiguration} */
     const mediaDecodingConfig = {
@@ -387,7 +386,7 @@ shaka.test.Util = class {
     };
     if (mimetype.startsWith('audio')) {
       const baseMimeType = MimeUtils.getBasicType(mimetype);
-      const codecs = StreamUtils.getCorrectAudioCodecs(
+      const codecs = MimeUtils.getCorrectAudioCodecs(
           MimeUtils.getCodecs(mimetype), baseMimeType);
       // AudioConfiguration
       mediaDecodingConfig.audio = {
@@ -395,7 +394,7 @@ shaka.test.Util = class {
             baseMimeType, codecs, ContentType.AUDIO),
       };
     } else {
-      const codecs = StreamUtils.getCorrectVideoCodecs(
+      const codecs = MimeUtils.getCorrectVideoCodecs(
           MimeUtils.getCodecs(mimetype));
       const baseMimeType = MimeUtils.getBasicType(mimetype);
       if (codecs.startsWith('hvc1.') && deviceDetected.disableHEVCSupport()) {

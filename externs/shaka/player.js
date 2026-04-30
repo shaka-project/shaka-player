@@ -2348,7 +2348,8 @@ shaka.extern.NetworkingConfiguration;
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback,
  *   dispatchAllEmsgBoxes: boolean,
  *   useSourceElements: boolean,
- *   durationReductionEmitsUpdateEnd: boolean
+ *   durationReductionEmitsUpdateEnd: boolean,
+ *   useWorkerForTransmux: boolean
  * }}
  *
  * @description
@@ -2416,6 +2417,14 @@ shaka.extern.NetworkingConfiguration;
  *   smaller than existing value.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {boolean} useWorkerForTransmux
+ *   If true, transmuxing (e.g., MPEG-TS to MP4) will be offloaded to a Web
+ *   Worker to avoid blocking the main thread. This can improve playback
+ *   smoothness on low-powered devices such as Smart TVs.
+ *   Falls back to main-thread transmuxing if Workers are not available.
+ *   <br>
+ *   Defaults to <code>true</code> on non-TV devices, <code>false</code> on
+ *   TVs.
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;

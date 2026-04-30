@@ -803,7 +803,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Uses source elements',
             'mediaSource.useSourceElements')
         .addBoolInput_('Expect updateEnd when duration is truncated',
-            'mediaSource.durationReductionEmitsUpdateEnd');
+            'mediaSource.durationReductionEmitsUpdateEnd')
+        .addBoolInput_('Use a worker for transmuxing',
+            'mediaSource.useWorkerForTransmux');
   }
 
   /**
