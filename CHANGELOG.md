@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.0.14](https://github.com/shaka-project/shaka-player/compare/v5.0.13...v5.0.14) (2026-05-04)
+
+
+### Bug Fixes
+
+* **UI:** check if ad is linear before updating mute label and icon ([#10044](https://github.com/shaka-project/shaka-player/issues/10044)) ([cb8724a](https://github.com/shaka-project/shaka-player/commit/cb8724a406fe18658749a1a572eba42f29f89d4d))
+
+
+### Performance Improvements
+
+* **DASH:** lazy segment reference creation ([#10050](https://github.com/shaka-project/shaka-player/issues/10050)) ([24c9c99](https://github.com/shaka-project/shaka-player/commit/24c9c999f7bd965ca3c7c1d7d5c2dc5bf152a0f2))
+* Remove unnecessary Uint8ArrayUtils.concat calls in Mp4Generator ([#10047](https://github.com/shaka-project/shaka-player/issues/10047)) ([4bcc188](https://github.com/shaka-project/shaka-player/commit/4bcc188929fa422cee14d8445002dede4b38bd1a))
+* **transmuxer:** Merge consecutive Uint8Arrays in h265 transmuxer ([#10046](https://github.com/shaka-project/shaka-player/issues/10046)) ([d9075a7](https://github.com/shaka-project/shaka-player/commit/d9075a722c9148115236ea7330ab08f9612915d3))
+
 ## [5.0.13](https://github.com/shaka-project/shaka-player/compare/v5.0.12...v5.0.13) (2026-04-27)
 
 
