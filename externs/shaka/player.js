@@ -2987,9 +2987,8 @@ shaka.extern.OfflineConfiguration;
  *   If <code>false</code>, captions render unconditionally on every captions
  *   update period.
  *   <br>
- *   Defaults to <code>true</code>, except on TV devices where it defaults to
- *   <code>false</code> because some TV browsers misreport
- *   <code>IntersectionObserver</code> visibility for the player container.
+ *   Defaults to <code>true</code> except on Tizen, WebOS, Hisense,
+ *   Vizio whose default value is <code>false</code>.
  * @exportDoc
  */
 shaka.extern.TextDisplayerConfiguration;
