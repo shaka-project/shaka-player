@@ -89,6 +89,7 @@ textlang
 textrole
 thirdquartile
 timeandseekrangeupdated
+timestampoffsetchanged
 timelineregionadded
 timelineregionenter
 timelineregionexit
