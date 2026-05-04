@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.15.42](https://github.com/shaka-project/shaka-player/compare/v4.15.41...v4.15.42) (2026-05-04)
+
+
+### Performance Improvements
+
+* **DASH:** lazy segment reference creation ([#10050](https://github.com/shaka-project/shaka-player/issues/10050)) ([6a3e89e](https://github.com/shaka-project/shaka-player/commit/6a3e89e96a53e231a4413c83aa75c609ef85de05))
+* Remove unnecessary Uint8ArrayUtils.concat calls in Mp4Generator ([#10047](https://github.com/shaka-project/shaka-player/issues/10047)) ([5a0ec3e](https://github.com/shaka-project/shaka-player/commit/5a0ec3e64c4bff8a7cfdb90ea84dd9847aa7e9e0))
+
 ## [4.15.41](https://github.com/shaka-project/shaka-player/compare/v4.15.40...v4.15.41) (2026-04-27)
 
 
