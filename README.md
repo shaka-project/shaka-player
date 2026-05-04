@@ -414,7 +414,7 @@ Shaka currently provides the following versions:
 
 ## Documentation & Important Links ##
 
- * [Demo](https://shaka-player-demo.appspot.com)([sources](demo/))
+ * [Demo](https://shaka-project.github.io/shaka-player-release/)([sources](demo/))
  * [Nightly Demo](https://shaka-project.github.io/shaka-player/)
  * [Demo index](https://index-dot-shaka-player-demo.appspot.com)
  * [API documentation](https://shaka-project.github.io/shaka-player/docs/api/index.html)
