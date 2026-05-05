@@ -2983,7 +2983,8 @@ shaka.extern.OfflineConfiguration;
  * @property {boolean} suspendRenderingWhenHidden
  *   If <code>true</code>, the UI text displayer suspends caption rendering
  *   when the video container is off-screen or the page is hidden, using
- *   <code>IntersectionObserver</code> and <code>document.visibilityState</code>.
+ *   <code>IntersectionObserver</code> and
+ *   <code>document.visibilityState</code>.
  *   If <code>false</code>, captions render unconditionally on every captions
  *   update period.
  *   <br>
