@@ -91,6 +91,7 @@ describe('UI', () => {
         'recenter_vr',
         'toggle_stereoscopic',
       ],
+      preferIntlDisplayNames: false,
       // TODO: Cast receiver id to test chromecast integration
     };
 
