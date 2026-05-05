@@ -16,7 +16,6 @@ goog.require('cml.cmcd.CMCD_QUERY');
 goog.require('cml.cmcd.CMCD_REQUEST_MODE');
 goog.require('cml.cmcd.CMCD_V2');
 goog.require('cml.cmcd.CmcdEventType');
-goog.require('cml.cmcd.defaultRequester');
 goog.require('cml.cmcd.encodeCmcd');
 goog.require('cml.cmcd.encodePreparedCmcd');
 goog.require('cml.cmcd.prepareCmcdData');
@@ -174,7 +173,7 @@ cml.cmcd.CmcdReporter = class {
     };
 
     /** @private {function(!Object): !Promise<{status: number}>} */
-    this.requester_ = requester || cml.cmcd.defaultRequester;
+    this.requester_ = requester;
 
     this.data_ = /** @type {!cml.cmcd.Cmcd} */ ({
       cid: this.config_.cid,

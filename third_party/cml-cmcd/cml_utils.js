@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('cml.cmcd.defaultRequester');
 goog.provide('cml.cmcd.urlToRelativePath');
 goog.provide('cml.cmcd.uuid');
 
@@ -24,32 +23,6 @@ goog.provide('cml.cmcd.uuid');
  * @return {string}
  */
 cml.cmcd.uuid = () => crypto.randomUUID();
-
-
-/**
- * Default `requester` shim for the vendored `CmcdReporter`.
- *
- * Upstream CML defines this inline in `CmcdReporter.ts`'s module scope
- * (`function defaultRequester(request)` -> `fetch(url, init)`). The
- * shaka adapter always supplies a custom `requester` callback that
- * routes through `NetworkingEngine`, so this codepath is dead at
- * runtime — Closure ADVANCED will strip it. Kept here so the
- * `CmcdReporter` constructor's default-parameter shape stays verbatim
- * to upstream and per-bump diffs stay trivial.
- *
- * Centralized in this shim file so the conformance whitelist for
- * `fetch` can stay scoped to a single dead-code wrapper.
- *
- * @param {!Object} request The CMCD event-mode request to dispatch.
- * @return {!Promise<{status: number}>}
- */
-cml.cmcd.defaultRequester = function(request) {
-  const url = /** @type {{url: string}} */ (request).url;
-  const init = Object.assign({}, request);
-  delete init['url'];
-  return fetch(url, /** @type {!RequestInit} */ (init));
-};
-
 
 /**
  * Constructs a relative path from a URL.
