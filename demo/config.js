@@ -432,7 +432,9 @@ shakaDemo.Config = class {
             positionAreaOptionNames)
         .addNumberInput_('Subtitle delay (seconds)',
             'textDisplayer.subtitleDelay',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Suspend rendering when hidden',
+            'textDisplayer.suspendRenderingWhenHidden');
   }
 
   /** @private */
@@ -1190,7 +1192,8 @@ shakaDemo.Config = class {
         .addUIArrayNumberInput_('Fast Forward Rates', 'fastForwardRates')
         .addUIArrayNumberInput_('Rewind Rates', 'rewindRates')
         .addUIArrayNumberInput_('Captions Font Scale Factors',
-            'captionsFontScaleFactors');
+            'captionsFontScaleFactors')
+        .addUIBoolInput_('Show buffering spinner', 'showBufferingSpinner');
   }
 
   /** @private */

@@ -205,11 +205,12 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 
 Features supported:
  - Media over QUIC Transport [draft-14](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/14/) and [draft-16](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/16/)
- - MOQT Streaming Format [draft-0](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/00/) and CMSF [draft-0](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/00/)
+ - MSF [draft-0](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/00/) and CMSF [draft-0](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/00/)
  - Audio, Video and Text
- - ABR (only navigator.connection change event)
+ - ABR
  - DRM support for Widevine, PlayReady, FairPlay and ClearKey, using the CMSF ContentProtection
  - MP4 / CMAF support
+ - LoC [draft-2](https://datatracker.ietf.org/doc/draft-ietf-moq-loc/02/) support
  - Live
  - For browsers that support WebTransport certificate fingerprints (e.g., Chrome), you can use self-signed certificates without installing them.
 
@@ -414,7 +415,7 @@ Shaka currently provides the following versions:
 
 ## Documentation & Important Links ##
 
- * [Demo](https://shaka-player-demo.appspot.com)([sources](demo/))
+ * [Demo](https://shaka-project.github.io/shaka-player-release/)([sources](demo/))
  * [Nightly Demo](https://shaka-project.github.io/shaka-player/)
  * [Demo index](https://index-dot-shaka-player-demo.appspot.com)
  * [API documentation](https://shaka-project.github.io/shaka-player/docs/api/index.html)

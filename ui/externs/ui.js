@@ -337,6 +337,7 @@ shaka.extern.UITrackLabelCallback;
  *   showUIOnPaused: boolean,
  *   showMenusOnTheRight: boolean,
  *   customTrackLabel: shaka.extern.UITrackLabelCallback,
+ *   showBufferingSpinner: boolean,
  * }}
  *
  * @property {!Array<string>} controlPanelElements
@@ -635,6 +636,14 @@ shaka.extern.UITrackLabelCallback;
  *   value to keep the default.
  *   <br>
  *   Defaults to a no-op that returns <code>''</code>.
+ * @property {boolean} showBufferingSpinner
+ *   Whether or not to display a buffering spinner while the media is loading
+ *   or temporarily stalled due to insufficient data. When enabled, a visual
+ *   indicator is shown to inform the user that playback is waiting for more
+ *   content to be buffered.
+ *   <br>
+ *   Defaults to <code>true</code> except on mobile and smart TV whose
+ *   default value is <code>false</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

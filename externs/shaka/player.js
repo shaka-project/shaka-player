@@ -2954,6 +2954,7 @@ shaka.extern.OfflineConfiguration;
  *   fontScaleFactor: number,
  *   positionArea: shaka.config.PositionArea,
  *   subtitleDelay: number,
+ *   suspendRenderingWhenHidden: boolean,
  * }}
  *
  * @description
@@ -2979,6 +2980,16 @@ shaka.extern.OfflineConfiguration;
  *   (appear later than video); negative values advance them.
  *   <br>
  *   Defaults to <code>0</code>.
+ * @property {boolean} suspendRenderingWhenHidden
+ *   If <code>true</code>, the UI text displayer suspends caption rendering
+ *   when the video container is off-screen or the page is hidden, using
+ *   <code>IntersectionObserver</code> and
+ *   <code>document.visibilityState</code>.
+ *   If <code>false</code>, captions render unconditionally on every captions
+ *   update period.
+ *   <br>
+ *   Defaults to <code>true</code> except on Tizen, WebOS, Hisense,
+ *   Vizio whose default value is <code>false</code>.
  * @exportDoc
  */
 shaka.extern.TextDisplayerConfiguration;

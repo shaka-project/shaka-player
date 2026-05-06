@@ -1292,8 +1292,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.addBigButtons_();
     }
 
-    if (!this.spinnerContainer_) {
-      this.addBufferingSpinner_();
+    if (this.config_.showBufferingSpinner) {
+      if (!this.spinnerContainer_) {
+        this.addBufferingSpinner_();
+      }
+    } else {
+      if (this.spinnerContainer_) {
+        this.videoContainer_.removeChild(this.spinnerContainer_);
+        this.spinnerContainer_ = null;
+      }
     }
 
     if (this.config_.seekOnTaps) {
@@ -1425,6 +1432,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       </g>
     </svg>`;
     spinner.insertAdjacentHTML('beforeend', str);
+    this.onBufferingStateChange_();
   }
 
   /**
@@ -2229,7 +2237,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   onBufferingStateChange_() {
-    if (!this.enabled_) {
+    if (!this.enabled_ || !this.spinnerContainer_) {
       return;
     }
 

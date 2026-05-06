@@ -84,6 +84,7 @@ goog.require('shaka.transmuxer.Ec3');
 goog.require('shaka.transmuxer.Ec3Transmuxer');
 goog.require('shaka.transmuxer.H264');
 goog.require('shaka.transmuxer.H265');
+goog.require('shaka.transmuxer.LocTransmuxer');
 goog.require('shaka.transmuxer.Mp3Transmuxer');
 goog.require('shaka.transmuxer.MpegAudio');
 goog.require('shaka.transmuxer.MpegTsTransmuxer');
