@@ -26,9 +26,13 @@ shaka.ui.SkipNextButton = class extends shaka.ui.Element {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
+   * @param {boolean=} showDisabled
    */
-  constructor(parent, controls) {
+  constructor(parent, controls, showDisabled = false) {
     super(parent, controls);
+
+    /** @private {boolean} */
+    this.showDisabled_ = showDisabled;
 
     this.queueManager_ = this.controls.getQueueManager();
 
@@ -90,9 +94,17 @@ shaka.ui.SkipNextButton = class extends shaka.ui.Element {
   /** @private */
   checkAvailability_() {
     const itemsLength = this.queueManager_.getItems().length;
-    const available = itemsLength > 1 &&
+    const hasNext = itemsLength > 1 &&
       (this.queueManager_.getCurrentItemIndex() + 1) < itemsLength;
-    shaka.ui.Utils.setDisplay(this.button_, available);
+
+    if (this.showDisabled_) {
+      // Always visible when queue has more than one item; disabled if no next.
+      const hasQueue = itemsLength > 1;
+      shaka.ui.Utils.setDisplay(this.button_, hasQueue);
+      this.button_.disabled = !hasNext;
+    } else {
+      shaka.ui.Utils.setDisplay(this.button_, hasNext);
+    }
   }
 };
 
@@ -113,3 +125,22 @@ shaka.ui.Controls.registerElement(
 
 shaka.ui.Controls.registerBigElement(
     'skip_next', new shaka.ui.SkipNextButton.Factory());
+
+
+/**
+ * @implements {shaka.extern.IUIElement.Factory}
+ * @final
+ */
+shaka.ui.SkipNextButton.AlwaysFactory = class {
+  /** @override */
+  create(rootElement, controls) {
+    return new shaka.ui.SkipNextButton(
+        rootElement, controls, /* showDisabled= */ true);
+  }
+};
+
+shaka.ui.Controls.registerElement(
+    'skip_next_always', new shaka.ui.SkipNextButton.AlwaysFactory());
+
+shaka.ui.Controls.registerBigElement(
+    'skip_next_always', new shaka.ui.SkipNextButton.AlwaysFactory());

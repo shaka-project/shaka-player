@@ -469,9 +469,9 @@ shaka.ui.Overlay = class {
     // This is in line with default styles in Chrome.
     if (this.isMobile()) {
       config.bigButtons = [
-        'skip_previous',
+        'skip_previous_always',
         'play_pause_buffering',
-        'skip_next',
+        'skip_next_always',
       ];
       config.customContextMenu = false;
       config.singleClickForPlayAndPause = false;
