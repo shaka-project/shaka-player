@@ -1086,7 +1086,14 @@ describe('UI', () => {
     const videos = container.getElementsByTagName('video');
     expect(videos.length).not.toBe(0);
 
-    UiUtils.confirmElementFound(container, 'shaka-spinner');
+    const overlay = /** @type {!shaka.ui.Overlay} */(videos[0]['ui']);
+    const config = overlay.getConfiguration();
+    if (config.showBufferingSpinner) {
+      UiUtils.confirmElementFound(container, 'shaka-spinner');
+    } else {
+      UiUtils.confirmElementMissing(container, 'shaka-spinner');
+    }
+
     const deviceType = deviceDetected.getDeviceType();
     if (deviceType == shaka.device.IDevice.DeviceType.CAST) {
       UiUtils.confirmElementMissing(container, 'shaka-overflow-menu');
