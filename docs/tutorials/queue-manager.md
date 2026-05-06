@@ -259,16 +259,3 @@ await queueManager.removeAllItems();
 
 This unloads the player, destroys any active or pending `PreloadManager`
 instances, and resets the current index to `-1`.
-
-
-#### Destroying the QueueManager
-
-The `QueueManager` is destroyed automatically when you destroy the player.
-If you need to tear it down manually, call:
-
-```js
-await queueManager.destroy();
-```
-
-This releases all event listeners, stops any pending repeat timers, unloads
-the player, and destroys all preload managers.
