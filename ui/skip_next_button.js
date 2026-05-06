@@ -26,13 +26,13 @@ shaka.ui.SkipNextButton = class extends shaka.ui.Element {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
-   * @param {boolean=} showDisabled
+   * @param {boolean=} showWhenUnavailable
    */
-  constructor(parent, controls, showDisabled = false) {
+  constructor(parent, controls, showWhenUnavailable = false) {
     super(parent, controls);
 
     /** @private {boolean} */
-    this.showDisabled_ = showDisabled;
+    this.showWhenUnavailable_ = showWhenUnavailable;
 
     this.queueManager_ = this.controls.getQueueManager();
 
@@ -97,7 +97,7 @@ shaka.ui.SkipNextButton = class extends shaka.ui.Element {
     const hasNext = itemsLength > 1 &&
       (this.queueManager_.getCurrentItemIndex() + 1) < itemsLength;
 
-    if (this.showDisabled_) {
+    if (this.showWhenUnavailable_) {
       // Always visible when queue has more than one item; disabled if no next.
       const hasQueue = itemsLength > 1;
       shaka.ui.Utils.setDisplay(this.button_, hasQueue);
