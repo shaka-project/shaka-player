@@ -254,6 +254,7 @@ describe('Player', () => {
 
         completionPercent: jasmine.any(Number),
         loadLatency: jasmine.any(Number),
+        timeToFirstFrame: jasmine.any(Number),
         manifestTimeSeconds: jasmine.any(Number),
         drmTimeSeconds: jasmine.any(Number),
         playTime: jasmine.any(Number),

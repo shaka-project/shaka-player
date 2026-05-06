@@ -73,6 +73,7 @@ shaka.extern.StateChange;
  *
  *   completionPercent: number,
  *   loadLatency: number,
+ *   timeToFirstFrame: number,
  *   manifestTimeSeconds: number,
  *   drmTimeSeconds: number,
  *   playTime: number,
@@ -140,9 +141,17 @@ shaka.extern.StateChange;
  *   playback. Also known as the "high water mark". If nothing is loaded, or
  *   the stream is live (and therefore indefinite), NaN.
  * @property {number} loadLatency
- *   This is the number of seconds it took for the video element to have enough
- *   data to begin playback.  This is measured from the time load() is called to
- *   the time the <code>'loadeddata'</code> event is fired by the media element.
+ *   Time in seconds from when load() is called to when the media element fires
+ *   the 'loadedmetadata' event.
+ *   This reflects how long it takes to retrieve and parse enough data to know
+ *   basic media information (duration, tracks, dimensions), but does NOT imply
+ *   that playback can start.
+ *   If nothing is loaded, NaN.
+ * @property {number} timeToFirstFrame
+ *   Time in seconds from when load() is called to when the first video frame
+ *   is available for rendering, measured using the 'loadeddata' event.
+ *   This represents the startup delay perceived by the user before seeing
+ *   visual content.
  *   If nothing is loaded, NaN.
  * @property {number} manifestTimeSeconds
  *   The amount of time it took to download and parse the manifest.

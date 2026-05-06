@@ -330,6 +330,7 @@ shaka.ui.Overlay = class {
         'licenseTime',
         'liveLatency',
         'loadLatency',
+        'timeToFirstFrame',
         'bufferingTime',
         'manifestTimeSeconds',
         'estimatedBandwidth',
