@@ -1178,6 +1178,39 @@ describe('Player', () => {
           const allThumbnails = await player.getAllThumbnails();
           expect(allThumbnails.length).toBe(3);
         });
+
+    it('handles concurrent getAllThumbnails calls', async () => {
+      await player.load('test:sintel_no_text_compiled');
+      const locationUri = new goog.Uri(location.href);
+      const partialUri =
+          new goog.Uri('/base/test/test/assets/thumbnails-sprites.vtt');
+      const absoluteUri = locationUri.resolve(partialUri);
+      const newTrack =
+          await player.addThumbnailsTrack(absoluteUri.toString());
+
+      // Two concurrent calls on the same track must share the
+      // createSegmentIndex call and both receive the full set without the
+      // first caller closing the segmentIndex out from under the second.
+      const [thumbnails1, thumbnails2] = await Promise.all([
+        player.getAllThumbnails(newTrack.id),
+        player.getAllThumbnails(newTrack.id),
+      ]);
+      expect(thumbnails1.length).toBe(3);
+      expect(thumbnails2.length).toBe(3);
+
+      // A subsequent call must still succeed after the concurrent pair
+      // tore down the shared pendingState.
+      const thumbnails3 = await player.getAllThumbnails(newTrack.id);
+      expect(thumbnails3.length).toBe(3);
+
+      // Default trackId must also coordinate with itself.
+      const [defaultThumbs1, defaultThumbs2] = await Promise.all([
+        player.getAllThumbnails(),
+        player.getAllThumbnails(),
+      ]);
+      expect(defaultThumbs1.length).toBe(3);
+      expect(defaultThumbs2.length).toBe(3);
+    });
   });  // describe('addThumbnailsTrack')
 
   it('preload', async () => {
