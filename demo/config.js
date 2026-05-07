@@ -806,6 +806,18 @@ shakaDemo.Config = class {
             'mediaSource.useSourceElements')
         .addBoolInput_('Expect updateEnd when duration is truncated',
             'mediaSource.durationReductionEmitsUpdateEnd');
+
+    const transmuxWorkerToggleOnChange = (input) => {
+      const url = input.checked ?
+          shakaDemoMain.getTransmuxerWorkerUrl() : '';
+      shakaDemoMain.configure('mediaSource.transmuxWorkerUrl', url);
+      shakaDemoMain.remakeHash();
+    };
+    this.addCustomBoolInput_(
+        'Use a worker for transmuxing', transmuxWorkerToggleOnChange);
+    if (shakaDemoMain.getCurrentConfigValue('mediaSource.transmuxWorkerUrl')) {
+      this.latestInput_.input().checked = true;
+    }
   }
 
   /**

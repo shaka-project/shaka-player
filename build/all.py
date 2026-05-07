@@ -231,6 +231,16 @@ def main(args):
   for mode in modes:
     tasks = []
 
+    worker_args = [
+      '--worker', '--name', 'transmuxer-worker',
+      '+@transmuxer-worker', '--langout', 'ECMASCRIPT5', '--mode', mode,
+    ]
+    if parsed_args.force:
+      worker_args += ['--force']
+    tasks.append((
+      [sys.executable, os.path.join(base, 'build', 'build.py')] + worker_args,
+      os.environ.copy()))
+
     for lang_out, suffix in language_variants:
       for build_args in builds:
         args = list(build_args)
@@ -242,6 +252,7 @@ def main(args):
         # Add language and mode flags.
         args += ['--langout', lang_out]
         args += ['--mode', mode]
+        args += ['--skip-worker']
 
         # Prepare environment and command for a separate process.
         env = os.environ.copy()
