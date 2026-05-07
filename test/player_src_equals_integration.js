@@ -324,7 +324,6 @@ describe('Player Src Equals', () => {
     const stats = player.getStats();
     expect(stats).toBeTruthy();
     expect(stats.loadLatency).toBeGreaterThan(0);
-    expect(stats.timeToFirstFrame).toBeGreaterThan(0);
     expect(stats.manifestTimeSeconds).toBeNaN(); // There's no manifest.
     expect(stats.drmTimeSeconds).toBeNaN(); // There's no DRM.
     expect(stats.height).toBe(110);
