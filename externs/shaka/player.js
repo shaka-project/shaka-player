@@ -149,10 +149,10 @@ shaka.extern.StateChange;
  *   If nothing is loaded, NaN.
  * @property {number} timeToFirstFrame
  *   Time in seconds from when load() is called to when the first video frame
- *   is available for rendering, measured using the 'loadeddata' event.
- *   This represents the startup delay perceived by the user before seeing
- *   visual content.
- *   If nothing is loaded, NaN.
+ *   is presented to the screen. Uses requestVideoFrameCallback when available
+ *   (measures actual render time), falling back to the 'loadeddata' event
+ *   (measures decode completion time) on unsupported browsers.
+ *   Not set for audio-only streams. If nothing is loaded, NaN.
  * @property {number} manifestTimeSeconds
  *   The amount of time it took to download and parse the manifest.
  *   If nothing is loaded, NaN.
