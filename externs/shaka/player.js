@@ -1654,6 +1654,18 @@ shaka.extern.DashManifestConfiguration;
 shaka.extern.HlsManifestConfiguration;
 
 /**
+ * Factory invoked by the MSF transport to construct the underlying
+ * WebTransport-like object. See `MsfManifestConfiguration.transportFactory`
+ * for the contract; this typedef exists so the @property signature stays
+ * within max-len without dropping precision.
+ *
+ * @typedef {function(string, !WebTransportOptions):
+ *               (!WebTransport|!Promise<!WebTransport>)}
+ */
+shaka.extern.MsfTransportFactory;
+
+
+/**
  * @typedef {{
  *   fingerprintUri: string,
  *   namespaces: !Array<string>,
@@ -1662,6 +1674,7 @@ shaka.extern.HlsManifestConfiguration;
  *   useFetchCatalog: boolean,
  *   version: shaka.config.MsfVersion,
  *   catalogPreprocessor: function(!msfCatalog.Catalog),
+ *   transportFactory: shaka.extern.MsfTransportFactory,
  * }}
  *
  * @property {string} fingerprintUri
@@ -1703,6 +1716,34 @@ shaka.extern.HlsManifestConfiguration;
  *   Called immediately after the CMSF/MSF catalog has been parsed.
  *   Provides a way for applications to perform efficient preprocessing of the
  *   catalog.
+ * @property {shaka.extern.MsfTransportFactory} transportFactory
+ *   Called by the MSF transport to construct the underlying WebTransport-like
+ *   object. May return either the transport directly or a Promise of one.
+ *   <br>
+ *   The factory receives the connect URI and a WebTransport-style options
+ *   object MSF builds. Always present: <code>allowPooling: false</code> and
+ *   <code>congestionControl: 'low-latency'</code>. Conditionally present:
+ *   <code>protocols</code> (set on <code>MsfVersion.AUTO</code> and
+ *   <code>DRAFT_16</code>; omitted on <code>DRAFT_14</code>);
+ *   <code>serverCertificateHashes</code> (set when the caller supplies a
+ *   fingerprint).
+ *   <br>
+ *   The factory must return either a real WebTransport or any object that
+ *   implements the WebTransport subset MSF uses: <code>.ready</code>,
+ *   <code>.closed</code>, <code>.protocol</code>,
+ *   <code>.createBidirectionalStream()</code> (resolves to a
+ *   <code>{readable, writable}</code> bidirectional stream pair),
+ *   <code>.incomingUnidirectionalStreams</code> (a
+ *   <code>ReadableStream&lt;ReadableStream&gt;</code>), and
+ *   <code>.close({closeCode, reason})</code>.
+ *   <br>
+ *   When this factory is the default
+ *   (<code>shaka.util.PlayerConfiguration.defaultTransportFactory</code>),
+ *   MSF requires <code>window.WebTransport</code> to be defined and throws
+ *   <code>WEBTRANSPORT_NOT_AVAILABLE</code> otherwise. Custom factories
+ *   bypass that guard, so non-WebTransport transports (Direct Sockets, AMT
+ *   tunnel, in-process test fakes) work in environments where the global
+ *   is absent.
  * @exportDoc
  */
 shaka.extern.MsfManifestConfiguration;
