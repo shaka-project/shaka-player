@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.16.31](https://github.com/shaka-project/shaka-player/compare/v4.16.30...v4.16.31) (2026-05-11)
+
+
+### Bug Fixes
+
+* Avoid race condition in concurrent getAllThumbnails calls ([#10022](https://github.com/shaka-project/shaka-player/issues/10022)) ([592c598](https://github.com/shaka-project/shaka-player/commit/592c598df03243a1607ebe19c13825f01d712e8c))
+* **text:** include regionAnchorX/Y in region cache key ([#10073](https://github.com/shaka-project/shaka-player/issues/10073)) ([86b10d0](https://github.com/shaka-project/shaka-player/commit/86b10d003c53da319ab666f08501a43775ab0522))
+
+
+### Performance Improvements
+
+* **media:** replace slice with in-place array truncation ([#10070](https://github.com/shaka-project/shaka-player/issues/10070)) ([7c83267](https://github.com/shaka-project/shaka-player/commit/7c8326789e90fb7a48ec74e56407223efb167dde))
+
 ## [4.16.30](https://github.com/shaka-project/shaka-player/compare/v4.16.29...v4.16.30) (2026-05-04)
 
 
