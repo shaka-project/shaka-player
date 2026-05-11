@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.1.4](https://github.com/shaka-project/shaka-player/compare/v5.1.3...v5.1.4) (2026-05-11)
+
+
+### Bug Fixes
+
+* Avoid race condition in concurrent getAllThumbnails calls ([#10022](https://github.com/shaka-project/shaka-player/issues/10022)) ([3dc5aff](https://github.com/shaka-project/shaka-player/commit/3dc5afff294dbf55fbd163d23fe8ead9f87ebaf6))
+* **MSF:** handle WebTransport.closed rejection to avoid Safari unhandled promise error ([#10056](https://github.com/shaka-project/shaka-player/issues/10056)) ([e810f08](https://github.com/shaka-project/shaka-player/commit/e810f08d1906a36430cc2334ddc84a9eb50768d5))
+* **text:** include regionAnchorX/Y in region cache key ([#10073](https://github.com/shaka-project/shaka-player/issues/10073)) ([6a4b7aa](https://github.com/shaka-project/shaka-player/commit/6a4b7aa739cf09a4315fd0ce8818ccef15c3c005))
+
+
+### Performance Improvements
+
+* **media:** replace slice with in-place array truncation ([#10070](https://github.com/shaka-project/shaka-player/issues/10070)) ([fad81e6](https://github.com/shaka-project/shaka-player/commit/fad81e64d106a92e582a5c6deb5aaef3a90e8487))
+* Remove unnecessary allocations in Mp4Generator ([#10059](https://github.com/shaka-project/shaka-player/issues/10059)) ([bd3960a](https://github.com/shaka-project/shaka-player/commit/bd3960ad06d8a9e10c28e8d4068311cccef004ef))
+* Remove unnecessary Uint8Array allocations in Mp4Generator ([#10069](https://github.com/shaka-project/shaka-player/issues/10069)) ([94a82e0](https://github.com/shaka-project/shaka-player/commit/94a82e0eccbe69be5ffa7d26a0a3d5726c366505))
+
 ## [5.1.3](https://github.com/shaka-project/shaka-player/compare/v5.1.2...v5.1.3) (2026-05-04)
 
 
