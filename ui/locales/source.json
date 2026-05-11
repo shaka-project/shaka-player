@@ -223,6 +223,10 @@
     "description": "Label used to identify a subtitle track that is forced to be shown.",
     "message": "Forced"
   },
+  "SUBTITLES_EXAMPLE": {
+    "description": "Example subtitle text shown while previewing subtitle style settings when no subtitle is currently visible.",
+    "message": "Subtitles example"
+  },
   "SUBTITLE_POSITION": {
     "description": "Label for a button used to indicate a subtitle position.",
     "message": "Subtitle position"
