@@ -154,6 +154,16 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.isMoving_ = false;
 
     /**
+     * True if we have set video.currentTime after a seek interaction but the
+     * video element has not yet fired the 'seeked' event. During this window
+     * video.buffered still reflects the pre-seek state, so we must keep using
+     * the "during-seek" buffer-painting logic to avoid a visible white-flash.
+     *
+     * @private {boolean}
+     */
+    this.isWaitingForSeek_ = false;
+
+    /**
      * The timer is activated to hide the thumbnail.
      *
      * @private {shaka.util.Timer}
@@ -228,6 +238,16 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.markChapters_();
       if (this.controls.getChapters().length > 0 && this.player.isDynamic()) {
         this.chaptersTimer_.tickEvery(/* seconds= */ 0.25);
+      }
+    });
+
+    // When the browser finishes seeking, video.buffered is finally updated.
+    // Clear the post-seek flag and repaint so the bar reflects the real
+    // buffered state without any delay.
+    this.eventManager.listen(this.video, 'seeked', () => {
+      if (this.isWaitingForSeek_) {
+        this.isWaitingForSeek_ = false;
+        this.update();
       }
     });
 
@@ -311,6 +331,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // They just let go of the seek bar, so cancel the timer and manually
     // call the event so that we can respond immediately.
     this.seekTimer_.tickNow();
+
+    // video.buffered is not updated synchronously after setting
+    // video.currentTime, so keep the "during-seek" painting logic active
+    // until the 'seeked' event confirms the browser has caught up.
+    this.isWaitingForSeek_ = true;
+
     this.controls.setSeeking(false);
 
     if (this.wasPlaying_) {
@@ -363,7 +389,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     let bufferedEnd = 0;
 
     if (bufferedLength) {
-      if (this.controls.isSeeking()) {
+      if (this.controls.isSeeking() || this.isWaitingForSeek_) {
         // While the user drags, only paint the range that actually contains
         // the target position (if it exists).
         const r = this.getBufferedRangeForTime_(currentTime);
