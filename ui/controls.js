@@ -26,6 +26,7 @@ goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.MediaSession');
 goog.require('shaka.ui.SeekBar');
 goog.require('shaka.ui.SkipAdButton');
+goog.require('shaka.ui.TextStylePreview');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.ui.VRManager');
 goog.require('shaka.util.ArrayUtils');
@@ -290,6 +291,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       for (const menu of this.menus_) {
         shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
       }
+      this.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
+      this.hideTextStylePreview();
       if (this.config_.enableTooltips) {
         this.controlsButtonPanel_.classList.add('shaka-tooltips-on');
       }
@@ -330,6 +333,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @private {shaka.ui.Localization} */
     this.localization_ = shaka.ui.Controls.createLocalization_();
+
+    /** @private {?shaka.ui.TextStylePreview} */
+    this.textStylePreview_ = new shaka.ui.TextStylePreview(
+        this.localPlayer_, this.localization_);
 
     /** @private {shaka.util.EventManager} */
     this.eventManager_ = new shaka.util.EventManager();
@@ -430,6 +437,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (document.pictureInPictureElement == this.localVideo_) {
       await document.exitPictureInPicture();
     }
+
+    this.textStylePreview_?.release();
+    this.textStylePreview_ = null;
 
     this.eventManager_?.release();
     this.eventManager_ = null;
@@ -568,6 +578,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   configure(config) {
     this.config_ = config;
+    this.hideTextStylePreview();
 
     this.castProxy_.changeReceiverId(config.castReceiverAppId,
         config.castAndroidReceiverCompatible);
@@ -912,6 +923,35 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     for (const menu of this.contextMenus_) {
       shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
     }
+    this.hideTextStylePreview();
+  }
+
+  /**
+   * Shows a temporary subtitle with the current text displayer style.
+   */
+  showTextStylePreview() {
+    this.textStylePreview_?.show();
+  }
+
+  /**
+   * Updates the temporary subtitle style without changing player config.
+   *
+   * @param {!shaka.ui.TextStylePreview.Configuration=} config
+   */
+  updateTextStylePreview(config = {}) {
+    this.textStylePreview_?.update(config);
+  }
+
+  /**
+   * Reverts the temporary subtitle to the style captured when the menu opened.
+   */
+  resetTextStylePreview() {
+    this.textStylePreview_?.reset();
+  }
+
+  /** Removes the temporary subtitle style preview. */
+  hideTextStylePreview() {
+    this.textStylePreview_?.hide();
   }
 
   /**
@@ -1318,6 +1358,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.videoContainer_.getElementsByClassName('shaka-settings-menu'));
     this.menus_.push(...Array.from(
         this.videoContainer_.getElementsByClassName('shaka-overflow-menu')));
+    this.menus_.push(...Array.from(
+        this.videoContainer_.getElementsByClassName('shaka-sub-menu')));
 
     this.contextMenus_ = Array.from(
         this.videoContainer_.getElementsByClassName('shaka-context-menu'));

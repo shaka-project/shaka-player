@@ -631,13 +631,106 @@ describe('UITextDisplayer', () => {
     expect(videoContainer.childNodes.length).toBe(0);
   });
 
+  it('previews text styles through the normal renderer', () => {
+    const cue = new shaka.text.Cue(0, 100, 'Previewed cue');
+    const config =
+        shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+
+    textDisplayer.configure(config);
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    updateCaptions();
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    let cueElement = textContainer.querySelector('div');
+    expect(cueElement.textContent).toBe('Previewed cue');
+    expect(cueElement.style.fontSize).toBe('');
+
+    const previewConfig =
+    /** @type {!shaka.extern.TextDisplayerConfiguration} */(
+        Object.assign({}, config, {'fontScaleFactor': 2}));
+    textDisplayer.setTextStylePreview(
+        previewConfig, 'Subtitles example');
+
+    cueElement = textContainer.querySelector('div');
+    expect(cueElement.textContent).toBe('Previewed cue');
+    expect(cueElement.style.fontSize).toBe('2em');
+
+    textDisplayer.clearTextStylePreview();
+
+    cueElement = textContainer.querySelector('div');
+    expect(cueElement.textContent).toBe('Previewed cue');
+    expect(cueElement.style.fontSize).toBe('');
+  });
+
+  it('shows example text only when no cue is active during preview', () => {
+    const config =
+        shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+
+    textDisplayer.configure(config);
+    textDisplayer.setTextVisibility(true);
+
+    textDisplayer.setTextStylePreview(config, 'Subtitles example');
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    expect(textContainer.textContent).toBe('Subtitles example');
+
+    textDisplayer.clearTextStylePreview();
+    expect(textContainer.textContent).toBe('');
+
+    textDisplayer.setTextStylePreview(config, 'Subtitles example');
+    expect(textContainer.textContent).toBe('Subtitles example');
+
+    textDisplayer.append([new shaka.text.Cue(0, 100, 'Real subtitle')]);
+    updateCaptions();
+
+    expect(textContainer.textContent).toBe('Real subtitle');
+  });
+
+  it('shows example text while normal text visibility is off', () => {
+    const config =
+        shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+
+    textDisplayer.configure(config);
+
+    textDisplayer.setTextStylePreview(config, 'Subtitles example');
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    expect(textContainer.textContent).toBe('Subtitles example');
+
+    textDisplayer.clearTextStylePreview();
+
+    expect(videoContainer.querySelector('.shaka-text-container')).toBe(null);
+  });
+
+  it('replaces example text during repeated preview updates', () => {
+    const config =
+        shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+
+    textDisplayer.configure(config);
+    textDisplayer.setTextVisibility(true);
+
+    textDisplayer.setTextStylePreview(config, 'First example');
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    let cueElements = textContainer.querySelectorAll('div');
+    expect(cueElements.length).toBe(1);
+    expect(textContainer.textContent).toBe('First example');
+
+    textDisplayer.setTextStylePreview(config, 'Second example');
+
+    cueElements = textContainer.querySelectorAll('div');
+    expect(cueElements.length).toBe(1);
+    expect(textContainer.textContent).toBe('Second example');
+  });
+
   it('positions cue at top-left when positionArea=TOP_LEFT', () => {
     /** @type {!shaka.text.Cue} */
     const cue = new shaka.text.Cue(0, 100, 'Top-Left');
 
     textDisplayer.setTextVisibility(true);
-    const player = new shaka.Player();
-    const config = player.getConfiguration().textDisplayer;
+    const config =
+        shaka.util.PlayerConfiguration.createDefault().textDisplayer;
     config.positionArea = shaka.config.PositionArea.TOP_LEFT;
     textDisplayer.configure(config);
 
