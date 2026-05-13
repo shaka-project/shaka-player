@@ -927,7 +927,7 @@ describe('CmcdManager', () => {
       await Promise.resolve();
 
       expect(networkingEngine.request).toHaveBeenCalled();
-      expect(captured.type).toBe(RequestType.TIMING);
+      expect(captured.type).toBe(RequestType.CMCD);
       expect(captured.request.method).toBe('POST');
     });
   });

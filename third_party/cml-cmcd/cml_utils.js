@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.provide('cml.cmcd.getBaseUrl');
 goog.provide('cml.cmcd.urlToRelativePath');
 goog.provide('cml.cmcd.uuid');
 
@@ -29,15 +30,24 @@ cml.cmcd.uuid = () => crypto.randomUUID();
  *
  * Vendored verbatim from `@svta/cml-utils`'s `urlToRelativePath`. Used
  * by `cml.cmcd.CMCD_FORMATTER_MAP`'s `nor` formatter to produce
- * root-relative URLs when a `baseUrl` is supplied via
+ * sibling-relative URLs when a `baseUrl` is supplied via
  * `CmcdEncodeOptions.baseUrl`.
+ *
+ * If `url` is already a relative path (parses as invalid URL), or its
+ * origin differs from `base`, it is returned unchanged.
  *
  * @param {string} url The destination URL.
  * @param {string} base The base URL.
  * @return {string} The relative path.
  */
-cml.cmcd.urlToRelativePath = function(url, base) {
-  const to = new URL(url);
+cml.cmcd.urlToRelativePath = (url, base) => {
+  let to;
+  try {
+    to = new URL(url);
+  } catch (e) {
+    return url;
+  }
+
   const from = new URL(base);
 
   if (to.origin !== from.origin) {
@@ -69,4 +79,22 @@ cml.cmcd.urlToRelativePath = function(url, base) {
 
   // preserve query parameters and hash of the destination url
   return relativePath + to.search + to.hash;
+};
+
+/**
+ * Get the base URL (origin + directory) from a full URL.
+ *
+ * Vendored verbatim from `@svta/cml-utils`'s `getBaseUrl`. Used by
+ * `cml.cmcd.CmcdReporter` to derive a sibling-relative base for `nor`
+ * conversion from the current request URL. Upstream signature accepts
+ * `string | URL`; the vendored shim restricts to `string` because
+ * shaka's only caller passes a string.
+ *
+ * @param {string} fullUrl The full URL.
+ * @return {string} The base URL.
+ */
+cml.cmcd.getBaseUrl = (fullUrl) => {
+  const url = new URL(fullUrl);
+  return url.origin +
+      url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
 };

@@ -141,9 +141,11 @@ cml.cmcd.CmcdReporter = class {
    *
    * @param {!cml.cmcd.CmcdReporterConfig} config The configuration for
    *   the CMCD reporter.
-   * @param {(function(!Object): !Promise<{status: number}>)=} requester
-   *   The function to use to send the request. The default is a simple
-   *   wrapper around the native `fetch` API.
+   * @param {function(!Object): !Promise<{status: number}>} requester
+   *   The function to use to send the request. Required: shaka's
+   *   adapter routes requests through NetworkingEngine. Diverges from
+   *   upstream's optional `requester = defaultRequester` since
+   *   `defaultRequester` was removed in `1fab16caa`.
    */
   constructor(config, requester) {
     /** @private {number} */
@@ -201,6 +203,10 @@ cml.cmcd.CmcdReporter = class {
    */
   start() {
     this.eventTargets_.forEach((target, config) => {
+      // Disarm any existing timer so repeated start() calls do not leak
+      // intervals.
+      this.disarmInterval_(target);
+
       // If the interval is 0 or the TIME_INTERVAL event is not enabled,
       // do not start the interval.
       if (config.interval === 0 ||
@@ -233,7 +239,7 @@ cml.cmcd.CmcdReporter = class {
     }
 
     this.eventTargets_.forEach((target) => {
-      clearInterval(target.intervalId);
+      this.disarmInterval_(target);
     });
   }
 
@@ -468,7 +474,7 @@ cml.cmcd.CmcdReporter = class {
           sn: this.requestTarget_.sn++,
         }));
     const options = cml.cmcd.CmcdReporter_createEncodingOptions_(
-        cml.cmcd.CMCD_REQUEST_MODE, this.config_, url.origin);
+        cml.cmcd.CMCD_REQUEST_MODE, this.config_, report.url);
 
     if (!isNaN(this.msd_) && !this.requestTarget_.msdSent) {
       cmcdData.msd = this.msd_;
@@ -539,18 +545,18 @@ cml.cmcd.CmcdReporter = class {
    * Sends an event report. Called by the reporter when a batch is
    * ready to be sent.
    *
-   * @param {!cml.cmcd.CmcdEventReportConfig} target The target to send
-   *   the event report to.
+   * @param {!cml.cmcd.CmcdEventReportConfig} config The target config
+   *   to send the event report to.
    * @param {!Array<!cml.cmcd.Cmcd>} data The data to send in the event
    *   report.
    * @return {!Promise<void>}
    * @private
    */
-  async sendEventReport_(target, data) {
+  async sendEventReport_(config, data) {
     const options = cml.cmcd.CmcdReporter_createEncodingOptions_(
-        cml.cmcd.CMCD_EVENT_MODE, target);
+        cml.cmcd.CMCD_EVENT_MODE, config);
     const response = await this.requester_({
-      url: target.url,
+      url: config.url,
       method: 'POST',
       headers: {
         'Content-Type': cml.cmcd.CMCD_MIME_TYPE,
@@ -562,18 +568,40 @@ cml.cmcd.CmcdReporter = class {
     const status = response.status;
 
     if (status === 410) {
-      // Clear the interval and drain the queue before removing the target
-      // so the orphaned setInterval does not keep firing after the Map
-      // entry is gone (which would prevent stop() from reaching it).
-      const state = this.eventTargets_.get(target);
-      if (state) {
-        clearInterval(state.intervalId);
-        state.queue = [];
-      }
-      this.eventTargets_.delete(target);
+      this.disposeEventTarget_(config);
     } else if (status === 429 || (status > 499 && status < 600)) {
       throw new Error(`Event report failed with status ${status}`);
     }
+  }
+
+  /**
+   * Cancels the time-interval timer for an event target and clears the
+   * stored id. Safe to call when no timer is armed
+   * (clearInterval(undefined) is a no-op).
+   *
+   * @param {!cml.cmcd.CmcdReporter_CmcdEventTarget_} target
+   * @private
+   */
+  disarmInterval_(target) {
+    clearInterval(target.intervalId);
+    target.intervalId = undefined;
+  }
+
+  /**
+   * Permanently removes an event target: cancels its timer and removes
+   * it from the eventTargets map. Used when the collector signals the
+   * target is gone (HTTP 410).
+   *
+   * @param {!cml.cmcd.CmcdEventReportConfig} config
+   * @private
+   */
+  disposeEventTarget_(config) {
+    const target = this.eventTargets_.get(config);
+    if (!target) {
+      return;
+    }
+    this.disarmInterval_(target);
+    this.eventTargets_.delete(config);
   }
 
   /**

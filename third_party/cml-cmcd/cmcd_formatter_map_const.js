@@ -9,6 +9,7 @@ goog.require('cml.cmcd.CmcdFormatterMap');
 goog.require('cml.cmcd.CmcdFormatterOptions');
 goog.require('cml.cmcd.CmcdValue');
 goog.require('cml.cmcd.SfItem');
+goog.require('cml.cmcd.getBaseUrl');
 goog.require('cml.cmcd.urlToRelativePath');
 
 
@@ -59,7 +60,8 @@ cml.cmcd.CMCD_FORMATTER_MAP_toUrlSafe_ = function(value, options) {
   } else {
     if (options.baseUrl) {
       value = cml.cmcd.urlToRelativePath(
-          /** @type {string} */ (value), options.baseUrl);
+          /** @type {string} */ (value),
+          cml.cmcd.getBaseUrl(options.baseUrl));
     }
     return options.version === 1 ?
         encodeURIComponent(/** @type {string} */ (value)) :

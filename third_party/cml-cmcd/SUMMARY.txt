@@ -1,12 +1,12 @@
 cml-cmcd
-  Common Media Library CMCD encoder + reporter, v2.3.0,
+  Common Media Library CMCD encoder + reporter, v2.3.2,
   by Streaming Video Technology Alliance / Casey Occhialini et al.
   Apache 2.0 license.
   https://github.com/streaming-video-technology-alliance/common-media-library
     /tree/main/libs/cmcd
   Source npm: @svta/cml-cmcd
-  Pinned tag: cmcd-v2.3.0
-  Pinned commit: 22390e35dfbbe1e53d15648d3aace99cdf71f9dd
+  Pinned tag: cmcd-v2.3.2
+  Pinned commit: 244ecf05132ae1d1dc9cbd01479fd88f7695dbce
 
   TRANSITIONAL: This vendored port exists because shaka-player uses Closure
   Compiler. When shaka migrates to TypeScript (issue #8262), delete this
@@ -26,8 +26,9 @@ cml-cmcd
     - cml-utils dep absorbed into `cml_utils.js` shim:
         * `uuid` (wraps `crypto.randomUUID()`; dead-codepath for shaka)
         * `urlToRelativePath` (used by `CMCD_FORMATTER_MAP`'s `nor`)
-        * `defaultRequester` (wraps `fetch`; dead-codepath for shaka —
-          adapter always supplies a custom requester via NetworkingEngine)
+        * `getBaseUrl` (extracts origin + directory from a full URL;
+          used by `CmcdReporter` and the `nor` formatter to derive a
+          sibling-relative base from the current request URL)
     - structured-field-values dep absorbed into `cml_sfv.js` shim:
         * `SfItem` / `SfToken` runtime classes
         * `encodeSfDict` (RFC 8941 §4.1 dictionary serializer; pulls in
@@ -55,5 +56,3 @@ cml-cmcd
       `start()`; replacing with `shaka.util.Timer` would break the
       verbatim-port property and the per-bump diff stability, so the
       conformance allowlist is extended for this single file.
-      `fetch` whitelisted for the dead-codepath `defaultRequester`
-      shim in `cml_utils.js`.
