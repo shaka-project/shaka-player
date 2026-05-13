@@ -1,12 +1,26 @@
 # Shaka Player Upgrade Guide
 
 If you are upgrading from **v1 or v2**, these releases are no longer supported,
-and upgrade guides are no longer maintained.  You can use these old upgrades
-guides to upgrade in stages:
+and upgrade guides are no longer maintained.  You can still upgrade in stages
+using the following guides:
 
- - {@link https://v2-4-7-dot-shaka-player-demo.appspot.com/docs/api/tutorial-upgrade.html Upgrade to v2.4}
- - {@link https://v2-5-23-dot-shaka-player-demo.appspot.com/docs/api/tutorial-upgrade-v2-4.html Upgrade v2.4 => v2.5}
- - {@link https://v3-0-15-dot-shaka-player-demo.appspot.com/docs/api/tutorial-upgrade-v2-5.html Upgrade v2.5 => v3.0}
+## Upgrade to v2.4
+
+- [Upgrade v1 => v2](../upgrades/upgrade-v1-to-v2.md)
+- [Upgrade v2.0 => v2.4](../upgrades/upgrade-v2.0-to-v2.4.md)
+- [Upgrade v2.1 => v2.4](../upgrades/upgrade-v2.1-to-v2.4.md)
+- [Upgrade v2.2 => v2.4](../upgrades/upgrade-v2.2-to-v2.4.md)
+- [Upgrade v2.3 => v2.4](../upgrades/upgrade-v2.3-to-v2.4.md)
+
+## Upgrade v2.4 => v2.5
+
+- [Upgrade v2.3 => v2.5](../upgrades/upgrade-v2.3-to-v2.5.md)
+- [Upgrade v2.4 => v2.5](../upgrades/upgrade-v2.4-to-v2.5.md)
+
+## Upgrade v2.5 => v3.0
+
+- [Upgrade v2.4 => v3.0](../upgrades/upgrade-v2.4-to-v3.0.md)
+- [Upgrade v2.5 => v3.0](../upgrades/upgrade-v2.5-to-v3.0.md)
 
 Since v3.0, Shaka Player has been following semantic versioning.  (The
 IE11 deprecation announced before v3.0 happened in v3.1, which technically
