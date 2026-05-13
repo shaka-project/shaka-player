@@ -656,6 +656,230 @@ describe('UI', () => {
       });
     });
 
+    describe('caption style preview', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {!jasmine.Spy} */
+      let setPreviewSpy;
+      /** @type {!jasmine.Spy} */
+      let clearPreviewSpy;
+
+      /**
+       * @param {!HTMLElement} menu
+       * @param {string} label
+       * @return {!HTMLElement}
+       */
+      function getStyleOption(menu, label) {
+        const buttons = Array.from(
+            menu.querySelectorAll('button[role="menuitemradio"]'));
+        const button = buttons.find((button) => {
+          const span = button.querySelector('span');
+          return span && span.textContent == label;
+        });
+        expect(button).not.toBe(undefined);
+        return /** @type {!HTMLElement} */(button);
+      }
+
+      /**
+       * @return {!shaka.extern.TextDisplayerConfiguration}
+       */
+      function latestPreviewConfig() {
+        const calls = setPreviewSpy.calls;
+        expect(calls.count()).toBeGreaterThan(0);
+        return /** @type {!shaka.extern.TextDisplayerConfiguration} */(
+          calls.mostRecent().args[0]);
+      }
+
+      /**
+       * @param {?shaka.Player} player
+       */
+      function usePreviewTextDisplayer(player) {
+        expect(player).not.toBe(null);
+        const localPlayer = /** @type {!shaka.Player} */(player);
+        /** @type {?} */
+        const textDisplayer = {};
+        setPreviewSpy = textDisplayer.setTextStylePreview =
+            jasmine.createSpy('setTextStylePreview');
+        clearPreviewSpy = textDisplayer.clearTextStylePreview =
+            jasmine.createSpy('clearTextStylePreview');
+        spyOn(localPlayer, 'getTextDisplayer').and.returnValue(
+            /** @type {!shaka.extern.TextDisplayer} */(textDisplayer));
+      }
+
+      it('does not require player or displayer preview methods', () => {
+        const player = /** @type {?} */(new shaka.util.FakeEventTarget());
+        player.getConfiguration = () => {
+          return shaka.util.PlayerConfiguration.createDefault();
+        };
+        const localization = new shaka.ui.Localization('en');
+        shaka.ui.Locales.addTo(localization);
+        const preview = new shaka.ui.TextStylePreview(
+            /** @type {!shaka.Player} */(player), localization);
+
+        expect(() => {
+          preview.show();
+          preview.update({'fontScaleFactor': 2});
+          preview.reset();
+          preview.hide();
+        }).not.toThrow();
+
+        preview.release();
+      });
+
+      it('updates and reverts font size on hover', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-size',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        player.configure('textDisplayer.fontScaleFactor', 1.25);
+        controls.showUI();
+
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-text-positions');
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        button.click();
+
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.25);
+
+        const largerOption = getStyleOption(menu, '200%');
+        UiUtils.simulateEvent(largerOption, 'mouseenter');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(2);
+
+        UiUtils.simulateEvent(largerOption, 'mouseleave');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.25);
+
+        const selectedOption = getStyleOption(menu, '150%');
+        selectedOption.click();
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.5);
+
+        UiUtils.simulateEvent(selectedOption, 'mouseleave');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.5);
+
+        controls.hideSettingsMenus();
+      });
+
+      it('updates and reverts text position on focus', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-position',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-text-positions');
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-position-button');
+        button.click();
+
+        expect(latestPreviewConfig().positionArea)
+            .toBe(shaka.config.PositionArea.DEFAULT);
+
+        const topLeftOption = getStyleOption(menu, 'Top left');
+        topLeftOption.dispatchEvent(new Event('focus'));
+        expect(latestPreviewConfig().positionArea)
+            .toBe(shaka.config.PositionArea.TOP_LEFT);
+
+        topLeftOption.dispatchEvent(new Event('blur'));
+        expect(latestPreviewConfig().positionArea)
+            .toBe(shaka.config.PositionArea.DEFAULT);
+      });
+
+      it('keeps a committed text size as the preview baseline', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-size',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        player.configure('textDisplayer.fontScaleFactor', 1.25);
+        controls.showUI();
+
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-text-positions');
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        button.click();
+
+        const largerOption = getStyleOption(menu, '200%');
+        UiUtils.simulateEvent(largerOption, 'mouseenter');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(2);
+
+        player.configure('textDisplayer.fontScaleFactor', 1.5);
+        expect(latestPreviewConfig().fontScaleFactor).toBe(2);
+
+        UiUtils.simulateEvent(largerOption, 'mouseleave');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.5);
+      });
+
+      it('hides the preview when a context menu closes', async () => {
+        const config = {
+          controlPanelElements: [],
+          contextMenuElements: [
+            'captions-size',
+          ],
+          customContextMenu: true,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const controlsContainer = controls.getControlsContainer();
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+
+        const captionsSizeButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        captionsSizeButton.click();
+
+        UiUtils.simulateEvent(controlsContainer, 'click');
+        expect(clearPreviewSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('hides the preview when the UI is reconfigured', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-size',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        button.click();
+
+        ui.configure('showUIAlways', true);
+        expect(clearPreviewSpy).toHaveBeenCalledTimes(1);
+      });
+    });
+
     describe('resolutions menu', () => {
       /** @type {!HTMLElement} */
       let resolutionsMenu;

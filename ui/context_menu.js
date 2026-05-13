@@ -132,6 +132,7 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
    */
   closeMenu() {
     shaka.ui.Utils.setDisplay(this.contextMenu_, false);
+    this.controls.hideTextStylePreview();
   }
 
   /**
