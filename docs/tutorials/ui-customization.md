@@ -87,6 +87,10 @@ The following elements can be added to the UI bar using this configuration value
   is visible only if there is next.
 * skip_previous: adds a button to skip to previous element in the queue. The button
   is visible only if there is previous.
+* skip_next_always: adds a button to skip to next element in the queue. The button
+  is visible only if there is more than 1 item in the queue.
+* skip_previous_always: adds a button to skip to previous element in the queue.  The button
+  is visible only if there is more than 1 item in the queue.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 [Document Picture-in-Picture API]: https://developer.chrome.com/docs/web-platform/document-picture-in-picture/
 
@@ -151,6 +155,10 @@ The following elements can be added as big buttons using this configuration valu
   is visible only if there is next.
 * skip_previous: adds a button to skip to previous element in the queue. The button
   is visible only if there is previous.
+* skip_next_always: adds a button to skip to next element in the queue. The button
+  is visible only if there is more than 1 item in the queue.
+* skip_previous_always: adds a button to skip to previous element in the queue.  The button
+  is visible only if there is more than 1 item in the queue.
 
 Example:
 ```js

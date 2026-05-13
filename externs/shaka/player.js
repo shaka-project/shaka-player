@@ -73,6 +73,7 @@ shaka.extern.StateChange;
  *
  *   completionPercent: number,
  *   loadLatency: number,
+ *   timeToFirstFrame: number,
  *   manifestTimeSeconds: number,
  *   drmTimeSeconds: number,
  *   playTime: number,
@@ -140,10 +141,18 @@ shaka.extern.StateChange;
  *   playback. Also known as the "high water mark". If nothing is loaded, or
  *   the stream is live (and therefore indefinite), NaN.
  * @property {number} loadLatency
- *   This is the number of seconds it took for the video element to have enough
- *   data to begin playback.  This is measured from the time load() is called to
- *   the time the <code>'loadeddata'</code> event is fired by the media element.
+ *   Time in seconds from when load() is called to when the media element fires
+ *   the 'loadedmetadata' event.
+ *   This reflects how long it takes to retrieve and parse enough data to know
+ *   basic media information (duration, tracks, dimensions), but does NOT imply
+ *   that playback can start.
  *   If nothing is loaded, NaN.
+ * @property {number} timeToFirstFrame
+ *   Time in seconds from when load() is called to when the first video frame
+ *   is presented to the screen. Uses requestVideoFrameCallback when available
+ *   (measures actual render time), falling back to the 'loadeddata' event
+ *   (measures decode completion time) on unsupported browsers.
+ *   Not set for audio-only streams. If nothing is loaded, NaN.
  * @property {number} manifestTimeSeconds
  *   The amount of time it took to download and parse the manifest.
  *   If nothing is loaded, NaN.
@@ -2969,6 +2978,7 @@ shaka.extern.OfflineConfiguration;
  *   fontScaleFactor: number,
  *   positionArea: shaka.config.PositionArea,
  *   subtitleDelay: number,
+ *   suspendRenderingWhenHidden: boolean,
  * }}
  *
  * @description
@@ -2994,6 +3004,16 @@ shaka.extern.OfflineConfiguration;
  *   (appear later than video); negative values advance them.
  *   <br>
  *   Defaults to <code>0</code>.
+ * @property {boolean} suspendRenderingWhenHidden
+ *   If <code>true</code>, the UI text displayer suspends caption rendering
+ *   when the video container is off-screen or the page is hidden, using
+ *   <code>IntersectionObserver</code> and
+ *   <code>document.visibilityState</code>.
+ *   If <code>false</code>, captions render unconditionally on every captions
+ *   update period.
+ *   <br>
+ *   Defaults to <code>true</code> except on Tizen, WebOS, Hisense,
+ *   Vizio whose default value is <code>false</code>.
  * @exportDoc
  */
 shaka.extern.TextDisplayerConfiguration;

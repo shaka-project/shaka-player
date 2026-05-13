@@ -432,7 +432,9 @@ shakaDemo.Config = class {
             positionAreaOptionNames)
         .addNumberInput_('Subtitle delay (seconds)',
             'textDisplayer.subtitleDelay',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Suspend rendering when hidden',
+            'textDisplayer.suspendRenderingWhenHidden');
   }
 
   /** @private */

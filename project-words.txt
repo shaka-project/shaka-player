@@ -74,6 +74,7 @@ resolutionselectionupdated
 seekbackward
 seekforward
 seekto
+seekrangechanged
 segmentappended
 selectcomplete
 showingui
@@ -87,6 +88,7 @@ submenuopen
 textchanged
 textlang
 textrole
+texttrackvisibility
 thirdquartile
 timeandseekrangeupdated
 timelineregionadded
@@ -154,6 +156,7 @@ programinformation
 seekbar
 statelessly
 stringifiers
+styleable
 testcheckstamp
 textproto
 transmux

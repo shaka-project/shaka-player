@@ -228,12 +228,12 @@
 
     transition: transform 0.18s ease-out, background-color 0.18s ease-out;
 
-    &:hover {
+    &:not([disabled]):hover {
       transform: scale(1.06);
       background-color: @general-background-color-hover;
     }
 
-    &:active {
+    &:not([disabled]):active {
       transform: scale(0.96);
     }
 
@@ -242,6 +242,15 @@
     }
 
     .show-when-controls-shown();
+
+    &[disabled] {
+      cursor: not-allowed;
+
+      .shaka-controls-container[shown="true"] &,
+      .shaka-controls-container[casting="true"] & {
+        opacity: 0.5;
+      }
+    }
   }
 }
 

@@ -40,6 +40,9 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
 
     this.addMenu_();
 
+    /** @private {boolean} */
+    this.isMenuOpened_ = false;
+
     this.inOverflowMenu_();
 
     this.eventManager.listen(this.button, 'click', () => {
@@ -54,6 +57,23 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
 
     /** @private {MutationObserver} */
     this.mutationObserver_ = null;
+
+    /** @private {MutationObserver} */
+    this.menuMutationObserver_ = null;
+
+    if (window.MutationObserver) {
+      this.menuMutationObserver_ = new MutationObserver(() => {
+        if (this.menu.classList.contains('shaka-hidden')) {
+          this.notifyMenuClose_();
+        } else {
+          this.notifyMenuOpen_();
+        }
+      });
+      this.menuMutationObserver_.observe(this.menu, {
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+    }
 
     const resize = () => this.adjustCustomStyle_();
 
@@ -76,6 +96,10 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     if (this.mutationObserver_) {
       this.mutationObserver_.disconnect();
       this.mutationObserver_ = null;
+    }
+    if (this.menuMutationObserver_) {
+      this.menuMutationObserver_.disconnect();
+      this.menuMutationObserver_ = null;
     }
     super.release();
   }
@@ -162,6 +186,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
       this.backIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['BACK']);
 
       this.eventManager.listen(this.menu, 'click', () => {
+        this.notifyMenuClose_();
         this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
         shaka.ui.Utils.setDisplay(this.menu, false);
         shaka.ui.Utils.setDisplay(this.parent, true);
@@ -177,6 +202,9 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
           if (m.type === 'attributes' && m.attributeName === 'class') {
             const newHidden = this.parent.classList.contains('shaka-hidden');
             if (newHidden && prevHidden != newHidden) {
+              if (!this.menu.classList.contains('shaka-hidden')) {
+                this.notifyMenuClose_();
+              }
               this.controls.dispatchEvent(
                   new shaka.util.FakeEvent('submenuclose'));
               shaka.ui.Utils.setDisplay(this.menu, false);
@@ -209,10 +237,12 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
           this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuopen'));
         }
         shaka.ui.Utils.setDisplay(this.menu, true);
+        this.notifyMenuOpen_();
         shaka.ui.Utils.focusOnTheChosenItem(this.menu);
         this.adjustCustomStyle_();
         this.button.setAttribute('aria-expanded', 'true');
       } else {
+        this.notifyMenuClose_();
         shaka.ui.Utils.setDisplay(this.menu, false);
         this.button.setAttribute('aria-expanded', 'false');
         this.button.focus();
@@ -220,6 +250,31 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     }
   }
 
+  /** @private */
+  notifyMenuOpen_() {
+    if (this.isMenuOpened_) {
+      return;
+    }
+
+    this.isMenuOpened_ = true;
+    this.onMenuOpen();
+  }
+
+  /** @private */
+  notifyMenuClose_() {
+    if (!this.isMenuOpened_) {
+      return;
+    }
+
+    this.isMenuOpened_ = false;
+    this.onMenuClose();
+  }
+
+  /** @protected */
+  onMenuOpen() {}
+
+  /** @protected */
+  onMenuClose() {}
 
   /**
    * @private

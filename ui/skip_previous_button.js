@@ -26,9 +26,13 @@ shaka.ui.SkipPreviousButton = class extends shaka.ui.Element {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
+   * @param {boolean=} showWhenUnavailable
    */
-  constructor(parent, controls) {
+  constructor(parent, controls, showWhenUnavailable = false) {
     super(parent, controls);
+
+    /** @private {boolean} */
+    this.showWhenUnavailable_ = showWhenUnavailable;
 
     this.queueManager_ = this.controls.getQueueManager();
 
@@ -89,9 +93,17 @@ shaka.ui.SkipPreviousButton = class extends shaka.ui.Element {
 
   /** @private */
   checkAvailability_() {
-    const available = this.queueManager_.getItems().length > 1 &&
-      this.queueManager_.getCurrentItemIndex() > 0;
-    shaka.ui.Utils.setDisplay(this.button_, available);
+    const itemsLength = this.queueManager_.getItems().length;
+    const hasPrevious = itemsLength > 1 &&
+        this.queueManager_.getCurrentItemIndex() > 0;
+    if (this.showWhenUnavailable_) {
+      // Always visible when queue has more than one item
+      // disabled if no previous.
+      shaka.ui.Utils.setDisplay(this.button_, itemsLength > 1);
+      this.button_.disabled = !hasPrevious;
+    } else {
+      shaka.ui.Utils.setDisplay(this.button_, hasPrevious);
+    }
   }
 };
 
@@ -112,3 +124,22 @@ shaka.ui.Controls.registerElement(
 
 shaka.ui.Controls.registerBigElement(
     'skip_previous', new shaka.ui.SkipPreviousButton.Factory());
+
+
+/**
+ * @implements {shaka.extern.IUIElement.Factory}
+ * @final
+ */
+shaka.ui.SkipPreviousButton.AlwaysFactory = class {
+  /** @override */
+  create(rootElement, controls) {
+    return new shaka.ui.SkipPreviousButton(
+        rootElement, controls, /* showDisabled= */ true);
+  }
+};
+
+shaka.ui.Controls.registerElement(
+    'skip_previous_always', new shaka.ui.SkipPreviousButton.AlwaysFactory());
+
+shaka.ui.Controls.registerBigElement(
+    'skip_previous_always', new shaka.ui.SkipPreviousButton.AlwaysFactory());

@@ -135,10 +135,26 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
         this.updateTextPositionSelection_();
       });
 
+      const previewConfig = {'positionArea': position};
+      shaka.ui.Utils.addHoverAndFocusListeners(
+          this.eventManager, button,
+          () => this.controls.updateTextStylePreview(previewConfig),
+          () => this.controls.resetTextStylePreview());
+
       this.menu.appendChild(button);
     }
     this.updateTextPositionSelection_();
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);
+  }
+
+  /** @override */
+  onMenuOpen() {
+    this.controls.showTextStylePreview();
+  }
+
+  /** @override */
+  onMenuClose() {
+    this.controls.hideTextStylePreview();
   }
 
   /** @private */

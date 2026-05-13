@@ -133,10 +133,26 @@ shaka.ui.TextSize = class extends shaka.ui.SettingsMenu {
         this.updateTextSizeSelection_();
       });
 
+      const previewConfig = {'fontScaleFactor': fontScaleFactor};
+      shaka.ui.Utils.addHoverAndFocusListeners(
+          this.eventManager, button,
+          () => this.controls.updateTextStylePreview(previewConfig),
+          () => this.controls.resetTextStylePreview());
+
       this.menu.appendChild(button);
     }
     this.updateTextSizeSelection_();
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);
+  }
+
+  /** @override */
+  onMenuOpen() {
+    this.controls.showTextStylePreview();
+  }
+
+  /** @override */
+  onMenuClose() {
+    this.controls.hideTextStylePreview();
   }
 
   /** @private */
