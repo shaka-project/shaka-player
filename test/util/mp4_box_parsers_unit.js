@@ -62,7 +62,12 @@ describe('Mp4BoxParsers', () => {
 
     const Mp4Parser = shaka.util.Mp4Parser;
     new Mp4Parser()
-        .box('moov', Mp4Parser.children)
+        .boxes([
+          'moov',
+          'trak',
+          'mdia',
+          'mvex',
+        ], Mp4Parser.children)
         .box('mvex', Mp4Parser.children)
         .fullBox('trex', (box) => {
           const parsedTREXBox = shaka.util.Mp4BoxParsers.parseTREX(
@@ -72,7 +77,6 @@ describe('Mp4BoxParsers', () => {
           defaultSampleSize = parsedTREXBox.defaultSampleSize;
           trexParsed = true;
         })
-        .box('trak', Mp4Parser.children)
         .fullBox('tkhd', (box) => {
           goog.asserts.assert(
               box.version != null,
@@ -84,7 +88,6 @@ describe('Mp4BoxParsers', () => {
           height = parsedTKHDBox.height;
           tkhdParsed = true;
         })
-        .box('mdia', Mp4Parser.children)
         .fullBox('mdhd', (box) => {
           goog.asserts.assert(
               box.version != null,
@@ -124,8 +127,10 @@ describe('Mp4BoxParsers', () => {
 
     const Mp4Parser = shaka.util.Mp4Parser;
     new Mp4Parser()
-        .box('moof', Mp4Parser.children)
-        .box('traf', Mp4Parser.children)
+        .boxes([
+          'moof',
+          'traf',
+        ], Mp4Parser.children)
         .fullBox('trun', (box) => {
           goog.asserts.assert(
               box.version != null,
@@ -182,11 +187,13 @@ describe('Mp4BoxParsers', () => {
 
     const Mp4Parser = shaka.util.Mp4Parser;
     new Mp4Parser()
-        .box('moov', Mp4Parser.children)
-        .box('trak', Mp4Parser.children)
-        .box('mdia', Mp4Parser.children)
-        .box('minf', Mp4Parser.children)
-        .box('stbl', Mp4Parser.children)
+        .boxes([
+          'moov',
+          'trak',
+          'mdia',
+          'minf',
+          'stbl',
+        ], Mp4Parser.children)
         .fullBox('stsd', Mp4Parser.sampleDescription)
         .box('mp4a', (box) => {
           const parsedAudioSampleEntryBox =
@@ -212,11 +219,13 @@ describe('Mp4BoxParsers', () => {
 
     const Mp4Parser = shaka.util.Mp4Parser;
     new Mp4Parser()
-        .box('moov', Mp4Parser.children)
-        .box('trak', Mp4Parser.children)
-        .box('mdia', Mp4Parser.children)
-        .box('minf', Mp4Parser.children)
-        .box('stbl', Mp4Parser.children)
+        .boxes([
+          'moov',
+          'trak',
+          'mdia',
+          'minf',
+          'stbl',
+        ], Mp4Parser.children)
         .fullBox('stsd', Mp4Parser.sampleDescription)
         .box('ac-4', (box) => {
           const parsedAudioSampleEntryBox =
@@ -284,11 +293,13 @@ describe('Mp4BoxParsers', () => {
 
     const Mp4Parser = shaka.util.Mp4Parser;
     new Mp4Parser()
-        .box('moov', Mp4Parser.children)
-        .box('trak', Mp4Parser.children)
-        .box('mdia', Mp4Parser.children)
-        .box('minf', Mp4Parser.children)
-        .box('stbl', Mp4Parser.children)
+        .boxes([
+          'moov',
+          'trak',
+          'mdia',
+          'minf',
+          'stbl',
+        ], Mp4Parser.children)
         .fullBox('stsd', Mp4Parser.sampleDescription)
         .box('encv', Mp4Parser.visualSampleEntry)
         .box('sinf', Mp4Parser.children)
