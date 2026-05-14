@@ -302,8 +302,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
         const trackLabelFormat = this.controls.getConfig().trackLabelFormat;
         if ((trackLabelFormat == TrackLabelFormat.ROLE ||
             trackLabelFormat == TrackLabelFormat.LANGUAGE_ROLE)) {
-          if (JSON.stringify(track.audioRoles) !=
-              JSON.stringify(selectedTrack.audioRoles)) {
+          if (!shaka.util.ArrayUtils.hasSameElements(
+              track.audioRoles || [], selectedTrack.audioRoles || [])) {
             return false;
           }
         }
@@ -488,31 +488,17 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       }
     }
     if (frameRates.size > 1) {
-      const frameRate = track.frameRate;
-      if (frameRate && (frameRate >= 50 || frameRate <= 20)) {
-        text += Math.round(track.frameRate);
+      const roundedFrameRate = Math.round(track.frameRate || 0);
+      if (roundedFrameRate > 30) {
+        text += roundedFrameRate;
       }
     }
-    const isDolbyVision = (t) => {
-      if (!t.codecs) {
-        return false;
-      }
-      const codec = shaka.util.MimeUtils.getNormalizedCodec(t.codecs);
-      return codec.startsWith('dovi-');
-    };
-    const isLCEVC = (t) => {
-      if (!t.codecs) {
-        return false;
-      }
-      const codec = shaka.util.MimeUtils.getNormalizedCodec(t.codecs);
-      return codec.startsWith('lcevc');
-    };
-    if (isDolbyVision(track)) {
+    if (this.isDolbyVision_(track)) {
       text += ' Dolby Vision';
     } else if (track.hdr == 'PQ' || track.hdr == 'HLG') {
       text += ' HDR';
     }
-    if (isLCEVC(track)) {
+    if (this.isLCEVC_(track)) {
       text += ' LCEVC';
     }
     const videoLayout = track.videoLayout || '';
@@ -523,8 +509,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       return firstTrack != secondTrack &&
           firstTrack.height == secondTrack.height &&
           firstTrack.hdr == secondTrack.hdr &&
-          isDolbyVision(firstTrack) == isDolbyVision(secondTrack) &&
-          isLCEVC(firstTrack) == isLCEVC(secondTrack) &&
+          this.isDolbyVision_(firstTrack) == this.isDolbyVision_(secondTrack) &&
+          this.isLCEVC_(firstTrack) == this.isLCEVC_(secondTrack) &&
           Math.round(firstTrack.frameRate || 0) ==
           Math.round(secondTrack.frameRate || 0);
     };
@@ -541,25 +527,60 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       }
 
       if (this.controls.getConfig().showVideoCodec) {
-        const getVideoCodecName = (codecs) => {
-          let name = '';
-          if (codecs) {
-            const codec = shaka.util.MimeUtils.getNormalizedCodec(codecs);
-            name = codec.toUpperCase();
-          }
-          return name ? ' ' + name : name;
-        };
         const hasDuplicateCodec = tracks.some((otherTrack) => {
           return basicResolutionComparison(track, otherTrack) &&
-              getVideoCodecName(otherTrack.codecs) !=
-              getVideoCodecName(track.codecs);
+              this.getVideoCodecName_(otherTrack.codecs) !=
+              this.getVideoCodecName_(track.codecs);
         });
         if (hasDuplicateCodec) {
-          text += getVideoCodecName(track.codecs);
+          text += this.getVideoCodecName_(track.codecs);
         }
       }
     }
     return text;
+  }
+
+
+  /**
+   * @param {!shaka.extern.VideoTrack} track
+   * @return {boolean}
+   * @private
+   */
+  isDolbyVision_(track) {
+    if (!track.codecs) {
+      return false;
+    }
+    const codec = shaka.util.MimeUtils.getNormalizedCodec(track.codecs);
+    return codec.startsWith('dovi-');
+  }
+
+
+  /**
+   * @param {!shaka.extern.VideoTrack} track
+   * @return {boolean}
+   * @private
+   */
+  isLCEVC_(track) {
+    if (!track.codecs) {
+      return false;
+    }
+    const codec = shaka.util.MimeUtils.getNormalizedCodec(track.codecs);
+    return codec.startsWith('lcevc');
+  }
+
+
+  /**
+   * @param {?string} codecs
+   * @return {string}
+   * @private
+   */
+  getVideoCodecName_(codecs) {
+    let name = '';
+    if (codecs) {
+      const codec = shaka.util.MimeUtils.getNormalizedCodec(codecs);
+      name = codec.toUpperCase();
+    }
+    return name ? ' ' + name : name;
   }
 
 
