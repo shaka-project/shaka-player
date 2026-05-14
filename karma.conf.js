@@ -301,6 +301,8 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-ts-muxed-mp3-h264/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-ec3-h264/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-opus-h264/*', included: false},
+      // eslint-disable-next-line @stylistic/max-len
+      {pattern: 'test/test/assets/hls-ts-muxed-opus-h264-2880/*', included: false},
       {pattern: 'test/test/assets/hls-ts-raw-aac/*', included: false},
       {pattern: 'test/test/assets/hls-ts-rollover/*', included: false},
       {pattern: 'test/test/assets/lcevc-sei/*', included: false},
