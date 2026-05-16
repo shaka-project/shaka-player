@@ -457,6 +457,7 @@ shaka.ui.Overlay = class {
       showUIOnPaused: true,
       showMenusOnTheRight: false,
       customTrackLabel: (defaultLabel, track, type) => '',
+      customVideoTrackLabel: (track, defaultLabel) => '',
       showBufferingSpinner: true,
     };
 

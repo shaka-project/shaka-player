@@ -125,6 +125,7 @@ shaka.test.FakeDemoMain = class {
       showUIOnPaused: true,
       showMenusOnTheRight: false,
       customTrackLabel: (defaultLabel, track, type) => '',
+      customVideoTrackLabel: (track, defaultLabel) => '',
       showBufferingSpinner: true,
     };
     this.selectedAsset = null;

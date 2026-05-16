@@ -274,6 +274,20 @@ shaka.extern.UIDocumentPictureInPicture;
 shaka.extern.UITrackLabelCallback;
 
 /**
+ * A callback for customizing the displayed label of a video track (resolution)
+ * in the UI resolution selection menu.
+ *
+ * The callback receives the video track and the default label that the UI
+ * would have used.  Return a string to override the label, or a falsy value
+ * to keep the default.  This is display-only and does not affect track
+ * selection, filtering, or ABR adaptation.
+ *
+ * @typedef {function(shaka.extern.VideoTrack, string): ?string}
+ * @exportDoc
+ */
+shaka.extern.UIVideoTrackLabelCallback;
+
+/**
  * @description
  * The UI's configuration options.
  *
@@ -337,6 +351,7 @@ shaka.extern.UITrackLabelCallback;
  *   showUIOnPaused: boolean,
  *   showMenusOnTheRight: boolean,
  *   customTrackLabel: shaka.extern.UITrackLabelCallback,
+ *   customVideoTrackLabel: shaka.extern.UIVideoTrackLabelCallback,
  *   showBufferingSpinner: boolean,
  * }}
  *
@@ -634,6 +649,14 @@ shaka.extern.UITrackLabelCallback;
  *   the track object, and a type string (<code>'audio'</code> or
  *   <code>'text'</code>).  Return a string to override the label, or a falsy
  *   value to keep the default.
+ *   <br>
+ *   Defaults to a no-op that returns <code>''</code>.
+ * @property {shaka.extern.UIVideoTrackLabelCallback} customVideoTrackLabel
+ *   A callback for customizing the displayed label of a video track
+ *   (resolution) in the UI resolution selection menu.  The callback receives
+ *   the video track and the default label.  Return a string to override the
+ *   label, or a falsy value to keep the default.  Display-only; does not
+ *   affect track selection, filtering, or ABR adaptation.
  *   <br>
  *   Defaults to a no-op that returns <code>''</code>.
  * @property {boolean} showBufferingSpinner
