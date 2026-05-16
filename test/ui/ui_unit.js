@@ -1067,7 +1067,7 @@ describe('UI', () => {
                 () => new shaka.test.FakeManifestParser(manifest));
 
             const merged = Object.assign({}, controls.getConfig(), {
-              customVideoTrackLabel: (track, defaultLabel) => {
+              customVideoTrackLabel: (defaultLabel, track) => {
                 if (track.height === 240) {
                   return 'Low';
                 }
@@ -1077,7 +1077,8 @@ describe('UI', () => {
                 return '';
               },
             });
-            controls.configure(merged);
+            controls.configure(
+                /** @type {!shaka.extern.UIConfiguration} */ (merged));
 
             await player.load(
                 /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
@@ -1113,7 +1114,8 @@ describe('UI', () => {
         const merged = Object.assign({}, controls.getConfig(), {
           customVideoTrackLabel: labelSpy,
         });
-        controls.configure(merged);
+        controls.configure(
+            /** @type {!shaka.extern.UIConfiguration} */ (merged));
 
         await player.load(
             /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);

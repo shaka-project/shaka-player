@@ -407,9 +407,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     });
 
     const abrEnabled = this.player.getConfiguration().abr.enabled;
-
-    const customVideoTrackLabel =
-        this.controls.getConfig().customVideoTrackLabel;
+    const config = this.controls.getConfig();
 
     // Add new ones
     for (const track of tracks) {
@@ -422,17 +420,21 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           () => this.onVideoTrackSelected_(track));
 
       const span = shaka.util.Dom.createHTMLElement('span');
-      let defaultLabel;
+      let label;
       if (track.height && track.width) {
-        defaultLabel = this.getResolutionLabel_(track, tracks);
+        label = this.getResolutionLabel_(track, tracks);
       } else if (track.bandwidth) {
-        defaultLabel = this.getTextFromBandwidth_(track.bandwidth);
+        label = this.getTextFromBandwidth_(track.bandwidth);
       } else {
-        defaultLabel = 'Unknown';
+        label = 'Unknown';
       }
-      const overrideLabel = customVideoTrackLabel ?
-          customVideoTrackLabel(track, defaultLabel) : '';
-      span.textContent = overrideLabel || defaultLabel;
+      if (config.customVideoTrackLabel) {
+        const customLabel = config.customVideoTrackLabel(label, track);
+        if (customLabel) {
+          label = customLabel;
+        }
+      }
+      span.textContent = label;
       button.appendChild(span);
 
       const mark = this.getQualityMark_(track.width, track.height);

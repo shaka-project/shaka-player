@@ -277,12 +277,12 @@ shaka.extern.UITrackLabelCallback;
  * A callback for customizing the displayed label of a video track (resolution)
  * in the UI resolution selection menu.
  *
- * The callback receives the video track and the default label that the UI
- * would have used.  Return a string to override the label, or a falsy value
+ * The callback receives the default label that the UI would have used and
+ * the video track.  Return a string to override the label, or a falsy value
  * to keep the default.  This is display-only and does not affect track
  * selection, filtering, or ABR adaptation.
  *
- * @typedef {function(shaka.extern.VideoTrack, string): ?string}
+ * @typedef {function(string, shaka.extern.VideoTrack): ?string}
  * @exportDoc
  */
 shaka.extern.UIVideoTrackLabelCallback;
@@ -654,7 +654,7 @@ shaka.extern.UIVideoTrackLabelCallback;
  * @property {shaka.extern.UIVideoTrackLabelCallback} customVideoTrackLabel
  *   A callback for customizing the displayed label of a video track
  *   (resolution) in the UI resolution selection menu.  The callback receives
- *   the video track and the default label.  Return a string to override the
+ *   the default label and the video track.  Return a string to override the
  *   label, or a falsy value to keep the default.  Display-only; does not
  *   affect track selection, filtering, or ABR adaptation.
  *   <br>
