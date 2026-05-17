@@ -428,8 +428,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       } else {
         label = 'Unknown';
       }
-      if (config.customVideoTrackLabel) {
-        const customLabel = config.customVideoTrackLabel(label, track);
+      if (config.customTrackLabel) {
+        const customLabel = config.customTrackLabel(label, track, 'video');
         if (customLabel) {
           label = customLabel;
         }
