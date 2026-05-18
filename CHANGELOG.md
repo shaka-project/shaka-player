@@ -1,5 +1,25 @@
 # Changelog
 
+## [5.0.16](https://github.com/shaka-project/shaka-player/compare/v5.0.15...v5.0.16) (2026-05-18)
+
+
+### Bug Fixes
+
+* fix opus transmux sample duration ([#10090](https://github.com/shaka-project/shaka-player/issues/10090)) ([33d4fac](https://github.com/shaka-project/shaka-player/commit/33d4facc0a9d8b6b8f49b472aa904eeb9ac07ce0))
+* force gap jump when stalled at the end of a buffer ([#10086](https://github.com/shaka-project/shaka-player/issues/10086)) ([687c319](https://github.com/shaka-project/shaka-player/commit/687c319d6bf75e323bf9567378c311e60a7d230f))
+* **HLS:** Fix timeline sync gaps on discontinuity sequences ([#10087](https://github.com/shaka-project/shaka-player/issues/10087)) ([3a2fb6d](https://github.com/shaka-project/shaka-player/commit/3a2fb6d7e312d9231daa95a932ad5a15a3eb3aee))
+* **Offline:** Only request the license on download when usePersistentLicense is true ([#10074](https://github.com/shaka-project/shaka-player/issues/10074)) ([898c35a](https://github.com/shaka-project/shaka-player/commit/898c35a70bae282e38dbde6e6e2059f8aa195a52))
+* **UI:** Remove buffered bar delay after seeking ([#10071](https://github.com/shaka-project/shaka-player/issues/10071)) ([60f6e38](https://github.com/shaka-project/shaka-player/commit/60f6e3864a6f1d1f9aa58a84c630a048df2f83ff))
+
+
+### Performance Improvements
+
+* **HLS:** skip rebuilding known refs on live playlist refresh ([#10075](https://github.com/shaka-project/shaka-player/issues/10075)) ([6180f1c](https://github.com/shaka-project/shaka-player/commit/6180f1c52342fc872d8746f3d3bcbd73afb79a98))
+* **Mp4Generator:** assemble segment data in a single allocation ([#10101](https://github.com/shaka-project/shaka-player/issues/10101)) ([8c6a80b](https://github.com/shaka-project/shaka-player/commit/8c6a80ba022ebdc39a74690cc29986eee40fd90f))
+* **player:** avoid full configuration deep-clone in time update callback ([#10098](https://github.com/shaka-project/shaka-player/issues/10098)) ([d4543c4](https://github.com/shaka-project/shaka-player/commit/d4543c4a6f39f371a09f091f6754d5b4a39cfefb))
+* **transmuxer:** Avoid repeatedly creating empty Uint8Arrays ([#10100](https://github.com/shaka-project/shaka-player/issues/10100)) ([0f263f8](https://github.com/shaka-project/shaka-player/commit/0f263f8f63bd9fc09a9c4b1c8c9612e0e45567c6))
+* **transmuxer:** Reduce per-frame object allocations for h265, ac-3 and ec-3 ([#10094](https://github.com/shaka-project/shaka-player/issues/10094)) ([d8eb02f](https://github.com/shaka-project/shaka-player/commit/d8eb02f31c4e94e331f4e25182fd223e3df98f69))
+
 ## [5.0.15](https://github.com/shaka-project/shaka-player/compare/v5.0.14...v5.0.15) (2026-05-11)
 
 
