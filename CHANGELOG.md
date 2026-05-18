@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.16.32](https://github.com/shaka-project/shaka-player/compare/v4.16.31...v4.16.32) (2026-05-18)
+
+
+### Bug Fixes
+
+* fix opus transmux sample duration ([#10090](https://github.com/shaka-project/shaka-player/issues/10090)) ([cea30c4](https://github.com/shaka-project/shaka-player/commit/cea30c47f0de52a4997ea818ddb865d7b740dc42))
+* force gap jump when stalled at the end of a buffer ([#10086](https://github.com/shaka-project/shaka-player/issues/10086)) ([522ba06](https://github.com/shaka-project/shaka-player/commit/522ba06570f67b67524b4c47a30ee1dbde846f53))
+* **Offline:** Only request the license on download when usePersistentLicense is true ([#10074](https://github.com/shaka-project/shaka-player/issues/10074)) ([2201734](https://github.com/shaka-project/shaka-player/commit/220173438edeaccfc486d01bdb759e63c6968816))
+
+
+### Performance Improvements
+
+* **player:** avoid full configuration deep-clone in time update callback ([#10098](https://github.com/shaka-project/shaka-player/issues/10098)) ([989ddba](https://github.com/shaka-project/shaka-player/commit/989ddbac9091eada30a38bc05929800ed566d684))
+* **transmuxer:** Avoid repeatedly creating empty Uint8Arrays ([#10100](https://github.com/shaka-project/shaka-player/issues/10100)) ([03850f6](https://github.com/shaka-project/shaka-player/commit/03850f62ce01b3e13bcef7bbe4e30a2cd0646a2f))
+* **transmuxer:** Reduce per-frame object allocations for h265, ac-3 and ec-3 ([#10094](https://github.com/shaka-project/shaka-player/issues/10094)) ([037c33e](https://github.com/shaka-project/shaka-player/commit/037c33e621c0aa01ab19bb7adc698c930cec6403))
+
 ## [4.16.31](https://github.com/shaka-project/shaka-player/compare/v4.16.30...v4.16.31) (2026-05-11)
 
 
