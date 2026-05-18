@@ -265,8 +265,7 @@ shaka.extern.UIDocumentPictureInPicture;
  * The callback receives the default label (or null if the language was
  * unrecognized), the track object, and a type string ('audio', 'text', or
  * 'video').  Return a string to override the label, or a falsy value to keep
- * the default.  For 'video', the override is display-only and does not affect
- * track selection, filtering, or ABR adaptation.
+ * the default.
  *
  * @typedef {function(?string,
  *     (shaka.extern.AudioTrack|shaka.extern.TextTrack|
@@ -636,9 +635,7 @@ shaka.extern.UITrackLabelCallback;
  *   the default label (or <code>null</code> if the language was unrecognized),
  *   the track object, and a type string (<code>'audio'</code>,
  *   <code>'text'</code>, or <code>'video'</code>).  Return a string to override
- *   the label, or a falsy value to keep the default.  For <code>'video'</code>,
- *   the override is display-only and does not affect track selection,
- *   filtering, or ABR adaptation.
+ *   the label, or a falsy value to keep the default.
  *   <br>
  *   Defaults to a no-op that returns <code>''</code>.
  * @property {boolean} showBufferingSpinner
