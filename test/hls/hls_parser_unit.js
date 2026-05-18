@@ -7103,4 +7103,47 @@ describe('HlsParser', () => {
     expect(manifest.variants.length).toBe(1);
     expect(manifest.variants[0].video).toBeTruthy();
   });
+
+  // eslint-disable-next-line @stylistic/max-len
+  it('corrects accumulated gap when discontinuity sequence changes', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.42c00d",',
+      'CLOSED-CAPTIONS=NONE\n',
+      'test:/video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:10\n',
+      '#EXT-X-DISCONTINUITY-SEQUENCE:0\n',
+      '#EXT-X-PROGRAM-DATE-TIME:2023-01-01T00:00:00Z\n',
+      '#EXTINF:10,\n',
+      'segment1.ts\n',
+      '#EXT-X-DISCONTINUITY\n',
+      '#EXT-X-PROGRAM-DATE-TIME:2023-01-01T01:00:00Z\n',
+      '#EXTINF:10,\n',
+      'segment2.ts\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', media);
+
+    const manifest = await parser.start('test:/master', playerInterface);
+    const video = manifest.variants[0].video;
+    await video.createSegmentIndex();
+
+    const index = video.segmentIndex;
+    const ref1 = index.get(0);
+    const ref2 = index.get(1);
+
+    expect(ref1.startTime).toBe(0);
+    expect(ref1.endTime).toBe(10);
+
+    expect(ref2.startTime).toBe(10);
+    expect(ref2.endTime).toBe(20);
+
+    expect(ref2.syncTime).toBe(ref1.syncTime + 10);
+  });
 });
