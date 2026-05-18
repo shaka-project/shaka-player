@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.15.44](https://github.com/shaka-project/shaka-player/compare/v4.15.43...v4.15.44) (2026-05-18)
+
+
+### Bug Fixes
+
+* force gap jump when stalled at the end of a buffer ([#10086](https://github.com/shaka-project/shaka-player/issues/10086)) ([fa9c2fc](https://github.com/shaka-project/shaka-player/commit/fa9c2fc6bf125192b992ed0f6f67efb562e6e34d))
+* **Offline:** Only request the license on download when usePersistentLicense is true ([#10074](https://github.com/shaka-project/shaka-player/issues/10074)) ([9694276](https://github.com/shaka-project/shaka-player/commit/9694276db3305bdb7293cad0035e279a5066aff7))
+
+
+### Performance Improvements
+
+* **player:** avoid full configuration deep-clone in time update callback ([#10098](https://github.com/shaka-project/shaka-player/issues/10098)) ([c272f9a](https://github.com/shaka-project/shaka-player/commit/c272f9aefeccbc5d51c0846493ba9870cd1bde44))
+* **transmuxer:** Avoid repeatedly creating empty Uint8Arrays ([#10100](https://github.com/shaka-project/shaka-player/issues/10100)) ([47874d8](https://github.com/shaka-project/shaka-player/commit/47874d8de6ccaf6f89a2e6433d81017c6234586c))
+
 ## [4.15.43](https://github.com/shaka-project/shaka-player/compare/v4.15.42...v4.15.43) (2026-05-11)
 
 
