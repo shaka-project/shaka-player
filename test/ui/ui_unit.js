@@ -1047,6 +1047,92 @@ describe('UI', () => {
         expect(getResolutions()).toEqual(['540p']);
       });
 
+      it('uses customTrackLabel with "video" type to override resolution ' +
+          'labels', async () => {
+        const manifest = shaka.test.ManifestGenerator.generate(
+            (manifest) => {
+              manifest.addVariant(0, (variant) => {
+                variant.addVideo(1, (stream) => {
+                  stream.size(320, 240);
+                });
+              });
+              manifest.addVariant(2, (variant) => {
+                variant.addVideo(3, (stream) => {
+                  stream.size(640, 480);
+                });
+              });
+            });
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType,
+            () => new shaka.test.FakeManifestParser(manifest));
+
+        const merged = Object.assign({}, controls.getConfig(), {
+          customTrackLabel: (defaultLabel, track, type) => {
+            if (type !== 'video') {
+              return '';
+            }
+            if (track.height === 240) {
+              return 'Low';
+            }
+            if (track.height === 480) {
+              return 'High';
+            }
+            return '';
+          },
+        });
+        controls.configure(
+            /** @type {!shaka.extern.UIConfiguration} */ (merged));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+        player.configure('abr.enabled', false);
+        await updateResolutionMenu();
+
+        const labels = Array.from(videoContainer.querySelectorAll(
+            'button.explicit-resolution > span'))
+            .map((s) => s.textContent).sort();
+        expect(labels).toEqual(['High', 'Low']);
+      });
+
+      it('falls back to default label when customTrackLabel returns ' +
+          'a falsy value for video tracks', async () => {
+        const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.size(320, 240);
+            });
+          });
+          manifest.addVariant(2, (variant) => {
+            variant.addVideo(3, (stream) => {
+              stream.size(640, 480);
+            });
+          });
+        });
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType,
+            () => new shaka.test.FakeManifestParser(manifest));
+
+        const labelSpy =
+            jasmine.createSpy('customTrackLabel').and.returnValue('');
+        const merged = Object.assign({}, controls.getConfig(), {
+          customTrackLabel: labelSpy,
+        });
+        controls.configure(
+            /** @type {!shaka.extern.UIConfiguration} */ (merged));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+        player.configure('abr.enabled', false);
+        await updateResolutionMenu();
+
+        expect(labelSpy).toHaveBeenCalledWith(
+            jasmine.any(String), jasmine.any(Object), 'video');
+        const labels = Array.from(videoContainer.querySelectorAll(
+            'button.explicit-resolution > span'))
+            .map((s) => s.textContent).sort();
+        expect(labels).toEqual(['240p', '480p']);
+      });
+
       it('displays audio quality based on current stream', async () => {
         const manifest =
           shaka.test.ManifestGenerator.generate((manifest) => {
