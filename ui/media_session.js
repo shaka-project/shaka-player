@@ -185,6 +185,34 @@ shaka.ui.MediaSession = class {
   }
 
   /**
+   * @param {string} artist
+   * @export
+   */
+  setupArtist(artist) {
+    const castReceiver = this.controls_.getCastReceiver();
+    if (castReceiver) {
+      castReceiver.setContentArtist(artist);
+    }
+    if (this.supported_) {
+      const metadata = this.getMediaMetadata();
+      metadata.artist = artist;
+      navigator.mediaSession.metadata = new MediaMetadata(metadata);
+    }
+  }
+
+  /**
+   * @param {string} album
+   * @export
+   */
+  setupAlbum(album) {
+    if (this.supported_) {
+      const metadata = this.getMediaMetadata();
+      metadata.album = album;
+      navigator.mediaSession.metadata = new MediaMetadata(metadata);
+    }
+  }
+
+  /**
    * @param {string} imageUrl
    * @export
    */
@@ -392,22 +420,38 @@ shaka.ui.MediaSession = class {
         return;
       }
       let title;
-      if (payload['key'] == 'TIT2' && payload['data']) {
-        title = payload['data'];
-      }
+      let artist;
+      let album;
       let imageUrl;
-      if (payload['key'] == 'APIC') {
-        if (payload['mimeType'] == '-->') {
-          imageUrl = payload['data'];
-        } else {
-          const data = /** @type {!ArrayBuffer} */ (payload['data']);
-          const mimeType = payload['mimeType'];
-          const blob = new Blob([data], {type: mimeType});
-          imageUrl = URL.createObjectURL(blob);
-        }
+      switch (payload['key']) {
+        case 'TIT2':
+          title = payload['data'];
+          break;
+        case 'TPE1':
+          artist = payload['data'];
+          break;
+        case 'TALB':
+          album = payload['data'];
+          break;
+        case 'APIC':
+          if (payload['mimeType'] == '-->') {
+            imageUrl = payload['data'];
+          } else {
+            const data = /** @type {!ArrayBuffer} */ (payload['data']);
+            const mimeType = payload['mimeType'];
+            const blob = new Blob([data], {type: mimeType});
+            imageUrl = URL.createObjectURL(blob);
+          }
+          break;
       }
       if (title) {
         this.setupTitle(title);
+      }
+      if (artist) {
+        this.setupArtist(artist);
+      }
+      if (album) {
+        this.setupAlbum(album);
       }
       if (imageUrl) {
         this.setupPoster(imageUrl);
