@@ -157,6 +157,7 @@ seekbar
 statelessly
 stringifiers
 styleable
+syncsafe
 testcheckstamp
 textproto
 transmux
@@ -404,6 +405,7 @@ subcues
 subframes
 subt
 subviewer
+talb
 tblr
 tbrl
 tenc
@@ -421,12 +423,15 @@ traf
 trak
 traks
 transquant
+trck
 trexs
 trickmode
 trun
 tsbd
 ttml
 txxx
+tyer
+ufid
 unskippable
 urlparam
 valu
