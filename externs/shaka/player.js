@@ -1361,7 +1361,7 @@ shaka.extern.InitDataTransform;
  *
  * @property {!string} tagName
  *   The name of the element
- * @property {!object} attributes
+ * @property {!Object<string, string>} attributes
  *   The attributes of the element
  * @property {!Array<shaka.extern.xml.Node | string>} children
  *   The child nodes or string body of the element
