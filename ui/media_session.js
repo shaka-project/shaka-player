@@ -60,6 +60,9 @@ shaka.ui.MediaSession = class {
         // eslint-disable-next-line no-restricted-syntax
         this.supported_ && 'chapterInfo' in MediaMetadata.prototype;
 
+    /** @private {?string} */
+    this.imageObjectUrl_ = null;
+
     /** @private {!Set<string>} */
     this.actionsHandled_ = new Set();
 
@@ -121,6 +124,7 @@ shaka.ui.MediaSession = class {
       this.addMediaSessionHandler(actionName);
     }
     this.actionsHandled_.clear();
+    this.revokeImageObjectUrl_();
   }
 
   /**
@@ -206,6 +210,7 @@ shaka.ui.MediaSession = class {
       metadata.artwork = [artwork];
       navigator.mediaSession.metadata = new MediaMetadata(metadata);
     }
+    this.updateManagedImageObjectUrl_(imageUrl);
   }
 
   /**
@@ -391,8 +396,15 @@ shaka.ui.MediaSession = class {
         title = payload['data'];
       }
       let imageUrl;
-      if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
-        imageUrl = payload['data'];
+      if (payload['key'] == 'APIC') {
+        if (payload['mimeType'] == '-->') {
+          imageUrl = payload['data'];
+        } else {
+          const data = /** @type {!ArrayBuffer} */ (payload['data']);
+          const mimeType = payload['mimeType'];
+          const blob = new Blob([data], {type: mimeType});
+          imageUrl = URL.createObjectURL(blob);
+        }
       }
       if (title) {
         this.setupTitle(title);
@@ -561,5 +573,33 @@ shaka.ui.MediaSession = class {
         this.adManager_, shaka.ads.Utils.AD_STOPPED, checkSkipAd);
 
     checkSkipAd();
+  }
+
+  /**
+   * @private
+   */
+  revokeImageObjectUrl_() {
+    if (this.imageObjectUrl_) {
+      URL.revokeObjectURL(this.imageObjectUrl_);
+      this.imageObjectUrl_ = null;
+    }
+  }
+
+  /**
+   * @param {string} url
+   * @private
+   */
+  updateManagedImageObjectUrl_(url) {
+    const previousUrl = this.imageObjectUrl_;
+
+    if (url.startsWith('blob:')) {
+      this.imageObjectUrl_ = url;
+    } else {
+      this.imageObjectUrl_ = null;
+    }
+
+    if (previousUrl && previousUrl != url) {
+      URL.revokeObjectURL(previousUrl);
+    }
   }
 };
