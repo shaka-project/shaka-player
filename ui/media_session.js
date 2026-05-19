@@ -61,7 +61,7 @@ shaka.ui.MediaSession = class {
         this.supported_ && 'chapterInfo' in MediaMetadata.prototype;
 
     /** @private {?string} */
-    this.objectUrl_ = null;
+    this.imageObjectUrl_ = null;
 
     /** @private {!Set<string>} */
     this.actionsHandled_ = new Set();
@@ -124,7 +124,7 @@ shaka.ui.MediaSession = class {
       this.addMediaSessionHandler(actionName);
     }
     this.actionsHandled_.clear();
-    this.revokeObjectUrl_();
+    this.revokeimageObjectUrl_();
   }
 
   /**
@@ -210,7 +210,7 @@ shaka.ui.MediaSession = class {
       metadata.artwork = [artwork];
       navigator.mediaSession.metadata = new MediaMetadata(metadata);
     }
-    this.updateManagedObjectUrl_(imageUrl);
+    this.updateManagedimageObjectUrl_(imageUrl);
   }
 
   /**
@@ -578,10 +578,10 @@ shaka.ui.MediaSession = class {
   /**
    * @private
    */
-  revokeObjectUrl_() {
-    if (this.objectUrl_) {
-      URL.revokeObjectURL(this.objectUrl_);
-      this.objectUrl_ = null;
+  revokeimageObjectUrl_() {
+    if (this.imageObjectUrl_) {
+      URL.revokeObjectURL(this.imageObjectUrl_);
+      this.imageObjectUrl_ = null;
     }
   }
 
@@ -589,13 +589,13 @@ shaka.ui.MediaSession = class {
    * @param {string} url
    * @private
    */
-  updateManagedObjectUrl_(url) {
-    const previousUrl = this.objectUrl_;
+  updateManagedimageObjectUrl_(url) {
+    const previousUrl = this.imageObjectUrl_;
 
     if (url.startsWith('blob:')) {
-      this.objectUrl_ = url;
+      this.imageObjectUrl_ = url;
     } else {
-      this.objectUrl_ = null;
+      this.imageObjectUrl_ = null;
     }
 
     if (previousUrl && previousUrl != url) {
