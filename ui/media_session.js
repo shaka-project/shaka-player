@@ -124,7 +124,7 @@ shaka.ui.MediaSession = class {
       this.addMediaSessionHandler(actionName);
     }
     this.actionsHandled_.clear();
-    this.revokeimageObjectUrl_();
+    this.revokeImageObjectUrl_();
   }
 
   /**
@@ -210,7 +210,7 @@ shaka.ui.MediaSession = class {
       metadata.artwork = [artwork];
       navigator.mediaSession.metadata = new MediaMetadata(metadata);
     }
-    this.updateManagedimageObjectUrl_(imageUrl);
+    this.updateManagedImageObjectUrl_(imageUrl);
   }
 
   /**
@@ -578,7 +578,7 @@ shaka.ui.MediaSession = class {
   /**
    * @private
    */
-  revokeimageObjectUrl_() {
+  revokeImageObjectUrl_() {
     if (this.imageObjectUrl_) {
       URL.revokeObjectURL(this.imageObjectUrl_);
       this.imageObjectUrl_ = null;
@@ -589,7 +589,7 @@ shaka.ui.MediaSession = class {
    * @param {string} url
    * @private
    */
-  updateManagedimageObjectUrl_(url) {
+  updateManagedImageObjectUrl_(url) {
     const previousUrl = this.imageObjectUrl_;
 
     if (url.startsWith('blob:')) {
