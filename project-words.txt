@@ -553,6 +553,7 @@ googlers
 halfling
 heliocentrism
 homebrewed
+Icecast
 ismena
 joeyparrish
 Kartenberg
@@ -571,6 +572,7 @@ RMKSA
 RVFC
 SEEKTABLE
 servernum
+Shoutcast
 sintel
 stardate
 systeminfo
