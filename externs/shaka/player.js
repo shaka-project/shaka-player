@@ -2047,6 +2047,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   returnToEndOfLiveWindowWhenOutside: boolean,
  *   stopFetchingOnPause: boolean,
  *   clampAppendWindowToDuration: boolean,
+ *   processSrcEqualMetadata: boolean,
  * }}
  *
  * @description
@@ -2307,6 +2308,14 @@ shaka.extern.SpeechToTextConfiguration;
  *   "ended" when seeking to end.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} processSrcEqualMetadata
+ *   If true, Shaka Player checks if the content MIME type supports
+ *   metadata extraction (such as ID3, Vorbis Comments, or iTunes ILST).
+ *   For supported types, the content is downloaded and loaded through a
+ *   Blob URL instead of being passed directly to the HTMLMediaElement.
+ *   This allows metadata frames to be parsed and exposed by the player.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
