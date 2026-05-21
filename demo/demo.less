@@ -621,3 +621,17 @@ footer .mdl-mega-footer__link-list {
 .extra-config-textarea {
   font-family: monospace;
 }
+
+.mdl-dialog .input-container-style-vertical {
+  .input-container-row:has(.mdl-switch) {
+    display: block;
+    width: 100%;
+  }
+
+  .mdl-switch {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    // Fill the full container width so the label text is never truncated.
+    width: 100%;
+  }
+}

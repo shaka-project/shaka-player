@@ -249,6 +249,115 @@ queueManager.insertItems([
 ```
 
 
+#### Loading an M3U Playlist
+
+`loadFromM3uPlaylist()` lets you populate the queue from a remote M3U or M3U8
+playlist in one call. The method fetches the file using the player's own
+networking engine (so request filters, credentials, and retry parameters all
+apply), parses every stream entry, and inserts the resulting items into the
+queue.
+
+```js
+// Load a playlist and start playing the first channel immediately.
+await queueManager.loadFromM3uPlaylist(
+  'https://example.com/channels.m3u',
+  /* playOnLoad= */ true,
+);
+```
+
+The second argument, `playOnLoad`, is optional and defaults to `false`. When
+`true`, `playItem(0)` is called automatically once the items have been
+inserted.
+
+```js
+// Load a playlist without starting playback — useful when you want to
+// inspect or filter the items before choosing which one to play.
+await queueManager.loadFromM3uPlaylist('https://example.com/channels.m3u');
+
+const items = queueManager.getItems();
+const newsIndex = items.findIndex(
+  (item) => item.metadata?.groupTitle === 'News',
+);
+if (newsIndex >= 0) {
+  await queueManager.playItem(newsIndex);
+}
+```
+
+##### EXTINF attributes and item metadata
+
+The parser supports the Extended M3U format (`#EXTM3U` / `#EXTINF`) with the
+`tvg-*` and `group-title` attributes commonly found in IPTV playlists. All
+attributes are copied into the item's `metadata` object **using their original
+hyphenated names** (e.g. `tvg-id`, `tvg-name`, `group-title`). Two standard
+`QueueItemMetadata` aliases are also set on top:
+
+| Playlist attribute | `metadata` property | Notes                                      |
+|--------------------|---------------------|--------------------------------------------|
+| `tvg-name`         | `tvg-name` + `title`| `title` falls back to the display name.    |
+| `tvg-logo`         | `tvg-logo` + `poster`|                                           |
+| `tvg-id`           | `tvg-id`            | Also used for deduplication (see below).   |
+| `tvg-language`     | `tvg-language`      |                                            |
+| `tvg-country`      | `tvg-country`       |                                            |
+| `tvg-url`          | `tvg-url`           | EPG (Electronic Programme Guide) feed URL. |
+| `group-title`      | `group-title`       |                                            |
+| Display name       | `displayTitle`      | The text after the last comma in `#EXTINF`.|
+| *(any other)*      | *(original name)*   | Unknown attributes are preserved as-is.    |
+
+A typical IPTV entry and the metadata it produces:
+
+```
+#EXTINF:-1 tvg-id="bbc1" tvg-name="BBC One" tvg-logo="https://example.com/bbc1.png" tvg-language="English" tvg-country="GB" group-title="Entertainment",BBC One HD
+https://example.com/bbc1/stream.m3u8
+```
+
+```js
+{
+  manifestUri: 'https://example.com/bbc1/stream.m3u8',
+  metadata: {
+    // Standard QueueItemMetadata aliases
+    title: 'BBC One',                        // from tvg-name
+    poster: 'https://example.com/bbc1.png',  // from tvg-logo
+    // Raw attribute names, exactly as in the playlist
+    'tvg-id': 'bbc1',
+    'tvg-name': 'BBC One',
+    'tvg-logo': 'https://example.com/bbc1.png',
+    'tvg-language': 'English',
+    'tvg-country': 'GB',
+    'group-title': 'Entertainment',
+    // Extra helper added by the parser
+    displayTitle: 'BBC One HD',              // raw text after the last comma
+  },
+}
+```
+
+You can use `metadata['group-title']` to build a channel-group UI, or
+`metadata['tvg-url']` to load EPG schedule data for the currently playing
+channel:
+
+```js
+queueManager.addEventListener('currentitemchanged', () => {
+  const item = queueManager.getCurrentItem();
+  if (item?.metadata) {
+    titleEl.textContent = item.metadata.title ?? '';
+    posterEl.src = item.metadata.poster ?? '';
+    groupEl.textContent = item.metadata['group-title'] ?? '';
+  }
+});
+```
+
+##### Duplicate channel handling
+
+Channels that share the same `tvg-id` value are automatically deduplicated:
+only the first occurrence is kept, and subsequent entries with the same id are
+silently dropped. Channels without a `tvg-id` are always included regardless
+of whether their stream URL appears more than once.
+
+Note: `loadFromM3uPlaylist()` uses `RequestType.PLAYLIST` and the
+`manifest.retryParameters` from the current player configuration. If the
+playlist URL requires custom headers or credentials, configure them via a
+request filter before calling this method.
+
+
 #### Clearing the Queue
 
 To stop playback and remove all items from the queue:
