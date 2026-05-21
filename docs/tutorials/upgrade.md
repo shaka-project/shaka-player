@@ -151,7 +151,10 @@ application:
     - `TextDisplayer` plugins must implement the `configure()` method.
     - `TextParser` plugins must implement the `setManifestType()` method.
     - `Transmuxer` plugins now has three new parameters in `transmux()` method.
-    - Removed `enableTextDisplayer` from `TextDisplayer` plugins
+    - Removed `enableTextDisplayer` from `TextDisplayer` plugins.
+    - Replaced `SimpleTextDisplayer` with `NativeTextDisplayer`.
+    - Builtin `TextDisplayer` plugin constructors take a `shaka.Player` instance
+      as the only parameter.
 
   - Player API Changes:
     - The constructor no longer takes `mediaElement` as a parameter; use the `attach` method to attach to a media element instead. (Deprecated in v4.6)
