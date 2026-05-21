@@ -78,6 +78,7 @@ describe('MimeUtils', () => {
 
     expect(isHlsType('application/x-mpegurl')).toBe(true);
     expect(isHlsType('application/vnd.apple.mpegurl')).toBe(true);
+    expect(isHlsType('audio/x-mpegurl')).toBe(true);
     expect(isHlsType('application/dash+xml')).toBe(false);
     expect(isHlsType('application/vnd.ms-sstr+xml')).toBe(false);
     expect(isHlsType('foo')).toBe(false);
