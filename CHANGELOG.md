@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.15.45](https://github.com/shaka-project/shaka-player/compare/v4.15.44...v4.15.45) (2026-05-25)
+
+
+### Bug Fixes
+
+* Fix XML node attribute externs ([#10111](https://github.com/shaka-project/shaka-player/issues/10111)) ([11fe3e6](https://github.com/shaka-project/shaka-player/commit/11fe3e673db7a53a1a33e33d69205bfb5a0c7ebe))
+* Map the "audio/x-mpegurl" MIME type as HLS ([#10114](https://github.com/shaka-project/shaka-player/issues/10114)) ([4177af5](https://github.com/shaka-project/shaka-player/commit/4177af5b619e1589dba5d453fb4aa9fcccabced4))
+
 ## [4.15.44](https://github.com/shaka-project/shaka-player/compare/v4.15.43...v4.15.44) (2026-05-18)
 
 
