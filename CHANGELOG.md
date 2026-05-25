@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.1.6](https://github.com/shaka-project/shaka-player/compare/v5.1.5...v5.1.6) (2026-05-25)
+
+
+### Bug Fixes
+
+* Fix XML node attribute externs ([#10111](https://github.com/shaka-project/shaka-player/issues/10111)) ([7d1bec3](https://github.com/shaka-project/shaka-player/commit/7d1bec38e98bba1d65b599db26f634e33e56889b))
+* Map the "audio/x-mpegurl" MIME type as HLS ([#10114](https://github.com/shaka-project/shaka-player/issues/10114)) ([6dcf8ba](https://github.com/shaka-project/shaka-player/commit/6dcf8ba46372056f7c0bce2d7cebbca3449374f2))
+* **UI:** Fix blurry seek bar marks ([#10097](https://github.com/shaka-project/shaka-player/issues/10097)) ([a930801](https://github.com/shaka-project/shaka-player/commit/a930801fe8bb22f90f53b8dbf8532711eedeac9a))
+
+
+### Performance Improvements
+
+* **transmuxer:** Write nalu lengths directly into combined buffer in h265 ([#10119](https://github.com/shaka-project/shaka-player/issues/10119)) ([21f7ad8](https://github.com/shaka-project/shaka-player/commit/21f7ad8e36a0408403cf7184e2a76cb86816cc44))
+
 ## [5.1.5](https://github.com/shaka-project/shaka-player/compare/v5.1.4...v5.1.5) (2026-05-18)
 
 
