@@ -272,6 +272,7 @@ shaka.ui.Overlay = class {
       'volume',
       'time_and_duration',
       'spacer',
+      'queue',
     ];
 
     if (window.chrome) {

@@ -7,9 +7,9 @@
 
 goog.provide('shaka.ui.SettingsMenu');
 
-goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
+goog.require('shaka.ui.MenuBase');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.FakeEvent');
@@ -17,11 +17,11 @@ goog.requireType('shaka.ui.Controls');
 
 
 /**
- * @extends {shaka.ui.Element}
+ * @extends {shaka.ui.MenuBase}
  * @implements {shaka.extern.IUISettingsMenu}
  * @export
  */
-shaka.ui.SettingsMenu = class extends shaka.ui.Element {
+shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
@@ -29,12 +29,6 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
    */
   constructor(parent, controls, iconText) {
     super(parent, controls);
-
-    /** @private {!shaka.extern.UIConfiguration} */
-    this.config_ = this.controls.getConfig();
-
-    /** @private {HTMLElement } */
-    this.videoContainer_ = this.controls.getVideoContainer();
 
     this.addButton_(iconText);
 
@@ -51,9 +45,6 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
       }
       this.onButtonClick_();
     });
-
-    /** @private {ResizeObserver} */
-    this.resizeObserver_ = null;
 
     /** @private {MutationObserver} */
     this.mutationObserver_ = null;
@@ -74,25 +65,10 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
         attributeFilter: ['class'],
       });
     }
-
-    const resize = () => this.adjustCustomStyle_();
-
-    // Use ResizeObserver if available, fallback to window resize event
-    if (window.ResizeObserver) {
-      this.resizeObserver_ = new ResizeObserver(resize);
-      this.resizeObserver_.observe(this.controls.getVideoContainer());
-    } else {
-      // Fallback for older browsers
-      this.eventManager.listen(window, 'resize', resize);
-    }
   }
 
   /** @override */
   release() {
-    if (this.resizeObserver_) {
-      this.resizeObserver_.disconnect();
-      this.resizeObserver_ = null;
-    }
     if (this.mutationObserver_) {
       this.mutationObserver_.disconnect();
       this.mutationObserver_ = null;
@@ -239,7 +215,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
         shaka.ui.Utils.setDisplay(this.menu, true);
         this.notifyMenuOpen_();
         shaka.ui.Utils.focusOnTheChosenItem(this.menu);
-        this.adjustCustomStyle_();
+        this.adjustCustomStyle();
         this.button.setAttribute('aria-expanded', 'true');
       } else {
         this.notifyMenuClose_();
@@ -276,51 +252,15 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
   /** @protected */
   onMenuClose() {}
 
-  /**
-   * @private
-   */
-  adjustCustomStyle_() {
+  /** @override */
+  adjustCustomStyle() {
+    // Submenus inherit the positioning of their parent overflow element.
     if (this.isSubMenu) {
-      // Submenus take up the style of the overflow element.
       return;
     }
-    // Compute max height
-    const rectMenu = this.menu.getBoundingClientRect();
-    const styleMenu = window.getComputedStyle(this.menu);
-    const paddingTop = parseFloat(styleMenu.paddingTop);
-    const paddingBottom = parseFloat(styleMenu.paddingBottom);
-    const rectContainer = this.videoContainer_.getBoundingClientRect();
-    const gap = 5;
-    const heightIntersection =
-        rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom - gap;
-
-    this.menu.style.maxHeight = heightIntersection + 'px';
-
-    if (this.config_.showMenusOnTheRight) {
-      this.menu.style.right = '15px';
-      return;
-    }
-
-    // Compute horizontal position
-    const bottomControlsPos =
-        this.controls.getControlsContainer().getBoundingClientRect();
-    const settingsMenuButtonPos =
-        this.button.getBoundingClientRect();
-    const leftGap = settingsMenuButtonPos.left - bottomControlsPos.left;
-    const rightGap = bottomControlsPos.right - settingsMenuButtonPos.right;
-    const EDGE_PADDING = 15;
-    const MIN_GAP = 60;
-    // Settings menu button is either placed to the left or center
-    if (leftGap < rightGap) {
-      const left = leftGap < MIN_GAP ?
-          EDGE_PADDING : Math.max(leftGap, EDGE_PADDING);
-      this.menu.style.left = left + 'px';
-      this.menu.style.right = 'auto';
-    } else {
-      const right = rightGap < MIN_GAP ?
-          EDGE_PADDING : Math.max(rightGap, EDGE_PADDING);
-      this.menu.style.right = right + 'px';
-      this.menu.style.left = 'auto';
-    }
+    this.adjustMenuStyle(
+        this.menu,
+        this.button,
+        this.controls.getControlsContainer());
   }
 };

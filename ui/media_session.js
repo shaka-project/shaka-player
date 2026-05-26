@@ -60,6 +60,9 @@ shaka.ui.MediaSession = class {
         // eslint-disable-next-line no-restricted-syntax
         this.supported_ && 'chapterInfo' in MediaMetadata.prototype;
 
+    /** @private {?string} */
+    this.imageObjectUrl_ = null;
+
     /** @private {!Set<string>} */
     this.actionsHandled_ = new Set();
 
@@ -121,6 +124,7 @@ shaka.ui.MediaSession = class {
       this.addMediaSessionHandler(actionName);
     }
     this.actionsHandled_.clear();
+    this.revokeImageObjectUrl_();
   }
 
   /**
@@ -181,6 +185,34 @@ shaka.ui.MediaSession = class {
   }
 
   /**
+   * @param {string} artist
+   * @export
+   */
+  setupArtist(artist) {
+    const castReceiver = this.controls_.getCastReceiver();
+    if (castReceiver) {
+      castReceiver.setContentArtist(artist);
+    }
+    if (this.supported_) {
+      const metadata = this.getMediaMetadata();
+      metadata.artist = artist;
+      navigator.mediaSession.metadata = new MediaMetadata(metadata);
+    }
+  }
+
+  /**
+   * @param {string} album
+   * @export
+   */
+  setupAlbum(album) {
+    if (this.supported_) {
+      const metadata = this.getMediaMetadata();
+      metadata.album = album;
+      navigator.mediaSession.metadata = new MediaMetadata(metadata);
+    }
+  }
+
+  /**
    * @param {string} imageUrl
    * @export
    */
@@ -206,6 +238,7 @@ shaka.ui.MediaSession = class {
       metadata.artwork = [artwork];
       navigator.mediaSession.metadata = new MediaMetadata(metadata);
     }
+    this.updateManagedImageObjectUrl_(imageUrl);
   }
 
   /**
@@ -387,15 +420,38 @@ shaka.ui.MediaSession = class {
         return;
       }
       let title;
-      if (payload['key'] == 'TIT2' && payload['data']) {
-        title = payload['data'];
-      }
+      let artist;
+      let album;
       let imageUrl;
-      if (payload['key'] == 'APIC' && payload['mimeType'] == '-->') {
-        imageUrl = payload['data'];
+      switch (payload['key']) {
+        case 'TIT2':
+          title = payload['data'];
+          break;
+        case 'TPE1':
+          artist = payload['data'];
+          break;
+        case 'TALB':
+          album = payload['data'];
+          break;
+        case 'APIC':
+          if (payload['mimeType'] == '-->') {
+            imageUrl = payload['data'];
+          } else {
+            const data = /** @type {!ArrayBuffer} */ (payload['data']);
+            const mimeType = payload['mimeType'];
+            const blob = new Blob([data], {type: mimeType});
+            imageUrl = URL.createObjectURL(blob);
+          }
+          break;
       }
       if (title) {
         this.setupTitle(title);
+      }
+      if (artist) {
+        this.setupArtist(artist);
+      }
+      if (album) {
+        this.setupAlbum(album);
       }
       if (imageUrl) {
         this.setupPoster(imageUrl);
@@ -561,5 +617,33 @@ shaka.ui.MediaSession = class {
         this.adManager_, shaka.ads.Utils.AD_STOPPED, checkSkipAd);
 
     checkSkipAd();
+  }
+
+  /**
+   * @private
+   */
+  revokeImageObjectUrl_() {
+    if (this.imageObjectUrl_) {
+      URL.revokeObjectURL(this.imageObjectUrl_);
+      this.imageObjectUrl_ = null;
+    }
+  }
+
+  /**
+   * @param {string} url
+   * @private
+   */
+  updateManagedImageObjectUrl_(url) {
+    const previousUrl = this.imageObjectUrl_;
+
+    if (url.startsWith('blob:')) {
+      this.imageObjectUrl_ = url;
+    } else {
+      this.imageObjectUrl_ = null;
+    }
+
+    if (previousUrl && previousUrl != url) {
+      URL.revokeObjectURL(previousUrl);
+    }
   }
 };

@@ -263,11 +263,13 @@ shaka.extern.UIDocumentPictureInPicture;
  * A callback for customizing track labels in the UI.
  *
  * The callback receives the default label (or null if the language was
- * unrecognized), the track object, and a type string ('audio' or 'text').
- * Return a string to override the label, or a falsy value to keep the default.
+ * unrecognized), the track object, and a type string ('audio', 'text', or
+ * 'video').  Return a string to override the label, or a falsy value to keep
+ * the default.
  *
  * @typedef {function(?string,
- *     (shaka.extern.AudioTrack|shaka.extern.TextTrack),
+ *     (shaka.extern.AudioTrack|shaka.extern.TextTrack|
+ *      shaka.extern.VideoTrack),
  *     string): ?string}
  * @exportDoc
  */
@@ -631,9 +633,9 @@ shaka.extern.UITrackLabelCallback;
  * @property {shaka.extern.UITrackLabelCallback} customTrackLabel
  *   A callback for customizing track labels in the UI.  The callback receives
  *   the default label (or <code>null</code> if the language was unrecognized),
- *   the track object, and a type string (<code>'audio'</code> or
- *   <code>'text'</code>).  Return a string to override the label, or a falsy
- *   value to keep the default.
+ *   the track object, and a type string (<code>'audio'</code>,
+ *   <code>'text'</code>, or <code>'video'</code>).  Return a string to override
+ *   the label, or a falsy value to keep the default.
  *   <br>
  *   Defaults to a no-op that returns <code>''</code>.
  * @property {boolean} showBufferingSpinner
@@ -765,8 +767,10 @@ shaka.extern.IUIRangeElement = class {
    * @param {!shaka.ui.Controls} controls
    * @param {!Array<string>} containerClassNames
    * @param {!Array<string>} barClassNames
+   * @param {boolean=} enableWheel
    */
-  constructor(parent, controls, containerClassNames, barClassNames) {
+  constructor(parent, controls, containerClassNames, barClassNames,
+      enableWheel) {
     /**
      * @protected {!HTMLElement}
      * @exportDoc
@@ -785,6 +789,11 @@ shaka.extern.IUIRangeElement = class {
    * @param {number} max
    */
   setRange(min, max) {}
+
+  /**
+   * @param {number|string} step
+   */
+  setStep(step) {}
 
   /**
    * Called when user interaction begins.

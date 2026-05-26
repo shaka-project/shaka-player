@@ -138,7 +138,6 @@ application:
     - `preferredVariantRole` has been renamed to `preferredAudioRole` (deprecated in v4.16.0)
     - `autoShowText` has been removed.
     - `removeLatencyFromFirstPacketTime` has been removed.
-    - `removeLatencyFromFirstPacketTime` has been removed.
     - `streaming.speechToText` moved to `accessibility.speechToText`
 
   - UI Configuration changes:
@@ -151,7 +150,10 @@ application:
     - `TextDisplayer` plugins must implement the `configure()` method.
     - `TextParser` plugins must implement the `setManifestType()` method.
     - `Transmuxer` plugins now has three new parameters in `transmux()` method.
-    - Removed `enableTextDisplayer` from `TextDisplayer` plugins
+    - Removed `enableTextDisplayer` from `TextDisplayer` plugins.
+    - Replaced `SimpleTextDisplayer` with `NativeTextDisplayer`.
+    - Builtin `TextDisplayer` plugin constructors take a `shaka.Player` instance
+      as the only parameter.
 
   - Player API Changes:
     - The constructor no longer takes `mediaElement` as a parameter; use the `attach` method to attach to a media element instead. (Deprecated in v4.6)
@@ -180,40 +182,39 @@ application:
     - `airplay` button has been removed; use the `remote` button instead
 
 
-## v5.1
+## v6.0
 
   - Configuration changes:
     - Individual preference config fields have been replaced by structured
-      preference arrays. The old fields still work with a deprecation warning
-      but will be removed in the next major version.
-    - `preferredAudioLanguage`, `preferredAudioRole`, `preferredAudioLabel`,
-      `preferredAudioChannelCount`, and `preferSpatialAudio` have been replaced
-      by `preferredAudio`, an array of `shaka.extern.AudioPreference` objects.
-    - `preferredAudioCodecs` has been replaced by `preferredAudio` with the
-      `codec` field in each entry.
-    - `preferredTextLanguage` and `preferredTextRole` have been replaced by
-      `preferredText`, an array of `shaka.extern.TextPreference` objects.
-    - `preferredTextFormats` has been replaced by `preferredText` with the
-      `format` field in each entry.
-    - `preferForcedSubs` has been replaced by the `forced` field in
-      `preferredText` entries (e.g.
-      `player.configure('preferredText', [{language: 'en', forced: true}])`).
-    - `preferredVideoLabel`, `preferredVideoRole`, `preferredVideoHdrLevel`,
-      and `preferredVideoLayout` have been replaced by `preferredVideo`, an
-      array of `shaka.extern.VideoPreference` objects.
-    - `preferredVideoCodecs` has been replaced by `preferredVideo` with the
-      `codec` field in each entry.
-    - The new structured arrays allow specifying multiple preference sets in
-      priority order. For example:
-      ```js
-      // Old way (deprecated, still works with a warning):
-      player.configure('preferredAudioLanguage', 'ko');
-      player.configure('preferredAudioChannelCount', 6);
+      preference arrays.  (Deprecated in v5.1)
+      - `preferredAudioLanguage`, `preferredAudioRole`, `preferredAudioLabel`,
+        `preferredAudioChannelCount`, and `preferSpatialAudio` have been replaced
+        by `preferredAudio`, an array of `shaka.extern.AudioPreference` objects.
+      - `preferredAudioCodecs` has been replaced by `preferredAudio` with the
+        `codec` field in each entry.
+      - `preferredTextLanguage` and `preferredTextRole` have been replaced by
+        `preferredText`, an array of `shaka.extern.TextPreference` objects.
+      - `preferredTextFormats` has been replaced by `preferredText` with the
+        `format` field in each entry.
+      - `preferForcedSubs` has been replaced by the `forced` field in
+        `preferredText` entries (e.g.
+        `player.configure('preferredText', [{language: 'en', forced: true}])`).
+      - `preferredVideoLabel`, `preferredVideoRole`, `preferredVideoHdrLevel`,
+        and `preferredVideoLayout` have been replaced by `preferredVideo`, an
+        array of `shaka.extern.VideoPreference` objects.
+      - `preferredVideoCodecs` has been replaced by `preferredVideo` with the
+        `codec` field in each entry.
+      - The new structured arrays allow specifying multiple preference sets in
+        priority order. For example:
+        ```js
+        // Old way (deprecated, still works with a warning):
+        player.configure('preferredAudioLanguage', 'ko');
+        player.configure('preferredAudioChannelCount', 6);
 
-      // New way:
-      player.configure('preferredAudio', [
-        {language: 'ko', channelCount: 6},
-        {language: 'ko'},
-        {language: 'en'},
-      ]);
-      ```
+        // New way:
+        player.configure('preferredAudio', [
+          {language: 'ko', channelCount: 6},
+          {language: 'ko'},
+          {language: 'en'},
+        ]);
+        ```
