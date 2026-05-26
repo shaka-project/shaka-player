@@ -779,8 +779,10 @@ shaka.extern.IUIRangeElement = class {
    * @param {!shaka.ui.Controls} controls
    * @param {!Array<string>} containerClassNames
    * @param {!Array<string>} barClassNames
+   * @param {boolean=} enableWheel
    */
-  constructor(parent, controls, containerClassNames, barClassNames) {
+  constructor(parent, controls, containerClassNames, barClassNames,
+      enableWheel) {
     /**
      * @protected {!HTMLElement}
      * @exportDoc
@@ -799,6 +801,11 @@ shaka.extern.IUIRangeElement = class {
    * @param {number} max
    */
   setRange(min, max) {}
+
+  /**
+   * @param {number|string} step
+   */
+  setStep(step) {}
 
   /**
    * Called when user interaction begins.

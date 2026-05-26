@@ -27,7 +27,8 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
    */
   constructor(parent, controls) {
     super(parent, controls,
-        ['shaka-volume-bar-container'], ['shaka-volume-bar']);
+        ['shaka-volume-bar-container'], ['shaka-volume-bar'],
+        /* enableWheel= */ true);
 
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.controls.getConfig();
@@ -79,10 +80,6 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
           this.checkAvailability();
           this.onPresentationVolumeChange_();
         });
-
-    this.eventManager.listen(this.container, 'wheel', (event) => {
-      this.onWheel_(/** @type {!WheelEvent} */ (event));
-    });
 
     // Initialize volume display and label.
     this.onPresentationVolumeChange_();
@@ -161,28 +158,6 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
       available = false;
     }
     shaka.ui.Utils.setDisplay(this.container, available);
-  }
-
-  /**
-   * Handle mouse wheel input to control volume.
-   * @param {!WheelEvent} event
-   * @private
-   */
-  onWheel_(event) {
-    // Ignore browser zoom gestures
-    if (event.ctrlKey || event.metaKey) {
-      return;
-    }
-
-    event.preventDefault();
-
-    let newValue = this.getValue() + (event.deltaY > 0 ? -1 : 1);
-
-    // Clamp value between 0 and 100
-    newValue = Math.max(0, Math.min(100, newValue));
-
-    this.setValue(newValue);
-    this.onChange(); // Apply the volume change
   }
 };
 
