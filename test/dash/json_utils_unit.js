@@ -116,6 +116,43 @@ describe('JsonUtils', () => {
       expect(periods[1].attributes['id']).toBe('p2');
     });
 
+    it('XML-escapes text content to prevent XML injection', () => {
+      // A malicious JSON value containing XML metacharacters must not be
+      // interpreted as markup by the XML parser.
+      const json = {
+        BaseURL: [{
+          $value: '</BaseURL><BaseURL>http://attacker.com/segments/',
+        }],
+      };
+
+      const xml = parse(shaka.dash.JsonUtils.jsonToMpd(json));
+
+      // Must have exactly one BaseURL element — not two.
+      const baseUrls = shaka.util.TXml.findChildren(xml, 'BaseURL');
+      expect(baseUrls.length).toBe(1);
+
+      // The text content must be the literal string, not parsed as markup.
+      expect(shaka.util.TXml.getContents(baseUrls[0]))
+          .toBe('</BaseURL><BaseURL>http://attacker.com/segments/');
+    });
+
+    it('XML-escapes attribute values to prevent injection', () => {
+      const json = {
+        Period: [{
+          id: 'p1" injected="yes',
+        }],
+      };
+
+      const xml = parse(shaka.dash.JsonUtils.jsonToMpd(json));
+      const period = shaka.util.TXml.findChild(xml, 'Period');
+      expect(period).not.toBeNull();
+
+      // The attribute must contain the literal string, not break out.
+      expect(period.attributes['id']).toBe('p1" injected="yes');
+      // No spurious 'injected' attribute must exist.
+      expect(period.attributes['injected']).toBeUndefined();
+    });
+
     it('writes namespaced child elements (prefix:Element)', () => {
       const json = {
         $ns: {
