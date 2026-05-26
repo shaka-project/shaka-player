@@ -141,20 +141,25 @@ describe('SimpleAbrManager (integration)', () => {
 
     const type = match[1];
     const ident = match[2];
-    let data;
-    if (ident === 'init') {
-      data = generators[type].getInitSegment(0);
-    } else {
-      data = generators[type].getSegment(Number(ident), 0);
+    const data = ident === 'init' ?
+        generators[type].getInitSegment(0) :
+        generators[type].getSegment(Number(ident), 0);
+    if (!data) {
+      return shaka.util.AbortableOperation.failed(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.MALFORMED_TEST_URI));
     }
 
-    return shaka.util.AbortableOperation.completed({
+    /** @type {shaka.extern.Response} */
+    const response = {
       uri,
       originalUri: uri,
       data,
       headers: {},
       originalRequest: request,
-    });
+    };
+    return shaka.util.AbortableOperation.completed(response);
   }
 
   /**
@@ -221,9 +226,6 @@ describe('SimpleAbrManager (integration)', () => {
    * @return {!Promise}
    */
   async function setupPlayback(defaultBandwidthEstimate) {
-    // Long enough that segments keep flowing through the EWMA estimator for
-    // the full duration of the dynamic-throughput scenarios, but not so long
-    // that the underlying media has to loop many times.
     const presentationDuration = 60;
     manifest = createMultiBitrateManifest(presentationDuration);
 
@@ -235,12 +237,7 @@ describe('SimpleAbrManager (integration)', () => {
     abrConfig.defaultBandwidthEstimate = defaultBandwidthEstimate;
     abrConfig.useNetworkInformation = false;
     abrConfig.minTimeToSwitch = 0;
-    // Integration tests cannot mock Date.now to fast-forward switchInterval
-    // the way the unit tests do, so shorten it instead.
     abrConfig.switchInterval = 1;
-    // EWMA half-lives default to 2s/5s, which is tuned to converge across
-    // many segments in production. The dynamic-throughput scenarios below
-    // need the estimator to react within a single test, so shorten them.
     abrConfig.advanced.fastHalfLife = 1;
     abrConfig.advanced.slowHalfLife = 2;
 
@@ -291,8 +288,6 @@ describe('SimpleAbrManager (integration)', () => {
 
     await video.play();
     await waiter.timeoutAfter(20).waitForMovement(video);
-    // Allow the EWMA estimator to stabilise and a buffer to accumulate so
-    // any startup readiness 'waiting' is excluded from the assertion.
     await Util.delay(8);
 
     const onWaiting = jasmine.createSpy('onWaiting');
@@ -311,17 +306,12 @@ describe('SimpleAbrManager (integration)', () => {
 
         await video.play();
         await waiter.timeoutAfter(20).waitForMovement(video);
-        // Allow a buffer to accumulate so any startup readiness 'waiting' is
-        // excluded from the assertion.
         await Util.delay(8);
 
         const onWaiting = jasmine.createSpy('onWaiting');
         eventManager.listen(video, 'waiting', Util.spyFunc(onWaiting));
         await Util.delay(5);
 
-        // Browsers vary in how aggressively the EWMA reaches the very top
-        // tier; what matters for the issue is that a high-throughput network
-        // results in a high-bandwidth choice (top or one below it).
         const chosen = abrManager.chooseVariant();
         expect(chosen.bandwidth)
             .toBeGreaterThanOrEqual(VARIANT_BANDWIDTHS[2]);
