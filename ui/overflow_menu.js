@@ -12,11 +12,11 @@ goog.require('shaka.ads.Utils');
 goog.require('shaka.log');
 goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
-goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.MenuBase');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.FakeEvent');
@@ -24,11 +24,11 @@ goog.require('shaka.util.Iterables');
 
 
 /**
- * @extends {shaka.ui.Element}
+ * @extends {shaka.ui.MenuBase}
  * @final
  * @export
  */
-shaka.ui.OverflowMenu = class extends shaka.ui.Element {
+shaka.ui.OverflowMenu = class extends shaka.ui.MenuBase {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
@@ -36,14 +36,8 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    /** @private {!shaka.extern.UIConfiguration} */
-    this.config_ = this.controls.getConfig();
-
-    /** @private {HTMLElement} */
+    /** @private {!HTMLElement} */
     this.controlsContainer_ = this.controls.getControlsContainer();
-
-    /** @private {HTMLElement } */
-    this.videoContainer_ = this.controls.getVideoContainer();
 
     /** @private {!Array<shaka.extern.IUIElement>} */
     this.children_ = [];
@@ -88,65 +82,16 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
       // There was already an ad.
       shaka.ui.Utils.setDisplay(this.overflowMenuButton_, false);
     }
-
-    /** @private {ResizeObserver} */
-    this.resizeObserver_ = null;
-
-    /** @private {?number} */
-    this.resizeRafId_ = null;
-
-    const resize = () => {
-      if (this.resizeRafId_ != null) {
-        cancelAnimationFrame(this.resizeRafId_);
-      }
-      this.resizeRafId_ = requestAnimationFrame(() => {
-        this.resizeRafId_ = null;
-        this.adjustCustomStyle_();
-      });
-    };
-
-    // Use ResizeObserver if available, fallback to window resize event
-    if (window.ResizeObserver) {
-      this.resizeObserver_ = new ResizeObserver(resize);
-      this.resizeObserver_.observe(this.controls.getVideoContainer());
-    } else {
-      // Fallback for older browsers
-      this.eventManager.listen(window, 'resize', resize);
-    }
-
-    if ('documentPictureInPicture' in window) {
-      this.eventManager.listen(window.documentPictureInPicture, 'enter',
-          (e) => {
-            const event = /** @type {DocumentPictureInPictureEvent} */(e);
-            const pipWindow = event.window;
-            this.eventManager.listen(pipWindow, 'resize', resize);
-            this.eventManager.listenOnce(pipWindow, 'pagehide', () => {
-              this.eventManager.unlisten(pipWindow, 'resize', resize);
-              resize();
-            });
-            resize();
-          });
-    }
   }
 
   /** @override */
   release() {
-    this.controlsContainer_ = null;
-
     for (const element of this.children_) {
       element.release();
     }
 
     this.children_ = [];
 
-    if (this.resizeObserver_) {
-      this.resizeObserver_.disconnect();
-      this.resizeObserver_ = null;
-    }
-    if (this.resizeRafId_ != null) {
-      cancelAnimationFrame(this.resizeRafId_);
-      this.resizeRafId_ = null;
-    }
     super.release();
   }
 
@@ -204,7 +149,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
    * @private
    */
   createChildren_() {
-    for (const name of this.config_.overflowMenuButtons) {
+    for (const name of this.config.overflowMenuButtons) {
       if (shaka.ui.OverflowMenu.elementNamesToFactories_.get(name)) {
         const factory =
             shaka.ui.OverflowMenu.elementNamesToFactories_.get(name);
@@ -245,7 +190,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
           Iterables.filter(this.overflowMenu_.childNodes, isDisplayed);
         /** @type {!HTMLElement} */ (visibleElements[0]).focus();
       }
-      this.adjustCustomStyle_();
+      this.adjustCustomStyle();
     }
   }
 
@@ -260,52 +205,12 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
   }
 
 
-  /**
-   * @private
-   */
-  adjustCustomStyle_() {
-    // Compute max height
-    const rectMenu = this.overflowMenu_.getBoundingClientRect();
-    // Use the element's own window so this works both in the main document
-    // and when videoContainer has been moved into a DocumentPictureInPicture
-    // window (where the global `window` would be the wrong browsing context).
-    const elementWindow =
-        this.overflowMenu_.ownerDocument.defaultView || window;
-    const styleMenu = elementWindow.getComputedStyle(this.overflowMenu_);
-    const paddingTop = parseFloat(styleMenu.paddingTop);
-    const paddingBottom = parseFloat(styleMenu.paddingBottom);
-    const rectContainer = this.videoContainer_.getBoundingClientRect();
-    const gap = 5;
-    const heightIntersection =
-        rectMenu.bottom - rectContainer.top - paddingTop - paddingBottom - gap;
-
-    this.overflowMenu_.style.maxHeight = heightIntersection + 'px';
-
-    if (this.config_.showMenusOnTheRight) {
-      this.overflowMenu_.style.right = '15px';
-      return;
-    }
-
-    // Compute horizontal position
-    const bottomControlsPos = this.controlsContainer_.getBoundingClientRect();
-    const overflowMenuButtonPos =
-        this.overflowMenuButton_.getBoundingClientRect();
-    const leftGap = overflowMenuButtonPos.left - bottomControlsPos.left;
-    const rightGap = bottomControlsPos.right - overflowMenuButtonPos.right;
-    const EDGE_PADDING = 15;
-    const MIN_GAP = 60;
-    // Overflow menu button is either placed to the left or center
-    if (leftGap < rightGap) {
-      const left = leftGap < MIN_GAP ?
-          EDGE_PADDING : Math.max(leftGap, EDGE_PADDING);
-      this.overflowMenu_.style.left = left + 'px';
-      this.overflowMenu_.style.right = 'auto';
-    } else {
-      const right = rightGap < MIN_GAP ?
-          EDGE_PADDING : Math.max(rightGap, EDGE_PADDING);
-      this.overflowMenu_.style.right = right + 'px';
-      this.overflowMenu_.style.left = 'auto';
-    }
+  /** @override */
+  adjustCustomStyle() {
+    this.adjustMenuStyle(
+        this.overflowMenu_,
+        this.overflowMenuButton_,
+        this.controlsContainer_);
   }
 };
 
