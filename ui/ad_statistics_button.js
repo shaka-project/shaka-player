@@ -14,7 +14,6 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -113,25 +112,16 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
       this.onTimerTick_();
     });
 
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
 
     this.loadContainer_();
-
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateLocalizedStrings_();
-        });
 
     this.eventManager.listen(this.button_, 'click', () => {
       if (!this.controls.isOpaque()) {
         return;
       }
       this.onClick_();
-      this.updateLocalizedStrings_();
+      this.updateLocalizedStrings();
     });
 
     this.eventManager.listen(this.player, 'loading', () => {
@@ -142,15 +132,6 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
         this.adManager, shaka.ads.Utils.AD_STARTED, () => {
           shaka.ui.Utils.setDisplay(this.button_, true);
         });
-
-    if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        shaka.ui.Utils.setDisplay(this.button_, false);
-      });
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        shaka.ui.Utils.setDisplay(this.button_, this.currentStats_.started > 0);
-      });
-    }
   }
 
   /** @private */
@@ -168,8 +149,8 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
     }
   }
 
-  /** @private */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.nameSpan_.textContent =
@@ -180,6 +161,13 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
     const labelText = this.container_.classList.contains('shaka-hidden') ?
         LocIds.OFF : LocIds.ON;
     this.stateSpan_.textContent = this.localization.resolve(labelText);
+  }
+
+  /** @override */
+  checkAvailability() {
+    shaka.ui.Utils.setDisplay(
+        this.button_,
+        !this.isSubMenuOpened && this.currentStats_.started > 0);
   }
 
   /**

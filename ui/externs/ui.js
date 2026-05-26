@@ -732,6 +732,18 @@ shaka.extern.IUIElement = class {
    * @override
    */
   release() {}
+
+  /**
+   * Called when the locale changes. Override to update UI strings.
+   * @protected
+   */
+  updateLocalizedStrings() {}
+
+  /**
+   * Called when a submenu opens or closes. Override to show/hide this element.
+   * @protected
+   */
+  checkAvailability() {}
 };
 
 
