@@ -92,7 +92,18 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     /** @private {ResizeObserver} */
     this.resizeObserver_ = null;
 
-    const resize = () => this.adjustCustomStyle_();
+    /** @private {?number} */
+    this.resizeRafId_ = null;
+
+    const resize = () => {
+      if (this.resizeRafId_ != null) {
+        cancelAnimationFrame(this.resizeRafId_);
+      }
+      this.resizeRafId_ = requestAnimationFrame(() => {
+        this.resizeRafId_ = null;
+        this.adjustCustomStyle_();
+      });
+    };
 
     // Use ResizeObserver if available, fallback to window resize event
     if (window.ResizeObserver) {
@@ -101,6 +112,20 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     } else {
       // Fallback for older browsers
       this.eventManager.listen(window, 'resize', resize);
+    }
+
+    if ('documentPictureInPicture' in window) {
+      this.eventManager.listen(window.documentPictureInPicture, 'enter',
+          (e) => {
+            const event = /** @type {DocumentPictureInPictureEvent} */(e);
+            const pipWindow = event.window;
+            this.eventManager.listen(pipWindow, 'resize', resize);
+            this.eventManager.listenOnce(pipWindow, 'pagehide', () => {
+              this.eventManager.unlisten(pipWindow, 'resize', resize);
+              resize();
+            });
+            resize();
+          });
     }
   }
 
@@ -117,6 +142,10 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     if (this.resizeObserver_) {
       this.resizeObserver_.disconnect();
       this.resizeObserver_ = null;
+    }
+    if (this.resizeRafId_ != null) {
+      cancelAnimationFrame(this.resizeRafId_);
+      this.resizeRafId_ = null;
     }
     super.release();
   }
@@ -237,7 +266,12 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
   adjustCustomStyle_() {
     // Compute max height
     const rectMenu = this.overflowMenu_.getBoundingClientRect();
-    const styleMenu = window.getComputedStyle(this.overflowMenu_);
+    // Use the element's own window so this works both in the main document
+    // and when videoContainer has been moved into a DocumentPictureInPicture
+    // window (where the global `window` would be the wrong browsing context).
+    const elementWindow =
+        this.overflowMenu_.ownerDocument.defaultView || window;
+    const styleMenu = elementWindow.getComputedStyle(this.overflowMenu_);
     const paddingTop = parseFloat(styleMenu.paddingTop);
     const paddingBottom = parseFloat(styleMenu.paddingBottom);
     const rectContainer = this.videoContainer_.getBoundingClientRect();

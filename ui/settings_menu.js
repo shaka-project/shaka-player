@@ -75,7 +75,18 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
       });
     }
 
-    const resize = () => this.adjustCustomStyle_();
+    /** @private {?number} */
+    this.resizeRafId_ = null;
+
+    const resize = () => {
+      if (this.resizeRafId_ != null) {
+        cancelAnimationFrame(this.resizeRafId_);
+      }
+      this.resizeRafId_ = requestAnimationFrame(() => {
+        this.resizeRafId_ = null;
+        this.adjustCustomStyle_();
+      });
+    };
 
     // Use ResizeObserver if available, fallback to window resize event
     if (window.ResizeObserver) {
@@ -84,6 +95,20 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     } else {
       // Fallback for older browsers
       this.eventManager.listen(window, 'resize', resize);
+    }
+
+    if ('documentPictureInPicture' in window) {
+      this.eventManager.listen(window.documentPictureInPicture, 'enter',
+          (e) => {
+            const event = /** @type {DocumentPictureInPictureEvent} */(e);
+            const pipWindow = event.window;
+            this.eventManager.listen(pipWindow, 'resize', resize);
+            this.eventManager.listenOnce(pipWindow, 'pagehide', () => {
+              this.eventManager.unlisten(pipWindow, 'resize', resize);
+              resize();
+            });
+            resize();
+          });
     }
   }
 
@@ -100,6 +125,10 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     if (this.menuMutationObserver_) {
       this.menuMutationObserver_.disconnect();
       this.menuMutationObserver_ = null;
+    }
+    if (this.resizeRafId_ != null) {
+      cancelAnimationFrame(this.resizeRafId_);
+      this.resizeRafId_ = null;
     }
     super.release();
   }
@@ -286,7 +315,11 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     }
     // Compute max height
     const rectMenu = this.menu.getBoundingClientRect();
-    const styleMenu = window.getComputedStyle(this.menu);
+    // Use the element's own window so this works both in the main document
+    // and when videoContainer has been moved into a DocumentPictureInPicture
+    // window (where the global `window` would be the wrong browsing context).
+    const elementWindow = this.menu.ownerDocument.defaultView || window;
+    const styleMenu = elementWindow.getComputedStyle(this.menu);
     const paddingTop = parseFloat(styleMenu.paddingTop);
     const paddingBottom = parseFloat(styleMenu.paddingBottom);
     const rectContainer = this.videoContainer_.getBoundingClientRect();
