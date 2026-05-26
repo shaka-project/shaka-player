@@ -36,6 +36,8 @@ describe('SimpleAbrManager (integration)', () => {
   /** @type {number} */
   let currentTargetBps;
   let metadata;
+  /** @type {function(string, number)} */
+  let onDisableStream;
 
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
@@ -67,6 +69,7 @@ describe('SimpleAbrManager (integration)', () => {
 
   beforeEach(() => {
     currentTargetBps = 1e6;
+    onDisableStream = () => {};
 
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
@@ -225,6 +228,9 @@ describe('SimpleAbrManager (integration)', () => {
    * @param {number} defaultBandwidthEstimate
    * @return {!Promise}
    */
+  /**
+   * @param {number} defaultBandwidthEstimate
+   */
   async function setupPlayback(defaultBandwidthEstimate) {
     const presentationDuration = 60;
     manifest = createMultiBitrateManifest(presentationDuration);
@@ -246,7 +252,7 @@ describe('SimpleAbrManager (integration)', () => {
           streamingEngine.switchVariant(
               variant, clearBuffer || false, safeMargin || 0);
         },
-        () => {});
+        (type, banDuration) => onDisableStream(type, banDuration));
     abrManager.configure(abrConfig);
     abrManager.setVariants(manifest.variants, false);
 
@@ -279,6 +285,7 @@ describe('SimpleAbrManager (integration)', () => {
 
     streamingEngine.switchVariant(initialVariant);
     await streamingEngine.start();
+    abrManager.setMediaElement(video);
     abrManager.enable();
   }
 
@@ -332,5 +339,89 @@ describe('SimpleAbrManager (integration)', () => {
     await Util.delay(15);
 
     expect(abrManager.chooseVariant().bandwidth).toBeLessThan(initialBandwidth);
+  });
+
+  describe('dropped frame protection', () => {
+    /**
+     * @param {number} dropped
+     * @param {number} total
+     * @return {!VideoPlaybackQuality}
+     */
+    function makeQuality(dropped, total) {
+      return /** @type {!VideoPlaybackQuality} */ ({
+        droppedVideoFrames: dropped,
+        totalVideoFrames: total,
+        corruptedVideoFrames: 0,
+        creationTime: 0,
+        totalFrameDelay: 0,
+      });
+    }
+
+    /**
+     * @param {!jasmine.Spy} disableStreamSpy
+     * @return {!Promise}
+     */
+    async function setupDroppedFramesPlayback(disableStreamSpy) {
+      onDisableStream = (type, banDuration) => {
+        Util.spyFunc(disableStreamSpy)(type, banDuration);
+      };
+      currentTargetBps = 5.5e6;
+      await setupPlayback(/* defaultBandwidthEstimate= */ 5.5e6);
+
+      // Override before configure so real browser frame counters don't
+      // contaminate the baseline.
+      video.getVideoPlaybackQuality = () => makeQuality(0, 0);
+
+      const droppedFramesConfig =
+          shaka.util.PlayerConfiguration.createDefault().abr;
+      droppedFramesConfig.droppedFrames = true;
+      droppedFramesConfig.advanced.droppedFramesThreshold = 0.15;
+      droppedFramesConfig.advanced.droppedFramesInterval = 0.5;
+      droppedFramesConfig.advanced.droppedFramesBanDuration = 30;
+      abrManager.configure(droppedFramesConfig);
+
+      await video.play();
+      await waiter.timeoutAfter(20).waitForMovement(video);
+    }
+
+    it('calls disableStreamCallback via timer when drop ratio exceeds' +
+        ' threshold', async () => {
+      const disableStreamSpy = jasmine.createSpy('disableStreamCallback');
+      await setupDroppedFramesPlayback(disableStreamSpy);
+
+      let droppedFrames = 0;
+      let totalFrames = 100;
+      video.getVideoPlaybackQuality = () => makeQuality(droppedFrames,
+          totalFrames);
+
+      await Util.delay(0.6);  // Establish baseline.
+
+      // 20/100 new frames dropped = 20% > 15% threshold.
+      droppedFrames = 20;
+      totalFrames = 200;
+      await Util.delay(0.6);
+
+      expect(disableStreamSpy).toHaveBeenCalledWith('video', 30);
+    });
+
+    it('does not call disableStreamCallback when drop ratio is below' +
+        ' threshold', async () => {
+      const disableStreamSpy = jasmine.createSpy('disableStreamCallback');
+      await setupDroppedFramesPlayback(disableStreamSpy);
+
+      let droppedFrames = 0;
+      let totalFrames = 100;
+      video.getVideoPlaybackQuality = () => makeQuality(droppedFrames,
+          totalFrames);
+
+      await Util.delay(0.6);  // Establish baseline.
+
+      // 10/100 new frames dropped = 10% < 15% threshold.
+      droppedFrames = 10;
+      totalFrames = 200;
+      await Util.delay(0.6);
+
+      expect(disableStreamSpy).not.toHaveBeenCalled();
+    });
   });
 });
