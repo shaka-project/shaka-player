@@ -25,6 +25,7 @@
 +../../ui/localization.js
 +../../ui/loop_button.js
 +../../ui/media_session.js
++../../ui/menu_base.js
 +../../ui/mute_button.js
 +../../ui/overflow_menu.js
 +../../ui/pip_button.js
