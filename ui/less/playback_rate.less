@@ -1,0 +1,158 @@
+/** @license
+ * Shaka Player
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Step buttons (− / +)
+@playback-rate-step-btn-border: fade(@general-font-color, 50%);
+@playback-rate-step-btn-border-active: fade(@general-font-color, 85%);
+@playback-rate-step-btn-bg-active: fade(@general-font-color, 10%);
+
+// Slider track
+@playback-rate-slider-track: fade(@general-font-color, 25%);
+
+// Preset pill buttons
+@playback-rate-preset-bg: fade(@general-font-color, 10%);
+@playback-rate-preset-bg-hover: fade(@general-font-color, 18%);
+@playback-rate-preset-selected-bg: fade(@general-font-color, 20%);
+@playback-rate-preset-selected-border: fade(@general-font-color, 70%);
+
+/* Menu container */
+
+.shaka-playback-rates {
+  min-width: 240px;
+}
+
+/* Slider section */
+
+.shaka-playback-rate-slider-section {
+  padding: 8px 0 4px;
+}
+
+.shaka-playback-rate-value {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 500;
+  color: @general-font-color;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 0 10px;
+  margin-left: 0;
+}
+
+.shaka-playback-rate-slider-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 10px;
+}
+
+/* Step buttons (− and +) */
+
+.shaka-playback-rate-step-btn {
+  /* Reset inherited .shaka-overflow-menu button styles. */
+  min-height: unset !important;
+  padding: 0 !important;
+  flex-shrink: 0;
+
+  width: 28px;
+  height: 28px;
+  border-radius: 50% !important;
+  border: 1.5px solid @playback-rate-step-btn-border !important;
+  background: transparent !important;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+  color: @general-font-color;
+
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    opacity 150ms ease;
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: @playback-rate-step-btn-border-active !important;
+    background: @playback-rate-step-btn-bg-active !important;
+  }
+
+  .shaka-keyboard-navigation &:focus:not(:disabled) {
+    border-color: @playback-rate-step-btn-border-active !important;
+    background: @playback-rate-step-btn-bg-active !important;
+  }
+}
+
+.shaka-playback-rate-slider-container {
+  flex: 1;
+  background: @playback-rate-slider-track;
+}
+
+/* Preset pill buttons */
+
+/* Horizontal strip. */
+.shaka-playback-rate-presets {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  /* Centre pills when they fit; safe-center degrades to flex-start on
+   * overflow so the leftmost pill stays reachable via scroll. */
+  justify-content: safe center;
+  /* stylelint-disable-next-line declaration-block-no-duplicate-properties */
+  justify-content: center; /* fallback for browsers without "safe" */
+
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+
+  gap: 6px;
+  padding: 6px 10px 10px;
+  white-space: nowrap;
+}
+
+.shaka-playback-rate-preset-btn {
+  /* Reset inherited .shaka-overflow-menu button styles. */
+  min-height: unset !important;
+  padding: 5px 14px !important;
+  border-radius: 20px !important;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  font-size: 13px;
+  color: @general-font-color;
+  background: @playback-rate-preset-bg !important;
+  border: 1.5px solid transparent !important;
+
+  transition: background 150ms ease, border-color 150ms ease;
+
+  &:hover {
+    background: @playback-rate-preset-bg-hover !important;
+  }
+
+  .shaka-keyboard-navigation &:focus {
+    background: @playback-rate-preset-bg-hover !important;
+  }
+
+  &.shaka-chosen-item {
+    background: @playback-rate-preset-selected-bg !important;
+    border-color: @playback-rate-preset-selected-border !important;
+    font-weight: 600;
+    color: @general-font-color;
+    margin-left: 0;
+  }
+}
