@@ -947,6 +947,15 @@ shakaDemo.Custom = class {
     };
     this.makeField_(container, 'MIME Type', mimeTypeSetup, mimeTypeOnChange);
 
+    // Toggle: when enabled, |manifestUri| is treated as an M3U
+    // playlist URL rather than a single-stream manifest.  The queue
+    // manager will fetch the playlist and populate the queue from it.
+    const isPlaylistOnChange = (input) => {
+      assetInProgress.isPlaylist = input.checked;
+    };
+    this.makeBoolInput_(container, 'Is M3U Playlist',
+        isPlaylistOnChange, assetInProgress.isPlaylist);
+
     return mainDiv;
   }
 
@@ -1148,7 +1157,14 @@ shakaDemo.Custom = class {
     const savedList = this.savedList_;
     const isFeatured = false;
     return new shakaDemo.AssetCard(savedList, asset, isFeatured, (c) => {
-      c.addBaseButtons();
+      if (asset.isPlaylist) {
+        // Playlist assets only support Play, Edit, and Delete.
+        // "Add to queue" and "Start Preload" are shown but disabled;
+        // the Store button is omitted entirely.
+        c.addBaseButtonsPlaylist();
+      } else {
+        c.addBaseButtons();
+      }
       c.addButton('Edit', async () => {
         if (asset.unstoreCallback) {
           await asset.unstoreCallback();
@@ -1165,7 +1181,10 @@ shakaDemo.Custom = class {
         this.saveAssetInfos_(this.assets_);
         this.remakeSavedList_();
       }, 'Delete this custom asset?');
-      c.addStoreButton();
+      if (!asset.isPlaylist) {
+        // The Store button is only relevant for regular stream assets.
+        c.addStoreButton();
+      }
     });
   }
 

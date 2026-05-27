@@ -1531,11 +1531,15 @@ shakaDemo.Main = class {
       }
 
       // Finally, the asset can be loaded.
-      const queueItem = await this.getQueueItem_(asset);
-      queueManager.insertItems([queueItem]);
-      await queueManager.playItem(0);
-
-      asset.preloadManager = null;
+      if (asset.isPlaylist) {
+        await queueManager.loadFromM3uPlaylist(
+            asset.manifestUri, /* playOnLoad= */ true);
+      } else {
+        const queueItem = await this.getQueueItem_(asset);
+        queueManager.insertItems([queueItem]);
+        await queueManager.playItem(0);
+        asset.preloadManager = null;
+      }
 
       if (this.visualizer_ && this.visualizer_.active) {
         this.visualizer_.start();
