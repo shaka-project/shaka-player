@@ -1168,8 +1168,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     placeholder.classList.add('shaka-video-container');
     placeholder.classList.add('pip-placeholder');
     const video = /** @type {HTMLVideoElement} */ (this.video_);
-    if (video?.poster) {
-      const posterDiv = document.createElement('div');
+    let posterDiv = null;
+    const updatePoster = () => {
+      if (posterDiv) {
+        posterDiv.remove();
+        posterDiv = null;
+      }
+      if (!video?.poster) {
+        return;
+      }
+      posterDiv = document.createElement('div');
       posterDiv.classList.add('pip-poster');
       posterDiv.style.backgroundImage = `url("${video.poster}")`;
       const videoWidth = video.videoWidth || video.clientWidth;
@@ -1178,9 +1186,22 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       if (videoWidth && videoHeight) {
         posterDiv.style.setProperty('aspect-ratio',
             `${videoWidth} / ${videoHeight}`);
-        placeholder.appendChild(posterDiv);
       }
+      placeholder.prepend(posterDiv);
+    };
+
+    updatePoster();
+
+    const posterObserver = new MutationObserver(() => {
+      updatePoster();
+    });
+    if (video) {
+      posterObserver.observe(this.getLocalVideo(), {
+        attributes: true,
+        attributeFilter: ['poster'],
+      });
     }
+
     const iconWrapper = shaka.util.Dom.createHTMLElement('div');
     iconWrapper.classList.add('pip-icon-wrapper');
     placeholder.appendChild(iconWrapper);
@@ -1206,6 +1227,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Listen for the PiP closing event to move the player back.
     this.eventManager_.listenOnce(pipWindow, 'pagehide', () => {
+      posterObserver.disconnect();
       this.eventManager_.unlisten(pipIcon, 'click', pipAction);
       pipPlayer.classList.remove('pip-mode');
       placeholder.replaceWith(/** @type {!Node} */(pipPlayer));
