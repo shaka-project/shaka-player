@@ -9,6 +9,7 @@
   { "license-wrapping": { "title": "License Wrapping" } },
   { "moq": { "title": "MoQ" } },
   { "preload": { "title": "Preloading" } },
+  { "transmuxing-in-worker": { "title": "Transmuxing in Worker" } },
   { "ui": { "title": "UI Library" } },
   { "ui-customization": { "title": "Configuring the UI" } },
   { "text-displayer": { "title": "Configuring text displayer" } },

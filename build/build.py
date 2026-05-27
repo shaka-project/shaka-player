@@ -192,6 +192,13 @@ class Build(object):
         return True
     return False
 
+  def has_transmuxer_proxy(self):
+    """Returns True if the transmuxer proxy is in the build."""
+    for path in self.include:
+      if path.endswith('transmuxer_proxy.js'):
+        return True
+    return False
+
   def generate_localizations(self, locales, force):
     localizations = compiler.GenerateLocalizations(locales)
     localizations.generate(force)
@@ -265,7 +272,56 @@ class Build(object):
 
     return True
 
-  def build_library(self, name, langout, locales, force, is_debug, skip_ts):
+  def build_worker_bundle(self, langout, force, is_debug):
+    """Compiles the transmuxer worker bundle.
+
+    Returns True on success; False on failure.
+    """
+    worker_build = Build()
+    if not worker_build.parse_build(['+@transmuxer-worker'], os.getcwd()):
+      return False
+    worker_build.add_closure()
+    if not worker_build.add_core():
+      return False
+
+    build_name = 'shaka-player.transmuxer-worker'
+    if is_debug:
+      build_name += '.debug'
+    closure = compiler.ClosureCompiler(worker_build.include, build_name)
+    closure.add_wrapper = False
+    closure.add_source_map = False
+
+    closure_opts = common_closure_opts + common_closure_defines
+    closure_opts += ['--language_out', langout]
+    if is_debug:
+      closure_opts += debug_closure_opts + debug_closure_defines
+    else:
+      closure_opts += release_closure_opts + release_closure_defines
+
+    closure_opts += [
+        '--dependency_mode=PRUNE',
+        '--entry_point=goog:shaka.transmuxer.TransmuxerWorker',
+        # Each transmuxer plugin registers itself at load time (side effect),
+        # so we must list them as entry points too.
+        '--entry_point=goog:shaka.transmuxer.AacTransmuxer',
+        '--entry_point=goog:shaka.transmuxer.Ac3Transmuxer',
+        '--entry_point=goog:shaka.transmuxer.Ec3Transmuxer',
+        '--entry_point=goog:shaka.transmuxer.Mp3Transmuxer',
+        '--entry_point=goog:shaka.transmuxer.MpegTsTransmuxer',
+        '--entry_point=goog:shaka.transmuxer.TsTransmuxer',
+    ]
+
+    # Suppress type errors caused by dependency pruning; the main build
+    # already validates all types.
+    closure_opts += [
+        '--jscomp_off=checkTypes',
+        '--jscomp_off=unknownDefines',
+    ]
+
+    return closure.compile(closure_opts, force)
+
+  def build_library(self, name, langout, locales, force, is_debug, skip_ts,
+      build_worker):
     """Builds Shaka Player using the files in |self.include|.
 
     Args:
@@ -275,6 +331,7 @@ class Build(object):
       force: True to rebuild, False to ignore if no changes are detected.
       is_debug: True to compile for debugging, false for release.
       skip_ts: True to skip generation of TypeScript definitions.
+      build_worker: True to build the standalone transmuxer worker if needed.
 
     Returns:
       True on success; False on failure.
@@ -288,6 +345,11 @@ class Build(object):
       # dummy cast proxy.
       if not self.has_cast():
         self.include.add(os.path.abspath('conditional/dummy_cast_proxy.js'))
+
+    if build_worker and self.has_transmuxer_proxy():
+      logging.info('Compiling transmuxer worker bundle...')
+      if not self.build_worker_bundle(langout, force, is_debug):
+        return False
 
     if is_debug:
       name += '.debug'
@@ -383,6 +445,16 @@ def main(args):
   parser.add_argument(
     '--skip-ts',
     help='Skips generation of TypeScript definition files (.d.ts).',
+    action='store_true')
+
+  parser.add_argument(
+    '--worker',
+    help='Build only the standalone transmuxer worker script.',
+    action='store_true')
+
+  parser.add_argument(
+    '--skip-worker',
+    help='Do not build the standalone transmuxer worker alongside the library.',
     action='store_true')
 
   parsed_args, commands = parser.parse_known_args(args)
@@ -501,8 +573,11 @@ def main(args):
   is_debug = parsed_args.mode == 'debug'
   skip_ts = parsed_args.skip_ts
 
-  if not custom_build.build_library(name, langout, locales, force, is_debug,
-      skip_ts):
+  if parsed_args.worker:
+    if not custom_build.build_worker_bundle(langout, force, is_debug):
+      return 1
+  elif not custom_build.build_library(name, langout, locales, force, is_debug,
+      skip_ts, not parsed_args.skip_worker):
     return 1
 
   # Persist (merge) the updated state under lock so we don't clobber parallel updates.

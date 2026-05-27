@@ -429,6 +429,13 @@ shakaDemo.Main = class {
     this.player_.configure(
         'manifest.dash.clockSyncUri', 'https://time.akamai.com/?ms&iso');
 
+    // The library does not auto-detect the transmuxer worker URL — the demo
+    // is responsible for telling Shaka where to load it from. The path
+    // depends on which build the demo loaded (compiled, debug, uncompiled).
+    this.player_.configure(
+        'mediaSource.transmuxWorkerUrl',
+        this.getTransmuxerWorkerUrl());
+
     // Get default config.
     this.defaultConfig_ = this.player_.getConfiguration();
     this.desiredConfig_ = this.player_.getConfiguration();
@@ -1226,6 +1233,29 @@ shakaDemo.Main = class {
       params.set(kv[0], kv.slice(1).join('='));
     }
     return params;
+  }
+
+  /**
+   * Picks the worker bundle that matches the build the demo loaded.
+   * The demo always serves the worker from `../dist/` (compiled) or from
+   * the repo root (`../transmuxer_worker.uncompiled.js`).
+   * @return {string}
+   */
+  getTransmuxerWorkerUrl() {
+    const params = this.getParams_();
+    let buildType = 'uncompiled';
+    if (params.has('build')) {
+      buildType = params.get('build');
+    } else if (params.has('compiled')) {
+      buildType = 'compiled';
+    }
+    if (buildType === 'uncompiled') {
+      return '../transmuxer_worker.uncompiled.js';
+    }
+    if (buildType === 'debug_compiled') {
+      return '../dist/shaka-player.transmuxer-worker.debug.js';
+    }
+    return '../dist/shaka-player.transmuxer-worker.js';
   }
 
   /**
