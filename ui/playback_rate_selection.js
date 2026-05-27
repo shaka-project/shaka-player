@@ -10,7 +10,6 @@ goog.provide('shaka.ui.PlaybackRateSelection');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
@@ -42,15 +41,6 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     }
 
     this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listenMulti(
         this.player,
         [
           'loaded',
@@ -59,25 +49,14 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
           this.updatePlaybackRateSelection_();
         });
 
-    if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        shaka.ui.Utils.setDisplay(this.button, false);
-      });
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        shaka.ui.Utils.setDisplay(this.button, true);
-      });
-    }
-
     // Set up all the strings in the user's preferred language.
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
     this.addPlaybackRates_();
     this.updatePlaybackRateSelection_();
   }
 
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);

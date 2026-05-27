@@ -11,7 +11,6 @@ goog.require('goog.asserts');
 goog.require('shaka.ads.Utils');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.RangeElement');
 goog.require('shaka.ui.Utils');
 
@@ -57,7 +56,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
           'unloading',
           'trackschanged',
         ], () => {
-          this.checkAvailability_();
+          this.checkAvailability();
         });
 
     this.eventManager.listen(this.controls,
@@ -74,33 +73,24 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
 
     this.eventManager.listen(this.adManager,
         shaka.ads.Utils.AD_STARTED,
-        () => this.checkAvailability_());
+        () => this.checkAvailability());
 
     this.eventManager.listen(this.adManager,
         shaka.ads.Utils.AD_STOPPED, () => {
-          this.checkAvailability_();
+          this.checkAvailability();
           this.onPresentationVolumeChange_();
-        });
-
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateAriaLabel_();
         });
 
     // Initialize volume display and label.
     this.onPresentationVolumeChange_();
-    this.updateAriaLabel_();
+    this.updateLocalizedStrings();
 
     if (this.ad) {
       // There was already an ad.
       this.onChange();
     }
 
-    this.checkAvailability_();
+    this.checkAvailability();
   }
 
   /**
@@ -153,13 +143,13 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
         'linear-gradient(' + gradient.join(',') + ')';
   }
 
-  /** @private */
-  updateAriaLabel_() {
+  /** @override */
+  updateLocalizedStrings() {
     this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.VOLUME);
   }
 
-  /** @private */
-  checkAvailability_() {
+  /** @override */
+  checkAvailability() {
     let available = true;
     if (this.ad && this.ad.isLinear()) {
       // We can't tell if the Ad has audio or not.

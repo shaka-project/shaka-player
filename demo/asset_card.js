@@ -248,6 +248,38 @@ shakaDemo.AssetCard = class {
     this.remakeButtonsFn_(this);
   }
 
+  /**
+   * Adds a Play button for M3U playlist assets and shows the remaining
+   * base buttons ("Add to queue", "Start Preload") as disabled, since
+   * those operations are not applicable to playlist-type assets:
+   * - "Add to queue" would add the raw playlist URL, not its entries.
+   * - "Start Preload" has no meaning before the playlist is fetched.
+   */
+  addBaseButtonsPlaylist() {
+    let disablePlay = false;
+
+    // Play loads the playlist via QueueManager.loadFromM3uPlaylist()
+    // and starts the first channel automatically.
+    this.addButton('Play', async () => {
+      if (disablePlay) {
+        return;
+      }
+      disablePlay = true;
+      await shakaDemoMain.loadAsset(this.asset_);
+      this.remakeButtons();
+    });
+
+    // Disabled: adding a raw playlist URL to an existing queue is not
+    // supported; the user should play the playlist directly instead.
+    const addToQueueButton = this.addButton('Add to queue', () => {});
+    addToQueueButton.setAttribute('disabled', '');
+
+    // Disabled: preloading a playlist URL is not meaningful before the
+    // playlist entries have been resolved.
+    const preloadButton = this.addButton('Start Preload', () => {});
+    preloadButton.setAttribute('disabled', '');
+  }
+
   /** Adds basic buttons to the card ("play" and "preload"). */
   addBaseButtons() {
     let disableButtons = false;

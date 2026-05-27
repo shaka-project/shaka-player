@@ -9,9 +9,9 @@ goog.provide('shaka.ui.Element');
 
 goog.require('shaka.ads.Utils');
 goog.require('shaka.util.EventManager');
+goog.require('shaka.ui.Localization');
 goog.requireType('shaka.Player');
 goog.requireType('shaka.ui.Controls');
-goog.requireType('shaka.ui.Localization');
 
 
 /**
@@ -83,6 +83,17 @@ shaka.ui.Element = class {
       this.ad = null;
     });
 
+    if (this.localization) {
+      this.eventManager.listenMulti(
+          this.localization,
+          [
+            shaka.ui.Localization.LOCALE_UPDATED,
+            shaka.ui.Localization.LOCALE_CHANGED,
+          ], () => {
+            this.updateLocalizedStrings();
+          });
+    }
+
     /**
      * @protected {boolean}
      * @exportInterface
@@ -99,9 +110,11 @@ shaka.ui.Element = class {
     if (this.isSubMenu) {
       this.eventManager.listen(this.controls, 'submenuopen', () => {
         this.isSubMenuOpened = true;
+        this.checkAvailability();
       });
       this.eventManager.listen(this.controls, 'submenuclose', () => {
         this.isSubMenuOpened = false;
+        this.checkAvailability();
       });
     }
   }
@@ -122,4 +135,10 @@ shaka.ui.Element = class {
     this.adManager = null;
     this.ad = null;
   }
+
+  /** @override */
+  updateLocalizedStrings() {}
+
+  /** @override */
+  checkAvailability() {}
 };

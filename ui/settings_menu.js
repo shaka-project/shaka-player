@@ -263,4 +263,9 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
         this.button,
         this.controls.getControlsContainer());
   }
+
+  /** @override */
+  checkAvailability() {
+    shaka.ui.Utils.setDisplay(this.button, !this.isSubMenuOpened);
+  }
 };

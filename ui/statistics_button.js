@@ -13,7 +13,6 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -177,32 +176,14 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       this.onTimerTick_();
     });
 
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
 
     this.loadContainer_();
 
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateLocalizedStrings_();
-        });
-
     this.eventManager.listen(this.button_, 'click', () => {
       this.onClick_();
-      this.updateLocalizedStrings_();
+      this.updateLocalizedStrings();
     });
-
-    if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        shaka.ui.Utils.setDisplay(this.button_, false);
-      });
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        shaka.ui.Utils.setDisplay(this.button_, true);
-      });
-    }
   }
 
   /** @private */
@@ -220,8 +201,8 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     }
   }
 
-  /** @private */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.nameSpan_.textContent =
@@ -302,6 +283,11 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     this.timer_.stop();
     this.timer_ = null;
     super.release();
+  }
+
+  /** @override */
+  checkAvailability() {
+    shaka.ui.Utils.setDisplay(this.button_, !this.isSubMenuOpened);
   }
 };
 

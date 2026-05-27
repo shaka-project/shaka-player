@@ -11,7 +11,6 @@ goog.require('shaka.ads.Utils');
 goog.require('shaka.net.NetworkingEngine');
 goog.require('shaka.net.NetworkingUtils');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.RangeElement');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -179,15 +178,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.controls.hideSettingsMenus();
     });
 
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateAriaLabel_();
-        });
-
     this.eventManager.listen(
         this.adManager, shaka.ads.Utils.AD_STARTED, () => {
           if (!this.shouldBeDisplayed_()) {
@@ -254,7 +244,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // Initialize seek state and label.
     this.setValue(this.video.currentTime);
     this.update();
-    this.updateAriaLabel_();
+    this.updateLocalizedStrings();
 
     if (this.ad) {
       // There was already an ad.
@@ -627,8 +617,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     return this.ad == null || !this.ad.isLinear();
   }
 
-  /** @private */
-  updateAriaLabel_() {
+  /** @override */
+  updateLocalizedStrings() {
     this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.SEEK);
   }
 

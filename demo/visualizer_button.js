@@ -65,25 +65,14 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
           shakaDemoMain.getIsVisualizerActive()) {
         shakaDemoMain.setIsVisualizerActive(false);
       }
-      this.checkAvailability_();
+      this.checkAvailability();
     });
 
     this.eventManager.listen(document, 'fullscreenchange', () => {
-      this.checkAvailability_();
+      this.checkAvailability();
     });
 
-    if (this.isSubMenu) {
-      this.eventManager.listenMulti(
-          this.controls,
-          [
-            'submenuopen',
-            'submenuclose',
-          ], () => {
-            this.checkAvailability_();
-          });
-    }
-
-    this.checkAvailability_();
+    this.checkAvailability();
   }
 
   /** @private */
@@ -97,11 +86,8 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
     }
   }
 
-
-  /**
-   * @private
-   */
-  checkAvailability_() {
+  /** @override */
+  checkAvailability() {
     if (!this.castProxy_.isCasting() &&
         !this.controls.isFullScreenEnabled() &&
         !this.isSubMenuOpened) {
