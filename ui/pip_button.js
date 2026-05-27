@@ -167,7 +167,8 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
       if (this.controls.isPiPEnabled()) {
         await this.controls.togglePiP();
       }
-    } else if (this.player && this.player.isAudioOnly()) {
+    } else if (this.player && this.player.isAudioOnly() &&
+        !this.controls.shouldUseDocumentPictureInPicture()) {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
       if (this.controls.isPiPEnabled()) {
         await this.controls.togglePiP();
