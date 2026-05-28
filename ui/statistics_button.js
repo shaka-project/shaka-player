@@ -83,6 +83,9 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     /** @private {!Map<string, HTMLElement>} */
     this.displayedElements_ = new Map();
 
+    /** @private {!HTMLElement} */
+    this.headerTitle_ = shaka.util.Dom.createHTMLElement('span');
+    this.headerTitle_.classList.add('shaka-statistics-title');
 
     const parsePx = (name) => {
       return this.currentStats_[name] + ' (px)';
@@ -173,7 +176,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
 
     /** @private {shaka.util.Timer} */
     this.timer_ = new shaka.util.Timer(() => {
-      this.onTimerTick_();
+      this.updateStats_();
     });
 
     this.updateLocalizedStrings();
@@ -208,6 +211,9 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     this.nameSpan_.textContent =
         this.localization.resolve(LocIds.STATISTICS);
 
+    this.headerTitle_.textContent =
+        this.localization.resolve(LocIds.STATISTICS);
+
     this.button_.ariaLabel = this.localization.resolve(LocIds.STATISTICS);
 
     const labelText = this.container_.classList.contains('shaka-hidden') ?
@@ -238,30 +244,157 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
 
   /** @private */
   loadContainer_() {
-    const closeElement = shaka.util.Dom.createHTMLElement('div');
-    closeElement.classList.add('shaka-no-propagation');
-    closeElement.classList.add('shaka-statistics-close');
-    const icon = new shaka.ui.Icon(closeElement,
+    const header = shaka.util.Dom.createHTMLElement('div');
+    header.classList.add('shaka-statistics-header');
+    header.classList.add('shaka-no-propagation');
+    header.appendChild(this.headerTitle_);
+    const icon = new shaka.ui.Icon(header,
         shaka.ui.Enums.MaterialDesignSVGIcons['CLOSE']);
     const iconElement = icon.getSvgElement();
     iconElement.classList.add('material-icons', 'notranslate');
-    this.container_.appendChild(closeElement);
+    this.container_.appendChild(header);
     this.eventManager.listen(iconElement, 'click', () => {
       this.onClick_();
     });
-    for (const name of this.controls.getConfig().statisticsList) {
-      if (name in this.currentStats_ && !this.skippedStats_.includes(name)) {
-        const element = this.generateComponent_(name);
-        this.container_.appendChild(element);
+
+    /**
+     * @const {!Array<{label: string, stats: !Array<string>}>}
+     */
+    const groups = [
+      {
+        label: 'Video',
+        stats: [
+          'width',
+          'height',
+          'currentCodecs',
+        ],
+      },
+      {
+        label: 'Network',
+        stats: [
+          'estimatedBandwidth',
+          'streamBandwidth',
+          'maxSegmentDuration',
+          'bytesDownloaded',
+        ],
+      },
+      {
+        label: 'Load',
+        stats: [
+          'loadLatency',
+          'timeToFirstFrame',
+          'manifestTimeSeconds',
+          'drmTimeSeconds',
+          'licenseTime',
+        ],
+      },
+      {
+        label: 'Playback',
+        stats: [
+          'playTime',
+          'pauseTime',
+          'bufferingTime',
+          'liveLatency',
+          'completionPercent',
+        ],
+      },
+      {
+        label: 'Frames',
+        stats: [
+          'decodedFrames',
+          'droppedFrames',
+          'corruptedFrames',
+        ],
+      },
+      {
+        label: 'Stability',
+        stats: [
+          'stallsDetected',
+          'gapsJumped',
+          'nonFatalErrorCount',
+        ],
+      },
+      {
+        label: 'Manifest',
+        stats: [
+          'manifestSizeBytes',
+          'manifestPeriodCount',
+          'manifestGapCount',
+        ],
+      },
+    ];
+
+    const configList = this.controls.getConfig().statisticsList;
+
+    /** @type {!Set<string>} Track which stats have already been rendered */
+    const rendered = new Set();
+
+    /** @param {string} labelText */
+    const appendSectionLabel = (labelText) => {
+      const el = shaka.util.Dom.createHTMLElement('div');
+      el.classList.add('shaka-statistics-section-label');
+      el.textContent = labelText;
+      this.container_.appendChild(el);
+    };
+
+    const appendDivider = () => {
+      const el = shaka.util.Dom.createHTMLElement('div');
+      el.classList.add('shaka-statistics-divider');
+      this.container_.appendChild(el);
+    };
+
+    let firstGroup = true;
+
+    for (const group of groups) {
+      // Only render stats that the integrator has configured AND that the
+      // player is actually reporting (skipping stateHistory / switchHistory).
+      const groupStats = group.stats.filter((name) =>
+        configList.includes(name) &&
+        name in this.currentStats_ &&
+        !this.skippedStats_.includes(name));
+
+      if (groupStats.length === 0) {
+        continue;
+      }
+
+      if (!firstGroup) {
+        appendDivider();
+      }
+      firstGroup = false;
+
+      appendSectionLabel(group.label);
+
+      for (const name of groupStats) {
+        this.container_.appendChild(this.generateComponent_(name));
         this.statisticsList_.push(name);
-      } else {
+        rendered.add(name);
+      }
+    }
+
+    // Any configured stat not covered by the groups above goes into 'Other'.
+    const remaining = configList.filter((name) =>
+      !rendered.has(name) &&
+      name in this.currentStats_ &&
+      !this.skippedStats_.includes(name));
+
+    if (remaining.length > 0) {
+      appendDivider();
+      appendSectionLabel('Other');
+      for (const name of remaining) {
+        this.container_.appendChild(this.generateComponent_(name));
+        this.statisticsList_.push(name);
+      }
+    }
+
+    for (const name of configList) {
+      if (!(name in this.currentStats_)) {
         shaka.log.alwaysWarn('Unrecognized statistic element:', name);
       }
     }
   }
 
   /** @private */
-  onTimerTick_() {
+  updateStats_() {
     this.currentStats_ = this.player.getStats();
 
     for (const name of this.statisticsList_) {

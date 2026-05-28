@@ -345,6 +345,8 @@ shaka.ui.Overlay = class {
         'nonFatalErrorCount',
         'manifestPeriodCount',
         'manifestGapCount',
+        'gapsJumped',
+        'stallsDetected',
       ],
       adStatisticsList: [
         'loadTimes',
