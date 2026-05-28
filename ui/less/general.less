@@ -146,6 +146,13 @@ the control buttons panel. */
 @quality-mark-color: #fff;
 @quality-mark-hightlight-color: #f00;
 
+/* Form elements don't inherit font-family from their ancestors by default in
+ * most browsers; they fall back to the OS system font instead.  Force them to
+ * inherit so that Shaka UI containers' font-family applies consistently. */
+button, input, select, textarea {
+  font-family: inherit;
+}
+
 @media (forced-colors: active) {
   .shaka-overflow-menu,
   .shaka-settings-menu,

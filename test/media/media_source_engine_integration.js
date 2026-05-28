@@ -179,6 +179,10 @@ describe('MediaSourceEngine', () => {
     onEvent = jasmine.createSpy('onEvent');
     onManifestUpdate = jasmine.createSpy('onManifestUpdate');
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    // Prevent worker creation: uncompiled worker requires Closure Library
+    // which is not served by Karma.
+    spyOn(shaka.transmuxer.TransmuxerProxy, 'getOrCreateWorker_')
+        .and.returnValue(null);
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
