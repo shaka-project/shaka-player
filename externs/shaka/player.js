@@ -2315,7 +2315,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   Blob URL instead of being passed directly to the HTMLMediaElement.
  *   This allows metadata frames to be parsed and exposed by the player.
  *   <br>
- *   Defaults to <code>true</code>.
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
