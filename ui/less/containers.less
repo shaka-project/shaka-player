@@ -256,13 +256,60 @@
 
 .shaka-video-container.pip-placeholder {
   .center-children();
+  flex-direction: column;
+  gap: 14px;
+  margin: auto;
 
+  // Clip the scaled poster so it never bleeds outside the player bounds.
+  overflow: hidden;
+
+  // Poster: contain, sharp, fills the placeholder at the bottom of the stack.
   .pip-poster {
-    height: 100%;
+    position: absolute;
+    inset: 0;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+  }
+
+  // Blur overlay: sits above the poster, blurs everything behind it and
+  // darkens slightly so the icon and label remain legible.
+  .pip-blur-overlay {
     position: absolute;
+    inset: 0;
+    backdrop-filter: blur(18px) brightness(0.55);
+    z-index: 1;
+  }
+
+  // Stacking context for everything above the poster.
+  .pip-icon-group {
+    position: relative;
+    .center-children();
+    z-index: 2;
+
+    // Size the group to the same footprint as the button so the ring
+    // is centered without extra markup.
+    width: 15%;
+    aspect-ratio: 1 / 1;
+  }
+
+  // Expanding pulse ring behind the button.
+  .pip-pulse-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 35%);
+    animation: pip-pulse 2s ease-out infinite;
+    pointer-events: none;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+
+  @keyframes pip-pulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(1.9); opacity: 0; }
   }
 
   .shaka-ui-icon {
@@ -271,24 +318,28 @@
   }
 
   .pip-icon-wrapper {
-    width: 15%;
+    width: 100%;
     aspect-ratio: 1 / 1;
     border-radius: 50%;
+    position: relative;
 
     .center-children();
 
     color: @general-font-color;
-    background-color: @general-background-color;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 35%);
+    background-color: rgba(0, 0, 0, 45%);
+    border: 1.5px solid rgba(255, 255, 255, 25%);
+    backdrop-filter: blur(6px);
     cursor: pointer;
 
-    transition: transform 0.18s ease-out, background-color 0.18s ease-out;
-
-    z-index: 1;
+    transition:
+      transform 0.18s ease-out,
+      background-color 0.18s ease-out,
+      border-color 0.18s ease-out;
 
     &:hover {
       transform: scale(1.06);
-      background-color: @general-background-color-hover;
+      background-color: rgba(0, 0, 0, 62%);
+      border-color: rgba(255, 255, 255, 45%);
     }
 
     &:active {
@@ -298,6 +349,21 @@
     @media (prefers-reduced-motion: reduce) {
       transition: none;
     }
+  }
+
+  // Descriptive label below the button.
+  .pip-label {
+    position: relative;
+    z-index: 2;
+    margin: 0;
+    font-size: @content-title-font-size;
+    color: rgba(255, 255, 255, 55%);
+    letter-spacing: 0.04em;
+    text-align: center;
+    pointer-events: none;
+
+    // Subtle text shadow so it reads on any poster colour.
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 80%);
   }
 }
 
