@@ -977,9 +977,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @return {boolean}
-   * @private
    */
-  shouldUseDocumentPictureInPicture_() {
+  shouldUseDocumentPictureInPicture() {
     return 'documentPictureInPicture' in window &&
         this.config_.documentPictureInPicture.enabled;
   }
@@ -1025,7 +1024,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       if (this.shouldUseDocumentFullscreen_()) {
         if (this.isPiPEnabled()) {
           await this.togglePiP();
-          if (this.shouldUseDocumentPictureInPicture_()) {
+          if (this.shouldUseDocumentPictureInPicture()) {
             // This is necessary because we need a small delay when
             // executing actions when returning from document PiP.
             await shaka.util.Functional.delay(0.05);
@@ -1089,7 +1088,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return false;
     }
     if (document.pictureInPictureEnabled ||
-        this.shouldUseDocumentPictureInPicture_()) {
+        this.shouldUseDocumentPictureInPicture()) {
       const video = /** @type {HTMLVideoElement} */(this.localVideo_);
       return !video.disablePictureInPicture;
     }
@@ -1109,7 +1108,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   async togglePiP() {
     try {
-      if (this.shouldUseDocumentPictureInPicture_()) {
+      if (this.shouldUseDocumentPictureInPicture()) {
         // If you were fullscreen, leave fullscreen first.
         if (this.isFullScreenEnabled()) {
           await this.exitFullScreen_();
