@@ -469,6 +469,7 @@ shakaDemo.Main = class {
     });
 
     this.localization_ = this.controls_.getLocalization();
+    this.setupLazyLocalization_();
 
     const drawerCloseButton = document.getElementById('drawer-close-button');
     drawerCloseButton.addEventListener('click', () => {
@@ -504,6 +505,33 @@ shakaDemo.Main = class {
       this.hideElement_(drawerCloseButton);
     });
     this.hideElement_(drawerCloseButton);
+  }
+
+  /**
+   * @private
+   */
+  setupLazyLocalization_() {
+    // Load locales on-demand.
+    const UNKNOWN_LOCALES = shaka.ui.Localization.UNKNOWN_LOCALES;
+    this.localization_.addEventListener(UNKNOWN_LOCALES, (event) => {
+      for (const locale of event['locales']) {
+        this.loadUILocale_(locale);
+      }
+    });
+
+    // Load the initial locale.
+    this.loadUILocale_(this.uiLocale_);
+
+    // Also try to load the 'base' localization.  This is so that, for example,
+    // the uiLocale_ is set to 'en-US', it will try to load 'en'.
+    if (this.uiLocale_.includes('-')) {
+      this.loadUILocale_(this.uiLocale_.split('-')[0]);
+    }
+
+    // Load 'en' as a fallback option, if not already loaded.
+    if (!this.uiLocale_.startsWith('en')) {
+      this.loadUILocale_('en');
+    }
   }
 
   /** @return {boolean} */
@@ -939,6 +967,27 @@ shakaDemo.Main = class {
    */
   getNativeControlsEnabled() {
     return this.nativeControlsEnabled_;
+  }
+
+  /**
+   * @param {string} locale
+   * @return {!Promise}
+   * @private
+   */
+  async loadUILocale_(locale) {
+    if (!locale) {
+      return;
+    }
+
+    const url = '../ui/locales/' + locale + '.json';
+    try {
+      const text = await this.loadText_(url);
+      const obj = /** @type {!Object<string, string>} */(JSON.parse(text));
+      const map = new Map(Object.entries(obj));
+      this.localization_.insert(locale, map);
+    } catch (error) {
+      console.warn('Unable to load locale', locale, 'from url', url);
+    }
   }
 
   /** @param {string} locale */
