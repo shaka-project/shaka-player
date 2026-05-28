@@ -71,6 +71,7 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
         [
           shaka.ads.Utils.AD_PAUSED,
           shaka.ads.Utils.AD_RESUMED,
+          shaka.ads.Utils.AD_PLAYING,
           shaka.ads.Utils.AD_STARTED,
           shaka.ads.Utils.AD_STOPPED,
         ], () => {
