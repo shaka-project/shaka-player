@@ -342,8 +342,6 @@ class Less(object):
 
     lessc = shakaBuildHelpers.get_node_binary('less', 'lessc')
     less_options = [
-      # Enable the "clean-CSS" plugin to minify the output and strip out comments.
-      '--clean-css',
       # Output a source map of the original CSS/less files.
       '--source-map=' + self.output + '.map',
     ]
@@ -360,12 +358,13 @@ class Less(object):
       self.output,
       '-o', self.output,
       '--use', 'autoprefixer',
+      '--use', 'cssnano',
       '--map',
     ]
 
     # We define the specific browsers using the environment variable. These are
     # the minimum browsers that the UI supports.
-    os.environ['BROWSERSLIST'] = 'chrome 38, safari 8, firefox 42, opera 15'
+    os.environ['BROWSERSLIST'] = 'chrome 38, safari 8, firefox 42, opera 25'
 
     if shakaBuildHelpers.execute_get_code(postcss + postcss_options) != 0:
       logging.error('PostCSS / Autoprefixer processing failed')
