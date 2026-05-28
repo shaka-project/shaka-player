@@ -63,7 +63,7 @@ shaka.extern.UIVolumeBarColors;
 /**
  * @typedef {{
  *   base: string,
- *   level: string
+ *   level: string,
  * }}
  *
  * @property {string} base
