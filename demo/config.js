@@ -106,6 +106,7 @@ shakaDemo.Config = class {
     this.addUISection_();
     this.addUISeekBarColorsSection_();
     this.addUIVolumeBarColorsSection_();
+    this.addUIPlaybackRateBarColorsSection_();
     this.addUIQualityMarksSection_();
     this.addUIMediaSessionSection_();
     this.addUIDocumentPiPSection_();
@@ -809,6 +810,18 @@ shakaDemo.Config = class {
             'mediaSource.useSourceElements')
         .addBoolInput_('Expect updateEnd when duration is truncated',
             'mediaSource.durationReductionEmitsUpdateEnd');
+
+    const transmuxWorkerToggleOnChange = (input) => {
+      const url = input.checked ?
+          shakaDemoMain.getTransmuxerWorkerUrl() : '';
+      shakaDemoMain.configure('mediaSource.transmuxWorkerUrl', url);
+      shakaDemoMain.remakeHash();
+    };
+    this.addCustomBoolInput_(
+        'Use a worker for transmuxing', transmuxWorkerToggleOnChange);
+    if (shakaDemoMain.getCurrentConfigValue('mediaSource.transmuxWorkerUrl')) {
+      this.latestInput_.input().checked = true;
+    }
   }
 
   /**
@@ -1192,6 +1205,12 @@ shakaDemo.Config = class {
         .addUIArrayStringInput_('Statistics List', 'statisticsList')
         .addUIArrayStringInput_('Ad Statistics List', 'adStatisticsList')
         .addUIArrayNumberInput_('Playback Rates', 'playbackRates')
+        .addUINumberInput_('Playback Rate Slider Min',
+            'playbackRateSliderMin',
+            /* canBeDecimal= */ true)
+        .addUINumberInput_('Playback Rate Slider Max',
+            'playbackRateSliderMax',
+            /* canBeDecimal= */ true)
         .addUIArrayNumberInput_('Fast Forward Rates', 'fastForwardRates')
         .addUIArrayNumberInput_('Rewind Rates', 'rewindRates')
         .addUIArrayNumberInput_('Captions Font Scale Factors',
@@ -1216,6 +1235,14 @@ shakaDemo.Config = class {
     this.addSection_('UI: Volume Bar Colors', docLink)
         .addUITextInput_('Base Color', 'volumeBarColors.base')
         .addUITextInput_('Level Color', 'volumeBarColors.level');
+  }
+
+  /** @private */
+  addUIPlaybackRateBarColorsSection_() {
+    const docLink = this.resolveExternLink_('.UIPlaybackRateBarColors');
+    this.addSection_('UI: Playback Rate Bar Colors', docLink)
+        .addUITextInput_('Base Color', 'playbackRateBarColors.base')
+        .addUITextInput_('Level Color', 'playbackRateBarColors.level');
   }
 
   /** @private */

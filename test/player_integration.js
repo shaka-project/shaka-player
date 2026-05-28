@@ -352,6 +352,46 @@ describe('Player', () => {
       expect(video.playbackRate).toBe(1);
     });
 
+    it('dispatch ratechange event', async () => {
+      await player.load('test:sintel_compiled');
+      await video.play();
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+
+      video.pause();
+
+      let numberOfRatechangeEvents = 0;
+      eventManager.listen(player, 'ratechange', () => {
+        numberOfRatechangeEvents++;
+      });
+
+      player.trickPlay(2);
+      expect(player.getPlaybackRate()).toBe(2);
+
+      await shaka.test.Util.shortDelay();
+
+      player.trickPlay(32);
+      expect(player.getPlaybackRate()).toBe(32);
+
+      await shaka.test.Util.shortDelay();
+
+      player.trickPlay(64);
+      expect(player.getPlaybackRate()).toBe(64);
+
+      await shaka.test.Util.shortDelay();
+
+      player.trickPlay(-1);
+      expect(player.getPlaybackRate()).toBe(-1);
+
+      await shaka.test.Util.shortDelay();
+
+      player.cancelTrickPlay();
+      expect(player.getPlaybackRate()).toBe(1);
+
+      await shaka.test.Util.shortDelay();
+
+      expect(numberOfRatechangeEvents).toBe(5);
+    });
+
     it('in sequence mode', async () => {
       if (!deviceDetected.supportsSequenceMode()) {
         pending('Sequence mode is not supported by the platform.');

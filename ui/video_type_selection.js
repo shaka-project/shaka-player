@@ -10,7 +10,6 @@ goog.provide('shaka.ui.VideoTypeSelection');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
@@ -36,16 +35,6 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
     this.button.classList.add('shaka-tooltip-status');
 
     this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateLocalizedStrings_();
-          this.updateVideoRoles_();
-        });
-
-    this.eventManager.listenMulti(
         this.player,
         [
           'loading',
@@ -59,32 +48,24 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
           this.updateVideoRoles_();
         });
 
-    if (this.isSubMenu) {
-      this.eventManager.listenMulti(
-          this.controls,
-          [
-            'submenuopen',
-            'submenuclose',
-          ], () => {
-            this.updateVideoRoles_();
-          });
-    }
-
-    // Set up all the strings in the user's preferred language.
-    this.updateLocalizedStrings_();
-    this.updateVideoRoles_();
+    this.updateLocalizedStrings();
   }
 
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
     this.button.ariaLabel = this.localization.resolve(LocIds.VIDEO_TYPE);
     this.nameSpan.textContent = this.localization.resolve(LocIds.VIDEO_TYPE);
     this.backSpan.textContent = this.localization.resolve(LocIds.VIDEO_TYPE);
+
+    this.updateVideoRoles_();
+  }
+
+  /** @override */
+  checkAvailability() {
+    this.updateVideoRoles_();
   }
 
   /**

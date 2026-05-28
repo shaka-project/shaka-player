@@ -27,10 +27,6 @@
 @material-icons-width: 48px;
 
 .translateX(@percent) {
-  -webkit-transform: translateX(percentage(@percent));
-  -moz-transform: translateX(percentage(@percent));
-  -ms-transform: translateX(percentage(@percent));
-  -o-transform: translateX(percentage(@percent));
   transform: translateX(percentage(@percent));
 }
 
@@ -49,8 +45,6 @@
     &:active:after {
       content: attr(aria-label);
 
-      /* Override .material-icons-round text styling */
-      font-family: @general-font-family;
       line-height: 20px;
       white-space: nowrap;
       font-size: @general-font-size;

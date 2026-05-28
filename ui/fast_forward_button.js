@@ -12,7 +12,6 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.util.Dom');
 
 
@@ -40,19 +39,11 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
         shaka.ui.Enums.MaterialDesignSVGIcons['FAST_FORWARD']);
 
     this.parent.appendChild(this.button_);
-    this.updateAriaLabel_();
 
     /** @private {!Array<number>} */
     this.fastForwardRates_ = this.controls.getConfig().fastForwardRates;
 
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateAriaLabel_();
-        });
+    this.updateLocalizedStrings();
 
     this.eventManager.listen(this.button_, 'click', () => {
       if (!this.controls.isOpaque()) {
@@ -67,10 +58,8 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
     });
   }
 
-  /**
-   * @private
-   */
-  updateAriaLabel_() {
+  /** @override */
+  updateLocalizedStrings() {
     this.button_.ariaLabel =
         this.localization.resolve(shaka.ui.Locales.Ids.FAST_FORWARD);
   }

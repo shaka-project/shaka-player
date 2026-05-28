@@ -2366,7 +2366,8 @@ shaka.extern.NetworkingConfiguration;
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback,
  *   dispatchAllEmsgBoxes: boolean,
  *   useSourceElements: boolean,
- *   durationReductionEmitsUpdateEnd: boolean
+ *   durationReductionEmitsUpdateEnd: boolean,
+ *   transmuxWorkerUrl: string
  * }}
  *
  * @description
@@ -2434,6 +2435,19 @@ shaka.extern.NetworkingConfiguration;
  *   smaller than existing value.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {string} transmuxWorkerUrl
+ *   URL of the standalone transmuxer worker script. When set to a non-empty
+ *   string, transmuxing (e.g., MPEG-TS to MP4) is offloaded to a Web Worker
+ *   loaded from this URL, freeing the main thread. When empty, transmuxing
+ *   runs on the main thread.
+ *   <br>
+ *   The library does not auto-detect this URL; the integrating application
+ *   is responsible for serving the worker script (e.g.,
+ *   <code>shaka-player.transmuxer-worker.js</code> from <code>dist/</code>)
+ *   and providing the URL here. Falls back to main-thread transmuxing if the
+ *   worker fails to load or the device does not support Workers.
+ *   <br>
+ *   Defaults to <code>''</code> (worker disabled).
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;

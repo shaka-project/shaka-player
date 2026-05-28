@@ -200,6 +200,7 @@ Clearkey
 Clearkeys
 Clutz
 codem
+cssnano
 hbbtv
 Conax
 cvox
@@ -540,6 +541,7 @@ awesomplete
 axinom
 BADENTRY
 beatle
+BROWSERSLIST
 checkmark
 crbug
 *deadbeef*
