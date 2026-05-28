@@ -397,78 +397,112 @@
   display: none;
 }
 
-.shaka-statistics-container {
-  overflow-x: hidden;
-  overflow-y: auto;
-
-  scrollbar-color: @general-font-color @general-background-color;
-  scrollbar-width: thin;
-
-  min-width: 300px;
-
-  color: @general-font-color;
-  background-color: rgba(35, 35, 35, 90%);
-
-  font-size: @general-font-size;
-
-  padding: 5px 10px;
-  border-radius: 2px;
-
-  position: absolute;
-  z-index: 2;
-  left: 15px;
-  top: 15px;
-
-  max-height: calc(100% - 115px);
-
-  /* Fades out with the other controls. */
-  .show-when-controls-shown();
-
-  div {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  span {
-    color: rgb(150, 150, 150);
-  }
-}
-
+.shaka-statistics-container,
 .shaka-ad-statistics-container {
   overflow-x: hidden;
   overflow-y: auto;
 
-  scrollbar-color: @general-font-color @general-background-color;
+  scrollbar-color: rgba(255, 255, 255, 15%) transparent;
   scrollbar-width: thin;
 
-  min-width: 150px;
-
   color: @general-font-color;
-  background-color: rgba(35, 35, 35, 90%);
+  background-color: rgba(12, 14, 18, 88%);
+  border: 1px solid rgba(255, 255, 255, 8%);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 50%);
 
   font-size: @general-font-size;
+  font-family: "JetBrains Mono", "Fira Mono", Consolas, monospace;
 
-  padding: 5px 10px;
-  border-radius: 2px;
+  padding: 0;
+  border-radius: 10px;
 
   position: absolute;
   z-index: 2;
-  right: 15px;
   top: 15px;
 
   max-height: calc(100% - 115px);
 
-  /* Fades out with the other controls. */
   .show-when-controls-shown();
 
+  /* ── Header bar (close button row) ── */
+  .shaka-statistics-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 7%);
+
+    svg {
+      width: 16px;
+      height: 16px;
+      opacity: 0.35;
+      cursor: pointer;
+      transition: opacity 0.15s;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  /* ── Section group labels ── */
+  .shaka-statistics-section-label {
+    display: block;
+    padding: 8px 14px 3px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 70%);
+  }
+
+  /* ── Dividers between groups ── */
+  .shaka-statistics-divider {
+    display: block;
+    height: 1px;
+    background: rgba(255, 255, 255, 6%);
+    margin: 6px 14px;
+    padding: 0;
+  }
+
+  /* ── Stat rows ── */
   div {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    padding: 3px 14px;
+    gap: 16px;
+    transition: background 0.1s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 3%);
+    }
   }
 
-  span {
-    color: rgb(150, 150, 150);
+  /* ── Row labels ── */
+  label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 45%);
+    white-space: nowrap;
   }
+
+  /* ── Row values ── */
+  span {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 90%);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+}
+
+.shaka-statistics-container {
+  min-width: 280px;
+  left: 15px;
+}
+
+.shaka-ad-statistics-container {
+  min-width: 220px;
+  right: 15px;
 }
 
 .shaka-scrim-container {

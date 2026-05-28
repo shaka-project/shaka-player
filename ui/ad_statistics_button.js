@@ -83,6 +83,10 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
     /** @private {!Map<string, HTMLElement>} */
     this.displayedElements_ = new Map();
 
+    /** @private {!HTMLElement} */
+    this.headerTitle_ = shaka.util.Dom.createHTMLElement('span');
+    this.headerTitle_.classList.add('shaka-statistics-title');
+
     const parseLoadTimes = (name) => {
       let totalTime = 0;
       const loadTimes =
@@ -109,12 +113,8 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
 
     /** @private {shaka.util.Timer} */
     this.timer_ = new shaka.util.Timer(() => {
-      this.onTimerTick_();
+      this.updateStats_();
     });
-
-    this.updateLocalizedStrings();
-
-    this.loadContainer_();
 
     this.eventManager.listen(this.button_, 'click', () => {
       if (!this.controls.isOpaque()) {
@@ -125,13 +125,20 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(this.player, 'loading', () => {
-      shaka.ui.Utils.setDisplay(this.button_, false);
+      this.updateStats_();
+      this.checkAvailability();
     });
 
     this.eventManager.listen(
         this.adManager, shaka.ads.Utils.AD_STARTED, () => {
-          shaka.ui.Utils.setDisplay(this.button_, true);
+          this.updateStats_();
+          this.checkAvailability();
         });
+
+    this.updateLocalizedStrings();
+    this.updateStats_();
+    this.loadContainer_();
+    this.checkAvailability();
   }
 
   /** @private */
@@ -156,6 +163,9 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
     this.nameSpan_.textContent =
         this.localization.resolve(LocIds.AD_STATISTICS);
 
+    this.headerTitle_.textContent =
+        this.localization.resolve(LocIds.AD_STATISTICS);
+
     this.button_.ariaLabel = this.localization.resolve(LocIds.AD_STATISTICS);
 
     const labelText = this.container_.classList.contains('shaka-hidden') ?
@@ -165,9 +175,15 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
 
   /** @override */
   checkAvailability() {
-    shaka.ui.Utils.setDisplay(
-        this.button_,
-        !this.isSubMenuOpened && this.currentStats_.started > 0);
+    const hasStats = this.currentStats_.started > 0 ||
+        this.currentStats_.overlayAds > 0 ||
+        this.currentStats_.playedCompletely > 0 ||
+        this.currentStats_.skipped > 0 ||
+        this.currentStats_.errors > 0;
+    shaka.ui.Utils.setDisplay(this.button_, !this.isSubMenuOpened && hasStats);
+    if (hasStats && !this.container_.classList.contains('shaka-hidden')) {
+      this.onClick_();
+    }
   }
 
   /**
@@ -193,15 +209,16 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
 
   /** @private */
   loadContainer_() {
-    const closeElement = shaka.util.Dom.createHTMLElement('div');
-    closeElement.classList.add('shaka-no-propagation');
-    closeElement.classList.add('shaka-statistics-close');
-    const icon = new shaka.ui.Icon(closeElement,
+    const header = shaka.util.Dom.createHTMLElement('div');
+    header.classList.add('shaka-statistics-header');
+    header.classList.add('shaka-no-propagation');
+    header.appendChild(this.headerTitle_);
+    const icon = new shaka.ui.Icon(header,
         shaka.ui.Enums.MaterialDesignSVGIcons['CLOSE']);
     const iconElement = icon.getSvgElement();
     iconElement.classList.add('material-icons', 'notranslate');
 
-    this.container_.appendChild(closeElement);
+    this.container_.appendChild(header);
     this.eventManager.listen(iconElement, 'click', () => {
       this.onClick_();
     });
@@ -216,7 +233,7 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
   }
 
   /** @private */
-  onTimerTick_() {
+  updateStats_() {
     this.currentStats_ = this.adManager.getStats();
 
     for (const name of this.statisticsList_) {
