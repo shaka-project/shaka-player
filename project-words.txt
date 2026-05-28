@@ -524,6 +524,7 @@ avinfo
 awesomplete
 axinom
 beatle
+BROWSERSLIST
 checkmark
 crbug
 *deadbeef*
