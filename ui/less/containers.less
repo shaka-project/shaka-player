@@ -28,7 +28,6 @@
   /* prevent text caret from showing when 'Navigate pages with a text cursor'
    * setting is enabled on chromium-based browsers */
   user-select: none;
-  -webkit-user-select: none;
 
   *,
   :after,
@@ -69,9 +68,6 @@
   }
 }
 .shaka-video-container:fullscreen { .fullscreen-container(); }
-.shaka-video-container:-webkit-full-screen { .fullscreen-container(); }
-.shaka-video-container:-moz-full-screen { .fullscreen-container(); }
-.shaka-video-container:-ms-fullscreen { .fullscreen-container(); }
 
 /* The actual video element.  Sits inside .shaka-video-container and gives it a
  * size in non-fullscreen mode.  In fullscreen mode, the sizing relationship
