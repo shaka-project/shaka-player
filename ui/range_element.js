@@ -220,6 +220,30 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   }
 
   /**
+   * @override
+   * @export
+   */
+  getMin() {
+    return parseFloat(this.bar.min);
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getMax() {
+    return parseFloat(this.bar.max);
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  setBackground(background) {
+    this.container.style.background = background;
+  }
+
+  /**
    * Called when user interaction begins.
    * To be overridden by subclasses.
    * @override
