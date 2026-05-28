@@ -1201,15 +1201,36 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       });
     }
 
+    // Blur overlay: covers the full placeholder, blurs the poster behind it.
+    const blurOverlay = shaka.util.Dom.createHTMLElement('div');
+    blurOverlay.classList.add('pip-blur-overlay');
+    placeholder.appendChild(blurOverlay);
+
+    // Wrap pulse ring + icon together so the ring is centered on the button.
+    const pipIconGroup = shaka.util.Dom.createHTMLElement('div');
+    pipIconGroup.classList.add('pip-icon-group');
+    placeholder.appendChild(pipIconGroup);
+
+    const pulseRing = shaka.util.Dom.createHTMLElement('div');
+    pulseRing.classList.add('pip-pulse-ring');
+    pipIconGroup.appendChild(pulseRing);
+
     const iconWrapper = shaka.util.Dom.createHTMLElement('div');
     iconWrapper.classList.add('pip-icon-wrapper');
-    placeholder.appendChild(iconWrapper);
+    pipIconGroup.appendChild(iconWrapper);
     const pipIcon = (new shaka.ui.Icon(iconWrapper,
         shaka.ui.Enums.MaterialDesignSVGIcons['EXIT_PIP'])).getSvgElement();
     const pipAction = () => this.togglePiP();
     this.eventManager_.listenOnce(pipIcon, 'click', pipAction);
 
+    const pipLabel = shaka.util.Dom.createHTMLElement('p');
+    pipLabel.classList.add('pip-label');
+    pipLabel.textContent =
+        this.localization_.resolve(shaka.ui.Locales.Ids.PIP_WINDOW_ACTIVE);
+    placeholder.appendChild(pipLabel);
+
     const style = getComputedStyle(pipPlayer);
+    placeholder.style.width = style.width;
     placeholder.style.height = style.height;
     parentPlayer.appendChild(placeholder);
 
