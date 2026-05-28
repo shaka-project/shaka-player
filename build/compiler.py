@@ -364,7 +364,7 @@ class Less(object):
 
     # We define the specific browsers using the environment variable. These are
     # the minimum browsers that the UI supports.
-    os.environ['BROWSERSLIST'] = 'chrome 38, safari 8, firefox 42, opera 25'
+    os.environ['BROWSERSLIST'] = 'chrome 38, safari 8, firefox 42'
 
     if shakaBuildHelpers.execute_get_code(postcss + postcss_options) != 0:
       logging.error('PostCSS / Autoprefixer processing failed')
