@@ -316,6 +316,9 @@ describe('UI', () => {
             'overflow_menu',
           ],
           customContextMenu: false,
+          documentPictureInPicture: {
+            enabled: false,
+          },
         };
         const ui = await UiUtils.createUIThroughAPI(
             videoContainer, video, config);
