@@ -15,7 +15,6 @@ goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.MenuBase');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -48,15 +47,6 @@ shaka.ui.OverflowMenu = class extends shaka.ui.MenuBase {
 
     this.createChildren_();
 
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateAriaLabel_();
-        });
-
     this.eventManager.listen(
         this.adManager, shaka.ads.Utils.AD_STARTED, () => {
           if (this.ad && this.ad.isLinear()) {
@@ -76,7 +66,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.MenuBase {
       this.onOverflowMenuButtonClick_();
     });
 
-    this.updateAriaLabel_();
+    this.updateLocalizedStrings();
 
     if (this.ad && this.ad.isLinear()) {
       // There was already an ad.
@@ -108,7 +98,6 @@ shaka.ui.OverflowMenu = class extends shaka.ui.MenuBase {
     }
   }
 
-
   /**
    * @private
    */
@@ -122,7 +111,6 @@ shaka.ui.OverflowMenu = class extends shaka.ui.MenuBase {
     this.overflowMenu_.setAttribute('role', 'menu');
     this.controlsContainer_.appendChild(this.overflowMenu_);
   }
-
 
   /**
    * @private
@@ -144,7 +132,6 @@ shaka.ui.OverflowMenu = class extends shaka.ui.MenuBase {
     this.parent.appendChild(this.overflowMenuButton_);
   }
 
-
   /**
    * @private
    */
@@ -161,7 +148,6 @@ shaka.ui.OverflowMenu = class extends shaka.ui.MenuBase {
       }
     }
   }
-
 
   /** @private */
   onOverflowMenuButtonClick_() {
@@ -194,16 +180,12 @@ shaka.ui.OverflowMenu = class extends shaka.ui.MenuBase {
     }
   }
 
-
-  /**
-   * @private
-   */
-  updateAriaLabel_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
     this.overflowMenuButton_.ariaLabel =
         this.localization.resolve(LocIds.MORE_SETTINGS);
   }
-
 
   /** @override */
   adjustCustomStyle() {

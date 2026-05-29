@@ -10,7 +10,6 @@ goog.provide('shaka.ui.QueueButton');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
@@ -39,15 +38,6 @@ shaka.ui.QueueButton = class extends shaka.ui.SettingsMenu {
     this.queueManager_ = this.controls.getQueueManager();
 
     this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listenMulti(
         this.queueManager_,
         [
           'itemsinserted',
@@ -60,20 +50,7 @@ shaka.ui.QueueButton = class extends shaka.ui.SettingsMenu {
       this.updateCurrentItem_();
     });
 
-    if (this.isSubMenu) {
-      this.eventManager.listenMulti(
-          this.controls,
-          [
-            'submenuopen',
-            'submenuclose',
-          ], () => {
-            const hasItems = this.getDisplayableItems_().length > 1;
-            shaka.ui.Utils.setDisplay(this.button,
-                hasItems && !this.isSubMenuOpened);
-          });
-    }
-
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
     this.updateQueueItems_();
   }
 
@@ -92,16 +69,16 @@ shaka.ui.QueueButton = class extends shaka.ui.SettingsMenu {
         (item) => item.metadata?.title);
   }
 
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
-    this.button.ariaLabel = this.localization.resolve(LocIds.QUEUE);
-    this.nameSpan.textContent = this.localization.resolve(LocIds.QUEUE);
-    this.backSpan.textContent = this.localization.resolve(LocIds.QUEUE);
+
+    const label = this.localization.resolve(LocIds.QUEUE);
+    this.button.ariaLabel = label;
+    this.nameSpan.textContent = label;
+    this.backSpan.textContent = label;
   }
 
   /**
@@ -223,6 +200,12 @@ shaka.ui.QueueButton = class extends shaka.ui.SettingsMenu {
         shaka.ui.Utils.focusOnTheChosenItem(this.menu);
       }
     }
+  }
+
+  /** @override */
+  checkAvailability() {
+    const hasItems = this.getDisplayableItems_().length > 1;
+    shaka.ui.Utils.setDisplay(this.button, hasItems && !this.isSubMenuOpened);
   }
 };
 

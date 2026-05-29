@@ -345,6 +345,8 @@ shaka.ui.Overlay = class {
         'nonFatalErrorCount',
         'manifestPeriodCount',
         'manifestGapCount',
+        'gapsJumped',
+        'stallsDetected',
       ],
       adStatisticsList: [
         'loadTimes',
@@ -363,7 +365,9 @@ shaka.ui.Overlay = class {
         'copy_video_frame',
         'save_video_frame',
       ],
-      playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      playbackRates: [1, 1.25, 1.5, 2, 3],
+      playbackRateSliderMin: 0.5,
+      playbackRateSliderMax: 3,
       fastForwardRates: [2, 4, 8, 1],
       rewindRates: [-1, -2, -4, -8],
       addSeekBar: true,
@@ -380,6 +384,10 @@ shaka.ui.Overlay = class {
         chapters: 'rgba(255, 0, 0, 0.8)',
       },
       volumeBarColors: {
+        base: 'rgba(255, 255, 255, 0.54)',
+        level: 'rgb(255, 255, 255)',
+      },
+      playbackRateBarColors: {
         base: 'rgba(255, 255, 255, 0.54)',
         level: 'rgb(255, 255, 255)',
       },

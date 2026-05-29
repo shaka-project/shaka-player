@@ -11,7 +11,6 @@ goog.require('goog.asserts');
 goog.require('shaka.ads.Utils');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Timer');
@@ -49,8 +48,7 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
     shaka.ui.Utils.setDisplay(this.button_, false);
     this.button_.classList.add('shaka-no-propagation');
     this.container_.appendChild(this.button_);
-    this.updateAriaLabel_();
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
 
     /**
      * The timer that tracks down the ad progress until it can be skipped.
@@ -60,16 +58,6 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
     this.timer_ = new shaka.util.Timer(() => {
       this.onTimerTick_();
     });
-
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateAriaLabel_();
-          this.updateLocalizedStrings_();
-        });
 
     this.eventManager.listen(
         this.adManager, shaka.ads.Utils.AD_STARTED, () => {
@@ -97,29 +85,19 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   release() {
     this.timer_.stop();
     this.timer_ = null;
     super.release();
   }
 
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
-    this.button_.textContent = this.localization.resolve(LocIds.SKIP_AD);
-  }
-
-  /**
-   * @private
-   */
-  updateAriaLabel_() {
-    const LocIds = shaka.ui.Locales.Ids;
-    this.button_.ariaLabel = this.localization.resolve(LocIds.SKIP_AD);
+    const label = this.localization.resolve(LocIds.SKIP_AD);
+    this.button_.textContent = label;
+    this.button_.ariaLabel = label;
   }
 
   /**

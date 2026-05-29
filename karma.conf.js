@@ -320,6 +320,9 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/lcevc-sei-ts/*', included: false},
       {pattern: 'test/test/assets/lcevc-dual-track/*', included: false},
       {pattern: 'dist/shaka-player.experimental.js', included: false},
+      {pattern: 'dist/shaka-player.transmuxer-worker.js', included: false},
+      // eslint-disable-next-line @stylistic/max-len
+      {pattern: 'dist/shaka-player.transmuxer-worker.debug.js', included: false},
       {pattern: 'dist/locales.js', included: false},
       {pattern: 'demo/**/*.js', included: false},
       {pattern: 'demo/locales/en.json', included: false},

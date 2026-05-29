@@ -81,6 +81,21 @@ html, body {
   font-family: Roboto, sans-serif;
 }
 
+// This font supports the Sindarin (sjn) translation.
+@font-face {
+  // The Tengwar Telcontar font
+  // From https://freetengwar.sourceforge.net/tengtelc.html
+  src: url("../demo/TengwarTelcontar.woff2") format("woff2");
+  // Unicode Private Use Area (PUA) used by ConScript Unicode Registry (CSUR)
+  // to represent Tengwar glyphs.  This will keep the font from being loaded
+  // for any other codepoints.
+  unicode-range: U+E000-E0FF;
+  // Fun trick to avoid hard-coding Tengwar support into the library:
+  // Add this font for these codepoint ranges in anything that uses "Roboto",
+  // without having to modify the CSS to point at another font family.
+  font-family: Roboto;
+}
+
 /* Change the default opacity of the ripple container, to get around an iOS bug.
  * See: https://github.com/google/material-design-lite/issues/5281 */
 .mdl-ripple {
@@ -620,4 +635,18 @@ footer .mdl-mega-footer__link-list {
 
 .extra-config-textarea {
   font-family: monospace;
+}
+
+.mdl-dialog .input-container-style-vertical {
+  .input-container-row:has(.mdl-switch) {
+    display: block;
+    width: 100%;
+  }
+
+  .mdl-switch {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    // Fill the full container width so the label text is never truncated.
+    width: 100%;
+  }
 }
