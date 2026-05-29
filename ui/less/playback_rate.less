@@ -4,20 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Step buttons (− / +)
-@playback-rate-step-btn-border: fade(@general-font-color, 50%);
-@playback-rate-step-btn-border-active: fade(@general-font-color, 85%);
-@playback-rate-step-btn-bg-active: fade(@general-font-color, 10%);
-
-// Slider track
-@playback-rate-slider-track: fade(@general-font-color, 25%);
-
-// Preset pill buttons
-@playback-rate-preset-bg: fade(@general-font-color, 10%);
-@playback-rate-preset-bg-hover: fade(@general-font-color, 18%);
-@playback-rate-preset-selected-bg: fade(@general-font-color, 20%);
-@playback-rate-preset-selected-border: fade(@general-font-color, 70%);
-
 /* Menu container */
 
 .shaka-playback-rates {
@@ -36,7 +22,7 @@
   text-align: center;
   font-size: 22px;
   font-weight: 500;
-  color: @general-font-color;
+  color: var(--shaka-font-color);
   font-variant-numeric: tabular-nums;
   padding: 2px 0 10px;
   margin-left: 0;
@@ -60,7 +46,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50% !important;
-  border: 1.5px solid @playback-rate-step-btn-border !important;
+  border: 1.5px solid var(--shaka-rate-border) !important;
   background: transparent !important;
 
   display: inline-flex;
@@ -70,7 +56,7 @@
   font-size: 18px;
   font-weight: 400;
   line-height: 1;
-  color: @general-font-color;
+  color: var(--shaka-font-color);
 
   transition:
     border-color 150ms ease,
@@ -83,19 +69,19 @@
   }
 
   &:hover:not(:disabled) {
-    border-color: @playback-rate-step-btn-border-active !important;
-    background: @playback-rate-step-btn-bg-active !important;
+    border-color: var(--shaka-rate-border-active) !important;
+    background: var(--shaka-rate-bg-active) !important;
   }
 
   .shaka-keyboard-navigation &:focus:not(:disabled) {
-    border-color: @playback-rate-step-btn-border-active !important;
-    background: @playback-rate-step-btn-bg-active !important;
+    border-color: var(--shaka-rate-border-active) !important;
+    background: var(--shaka-rate-bg-active) !important;
   }
 }
 
 .shaka-playback-rate-slider-container {
   flex: 1;
-  background: @playback-rate-slider-track;
+  background: var(--shaka-rate-slider);
 }
 
 /* Preset pill buttons */
@@ -134,25 +120,25 @@
   flex-shrink: 0;
 
   font-size: 13px;
-  color: @general-font-color;
-  background: @playback-rate-preset-bg !important;
+  color: var(--shaka-font-color);
+  background: var(--shaka-rate-preset-bg) !important;
   border: 1.5px solid transparent !important;
 
   transition: background 150ms ease, border-color 150ms ease;
 
   &:hover {
-    background: @playback-rate-preset-bg-hover !important;
+    background: var(--shaka-rate-preset-hover) !important;
   }
 
   .shaka-keyboard-navigation &:focus {
-    background: @playback-rate-preset-bg-hover !important;
+    background: var(--shaka-rate-preset-hover) !important;
   }
 
   &.shaka-chosen-item {
-    background: @playback-rate-preset-selected-bg !important;
-    border-color: @playback-rate-preset-selected-border !important;
+    background: var(--shaka-rate-preset-active) !important;
+    border-color: var(--shaka-rate-preset-border) !important;
     font-weight: 600;
-    color: @general-font-color;
+    color: var(--shaka-font-color);
     margin-left: 0;
   }
 }

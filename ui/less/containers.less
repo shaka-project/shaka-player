@@ -17,11 +17,11 @@
 
   /* Set a special font for material design icons. */
   .shaka-ui-icon {
-    font-size: 24px;
+    font-size: var(--shaka-icon-size-sm);
   }
 
   /* Set the fonts for all other content. */
-  font-family: @general-font-family;
+  font-family: var(--shaka-font-family);
   font-weight: normal;
   -webkit-font-smoothing: antialiased;
 
@@ -37,7 +37,7 @@
 
   /* stylelint-disable max-line-length, declaration-block-no-duplicate-properties, unit-no-unknown */
   &.pip-mode {
-    background-color: @general-background-color-opaque;
+    background-color: var(--shaka-bg-solid);
     // Old browsers
     width: 100vw;
     height: 100vh;
@@ -57,7 +57,7 @@
 .fullscreen-container() {
   .fill-container();
 
-  background-color: @general-background-color-opaque;
+  background-color: var(--shaka-bg-solid);
 
   .shaka-text-container,
   .shaka-speech-to-text-container {
@@ -142,7 +142,7 @@
 /* Container for controls positioned at the top of the video container:
  * controls button panel. */
 .shaka-top-controls {
-  width: @bottom-controls-width;
+  width: var(--shaka-controls-w);
   padding: 0;
 
   position: absolute;
@@ -159,7 +159,7 @@
 /* Container for controls positioned at the bottom of the video container:
  * controls button panel and the seek bar. */
 .shaka-bottom-controls {
-  width: @bottom-controls-width;
+  width: var(--shaka-controls-w);
   padding: 0;
 
   /* Position the bottom panel in front of other controls (play button and
@@ -217,8 +217,8 @@
 
     .center-children();
 
-    color: @general-font-color;
-    background-color: @general-background-color;
+    color: var(--shaka-font-color);
+    background-color: var(--shaka-bg);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 35%);
     cursor: pointer;
 
@@ -226,7 +226,7 @@
 
     &:not([disabled]):hover {
       transform: scale(1.06);
-      background-color: @general-background-color-hover;
+      background-color: var(--shaka-bg-hover);
     }
 
     &:not([disabled]):active {
@@ -321,7 +321,7 @@
 
     .center-children();
 
-    color: @general-font-color;
+    color: var(--shaka-font-color);
     background-color: rgba(0, 0, 0, 45%);
     border: 1.5px solid rgba(255, 255, 255, 25%);
     backdrop-filter: blur(6px);
@@ -352,7 +352,7 @@
     position: relative;
     z-index: 2;
     margin: 0;
-    font-size: @content-title-font-size;
+    font-size: var(--shaka-title-size);
     color: rgba(255, 255, 255, 55%);
     letter-spacing: 0.04em;
     text-align: center;
@@ -388,7 +388,7 @@
 
   /* Make sure we don't inherit odd font sizes and styles from the environment.
    * TODO: When did this happen?  What forced us to do this? */
-  font-size: 12px;
+  font-size: var(--shaka-font-size-sm);
   font-weight: normal;
   font-style: normal;
 
@@ -401,11 +401,10 @@
    * have these characteristics by default. */
   & > * {
     /* White text or button icons. */
-    color: @general-font-color;
+    color: var(--shaka-font-color);
 
-    /* 48px tall controls. */
-    height: 48px;
-    width: 48px;
+    height: var(--shaka-icon-size);
+    width: var(--shaka-icon-size);
 
     /* Consistent alignment of buttons. */
     line-height: 0.5;
@@ -419,7 +418,7 @@
     cursor: pointer;
     opacity: 0.9;
     transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 100ms;
-    text-shadow: 0 0 2px @general-background-color;
+    text-shadow: 0 0 2px var(--shaka-bg);
 
     /* Use a bit larger icons for some buttons */
     &.shaka-fast-forward-button,
@@ -428,21 +427,16 @@
     &.shaka-skip-previous-button,
     &.shaka-skip-next-button {
       .shaka-ui-icon {
-        font-size: 32px;
+        font-size: var(--shaka-icon-size-lg);
       }
     }
 
-    &.shaka-fullscreen-button {
-      .shaka-ui-icon {
-        font-size: 24px;
-      }
-    }
-
+    &.shaka-fullscreen-button,
     &.shaka-overflow-menu-button {
       position: relative;
 
       .shaka-ui-icon {
-        font-size: 24px;
+        font-size: var(--shaka-icon-size-sm);
       }
     }
 
@@ -467,12 +461,12 @@
   scrollbar-color: rgba(255, 255, 255, 15%) transparent;
   scrollbar-width: thin;
 
-  color: @general-font-color;
+  color: var(--shaka-font-color);
   background-color: rgba(12, 14, 18, 88%);
   border: 1px solid rgba(255, 255, 255, 8%);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 50%);
 
-  font-size: @general-font-size;
+  font-size: var(--shaka-font-size);
   font-family: monospace;
 
   padding: 0;
@@ -609,7 +603,7 @@
   /* These are defaults which are overridden by JS or cue styles. */
   font-size: 20px;
   line-height: 1.4;  // relative to font size.
-  color: @general-font-color;
+  color: var(--shaka-font-color);
 
   span.shaka-text-wrapper {
     display: inline;
