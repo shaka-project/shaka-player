@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.18](https://github.com/shaka-project/shaka-player/compare/v5.0.17...v5.0.18) (2026-05-29)
+
+
+### Bug Fixes
+
+* **HLS:** Fix LL-HLS stall on live playlist updates after [#9998](https://github.com/shaka-project/shaka-player/issues/9998) ([#10150](https://github.com/shaka-project/shaka-player/issues/10150)) ([8c2eecf](https://github.com/shaka-project/shaka-player/commit/8c2eecf763d4c0fc84a2cd6a22eb4e926ce4871b))
+
 ## [5.0.17](https://github.com/shaka-project/shaka-player/compare/v5.0.16...v5.0.17) (2026-05-25)
 
 
