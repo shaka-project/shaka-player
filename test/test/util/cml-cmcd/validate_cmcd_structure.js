@@ -17,7 +17,6 @@ goog.require('cml.cmcd.CMCD_V1');
 goog.require('cml.cmcd.CMCD_VALIDATION_SEVERITY_ERROR');
 goog.require('cml.cmcd.CMCD_VALIDATION_SEVERITY_WARNING');
 goog.require('cml.cmcd.resolveVersion');
-goog.requireType('cml.cmcd.CmcdValidationIssue');
 goog.requireType('cml.cmcd.CmcdValidationOptions');
 goog.requireType('cml.cmcd.CmcdValidationResult');
 

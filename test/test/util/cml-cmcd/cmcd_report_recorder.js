@@ -18,7 +18,18 @@ goog.require('cml.cmcd.createXhrTransport');
 goog.requireType('cml.cmcd.CmcdRecordedReport');
 goog.requireType('cml.cmcd.CmcdReportRecorderOptions');
 goog.requireType('cml.cmcd.CmcdReportRecorderWaitOptions');
-goog.requireType('cml.cmcd.CmcdTransportAdapter');
+
+
+/**
+ * @typedef {{
+ *   type: (string|undefined),
+ *   count: number,
+ *   resolve: function(!Array<!cml.cmcd.CmcdRecordedReport>),
+ *   reject: function(*)
+ * }}
+ * @private
+ */
+cml.cmcd.CmcdReportRecorderInternalWaiter_;
 
 
 /** @const {!RegExp} @private */
@@ -104,7 +115,7 @@ cml.cmcd.CmcdReportRecorder = class {
     this.attached_ = false;
     /** @private {!Array<string>} */
     this.eventTargetUrls_ = [];
-    /** @private {!Map<number, !Object>} */
+    /** @private {!Map<number, !cml.cmcd.CmcdReportRecorderInternalWaiter_>} */
     this.waiters_ = new Map();
     /** @private {?function(!cml.cmcd.CmcdRecordedReport):void} */
     this.onReport_ = null;
@@ -161,14 +172,14 @@ cml.cmcd.CmcdReportRecorder = class {
 
   /** @private */
   notifyWaiters_() {
-    for (const [timer, waiter] of this.waiters_) {
+    this.waiters_.forEach((waiter, timer) => {
       const matching = this.getMatching_(waiter.type);
       if (matching.length >= waiter.count) {
         clearTimeout(timer);
         this.waiters_.delete(timer);
         waiter.resolve(matching);
       }
-    }
+    });
   }
 
   /**
@@ -189,14 +200,14 @@ cml.cmcd.CmcdReportRecorder = class {
     }
 
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
+      const timer = /** @type {number} */ (setTimeout(() => {
         this.waiters_.delete(timer);
         const current = this.getMatching_(type);
         reject(new Error(
             'Timeout waiting for ' + count + ' ' + (type || 'any') +
             ' CMCD report(s). Got ' + current.length +
             '. Total recorded: ' + this.reports_.length + '.'));
-      }, timeout);
+      }, timeout));
 
       this.waiters_.set(timer, {type, count, resolve, reject});
     });
@@ -208,10 +219,12 @@ cml.cmcd.CmcdReportRecorder = class {
    *
    * @param {!cml.cmcd.CmcdReportRecorderOptions=} options
    */
-  attach(options = {}) {
+  attach(options) {
     if (this.attached_) {
       return;
     }
+    options = options ||
+        /** @type {!cml.cmcd.CmcdReportRecorderOptions} */ ({});
     this.attached_ = true;
     this.eventTargetUrls_ = options.eventTargetUrls ?
         options.eventTargetUrls.slice() :
@@ -244,9 +257,11 @@ cml.cmcd.CmcdReportRecorder = class {
     this.eventTargetUrls_ = [];
     this.onReport_ = null;
 
-    for (const [timer, waiter] of this.waiters_) {
-      clearTimeout(timer);
+    for (const waiter of this.waiters_.values()) {
       waiter.reject(new Error('Recorder detached while waiting'));
+    }
+    for (const timer of this.waiters_.keys()) {
+      clearTimeout(timer);
     }
     this.waiters_.clear();
   }
@@ -269,7 +284,9 @@ cml.cmcd.CmcdReportRecorder = class {
    * @param {!cml.cmcd.CmcdReportRecorderWaitOptions=} options
    * @return {!Promise<!Array<!cml.cmcd.CmcdRecordedReport>>}
    */
-  waitForReports(options = {}) {
+  waitForReports(options) {
+    options = options ||
+        /** @type {!cml.cmcd.CmcdReportRecorderWaitOptions} */ ({});
     return this.waitFor_(undefined, options);
   }
 
@@ -277,7 +294,9 @@ cml.cmcd.CmcdReportRecorder = class {
    * @param {!cml.cmcd.CmcdReportRecorderWaitOptions=} options
    * @return {!Promise<!Array<!cml.cmcd.CmcdRecordedReport>>}
    */
-  waitForManifest(options = {}) {
+  waitForManifest(options) {
+    options = options ||
+        /** @type {!cml.cmcd.CmcdReportRecorderWaitOptions} */ ({});
     return this.waitFor_(
         cml.cmcd.CMCD_RECORDED_REQUEST_TYPE_MANIFEST, options);
   }
@@ -286,7 +305,9 @@ cml.cmcd.CmcdReportRecorder = class {
    * @param {!cml.cmcd.CmcdReportRecorderWaitOptions=} options
    * @return {!Promise<!Array<!cml.cmcd.CmcdRecordedReport>>}
    */
-  waitForSegments(options = {}) {
+  waitForSegments(options) {
+    options = options ||
+        /** @type {!cml.cmcd.CmcdReportRecorderWaitOptions} */ ({});
     return this.waitFor_(
         cml.cmcd.CMCD_RECORDED_REQUEST_TYPE_SEGMENT, options);
   }
@@ -295,7 +316,9 @@ cml.cmcd.CmcdReportRecorder = class {
    * @param {!cml.cmcd.CmcdReportRecorderWaitOptions=} options
    * @return {!Promise<!Array<!cml.cmcd.CmcdRecordedReport>>}
    */
-  waitForEvents(options = {}) {
+  waitForEvents(options) {
+    options = options ||
+        /** @type {!cml.cmcd.CmcdReportRecorderWaitOptions} */ ({});
     return this.waitFor_(
         cml.cmcd.CMCD_RECORDED_REQUEST_TYPE_EVENT, options);
   }

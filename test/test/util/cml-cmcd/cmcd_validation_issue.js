@@ -5,8 +5,6 @@
 
 goog.provide('cml.cmcd.CmcdValidationIssue');
 
-goog.requireType('cml.cmcd.CmcdValidationSeverity');
-
 
 /**
  * Describes a single validation issue found in a CMCD payload.

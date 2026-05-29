@@ -132,7 +132,8 @@ cml.cmcd.validateCmcdValues = function(data, options) {
   const version = cml.cmcd.resolveVersion(data, options);
   const issues = [];
 
-  for (const [key, value] of Object.entries(data)) {
+  for (const key in data) {
+    const value = data[key];
     if (cml.cmcd.isCmcdCustomKey(key)) {
       // Custom key values must be string or token, max 64 chars.
       if (typeof value !== 'string') {

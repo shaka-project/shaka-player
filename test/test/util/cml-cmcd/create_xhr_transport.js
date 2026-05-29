@@ -5,7 +5,6 @@
 
 goog.provide('cml.cmcd.createXhrTransport');
 
-goog.requireType('cml.cmcd.CmcdRequestDeliver');
 goog.requireType('cml.cmcd.CmcdTransportAdapter');
 
 
@@ -109,7 +108,8 @@ cml.cmcd.createXhrTransport = function() {
         const self = /** @type {!Object<string, *>} */ (this);
         const httpRequest = {
           url: self['_cmcdUrl'] || '',
-          method: (self['_cmcdMethod'] || 'GET').toUpperCase(),
+          method: (/** @type {string} */ (self['_cmcdMethod']) || 'GET')
+              .toUpperCase(),
           headers: self['_cmcdHeaders'] || {},
           body: (typeof Document !== 'undefined' && body instanceof Document) ?
               undefined :

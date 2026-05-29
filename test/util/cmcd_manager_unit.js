@@ -632,8 +632,9 @@ describe('CmcdManager', () => {
     });
 
     it('suppresses duplicates of the same state', () => {
-      // Adapter-side lastPlayerState_ dedup short-circuits before
-      // entering the reporter; reporter's own dedup is a backstop.
+      // Adapter-side lastPlayerState_ deduplication short-circuits before
+      // entering the reporter; the reporter's own deduplication is a
+      // backstop.
       const player = createMockPlayer();
       const {manager} = createManager(player);
       spyOn(priv(manager)['reporter_'], 'update');

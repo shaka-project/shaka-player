@@ -16,6 +16,7 @@
  * shaka's karma+jasmine harness.
  */
 
+/** @suppress {checkTypes|accessControls|missingProperties|undefinedVars} */
 describe('CmcdManager integration', () => {
   // Absolute URL required: CmcdReporter uses new URL(uri) internally, which
   // throws on relative paths. Karma serves at window.location.origin.
@@ -82,7 +83,7 @@ describe('CmcdManager integration', () => {
     entries.push(cmcd.slice(start));
 
     for (const entry of entries) {
-      const trimmed = entry.trim();
+      const trimmed = /** @type {string} */ (entry.trim());
       if (!trimmed) {
         continue;
       }
@@ -154,12 +155,13 @@ describe('CmcdManager integration', () => {
       return body;
     }
     if (ArrayBuffer.isView(body)) {
-      return new TextDecoder().decode(body.buffer);
+      return shaka.util.StringUtils.fromUTF8(
+          /** @type {!BufferSource} */ (body));
     }
-    // ArrayBuffer itself (not a typed-array view).
     if (body && typeof body === 'object' &&
         body.constructor && body.constructor.name === 'ArrayBuffer') {
-      return new TextDecoder().decode(/** @type {!ArrayBuffer} */ (body));
+      return shaka.util.StringUtils.fromUTF8(
+          /** @type {!BufferSource} */ (body));
     }
     return String(body || '');
   }
@@ -172,13 +174,14 @@ describe('CmcdManager integration', () => {
    */
   function decodeCmcdFromReport(report) {
     if (report.reportingMode === cml.cmcd.CmcdRecordedReportMode.QUERY) {
-      const url = new URL(report.request.url);
+      const url = new URL(/** @type {string} */ (report.request['url']));
       const cmcd = url.searchParams.get('CMCD');
       return parseCmcdDict(cmcd || '');
     }
     if (report.reportingMode === cml.cmcd.CmcdRecordedReportMode.HEADER) {
       const merged = {};
-      for (const [k, v] of Object.entries(report.request.headers || {})) {
+      for (const [k, v] of Object.entries(
+          report.request['headers'] || {})) {
         if (k.toLowerCase().startsWith('cmcd-')) {
           Object.assign(merged, parseCmcdDict(v));
         }
@@ -189,7 +192,7 @@ describe('CmcdManager integration', () => {
       // Event body is newline-separated dicts (may be ArrayBuffer from
       // NetworkingEngine's UTF-8 encoding). For test convenience, return
       // the first non-empty line decoded.
-      const rawBody = bodyToString(report.request.body || '');
+      const rawBody = bodyToString(report.request['body'] || '');
       const body = rawBody.split(/\r?\n/)[0];
       return parseCmcdDict(body);
     }
@@ -270,6 +273,7 @@ describe('CmcdManager integration', () => {
    * 204 responses to have an empty body, satisfying shaka's assertion.
    *
    * @param {!cml.cmcd.CmcdReportRecorderOptions=} options
+   * @suppress {constantProperty|accessControls}
    */
   function attachRecorder(options) {
     recorder.attach(options);
@@ -294,6 +298,7 @@ describe('CmcdManager integration', () => {
 
   /**
    * Detach the recorder and restore shaka's internal fetch reference.
+   * @suppress {constantProperty|accessControls}
    */
   function detachRecorder() {
     recorder.detach();
@@ -500,7 +505,7 @@ describe('CmcdManager integration', () => {
       const reports = await recorder.waitForManifest();
       const report = reports[0];
       expect(report.reportingMode).toBe(cml.cmcd.CmcdRecordedReportMode.HEADER);
-      expect(report.request.url).not.toContain('CMCD=');
+      expect(report.request['url']).not.toContain('CMCD=');
       const decoded = decodeCmcdFromReport(report);
       expect(decoded['ot']).toBe('m');
       // sf='h' for HLS, 'd' for DASH.
@@ -524,7 +529,7 @@ describe('CmcdManager integration', () => {
     it('places fields in correct header shards', async () => {
       await player.load(TEST_STREAM);
       const reports = await recorder.waitForManifest();
-      const headers = reports[0].request.headers || {};
+      const headers = reports[0].request['headers'] || {};
       // Session shard must carry sid and sf
       const sessionShard = headers['cmcd-session'] || '';
       expect(sessionShard).toContain('sid=');
@@ -567,13 +572,13 @@ describe('CmcdManager integration', () => {
       expect(reports.length).toBeGreaterThan(0);
 
       const report = reports[0];
-      expect(report.request.method).toBe('POST');
+      expect(report.request['method']).toBe('POST');
 
       // The event body is sent as a UTF-8 encoded Uint8Array. Browsers
       // differ in how the fetch transport normalizes binary bodies:
       // some return the decoded string, others may return undefined.
       // Both indicate the event fired and was routed correctly.
-      const rawBody = bodyToString(report.request.body || '');
+      const rawBody = bodyToString(report.request['body'] || '');
       if (rawBody.length > 0) {
         // Validate each line of the event body as a CMCD event dict
         const lines = rawBody.split(/\r?\n/).filter((l) => l.trim());

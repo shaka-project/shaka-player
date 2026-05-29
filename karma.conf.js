@@ -238,7 +238,8 @@ module.exports = (config) => {
       // CMCD_KEYS (cmcd_keys.js) is not required by the main library. Load it
       // explicitly here, before the cml-cmcd test utilities, so the Sets are
       // built correctly. Its transitive deps (CMCD_V1_KEYS, CMCD_REQUEST_KEYS,
-      // CMCD_RESPONSE_KEYS, CMCD_EVENT_KEYS) are already loaded by cmcd_manager.
+      // CMCD_RESPONSE_KEYS, CMCD_EVENT_KEYS) are already loaded by
+      // cmcd_manager.
       'third_party/cml-cmcd/cmcd_keys.js',
 
       // cml-cmcd test-only helpers (CmcdReportRecorder, validateCmcd, etc.)

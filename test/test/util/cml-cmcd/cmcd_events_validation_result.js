@@ -5,9 +5,7 @@
 
 goog.provide('cml.cmcd.CmcdEventsValidationResult');
 
-goog.requireType('cml.cmcd.CmcdData');
 goog.requireType('cml.cmcd.CmcdValidationIssue');
-goog.requireType('cml.cmcd.CmcdValidationResult');
 
 
 /**

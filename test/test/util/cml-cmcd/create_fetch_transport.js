@@ -5,7 +5,6 @@
 
 goog.provide('cml.cmcd.createFetchTransport');
 
-goog.requireType('cml.cmcd.CmcdRequestDeliver');
 goog.requireType('cml.cmcd.CmcdTransportAdapter');
 
 
@@ -26,7 +25,7 @@ cml.cmcd.createFetchTransport_toHttpRequest_ = async function(request) {
 
   /** @type {string|undefined} */
   let body;
-  if (request.body) {
+  if (request['body']) {
     try {
       body = await request.text();
     } catch (err) {
