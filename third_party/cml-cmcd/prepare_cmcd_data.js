@@ -5,12 +5,15 @@
 
 goog.provide('cml.cmcd.prepareCmcdData');
 
+goog.require('cml.cmcd.CMCD_EVENT_BACKGROUNDED_MODE');
 goog.require('cml.cmcd.CMCD_EVENT_CUSTOM_EVENT');
 goog.require('cml.cmcd.CMCD_EVENT_MODE');
+goog.require('cml.cmcd.CMCD_EVENT_PLAYBACK_RATE');
 goog.require('cml.cmcd.CMCD_EVENT_RESPONSE_RECEIVED');
 goog.require('cml.cmcd.CMCD_FORMATTER_MAP');
 goog.require('cml.cmcd.CMCD_INNER_LIST_KEYS');
 goog.require('cml.cmcd.CMCD_REQUEST_MODE');
+goog.require('cml.cmcd.CMCD_STATE_EVENT_FIELDS');
 goog.require('cml.cmcd.CMCD_V2');
 goog.require('cml.cmcd.Cmcd');
 goog.require('cml.cmcd.CmcdEncodeOptions');
@@ -174,6 +177,15 @@ cml.cmcd.prepareCmcdData = function(obj, options) {
         eventType === cml.cmcd.CMCD_EVENT_CUSTOM_EVENT) {
       keys.push('cen');
     }
+
+    const requiredField = eventType ?
+        cml.cmcd.CMCD_STATE_EVENT_FIELDS.get(
+            /** @type {string} */ (eventType)) :
+        undefined;
+    if (requiredField && data[requiredField] != null &&
+        !keys.includes(requiredField)) {
+      keys.push(requiredField);
+    }
   }
 
   if (keys.length === 0) {
@@ -211,8 +223,11 @@ cml.cmcd.prepareCmcdData = function(obj, options) {
       }
     }
 
-    // Playback rate should only be sent if not equal to 1.
-    if (key === 'pr' && value === 1) {
+    // Playback rate should only be sent if not equal to 1, except as
+    // the value of a PLAYBACK_RATE state-change event (where pr=1 is
+    // the data being reported, not a default to skip).
+    if (key === 'pr' && value === 1 &&
+        !(isEventMode && data['e'] === cml.cmcd.CMCD_EVENT_PLAYBACK_RATE)) {
       continue;
     }
 
@@ -221,8 +236,15 @@ cml.cmcd.prepareCmcdData = function(obj, options) {
       value = Date.now();
     }
 
-    // ignore invalid values
-    if (!cml.cmcd.isValid(value)) {
+    // Ignore invalid values, except `bg: false` on a backgrounded-mode
+    // (e=b) state-change event — the wire must carry `?0` per
+    // CTA-5004-B so the transition is reportable. `bg` is the only
+    // state-change required field typed as boolean.
+    const isBgFalseTransition = isEventMode &&
+        value === false &&
+        key === 'bg' &&
+        data['e'] === cml.cmcd.CMCD_EVENT_BACKGROUNDED_MODE;
+    if (!cml.cmcd.isValid(value) && !isBgFalseTransition) {
       continue;
     }
 

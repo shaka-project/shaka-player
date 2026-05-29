@@ -12,7 +12,7 @@ goog.provide('cml.cmcd.CMCD_TOKEN_VALUES');
  * @const {!Object<string, !Array<string>>}
  */
 cml.cmcd.CMCD_TOKEN_VALUES = {
-  e: ['bc', 'ps', 'e', 't', 'c', 'b', 'm', 'um', 'pe', 'pc', 'rr',
+  e: ['bc', 'ps', 'pr', 'e', 't', 'c', 'b', 'm', 'um', 'pe', 'pc', 'rr',
     'as', 'ae', 'abs', 'abe', 'sk', 'ce'],
   ot: ['m', 'a', 'v', 'av', 'i', 'c', 'tt', 'k', 'o'],
   sf: ['d', 'h', 's', 'o'],

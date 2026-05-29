@@ -617,26 +617,30 @@ describe('CmcdManager', () => {
   // ── Player-state deduplication ──
 
   describe('player-state deduplication', () => {
-    it('emits a recordEvent on each unique state transition', () => {
+    it('emits an update on each unique state transition', () => {
+      // v2.4.0: adapter calls update({sta}); CmcdReporter auto-fires
+      // PLAY_STATE from update() when sta changes vs. lastEmitted.
+      // Adapter-side lastPlayerState_ short-circuits before entering
+      // the reporter.
       const player = createMockPlayer();
       const {manager} = createManager(player);
       spyOn(priv(manager)['reporter_'], 'update');
-      spyOn(priv(manager)['reporter_'], 'recordEvent');
       priv(manager)['setPlayerState_'](PlayerState.PLAYING);
       priv(manager)['setPlayerState_'](PlayerState.PAUSED);
       priv(manager)['setPlayerState_'](PlayerState.PLAYING);
-      expect(priv(manager)['reporter_'].recordEvent).toHaveBeenCalledTimes(3);
+      expect(priv(manager)['reporter_'].update).toHaveBeenCalledTimes(3);
     });
 
     it('suppresses duplicates of the same state', () => {
+      // Adapter-side lastPlayerState_ dedup short-circuits before
+      // entering the reporter; reporter's own dedup is a backstop.
       const player = createMockPlayer();
       const {manager} = createManager(player);
       spyOn(priv(manager)['reporter_'], 'update');
-      spyOn(priv(manager)['reporter_'], 'recordEvent');
       priv(manager)['setPlayerState_'](PlayerState.PLAYING);
       priv(manager)['setPlayerState_'](PlayerState.PLAYING);
       priv(manager)['setPlayerState_'](PlayerState.PLAYING);
-      expect(priv(manager)['reporter_'].recordEvent).toHaveBeenCalledTimes(1);
+      expect(priv(manager)['reporter_'].update).toHaveBeenCalledTimes(1);
     });
 
     it('updates with sta wire key on transition', () => {
@@ -670,13 +674,12 @@ describe('CmcdManager', () => {
     });
 
     it('translates pause → PAUSED player-state', () => {
+      // v2.4.0: adapter calls update({sta}); reporter auto-fires
+      // PLAY_STATE from update.
       spyOn(priv(manager)['reporter_'], 'update');
-      spyOn(priv(manager)['reporter_'], 'recordEvent');
       video.dispatchEvent(new shaka.util.FakeEvent('pause'));
       expect(priv(manager)['reporter_'].update).toHaveBeenCalledWith(
           {sta: PlayerState.PAUSED});
-      expect(priv(manager)['reporter_'].recordEvent).toHaveBeenCalledWith(
-          EventType.PLAY_STATE);
     });
 
     it('translates seeking → SEEKING player-state', () => {
@@ -720,13 +723,12 @@ describe('CmcdManager', () => {
     });
 
     it('translates Player adaptation → BITRATE_CHANGE', () => {
+      // v2.4.0: adapter calls update({br}); reporter auto-fires
+      // BITRATE_CHANGE from update.
       spyOn(priv(manager)['reporter_'], 'update');
-      spyOn(priv(manager)['reporter_'], 'recordEvent');
       player.dispatchEvent(new shaka.util.FakeEvent('adaptation'));
       expect(priv(manager)['reporter_'].update).toHaveBeenCalledWith(
           {br: [5000]});
-      expect(priv(manager)['reporter_'].recordEvent).toHaveBeenCalledWith(
-          EventType.BITRATE_CHANGE);
     });
 
     it('translates Player error → FATAL_ERROR + ERROR', () => {

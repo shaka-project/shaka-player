@@ -177,6 +177,7 @@
 +../../third_party/cml-cmcd/cmcd_request_report_config.js
 +../../third_party/cml-cmcd/cmcd_response.js
 +../../third_party/cml-cmcd/cmcd_response_keys.js
++../../third_party/cml-cmcd/cmcd_state_event_fields.js
 +../../third_party/cml-cmcd/cmcd_stream_type.js
 +../../third_party/cml-cmcd/cmcd_streaming_format.js
 +../../third_party/cml-cmcd/cmcd_string_length_limits.js

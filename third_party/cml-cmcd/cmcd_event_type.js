@@ -13,6 +13,7 @@ goog.provide('cml.cmcd.CMCD_EVENT_CONTENT_ID');
 goog.provide('cml.cmcd.CMCD_EVENT_CUSTOM_EVENT');
 goog.provide('cml.cmcd.CMCD_EVENT_ERROR');
 goog.provide('cml.cmcd.CMCD_EVENT_MUTE');
+goog.provide('cml.cmcd.CMCD_EVENT_PLAYBACK_RATE');
 goog.provide('cml.cmcd.CMCD_EVENT_PLAYER_COLLAPSE');
 goog.provide('cml.cmcd.CMCD_EVENT_PLAYER_EXPAND');
 goog.provide('cml.cmcd.CMCD_EVENT_PLAY_STATE');
@@ -36,6 +37,13 @@ cml.cmcd.CMCD_EVENT_BITRATE_CHANGE = 'bc';
  * @const {string}
  */
 cml.cmcd.CMCD_EVENT_PLAY_STATE = 'ps';
+
+/**
+ * CMCD event type for the 'pr' key (playback rate change).
+ *
+ * @const {string}
+ */
+cml.cmcd.CMCD_EVENT_PLAYBACK_RATE = 'pr';
 
 /**
  * CMCD event type for the 'e' key (error).
@@ -160,6 +168,11 @@ cml.cmcd.CmcdEventType = {
    * A change in the player state.
    */
   PLAY_STATE: cml.cmcd.CMCD_EVENT_PLAY_STATE,
+
+  /**
+   * A change in the playback rate.
+   */
+  PLAYBACK_RATE: cml.cmcd.CMCD_EVENT_PLAYBACK_RATE,
 
   /**
    * An error event.

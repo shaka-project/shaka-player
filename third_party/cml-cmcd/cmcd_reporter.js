@@ -14,6 +14,7 @@ goog.require('cml.cmcd.CMCD_MIME_TYPE');
 goog.require('cml.cmcd.CMCD_PARAM');
 goog.require('cml.cmcd.CMCD_QUERY');
 goog.require('cml.cmcd.CMCD_REQUEST_MODE');
+goog.require('cml.cmcd.CMCD_STATE_EVENT_FIELDS');
 goog.require('cml.cmcd.CMCD_V2');
 goog.require('cml.cmcd.CmcdEventType');
 goog.require('cml.cmcd.encodeCmcd');
@@ -24,6 +25,7 @@ goog.require('cml.cmcd.uuid');
 goog.requireType('cml.cmcd.Cmcd');
 goog.requireType('cml.cmcd.CmcdEncodeOptions');
 goog.requireType('cml.cmcd.CmcdEventReportConfig');
+goog.requireType('cml.cmcd.CmcdObjectTypeList');
 goog.requireType('cml.cmcd.CmcdReportConfig');
 goog.requireType('cml.cmcd.CmcdReporterConfig');
 goog.requireType('cml.cmcd.CmcdRequestReport');
@@ -131,6 +133,133 @@ cml.cmcd.CmcdReporter_createCmcdReporterConfig_ = function(config) {
 
 
 /**
+ * Deep equality for CmcdObjectTypeList (used for `br` dedup).
+ *
+ * Order-sensitive: arrays with the same elements in different positions
+ * are treated as different. Players that construct `br` consistently
+ * get correct dedup; shuffling produces spurious emits, which is the
+ * safer failure mode.
+ *
+ * @param {!cml.cmcd.CmcdObjectTypeList} a
+ * @param {!cml.cmcd.CmcdObjectTypeList} b
+ * @return {boolean}
+ * @private
+ */
+cml.cmcd.CmcdReporter_cmcdObjectTypeListEqual_ = function(a, b) {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+
+  for (let i = 0; i < a.length; i++) {
+    const ai = a[i];
+    const bi = b[i];
+    if (ai === bi) continue;
+    if (typeof ai === 'number' || typeof bi === 'number') return false;
+
+    // Both are SfItem<number, ExclusiveRecord<CmcdObjectType, boolean>>
+    const ais = /** @type {!Object<string, *>} */ (ai);
+    const bis = /** @type {!Object<string, *>} */ (bi);
+    if (ais['value'] !== bis['value']) return false;
+
+    const ap = /** @type {(Object<string, *>|null|undefined)} */ (
+        ais['params']);
+    const bp = /** @type {(Object<string, *>|null|undefined)} */ (
+        bis['params']);
+    const ak = ap && Object.keys(ap)[0];
+    const bk = bp && Object.keys(bp)[0];
+    if (ak !== bk) return false;
+    if (ak && bk && ap && bp && ap[/** @type {string} */ (ak)] !==
+        bp[/** @type {string} */ (bk)]) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+
+/**
+ * One row in the STATE_FIELDS_ dispatch table.
+ *
+ * `snapshot` captures the value stored in `lastEmitted_` for dedup
+ * comparisons. Reference types must clone so the baseline doesn't
+ * share a reference with the caller's input, which would let in-place
+ * mutation silently poison the dedup state.
+ *
+ * @typedef {{
+ *   field: string,
+ *   event: string,
+ *   equal: function(*, *): boolean,
+ *   snapshot: function(*): *
+ * }}
+ * @private
+ */
+cml.cmcd.CmcdReporter_StateFieldEntry_;
+
+
+/**
+ * Identity snapshot for primitive fields.
+ *
+ * @param {*} v
+ * @return {*}
+ * @private
+ */
+cml.cmcd.CmcdReporter_identity_ = function(v) {
+  return v;
+};
+
+
+/**
+ * Maps each tracked state field to its event type and equality
+ * function. Order matters: `update()` fires events in this order for
+ * multi-field updates.
+ *
+ * @const {!Array<!cml.cmcd.CmcdReporter_StateFieldEntry_>}
+ * @private
+ */
+cml.cmcd.CmcdReporter_STATE_FIELDS_ = (function() {
+  /** @type {!Array<!cml.cmcd.CmcdReporter_StateFieldEntry_>} */
+  const entries = [];
+  cml.cmcd.CMCD_STATE_EVENT_FIELDS.forEach((field, event) => {
+    if (field === 'br') {
+      entries.push({
+        event: event,
+        field: field,
+        equal: (a, b) => (a === undefined || b === undefined) ?
+            a === b :
+            cml.cmcd.CmcdReporter_cmcdObjectTypeListEqual_(
+                /** @type {!cml.cmcd.CmcdObjectTypeList} */ (a),
+                /** @type {!cml.cmcd.CmcdObjectTypeList} */ (b)),
+        snapshot: (v) =>
+          /** @type {!cml.cmcd.CmcdObjectTypeList} */ (v).slice(),
+      });
+    } else {
+      entries.push({
+        event: event,
+        field: field,
+        equal: Object.is,
+        snapshot: cml.cmcd.CmcdReporter_identity_,
+      });
+    }
+  });
+  return entries;
+})();
+
+
+/**
+ * @const {!Map<string, !cml.cmcd.CmcdReporter_StateFieldEntry_>}
+ * @private
+ */
+cml.cmcd.CmcdReporter_STATE_FIELDS_BY_EVENT_ = (function() {
+  /** @type {!Map<string, !cml.cmcd.CmcdReporter_StateFieldEntry_>} */
+  const map = new Map();
+  for (const entry of cml.cmcd.CmcdReporter_STATE_FIELDS_) {
+    map.set(entry.event, entry);
+  }
+  return map;
+})();
+
+
+/**
  * The CMCD reporter.
  *
  * @see {@link https://cta-wave.github.io/Resources/common-media-client-data--cta-5004-b.html#reporting-modes-when-we-send-data}
@@ -176,6 +305,15 @@ cml.cmcd.CmcdReporter = class {
 
     /** @private {function(!Object): !Promise<{status: number}>} */
     this.requester_ = requester;
+
+    /**
+     * Last value emitted on the wire for each tracked state field.
+     * Used by update() to dedup state-change events and by
+     * recordEvent() to suppress no-transition events.
+     *
+     * @private {!Object<string, *>}
+     */
+    this.lastEmitted_ = {};
 
     this.data_ = /** @type {!cml.cmcd.Cmcd} */ ({
       cid: this.config_.cid,
@@ -253,7 +391,22 @@ cml.cmcd.CmcdReporter = class {
   }
 
   /**
-   * Updates the CMCD data. Called by the player when the data changes.
+   * Updates the CMCD data.
+   *
+   * Called by the player when data changes. For tracked state fields
+   * (`sta`, `pr`, `cid`, `bg`, `br`), if the new value differs from
+   * the last-reported value (the value most recently emitted on the
+   * wire for that field), the corresponding state-change event is
+   * automatically fired. Comparing against the last-reported value
+   * (rather than the previous persisted value) ensures the first
+   * state-change event in a new session always emits, even when the
+   * persisted value didn't change across the `sid` boundary.
+   *
+   * Multi-field updates fire multiple events in the order:
+   * `sta` → `pr` → `cid` → `bg` → `br`. The order of keys in the
+   * input object does not affect the firing order.
+   *
+   * A `sid` change resets the dedup baseline.
    *
    * @param {!cml.cmcd.Cmcd} data The data to update.
    */
@@ -271,18 +424,78 @@ cml.cmcd.CmcdReporter = class {
     // update.
     this.data_ = /** @type {!cml.cmcd.Cmcd} */ (
         Object.assign({}, this.data_, data, {msd: undefined}));
+
+    // Auto-trigger state-change events for any tracked field whose
+    // value differs from the last wire-emitted value. Comparing
+    // against lastEmitted_ (not the pre-merge value) ensures
+    // correctness after a session reset, and unifies the comparison
+    // basis with recordEvent's internal dedup.
+    for (const entry of cml.cmcd.CmcdReporter_STATE_FIELDS_) {
+      if (entry.field in data &&
+          !entry.equal(this.data_[entry.field],
+                       this.lastEmitted_[entry.field])) {
+        this.recordEvent(entry.event);
+      }
+    }
   }
 
   /**
    * Records an event. Called by the player when an event occurs.
    *
+   * For state-change events (`PLAY_STATE`, `PLAYBACK_RATE`,
+   * `CONTENT_ID`, `BACKGROUNDED_MODE`, `BITRATE_CHANGE`), this method:
+   *   1. Persists the dedup field from `data` (if present) into the
+   *      reporter's persistent data store — equivalent to a
+   *      write-through `update()`.
+   *   2. Drops the event entirely if the dedup field has no value
+   *      after the write-through. State-change events without their
+   *      required field would violate CTA-5004-B.
+   *   3. Suppresses the event if the field's current value matches
+   *      the last-emitted value (no state transition).
+   *
+   * For all other event types, the event is always emitted.
+   *
+   * Most callers can rely on {@link CmcdReporter#update} to auto-fire
+   * state-change events. Use `recordEvent` directly when you need to
+   * attach extra context to the event report (e.g., `bl`, `pt` at the
+   * moment of a play-state transition).
+   *
    * @param {string} type The type of event to record.
    * @param {!cml.cmcd.Cmcd=} data Additional data to record with the
-   *   event. This data only applies to this event report. Persistent
-   *   data should be updated using `update()`.
+   *   event. This data only applies to this event report, except for
+   *   the dedup field of a state-change event, which is also
+   *   persisted into the reporter's data store.
    */
   recordEvent(type, data) {
     const eventData = data || /** @type {!cml.cmcd.Cmcd} */ ({});
+
+    const entry = cml.cmcd.CmcdReporter_STATE_FIELDS_BY_EVENT_.get(
+        /** @type {string} */ (type));
+    if (entry) {
+      const field = entry.field;
+      const incoming = eventData[field];
+
+      if (incoming !== undefined) {
+        this.data_[field] = incoming;
+      }
+
+      const current = this.data_[field];
+
+      // Never emit a state-change event with a missing required
+      // field — per CTA-5004-B these events must carry their dedup
+      // field. Catches both "no value ever set" and "previous value
+      // was cleared to undefined".
+      if (current === undefined) {
+        return;
+      }
+
+      if (entry.equal(current, this.lastEmitted_[field])) {
+        return;
+      }
+
+      this.lastEmitted_[field] = entry.snapshot(current);
+    }
+
     this.eventTargets_.forEach((target, config) => {
       this.recordTargetEvent_(target, config, type, eventData);
     });
@@ -615,5 +828,6 @@ cml.cmcd.CmcdReporter = class {
       target.sn = 0;
     });
     this.requestTarget_.sn = 0;
+    this.lastEmitted_ = {};
   }
 };
