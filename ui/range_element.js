@@ -32,8 +32,10 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
    * @param {!shaka.ui.Controls} controls
    * @param {!Array<string>} containerClassNames
    * @param {!Array<string>} barClassNames
+   * @param {boolean=} enableWheel
    */
-  constructor(parent, controls, containerClassNames, barClassNames) {
+  constructor(parent, controls, containerClassNames, barClassNames,
+      enableWheel = false) {
     super(parent, controls);
 
     /**
@@ -182,6 +184,12 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
       e.preventDefault();
       e.stopPropagation();
     });
+
+    if (enableWheel) {
+      this.eventManager.listen(this.container, 'wheel', (event) => {
+        this.onWheel_(/** @type {!WheelEvent} */ (event));
+      });
+    }
   }
 
   /** @override */
@@ -201,6 +209,38 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   setRange(min, max) {
     this.bar.min = min;
     this.bar.max = max;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  setStep(step) {
+    this.bar.step = step;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getMin() {
+    return parseFloat(this.bar.min);
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getMax() {
+    return parseFloat(this.bar.max);
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  setBackground(background) {
+    this.container.style.background = background;
   }
 
   /**
@@ -339,5 +379,33 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     const changedTouch = /** @type {TouchEvent} */ (event).changedTouches[0];
 
     this.bar.value = this.getValueFromPosition(changedTouch.clientX);
+  }
+
+  /**
+   * Handle mouse wheel input to control the range value.
+   * @param {!WheelEvent} event
+   * @private
+   */
+  onWheel_(event) {
+    // Ignore browser zoom gestures
+    if (event.ctrlKey || event.metaKey) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const min = parseFloat(this.bar.min);
+    const max = parseFloat(this.bar.max);
+    const step = parseFloat(this.bar.step) || 1;
+
+    let newValue = this.getValue() + (event.deltaY > 0 ? -step : step);
+
+    // Clamp value between min and max
+    newValue = Math.max(min, Math.min(max, newValue));
+
+    this.setValue(newValue);
+
+    // Apply the change immediately
+    this.onChange();
   }
 };

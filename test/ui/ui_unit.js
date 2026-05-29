@@ -316,6 +316,9 @@ describe('UI', () => {
             'overflow_menu',
           ],
           customContextMenu: false,
+          documentPictureInPicture: {
+            enabled: false,
+          },
         };
         const ui = await UiUtils.createUIThroughAPI(
             videoContainer, video, config);
@@ -656,6 +659,230 @@ describe('UI', () => {
       });
     });
 
+    describe('caption style preview', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {!jasmine.Spy} */
+      let setPreviewSpy;
+      /** @type {!jasmine.Spy} */
+      let clearPreviewSpy;
+
+      /**
+       * @param {!HTMLElement} menu
+       * @param {string} label
+       * @return {!HTMLElement}
+       */
+      function getStyleOption(menu, label) {
+        const buttons = Array.from(
+            menu.querySelectorAll('button[role="menuitemradio"]'));
+        const button = buttons.find((button) => {
+          const span = button.querySelector('span');
+          return span && span.textContent == label;
+        });
+        expect(button).not.toBe(undefined);
+        return /** @type {!HTMLElement} */(button);
+      }
+
+      /**
+       * @return {!shaka.extern.TextDisplayerConfiguration}
+       */
+      function latestPreviewConfig() {
+        const calls = setPreviewSpy.calls;
+        expect(calls.count()).toBeGreaterThan(0);
+        return /** @type {!shaka.extern.TextDisplayerConfiguration} */(
+          calls.mostRecent().args[0]);
+      }
+
+      /**
+       * @param {?shaka.Player} player
+       */
+      function usePreviewTextDisplayer(player) {
+        expect(player).not.toBe(null);
+        const localPlayer = /** @type {!shaka.Player} */(player);
+        /** @type {?} */
+        const textDisplayer = {};
+        setPreviewSpy = textDisplayer.setTextStylePreview =
+            jasmine.createSpy('setTextStylePreview');
+        clearPreviewSpy = textDisplayer.clearTextStylePreview =
+            jasmine.createSpy('clearTextStylePreview');
+        spyOn(localPlayer, 'getTextDisplayer').and.returnValue(
+            /** @type {!shaka.extern.TextDisplayer} */(textDisplayer));
+      }
+
+      it('does not require player or displayer preview methods', () => {
+        const player = /** @type {?} */(new shaka.util.FakeEventTarget());
+        player.getConfiguration = () => {
+          return shaka.util.PlayerConfiguration.createDefault();
+        };
+        const localization = new shaka.ui.Localization('en');
+        shaka.ui.Locales.addTo(localization);
+        const preview = new shaka.ui.TextStylePreview(
+            /** @type {!shaka.Player} */(player), localization);
+
+        expect(() => {
+          preview.show();
+          preview.update({'fontScaleFactor': 2});
+          preview.reset();
+          preview.hide();
+        }).not.toThrow();
+
+        preview.release();
+      });
+
+      it('updates and reverts font size on hover', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-size',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        player.configure('textDisplayer.fontScaleFactor', 1.25);
+        controls.showUI();
+
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-text-positions');
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        button.click();
+
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.25);
+
+        const largerOption = getStyleOption(menu, '200%');
+        UiUtils.simulateEvent(largerOption, 'mouseenter');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(2);
+
+        UiUtils.simulateEvent(largerOption, 'mouseleave');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.25);
+
+        const selectedOption = getStyleOption(menu, '150%');
+        selectedOption.click();
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.5);
+
+        UiUtils.simulateEvent(selectedOption, 'mouseleave');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.5);
+
+        controls.hideSettingsMenus();
+      });
+
+      it('updates and reverts text position on focus', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-position',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-text-positions');
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-position-button');
+        button.click();
+
+        expect(latestPreviewConfig().positionArea)
+            .toBe(shaka.config.PositionArea.DEFAULT);
+
+        const topLeftOption = getStyleOption(menu, 'Top left');
+        topLeftOption.dispatchEvent(new Event('focus'));
+        expect(latestPreviewConfig().positionArea)
+            .toBe(shaka.config.PositionArea.TOP_LEFT);
+
+        topLeftOption.dispatchEvent(new Event('blur'));
+        expect(latestPreviewConfig().positionArea)
+            .toBe(shaka.config.PositionArea.DEFAULT);
+      });
+
+      it('keeps a committed text size as the preview baseline', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-size',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        player.configure('textDisplayer.fontScaleFactor', 1.25);
+        controls.showUI();
+
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-text-positions');
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        button.click();
+
+        const largerOption = getStyleOption(menu, '200%');
+        UiUtils.simulateEvent(largerOption, 'mouseenter');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(2);
+
+        player.configure('textDisplayer.fontScaleFactor', 1.5);
+        expect(latestPreviewConfig().fontScaleFactor).toBe(2);
+
+        UiUtils.simulateEvent(largerOption, 'mouseleave');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.5);
+      });
+
+      it('hides the preview when a context menu closes', async () => {
+        const config = {
+          controlPanelElements: [],
+          contextMenuElements: [
+            'captions-size',
+          ],
+          customContextMenu: true,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const controlsContainer = controls.getControlsContainer();
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+
+        const captionsSizeButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        captionsSizeButton.click();
+
+        UiUtils.simulateEvent(controlsContainer, 'click');
+        expect(clearPreviewSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('hides the preview when the UI is reconfigured', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-size',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        button.click();
+
+        ui.configure('showUIAlways', true);
+        expect(clearPreviewSpy).toHaveBeenCalledTimes(1);
+      });
+    });
+
     describe('resolutions menu', () => {
       /** @type {!HTMLElement} */
       let resolutionsMenu;
@@ -823,6 +1050,92 @@ describe('UI', () => {
         expect(getResolutions()).toEqual(['540p']);
       });
 
+      it('uses customTrackLabel with "video" type to override resolution ' +
+          'labels', async () => {
+        const manifest = shaka.test.ManifestGenerator.generate(
+            (manifest) => {
+              manifest.addVariant(0, (variant) => {
+                variant.addVideo(1, (stream) => {
+                  stream.size(320, 240);
+                });
+              });
+              manifest.addVariant(2, (variant) => {
+                variant.addVideo(3, (stream) => {
+                  stream.size(640, 480);
+                });
+              });
+            });
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType,
+            () => new shaka.test.FakeManifestParser(manifest));
+
+        const merged = Object.assign({}, controls.getConfig(), {
+          customTrackLabel: (defaultLabel, track, type) => {
+            if (type !== 'video') {
+              return '';
+            }
+            if (track.height === 240) {
+              return 'Low';
+            }
+            if (track.height === 480) {
+              return 'High';
+            }
+            return '';
+          },
+        });
+        controls.configure(
+            /** @type {!shaka.extern.UIConfiguration} */ (merged));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+        player.configure('abr.enabled', false);
+        await updateResolutionMenu();
+
+        const labels = Array.from(videoContainer.querySelectorAll(
+            'button.explicit-resolution > span'))
+            .map((s) => s.textContent).sort();
+        expect(labels).toEqual(['High', 'Low']);
+      });
+
+      it('falls back to default label when customTrackLabel returns ' +
+          'a falsy value for video tracks', async () => {
+        const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.size(320, 240);
+            });
+          });
+          manifest.addVariant(2, (variant) => {
+            variant.addVideo(3, (stream) => {
+              stream.size(640, 480);
+            });
+          });
+        });
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType,
+            () => new shaka.test.FakeManifestParser(manifest));
+
+        const labelSpy =
+            jasmine.createSpy('customTrackLabel').and.returnValue('');
+        const merged = Object.assign({}, controls.getConfig(), {
+          customTrackLabel: labelSpy,
+        });
+        controls.configure(
+            /** @type {!shaka.extern.UIConfiguration} */ (merged));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+        player.configure('abr.enabled', false);
+        await updateResolutionMenu();
+
+        expect(labelSpy).toHaveBeenCalledWith(
+            jasmine.any(String), jasmine.any(Object), 'video');
+        const labels = Array.from(videoContainer.querySelectorAll(
+            'button.explicit-resolution > span'))
+            .map((s) => s.textContent).sort();
+        expect(labels).toEqual(['240p', '480p']);
+      });
+
       it('displays audio quality based on current stream', async () => {
         const manifest =
           shaka.test.ManifestGenerator.generate((manifest) => {
@@ -977,22 +1290,40 @@ describe('UI', () => {
 
       it('displays all the available statistics', () => {
         const skippedStats = ['stateHistory', 'switchHistory'];
-        const nodes = statisticsContainer.childNodes;
-        // First index is close button.
-        let nodeIndex = 1;
+
+        /**
+         * Returns the stat node by label name.
+         * @param {string} name
+         * @return {?Node}
+         */
+        function getStatsElementByName(name) {
+          const nodes = statisticsContainer.childNodes;
+
+          for (const node of nodes) {
+            if (node.hasChildNodes() &&
+                node.childNodes.length >= 2 &&
+                node.childNodes[0].textContent.replace(':', '') == name) {
+              return node;
+            }
+          }
+
+          return null;
+        }
 
         for (const statistic in new shaka.util.Stats().getBlob()) {
-          if (!skippedStats.includes(statistic)) {
-            // Text content of label (without ':') is a valid statistic
-            const label = nodes[nodeIndex].childNodes[0].textContent;
-            expect(label.replace(':', '')).toBe(statistic);
-
-            // Value has been parsed and it is not the default 'NaN'
-            const value = nodes[nodeIndex].childNodes[1].textContent;
-            expect(value).not.toBe('NaN');
-
-            nodeIndex += 1;
+          if (skippedStats.includes(statistic)) {
+            continue;
           }
+
+          const node = getStatsElementByName(statistic);
+
+          expect(node).not.toBe(null);
+
+          const label = node.childNodes[0].textContent;
+          expect(label.replace(':', '')).toBe(statistic);
+
+          const value = node.childNodes[1].textContent;
+          expect(value).not.toBe('NaN');
         }
       });
 
@@ -1086,7 +1417,14 @@ describe('UI', () => {
     const videos = container.getElementsByTagName('video');
     expect(videos.length).not.toBe(0);
 
-    UiUtils.confirmElementFound(container, 'shaka-spinner');
+    const overlay = /** @type {!shaka.ui.Overlay} */(videos[0]['ui']);
+    const config = overlay.getConfiguration();
+    if (config.showBufferingSpinner) {
+      UiUtils.confirmElementFound(container, 'shaka-spinner');
+    } else {
+      UiUtils.confirmElementMissing(container, 'shaka-spinner');
+    }
+
     const deviceType = deviceDetected.getDeviceType();
     if (deviceType == shaka.device.IDevice.DeviceType.CAST) {
       UiUtils.confirmElementMissing(container, 'shaka-overflow-menu');

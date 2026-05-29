@@ -7,7 +7,9 @@
   { "drm-config": { "title": "DRM Configuration" } },
   { "license-server-auth": { "title": "License Server Authentication" } },
   { "license-wrapping": { "title": "License Wrapping" } },
+  { "moq": { "title": "MoQ" } },
   { "preload": { "title": "Preloading" } },
+  { "transmuxing-in-worker": { "title": "Transmuxing in Worker" } },
   { "ui": { "title": "UI Library" } },
   { "ui-customization": { "title": "Configuring the UI" } },
   { "text-displayer": { "title": "Configuring text displayer" } },
@@ -29,5 +31,6 @@
   { "upgrade": { "title": "Upgrade Guide" } },
   { "upgrade-manifest": { "title": "ManifestParser Upgrade Guide" } },
   { "lcevc": { "title": "LCEVC Quick Start" } },
-  { "accessibility": { "title": "Accessibility" } }
+  { "accessibility": { "title": "Accessibility" } },
+  { "queue-manager": { "title": "QueueManager" } }
 ]

@@ -460,6 +460,7 @@ async function checkSupport() {
     window.shakaSupport = await shaka.Player.probeSupport();
     const endMs = Date.now();
     // Bypass Karma's log settings and dump this to the console.
+    window.dump('User agent: ' + navigator.userAgent);
     window.dump('Platform support: ' + JSON.stringify(shakaSupport, null, 2));
     window.dump(`Platform support check took ${endMs - startMs} ms.`);
     // eslint-disable-next-line no-restricted-syntax

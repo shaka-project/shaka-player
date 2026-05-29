@@ -11,6 +11,7 @@ goog.require('goog.asserts');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.util.Mp4Parser');
+goog.requireType('shaka.util.EventManager');
 
 
 shaka.ui.Utils = class {
@@ -94,6 +95,20 @@ shaka.ui.Utils = class {
     } else {
       element.classList.add('shaka-hidden');
     }
+  }
+
+  /**
+   * @param {!shaka.util.EventManager} eventManager
+   * @param {!Element} element
+   * @param {function()} onHoverOrFocus
+   * @param {function()} onLeaveOrBlur
+   */
+  static addHoverAndFocusListeners(
+      eventManager, element, onHoverOrFocus, onLeaveOrBlur) {
+    eventManager.listen(element, 'mouseenter', onHoverOrFocus);
+    eventManager.listen(element, 'mouseleave', onLeaveOrBlur);
+    eventManager.listen(element, 'focus', onHoverOrFocus);
+    eventManager.listen(element, 'blur', onLeaveOrBlur);
   }
 
 

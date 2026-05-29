@@ -74,6 +74,7 @@ resolutionselectionupdated
 seekbackward
 seekforward
 seekto
+seekrangechanged
 segmentappended
 selectcomplete
 showingui
@@ -87,6 +88,7 @@ submenuopen
 textchanged
 textlang
 textrole
+texttrackvisibility
 thirdquartile
 timeandseekrangeupdated
 timelineregionadded
@@ -154,6 +156,8 @@ programinformation
 seekbar
 statelessly
 stringifiers
+styleable
+syncsafe
 testcheckstamp
 textproto
 transmux
@@ -196,6 +200,7 @@ Clearkey
 Clearkeys
 Clutz
 codem
+cssnano
 hbbtv
 Conax
 cvox
@@ -401,6 +406,7 @@ subcues
 subframes
 subt
 subviewer
+talb
 tblr
 tbrl
 tenc
@@ -418,12 +424,15 @@ traf
 trak
 traks
 transquant
+trck
 trexs
 trickmode
 trun
 tsbd
 ttml
 txxx
+tyer
+ufid
 unskippable
 urlparam
 valu
@@ -516,6 +525,7 @@ avinfo
 awesomplete
 axinom
 beatle
+BROWSERSLIST
 checkmark
 crbug
 *deadbeef*

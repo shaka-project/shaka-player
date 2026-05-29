@@ -11,7 +11,6 @@ goog.require('goog.asserts');
 goog.require('shaka.ads.Utils');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Timer');
@@ -46,17 +45,6 @@ shaka.ui.AdInfo = class extends shaka.ui.Element {
       this.onTimerTick_();
     });
 
-    this.updateAriaLabel_();
-
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateAriaLabel_();
-        });
-
     this.eventManager.listen(
         this.adManager, shaka.ads.Utils.AD_STARTED, () => {
           this.onAdStarted_();
@@ -71,13 +59,6 @@ shaka.ui.AdInfo = class extends shaka.ui.Element {
       // There was already an ad.
       this.onAdStarted_();
     }
-  }
-
-  /**
-   * @private
-   */
-  updateAriaLabel_() {
-    // arai-label is set dynamically in onTimerTick_().
   }
 
   /**

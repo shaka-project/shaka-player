@@ -87,6 +87,14 @@ The following elements can be added to the UI bar using this configuration value
   is visible only if there is next.
 * skip_previous: adds a button to skip to previous element in the queue. The button
   is visible only if there is previous.
+* skip_next_always: adds a button to skip to next element in the queue. The button
+  is visible only if there is more than 1 item in the queue.
+* skip_previous_always: adds a button to skip to previous element in the queue.  The button
+  is visible only if there is more than 1 item in the queue.
+* queue: adds a button that opens a menu listing all items in the playback queue.
+  Each item displays its title and, if available, a poster thumbnail. The currently
+  playing item is highlighted with a checkmark. The button is visible only if there
+  is more than 1 item in the queue with a title in its metadata.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 [Document Picture-in-Picture API]: https://developer.chrome.com/docs/web-platform/document-picture-in-picture/
 
@@ -120,6 +128,10 @@ The following buttons can be added to the overflow menu:
   The button is visible only if the content has at least one text track.
 * captions-size: adds a button that controls the size of the captions.
   The button is visible only if the content has at least one text track.
+* queue: adds a button that opens a menu listing all items in the playback queue.
+  Each item displays its title and, if available, a poster thumbnail. The currently
+  playing item is highlighted with a checkmark. The button is visible only if there
+  is more than 1 item in the queue with a title in its metadata.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:
@@ -151,6 +163,10 @@ The following elements can be added as big buttons using this configuration valu
   is visible only if there is next.
 * skip_previous: adds a button to skip to previous element in the queue. The button
   is visible only if there is previous.
+* skip_next_always: adds a button to skip to next element in the queue. The button
+  is visible only if there is more than 1 item in the queue.
+* skip_previous_always: adds a button to skip to previous element in the queue.  The button
+  is visible only if there is more than 1 item in the queue.
 
 Example:
 ```js

@@ -49,9 +49,9 @@ describe('TsParser', () => {
     expect(metadata).toBeTruthy();
     expect(metadata.length).toBe(2);
     const firstMetadata = metadata[0];
-    expect(firstMetadata.frames.length).toBe(2);
+    expect(firstMetadata.frames.length).toBe(3);
     const secondMetadata = metadata[1];
-    expect(secondMetadata.frames.length).toBe(2);
+    expect(secondMetadata.frames.length).toBe(3);
   });
 
   it('get the start time from a TS segment', async () => {

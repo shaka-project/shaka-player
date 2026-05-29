@@ -254,6 +254,7 @@ describe('Player', () => {
 
         completionPercent: jasmine.any(Number),
         loadLatency: jasmine.any(Number),
+        timeToFirstFrame: jasmine.any(Number),
         manifestTimeSeconds: jasmine.any(Number),
         drmTimeSeconds: jasmine.any(Number),
         playTime: jasmine.any(Number),
@@ -349,6 +350,46 @@ describe('Player', () => {
       // Cancelling trick play should return our playback rate to normal.
       player.cancelTrickPlay();
       expect(video.playbackRate).toBe(1);
+    });
+
+    it('dispatch ratechange event', async () => {
+      await player.load('test:sintel_compiled');
+      await video.play();
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+
+      video.pause();
+
+      let numberOfRatechangeEvents = 0;
+      eventManager.listen(player, 'ratechange', () => {
+        numberOfRatechangeEvents++;
+      });
+
+      player.trickPlay(2);
+      expect(player.getPlaybackRate()).toBe(2);
+
+      await shaka.test.Util.shortDelay();
+
+      player.trickPlay(32);
+      expect(player.getPlaybackRate()).toBe(32);
+
+      await shaka.test.Util.shortDelay();
+
+      player.trickPlay(64);
+      expect(player.getPlaybackRate()).toBe(64);
+
+      await shaka.test.Util.shortDelay();
+
+      player.trickPlay(-1);
+      expect(player.getPlaybackRate()).toBe(-1);
+
+      await shaka.test.Util.shortDelay();
+
+      player.cancelTrickPlay();
+      expect(player.getPlaybackRate()).toBe(1);
+
+      await shaka.test.Util.shortDelay();
+
+      expect(numberOfRatechangeEvents).toBe(5);
     });
 
     it('in sequence mode', async () => {
@@ -1178,6 +1219,39 @@ describe('Player', () => {
           const allThumbnails = await player.getAllThumbnails();
           expect(allThumbnails.length).toBe(3);
         });
+
+    it('handles concurrent getAllThumbnails calls', async () => {
+      await player.load('test:sintel_no_text_compiled');
+      const locationUri = new goog.Uri(location.href);
+      const partialUri =
+          new goog.Uri('/base/test/test/assets/thumbnails-sprites.vtt');
+      const absoluteUri = locationUri.resolve(partialUri);
+      const newTrack =
+          await player.addThumbnailsTrack(absoluteUri.toString());
+
+      // Two concurrent calls on the same track must share the
+      // createSegmentIndex call and both receive the full set without the
+      // first caller closing the segmentIndex out from under the second.
+      const [thumbnails1, thumbnails2] = await Promise.all([
+        player.getAllThumbnails(newTrack.id),
+        player.getAllThumbnails(newTrack.id),
+      ]);
+      expect(thumbnails1.length).toBe(3);
+      expect(thumbnails2.length).toBe(3);
+
+      // A subsequent call must still succeed after the concurrent pair
+      // tore down the shared pendingState.
+      const thumbnails3 = await player.getAllThumbnails(newTrack.id);
+      expect(thumbnails3.length).toBe(3);
+
+      // Default trackId must also coordinate with itself.
+      const [defaultThumbs1, defaultThumbs2] = await Promise.all([
+        player.getAllThumbnails(),
+        player.getAllThumbnails(),
+      ]);
+      expect(defaultThumbs1.length).toBe(3);
+      expect(defaultThumbs2.length).toBe(3);
+    });
   });  // describe('addThumbnailsTrack')
 
   it('preload', async () => {

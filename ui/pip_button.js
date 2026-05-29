@@ -12,7 +12,6 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -38,7 +37,6 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     /** @private {HTMLElement } */
     this.videoContainer_ = this.controls.getVideoContainer();
 
-    const LocIds = shaka.ui.Locales.Ids;
     /** @private {!HTMLButtonElement} */
     this.pipButton_ = shaka.util.Dom.createButton();
     this.pipButton_.classList.add('shaka-pip-button');
@@ -55,8 +53,6 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     label.classList.add('shaka-overflow-menu-only');
     label.classList.add('shaka-simple-overflow-button-label-inline');
     this.pipNameSpan_ = shaka.util.Dom.createHTMLElement('span');
-    this.pipNameSpan_.textContent =
-      this.localization.resolve(LocIds.PICTURE_IN_PICTURE);
     label.appendChild(this.pipNameSpan_);
 
     /** @private {!HTMLElement} */
@@ -66,7 +62,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
 
     this.pipButton_.appendChild(label);
 
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
 
     this.parent.appendChild(this.pipButton_);
 
@@ -76,15 +72,6 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     if (!this.controls.isPiPAllowed()) {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
     }
-
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateLocalizedStrings_();
-        });
 
     this.eventManager.listen(this.pipButton_, 'click', () => {
       if (!this.controls.isOpaque()) {
@@ -102,23 +89,12 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(this.controls, 'caststatuschanged', () => {
-      this.checkAvailability_();
+      this.checkAvailability();
     });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.checkAvailability_();
+      this.checkAvailability();
     });
-
-    if (this.isSubMenu) {
-      this.eventManager.listenMulti(
-          this.controls,
-          [
-            'submenuopen',
-            'submenuclose',
-          ], () => {
-            this.checkAvailability_();
-          });
-    }
 
     if ('documentPictureInPicture' in window) {
       this.eventManager.listen(window.documentPictureInPicture, 'enter',
@@ -133,7 +109,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
           });
     }
 
-    this.checkAvailability_();
+    this.checkAvailability();
   }
 
   /** @private */
@@ -147,7 +123,6 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     this.pipButton_.ariaPressed = 'true';
   }
 
-
   /** @private */
   onLeavePictureInPicture_() {
     const LocIds = shaka.ui.Locales.Ids;
@@ -159,11 +134,8 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     this.pipButton_.ariaPressed = 'false';
   }
 
-
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.pipNameSpan_.textContent =
@@ -182,21 +154,21 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
         this.localization.resolve(currentPipState);
   }
 
-
   /**
    * Display the picture-in-picture button only when the content contains video.
    * If it's displaying in picture-in-picture mode, and an audio only content is
    * loaded, exit the picture-in-picture display.
    * @return {!Promise}
-   * @private
+   * @override
    */
-  async checkAvailability_() {
+  async checkAvailability() {
     if (!this.controls.isPiPAllowed()) {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
       if (this.controls.isPiPEnabled()) {
         await this.controls.togglePiP();
       }
-    } else if (this.player && this.player.isAudioOnly()) {
+    } else if (this.player && this.player.isAudioOnly() &&
+        !this.controls.shouldUseDocumentPictureInPicture()) {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
       if (this.controls.isPiPEnabled()) {
         await this.controls.togglePiP();

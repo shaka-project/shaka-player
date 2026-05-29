@@ -11,7 +11,6 @@ goog.require('goog.asserts');
 goog.require('shaka.ads.Utils');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.RangeElement');
 goog.require('shaka.ui.Utils');
 
@@ -28,7 +27,8 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
    */
   constructor(parent, controls) {
     super(parent, controls,
-        ['shaka-volume-bar-container'], ['shaka-volume-bar']);
+        ['shaka-volume-bar-container'], ['shaka-volume-bar'],
+        /* enableWheel= */ true);
 
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.controls.getConfig();
@@ -56,7 +56,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
           'unloading',
           'trackschanged',
         ], () => {
-          this.checkAvailability_();
+          this.checkAvailability();
         });
 
     this.eventManager.listen(this.controls,
@@ -73,37 +73,24 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
 
     this.eventManager.listen(this.adManager,
         shaka.ads.Utils.AD_STARTED,
-        () => this.checkAvailability_());
+        () => this.checkAvailability());
 
     this.eventManager.listen(this.adManager,
         shaka.ads.Utils.AD_STOPPED, () => {
-          this.checkAvailability_();
+          this.checkAvailability();
           this.onPresentationVolumeChange_();
         });
 
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateAriaLabel_();
-        });
-
-    this.eventManager.listen(this.container, 'wheel', (event) => {
-      this.onWheel_(/** @type {!WheelEvent} */ (event));
-    });
-
     // Initialize volume display and label.
     this.onPresentationVolumeChange_();
-    this.updateAriaLabel_();
+    this.updateLocalizedStrings();
 
     if (this.ad) {
       // There was already an ad.
       this.onChange();
     }
 
-    this.checkAvailability_();
+    this.checkAvailability();
   }
 
   /**
@@ -156,13 +143,13 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
         'linear-gradient(' + gradient.join(',') + ')';
   }
 
-  /** @private */
-  updateAriaLabel_() {
+  /** @override */
+  updateLocalizedStrings() {
     this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.VOLUME);
   }
 
-  /** @private */
-  checkAvailability_() {
+  /** @override */
+  checkAvailability() {
     let available = true;
     if (this.ad && this.ad.isLinear()) {
       // We can't tell if the Ad has audio or not.
@@ -171,28 +158,6 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
       available = false;
     }
     shaka.ui.Utils.setDisplay(this.container, available);
-  }
-
-  /**
-   * Handle mouse wheel input to control volume.
-   * @param {!WheelEvent} event
-   * @private
-   */
-  onWheel_(event) {
-    // Ignore browser zoom gestures
-    if (event.ctrlKey || event.metaKey) {
-      return;
-    }
-
-    event.preventDefault();
-
-    let newValue = this.getValue() + (event.deltaY > 0 ? -1 : 1);
-
-    // Clamp value between 0 and 100
-    newValue = Math.max(0, Math.min(100, newValue));
-
-    this.setValue(newValue);
-    this.onChange(); // Apply the volume change
   }
 };
 

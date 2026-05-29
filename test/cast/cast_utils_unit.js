@@ -20,6 +20,7 @@ describe('CastUtils', () => {
       'getNetworkingEngine',  // Handled specially
       'getDrmEngine',  // Handled specially
       'getMediaElement',  // Handled specially
+      'getTextDisplayer',  // Internal UI hook, not proxied.
       'destroy',  // Should use CastProxy.destroy instead
       'drmInfo',  // Too large to proxy
       'getManifest', // Too large to proxy
