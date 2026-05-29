@@ -74,9 +74,11 @@ shaka.ui.QueueButton = class extends shaka.ui.SettingsMenu {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
-    this.button.ariaLabel = this.localization.resolve(LocIds.QUEUE);
-    this.nameSpan.textContent = this.localization.resolve(LocIds.QUEUE);
-    this.backSpan.textContent = this.localization.resolve(LocIds.QUEUE);
+
+    const label = this.localization.resolve(LocIds.QUEUE);
+    this.button.ariaLabel = label;
+    this.nameSpan.textContent = label;
+    this.backSpan.textContent = label;
   }
 
   /**

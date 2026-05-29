@@ -65,9 +65,11 @@ shaka.ui.ChapterSelection = class extends shaka.ui.SettingsMenu {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
-    this.button.ariaLabel = this.localization.resolve(LocIds.CHAPTERS);
-    this.nameSpan.textContent = this.localization.resolve(LocIds.CHAPTERS);
-    this.backSpan.textContent = this.localization.resolve(LocIds.CHAPTERS);
+
+    const label = this.localization.resolve(LocIds.CHAPTERS);
+    this.button.ariaLabel = label;
+    this.nameSpan.textContent = label;
+    this.backSpan.textContent = label;
 
     this.updateChapters_();
   }

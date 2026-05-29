@@ -116,10 +116,9 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
   updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.button_.ariaLabel =
-        this.localization.resolve(LocIds.COPY_VIDEO_FRAME);
-    this.nameSpan_.textContent =
-        this.localization.resolve(LocIds.COPY_VIDEO_FRAME);
+    const label = this.localization.resolve(LocIds.COPY_VIDEO_FRAME);
+    this.button_.ariaLabel = label;
+    this.nameSpan_.textContent = label;
   }
 };
 

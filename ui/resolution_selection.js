@@ -635,12 +635,13 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     const locId = this.player.isAudioOnly() ?
         LocIds.QUALITY : LocIds.RESOLUTION;
 
-    this.button.ariaLabel = this.localization.resolve(locId);
-    this.backButton.ariaLabel = this.localization.resolve(locId);
-    this.backSpan.textContent =
-        this.localization.resolve(locId);
-    this.nameSpan.textContent =
-        this.localization.resolve(locId);
+    this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
+
+    const label = this.localization.resolve(locId);
+    this.button.ariaLabel = label;
+    this.nameSpan.textContent = label;
+    this.backSpan.textContent = label;
+
     this.abrOnSpan_.textContent =
         this.localization.resolve(LocIds.AUTO_QUALITY);
 

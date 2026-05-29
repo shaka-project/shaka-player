@@ -187,12 +187,12 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
   updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.button.ariaLabel = this.localization.resolve(LocIds.CAPTIONS);
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
-    this.nameSpan.textContent =
-        this.localization.resolve(LocIds.CAPTIONS);
-    this.backSpan.textContent =
-        this.localization.resolve(LocIds.CAPTIONS);
+
+    const label = this.localization.resolve(LocIds.CAPTIONS);
+    this.button.ariaLabel = label;
+    this.nameSpan.textContent = label;
+    this.backSpan.textContent = label;
     this.captionsOffSpan_.textContent =
         this.localization.resolve(LocIds.OFF);
 
