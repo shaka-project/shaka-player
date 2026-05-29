@@ -73,12 +73,12 @@ shaka.ui.TextSize = class extends shaka.ui.SettingsMenu {
   updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.button.ariaLabel = this.localization.resolve(LocIds.SUBTITLE_SIZE);
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
-    this.nameSpan.textContent =
-        this.localization.resolve(LocIds.SUBTITLE_SIZE);
-    this.backSpan.textContent =
-        this.localization.resolve(LocIds.SUBTITLE_SIZE);
+
+    const label = this.localization.resolve(LocIds.SUBTITLE_SIZE);
+    this.button.ariaLabel = label;
+    this.nameSpan.textContent = label;
+    this.backSpan.textContent = label;
   }
 
   /** @private */

@@ -82,11 +82,9 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
   /** @override */
   updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
-
-    this.recenterVRButton_.ariaLabel =
-        this.localization.resolve(LocIds.RECENTER_VR);
-    this.recenterVRNameSpan_.textContent =
-        this.localization.resolve(LocIds.RECENTER_VR);
+    const label = this.localization.resolve(LocIds.RECENTER_VR);
+    this.recenterVRButton_.ariaLabel = label;
+    this.recenterVRNameSpan_.textContent = label;
   }
 };
 

@@ -87,9 +87,11 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
-    this.button.ariaLabel = this.localization.resolve(LocIds.PLAYBACK_RATE);
-    this.nameSpan.textContent = this.localization.resolve(LocIds.PLAYBACK_RATE);
-    this.backSpan.textContent = this.localization.resolve(LocIds.PLAYBACK_RATE);
+
+    const label = this.localization.resolve(LocIds.PLAYBACK_RATE);
+    this.button.ariaLabel = label;
+    this.nameSpan.textContent = label;
+    this.backSpan.textContent = label;
   }
 
   /** @private */

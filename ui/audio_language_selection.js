@@ -97,11 +97,11 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
-    this.button.ariaLabel = this.localization.resolve(LocIds.LANGUAGE);
-    this.nameSpan.textContent =
-        this.localization.resolve(LocIds.LANGUAGE);
-    this.backSpan.textContent =
-        this.localization.resolve(LocIds.LANGUAGE);
+
+    const label = this.localization.resolve(LocIds.LANGUAGE);
+    this.button.ariaLabel = label;
+    this.nameSpan.textContent = label;
+    this.backSpan.textContent = label;
   }
 
   /** @override */

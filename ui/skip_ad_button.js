@@ -95,8 +95,9 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
   /** @override */
   updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
-    this.button_.textContent = this.localization.resolve(LocIds.SKIP_AD);
-    this.button_.ariaLabel = this.localization.resolve(LocIds.SKIP_AD);
+    const label = this.localization.resolve(LocIds.SKIP_AD);
+    this.button_.textContent = label;
+    this.button_.ariaLabel = label;
   }
 
   /**

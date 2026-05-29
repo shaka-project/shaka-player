@@ -132,17 +132,18 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
   /** @override */
   updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
-    let label;
+    let locId;
     if (this.ad && this.ad.isLinear()) {
-      label = this.ad.isMuted() ? LocIds.UNMUTE : LocIds.MUTE;
+      locId = this.ad.isMuted() ? LocIds.UNMUTE : LocIds.MUTE;
     } else {
-      label = (this.video.muted || this.video.volume == 0) ?
+      locId = (this.video.muted || this.video.volume == 0) ?
           LocIds.UNMUTE : LocIds.MUTE;
     }
+    const label = this.localization.resolve(locId);
 
-    this.button_.ariaLabel = this.localization.resolve(label);
-    this.button_.ariaPressed = label == LocIds.UNMUTE ? 'true' : 'false';
-    this.nameSpan_.textContent = this.localization.resolve(label);
+    this.button_.ariaLabel = label;
+    this.button_.ariaPressed = locId == LocIds.UNMUTE ? 'true' : 'false';
+    this.nameSpan_.textContent = label;
   }
 
   /**

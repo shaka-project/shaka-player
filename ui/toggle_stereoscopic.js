@@ -87,11 +87,9 @@ shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
   /** @override */
   updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
-
-    this.toggleStereoscopicButton_.ariaLabel =
-        this.localization.resolve(LocIds.TOGGLE_STEREOSCOPIC);
-    this.toggleStereoscopicNameSpan_.textContent =
-        this.localization.resolve(LocIds.TOGGLE_STEREOSCOPIC);
+    const label = this.localization.resolve(LocIds.TOGGLE_STEREOSCOPIC);
+    this.toggleStereoscopicButton_.ariaLabel = label;
+    this.toggleStereoscopicNameSpan_.textContent = label;
   }
 };
 

@@ -160,13 +160,11 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
   updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.nameSpan_.textContent =
-        this.localization.resolve(LocIds.AD_STATISTICS);
+    const label = this.localization.resolve(LocIds.AD_STATISTICS);
 
-    this.headerTitle_.textContent =
-        this.localization.resolve(LocIds.AD_STATISTICS);
-
-    this.button_.ariaLabel = this.localization.resolve(LocIds.AD_STATISTICS);
+    this.nameSpan_.textContent = label;
+    this.headerTitle_.textContent = label;
+    this.button_.ariaLabel = label;
 
     const labelText = this.container_.classList.contains('shaka-hidden') ?
         LocIds.OFF : LocIds.ON;
