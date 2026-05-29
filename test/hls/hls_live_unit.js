@@ -1917,4 +1917,55 @@ describe('HlsParser live', () => {
     return ManifestParser.makeReference(uri, start, end, baseUri, startByte,
         endByte, timestampOffset, partialReferences, tilesLayout, syncTime);
   }
+
+  it('calls mergeAndEvict on update when segment has partials', async () => {
+    // Regression test for #9998. When a segment has partial segments, it gets
+    // rebuilt on every live update, but without the fix the rebuilt reference
+    // was discarded from mergeAndEvict because its position was already in
+    // mediaSequenceToStartTime. This caused LL-HLS streams to stall.
+
+    const mediaWithPartials = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:100\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:2,\n',
+      'main.mp4\n',
+      '#EXTINF:2,\n',
+      'main2.mp4\n',
+      '#EXT-X-PART:DURATION=1.0,URI="partial.mp4"\n',
+      '#EXT-X-PART:DURATION=1.0,URI="partial2.mp4"\n',
+      '#EXTINF:2,\n',
+      'main3.mp4\n',
+    ].join('');
+
+    const mediaWithMorePartials = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:100\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:2,\n',
+      'main.mp4\n',
+      '#EXTINF:2,\n',
+      'main2.mp4\n',
+      '#EXT-X-PART:DURATION=1.0,URI="partial.mp4"\n',
+      '#EXT-X-PART:DURATION=1.0,URI="partial2.mp4"\n',
+      '#EXT-X-PART:DURATION=1.0,URI="partial3.mp4"\n',
+      '#EXT-X-PART:DURATION=1.0,URI="partial4.mp4"\n',
+      '#EXTINF:2,\n',
+      'main3.mp4\n',
+    ].join('');
+
+    const manifest = await testInitialManifest(
+        master, mediaWithPartials);
+
+    const video = manifest.variants[0].video;
+    goog.asserts.assert(video.segmentIndex, 'Segment index should exist!');
+
+    spyOn(video.segmentIndex, 'mergeAndEvict').and.callThrough();
+
+    await testUpdate(manifest, mediaWithMorePartials);
+
+    expect(video.segmentIndex.mergeAndEvict).toHaveBeenCalled();
+  });
 });  // describe('HlsParser live')
