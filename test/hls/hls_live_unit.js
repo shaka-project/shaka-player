@@ -1847,7 +1847,7 @@ describe('HlsParser live', () => {
         endByte, timestampOffset, partialReferences, tilesLayout, syncTime);
   }
 
-  it('calls mergeAndEvict during update when segment has partials', async () => {
+  it('calls mergeAndEvict on update when segment has partials', async () => {
     // Regression test for #9998. When a segment has partial segments, it gets
     // rebuilt on every live update, but without the fix the rebuilt reference
     // was discarded from mergeAndEvict because its position was already in
