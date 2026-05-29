@@ -238,6 +238,7 @@ describe('SimpleAbrManager (integration)', () => {
     const streamingConfig =
         shaka.util.PlayerConfiguration.createDefault().streaming;
     streamingConfig.stallEnabled = false;
+    streamingConfig.bufferingGoal = 4;
 
     const abrConfig = shaka.util.PlayerConfiguration.createDefault().abr;
     abrConfig.defaultBandwidthEstimate = defaultBandwidthEstimate;
@@ -336,17 +337,7 @@ describe('SimpleAbrManager (integration)', () => {
     expect(initialBandwidth).toBeGreaterThanOrEqual(VARIANT_BANDWIDTHS[2]);
 
     currentTargetBps = 250e3;
-
-    await new Promise((resolve) => {
-      const deadline = Date.now() + 30000;
-      const interval = setInterval(() => {
-        if (abrManager.chooseVariant().bandwidth < initialBandwidth ||
-            Date.now() >= deadline) {
-          clearInterval(interval);
-          resolve();
-        }
-      }, 1000);
-    });
+    await Util.delay(15);
 
     expect(abrManager.chooseVariant().bandwidth).toBeLessThan(initialBandwidth);
   });
