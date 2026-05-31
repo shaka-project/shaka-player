@@ -8,6 +8,7 @@ goog.provide('shakaDemo.AssetCard');
 
 goog.require('goog.asserts');
 goog.require('shakaAssets');
+goog.require('shakaDemo.Icons');
 goog.require('shakaDemo.Tooltips');
 goog.requireType('ShakaDemoAssetInfo');
 
@@ -355,13 +356,11 @@ shakaDemo.AssetCard = class {
      * @param {!Element} button
      * @param {!Element} attachPoint If there is no attach point, just pass the
      *  button in here.
-     * @param {string} iconText
+     * @param {string} iconPath
      */
-    const styleAsDownloadButton = (button, attachPoint, iconText) => {
+    const styleAsDownloadButton = (button, attachPoint, iconPath) => {
       attachPoint.classList.add('asset-card-corner-button');
-      const icon = document.createElement('i');
-      icon.textContent = iconText;
-      icon.classList.add('material-icons-round');
+      const icon = shakaDemo.Icons.makeSvgIcon(iconPath);
       button.appendChild(icon);
     };
 
@@ -378,21 +377,23 @@ shakaDemo.AssetCard = class {
       // that is the element this has to move with CSS, otherwise the tooltip
       // will end up coming out of the wrong place.
       const attachPoint = button.parentElement || button;
-      styleAsDownloadButton(button, attachPoint, 'get_app');
+      styleAsDownloadButton(button, attachPoint, shakaDemo.Icons.DOWNLOAD);
       return;
     }
     if (this.asset_.isStored()) {
       const deleteButton = this.addButton(null, () => {
         this.attachDeleteDialog_(deleteButton);
       });
-      styleAsDownloadButton(deleteButton, deleteButton, 'offline_pin');
+      styleAsDownloadButton(
+          deleteButton, deleteButton, shakaDemo.Icons.OFFLINE_PIN);
     } else {
       const downloadButton = this.addButton(null, async () => {
         downloadButton.disabled = true;
         await this.asset_.storeCallback();
         this.remakeButtons();
       });
-      styleAsDownloadButton(downloadButton, downloadButton, 'get_app');
+      styleAsDownloadButton(
+          downloadButton, downloadButton, shakaDemo.Icons.DOWNLOAD);
     }
   }
 
