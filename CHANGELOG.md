@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.0.18](https://github.com/shaka-project/shaka-player/compare/v5.0.17...v5.0.18) (2026-06-01)
+
+
+### Bug Fixes
+
+* **demo:** Re-enable lazy localization ([#10137](https://github.com/shaka-project/shaka-player/issues/10137)) ([f7458bf](https://github.com/shaka-project/shaka-player/commit/f7458bf3c930594611045e8ab56944d01b7b0e15))
+* Emit ratechange event when playbackRate stays at 0 ([#10130](https://github.com/shaka-project/shaka-player/issues/10130)) ([d5ac037](https://github.com/shaka-project/shaka-player/commit/d5ac037f903bf680517079e9211170de12bd1302))
+* **HLS:** Fix LL-HLS stall on live playlist updates after [#9998](https://github.com/shaka-project/shaka-player/issues/9998) ([#10154](https://github.com/shaka-project/shaka-player/issues/10154)) ([3d31deb](https://github.com/shaka-project/shaka-player/commit/3d31deb23d1a3f1d0ea465c40507547ca7d99249))
+* **preload:** Restore adaptation on reused Player with preloaded variant ([#10151](https://github.com/shaka-project/shaka-player/issues/10151)) ([db5870f](https://github.com/shaka-project/shaka-player/commit/db5870f5bb38eee1bb0d55ca87359eac18ac03ea))
+* **UI:** Sync Document PiP placeholder with video poster changes ([#10135](https://github.com/shaka-project/shaka-player/issues/10135)) ([7b6bcab](https://github.com/shaka-project/shaka-player/commit/7b6bcab205554ecdacceddea2089fe3d9b22feac))
+
+
+### Performance Improvements
+
+* **HLS:** Improve startup time with SGAI Streams with long DVR ([#10113](https://github.com/shaka-project/shaka-player/issues/10113)) ([1dff07f](https://github.com/shaka-project/shaka-player/commit/1dff07f8c6a04dd8ab902ab564bab7b495d8952b))
+
 ## [5.0.17](https://github.com/shaka-project/shaka-player/compare/v5.0.16...v5.0.17) (2026-05-25)
 
 
