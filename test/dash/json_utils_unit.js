@@ -143,13 +143,18 @@ describe('JsonUtils', () => {
         }],
       };
 
-      const xml = parse(shaka.dash.JsonUtils.jsonToMpd(json));
+      const mpd = shaka.dash.JsonUtils.jsonToMpd(json);
+
+      // The double quote must be escaped so it cannot terminate the
+      // attribute value and inject a new attribute.
+      expect(mpd).toContain('id="p1&quot; injected=&quot;yes"');
+      expect(mpd).not.toContain('injected="yes"');
+
+      const xml = parse(mpd);
       const period = shaka.util.TXml.findChild(xml, 'Period');
       expect(period).not.toBeNull();
 
-      // The attribute must contain the literal string, not break out.
-      expect(period.attributes['id']).toBe('p1" injected="yes');
-      // No spurious 'injected' attribute must exist.
+      // No spurious 'injected' attribute must exist after parsing.
       expect(period.attributes['injected']).toBeUndefined();
     });
 
