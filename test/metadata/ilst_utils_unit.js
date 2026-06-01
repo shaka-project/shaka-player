@@ -8,7 +8,7 @@
 // cspell:ignore xyzz smpb
 
 describe('IlstUtils', () => {
-  const IlstUtils = shaka.util.IlstUtils;
+  const IlstUtils = shaka.metadata.IlstUtils;
   const BufferUtils = shaka.util.BufferUtils;
 
   // ---------------------------------------------------------------------------

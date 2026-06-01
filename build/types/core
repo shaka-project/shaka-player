@@ -82,6 +82,9 @@
 +../../lib/transmuxer/transmuxer_proxy.js
 +../../lib/transmuxer/transmuxer_utils.js
 
++../../lib/metadata/id3_utils.js
++../../lib/metadata/metadata_utils.js
+
 +../../lib/util/abortable_operation.js
 +../../lib/util/array_utils.js
 +../../lib/util/buffer_utils.js
@@ -101,8 +104,6 @@
 +../../lib/util/functional.js
 +../../lib/util/i_destroyable.js
 +../../lib/util/i_releasable.js
-+../../lib/util/id3_utils.js
-+../../lib/util/ilst_utils.js
 +../../lib/util/iterables.js
 +../../lib/util/language_utils.js
 +../../lib/util/lazy.js
@@ -110,7 +111,6 @@
 +../../lib/util/map_utils.js
 +../../lib/util/media_element_event.js
 +../../lib/util/media_ready_state_utils.js
-+../../lib/util/metadata_utils.js
 +../../lib/util/mime_utils.js
 +../../lib/util/mp4_box_parsers.js
 +../../lib/util/mp4_generator.js
@@ -135,7 +135,6 @@
 +../../lib/util/tXml.js
 +../../lib/util/uint8array_utils.js
 +../../lib/util/video_frame_callback_handler.js
-+../../lib/util/vorbis_utils.js
 
 +../../third_party/closure-uri/uri.js
 +../../third_party/closure-uri/utils.js

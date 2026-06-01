@@ -5,7 +5,7 @@
  */
 
 describe('VorbisUtils', () => {
-  const VorbisUtils = shaka.util.VorbisUtils;
+  const VorbisUtils = shaka.metadata.VorbisUtils;
   const BufferUtils = shaka.util.BufferUtils;
 
   // ---------------------------------------------------------------------------
