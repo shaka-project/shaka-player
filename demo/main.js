@@ -10,6 +10,7 @@ goog.provide('shakaDemo.Main');
 goog.require('ShakaDemoAssetInfo');
 goog.require('goog.asserts');
 goog.require('shakaDemo.CloseButton');
+goog.require('shakaDemo.Icons');
 goog.require('shakaDemo.Utils');
 goog.require('shakaDemo.Visualizer');
 goog.require('shakaDemo.VisualizerButton');
@@ -80,9 +81,11 @@ shakaDemo.Main = class {
     /** @private {?number} */
     this.currentErrorSeverity_ = null;
 
-    // Override the icon for the MDL library's menu button.
+    // The demo no longer loads an icon font, so suppress MDL's font-based menu
+    // glyph.  We inject our own inline SVG gear icon into the drawer button
+    // once MDL has created it (see the drawer setup in setupPlayer_).
     // eslint-disable-next-line no-restricted-syntax
-    MaterialLayout.prototype.Constant_.MENU_ICON = 'settings';
+    MaterialLayout.prototype.Constant_.MENU_ICON = '';
 
     /** @private {?shakaDemo.Visualizer} */
     this.visualizer_ = null;
@@ -493,6 +496,13 @@ shakaDemo.Main = class {
     // are pressed also.
     const drawerButton = document.querySelector('.mdl-layout__drawer-button');
     goog.asserts.assert(drawerButton, 'There should be a drawer button.');
+    // MDL created the drawer button's (now-empty) icon element; fill it with
+    // the demo's gear icon as an inline SVG, since the icon font is gone.
+    const drawerButtonIcon = drawerButton.querySelector('.material-icons');
+    goog.asserts.assert(
+        drawerButtonIcon, 'There should be a drawer button icon.');
+    drawerButtonIcon.appendChild(
+        shakaDemo.Icons.makeSvgIcon(shakaDemo.Icons.SETTINGS));
     const openDrawer = () => {
       this.dispatchEventWithName_('shaka-main-drawer-state-change');
       this.showElement_(drawerCloseButton);

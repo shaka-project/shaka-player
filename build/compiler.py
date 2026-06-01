@@ -327,9 +327,58 @@ class Less(object):
     self.all_source_files = _canonicalize_source_files(all_source_files)
     self.output = output
 
+    # Derive the modern output path by inserting ".modern" before the
+    # extension: e.g. "dist/controls.css" -> "dist/controls.modern.css".
+    base, ext = os.path.splitext(output)
+    self.output_modern = base + '.modern' + ext
+
+  def _run_postcss(self, input_path, output_path, plugins, browserslist):
+    """Runs PostCSS on |input_path|, writing to |output_path|.
+
+    Sets BROWSERSLIST in os.environ for the duration of the call and restores
+    the previous value (or removes the key) afterwards.  This avoids passing
+    an 'env' kwarg that execute_get_code does not support.
+
+    Args:
+      input_path: Path to the CSS file to process.
+      output_path: Path to write the processed CSS to.
+      plugins: List of --use plugin names to pass to PostCSS.
+      browserslist: Browserslist query string.
+
+    Returns:
+      True on success; False on failure.
+    """
+    postcss = shakaBuildHelpers.get_node_binary('postcss-cli', 'postcss')
+
+    plugin_flags = []
+    for plugin in plugins:
+      plugin_flags += ['--use', plugin]
+
+    cmd_line = postcss + [input_path, '-o', output_path] + plugin_flags + ['--map']
+
+    # Temporarily override BROWSERSLIST, preserving any existing value.
+    previous = os.environ.get('BROWSERSLIST')
+    os.environ['BROWSERSLIST'] = browserslist
+    try:
+      return shakaBuildHelpers.execute_get_code(cmd_line) == 0
+    finally:
+      if previous is None:
+        os.environ.pop('BROWSERSLIST', None)
+      else:
+        os.environ['BROWSERSLIST'] = previous
+
   def compile(self, force=False):
-    """Compiles the main less file in |self.main_source_file| into the
-       |self.output| css file and applies PostCSS Autoprefixer.
+    """Compiles the main less file in |self.main_source_file| into two CSS
+       output files:
+
+       - |self.output|        — legacy build, CSS custom properties flattened
+                                via postcss-custom-properties so that it works
+                                in older browsers (chrome 38, safari 8,
+                                firefox 42).
+       - |self.output_modern| — modern build, CSS custom properties preserved,
+                                targeting the last 2 years of browsers.
+
+       Both outputs go through Autoprefixer and cssnano.
 
     Args:
       force: Generate the output even if the inputs have not changed.
@@ -337,47 +386,58 @@ class Less(object):
     Returns:
       True on success; False on failure.
     """
-    if not force and not _must_build(self.output, self.all_source_files):
+    # Rebuild if either output is stale or missing.
+    if not force and (
+        not _must_build(self.output, self.all_source_files) and
+        not _must_build(self.output_modern, self.all_source_files)):
       return True
 
+    # Step 1: compile LESS -> raw CSS (shared intermediate)
     lessc = shakaBuildHelpers.get_node_binary('less', 'lessc')
     less_options = [
-      # Output a source map of the original CSS/less files.
       '--source-map=' + self.output + '.map',
     ]
-
     cmd_line = lessc + less_options + [self.main_source_file, self.output]
 
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       logging.error('CSS compilation failed')
       return False
 
-    # We look for the PostCSS binary within node_modules/postcss-cli
-    postcss = shakaBuildHelpers.get_node_binary('postcss-cli', 'postcss')
-    postcss_options = [
-      self.output,
-      '-o', self.output,
-      '--use', 'autoprefixer',
-      '--use', 'cssnano',
-      '--map',
-    ]
+    # Duplicate the raw compiled CSS so each PostCSS pass has its own file.
+    shutil.copy2(self.output, self.output_modern)
 
-    # We define the specific browsers using the environment variable. These are
-    # the minimum browsers that the UI supports.
-    os.environ['BROWSERSLIST'] = 'chrome 38, safari 8, firefox 42'
-
-    if shakaBuildHelpers.execute_get_code(postcss + postcss_options) != 0:
-      logging.error('PostCSS / Autoprefixer processing failed')
+    # Step 2a: legacy build
+    #   • postcss-custom-properties  — resolve/flatten all CSS variables
+    #   • autoprefixer               — add vendor prefixes for old browsers
+    #   • cssnano                    — minify
+    if not self._run_postcss(
+        self.output, self.output,
+        ['postcss-custom-properties', 'autoprefixer', 'cssnano'],
+        'chrome 38, safari 8, firefox 42'):
+      logging.error('PostCSS legacy processing failed')
       return False
 
-    # We need to prepend the license header to the compiled CSS.
+    # Step 2b: modern build
+    #   • autoprefixer  — add vendor prefixes for recent browsers only
+    #   • cssnano       — minify
+    #   (CSS custom properties are intentionally kept as-is)
+    if not self._run_postcss(
+        self.output_modern, self.output_modern,
+        ['autoprefixer', 'cssnano'],
+        'last 2 years'):
+      logging.error('PostCSS modern processing failed')
+      return False
+
+    # Step 3: prepend the license header to both outputs
     with open(_get_source_path('build/license-header'), 'rb') as f:
       license_header = f.read()
-    with open(self.output, 'rb') as f:
-      contents = f.read()
-    with open(self.output, 'wb') as f:
-      f.write(license_header)
-      f.write(contents)
+
+    for output_path in (self.output, self.output_modern):
+      with open(output_path, 'rb') as f:
+        contents = f.read()
+      with open(output_path, 'wb') as f:
+        f.write(license_header)
+        f.write(contents)
 
     return True
 

@@ -11,6 +11,7 @@ goog.provide('shakaDemo.Custom');
 goog.require('ShakaDemoAssetInfo');
 goog.require('shakaDemo.AssetCard');
 goog.require('shakaDemo.BoolInput');
+goog.require('shakaDemo.Icons');
 goog.require('shakaDemo.Input');
 goog.require('shakaDemo.InputContainer');
 goog.require('shakaDemo.TextInput');
@@ -60,7 +61,7 @@ shakaDemo.Custom = class {
     container.appendChild(addButtonContainer);
     // Style it as an MDL Floating Action Button (FAB).
     const buttonStyle = shakaDemo.Custom.ButtonStyle_.FAB;
-    const addButton = this.makeButton_('add', buttonStyle, () => {
+    const addButton = this.makeButton_(shakaDemo.Icons.ADD, buttonStyle, () => {
       this.showAssetDialog_(ShakaDemoAssetInfo.makeBlankAsset());
     });
     addButtonContainer.appendChild(addButton);
@@ -1116,6 +1117,8 @@ shakaDemo.Custom = class {
 
   /**
    * @param {string} name
+   *   For RAISED and PLAIN buttons, the text to display.  For FAB buttons, the
+   *   SVG path data of the icon to display (see shakaDemo.Icons).
    * @param {shakaDemo.Custom.ButtonStyle_} buttonStyle
    *   What style should this button be in?
    * @param {function()} callback
@@ -1125,14 +1128,11 @@ shakaDemo.Custom = class {
   makeButton_(name, buttonStyle, callback) {
     const button = document.createElement('button');
     switch (buttonStyle) {
-      case shakaDemo.Custom.ButtonStyle_.FAB: {
+      case shakaDemo.Custom.ButtonStyle_.FAB:
         button.classList.add('mdl-button--fab');
         button.classList.add('mdl-button--colored');
-        const icon = document.createElement('i');
-        icon.classList.add('material-icons-round');
-        icon.textContent = name;
-        button.appendChild(icon);
-      } break;
+        button.appendChild(shakaDemo.Icons.makeSvgIcon(name));
+        break;
       case shakaDemo.Custom.ButtonStyle_.RAISED:
         button.textContent = name;
         button.classList.add('mdl-button--raised');

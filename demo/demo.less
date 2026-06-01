@@ -22,17 +22,16 @@
 @progress-circle-size: 45px;
 @progress-circle-thickness: 5px;
 
-/* This class name is used by MDL, but we use a slightly different font.  So
- * here we override the font family for the MDL class.  Without this, the menu
- * on the left side of the screen has no icon. */
-.material-icons {
-  font-family: "Material Icons Round";
-}
-
-/* Conflicting styles between the icons font & the MDL buttons caused some
- * icons not to be centered in their MDL button.  This fixes it. */
-.mdl-button .material-icons {
-  line-height: 36px;
+/* The demo's icons are inline SVGs (see demo/icons.js), matching the player
+ * UI's switch away from an icon font.  The path data is painted with the
+ * inherited text color, and vertical-align centers the icon inside MDL
+ * buttons. */
+.demo-icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  fill: currentcolor;
+  vertical-align: middle;
 }
 
 /* This is a less mixin only, rather than a CSS class. MDL has an equivalent
@@ -412,9 +411,11 @@ html, body {
   padding: 0 16px;
 }
 
-.app-header .mdl-layout__drawer-button .material-icons {
+/* The drawer toggle button's gear icon is an inline SVG, injected into MDL's
+ * button in setupPlayer_ (main.js) and sized by the .demo-icon rule above. */
+.app-header .mdl-layout__drawer-button .material-icons svg {
   &:hover {
-    /* Spin the gear icon in the settings menu when hovered. */
+    /* Spin the gear icon when hovered. */
     transform: rotate(90deg);
   }
 
@@ -467,6 +468,9 @@ footer .mdl-mega-footer__link-list {
   /* Constrain to the window if necessary, so that it doesn't overflow small
    * mobile screens. */
   max-width: 100%;
+
+  /* A little vertical padding is needed to make it look balanced. */
+  padding: 1em 0;
 }
 
 /* When the drawer is open, MDL sets overflow: hidden on the main content
