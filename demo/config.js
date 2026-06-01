@@ -10,6 +10,7 @@ goog.provide('shakaDemo.Config');
 goog.require('goog.asserts');
 goog.require('shakaDemo.BoolInput');
 goog.require('shakaDemo.DatalistInput');
+goog.require('shakaDemo.Icons');
 goog.require('shakaDemo.InputContainer');
 goog.require('shakaDemo.NumberInput');
 goog.require('shakaDemo.SelectInput');
@@ -854,9 +855,7 @@ shakaDemo.Config = class {
       deleteBtn.classList.add(
           'pref-entry-delete', 'mdl-button', 'mdl-js-button',
           'mdl-button--icon');
-      const deleteIcon = document.createElement('i');
-      deleteIcon.classList.add('material-icons-round');
-      deleteIcon.textContent = 'close';
+      const deleteIcon = shakaDemo.Icons.makeSvgIcon(shakaDemo.Icons.CLOSE);
       deleteBtn.appendChild(deleteIcon);
       const indexForDelete = i;
       deleteBtn.addEventListener('click', () => {

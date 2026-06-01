@@ -43,14 +43,14 @@
   padding-bottom: 1%;
 
   button, div {
-    color: @general-font-color;
+    color: var(--shaka-font-color);
     font-size: initial;
   }
 }
 
 .shaka-ad-info {
-  font-size: @general-font-size;
-  color: @general-font-color;
+  font-size: var(--shaka-font-size);
+  color: var(--shaka-font-color);
   width: auto;
   padding: 0 5px;
 
@@ -66,12 +66,13 @@
   position: relative;
 
   /* This math is determining how far the button is from the right edge.
-   * Ad panel's parent is centered and @bottom-controls-width wide, so
-   * 100% - @bottom-controls-width = margins from both sides of the container.
+   * Ad panel's parent is centered and --shaka-controls-w wide, so
+   * 100% - --shaka-controls-w = margins from both sides of the
+   * container.
    * That divided by 2 is margin on one side, so we take that, and move the
    * button from its normal position to the right by that percentage.
    */
-  right: calc((100% - @bottom-controls-width) / 2 * -1);
+  right: calc((100% - var(--shaka-controls-w)) / 2 * -1);
   display: flex;
   flex-direction: row;
   margin: 0;
@@ -80,11 +81,15 @@
 
 .shaka-skip-ad-button {
   padding: 5px 15px;
-  background: rgba(0, 0, 0, 70%);
+  background: var(--shaka-bg);
   border: none;
 
   &:disabled {
-    background: rgba(0, 0, 0, 30%);
+    opacity: 0.5;
+  }
+
+  &:not([disabled]):hover {
+    background: var(--shaka-bg-hover);
   }
 
   cursor: pointer;
@@ -92,6 +97,6 @@
 
 .shaka-skip-ad-counter {
   padding: 5px;
-  background: rgba(0, 0, 0, 70%);
+  background: var(--shaka-bg);
   margin: 0;
 }

@@ -115,11 +115,9 @@ shaka.ui.SaveVideoFrameButton = class extends shaka.ui.Element {
   /** @override */
   updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
-
-    this.button_.ariaLabel =
-        this.localization.resolve(LocIds.DOWNLOAD_VIDEO_FRAME);
-    this.nameSpan_.textContent =
-        this.localization.resolve(LocIds.DOWNLOAD_VIDEO_FRAME);
+    const label = this.localization.resolve(LocIds.DOWNLOAD_VIDEO_FRAME);
+    this.button_.ariaLabel = label;
+    this.nameSpan_.textContent = label;
   }
 };
 

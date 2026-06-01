@@ -141,9 +141,9 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
   updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.castButton_.ariaLabel = this.localization.resolve(LocIds.CAST);
-    this.castNameSpan_.textContent =
-        this.localization.resolve(LocIds.CAST);
+    const label = this.localization.resolve(LocIds.CAST);
+    this.castButton_.ariaLabel = label;
+    this.castNameSpan_.textContent = label;
 
     // If we're not casting, string "not casting" will be displayed,
     // which needs localization.

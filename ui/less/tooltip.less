@@ -24,12 +24,6 @@
  * SOFTWARE.
  */
 
-@material-icons-width: 48px;
-
-.translateX(@percent) {
-  transform: translateX(percentage(@percent));
-}
-
 /* .shaka-tooltips-on enables the tooltips and is only added to the
  * control panel when the 'enableTooltips' option is set to true */
 .shaka-tooltips-on {
@@ -45,28 +39,28 @@
     &:active:after {
       content: attr(aria-label);
 
-      line-height: 20px;
+      line-height: 1.2;
       white-space: nowrap;
-      font-size: @general-font-size;
+      font-size: var(--shaka-font-size);
 
       /* Styling */
-      background: @general-background-color;
-      color: @general-font-color;
+      background: var(--shaka-bg);
+      color: var(--shaka-font-color);
       border-radius: 2px;
       padding: 2px 10px;
 
       /* Positioning */
       position: absolute;
-      bottom: @material-icons-width + 14px;
+      bottom: calc(var(--shaka-icon-size) + 14px);
 
       /* Left attribute is set to half of the width of the parent button */
-      left: calc(@material-icons-width / 2);
+      left: calc(var(--shaka-icon-size) / 2);
 
       /* The tooltip is also translated 50% to appear centered */
-      .translateX(-0.5);
+      transform: translateX(-50%);
 
       @media (prefers-reduced-transparency) {
-        background-color: @general-background-color-mostly-opaque;
+        background-color: var(--shaka-bg-90);
       }
     }
   }
@@ -77,7 +71,7 @@
       &:hover:after,
       &:focus-visible:after,
       &:active:after {
-        bottom: -1 * (@material-icons-width/2);
+        bottom: calc(var(--shaka-icon-size) / 2 * -1);
       }
     }
   }
@@ -88,14 +82,16 @@
       &:hover:after,
       &:focus-visible:after,
       &:active:after {
-        bottom: @material-icons-width;
+        bottom: var(--shaka-icon-size);
       }
     }
   }
 
   /* Adds an additional attribute for the status in .shaka-tooltip-status */
   & > .shaka-tooltip-status {
-    &:hover:after, &:focus-visible:after, &:active:after {
+    &:hover:after,
+    &:focus-visible:after,
+    &:active:after {
       content: attr(aria-label) " (" attr(shaka-status) ")";
     }
   }
@@ -103,18 +99,22 @@
   /* The first tooltip of the panel is not centered on top of the button
    * but rather aligned with the left border of the control panel */
   button:first-child {
-    &:hover:after, &:focus-visible:after, &:active:after {
+    &:hover:after,
+    &:focus-visible:after,
+    &:active:after {
       left: 0;
-      .translateX(0);
+      transform: translateX(0);
     }
   }
 
   /* The last tooltip of the panel is not centered on top of the button
    * but rather aligned with the right border of the control panel */
   button:last-child {
-    &:hover:after, &:focus-visible:after,&:active:after {
-      left: @material-icons-width;
-      .translateX(-1);
+    &:hover:after,
+    &:focus-visible:after,
+    &:active:after {
+      left: var(--shaka-icon-size);
+      transform: translateX(-100%);
     }
   }
 }

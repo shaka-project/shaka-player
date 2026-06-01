@@ -74,12 +74,13 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
   updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.button.ariaLabel = this.localization.resolve(LocIds.SUBTITLE_POSITION);
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
-    this.nameSpan.textContent =
-        this.localization.resolve(LocIds.SUBTITLE_POSITION);
-    this.backSpan.textContent =
-        this.localization.resolve(LocIds.SUBTITLE_POSITION);
+
+    const label = this.localization.resolve(LocIds.SUBTITLE_POSITION);
+
+    this.button.ariaLabel = label;
+    this.nameSpan.textContent = label;
+    this.backSpan.textContent = label;
 
     this.addTextPositions_();
   }

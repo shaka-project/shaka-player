@@ -56,9 +56,11 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
-    this.button.ariaLabel = this.localization.resolve(LocIds.VIDEO_TYPE);
-    this.nameSpan.textContent = this.localization.resolve(LocIds.VIDEO_TYPE);
-    this.backSpan.textContent = this.localization.resolve(LocIds.VIDEO_TYPE);
+
+    const label = this.localization.resolve(LocIds.VIDEO_TYPE);
+    this.button.ariaLabel = label;
+    this.nameSpan.textContent = label;
+    this.backSpan.textContent = label;
 
     this.updateVideoRoles_();
   }
