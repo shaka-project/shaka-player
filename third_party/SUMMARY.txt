@@ -6,7 +6,7 @@ closure-uri
     - Library stripped down to just URI parsing, and that stripped of all deps
 
 cml-cmcd
-  Common Media Library CMCD encoder + reporter, v2.3.0,
+  Common Media Library CMCD encoder + reporter, v2.4.0,
   by Streaming Video Technology Alliance / Casey Occhialini et al.
   Apache 2.0 license.
   https://github.com/streaming-video-technology-alliance/common-media-library
