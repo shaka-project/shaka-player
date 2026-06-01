@@ -17,18 +17,17 @@
 
   /* Set a special font for material design icons. */
   .shaka-ui-icon {
-    font-size: 24px;
+    font-size: var(--shaka-icon-size-sm);
   }
 
   /* Set the fonts for all other content. */
-  font-family: @general-font-family;
+  font-family: var(--shaka-font-family);
   font-weight: normal;
   -webkit-font-smoothing: antialiased;
 
   /* prevent text caret from showing when 'Navigate pages with a text cursor'
    * setting is enabled on chromium-based browsers */
   user-select: none;
-  -webkit-user-select: none;
 
   *,
   :after,
@@ -38,7 +37,7 @@
 
   /* stylelint-disable max-line-length, declaration-block-no-duplicate-properties, unit-no-unknown */
   &.pip-mode {
-    background-color: @general-background-color-opaque;
+    background-color: var(--shaka-bg-solid);
     // Old browsers
     width: 100vw;
     height: 100vh;
@@ -58,7 +57,7 @@
 .fullscreen-container() {
   .fill-container();
 
-  background-color: @general-background-color-opaque;
+  background-color: var(--shaka-bg-solid);
 
   .shaka-text-container,
   .shaka-speech-to-text-container {
@@ -69,9 +68,6 @@
   }
 }
 .shaka-video-container:fullscreen { .fullscreen-container(); }
-.shaka-video-container:-webkit-full-screen { .fullscreen-container(); }
-.shaka-video-container:-moz-full-screen { .fullscreen-container(); }
-.shaka-video-container:-ms-fullscreen { .fullscreen-container(); }
 
 /* The actual video element.  Sits inside .shaka-video-container and gives it a
  * size in non-fullscreen mode.  In fullscreen mode, the sizing relationship
@@ -146,7 +142,7 @@
 /* Container for controls positioned at the top of the video container:
  * controls button panel. */
 .shaka-top-controls {
-  width: @bottom-controls-width;
+  width: var(--shaka-controls-w);
   padding: 0;
 
   position: absolute;
@@ -163,7 +159,7 @@
 /* Container for controls positioned at the bottom of the video container:
  * controls button panel and the seek bar. */
 .shaka-bottom-controls {
-  width: @bottom-controls-width;
+  width: var(--shaka-controls-w);
   padding: 0;
 
   /* Position the bottom panel in front of other controls (play button and
@@ -221,8 +217,8 @@
 
     .center-children();
 
-    color: @general-font-color;
-    background-color: @general-background-color;
+    color: var(--shaka-font-color);
+    background-color: var(--shaka-bg);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 35%);
     cursor: pointer;
 
@@ -230,7 +226,7 @@
 
     &:not([disabled]):hover {
       transform: scale(1.06);
-      background-color: @general-background-color-hover;
+      background-color: var(--shaka-bg-hover);
     }
 
     &:not([disabled]):active {
@@ -256,13 +252,60 @@
 
 .shaka-video-container.pip-placeholder {
   .center-children();
+  flex-direction: column;
+  gap: 14px;
+  margin: auto;
 
+  // Clip the scaled poster so it never bleeds outside the player bounds.
+  overflow: hidden;
+
+  // Poster: contain, sharp, fills the placeholder at the bottom of the stack.
   .pip-poster {
-    height: 100%;
+    position: absolute;
+    inset: 0;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+  }
+
+  // Blur overlay: sits above the poster, blurs everything behind it and
+  // darkens slightly so the icon and label remain legible.
+  .pip-blur-overlay {
     position: absolute;
+    inset: 0;
+    backdrop-filter: blur(18px) brightness(0.55);
+    z-index: 1;
+  }
+
+  // Stacking context for everything above the poster.
+  .pip-icon-group {
+    position: relative;
+    .center-children();
+    z-index: 2;
+
+    // Size the group to the same footprint as the button so the ring
+    // is centered without extra markup.
+    width: 15%;
+    aspect-ratio: 1 / 1;
+  }
+
+  // Expanding pulse ring behind the button.
+  .pip-pulse-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 35%);
+    animation: pip-pulse 2s ease-out infinite;
+    pointer-events: none;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+
+  @keyframes pip-pulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(1.9); opacity: 0; }
   }
 
   .shaka-ui-icon {
@@ -271,24 +314,28 @@
   }
 
   .pip-icon-wrapper {
-    width: 15%;
+    width: 100%;
     aspect-ratio: 1 / 1;
     border-radius: 50%;
+    position: relative;
 
     .center-children();
 
-    color: @general-font-color;
-    background-color: @general-background-color;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 35%);
+    color: var(--shaka-font-color);
+    background-color: rgba(0, 0, 0, 45%);
+    border: 1.5px solid rgba(255, 255, 255, 25%);
+    backdrop-filter: blur(6px);
     cursor: pointer;
 
-    transition: transform 0.18s ease-out, background-color 0.18s ease-out;
-
-    z-index: 1;
+    transition:
+      transform 0.18s ease-out,
+      background-color 0.18s ease-out,
+      border-color 0.18s ease-out;
 
     &:hover {
       transform: scale(1.06);
-      background-color: @general-background-color-hover;
+      background-color: rgba(0, 0, 0, 62%);
+      border-color: rgba(255, 255, 255, 45%);
     }
 
     &:active {
@@ -298,6 +345,21 @@
     @media (prefers-reduced-motion: reduce) {
       transition: none;
     }
+  }
+
+  // Descriptive label below the button.
+  .pip-label {
+    position: relative;
+    z-index: 2;
+    margin: 0;
+    font-size: var(--shaka-title-size);
+    color: rgba(255, 255, 255, 55%);
+    letter-spacing: 0.04em;
+    text-align: center;
+    pointer-events: none;
+
+    // Subtle text shadow so it reads on any poster colour.
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 80%);
   }
 }
 
@@ -326,7 +388,7 @@
 
   /* Make sure we don't inherit odd font sizes and styles from the environment.
    * TODO: When did this happen?  What forced us to do this? */
-  font-size: 12px;
+  font-size: var(--shaka-font-size-sm);
   font-weight: normal;
   font-style: normal;
 
@@ -339,11 +401,10 @@
    * have these characteristics by default. */
   & > * {
     /* White text or button icons. */
-    color: @general-font-color;
+    color: var(--shaka-font-color);
 
-    /* 48px tall controls. */
-    height: 48px;
-    width: 48px;
+    height: var(--shaka-icon-size);
+    width: var(--shaka-icon-size);
 
     /* Consistent alignment of buttons. */
     line-height: 0.5;
@@ -357,7 +418,7 @@
     cursor: pointer;
     opacity: 0.9;
     transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 100ms;
-    text-shadow: 0 0 2px @general-background-color;
+    text-shadow: 0 0 2px var(--shaka-bg);
 
     /* Use a bit larger icons for some buttons */
     &.shaka-fast-forward-button,
@@ -366,21 +427,16 @@
     &.shaka-skip-previous-button,
     &.shaka-skip-next-button {
       .shaka-ui-icon {
-        font-size: 32px;
+        font-size: var(--shaka-icon-size-lg);
       }
     }
 
-    &.shaka-fullscreen-button {
-      .shaka-ui-icon {
-        font-size: 24px;
-      }
-    }
-
+    &.shaka-fullscreen-button,
     &.shaka-overflow-menu-button {
       position: relative;
 
       .shaka-ui-icon {
-        font-size: 24px;
+        font-size: var(--shaka-icon-size-sm);
       }
     }
 
@@ -397,78 +453,112 @@
   display: none;
 }
 
-.shaka-statistics-container {
-  overflow-x: hidden;
-  overflow-y: auto;
-
-  scrollbar-color: @general-font-color @general-background-color;
-  scrollbar-width: thin;
-
-  min-width: 300px;
-
-  color: @general-font-color;
-  background-color: rgba(35, 35, 35, 90%);
-
-  font-size: @general-font-size;
-
-  padding: 5px 10px;
-  border-radius: 2px;
-
-  position: absolute;
-  z-index: 2;
-  left: 15px;
-  top: 15px;
-
-  max-height: calc(100% - 115px);
-
-  /* Fades out with the other controls. */
-  .show-when-controls-shown();
-
-  div {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  span {
-    color: rgb(150, 150, 150);
-  }
-}
-
+.shaka-statistics-container,
 .shaka-ad-statistics-container {
   overflow-x: hidden;
   overflow-y: auto;
 
-  scrollbar-color: @general-font-color @general-background-color;
+  scrollbar-color: rgba(255, 255, 255, 15%) transparent;
   scrollbar-width: thin;
 
-  min-width: 150px;
+  color: var(--shaka-font-color);
+  background-color: rgba(12, 14, 18, 88%);
+  border: 1px solid rgba(255, 255, 255, 8%);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 50%);
 
-  color: @general-font-color;
-  background-color: rgba(35, 35, 35, 90%);
+  font-size: var(--shaka-font-size);
+  font-family: monospace;
 
-  font-size: @general-font-size;
-
-  padding: 5px 10px;
-  border-radius: 2px;
+  padding: 0;
+  border-radius: 10px;
 
   position: absolute;
   z-index: 2;
-  right: 15px;
   top: 15px;
 
   max-height: calc(100% - 115px);
 
-  /* Fades out with the other controls. */
   .show-when-controls-shown();
 
+  /* Header bar (close button row) */
+  .shaka-statistics-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 7%);
+
+    svg {
+      width: 16px;
+      height: 16px;
+      opacity: 0.35;
+      cursor: pointer;
+      transition: opacity 0.15s;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  /* Section group labels */
+  .shaka-statistics-section-label {
+    display: block;
+    padding: 8px 14px 3px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 70%);
+  }
+
+  /* Dividers between groups */
+  .shaka-statistics-divider {
+    display: block;
+    height: 1px;
+    background: rgba(255, 255, 255, 6%);
+    margin: 6px 14px;
+    padding: 0;
+  }
+
+  /* Stat rows */
   div {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    padding: 3px 14px;
+    gap: 16px;
+    transition: background 0.1s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 3%);
+    }
   }
 
-  span {
-    color: rgb(150, 150, 150);
+  /* Row labels */
+  label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 45%);
+    white-space: nowrap;
   }
+
+  /* Row values */
+  span {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 90%);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+}
+
+.shaka-statistics-container {
+  min-width: 280px;
+  left: 15px;
+}
+
+.shaka-ad-statistics-container {
+  min-width: 220px;
+  right: 15px;
 }
 
 .shaka-scrim-container {
@@ -513,7 +603,7 @@
   /* These are defaults which are overridden by JS or cue styles. */
   font-size: 20px;
   line-height: 1.4;  // relative to font size.
-  color: @general-font-color;
+  color: var(--shaka-font-color);
 
   span.shaka-text-wrapper {
     display: inline;

@@ -1,0 +1,10 @@
+# Transmuxer Worker bundle.
+# This build type produces a standalone script to be loaded in a Web Worker.
+# It includes all transmuxer plugins and the worker entry point.
+
++../../lib/device/apple_browser.js
++../../lib/device/default_browser.js
++@devices
++../../lib/transmuxer/loc_transmuxer.js
++../../lib/transmuxer/transmuxer_worker.js
++@transmuxer

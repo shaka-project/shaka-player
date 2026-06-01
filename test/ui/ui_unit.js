@@ -316,6 +316,9 @@ describe('UI', () => {
             'overflow_menu',
           ],
           customContextMenu: false,
+          documentPictureInPicture: {
+            enabled: false,
+          },
         };
         const ui = await UiUtils.createUIThroughAPI(
             videoContainer, video, config);
@@ -1287,22 +1290,40 @@ describe('UI', () => {
 
       it('displays all the available statistics', () => {
         const skippedStats = ['stateHistory', 'switchHistory'];
-        const nodes = statisticsContainer.childNodes;
-        // First index is close button.
-        let nodeIndex = 1;
+
+        /**
+         * Returns the stat node by label name.
+         * @param {string} name
+         * @return {?Node}
+         */
+        function getStatsElementByName(name) {
+          const nodes = statisticsContainer.childNodes;
+
+          for (const node of nodes) {
+            if (node.hasChildNodes() &&
+                node.childNodes.length >= 2 &&
+                node.childNodes[0].textContent.replace(':', '') == name) {
+              return node;
+            }
+          }
+
+          return null;
+        }
 
         for (const statistic in new shaka.util.Stats().getBlob()) {
-          if (!skippedStats.includes(statistic)) {
-            // Text content of label (without ':') is a valid statistic
-            const label = nodes[nodeIndex].childNodes[0].textContent;
-            expect(label.replace(':', '')).toBe(statistic);
-
-            // Value has been parsed and it is not the default 'NaN'
-            const value = nodes[nodeIndex].childNodes[1].textContent;
-            expect(value).not.toBe('NaN');
-
-            nodeIndex += 1;
+          if (skippedStats.includes(statistic)) {
+            continue;
           }
+
+          const node = getStatsElementByName(statistic);
+
+          expect(node).not.toBe(null);
+
+          const label = node.childNodes[0].textContent;
+          expect(label.replace(':', '')).toBe(statistic);
+
+          const value = node.childNodes[1].textContent;
+          expect(value).not.toBe('NaN');
         }
       });
 

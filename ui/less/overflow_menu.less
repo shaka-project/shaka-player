@@ -25,14 +25,16 @@
   overflow-x: hidden;
   overflow-y: auto;
 
-  scrollbar-color: @general-font-color @general-background-color;
+  scrollbar-color:
+    var(--shaka-font-color)
+    var(--shaka-bg);
   scrollbar-width: thin;
 
   /* Don't wrap text to the next line. */
   white-space: nowrap;
 
   /* Styles for the menu itself. */
-  background: rgba(28, 28, 28, 90%);
+  background: var(--shaka-bg-menu);
   border-radius: 12px;
   max-height: 250px;
   min-width: 190px;
@@ -50,13 +52,13 @@
   /* Where the menu appears. */
   position: absolute;
   z-index: 2;
-  bottom: @material-icons-width + 14px;
+  bottom: calc(var(--shaka-icon-size) + 14px);
 
   /* The buttons inside the menu. */
   button {
-    font-size: @general-font-size;
+    font-size: var(--shaka-font-size);
     background: transparent;
-    color: @general-font-color;
+    color: var(--shaka-font-color);
     border: none;
     border-radius: 12px;
     min-height: 30px;
@@ -100,7 +102,7 @@
 
   // If the seekbar is missing, this is positioned lower.
   &.shaka-low-position {
-    bottom: @material-icons-width;
+    bottom: var(--shaka-icon-size);
   }
 }
 
@@ -131,14 +133,30 @@
 
 .shaka-overflow-button-label-inline {
   box-sizing: border-box;
+  display: flex;
   flex-direction: row;
   justify-content: space-between;
-  width: calc(100% - 24px);
-  padding-right: 28px;
-  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjRweCIgZmlsbD0iI2VlZWVlZSI+PHBhdGggZD0iTTAgMGgyNHYyNEgwVjB6IiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTguNTkgMTYuNTlMMTMuMTcgMTIgOC41OSA3LjQxIDEwIDZsNiA2LTYgNi0xLjQxLTEuNDF6Ii8+PC9zdmc+");
-  background-repeat: no-repeat;
-  background-position: right 5px center;
-  background-size: 24px 24px;
+
+  width: calc(100% - var(--shaka-icon-size-sm));
+  padding-right: calc(var(--shaka-icon-size-sm) + 8px);
+
+  position: relative;
+
+  &:after {
+    content: "";
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    width: var(--shaka-icon-size-sm);
+    height: var(--shaka-icon-size-sm);
+
+    background-color: var(--shaka-font-color);
+
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z'/%3E%3C/svg%3E") no-repeat center;
+    mask-size: contain;
+  }
 }
 
 .shaka-simple-overflow-button-label-inline {
@@ -153,21 +171,21 @@
  * language, the currently-selected resolution, etc. */
 .shaka-current-selection-span {
   /* This is dimmer than the other span, which is the name of the submenu. */
-  font-size: 12px;
+  font-size: var(--shaka-font-size-sm);
   padding-left: 10px;
 }
 
 .shaka-current-auto-quality {
   margin-left: 5px;
   font-size: 11px;
-  color: @general-font-color-secondary;
+  color: var(--shaka-font-color-secondary);
 }
 
 .shaka-quality-mark,
 .shaka-current-quality-mark {
-  color: @quality-mark-hightlight-color;
+  color: var(--shaka-badge-active);
   margin-left: 2px !important;
-  font-size: 10px;
+  font-size: var(--shaka-badge-size);
   height: 17px;
 }
 
@@ -177,13 +195,12 @@
 
 .shaka-overflow-quality-mark,
 .shaka-overflow-playback-rate-mark {
-  background: @quality-mark-hightlight-color;
-  color: @quality-mark-color;
+  background: var(--shaka-badge-active);
+  color: var(--shaka-badge-color);
   border-radius: 2px;
-  font-family: @general-font-family;
-  font-size: 10px;
+  font-size: var(--shaka-badge-size);
   font-weight: bold;
-  line-height: 10px;
+  line-height: 1;
   text-shadow: none;
   padding: 1px;
   position: absolute;
@@ -221,6 +238,65 @@
   .shaka-chapter {
     /* TODO(b/116651454): eliminate hard-coded offsets */
     margin-left: 10px;
+  }
+
+  .shaka-queue-item {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    height: auto;
+    min-height: 30px;
+    white-space: normal;
+
+    // Highlight the currently-playing entry.
+    &.shaka-queue-item-current {
+      background: rgba(255, 255, 255, 8%);
+      border-radius: 8px;
+    }
+  }
+
+  .shaka-queue-poster {
+    width: 60px;
+    height: 34px;
+    overflow: hidden;
+    border-radius: 4px;
+    flex-shrink: 0;
+    position: relative;
+    background: rgba(255, 255, 255, 5%);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  .shaka-queue-item-text {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .shaka-queue-item-title {
+    margin-left: 0 !important;
+    // Multi-line: allow wrapping, no ellipsis.
+    white-space: normal;
+    word-break: break-word;
+    flex: 1;
+    min-width: 0;
+    max-width: 200px;
+    text-align: left;
+  }
+
+  .shaka-queue-item-text .shaka-ui-icon.shaka-chosen-item {
+    order: 1;
+    flex-shrink: 0;
+    align-self: center;
+    margin-left: 6px;
   }
 }
 

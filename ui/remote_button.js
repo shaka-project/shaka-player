@@ -14,7 +14,6 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -70,25 +69,14 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     this.callbackId_ = -1;
 
     // Setup strings in the correct language
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
 
     shaka.ui.Utils.setDisplay(this.remoteButton_, false);
 
     /** @private {?RemotePlayback} */
     this.remote_ = device.getRemote(this.video);
 
-    if (!this.remote_) {
-      this.remoteButton_.classList.add('shaka-hidden');
-    } else {
-      this.eventManager.listenMulti(
-          this.localization,
-          [
-            shaka.ui.Localization.LOCALE_UPDATED,
-            shaka.ui.Localization.LOCALE_CHANGED,
-          ], () => {
-            this.updateLocalizedStrings_();
-          });
-
+    if (this.remote_) {
       this.eventManager.listen(this.controls, 'caststatuschanged', () => {
         this.updateRemoteState_();
       });
@@ -114,17 +102,6 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
       this.eventManager.listen(this.player, 'loaded', () => {
         this.updateRemoteState_();
       });
-
-      if (this.isSubMenu) {
-        this.eventManager.listenMulti(
-            this.controls,
-            [
-              'submenuopen',
-              'submenuclose',
-            ], () => {
-              this.updateRemoteState_(/* force= */ true);
-            });
-      }
 
       this.updateRemoteState_(/* force= */ true);
       this.updateIcon_();
@@ -201,10 +178,8 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         this.remote_?.state == 'connected' ? 'true' : 'false';
   }
 
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
     const text = this.isAirPlay_ ?
         this.localization.resolve(LocIds.AIRPLAY) :
@@ -225,6 +200,11 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     } else {
       this.remoteIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['EXIT_CAST']);
     }
+  }
+
+  /** @override */
+  checkAvailability() {
+    this.updateRemoteState_(/* force= */ true);
   }
 };
 

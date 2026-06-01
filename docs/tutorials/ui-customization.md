@@ -91,6 +91,10 @@ The following elements can be added to the UI bar using this configuration value
   is visible only if there is more than 1 item in the queue.
 * skip_previous_always: adds a button to skip to previous element in the queue.  The button
   is visible only if there is more than 1 item in the queue.
+* queue: adds a button that opens a menu listing all items in the playback queue.
+  Each item displays its title and, if available, a poster thumbnail. The currently
+  playing item is highlighted with a checkmark. The button is visible only if there
+  is more than 1 item in the queue with a title in its metadata.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 [Document Picture-in-Picture API]: https://developer.chrome.com/docs/web-platform/document-picture-in-picture/
 
@@ -124,6 +128,10 @@ The following buttons can be added to the overflow menu:
   The button is visible only if the content has at least one text track.
 * captions-size: adds a button that controls the size of the captions.
   The button is visible only if the content has at least one text track.
+* queue: adds a button that opens a menu listing all items in the playback queue.
+  Each item displays its title and, if available, a poster thumbnail. The currently
+  playing item is highlighted with a checkmark. The button is visible only if there
+  is more than 1 item in the queue with a title in its metadata.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:
@@ -342,6 +350,45 @@ uiConfig['controlPanelElements'] = ['rewind', 'fast_forward', 'skip'];
 ```
 <!-- TODO: Create a doc on best a11y practices for custom buttons and link to the
   localization docs explaining how to take advantage of our localization system. -->
+
+#### Customizing the UI with CSS variables
+
+Shaka Player UI exposes styling through CSS custom properties defined on the :root.
+
+This allows applications to easily theme the player without modifying the source CSS.
+
+##### Example
+```css
+:root {
+  /* Layout */
+  --shaka-controls-w: 98%;
+
+  /* Typography */
+  --shaka-font-family: roboto, sans-serif;
+  --shaka-font-color: white;
+  --shaka-font-size: 14px;
+
+  /* Backgrounds */
+  --shaka-bg: rgba(0, 0, 0, 0.5);
+  --shaka-bg-hover: rgba(0, 0, 0, 0.75);
+
+  /* Controls */
+  --shaka-thumb-color: white;
+  --shaka-track-color: white;
+}
+```
+
+##### Using modern vs legacy builds
+
+If you are using the modern UI build, CSS custom properties are preserved and can be overridden at runtime.
+
+If you are using the legacy UI build, CSS custom properties are processed at build time for compatibility, but the variables remain in the output CSS and include fallback values for older browsers that do not support them.
+
+##### Recommendation
+
+Use:
+- controls.modern.css → when targeting modern browsers (recommended)
+- controls.css → when supporting older browsers
 
 ####  Shaka Theme Gallery
 <!-- cspell: disable-next-line -->

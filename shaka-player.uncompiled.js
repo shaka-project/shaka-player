@@ -118,6 +118,7 @@ goog.require('shaka.ui.PipButton');
 goog.require('shaka.ui.PlayButton');
 goog.require('shaka.ui.PlaybackRateSelection');
 goog.require('shaka.ui.PresentationTimeTracker');
+goog.require('shaka.ui.QueueButton');
 goog.require('shaka.ui.RecenterVRButton');
 goog.require('shaka.ui.RemoteButton');
 goog.require('shaka.ui.ResolutionSelection');

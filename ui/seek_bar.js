@@ -11,7 +11,6 @@ goog.require('shaka.ads.Utils');
 goog.require('shaka.net.NetworkingEngine');
 goog.require('shaka.net.NetworkingUtils');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.RangeElement');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -179,15 +178,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.controls.hideSettingsMenus();
     });
 
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateAriaLabel_();
-        });
-
     this.eventManager.listen(
         this.adManager, shaka.ads.Utils.AD_STARTED, () => {
           if (!this.shouldBeDisplayed_()) {
@@ -254,7 +244,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // Initialize seek state and label.
     this.setValue(this.video.currentTime);
     this.update();
-    this.updateAriaLabel_();
+    this.updateLocalizedStrings();
 
     if (this.ad) {
       // There was already an ad.
@@ -461,8 +451,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
-    const gradient = ['to right'];
-    let pointsAsFractions = [];
+    const rects = [];
     const adBreakColor = this.config_.seekBarColors.adBreaks;
     let postRollAd = false;
     for (const point of this.adCuePoints_) {
@@ -486,42 +475,29 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           endFrac = (endDist / seekRangeSize) || 0;
         }
 
-        pointsAsFractions.push({
-          start: startFrac,
-          end: endFrac,
+        rects.push({
+          position: (startFrac * 100) + '%',
+          width: ((endFrac - startFrac) * 100) + '%',
         });
       }
     }
 
-    pointsAsFractions = pointsAsFractions.sort((a, b) => {
-      return a.start - b.start;
-    });
-
-    for (const point of pointsAsFractions) {
-      gradient.push(this.makeColor_('transparent', point.start));
-      gradient.push(this.makeColor_(adBreakColor, point.start));
-      gradient.push(this.makeColor_(adBreakColor, point.end));
-      gradient.push(this.makeColor_('transparent', point.end));
-    }
-
     if (postRollAd) {
-      gradient.push(this.makeColor_('transparent', 0.99));
-      gradient.push(this.makeColor_(adBreakColor, 0.99));
+      rects.push({position: '99%', width: '1%'});
     }
     this.adMarkerContainer_.style.background =
-            'linear-gradient(' + gradient.join(',') + ')';
+            this.buildLayeredBackground_(rects, adBreakColor);
   }
 
   /**
    * @private
    */
   markChapters_() {
-    const gradient = ['to right'];
-    const chapterColor = this.config_.seekBarColors.chapters;
+    const color = this.config_.seekBarColors.chapters;
 
     const chapters = this.controls.getChapters();
 
-    if (!chapters.length || !chapterColor || chapterColor === 'transparent') {
+    if (!chapters.length || !color || color === 'transparent') {
       this.chapterMarkerContainer_.style.background = 'transparent';
       this.chaptersTimer_?.stop();
       return;
@@ -560,19 +536,13 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       return;
     }
 
-    const sortedPoints = Array.from(points).sort((a, b) => a - b);
-    for (const point of sortedPoints) {
-      const start = ((point - seekRange.start) / seekRangeSize) * 100 + '%';
-      const end = `calc(${start} + 2px)`;
-
-      gradient.push(`transparent ${start}`);
-      gradient.push(`${chapterColor} ${start}`);
-      gradient.push(`${chapterColor} ${end}`);
-      gradient.push(`transparent ${end}`);
-    }
+    const rects = Array.from(points).map((point) => ({
+      position: ((point - seekRange.start) / seekRangeSize) * 100 + '%',
+      width: '2px',
+    }));
 
     this.chapterMarkerContainer_.style.background =
-        'linear-gradient(' + gradient.join(',') + ')';
+            this.buildLayeredBackground_(rects, color);
   }
 
 
@@ -584,6 +554,21 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    */
   makeColor_(color, fraction) {
     return color + ' ' + (fraction * 100) + '%';
+  }
+
+  /**
+   * @param {!Array<{ position: string, width: string }>} rects
+   * @param {string} color
+   * @private
+   */
+  buildLayeredBackground_(rects, color) {
+    if (!rects.length || !color || color === 'transparent') {
+      return 'transparent';
+    }
+    return rects
+        .map(({position, width}) =>
+          `linear-gradient(${color}) ${position} / ${width} 100% no-repeat`)
+        .join(',');
   }
 
 
@@ -632,8 +617,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     return this.ad == null || !this.ad.isLinear();
   }
 
-  /** @private */
-  updateAriaLabel_() {
+  /** @override */
+  updateLocalizedStrings() {
     this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.SEEK);
   }
 
