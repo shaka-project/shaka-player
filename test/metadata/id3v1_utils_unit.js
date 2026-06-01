@@ -29,7 +29,7 @@ describe('Id3V1Utils', () => {
     data[126] = 7;
     data[127] = 13;
 
-    const frames = Id3V1Utils.getID3v1Frames(data);
+    const frames = new Id3V1Utils().parse(data);
 
     expect(frames).toEqual(jasmine.arrayContaining([
       jasmine.objectContaining({
@@ -52,7 +52,7 @@ describe('Id3V1Utils', () => {
   });
 
   it('returns empty array when no ID3v1 tag exists', () => {
-    const frames = Id3V1Utils.getID3v1Frames(new Uint8Array(128));
+    const frames = new Id3V1Utils().parse(new Uint8Array(128));
 
     expect(frames).toEqual([]);
   });

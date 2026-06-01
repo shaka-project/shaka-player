@@ -120,7 +120,7 @@ describe('IlstUtils', () => {
 
   /**
    * Wrap ILST children in the moov > udta > meta(full) > ilst structure
-   * expected by IlstUtils.parse().
+   * expected by new IlstUtils().parse().
    *
    * Each argument is an Array<number> representing one child box.
    *
@@ -143,12 +143,12 @@ describe('IlstUtils', () => {
   // ---------------------------------------------------------------------------
 
   it('empty data returns empty array', () => {
-    expect(IlstUtils.parse(new Uint8Array([]))).toEqual([]);
+    expect(new IlstUtils().parse(new Uint8Array([]))).toEqual([]);
   });
 
   it('empty ilst box returns empty array', () => {
     const data = buildMp4(/* no children */);
-    expect(IlstUtils.parse(data)).toEqual([]);
+    expect(new IlstUtils().parse(data)).toEqual([]);
   });
 
   // ---------------------------------------------------------------------------
@@ -158,7 +158,7 @@ describe('IlstUtils', () => {
   it('parses a UTF-8 text atom and maps its key to the ID3 equivalent', () => {
     const data = buildMp4(ilstChild('©nam', 1, ascii('Shaka')));
 
-    expect(IlstUtils.parse(data)).toEqual([{
+    expect(new IlstUtils().parse(data)).toEqual([{
       key: 'TIT2',
       data: 'Shaka',
       description: '',
@@ -169,7 +169,7 @@ describe('IlstUtils', () => {
 
   it('strips embedded null characters from UTF-8 values', () => {
     const data = buildMp4(ilstChild('©nam', 1, [...ascii('Shaka'), 0, 0]));
-    const frames = IlstUtils.parse(data);
+    const frames = new IlstUtils().parse(data);
     expect(frames[0].data).toBe('Shaka');
   });
 
@@ -192,7 +192,7 @@ describe('IlstUtils', () => {
 
     for (const [ilstKey, id3Key] of mapping) {
       const data = buildMp4(ilstChild(ilstKey, 1, ascii('test')));
-      const frames = IlstUtils.parse(data);
+      const frames = new IlstUtils().parse(data);
       expect(frames[0].key)
           .withContext(`${ilstKey} → ${id3Key}`)
           .toBe(id3Key);
@@ -201,14 +201,14 @@ describe('IlstUtils', () => {
 
   it('passes through unrecognised ILST keys unchanged', () => {
     const data = buildMp4(ilstChild('xyzz', 1, ascii('value')));
-    const frames = IlstUtils.parse(data);
+    const frames = new IlstUtils().parse(data);
     expect(frames[0].key).toBe('xyzz');
   });
 
   it('treats atoms with unknown type flags as UTF-8 text', () => {
     // flags = 99 is not defined by iTunes; the default branch returns text.
     const data = buildMp4(ilstChild('©nam', 99, ascii('Shaka')));
-    const frames = IlstUtils.parse(data);
+    const frames = new IlstUtils().parse(data);
     expect(frames[0].data).toBe('Shaka');
   });
 
@@ -219,7 +219,7 @@ describe('IlstUtils', () => {
   it('parses a JPEG cover art atom as an APIC frame with image/jpeg', () => {
     const imageBytes = [0xff, 0xd8, 0xff, 0xe0, 0x01, 0x02];
     const data = buildMp4(ilstChild('covr', 13, imageBytes));
-    const frames = IlstUtils.parse(data);
+    const frames = new IlstUtils().parse(data);
 
     expect(frames).toEqual([{
       key: 'APIC',
@@ -233,7 +233,7 @@ describe('IlstUtils', () => {
   it('parses a PNG cover art atom as an APIC frame with image/png', () => {
     const imageBytes = [0x89, 0x50, 0x4e, 0x47];
     const data = buildMp4(ilstChild('covr', 14, imageBytes));
-    const frames = IlstUtils.parse(data);
+    const frames = new IlstUtils().parse(data);
 
     expect(frames[0].mimeType).toBe('image/png');
     expect(frames[0].pictureType).toBe(3);
@@ -246,37 +246,37 @@ describe('IlstUtils', () => {
 
   it('parses a 1-byte signed integer (flags = 21)', () => {
     const data = buildMp4(ilstChild('tmpo', 21, [120]));
-    expect(IlstUtils.parse(data)[0].data).toBe(120);
+    expect(new IlstUtils().parse(data)[0].data).toBe(120);
   });
 
   it('parses a 2-byte signed integer (flags = 21)', () => {
     // 0x00C8 = 200
     const data = buildMp4(ilstChild('tmpo', 21, [0x00, 0xc8]));
-    expect(IlstUtils.parse(data)[0].data).toBe(200);
+    expect(new IlstUtils().parse(data)[0].data).toBe(200);
   });
 
   it('sign-extends a negative 3-byte integer (flags = 21)', () => {
     // 0x800000 with sign extension = -8388608
     const data = buildMp4(ilstChild('tmpo', 21, [0x80, 0x00, 0x00]));
-    expect(IlstUtils.parse(data)[0].data).toBe(-8388608);
+    expect(new IlstUtils().parse(data)[0].data).toBe(-8388608);
   });
 
   it('parses a positive 3-byte integer (flags = 21)', () => {
     // 0x000003 = 3
     const data = buildMp4(ilstChild('tmpo', 21, [0x00, 0x00, 0x03]));
-    expect(IlstUtils.parse(data)[0].data).toBe(3);
+    expect(new IlstUtils().parse(data)[0].data).toBe(3);
   });
 
   it('parses a 4-byte negative signed integer (flags = 21)', () => {
     // 0xFFFFFF9C = -100 as Int32
     const data = buildMp4(ilstChild('tmpo', 21, [0xff, 0xff, 0xff, 0x9c]));
-    expect(IlstUtils.parse(data)[0].data).toBe(-100);
+    expect(new IlstUtils().parse(data)[0].data).toBe(-100);
   });
 
   it('parses a 4-byte positive signed integer (flags = 21)', () => {
     // 0x000001F4 = 500
     const data = buildMp4(ilstChild('tmpo', 21, [0x00, 0x00, 0x01, 0xf4]));
-    expect(IlstUtils.parse(data)[0].data).toBe(500);
+    expect(new IlstUtils().parse(data)[0].data).toBe(500);
   });
 
   // ---------------------------------------------------------------------------
@@ -287,7 +287,7 @@ describe('IlstUtils', () => {
     // Layout: 2 bytes padding, uint16BE index, uint16BE total, 2 bytes optional
     const value = [0x00, 0x00, 0x00, 0x03, 0x00, 0x0c, 0x00, 0x00]; // 3/12
     const data = buildMp4(ilstChild('trkn', 21, value));
-    const frames = IlstUtils.parse(data);
+    const frames = new IlstUtils().parse(data);
 
     expect(frames[0].key).toBe('TRCK');
     expect(frames[0].data).toBe('3/12');
@@ -296,7 +296,7 @@ describe('IlstUtils', () => {
   it('parses trkn atom as plain index string when total = 0', () => {
     const value = [0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00]; // 5
     const data = buildMp4(ilstChild('trkn', 21, value));
-    const frames = IlstUtils.parse(data);
+    const frames = new IlstUtils().parse(data);
 
     expect(frames[0].key).toBe('TRCK');
     expect(frames[0].data).toBe('5');
@@ -305,7 +305,7 @@ describe('IlstUtils', () => {
   it('parses disk atom as "index/total" when total > 0', () => {
     const value = [0x00, 0x00, 0x00, 0x02, 0x00, 0x03, 0x00, 0x00]; // 2/3
     const data = buildMp4(ilstChild('disk', 21, value));
-    const frames = IlstUtils.parse(data);
+    const frames = new IlstUtils().parse(data);
 
     expect(frames[0].key).toBe('TPOS');
     expect(frames[0].data).toBe('2/3');
@@ -315,7 +315,7 @@ describe('IlstUtils', () => {
     // The trkn special case requires raw.length >= 6.  With 4 bytes it falls
     // through to the integer switch without throwing.
     const data = buildMp4(ilstChild('trkn', 21, [0x00, 0x00, 0x00, 0x05]));
-    expect(() => IlstUtils.parse(data)).not.toThrow();
+    expect(() => new IlstUtils().parse(data)).not.toThrow();
   });
 
   // ---------------------------------------------------------------------------
@@ -328,7 +328,7 @@ describe('IlstUtils', () => {
         freeformChild('com.apple.iTunes', 'iTunSMPB', 1, ascii('0 2112 840')),
     );
 
-    expect(IlstUtils.parse(data)).toEqual([{
+    expect(new IlstUtils().parse(data)).toEqual([{
       key: 'iTunSMPB',
       data: '0 2112 840',
       description: 'Domain: com.apple.iTunes',
@@ -341,7 +341,7 @@ describe('IlstUtils', () => {
     const data = buildMp4(
         freeformChild('', 'myTag', 1, ascii('hello')),
     );
-    const frames = IlstUtils.parse(data);
+    const frames = new IlstUtils().parse(data);
     expect(frames[0].description).toBe('');
   });
 
@@ -352,7 +352,7 @@ describe('IlstUtils', () => {
     const child = basicBox('----', [...meanBox, ...dataBytes]);
     const data = buildMp4(child);
 
-    expect(IlstUtils.parse(data)).toEqual([]);
+    expect(new IlstUtils().parse(data)).toEqual([]);
   });
 
   it('skips a freeform atom when the data box is absent', () => {
@@ -362,7 +362,7 @@ describe('IlstUtils', () => {
     const child = basicBox('----', [...meanBox, ...nameBox]);
     const data = buildMp4(child);
 
-    expect(IlstUtils.parse(data)).toEqual([]);
+    expect(new IlstUtils().parse(data)).toEqual([]);
   });
 
   // ---------------------------------------------------------------------------
@@ -375,7 +375,7 @@ describe('IlstUtils', () => {
         ilstChild('©ART', 1, ascii('Hans Zimmer')),
         ilstChild('©alb', 1, ascii('Blade Runner 2049 OST')),
     );
-    const frames = IlstUtils.parse(data);
+    const frames = new IlstUtils().parse(data);
 
     expect(frames.length).toBe(3);
     expect(frames.find((f) => f.key === 'TIT2').data).toBe('Blade Runner 2049');
@@ -389,7 +389,7 @@ describe('IlstUtils', () => {
         ilstChild('©nam', 1, ascii('Title')),
         freeformChild('com.apple.iTunes', 'iTunSMPB', 1, ascii('smpb')),
     );
-    const frames = IlstUtils.parse(data);
+    const frames = new IlstUtils().parse(data);
 
     expect(frames.length).toBe(2);
     expect(frames.find((f) => f.key === 'TIT2')).toBeDefined();
@@ -407,8 +407,8 @@ describe('IlstUtils', () => {
     const malformed = [...uint32BE(4), ...ascii('©nam')];
     const data = buildMp4(malformed);
 
-    expect(() => IlstUtils.parse(data)).not.toThrow();
-    expect(IlstUtils.parse(data)).toEqual([]);
+    expect(() => new IlstUtils().parse(data)).not.toThrow();
+    expect(new IlstUtils().parse(data)).toEqual([]);
   });
 
   // eslint-disable-next-line @stylistic/max-len
@@ -426,9 +426,9 @@ describe('IlstUtils', () => {
     ];
     const data = buildMp4(fakeChild);
 
-    expect(() => IlstUtils.parse(data)).not.toThrow();
+    expect(() => new IlstUtils().parse(data)).not.toThrow();
     // The clamped payload is still a valid data box, so the frame parses.
-    const frames = IlstUtils.parse(data);
+    const frames = new IlstUtils().parse(data);
     expect(frames[0].key).toBe('TIT2');
     expect(frames[0].data).toBe('Shaka');
   });
@@ -436,7 +436,7 @@ describe('IlstUtils', () => {
   it('does not throw when a freeform atom contains no sub-boxes', () => {
     const emptyFreeform = basicBox('----', []);
     const data = buildMp4(emptyFreeform);
-    expect(() => IlstUtils.parse(data)).not.toThrow();
-    expect(IlstUtils.parse(data)).toEqual([]);
+    expect(() => new IlstUtils().parse(data)).not.toThrow();
+    expect(new IlstUtils().parse(data)).toEqual([]);
   });
 });

@@ -165,16 +165,16 @@ describe('VorbisUtils', () => {
   }
 
   // ---------------------------------------------------------------------------
-  // getVorbisComments – dispatch
+  // parse – dispatch
   // ---------------------------------------------------------------------------
 
   it('empty data returns empty output', () => {
-    expect(VorbisUtils.getVorbisComments(new Uint8Array([]))).toEqual([]);
+    expect(new VorbisUtils().parse(new Uint8Array([]))).toEqual([]);
   });
 
   it('non-FLAC non-OGG data returns empty output', () => {
     const data = new Uint8Array([0x00, 0x01, 0x02, 0x03]);
-    expect(VorbisUtils.getVorbisComments(data)).toEqual([]);
+    expect(new VorbisUtils().parse(data)).toEqual([]);
   });
 
   // ---------------------------------------------------------------------------
@@ -185,7 +185,7 @@ describe('VorbisUtils', () => {
     const body = vorbisCommentBody('', ['TITLE=Shaka']);
     const data = flac([flacBlock(4, /* isLast= */ true, body)]);
 
-    expect(VorbisUtils.getVorbisComments(data)).toEqual([{
+    expect(new VorbisUtils().parse(data)).toEqual([{
       key: 'TIT2',
       data: 'Shaka',
       description: '',
@@ -200,7 +200,7 @@ describe('VorbisUtils', () => {
         ['TITLE=A Way of Life', 'ARTIST=Hans Zimmer', 'ALBUM=The Last Samurai'],
     );
     const data = flac([flacBlock(4, /* isLast= */ true, body)]);
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     expect(frames).toEqual(jasmine.arrayContaining([
       jasmine.objectContaining({key: 'TIT2', data: 'A Way of Life'}),
@@ -230,7 +230,7 @@ describe('VorbisUtils', () => {
     for (const [vorbisKey, id3Key] of mapping) {
       const body = vorbisCommentBody('', [`${vorbisKey}=test`]);
       const data = flac([flacBlock(4, /* isLast= */ true, body)]);
-      const frames = VorbisUtils.getVorbisComments(data);
+      const frames = new VorbisUtils().parse(data);
 
       expect(frames[0].key)
           .withContext(`${vorbisKey} → ${id3Key}`)
@@ -241,7 +241,7 @@ describe('VorbisUtils', () => {
   it('passes unknown Vorbis keys through unchanged in upper-case', () => {
     const body = vorbisCommentBody('', ['REPLAYGAIN_TRACK_GAIN=-6.0 dB']);
     const data = flac([flacBlock(4, /* isLast= */ true, body)]);
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     expect(frames[0].key).toBe('REPLAYGAIN_TRACK_GAIN');
     expect(frames[0].data).toBe('-6.0 dB');
@@ -251,7 +251,7 @@ describe('VorbisUtils', () => {
   it('lower-case Vorbis keys are normalised to upper-case before mapping', () => {
     const body = vorbisCommentBody('', ['title=Shaka']);
     const data = flac([flacBlock(4, /* isLast= */ true, body)]);
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     expect(frames[0].key).toBe('TIT2');
   });
@@ -259,7 +259,7 @@ describe('VorbisUtils', () => {
   it('skips comment entries that have no "=" separator', () => {
     const body = vorbisCommentBody('', ['BADENTRY', 'TITLE=Shaka']);
     const data = flac([flacBlock(4, /* isLast= */ true, body)]);
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     expect(frames.length).toBe(1);
     expect(frames[0].key).toBe('TIT2');
@@ -268,7 +268,7 @@ describe('VorbisUtils', () => {
   it('value may contain "=" characters without being truncated', () => {
     const body = vorbisCommentBody('', ['TITLE=A=B=C']);
     const data = flac([flacBlock(4, /* isLast= */ true, body)]);
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     expect(frames[0].data).toBe('A=B=C');
   });
@@ -284,7 +284,7 @@ describe('VorbisUtils', () => {
       flacBlock(4, /* isLast= */ true, secondBody),
     ]);
 
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     expect(frames.length).toBe(1);
     expect(frames[0].key).toBe('TIT2');
@@ -299,7 +299,7 @@ describe('VorbisUtils', () => {
       0x00, 0x00, 0x00, 0x00,  // only 4 bytes of body
     ]);
 
-    expect(VorbisUtils.getVorbisComments(data)).toEqual([]);
+    expect(new VorbisUtils().parse(data)).toEqual([]);
   });
 
   // eslint-disable-next-line @stylistic/max-len
@@ -308,7 +308,7 @@ describe('VorbisUtils', () => {
     const body = [0x00, 0x01];
     const data = flac([flacBlock(4, /* isLast= */ true, body)]);
 
-    expect(VorbisUtils.getVorbisComments(data)).toEqual([]);
+    expect(new VorbisUtils().parse(data)).toEqual([]);
   });
 
   // eslint-disable-next-line @stylistic/max-len
@@ -318,7 +318,7 @@ describe('VorbisUtils', () => {
     const body = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
     const data = flac([flacBlock(4, /* isLast= */ true, body)]);
 
-    expect(VorbisUtils.getVorbisComments(data)).toEqual([]);
+    expect(new VorbisUtils().parse(data)).toEqual([]);
   });
 
   // eslint-disable-next-line @stylistic/max-len
@@ -334,7 +334,7 @@ describe('VorbisUtils', () => {
       ...brokenEntry,
     ];
     const data = flac([flacBlock(4, /* isLast= */ true, body)]);
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     // Only the valid first entry should be returned.
     expect(frames.length).toBe(1);
@@ -349,7 +349,7 @@ describe('VorbisUtils', () => {
     const imageData = [0xff, 0xd8, 0xff, 0xe0, 0x01, 0x02]; // fake JPEG header
     const body = flacPictureBody(3, 'image/jpeg', '', imageData);
     const data = flac([flacBlock(6, /* isLast= */ true, body)]);
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     expect(frames).toEqual([{
       key: 'APIC',
@@ -363,7 +363,7 @@ describe('VorbisUtils', () => {
   it('preserves the description field from a FLAC PICTURE block', () => {
     const body = flacPictureBody(3, 'image/png', 'Front Cover', [0x89, 0x50]);
     const data = flac([flacBlock(6, /* isLast= */ true, body)]);
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     expect(frames[0].description).toBe('Front Cover');
   });
@@ -372,7 +372,7 @@ describe('VorbisUtils', () => {
     // pictureType 4 = "Back cover"
     const body = flacPictureBody(4, 'image/jpeg', '', [0x01]);
     const data = flac([flacBlock(6, /* isLast= */ true, body)]);
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     expect(frames[0].pictureType).toBe(4);
   });
@@ -382,7 +382,7 @@ describe('VorbisUtils', () => {
     // Only 2 bytes – not enough for the first uint32 BE.
     const data = flac([flacBlock(6, /* isLast= */ true, [0x00, 0x00])]);
 
-    expect(VorbisUtils.getVorbisComments(data)).toEqual([]);
+    expect(new VorbisUtils().parse(data)).toEqual([]);
   });
 
   it('returns null (skips) a PICTURE block truncated after MIME type', () => {
@@ -394,7 +394,7 @@ describe('VorbisUtils', () => {
     ];
     const data = flac([flacBlock(6, /* isLast= */ true, body)]);
 
-    expect(VorbisUtils.getVorbisComments(data)).toEqual([]);
+    expect(new VorbisUtils().parse(data)).toEqual([]);
   });
 
   it('returns null (skips) a PICTURE block truncated after description', () => {
@@ -408,7 +408,7 @@ describe('VorbisUtils', () => {
     ];
     const data = flac([flacBlock(6, /* isLast= */ true, body)]);
 
-    expect(VorbisUtils.getVorbisComments(data)).toEqual([]);
+    expect(new VorbisUtils().parse(data)).toEqual([]);
   });
 
   // eslint-disable-next-line @stylistic/max-len
@@ -427,7 +427,7 @@ describe('VorbisUtils', () => {
     ];
     const data = flac([flacBlock(6, /* isLast= */ true, body)]);
 
-    expect(VorbisUtils.getVorbisComments(data)).toEqual([]);
+    expect(new VorbisUtils().parse(data)).toEqual([]);
   });
 
   // eslint-disable-next-line @stylistic/max-len
@@ -444,7 +444,7 @@ describe('VorbisUtils', () => {
     ];
     const data = flac([flacBlock(6, /* isLast= */ true, body)]);
 
-    expect(VorbisUtils.getVorbisComments(data)).toEqual([]);
+    expect(new VorbisUtils().parse(data)).toEqual([]);
   });
 
   // ---------------------------------------------------------------------------
@@ -461,7 +461,7 @@ describe('VorbisUtils', () => {
       flacBlock(6, /* isLast= */ true, pictureBody),
     ]);
 
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     expect(frames.length).toBe(2);
     expect(frames.find((f) => f.key === 'TIT2')).toBeDefined();
@@ -478,7 +478,7 @@ describe('VorbisUtils', () => {
       flacBlock(4, /* isLast= */ true, commentBody),
     ]);
 
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     expect(frames.length).toBe(1);
     expect(frames[0].key).toBe('TIT2');
@@ -491,7 +491,7 @@ describe('VorbisUtils', () => {
   it('parses OGG Opus comments via the OpusTags marker', () => {
     const body = vorbisCommentBody('', ['TITLE=Shaka', 'ARTIST=Hans Zimmer']);
     const data = ogg('opus', body);
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     expect(frames).toEqual(jasmine.arrayContaining([
       jasmine.objectContaining({key: 'TIT2', data: 'Shaka'}),
@@ -502,7 +502,7 @@ describe('VorbisUtils', () => {
   it('returns empty array for OGG Opus with no comments', () => {
     const body = vorbisCommentBody('reference libopus', []);
     const data = ogg('opus', body);
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     expect(frames).toEqual([]);
   });
@@ -514,7 +514,7 @@ describe('VorbisUtils', () => {
   it('parses OGG Vorbis comments via the vorbis marker', () => {
     const body = vorbisCommentBody('', ['ALBUM=The Last Samurai']);
     const data = ogg('vorbis', body);
-    const frames = VorbisUtils.getVorbisComments(data);
+    const frames = new VorbisUtils().parse(data);
 
     expect(frames).toEqual([
       jasmine.objectContaining({key: 'TALB', data: 'The Last Samurai'}),
@@ -528,6 +528,6 @@ describe('VorbisUtils', () => {
       0x00, 0x01, 0x02, 0x03,
     ]);
 
-    expect(VorbisUtils.getVorbisComments(data)).toEqual([]);
+    expect(new VorbisUtils().parse(data)).toEqual([]);
   });
 });
