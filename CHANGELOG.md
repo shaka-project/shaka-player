@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.16.34](https://github.com/shaka-project/shaka-player/compare/v4.16.33...v4.16.34) (2026-06-01)
+
+
+### Bug Fixes
+
+* **demo:** Re-enable lazy localization ([#10137](https://github.com/shaka-project/shaka-player/issues/10137)) ([825a8d4](https://github.com/shaka-project/shaka-player/commit/825a8d4e25533afbb21d8a461136a7a98e349887))
+* Emit ratechange event when playbackRate stays at 0 ([#10130](https://github.com/shaka-project/shaka-player/issues/10130)) ([c0bcca9](https://github.com/shaka-project/shaka-player/commit/c0bcca9179d2327ff2bb58df4d656190a6893ef1))
+* **preload:** Restore adaptation on reused Player with preloaded variant ([#10151](https://github.com/shaka-project/shaka-player/issues/10151)) ([01865e8](https://github.com/shaka-project/shaka-player/commit/01865e873506835ef2e08cc1f714326862232b6a))
+
 ## [4.16.33](https://github.com/shaka-project/shaka-player/compare/v4.16.32...v4.16.33) (2026-05-25)
 
 
