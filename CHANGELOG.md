@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.1.7](https://github.com/shaka-project/shaka-player/compare/v5.1.6...v5.1.7) (2026-06-01)
+
+
+### Bug Fixes
+
+* **Cast:** Proxy missing ad events through CastProxy ([#10142](https://github.com/shaka-project/shaka-player/issues/10142)) ([7abab8a](https://github.com/shaka-project/shaka-player/commit/7abab8ab063d24ee339e36b4a5c93cc0d91fef90))
+* **demo:** Re-enable lazy localization ([#10137](https://github.com/shaka-project/shaka-player/issues/10137)) ([ec69d9b](https://github.com/shaka-project/shaka-player/commit/ec69d9b0a1f1fb38da53348e75b0cd2220ca10d7))
+* Emit ratechange event when playbackRate stays at 0 ([#10130](https://github.com/shaka-project/shaka-player/issues/10130)) ([2c6a2ee](https://github.com/shaka-project/shaka-player/commit/2c6a2ee87dfd567add7044c2c3eef7600e3037d6))
+* **HLS:** Fix LL-HLS stall on live playlist updates after [#9998](https://github.com/shaka-project/shaka-player/issues/9998) ([#10154](https://github.com/shaka-project/shaka-player/issues/10154)) ([8bd35c3](https://github.com/shaka-project/shaka-player/commit/8bd35c32129c192aa6ff9473cc19441e3614f32d))
+* **preload:** Restore adaptation on reused Player with preloaded variant ([#10151](https://github.com/shaka-project/shaka-player/issues/10151)) ([fe319d0](https://github.com/shaka-project/shaka-player/commit/fe319d0fe75ee5d21ea3c2ecf9805766a8e5f813))
+* **UI:** Sync Document PiP placeholder with video poster changes ([#10135](https://github.com/shaka-project/shaka-player/issues/10135)) ([73e772d](https://github.com/shaka-project/shaka-player/commit/73e772db1105a1d6266cfa099528afca22bb4cda))
+* **UI:** Update play button state on shaka.ads.Utils.AD_PLAYING ([#10143](https://github.com/shaka-project/shaka-player/issues/10143)) ([fa9b7fe](https://github.com/shaka-project/shaka-player/commit/fa9b7fed62545b68ca87902de74c4e5722fbb9c5))
+
+
+### Performance Improvements
+
+* **HLS:** Improve startup time with SGAI Streams with long DVR ([#10113](https://github.com/shaka-project/shaka-player/issues/10113)) ([8d81f7f](https://github.com/shaka-project/shaka-player/commit/8d81f7fcb1eb20fbcd5137daa85a0597b6436972))
+
 ## [5.1.6](https://github.com/shaka-project/shaka-player/compare/v5.1.5...v5.1.6) (2026-05-25)
 
 
