@@ -10,7 +10,7 @@
   /* Set the background and the color, otherwise it might be overwritten by
    * the css styles in demo. */
   background-color: transparent;
-  color: @general-font-color;
+  color: var(--shaka-font-color);
   cursor: default;
 }
 
@@ -19,8 +19,8 @@
  * edge. Otherwise, the button is disabled.
  */
 .shaka-current-time {
-  font-size: @general-font-size;
-  color: @general-font-color;
+  font-size: var(--shaka-font-size);
+  color: var(--shaka-font-color);
   cursor: pointer;
   width: auto;
   padding: 0 5px;
@@ -35,8 +35,8 @@
   justify-content: center;
   flex-direction: column;
 
-  font-size: @content-title-font-size;
-  color: @general-font-color;
+  font-size: var(--shaka-title-size);
+  color: var(--shaka-font-color);
   width: auto;
   padding: 0 5px;
 
@@ -88,8 +88,8 @@
   /* No border. */
   border: none;
 
-  color: @general-font-color;
-  background-color: @general-background-color;
+  color: var(--shaka-font-color);
+  background-color: var(--shaka-bg);
 
   cursor: default;
   font-size: 20px;

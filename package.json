@@ -67,6 +67,7 @@
     "open-sans-fonts": "^1.6.2",
     "postcss": "^8.5.15",
     "postcss-cli": "^11.0.1",
+    "postcss-custom-properties": "^15.0.1",
     "postcss-less": "^6.0.0",
     "pwacompat": "^2.0.17",
     "rimraf": "^3.0.2",
