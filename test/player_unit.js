@@ -1431,6 +1431,20 @@ describe('Player', () => {
       expect(abrManager.chooseVariant).toHaveBeenCalled();
     });
 
+    it('calls chooseVariant via PreloadManager', async () => {
+      // Regression test for #10045: when load() is given a PreloadManager
+      // with a prefetched variant, loadInner_ used to skip chooseVariant_,
+      // leaving the AbrManager uninitialized and breaking adaptation on
+      // subsequent loads on a reused Player.
+      const preloadManager = await player.preload(
+          fakeManifestUri, 0, fakeMimeType);
+      await preloadManager.waitForFinish();
+      // Reset so we only count calls from load(), not from preload().
+      abrManager.chooseVariant.calls.reset();
+      await player.load(preloadManager);
+      expect(abrManager.chooseVariant).toHaveBeenCalled();
+    });
+
     it('enables automatically', async () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(abrManager.enable).toHaveBeenCalled();
