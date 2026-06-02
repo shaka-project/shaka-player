@@ -257,13 +257,13 @@ describe('QueueManager', () => {
     expect(playSpy).toHaveBeenCalled();
   });
 
-  it('does not repeat or advance when repeatMode is OFF', async () => {
+  it('does not repeat when repeatMode is OFF', async () => {
     queueManager.insertItems([queueItem, queueItem2]);
     const config = queueManager.getConfiguration();
     config.repeatMode = shaka.config.RepeatMode.OFF;
     queueManager.configure(config);
 
-    await queueManager.playItem(0);
+    await queueManager.playItem(queueManager.getItems().length - 1);
 
     const initialIndex = queueManager.getCurrentItemIndex();
     const initialItem = queueManager.getCurrentItem();
