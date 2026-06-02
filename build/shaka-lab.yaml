@@ -121,6 +121,17 @@ vars:
       # adb on the tethered device.
       androidPackage: com.android.chrome
 
+  mac_chrome_config: &mac_chrome_config
+    goog:chromeOptions:
+      args:
+        # On macOS Sequoia and newer, Chrome is failing because of Local
+        # Network Permission (LNP).  Granting permission doesn't persist,
+        # because every Chrome update loses its previously-granted permissions.
+        # So we need a proxy service running to access a Karma instance running
+        # on the local network.  The proxy's permission will persist.
+        # See also https://github.com/shaka-project/shaka-lab/pull/84
+        - "--proxy-pac-url=data:application/x-ns-proxy-autoconfig;base64,ZnVuY3Rpb24gRmluZFByb3h5Rm9yVVJMKHUsaCl7dmFyIGk9L15cZCtcLlxkK1wuXGQrXC5cZCskLy50ZXN0KGgpP2g6ZG5zUmVzb2x2ZShoKTtyZXR1cm4gaSYmKGlzSW5OZXQoaSwiMTAuMC4wLjAiLCIyNTUuMC4wLjAiKXx8aXNJbk5ldChpLCIxNzIuMTYuMC4wIiwiMjU1LjI0MC4wLjAiKXx8aXNJbk5ldChpLCIxOTIuMTY4LjAuMCIsIjI1NS4yNTUuMC4wIil8fGlzSW5OZXQoaSwiMTY5LjI1NC4wLjAiLCIyNTUuMjU1LjAuMCIpKT8iUFJPWFkgMTI3LjAuMC4xOjEwODAiOiJESVJFQ1QiO30="
+
   chromeos_config: &chromeos_config
     # Pass Chrome arguments through generic-webdriver-server.
     # This array will be appended after "--" instead of being set through one
@@ -160,6 +171,7 @@ ChromeMac:
   os: Mac
   extra_configs:
     - *basic_chrome_config
+    - *mac_chrome_config
 
 FirefoxMac:
   browser: firefox
