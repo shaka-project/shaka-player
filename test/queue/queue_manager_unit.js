@@ -162,7 +162,7 @@ describe('QueueManager', () => {
     await shaka.test.Util.shortDelay();
 
     expect(preloadSpy).toHaveBeenCalledWith(
-        queueItem2.manifestUri, null, null, null);
+        queueItem2.manifestUri, null, null, null, true);
   });
 
   it('cleans up previous preload when playing next item', async () => {
