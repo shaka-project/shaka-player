@@ -2617,6 +2617,13 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['cmaf/clear'],
+          },
+        },
+      })
       .setMimeType('application/msf'),
   new ShakaDemoAssetInfo(
       /* name= */ 'moqlivemock Multi-DRM',
@@ -2633,7 +2640,7 @@ shakaAssets.testAssets = [
       .setExtraConfig({
         manifest: {
           msf: {
-            namespaces: ['cmsf/drm-cbcs'],
+            namespaces: ['cmaf/drm-cbcs'],
           },
         },
       })
@@ -2651,7 +2658,7 @@ shakaAssets.testAssets = [
       .setExtraConfig({
         manifest: {
           msf: {
-            namespaces: ['cmsf/eccp-cbcs'],
+            namespaces: ['cmaf/eccp-cbcs'],
           },
         },
       })
