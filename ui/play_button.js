@@ -13,7 +13,6 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.MediaElementEvent');
 
@@ -46,22 +45,13 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     this.icon_ = new shaka.ui.Icon(this.button_);
 
     this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateAriaLabel_();
-        });
-
-    this.eventManager.listenMulti(
         this.video,
         [
           shaka.util.MediaElementEvent.PLAY,
           shaka.util.MediaElementEvent.PAUSE,
           shaka.util.MediaElementEvent.SEEKING,
         ], () => {
-          this.updateAriaLabel_();
+          this.updateLocalizedStrings();
           this.updateIcon_();
         });
 
@@ -73,7 +63,7 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
           'unloading',
           'buffering',
         ], () => {
-          this.updateAriaLabel_();
+          this.updateLocalizedStrings();
           this.updateIcon_();
         });
 
@@ -82,10 +72,11 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
         [
           shaka.ads.Utils.AD_PAUSED,
           shaka.ads.Utils.AD_RESUMED,
+          shaka.ads.Utils.AD_PLAYING,
           shaka.ads.Utils.AD_STARTED,
           shaka.ads.Utils.AD_STOPPED,
         ], () => {
-          this.updateAriaLabel_();
+          this.updateLocalizedStrings();
           this.updateIcon_();
         });
 
@@ -96,7 +87,7 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
       this.controls.playPausePresentation();
     });
 
-    this.updateAriaLabel_();
+    this.updateLocalizedStrings();
     this.updateIcon_();
   }
 
@@ -136,10 +127,8 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     return this.player ? this.player.isBuffering() : false;
   }
 
-  /**
-   * @private
-   */
-  updateAriaLabel_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
     if (this.isEnded_() && this.video.duration) {
       this.button_.ariaLabel = this.localization.resolve(LocIds.REPLAY);
@@ -150,7 +139,6 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
       this.button_.ariaLabel = this.localization.resolve(label);
     }
   }
-
 
   /**
    * @private

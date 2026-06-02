@@ -25,16 +25,6 @@
  * track.  And since we are still using a semantically correct input element,
  * the element is inherently accessible. */
 
-/* These control the color and size of the various pieces. */
-@thumb-color: @general-font-color;
-@track-default-color: @general-font-color;
-@thumb-size: 12px;
-@track-height: 4px;
-
-/* The range element has a larger interactive area than its visible size.
- * This value should always be greater than @thumb-size. */
-@touchable-size: 40px;
-
 /* The range container is the div that contains a range element.
  * This div will act as a virtual track to allow us to style the track space.
  * An actual track still exists inside the range element, but is transparent. */
@@ -43,16 +33,16 @@
   .overlay-parent();
 
   /* Vertical margins to occupy the same space as the thumb. */
-  margin: calc((@thumb-size - @track-height) / 2) 6px;
+  margin: calc((var(--shaka-thumb-size) - var(--shaka-track-h)) / 2) 6px;
 
   /* Smaller height to contain the background for the virtual track. */
-  height: @track-height;
+  height: var(--shaka-track-h);
 
   /* Rounded ends on the virtual track. */
-  border-radius: @track-height;
+  border-radius: var(--shaka-track-h);
 
   /* Until we set a gradient background in JS, this will be the track color. */
-  background: @track-default-color;
+  background: var(--shaka-track-color);
 
   /* Override box-sizing to avoid other box-sizing rules break this element */
   box-sizing: content-box;
@@ -72,7 +62,7 @@
   /* The track should be tall enough to contain the thumb without clipping it.
    * It is very tricky to make the thumb show outside the track on IE 11, and
    * it is incompatible with our background gradients. */
-  height: @thumb-size;
+  height: var(--shaka-thumb-size);
 
   /* Some browsers have default backgrounds, colors, or borders for this.
    * Hide them all. */
@@ -92,12 +82,12 @@
   border: none;
 
   /* Make the thumb a circle and set its diameter. */
-  border-radius: @thumb-size;
-  height: @thumb-size;
-  width: @thumb-size;
+  border-radius: var(--shaka-thumb-size);
+  height: var(--shaka-thumb-size);
+  width: var(--shaka-thumb-size);
 
   /* Give it the desired color. */
-  background: @thumb-color;
+  background: var(--shaka-thumb-color);
 }
 
 /* This is the actual range input element. */
@@ -112,12 +102,12 @@
 
   /* The range element should have a minimum touchable height for
    * accessibility. */
-  height: @touchable-size;
+  height: var(--shaka-touch-size);
 
   /* Position the top of the range element so that it is centered on the
    * container. Note that the container is actually smaller than the
    * touchable-size. */
-  top: calc((@track-height - @touchable-size) / 2);
+  top: calc((var(--shaka-track-h) - var(--shaka-touch-size)) / 2);
 
   /* Make sure clicking at the very top of the bar still takes effect and is not
    * confused with clicking the video to play/pause it. */
@@ -197,7 +187,7 @@
   height: 5px;
 
   /* add spacing between seek-bar-container and controls-button-panel */
-  margin-bottom: @track-height;
+  margin-bottom: var(--shaka-track-h);
 
   background-clip: padding-box !important;
   border-top: 4px solid transparent;

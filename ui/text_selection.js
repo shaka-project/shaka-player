@@ -11,7 +11,6 @@ goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.LanguageUtils');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
@@ -53,19 +52,6 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     this.addOffOption_();
 
     this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateLocalizedStrings_();
-          // If captions/subtitles are off, this string needs localization.
-          // TODO: is there a more efficient way of updating just the strings
-          // we need instead of running the whole language update?
-          this.updateTextLanguages_();
-        });
-
-    this.eventManager.listenMulti(
         this.player,
         [
           'loading',
@@ -81,22 +67,11 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
       this.updateTextLanguages_();
     });
 
-    if (this.isSubMenu) {
-      this.eventManager.listenMulti(
-          this.controls,
-          [
-            'submenuopen',
-            'submenuclose',
-          ], () => {
-            this.updateTextLanguages_();
-          });
-    }
-
     // Initialize caption state with a fake event.
     this.onCaptionStateChange_();
 
     // Set up all the strings in the user's preferred language.
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
 
     this.updateTextLanguages_();
   }
@@ -208,21 +183,28 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     });
   }
 
-
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.button.ariaLabel = this.localization.resolve(LocIds.CAPTIONS);
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
-    this.nameSpan.textContent =
-        this.localization.resolve(LocIds.CAPTIONS);
-    this.backSpan.textContent =
-        this.localization.resolve(LocIds.CAPTIONS);
+
+    const label = this.localization.resolve(LocIds.CAPTIONS);
+    this.button.ariaLabel = label;
+    this.nameSpan.textContent = label;
+    this.backSpan.textContent = label;
     this.captionsOffSpan_.textContent =
         this.localization.resolve(LocIds.OFF);
+
+    // If captions/subtitles are off, this string needs localization.
+    // TODO: is there a more efficient way of updating just the strings
+    // we need instead of running the whole language update?
+    this.updateTextLanguages_();
+  }
+
+  /** @override */
+  checkAvailability() {
+    this.updateTextLanguages_();
   }
 };
 

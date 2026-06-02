@@ -30,7 +30,9 @@ shaka.test.FakeDemoMain = class {
       contextMenuElements: [],
       statisticsList: [],
       adStatisticsList: [],
-      playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      playbackRates: [1, 1.25, 1.5, 2, 3],
+      playbackRateSliderMin: 0.5,
+      playbackRateSliderMax: 3,
       fastForwardRates: [2, 4, 8, 1],
       rewindRates: [-1, -2, -4, -8],
       addSeekBar: true,
@@ -47,6 +49,10 @@ shaka.test.FakeDemoMain = class {
         chapters: 'rgba(255, 0, 0, 0.8)',
       },
       volumeBarColors: {
+        base: 'rgba(255, 255, 255, 0.54)',
+        level: 'rgb(255, 255, 255)',
+      },
+      playbackRateBarColors: {
         base: 'rgba(255, 255, 255, 0.54)',
         level: 'rgb(255, 255, 255)',
       },
@@ -201,10 +207,6 @@ shaka.test.FakeDemoMain = class {
     this.getHamburgerMenu.and.callFake(() => {
       return /** @type {!HTMLDivElement} */ (document.createElement('div'));
     });
-
-    /** @type {!jasmine.Spy} */
-    this.getLocalizedString = jasmine.createSpy('getLocalizedString');
-    this.getLocalizedString.and.callFake((name) => name);
 
     /** @type {!jasmine.Spy} */
     this.loadAsset = jasmine.createSpy('loadAsset');

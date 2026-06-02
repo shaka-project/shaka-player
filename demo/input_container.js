@@ -8,6 +8,7 @@
 goog.provide('shakaDemo.InputContainer');
 
 
+goog.require('shakaDemo.Icons');
 goog.require('shakaDemo.Tooltips');
 
 /**
@@ -141,9 +142,7 @@ shakaDemo.InputContainer = class {
     link.classList.add('mdl-js-ripple-effect');
     link.classList.add('mdl-button--colored');
 
-    const icon = document.createElement('i');
-    icon.classList.add('material-icons-round');
-    icon.textContent = 'help';
+    const icon = shakaDemo.Icons.makeSvgIcon(shakaDemo.Icons.HELP);
 
     link.appendChild(icon);
     parentDiv.appendChild(link);

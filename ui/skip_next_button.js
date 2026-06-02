@@ -12,7 +12,6 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 
@@ -49,17 +48,8 @@ shaka.ui.SkipNextButton = class extends shaka.ui.Element {
         shaka.ui.Enums.MaterialDesignSVGIcons['SKIP_NEXT']);
     this.parent.appendChild(this.button_);
 
-    this.updateAriaLabel_();
-    this.checkAvailability_();
-
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateAriaLabel_();
-        });
+    this.updateLocalizedStrings();
+    this.checkAvailability();
 
     this.eventManager.listen(this.button_, 'click', () => {
       if (!this.controls.isOpaque()) {
@@ -75,24 +65,22 @@ shaka.ui.SkipNextButton = class extends shaka.ui.Element {
           'itemsinserted',
           'itemsremoved',
         ], () => {
-          this.checkAvailability_();
+          this.checkAvailability();
         });
 
     this.eventManager.listen(this.player, 'loading', () => {
-      this.checkAvailability_();
+      this.checkAvailability();
     });
   }
 
-  /**
-   * @private
-   */
-  updateAriaLabel_() {
+  /** @override */
+  updateLocalizedStrings() {
     this.button_.ariaLabel =
         this.localization.resolve(shaka.ui.Locales.Ids.SKIP_NEXT);
   }
 
-  /** @private */
-  checkAvailability_() {
+  /** @override */
+  checkAvailability() {
     const itemsLength = this.queueManager_.getItems().length;
     const hasNext = itemsLength > 1 &&
       (this.queueManager_.getCurrentItemIndex() + 1) < itemsLength;

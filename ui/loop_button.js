@@ -13,7 +13,6 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -36,7 +35,6 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     /** @private {shaka.extern.IQueueManager} */
     this.queueManager_ = this.controls.getQueueManager();
 
-    const LocIds = shaka.ui.Locales.Ids;
     /** @private {!HTMLButtonElement} */
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-loop-button');
@@ -53,7 +51,6 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     label.classList.add('shaka-overflow-menu-only');
     label.classList.add('shaka-simple-overflow-button-label-inline');
     this.nameSpan_ = shaka.util.Dom.createHTMLElement('span');
-    this.nameSpan_.textContent = this.localization.resolve(LocIds.LOOP);
     label.appendChild(this.nameSpan_);
 
     /** @private {!HTMLElement} */
@@ -63,18 +60,9 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
 
     this.button_.appendChild(label);
 
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
 
     this.parent.appendChild(this.button_);
-
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateLocalizedStrings_();
-        });
 
     this.eventManager.listen(this.button_, 'click', () => {
       if (!this.controls.isOpaque()) {
@@ -88,7 +76,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
       for (const mutation of mutationsList) {
         if (mutation.type === 'attributes' &&
             mutation.attributeName === 'loop') {
-          this.updateLocalizedStrings_();
+          this.updateLocalizedStrings();
         }
       }
     });
@@ -105,29 +93,18 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
           'loaded',
           'manifestupdated',
         ], () => {
-          this.checkAvailability_();
+          this.checkAvailability();
         });
 
     this.eventManager.listen(this.player, 'configurationchanged', () => {
-      this.updateLocalizedStrings_();
+      this.updateLocalizedStrings();
     });
 
     this.eventManager.listen(this.video, 'durationchange', () => {
-      this.checkAvailability_();
+      this.checkAvailability();
     });
 
-    if (this.isSubMenu) {
-      this.eventManager.listenMulti(
-          this.controls,
-          [
-            'submenuopen',
-            'submenuclose',
-          ], () => {
-            this.checkAvailability_();
-          });
-    }
-
-    this.checkAvailability_();
+    this.checkAvailability();
   }
 
   /**
@@ -163,11 +140,8 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     }
   }
 
-
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
     const Icons = shaka.ui.Enums.MaterialDesignSVGIcons;
 
@@ -206,11 +180,8 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     }
   }
 
-
-  /**
-   * @private
-   */
-  checkAvailability_() {
+  /** @override */
+  checkAvailability() {
     shaka.ui.Utils.setDisplay(
         this.button_, !this.player.isLive() && !this.isSubMenuOpened);
   }

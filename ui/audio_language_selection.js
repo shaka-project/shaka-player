@@ -11,7 +11,6 @@ goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.LanguageUtils');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
@@ -36,15 +35,6 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
     this.menu.classList.add('shaka-audio-languages');
 
     this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listenMulti(
         this.player,
         [
           'loading',
@@ -55,23 +45,11 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
           this.onAudioTracksChanged_();
         });
 
-    if (this.isSubMenu) {
-      this.eventManager.listenMulti(
-          this.controls,
-          [
-            'submenuopen',
-            'submenuclose',
-          ], () => {
-            this.onAudioTracksChanged_();
-          });
-    }
-
     // Set up all the strings in the user's preferred language.
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
 
     this.onAudioTracksChanged_();
   }
-
 
   /** @private */
   onAudioTracksChanged_() {
@@ -114,19 +92,21 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
     this.player.configure({preferredAudio: [pref]});
   }
 
-
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
-    this.button.ariaLabel = this.localization.resolve(LocIds.LANGUAGE);
-    this.nameSpan.textContent =
-        this.localization.resolve(LocIds.LANGUAGE);
-    this.backSpan.textContent =
-        this.localization.resolve(LocIds.LANGUAGE);
+
+    const label = this.localization.resolve(LocIds.LANGUAGE);
+    this.button.ariaLabel = label;
+    this.nameSpan.textContent = label;
+    this.backSpan.textContent = label;
+  }
+
+  /** @override */
+  checkAvailability() {
+    this.onAudioTracksChanged_();
   }
 };
 

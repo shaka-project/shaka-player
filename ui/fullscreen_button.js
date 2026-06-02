@@ -13,7 +13,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.MediaElementEvent');
 
@@ -44,19 +44,11 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     this.icon_ = new shaka.ui.Icon(this.button_,
         shaka.ui.Enums.MaterialDesignSVGIcons['FULLSCREEN']);
 
-    this.checkSupport_();
+    this.checkAvailability();
 
     this.parent.appendChild(this.button_);
-    this.updateAriaLabel_();
 
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateAriaLabel_();
-        });
+    this.updateLocalizedStrings();
 
     this.eventManager.listen(this.button_, 'click', async () => {
       if (!this.controls.isOpaque()) {
@@ -68,7 +60,7 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
 
     this.eventManager.listen(document, 'fullscreenchange', () => {
       this.updateIcon_();
-      this.updateAriaLabel_();
+      this.updateLocalizedStrings();
     });
 
     this.eventManager.listenMulti(
@@ -77,7 +69,7 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
           shaka.util.MediaElementEvent.LOADED_METADATA,
           shaka.util.MediaElementEvent.LOADED_DATA,
         ], () => {
-          this.checkSupport_();
+          this.checkAvailability();
         });
 
     this.eventManager.listenMulti(
@@ -86,26 +78,12 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
           shaka.ads.Utils.AD_STARTED,
           shaka.ads.Utils.AD_STOPPED,
         ], () => {
-          this.checkSupport_();
+          this.checkAvailability();
         });
   }
 
-  /**
-   * @private
-   */
-  checkSupport_() {
-    // Don't show the button if fullscreen is not supported
-    if (!this.controls.isFullScreenSupported()) {
-      this.button_.classList.add('shaka-hidden');
-    } else {
-      this.button_.classList.remove('shaka-hidden');
-    }
-  }
-
-  /**
-   * @private
-   */
-  updateAriaLabel_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
     const label = this.controls.isFullScreenEnabled() ?
         LocIds.EXIT_FULL_SCREEN : LocIds.FULL_SCREEN;
@@ -115,14 +93,18 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
         this.controls.isFullScreenEnabled() ? 'true' : 'false';
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   updateIcon_() {
     this.icon_.use(this.controls.isFullScreenEnabled() ?
       shaka.ui.Enums.MaterialDesignSVGIcons['EXIT_FULLSCREEN'] :
       shaka.ui.Enums.MaterialDesignSVGIcons['FULLSCREEN'],
     );
+  }
+
+  /** @override */
+  checkAvailability() {
+    shaka.ui.Utils.setDisplay(
+        this.button_, this.controls.isFullScreenSupported());
   }
 };
 

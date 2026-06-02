@@ -131,6 +131,29 @@ shaka.extern.IQueueManager = class extends EventTarget {
    * @return {!Promise}
    */
   playItem(itemIndex) {}
+
+  /**
+   * Fetches an M3U/M3U8 playlist from the given URL using the player's
+   * networking engine, parses it, and inserts the resulting items into the
+   * queue. Supports the extended EXTINF format with tvg-* attributes
+   * commonly found in IPTV playlists (tvg-id, tvg-name, tvg-logo,
+   * tvg-language, tvg-country, tvg-url, group-title).
+   *
+   * The parsed tvg-* attribute values are stored in the item's metadata:
+   *   - tvg-name  → metadata.title  (falls back to the display name)
+   *   - tvg-logo  → metadata.poster
+   *   - tvg-id    → metadata.tvgId
+   *   - tvg-language → metadata.tvgLanguage
+   *   - tvg-country  → metadata.tvgCountry
+   *   - tvg-url      → metadata.tvgUrl
+   *   - group-title  → metadata.groupTitle
+   *   - display name → metadata.displayTitle
+   *
+   * @param {string} url
+   * @param {boolean=} playOnLoad
+   * @return {!Promise}
+   */
+  loadFromM3uPlaylist(url, playOnLoad) {}
 };
 
 
