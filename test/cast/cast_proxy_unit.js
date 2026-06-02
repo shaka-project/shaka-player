@@ -401,7 +401,7 @@ describe('CastProxy', () => {
         expect(proxyListener).not.toHaveBeenCalled();
         const fakeEvent = new FakeEvent(
             'buffering', (new Map()).set('detail', 8675309));
-        mockPlayer.listeners['buffering'](fakeEvent);
+        mockPlayer.listeners[shaka.util.FakeEventTarget.ALL_EVENTS](fakeEvent);
         expect(proxyListener).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'buffering',
           detail: 8675309,
@@ -420,7 +420,7 @@ describe('CastProxy', () => {
         expect(proxyListener).not.toHaveBeenCalled();
         const fakeEvent = new FakeEvent(
             'buffering', (new Map()).set('detail', 8675309));
-        mockPlayer.listeners['buffering'](fakeEvent);
+        mockPlayer.listeners[shaka.util.FakeEventTarget.ALL_EVENTS](fakeEvent);
         expect(proxyListener).not.toHaveBeenCalled();
       });
     });
