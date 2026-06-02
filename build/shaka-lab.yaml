@@ -130,6 +130,7 @@ vars:
         # So we need a proxy service running to access a Karma instance running
         # on the local network.  The proxy's permission will persist.
         # See also https://github.com/shaka-project/shaka-lab/pull/84
+        # and https://github.com/shaka-project/shaka-lab/blob/main/shaka-lab-node/macos/local-network-privacy.md
         - "--proxy-pac-url=data:application/x-ns-proxy-autoconfig;base64,ZnVuY3Rpb24gRmluZFByb3h5Rm9yVVJMKHUsaCl7dmFyIGk9L15cZCtcLlxkK1wuXGQrXC5cZCskLy50ZXN0KGgpP2g6ZG5zUmVzb2x2ZShoKTtyZXR1cm4gaSYmKGlzSW5OZXQoaSwiMTAuMC4wLjAiLCIyNTUuMC4wLjAiKXx8aXNJbk5ldChpLCIxNzIuMTYuMC4wIiwiMjU1LjI0MC4wLjAiKXx8aXNJbk5ldChpLCIxOTIuMTY4LjAuMCIsIjI1NS4yNTUuMC4wIil8fGlzSW5OZXQoaSwiMTY5LjI1NC4wLjAiLCIyNTUuMjU1LjAuMCIpKT8iUFJPWFkgMTI3LjAuMC4xOjEwODAiOiJESVJFQ1QiO30="
 
   chromeos_config: &chromeos_config
