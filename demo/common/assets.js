@@ -2620,7 +2620,7 @@ shakaAssets.testAssets = [
       .setExtraConfig({
         manifest: {
           msf: {
-            namespaces: ['cmaf/clear'],
+            namespaces: ['cmsf/clear'],
           },
         },
       })
@@ -2640,7 +2640,7 @@ shakaAssets.testAssets = [
       .setExtraConfig({
         manifest: {
           msf: {
-            namespaces: ['cmaf/drm-cbcs'],
+            namespaces: ['cmsf/drm-cbcs'],
           },
         },
       })
@@ -2658,7 +2658,7 @@ shakaAssets.testAssets = [
       .setExtraConfig({
         manifest: {
           msf: {
-            namespaces: ['cmaf/eccp-cbcs'],
+            namespaces: ['cmsf/eccp-cbcs'],
           },
         },
       })
@@ -2668,7 +2668,6 @@ shakaAssets.testAssets = [
       /* iconUri= */ '',
       /* manifestUri= */ 'https://moqlivemock.demo.osaas.io/moq',
       /* source= */ shakaAssets.Source.EYEVINN)
-      .addKeySystem(shakaAssets.KeySystem.CLEAR_KEY)
       .addFeature(shakaAssets.Feature.MSF)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
