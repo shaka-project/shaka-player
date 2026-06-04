@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('CastProxy', () => {
+/** @return {boolean} */
+const castProxySupport =
+    () => typeof Proxy != 'undefined';
+filterDescribe('CastProxy', castProxySupport, () => {
   const CastProxy = shaka.cast.CastProxy;
   const FakeEvent = shaka.util.FakeEvent;
   const Util = shaka.test.Util;
