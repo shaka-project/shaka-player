@@ -98,6 +98,7 @@ msfCatalog.Accessibility;
  *   renderGroup: (number|undefined),
  *   altGroup: (number|undefined),
  *   initData: (string|undefined),
+ *   initRef: (string|undefined),
  *   depends: (Array<string>|undefined),
  *   temporalId: (number|undefined),
  *   spatialId: (number|undefined),
