@@ -80,8 +80,10 @@ describe('DashParser', () => {
     player.configure({
       drm: {
         clearKeys: {
-          // cspell: disable-next-line
-          'nrQFDeRLSAKTLifXUIPiZg': 'FmY0xnWCPCNaSpRG-tUuTQ',
+          // cspell: disable
+          // eslint-disable-next-line @stylistic/max-len
+          '4060a865887842679cbf91ae5bae1e72': 'fc35340837310cc0fb53de97e22a69e0',
+          // cspell: enable
         },
       },
     });
