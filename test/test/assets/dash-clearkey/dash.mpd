@@ -1,23 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-Version information:
-Axinom.MediaProcessing v3.0.0 targeting General Purpose Media Format specification v7
-ffmpeg version N-81423-g61fac0e Copyright (c) 2000-2016 the FFmpeg developers
-x265 [info]: HEVC encoder version 2.0+12-49a0d1176aef5bc6
-x264 0.148.2705 3f5ed56
-MP4Box - GPAC version 0.6.2-DEV-rev683-g7b29fbe-master
-MediaInfoLib - v0.7.87
-
-For more info about this video, see https://github.com/Axinom/dash-test-vectors
--->
-<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" minBufferTime="PT1.500S" type="static" mediaPresentationDuration="PT0H00M20.000S" maxSegmentDuration="PT0H0M4.000S" profiles="urn:mpeg:dash:profile:isoff-live:2011,http://dashif.org/guidelines/dash264" xmlns:cenc="urn:mpeg:cenc:2013" xmlns:clearkey="http://dashif.org/guidelines/clearKey">
-  <Period duration="PT0H00M20.000S">
-    <AdaptationSet segmentAlignment="true" group="1" maxWidth="1920" maxHeight="1080" maxFrameRate="24" par="16:9" lang="und">
-      <ContentProtection schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc" cenc:default_KID="9eb4050d-e44b-4802-932e-27d75083e266" />
-      <ContentProtection value="ClearKey1.0" schemeIdUri="urn:uuid:e2719d58-a985-b3c9-781a-b030af78d30e"></ContentProtection>
+<?xml version="1.0" encoding="UTF-8"?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd" xmlns:cenc="urn:mpeg:cenc:2013" profiles="urn:mpeg:dash:profile:isoff-live:2011" minBufferTime="PT2S" type="static" mediaPresentationDuration="PT20.000S">
+  <Period id="0">
+    <AdaptationSet id="3" contentType="video" maxWidth="512" maxHeight="288" frameRate="24/1" segmentAlignment="true" par="16:9">
       <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main" />
-      <SegmentTemplate timescale="24" media="$Number%04d$.m4s" startNumber="1" duration="96" initialization="init.mp4" />
-      <Representation id="1" mimeType="video/mp4" codecs="avc1.64001f" width="512" height="288" frameRate="24" sar="1:1" startWithSAP="1" bandwidth="389802"></Representation>
+      <ContentProtection value="cenc" schemeIdUri="urn:mpeg:dash:mp4protection:2011" cenc:default_KID="4060a865-8878-4267-9cbf-91ae5bae1e72" />
+      <ContentProtection schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">
+        <cenc:pssh>AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9ACIAaAB0AHQAcAA6AC8ALwBzAGMAaABlAG0AYQBzAC4AbQBpAGMAcgBvAHMAbwBmAHQALgBjAG8AbQAvAEQAUgBNAC8AMgAwADAANwAvADAAMwAvAFAAbABhAHkAUgBlAGEAZAB5AEgAZQBhAGQAZQByACIAIAB2AGUAcgBzAGkAbwBuAD0AIgA0AC4AMAAuADAALgAwACIAPgA8AEQAQQBUAEEAPgA8AFAAUgBPAFQARQBDAFQASQBOAEYATwA+ADwASwBFAFkATABFAE4APgAxADYAPAAvAEsARQBZAEwARQBOAD4APABBAEwARwBJAEQAPgBBAEUAUwBDAFQAUgA8AC8AQQBMAEcASQBEAD4APAAvAFAAUgBPAFQARQBDAFQASQBOAEYATwA+ADwASwBJAEQAPgBaAGEAaABnAFEASABpAEkAWgAwAEsAYwB2ADUARwB1AFcANgA0AGUAYwBnAD0APQA8AC8ASwBJAEQAPgA8AEMASABFAEMASwBTAFUATQA+AHkAeABsAEcAbABoAGYARAArAGEAYwA9ADwALwBDAEgARQBDAEsAUwBVAE0APgA8AC8ARABBAFQAQQA+ADwALwBXAFIATQBIAEUAQQBEAEUAUgA+AA==</cenc:pssh>
+      </ContentProtection>
+      <ContentProtection schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed">
+        <cenc:pssh>AAAAXHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAADwSEEBgqGWIeEJnnL+RrluuHnISEEBgqGWIeEJnnL+RrluuHnISEEBgqGWIeEJnnL+RrluuHnJI49yVmwY=</cenc:pssh>
+      </ContentProtection>
+      <Representation id="7" bandwidth="513226" codecs="avc1.640015" mimeType="video/mp4" sar="1:1" width="512" height="288">
+        <SegmentTemplate timescale="24" initialization="video-H264-288-400k_init.mp4" media="video-H264-288-400k_$Number$.m4s" startNumber="1">
+          <SegmentTimeline>
+            <S t="0" d="96" r="4" />
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
     </AdaptationSet>
   </Period>
 </MPD>
