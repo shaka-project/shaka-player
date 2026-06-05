@@ -744,6 +744,13 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Raw MP3 with ID3 metadata (src=)',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://raw.githubusercontent.com/shaka-project/shaka-player-history/refs/heads/main/sources/bach/John_Lewis_Grant_-_01_-_Bach_Prelude___Fugue_1.mp3',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addFeature(shakaAssets.Feature.AUDIO_ONLY)
+      .addFeature(shakaAssets.Feature.CONTAINERLESS),
   // End Shaka assets }}}
 
   // Axinom assets {{{

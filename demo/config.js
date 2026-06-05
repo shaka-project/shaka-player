@@ -725,7 +725,10 @@ shakaDemo.Config = class {
             'streaming.returnToEndOfLiveWindowWhenOutside')
         .addBoolInput_(
             'Stop fetching new segments on pause',
-            'streaming.stopFetchingOnPause');
+            'streaming.stopFetchingOnPause')
+        .addBoolInput_(
+            'Process metadata when using src=',
+            'streaming.processSrcEqualMetadata');
     this.addRetrySection_('streaming', 'Streaming Retry Parameters');
     this.addLiveSyncSection_();
   }
