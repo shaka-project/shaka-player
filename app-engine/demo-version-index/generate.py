@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Shaka Player Version Index Generator
-# Copyright 2022 Google LLC
+# Copyright 2016 Google LLC
 # SPDX-License-Identifier: Apache-2.0
 
 # Generate an index of Shaka Player versions on appspot.
