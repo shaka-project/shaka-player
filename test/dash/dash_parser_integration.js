@@ -102,6 +102,37 @@ describe('DashParser', () => {
     await player.unload();
   });
 
+  it('supports ClearKey with raw single key with Web Crypto', async () => {
+    if (!checkClearKeySupport()) {
+      pending('ClearKey is not supported');
+    }
+    spyOn(deviceDetected, 'hasWorkingClearKeySupport').and.returnValue(false);
+
+    player.configure({
+      drm: {
+        clearKeys: {
+          // cspell: disable
+          // eslint-disable-next-line @stylistic/max-len
+          '4060a865887842679cbf91ae5bae1e72': 'fc35340837310cc0fb53de97e22a69e0',
+          // cspell: enable
+        },
+      },
+    });
+    await player.load('/base/test/test/assets/dash-clearkey/dash.mpd');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 8 seconds, but stop early if the video ends.  If it takes
+    // longer than 30 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
+
+    await player.unload();
+  });
+
   it('support multi type variants', async () => {
     const DeviceType = shaka.device.IDevice.DeviceType;
     if (deviceDetected.getDeviceType() === DeviceType.TV &&
