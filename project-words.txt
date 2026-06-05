@@ -1,5 +1,6 @@
 # events / html
 abrstatuschanged
+abrtest
 haspopup
 menuitemradio
 adblocker
