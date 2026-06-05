@@ -205,7 +205,7 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 
 Features supported:
  - Media over QUIC Transport [draft-14](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/14/) and [draft-16](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/16/)
- - MSF [draft-0](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/00/) and CMSF [draft-0](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/00/)
+ - MSF [draft-1](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/01/) and CMSF [draft-1](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/01/)
  - Audio, Video and Text
  - ABR
  - DRM support for Widevine, PlayReady, FairPlay and ClearKey, using the CMSF ContentProtection

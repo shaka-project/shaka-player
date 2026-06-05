@@ -908,7 +908,7 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'ClearKey with raw single key',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
-      /* manifestUri= */ 'https://media.axprod.net/TestVectors/v7-MultiDRM-SingleKey/Manifest_1080p_ClearKey.mpd',
+      /* manifestUri= */ 'https://media.axprod.net/TestVectors/Dash/protected_dash_1080p_h264_singlekey/manifest.mpd',
       /* source= */ shakaAssets.Source.AXINOM)
       .addKeySystem(shakaAssets.KeySystem.CLEAR_KEY)
       .addFeature(shakaAssets.Feature.DASH)
@@ -921,14 +921,14 @@ shakaAssets.testAssets = [
         drm: {
           clearKeys: {
             // cspell: disable-next-line
-            'nrQFDeRLSAKTLifXUIPiZg': 'FmY0xnWCPCNaSpRG-tUuTQ',
+            '4060a865887842679cbf91ae5bae1e72': 'fc35340837310cc0fb53de97e22a69e0',
           },
         },
       }),
   new ShakaDemoAssetInfo(
       /* name= */ 'ClearKey with raw multiple keys',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
-      /* manifestUri= */ 'https://media.axprod.net/TestVectors/v7-MultiDRM-MultiKey/Manifest_1080p_ClearKey.mpd',
+      /* manifestUri= */ 'https://media.axprod.net/TestVectors/MultiKey/Dash_h264_1080p_cenc/manifest.mpd',
       /* source= */ shakaAssets.Source.AXINOM)
       .addKeySystem(shakaAssets.KeySystem.CLEAR_KEY)
       .addFeature(shakaAssets.Feature.DASH)
@@ -941,11 +941,9 @@ shakaAssets.testAssets = [
         drm: {
           clearKeys: {
             // cspell: disable
-            'gDmb9YohQBSAU-J-dI6YwA': '3aHppzZ2g3Y3wK1uNnUXmg',
-            'kJU-CWyySaOiYHpf7-rUmQ': 'zsmKW7Mq9Unz5R7oUGeF8w',
-            'Dk2pK9DoSmaMP8Jal-tlMg': 'UmYYfGb7znuoFAQM79ayHw',
-            'WF8jPzByRvGfpG3CLGagFA': 'jayKpC3tmPq4YKXkapa8FA',
-            'QiK9eLxFQb-2Pm-BTcOR3w': 'GAMi9v92b9ca5yBwaptN-Q',
+            '426d1a3278fd4f22873068db3974dda9': '36bd3359241d4ba6f9cba62c1e041e01',
+            '9dc8e80acbfa41c3984fb6043440391a': '495a038c79dd5af4290f0850435832e5',
+            '41baa59969054fc0a8c6355dcd1ab39f': '02ee51601e6cd506846de4468f22ad7f',
             // cspell: enable
           },
         },
@@ -2624,6 +2622,13 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['cmsf/clear'],
+          },
+        },
+      })
       .setMimeType('application/msf'),
   new ShakaDemoAssetInfo(
       /* name= */ 'moqlivemock Multi-DRM',
@@ -2668,7 +2673,6 @@ shakaAssets.testAssets = [
       /* iconUri= */ '',
       /* manifestUri= */ 'https://moqlivemock.demo.osaas.io/moq',
       /* source= */ shakaAssets.Source.EYEVINN)
-      .addKeySystem(shakaAssets.KeySystem.CLEAR_KEY)
       .addFeature(shakaAssets.Feature.MSF)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
