@@ -1,5 +1,5 @@
 /*! @license
- * Copyright 2008 The Closure Library Authors
+ * Copyright 2006 The Closure Library Authors
  * SPDX-License-Identifier: Apache-2.0
  */
 
