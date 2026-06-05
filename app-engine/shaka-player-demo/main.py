@@ -1,5 +1,5 @@
 # Shaka Player Demo - Appspot Entrypoint
-# Copyright 2022 Google LLC
+# Copyright 2016 Google LLC
 # SPDX-License-Identifier: Apache-2.0
 
 # Most of the app is served as static content.  Any exceptions go here.
