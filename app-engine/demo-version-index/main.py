@@ -1,5 +1,5 @@
 # Shaka Player Version Index - Appspot Entrypoint
-# Copyright 2022 Google LLC
+# Copyright 2016 Google LLC
 # SPDX-License-Identifier: Apache-2.0
 
 # In the App Engine Python 3 runtime, you must have an entrypoint, even if all
