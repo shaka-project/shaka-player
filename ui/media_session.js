@@ -205,6 +205,10 @@ shaka.ui.MediaSession = class {
    * @export
    */
   setupAlbum(album) {
+    const castReceiver = this.controls_.getCastReceiver();
+    if (castReceiver) {
+      castReceiver.setContentAlbumName(album);
+    }
     if (this.supported_) {
       const metadata = this.getMediaMetadata();
       metadata.album = album;
