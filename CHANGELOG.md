@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.16.35](https://github.com/shaka-project/shaka-player/compare/v4.16.34...v4.16.35) (2026-06-08)
+
+
+### Bug Fixes
+
+* **Cast:** Use cast platform APIs in MediaCapabilties polyfill ([#10170](https://github.com/shaka-project/shaka-player/issues/10170)) ([f628f65](https://github.com/shaka-project/shaka-player/commit/f628f6541bd78992d1d7ac9efbbf1789e416e2c4))
+
 ## [4.16.34](https://github.com/shaka-project/shaka-player/compare/v4.16.33...v4.16.34) (2026-06-01)
 
 
