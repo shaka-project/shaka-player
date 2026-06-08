@@ -83,6 +83,9 @@
 +../../lib/transmuxer/transmuxer_proxy.js
 +../../lib/transmuxer/transmuxer_utils.js
 
++../../lib/metadata/id3_utils.js
++../../lib/metadata/metadata.js
+
 +../../lib/util/abortable_operation.js
 +../../lib/util/array_utils.js
 +../../lib/util/buffer_utils.js
@@ -102,7 +105,6 @@
 +../../lib/util/functional.js
 +../../lib/util/i_destroyable.js
 +../../lib/util/i_releasable.js
-+../../lib/util/id3_utils.js
 +../../lib/util/iterables.js
 +../../lib/util/language_utils.js
 +../../lib/util/lazy.js

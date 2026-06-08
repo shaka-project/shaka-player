@@ -1,5 +1,5 @@
 # Shaka Player Demo - Poster Definitions
-# Copyright 2022 Google LLC
+# Copyright 2016 Google LLC
 # SPDX-License-Identifier: Apache-2.0
 
 # A Doodle-like service to change the poster on certain days.

@@ -6,6 +6,7 @@
 +@fairplay
 +@networking
 +@manifests
++@metadata
 +@polyfill
 +@polyfillForUI
 +@queue
