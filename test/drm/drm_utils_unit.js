@@ -366,4 +366,36 @@ describe('DrmUtils', () => {
           .toBeUndefined();
     });
   });
+
+  describe('normalizeClearKeyValue', () => {
+    it('returns base64url values unchanged', () => {
+      // cspell: disable-next-line
+      const value = 'EjRWeJCrze8SNFZ4kKvN7w';
+
+      expect(shaka.drm.DrmUtils.normalizeClearKeyValue(value))
+          .toBe(value);
+    });
+
+    it('converts a hex value to base64url', () => {
+      const hex = '1234567890abcdef1234567890abcdef';
+
+      expect(shaka.drm.DrmUtils.normalizeClearKeyValue(hex))
+          // cspell: disable-next-line
+          .toBe('EjRWeJCrze8SNFZ4kKvN7w');
+    });
+
+    it('converts a key id consisting of all zeros', () => {
+      const hex = '00000000000000000000000000000000';
+
+      expect(shaka.drm.DrmUtils.normalizeClearKeyValue(hex))
+          .toBe('AAAAAAAAAAAAAAAAAAAAAA');
+    });
+
+    it('converts a key id consisting of all ff bytes', () => {
+      const hex = 'ffffffffffffffffffffffffffffffff';
+
+      expect(shaka.drm.DrmUtils.normalizeClearKeyValue(hex))
+          .toBe('_____________________w');
+    });
+  });
 });
