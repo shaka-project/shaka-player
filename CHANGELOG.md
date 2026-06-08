@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.0.19](https://github.com/shaka-project/shaka-player/compare/v5.0.18...v5.0.19) (2026-06-08)
+
+
+### Bug Fixes
+
+* **Cast:** Use cast platform APIs in MediaCapabilties polyfill ([#10170](https://github.com/shaka-project/shaka-player/issues/10170)) ([f27b5aa](https://github.com/shaka-project/shaka-player/commit/f27b5aa40762daca94e4083fcb7c1707f7396beb))
+* **Queue:** Fix usage with RepeatMode.OFF ([#10164](https://github.com/shaka-project/shaka-player/issues/10164)) ([b00b225](https://github.com/shaka-project/shaka-player/commit/b00b225c77067b5470bdd94aca61d0ef032a347c))
+
 ## [5.0.18](https://github.com/shaka-project/shaka-player/compare/v5.0.17...v5.0.18) (2026-06-01)
 
 
