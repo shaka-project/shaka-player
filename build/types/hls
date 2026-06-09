@@ -1,5 +1,7 @@
 # The HLS manifest parser plugin.
 
++../../lib/event/session_data.js
+
 +../../lib/hls/hls_classes.js
 +../../lib/hls/hls_parser.js
 +../../lib/hls/hls_utils.js

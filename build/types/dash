@@ -1,5 +1,7 @@
 # The DASH manifest parser plugin.
 
++../../lib/event/program_information.js
+
 +../../lib/dash/content_protection.js
 +../../lib/dash/dash_parser.js
 +../../lib/dash/ebml_parser.js

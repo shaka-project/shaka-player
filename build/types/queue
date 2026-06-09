@@ -1,3 +1,7 @@
 # Queue Functionality
 
++../../lib/event/current_item_changed.js
++../../lib/event/items_inserted.js
++../../lib/event/items_removed.js
+
 +../../lib/queue/queue_manager.js
