@@ -12,7 +12,6 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 
@@ -26,9 +25,13 @@ shaka.ui.SkipNextButton = class extends shaka.ui.Element {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
+   * @param {boolean=} showWhenUnavailable
    */
-  constructor(parent, controls) {
+  constructor(parent, controls, showWhenUnavailable = false) {
     super(parent, controls);
+
+    /** @private {boolean} */
+    this.showWhenUnavailable_ = showWhenUnavailable;
 
     this.queueManager_ = this.controls.getQueueManager();
 
@@ -45,17 +48,8 @@ shaka.ui.SkipNextButton = class extends shaka.ui.Element {
         shaka.ui.Enums.MaterialDesignSVGIcons['SKIP_NEXT']);
     this.parent.appendChild(this.button_);
 
-    this.updateAriaLabel_();
-    this.checkAvailability_();
-
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateAriaLabel_();
-        });
+    this.updateLocalizedStrings();
+    this.checkAvailability();
 
     this.eventManager.listen(this.button_, 'click', () => {
       if (!this.controls.isOpaque()) {
@@ -71,28 +65,34 @@ shaka.ui.SkipNextButton = class extends shaka.ui.Element {
           'itemsinserted',
           'itemsremoved',
         ], () => {
-          this.checkAvailability_();
+          this.checkAvailability();
         });
 
     this.eventManager.listen(this.player, 'loading', () => {
-      this.checkAvailability_();
+      this.checkAvailability();
     });
   }
 
-  /**
-   * @private
-   */
-  updateAriaLabel_() {
+  /** @override */
+  updateLocalizedStrings() {
     this.button_.ariaLabel =
         this.localization.resolve(shaka.ui.Locales.Ids.SKIP_NEXT);
   }
 
-  /** @private */
-  checkAvailability_() {
+  /** @override */
+  checkAvailability() {
     const itemsLength = this.queueManager_.getItems().length;
-    const available = itemsLength > 1 &&
+    const hasNext = itemsLength > 1 &&
       (this.queueManager_.getCurrentItemIndex() + 1) < itemsLength;
-    shaka.ui.Utils.setDisplay(this.button_, available);
+
+    if (this.showWhenUnavailable_) {
+      // Always visible when queue has more than one item; disabled if no next.
+      const hasQueue = itemsLength > 1;
+      shaka.ui.Utils.setDisplay(this.button_, hasQueue);
+      this.button_.disabled = !hasNext;
+    } else {
+      shaka.ui.Utils.setDisplay(this.button_, hasNext);
+    }
   }
 };
 
@@ -113,3 +113,22 @@ shaka.ui.Controls.registerElement(
 
 shaka.ui.Controls.registerBigElement(
     'skip_next', new shaka.ui.SkipNextButton.Factory());
+
+
+/**
+ * @implements {shaka.extern.IUIElement.Factory}
+ * @final
+ */
+shaka.ui.SkipNextButton.AlwaysFactory = class {
+  /** @override */
+  create(rootElement, controls) {
+    return new shaka.ui.SkipNextButton(
+        rootElement, controls, /* showDisabled= */ true);
+  }
+};
+
+shaka.ui.Controls.registerElement(
+    'skip_next_always', new shaka.ui.SkipNextButton.AlwaysFactory());
+
+shaka.ui.Controls.registerBigElement(
+    'skip_next_always', new shaka.ui.SkipNextButton.AlwaysFactory());

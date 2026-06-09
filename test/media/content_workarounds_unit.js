@@ -336,11 +336,13 @@ describe('ContentWorkarounds', () => {
       const getChannelCount = (initSegment) => {
         let channelCount = 0;
         new shaka.util.Mp4Parser()
-            .box('moov', shaka.util.Mp4Parser.children)
-            .box('trak', shaka.util.Mp4Parser.children)
-            .box('mdia', shaka.util.Mp4Parser.children)
-            .box('minf', shaka.util.Mp4Parser.children)
-            .box('stbl', shaka.util.Mp4Parser.children)
+            .boxes([
+              'moov',
+              'trak',
+              'mdia',
+              'minf',
+              'stbl',
+            ], shaka.util.Mp4Parser.children)
             .fullBox('stsd', shaka.util.Mp4Parser.sampleDescription)
             .box('enca', (box) => {
               const data = shaka.util.Mp4BoxParsers
@@ -373,11 +375,13 @@ describe('ContentWorkarounds', () => {
       const getBox = (initSegment, type) => {
         let box = null;
         new shaka.util.Mp4Parser()
-            .box('moov', shaka.util.Mp4Parser.children)
-            .box('trak', shaka.util.Mp4Parser.children)
-            .box('mdia', shaka.util.Mp4Parser.children)
-            .box('minf', shaka.util.Mp4Parser.children)
-            .box('stbl', shaka.util.Mp4Parser.children)
+            .boxes([
+              'moov',
+              'trak',
+              'mdia',
+              'minf',
+              'stbl',
+            ], shaka.util.Mp4Parser.children)
             .fullBox('stsd', shaka.util.Mp4Parser.sampleDescription)
             .box('hvc1', shaka.util.Mp4Parser.visualSampleEntry)
             .box(type, (_box) => {

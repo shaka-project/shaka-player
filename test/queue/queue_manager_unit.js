@@ -162,7 +162,7 @@ describe('QueueManager', () => {
     await shaka.test.Util.shortDelay();
 
     expect(preloadSpy).toHaveBeenCalledWith(
-        queueItem2.manifestUri, null, null, null);
+        queueItem2.manifestUri, null, null, null, true);
   });
 
   it('cleans up previous preload when playing next item', async () => {
@@ -257,13 +257,13 @@ describe('QueueManager', () => {
     expect(playSpy).toHaveBeenCalled();
   });
 
-  it('does not repeat or advance when repeatMode is OFF', async () => {
+  it('does not repeat when repeatMode is OFF', async () => {
     queueManager.insertItems([queueItem, queueItem2]);
     const config = queueManager.getConfiguration();
     config.repeatMode = shaka.config.RepeatMode.OFF;
     queueManager.configure(config);
 
-    await queueManager.playItem(0);
+    await queueManager.playItem(queueManager.getItems().length - 1);
 
     const initialIndex = queueManager.getCurrentItemIndex();
     const initialItem = queueManager.getCurrentItem();
@@ -305,5 +305,75 @@ describe('QueueManager', () => {
     } else {
       expect(player.getChaptersTracks().length).toBe(0);
     }
+  });
+
+  it('loads items from M3U playlist', async () => {
+    const playlist = [
+      '#EXTM3U',
+      '#EXTINF:-1 tvg-id="ch1" tvg-name="Channel 1",Channel 1 Display',
+      '/base/test/test/assets/small.mp4',
+      '#EXTINF:-1 tvg-id="ch2" tvg-name="Channel 2",Channel 2 Display',
+      '/base/test/test/assets/small.mp4',
+    ].join('\n');
+
+    const dataUri = 'data:application/x-mpegURL;charset=utf-8,' +
+        encodeURIComponent(playlist);
+
+    await queueManager.loadFromM3uPlaylist(dataUri);
+
+    const items = queueManager.getItems();
+
+    expect(items.length).toBe(2);
+
+    expect(items[0].manifestUri).toBe('/base/test/test/assets/small.mp4');
+    expect(items[0].metadata.title).toBe('Channel 1');
+    expect(items[0].metadata['tvg-id']).toBe('ch1');
+
+    expect(items[1].metadata.title).toBe('Channel 2');
+  });
+
+  it('loads and plays first item from M3U playlist', async () => {
+    const playlist = [
+      '#EXTM3U',
+      '#EXTINF:-1 tvg-id="ch1" tvg-name="Channel 1",Channel 1 Display',
+      '/base/test/test/assets/small.mp4',
+    ].join('\n');
+
+    const dataUri =
+        'data:application/x-mpegURL;charset=utf-8,' +
+        encodeURIComponent(playlist);
+
+    await queueManager.loadFromM3uPlaylist(dataUri, true);
+
+    expect(queueManager.getCurrentItemIndex()).toBe(0);
+
+    const currentItem = queueManager.getCurrentItem();
+
+    expect(currentItem).not.toBeNull();
+    expect(currentItem.manifestUri)
+        .toBe('/base/test/test/assets/small.mp4');
+  });
+
+  it('skips duplicated channels by tvg-id', async () => {
+    const playlist = [
+      '#EXTM3U',
+      '#EXTINF:-1 tvg-id="dup" tvg-name="Channel 1",Channel 1',
+      '/base/test/test/assets/small.mp4',
+      '#EXTINF:-1 tvg-id="dup" tvg-name="Channel 1.1",Channel 1.1',
+      '/base/test/test/assets/small.mp4',
+      '#EXTINF:-1 tvg-id="dup" tvg-name="Channel 1.2",Channel 1.2',
+      '/base/test/test/assets/small.mp4',
+    ].join('\n');
+
+    const dataUri =
+        'data:application/x-mpegURL;charset=utf-8,' +
+        encodeURIComponent(playlist);
+
+    await queueManager.loadFromM3uPlaylist(dataUri);
+
+    const items = queueManager.getItems();
+
+    expect(items.length).toBe(1);
+    expect(items[0].metadata.title).toBe('Channel 1');
   });
 });

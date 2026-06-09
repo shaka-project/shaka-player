@@ -8,6 +8,7 @@ goog.provide('shakaDemo.AssetCard');
 
 goog.require('goog.asserts');
 goog.require('shakaAssets');
+goog.require('shakaDemo.Icons');
 goog.require('shakaDemo.Tooltips');
 goog.requireType('ShakaDemoAssetInfo');
 
@@ -248,6 +249,38 @@ shakaDemo.AssetCard = class {
     this.remakeButtonsFn_(this);
   }
 
+  /**
+   * Adds a Play button for M3U playlist assets and shows the remaining
+   * base buttons ("Add to queue", "Start Preload") as disabled, since
+   * those operations are not applicable to playlist-type assets:
+   * - "Add to queue" would add the raw playlist URL, not its entries.
+   * - "Start Preload" has no meaning before the playlist is fetched.
+   */
+  addBaseButtonsPlaylist() {
+    let disablePlay = false;
+
+    // Play loads the playlist via QueueManager.loadFromM3uPlaylist()
+    // and starts the first channel automatically.
+    this.addButton('Play', async () => {
+      if (disablePlay) {
+        return;
+      }
+      disablePlay = true;
+      await shakaDemoMain.loadAsset(this.asset_);
+      this.remakeButtons();
+    });
+
+    // Disabled: adding a raw playlist URL to an existing queue is not
+    // supported; the user should play the playlist directly instead.
+    const addToQueueButton = this.addButton('Add to queue', () => {});
+    addToQueueButton.setAttribute('disabled', '');
+
+    // Disabled: preloading a playlist URL is not meaningful before the
+    // playlist entries have been resolved.
+    const preloadButton = this.addButton('Start Preload', () => {});
+    preloadButton.setAttribute('disabled', '');
+  }
+
   /** Adds basic buttons to the card ("play" and "preload"). */
   addBaseButtons() {
     let disableButtons = false;
@@ -323,13 +356,11 @@ shakaDemo.AssetCard = class {
      * @param {!Element} button
      * @param {!Element} attachPoint If there is no attach point, just pass the
      *  button in here.
-     * @param {string} iconText
+     * @param {string} iconPath
      */
-    const styleAsDownloadButton = (button, attachPoint, iconText) => {
+    const styleAsDownloadButton = (button, attachPoint, iconPath) => {
       attachPoint.classList.add('asset-card-corner-button');
-      const icon = document.createElement('i');
-      icon.textContent = iconText;
-      icon.classList.add('material-icons-round');
+      const icon = shakaDemo.Icons.makeSvgIcon(iconPath);
       button.appendChild(icon);
     };
 
@@ -346,21 +377,23 @@ shakaDemo.AssetCard = class {
       // that is the element this has to move with CSS, otherwise the tooltip
       // will end up coming out of the wrong place.
       const attachPoint = button.parentElement || button;
-      styleAsDownloadButton(button, attachPoint, 'get_app');
+      styleAsDownloadButton(button, attachPoint, shakaDemo.Icons.DOWNLOAD);
       return;
     }
     if (this.asset_.isStored()) {
       const deleteButton = this.addButton(null, () => {
         this.attachDeleteDialog_(deleteButton);
       });
-      styleAsDownloadButton(deleteButton, deleteButton, 'offline_pin');
+      styleAsDownloadButton(
+          deleteButton, deleteButton, shakaDemo.Icons.OFFLINE_PIN);
     } else {
       const downloadButton = this.addButton(null, async () => {
         downloadButton.disabled = true;
         await this.asset_.storeCallback();
         this.remakeButtons();
       });
-      styleAsDownloadButton(downloadButton, downloadButton, 'get_app');
+      styleAsDownloadButton(
+          downloadButton, downloadButton, shakaDemo.Icons.DOWNLOAD);
     }
   }
 

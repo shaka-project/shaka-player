@@ -1117,6 +1117,155 @@ describe('HlsParser live', () => {
             manifest, mediaWithAdditionalSegment, [newRef1, newRef2]);
       });
 
+      it('only creates references for the new tail on update', async () => {
+        const createSegmentReferenceSpy =
+            spyOn(parser, 'createSegmentReference_').and.callThrough();
+
+        const ref1 = makeReference(
+            'test:/main.mp4', 0, 2, /* syncTime= */ null);
+        const ref2 = makeReference(
+            'test:/main2.mp4', 2, 4, /* syncTime= */ null);
+
+        const manifest = await testInitialManifest(
+            master, mediaWithAdditionalSegment, [ref1, ref2]);
+
+        createSegmentReferenceSpy.calls.reset();
+
+        const ref3 = makeReference(
+            'test:/main3.mp4', 4, 6, /* syncTime= */ null);
+        const mediaWithAdditionalSegmentAndNewSegment = [
+          mediaWithAdditionalSegment,
+          '#EXTINF:2,\n',
+          'main3.mp4\n',
+        ].join('');
+        await testUpdate(
+            manifest, mediaWithAdditionalSegmentAndNewSegment,
+            [ref1, ref2, ref3]);
+
+        expect(createSegmentReferenceSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('falls back to rebuilding all refs on redirect updates', async () => {
+        const createSegmentReferenceSpy =
+            spyOn(parser, 'createSegmentReference_').and.callThrough();
+
+        const ref1 = makeReference(
+            'test:/main.mp4', 0, 2, /* syncTime= */ null);
+
+        let playlistFetchCount = 0;
+        fakeNetEngine.setResponseFilter((type, response) => {
+          if (response.uri == 'test:/video') {
+            playlistFetchCount++;
+            if (playlistFetchCount == 2) {
+              response.uri = 'test:/redirected/video';
+            }
+          }
+        });
+
+        const manifest = await testInitialManifest(master, media, [ref1]);
+
+        createSegmentReferenceSpy.calls.reset();
+
+        const redirectedRef1 = makeReference(
+            ['test:/redirected/main.mp4', 'test:/main.mp4'],
+            0, 2, /* syncTime= */ null);
+        const redirectedRef2 = makeReference(
+            ['test:/redirected/main2.mp4', 'test:/main2.mp4'],
+            2, 4, /* syncTime= */ null);
+        await testUpdate(
+            manifest, mediaWithAdditionalSegment,
+            [redirectedRef1, redirectedRef2]);
+
+        expect(createSegmentReferenceSpy).toHaveBeenCalledTimes(2);
+      });
+
+      it('extrapolates syncTime for new tail ref via anchor on update',
+          async () => {
+            const createSegmentReferenceSpy =
+                spyOn(parser, 'createSegmentReference_').and.callThrough();
+
+            // Corresponds to "2000-01-01T00:00:00.00Z".
+            const syncTimeBase = 946684800;
+
+            const mediaWithPdt = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:0\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main.mp4\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+            ].join('');
+
+            const mediaWithPdtAndNewSegment = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:0\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main.mp4\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+              '#EXTINF:2,\n',
+              'main3.mp4\n',
+            ].join('');
+
+            const ref1 = makeReference(
+                'test:/main.mp4', 0, 2, syncTimeBase);
+            const ref2 = makeReference(
+                'test:/main2.mp4', 2, 4, syncTimeBase + 2);
+            const ref3 = makeReference(
+                'test:/main3.mp4', 4, 6, syncTimeBase + 4);
+
+            const manifest = await testInitialManifest(
+                master, mediaWithPdt, [ref1, ref2]);
+
+            createSegmentReferenceSpy.calls.reset();
+
+            await testUpdate(
+                manifest, mediaWithPdtAndNewSegment, [ref1, ref2, ref3]);
+
+            // Only the new tail segment was created — the two known segments
+            // were skipped and their anchor used to extrapolate syncTime.
+            expect(createSegmentReferenceSpy).toHaveBeenCalledTimes(1);
+          });
+
+      it('falls back to full rebuild when anchor reference is unavailable',
+          async () => {
+            const createSegmentReferenceSpy =
+                spyOn(parser, 'createSegmentReference_').and.callThrough();
+
+            const ref1 = makeReference(
+                'test:/main.mp4', 0, 2, /* syncTime= */ null);
+            const ref2 = makeReference(
+                'test:/main2.mp4', 2, 4, /* syncTime= */ null);
+            const ref3 = makeReference(
+                'test:/main3.mp4', 4, 6, /* syncTime= */ null);
+
+            const manifest = await testInitialManifest(
+                master, mediaWithAdditionalSegment, [ref1, ref2]);
+
+            createSegmentReferenceSpy.calls.reset();
+            // Force anchor lookup to fail, triggering full-rebuild fallback.
+            spyOn(parser, 'getReferenceForMediaSequence_')
+                .and.returnValue(null);
+
+            const mediaWithThreeSegments = [
+              mediaWithAdditionalSegment,
+              '#EXTINF:2,\n',
+              'main3.mp4\n',
+            ].join('');
+
+            await testUpdate(
+                manifest, mediaWithThreeSegments, [ref1, ref2, ref3]);
+
+            // All 3 segments rebuilt since the anchor was unavailable.
+            expect(createSegmentReferenceSpy).toHaveBeenCalledTimes(3);
+          });
+
       it('parses start time from mp4 segments', async () => {
         const ref = makeReference(
             'test:/main.mp4', 0, 2, /* syncTime= */ null);
@@ -1769,4 +1918,55 @@ describe('HlsParser live', () => {
     return ManifestParser.makeReference(uri, start, end, baseUri, startByte,
         endByte, timestampOffset, partialReferences, tilesLayout, syncTime);
   }
+
+  it('calls mergeAndEvict on update when segment has partials', async () => {
+    // Regression test for #9998. When a segment has partial segments, it gets
+    // rebuilt on every live update, but without the fix the rebuilt reference
+    // was discarded from mergeAndEvict because its position was already in
+    // mediaSequenceToStartTime. This caused LL-HLS streams to stall.
+
+    const mediaWithPartials = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:100\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:2,\n',
+      'main.mp4\n',
+      '#EXTINF:2,\n',
+      'main2.mp4\n',
+      '#EXT-X-PART:DURATION=1.0,URI="partial.mp4"\n',
+      '#EXT-X-PART:DURATION=1.0,URI="partial2.mp4"\n',
+      '#EXTINF:2,\n',
+      'main3.mp4\n',
+    ].join('');
+
+    const mediaWithMorePartials = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:100\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:2,\n',
+      'main.mp4\n',
+      '#EXTINF:2,\n',
+      'main2.mp4\n',
+      '#EXT-X-PART:DURATION=1.0,URI="partial.mp4"\n',
+      '#EXT-X-PART:DURATION=1.0,URI="partial2.mp4"\n',
+      '#EXT-X-PART:DURATION=1.0,URI="partial3.mp4"\n',
+      '#EXT-X-PART:DURATION=1.0,URI="partial4.mp4"\n',
+      '#EXTINF:2,\n',
+      'main3.mp4\n',
+    ].join('');
+
+    const manifest = await testInitialManifest(
+        master, mediaWithPartials);
+
+    const video = manifest.variants[0].video;
+    goog.asserts.assert(video.segmentIndex, 'Segment index should exist!');
+
+    spyOn(video.segmentIndex, 'mergeAndEvict').and.callThrough();
+
+    await testUpdate(manifest, mediaWithMorePartials);
+
+    expect(video.segmentIndex.mergeAndEvict).toHaveBeenCalled();
+  });
 });  // describe('HlsParser live')

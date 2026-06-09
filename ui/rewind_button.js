@@ -12,7 +12,6 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.util.Dom');
 
 
@@ -41,19 +40,10 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
         shaka.ui.Enums.MaterialDesignSVGIcons['REWIND']);
 
     this.parent.appendChild(this.button_);
-    this.updateAriaLabel_();
+    this.updateLocalizedStrings();
 
     /** @private {!Array<number>} */
     this.rewindRates_ = this.controls.getConfig().rewindRates;
-
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateAriaLabel_();
-        });
 
     this.eventManager.listen(this.button_, 'click', () => {
       if (!this.controls.isOpaque()) {
@@ -68,10 +58,8 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
     });
   }
 
-  /**
-   * @private
-   */
-  updateAriaLabel_() {
+  /** @override */
+  updateLocalizedStrings() {
     this.button_.ariaLabel =
         this.localization.resolve(shaka.ui.Locales.Ids.REWIND);
   }

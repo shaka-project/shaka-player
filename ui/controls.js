@@ -26,6 +26,7 @@ goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.MediaSession');
 goog.require('shaka.ui.SeekBar');
 goog.require('shaka.ui.SkipAdButton');
+goog.require('shaka.ui.TextStylePreview');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.ui.VRManager');
 goog.require('shaka.util.ArrayUtils');
@@ -290,6 +291,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       for (const menu of this.menus_) {
         shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
       }
+      this.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
+      this.hideTextStylePreview();
       if (this.config_.enableTooltips) {
         this.controlsButtonPanel_.classList.add('shaka-tooltips-on');
       }
@@ -330,6 +333,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @private {shaka.ui.Localization} */
     this.localization_ = shaka.ui.Controls.createLocalization_();
+
+    /** @private {?shaka.ui.TextStylePreview} */
+    this.textStylePreview_ = new shaka.ui.TextStylePreview(
+        this.localPlayer_, this.localization_);
 
     /** @private {shaka.util.EventManager} */
     this.eventManager_ = new shaka.util.EventManager();
@@ -430,6 +437,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (document.pictureInPictureElement == this.localVideo_) {
       await document.exitPictureInPicture();
     }
+
+    this.textStylePreview_?.release();
+    this.textStylePreview_ = null;
 
     this.eventManager_?.release();
     this.eventManager_ = null;
@@ -568,6 +578,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   configure(config) {
     this.config_ = config;
+    this.hideTextStylePreview();
 
     this.castProxy_.changeReceiverId(config.castReceiverAppId,
         config.castAndroidReceiverCompatible);
@@ -912,6 +923,35 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     for (const menu of this.contextMenus_) {
       shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
     }
+    this.hideTextStylePreview();
+  }
+
+  /**
+   * Shows a temporary subtitle with the current text displayer style.
+   */
+  showTextStylePreview() {
+    this.textStylePreview_?.show();
+  }
+
+  /**
+   * Updates the temporary subtitle style without changing player config.
+   *
+   * @param {!shaka.ui.TextStylePreview.Configuration=} config
+   */
+  updateTextStylePreview(config = {}) {
+    this.textStylePreview_?.update(config);
+  }
+
+  /**
+   * Reverts the temporary subtitle to the style captured when the menu opened.
+   */
+  resetTextStylePreview() {
+    this.textStylePreview_?.reset();
+  }
+
+  /** Removes the temporary subtitle style preview. */
+  hideTextStylePreview() {
+    this.textStylePreview_?.hide();
   }
 
   /**
@@ -937,9 +977,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @return {boolean}
-   * @private
    */
-  shouldUseDocumentPictureInPicture_() {
+  shouldUseDocumentPictureInPicture() {
     return 'documentPictureInPicture' in window &&
         this.config_.documentPictureInPicture.enabled;
   }
@@ -985,7 +1024,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       if (this.shouldUseDocumentFullscreen_()) {
         if (this.isPiPEnabled()) {
           await this.togglePiP();
-          if (this.shouldUseDocumentPictureInPicture_()) {
+          if (this.shouldUseDocumentPictureInPicture()) {
             // This is necessary because we need a small delay when
             // executing actions when returning from document PiP.
             await shaka.util.Functional.delay(0.05);
@@ -1049,7 +1088,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return false;
     }
     if (document.pictureInPictureEnabled ||
-        this.shouldUseDocumentPictureInPicture_()) {
+        this.shouldUseDocumentPictureInPicture()) {
       const video = /** @type {HTMLVideoElement} */(this.localVideo_);
       return !video.disablePictureInPicture;
     }
@@ -1069,7 +1108,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   async togglePiP() {
     try {
-      if (this.shouldUseDocumentPictureInPicture_()) {
+      if (this.shouldUseDocumentPictureInPicture()) {
         // If you were fullscreen, leave fullscreen first.
         if (this.isFullScreenEnabled()) {
           await this.exitFullScreen_();
@@ -1128,8 +1167,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     placeholder.classList.add('shaka-video-container');
     placeholder.classList.add('pip-placeholder');
     const video = /** @type {HTMLVideoElement} */ (this.video_);
-    if (video?.poster) {
-      const posterDiv = document.createElement('div');
+    let posterDiv = null;
+    const updatePoster = () => {
+      if (posterDiv) {
+        posterDiv.remove();
+        posterDiv = null;
+      }
+      if (!video?.poster) {
+        return;
+      }
+      posterDiv = document.createElement('div');
       posterDiv.classList.add('pip-poster');
       posterDiv.style.backgroundImage = `url("${video.poster}")`;
       const videoWidth = video.videoWidth || video.clientWidth;
@@ -1138,18 +1185,52 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       if (videoWidth && videoHeight) {
         posterDiv.style.setProperty('aspect-ratio',
             `${videoWidth} / ${videoHeight}`);
-        placeholder.appendChild(posterDiv);
       }
+      placeholder.prepend(posterDiv);
+    };
+
+    updatePoster();
+
+    const posterObserver = new MutationObserver(() => {
+      updatePoster();
+    });
+    if (video) {
+      posterObserver.observe(this.getLocalVideo(), {
+        attributes: true,
+        attributeFilter: ['poster'],
+      });
     }
+
+    // Blur overlay: covers the full placeholder, blurs the poster behind it.
+    const blurOverlay = shaka.util.Dom.createHTMLElement('div');
+    blurOverlay.classList.add('pip-blur-overlay');
+    placeholder.appendChild(blurOverlay);
+
+    // Wrap pulse ring + icon together so the ring is centered on the button.
+    const pipIconGroup = shaka.util.Dom.createHTMLElement('div');
+    pipIconGroup.classList.add('pip-icon-group');
+    placeholder.appendChild(pipIconGroup);
+
+    const pulseRing = shaka.util.Dom.createHTMLElement('div');
+    pulseRing.classList.add('pip-pulse-ring');
+    pipIconGroup.appendChild(pulseRing);
+
     const iconWrapper = shaka.util.Dom.createHTMLElement('div');
     iconWrapper.classList.add('pip-icon-wrapper');
-    placeholder.appendChild(iconWrapper);
+    pipIconGroup.appendChild(iconWrapper);
     const pipIcon = (new shaka.ui.Icon(iconWrapper,
         shaka.ui.Enums.MaterialDesignSVGIcons['EXIT_PIP'])).getSvgElement();
     const pipAction = () => this.togglePiP();
     this.eventManager_.listenOnce(pipIcon, 'click', pipAction);
 
+    const pipLabel = shaka.util.Dom.createHTMLElement('p');
+    pipLabel.classList.add('pip-label');
+    pipLabel.textContent =
+        this.localization_.resolve(shaka.ui.Locales.Ids.PIP_WINDOW_ACTIVE);
+    placeholder.appendChild(pipLabel);
+
     const style = getComputedStyle(pipPlayer);
+    placeholder.style.width = style.width;
     placeholder.style.height = style.height;
     parentPlayer.appendChild(placeholder);
 
@@ -1166,6 +1247,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Listen for the PiP closing event to move the player back.
     this.eventManager_.listenOnce(pipWindow, 'pagehide', () => {
+      posterObserver.disconnect();
       this.eventManager_.unlisten(pipIcon, 'click', pipAction);
       pipPlayer.classList.remove('pip-mode');
       placeholder.replaceWith(/** @type {!Node} */(pipPlayer));
@@ -1318,6 +1400,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.videoContainer_.getElementsByClassName('shaka-settings-menu'));
     this.menus_.push(...Array.from(
         this.videoContainer_.getElementsByClassName('shaka-overflow-menu')));
+    this.menus_.push(...Array.from(
+        this.videoContainer_.getElementsByClassName('shaka-sub-menu')));
 
     this.contextMenus_ = Array.from(
         this.videoContainer_.getElementsByClassName('shaka-context-menu'));

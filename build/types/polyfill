@@ -13,5 +13,6 @@
 +../../lib/polyfill/symbol.js
 +../../lib/polyfill/typed_array.js
 +../../lib/polyfill/video_play_promise.js
++../../lib/polyfill/videoframecallback.js
 +../../lib/polyfill/videoplaybackquality.js
 +../../lib/polyfill/vttcue.js

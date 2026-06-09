@@ -1,12 +1,26 @@
 # Shaka Player Upgrade Guide
 
 If you are upgrading from **v1 or v2**, these releases are no longer supported,
-and upgrade guides are no longer maintained.  You can use these old upgrades
-guides to upgrade in stages:
+and upgrade guides are no longer maintained.  You can still upgrade in stages
+using the following guides:
 
- - {@link https://v2-4-7-dot-shaka-player-demo.appspot.com/docs/api/tutorial-upgrade.html Upgrade to v2.4}
- - {@link https://v2-5-23-dot-shaka-player-demo.appspot.com/docs/api/tutorial-upgrade-v2-4.html Upgrade v2.4 => v2.5}
- - {@link https://v3-0-15-dot-shaka-player-demo.appspot.com/docs/api/tutorial-upgrade-v2-5.html Upgrade v2.5 => v3.0}
+## Upgrade to v2.4
+
+- [Upgrade v1 => v2](../upgrades/upgrade-v1-to-v2.md)
+- [Upgrade v2.0 => v2.4](../upgrades/upgrade-v2.0-to-v2.4.md)
+- [Upgrade v2.1 => v2.4](../upgrades/upgrade-v2.1-to-v2.4.md)
+- [Upgrade v2.2 => v2.4](../upgrades/upgrade-v2.2-to-v2.4.md)
+- [Upgrade v2.3 => v2.4](../upgrades/upgrade-v2.3-to-v2.4.md)
+
+## Upgrade v2.4 => v2.5
+
+- [Upgrade v2.3 => v2.5](../upgrades/upgrade-v2.3-to-v2.5.md)
+- [Upgrade v2.4 => v2.5](../upgrades/upgrade-v2.4-to-v2.5.md)
+
+## Upgrade v2.5 => v3.0
+
+- [Upgrade v2.4 => v3.0](../upgrades/upgrade-v2.4-to-v3.0.md)
+- [Upgrade v2.5 => v3.0](../upgrades/upgrade-v2.5-to-v3.0.md)
 
 Since v3.0, Shaka Player has been following semantic versioning.  (The
 IE11 deprecation announced before v3.0 happened in v3.1, which technically
@@ -124,7 +138,6 @@ application:
     - `preferredVariantRole` has been renamed to `preferredAudioRole` (deprecated in v4.16.0)
     - `autoShowText` has been removed.
     - `removeLatencyFromFirstPacketTime` has been removed.
-    - `removeLatencyFromFirstPacketTime` has been removed.
     - `streaming.speechToText` moved to `accessibility.speechToText`
 
   - UI Configuration changes:
@@ -137,7 +150,10 @@ application:
     - `TextDisplayer` plugins must implement the `configure()` method.
     - `TextParser` plugins must implement the `setManifestType()` method.
     - `Transmuxer` plugins now has three new parameters in `transmux()` method.
-    - Removed `enableTextDisplayer` from `TextDisplayer` plugins
+    - Removed `enableTextDisplayer` from `TextDisplayer` plugins.
+    - Replaced `SimpleTextDisplayer` with `NativeTextDisplayer`.
+    - Builtin `TextDisplayer` plugin constructors take a `shaka.Player` instance
+      as the only parameter.
 
   - Player API Changes:
     - The constructor no longer takes `mediaElement` as a parameter; use the `attach` method to attach to a media element instead. (Deprecated in v4.6)
@@ -166,40 +182,39 @@ application:
     - `airplay` button has been removed; use the `remote` button instead
 
 
-## v5.1
+## v6.0
 
   - Configuration changes:
     - Individual preference config fields have been replaced by structured
-      preference arrays. The old fields still work with a deprecation warning
-      but will be removed in the next major version.
-    - `preferredAudioLanguage`, `preferredAudioRole`, `preferredAudioLabel`,
-      `preferredAudioChannelCount`, and `preferSpatialAudio` have been replaced
-      by `preferredAudio`, an array of `shaka.extern.AudioPreference` objects.
-    - `preferredAudioCodecs` has been replaced by `preferredAudio` with the
-      `codec` field in each entry.
-    - `preferredTextLanguage` and `preferredTextRole` have been replaced by
-      `preferredText`, an array of `shaka.extern.TextPreference` objects.
-    - `preferredTextFormats` has been replaced by `preferredText` with the
-      `format` field in each entry.
-    - `preferForcedSubs` has been replaced by the `forced` field in
-      `preferredText` entries (e.g.
-      `player.configure('preferredText', [{language: 'en', forced: true}])`).
-    - `preferredVideoLabel`, `preferredVideoRole`, `preferredVideoHdrLevel`,
-      and `preferredVideoLayout` have been replaced by `preferredVideo`, an
-      array of `shaka.extern.VideoPreference` objects.
-    - `preferredVideoCodecs` has been replaced by `preferredVideo` with the
-      `codec` field in each entry.
-    - The new structured arrays allow specifying multiple preference sets in
-      priority order. For example:
-      ```js
-      // Old way (deprecated, still works with a warning):
-      player.configure('preferredAudioLanguage', 'ko');
-      player.configure('preferredAudioChannelCount', 6);
+      preference arrays.  (Deprecated in v5.1)
+      - `preferredAudioLanguage`, `preferredAudioRole`, `preferredAudioLabel`,
+        `preferredAudioChannelCount`, and `preferSpatialAudio` have been replaced
+        by `preferredAudio`, an array of `shaka.extern.AudioPreference` objects.
+      - `preferredAudioCodecs` has been replaced by `preferredAudio` with the
+        `codec` field in each entry.
+      - `preferredTextLanguage` and `preferredTextRole` have been replaced by
+        `preferredText`, an array of `shaka.extern.TextPreference` objects.
+      - `preferredTextFormats` has been replaced by `preferredText` with the
+        `format` field in each entry.
+      - `preferForcedSubs` has been replaced by the `forced` field in
+        `preferredText` entries (e.g.
+        `player.configure('preferredText', [{language: 'en', forced: true}])`).
+      - `preferredVideoLabel`, `preferredVideoRole`, `preferredVideoHdrLevel`,
+        and `preferredVideoLayout` have been replaced by `preferredVideo`, an
+        array of `shaka.extern.VideoPreference` objects.
+      - `preferredVideoCodecs` has been replaced by `preferredVideo` with the
+        `codec` field in each entry.
+      - The new structured arrays allow specifying multiple preference sets in
+        priority order. For example:
+        ```js
+        // Old way (deprecated, still works with a warning):
+        player.configure('preferredAudioLanguage', 'ko');
+        player.configure('preferredAudioChannelCount', 6);
 
-      // New way:
-      player.configure('preferredAudio', [
-        {language: 'ko', channelCount: 6},
-        {language: 'ko'},
-        {language: 'en'},
-      ]);
-      ```
+        // New way:
+        player.configure('preferredAudio', [
+          {language: 'ko', channelCount: 6},
+          {language: 'ko'},
+          {language: 'en'},
+        ]);
+        ```

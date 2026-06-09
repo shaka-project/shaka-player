@@ -6,13 +6,63 @@
 
 /* General utility mixins and classes with broad applicability. */
 
+/*
+ * CSS custom properties (variables) — replaces all former LESS @variables.
+ * Override any of these on a parent element to theme the player.
+ */
+:root {
+  /* Layout */
+  --shaka-controls-w: 98%;
+
+  /* Typography */
+  --shaka-font-family: roboto, sans-serif;
+  --shaka-font-color: white;
+  --shaka-font-color-secondary: #ccc;
+  --shaka-font-size: 14px;
+  --shaka-font-size-sm: 12px;
+
+  /* Backgrounds */
+  --shaka-bg: rgba(0, 0, 0, 50%);
+  --shaka-bg-hover: rgba(0, 0, 0, 75%);
+  --shaka-bg-90: rgba(0, 0, 0, 90%);
+  --shaka-bg-solid: black;
+  --shaka-bg-menu: rgba(28, 28, 28, 90%);
+
+  /* Content */
+  --shaka-title-size: 18px;
+
+  /* Badge mark */
+  --shaka-badge-color: #fff;
+  --shaka-badge-active: #f00;
+  --shaka-badge-size: 10px;
+
+  /* Tooltip / overflow-menu icon button size */
+  --shaka-icon-size: 48px;
+  --shaka-icon-size-sm: calc(var(--shaka-icon-size) / 2);
+  --shaka-icon-size-lg: calc(var(--shaka-icon-size) * 2 / 3);
+
+  /* Range / seek-bar pieces */
+  --shaka-thumb-color: white;
+  --shaka-track-color: white;
+  --shaka-thumb-size: 12px;
+  --shaka-track-h: 4px;
+  --shaka-touch-size: 40px;
+
+  /* Playback-rate menu */
+  --shaka-rate-border: rgba(255, 255, 255, 50%);
+  --shaka-rate-border-active: rgba(255, 255, 255, 85%);
+  --shaka-rate-bg-active: rgba(255, 255, 255, 10%);
+  --shaka-rate-slider: rgba(255, 255, 255, 25%);
+  --shaka-rate-preset-bg: rgba(255, 255, 255, 10%);
+  --shaka-rate-preset-hover: rgba(255, 255, 255, 18%);
+  --shaka-rate-preset-active: rgba(255, 255, 255, 20%);
+  --shaka-rate-preset-border: rgba(255, 255, 255, 70%);
+}
+
 /* Make a thing unselectable.  There are currently no cases where we make it
  * selectable again. */
 .unselectable() {
   user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
 }
 
 .hidden() {
@@ -128,23 +178,12 @@
   }
 }
 
-/* The width of the bottom-section controls: seek bar, ad controls, and
-the control buttons panel. */
-@bottom-controls-width: 98%;
-
-@general-font-family: Roboto, sans-serif, TengwarTelcontar;
-@general-font-color: white;
-@general-font-color-secondary: #ccc;
-@general-font-size: 14px;
-@general-background-color: rgba(0, 0, 0, 50%);
-@general-background-color-hover: rgba(0, 0, 0, 75%);
-@general-background-color-mostly-opaque: rgba(0, 0, 0, 90%);
-@general-background-color-opaque: black;
-
-@content-title-font-size: 18px;
-
-@quality-mark-color: #fff;
-@quality-mark-hightlight-color: #f00;
+/* Form elements don't inherit font-family from their ancestors by default in
+ * most browsers; they fall back to the OS system font instead.  Force them to
+ * inherit so that Shaka UI containers' font-family applies consistently. */
+button, input, select, textarea {
+  font-family: inherit;
+}
 
 @media (forced-colors: active) {
   .shaka-overflow-menu,

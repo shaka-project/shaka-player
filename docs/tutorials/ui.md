@@ -304,3 +304,24 @@ To enable poster display in the user interface, configure your streams with one 
 - HLS: Include the `#EXT-X-SESSION-DATA` tag with the ID `com.apple.hls.poster`.
 
 Note: This same metadata is also used by the [Media Session API](https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API) to enhance media playback experiences across platforms.
+
+#### Modern and Legacy UI styles
+
+Shaka Player UI now provides two CSS outputs to support both modern and legacy browsers.
+
+Note: both files are generated from the same LESS source and go through Autoprefixer and cssnano, ensuring consistent visual output across builds.
+
+##### Legacy CSS (controls.css)
+- Generated from the default UI build.
+- CSS custom properties are resolved at build time using postcss-custom-properties.
+- Ensures compatibility with older browsers such as:
+  - Chrome 38
+  - Safari 8
+  - Firefox 42
+- Suitable when CSS variable support is not available.
+
+##### Modern CSS (controls.modern.css)
+- Uses the same source styles but preserves CSS custom properties.
+- Targets modern browsers (last 2 years of browser versions).
+- Does not flatten CSS variables, allowing runtime theming and overrides.
+- Recommended for all modern applications.

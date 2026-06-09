@@ -12,7 +12,6 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -59,16 +58,7 @@ shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
     this.parent.appendChild(this.toggleStereoscopicButton_);
 
     // Setup strings in the correct language
-    this.updateLocalizedStrings_();
-
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateLocalizedStrings_();
-        });
+    this.updateLocalizedStrings();
 
     const vr = this.controls.getVR();
 
@@ -82,43 +72,24 @@ shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(vr, 'vrstatuschanged', () => {
-      this.checkAvailability_();
+      this.checkAvailability();
     });
 
-    if (this.isSubMenu) {
-      this.eventManager.listenMulti(
-          this.controls,
-          [
-            'submenuopen',
-            'submenuclose',
-          ], () => {
-            this.checkAvailability_();
-          });
-    }
-
-    this.checkAvailability_();
+    this.checkAvailability();
   }
 
-
-  /**
-   * @private
-   */
-  checkAvailability_() {
+  /** @override */
+  checkAvailability() {
     shaka.ui.Utils.setDisplay(this.toggleStereoscopicButton_,
         this.controls.isPlayingVR() && !this.isSubMenuOpened);
   }
 
-
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
-
-    this.toggleStereoscopicButton_.ariaLabel =
-        this.localization.resolve(LocIds.TOGGLE_STEREOSCOPIC);
-    this.toggleStereoscopicNameSpan_.textContent =
-        this.localization.resolve(LocIds.TOGGLE_STEREOSCOPIC);
+    const label = this.localization.resolve(LocIds.TOGGLE_STEREOSCOPIC);
+    this.toggleStereoscopicButton_.ariaLabel = label;
+    this.toggleStereoscopicNameSpan_.textContent = label;
   }
 };
 

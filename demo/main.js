@@ -10,6 +10,7 @@ goog.provide('shakaDemo.Main');
 goog.require('ShakaDemoAssetInfo');
 goog.require('goog.asserts');
 goog.require('shakaDemo.CloseButton');
+goog.require('shakaDemo.Icons');
 goog.require('shakaDemo.Utils');
 goog.require('shakaDemo.Visualizer');
 goog.require('shakaDemo.VisualizerButton');
@@ -80,9 +81,11 @@ shakaDemo.Main = class {
     /** @private {?number} */
     this.currentErrorSeverity_ = null;
 
-    // Override the icon for the MDL library's menu button.
+    // The demo no longer loads an icon font, so suppress MDL's font-based menu
+    // glyph.  We inject our own inline SVG gear icon into the drawer button
+    // once MDL has created it (see the drawer setup in setupPlayer_).
     // eslint-disable-next-line no-restricted-syntax
-    MaterialLayout.prototype.Constant_.MENU_ICON = 'settings';
+    MaterialLayout.prototype.Constant_.MENU_ICON = '';
 
     /** @private {?shakaDemo.Visualizer} */
     this.visualizer_ = null;
@@ -429,6 +432,13 @@ shakaDemo.Main = class {
     this.player_.configure(
         'manifest.dash.clockSyncUri', 'https://time.akamai.com/?ms&iso');
 
+    // The library does not auto-detect the transmuxer worker URL — the demo
+    // is responsible for telling Shaka where to load it from. The path
+    // depends on which build the demo loaded (compiled, debug, uncompiled).
+    this.player_.configure(
+        'mediaSource.transmuxWorkerUrl',
+        this.getTransmuxerWorkerUrl());
+
     // Get default config.
     this.defaultConfig_ = this.player_.getConfiguration();
     this.desiredConfig_ = this.player_.getConfiguration();
@@ -473,6 +483,7 @@ shakaDemo.Main = class {
     });
 
     this.localization_ = this.controls_.getLocalization();
+    this.setupLazyLocalization_();
 
     const drawerCloseButton = document.getElementById('drawer-close-button');
     drawerCloseButton.addEventListener('click', () => {
@@ -485,6 +496,13 @@ shakaDemo.Main = class {
     // are pressed also.
     const drawerButton = document.querySelector('.mdl-layout__drawer-button');
     goog.asserts.assert(drawerButton, 'There should be a drawer button.');
+    // MDL created the drawer button's (now-empty) icon element; fill it with
+    // the demo's gear icon as an inline SVG, since the icon font is gone.
+    const drawerButtonIcon = drawerButton.querySelector('.material-icons');
+    goog.asserts.assert(
+        drawerButtonIcon, 'There should be a drawer button icon.');
+    drawerButtonIcon.appendChild(
+        shakaDemo.Icons.makeSvgIcon(shakaDemo.Icons.SETTINGS));
     const openDrawer = () => {
       this.dispatchEventWithName_('shaka-main-drawer-state-change');
       this.showElement_(drawerCloseButton);
@@ -508,6 +526,33 @@ shakaDemo.Main = class {
       this.hideElement_(drawerCloseButton);
     });
     this.hideElement_(drawerCloseButton);
+  }
+
+  /**
+   * @private
+   */
+  setupLazyLocalization_() {
+    // Load locales on-demand.
+    const UNKNOWN_LOCALES = shaka.ui.Localization.UNKNOWN_LOCALES;
+    this.localization_.addEventListener(UNKNOWN_LOCALES, (event) => {
+      for (const locale of event['locales']) {
+        this.loadUILocale_(locale);
+      }
+    });
+
+    // Load the initial locale.
+    this.loadUILocale_(this.uiLocale_);
+
+    // Also try to load the 'base' localization.  This is so that, for example,
+    // the uiLocale_ is set to 'en-US', it will try to load 'en'.
+    if (this.uiLocale_.includes('-')) {
+      this.loadUILocale_(this.uiLocale_.split('-')[0]);
+    }
+
+    // Load 'en' as a fallback option, if not already loaded.
+    if (!this.uiLocale_.startsWith('en')) {
+      this.loadUILocale_('en');
+    }
   }
 
   /** @return {boolean} */
@@ -920,6 +965,27 @@ shakaDemo.Main = class {
     return this.nativeControlsEnabled_;
   }
 
+  /**
+   * @param {string} locale
+   * @return {!Promise}
+   * @private
+   */
+  async loadUILocale_(locale) {
+    if (!locale) {
+      return;
+    }
+
+    const url = '../ui/locales/' + locale + '.json';
+    try {
+      const text = await this.loadText_(url);
+      const obj = /** @type {!Object<string, string>} */(JSON.parse(text));
+      const map = new Map(Object.entries(obj));
+      this.localization_.insert(locale, map);
+    } catch (error) {
+      console.warn('Unable to load locale', locale, 'from url', url);
+    }
+  }
+
   /** @param {string} locale */
   setUILocale(locale) {
     this.uiLocale_ = locale;
@@ -1229,6 +1295,29 @@ shakaDemo.Main = class {
   }
 
   /**
+   * Picks the worker bundle that matches the build the demo loaded.
+   * The demo always serves the worker from `../dist/` (compiled) or from
+   * the repo root (`../transmuxer_worker.uncompiled.js`).
+   * @return {string}
+   */
+  getTransmuxerWorkerUrl() {
+    const params = this.getParams_();
+    let buildType = 'uncompiled';
+    if (params.has('build')) {
+      buildType = params.get('build');
+    } else if (params.has('compiled')) {
+      buildType = 'compiled';
+    }
+    if (buildType === 'uncompiled') {
+      return '../transmuxer_worker.uncompiled.js';
+    }
+    if (buildType === 'debug_compiled') {
+      return '../dist/shaka-player.transmuxer-worker.debug.js';
+    }
+    return '../dist/shaka-player.transmuxer-worker.js';
+  }
+
+  /**
    * Recovers the value from the given config field, from an arbitrary config
    * object.
    * This uses the same syntax as setting a single configuration field.
@@ -1531,11 +1620,15 @@ shakaDemo.Main = class {
       }
 
       // Finally, the asset can be loaded.
-      const queueItem = await this.getQueueItem_(asset);
-      queueManager.insertItems([queueItem]);
-      await queueManager.playItem(0);
-
-      asset.preloadManager = null;
+      if (asset.isPlaylist) {
+        await queueManager.loadFromM3uPlaylist(
+            asset.manifestUri, /* playOnLoad= */ true);
+      } else {
+        const queueItem = await this.getQueueItem_(asset);
+        queueManager.insertItems([queueItem]);
+        await queueManager.playItem(0);
+        asset.preloadManager = null;
+      }
 
       if (this.visualizer_ && this.visualizer_.active) {
         this.visualizer_.start();

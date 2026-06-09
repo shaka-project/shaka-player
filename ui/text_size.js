@@ -10,7 +10,6 @@ goog.provide('shaka.ui.TextSize');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
@@ -37,15 +36,6 @@ shaka.ui.TextSize = class extends shaka.ui.SettingsMenu {
     this.menu.classList.add('shaka-text-positions');
 
     this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listenMulti(
         this.player,
         [
           'loading',
@@ -54,30 +44,19 @@ shaka.ui.TextSize = class extends shaka.ui.SettingsMenu {
           'trackschanged',
         ], () => {
           this.updateTextSizeSelection_();
-          this.checkAvailability_();
+          this.checkAvailability();
         });
 
-    if (this.isSubMenu) {
-      this.eventManager.listenMulti(
-          this.controls,
-          [
-            'submenuopen',
-            'submenuclose',
-          ], () => {
-            this.checkAvailability_();
-          });
-    }
-
     // Set up all the strings in the user's preferred language.
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
 
-    this.checkAvailability_();
+    this.checkAvailability();
     this.addTextSizes_();
     this.updateTextSizeSelection_();
   }
 
-  /** @private */
-  checkAvailability_() {
+  /** @override */
+  checkAvailability() {
     const tracks = this.player.getTextTracks() || [];
     const hasTrack = tracks.some((track) => track.active);
     const available = hasTrack && !this.isSubMenuOpened &&
@@ -90,18 +69,16 @@ shaka.ui.TextSize = class extends shaka.ui.SettingsMenu {
     }
   }
 
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.button.ariaLabel = this.localization.resolve(LocIds.SUBTITLE_SIZE);
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
-    this.nameSpan.textContent =
-        this.localization.resolve(LocIds.SUBTITLE_SIZE);
-    this.backSpan.textContent =
-        this.localization.resolve(LocIds.SUBTITLE_SIZE);
+
+    const label = this.localization.resolve(LocIds.SUBTITLE_SIZE);
+    this.button.ariaLabel = label;
+    this.nameSpan.textContent = label;
+    this.backSpan.textContent = label;
   }
 
   /** @private */
@@ -133,10 +110,26 @@ shaka.ui.TextSize = class extends shaka.ui.SettingsMenu {
         this.updateTextSizeSelection_();
       });
 
+      const previewConfig = {'fontScaleFactor': fontScaleFactor};
+      shaka.ui.Utils.addHoverAndFocusListeners(
+          this.eventManager, button,
+          () => this.controls.updateTextStylePreview(previewConfig),
+          () => this.controls.resetTextStylePreview());
+
       this.menu.appendChild(button);
     }
     this.updateTextSizeSelection_();
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);
+  }
+
+  /** @override */
+  onMenuOpen() {
+    this.controls.showTextStylePreview();
+  }
+
+  /** @override */
+  onMenuClose() {
+    this.controls.hideTextStylePreview();
   }
 
   /** @private */

@@ -1429,7 +1429,7 @@ shaka.extern.InitDataTransform;
  *
  * @property {!string} tagName
  *   The name of the element
- * @property {!object} attributes
+ * @property {!Object<string, string>} attributes
  *   The attributes of the element
  * @property {!Array<shaka.extern.xml.Node | string>} children
  *   The child nodes or string body of the element
@@ -2088,6 +2088,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   returnToEndOfLiveWindowWhenOutside: boolean,
  *   stopFetchingOnPause: boolean,
  *   clampAppendWindowToDuration: boolean,
+ *   processSrcEqualMetadata: boolean,
  * }}
  *
  * @description
@@ -2348,6 +2349,14 @@ shaka.extern.SpeechToTextConfiguration;
  *   "ended" when seeking to end.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} processSrcEqualMetadata
+ *   If true, Shaka Player checks if the content MIME type supports
+ *   metadata extraction (such as ID3, Vorbis Comments, or iTunes ILST).
+ *   For supported types, the content is downloaded and loaded through a
+ *   Blob URL instead of being passed directly to the HTMLMediaElement.
+ *   This allows metadata frames to be parsed and exposed by the player.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -2398,7 +2407,8 @@ shaka.extern.NetworkingConfiguration;
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback,
  *   dispatchAllEmsgBoxes: boolean,
  *   useSourceElements: boolean,
- *   durationReductionEmitsUpdateEnd: boolean
+ *   durationReductionEmitsUpdateEnd: boolean,
+ *   transmuxWorkerUrl: string
  * }}
  *
  * @description
@@ -2466,6 +2476,19 @@ shaka.extern.NetworkingConfiguration;
  *   smaller than existing value.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {string} transmuxWorkerUrl
+ *   URL of the standalone transmuxer worker script. When set to a non-empty
+ *   string, transmuxing (e.g., MPEG-TS to MP4) is offloaded to a Web Worker
+ *   loaded from this URL, freeing the main thread. When empty, transmuxing
+ *   runs on the main thread.
+ *   <br>
+ *   The library does not auto-detect this URL; the integrating application
+ *   is responsible for serving the worker script (e.g.,
+ *   <code>shaka-player.transmuxer-worker.js</code> from <code>dist/</code>)
+ *   and providing the URL here. Falls back to main-thread transmuxing if the
+ *   worker fails to load or the device does not support Workers.
+ *   <br>
+ *   Defaults to <code>''</code> (worker disabled).
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;

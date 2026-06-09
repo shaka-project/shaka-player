@@ -59,6 +59,36 @@ msfCatalog.ContentProtection;
 
 /**
  * @typedef {{
+ *   id: string,
+ *   type: string,
+ *   data: string,
+ * }}
+ */
+msfCatalog.InitDataList;
+
+
+/**
+ * Describes a single accessibility descriptor within a Track entry,
+ * as defined in the MSF catalog accessibility field.
+ * The schemeId identifies the accessibility scheme (e.g. CEA-608, CEA-708),
+ * and the optional value carries the scheme-specific parameters such as
+ * channel-to-language assignments.
+ *
+ * CEA-608 example: { schemeId: "urn:scte:dash:cc:cea-608:2015",
+ *                    value: "CC1=eng;CC3=spa" }
+ * CEA-708 example: { schemeId: "urn:scte:dash:cc:cea-708:2015",
+ *                    value: "1=lang:eng;2=lang:spa" }
+ *
+ * @typedef {{
+ *   schemeId: string,
+ *   value: (string|undefined),
+ * }}
+ */
+msfCatalog.Accessibility;
+
+
+/**
+ * @typedef {{
  *   namespace: (string|undefined),
  *   name: string,
  *   packaging: string,
@@ -68,6 +98,7 @@ msfCatalog.ContentProtection;
  *   renderGroup: (number|undefined),
  *   altGroup: (number|undefined),
  *   initData: (string|undefined),
+ *   initRef: (string|undefined),
  *   depends: (Array<string>|undefined),
  *   temporalId: (number|undefined),
  *   spatialId: (number|undefined),
@@ -88,6 +119,7 @@ msfCatalog.ContentProtection;
  *   eventType: (string|undefined),
  *   parentName: (string|undefined),
  *   contentProtectionRefIDs: (Array<string>|undefined),
+ *   accessibility: (Array<!msfCatalog.Accessibility>|undefined),
  * }}
  */
 msfCatalog.Track;
@@ -100,6 +132,7 @@ msfCatalog.Track;
  *   isComplete: (boolean|undefined),
  *   deltaUpdate: (boolean|undefined),
  *   contentProtections: (Array<!msfCatalog.ContentProtection>|undefined),
+ *   initDataList: (Array<!msfCatalog.InitDataList>|undefined),
  *   addTracks: (Array<!msfCatalog.Track>|undefined),
  *   removeTracks: (Array<!msfCatalog.Track>|undefined),
  *   cloneTracks: (Array<!msfCatalog.Track>|undefined),

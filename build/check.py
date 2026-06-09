@@ -17,7 +17,7 @@
 """This is used to validate that the library is correct.
 
 This checks:
- * All files in lib/ appear when compiling +@complete
+ * All files in lib/ appear in +@complete or another standalone build type
  * Runs a compiler pass over the test code to check for type errors
  * Run the linter to check for style violations.
 """
@@ -48,7 +48,11 @@ def complete_build_files():
   # Normally we don't need to include @core, but because we look at the build
   # object directly, we need to include it here.  When using main(), it will
   # call addCore which will ensure core is included.
-  if not complete.parse_build(['+@complete', '+@core'], os.getcwd()):
+  #
+  # Standalone build types are included here so their entry points are covered
+  # by the "all files are in a build" invariant without bloating +@complete.
+  if not complete.parse_build(
+      ['+@complete', '+@core', '+@transmuxer-worker'], os.getcwd()):
     logging.error('Error parsing complete build')
     return False
   return complete.include
@@ -120,7 +124,7 @@ def check_html_lint(args):
 
 @_Check('complete')
 def check_complete(_):
-  """Checks whether the 'complete' build references every file.
+  """Checks whether the build type definitions reference every file.
 
   This is used by the build script to ensure that every file is included in at
   least one build type.

@@ -14,7 +14,6 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -37,7 +36,6 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
     /** @private {shaka.cast.CastProxy} */
     this.castProxy_ = this.controls.getCastProxy();
 
-    const LocIds = shaka.ui.Locales.Ids;
     /** @private {!HTMLButtonElement} */
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-copy-video-frame-button');
@@ -51,8 +49,6 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
     label.classList.add('shaka-overflow-button-label');
     label.classList.add('shaka-overflow-menu-only');
     this.nameSpan_ = shaka.util.Dom.createHTMLElement('span');
-    this.nameSpan_.textContent =
-        this.localization.resolve(LocIds.COPY_VIDEO_FRAME);
     label.appendChild(this.nameSpan_);
 
     /** @private {!HTMLElement} */
@@ -62,18 +58,9 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
 
     this.button_.appendChild(label);
 
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
 
     this.parent.appendChild(this.button_);
-
-    this.eventManager.listenMulti(
-        this.localization,
-        [
-          shaka.ui.Localization.LOCALE_UPDATED,
-          shaka.ui.Localization.LOCALE_CHANGED,
-        ], () => {
-          this.updateLocalizedStrings_();
-        });
 
     this.eventManager.listen(this.button_, 'click', () => {
       this.controls.copyVideoFrameToClipboard();
@@ -81,7 +68,7 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
 
     const vr = this.controls.getVR();
     this.eventManager.listen(vr, 'vrstatuschanged', () => {
-      this.checkAvailability_();
+      this.checkAvailability();
     });
 
     this.eventManager.listenMulti(
@@ -90,7 +77,7 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
           shaka.ads.Utils.AD_STARTED,
           shaka.ads.Utils.AD_STOPPED,
         ], () => {
-          this.checkAvailability_();
+          this.checkAvailability();
         });
 
     this.eventManager.listenMulti(
@@ -99,7 +86,7 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
           'unloading',
           'loaded',
         ], () => {
-          this.checkAvailability_();
+          this.checkAvailability();
         });
 
     this.eventManager.listenMulti(
@@ -109,47 +96,29 @@ shaka.ui.CopyVideoFrameButton = class extends shaka.ui.Element {
           shaka.util.MediaElementEvent.PAUSE,
           shaka.util.MediaElementEvent.SEEKING,
         ], () => {
-          this.checkAvailability_();
+          this.checkAvailability();
         });
 
     this.eventManager.listen(this.controls, 'caststatuschanged', () => {
-      this.checkAvailability_();
+      this.checkAvailability();
     });
 
-    if (this.isSubMenu) {
-      this.eventManager.listenMulti(
-          this.controls,
-          [
-            'submenuopen',
-            'submenuclose',
-          ], () => {
-            this.checkAvailability_();
-          });
-    }
-
-    this.checkAvailability_();
+    this.checkAvailability();
   }
 
-
-  /**
-   * @private
-   */
-  checkAvailability_() {
+  /** @override */
+  checkAvailability() {
     shaka.ui.Utils.setDisplay(this.button_,
         this.controls.canCopyVideoFrameToClipboard() && !this.isSubMenuOpened);
   }
 
-
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.button_.ariaLabel =
-        this.localization.resolve(LocIds.COPY_VIDEO_FRAME);
-    this.nameSpan_.textContent =
-        this.localization.resolve(LocIds.COPY_VIDEO_FRAME);
+    const label = this.localization.resolve(LocIds.COPY_VIDEO_FRAME);
+    this.button_.ariaLabel = label;
+    this.nameSpan_.textContent = label;
   }
 };
 

@@ -99,6 +99,14 @@ const ShakaDemoAssetInfo = class {
     this.useIMA = true;
     /** @type {?string} */
     this.mimeType = null;
+    /**
+     * When true, |manifestUri| points to an M3U/M3U8 playlist file
+     * rather than a single-stream manifest.  The demo will call
+     * QueueManager.loadFromM3uPlaylist() instead of the normal load path,
+     * and will play the first item in the playlist automatically.
+     * @type {boolean}
+     */
+    this.isPlaylist = false;
 
 
     // Preload values.

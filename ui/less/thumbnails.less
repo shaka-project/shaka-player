@@ -13,9 +13,9 @@
   gap: 5px;
 
   .shaka-player-ui-thumbnail-image-container {
-    background-color: @general-background-color-opaque;
-    border: 1px solid @general-background-color-opaque;
-    box-shadow: 0 8px 8px 0 @general-background-color;
+    background-color: var(--shaka-bg-solid);
+    border: 1px solid var(--shaka-bg-solid);
+    box-shadow: 0 8px 8px 0 var(--shaka-bg);
     min-width: 150px;
     overflow: hidden;
     position: relative;
@@ -36,14 +36,14 @@
     justify-content: center;
 
     .shaka-player-ui-thumbnail-time {
-      background-color: @general-background-color;
-      border-radius: @general-font-size;
-      color: @general-font-color;
-      font-size: @general-font-size;
+      background-color: var(--shaka-bg);
+      border-radius: var(--shaka-font-size);
+      color: var(--shaka-font-color);
+      font-size: var(--shaka-font-size);
       padding: 0 5px;
 
       @media (prefers-reduced-transparency) {
-        background-color: @general-background-color-mostly-opaque;
+        background-color: var(--shaka-bg-90);
       }
     }
   }
