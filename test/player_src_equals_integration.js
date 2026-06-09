@@ -341,11 +341,10 @@ describe('Player Src Equals', () => {
 
     textchanged.calls.reset();
 
-    const locationUri = new goog.Uri(location.href);
-    const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
-    const absoluteUri = locationUri.resolve(partialUri);
+    const absoluteUrl = new URL('/base/test/test/assets/text-clip.vtt',
+        location.href);
     const newTrack = await player.addTextTrackAsync(
-        absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
+        absoluteUrl.href, 'en', 'subtitles', 'text/vtt');
 
     expect(textchanged).toHaveBeenCalledTimes(1);
 
@@ -358,11 +357,9 @@ describe('Player Src Equals', () => {
   describe('addChaptersTrack', () => {
     it('adds external chapters in vtt format', async () => {
       await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
-
-      const locationUri = new goog.Uri(location.href);
-      const partialUri1 = new goog.Uri('/base/test/test/assets/chapters.vtt');
-      const absoluteUri1 = locationUri.resolve(partialUri1);
-      await player.addChaptersTrack(absoluteUri1.toString(), 'en');
+      const absoluteUrl = new URL('/base/test/test/assets/chapters.vtt',
+          location.href);
+      await player.addChaptersTrack(absoluteUrl.href, 'en');
 
       // Data should be available as soon as addChaptersTrack resolves.
       // See https://github.com/shaka-project/shaka-player/issues/4186
@@ -381,9 +378,9 @@ describe('Player Src Equals', () => {
       expect(chapter3.startTime).toBe(10);
       expect(chapter3.endTime).toBe(20);
 
-      const partialUri2 = new goog.Uri('/base/test/test/assets/chapters2.vtt');
-      const absoluteUri2 = locationUri.resolve(partialUri2);
-      await player.addChaptersTrack(absoluteUri2.toString(), 'en');
+      const absoluteUrl2 = new URL('/base/test/test/assets/chapters2.vtt',
+          location.href);
+      await player.addChaptersTrack(absoluteUrl2.href, 'en');
 
       const chaptersUpdated = await player.getChaptersAsync('en');
       expect(chaptersUpdated.length).toBe(6);
@@ -416,10 +413,9 @@ describe('Player Src Equals', () => {
     it('add external chapters in srt format', async () => {
       await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
 
-      const locationUri = new goog.Uri(location.href);
-      const partialUri = new goog.Uri('/base/test/test/assets/chapters.srt');
-      const absoluteUri = locationUri.resolve(partialUri);
-      await player.addChaptersTrack(absoluteUri.toString(), 'es');
+      const absoluteUrl = new URL('/base/test/test/assets/chapters.srt',
+          location.href);
+      await player.addChaptersTrack(absoluteUrl.href, 'es');
 
       const chapters = await player.getChaptersAsync('es');
       expect(chapters.length).toBe(3);
@@ -456,12 +452,10 @@ describe('Player Src Equals', () => {
     it('appends thumbnails for external thumbnails with sprites',
         async () => {
           await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
-          const locationUri = new goog.Uri(location.href);
-          const partialUri =
-              new goog.Uri('/base/test/test/assets/thumbnails-sprites.vtt');
-          const absoluteUri = locationUri.resolve(partialUri);
-          const newTrack =
-              await player.addThumbnailsTrack(absoluteUri.toString());
+          const absoluteUrl = new URL(
+              '/base/test/test/assets/thumbnails-sprites.vtt',
+              location.href);
+          const newTrack = await player.addThumbnailsTrack(absoluteUrl.href);
 
           expect(player.getImageTracks()).toEqual([newTrack]);
 
@@ -500,12 +494,9 @@ describe('Player Src Equals', () => {
     it('appends thumbnails for external thumbnails without sprites',
         async () => {
           await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
-          const locationUri = new goog.Uri(location.href);
-          const partialUri =
-              new goog.Uri('/base/test/test/assets/thumbnails.vtt');
-          const absoluteUri = locationUri.resolve(partialUri);
-          const newTrack =
-              await player.addThumbnailsTrack(absoluteUri.toString());
+          const absoluteUrl = new URL('/base/test/test/assets/thumbnails.vtt',
+              location.href);
+          const newTrack = await player.addThumbnailsTrack(absoluteUrl.href);
 
           expect(player.getImageTracks()).toEqual([newTrack]);
 
