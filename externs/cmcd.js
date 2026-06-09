@@ -18,6 +18,7 @@
  *   d: (number|undefined),
  *   ot: (string|undefined),
  *   tb: (number|undefined),
+ *   tpb: (number|undefined),
  *   bl: (number|undefined),
  *   dl: (number|undefined),
  *   mtp: (number|undefined),
@@ -79,6 +80,12 @@
  * @property {number} tb
  *   The highest bitrate rendition in the manifest or playlist that the client
  *   is allowed to play, given current codec, licensing and sizing constraints.
+ *
+ * @property {number} tpb
+ *   The highest bitrate rendition that the player is willing to select given
+ *   current ABR restrictions (bandwidth, resolution limits, etc.). Unlike tb,
+ *   which reports the top bitrate available in the manifest, tpb reflects what
+ *   the player would actually be willing to select.
  *
  * @property {number} bl
  *   The buffer length associated with the media object being requested. This
