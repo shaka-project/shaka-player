@@ -584,6 +584,7 @@ TRACKNUMBER
 UNLCK
 vaage
 webapis
+WHATWG
 
 # banned words
 !timmer

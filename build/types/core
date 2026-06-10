@@ -137,9 +137,6 @@
 +../../lib/util/url.js
 +../../lib/util/video_frame_callback_handler.js
 
-+../../third_party/closure-uri/uri.js
-+../../third_party/closure-uri/utils.js
-
 +../../third_party/language-mapping-list/language-mapping-list.js
 
 +@lcevc

@@ -162,7 +162,7 @@ describe('URL', () => {
 
       const result = shaka.util.URL.appendParams(uri, params);
 
-      expect(result).toBe('http://example.com?a=1&b=2');
+      expect(result).toBe('http://example.com/?a=1&b=2');
     });
 
     it('appends to existing query string', () => {
@@ -173,7 +173,7 @@ describe('URL', () => {
 
       const result = shaka.util.URL.appendParams(uri, params);
 
-      expect(result).toBe('http://example.com?x=9&a=1');
+      expect(result).toBe('http://example.com/?x=9&a=1');
     });
   });
 });

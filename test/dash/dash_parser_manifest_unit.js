@@ -771,14 +771,14 @@ describe('DashParser Manifest', () => {
           return shaka.util.AbortableOperation.completed({
             data: data,
             headers: {},
-            uri: '',
+            uri: request.uris[0],
           });
         } else {
           expect(request.uris[0]).toBe('http://foo.bar/date');
           return shaka.util.AbortableOperation.completed({
             data: new ArrayBuffer(0),
             headers: {'date': '1970-01-01T00:00:40Z'},
-            uri: '',
+            uri: request.uris[0],
           });
         }
       });

@@ -137,7 +137,7 @@ describe('DashParser SegmentBase', () => {
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest(
-        'http://example.com', 100, 200, /* isInit= */ false);
+        'http://example.com/', 100, 200, /* isInit= */ false);
   });
 
   it('inherits from AdaptationSet', async () => {
@@ -170,7 +170,7 @@ describe('DashParser SegmentBase', () => {
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest(
-        'http://example.com', 100, 200, /* isInit= */ false);
+        'http://example.com/', 100, 200, /* isInit= */ false);
   });
 
   it('does not require sourceURL in Initialization', async () => {
@@ -285,7 +285,7 @@ describe('DashParser SegmentBase', () => {
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest(
-        'http://example.com', 30, 900, /* isInit= */ false);
+        'http://example.com/', 30, 900, /* isInit= */ false);
   });
 
   it('does not assume the same timescale as media', async () => {
