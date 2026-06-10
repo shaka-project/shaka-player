@@ -1006,6 +1006,8 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     expect(offlineScheme.calls.argsFor(0)[0]).toBe('offline:db/123');
 
     shaka.net.NetworkingEngine.unregisterScheme('offline');
+    shaka.net.NetworkingEngine.registerScheme(
+        'offline', shaka.offline.OfflineScheme.plugin);
   });
 
   it('stores and reuses CommonAccessToken by host', async () => {
