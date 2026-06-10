@@ -479,7 +479,7 @@ module.exports = (config) => {
     clientArgs.testFiles.push('test/player_external.js');
   } else {
     // In a normal test run, we serve unit tests.
-    // clientArgs.testFiles.push('test/**/*_unit.js');
+    clientArgs.testFiles.push('test/**/*_unit.js');
 
     if (!settings.quick) {
       // If --quick is present, we don't serve integration tests.
