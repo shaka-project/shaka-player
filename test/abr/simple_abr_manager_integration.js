@@ -5,7 +5,7 @@
  */
 
 describe('SimpleAbrManager (integration)', () => {
-  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const ContentType = shaka.media.ManifestParser.ContentType;
   const Util = shaka.test.Util;
   const TEST_SCHEME = 'abrtest';
 

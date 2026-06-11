@@ -238,7 +238,8 @@ describe('AdaptationSet', () => {
       forced: false,
       trickModeVideo: null,
       dependencyStream: null,
-      type: '',
+      type: /** @type {shaka.media.ManifestParser.ContentType} */ (
+        mimeType.split('/')[0]),
       accessibilityPurpose: null,
       external: false,
       groupId: null,

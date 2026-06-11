@@ -198,7 +198,7 @@ shaka.test.TestScheme = class {
      * @param {!shaka.test.ManifestGenerator.Stream} stream
      * @param {!shaka.test.ManifestGenerator.Variant} variant
      * @param {MetadataType} data
-     * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+     * @param {shaka.media.ManifestParser.ContentType} contentType
      * @param {string} name
      */
     function addStreamInfo(stream, variant, data, contentType, name) {
@@ -282,7 +282,7 @@ shaka.test.TestScheme = class {
     const DATA = shaka.test.TestScheme.DATA;
     const GENERATORS = shaka.test.TestScheme.GENERATORS;
     const MANIFESTS = shaka.test.TestScheme.MANIFESTS;
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
 
     for (const name in DATA) {
       GENERATORS[name + suffix] = GENERATORS[name + suffix] || {};

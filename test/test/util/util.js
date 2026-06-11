@@ -378,7 +378,7 @@ shaka.test.Util = class {
    */
   static async isTypeSupported(mimetype, width, height) {
     const MimeUtils = shaka.util.MimeUtils;
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
 
     /** @type {!MediaDecodingConfiguration} */
     const mediaDecodingConfig = {

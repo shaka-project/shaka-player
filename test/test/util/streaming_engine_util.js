@@ -315,7 +315,7 @@ shaka.test.StreamingEngineUtil = class {
             appendWindowEnd);
         ref.mimeType = mimeType;
         ref.codecs = codecs;
-        const ContentType = shaka.util.ManifestParserUtils.ContentType;
+        const ContentType = shaka.media.ManifestParser.ContentType;
         if (aesKey &&
             (type == ContentType.AUDIO || type == ContentType.VIDEO)) {
           ref.aesKey = aesKey;
@@ -390,7 +390,7 @@ shaka.test.StreamingEngineUtil = class {
         variant2.audio = /** @type {shaka.extern.Stream} */ (
           shaka.test.StreamingEngineUtil.createMockStream('audio', 11));
 
-        const ContentType = shaka.util.ManifestParserUtils.ContentType;
+        const ContentType = shaka.media.ManifestParser.ContentType;
         const segmentIndex = new shaka.test.FakeSegmentIndex();
         segmentIndex.getNumReferences.and.callFake(
             () => getNumReferences(ContentType.AUDIO));
@@ -434,7 +434,7 @@ shaka.test.StreamingEngineUtil = class {
 
     // Populate the Manifest.
     for (const type in segmentDurations) {
-      const ContentType = shaka.util.ManifestParserUtils.ContentType;
+      const ContentType = shaka.media.ManifestParser.ContentType;
       let stream;
       if (type == ContentType.TEXT) {
         stream = textStream;
@@ -505,7 +505,7 @@ shaka.test.StreamingEngineUtil = class {
    * @return {shaka.extern.Stream}
    */
   static createMockAudioStream(id) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
     const Util = shaka.test.Util;
 
     const mimeType = 'audio/mp4';
@@ -554,7 +554,7 @@ shaka.test.StreamingEngineUtil = class {
    * @return {shaka.extern.Stream}
    */
   static createMockVideoStream(id, mimeType='video/mp4') {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
     const Util = shaka.test.Util;
 
     const codecs = 'avc1.42c01e';
@@ -619,7 +619,7 @@ shaka.test.StreamingEngineUtil = class {
       codecs,
       supplementalCodecs: '',
       kind: ManifestParserUtils.TextStreamKind.SUBTITLE,
-      type: ManifestParserUtils.ContentType.TEXT,
+      type: shaka.media.ManifestParser.ContentType.TEXT,
       label: '',
       language: 'und',
       originalLanguage: null,

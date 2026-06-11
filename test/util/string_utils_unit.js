@@ -65,7 +65,7 @@ function defineStringUtilTests() {
     // This is 4 Unicode characters, the last will be split into a surrogate
     // pair.
     const arr = [0xef, 0xbb, 0xbf, 0x74, 0x65, 0x78, 0x74];
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
     expect(StringUtils.fromUTF8(new Uint8Array(arr))).toBe(ContentType.TEXT);
   });
 

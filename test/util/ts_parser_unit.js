@@ -7,7 +7,7 @@
 describe('TsParser', () => {
   const Util = shaka.test.Util;
   const BufferUtils = shaka.util.BufferUtils;
-  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const ContentType = shaka.media.ManifestParser.ContentType;
 
   it('probes a TS segment', async () => {
     const responses = await Promise.all([

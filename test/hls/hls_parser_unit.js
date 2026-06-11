@@ -7,7 +7,7 @@
 // cspell:ignore FBQUFBQUFBQUFBQUFBQUFBQUFBQU Gxhe Ijpb Ijpbey AAEC
 
 describe('HlsParser', () => {
-  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const ContentType = shaka.media.ManifestParser.ContentType;
   const TextStreamKind = shaka.util.ManifestParserUtils.TextStreamKind;
   const Util = shaka.test.Util;
   const originalAlwaysWarn = shaka.log.alwaysWarn;

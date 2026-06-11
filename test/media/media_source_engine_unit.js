@@ -36,7 +36,7 @@ let MockSourceBuffer;
 
 describe('MediaSourceEngine', () => {
   const Util = shaka.test.Util;
-  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const ContentType = shaka.media.ManifestParser.ContentType;
 
   const originalIsTypeSupported = window.MediaSource.isTypeSupported;
   let originalIsTypeSupportedManaged;
@@ -1437,7 +1437,7 @@ describe('MediaSourceEngine', () => {
     initObject.set(ContentType.AUDIO, fakeAudioStream);
 
     /**
-     * @param {!Map<shaka.util.ManifestParserUtils.ContentType,
+     * @param {!Map<shaka.media.ManifestParser.ContentType,
      *              shaka.extern.Stream>} initObject
      * @suppress {visibility}
      */

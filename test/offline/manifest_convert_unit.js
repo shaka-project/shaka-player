@@ -6,8 +6,8 @@
 
 describe('ManifestConverter', () => {
   describe('createVariants', () => {
-    const audioType = 'audio';
-    const videoType = 'video';
+    const audioType = shaka.media.ManifestParser.ContentType.AUDIO;
+    const videoType = shaka.media.ManifestParser.ContentType.VIDEO;
 
     it('will create variants with variant ids', () => {
       /** @type {!Array<shaka.extern.StreamDB>} */
@@ -290,7 +290,7 @@ describe('ManifestConverter', () => {
 
   /**
    * @param {number} id
-   * @param {string} type
+   * @param {shaka.media.ManifestParser.ContentType} type
    * @param {!Array<number>} variantIds
    * @return {shaka.extern.StreamDB}
    */
@@ -362,7 +362,7 @@ describe('ManifestConverter', () => {
    * @return {shaka.extern.StreamDB}
    */
   function createVideoStreamDB(id, variantIds) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
     const mimeType = 'video/mp4';
     const codecs = 'avc1.42c01e';
     return {
@@ -424,7 +424,7 @@ describe('ManifestConverter', () => {
    * @return {shaka.extern.StreamDB}
    */
   function createAudioStreamDB(id, variantIds) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
     const mimeType = 'audio/mp4';
     const codecs = 'mp4a.40.2';
     return {
@@ -485,7 +485,7 @@ describe('ManifestConverter', () => {
    * @return {shaka.extern.StreamDB}
    */
   function createTextStreamDB(id) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
     const mimeType = 'text/vtt';
     const codecs = '';
     return {

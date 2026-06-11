@@ -212,7 +212,7 @@ shaka.test.ManifestGenerator.Manifest = class {
    * @param {function(!shaka.test.ManifestGenerator.Stream)=} func
    */
   addTextStream(id, func) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
     const stream = new shaka.test.ManifestGenerator.Stream(
         this, /* isPartial= */ false, id, ContentType.TEXT, 'und');
     if (func) {
@@ -228,7 +228,7 @@ shaka.test.ManifestGenerator.Manifest = class {
    * @param {function(!shaka.test.ManifestGenerator.Stream)=} func
    */
   addImageStream(id, func) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
     const stream = new shaka.test.ManifestGenerator.Stream(
         this, /* isPartial= */ false, id, ContentType.IMAGE, 'und');
     if (func) {
@@ -245,7 +245,7 @@ shaka.test.ManifestGenerator.Manifest = class {
    * @param {function(!shaka.test.ManifestGenerator.Stream)} func
    */
   addPartialTextStream(func) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
 
     const stream = new shaka.test.ManifestGenerator.Stream(
         this, /* isPartial= */ true, null, ContentType.TEXT);
@@ -317,7 +317,7 @@ shaka.test.ManifestGenerator.Variant = class {
    * @param {function(!shaka.test.ManifestGenerator.Stream)=} func
    */
   addVideo(id, func) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
     const stream = new shaka.test.ManifestGenerator.Stream(
         this.manifest_, /* isPartial= */ false, id, ContentType.VIDEO, 'und');
     if (func) {
@@ -333,7 +333,7 @@ shaka.test.ManifestGenerator.Variant = class {
    * @param {function(!shaka.test.ManifestGenerator.Stream)=} func
    */
   addAudio(id, func) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
     const stream = new shaka.test.ManifestGenerator.Stream(
         this.manifest_, /* isPartial= */ false, id, ContentType.AUDIO,
         this.language, this.label);
@@ -350,7 +350,7 @@ shaka.test.ManifestGenerator.Variant = class {
    */
   addExistingStream(id) {
     const stream = this.manifest_.findExistingStream_(id);
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
     goog.asserts.assert(stream, 'Must list an existing stream ID');
     if (stream.type == ContentType.AUDIO) {
       this.audio = stream;
@@ -366,11 +366,11 @@ shaka.test.ManifestGenerator.Variant = class {
    * the properties that were explicitly given to it.  All other properties will
    * be ignored.
    *
-   * @param {shaka.util.ManifestParserUtils.ContentType} type
+   * @param {shaka.media.ManifestParser.ContentType} type
    * @param {function(!shaka.test.ManifestGenerator.Stream)=} func
    */
   addPartialStream(type, func) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
 
     const stream = new shaka.test.ManifestGenerator.Stream(
         this.manifest_, /* isPartial= */ true, null, type);
@@ -503,7 +503,7 @@ shaka.test.ManifestGenerator.Stream = class {
    * @param {shaka.test.ManifestGenerator.Manifest} manifest
    * @param {boolean} isPartial
    * @param {?number} id
-   * @param {shaka.util.ManifestParserUtils.ContentType} type
+   * @param {shaka.media.ManifestParser.ContentType} type
    * @param {?string=} lang
    * @param {string=} label
    */
@@ -513,7 +513,7 @@ shaka.test.ManifestGenerator.Stream = class {
     // goog.asserts.assert(
     //     !manifest || !manifest.isIdUsed_(id),
     //     'Streams should have unique ids!');
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
 
     /** @const {shaka.test.ManifestGenerator.Manifest} */
     this.manifest_ = manifest;
@@ -521,7 +521,7 @@ shaka.test.ManifestGenerator.Stream = class {
     /** @type {shaka.media.InitSegmentReference} */
     this.initSegmentReference_ = null;
 
-    /** @type {string} */
+    /** @type {shaka.media.ManifestParser.ContentType} */
     this.type = type;
     if (id != null) {
       /** @type {number} */
@@ -530,13 +530,13 @@ shaka.test.ManifestGenerator.Stream = class {
 
     let defaultMimeType = 'text/plain';
     let defaultCodecs = '';
-    if (type == ContentType.AUDIO) {
+    if (type === ContentType.AUDIO) {
       defaultMimeType = 'audio/mp4';
       defaultCodecs = 'mp4a.40.2';
-    } else if (type == ContentType.VIDEO) {
+    } else if (type === ContentType.VIDEO) {
       defaultMimeType = 'video/mp4';
       defaultCodecs = 'avc1.4d401f';
-    } else if (type == ContentType.TEXT) {
+    } else if (type === ContentType.TEXT) {
       defaultMimeType = 'text/vtt';
     }
 

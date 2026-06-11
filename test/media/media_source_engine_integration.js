@@ -7,7 +7,7 @@
 // cspell:ignore customdatascheme
 
 describe('MediaSourceEngine', () => {
-  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const ContentType = shaka.media.ManifestParser.ContentType;
   const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
   const Cue = shaka.text.Cue;
   const Util = shaka.test.Util;

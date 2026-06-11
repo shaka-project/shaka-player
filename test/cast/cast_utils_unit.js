@@ -300,7 +300,7 @@ describe('CastUtils', () => {
             },
             config);
 
-        const ContentType = shaka.util.ManifestParserUtils.ContentType;
+        const ContentType = shaka.media.ManifestParser.ContentType;
         const initObject = new Map();
         initObject.set(ContentType.VIDEO, fakeVideoStream);
 

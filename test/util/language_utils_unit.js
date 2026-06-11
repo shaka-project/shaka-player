@@ -145,7 +145,7 @@ describe('LanguageUtils', () => {
      */
     function makeTextStream(language) {
       const sparse = {
-        type: shaka.util.ManifestParserUtils.ContentType.TEXT,
+        type: shaka.media.ManifestParser.ContentType.TEXT,
         language: language,
       };
 

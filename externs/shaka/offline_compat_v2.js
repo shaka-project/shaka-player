@@ -63,7 +63,7 @@ shaka.extern.PeriodDBV2;
  *   originalId: ?string,
  *   primary: boolean,
  *   presentationTimeOffset: number,
- *   contentType: string,
+ *   contentType: shaka.media.ManifestParser.ContentType,
  *   mimeType: string,
  *   codecs: string,
  *   frameRate: (number|undefined),
@@ -90,7 +90,7 @@ shaka.extern.PeriodDBV2;
  * @property {number} presentationTimeOffset
  *   The presentation time offset of the stream, in seconds.  Note that this is
  *   the inverse of the timestampOffset as defined in the manifest types.
- * @property {string} contentType
+ * @property {shaka.media.ManifestParser.ContentType} contentType
  *   The type of the stream, 'audio', 'text', or 'video'.
  * @property {string} mimeType
  *   The MIME type of the stream.

@@ -2003,7 +2003,7 @@ describe('PeriodCombiner', () => {
         /* manifest= */ null,
         /* isPartial= */ false,
         /* id= */ nextId++,
-        /* type= */ shaka.util.ManifestParserUtils.ContentType.VIDEO,
+        /* type= */ shaka.media.ManifestParser.ContentType.VIDEO,
         /* lang= */ 'und');
     streamGenerator.size(width, height);
     streamGenerator.originalId = height.toString();
@@ -2022,7 +2022,7 @@ describe('PeriodCombiner', () => {
         /* manifest= */ null,
         /* isPartial= */ false,
         /* id= */ nextId++,
-        /* type= */ shaka.util.ManifestParserUtils.ContentType.AUDIO,
+        /* type= */ shaka.media.ManifestParser.ContentType.AUDIO,
         language);
     streamGenerator.primary = primary;
     streamGenerator.channelsCount = channels;
@@ -2045,7 +2045,7 @@ describe('PeriodCombiner', () => {
         /* manifest= */ null,
         /* isPartial= */ false,
         /* id= */ nextId++,
-        /* type= */ shaka.util.ManifestParserUtils.ContentType.TEXT,
+        /* type= */ shaka.media.ManifestParser.ContentType.TEXT,
         language);
     streamGenerator.primary = primary;
     streamGenerator.originalId = primary ?
@@ -2065,7 +2065,7 @@ describe('PeriodCombiner', () => {
         /* manifest= */ null,
         /* isPartial= */ false,
         /* id= */ nextId++,
-        /* type= */ shaka.util.ManifestParserUtils.ContentType.IMAGE);
+        /* type= */ shaka.media.ManifestParser.ContentType.IMAGE);
     streamGenerator.size(width, height);
     streamGenerator.originalId = height.toString();
     streamGenerator.mime('image/jpeg');

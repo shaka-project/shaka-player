@@ -367,7 +367,7 @@ shaka.extern.SegmentIndex = class {
  *   language: string,
  *   originalLanguage: ?string,
  *   label: ?string,
- *   type: string,
+ *   type: shaka.media.ManifestParser.ContentType,
  *   primary: boolean,
  *   trickModeVideo: ?shaka.extern.Stream,
  *   dependencyStream: ?shaka.extern.Stream,
@@ -479,7 +479,7 @@ shaka.extern.SegmentIndex = class {
  *   The original language, if any, that appeared in the manifest.
  * @property {?string} label
  *   The Stream's label, unique text that should describe the audio/text track.
- * @property {string} type
+ * @property {shaka.media.ManifestParser.ContentType} type
  *   <i>Required.</i> <br>
  *   Content type (e.g. 'video', 'audio' or 'text', 'image')
  * @property {boolean} primary

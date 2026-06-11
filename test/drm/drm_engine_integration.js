@@ -5,7 +5,7 @@
  */
 
 describe('DrmEngine', () => {
-  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const ContentType = shaka.media.ManifestParser.ContentType;
 
   // These come from Axinom.
   const videoInitSegmentUri = '/base/test/test/assets/multidrm-video-init.mp4';

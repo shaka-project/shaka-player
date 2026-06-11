@@ -100,7 +100,7 @@ filterDescribe('Storage Compatibility', offlineSupported, () => {
 
   function makeTests(metadata) {
     const CannedIDB = shaka.test.CannedIDB;
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
     const Util = shaka.test.Util;
 
     /** @type {?shaka.extern.StorageCell} */

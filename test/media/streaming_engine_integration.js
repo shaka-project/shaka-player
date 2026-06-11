@@ -5,7 +5,7 @@
  */
 
 describe('StreamingEngine', () => {
-  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const ContentType = shaka.media.ManifestParser.ContentType;
   const Util = shaka.test.Util;
 
   let metadata;
@@ -642,7 +642,7 @@ describe('StreamingEngine', () => {
             bandwidth: 5000000,
             width: 600,
             height: 400,
-            type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+            type: shaka.media.ManifestParser.ContentType.VIDEO,
             drmInfos: [],
           },
           audio: {
@@ -652,7 +652,7 @@ describe('StreamingEngine', () => {
             mimeType: 'audio/mp4',
             codecs: 'mp4a.40.2',
             bandwidth: 192000,
-            type: shaka.util.ManifestParserUtils.ContentType.AUDIO,
+            type: shaka.media.ManifestParser.ContentType.AUDIO,
             drmInfos: [],
           },
         }],

@@ -5,7 +5,7 @@
  */
 
 describe('Player', () => {
-  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const ContentType = shaka.media.ManifestParser.ContentType;
   const Util = shaka.test.Util;
 
   const originalLogError = shaka.log.error;

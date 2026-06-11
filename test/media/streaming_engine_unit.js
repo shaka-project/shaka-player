@@ -6,20 +6,20 @@
 
 describe('StreamingEngine', () => {
   const Util = shaka.test.Util;
-  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const ContentType = shaka.media.ManifestParser.ContentType;
 
   // Dummy byte ranges and sizes for initialization and media segments.
   // Create empty object first and initialize the fields through
   // [] to allow field names to be expressions.
   /**
-   * @type {!Object<shaka.util.ManifestParserUtils.ContentType,
+   * @type {!Object<shaka.media.ManifestParser.ContentType,
    *                 !Array<number>>}
    */
   const initSegmentRanges = {};
   initSegmentRanges[ContentType.AUDIO] = [100, 1000];
   initSegmentRanges[ContentType.VIDEO] = [200, 2000];
 
-  /** @type {!Object<shaka.util.ManifestParserUtils.ContentType, number>} */
+  /** @type {!Object<shaka.media.ManifestParser.ContentType, number>} */
   const segmentSizes = {};
   segmentSizes[ContentType.AUDIO] = 1000;
   segmentSizes[ContentType.VIDEO] = 10000;

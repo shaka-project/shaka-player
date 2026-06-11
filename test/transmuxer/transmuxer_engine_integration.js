@@ -5,7 +5,7 @@
  */
 
 describe('TransmuxerEngine', () => {
-  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const ContentType = shaka.media.ManifestParser.ContentType;
 
   const mp4MimeType = 'video/mp4; codecs="avc1.42E01E"';
   const transportStreamVideoMimeType = 'video/mp2t; codecs="avc1.42E01E"';

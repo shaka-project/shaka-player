@@ -232,7 +232,7 @@ shaka.test.FakeMediaSourceEngine = class {
       throw new Error('unexpected type');
     }
 
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
     const hasSegment = (i) => {
       return this.segments[type][i] ||
           (type == ContentType.VIDEO && this.segments['trickvideo'] &&
@@ -268,7 +268,7 @@ shaka.test.FakeMediaSourceEngine = class {
 
     // Remains 'video' even when we detect a 'trickvideo' segment.
     const originalType = type;
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
 
     // Set init segment.
     let i = this.segmentData[type].initSegments.indexOf(data);
@@ -279,7 +279,7 @@ shaka.test.FakeMediaSourceEngine = class {
       if (i >= 0) {
         // 'trickvideo' value is only used for testing.
         // Cast to the ContentType enum for compatibility.
-        type = /** @type {shaka.util.ManifestParserUtils.ContentType} */(
+        type = /** @type {shaka.media.ManifestParser.ContentType} */(
           'trickvideo');
       }
     }
@@ -301,7 +301,7 @@ shaka.test.FakeMediaSourceEngine = class {
       if (i >= 0) {
         // 'trickvideo' value is only used for testing.
         // Cast to the ContentType enum for compatibility.
-        type = /** @type {shaka.util.ManifestParserUtils.ContentType} */(
+        type = /** @type {shaka.media.ManifestParser.ContentType} */(
           'trickvideo');
       }
     }
@@ -378,14 +378,14 @@ shaka.test.FakeMediaSourceEngine = class {
 
     this.segments[type] = this.segments[type].map((c) => false);
 
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
 
     // If we're clearing video, clear the segment list for 'trickvideo', too.
     if (type == ContentType.VIDEO && this.segments['trickvideo']) {
       // 'trickvideo' value is only used for testing.
       // Cast to the ContentType enum for compatibility.
       this.clearImpl_(
-          /** @type {shaka.util.ManifestParserUtils.ContentType} */(
+          /** @type {shaka.media.ManifestParser.ContentType} */(
             'trickvideo'));
     }
 

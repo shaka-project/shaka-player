@@ -2978,7 +2978,7 @@ describe('DrmEngine', () => {
       drmEngine.newInitData = shaka.test.Util.spyFunc(newInitDataSpy);
 
       await drmEngine.parseInbandPssh(
-          shaka.util.ManifestParserUtils.ContentType.VIDEO, binarySegment);
+          shaka.media.ManifestParser.ContentType.VIDEO, binarySegment);
       const expectedInitData = shaka.util.Uint8ArrayUtils.fromHex(
           WIDEVINE_PSSH + PLAYREADY_PSSH);
       expect(newInitDataSpy).toHaveBeenCalledWith('cenc', expectedInitData);
@@ -2992,7 +2992,7 @@ describe('DrmEngine', () => {
       const newInitDataSpy = jasmine.createSpy('newInitData');
       drmEngine.newInitData = shaka.test.Util.spyFunc(newInitDataSpy);
       await drmEngine.parseInbandPssh(
-          shaka.util.ManifestParserUtils.ContentType.VIDEO, binarySegment);
+          shaka.media.ManifestParser.ContentType.VIDEO, binarySegment);
       expect(newInitDataSpy).not.toHaveBeenCalled();
     });
   });

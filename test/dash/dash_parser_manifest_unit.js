@@ -6,7 +6,7 @@
 
 // Test basic manifest parsing functionality.
 describe('DashParser Manifest', () => {
-  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const ContentType = shaka.media.ManifestParser.ContentType;
   const Dash = shaka.test.Dash;
   const mp4IndexSegmentUri = '/base/test/test/assets/index-segment.mp4';
 
@@ -1066,7 +1066,7 @@ describe('DashParser Manifest', () => {
     let video = variant && variant.video;
     expect(video).toEqual(jasmine.objectContaining({
       originalId: 'main',
-      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+      type: shaka.media.ManifestParser.ContentType.VIDEO,
       bandwidth: 2,
     }));
     let dependencyStream = video && video.dependencyStream;
@@ -1077,13 +1077,13 @@ describe('DashParser Manifest', () => {
     video = variant && variant.video;
     expect(video).toEqual(jasmine.objectContaining({
       originalId: 'mainenhance',
-      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+      type: shaka.media.ManifestParser.ContentType.VIDEO,
       bandwidth: 2,
     }));
     dependencyStream = video && video.dependencyStream;
     expect(dependencyStream).toEqual(jasmine.objectContaining({
       originalId: 'enhance',
-      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+      type: shaka.media.ManifestParser.ContentType.VIDEO,
       bandwidth: 1,
       baseOriginalId: 'main',
     }));
@@ -1120,7 +1120,7 @@ describe('DashParser Manifest', () => {
                          variant.video.trickModeVideo;
     expect(trickModeVideo).toEqual(jasmine.objectContaining({
       id: 2,
-      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+      type: shaka.media.ManifestParser.ContentType.VIDEO,
     }));
   });
 
@@ -1160,7 +1160,7 @@ describe('DashParser Manifest', () => {
                          variant.video.trickModeVideo;
     expect(trickModeVideo).toEqual(jasmine.objectContaining({
       id: 3,
-      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+      type: shaka.media.ManifestParser.ContentType.VIDEO,
     }));
 
     const variant2 = manifest.variants[1];
@@ -1168,7 +1168,7 @@ describe('DashParser Manifest', () => {
                          variant2.video.trickModeVideo;
     expect(trickModeVideo2).toEqual(jasmine.objectContaining({
       id: 3,
-      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+      type: shaka.media.ManifestParser.ContentType.VIDEO,
     }));
   });
 
@@ -1213,7 +1213,7 @@ describe('DashParser Manifest', () => {
                          variant.video.trickModeVideo;
     expect(trickModeVideo).toEqual(jasmine.objectContaining({
       id: 3,
-      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+      type: shaka.media.ManifestParser.ContentType.VIDEO,
     }));
     expect(trickModeVideo.bandwidth).toBe(1);
 
@@ -1222,7 +1222,7 @@ describe('DashParser Manifest', () => {
                          variant2.video.trickModeVideo;
     expect(trickModeVideo2).toEqual(jasmine.objectContaining({
       id: 4,
-      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+      type: shaka.media.ManifestParser.ContentType.VIDEO,
     }));
     expect(trickModeVideo2.bandwidth).toBe(2);
   });
@@ -1395,7 +1395,7 @@ describe('DashParser Manifest', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.textStreams.length).toBe(2);
     // At one time, these came out as 'application' rather than 'text'.
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = shaka.media.ManifestParser.ContentType;
     expect(manifest.textStreams[0].type).toBe(ContentType.TEXT);
     expect(manifest.textStreams[1].type).toBe(ContentType.TEXT);
   });
@@ -1426,7 +1426,7 @@ describe('DashParser Manifest', () => {
     // In #875, this was an empty list.
     expect(manifest.textStreams.length).toBe(1);
     if (manifest.textStreams.length) {
-      const ContentType = shaka.util.ManifestParserUtils.ContentType;
+      const ContentType = shaka.media.ManifestParser.ContentType;
       expect(manifest.textStreams[0].type).toBe(ContentType.TEXT);
     }
   });

@@ -116,7 +116,7 @@ shaka.extern.ManifestDB;
  *   originalId: ?string,
  *   groupId: ?string,
  *   primary: boolean,
- *   type: string,
+ *   type: shaka.media.ManifestParser.ContentType,
  *   mimeType: string,
  *   codecs: string,
  *   frameRate: (number|undefined),
@@ -156,7 +156,7 @@ shaka.extern.ManifestDB;
  *   ID that represents the representation's parent adaptation element
  * @property {boolean} primary
  *   Whether the stream set was primary.
- * @property {string} type
+ * @property {shaka.media.ManifestParser.ContentType} type
  *   The type of the stream, 'audio', 'text', or 'video'.
  * @property {string} mimeType
  *   The MIME type of the stream.

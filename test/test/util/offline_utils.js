@@ -26,7 +26,7 @@ shaka.test.OfflineUtils = class {
 
   /**
    * @param {number} id
-   * @param {string} type
+   * @param {shaka.media.ManifestParser.ContentType} type
    * @return {shaka.extern.StreamDB}
    */
   static createStream(id, type) {
