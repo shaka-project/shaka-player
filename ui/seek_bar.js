@@ -557,8 +557,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   }
 
   /**
-   * @param {!Array<{ position: string, width: string }>} rects
+   * @param {!Array<{position: string, width: string}>} rects
    * @param {string} color
+   * @return {string}
    * @private
    */
   buildLayeredBackground_(rects, color) {
@@ -566,8 +567,26 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       return 'transparent';
     }
     return rects
-        .map(({position, width}) =>
-          `linear-gradient(${color}) ${position} / ${width} 100% no-repeat`)
+        .map(({position, width}) => {
+          if (width.endsWith('%')) {
+            // CSS background-position with percentages behaves
+            // differently than absolute pixels. To avoid shifting
+            // percentage-based markers, we use color stops.
+            const start = parseFloat(position);
+            const end = start + parseFloat(width);
+            const p1 = `transparent ${start}%`;
+            const p2 = `${color} ${start}%`;
+            const p3 = `${color} ${end}%`;
+            const p4 = `transparent ${end}%`;
+
+            return `linear-gradient(to right, ${p1}, ${p2}, ${p3}, ` +
+                   `${p4}) 0 0 / 100% 100% no-repeat`;
+          }
+
+          // Standard background positioning for absolute widths.
+          return `linear-gradient(${color}, ${color}) ` +
+                 `${position} / ${width} 100% no-repeat`;
+        })
         .join(',');
   }
 
