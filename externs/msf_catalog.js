@@ -58,6 +58,16 @@ msfCatalog.ContentProtection;
 
 
 /**
+ * @typedef {{
+ *   id: string,
+ *   type: string,
+ *   data: string,
+ * }}
+ */
+msfCatalog.InitDataList;
+
+
+/**
  * Describes a single accessibility descriptor within a Track entry,
  * as defined in the MSF catalog accessibility field.
  * The schemeId identifies the accessibility scheme (e.g. CEA-608, CEA-708),
@@ -88,6 +98,7 @@ msfCatalog.Accessibility;
  *   renderGroup: (number|undefined),
  *   altGroup: (number|undefined),
  *   initData: (string|undefined),
+ *   initRef: (string|undefined),
  *   depends: (Array<string>|undefined),
  *   temporalId: (number|undefined),
  *   spatialId: (number|undefined),
@@ -121,6 +132,7 @@ msfCatalog.Track;
  *   isComplete: (boolean|undefined),
  *   deltaUpdate: (boolean|undefined),
  *   contentProtections: (Array<!msfCatalog.ContentProtection>|undefined),
+ *   initDataList: (Array<!msfCatalog.InitDataList>|undefined),
  *   addTracks: (Array<!msfCatalog.Track>|undefined),
  *   removeTracks: (Array<!msfCatalog.Track>|undefined),
  *   cloneTracks: (Array<!msfCatalog.Track>|undefined),

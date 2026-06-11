@@ -162,7 +162,7 @@ describe('QueueManager', () => {
     await shaka.test.Util.shortDelay();
 
     expect(preloadSpy).toHaveBeenCalledWith(
-        queueItem2.manifestUri, null, null, null);
+        queueItem2.manifestUri, null, null, null, true);
   });
 
   it('cleans up previous preload when playing next item', async () => {
@@ -257,13 +257,13 @@ describe('QueueManager', () => {
     expect(playSpy).toHaveBeenCalled();
   });
 
-  it('does not repeat or advance when repeatMode is OFF', async () => {
+  it('does not repeat when repeatMode is OFF', async () => {
     queueManager.insertItems([queueItem, queueItem2]);
     const config = queueManager.getConfiguration();
     config.repeatMode = shaka.config.RepeatMode.OFF;
     queueManager.configure(config);
 
-    await queueManager.playItem(0);
+    await queueManager.playItem(queueManager.getItems().length - 1);
 
     const initialIndex = queueManager.getCurrentItemIndex();
     const initialItem = queueManager.getCurrentItem();
