@@ -179,7 +179,7 @@ shaka.ui.AdStatisticsButton = class extends shaka.ui.Element {
         this.currentStats_.skipped > 0 ||
         this.currentStats_.errors > 0;
     shaka.ui.Utils.setDisplay(this.button_, !this.isSubMenuOpened && hasStats);
-    if (hasStats && !this.container_.classList.contains('shaka-hidden')) {
+    if (!hasStats && !this.container_.classList.contains('shaka-hidden')) {
       this.onClick_();
     }
   }
