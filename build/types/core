@@ -1,6 +1,7 @@
 # The core library.  This is always included, regardless of whether it is
 # explicitly listed.
 
++../../lib/abr/buffer_based_abr_manager.js
 +../../lib/abr/ewma.js
 +../../lib/abr/ewma_bandwidth_estimator.js
 +../../lib/abr/simple_abr_manager.js
