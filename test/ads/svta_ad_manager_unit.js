@@ -73,8 +73,7 @@ describe('SVTA Ad manager', () => {
     const config = shaka.util.PlayerConfiguration.createDefault().ads;
     svtaAdManager.configure(config);
 
-    player.dispatchEvent(new shaka.util.FakeEvent(
-        shaka.util.FakeEvent.EventName.Loading));
+    player.dispatchEvent(new shaka.event.Loading());
   });
 
   afterEach(async () => {
@@ -271,8 +270,7 @@ describe('SVTA Ad manager', () => {
     });
 
     it('ignore if not asset loaded', async () => {
-      player.dispatchEvent(new shaka.util.FakeEvent(
-          shaka.util.FakeEvent.EventName.Unloading));
+      player.dispatchEvent(new shaka.event.Unloading());
 
       const metadata = {
         type: 'urn:svta:advertising-wg:ad-creative-signaling',
@@ -482,8 +480,7 @@ describe('SVTA Ad manager', () => {
     });
 
     it('ignore if not asset loaded', async () => {
-      player.dispatchEvent(new shaka.util.FakeEvent(
-          shaka.util.FakeEvent.EventName.Unloading));
+      player.dispatchEvent(new shaka.event.Unloading());
 
       const eventString = [
         '<Event duration="5" id="TEST" presentationTime="0">',
