@@ -102,8 +102,8 @@ describe('DashParser SegmentTemplate', () => {
         ' presentationTimeOffset="10" />',
       ], /* duration= */ 30, /* startTime= */ 40);
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const manifest = await parser.start('http://foo', playerInterface);
 
       expect(manifest.variants.length).toBe(1);
 
@@ -131,8 +131,8 @@ describe('DashParser SegmentTemplate', () => {
         ' presentationTimeOffset="10" />',
       ], /* duration= */ 30, /* startTime= */ 40);
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const manifest = await parser.start('http://foo', playerInterface);
 
       expect(manifest.variants.length).toBe(1);
 
@@ -170,8 +170,8 @@ describe('DashParser SegmentTemplate', () => {
         '<SegmentTemplate media="s$Number$.mp4" duration="60" />',
       ], /* duration= */ 30, /* startTime= */ 30);
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const manifest = await parser.start('http://foo', playerInterface);
       expect(manifest.presentationTimeline.getSeekRangeStart()).toBe(30);
     });
 
@@ -184,8 +184,8 @@ describe('DashParser SegmentTemplate', () => {
       config.dash.initialSegmentLimit = 100;
       parser.configure(config);
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const manifest = await parser.start('http://foo', playerInterface);
       const stream = manifest.variants[0].video;
       await stream.createSegmentIndex();
       goog.asserts.assert(stream.segmentIndex, 'Should have created index');
@@ -203,8 +203,8 @@ describe('DashParser SegmentTemplate', () => {
       config.dash.initialSegmentLimit = 100;
       parser.configure(config);
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const manifest = await parser.start('http://foo', playerInterface);
       const stream = manifest.variants[0].video;
       await stream.createSegmentIndex();
       goog.asserts.assert(stream.segmentIndex, 'Should have created index');
@@ -222,10 +222,10 @@ describe('DashParser SegmentTemplate', () => {
       ]);
 
       fakeNetEngine
-          .setResponseText('dummy://foo', source)
+          .setResponseText('http://foo', source)
           .setResponseValue('http://example.com/index-500.mp4', mp4Index);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('http://foo', playerInterface);
       const segmentReference =
           await Dash.getFirstVideoSegmentReference(manifest);
       const initSegmentReference = segmentReference.initSegmentReference;
@@ -250,10 +250,10 @@ describe('DashParser SegmentTemplate', () => {
       ]);
 
       fakeNetEngine
-          .setResponseText('dummy://foo', source)
+          .setResponseText('http://foo', source)
           .setResponseValue('http://example.com/index-500.mp4', mp4Index);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('http://foo', playerInterface);
       const segmentReference =
           await Dash.getFirstVideoSegmentReference(manifest);
       const initSegmentReference = segmentReference.initSegmentReference;
@@ -284,11 +284,11 @@ describe('DashParser SegmentTemplate', () => {
       ].join('\n');
 
       fakeNetEngine
-          .setResponseText('dummy://foo', source)
+          .setResponseText('http://foo', source)
           .setResponseValue('http://example.com/index-500.webm', webmIndex)
           .setResponseValue('http://example.com/init-500.webm', webmInit);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('http://foo', playerInterface);
       const segmentReference =
           await Dash.getFirstVideoSegmentReference(manifest);
       const initSegmentReference = segmentReference.initSegmentReference;
@@ -319,10 +319,10 @@ describe('DashParser SegmentTemplate', () => {
       ].join('\n');
 
       fakeNetEngine
-          .setResponseText('dummy://foo', source)
+          .setResponseText('http://foo', source)
           .setResponseValue('http://example.com/index-500.mp4', mp4Index);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('http://foo', playerInterface);
       const segmentReference =
           await Dash.getFirstVideoSegmentReference(manifest);
       const initSegmentReference = segmentReference.initSegmentReference;
@@ -351,10 +351,10 @@ describe('DashParser SegmentTemplate', () => {
       ].join('\n');
 
       fakeNetEngine
-          .setResponseText('dummy://foo', source)
+          .setResponseText('http://foo', source)
           .setResponseValue('http://example.com/index-500.mp4', mp4Index);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('http://foo', playerInterface);
       const segmentReference =
           await Dash.getFirstVideoSegmentReference(manifest);
       const initSegmentReference = segmentReference.initSegmentReference;
@@ -472,8 +472,8 @@ describe('DashParser SegmentTemplate', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const actual = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const actual = await parser.start('http://foo', playerInterface);
       expect(actual).toBeTruthy();
 
       const variants = actual.variants;
@@ -523,8 +523,8 @@ describe('DashParser SegmentTemplate', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const actual = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const actual = await parser.start('http://foo', playerInterface);
       expect(actual).toBeTruthy();
 
       const variants = actual.variants;
@@ -588,8 +588,8 @@ describe('DashParser SegmentTemplate', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const actual = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const actual = await parser.start('http://foo', playerInterface);
       expect(actual).toBeTruthy();
 
       const variants = actual.variants;
@@ -633,8 +633,8 @@ describe('DashParser SegmentTemplate', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const actual = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const actual = await parser.start('http://foo', playerInterface);
       expect(actual).toBeTruthy();
 
       const variants = actual.variants;
@@ -856,8 +856,8 @@ describe('DashParser SegmentTemplate', () => {
           '</MPD>',
         ].join('\n');
 
-        fakeNetEngine.setResponseText('dummy://foo', source);
-        const manifest = await parser.start('dummy://foo', playerInterface);
+        fakeNetEngine.setResponseText('http://foo', source);
+        const manifest = await parser.start('http://foo', playerInterface);
         const stream = manifest.variants[0].video;
         await stream.createSegmentIndex();
 
@@ -1034,8 +1034,8 @@ describe('DashParser SegmentTemplate', () => {
           </Period>
         </MPD>`;
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const manifest = await parser.start('http://foo', playerInterface);
 
       const stream = manifest.variants[0].audio;
       await stream.createSegmentIndex();
@@ -1079,8 +1079,8 @@ describe('DashParser SegmentTemplate', () => {
           </Period>
         </MPD>`;
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const manifest = await parser.start('http://foo', playerInterface);
 
       const stream = manifest.variants[0].audio;
       await stream.createSegmentIndex();
@@ -1125,8 +1125,8 @@ describe('DashParser SegmentTemplate', () => {
           </Period>
         </MPD>`;
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const manifest = await parser.start('http://foo', playerInterface);
 
       const stream = manifest.variants[0].audio;
       await stream.createSegmentIndex();
@@ -1170,8 +1170,8 @@ describe('DashParser SegmentTemplate', () => {
           </Period>
         </MPD>`;
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const manifest = await parser.start('http://foo', playerInterface);
 
       const stream = manifest.variants[0].audio;
       await stream.createSegmentIndex();
@@ -1213,8 +1213,8 @@ describe('DashParser SegmentTemplate', () => {
           </Period>
         </MPD>`;
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const manifest = await parser.start('http://foo', playerInterface);
 
       const stream = manifest.variants[0].audio;
       await stream.createSegmentIndex();
@@ -1257,8 +1257,8 @@ describe('DashParser SegmentTemplate', () => {
           </Period>
         </MPD>`;
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('http://foo', source);
+      const manifest = await parser.start('http://foo', playerInterface);
 
       const stream = manifest.variants[0].audio;
       await stream.createSegmentIndex();
@@ -1318,8 +1318,8 @@ describe('DashParser SegmentTemplate', () => {
       '</SegmentTemplate>',
     ], /* duration= */ 45);
 
-    fakeNetEngine.setResponseText('dummy://foo', dummySource);
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    fakeNetEngine.setResponseText('http://foo', dummySource);
+    const manifest = await parser.start('http://foo', playerInterface);
 
     expect(manifest.variants.length).toBe(1);
 
