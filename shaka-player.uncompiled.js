@@ -65,6 +65,7 @@ goog.require('shaka.polyfill.PiPWebkit');
 goog.require('shaka.polyfill.RandomUUID');
 goog.require('shaka.polyfill.Symbol');
 goog.require('shaka.polyfill.TypedArray');
+goog.require('shaka.polyfill.URLAndSearchParams');
 goog.require('shaka.polyfill.VTTCue');
 goog.require('shaka.polyfill.VideoFrameCallback');
 goog.require('shaka.polyfill.VideoPlayPromise');
