@@ -6,9 +6,9 @@
 
 const testGetMimeType = async (expertedMimeType, contentType) => {
   const netEngine = new shaka.test.FakeNetworkingEngine()
-      .setHeaders('http://foo', {'content-type': contentType});
+      .setHeaders('dummy://foo', {'content-type': contentType});
   const mimeType = await shaka.net.NetworkingUtils
-      .getMimeType('http://foo', netEngine,
+      .getMimeType('dummy://foo', netEngine,
           shaka.net.NetworkingEngine.defaultRetryParameters());
   expect(mimeType).toBe(expertedMimeType);
 };

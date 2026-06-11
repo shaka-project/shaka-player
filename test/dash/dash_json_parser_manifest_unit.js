@@ -139,9 +139,9 @@ describe('DashJsonParser Manifest', () => {
       },
     });
 
-    fakeNetEngine.setResponseText('http://foo?a=1', source);
+    fakeNetEngine.setResponseText('dummy://foo?a=1', source);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('http://foo?a=1', playerInterface);
+    const manifest = await parser.start('dummy://foo?a=1', playerInterface);
     expect(manifest.variants.length).toBe(2);
 
     const variant1 = manifest.variants[0];
@@ -156,8 +156,8 @@ describe('DashJsonParser Manifest', () => {
     const variant1Ref = Array.from(video1.segmentIndex)[0];
 
     expect(variant1Ref.getUris())
-        .toEqual(['http://foo/media-video-av01-dav1-db1p-1-0001.m4s?a=1']);
+        .toEqual(['dummy://foo/media-video-av01-dav1-db1p-1-0001.m4s?a=1']);
     expect(variant1Ref.initSegmentReference.getUris())
-        .toEqual(['http://foo/media-video-av01-dav1-db1p-1-init.mp4?a=1']);
+        .toEqual(['dummy://foo/media-video-av01-dav1-db1p-1-init.mp4?a=1']);
   });
 });
