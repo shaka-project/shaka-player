@@ -96,8 +96,8 @@ describe('DashParser Manifest', () => {
      * @return {!Promise}
      */
     async function testDashParser(manifestText) {
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
-      const actual = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('https://foo', manifestText);
+      const actual = await parser.start('https://foo', playerInterface);
       expect(actual).toEqual(expected);
     }
 
@@ -325,9 +325,9 @@ describe('DashParser Manifest', () => {
     ].join('\n');
     const source = sprintf(template, {periodContents: periodContents});
 
-    fakeNetEngine.setResponseText('dummy://foo', source);
+    fakeNetEngine.setResponseText('https://foo', source);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const timeline = manifest.presentationTimeline;
     expect(timeline.getDuration()).toBe(40);
   });
@@ -343,10 +343,10 @@ describe('DashParser Manifest', () => {
       '</SegmentList>',
     ]);
 
-    fakeNetEngine.setResponseText('dummy://foo', source);
+    fakeNetEngine.setResponseText('https://foo', source);
     fakeNetEngine.setResponseValue('http://example.com', mp4Index);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const stream = manifest.variants[0].video;
     await stream.createSegmentIndex();
     goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
@@ -370,9 +370,9 @@ describe('DashParser Manifest', () => {
       '</SegmentTemplate>',
     ]);
 
-    fakeNetEngine.setResponseText('dummy://foo', source);
+    fakeNetEngine.setResponseText('https://foo', source);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const stream = manifest.variants[0].video;
     await stream.createSegmentIndex();
     goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
@@ -399,10 +399,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', source);
+    fakeNetEngine.setResponseText('https://foo', source);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const stream = manifest.textStreams[0];
     await stream.createSegmentIndex();
     goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
@@ -443,10 +443,10 @@ describe('DashParser Manifest', () => {
           '</MPD>',
         ].join('\n');
 
-        fakeNetEngine.setResponseText('dummy://foo', source);
+        fakeNetEngine.setResponseText('https://foo', source);
 
         /** @type {shaka.extern.Manifest} */
-        const manifest = await parser.start('dummy://foo', playerInterface);
+        const manifest = await parser.start('https://foo', playerInterface);
         const stream1 = manifest.variants[0].video;
         const stream2 = manifest.variants[1].video;
 
@@ -479,10 +479,10 @@ describe('DashParser Manifest', () => {
           '</MPD>',
         ].join('\n');
 
-        fakeNetEngine.setResponseText('dummy://foo', source);
+        fakeNetEngine.setResponseText('https://foo', source);
 
         /** @type {shaka.extern.Manifest} */
-        const manifest = await parser.start('dummy://foo', playerInterface);
+        const manifest = await parser.start('https://foo', playerInterface);
         const stream = manifest.variants[0].video;
         const expectedClosedCaptions = new Map([
           ['svc1', shaka.util.LanguageUtils.normalize('eng')],
@@ -507,10 +507,10 @@ describe('DashParser Manifest', () => {
           '</MPD>',
         ].join('\n');
 
-        fakeNetEngine.setResponseText('dummy://foo', source);
+        fakeNetEngine.setResponseText('https://foo', source);
 
         /** @type {shaka.extern.Manifest} */
-        const manifest = await parser.start('dummy://foo', playerInterface);
+        const manifest = await parser.start('https://foo', playerInterface);
         const stream = manifest.variants[0].video;
         const expectedClosedCaptions = new Map([
           ['svc1', shaka.util.LanguageUtils.normalize('eng')],
@@ -535,10 +535,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', source);
+    fakeNetEngine.setResponseText('https://foo', source);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const stream = manifest.variants[0].audio;
     expect(stream.spatialAudio).toBe(true);
   });
@@ -560,10 +560,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', source);
+    fakeNetEngine.setResponseText('https://foo', source);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const stream = manifest.variants[0].audio;
     expect(stream.spatialAudio).toBe(true);
   });
@@ -591,10 +591,10 @@ describe('DashParser Manifest', () => {
           '</MPD>',
         ].join('\n');
 
-        fakeNetEngine.setResponseText('dummy://foo', source);
+        fakeNetEngine.setResponseText('https://foo', source);
 
         /** @type {shaka.extern.Manifest} */
-        const manifest = await parser.start('dummy://foo', playerInterface);
+        const manifest = await parser.start('https://foo', playerInterface);
         const stream1 = manifest.variants[0].video;
         const stream2 = manifest.variants[1].video;
 
@@ -629,10 +629,10 @@ describe('DashParser Manifest', () => {
           '</MPD>',
         ].join('\n');
 
-        fakeNetEngine.setResponseText('dummy://foo', source);
+        fakeNetEngine.setResponseText('https://foo', source);
 
         /** @type {shaka.extern.Manifest} */
-        const manifest = await parser.start('dummy://foo', playerInterface);
+        const manifest = await parser.start('https://foo', playerInterface);
         const stream = manifest.variants[0].video;
         const expectedClosedCaptions = new Map([['CC1', 'und']]);
         expect(stream.closedCaptions).toEqual(expectedClosedCaptions);
@@ -653,10 +653,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', source);
+    fakeNetEngine.setResponseText('https://foo', source);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const variant = manifest.variants[0];
     const stream = variant.audio;
     await stream.createSegmentIndex();
@@ -859,10 +859,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', source);
+    fakeNetEngine.setResponseText('https://foo', source);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     // First Representation should be dropped.
     expect(manifest.variants.length).toBe(1);
     expect(manifest.variants[0].bandwidth).toBe(200);
@@ -885,10 +885,10 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
+      fakeNetEngine.setResponseText('https://foo', source);
 
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       expect(manifest.textStreams.length).toBe(1);
     });
 
@@ -908,10 +908,10 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
+      fakeNetEngine.setResponseText('https://foo', source);
 
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       expect(manifest.textStreams.length).toBe(1);
     });
 
@@ -931,10 +931,10 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
+      fakeNetEngine.setResponseText('https://foo', source);
 
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       expect(manifest.textStreams.length).toBe(1);
     });
   });
@@ -977,7 +977,7 @@ describe('DashParser Manifest', () => {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_INVALID_XML,
-          'dummy://foo');
+          'https://foo');
       await Dash.testFails(source, error);
     });
 
@@ -1055,9 +1055,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(2);
     expect(manifest.textStreams.length).toBe(0);
 
@@ -1109,9 +1109,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
     expect(manifest.textStreams.length).toBe(0);
 
@@ -1149,9 +1149,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(2);
     expect(manifest.textStreams.length).toBe(0);
 
@@ -1202,9 +1202,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(2);
     expect(manifest.textStreams.length).toBe(0);
 
@@ -1247,9 +1247,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
     expect(manifest.textStreams.length).toBe(0);
     expect(manifest.variants[0].video.trickModeVideo).toBeUndefined();
@@ -1275,14 +1275,14 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.disableIFrames = true;
     parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
     expect(manifest.textStreams.length).toBe(0);
 
@@ -1309,9 +1309,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
 
     // The bogus EssentialProperty did not result in a variant.
     expect(manifest.variants.length).toBe(1);
@@ -1349,10 +1349,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
 
 
     expect(manifest.variants.length).toBe(1);
@@ -1390,9 +1390,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.textStreams.length).toBe(2);
     // At one time, these came out as 'application' rather than 'text'.
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
@@ -1419,9 +1419,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
 
     // In #875, this was an empty list.
     expect(manifest.textStreams.length).toBe(1);
@@ -1462,9 +1462,9 @@ describe('DashParser Manifest', () => {
     // would use the same segment index, so they would have the same references.
     // This test proves that duplicate Representation IDs are allowed for VOD
     // and that error doesn't occur.
-    fakeNetEngine.setResponseText('dummy://foo', source);
+    fakeNetEngine.setResponseText('https://foo', source);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(2);
 
     const variant1 = manifest.variants[0];
@@ -1478,8 +1478,8 @@ describe('DashParser Manifest', () => {
     const variant1Ref = Array.from(variant1.video.segmentIndex)[0];
     const variant2Ref = Array.from(variant2.video.segmentIndex)[0];
 
-    expect(variant1Ref.getUris()).toEqual(['dummy://foo/1.mp4']);
-    expect(variant2Ref.getUris()).toEqual(['dummy://foo/2.mp4']);
+    expect(variant1Ref.getUris()).toEqual(['https://foo/1.mp4']);
+    expect(variant2Ref.getUris()).toEqual(['https://foo/2.mp4']);
   });
 
   it('handles bandwidth of 0 or missing', async () => {
@@ -1507,9 +1507,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', source);
+    fakeNetEngine.setResponseText('https://foo', source);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(2);
 
     const variant1 = manifest.variants[0];
@@ -1559,9 +1559,9 @@ describe('DashParser Manifest', () => {
       // together.
       parser = shaka.test.Dash.makeDashParser();
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
+      fakeNetEngine.setResponseText('https://foo', source);
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       expect(manifest.variants.length).toBe(1);
 
       const variant = manifest.variants[0];
@@ -1692,8 +1692,8 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    await parser.start('dummy://foo', playerInterface);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
+    await parser.start('https://foo', playerInterface);
   });
 
   it('exposes Representation IDs', async () => {
@@ -1721,9 +1721,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const variant = manifest.variants[0];
     const textStream = manifest.textStreams[0];
     expect(variant.audio.originalId).toBe('audio-en');
@@ -1751,13 +1751,13 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.disableAudio = true;
     parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const variant = manifest.variants[0];
     expect(variant.audio).toBe(null);
     expect(variant.video).toBeTruthy();
@@ -1783,13 +1783,13 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.disableVideo = true;
     parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const variant = manifest.variants[0];
     expect(variant.audio).toBeTruthy();
     expect(variant.video).toBe(null);
@@ -1820,13 +1820,13 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.disableText = true;
     parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const stream = manifest.textStreams[0];
     expect(stream).toBeUndefined();
   });
@@ -1845,13 +1845,13 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.dash.ignoreMaxSegmentDuration = true;
     parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const maxSegmentDuration =
         manifest.presentationTimeline.getMaxSegmentDuration();
     expect(maxSegmentDuration).toBe(1);
@@ -1871,13 +1871,13 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.dash.ignoreMaxSegmentDuration = false;
     parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const maxSegmentDuration =
         manifest.presentationTimeline.getMaxSegmentDuration();
     expect(maxSegmentDuration).toBe(5);
@@ -1900,13 +1900,13 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.dash.ignoreMinBufferTime = true;
     parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const presentationTimeline = manifest.presentationTimeline;
     const presentationDelay = presentationTimeline.getDelay();
     expect(presentationDelay).not.toBeNaN();
@@ -1927,14 +1927,14 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.dash.ignoreSuggestedPresentationDelay = true;
     config.defaultPresentationDelay = 10;
     parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const presentationTimeline = manifest.presentationTimeline;
     const presentationDelay = presentationTimeline.getDelay();
     expect(presentationDelay).toBe(config.defaultPresentationDelay);
@@ -1957,13 +1957,13 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.dash.ignoreSuggestedPresentationDelay = true;
     parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const presentationTimeline = manifest.presentationTimeline;
     const presentationDelay = presentationTimeline.getDelay();
     expect(presentationDelay).toBe(3);
@@ -1985,13 +1985,13 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.dash.ignoreEmptyAdaptationSet = true;
     parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.presentationTimeline).toBeTruthy();
   });
 
@@ -2020,7 +2020,7 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.dash.manifestPreprocessorTXml = (mpd) => {
       /** @type {shaka.extern.xml.Node} */
@@ -2034,7 +2034,7 @@ describe('DashParser Manifest', () => {
     parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const stream = manifest.textStreams[0];
     expect(stream).toBeUndefined();
   });
@@ -2070,9 +2070,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const textStream = manifest.textStreams[0];
     expect(textStream.accessibilityPurpose).toBe(
         shaka.media.ManifestParser.AccessibilityPurpose.HARD_OF_HEARING);
@@ -2106,9 +2106,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const textStream = manifest.textStreams[0];
     expect(textStream.roles).toEqual(['captions', 'foo']);
     expect(textStream.kind).toBe('caption');
@@ -2138,9 +2138,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const textStream = manifest.textStreams[0];
     expect(textStream.roles).toEqual(['captions', 'forced_subtitle']);
     expect(textStream.forced).toBe(true);
@@ -2170,9 +2170,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const textStream = manifest.textStreams[0];
     expect(textStream.roles).toEqual(['captions', 'forced-subtitle']);
     expect(textStream.forced).toBe(true);
@@ -2201,10 +2201,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
     const stream = manifest.variants[0].video;
     expect(stream.hdr).toBe('PQ');
@@ -2234,10 +2234,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
     const stream = manifest.variants[0].video;
     expect(stream.hdr).toBe('PQ');
@@ -2266,10 +2266,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
   });
 
@@ -2296,10 +2296,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
     const stream = manifest.variants[0].video;
     expect(stream.colorGamut).toBe('rec2020');
@@ -2329,10 +2329,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
     const stream = manifest.variants[0].video;
     expect(stream.hdr).toBe('HLG');
@@ -2361,10 +2361,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
   });
 
@@ -2391,10 +2391,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
   });
 
@@ -2423,11 +2423,11 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      fakeNetEngine.setResponseText('https://foo', manifestText);
 
       /** @type {shaka.extern.Manifest} */
       // eslint-disable-next-line no-await-in-loop
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       expect(manifest.variants.length).toBe(1);
       const stream = manifest.variants[0].video;
       expect(stream.hdr).toBe('SDR');
@@ -2452,10 +2452,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
     const stream = manifest.variants[0].video;
     await stream.createSegmentIndex();
@@ -2490,10 +2490,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     const variant = manifest.variants[0];
     expect(variant.audio).toBeTruthy();
     expect(variant.video).toBeTruthy();
@@ -2526,10 +2526,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.imageStreams.length).toBe(1);
     expect(manifest.presentationTimeline.getMaxSegmentDuration()).toBe(1);
     const imageStream = manifest.imageStreams[0];
@@ -2569,10 +2569,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.imageStreams.length).toBe(2);
     const firstImageStream = manifest.imageStreams[0];
     expect(firstImageStream.width).toBe(1024);
@@ -2608,10 +2608,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
 
     const video0 = manifest.variants[0].video;
     await video0.createSegmentIndex();
@@ -2659,10 +2659,10 @@ describe('DashParser Manifest', () => {
             '</MPD>',
           ].join('\n');
 
-          fakeNetEngine.setResponseText('dummy://foo', manifestText);
+          fakeNetEngine.setResponseText('https://foo', manifestText);
 
           /** @type {shaka.extern.Manifest} */
-          const manifest = await parser.start('dummy://foo', playerInterface);
+          const manifest = await parser.start('https://foo', playerInterface);
 
           const video0 = manifest.variants[0].video;
           await video0.createSegmentIndex();
@@ -2709,10 +2709,10 @@ describe('DashParser Manifest', () => {
             '</MPD>',
           ].join('\n');
 
-          fakeNetEngine.setResponseText('dummy://foo', manifestText);
+          fakeNetEngine.setResponseText('https://foo', manifestText);
 
           /** @type {shaka.extern.Manifest} */
-          const manifest = await parser.start('dummy://foo', playerInterface);
+          const manifest = await parser.start('https://foo', playerInterface);
 
           const video0 = manifest.variants[0].video;
           await video0.createSegmentIndex();
@@ -2780,10 +2780,10 @@ describe('DashParser Manifest', () => {
             '</MPD>',
           ].join('\n');
 
-          fakeNetEngine.setResponseText('dummy://foo', manifestText);
+          fakeNetEngine.setResponseText('https://foo', manifestText);
 
           /** @type {shaka.extern.Manifest} */
-          const manifest = await parser.start('dummy://foo', playerInterface);
+          const manifest = await parser.start('https://foo', playerInterface);
 
           const video0 = manifest.variants[0].video;
           await video0.createSegmentIndex();
@@ -2833,10 +2833,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
 
     const video0 = manifest.variants[0].video;
     await video0.createSegmentIndex();
@@ -2913,10 +2913,10 @@ describe('DashParser Manifest', () => {
     const segments = [];
 
     for (const source of sources) {
-      fakeNetEngine.setResponseText('dummy://foo', source);
+      fakeNetEngine.setResponseText('https://foo', source);
       /** @type {shaka.extern.Manifest} */
       // eslint-disable-next-line no-await-in-loop
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const video = manifest.variants[0].video;
       // eslint-disable-next-line no-await-in-loop
       await video.createSegmentIndex();
@@ -2945,10 +2945,10 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
+      fakeNetEngine.setResponseText('https://foo', source);
 
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
 
       expect(manifest.serviceDescription.targetLatency).toBe(2);
       expect(manifest.serviceDescription.maxLatency).toBe(4);
@@ -2968,10 +2968,10 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
+      fakeNetEngine.setResponseText('https://foo', source);
 
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
 
       expect(manifest.serviceDescription.targetLatency).toBe(2);
       expect(manifest.serviceDescription.maxLatency).toBeUndefined();
@@ -2990,10 +2990,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', source);
+    fakeNetEngine.setResponseText('https://foo', source);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
 
     expect(manifest.nextUrl).toBe('https://nextUrl');
   });
@@ -3033,9 +3033,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.variants.length).toBe(2);
 
     const normalStream = manifest.variants[0].video;
@@ -3082,9 +3082,9 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      fakeNetEngine.setResponseText('https://foo', manifestText);
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const stream = manifest.variants[0].video;
       await stream.createSegmentIndex();
       goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
@@ -3098,22 +3098,22 @@ describe('DashParser Manifest', () => {
       expect(firstPartialReference.startTime).toBe(0);
       expect(firstPartialReference.endTime).toBe(0.5);
       expect(firstPartialReference.getUris())
-          .toEqual(['dummy://foo/l-1-p0.mp4']);
+          .toEqual(['https://foo/l-1-p0.mp4']);
       const secondPartialReference = firstReference.partialReferences[1];
       expect(secondPartialReference.startTime).toBe(0.5);
       expect(secondPartialReference.endTime).toBe(1);
       expect(secondPartialReference.getUris())
-          .toEqual(['dummy://foo/l-1-p1.mp4']);
+          .toEqual(['https://foo/l-1-p1.mp4']);
       const thirdPartialReference = firstReference.partialReferences[2];
       expect(thirdPartialReference.startTime).toBe(1);
       expect(thirdPartialReference.endTime).toBe(1.5);
       expect(thirdPartialReference.getUris())
-          .toEqual(['dummy://foo/l-1-p2.mp4']);
+          .toEqual(['https://foo/l-1-p2.mp4']);
       const fourthPartialReference = firstReference.partialReferences[3];
       expect(fourthPartialReference.startTime).toBe(1.5);
       expect(fourthPartialReference.endTime).toBe(2);
       expect(fourthPartialReference.getUris())
-          .toEqual(['dummy://foo/l-1-p3.mp4']);
+          .toEqual(['https://foo/l-1-p3.mp4']);
     });
 
     it('with cadence equal to 1', async () => {
@@ -3137,9 +3137,9 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      fakeNetEngine.setResponseText('https://foo', manifestText);
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const stream = manifest.variants[0].video;
       await stream.createSegmentIndex();
       goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
@@ -3176,9 +3176,9 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      fakeNetEngine.setResponseText('https://foo', manifestText);
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const stream = manifest.variants[0].video;
       await stream.createSegmentIndex();
       goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
@@ -3211,9 +3211,9 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      fakeNetEngine.setResponseText('https://foo', manifestText);
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const stream = manifest.variants[0].video;
       await stream.createSegmentIndex();
       goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
@@ -3252,7 +3252,7 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      fakeNetEngine.setResponseText('https://foo', manifestText);
 
       const contentSteering = JSON.stringify({
         'VERSION': 1,
@@ -3264,7 +3264,7 @@ describe('DashParser Manifest', () => {
       fakeNetEngine.setResponseText('http://contentsteering', contentSteering);
 
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
 
       const video0 = manifest.variants[0].video;
       await video0.createSegmentIndex();
@@ -3298,7 +3298,7 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      fakeNetEngine.setResponseText('https://foo', manifestText);
 
       const contentSteering = JSON.stringify({
         'VERSION': 1,
@@ -3313,7 +3313,7 @@ describe('DashParser Manifest', () => {
       fakeNetEngine.setResponseText('http://contentsteering', contentSteering);
 
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
 
       const video0 = manifest.variants[0].video;
       await video0.createSegmentIndex();
@@ -3347,7 +3347,7 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      fakeNetEngine.setResponseText('https://foo', manifestText);
 
       const contentSteering = JSON.stringify({
         'VERSION': 1,
@@ -3361,7 +3361,7 @@ describe('DashParser Manifest', () => {
       fakeNetEngine.setResponseText('http://contentsteering', contentSteering);
 
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
 
       const video0 = manifest.variants[0].video;
       await video0.createSegmentIndex();
@@ -3394,12 +3394,12 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      fakeNetEngine.setResponseText('https://foo', manifestText);
 
       fakeNetEngine.setResponseText('http://contentsteering', 'foo');
 
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
 
       const video0 = manifest.variants[0].video;
       await video0.createSegmentIndex();
@@ -3432,12 +3432,12 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      fakeNetEngine.setResponseText('https://foo', manifestText);
 
       fakeNetEngine.setResponseText('http://contentsteering', 'foo');
 
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
 
       const video0 = manifest.variants[0].video;
       await video0.createSegmentIndex();
@@ -3482,7 +3482,7 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      fakeNetEngine.setResponseText('https://foo', manifestText);
 
       const contentSteering = JSON.stringify({
         'VERSION': 1,
@@ -3497,7 +3497,7 @@ describe('DashParser Manifest', () => {
       fakeNetEngine.setResponseText('http://contentsteering', contentSteering);
 
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
 
       const video0 = manifest.variants[0].video;
       await video0.createSegmentIndex();
@@ -3539,9 +3539,9 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
     expect(manifest.gapCount).toBe(1);
   });
 
@@ -3572,11 +3572,11 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
-    await parser.start('dummy://foo', playerInterface);
+    await parser.start('https://foo', playerInterface);
     expect(addFontSpy).toHaveBeenCalledTimes(2);
-    expect(addFontSpy).toHaveBeenCalledWith('foo', 'dummy://foo/foo.woff');
+    expect(addFontSpy).toHaveBeenCalledWith('foo', 'https://foo/foo.woff');
     expect(addFontSpy).toHaveBeenCalledWith('foo2', 'https://foo/foo2.woff');
   });
 
@@ -3604,9 +3604,9 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo?a=1', source);
+      fakeNetEngine.setResponseText('https://foo?a=1', source);
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo?a=1', playerInterface);
+      const manifest = await parser.start('https://foo?a=1', playerInterface);
       expect(manifest.variants.length).toBe(1);
 
       const variant1 = manifest.variants[0];
@@ -3616,9 +3616,9 @@ describe('DashParser Manifest', () => {
 
       const variant1Ref = Array.from(variant1.video.segmentIndex)[0];
 
-      expect(variant1Ref.getUris()).toEqual(['dummy://foo/s1.mp4?a=1&b=1']);
+      expect(variant1Ref.getUris()).toEqual(['https://foo/s1.mp4?a=1&b=1']);
       expect(variant1Ref.initSegmentReference.getUris())
-          .toEqual(['dummy://foo/init.mp4?a=1&b=1']);
+          .toEqual(['https://foo/init.mp4?a=1&b=1']);
     });
 
     it('with SegmentTemplate', async () => {
@@ -3646,9 +3646,9 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo?a=1', source);
+      fakeNetEngine.setResponseText('https://foo?a=1', source);
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo?a=1', playerInterface);
+      const manifest = await parser.start('https://foo?a=1', playerInterface);
       expect(manifest.variants.length).toBe(1);
 
       const variant1 = manifest.variants[0];
@@ -3658,9 +3658,9 @@ describe('DashParser Manifest', () => {
 
       const variant1Ref = Array.from(variant1.video.segmentIndex)[0];
 
-      expect(variant1Ref.getUris()).toEqual(['dummy://foo/l-1.mp4?a=1']);
+      expect(variant1Ref.getUris()).toEqual(['https://foo/l-1.mp4?a=1']);
       expect(variant1Ref.initSegmentReference.getUris())
-          .toEqual(['dummy://foo/init.mp4?a=1']);
+          .toEqual(['https://foo/init.mp4?a=1']);
     });
 
     it('with SupplementalProperty in AdaptationSet', async () => {
@@ -3688,9 +3688,9 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo?a=1', source);
+      fakeNetEngine.setResponseText('https://foo?a=1', source);
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo?a=1', playerInterface);
+      const manifest = await parser.start('https://foo?a=1', playerInterface);
       expect(manifest.variants.length).toBe(1);
 
       const variant1 = manifest.variants[0];
@@ -3700,9 +3700,9 @@ describe('DashParser Manifest', () => {
 
       const variant1Ref = Array.from(variant1.video.segmentIndex)[0];
 
-      expect(variant1Ref.getUris()).toEqual(['dummy://foo/l-1.mp4?a=1']);
+      expect(variant1Ref.getUris()).toEqual(['https://foo/l-1.mp4?a=1']);
       expect(variant1Ref.initSegmentReference.getUris())
-          .toEqual(['dummy://foo/init.mp4?a=1']);
+          .toEqual(['https://foo/init.mp4?a=1']);
     });
 
     it('with EssentialProperty in AdaptationSet', async () => {
@@ -3730,9 +3730,9 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo?a=1', source);
+      fakeNetEngine.setResponseText('https://foo?a=1', source);
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo?a=1', playerInterface);
+      const manifest = await parser.start('https://foo?a=1', playerInterface);
       expect(manifest.variants.length).toBe(1);
 
       const variant1 = manifest.variants[0];
@@ -3742,9 +3742,9 @@ describe('DashParser Manifest', () => {
 
       const variant1Ref = Array.from(variant1.video.segmentIndex)[0];
 
-      expect(variant1Ref.getUris()).toEqual(['dummy://foo/l-1.mp4?a=1']);
+      expect(variant1Ref.getUris()).toEqual(['https://foo/l-1.mp4?a=1']);
       expect(variant1Ref.initSegmentReference.getUris())
-          .toEqual(['dummy://foo/init.mp4?a=1']);
+          .toEqual(['https://foo/init.mp4?a=1']);
     });
 
     it('with SupplementalProperty in Representation', async () => {
@@ -3772,9 +3772,9 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo?a=1', source);
+      fakeNetEngine.setResponseText('https://foo?a=1', source);
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo?a=1', playerInterface);
+      const manifest = await parser.start('https://foo?a=1', playerInterface);
       expect(manifest.variants.length).toBe(1);
 
       const variant1 = manifest.variants[0];
@@ -3784,9 +3784,9 @@ describe('DashParser Manifest', () => {
 
       const variant1Ref = Array.from(variant1.video.segmentIndex)[0];
 
-      expect(variant1Ref.getUris()).toEqual(['dummy://foo/l-1.mp4?a=1&b=foo']);
+      expect(variant1Ref.getUris()).toEqual(['https://foo/l-1.mp4?a=1&b=foo']);
       expect(variant1Ref.initSegmentReference.getUris())
-          .toEqual(['dummy://foo/init.mp4?a=1&b=foo']);
+          .toEqual(['https://foo/init.mp4?a=1&b=foo']);
     });
 
     it('with EssentialProperty in Representation', async () => {
@@ -3814,9 +3814,9 @@ describe('DashParser Manifest', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo?a=1', source);
+      fakeNetEngine.setResponseText('https://foo?a=1', source);
       /** @type {shaka.extern.Manifest} */
-      const manifest = await parser.start('dummy://foo?a=1', playerInterface);
+      const manifest = await parser.start('https://foo?a=1', playerInterface);
       expect(manifest.variants.length).toBe(1);
 
       const variant1 = manifest.variants[0];
@@ -3826,9 +3826,9 @@ describe('DashParser Manifest', () => {
 
       const variant1Ref = Array.from(variant1.video.segmentIndex)[0];
 
-      expect(variant1Ref.getUris()).toEqual(['dummy://foo/l-1.mp4?a=1']);
+      expect(variant1Ref.getUris()).toEqual(['https://foo/l-1.mp4?a=1']);
       expect(variant1Ref.initSegmentReference.getUris())
-          .toEqual(['dummy://foo/init.mp4?a=1']);
+          .toEqual(['https://foo/init.mp4?a=1']);
     });
   });
 
@@ -3855,10 +3855,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
 
     const timeline = manifest.presentationTimeline;
     expect(timeline.getSeekRangeStart()).toBe(0);
@@ -3888,10 +3888,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
 
     const timeline = manifest.presentationTimeline;
     expect(timeline.getSeekRangeStart()).toBe(0);
@@ -3917,10 +3917,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
 
     expect(manifest.variants.length).toBe(2);
     expect(manifest.textStreams.length).toBe(0);
@@ -3951,14 +3951,14 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.ignoreSupplementalCodecs = true;
     parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
 
     expect(manifest.variants.length).toBe(1);
     expect(manifest.textStreams.length).toBe(0);
@@ -3989,10 +3989,10 @@ describe('DashParser Manifest', () => {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('https://foo', playerInterface);
 
     const programStartTime = 1744205180.662;
     const expectedEvent = {
