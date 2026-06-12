@@ -119,6 +119,8 @@ csslintrc
 csslintstamp
 cygpath
 datas
+Decryptor
+Decryptors
 degrad
 discardable
 displayer
@@ -172,6 +174,7 @@ uints
 uncompiled
 unconfigured
 unfuzzed
+unpadding
 unregisters
 unstore
 unviewed
@@ -383,12 +386,14 @@ rltb
 samplerate
 saio
 saiz
+sbgp
 schi
 schm
 scte
 sdtp
 senc
 sepiff
+sgpd
 sidx
 sinf
 skipoffset
@@ -407,6 +412,7 @@ stsd
 stsz
 sttg
 stts
+styp
 subcues
 subframes
 subt

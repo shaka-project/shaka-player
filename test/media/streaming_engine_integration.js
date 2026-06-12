@@ -78,6 +78,7 @@ describe('StreamingEngine', () => {
           onEmsg: () => {},
           onEvent: () => {},
           onManifestUpdate: () => {},
+          getDrmInfo: () => null,
         },
         mediaSourceConfig);
     waiter.setMediaSourceEngine(mediaSourceEngine);

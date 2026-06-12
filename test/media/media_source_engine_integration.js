@@ -193,6 +193,7 @@ describe('MediaSourceEngine', () => {
           onEmsg: Util.spyFunc(onEmsg),
           onEvent: Util.spyFunc(onEvent),
           onManifestUpdate: Util.spyFunc(onManifestUpdate),
+          getDrmInfo: () => null,
         },
         config);
 

@@ -371,4 +371,125 @@ describe('Mp4BoxParsers', () => {
       expect(parsedHdlr.handlerType).toBe('vide');
     });
   });
+
+  describe('parseTENC', () => {
+    it('parses version 0 tenc box with per-sample IV', () => {
+      const tencBox = new Uint8Array([
+        0x00, // reserved
+        0x00, // patternByte
+        0x01, // defaultIsProtected
+        0x08, // defaultPerSampleIVSize
+        // defaultKID (16 bytes)
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+        0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
+      ]);
+      const reader = new shaka.util.DataViewReader(
+          tencBox, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+      const parsed =
+          shaka.util.Mp4BoxParsers.parseTENC(reader, /* version= */ 0);
+
+      expect(parsed.defaultCryptByteBlock).toBe(0);
+      expect(parsed.defaultSkipByteBlock).toBe(0);
+      expect(parsed.defaultIsProtected).toBe(1);
+      expect(parsed.defaultPerSampleIVSize).toBe(8);
+      expect(parsed.defaultKID).toBe('0102030405060708090a0b0c0d0e0f10');
+      expect(parsed.defaultConstantIV).toBeNull();
+    });
+
+    // eslint-disable-next-line @stylistic/max-len
+    it('parses version 1 tenc box with pattern encryption and constant IV', () => {
+      const tencBox = new Uint8Array([
+        0x00, // reserved
+        0x12, // patternByte (crypt = 1 [0x1-], skip = 2 [-0x2])
+        0x01, // defaultIsProtected
+        0x00, // defaultPerSampleIVSize
+        // defaultKID (16 bytes)
+        0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
+        0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
+        0x04, // ivSize
+        0x55, 0x66, 0x77, 0x88, // defaultConstantIV
+      ]);
+      const reader = new shaka.util.DataViewReader(
+          tencBox, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+      const parsed =
+          shaka.util.Mp4BoxParsers.parseTENC(reader, /* version= */ 1);
+
+      expect(parsed.defaultCryptByteBlock).toBe(1);
+      expect(parsed.defaultSkipByteBlock).toBe(2);
+      expect(parsed.defaultIsProtected).toBe(1);
+      expect(parsed.defaultPerSampleIVSize).toBe(0);
+      expect(parsed.defaultKID).toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+      expect(parsed.defaultConstantIV)
+          .toEqual(new Uint8Array([0x55, 0x66, 0x77, 0x88]));
+    });
+  });
+
+  describe('parseSENC', () => {
+    it('parses senc box without subsamples or parameter overrides', () => {
+      const sencBox = new Uint8Array([
+        0x00, 0x00, 0x00, 0x01, // sampleCount
+        // IV del sample (8 bytes)
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+      ]);
+      const reader = new shaka.util.DataViewReader(
+          sencBox, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+
+      const parsed = shaka.util.Mp4BoxParsers.parseSENC(
+          reader, /* flags= */ 0, /* perSampleIVSize= */ 8,
+          /* defaultConstantIV= */ null);
+
+      expect(parsed.samples.length).toBe(1);
+      expect(parsed.samples[0].subsamples).toBeNull();
+
+      const expectedIv = new Uint8Array(16);
+      expectedIv.set([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08], 0);
+      expect(parsed.samples[0].iv).toEqual(expectedIv);
+    });
+
+    it('parses senc box with subsamples', () => {
+      const sencBox = new Uint8Array([
+        0x00, 0x00, 0x00, 0x01, // sampleCount
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+        0x00, 0x01, // subsample count
+        0x00, 0x05, // clearBytes
+        0x00, 0x00, 0x00, 0x0a, // encryptedBytes
+      ]);
+      const reader = new shaka.util.DataViewReader(
+          sencBox, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+
+      const parsed = shaka.util.Mp4BoxParsers.parseSENC(
+          reader, /* flags= */ 0x000002, /* perSampleIVSize= */ 8,
+          /* defaultConstantIV= */ null);
+
+      expect(parsed.samples.length).toBe(1);
+      expect(parsed.samples[0].subsamples).toEqual([
+        {clearBytes: 5, encryptedBytes: 10},
+      ]);
+    });
+
+    it('parses senc box and overrides track encryption parameters', () => {
+      const sencBox = new Uint8Array([
+        0x00, 0x00, 0x00, // AlgorithmID
+        0x00, // ivSize
+        // KID
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+        0x04, // constantIVSize
+        0x11, 0x22, 0x33, 0x44, // constantIV
+        0x00, 0x00, 0x00, 0x01, // sampleCount
+      ]);
+      const reader = new shaka.util.DataViewReader(
+          sencBox, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+
+      const parsed = shaka.util.Mp4BoxParsers.parseSENC(
+          reader, /* flags= */ 0x000001, /* perSampleIVSize= */ 8,
+          /* defaultConstantIV= */ null);
+
+      expect(parsed.samples.length).toBe(1);
+
+      const expectedIv = new Uint8Array(16);
+      expectedIv.set([0x11, 0x22, 0x33, 0x44], 0);
+      expect(parsed.samples[0].iv).toEqual(expectedIv);
+    });
+  });
 });
