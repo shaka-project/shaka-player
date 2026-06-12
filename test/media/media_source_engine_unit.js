@@ -264,6 +264,7 @@ describe('MediaSourceEngine', () => {
           onEmsg: () => {},
           onEvent: () => {},
           onManifestUpdate: () => {},
+          getDrmInfo: () => null,
         },
         config);
     mediaSourceEngine.getCaptionParser = () => {
@@ -342,6 +343,7 @@ describe('MediaSourceEngine', () => {
             onEmsg: () => {},
             onEvent: () => {},
             onManifestUpdate: () => {},
+            getDrmInfo: () => null,
           },
           config);
 
@@ -369,6 +371,7 @@ describe('MediaSourceEngine', () => {
             onEmsg: () => {},
             onEvent: () => {},
             onManifestUpdate: () => {},
+            getDrmInfo: () => null,
           },
           config);
 

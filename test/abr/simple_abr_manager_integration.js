@@ -99,6 +99,7 @@ describe('SimpleAbrManager (integration)', () => {
           onEmsg: () => {},
           onEvent: () => {},
           onManifestUpdate: () => {},
+          getDrmInfo: () => null,
         },
         mediaSourceConfig);
     waiter.setMediaSourceEngine(mediaSourceEngine);
