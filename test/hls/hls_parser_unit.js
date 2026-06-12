@@ -4568,6 +4568,9 @@ describe('HlsParser', () => {
             drmInfo.keyIds.add(keyId);
             drmInfo.addKeyIdsData(initDataBase64);
             drmInfo.encryptionScheme = 'cenc';
+            drmInfo.clearKeys = new Map([
+              ['AAAAAAAAAAAAAAAAAAAAAA', 'UGo2aEZndDVpRlp0ZkJMTjZvcThFZz09'],
+            ]);
           });
         });
       });
@@ -4615,6 +4618,9 @@ describe('HlsParser', () => {
             drmInfo.keyIds.add(keyId);
             drmInfo.addKeyIdsData(initDataBase64);
             drmInfo.encryptionScheme = 'cenc';
+            drmInfo.clearKeys = new Map([
+              ['AAAAAAAAAAAAAAAAAAAAAA', 'UGo2aEZndDVpRlp0ZkJMTjZvcThFZz09'],
+            ]);
           });
         });
       });
@@ -4663,6 +4669,9 @@ describe('HlsParser', () => {
             drmInfo.keyIds.add(keyId);
             drmInfo.addKeyIdsData(initDataBase64);
             drmInfo.encryptionScheme = 'cenc';
+            drmInfo.clearKeys = new Map([
+              ['AAAAAAAAAAAAAAAAAAAAAA', 'Pj6hFgt5iFZtfBLN6oq8Eg'],
+            ]);
           });
         });
       });
@@ -4908,6 +4917,9 @@ describe('HlsParser', () => {
               drmInfo.keyIds.add(keyId);
               drmInfo.addKeyIdsData(initDataBase64);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.clearKeys = new Map([
+                ['AAAAAAAAAAAAAAAAAAAAAA', 'UGo2aEZndDVpRlp0ZkJMTjZvcThFZz09'],
+              ]);
             });
           });
         });
@@ -4918,6 +4930,9 @@ describe('HlsParser', () => {
               drmInfo.keyIds.add(keyId);
               drmInfo.addKeyIdsData(initDataBase64);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.clearKeys = new Map([
+                ['AAAAAAAAAAAAAAAAAAAAAA', 'UGo2aEZndDVpRlp0ZkJMTjZvcThFZz09'],
+              ]);
             });
           });
         });
@@ -4962,6 +4977,9 @@ describe('HlsParser', () => {
               drmInfo.keyIds.add(keyId);
               drmInfo.addKeyIdsData(initDataBase64);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.clearKeys = new Map([
+                ['AAAAAAAAAAAAAAAAAAAAAA', 'UGo2aEZndDVpRlp0ZkJMTjZvcThFZz09'],
+              ]);
             });
           });
         });
@@ -4972,6 +4990,9 @@ describe('HlsParser', () => {
               drmInfo.keyIds.add(keyId);
               drmInfo.addKeyIdsData(initDataBase64);
               drmInfo.encryptionScheme = 'cenc';
+              drmInfo.clearKeys = new Map([
+                ['AAAAAAAAAAAAAAAAAAAAAA', 'UGo2aEZndDVpRlp0ZkJMTjZvcThFZz09'],
+              ]);
             });
           });
         });

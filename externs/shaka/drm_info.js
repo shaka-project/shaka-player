@@ -49,7 +49,8 @@ shaka.extern.InitDataOverride;
  *   sessionType: string,
  *   initData: Array<!shaka.extern.InitDataOverride>,
  *   keyIds: Set<string>,
- *   mediaTypes: (!Array<string>|undefined)
+ *   mediaTypes: (!Array<string>|undefined),
+ *   clearKeys: (!Map<string, string>|undefined),
  * }}
  *
  * @description
@@ -108,6 +109,16 @@ shaka.extern.InitDataOverride;
  *   An optional list specifying each component in a media type:
  *   https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/data#media-type
  *   included in a <code>data:</code> scheme URI, separated by semicolon.
+ * @property {(!Map<string, string>|undefined)} clearKeys
+ *   An optional map of normalized ClearKey key pairs where:
+ *   - key = key ID ('kid') encoded as base64url without padding
+ *   - value = decryption key ('k') encoded as base64url without padding
+ *
+ *   If values are provided in another format (e.g. hexadecimal), they must
+ *   be normalized before being stored.
+ *
+ *   This map is used only for ClearKey key systems and is ignored for other
+ *   DRM systems.
  * @exportDoc
  */
 shaka.extern.DrmInfo;
