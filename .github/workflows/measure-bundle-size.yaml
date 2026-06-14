@@ -91,6 +91,8 @@ jobs:
       - name: Checkout repo (for script access)
         uses: actions/checkout@v4
         with:
+          # The script that generates the table should be run from `main`, not
+          # the PR that triggered the workflow.
           ref: main
           persist-credentials: false
 
