@@ -5,6 +5,24 @@ closure-uri
   Local mods:
     - Library stripped down to just URI parsing, and that stripped of all deps
 
+cml-cmcd
+  Common Media Library CMCD encoder + reporter, v2.4.0,
+  by Streaming Video Technology Alliance / Casey Occhialini et al.
+  Apache 2.0 license.
+  https://github.com/streaming-video-technology-alliance/common-media-library
+    /tree/main/libs/cmcd
+  Source npm: @svta/cml-cmcd
+  TRANSITIONAL: vendored Closure port; deletes when shaka migrates to TypeScript
+  (#8262) and `goog.require('cml.cmcd.X')` becomes
+  `import { X } from '@svta/cml-cmcd'`.
+  Local mods:
+    - TypeScript source converted to Closure-annotated JS by hand
+    - Type-only imports erased; replaced with local closure typedefs
+    - Decoder/parsing support omitted; runtime validators/predicate helpers
+      remain vendored
+    - cml-utils dep replaced with a local cml_utils.js shim providing uuid,
+      urlToRelativePath, and defaultRequester
+
 language-mapping-list
   A map of languages to their names, v0.0.16, by Ali Al Dallal / Mozilla.
   MIT license.
