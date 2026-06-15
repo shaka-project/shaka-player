@@ -960,7 +960,8 @@ shaka.extern.HLSMetadata;
  *   endTime: number,
  *   id: string,
  *   timescale: number,
- *   eventNode: ?shaka.extern.xml.Node
+ *   eventNode: ?shaka.extern.xml.Node,
+ *   urlParams: (?function():string|undefined),
  * }}
  *
  * @description
@@ -982,6 +983,9 @@ shaka.extern.HLSMetadata;
  *   Provides the timescale, in ticks per second.
  * @property {?shaka.extern.xml.Node} eventNode
  *   The XML element that defines the Event.
+ * @property {(?function():string|undefined)} urlParams
+ *   Optional URL parameters function derived from a RequestParam element
+ *   (urn:mpeg:dash:urlparam:2025 scheme) present in the EventStream.
  * @exportDoc
  */
 shaka.extern.TimelineRegionInfo;
