@@ -59,6 +59,12 @@
 
   background-color: var(--shaka-bg-solid);
 
+  /* Force a compositing context so the GPU layer stack
+   * is well-defined in fullscreen, regardless of whether the top
+   * controls panel is present. Without this, Chrome may fail to
+   * composite .shaka-bottom-controls when the top panel is absent. */
+  isolation: isolate;
+
   .shaka-text-container,
   .shaka-speech-to-text-container {
     /* In fullscreen mode, the text displayer's font size should be relative to
@@ -161,6 +167,12 @@
 .shaka-bottom-controls {
   width: var(--shaka-controls-w);
   padding: 0;
+
+  /* position: relative is needed so that z-index: 1
+   * actually creates a stacking context. Without it, Chrome's GPU
+   * compositor may skip painting this element in fullscreen when
+   * .shaka-top-controls (which has position: absolute) is absent. */
+  position: relative;
 
   /* Position the bottom panel in front of other controls (play button and
    * spinner containers).
