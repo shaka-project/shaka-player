@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.16.36](https://github.com/shaka-project/shaka-player/compare/v4.16.35...v4.16.36) (2026-06-15)
+
+
+### Bug Fixes
+
+* **Ads:** Prevent pre-roll ads if a previous ad has already played ([#10195](https://github.com/shaka-project/shaka-player/issues/10195)) ([9f3d0ff](https://github.com/shaka-project/shaka-player/commit/9f3d0ffbb41d5f72d7dc0d1c635ff6db2073be2b))
+* **UI:** Close context menu on left click outside the player bounds ([#10213](https://github.com/shaka-project/shaka-player/issues/10213)) ([7646e92](https://github.com/shaka-project/shaka-player/commit/7646e925def5d8186d417d85d78f091453fd86c8))
+
+
+### Performance Improvements
+
+* Disable ContentWorkarounds on Safari &gt;=26.4 ([#10204](https://github.com/shaka-project/shaka-player/issues/10204)) ([8c53830](https://github.com/shaka-project/shaka-player/commit/8c53830a9f54abf1aee2486a0120dd411283d6db))
+
 ## [4.16.35](https://github.com/shaka-project/shaka-player/compare/v4.16.34...v4.16.35) (2026-06-08)
 
 
