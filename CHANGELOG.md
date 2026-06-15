@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.15.48](https://github.com/shaka-project/shaka-player/compare/v4.15.47...v4.15.48) (2026-06-15)
+
+
+### Bug Fixes
+
+* **UI:** Close context menu on left click outside the player bounds ([#10213](https://github.com/shaka-project/shaka-player/issues/10213)) ([2f68a03](https://github.com/shaka-project/shaka-player/commit/2f68a030433a880d6a21414739da7d822d0b3d5c))
+
 ## [4.15.47](https://github.com/shaka-project/shaka-player/compare/v4.15.46...v4.15.47) (2026-06-08)
 
 
