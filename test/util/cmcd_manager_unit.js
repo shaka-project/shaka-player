@@ -3638,13 +3638,19 @@ describe('CmcdManager Setup', () => {
 
       it('should return only enabled event targets', () => {
         const targets = [
-          {enabled: true, url: 'url1'},
-          {enabled: false, url: 'url2'},
+          {
+            enabled: true,
+            url: 'https://example.com/url1',
+          },
+          {
+            enabled: false,
+            url: 'https://example.com/url2',
+          },
         ];
         const cmcdManager = createCmcdManager(mockPlayer, {targets});
         const enabledEventTargets = cmcdManager.getEventModeEnabledTargets_();
         expect(enabledEventTargets.length).toBe(1);
-        expect(enabledEventTargets[0].url).toBe('url1');
+        expect(enabledEventTargets[0].url).toBe('https://example.com/url1');
       });
 
       it('should return an empty array if no targets are configured', () => {

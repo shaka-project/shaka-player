@@ -1623,7 +1623,7 @@ describe('TtmlTextParser', () => {
         {
           startTime: 62.05,
           endTime: 3723.2,
-          backgroundImage: 'foo://bar/img_0.png',
+          backgroundImage: 'https://bar/img_0.png',
           isContainer: false,
         });
   });
@@ -2694,7 +2694,7 @@ describe('TtmlTextParser', () => {
     const data =
         shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
     const result = new shaka.text.TtmlTextParser()
-        .parseMedia(data, time, 'foo://bar', /* images= */ []);
+        .parseMedia(data, time, 'https://bar', /* images= */ []);
     shaka.test.TtmlUtils.verifyHelper(
         cues, result, bodyProperties, divProperties);
   }
@@ -2728,7 +2728,7 @@ describe('TtmlTextParser', () => {
             vttOffset: 0,
             isMpegTs: false,
           },
-          'foo://bar', /* images= */ []);
+          'https://bar', /* images= */ []);
     }).toThrow(error);
   }
 });
