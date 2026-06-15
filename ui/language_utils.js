@@ -163,6 +163,11 @@ shaka.ui.LanguageUtils = class {
     for (const track of tracks) {
       const language = track.language;
       const rolesString = getRolesString(track);
+      const displayRolesString =
+          shaka.ui.LanguageUtils.getDisplayRolesString_(track);
+      const machineGeneratedSuffix =
+          shaka.ui.LanguageUtils.getMachineGeneratedSuffix_(
+              track, localization);
       const label = track.label;
       const channelsCount = track.channelsCount;
       const accessibilityPurpose = track.accessibilityPurpose;
@@ -230,23 +235,29 @@ shaka.ui.LanguageUtils = class {
             span.textContent += ' - ' +
                 localization.resolve(shaka.ui.Locales.Ids.AUDIO_DESCRIPTION);
           }
+          span.textContent += machineGeneratedSuffix;
           break;
         case TrackLabelFormat.ROLE:
           span.textContent += basicInfo;
-          if (!rolesString) {
-            // Fallback behavior. This probably shouldn't happen.
-            shaka.log.alwaysWarn('Track #' + JSON.stringify(track) +
-                ' does not have a role, but the UI is configured to ' +
-                'only show role.');
-            span.textContent = '?';
+          if (!displayRolesString) {
+            if (machineGeneratedSuffix) {
+              span.textContent += machineGeneratedSuffix;
+            } else {
+              // Fallback behavior. This probably shouldn't happen.
+              shaka.log.alwaysWarn('Track #' + JSON.stringify(track) +
+                  ' does not have a role, but the UI is configured to ' +
+                  'only show role.');
+              span.textContent = '?';
+            }
           } else {
-            span.textContent = rolesString;
+            span.textContent = displayRolesString + machineGeneratedSuffix;
           }
           break;
         case TrackLabelFormat.LANGUAGE_ROLE:
           span.textContent += basicInfo;
-          if (rolesString) {
-            span.textContent += ': ' + rolesString;
+          span.textContent += machineGeneratedSuffix;
+          if (displayRolesString) {
+            span.textContent += ': ' + displayRolesString;
           }
           break;
         case TrackLabelFormat.LABEL:
@@ -336,6 +347,11 @@ shaka.ui.LanguageUtils = class {
       const forced = track.forced;
       const forcedString = localization.resolve(LocIds.SUBTITLE_FORCED);
       const rolesString = getRolesString(track);
+      const displayRolesString =
+          shaka.ui.LanguageUtils.getDisplayRolesString_(track);
+      const machineGeneratedSuffix =
+          shaka.ui.LanguageUtils.getMachineGeneratedSuffix_(
+              track, localization);
       const label = track.label;
       const combinationName =
           getCombination(language, rolesString, label, forced);
@@ -399,26 +415,34 @@ shaka.ui.LanguageUtils = class {
       }
       switch (labelFormat) {
         case TrackLabelFormat.LANGUAGE:
+          span.textContent += machineGeneratedSuffix;
           if (forced) {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
         case TrackLabelFormat.ROLE:
-          if (!rolesString) {
-            // Fallback behavior. This probably shouldn't happen.
-            shaka.log.alwaysWarn('Track #' + track.id + ' does not have a ' +
-                'role, but the UI is configured to only show role.');
-            span.textContent = '?';
+          if (!displayRolesString) {
+            if (machineGeneratedSuffix) {
+              // The only roles are machine-generated characteristics; surface
+              // them via the language name + suffix so the button is not empty.
+              span.textContent += machineGeneratedSuffix;
+            } else {
+              // Fallback behavior. This probably shouldn't happen.
+              shaka.log.alwaysWarn('Track #' + track.id + ' does not have a ' +
+                  'role, but the UI is configured to only show role.');
+              span.textContent = '?';
+            }
           } else {
-            span.textContent = rolesString;
+            span.textContent = displayRolesString + machineGeneratedSuffix;
           }
           if (forced) {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
         case TrackLabelFormat.LANGUAGE_ROLE:
-          if (rolesString) {
-            span.textContent += ': ' + rolesString;
+          span.textContent += machineGeneratedSuffix;
+          if (displayRolesString) {
+            span.textContent += ': ' + displayRolesString;
           }
           if (forced) {
             span.textContent += ' (' + forcedString + ')';
@@ -446,6 +470,35 @@ shaka.ui.LanguageUtils = class {
     }
   }
 
+
+  /**
+   * @param {shaka.extern.AudioTrack|shaka.extern.TextTrack} track
+   * @return {string}
+   * @private
+   */
+  static getDisplayRolesString_(track) {
+    return track.roles.filter(
+        (r) => r !== shaka.ui.LanguageUtils.MACHINE_GENERATED_CHAR_ &&
+            r !== shaka.ui.LanguageUtils.TRANSLATION_CHAR_,
+    ).join(', ');
+  }
+
+  /**
+   * @param {shaka.extern.AudioTrack|shaka.extern.TextTrack} track
+   * @param {shaka.ui.Localization} localization
+   * @return {string}
+   * @private
+   */
+  static getMachineGeneratedSuffix_(track, localization) {
+    if (!track.roles.includes(shaka.ui.LanguageUtils.MACHINE_GENERATED_CHAR_)) {
+      return '';
+    }
+    const LocIds = shaka.ui.Locales.Ids;
+    if (track.roles.includes(shaka.ui.LanguageUtils.TRANSLATION_CHAR_)) {
+      return ' ' + localization.resolve(LocIds.MACHINE_TRANSLATED);
+    }
+    return ' ' + localization.resolve(LocIds.MACHINE_GENERATED);
+  }
 
   /**
    * Returns the language's name for itself in its own script (autoglottonym),
@@ -541,3 +594,15 @@ shaka.ui.LanguageUtils = class {
     }
   }
 };
+
+/**
+ * @const {string}
+ * @private
+ */
+shaka.ui.LanguageUtils.MACHINE_GENERATED_CHAR_ = 'public.machine-generated';
+
+/**
+ * @const {string}
+ * @private
+ */
+shaka.ui.LanguageUtils.TRANSLATION_CHAR_ = 'public.translation';

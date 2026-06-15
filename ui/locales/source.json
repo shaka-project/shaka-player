@@ -27,6 +27,14 @@
     "description": "Label for a button used to select an auto generated text track.",
     "message": "Auto generated"
   },
+  "MACHINE_GENERATED": {
+    "description": "Suffix appended to a track's language name to indicate it was programmatically generated (e.g. 'English Generated').",
+    "message": "Generated"
+  },
+  "MACHINE_TRANSLATED": {
+    "description": "Suffix appended to a track's language name to indicate it was programmatically translated (e.g. 'Spanish Translated').",
+    "message": "Translated"
+  },
   "AUTO_QUALITY": {
     "description": "Label for a button used to allow the video player to select the resolution/quality of the video automatically.",
     "meaning": "Automatic",
