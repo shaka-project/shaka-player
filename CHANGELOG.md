@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.1.9](https://github.com/shaka-project/shaka-player/compare/v5.1.8...v5.1.9) (2026-06-15)
+
+
+### Bug Fixes
+
+* **Ads:** Prevent pre-roll ads if a previous ad has already played ([#10195](https://github.com/shaka-project/shaka-player/issues/10195)) ([7494ceb](https://github.com/shaka-project/shaka-player/commit/7494ceb9e94793a1d5074ff71a4d7d925f08f969))
+* Apply PlayReady fixes on Edge to the rest of the browsers that use Windows ([#10205](https://github.com/shaka-project/shaka-player/issues/10205)) ([aeb78f5](https://github.com/shaka-project/shaka-player/commit/aeb78f5d90a091dc2c0747ff85ce5ccb0d92c59e))
+* **UI:** Close context menu on left click outside the player bounds ([#10213](https://github.com/shaka-project/shaka-player/issues/10213)) ([e240778](https://github.com/shaka-project/shaka-player/commit/e240778be3f144c49087fa245e3ba31665234196))
+* **UI:** Fix ad marker alignment regression ([#10193](https://github.com/shaka-project/shaka-player/issues/10193)) ([cec4d8d](https://github.com/shaka-project/shaka-player/commit/cec4d8d64b0f9937ca62a6b6d289cc4ee7b80420))
+
+
+### Performance Improvements
+
+* Disable ContentWorkarounds on Safari &gt;=26.4 ([#10204](https://github.com/shaka-project/shaka-player/issues/10204)) ([0e7c0a3](https://github.com/shaka-project/shaka-player/commit/0e7c0a34bc164702367951a8e3445a48ccba6fad))
+
 ## [5.1.8](https://github.com/shaka-project/shaka-player/compare/v5.1.7...v5.1.8) (2026-06-08)
 
 
