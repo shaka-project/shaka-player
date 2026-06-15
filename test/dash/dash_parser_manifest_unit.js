@@ -4009,4 +4009,197 @@ describe('DashParser Manifest', () => {
     const timeline = manifest.presentationTimeline;
     expect(timeline.getInitialProgramDateTime()).toBe(programStartTime);
   });
+
+  describe('supports ImportedMPD (Linked Periods, DASH 6th ed. §5.3.2.6)',
+      () => {
+        // Minimal static MPD returned when an ImportedMPD URL is fetched.
+        // Mirrors the structure of the real livesim2 namibia_ad MPD:
+        //   mediaPresentationDuration / Period duration = 10 s
+        //   SegmentTemplate: timescale=12288, segment duration=24576 → 2 s/seg
+        //   5 segments total per period.
+        const importedMpdSource = [
+          '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static"',
+          '    mediaPresentationDuration="PT10S">',
+          '  <Period duration="PT10S">',
+          '    <AdaptationSet mimeType="video/mp4" segmentAlignment="true">',
+          '      <SegmentTemplate media="$RepresentationID$/$Number$.m4s"',
+          '          initialization="$RepresentationID$/init.mp4"',
+          '          timescale="12288" startNumber="1" duration="24576"/>',
+          '      <Representation id="V1" bandwidth="1000"',
+          '          codecs="avc1.64001E" width="640" height="360"/>',
+          '    </AdaptationSet>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n');
+
+        // List MPD with a single Linked Period.
+        const singlePeriodListMpd = [
+          '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="list"',
+          '    minBufferTime="PT1S">',
+          '  <Period id="1">',
+          '    <ImportedMPD>https://imported/manifest.mpd</ImportedMPD>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n');
+
+        beforeEach(() => {
+          fakeNetEngine
+              .setResponseText('https://foo', singlePeriodListMpd)
+              .setResponseText('https://imported/manifest.mpd', importedMpdSource);
+        });
+
+        it('resolves ImportedMPD and creates video variants', async () => {
+          const manifest = await parser.start('https://foo', playerInterface);
+          expect(manifest.variants.length).toBe(1);
+          expect(manifest.variants[0].video).not.toBeNull();
+        });
+
+        it('segment URIs are resolved relative to the imported MPD URL',
+            async () => {
+              const manifest = await parser.start('https://foo', playerInterface);
+              const video = manifest.variants[0].video;
+              await video.createSegmentIndex();
+
+              goog.asserts.assert(video.segmentIndex, 'Null segmentIndex!');
+              const refs = Array.from(video.segmentIndex);
+              expect(refs.length).toBe(5);
+
+              // BaseURL = 'https://imported/manifest.mpd'
+              // → directory base = 'https://imported/'
+              // → segment V1/1.m4s resolves to 'https://imported/V1/1.m4s'
+              expect(refs[0].getUris()).toEqual(['https://imported/V1/1.m4s']);
+              expect(refs[4].getUris()).toEqual(['https://imported/V1/5.m4s']);
+            });
+
+        it('init segment URI is resolved relative to the imported MPD URL',
+            async () => {
+              const manifest = await parser.start('https://foo', playerInterface);
+              const video = manifest.variants[0].video;
+              await video.createSegmentIndex();
+
+              goog.asserts.assert(video.segmentIndex, 'Null segmentIndex!');
+              const ref = Array.from(video.segmentIndex)[0];
+              expect(ref.initSegmentReference.getUris())
+                  .toEqual(['https://imported/V1/init.mp4']);
+            });
+
+        it('period duration is inherited from the imported MPD', async () => {
+          const manifest = await parser.start('https://foo', playerInterface);
+          // Total presentation duration must equal the imported period's 10 s.
+          expect(manifest.presentationTimeline.getDuration()).toBe(10);
+        });
+
+        it('segment timing spans the full period duration', async () => {
+          const manifest = await parser.start('https://foo', playerInterface);
+          const video = manifest.variants[0].video;
+          await video.createSegmentIndex();
+
+          goog.asserts.assert(video.segmentIndex, 'Null segmentIndex!');
+          const refs = Array.from(video.segmentIndex);
+          // First segment starts at 0 s.
+          expect(refs[0].startTime).toBeCloseTo(0, 6);
+          // Each segment is 2 s (24576 / 12288).
+          expect(refs[0].endTime).toBeCloseTo(2, 6);
+          // Last segment ends at 10 s.
+          expect(refs[4].endTime).toBeCloseTo(10, 6);
+        });
+
+        it('makes one network request to fetch the imported MPD', async () => {
+          await parser.start('https://foo', playerInterface);
+          expect(fakeNetEngine.request).toHaveBeenCalledWith(
+              shaka.net.NetworkingEngine.RequestType.MANIFEST,
+              jasmine.objectContaining(
+                  {uris: ['https://imported/manifest.mpd']}));
+        });
+
+        it('two linked periods produce correct total duration', async () => {
+          // Second imported MPD (same structure, different Representation id).
+          const importedMpd2 =
+              importedMpdSource.replace(/V1/g, 'V2');
+          fakeNetEngine
+              .setResponseText('https://foo', [
+                '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="list"',
+                '    minBufferTime="PT1S">',
+                '  <Period id="1">',
+                '    <ImportedMPD>https://imported/manifest.mpd</ImportedMPD>',
+                '  </Period>',
+                '  <Period id="2">',
+                '    <ImportedMPD>https://imported2/manifest.mpd</ImportedMPD>',
+                '  </Period>',
+                '</MPD>',
+              ].join('\n'))
+              .setResponseText(
+                  'https://imported2/manifest.mpd', importedMpd2);
+
+          const manifest = await parser.start('https://foo', playerInterface);
+          // Two 10 s periods → total 20 s.
+          expect(manifest.presentationTimeline.getDuration()).toBe(20);
+        });
+
+        it('two linked periods expose segments for both periods', async () => {
+          const importedMpd2 = importedMpdSource.replace(/V1/g, 'V2');
+          fakeNetEngine
+              .setResponseText('https://foo', [
+                '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="list"',
+                '    minBufferTime="PT1S">',
+                '  <Period id="1">',
+                '    <ImportedMPD>https://imported/manifest.mpd</ImportedMPD>',
+                '  </Period>',
+                '  <Period id="2">',
+                '    <ImportedMPD>https://imported2/manifest.mpd</ImportedMPD>',
+                '  </Period>',
+                '</MPD>',
+              ].join('\n'))
+              .setResponseText(
+                  'https://imported2/manifest.mpd', importedMpd2);
+
+          const manifest = await parser.start('https://foo', playerInterface);
+          const video = manifest.variants[0].video;
+          await video.createSegmentIndex();
+
+          goog.asserts.assert(video.segmentIndex, 'Null segmentIndex!');
+          const refs = Array.from(video.segmentIndex);
+          // 5 segments per period × 2 periods = 10 total.
+          expect(refs.length).toBe(10);
+
+          // Period 1 segments start at 0; Period 2 segments start at 10 s.
+          expect(refs[0].startTime).toBeCloseTo(0, 6);
+          expect(refs[4].endTime).toBeCloseTo(10, 6);
+          expect(refs[5].startTime).toBeCloseTo(10, 6);
+          expect(refs[9].endTime).toBeCloseTo(20, 6);
+
+          // Period 1 segments use https://imported/ base URL.
+          expect(refs[0].getUris()).toEqual(['https://imported/V1/1.m4s']);
+          // Period 2 segments use https://imported2/ base URL.
+          expect(refs[5].getUris()).toEqual(['https://imported2/V2/1.m4s']);
+        });
+
+        it('EventStream children from the list MPD are preserved', async () => {
+          const listMpdWithEvent = [
+            '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="list"',
+            '    minBufferTime="PT1S">',
+            '  <EssentialProperty schemeIdUri="urn:mpeg:dash:urlparam:2025"/>',
+            '  <Period id="1">',
+            '    <ImportedMPD>https://imported/manifest.mpd</ImportedMPD>',
+            '    <EventStream schemeIdUri="urn:mpeg:dash:event:callback:2015"',
+            '        value="1" timescale="1000">',
+            '      <Event presentationTime="0" id="1">',
+            '        https://example.com/beacon/impression',
+            '      </Event>',
+            '    </EventStream>',
+            '  </Period>',
+            '</MPD>',
+          ].join('\n');
+
+          const onTimelineRegionAdded =
+              jasmine.createSpy('onTimelineRegionAdded');
+          playerInterface.onTimelineRegionAdded =
+              shaka.test.Util.spyFunc(onTimelineRegionAdded);
+          fakeNetEngine.setResponseText('https://foo', listMpdWithEvent);
+
+          await parser.start('https://foo', playerInterface);
+          // The EventStream callback event from the list MPD must fire.
+          expect(onTimelineRegionAdded).toHaveBeenCalled();
+        });
+      });
 });

@@ -869,4 +869,290 @@ describe('MpdUtils', () => {
           fakeNetEngine).promise;
     }
   });
+
+  describe('hasLinkedPeriods', () => {
+    it('returns false when no Period has ImportedMPD', () => {
+      const xml = /** @type {!shaka.extern.xml.Node} */ (
+        shaka.util.TXml.parseXmlString([
+          '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011">',
+          '  <Period id="1" duration="PT10S">',
+          '    <AdaptationSet mimeType="video/mp4"/>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n')));
+      expect(MpdUtils.hasLinkedPeriods(xml)).toBe(false);
+    });
+
+    it('returns false for an empty MPD', () => {
+      const xml = /** @type {!shaka.extern.xml.Node} */ (
+        shaka.util.TXml.parseXmlString(
+            '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011"/>'));
+      expect(MpdUtils.hasLinkedPeriods(xml)).toBe(false);
+    });
+
+    it('returns true when a Period has an ImportedMPD child', () => {
+      const xml = /** @type {!shaka.extern.xml.Node} */ (
+        shaka.util.TXml.parseXmlString([
+          '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="list">',
+          '  <Period id="1">',
+          '    <ImportedMPD>https://example.com/ad.mpd</ImportedMPD>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n')));
+      expect(MpdUtils.hasLinkedPeriods(xml)).toBe(true);
+    });
+
+    it('returns true when only one of multiple Periods has ImportedMPD', () => {
+      const xml = /** @type {!shaka.extern.xml.Node} */ (
+        shaka.util.TXml.parseXmlString([
+          '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="list">',
+          '  <Period id="1" duration="PT10S">',
+          '    <AdaptationSet mimeType="video/mp4"/>',
+          '  </Period>',
+          '  <Period id="2">',
+          '    <ImportedMPD>https://example.com/ad.mpd</ImportedMPD>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n')));
+      expect(MpdUtils.hasLinkedPeriods(xml)).toBe(true);
+    });
+  });
+
+  describe('processLinkedPeriods', () => {
+    /** @type {!shaka.test.FakeNetworkingEngine} */
+    let fakeNetEngine;
+    /** @type {shaka.extern.RetryParameters} */
+    let retry;
+
+    // Minimal single-period static MPD returned by the imported URL.
+    const importedMpdXml = [
+      '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static"',
+      '    mediaPresentationDuration="PT10S">',
+      '  <Period duration="PT10S">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <SegmentTemplate media="$RepresentationID$/$Number$.m4s"',
+      '          initialization="$RepresentationID$/init.mp4"',
+      '          timescale="12288" startNumber="1" duration="24576"/>',
+      '      <Representation id="V1" bandwidth="1000"',
+      '          codecs="avc1.64001E" width="640" height="360"/>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    beforeEach(() => {
+      retry = shaka.net.NetworkingEngine.defaultRetryParameters();
+      fakeNetEngine = new shaka.test.FakeNetworkingEngine();
+      fakeNetEngine.setResponseText(
+          'https://example.com/ad/manifest.mpd', importedMpdXml);
+    });
+
+    /**
+     * @param {string} listMpdXml
+     * @return {!Promise<!shaka.extern.xml.Node>}
+     */
+    function processLinkedPeriods(listMpdXml) {
+      const xml = /** @type {!shaka.extern.xml.Node} */ (
+        shaka.util.TXml.parseXmlString(listMpdXml));
+      return MpdUtils.processLinkedPeriods(
+          xml, 'https://base/ads.mpd', retry, fakeNetEngine).promise;
+    }
+
+    /**
+     * Resolves the Linked Period and returns the first Period node, asserting
+     * that it is non-null.
+     * @param {string} listMpd
+     * @return {!Promise<!shaka.extern.xml.Node>}
+     */
+    async function getPeriod(listMpd) {
+      const mpd = await processLinkedPeriods(listMpd);
+      const period = shaka.util.TXml.findChild(mpd, 'Period');
+      goog.asserts.assert(period, 'Expected Period element');
+      return /** @type {!shaka.extern.xml.Node} */ (period);
+    }
+
+    /** @return {string} */
+    function singlePeriodMpd() {
+      return [
+        '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="list">',
+        '  <Period id="1">',
+        '    <ImportedMPD>https://example.com/ad/manifest.mpd</ImportedMPD>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+    }
+
+    it('removes the ImportedMPD element after resolution', async () => {
+      const period = await getPeriod(singlePeriodMpd());
+      const TXml = shaka.util.TXml;
+      expect(TXml.findChild(period, 'ImportedMPD')).toBeNull();
+    });
+
+    it('merges AdaptationSets from the imported MPD into the Linked Period',
+        async () => {
+          const period = await getPeriod(singlePeriodMpd());
+          const TXml = shaka.util.TXml;
+          const adaptationSets = TXml.findChildren(period, 'AdaptationSet');
+          expect(adaptationSets.length).toBe(1);
+          expect(adaptationSets[0].attributes['mimeType']).toBe('video/mp4');
+        });
+
+    it('copies SegmentTemplate from the imported Period', async () => {
+      const TXml = shaka.util.TXml;
+      const period = await getPeriod(singlePeriodMpd());
+      const adaptationSet = TXml.findChild(period, 'AdaptationSet');
+      goog.asserts.assert(adaptationSet, 'Expected AdaptationSet');
+      const segTemplate = TXml.findChild(
+          /** @type {!shaka.extern.xml.Node} */ (adaptationSet),
+          'SegmentTemplate');
+      expect(segTemplate).not.toBeNull();
+      goog.asserts.assert(segTemplate, 'Expected SegmentTemplate');
+      expect(segTemplate.attributes['timescale']).toBe('12288');
+      expect(segTemplate.attributes['duration']).toBe('24576');
+    });
+
+    it('copies duration from the imported Period if not set on Linked Period',
+        async () => {
+          const period = await getPeriod(singlePeriodMpd());
+          expect(period.attributes['duration']).toBe('PT10S');
+        });
+
+    it('does not override duration already set on the Linked Period',
+        async () => {
+          const listMpd = [
+            '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="list">',
+            '  <Period id="1" duration="PT5S">',
+            '    <ImportedMPD>' +
+            'https://example.com/ad/manifest.mpd</ImportedMPD>',
+            '  </Period>',
+            '</MPD>',
+          ].join('\n');
+          const period = await getPeriod(listMpd);
+          expect(period.attributes['duration']).toBe('PT5S');
+        });
+
+    it('injects a BaseURL with the imported MPD URL for segment resolution',
+        async () => {
+          const TXml = shaka.util.TXml;
+          const period = await getPeriod(singlePeriodMpd());
+          const baseUrls = TXml.findChildren(period, 'BaseURL');
+          expect(baseUrls.length).toBeGreaterThanOrEqual(1);
+          expect(TXml.getContents(baseUrls[0]))
+              .toBe('https://example.com/ad/manifest.mpd');
+        });
+
+    it('makes exactly one network request per Linked Period', async () => {
+      await processLinkedPeriods(singlePeriodMpd());
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      expect(fakeNetEngine.request).toHaveBeenCalledWith(
+          shaka.net.NetworkingEngine.RequestType.MANIFEST,
+          jasmine.objectContaining(
+              {uris: ['https://example.com/ad/manifest.mpd']}));
+    });
+
+    it('resolves relative ImportedMPD href against the base URI', async () => {
+      fakeNetEngine.setResponseText(
+          'https://base/ad/manifest.mpd', importedMpdXml);
+      const listMpd = [
+        '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="list">',
+        '  <Period id="1">',
+        '    <ImportedMPD>ad/manifest.mpd</ImportedMPD>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      const TXml = shaka.util.TXml;
+      const period = await getPeriod(listMpd);
+      expect(TXml.findChildren(period, 'AdaptationSet').length).toBe(1);
+    });
+
+    it('processes two Linked Periods independently', async () => {
+      const TXml = shaka.util.TXml;
+      const importedMpd2Xml = importedMpdXml.replace('V1', 'W1');
+      fakeNetEngine.setResponseText(
+          'https://example.com/ad2/manifest.mpd', importedMpd2Xml);
+
+      const listMpd = [
+        '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="list">',
+        '  <Period id="1">',
+        '    <ImportedMPD>https://example.com/ad/manifest.mpd</ImportedMPD>',
+        '  </Period>',
+        '  <Period id="2">',
+        '    <ImportedMPD>https://example.com/ad2/manifest.mpd</ImportedMPD>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      const mpd = await processLinkedPeriods(listMpd);
+      const periods = TXml.findChildren(mpd, 'Period');
+      expect(periods.length).toBe(2);
+
+      // Period 1: no ImportedMPD, has AdaptationSet with Representation V1
+      expect(TXml.findChild(periods[0], 'ImportedMPD')).toBeNull();
+      const as1 = TXml.findChild(periods[0], 'AdaptationSet');
+      goog.asserts.assert(as1, 'Expected AdaptationSet in Period 1');
+      const rep1 = TXml.findChild(
+          /** @type {!shaka.extern.xml.Node} */ (as1), 'Representation');
+      goog.asserts.assert(rep1, 'Expected Representation in Period 1');
+      expect(rep1.attributes['id']).toBe('V1');
+
+      // Period 2: no ImportedMPD, has AdaptationSet with Representation W1
+      expect(TXml.findChild(periods[1], 'ImportedMPD')).toBeNull();
+      const as2 = TXml.findChild(periods[1], 'AdaptationSet');
+      goog.asserts.assert(as2, 'Expected AdaptationSet in Period 2');
+      const rep2 = TXml.findChild(
+          /** @type {!shaka.extern.xml.Node} */ (as2), 'Representation');
+      goog.asserts.assert(rep2, 'Expected Representation in Period 2');
+      expect(rep2.attributes['id']).toBe('W1');
+
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
+    });
+
+    it('handles ImportedMPD with no text content gracefully', async () => {
+      const listMpd = [
+        '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="list">',
+        '  <Period id="1">',
+        '    <ImportedMPD/>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      const TXml = shaka.util.TXml;
+      // ImportedMPD element removed; no network request made.
+      const period = await getPeriod(listMpd);
+      expect(TXml.findChild(period, 'ImportedMPD')).toBeNull();
+      expect(fakeNetEngine.request).not.toHaveBeenCalled();
+    });
+
+    it('skips resolution when imported MPD response is invalid XML',
+        async () => {
+          fakeNetEngine.setResponseText(
+              'https://example.com/ad/manifest.mpd', '<not valid xml!!');
+          const TXml = shaka.util.TXml;
+          // ImportedMPD is still removed; no AdaptationSets injected.
+          const period = await getPeriod(singlePeriodMpd());
+          expect(TXml.findChild(period, 'ImportedMPD')).toBeNull();
+          expect(TXml.findChildren(period, 'AdaptationSet').length).toBe(0);
+        });
+
+    it('preserves non-ImportedMPD children of the Linked Period', async () => {
+      const listMpd = [
+        '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="list">',
+        '  <Period id="1">',
+        '    <ImportedMPD>https://example.com/ad/manifest.mpd</ImportedMPD>',
+        '    <EventStream schemeIdUri="urn:example:events" timescale="1">',
+        '      <Event presentationTime="0" id="ev1"/>',
+        '    </EventStream>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      const TXml = shaka.util.TXml;
+      const period = await getPeriod(listMpd);
+      // EventStream from the list MPD must still be present.
+      expect(TXml.findChild(period, 'EventStream')).not.toBeNull();
+      // And the imported AdaptationSet is also present.
+      expect(TXml.findChildren(period, 'AdaptationSet').length).toBe(1);
+    });
+  });
 });
