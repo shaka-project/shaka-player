@@ -145,6 +145,19 @@ shaka.ui.Utils = class {
 
 
   /**
+   * Marks a menu item as selected or unselected by toggling the ARIA state
+   * and the visual indicator class atomically.
+   * @param {!HTMLElement} button
+   * @param {!HTMLElement} chosenItemElement
+   * @param {boolean=} chosen
+   */
+  static setChosenItem(button, chosenItemElement, chosen = true) {
+    button.setAttribute('aria-checked', chosen ? 'true' : 'false');
+    chosenItemElement.classList.toggle('shaka-chosen-item', chosen);
+  }
+
+
+  /**
    * @param {!shaka.extern.Thumbnail} thumbnail
    * @param {!shaka.extern.Response} response
    * @return {string}
