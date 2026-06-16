@@ -10,6 +10,10 @@ on:
 
 permissions:
   contents: read
+  # Needed to download artifacts from the triggering workflow run.
+  actions: read
+  # Needed to post a comment on the PR.
+  issues: write
 
 jobs:
   report:
