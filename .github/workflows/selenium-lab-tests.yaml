@@ -60,6 +60,9 @@ jobs:
     outputs:
       SHA: ${{ steps.compute.outputs.SHA }}
 
+    permissions:
+      contents: read
+
     steps:
       - name: Compute SHA
         id: compute
@@ -79,6 +82,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       INCLUDE: ${{ steps.configure.outputs.INCLUDE }}
+
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4

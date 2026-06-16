@@ -18,6 +18,9 @@ jobs:
     outputs:
       SHA: ${{ steps.compute.outputs.SHA }}
 
+    permissions:
+      contents: read
+
     steps:
       - name: Compute SHA
         id: compute
@@ -70,6 +73,8 @@ jobs:
     needs: [compute-sha, run-lab-tests]
     # NOTE: NO PERMISSIONS ON THIS JOB.  It runs PR-author-controlled code from
     # the PR, and so must be untrusted!
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -131,6 +136,8 @@ jobs:
     # NOTE: No granular permissions here, because we use SHAKA_BOT_TOKEN
     # instead of the default token.  The action to push to the PR must be done
     # by an actor with permission, and the default GitHub token doesn't work.
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
