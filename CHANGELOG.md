@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.22](https://github.com/shaka-project/shaka-player/compare/v5.0.21...v5.0.22) (2026-06-17)
+
+
+### Bug Fixes
+
+* **release:** Revert bad build-deps cherry-pick ([4f444cf](https://github.com/shaka-project/shaka-player/commit/4f444cfdde7d74f022853655ccd4b647ae868e0f))
+
 ## [5.0.21](https://github.com/shaka-project/shaka-player/compare/v5.0.20...v5.0.21) (2026-06-17)
 
 
