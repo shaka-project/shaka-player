@@ -21,6 +21,22 @@ describe('URL', () => {
       expect(shaka.util.URL.resolve(base, relative))
           .toBe('https://other.com/a');
     });
+
+    it('resolves root-relative path against base URL', () => {
+      const base = 'http://example.com/path/page.html';
+      const relative = '/other/file.html';
+
+      expect(shaka.util.URL.resolve(base, relative))
+          .toBe('http://example.com/other/file.html');
+    });
+
+    it('discards base query string when resolving relative path', () => {
+      const base = 'http://example.com/path?q=1';
+      const relative = 'file.html';
+
+      expect(shaka.util.URL.resolve(base, relative))
+          .toBe('http://example.com/file.html');
+    });
   });
 
   describe('resolveUris', () => {
@@ -119,6 +135,16 @@ describe('URL', () => {
           .toBe('foo.bar.com');
     });
 
+    it('extracts domain without port from URL with port', () => {
+      expect(shaka.util.URL.getDomain('http://example.com:8080/path'))
+          .toBe('example.com');
+    });
+
+    it('returns empty string when URL has no domain', () => {
+      expect(shaka.util.URL.getDomain('file:///local/path'))
+          .toBe('');
+    });
+
     it('extracts domain from skd:// FairPlay URL', () => {
       expect(shaka.util.URL.getDomain('skd://example.com/license/12345'))
           .toBe('example.com');
@@ -150,6 +176,14 @@ describe('URL', () => {
 
       expect(result).toBe('http://foo.com/path?a=1');
     });
+
+    it('preserves port when replacing domain', () => {
+      const result = shaka.util.URL.setDomain(
+          'http://example.com:8080/path',
+          'foo.com');
+
+      expect(result).toBe('http://foo.com:8080/path');
+    });
   });
 
   describe('appendParams', () => {
@@ -174,6 +208,88 @@ describe('URL', () => {
       const result = shaka.util.URL.appendParams(uri, params);
 
       expect(result).toBe('http://example.com/?x=9&a=1');
+    });
+
+    it('returns URL unchanged when params map is empty', () => {
+      const uri = 'http://example.com/path?x=1';
+      const result = shaka.util.URL.appendParams(uri, new Map());
+      expect(result).toBe('http://example.com/path?x=1');
+    });
+
+    it('overwrites existing param with same key', () => {
+      const uri = 'http://example.com/?a=old';
+
+      const params = new Map();
+      params.set('a', 'new');
+
+      const result = shaka.util.URL.appendParams(uri, params);
+
+      expect(result).toBe('http://example.com/?a=new');
+    });
+  });
+
+  describe('getScheme', () => {
+    it('returns scheme for http URL', () => {
+      expect(shaka.util.URL.getScheme('http://example.com/path'))
+          .toBe('http');
+    });
+
+    it('returns scheme for https URL', () => {
+      expect(shaka.util.URL.getScheme('https://example.com/path'))
+          .toBe('https');
+    });
+
+    it('returns lowercase scheme for uppercase scheme in input', () => {
+      expect(shaka.util.URL.getScheme('HTTP://EXAMPLE.COM/'))
+          .toBe('http');
+    });
+
+    it('returns scheme for custom offline: URI', () => {
+      expect(shaka.util.URL.getScheme('offline://content/123'))
+          .toBe('offline');
+    });
+
+    it('returns scheme for skd:// FairPlay URI', () => {
+      expect(shaka.util.URL.getScheme('skd://example.com/license/12345'))
+          .toBe('skd');
+    });
+
+    it('returns empty string when no scheme is present', () => {
+      expect(shaka.util.URL.getScheme('example.com/path'))
+          .toBe('');
+    });
+
+    it('returns empty string for empty string', () => {
+      expect(shaka.util.URL.getScheme(''))
+          .toBe('');
+    });
+  });
+
+  describe('setScheme', () => {
+    it('replaces http with https', () => {
+      expect(shaka.util.URL.setScheme('http://example.com/path', 'https'))
+          .toBe('https://example.com/path');
+    });
+
+    it('replaces https with http', () => {
+      expect(shaka.util.URL.setScheme('https://example.com/path', 'http'))
+          .toBe('http://example.com/path');
+    });
+
+    it('preserves path and query string when replacing scheme', () => {
+      expect(
+          shaka.util.URL.setScheme('http://example.com/path?a=1&b=2', 'https'))
+          .toBe('https://example.com/path?a=1&b=2');
+    });
+
+    it('replaces scheme in custom scheme URI', () => {
+      expect(shaka.util.URL.setScheme('skd://example.com/license/123', 'https'))
+          .toBe('https://example.com/license/123');
+    });
+
+    it('prepends scheme when URI has no scheme', () => {
+      expect(shaka.util.URL.setScheme('//example.com/path', 'https'))
+          .toBe('https://example.com/path');
     });
   });
 });
