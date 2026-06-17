@@ -741,6 +741,28 @@ describe('MediaSourceEngine', () => {
     expect(onMetadata).toHaveBeenCalled();
   });
 
+  describe('destroy', () => {
+    // Regression test for the unload regression introduced by switching the
+    // media element from a src attribute to <source> elements (commit 445b0ce).
+    // destroy() must fully unload the media element: remove any stale src
+    // attribute, remove all <source> elements, and call load().  Otherwise the
+    // element never returns to HAVE_NOTHING, and DRM teardown
+    // (setMediaKeys(null)) throws InvalidStateError, hanging playback on the
+    // next asset.
+    it('fully unloads the media element', async () => {
+      // The MSE <source> element was added by the beforeEach.  Simulate a stale
+      // src attribute left behind by a previous src= playback (e.g. an ad
+      // break) sitting alongside the <source> element.
+      expect(video.getElementsByTagName('source').length).toBe(1);
+      video.setAttribute('src', 'data:,');
+
+      await mediaSourceEngine.destroy();
+
+      expect(video.getAttribute('src')).toBeNull();
+      expect(video.getElementsByTagName('source').length).toBe(0);
+    });
+  });
+
   describe('embedded emsg boxes', () => {
     // V0 box format
     const emsgSegmentV0 = Uint8ArrayUtils.fromHex(
