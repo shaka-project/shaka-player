@@ -667,6 +667,16 @@ describe('UI', () => {
       /** @type {!jasmine.Spy} */
       let clearPreviewSpy;
 
+      afterEach(() => {
+        // Tests that don't call createUIThroughAPI won't have the
+        // data-shaka-player-container attribute set, so cleanupUI() won't
+        // remove their videoContainer. Clean it up here in that case.
+        if (!('shakaPlayerContainer' in videoContainer.dataset) &&
+            videoContainer.parentElement) {
+          videoContainer.remove();
+        }
+      });
+
       /**
        * @param {!HTMLElement} menu
        * @param {string} label
