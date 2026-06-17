@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.16.37](https://github.com/shaka-project/shaka-player/compare/v4.16.36...v4.16.37) (2026-06-17)
+
+
+### Bug Fixes
+
+* Avoid hang when loading a new asset after DRM playback ([#10239](https://github.com/shaka-project/shaka-player/issues/10239)) ([87b3ac6](https://github.com/shaka-project/shaka-player/commit/87b3ac6a83b08cb06afd4e31f4990fc42a0142d8))
+
 ## [4.16.36](https://github.com/shaka-project/shaka-player/compare/v4.16.35...v4.16.36) (2026-06-15)
 
 
