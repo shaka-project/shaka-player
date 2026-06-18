@@ -1687,33 +1687,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.dispatchEvent(new shaka.util.FakeEvent('vrstatuschanged'));
     });
 
-    this.eventManager_.listen(this.videoContainer_, 'keydown', (e) => {
-      if (!this.config_.enableKeyboardPlaybackControlsInWindow &&
-        !this.isFullScreenEnabled()) {
-        this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
-      }
-    });
-
-    this.eventManager_.listen(this.videoContainer_, 'keyup', (e) => {
-      if (!this.config_.enableKeyboardPlaybackControlsInWindow &&
-        !this.isFullScreenEnabled()) {
-        this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
-      }
-    });
-
-    this.eventManager_.listen(window, 'keydown', (e) => {
-      if (this.config_.enableKeyboardPlaybackControlsInWindow ||
-        this.isFullScreenEnabled()) {
-        this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
-      }
-    });
-
-    this.eventManager_.listen(window, 'keyup', (e) => {
-      if (this.config_.enableKeyboardPlaybackControlsInWindow ||
-        this.isFullScreenEnabled()) {
-        this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
-      }
-    });
+    this.listenForControlsKeyEvents_(this.videoContainer_,
+        () => !this.config_.enableKeyboardPlaybackControlsInWindow &&
+              !this.isFullScreenEnabled());
+    this.listenForControlsKeyEvents_(window,
+        () => this.config_.enableKeyboardPlaybackControlsInWindow ||
+              this.isFullScreenEnabled());
 
     this.eventManager_.listen(
         this.adManager_, shaka.ads.Utils.AD_STARTED, () => {
@@ -2043,6 +2022,24 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   onPlayStateChange_() {
     this.computeOpacity();
+  }
+
+  /**
+   * @param {!EventTarget} target
+   * @param {function():boolean} condition
+   * @private
+   */
+  listenForControlsKeyEvents_(target, condition) {
+    this.eventManager_.listen(target, 'keydown', (e) => {
+      if (condition()) {
+        this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
+      }
+    });
+    this.eventManager_.listen(target, 'keyup', (e) => {
+      if (condition()) {
+        this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
+      }
+    });
   }
 
   /**
