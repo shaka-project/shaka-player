@@ -26,6 +26,7 @@
 +../../ui/loop_button.js
 +../../ui/media_session.js
 +../../ui/mute_button.js
++../../ui/mute_volume_bar.js
 +../../ui/overflow_menu.js
 +../../ui/pip_button.js
 +../../ui/playback_rate_selection.js
