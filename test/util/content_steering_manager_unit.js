@@ -54,9 +54,9 @@ describe('ContentSteeringManager', () => {
 
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(3);
-      expect(locations[0]).toBe('http://cdn-a');
-      expect(locations[1]).toBe('http://cdn-b');
-      expect(locations[2]).toBe('http://cdn-c');
+      expect(locations[0]).toBe('http://cdn-a/');
+      expect(locations[1]).toBe('http://cdn-b/');
+      expect(locations[2]).toBe('http://cdn-c/');
     });
 
     it('allows one value', () => {
@@ -64,7 +64,7 @@ describe('ContentSteeringManager', () => {
 
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(1);
-      expect(locations[0]).toBe('http://cdn-b');
+      expect(locations[0]).toBe('http://cdn-b/');
     });
 
     it('allows multiple values', () => {
@@ -72,9 +72,9 @@ describe('ContentSteeringManager', () => {
 
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(3);
-      expect(locations[0]).toBe('http://cdn-b');
-      expect(locations[1]).toBe('http://cdn-a');
-      expect(locations[2]).toBe('http://cdn-c');
+      expect(locations[0]).toBe('http://cdn-b/');
+      expect(locations[1]).toBe('http://cdn-a/');
+      expect(locations[2]).toBe('http://cdn-c/');
     });
   });
 
@@ -96,8 +96,8 @@ describe('ContentSteeringManager', () => {
 
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(2);
-      expect(locations[0]).toBe('http://cdn-b');
-      expect(locations[1]).toBe('http://cdn-a');
+      expect(locations[0]).toBe('http://cdn-b/');
+      expect(locations[1]).toBe('http://cdn-a/');
 
       const manifestUpdate = JSON.stringify({
         'VERSION': 1,
@@ -114,7 +114,7 @@ describe('ContentSteeringManager', () => {
 
       const newLocations = manager.getLocations('foo');
       expect(newLocations.length).toBe(1);
-      expect(newLocations[0]).toBe('http://cdn-b');
+      expect(newLocations[0]).toBe('http://cdn-b/');
     });
 
     it('send the correct value for HLS', async () => {
@@ -134,8 +134,8 @@ describe('ContentSteeringManager', () => {
 
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(2);
-      expect(locations[0]).toBe('http://cdn-b');
-      expect(locations[1]).toBe('http://cdn-a');
+      expect(locations[0]).toBe('http://cdn-b/');
+      expect(locations[1]).toBe('http://cdn-a/');
 
       const manifestUpdate = JSON.stringify({
         'VERSION': 1,
@@ -152,7 +152,7 @@ describe('ContentSteeringManager', () => {
 
       const newLocations = manager.getLocations('foo');
       expect(newLocations.length).toBe(1);
-      expect(newLocations[0]).toBe('http://cdn-b');
+      expect(newLocations[0]).toBe('http://cdn-b/');
     });
 
     it('not send value for unknown manifest', async () => {
@@ -171,8 +171,8 @@ describe('ContentSteeringManager', () => {
 
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(2);
-      expect(locations[0]).toBe('http://cdn-b');
-      expect(locations[1]).toBe('http://cdn-a');
+      expect(locations[0]).toBe('http://cdn-b/');
+      expect(locations[1]).toBe('http://cdn-a/');
 
       const manifestUpdate = JSON.stringify({
         'VERSION': 1,
@@ -188,7 +188,7 @@ describe('ContentSteeringManager', () => {
 
       const newLocations = manager.getLocations('foo');
       expect(newLocations.length).toBe(1);
-      expect(newLocations[0]).toBe('http://cdn-b');
+      expect(newLocations[0]).toBe('http://cdn-b/');
     });
   });
 
@@ -209,9 +209,9 @@ describe('ContentSteeringManager', () => {
 
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(3);
-      expect(locations[0]).toBe('http://cdn-a');
-      expect(locations[1]).toBe('http://cdn-b');
-      expect(locations[2]).toBe('http://cdn-c');
+      expect(locations[0]).toBe('http://cdn-a/');
+      expect(locations[1]).toBe('http://cdn-b/');
+      expect(locations[2]).toBe('http://cdn-c/');
     });
 
     it('honors RELOAD-URI', async () => {
@@ -230,8 +230,8 @@ describe('ContentSteeringManager', () => {
 
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(2);
-      expect(locations[0]).toBe('http://cdn-b');
-      expect(locations[1]).toBe('http://cdn-a');
+      expect(locations[0]).toBe('http://cdn-b/');
+      expect(locations[1]).toBe('http://cdn-a/');
 
       const manifestUpdate = JSON.stringify({
         'VERSION': 1,
@@ -247,7 +247,7 @@ describe('ContentSteeringManager', () => {
 
       const newLocations = manager.getLocations('foo');
       expect(newLocations.length).toBe(1);
-      expect(newLocations[0]).toBe('http://cdn-b');
+      expect(newLocations[0]).toBe('http://cdn-b/');
     });
 
     it('fallback for no RELOAD-URI', async () => {
@@ -265,8 +265,8 @@ describe('ContentSteeringManager', () => {
 
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(2);
-      expect(locations[0]).toBe('http://cdn-b');
-      expect(locations[1]).toBe('http://cdn-a');
+      expect(locations[0]).toBe('http://cdn-b/');
+      expect(locations[1]).toBe('http://cdn-a/');
 
       const manifestUpdate = JSON.stringify({
         'VERSION': 1,
@@ -281,7 +281,7 @@ describe('ContentSteeringManager', () => {
 
       const newLocations = manager.getLocations('foo');
       expect(newLocations.length).toBe(1);
-      expect(newLocations[0]).toBe('http://cdn-b');
+      expect(newLocations[0]).toBe('http://cdn-b/');
     });
 
     it('honors TTL', async () => {
@@ -300,8 +300,8 @@ describe('ContentSteeringManager', () => {
 
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(2);
-      expect(locations[0]).toBe('http://cdn-b');
-      expect(locations[1]).toBe('http://cdn-a');
+      expect(locations[0]).toBe('http://cdn-b/');
+      expect(locations[1]).toBe('http://cdn-a/');
 
       const manifestUpdate = JSON.stringify({
         'VERSION': 1,
@@ -317,7 +317,7 @@ describe('ContentSteeringManager', () => {
 
       const newLocations = manager.getLocations('foo');
       expect(newLocations.length).toBe(1);
-      expect(newLocations[0]).toBe('http://cdn-b');
+      expect(newLocations[0]).toBe('http://cdn-b/');
     });
   });
 
@@ -339,9 +339,9 @@ describe('ContentSteeringManager', () => {
 
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(3);
-      expect(locations[0]).toBe('http://cdn-b');
-      expect(locations[1]).toBe('http://cdn-a');
-      expect(locations[2]).toBe('http://cdn-c');
+      expect(locations[0]).toBe('http://cdn-b/');
+      expect(locations[1]).toBe('http://cdn-a/');
+      expect(locations[2]).toBe('http://cdn-c/');
     });
 
     it('with PATHWAY-PRIORITY and PATHWAY-CLONES', async () => {
@@ -371,10 +371,10 @@ describe('ContentSteeringManager', () => {
 
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(4);
-      expect(locations[0]).toBe('http://cdn-d');
-      expect(locations[1]).toBe('http://cdn-b');
-      expect(locations[2]).toBe('http://cdn-a');
-      expect(locations[3]).toBe('http://cdn-c');
+      expect(locations[0]).toBe('http://cdn-d/');
+      expect(locations[1]).toBe('http://cdn-b/');
+      expect(locations[2]).toBe('http://cdn-a/');
+      expect(locations[3]).toBe('http://cdn-c/');
     });
 
     it('without PATHWAY-PRIORITY but with defaultPathwayId', () => {
@@ -382,17 +382,17 @@ describe('ContentSteeringManager', () => {
 
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(3);
-      expect(locations[0]).toBe('http://cdn-b');
-      expect(locations[1]).toBe('http://cdn-a');
-      expect(locations[2]).toBe('http://cdn-c');
+      expect(locations[0]).toBe('http://cdn-b/');
+      expect(locations[1]).toBe('http://cdn-a/');
+      expect(locations[2]).toBe('http://cdn-c/');
     });
 
     it('without PATHWAY-PRIORITY neither defaultPathwayId', () => {
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(3);
-      expect(locations[0]).toBe('http://cdn-a');
-      expect(locations[1]).toBe('http://cdn-b');
-      expect(locations[2]).toBe('http://cdn-c');
+      expect(locations[0]).toBe('http://cdn-a/');
+      expect(locations[1]).toBe('http://cdn-b/');
+      expect(locations[2]).toBe('http://cdn-c/');
     });
 
     it('use base uris if no locations', () => {
@@ -423,8 +423,8 @@ describe('ContentSteeringManager', () => {
 
       const locations = manager.getLocations('foo');
       expect(locations.length).toBe(2);
-      expect(locations[0]).toBe('http://cdn-a');
-      expect(locations[1]).toBe('http://cdn-c');
+      expect(locations[0]).toBe('http://cdn-a/');
+      expect(locations[1]).toBe('http://cdn-c/');
     });
   });
 });

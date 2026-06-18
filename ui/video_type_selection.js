@@ -114,9 +114,8 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
         button.appendChild(span);
 
         if (selectedTrack.roles.includes(role)) {
-          button.setAttribute('aria-checked', 'true');
           button.appendChild(shaka.ui.Utils.checkmarkIcon());
-          span.classList.add('shaka-chosen-item');
+          shaka.ui.Utils.setChosenItem(button, span);
           this.currentSelection.textContent = span.textContent;
         }
         this.menu.appendChild(button);
