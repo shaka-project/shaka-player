@@ -667,6 +667,16 @@ describe('UI', () => {
       /** @type {!jasmine.Spy} */
       let clearPreviewSpy;
 
+      afterEach(() => {
+        // Tests that don't call createUIThroughAPI won't have the
+        // data-shaka-player-container attribute set, so cleanupUI() won't
+        // remove their videoContainer. Clean it up here in that case.
+        if (!('shakaPlayerContainer' in videoContainer.dataset) &&
+            videoContainer.parentElement) {
+          videoContainer.remove();
+        }
+      });
+
       /**
        * @param {!HTMLElement} menu
        * @param {string} label
@@ -783,6 +793,7 @@ describe('UI', () => {
         usePreviewTextDisplayer(player);
         controls.showUI();
 
+        const localization = controls.getLocalization();
         const menu = UiUtils.getElementByClassName(
             videoContainer, 'shaka-text-positions');
         const button = UiUtils.getElementByClassName(
@@ -792,7 +803,9 @@ describe('UI', () => {
         expect(latestPreviewConfig().positionArea)
             .toBe(shaka.config.PositionArea.DEFAULT);
 
-        const topLeftOption = getStyleOption(menu, 'Top left');
+        const topLeftLabel =
+            localization.resolve(shaka.ui.Locales.Ids.TOP_LEFT);
+        const topLeftOption = getStyleOption(menu, topLeftLabel);
         topLeftOption.dispatchEvent(new Event('focus'));
         expect(latestPreviewConfig().positionArea)
             .toBe(shaka.config.PositionArea.TOP_LEFT);

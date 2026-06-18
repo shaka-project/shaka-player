@@ -12,26 +12,30 @@ describe('QueueManager', () => {
   /** @type {shaka.extern.IQueueManager} */
   let queueManager;
 
+  const resolveUri = (uri) => {
+    return new URL(uri, location.href).toString();
+  };
+
   /** @type {shaka.extern.QueueItem} */
   const queueItem = {
-    manifestUri: '/base/test/test/assets/small.mp4',
+    manifestUri: resolveUri('/base/test/test/assets/small.mp4'),
     preloadManager: null,
     startTime: null,
     mimeType: null,
     config: null,
     extraText: [
       {
-        uri: '/base/test/test/assets/text-clip.vtt',
+        uri: resolveUri('/base/test/test/assets/text-clip.vtt'),
         language: 'en',
         kind: 'subtitles',
       },
     ],
     extraThumbnail: [
-      '/base/test/test/assets/thumbnails.vtt',
+      resolveUri('/base/test/test/assets/thumbnails.vtt'),
     ],
     extraChapter: [
       {
-        uri: '/base/test/test/assets/chapters.srt',
+        uri: resolveUri('/base/test/test/assets/chapters.srt'),
         language: 'en',
       },
     ],
@@ -40,7 +44,7 @@ describe('QueueManager', () => {
 
   /** @type {shaka.extern.QueueItem} */
   const queueItem2 = {
-    manifestUri: '/base/test/test/assets/small.mp4',
+    manifestUri: resolveUri('/base/test/test/assets/small.mp4'),
     preloadManager: null,
     startTime: null,
     mimeType: null,
@@ -311,9 +315,9 @@ describe('QueueManager', () => {
     const playlist = [
       '#EXTM3U',
       '#EXTINF:-1 tvg-id="ch1" tvg-name="Channel 1",Channel 1 Display',
-      '/base/test/test/assets/small.mp4',
+      resolveUri('/base/test/test/assets/small.mp4'),
       '#EXTINF:-1 tvg-id="ch2" tvg-name="Channel 2",Channel 2 Display',
-      '/base/test/test/assets/small.mp4',
+      resolveUri('/base/test/test/assets/small.mp4'),
     ].join('\n');
 
     const dataUri = 'data:application/x-mpegURL;charset=utf-8,' +
@@ -325,7 +329,8 @@ describe('QueueManager', () => {
 
     expect(items.length).toBe(2);
 
-    expect(items[0].manifestUri).toBe('/base/test/test/assets/small.mp4');
+    expect(items[0].manifestUri)
+        .toBe(resolveUri('/base/test/test/assets/small.mp4'));
     expect(items[0].metadata.title).toBe('Channel 1');
     expect(items[0].metadata['tvg-id']).toBe('ch1');
 
@@ -336,7 +341,7 @@ describe('QueueManager', () => {
     const playlist = [
       '#EXTM3U',
       '#EXTINF:-1 tvg-id="ch1" tvg-name="Channel 1",Channel 1 Display',
-      '/base/test/test/assets/small.mp4',
+      resolveUri('/base/test/test/assets/small.mp4'),
     ].join('\n');
 
     const dataUri =
@@ -351,18 +356,18 @@ describe('QueueManager', () => {
 
     expect(currentItem).not.toBeNull();
     expect(currentItem.manifestUri)
-        .toBe('/base/test/test/assets/small.mp4');
+        .toBe(resolveUri('/base/test/test/assets/small.mp4'));
   });
 
   it('skips duplicated channels by tvg-id', async () => {
     const playlist = [
       '#EXTM3U',
       '#EXTINF:-1 tvg-id="dup" tvg-name="Channel 1",Channel 1',
-      '/base/test/test/assets/small.mp4',
+      resolveUri('/base/test/test/assets/small.mp4'),
       '#EXTINF:-1 tvg-id="dup" tvg-name="Channel 1.1",Channel 1.1',
-      '/base/test/test/assets/small.mp4',
+      resolveUri('/base/test/test/assets/small.mp4'),
       '#EXTINF:-1 tvg-id="dup" tvg-name="Channel 1.2",Channel 1.2',
-      '/base/test/test/assets/small.mp4',
+      resolveUri('/base/test/test/assets/small.mp4'),
     ].join('\n');
 
     const dataUri =

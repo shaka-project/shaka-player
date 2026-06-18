@@ -161,8 +161,7 @@ shaka.ui.TextPosition = class extends shaka.ui.SettingsMenu {
     if (span) {
       const button = span.parentElement;
       button.appendChild(shaka.ui.Utils.checkmarkIcon());
-      button.setAttribute('aria-checked', 'true');
-      span.classList.add('shaka-chosen-item');
+      shaka.ui.Utils.setChosenItem(button, span);
     }
     this.currentSelection.textContent = positionAreaName;
   }
