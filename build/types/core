@@ -135,10 +135,8 @@
 +../../lib/util/ts_parser.js
 +../../lib/util/tXml.js
 +../../lib/util/uint8array_utils.js
++../../lib/util/url.js
 +../../lib/util/video_frame_callback_handler.js
-
-+../../third_party/closure-uri/uri.js
-+../../third_party/closure-uri/utils.js
 
 +../../third_party/language-mapping-list/language-mapping-list.js
 

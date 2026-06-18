@@ -29,7 +29,7 @@ shaka.test.Dash = class {
     const dashParser = shaka.test.Dash.makeDashParser();
 
     const networkingEngine = new shaka.test.FakeNetworkingEngine()
-        .setResponseValue('dummy://foo', buffer);
+        .setResponseValue('https://foo', buffer);
 
     const config = shaka.util.PlayerConfiguration.createDefault();
     const playerInterface = {
@@ -53,7 +53,7 @@ shaka.test.Dash = class {
       onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
     try {
-      const manifest = await dashParser.start('dummy://foo', playerInterface);
+      const manifest = await dashParser.start('https://foo', playerInterface);
       const stream = manifest.variants[0].video;
       await stream.createSegmentIndex();
 
@@ -80,7 +80,7 @@ shaka.test.Dash = class {
     }
 
     const networkingEngine = new shaka.test.FakeNetworkingEngine()
-        .setResponseValue('dummy://foo', manifestData);
+        .setResponseValue('https://foo', manifestData);
 
     const dConfig = shaka.util.PlayerConfiguration.createDefault();
     const playerInterface = {
@@ -105,7 +105,7 @@ shaka.test.Dash = class {
     };
 
     try {
-      const p = dashParser.start('dummy://foo', playerInterface);
+      const p = dashParser.start('https://foo', playerInterface);
       await expectAsync(p).toBeRejectedWith(
           shaka.test.Util.jasmineError(expectedError));
     } finally {
