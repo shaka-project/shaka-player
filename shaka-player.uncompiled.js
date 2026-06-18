@@ -110,6 +110,7 @@ goog.require('shaka.ui.LoopButton');
 goog.require('shaka.ui.Matrix4x4');
 goog.require('shaka.ui.MatrixQuaternion');
 goog.require('shaka.ui.MuteButton');
+goog.require('shaka.ui.MuteVolumeBar');
 goog.require('shaka.ui.Overlay');
 goog.require('shaka.ui.PipButton');
 goog.require('shaka.ui.PlaybackRateSelection');
