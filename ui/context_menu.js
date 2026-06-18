@@ -112,6 +112,15 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
       }
     });
 
+    // Close the context menu on any left-click outside the controls container
+    this.eventManager.listen(document, 'click', (e) => {
+      if (this.controlsContainer_ &&
+          !this.contextMenu_.classList.contains('shaka-hidden') &&
+          !this.controlsContainer_.contains(/** @type {Node} */ (e.target))) {
+        this.closeMenu();
+      }
+    });
+
     this.createChildren_();
   }
 
