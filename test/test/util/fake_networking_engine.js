@@ -235,6 +235,13 @@ shaka.test.FakeNetworkingEngine = class {
    */
   setResponse(uri, callback) {
     this.responseMap_.set(uri, callback);
+    try {
+      const normalizedUri = new URL(uri).toString();
+      if (normalizedUri != uri) {
+        this.responseMap_.set(normalizedUri, callback);
+      }
+    // eslint-disable-next-line no-restricted-syntax
+    } catch (e) {}
     return this;
   }
 

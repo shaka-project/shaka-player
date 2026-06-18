@@ -71,7 +71,7 @@ describe('Interstitial Ad manager', () => {
           },
           {
             key: 'X-ASSET-URI',
-            data: 'test.m3u8',
+            data: 'http://foo.bar/test.m3u8',
           },
           {
             key: 'X-RESUME-OFFSET',
@@ -120,7 +120,7 @@ describe('Interstitial Ad manager', () => {
           },
           {
             key: 'X-ASSET-URI',
-            data: 'test.m3u8',
+            data: 'http://foo.bar/test.m3u8',
           },
           {
             key: 'X-RESUME-OFFSET',
@@ -149,7 +149,7 @@ describe('Interstitial Ad manager', () => {
           },
           {
             key: 'X-ASSET-URI',
-            data: 'test.m3u8',
+            data: 'http://foo.bar/test.m3u8',
           },
           {
             key: 'X-RESUME-OFFSET',
@@ -214,7 +214,7 @@ describe('Interstitial Ad manager', () => {
           },
           {
             key: 'X-ASSET-URI',
-            data: 'test.m3u8',
+            data: 'http://foo.bar/test.m3u8',
           },
           {
             key: 'X-RESUME-OFFSET',
@@ -515,7 +515,7 @@ describe('Interstitial Ad manager', () => {
           },
           {
             key: 'X-ASSET-URI',
-            data: 'test.m3u8',
+            data: 'http://foo.bar/test.m3u8',
           },
           {
             key: 'X-RESTRICT',
@@ -533,7 +533,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: null,
-        uri: 'test.m3u8?_HLS_primary_id=1',
+        uri: 'http://foo.bar/test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: false,
         skipOffset: null,
@@ -570,7 +570,7 @@ describe('Interstitial Ad manager', () => {
           },
           {
             key: 'X-ASSET-URI',
-            data: 'test.m3u8',
+            data: 'http://foo.bar/test.m3u8',
           },
           {
             key: 'X-SKIP-CONTROL-OFFSET',
@@ -592,7 +592,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: null,
-        uri: 'test.m3u8?_HLS_primary_id=1',
+        uri: 'http://foo.bar/test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 5,
@@ -629,7 +629,7 @@ describe('Interstitial Ad manager', () => {
           },
           {
             key: 'X-ASSET-URI',
-            data: 'test.m3u8',
+            data: 'http://foo.bar/test.m3u8',
           },
           {
             key: 'X-RESUME-OFFSET',
@@ -647,7 +647,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: null,
-        uri: 'test.m3u8?_HLS_primary_id=1',
+        uri: 'http://foo.bar/test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 0,
@@ -684,7 +684,7 @@ describe('Interstitial Ad manager', () => {
           },
           {
             key: 'X-ASSET-URI',
-            data: 'test.m3u8',
+            data: 'http://foo.bar/test.m3u8',
           },
           {
             key: 'X-PLAYOUT-LIMIT',
@@ -702,7 +702,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: null,
-        uri: 'test.m3u8?_HLS_primary_id=1',
+        uri: 'http://foo.bar/test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 0,
@@ -739,7 +739,7 @@ describe('Interstitial Ad manager', () => {
           },
           {
             key: 'X-ASSET-URI',
-            data: 'test.m3u8',
+            data: 'http://foo.bar/test.m3u8',
           },
           {
             key: 'CUE',
@@ -757,7 +757,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: null,
-        uri: 'test.m3u8?_HLS_primary_id=1',
+        uri: 'http://foo.bar/test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 0,
@@ -794,7 +794,7 @@ describe('Interstitial Ad manager', () => {
           },
           {
             key: 'X-ASSET-URI',
-            data: 'test.m3u8',
+            data: 'http://foo.bar/test.m3u8',
           },
           {
             key: 'CUE',
@@ -812,7 +812,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: null,
-        uri: 'test.m3u8?_HLS_primary_id=1',
+        uri: 'http://foo.bar/test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 0,
@@ -849,7 +849,7 @@ describe('Interstitial Ad manager', () => {
           },
           {
             key: 'X-ASSET-URI',
-            data: 'test.m3u8',
+            data: 'http://foo.bar/test.m3u8',
           },
           {
             key: 'CUE',
@@ -867,7 +867,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: null,
-        uri: 'test.m3u8?_HLS_primary_id=1',
+        uri: 'http://foo.bar/test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 0,
@@ -904,7 +904,7 @@ describe('Interstitial Ad manager', () => {
           },
           {
             key: 'X-ASSET-URI',
-            data: 'test.m3u8',
+            data: 'http://foo.bar/test.m3u8',
           },
           {
             key: 'X-TIMELINE-OCCUPIES',
@@ -922,7 +922,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 100,
         endTime: 130,
-        uri: 'test.m3u8?_HLS_primary_id=1',
+        uri: 'http://foo.bar/test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/x-mpegurl',
         isSkippable: true,
         skipOffset: 0,
@@ -1025,7 +1025,7 @@ describe('Interstitial Ad manager', () => {
           },
           {
             key: 'X-ASSET-URI',
-            data: 'test.m3u8',
+            data: 'http://foo.bar/test.m3u8',
           },
           {
             key: 'X-ASSET-MIMETYPE',
@@ -1069,7 +1069,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: 1,
-        uri: 'test.m3u8?_HLS_primary_id=1',
+        uri: 'http://foo.bar/test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/vnd.apple.mpegurl',
         isSkippable: false,
         skipOffset: null,
@@ -1132,7 +1132,7 @@ describe('Interstitial Ad manager', () => {
           },
           {
             key: 'X-ASSET-URI',
-            data: 'test.m3u8',
+            data: 'http://foo.bar/test.m3u8',
           },
           {
             key: 'X-ASSET-MIMETYPE',
@@ -1184,7 +1184,7 @@ describe('Interstitial Ad manager', () => {
         groupId: null,
         startTime: 0,
         endTime: 1,
-        uri: 'test.m3u8?_HLS_primary_id=1',
+        uri: 'http://foo.bar/test.m3u8?_HLS_primary_id=1',
         mimeType: 'application/vnd.apple.mpegurl',
         isSkippable: false,
         skipOffset: null,
@@ -2667,7 +2667,7 @@ describe('Interstitial Ad manager', () => {
         },
         {
           key: 'X-ASSET-URI',
-          data: 'test.m3u8',
+          data: 'http://foo.bar/test.m3u8',
         },
         {
           key: 'X-RESTRICT',
@@ -2737,7 +2737,7 @@ describe('Interstitial Ad manager', () => {
         },
         {
           key: 'X-ASSET-URI',
-          data: 'test.m3u8',
+          data: 'http://foo.bar/test.m3u8',
         },
       ],
     };
@@ -2804,7 +2804,7 @@ describe('Interstitial Ad manager', () => {
         },
         {
           key: 'X-ASSET-URI',
-          data: 'test.m3u8',
+          data: 'http://foo.bar/test.m3u8',
         },
         {
           key: 'X-RESTRICT',
