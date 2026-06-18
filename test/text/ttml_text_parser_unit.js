@@ -1757,6 +1757,41 @@ describe('TtmlTextParser', () => {
         {startTime: 62.05, endTime: 3723.2});
   });
 
+  it('parses lineThrough text decoration', () => {
+    // Regression test: ensure tts:textDecoration="lineThrough" produces a cue
+    // whose textDecoration array contains the LINE_THROUGH enum value.  The
+    // existing 'parses text decoration' test combined lineThrough with
+    // noLineThrough to test removal, so it never asserted the positive case.
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: 'Test',
+            textDecoration: [Cue.textDecoration.LINE_THROUGH],
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<styling>' +
+        '<style xml:id="s1" tts:textDecoration="lineThrough"/>' +
+        '</styling>' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" style="s1"/>' +
+        '</layout>' +
+        '<body region="subtitleArea"><div>' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 60,
+          segmentEnd: 3730,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {startTime: 62.05, endTime: 3723.2, region: {id: 'subtitleArea'}},
+        {startTime: 62.05, endTime: 3723.2});
+  });
+
   it('cues should have default cellResolution', () => {
     verifyHelper(
         [

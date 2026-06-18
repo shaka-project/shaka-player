@@ -122,6 +122,32 @@ describe('UITextDisplayer', () => {
         .toEqual(jasmine.objectContaining({'background-color': 'black'}));
   });
 
+  it('renders LINE_THROUGH text decoration as a valid CSS value', () => {
+    // Regression test: previously LINE_THROUGH was 'lineThrough', which
+    // is not a valid CSS text-decoration value, so browsers ignored it
+    // and no strikethrough was drawn.  After the fix the value is the
+    // valid CSS token 'line-through'.
+    /** @type {!shaka.text.Cue} */
+    const cue = new shaka.text.Cue(0, 100, 'deleted text');
+    cue.textDecoration.push(shaka.text.Cue.textDecoration.LINE_THROUGH);
+    cue.nestedCues = [];
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    updateCaptions();
+
+    const textContainer =
+        videoContainer.querySelector('.shaka-text-container');
+    const captions = textContainer.querySelector('div');
+    // Browsers expose the parsed value via the longhand
+    // text-decoration-line; fall back to the shorthand for older engines.
+    const decoration =
+        captions.style.textDecorationLine ||
+        captions.style.textDecoration;
+    expect(decoration).toContain('line-through');
+    expect(decoration).not.toContain('lineThrough');
+  });
+
   it('correctly displays styles for nested cues', () => {
     /** @type {!shaka.text.Cue} */
     const cue = new shaka.text.Cue(0, 100, '');
