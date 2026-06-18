@@ -7,6 +7,7 @@
 +../../lib/polyfill/mcap_encryption_scheme.js
 +../../lib/polyfill/mediasource.js
 +../../lib/polyfill/media_capabilities.js
++../../lib/polyfill/media_key_status_map.js
 +../../lib/polyfill/patchedmediakeys_cert.js
 +../../lib/polyfill/patchedmediakeys_webkit.js
 +../../lib/polyfill/random_uuid.js
