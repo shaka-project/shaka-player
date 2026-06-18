@@ -172,10 +172,21 @@
     width: 50px;
     opacity: 1;
   }
+
+  .shaka-mute-volume-container:hover .shaka-volume-bar-container-allow-hiding {
+    width: 50px;
+    opacity: 1;
+  }
 }
 
 /* stylelint-disable-next-line max-line-length */
 .shaka-mute-button + .shaka-volume-bar-container-allow-hiding:not(:focus-within) {
+  width: 0;
+  opacity: 0;
+}
+
+/* stylelint-disable-next-line max-line-length */
+.shaka-mute-volume-container .shaka-volume-bar-container-allow-hiding:not(:focus-within) {
   width: 0;
   opacity: 0;
 }
@@ -185,6 +196,17 @@
     width: 100px;
     opacity: 1;
   }
+
+  .shaka-mute-volume-container:hover .shaka-volume-bar-container-allow-hiding {
+    width: 100px;
+    opacity: 1;
+  }
+}
+
+.shaka-mute-volume-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 
 .shaka-range-element {
