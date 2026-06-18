@@ -143,9 +143,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     if (!hasTrack) {
       // ARIA: single-select menu item
       offButton.setAttribute('role', 'menuitemradio');
-      offButton.setAttribute('aria-checked', 'true');
       offButton.appendChild(shaka.ui.Utils.checkmarkIcon());
-      this.captionsOffSpan_.classList.add('shaka-chosen-item');
+      shaka.ui.Utils.setChosenItem(offButton, this.captionsOffSpan_);
       this.currentSelection.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.OFF);
     } else {
