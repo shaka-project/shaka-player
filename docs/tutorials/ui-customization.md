@@ -53,6 +53,7 @@ The following elements can be added to the UI bar using this configuration value
 * play_pause_buffering: adds a button that plays/pauses the video on click.
 * mute: adds a button that mutes/unmutes the video on click.
 * volume: adds a volume slider.
+* mute_volume: adds a combined mute button and volume slider in a single container.
 * fullscreen: adds a button that toggles full screen mode on click.
 * overflow_menu: adds a button that opens an overflow menu with additional settings
   buttons. It's content is also configurable.
