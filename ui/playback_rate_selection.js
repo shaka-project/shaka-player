@@ -14,6 +14,7 @@ goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.RangeElement');
 goog.require('shaka.ui.SettingsMenu');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.NumberUtils');
 goog.requireType('shaka.ui.Controls');
@@ -270,8 +271,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
       const btnRate = parseFloat(button.dataset['rate']);
       const isChosen =
           shaka.util.NumberUtils.isFloatEqual(btnRate, rate, 0.001);
-      button.setAttribute('aria-checked', isChosen ? 'true' : 'false');
-      button.classList.toggle('shaka-chosen-item', isChosen);
+      shaka.ui.Utils.setChosenItem(button, button, isChosen);
     }
 
     // Overflow-menu badge / tooltip.

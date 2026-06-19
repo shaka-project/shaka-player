@@ -444,6 +444,40 @@
       opacity: 1;
     }
   }
+
+  /* .shaka-mute-volume-container is a layout wrapper, not a button.
+   * Only non-inherited properties need to be reset here; inherited ones
+   * (cursor, opacity, line-height, text-shadow, color) are re-applied
+   * explicitly on the mute button child below so the wrapper does not
+   * accidentally override them via the cascade. */
+  & > .shaka-mute-volume-container {
+    width: auto;
+    height: auto;
+    padding: 0;
+    background: transparent;
+    border: 0;
+
+    /* Re-apply button styles to the mute button inside the wrapper.
+     * These mirror what & > * gives to direct panel children, which the
+     * wrapper intercepts before they can reach .shaka-mute-button. */
+    .shaka-mute-button {
+      color: var(--shaka-font-color);
+      height: var(--shaka-icon-size);
+      width: var(--shaka-icon-size);
+      line-height: 0.5;
+      padding: 0 2px;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      opacity: 0.9;
+      transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 100ms;
+      text-shadow: 0 0 2px var(--shaka-bg);
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
 }
 
 /* Buttons hide certain items if they are found inside the control panel */
