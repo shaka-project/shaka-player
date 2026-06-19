@@ -59,6 +59,14 @@ describe('UITextDisplayer', () => {
     video.currentTime = 0;
     /** @suppress {checkTypes} */
     textDisplayer = new shaka.text.UITextDisplayer(player);
+    // Disable suspendRenderingWhenHidden so the tests don't depend on the
+    // video container actually intersecting the viewport.  On some devices
+    // (e.g. Chromecast) the IntersectionObserver reports the test container as
+    // not visible and suspends rendering, which would intermittently prevent
+    // cues from being rendered at all.
+    const config = shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
+    textDisplayer.configure(config);
   });
 
   afterEach(async () => {
@@ -666,6 +674,7 @@ describe('UITextDisplayer', () => {
     const cue = new shaka.text.Cue(0, 100, 'Previewed cue');
     const config =
         shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
 
     textDisplayer.configure(config);
     textDisplayer.setTextVisibility(true);
@@ -698,6 +707,7 @@ describe('UITextDisplayer', () => {
   it('shows example text only when no cue is active during preview', async () => {
     const config =
         shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
 
     textDisplayer.configure(config);
     textDisplayer.setTextVisibility(true);
@@ -722,6 +732,7 @@ describe('UITextDisplayer', () => {
   it('shows example text while normal text visibility is off', () => {
     const config =
         shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
 
     textDisplayer.configure(config);
 
@@ -738,6 +749,7 @@ describe('UITextDisplayer', () => {
   it('replaces example text during repeated preview updates', () => {
     const config =
         shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
 
     textDisplayer.configure(config);
     textDisplayer.setTextVisibility(true);
@@ -763,6 +775,7 @@ describe('UITextDisplayer', () => {
     textDisplayer.setTextVisibility(true);
     const config =
         shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
     config.positionArea = shaka.config.PositionArea.TOP_LEFT;
     textDisplayer.configure(config);
 
