@@ -138,15 +138,11 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       this.checkVrStatus_();
     });
 
-    this.loadEventManager_.listen(player, 'nospatialvideoinfo', () => {
-      this.vrAsset_ = null;
-      this.checkVrStatus_();
-    });
-
-    this.loadEventManager_.listen(player, 'unloading', () => {
-      this.vrAsset_ = null;
-      this.checkVrStatus_();
-    });
+    this.loadEventManager_.listenMulti(
+        player, ['nospatialvideoinfo', 'unloading'], () => {
+          this.vrAsset_ = null;
+          this.checkVrStatus_();
+        });
 
     this.loadEventManager_.listen(this.controls_, 'caststatuschanged', () => {
       this.checkVrStatus_();
@@ -454,12 +450,10 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     }
 
     // End
-    this.eventManager_.listen(this.container_, 'mouseleave', () => {
-      this.onGesture_ = false;
-    });
-    this.eventManager_.listen(this.container_, 'mouseup', () => {
-      this.onGesture_ = false;
-    });
+    this.eventManager_.listenMulti(
+        this.container_, ['mouseleave', 'mouseup'], () => {
+          this.onGesture_ = false;
+        });
     if (navigator.maxTouchPoints > 0) {
       this.eventManager_.listen(this.container_, 'touchend', () => {
         this.onGesture_ = false;
