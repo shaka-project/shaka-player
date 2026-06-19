@@ -614,8 +614,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         'shaka-no-propagation');
     for (const element of noPropagationElements) {
       const cb = (event) => event.stopPropagation();
-      this.eventManager_.listen(element, 'click', cb);
-      this.eventManager_.listen(element, 'dblclick', cb);
+      this.eventManager_.listenMulti(element, ['click', 'dblclick'], cb);
       if (navigator.maxTouchPoints > 0) {
         const touchCb = (event) => {
           if (!this.isOpaque()) {
@@ -1649,11 +1648,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Listen for click events to dismiss the settings menus.
     this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
 
-    this.eventManager_.listen(this.video_, 'play', () => {
-      this.onPlayStateChange_();
-    });
-
-    this.eventManager_.listen(this.video_, 'pause', () => {
+    this.eventManager_.listenMulti(this.video_, ['play', 'pause'], () => {
       this.onPlayStateChange_();
     });
 
@@ -1662,13 +1657,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     if (navigator.maxTouchPoints > 0) {
-      this.eventManager_.listen(this.videoContainer_, 'touchmove', (e) => {
-        this.onMouseMove_(e);
-      }, {passive: true});
-
-      this.eventManager_.listen(this.videoContainer_, 'touchend', (e) => {
-        this.onMouseMove_(e);
-      }, {passive: true});
+      this.eventManager_.listenMulti(
+          this.videoContainer_, ['touchmove', 'touchend'], (e) => {
+            this.onMouseMove_(e);
+          }, {passive: true});
     }
 
     this.eventManager_.listen(this.videoContainer_, 'mouseleave', () => {
