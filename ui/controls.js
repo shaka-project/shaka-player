@@ -625,8 +625,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         'shaka-no-propagation');
     for (const element of noPropagationElements) {
       const cb = (event) => event.stopPropagation();
-      this.eventManager_.listen(element, 'click', cb);
-      this.eventManager_.listen(element, 'dblclick', cb);
+      this.eventManager_.listenMulti(element, ['click', 'dblclick'], cb);
       if (navigator.maxTouchPoints > 0) {
         const touchCb = (event) => {
           if (!this.isOpaque()) {
@@ -1721,11 +1720,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Listen for click events to dismiss the settings menus.
     this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
 
-    this.eventManager_.listen(this.video_, 'play', () => {
-      this.onPlayStateChange_();
-    });
-
-    this.eventManager_.listen(this.video_, 'pause', () => {
+    this.eventManager_.listenMulti(this.video_, ['play', 'pause'], () => {
       this.onPlayStateChange_();
     });
 
@@ -1734,13 +1729,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     if (navigator.maxTouchPoints > 0) {
-      this.eventManager_.listen(this.videoContainer_, 'touchmove', (e) => {
-        this.onMouseMove_(e);
-      }, {passive: true});
-
-      this.eventManager_.listen(this.videoContainer_, 'touchend', (e) => {
-        this.onMouseMove_(e);
-      }, {passive: true});
+      this.eventManager_.listenMulti(
+          this.videoContainer_, ['touchmove', 'touchend'], (e) => {
+            this.onMouseMove_(e);
+          }, {passive: true});
     }
 
     this.eventManager_.listen(this.videoContainer_, 'mouseleave', () => {
@@ -1759,33 +1751,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.dispatchEvent(new shaka.util.FakeEvent('vrstatuschanged'));
     });
 
-    this.eventManager_.listen(this.videoContainer_, 'keydown', (e) => {
-      if (!this.config_.enableKeyboardPlaybackControlsInWindow &&
-        !this.isFullScreenEnabled()) {
-        this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
-      }
-    });
-
-    this.eventManager_.listen(this.videoContainer_, 'keyup', (e) => {
-      if (!this.config_.enableKeyboardPlaybackControlsInWindow &&
-        !this.isFullScreenEnabled()) {
-        this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
-      }
-    });
-
-    this.eventManager_.listen(window, 'keydown', (e) => {
-      if (this.config_.enableKeyboardPlaybackControlsInWindow ||
-        this.isFullScreenEnabled()) {
-        this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
-      }
-    });
-
-    this.eventManager_.listen(window, 'keyup', (e) => {
-      if (this.config_.enableKeyboardPlaybackControlsInWindow ||
-        this.isFullScreenEnabled()) {
-        this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
-      }
-    });
+    this.listenForControlsKeyEvents_(this.videoContainer_,
+        () => !this.config_.enableKeyboardPlaybackControlsInWindow &&
+              !this.isFullScreenEnabled());
+    this.listenForControlsKeyEvents_(window,
+        () => this.config_.enableKeyboardPlaybackControlsInWindow ||
+              this.isFullScreenEnabled());
 
     this.eventManager_.listen(
         this.adManager_, shaka.ads.Utils.AD_STARTED, () => {
@@ -2116,6 +2087,24 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   onPlayStateChange_() {
     this.computeOpacity();
+  }
+
+  /**
+   * @param {!EventTarget} target
+   * @param {function():boolean} condition
+   * @private
+   */
+  listenForControlsKeyEvents_(target, condition) {
+    this.eventManager_.listen(target, 'keydown', (e) => {
+      if (condition()) {
+        this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
+      }
+    });
+    this.eventManager_.listen(target, 'keyup', (e) => {
+      if (condition()) {
+        this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
+      }
+    });
   }
 
   /**

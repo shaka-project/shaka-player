@@ -818,6 +818,7 @@ describe('Player', () => {
     });
   });  // describe('load/unload')
 
+
   describe(`get ID3 related methods`, () => {
     it('return null when not loaded', () => {
       expect(player.getAllMetadataRegions()).toEqual([]);
