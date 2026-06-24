@@ -1515,6 +1515,29 @@ describe('MpdUtils', () => {
       expect(TXml.findChildren(mpd, 'Period').length).toBe(0);
     });
 
+    it('rejects an imported MPD with more than one Period', async () => {
+      // Clause 8.15.2: one and only one Period element shall be present, so a
+      // multi-Period imported MPD does not conform (step 1.b) and the empty
+      // Linked Period is removed (step 2).
+      const twoPeriodMpd = [
+        '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static"',
+        '    mediaPresentationDuration="PT20S">',
+        '  <Period duration="PT10S">',
+        '    <AdaptationSet mimeType="video/mp4"/>',
+        '  </Period>',
+        '  <Period duration="PT10S">',
+        '    <AdaptationSet mimeType="video/mp4"/>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+      fakeNetEngine.setResponseText(
+          'https://example.com/ad/manifest.mpd', twoPeriodMpd);
+
+      const TXml = shaka.util.TXml;
+      const mpd = await processLinkedPeriods(singlePeriodMpd());
+      expect(TXml.findChildren(mpd, 'Period').length).toBe(0);
+    });
+
     it('rejects a type="list" imported MPD', async () => {
       const listImported =
           importedMpdXml.replace('type="static"', 'type="list"');
