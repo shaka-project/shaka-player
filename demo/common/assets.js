@@ -1333,6 +1333,15 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Live sim Server-Guided Ad Insertion using DASH 6th-edition Alternative-MPD Replace events',
+      /* iconUri= */ 'https://livesim2.dashif.org/livesim2/sgai_p60:20/testpic_2s/Manifest.mpd?sessionId=alice&interests=travel,sailing',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/segtimelinenr_pattern/testpic_2s/Manifest.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ADS),
   // End DASH-IF Assets }}}
 
   // Bitmovin assets {{{
