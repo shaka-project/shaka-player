@@ -583,6 +583,7 @@ RMKSA
 RVFC
 SEEKTABLE
 servernum
+SGAI
 Shoutcast
 sintel
 stardate
