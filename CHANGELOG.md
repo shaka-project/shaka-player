@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.0.23](https://github.com/shaka-project/shaka-player/compare/v5.0.22...v5.0.23) (2026-06-24)
+
+
+### Bug Fixes
+
+* **text:** use valid CSS value 'line-through' for LINE_THROUGH ([#10249](https://github.com/shaka-project/shaka-player/issues/10249)) ([a21f501](https://github.com/shaka-project/shaka-player/commit/a21f5019671508dee70c8911a097d774686496b8))
+* **UI:** Add mute_volume composite element to fix hover jank between mute button and volume bar ([#10214](https://github.com/shaka-project/shaka-player/issues/10214)) ([93b7d5a](https://github.com/shaka-project/shaka-player/commit/93b7d5a6e69540426591efdb720d28fc6bfd6114))
+
 ## [5.0.22](https://github.com/shaka-project/shaka-player/compare/v5.0.21...v5.0.22) (2026-06-17)
 
 
