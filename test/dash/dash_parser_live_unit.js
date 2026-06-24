@@ -1336,6 +1336,7 @@ describe('DashParser Live', () => {
         id: '',
         timescale: 100,
         eventNode: jasmine.any(Object),
+        urlParams: undefined,
       });
       expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith({
         schemeIdUri: 'http://example.com',
@@ -1345,6 +1346,7 @@ describe('DashParser Live', () => {
         id: 'abc',
         timescale: 100,
         eventNode: jasmine.any(Object),
+        urlParams: undefined,
       });
     });
 
@@ -1858,6 +1860,133 @@ describe('DashParser Live', () => {
           expect(spy).toHaveBeenCalledTimes(3);
           expect(spy.calls.all().map((c) => c.args[2].start))
               .toEqual([30, 40, 50]);
+        });
+  });
+
+  describe('RequestParam (urlparam:2025, DASH 6th ed.)', () => {
+    const manifestRequest = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+    const manifestContext = {
+      type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD,
+    };
+    const patchContext = {
+      type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD_PATCH,
+    };
+
+    it('appends mpdpatch RequestParam params to PatchLocation URL',
+        async () => {
+          const publishTime = new Date(2024, 0, 1);
+          Date.now = () => publishTime.getTime() + 10;
+
+          const source = [
+            '<MPD id="foo" type="dynamic"',
+            '    availabilityStartTime="1970-01-01T00:00:00Z"',
+            `    publishTime="${publishTime.toUTCString()}"`,
+            '    minimumUpdatePeriod="PT5S">',
+            '  <RequestParam includeInRequests="mpdpatch"',
+            '      queryTemplate="$querypart$" useMPDUrlQuery="true"/>',
+            '  <PatchLocation ttl="60">https://cdn.example.com/patch</PatchLocation>',
+            '  <Period id="1">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <Representation bandwidth="1">',
+            '        <SegmentTemplate media="s$Number$.mp4"',
+            '            startNumber="1" duration="5"/>',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '</MPD>',
+          ].join('\n');
+
+          const patchText = [
+            '<Patch mpdId="foo"',
+            `    originalPublishTime="${publishTime.toUTCString()}"`,
+            '/>',
+          ].join('\n');
+
+          fakeNetEngine.setResponseText('https://foo.example.com/mpd?tok=abc', source);
+          fakeNetEngine.setResponseText('https://cdn.example.com/patch?tok=abc', patchText);
+
+          await parser.start('https://foo.example.com/mpd?tok=abc', playerInterface);
+          fakeNetEngine.request.calls.reset();
+
+          await updateManifest();
+
+          fakeNetEngine.expectRequest(
+              'https://cdn.example.com/patch?tok=abc', manifestRequest, patchContext);
+        });
+
+    it('does not modify PatchLocation URL when no mpdpatch RequestParam',
+        async () => {
+          const publishTime = new Date(2024, 0, 1);
+          Date.now = () => publishTime.getTime() + 10;
+
+          const source = [
+            '<MPD id="foo" type="dynamic"',
+            '    availabilityStartTime="1970-01-01T00:00:00Z"',
+            `    publishTime="${publishTime.toUTCString()}"`,
+            '    minimumUpdatePeriod="PT5S">',
+            '  <PatchLocation ttl="60">https://cdn.example.com/patch</PatchLocation>',
+            '  <Period id="1">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <Representation bandwidth="1">',
+            '        <SegmentTemplate media="s$Number$.mp4"',
+            '            startNumber="1" duration="5"/>',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '</MPD>',
+          ].join('\n');
+
+          const patchText = [
+            '<Patch mpdId="foo"',
+            `    originalPublishTime="${publishTime.toUTCString()}"`,
+            '/>',
+          ].join('\n');
+
+          fakeNetEngine.setResponseText(
+              'https://foo.example.com/mpd?tok=abc', source);
+          fakeNetEngine.setResponseText('https://cdn.example.com/patch', patchText);
+
+          await parser.start(
+              'https://foo.example.com/mpd?tok=abc', playerInterface);
+          fakeNetEngine.request.calls.reset();
+
+          await updateManifest();
+
+          fakeNetEngine.expectRequest(
+              'https://cdn.example.com/patch', manifestRequest, patchContext);
+        });
+
+    it('appends mpd RequestParam params to subsequent MPD requests',
+        async () => {
+          const source = [
+            '<MPD type="dynamic"',
+            '    availabilityStartTime="1970-01-01T00:00:00Z"',
+            '    minimumUpdatePeriod="PT5S">',
+            '  <RequestParam includeInRequests="mpd"',
+            '      queryTemplate="session=123" useMPDUrlQuery="true"/>',
+            '  <Period id="1">',
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <Representation bandwidth="1">',
+            '        <SegmentTemplate media="s$Number$.mp4"',
+            '            startNumber="1" duration="5"/>',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '</MPD>',
+          ].join('\n');
+
+          fakeNetEngine.setResponseText('https://foo.example.com/manifest.mpd', source);
+          fakeNetEngine.setResponseText(
+              'https://foo.example.com/manifest.mpd?session=123', source);
+
+          await parser.start('https://foo.example.com/manifest.mpd', playerInterface);
+          fakeNetEngine.request.calls.reset();
+
+          await updateManifest();
+
+          fakeNetEngine.expectRequest(
+              'https://foo.example.com/manifest.mpd?session=123',
+              manifestRequest, manifestContext);
         });
   });
 });
