@@ -2558,16 +2558,17 @@ shaka.extern.AccessibilityConfiguration;
  *   <br>
  *   Defaults to <code>10</code>.
  * @property {boolean} disablePlayedLinearAdSkip
- *   If this is true, already-played linear ads will not be automatically
- *   skipped, allowing them to replay. By default, played linear ads are
- *   force-skipped so the app has no opportunity to control replay behavior.
+ *   If true, disables automatic skipping of already-played linear ads.
+ *   Normally, played linear ads are force-skipped on replay. When this flag
+ *   is set, they will play through, allowing the app to control skip behavior.
+ *   Only applies to MediaTailor streams.
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {boolean} disableTrackingForPlayedLinearAds
- *   If this is true, impression and progress tracking beacons are suppressed
- *   when a previously-played linear ad replays. Player UI lifecycle events
- *   (e.g. AD_STARTED, AD_COMPLETE) continue to fire normally. Only meaningful
- *   when <code>disablePlayedLinearAdSkip</code> is also true.
+ *   If true, suppresses tracking beacons when a previously-played linear ad
+ *   replays. Only meaningful when
+ *   <code>disablePlayedLinearAdSkip</code> is also true. Only applies to
+ *   MediaTailor streams.
  *   <br>
  *   Defaults to <code>false</code>.
  *
