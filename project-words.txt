@@ -274,6 +274,7 @@ containerless
 covr
 cpil
 cuelist
+cuepoint
 cuepoints
 cwip
 demuxer
