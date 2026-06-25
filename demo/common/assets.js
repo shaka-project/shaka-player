@@ -1335,8 +1335,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4),
   new ShakaDemoAssetInfo(
       /* name= */ 'Live sim Server-Guided Ad Insertion using DASH 6th-edition Alternative-MPD Replace events',
-      /* iconUri= */ 'https://livesim2.dashif.org/livesim2/sgai_p60:20/testpic_2s/Manifest.mpd?sessionId=alice&interests=travel,sailing',
-      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/segtimelinenr_pattern/testpic_2s/Manifest.mpd',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/sgai_p60:20/testpic_2s/Manifest.mpd?sessionId=alice&interests=travel,sailing',
       /* source= */ shakaAssets.Source.DASH_IF)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
@@ -1648,6 +1648,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.APPLE)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ADS)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.TRICK_MODE)
       .addFeature(shakaAssets.Feature.SUBTITLES)
