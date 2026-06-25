@@ -7,89 +7,28 @@
 
 goog.provide('shaka.ui.RewindButton');
 
-goog.require('shaka.ui.Controls');
-goog.require('shaka.ui.Element');
-goog.require('shaka.ui.Enums');
-goog.require('shaka.ui.Icon');
-goog.require('shaka.ui.Locales');
-goog.require('shaka.util.Dom');
+goog.require('shaka.Deprecate');
+goog.require('shaka.ui.TrickPlayButton');
+goog.requireType('shaka.ui.Controls');
 
 
 /**
- * @extends {shaka.ui.Element}
+ * @extends {shaka.ui.TrickPlayButton}
  * @final
  * @export
+ * @deprecated Use shaka.ui.TrickPlayButton with isForward=false, or the
+ *   'rewind' UI element name directly.
  */
-shaka.ui.RewindButton = class extends shaka.ui.Element {
+shaka.ui.RewindButton = class extends shaka.ui.TrickPlayButton {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
-    super(parent, controls);
-
-    /** @private {!HTMLButtonElement} */
-    this.button_ = shaka.util.Dom.createButton();
-    this.button_.classList.add('shaka-rewind-button');
-    this.button_.classList.add('shaka-tooltip-status');
-    this.button_.classList.add('shaka-no-propagation');
-    this.button_.setAttribute('shaka-status',
-        this.localization.resolve(shaka.ui.Locales.Ids.OFF));
-
-    new shaka.ui.Icon(this.button_).use(
-        shaka.ui.Enums.MaterialDesignSVGIcons['REWIND']);
-
-    this.parent.appendChild(this.button_);
-    this.updateLocalizedStrings();
-
-    /** @private {!Array<number>} */
-    this.rewindRates_ = this.controls.getConfig().rewindRates;
-
-    this.eventManager.listen(this.button_, 'click', () => {
-      if (!this.controls.isOpaque()) {
-        return;
-      }
-      this.rewind_();
-    });
-
-    this.eventManager.listen(this.player, 'ratechange', () => {
-      this.button_.setAttribute(
-          'shaka-status', this.player.getPlaybackRate() + 'x');
-    });
-  }
-
-  /** @override */
-  updateLocalizedStrings() {
-    this.button_.ariaLabel =
-        this.localization.resolve(shaka.ui.Locales.Ids.REWIND);
-  }
-
-  /**
-   * Cycles trick play rate between the selected rewind rates.
-   * @private
-   */
-  rewind_() {
-    if (!this.video.duration) {
-      return;
-    }
-
-    const trickPlayRate = this.player.getPlaybackRate();
-    const newRateIndex = this.rewindRates_.indexOf(trickPlayRate) + 1;
-
-    // When the button is clicked, the next rate in this.rewindRates_ is
-    // selected. If no more rates are available, the first one is set.
-    const newRate = (newRateIndex != this.rewindRates_.length) ?
-        this.rewindRates_[newRateIndex] : this.rewindRates_[0];
-
-    if (this.video.paused) {
-      // Our fast forward is implemented with playbackRate and needs the video
-      // to be playing (to not be paused) to take immediate effect.
-      // If the video is paused, "unpause" it.
-      this.video.play();
-    }
-    this.player.trickPlay(newRate);
-
-    this.button_.setAttribute('shaka-status', newRate + 'x');
+    super(parent, controls, /* isForward= */ false);
+    shaka.Deprecate.deprecateFeature(6,
+        'shaka.ui.RewindButton',
+        'Use shaka.ui.TrickPlayButton with isForward=false instead.');
   }
 };
 
@@ -97,6 +36,7 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
 /**
  * @implements {shaka.extern.IUIElement.Factory}
  * @final
+ * @deprecated Use shaka.ui.TrickPlayButton.RewindFactory instead.
  */
 shaka.ui.RewindButton.Factory = class {
   /** @override */
@@ -104,9 +44,3 @@ shaka.ui.RewindButton.Factory = class {
     return new shaka.ui.RewindButton(rootElement, controls);
   }
 };
-
-shaka.ui.Controls.registerElement(
-    'rewind', new shaka.ui.RewindButton.Factory());
-
-shaka.ui.Controls.registerBigElement(
-    'rewind', new shaka.ui.RewindButton.Factory());
