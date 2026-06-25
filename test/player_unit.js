@@ -1843,6 +1843,64 @@ describe('Player', () => {
       const actualVariantTracks = player.getVariantTracks();
       expect(actualVariantTracks).toEqual(variantTracks);
     });
+
+    it('reports null audio/videoLanguage when the stream is absent',
+        async () => {
+          // No combined variant exists, so the audio-only and video-only
+          // variants are both retained.  This exercises the null branches of
+          // audioLanguage (video-only) and videoLanguage (audio-only).
+          manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addVariant(20, (variant) => {  // audio-only
+              variant.language = 'fr';
+              variant.addAudio(1);
+            });
+            manifest.addVariant(21, (variant) => {  // video-only
+              variant.addVideo(2);
+            });
+          });
+
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+          const tracks = player.getVariantTracks();
+
+          const audioOnly = tracks.find((t) => t.id == 20);
+          goog.asserts.assert(audioOnly, 'audio-only track must exist');
+          // addAudio() uses the variant language for the audio stream.
+          expect(audioOnly.audioLanguage).toBe('fr');
+          expect(audioOnly.videoLanguage).toBe(null);
+
+          const videoOnly = tracks.find((t) => t.id == 21);
+          goog.asserts.assert(videoOnly, 'video-only track must exist');
+          // addVideo() defaults the video stream language to 'und'.
+          expect(videoOnly.videoLanguage).toBe('und');
+          expect(videoOnly.audioLanguage).toBe(null);
+        });
+
+    it('reports the sign-language videoRoles and videoLanguage',
+        async () => {
+          manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addVariant(30, (variant) => {
+              variant.language = 'en';
+              variant.addAudio(1);
+              variant.addVideo(2, (stream) => {
+                stream.language = 'sgn-US';
+                stream.roles = ['sign'];
+              });
+            });
+          });
+
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+          const track = player.getVariantTracks().find((t) => t.id == 30);
+          goog.asserts.assert(track, 'sign-language track must exist');
+
+          expect(track.videoRoles).toEqual(['sign']);
+          expect(track.videoLanguage).toBe('sgn-US');
+          expect(track.audioLanguage).toBe('en');
+
+          // The VideoTrack view exposes the same value as its language.
+          const videoTrack = player.getVideoTracks()[0];
+          goog.asserts.assert(videoTrack, 'video track must exist');
+          expect(videoTrack.language).toBe('sgn-US');
+        });
   });
 
   describe('tracks', () => {
@@ -2037,6 +2095,8 @@ describe('Player', () => {
           roles: ['main'],
           audioRoles: ['main'],
           videoRoles: ['main'],
+          audioLanguage: 'en',
+          videoLanguage: 'und',
           forced: false,
           videoId: 1,
           audioId: 3,
@@ -2080,6 +2140,8 @@ describe('Player', () => {
           roles: ['main'],
           audioRoles: ['main'],
           videoRoles: [],
+          audioLanguage: 'en',
+          videoLanguage: 'und',
           forced: false,
           videoId: 2,
           audioId: 3,
@@ -2123,6 +2185,8 @@ describe('Player', () => {
           roles: ['main'],
           audioRoles: ['main'],
           videoRoles: ['main'],
+          audioLanguage: 'en',
+          videoLanguage: 'und',
           forced: false,
           videoId: 1,
           audioId: 4,
@@ -2166,6 +2230,8 @@ describe('Player', () => {
           roles: ['main'],
           audioRoles: ['main'],
           videoRoles: [],
+          audioLanguage: 'en',
+          videoLanguage: 'und',
           forced: false,
           videoId: 2,
           audioId: 4,
@@ -2209,6 +2275,8 @@ describe('Player', () => {
           roles: ['commentary', 'main'],
           audioRoles: ['commentary'],
           videoRoles: ['main'],
+          audioLanguage: 'en',
+          videoLanguage: 'und',
           forced: false,
           videoId: 1,
           audioId: 5,
@@ -2252,6 +2320,8 @@ describe('Player', () => {
           roles: ['commentary'],
           audioRoles: ['commentary'],
           videoRoles: [],
+          audioLanguage: 'en',
+          videoLanguage: 'und',
           forced: false,
           videoId: 2,
           audioId: 5,
@@ -2295,6 +2365,8 @@ describe('Player', () => {
           roles: ['main'],
           audioRoles: [],
           videoRoles: ['main'],
+          audioLanguage: 'es',
+          videoLanguage: 'und',
           forced: false,
           videoId: 1,
           audioId: 6,
@@ -2338,6 +2410,8 @@ describe('Player', () => {
           roles: [],
           audioRoles: [],
           videoRoles: [],
+          audioLanguage: 'es',
+          videoLanguage: 'und',
           forced: false,
           videoId: 2,
           audioId: 6,
@@ -2381,6 +2455,8 @@ describe('Player', () => {
           roles: ['main'],
           audioRoles: [],
           videoRoles: ['main'],
+          audioLanguage: 'es',
+          videoLanguage: 'und',
           forced: false,
           videoId: 1,
           audioId: 7,
@@ -2424,6 +2500,8 @@ describe('Player', () => {
           roles: [],
           audioRoles: [],
           videoRoles: [],
+          audioLanguage: 'es',
+          videoLanguage: 'und',
           forced: false,
           videoId: 2,
           audioId: 7,
@@ -2518,6 +2596,7 @@ describe('Player', () => {
       videoTracks = [
         {
           active: true,
+          language: 'und',
           bandwidth: 1000,
           width: 100,
           height: 200,
@@ -2533,6 +2612,7 @@ describe('Player', () => {
         },
         {
           active: false,
+          language: 'und',
           bandwidth: 2000,
           width: 200,
           height: 400,
