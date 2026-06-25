@@ -297,6 +297,7 @@ describe('CastUtils', () => {
               onEmsg: () => {},
               onEvent: () => {},
               onManifestUpdate: () => {},
+              getDrmInfo: () => null,
             },
             config);
 

@@ -263,6 +263,9 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'test/test/assets/clear-encrypted/*', included: false},
       {pattern: 'test/test/assets/clear-encrypted-hls/*', included: false},
+      {pattern: 'test/test/assets/dash-event-callback/*', included: false},
+      // eslint-disable-next-line @stylistic/max-len
+      {pattern: 'test/test/assets/dash-event-callback-urlparam/*', included: false},
       {pattern: 'test/test/assets/dash-multi-codec/*', included: false},
       {pattern: 'test/test/assets/dash-multi-codec-ec3/*', included: false},
       {pattern: 'test/test/assets/dash-multitype-variant/*', included: false},

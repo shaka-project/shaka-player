@@ -593,12 +593,10 @@ shaka.ui.MediaSession = class {
       }
     };
 
-    this.eventManager_.listen(
-        this.queueManager_, 'currentitemchanged', checkQueueItems);
-    this.eventManager_.listen(
-        this.queueManager_, 'itemsinserted', checkQueueItems);
-    this.eventManager_.listen(
-        this.queueManager_, 'itemsremoved', checkQueueItems);
+    this.eventManager_.listenMulti(
+        this.queueManager_,
+        ['currentitemchanged', 'itemsinserted', 'itemsremoved'],
+        checkQueueItems);
     this.eventManager_.listen(
         this.player_, 'loading', checkQueueItems);
 
@@ -613,12 +611,14 @@ shaka.ui.MediaSession = class {
       }
     };
 
-    this.eventManager_.listen(
-        this.adManager_, shaka.ads.Utils.AD_STARTED, checkSkipAd);
-    this.eventManager_.listen(
-        this.adManager_, shaka.ads.Utils.AD_SKIP_STATE_CHANGED, checkSkipAd);
-    this.eventManager_.listen(
-        this.adManager_, shaka.ads.Utils.AD_STOPPED, checkSkipAd);
+    this.eventManager_.listenMulti(
+        this.adManager_,
+        [
+          shaka.ads.Utils.AD_STARTED,
+          shaka.ads.Utils.AD_SKIP_STATE_CHANGED,
+          shaka.ads.Utils.AD_STOPPED,
+        ],
+        checkSkipAd);
 
     checkSkipAd();
   }

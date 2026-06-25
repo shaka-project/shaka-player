@@ -59,6 +59,14 @@ describe('UITextDisplayer', () => {
     video.currentTime = 0;
     /** @suppress {checkTypes} */
     textDisplayer = new shaka.text.UITextDisplayer(player);
+    // Disable suspendRenderingWhenHidden so the tests don't depend on the
+    // video container actually intersecting the viewport.  On some devices
+    // (e.g. Chromecast) the IntersectionObserver reports the test container as
+    // not visible and suspends rendering, which would intermittently prevent
+    // cues from being rendered at all.
+    const config = shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
+    textDisplayer.configure(config);
   });
 
   afterEach(async () => {
@@ -131,6 +139,33 @@ describe('UITextDisplayer', () => {
     expect(parseCssText(textContainer.querySelector('span').style.cssText))
         .toEqual(jasmine.objectContaining({'background-color': 'black'}));
   });
+
+  it('renders LINE_THROUGH text decoration as a valid CSS value',
+      async () => {
+        // Regression test: previously LINE_THROUGH was 'lineThrough', which
+        // is not a valid CSS text-decoration value, so browsers ignored it
+        // and no strikethrough was drawn.  After the fix the value is the
+        // valid CSS token 'line-through'.
+        /** @type {!shaka.text.Cue} */
+        const cue = new shaka.text.Cue(0, 100, 'deleted text');
+        cue.textDecoration.push(shaka.text.Cue.textDecoration.LINE_THROUGH);
+        cue.nestedCues = [];
+
+        textDisplayer.setTextVisibility(true);
+        textDisplayer.append([cue]);
+        await updateCaptions();
+
+        const textContainer =
+            videoContainer.querySelector('.shaka-text-container');
+        const captions = textContainer.querySelector('div');
+        // Browsers expose the parsed value via the longhand
+        // text-decoration-line; fall back to the shorthand for older engines.
+        const decoration =
+            captions.style.textDecorationLine ||
+            captions.style.textDecoration;
+        expect(decoration).toContain('line-through');
+        expect(decoration).not.toContain('lineThrough');
+      });
 
   it('correctly displays styles for nested cues', async () => {
     /** @type {!shaka.text.Cue} */
@@ -639,6 +674,7 @@ describe('UITextDisplayer', () => {
     const cue = new shaka.text.Cue(0, 100, 'Previewed cue');
     const config =
         shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
 
     textDisplayer.configure(config);
     textDisplayer.setTextVisibility(true);
@@ -671,6 +707,7 @@ describe('UITextDisplayer', () => {
   it('shows example text only when no cue is active during preview', async () => {
     const config =
         shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
 
     textDisplayer.configure(config);
     textDisplayer.setTextVisibility(true);
@@ -695,6 +732,7 @@ describe('UITextDisplayer', () => {
   it('shows example text while normal text visibility is off', () => {
     const config =
         shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
 
     textDisplayer.configure(config);
 
@@ -711,6 +749,7 @@ describe('UITextDisplayer', () => {
   it('replaces example text during repeated preview updates', () => {
     const config =
         shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
 
     textDisplayer.configure(config);
     textDisplayer.setTextVisibility(true);
@@ -736,6 +775,7 @@ describe('UITextDisplayer', () => {
     textDisplayer.setTextVisibility(true);
     const config =
         shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
     config.positionArea = shaka.config.PositionArea.TOP_LEFT;
     textDisplayer.configure(config);
 

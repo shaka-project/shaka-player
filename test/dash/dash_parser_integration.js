@@ -102,6 +102,37 @@ describe('DashParser', () => {
     await player.unload();
   });
 
+  it('supports ClearKey with raw single key with Web Crypto', async () => {
+    if (!checkClearKeySupport()) {
+      pending('ClearKey is not supported');
+    }
+    spyOn(deviceDetected, 'hasWorkingClearKeySupport').and.returnValue(false);
+
+    player.configure({
+      drm: {
+        clearKeys: {
+          // cspell: disable
+          // eslint-disable-next-line @stylistic/max-len
+          '4060a865887842679cbf91ae5bae1e72': 'fc35340837310cc0fb53de97e22a69e0',
+          // cspell: enable
+        },
+      },
+    });
+    await player.load('/base/test/test/assets/dash-clearkey/dash.mpd');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 8 seconds, but stop early if the video ends.  If it takes
+    // longer than 30 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
+
+    await player.unload();
+  });
+
   it('support multi type variants', async () => {
     const DeviceType = shaka.device.IDevice.DeviceType;
     if (deviceDetected.getDeviceType() === DeviceType.TV &&
@@ -120,6 +151,82 @@ describe('DashParser', () => {
     expect(player.isLive()).toBe(false);
 
     await waiter.timeoutAfter(30).waitForEnd(video);
+
+    await player.unload();
+  });
+
+  it('fires EventStream callback beacons during playback', async () => {
+    const netEngine = player.getNetworkingEngine();
+
+    const EventCallbackType =
+        compiledShaka.net.NetworkingEngine.RequestType.EVENT_CALLBACK;
+
+    /** @type {?string} */
+    let capturedCallbackUrl = null;
+
+    netEngine.registerRequestFilter((type, request) => {
+      if (type == EventCallbackType) {
+        capturedCallbackUrl = request.uris[0];
+        // Redirect to an existing local resource so the request succeeds.
+        request.uris =
+            ['/base/test/test/assets/dash-svta-2053-2/init.mp4'];
+      }
+    });
+
+    // The region starts at presentationTime=0, so TimelineRegionEnter may
+    // fire synchronously during player.load(). Register the listener first.
+    const regionEnterPromise = new Promise((resolve) => {
+      eventManager.listenOnce(player, 'timelineregionenter', resolve);
+    });
+
+    const streamUri =
+        '/base/test/test/assets/dash-event-callback/dash.mpd';
+
+    await player.load(streamUri);
+    await video.play();
+
+    // Wait for the enter event (may already be resolved if it fired on load).
+    await waiter.timeoutAfter(10).failOnTimeout(true)
+        .waitForPromise(regionEnterPromise, 'timelineregionenter');
+
+    expect(capturedCallbackUrl).toBe('https://example.com/beacon/impression');
+
+    await player.unload();
+  });
+
+  it('appends RequestParam urlParams to EventStream callback URL', async () => {
+    const netEngine = player.getNetworkingEngine();
+
+    const EventCallbackType =
+        compiledShaka.net.NetworkingEngine.RequestType.EVENT_CALLBACK;
+
+    /** @type {?string} */
+    let capturedCallbackUrl = null;
+
+    netEngine.registerRequestFilter((type, request) => {
+      if (type == EventCallbackType) {
+        capturedCallbackUrl = request.uris[0];
+        // Redirect to an existing local resource so the request succeeds.
+        request.uris =
+            ['/base/test/test/assets/dash-svta-2053-2/init.mp4'];
+      }
+    });
+
+    const regionEnterPromise = new Promise((resolve) => {
+      eventManager.listenOnce(player, 'timelineregionenter', resolve);
+    });
+
+    const streamUri =
+        '/base/test/test/assets/dash-event-callback-urlparam/dash.mpd';
+
+    await player.load(streamUri);
+    await video.play();
+
+    await waiter.timeoutAfter(10).failOnTimeout(true)
+        .waitForPromise(regionEnterPromise, 'timelineregionenter');
+
+    expect(capturedCallbackUrl)
+        .toBe('https://example.com/beacon/impression?tok=abc');
 
     await player.unload();
   });

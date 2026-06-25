@@ -332,7 +332,7 @@ describe('DashParser SegmentList', () => {
       '</MPD>',
     ].join('\n');
     const networkingEngine = new shaka.test.FakeNetworkingEngine()
-        .setResponseText('dummy://foo', source);
+        .setResponseText('https://foo', source);
 
     const dashParser = shaka.test.Dash.makeDashParser();
 
@@ -358,7 +358,7 @@ describe('DashParser SegmentList', () => {
       onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
     try {
-      const manifest = await dashParser.start('dummy://foo', playerInterface);
+      const manifest = await dashParser.start('https://foo', playerInterface);
       const stream = manifest.variants[0].video;
       await stream.createSegmentIndex();
       goog.asserts.assert(stream.segmentIndex, 'Expected index to be created');

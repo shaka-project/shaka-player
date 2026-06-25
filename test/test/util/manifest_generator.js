@@ -427,6 +427,8 @@ shaka.test.ManifestGenerator.DrmInfo = class {
     this.keySystemUris;
     /** @type {(!Array<string> | undefined)} */
     this.mediaTypes;
+    /** @type {(!Map<string, string>|undefined)} */
+    this.clearKeys;
 
     /** @type {shaka.extern.DrmInfo} */
     const foo = this;

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static"
+    mediaPresentationDuration="PT4S" maxSegmentDuration="PT4S"
+    profiles="urn:mpeg:dash:profile:isoff-live:2011">
+  <Period id="0" duration="PT4S">
+    <EventStream schemeIdUri="urn:mpeg:dash:event:callback:2015"
+        value="1" timescale="1">
+      <RequestParam includeInRequests="callback"
+          queryTemplate="tok=abc" useMPDUrlQuery="true"/>
+      <Event presentationTime="0" duration="4" id="1">
+        https://example.com/beacon/impression
+      </Event>
+    </EventStream>
+    <AdaptationSet segmentAlignment="true" lang="und">
+      <SegmentTemplate timescale="24"
+          media="../dash-svta-2053-2/$Number%04d$.m4s"
+          startNumber="1" duration="96"
+          initialization="../dash-svta-2053-2/init.mp4"/>
+      <Representation id="1" mimeType="video/mp4" codecs="avc1.64001f"
+          width="512" height="288" bandwidth="389802"/>
+    </AdaptationSet>
+  </Period>
+</MPD>

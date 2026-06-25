@@ -126,6 +126,7 @@ describe('DrmEngine', () => {
           onEmsg: () => {},
           onEvent: () => {},
           onManifestUpdate: () => {},
+          getDrmInfo: () => null,
         },
         mediaSourceConfig);
 
@@ -257,6 +258,10 @@ describe('DrmEngine', () => {
 
   filterDescribe('ClearKey', checkClearKeySupport, () => {
     drmIt('plays encrypted content with the ClearKey CDM', async () => {
+      const BrowserEngine = shaka.device.IDevice.BrowserEngine;
+      if (deviceDetected.getBrowserEngine() === BrowserEngine.WEBKIT) {
+        pending('Disabled on Safari.');
+      }
       // Configure DrmEngine for ClearKey playback.
       const config = shaka.util.PlayerConfiguration.createDefault().drm;
       config.clearKeys = {
