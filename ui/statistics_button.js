@@ -9,83 +9,33 @@ goog.provide('shaka.ui.StatisticsButton');
 
 goog.require('shaka.log');
 goog.require('shaka.ui.Controls');
-goog.require('shaka.ui.Element');
-goog.require('shaka.ui.Enums');
-goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.OverflowMenu');
+goog.require('shaka.ui.StatisticsButtonBase');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
-goog.require('shaka.util.Timer');
 goog.requireType('shaka.ui.Controls');
 
 
 /**
- * @extends {shaka.ui.Element}
+ * @extends {shaka.ui.StatisticsButtonBase}
  * @final
  * @export
  */
-shaka.ui.StatisticsButton = class extends shaka.ui.Element {
+shaka.ui.StatisticsButton = class extends shaka.ui.StatisticsButtonBase {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
-    super(parent, controls);
-
-    /** @private {!HTMLButtonElement} */
-    this.button_ = shaka.util.Dom.createButton();
-    this.button_.classList.add('shaka-statistics-button');
-    this.button_.classList.add('shaka-tooltip');
-    this.button_.classList.add('shaka-no-propagation');
-    this.button_.ariaPressed = 'false';
-
-    /** @private {!shaka.ui.Icon} */
-    this.icon_ = new shaka.ui.Icon(this.button_,
-        shaka.ui.Enums.MaterialDesignSVGIcons['STATISTICS_ON']);
-
-    const label = shaka.util.Dom.createHTMLElement('label');
-    label.classList.add('shaka-overflow-button-label');
-    label.classList.add('shaka-simple-overflow-button-label-inline');
-
-    /** @private {!HTMLElement} */
-    this.nameSpan_ = shaka.util.Dom.createHTMLElement('span');
-    label.appendChild(this.nameSpan_);
-
-    /** @private {!HTMLElement} */
-    this.stateSpan_ = shaka.util.Dom.createHTMLElement('span');
-    this.stateSpan_.classList.add('shaka-current-selection-span');
-    label.appendChild(this.stateSpan_);
-
-    this.button_.appendChild(label);
-
-    this.parent.appendChild(this.button_);
-
-    /** @private {!HTMLElement} */
-    this.container_ = shaka.util.Dom.createHTMLElement('div');
-    this.container_.classList.add('shaka-no-propagation');
-    this.container_.classList.add('shaka-show-controls-on-mouse-over');
-    this.container_.classList.add('shaka-statistics-container');
-    this.container_.classList.add('shaka-hidden');
-
-    const controlsContainer = this.controls.getControlsContainer();
-    controlsContainer.appendChild(this.container_);
-
-    /** @private {!Array} */
-    this.statisticsList_ = [];
+    super(parent, controls,
+        'shaka-statistics-button', 'shaka-statistics-container');
 
     /** @private {!Array} */
     this.skippedStats_ = ['stateHistory', 'switchHistory'];
 
     /** @private {!shaka.extern.Stats} */
     this.currentStats_ = this.player.getStats();
-
-    /** @private {!Map<string, HTMLElement>} */
-    this.displayedElements_ = new Map();
-
-    /** @private {!HTMLElement} */
-    this.headerTitle_ = shaka.util.Dom.createHTMLElement('span');
-    this.headerTitle_.classList.add('shaka-statistics-title');
 
     const parsePx = (name) => {
       return this.currentStats_[name] + ' (px)';
@@ -145,8 +95,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       }
     };
 
-    /** @private {!Map<string, function(string): string>} */
-    this.parseFrom_ = new Map()
+    this.statsParseFrom = new Map()
         .set('width', parsePx)
         .set('height', parsePx)
         .set('currentCodecs', parseString)
@@ -174,34 +123,14 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
         .set('manifestPeriodCount', parsePeriods)
         .set('manifestGapCount', parseGaps);
 
-    /** @private {shaka.util.Timer} */
-    this.timer_ = new shaka.util.Timer(() => {
-      this.updateStats_();
-    });
-
     this.updateLocalizedStrings();
 
     this.loadContainer_();
 
-    this.eventManager.listen(this.button_, 'click', () => {
-      this.onClick_();
+    this.eventManager.listen(this.statsButton, 'click', () => {
+      this.toggleContainer();
       this.updateLocalizedStrings();
     });
-  }
-
-  /** @private */
-  onClick_() {
-    if (this.container_.classList.contains('shaka-hidden')) {
-      this.icon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['STATISTICS_OFF']);
-      this.timer_.tickEvery(0.1);
-      shaka.ui.Utils.setDisplay(this.container_, true);
-      this.button_.ariaPressed = 'true';
-    } else {
-      this.icon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['STATISTICS_ON']);
-      this.timer_.stop();
-      shaka.ui.Utils.setDisplay(this.container_, false);
-      this.button_.ariaPressed = 'false';
-    }
   }
 
   /** @override */
@@ -210,50 +139,23 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
 
     const label = this.localization.resolve(LocIds.STATISTICS);
 
-    this.nameSpan_.textContent = label;
-    this.headerTitle_.textContent = label;
-    this.button_.ariaLabel = label;
+    this.statsNameSpan.textContent = label;
+    this.statsHeaderTitle.textContent = label;
+    this.statsButton.ariaLabel = label;
 
-    const labelText = this.container_.classList.contains('shaka-hidden') ?
+    const labelText = this.statsContainer.classList.contains('shaka-hidden') ?
         LocIds.OFF : LocIds.ON;
-    this.stateSpan_.textContent = this.localization.resolve(labelText);
+    this.statsStateSpan.textContent = this.localization.resolve(labelText);
   }
 
-  /**
-   * @param {string} name
-   * @return {!HTMLElement}
-   * @private
-   */
-  generateComponent_(name) {
-    const section = shaka.util.Dom.createHTMLElement('div');
-
-    const label = shaka.util.Dom.createHTMLElement('label');
-    label.textContent = name + ':';
-    section.appendChild(label);
-
-    const value = shaka.util.Dom.createHTMLElement('span');
-    value.textContent = this.parseFrom_.get(name)(name);
-    section.appendChild(value);
-
-    this.displayedElements_.set(name, value);
-
-    return section;
+  /** @override */
+  checkAvailability() {
+    shaka.ui.Utils.setDisplay(this.statsButton, !this.isSubMenuOpened);
   }
 
   /** @private */
   loadContainer_() {
-    const header = shaka.util.Dom.createHTMLElement('div');
-    header.classList.add('shaka-statistics-header');
-    header.classList.add('shaka-no-propagation');
-    header.appendChild(this.headerTitle_);
-    const icon = new shaka.ui.Icon(header,
-        shaka.ui.Enums.MaterialDesignSVGIcons['CLOSE']);
-    const iconElement = icon.getSvgElement();
-    iconElement.classList.add('material-icons', 'notranslate');
-    this.container_.appendChild(header);
-    this.eventManager.listen(iconElement, 'click', () => {
-      this.onClick_();
-    });
+    this.buildStatsContainerHeader();
 
     /**
      * @const {!Array<{label: string, stats: !Array<string>}>}
@@ -332,13 +234,13 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       const el = shaka.util.Dom.createHTMLElement('div');
       el.classList.add('shaka-statistics-section-label');
       el.textContent = labelText;
-      this.container_.appendChild(el);
+      this.statsContainer.appendChild(el);
     };
 
     const appendDivider = () => {
       const el = shaka.util.Dom.createHTMLElement('div');
       el.classList.add('shaka-statistics-divider');
-      this.container_.appendChild(el);
+      this.statsContainer.appendChild(el);
     };
 
     let firstGroup = true;
@@ -363,8 +265,8 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       appendSectionLabel(group.label);
 
       for (const name of groupStats) {
-        this.container_.appendChild(this.generateComponent_(name));
-        this.statisticsList_.push(name);
+        this.statsContainer.appendChild(this.generateStatComponent(name));
+        this.statsList.push(name);
         rendered.add(name);
       }
     }
@@ -379,8 +281,8 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       appendDivider();
       appendSectionLabel('Other');
       for (const name of remaining) {
-        this.container_.appendChild(this.generateComponent_(name));
-        this.statisticsList_.push(name);
+        this.statsContainer.appendChild(this.generateStatComponent(name));
+        this.statsList.push(name);
       }
     }
 
@@ -391,13 +293,13 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     }
   }
 
-  /** @private */
-  updateStats_() {
+  /** @override */
+  updateStatsDisplay() {
     this.currentStats_ = this.player.getStats();
 
-    for (const name of this.statisticsList_) {
-      const element = this.displayedElements_.get(name);
-      element.textContent = this.parseFrom_.get(name)(name);
+    for (const name of this.statsList) {
+      const element = this.statsDisplayedElements.get(name);
+      element.textContent = this.statsParseFrom.get(name)(name);
       if (element && element.parentElement) {
         const value = this.currentStats_[name];
         if (typeof value == 'string') {
@@ -407,18 +309,6 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
         }
       }
     }
-  }
-
-  /** @override */
-  release() {
-    this.timer_.stop();
-    this.timer_ = null;
-    super.release();
-  }
-
-  /** @override */
-  checkAvailability() {
-    shaka.ui.Utils.setDisplay(this.button_, !this.isSubMenuOpened);
   }
 };
 

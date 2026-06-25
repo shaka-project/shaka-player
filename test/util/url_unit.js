@@ -265,6 +265,47 @@ describe('URL', () => {
     });
   });
 
+  describe('applyUrlParams', () => {
+    it('returns URI unchanged when paramFn is null', () => {
+      const uri = 'https://example.com/path';
+      expect(shaka.util.URL.applyUrlParams(uri, null)).toBe(uri);
+    });
+
+    it('returns URI unchanged when paramFn is undefined', () => {
+      const uri = 'https://example.com/path';
+      expect(shaka.util.URL.applyUrlParams(uri, undefined)).toBe(uri);
+    });
+
+    it('returns URI unchanged when paramFn returns empty string', () => {
+      const uri = 'https://example.com/path';
+      expect(shaka.util.URL.applyUrlParams(uri, () => '')).toBe(uri);
+    });
+
+    it('appends a single param to URI with no existing query string', () => {
+      const uri = 'https://example.com/path';
+      expect(shaka.util.URL.applyUrlParams(uri, () => 'tok=abc'))
+          .toBe('https://example.com/path?tok=abc');
+    });
+
+    it('appends multiple params to URI', () => {
+      const uri = 'https://example.com/path';
+      expect(shaka.util.URL.applyUrlParams(uri, () => 'a=1&b=2'))
+          .toBe('https://example.com/path?a=1&b=2');
+    });
+
+    it('overwrites existing query param with same key', () => {
+      const uri = 'https://example.com/path?tok=old';
+      expect(shaka.util.URL.applyUrlParams(uri, () => 'tok=new'))
+          .toBe('https://example.com/path?tok=new');
+    });
+
+    it('preserves existing params not overwritten by paramFn', () => {
+      const uri = 'https://example.com/path?x=1';
+      expect(shaka.util.URL.applyUrlParams(uri, () => 'tok=abc'))
+          .toBe('https://example.com/path?x=1&tok=abc');
+    });
+  });
+
   describe('setScheme', () => {
     it('replaces http with https', () => {
       expect(shaka.util.URL.setScheme('http://example.com/path', 'https'))
