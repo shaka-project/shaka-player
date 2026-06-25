@@ -492,5 +492,60 @@ describe('PresentationTimeline', () => {
       expect(timeline2.getSeekRangeEnd()).toBe(20);
     });
   });
+
+  describe('getProgramDateTimeForTime', () => {
+    it('returns null when there is no program date time', () => {
+      const timeline = makeVodTimeline(/* duration= */ 60);
+      expect(timeline.getProgramDateTimeForTime(10)).toBe(null);
+    });
+
+    it('extrapolates from the initial program date time', () => {
+      const timeline = makeVodTimeline(/* duration= */ 60);
+      timeline.setInitialProgramDateTime(1000);
+      expect(timeline.getProgramDateTimeForTime(0)).toBe(1000);
+      expect(timeline.getProgramDateTimeForTime(10)).toBe(1010);
+    });
+
+    it('accounts for program date time jumps at discontinuities', () => {
+      const timeline = makeVodTimeline(/* duration= */ 60);
+      timeline.setInitialProgramDateTime(1000);
+      // A discontinuity at presentation time 30 jumps the PDT forward by an
+      // extra hour (3600s) relative to the continuous timeline.
+      timeline.setProgramDateTimeRegions([
+        {start: 0, pdt: 1000},
+        {start: 30, pdt: 1030 + 3600},
+      ]);
+
+      // Before the discontinuity, behaves like the initial PDT.
+      expect(timeline.getProgramDateTimeForTime(0)).toBe(1000);
+      expect(timeline.getProgramDateTimeForTime(10)).toBe(1010);
+
+      // After the discontinuity, the extra hour is reflected.
+      expect(timeline.getProgramDateTimeForTime(30)).toBe(1030 + 3600);
+      expect(timeline.getProgramDateTimeForTime(40)).toBe(1040 + 3600);
+    });
+
+    it('maps times before the first region to the first region', () => {
+      const timeline = makeVodTimeline(/* duration= */ 60);
+      timeline.setProgramDateTimeRegions([
+        {start: 10, pdt: 1010},
+        {start: 30, pdt: 5000},
+      ]);
+      expect(timeline.getProgramDateTimeForTime(0)).toBe(1000);
+    });
+
+    it('falls back to the initial PDT after regions are cleared', () => {
+      const timeline = makeVodTimeline(/* duration= */ 60);
+      timeline.setInitialProgramDateTime(1000);
+      timeline.setProgramDateTimeRegions([
+        {start: 0, pdt: 1000},
+        {start: 30, pdt: 5000},
+      ]);
+      expect(timeline.getProgramDateTimeForTime(40)).toBe(5010);
+
+      timeline.setProgramDateTimeRegions([]);
+      expect(timeline.getProgramDateTimeForTime(40)).toBe(1040);
+    });
+  });
 });
 

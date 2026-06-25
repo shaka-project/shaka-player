@@ -7168,4 +7168,46 @@ describe('HlsParser', () => {
 
     expect(ref2.syncTime).toBe(ref1.syncTime + 10);
   });
+
+  it('maps playhead date across discontinuity PDT jumps', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.42c00d",',
+      'CLOSED-CAPTIONS=NONE\n',
+      'test:/video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:10\n',
+      '#EXT-X-DISCONTINUITY-SEQUENCE:0\n',
+      '#EXT-X-PROGRAM-DATE-TIME:2023-01-01T00:00:00Z\n',
+      '#EXTINF:10,\n',
+      'segment1.ts\n',
+      '#EXT-X-DISCONTINUITY\n',
+      '#EXT-X-PROGRAM-DATE-TIME:2023-01-01T01:00:00Z\n',
+      '#EXTINF:10,\n',
+      'segment2.ts\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', media);
+
+    const manifest = await parser.start('test:/master', playerInterface);
+    const video = manifest.variants[0].video;
+    await video.createSegmentIndex();
+
+    const timeline = manifest.presentationTimeline;
+    const pdt0 = Date.parse('2023-01-01T00:00:00Z') / 1000;
+    const pdt1 = Date.parse('2023-01-01T01:00:00Z') / 1000;
+
+    // Before the discontinuity, the date follows the initial PDT.
+    expect(timeline.getProgramDateTimeForTime(0)).toBe(pdt0);
+    expect(timeline.getProgramDateTimeForTime(5)).toBe(pdt0 + 5);
+    // After the discontinuity, the date reflects the 1-hour PDT jump even
+    // though the presentation timeline itself stays continuous.
+    expect(timeline.getProgramDateTimeForTime(10)).toBe(pdt1);
+    expect(timeline.getProgramDateTimeForTime(15)).toBe(pdt1 + 5);
+  });
 });

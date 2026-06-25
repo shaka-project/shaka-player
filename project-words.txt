@@ -92,6 +92,7 @@ textrole
 texttrackvisibility
 thirdquartile
 timeandseekrangeupdated
+timelinechange
 timelineregionadded
 timelineregionenter
 timelineregionexit
@@ -402,6 +403,7 @@ smpte
 sntp
 soun
 srcs
+ssai
 ssim
 sstr
 stbl
