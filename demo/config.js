@@ -499,6 +499,10 @@ shakaDemo.Config = class {
             'ads.disableTrackingEvents')
         .addBoolInput_('Disable Snapback',
             'ads.disableSnapback')
+        .addBoolInput_('Disable played linear ad skip (MediaTailor)',
+            'ads.disablePlayedLinearAdSkip')
+        .addBoolInput_('Disable tracking for played linear ads (MediaTailor)',
+            'ads.disableTrackingForPlayedLinearAds')
         .addNumberInput_('Interstitial preload ahead time',
             'ads.interstitialPreloadAheadTime',
             /* canBeDecimal= */ true,
