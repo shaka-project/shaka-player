@@ -279,6 +279,8 @@ shaka.extern.BufferedInfo;
  *   roles: !Array<string>,
  *   audioRoles: Array<string>,
  *   videoRoles: Array<string>,
+ *   audioLanguage: ?string,
+ *   videoLanguage: ?string,
  *   accessibilityPurpose: ?shaka.media.ManifestParser.AccessibilityPurpose,
  *   forced: boolean,
  *   videoId: ?number,
@@ -369,6 +371,14 @@ shaka.extern.BufferedInfo;
  * @property {Array<string>} videoRoles
  *   The roles of the video in the track, e.g. <code>'main'</code> or
  *   <code>'sign'</code>. Will be null for text tracks or variant tracks
+ *   without video.
+ * @property {?string} audioLanguage
+ *   The language of the audio in the track, e.g. <code>'und'</code> or
+ *   <code>'en'</code>. Will be null for text tracks or variant tracks
+ *   without audio.
+ * @property {?string} videoLanguage
+ *   The language of the video in the track, e.g. <code>'und'</code> or
+ *   <code>'sgn-US'</code>. Will be null for text tracks or variant tracks
  *   without video.
  * @property {?shaka.media.ManifestParser.AccessibilityPurpose
  *           } accessibilityPurpose
@@ -560,6 +570,7 @@ shaka.extern.TextTrack;
 /**
  * @typedef {{
  *   active: boolean,
+ *   language: string,
  *   bandwidth: number,
  *   width: ?number,
  *   height: ?number,
@@ -581,6 +592,11 @@ shaka.extern.TextTrack;
  * @property {boolean} active
  *   If true, this is the track being streamed (another track may be
  *   visible/audible in the buffer).
+ * @property {string} language
+ *   The language of the track, or <code>'und'</code> if not given.  This value
+ *   is normalized as follows - language part is always lowercase and translated
+ *   to ISO-639-1 when possible, locale part is always uppercase,
+ *   i.e. <code>'sgn-US'</code>.
  * @property {number} bandwidth
  *   The bandwidth required to play the track, in bits/sec.
  * @property {?number} width
