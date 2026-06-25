@@ -17,7 +17,7 @@ goog.requireType('shaka.ui.Controls');
 
 
 /**
- * @extends {shaka.ui.TextStyleMenu}
+ * @extends {shaka.ui.TextStyleMenu<shaka.config.PositionArea>}
  * @final
  * @export
  */
@@ -45,19 +45,17 @@ shaka.ui.TextPosition = class extends shaka.ui.TextStyleMenu {
 
   /** @override */
   getLabelForItem(position) {
-    return this.getNameOfPosition_(
-        /** @type {!shaka.config.PositionArea} */ (position));
+    return this.getNameOfPosition_(position);
   }
 
   /** @override */
   onItemSelected(position) {
-    this.player.configure('textDisplayer.positionArea',
-        /** @type {!shaka.config.PositionArea} */ (position));
+    this.player.configure('textDisplayer.positionArea', position);
   }
 
   /** @override */
   getPreviewConfigForItem(position) {
-    return {positionArea: /** @type {!shaka.config.PositionArea} */ (position)};
+    return {positionArea: position};
   }
 
   /** @override */

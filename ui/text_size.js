@@ -16,7 +16,7 @@ goog.requireType('shaka.ui.Controls');
 
 
 /**
- * @extends {shaka.ui.TextStyleMenu}
+ * @extends {shaka.ui.TextStyleMenu<number>}
  * @final
  * @export
  */
@@ -45,18 +45,17 @@ shaka.ui.TextSize = class extends shaka.ui.TextStyleMenu {
 
   /** @override */
   getLabelForItem(fontScaleFactor) {
-    return /** @type {number} */ (fontScaleFactor) * 100 + '%';
+    return fontScaleFactor * 100 + '%';
   }
 
   /** @override */
   onItemSelected(fontScaleFactor) {
-    this.player.configure('textDisplayer.fontScaleFactor',
-        /** @type {number} */ (fontScaleFactor));
+    this.player.configure('textDisplayer.fontScaleFactor', fontScaleFactor);
   }
 
   /** @override */
   getPreviewConfigForItem(fontScaleFactor) {
-    return {fontScaleFactor: /** @type {number} */ (fontScaleFactor)};
+    return {fontScaleFactor: fontScaleFactor};
   }
 
   /** @override */

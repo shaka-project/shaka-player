@@ -11,6 +11,7 @@ goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.requireType('shaka.ui.Controls');
+goog.requireType('shaka.ui.TextStylePreview');
 
 
 /**
@@ -19,6 +20,7 @@ goog.requireType('shaka.ui.Controls');
  * onItemSelected / getPreviewConfigForItem / getCurrentValueLabel.
  *
  * @extends {shaka.ui.SettingsMenu}
+ * @template T
  * @abstract
  * @export
  */
@@ -65,27 +67,27 @@ shaka.ui.TextStyleMenu = class extends shaka.ui.SettingsMenu {
   }
 
   /**
-   * @return {!Array<*>}
+   * @return {!Array<T>}
    * @protected
    */
   getItems() { return []; }
 
   /**
-   * @param {*} item
+   * @param {T} item
    * @return {string}
    * @protected
    */
   getLabelForItem(item) { return ''; }
 
   /**
-   * @param {*} item
+   * @param {T} item
    * @protected
    */
   onItemSelected(item) {}
 
   /**
-   * @param {*} item
-   * @return {!Object}
+   * @param {T} item
+   * @return {!shaka.ui.TextStylePreview.Configuration}
    * @protected
    */
   getPreviewConfigForItem(item) { return {}; }
