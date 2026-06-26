@@ -228,6 +228,7 @@ Playready
 Quicktime
 svta
 teppeis
+TiVo
 Tizen
 Uplynk
 Verimatrix
