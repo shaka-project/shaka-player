@@ -401,7 +401,7 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_('Dropped Frames Ban Duration',
             'abr.advanced.droppedFramesBanDuration')
-        .addNumberInput_('Dropped Frames Ban Duration',
+        .addNumberInput_('Min Buffer Ahead To Upgrade',
             'abr.minBufferAheadToUpgrade',
             /* canBeDecimal= */ true,
             /* canBeZero= */ true);
