@@ -149,7 +149,7 @@ shaka.ui.Utils = class {
    * and the visual indicator class atomically.
    * @param {!HTMLElement} button
    * @param {!HTMLElement} chosenItemElement
-   * @param {boolean} chosen
+   * @param {boolean=} chosen
    */
   static setChosenItem(button, chosenItemElement, chosen = true) {
     button.setAttribute('aria-checked', chosen ? 'true' : 'false');

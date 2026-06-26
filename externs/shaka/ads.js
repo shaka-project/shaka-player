@@ -78,6 +78,7 @@ shaka.extern.AdCuePoint;
  *   pre: boolean,
  *   post: boolean,
  *   timelineRange: boolean,
+ *   resolutionTimeOffset: (number|undefined),
  *   loop: boolean,
  *   overlay: ?shaka.extern.AdPositionInfo,
  *   displayOnBackground: boolean,
@@ -132,6 +133,14 @@ shaka.extern.AdCuePoint;
  * @property {boolean} timelineRange
  *   Indicates whether the  interstitial should be presented in a timeline UI
  *   as a single point or as a range.
+ * @property {(number|undefined)} resolutionTimeOffset
+ *   The offset, in seconds before <code>startTime</code>, at which the
+ *   interstitial's resources (e.g. an HLS X-ASSET-LIST) may be resolved and
+ *   preloaded. This maps to the DASH <code>earliestResolutionTimeOffset</code>
+ *   attribute and to the HLS <code>com.apple.hls.preload</code> EXT-X-DATERANGE
+ *   mechanism (RFC 8216bis Appendix F). When it is <code>undefined</code> or
+ *   <code>0</code>, the <code>interstitialPreloadAheadTime</code> configuration
+ *   value is used instead.
  * @property {boolean} loop
  *   Indicates that the interstitials should play in loop.
  *   Only applies if the interstitials is an overlay.
