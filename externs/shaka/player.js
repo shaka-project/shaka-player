@@ -2721,6 +2721,7 @@ shaka.extern.AdsConfiguration;
  *   preferNetworkInformationBandwidth: boolean,
  *   droppedFrames: boolean,
  *   allowAudioFallback: boolean,
+ *   minBufferAheadToUpgrade: number,
  * }}
  *
  * @property {boolean} enabled
@@ -2825,6 +2826,11 @@ shaka.extern.AdsConfiguration;
  *   soon as the bandwidth allows it.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {number} minBufferAheadToUpgrade
+ *   The minimum amount of buffer, in seconds, required ahead of the current
+ *   playback position before upgrading to a higher bandwidth rendition.
+ *   The recommended value should be defined according to the segment length.
+ *   Defaults to <code>0</code>.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
