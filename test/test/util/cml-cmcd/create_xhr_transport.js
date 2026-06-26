@@ -29,46 +29,48 @@ cml.cmcd.createXhrTransport_completeXhrWith_ =
       ProgressEvent :
       Event;
 
-  queueMicrotask(function() {
-    const xhrAny = /** @type {!Object<string, *>} */ (xhr);
-    try {
-      Object.defineProperty(
-          xhr, 'status', {value: response.status, configurable: true});
-      Object.defineProperty(
-          xhr, 'statusText',
-          {value: response.statusText, configurable: true});
-      Object.defineProperty(
-          xhr, 'readyState', {value: 4, configurable: true});
-      Object.defineProperty(
-          xhr, 'responseURL',
-          {value: xhrAny['_cmcdUrl'] || '', configurable: true});
-      Object.defineProperty(
-          xhr, 'response', {value: text, configurable: true});
-      Object.defineProperty(
-          xhr, 'responseText', {value: text, configurable: true});
+  // Defer completion to a fresh microtask so onload/onloadend never fire
+  // synchronously within send(), mirroring real XHR behavior.
+  await Promise.resolve();
 
-      if (typeof xhr.onload === 'function') {
-        xhr.onload.call(xhr, new ProgressEventCtor('load'));
-      }
-      if (typeof xhr.onloadend === 'function') {
-        xhr.onloadend.call(xhr, new ProgressEventCtor('loadend'));
-      }
-    } catch (err) {
-      // Fallback for environments where defineProperty is restricted.
-      xhrAny['status'] = response.status;
-      xhrAny['statusText'] = response.statusText;
-      xhrAny['readyState'] = 4;
-      xhrAny['responseURL'] = xhrAny['_cmcdUrl'] || '';
-      xhrAny['response'] = text;
-      xhrAny['responseText'] = text;
-      if (typeof xhr.onload === 'function') {
-        xhr.onload.call(xhr, new ProgressEventCtor('load'));
-      }
-      if (typeof xhr.onloadend === 'function') {
-        xhr.onloadend.call(xhr, new ProgressEventCtor('loadend'));
-      }
+  const xhrAny = /** @type {!Object<string, *>} */ (xhr);
+  try {
+    Object.defineProperty(
+        xhr, 'status', {value: response.status, configurable: true});
+    Object.defineProperty(
+        xhr, 'statusText',
+        {value: response.statusText, configurable: true});
+    Object.defineProperty(
+        xhr, 'readyState', {value: 4, configurable: true});
+    Object.defineProperty(
+        xhr, 'responseURL',
+        {value: xhrAny['_cmcdUrl'] || '', configurable: true});
+    Object.defineProperty(
+        xhr, 'response', {value: text, configurable: true});
+    Object.defineProperty(
+        xhr, 'responseText', {value: text, configurable: true});
+
+    if (typeof xhr.onload === 'function') {
+      xhr.onload.call(xhr, new ProgressEventCtor('load'));
     }
-  });
+    if (typeof xhr.onloadend === 'function') {
+      xhr.onloadend.call(xhr, new ProgressEventCtor('loadend'));
+    }
+  } catch (err) {
+    // Fallback for environments where defineProperty is restricted.
+    xhrAny['status'] = response.status;
+    xhrAny['statusText'] = response.statusText;
+    xhrAny['readyState'] = 4;
+    xhrAny['responseURL'] = xhrAny['_cmcdUrl'] || '';
+    xhrAny['response'] = text;
+    xhrAny['responseText'] = text;
+    if (typeof xhr.onload === 'function') {
+      xhr.onload.call(xhr, new ProgressEventCtor('load'));
+    }
+    if (typeof xhr.onloadend === 'function') {
+      xhr.onloadend.call(xhr, new ProgressEventCtor('loadend'));
+    }
+  }
 };
 
 
