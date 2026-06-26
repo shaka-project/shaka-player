@@ -1033,6 +1033,27 @@ describe('DashParser Manifest', () => {
           shaka.util.Error.Code.DASH_DUPLICATE_REPRESENTATION_ID);
       await Dash.testFails(source, error);
     });
+
+    it('unsupported MPD-level EssentialProperty', async () => {
+      const source = [
+        '<MPD minBufferTime="PT75S">',
+        '  <EssentialProperty schemeIdUri="urn:example:unsupported:2024" />',
+        '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentTemplate media="1.mp4" duration="1" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.DASH_UNSUPPORTED_ESSENTIAL_PROPERTY,
+          ['urn:example:unsupported:2024']);
+      await Dash.testFails(source, error);
+    });
   });
 
   it('parses dependencyStream tracks', async () => {
@@ -1322,6 +1343,51 @@ describe('DashParser Manifest', () => {
     const trickModeVideo = variant && variant.video &&
                          variant.video.trickModeVideo;
     expect(trickModeVideo).toBe(null);
+  });
+
+  it('ignores unsupported MPD-level SupplementalProperty', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <SupplementalProperty schemeIdUri="urn:example:unsupported:2024" />',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation bandwidth="1">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('https://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('https://foo', playerInterface);
+
+    // A SupplementalProperty is not essential, so it does not block parsing.
+    expect(manifest.variants.length).toBe(1);
+  });
+
+  it('allows supported MPD-level EssentialProperty', async () => {
+    // Regression test: a recognized EssentialProperty scheme at MPD level (e.g.
+    // SGAI manifests carrying urlparam:2025) must not terminate parsing.
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation bandwidth="1">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '  <EssentialProperty schemeIdUri="urn:mpeg:dash:urlparam:2025" />',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('https://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('https://foo', playerInterface);
+
+    expect(manifest.variants.length).toBe(1);
   });
 
   it('populates groupId', async () => {
