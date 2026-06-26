@@ -2695,6 +2695,7 @@ shaka.extern.AdsConfiguration;
  * @property {boolean} droppedFrames
  *   Enable or disable dropped frames protection.
  *   <br>
+ *   Defaults to <code>true</code>.
  * @property {number} minBufferAheadToUpgrade
  *   The minimum amount of buffer, in seconds, required ahead of the current
  *   playback position before upgrading to a higher bandwidth rendition.
