@@ -288,7 +288,8 @@ describe('SimpleAbrManager', () => {
 
     // The second parameter is missing to indicate that the buffer should not be
     // cleared.
-    expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object), false, 0, 0);
+    expect(switchCallback).toHaveBeenCalledWith(
+        jasmine.any(Object), false, 0, 0);
   });
 
   it('does clear the buffer on upgrade with safeMargin to 4', () => {
@@ -316,7 +317,8 @@ describe('SimpleAbrManager', () => {
 
     // The second parameter is missing to indicate that the buffer should not be
     // cleared.
-    expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object), true, 4, 0);
+    expect(switchCallback).toHaveBeenCalledWith(
+        jasmine.any(Object), true, 4, 0);
   });
 
   it('does not clear the buffer on downgrade', () => {
@@ -343,7 +345,8 @@ describe('SimpleAbrManager', () => {
 
     // The second parameter is missing to indicate that the buffer should not be
     // cleared.
-    expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object), false, 0, 0);
+    expect(switchCallback).toHaveBeenCalledWith(
+        jasmine.any(Object), false, 0, 0);
   });
 
   it('will respect restrictions', () => {
