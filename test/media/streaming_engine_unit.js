@@ -754,7 +754,9 @@ describe('StreamingEngine', () => {
     const config = shaka.util.PlayerConfiguration.createDefault().streaming;
     config.lowLatencyMode = true;
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-    mediaSourceEngine.appendBuffer.and.stub();
+    mediaSourceEngine.appendBuffer.and.returnValue(Promise.resolve({
+      mediaTimestamp: null,
+    }));
     createStreamingEngine(config);
 
     // Here we go!
@@ -1282,7 +1284,9 @@ describe('StreamingEngine', () => {
       mediaSourceEngine.appendBuffer.and.callFake(
           (type, data, reference) => {
             bufferEnd[type] = reference && reference.endTime;
-            return Promise.resolve();
+            return Promise.resolve({
+              mediaTimestamp: null,
+            });
           });
       mediaSourceEngine.bufferEnd.and.callFake((type) => {
         return bufferEnd[type];
@@ -3408,7 +3412,9 @@ describe('StreamingEngine', () => {
       const bufferEnd = {audio: 0, video: 0, text: 0};
       mediaSourceEngine.appendBuffer.and.callFake((type, data, reference) => {
         bufferEnd[type] = reference && reference.endTime;
-        return Promise.resolve();
+        return Promise.resolve({
+          mediaTimestamp: null,
+        });
       });
       mediaSourceEngine.bufferEnd.and.callFake((type) => bufferEnd[type]);
       mediaSourceEngine.bufferedAheadOf.and.callFake(
@@ -3709,7 +3715,9 @@ describe('StreamingEngine', () => {
       mediaSourceEngine.appendBuffer.and.callFake(
           (type, data, reference) => {
             bufferEnd[type] = reference && reference.endTime;
-            return Promise.resolve();
+            return Promise.resolve({
+              mediaTimestamp: null,
+            });
           });
       mediaSourceEngine.bufferEnd.and.callFake((type) => {
         return bufferEnd[type];
