@@ -64,6 +64,27 @@ describe('TsParser', () => {
     expect(starttime).toBeCloseTo(90019.586, 3);
   });
 
+  it('gets the start time from TS PES headers', async () => {
+    const responses = await Promise.all([
+      Util.fetch('/base/test/test/assets/video.ts'),
+      Util.fetch('/base/test/test/assets/audio.ts'),
+    ]);
+    const videoSegment = BufferUtils.toUint8(responses[0]);
+    const audioSegment = BufferUtils.toUint8(responses[1]);
+
+    const videoStartTime = new shaka.util.TsParser().parse(videoSegment)
+        .getStartTime(ContentType.VIDEO);
+    const headerVideoStartTime = new shaka.util.TsParser().parse(videoSegment)
+        .getStartTimeFromPesHeaders(ContentType.VIDEO);
+    expect(headerVideoStartTime).toBe(videoStartTime);
+
+    const audioStartTime = new shaka.util.TsParser().parse(audioSegment)
+        .getStartTime(ContentType.AUDIO);
+    const headerAudioStartTime = new shaka.util.TsParser().parse(audioSegment)
+        .getStartTimeFromPesHeaders(ContentType.AUDIO);
+    expect(headerAudioStartTime).toBe(audioStartTime);
+  });
+
   it('get the codecs from a TS segment', async () => {
     const responses = await Promise.all([
       Util.fetch('/base/test/test/assets/id3-metadata.ts'),
