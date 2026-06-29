@@ -90,4 +90,56 @@ describe('Uint8ArrayUtils', () => {
       expect(Uint8ArrayUtils.concatRange([])).toEqual(new Uint8Array([]));
     });
   });
+
+  describe('removeEmulationPreventionBytes', () => {
+    const removeEmu = (/** @type {!Array<number>} */ arr) =>
+      Uint8ArrayUtils.removeEmulationPreventionBytes(new Uint8Array(arr));
+
+    it('removes a single emulation prevention byte', () => {
+      // 0x00, 0x00, 0x03 -> the 0x03 is dropped.
+      expect(removeEmu([0x00, 0x00, 0x03]))
+          .toEqual(new Uint8Array([0x00, 0x00]));
+    });
+
+    it('returns a new array without mutating the input', () => {
+      // Chromium VDA is strict about NAL unit length, so the result must be a
+      // freshly built array (correct, shortened length) and the input must be
+      // left untouched rather than having its bytes shifted in place.
+      const input = new Uint8Array([0x00, 0x00, 0x03]);
+      const result = Uint8ArrayUtils.removeEmulationPreventionBytes(input);
+      expect(result).toEqual(new Uint8Array([0x00, 0x00]));
+      expect(input).toEqual(new Uint8Array([0x00, 0x00, 0x03]));
+    });
+
+    it('removes consecutive emulation prevention bytes', () => {
+      expect(removeEmu([0x00, 0x00, 0x03, 0x00, 0x00, 0x03]))
+          .toEqual(new Uint8Array([0x00, 0x00, 0x00, 0x00]));
+    });
+
+    it('removes an emulation prevention byte after three zeros', () => {
+      expect(removeEmu([0x00, 0x00, 0x00, 0x03]))
+          .toEqual(new Uint8Array([0x00, 0x00, 0x00]));
+    });
+
+    it('keeps a 0x03 not preceded by two zeros', () => {
+      expect(removeEmu([0x00, 0x03])).toEqual(new Uint8Array([0x00, 0x03]));
+      expect(removeEmu([0x01, 0x00, 0x03]))
+          .toEqual(new Uint8Array([0x01, 0x00, 0x03]));
+    });
+
+    it('keeps data without emulation prevention bytes', () => {
+      expect(removeEmu([0x01, 0x02, 0x03, 0x04]))
+          .toEqual(new Uint8Array([0x01, 0x02, 0x03, 0x04]));
+    });
+
+    it('handles a mix of escaped and unescaped bytes', () => {
+      // 0x00 0x00 0x03 (escaped) then 0x01, then 0x00 0x00 0x03 0x04 (escaped).
+      expect(removeEmu([0x00, 0x00, 0x03, 0x01, 0x00, 0x00, 0x03, 0x04]))
+          .toEqual(new Uint8Array([0x00, 0x00, 0x01, 0x00, 0x00, 0x04]));
+    });
+
+    it('handles empty input', () => {
+      expect(removeEmu([])).toEqual(new Uint8Array([]));
+    });
+  });
 });

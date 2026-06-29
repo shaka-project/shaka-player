@@ -228,6 +228,7 @@ Playready
 Quicktime
 svta
 teppeis
+TiVo
 Tizen
 Uplynk
 Verimatrix
@@ -274,6 +275,7 @@ containerless
 covr
 cpil
 cuelist
+cuepoint
 cuepoints
 cwip
 demuxer
@@ -583,6 +585,7 @@ RMKSA
 RVFC
 SEEKTABLE
 servernum
+SGAI
 Shoutcast
 sintel
 stardate
