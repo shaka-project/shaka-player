@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.16.39](https://github.com/shaka-project/shaka-player/compare/v4.16.38...v4.16.39) (2026-06-29)
+
+
+### Bug Fixes
+
+* Correct device detection for PlayStation 4 Pro to enable 4K resolution ([#10269](https://github.com/shaka-project/shaka-player/issues/10269)) ([eea9fd2](https://github.com/shaka-project/shaka-player/commit/eea9fd2cce4b46d8564a00fcde72cdacacf6c963))
+
 ## [4.16.38](https://github.com/shaka-project/shaka-player/compare/v4.16.37...v4.16.38) (2026-06-24)
 
 
