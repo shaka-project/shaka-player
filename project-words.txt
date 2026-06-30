@@ -259,6 +259,7 @@ bsid
 buffersource
 cabac
 cbcs
+cdat
 cdna
 cehx
 cenc
