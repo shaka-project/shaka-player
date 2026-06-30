@@ -2120,6 +2120,21 @@ describe('Interstitial Ad manager', () => {
   });
 
   describe('DASH', () => {
+    // The InterstitialAdManager no longer ingests DASH regions directly;
+    // shaka.ads.AdManager parses them with DashInterstitialParser and feeds the
+    // result to addInterstitials. This helper reproduces that wiring so the
+    // tests can keep exercising the parse + schedule pipeline end to end.
+    /**
+     * @param {shaka.extern.TimelineRegionInfo} region
+     * @return {!Promise}
+     */
+    async function addRegion(region) {
+      const interstitial = shaka.ads.DashInterstitialParser.parseRegion(region);
+      if (interstitial) {
+        await interstitialAdManager.addInterstitials([interstitial]);
+      }
+    }
+
     it('supports alternative MPD', async () => {
       const eventString = [
         '<Event duration="1" id="PREROLL" presentationTime="0">',
@@ -2138,7 +2153,7 @@ describe('Interstitial Ad manager', () => {
         value: '',
         timescale: 1,
       };
-      await interstitialAdManager.addRegion(region);
+      await addRegion(region);
 
       expect(onEventSpy).toHaveBeenCalledTimes(1);
       const eventValue1 = {
@@ -2152,55 +2167,24 @@ describe('Interstitial Ad manager', () => {
       };
       expect(onEventSpy).toHaveBeenCalledWith(
           jasmine.objectContaining(eventValue1));
-    });
 
-    it('supports alternative MPD with noJump and skipAfter', async () => {
-      const eventString = [
-        '<Event duration="1" id="TEST" presentationTime="1">',
-        '<InsertPresentation uri="test.mpd" noJump="1" skipAfter="PT0S"/>',
-        '</Event>',
-      ].join('');
-      const eventNode = TXml.parseXmlString(eventString);
-      goog.asserts.assert(eventNode, 'Should have a event node!');
-      /** @type {shaka.extern.TimelineRegionInfo} */
-      const region = {
-        startTime: 1,
-        endTime: 2,
-        id: 'TEST',
-        schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:insert:2025',
-        eventNode,
-        value: '',
-        timescale: 1,
-      };
-      await interstitialAdManager.addRegion(region);
-
-      expect(onEventSpy).toHaveBeenCalledTimes(1);
-      const eventValue1 = {
-        type: 'ad-cue-points-changed',
-        cuepoints: [
-          {
-            start: 1,
-            end: null,
-          },
-        ],
-      };
-      expect(onEventSpy).toHaveBeenCalledWith(
-          jasmine.objectContaining(eventValue1));
-
+      // The parser leaves mimeType null; addInterstitials resolves it from the
+      // URI. The detailed field-by-field parsing is covered by
+      // DashInterstitialParser's own unit tests.
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
       /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
-        id: 'TEST',
+        id: 'PREROLL',
         groupId: null,
-        startTime: 1,
-        endTime: 2,
+        startTime: 0,
+        endTime: 1,
         uri: 'test.mpd',
         mimeType: 'application/dash+xml',
-        isSkippable: true,
-        skipOffset: 0,
+        isSkippable: false,
+        skipOffset: null,
         skipFor: null,
-        canJump: false,
+        canJump: true,
         resumeOffset: 0,
         playoutLimit: null,
         once: false,
@@ -2217,34 +2201,6 @@ describe('Interstitial Ad manager', () => {
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
-
-    it('supports alternative MPD with earliestResolutionTimeOffset',
-        async () => {
-          const eventString = [
-            '<Event duration="2" id="TEST" presentationTime="10">',
-            '<InsertPresentation uri="test.mpd" ' +
-                'earliestResolutionTimeOffset="20"/>',
-            '</Event>',
-          ].join('');
-          const eventNode = TXml.parseXmlString(eventString);
-          goog.asserts.assert(eventNode, 'Should have a event node!');
-          /** @type {shaka.extern.TimelineRegionInfo} */
-          const region = {
-            startTime: 10,
-            endTime: 12,
-            id: 'TEST',
-            schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:insert:2025',
-            eventNode,
-            value: '',
-            timescale: 2,
-          };
-          await interstitialAdManager.addRegion(region);
-
-          const interstitials = interstitialAdManager.getInterstitials();
-          expect(interstitials.length).toBe(1);
-          // 20 (in timescale units) / timescale(2) = 10 seconds.
-          expect(interstitials[0].resolutionTimeOffset).toBe(10);
-        });
 
     it('ignore duplicate alternative MPD', async () => {
       const eventString = [
@@ -2264,8 +2220,8 @@ describe('Interstitial Ad manager', () => {
         value: '',
         timescale: 1,
       };
-      await interstitialAdManager.addRegion(region);
-      await interstitialAdManager.addRegion(region);
+      await addRegion(region);
+      await addRegion(region);
 
       expect(onEventSpy).toHaveBeenCalledTimes(1);
       const eventValue1 = {
@@ -2300,7 +2256,7 @@ describe('Interstitial Ad manager', () => {
         value: '',
         timescale: 1,
       };
-      await interstitialAdManager.addRegion(region);
+      await addRegion(region);
 
       expect(onEventSpy).not.toHaveBeenCalled();
     });
@@ -2329,7 +2285,7 @@ describe('Interstitial Ad manager', () => {
         value: '',
         timescale: 1,
       };
-      await interstitialAdManager.addOverlayRegion(region);
+      await addRegion(region);
 
       expect(onEventSpy).not.toHaveBeenCalled();
 
@@ -2401,184 +2357,9 @@ describe('Interstitial Ad manager', () => {
         value: '',
         timescale: 1,
       };
-      await interstitialAdManager.addOverlayRegion(region);
+      await addRegion(region);
 
       expect(onEventSpy).not.toHaveBeenCalled();
-    });
-
-    it('supports overlay events with L-Shape format', async () => {
-      const eventString = [
-        '<Event duration="1" id="OVERLAY" presentationTime="0">',
-        '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd" z="-1">',
-        '<Viewport x="1920" y="1080"/>',
-        '<Squeeze>',
-        '<TopLeft x="0" y="0"/>',
-        '<Size x="960" y="540"/>',
-        '</Squeeze>',
-        '</OverlayEvent>',
-        '</Event>',
-      ].join('');
-      const eventNode = TXml.parseXmlString(eventString);
-      goog.asserts.assert(eventNode, 'Should have a event node!');
-      /** @type {shaka.extern.TimelineRegionInfo} */
-      const region = {
-        startTime: 0,
-        endTime: 1,
-        id: 'OVERLAY',
-        schemeIdUri: 'urn:scte:dash:scte214-events',
-        eventNode,
-        value: '',
-        timescale: 1,
-      };
-      await interstitialAdManager.addOverlayRegion(region);
-
-      expect(onEventSpy).not.toHaveBeenCalled();
-
-      const interstitials = interstitialAdManager.getInterstitials();
-      expect(interstitials.length).toBe(1);
-      /** @type {!shaka.extern.AdInterstitial} */
-      const expectedInterstitial = {
-        id: 'OVERLAY',
-        groupId: null,
-        startTime: 0,
-        endTime: 1,
-        uri: 'test.mpd',
-        mimeType: 'application/dash+xml',
-        isSkippable: false,
-        skipOffset: null,
-        skipFor: null,
-        canJump: true,
-        resumeOffset: null,
-        playoutLimit: null,
-        once: false,
-        pre: false,
-        post: false,
-        timelineRange: true,
-        loop: false,
-        overlay: {
-          viewport: {
-            x: 1920,
-            y: 1080,
-          },
-          topLeft: {
-            x: 0,
-            y: 0,
-          },
-          size: {
-            x: 1920,
-            y: 1080,
-          },
-        },
-        displayOnBackground: true,
-        currentVideo: {
-          viewport: {
-            x: 1920,
-            y: 1080,
-          },
-          topLeft: {
-            x: 0,
-            y: 0,
-          },
-          size: {
-            x: 960,
-            y: 540,
-          },
-        },
-        background: null,
-        clickThroughUrl: null,
-        tracking: null,
-      };
-      expect(interstitials[0]).toEqual(expectedInterstitial);
-    });
-
-    it('supports overlay events with double box format', async () => {
-      const eventString = [
-        '<Event duration="1" id="OVERLAY" presentationTime="0">',
-        '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd" z="-1">',
-        '<Background>red</Background>',
-        '<Viewport x="1920" y="1080"/>',
-        '<Overlay>',
-        '<TopLeft x="0" y="720"/>',
-        '<Size x="480" y="360"/>',
-        '</Overlay>',
-        '<Squeeze>',
-        '<TopLeft x="0" y="0"/>',
-        '<Size x="960" y="540"/>',
-        '</Squeeze>',
-        '</OverlayEvent>',
-        '</Event>',
-      ].join('');
-      const eventNode = TXml.parseXmlString(eventString);
-      goog.asserts.assert(eventNode, 'Should have a event node!');
-      /** @type {shaka.extern.TimelineRegionInfo} */
-      const region = {
-        startTime: 0,
-        endTime: 1,
-        id: 'OVERLAY',
-        schemeIdUri: 'urn:scte:dash:scte214-events',
-        eventNode,
-        value: '',
-        timescale: 1,
-      };
-      await interstitialAdManager.addOverlayRegion(region);
-
-      expect(onEventSpy).not.toHaveBeenCalled();
-
-      const interstitials = interstitialAdManager.getInterstitials();
-      expect(interstitials.length).toBe(1);
-      /** @type {!shaka.extern.AdInterstitial} */
-      const expectedInterstitial = {
-        id: 'OVERLAY',
-        groupId: null,
-        startTime: 0,
-        endTime: 1,
-        uri: 'test.mpd',
-        mimeType: 'application/dash+xml',
-        isSkippable: false,
-        skipOffset: null,
-        skipFor: null,
-        canJump: true,
-        resumeOffset: null,
-        playoutLimit: null,
-        once: false,
-        pre: false,
-        post: false,
-        timelineRange: true,
-        loop: false,
-        overlay: {
-          viewport: {
-            x: 1920,
-            y: 1080,
-          },
-          topLeft: {
-            x: 0,
-            y: 720,
-          },
-          size: {
-            x: 480,
-            y: 360,
-          },
-        },
-        displayOnBackground: true,
-        currentVideo: {
-          viewport: {
-            x: 1920,
-            y: 1080,
-          },
-          topLeft: {
-            x: 0,
-            y: 0,
-          },
-          size: {
-            x: 960,
-            y: 540,
-          },
-        },
-        background: 'red',
-        clickThroughUrl: null,
-        tracking: null,
-      };
-      expect(interstitials[0]).toEqual(expectedInterstitial);
     });
   });
 

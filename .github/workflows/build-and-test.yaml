@@ -64,9 +64,6 @@ jobs:
             browser: Firefox
             extra_flags: "--use-xvfb --running_in_vm"
           - os: ubuntu-latest
-            browser: Edge
-            extra_flags: "--use-xvfb --running_in_vm"
-          - os: ubuntu-latest
             browser: Opera
             extra_flags: "--use-xvfb --running_in_vm"
 

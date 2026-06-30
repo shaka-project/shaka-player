@@ -6,6 +6,7 @@
 +../../lib/ads/ads_stats.js
 +../../lib/ads/client_side_ad.js
 +../../lib/ads/client_side_ad_manager.js
++../../lib/ads/dash_interstitial_parser.js
 +../../lib/ads/interstitial_ad.js
 +../../lib/ads/interstitial_ad_manager.js
 +../../lib/ads/interstitial_static_ad.js
@@ -15,3 +16,4 @@
 +../../lib/ads/server_side_ad_manager.js
 +../../lib/ads/svta_ad.js
 +../../lib/ads/svta_ad_manager.js
++../../lib/ads/vast_interstitial_parser.js
