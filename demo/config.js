@@ -422,9 +422,6 @@ shakaDemo.Config = class {
 
     const docLink = this.resolveExternLink_('.TextDisplayerConfiguration');
     this.addSection_('Text displayer', docLink)
-        .addNumberInput_('Captions update period',
-            'textDisplayer.captionsUpdatePeriod',
-            /* canBeDecimal= */ true)
         .addNumberInput_('Font scale factor',
             'textDisplayer.fontScaleFactor',
             /* canBeDecimal= */ true)

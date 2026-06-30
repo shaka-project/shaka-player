@@ -3002,7 +3002,6 @@ shaka.extern.OfflineConfiguration;
 
 /**
  * @typedef {{
- *   captionsUpdatePeriod: number,
  *   fontScaleFactor: number,
  *   positionArea: shaka.config.PositionArea,
  *   subtitleDelay: number,
@@ -3012,10 +3011,6 @@ shaka.extern.OfflineConfiguration;
  * @description
  *   Text displayer configuration.
  *
- * @property {number} captionsUpdatePeriod
- *   The number of seconds to see if the captions should be updated.
- *   <br>
- *   Defaults to <code>0.25</code>.
  * @property {number} fontScaleFactor
  *   The font scale factor used to increase or decrease the font size.
  *   <br>

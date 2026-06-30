@@ -411,4 +411,76 @@ describe('Cea608Memory', () => {
       expect(caption).toEqual(expectedCaption);
     });
   });
+
+  describe('progressive reveal', () => {
+    it('reveals characters at their decode times', () => {
+      const startTime = 1;
+      const endTime = 5;
+
+      // Each character is decoded at a later time, as in paint-on / roll-up.
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'a'.charCodeAt(0), 2);
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'b'.charCodeAt(0), 3);
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'c'.charCodeAt(0), 3);
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'd'.charCodeAt(0), 4);
+
+      const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+      topLevelCue.line = 10;
+      topLevelCue.lineInterpretation =
+          shaka.text.Cue.lineInterpretation.PERCENTAGE;
+      // One nested cue per decode time, each ending at the cue's end time.
+      topLevelCue.nestedCues = [
+        CeaUtils.createDefaultCue(/* startTime= */ 2, endTime, 'a'),
+        CeaUtils.createDefaultCue(/* startTime= */ 3, endTime, 'bc'),
+        CeaUtils.createDefaultCue(/* startTime= */ 4, endTime, 'd'),
+      ];
+
+      const caption =
+          memory.forceEmit(startTime, endTime, /* progressive= */ true);
+      expect(caption).toEqual({stream, cue: topLevelCue});
+    });
+
+    it('reveals characters decoded at or before the start immediately', () => {
+      const startTime = 3;
+      const endTime = 5;
+
+      // 'a' and 'b' were decoded at or before the cue start (e.g. a roll-up row
+      // that scrolled up), so they should be revealed immediately; 'c' is new.
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'a'.charCodeAt(0), 1);
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'b'.charCodeAt(0), 3);
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'c'.charCodeAt(0), 4);
+
+      const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+      topLevelCue.line = 10;
+      topLevelCue.lineInterpretation =
+          shaka.text.Cue.lineInterpretation.PERCENTAGE;
+      topLevelCue.nestedCues = [
+        CeaUtils.createDefaultCue(/* startTime= */ 3, endTime, 'ab'),
+        CeaUtils.createDefaultCue(/* startTime= */ 4, endTime, 'c'),
+      ];
+
+      const caption =
+          memory.forceEmit(startTime, endTime, /* progressive= */ true);
+      expect(caption).toEqual({stream, cue: topLevelCue});
+    });
+
+    it('ignores decode times when not progressive (e.g. pop-on)', () => {
+      const startTime = 1;
+      const endTime = 5;
+
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'a'.charCodeAt(0), 2);
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'b'.charCodeAt(0), 3);
+
+      const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+      topLevelCue.line = 10;
+      topLevelCue.lineInterpretation =
+          shaka.text.Cue.lineInterpretation.PERCENTAGE;
+      // Without progressive mode, everything appears at once at the start time.
+      topLevelCue.nestedCues = [
+        CeaUtils.createDefaultCue(startTime, endTime, 'ab'),
+      ];
+
+      const caption = memory.forceEmit(startTime, endTime);
+      expect(caption).toEqual({stream, cue: topLevelCue});
+    });
+  });
 });
