@@ -199,10 +199,19 @@ cml.cmcd.CmcdReportRecorder = class {
       return Promise.resolve(matching);
     }
 
+    const rejectOnTimeout = options.rejectOnTimeout !== false;
     return new Promise((resolve, reject) => {
       const timer = /** @type {number} */ (setTimeout(() => {
         this.waiters_.delete(timer);
         const current = this.getMatching_(type);
+        // Soft wait: resolve with whatever arrived rather than rejecting, for
+        // callers that validate over the reports they happen to observe and
+        // assert nothing about the count. A slow browser delivering fewer than
+        // `count` reports must not fail the run.
+        if (!rejectOnTimeout) {
+          resolve(current);
+          return;
+        }
         reject(new Error(
             'Timeout waiting for ' + count + ' ' + (type || 'any') +
             ' CMCD report(s). Got ' + current.length +

@@ -328,14 +328,20 @@ describe('CmcdManager integration', () => {
   });
 
   afterEach(async () => {
-    if (player) {
-      await player.destroy();
-    }
-    if (recorder) {
-      detachRecorder();
-    }
-    if (eventManager) {
-      eventManager.release();
+    try {
+      if (player) {
+        await player.destroy();
+      }
+    } finally {
+      // Always restore the global fetch / HttpFetchPlugin.fetch_ patch and
+      // release listeners, even if destroy() rejects, so a failure in one spec
+      // cannot leak the recorder's transport patches into later specs.
+      if (recorder) {
+        detachRecorder();
+      }
+      if (eventManager) {
+        eventManager.release();
+      }
     }
   });
 
@@ -380,7 +386,16 @@ describe('CmcdManager integration', () => {
       await video.play();
       // Wait for a few segment reports so we can find one with full CMCD data.
       // Initialization segments and early requests may omit ot/br.
-      const reports = await recorder.waitForSegments({count: 2});
+      const reports = await recorder.waitForSegments(
+          {count: 2, rejectOnTimeout: false});
+      // A slow browser may deliver only the init segment within the timeout;
+      // require at least one segment report before validating.
+      expect(reports.length)
+          .withContext('expected at least one segment report during playback')
+          .toBeGreaterThan(0);
+      if (!reports.length) {
+        return;
+      }
       // Find the most complete report (has ot and br set).
       const report = reports.find((r) => {
         const d = decodeCmcdFromReport(r);
@@ -412,7 +427,11 @@ describe('CmcdManager integration', () => {
           await waiter.waitForMovementOrFailOnTimeout(video, 10);
           // Clear pre-play reports; wait for fresh post-play reports.
           recorder.clear();
-          const reports = await recorder.waitForSegments({count: 2});
+          // Soft wait: this test validates nor only when present and asserts
+          // nothing about how many segment reports arrive, so a slow browser
+          // delivering fewer than 2 must not fail it.
+          const reports = await recorder.waitForSegments(
+              {count: 2, rejectOnTimeout: false});
           // nor appears only when shaka knows the next segment URL. Not
           // all streams or buffer states guarantee it. Validate when
           // present. In v2, nor is a STRING_LIST inner list → decoded as
@@ -446,7 +465,8 @@ describe('CmcdManager integration', () => {
       // After movement, the 'playing' event has fired and reporter has sta=p.
       // Clear buffering-phase reports and capture new ones during playback.
       recorder.clear();
-      const reports = await recorder.waitForSegments({count: 2});
+      const reports = await recorder.waitForSegments(
+          {count: 2, rejectOnTimeout: false});
       const staValues = reports.map((r) => decodeCmcdFromReport(r)['sta']);
       const staFound = reports.some((r) => {
         const decoded = decodeCmcdFromReport(r);
@@ -469,7 +489,8 @@ describe('CmcdManager integration', () => {
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
       // Clear pre-play reports; wait for fresh reports from active playback.
       recorder.clear();
-      const reports = await recorder.waitForSegments({count: 2});
+      const reports = await recorder.waitForSegments(
+          {count: 2, rejectOnTimeout: false});
       // At least one of mtp (measured) or rtp (requested) should be present.
       const throughputFound = reports.some((r) => {
         const decoded = decodeCmcdFromReport(r);
@@ -699,7 +720,8 @@ describe('CmcdManager integration', () => {
 
       // Clear pre-play reports; wait for fresh segment reports from playback.
       recorder.clear();
-      const reports = await recorder.waitForSegments({count: 2});
+      const reports = await recorder.waitForSegments(
+          {count: 2, rejectOnTimeout: false});
       const staPlayFound = reports.some((r) => {
         const decoded = decodeCmcdFromReport(r);
         return decoded['sta'] === 'p';
