@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runtime: python313
-default_expiration: 1h
+runtime: python314
+default_expiration: 5m
 
 handlers:
 # Server static/index.html as the root.
