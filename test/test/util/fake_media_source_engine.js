@@ -259,7 +259,7 @@ shaka.test.FakeMediaSourceEngine = class {
    * @param {string} type
    * @param {!ArrayBuffer} data
    * @param {?shaka.media.SegmentReference} reference
-   * @return {!Promise}
+   * @return {!Promise<!shaka.media.MediaSourceEngine.AppendBufferInfo>}
    */
   appendBufferImpl(type, data, reference) {
     if (!this.segments[type]) {
@@ -289,7 +289,9 @@ shaka.test.FakeMediaSourceEngine = class {
       this.initSegments[type] =
           this.segmentData[type].initSegments.map((c) => false);
       this.initSegments[type][i] = true;
-      return Promise.resolve();
+      return Promise.resolve({
+        mediaTimestamp: null,
+      });
     }
 
     // Set media segment.
@@ -323,7 +325,9 @@ shaka.test.FakeMediaSourceEngine = class {
     }
 
     this.segments[type][i] = true;
-    return Promise.resolve();
+    return Promise.resolve({
+      mediaTimestamp: segmentData.segmentStartTimes[i],
+    });
   }
 
   /**
