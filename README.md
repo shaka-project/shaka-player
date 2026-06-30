@@ -412,7 +412,6 @@ Shaka currently provides the following versions:
 
  * [Demo](https://shaka-project.github.io/shaka-player-release/)([sources](demo/))
  * [Nightly Demo](https://shaka-project.github.io/shaka-player/)
- * [Demo index](https://index-dot-shaka-player-demo.appspot.com)
  * [API documentation](https://shaka-project.github.io/shaka-player/docs/api/index.html)
  * [Tutorials](https://shaka-project.github.io/shaka-player/docs/api/tutorial-welcome.html)
  * [Hosted builds on Google Hosted Libraries](https://developers.google.com/speed/libraries/#shaka-player)
