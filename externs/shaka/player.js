@@ -2631,9 +2631,6 @@ shaka.extern.AdsConfiguration;
  *   trust the information provided by the browser.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {shaka.extern.DroppedFrameProtectionConfig} droppedFrameProtection
- *   Configuration for monitoring dropped frames and temporarily disabling
- *   streams that exceed a threshold.
  * @property {boolean} droppedFrames
  *   Enable or disable dropped frames protection.
  *   <br>
