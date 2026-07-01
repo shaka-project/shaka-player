@@ -2681,8 +2681,8 @@ describe('TtmlTextParser', () => {
   it('trims cues to segment boundaries', () => {
     verifyHelper(
         [
-          // Capped to segment end time.
-          {startTime: 168, endTime: 170},
+          // Not capped to segment end time; cue may extend past the segment.
+          {startTime: 168, endTime: Util.closeTo(170.92)},
         ],
         '<tt><body><div>' +
         '  <p begin="00:02:48.00" end="00:02:50.92" xml:id="sub22">' +
@@ -2712,6 +2712,26 @@ describe('TtmlTextParser', () => {
           periodStart: 0,
           segmentStart: 170,
           segmentEnd: 180,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {});
+
+    // Test for https://github.com/shaka-project/shaka-player/issues/10172
+    verifyHelper(
+        [
+          // Cue extends past the segment boundary; end must not be clipped.
+          {startTime: Util.closeTo(699.781), endTime: Util.closeTo(700.700)},
+        ],
+        '<tt><body><div>' +
+        '  <p begin="00:11:39.781" end="00:11:40.700">' +
+        '    subtitle text' +
+        '  </p>' +
+        '</div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 699,
+          segmentEnd: 700,
           vttOffset: 0,
           isMpegTs: false,
         },

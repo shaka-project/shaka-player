@@ -181,4 +181,23 @@ describe('TextUtils', () => {
       expect(cue.positionAlign).toBe(defaultCue.positionAlign);
     });
   });
+
+  describe('isCueStrictSubset', () => {
+    it('detects strict subsets with the same payload', () => {
+      const superset = new shaka.text.Cue(168, 170.92, 'hello');
+      const subset = new shaka.text.Cue(170, 170.92, 'hello');
+      expect(shaka.text.Utils.isCueStrictSubset(superset, subset)).toBe(true);
+    });
+
+    it('returns false for equal cues', () => {
+      const cue = new shaka.text.Cue(168, 170.92, 'hello');
+      expect(shaka.text.Utils.isCueStrictSubset(cue, cue)).toBe(false);
+    });
+
+    it('returns false for different payloads', () => {
+      const superset = new shaka.text.Cue(168, 170.92, 'hello');
+      const subset = new shaka.text.Cue(170, 170.92, 'goodbye');
+      expect(shaka.text.Utils.isCueStrictSubset(superset, subset)).toBe(false);
+    });
+  });
 });
