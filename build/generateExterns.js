@@ -908,16 +908,22 @@ function generateShakaNamespaceTypedef(names) {
 function main(args) {
   const inputPaths = [];
   let outputPath;
+  let namespaceTypedefPath;
 
   for (let i = 0; i < args.length; ++i) {
     if (args[i] == '--output') {
       outputPath = args[i + 1];
       ++i;
+    } else if (args[i] == '--namespace-typedef') {
+      namespaceTypedefPath = args[i + 1];
+      ++i;
     } else {
       inputPaths.push(args[i]);
     }
   }
-  assert(outputPath, 'You must specify output file with --output <EXTERNS>');
+  assert(outputPath || namespaceTypedefPath,
+      'You must specify an output file with --output <EXTERNS> and/or ' +
+      '--namespace-typedef <EXTERNS>');
   assert(inputPaths.length, 'You must specify at least one input file.');
 
   // Generate externs for all input paths.
@@ -978,16 +984,33 @@ function main(args) {
   const shakaTypedef = generateShakaNamespaceTypedef(names);
 
   // Output generated externs, with an appropriate header.
-  fs.writeFileSync(outputPath,
-      licenseHeader +
-      '/**\n' +
-      ' * @fileoverview Generated externs.  DO NOT EDIT!\n' +
-      ' * @externs\n' +
-      ' * @suppress {constantProperty, duplicate} To prevent compiler\n' +
-      ' *   errors with the namespace being declared both here and by\n' +
-      ' *   goog.provide in the library.\n' +
-      ' */\n\n' +
-      namespaceDeclarations.join('') + '\n' + shakaTypedef + externs);
+  if (outputPath) {
+    fs.writeFileSync(outputPath,
+        licenseHeader +
+        '/**\n' +
+        ' * @fileoverview Generated externs.  DO NOT EDIT!\n' +
+        ' * @externs\n' +
+        ' * @suppress {constantProperty, duplicate} To prevent compiler\n' +
+        ' *   errors with the namespace being declared both here and by\n' +
+        ' *   goog.provide in the library.\n' +
+        ' */\n\n' +
+        namespaceDeclarations.join('') + '\n' + shakaTypedef + externs);
+  }
+
+  // Output a standalone externs file with only the shaka namespace typedef.
+  // Unlike the full externs above, this does not re-declare the library API, so
+  // it can be type-checked alongside the uncompiled source (e.g. in the tests)
+  // without conflicting with the goog.provide declarations.
+  if (namespaceTypedefPath) {
+    fs.writeFileSync(namespaceTypedefPath,
+        licenseHeader +
+        '/**\n' +
+        ' * @fileoverview Generated externs for the shaka namespace type.\n' +
+        ' *   DO NOT EDIT!\n' +
+        ' * @externs\n' +
+        ' */\n\n' +
+        shakaTypedef);
+  }
 }
 
 

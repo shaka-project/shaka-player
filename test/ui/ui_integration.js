@@ -27,7 +27,7 @@ describe('UI', () => {
   let ui;
   /** @type {!shaka.ui.Controls} */
   let controls;
-  /** @type {shakaNamespaceType} */
+  /** @type {shaka} */
   let compiledShaka;
   /** @type {!Array<string>|undefined} */
   let savedLanguages;
@@ -758,8 +758,10 @@ describe('UI', () => {
           videoContainer, fakeControls);
       uncompiledElement.release();
 
+      /** @type {typeof shaka.ui.Element} */
+      const CompiledElement = compiledShaka.ui.Element;
       /** @extends {shaka.ui.Element} */
-      const TestElement = class extends compiledShaka.ui.Element {
+      const TestElement = class extends CompiledElement {
         /**
          * @param {!HTMLElement} parent
          * @param {!shaka.ui.Controls} controls
