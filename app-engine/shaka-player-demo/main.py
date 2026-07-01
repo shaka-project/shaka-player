@@ -30,6 +30,9 @@ DOCS_API = MAIN_SITE + 'docs/api/'
 SUPPORT = MAIN_SITE + 'support.html'
 POSTER = MAIN_SITE + 'demo/poster.png'
 AUDIO_POSTER = MAIN_SITE + 'demo/poster-audio.gif'
+ERROR_CODE_LOOKUP_HOST = 'error-code-lookup-dot-shaka-player-demo.appspot.com'
+ERROR_CODE_TEMPLATE = DOCS_API + 'shaka.util.Error.html#value:{0}'
+INDEX_HOST = 'index-dot-shaka-player-demo.appspot.com'
 
 # The old demo fetched this for clock sync.  Akamai's endpoint sends permissive
 # CORS headers, which is why it was chosen as the in-app replacement, so it is
@@ -62,6 +65,20 @@ def version_prefix(host):
 def compat(path):
   host = request.host.split(':')[0].lower()
   path = '/' + path
+
+  # An old error-code-lookup tool that was used internally at Google for short
+  # links.  Now rolled into this deployment directly.
+  if host == ERROR_CODE_LOOKUP_HOST:
+    # The path (after the slash) was an error code.  Forward to the docs with a
+    # highlight on that specific error code.
+    code = path[1:]
+    url = ERROR_CODE_TEMPLATE.format(code)
+    return redirect(url, code=302)
+
+  # The index subdomain used to have a list of hosted versions.  Now, we just
+  # show a turndown notice with links to CDNs.
+  if host == INDEX_HOST:
+    return render_template('index.html')
 
   # The nightly subdomain mirrored the main branch; everything else (including
   # the bare domain) maps to the latest release.
