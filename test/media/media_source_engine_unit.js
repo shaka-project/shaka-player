@@ -643,6 +643,42 @@ describe('MediaSourceEngine', () => {
       await p;
     });
 
+    it('returns parsed media timestamp', async () => {
+      const reference = dummyReference(7, 10);
+      spyOn(mediaSourceEngine, 'getTimestampAndDispatchMetadata')
+          .and.returnValue({
+            timestamp: 5,
+            metadata: [],
+          });
+
+      const p = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, reference, fakeStream,
+          /* hasClosedCaptions= */ false);
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      audioSourceBuffer.updateend();
+
+      const appendBufferInfo = await p;
+      expect(appendBufferInfo.mediaTimestamp).toBe(5);
+    });
+
+    it('returns null media timestamp when none is parsed', async () => {
+      const reference = dummyReference(7, 10);
+      spyOn(mediaSourceEngine, 'getTimestampAndDispatchMetadata')
+          .and.returnValue({
+            timestamp: null,
+            metadata: [],
+          });
+
+      const p = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, reference, fakeStream,
+          /* hasClosedCaptions= */ false);
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      audioSourceBuffer.updateend();
+
+      const appendBufferInfo = await p;
+      expect(appendBufferInfo.mediaTimestamp).toBeNull();
+    });
+
     it('rejects promise when operation throws', async () => {
       const reference = dummyReference(0, 1000);
       audioSourceBuffer.appendBuffer.and.throwError('fail!');

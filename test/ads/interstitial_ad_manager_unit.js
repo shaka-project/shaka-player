@@ -1673,10 +1673,468 @@ describe('Interstitial Ad manager', () => {
         expect(interstitials[0].id).not.toBe(
             'MID_shaka_asset_0');
       });
+
+      it('re-requests the asset list with a new _HLS_start_offset ' +
+          'after seeking into it', async () => {
+        spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+        spyOn(player, 'isLive').and.returnValue(true);
+        spyOn(player, 'getLoadMode').and.returnValue(
+            shaka.Player.LoadMode.MEDIA_SOURCE);
+        spyOn(player, 'seekRange').and.returnValue({start: 0, end: Infinity});
+
+        const assetsList = JSON.stringify({
+          ASSETS: [{URI: 'ad.m3u8'}],
+        });
+        // Initial resolution at the break start (offset 0).
+        networkingEngine.setResponseText(
+            'test:/test.json?_HLS_primary_id=1', assetsList);
+        // Resolution after seeking 15s into the break.
+        networkingEngine.setResponseText(
+            'test:/test.json?_HLS_primary_id=1&_HLS_start_offset=15',
+            assetsList);
+
+        fakeCurrentTime = 10;
+        const metadata = {
+          type: 'com.apple.quicktime.HLS',
+          startTime: 10,
+          endTime: 40,
+          values: [
+            {key: 'ID', data: 'MID'},
+            {key: 'X-ASSET-LIST', data: 'test:/test.json'},
+          ],
+        };
+        await interstitialAdManager.addMetadata(metadata);
+        expect(interstitialAdManager.getInterstitials().length).toBe(1);
+        networkingEngine.expectRequest(
+            'test:/test.json?_HLS_primary_id=1',
+            shaka.net.NetworkingEngine.RequestType.ADS);
+
+        // Establish the playhead (listeners are now active). Pause afterwards
+        // so the interstitial is not auto-played, but lastTime_ still updates.
+        video.play();
+        video.dispatchEvent(new Event('timeupdate'));
+        video.pause();
+
+        // Seek into the middle of the break. The resolved asset list cache is
+        // reset so it will be re-requested with the correct offset.
+        fakeCurrentTime = 25;
+        video.dispatchEvent(new Event('seeked'));
+        expect(interstitialAdManager.getInterstitials().length).toBe(0);
+
+        // The poll timer re-resolves with _HLS_start_offset = 25 - 10 = 15.
+        await shaka.test.Util.delay(1.5);
+
+        expect(interstitialAdManager.getInterstitials().length).toBe(1);
+        networkingEngine.expectRequest(
+            'test:/test.json?_HLS_primary_id=1&_HLS_start_offset=15',
+            shaka.net.NetworkingEngine.RequestType.ADS);
+      });
+    });
+
+    describe('deferred X-ASSET-LIST resolution', () => {
+      /** @type {number} */
+      let fakeCurrentTime;
+
+      beforeEach(() => {
+        fakeCurrentTime = 0;
+        Object.defineProperty(video, 'currentTime', {
+          get: () => fakeCurrentTime,
+          set: (val) => {
+            fakeCurrentTime = val;
+          },
+          configurable: true,
+        });
+      });
+
+      it('defers resolution until within the look-ahead window', async () => {
+        spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+        spyOn(player, 'isLive').and.returnValue(false);
+
+        const assetsList = JSON.stringify({
+          ASSETS: [{URI: 'ad.m3u8'}],
+        });
+        networkingEngine.setResponseText(
+            'test:/test.json?_HLS_primary_id=1', assetsList);
+
+        // The playhead (0) is far from the ad break (100), so the asset list
+        // must not be resolved yet.
+        const metadata = {
+          type: 'com.apple.quicktime.HLS',
+          startTime: 100,
+          endTime: null,
+          values: [
+            {key: 'ID', data: 'MID'},
+            {key: 'X-ASSET-LIST', data: 'test:/test.json'},
+          ],
+        };
+        await interstitialAdManager.addMetadata(metadata);
+
+        expect(interstitialAdManager.getInterstitials().length).toBe(0);
+        // No ad decision request should have been made yet.
+        networkingEngine.expectNoRequest(
+            'test:/test.json?_HLS_primary_id=1',
+            shaka.net.NetworkingEngine.RequestType.ADS);
+        // But the cue point is surfaced immediately for the timeline UI.
+        expect(onEventSpy).toHaveBeenCalledWith(jasmine.objectContaining({
+          type: 'ad-cue-points-changed',
+          cuepoints: [{start: 100, end: null}],
+        }));
+      });
+
+      it('resolves eagerly when already within the window', async () => {
+        spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+        spyOn(player, 'isLive').and.returnValue(false);
+        fakeCurrentTime = 95;
+
+        const assetsList = JSON.stringify({
+          ASSETS: [{URI: 'ad.m3u8'}],
+        });
+        networkingEngine.setResponseText(
+            'test:/test.json?_HLS_primary_id=1', assetsList);
+
+        const metadata = {
+          type: 'com.apple.quicktime.HLS',
+          startTime: 100,
+          endTime: null,
+          values: [
+            {key: 'ID', data: 'MID'},
+            {key: 'X-ASSET-LIST', data: 'test:/test.json'},
+          ],
+        };
+        await interstitialAdManager.addMetadata(metadata);
+
+        expect(interstitialAdManager.getInterstitials().length).toBe(1);
+      });
+
+      it('resolves a deferred asset list as the playhead approaches',
+          async () => {
+            spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+            spyOn(player, 'isLive').and.returnValue(false);
+            spyOn(player, 'getLoadMode').and.returnValue(
+                shaka.Player.LoadMode.MEDIA_SOURCE);
+            spyOn(player, 'seekRange').and.returnValue({
+              start: 0,
+              end: Infinity,
+            });
+            // Avoid actually preloading the (fake) ad media once it resolves.
+            spyOn(interstitialAdManager.getPlayer(), 'preload')
+                .and.returnValue(Promise.resolve(null));
+
+            const assetsList = JSON.stringify({
+              ASSETS: [{URI: 'ad.m3u8'}],
+            });
+            networkingEngine.setResponseText(
+                'test:/test.json?_HLS_primary_id=1', assetsList);
+
+            const metadata = {
+              type: 'com.apple.quicktime.HLS',
+              startTime: 100,
+              endTime: null,
+              values: [
+                {key: 'ID', data: 'MID'},
+                {key: 'X-ASSET-LIST', data: 'test:/test.json'},
+              ],
+            };
+            await interstitialAdManager.addMetadata(metadata);
+            expect(interstitialAdManager.getInterstitials().length).toBe(0);
+
+            // Advance the playhead into the look-ahead window and let the poll
+            // timer resolve the asset list.
+            fakeCurrentTime = 95;
+            video.play();
+            video.dispatchEvent(new Event('timeupdate'));
+
+            await shaka.test.Util.delay(1.5);
+
+            expect(interstitialAdManager.getInterstitials().length).toBe(1);
+          });
+    });
+
+    describe('preload Date Range (Appendix F)', () => {
+      /** @type {number} */
+      let fakeCurrentTime;
+
+      beforeEach(() => {
+        fakeCurrentTime = 0;
+        Object.defineProperty(video, 'currentTime', {
+          get: () => fakeCurrentTime,
+          set: (val) => {
+            fakeCurrentTime = val;
+          },
+          configurable: true,
+        });
+      });
+
+      /**
+       * @param {number} startTime
+       * @return {shaka.extern.HLSMetadata}
+       */
+      function preloadMetadata(startTime) {
+        return {
+          type: 'com.apple.hls.preload',
+          startTime,
+          endTime: startTime + 1,
+          values: [
+            {key: 'ID', data: 'PRELOAD'},
+            {key: 'X-TARGET-ID', data: 'MID'},
+            {key: 'X-TARGET-CLASS', data: 'com.apple.hls.interstitial'},
+            {key: 'X-URI', data: 'http://foo.bar/test.m3u8'},
+          ],
+        };
+      }
+
+      /** @return {shaka.extern.HLSMetadata} */
+      function midRollAssetUri() {
+        return {
+          type: 'com.apple.quicktime.HLS',
+          startTime: 100,
+          endTime: null,
+          values: [
+            {key: 'ID', data: 'MID'},
+            {key: 'X-ASSET-URI', data: 'http://foo.bar/test.m3u8'},
+          ],
+        };
+      }
+
+      it('sets resolutionTimeOffset on an already known interstitial',
+          async () => {
+            await interstitialAdManager.addMetadata(midRollAssetUri());
+            let interstitials = interstitialAdManager.getInterstitials();
+            expect(interstitials.length).toBe(1);
+            expect(interstitials[0].resolutionTimeOffset).toBeUndefined();
+
+            // Preload Date Range starts 10s before the interstitial (100).
+            interstitialAdManager.addPreloadMetadata(preloadMetadata(90));
+
+            interstitials = interstitialAdManager.getInterstitials();
+            expect(interstitials[0].resolutionTimeOffset).toBe(10);
+          });
+
+      it('sets resolutionTimeOffset when the preload arrives first',
+          async () => {
+            interstitialAdManager.addPreloadMetadata(preloadMetadata(90));
+
+            await interstitialAdManager.addMetadata(midRollAssetUri());
+
+            const interstitials = interstitialAdManager.getInterstitials();
+            expect(interstitials.length).toBe(1);
+            expect(interstitials[0].resolutionTimeOffset).toBe(10);
+          });
+
+      it('uses the preload offset to widen the resolution window',
+          async () => {
+            spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+            spyOn(player, 'isLive').and.returnValue(false);
+
+            const assetsList = JSON.stringify({
+              ASSETS: [{URI: 'ad.m3u8'}],
+            });
+            networkingEngine.setResponseText(
+                'test:/test.json?_HLS_primary_id=1', assetsList);
+
+            // The preload Date Range starts at 0, the interstitial at 100, so
+            // the resolution offset (100) covers the whole gap and the asset
+            // list is resolved immediately even though the default ahead time
+            // (10s) would have deferred it.
+            interstitialAdManager.addPreloadMetadata(preloadMetadata(0));
+
+            const metadata = {
+              type: 'com.apple.quicktime.HLS',
+              startTime: 100,
+              endTime: null,
+              values: [
+                {key: 'ID', data: 'MID'},
+                {key: 'X-ASSET-LIST', data: 'test:/test.json'},
+              ],
+            };
+            await interstitialAdManager.addMetadata(metadata);
+
+            const interstitials = interstitialAdManager.getInterstitials();
+            expect(interstitials.length).toBe(1);
+            expect(interstitials[0].resolutionTimeOffset).toBe(100);
+          });
+    });
+
+    describe('EXT-X-DATERANGE updates (issue #9851)', () => {
+      /**
+       * @param {!Array<!{key: string, data: string}>} extraValues
+       * @return {shaka.extern.HLSMetadata}
+       */
+      function midRoll(extraValues) {
+        return {
+          type: 'com.apple.quicktime.HLS',
+          startTime: 10,
+          endTime: null,
+          values: [
+            {key: 'ID', data: 'MID'},
+            {key: 'X-ASSET-URI', data: 'http://foo.bar/test.m3u8'},
+          ].concat(extraValues),
+        };
+      }
+
+      it('augments a known interstitial with a new X-PLAYOUT-LIMIT',
+          async () => {
+            await interstitialAdManager.addMetadata(midRoll([]));
+            let interstitials = interstitialAdManager.getInterstitials();
+            expect(interstitials.length).toBe(1);
+            expect(interstitials[0].playoutLimit).toBe(null);
+
+            // A subsequent EXT-X-DATERANGE with the same ID adds the attribute.
+            await interstitialAdManager.addMetadata(midRoll([
+              {key: 'X-PLAYOUT-LIMIT', data: '12.0'},
+            ]));
+
+            interstitials = interstitialAdManager.getInterstitials();
+            expect(interstitials.length).toBe(1);
+            expect(interstitials[0].playoutLimit).toBe(12);
+          });
+
+      it('does not change an X-PLAYOUT-LIMIT already present (spec rule)',
+          async () => {
+            await interstitialAdManager.addMetadata(midRoll([
+              {key: 'X-PLAYOUT-LIMIT', data: '30.0'},
+            ]));
+            let interstitials = interstitialAdManager.getInterstitials();
+            expect(interstitials.length).toBe(1);
+            expect(interstitials[0].playoutLimit).toBe(30);
+
+            // The spec requires shared attributes to keep the same value, so a
+            // conflicting update must be ignored.
+            await interstitialAdManager.addMetadata(midRoll([
+              {key: 'X-PLAYOUT-LIMIT', data: '12.0'},
+            ]));
+
+            interstitials = interstitialAdManager.getInterstitials();
+            expect(interstitials.length).toBe(1);
+            expect(interstitials[0].playoutLimit).toBe(30);
+          });
+
+      it('does not create a duplicate interstitial on update', async () => {
+        await interstitialAdManager.addMetadata(midRoll([]));
+        await interstitialAdManager.addMetadata(midRoll([
+          {key: 'X-PLAYOUT-LIMIT', data: '12.0'},
+        ]));
+        expect(interstitialAdManager.getInterstitials().length).toBe(1);
+      });
+    });
+
+    // Integration-style scenario exercising the three related features
+    // together: lazy X-ASSET-LIST resolution, the per-interstitial
+    // resolutionTimeOffset (here from an HLS preload Date Range), and a
+    // subsequent EXT-X-DATERANGE update.
+    describe('combined interstitial lifecycle', () => {
+      /** @type {number} */
+      let fakeCurrentTime;
+
+      beforeEach(() => {
+        fakeCurrentTime = 0;
+        Object.defineProperty(video, 'currentTime', {
+          get: () => fakeCurrentTime,
+          set: (val) => {
+            fakeCurrentTime = val;
+          },
+          configurable: true,
+        });
+      });
+
+      it('defers, resolves with a preload offset, then applies an update',
+          async () => {
+            spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+            spyOn(player, 'isLive').and.returnValue(false);
+            spyOn(player, 'getLoadMode').and.returnValue(
+                shaka.Player.LoadMode.MEDIA_SOURCE);
+            spyOn(player, 'seekRange').and.returnValue({
+              start: 0,
+              end: Infinity,
+            });
+            // Avoid actually preloading the (fake) ad media once it resolves.
+            spyOn(interstitialAdManager.getPlayer(), 'preload')
+                .and.returnValue(Promise.resolve(null));
+
+            const assetsList = JSON.stringify({
+              ASSETS: [{URI: 'ad.m3u8'}],
+            });
+            networkingEngine.setResponseText(
+                'test:/list.json?_HLS_primary_id=1', assetsList);
+
+            // (1) HLS preload Date Range (Appendix F): preload starts 30s
+            // before the interstitial (100), widening its window to 30s.
+            interstitialAdManager.addPreloadMetadata({
+              type: 'com.apple.hls.preload',
+              startTime: 70,
+              endTime: 71,
+              values: [
+                {key: 'ID', data: 'PRELOAD'},
+                {key: 'X-TARGET-ID', data: 'MID'},
+                {key: 'X-TARGET-CLASS', data: 'com.apple.hls.interstitial'},
+                {key: 'X-URI', data: 'test:/list.json'},
+              ],
+            });
+
+            // (2) The mid-roll asset list is signaled while the playhead (0) is
+            // still outside the (widened) window, so it is deferred.
+            await interstitialAdManager.addMetadata({
+              type: 'com.apple.quicktime.HLS',
+              startTime: 100,
+              endTime: 130,
+              values: [
+                {key: 'ID', data: 'MID'},
+                {key: 'X-ASSET-LIST', data: 'test:/list.json'},
+              ],
+            });
+            expect(interstitialAdManager.getInterstitials().length).toBe(0);
+            networkingEngine.expectNoRequest(
+                'test:/list.json?_HLS_primary_id=1',
+                shaka.net.NetworkingEngine.RequestType.ADS);
+
+            // (3) Advance to within 30s of the interstitial. The default ahead
+            // time (10s) would still defer, but the 30s offset resolves it.
+            fakeCurrentTime = 75;
+            video.play();
+            video.dispatchEvent(new Event('timeupdate'));
+            video.pause();
+            await shaka.test.Util.delay(1.5);
+
+            let interstitials = interstitialAdManager.getInterstitials();
+            expect(interstitials.length).toBe(1);
+            expect(interstitials[0].resolutionTimeOffset).toBe(30);
+            expect(interstitials[0].playoutLimit).toBe(null);
+
+            // (4) A later EXT-X-DATERANGE with the same ID augments it with a
+            // playout limit.
+            await interstitialAdManager.addMetadata({
+              type: 'com.apple.quicktime.HLS',
+              startTime: 100,
+              endTime: 130,
+              values: [
+                {key: 'ID', data: 'MID'},
+                {key: 'X-PLAYOUT-LIMIT', data: '12.0'},
+              ],
+            });
+
+            interstitials = interstitialAdManager.getInterstitials();
+            expect(interstitials.length).toBe(1);
+            expect(interstitials[0].playoutLimit).toBe(12);
+          });
     });
   });
 
   describe('DASH', () => {
+    // The InterstitialAdManager no longer ingests DASH regions directly;
+    // shaka.ads.AdManager parses them with DashInterstitialParser and feeds the
+    // result to addInterstitials. This helper reproduces that wiring so the
+    // tests can keep exercising the parse + schedule pipeline end to end.
+    /**
+     * @param {shaka.extern.TimelineRegionInfo} region
+     * @return {!Promise}
+     */
+    async function addRegion(region) {
+      const interstitial = shaka.ads.DashInterstitialParser.parseRegion(region);
+      if (interstitial) {
+        await interstitialAdManager.addInterstitials([interstitial]);
+      }
+    }
+
     it('supports alternative MPD', async () => {
       const eventString = [
         '<Event duration="1" id="PREROLL" presentationTime="0">',
@@ -1695,7 +2153,7 @@ describe('Interstitial Ad manager', () => {
         value: '',
         timescale: 1,
       };
-      await interstitialAdManager.addRegion(region);
+      await addRegion(region);
 
       expect(onEventSpy).toHaveBeenCalledTimes(1);
       const eventValue1 = {
@@ -1709,55 +2167,24 @@ describe('Interstitial Ad manager', () => {
       };
       expect(onEventSpy).toHaveBeenCalledWith(
           jasmine.objectContaining(eventValue1));
-    });
 
-    it('supports alternative MPD with noJump and skipAfter', async () => {
-      const eventString = [
-        '<Event duration="1" id="TEST" presentationTime="1">',
-        '<InsertPresentation uri="test.mpd" noJump="1" skipAfter="PT0S"/>',
-        '</Event>',
-      ].join('');
-      const eventNode = TXml.parseXmlString(eventString);
-      goog.asserts.assert(eventNode, 'Should have a event node!');
-      /** @type {shaka.extern.TimelineRegionInfo} */
-      const region = {
-        startTime: 1,
-        endTime: 2,
-        id: 'TEST',
-        schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:insert:2025',
-        eventNode,
-        value: '',
-        timescale: 1,
-      };
-      await interstitialAdManager.addRegion(region);
-
-      expect(onEventSpy).toHaveBeenCalledTimes(1);
-      const eventValue1 = {
-        type: 'ad-cue-points-changed',
-        cuepoints: [
-          {
-            start: 1,
-            end: null,
-          },
-        ],
-      };
-      expect(onEventSpy).toHaveBeenCalledWith(
-          jasmine.objectContaining(eventValue1));
-
+      // The parser leaves mimeType null; addInterstitials resolves it from the
+      // URI. The detailed field-by-field parsing is covered by
+      // DashInterstitialParser's own unit tests.
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
       /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
-        id: 'TEST',
+        id: 'PREROLL',
         groupId: null,
-        startTime: 1,
-        endTime: 2,
+        startTime: 0,
+        endTime: 1,
         uri: 'test.mpd',
         mimeType: 'application/dash+xml',
-        isSkippable: true,
-        skipOffset: 0,
+        isSkippable: false,
+        skipOffset: null,
         skipFor: null,
-        canJump: false,
+        canJump: true,
         resumeOffset: 0,
         playoutLimit: null,
         once: false,
@@ -1793,8 +2220,8 @@ describe('Interstitial Ad manager', () => {
         value: '',
         timescale: 1,
       };
-      await interstitialAdManager.addRegion(region);
-      await interstitialAdManager.addRegion(region);
+      await addRegion(region);
+      await addRegion(region);
 
       expect(onEventSpy).toHaveBeenCalledTimes(1);
       const eventValue1 = {
@@ -1829,7 +2256,7 @@ describe('Interstitial Ad manager', () => {
         value: '',
         timescale: 1,
       };
-      await interstitialAdManager.addRegion(region);
+      await addRegion(region);
 
       expect(onEventSpy).not.toHaveBeenCalled();
     });
@@ -1858,7 +2285,7 @@ describe('Interstitial Ad manager', () => {
         value: '',
         timescale: 1,
       };
-      await interstitialAdManager.addOverlayRegion(region);
+      await addRegion(region);
 
       expect(onEventSpy).not.toHaveBeenCalled();
 
@@ -1930,184 +2357,9 @@ describe('Interstitial Ad manager', () => {
         value: '',
         timescale: 1,
       };
-      await interstitialAdManager.addOverlayRegion(region);
+      await addRegion(region);
 
       expect(onEventSpy).not.toHaveBeenCalled();
-    });
-
-    it('supports overlay events with L-Shape format', async () => {
-      const eventString = [
-        '<Event duration="1" id="OVERLAY" presentationTime="0">',
-        '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd" z="-1">',
-        '<Viewport x="1920" y="1080"/>',
-        '<Squeeze>',
-        '<TopLeft x="0" y="0"/>',
-        '<Size x="960" y="540"/>',
-        '</Squeeze>',
-        '</OverlayEvent>',
-        '</Event>',
-      ].join('');
-      const eventNode = TXml.parseXmlString(eventString);
-      goog.asserts.assert(eventNode, 'Should have a event node!');
-      /** @type {shaka.extern.TimelineRegionInfo} */
-      const region = {
-        startTime: 0,
-        endTime: 1,
-        id: 'OVERLAY',
-        schemeIdUri: 'urn:scte:dash:scte214-events',
-        eventNode,
-        value: '',
-        timescale: 1,
-      };
-      await interstitialAdManager.addOverlayRegion(region);
-
-      expect(onEventSpy).not.toHaveBeenCalled();
-
-      const interstitials = interstitialAdManager.getInterstitials();
-      expect(interstitials.length).toBe(1);
-      /** @type {!shaka.extern.AdInterstitial} */
-      const expectedInterstitial = {
-        id: 'OVERLAY',
-        groupId: null,
-        startTime: 0,
-        endTime: 1,
-        uri: 'test.mpd',
-        mimeType: 'application/dash+xml',
-        isSkippable: false,
-        skipOffset: null,
-        skipFor: null,
-        canJump: true,
-        resumeOffset: null,
-        playoutLimit: null,
-        once: false,
-        pre: false,
-        post: false,
-        timelineRange: true,
-        loop: false,
-        overlay: {
-          viewport: {
-            x: 1920,
-            y: 1080,
-          },
-          topLeft: {
-            x: 0,
-            y: 0,
-          },
-          size: {
-            x: 1920,
-            y: 1080,
-          },
-        },
-        displayOnBackground: true,
-        currentVideo: {
-          viewport: {
-            x: 1920,
-            y: 1080,
-          },
-          topLeft: {
-            x: 0,
-            y: 0,
-          },
-          size: {
-            x: 960,
-            y: 540,
-          },
-        },
-        background: null,
-        clickThroughUrl: null,
-        tracking: null,
-      };
-      expect(interstitials[0]).toEqual(expectedInterstitial);
-    });
-
-    it('supports overlay events with double box format', async () => {
-      const eventString = [
-        '<Event duration="1" id="OVERLAY" presentationTime="0">',
-        '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd" z="-1">',
-        '<Background>red</Background>',
-        '<Viewport x="1920" y="1080"/>',
-        '<Overlay>',
-        '<TopLeft x="0" y="720"/>',
-        '<Size x="480" y="360"/>',
-        '</Overlay>',
-        '<Squeeze>',
-        '<TopLeft x="0" y="0"/>',
-        '<Size x="960" y="540"/>',
-        '</Squeeze>',
-        '</OverlayEvent>',
-        '</Event>',
-      ].join('');
-      const eventNode = TXml.parseXmlString(eventString);
-      goog.asserts.assert(eventNode, 'Should have a event node!');
-      /** @type {shaka.extern.TimelineRegionInfo} */
-      const region = {
-        startTime: 0,
-        endTime: 1,
-        id: 'OVERLAY',
-        schemeIdUri: 'urn:scte:dash:scte214-events',
-        eventNode,
-        value: '',
-        timescale: 1,
-      };
-      await interstitialAdManager.addOverlayRegion(region);
-
-      expect(onEventSpy).not.toHaveBeenCalled();
-
-      const interstitials = interstitialAdManager.getInterstitials();
-      expect(interstitials.length).toBe(1);
-      /** @type {!shaka.extern.AdInterstitial} */
-      const expectedInterstitial = {
-        id: 'OVERLAY',
-        groupId: null,
-        startTime: 0,
-        endTime: 1,
-        uri: 'test.mpd',
-        mimeType: 'application/dash+xml',
-        isSkippable: false,
-        skipOffset: null,
-        skipFor: null,
-        canJump: true,
-        resumeOffset: null,
-        playoutLimit: null,
-        once: false,
-        pre: false,
-        post: false,
-        timelineRange: true,
-        loop: false,
-        overlay: {
-          viewport: {
-            x: 1920,
-            y: 1080,
-          },
-          topLeft: {
-            x: 0,
-            y: 720,
-          },
-          size: {
-            x: 480,
-            y: 360,
-          },
-        },
-        displayOnBackground: true,
-        currentVideo: {
-          viewport: {
-            x: 1920,
-            y: 1080,
-          },
-          topLeft: {
-            x: 0,
-            y: 0,
-          },
-          size: {
-            x: 960,
-            y: 540,
-          },
-        },
-        background: 'red',
-        clickThroughUrl: null,
-        tracking: null,
-      };
-      expect(interstitials[0]).toEqual(expectedInterstitial);
     });
   });
 

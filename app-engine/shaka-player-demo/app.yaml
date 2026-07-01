@@ -12,50 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runtime: python313
+# This service is now a compatibility shim (see main.py).  Every request is
+# handled by the Flask app, which forwards old appspot URLs to GitHub Pages.
+
+runtime: python314
 default_expiration: 5m
 
 handlers:
-# A static file used for clock sync in the demo app
-- url: /time.txt
-  static_files: time.txt
-  upload: time.txt
-  expiration: 0
-  http_headers:
-    Access-Control-Allow-Origin: "*"
-    Access-Control-Allow-Headers: "If-Modified-Since,Range,Origin"
-    Access-Control-Expose-Headers: "Date"
-    Access-Control-Max-Age: "2592000"
-
-# These used to exist in the repo, but have been generated server-side for many
-# years now.
-- url: /assets/poster.jpg
+- url: /.*
+  secure: always
   script: auto
-- url: /assets/audioOnly.gif
-  script: auto
-
-# Serve favicon.ico from the demo folder.
-- url: /favicon.ico
-  secure: always
-  static_files: demo/favicon.ico
-  upload: demo/favicon.ico
-
-# For these folders, serve their indexes.
-- url: /docs/api/
-  secure: always
-  static_files: docs/api/index.html
-  upload: docs/api/index.html
-- url: /demo/
-  secure: always
-  static_files: demo/index.html
-  upload: demo/index.html
-- url: /demo/
-  secure: always
-  static_files: demo/index.html
-  upload: demo/index.html
-
-# Serve everything else directly.
-- url: /(.+)
-  secure: always
-  static_files: \1
-  upload: .+

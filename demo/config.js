@@ -422,9 +422,6 @@ shakaDemo.Config = class {
 
     const docLink = this.resolveExternLink_('.TextDisplayerConfiguration');
     this.addSection_('Text displayer', docLink)
-        .addNumberInput_('Captions update period',
-            'textDisplayer.captionsUpdatePeriod',
-            /* canBeDecimal= */ true)
         .addNumberInput_('Font scale factor',
             'textDisplayer.fontScaleFactor',
             /* canBeDecimal= */ true)
@@ -499,6 +496,10 @@ shakaDemo.Config = class {
             'ads.disableTrackingEvents')
         .addBoolInput_('Disable Snapback',
             'ads.disableSnapback')
+        .addBoolInput_('Disable played linear ad skip (MediaTailor)',
+            'ads.disablePlayedLinearAdSkip')
+        .addBoolInput_('Disable tracking for played linear ads (MediaTailor)',
+            'ads.disableTrackingForPlayedLinearAds')
         .addNumberInput_('Interstitial preload ahead time',
             'ads.interstitialPreloadAheadTime',
             /* canBeDecimal= */ true,

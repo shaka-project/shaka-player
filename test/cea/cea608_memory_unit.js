@@ -176,7 +176,8 @@ describe('Cea608Memory', () => {
     // ...
     // So we expect that test\n\ntest is emitted
     const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-    topLevelCue.line = 36.66;
+    // Anchored to the first non-empty row (row 2), not the cursor row (6).
+    topLevelCue.line = 15.33;
     topLevelCue.lineInterpretation =
         shaka.text.Cue.lineInterpretation.PERCENTAGE;
     topLevelCue.nestedCues = [
@@ -234,6 +235,50 @@ describe('Cea608Memory', () => {
 
     const caption = memory.forceEmit(startTime, endTime);
     expect(caption).toEqual(expectedCaption);
+  });
+
+  it('emits a horizontal position from the indent and tab offset', () => {
+    const startTime = 1;
+    const endTime = 2;
+    const text = 'test';
+    memory.setIndent(2);
+    memory.setOffset(3);
+    for (const c of text) {
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, c.charCodeAt(0));
+    }
+
+    const caption = memory.forceEmit(startTime, endTime);
+    // position = 10 + min(70, indent * 10) + offset * 2.5 = 10 + 20 + 7.5
+    expect(caption.cue.position).toBe(37.5);
+  });
+
+  it('does not emit a position without both indent and tab offset', () => {
+    const startTime = 1;
+    const endTime = 2;
+    const text = 'test';
+    memory.setIndent(2); // No tab offset set.
+    for (const c of text) {
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, c.charCodeAt(0));
+    }
+
+    const caption = memory.forceEmit(startTime, endTime);
+    expect(caption.cue.position).toBe(null);
+  });
+
+  it('clears the indent and tab offset on reset', () => {
+    const startTime = 1;
+    const endTime = 2;
+    const text = 'test';
+    memory.setIndent(2);
+    memory.setOffset(3);
+    memory.reset();
+    for (const c of text) {
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, c.charCodeAt(0));
+    }
+
+    const caption = memory.forceEmit(startTime, endTime);
+    // The positioning state was cleared, so no position should be emitted.
+    expect(caption.cue.position).toBe(null);
   });
 
   describe('eraseBuffer', () => {
@@ -294,7 +339,8 @@ describe('Cea608Memory', () => {
 
       // Expected text is 's\nt\nt\ne'
       const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-      topLevelCue.line = 31.33;
+      // Anchored to the first non-empty row (row 3).
+      topLevelCue.line = 20.66;
       topLevelCue.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue.nestedCues = [
@@ -341,7 +387,8 @@ describe('Cea608Memory', () => {
 
       // Expected text is 't\ne\ns\nt'
       const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-      topLevelCue.line = 31.33;
+      // The move is a no-op, so text stays on rows 1-4; anchored to row 1.
+      topLevelCue.line = 10;
       topLevelCue.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue.nestedCues = [
@@ -388,7 +435,8 @@ describe('Cea608Memory', () => {
 
       // Expected text is 't\ne\ns\nt'
       const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-      topLevelCue.line = 31.33;
+      // The move is a no-op, so text stays on rows 1-4; anchored to row 1.
+      topLevelCue.line = 10;
       topLevelCue.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue.nestedCues = [
@@ -409,6 +457,78 @@ describe('Cea608Memory', () => {
       // Force out the new memory.
       const caption = memory.forceEmit(startTime, endTime);
       expect(caption).toEqual(expectedCaption);
+    });
+  });
+
+  describe('progressive reveal', () => {
+    it('reveals characters at their decode times', () => {
+      const startTime = 1;
+      const endTime = 5;
+
+      // Each character is decoded at a later time, as in paint-on / roll-up.
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'a'.charCodeAt(0), 2);
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'b'.charCodeAt(0), 3);
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'c'.charCodeAt(0), 3);
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'd'.charCodeAt(0), 4);
+
+      const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+      topLevelCue.line = 10;
+      topLevelCue.lineInterpretation =
+          shaka.text.Cue.lineInterpretation.PERCENTAGE;
+      // One nested cue per decode time, each ending at the cue's end time.
+      topLevelCue.nestedCues = [
+        CeaUtils.createDefaultCue(/* startTime= */ 2, endTime, 'a'),
+        CeaUtils.createDefaultCue(/* startTime= */ 3, endTime, 'bc'),
+        CeaUtils.createDefaultCue(/* startTime= */ 4, endTime, 'd'),
+      ];
+
+      const caption =
+          memory.forceEmit(startTime, endTime, /* progressive= */ true);
+      expect(caption).toEqual({stream, cue: topLevelCue});
+    });
+
+    it('reveals characters decoded at or before the start immediately', () => {
+      const startTime = 3;
+      const endTime = 5;
+
+      // 'a' and 'b' were decoded at or before the cue start (e.g. a roll-up row
+      // that scrolled up), so they should be revealed immediately; 'c' is new.
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'a'.charCodeAt(0), 1);
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'b'.charCodeAt(0), 3);
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'c'.charCodeAt(0), 4);
+
+      const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+      topLevelCue.line = 10;
+      topLevelCue.lineInterpretation =
+          shaka.text.Cue.lineInterpretation.PERCENTAGE;
+      topLevelCue.nestedCues = [
+        CeaUtils.createDefaultCue(/* startTime= */ 3, endTime, 'ab'),
+        CeaUtils.createDefaultCue(/* startTime= */ 4, endTime, 'c'),
+      ];
+
+      const caption =
+          memory.forceEmit(startTime, endTime, /* progressive= */ true);
+      expect(caption).toEqual({stream, cue: topLevelCue});
+    });
+
+    it('ignores decode times when not progressive (e.g. pop-on)', () => {
+      const startTime = 1;
+      const endTime = 5;
+
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'a'.charCodeAt(0), 2);
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, 'b'.charCodeAt(0), 3);
+
+      const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+      topLevelCue.line = 10;
+      topLevelCue.lineInterpretation =
+          shaka.text.Cue.lineInterpretation.PERCENTAGE;
+      // Without progressive mode, everything appears at once at the start time.
+      topLevelCue.nestedCues = [
+        CeaUtils.createDefaultCue(startTime, endTime, 'ab'),
+      ];
+
+      const caption = memory.forceEmit(startTime, endTime);
+      expect(caption).toEqual({stream, cue: topLevelCue});
     });
   });
 });

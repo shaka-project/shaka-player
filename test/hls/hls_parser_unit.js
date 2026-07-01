@@ -33,6 +33,8 @@ describe('HlsParser', () => {
   let newDrmInfoSpy;
   /** @type {!jasmine.Spy} */
   let onMetadataSpy;
+  /** @type {!jasmine.Spy} */
+  let onTimelineRegionAddedSpy;
   /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
   /** @type {shaka.extern.ManifestConfiguration} */
@@ -95,6 +97,7 @@ describe('HlsParser', () => {
     onEventSpy = jasmine.createSpy('onEvent');
     newDrmInfoSpy = jasmine.createSpy('newDrmInfo');
     onMetadataSpy = jasmine.createSpy('onMetadata');
+    onTimelineRegionAddedSpy = jasmine.createSpy('onTimelineRegionAdded');
     playerInterface = {
       modifyManifestRequest: (request, manifestInfo) => {},
       modifySegmentRequest: (request, segmentInfo) => {},
@@ -103,7 +106,7 @@ describe('HlsParser', () => {
       networkingEngine: fakeNetEngine,
       onError: fail,
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
-      onTimelineRegionAdded: fail,
+      onTimelineRegionAdded: shaka.test.Util.spyFunc(onTimelineRegionAddedSpy),
       isLowLatencyMode: () => false,
       updateDuration: () => {},
       newDrmInfo: shaka.test.Util.spyFunc(newDrmInfoSpy),
@@ -6631,6 +6634,43 @@ describe('HlsParser', () => {
           thirdValues);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 15, null,
           forthValues);
+
+      // Unlike 'metadataadded', 'onTimelineRegionAdded' fires once per
+      // EXT-X-DATERANGE tag, with the ID and the rest of the attributes
+      // correlated together in the same call.
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(4);
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            schemeIdUri: metadataType,
+            id: '0',
+            startTime: 0,
+            endTime: 1,
+            values: firstValues,
+          }));
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            schemeIdUri: metadataType,
+            id: '1',
+            startTime: 5,
+            endTime: 6,
+            values: secondValues,
+          }));
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            schemeIdUri: metadataType,
+            id: '2',
+            startTime: 10,
+            endTime: 11,
+            values: thirdValues,
+          }));
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            schemeIdUri: metadataType,
+            id: '3',
+            startTime: 15,
+            endTime: Infinity,
+            values: forthValues,
+          }));
     });
 
     it('supports END-ON-NEXT', async () => {
@@ -6684,6 +6724,7 @@ describe('HlsParser', () => {
       await parser.start('test:/master', playerInterface);
 
       expect(onMetadataSpy).not.toHaveBeenCalled();
+      expect(onTimelineRegionAddedSpy).not.toHaveBeenCalled();
     });
 
     it('ignores without useful value', async () => {
@@ -6704,6 +6745,16 @@ describe('HlsParser', () => {
       await parser.start('test:/master', playerInterface);
 
       expect(onMetadataSpy).not.toHaveBeenCalled();
+      // Unlike 'metadataadded', 'onTimelineRegionAdded' does not require
+      // more than just the ID, since consumers only need the ID and the
+      // start/end times to schedule ads.
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(1);
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            id: '0',
+            startTime: 0,
+            endTime: 1,
+          }));
     });
 
     it('ignores if date ranges are in the past', async () => {
@@ -6726,6 +6777,7 @@ describe('HlsParser', () => {
       await parser.start('test:/master', playerInterface);
 
       expect(onMetadataSpy).not.toHaveBeenCalled();
+      expect(onTimelineRegionAddedSpy).not.toHaveBeenCalled();
     });
 
     it('supports interstitial', async () => {

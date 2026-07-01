@@ -1,9 +1,9 @@
 # Google App Engine Code
 
 This folder contains source code for the services we run on Google App Engine
-(appspot.com).
+(appspot.com).  The primary services have been shut down, and this is now
+just a compatibility shim.
 
- - shaka-player-demo: Our hosted demo on https://shaka-player-demo.appspot.com/
-
- - demo-version-index: An index of Shaka Player releases and demos, hosted at
-                       https://index-dot-shaka-player-demo.appspot.com/
+ - shaka-player-demo: Formerly, our hosted demo.  Now, a compatibility service
+   to parse outdated links to the old service and forward users to the new demo
+   on GitHub Pages.

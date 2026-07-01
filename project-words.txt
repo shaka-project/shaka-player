@@ -229,6 +229,7 @@ Playready
 Quicktime
 svta
 teppeis
+TiVo
 Tizen
 Uplynk
 Verimatrix
@@ -259,6 +260,7 @@ bsid
 buffersource
 cabac
 cbcs
+cdat
 cdna
 cehx
 cenc
@@ -275,6 +277,7 @@ containerless
 covr
 cpil
 cuelist
+cuepoint
 cuepoints
 cwip
 demuxer
@@ -585,6 +588,7 @@ RMKSA
 RVFC
 SEEKTABLE
 servernum
+SGAI
 Shoutcast
 sintel
 stardate

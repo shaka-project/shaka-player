@@ -348,6 +348,12 @@ describe('CeaDecoder', () => {
       }
       decoder.extract(eraseDisplayedMemory, 6);
 
+      // Roll-up is revealed character by character: each row appears at the
+      // time its bytes were decoded. The newest row of every caption was
+      // decoded in the same frame as its carriage return (the end of the
+      // caption's window), so it is revealed at that window's end time, while
+      // older rows that scrolled up from a previous caption show immediately.
+
       // Top level cue corresponding to the first closed caption.
       const topLevelCue1 = new shaka.text.Cue(
           /* startTime= */ time1, /* endTime= */ time2, '');
@@ -356,13 +362,14 @@ describe('CeaDecoder', () => {
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue1.nestedCues = [
         CeaUtils.createDefaultCue(
-            /* startTime= */ time1, /* endTime= */ time2, /* payload= */ '1.'),
+            /* startTime= */ time2, /* endTime= */ time2, /* payload= */ '1.'),
       ];
 
       // Top level cue corresponding to the second closed caption.
       const topLevelCue2 = new shaka.text.Cue(
           /* startTime= */ time2, /* endTime= */ time3, '');
-      topLevelCue2.line = 84.66;
+      // Two rows (14, 15); anchored to the first non-empty row (14).
+      topLevelCue2.line = 79.33;
       topLevelCue2.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue2.nestedCues = [
@@ -373,13 +380,14 @@ describe('CeaDecoder', () => {
             /* startTime= */ time2, /* endTime= */ time3),
 
         CeaUtils.createDefaultCue(
-            /* startTime= */ time2, /* endTime= */ time3, /* payload= */ '2.'),
+            /* startTime= */ time3, /* endTime= */ time3, /* payload= */ '2.'),
       ];
 
       // Top level cue corresponding to the third closed caption.
       const topLevelCue3 = new shaka.text.Cue(
           /* startTime= */ time3, /* endTime= */ time4, '');
-      topLevelCue3.line = 84.66;
+      // Two rows (14, 15); anchored to the first non-empty row (14).
+      topLevelCue3.line = 79.33;
       topLevelCue3.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue3.nestedCues = [
@@ -390,13 +398,14 @@ describe('CeaDecoder', () => {
             /* startTime= */ time3, /* endTime= */ time4),
 
         CeaUtils.createDefaultCue(
-            /* startTime= */ time3, /* endTime= */ time4, /* payload= */ '3.'),
+            /* startTime= */ time4, /* endTime= */ time4, /* payload= */ '3.'),
       ];
 
       // Top level cue corresponding to the fourth closed caption.
       const topLevelCue4 = new shaka.text.Cue(
           /* startTime= */ time4, /* endTime= */ time5, '');
-      topLevelCue4.line = 84.66;
+      // Two rows (14, 15); anchored to the first non-empty row (14).
+      topLevelCue4.line = 79.33;
       topLevelCue4.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue4.nestedCues = [
@@ -407,7 +416,7 @@ describe('CeaDecoder', () => {
             /* startTime= */ time4, /* endTime= */ time5),
 
         CeaUtils.createDefaultCue(
-            /* startTime= */ time4, /* endTime= */ time5, /* payload= */ '4.'),
+            /* startTime= */ time5, /* endTime= */ time5, /* payload= */ '4.'),
       ];
 
       const expectedCaptions = [
@@ -466,6 +475,11 @@ describe('CeaDecoder', () => {
       }
       decoder.extract(eraseDisplayedMemory, 3);
 
+      // Roll-up reveals each row at its decode time. The newest row of each
+      // caption was decoded in the same frame that ends the caption's window,
+      // so it is revealed at that end time; rows scrolled up from a previous
+      // caption show immediately.
+
       // Top level cue corresponding to the first closed caption.
       const topLevelCue1 = new shaka.text.Cue(/* startTime= */ 1,
           /* endTime= */ 2, '');
@@ -474,13 +488,15 @@ describe('CeaDecoder', () => {
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue1.nestedCues = [
         CeaUtils.createDefaultCue(
-            /* startTime= */ 1, /* endTime= */ 2, /* payload= */ '1.'),
+            /* startTime= */ 2, /* endTime= */ 2, /* payload= */ '1.'),
       ];
 
       // Top level cue corresponding to the second closed caption.
       const topLevelCue2 = new shaka.text.Cue(/* startTime= */ 2,
           /* endTime= */ 3, '');
-      topLevelCue2.line = 26;
+      // The window moved to base row 4, so text is on rows 3 and 4; anchored
+      // to the first non-empty row (3).
+      topLevelCue2.line = 20.66;
       topLevelCue2.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue2.nestedCues = [
@@ -490,7 +506,7 @@ describe('CeaDecoder', () => {
         CeaUtils.createLineBreakCue(/* startTime= */ 2, /* endTime= */ 3),
 
         CeaUtils.createDefaultCue(
-            /* startTime= */ 2, /* endTime= */ 3, /* payload= */ '2.'),
+            /* startTime= */ 3, /* endTime= */ 3, /* payload= */ '2.'),
       ];
 
       const expectedCaptions = [
