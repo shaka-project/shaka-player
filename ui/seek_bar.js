@@ -508,6 +508,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const minSeekBarWindow =
         shaka.ui.SeekBar.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_;
     if (seekRangeSize < minSeekBarWindow) {
+      if (seekRangeSize <= 0) {
+        this.chaptersTimer_.tickAfter(/* seconds= */ 0.1);
+        return;
+      }
       this.chapterMarkerContainer_.style.background = 'transparent';
       this.chaptersTimer_?.stop();
       return;
@@ -536,10 +540,29 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       return;
     }
 
-    const rects = Array.from(points).map((point) => ({
-      position: ((point - seekRange.start) / seekRangeSize) * 100 + '%',
-      width: '2px',
-    }));
+    const rect = this.bar.getBoundingClientRect();
+    const thumbSize = 12;
+    const barMin = parseFloat(this.bar.min);
+    const barMax = parseFloat(this.bar.max);
+    const barRange = barMax - barMin;
+
+    if (rect.width === 0 || barRange === 0) {
+      this.chaptersTimer_.tickAfter(/* seconds= */ 0.1);
+      return;
+    }
+
+    // Align each marker with the playhead thumb rather than the raw seek-bar
+    // edges. The thumb is centered within (width - thumbSize), so a naive
+    // (time / range) * 100% placement drifts away from where the thumb sits.
+    const markWidth = 2;
+    const rects = Array.from(points).sort((a, b) => a - b).map((point) => {
+      const fraction = (point - barMin) / barRange;
+      const pixelCenter = fraction * (rect.width - thumbSize) + thumbSize / 2;
+      return {
+        position: (pixelCenter - markWidth / 2) + 'px',
+        width: markWidth + 'px',
+      };
+    });
 
     this.chapterMarkerContainer_.style.background =
             this.buildLayeredBackground_(rects, color);
@@ -844,7 +867,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   getChapter_(totalSeconds) {
     for (const chapter of this.controls.getChapters()) {
       if (chapter.startTime <= totalSeconds &&
-          chapter.endTime >= totalSeconds) {
+          chapter.endTime > totalSeconds) {
         return chapter;
       }
     }
