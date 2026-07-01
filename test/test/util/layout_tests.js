@@ -276,6 +276,9 @@ shaka.test.DomTextLayoutTests = class extends shaka.test.TextLayoutTests {
     this.player = {
       getMediaElement: () => /** @type {!HTMLMediaElement} */(this.mockVideo),
       getVideoContainer: () => this.videoContainer,
+      getPlaybackRate: () => this.mockVideo ? this.mockVideo.playbackRate : 1,
+      addEventListener: () => {},
+      removeEventListener: () => {},
     };
 
     await this.waitForFont('Roboto');

@@ -49,9 +49,15 @@ describe('UITextDisplayer', () => {
     videoContainer.style.height = `${videoContainerHeight}px`;
     document.body.appendChild(videoContainer);
     video = new shaka.test.FakeVideo();
+    // The displayer reads getPlaybackRate() and listens to the player's
+    // 'ratechange' event, so the fake exposes those (the event listener is
+    // never fired in these tests, so addEventListener can be a no-op).
     player = {
       getMediaElement: () => video,
       getVideoContainer: () => videoContainer,
+      getPlaybackRate: () => video.playbackRate,
+      addEventListener: () => {},
+      removeEventListener: () => {},
     };
   });
 
@@ -821,5 +827,47 @@ describe('UITextDisplayer', () => {
 
     // Text content should be present
     expect(cueElement.textContent).toBe('Top-Left');
+  });
+
+  describe('getNextBoundary_', () => {
+    /**
+     * @param {!Array<!shaka.text.Cue>} cues
+     * @param {number} time
+     * @return {?number}
+     * @suppress {visibility}
+     */
+    function getNextBoundary(cues, time) {
+      return textDisplayer.getNextBoundary_(cues, time);
+    }
+
+    it('returns the earliest boundary strictly after the time', () => {
+      const cues = [new shaka.text.Cue(1, 3, 'a')];
+      expect(getNextBoundary(cues, 0)).toBe(1);
+      expect(getNextBoundary(cues, 1)).toBe(3);
+      expect(getNextBoundary(cues, 2)).toBe(3);
+      // No boundary remains after the cue has ended.
+      expect(getNextBoundary(cues, 3)).toBe(null);
+    });
+
+    it('considers all cues', () => {
+      const cues = [
+        new shaka.text.Cue(1, 3, 'a'),
+        new shaka.text.Cue(5, 8, 'b'),
+      ];
+      expect(getNextBoundary(cues, 3)).toBe(5);
+      expect(getNextBoundary(cues, 5)).toBe(8);
+    });
+
+    it('descends into nested cues (character-by-character reveals)', () => {
+      const cue = new shaka.text.Cue(1, 10, '');
+      cue.nestedCues = [
+        new shaka.text.Cue(2, 10, 'a'),
+        new shaka.text.Cue(5, 10, 'b'),
+      ];
+      const cues = [cue];
+      expect(getNextBoundary(cues, 1)).toBe(2);
+      expect(getNextBoundary(cues, 2)).toBe(5);
+      expect(getNextBoundary(cues, 5)).toBe(10);
+    });
   });
 });
