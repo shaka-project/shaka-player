@@ -1,95 +1,118 @@
-# Shaka Player Demo - Appspot Entrypoint
+# Shaka Player Demo - Appspot Compatibility Shim
 # Copyright 2016 Google LLC
 # SPDX-License-Identifier: Apache-2.0
 
-# Most of the app is served as static content.  Any exceptions go here.
+# The hosted demo on App Engine has been shut down.  This service is now just a
+# best-effort compatibility shim: it inspects the requested host and path and
+# forwards old appspot URLs to their equivalents on GitHub Pages.
+#
+# This deployment is the *default* version/service for the shaka-player-demo
+# project, so App Engine routes requests for every now-deleted version subdomain
+# (nightly-dot-, support-dot-, v2-4-7-dot-, ...) here, preserving the original
+# Host header.  We branch on that Host header plus the path to decide where to
+# send each request.
+#
+# Hash fragments (e.g. /demo/#asset=...) are never sent to the server, so the
+# /demo/ paths can't be redirected at the HTTP level.  Those render an
+# interstitial page whose JavaScript reads the hash, translates any outdated
+# parameters into the current format, and forwards the user on.
 
-import datetime
-import os
-
-from flask import Flask, make_response, redirect, request, send_file
+from flask import Flask, redirect, render_template, request
 
 
 app = Flask(__name__)
 
 
-# Redirect root requests to /demo.
-@app.route('/')
-def root():
-  return redirect('/demo/', code=302)
+# GitHub Pages targets.  Docs, support, and posters only exist on the main site.
+MAIN_SITE = 'https://shaka-project.github.io/shaka-player/'
+RELEASE_SITE = 'https://shaka-project.github.io/shaka-player-release/'
+DOCS_API = MAIN_SITE + 'docs/api/'
+SUPPORT = MAIN_SITE + 'support.html'
+POSTER = MAIN_SITE + 'demo/poster.png'
+AUDIO_POSTER = MAIN_SITE + 'demo/poster-audio.gif'
+ERROR_CODE_LOOKUP_HOST = 'error-code-lookup-dot-shaka-player-demo.appspot.com'
+ERROR_CODE_TEMPLATE = DOCS_API + 'shaka.util.Error.html#value:{0}'
+INDEX_HOST = 'index-dot-shaka-player-demo.appspot.com'
+
+# The old demo fetched this for clock sync.  Akamai's endpoint sends permissive
+# CORS headers, which is why it was chosen as the in-app replacement, so it is
+# safe to forward old cross-origin XHRs there via a redirect.
+TIME = 'https://time.akamai.com/?ms&iso'
+
+# A handful of archived version subdomains linked to an upgrade tutorial that
+# has since been split and renamed per version range.  Map those specific links
+# to their new homes; anything else under /docs/api/ falls through to the
+# generic docs forward below.
+UPGRADE_TUTORIALS = {
+    'v2-4-7': DOCS_API + 'tutorial-upgrade-old-to-24.html',
+    'v2-5-23': DOCS_API + 'tutorial-upgrade-24-to-25.html',
+    'v3-0-15': DOCS_API + 'tutorial-upgrade-25-to-30.html',
+}
 
 
-# A Doodle-like service to change the poster on certain days.
-# All posters are chosen based on the current date in PST.
-
-from posters import VIDEO_POSTERS, VIDEO_DEFAULT, AUDIO_POSTERS, AUDIO_DEFAULT
-
-
-# Timezone info for PST.
-# I'm ignoring DST to avoid complicating the code.
-class PST(datetime.tzinfo):
-  def utcoffset(self, dt):
-    return datetime.timedelta(hours=-8)
-
-  def dst(self, dt):
-    return datetime.timedelta(0)
-
-  def tzname(self, dt):
-    return 'PST'
+def version_prefix(host):
+  """Return the archived-version subdomain prefix (e.g. 'v2-4-7'), or None."""
+  suffix = '-dot-shaka-player-demo.appspot.com'
+  if host.endswith(suffix):
+    label = host[:-len(suffix)]
+    if label.startswith('v'):
+      return label
+  return None
 
 
-def get_poster(poster_map, default_poster):
-  now = datetime.datetime.now(PST())
-  today = (now.month, now.day)
-  today_with_year = (now.month, now.day, now.year)
-  midnight = datetime.datetime(now.year, now.month, now.day, tzinfo=PST())
-  local_expiration = midnight + datetime.timedelta(days=1)
-  max_age = (local_expiration - now).total_seconds()
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def compat(path):
+  host = request.host.split(':')[0].lower()
+  path = '/' + path
 
-  # For internal debugging and testing of the poster service, we can override
-  # the date.  To set an override, open /assets/poster.jpg and run this in the
-  # JS console:
-  #   document.cookie="posterdate=10-31"
-  # To clear an override, run:
-  #   document.cookie="posterdate="
-  override = request.cookies.get('posterdate')
-  if override:
-    override_tuple = [int(x) for x in override.split('-')]
-    print('Date override:', repr(override_tuple))
+  # An old error-code-lookup tool that was used internally at Google for short
+  # links.  Now rolled into this deployment directly.
+  if host == ERROR_CODE_LOOKUP_HOST:
+    # The path (after the slash) was an error code.  Forward to the docs with a
+    # highlight on that specific error code.
+    code = path[1:]
+    url = ERROR_CODE_TEMPLATE.format(code)
+    return redirect(url, code=302)
 
-    if len(override_tuple) == 3:
-      # Override includes year.
-      today_with_year = tuple(override_tuple)
-      today = tuple(override_tuple[0:2])
-    elif len(override_tuple) == 2:
-      # Override does not include year, so add the current year.
-      today_with_year = tuple(override_tuple + [now.year])
-      today = tuple(override_tuple)
-    else:
-      # Bad override format.  Ignore the year, but add a response header to
-      # indicate that the override failed.  For internal debugging of the
-      # poster service.
-      print('Bad date override:', override, file=sys.stderr)
+  # The index subdomain used to have a list of hosted versions.  Now, we just
+  # show a turndown notice with links to CDNs.
+  if host == INDEX_HOST:
+    return render_template('index.html')
 
-  # Prefer a poster for this specific year.
-  name = poster_map.get(today_with_year, poster_map.get(today, default_poster))
-  path = 'posters/%s' % name
+  # The nightly subdomain mirrored the main branch; everything else (including
+  # the bare domain) maps to the latest release.
+  site = MAIN_SITE if host.startswith('nightly-dot-') else RELEASE_SITE
 
-  response = make_response(
-      send_file(path, last_modified=midnight, max_age=max_age))
+  # Static assets that old demo builds still try to load.
+  if path == '/assets/poster.jpg':
+    return redirect(POSTER, code=302)
+  if path == '/assets/audioOnly.gif':
+    return redirect(AUDIO_POSTER, code=302)
+  if path == '/time.txt':
+    return redirect(TIME, code=302)
 
-  response.headers['Access-Control-Allow-Origin'] = '*'
-  response.headers['Access-Control-Allow-Headers'] = 'If-Modified-Since,Range'
-  response.headers['Access-Control-Expose-Headers'] = 'Date'
-  response.headers['Access-Control-Max-Age'] = '2592000'
+  # Documentation.
+  if path == '/docs/api/tutorial-upgrade.html':
+    target = UPGRADE_TUTORIALS.get(version_prefix(host))
+    if target:
+      return redirect(target, code=302)
+  if path.startswith('/docs/api/'):
+    return redirect(DOCS_API + path[len('/docs/api/'):], code=302)
 
-  return response
+  # The support page had a subdomain-base redirect that we carry forward here.
+  if host.startswith('support-dot-'):
+    return redirect(SUPPORT, code=302)
 
+  # The demo itself, which lives under /demo/ on the new sites too.  Hash params
+  # can only be translated client-side, so render the interstitial and let its
+  # JavaScript append the translated fragment to this target.  We must point
+  # straight at /demo/ rather than the site root, whose own redirect to /demo/
+  # would drop the fragment we just translated.
+  if path in ('/demo/', '/demo/index.html'):
+    return render_template('interstitial.html', target=site + 'demo/')
 
-@app.route('/assets/poster.jpg')
-def get_video_poster():
-  return get_poster(VIDEO_POSTERS, VIDEO_DEFAULT)
-
-@app.route('/assets/audioOnly.gif')
-def get_audio_poster():
-  return get_poster(AUDIO_POSTERS, AUDIO_DEFAULT)
+  # Everything else: forward to the same path on the appropriate demo site, so
+  # direct requests for a library file, image, etc. land on their equivalent.
+  # The bare domain reduces to the site root, which is the demo's new home.
+  return redirect(site + path.lstrip('/'), code=302)

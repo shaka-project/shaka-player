@@ -1,18 +1,28 @@
-# Google App Engine Demo
+# Google App Engine Demo (Compatibility Shim)
 
-This folder contains everything necessary to host our demo on
-https://shaka-player-demo.appspot.com/
+The hosted demo on https://shaka-player-demo.appspot.com/ has been shut down.
+This folder now contains a best-effort compatibility shim that forwards old
+appspot URLs to their equivalents on GitHub Pages.
 
- - app.yaml: App Engine config file.  Defines cache expiration and how specific
-             URLs are mapped to specific files.
+This is the *default* version/service for the project, so App Engine routes
+requests for every now-deleted version subdomain (nightly-dot-, support-dot-,
+v2-4-7-dot-, ...) here, preserving the original Host header.
 
- - main.py: A catch-all python service to serve any non-static files.  This
-            handles HTTP redirects for the root path (this is the only way to
-            do HTTP redirects in App Engine) and the poster service (which
-            returns special poster images on certain days).
+ - app.yaml: App Engine config file.  Routes every request to the Flask app.
+
+ - main.py: A Flask app that branches on the request's Host header and path and
+   forwards old URLs to GitHub Pages.  Most cases are HTTP redirects; the
+   /demo/ paths instead render an interstitial page, because the hash fragment
+   they rely on is never sent to the server.
+
+ - templates/interstitial.html: The page rendered for /demo/.  Its JavaScript
+   reads the URL fragment, translates outdated demo parameters into the current
+   format, and forwards the user to the new demo.
+
+ - templates/index.html: A turndown notice for the archive of Shaka Player
+   release demos and libraries that used to be hosted at the "index" subdomain.
+   Informs users that we no longer host individual demo versions, and points
+   them at CDNs and other services where library versions can be found.
 
  - requirements.txt: Used by App Engine to install the necessary Python server
-                     requirements (Flask).
-
- - time.txt: A static file used for time sync in the client.  Configured with
-             special response headers for cross-origin access.
+   requirements (Flask).
