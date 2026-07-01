@@ -170,7 +170,7 @@ shaka.test.TestScheme = class {
 
   /**
    * Creates the manifests and generators.
-   * @param {shakaNamespaceType} compiledShaka
+   * @param {shaka} compiledShaka
    * @param {string} suffix
    * @return {!Promise}
    */
