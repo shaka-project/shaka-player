@@ -283,4 +283,24 @@ describe('HlsParser', () => {
     // Play for a few seconds.
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 40);
   });
+
+  it('plays an EXT-X-I-FRAMES-ONLY playlist with broken segments', async () => {
+    // This asset is an I-frame only playlist whose fragments were clipped
+    // to a single I-frame via EXT-X-BYTERANGE, but whose moof/mdat still
+    // declare the whole GOP.  Without repairing them, appending fails with
+    // CHUNK_DEMUXER_ERROR_APPEND_FAILED.
+    await player.load('/base/test/test/assets/hls-iframe-only/media.m3u8');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play into the second segment, to make sure both broken fragments were
+    // repaired and appended.  If it takes longer than 30 seconds, fail.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 3, 30);
+
+    await player.unload();
+  });
 });

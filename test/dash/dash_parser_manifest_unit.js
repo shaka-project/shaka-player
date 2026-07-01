@@ -1142,6 +1142,7 @@ describe('DashParser Manifest', () => {
     expect(trickModeVideo).toEqual(jasmine.objectContaining({
       id: 2,
       type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+      isIframe: true,
     }));
   });
 

@@ -2393,7 +2393,34 @@ describe('HlsParser', () => {
     expect(trickModeVideo).toBeDefined();
     expect(trickModeVideo.width).toBe(960);
     expect(trickModeVideo.height).toBe(540);
+    expect(trickModeVideo.isIframe).toBe(true);
   });
+
+  it('marks a directly loaded EXT-X-I-FRAMES-ONLY playlist as I-frame',
+      async () => {
+        const media = [
+          '#EXTM3U\n',
+          '#EXT-X-VERSION:7\n',
+          '#EXT-X-PLAYLIST-TYPE:VOD\n',
+          '#EXT-X-I-FRAMES-ONLY\n',
+          '#EXT-X-TARGETDURATION:2\n',
+          '#EXT-X-MAP:URI="init.mp4"\n',
+          '#EXTINF:2,\n',
+          '#EXT-X-BYTERANGE:200@0\n',
+          'main.mp4\n',
+        ].join('');
+
+        fakeNetEngine
+            .setResponseText('test:/media', media)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
+
+        const actual = await parser.start('test:/media', playerInterface);
+        await loadAllStreamsFor(actual);
+
+        expect(actual.variants.length).toBe(1);
+        expect(actual.variants[0].video.isIframe).toBe(true);
+      });
 
   it('Disable I-Frame does not create I-Frame streams', async () => {
     const master = [

@@ -323,6 +323,7 @@ describe('ManifestConverter', () => {
       external: false,
       fastSwitching: false,
       isAudioMuxedInVideo: false,
+      isIframe: false,
     };
 
     return streamDB;
@@ -415,6 +416,7 @@ describe('ManifestConverter', () => {
       external: false,
       fastSwitching: false,
       isAudioMuxedInVideo: false,
+      isIframe: false,
     };
   }
 
@@ -477,6 +479,7 @@ describe('ManifestConverter', () => {
       external: false,
       fastSwitching: false,
       isAudioMuxedInVideo: false,
+      isIframe: false,
     };
   }
 
@@ -538,6 +541,7 @@ describe('ManifestConverter', () => {
       external: false,
       fastSwitching: false,
       isAudioMuxedInVideo: false,
+      isIframe: false,
     };
   }
 
@@ -598,6 +602,7 @@ describe('ManifestConverter', () => {
           streamDb.mimeType, streamDb.codecs)]),
       isAudioMuxedInVideo: streamDb.isAudioMuxedInVideo,
       baseOriginalId: null,
+      isIframe: streamDb.isIframe,
     };
 
     expect(stream).toEqual(expectedStream);
