@@ -176,7 +176,8 @@ describe('Cea608Memory', () => {
     // ...
     // So we expect that test\n\ntest is emitted
     const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-    topLevelCue.line = 36.66;
+    // Anchored to the first non-empty row (row 2), not the cursor row (6).
+    topLevelCue.line = 15.33;
     topLevelCue.lineInterpretation =
         shaka.text.Cue.lineInterpretation.PERCENTAGE;
     topLevelCue.nestedCues = [
@@ -234,6 +235,50 @@ describe('Cea608Memory', () => {
 
     const caption = memory.forceEmit(startTime, endTime);
     expect(caption).toEqual(expectedCaption);
+  });
+
+  it('emits a horizontal position from the indent and tab offset', () => {
+    const startTime = 1;
+    const endTime = 2;
+    const text = 'test';
+    memory.setIndent(2);
+    memory.setOffset(3);
+    for (const c of text) {
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, c.charCodeAt(0));
+    }
+
+    const caption = memory.forceEmit(startTime, endTime);
+    // position = 10 + min(70, indent * 10) + offset * 2.5 = 10 + 20 + 7.5
+    expect(caption.cue.position).toBe(37.5);
+  });
+
+  it('does not emit a position without both indent and tab offset', () => {
+    const startTime = 1;
+    const endTime = 2;
+    const text = 'test';
+    memory.setIndent(2); // No tab offset set.
+    for (const c of text) {
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, c.charCodeAt(0));
+    }
+
+    const caption = memory.forceEmit(startTime, endTime);
+    expect(caption.cue.position).toBe(null);
+  });
+
+  it('clears the indent and tab offset on reset', () => {
+    const startTime = 1;
+    const endTime = 2;
+    const text = 'test';
+    memory.setIndent(2);
+    memory.setOffset(3);
+    memory.reset();
+    for (const c of text) {
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN, c.charCodeAt(0));
+    }
+
+    const caption = memory.forceEmit(startTime, endTime);
+    // The positioning state was cleared, so no position should be emitted.
+    expect(caption.cue.position).toBe(null);
   });
 
   describe('eraseBuffer', () => {
@@ -294,7 +339,8 @@ describe('Cea608Memory', () => {
 
       // Expected text is 's\nt\nt\ne'
       const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-      topLevelCue.line = 31.33;
+      // Anchored to the first non-empty row (row 3).
+      topLevelCue.line = 20.66;
       topLevelCue.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue.nestedCues = [
@@ -341,7 +387,8 @@ describe('Cea608Memory', () => {
 
       // Expected text is 't\ne\ns\nt'
       const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-      topLevelCue.line = 31.33;
+      // The move is a no-op, so text stays on rows 1-4; anchored to row 1.
+      topLevelCue.line = 10;
       topLevelCue.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue.nestedCues = [
@@ -388,7 +435,8 @@ describe('Cea608Memory', () => {
 
       // Expected text is 't\ne\ns\nt'
       const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-      topLevelCue.line = 31.33;
+      // The move is a no-op, so text stays on rows 1-4; anchored to row 1.
+      topLevelCue.line = 10;
       topLevelCue.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue.nestedCues = [

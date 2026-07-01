@@ -368,7 +368,8 @@ describe('CeaDecoder', () => {
       // Top level cue corresponding to the second closed caption.
       const topLevelCue2 = new shaka.text.Cue(
           /* startTime= */ time2, /* endTime= */ time3, '');
-      topLevelCue2.line = 84.66;
+      // Two rows (14, 15); anchored to the first non-empty row (14).
+      topLevelCue2.line = 79.33;
       topLevelCue2.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue2.nestedCues = [
@@ -385,7 +386,8 @@ describe('CeaDecoder', () => {
       // Top level cue corresponding to the third closed caption.
       const topLevelCue3 = new shaka.text.Cue(
           /* startTime= */ time3, /* endTime= */ time4, '');
-      topLevelCue3.line = 84.66;
+      // Two rows (14, 15); anchored to the first non-empty row (14).
+      topLevelCue3.line = 79.33;
       topLevelCue3.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue3.nestedCues = [
@@ -402,7 +404,8 @@ describe('CeaDecoder', () => {
       // Top level cue corresponding to the fourth closed caption.
       const topLevelCue4 = new shaka.text.Cue(
           /* startTime= */ time4, /* endTime= */ time5, '');
-      topLevelCue4.line = 84.66;
+      // Two rows (14, 15); anchored to the first non-empty row (14).
+      topLevelCue4.line = 79.33;
       topLevelCue4.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue4.nestedCues = [
@@ -491,7 +494,9 @@ describe('CeaDecoder', () => {
       // Top level cue corresponding to the second closed caption.
       const topLevelCue2 = new shaka.text.Cue(/* startTime= */ 2,
           /* endTime= */ 3, '');
-      topLevelCue2.line = 26;
+      // The window moved to base row 4, so text is on rows 3 and 4; anchored
+      // to the first non-empty row (3).
+      topLevelCue2.line = 20.66;
       topLevelCue2.lineInterpretation =
           shaka.text.Cue.lineInterpretation.PERCENTAGE;
       topLevelCue2.nestedCues = [
