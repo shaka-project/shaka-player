@@ -2512,6 +2512,8 @@ shaka.extern.AccessibilityConfiguration;
  *   disableTrackingEvents: boolean,
  *   disableSnapback: boolean,
  *   interstitialPreloadAheadTime: number,
+ *   disablePlayedLinearAdSkip: boolean,
+ *   disableTrackingForPlayedLinearAds: boolean,
  * }}
  *
  * @description
@@ -2571,6 +2573,20 @@ shaka.extern.AccessibilityConfiguration;
  *   Interstitial preload ahead time, in seconds.
  *   <br>
  *   Defaults to <code>10</code>.
+ * @property {boolean} disablePlayedLinearAdSkip
+ *   If true, disables automatic skipping of already-played linear ads.
+ *   Normally, played linear ads are force-skipped on replay. When this flag
+ *   is set, they will play through, allowing the app to control skip behavior.
+ *   Only applies to MediaTailor streams.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disableTrackingForPlayedLinearAds
+ *   If true, suppresses tracking beacons when a previously-played linear ad
+ *   replays. Only meaningful when
+ *   <code>disablePlayedLinearAdSkip</code> is also true. Only applies to
+ *   MediaTailor streams.
+ *   <br>
+ *   Defaults to <code>false</code>.
  *
  * @exportDoc
  */
