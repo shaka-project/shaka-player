@@ -4,51 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/**
- * A stand-in type for the "shaka" namespace.  Used when loading the compiled
- * library or when referencing it in ManifestGenerator or TestScheme.
- *
- * The new compiler has a "typeof" annotation for classes, but it warns of an
- * incomplete type when used on the entire library namespace.  So instead, we
- * use this type, which maps out parts of the compiled namespace used in
- * top-level integration tests.
- *
- * @typedef {{
- *   Player: typeof shaka.Player,
- *   media: {
- *     SegmentReference: typeof shaka.media.SegmentReference,
- *     InitSegmentReference: typeof shaka.media.InitSegmentReference,
- *     SegmentIndex: typeof shaka.media.SegmentIndex,
- *     PresentationTimeline: typeof shaka.media.PresentationTimeline
- *   },
- *   net: {
- *     NetworkingEngine: typeof shaka.net.NetworkingEngine
- *   },
- *   offline: {
- *     Storage: typeof shaka.offline.Storage
- *   },
- *   ui: {
- *     Overlay: typeof shaka.ui.Overlay,
- *     Controls: typeof shaka.ui.Controls,
- *     Element: typeof shaka.ui.Element
- *   },
- *   util: {
- *     StringUtils: typeof shaka.util.StringUtils
- *   }
- * }}
- */
-let shakaNamespaceType;
-
-
 shaka.test.Loader = class {
   /**
    * @param {boolean} loadUncompiled
-   * @return {!Promise<shakaNamespaceType>}
+   * @return {!Promise<shaka>}
    */
   static async loadShaka(loadUncompiled) {
     /** @type {!Promise.PromiseWithResolvers} */
     const loaded = Promise.withResolvers();
-    /** @type {shakaNamespaceType} */
+    /** @type {shaka} */
     let compiledShaka;
 
     if (loadUncompiled) {
