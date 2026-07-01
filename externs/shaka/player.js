@@ -978,12 +978,13 @@ shaka.extern.HLSMetadata;
  *   timescale: number,
  *   eventNode: ?shaka.extern.xml.Node,
  *   urlParams: (?function():string|undefined),
+ *   values: (!Array<shaka.extern.MetadataFrame>|undefined),
  * }}
  *
  * @description
  * Contains information about a region of the timeline that will cause an event
  * to be raised when the playhead enters or exits it.  In DASH this is the
- * EventStream element.
+ * EventStream element.  In HLS this is the EXT-X-DATERANGE tag.
  *
  * @property {string} schemeIdUri
  *   Identifies the message scheme.
@@ -1002,6 +1003,10 @@ shaka.extern.HLSMetadata;
  * @property {(?function():string|undefined)} urlParams
  *   Optional URL parameters function derived from a RequestParam element
  *   (urn:mpeg:dash:urlparam:2025 scheme) present in the EventStream.
+ * @property {(!Array<shaka.extern.MetadataFrame>|undefined)} values
+ *   For HLS EXT-X-DATERANGE tags, contains all the attributes of the tag
+ *   (including ID and any custom attributes), so they can be correlated
+ *   together in a single event.
  * @exportDoc
  */
 shaka.extern.TimelineRegionInfo;
