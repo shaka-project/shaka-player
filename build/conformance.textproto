@@ -236,6 +236,7 @@ requirement: {
   whitelist_regexp: "demo/"
   whitelist_regexp: "test/"
   whitelist_regexp: "lib/util/timer.js"
+  whitelist_regexp: "third_party/cml-cmcd/cmcd_reporter.js"
 }
 requirement: {
   type: BANNED_NAME
@@ -248,6 +249,7 @@ requirement: {
   whitelist_regexp: "demo/"
   whitelist_regexp: "test/"
   whitelist_regexp: "lib/util/timer.js"
+  whitelist_regexp: "third_party/cml-cmcd/cmcd_reporter.js"
 }
 
 # Disallow setTimeout.
@@ -313,6 +315,7 @@ requirement: {
     "instead."
   whitelist_regexp: "lib/net/http_fetch_plugin.js"
   whitelist_regexp: "test/test/util/util.js"
+  whitelist_regexp: "third_party/cml-cmcd/cml_utils.js"
 }
 
 # Disallow the general use of AbortController, which is not available on all
