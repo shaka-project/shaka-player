@@ -546,6 +546,17 @@ describe('PresentationTimeline', () => {
       timeline.setProgramDateTimeRegions([]);
       expect(timeline.getProgramDateTimeForTime(40)).toBe(1040);
     });
+
+    it('prefers a single region over a stale initial PDT', () => {
+      // Models a live window whose only discontinuity has already scrolled out:
+      // the initial PDT is stale (from before the jump), but the window's sole
+      // region carries the correct post-jump PDT.
+      const timeline = makeVodTimeline(/* duration= */ 60);
+      timeline.setInitialProgramDateTime(1000);
+      timeline.setProgramDateTimeRegions([{start: 30, pdt: 5000}]);
+      // Without the region we would extrapolate the stale PDT: 1000 + 40.
+      expect(timeline.getProgramDateTimeForTime(40)).toBe(5010);
+    });
   });
 });
 
