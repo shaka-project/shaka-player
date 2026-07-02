@@ -7262,4 +7262,141 @@ describe('HlsParser', () => {
     expect(timeline.getProgramDateTimeForTime(10)).toBe(pdt1);
     expect(timeline.getProgramDateTimeForTime(15)).toBe(pdt1 + 5);
   });
+
+  it('maps playhead date from a single PROGRAM-DATE-TIME', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.42c00d",',
+      'CLOSED-CAPTIONS=NONE\n',
+      'test:/video\n',
+    ].join('');
+
+    // A single PROGRAM-DATE-TIME at the start of the playlist, no
+    // discontinuities: every later segment extrapolates from it.
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:10\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-PROGRAM-DATE-TIME:2023-01-01T00:00:00Z\n',
+      '#EXTINF:10,\n',
+      'segment1.ts\n',
+      '#EXTINF:10,\n',
+      'segment2.ts\n',
+      '#EXTINF:10,\n',
+      'segment3.ts\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', media);
+
+    const manifest = await parser.start('test:/master', playerInterface);
+    const video = manifest.variants[0].video;
+    await video.createSegmentIndex();
+
+    const timeline = manifest.presentationTimeline;
+    const pdt0 = Date.parse('2023-01-01T00:00:00Z') / 1000;
+
+    expect(timeline.getProgramDateTimeForTime(0)).toBe(pdt0);
+    expect(timeline.getProgramDateTimeForTime(5)).toBe(pdt0 + 5);
+    expect(timeline.getProgramDateTimeForTime(25)).toBe(pdt0 + 25);
+  });
+
+  it('maps playhead date with sparse PROGRAM-DATE-TIME tags', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.42c00d",',
+      'CLOSED-CAPTIONS=NONE\n',
+      'test:/video\n',
+    ].join('');
+
+    // PROGRAM-DATE-TIME is only present on some segments; the rest are
+    // extrapolated.  The two tags are consistent with the segment durations,
+    // so this is a single continuous region.
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:10\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-PROGRAM-DATE-TIME:2023-01-01T00:00:00Z\n',
+      '#EXTINF:10,\n',
+      'segment1.ts\n',
+      '#EXTINF:10,\n',
+      'segment2.ts\n',
+      '#EXT-X-PROGRAM-DATE-TIME:2023-01-01T00:00:20Z\n',
+      '#EXTINF:10,\n',
+      'segment3.ts\n',
+      '#EXTINF:10,\n',
+      'segment4.ts\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', media);
+
+    const manifest = await parser.start('test:/master', playerInterface);
+    const video = manifest.variants[0].video;
+    await video.createSegmentIndex();
+
+    const timeline = manifest.presentationTimeline;
+    const pdt0 = Date.parse('2023-01-01T00:00:00Z') / 1000;
+
+    // The extrapolated segments and the ones carrying a tag all resolve to the
+    // same continuous wall-clock time.
+    expect(timeline.getProgramDateTimeForTime(5)).toBe(pdt0 + 5);
+    expect(timeline.getProgramDateTimeForTime(15)).toBe(pdt0 + 15);
+    expect(timeline.getProgramDateTimeForTime(20)).toBe(pdt0 + 20);
+    expect(timeline.getProgramDateTimeForTime(35)).toBe(pdt0 + 35);
+  });
+
+  it('maps playhead date with sparse PROGRAM-DATE-TIME across a discontinuity',
+      async () => {
+        const master = [
+          '#EXTM3U\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.42c00d",',
+          'CLOSED-CAPTIONS=NONE\n',
+          'test:/video\n',
+        ].join('');
+
+        // Sparse PROGRAM-DATE-TIME with a discontinuity in the middle.  The
+        // second tag is 2023-01-01T00:00:50Z instead of the continuous
+        // 00:00:20, so the discontinuity introduces a 30s PDT jump.
+        const media = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:10\n',
+          '#EXT-X-PLAYLIST-TYPE:VOD\n',
+          '#EXT-X-PROGRAM-DATE-TIME:2023-01-01T00:00:00Z\n',
+          '#EXTINF:10,\n',
+          'segment1.ts\n',
+          '#EXTINF:10,\n',
+          'segment2.ts\n',
+          '#EXT-X-DISCONTINUITY\n',
+          '#EXT-X-PROGRAM-DATE-TIME:2023-01-01T00:00:50Z\n',
+          '#EXTINF:10,\n',
+          'segment3.ts\n',
+          '#EXTINF:10,\n',
+          'segment4.ts\n',
+        ].join('');
+
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', media);
+
+        const manifest = await parser.start('test:/master', playerInterface);
+        const video = manifest.variants[0].video;
+        await video.createSegmentIndex();
+
+        const timeline = manifest.presentationTimeline;
+        const pdt0 = Date.parse('2023-01-01T00:00:00Z') / 1000;
+
+        // Before the discontinuity, continuous from the first PDT (segment2 is
+        // extrapolated).
+        expect(timeline.getProgramDateTimeForTime(5)).toBe(pdt0 + 5);
+        expect(timeline.getProgramDateTimeForTime(15)).toBe(pdt0 + 15);
+        // At the discontinuity (presentation time 20), the date jumps to
+        // 00:00:50 even though the presentation timeline stays continuous.
+        expect(timeline.getProgramDateTimeForTime(20)).toBe(pdt0 + 50);
+        expect(timeline.getProgramDateTimeForTime(25)).toBe(pdt0 + 55);
+        // segment4 is extrapolated within the post-discontinuity region.
+        expect(timeline.getProgramDateTimeForTime(35)).toBe(pdt0 + 65);
+      });
 });

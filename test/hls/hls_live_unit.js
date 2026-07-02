@@ -1285,6 +1285,67 @@ describe('HlsParser live', () => {
             expect(timeline.getProgramDateTimeForTime(2)).toBe(pdt1);
           });
 
+      it('anchors a new post-discontinuity segment by its own PDT',
+          async () => {
+            const pdt0 = 946684800;
+            const pdt1 = pdt0 + 3600;
+
+            const mediaWithDiscontinuity = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:0\n',
+              '#EXT-X-DISCONTINUITY-SEQUENCE:0\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main.mp4\n',
+              '#EXT-X-DISCONTINUITY\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+            ].join('');
+
+            // main scrolled out; a brand-new post-discontinuity segment (main3)
+            // arrives.  syncAgainst() repositions main3 using its raw syncTime
+            // (the discontinuity gap is no longer removed), so its startTime no
+            // longer lines up with the continuous timeline.
+            const mediaAfterSlide = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:1\n',
+              '#EXT-X-DISCONTINUITY-SEQUENCE:1\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:02.00Z\n',
+              '#EXTINF:2,\n',
+              'main3.mp4\n',
+            ].join('');
+
+            const manifest =
+                await testInitialManifest(master, mediaWithDiscontinuity);
+            const timeline = manifest.presentationTimeline;
+
+            await testUpdate(manifest, mediaAfterSlide);
+
+            // Whatever presentation time main3 ended up at, its date must
+            // reflect its own PROGRAM-DATE-TIME, not an extrapolation across
+            // the drift.
+            const segmentIndex = /** @type {!shaka.media.SegmentIndex} */ (
+              manifest.variants[0].video.segmentIndex);
+            let main3 = null;
+            for (const ref of segmentIndex) {
+              if (ref) {
+                main3 = ref;
+              }
+            }
+            expect(timeline.getProgramDateTimeForTime(main3.startTime))
+                .toBe(pdt1 + 2);
+            // main2 remains correct too.
+            expect(timeline.getProgramDateTimeForTime(2)).toBe(pdt1);
+          });
+
       it('falls back to full rebuild when anchor reference is unavailable',
           async () => {
             const createSegmentReferenceSpy =
