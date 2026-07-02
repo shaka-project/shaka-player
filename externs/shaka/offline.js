@@ -143,7 +143,8 @@ shaka.extern.ManifestDB;
  *   tilesLayout: (string|undefined),
  *   external: boolean,
  *   fastSwitching: boolean,
- *   isAudioMuxedInVideo: boolean
+ *   isAudioMuxedInVideo: boolean,
+ *   isIframe: boolean,
  * }}
  *
  * @property {number} id
@@ -221,6 +222,8 @@ shaka.extern.ManifestDB;
  *   Indicate if the stream should be used for fast switching.
  * @property {boolean} isAudioMuxedInVideo
  *   Indicate if the audio of this stream is muxed in the video of other stream.
+ * @property {boolean} isIframe
+ *   Indicate if the stream only contains I-frames (key frames).
  */
 shaka.extern.StreamDB;
 

@@ -387,7 +387,8 @@ shaka.extern.SegmentIndex = class {
  *   fastSwitching: boolean,
  *   fullMimeTypes: !Set<string>,
  *   isAudioMuxedInVideo: boolean,
- *   baseOriginalId: ?string
+ *   baseOriginalId: ?string,
+ *   isIframe: boolean,
  * }}
  *
  * @description
@@ -545,6 +546,10 @@ shaka.extern.SegmentIndex = class {
  *   Indicate the original ID of the base stream, if any, that appeared in the
  *   manifest. Only populated when the stream is included within another stream
  *   using dependencyStream.
+ * @property {boolean} isIframe
+ *   True if the stream only contains I-frames (key frames), such as an HLS
+ *   I-frame-only playlist (EXT-X-I-FRAMES-ONLY / EXT-X-I-FRAME-STREAM-INF) or a
+ *   DASH trick mode stream.
  *
  * @exportDoc
  */
