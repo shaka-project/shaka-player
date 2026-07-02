@@ -443,10 +443,35 @@ shakaDemo.Config = class {
         .addBoolInput_('Enabled', 'cmcd.enabled')
         .addTextInput_('Session ID', 'cmcd.sessionId')
         .addTextInput_('Content ID', 'cmcd.contentId')
-        .addTextInput_('Version', 'cmcd.version')
+        .addNumberInput_('Version', 'cmcd.version',
+            /* canBeDecimal= */ false)
         .addNumberInput_('RTP safety Factor', 'cmcd.rtpSafetyFactor',
             /* canBeDecimal= */ true)
         .addBoolInput_('Use Headers', 'cmcd.useHeaders');
+
+    // CMCD v2 event-mode targets. JSON because the typedef is an
+    // array of objects with several fields each; a per-field UI would
+    // bloat the demo significantly.
+    const eventTargetsTooltip =
+        'JSON array of event-mode CmcdTarget objects, e.g. ' +
+        '[{"enabled":true,"url":"https://collector/cmcd",' +
+        '"events":["ps","rr"],"interval":30,"includeKeys":[]}]';
+    const onTargetsChange = (input) => {
+      try {
+        const parsed = input.value.trim() ? JSON.parse(input.value) : [];
+        shakaDemoMain.configure('cmcd.eventTargets', parsed);
+        shakaDemoMain.remakeHash();
+        input.setCustomValidity('');
+      } catch (e) {
+        input.setCustomValidity('Invalid JSON');
+      }
+    };
+    this.addCustomTextInput_(
+        'Event Targets (JSON)', onTargetsChange, eventTargetsTooltip);
+    const current = /** @type {Array<*>} */ (
+      shakaDemoMain.getCurrentConfigValue('cmcd.eventTargets'));
+    this.latestInput_.input().value =
+        (current && current.length) ? JSON.stringify(current) : '';
   }
 
   /** @private */
@@ -496,6 +521,10 @@ shakaDemo.Config = class {
             'ads.disableTrackingEvents')
         .addBoolInput_('Disable Snapback',
             'ads.disableSnapback')
+        .addBoolInput_('Disable played linear ad skip (MediaTailor)',
+            'ads.disablePlayedLinearAdSkip')
+        .addBoolInput_('Disable tracking for played linear ads (MediaTailor)',
+            'ads.disableTrackingForPlayedLinearAds')
         .addNumberInput_('Interstitial preload ahead time',
             'ads.interstitialPreloadAheadTime',
             /* canBeDecimal= */ true,
