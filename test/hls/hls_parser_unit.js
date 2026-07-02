@@ -7399,4 +7399,72 @@ describe('HlsParser', () => {
         // segment4 is extrapolated within the post-discontinuity region.
         expect(timeline.getProgramDateTimeForTime(35)).toBe(pdt0 + 65);
       });
+
+  it('maps playhead date when audio and video start at different PDTs',
+      async () => {
+        const master = [
+          '#EXTM3U\n',
+          '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+          'URI="test:/audio"\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.42c00d,mp4a.40.2",',
+          'AUDIO="aud1",CLOSED-CAPTIONS=NONE\n',
+          'test:/video\n',
+        ].join('');
+
+        // Audio starts 6 seconds before video.
+        const audio = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:10\n',
+          '#EXT-X-PLAYLIST-TYPE:VOD\n',
+          '#EXT-X-PROGRAM-DATE-TIME:2023-01-01T00:00:00Z\n',
+          '#EXTINF:10,\n',
+          'audio1.ts\n',
+          '#EXTINF:10,\n',
+          'audio2.ts\n',
+          '#EXTINF:10,\n',
+          'audio3.ts\n',
+        ].join('');
+        const video = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:10\n',
+          '#EXT-X-PLAYLIST-TYPE:VOD\n',
+          '#EXT-X-PROGRAM-DATE-TIME:2023-01-01T00:00:06Z\n',
+          '#EXTINF:10,\n',
+          'segment1.ts\n',
+          '#EXT-X-DISCONTINUITY\n',
+          '#EXT-X-PROGRAM-DATE-TIME:2023-01-01T01:00:00Z\n',
+          '#EXTINF:10,\n',
+          'segment2.ts\n',
+        ].join('');
+
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/audio', audio)
+            .setResponseText('test:/video', video);
+
+        const manifest = await parser.start('test:/master', playerInterface);
+        const videoStream = manifest.variants[0].video;
+        await videoStream.createSegmentIndex();
+
+        const timeline = manifest.presentationTimeline;
+        const pdtV = Date.parse('2023-01-01T00:00:06Z') / 1000;
+        const pdtD = Date.parse('2023-01-01T01:00:00Z') / 1000;
+
+        // Regardless of how the streams are aligned on the presentation
+        // timeline, each video segment's date must reflect its own
+        // PROGRAM-DATE-TIME.
+        const segmentIndex = /** @type {!shaka.media.SegmentIndex} */ (
+          videoStream.segmentIndex);
+        const refs = [];
+        for (const ref of segmentIndex) {
+          if (ref) {
+            refs.push(ref);
+          }
+        }
+        expect(refs.length).toBe(2);
+        expect(timeline.getProgramDateTimeForTime(refs[0].startTime))
+            .toBe(pdtV);
+        expect(timeline.getProgramDateTimeForTime(refs[1].startTime))
+            .toBe(pdtD);
+      });
 });
