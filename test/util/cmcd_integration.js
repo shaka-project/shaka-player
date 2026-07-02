@@ -621,6 +621,76 @@ describe('CmcdManager integration', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // Group 3b: Event Mode v2 over the XHR scheme plugin.
+  //
+  // Legacy TV browsers (e.g. Tizen 3.0) fail HttpFetchPlugin.isSupported()
+  // and fall back to HttpXHRPlugin, which routes event POSTs through the
+  // recorder's synthetic XHR completion instead of the fetch transport.
+  // Evergreen CI browsers never exercise that path organically, so force
+  // the XHR plugin here to keep it covered everywhere.
+  // ---------------------------------------------------------------------------
+
+  describe('Event Mode v2 via XHR scheme plugin', () => {
+    /** @type {(!Object|undefined)} */
+    let savedHttpScheme;
+    /** @type {(!Object|undefined)} */
+    let savedHttpsScheme;
+
+    beforeAll(() => {
+      const NetworkingEngine = shaka.net.NetworkingEngine;
+      savedHttpScheme = NetworkingEngine.schemes_.get('http');
+      savedHttpsScheme = NetworkingEngine.schemes_.get('https');
+      NetworkingEngine.registerScheme('http', shaka.net.HttpXHRPlugin.parse,
+          NetworkingEngine.PluginPriority.APPLICATION,
+          /* progressSupport= */ true);
+      NetworkingEngine.registerScheme('https', shaka.net.HttpXHRPlugin.parse,
+          NetworkingEngine.PluginPriority.APPLICATION,
+          /* progressSupport= */ true);
+    });
+
+    afterAll(() => {
+      const NetworkingEngine = shaka.net.NetworkingEngine;
+      if (savedHttpScheme) {
+        NetworkingEngine.schemes_.set('http', savedHttpScheme);
+      } else {
+        NetworkingEngine.unregisterScheme('http');
+      }
+      if (savedHttpsScheme) {
+        NetworkingEngine.schemes_.set('https', savedHttpsScheme);
+      } else {
+        NetworkingEngine.unregisterScheme('https');
+      }
+    });
+
+    it('sends play state events via POST', async () => {
+      player.configure({
+        cmcd: {
+          enabled: true,
+          version: 2,
+          sessionId: SESSION_ID,
+          contentId: CONTENT_ID,
+          eventTargets: [{
+            url: EVENT_TARGET_URL,
+            events: [cml.cmcd.CmcdEventType.PLAY_STATE],
+          }],
+        },
+      });
+      attachRecorder({
+        eventTargetUrls: [EVENT_TARGET_URL],
+        waitTimeout: REQUEST_TIMEOUT,
+      });
+
+      await player.load(TEST_STREAM);
+      await video.play();
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      const reports = await recorder.waitForEvents();
+      expect(reports.length).toBeGreaterThan(0);
+      expect(reports[0].request['method']).toBe('POST');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // Group 4: Key Filtering
   // ---------------------------------------------------------------------------
 
