@@ -1285,6 +1285,84 @@ describe('HlsParser live', () => {
             expect(timeline.getProgramDateTimeForTime(2)).toBe(pdt1);
           });
 
+      it('stays continuous across two scrolled-out discontinuities',
+          async () => {
+            const hour = 3600;
+            const pdtA = 946684800; // 2000-01-01T00:00:00Z
+            const pdtB = pdtA + hour; // 01:00:00Z
+            const pdtC = pdtA + 2 * hour; // 02:00:00Z
+
+            // Three discontinuity sequences, each jumping the PDT forward by an
+            // hour.
+            const mediaInitial = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:0\n',
+              '#EXT-X-DISCONTINUITY-SEQUENCE:0\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main0.mp4\n',
+              '#EXT-X-DISCONTINUITY\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+              '#EXT-X-DISCONTINUITY\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T02:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main3.mp4\n',
+            ].join('');
+            // The first discontinuity has scrolled out, and a brand-new segment
+            // (main4) continues the last discontinuity sequence.
+            const mediaSlide = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:1\n',
+              '#EXT-X-DISCONTINUITY-SEQUENCE:1\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+              '#EXT-X-DISCONTINUITY\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T02:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main3.mp4\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T02:00:02.00Z\n',
+              '#EXTINF:2,\n',
+              'main4.mp4\n',
+            ].join('');
+
+            const manifest = await testInitialManifest(master, mediaInitial);
+            const timeline = manifest.presentationTimeline;
+            await testUpdate(manifest, mediaSlide);
+
+            const byUri = new Map();
+            const segmentIndex = /** @type {!shaka.media.SegmentIndex} */ (
+              manifest.variants[0].video.segmentIndex);
+            for (const ref of segmentIndex) {
+              if (ref) {
+                byUri.set(ref.getUris()[0], ref);
+              }
+            }
+            const main2 = byUri.get('test:/main2.mp4');
+            const main3 = byUri.get('test:/main3.mp4');
+            const main4 = byUri.get('test:/main4.mp4');
+
+            // The presentation timeline stays continuous - the new segment is
+            // not stranded far in the future by syncAgainst().
+            expect(main2.startTime).toBe(2);
+            expect(main3.startTime).toBe(4);
+            expect(main4.startTime).toBe(6);
+
+            // And each segment's date reflects its own PROGRAM-DATE-TIME.
+            expect(timeline.getProgramDateTimeForTime(main2.startTime))
+                .toBe(pdtB);
+            expect(timeline.getProgramDateTimeForTime(main3.startTime))
+                .toBe(pdtC);
+            expect(timeline.getProgramDateTimeForTime(main4.startTime))
+                .toBe(pdtC + 2);
+          });
+
       it('anchors a new post-discontinuity segment by its own PDT',
           async () => {
             const pdt0 = 946684800;
@@ -1306,9 +1384,7 @@ describe('HlsParser live', () => {
             ].join('');
 
             // main scrolled out; a brand-new post-discontinuity segment (main3)
-            // arrives.  syncAgainst() repositions main3 using its raw syncTime
-            // (the discontinuity gap is no longer removed), so its startTime no
-            // longer lines up with the continuous timeline.
+            // arrives while the discontinuity is no longer visible.
             const mediaAfterSlide = [
               '#EXTM3U\n',
               '#EXT-X-TARGETDURATION:5\n',
@@ -1329,9 +1405,6 @@ describe('HlsParser live', () => {
 
             await testUpdate(manifest, mediaAfterSlide);
 
-            // Whatever presentation time main3 ended up at, its date must
-            // reflect its own PROGRAM-DATE-TIME, not an extrapolation across
-            // the drift.
             const segmentIndex = /** @type {!shaka.media.SegmentIndex} */ (
               manifest.variants[0].video.segmentIndex);
             let main3 = null;
@@ -1340,6 +1413,9 @@ describe('HlsParser live', () => {
                 main3 = ref;
               }
             }
+            // main3 stays on the continuous timeline (right after main2, which
+            // ends at 4) and its date reflects its own PROGRAM-DATE-TIME.
+            expect(main3.startTime).toBe(4);
             expect(timeline.getProgramDateTimeForTime(main3.startTime))
                 .toBe(pdt1 + 2);
             // main2 remains correct too.
