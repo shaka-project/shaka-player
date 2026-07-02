@@ -360,6 +360,7 @@ mspro
 mssim
 multicodec
 multidrm
+multivideo
 muxed
 muxer
 mvex
