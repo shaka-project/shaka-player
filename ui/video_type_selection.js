@@ -119,7 +119,7 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
     const realLanguages = new Set();
     const distinctRoles = new Set();
     for (const option of options.values()) {
-      if (option.language && option.language != 'und') {
+      if (option.language) {
         realLanguages.add(option.language);
       }
       if (option.label) {
