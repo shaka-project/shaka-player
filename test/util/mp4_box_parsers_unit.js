@@ -180,6 +180,65 @@ describe('Mp4BoxParsers', () => {
     expect(baseMediaDecodeTime).toBe(expectedBaseMediaDecodeTime);
   });
 
+  describe('parseTRUN sampleCount validation', () => {
+    const DataViewReader = shaka.util.DataViewReader;
+    const Endianness = shaka.util.DataViewReader.Endianness;
+
+    /**
+     * Builds a minimal TRUN payload (the bytes after the box header, version,
+     * and flags) with the given declared sample_count followed by
+     * |extraBytes| additional bytes representing per-sample data.
+     * @param {number} sampleCount
+     * @param {number} extraBytes
+     * @return {!shaka.util.DataViewReader}
+     */
+    function makeTrunReader(sampleCount, extraBytes) {
+      const data = new Uint8Array(4 + extraBytes);
+      new DataView(data.buffer).setUint32(0, sampleCount);
+      return new DataViewReader(data, Endianness.BIG_ENDIAN);
+    }
+
+    it('rejects a sample_count larger than the box can hold (flags=0)', () => {
+      // flags = 0 means the per-sample loop reads no bytes, so without a
+      // bound the parser would allocate ~4.29 billion objects from a tiny
+      // input.  The box has no per-sample bytes, so any non-zero count is
+      // out of bounds.
+      const reader = makeTrunReader(0xFFFFFFFF, 0);
+      expect(() => {
+        shaka.util.Mp4BoxParsers.parseTRUN(reader, /* version= */ 0,
+            /* flags= */ 0);
+      }).toThrow();
+    });
+
+    it('rejects a sample_count larger than the box can hold (flags set)', () => {
+      // flags request sample_duration + sample_size = 8 bytes per sample.
+      // The box only carries 8 extra bytes (room for exactly one sample),
+      // so a declared count of 1,000,000 must be rejected.
+      const reader = makeTrunReader(1000000, /* extraBytes= */ 8);
+      expect(() => {
+        shaka.util.Mp4BoxParsers.parseTRUN(reader, /* version= */ 0,
+            /* flags= */ 0x000300);
+      }).toThrow();
+    });
+
+    it('accepts a valid sample_count backed by enough bytes', () => {
+      // 3 samples * 8 bytes/sample (duration + size) = 24 bytes.
+      const reader = makeTrunReader(3, /* extraBytes= */ 24);
+      const parsed = shaka.util.Mp4BoxParsers.parseTRUN(
+          reader, /* version= */ 0, /* flags= */ 0x000300);
+      expect(parsed.sampleCount).toBe(3);
+      expect(parsed.sampleData.length).toBe(3);
+    });
+
+    it('accepts a zero sample_count', () => {
+      const reader = makeTrunReader(0, /* extraBytes= */ 0);
+      const parsed = shaka.util.Mp4BoxParsers.parseTRUN(
+          reader, /* version= */ 0, /* flags= */ 0);
+      expect(parsed.sampleCount).toBe(0);
+      expect(parsed.sampleData.length).toBe(0);
+    });
+  });
+
   it('parses ESDS box for xHE-AAC segment', () => {
     let channelCount;
     let sampleRate;
