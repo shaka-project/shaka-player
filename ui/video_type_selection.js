@@ -99,10 +99,11 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
     /** @type {!Map<string, {role: string, language: string}>} */
     const options = new Map();
     for (const track of tracks) {
-      for (const role of track.roles) {
-        if (!role) {
-          continue;
-        }
+      const roles = track.roles.slice();
+      if (!roles.length) {
+        roles.push('');
+      }
+      for (const role of roles) {
         const key = role + '\0' + track.language;
         if (!options.has(key)) {
           options.set(key, {role, language: track.language});
