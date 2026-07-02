@@ -381,6 +381,77 @@ describe('AdaptationSetCriteria', () => {
       expect(set).toBe(builder.getLastAdaptationSet());
     });
 
+    it('chooses variants in preferred video role and language', () => {
+      // Regression test for https://github.com/shaka-project/shaka-player/issues/10198
+      // Two video tracks can share the same role (e.g. 'sign') but differ in
+      // language (e.g. multiple sign-language video tracks).
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(10, (stream) => {
+            stream.roles = ['sign'];
+            stream.language = 'sgn-US';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(20, (stream) => {
+            stream.roles = ['sign'];
+            stream.language = 'sgn-NL';
+          });
+        });
+        manifest.addVariant(3, (variant) => {
+          variant.addVideo(30, (stream) => {
+            stream.roles = ['main'];
+          });
+        });
+      });
+
+      const builder = new shaka.media.PreferenceBasedCriteria();
+      builder.configure({
+        preferredAudio: [{
+          language: 'en',
+          role: 'main',
+          label: '',
+          channelCount: 0,
+          codec: '',
+          spatialAudio: false,
+        }],
+        preferredVideo: [{
+          role: 'sign',
+          label: '',
+          language: 'sgn-NL',
+          codec: '',
+          hdrLevel: '',
+          layout: '',
+        }],
+        language: '',
+        role: '',
+        videoRole: '',
+        channelCount: 0,
+        hdrLevel: '',
+        spatialAudio: false,
+        videoLayout: '',
+        audioLabel: '',
+        videoLabel: '',
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
+        codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
+        audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        keySystem: '',
+      });
+
+      expect(builder.getLastAdaptationSet()).toBeNull();
+
+      const set = builder.create(manifest.variants);
+
+      checkSet(set, [
+        manifest.variants[1],
+      ]);
+
+      expect(set).toBe(builder.getLastAdaptationSet());
+    });
+
     it('chooses only one role, even if none is preferred', () => {
       // Regression test for https://github.com/shaka-project/shaka-player/issues/949
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {

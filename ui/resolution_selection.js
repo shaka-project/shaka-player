@@ -354,6 +354,12 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           !ArrayUtils.hasSameElements(selectedTrack.roles, track.roles)) {
         return false;
       }
+      // If the same role has multiple video languages (e.g. multiple
+      // sign-language video tracks), only offer resolutions for the
+      // language that is currently selected.
+      if (selectedTrack && selectedTrack.language != track.language) {
+        return false;
+      }
       // Keep the first one with the same height and framerate or bandwidth.
       const otherIdx = tracks.findIndex((t) => {
         let ret = t.height == track.height &&
@@ -361,6 +367,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
             t.frameRate == track.frameRate &&
             t.hdr == track.hdr &&
             t.videoLayout == track.videoLayout &&
+            t.language == track.language &&
             shaka.util.ArrayUtils.hasSameElements(t.roles, track.roles);
         if (ret && this.controls.getConfig().showVideoCodec &&
             t.codecs && track.codecs) {

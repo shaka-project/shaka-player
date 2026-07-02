@@ -1069,6 +1069,7 @@ shakaDemo.Config = class {
     this.addPreferenceList_(configKey, () => ({
       label: '',
       role: '',
+      language: '',
       codec: '',
       hdrLevel: 'AUTO',
       layout: '',
@@ -1077,6 +1078,8 @@ shakaDemo.Config = class {
           (v) => makeChange(index, 'label', v));
       this.addPrefTextField_(container, 'Role', entry['role'] || '',
           (v) => makeChange(index, 'role', v));
+      this.addPrefTextField_(container, 'Language', entry['language'] || '',
+          (v) => makeChange(index, 'language', v));
       this.addPrefTextField_(container, 'Codec', entry['codec'] || '',
           (v) => makeChange(index, 'codec', v));
       this.addPrefSelectField_(container, 'HDR Level', hdrLevelNames,
