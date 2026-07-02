@@ -1363,6 +1363,75 @@ describe('HlsParser live', () => {
                 .toBe(pdtC + 2);
           });
 
+      it('keeps playhead date accurate after a disconnect', async () => {
+        const pdtA = 946684800; // 2000-01-01T00:00:00Z
+        const pdtB = pdtA + 3600; // 01:00:00Z
+
+        const mediaInitial = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXT-X-DISCONTINUITY-SEQUENCE:0\n',
+          '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+          '#EXTINF:2,\n',
+          'main.mp4\n',
+          '#EXT-X-DISCONTINUITY\n',
+          '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:00.00Z\n',
+          '#EXTINF:2,\n',
+          'main2.mp4\n',
+        ].join('');
+
+        // After a disconnect: the media sequence jumped past every position we
+        // know about, so the parser cannot chain the new segments to a cached
+        // position and recovers via the availability-start estimate.  Their
+        // raw PROGRAM-DATE-TIME is then the only reliable way to re-position
+        // them (via syncAgainst), so the start time estimate must not be used
+        // to derive an accumulated-gap correction.
+        const mediaAfterDisconnect = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-MEDIA-SEQUENCE:5\n',
+          '#EXT-X-DISCONTINUITY-SEQUENCE:1\n',
+          '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:10.00Z\n',
+          '#EXTINF:2,\n',
+          'main3.mp4\n',
+          '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:12.00Z\n',
+          '#EXTINF:2,\n',
+          'main4.mp4\n',
+        ].join('');
+
+        const manifest = await testInitialManifest(master, mediaInitial);
+        const timeline = manifest.presentationTimeline;
+        await testUpdate(manifest, mediaAfterDisconnect);
+
+        const byUri = new Map();
+        const segmentIndex = /** @type {!shaka.media.SegmentIndex} */ (
+          manifest.variants[0].video.segmentIndex);
+        for (const ref of segmentIndex) {
+          if (ref) {
+            byUri.set(ref.getUris()[0], ref);
+          }
+        }
+        const main2 = byUri.get('test:/main2.mp4');
+        const main3 = byUri.get('test:/main3.mp4');
+        const main4 = byUri.get('test:/main4.mp4');
+
+        // The recovered segments are re-positioned by their raw
+        // PROGRAM-DATE-TIME relative to the sync origin (pdtA), not pinned to
+        // the availability-start estimate.
+        expect(main3.startTime).toBe(3610);
+        expect(main4.startTime).toBe(3612);
+
+        // And every segment's date still reflects its own PROGRAM-DATE-TIME.
+        expect(timeline.getProgramDateTimeForTime(main2.startTime)).toBe(pdtB);
+        expect(timeline.getProgramDateTimeForTime(main3.startTime))
+            .toBe(pdtB + 10);
+        expect(timeline.getProgramDateTimeForTime(main4.startTime))
+            .toBe(pdtB + 12);
+      });
+
       it('anchors a new post-discontinuity segment by its own PDT',
           async () => {
             const pdt0 = 946684800;
