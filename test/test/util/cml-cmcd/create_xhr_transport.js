@@ -5,6 +5,8 @@
 
 goog.provide('cml.cmcd.createXhrTransport');
 
+goog.require('shaka.util.StringUtils');
+
 goog.requireType('cml.cmcd.CmcdTransportAdapter');
 
 
@@ -24,6 +26,15 @@ cml.cmcd.createXhrTransport_completeXhrWith_ =
   } catch (err) {
     text = '';
   }
+
+  // shaka's HttpXHRPlugin sets responseType='arraybuffer' and asserts that
+  // xhr.response is an ArrayBuffer, so honor the requested responseType
+  // when completing synthetically. Uses shaka.util.StringUtils (a deliberate
+  // divergence from the dependency-free upstream port) because shaka's
+  // conformance config bans direct TextEncoder and TypedArray.buffer use.
+  const responseValue = (xhr.responseType === 'arraybuffer') ?
+      shaka.util.StringUtils.toUTF8(text) :
+      text;
 
   const ProgressEventCtor = (typeof ProgressEvent !== 'undefined') ?
       ProgressEvent :
@@ -46,7 +57,7 @@ cml.cmcd.createXhrTransport_completeXhrWith_ =
         xhr, 'responseURL',
         {value: xhrAny['_cmcdUrl'] || '', configurable: true});
     Object.defineProperty(
-        xhr, 'response', {value: text, configurable: true});
+        xhr, 'response', {value: responseValue, configurable: true});
     Object.defineProperty(
         xhr, 'responseText', {value: text, configurable: true});
 
@@ -62,7 +73,7 @@ cml.cmcd.createXhrTransport_completeXhrWith_ =
     xhrAny['statusText'] = response.statusText;
     xhrAny['readyState'] = 4;
     xhrAny['responseURL'] = xhrAny['_cmcdUrl'] || '';
-    xhrAny['response'] = text;
+    xhrAny['response'] = responseValue;
     xhrAny['responseText'] = text;
     if (typeof xhr.onload === 'function') {
       xhr.onload.call(xhr, new ProgressEventCtor('load'));

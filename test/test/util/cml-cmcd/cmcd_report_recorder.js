@@ -155,7 +155,13 @@ cml.cmcd.CmcdReportRecorder = class {
       }
       this.notifyWaiters_();
 
-      return isEventTarget ? new Response(null, {status: 204}) : undefined;
+      // NOTE: upstream passes `null` for the body, but old Chromium
+      // (e.g. Tizen 3.0's M47) predates the nullable-BodyInit spec change:
+      // it stringifies null into a real body, which throws for status 204.
+      // Explicit `undefined` means "absent" in both old and new engines.
+      return isEventTarget ?
+          new Response(undefined, {status: 204}) :
+          undefined;
     };
   }
 

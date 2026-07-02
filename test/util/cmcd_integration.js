@@ -268,9 +268,10 @@ describe('CmcdManager integration', () => {
    * Must be called BEFORE player.load().
    *
    * Shaka's HttpFetchPlugin asserts that non-HEAD responses have a body.
-   * The recorder returns `new Response(null, {status: 204})` for event-target
-   * POSTs, which has a null body. We wrap window.fetch to upgrade null-body
-   * 204 responses to have an empty body, satisfying shaka's assertion.
+   * The recorder returns `new Response(undefined, {status: 204})` for
+   * event-target POSTs, which has a null body. We wrap window.fetch to
+   * upgrade null-body 204 responses to have an empty body, satisfying
+   * shaka's assertion.
    *
    * @param {!cml.cmcd.CmcdReportRecorderOptions=} options
    * @suppress {constantProperty|accessControls}
@@ -283,7 +284,7 @@ describe('CmcdManager integration', () => {
     const recorderFetch = window.fetch;
     const shakaCompatFetch = async (input, init) => {
       const response = await recorderFetch(input, init);
-      // The recorder returns new Response(null, {status:204}) for event
+      // The recorder returns new Response(undefined, {status:204}) for event
       // targets. Shaka asserts response.body is non-null for non-HEAD requests.
       // Upgrade to Response('', {status: 204}) to satisfy the assertion.
       if (response && response.status === 204 && response.body === null) {
