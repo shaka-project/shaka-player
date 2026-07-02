@@ -261,6 +261,24 @@ describe('StreamingEngine', () => {
     variant = manifest.variants[0];
   }
 
+  function setupNewVariant() {
+    const firstPeriodStartTime = 0;
+    const secondPeriodStartTime = 20;
+    const presentationDuration = 40;
+    manifest = shaka.test.StreamingEngineUtil.createManifest(
+        /** @type {!shaka.media.PresentationTimeline} */(timeline),
+        [firstPeriodStartTime, secondPeriodStartTime], presentationDuration,
+        /* segmentDurations= */ {
+          audio: metadata.audio.segmentDuration,
+          video: metadata.video.segmentDuration,
+        },
+        /* initSegmentRanges= */ {
+          audio: [0, null],
+          video: [0, null],
+        });
+    return manifest.variants[0];
+  }
+
   function createStreamingEngine() {
     const playerInterface = {
       getPresentationTime: () => playhead.getTime(),
@@ -299,6 +317,23 @@ describe('StreamingEngine', () => {
       // timeout window.  Note that we have seen some devices fail to play at
       // full speed for reasons beyond our control, so we plan for >= 0.5x.
       await waiter.timeoutAfter(100).waitForEnd(video);
+    });
+
+    it('plays without bitrate changed', async () => {
+      // Let's go!
+      const bandwidth1 = variant.video.bandwidth;
+      const bandwidth2 = 10000000;
+      const variant2 = setupNewVariant();
+      variant2.video.bandwidth = bandwidth2;
+      expect(variant.video.bandwidth).toBe(5000000);
+      expect(variant2.video.bandwidth).toBe(10000000);
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      await video.play();
+      await waiter.timeoutAfter(10);
+      streamingEngine.switchVariant(variant2, false, 0, false, undefined, 120);
+      expect(streamingEngine.getCurrentVariant().video.bandwidth)
+          .toBe(bandwidth1);
     });
 
     it('plays at high playback rates', async () => {

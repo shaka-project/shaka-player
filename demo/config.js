@@ -400,7 +400,11 @@ shakaDemo.Config = class {
             'abr.advanced.droppedFramesInterval',
             /* canBeDecimal= */ true)
         .addNumberInput_('Dropped Frames Ban Duration',
-            'abr.advanced.droppedFramesBanDuration');
+            'abr.advanced.droppedFramesBanDuration')
+        .addNumberInput_('Min Buffer Ahead To Upgrade',
+            'abr.minBufferAheadToUpgrade',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true);
     this.addRestrictionsSection_('abr', 'Adaptation Restrictions');
   }
 
