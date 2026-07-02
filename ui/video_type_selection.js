@@ -92,11 +92,9 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
 
     const selectedTrack = tracks.find((track) => track.active);
 
-    // Collect the distinct (role, language) combinations, in the order they
-    // are first seen.  A role alone is not enough to uniquely identify a
-    // video option: manifests can carry multiple video tracks with the same
-    // role but different languages (e.g. multiple sign-language tracks).
-    /** @type {!Map<string, {role: string, language: string}>} */
+    /**
+     * @type {!Map<string, {role: string, language: string, label: ?string}>}
+     */
     const options = new Map();
     for (const track of tracks) {
       const roles = track.roles.slice();
@@ -104,9 +102,13 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
         roles.push('');
       }
       for (const role of roles) {
-        const key = role + '\0' + track.language;
+        const key = role + '\0' + track.language + '\0' + track.label;
         if (!options.has(key)) {
-          options.set(key, {role, language: track.language});
+          options.set(key, {
+            role,
+            language: track.language,
+            label: track.label,
+          });
         }
       }
     }
@@ -120,6 +122,9 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
       if (option.language && option.language != 'und') {
         realLanguages.add(option.language);
       }
+      if (option.label) {
+        realLanguages.add(option.label);
+      }
       distinctRoles.add(option.role);
     }
     const showLanguage = realLanguages.size > 1;
@@ -129,7 +134,7 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
     const roleIsRedundant = showLanguage && distinctRoles.size == 1;
 
     if (options.size > 1) {
-      for (const {role, language} of options.values()) {
+      for (const {role, language, label} of options.values()) {
         const button = shaka.util.Dom.createButton();
         // ARIA: single-select menu item
         button.setAttribute('role', 'menuitemradio');
@@ -138,13 +143,14 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
             () => this.onVideoRoleSelected_(role, language));
 
         const span = shaka.util.Dom.createHTMLElement('span');
-        const hasRealLanguage = language && language != 'und';
+        const hasRealLanguage = (language && language != 'und') || label;
         if (roleIsRedundant && hasRealLanguage) {
-          span.textContent = this.getLanguageLabel_(language);
+          span.textContent = this.getLanguageLabel_(language, label);
         } else {
           span.textContent = this.getRoleLabel_(role);
           if (showLanguage && hasRealLanguage) {
-            span.textContent += ' (' + this.getLanguageLabel_(language) + ')';
+            span.textContent +=
+                ' (' + this.getLanguageLabel_(language, label) + ')';
           }
         }
         button.appendChild(span);
@@ -183,10 +189,14 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
 
   /**
    * @param {string} language
+   * @param {?string} label
    * @return {string}
    * @private
    */
-  getLanguageLabel_(language) {
+  getLanguageLabel_(language, label) {
+    if (label) {
+      return label;
+    }
     const preferIntlDisplayNames =
         this.controls.getConfig().preferIntlDisplayNames;
     const name = shaka.ui.LanguageUtils.getLanguageName(
