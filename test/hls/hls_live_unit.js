@@ -1233,6 +1233,58 @@ describe('HlsParser live', () => {
             expect(createSegmentReferenceSpy).toHaveBeenCalledTimes(1);
           });
 
+      it('keeps playhead date accurate after a discontinuity leaves the window',
+          async () => {
+            // Corresponds to "2000-01-01T00:00:00.00Z" and one hour later.
+            const pdt0 = 946684800;
+            const pdt1 = pdt0 + 3600;
+
+            // Initial live window with a discontinuity that jumps the PDT
+            // forward by an hour.
+            const mediaWithDiscontinuity = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:0\n',
+              '#EXT-X-DISCONTINUITY-SEQUENCE:0\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main.mp4\n',
+              '#EXT-X-DISCONTINUITY\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+            ].join('');
+
+            // The window has slid forward: the pre-discontinuity segment and
+            // the discontinuity tag are gone.
+            const mediaAfterSlide = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:1\n',
+              '#EXT-X-DISCONTINUITY-SEQUENCE:1\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+            ].join('');
+
+            const manifest =
+                await testInitialManifest(master, mediaWithDiscontinuity);
+            const timeline = manifest.presentationTimeline;
+
+            // main2 (post-discontinuity) sits at presentation time 2.
+            expect(timeline.getProgramDateTimeForTime(2)).toBe(pdt1);
+
+            await testUpdate(manifest, mediaAfterSlide);
+
+            // Even though the discontinuity is no longer visible in the
+            // manifest, the date for main2 must still reflect the
+            // post-discontinuity PDT instead of reverting to extrapolating
+            // from the initial (pre-jump) program date time.
+            expect(timeline.getProgramDateTimeForTime(2)).toBe(pdt1);
+          });
+
       it('falls back to full rebuild when anchor reference is unavailable',
           async () => {
             const createSegmentReferenceSpy =
