@@ -82,7 +82,9 @@ cml.cmcd.createXhrTransport_completeXhrWith_ =
 cml.cmcd.createXhrTransport = function() {
   return {
     attach: function(deliver) {
-      const Xhr = globalThis.XMLHttpRequest;
+      // `window`, not `globalThis`: older Tizen/WebOS (Chromium < 71) lack
+      // globalThis and karma's babel pipeline does not polyfill it.
+      const Xhr = window.XMLHttpRequest;
       if (!Xhr) {
         return function() { /* no XHR to detach */ };
       }

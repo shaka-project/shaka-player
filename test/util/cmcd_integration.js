@@ -253,9 +253,9 @@ describe('CmcdManager integration', () => {
   //
   // Shaka's HTTP fetch plugin captures `window.fetch` at module-load time
   // into `shaka.net.HttpFetchPlugin.fetch_`.  The recorder's fetch transport
-  // adapter patches `globalThis.fetch` AFTER module load, so shaka never sees
+  // adapter patches `window.fetch` AFTER module load, so shaka never sees
   // the patch.  The helpers below additionally forward
-  // `HttpFetchPlugin.fetch_` to `globalThis.fetch` while the recorder is
+  // `HttpFetchPlugin.fetch_` to `window.fetch` while the recorder is
   // active, so that both shaka's manifest/segment fetches AND event-mode POSTs
   // (which go through the same plugin) are visible to the recorder.
   // ---------------------------------------------------------------------------
@@ -264,12 +264,12 @@ describe('CmcdManager integration', () => {
   let origShakaFetch_ = null;
 
   /**
-   * Attach the recorder and forward shaka's internal fetch to globalThis.fetch.
+   * Attach the recorder and forward shaka's internal fetch to window.fetch.
    * Must be called BEFORE player.load().
    *
    * Shaka's HttpFetchPlugin asserts that non-HEAD responses have a body.
    * The recorder returns `new Response(null, {status: 204})` for event-target
-   * POSTs, which has a null body. We wrap globalThis.fetch to upgrade null-body
+   * POSTs, which has a null body. We wrap window.fetch to upgrade null-body
    * 204 responses to have an empty body, satisfying shaka's assertion.
    *
    * @param {!cml.cmcd.CmcdReportRecorderOptions=} options
@@ -277,10 +277,10 @@ describe('CmcdManager integration', () => {
    */
   function attachRecorder(options) {
     recorder.attach(options);
-    // After attach(), globalThis.fetch is the recorder's patched version.
+    // After attach(), window.fetch is the recorder's patched version.
     // Wrap it to fix null-body 204 responses that would otherwise trigger
     // shaka's HttpFetchPlugin assertion.
-    const recorderFetch = globalThis.fetch;
+    const recorderFetch = window.fetch;
     const shakaCompatFetch = async (input, init) => {
       const response = await recorderFetch(input, init);
       // The recorder returns new Response(null, {status:204}) for event
