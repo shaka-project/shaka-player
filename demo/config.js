@@ -1138,11 +1138,13 @@ shakaDemo.Config = class {
     const vrProjectionModeOptions = {
       'equirectangular': 'equirectangular',
       'halfequirectangular': 'halfequirectangular',
+      'fisheye': 'fisheye',
       'cubemap': 'cubemap',
     };
     const vrProjectionModeNames = {
       'equirectangular': 'Equirectangular',
       'halfequirectangular': 'Half Equirectangular',
+      'fisheye': 'Fisheye',
       'cubemap': 'Cubemap',
     };
 
