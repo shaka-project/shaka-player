@@ -1384,10 +1384,11 @@ describe('HlsParser live', () => {
 
         // After a disconnect: the media sequence jumped past every position we
         // know about, so the parser cannot chain the new segments to a cached
-        // position and recovers via the availability-start estimate.  Their
-        // raw PROGRAM-DATE-TIME is then the only reliable way to re-position
-        // them (via syncAgainst), so the start time estimate must not be used
-        // to derive an accumulated-gap correction.
+        // position.  The availability-start estimate must not be used to
+        // derive the accumulated-gap correction; instead the gap in effect at
+        // the end of the known window carries over (a brief outage is unlikely
+        // to have crossed another discontinuity), which keeps the recovered
+        // segments media-continuous with the missed ones.
         const mediaAfterDisconnect = [
           '#EXTM3U\n',
           '#EXT-X-TARGETDURATION:5\n',
@@ -1418,11 +1419,13 @@ describe('HlsParser live', () => {
         const main3 = byUri.get('test:/main3.mp4');
         const main4 = byUri.get('test:/main4.mp4');
 
-        // The recovered segments are re-positioned by their raw
-        // PROGRAM-DATE-TIME relative to the sync origin (pdtA), not pinned to
-        // the availability-start estimate.
-        expect(main3.startTime).toBe(3610);
-        expect(main4.startTime).toBe(3612);
+        // main2 ended at 4 with PDT 01:00:02; main3's PDT is 01:00:10, i.e. 8
+        // seconds of media were missed during the outage.  Carrying over the
+        // last known discontinuity gap places main3 media-continuously at
+        // 4 + 8 = 12 (not pinned to the availability-start estimate, and not
+        // thrown to raw wall-clock position 3610).
+        expect(main3.startTime).toBe(12);
+        expect(main4.startTime).toBe(14);
 
         // And every segment's date still reflects its own PROGRAM-DATE-TIME.
         expect(timeline.getProgramDateTimeForTime(main2.startTime)).toBe(pdtB);
