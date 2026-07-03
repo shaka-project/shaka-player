@@ -101,6 +101,50 @@ cml.cmcd.CmcdReportRecorder_detectReportingMode_ =
 
 
 /**
+ * Build the synthetic success response for an intercepted event-target POST.
+ *
+ * NOTE: upstream constructs `new Response(null, {status: 204})` inline.
+ * Legacy TV engines (e.g. Tizen 3.0's WebKit 538) reject Response
+ * construction with a null-body status in engine-specific ways, and the
+ * resulting raw error escapes through the patched xhr.send() into shaka's
+ * networking stack, surfacing as a 'Wrong error type' assertion. Try
+ * spec-conformant variants first, then fall back to a minimal Response-like
+ * object that satisfies the XHR transport (the only transport that runs on
+ * engines old enough to need it). Construction failures are logged so
+ * device-lab CI logs capture the underlying engine error.
+ *
+ * @return {!Response}
+ * @private
+ */
+cml.cmcd.CmcdReportRecorder_syntheticResponse_ = function() {
+  try {
+    // A 204 with no body, matching upstream semantics.
+    return new Response(undefined, {status: 204});
+  } catch (err1) {
+    try {
+      // Some engines reject any body argument when the status is a
+      // null-body status; an empty-string body with status 200 sidesteps
+      // that rule entirely.
+      return new Response('', {status: 200});
+    } catch (err2) {
+      console.error('CmcdReportRecorder: Response construction failed:',
+          err1, err2);
+      // Minimal Response-like stand-in; only the XHR transport consumes it
+      // (status/statusText/clone/text), and only legacy engines get here.
+      const responseLike = {
+        status: 204,
+        statusText: '',
+        body: null,
+        text: () => Promise.resolve(''),
+      };
+      responseLike.clone = () => responseLike;
+      return /** @type {!Response} */ (/** @type {*} */ (responseLike));
+    }
+  }
+};
+
+
+/**
  * Test helper that records CMCD-bearing reports across XHR and fetch
  * transports. Each captured request is normalized to a plain
  * HttpRequest-shaped object.
@@ -155,7 +199,9 @@ cml.cmcd.CmcdReportRecorder = class {
       }
       this.notifyWaiters_();
 
-      return isEventTarget ? new Response(null, {status: 204}) : undefined;
+      return isEventTarget ?
+          cml.cmcd.CmcdReportRecorder_syntheticResponse_() :
+          undefined;
     };
   }
 

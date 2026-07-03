@@ -43,17 +43,21 @@ cml.cmcd.createFetchTransport_toHttpRequest_ = async function(request) {
 
 
 /**
- * Create a transport adapter that patches `globalThis.fetch` to
+ * Create a transport adapter that patches `window.fetch` to
  * capture CMCD-bearing requests.
+ *
+ * NOTE: upstream uses `globalThis`, which is missing on older Tizen/WebOS
+ * (Chromium < 71) and is not polyfilled by karma's babel pipeline. Use
+ * `window` instead; they are the same object in browsers.
  *
  * @return {!cml.cmcd.CmcdTransportAdapter}
  */
 cml.cmcd.createFetchTransport = function() {
   return {
     attach: function(deliver) {
-      const origFetch = globalThis.fetch;
+      const origFetch = window.fetch;
 
-      globalThis.fetch = async function(input, init) {
+      window.fetch = async function(input, init) {
         const inspect = (input instanceof Request) ?
             input.clone() :
             new Request(/** @type {!RequestInfo} */ (input), init);
@@ -64,11 +68,11 @@ cml.cmcd.createFetchTransport = function() {
           return synthetic;
         }
         return origFetch.call(
-            globalThis, /** @type {!RequestInfo} */ (input), init);
+            window, /** @type {!RequestInfo} */ (input), init);
       };
 
       return function() {
-        globalThis.fetch = origFetch;
+        window.fetch = origFetch;
       };
     },
   };
