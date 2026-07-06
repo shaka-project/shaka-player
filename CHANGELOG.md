@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.0.25](https://github.com/shaka-project/shaka-player/compare/v5.0.24...v5.0.25) (2026-07-06)
+
+
+### Bug Fixes
+
+* **HLS:** recognize binary/octet-stream as generic binary MIME type ([#10294](https://github.com/shaka-project/shaka-player/issues/10294)) ([d62bcee](https://github.com/shaka-project/shaka-player/commit/d62bceea44894b9d6a02a02c3a070ee21ebbd59a))
+* Set Default robustness on Android for Widevine key system ([#10289](https://github.com/shaka-project/shaka-player/issues/10289)) ([9d3f2ec](https://github.com/shaka-project/shaka-player/commit/9d3f2ece3d1ffc1400b83a46466f16e3665df681))
+* **UI:** Hide volume slider on Smart TV and mobile after mute_volume change ([#10287](https://github.com/shaka-project/shaka-player/issues/10287)) ([46a06da](https://github.com/shaka-project/shaka-player/commit/46a06da4ecb0f0a968298fe99035fb493792b6c2))
+
+
+### Performance Improvements
+
+* **ts:** derive start time from PES headers ([#10132](https://github.com/shaka-project/shaka-player/issues/10132)) ([61addf5](https://github.com/shaka-project/shaka-player/commit/61addf508e46108185407046ec45592d1d4d5993))
+
 ## [5.0.24](https://github.com/shaka-project/shaka-player/compare/v5.0.23...v5.0.24) (2026-06-29)
 
 
