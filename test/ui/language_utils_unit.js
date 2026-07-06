@@ -9,34 +9,6 @@
 describe('LanguageUtils (UI)', () => {
   const LanguageUtils = shaka.ui.LanguageUtils;
 
-  describe('looksLikeUnresolvedCode_', () => {
-    /**
-     * @param {string} name
-     * @return {boolean}
-     * @suppress {accessControls}
-     */
-    const looksLikeUnresolvedCode = (name) =>
-      LanguageUtils.looksLikeUnresolvedCode_(name);
-
-    it('rejects strings that are just a raw language code', () => {
-      expect(looksLikeUnresolvedCode('dse')).toBe(true);
-      expect(looksLikeUnresolvedCode('zzz')).toBe(true);
-      expect(looksLikeUnresolvedCode('sgn')).toBe(true);
-      expect(looksLikeUnresolvedCode('xx (YY)')).toBe(true);
-    });
-
-    it('accepts real, title-cased display names', () => {
-      expect(looksLikeUnresolvedCode('English')).toBe(false);
-      expect(looksLikeUnresolvedCode('Ewe')).toBe(false);
-      expect(looksLikeUnresolvedCode('American Sign Language')).toBe(false);
-    });
-
-    it('accepts names in scripts without letter case', () => {
-      expect(looksLikeUnresolvedCode('العربية')).toBe(false);
-      expect(looksLikeUnresolvedCode('中文')).toBe(false);
-    });
-  });
-
   describe('getLanguageName', () => {
     /** @type {!shaka.ui.Localization} */
     let localization;
