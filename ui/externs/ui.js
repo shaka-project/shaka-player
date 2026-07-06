@@ -348,6 +348,7 @@ shaka.extern.UITrackLabelCallback;
  *   allowTogglePresentationTime: boolean,
  *   showRemainingTimeInPresentationTime: boolean,
  *   enableVrDeviceMotion: boolean,
+ *   enableVrWheelZoom: boolean,
  *   showUIAlways: boolean,
  *   showUIAlwaysOnAudioOnly: boolean,
  *   preferIntlDisplayNames: boolean,
@@ -573,8 +574,9 @@ shaka.extern.UITrackLabelCallback;
  *   Defaults to <code>false</code>.
  * @property {string} defaultVrProjectionMode
  *   Indicate the default VR projection mode.
- *   Possible values: <code>'equirectangular'</code> or
- *   <code>'halfequirectangular'</code> or <code>'cubemap'</code>.
+ *   Possible values: <code>'equirectangular'</code>,
+ *   <code>'halfequirectangular'</code>, <code>'fisheye'</code> or
+ *   <code>'cubemap'</code>.
  *   <br>
  *   Defaults to <code>'equirectangular'</code>.
  * @property {boolean} preferVideoFullScreenInVisionOS
@@ -627,6 +629,13 @@ shaka.extern.UITrackLabelCallback;
  *   <br>
  *   Defaults to <code>true</code> except on Vision OS where the default value
  *   is <code>false</code>
+ * @property {boolean} enableVrWheelZoom
+ *   Enables zooming the field of view of VR videos with the mouse wheel.
+ *   When disabled, the wheel scrolls the page normally, which is usually a
+ *   better experience for players embedded in a page. The field of view can
+ *   still be changed with a pinch gesture or through the API.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @property {boolean} showUIAlways
  *   If true, always keep the UI visible for all content.
  *   <br>

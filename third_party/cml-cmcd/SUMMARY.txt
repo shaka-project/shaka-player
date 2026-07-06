@@ -90,7 +90,9 @@ cml-cmcd
         `cmcd_report_recorder_wait_options.js` (typedefs)
       - `cmcd_transport_adapter.js` (typedef for the adapter contract
         + `CmcdRequestDeliver` callback)
-      - `create_fetch_transport.js` (patches `globalThis.fetch`)
+      - `create_fetch_transport.js` (patches `window.fetch`; upstream
+        uses `globalThis`, which is missing on Chromium < 71 devices
+        like older Tizen and is not polyfilled in karma's babel path)
       - `create_xhr_transport.js` (patches `XMLHttpRequest.prototype`)
 
     Data-level validators (work on pre-decoded data):

@@ -253,9 +253,9 @@ describe('CmcdManager integration', () => {
   //
   // Shaka's HTTP fetch plugin captures `window.fetch` at module-load time
   // into `shaka.net.HttpFetchPlugin.fetch_`.  The recorder's fetch transport
-  // adapter patches `globalThis.fetch` AFTER module load, so shaka never sees
+  // adapter patches `window.fetch` AFTER module load, so shaka never sees
   // the patch.  The helpers below additionally forward
-  // `HttpFetchPlugin.fetch_` to `globalThis.fetch` while the recorder is
+  // `HttpFetchPlugin.fetch_` to `window.fetch` while the recorder is
   // active, so that both shaka's manifest/segment fetches AND event-mode POSTs
   // (which go through the same plugin) are visible to the recorder.
   // ---------------------------------------------------------------------------
@@ -264,26 +264,27 @@ describe('CmcdManager integration', () => {
   let origShakaFetch_ = null;
 
   /**
-   * Attach the recorder and forward shaka's internal fetch to globalThis.fetch.
+   * Attach the recorder and forward shaka's internal fetch to window.fetch.
    * Must be called BEFORE player.load().
    *
    * Shaka's HttpFetchPlugin asserts that non-HEAD responses have a body.
-   * The recorder returns `new Response(null, {status: 204})` for event-target
-   * POSTs, which has a null body. We wrap globalThis.fetch to upgrade null-body
-   * 204 responses to have an empty body, satisfying shaka's assertion.
+   * The recorder returns `new Response(undefined, {status: 204})` for
+   * event-target POSTs, which has a null body. We wrap window.fetch to
+   * upgrade null-body 204 responses to have an empty body, satisfying
+   * shaka's assertion.
    *
    * @param {!cml.cmcd.CmcdReportRecorderOptions=} options
    * @suppress {constantProperty|accessControls}
    */
   function attachRecorder(options) {
     recorder.attach(options);
-    // After attach(), globalThis.fetch is the recorder's patched version.
+    // After attach(), window.fetch is the recorder's patched version.
     // Wrap it to fix null-body 204 responses that would otherwise trigger
     // shaka's HttpFetchPlugin assertion.
-    const recorderFetch = globalThis.fetch;
+    const recorderFetch = window.fetch;
     const shakaCompatFetch = async (input, init) => {
       const response = await recorderFetch(input, init);
-      // The recorder returns new Response(null, {status:204}) for event
+      // The recorder returns new Response(undefined, {status:204}) for event
       // targets. Shaka asserts response.body is non-null for non-HEAD requests.
       // Upgrade to Response('', {status: 204}) to satisfy the assertion.
       if (response && response.status === 204 && response.body === null) {
@@ -616,6 +617,76 @@ describe('CmcdManager integration', () => {
               .toBeDefined();
         }
       }
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Group 3b: Event Mode v2 over the XHR scheme plugin.
+  //
+  // Legacy TV browsers (e.g. Tizen 3.0) fail HttpFetchPlugin.isSupported()
+  // and fall back to HttpXHRPlugin, which routes event POSTs through the
+  // recorder's synthetic XHR completion instead of the fetch transport.
+  // Evergreen CI browsers never exercise that path organically, so force
+  // the XHR plugin here to keep it covered everywhere.
+  // ---------------------------------------------------------------------------
+
+  describe('Event Mode v2 via XHR scheme plugin', () => {
+    /** @type {(!Object|undefined)} */
+    let savedHttpScheme;
+    /** @type {(!Object|undefined)} */
+    let savedHttpsScheme;
+
+    beforeAll(() => {
+      const NetworkingEngine = shaka.net.NetworkingEngine;
+      savedHttpScheme = NetworkingEngine.schemes_.get('http');
+      savedHttpsScheme = NetworkingEngine.schemes_.get('https');
+      NetworkingEngine.registerScheme('http', shaka.net.HttpXHRPlugin.parse,
+          NetworkingEngine.PluginPriority.APPLICATION,
+          /* progressSupport= */ true);
+      NetworkingEngine.registerScheme('https', shaka.net.HttpXHRPlugin.parse,
+          NetworkingEngine.PluginPriority.APPLICATION,
+          /* progressSupport= */ true);
+    });
+
+    afterAll(() => {
+      const NetworkingEngine = shaka.net.NetworkingEngine;
+      if (savedHttpScheme) {
+        NetworkingEngine.schemes_.set('http', savedHttpScheme);
+      } else {
+        NetworkingEngine.unregisterScheme('http');
+      }
+      if (savedHttpsScheme) {
+        NetworkingEngine.schemes_.set('https', savedHttpsScheme);
+      } else {
+        NetworkingEngine.unregisterScheme('https');
+      }
+    });
+
+    it('sends play state events via POST', async () => {
+      player.configure({
+        cmcd: {
+          enabled: true,
+          version: 2,
+          sessionId: SESSION_ID,
+          contentId: CONTENT_ID,
+          eventTargets: [{
+            url: EVENT_TARGET_URL,
+            events: [cml.cmcd.CmcdEventType.PLAY_STATE],
+          }],
+        },
+      });
+      attachRecorder({
+        eventTargetUrls: [EVENT_TARGET_URL],
+        waitTimeout: REQUEST_TIMEOUT,
+      });
+
+      await player.load(TEST_STREAM);
+      await video.play();
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      const reports = await recorder.waitForEvents();
+      expect(reports.length).toBeGreaterThan(0);
+      expect(reports[0].request['method']).toBe('POST');
     });
   });
 

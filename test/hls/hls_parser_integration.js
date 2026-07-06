@@ -263,6 +263,51 @@ describe('HlsParser', () => {
     await player.unload();
   });
 
+  it('plays all combinations of video and audio renditions', async () => {
+    // This asset has two EXT-X-STREAM-INF tags with both AUDIO and VIDEO
+    // attributes: 2 resolutions x 3 video renditions (RED has no URI, so it
+    // is the variant's own stream) x 3 audio renditions = 18 variants.
+    player.configure('abr.enabled', false);
+    await player.load('/base/test/test/assets/hls-multivideo/master.m3u8');
+    expect(player.isLive()).toBe(false);
+
+    const variants = player.getVariantTracks();
+    expect(variants.length).toBe(18);
+
+    // Every combination must be present exactly once.
+    const combinations = variants.map((variant) => {
+      return variant.height + '-' + variant.videoLabel + '-' + variant.label;
+    });
+    expect(combinations.length).toBe(new Set(combinations).size);
+    for (const height of [720, 360]) {
+      for (const videoLabel of ['RED', 'GREEN', 'BLUE']) {
+        for (const audioLabel of
+          ['Original 128k', 'High Pitch 128k', 'Low Pitch 128k']) {
+          expect(combinations)
+              .toContain(height + '-' + videoLabel + '-' + audioLabel);
+        }
+      }
+    }
+
+    await video.play();
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play every combination from the beginning.
+    for (const variant of variants) {
+      player.selectVariantTrack(variant, /* clearBuffer= */ true);
+      video.currentTime = 0;
+      // eslint-disable-next-line no-await-in-loop
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      const active = player.getVariantTracks().find((t) => t.active);
+      expect(active.id).toBe(variant.id);
+    }
+
+    await player.unload();
+  });
+
   it('plays muxed TS audio in video', async () => {
     // This asset has muxed audio in the video stream (no separate audio URI
     // for the default audio group).
@@ -282,5 +327,25 @@ describe('HlsParser', () => {
 
     // Play for a few seconds.
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 40);
+  });
+
+  it('plays an EXT-X-I-FRAMES-ONLY playlist with broken segments', async () => {
+    // This asset is an I-frame only playlist whose fragments were clipped
+    // to a single I-frame via EXT-X-BYTERANGE, but whose moof/mdat still
+    // declare the whole GOP.  Without repairing them, appending fails with
+    // CHUNK_DEMUXER_ERROR_APPEND_FAILED.
+    await player.load('/base/test/test/assets/hls-iframe-only/media.m3u8');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play into the second segment, to make sure both broken fragments were
+    // repaired and appended.  If it takes longer than 30 seconds, fail.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 3, 30);
+
+    await player.unload();
   });
 });

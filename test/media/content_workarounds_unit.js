@@ -297,6 +297,108 @@ describe('ContentWorkarounds', () => {
     });
   });
 
+  describe('fixBrokenIframes', () => {
+    // A movie fragment declaring two samples (durations from the tfhd
+    // default_sample_duration of 100), whose mdat declares 8 payload bytes but
+    // only carries 4 (the first sample).  This mimics an I-frame only playlist
+    // that clipped the byte range without rewriting the moof.
+    const brokenSegment = () => new Uint8Array([
+      0x00, 0x00, 0x00, 0x50,    // moof size (80)
+      ...boxNameToArray('moof'), // moof
+      0x00, 0x00, 0x00, 0x10,    // mfhd size (16)
+      ...boxNameToArray('mfhd'), // mfhd
+      0x00, 0x00, 0x00, 0x00,    // version & flags
+      0x00, 0x00, 0x00, 0x01,    // sequence number
+      0x00, 0x00, 0x00, 0x38,    // traf size (56)
+      ...boxNameToArray('traf'), // traf
+      0x00, 0x00, 0x00, 0x14,    // tfhd size (20)
+      ...boxNameToArray('tfhd'), // tfhd
+      0x00, 0x00, 0x00, 0x08,    // version & flags (default_sample_duration)
+      0x00, 0x00, 0x00, 0x01,    // track id
+      0x00, 0x00, 0x00, 0x64,    // default_sample_duration (100)
+      0x00, 0x00, 0x00, 0x1c,    // trun size (28)
+      ...boxNameToArray('trun'), // trun
+      0x00, 0x00, 0x02, 0x01,    // version & flags (data_offset + sample_size)
+      0x00, 0x00, 0x00, 0x02,    // sample count (2)
+      0x00, 0x00, 0x00, 0x58,    // data offset (88)
+      0x00, 0x00, 0x00, 0x04,    // sample[0] size (4)
+      0x00, 0x00, 0x00, 0x04,    // sample[1] size (4)
+      0x00, 0x00, 0x00, 0x10,    // mdat size (16, declares 8 payload bytes)
+      ...boxNameToArray('mdat'), // mdat
+      0xde, 0xad, 0xbe, 0xef,    // sample[0] data (only 4 of 8 bytes present)
+    ]);
+
+    it('truncates the fragment to the samples that are present', () => {
+      const modified =
+          shaka.media.ContentWorkarounds.fixBrokenIframes(brokenSegment());
+      const view = shaka.util.BufferUtils.toDataView(modified);
+
+      // moof/traf/trun shrink by one removed sample entry (4 bytes).
+      expect(view.getUint32(0)).toBe(76); // moof size
+      expect(view.getUint32(24)).toBe(52); // traf size
+      expect(view.getUint32(52)).toBe(24); // trun size
+
+      // The single kept sample now carries the whole segment duration so the
+      // I-frame spans the original slot (2 * 100).
+      expect(view.getUint32(48)).toBe(200); // tfhd default_sample_duration
+
+      expect(view.getUint32(64)).toBe(1); // trun sample count
+      expect(view.getUint32(68)).toBe(84); // trun data offset (88 - 4)
+      expect(view.getUint32(72)).toBe(4); // trun sample[0] size
+
+      // The mdat is rebuilt to hold only the present payload.
+      expect(view.getUint32(76)).toBe(12); // mdat size (header + 4)
+      expect(modified.byteLength).toBe(88); // 76 (moof) + 12 (mdat)
+
+      // The data offset points exactly at the start of the mdat payload.
+      expect(view.getUint32(68)).toBe(76 + 8);
+    });
+
+    it('leaves a well-formed fragment untouched', () => {
+      // Same fragment, but with both samples present in the mdat.
+      const wellFormed = brokenSegment();
+      const withFullMdat = new Uint8Array([
+        ...wellFormed,
+        0xca, 0xfe, 0xba, 0xbe, // sample[1] data (now present)
+      ]);
+
+      const modified =
+          shaka.media.ContentWorkarounds.fixBrokenIframes(withFullMdat);
+      expect(modified).toEqual(withFullMdat);
+    });
+
+    it('leaves a single-sample fragment untouched', () => {
+      const singleSample = new Uint8Array([
+        0x00, 0x00, 0x00, 0x4c,    // moof size (76)
+        ...boxNameToArray('moof'), // moof
+        0x00, 0x00, 0x00, 0x10,    // mfhd size (16)
+        ...boxNameToArray('mfhd'), // mfhd
+        0x00, 0x00, 0x00, 0x00,    // version & flags
+        0x00, 0x00, 0x00, 0x01,    // sequence number
+        0x00, 0x00, 0x00, 0x34,    // traf size (52)
+        ...boxNameToArray('traf'), // traf
+        0x00, 0x00, 0x00, 0x14,    // tfhd size (20)
+        ...boxNameToArray('tfhd'), // tfhd
+        0x00, 0x00, 0x00, 0x08,    // version & flags
+        0x00, 0x00, 0x00, 0x01,    // track id
+        0x00, 0x00, 0x00, 0x64,    // default_sample_duration (100)
+        0x00, 0x00, 0x00, 0x18,    // trun size (24)
+        ...boxNameToArray('trun'), // trun
+        0x00, 0x00, 0x02, 0x01,    // version & flags
+        0x00, 0x00, 0x00, 0x01,    // sample count (1)
+        0x00, 0x00, 0x00, 0x54,    // data offset (84)
+        0x00, 0x00, 0x00, 0x04,    // sample[0] size (4)
+        0x00, 0x00, 0x00, 0x0c,    // mdat size (12)
+        ...boxNameToArray('mdat'), // mdat
+        0xde, 0xad, 0xbe, 0xef,    // sample[0] data
+      ]);
+
+      const modified =
+          shaka.media.ContentWorkarounds.fixBrokenIframes(singleSample);
+      expect(modified).toEqual(singleSample);
+    });
+  });
+
   describe('fakeEC3', () => {
     it('replaces ac-3 with ec-3', () => {
       const unchanged = new Uint8Array([

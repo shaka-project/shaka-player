@@ -247,6 +247,7 @@ describe('AdaptationSet', () => {
           mimeType, codecs.join(','))]),
       isAudioMuxedInVideo: false,
       baseOriginalId: null,
+      isIframe: false,
     };
   }
 });
