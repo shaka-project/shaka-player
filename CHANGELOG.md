@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.1.13](https://github.com/shaka-project/shaka-player/compare/v5.1.12...v5.1.13) (2026-07-06)
+
+
+### Bug Fixes
+
+* **ABR:** Removed unused droppedFrameProtection type ([#10302](https://github.com/shaka-project/shaka-player/issues/10302)) ([fda0edd](https://github.com/shaka-project/shaka-player/commit/fda0eddd6646fb591baa1435d94a8e427029c119))
+* **CEA:** Read each trun from its own data offset in shared mdat ([#10295](https://github.com/shaka-project/shaka-player/issues/10295)) ([a34cc4b](https://github.com/shaka-project/shaka-player/commit/a34cc4b781b596f334bdf61367018d57efb1048a))
+* **dash-json:** XML-escape text content and attributes in jsonToMpd ([#10131](https://github.com/shaka-project/shaka-player/issues/10131)) ([4f9594f](https://github.com/shaka-project/shaka-player/commit/4f9594f118a1172a6318a30178ae45a61e63a5b5))
+* **HLS:** recognize binary/octet-stream as generic binary MIME type ([#10294](https://github.com/shaka-project/shaka-player/issues/10294)) ([cb33547](https://github.com/shaka-project/shaka-player/commit/cb335472357919792b71c632af47347b36090886))
+* Set Default robustness on Android for Widevine key system ([#10289](https://github.com/shaka-project/shaka-player/issues/10289)) ([65a6658](https://github.com/shaka-project/shaka-player/commit/65a665839f38f1ac1c4224b13c2bf1d1899f07e2))
+* **UI:** Hide volume slider on Smart TV and mobile after mute_volume change ([#10287](https://github.com/shaka-project/shaka-player/issues/10287)) ([ffb51d5](https://github.com/shaka-project/shaka-player/commit/ffb51d5b38b02544a860ccbfc18113fc1e8cb0d3))
+
+
+### Performance Improvements
+
+* **ts:** derive start time from PES headers ([#10132](https://github.com/shaka-project/shaka-player/issues/10132)) ([374b492](https://github.com/shaka-project/shaka-player/commit/374b492346c4e1c2dde42fb5227a3cbf6a79ce2d))
+
 ## [5.1.12](https://github.com/shaka-project/shaka-player/compare/v5.1.11...v5.1.12) (2026-06-29)
 
 
