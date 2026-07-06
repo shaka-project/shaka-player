@@ -626,7 +626,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     for (const element of noPropagationElements) {
       const cb = (event) => event.stopPropagation();
       this.eventManager_.listenMulti(element, ['click', 'dblclick'], cb);
-      if (navigator.maxTouchPoints > 0) {
+      if (shaka.ui.Utils.isTouchDevice()) {
         const touchCb = (event) => {
           if (!this.isOpaque()) {
             return;
@@ -1421,7 +1421,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // setEnabledShakaControls:
     this.videoContainer_.setAttribute('shaka-controls', 'true');
 
-    if (navigator.maxTouchPoints > 0) {
+    if (shaka.ui.Utils.isTouchDevice()) {
       this.eventManager_.listen(this.controlsContainer_, 'touchend', (e) => {
         this.onContainerTouch(e);
       });
@@ -1728,7 +1728,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onMouseMove_(e);
     });
 
-    if (navigator.maxTouchPoints > 0) {
+    if (shaka.ui.Utils.isTouchDevice()) {
       this.eventManager_.listenMulti(
           this.videoContainer_, ['touchmove', 'touchend'], (e) => {
             this.onMouseMove_(e);

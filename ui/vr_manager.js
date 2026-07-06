@@ -8,6 +8,7 @@
 goog.provide('shaka.ui.VRManager');
 
 goog.require('shaka.log');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.ui.VRWebgl');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.EventManager');
@@ -429,7 +430,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
         this.gestureStart_(event.clientX, event.clientY);
       }
     });
-    if (navigator.maxTouchPoints > 0) {
+    if (shaka.ui.Utils.isTouchDevice()) {
       this.eventManager_.listen(this.container_, 'touchstart', (e) => {
         const event = /** @type {!TouchEvent} */(e);
         if (event.touches.length == 2) {
@@ -461,7 +462,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
         this.gestureMove_(event.clientX, event.clientY);
       }
     });
-    if (navigator.maxTouchPoints > 0) {
+    if (shaka.ui.Utils.isTouchDevice()) {
       this.eventManager_.listen(this.container_, 'touchmove', (e) => {
         const event = /** @type {!TouchEvent} */(e);
         if (this.pinchDistance_ != null && event.touches.length == 2) {
@@ -484,7 +485,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
         this.container_, ['mouseleave', 'mouseup'], () => {
           this.onGesture_ = false;
         });
-    if (navigator.maxTouchPoints > 0) {
+    if (shaka.ui.Utils.isTouchDevice()) {
       this.eventManager_.listen(this.container_, 'touchend', (e) => {
         const event = /** @type {!TouchEvent} */(e);
         this.onGesture_ = false;
@@ -507,7 +508,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       // See: https://dev.to/li/how-to-requestpermission-for-devicemotion-and-deviceorientation-events-in-ios-13-46g2
       if (typeof DeviceMotionEvent.requestPermission == 'function') {
         const userGestureEvents = ['click', 'mouseup'];
-        if (navigator.maxTouchPoints > 0) {
+        if (shaka.ui.Utils.isTouchDevice()) {
           userGestureEvents.push('touchend');
         }
         const userGestureListener = () => {

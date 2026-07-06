@@ -77,6 +77,14 @@ shaka.ui.Utils = class {
 
 
   /**
+   * @return {boolean}
+   */
+  static isTouchDevice() {
+    return navigator.maxTouchPoints > 0;
+  }
+
+
+  /**
    * Depending on the value of display, sets/removes the css class of element to
    * either display it or hide it.
    *

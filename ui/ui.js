@@ -16,6 +16,7 @@ goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
 goog.require('shaka.polyfill');
 goog.require('shaka.ui.Controls');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.ui.Watermark');
 goog.require('shaka.util.ConfigUtils');
 goog.require('shaka.util.Dom');
@@ -544,7 +545,7 @@ shaka.ui.Overlay = class {
       config.contextMenuElements = config.contextMenuElements.filter(
           (name) => !filterElements.includes(name));
     } else {
-      config.seekOnTaps = navigator.maxTouchPoints > 0;
+      config.seekOnTaps = shaka.ui.Utils.isTouchDevice();
     }
 
     if (config.bigButtons.some((name) => name === 'play_pause_buffering')) {

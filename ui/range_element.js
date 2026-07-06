@@ -8,6 +8,7 @@
 goog.provide('shaka.ui.RangeElement');
 
 goog.require('shaka.ui.Element');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Timer');
 goog.requireType('shaka.ui.Controls');
@@ -125,7 +126,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
       this.onChange();
     });
 
-    if (navigator.maxTouchPoints > 0) {
+    if (shaka.ui.Utils.isTouchDevice()) {
       this.eventManager.listen(this.bar, 'touchstart', (e) => {
         if (!this.bar.disabled) {
           this.isChanging_ = true;
