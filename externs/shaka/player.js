@@ -2387,7 +2387,8 @@ shaka.extern.NetworkingConfiguration;
  *   dispatchAllEmsgBoxes: boolean,
  *   useSourceElements: boolean,
  *   durationReductionEmitsUpdateEnd: boolean,
- *   transmuxWorkerUrl: string
+ *   transmuxWorkerUrl: string,
+ *   repairIFrames: boolean,
  * }}
  *
  * @description
@@ -2468,6 +2469,13 @@ shaka.extern.NetworkingConfiguration;
  *   worker fails to load or the device does not support Workers.
  *   <br>
  *   Defaults to <code>''</code> (worker disabled).
+ * @property {boolean} repairIFrames
+ *   Some I-frame only stream clip the media segment byte range without
+ *   rewriting the moof/mdat, leaving the fragment declaring more samples than
+ *   it actually contains.  Repair those before appending.
+ *   Note: this is allowed by HLS spec.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;

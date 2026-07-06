@@ -807,7 +807,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Uses source elements',
             'mediaSource.useSourceElements')
         .addBoolInput_('Expect updateEnd when duration is truncated',
-            'mediaSource.durationReductionEmitsUpdateEnd');
+            'mediaSource.durationReductionEmitsUpdateEnd')
+        .addBoolInput_('Repair I-Frames segments',
+            'mediaSource.repairIFrames');;
 
     const transmuxWorkerToggleOnChange = (input) => {
       const url = input.checked ?
