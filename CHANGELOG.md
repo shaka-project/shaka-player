@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.16.40](https://github.com/shaka-project/shaka-player/compare/v4.16.39...v4.16.40) (2026-07-06)
+
+
+### Bug Fixes
+
+* **HLS:** recognize binary/octet-stream as generic binary MIME type ([#10294](https://github.com/shaka-project/shaka-player/issues/10294)) ([6c2c206](https://github.com/shaka-project/shaka-player/commit/6c2c206f1e0fa7840e20f0d95a13da957cf36828))
+* Set Default robustness on Android for Widevine key system ([#10289](https://github.com/shaka-project/shaka-player/issues/10289)) ([4891a24](https://github.com/shaka-project/shaka-player/commit/4891a240a328355b9b7cc6eaa82aa756d91f61d4))
+
+
+### Performance Improvements
+
+* **ts:** derive start time from PES headers ([#10132](https://github.com/shaka-project/shaka-player/issues/10132)) ([6380e2c](https://github.com/shaka-project/shaka-player/commit/6380e2c80bc28ec12973a2f829c959440578e51e))
+
 ## [4.16.39](https://github.com/shaka-project/shaka-player/compare/v4.16.38...v4.16.39) (2026-06-29)
 
 
