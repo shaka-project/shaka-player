@@ -521,22 +521,18 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
           });
         };
         const listenToUserGesturesAgain = () => {
-          for (const eventName of userGestureEvents) {
-            this.eventManager_.unlisten(
-                this.container_, eventName, userGestureListener);
-            this.eventManager_.listenOnce(
-                this.container_, eventName, userGestureListener);
-          }
+          this.eventManager_.unlistenMulti(
+              this.container_, userGestureEvents, userGestureListener);
+          this.eventManager_.listenOnceMulti(
+              this.container_, userGestureEvents, userGestureListener);
         };
         DeviceMotionEvent.requestPermission().then((permissionState) => {
           if (permissionState !== 'granted') {
             listenToUserGesturesAgain();
             return;
           }
-          for (const eventName of userGestureEvents) {
-            this.eventManager_.unlisten(
-                this.container_, eventName, userGestureListener);
-          }
+          this.eventManager_.unlistenMulti(
+              this.container_, userGestureEvents, userGestureListener);
           deviceOrientationListener = true;
           this.setupDeviceOrientationListener_();
         }).catch(listenToUserGesturesAgain);
