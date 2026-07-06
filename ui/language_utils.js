@@ -472,23 +472,6 @@ shaka.ui.LanguageUtils = class {
 
 
   /**
-   * Checks whether a string returned by Intl.DisplayNames looks like a raw,
-   * unresolved BCP-47/ISO-639 code rather than an actual display name.
-   * Language subtags are always lowercase; real display names are
-   * title-cased, or start with a character that has no letter case at all
-   * (e.g. CJK, Arabic, Hebrew scripts).
-   *
-   * @param {string} name
-   * @return {boolean}
-   * @private
-   */
-  static looksLikeUnresolvedCode_(name) {
-    const firstChar = name.charAt(0);
-    return firstChar === firstChar.toLowerCase() &&
-        firstChar !== firstChar.toUpperCase();
-  }
-
-  /**
    * @param {shaka.extern.AudioTrack|shaka.extern.TextTrack} track
    * @return {string}
    * @private
@@ -601,6 +584,11 @@ shaka.ui.LanguageUtils = class {
         const languageNames = new Intl.DisplayNames(locales,
             {type: 'language', languageDisplay: 'standard'});
         const languageName = languageNames.of(canonicalLocale);
+        const looksLikeUnresolvedCode = (name) => {
+          const firstChar = name.charAt(0);
+          return firstChar === firstChar.toLowerCase() &&
+              firstChar !== firstChar.toUpperCase();
+        };
         // Only prefer it when it's reliable.  Intl.DisplayNames falls back
         // to echoing the (possibly re-canonicalized) language identifier
         // itself when it has no display name for it -- e.g. 'dse' (Dutch
@@ -612,7 +600,7 @@ shaka.ui.LanguageUtils = class {
         // show a code like "Dse" as if it were a real name.
         if (languageName &&
             languageName.toLowerCase() != canonicalLocale.toLowerCase() &&
-            !shaka.ui.LanguageUtils.looksLikeUnresolvedCode_(languageName)) {
+            !looksLikeUnresolvedCode(languageName)) {
           return languageName.charAt(0).toUpperCase() + languageName.slice(1);
         }
       } catch (e) {
