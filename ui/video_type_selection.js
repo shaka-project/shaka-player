@@ -92,6 +92,22 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
 
     const selectedTrack = tracks.find((track) => track.active);
 
+    const isSelectedTrack = (role, language, label) => {
+      if (!selectedTrack) {
+        return false;
+      }
+      if (language != selectedTrack.language) {
+        return false;
+      }
+      if (label != selectedTrack.label) {
+        return false;
+      }
+      if (role == '' && !selectedTrack.roles.length) {
+        return true;
+      }
+      return selectedTrack.roles.includes(role);
+    }
+
     /**
      * @type {!Map<string, {role: string, language: string, label: ?string}>}
      */
@@ -155,8 +171,7 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
         }
         button.appendChild(span);
 
-        if (selectedTrack && selectedTrack.roles.includes(role) &&
-            selectedTrack.language == language) {
+        if (isSelectedTrack(role, language, label)) {
           button.appendChild(shaka.ui.Utils.checkmarkIcon());
           shaka.ui.Utils.setChosenItem(button, span);
           this.currentSelection.textContent = span.textContent;
