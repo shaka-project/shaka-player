@@ -106,7 +106,7 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
         return true;
       }
       return selectedTrack.roles.includes(role);
-    }
+    };
 
     /**
      * @type {!Map<string, {role: string, language: string, label: ?string}>}
