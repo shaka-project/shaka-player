@@ -1435,6 +1435,66 @@ describe('HlsParser live', () => {
             .toBe(pdtB + 12);
       });
 
+      it('does not treat PROGRAM-DATE-TIME jitter as a discontinuity gap',
+          async () => {
+            const pdtA = 946684800; // 2000-01-01T00:00:00Z
+
+            // Real streams commonly have sub-second drift between EXTINF
+            // durations and PROGRAM-DATE-TIME deltas.  When such a segment is
+            // added on an update, the drift must not be picked up as an
+            // accumulated discontinuity gap.
+            const mediaInitial = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:0\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main.mp4\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:02.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+            ].join('');
+            // The new segment's PDT has drifted 0.1s from the EXTINF chain
+            // (main2 ends at 4, but the PDT says 4.1).
+            const mediaUpdated = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:0\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main.mp4\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:02.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:04.10Z\n',
+              '#EXTINF:2,\n',
+              'main3.mp4\n',
+            ].join('');
+
+            const manifest = await testInitialManifest(master, mediaInitial);
+            const timeline = manifest.presentationTimeline;
+            await testUpdate(manifest, mediaUpdated);
+
+            const byUri = new Map();
+            const segmentIndex = /** @type {!shaka.media.SegmentIndex} */ (
+              manifest.variants[0].video.segmentIndex);
+            for (const ref of segmentIndex) {
+              if (ref) {
+                byUri.set(ref.getUris()[0], ref);
+              }
+            }
+            const main3 = byUri.get('test:/main3.mp4');
+
+            // main3 follows its own PROGRAM-DATE-TIME (4.1s from the origin).
+            // If the jitter had been treated as a gap, it would land at 4
+            // (the previous segment's end time) instead.
+            expect(main3.startTime).toBeCloseTo(4.1, 5);
+            expect(timeline.getProgramDateTimeForTime(main3.startTime))
+                .toBeCloseTo(pdtA + 4.1, 5);
+          });
+
       it('anchors a new post-discontinuity segment by its own PDT',
           async () => {
             const pdt0 = 946684800;
