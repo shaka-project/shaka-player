@@ -412,8 +412,26 @@ html, body {
 }
 
 /* The drawer toggle button's gear icon is an inline SVG, injected into MDL's
- * button in setupPlayer_ (main.js) and sized by the .demo-icon rule above. */
+ * button in setupPlayer_ (main.js) and sized by the .demo-icon rule above.
+ * Unlike other MDL icon buttons, MDL has no rule to center this button's
+ * .material-icons element, since it expects a text glyph rather than an
+ * inline SVG. Center it explicitly, the same way MDL centers its own icon
+ * buttons (e.g. .mdl-button--icon .material-icons). */
+.app-header .mdl-layout__drawer-button .material-icons {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+}
+
 .app-header .mdl-layout__drawer-button .material-icons svg {
+  /* Avoid the inline-element baseline/vertical-align quirks that come with
+   * treating this SVG as text; it should just fill its exactly-sized,
+   * already-centered parent. */
+  display: block;
+
   &:hover {
     /* Spin the gear icon when hovered. */
     transform: rotate(90deg);
