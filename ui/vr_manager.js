@@ -73,6 +73,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     /** @private {number} */
     this.prevY_ = 0;
 
+    /** @private {?number} */
+    this.pinchDistance_ = null;
+
     /** @private {number} */
     this.prevAlpha_ = 0;
 
@@ -421,14 +424,20 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
   setupVRListeners_() {
     // Start
     this.eventManager_.listen(this.container_, 'mousedown', (event) => {
-      if (!this.onGesture_) {
+      if (!this.onGesture_ && event.button == 0 &&
+          this.canStartGesture_(event.target)) {
         this.gestureStart_(event.clientX, event.clientY);
       }
     });
     if (navigator.maxTouchPoints > 0) {
       this.eventManager_.listen(this.container_, 'touchstart', (e) => {
-        if (!this.onGesture_) {
-          const event = /** @type {!TouchEvent} */(e);
+        const event = /** @type {!TouchEvent} */(e);
+        if (event.touches.length == 2) {
+          // Stop panning and start a pinch zoom gesture.
+          this.onGesture_ = false;
+          this.pinchDistance_ = this.getPinchDistance_(event);
+        } else if (!this.onGesture_ &&
+            this.canStartGesture_(event.target)) {
           this.gestureStart_(
               event.touches[0].clientX, event.touches[0].clientY);
         }
@@ -437,7 +446,8 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
 
     // Zoom
     this.eventManager_.listen(this.container_, 'wheel', (e) => {
-      if (!this.onGesture_) {
+      if (!this.onGesture_ && this.config_.enableVrWheelZoom &&
+          this.canStartGesture_(e.target)) {
         const event = /** @type {!WheelEvent} */(e);
         this.vrWebgl_.zoom(event.deltaY);
         event.preventDefault();
@@ -453,12 +463,19 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     });
     if (navigator.maxTouchPoints > 0) {
       this.eventManager_.listen(this.container_, 'touchmove', (e) => {
-        if (this.onGesture_) {
-          const event = /** @type {!TouchEvent} */(e);
+        const event = /** @type {!TouchEvent} */(e);
+        if (this.pinchDistance_ != null && event.touches.length == 2) {
+          const newPinchDistance = this.getPinchDistance_(event);
+          this.vrWebgl_.zoom(
+              (this.pinchDistance_ - newPinchDistance) *
+              shaka.ui.VRManager.PINCH_ZOOM_FACTOR_);
+          this.pinchDistance_ = newPinchDistance;
+          e.preventDefault();
+        } else if (this.onGesture_) {
           this.gestureMove_(
               event.touches[0].clientX, event.touches[0].clientY);
+          e.preventDefault();
         }
-        e.preventDefault();
       });
     }
 
@@ -468,8 +485,19 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
           this.onGesture_ = false;
         });
     if (navigator.maxTouchPoints > 0) {
-      this.eventManager_.listen(this.container_, 'touchend', () => {
+      this.eventManager_.listen(this.container_, 'touchend', (e) => {
+        const event = /** @type {!TouchEvent} */(e);
         this.onGesture_ = false;
+        if (event.touches.length == 2) {
+          this.pinchDistance_ = this.getPinchDistance_(event);
+        } else {
+          this.pinchDistance_ = null;
+        }
+        if (event.touches.length == 1) {
+          // Continue panning with the remaining finger.
+          this.gestureStart_(
+              event.touches[0].clientX, event.touches[0].clientY);
+        }
       });
     }
 
@@ -557,6 +585,33 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * Returns true if a VR gesture can start on this element. Gestures that
+   * start on the controls (buttons, menus, seek bar) should not move the
+   * view.
+   *
+   * @param {?EventTarget} target
+   * @return {boolean}
+   * @private
+   */
+  canStartGesture_(target) {
+    if (target instanceof Element) {
+      return !target.closest('.shaka-no-propagation');
+    }
+    return true;
+  }
+
+  /**
+   * @param {!TouchEvent} event
+   * @return {number}
+   * @private
+   */
+  getPinchDistance_(event) {
+    return Math.hypot(
+        event.touches[0].clientX - event.touches[1].clientX,
+        event.touches[0].clientY - event.touches[1].clientY);
+  }
+
+  /**
    * @param {number} x
    * @param {number} y
    * @private
@@ -587,3 +642,13 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
  * @private
  */
 shaka.ui.VRManager.TO_RADIANS_ = Math.PI / 180;
+
+/**
+ * Amount of field of view change per pixel of pinch distance change.
+ * The value is scaled down by 50 in shaka.ui.VRWebgl.zoom, so this results
+ * in 0.1 degrees of field of view per pixel.
+ *
+ * @const {number}
+ * @private
+ */
+shaka.ui.VRManager.PINCH_ZOOM_FACTOR_ = 5;

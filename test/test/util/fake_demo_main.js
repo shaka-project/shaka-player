@@ -110,6 +110,7 @@ shaka.test.FakeDemoMain = class {
       allowTogglePresentationTime: true,
       showRemainingTimeInPresentationTime: false,
       enableVrDeviceMotion: true,
+      enableVrWheelZoom: false,
       showUIAlways: false,
       showUIAlwaysOnAudioOnly: true,
       preferIntlDisplayNames: true,
