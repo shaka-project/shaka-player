@@ -521,9 +521,7 @@ shaka.ui.LanguageUtils = class {
    * language list, but could be distinguished by their locale.
    *
    * Sign languages are a special case: deprecated tags like "sgn-US" are
-   * resolved to their replacement ISO 639-3 code ("ase") first, and a small
-   * built-in table (SIGN_LANGUAGE_NAMES_) supplies an English name for those
-   * codes when neither Intl.DisplayNames nor mozilla.LanguageMapping has one.
+   * resolved to their replacement ISO 639-3 code ("ase") first.
    *
    * @param {string} locale
    * @param {shaka.ui.Localization} localization
@@ -614,15 +612,10 @@ shaka.ui.LanguageUtils = class {
     // When there is a loss of specificity (either to a base language or to
     // "unknown"), we should append the original language code.
     // Otherwise, there may be multiple identical-looking items in the list.
-    const SignNames = shaka.ui.LanguageUtils.SIGN_LANGUAGE_NAMES_;
     if (canonicalLocale in mozilla.LanguageMapping) {
       return mozilla.LanguageMapping[canonicalLocale];
     } else if (language in mozilla.LanguageMapping) {
       return mozilla.LanguageMapping[language] + ' (' + locale + ')';
-    } else if (canonicalLocale in SignNames) {
-      return SignNames[canonicalLocale];
-    } else if (language in SignNames) {
-      return SignNames[language] + ' (' + locale + ')';
     } else {
       return null;
     }
@@ -665,39 +658,3 @@ shaka.ui.LanguageUtils.SIGN_LANGUAGE_ALIASES_ = new Map([
   ['sgn-pt', 'psr'], ['sgn-se', 'swl'], ['sgn-us', 'ase'],
   ['sgn-za', 'sfs'],
 ]);
-
-/**
- * Display names for sign-language ISO 639-3 codes that are missing or
- * unreliable in both mozilla.LanguageMapping and Intl.DisplayNames (verified
- * against Chrome/Node ICU: only 'ase' reliably resolves via Intl, the rest
- * echo the code back unchanged).  Names are the reference names from RFC
- * 5645 / the ISO 639-3 registry; sign languages have no written script of
- * their own, so there is no autoglottonym to prefer here, unlike the rest of
- * mozilla.LanguageMapping.
- * @const {!Object<string, string>}
- * @private
- */
-shaka.ui.LanguageUtils.SIGN_LANGUAGE_NAMES_ = {
-  'ase': 'American Sign Language',
-  'bfi': 'British Sign Language',
-  'bzs': 'Brazilian Sign Language',
-  'csn': 'Colombian Sign Language',
-  'dse': 'Dutch Sign Language',
-  'dsl': 'Danish Sign Language',
-  'fsl': 'French Sign Language',
-  'gsg': 'German Sign Language',
-  'gss': 'Greek Sign Language',
-  'isg': 'Irish Sign Language',
-  'ise': 'Italian Sign Language',
-  'jsl': 'Japanese Sign Language',
-  'mfs': 'Mexican Sign Language',
-  'ncs': 'Nicaraguan Sign Language',
-  'nsl': 'Norwegian Sign Language',
-  'psr': 'Portuguese Sign Language',
-  'sfb': 'French Belgian Sign Language',
-  'sfs': 'South African Sign Language',
-  'sgg': 'Swiss German Sign Language',
-  'ssp': 'Spanish Sign Language',
-  'swl': 'Swedish Sign Language',
-  'vgt': 'Flemish Sign Language',
-};
