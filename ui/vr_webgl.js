@@ -30,8 +30,10 @@ shaka.ui.VRWebgl = class {
    * @param {!HTMLCanvasElement} canvas
    * @param {WebGLRenderingContext} gl
    * @param {string} projectionMode
+   * @param {number=} hfov Horizontal field of view of the content, in
+   *   degrees. Only used by the fisheye projection.
    */
-  constructor(video, player, canvas, gl, projectionMode) {
+  constructor(video, player, canvas, gl, projectionMode, hfov = 180) {
     /** @private {!HTMLVideoElement} */
     this.video_ = /** @type {!HTMLVideoElement} */ (video);
 
@@ -107,6 +109,18 @@ shaka.ui.VRWebgl = class {
     /** @private {?number} */
     this.textureCoordAttribute_ = null;
 
+    /** @private {?WebGLUniformLocation} */
+    this.samplerUniform_ = null;
+
+    /** @private {?WebGLUniformLocation} */
+    this.vpMatrixUniform_ = null;
+
+    /** @private {?WebGLUniformLocation} */
+    this.projectionMatrixUniform_ = null;
+
+    /** @private {?WebGLUniformLocation} */
+    this.modelViewMatrixUniform_ = null;
+
     /** @private {?WebGLTexture} */
     this.texture_ = null;
 
@@ -124,6 +138,9 @@ shaka.ui.VRWebgl = class {
 
     /** @private {string} */
     this.projectionMode_ = projectionMode;
+
+    /** @private {number} */
+    this.hfov_ = hfov;
 
     /** @private {?shaka.util.VideoFrameCallbackHandler} */
     this.videoFrameCallbackHandler_ =
@@ -154,6 +171,13 @@ shaka.ui.VRWebgl = class {
    */
   getProjectionMode() {
     return this.projectionMode_;
+  }
+
+  /**
+   * @return {number}
+   */
+  getHfov() {
+    return this.hfov_;
   }
 
   /**
@@ -336,6 +360,10 @@ shaka.ui.VRWebgl = class {
           this.shaderProgram_, 'aVertexPosition');
       this.textureCoordAttribute_ = this.gl_.getAttribLocation(
           this.shaderProgram_, 'aTextureCoord');
+      this.projectionMatrixUniform_ = this.gl_.getUniformLocation(
+          this.shaderProgram_, 'uProjectionMatrix');
+      this.modelViewMatrixUniform_ = this.gl_.getUniformLocation(
+          this.shaderProgram_, 'uModelViewMatrix');
     } else {
       this.vertexPositionAttribute_ = this.gl_.getAttribLocation(
           this.shaderProgram_, 'a_vPosition');
@@ -343,7 +371,11 @@ shaka.ui.VRWebgl = class {
       this.textureCoordAttribute_ = this.gl_.getAttribLocation(
           this.shaderProgram_, 'a_TexCoordinate');
       this.gl_.enableVertexAttribArray(this.textureCoordAttribute_);
+      this.vpMatrixUniform_ = this.gl_.getUniformLocation(
+          this.shaderProgram_, 'u_VPMatrix');
     }
+    this.samplerUniform_ = this.gl_.getUniformLocation(
+        this.shaderProgram_, 'uSampler');
   }
 
   /**
@@ -365,10 +397,19 @@ shaka.ui.VRWebgl = class {
         }
         break;
       case this.gl_.FRAGMENT_SHADER:
-        if (this.projectionMode_ == 'cubemap') {
-          source = shaka.ui.VRUtils.FRAGMENT_CUBE_SHADER;
-        } else {
-          source = shaka.ui.VRUtils.FRAGMENT_SPHERE_SHADER;
+        switch (this.projectionMode_) {
+          case 'cubemap':
+            source = shaka.ui.VRUtils.FRAGMENT_CUBE_SHADER;
+            break;
+          case 'fisheye':
+            source = shaka.ui.VRUtils.FRAGMENT_FISHEYE_SHADER;
+            break;
+          case 'halfequirectangular':
+            source = shaka.ui.VRUtils.FRAGMENT_SEMI_SPHERE_SHADER;
+            break;
+          default:
+            source = shaka.ui.VRUtils.FRAGMENT_SPHERE_SHADER;
+            break;
         }
         break;
       default:
@@ -396,9 +437,13 @@ shaka.ui.VRWebgl = class {
    */
   initGLBuffers_() {
     if (this.projectionMode_ == 'cubemap') {
-      this.geometry_ = shaka.ui.VRUtils.generateCube();
+      this.geometry_ = shaka.ui.VRUtils.generateCube(
+          this.getCubeInsetU_(), this.getCubeInsetV_());
+    } else if (this.projectionMode_ == 'fisheye') {
+      this.geometry_ = shaka.ui.VRUtils.generateFisheye(100, this.hfov_);
     } else if (this.projectionMode_ == 'halfequirectangular') {
-      this.geometry_ = shaka.ui.VRUtils.generateSphere(100, true);
+      this.geometry_ = shaka.ui.VRUtils.generateSphere(
+          100, /* isSemiSphere= */ true);
     } else {
       this.geometry_ = shaka.ui.VRUtils.generateSphere(100);
     }
@@ -430,9 +475,9 @@ shaka.ui.VRWebgl = class {
     this.gl_.texParameteri(this.gl_.TEXTURE_2D,
         this.gl_.TEXTURE_WRAP_T, this.gl_.CLAMP_TO_EDGE);
     this.gl_.texParameteri(this.gl_.TEXTURE_2D,
-        this.gl_.TEXTURE_MIN_FILTER, this.gl_.NEAREST);
+        this.gl_.TEXTURE_MIN_FILTER, this.gl_.LINEAR);
     this.gl_.texParameteri(this.gl_.TEXTURE_2D,
-        this.gl_.TEXTURE_MAG_FILTER, this.gl_.NEAREST);
+        this.gl_.TEXTURE_MAG_FILTER, this.gl_.LINEAR);
   }
 
   /**
@@ -447,15 +492,7 @@ shaka.ui.VRWebgl = class {
       return;
     }
     shaka.ui.Matrix4x4.perspective(this.projectionMatrix_,
-        this.fieldOfView_ * Math.PI / 180, 5 / 3.2, 0.1, 100.0);
-
-    if (this.projectionMode_ == 'cubemap') {
-      shaka.ui.Matrix4x4.perspective(this.projectionMatrix_,
-          this.fieldOfView_ * Math.PI / 180, 5 / 2, 0.1, 100.0);
-    } else {
-      shaka.ui.Matrix4x4.perspective(this.projectionMatrix_,
-          this.fieldOfView_ * Math.PI / 180, 5 / 3.2, 0.1, 100.0);
-    }
+        this.fieldOfView_ * Math.PI / 180, this.getAspectRatio_(), 0.1, 100.0);
 
     this.gl_.useProgram(this.shaderProgram_);
 
@@ -471,8 +508,7 @@ shaka.ui.VRWebgl = class {
     }
 
     // Update matrix
-    if (this.projectionMode_ == 'equirectangular' ||
-        this.projectionMode_ == 'halfequirectangular') {
+    if (this.projectionMode_ != 'cubemap') {
       shaka.ui.Matrix4x4.multiply(this.viewProjectionMatrix_,
           this.viewMatrix_, this.identityMatrix_);
       shaka.ui.Matrix4x4.multiply(this.viewProjectionMatrix_,
@@ -502,8 +538,7 @@ shaka.ui.VRWebgl = class {
 
     this.setMatrixUniforms_();
 
-    this.gl_.uniform1i(
-        this.gl_.getUniformLocation(this.shaderProgram_, 'uSampler'), 0);
+    this.gl_.uniform1i(this.samplerUniform_, 0);
 
     if (this.stereoscopicMode_) {
       this.gl_.viewport(0, 0, this.canvas_.width / 2, this.canvas_.height);
@@ -527,16 +562,39 @@ shaka.ui.VRWebgl = class {
   setMatrixUniforms_() {
     if (this.projectionMode_ == 'cubemap') {
       this.gl_.uniformMatrix4fv(
-          this.gl_.getUniformLocation(this.shaderProgram_, 'uProjectionMatrix'),
-          false, this.projectionMatrix_);
+          this.projectionMatrixUniform_, false, this.projectionMatrix_);
       this.gl_.uniformMatrix4fv(
-          this.gl_.getUniformLocation(this.shaderProgram_, 'uModelViewMatrix'),
-          false, this.viewProjectionMatrix_);
+          this.modelViewMatrixUniform_, false, this.viewProjectionMatrix_);
     } else {
       this.gl_.uniformMatrix4fv(
-          this.gl_.getUniformLocation(this.shaderProgram_, 'u_VPMatrix'),
-          false, this.viewProjectionMatrix_);
+          this.vpMatrixUniform_, false, this.viewProjectionMatrix_);
     }
+  }
+
+  /**
+   * Returns the aspect ratio of the displayed viewport, so that the
+   * perspective projection does not stretch the image. The canvas is
+   * displayed at the size of the video container, so the client size is
+   * what the user sees. In stereoscopic mode each eye gets half of the
+   * width.
+   *
+   * @return {number}
+   * @private
+   */
+  getAspectRatio_() {
+    let aspectRatio = 0;
+    if (this.canvas_.clientHeight) {
+      aspectRatio = this.canvas_.clientWidth / this.canvas_.clientHeight;
+    } else if (this.video_.videoHeight) {
+      aspectRatio = this.video_.videoWidth / this.video_.videoHeight;
+    }
+    if (!aspectRatio) {
+      aspectRatio = 16 / 9;
+    }
+    if (this.stereoscopicMode_) {
+      aspectRatio /= 2;
+    }
+    return aspectRatio;
   }
 
   /**
@@ -560,13 +618,46 @@ shaka.ui.VRWebgl = class {
       this.previousCanvasWidth_ = currentWidth;
       this.previousCanvasHeight_ = currentHeight;
 
-      const ratio = currentWidth / currentHeight;
-
-      this.projectionMatrix_ = shaka.ui.Matrix4x4.frustum(
-          this.projectionMatrix_, -ratio, ratio, -1, 1, 0, 1);
-
       this.gl_.viewport(0, 0, currentWidth, currentHeight);
+
+      if (this.projectionMode_ == 'cubemap' &&
+          this.verticesTextureCoordBuffer_) {
+        // The half-texel inset of the cube faces depends on the video
+        // dimensions, so recompute the texture coordinates.
+        this.geometry_ = shaka.ui.VRUtils.generateCube(
+            this.getCubeInsetU_(), this.getCubeInsetV_());
+        this.gl_.bindBuffer(
+            this.gl_.ARRAY_BUFFER, this.verticesTextureCoordBuffer_);
+        this.gl_.bufferData(this.gl_.ARRAY_BUFFER,
+            new Float32Array(this.geometry_.textureCoords),
+            this.gl_.STATIC_DRAW);
+      }
     }
+  }
+
+  /**
+   * Returns a horizontal inset of half a texel, so that the cube faces are
+   * not sampled at the exact edge they share with the adjacent face of the
+   * atlas. Otherwise the edges of the cube can become visible while moving
+   * the view.
+   *
+   * @return {number}
+   * @private
+   */
+  getCubeInsetU_() {
+    const width = this.video_.videoWidth || this.previousCanvasWidth_;
+    return width > 0 ? 0.5 / width : 0;
+  }
+
+  /**
+   * Returns a vertical inset of half a texel, see getCubeInsetU_.
+   *
+   * @return {number}
+   * @private
+   */
+  getCubeInsetV_() {
+    const height = this.video_.videoHeight || this.previousCanvasHeight_;
+    return height > 0 ? 0.5 / height : 0;
   }
 
   /**
@@ -580,7 +671,8 @@ shaka.ui.VRWebgl = class {
     let yawBoundary = Infinity;
     let pitchBoundary = 90.0 * Math.PI / 180;
 
-    if (this.projectionMode_ == 'halfequirectangular') {
+    if (this.projectionMode_ == 'halfequirectangular' ||
+        this.projectionMode_ == 'fisheye') {
       yawBoundary = 90.0 * Math.PI / 180;
       pitchBoundary /= 2;
     }

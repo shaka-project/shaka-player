@@ -574,8 +574,9 @@ shaka.extern.UITrackLabelCallback;
  *   Defaults to <code>false</code>.
  * @property {string} defaultVrProjectionMode
  *   Indicate the default VR projection mode.
- *   Possible values: <code>'equirectangular'</code> or
- *   <code>'halfequirectangular'</code> or <code>'cubemap'</code>.
+ *   Possible values: <code>'equirectangular'</code>,
+ *   <code>'halfequirectangular'</code>, <code>'fisheye'</code> or
+ *   <code>'cubemap'</code>.
  *   <br>
  *   Defaults to <code>'equirectangular'</code>.
  * @property {boolean} preferVideoFullScreenInVisionOS
