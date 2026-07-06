@@ -88,17 +88,9 @@ shaka.ui.LanguageUtils = class {
       codecsByLanguage.has(language) && codecsByLanguage.get(language).size > 1;
 
     // Remove old tracks
-    // 1. Save the back to menu button
-    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
-        langMenu, 'shaka-back-to-overflow-button');
+    shaka.ui.Utils.clearMenuKeepingBackButton(langMenu);
 
-    // 2. Remove everything
-    shaka.util.Dom.removeAllChildren(langMenu);
-
-    // 3. Add the backTo Menu button back
-    langMenu.appendChild(backButton);
-
-    // 4. Figure out which languages have multiple roles.
+    // Figure out which languages have multiple roles.
     const getRolesString = (track) => {
       return track.roles.join(', ');
     };
@@ -308,17 +300,9 @@ shaka.ui.LanguageUtils = class {
     });
 
     // Remove old tracks
-    // 1. Save the back to menu button
-    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
-        langMenu, 'shaka-back-to-overflow-button');
+    shaka.ui.Utils.clearMenuKeepingBackButton(langMenu);
 
-    // 2. Remove everything
-    shaka.util.Dom.removeAllChildren(langMenu);
-
-    // 3. Add the backTo Menu button back
-    langMenu.appendChild(backButton);
-
-    // 4. Figure out which languages have multiple roles.
+    // Figure out which languages have multiple roles.
     const getRolesString = (track) => {
       return track.roles.join(', ');
     };
