@@ -140,7 +140,7 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
         button.setAttribute('role', 'menuitemradio');
         button.setAttribute('aria-checked', 'false');
         this.eventManager.listen(button, 'click',
-            () => this.onVideoRoleSelected_(role, language));
+            () => this.onVideoRoleSelected_(role, language, label));
 
         const span = shaka.util.Dom.createHTMLElement('span');
         const hasRealLanguage = (language && language != 'und') || label;
@@ -211,13 +211,14 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
   /**
    * @param {string} role
    * @param {string} language
+   * @param {?string} label
    * @private
    */
-  onVideoRoleSelected_(role, language) {
+  onVideoRoleSelected_(role, language, label) {
     this.player.configure({
       preferredVideo: [{
         role,
-        label: '',
+        label: label || '',
         language: language || '',
         codec: '',
         hdrLevel: '',
