@@ -1204,6 +1204,230 @@ describe('UI', () => {
         }
         goog.asserts.assert(found, 'Unable to find resolution menu');
       }
+
+      it('does not collapse resolutions across video languages',
+          async () => {
+            // Regression test for
+            // https://github.com/shaka-project/shaka-player/issues/10198
+            // Two video-only variants can share a role (e.g. 'sign') and
+            // resolution but differ in language (e.g. multiple
+            // sign-language video tracks). They must not be collapsed into
+            // a single entry, and only the language of the active track
+            // should be listed.
+            const manifest =
+                shaka.test.ManifestGenerator.generate((manifest) => {
+                  manifest.addVariant(0, (variant) => {
+                    variant.addVideo(1, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-US';
+                      stream.size(640, 480);
+                    });
+                  });
+                  manifest.addVariant(2, (variant) => {
+                    variant.addVideo(3, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-NL';
+                      stream.size(640, 480);
+                    });
+                  });
+                  manifest.addVariant(4, (variant) => {
+                    variant.addVideo(5, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-NL';
+                      stream.size(1280, 720);
+                    });
+                  });
+                });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
+
+            await player.load(
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+            player.configure('abr.enabled', false);
+
+            const videoTracks = player.getVideoTracks();
+            const dutch480 = videoTracks.find(
+                (t) => t.language == 'sgn-NL' && t.height == 480);
+            goog.asserts.assert(dutch480, 'Unable to find video track');
+            player.selectVideoTrack(dutch480, true);
+            await updateResolutionMenu();
+
+            const resolutionButtons = videoContainer.querySelectorAll(
+                'button.explicit-resolution > span');
+            const resolutions = Array.from(resolutionButtons)
+                .map((btn) => btn.innerText)
+                .sort();
+
+            // Only the Dutch sign-language resolutions should be listed;
+            // the American one at the same 480p must not be silently
+            // collapsed into it.
+            expect(resolutions).toEqual(['480p', '720p']);
+          });
+    });
+
+    describe('video type menu', () => {
+      /** @type {!HTMLElement} */
+      let videoTypeMenu;
+      /** @type {shaka.ui.Controls} */
+      let controls;
+
+      beforeEach(async () => {
+        const config = {
+          controlPanelElements: [
+            'overflow_menu',
+          ],
+          overflowMenuButtons: [
+            'video_type',
+          ],
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        // Force a known locale so the label assertions below are not at the
+        // mercy of the test environment's navigator.languages.
+        controls.getLocalization().changeLocale(['en']);
+
+        const videoTypeMenus =
+            videoContainer.getElementsByClassName('shaka-video-type');
+        expect(videoTypeMenus.length).toBe(1);
+        videoTypeMenu = /** @type {!HTMLElement} */ (videoTypeMenus[0]);
+      });
+
+      it('does not show a language when all video roles share it',
+          async () => {
+            const manifest =
+                shaka.test.ManifestGenerator.generate((manifest) => {
+                  manifest.addVariant(0, (variant) => {
+                    variant.addVideo(1, (stream) => {
+                      stream.roles = ['main'];
+                      stream.language = 'en';
+                    });
+                  });
+                  manifest.addVariant(2, (variant) => {
+                    variant.addVideo(3, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'en';
+                    });
+                  });
+                });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
+
+            await player.load(
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+            await updateVideoTypeMenu();
+
+            expect(getVideoTypeLabels().sort()).toEqual(
+                ['Main', 'Sign language']);
+          });
+
+      it('shows only the language when every option shares the same role',
+          async () => {
+            // Regression test for
+            // https://github.com/shaka-project/shaka-player/issues/10198
+            // When every option has the same role (e.g. two sign-language
+            // video tracks), repeating that role on every button is
+            // redundant; the language alone is what disambiguates them.
+            const manifest =
+                shaka.test.ManifestGenerator.generate((manifest) => {
+                  manifest.addVariant(0, (variant) => {
+                    variant.addVideo(1, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-US';
+                    });
+                  });
+                  manifest.addVariant(2, (variant) => {
+                    variant.addVideo(3, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-NL';
+                    });
+                  });
+                });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
+
+            await player.load(
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+            await updateVideoTypeMenu();
+
+            const labels = getVideoTypeLabels();
+            expect(labels.length).toBe(2);
+            expect(labels.some((l) => l.startsWith('Sign language'))).toBe(
+                false);
+            // The two languages must not be conflated into an identical
+            // label.
+            expect(new Set(labels).size).toBe(2);
+          });
+
+      it('keeps the role label when languages differ across roles',
+          async () => {
+            const manifest =
+                shaka.test.ManifestGenerator.generate((manifest) => {
+                  manifest.addVariant(0, (variant) => {
+                    variant.addVideo(1, (stream) => {
+                      stream.roles = ['main'];
+                      stream.language = 'en';
+                    });
+                  });
+                  manifest.addVariant(2, (variant) => {
+                    variant.addVideo(3, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-US';
+                    });
+                  });
+                  manifest.addVariant(4, (variant) => {
+                    variant.addVideo(5, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-NL';
+                    });
+                  });
+                });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
+
+            await player.load(
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+            await updateVideoTypeMenu();
+
+            const labels = getVideoTypeLabels();
+            expect(labels.length).toBe(3);
+            expect(labels.filter((l) => l.startsWith('Main (')).length)
+                .toBe(1);
+            expect(
+                labels.filter((l) => l.startsWith('Sign language (')).length)
+                .toBe(2);
+            expect(new Set(labels).size).toBe(3);
+          });
+
+      function getVideoTypeLabels() {
+        return Array.from(videoTypeMenu.querySelectorAll(
+            'button:not(.shaka-back-to-overflow-button) > span'))
+            .map((s) => s.textContent);
+      }
+
+      /**
+       * @suppress {accessControls}
+       */
+      async function updateVideoTypeMenu() {
+        await Util.shortDelay();
+        let found = false;
+        for (const elem of controls.elements_) {
+          if (elem instanceof shaka.ui.OverflowMenu) {
+            for (const child of elem.children_) {
+              if (child instanceof shaka.ui.VideoTypeSelection) {
+                child.updateVideoRoles_();
+                found = true;
+              }
+            }
+          }
+        }
+        goog.asserts.assert(found, 'Unable to find video type menu');
+      }
     });
 
     describe('custom context menu', () => {

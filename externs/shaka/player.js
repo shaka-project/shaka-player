@@ -3158,6 +3158,7 @@ shaka.extern.TextPreference;
  * @typedef {{
  *   label: string,
  *   role: string,
+ *   language: string,
  *   codec: string,
  *   hdrLevel: string,
  *   layout: string
@@ -3169,6 +3170,13 @@ shaka.extern.TextPreference;
  *   Defaults to <code>''</code>.
  * @property {string} role
  *   The preferred role for video tracks.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {string} language
+ *   The preferred language for video tracks, e.g. <code>'sgn-US'</code> for
+ *   American Sign Language. Used to disambiguate video tracks that share the
+ *   same role but differ in language (for example, multiple sign-language
+ *   video tracks). An IETF language tag like 'en', 'en-US', 'sgn-NL', etc.
  *   <br>
  *   Defaults to <code>''</code>.
  * @property {string} codec
