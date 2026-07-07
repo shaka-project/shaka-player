@@ -79,6 +79,7 @@ describe('StreamingEngine', () => {
           onEvent: () => {},
           onManifestUpdate: () => {},
           getDrmInfo: () => null,
+          getPlaybackRate: () => 1,
         },
         mediaSourceConfig);
     waiter.setMediaSourceEngine(mediaSourceEngine);

@@ -585,15 +585,17 @@ shaka.test.FakeSegmentIndex = class {
 
     /** @type {!jasmine.Spy} */
     this.getIteratorForTime = jasmine.createSpy('getIteratorForTime')
-        .and.callFake((time) => {
+        .and.callFake((time, allowNonIndependent = false, reverse = false) => {
+          let step = reverse ? -1 : 1;
           let nextPosition = this.find(time);
           if (nextPosition == null) {
-            nextPosition = this.getNumReferences();
+            nextPosition = reverse ? -1 : this.getNumReferences();
           }
 
           return {
             next: () => {
-              const value = this.get(nextPosition++);
+              const value = this.get(nextPosition);
+              nextPosition += step;
               return {
                 value,
                 done: !value,
@@ -601,7 +603,7 @@ shaka.test.FakeSegmentIndex = class {
             },
 
             current: () => {
-              return this.get(nextPosition - 1);
+              return this.get(nextPosition - step);
             },
 
             currentPosition: () => {
@@ -610,10 +612,14 @@ shaka.test.FakeSegmentIndex = class {
 
             seek: (time) => {
               nextPosition = this.find(time);
-              return this.get(nextPosition++);
+              const value = this.get(nextPosition);
+              nextPosition += step;
+              return value;
             },
 
-            setReverse: () => {},
+            setReverse: (newReverse) => {
+              step = newReverse ? -1 : 1;
+            },
 
             resetToLastIndependent: () => {},
           };

@@ -194,6 +194,7 @@ describe('MediaSourceEngine', () => {
           onEvent: Util.spyFunc(onEvent),
           onManifestUpdate: Util.spyFunc(onManifestUpdate),
           getDrmInfo: () => null,
+          getPlaybackRate: () => 1,
         },
         config);
 

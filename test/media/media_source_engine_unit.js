@@ -106,6 +106,9 @@ describe('MediaSourceEngine', () => {
   let videoSourceBuffer;
   let mockVideo;
 
+  /** @type {number} */
+  let playbackRate;
+
   /** @type {HTMLMediaElement} */
   let video;
   let mockMediaSource;
@@ -249,6 +252,7 @@ describe('MediaSourceEngine', () => {
     video = /** @type {HTMLMediaElement} */(mockVideo);
     mockClosedCaptionParser = new shaka.test.FakeClosedCaptionParser();
     mockTextDisplayer = new shaka.test.FakeTextDisplayer();
+    playbackRate = 1;
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     // FakeTransmuxer is not in the worker bundle; prevent worker creation so
     // transmux calls fall back to the main-thread inner transmuxer.
@@ -265,6 +269,7 @@ describe('MediaSourceEngine', () => {
           onEvent: () => {},
           onManifestUpdate: () => {},
           getDrmInfo: () => null,
+          getPlaybackRate: () => playbackRate,
         },
         config);
     mediaSourceEngine.getCaptionParser = () => {
@@ -344,6 +349,7 @@ describe('MediaSourceEngine', () => {
             onEvent: () => {},
             onManifestUpdate: () => {},
             getDrmInfo: () => null,
+            getPlaybackRate: () => 1,
           },
           config);
 
@@ -372,6 +378,7 @@ describe('MediaSourceEngine', () => {
             onEvent: () => {},
             onManifestUpdate: () => {},
             getDrmInfo: () => null,
+            getPlaybackRate: () => 1,
           },
           config);
 
@@ -1010,6 +1017,39 @@ describe('MediaSourceEngine', () => {
 
       expect(videoSourceBuffer.timestampOffset).toBe(0.50);
     });
+
+    it('sets timestampOffset on every segment in reverse sequence mode',
+        async () => {
+          const initObject = new Map();
+          initObject.set(ContentType.VIDEO, fakeVideoStream);
+          videoSourceBuffer.mode = 'sequence';
+
+          await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
+          expect(videoSourceBuffer.timestampOffset).toBe(0);
+
+          // When playing in reverse, segments are appended in decreasing time
+          // order.  Because sequence mode otherwise places each appended
+          // segment right after the previous one, the timestampOffset must be
+          // reset to each segment's startTime even though these are not seeks
+          // or adaptations.
+          playbackRate = -1;
+
+          const appendLater = mediaSourceEngine.appendBuffer(
+              ContentType.VIDEO, buffer, dummyReference(20, 30), fakeStream,
+              /* hasClosedCaptions= */ false,
+              /* seeked= */ false, /* adaptation= */ false);
+          videoSourceBuffer.updateend();
+          await appendLater;
+          expect(videoSourceBuffer.timestampOffset).toBe(20);
+
+          const appendEarlier = mediaSourceEngine.appendBuffer(
+              ContentType.VIDEO, buffer2, dummyReference(10, 20), fakeStream,
+              /* hasClosedCaptions= */ false,
+              /* seeked= */ false, /* adaptation= */ false);
+          videoSourceBuffer.updateend();
+          await appendEarlier;
+          expect(videoSourceBuffer.timestampOffset).toBe(10);
+        });
   });
 
   describe('remove', () => {
