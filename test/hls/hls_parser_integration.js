@@ -344,6 +344,10 @@ describe('HlsParser', () => {
   });
 
   it('plays an EXT-X-I-FRAMES-ONLY playlist with broken segments', async () => {
+    if (deviceDetected.getDeviceName() === 'Tizen' &&
+        deviceDetected.getVersion() === 3) {
+      pending('Tizen 3 throws 3016 with this content');
+    }
     // This asset is an I-frame only playlist whose fragments were clipped
     // to a single I-frame via EXT-X-BYTERANGE, but whose moof/mdat still
     // declare the whole GOP.  Without repairing them, appending fails with
