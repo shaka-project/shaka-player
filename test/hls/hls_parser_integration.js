@@ -34,6 +34,8 @@ describe('HlsParser', () => {
     player = new compiledShaka.Player();
     await player.attach(video);
 
+    // Disable stall detection, which can interfere with playback tests.
+    player.configure('streaming.stallEnabled', false);
     // Disable gapPadding, which can interfere with playback tests.
     player.configure('streaming.gapPadding', 0);
 
@@ -134,8 +136,22 @@ describe('HlsParser', () => {
     await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
     await video.play();
 
-    // Wait for last cue
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // All text segments are fetched while filling the buffering goal, so
+    // there is no need to play the presentation through to see every cue.
+    // This also keeps the test independent of gap-jumping behavior: this
+    // content has a small gap in the media timeline at the discontinuity,
+    // and some older WebKit versions fail to resume playback after jumping
+    // it.  Playing through gaps is covered by "supports playback with gaps".
+    const textTrack = video.textTracks[0];
+    const deadline = Date.now() + 20 * 1000;
+    while ((textTrack.cues || []).length < 3 && Date.now() < deadline) {
+      // eslint-disable-next-line no-await-in-loop
+      await shaka.test.Util.delay(0.25);
+    }
 
     const cues = video.textTracks[0].cues;
     expect(cues.length).toBe(3);
