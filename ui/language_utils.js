@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// cspell:words Österreich ﺎﻠﻋﺮﺒﻳﺓ
+// cspell:words Österreich ﺎﻠﻋﺮﺒﻳﺓ subtags
 
 goog.provide('shaka.ui.LanguageUtils');
 
@@ -88,17 +88,9 @@ shaka.ui.LanguageUtils = class {
       codecsByLanguage.has(language) && codecsByLanguage.get(language).size > 1;
 
     // Remove old tracks
-    // 1. Save the back to menu button
-    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
-        langMenu, 'shaka-back-to-overflow-button');
+    shaka.ui.Utils.clearMenuKeepingBackButton(langMenu);
 
-    // 2. Remove everything
-    shaka.util.Dom.removeAllChildren(langMenu);
-
-    // 3. Add the backTo Menu button back
-    langMenu.appendChild(backButton);
-
-    // 4. Figure out which languages have multiple roles.
+    // Figure out which languages have multiple roles.
     const getRolesString = (track) => {
       return track.roles.join(', ');
     };
@@ -163,6 +155,11 @@ shaka.ui.LanguageUtils = class {
     for (const track of tracks) {
       const language = track.language;
       const rolesString = getRolesString(track);
+      const displayRolesString =
+          shaka.ui.LanguageUtils.getDisplayRolesString_(track);
+      const machineGeneratedSuffix =
+          shaka.ui.LanguageUtils.getMachineGeneratedSuffix_(
+              track, localization);
       const label = track.label;
       const channelsCount = track.channelsCount;
       const accessibilityPurpose = track.accessibilityPurpose;
@@ -230,23 +227,29 @@ shaka.ui.LanguageUtils = class {
             span.textContent += ' - ' +
                 localization.resolve(shaka.ui.Locales.Ids.AUDIO_DESCRIPTION);
           }
+          span.textContent += machineGeneratedSuffix;
           break;
         case TrackLabelFormat.ROLE:
           span.textContent += basicInfo;
-          if (!rolesString) {
-            // Fallback behavior. This probably shouldn't happen.
-            shaka.log.alwaysWarn('Track #' + JSON.stringify(track) +
-                ' does not have a role, but the UI is configured to ' +
-                'only show role.');
-            span.textContent = '?';
+          if (!displayRolesString) {
+            if (machineGeneratedSuffix) {
+              span.textContent += machineGeneratedSuffix;
+            } else {
+              // Fallback behavior. This probably shouldn't happen.
+              shaka.log.alwaysWarn('Track #' + JSON.stringify(track) +
+                  ' does not have a role, but the UI is configured to ' +
+                  'only show role.');
+              span.textContent = '?';
+            }
           } else {
-            span.textContent = rolesString;
+            span.textContent = displayRolesString + machineGeneratedSuffix;
           }
           break;
         case TrackLabelFormat.LANGUAGE_ROLE:
           span.textContent += basicInfo;
-          if (rolesString) {
-            span.textContent += ': ' + rolesString;
+          span.textContent += machineGeneratedSuffix;
+          if (displayRolesString) {
+            span.textContent += ': ' + displayRolesString;
           }
           break;
         case TrackLabelFormat.LABEL:
@@ -297,17 +300,9 @@ shaka.ui.LanguageUtils = class {
     });
 
     // Remove old tracks
-    // 1. Save the back to menu button
-    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
-        langMenu, 'shaka-back-to-overflow-button');
+    shaka.ui.Utils.clearMenuKeepingBackButton(langMenu);
 
-    // 2. Remove everything
-    shaka.util.Dom.removeAllChildren(langMenu);
-
-    // 3. Add the backTo Menu button back
-    langMenu.appendChild(backButton);
-
-    // 4. Figure out which languages have multiple roles.
+    // Figure out which languages have multiple roles.
     const getRolesString = (track) => {
       return track.roles.join(', ');
     };
@@ -336,6 +331,11 @@ shaka.ui.LanguageUtils = class {
       const forced = track.forced;
       const forcedString = localization.resolve(LocIds.SUBTITLE_FORCED);
       const rolesString = getRolesString(track);
+      const displayRolesString =
+          shaka.ui.LanguageUtils.getDisplayRolesString_(track);
+      const machineGeneratedSuffix =
+          shaka.ui.LanguageUtils.getMachineGeneratedSuffix_(
+              track, localization);
       const label = track.label;
       const combinationName =
           getCombination(language, rolesString, label, forced);
@@ -399,26 +399,34 @@ shaka.ui.LanguageUtils = class {
       }
       switch (labelFormat) {
         case TrackLabelFormat.LANGUAGE:
+          span.textContent += machineGeneratedSuffix;
           if (forced) {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
         case TrackLabelFormat.ROLE:
-          if (!rolesString) {
-            // Fallback behavior. This probably shouldn't happen.
-            shaka.log.alwaysWarn('Track #' + track.id + ' does not have a ' +
-                'role, but the UI is configured to only show role.');
-            span.textContent = '?';
+          if (!displayRolesString) {
+            if (machineGeneratedSuffix) {
+              // The only roles are machine-generated characteristics; surface
+              // them via the language name + suffix so the button is not empty.
+              span.textContent += machineGeneratedSuffix;
+            } else {
+              // Fallback behavior. This probably shouldn't happen.
+              shaka.log.alwaysWarn('Track #' + track.id + ' does not have a ' +
+                  'role, but the UI is configured to only show role.');
+              span.textContent = '?';
+            }
           } else {
-            span.textContent = rolesString;
+            span.textContent = displayRolesString + machineGeneratedSuffix;
           }
           if (forced) {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
         case TrackLabelFormat.LANGUAGE_ROLE:
-          if (rolesString) {
-            span.textContent += ': ' + rolesString;
+          span.textContent += machineGeneratedSuffix;
+          if (displayRolesString) {
+            span.textContent += ': ' + displayRolesString;
           }
           if (forced) {
             span.textContent += ' (' + forcedString + ')';
@@ -448,6 +456,35 @@ shaka.ui.LanguageUtils = class {
 
 
   /**
+   * @param {shaka.extern.AudioTrack|shaka.extern.TextTrack} track
+   * @return {string}
+   * @private
+   */
+  static getDisplayRolesString_(track) {
+    return track.roles.filter(
+        (r) => r !== shaka.ui.LanguageUtils.MACHINE_GENERATED_CHAR_ &&
+            r !== shaka.ui.LanguageUtils.TRANSLATION_CHAR_,
+    ).join(', ');
+  }
+
+  /**
+   * @param {shaka.extern.AudioTrack|shaka.extern.TextTrack} track
+   * @param {shaka.ui.Localization} localization
+   * @return {string}
+   * @private
+   */
+  static getMachineGeneratedSuffix_(track, localization) {
+    if (!track.roles.includes(shaka.ui.LanguageUtils.MACHINE_GENERATED_CHAR_)) {
+      return '';
+    }
+    const LocIds = shaka.ui.Locales.Ids;
+    if (track.roles.includes(shaka.ui.LanguageUtils.TRANSLATION_CHAR_)) {
+      return ' ' + localization.resolve(LocIds.MACHINE_TRANSLATED);
+    }
+    return ' ' + localization.resolve(LocIds.MACHINE_GENERATED);
+  }
+
+  /**
    * Returns the language's name for itself in its own script (autoglottonym),
    * if we have it.
    *
@@ -466,6 +503,9 @@ shaka.ui.LanguageUtils = class {
    * for specificity.  For example, "sjn" would map to "Unknown (sjn)".  In this
    * way, multiple unrecognized languages would not all look the same in the
    * language list, but could be distinguished by their locale.
+   *
+   * Sign languages are a special case: deprecated tags like "sgn-US" are
+   * resolved to their replacement ISO 639-3 code ("ase") first.
    *
    * @param {string} locale
    * @param {shaka.ui.Localization} localization
@@ -502,8 +542,18 @@ shaka.ui.LanguageUtils = class {
         return resolve(shaka.ui.Locales.Ids.NOT_APPLICABLE);
     }
 
+    // Some BCP-47 tags are deprecated "grandfathered" forms that RFC 5645
+    // replaced with a specific ISO 639-3 code -- most commonly the 'sgn-XX'
+    // sign-language tags (e.g. 'sgn-US' -> 'ase', American Sign Language).
+    // Manifests routinely still use the deprecated form, but neither our own
+    // name table nor (for most of them) Intl.DisplayNames recognize it, so
+    // resolve to the canonical code before doing any name lookup.
+    const canonicalLocale =
+        shaka.ui.LanguageUtils.SIGN_LANGUAGE_ALIASES_.get(
+            locale.toLowerCase()) || locale;
+
     // Extract the base language from the locale as a fallback step.
-    const language = shaka.util.LanguageUtils.getBase(locale);
+    const language = shaka.util.LanguageUtils.getBase(canonicalLocale);
 
     // If Intl.DisplayNames is supported we prefer it, because the list of
     // languages is up to date.
@@ -515,10 +565,24 @@ shaka.ui.LanguageUtils = class {
         }
         const languageNames = new Intl.DisplayNames(locales,
             {type: 'language', languageDisplay: 'standard'});
-        const languageName = languageNames.of(locale);
-        // Only prefer it when it's reliable
+        const languageName = languageNames.of(canonicalLocale);
+        const looksLikeUnresolvedCode = (name) => {
+          const firstChar = name.charAt(0);
+          return firstChar === firstChar.toLowerCase() &&
+              firstChar !== firstChar.toUpperCase();
+        };
+        // Only prefer it when it's reliable.  Intl.DisplayNames falls back
+        // to echoing the (possibly re-canonicalized) language identifier
+        // itself when it has no display name for it -- e.g. 'dse' (Dutch
+        // Sign Language) has no display name in some ICU versions, so 'dse'
+        // is returned as-is.  Such fallbacks are always still-raw BCP-47
+        // subtags, which start with a lowercase letter; real display names
+        // are title-cased (or start with an uncased character, for scripts
+        // without letter case).  Reject the lowercase-start case so we don't
+        // show a code like "Dse" as if it were a real name.
         if (languageName &&
-            languageName.toLowerCase() != locale.toLowerCase()) {
+            languageName.toLowerCase() != canonicalLocale.toLowerCase() &&
+            !looksLikeUnresolvedCode(languageName)) {
           return languageName.charAt(0).toUpperCase() + languageName.slice(1);
         }
       } catch (e) {
@@ -532,8 +596,8 @@ shaka.ui.LanguageUtils = class {
     // When there is a loss of specificity (either to a base language or to
     // "unknown"), we should append the original language code.
     // Otherwise, there may be multiple identical-looking items in the list.
-    if (locale in mozilla.LanguageMapping) {
-      return mozilla.LanguageMapping[locale];
+    if (canonicalLocale in mozilla.LanguageMapping) {
+      return mozilla.LanguageMapping[canonicalLocale];
     } else if (language in mozilla.LanguageMapping) {
       return mozilla.LanguageMapping[language] + ' (' + locale + ')';
     } else {
@@ -541,3 +605,40 @@ shaka.ui.LanguageUtils = class {
     }
   }
 };
+
+/**
+ * @const {string}
+ * @private
+ */
+shaka.ui.LanguageUtils.MACHINE_GENERATED_CHAR_ = 'public.machine-generated';
+
+/**
+ * @const {string}
+ * @private
+ */
+shaka.ui.LanguageUtils.TRANSLATION_CHAR_ = 'public.translation';
+
+/**
+ * A map from deprecated "grandfathered" BCP-47 sign-language tags to the
+ * specific ISO 639-3 code that replaced them, per RFC 5645
+ * (https://www.rfc-editor.org/rfc/rfc5645.html, section 2.5).  For example,
+ * 'sgn-US' (American Sign Language) is not itself a valid ISO 639-3 code;
+ * its replacement is 'ase'.  Manifests still commonly use the deprecated
+ * 'sgn-XX' form, so we resolve it before doing any name lookup.  Keys are
+ * lowercase.  Three-part tags (e.g. 'sgn-be-fr') are included for
+ * completeness, but shaka.util.LanguageUtils.normalize() currently drops
+ * anything past the first two subtags, so they will rarely reach here
+ * un-collapsed.
+ * @const {!Map<string, string>}
+ * @private
+ */
+shaka.ui.LanguageUtils.SIGN_LANGUAGE_ALIASES_ = new Map([
+  ['sgn-be-fr', 'sfb'], ['sgn-be-nl', 'vgt'], ['sgn-br', 'bzs'],
+  ['sgn-ch-de', 'sgg'], ['sgn-co', 'csn'], ['sgn-de', 'gsg'],
+  ['sgn-dk', 'dsl'], ['sgn-es', 'ssp'], ['sgn-fr', 'fsl'],
+  ['sgn-gb', 'bfi'], ['sgn-gr', 'gss'], ['sgn-ie', 'isg'],
+  ['sgn-it', 'ise'], ['sgn-jp', 'jsl'], ['sgn-mx', 'mfs'],
+  ['sgn-ni', 'ncs'], ['sgn-nl', 'dse'], ['sgn-no', 'nsl'],
+  ['sgn-pt', 'psr'], ['sgn-se', 'swl'], ['sgn-us', 'ase'],
+  ['sgn-za', 'sfs'],
+]);

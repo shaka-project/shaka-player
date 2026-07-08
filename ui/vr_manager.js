@@ -73,6 +73,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     /** @private {number} */
     this.prevY_ = 0;
 
+    /** @private {?number} */
+    this.pinchDistance_ = null;
+
     /** @private {number} */
     this.prevAlpha_ = 0;
 
@@ -85,6 +88,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     /** @private {?string} */
     this.vrAsset_ = null;
 
+    /** @private {?number} */
+    this.vrHfov_ = null;
+
     this.loadEventManager_.listen(player, 'loading', () => {
       if (this.vrWebgl_) {
         this.vrWebgl_.reset();
@@ -96,6 +102,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       /** @type {shaka.extern.SpatialVideoInfo} */
       const spatialInfo = event['detail'];
       let unsupported = false;
+      this.vrHfov_ = spatialInfo.hfov;
       switch (spatialInfo.projection) {
         case 'rect':
           // Rectilinear content is the flat rectangular media.
@@ -123,9 +130,12 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
           }
           break;
         case 'fish':
-          // It's not really the same thing, but the difference is very subtle
-          // and allows us to tolerate it.
-          this.vrAsset_ = 'halfequirectangular';
+        case 'prim':
+        case 'aiv':
+          // Apple Immersive Video ('aiv') uses the parametric immersive
+          // projection ('prim'), which is fisheye-based, so all of these
+          // are rendered as fisheye content.
+          this.vrAsset_ = 'fisheye';
           break;
         default:
           this.vrAsset_ = null;
@@ -138,15 +148,12 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       this.checkVrStatus_();
     });
 
-    this.loadEventManager_.listen(player, 'nospatialvideoinfo', () => {
-      this.vrAsset_ = null;
-      this.checkVrStatus_();
-    });
-
-    this.loadEventManager_.listen(player, 'unloading', () => {
-      this.vrAsset_ = null;
-      this.checkVrStatus_();
-    });
+    this.loadEventManager_.listenMulti(
+        player, ['nospatialvideoinfo', 'unloading'], () => {
+          this.vrAsset_ = null;
+          this.vrHfov_ = null;
+          this.checkVrStatus_();
+        });
 
     this.loadEventManager_.listen(this.controls_, 'caststatuschanged', () => {
       this.checkVrStatus_();
@@ -346,18 +353,21 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       }
       const newProjectionMode =
           this.vrAsset_ || this.config_.defaultVrProjectionMode;
+      const newHfov = this.vrHfov_ || 180;
       if (!this.vrWebgl_) {
         this.canvas_.style.display = '';
-        this.init_(newProjectionMode);
+        this.init_(newProjectionMode, newHfov);
         this.dispatchEvent(new shaka.util.FakeEvent(
             'vrstatuschanged',
             (new Map()).set('newStatus', this.isPlayingVR())));
       } else {
         const currentProjectionMode = this.vrWebgl_.getProjectionMode();
-        if (currentProjectionMode != newProjectionMode) {
+        const hfovChanged = newProjectionMode == 'fisheye' &&
+            this.vrWebgl_.getHfov() != newHfov;
+        if (currentProjectionMode != newProjectionMode || hfovChanged) {
           this.eventManager_.removeAll();
           this.vrWebgl_.release();
-          this.init_(newProjectionMode);
+          this.init_(newProjectionMode, newHfov);
           // Re-initialization the status does not change.
         }
       }
@@ -374,12 +384,14 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
 
   /**
    * @param {string} projectionMode
+   * @param {number} hfov
    * @private
    */
-  init_(projectionMode) {
+  init_(projectionMode, hfov) {
     if (this.gl_ && this.canvas_) {
       this.vrWebgl_ = new shaka.ui.VRWebgl(
-          this.video_, this.player_, this.canvas_, this.gl_, projectionMode);
+          this.video_, this.player_, this.canvas_, this.gl_, projectionMode,
+          hfov);
       this.setupVRListeners_();
     }
   }
@@ -412,14 +424,20 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
   setupVRListeners_() {
     // Start
     this.eventManager_.listen(this.container_, 'mousedown', (event) => {
-      if (!this.onGesture_) {
+      if (!this.onGesture_ && event.button == 0 &&
+          this.canStartGesture_(event.target)) {
         this.gestureStart_(event.clientX, event.clientY);
       }
     });
     if (navigator.maxTouchPoints > 0) {
       this.eventManager_.listen(this.container_, 'touchstart', (e) => {
-        if (!this.onGesture_) {
-          const event = /** @type {!TouchEvent} */(e);
+        const event = /** @type {!TouchEvent} */(e);
+        if (event.touches.length == 2) {
+          // Stop panning and start a pinch zoom gesture.
+          this.onGesture_ = false;
+          this.pinchDistance_ = this.getPinchDistance_(event);
+        } else if (!this.onGesture_ &&
+            this.canStartGesture_(event.target)) {
           this.gestureStart_(
               event.touches[0].clientX, event.touches[0].clientY);
         }
@@ -428,7 +446,8 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
 
     // Zoom
     this.eventManager_.listen(this.container_, 'wheel', (e) => {
-      if (!this.onGesture_) {
+      if (!this.onGesture_ && this.config_.enableVrWheelZoom &&
+          this.canStartGesture_(e.target)) {
         const event = /** @type {!WheelEvent} */(e);
         this.vrWebgl_.zoom(event.deltaY);
         event.preventDefault();
@@ -444,25 +463,41 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     });
     if (navigator.maxTouchPoints > 0) {
       this.eventManager_.listen(this.container_, 'touchmove', (e) => {
-        if (this.onGesture_) {
-          const event = /** @type {!TouchEvent} */(e);
+        const event = /** @type {!TouchEvent} */(e);
+        if (this.pinchDistance_ != null && event.touches.length == 2) {
+          const newPinchDistance = this.getPinchDistance_(event);
+          this.vrWebgl_.zoom(
+              (this.pinchDistance_ - newPinchDistance) *
+              shaka.ui.VRManager.PINCH_ZOOM_FACTOR_);
+          this.pinchDistance_ = newPinchDistance;
+          e.preventDefault();
+        } else if (this.onGesture_) {
           this.gestureMove_(
               event.touches[0].clientX, event.touches[0].clientY);
+          e.preventDefault();
         }
-        e.preventDefault();
       });
     }
 
     // End
-    this.eventManager_.listen(this.container_, 'mouseleave', () => {
-      this.onGesture_ = false;
-    });
-    this.eventManager_.listen(this.container_, 'mouseup', () => {
-      this.onGesture_ = false;
-    });
+    this.eventManager_.listenMulti(
+        this.container_, ['mouseleave', 'mouseup'], () => {
+          this.onGesture_ = false;
+        });
     if (navigator.maxTouchPoints > 0) {
-      this.eventManager_.listen(this.container_, 'touchend', () => {
+      this.eventManager_.listen(this.container_, 'touchend', (e) => {
+        const event = /** @type {!TouchEvent} */(e);
         this.onGesture_ = false;
+        if (event.touches.length == 2) {
+          this.pinchDistance_ = this.getPinchDistance_(event);
+        } else {
+          this.pinchDistance_ = null;
+        }
+        if (event.touches.length == 1) {
+          // Continue panning with the remaining finger.
+          this.gestureStart_(
+              event.touches[0].clientX, event.touches[0].clientY);
+        }
       });
     }
 
@@ -471,6 +506,10 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       let deviceOrientationListener = false;
       // See: https://dev.to/li/how-to-requestpermission-for-devicemotion-and-deviceorientation-events-in-ios-13-46g2
       if (typeof DeviceMotionEvent.requestPermission == 'function') {
+        const userGestureEvents = ['click', 'mouseup'];
+        if (navigator.maxTouchPoints > 0) {
+          userGestureEvents.push('touchend');
+        }
         const userGestureListener = () => {
           DeviceMotionEvent.requestPermission().then((newPermissionState) => {
             if (newPermissionState !== 'granted' ||
@@ -481,46 +520,22 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
             this.setupDeviceOrientationListener_();
           });
         };
+        const listenToUserGesturesAgain = () => {
+          this.eventManager_.unlistenMulti(
+              this.container_, userGestureEvents, userGestureListener);
+          this.eventManager_.listenOnceMulti(
+              this.container_, userGestureEvents, userGestureListener);
+        };
         DeviceMotionEvent.requestPermission().then((permissionState) => {
-          this.eventManager_.unlisten(
-              this.container_, 'click', userGestureListener);
-          this.eventManager_.unlisten(
-              this.container_, 'mouseup', userGestureListener);
-          if (navigator.maxTouchPoints > 0) {
-            this.eventManager_.unlisten(
-                this.container_, 'touchend', userGestureListener);
-          }
           if (permissionState !== 'granted') {
-            this.eventManager_.listenOnce(
-                this.container_, 'click', userGestureListener);
-            this.eventManager_.listenOnce(
-                this.container_, 'mouseup', userGestureListener);
-            if (navigator.maxTouchPoints > 0) {
-              this.eventManager_.listenOnce(
-                  this.container_, 'touchend', userGestureListener);
-            }
+            listenToUserGesturesAgain();
             return;
           }
+          this.eventManager_.unlistenMulti(
+              this.container_, userGestureEvents, userGestureListener);
           deviceOrientationListener = true;
           this.setupDeviceOrientationListener_();
-        }).catch(() => {
-          this.eventManager_.unlisten(
-              this.container_, 'click', userGestureListener);
-          this.eventManager_.unlisten(
-              this.container_, 'mouseup', userGestureListener);
-          if (navigator.maxTouchPoints > 0) {
-            this.eventManager_.unlisten(
-                this.container_, 'touchend', userGestureListener);
-          }
-          this.eventManager_.listenOnce(
-              this.container_, 'click', userGestureListener);
-          this.eventManager_.listenOnce(
-              this.container_, 'mouseup', userGestureListener);
-          if (navigator.maxTouchPoints > 0) {
-            this.eventManager_.listenOnce(
-                this.container_, 'touchend', userGestureListener);
-          }
-        });
+        }).catch(listenToUserGesturesAgain);
       } else {
         deviceOrientationListener = true;
         this.setupDeviceOrientationListener_();
@@ -566,6 +581,33 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * Returns true if a VR gesture can start on this element. Gestures that
+   * start on the controls (buttons, menus, seek bar) should not move the
+   * view.
+   *
+   * @param {?EventTarget} target
+   * @return {boolean}
+   * @private
+   */
+  canStartGesture_(target) {
+    if (target instanceof Element) {
+      return !target.closest('.shaka-no-propagation');
+    }
+    return true;
+  }
+
+  /**
+   * @param {!TouchEvent} event
+   * @return {number}
+   * @private
+   */
+  getPinchDistance_(event) {
+    return Math.hypot(
+        event.touches[0].clientX - event.touches[1].clientX,
+        event.touches[0].clientY - event.touches[1].clientY);
+  }
+
+  /**
    * @param {number} x
    * @param {number} y
    * @private
@@ -596,3 +638,13 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
  * @private
  */
 shaka.ui.VRManager.TO_RADIANS_ = Math.PI / 180;
+
+/**
+ * Amount of field of view change per pixel of pinch distance change.
+ * The value is scaled down by 50 in shaka.ui.VRWebgl.zoom, so this results
+ * in 0.1 degrees of field of view per pixel.
+ *
+ * @const {number}
+ * @private
+ */
+shaka.ui.VRManager.PINCH_ZOOM_FACTOR_ = 5;

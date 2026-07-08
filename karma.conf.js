@@ -234,6 +234,18 @@ module.exports = (config) => {
       // test utilities next, which fill in that namespace
       'test/test/util/*.js',
 
+      // validate_cmcd_keys.js builds Sets at module-eval time from CMCD_KEYS.
+      // CMCD_KEYS (cmcd_keys.js) is not required by the main library. Load it
+      // explicitly here, before the cml-cmcd test utilities, so the Sets are
+      // built correctly. Its transitive deps (CMCD_V1_KEYS, CMCD_REQUEST_KEYS,
+      // CMCD_RESPONSE_KEYS, CMCD_EVENT_KEYS) are already loaded by
+      // cmcd_manager.
+      'third_party/cml-cmcd/cmcd_keys.js',
+
+      // cml-cmcd test-only helpers (CmcdReportRecorder, validateCmcd, etc.)
+      // These use goog.provide so must be loaded before the integration tests.
+      'test/test/util/cml-cmcd/*.js',
+
       // bootstrapping for the test suite last; this will load the actual tests
       'test/test/boot.js',
 
@@ -251,6 +263,9 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'test/test/assets/clear-encrypted/*', included: false},
       {pattern: 'test/test/assets/clear-encrypted-hls/*', included: false},
+      {pattern: 'test/test/assets/dash-event-callback/*', included: false},
+      // eslint-disable-next-line @stylistic/max-len
+      {pattern: 'test/test/assets/dash-event-callback-urlparam/*', included: false},
       {pattern: 'test/test/assets/dash-multi-codec/*', included: false},
       {pattern: 'test/test/assets/dash-multi-codec-ec3/*', included: false},
       {pattern: 'test/test/assets/dash-multitype-variant/*', included: false},
@@ -270,8 +285,10 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-aes-256/*', included: false},
       {pattern: 'test/test/assets/hls-chapters/*', included: false},
       {pattern: 'test/test/assets/hls-gap/*', included: false},
+      {pattern: 'test/test/assets/hls-iframe-only/*', included: false},
       {pattern: 'test/test/assets/hls-interstitial/*', included: false},
       {pattern: 'test/test/assets/hls-mp4-muxed-aac-h264/*', included: false},
+      {pattern: 'test/test/assets/hls-multivideo/*', included: false},
       {pattern: 'test/test/assets/hls-muxed-mp4-ts/*', included: false},
       {pattern: 'test/test/assets/hls-raw-aac/*', included: false},
       {pattern: 'test/test/assets/hls-raw-ac3/*', included: false},

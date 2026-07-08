@@ -33,6 +33,8 @@ describe('HlsParser', () => {
   let newDrmInfoSpy;
   /** @type {!jasmine.Spy} */
   let onMetadataSpy;
+  /** @type {!jasmine.Spy} */
+  let onTimelineRegionAddedSpy;
   /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
   /** @type {shaka.extern.ManifestConfiguration} */
@@ -95,6 +97,7 @@ describe('HlsParser', () => {
     onEventSpy = jasmine.createSpy('onEvent');
     newDrmInfoSpy = jasmine.createSpy('newDrmInfo');
     onMetadataSpy = jasmine.createSpy('onMetadata');
+    onTimelineRegionAddedSpy = jasmine.createSpy('onTimelineRegionAdded');
     playerInterface = {
       modifyManifestRequest: (request, manifestInfo) => {},
       modifySegmentRequest: (request, segmentInfo) => {},
@@ -103,7 +106,7 @@ describe('HlsParser', () => {
       networkingEngine: fakeNetEngine,
       onError: fail,
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
-      onTimelineRegionAdded: fail,
+      onTimelineRegionAdded: shaka.test.Util.spyFunc(onTimelineRegionAddedSpy),
       isLowLatencyMode: () => false,
       updateDuration: () => {},
       newDrmInfo: shaka.test.Util.spyFunc(newDrmInfoSpy),
@@ -1177,7 +1180,8 @@ describe('HlsParser', () => {
   });
 
 
-  it('parses video variant without URI', async () => {
+  // eslint-disable-next-line @stylistic/max-len
+  it('guesses video for a URI-less VIDEO rendition despite audio-only CODECS', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="mp4a",VIDEO="vid1"\n',
@@ -1194,18 +1198,22 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    // The URI-less VIDEO Rendition means the video data is included in the
+    // variant's own Media Playlist, even though CODECS only declares audio.
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
-        variant.addPartialStream(ContentType.AUDIO, (stream) => {
-          stream.mime('audio/mp4', 'mp4a');
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.label = 'video';
+          stream.mime('video/mp4', 'mp4a');
         });
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
     });
 
-    await testHlsParser(master, media, manifest);
+    const actual = await testHlsParser(master, media, manifest);
+    expect(actual.variants[0].audio).toBe(null);
   });
 
   it('parses multiple variants', async () => {
@@ -2393,7 +2401,34 @@ describe('HlsParser', () => {
     expect(trickModeVideo).toBeDefined();
     expect(trickModeVideo.width).toBe(960);
     expect(trickModeVideo.height).toBe(540);
+    expect(trickModeVideo.isIframe).toBe(true);
   });
+
+  it('marks a directly loaded EXT-X-I-FRAMES-ONLY playlist as I-frame',
+      async () => {
+        const media = [
+          '#EXTM3U\n',
+          '#EXT-X-VERSION:7\n',
+          '#EXT-X-PLAYLIST-TYPE:VOD\n',
+          '#EXT-X-I-FRAMES-ONLY\n',
+          '#EXT-X-TARGETDURATION:2\n',
+          '#EXT-X-MAP:URI="init.mp4"\n',
+          '#EXTINF:2,\n',
+          '#EXT-X-BYTERANGE:200@0\n',
+          'main.mp4\n',
+        ].join('');
+
+        fakeNetEngine
+            .setResponseText('test:/media', media)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
+
+        const actual = await parser.start('test:/media', playerInterface);
+        await loadAllStreamsFor(actual);
+
+        expect(actual.variants.length).toBe(1);
+        expect(actual.variants[0].video.isIframe).toBe(true);
+      });
 
   it('Disable I-Frame does not create I-Frame streams', async () => {
     const master = [
@@ -6631,6 +6666,43 @@ describe('HlsParser', () => {
           thirdValues);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 15, null,
           forthValues);
+
+      // Unlike 'metadataadded', 'onTimelineRegionAdded' fires once per
+      // EXT-X-DATERANGE tag, with the ID and the rest of the attributes
+      // correlated together in the same call.
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(4);
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            schemeIdUri: metadataType,
+            id: '0',
+            startTime: 0,
+            endTime: 1,
+            values: firstValues,
+          }));
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            schemeIdUri: metadataType,
+            id: '1',
+            startTime: 5,
+            endTime: 6,
+            values: secondValues,
+          }));
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            schemeIdUri: metadataType,
+            id: '2',
+            startTime: 10,
+            endTime: 11,
+            values: thirdValues,
+          }));
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            schemeIdUri: metadataType,
+            id: '3',
+            startTime: 15,
+            endTime: Infinity,
+            values: forthValues,
+          }));
     });
 
     it('supports END-ON-NEXT', async () => {
@@ -6684,6 +6756,7 @@ describe('HlsParser', () => {
       await parser.start('test:/master', playerInterface);
 
       expect(onMetadataSpy).not.toHaveBeenCalled();
+      expect(onTimelineRegionAddedSpy).not.toHaveBeenCalled();
     });
 
     it('ignores without useful value', async () => {
@@ -6704,6 +6777,16 @@ describe('HlsParser', () => {
       await parser.start('test:/master', playerInterface);
 
       expect(onMetadataSpy).not.toHaveBeenCalled();
+      // Unlike 'metadataadded', 'onTimelineRegionAdded' does not require
+      // more than just the ID, since consumers only need the ID and the
+      // start/end times to schedule ads.
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(1);
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            id: '0',
+            startTime: 0,
+            endTime: 1,
+          }));
     });
 
     it('ignores if date ranges are in the past', async () => {
@@ -6726,6 +6809,7 @@ describe('HlsParser', () => {
       await parser.start('test:/master', playerInterface);
 
       expect(onMetadataSpy).not.toHaveBeenCalled();
+      expect(onTimelineRegionAddedSpy).not.toHaveBeenCalled();
     });
 
     it('supports interstitial', async () => {
@@ -7048,6 +7132,115 @@ describe('HlsParser', () => {
 
     expect(audioLabels).toContain('audio128');
     expect(audioLabels).toContain('audio64');
+  });
+
+  it('parses a variant with both AUDIO and VIDEO attributes', async () => {
+    // Regression test for combined AUDIO+VIDEO alternative renditions on a
+    // single EXT-X-STREAM-INF tag (e.g. multi-angle camera content), per
+    // https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis-22
+    // section 4.4.6.2.1.  The "RED" video rendition has no URI, meaning its
+    // media data is the Variant Stream's own playlist.
+    const masterPlaylist = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",NAME="English",',
+      'DEFAULT=YES,LANGUAGE="en",URI="en.m3u8"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",NAME="Spanish",',
+      'DEFAULT=NO,LANGUAGE="es",URI="es.m3u8"\n',
+      '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",NAME="RED",',
+      'DEFAULT=YES,AUTOSELECT=YES,CHARACTERISTICS="public.main"\n',
+      '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",NAME="GREEN",',
+      'DEFAULT=NO,AUTOSELECT=YES,URI="green.m3u8"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.42c00d",',
+      'RESOLUTION=960x540,AUDIO="aud",VIDEO="vid"\n',
+      'red.m3u8\n',
+    ].join('');
+
+    const manifestData = shaka.util.StringUtils.toUTF8(masterPlaylist);
+    const manifestUri = 'https://example.com/master.m3u8';
+    fakeNetEngine.setResponseValue(manifestUri, manifestData);
+
+    const manifest = await parser.start(manifestUri, playerInterface);
+
+    // 2 audio renditions x 2 video renditions (RED via the variant's own
+    // stream, GREEN via the VIDEO group) = 4 variants.
+    expect(manifest.variants.length).toBe(4);
+
+    const videoLabels =
+        manifest.variants.map((v) => v.video.label).sort();
+    expect(videoLabels).toEqual(['GREEN', 'GREEN', 'RED', 'RED']);
+
+    const audioLabels =
+        manifest.variants.map((v) => v.audio.label).sort();
+    expect(audioLabels).toEqual(['English', 'English', 'Spanish', 'Spanish']);
+
+    const redVariant = manifest.variants.find((v) => v.video.label == 'RED');
+    expect(redVariant.video.primary).toBe(true);
+    expect(redVariant.video.roles).toEqual(['public.main']);
+
+    const greenVariant =
+        manifest.variants.find((v) => v.video.label == 'GREEN');
+    expect(greenVariant.video.primary).toBe(false);
+  });
+
+  it('names the video track via a URI-less VIDEO rendition', async () => {
+    // A VIDEO group whose only Rendition has no URI is a common way to give
+    // the video track a NAME.  The variant must still be detected as
+    // multiplexed audio+video (the placeholder is not a separate video
+    // alternative), and the video stream must inherit the Rendition's
+    // metadata.
+    const masterPlaylist = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",NAME="Main Camera",',
+      'DEFAULT=YES\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.42c00d,mp4a.40.2",',
+      'RESOLUTION=960x540,VIDEO="vid"\n',
+      'video.m3u8\n',
+    ].join('');
+
+    const manifestData = shaka.util.StringUtils.toUTF8(masterPlaylist);
+    const manifestUri = 'https://example.com/master.m3u8';
+    fakeNetEngine.setResponseValue(manifestUri, manifestData);
+
+    const manifest = await parser.start(manifestUri, playerInterface);
+
+    expect(manifest.variants.length).toBe(1);
+    const variant = manifest.variants[0];
+    expect(variant.video).toBeTruthy();
+    expect(variant.video.label).toBe('Main Camera');
+    expect(variant.video.primary).toBe(true);
+    expect(variant.video.isAudioMuxedInVideo).toBe(false);
+    // Multiplexed content: both codecs stay on the video stream.
+    expect(variant.video.codecs).toBe('avc1.42c00d,mp4a.40.2');
+  });
+
+  it('doesn\'t set a video label for a plain bitrate ladder', async () => {
+    // Regression test for https://github.com/shaka-project/shaka-player/
+    // issues/9175: a variant's own video stream must never derive its label
+    // from the playlist URI (which differs per bitrate and previously broke
+    // ABR quality restoration). With no EXT-X-MEDIA VIDEO renditions
+    // involved, the video label must stay null for every variant.
+    const masterPlaylist = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=100000,CODECS="avc1.42c00d,mp4a.40.2",',
+      'RESOLUTION=256x144,AUDIO="aud"\n',
+      'low.m3u8\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=2500000,CODECS="avc1.42c00d,mp4a.40.2",',
+      'RESOLUTION=1280x720,AUDIO="aud"\n',
+      'high.m3u8\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",NAME="stream_0",',
+      'DEFAULT=YES,LANGUAGE="en",URI="audio.m3u8"\n',
+    ].join('');
+
+    const manifestData = shaka.util.StringUtils.toUTF8(masterPlaylist);
+    const manifestUri = 'https://example.com/master.m3u8';
+    fakeNetEngine.setResponseValue(manifestUri, manifestData);
+
+    const manifest = await parser.start(manifestUri, playerInterface);
+
+    expect(manifest.variants.length).toBe(2);
+    for (const variant of manifest.variants) {
+      expect(variant.video.label).toBeNull();
+    }
   });
 
   it('don\'t set label for audio if no name', async () => {

@@ -154,4 +154,80 @@ describe('DashParser', () => {
 
     await player.unload();
   });
+
+  it('fires EventStream callback beacons during playback', async () => {
+    const netEngine = player.getNetworkingEngine();
+
+    const EventCallbackType =
+        compiledShaka.net.NetworkingEngine.RequestType.EVENT_CALLBACK;
+
+    /** @type {?string} */
+    let capturedCallbackUrl = null;
+
+    netEngine.registerRequestFilter((type, request) => {
+      if (type == EventCallbackType) {
+        capturedCallbackUrl = request.uris[0];
+        // Redirect to an existing local resource so the request succeeds.
+        request.uris =
+            ['/base/test/test/assets/dash-svta-2053-2/init.mp4'];
+      }
+    });
+
+    // The region starts at presentationTime=0, so TimelineRegionEnter may
+    // fire synchronously during player.load(). Register the listener first.
+    const regionEnterPromise = new Promise((resolve) => {
+      eventManager.listenOnce(player, 'timelineregionenter', resolve);
+    });
+
+    const streamUri =
+        '/base/test/test/assets/dash-event-callback/dash.mpd';
+
+    await player.load(streamUri);
+    await video.play();
+
+    // Wait for the enter event (may already be resolved if it fired on load).
+    await waiter.timeoutAfter(10).failOnTimeout(true)
+        .waitForPromise(regionEnterPromise, 'timelineregionenter');
+
+    expect(capturedCallbackUrl).toBe('https://example.com/beacon/impression');
+
+    await player.unload();
+  });
+
+  it('appends RequestParam urlParams to EventStream callback URL', async () => {
+    const netEngine = player.getNetworkingEngine();
+
+    const EventCallbackType =
+        compiledShaka.net.NetworkingEngine.RequestType.EVENT_CALLBACK;
+
+    /** @type {?string} */
+    let capturedCallbackUrl = null;
+
+    netEngine.registerRequestFilter((type, request) => {
+      if (type == EventCallbackType) {
+        capturedCallbackUrl = request.uris[0];
+        // Redirect to an existing local resource so the request succeeds.
+        request.uris =
+            ['/base/test/test/assets/dash-svta-2053-2/init.mp4'];
+      }
+    });
+
+    const regionEnterPromise = new Promise((resolve) => {
+      eventManager.listenOnce(player, 'timelineregionenter', resolve);
+    });
+
+    const streamUri =
+        '/base/test/test/assets/dash-event-callback-urlparam/dash.mpd';
+
+    await player.load(streamUri);
+    await video.play();
+
+    await waiter.timeoutAfter(10).failOnTimeout(true)
+        .waitForPromise(regionEnterPromise, 'timelineregionenter');
+
+    expect(capturedCallbackUrl)
+        .toBe('https://example.com/beacon/impression?tok=abc');
+
+    await player.unload();
+  });
 });

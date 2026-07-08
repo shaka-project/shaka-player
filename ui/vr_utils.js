@@ -60,10 +60,60 @@ shaka.ui.VRUtils = class {
   }
 
   /**
+   * Generates a semi-sphere mesh with fisheye texture coordinates. The
+   * texture is expected to be a circular fisheye image centered on the
+   * frame, covering <code>fov</code> degrees with an equidistant mapping
+   * (the distance to the image center is proportional to the angle from
+   * the lens axis). This is the projection used by Apple Immersive Video
+   * (parametric immersive) and by regular fisheye content.
+   *
+   * @param {number} resolution
+   * @param {number} fov Field of view covered by the image, in degrees.
    * @return {{vertices: !Array<number>, textureCoords: !Array<number>,
    *          indices: !Array<number>}}
    */
-  static generateCube() {
+  static generateFisheye(resolution, fov) {
+    // Use the same geometry as the semi-sphere, and only remap the texture
+    // coordinates, so the winding order and the view boundaries keep
+    // working the same way.
+    const mesh = shaka.ui.VRUtils.generateSphere(
+        resolution, /* isSemiSphere= */ true);
+
+    const fovRadians = fov * Math.PI / 180;
+
+    /** @type {!Array<number>} */
+    const textureCoords = [];
+    for (let i = 0; i < mesh.vertices.length; i += 3) {
+      // In the vertex attribute layout the view direction is +X, up is +Y
+      // and right is +Z.
+      const forward = mesh.vertices[i];
+      const up = mesh.vertices[i + 1];
+      const right = mesh.vertices[i + 2];
+      // Angle between the vertex direction and the lens axis.
+      const alpha = Math.acos(Math.min(Math.max(forward, -1), 1));
+      const radial = Math.hypot(right, up);
+      let u = 0.5;
+      let v = 0.5;
+      if (radial > 1e-6) {
+        const r = alpha / fovRadians;
+        u = 0.5 + r * (right / radial);
+        v = 0.5 - r * (up / radial);
+      }
+      textureCoords.push(u, v);
+    }
+
+    return {vertices: mesh.vertices, textureCoords, indices: mesh.indices};
+  }
+
+  /**
+   * @param {number=} uInset Horizontal inset, in texture coordinates,
+   *   applied to every face so that filtering at the shared edges does not
+   *   sample the adjacent face of the atlas. Typically half a texel.
+   * @param {number=} vInset Vertical inset, see uInset.
+   * @return {{vertices: !Array<number>, textureCoords: !Array<number>,
+   *          indices: !Array<number>}}
+   */
+  static generateCube(uInset = 0, vInset = 0) {
     /** @type {!Array<number>} */
     const vertices = [
       //  order : left top back right bottom front
@@ -131,6 +181,24 @@ shaka.ui.VRUtils = class {
       2 / 3, 0.5,
       2 / 3, 1.0,
     ];
+    if (uInset > 0 || vInset > 0) {
+      // Pull the coordinates of each face (4 (u, v) pairs) towards the
+      // center of the face.
+      for (let face = 0; face < textureCoords.length; face += 8) {
+        let minU = 1;
+        let minV = 1;
+        for (let corner = 0; corner < 8; corner += 2) {
+          minU = Math.min(minU, textureCoords[face + corner]);
+          minV = Math.min(minV, textureCoords[face + corner + 1]);
+        }
+        for (let corner = 0; corner < 8; corner += 2) {
+          textureCoords[face + corner] +=
+              textureCoords[face + corner] == minU ? uInset : -uInset;
+          textureCoords[face + corner + 1] +=
+              textureCoords[face + corner + 1] == minV ? vInset : -vInset;
+        }
+      }
+    }
     /** @type {!Array<number>} */
     const indices = [
       // Front face
@@ -190,13 +258,56 @@ varying vec2 v_TexCoordinate;
 varying vec3 pass_position;
 uniform sampler2D uSampler;
 void main(void) {
-highp float xValue =
+ // Compute the longitude per fragment, instead of using the interpolated
+ // texture coordinate, to avoid needing texture wrapping at the seam.
+ // (REPEAT is not available for non-power-of-two video textures in WebGL1.)
+ highp float xValue =
       (PI + atan(pass_position.z, pass_position.x)) / (2.0 * PI);
- vec2 tc = vec2(xValue, v_TexCoordinate.t);
- tc = vec2(tc.x , tc.y);
-highp vec4 texelColor =
-      texture2D(uSampler, tc);
+ highp vec4 texelColor =
+      texture2D(uSampler, vec2(xValue, v_TexCoordinate.t));
+ gl_FragColor = vec4(texelColor.rgb, texelColor.a);
+}`;
+
+/**
+ * Semi-sphere (half equirectangular) fragment shader.
+ *
+ * @const {string}
+ */
+shaka.ui.VRUtils.FRAGMENT_SEMI_SPHERE_SHADER =
+`precision highp float;
+#define PI 3.141592653589793238462643383279
+#define HALF_PI 1.570796326794896619231321691639
+varying vec2 v_TexCoordinate;
+varying vec3 pass_position;
+uniform sampler2D uSampler;
+void main(void) {
+ // The semi-sphere only spans 180 degrees of longitude, so the whole
+ // texture width maps to half a turn of atan().
+ highp float xValue =
+      (HALF_PI + atan(pass_position.z, pass_position.x)) / PI;
+ highp vec4 texelColor =
+      texture2D(uSampler, vec2(xValue, v_TexCoordinate.t));
+ gl_FragColor = vec4(texelColor.rgb, texelColor.a);
+}`;
+
+/**
+ * Fisheye fragment shader.
+ *
+ * @const {string}
+ */
+shaka.ui.VRUtils.FRAGMENT_FISHEYE_SHADER =
+`precision highp float;
+varying vec2 v_TexCoordinate;
+varying vec3 pass_position;
+uniform sampler2D uSampler;
+void main(void) {
+ if (distance(v_TexCoordinate, vec2(0.5, 0.5)) > 0.5001) {
+  // There is no content outside of the image circle.
+  gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+ } else {
+  highp vec4 texelColor = texture2D(uSampler, v_TexCoordinate);
   gl_FragColor = vec4(texelColor.rgb, texelColor.a);
+ }
 }`;
 
 /**

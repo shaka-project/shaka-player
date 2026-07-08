@@ -16,7 +16,7 @@
 shaka.test.ManifestGenerator = class {
   /**
    * @param {function(!shaka.test.ManifestGenerator.Manifest)=} func
-   * @param {shakaNamespaceType=} compiledShaka
+   * @param {shaka=} compiledShaka
    * @return {shaka.extern.Manifest}
    */
   static generate(func, compiledShaka) {
@@ -71,9 +71,9 @@ shaka.test.ManifestGenerator = class {
 };
 
 shaka.test.ManifestGenerator.Manifest = class {
-  /** @param {shakaNamespaceType=} compiledShaka */
+  /** @param {shaka=} compiledShaka */
   constructor(compiledShaka) {
-    /** @private {shakaNamespaceType} */
+    /** @private {shaka} */
     this.shaka_ = compiledShaka || window['shaka'];
 
     /** @type {!Array<shaka.extern.Variant>} */
@@ -639,6 +639,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.isAudioMuxedInVideo = false;
       /** @type {?string} */
       this.baseOriginalId = null;
+      /** @type {boolean} */
+      this.isIframe = false;
     }
     /** @type {!Set<string>} */
     this.fullMimeTypes = new Set([shaka.util.MimeUtils.getFullType(

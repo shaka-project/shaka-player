@@ -992,6 +992,49 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     expect(onSegmentDownloaded).not.toHaveBeenCalled();
   });
 
+  it('infers a scheme for URIs without authority (e.g. offline:)', async () => {
+    const offlineScheme = makeResolveScheme('offline scheme');
+    shaka.net.NetworkingEngine.registerScheme('offline',
+        Util.spyFunc(offlineScheme));
+
+    fakeProtocol = 'https:';
+    await networkingEngine
+        .request(requestType, createRequest('offline:db/123'))
+        .promise;
+
+    expect(offlineScheme).toHaveBeenCalled();
+    expect(offlineScheme.calls.argsFor(0)[0]).toBe('offline:db/123');
+
+    shaka.net.NetworkingEngine.unregisterScheme('offline');
+    shaka.net.NetworkingEngine.registerScheme(
+        'offline', shaka.offline.OfflineScheme.plugin);
+  });
+
+  it('stores and reuses CommonAccessToken by host', async () => {
+    const tokenHeaderName = networkingEngine.config_
+        .commonAccessTokenHeaderName;
+
+    resolveScheme.and.callFake(() => {
+      const response = createResponse();
+      response.uri = 'resolve://example.com/segment1';
+      response.headers[tokenHeaderName] = 'token-abc';
+      return shaka.util.AbortableOperation.completed(response);
+    });
+    await networkingEngine
+        .request(requestType, createRequest('resolve://example.com/segment1'))
+        .promise;
+
+    resolveScheme.and.callFake((uri, request) => {
+      expect(request.headers[tokenHeaderName]).toBe('token-abc');
+      return shaka.util.AbortableOperation.completed(createResponse());
+    });
+    await networkingEngine
+        .request(requestType, createRequest('resolve://example.com/segment2'))
+        .promise;
+
+    expect(resolveScheme).toHaveBeenCalledTimes(2);
+  });
+
   describe('\'retry\' event', () => {
     /** @type {shaka.extern.Request} */
     let request;

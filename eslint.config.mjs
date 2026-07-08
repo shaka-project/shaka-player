@@ -428,4 +428,24 @@ export default [
       'no-console': 'off',
     },
   },
+  {
+    // Verbatim ports of upstream @svta/cml-cmcd test utilities. These
+    // files mirror the upstream TS source (function expressions, 2-space
+    // indent, longer lines, XHR.prototype patching, etc.) so that future
+    // bumps stay mechanical. Shaka style rules don't apply.
+    files: ['test/test/util/cml-cmcd/**/*.js'],
+    rules: {
+      '@stylistic/arrow-parens': 'off',
+      '@stylistic/indent': 'off',
+      '@stylistic/max-len': 'off',
+      'consistent-return': 'off',
+      'jsdoc/require-jsdoc': 'off',
+      'jsdoc/require-param': 'off',
+      'jsdoc/require-returns': 'off',
+      'new-cap': 'off',
+      'no-restricted-syntax': 'off',
+      'no-useless-call': 'off',
+      'prefer-arrow-callback': 'off',
+    },
+  },
 ];

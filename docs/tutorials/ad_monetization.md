@@ -75,14 +75,51 @@ Shaka Player supports different types of interstitials:
 It is not necessary to do anything, Shaka Player supports it natively without
 any type of intervention.
 
+A few details worth knowing:
+
+- **Lazy asset list resolution.** When an interstitial references an asset list
+  (`X-ASSET-LIST`), Shaka Player resolves it lazily, i.e. only once playback
+  approaches the interstitial, instead of at playlist parse time. This avoids a
+  burst of concurrent ad-decision requests and keeps the decision close to
+  playback. How far ahead the asset list is resolved is controlled by the
+  `ads.interstitialPreloadAheadTime` configuration (10 seconds by default), or
+  per-interstitial by the mechanism below.
+- **Preload Date Range (RFC 8216bis Appendix F).** A
+  `CLASS="com.apple.hls.preload"` `EXT-X-DATERANGE` that targets another Date
+  Range (via `X-TARGET-ID`) advises the player how early that interstitial's
+  resources may be resolved. Shaka Player translates this into a
+  per-interstitial resolution offset.
+- **Date Range updates.** Subsequent `EXT-X-DATERANGE` tags that share the same
+  `ID` are consolidated: a later tag may add attributes that were not present
+  before, most notably `X-PLAYOUT-LIMIT`, which is commonly used to shorten an
+  interstitial and return to the main content early in live (SGAI) streams. As
+  required by the specification, attributes that already had a value are not
+  changed.
+- **Seeking into a live break.** For live streams with
+  `ads.allowStartInMiddleOfInterstitial` enabled, seeking back into an
+  interstitial that was already resolved re-requests its asset list with an
+  updated `_HLS_start_offset` reflecting the new playhead position.
+
 
 ##### DASH Media Presentation Insertion (MPD alternate)
 
 It is not necessary to do anything, Shaka Player supports it natively without
 any type of intervention.
 
+The `earliestResolutionTimeOffset` attribute of `InsertPresentation` /
+`ReplacePresentation` is honored: it controls how early (in seconds before the
+interstitial's presentation time) the alternative MPD may be resolved. When it
+is absent, the `ads.interstitialPreloadAheadTime` configuration value is used.
+
 
 ##### Custom Interstitials
+
+The interstitial object accepts an optional `resolutionTimeOffset` property
+(in seconds). It is the offset before `startTime` at which the interstitial's
+resources may be resolved and preloaded, mirroring the DASH
+`earliestResolutionTimeOffset` attribute and the HLS preload Date Range. When it
+is omitted (`undefined`) or `0`, the `ads.interstitialPreloadAheadTime`
+configuration value is used instead. All the examples below omit it for brevity.
 
 Example:
 

@@ -10,6 +10,7 @@ goog.provide('shaka.ui.Utils');
 goog.require('goog.asserts');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
+goog.require('shaka.util.Dom');
 goog.require('shaka.util.Mp4Parser');
 goog.requireType('shaka.util.EventManager');
 
@@ -60,6 +61,25 @@ shaka.ui.Utils = class {
     if (chosenItem) {
       chosenItem.parentElement.focus();
     }
+  }
+
+
+  /**
+   * Clears out a submenu, preserving its "back to overflow menu" button so
+   * the submenu can be rebuilt from scratch.
+   *
+   * @param {!HTMLElement} menu
+   */
+  static clearMenuKeepingBackButton(menu) {
+    // 1. Save the back to menu button.
+    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
+        menu, 'shaka-back-to-overflow-button');
+
+    // 2. Remove everything.
+    shaka.util.Dom.removeAllChildren(menu);
+
+    // 3. Add the back-to-menu button back.
+    menu.appendChild(backButton);
   }
 
 
@@ -141,6 +161,19 @@ shaka.ui.Utils = class {
       }
     }
     return text;
+  }
+
+
+  /**
+   * Marks a menu item as selected or unselected by toggling the ARIA state
+   * and the visual indicator class atomically.
+   * @param {!HTMLElement} button
+   * @param {!HTMLElement} chosenItemElement
+   * @param {boolean=} chosen
+   */
+  static setChosenItem(button, chosenItemElement, chosen = true) {
+    button.setAttribute('aria-checked', chosen ? 'true' : 'false');
+    chosenItemElement.classList.toggle('shaka-chosen-item', chosen);
   }
 
 

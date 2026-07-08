@@ -268,8 +268,7 @@ shaka.ui.Overlay = class {
       'play_pause',
       'skip_previous',
       'skip_next',
-      'mute',
-      'volume',
+      'mute_volume',
       'time_and_duration',
       'spacer',
       'queue',
@@ -445,6 +444,7 @@ shaka.ui.Overlay = class {
       allowTogglePresentationTime: true,
       showRemainingTimeInPresentationTime: false,
       enableVrDeviceMotion: true,
+      enableVrWheelZoom: false,
       showUIAlways: false,
       showUIAlwaysOnAudioOnly: true,
       preferIntlDisplayNames: true,
@@ -491,11 +491,15 @@ shaka.ui.Overlay = class {
       config.enableFullscreenOnRotation = device.getBrowserEngine() !==
           shaka.device.IDevice.BrowserEngine.WEBKIT;
       config.forceLandscapeOnFullscreen = true;
+      // On mobile, keep the mute button but hide the volume slider by
+      // replacing the composite mute_volume element with a standalone mute
+      // button.
+      config.controlPanelElements = config.controlPanelElements.map(
+          (name) => name === 'mute_volume' ? 'mute' : name);
       const filterElements = [
         'play_pause',
         'skip_previous',
         'skip_next',
-        'volume',
       ];
       config.controlPanelElements = config.controlPanelElements.filter(
           (name) => !filterElements.includes(name));
@@ -522,11 +526,15 @@ shaka.ui.Overlay = class {
       config.singleClickForPlayAndPause = false;
       config.enableTooltips = false;
       config.doubleClickForFullscreen = false;
+      // Smart TVs adjust volume with the remote, so replace the composite
+      // mute_volume element (mute button + volume slider) with a standalone
+      // mute button: keep the mute control but hide the volume slider.
+      config.controlPanelElements = config.controlPanelElements.map(
+          (name) => name === 'mute_volume' ? 'mute' : name);
       const filterElements = [
         'play_pause',
         'cast',
         'remote',
-        'volume',
         'save_video_frame',
       ];
       config.controlPanelElements = config.controlPanelElements.filter(

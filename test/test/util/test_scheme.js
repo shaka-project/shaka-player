@@ -170,7 +170,7 @@ shaka.test.TestScheme = class {
 
   /**
    * Creates the manifests and generators.
-   * @param {shakaNamespaceType} compiledShaka
+   * @param {shaka} compiledShaka
    * @param {string} suffix
    * @return {!Promise}
    */
@@ -263,18 +263,6 @@ shaka.test.TestScheme = class {
       if (data.customizeStream) {
         data.customizeStream(stream);
       }
-    }
-
-    /**
-     * @param {MetadataType} data
-     * @return {string}
-     */
-    function getAbsoluteUri(data) {
-      // This seems to be necessary.  Otherwise, we end up with an URL like
-      // "http:/base/..." which then fails to load on Safari for some reason.
-      const locationUri = new goog.Uri(location.href);
-      const partialUri = new goog.Uri(data.text.uri);
-      return locationUri.resolve(partialUri).toString();
     }
 
     const promises = [];
@@ -378,7 +366,8 @@ shaka.test.TestScheme = class {
             manifest.addTextStream(nextId++, (stream) => {
               stream.mimeType = data.text.mimeType;
               stream.codecs = data.text.codecs || '';
-              stream.textStream(getAbsoluteUri(data));
+              stream.textStream(
+                  shaka.util.URL.resolve(location.href, data.text.uri));
 
               if (lang) {
                 stream.language = lang;

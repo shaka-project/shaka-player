@@ -188,15 +188,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
   /** @private */
   updateSelection_() {
     // Remove old shaka-resolutions
-    // 1. Save the back to menu button
-    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
-        this.menu, 'shaka-back-to-overflow-button');
-
-    // 2. Remove everything
-    shaka.util.Dom.removeAllChildren(this.menu);
-
-    // 3. Add the backTo Menu button back
-    this.menu.appendChild(backButton);
+    shaka.ui.Utils.clearMenuKeepingBackButton(this.menu);
 
     // Add new ones
     let numberOfTracks = 0;
@@ -226,10 +218,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     // If abr is enabled reflect it by marking 'Auto' as selected.
     if (this.player.getConfiguration().abr.enabled) {
-      autoButton.setAttribute('aria-checked', 'true');
       autoButton.appendChild(shaka.ui.Utils.checkmarkIcon());
-
-      this.abrOnSpan_.classList.add('shaka-chosen-item');
+      shaka.ui.Utils.setChosenItem(autoButton, this.abrOnSpan_);
 
       this.currentSelection.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
@@ -330,9 +320,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
       if (!abrEnabled && track == selectedTrack) {
         // If abr is disabled, mark the selected track's resolution.
-        button.setAttribute('aria-checked', 'true');
         button.appendChild(shaka.ui.Utils.checkmarkIcon());
-        span.classList.add('shaka-chosen-item');
+        shaka.ui.Utils.setChosenItem(button, span);
         this.currentSelection.textContent = span.textContent;
       }
       this.menu.appendChild(button);
@@ -357,6 +346,13 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           !ArrayUtils.hasSameElements(selectedTrack.roles, track.roles)) {
         return false;
       }
+      // If the same role has multiple video languages/labels (e.g. multiple
+      // sign-language video tracks), only offer resolutions for the
+      // language that is currently selected.
+      if (selectedTrack && (selectedTrack.language != track.language ||
+          selectedTrack.label != track.label)) {
+        return false;
+      }
       // Keep the first one with the same height and framerate or bandwidth.
       const otherIdx = tracks.findIndex((t) => {
         let ret = t.height == track.height &&
@@ -364,6 +360,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
             t.frameRate == track.frameRate &&
             t.hdr == track.hdr &&
             t.videoLayout == track.videoLayout &&
+            t.language == track.language &&
+            t.label == track.label &&
             shaka.util.ArrayUtils.hasSameElements(t.roles, track.roles);
         if (ret && this.controls.getConfig().showVideoCodec &&
             t.codecs && track.codecs) {
@@ -424,9 +422,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
       if (!abrEnabled && track == selectedTrack) {
         // If abr is disabled, mark the selected track's resolution.
-        button.setAttribute('aria-checked', 'true');
         button.appendChild(shaka.ui.Utils.checkmarkIcon());
-        span.classList.add('shaka-chosen-item');
+        shaka.ui.Utils.setChosenItem(button, span);
         this.currentSelection.textContent = span.textContent;
       }
       this.menu.appendChild(button);

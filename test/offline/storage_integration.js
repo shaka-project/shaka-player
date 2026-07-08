@@ -1375,6 +1375,8 @@ filterDescribe('Storage', storageSupport, () => {
       bandwidth: bandwidth,
       language: language,
       originalLanguage: language,
+      audioLanguage: language,
+      videoLanguage: null,
       label: null,
       videoLabel: null,
       kind: null,
@@ -1426,6 +1428,8 @@ filterDescribe('Storage', storageSupport, () => {
       bandwidth: 1000,
       language: language,
       originalLanguage: language,
+      audioLanguage: null,
+      videoLanguage: null,
       label: null,
       videoLabel: null,
       kind: null,
@@ -1845,14 +1849,14 @@ filterDescribe('Storage', storageSupport, () => {
    * @param {string} uri
    * @param {number} startTime
    * @param {number} endTime
-   * @param {shakaNamespaceType=} compiledShaka
+   * @param {shaka=} compiledShaka
    * @return {shaka.media.SegmentReference}
    */
   function makeReference(uri, startTime, endTime, compiledShaka) {
-    /** @type {shakaNamespaceType} */
-    const shaka = compiledShaka || window['shaka'];
+    /** @type {shaka} */
+    const shakaNamespace = compiledShaka || window['shaka'];
 
-    return new shaka.media.SegmentReference(
+    return new shakaNamespace.media.SegmentReference(
         startTime,
         endTime,
         /* getUris= */ () => [uri],
