@@ -34,11 +34,6 @@ describe('HlsParser', () => {
     player = new compiledShaka.Player();
     await player.attach(video);
 
-    // Disable stall detection, which can interfere with playback tests.
-    player.configure('streaming.stallEnabled', false);
-    // Disable gapPadding, which can interfere with playback tests.
-    player.configure('streaming.gapPadding', 0);
-
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
