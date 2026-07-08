@@ -127,7 +127,6 @@ describe('DrmEngine', () => {
           onEvent: () => {},
           onManifestUpdate: () => {},
           getDrmInfo: () => null,
-          getPlaybackRate: () => 1,
         },
         mediaSourceConfig);
 

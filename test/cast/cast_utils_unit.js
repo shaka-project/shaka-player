@@ -298,7 +298,6 @@ describe('CastUtils', () => {
               onEvent: () => {},
               onManifestUpdate: () => {},
               getDrmInfo: () => null,
-              getPlaybackRate: () => 1,
             },
             config);
 
