@@ -698,6 +698,35 @@ describe('TextEngine', () => {
     });
   });
 
+  describe('bufferedBehindOf', () => {
+    beforeEach(() => {
+      mockParseMedia.and.callFake(() => {
+        return [createFakeCue(0, 1), createFakeCue(1, 2), createFakeCue(2, 3)];
+      });
+    });
+
+    it('returns 0 when there are no cues', () => {
+      expect(textEngine.bufferedBehindOf(3)).toBe(0);
+    });
+
+    it('returns 0 if |t| is before the buffer', async () => {
+      await textEngine.appendBuffer(dummyData, 3, 6);
+      expect(textEngine.bufferedBehindOf(2.9)).toBe(0);
+    });
+
+    it('ignores gaps in the content', async () => {
+      await textEngine.appendBuffer(dummyData, 3, 6);
+      expect(textEngine.bufferedBehindOf(9)).toBe(3);
+    });
+
+    it('returns the distance from the start if |t| is buffered', async () => {
+      await textEngine.appendBuffer(dummyData, 0, 3);
+      expect(textEngine.bufferedBehindOf(3)).toBe(3);
+      expect(textEngine.bufferedBehindOf(2)).toBe(2);
+      expect(textEngine.bufferedBehindOf(0.5)).toBeCloseTo(0.5);
+    });
+  });
+
   describe('setAppendWindow', () => {
     beforeEach(() => {
       mockParseMedia.and.callFake(() => {
