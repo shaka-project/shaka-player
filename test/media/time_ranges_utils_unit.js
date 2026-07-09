@@ -81,6 +81,42 @@ describe('TimeRangesUtils', () => {
     }
   });
 
+  describe('bufferedBehindOf', () => {
+    it('still works when passed null', () => {
+      expect(TimeRangesUtils.bufferedBehindOf(null, 10)).toBe(0);
+    });
+
+    it('still works when nothing is buffered', () => {
+      const b = createFakeBuffered([]);
+      expect(TimeRangesUtils.bufferedBehindOf(b, 10)).toBe(0);
+    });
+
+
+    // Ranges: [10-20], [30-40], [50-60]
+    defineTest('returns 0 before first range', {time: 5, expected: 0});
+    defineTest(
+        'gives partial amount for first range', {time: 15, expected: 5});
+    defineTest('skips over first gap', {time: 25, expected: 10});
+    defineTest(
+        'gives partial amount for middle range', {time: 35, expected: 15});
+    defineTest('skips over last gap', {time: 45, expected: 20});
+    defineTest('gives partial amount for last range', {time: 55, expected: 25});
+    defineTest('returns total when past end', {time: 65, expected: 30});
+
+    /**
+     * @param {string} name
+     * @param {{time: number, expected: number}} data
+     */
+    function defineTest(name, data) {
+      it(name, () => {
+        const b = createFakeBuffered(
+            [{start: 10, end: 20}, {start: 30, end: 40}, {start: 50, end: 60}]);
+        expect(TimeRangesUtils.bufferedBehindOf(
+            b, data.time)).toBe(data.expected);
+      });
+    }
+  });
+
   describe('getGapIndex', () => {
     it('still works when passed null', () => {
       expect(TimeRangesUtils.getGapIndex(null, 10, 0.1)).toBe(null);
