@@ -1844,7 +1844,7 @@ describe('VttTextParser', () => {
     const error = shaka.test.Util.jasmineError(shakaError);
     const data =
         shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
-    expect(() => 
+    expect(() =>
       new shaka.text.VttTextParser().parseMedia(data, time, null, []))
         .toThrow(error);
   }
