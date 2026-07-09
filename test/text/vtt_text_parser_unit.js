@@ -1811,7 +1811,7 @@ describe('VttTextParser', () => {
       parser.setManifestType(shaka.media.ManifestParser.HLS);
     }
 
-    const result = parser.parseMedia(data, time);
+    const result = parser.parseMedia(data, time, null, []);
 
     const checkCue = (cue) => {
       if (cue.nestedCues) {
@@ -1844,7 +1844,8 @@ describe('VttTextParser', () => {
     const error = shaka.test.Util.jasmineError(shakaError);
     const data =
         shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
-    expect(() => new shaka.text.VttTextParser().parseMedia(data, time))
+    expect(() => 
+      new shaka.text.VttTextParser().parseMedia(data, time, null, []))
         .toThrow(error);
   }
 });
