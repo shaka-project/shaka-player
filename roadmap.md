@@ -15,10 +15,30 @@ Candidate features for future release cycles:
 v6.0
  - Conversion to Typescript (Smaller, more modular binary)
 
-v5.2 - 2026 Q3
+v5.2 - 2026 Q4
  - TBD
 
 =====
+
+v5.2 - 2026 Q3
+ - Metadata extraction support for `src=` playback
+   https://github.com/shaka-project/shaka-player/issues/10112
+ - Transmuxing moved to a worker thread (performance & main-thread improvements)
+   https://github.com/shaka-project/shaka-player/issues/9914
+ - HLS: Disable sequence mode by default
+   https://github.com/shaka-project/shaka-player/issues/10325
+ - Support ClearKey playback in Safari through WebCrypto
+   https://github.com/shaka-project/shaka-player/issues/10180
+ - DASH: Resolve Linked Periods via ImportedMPD (DASH 6th ed.)
+   https://github.com/shaka-project/shaka-player/issues/10221
+ - DASH: Unified URL parameter handling (urlparam:2016 / urlparam:2025)
+   https://github.com/shaka-project/shaka-player/issues/10282
+ - Queue: M3U playlist loading support
+   https://github.com/shaka-project/shaka-player/issues/10115
+ - UI: Modern CSS theme support using CSS custom properties
+   https://github.com/shaka-project/shaka-player/issues/10152
+ - UI: VR improvements, including fisheye projection for Apple Immersive Video
+   https://github.com/shaka-project/shaka-player/issues/10310
 
 v5.1 - 2026 Q2
  - DASH: JSON manifest support (experimental build)
