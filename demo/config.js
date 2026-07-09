@@ -836,7 +836,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Uses source elements',
             'mediaSource.useSourceElements')
         .addBoolInput_('Expect updateEnd when duration is truncated',
-            'mediaSource.durationReductionEmitsUpdateEnd');
+            'mediaSource.durationReductionEmitsUpdateEnd')
+        .addBoolInput_('Repair I-Frames segments',
+            'mediaSource.repairIFrames');
 
     const transmuxWorkerToggleOnChange = (input) => {
       const url = input.checked ?
@@ -1098,6 +1100,7 @@ shakaDemo.Config = class {
     this.addPreferenceList_(configKey, () => ({
       label: '',
       role: '',
+      language: '',
       codec: '',
       hdrLevel: 'AUTO',
       layout: '',
@@ -1106,6 +1109,8 @@ shakaDemo.Config = class {
           (v) => makeChange(index, 'label', v));
       this.addPrefTextField_(container, 'Role', entry['role'] || '',
           (v) => makeChange(index, 'role', v));
+      this.addPrefTextField_(container, 'Language', entry['language'] || '',
+          (v) => makeChange(index, 'language', v));
       this.addPrefTextField_(container, 'Codec', entry['codec'] || '',
           (v) => makeChange(index, 'codec', v));
       this.addPrefSelectField_(container, 'HDR Level', hdrLevelNames,
@@ -1138,11 +1143,13 @@ shakaDemo.Config = class {
     const vrProjectionModeOptions = {
       'equirectangular': 'equirectangular',
       'halfequirectangular': 'halfequirectangular',
+      'fisheye': 'fisheye',
       'cubemap': 'cubemap',
     };
     const vrProjectionModeNames = {
       'equirectangular': 'Equirectangular',
       'halfequirectangular': 'Half Equirectangular',
+      'fisheye': 'Fisheye',
       'cubemap': 'Cubemap',
     };
 
@@ -1213,6 +1220,7 @@ shakaDemo.Config = class {
             vrProjectionModeOptions,
             vrProjectionModeNames)
         .addUIBoolInput_('Enable VR Device Motion', 'enableVrDeviceMotion')
+        .addUIBoolInput_('Enable VR Wheel Zoom', 'enableVrWheelZoom')
         .addUIBoolInput_('Prefer Video Fullscreen In VisionOS',
             'preferVideoFullScreenInVisionOS')
         .addUIBoolInput_('Cast Android Receiver Compatible',

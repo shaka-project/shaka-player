@@ -2392,7 +2392,8 @@ shaka.extern.NetworkingConfiguration;
  *   dispatchAllEmsgBoxes: boolean,
  *   useSourceElements: boolean,
  *   durationReductionEmitsUpdateEnd: boolean,
- *   transmuxWorkerUrl: string
+ *   transmuxWorkerUrl: string,
+ *   repairIFrames: boolean,
  * }}
  *
  * @description
@@ -2473,6 +2474,13 @@ shaka.extern.NetworkingConfiguration;
  *   worker fails to load or the device does not support Workers.
  *   <br>
  *   Defaults to <code>''</code> (worker disabled).
+ * @property {boolean} repairIFrames
+ *   Some I-frame only stream clip the media segment byte range without
+ *   rewriting the moof/mdat, leaving the fragment declaring more samples than
+ *   it actually contains.  Repair those before appending.
+ *   Note: this is allowed by HLS spec.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;
@@ -3150,6 +3158,7 @@ shaka.extern.TextPreference;
  * @typedef {{
  *   label: string,
  *   role: string,
+ *   language: string,
  *   codec: string,
  *   hdrLevel: string,
  *   layout: string
@@ -3161,6 +3170,13 @@ shaka.extern.TextPreference;
  *   Defaults to <code>''</code>.
  * @property {string} role
  *   The preferred role for video tracks.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {string} language
+ *   The preferred language for video tracks, e.g. <code>'sgn-US'</code> for
+ *   American Sign Language. Used to disambiguate video tracks that share the
+ *   same role but differ in language (for example, multiple sign-language
+ *   video tracks). An IETF language tag like 'en', 'en-US', 'sgn-NL', etc.
  *   <br>
  *   Defaults to <code>''</code>.
  * @property {string} codec

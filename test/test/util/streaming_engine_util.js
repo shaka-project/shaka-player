@@ -232,9 +232,9 @@ shaka.test.StreamingEngineUtil = class {
      * @return {shaka.media.SegmentReference} A SegmentReference.
      */
     const get = (type, position, mimeType, codecs, altAudioVariant = false) => {
-      if (position > 50) {
-        // Terminate so it doesn't go on forever when iterating over the
-        // references.
+      if (position < 0 || position > 50) {
+        // Out of range below the first segment, or terminate so it doesn't go
+        // on forever when iterating over the references.
         return null;
       }
 
@@ -543,6 +543,7 @@ shaka.test.StreamingEngineUtil = class {
           mimeType, codecs)]),
       isAudioMuxedInVideo: false,
       baseOriginalId: null,
+      isIframe: false,
     };
   }
 
@@ -593,6 +594,7 @@ shaka.test.StreamingEngineUtil = class {
           mimeType, codecs)]),
       isAudioMuxedInVideo: false,
       baseOriginalId: null,
+      isIframe: false,
     };
   }
 
@@ -641,6 +643,7 @@ shaka.test.StreamingEngineUtil = class {
           mimeType, codecs)]),
       isAudioMuxedInVideo: false,
       baseOriginalId: null,
+      isIframe: false,
     };
   }
 };

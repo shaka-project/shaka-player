@@ -1172,6 +1172,7 @@ shakaDemo.Main = class {
             ({
               role: '',
               label: '',
+              language: '',
               codec,
               hdrLevel: 'AUTO',
               layout: '',

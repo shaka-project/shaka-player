@@ -105,10 +105,7 @@ shaka.ui.TextStyleMenu = class extends shaka.ui.SettingsMenu {
    * @protected
    */
   rebuildMenu() {
-    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
-        this.menu, 'shaka-back-to-overflow-button');
-    shaka.util.Dom.removeAllChildren(this.menu);
-    this.menu.appendChild(backButton);
+    shaka.ui.Utils.clearMenuKeepingBackButton(this.menu);
 
     for (const item of this.getItems()) {
       const button = shaka.util.Dom.createButton();

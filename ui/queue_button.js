@@ -87,15 +87,7 @@ shaka.ui.QueueButton = class extends shaka.ui.SettingsMenu {
    * @private
    */
   updateQueueItems_() {
-    // 1. Save the back to menu button
-    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
-        this.menu, 'shaka-back-to-overflow-button');
-
-    // 2. Remove everything
-    shaka.util.Dom.removeAllChildren(this.menu);
-
-    // 3. Add the backTo Menu button back
-    this.menu.appendChild(backButton);
+    shaka.ui.Utils.clearMenuKeepingBackButton(this.menu);
 
     const displayableItems = this.getDisplayableItems_();
 

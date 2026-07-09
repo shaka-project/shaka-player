@@ -609,6 +609,80 @@ describe('StreamingEngine', () => {
     netEngine.expectRequest('1_text_3', segmentType, segmentContext);
   });
 
+  it('fetches segments behind the playhead when playing in reverse',
+      async () => {
+        setupVod();
+        mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+        createStreamingEngine();
+
+        // Play in reverse, starting near the end of the presentation.
+        getPlaybackRate.and.returnValue(-1);
+        presentationTimeInSeconds = 35;
+
+        streamingEngine.switchVariant(variant);
+        streamingEngine.switchTextStream(textStream);
+        await streamingEngine.start();
+
+        // Move the playhead backwards over time, the way the PlayRateController
+        // would for a negative playback rate.  |playing| stays false so that
+        // runTest() does not advance the playhead forward on its own.
+        await runTest(() => {
+          presentationTimeInSeconds =
+              Math.max(0, presentationTimeInSeconds - 1);
+        });
+
+        // The engine should have fetched every segment behind the initial
+        // playhead position, all the way back to the start of the
+        // presentation, instead of stalling once the (forward) buffering goal
+        // appeared to be met.
+        expect(mediaSourceEngine.segments).toEqual({
+          audio: [true, true, true, true],
+          video: [true, true, true, true],
+          text: [true, true, true, true],
+        });
+
+        // The buffering goal must be evaluated against the content buffered
+        // *behind* the playhead when playing in reverse, not ahead of it.
+        expect(mediaSourceEngine.bufferedBehindOf).toHaveBeenCalled();
+        expect(mediaSourceEngine.bufferedAheadOf).not.toHaveBeenCalledWith(
+            ContentType.VIDEO, jasmine.any(Number));
+      });
+
+  it('resumes fetching behind the playhead when reverse is engaged after ' +
+      'buffering to the end of the presentation', async () => {
+    setupVod();
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    createStreamingEngine();
+
+    // Play forward from near the end so we buffer only the last segment and
+    // reach the end of the presentation, which stops the update loop
+    // (mediaState.endOfStream).  |playing| stays false so the playhead does not
+    // advance on its own.
+    presentationTimeInSeconds = 35;
+    streamingEngine.switchVariant(variant);
+    streamingEngine.switchTextStream(textStream);
+    await streamingEngine.start();
+    await runTest();
+
+    // Only the last segment is buffered and the update loop has stopped.
+    expect(mediaSourceEngine.segments[ContentType.VIDEO])
+        .toEqual([false, false, false, true]);
+
+    // Engage reverse.  This must wake the stopped update loop so it resumes
+    // fetching the earlier segments *behind* the playhead; without that, the
+    // engine would stay idle (endOfStream) and never buffer them.
+    getPlaybackRate.and.returnValue(-1);
+    streamingEngine.setTrickPlay(true);
+
+    await runTest(() => {
+      presentationTimeInSeconds = Math.max(0, presentationTimeInSeconds - 1);
+    });
+
+    // Everything behind the initial playhead position is now buffered.
+    expect(mediaSourceEngine.segments[ContentType.VIDEO])
+        .toEqual([true, true, true, true]);
+  });
+
   it('does not wait for muxed audio to buffer', async () => {
     setupVod();
 

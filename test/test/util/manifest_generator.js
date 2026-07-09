@@ -639,6 +639,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.isAudioMuxedInVideo = false;
       /** @type {?string} */
       this.baseOriginalId = null;
+      /** @type {boolean} */
+      this.isIframe = false;
     }
     /** @type {!Set<string>} */
     this.fullMimeTypes = new Set([shaka.util.MimeUtils.getFullType(
