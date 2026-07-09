@@ -1233,6 +1233,327 @@ describe('HlsParser live', () => {
             expect(createSegmentReferenceSpy).toHaveBeenCalledTimes(1);
           });
 
+      it('keeps playhead date accurate after a discontinuity leaves the window',
+          async () => {
+            // Corresponds to "2000-01-01T00:00:00.00Z" and one hour later.
+            const pdt0 = 946684800;
+            const pdt1 = pdt0 + 3600;
+
+            // Initial live window with a discontinuity that jumps the PDT
+            // forward by an hour.
+            const mediaWithDiscontinuity = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:0\n',
+              '#EXT-X-DISCONTINUITY-SEQUENCE:0\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main.mp4\n',
+              '#EXT-X-DISCONTINUITY\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+            ].join('');
+
+            // The window has slid forward: the pre-discontinuity segment and
+            // the discontinuity tag are gone.
+            const mediaAfterSlide = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:1\n',
+              '#EXT-X-DISCONTINUITY-SEQUENCE:1\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+            ].join('');
+
+            const manifest =
+                await testInitialManifest(master, mediaWithDiscontinuity);
+            const timeline = manifest.presentationTimeline;
+
+            // main2 (post-discontinuity) sits at presentation time 2.
+            expect(timeline.getProgramDateTimeForTime(2)).toBe(pdt1);
+
+            await testUpdate(manifest, mediaAfterSlide);
+
+            // Even though the discontinuity is no longer visible in the
+            // manifest, the date for main2 must still reflect the
+            // post-discontinuity PDT instead of reverting to extrapolating
+            // from the initial (pre-jump) program date time.
+            expect(timeline.getProgramDateTimeForTime(2)).toBe(pdt1);
+          });
+
+      it('stays continuous across two scrolled-out discontinuities',
+          async () => {
+            const hour = 3600;
+            const pdtA = 946684800; // 2000-01-01T00:00:00Z
+            const pdtB = pdtA + hour; // 01:00:00Z
+            const pdtC = pdtA + 2 * hour; // 02:00:00Z
+
+            // Three discontinuity sequences, each jumping the PDT forward by an
+            // hour.
+            const mediaInitial = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:0\n',
+              '#EXT-X-DISCONTINUITY-SEQUENCE:0\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main0.mp4\n',
+              '#EXT-X-DISCONTINUITY\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+              '#EXT-X-DISCONTINUITY\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T02:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main3.mp4\n',
+            ].join('');
+            // The first discontinuity has scrolled out, and a brand-new segment
+            // (main4) continues the last discontinuity sequence.
+            const mediaSlide = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:1\n',
+              '#EXT-X-DISCONTINUITY-SEQUENCE:1\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+              '#EXT-X-DISCONTINUITY\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T02:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main3.mp4\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T02:00:02.00Z\n',
+              '#EXTINF:2,\n',
+              'main4.mp4\n',
+            ].join('');
+
+            const manifest = await testInitialManifest(master, mediaInitial);
+            const timeline = manifest.presentationTimeline;
+            await testUpdate(manifest, mediaSlide);
+
+            const byUri = new Map();
+            const segmentIndex = /** @type {!shaka.media.SegmentIndex} */ (
+              manifest.variants[0].video.segmentIndex);
+            for (const ref of segmentIndex) {
+              if (ref) {
+                byUri.set(ref.getUris()[0], ref);
+              }
+            }
+            const main2 = byUri.get('test:/main2.mp4');
+            const main3 = byUri.get('test:/main3.mp4');
+            const main4 = byUri.get('test:/main4.mp4');
+
+            // The presentation timeline stays continuous - the new segment is
+            // not stranded far in the future by syncAgainst().
+            expect(main2.startTime).toBe(2);
+            expect(main3.startTime).toBe(4);
+            expect(main4.startTime).toBe(6);
+
+            // And each segment's date reflects its own PROGRAM-DATE-TIME.
+            expect(timeline.getProgramDateTimeForTime(main2.startTime))
+                .toBe(pdtB);
+            expect(timeline.getProgramDateTimeForTime(main3.startTime))
+                .toBe(pdtC);
+            expect(timeline.getProgramDateTimeForTime(main4.startTime))
+                .toBe(pdtC + 2);
+          });
+
+      it('keeps playhead date accurate after a disconnect', async () => {
+        const pdtA = 946684800; // 2000-01-01T00:00:00Z
+        const pdtB = pdtA + 3600; // 01:00:00Z
+
+        const mediaInitial = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXT-X-DISCONTINUITY-SEQUENCE:0\n',
+          '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+          '#EXTINF:2,\n',
+          'main.mp4\n',
+          '#EXT-X-DISCONTINUITY\n',
+          '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:00.00Z\n',
+          '#EXTINF:2,\n',
+          'main2.mp4\n',
+        ].join('');
+
+        // After a disconnect: the media sequence jumped past every position we
+        // know about, so the parser cannot chain the new segments to a cached
+        // position.  The availability-start estimate must not be used to
+        // derive the accumulated-gap correction; instead the gap in effect at
+        // the end of the known window carries over (a brief outage is unlikely
+        // to have crossed another discontinuity), which keeps the recovered
+        // segments media-continuous with the missed ones.
+        const mediaAfterDisconnect = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-MEDIA-SEQUENCE:5\n',
+          '#EXT-X-DISCONTINUITY-SEQUENCE:1\n',
+          '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:10.00Z\n',
+          '#EXTINF:2,\n',
+          'main3.mp4\n',
+          '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:12.00Z\n',
+          '#EXTINF:2,\n',
+          'main4.mp4\n',
+        ].join('');
+
+        const manifest = await testInitialManifest(master, mediaInitial);
+        const timeline = manifest.presentationTimeline;
+        await testUpdate(manifest, mediaAfterDisconnect);
+
+        const byUri = new Map();
+        const segmentIndex = /** @type {!shaka.media.SegmentIndex} */ (
+          manifest.variants[0].video.segmentIndex);
+        for (const ref of segmentIndex) {
+          if (ref) {
+            byUri.set(ref.getUris()[0], ref);
+          }
+        }
+        const main2 = byUri.get('test:/main2.mp4');
+        const main3 = byUri.get('test:/main3.mp4');
+        const main4 = byUri.get('test:/main4.mp4');
+
+        // main2 ended at 4 with PDT 01:00:02; main3's PDT is 01:00:10, i.e. 8
+        // seconds of media were missed during the outage.  Carrying over the
+        // last known discontinuity gap places main3 media-continuously at
+        // 4 + 8 = 12 (not pinned to the availability-start estimate, and not
+        // thrown to raw wall-clock position 3610).
+        expect(main3.startTime).toBe(12);
+        expect(main4.startTime).toBe(14);
+
+        // And every segment's date still reflects its own PROGRAM-DATE-TIME.
+        expect(timeline.getProgramDateTimeForTime(main2.startTime)).toBe(pdtB);
+        expect(timeline.getProgramDateTimeForTime(main3.startTime))
+            .toBe(pdtB + 10);
+        expect(timeline.getProgramDateTimeForTime(main4.startTime))
+            .toBe(pdtB + 12);
+      });
+
+      it('does not treat PROGRAM-DATE-TIME jitter as a discontinuity gap',
+          async () => {
+            const pdtA = 946684800; // 2000-01-01T00:00:00Z
+
+            // Real streams commonly have sub-second drift between EXTINF
+            // durations and PROGRAM-DATE-TIME deltas.  When such a segment is
+            // added on an update, the drift must not be picked up as an
+            // accumulated discontinuity gap.
+            const mediaInitial = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:0\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main.mp4\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:02.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+            ].join('');
+            // The new segment's PDT has drifted 0.1s from the EXTINF chain
+            // (main2 ends at 4, but the PDT says 4.1).
+            const mediaUpdated = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:0\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main.mp4\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:02.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:04.10Z\n',
+              '#EXTINF:2,\n',
+              'main3.mp4\n',
+            ].join('');
+
+            const manifest = await testInitialManifest(master, mediaInitial);
+            const timeline = manifest.presentationTimeline;
+            await testUpdate(manifest, mediaUpdated);
+
+            const byUri = new Map();
+            const segmentIndex = /** @type {!shaka.media.SegmentIndex} */ (
+              manifest.variants[0].video.segmentIndex);
+            for (const ref of segmentIndex) {
+              if (ref) {
+                byUri.set(ref.getUris()[0], ref);
+              }
+            }
+            const main3 = byUri.get('test:/main3.mp4');
+
+            // main3 follows its own PROGRAM-DATE-TIME (4.1s from the origin).
+            // If the jitter had been treated as a gap, it would land at 4
+            // (the previous segment's end time) instead.
+            expect(main3.startTime).toBeCloseTo(4.1, 5);
+            expect(timeline.getProgramDateTimeForTime(main3.startTime))
+                .toBeCloseTo(pdtA + 4.1, 5);
+          });
+
+      it('anchors a new post-discontinuity segment by its own PDT',
+          async () => {
+            const pdt0 = 946684800;
+            const pdt1 = pdt0 + 3600;
+
+            const mediaWithDiscontinuity = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:0\n',
+              '#EXT-X-DISCONTINUITY-SEQUENCE:0\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main.mp4\n',
+              '#EXT-X-DISCONTINUITY\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+            ].join('');
+
+            // main scrolled out; a brand-new post-discontinuity segment (main3)
+            // arrives while the discontinuity is no longer visible.
+            const mediaAfterSlide = [
+              '#EXTM3U\n',
+              '#EXT-X-TARGETDURATION:5\n',
+              '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+              '#EXT-X-MEDIA-SEQUENCE:1\n',
+              '#EXT-X-DISCONTINUITY-SEQUENCE:1\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:00.00Z\n',
+              '#EXTINF:2,\n',
+              'main2.mp4\n',
+              '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T01:00:02.00Z\n',
+              '#EXTINF:2,\n',
+              'main3.mp4\n',
+            ].join('');
+
+            const manifest =
+                await testInitialManifest(master, mediaWithDiscontinuity);
+            const timeline = manifest.presentationTimeline;
+
+            await testUpdate(manifest, mediaAfterSlide);
+
+            const segmentIndex = /** @type {!shaka.media.SegmentIndex} */ (
+              manifest.variants[0].video.segmentIndex);
+            let main3 = null;
+            for (const ref of segmentIndex) {
+              if (ref) {
+                main3 = ref;
+              }
+            }
+            // main3 stays on the continuous timeline (right after main2, which
+            // ends at 4) and its date reflects its own PROGRAM-DATE-TIME.
+            expect(main3.startTime).toBe(4);
+            expect(timeline.getProgramDateTimeForTime(main3.startTime))
+                .toBe(pdt1 + 2);
+            // main2 remains correct too.
+            expect(timeline.getProgramDateTimeForTime(2)).toBe(pdt1);
+          });
+
       it('falls back to full rebuild when anchor reference is unavailable',
           async () => {
             const createSegmentReferenceSpy =

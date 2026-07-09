@@ -4620,6 +4620,21 @@ describe('Player', () => {
       // (100 (program date time) + 20 (playhead time)) * 1000 (ms/sec)
       expect(liveTimeUtc).toEqual(new Date(120 * 1000));
     });
+
+    it('accounts for program date time across discontinuities', () => {
+      timeline.setInitialProgramDateTime(100);
+      // A discontinuity at presentation time 30 jumps the PDT forward by an
+      // extra 1000s relative to the continuous timeline.
+      timeline.setProgramDateTimeRegions([
+        {start: 0, pdt: 100},
+        {start: 30, pdt: 130 + 1000},
+      ]);
+      playhead.getTime.and.returnValue(40);
+
+      const liveTimeUtc = player.getPlayheadTimeAsDate();
+      // (1130 (region pdt) + 10 (offset within region)) * 1000 (ms/sec)
+      expect(liveTimeUtc).toEqual(new Date(1140 * 1000));
+    });
   });
 
   describe('getPresentationStartTimeAsDate()', () => {

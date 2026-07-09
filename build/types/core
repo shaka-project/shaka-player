@@ -47,6 +47,7 @@
 +../../lib/media/preference_based_criteria.js
 +../../lib/media/preload_manager.js
 +../../lib/media/presentation_timeline.js
++../../lib/media/program_date_time_observer.js
 +../../lib/media/quality_observer.js
 +../../lib/media/region_observer.js
 +../../lib/media/region_timeline.js
