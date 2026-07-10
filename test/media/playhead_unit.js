@@ -145,7 +145,6 @@ describe('Playhead', () => {
       chapterStreams: [],
       presentationTimeline: timeline,
       offlineSessionIds: [],
-      sequenceMode: false,
       ignoreManifestTimestampsInSegmentsMode: false,
       type: 'UNKNOWN',
       serviceDescription: null,

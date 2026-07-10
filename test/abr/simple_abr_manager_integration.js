@@ -198,7 +198,6 @@ describe('SimpleAbrManager (integration)', () => {
   function createMultiBitrateManifest(duration) {
     return shaka.test.ManifestGenerator.generate((m) => {
       m.presentationTimeline.setDuration(duration);
-      m.sequenceMode = false;
 
       let nextStreamId = 100;
       VARIANT_BANDWIDTHS.forEach((bw, i) => {
