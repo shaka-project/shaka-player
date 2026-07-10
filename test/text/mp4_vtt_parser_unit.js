@@ -72,7 +72,7 @@ describe('Mp4VttParser', () => {
       vttOffset: 0,
       isMpegTs: false,
     };
-    const result = parser.parseMedia(vttSegment, time);
+    const result = parser.parseMedia(vttSegment, time, null, []);
     verifyHelper(cues, result);
   });
 
@@ -106,7 +106,7 @@ describe('Mp4VttParser', () => {
       vttOffset: 0,
       isMpegTs: false,
     };
-    const result = parser.parseMedia(vttSegmentMultiPayload, time);
+    const result = parser.parseMedia(vttSegmentMultiPayload, time, null, []);
     verifyHelper(cues, result);
   });
 
@@ -140,7 +140,7 @@ describe('Mp4VttParser', () => {
       vttOffset: 0,
       isMpegTs: false,
     };
-    const result = parser.parseMedia(vttSegSettings, time);
+    const result = parser.parseMedia(vttSegSettings, time, null, []);
     verifyHelper(cues, result);
   });
 
@@ -168,7 +168,7 @@ describe('Mp4VttParser', () => {
       vttOffset: 0,
       isMpegTs: false,
     };
-    const result = parser.parseMedia(vttSegNoDuration, time);
+    const result = parser.parseMedia(vttSegNoDuration, time, null, []);
     verifyHelper(cues, result);
   });
 
@@ -196,7 +196,7 @@ describe('Mp4VttParser', () => {
       vttOffset: 10,
       isMpegTs: false,
     };
-    const result = parser.parseMedia(vttSegment, time);
+    const result = parser.parseMedia(vttSegment, time, null, []);
     verifyHelper(cues, result);
   });
 
@@ -210,7 +210,7 @@ describe('Mp4VttParser', () => {
       vttOffset: 0,
       isMpegTs: false,
     };
-    const result = parser.parseMedia(new Uint8Array(0), time);
+    const result = parser.parseMedia(new Uint8Array(0), time, null, []);
     verifyHelper([], result);
   });
 
