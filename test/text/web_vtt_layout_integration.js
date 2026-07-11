@@ -513,7 +513,7 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       isMpegTs: false,
     };
     const textParser = new shaka.text.VttTextParser();
-    const cues = textParser.parseMedia(data, time);
+    const cues = textParser.parseMedia(data, time, null, []);
     helper.textDisplayer.append(cues);
   }
 });
