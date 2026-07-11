@@ -10,7 +10,6 @@
     "demo/**/*.js",
     "test/**/*.js",
     "externs/**/*.js",
-    "src/**/*.js",
     "third_party/**/*.js",
     "conditional/**/*.js",
     "shaka-player.uncompiled.js",
