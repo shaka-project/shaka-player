@@ -306,9 +306,26 @@ class Build(object):
         '--entry_point=goog:shaka.transmuxer.AacTransmuxer',
         '--entry_point=goog:shaka.transmuxer.Ac3Transmuxer',
         '--entry_point=goog:shaka.transmuxer.Ec3Transmuxer',
+        '--entry_point=goog:shaka.transmuxer.LocTransmuxer',
         '--entry_point=goog:shaka.transmuxer.Mp3Transmuxer',
         '--entry_point=goog:shaka.transmuxer.MpegTsTransmuxer',
         '--entry_point=goog:shaka.transmuxer.TsTransmuxer',
+
+        # Each device plugin registers itself at load time (side effect). They
+        # must be entry points too, otherwise PRUNE drops them and
+        # DeviceFactory.getDevice() returns undefined inside the worker.
+        '--entry_point=goog:shaka.device.AppleBrowser',
+        '--entry_point=goog:shaka.device.Chromecast',
+        '--entry_point=goog:shaka.device.DefaultBrowser',
+        '--entry_point=goog:shaka.device.Hisense',
+        '--entry_point=goog:shaka.device.PlayStation',
+        '--entry_point=goog:shaka.device.TitanOS',
+        '--entry_point=goog:shaka.device.TiVoOS',
+        '--entry_point=goog:shaka.device.Tizen',
+        '--entry_point=goog:shaka.device.Vizio',
+        '--entry_point=goog:shaka.device.WebKitSTB',
+        '--entry_point=goog:shaka.device.WebOS',
+        '--entry_point=goog:shaka.device.Xbox',
     ]
 
     # Suppress type errors caused by dependency pruning; the main build
