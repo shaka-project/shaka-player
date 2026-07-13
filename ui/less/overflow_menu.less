@@ -38,6 +38,14 @@
   border-radius: 12px;
   max-height: 250px;
   min-width: 190px;
+
+  /* Never wider than the video container: the percentage resolves against
+   * the controls container, and the 40px accounts for the ~15px edge
+   * insets applied by the positioning logic in menu_base.js plus this
+   * menu's own padding.  On wide screens this never binds and menus keep
+   * their natural content-sized width; on narrow or portrait screens the
+   * menu shrinks instead of getting cut off at the screen edge. */
+  max-width: calc(100% - 40px);
   padding: 5px;
 
   /* The menus fade out with the other controls. */
