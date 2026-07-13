@@ -209,6 +209,7 @@ cssnano
 hbbtv
 Conax
 cvox
+dolbylaboratories
 expressjs
 Expressplay
 Eyevinn
@@ -510,6 +511,7 @@ xyzw
 # DASH
 dashif
 fontdownload
+isobmff
 isoff
 querypart
 startnumber
