@@ -421,30 +421,38 @@ describe('TransmuxerProxy', () => {
       beforeEach(() => jasmine.clock().install());
       afterEach(() => jasmine.clock().uninstall());
 
-      it('rejects on timeout when worker does not respond', async () => {
+      it('falls back to main thread when worker does not respond',
+          async () => {
+            const p = transmuxer.transmux(
+                fakeData, fakeStream, null, 10, 'video');
+
+            jasmine.clock().tick(30001);
+
+            // The pending call resolves via the inner transmuxer instead of
+            // rejecting, so playback can continue.
+            const result = await p;
+            expect(mockInner.transmux).toHaveBeenCalled();
+            expect(result).toEqual(jasmine.any(Uint8Array));
+          });
+
+      it('warns via alwaysWarn on timeout', async () => {
+        spyOn(shaka.log, 'alwaysWarn');
         const p = transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
-        const assertion = expectAsync(p).toBeRejectedWith(
-            jasmine.objectContaining({
-              code: shaka.util.Error.Code.TRANSMUXING_FAILED,
-            }));
 
         jasmine.clock().tick(30001);
-        await assertion;
+        await p;
+
+        expect(shaka.log.alwaysWarn).toHaveBeenCalled();
       });
 
-      it('falls back to main thread after timeout', async () => {
+      it('continues falling back to main thread after timeout', async () => {
         const p = transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
-        const assertion = expectAsync(p).toBeRejectedWith(
-            jasmine.objectContaining({
-              code: shaka.util.Error.Code.TRANSMUXING_FAILED,
-            }));
         jasmine.clock().tick(30001);
-        await assertion;
+        await p;
 
-        // mockInner.transmux returns a resolved promise, so this does not
-        // involve setTimeout and is safe to await with the clock still running.
+        // A subsequent call should go straight to the inner transmuxer.
         await transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
-        expect(mockInner.transmux).toHaveBeenCalled();
+        expect(mockInner.transmux).toHaveBeenCalledTimes(2);
       });
     });
 
