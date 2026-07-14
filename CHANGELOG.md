@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.2.1](https://github.com/shaka-project/shaka-player/compare/v5.2.0...v5.2.1) (2026-07-14)
+
+
+### Bug Fixes
+
+* Restore correct playhead position after MediaSource reload ([#10335](https://github.com/shaka-project/shaka-player/issues/10335)) ([97327d5](https://github.com/shaka-project/shaka-player/commit/97327d5dff98bdb81e96ae37f75c2663d75f05e9))
+* **Transmux:** Add device registration to the web worker ([#10348](https://github.com/shaka-project/shaka-player/issues/10348)) ([cc75dbc](https://github.com/shaka-project/shaka-player/commit/cc75dbcfc2efcdd2a8b47900efc963e2e725a07f))
+* **Transmux:** Fall back to main thread on worker transmux timeout ([#10349](https://github.com/shaka-project/shaka-player/issues/10349)) ([2add6a8](https://github.com/shaka-project/shaka-player/commit/2add6a803fb157e23163a10c26402a0216db139d))
+* **UI:** Fix thumbnail preview not scaling with player size ([#10333](https://github.com/shaka-project/shaka-player/issues/10333)) ([d865be8](https://github.com/shaka-project/shaka-player/commit/d865be81210905e60b75e0582f928ceec7ca9d3d))
+* **UI:** Prevent playback rate menu from being cut off on narrow screens ([#10343](https://github.com/shaka-project/shaka-player/issues/10343)) ([88d0519](https://github.com/shaka-project/shaka-player/commit/88d051955e6309d558b519745a115448ec935b28))
+* **UI:** Scope form element font inheritance to the player container ([#10353](https://github.com/shaka-project/shaka-player/issues/10353)) ([9aa04be](https://github.com/shaka-project/shaka-player/commit/9aa04be1505ab930694bbb004e3f845122ba4f59))
+
 ## [5.2.0](https://github.com/shaka-project/shaka-player/compare/v5.1.0...v5.2.0) (2026-07-10)
 
 
