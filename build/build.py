@@ -311,21 +311,11 @@ class Build(object):
         '--entry_point=goog:shaka.transmuxer.MpegTsTransmuxer',
         '--entry_point=goog:shaka.transmuxer.TsTransmuxer',
 
-        # Each device plugin registers itself at load time (side effect). They
-        # must be entry points too, otherwise PRUNE drops them and
-        # DeviceFactory.getDevice() returns undefined inside the worker.
-        '--entry_point=goog:shaka.device.AppleBrowser',
-        '--entry_point=goog:shaka.device.Chromecast',
-        '--entry_point=goog:shaka.device.DefaultBrowser',
-        '--entry_point=goog:shaka.device.Hisense',
-        '--entry_point=goog:shaka.device.PlayStation',
-        '--entry_point=goog:shaka.device.TitanOS',
-        '--entry_point=goog:shaka.device.TiVoOS',
-        '--entry_point=goog:shaka.device.Tizen',
-        '--entry_point=goog:shaka.device.Vizio',
-        '--entry_point=goog:shaka.device.WebKitSTB',
-        '--entry_point=goog:shaka.device.WebOS',
-        '--entry_point=goog:shaka.device.Xbox',
+        # Every device plugin self-registers at load time (side effect). The
+        # shaka.device.AllDevices aggregator requires them all, so a single entry
+        # point keeps them under PRUNE and DeviceFactory.getDevice() works in the
+        # worker.
+        '--entry_point=goog:shaka.device.AllDevices',
     ]
 
     # Suppress type errors caused by dependency pruning; the main build
