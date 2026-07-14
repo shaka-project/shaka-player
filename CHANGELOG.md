@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.1.14](https://github.com/shaka-project/shaka-player/compare/v5.1.13...v5.1.14) (2026-07-14)
+
+
+### Bug Fixes
+
+* Restore correct playhead position after MediaSource reload ([#10335](https://github.com/shaka-project/shaka-player/issues/10335)) ([827fad6](https://github.com/shaka-project/shaka-player/commit/827fad64f38fe24a315f344b8c61e4d30640a20d))
+* Retry the stall-breaking action when a stall persists ([#10327](https://github.com/shaka-project/shaka-player/issues/10327)) ([374966b](https://github.com/shaka-project/shaka-player/commit/374966b5c312f1575aebdb370b5e91e4bdf37d20))
+* Support negative playback rate (reverse trick play) correctly ([#10323](https://github.com/shaka-project/shaka-player/issues/10323)) ([f151b1c](https://github.com/shaka-project/shaka-player/commit/f151b1ca1c1be34932ce32dcc47aad5f8acbd929))
+* **TS:** Fix timestamps when a segment straddles the 33-bit PTS/DTS rollover ([#10324](https://github.com/shaka-project/shaka-player/issues/10324)) ([c64ee0f](https://github.com/shaka-project/shaka-player/commit/c64ee0f3f554f5c9e23b5f9e2d7a3b5a7af520b4))
+
 ## [5.1.13](https://github.com/shaka-project/shaka-player/compare/v5.1.12...v5.1.13) (2026-07-06)
 
 
