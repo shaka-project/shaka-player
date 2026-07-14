@@ -44,7 +44,7 @@ jobs:
       is_latest: ${{ steps.compute.outputs.is_latest }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: refs/tags/${{ needs.release.outputs.tag_name }}
           persist-credentials: false
@@ -77,7 +77,7 @@ jobs:
     needs: release
     if: needs.release.outputs.release_created && needs.release.outputs.patch != '0'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Check out the origin repo, and do it at main, not the PR branch.
           ref: main
@@ -109,19 +109,19 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: refs/tags/${{ needs.release.outputs.tag_name }}
           persist-credentials: false
           # Needed to view all tags and correctly compute the latest tag.
           fetch-depth: 0
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: zulu
           java-version: 21
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           # NOTE: OIDC fails with node less than 24.
           node-version: 24
@@ -199,7 +199,7 @@ jobs:
     if: needs.compute-latest.outputs.is_latest == 'true'
     steps:
       - name: Check out source repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # Check out the source repo at the release tag.
           ref: refs/tags/${{ needs.release.outputs.tag_name }}
@@ -208,12 +208,12 @@ jobs:
           # No credentials.
           persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: zulu
           java-version: 21
@@ -262,7 +262,7 @@ jobs:
     needs: release
     if: needs.release.outputs.release_created && needs.release.outputs.patch == '0'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: refs/tags/${{ needs.release.outputs.tag_name }}
           fetch-depth: 0
