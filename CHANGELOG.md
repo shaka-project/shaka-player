@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.15.52](https://github.com/shaka-project/shaka-player/compare/v4.15.51...v4.15.52) (2026-07-14)
+
+
+### Bug Fixes
+
+* Retry the stall-breaking action when a stall persists ([#10327](https://github.com/shaka-project/shaka-player/issues/10327)) ([9465674](https://github.com/shaka-project/shaka-player/commit/9465674eae666d84c0e5661d1321a2d7ea75a8c7))
+* **TS:** Fix timestamps when a segment straddles the 33-bit PTS/DTS rollover ([#10324](https://github.com/shaka-project/shaka-player/issues/10324)) ([1c6cc79](https://github.com/shaka-project/shaka-player/commit/1c6cc79350775c619b41a9f864cd26fd6ce70dbb))
+
 ## [4.15.51](https://github.com/shaka-project/shaka-player/compare/v4.15.50...v4.15.51) (2026-07-06)
 
 
