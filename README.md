@@ -398,6 +398,8 @@ VR modes supported:
 - Equirectangular projection with 360 degrees of horizontal field of view.
 - Half equirectangular projection with 180 degrees of horizontal field of view.
 - Cubemap projection with 360 degrees of horizontal field of view.
+- Fisheye projection, used for regular fisheye content, parametric immersive
+  (`prim`) content, and Apple Immersive Video (`aiv`).
 
 NOTES:
   - VR is only supported for clear streams or HLS-AES stream. DRM prevents
