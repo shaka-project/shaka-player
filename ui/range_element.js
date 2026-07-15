@@ -129,6 +129,11 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
           this.isChanging_ = true;
           this.setBarValueForTouch_(e);
           this.onChangeStart();
+          // Apply the new value right away, mirroring the mousedown handler.
+          // This makes a single tap seek to the touched position for controls
+          // that act on onChange (e.g. volume and playback-rate sliders),
+          // instead of requiring the user to drag the thumb.
+          this.onChange();
           e.stopPropagation();
         }
       });
