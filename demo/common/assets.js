@@ -2712,22 +2712,6 @@ shakaAssets.testAssets = [
       })
       .setMimeType('application/msf'),
   new ShakaDemoAssetInfo(
-      /* name= */ 'moqtail HDR',
-      /* iconUri= */ '',
-      /* manifestUri= */ 'https://ord.abr.moqtail.dev',
-      /* source= */ shakaAssets.Source.MOQTAIL)
-      .addFeature(shakaAssets.Feature.MSF)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .setExtraConfig({
-        manifest: {
-          msf: {
-            namespaces: ['moqtail'],
-          },
-        },
-      })
-      .setMimeType('application/msf'),
-  new ShakaDemoAssetInfo(
       /* name= */ 'moqtail ch00',
       /* iconUri= */ '',
       /* manifestUri= */ 'https://relay.moqtail.dev',
