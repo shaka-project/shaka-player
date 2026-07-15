@@ -1481,6 +1481,71 @@ describe('UI', () => {
       });
     });
 
+    describe('custom context menu on touch devices', () => {
+      /** @type {!HTMLElement} */
+      let controlsContainer;
+      /** @type {!HTMLElement} */
+      let contextMenu;
+      /** @type {number} */
+      let originalMaxTouchPoints;
+
+      beforeEach(async () => {
+        originalMaxTouchPoints = navigator.maxTouchPoints;
+        // The touch listeners are only wired up on touch-capable devices, so
+        // pretend to be one before the UI is created.
+        Util.setMaxTouchPoints(1);
+
+        const config = {
+          customContextMenu: true,
+          contextMenuElements: [
+            'statistics',
+          ],
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+
+        const controls = ui.getControls();
+        controlsContainer = controls.getControlsContainer();
+        // onContainerTouch ignores touches until the media has a duration and
+        // only acts while the controls are showing (opaque).
+        Object.defineProperty(video, 'duration',
+            {value: 100, configurable: true});
+        controlsContainer.setAttribute('shown', 'true');
+
+        const contextMenus =
+            videoContainer.getElementsByClassName('shaka-context-menu');
+        expect(contextMenus.length).toBe(1);
+        contextMenu = /** @type {!HTMLElement} */ (contextMenus[0]);
+      });
+
+      afterEach(() => {
+        Util.setMaxTouchPoints(originalMaxTouchPoints);
+      });
+
+      it('stays open when the long-press is released', () => {
+        // A long-press fires 'contextmenu' while the finger is down, then
+        // 'touchend' when it is released.  The menu must survive the release.
+        UiUtils.simulateEvent(controlsContainer, 'touchstart');
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
+
+        UiUtils.simulateEvent(controlsContainer, 'touchend');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('closes on a subsequent tap', () => {
+        UiUtils.simulateEvent(controlsContainer, 'touchstart');
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+        UiUtils.simulateEvent(controlsContainer, 'touchend');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
+
+        // A separate tap (its own touchstart + touchend) closes the menu.
+        UiUtils.simulateEvent(controlsContainer, 'touchstart');
+        UiUtils.simulateEvent(controlsContainer, 'touchend');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
+      });
+    });
+
     describe('statistics context menu', () => {
       /** @type {!HTMLElement} */
       let statisticsButton;
