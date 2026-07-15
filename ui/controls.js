@@ -325,6 +325,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {?number} */
     this.lastContainerTouchEventTime_ = null;
 
+    /**
+     * Set while a long-press is opening the custom context menu, so that the
+     * touchend which ends that same long-press does not immediately close the
+     * menu.  Reset on every touchstart and consumed by the next touchend.
+     * @private {boolean}
+     */
+    this.contextMenuOpenedByTouch_ = false;
+
     /** @private {!Array<!shaka.extern.IUIElement>} */
     this.elements_ = [];
 
@@ -1353,6 +1361,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.videoContainer_.setAttribute('shaka-controls', 'true');
 
     if (navigator.maxTouchPoints > 0) {
+      this.eventManager_.listen(this.controlsContainer_, 'touchstart', () => {
+        // A fresh touch starts a new gesture; forget any previous long-press
+        // that opened the context menu.
+        this.contextMenuOpenedByTouch_ = false;
+      });
+      this.eventManager_.listen(this.controlsContainer_, 'contextmenu', () => {
+        // A long-press fires 'contextmenu' while the finger is still down.
+        // Remember it so the touchend that ends the press keeps the menu open
+        // (see onContainerTouch).
+        this.contextMenuOpenedByTouch_ = true;
+      });
       this.eventManager_.listen(this.controlsContainer_, 'touchend', (e) => {
         this.onContainerTouch(e);
       });
@@ -1928,6 +1947,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   onContainerTouch(event) {
     if (!this.video_.duration) {
       // Can't play yet.  Ignore.
+      return;
+    }
+
+    if (this.contextMenuOpenedByTouch_ && this.anyContextMenusAreOpen()) {
+      // This touchend ends the long-press that just opened the context menu.
+      // Keep the menu open (matching desktop right-click behavior); a
+      // subsequent tap will close it through the normal path below.
+      this.contextMenuOpenedByTouch_ = false;
+      if (event.cancelable) {
+        event.preventDefault();
+      }
       return;
     }
 
