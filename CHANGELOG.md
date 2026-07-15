@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.2.1](https://github.com/shaka-project/shaka-player/compare/v5.2.0...v5.2.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* **net:** isolate headers across retry attempts ([#10361](https://github.com/shaka-project/shaka-player/issues/10361)) ([f8297f5](https://github.com/shaka-project/shaka-player/commit/f8297f5e40a8dcf91dcf8c08147aa08c89ec9f95))
+* Prevent screen.orientation methods from being garbage collected on Safari ([#10364](https://github.com/shaka-project/shaka-player/issues/10364)) ([a56b17a](https://github.com/shaka-project/shaka-player/commit/a56b17af3f2dc4e07632f7ce7384eb0ca40508c9))
+* Restore correct playhead position after MediaSource reload ([#10335](https://github.com/shaka-project/shaka-player/issues/10335)) ([33a5f25](https://github.com/shaka-project/shaka-player/commit/33a5f25d0b30b51d07ee8c97f48b0d142c728f17))
+* **Transmux:** Add device registration to the web worker ([#10348](https://github.com/shaka-project/shaka-player/issues/10348)) ([6821c15](https://github.com/shaka-project/shaka-player/commit/6821c15eac13c3ea8c9e18160371c27b7419140d))
+* **Transmux:** Fall back to main thread on worker transmux timeout ([#10349](https://github.com/shaka-project/shaka-player/issues/10349)) ([2586e14](https://github.com/shaka-project/shaka-player/commit/2586e1405a8f55848cd35e978523f0e03e71f625))
+* **UI:** Fix context menu and rate slider touch behavior on mobile ([#10365](https://github.com/shaka-project/shaka-player/issues/10365)) ([41fea2e](https://github.com/shaka-project/shaka-player/commit/41fea2e307e7e91ea629327af309862218de61ab)), closes [#10363](https://github.com/shaka-project/shaka-player/issues/10363)
+* **UI:** Fix thumbnail preview not scaling with player size ([#10333](https://github.com/shaka-project/shaka-player/issues/10333)) ([aafb1e2](https://github.com/shaka-project/shaka-player/commit/aafb1e205c55a515894ee83914a5611af05c7391))
+* **UI:** Prevent playback rate menu from being cut off on narrow screens ([#10343](https://github.com/shaka-project/shaka-player/issues/10343)) ([d566247](https://github.com/shaka-project/shaka-player/commit/d56624742e1a283f9abdc3253555aec3e0df1629))
+* **UI:** Scope form element font inheritance to the player container ([#10353](https://github.com/shaka-project/shaka-player/issues/10353)) ([6c358dc](https://github.com/shaka-project/shaka-player/commit/6c358dc67b061c23f4edc428aafaab1940b0a53b))
+
 ## [5.2.0](https://github.com/shaka-project/shaka-player/compare/v5.1.0...v5.2.0) (2026-07-10)
 
 
