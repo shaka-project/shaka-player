@@ -39,18 +39,7 @@ importScripts(
 // device inside the worker (needed by Ac3Transmuxer and MimeUtils codec
 // conversion). Without these, getDevice() always returns DefaultBrowser even
 // on Tizen/WebOS/Xbox/etc.
-goog.require('shaka.device.AppleBrowser');
-goog.require('shaka.device.Chromecast');
-goog.require('shaka.device.DefaultBrowser');
-goog.require('shaka.device.Hisense');
-goog.require('shaka.device.PlayStation');
-goog.require('shaka.device.TitanOS');
-goog.require('shaka.device.TiVoOS');
-goog.require('shaka.device.Tizen');
-goog.require('shaka.device.Vizio');
-goog.require('shaka.device.WebKitSTB');
-goog.require('shaka.device.WebOS');
-goog.require('shaka.device.Xbox');
+goog.require('shaka.device.AllDevices');
 
 // Pull in the transmuxer plugins so they self-register with
 // TransmuxerEngine, then load the worker entry point.

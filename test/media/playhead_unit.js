@@ -410,6 +410,47 @@ describe('Playhead', () => {
     });
   });  // getTime
 
+  // Regression test for https://github.com/shaka-project/shaka-player/issues/10299
+  // A codec-switch (or MSE error recovery) reload briefly drops the video's
+  // readyState back to 0. If the playhead is repositioned while that's
+  // happening, it must end up at the newly requested time once the video
+  // becomes ready again, not at the original startTime it was constructed
+  // with.
+  it('setStartTime applies the requested time if the video becomes ' +
+      'temporarily unready', () => {
+    video.readyState = HTMLMediaElement.HAVE_METADATA;
+    playhead = new shaka.media.MediaSourcePlayhead(
+        video,
+        manifest,
+        config,
+        /* startTime= */ 5,
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent));
+
+    playhead.ready();
+
+    expect(video.currentTime).toBe(5);
+
+    // Simulate normal playback progressing past the initial start time.
+    video.currentTime = 40;
+    video.on['seeking']();
+
+    // Simulate the video element becoming unready, e.g. because
+    // MediaSourceEngine reassigned video.src during a reload.
+    video.readyState = 0;
+
+    // Something (e.g. the "skip initial buffer gap" logic) asks the
+    // playhead to move to a new position while the video isn't ready yet.
+    playhead.setStartTime(42);
+
+    // Once the video becomes ready again, it should end up at the newly
+    // requested position, not the original startTime (5).
+    video.readyState = HTMLMediaElement.HAVE_METADATA;
+    video.on['loadedmetadata']();
+
+    expect(video.currentTime).toBe(42);
+  });
+
   it('clamps playhead after seeking for live', () => {
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
