@@ -732,9 +732,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       return;
     }
     if (thumbnail.width < thumbnail.height) {
-      this.thumbnailImageContainer_.classList.add('portrait-thumbnail');
+      this.thumbnailContainer_.classList.add('portrait-thumbnail');
     } else {
-      this.thumbnailImageContainer_.classList.remove('portrait-thumbnail');
+      this.thumbnailContainer_.classList.remove('portrait-thumbnail');
     }
     let uri = thumbnail.uris[0].split('#xywh=')[0];
     if (!this.lastThumbnail_ ||

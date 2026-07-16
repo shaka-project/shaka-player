@@ -86,26 +86,19 @@
 
 /* Preset pill buttons */
 
-/* Horizontal strip. */
+/* Horizontal strip that wraps onto extra rows when the pills don't fit.
+ * On wide screens the menu grows to hold every pill on a single line,
+ * exactly as before; extra rows only appear on narrow screens, where the
+ * menu is capped by the floating-menu max-width, so every preset stays
+ * visible instead of hiding behind a scrollbar-less horizontal scroll. */
 .shaka-playback-rate-presets {
   display: flex;
-  flex-direction: row;
+  flex-flow: row wrap;
   align-items: center;
-
-  /* Centre pills when they fit; safe-center degrades to flex-start on
-   * overflow so the leftmost pill stays reachable via scroll. */
-  justify-content: safe center;
-  /* stylelint-disable-next-line declaration-block-no-duplicate-properties */
-  justify-content: center; /* fallback for browsers without "safe" */
-
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
+  justify-content: center;
 
   gap: 6px;
   padding: 6px 10px 10px;
-  white-space: nowrap;
 }
 
 .shaka-playback-rate-preset-btn {

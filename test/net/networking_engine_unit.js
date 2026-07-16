@@ -263,6 +263,89 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       expect(resolveScheme).toHaveBeenCalledTimes(1);
     });
 
+    it('does not leak CommonAccessToken to fallback hosts', async () => {
+      const tokenHeaderName = networkingEngine.config_
+          .commonAccessTokenHeaderName;
+
+      resolveScheme.and.callFake(() => {
+        const response = createResponse();
+        response.uri = 'resolve://trusted.example/segment1';
+        response.headers[tokenHeaderName] = 'token-abc';
+        return shaka.util.AbortableOperation.completed(response);
+      });
+      await networkingEngine
+          .request(
+              requestType, createRequest('resolve://trusted.example/segment1'))
+          .promise;
+
+      resolveScheme.calls.reset();
+      rejectScheme.and.callFake((uri, request) => {
+        expect(request.headers[tokenHeaderName]).toBe('token-abc');
+        return shaka.util.AbortableOperation.failed(error);
+      });
+      resolveScheme.and.callFake((uri, request) => {
+        expect(uri).toBe('resolve://attacker.example/segment2');
+        expect(request.headers[tokenHeaderName]).toBeUndefined();
+        return shaka.util.AbortableOperation.completed(createResponse());
+      });
+
+      const request = createRequest('', {
+        maxAttempts: 2,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      });
+      request.uris = [
+        'reject://trusted.example/segment2',
+        'resolve://attacker.example/segment2',
+      ];
+      await networkingEngine.request(requestType, request).promise;
+
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
+      expect(resolveScheme).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not leak request filter headers to fallback hosts', async () => {
+      networkingEngine.registerRequestFilter((type, request) => {
+        const index = request.attempt % request.uris.length;
+        const domain = shaka.util.URL.getDomain(request.uris[index]);
+        if (domain == 'trusted.example') {
+          request.headers['Authorization'] = 'Bearer token-abc';
+        }
+      });
+
+      rejectScheme.and.callFake((uri, request) => {
+        expect(request.headers['Authorization']).toBe('Bearer token-abc');
+        return shaka.util.AbortableOperation.failed(error);
+      });
+      resolveScheme.and.callFake((uri, request) => {
+        expect(uri).toBe('resolve://attacker.example/segment');
+        expect(request.headers['Authorization']).toBeUndefined();
+        return shaka.util.AbortableOperation.completed(createResponse());
+      });
+
+      const request = createRequest('', {
+        maxAttempts: 2,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      });
+      request.uris = [
+        'reject://trusted.example/segment',
+        'resolve://attacker.example/segment',
+      ];
+      await networkingEngine.request(requestType, request).promise;
+
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
+      expect(resolveScheme).toHaveBeenCalledTimes(1);
+    });
+
     it('won\'t retry for CRITICAL error', async () => {
       const request = createRequest('reject://foo', {
         maxAttempts: 5,
