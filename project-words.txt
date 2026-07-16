@@ -214,6 +214,7 @@ Jwplayer
 Kaltura
 Livesim
 moqlivemock
+moqtail
 muxjs
 Nagra
 Playready
