@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.15.53](https://github.com/shaka-project/shaka-player/compare/v4.15.52...v4.15.53) (2026-07-17)
+
+
+### Bug Fixes
+
+* **preload:** Restore adaptation on reused Player with preloaded variant ([#10151](https://github.com/shaka-project/shaka-player/issues/10151)) ([78eeb49](https://github.com/shaka-project/shaka-player/commit/78eeb49836932b7b6197e158cfa5eefb66bc65f5))
+
 ## [4.15.52](https://github.com/shaka-project/shaka-player/compare/v4.15.51...v4.15.52) (2026-07-14)
 
 
