@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.1.15](https://github.com/shaka-project/shaka-player/compare/v5.1.14...v5.1.15) (2026-07-20)
+
+
+### Bug Fixes
+
+* Fix duplicate error code 4058 ([#10372](https://github.com/shaka-project/shaka-player/issues/10372)) ([7f8fafe](https://github.com/shaka-project/shaka-player/commit/7f8fafe9310355c6c58ade2127579810d559f077))
+* **MSF:** Fix draft-16 negotiation and skip empty catalog objects ([#10367](https://github.com/shaka-project/shaka-player/issues/10367)) ([bc6c68f](https://github.com/shaka-project/shaka-player/commit/bc6c68f32bbaba9c168e1d01356f37cd1def80d2))
+* Prevent screen.orientation methods from being garbage collected on Safari ([#10364](https://github.com/shaka-project/shaka-player/issues/10364)) ([6f23594](https://github.com/shaka-project/shaka-player/commit/6f235944c0749ebec4f95d445f801fa7f6cffb27))
+* **security:** prevent glob expansion in shaka-bot comment command parser ([#10281](https://github.com/shaka-project/shaka-player/issues/10281)) ([e219619](https://github.com/shaka-project/shaka-player/commit/e219619f90302793caf087cffc9816b99462b7f1))
+* **UI:** Fix context menu and rate slider touch behavior on mobile ([#10365](https://github.com/shaka-project/shaka-player/issues/10365)) ([f159d12](https://github.com/shaka-project/shaka-player/commit/f159d1202ac127714b348f45badb402222f012f2)), closes [#10363](https://github.com/shaka-project/shaka-player/issues/10363)
+
 ## [5.1.14](https://github.com/shaka-project/shaka-player/compare/v5.1.13...v5.1.14) (2026-07-14)
 
 
