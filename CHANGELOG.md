@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.2.2](https://github.com/shaka-project/shaka-player/compare/v5.2.1...v5.2.2) (2026-07-20)
+
+
+### Bug Fixes
+
+* Fix duplicate error code 4058 ([#10372](https://github.com/shaka-project/shaka-player/issues/10372)) ([2bc9d47](https://github.com/shaka-project/shaka-player/commit/2bc9d472b197aa6302d8eb256a2318c62181fb41))
+* **MSF:** Fix draft-16 negotiation and skip empty catalog objects ([#10367](https://github.com/shaka-project/shaka-player/issues/10367)) ([b48d560](https://github.com/shaka-project/shaka-player/commit/b48d56028c20a718a376a0c6cd4ff07591c03acb))
+* **MSF:** Report bandwidth per group so ABR can pick higher qualities ([#10371](https://github.com/shaka-project/shaka-player/issues/10371)) ([d00114f](https://github.com/shaka-project/shaka-player/commit/d00114f856a4cf0525e75f2534f7089a5111b55f))
+* **net:** isolate headers across retry attempts ([#10361](https://github.com/shaka-project/shaka-player/issues/10361)) ([60026d6](https://github.com/shaka-project/shaka-player/commit/60026d6e3b0ab6f3ddd5ac75715ac7ffb2dc7c95))
+* Prevent screen.orientation methods from being garbage collected on Safari ([#10364](https://github.com/shaka-project/shaka-player/issues/10364)) ([4e742fd](https://github.com/shaka-project/shaka-player/commit/4e742fdf6caa0ce496ec2e32e82bc42851d23d85))
+* **security:** prevent glob expansion in shaka-bot comment command parser ([#10281](https://github.com/shaka-project/shaka-player/issues/10281)) ([4c89aed](https://github.com/shaka-project/shaka-player/commit/4c89aeddcd16d348203286fb9de189b13e784396))
+* **Transmux:** Fall back to main thread when the transmux worker fails ([#10370](https://github.com/shaka-project/shaka-player/issues/10370)) ([562425b](https://github.com/shaka-project/shaka-player/commit/562425b8bf3a53b27c839326fadca80b31a34abb))
+* **UI:** Fix context menu and rate slider touch behavior on mobile ([#10365](https://github.com/shaka-project/shaka-player/issues/10365)) ([14dc58e](https://github.com/shaka-project/shaka-player/commit/14dc58ec888cf94da90d9ed24f8bca319220455b)), closes [#10363](https://github.com/shaka-project/shaka-player/issues/10363)
+
 ## [5.2.1](https://github.com/shaka-project/shaka-player/compare/v5.2.0...v5.2.1) (2026-07-14)
 
 
