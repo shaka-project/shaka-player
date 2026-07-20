@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.15.54](https://github.com/shaka-project/shaka-player/compare/v4.15.53...v4.15.54) (2026-07-20)
+
+
+### Bug Fixes
+
+* Prevent screen.orientation methods from being garbage collected on Safari ([#10364](https://github.com/shaka-project/shaka-player/issues/10364)) ([a75b9bd](https://github.com/shaka-project/shaka-player/commit/a75b9bd659a3623a80a8dc16fcba1c257a5fe0af))
+* **security:** prevent glob expansion in shaka-bot comment command parser ([#10281](https://github.com/shaka-project/shaka-player/issues/10281)) ([becbc5a](https://github.com/shaka-project/shaka-player/commit/becbc5a5858bad1a5b81efcf1dde0ab64fb6f4cc))
+
 ## [4.15.53](https://github.com/shaka-project/shaka-player/compare/v4.15.52...v4.15.53) (2026-07-17)
 
 
