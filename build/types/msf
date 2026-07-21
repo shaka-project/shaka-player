@@ -1,6 +1,7 @@
 # The MOQT Streaming Format manifest parser plugin.
 
 +../../lib/msf/dialect_registry.js
++../../lib/msf/i_control_stream.js
 +../../lib/msf/quic_var_int_codec.js
 +../../lib/msf/request_id_session.js
 +../../lib/msf/drafts/draft14/messages.js

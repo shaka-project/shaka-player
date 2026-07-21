@@ -91,7 +91,7 @@ shaka.extern.MsfDialect = class {
  *
  * This is the boundary between the draft-specific layers and the rest of the
  * player: it speaks only intent, and hands back objects in the draft-neutral
- * shaka.msf.Utils.MOQObject shape. Nothing above it knows how a request is
+ * shaka.extern.MsfObject shape. Nothing above it knows how a request is
  * addressed, how a response is matched to it, or how object data is framed --
  * all of which change between drafts.
  *
@@ -105,7 +105,7 @@ shaka.extern.MsfSession = class {
    *
    * @param {Array<string>} namespace
    * @param {string} trackName
-   * @param {shaka.msf.Utils.ObjectCallback} callback
+   * @param {shaka.extern.MsfObjectCallback} callback
    * @return {!Promise<bigint>}
    * @exportDoc
    */
@@ -126,7 +126,7 @@ shaka.extern.MsfSession = class {
    *
    * @param {Array<string>} namespace
    * @param {string} trackName
-   * @param {shaka.msf.Utils.ObjectCallback} callback
+   * @param {shaka.extern.MsfObjectCallback} callback
    * @return {!Promise}
    * @exportDoc
    */
@@ -167,34 +167,35 @@ shaka.extern.MsfSession = class {
 
 
 /**
- * A control stream carrying MoQT control messages in some draft's wire format.
+ * An object delivered on a subscription or fetch.
  *
- * The shared session for drafts 14 and 16 talks to one of these rather than to
- * a concrete class: both drafts use a single bidirectional control stream and
- * the same session logic, and differ only in how the messages on it are
- * serialized.
+ * Defined here rather than borrowed from shaka.msf.Utils because externs are
+ * compiled into every build, including ones that leave the MSF parser out, so
+ * this file cannot depend on lib/msf being present.
  *
- * @interface
+ * @typedef {{
+ *   trackAlias: bigint,
+ *   location: {
+ *     group: bigint,
+ *     object: bigint,
+ *     subgroup: ?(bigint|undefined),
+ *   },
+ *   data: !Uint8Array,
+ *   extensions: ?(Uint8Array|undefined),
+ *   status: ?(bigint|undefined),
+ *   payloadReadStartMs: number,
+ *   receiveTimestampMs: number,
+ * }}
  * @exportDoc
  */
-shaka.extern.MsfControlStream = class {
-  /**
-   * Reads the next control message.
-   *
-   * @return {!Promise<shaka.msf.Utils.Message>}
-   * @exportDoc
-   */
-  receive() {}
+shaka.extern.MsfObject;
 
-  /**
-   * Writes a control message.
-   *
-   * @param {shaka.msf.Utils.Message} msg
-   * @return {!Promise}
-   * @exportDoc
-   */
-  send(msg) {}
-};
+
+/**
+ * @typedef {function(shaka.extern.MsfObject)}
+ * @exportDoc
+ */
+shaka.extern.MsfObjectCallback;
 
 
 /**
