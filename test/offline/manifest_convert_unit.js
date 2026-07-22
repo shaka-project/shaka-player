@@ -324,6 +324,7 @@ describe('ManifestConverter', () => {
       fastSwitching: false,
       isAudioMuxedInVideo: false,
       isIframe: false,
+      preselection: null,
     };
 
     return streamDB;
@@ -417,6 +418,7 @@ describe('ManifestConverter', () => {
       fastSwitching: false,
       isAudioMuxedInVideo: false,
       isIframe: false,
+      preselection: null,
     };
   }
 
@@ -480,6 +482,7 @@ describe('ManifestConverter', () => {
       fastSwitching: false,
       isAudioMuxedInVideo: false,
       isIframe: false,
+      preselection: null,
     };
   }
 
@@ -542,6 +545,7 @@ describe('ManifestConverter', () => {
       fastSwitching: false,
       isAudioMuxedInVideo: false,
       isIframe: false,
+      preselection: null,
     };
   }
 
@@ -603,6 +607,7 @@ describe('ManifestConverter', () => {
       isAudioMuxedInVideo: streamDb.isAudioMuxedInVideo,
       baseOriginalId: null,
       isIframe: streamDb.isIframe,
+      preselection: streamDb.preselection || null,
     };
 
     expect(stream).toEqual(expectedStream);
