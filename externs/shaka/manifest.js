@@ -389,6 +389,7 @@ shaka.extern.SegmentIndex = class {
  *   isAudioMuxedInVideo: boolean,
  *   baseOriginalId: ?string,
  *   isIframe: boolean,
+ *   preselection: ?shaka.extern.Preselection,
  * }}
  *
  * @description
@@ -550,10 +551,38 @@ shaka.extern.SegmentIndex = class {
  *   True if the stream only contains I-frames (key frames), such as an HLS
  *   I-frame-only playlist (EXT-X-I-FRAMES-ONLY / EXT-X-I-FRAME-STREAM-INF) or a
  *   DASH trick mode stream.
+ * @property {?shaka.extern.Preselection} preselection
+ *   <i>Defaults to null.</i> <br>
+ *   The Preselection this stream belongs to, if any.  Set when the stream
+ *   represents one of several pre-defined experiences carried in the same
+ *   media segments.
  *
  * @exportDoc
  */
 shaka.extern.Stream;
+
+
+/**
+ * @typedef {{
+ *   id: string,
+ *   tag: ?string
+ * }}
+ *
+ * @description
+ * Describes the Preselection (ISO/IEC 23009-1 clause 5.3.11) a stream belongs
+ * to, when the stream represents one of several pre-defined experiences
+ * multiplexed at the elementary-stream level in the same media segments (for
+ * example, Dolby AC-4 or MPEG-H 3D Audio presentations).
+ *
+ * @property {string} id
+ *   The id of the Preselection.  Unique within one Period.
+ * @property {?string} tag
+ *   The Preselection Tag that identifies the experience to be selected in
+ *   the media stream, or null if not signaled.  For example, for Dolby AC-4
+ *   it corresponds to the presentation to be decoded.
+ * @exportDoc
+ */
+shaka.extern.Preselection;
 
 
 /**
