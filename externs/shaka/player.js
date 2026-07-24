@@ -2584,6 +2584,7 @@ shaka.extern.AccessibilityConfiguration;
  *   allowStartInMiddleOfInterstitial: boolean,
  *   disableTrackingEvents: boolean,
  *   disableSnapback: boolean,
+ *   skipPlayedAdsUsingSkipRanges: boolean,
  *   interstitialPreloadAheadTime: number,
  *   disablePlayedLinearAdSkip: boolean,
  *   disableTrackingForPlayedLinearAds: boolean,
@@ -2640,6 +2641,14 @@ shaka.extern.AccessibilityConfiguration;
  *   automatically return to the start of the ad break to ensure ads are shown.
  *   When this flag is set, the player will not rewind to show skipped ads,
  *   and playback will continue from the user's seek position.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} skipPlayedAdsUsingSkipRanges
+ *   MediaTailor only.  If true, once every ad in a linear ad break has been
+ *   played, the whole break is dropped from the buffer and excluded from
+ *   future streaming via a single skip range, so a later seek back into it
+ *   neither re-fetches nor replays the ads.  Applies to fully watched breaks
+ *   only, not individual ads.  DASH segments-mode VOD only.
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {number} interstitialPreloadAheadTime
