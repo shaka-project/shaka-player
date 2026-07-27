@@ -46,8 +46,8 @@ describe('SkipRangeController', () => {
     });
 
     it('records ranges and answers queries', () => {
-      controller.add(10, 20);
-      controller.add(30, 40);
+      expect(controller.add(10, 20)).toBe(true);
+      expect(controller.add(30, 40)).toBe(true);
       expect(controller.getAll()).toEqual([
         {start: 10, end: 20},
         {start: 30, end: 40},
@@ -56,16 +56,16 @@ describe('SkipRangeController', () => {
     });
 
     it('rejects an empty or reversed interval', () => {
-      controller.add(20, 20);
-      controller.add(30, 10);
+      expect(controller.add(20, 20)).toBe(false);
+      expect(controller.add(30, 10)).toBe(false);
       expect(controller.getAll()).toEqual([]);
       expect(controller.isEmpty()).toBe(true);
     });
 
     it('rejects an overlapping or touching range', () => {
-      controller.add(10, 30);
-      controller.add(20, 40);  // overlaps
-      controller.add(30, 50);  // touches at the edge
+      expect(controller.add(10, 30)).toBe(true);
+      expect(controller.add(20, 40)).toBe(false);  // overlaps
+      expect(controller.add(30, 50)).toBe(false);  // touches at the edge
       expect(controller.getAll()).toEqual([{start: 10, end: 30}]);
     });
 
@@ -120,13 +120,13 @@ describe('SkipRangeController', () => {
       const controller = makeController(makeStreaming({
         isBuffered: (type, time) => time >= 10 && time < 20,
       }));
-      controller.add(10, 30);
+      expect(controller.add(10, 30)).toBe(false);
       expect(controller.getAll()).toEqual([]);
     });
 
     it('records a range that is not buffered', () => {
       const controller = makeController(makeStreaming());
-      controller.add(10, 30);
+      expect(controller.add(10, 30)).toBe(true);
       expect(controller.getAll()).toEqual([{start: 10, end: 30}]);
     });
 

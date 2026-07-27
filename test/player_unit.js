@@ -293,7 +293,7 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       logWarnSpy.calls.reset();
 
-      player.addSkipRange(10, 30);
+      expect(player.addSkipRange(10, 30)).toBe(true);
       expect(logWarnSpy).not.toHaveBeenCalledWith(unsupportedWarning);
     });
 
@@ -302,7 +302,7 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       logWarnSpy.calls.reset();
 
-      player.addSkipRange(10, 30);
+      expect(player.addSkipRange(10, 30)).toBe(false);
       expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
     });
 
@@ -312,7 +312,7 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       logWarnSpy.calls.reset();
 
-      player.addSkipRange(10, 30);
+      expect(player.addSkipRange(10, 30)).toBe(false);
       expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
     });
 
@@ -322,7 +322,7 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       logWarnSpy.calls.reset();
 
-      player.addSkipRange(10, 30);
+      expect(player.addSkipRange(10, 30)).toBe(false);
       expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
     });
   });
