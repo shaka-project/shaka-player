@@ -56,6 +56,7 @@
 +../../lib/media/streaming_engine.js
 +../../lib/media/segment_prefetch.js
 +../../lib/media/segment_utils.js
++../../lib/media/skip_range_controller.js
 +../../lib/media/time_ranges_utils.js
 +../../lib/media/video_wrapper.js
 

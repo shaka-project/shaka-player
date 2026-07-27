@@ -284,7 +284,7 @@ describe('SimpleAbrManager (integration)', () => {
       disableStream: () => false,
       shouldPrefetchNextSegment: () => true,
       getKeySystem: () => '',
-    });
+    }, new shaka.media.SkipRangeController());
     streamingEngine.configure(streamingConfig);
 
     streamingEngine.switchVariant(initialVariant);

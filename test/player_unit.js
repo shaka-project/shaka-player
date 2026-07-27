@@ -282,41 +282,48 @@ describe('Player', () => {
   });
 
   describe('skip ranges', () => {
-    it('delegate to the streaming engine when loaded', async () => {
+    // Player owns the manifest stream-type guard; add/remove/buffered behavior
+    // lives in SkipRangeController and is covered by its own tests.
+    const unsupportedWarning =
+        'addSkipRange() supports DASH segments mode, VOD only; ignoring';
+
+    it('accepts a range on DASH segments-mode VOD content', async () => {
+      manifest.type = shaka.media.ManifestParser.DASH;
+      manifest.sequenceMode = false;
       await player.load(fakeManifestUri, 0, fakeMimeType);
-      expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.MEDIA_SOURCE);
+      logWarnSpy.calls.reset();
 
       player.addSkipRange(10, 30);
-      expect(streamingEngine.addSkipRange).toHaveBeenCalledWith(10, 30);
-
-      player.removeSkipRange(10, 30);
-      expect(streamingEngine.removeSkipRange).toHaveBeenCalledWith(10, 30);
-
-      player.clearSkipRanges();
-      expect(streamingEngine.clearSkipRanges).toHaveBeenCalled();
+      expect(logWarnSpy).not.toHaveBeenCalledWith(unsupportedWarning);
     });
 
-    it('queues ranges added before load and applies them on load',
-        async () => {
-          // Added before load (e.g. to skip a preroll).
-          player.addSkipRange(0, 5);
-          player.addSkipRange(30, 40);
-          expect(streamingEngine.addSkipRange).not.toHaveBeenCalled();
-
-          await player.load(fakeManifestUri, 0, fakeMimeType);
-
-          // Applied to the streaming engine once it exists.
-          expect(streamingEngine.addSkipRange).toHaveBeenCalledWith(0, 5);
-          expect(streamingEngine.addSkipRange).toHaveBeenCalledWith(30, 40);
-        });
-
-    it('drops a queued range removed before load', async () => {
-      player.addSkipRange(30, 40);
-      player.removeSkipRange(30, 40);
-
+    it('ignores a range on non-DASH content', async () => {
+      manifest.type = shaka.media.ManifestParser.HLS;
       await player.load(fakeManifestUri, 0, fakeMimeType);
+      logWarnSpy.calls.reset();
 
-      expect(streamingEngine.addSkipRange).not.toHaveBeenCalledWith(30, 40);
+      player.addSkipRange(10, 30);
+      expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
+    });
+
+    it('ignores a range in sequence mode', async () => {
+      manifest.type = shaka.media.ManifestParser.DASH;
+      manifest.sequenceMode = true;
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      logWarnSpy.calls.reset();
+
+      player.addSkipRange(10, 30);
+      expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
+    });
+
+    it('ignores a range on live content', async () => {
+      manifest.type = shaka.media.ManifestParser.DASH;
+      spyOn(manifest.presentationTimeline, 'isDynamic').and.returnValue(true);
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      logWarnSpy.calls.reset();
+
+      player.addSkipRange(10, 30);
+      expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
     });
   });
 

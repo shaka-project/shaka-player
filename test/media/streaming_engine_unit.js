@@ -71,6 +71,8 @@ describe('StreamingEngine', () => {
   let getPlaybackRate;
   /** @type {!shaka.media.StreamingEngine} */
   let streamingEngine;
+  /** @type {!shaka.media.SkipRangeController} */
+  let skipRangeController;
   /** @type {!jasmine.Spy} */
   let beforeAppendSegment;
   /** @type {!jasmine.Spy} */
@@ -485,8 +487,22 @@ describe('StreamingEngine', () => {
       shouldPrefetchNextSegment: () => true,
       getKeySystem: () => '',
     };
+    // Wire the controller to the fake engine/MSE as Player does; the manifest
+    // guard lives in Player and is not exercised here.
+    skipRangeController = new shaka.media.SkipRangeController({
+      getContentTypes: () =>
+        streamingEngine ? streamingEngine.getContentTypes() : [],
+      isBuffered: (type, time) => mediaSourceEngine.isBuffered(type, time),
+      bufferEnd: (type) => mediaSourceEngine.bufferEnd(type),
+      requestUpdate: () => {
+        if (streamingEngine) {
+          streamingEngine.requestSkipRangeUpdate();
+        }
+      },
+    });
     streamingEngine = new shaka.media.StreamingEngine(
-        /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
+        /** @type {shaka.extern.Manifest} */(manifest), playerInterface,
+        skipRangeController);
     streamingEngine.configure(config);
   }
 
@@ -4023,7 +4039,7 @@ describe('StreamingEngine', () => {
       streamingEngine.switchTextStream(textStream);
       // Skip segments 1 and 2 ([10,20) and [20,30)) before playback reaches
       // them.
-      streamingEngine.addSkipRange(10, 30);
+      skipRangeController.add(10, 30);
       await streamingEngine.start();
       playing = true;
 
@@ -4042,7 +4058,7 @@ describe('StreamingEngine', () => {
         async () => {
           streamingEngine.switchVariant(variant);
           streamingEngine.switchTextStream(textStream);
-          streamingEngine.addSkipRange(10, 30);
+          skipRangeController.add(10, 30);
           await streamingEngine.start();
           playing = true;
 
@@ -4059,7 +4075,7 @@ describe('StreamingEngine', () => {
           streamingEngine.switchVariant(variant);
           streamingEngine.switchTextStream(textStream);
           // Skip the final segment ([30,40)); B == duration.
-          streamingEngine.addSkipRange(30, 40);
+          skipRangeController.add(30, 40);
           await streamingEngine.start();
           playing = true;
 
@@ -4084,7 +4100,7 @@ describe('StreamingEngine', () => {
 
           streamingEngine.switchVariant(variant);
           streamingEngine.switchTextStream(textStream);
-          streamingEngine.addSkipRange(10, 30);
+          skipRangeController.add(10, 30);
           await streamingEngine.start();
           playing = false;
 
@@ -4094,8 +4110,8 @@ describe('StreamingEngine', () => {
 
           // Streaming has buffered past the range (segment 3), so the hole is
           // committed; removal is refused and the buffer is left untouched.
-          streamingEngine.removeSkipRange(10, 30);
-          expect(streamingEngine.getSkipRanges()).toEqual([
+          skipRangeController.remove(10, 30);
+          expect(skipRangeController.getAll()).toEqual([
             {start: 10, end: 30},
           ]);
           await runTest();
@@ -4108,9 +4124,9 @@ describe('StreamingEngine', () => {
       streamingEngine.switchTextStream(textStream);
       // Skip [30,40), then remove it before the fetch loop reaches it (playhead
       // parked at 0, nothing buffered past 30 yet at the moment of removal).
-      streamingEngine.addSkipRange(30, 40);
-      streamingEngine.removeSkipRange(30, 40);
-      expect(streamingEngine.getSkipRanges()).toEqual([]);
+      skipRangeController.add(30, 40);
+      skipRangeController.remove(30, 40);
+      expect(skipRangeController.getAll()).toEqual([]);
       await streamingEngine.start();
       playing = true;
 
@@ -4139,7 +4155,7 @@ describe('StreamingEngine', () => {
       // A range must be declared before streaming buffers into it.  Adding one
       // that is already buffered is refused, and the buffer is left intact --
       // the skip is a forward-looking decision, never a retroactive eviction.
-      streamingEngine.addSkipRange(10, 30);
+      skipRangeController.add(10, 30);
       await runTest();
 
       expect(mediaSourceEngine.segments).toEqual({
@@ -4158,7 +4174,7 @@ describe('StreamingEngine', () => {
       createStreamingEngine(config);
 
       streamingEngine.switchVariant(variant);
-      streamingEngine.addSkipRange(10, 30);
+      skipRangeController.add(10, 30);
       await streamingEngine.start();
       playing = true;
 
@@ -4189,7 +4205,7 @@ describe('StreamingEngine', () => {
         // before buffering has reached it.
         if (presentationTimeInSeconds == 1 && !added) {
           added = true;
-          streamingEngine.addSkipRange(30, 40);
+          skipRangeController.add(30, 40);
         }
       });
 
@@ -4202,15 +4218,15 @@ describe('StreamingEngine', () => {
           streamingEngine.switchTextStream(textStream);
           // Adjacent ranges must be coalesced by the caller: the second,
           // abutting range is rejected, so only [10,20) would be skipped.
-          streamingEngine.addSkipRange(10, 20);
-          streamingEngine.addSkipRange(20, 30);  // adjacent -> ignored
-          expect(streamingEngine.getSkipRanges()).toEqual([
+          skipRangeController.add(10, 20);
+          skipRangeController.add(20, 30);  // adjacent -> ignored
+          expect(skipRangeController.getAll()).toEqual([
             {start: 10, end: 20},
           ]);
 
           // The correct way to skip segments 1 and 2 is one range.
-          streamingEngine.clearSkipRanges();
-          streamingEngine.addSkipRange(10, 30);
+          skipRangeController.clear();
+          skipRangeController.add(10, 30);
           await streamingEngine.start();
           playing = true;
 
@@ -4224,59 +4240,15 @@ describe('StreamingEngine', () => {
 
     it('rejects an overlapping range', () => {
       streamingEngine.switchVariant(variant);
-      streamingEngine.addSkipRange(10, 30);
-      streamingEngine.addSkipRange(20, 40);  // overlaps -> ignored
-      expect(streamingEngine.getSkipRanges()).toEqual([
+      skipRangeController.add(10, 30);
+      skipRangeController.add(20, 40);  // overlaps -> ignored
+      expect(skipRangeController.getAll()).toEqual([
         {start: 10, end: 30},
       ]);
     });
 
-    it('ignores a range added on live (dynamic) content', async () => {
-      timeline.isDynamic.and.returnValue(true);
-      streamingEngine.switchVariant(variant);
-      streamingEngine.switchTextStream(textStream);
-      streamingEngine.addSkipRange(10, 30);
-      await streamingEngine.start();
-      playing = true;
-
-      await runTest();
-
-      // The range was not skipped; all segments buffer normally.
-      expect(mediaSourceEngine.segments[ContentType.VIDEO]).toEqual(
-          [true, true, true, true]);
-    });
-
-    it('ignores a range on non-DASH content', async () => {
-      manifest.type = shaka.media.ManifestParser.HLS;
-      streamingEngine.switchVariant(variant);
-      streamingEngine.switchTextStream(textStream);
-      streamingEngine.addSkipRange(10, 30);
-      expect(streamingEngine.getSkipRanges()).toEqual([]);
-      await streamingEngine.start();
-      playing = true;
-
-      await runTest();
-
-      // The range was not accepted; all segments buffer normally.
-      expect(mediaSourceEngine.segments[ContentType.VIDEO]).toEqual(
-          [true, true, true, true]);
-    });
-
-    it('ignores a range in sequence mode', async () => {
-      manifest.sequenceMode = true;
-      streamingEngine.switchVariant(variant);
-      streamingEngine.switchTextStream(textStream);
-      streamingEngine.addSkipRange(10, 30);
-      expect(streamingEngine.getSkipRanges()).toEqual([]);
-      await streamingEngine.start();
-      playing = true;
-
-      await runTest();
-
-      // Not accepted; all segments buffer normally.
-      expect(mediaSourceEngine.segments[ContentType.VIDEO]).toEqual(
-          [true, true, true, true]);
-    });
+    // The manifest stream-type guard lives in Player.addSkipRange; its
+    // live/non-DASH/sequence-mode rejection is covered by the Player tests.
 
     it('skips a segment that straddles the range end', async () => {
       streamingEngine.switchVariant(variant);
@@ -4286,7 +4258,7 @@ describe('StreamingEngine', () => {
       // the range (at 20), so its front carries skipped content and it is
       // skipped too; buffering lands on the first segment that starts at or
       // after the range end -- segment 3 ([30,40)).
-      streamingEngine.addSkipRange(10, 25);
+      skipRangeController.add(10, 25);
       await streamingEngine.start();
       playing = true;
 
@@ -4305,7 +4277,7 @@ describe('StreamingEngine', () => {
       // before the range start, so it is the last content segment and is kept
       // and played in full; segment 2 ([20,30)) lies within the range and is
       // skipped.
-      streamingEngine.addSkipRange(15, 30);
+      skipRangeController.add(15, 30);
       await streamingEngine.start();
       playing = true;
 
