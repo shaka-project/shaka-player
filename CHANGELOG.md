@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.28](https://github.com/shaka-project/shaka-player/compare/v5.0.27...v5.0.28) (2026-07-27)
+
+
+### Bug Fixes
+
+* Reset media source before switching variant on MSE append failure ([#10380](https://github.com/shaka-project/shaka-player/issues/10380)) ([f5cbfe3](https://github.com/shaka-project/shaka-player/commit/f5cbfe3edd191b085803114f44ce73060ee43e8c))
+
 ## [5.0.27](https://github.com/shaka-project/shaka-player/compare/v5.0.26...v5.0.27) (2026-07-20)
 
 
