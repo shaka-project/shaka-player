@@ -2588,7 +2588,7 @@ shaka.extern.AccessibilityConfiguration;
  *   played, the whole break is dropped from the buffer and excluded from
  *   future streaming via a single skip range, so a later seek back into it
  *   neither re-fetches nor replays the ads.  Applies to fully watched breaks
- *   only, not individual ads.  DASH segments-mode VOD only.
+ *   only, not individual ads.  Segments-mode VOD only.
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {number} interstitialPreloadAheadTime

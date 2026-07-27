@@ -285,7 +285,7 @@ describe('Player', () => {
     // Player owns the manifest stream-type guard; add/remove/buffered behavior
     // lives in SkipRangeController and is covered by its own tests.
     const unsupportedWarning =
-        'addSkipRange() supports DASH segments mode, VOD only; ignoring';
+        'addSkipRange() supports segments mode, VOD only; ignoring';
 
     it('accepts a range on DASH segments-mode VOD content', async () => {
       manifest.type = shaka.media.ManifestParser.DASH;
@@ -297,13 +297,14 @@ describe('Player', () => {
       expect(logWarnSpy).not.toHaveBeenCalledWith(unsupportedWarning);
     });
 
-    it('ignores a range on non-DASH content', async () => {
+    it('accepts a range on non-DASH segments-mode VOD content', async () => {
       manifest.type = shaka.media.ManifestParser.HLS;
+      manifest.sequenceMode = false;
       await player.load(fakeManifestUri, 0, fakeMimeType);
       logWarnSpy.calls.reset();
 
-      expect(player.addSkipRange(10, 30)).toBe(false);
-      expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
+      expect(player.addSkipRange(10, 30)).toBe(true);
+      expect(logWarnSpy).not.toHaveBeenCalledWith(unsupportedWarning);
     });
 
     it('ignores a range in sequence mode', async () => {
@@ -318,6 +319,7 @@ describe('Player', () => {
 
     it('ignores a range on live content', async () => {
       manifest.type = shaka.media.ManifestParser.DASH;
+      manifest.sequenceMode = false;
       spyOn(manifest.presentationTimeline, 'isDynamic').and.returnValue(true);
       await player.load(fakeManifestUri, 0, fakeMimeType);
       logWarnSpy.calls.reset();
