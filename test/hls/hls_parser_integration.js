@@ -238,4 +238,44 @@ describe('HlsParser', () => {
     // Play for a few seconds.
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 40);
   });
+
+  it('plays MP3 audio-only with codec metadata', async () => {
+    // This asset has mp3 audio only, with explicit codecs.
+    const url =
+        '/base/test/test/assets/hls-raw-mp3/playlist.m3u8';
+
+    await player.load(url);
+
+    // Verify that we are using the expected variant.
+    const variants = player.getVariantTracks();
+    expect(variants.length).toBeGreaterThan(0);
+
+    await video.play();
+
+    // Wait for the video to start playback.
+    await waiter.waitForMovementOrFailOnTimeout(video, 20);
+
+    // Play for a few seconds.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 40);
+  });
+
+  it('plays MP3 audio-only without codec metadata', async () => {
+    // This asset has mp3 audio only, without explicit codecs.
+    const url =
+        '/base/test/test/assets/hls-raw-mp3/playlist-no-codecs.m3u8';
+
+    await player.load(url);
+
+    // Verify that we are using the expected variant.
+    const variants = player.getVariantTracks();
+    expect(variants.length).toBeGreaterThan(0);
+
+    await video.play();
+
+    // Wait for the video to start playback.
+    await waiter.waitForMovementOrFailOnTimeout(video, 20);
+
+    // Play for a few seconds.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 40);
+  });
 });

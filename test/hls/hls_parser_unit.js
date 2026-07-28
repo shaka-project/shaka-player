@@ -756,6 +756,38 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  // https://github.com/shaka-project/shaka-player/issues/10387
+  it('detects audio-only raw content when CODECS is missing', async () => {
+    // With no CODECS attribute, we default to assuming multiplexed
+    // audio+video.  The media playlist proves otherwise: a raw MP3 elementary
+    // stream can't hold video.
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=63701\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'main.mp3',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/mpeg', 'mp4a.40.2');
+        });
+      });
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+    });
+
+    await testHlsParser(master, media, manifest);
+  });
+
   it('accepts fLaC codec as audio/mp4', async () => {
     const master = [
       '#EXTM3U\n',
