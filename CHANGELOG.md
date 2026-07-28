@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.16.43](https://github.com/shaka-project/shaka-player/compare/v4.16.42...v4.16.43) (2026-07-28)
+
+
+### Bug Fixes
+
+* **HLS:** Detect audio-only raw content when CODECS is missing ([#10399](https://github.com/shaka-project/shaka-player/issues/10399)) ([2c4ed7e](https://github.com/shaka-project/shaka-player/commit/2c4ed7ef38a5733346a99b4c5d5603eda5f545d9))
+
 ## [4.16.42](https://github.com/shaka-project/shaka-player/compare/v4.16.41...v4.16.42) (2026-07-20)
 
 
