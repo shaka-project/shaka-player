@@ -800,7 +800,7 @@ describe('HlsParser', () => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
-          stream.mime('audio/mpeg', '');
+          stream.mime('audio/mpeg', 'mp4a.40.2');
         });
       });
       manifest.sequenceMode = sequenceMode;
