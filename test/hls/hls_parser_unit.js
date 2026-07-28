@@ -778,6 +778,76 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  // https://github.com/shaka-project/shaka-player/issues/10387
+  it('detects audio-only raw content when CODECS is missing', async () => {
+    // Without a CODECS attribute we would assume multiplexed audio+video.
+    // Looking at the media playlist first shows that the segments are a raw
+    // MP3 elementary stream, which can only be audio.  The result is the same
+    // manifest we would have built from CODECS="mp4a.40.34".
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=63701\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'main.mp3',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/mpeg', 'mp4a.40.34');
+        });
+      });
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+    });
+
+    await testHlsParser(master, media, manifest);
+  });
+
+  // https://github.com/shaka-project/shaka-player/issues/10387
+  it('peeks at one media playlist per CODECS-less variant', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=63701\n',
+      'audio\n',
+      // A variant that declares its codecs needs no peeking.
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1"\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/video', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    await parser.start('test:/master', playerInterface);
+
+    // The CODECS-less playlist is fetched once to peek at it, and the one with
+    // CODECS is not fetched at all until it is lazy-loaded.
+    const requests = fakeNetEngine.request.calls.all().map(
+        (call) => call.args[1].uris[0]);
+    expect(requests.filter((uri) => uri == 'test:/audio').length).toBe(1);
+    expect(requests.filter((uri) => uri == 'test:/video').length).toBe(0);
+  });
+
   it('accepts fLaC codec as audio/mp4', async () => {
     const master = [
       '#EXTM3U\n',
