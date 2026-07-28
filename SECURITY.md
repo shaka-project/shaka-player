@@ -18,7 +18,7 @@ The Google Security Team will process your report within a day, and respond with
 
 ## Remediation Actions
 
- * A GitHub issue will be created with the `type: vulnerability` label to coordinate a response.  After remediation, we will also use this issue to disclose any details we withheld between receiving the private report and resolving the issue.
+ * A GitHub issue will be created to coordinate a response.  After remediation, we will also use this issue to disclose any details we withheld between receiving the private report and resolving the issue.
 
  * A GitHub Security Advisory may be created, if appropriate.  For example, this would be done if the issue impacts users or dependent projects.  This might be skipped for other issues, such as CI workflow vulnerabilities.
 
