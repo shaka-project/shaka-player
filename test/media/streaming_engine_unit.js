@@ -487,18 +487,18 @@ describe('StreamingEngine', () => {
       shouldPrefetchNextSegment: () => true,
       getKeySystem: () => '',
     };
-    // Wire the controller to the fake engine/MSE as Player does; the manifest
+    // Wire the controller to the fake engine as Player does; the manifest
     // guard lives in Player and is not exercised here.
     skipRangeController = new shaka.media.SkipRangeController({
-      getContentTypes: () =>
-        streamingEngine ? streamingEngine.getContentTypes() : [],
-      isBuffered: (type, time) => mediaSourceEngine.isBuffered(type, time),
-      bufferEnd: (type) => mediaSourceEngine.bufferEnd(type),
       requestUpdate: () => {
         if (streamingEngine) {
           streamingEngine.requestSkipRangeUpdate();
         }
       },
+      getPlaybackRate: Util.spyFunc(getPlaybackRate),
+      isRegionBuffered: (start, end) =>
+        streamingEngine ? streamingEngine.isSkipRegionBuffered(start, end) :
+            false,
     });
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface,
@@ -4089,7 +4089,7 @@ describe('StreamingEngine', () => {
           expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
         });
 
-    it('ignores removal of a range once it has been buffered past',
+    it('removing a range does not refill a committed hole',
         async () => {
           // Large buffering goal so all non-skipped segments buffer while the
           // playhead stays at 0.
@@ -4108,12 +4108,12 @@ describe('StreamingEngine', () => {
           expect(mediaSourceEngine.segments[ContentType.VIDEO]).toEqual(
               [true, false, false, true]);
 
-          // Streaming has buffered past the range (segment 3), so the hole is
-          // committed; removal is refused and the buffer is left untouched.
+          // Removal always succeeds, but streaming has already buffered past
+          // the hole (segment 3), so there is no unbuffered region left to
+          // re-fetch here; the committed hole is left as-is until the region is
+          // reached again (e.g. by seeking back).
           skipRangeController.remove(10, 30);
-          expect(skipRangeController.getAll()).toEqual([
-            {start: 10, end: 30},
-          ]);
+          expect(skipRangeController.getAll()).toEqual([]);
           await runTest();
           expect(mediaSourceEngine.segments[ContentType.VIDEO]).toEqual(
               [true, false, false, true]);
@@ -4136,9 +4136,7 @@ describe('StreamingEngine', () => {
       expect(mediaSourceEngine.segments[ContentType.VIDEO][3]).toBe(true);
     });
 
-    it('ignores a range that has already buffered', async () => {
-      // Buffer the entire presentation first (large buffering goal, playhead
-      // parked at 0).
+    it('records an already-buffered range but does not act on it', async () => {
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
       config.bufferingGoal = 60;
       createStreamingEngine(config);
@@ -4148,14 +4146,10 @@ describe('StreamingEngine', () => {
       await streamingEngine.start();
       playing = false;
 
+      // Buffer everything, then add a range over it: recorded, but inert while
+      // buffered, so nothing is evicted.
       await runTest();
-      expect(mediaSourceEngine.segments[ContentType.VIDEO]).toEqual(
-          [true, true, true, true]);
-
-      // A range must be declared before streaming buffers into it.  Adding one
-      // that is already buffered is refused, and the buffer is left intact --
-      // the skip is a forward-looking decision, never a retroactive eviction.
-      skipRangeController.add(10, 30);
+      expect(skipRangeController.add(10, 30)).toBe(true);
       await runTest();
 
       expect(mediaSourceEngine.segments).toEqual({
@@ -4163,6 +4157,91 @@ describe('StreamingEngine', () => {
         video: [true, true, true, true],
         text: [true, true, true, true],
       });
+    });
+
+    it('acts on a range added over buffered content once it is evicted',
+        async () => {
+          const config =
+              shaka.util.PlayerConfiguration.createDefault().streaming;
+          config.bufferingGoal = 60;
+          createStreamingEngine(config);
+
+          streamingEngine.switchVariant(variant);
+          streamingEngine.switchTextStream(textStream);
+          await streamingEngine.start();
+          playing = false;
+
+          // Buffer everything, then add a range over it (inert while buffered).
+          await runTest();
+          expect(skipRangeController.add(10, 30)).toBe(true);
+          await runTest();
+          expect(mediaSourceEngine.segments[ContentType.VIDEO]).toEqual(
+              [true, true, true, true]);
+
+          // Evict the range for every stream; now clear, the skip acts and the
+          // hole re-forms instead of re-fetching.
+          await Promise.all(
+              [ContentType.AUDIO, ContentType.VIDEO, ContentType.TEXT].map(
+                  (type) => mediaSourceEngine.remove(type, 10, 30)));
+          await runTest();
+
+          expect(mediaSourceEngine.segments).toEqual({
+            audio: [true, false, false, true],
+            video: [true, false, false, true],
+            text: [true, false, false, true],
+          });
+        });
+
+    it('does not act while only part of the range is buffered', async () => {
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.bufferingGoal = 60;
+      createStreamingEngine(config);
+
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = false;
+
+      // Buffer everything, add a range over segments 1 and 2, then evict only
+      // segment 1.  Segment 2 keeps the range partly buffered, so the skip
+      // stays inert: segment 2 is untouched and the hole is not widened.
+      await runTest();
+      expect(skipRangeController.add(10, 30)).toBe(true);
+      await Promise.all(
+          [ContentType.AUDIO, ContentType.VIDEO, ContentType.TEXT].map(
+              (type) => mediaSourceEngine.remove(type, 10, 20)));
+      await runTest();
+
+      expect(mediaSourceEngine.segments).toEqual({
+        audio: [true, false, true, true],
+        video: [true, false, true, true],
+        text: [true, false, true, true],
+      });
+    });
+
+    it('keeps fetching past a range the playhead is inside', async () => {
+      // Regression: an inert range must not stall streaming.  Adding one while
+      // the playhead is inside its buffered content must still fetch past it.
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+
+      // By t=25 the playhead is inside [10,30) and that content is buffered.
+      let added = false;
+      await runTest(() => {
+        if (presentationTimeInSeconds == 25 && !added) {
+          added = true;
+          expect(skipRangeController.add(10, 30)).toBe(true);
+        }
+      });
+
+      expect(mediaSourceEngine.segments).toEqual({
+        audio: [true, true, true, true],
+        video: [true, true, true, true],
+        text: [true, true, true, true],
+      });
+      expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
     });
 
     it('does not fetch or prefetch skipped segments', async () => {

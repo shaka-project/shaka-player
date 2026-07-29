@@ -97,12 +97,12 @@ shaka.test.FakeStreamingEngine = class {
     this.applyPlayRange = jasmine.createSpy('applyPlayRange');
 
     /** @type {!jasmine.Spy} */
-    this.getContentTypes =
-        jasmine.createSpy('getContentTypes').and.returnValue([]);
-
-    /** @type {!jasmine.Spy} */
     this.requestSkipRangeUpdate =
         jasmine.createSpy('requestSkipRangeUpdate');
+
+    /** @type {!jasmine.Spy} */
+    this.isSkipRegionBuffered =
+        jasmine.createSpy('isSkipRegionBuffered').and.returnValue(false);
 
     /** @type {!jasmine.Spy} */
     this.seeked = jasmine.createSpy('seeked');

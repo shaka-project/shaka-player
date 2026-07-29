@@ -5,28 +5,19 @@
  */
 
 describe('SkipRangeController', () => {
-  const ContentType = shaka.util.ManifestParserUtils.ContentType;
-
   /**
-   * A streaming PlayerInterface (two content types, nothing buffered) with the
-   * given overrides.
+   * A PlayerInterface with the given overrides.
    *
    * @param {!Object=} overrides
    * @return {!shaka.media.SkipRangeController.PlayerInterface}
    */
-  function makeStreaming(overrides = {}) {
+  function makeInterface(overrides = {}) {
     return /** @type {!shaka.media.SkipRangeController.PlayerInterface} */ (
       Object.assign({
-        getContentTypes: () => [ContentType.AUDIO, ContentType.VIDEO],
-        isBuffered: (type, time) => false,
-        bufferEnd: (type) => null,
         requestUpdate: () => {},
+        getPlaybackRate: () => 1,
+        isRegionBuffered: (start, end) => false,
       }, overrides));
-  }
-
-  /** @return {!shaka.media.SkipRangeController.PlayerInterface} Pre-load. */
-  function makeIdle() {
-    return makeStreaming({getContentTypes: () => []});
   }
 
   /**
@@ -37,12 +28,12 @@ describe('SkipRangeController', () => {
     return new shaka.media.SkipRangeController(playerInterface);
   }
 
-  describe('interval logic (no streaming)', () => {
+  describe('interval logic', () => {
     /** @type {!shaka.media.SkipRangeController} */
     let controller;
 
     beforeEach(() => {
-      controller = makeController(makeIdle());
+      controller = makeController(makeInterface());
     });
 
     it('records ranges and answers queries', () => {
@@ -69,13 +60,6 @@ describe('SkipRangeController', () => {
       expect(controller.getAll()).toEqual([{start: 10, end: 30}]);
     });
 
-    it('does not run buffered checks when nothing is streaming', () => {
-      // No content types, so the range is recorded without consulting the
-      // buffer -- the pre-load queueing behavior.
-      controller.add(10, 20);
-      expect(controller.getAll()).toEqual([{start: 10, end: 20}]);
-    });
-
     it('removes a range matched by start/end', () => {
       controller.add(10, 20);
       controller.add(30, 40);
@@ -91,12 +75,12 @@ describe('SkipRangeController', () => {
     });
   });
 
-  describe('getRangeAt / getTimePast', () => {
+  describe('getRangeAt', () => {
     /** @type {!shaka.media.SkipRangeController} */
     let controller;
 
     beforeEach(() => {
-      controller = makeController(makeIdle());
+      controller = makeController(makeInterface());
       controller.add(10, 20);
       controller.add(30, 40);
     });
@@ -107,58 +91,71 @@ describe('SkipRangeController', () => {
       expect(controller.getRangeAt(20)).toBe(null);  // end is exclusive
       expect(controller.getRangeAt(25)).toBe(null);
     });
+  });
 
-    it('advances a time past the range it falls in', () => {
-      expect(controller.getTimePast(15)).toBe(20);
-      expect(controller.getTimePast(35)).toBe(40);
-      expect(controller.getTimePast(25)).toBe(25);  // outside any range
+  describe('activeRangeAt / timeNeededPast', () => {
+    it('acts on a range while it is unbuffered', () => {
+      const controller = makeController(makeInterface({
+        isRegionBuffered: (start, end) => false,
+      }));
+      controller.add(10, 20);
+      expect(controller.activeRangeAt(15)).toEqual({start: 10, end: 20});
+      expect(controller.timeNeededPast(15)).toBe(20);
+      expect(controller.timeNeededPast(25)).toBe(25);  // outside any range
+    });
+
+    it('goes inert while any of the range is buffered', () => {
+      const controller = makeController(makeInterface({
+        isRegionBuffered: (start, end) => true,
+      }));
+      controller.add(10, 20);
+      // The range is recorded, but buffered content makes it inert: no skip and
+      // no run-ahead jump, so streaming plays through instead of stalling.
+      expect(controller.activeRangeAt(15)).toBe(null);
+      expect(controller.timeNeededPast(15)).toBe(15);
+    });
+
+    it('does not act during reverse playback', () => {
+      const controller = makeController(makeInterface({
+        getPlaybackRate: () => -1,
+        isRegionBuffered: (start, end) => false,
+      }));
+      controller.add(10, 20);
+      expect(controller.activeRangeAt(15)).toBe(null);
+      expect(controller.timeNeededPast(15)).toBe(15);
     });
   });
 
-  describe('buffered checks while streaming', () => {
-    it('rejects a range whose start is already buffered', () => {
-      const controller = makeController(makeStreaming({
-        isBuffered: (type, time) => time >= 10 && time < 20,
-      }));
-      expect(controller.add(10, 30)).toBe(false);
-      expect(controller.getAll()).toEqual([]);
-    });
+  describe('accepts regardless of buffering', () => {
+    // The controller never consults the buffer: a range is always recorded and
+    // always removable.  Whether the skip actually forms a gap is decided by
+    // the streaming side, once the region's span is clear.
 
-    it('records a range that is not buffered', () => {
-      const controller = makeController(makeStreaming());
+    it('records a range even if it is already buffered', () => {
+      const controller = makeController(makeInterface());
       expect(controller.add(10, 30)).toBe(true);
       expect(controller.getAll()).toEqual([{start: 10, end: 30}]);
     });
 
+    it('removes a range even after the hole is committed', () => {
+      const controller = makeController(makeInterface());
+      controller.add(10, 30);
+      controller.remove(10, 30);
+      expect(controller.getAll()).toEqual([]);
+    });
+
     it('requests an update when a range is accepted', () => {
       const requestUpdate = jasmine.createSpy('requestUpdate');
-      const controller = makeController(makeStreaming({requestUpdate}));
+      const controller = makeController(makeInterface({requestUpdate}));
       controller.add(10, 30);
       expect(requestUpdate).toHaveBeenCalled();
     });
 
     it('does not request an update when a range is rejected', () => {
       const requestUpdate = jasmine.createSpy('requestUpdate');
-      const controller = makeController(makeStreaming({requestUpdate}));
+      const controller = makeController(makeInterface({requestUpdate}));
       controller.add(30, 10);  // reversed -> rejected
       expect(requestUpdate).not.toHaveBeenCalled();
-    });
-
-    it('ignores removal once the hole is committed', () => {
-      // Buffer end is past the range start, so the hole is committed.
-      const controller = makeController(
-          makeStreaming({bufferEnd: (type) => 35}));
-      controller.add(10, 30);
-      controller.remove(10, 30);
-      expect(controller.getAll()).toEqual([{start: 10, end: 30}]);
-    });
-
-    it('removes a range that is not yet buffered past', () => {
-      const controller = makeController(
-          makeStreaming({bufferEnd: (type) => 5}));
-      controller.add(10, 30);
-      controller.remove(10, 30);
-      expect(controller.getAll()).toEqual([]);
     });
   });
 });
