@@ -3157,4 +3157,38 @@ describe('Interstitial Ad manager', () => {
     const interstitials = interstitialAdManager.getInterstitials();
     expect(interstitials.length).toBe(1);
   });
+
+  describe('click-through URI scheme', () => {
+    const isSafe = (uri) =>
+      shaka.ads.InterstitialAdManager.isSafeClickThroughUri_(uri);
+
+    it('allows http(s) and relative URIs', () => {
+      expect(isSafe('https://example.com/offer')).toBe(true);
+      expect(isSafe('http://example.com/offer')).toBe(true);
+      expect(isSafe('HTTPS://example.com/offer')).toBe(true);
+      expect(isSafe('/offer')).toBe(true);
+      expect(isSafe('offer.html')).toBe(true);
+    });
+
+    it('rejects javascript: URIs', () => {
+      expect(isSafe('javascript:alert(1)')).toBe(false);
+      expect(isSafe('JavaScript:alert(1)')).toBe(false);
+    });
+
+    it('rejects javascript: URIs hidden by control characters', () => {
+      // Browsers ignore leading control characters and whitespace when
+      // resolving a URL's scheme, so they must be stripped before the check.
+      expect(isSafe('\u0000javascript:alert(1)')).toBe(false);
+      expect(isSafe('  javascript:alert(1)')).toBe(false);
+      expect(isSafe('java\nscript:alert(1)')).toBe(false);
+      expect(isSafe('java\tscript:alert(1)')).toBe(false);
+    });
+
+    it('rejects other non-http schemes', () => {
+      expect(isSafe('data:text/html,<script>alert(1)</script>')).toBe(false);
+      expect(isSafe('blob:https://example.com/abc')).toBe(false);
+      expect(isSafe('vbscript:msgbox(1)')).toBe(false);
+      expect(isSafe('file:///etc/passwd')).toBe(false);
+    });
+  });
 });
