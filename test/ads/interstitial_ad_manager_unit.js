@@ -3158,8 +3158,8 @@ describe('Interstitial Ad manager', () => {
     expect(interstitials.length).toBe(1);
   });
 
+  /** @suppress {visibility} */
   describe('click-through URI scheme', () => {
-    /** @suppress {visibility} */
     const isSafe = (uri) =>
       shaka.ads.InterstitialAdManager.isSafeClickThroughUri_(uri);
 
