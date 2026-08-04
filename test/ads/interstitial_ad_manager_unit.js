@@ -3159,6 +3159,7 @@ describe('Interstitial Ad manager', () => {
   });
 
   describe('click-through URI scheme', () => {
+    /** @suppress {visibility} */
     const isSafe = (uri) =>
       shaka.ads.InterstitialAdManager.isSafeClickThroughUri_(uri);
 
@@ -3171,7 +3172,9 @@ describe('Interstitial Ad manager', () => {
     });
 
     it('rejects javascript: URIs', () => {
+      // eslint-disable-next-line no-script-url
       expect(isSafe('javascript:alert(1)')).toBe(false);
+      // eslint-disable-next-line no-script-url
       expect(isSafe('JavaScript:alert(1)')).toBe(false);
     });
 
@@ -3187,6 +3190,7 @@ describe('Interstitial Ad manager', () => {
     it('rejects other non-http schemes', () => {
       expect(isSafe('data:text/html,<script>alert(1)</script>')).toBe(false);
       expect(isSafe('blob:https://example.com/abc')).toBe(false);
+      // cspell: disable-next-line
       expect(isSafe('vbscript:msgbox(1)')).toBe(false);
       expect(isSafe('file:///etc/passwd')).toBe(false);
     });
