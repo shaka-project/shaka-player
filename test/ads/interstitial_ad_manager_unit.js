@@ -2029,4 +2029,150 @@ describe('Interstitial Ad manager', () => {
     const interstitials = interstitialAdManager.getInterstitials();
     expect(interstitials.length).toBe(1);
   });
+
+  /** @suppress {visibility} */
+  describe('click-through URI scheme', () => {
+    const isSafe = (uri) =>
+      shaka.ads.InterstitialAdManager.isSafeClickThroughUri_(uri);
+
+    it('allows http(s) and relative URIs', () => {
+      expect(isSafe('https://example.com/offer')).toBe(true);
+      expect(isSafe('http://example.com/offer')).toBe(true);
+      expect(isSafe('HTTPS://example.com/offer')).toBe(true);
+      expect(isSafe('/offer')).toBe(true);
+      expect(isSafe('offer.html')).toBe(true);
+    });
+
+    it('rejects javascript: URIs', () => {
+      // eslint-disable-next-line no-script-url
+      expect(isSafe('javascript:alert(1)')).toBe(false);
+      // eslint-disable-next-line no-script-url
+      expect(isSafe('JavaScript:alert(1)')).toBe(false);
+    });
+
+    it('rejects javascript: URIs hidden by control characters', () => {
+      // Browsers ignore leading control characters and whitespace when
+      // resolving a URL's scheme, so they must be stripped before the check.
+      expect(isSafe('\u0000javascript:alert(1)')).toBe(false);
+      expect(isSafe('  javascript:alert(1)')).toBe(false);
+      expect(isSafe('java\nscript:alert(1)')).toBe(false);
+      expect(isSafe('java\tscript:alert(1)')).toBe(false);
+    });
+
+    it('rejects other non-http schemes', () => {
+      expect(isSafe('data:text/html,<script>alert(1)</script>')).toBe(false);
+      expect(isSafe('blob:https://example.com/abc')).toBe(false);
+      // cspell: disable-next-line
+      expect(isSafe('vbscript:msgbox(1)')).toBe(false);
+      expect(isSafe('file:///etc/passwd')).toBe(false);
+    });
+  });
+
+  describe('click-through', () => {
+    /** @type {!jasmine.Spy} */
+    let openSpy;
+
+    beforeEach(() => {
+      openSpy = spyOn(window, 'open');
+    });
+
+    /**
+     * @param {string} clickThroughUrl
+     * @return {!shaka.extern.AdInterstitial}
+     */
+    function overlayInterstitial(clickThroughUrl) {
+      return {
+        id: null,
+        groupId: null,
+        startTime: 0,
+        endTime: null,
+        uri: 'test.html',
+        mimeType: 'text/html',
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: false,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: true,
+        pre: true,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 0,
+            y: 0,
+          },
+          size: {
+            x: 1920,
+            y: 1080,
+          },
+        },
+        displayOnBackground: false,
+        currentVideo: null,
+        background: null,
+        clickThroughUrl: clickThroughUrl,
+        tracking: null,
+      };
+    }
+
+    /**
+     * Starts an overlay interstitial with the given click-through URI and
+     * clicks on it.
+     *
+     * @param {string} clickThroughUrl
+     */
+    async function startAdAndClick(clickThroughUrl) {
+      await interstitialAdManager.addInterstitials(
+          [overlayInterstitial(clickThroughUrl)]);
+
+      video.play();
+      video.dispatchEvent(new Event('timeupdate'));
+
+      await shaka.test.Util.shortDelay();
+
+      // An overlay interstitial with a text/html mimeType is rendered into an
+      // iframe inside the ad container, and that element carries the click
+      // listener.
+      const element = adContainer.querySelector('iframe');
+      expect(element).not.toBeNull();
+      element.dispatchEvent(new Event('click'));
+    }
+
+    it('opens http(s) click-through URIs', async () => {
+      await startAdAndClick('https://example.com/offer');
+
+      expect(openSpy).toHaveBeenCalledWith(
+          'https://example.com/offer', '_blank');
+    });
+
+    it('does not open javascript: click-through URIs', async () => {
+      // eslint-disable-next-line no-script-url
+      await startAdAndClick('javascript:alert(1)');
+
+      expect(openSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not open data: click-through URIs', async () => {
+      await startAdAndClick('data:text/html,<script>alert(1)</script>');
+
+      expect(openSpy).not.toHaveBeenCalled();
+    });
+
+    it('still reports the click when the URI is rejected', async () => {
+      // eslint-disable-next-line no-script-url
+      await startAdAndClick('javascript:alert(1)');
+
+      const eventValue = {
+        type: 'ad-clicked',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValue));
+    });
+  });
 });
