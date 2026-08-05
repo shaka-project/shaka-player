@@ -1,5 +1,17 @@
 # The MOQT Streaming Format manifest parser plugin.
 
++../../lib/msf/dialect_registry.js
++../../lib/msf/i_control_stream.js
++../../lib/msf/quic_var_int_codec.js
++../../lib/msf/request_id_session.js
++../../lib/msf/drafts/draft14/messages.js
++../../lib/msf/drafts/draft14/control_stream.js
++../../lib/msf/drafts/draft14/dialect.js
++../../lib/msf/drafts/draft16/dialect.js
++../../lib/msf/drafts/draft18/codec.js
++../../lib/msf/drafts/draft18/messages.js
++../../lib/msf/drafts/draft18/session.js
++../../lib/msf/drafts/draft18/dialect.js
 +../../lib/msf/buffer_control_writer.js
 +../../lib/msf/loc_parser.js
 +../../lib/msf/msf_classes.js
@@ -8,7 +20,7 @@
 +../../lib/msf/msf_presentation_timeline.js
 +../../lib/msf/msf_receiver.js
 +../../lib/msf/msf_sender.js
-+../../lib/msf/msf_tracks_manager.js
++../../lib/msf/track_alias_registry.js
 +../../lib/msf/msf_transport.js
 +../../lib/msf/msf_utils.js
 
