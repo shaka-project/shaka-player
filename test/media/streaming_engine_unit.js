@@ -4272,6 +4272,33 @@ describe('StreamingEngine', () => {
       expect(mediaSourceEngine.segments[ContentType.VIDEO][3]).toBe(true);
     });
 
+    it('skips in-range segments even when the region reads buffered',
+        async () => {
+          // Regression for the seek-into-range stall: the per-segment skip
+          // decision must be independent of buffer state.  Force the region to
+          // read buffered (as stale in-range content left by a mid-range scrub
+          // does) and verify the frontier STILL skips the in-range segments,
+          // rather than filling misaligned in-range content that stalls.
+          spyOn(streamingEngine, 'isSkipRegionBuffered').and.returnValue(true);
+
+          streamingEngine.switchVariant(variant);
+          streamingEngine.switchTextStream(textStream);
+          skipRangeController.add(10, 30);
+          await streamingEngine.start();
+          playing = true;
+
+          await runTest();
+
+          // Despite the region reading buffered, the range was still carved
+          // to a clean hole for every stream (the skip ignores buffer state).
+          expect(mediaSourceEngine.segments).toEqual({
+            audio: [true, false, false, true],
+            video: [true, false, false, true],
+            text: [true, false, false, true],
+          });
+          expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+        });
+
     it('skips a range added mid-playback before it is reached', async () => {
       streamingEngine.switchVariant(variant);
       streamingEngine.switchTextStream(textStream);
@@ -4291,53 +4318,17 @@ describe('StreamingEngine', () => {
       expect(mediaSourceEngine.segments[ContentType.VIDEO][3]).toBe(false);
     });
 
-    it('rejects an adjacent range; a single range covers the span',
-        async () => {
-          streamingEngine.switchVariant(variant);
-          streamingEngine.switchTextStream(textStream);
-          // Adjacent ranges must be coalesced by the caller: the second,
-          // abutting range is rejected, so only [10,20) would be skipped.
-          skipRangeController.add(10, 20);
-          skipRangeController.add(20, 30);  // adjacent -> ignored
-          expect(skipRangeController.getAll()).toEqual([
-            {start: 10, end: 20},
-          ]);
-
-          // The correct way to skip segments 1 and 2 is one range.
-          skipRangeController.clear();
-          skipRangeController.add(10, 30);
-          await streamingEngine.start();
-          playing = true;
-
-          await runTest();
-
-          expect(mediaSourceEngine.segments[ContentType.VIDEO]).toEqual(
-              [true, false, false, true]);
-          expect(mediaSourceEngine.segments[ContentType.AUDIO]).toEqual(
-              [true, false, false, true]);
-        });
-
-    it('rejects an overlapping range', () => {
+    it('merges adjacent ranges into a single span', async () => {
       streamingEngine.switchVariant(variant);
-      skipRangeController.add(10, 30);
-      skipRangeController.add(20, 40);  // overlaps -> ignored
+      streamingEngine.switchTextStream(textStream);
+      // Adjacent ranges coalesce, so [10,20) + [20,30) becomes one [10,30)
+      // range covering segments 1 and 2.
+      skipRangeController.add(10, 20);
+      skipRangeController.add(20, 30);  // adjacent -> merges
       expect(skipRangeController.getAll()).toEqual([
         {start: 10, end: 30},
       ]);
-    });
 
-    // The manifest stream-type guard lives in Player.addSkipRange; its
-    // live/non-DASH/sequence-mode rejection is covered by the Player tests.
-
-    it('skips a segment that straddles the range end', async () => {
-      streamingEngine.switchVariant(variant);
-      streamingEngine.switchTextStream(textStream);
-      // End the range at 25, inside segment 2 ([20,30)).  Segment 1 ([10,20))
-      // starts within the range and is skipped.  Segment 2 also starts within
-      // the range (at 20), so its front carries skipped content and it is
-      // skipped too; buffering lands on the first segment that starts at or
-      // after the range end -- segment 3 ([30,40)).
-      skipRangeController.add(10, 25);
       await streamingEngine.start();
       playing = true;
 
@@ -4349,13 +4340,82 @@ describe('StreamingEngine', () => {
           [true, false, false, true]);
     });
 
-    it('keeps the segment straddling the range start', async () => {
+    it('merges an overlapping range', () => {
+      streamingEngine.switchVariant(variant);
+      skipRangeController.add(10, 30);
+      skipRangeController.add(20, 40);  // overlaps -> merges
+      expect(skipRangeController.getAll()).toEqual([
+        {start: 10, end: 40},
+      ]);
+    });
+
+    it('tolerates a slightly-off range end at a segment boundary',
+        async () => {
+          streamingEngine.switchVariant(variant);
+          streamingEngine.switchTextStream(textStream);
+          // Range end 29.9995 is a hair below segment 3's start (30); the
+          // straddle check treats it as *at* the boundary, so segment 3 is
+          // kept (fetched) rather than dropped; no straddling segment remains.
+          skipRangeController.add(10, 29.9995);
+          await streamingEngine.start();
+          playing = true;
+
+          await runTest();
+
+          expect(mediaSourceEngine.segments[ContentType.VIDEO]).toEqual(
+              [true, false, false, true]);
+          expect(mediaSourceEngine.segments[ContentType.AUDIO]).toEqual(
+              [true, false, false, true]);
+        });
+
+    it('snaps the stored range to real video segment boundaries',
+        async () => {
+          streamingEngine.switchVariant(variant);
+          streamingEngine.switchTextStream(textStream);
+          // Add a range whose endpoints miss the segment grid by a fraction;
+          // once streaming resolves it against the video index, the stored
+          // range should read back as the aligned boundaries [10, 30).
+          skipRangeController.add(10.0005, 29.9995);
+          await streamingEngine.start();
+          playing = true;
+
+          await runTest();
+
+          expect(skipRangeController.getAll()).toEqual([
+            {start: 10, end: 30},
+          ]);
+        });
+
+    // The manifest stream-type guard lives in Player.addSkipRange; its
+    // live/non-DASH/sequence-mode rejection is covered by the Player tests.
+
+    it('does not skip a range whose end is mid-segment', async () => {
+      const warnOnce = spyOn(shaka.log, 'warning').and.callThrough();
       streamingEngine.switchVariant(variant);
       streamingEngine.switchTextStream(textStream);
-      // Start the range at 15, inside segment 1 ([10,20)).  Segment 1 starts
-      // before the range start, so it is the last content segment and is kept
-      // and played in full; segment 2 ([20,30)) lies within the range and is
-      // skipped.
+      // End the range at 25, inside segment 2 ([20,30)) -- not a segment
+      // boundary.  The range can't form a clean [start,end) hole, so nothing is
+      // skipped on any stream and a one-time diagnostic is logged.
+      skipRangeController.add(10, 25);
+      await streamingEngine.start();
+      playing = true;
+
+      await runTest();
+
+      expect(mediaSourceEngine.segments[ContentType.VIDEO]).toEqual(
+          [true, true, true, true]);
+      expect(mediaSourceEngine.segments[ContentType.AUDIO]).toEqual(
+          [true, true, true, true]);
+      expect(warnOnce).toHaveBeenCalled();
+    });
+
+    it('does not skip a range whose start is mid-segment', async () => {
+      const warnOnce = spyOn(shaka.log, 'warning').and.callThrough();
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      // Start the range at 15, inside segment 1 ([10,20)) -- not a segment
+      // boundary.  Misaligned start, so nothing is skipped (we don't even check
+      // the end) and a diagnostic is logged.
       skipRangeController.add(15, 30);
       await streamingEngine.start();
       playing = true;
@@ -4363,7 +4423,8 @@ describe('StreamingEngine', () => {
       await runTest();
 
       expect(mediaSourceEngine.segments[ContentType.VIDEO]).toEqual(
-          [true, true, false, true]);
+          [true, true, true, true]);
+      expect(warnOnce).toHaveBeenCalled();
     });
   });
 
