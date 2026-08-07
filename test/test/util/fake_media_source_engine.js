@@ -234,8 +234,14 @@ shaka.test.FakeMediaSourceEngine = class {
       return false;
     }
 
-    return time >= this.toTime_(type, first) &&
-        time < this.toTime_(type, last);
+    if (time < this.toTime_(type, first) || time >= this.toTime_(type, last)) {
+      return false;
+    }
+    // Respect holes: |time| is buffered only if the specific segment covering
+    // it is present, not merely because it lies between the first and last
+    // buffered segments (a real buffer reports gaps this way).
+    const index = this.toIndex_(type, time);
+    return this.segments[type][index] === true;
   }
 
   /**
