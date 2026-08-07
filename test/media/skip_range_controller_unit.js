@@ -392,6 +392,33 @@ describe('SkipRangeController', () => {
       expect(controller.isUnalignable(region)).toBe(true);
     });
 
+    it('aligns to a boundary below the endpoint, within tolerance', () => {
+      // Endpoints a hair *below* the boundaries, as an ad server reporting
+      // times truncated to milliseconds gives.
+      controller.add(12.0333, 18.0666);
+      const region = getRange(controller, 12.0333);
+      controller.resolveAlignment(
+          region,
+          [seg(6.0, 12.033333), seg(12.033333, 18.066666)],
+          [seg(12.033333, 18.066666), seg(18.066666, 24.1)]);
+      expect(controller.isUnalignable(region)).toBe(false);
+      expect(controller.getAll()).toEqual([
+        {start: 12.033333, end: 18.066666},
+      ]);
+    });
+
+    it('snaps to the closest boundary when two are within tolerance', () => {
+      // 3.0 and 3.0008 are both within tolerance of start 3.0006, but 3.0008
+      // is nearer and must win over the earlier-examined 3.0.
+      controller.add(3.0006, 6.0);
+      const region = getRange(controller, 3.0006);
+      controller.resolveAlignment(
+          region,
+          [seg(2.0, 3.0), seg(3.0, 3.0008), seg(3.0008, 6.0)],
+          [seg(3.0008, 6.0), seg(6.0, 9.0)]);
+      expect(controller.getAll()).toEqual([{start: 3.0008, end: 6.0}]);
+    });
+
     it('keeps the set sorted after snapping', () => {
       controller.add(30, 40);
       controller.add(10.0005, 20);  // start a hair off the 10.0 boundary

@@ -4386,6 +4386,26 @@ describe('StreamingEngine', () => {
           ]);
         });
 
+    it('snaps a range whose endpoints fall just below the boundaries',
+        async () => {
+          streamingEngine.switchVariant(variant);
+          streamingEngine.switchTextStream(textStream);
+          // Endpoints a hair *below* the boundaries (10, 30); without a
+          // tolerant lookup each resolves to the preceding segment and the
+          // range is rejected.
+          skipRangeController.add(9.9995, 29.9995);
+          await streamingEngine.start();
+          playing = true;
+
+          await runTest();
+
+          expect(skipRangeController.getAll()).toEqual([
+            {start: 10, end: 30},
+          ]);
+          expect(mediaSourceEngine.segments[ContentType.VIDEO]).toEqual(
+              [true, false, false, true]);
+        });
+
     // The manifest stream-type guard lives in Player.addSkipRange; its
     // live/non-DASH/sequence-mode rejection is covered by the Player tests.
 
