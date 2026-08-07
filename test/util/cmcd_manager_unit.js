@@ -241,6 +241,26 @@ describe('CmcdManager', () => {
       expect(priv(manager)['reporter_'].recordEvent).toHaveBeenCalledTimes(1);
     });
 
+    it('rebuilt reporter re-learns sf after a material config change', () => {
+      // The manifest path only pushes sf into the reporter when it
+      // differs from the cached sf_. The configure() teardown must clear
+      // session-scoped state (via reset()) so a rebuilt reporter is not
+      // starved of sf by the previous session's cache.
+      const player = createMockPlayer();
+      const {manager, config} = createManager(player);
+      const manifestContext = /** @type {shaka.extern.RequestContext} */ (
+        {type: AdvancedRequestType.MPD});
+      manager.applyRequestData(
+          RequestType.MANIFEST, createRequest(), manifestContext);
+      manager.configure(Object.assign({}, config, {contentId: 'changed'}));
+      const newReporter = priv(manager)['reporter_'];
+      spyOn(newReporter, 'update');
+      manager.applyRequestData(
+          RequestType.MANIFEST, createRequest(), manifestContext);
+      expect(newReporter.update).toHaveBeenCalledWith(
+          jasmine.objectContaining({sf: StreamingFormat.DASH}));
+    });
+
     it('reset stops the reporter and clears state', () => {
       const player = createMockPlayer();
       const {manager} = createManager(player);
