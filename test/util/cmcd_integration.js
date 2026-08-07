@@ -382,6 +382,41 @@ describe('CmcdManager integration', () => {
       expect(decoded['v']).toBe(2);
     });
 
+    it('keeps emitting CMCD on the next load() on the same player',
+        async () => {
+          // Regression test for
+          // https://github.com/shaka-project/shaka-player/issues/10414:
+          // every load() after the first triggers an internal unload,
+          // which resets the CmcdManager; 5.2.0 never re-armed it, so
+          // CMCD silently stopped for the rest of the player's lifetime
+          // unless the app happened to call configure() again.
+          await player.load(TEST_STREAM);
+          await recorder.waitForManifest();
+
+          recorder.clear();
+          await player.load(TEST_STREAM);
+
+          // load() resolves only after the manifest fetch completes, and
+          // the recorder captures CMCD-bearing requests at request time —
+          // so no wait is needed: either the second manifest request
+          // carried CMCD and was recorded, or the data was never applied.
+          const manifests = recorder.getReports().filter(
+              (r) => r.type ===
+                  cml.cmcd.CMCD_RECORDED_REQUEST_TYPE_MANIFEST);
+          expect(manifests.length)
+              .withContext(
+                  'manifest request of a second load() should carry CMCD')
+              .toBeGreaterThan(0);
+          if (!manifests.length) {
+            return;
+          }
+          const decoded = validateRecordedReport(manifests[0]);
+          expect(decoded['ot']).toBe('m');
+          expect(decoded['sid']).toBe(SESSION_ID);
+          expect(decoded['cid']).toBe(CONTENT_ID);
+          expect(decoded['v']).toBe(2);
+        });
+
     it('emits valid CMCD v2 on segment requests', async () => {
       await player.load(TEST_STREAM);
       await video.play();
