@@ -211,6 +211,36 @@ describe('CmcdManager', () => {
       expect(priv(manager)['reporter_']).toBe(firstReporter);
     });
 
+    // configure()'s teardown branch must also clear event listeners —
+    // otherwise the rebuild path registers every video/player/document
+    // listener a second time, and recordEvent-based events (MUTE,
+    // UNMUTE, PLAYER_EXPAND, ...) get reported once per registration.
+    // State-change updates (sta) are deduped by lastPlayerState_, which
+    // masked the doubling.
+
+    it('does not duplicate listeners across disable/re-enable', () => {
+      const player = createMockPlayer();
+      const {manager, config} = createManager(player);
+      const video = priv(manager)['video_'];
+      manager.configure(Object.assign({}, config, {enabled: false}));
+      manager.configure(Object.assign({}, config, {enabled: true}));
+      spyOn(priv(manager)['reporter_'], 'recordEvent');
+      video.muted = true;
+      video.dispatchEvent(new shaka.util.FakeEvent('volumechange'));
+      expect(priv(manager)['reporter_'].recordEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not duplicate listeners on material config change', () => {
+      const player = createMockPlayer();
+      const {manager, config} = createManager(player);
+      const video = priv(manager)['video_'];
+      manager.configure(Object.assign({}, config, {contentId: 'changed'}));
+      spyOn(priv(manager)['reporter_'], 'recordEvent');
+      video.muted = true;
+      video.dispatchEvent(new shaka.util.FakeEvent('volumechange'));
+      expect(priv(manager)['reporter_'].recordEvent).toHaveBeenCalledTimes(1);
+    });
+
     it('reset stops the reporter and clears state', () => {
       const player = createMockPlayer();
       const {manager} = createManager(player);
