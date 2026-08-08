@@ -2685,6 +2685,7 @@ shaka.extern.AdsConfiguration;
  *   minTimeToSwitch: number,
  *   preferNetworkInformationBandwidth: boolean,
  *   droppedFrames: boolean,
+ *   minBufferAheadToUpgrade: number,
  * }}
  *
  * @property {boolean} enabled
@@ -2781,6 +2782,11 @@ shaka.extern.AdsConfiguration;
  *   Enable or disable dropped frames protection.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {number} minBufferAheadToUpgrade
+ *   The minimum amount of buffer, in seconds, required ahead of the current
+ *   playback position before upgrading to a higher bandwidth rendition.
+ *   The recommended value should be defined according to the segment length.
+ *   Defaults to <code>0</code>.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
