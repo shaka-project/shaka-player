@@ -211,6 +211,56 @@ describe('CmcdManager', () => {
       expect(priv(manager)['reporter_']).toBe(firstReporter);
     });
 
+    // configure()'s teardown branch must also clear event listeners —
+    // otherwise the rebuild path registers every video/player/document
+    // listener a second time, and recordEvent-based events (MUTE,
+    // UNMUTE, PLAYER_EXPAND, ...) get reported once per registration.
+    // State-change updates (sta) are deduped by lastPlayerState_, which
+    // masked the doubling.
+
+    it('does not duplicate listeners across disable/re-enable', () => {
+      const player = createMockPlayer();
+      const {manager, config} = createManager(player);
+      const video = priv(manager)['video_'];
+      manager.configure(Object.assign({}, config, {enabled: false}));
+      manager.configure(Object.assign({}, config, {enabled: true}));
+      spyOn(priv(manager)['reporter_'], 'recordEvent');
+      video.muted = true;
+      video.dispatchEvent(new shaka.util.FakeEvent('volumechange'));
+      expect(priv(manager)['reporter_'].recordEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not duplicate listeners on material config change', () => {
+      const player = createMockPlayer();
+      const {manager, config} = createManager(player);
+      const video = priv(manager)['video_'];
+      manager.configure(Object.assign({}, config, {contentId: 'changed'}));
+      spyOn(priv(manager)['reporter_'], 'recordEvent');
+      video.muted = true;
+      video.dispatchEvent(new shaka.util.FakeEvent('volumechange'));
+      expect(priv(manager)['reporter_'].recordEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('rebuilt reporter re-learns sf after a material config change', () => {
+      // The manifest path only pushes sf into the reporter when it
+      // differs from the cached sf_. The configure() teardown must clear
+      // session-scoped state (via reset()) so a rebuilt reporter is not
+      // starved of sf by the previous session's cache.
+      const player = createMockPlayer();
+      const {manager, config} = createManager(player);
+      const manifestContext = /** @type {shaka.extern.RequestContext} */ (
+        {type: AdvancedRequestType.MPD});
+      manager.applyRequestData(
+          RequestType.MANIFEST, createRequest(), manifestContext);
+      manager.configure(Object.assign({}, config, {contentId: 'changed'}));
+      const newReporter = priv(manager)['reporter_'];
+      spyOn(newReporter, 'update');
+      manager.applyRequestData(
+          RequestType.MANIFEST, createRequest(), manifestContext);
+      expect(newReporter.update).toHaveBeenCalledWith(
+          jasmine.objectContaining({sf: StreamingFormat.DASH}));
+    });
+
     it('reset stops the reporter and clears state', () => {
       const player = createMockPlayer();
       const {manager} = createManager(player);
@@ -235,6 +285,62 @@ describe('CmcdManager', () => {
       // reconstruct and event listeners should re-attach.
       manager.configure(Object.assign({}, config, {useHeaders: true}));
       expect(priv(manager)['reporter_']).not.toBeNull();
+    });
+
+    // Regression coverage for
+    // https://github.com/shaka-project/shaka-player/issues/10414: every
+    // load() after the first triggers an internal unload → reset(), and
+    // nothing in the plain load() path re-ran setMediaElement() or
+    // configure() — so the reporter stayed dead and CMCD silently stopped.
+    // Player.load() now calls onLoad() to re-arm the reporter for each
+    // new playback session.
+
+    it('onLoad() re-arms the reporter after reset()', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player);
+      manager.reset();
+      expect(priv(manager)['reporter_']).toBeNull();
+      manager.onLoad();
+      expect(priv(manager)['reporter_']).not.toBeNull();
+    });
+
+    it('onLoad() keeps the running reporter when one exists', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player);
+      const firstReporter = priv(manager)['reporter_'];
+      expect(firstReporter).not.toBeNull();
+      manager.onLoad();
+      expect(priv(manager)['reporter_']).toBe(firstReporter);
+    });
+
+    it('onLoad() does not start a reporter when disabled', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player, {enabled: false});
+      manager.onLoad();
+      expect(priv(manager)['reporter_']).toBeNull();
+    });
+
+    it('applies request data after a reset()/onLoad() cycle', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player);
+      manager.reset();
+      manager.onLoad();
+      const request = createRequest();
+      manager.applyRequestData(
+          RequestType.SEGMENT, request, createSegmentContext());
+      expect(request.uris[0]).toContain('CMCD=');
+    });
+
+    it('re-attaches video listeners after a reset()/onLoad() cycle', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player);
+      const video = priv(manager)['video_'];
+      manager.reset();
+      manager.onLoad();
+      spyOn(priv(manager)['reporter_'], 'update');
+      video.dispatchEvent(new shaka.util.FakeEvent('pause'));
+      expect(priv(manager)['reporter_'].update).toHaveBeenCalledWith(
+          {sta: PlayerState.PAUSED});
     });
   });
 
