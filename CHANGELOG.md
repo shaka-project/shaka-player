@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.2.5](https://github.com/shaka-project/shaka-player/compare/v5.2.4...v5.2.5) (2026-08-11)
+
+
+### Bug Fixes
+
+* **Ads:** Restrict click-through URIs to http(s) schemes ([#10412](https://github.com/shaka-project/shaka-player/issues/10412)) ([44953fc](https://github.com/shaka-project/shaka-player/commit/44953fcf7e44e56b5e949b8064601b73a67dc977))
+* **CMCD:** Re-arm the reporter on every load() ([#10416](https://github.com/shaka-project/shaka-player/issues/10416)) ([33edc15](https://github.com/shaka-project/shaka-player/commit/33edc152931405232b812331200f45295b674dc6))
+* Don't re-encode existing query parameters when appending new ones ([#10415](https://github.com/shaka-project/shaka-player/issues/10415)) ([9f93f62](https://github.com/shaka-project/shaka-player/commit/9f93f623d597c4e84d8cf599d0bad108ff143563))
+* **HLS:** Fix audio/video desync in muxed TS segments mode ([#10406](https://github.com/shaka-project/shaka-player/issues/10406)) ([26ed0a1](https://github.com/shaka-project/shaka-player/commit/26ed0a130550d219757d0bbd24281d7293deb350)), closes [#10341](https://github.com/shaka-project/shaka-player/issues/10341)
+* Only mark MSE append errors recoverable when the stream is disabled ([#10409](https://github.com/shaka-project/shaka-player/issues/10409)) ([4a0e440](https://github.com/shaka-project/shaka-player/commit/4a0e440fd5ac8e5efbfef0d478c2f51861b4fb1c))
+* **UI:** Align seek bar chapter markers with the playhead thumb ([#10229](https://github.com/shaka-project/shaka-player/issues/10229)) ([bbbb2a4](https://github.com/shaka-project/shaka-player/commit/bbbb2a439a93d7e576bf454ff342cdc9f78b69a2))
+
 ## [5.2.4](https://github.com/shaka-project/shaka-player/compare/v5.2.3...v5.2.4) (2026-07-28)
 
 
