@@ -885,6 +885,8 @@ describe('HlsParser', () => {
   });
 
   it('parses audio+video variant with closed captions', async () => {
+    const basicInfoSpy = spyOn(
+        shaka.media.SegmentUtils, 'getBasicInfoFromMp4').and.callThrough();
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",CHANNELS="2",',
