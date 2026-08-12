@@ -4245,7 +4245,7 @@ describe('StreamingEngine', () => {
     });
 
     it('does not fetch or prefetch skipped segments', async () => {
-      // Enable segment prefetch; the prefetcher must be re-seeded past the
+      // Enable segment prefetch; it must be re-seeded past the
       // range when it is crossed, rather than continuing to fetch skipped
       // segments with its own iterator.
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
