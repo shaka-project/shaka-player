@@ -54,8 +54,8 @@ describe('SkipRangeController', () => {
   }
 
   /**
-   * Resolves |region| as aligned to boundaries [start, end): a segment starts at
-   * start, and a segment starts at end.
+   * Resolves |region| as aligned to boundaries [start, end): a segment starts
+   * at start, and a segment starts at end.
    *
    * @param {!shaka.media.SkipRangeController} controller
    * @param {!shaka.media.SkipRangeController.SkipRange} region
@@ -166,8 +166,8 @@ describe('SkipRangeController', () => {
     beforeEach(() => {
       controller = makeController(makeInterface());
       controller.add(10, 30);
-      // Confirm the range aligns to segment boundaries (the video grid does this
-      // in StreamingEngine); only then may it be carved.
+      // Confirm the range aligns to segment boundaries (the video grid does
+      // this in StreamingEngine); only then may it be carved.
       markAligned(controller, getRange(controller, 10), 10, 30);
     });
 
