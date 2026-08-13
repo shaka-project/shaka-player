@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.16.44](https://github.com/shaka-project/shaka-player/compare/v4.16.43...v4.16.44) (2026-08-11)
+
+
+### Bug Fixes
+
+* **Ads:** Restrict click-through URIs to http(s) schemes ([#10412](https://github.com/shaka-project/shaka-player/issues/10412)) ([66c6c4d](https://github.com/shaka-project/shaka-player/commit/66c6c4d73006fd618689fa9c9515df6e22672a26))
+
 ## [4.16.43](https://github.com/shaka-project/shaka-player/compare/v4.16.42...v4.16.43) (2026-07-28)
 
 
