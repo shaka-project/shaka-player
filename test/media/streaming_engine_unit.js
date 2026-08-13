@@ -4182,7 +4182,7 @@ describe('StreamingEngine', () => {
           // hole re-forms instead of re-fetching.
           await Promise.all(
               [ContentType.AUDIO, ContentType.VIDEO, ContentType.TEXT].map(
-                  (type) => mediaSourceEngine.remove(type, 10, 30)));
+                  (type) => mediaSourceEngine.removeImpl(type, 10, 30)));
           await runTest();
 
           expect(mediaSourceEngine.segments).toEqual({
@@ -4209,7 +4209,7 @@ describe('StreamingEngine', () => {
       expect(skipRangeController.add(10, 30)).toBe(true);
       await Promise.all(
           [ContentType.AUDIO, ContentType.VIDEO, ContentType.TEXT].map(
-              (type) => mediaSourceEngine.remove(type, 10, 20)));
+              (type) => mediaSourceEngine.removeImpl(type, 10, 20)));
       await runTest();
 
       expect(mediaSourceEngine.segments).toEqual({
