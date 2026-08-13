@@ -180,6 +180,48 @@ describe('SegmentPrefetch', () => {
       expect(fetchDispatcher).toHaveBeenCalledTimes(3);
     });
 
+    it('keeps init segments when clearInitSegments is false', async () => {
+      const references = [
+        makeReference(uri('0.10'), 0, 10),
+        makeReference(uri('10.20'), 10, 20),
+        makeReference(uri('20.30'), 20, 30),
+        makeReference(uri('30.40'), 30, 40),
+      ];
+      references[0].initSegmentReference =
+          new shaka.media.InitSegmentReference(() => ['init-0.mp4'], 0, 500);
+      references[1].initSegmentReference =
+          new shaka.media.InitSegmentReference(() => ['init-1.mp4'], 0, 500);
+      references[2].initSegmentReference =
+          new shaka.media.InitSegmentReference(() => ['init-2.mp4'], 0, 500);
+      references[3].initSegmentReference =
+          new shaka.media.InitSegmentReference(() => ['init-3.mp4'], 0, 500);
+
+      stream = createStream();
+      stream.segmentIndex = new shaka.media.SegmentIndex(references);
+      segmentPrefetch.switchStream(stream);
+
+      await segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
+      // 3 media segments + 3 init segments.
+      expect(fetchDispatcher).toHaveBeenCalledTimes(6);
+
+      segmentPrefetch.clearAll(/* clearInitSegments= */ false);
+
+      for (let i = 0; i < 3; i++) {
+        // Verify media segments are gone.
+        expect(segmentPrefetch.getPrefetchedSegment(references[i])).toBeNull();
+      }
+      // Verify init segments are kept.
+      for (let i = 0; i < 3; i++) {
+        const op = segmentPrefetch.getPrefetchedSegment(
+            references[i].initSegmentReference);
+        expect(op).not.toBeNull();
+      }
+
+      await segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
+
+      expect(fetchDispatcher).toHaveBeenCalledTimes(9);
+    });
+
     it('resets time pos so prefetch can happen again', () => {
       segmentPrefetch.prefetchSegmentsByTime(references[3].startTime);
       segmentPrefetch.clearAll();
