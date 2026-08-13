@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.1.18](https://github.com/shaka-project/shaka-player/compare/v5.1.17...v5.1.18) (2026-08-11)
+
+
+### Bug Fixes
+
+* **Ads:** Restrict click-through URIs to http(s) schemes ([#10412](https://github.com/shaka-project/shaka-player/issues/10412)) ([cac53ff](https://github.com/shaka-project/shaka-player/commit/cac53ff1db5ecffce651c25705505da5ced68323))
+* Only mark MSE append errors recoverable when the stream is disabled ([#10409](https://github.com/shaka-project/shaka-player/issues/10409)) ([0d93077](https://github.com/shaka-project/shaka-player/commit/0d93077a3c01c58932ccf9f19aa2d7f03525b423))
+* **UI:** Align seek bar chapter markers with the playhead thumb ([#10229](https://github.com/shaka-project/shaka-player/issues/10229)) ([aa283cc](https://github.com/shaka-project/shaka-player/commit/aa283cc558598be0441bba01744195f08ef4c317))
+
 ## [5.1.17](https://github.com/shaka-project/shaka-player/compare/v5.1.16...v5.1.17) (2026-07-28)
 
 
