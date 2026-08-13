@@ -928,6 +928,9 @@ describe('HlsParser', () => {
   });
 
   describe('detects embedded closed captions', () => {
+    /** @type {!jasmine.Spy} */
+    let getInfoSpy;
+
     /**
      * @param {?shaka.media.InitSegmentReference=} candidateInit
      * @return {!Array<!shaka.media.SegmentReference>}
@@ -953,7 +956,7 @@ describe('HlsParser', () => {
       if (isLive) {
         spyOn(parser, 'isLive_').and.returnValue(true);
       }
-      const getInfoSpy = spyOn(parser, 'getInfoFromSegment_').and.callFake(
+      getInfoSpy = spyOn(parser, 'getInfoFromSegment_').and.callFake(
           (segment, segmentIndex) => {
             const data = new Uint8Array([segmentIndex]);
             return Promise.resolve({mimeType: 'video/mp4', data});
@@ -992,7 +995,7 @@ describe('HlsParser', () => {
       expect(basicInfo.closedCaptions).toEqual(new Map([['CC1', 'CC1']]));
       expect(shaka.media.SegmentUtils.getBasicInfoFromMp4)
           .toHaveBeenCalledTimes(2);
-      expect(parser.getInfoFromSegment_).toHaveBeenCalledTimes(3);
+      expect(getInfoSpy).toHaveBeenCalledTimes(3);
     });
 
     it('fetches a different init segment for a candidate', async () => {
@@ -1004,9 +1007,8 @@ describe('HlsParser', () => {
       ], /* isLive= */ false, candidateInit);
 
       expect(basicInfo.closedCaptions).toEqual(new Map([['CC1', 'CC1']]));
-      expect(parser.getInfoFromSegment_).toHaveBeenCalledTimes(4);
-      expect(parser.getInfoFromSegment_)
-          .toHaveBeenCalledWith(candidateInit, 0);
+      expect(getInfoSpy).toHaveBeenCalledTimes(4);
+      expect(getInfoSpy).toHaveBeenCalledWith(candidateInit, 0);
     });
 
     it('limits probes when no sampled segment has caption data', async () => {
@@ -1019,7 +1021,7 @@ describe('HlsParser', () => {
       expect(basicInfo.closedCaptions.size).toBe(0);
       expect(shaka.media.SegmentUtils.getBasicInfoFromMp4)
           .toHaveBeenCalledTimes(3);
-      expect(parser.getInfoFromSegment_).toHaveBeenCalledTimes(4);
+      expect(getInfoSpy).toHaveBeenCalledTimes(4);
     });
 
     it('propagates detected captions to sibling video renditions', () => {
@@ -1037,6 +1039,7 @@ describe('HlsParser', () => {
       privateParser.propagateDetectedClosedCaptions_();
 
       expect(siblingVideo.closedCaptions).toEqual(closedCaptions);
+      expect(siblingVideo.closedCaptions).not.toBe(closedCaptions);
     });
 
     it('does not propagate captions declared by manifest groups', () => {
