@@ -637,6 +637,53 @@ describe('StreamingEngine', () => {
         .toEqual([false, false, false, false]);
   });
 
+  /** @suppress {accessControls} */
+  it('fetches more if muxed audio is short', async () => {
+    // Setup a VOD manifest.
+    setupVod();
+
+    // Remove audio from the variant to simulate a video-only manifest that
+    // actually contains multiplexed audio (discovered later by
+    // MSE/transmuxer).
+    variant.audio = null;
+
+    // Configure a rebuffering goal of 10s and buffering goal of 10s.
+    const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+    config.rebufferingGoal = 10;
+    config.bufferingGoal = 10;
+
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    // Simulate that MediaSourceEngine created video and audio SourceBuffers.
+    mediaSourceEngine.hasSourceBufferFor.and.callFake((type) => {
+      return type == ContentType.VIDEO || type == ContentType.AUDIO;
+    });
+
+    createStreamingEngine(config);
+
+    streamingEngine.switchVariant(variant);
+    await streamingEngine.start();
+    playing = true;
+
+    // Simulate a state where video is buffered to 11s (meets goal),
+    // but audio is only buffered to 9s (short of 10s goal).  To meet the
+    // overall goal, we would now need to fetch another segment.
+    mediaSourceEngine.bufferedAheadOf.withArgs(ContentType.VIDEO, 0)
+        .and.returnValue(11);
+    mediaSourceEngine.bufferedAheadOf.withArgs(ContentType.AUDIO, 0)
+        .and.returnValue(9);
+
+    // Call update_() manually for VIDEO.  If it only checked the video
+    // buffered range, it would think the goal were satisfied.  That is the bug
+    // this regression test is meant to cover.
+    await videoStream.createSegmentIndex();
+    const delay = await streamingEngine.update_(
+        streamingEngine.mediaStates_.get(ContentType.VIDEO));
+
+    // It should decide to fetch the next segment (returning null delay)
+    // because it checks the audio buffer and sees it's short of the goal.
+    expect(delay).toBeNull();
+  });
+
   it('marks muxed audio as endOfStream when video ends', async () => {
     setupVod();
 
