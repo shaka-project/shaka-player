@@ -151,6 +151,10 @@ shaka.test.FakeMediaSourceEngine = class {
     /** @type {!jasmine.Spy} */
     this.clearLiveSeekableRange =
         jasmine.createSpy('clearLiveSeekableRange').and.stub();
+
+    /** @type {!jasmine.Spy} */
+    this.hasSourceBufferFor =
+        jasmine.createSpy('hasSourceBufferFor').and.stub();
   }
 
   /** @override */
