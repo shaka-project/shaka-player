@@ -2210,6 +2210,34 @@ describe('StreamingEngine', () => {
         text: [true, false, false, false],
       });
     });
+
+    it('does not re-fetch init segments when prefetch is enabled', async () => {
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 1;
+      streamingEngine.configure(config);
+
+      const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+
+      let seekComplete = false;
+      await runTest(() => {
+        if (presentationTimeInSeconds == 2 && !seekComplete) {
+          netEngine.expectRequest('0_audio_init', segmentType);
+          netEngine.expectRequest('0_video_init', segmentType);
+          netEngine.request.calls.reset();
+          presentationTimeInSeconds = 15;
+          streamingEngine.seeked();
+          seekComplete = true;
+        }
+      });
+
+      netEngine.expectNoRequest('0_audio_init', segmentType);
+      netEngine.expectNoRequest('0_video_init', segmentType);
+    });
   });
 
   describe('handles seeks (live)', () => {
