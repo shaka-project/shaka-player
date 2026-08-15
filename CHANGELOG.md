@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.16.45](https://github.com/shaka-project/shaka-player/compare/v4.16.44...v4.16.45) (2026-08-15)
+
+
+### Bug Fixes
+
+* Avoid re-downloading init segments on unbuffered seek ([#10428](https://github.com/shaka-project/shaka-player/issues/10428)) ([4166de0](https://github.com/shaka-project/shaka-player/commit/4166de0d21886d9d1f939e9ad914dd0a0234e2ec)), closes [#10373](https://github.com/shaka-project/shaka-player/issues/10373)
+* Fix stuck playback on multiplexed TS content ([#10431](https://github.com/shaka-project/shaka-player/issues/10431)) ([48f98d2](https://github.com/shaka-project/shaka-player/commit/48f98d232ae43f6e81b549fe4e417d7fe536a04c))
+
 ## [4.16.44](https://github.com/shaka-project/shaka-player/compare/v4.16.43...v4.16.44) (2026-08-11)
 
 
