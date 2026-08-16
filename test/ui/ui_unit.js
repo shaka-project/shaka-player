@@ -1708,6 +1708,200 @@ describe('UI', () => {
         expect(bufferingTime).toBe(lastBufferingTime);
       });
     });
+
+    describe('keyboard shortcuts and multi-player isolation', () => {
+      /** @type {!HTMLElement} */
+      let container1;
+      /** @type {!HTMLVideoElement} */
+      let video1;
+      /** @type {shaka.ui.Overlay} */
+      let ui1;
+      /** @type {shaka.ui.Controls} */
+      let controls1;
+      /** @type {shaka.Player} */
+      let player1;
+
+      /** @type {!HTMLElement} */
+      let container2;
+      /** @type {!HTMLVideoElement} */
+      let video2;
+      /** @type {shaka.ui.Overlay} */
+      let ui2;
+      /** @type {shaka.ui.Controls} */
+      let controls2;
+      /** @type {shaka.Player} */
+      let player2;
+
+      beforeEach(async () => {
+        container1 =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        document.body.appendChild(container1);
+        video1 = shaka.test.UiUtils.createVideoElement();
+        container1.appendChild(video1);
+
+        container2 =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        document.body.appendChild(container2);
+        video2 = shaka.test.UiUtils.createVideoElement();
+        container2.appendChild(video2);
+
+        ui1 = await UiUtils.createUIThroughAPI(container1, video1);
+        controls1 = ui1.getControls();
+        player1 = controls1.getLocalPlayer();
+        spyOn(player1, 'getAssetUri').and.returnValue('fake-uri-1');
+        spyOn(player1, 'seekRange').and.returnValue({start: 0, end: 100});
+        spyOn(controls1, 'getDisplayTime').and.returnValue(50);
+
+        ui2 = await UiUtils.createUIThroughAPI(container2, video2);
+        controls2 = ui2.getControls();
+        player2 = controls2.getLocalPlayer();
+        spyOn(player2, 'getAssetUri').and.returnValue('fake-uri-2');
+        spyOn(player2, 'seekRange').and.returnValue({start: 0, end: 100});
+        spyOn(controls2, 'getDisplayTime').and.returnValue(50);
+      });
+
+      it('handles seekbar Space and Arrow keys with preventDefault', () => {
+        const playPauseSpy = spyOn(controls1, 'playPausePresentation');
+        const seekSpy = spyOn(controls1, 'seek_');
+        const seekBar = container1.querySelector('.shaka-seek-bar');
+        expect(seekBar).toBeTruthy();
+
+        /** @type {!HTMLElement} */ (seekBar).focus();
+
+        const spaceEvent = new KeyboardEvent('keydown', {
+          key: ' ',
+          bubbles: true,
+          cancelable: true,
+        });
+        const spacePreventDefaultSpy =
+            spyOn(spaceEvent, 'preventDefault').and.callThrough();
+        seekBar.dispatchEvent(spaceEvent);
+
+        expect(playPauseSpy).toHaveBeenCalledTimes(1);
+        expect(spacePreventDefaultSpy).toHaveBeenCalled();
+
+        const arrowLeftEvent = new KeyboardEvent('keydown', {
+          key: 'ArrowLeft',
+          bubbles: true,
+          cancelable: true,
+        });
+        const arrowLeftPreventDefaultSpy =
+            spyOn(arrowLeftEvent, 'preventDefault').and.callThrough();
+        seekBar.dispatchEvent(arrowLeftEvent);
+
+        expect(seekSpy).toHaveBeenCalledWith(45);
+        expect(arrowLeftPreventDefaultSpy).toHaveBeenCalled();
+
+        const arrowRightEvent = new KeyboardEvent('keydown', {
+          key: 'ArrowRight',
+          bubbles: true,
+          cancelable: true,
+        });
+        seekBar.dispatchEvent(arrowRightEvent);
+
+        expect(seekSpy).toHaveBeenCalledWith(55);
+      });
+
+      it('isolates fullscreen status and keys between players', () => {
+        const originalFullscreenElement =
+            Object.getOwnPropertyDescriptor(document, 'fullscreenElement');
+
+        try {
+          Object.defineProperty(document, 'fullscreenElement', {
+            get: () => container1,
+            configurable: true,
+          });
+
+          expect(controls1.isFullScreenEnabled()).toBe(true);
+          expect(controls2.isFullScreenEnabled()).toBe(false);
+
+          const playPause1Spy = spyOn(controls1, 'playPausePresentation');
+          const playPause2Spy = spyOn(controls2, 'playPausePresentation');
+          const seek1Spy = spyOn(controls1, 'seek_');
+          const seek2Spy = spyOn(controls2, 'seek_');
+
+          const arrowLeftEvent = new KeyboardEvent('keydown', {
+            key: 'ArrowLeft',
+            bubbles: true,
+            cancelable: true,
+          });
+          window.dispatchEvent(arrowLeftEvent);
+
+          expect(seek1Spy).toHaveBeenCalledWith(45);
+          expect(seek2Spy).not.toHaveBeenCalled();
+
+          const spaceEvent = new KeyboardEvent('keydown', {
+            key: ' ',
+            bubbles: true,
+            cancelable: true,
+          });
+          window.dispatchEvent(spaceEvent);
+
+          expect(playPause1Spy).toHaveBeenCalledTimes(1);
+          expect(playPause2Spy).not.toHaveBeenCalled();
+        } finally {
+          if (originalFullscreenElement) {
+            Object.defineProperty(
+                document, 'fullscreenElement', originalFullscreenElement);
+          } else {
+            // @ts-ignore
+            delete document['fullscreenElement'];
+          }
+        }
+      });
+
+      it('does not leak seekbar focus events to other players', () => {
+        ui2.configure({enableKeyboardPlaybackControlsInWindow: true});
+
+        const seek1Spy = spyOn(controls1, 'seek_');
+        const seek2Spy = spyOn(controls2, 'seek_');
+
+        const seekBar1 = container1.querySelector('.shaka-seek-bar');
+        expect(seekBar1).toBeTruthy();
+        /** @type {!HTMLElement} */ (seekBar1).focus();
+
+        const arrowRightEvent = new KeyboardEvent('keydown', {
+          key: 'ArrowRight',
+          bubbles: true,
+          cancelable: true,
+        });
+        seekBar1.dispatchEvent(arrowRightEvent);
+
+        expect(seek1Spy).toHaveBeenCalledWith(55);
+        expect(seek2Spy).not.toHaveBeenCalled();
+      });
+
+      it('does not trigger shortcuts when typing in a form input', () => {
+        ui1.configure({enableKeyboardPlaybackControlsInWindow: true});
+        const playPauseSpy = spyOn(controls1, 'playPausePresentation');
+        const seekSpy = spyOn(controls1, 'seek_');
+
+        const input =
+        /** @type {!HTMLInputElement} */ (document.createElement('input'));
+        input.type = 'text';
+        document.body.appendChild(input);
+        input.focus();
+
+        const spaceEvent = new KeyboardEvent('keydown', {
+          key: ' ',
+          bubbles: true,
+          cancelable: true,
+        });
+        window.dispatchEvent(spaceEvent);
+
+        const arrowLeftEvent = new KeyboardEvent('keydown', {
+          key: 'ArrowLeft',
+          bubbles: true,
+          cancelable: true,
+        });
+        window.dispatchEvent(arrowLeftEvent);
+
+        expect(playPauseSpy).not.toHaveBeenCalled();
+        expect(seekSpy).not.toHaveBeenCalled();
+
+        document.body.removeChild(input);
+      });
+    });
   });
 
 
