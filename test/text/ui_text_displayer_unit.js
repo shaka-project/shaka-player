@@ -13,6 +13,8 @@ describe('UITextDisplayer', () => {
   let textDisplayer;
   /** @type {number} */
   const videoContainerHeight = 450;
+  /** @type {Object} **/
+  let player;
 
   /**
    * Transform a cssText to an object.
@@ -24,7 +26,7 @@ describe('UITextDisplayer', () => {
    *   font-size: '10px',
    * }
    * @param {string} cssStr
-   * @return {!Object.<string, string|number>}
+   * @return {!Object<string, string | number>}
    */
   function parseCssText(cssStr) {
     // Remove the white spaces in the string.
@@ -47,12 +49,30 @@ describe('UITextDisplayer', () => {
     videoContainer.style.height = `${videoContainerHeight}px`;
     document.body.appendChild(videoContainer);
     video = new shaka.test.FakeVideo();
+    // The displayer reads getPlaybackRate() and listens to the player's
+    // 'ratechange' event, so the fake exposes those (the event listener is
+    // never fired in these tests, so addEventListener can be a no-op).
+    player = {
+      getMediaElement: () => video,
+      getVideoContainer: () => videoContainer,
+      getPlaybackRate: () => video.playbackRate,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    };
   });
 
   beforeEach(() => {
     video.currentTime = 0;
-    textDisplayer = new shaka.text.UITextDisplayer(
-        video, videoContainer, {captionsUpdatePeriod: 0.25});
+    /** @suppress {checkTypes} */
+    textDisplayer = new shaka.text.UITextDisplayer(player);
+    // Disable suspendRenderingWhenHidden so the tests don't depend on the
+    // video container actually intersecting the viewport.  On some devices
+    // (e.g. Chromecast) the IntersectionObserver reports the test container as
+    // not visible and suspends rendering, which would intermittently prevent
+    // cues from being rendered at all.
+    const config = shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
+    textDisplayer.configure(config);
   });
 
   afterEach(async () => {
@@ -67,20 +87,24 @@ describe('UITextDisplayer', () => {
    * @suppress {visibility}
    * "suppress visibility" has function scope, so this is a mini-function that
    * exists solely to suppress visibility rules for these actions.
+   * @return {!Promise}
    */
-  function updateCaptions() {
+  async function updateCaptions() {
     // Rather than wait for a timer, which can be unreliable on Safari when the
     // device is heavily loaded, trigger the update explicitly.
     textDisplayer.updateCaptions_();
+
+    await shaka.test.Util.shortDelay();
   }
 
-  it('correctly displays styles for cues', () => {
+  it('correctly displays styles for cues', async () => {
     /** @type {!shaka.text.Cue} */
     const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
     cue.color = 'green';
     cue.backgroundColor = 'black';
     cue.direction = shaka.text.Cue.direction.HORIZONTAL_LEFT_TO_RIGHT;
-    cue.fontSize = '10px';
+    const cueSampleFontSize = '10px';
+    cue.fontSize = cueSampleFontSize;
     cue.fontWeight = shaka.text.Cue.fontWeight.NORMAL;
     cue.fontStyle = shaka.text.Cue.fontStyle.NORMAL;
     cue.lineHeight = '2';
@@ -90,7 +114,7 @@ describe('UITextDisplayer', () => {
 
     textDisplayer.setTextVisibility(true);
     textDisplayer.append([cue]);
-    updateCaptions();
+    await updateCaptions();
 
     const textContainer = videoContainer.querySelector('.shaka-text-container');
     const captions = textContainer.querySelector('div');
@@ -99,7 +123,7 @@ describe('UITextDisplayer', () => {
     const expectCssObj = {
       'color': 'green',
       'direction': 'ltr',
-      'font-size': '10px',
+      'font-size': cueSampleFontSize,
       'font-style': 'normal',
       'font-weight': 400,
       'text-align': 'center',
@@ -122,7 +146,34 @@ describe('UITextDisplayer', () => {
         .toEqual(jasmine.objectContaining({'background-color': 'black'}));
   });
 
-  it('correctly displays styles for nested cues', () => {
+  it('renders LINE_THROUGH text decoration as a valid CSS value',
+      async () => {
+        // Regression test: previously LINE_THROUGH was 'lineThrough', which
+        // is not a valid CSS text-decoration value, so browsers ignored it
+        // and no strikethrough was drawn.  After the fix the value is the
+        // valid CSS token 'line-through'.
+        /** @type {!shaka.text.Cue} */
+        const cue = new shaka.text.Cue(0, 100, 'deleted text');
+        cue.textDecoration.push(shaka.text.Cue.textDecoration.LINE_THROUGH);
+        cue.nestedCues = [];
+
+        textDisplayer.setTextVisibility(true);
+        textDisplayer.append([cue]);
+        await updateCaptions();
+
+        const textContainer =
+            videoContainer.querySelector('.shaka-text-container');
+        const captions = textContainer.querySelector('div');
+        // Browsers expose the parsed value via the longhand
+        // text-decoration-line; fall back to the shorthand for older engines.
+        const decoration =
+            captions.style.textDecorationLine ||
+            captions.style.textDecoration;
+        expect(decoration).toContain('line-through');
+        expect(decoration).not.toContain('lineThrough');
+      });
+
+  it('correctly displays styles for nested cues', async () => {
     /** @type {!shaka.text.Cue} */
     const cue = new shaka.text.Cue(0, 100, '');
     const nestedCue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
@@ -131,7 +182,8 @@ describe('UITextDisplayer', () => {
     nestedCue.writingMode = shaka.text.Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM;
     nestedCue.color = 'green';
     nestedCue.backgroundColor = 'black';
-    nestedCue.fontSize = '10px';
+    const cueSampleFontSize = '10px';
+    nestedCue.fontSize = cueSampleFontSize;
     nestedCue.fontWeight = shaka.text.Cue.fontWeight.NORMAL;
     nestedCue.fontStyle = shaka.text.Cue.fontStyle.NORMAL;
     nestedCue.lineHeight = '2';
@@ -139,7 +191,7 @@ describe('UITextDisplayer', () => {
 
     textDisplayer.setTextVisibility(true);
     textDisplayer.append([cue]);
-    updateCaptions();
+    await updateCaptions();
 
     // Verify styles applied to the nested cues.
     const textContainer = videoContainer.querySelector('.shaka-text-container');
@@ -149,7 +201,7 @@ describe('UITextDisplayer', () => {
 
     const expectCssObj = {
       'color': 'green',
-      'font-size': '10px',
+      'font-size': cueSampleFontSize,
       'font-style': 'normal',
       'font-weight': 400,
       'text-align': 'center',
@@ -172,10 +224,12 @@ describe('UITextDisplayer', () => {
         .toEqual(jasmine.objectContaining({'background-color': 'black'}));
   });
 
-  it('correctly displays styles for cellResolution units', () => {
+  it('correctly displays styles for cellResolution units', async () => {
     /** @type {!shaka.text.Cue} */
     const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
-    cue.fontSize = '0.80c';
+
+    const fontSizeAsCellResolution = 0.80;
+    cue.fontSize = `${fontSizeAsCellResolution}c`;
     cue.linePadding = '0.50c';
     cue.cellResolution = {
       columns: 60,
@@ -184,11 +238,12 @@ describe('UITextDisplayer', () => {
 
     textDisplayer.setTextVisibility(true);
     textDisplayer.append([cue]);
-    updateCaptions();
+    await updateCaptions();
 
     // Expected value is calculated based on  ttp:cellResolution="60 20"
     // videoContainerHeight=450px and tts:fontSize="0.80c" on the default style.
-    const expectedFontSize = '18px';
+    const calculatedFontSize = (450/20) * fontSizeAsCellResolution;
+    const expectedFontSize = `${calculatedFontSize}px`;
 
     // Expected value is calculated based on ttp:cellResolution="60 20"
     // videoContainerHeight=450px and ebutts:linePadding="0.5c" on the default
@@ -206,10 +261,11 @@ describe('UITextDisplayer', () => {
         }));
   });
 
-  it('correctly displays styles for percentages units', () => {
+  it('correctly displays styles for percentages units', async () => {
     /** @type {!shaka.text.Cue} */
     const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
-    cue.fontSize = '90%';
+    const cueSampleFontSize = 90;
+    cue.fontSize = `${cueSampleFontSize}%`;
     cue.cellResolution = {
       columns: 32,
       rows: 15,
@@ -217,11 +273,12 @@ describe('UITextDisplayer', () => {
 
     textDisplayer.setTextVisibility(true);
     textDisplayer.append([cue]);
-    updateCaptions();
+    await updateCaptions();
 
     // Expected value is calculated based on  ttp:cellResolution="32 15"
     // videoContainerHeight=450px and tts:fontSize="90%" on the default style.
-    const expectedFontSize = '27px';
+    const calculatedFontSize = (450/15) * (cueSampleFontSize/100);
+    const expectedFontSize = `${calculatedFontSize}px`;
 
     const textContainer = videoContainer.querySelector('.shaka-text-container');
     const captions = textContainer.querySelector('div');
@@ -230,14 +287,14 @@ describe('UITextDisplayer', () => {
         jasmine.objectContaining({'font-size': expectedFontSize}));
   });
 
-  it('does not display duplicate cues', () => {
+  it('does not display duplicate cues', async () => {
     // These are identical.
     const cue1 = new shaka.text.Cue(0, 100, 'Captain\'s log.');
     const cue2 = new shaka.text.Cue(0, 100, 'Captain\'s log.');
 
     textDisplayer.setTextVisibility(true);
     textDisplayer.append([cue1]);
-    updateCaptions();
+    await updateCaptions();
 
     /** @type {Element} */
     const textContainer = videoContainer.querySelector('.shaka-text-container');
@@ -246,14 +303,14 @@ describe('UITextDisplayer', () => {
     expect(captions.length).toBe(1);
 
     textDisplayer.append([cue2]);
-    updateCaptions();
+    await updateCaptions();
 
     captions = textContainer.querySelectorAll('div');
     // Expect textContainer to display one cue without duplication.
     expect(captions.length).toBe(1);
   });
 
-  it('does not mistake cues with nested cues as duplicates', () => {
+  it('does not mistake cues with nested cues as duplicates', async () => {
     // These are not identical, but might look like it at the top level.
     const cue1 = new shaka.text.Cue(0, 100, '');
     cue1.nestedCues = [
@@ -270,7 +327,7 @@ describe('UITextDisplayer', () => {
 
     textDisplayer.setTextVisibility(true);
     textDisplayer.append([cue1]);
-    updateCaptions();
+    await updateCaptions();
 
     /** @type {Element} */
     const textContainer = videoContainer.querySelector('.shaka-text-container');
@@ -279,7 +336,7 @@ describe('UITextDisplayer', () => {
     expect(captions.length).toBe(1);
 
     textDisplayer.append([cue2, cue3]);
-    updateCaptions();
+    await updateCaptions();
 
     captions = textContainer.querySelectorAll('div');
     // Expect textContainer to display all three cues, since they are not truly
@@ -287,7 +344,7 @@ describe('UITextDisplayer', () => {
     expect(captions.length).toBe(3);
   });
 
-  it('does not mistake cues with different styles duplicates', () => {
+  it('does not mistake cues with different styles duplicates', async () => {
     // These all have the same text and timing, but different styles.
     const cue1 = new shaka.text.Cue(0, 100, 'Hello!');
     cue1.color = 'green';
@@ -301,7 +358,7 @@ describe('UITextDisplayer', () => {
 
     textDisplayer.setTextVisibility(true);
     textDisplayer.append([cue1]);
-    updateCaptions();
+    await updateCaptions();
 
     /** @type {Element} */
     const textContainer = videoContainer.querySelector('.shaka-text-container');
@@ -310,7 +367,7 @@ describe('UITextDisplayer', () => {
     expect(captions.length).toBe(1);
 
     textDisplayer.append([cue2, cue3]);
-    updateCaptions();
+    await updateCaptions();
 
     captions = textContainer.querySelectorAll('div');
     // Expect textContainer to display all three cues, since they are not truly
@@ -318,12 +375,12 @@ describe('UITextDisplayer', () => {
     expect(captions.length).toBe(3);
   });
 
-  it('hides currently displayed cue when removed', () => {
+  it('hides currently displayed cue when removed', async () => {
     const cue = new shaka.text.Cue(0, 50, 'One');
     textDisplayer.setTextVisibility(true);
     textDisplayer.append([cue]);
     video.currentTime = 10;
-    updateCaptions();
+    await updateCaptions();
     const textContainer = videoContainer.querySelector('.shaka-text-container');
 
     let cueElements = textContainer.querySelectorAll('div');
@@ -336,7 +393,7 @@ describe('UITextDisplayer', () => {
     expect(cueElements.length).toBe(0);
   });
 
-  it('hides and shows nested cues at appropriate times', () => {
+  it('hides and shows nested cues at appropriate times', async () => {
     const parentCue1 = new shaka.text.Cue(0, 100, '');
     const cue1 = new shaka.text.Cue(0, 50, 'One');
     const cue2 = new shaka.text.Cue(25, 75, 'Two');
@@ -351,7 +408,7 @@ describe('UITextDisplayer', () => {
     textDisplayer.append([parentCue1, parentCue2]);
 
     video.currentTime = 10;
-    updateCaptions();
+    await updateCaptions();
     /** @type {Element} */
     const textContainer = videoContainer.querySelector('.shaka-text-container');
     let parentCueElements = textContainer.querySelectorAll('div');
@@ -360,44 +417,44 @@ describe('UITextDisplayer', () => {
     expect(parentCueElements[0].textContent).toBe('One');
 
     video.currentTime = 35;
-    updateCaptions();
+    await updateCaptions();
     parentCueElements = textContainer.querySelectorAll('div');
     expect(parentCueElements.length).toBe(1);
     expect(parentCueElements[0].textContent).toBe('OneTwo');
 
     video.currentTime = 60;
-    updateCaptions();
+    await updateCaptions();
     parentCueElements = textContainer.querySelectorAll('div');
     expect(parentCueElements.length).toBe(1);
     expect(parentCueElements[0].textContent).toBe('TwoThree');
 
     video.currentTime = 85;
-    updateCaptions();
+    await updateCaptions();
     parentCueElements = textContainer.querySelectorAll('div');
     expect(parentCueElements.length).toBe(1);
     expect(parentCueElements[0].textContent).toBe('Three');
 
     video.currentTime = 95;
-    updateCaptions();
+    await updateCaptions();
     parentCueElements = textContainer.querySelectorAll('div');
     expect(parentCueElements.length).toBe(2);
     expect(parentCueElements[0].textContent).toBe('Three');
     expect(parentCueElements[1].textContent).toBe('Four');
 
     video.currentTime = 105;
-    updateCaptions();
+    await updateCaptions();
     parentCueElements = textContainer.querySelectorAll('div');
     expect(parentCueElements.length).toBe(1);
     expect(parentCueElements[0].textContent).toBe('Four');
 
     video.currentTime = 150;
-    updateCaptions();
+    await updateCaptions();
     parentCueElements = textContainer.querySelectorAll('div');
     expect(parentCueElements.length).toBe(1);
     expect(parentCueElements[0].textContent).toBe('');
   });
 
-  it('creates separate elements for cue regions', () => {
+  it('creates separate elements for cue regions', async () => {
     const cueRegion = new shaka.text.CueRegion();
     cueRegion.id = 'regionId';
     cueRegion.height = 80;
@@ -422,7 +479,7 @@ describe('UITextDisplayer', () => {
 
     textDisplayer.setTextVisibility(true);
     textDisplayer.append(cues);
-    updateCaptions();
+    await updateCaptions();
 
     const textContainer = videoContainer.querySelector('.shaka-text-container');
     const allRegionElements = textContainer.querySelectorAll(
@@ -461,7 +518,7 @@ describe('UITextDisplayer', () => {
     }
   });
 
-  it('does not lose second item in a region', () => {
+  it('does not lose second item in a region', async () => {
     const cueRegion = new shaka.text.CueRegion();
     cueRegion.id = 'regionId';
     cueRegion.height = 80;
@@ -500,7 +557,7 @@ describe('UITextDisplayer', () => {
     video.currentTime = 170;
     textDisplayer.setTextVisibility(true);
     textDisplayer.append([cue1]);
-    updateCaptions();
+    await updateCaptions();
 
     /** @type {Element} */
     const textContainer = videoContainer.querySelector('.shaka-text-container');
@@ -513,7 +570,7 @@ describe('UITextDisplayer', () => {
 
     // Advance time to where there is none to show
     video.currentTime = 171;
-    updateCaptions();
+    await updateCaptions();
 
     allRegionElements = textContainer.querySelectorAll(
         '.shaka-text-region');
@@ -521,7 +578,7 @@ describe('UITextDisplayer', () => {
 
     // Advance time to where there is something to show
     video.currentTime = 173;
-    updateCaptions();
+    await updateCaptions();
 
     allRegionElements = textContainer.querySelectorAll(
         '.shaka-text-region');
@@ -537,7 +594,8 @@ describe('UITextDisplayer', () => {
     expect(allRegionElements.length).toBe(1);
   });
 
-  it('creates separate regions when dimensions differ but id same', () => {
+  // eslint-disable-next-line @stylistic/max-len
+  it('creates separate regions when dimensions differ but id same', async () => {
     const identicalRegionId = 'regionId';
 
     const cueRegion1 = new shaka.text.CueRegion();
@@ -589,7 +647,7 @@ describe('UITextDisplayer', () => {
     textDisplayer.setTextVisibility(true);
     textDisplayer.append(firstBatchOfCues);
     textDisplayer.append(secondBatchOfCues);
-    updateCaptions();
+    await updateCaptions();
 
     const textContainer = videoContainer.querySelector('.shaka-text-container');
     const allRegionElements = textContainer.querySelectorAll(
@@ -608,6 +666,8 @@ describe('UITextDisplayer', () => {
   });
 
   it('textDisplayer does not crash if destroy is called more than once', () => {
+    textDisplayer.setTextVisibility(true);
+
     expect(videoContainer.childNodes.length).toBe(1);
 
     textDisplayer.destroy();
@@ -616,10 +676,198 @@ describe('UITextDisplayer', () => {
     expect(videoContainer.childNodes.length).toBe(0);
   });
 
-  it('Backward compatible UITextDisplayer constructor', () => {
-    // The third argument to UITextDisplayer constructor is new in v4.8.0.
-    // Test without, to support existing applications.
-    /** @suppress {checkTypes} */
-    textDisplayer = new shaka.text.UITextDisplayer(video, videoContainer);
+  it('previews text styles through the normal renderer', async () => {
+    const cue = new shaka.text.Cue(0, 100, 'Previewed cue');
+    const config =
+        shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
+
+    textDisplayer.configure(config);
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    await updateCaptions();
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    let cueElement = textContainer.querySelector('div');
+    expect(cueElement.textContent).toBe('Previewed cue');
+    expect(cueElement.style.fontSize).toBe('');
+
+    const previewConfig =
+    /** @type {!shaka.extern.TextDisplayerConfiguration} */(
+        Object.assign({}, config, {'fontScaleFactor': 2}));
+    textDisplayer.setTextStylePreview(
+        previewConfig, 'Subtitles example');
+
+    cueElement = textContainer.querySelector('div');
+    expect(cueElement.textContent).toBe('Previewed cue');
+    expect(cueElement.style.fontSize).toBe('2em');
+
+    textDisplayer.clearTextStylePreview();
+
+    cueElement = textContainer.querySelector('div');
+    expect(cueElement.textContent).toBe('Previewed cue');
+    expect(cueElement.style.fontSize).toBe('');
+  });
+
+  // eslint-disable-next-line @stylistic/max-len
+  it('shows example text only when no cue is active during preview', async () => {
+    const config =
+        shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
+
+    textDisplayer.configure(config);
+    textDisplayer.setTextVisibility(true);
+
+    textDisplayer.setTextStylePreview(config, 'Subtitles example');
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    expect(textContainer.textContent).toBe('Subtitles example');
+
+    textDisplayer.clearTextStylePreview();
+    expect(textContainer.textContent).toBe('');
+
+    textDisplayer.setTextStylePreview(config, 'Subtitles example');
+    expect(textContainer.textContent).toBe('Subtitles example');
+
+    textDisplayer.append([new shaka.text.Cue(0, 100, 'Real subtitle')]);
+    await updateCaptions();
+
+    expect(textContainer.textContent).toBe('Real subtitle');
+  });
+
+  it('shows example text while normal text visibility is off', () => {
+    const config =
+        shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
+
+    textDisplayer.configure(config);
+
+    textDisplayer.setTextStylePreview(config, 'Subtitles example');
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    expect(textContainer.textContent).toBe('Subtitles example');
+
+    textDisplayer.clearTextStylePreview();
+
+    expect(videoContainer.querySelector('.shaka-text-container')).toBe(null);
+  });
+
+  it('replaces example text during repeated preview updates', () => {
+    const config =
+        shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
+
+    textDisplayer.configure(config);
+    textDisplayer.setTextVisibility(true);
+
+    textDisplayer.setTextStylePreview(config, 'First example');
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    let cueElements = textContainer.querySelectorAll('div');
+    expect(cueElements.length).toBe(1);
+    expect(textContainer.textContent).toBe('First example');
+
+    textDisplayer.setTextStylePreview(config, 'Second example');
+
+    cueElements = textContainer.querySelectorAll('div');
+    expect(cueElements.length).toBe(1);
+    expect(textContainer.textContent).toBe('Second example');
+  });
+
+  it('positions cue at top-left when positionArea=TOP_LEFT', async () => {
+    /** @type {!shaka.text.Cue} */
+    const cue = new shaka.text.Cue(0, 100, 'Top-Left');
+
+    textDisplayer.setTextVisibility(true);
+    const config =
+        shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+    config.suspendRenderingWhenHidden = false;
+    config.positionArea = shaka.config.PositionArea.TOP_LEFT;
+    textDisplayer.configure(config);
+
+    textDisplayer.append([cue]);
+    await updateCaptions();
+
+    /** @type {Element} */
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+
+    // Top-level cue should be a DIV
+    const cueElement = textContainer.querySelector('div');
+
+    // The custom region (CustomRegion) should be created and wrap the cue
+    const regionElement = textContainer.querySelector('.shaka-text-region');
+
+    // --- Region validations (CustomRegion: 90% x 90% at top/left 5%) ---
+    const regionCss = parseCssText(regionElement.style.cssText);
+    expect(regionCss).toEqual(jasmine.objectContaining({
+      'position': 'absolute',
+      'height': '90%',
+      'width': '90%',
+      'top': '5%',
+      'left': '5%',
+      'display': 'flex',
+      'flex-direction': 'column',
+      'align-items': 'center',
+      // displayAlign BEFORE => justifyContent 'flex-start'
+      'justify-content': 'flex-start',
+    }));
+
+    // --- Cue validations (LEFT + BEFORE) ---
+    const cueCss = parseCssText(cueElement.style.cssText);
+    expect(cueCss).toEqual(jasmine.objectContaining({
+      'display': 'flex',
+      'flex-direction': 'column',
+      // textAlign LEFT => alignItems 'flex-start' and width 100%
+      'align-items': 'flex-start',
+      'width': '100%',
+      // displayAlign BEFORE => justifyContent 'flex-start'
+      'justify-content': 'flex-start',
+      'text-align': 'left',
+    }));
+
+    // Text content should be present
+    expect(cueElement.textContent).toBe('Top-Left');
+  });
+
+  describe('getNextBoundary_', () => {
+    /**
+     * @param {!Array<!shaka.text.Cue>} cues
+     * @param {number} time
+     * @return {?number}
+     * @suppress {visibility}
+     */
+    function getNextBoundary(cues, time) {
+      return textDisplayer.getNextBoundary_(cues, time);
+    }
+
+    it('returns the earliest boundary strictly after the time', () => {
+      const cues = [new shaka.text.Cue(1, 3, 'a')];
+      expect(getNextBoundary(cues, 0)).toBe(1);
+      expect(getNextBoundary(cues, 1)).toBe(3);
+      expect(getNextBoundary(cues, 2)).toBe(3);
+      // No boundary remains after the cue has ended.
+      expect(getNextBoundary(cues, 3)).toBe(null);
+    });
+
+    it('considers all cues', () => {
+      const cues = [
+        new shaka.text.Cue(1, 3, 'a'),
+        new shaka.text.Cue(5, 8, 'b'),
+      ];
+      expect(getNextBoundary(cues, 3)).toBe(5);
+      expect(getNextBoundary(cues, 5)).toBe(8);
+    });
+
+    it('descends into nested cues (character-by-character reveals)', () => {
+      const cue = new shaka.text.Cue(1, 10, '');
+      cue.nestedCues = [
+        new shaka.text.Cue(2, 10, 'a'),
+        new shaka.text.Cue(5, 10, 'b'),
+      ];
+      const cues = [cue];
+      expect(getNextBoundary(cues, 1)).toBe(2);
+      expect(getNextBoundary(cues, 2)).toBe(5);
+      expect(getNextBoundary(cues, 5)).toBe(10);
+    });
   });
 });

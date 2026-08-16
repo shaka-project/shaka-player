@@ -63,7 +63,7 @@ describe('Player Load Graph', () => {
         expect(video.getElementsByTagName('source').length).toBeTruthy();
       });
 
-  it('attach + initializeMediaSource=false will not intialize media source',
+  it('attach + initializeMediaSource=false will not initialize media source',
       async () => {
         createPlayer();
 
@@ -717,7 +717,7 @@ describe('Player Load Graph', () => {
      * @return {!Promise}
      */
     async function startIn(state) {
-      /** @type {!Map.<string, function():!Promise>} */
+      /** @type {!Map<string, function(): !Promise>} */
       const actions = new Map()
           .set('detach', async () => {
             await player.detach();
@@ -754,7 +754,7 @@ describe('Player Load Graph', () => {
      * @return {!Promise}
      */
     async function passingThrough(state, doThis) {
-      /** @type {!Set.<string>} */
+      /** @type {!Set<string>} */
       const preLoadStates = new Set([
         'manifest-parser',
         'manifest',
@@ -762,7 +762,7 @@ describe('Player Load Graph', () => {
         // Excludes 'unload'.
       ]);
 
-      /** @type {!Set.<string>} */
+      /** @type {!Set<string>} */
       const postLoadStates = new Set([
         'unload',
       ]);
@@ -811,7 +811,7 @@ describe('Player Load Graph', () => {
      * @return {!Promise}
      */
     async function goTo(state, videoToUse = video) {
-      /** @type {!Map.<string, function():!Promise>} */
+      /** @type {!Map<string, function(): !Promise>} */
       const actions = new Map()
           .set('detach', () => {
             return player.detach();
@@ -842,7 +842,7 @@ describe('Player Load Graph', () => {
    * Get a list of all the states that the walker went through after
    * |beforeEach| finished.
    *
-   * @return {!Array.<string>}
+   * @return {!Array<string>}
    */
   function getVisitedStates() {
     const states = [];

@@ -4,21 +4,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-module.exports = {
-  rules: {},
+import argCommentSpacing from './arg-comment-spacing.js';
+import arrayNoInstanceof from './array-no-instanceof.js';
+import buffersourceNoInstanceof from './buffersource-no-instanceof.js';
+import privateRule from './private.js';
+
+const index = {
+  rules: {
+    'arg-comment-spacing': argCommentSpacing,
+    'array-no-instanceof': arrayNoInstanceof,
+    'buffersource-no-instanceof': buffersourceNoInstanceof,
+    'private': privateRule,
+  },
   configs: {
     config: {
-      plugins: ['shaka-rules'],
+      plugins: {},
       rules: {},
     },
   },
 };
 
-const RULES = [
-  'arg-comment-spacing',
-  'private',
-];
-for (const rule of RULES) {
-  module.exports.rules[rule] = require('./' + rule);
-  module.exports.configs.config.rules['shaka-rules/' + rule] = 'error';
+index.configs.config.plugins['shaka-rules'] = index;
+
+for (const rule of Object.keys(index.rules)) {
+  index.configs.config.rules['shaka-rules/' + rule] = 'error';
 }
+
+export default index;

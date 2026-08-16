@@ -12,15 +12,9 @@ describe('StringUtils', () => {
   });
 
   describe('without TextDecoder', () => {
-    let originalTextDecoder;
-
-    beforeAll(() => {
-      originalTextDecoder = window.TextDecoder;
-      window['TextDecoder'] = null;
-    });
-
-    afterAll(() => {
-      window.TextDecoder = originalTextDecoder;
+    beforeEach(() => {
+      spyOn(deviceDetected, 'shouldAvoidUseTextDecoderEncoder')
+          .and.returnValue(true);
     });
 
     defineStringUtilTests();
@@ -120,6 +114,12 @@ function defineStringUtilTests() {
     it('guesses UTF-16 LE', () => {
       const arr = [0x46, 0x00, 0x6f, 0x00, 0x6f, 0x00];
       expect(StringUtils.fromBytesAutoDetect(new Uint8Array(arr))).toBe('Foo');
+    });
+
+    // Regression test for #8336
+    it('counts newlines as ASCII', () => {
+      const arr = [0x0a, 0x46, 0x6f];
+      expect(StringUtils.fromBytesAutoDetect(new Uint8Array(arr))).toBe('\nFo');
     });
 
     it('fails if unable to guess', () => {

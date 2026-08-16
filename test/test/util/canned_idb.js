@@ -22,7 +22,7 @@ shaka.test.CannedIDB = class {
    * @param {boolean=} dummyArrayBuffers If true, replace array buffer data with
    *   dummy data, as you might want for generating unit test data. Defaults to
    *   false.
-   * @return {!Promise.<string>} A JSON string that can be used to recreate the
+   * @return {!Promise<string>} A JSON string that can be used to recreate the
    *   database later in a call to restoreJSON().
    */
   static async dumpJSON(name, dummyArrayBuffers) {
@@ -34,7 +34,7 @@ shaka.test.CannedIDB = class {
 
   /**
    * @param {string} name The name of the database to dump.
-   * @return {!Promise.<shaka.test.CannedIDB.SavedDatabase>} An object that can
+   * @return {!Promise<shaka.test.CannedIDB.SavedDatabase>} An object that can
    *   be used to recreate the database later in a call to restore().
    */
   static async dump(name) {
@@ -119,6 +119,7 @@ shaka.test.CannedIDB = class {
    * @private
    */
   static replacer_(dummyArrayBuffers, key, value) {
+    // eslint-disable-next-line shaka-rules/buffersource-no-instanceof
     if (value instanceof ArrayBuffer) {
       /** @type {string} */
       let data;
@@ -154,7 +155,7 @@ shaka.test.CannedIDB = class {
 
   /**
    * @param {string} name The name of the database to open.
-   * @return {!Promise.<!IDBDatabase>} Resolved when the named DB has been
+   * @return {!Promise<!IDBDatabase>} Resolved when the named DB has been
    *   opened.
    * @private
    */
@@ -249,7 +250,7 @@ shaka.test.CannedIDB = class {
    * @param {string} name The name of the database to create.
    * @param {shaka.test.CannedIDB.SavedDatabase} savedDatabase An object
    *   containing the database definition and the data to populate it with.
-   * @return {!Promise.<IDBDatabase>} Resolved when the named DB has been
+   * @return {!Promise<IDBDatabase>} Resolved when the named DB has been
    *   created.
    * @private
    */
@@ -365,7 +366,7 @@ shaka.test.CannedIDB.SavedStoreDataItem;
 /**
  * @typedef {{
  *   parameters: shaka.test.CannedIDB.SavedStoreParameters,
- *   data: !Array.<shaka.test.CannedIDB.SavedStoreDataItem>,
+ *   data: !Array<shaka.test.CannedIDB.SavedStoreDataItem>,
  * }}
  */
 shaka.test.CannedIDB.SavedStore;
@@ -373,7 +374,7 @@ shaka.test.CannedIDB.SavedStore;
 /**
  * @typedef {{
  *   version: number,
- *   stores: !Object.<string, shaka.test.CannedIDB.SavedStore>,
+ *   stores: !Object<string, shaka.test.CannedIDB.SavedStore>,
  * }}
  */
 shaka.test.CannedIDB.SavedDatabase;

@@ -65,8 +65,14 @@ describe('Mp4VttParser', () => {
 
     const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0};
-    const result = parser.parseMedia(vttSegment, time);
+    const time = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 0,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
+    const result = parser.parseMedia(vttSegment, time, null, []);
     verifyHelper(cues, result);
   });
 
@@ -93,8 +99,14 @@ describe('Mp4VttParser', () => {
 
     const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0};
-    const result = parser.parseMedia(vttSegmentMultiPayload, time);
+    const time = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 0,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
+    const result = parser.parseMedia(vttSegmentMultiPayload, time, null, []);
     verifyHelper(cues, result);
   });
 
@@ -121,8 +133,14 @@ describe('Mp4VttParser', () => {
 
     const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0};
-    const result = parser.parseMedia(vttSegSettings, time);
+    const time = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 0,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
+    const result = parser.parseMedia(vttSegSettings, time, null, []);
     verifyHelper(cues, result);
   });
 
@@ -143,8 +161,14 @@ describe('Mp4VttParser', () => {
 
     const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0};
-    const result = parser.parseMedia(vttSegNoDuration, time);
+    const time = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 0,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
+    const result = parser.parseMedia(vttSegNoDuration, time, null, []);
     verifyHelper(cues, result);
   });
 
@@ -165,17 +189,28 @@ describe('Mp4VttParser', () => {
 
     const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    const time =
-        {periodStart: 10, segmentStart: 0, segmentEnd: 0, vttOffset: 10};
-    const result = parser.parseMedia(vttSegment, time);
+    const time = {
+      periodStart: 10,
+      segmentStart: 0,
+      segmentEnd: 0,
+      vttOffset: 10,
+      isMpegTs: false,
+    };
+    const result = parser.parseMedia(vttSegment, time, null, []);
     verifyHelper(cues, result);
   });
 
   it('handles empty media segments', () => {
     const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0};
-    const result = parser.parseMedia(new Uint8Array(0), time);
+    const time = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 0,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
+    const result = parser.parseMedia(new Uint8Array(0), time, null, []);
     verifyHelper([], result);
   });
 

@@ -32,9 +32,10 @@ shaka.ui.Matrix4x4 = class {
    * up axis.
    *
    * @param {!Float32Array} out 4x4 matrix frustum matrix will be written into
-   * @param {!Array.<number>} eye Position of the viewer
-   * @param {!Array.<number>} center Point the viewer is looking at
-   * @param {!Array.<number>} up Vector pointing up
+   * @param {!Array<number>} eye Position of the viewer
+   * @param {!Array<number>} center Point the viewer is looking at
+   * @param {!Array<number>} up Vector pointing up
+   * @return {!Float32Array}
    */
   static lookAt(out, eye, center, up) {
     let x0;
@@ -129,7 +130,7 @@ shaka.ui.Matrix4x4 = class {
    *
    * @param {!Float32Array} out the receiving matrix
    * @param {!Float32Array} a the matrix to scale
-   * @param {!Array.<number>} v the vector to scale the matrix by
+   * @param {!Array<number>} v the vector to scale the matrix by
    */
   static scale(out, a, v) {
     const x = v[0];
@@ -166,6 +167,7 @@ shaka.ui.Matrix4x4 = class {
    * @param {number} aspect Aspect ratio. typically viewport width/height
    * @param {number} near Near bound of the frustum
    * @param {number} far Far bound of the frustum, can be null or Infinity
+   * @return {!Float32Array}
    */
   static perspective(out, fovy, aspect, near, far) {
     const f = 1.0 / Math.tan(fovy / 2);
@@ -267,6 +269,7 @@ shaka.ui.Matrix4x4 = class {
    * @param {number} top Top bound of the frustum
    * @param {number} near Near bound of the frustum
    * @param {number} far Far bound of the frustum
+   * @return {!Float32Array}
    */
   static frustum(out, left, right, bottom, top, near, far) {
     const rl = 1 / (right - left);
@@ -424,6 +427,7 @@ shaka.ui.Matrix4x4 = class {
    * same as the quaternion originally supplied.
    * @param {!Float32Array} out Quaternion to receive the rotation component
    * @param {!Float32Array} mat Matrix to be decomposed (input)
+   * @return {!Float32Array}
    */
   static getRotation(out, mat) {
     const scaling = new Float32Array(3);
@@ -526,18 +530,20 @@ shaka.ui.Matrix4x4 = class {
    * Set a 4x4 matrix to the identity matrix
    *
    * @param {!Float32Array} out the receiving matrix
+   * @return {!Float32Array}
    * @private
    */
   static identity_(out) {
     for (let i = 0; i < 16; i++) {
       out[i] = (i % 5) == 0 ? 1 : 0;
     }
+    return out;
   }
 
   /**
    * Returns the scaling factor component of a transformation
    * matrix. If a matrix is built with fromRotationTranslationScale
-   * with a normalized Quaternion paramter, the returned vector will be
+   * with a normalized Quaternion parameter, the returned vector will be
    * the same as the scaling vector
    * originally supplied.
    * @param  {!Float32Array} out Vector to receive scaling factor component

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2016 Google LLC
 #
@@ -285,6 +285,11 @@ class Launcher:
         '--grid-config',
         help='Path to a yaml config defining Selenium grid browsers. '
              '(See docs/selenium-grid-config.md)')
+    running_commands.add_argument(
+        '--running_in_vm',
+        help='Set to indicate that we are running in VM',
+        action='store_true',
+        default=False)
 
 
     logging_commands.add_argument(
@@ -406,6 +411,7 @@ class Launcher:
       'tls_key',
       'tls_cert',
       'uncompiled',
+      'running_in_vm',
     ]
 
     # Check each value before setting it to avoid passing null values.

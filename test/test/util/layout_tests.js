@@ -57,7 +57,7 @@ shaka.test.LayoutTests = class {
    * knows if the browser is connected via WebDriver.  So this must be checked
    * in Karma via an HTTP request.
    *
-   * @return {!Promise.<boolean>}
+   * @return {!Promise<boolean>}
    */
   static async supported() {
     // We need our own ID for Karma to look up the WebDriver connection.
@@ -175,23 +175,16 @@ shaka.test.TextLayoutTests = class extends shaka.test.LayoutTests {
 
   /** @override */
   static async supported() {
+    // We only do this in our lab, where we control device a11y settings that
+    // impact these tests heavily.
+    if (deviceDetected.getBrowserEngine() ===
+        shaka.device.IDevice.BrowserEngine.WEBKIT &&
+        getClientArg('runningInVM')) {
+      return false;
+    }
+
     const baseSupported = await super.supported();
     if (!baseSupported) {
-      return false;
-    }
-
-    // Due to a Safari implementation bug, the browser only does the correct
-    // thing for a timing edge case on Safari 16+.  Skip the tests on earlier
-    // versions.
-    const safariVersion = shaka.util.Platform.safariVersion();
-    if (safariVersion && safariVersion < 16) {
-      return false;
-    }
-
-    // Due to updates in the rendering and/or default styles in Chrome, the
-    // screenshots for native rendering only match in Chrome 106+.
-    const chromeVersion = shaka.util.Platform.chromeVersion();
-    if (chromeVersion && chromeVersion < 106) {
       return false;
     }
 
@@ -250,6 +243,9 @@ shaka.test.DomTextLayoutTests = class extends shaka.test.TextLayoutTests {
 
     /** @type {number} */
     this.minSimilarity = MIN_SIMILARITY_UI;
+
+    /** @type {Object} **/
+    this.player = null;
   }
 
   /** @override */
@@ -277,6 +273,14 @@ shaka.test.DomTextLayoutTests = class extends shaka.test.TextLayoutTests {
     // tests.
     this.videoContainer.classList.add('shaka-video-container');
 
+    this.player = {
+      getMediaElement: () => /** @type {!HTMLMediaElement} */(this.mockVideo),
+      getVideoContainer: () => this.videoContainer,
+      getPlaybackRate: () => this.mockVideo ? this.mockVideo.playbackRate : 1,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    };
+
     await this.waitForFont('Roboto');
   }
 
@@ -289,10 +293,8 @@ shaka.test.DomTextLayoutTests = class extends shaka.test.TextLayoutTests {
 
   /** @override */
   recreateTextDisplayer() {
-    this.textDisplayer = new shaka.text.UITextDisplayer(
-        /** @type {!HTMLMediaElement} */(this.mockVideo),
-        this.videoContainer,
-        {captionsUpdatePeriod: 0.25});
+    /** @suppress {checkTypes} */
+    this.textDisplayer = new shaka.text.UITextDisplayer(this.player);
     this.textDisplayer.setTextVisibility(true);
   }
 
@@ -339,10 +341,35 @@ shaka.test.NativeTextLayoutTests = class extends shaka.test.TextLayoutTests {
 
     /** @type {shaka.test.Waiter} */
     this.waiter = null;
+
+    /** @type {Object} **/
+    this.player = null;
   }
 
   /** @override */
   async beforeAll() {
+    /** @type {!Array<shaka.extern.TextTrack>} */
+    const textTracks= [{
+      id: 0,
+      active: true,
+    }];
+    this.player = {
+      addEventListener: () => { },
+      removeEventListener: () => { },
+      getMediaElement: () => this.video,
+      getLoadMode: () => shaka.Player.LoadMode.MEDIA_SOURCE,
+      getTextTracks: () => textTracks,
+      selectTextTrack: (track) => {
+        if (track) {
+          const activeTrack = textTracks.find((t) => t.id === track.id);
+          expect(activeTrack).toBeTruthy();
+          this.textDisplayer.setTextVisibility(true);
+        } else {
+          this.textDisplayer.setTextVisibility(false);
+        }
+      },
+    };
+
     this.video = shaka.test.UiUtils.createVideoElement();
 
     // On some platforms, such as Chrome on Android, we may see a "cast"
@@ -378,8 +405,8 @@ shaka.test.NativeTextLayoutTests = class extends shaka.test.TextLayoutTests {
 
   /** @override */
   recreateTextDisplayer() {
-    this.textDisplayer = new shaka.text.SimpleTextDisplayer(
-        this.video, shaka.Player.TextTrackLabel);
+    /** @suppress {checkTypes} */
+    this.textDisplayer = new shaka.text.NativeTextDisplayer(this.player);
     this.textDisplayer.setTextVisibility(true);
   }
 

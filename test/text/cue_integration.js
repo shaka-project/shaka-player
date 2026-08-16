@@ -19,7 +19,13 @@ describe('Cue', () => {
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
         'Test',
-        {periodStart: 7, segmentStart: 10, segmentEnd: 60, vttOffset: 7});
+        {
+          periodStart: 7,
+          segmentStart: 10,
+          segmentEnd: 60,
+          vttOffset: 7,
+          isMpegTs: false,
+        });
     expect(cues.length).toBe(1);
     expect(cues[0].startTime).toBe(27);
     expect(cues[0].endTime).toBe(47);
@@ -34,18 +40,24 @@ describe('Cue', () => {
         'ID1\n' +
         '00:00:20.000 --> 00:00:40.000 align:middle size:56% vertical:lr\n' +
         'Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
     expect(cues.length).toBe(1);
   });
 
   /**
    * @param {string} text
    * @param {!shaka.extern.TextParser.TimeContext} time
-   * @return {!Array.<!shaka.text.Cue>}
+   * @return {!Array<!shaka.text.Cue>}
    */
   function parseVtt(text, time) {
     const data =
         shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
-    return new shaka.text.VttTextParser().parseMedia(data, time);
+    return new shaka.text.VttTextParser().parseMedia(data, time, null, []);
   }
 });

@@ -1,76 +1,37 @@
-# How to contribute #
+# How to Contribute
 
-We'd love to accept your patches and contributions to this project.  There are
-just a few small guidelines you need to follow.
-
-1. File a bug at https://github.com/shaka-project/shaka-player/issues (if there
-   isn't one already).  If your patch is going to be large, you should start a
-   discussion on GitHub first.
-
-   Leave a comment to let us know that you are working on a PR for the issue.
-   We'll assign the issue to you.
-
-2. For legal reasons, all contributors must sign a Contributor License
-   Agreement, either for an individual or corporation, before a patch can be
-   accepted.  (See below.)
-
-3. Follow the normal process of [forking][] the project, and setup a new
-   branch to work in.  It's important that each group of changes be done in
-   separate branches in order to ensure that a pull request only includes the
-   commits related to that bug or feature.
-
-4. Add an entry to the [AUTHORS][] and [CONTRIBUTORS][] files with your name
-   and email.  For corporate contributions, AUTHORS should contain an entry
-   for your company.
-
-5. Do your best to have [well-formed commit messages][] for each change.
-   This provides consistency throughout the project, and ensures that commit
-   messages are able to be formatted properly by various git tools.
-
-6. Add or modify unit or integration tests for any new or modified
-   functionality in your patch.  For bug fixes, try to write a regression test
-   that fails without your patch and passes with it. Our tests are written with
-   [Jasmine](https://jasmine.github.io/).
-
-7. Test all changes in both the compiler and linter with:
-```sh
-   python build/all.py
-```
-   Patches that do not compile or pass linter checks will not be accepted.
-
-8. Test all changes in the unit and integration tests with:
-```sh
-   python build/test.py
-```
-   Patches that do not pass unit and integration tests will not be accepted.
-
-9. Finally, push the commits to your fork and submit a [pull request][].
-
-[forking]: https://help.github.com/articles/fork-a-repo
-[AUTHORS]: AUTHORS
-[CONTRIBUTORS]: CONTRIBUTORS
-[well-formed commit messages]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
-[pull request]: https://help.github.com/articles/creating-a-pull-request
+We'd love to accept your patches and contributions to this project. There are just a few guidelines to follow.
 
 
-## Contributor License Agreement ##
+## Filing Issues
 
-Contributions to any Google project must be accompanied by a Contributor
-License Agreement.  This is not a copyright **assignment**, it simply gives
-Google permission to use and redistribute your contributions as part of the
-project.
+Before starting work on a significant change, we recommend filing or finding an issue first. This lets us discuss the approach and avoid duplicated effort. For small bug fixes, jumping straight to a PR is fine.
 
-  * If you are an individual writing original source code and you're sure you
-    own the intellectual property, then you'll need to sign an [individual
-    CLA][].
 
-  * If you work for a company that wants to allow you to contribute your work,
-    then you'll need to sign a [corporate CLA][].
+## Submitting a Pull Request
 
-You generally only need to submit a CLA once, so if you've already submitted
-one (even if it was for a different project), you probably don't need to do it
-again.
+All submissions, including submissions by project members, require review via GitHub pull request.
 
-[individual CLA]: https://developers.google.com/open-source/cla/individual
-[corporate CLA]: https://developers.google.com/open-source/cla/corporate
 
+## Commit Messages
+
+This project follows [Conventional Commits](https://www.conventionalcommits.org/). Commit messages and PR titles should use a type prefix such as `fix:`, `feat:`, `chore:`, etc. These feed directly into automated changelog generation and semantic versioning, so the message should describe the user-visible impact, not the implementation detail.
+
+Because the PR title generates the changelog entry, your PR title should reflect what a user needs to know about the change.  So we would prefer `fix: Avoid uncaught exceptions when loading encrypted content` (says what was wrong from a user perspective) over `fix: Refactor internal error handling in FooLoader` (describes the internal changes, not the observable changes).
+
+
+## Code Style and Tests
+
+Before submitting a pull request, make sure your changes pass the project's linter and test suite. Details on how to run these can be found in the project's README, `AGENTS.md`, or via standard commands like `npm run lint` and `npm test`.
+
+
+## AI-Assisted Contributions
+
+Contributions written or assisted by AI coding agents are welcome. Any commit that involved AI assistance must include attribution in the commit message. See [`AGENT-ATTRIBUTION.md`](AGENT-ATTRIBUTION.md) for the required format.
+
+**Why this matters:** Attribution helps reviewers calibrate their review effort, gives the project an honest record of how the code was produced, and ensures the human submitting the PR has reviewed and takes responsibility for the changes.
+
+
+## Code of Conduct
+
+This project follows our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold it.

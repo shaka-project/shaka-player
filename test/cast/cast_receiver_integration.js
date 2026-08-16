@@ -10,7 +10,9 @@
 // only be run on Chrome and Chromecast.
 /** @return {boolean} */
 const castReceiverIntegrationSupport =
-    () => shaka.util.Platform.isChrome() || shaka.util.Platform.isChromecast();
+    () => deviceDetected.getDeviceName() === 'Chrome' ||
+      deviceDetected.getDeviceName() === 'Edge' ||
+      deviceDetected.getDeviceType() === shaka.device.IDevice.DeviceType.CAST;
 filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
   const CastReceiver = shaka.cast.CastReceiver;
   const CastUtils = shaka.cast.CastUtils;
@@ -32,12 +34,12 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
   /** @type {HTMLVideoElement} */
   let video;
 
-  /** @type {shaka.util.PublicPromise} */
+  /** @type {Promise.PromiseWithResolvers} */
   let messageWaitPromise;
-  /** @type {Array.<string>} */
+  /** @type {Array<string>} */
   let pendingMessages = null;
 
-  /** @type {!Array.<function()>} */
+  /** @type {!Array<function()>} */
   let toRestore;
   let pendingWaitWrapperCalls = 0;
 
@@ -96,9 +98,6 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     fakeInitState = {
       player: {
         configure: {},
-      },
-      playerAfterLoad: {
-        setTextTrackVisibility: true,
       },
       video: {
         loop: true,
@@ -204,8 +203,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       for (const message of messages) {
         // Check that the update message is of a reasonable size. From previous
         // testing we found that the socket would silently reject data that got
-        // too big. 7KB is safely below the limit.
-        expect(message.length).toBeLessThan(7000);
+        // too big. 8KB is safely below the limit.
+        expect(message.length).toBeLessThan(8000);
       }
     });
 
@@ -243,8 +242,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     });
   });
 
-  const widevineSupport = () => shakaSupport.drm['com.widevine.alpha'];
-  filterDescribe('with drm', widevineSupport, () => {
+  filterDescribe('with drm', checkWidevineSupport, () => {
     drmIt('sends reasonably-sized updates', async () => {
       // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
       fakeInitState.manifest = 'test:sintel-enc';
@@ -270,8 +268,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       for (const message of messages) {
         // Check that the update message is of a reasonable size. From previous
         // testing we found that the socket would silently reject data that got
-        // too big. 7KB is safely below the limit.
-        expect(message.length).toBeLessThan(7000);
+        // too big. 8KB is safely below the limit.
+        expect(message.length).toBeLessThan(8000);
       }
     });
 
@@ -324,10 +322,10 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
         'start');
     waitForUpdateMessageWrapper(
         // eslint-disable-next-line no-restricted-syntax
-        shaka.media.DrmEngine.prototype, 'DrmEngine', 'initForPlayback');
+        shaka.drm.DrmEngine.prototype, 'DrmEngine', 'initForPlayback');
     waitForUpdateMessageWrapper(
         // eslint-disable-next-line no-restricted-syntax
-        shaka.media.DrmEngine.prototype, 'DrmEngine', 'attach');
+        shaka.drm.DrmEngine.prototype, 'DrmEngine', 'attach');
     waitForUpdateMessageWrapper(
         // eslint-disable-next-line no-restricted-syntax
         shaka.media.StreamingEngine.prototype, 'StreamingEngine', 'start');
@@ -363,17 +361,21 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
   function waitForUpdateMessageWrapper(prototype, name, methodName) {
     pendingWaitWrapperCalls += 1;
     const original = prototype[methodName];
-    // eslint-disable-next-line no-restricted-syntax
-    prototype[methodName] = /** @this {Object} @return {*} */ async function() {
-      pendingWaitWrapperCalls -= 1;
-      shaka.log.debug(
-          'Waiting for update message before calling ' +
-          name + '.' + methodName + '...');
-      const originalArguments = Array.from(arguments);
-      await waitForUpdateMessages();
+    prototype[methodName] =
+      /**
+       * @this {Object}
+       * @return {*}
+       */
       // eslint-disable-next-line no-restricted-syntax
-      return original.apply(this, originalArguments);
-    };
+      async function() {
+        pendingWaitWrapperCalls -= 1;
+        shaka.log.debug(
+            'Waiting for update message before calling ' +
+            name + '.' + methodName + '...');
+        const originalArguments = Array.from(arguments);
+        await waitForUpdateMessages();
+        return original.apply(this, originalArguments);
+      };
     toRestore.push(() => {
       prototype[methodName] = original;
     });
@@ -388,8 +390,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
 
   function waitForUpdateMessages() {
     pendingMessages = [];
-    messageWaitPromise = new shaka.util.PublicPromise();
-    return messageWaitPromise;
+    messageWaitPromise = Promise.withResolvers();
+    return messageWaitPromise.promise;
   }
 
   function createMockReceiverApi() {

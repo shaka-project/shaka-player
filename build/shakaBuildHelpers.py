@@ -22,6 +22,7 @@ This uses two environment variables to help with debugging the scripts:
 
 from __future__ import print_function
 
+import contextlib
 import errno
 import json
 import logging
@@ -30,6 +31,7 @@ import platform
 import re
 import subprocess
 import sys
+import tempfile
 import time
 
 import subprocessWindowsPatch
@@ -62,6 +64,30 @@ def _modules_need_update():
     return True
 
   return False
+
+
+# Like tempfile.NamedTemporaryFile, but with the behavior of delete=True,
+# delete_on_close=False, even on older Python versions that don't support the
+# new delete_on_close parameter (added in Python 3.12).  This can be removed
+# when we require Python 3.12+, though more likely we'll replace this whole
+# build system sooner than that.
+class _NamedTemporaryFile(contextlib.AbstractContextManager):
+  def __init__(self, temp):
+    self.temp = temp
+
+  def __enter__(self):
+    self.fp = self.temp.__enter__()
+    return self.fp
+
+  def __exit__(self, type, value, traceback):
+    self.fp.close()
+    os.unlink(self.fp.name)
+    self.temp.__exit__(type, value, traceback)
+
+
+def NamedTemporaryFile():
+  return _NamedTemporaryFile(tempfile.NamedTemporaryFile(delete=False))
+
 
 def get_source_base():
   """Returns the absolute path to the source code base."""
@@ -202,7 +228,7 @@ def npm_version(is_dirty=False):
     text = execute_get_output(cmd_line).decode('utf8')
   except subprocess.CalledProcessError as e:
     text = e.output.decode('utf8')
-  match = re.search(r'shaka-player@(.*) ', text)
+  match = re.search(r'shaka-player.*@(.*) ', text)
   if match:
     return match.group(1) + ('-npm-dirty' if is_dirty else '')
   raise RuntimeError('Unable to determine library version!')
@@ -229,7 +255,7 @@ def get_all_js_files(*path_components):
   """Get all JavaScript file paths recursively from the given path components.
 
   Args:
-    *path_components: The components of the path to search.  Joining is handling
+    *path_components: The components of the path to search.  Joining is handled
     internally according to os path semantics.
   Returns:
     An array of absolute paths to all JS files.

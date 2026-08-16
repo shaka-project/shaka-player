@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC
+# Copyright 2016 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,13 +25,16 @@ WORKFLOW_ARGS=( "pr=$PR_NUMBER" )
 
 case "${SHAKA_BOT_ARGUMENTS[0]}" in
   # CE devices only.
-  ce) WORKFLOW_ARGS+=( "browser_filter=Tizen ChromecastUltra ChromecastGTV ChromeAndroid" ) ;;
+  ce) WORKFLOW_ARGS+=( "browser_filter=Tizen ChromecastUltra ChromecastGTV ChromecastStreamer ChromeAndroid" ) ;;
 
   # Cast devices only.
-  cast) WORKFLOW_ARGS+=( "browser_filter=ChromecastUltra ChromecastGTV" ) ;;
+  cast) WORKFLOW_ARGS+=( "browser_filter=ChromecastUltra ChromecastGTV ChromecastStreamer" ) ;;
 
   # Tizen device only.
   tizen) WORKFLOW_ARGS+=( "browser_filter=Tizen" ) ;;
+
+  # Android device only.
+  android) WORKFLOW_ARGS+=( "browser_filter=ChromeAndroid" ) ;;
 
   # No command argument, no extra workflow arguments.
   "") ;;

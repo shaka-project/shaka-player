@@ -11,8 +11,8 @@ goog.require('goog.asserts');
 goog.require('shaka.ads.Utils');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.RangeElement');
+goog.require('shaka.ui.Utils');
 
 
 /**
@@ -27,10 +27,15 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
    */
   constructor(parent, controls) {
     super(parent, controls,
-        ['shaka-volume-bar-container'], ['shaka-volume-bar']);
+        ['shaka-volume-bar-container'], ['shaka-volume-bar'],
+        /* enableWheel= */ true);
 
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.controls.getConfig();
+
+    if (!this.config_.alwaysShowVolumeBar) {
+      this.container.classList.add('shaka-volume-bar-container-allow-hiding');
+    }
 
     // We use a range of 100 to avoid problems with Firefox.
     // See https://github.com/shaka-project/shaka-player/issues/3987
@@ -40,34 +45,48 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
         'volumechange',
         () => this.onPresentationVolumeChange_());
 
-    this.eventManager.listen(this.adManager,
-        shaka.ads.Utils.AD_VOLUME_CHANGED,
-        () => this.onAdVolumeChange_());
-
-    this.eventManager.listen(this.adManager,
-        shaka.ads.Utils.AD_MUTED,
-        () => this.onAdVolumeChange_());
-
-    this.eventManager.listen(this.adManager,
-        shaka.ads.Utils.AD_STOPPED,
+    this.eventManager.listen(this.player,
+        'loading',
         () => this.onPresentationVolumeChange_());
 
-    this.eventManager.listen(this.localization,
-        shaka.ui.Localization.LOCALE_UPDATED,
-        () => this.updateAriaLabel_());
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'loaded',
+          'unloading',
+          'trackschanged',
+        ], () => {
+          this.checkAvailability();
+        });
 
-    this.eventManager.listen(this.localization,
-        shaka.ui.Localization.LOCALE_CHANGED,
-        () => this.updateAriaLabel_());
+    this.eventManager.listen(this.controls,
+        'caststatuschanged',
+        () => this.onPresentationVolumeChange_());
+
+    this.eventManager.listenMulti(this.adManager,
+        [shaka.ads.Utils.AD_VOLUME_CHANGED, shaka.ads.Utils.AD_MUTED],
+        () => this.onAdVolumeChange_());
+
+    this.eventManager.listen(this.adManager,
+        shaka.ads.Utils.AD_STARTED,
+        () => this.checkAvailability());
+
+    this.eventManager.listen(this.adManager,
+        shaka.ads.Utils.AD_STOPPED, () => {
+          this.checkAvailability();
+          this.onPresentationVolumeChange_();
+        });
 
     // Initialize volume display and label.
     this.onPresentationVolumeChange_();
-    this.updateAriaLabel_();
+    this.updateLocalizedStrings();
 
     if (this.ad) {
       // There was already an ad.
       this.onChange();
     }
+
+    this.checkAvailability();
   }
 
   /**
@@ -81,9 +100,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
       this.ad.setVolume(this.getValue() / 100);
     } else {
       this.video.volume = this.getValue() / 100;
-      if (this.video.volume == 0) {
-        this.video.muted = true;
-      } else {
+      if (this.video.volume > 0) {
         this.video.muted = false;
       }
     }
@@ -122,9 +139,21 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
         'linear-gradient(' + gradient.join(',') + ')';
   }
 
-  /** @private */
-  updateAriaLabel_() {
+  /** @override */
+  updateLocalizedStrings() {
     this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.VOLUME);
+  }
+
+  /** @override */
+  checkAvailability() {
+    let available = true;
+    if (this.ad && this.ad.isLinear()) {
+      // We can't tell if the Ad has audio or not.
+      available = true;
+    } else if (this.player.isVideoOnly()) {
+      available = false;
+    }
+    shaka.ui.Utils.setDisplay(this.container, available);
   }
 };
 

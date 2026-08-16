@@ -11,6 +11,23 @@
  * @externs
  */
 
+// See: https://github.com/WebKit/explainers/tree/main/TrackConfiguration
+/** @constructor */
+function AudioTrackConfiguration() {}
+
+/** @type {string} */
+AudioTrackConfiguration.prototype.codec;
+
+/** @type {number} */
+AudioTrackConfiguration.prototype.bitrate;
+
+/** @type {number} */
+AudioTrackConfiguration.prototype.sampleRate;
+
+/** @type {number} */
+AudioTrackConfiguration.prototype.numberOfChannels;
+
+
 /** @constructor */
 function AudioTrack() {}
 
@@ -32,9 +49,12 @@ AudioTrack.prototype.language;
 /** @type {SourceBuffer} */
 AudioTrack.prototype.sourceBuffer;
 
+/** @type {?AudioTrackConfiguration} */
+AudioTrack.prototype.configuration;
+
 
 /**
- * @extends {IArrayLike.<AudioTrack>}
+ * @extends {IArrayLike<AudioTrack>}
  * @extends {EventTarget}
  * @interface
  */

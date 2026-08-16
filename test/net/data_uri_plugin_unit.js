@@ -20,6 +20,7 @@ describe('DataUriPlugin', () => {
 
   it('supports base64 encoded text', async () => {
     await testSucceeds(
+        // cspell: disable-next-line
         'data:;base64,SGVsbG8sIFdvcmxkIQ%3D%3D', '', 'Hello, World!');
   });
 
@@ -47,6 +48,7 @@ describe('DataUriPlugin', () => {
 
   it('supports arbitrary metadata with base64 encoding', async () => {
     await testSucceeds(
+        // cspell: disable-next-line
         'data:text/plain;foo=bar;base64,SGVsbG8sIFdvcmxkIQ%3D%3D',
         'text/plain',
         'Hello, World!');

@@ -47,7 +47,11 @@ function failTestsOnNamespacedElementOrAttributeNames() {
   const patchElementNamespaceFunction = (name) => {
     // eslint-disable-next-line no-restricted-syntax
     const real = Element.prototype[name];
-    /** @this {Element} */
+    /**
+     * @this {Element}
+     * @param {string} arg
+     * @return {*}
+     */
     // eslint-disable-next-line no-restricted-syntax
     Element.prototype[name] = function(arg) {
       // Ignore xml: namespaces since it's builtin.
@@ -55,7 +59,6 @@ function failTestsOnNamespacedElementOrAttributeNames() {
           arg.includes(':')) {
         fail('Use namespace-aware ' + name);
       }
-      // eslint-disable-next-line no-restricted-syntax
       return real.apply(this, arguments);
     };
   };
@@ -168,6 +171,34 @@ function workAroundLegacyEdgePromiseIssues() {
   // polyfill that binds to timer calls the first time it needs to schedule
   // something.
   Promise.resolve().then(() => {});
+}
+
+/**
+ * Install a polyfill for Promise.withResolvers if needed.
+ *
+ * This polyfill is not included in the Babel polyfill, so we need to install it
+ * manually, as we don't want to mess around with current test environment until
+ * we switch to TS.
+ */
+function installPromiseWithResolversPolyfill() {
+  Promise.withResolvers ??= () => {
+    let resolve;
+    let reject;
+    const promise = new Promise((r1, r2) => {
+      resolve = r1;
+      reject = r2;
+    });
+    return {promise, resolve, reject};
+  };
+}
+
+/**
+ * Work around lab crashes by flagging if we're running in the lab.  This lets
+ * us add lab-specific workarounds for our unique lab environment.  This won't
+ * affect local test runs on developer machines or GitHub Actions workflows.
+ */
+function workAroundLabCrashes() {
+  shaka.debug.RunningInLab = getClientArg('runningInLab');
 }
 
 /**
@@ -340,13 +371,6 @@ function configureJasmineEnvironment() {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = Number(timeout);
   }
 
-  const logLevel = getClientArg('logLevel');
-  if (logLevel) {
-    shaka.log.setLevel(Number(logLevel));
-  } else {
-    shaka.log.setLevel(shaka.log.Level.INFO);
-  }
-
   beforeAll(async () => {
     // Ensure node modules are loaded before any tests execute.
     await loadNodeModules();
@@ -367,17 +391,15 @@ function configureJasmineEnvironment() {
     });
   }
 
-  // Work-around: allow the Tizen media pipeline to cool down.
-  // Without this, Tizen's pipeline seems to hang in subsequent tests.
-  // TODO: file a bug on Tizen
-  if (shaka.util.Platform.isTizen()) {
-    afterEach((done) => {  // eslint-disable-line no-restricted-syntax
-      originalSetTimeout(done, /* ms= */ 100);
-    });
-  }
+  const originalDevice = shaka.device.DeviceFactory.getDevice();
+  goog.asserts.assert(originalDevice, 'device must be non-null');
+  window.dump(originalDevice.toString());
+  window.deviceDetected = originalDevice;
 
-  // Reset decoding config cache after each test.
   afterEach(/** @suppress {accessControls} */ () => {
+    goog.asserts.assert(originalDevice, 'device must be non-null');
+    window.deviceDetected = originalDevice;
+    // Reset decoding config cache after each test.
     shaka.util.StreamUtils.clearDecodingConfigCache();
     shaka.media.Capabilities.MediaSourceTypeSupportMap.clear();
   });
@@ -438,12 +460,148 @@ async function checkSupport() {
     window.shakaSupport = await shaka.Player.probeSupport();
     const endMs = Date.now();
     // Bypass Karma's log settings and dump this to the console.
+    window.dump('User agent: ' + navigator.userAgent);
     window.dump('Platform support: ' + JSON.stringify(shakaSupport, null, 2));
     window.dump(`Platform support check took ${endMs - startMs} ms.`);
     // eslint-disable-next-line no-restricted-syntax
   } catch (error) {
     window.dump('Support check failed at boot: ' + error);
   }
+}
+
+/**
+ * Check if ClearKey CENC is supported.
+ * @return {boolean}
+ */
+function checkClearKeySupport() {
+  const clearKeySupport = shakaSupport.drm['org.w3.clearkey'];
+  if (!clearKeySupport) {
+    return false;
+  }
+  return clearKeySupport.encryptionSchemes.includes('cenc');
+}
+
+/**
+ * Check if PlayReady is supported.
+ * @return {boolean}
+ */
+function checkPlayReadySupport() {
+  if (shakaSupport.drm['com.microsoft.playready'] ||
+      shakaSupport.drm['com.microsoft.playready.recommendation'] ||
+      shakaSupport.drm['com.microsoft.playready.recommendation.3000']) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Check if Widevine is supported.
+ * @return {boolean}
+ */
+function checkWidevineSupport() {
+  if (shakaSupport.drm['com.widevine.alpha']) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Check if FairPlay is supported.
+ * @return {boolean}
+ */
+function checkFairPlaySupport() {
+  if (shakaSupport.drm['com.apple.fps'] && !getClientArg('runningInVM')) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Check if Widevine with persistence state is supported.
+ * @return {boolean}
+ */
+function checkWidevinePersistentSupport() {
+  const widevine = shakaSupport.drm['com.widevine.alpha'];
+  if (!widevine) {
+    return false;
+  }
+  return widevine.persistentState;
+}
+
+/**
+ * Check if Widevine and/or PlayReady are supported.
+ * @return {boolean}
+ */
+function checkTrueDrmSupport() {
+  // We don't include FairPlay because our test assets aren't ready to use it.
+  return checkWidevineSupport() || checkPlayReadySupport();
+}
+
+/**
+ * Check if MSF parser is supported.
+ * @return {boolean}
+ */
+window.isMSFSupported = () => {
+  if (!isBigIntSupported()) {
+    return false;
+  }
+  if (!isWritableStreamSupported()) {
+    return false;
+  }
+  if (!isReadableStreamSupported()) {
+    return false;
+  }
+  return true;
+};
+
+/**
+ * Check if ReadableStream is supported.
+ * @return {boolean}
+ */
+function isBigIntSupported() {
+  let supported = false;
+  try {
+    supported = typeof window.BigInt === 'function';
+    // eslint-disable-next-line no-restricted-syntax
+  } catch (e) {
+    // Ignore errors
+  }
+  return supported;
+}
+
+/**
+ * Check if ReadableStream is supported.
+ * @return {boolean}
+ */
+function isReadableStreamSupported() {
+  // On Edge, ReadableStream exists, but attempting to construct it results in
+  // an error. See https://bit.ly/2zwaFLL
+  // So this has to check that ReadableStream is present AND usable.
+  if (window.ReadableStream) {
+    try {
+      new ReadableStream({}); // eslint-disable-line no-new
+    } catch (e) { // eslint-disable-line no-restricted-syntax
+      return false;
+    }
+  } else {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Check if WritableStream is supported.
+ * @return {boolean}
+ */
+function isWritableStreamSupported() {
+  let supported = false;
+  try {
+    supported = typeof window.WritableStream === 'function';
+    // eslint-disable-next-line no-restricted-syntax
+  } catch (e) {
+    // Ignore errors
+  }
+  return supported;
 }
 
 /**
@@ -456,6 +614,16 @@ async function setupTestEnvironment() {
   failTestsOnUnhandledErrors();
   disableScrollbars();
   workAroundLegacyEdgePromiseIssues();
+  workAroundLabCrashes();
+
+  const logLevel = getClientArg('logLevel');
+  if (logLevel) {
+    shaka.log.setLevel(Number(logLevel));
+  } else {
+    shaka.log.setLevel(shaka.log.Level.INFO);
+  }
+
+  installPromiseWithResolversPolyfill();
 
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly

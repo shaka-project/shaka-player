@@ -21,7 +21,8 @@ shaka.extern = {};
  *   base: string,
  *   buffered: string,
  *   played: string,
- *   adBreaks: string
+ *   adBreaks: string,
+ *   chapters: string,
  * }}
  *
  * @property {string} base
@@ -36,6 +37,9 @@ shaka.extern = {};
  * @property {string} adBreaks
  *   The CSS background color applied to the portion of the seek bar showing
  *   when the ad breaks are scheduled to occur on the timeline.
+ * @property {string} chapters
+ *   The CSS background color applied to the portion of the seek bar showing
+ *   when a chapter appears on the timeline.
  * @exportDoc
  */
 shaka.extern.UISeekBarColors;
@@ -57,20 +61,254 @@ shaka.extern.UISeekBarColors;
 shaka.extern.UIVolumeBarColors;
 
 /**
+ * @typedef {{
+ *   base: string,
+ *   level: string,
+ * }}
+ *
+ * @property {string} base
+ *   The CSS background color applied to the base of the playback rate bar, on
+ *   top of which the current playback rate level is shown.
+ * @property {string} level
+ *   The CSS background color applied to the portion of the playback rate bar
+ *   showing the current playback rate level.
+ * @exportDoc
+ */
+shaka.extern.UIPlaybackRateBarColors;
+
+/**
+ * @typedef {{
+ *   720: string,
+ *   1080: string,
+ *   1440: string,
+ *   2160: string,
+ *   4320: string
+ * }}
+ *
+ * @property {string} 720
+ *   The mark that will be displayed when the quality is 720p.
+ *   <br>
+ *   Defaults to ''.
+ * @property {string} 1080
+ *   The mark that will be displayed when the quality is 1080p.
+ *   <br>
+ *   Defaults to 'HD'.
+ * @property {string} 1440
+ *   The mark that will be displayed when the quality is 1440p.
+ *   <br>
+ *   Defaults to '2K'.
+ * @property {string} 2160
+ *   The mark that will be displayed when the quality is 2160p.
+ *   <br>
+ *   Defaults to '4K'.
+ * @property {string} 4320
+ *   The mark that will be displayed when the quality is 4320p.
+ *   <br>
+ *   Defaults to '8K'.
+ * @exportDoc
+ */
+shaka.extern.UIQualityMarks;
+
+/**
+ * @typedef {{
+ *   small_rewind: string,
+ *   small_fast_forward: string,
+ *   large_rewind: string,
+ *   large_fast_forward: string,
+ *   home: string,
+ *   end: string,
+ *   captions: string,
+ *   fullscreen: string,
+ *   mute: string,
+ *   picture_in_picture: string,
+ *   increase_video_speed: string,
+ *   decrease_video_speed: string,
+ *   play: string,
+ *   take_screenshot: string,
+ *   last_frame: string,
+ *   next_frame: string,
+ * }}
+ *
+ * @property {string} small_rewind
+ *   Shortcut for small rewind.
+ *   <br>
+ *   Defaults to 'ArrowLeft'.
+ * @property {string} small_fast_forward
+ *   Shortcut for small fast forward.
+ *   <br>
+ *   Defaults to 'ArrowRight'.
+ * @property {string} large_rewind
+ *   Shortcut for large rewind.
+ *   <br>
+ *   Defaults to 'PageDown'.
+ * @property {string} large_fast_forward
+ *   Shortcut for large fast forward.
+ *   <br>
+ *   Defaults to 'PageUp'.
+ * @property {string} home
+ *   Shortcut to go home.
+ *   <br>
+ *   Defaults to 'Home'.
+ * @property {string} end
+ *   Shortcut to go end.
+ *   <br>
+ *   Defaults to 'End'.
+ * @property {string} captions
+ *   Shortcut for toggle last captions.
+ *   <br>
+ *   Defaults to 'c'.
+ * @property {string} fullscreen
+ *   Shortcut for toggle fullscreen.
+ *   <br>
+ *   Defaults to 'f'.
+ * @property {string} picture_in_picture
+ *   Shortcut for toggle picture in picture.
+ *   <br>
+ *   Defaults to 'p'.
+ * @property {string} increase_video_speed
+ *   Shortcut for increase video speed.
+ *   <br>
+ *   Defaults to '>'.
+ * @property {string} decrease_video_speed
+ *   Shortcut for decrease video speed.
+ *   <br>
+ *   Defaults to '<'.
+ * @property {string} play
+ *   Shortcut for toggle play/pause.
+ *   <br>
+ *   Defaults to 'k'.
+ * @property {string} take_screenshot
+ *   Shortcut for take screenshot.
+ *   <br>
+ *   Defaults to 'u'.
+ * @property {string} last_frame
+ *   Shortcut for return to previous frame.
+ *   <br>
+ *   Defaults to ','.
+ * @property {string} next_frame
+ *   Shortcut for advance to next frame.
+ *   <br>
+ *   Defaults to '.'.
+ * @exportDoc
+ */
+shaka.extern.UIShortcuts;
+
+/**
+ * @typedef {{
+ *   enabled: boolean,
+ *   handleMetadata: boolean,
+ *   handleActions: boolean,
+ *   handlePosition: boolean,
+ *   supportedActions: !Array<string>,
+ *   allowAutoPiP: boolean,
+ * }}
+ *
+ * @property {boolean} enabled
+ *   If true, MediaSession controls will be managed by the UI.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} handleMetadata
+ *   Setup MediaSession metadata from the following sources:
+ *   <br>
+ *   - ID3 with the `TIT2` tag for title
+ *   <br>
+ *   - ID3 with the `APIC` tag for image
+ *   <br>
+ *   - HLS with the `#EXT-X-SESSION-DATA` tag with the ID
+ *     `com.apple.hls.title` for title
+ *   <br>
+ *   - HLS with the `#EXT-X-SESSION-DATA` tag with the ID
+ *     `com.apple.hls.poster` for image
+ *   <br>
+ *   - DASH with `ProgramInformation` element and child `Title` field for title.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} handleActions
+ *   If true, MediaSession actions supported will be managed by the UI.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} handlePosition
+ *   If true, MediaSession position will be managed by the UI.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {!Array<string>} supportedActions
+ *   List of supported MediaSession actions.
+ * @property {boolean} allowAutoPiP
+ *   If true, enables handling of browser-initiated Picture-in-Picture (PiP)
+ *   requests via the MediaSession <code>enterpictureinpicture</code> action
+ *   (e.g. when content is occluded). If false, these automatic PiP requests
+ *   will be ignored.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @exportDoc
+ */
+shaka.extern.UIMediaSession;
+
+/**
+ * @typedef {{
+ *   enabled: boolean,
+ *   preferInitialWindowPlacement: boolean,
+ *   disallowReturnToOpener: boolean
+ * }}
+ *
+ * @property {boolean} enabled
+ *   If true, the Document Picture-in-Picture API is preferred.
+ *   <br>
+ *   Changing this property mid-playback may produce undesired behavior if
+ *   you are already in PiP.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} preferInitialWindowPlacement
+ *   If true, the PiP window will always appear at the position and size it
+ *   initially opened at when closed and reopened.
+ *   <br>
+ *   If false, the PiP window's size and position will be remembered when closed
+ *   and reopened (for example, as set by the user).
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disallowReturnToOpener
+ *   When true, hints the browser not to display a UI control that allows the
+ *   user to return to the originating tab when the PiP window is closed.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @exportDoc
+ */
+shaka.extern.UIDocumentPictureInPicture;
+
+/**
+ * A callback for customizing track labels in the UI.
+ *
+ * The callback receives the default label (or null if the language was
+ * unrecognized), the track object, and a type string ('audio', 'text', or
+ * 'video').  Return a string to override the label, or a falsy value to keep
+ * the default.
+ *
+ * @typedef {function(?string,
+ *     (shaka.extern.AudioTrack|shaka.extern.TextTrack|
+ *      shaka.extern.VideoTrack),
+ *     string): ?string}
+ * @exportDoc
+ */
+shaka.extern.UITrackLabelCallback;
+
+/**
  * @description
  * The UI's configuration options.
  *
  * @typedef {{
- *   controlPanelElements: !Array.<string>,
- *   overflowMenuButtons: !Array.<string>,
- *   contextMenuElements: !Array.<string>,
- *   statisticsList: !Array.<string>,
- *   adStatisticsList: !Array.<string>,
- *   playbackRates: !Array.<number>,
- *   fastForwardRates: !Array.<number>,
- *   rewindRates: !Array.<number>,
+ *   controlPanelElements: !Array<string>,
+ *   topControlPanelElements: !Array<string>,
+ *   bigButtons: !Array<string>,
+ *   overflowMenuButtons: !Array<string>,
+ *   contextMenuElements: !Array<string>,
+ *   statisticsList: !Array<string>,
+ *   adStatisticsList: !Array<string>,
+ *   playbackRates: !Array<number>,
+ *   playbackRateSliderMin: number,
+ *   playbackRateSliderMax: number,
+ *   fastForwardRates: !Array<number>,
+ *   rewindRates: !Array<number>,
  *   addSeekBar: boolean,
- *   addBigPlayButton: boolean,
  *   customContextMenu: boolean,
  *   castReceiverAppId: string,
  *   castAndroidReceiverCompatible: boolean,
@@ -78,9 +316,12 @@ shaka.extern.UIVolumeBarColors;
  *   showUnbufferedStart: boolean,
  *   seekBarColors: shaka.extern.UISeekBarColors,
  *   volumeBarColors: shaka.extern.UIVolumeBarColors,
+ *   playbackRateBarColors: shaka.extern.UIPlaybackRateBarColors,
+ *   qualityMarks: shaka.extern.UIQualityMarks,
  *   trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat,
  *   textTrackLabelFormat: shaka.ui.Overlay.TrackLabelFormat,
  *   fadeDelay: number,
+ *   closeMenusDelay: number,
  *   doubleClickForFullscreen: boolean,
  *   singleClickForPlayAndPause: boolean,
  *   enableKeyboardPlaybackControls: boolean,
@@ -90,53 +331,102 @@ shaka.extern.UIVolumeBarColors;
  *   keyboardSeekDistance: number,
  *   keyboardLargeSeekDistance: number,
  *   fullScreenElement: HTMLElement,
- *   preferDocumentPictureInPicture: boolean,
  *   showAudioChannelCountVariants: boolean,
  *   seekOnTaps: boolean,
  *   tapSeekDistance: number,
  *   refreshTickInSeconds: number,
  *   displayInVrMode: boolean,
  *   defaultVrProjectionMode: string,
- *   setupMediaSession: boolean,
  *   preferVideoFullScreenInVisionOS: boolean,
- *   showAudioCodec: boolean
+ *   showAudioCodec: boolean,
+ *   showVideoCodec: boolean,
+ *   castSenderUrl: string,
+ *   enableKeyboardPlaybackControlsInWindow: boolean,
+ *   alwaysShowVolumeBar: boolean,
+ *   shortcuts: shaka.extern.UIShortcuts,
+ *   menuOpenUntilUserClosesIt: boolean,
+ *   allowTogglePresentationTime: boolean,
+ *   showRemainingTimeInPresentationTime: boolean,
+ *   enableVrDeviceMotion: boolean,
+ *   enableVrWheelZoom: boolean,
+ *   showUIAlways: boolean,
+ *   showUIAlwaysOnAudioOnly: boolean,
+ *   preferIntlDisplayNames: boolean,
+ *   mediaSession: shaka.extern.UIMediaSession,
+ *   captionsStyles: boolean,
+ *   captionsFontScaleFactors: !Array<number>,
+ *   documentPictureInPicture: shaka.extern.UIDocumentPictureInPicture,
+ *   showUIOnPaused: boolean,
+ *   showMenusOnTheRight: boolean,
+ *   customTrackLabel: shaka.extern.UITrackLabelCallback,
+ *   showBufferingSpinner: boolean,
  * }}
  *
- * @property {!Array.<string>} controlPanelElements
+ * @property {!Array<string>} controlPanelElements
  *   The ordered list of control panel elements of the UI.
- * @property {!Array.<string>} overflowMenuButtons
+ * @property {!Array<string>} topControlPanelElements
+ *   The ordered list of top control panel elements of the UI.
+ * @property {!Array<string>} bigButtons
+ *   The ordered list of big buttons elements of the UI.
+ * @property {!Array<string>} overflowMenuButtons
  *   The ordered list of the overflow menu buttons.
- * @property {!Array.<string>} contextMenuElements
+ * @property {!Array<string>} contextMenuElements
  *   The ordered list of buttons in the context menu.
- * @property {!Array.<string>} statisticsList
+ * @property {!Array<string>} statisticsList
  *   The ordered list of statistics present in the statistics container.
- * @property {!Array.<string>} adStatisticsList
+ * @property {!Array<string>} adStatisticsList
  *   The ordered list of ad statistics present in the ad statistics container.
- * @property {!Array.<number>} playbackRates
+ * @property {!Array<number>} playbackRates
  *   The ordered list of rates for playback selection.
-  * @property {!Array.<number>} fastForwardRates
+ *   <br>
+ *   Defaults to <code>[1, 1.25, 1.5, 2, 3]</code>.
+ * @property {number} playbackRateSliderMin
+ *   The minimum playback rate available in the playback-rate slider.
+ *   This only affects the continuous slider range and does not add a preset
+ *   button to the playback-rate menu.
+ *   <br>
+ *   Defaults to <code>0.5</code>.
+ * @property {number} playbackRateSliderMax
+ *   The maximum playback rate available in the playback-rate slider.
+ *   This only affects the continuous slider range and does not add a preset
+ *   button to the playback-rate menu.
+ *   <br>
+ *   Defaults to <code>3</code>.
+ * @property {!Array<number>} fastForwardRates
  *   The ordered list of rates for fast forward selection.
- * @property {!Array.<number>} rewindRates
+ *   <br>
+ *   Defaults to <code>[2, 4, 8, 1]</code>.
+ * @property {!Array<number>} rewindRates
  *   The ordered list of rates for rewind selection.
+ *   <br>
+ *   Defaults to <code>[-1, -2, -4, -8]</code>.
  * @property {boolean} addSeekBar
  *   Whether or not a seek bar should be part of the UI.
- * @property {boolean} addBigPlayButton
- *   Whether or not a big play button in the center of the video
- *   should be part of the UI.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {boolean} customContextMenu
  *   Whether or not a custom context menu replaces the default.
+ *   <br>
+ *   Defaults to <code>true</code> except on mobile, cast and smart TV whose
+ *   default value is <code>false</code>.
  * @property {string} castReceiverAppId
  *   Receiver app id to use for the Chromecast support.
+ *   <br>
+ *   Defaults to <code>''</code>.
  * @property {boolean} castAndroidReceiverCompatible
  *   Indicates if the app is compatible with an Android Cast Receiver.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @property {boolean} clearBufferOnQualityChange
  *   Only applicable if the resolution selection is part of the UI.
  *   Whether buffer should be cleared when changing resolution
- *   via UI. Clearing buffer would result in immidiate change of quality,
+ *   via UI. Clearing buffer would result in immediate change of quality,
  *   but playback may flicker/stall for a sec as the content in new
  *   resolution is being buffered. Not clearing the buffer will mean
  *   we play the content in the previously selected resolution that we
  *   already have buffered before switching to the new resolution.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {boolean} showUnbufferedStart
  *   If true, color any unbuffered region at the start of the seek bar as
  *   unbuffered (using the "base" color).  If false, color any unbuffered region
@@ -147,7 +437,7 @@ shaka.extern.UIVolumeBarColors;
  *   <br>
  *   A value of true matches the default behavior of Shaka Player v2.5.
  *   <br>
- *   Defaults to false.
+ *   Defaults to <code>false</code>.
  * @property {shaka.extern.UISeekBarColors} seekBarColors
  *   The CSS colors applied to the seek bar.  This allows you to override the
  *   colors used in the linear gradient constructed in JavaScript, since you
@@ -156,6 +446,12 @@ shaka.extern.UIVolumeBarColors;
  *   The CSS colors applied to the volume bar.  This allows you to override the
  *   colors used in the linear gradient constructed in JavaScript, since you
  *   cannot do this in pure CSS.
+ * @property {shaka.extern.UIPlaybackRateBarColors} playbackRateBarColors
+ *   The CSS colors applied to the playback rate bar.  This allows you to
+ *   override the colors used in the linear gradient constructed in JavaScript,
+ *   since you cannot do this in pure CSS.
+ * @property {shaka.extern.UIQualityMarks} qualityMarks
+ *   The name of the quality marks.
  * @property {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
  *   An enum that determines what is shown in the labels for audio variant
  *   selection.
@@ -165,7 +461,12 @@ shaka.extern.UIVolumeBarColors;
  *   there is no role.
  *   LABEL means the non-standard DASH "label" attribute or the standard DASH
  *   "Label" element or the HLS "NAME" attribute are shown.
- *   Defaults to LANGUAGE.
+ *   LABEL_OR_LANGUAGE means that LABEL is preferred; if it does not exist,
+ *   LANGUAGE is used.
+ *   LANGUAGE_OR_LABEL means that LANGUAGE is preferred; if it does not exist
+ *   or is "und" (undefined), LABEL is used instead.
+ *   <br>
+ *   Defaults to <code>LANGUAGE</code>.
  * @property {shaka.ui.Overlay.TrackLabelFormat} textTrackLabelFormat
  *   An enum that determines what is shown in the labels for text track
  *   selection.
@@ -175,96 +476,220 @@ shaka.extern.UIVolumeBarColors;
  *   there is no role.
  *   LABEL means the non-standard DASH "label" attribute or the standard DASH
  *   "Label" element or the HLS "NAME" attribute are shown.
- *   Defaults to LANGUAGE.
+ *   LABEL_OR_LANGUAGE means that LABEL is preferred; if it does not exist,
+ *   LANGUAGE is used.
+ *   LANGUAGE_OR_LABEL means that LANGUAGE is preferred; if it does not exist
+ *   or is "und" (undefined), LABEL is used instead.
+ *   <br>
+ *   Defaults to <code>LANGUAGE</code>.
  * @property {number} fadeDelay
  *   The delay (in seconds) before fading out the controls once the user stops
  *   interacting with them.  We recommend setting this to 3 on your cast
  *   receiver UI.
- *   Defaults to 0.
+ *   <br>
+ *   Defaults to <code>0</code> except on cast whose default value is
+ *   <code>3</code>.
+ * @property {number} closeMenusDelay
+ *   The delay (in seconds) before close the opened menus when the UI is hidden.
+ *   <br>
+ *   Defaults to <code>2</code>.
  * @property {boolean} doubleClickForFullscreen
  *   Whether or not double-clicking on the UI should cause it to enter
  *   fullscreen.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>true</code> except on cast and smart TV whose
+ *   default value is <code>false</code>.
  * @property {boolean} singleClickForPlayAndPause
  *   Whether or not clicking on the video should cause it to play or pause.
  *   It does not work in VR mode.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>true</code> except on mobile, cast and smart TV whose
+ *   default value is <code>false</code>.
  * @property {boolean} enableKeyboardPlaybackControls
  *   Whether or not playback controls via keyboard is enabled, such as seek
  *   forward, seek backward, jump to the beginning/end of the video.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {boolean} enableFullscreenOnRotation
  *   Whether or not to enter/exit fullscreen mode when the screen is rotated.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>false</code> except on Android where the default value
+ *   is <code>true</code>
  * @property {boolean} forceLandscapeOnFullscreen
  *   Whether or not the device should rotate to landscape mode when the video
  *   enters fullscreen.  Note that this behavior is based on an experimental
  *   browser API, and may not work on all platforms.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>false</code> except on mobile where the default value
+ *   is <code>true</code>
  * @property {boolean} enableTooltips
  *   Whether or not buttons in the control panel display tooltips that contain
  *   information about their function.
- *   Defaults to false.
+ *   <br>
+ *   Defaults to <code>true</code> except on mobile, cast and smart TV whose
+ *   default value is <code>false</code>.
  * @property {number} keyboardSeekDistance
  *   The time interval, in seconds, to seek when the user presses the left or
  *   right keyboard keys when the video is selected. If less than or equal to 0,
  *   no seeking will occur.
- *   Defaults to 5 seconds.
+ *   <br>
+ *   Defaults to <code>5</code>.
  * @property {number} keyboardLargeSeekDistance
  *   The time interval, in seconds, to seek when the user presses the page up or
  *   page down keyboard keys when the video is selected. If less than or equal
  *   to 0, no seeking will occur.
- *   Defaults to 60 seconds.
+ *   <br>
+ *   Defaults to <code>60</code>.
  * @property {HTMLElement} fullScreenElement
  *   DOM element on which fullscreen will be done.
- *   Defaults to Shaka Player Container.
- * @property {boolean} preferDocumentPictureInPicture
- *   Indicates whether the Document Picture in Picture API is preferred or the
- *   Video Element Picture in Picture API is preferred.
- *   Changing this property in mid-playback may produce undesired behavior if
- *   you are already in PiP.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>Shaka Player Container</code>.
  * @property {boolean} showAudioChannelCountVariants
  *   Indicates whether the combination of language and channel count should be
  *   displayed or if, on the contrary, only the language should be displayed
  *   regardless of the channel count.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {boolean} seekOnTaps
  *   Indicates whether or not a fast-forward and rewind tap button that seeks
  *   video some seconds.
- *   Defaults to true if the browser <code>navigator.maxTouchPoints > 0</code>
- *   is true.
+ *   <br>
+ *   Defaults to <code>false</code> except on mobile where the default value
+ *   is <code>true</code>
  * @property {number} tapSeekDistance
  *   The time interval, in seconds, to seek when the user presses the left or
  *   right part of the video. If less than or equal to 0,
  *   no seeking will occur.
- *   Defaults to 10 seconds.
+ *   <br>
+ *   Defaults to <code>10</code>.
  * @property {number} refreshTickInSeconds
  *   The time interval, in seconds, to update the seek bar.
- *   Defaults to 0.125 seconds.
+ *   <br>
+ *   Defaults to <code>0.125</code>.
  * @property {boolean} displayInVrMode
  *   If true, the content will be treated as VR.
  *   If false, it will only be treated as VR if we automatically detect it as
  *   such. (See the Enabling VR section in docs/tutorials/ui.md)
- *   Defaults to false.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @property {string} defaultVrProjectionMode
  *   Indicate the default VR projection mode.
- *   Possible values: <code>'equirectangular'</code> or <code>'cubemap'</code>.
+ *   Possible values: <code>'equirectangular'</code>,
+ *   <code>'halfequirectangular'</code>, <code>'fisheye'</code> or
+ *   <code>'cubemap'</code>.
+ *   <br>
  *   Defaults to <code>'equirectangular'</code>.
- * @property {boolean} setupMediaSession
- *   If true, MediaSession controls will be managed by the UI. It will also use
- *   the ID3 APIC and TIT2 as image and title in Media Session, and ID3 APIC
- *   will also be used to change video poster.
- *   Defaults to true.
  * @property {boolean} preferVideoFullScreenInVisionOS
  *   If true, we will use the fullscreen API of the video element itself if it
  *   is available in Vision OS. This is useful to be able to access 3D
  *   experiences that are only allowed with the fullscreen of the video element
  *   itself.
- *   Defaults to false.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {boolean} showAudioCodec
  *   Show the audio codec if the language has more than one audio codec.
- *   Defaults to true.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} showVideoCodec
+ *   Show the video codec if the resolution has more than one video codec.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {string} castSenderUrl
+ *   URL to load the cast sender if your platform supports it. This URL does not
+ *   apply to Smart TVs.
+ *   Note: This URL is only used if the cast sender is not previously loaded.
+ *   <br>
+ *   Defaults to
+ *   <code>'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js'</code>.
+ * @property {boolean} enableKeyboardPlaybackControlsInWindow
+ *   Enable event listening on the window instead of video container for
+ *   keyboard controls.
+ *   Note: only taken into account when
+ *   <code>enableKeyboardPlaybackControls</code> is true.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} alwaysShowVolumeBar
+ *   Always show the volume bar, even when the volume and mute bars are next to
+ *   each other.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {shaka.extern.UIShortcuts} shortcuts
+ *   The UI shortcuts.
+ * @property {boolean} allowTogglePresentationTime
+ *   Allow change between show progress or remaining time on presentation time,
+ *   when playing a VOD.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} showRemainingTimeInPresentationTime
+ *   Show remaining time of presentation time by default, when playing a VOD.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} enableVrDeviceMotion
+ *   Enables or disables the device motion for VR videos.
+ *   <br>
+ *   Defaults to <code>true</code> except on Vision OS where the default value
+ *   is <code>false</code>
+ * @property {boolean} enableVrWheelZoom
+ *   Enables zooming the field of view of VR videos with the mouse wheel.
+ *   When disabled, the wheel scrolls the page normally, which is usually a
+ *   better experience for players embedded in a page. The field of view can
+ *   still be changed with a pinch gesture or through the API.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} showUIAlways
+ *   If true, always keep the UI visible for all content.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} showUIAlwaysOnAudioOnly
+ *   If true, keep the UI always visible if the content is audio only.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} preferIntlDisplayNames
+ *   Prefer <code>Intl.DisplayNames</code> to display language names if the API
+ *   is available.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {shaka.extern.UIMediaSession} mediaSession
+ *   Media Session config.
+ * @property {boolean} captionsStyles
+ *   If true, displays buttons to change caption styles.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {!Array<number>} captionsFontScaleFactors
+ *   The ordered list of font scale factor selection.
+ *   <br>
+ *   Defaults to <code>[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]</code>.
+ * @property {shaka.extern.UIDocumentPictureInPicture} documentPictureInPicture
+ *   Document Picture-in-Picture configuration.
+ *   <br>
+ *   Enables using the Document Picture-in-Picture API, with options to control
+ *   initial window placement and whether the PiP window can return focus to
+ *   the originating tab.
+ * @property {boolean} showUIOnPaused
+ *   Whether to show the UI whenever the video is paused.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} showMenusOnTheRight
+ *   It always displays the menus on the right side of the container regardless
+ *   of where the button that opens the menu is located.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {shaka.extern.UITrackLabelCallback} customTrackLabel
+ *   A callback for customizing track labels in the UI.  The callback receives
+ *   the default label (or <code>null</code> if the language was unrecognized),
+ *   the track object, and a type string (<code>'audio'</code>,
+ *   <code>'text'</code>, or <code>'video'</code>).  Return a string to override
+ *   the label, or a falsy value to keep the default.
+ *   <br>
+ *   Defaults to a no-op that returns <code>''</code>.
+ * @property {boolean} showBufferingSpinner
+ *   Whether or not to display a buffering spinner while the media is loading
+ *   or temporarily stalled due to insufficient data. When enabled, a visual
+ *   indicator is shown to inform the user that playback is waiting for more
+ *   content to be buffered.
+ *   <br>
+ *   Defaults to <code>true</code> except on mobile and smart TV whose
+ *   default value is <code>false</code>.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;
@@ -329,16 +754,40 @@ shaka.extern.IUIElement = class {
     this.adManager;
 
     /**
-     * @protected {shaka.extern.IAd}
+     * @protected {?shaka.extern.IAd}
      * @exportDoc
      */
     this.ad;
+
+    /**
+     * @protected {boolean}
+     * @exportInterface
+     */
+    this.isSubMenu;
+
+    /**
+     * @protected {boolean}
+     * @exportInterface
+     */
+    this.isSubMenuOpened;
   }
 
   /**
    * @override
    */
   release() {}
+
+  /**
+   * Called when the locale changes. Override to update UI strings.
+   * @protected
+   */
+  updateLocalizedStrings() {}
+
+  /**
+   * Called when a submenu opens or closes. Override to show/hide this element.
+   * @protected
+   */
+  checkAvailability() {}
 };
 
 
@@ -372,10 +821,12 @@ shaka.extern.IUIRangeElement = class {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
-   * @param {!Array.<string>} containerClassNames
-   * @param {!Array.<string>} barClassNames
+   * @param {!Array<string>} containerClassNames
+   * @param {!Array<string>} barClassNames
+   * @param {boolean=} enableWheel
    */
-  constructor(parent, controls, containerClassNames, barClassNames) {
+  constructor(parent, controls, containerClassNames, barClassNames,
+      enableWheel) {
     /**
      * @protected {!HTMLElement}
      * @exportDoc
@@ -394,6 +845,26 @@ shaka.extern.IUIRangeElement = class {
    * @param {number} max
    */
   setRange(min, max) {}
+
+  /**
+   * @param {number|string} step
+   */
+  setStep(step) {}
+
+  /**
+   * @return {number}
+   */
+  getMin() {}
+
+  /**
+   * @return {number}
+   */
+  getMax() {}
+
+  /**
+   * @param {string} background
+   */
+  setBackground(background) {}
 
   /**
    * Called when user interaction begins.
@@ -447,7 +918,7 @@ shaka.extern.IUISettingsMenu = class {
     this.button;
 
     /**
-     * @protected {!HTMLElement}
+     * @protected {!shaka.ui.Icon}
      * @exportDoc
      */
     this.icon;
@@ -486,7 +957,7 @@ shaka.extern.IUISettingsMenu = class {
 
 /**
  * Interface for SeekBars. SeekBars should inherit from the concrete base
- * class shaka.ui.Element. If you do not need to totaly rebuild the
+ * class shaka.ui.Element. If you do not need to totally rebuild the
  * SeekBar, you should consider using shaka.ui.RangeElement or
  * shaka.ui.SeekBar as your base class.
  *
@@ -527,25 +998,25 @@ shaka.extern.IUISeekBar.Factory = class {
 };
 
 /**
- * @interface
+ * @typedef {{
+ *   path: ?(string | Array<string>),
+ *   viewBox: ?string,
+ *   url: ?string,
+ *   size: ?number,
+ * }}
+ *
+ * @property {?(string | Array<string>)} path
+ *   A single SVG path string or an array of multiple path strings.
+ *   Used to define the shape(s) of the SVG icon.
+ * @property {?string} viewBox
+ *   The `viewBox` attribute for the SVG element.
+ *   Defaults to `'0 -960 960 960'` if not specified.
+ * @property {?string} url
+ *   The URL of an external SVG icon.
+ *   If this is defined, `viewBox` and `path` will be ignored.
+ * @property {?number} size
+ *   Custom size for the icon in pixels.
+ *   If not provided, the size will be controlled via CSS.
  * @exportDoc
  */
-shaka.extern.IUIPlayButton = class {
-  /**
-   * @param {!HTMLElement} parent
-   * @param {!shaka.ui.Controls} controls
-   */
-  constructor(parent, controls) {
-    /**
-     * @protected {!HTMLButtonElement}
-     * @exportDoc
-     */
-    this.button;
-  }
-
-  /** @return {boolean} */
-  isPaused() {}
-
-  /** @return {boolean} */
-  isEnded() {}
-};
+shaka.extern.UIIcon;

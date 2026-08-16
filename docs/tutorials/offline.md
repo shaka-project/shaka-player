@@ -68,7 +68,6 @@ the end of the tutorial.
 
     <video id="video"
            width="640"
-           poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
            controls autoplay></video>
 
     <table id="content-table" style="width:640px"></table>
@@ -430,7 +429,6 @@ That’s it! For your convenience, here is the completed code:
 
     <video id="video"
            width="640"
-           poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
            controls autoplay></video>
 
     <table id="content-table" style="width:640px"></table>
@@ -662,7 +660,8 @@ document.addEventListener('DOMContentLoaded', initApp);
 ## Protected Content
 
 When storing protected content offline, there are some limitations based on
-browsers. Before Chrome v64, persistent licenses were only supported on Android (M62+) and Chromebooks. In Chrome v64 support was added for Windows and Mac as well.
+browsers. Persistent licenses are only supported on Android (M62+) and Chromebooks.
+Chrome v64 to v142 did support persistent licenses on Windows and Mac as well.
 
 For other platforms, we offer the ability to disable the use of persistent
 licenses. If you choose to disable persistent licenses, you will get offline
@@ -684,3 +683,30 @@ setting or set it explicitly with:
 ```js
 usePersistentLicense: true
 ```
+
+## Configure the timeout for opening IndexedDB-based storage
+
+There is a default timeout of 5 seconds for opening IndexedDB-based storage.
+This is useful to ensure that your application does not block indefinitely
+while waiting for the IndexedDB database to open.
+
+If you want to change the value of this timeout, you can do so by setting
+accordingly the value of the `shaka.offline.indexeddb.StorageMechanismOpenTimeout`
+variable. For example, to set the timeout to 10 seconds, you can do the following:
+
+```js
+// In seconds
+shaka.offline.indexeddb.StorageMechanismOpenTimeout = 10;
+```
+
+You can also disable this timeout and consequently wait indefinitely for the
+IndexedDB database to open successfully or fail to open. To do this, set the
+`shaka.offline.indexeddb.StorageMechanismOpenTimeout` variable to `false`:
+
+```js
+shaka.offline.indexeddb.StorageMechanismOpenTimeout = false;
+```
+
+Note that this configuration must be done before doing any other offline
+storage related operation (download and store content, list content,
+remove content, playback of content).

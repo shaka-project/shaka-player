@@ -11,6 +11,7 @@ goog.provide('shakaDemo.Custom');
 goog.require('ShakaDemoAssetInfo');
 goog.require('shakaDemo.AssetCard');
 goog.require('shakaDemo.BoolInput');
+goog.require('shakaDemo.Icons');
 goog.require('shakaDemo.Input');
 goog.require('shakaDemo.InputContainer');
 goog.require('shakaDemo.TextInput');
@@ -43,13 +44,13 @@ shakaDemo.Custom = class {
       dialogPolyfill.registerDialog(this.dialog_);
     }
 
-    /** @private {!Set.<!ShakaDemoAssetInfo>} */
+    /** @private {!Set<!ShakaDemoAssetInfo>} */
     this.assets_ = this.loadAssetInfos_();
 
     /** @private {!HTMLInputElement} */
     this.manifestField_;
 
-    /** @private {!Array.<!shakaDemo.AssetCard>} */
+    /** @private {!Array<!shakaDemo.AssetCard>} */
     this.assetCards_ = [];
     this.savedList_ = document.createElement('div');
     container.appendChild(this.savedList_);
@@ -60,7 +61,7 @@ shakaDemo.Custom = class {
     container.appendChild(addButtonContainer);
     // Style it as an MDL Floating Action Button (FAB).
     const buttonStyle = shakaDemo.Custom.ButtonStyle_.FAB;
-    const addButton = this.makeButton_('add', buttonStyle, () => {
+    const addButton = this.makeButton_(shakaDemo.Icons.ADD, buttonStyle, () => {
       this.showAssetDialog_(ShakaDemoAssetInfo.makeBlankAsset());
     });
     addButtonContainer.appendChild(addButton);
@@ -81,7 +82,7 @@ shakaDemo.Custom = class {
     });
   }
 
-  /** @return {!Array.<!ShakaDemoAssetInfo>} */
+  /** @return {!Array<!ShakaDemoAssetInfo>} */
   assets() {
     return Array.from(this.assets_);
   }
@@ -114,6 +115,23 @@ shakaDemo.Custom = class {
   }
 
   /**
+   * A utility to simplify the creation of datalist input on the dialog.
+   * @param {!shakaDemo.InputContainer} container
+   * @param {string} name
+   * @param {function(!HTMLInputElement, !Element)} setup
+   * @param {function(!Element, !shakaDemo.Input)} onChange
+   * @param {!Array<string>} values
+   * @private
+   */
+  makeDatalistInput_(container, name, setup, onChange, values) {
+    container.addRow(/* labelString= */ null, /* tooltipString= */ null);
+    const input =
+        new shakaDemo.DatalistInput(container, name, onChange, values);
+    input.extra().textContent = name;
+    setup(input.input(), input.container());
+  }
+
+  /**
    * A utility to simplify the creation of bool on the dialog.
    * @param {!shakaDemo.InputContainer} container
    * @param {string} name
@@ -130,7 +148,7 @@ shakaDemo.Custom = class {
 
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
-   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @param {!Array<!HTMLInputElement>} inputsToCheck
    * @return {!Element} div
    * @private
    */
@@ -143,7 +161,7 @@ shakaDemo.Custom = class {
       makePreFilledRow(/* headerName= */ null, /* headerValue= */ null);
     };
     /**
-     * @type {!Array.<{
+     * @type {!Array<{
      *   headerName: ?string,
      *   div: !Element,
      * }>}
@@ -253,7 +271,7 @@ shakaDemo.Custom = class {
 
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
-   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @param {!Array<!HTMLInputElement>} inputsToCheck
    * @return {!Element} div
    * @private
    */
@@ -271,7 +289,7 @@ shakaDemo.Custom = class {
       }
     };
     const adTagOnChange = (input) => {
-      assetInProgress.adTagUri = input.value;
+      assetInProgress.setAdTagUri(input.value);
     };
     this.makeField_(container, 'Ad Tag URL', adTagSetup, adTagOnChange);
 
@@ -285,7 +303,7 @@ shakaDemo.Custom = class {
         this.checkManifestRequired_(assetInProgress);
     };
     const contentSrcIdOnChange = (input) => {
-      assetInProgress.imaContentSrcId = input.value;
+      assetInProgress.setIMAContentSourceId(input.value);
       this.manifestField_.required =
         this.checkManifestRequired_(assetInProgress);
     };
@@ -303,7 +321,7 @@ shakaDemo.Custom = class {
         this.checkManifestRequired_(assetInProgress);
     };
     const videoIdOnChange = (input) => {
-      assetInProgress.imaVideoId = input.value;
+      assetInProgress.setIMAVideoId(input.value);
       this.manifestField_.required =
         this.checkManifestRequired_(assetInProgress);
     };
@@ -320,7 +338,7 @@ shakaDemo.Custom = class {
         this.checkManifestRequired_(assetInProgress);
     };
     const assetKeyChange = (input) => {
-      assetInProgress.imaAssetKey = input.value;
+      assetInProgress.setIMAAssetKey(input.value);
       this.manifestField_.required =
         this.checkManifestRequired_(assetInProgress);
     };
@@ -337,7 +355,7 @@ shakaDemo.Custom = class {
         this.checkManifestRequired_(assetInProgress);
     };
     const manifestTypeChange = (input) => {
-      assetInProgress.imaManifestType = input.value;
+      assetInProgress.setIMAManifestType(input.value);
       this.manifestField_.required =
         this.checkManifestRequired_(assetInProgress);
     };
@@ -373,7 +391,7 @@ shakaDemo.Custom = class {
 
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
-   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @param {!Array<!HTMLInputElement>} inputsToCheck
    * @return {!Element} div
    * @private
    */
@@ -442,25 +460,24 @@ shakaDemo.Custom = class {
     // Make the drm system field.
     const drmSetup = (input, container) => {
       customDrmSystemInput = input;
-      const drmSystems = assetInProgress.licenseServers.keys();
-      for (const drmSystem of drmSystems) {
-        if (!shakaDemo.Main.commonDrmSystems.includes(drmSystem)) {
-          input.value = drmSystem;
-          break;
-        }
+      if (assetInProgress.licenseServers.size == 1) {
+        const drmSystems = assetInProgress.licenseServers.keys();
+        input.value = Array.from(drmSystems)[0];
       }
     };
     const drmOnChange = (input) => {
       setLicenseServerURLs();
     };
-    this.makeField_(container, 'Custom DRM System', drmSetup, drmOnChange);
+    this.makeDatalistInput_(
+        container, 'Custom DRM System', drmSetup, drmOnChange,
+        shakaDemo.Main.commonDrmSystems);
 
     return drmDiv;
   }
 
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
-   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @param {!Array<!HTMLInputElement>} inputsToCheck
    * @return {!Element} div
    * @private
    */
@@ -487,7 +504,7 @@ shakaDemo.Custom = class {
         container, 'Thumbnails URL', thumbnailsUrlSetup, thumbnailsUrlOnChange);
 
     /**
-     * @type {!Array.<{
+     * @type {!Array<{
      *   uri: ?string,
      *   div: !Element,
      * }>}
@@ -545,7 +562,7 @@ shakaDemo.Custom = class {
         assetInProgress.extraText.push({
           uri: String(textUrl),
           language: String(textLanguage),
-          kind: 'subtitle',
+          kind: 'subtitles',
           mime: '',
         });
         // Eliminate any OTHER subtitles with the same name. Assume this newly
@@ -715,7 +732,7 @@ shakaDemo.Custom = class {
 
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
-   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @param {!Array<!HTMLInputElement>} inputsToCheck
    * @return {!Element} div
    * @private
    */
@@ -729,6 +746,7 @@ shakaDemo.Custom = class {
     container.setDefaultRowClass('wide-input');
 
     const extraSetup = (input, container) => {
+      input.classList.add('extra-config-textarea');
       input.setAttribute('rows', 10);
 
       if (assetInProgress.extraConfig) {
@@ -770,7 +788,63 @@ shakaDemo.Custom = class {
 
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
-   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @param {!Array<!HTMLInputElement>} inputsToCheck
+   * @return {!Element} div
+   * @private
+   */
+  makeAssetDialogContentsUIExtra_(assetInProgress, inputsToCheck) {
+    const extraUIConfigDiv = document.createElement('div');
+    const containerStyle = shakaDemo.InputContainer.Style.FLEX;
+    const container = new shakaDemo.InputContainer(
+        extraUIConfigDiv, /* headerText= */ null, containerStyle,
+        /* docLink= */ null);
+    container.getClassList().add('wide-input');
+    container.setDefaultRowClass('wide-input');
+
+    const extraSetup = (input, container) => {
+      input.classList.add('extra-config-textarea');
+      input.setAttribute('rows', 10);
+
+      if (assetInProgress.extraUiConfig) {
+        // Pretty-print the extra config.
+        input.value = JSON.stringify(
+            assetInProgress.extraUiConfig,
+            /* replacer= */ null, /* spacing= */ 2);
+      }
+
+      inputsToCheck.push(input);
+
+      // Make an error that shows up if you did not provide valid JSON.
+      const error = document.createElement('span');
+      error.classList.add('mdl-textfield__error');
+      error.textContent = 'Invalid JSON configuration';
+
+      container.appendChild(error);
+    };
+    const extraOnChange = (inputElement, inputWrapper) => {
+      try {
+        if (!inputElement.value) {
+          assetInProgress.extraUiConfig = null;
+        } else {
+          const config = /** @type {!Object} */(JSON.parse(inputElement.value));
+          assetInProgress.extraUiConfig = config;
+        }
+        inputWrapper.setValid(true);
+      } catch (exception) {
+        inputWrapper.setValid(false);
+      }
+    };
+    const extraUIConfigLabel = 'Extra Shaka Player UI configuration (JSON)';
+    this.makeField_(
+        container, extraUIConfigLabel, extraSetup, extraOnChange,
+        /* isTextArea= */ true);
+
+    return extraUIConfigDiv;
+  }
+
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @param {!Array<!HTMLInputElement>} inputsToCheck
    * @param {!Element} iconDiv
    * @return {!Element} div
    * @private
@@ -816,7 +890,7 @@ shakaDemo.Custom = class {
 
       // Make a regex that will detect duplicates.
       input.required = true;
-      input.pattern = '^(?!( *';
+      let pattern = '^(?!( *';
       for (const asset of this.assets_) {
         if (asset == assetInProgress) {
           // If editing an existing asset, it's okay if the name doesn't change.
@@ -825,9 +899,10 @@ shakaDemo.Custom = class {
         const escape = (input) => {
           return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         };
-        input.pattern += '|' + escape(asset.name);
+        pattern += '|' + escape(asset.name);
       }
-      input.pattern += ')$).*$';
+      pattern += ')$).*$';
+      input.pattern = pattern;
     };
     const nameOnChange = (input) => {
       assetInProgress.name = input.value;
@@ -873,11 +948,21 @@ shakaDemo.Custom = class {
     };
     this.makeField_(container, 'MIME Type', mimeTypeSetup, mimeTypeOnChange);
 
+    // Toggle: when enabled, |manifestUri| is treated as an M3U
+    // playlist URL rather than a single-stream manifest.  The queue
+    // manager will fetch the playlist and populate the queue from it.
+    const isPlaylistOnChange = (input) => {
+      assetInProgress.isPlaylist = input.checked;
+    };
+    this.makeBoolInput_(container, 'Is M3U Playlist',
+        isPlaylistOnChange, assetInProgress.isPlaylist);
+
     return mainDiv;
   }
 
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @return {boolean}
    * @private
    */
   checkManifestRequired_(assetInProgress) {
@@ -892,7 +977,7 @@ shakaDemo.Custom = class {
 
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
-   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @param {!Array<!HTMLInputElement>} inputsToCheck
    * @return {!Element} div
    * @private
    */
@@ -928,7 +1013,7 @@ shakaDemo.Custom = class {
     shaka.util.Dom.removeAllChildren(this.dialog_);
 
     // An array of inputs which have validity checks which we care about.
-    /** @type {!Array.<!HTMLInputElement>} */
+    /** @type {!Array<!HTMLInputElement>} */
     const inputsToCheck = [];
 
     // Make the contents divs.
@@ -944,6 +1029,8 @@ shakaDemo.Custom = class {
     const extraTracksDiv = this.makeAssetDialogContentsExtraTracks_(
         assetInProgress, inputsToCheck);
     const extraConfigDiv = this.makeAssetDialogContentsExtra_(
+        assetInProgress, inputsToCheck);
+    const extraUIConfigDiv = this.makeAssetDialogContentsUIExtra_(
         assetInProgress, inputsToCheck);
     const finishDiv = this.makeAssetDialogContentsFinish_(
         assetInProgress, inputsToCheck);
@@ -979,6 +1066,7 @@ shakaDemo.Custom = class {
     addTabButton('Ads', adsDiv, /* startOn= */ false);
     addTabButton('Extra Tracks', extraTracksDiv, /* startOn= */ false);
     addTabButton('Extra Config', extraConfigDiv, /* startOn= */ false);
+    addTabButton('Extra UI Config', extraUIConfigDiv, /* startOn= */ false);
 
     // Append the divs in the desired order.
     this.dialog_.appendChild(tabDiv);
@@ -988,6 +1076,7 @@ shakaDemo.Custom = class {
     this.dialog_.appendChild(adsDiv);
     this.dialog_.appendChild(extraTracksDiv);
     this.dialog_.appendChild(extraConfigDiv);
+    this.dialog_.appendChild(extraUIConfigDiv);
     this.dialog_.appendChild(finishDiv);
     this.dialog_.appendChild(iconDiv);
 
@@ -999,14 +1088,14 @@ shakaDemo.Custom = class {
   }
 
   /**
-   * @return {!Set.<!ShakaDemoAssetInfo>}
+   * @return {!Set<!ShakaDemoAssetInfo>}
    * @private
    */
   loadAssetInfos_() {
     const savedString = window.localStorage.getItem(shakaDemo.Custom.saveId_);
     if (savedString) {
       const assets =
-        /** @type {!Array.<!ShakaDemoAssetInfo>} */(JSON.parse(savedString));
+        /** @type {!Array<!ShakaDemoAssetInfo>} */(JSON.parse(savedString));
       return new Set(assets.map((json) => {
         const asset = ShakaDemoAssetInfo.fromJSON(json);
         shakaDemoMain.setupOfflineSupport(asset);
@@ -1017,7 +1106,7 @@ shakaDemo.Custom = class {
   }
 
   /**
-   * @param {!Set.<!ShakaDemoAssetInfo>} assetInfos
+   * @param {!Set<!ShakaDemoAssetInfo>} assetInfos
    * @private
    */
   saveAssetInfos_(assetInfos) {
@@ -1028,6 +1117,8 @@ shakaDemo.Custom = class {
 
   /**
    * @param {string} name
+   *   For RAISED and PLAIN buttons, the text to display.  For FAB buttons, the
+   *   SVG path data of the icon to display (see shakaDemo.Icons).
    * @param {shakaDemo.Custom.ButtonStyle_} buttonStyle
    *   What style should this button be in?
    * @param {function()} callback
@@ -1037,14 +1128,11 @@ shakaDemo.Custom = class {
   makeButton_(name, buttonStyle, callback) {
     const button = document.createElement('button');
     switch (buttonStyle) {
-      case shakaDemo.Custom.ButtonStyle_.FAB: {
+      case shakaDemo.Custom.ButtonStyle_.FAB:
         button.classList.add('mdl-button--fab');
         button.classList.add('mdl-button--colored');
-        const icon = document.createElement('i');
-        icon.classList.add('material-icons-round');
-        icon.textContent = name;
-        button.appendChild(icon);
-      } break;
+        button.appendChild(shakaDemo.Icons.makeSvgIcon(name));
+        break;
       case shakaDemo.Custom.ButtonStyle_.RAISED:
         button.textContent = name;
         button.classList.add('mdl-button--raised');
@@ -1069,7 +1157,14 @@ shakaDemo.Custom = class {
     const savedList = this.savedList_;
     const isFeatured = false;
     return new shakaDemo.AssetCard(savedList, asset, isFeatured, (c) => {
-      c.addBaseButtons();
+      if (asset.isPlaylist) {
+        // Playlist assets only support Play, Edit, and Delete.
+        // "Add to queue" and "Start Preload" are shown but disabled;
+        // the Store button is omitted entirely.
+        c.addBaseButtonsPlaylist();
+      } else {
+        c.addBaseButtons();
+      }
       c.addButton('Edit', async () => {
         if (asset.unstoreCallback) {
           await asset.unstoreCallback();
@@ -1086,7 +1181,10 @@ shakaDemo.Custom = class {
         this.saveAssetInfos_(this.assets_);
         this.remakeSavedList_();
       }, 'Delete this custom asset?');
-      c.addStoreButton();
+      if (!asset.isPlaylist) {
+        // The Store button is only relevant for regular stream assets.
+        c.addStoreButton();
+      }
     });
   }
 

@@ -156,4 +156,23 @@ describe('BufferingObserver', () => {
       expect(controller.getLastRebufferTime()).toBe(Date.now());
     });
   });
+
+  it('reports starving state when seeking', () => {
+    controller.reportEvent(shaka.util.MediaElementEvent.SEEKING, 0);
+    expect(controller.getState()).toBe(State.STARVING);
+  });
+
+  it('reports satisfied state when playing', () => {
+    controller.reportEvent(shaka.util.MediaElementEvent.PLAYING, 0);
+    expect(controller.getState()).toBe(State.SATISFIED);
+  });
+
+  it('reports satisfied state when timeline progresses', () => {
+    controller.reportEvent(shaka.util.MediaElementEvent.WAITING, 0);
+    expect(controller.getState()).toBe(State.STARVING);
+    controller.reportEvent(shaka.util.MediaElementEvent.TIME_UPDATE, 0);
+    expect(controller.getState()).toBe(State.STARVING);
+    controller.reportEvent(shaka.util.MediaElementEvent.TIME_UPDATE, 1);
+    expect(controller.getState()).toBe(State.SATISFIED);
+  });
 });

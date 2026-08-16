@@ -14,47 +14,33 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
 
     /** @private {shaka.ads.AdsStats} */
     this.stats_ = new shaka.ads.AdsStats();
-  }
 
-  /** @override */
-  release() {}
+    /** @private {?shaka.extern.IAd} */
+    this.currentAd_ = null;
+  }
 
   /** @override */
   setLocale(locale) {}
 
   /** @override */
+  setContainers(clientSideAdContainer, serverSideAdContainer) {}
+
+  /** @override */
   configure(config) {}
 
   /** @override */
-  initInterstitial(adContainer, basePlayer, baseVideo) {}
-
-  /** @override */
-  initClientSide(adContainer, video, adsRenderingSettings) {}
+  release() {}
 
   /** @override */
   onAssetUnload() {}
 
   /** @override */
-  requestClientSideAds(imaRequest) {
+  requestClientSideAds(imaRequest, adsRenderingSettings) {
     return Promise.resolve('fake:url');
   }
 
   /** @override */
   updateClientSideAdsRenderingSettings(adsRenderingSettings) {}
-
-  /** @override */
-  initMediaTailor(networkingEngine, video) {}
-
-  /** @override */
-  requestMediaTailorStream(url, adsParams, backupUrl) {
-    return Promise.resolve('fake:url');
-  }
-
-  /** @override */
-  addMediaTailorTrackingUrl(url) {}
-
-  /** @override */
-  initServerSide(adContainer, video) {}
 
   /** @override */
   requestServerSideStream(imaRequest, backupUrl = '') {
@@ -65,9 +51,21 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   replaceServerSideAdTagParameters(adTagParameters) {}
 
   /** @override */
-  getServerSideCuePoints() {
-    return [];
+  requestMediaTailorStream(url, adsParams, backupUrl) {
+    return Promise.resolve('fake:url');
   }
+
+  /** @override */
+  addMediaTailorTrackingUrl(url) {}
+
+  /** @override */
+  addCustomInterstitial(interstitial) {}
+
+  /** @override */
+  addAdUrlInterstitial(url) {}
+
+  /** @override */
+  getInterstitialPlayer() {}
 
   /** @override */
   getCuePoints() {
@@ -83,30 +81,27 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   onManifestUpdated(isLive) {}
 
   /** @override */
-  onDashTimedMetadata(region) {}
-
-  /** @override */
   onHlsTimedMetadata(metadata) {}
 
   /** @override */
   onCueMetadataChange(data) {}
 
   /** @override */
-  onHLSInterstitialMetadata(basePlayer, baseVideo, interstitial) {}
+  onHLSMetadata(metadata) {}
 
   /** @override */
-  onDASHInterstitialMetadata(basePlayer, baseVideo, region) {}
+  onDASHMetadata(region) {}
 
   /** @override */
-  addCustomInterstitial(interstitial) {}
-
-  /** @override */
-  addAdUrlInterstitial(url) {}
+  getCurrentAd() {
+    return this.currentAd_;
+  }
 
   /**
    * @param {!shaka.test.FakeAd} ad
    */
   startAd(ad) {
+    this.currentAd_ = ad;
     const event = new shaka.util.FakeEvent(shaka.ads.Utils.AD_STARTED,
         (new Map()).set('ad', ad));
 
@@ -115,6 +110,7 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
 
   /** @public */
   finishAd() {
+    this.currentAd_ = null;
     const event = new shaka.util.FakeEvent(shaka.ads.Utils.AD_STOPPED);
     this.dispatchEvent(event);
   }

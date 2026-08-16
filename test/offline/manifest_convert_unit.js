@@ -10,12 +10,12 @@ describe('ManifestConverter', () => {
     const videoType = 'video';
 
     it('will create variants with variant ids', () => {
-      /** @type {!Array.<shaka.extern.StreamDB>} */
+      /** @type {!Array<shaka.extern.StreamDB>} */
       const audios = [
         createStreamDB(0, audioType, [0]),
         createStreamDB(1, audioType, [1]),
       ];
-      /** @type {!Array.<shaka.extern.StreamDB>} */
+      /** @type {!Array<shaka.extern.StreamDB>} */
       const videos = [
         createStreamDB(2, videoType, [0]),
         createStreamDB(3, videoType, [1]),
@@ -23,7 +23,7 @@ describe('ManifestConverter', () => {
 
       const timeline = createTimeline();
 
-      /** @type {!Map.<number, shaka.extern.Variant>} */
+      /** @type {!Map<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
           audios, videos, timeline);
       expect(variants.size).toBe(2);
@@ -38,26 +38,26 @@ describe('ManifestConverter', () => {
     });
 
     it('will create variants when there is only audio', () => {
-      /** @type {!Array.<shaka.extern.StreamDB>} */
+      /** @type {!Array<shaka.extern.StreamDB>} */
       const audios = [
         createStreamDB(0, audioType, [0]),
         createStreamDB(1, audioType, [1]),
       ];
-      /** @type {!Array.<shaka.extern.StreamDB>} */
+      /** @type {!Array<shaka.extern.StreamDB>} */
       const videos = [];
 
       const timeline = createTimeline();
 
-      /** @type {!Map.<number, shaka.extern.Variant>} */
+      /** @type {!Map<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
           audios, videos, timeline);
       expect(variants.size).toBe(2);
     });
 
     it('will create variants when there is only video', () => {
-      /** @type {!Array.<shaka.extern.StreamDB>} */
+      /** @type {!Array<shaka.extern.StreamDB>} */
       const audios = [];
-      /** @type {!Array.<shaka.extern.StreamDB>} */
+      /** @type {!Array<shaka.extern.StreamDB>} */
       const videos = [
         createStreamDB(2, videoType, [0]),
         createStreamDB(3, videoType, [1]),
@@ -65,7 +65,7 @@ describe('ManifestConverter', () => {
 
       const timeline = createTimeline();
 
-      /** @type {!Map.<number, shaka.extern.Variant>} */
+      /** @type {!Map<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
           audios, videos, timeline);
       expect(variants.size).toBe(2);
@@ -291,7 +291,7 @@ describe('ManifestConverter', () => {
   /**
    * @param {number} id
    * @param {string} type
-   * @param {!Array.<number>} variantIds
+   * @param {!Array<number>} variantIds
    * @return {shaka.extern.StreamDB}
    */
   function createStreamDB(id, type, variantIds) {
@@ -304,6 +304,7 @@ describe('ManifestConverter', () => {
       type,
       mimeType: '',
       codecs: '',
+      supplementalCodecs: '',
       language: '',
       originalLanguage: null,
       label: null,
@@ -322,6 +323,8 @@ describe('ManifestConverter', () => {
       external: false,
       fastSwitching: false,
       isAudioMuxedInVideo: false,
+      isIframe: false,
+      preselection: null,
     };
 
     return streamDB;
@@ -349,6 +352,7 @@ describe('ManifestConverter', () => {
       mimeType,
       codecs,
       thumbnailSprite: null,
+      chapterTitle: null,
     };
 
     return segment;
@@ -356,7 +360,7 @@ describe('ManifestConverter', () => {
 
   /**
    * @param {number} id
-   * @param {!Array.<number>} variantIds
+   * @param {!Array<number>} variantIds
    * @return {shaka.extern.StreamDB}
    */
   function createVideoStreamDB(id, variantIds) {
@@ -413,12 +417,14 @@ describe('ManifestConverter', () => {
       external: false,
       fastSwitching: false,
       isAudioMuxedInVideo: false,
+      isIframe: false,
+      preselection: null,
     };
   }
 
   /**
    * @param {number} id
-   * @param {!Array.<number>} variantIds
+   * @param {!Array<number>} variantIds
    * @return {shaka.extern.StreamDB}
    */
   function createAudioStreamDB(id, variantIds) {
@@ -475,6 +481,8 @@ describe('ManifestConverter', () => {
       external: false,
       fastSwitching: false,
       isAudioMuxedInVideo: false,
+      isIframe: false,
+      preselection: null,
     };
   }
 
@@ -536,6 +544,8 @@ describe('ManifestConverter', () => {
       external: false,
       fastSwitching: false,
       isAudioMuxedInVideo: false,
+      isIframe: false,
+      preselection: null,
     };
   }
 
@@ -562,6 +572,7 @@ describe('ManifestConverter', () => {
       segmentIndex: jasmine.any(shaka.media.SegmentIndex),
       mimeType: streamDb.mimeType,
       codecs: streamDb.codecs,
+      supplementalCodecs: '',
       frameRate: streamDb.frameRate,
       pixelAspectRatio: streamDb.pixelAspectRatio,
       hdr: streamDb.hdr,
@@ -579,6 +590,7 @@ describe('ManifestConverter', () => {
       type: streamDb.type,
       primary: streamDb.primary,
       trickModeVideo: null,
+      dependencyStream: null,
       emsgSchemeIdUris: null,
       roles: streamDb.roles,
       forced: streamDb.forced,
@@ -593,6 +605,9 @@ describe('ManifestConverter', () => {
       fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
           streamDb.mimeType, streamDb.codecs)]),
       isAudioMuxedInVideo: streamDb.isAudioMuxedInVideo,
+      baseOriginalId: null,
+      isIframe: streamDb.isIframe,
+      preselection: streamDb.preselection || null,
     };
 
     expect(stream).toEqual(expectedStream);
@@ -629,7 +644,7 @@ describe('ManifestConverter', () => {
   }
 
   /**
-   * @param {!Array.<shaka.extern.Variant>} variants
+   * @param {!Array<shaka.extern.Variant>} variants
    * @param {?number} audioId
    * @param {?number} videoId
    * @return {?shaka.extern.Variant}

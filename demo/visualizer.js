@@ -60,7 +60,7 @@ shakaDemo.Visualizer = class {
     this.autoScreenshotTaken_ = false;
 
     /**
-     * @private {!Array.<{
+     * @private {!Array<{
      *   start: number,
      *   end: number,
      *   contentType: string,
@@ -75,7 +75,10 @@ shakaDemo.Visualizer = class {
       const end = /** @type {number} */ (event['end']);
       const contentType = /** @type {string} */ (event['contentType']);
       const isMuxed = /** @type {boolean} */ (event['isMuxed']);
-      this.updates_.push({start, end, contentType, isMuxed});
+      const isDependency = /** @type {boolean} */ (event['isDependency']);
+      if (!isDependency) {
+        this.updates_.push({start, end, contentType, isMuxed});
+      }
     });
 
     player.addEventListener('unloading', () => {
@@ -125,7 +128,7 @@ shakaDemo.Visualizer = class {
 
   /**
    * @param {!CanvasRenderingContext2D} ctx
-   * @param {!Array.<string>} colors
+   * @param {!Array<string>} colors
    * @param {number} y
    * @param {number} h
    * @param {number} scaleFactor Measured in pixels per second.
@@ -245,7 +248,7 @@ shakaDemo.Visualizer = class {
     // Prune updates that are no longer buffered.
     const allBufferedInfo = this.player_.getBufferedInfo();
     this.updates_ = this.updates_.filter((update) => {
-      /** @type {!Array.<shaka.extern.BufferedRange>} */
+      /** @type {!Array<shaka.extern.BufferedRange>} */
       let bufferedInfo = [];
       switch (update.contentType) {
         case 'video':

@@ -29,7 +29,6 @@ __Manifest parsers__
   - Default manifest parser plugins:
     - DASH: {@linksource shaka.dash.DashParser}
     - HLS: {@linksource shaka.hls.HlsParser}
-    - MSS: {@linksource shaka.mss.MssParser}
 
 __Subtitle/caption parsers__
   - Selected by MIME type
@@ -40,16 +39,13 @@ __Subtitle/caption parsers__
     - TTML: {@linksource shaka.text.TtmlTextParser} and
       {@linksource shaka.text.Mp4TtmlParser}
     - SubRip (SRT): {@linksource shaka.text.SrtTextParser}
-    - LyRiCs (LRC): {@linksource shaka.text.LrcTextParser}
-    - SubStation Alpha (SSA, ASS): {@linksource shaka.text.SsaTextParser}
-    - SubViewer (SBV): {@linksource shaka.text.SbvTextParser}
 
 __Subtitle/caption displayers__
   - Configured at runtime on a Player instance
   - Use {@link player.configure} and set the `textDisplayFactory` field
   - Must implement the {@link shaka.extern.TextDisplayer} interface
   - Default TextDisplayer implementation:
-    {@linksource shaka.text.SimpleTextDisplayer}
+    {@linksource shaka.text.NativeTextDisplayer}
 
 __Networking plugins__
   - Selected by URI scheme (http, https, etc.)
@@ -98,16 +94,16 @@ You can start with the complete library (`+@complete`) and exclude any
 individual source file with a minus sign and a path:
 
 ```sh
-python build/build.py +@complete -lib/text/mp4_ttml_parser.js
+python3 build/build.py +@complete -lib/text/mp4_ttml_parser.js
 ```
 
 You can also exclude an entire category of plugins:
 
 ```sh
 # Build without polyfills:
-python build/build.py +@complete -@polyfill
+python3 build/build.py +@complete -@polyfill
 # Build without polyfills or text parsers:
-python build/build.py +@complete -@polyfill -@text
+python3 build/build.py +@complete -@polyfill -@text
 ```
 
 To see the complete list of categories, its in [`build/types/`](https://github.com/shaka-project/shaka-player/tree/main/build/types)
@@ -137,13 +133,13 @@ the bottom of the source file.
 To add a single source file, prefix it with a plus sign:
 
 ```sh
-python build/build.py +@complete +my_plugin.js
+python3 build/build.py +@complete +my_plugin.js
 ```
 
 You can add multiple sources as well:
 
 ```sh
-python build/build.py +@complete +my_plugin.js +/path/to/my_other_plugin.js
+python3 build/build.py +@complete +my_plugin.js +/path/to/my_other_plugin.js
 ```
 
 

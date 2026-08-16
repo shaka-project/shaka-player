@@ -35,6 +35,7 @@ describe('DashParser SegmentTemplate', () => {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
 
+    const config = shaka.util.PlayerConfiguration.createDefault();
     playerInterface = {
       networkingEngine: fakeNetEngine,
       modifyManifestRequest: (request, manifestInfo) => {},
@@ -45,8 +46,6 @@ describe('DashParser SegmentTemplate', () => {
       onEvent: fail,
       onError: fail,
       isLowLatencyMode: () => false,
-      isAutoLowLatencyMode: () => false,
-      enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
@@ -54,6 +53,8 @@ describe('DashParser SegmentTemplate', () => {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => config.streaming.retryParameters,
+      onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
   });
 
@@ -98,11 +99,11 @@ describe('DashParser SegmentTemplate', () => {
     it('honors presentationTimeOffset', async () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate media="s$Number$.mp4" duration="10"',
-        ' presentationTimeOffset="50" />',
+        ' presentationTimeOffset="10" />',
       ], /* duration= */ 30, /* startTime= */ 40);
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('https://foo', source);
+      const manifest = await parser.start('https://foo', playerInterface);
 
       expect(manifest.variants.length).toBe(1);
 
@@ -112,16 +113,43 @@ describe('DashParser SegmentTemplate', () => {
 
       const expectedRef1 = ManifestParser.makeReference(
           's1.mp4', 40, 50, baseUri);
-      expectedRef1.timestampOffset = -10;
+      expectedRef1.timestampOffset = 30; // period start 40 - pto 10
 
       const expectedRef2 = ManifestParser.makeReference(
           's2.mp4', 50, 60, baseUri);
-      expectedRef2.timestampOffset = -10;
+      expectedRef2.timestampOffset = 30; // period start 40 - pto 10
 
       const ref1 = stream.segmentIndex.getIteratorForTime(45).next().value;
       const ref2 = stream.segmentIndex.getIteratorForTime(55).next().value;
       expect(ref1).toEqual(expectedRef1);
       expect(ref2).toEqual(expectedRef2);
+    });
+
+    it('constructs $Time$ ignoring offset and period', async () => {
+      const source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate media="s$Number$-$Time$.mp4" duration="10"',
+        ' presentationTimeOffset="10" />',
+      ], /* duration= */ 30, /* startTime= */ 40);
+
+      fakeNetEngine.setResponseText('https://foo', source);
+      const manifest = await parser.start('https://foo', playerInterface);
+
+      expect(manifest.variants.length).toBe(1);
+
+      const stream = manifest.variants[0].video;
+      expect(stream).toBeTruthy();
+      await stream.createSegmentIndex();
+
+      // The media time of the segment (0) is used in $Time$, without regard
+      // for the presentationTimeOffset (10), and without regard for the period
+      // start (40).  The reference itself has a start time that includes the
+      // period.
+      const expectedRef1 = ManifestParser.makeReference(
+          's1-0.mp4', 40, 50, baseUri);
+      expectedRef1.timestampOffset = 30; // period start 40 - pto 10
+
+      const ref1 = stream.segmentIndex.getIteratorForTime(45).next().value;
+      expect(ref1).toEqual(expectedRef1);
     });
 
     it('handles segments larger than the period', async () => {
@@ -142,8 +170,8 @@ describe('DashParser SegmentTemplate', () => {
         '<SegmentTemplate media="s$Number$.mp4" duration="60" />',
       ], /* duration= */ 30, /* startTime= */ 30);
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('https://foo', source);
+      const manifest = await parser.start('https://foo', playerInterface);
       expect(manifest.presentationTimeline.getSeekRangeStart()).toBe(30);
     });
 
@@ -156,8 +184,8 @@ describe('DashParser SegmentTemplate', () => {
       config.dash.initialSegmentLimit = 100;
       parser.configure(config);
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('https://foo', source);
+      const manifest = await parser.start('https://foo', playerInterface);
       const stream = manifest.variants[0].video;
       await stream.createSegmentIndex();
       goog.asserts.assert(stream.segmentIndex, 'Should have created index');
@@ -175,8 +203,8 @@ describe('DashParser SegmentTemplate', () => {
       config.dash.initialSegmentLimit = 100;
       parser.configure(config);
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('https://foo', source);
+      const manifest = await parser.start('https://foo', playerInterface);
       const stream = manifest.variants[0].video;
       await stream.createSegmentIndex();
       goog.asserts.assert(stream.segmentIndex, 'Should have created index');
@@ -194,10 +222,10 @@ describe('DashParser SegmentTemplate', () => {
       ]);
 
       fakeNetEngine
-          .setResponseText('dummy://foo', source)
+          .setResponseText('https://foo', source)
           .setResponseValue('http://example.com/index-500.mp4', mp4Index);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const segmentReference =
           await Dash.getFirstVideoSegmentReference(manifest);
       const initSegmentReference = segmentReference.initSegmentReference;
@@ -222,10 +250,10 @@ describe('DashParser SegmentTemplate', () => {
       ]);
 
       fakeNetEngine
-          .setResponseText('dummy://foo', source)
+          .setResponseText('https://foo', source)
           .setResponseValue('http://example.com/index-500.mp4', mp4Index);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const segmentReference =
           await Dash.getFirstVideoSegmentReference(manifest);
       const initSegmentReference = segmentReference.initSegmentReference;
@@ -256,11 +284,11 @@ describe('DashParser SegmentTemplate', () => {
       ].join('\n');
 
       fakeNetEngine
-          .setResponseText('dummy://foo', source)
+          .setResponseText('https://foo', source)
           .setResponseValue('http://example.com/index-500.webm', webmIndex)
           .setResponseValue('http://example.com/init-500.webm', webmInit);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const segmentReference =
           await Dash.getFirstVideoSegmentReference(manifest);
       const initSegmentReference = segmentReference.initSegmentReference;
@@ -291,10 +319,10 @@ describe('DashParser SegmentTemplate', () => {
       ].join('\n');
 
       fakeNetEngine
-          .setResponseText('dummy://foo', source)
+          .setResponseText('https://foo', source)
           .setResponseValue('http://example.com/index-500.mp4', mp4Index);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const segmentReference =
           await Dash.getFirstVideoSegmentReference(manifest);
       const initSegmentReference = segmentReference.initSegmentReference;
@@ -323,10 +351,10 @@ describe('DashParser SegmentTemplate', () => {
       ].join('\n');
 
       fakeNetEngine
-          .setResponseText('dummy://foo', source)
+          .setResponseText('https://foo', source)
           .setResponseValue('http://example.com/index-500.mp4', mp4Index);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const segmentReference =
           await Dash.getFirstVideoSegmentReference(manifest);
       const initSegmentReference = segmentReference.initSegmentReference;
@@ -444,8 +472,8 @@ describe('DashParser SegmentTemplate', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const actual = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('https://foo', source);
+      const actual = await parser.start('https://foo', playerInterface);
       expect(actual).toBeTruthy();
 
       const variants = actual.variants;
@@ -495,8 +523,8 @@ describe('DashParser SegmentTemplate', () => {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://foo', source);
-      const actual = await parser.start('dummy://foo', playerInterface);
+      fakeNetEngine.setResponseText('https://foo', source);
+      const actual = await parser.start('https://foo', playerInterface);
       expect(actual).toBeTruthy();
 
       const variants = actual.variants;
@@ -515,6 +543,122 @@ describe('DashParser SegmentTemplate', () => {
           ['http://example.com/segment-test2-0.dash']);
       expect(firstSegment(variants[2]).getUris()).toEqual(
           ['http://example.com/segment-test3-0.dash']);
+    });
+
+    it('constructs $Time$ ignoring offset and period', async () => {
+      const source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate media="$Number$-$Time$.mp4"',
+        ' presentationTimeOffset="10" startNumber="0">',
+        '  <SegmentTimeline>',
+        '    <S t="0" d="15" r="2" />',
+        '  </SegmentTimeline>',
+        '</SegmentTemplate>',
+      ], /* duration= */ 35, /* startTime= */ 40);
+      const references = [
+        // Reference time is the media time plus period time, but the $Time$
+        // used in the URL ignores both presentationTimeOffset and period start.
+        ManifestParser.makeReference('0-0.mp4', 30, 45, baseUri),
+        ManifestParser.makeReference('1-15.mp4', 45, 60, baseUri),
+        ManifestParser.makeReference('2-30.mp4', 60, 75, baseUri),
+      ].map((ref) => {
+        ref.timestampOffset = 30; // period start 40 - pto 10
+        return ref;
+      });
+      await Dash.testSegmentIndex(source, references);
+    });
+
+    it('create correct index Uris with supplementalCodecs', async () => {
+      const source = [
+        '<MPD type="static" xmlns:scte214="urn:scte:dash:scte214-extensions">',
+        '  <Period duration="PT60S">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <BaseURL>http://example.com</BaseURL>',
+        '      <SegmentTemplate timescale="1000" startNumber="1"',
+        '         initialization="init-$RepresentationID$.mp4"',
+        '          media="segment-$RepresentationID$-$Number$.m4s">',
+        '        <SegmentTimeline>',
+        '           <S t="0" d="6000" r="1176" />',
+        '         <S d="4520" />',
+        '       </SegmentTimeline>',
+        '      </SegmentTemplate>',
+        '      <Representation id="test1" bandwidth="100" codecs="my_codec"',
+        '          scte214:supplementalCodecs="my_supplemental_codec" />',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('https://foo', source);
+      const actual = await parser.start('https://foo', playerInterface);
+      expect(actual).toBeTruthy();
+
+      const variants = actual.variants;
+      expect(variants.length).toBe(2);
+
+      expect(variants[0].video.codecs).toBe('my_codec');
+      expect(variants[1].video.codecs).toBe('my_supplemental_codec');
+
+      await variants[0].video.createSegmentIndex();
+      await variants[1].video.createSegmentIndex();
+
+      const firstSegment = (variant) => {
+        return Array.from(variant.video.segmentIndex)[0];
+      };
+
+      expect(firstSegment(variants[0]).initSegmentReference.getUris()).toEqual(
+          ['http://example.com/init-test1.mp4']);
+      expect(firstSegment(variants[0]).getUris()).toEqual(
+          ['http://example.com/segment-test1-1.m4s']);
+
+      expect(firstSegment(variants[1]).initSegmentReference.getUris()).toEqual(
+          ['http://example.com/init-test1.mp4']);
+      expect(firstSegment(variants[1]).getUris()).toEqual(
+          ['http://example.com/segment-test1-1.m4s']);
+    });
+
+    it('create correct duration Uris with supplementalCodecs', async () => {
+      const source = [
+        '<MPD type="static" xmlns:scte214="urn:scte:dash:scte214-extensions">',
+        '  <Period duration="PT60S">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <BaseURL>http://example.com</BaseURL>',
+        '      <SegmentTemplate timescale="1000" duration="4000"',
+        '          initialization="init-$RepresentationID$.mp4"',
+        '          media="segment-$RepresentationID$-$Number$.m4s"',
+        '          startNumber="1" />',
+        '      <Representation id="test1" bandwidth="100" codecs="my_codec"',
+        '          scte214:supplementalCodecs="my_supplemental_codec" />',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('https://foo', source);
+      const actual = await parser.start('https://foo', playerInterface);
+      expect(actual).toBeTruthy();
+
+      const variants = actual.variants;
+      expect(variants.length).toBe(2);
+
+      expect(variants[0].video.codecs).toBe('my_codec');
+      expect(variants[1].video.codecs).toBe('my_supplemental_codec');
+
+      await variants[0].video.createSegmentIndex();
+      await variants[1].video.createSegmentIndex();
+
+      const firstSegment = (variant) => {
+        return Array.from(variant.video.segmentIndex)[0];
+      };
+
+      expect(firstSegment(variants[0]).initSegmentReference.getUris()).toEqual(
+          ['http://example.com/init-test1.mp4']);
+      expect(firstSegment(variants[0]).getUris()).toEqual(
+          ['http://example.com/segment-test1-1.m4s']);
+
+      expect(firstSegment(variants[1]).initSegmentReference.getUris()).toEqual(
+          ['http://example.com/init-test1.mp4']);
+      expect(firstSegment(variants[1]).getUris()).toEqual(
+          ['http://example.com/segment-test1-1.m4s']);
     });
   });
 
@@ -712,8 +856,8 @@ describe('DashParser SegmentTemplate', () => {
           '</MPD>',
         ].join('\n');
 
-        fakeNetEngine.setResponseText('dummy://foo', source);
-        const manifest = await parser.start('dummy://foo', playerInterface);
+        fakeNetEngine.setResponseText('https://foo', source);
+        const manifest = await parser.start('https://foo', playerInterface);
         const stream = manifest.variants[0].video;
         await stream.createSegmentIndex();
 
@@ -739,6 +883,7 @@ describe('DashParser SegmentTemplate', () => {
         expect(pos).toBeNull();
       });
     });
+
     describe('get', () => {
       it('creates a segment reference for a given position', async () => {
         const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
@@ -774,6 +919,19 @@ describe('DashParser SegmentTemplate', () => {
         const ref = index.get(-12);
         expect(ref).toBeNull();
       });
+
+      it('clamps last segment time to period duration', async () => {
+        const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
+        const index = await makeTimelineSegmentIndex(info);
+        // Modify last segment end time after creating TSI, but before making
+        // any operation on it.
+        info.timeline[info.timeline.length - 1].end = 100;
+        const ref = index.get(9);
+        // Last segment end time is clamped to period duration.
+        expect(ref.endTime).toBe(21);
+        // True end time is unaffected by period duration.
+        expect(ref.trueEndTime).toBe(100);
+      });
     });
 
     describe('appendTemplateInfo', () => {
@@ -806,6 +964,38 @@ describe('DashParser SegmentTemplate', () => {
         expect(index.find(0)).toBe(0);
         expect(index.find(newEnd - 1.0)).toBe(9);
       });
+
+      it('shifts timeline on presentationTimeOffset change', async () => {
+        const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
+        info.unscaledPresentationTimeOffset = 0;
+        const index = await makeTimelineSegmentIndex(info, false);
+
+        // The initial template should contain a timeline of 5
+        // initial ranges.
+        expect(index.getTimeline().length).toBe(10);
+
+        // The same 5 ranges are now shifted by PTO and not by
+        // their internal timestamps.
+        // cached: |--|--|--|--|--|
+        // next:      |--|--|--|--|--|
+        //         shift is 1x the timescale = 1 range.
+        //         the last range shall be added to the cache.
+        const nextInfo = makeTemplateInfo(makeRanges(0, 2.0, 10));
+        nextInfo.unscaledPresentationTimeOffset = 90000;
+        index.appendTemplateInfo(nextInfo, 0, 30);
+
+        const timeline = index.getTimeline();
+        expect(timeline.length).toBe(11);
+
+        // The last segment is the new one, based on the cached
+        // presentationTimeOffset.
+        expect(timeline[timeline.length - 1]).toEqual({
+          start: 20,
+          unscaledStart: 1710000,
+          end: 22,
+          unscaledEnd: 1890000,
+        });
+      });
     });
 
     describe('evict', () => {
@@ -818,6 +1008,287 @@ describe('DashParser SegmentTemplate', () => {
         expect(index.find(2.0)).toBe(2);
         expect(index.find(6.0)).toBe(3);
       });
+    });
+  });
+
+  describe('patterns', () => {
+    it('expands SegmentTimeline patterns correctly', async () => {
+      const source = `
+        <MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
+             type="static"
+             minBufferTime="PT1S">
+          <Period duration="PT7S">
+            <AdaptationSet mimeType="audio/mp4">
+              <Representation id="1" bandwidth="128000">
+                <SegmentTemplate timescale="1" media="s$Time$.m4s">
+                  <SegmentTimeline>
+                    <Pattern id="1">
+                      <P d="2" r="1"/>
+                      <P d="3"/>
+                    </Pattern>
+                    <S t="0" r="2" p="1"/>
+                  </SegmentTimeline>
+                </SegmentTemplate>
+              </Representation>
+            </AdaptationSet>
+          </Period>
+        </MPD>`;
+
+      fakeNetEngine.setResponseText('https://foo', source);
+      const manifest = await parser.start('https://foo', playerInterface);
+
+      const stream = manifest.variants[0].audio;
+      await stream.createSegmentIndex();
+      goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+      const references = Array.from(stream.segmentIndex);
+
+      // Pattern durations: [2, 2, 3]
+      // r=2 => 3 segments
+      const expectedDurations = [2, 2, 3];
+      const expectedStartTimes = [0, 2, 4];
+
+      expect(references.length).toBe(3);
+
+      for (let i = 0; i < references.length; i++) {
+        expect(references[i].startTime).toBe(expectedStartTimes[i]);
+        expect(references[i].endTime)
+            .toBe(expectedStartTimes[i] + expectedDurations[i]);
+      }
+    });
+
+    it('respects pE (pattern entry point)', async () => {
+      const source = `
+        <MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
+             type="static"
+             minBufferTime="PT1S">
+          <Period duration="PT5S">
+            <AdaptationSet mimeType="audio/mp4">
+              <Representation id="1" bandwidth="128000">
+                <SegmentTemplate timescale="1" media="s$Time$.m4s">
+                  <SegmentTimeline>
+                    <Pattern id="1">
+                      <P d="1"/>
+                      <P d="2"/>
+                      <P d="3"/>
+                    </Pattern>
+                    <S t="0" r="1" p="1" pE="1"/>
+                  </SegmentTimeline>
+                </SegmentTemplate>
+              </Representation>
+            </AdaptationSet>
+          </Period>
+        </MPD>`;
+
+      fakeNetEngine.setResponseText('https://foo', source);
+      const manifest = await parser.start('https://foo', playerInterface);
+
+      const stream = manifest.variants[0].audio;
+      await stream.createSegmentIndex();
+      goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+      const references = Array.from(stream.segmentIndex);
+
+      const expected = [
+        {start: 0, dur: 2},
+        {start: 2, dur: 3},
+      ];
+
+      expect(references.length).toBe(2);
+
+      for (let i = 0; i < references.length; i++) {
+        expect(references[i].startTime).toBe(expected[i].start);
+        expect(references[i].endTime)
+            .toBe(expected[i].start + expected[i].dur);
+      }
+    });
+
+    it('expands pattern with repeated equal durations correctly', async () => {
+      const source = `
+        <MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
+             type="static"
+             minBufferTime="PT1S">
+          <Period duration="PT3S">
+            <AdaptationSet mimeType="audio/mp4">
+              <Representation id="1" bandwidth="128000">
+                <SegmentTemplate timescale="1"
+                                 media="s$Time$.m4s">
+                  <SegmentTimeline>
+                    <Pattern id="1">
+                      <P d="1"/>
+                      <P d="2"/>
+                      <P d="3"/>
+                    </Pattern>
+                    <S t="0" r="1" p="1"/>
+                  </SegmentTimeline>
+                </SegmentTemplate>
+              </Representation>
+            </AdaptationSet>
+          </Period>
+        </MPD>`;
+
+      fakeNetEngine.setResponseText('https://foo', source);
+      const manifest = await parser.start('https://foo', playerInterface);
+
+      const stream = manifest.variants[0].audio;
+      await stream.createSegmentIndex();
+      goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+      const references = Array.from(stream.segmentIndex);
+
+      const expectedStartTimes = [0, 1];
+      const expectedDurations = [1, 2];
+
+      expect(references.length).toBe(2);
+
+      for (let i = 0; i < references.length; i++) {
+        expect(references[i].startTime).toBe(expectedStartTimes[i]);
+        expect(references[i].endTime)
+            .toBe(expectedStartTimes[i] + expectedDurations[i]);
+      }
+    });
+
+    it('expands S elements referencing a pattern correctly', async () => {
+      const source = `
+        <MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
+             type="static"
+             minBufferTime="PT1S">
+          <Period duration="PT6S">
+            <AdaptationSet mimeType="audio/mp4">
+              <Representation id="1" bandwidth="128000">
+                <SegmentTemplate timescale="1"
+                                 media="s$Time$.m4s">
+                  <SegmentTimeline>
+                    <Pattern id="p1">
+                      <P d="1"/>
+                      <P d="2"/>
+                      <P d="3"/>
+                    </Pattern>
+                    <S t="0" r="1" p="p1" pE="0"/>
+                    <S t="3" r="0" p="p1" pE="2"/>
+                  </SegmentTimeline>
+                </SegmentTemplate>
+              </Representation>
+            </AdaptationSet>
+          </Period>
+        </MPD>`;
+
+      fakeNetEngine.setResponseText('https://foo', source);
+      const manifest = await parser.start('https://foo', playerInterface);
+
+      const stream = manifest.variants[0].audio;
+      await stream.createSegmentIndex();
+      goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+      const references = Array.from(stream.segmentIndex);
+
+      const expectedStartTimes = [0, 1, 3];
+      const expectedDurations = [1, 2, 3];
+
+      expect(references.length).toBe(3);
+
+      for (let i = 0; i < references.length; i++) {
+        expect(references[i].startTime).toBe(expectedStartTimes[i]);
+        expect(references[i].endTime)
+            .toBe(expectedStartTimes[i] + expectedDurations[i]);
+      }
+    });
+
+    it('expands pattern correctly with timescale != 1', async () => {
+      const source = `
+        <MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
+             type="static"
+             minBufferTime="PT1S">
+          <Period duration="PT5S">
+            <AdaptationSet mimeType="audio/mp4">
+              <Representation id="1" bandwidth="128000">
+                <SegmentTemplate timescale="2"
+                                 media="s$Time$.m4s">
+                  <SegmentTimeline>
+                    <Pattern id="1">
+                      <P d="4"/>
+                      <P d="6"/>
+                    </Pattern>
+                    <S t="0" r="1" p="1"/>
+                  </SegmentTimeline>
+                </SegmentTemplate>
+              </Representation>
+            </AdaptationSet>
+          </Period>
+        </MPD>`;
+
+      fakeNetEngine.setResponseText('https://foo', source);
+      const manifest = await parser.start('https://foo', playerInterface);
+
+      const stream = manifest.variants[0].audio;
+      await stream.createSegmentIndex();
+      goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+      const references = Array.from(stream.segmentIndex);
+
+      const expectedStartTimes = [0, 2];
+      const expectedDurations = [2, 3];
+
+      expect(references.length).toBe(2);
+
+      for (let i = 0; i < references.length; i++) {
+        expect(references[i].startTime).toBe(expectedStartTimes[i]);
+        expect(references[i].endTime)
+            .toBe(expectedStartTimes[i] + expectedDurations[i]);
+      }
+    });
+
+    // eslint-disable-next-line @stylistic/max-len
+    it('expands a single S with large r and pE using pattern rotation', async () => {
+      const source = `
+        <MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
+             type="static"
+             minBufferTime="PT1S">
+          <Period duration="PT14S">
+            <AdaptationSet mimeType="audio/mp4">
+              <Representation id="1" bandwidth="128000">
+                <SegmentTemplate timescale="1" media="s$Time$.m4s">
+                  <SegmentTimeline>
+                    <Pattern id="rot">
+                      <P d="1"/>
+                      <P d="2"/>
+                      <P d="3"/>
+                    </Pattern>
+                    <S t="0" r="6" p="rot" pE="1"/>
+                  </SegmentTimeline>
+                </SegmentTemplate>
+              </Representation>
+            </AdaptationSet>
+          </Period>
+        </MPD>`;
+
+      fakeNetEngine.setResponseText('https://foo', source);
+      const manifest = await parser.start('https://foo', playerInterface);
+
+      const stream = manifest.variants[0].audio;
+      await stream.createSegmentIndex();
+      goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+      const references = Array.from(stream.segmentIndex);
+
+      // Pattern = [1,2,3], pE=1 → start at 2
+      // r= → need 7 segments: [2,3,1,2,3,1,2]
+      const pattern = [1, 2, 3];
+      const pE = 1;
+      const r = 6;
+      const expectedDurations = [];
+      for (let i = 0; i <= r; i++) {
+        expectedDurations.push(pattern[(pE + i) % pattern.length]);
+      }
+
+      const expectedStartTimes = [];
+      let currentTime = 0;
+      for (const d of expectedDurations) {
+        expectedStartTimes.push(currentTime);
+        currentTime += d;
+      }
+
+      expect(references.length).toBe(expectedDurations.length);
+
+      for (let i = 0; i < references.length; i++) {
+        expect(references[i].startTime).toBe(expectedStartTimes[i]);
+        expect(references[i].endTime)
+            .toBe(expectedStartTimes[i] + expectedDurations[i]);
+      }
     });
   });
 
@@ -847,8 +1318,8 @@ describe('DashParser SegmentTemplate', () => {
       '</SegmentTemplate>',
     ], /* duration= */ 45);
 
-    fakeNetEngine.setResponseText('dummy://foo', dummySource);
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    fakeNetEngine.setResponseText('https://foo', dummySource);
+    const manifest = await parser.start('https://foo', playerInterface);
 
     expect(manifest.variants.length).toBe(1);
 
@@ -897,8 +1368,9 @@ function makeRanges(start, duration, num) {
   for (let i = 0; i < num; i += 1) {
     ranges.push({
       start: currentPos,
-      end: currentPos + duration,
       unscaledStart: currentPos * 90000,
+      end: currentPos + duration,
+      unscaledEnd: (currentPos + duration) * 90000,
     });
     currentPos += duration;
   }
@@ -916,6 +1388,7 @@ function makeRanges(start, duration, num) {
  */
 function makeTemplateInfo(timeline) {
   return {
+    'unscaledSegmentDuration': null,
     'segmentDuration': null,
     'timescale': 90000,
     'startNumber': 1,

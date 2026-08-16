@@ -61,3 +61,10 @@ chrome.webview.hostObjects.sync = {};
 
 /** @const */
 chrome.webview.hostObjects.sync.Windows = Windows;
+
+/**
+ * Typedef for the module interface.
+ *
+ * @typedef {typeof Windows}
+ */
+var WinRT;

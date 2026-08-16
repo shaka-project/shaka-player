@@ -7,12 +7,11 @@
 
 goog.provide('shaka.ui.PipButton');
 
-goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -38,24 +37,22 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     /** @private {HTMLElement } */
     this.videoContainer_ = this.controls.getVideoContainer();
 
-    const LocIds = shaka.ui.Locales.Ids;
     /** @private {!HTMLButtonElement} */
     this.pipButton_ = shaka.util.Dom.createButton();
     this.pipButton_.classList.add('shaka-pip-button');
     this.pipButton_.classList.add('shaka-tooltip');
+    this.pipButton_.classList.add('shaka-no-propagation');
+    this.pipButton_.ariaPressed = 'false';
 
-    /** @private {!HTMLElement} */
-    this.pipIcon_ = shaka.util.Dom.createHTMLElement('i');
-    this.pipIcon_.classList.add('material-icons-round');
-    this.pipIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.PIP;
-    this.pipButton_.appendChild(this.pipIcon_);
+    /** @private {!shaka.ui.Icon} */
+    this.pipIcon_ = new shaka.ui.Icon(this.pipButton_,
+        shaka.ui.Enums.MaterialDesignSVGIcons['PIP']);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
     label.classList.add('shaka-overflow-menu-only');
+    label.classList.add('shaka-simple-overflow-button-label-inline');
     this.pipNameSpan_ = shaka.util.Dom.createHTMLElement('span');
-    this.pipNameSpan_.textContent =
-      this.localization.resolve(LocIds.PICTURE_IN_PICTURE);
     label.appendChild(this.pipNameSpan_);
 
     /** @private {!HTMLElement} */
@@ -65,7 +62,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
 
     this.pipButton_.appendChild(label);
 
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
 
     this.parent.appendChild(this.pipButton_);
 
@@ -76,17 +73,10 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
     }
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateLocalizedStrings_();
-        });
-
     this.eventManager.listen(this.pipButton_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       this.controls.togglePiP();
     });
 
@@ -99,11 +89,11 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(this.controls, 'caststatuschanged', () => {
-      this.onTracksChanged_();
+      this.checkAvailability();
     });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.onTracksChanged_();
+      this.checkAvailability();
     });
 
     if ('documentPictureInPicture' in window) {
@@ -118,34 +108,34 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
             });
           });
     }
+
+    this.checkAvailability();
   }
 
   /** @private */
   onEnterPictureInPicture_() {
     const LocIds = shaka.ui.Locales.Ids;
-    this.pipIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.EXIT_PIP;
+    this.pipIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['EXIT_PIP']);
     this.pipButton_.ariaLabel =
         this.localization.resolve(LocIds.EXIT_PICTURE_IN_PICTURE);
     this.currentPipState_.textContent =
         this.localization.resolve(LocIds.ON);
+    this.pipButton_.ariaPressed = 'true';
   }
-
 
   /** @private */
   onLeavePictureInPicture_() {
     const LocIds = shaka.ui.Locales.Ids;
-    this.pipIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.PIP;
+    this.pipIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['PIP']);
     this.pipButton_.ariaLabel =
         this.localization.resolve(LocIds.ENTER_PICTURE_IN_PICTURE);
     this.currentPipState_.textContent =
         this.localization.resolve(LocIds.OFF);
+    this.pipButton_.ariaPressed = 'false';
   }
 
-
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.pipNameSpan_.textContent =
@@ -164,27 +154,27 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
         this.localization.resolve(currentPipState);
   }
 
-
   /**
    * Display the picture-in-picture button only when the content contains video.
    * If it's displaying in picture-in-picture mode, and an audio only content is
    * loaded, exit the picture-in-picture display.
    * @return {!Promise}
-   * @private
+   * @override
    */
-  async onTracksChanged_() {
+  async checkAvailability() {
     if (!this.controls.isPiPAllowed()) {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
       if (this.controls.isPiPEnabled()) {
         await this.controls.togglePiP();
       }
-    } else if (this.player && this.player.isAudioOnly()) {
+    } else if (this.player && this.player.isAudioOnly() &&
+        !this.controls.shouldUseDocumentPictureInPicture()) {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
       if (this.controls.isPiPEnabled()) {
         await this.controls.togglePiP();
       }
     } else {
-      shaka.ui.Utils.setDisplay(this.pipButton_, true);
+      shaka.ui.Utils.setDisplay(this.pipButton_, !this.isSubMenuOpened);
     }
   }
 };
@@ -207,5 +197,5 @@ shaka.ui.OverflowMenu.registerElement(
 shaka.ui.Controls.registerElement(
     'picture_in_picture', new shaka.ui.PipButton.Factory());
 
-shaka.ui.ContextMenu.registerElement(
+shaka.ui.Controls.registerBigElement(
     'picture_in_picture', new shaka.ui.PipButton.Factory());

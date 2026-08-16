@@ -15,14 +15,24 @@ vars:
       # for each test run.
       prefs:
         # Overrides Selenium's explicit default setting, to allow Firefox to
-        # install the Widevine CDM on demand.
+        # install the Widevine CDM on demand and use it.
         media.gmp-manager.updateEnabled: true
+        media.gmp-widevinecdm.enabled: true
+        media.gmp-widevinecdm.visible: true
         # Overrides Firefox's Linux-specific default setting to disable DRM.
         media.eme.enabled: true
         # Disable GPU acceleration to avoid contention for hardware resources
         # during parallel testing and to create more stability for screenshots.
+        media.gpu-process-decoder: false
         media.hardware-video-decoding.enabled: false
         media.hardware-video-decoding.force-enabled: false
+
+  firefox_windows_config: &firefox_windows_config
+    moz:firefoxOptions:
+      # Since Firefox 145(-ish), our lab can no longer run Firefox in a Windows
+      # service without an explicit headless mode.
+      args:
+        - "-headless"
 
   basic_chrome_config: &basic_chrome_config
     goog:chromeOptions:
@@ -111,6 +121,18 @@ vars:
       # adb on the tethered device.
       androidPackage: com.android.chrome
 
+  mac_chrome_config: &mac_chrome_config
+    goog:chromeOptions:
+      args:
+        # On macOS Sequoia and newer, Chrome is failing because of Local
+        # Network Permission (LNP).  Granting permission doesn't persist,
+        # because every Chrome update loses its previously-granted permissions.
+        # So we need a proxy service running to access a Karma instance running
+        # on the local network.  The proxy's permission will persist.
+        # See also https://github.com/shaka-project/shaka-lab/pull/84
+        # and https://github.com/shaka-project/shaka-lab/blob/main/shaka-lab-node/macos/local-network-privacy.md
+        - "--proxy-pac-url=data:application/x-ns-proxy-autoconfig;base64,ZnVuY3Rpb24gRmluZFByb3h5Rm9yVVJMKHUsaCl7dmFyIGk9L15cZCtcLlxkK1wuXGQrXC5cZCskLy50ZXN0KGgpP2g6ZG5zUmVzb2x2ZShoKTtyZXR1cm4gaSYmKGlzSW5OZXQoaSwiMTAuMC4wLjAiLCIyNTUuMC4wLjAiKXx8aXNJbk5ldChpLCIxNzIuMTYuMC4wIiwiMjU1LjI0MC4wLjAiKXx8aXNJbk5ldChpLCIxOTIuMTY4LjAuMCIsIjI1NS4yNTUuMC4wIil8fGlzSW5OZXQoaSwiMTY5LjI1NC4wLjAiLCIyNTUuMjU1LjAuMCIpKT8iUFJPWFkgMTI3LjAuMC4xOjEwODAiOiJESVJFQ1QiO30="
+
   chromeos_config: &chromeos_config
     # Pass Chrome arguments through generic-webdriver-server.
     # This array will be appended after "--" instead of being set through one
@@ -150,6 +172,7 @@ ChromeMac:
   os: Mac
   extra_configs:
     - *basic_chrome_config
+    - *mac_chrome_config
 
 FirefoxMac:
   browser: firefox
@@ -190,6 +213,7 @@ FirefoxWindows:
   os: Windows
   extra_configs:
     - *basic_firefox_config
+    - *firefox_windows_config
 
 Edge:
   browser: msedge
@@ -224,6 +248,8 @@ EdgeLinux:
 ### Misc ###
 
 ChromeAndroid:
+  # Device has failed in the lab and needs to be replaced.
+  disabled: true
   browser: chrome
   os: Android
   extra_configs:
@@ -259,6 +285,11 @@ ChromecastV1:
   disabled: true
   browser: chromecast
   version: v1
+
+ChromecastStreamer:
+  # This is publicly the "Google TV Streamer", but it's still a Chromecast, too.
+  browser: chromecast
+  version: streamer
 
 ChromeOS:
   # TODO(b/145916766): Persistent license tests failing

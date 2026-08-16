@@ -247,8 +247,8 @@ const controls = ui.getControls();
 const player = controls.getPlayer();
 const video = controls.getVideo();
 
-// Programatically configure the Chromecast Receiver App Id and Android
-// Receiver Compatability.
+// Programmatically configure the Chromecast Receiver App Id and Android
+// Receiver Compatibility.
 ui.configure({
   // Set the castReceiverAppId
   'castReceiverAppId': '07AEE832',
@@ -271,3 +271,57 @@ full-window watch page, and lazy-loads translations as needed.
 See it live at [https://bbbcm-if.org/watch/](https://bbbcm-if.org/watch/), and
 override the UI language with the lang= parameter.
 (ex: [https://bbbcm-if.org/watch/?lang=sjn](https://bbbcm-if.org/watch/?lang=sjn))
+
+
+#### Supported shortcuts
+
+* `Spacebar`: Play/Pause when the seek bar is selected.
+* `Left arrow`/`Right arrow` on the seek bar: Seek backward/forward 5 seconds. This seek distance can be configured with `keyboardSeekDistance`.
+* `PageDown`/`PageUp` on the seek bar: Seek backward/forward 60 seconds. This seek distance can be configured with `keyboardLargeSeekDistance`.
+* `Home`/`End`: Seek to the beginning/last seconds of the video.
+* `c`: Activate closed captions and subtitles if available. To hide captions and subtitles, press C again.
+* `f`: Activate full screen. If full screen mode is enabled, press F again or press escape to exit full screen mode.
+* `m`: Mute/unmute the video.
+* `p`: Activate picture in picture. If picture in picture mode is enabled, press P again.
+* `>`: Speed up the video playback rate.
+* `<`: Slow down the video playback rate.
+
+
+#### Stream configuration for Displaying Title in the UI
+To ensure that the stream title is correctly displayed in the user interface, configure your streams with one of the following options:
+
+- ID3: Use the `TIT2` tag.
+- HLS: Include the `#EXT-X-SESSION-DATA` tag with the ID `com.apple.hls.title`.
+- DASH: Use the `ProgramInformation` element and ensure it includes the `Title` field.
+
+Note: This same metadata is also used by the [Media Session API](https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API) to enhance media playback experiences across platforms.
+
+
+#### Stream configuration for displaying Poster in the UI
+To enable poster display in the user interface, configure your streams with one of the following options:
+
+- ID3: Use the `APIC` tag.
+- HLS: Include the `#EXT-X-SESSION-DATA` tag with the ID `com.apple.hls.poster`.
+
+Note: This same metadata is also used by the [Media Session API](https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API) to enhance media playback experiences across platforms.
+
+#### Modern and Legacy UI styles
+
+Shaka Player UI now provides two CSS outputs to support both modern and legacy browsers.
+
+Note: both files are generated from the same LESS source and go through Autoprefixer and cssnano, ensuring consistent visual output across builds.
+
+##### Legacy CSS (controls.css)
+- Generated from the default UI build.
+- CSS custom properties are resolved at build time using postcss-custom-properties.
+- Ensures compatibility with older browsers such as:
+  - Chrome 38
+  - Safari 8
+  - Firefox 42
+- Suitable when CSS variable support is not available.
+
+##### Modern CSS (controls.modern.css)
+- Uses the same source styles but preserves CSS custom properties.
+- Targets modern browsers (last 2 years of browser versions).
+- Does not flatten CSS variables, allowing runtime theming and overrides.
+- Recommended for all modern applications.

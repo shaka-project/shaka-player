@@ -13,6 +13,18 @@
  */
 
 
+/**
+ * @typedef {{
+ *   action: string,
+ *   seekOffset: (number|undefined),
+ *   seekTime: (number|undefined),
+ *   fastSeek: (boolean|undefined),
+ *   enterPictureInPictureReason: (string|undefined)
+ * }}
+ */
+var MediaSessionActionDetails;
+
+
 const MediaMetadata = class {
   constructor(options) {
     /** @type {string} */
@@ -21,8 +33,14 @@ const MediaMetadata = class {
     /** @type {string} */
     this.artist;
 
+    /** @type {string} */
+    this.album;
+
     /** @type {!Object} */
     this.artwork;
+
+    /** @type {!Object} */
+    this.chapterInfo;
   }
 };
 
@@ -37,8 +55,8 @@ const MediaSession = class {
     /** @type {string} */
     this.type = type;
 
-    /** @type {!function(!{action: string, seekOffset: ?number,
-     *                     seekTime: ?number})}
+    /**
+     * @type {!function(!MediaSessionActionDetails)}
      */
     this.callback = callback;
   }

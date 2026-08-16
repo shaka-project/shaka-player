@@ -38,7 +38,7 @@ shaka.extern.InitDataOverride;
  * @typedef {{
  *   keySystem: string,
  *   encryptionScheme: string,
- *   keySystemUris: (Set.<string>|undefined),
+ *   keySystemUris: (Set<string>|undefined),
  *   licenseServerUri: string,
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
@@ -47,8 +47,10 @@ shaka.extern.InitDataOverride;
  *   serverCertificate: Uint8Array,
  *   serverCertificateUri: string,
  *   sessionType: string,
- *   initData: Array.<!shaka.extern.InitDataOverride>,
- *   keyIds: Set.<string>
+ *   initData: Array<!shaka.extern.InitDataOverride>,
+ *   keyIds: Set<string>,
+ *   mediaTypes: (!Array<string>|undefined),
+ *   clearKeys: (!Map<string, string>|undefined),
  * }}
  *
  * @description
@@ -60,7 +62,7 @@ shaka.extern.InitDataOverride;
  * @property {string} encryptionScheme
  *   <i>Required.</i> <br>
  *   The encryption scheme, e.g., "cenc", "cbcs", "cbcs-1-9".
- * @property {(Set.<string>|undefined)} keySystemUris
+ * @property {(Set<string>|undefined)} keySystemUris
  *   <i>Optional.</i> <br>
  *   The key system uri, e.g., "skd://" for fairplay.
  * @property {string} licenseServerUri
@@ -95,14 +97,28 @@ shaka.extern.InitDataOverride;
  *   <i>Defaults to '', e.g., server certificate will be requested from the
  *   given URI if serverCertificate is not provided. Can be filled in by
  *   advanced DRM config.</i>
- * @property {Array.<!shaka.extern.InitDataOverride>} initData
+ * @property {Array<!shaka.extern.InitDataOverride>} initData
  *   <i>Defaults to [], e.g., no override.</i> <br>
  *   A list of initialization data which override any initialization data found
  *   in the content.  See also shaka.extern.InitDataOverride.
- * @property {Set.<string>} keyIds
+ * @property {Set<string>} keyIds
  *   <i>Defaults to the empty Set</i> <br>
  *   If not empty, contains the default key IDs for this key system, as
  *   lowercase hex strings.
+ * @property {!Array<string>=} mediaTypes
+ *   An optional list specifying each component in a media type:
+ *   https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/data#media-type
+ *   included in a <code>data:</code> scheme URI, separated by semicolon.
+ * @property {(!Map<string, string>|undefined)} clearKeys
+ *   An optional map of normalized ClearKey key pairs where:
+ *   - key = key ID ('kid') encoded as base64url without padding
+ *   - value = decryption key ('k') encoded as base64url without padding
+ *
+ *   If values are provided in another format (e.g. hexadecimal), they must
+ *   be normalized before being stored.
+ *
+ *   This map is used only for ClearKey key systems and is ignored for other
+ *   DRM systems.
  * @exportDoc
  */
 shaka.extern.DrmInfo;

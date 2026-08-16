@@ -29,6 +29,9 @@ describe('StallDetector', () => {
 
     /** @override */
     getWallSeconds() { return this.wallSeconds; }
+
+    /** @override */
+    release() {}
   }
 
   /** @type {!TestImplementation} */
@@ -40,21 +43,15 @@ describe('StallDetector', () => {
   /** @type {!jasmine.Spy} */
   let onStall;
 
-  /** @type {!jasmine.Spy} */
-  let onEvent;
-
   beforeEach(() => {
     onStall = jasmine.createSpy('onStall');
-    onEvent = jasmine.createSpy('onEvent');
 
     implementation = new TestImplementation();
 
     detector = new shaka.media.StallDetector(
         implementation,
         /* stallThresholdSeconds= */ 1,
-        Util.spyFunc(onEvent));
-
-    detector.onStall(Util.spyFunc(onStall));
+        Util.spyFunc(onStall));
   });
 
   it('does not call onStall when values changes', () => {
@@ -70,7 +67,6 @@ describe('StallDetector', () => {
 
     detector.poll();
 
-    expect(onEvent).not.toHaveBeenCalled();
     expect(onStall).not.toHaveBeenCalled();
   });
 
@@ -82,7 +78,6 @@ describe('StallDetector', () => {
       implementation.wallSeconds = time;
 
       detector.poll();
-      expect(onEvent).not.toHaveBeenCalled();
       expect(onStall).not.toHaveBeenCalled();
     }
 
@@ -90,10 +85,10 @@ describe('StallDetector', () => {
     implementation.wallSeconds = 1;
 
     detector.poll();
-    expect(onEvent).toHaveBeenCalled();
     expect(onStall).toHaveBeenCalledOnceMoreWith([
       /* stalledWith= */ 5,
       /* stallDurationSeconds= */ 1,
+      /* retryNumber= */ 0,
     ]);
   });
 
@@ -106,10 +101,10 @@ describe('StallDetector', () => {
     implementation.wallSeconds = 10;
     detector.poll();
 
-    expect(onEvent).toHaveBeenCalled();
     expect(onStall).toHaveBeenCalledOnceMoreWith([
       /* stalledWith= */ 5,
-      /* stallDurationms= */ 10,
+      /* stallDurationMs= */ 10,
+      /* retryNumber= */ 0,
     ]);
   });
 
@@ -128,7 +123,6 @@ describe('StallDetector', () => {
 
     detector.poll();
 
-    expect(onEvent).not.toHaveBeenCalled();
     expect(onStall).not.toHaveBeenCalled();
   });
 
@@ -147,38 +141,84 @@ describe('StallDetector', () => {
     implementation.wallSeconds = 10;
     detector.poll();
 
-    expect(onEvent).not.toHaveBeenCalled();
     expect(onStall).not.toHaveBeenCalled();
   });
 
-  it('does not call onStall multiple times for same stall', () => {
+  it('retries onStall while the stall persists, up to the limit', () => {
     implementation.shouldMakeProgress = true;
-    implementation.presentationSeconds = 0;
+    implementation.presentationSeconds = 5;
     implementation.wallSeconds = 0;
     detector.poll();
-    expect(onEvent).not.toHaveBeenCalled();
     expect(onStall).not.toHaveBeenCalled();
 
-    implementation.wallSeconds = 10;
+    // The initial attempt happens after the stall threshold.
+    implementation.wallSeconds = 1;
     detector.poll();
-    expect(onEvent).toHaveBeenCalled();
-    expect(onStall).toHaveBeenCalled();
-    onEvent.calls.reset();
-    onStall.calls.reset();
+    expect(onStall).toHaveBeenCalledOnceMoreWith([
+      /* stalledWith= */ 5,
+      /* stallDurationSeconds= */ 1,
+      /* retryNumber= */ 0,
+    ]);
 
-    // This is the same stall, should not be called again.
-    implementation.wallSeconds = 20;
+    // Polling again before a full threshold has passed since the last
+    // attempt should not retry yet.
     detector.poll();
-    expect(onEvent).not.toHaveBeenCalled();
+    implementation.wallSeconds = 1.5;
+    detector.poll();
     expect(onStall).not.toHaveBeenCalled();
 
-    // Now that we changed time, we should get another call.
-    implementation.presentationSeconds = 10;
+    // First retry, one threshold after the previous attempt.
+    implementation.wallSeconds = 2;
+    detector.poll();
+    expect(onStall).toHaveBeenCalledOnceMoreWith([
+      /* stalledWith= */ 5,
+      /* stallDurationSeconds= */ 2,
+      /* retryNumber= */ 1,
+    ]);
+
+    // Second and last retry.
+    implementation.wallSeconds = 3;
+    detector.poll();
+    expect(onStall).toHaveBeenCalledOnceMoreWith([
+      /* stalledWith= */ 5,
+      /* stallDurationSeconds= */ 3,
+      /* retryNumber= */ 2,
+    ]);
+
+    // The retry limit has been reached, so the same stall should not
+    // trigger any more attempts.
     implementation.wallSeconds = 30;
     detector.poll();
-    implementation.wallSeconds = 40;
+    expect(onStall).not.toHaveBeenCalled();
+  });
+
+  it('resets the retry limit when progress is made', () => {
+    implementation.shouldMakeProgress = true;
+    implementation.presentationSeconds = 5;
+    implementation.wallSeconds = 0;
     detector.poll();
-    expect(onEvent).toHaveBeenCalled();
-    expect(onStall).toHaveBeenCalled();
+
+    // Exhaust all the attempts for the first stall.
+    for (const time of [1, 2, 3, 30]) {
+      implementation.wallSeconds = time;
+      detector.poll();
+    }
+    expect(onStall).toHaveBeenCalledTimes(
+        1 + shaka.media.StallDetector.MAX_STALL_RETRIES);
+    onStall.calls.reset();
+
+    // Progress resets the limit, so a new stall triggers again.
+    implementation.presentationSeconds = 10;
+    implementation.wallSeconds = 31;
+    detector.poll();
+    expect(onStall).not.toHaveBeenCalled();
+
+    implementation.wallSeconds = 32;
+    detector.poll();
+    expect(onStall).toHaveBeenCalledOnceMoreWith([
+      /* stalledWith= */ 10,
+      /* stallDurationSeconds= */ 1,
+      /* retryNumber= */ 0,
+    ]);
   });
 });

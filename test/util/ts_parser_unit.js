@@ -49,9 +49,9 @@ describe('TsParser', () => {
     expect(metadata).toBeTruthy();
     expect(metadata.length).toBe(2);
     const firstMetadata = metadata[0];
-    expect(firstMetadata.frames.length).toBe(2);
+    expect(firstMetadata.frames.length).toBe(3);
     const secondMetadata = metadata[1];
-    expect(secondMetadata.frames.length).toBe(2);
+    expect(secondMetadata.frames.length).toBe(3);
   });
 
   it('get the start time from a TS segment', async () => {
@@ -62,6 +62,27 @@ describe('TsParser', () => {
     const starttime = new shaka.util.TsParser().parse(tsSegment)
         .getStartTime(ContentType.AUDIO);
     expect(starttime).toBeCloseTo(90019.586, 3);
+  });
+
+  it('gets the start time from TS PES headers', async () => {
+    const responses = await Promise.all([
+      Util.fetch('/base/test/test/assets/video.ts'),
+      Util.fetch('/base/test/test/assets/audio.ts'),
+    ]);
+    const videoSegment = BufferUtils.toUint8(responses[0]);
+    const audioSegment = BufferUtils.toUint8(responses[1]);
+
+    const videoStartTime = new shaka.util.TsParser().parse(videoSegment)
+        .getStartTime(ContentType.VIDEO);
+    const headerVideoStartTime = new shaka.util.TsParser().parse(videoSegment)
+        .getStartTimeFromPesHeaders(ContentType.VIDEO);
+    expect(headerVideoStartTime).toBe(videoStartTime);
+
+    const audioStartTime = new shaka.util.TsParser().parse(audioSegment)
+        .getStartTime(ContentType.AUDIO);
+    const headerAudioStartTime = new shaka.util.TsParser().parse(audioSegment)
+        .getStartTimeFromPesHeaders(ContentType.AUDIO);
+    expect(headerAudioStartTime).toBe(audioStartTime);
   });
 
   it('get the codecs from a TS segment', async () => {

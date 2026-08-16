@@ -53,10 +53,10 @@ shaka.extern.RetryParameters;
 
 /**
  * @typedef {{
- *   uris: !Array.<string>,
+ *   uris: !Array<string>,
  *   method: string,
  *   body: ?BufferSource,
- *   headers: !Object.<string, string>,
+ *   headers: !Object<string, string>,
  *   allowCrossSiteCredentials: boolean,
  *   retryParameters: !shaka.extern.RetryParameters,
  *   licenseRequestType: ?string,
@@ -68,7 +68,8 @@ shaka.extern.RetryParameters;
  *   requestStartTime: (?number|undefined),
  *   timeToFirstByte: (?number|undefined),
  *   packetNumber: (?number|undefined),
- *   contentType: (?string|undefined)
+ *   contentType: (?string|undefined),
+ *   attempt: number,
  * }}
  *
  * @description
@@ -76,14 +77,14 @@ shaka.extern.RetryParameters;
  * that may alter the request, then it is passed to a scheme plugin which
  * performs the actual operation.
  *
- * @property {!Array.<string>} uris
+ * @property {!Array<string>} uris
  *   An array of URIs to attempt.  They will be tried in the order they are
  *   given.
  * @property {string} method
  *   The HTTP method to use for the request.
  * @property {?BufferSource} body
  *   The body of the request.
- * @property {!Object.<string, string>} headers
+ * @property {!Object<string, string>} headers
  *   A mapping of headers for the request.  e.g.: {'HEADER': 'VALUE'}
  * @property {boolean} allowCrossSiteCredentials
  *   Make requests with credentials.  This will allow cookies in cross-site
@@ -117,6 +118,8 @@ shaka.extern.RetryParameters;
  *   A number representing the order the packet within the request.
  * @property {(?string|undefined)} contentType
  *   Content type (e.g. 'video', 'audio' or 'text', 'image')
+ * @property {number} attempt
+ *   Current request attempt, 0-based.
  * @exportDoc
  */
 shaka.extern.Request;
@@ -128,9 +131,10 @@ shaka.extern.Request;
  *   originalUri: string,
  *   data: BufferSource,
  *   status: (number|undefined),
- *   headers: !Object.<string, string>,
+ *   headers: !Object<string, string>,
  *   timeMs: (number|undefined),
- *   fromCache: (boolean|undefined)
+ *   fromCache: (boolean|undefined),
+ *   originalRequest: shaka.extern.Request
  * }}
  *
  * @description
@@ -148,7 +152,7 @@ shaka.extern.Request;
  *   The body of the response.
  * @property {(number|undefined)} status
  *   The response HTTP status code.
- * @property {!Object.<string, string>} headers
+ * @property {!Object<string, string>} headers
  *   A map of response headers, if supported by the underlying protocol.
  *   All keys should be lowercased.
  *   For HTTP/HTTPS, may not be available cross-origin.
@@ -158,6 +162,8 @@ shaka.extern.Request;
  * @property {(boolean|undefined)} fromCache
  *   Optional. If true, this response was from a cache and should be ignored
  *   for bandwidth estimation.
+ * @property {shaka.extern.Request} originalRequest
+ *   The original request that gave rise to this response.
  *
  * @exportDoc
  */
@@ -188,18 +194,18 @@ shaka.extern.SchemePlugin;
 
 /**
  * @typedef {{
-*   minBytesForProgressEvents: (number|undefined)
-* }}
-*
-* @description
-*   Defines configuration object to use by SchemePlugins.
-*
-* @property {(number|undefined)} minBytesForProgressEvents
-*   Defines minimum number of bytes that should be use to emit progress event,
-*   if possible.
-*
-* @exportDoc
-*/
+ *   minBytesForProgressEvents: (number|undefined)
+ * }}
+ *
+ * @description
+ *   Defines configuration object to use by SchemePlugins.
+ *
+ * @property {(number|undefined)} minBytesForProgressEvents
+ *   Defines minimum number of bytes that should be use to emit progress event,
+ *   if possible.
+ *
+ * @exportDoc
+ */
 shaka.extern.SchemePluginConfig;
 
 
@@ -221,7 +227,7 @@ shaka.extern.ProgressUpdated;
 
 
 /**
- * @typedef {function(!Object.<string, string>)}
+ * @typedef {function(!Object<string, string>)}
  *
  * @description
  * A callback function to handle headers received events through networking
@@ -245,7 +251,7 @@ shaka.extern.HeadersReceived;
  * @property {shaka.net.NetworkingEngine.AdvancedRequestType=} type
  *   The advanced type
  * @property {shaka.extern.Stream=} stream
- *   The duration of the segment in seconds
+ *   A reference to the Stream object
  * @property {shaka.media.SegmentReference=} segment
  *   The request's segment reference
  * @property {boolean=} isPreload
@@ -263,6 +269,9 @@ shaka.extern.RequestContext;
  * provide additional information about the request. A request filter can run
  * asynchronously by returning a promise; in this case, the request will not be
  * sent until the promise is resolved.
+ * If a request is attempted multiple times, this filter will be called for each
+ * attempt. You can check the attempt parameter on the request object to see
+ * which attempt this filter is being called on.
  *
  * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
  *                     shaka.extern.Request,

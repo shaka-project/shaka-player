@@ -18,9 +18,9 @@ For more info about this video, see https://github.com/Axinom/dash-test-vectors
     </AdaptationSet>
   </Period>
   <Period id="1" duration="PT0H00M16.000S">
-    <EventStream schemeIdUri="urn:mpeg:dash:event:alternativeMPD:2022" timescale="10000000">
+    <EventStream schemeIdUri="urn:mpeg:dash:event:alternativeMPD:replace:2025" timescale="10000000">
       <Event presentationTime="0" duration="20000000" id="1">
-        <AlternativeMPD uri="/base/test/test/assets/dash-multi-codec/dash.mpd" mode="replace" />
+        <ReplacePresentation url="/base/test/test/assets/dash-multi-codec/dash.mpd"/>
       </Event>
     </EventStream>
     <AdaptationSet segmentAlignment="true" group="1" maxWidth="1920" maxHeight="1080" maxFrameRate="24" par="16:9" lang="und">

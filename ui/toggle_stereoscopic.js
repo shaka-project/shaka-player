@@ -10,8 +10,8 @@ goog.provide('shaka.ui.ToggleStereoscopicButton');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -38,12 +38,10 @@ shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
     this.toggleStereoscopicButton_.classList.add('shaka-tooltip');
     this.toggleStereoscopicButton_.ariaPressed = 'false';
 
-    /** @private {!HTMLElement} */
-    this.toggleStereoscopicIcon_ = shaka.util.Dom.createHTMLElement('i');
-    this.toggleStereoscopicIcon_.classList.add('material-icons-round');
-    this.toggleStereoscopicIcon_.textContent =
-        shaka.ui.Enums.MaterialDesignIcons.TOGGLE_STEREOSCOPIC;
-    this.toggleStereoscopicButton_.appendChild(this.toggleStereoscopicIcon_);
+    /** @private {!shaka.ui.Icon} */
+    this.toggleStereoscopicIcon_ = new shaka.ui.Icon(
+        this.toggleStereoscopicButton_,
+        shaka.ui.Enums.MaterialDesignSVGIcons['TOGGLE_STEREOSCOPIC']);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -60,51 +58,38 @@ shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
     this.parent.appendChild(this.toggleStereoscopicButton_);
 
     // Setup strings in the correct language
-    this.updateLocalizedStrings_();
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateLocalizedStrings_();
-        });
+    this.updateLocalizedStrings();
 
     const vr = this.controls.getVR();
 
     this.eventManager.listen(this.toggleStereoscopicButton_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       vr.toggleStereoscopicMode();
+      this.toggleStereoscopicButton_.ariaPressed =
+          vr.isStereoscopicModeEnabled() ? 'true' : 'false';
     });
 
     this.eventManager.listen(vr, 'vrstatuschanged', () => {
-      this.checkAvailability_();
+      this.checkAvailability();
     });
 
-    this.checkAvailability_();
+    this.checkAvailability();
   }
 
-
-  /**
-   * @private
-   */
-  checkAvailability_() {
+  /** @override */
+  checkAvailability() {
     shaka.ui.Utils.setDisplay(this.toggleStereoscopicButton_,
-        this.controls.isPlayingVR());
+        this.controls.isPlayingVR() && !this.isSubMenuOpened);
   }
 
-
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
-
-    this.toggleStereoscopicButton_.ariaLabel =
-        this.localization.resolve(LocIds.TOGGLE_STEREOSCOPIC);
-    this.toggleStereoscopicNameSpan_.textContent =
-        this.localization.resolve(LocIds.TOGGLE_STEREOSCOPIC);
+    const label = this.localization.resolve(LocIds.TOGGLE_STEREOSCOPIC);
+    this.toggleStereoscopicButton_.ariaLabel = label;
+    this.toggleStereoscopicNameSpan_.textContent = label;
   }
 };
 

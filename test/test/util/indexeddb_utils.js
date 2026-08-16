@@ -18,7 +18,7 @@ shaka.test.IndexedDBUtils = class {
    * @param {number} version
    * @param {function(IDBDatabase)} upgrade
    *
-   * @return {!Promise.<IDBDatabase>}
+   * @return {!Promise<IDBDatabase>}
    */
   static async makeConnection(name, version, upgrade) {
     const wait = () => {
@@ -49,8 +49,8 @@ shaka.test.IndexedDBUtils = class {
    * @return {!Promise}
    */
   static deleteDB(name) {
-    /** @type {!shaka.util.PublicPromise} */
-    const p = new shaka.util.PublicPromise();
+    /** @type {!Promise.PromiseWithResolvers} */
+    const p = Promise.withResolvers();
 
     const goaway = window.indexedDB.deleteDatabase(name);
     goaway.onsuccess = (e) => {
@@ -60,7 +60,7 @@ shaka.test.IndexedDBUtils = class {
       p.reject();
     };
 
-    return p;
+    return p.promise;
   }
 
   /**
@@ -68,14 +68,14 @@ shaka.test.IndexedDBUtils = class {
    * @param {number} version
    * @param {function(IDBDatabase)} upgrade
    *
-   * @return {!Promise.<IDBDatabase>}
+   * @return {!Promise<IDBDatabase>}
    * @private
    */
   static dbOpenNew_(name, version, upgrade) {
     let upgraded = false;
 
-    /** @type {!shaka.util.PublicPromise} */
-    const p = new shaka.util.PublicPromise();
+    /** @type {!Promise.PromiseWithResolvers} */
+    const p = Promise.withResolvers();
 
     const open = window.indexedDB.open(name, version);
     open.onerror = (e) => {
@@ -97,7 +97,7 @@ shaka.test.IndexedDBUtils = class {
       upgraded = true;
     };
 
-    return p;
+    return p.promise;
   }
 
   /**
@@ -105,11 +105,11 @@ shaka.test.IndexedDBUtils = class {
    * not exist, the returned promise will be rejected.
    *
    * @param {string} name
-   * @return {!Promise.<IDBDatabase>}
+   * @return {!Promise<IDBDatabase>}
    */
   static open(name) {
-    /** @type {!shaka.util.PublicPromise} */
-    const p = new shaka.util.PublicPromise();
+    /** @type {!Promise.PromiseWithResolvers} */
+    const p = Promise.withResolvers();
 
     const open = window.indexedDB.open(name);
     open.onerror = (e) => {
@@ -119,6 +119,6 @@ shaka.test.IndexedDBUtils = class {
       p.resolve(open.result);
     };
 
-    return p;
+    return p.promise;
   }
 };

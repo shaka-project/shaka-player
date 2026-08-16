@@ -28,13 +28,16 @@
 shaka.extern.AbrManager = class {
   constructor() {}
 
+  /* eslint-disable @stylistic/max-len */
   /**
    * Initializes the AbrManager.
    *
    * @param {shaka.extern.AbrManager.SwitchCallback} switchCallback
+   * @param {shaka.extern.AbrManager.DisableStreamCallback} disableStreamCallback
    * @exportDoc
    */
-  init(switchCallback) {}
+  /* eslint-enable @stylistic/max-len */
+  init(switchCallback, disableStreamCallback) {}
 
   /**
    * Stops any background timers and frees any objects held by this instance.
@@ -52,19 +55,25 @@ shaka.extern.AbrManager = class {
 
   /**
    * Updates manager's variants collection.
+   * Returns true if the variants are updated. Returns false if the variants
+   * are equal.
    *
-   * @param {!Array.<!shaka.extern.Variant>} variants
+   * @param {!Array<!shaka.extern.Variant>} variants
+   * @param {boolean} isLowLatency
+   * @return {boolean}
    * @exportDoc
    */
-  setVariants(variants) {}
+  setVariants(variants, isLowLatency) {}
 
   /**
    * Chooses one variant to switch to.  Called by the Player.
    *
+   * @param {boolean=} preferFastSwitching If not provided meant "avoid fast
+   * switching if possible".
    * @return {shaka.extern.Variant}
    * @exportDoc
    */
-  chooseVariant() {}
+  chooseVariant(preferFastSwitching) {}
 
   /**
    * Enables automatic Variant choices from the last ones passed to setVariants.
@@ -93,9 +102,11 @@ shaka.extern.AbrManager = class {
    *     to another stream.
    * @param {shaka.extern.Request=} request
    *     A reference to the request
+   * @param {shaka.extern.RequestContext=} context
+   *     A reference to the request context
    * @exportDoc
    */
-  segmentDownloaded(deltaTimeMs, numBytes, allowSwitch, request) {}
+  segmentDownloaded(deltaTimeMs, numBytes, allowSwitch, request, context) {}
 
   /**
    * Notifies the ABR that it is a time to suggest new streams. This is used by
@@ -171,6 +182,22 @@ shaka.extern.AbrManager = class {
  * @exportDoc
  */
 shaka.extern.AbrManager.SwitchCallback;
+
+
+/**
+ * A callback into the Player that should be called when the AbrManager decides
+ * that the currently playing stream should be temporarily restricted.
+ *
+ * The first argument specifies the type of stream ('audio' or 'video'),
+ * and the second argument specifies the duration of the restriction in seconds.
+ *
+ * The exact behavior of the restriction (e.g. temporarily disabling the stream
+ * or otherwise penalizing it) is implementation-defined by the caller.
+ *
+ * @typedef {function(string, number)}
+ * @exportDoc
+ */
+shaka.extern.AbrManager.DisableStreamCallback;
 
 
 /**

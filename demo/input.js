@@ -98,10 +98,10 @@ shakaDemo.Input = class {
   }
 
   /**
-  * @param {string} prefix
-  * @return {string}
-  * @private
-  */
+   * @param {string} prefix
+   * @return {string}
+   * @private
+   */
   static generateNewId_(prefix) {
     const idNumber = shakaDemo.Input.lastId_;
     shakaDemo.Input.lastId_ += 1;
@@ -122,7 +122,7 @@ shakaDemo.SelectInput = class extends shakaDemo.Input {
    * @param {!shakaDemo.InputContainer} parentContainer
    * @param {?string} name
    * @param {function(!HTMLInputElement, !shakaDemo.Input)} onChange
-   * @param {!Object.<string, string>} values
+   * @param {!Object<string, string>} values
    */
   constructor(parentContainer, name, onChange, values) {
     super(parentContainer, 'select', 'div', 'label', onChange);
@@ -141,7 +141,7 @@ shakaDemo.SelectInput = class extends shakaDemo.Input {
       option.textContent = values[value];
       option.value = value;
       this.input_.appendChild(option);
-    }
+    };
   }
 };
 
@@ -203,7 +203,7 @@ shakaDemo.DatalistInput = class extends shakaDemo.TextInput {
    * @param {!shakaDemo.InputContainer} parentContainer
    * @param {string} name
    * @param {function(!HTMLInputElement, !shakaDemo.Input)} onChange
-   * @param {!Array.<string>} values
+   * @param {!Array<string>} values
    */
   constructor(parentContainer, name, onChange, values) {
     super(parentContainer, name, onChange, /* isTextArea= */ false);
@@ -267,7 +267,7 @@ shakaDemo.NumberInput = class extends shakaDemo.TextInput {
     if (canBeDecimal) {
       // strictly allow for 0.xxxx decimals
       this.input_.pattern += '?(0(?=.))?';
-      // TODO: Handle commas as decimal delimeters, for appropriate regions?
+      // TODO: Handle commas as decimal delimiters, for appropriate regions?
       this.input_.pattern += '(.[0-9]+)?';
     }
 

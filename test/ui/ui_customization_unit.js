@@ -54,10 +54,14 @@ describe('UI Customization', () => {
   });
 
   it('only the specified overflow menu buttons are created', async () => {
-    const config = {overflowMenuButtons: ['cast']};
+    const config = {
+      controlPanelElements: ['overflow_menu'],
+      overflowMenuButtons: ['loop'],
+      customContextMenu: false,
+    };
     await UiUtils.createUIThroughAPI(container, video, config, canvas);
 
-    UiUtils.confirmElementFound(container, 'shaka-cast-button');
+    UiUtils.confirmElementFound(container, 'shaka-loop-button');
 
     UiUtils.confirmElementMissing(container, 'shaka-caption-button');
   });
@@ -73,45 +77,26 @@ describe('UI Customization', () => {
     UiUtils.confirmElementFound(container, 'shaka-seek-bar');
   });
 
-  it('big play button only created when configured', async () => {
+  it('big buttons only created when configured', async () => {
+    const config = {
+      bigButtons: [],
+    };
     const ui = await UiUtils.createUIThroughAPI(
-        container, video, {addBigPlayButton: false}, canvas);
-    UiUtils.confirmElementMissing(container, 'shaka-play-button-container');
-    UiUtils.confirmElementMissing(container, 'shaka-play-button');
+        container, video, config, canvas);
+    UiUtils.confirmElementMissing(container, 'shaka-big-buttons-container');
     await ui.destroy();
 
+    config.bigButtons.push('play_pause');
     await UiUtils.createUIThroughAPI(
-        container, video, {addBigPlayButton: true}, canvas);
-    UiUtils.confirmElementFound(container, 'shaka-play-button-container');
-    UiUtils.confirmElementFound(container, 'shaka-play-button');
-  });
-
-  it('settings menus are lower when seek bar is absent', async () => {
-    const config = {addSeekBar: false};
-    await UiUtils.createUIThroughAPI(container, video, config, canvas);
-
-    function confirmLowPosition(className) {
-      const elements =
-        container.getElementsByClassName(className);
-      expect(elements.length).toBe(1);
-      expect(
-          elements[0].classList.contains('shaka-low-position')).toBe(true);
-    }
-
-    UiUtils.confirmElementMissing(container, 'shaka-seek-bar');
-
-    confirmLowPosition('shaka-overflow-menu');
-    confirmLowPosition('shaka-resolutions');
-    confirmLowPosition('shaka-audio-languages');
-    confirmLowPosition('shaka-text-languages');
-    confirmLowPosition('shaka-playback-rates');
+        container, video, config, canvas);
+    UiUtils.confirmElementFound(container, 'shaka-big-buttons-container');
   });
 
   it('controls are created in specified order', async () => {
     const config = {
       controlPanelElements: [
         'mute',
-        'time_and_duration',
+        'loop',
         'fullscreen',
       ],
     };
@@ -130,7 +115,7 @@ describe('UI Customization', () => {
     expect( /** @type {!HTMLElement} */ (buttons[0]).className)
         .toContain('shaka-mute-button');
     expect( /** @type {!HTMLElement} */ (buttons[1]).className)
-        .toContain('shaka-current-time');
+        .toContain('shaka-loop-button');
     expect( /** @type {!HTMLElement} */ (buttons[2]).className)
         .toContain('shaka-fullscreen');
   });

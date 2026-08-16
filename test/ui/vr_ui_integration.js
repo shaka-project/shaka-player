@@ -29,7 +29,7 @@ describe('VR UI', () => {
   let ui;
   /** @type {!shaka.ui.Controls} */
   let controls;
-  /** @type {shakaNamespaceType} */
+  /** @type {shaka} */
   let compiledShaka;
   /** @type {boolean} */
   let canPlayVR;

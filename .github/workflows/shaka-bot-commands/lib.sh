@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC
+# Copyright 2016 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -79,7 +79,10 @@ function parse_command() {
     echo "Parsing comment.  Line: \"$COMMENT_LINE\""
 
     # Tokenize the line by whitespace.
-    local TOKENS=( $COMMENT_LINE )
+    # Security fix: use read -ra for safe word-splitting to prevent
+    # glob expansion from attacker-controlled comment content.
+    local TOKENS
+    IFS=' ' read -ra TOKENS <<< "$COMMENT_LINE"
 
     local INDEX
     for (( INDEX=0; INDEX < ${#TOKENS[@]}; INDEX++ )); do

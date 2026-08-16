@@ -22,3 +22,9 @@ function ManagedMediaSource() {}
  * @return {boolean}
  */
 ManagedMediaSource.isTypeSupported = function(type) {};
+
+/**
+ * @constructor
+ * @extends {SourceBuffer}
+ */
+function ManagedSourceBuffer() {}

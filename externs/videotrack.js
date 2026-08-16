@@ -11,6 +11,29 @@
  * @externs
  */
 
+// See: https://github.com/WebKit/explainers/tree/main/TrackConfiguration
+/** @constructor */
+function VideoTrackConfiguration() {}
+
+/** @type {string} */
+VideoTrackConfiguration.prototype.codec;
+
+/** @type {number} */
+VideoTrackConfiguration.prototype.bitrate;
+
+/** @type {number} */
+VideoTrackConfiguration.prototype.framerate;
+
+/** @type {number} */
+VideoTrackConfiguration.prototype.width;
+
+/** @type {number} */
+VideoTrackConfiguration.prototype.height;
+
+/** @type {VideoColorSpace} */
+VideoTrackConfiguration.prototype.colorSpace;
+
+
 /** @constructor */
 function VideoTrack() {}
 
@@ -32,9 +55,12 @@ VideoTrack.prototype.language;
 /** @type {SourceBuffer} */
 VideoTrack.prototype.sourceBuffer;
 
+/** @type {?VideoTrackConfiguration} */
+VideoTrack.prototype.configuration;
+
 
 /**
- * @extends {IArrayLike.<VideoTrack>}
+ * @extends {IArrayLike<VideoTrack>}
  * @extends {EventTarget}
  * @interface
  */

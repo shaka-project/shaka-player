@@ -11,9 +11,10 @@
 
 /**
  * @typedef {{
- *   loadTimes: !Array.<number>,
+ *   loadTimes: !Array<number>,
  *   averageLoadTime: number,
  *   started: number,
+ *   overlayAds: number,
  *   playedCompletely: number,
  *   skipped: number,
  *   errors: number
@@ -27,7 +28,9 @@
  * @property {number} averageLoadTime
  *   The average time it took to get the final manifest.
  * @property {number} started
- *   The number of ads started.
+ *   The number of ads started (linear and overlays ads).
+ * @property {number} overlayAds
+ *   The number of overlay ads started.
  * @property {number} playedCompletely
  *   The number of ads played completely.
  * @property {number} skipped
@@ -60,9 +63,11 @@ shaka.extern.AdCuePoint;
 /**
  * @typedef {{
  *   id: ?string,
+ *   groupId: ?string,
  *   startTime: number,
  *   endTime: ?number,
  *   uri: string,
+ *   mimeType: ?string,
  *   isSkippable: boolean,
  *   skipOffset: ?number,
  *   skipFor: ?number,
@@ -72,7 +77,15 @@ shaka.extern.AdCuePoint;
  *   once: boolean,
  *   pre: boolean,
  *   post: boolean,
- *   timelineRange: boolean
+ *   timelineRange: boolean,
+ *   resolutionTimeOffset: (number|undefined),
+ *   loop: boolean,
+ *   overlay: ?shaka.extern.AdPositionInfo,
+ *   displayOnBackground: boolean,
+ *   currentVideo: ?shaka.extern.AdPositionInfo,
+ *   background: ?string,
+ *   clickThroughUrl: ?string,
+ *   tracking: ?shaka.extern.AdTrackingEvent,
  * }}
  *
  * @description
@@ -80,6 +93,8 @@ shaka.extern.AdCuePoint;
  *
  * @property {?string} id
  *   The id of the interstitial.
+ * @property {?string} groupId
+ *   The group id of the interstitial.
  * @property {number} startTime
  *   The start time of the interstitial.
  * @property {?number} endTime
@@ -87,6 +102,8 @@ shaka.extern.AdCuePoint;
  * @property {string} uri
  *   The uri of the interstitial, can be any type that
  *   ShakaPlayer supports (either in MSE or src=)
+ * @property {?string} mimeType
+ *   The mimeType of the interstitial if known.
  * @property {boolean} isSkippable
  *   Indicate if the interstitial is skippable.
  * @property {?number} skipOffset
@@ -116,8 +133,136 @@ shaka.extern.AdCuePoint;
  * @property {boolean} timelineRange
  *   Indicates whether the  interstitial should be presented in a timeline UI
  *   as a single point or as a range.
+ * @property {(number|undefined)} resolutionTimeOffset
+ *   The offset, in seconds before <code>startTime</code>, at which the
+ *   interstitial's resources (e.g. an HLS X-ASSET-LIST) may be resolved and
+ *   preloaded. This maps to the DASH <code>earliestResolutionTimeOffset</code>
+ *   attribute and to the HLS <code>com.apple.hls.preload</code> EXT-X-DATERANGE
+ *   mechanism (RFC 8216bis Appendix F). When it is <code>undefined</code> or
+ *   <code>0</code>, the <code>interstitialPreloadAheadTime</code> configuration
+ *   value is used instead.
+ * @property {boolean} loop
+ *   Indicates that the interstitials should play in loop.
+ *   Only applies if the interstitials is an overlay.
+ *   Only supported when using multiple video elements for interstitials.
+ * @property {?shaka.extern.AdPositionInfo} overlay
+ *   Indicates the characteristics of the overlay
+ *   Only supported when using multiple video elements for interstitials.
+ * @property {boolean} displayOnBackground
+ *   Indicates if we should display on background, shrinking the current video.
+ * @property {?shaka.extern.AdPositionInfo} currentVideo
+ *   Indicates the characteristics of the current video.
+ *   Only set if any feature changes.
+ * @property {?string} background
+ *   Specifies the background, the value can be any value of the CSS background
+ *   property.
+ * @property {?string} clickThroughUrl
+ *   Indicate the URL when the ad is clicked.
+ * @property {?shaka.extern.AdTrackingEvent} tracking
+ *   Contains the tracking events that should be sent.
+ * @exportDoc
  */
 shaka.extern.AdInterstitial;
+
+
+/**
+ * @typedef {{
+ *   viewport: {x: number, y: number},
+ *   topLeft: {x: number, y: number},
+ *   size: {x: number, y: number}
+ * }}
+ *
+ * @description
+ * Contains the coordinates of a position info
+ *
+ * @property {{x: number, y: number}} viewport
+ *   The viewport in pixels.
+ * @property {{x: number, y: number}} topLeft
+ *   The topLeft in pixels.
+ * @property {{x: number, y: number}} size
+ *   The size in pixels.
+ * @exportDoc
+ */
+shaka.extern.AdPositionInfo;
+
+
+/**
+ * @typedef {{
+ *   startTime: number,
+ *   endTime: ?number,
+ *   tracking: ?shaka.extern.AdTrackingEvent,
+ *   position: number,
+ *   sequenceLength: number,
+ * }}
+ *
+ * @description
+ * Contains the Tracking info.
+ *
+ * @property {number} startTime
+ *   The start time of the tracking info.
+ * @property {?number} endTime
+ *   The end time of the tracking info.
+ * @property {?shaka.extern.AdTrackingEvent} tracking
+ *   Contains the tracking events that should be sent.
+ * @property {number} position
+ *   Returns the position of the tracking.
+ * @property {number} sequenceLength
+ *   The total number of trackings.
+ * @exportDoc
+ */
+shaka.extern.AdTrackingInfo;
+
+
+/**
+ * @typedef {{
+ *   impression: ?Array<string>,
+ *   clickTracking: ?Array<string>,
+ *   start: ?Array<string>,
+ *   firstQuartile: ?Array<string>,
+ *   midpoint: ?Array<string>,
+ *   thirdQuartile: ?Array<string>,
+ *   complete: ?Array<string>,
+ *   skip: ?Array<string>,
+ *   error: ?Array<string>,
+ *   resume: ?Array<string>,
+ *   pause: ?Array<string>,
+ *   mute: ?Array<string>,
+ *   unmute: ?Array<string>,
+ * }}
+ *
+ * @description
+ * Contains the Ad tracking events.
+ *
+ * @property {?Array<string>} impression
+ *   When the impression of the ad occurs.
+ * @property {?Array<string>} clickTracking
+ *   When the click through component of an ad is activated.
+ * @property {?Array<string>} start
+ *   When the start of the ad occurs.
+ * @property {?Array<string>} firstQuartile
+ *   When 25% of the ad was played.
+ * @property {?Array<string>} midpoint
+ *   When 50% of the ad was played.
+ * @property {?Array<string>} thirdQuartile
+ *   When 75% of the ad was played.
+ * @property {?Array<string>} complete
+ *   When 100% of the ad was played to the end.
+ * @property {?Array<string>} skip
+ *   When a user action has caused the ad to be skipped.
+ * @property {?Array<string>} error
+ *  When an error has occurred during the presentation of an ad.
+ * @property {?Array<string>} resume
+ *  When a user action has caused the ad to begin again after previously being
+ *  paused or stopped.
+ * @property {?Array<string>} pause
+ *  When a user action has caused the ad to be paused.
+ * @property {?Array<string>} mute
+ *  When a user action has caused the ad to be muted.
+ * @property {?Array<string>} unmute
+ *  When a user action has caused the ad to be unmuted.
+ * @exportDoc
+ */
+shaka.extern.AdTrackingEvent;
 
 
 /**
@@ -134,6 +279,12 @@ shaka.extern.IAdManager = class extends EventTarget {
   setLocale(locale) {}
 
   /**
+   * @param {!HTMLElement} clientSideAdContainer
+   * @param {!HTMLElement} serverSideAdContainer
+   */
+  setContainers(clientSideAdContainer, serverSideAdContainer) {}
+
+  /**
    * Called by the Player to provide an updated configuration any time it
    * changes.
    * Must be called at least once before init*().
@@ -146,60 +297,25 @@ shaka.extern.IAdManager = class extends EventTarget {
 
   onAssetUnload() {}
 
-  /**
-   * @param {?HTMLElement} adContainer
-   * @param {!shaka.Player} basePlayer
-   * @param {!HTMLMediaElement} baseVideo
-   */
-  initInterstitial(adContainer, basePlayer, baseVideo) {}
-
-  /**
-   * @param {!HTMLElement} adContainer
-   * @param {!HTMLMediaElement} video
-   * @param {?google.ima.AdsRenderingSettings} adsRenderingSettings
-   */
-  initClientSide(adContainer, video, adsRenderingSettings) {}
+  // IMA SDK Client Side
 
   /**
    * @param {!google.ima.AdsRequest} imaRequest
+   * @param {?google.ima.AdsRenderingSettings} adsRenderingSettings
    */
-  requestClientSideAds(imaRequest) {}
+  requestClientSideAds(imaRequest, adsRenderingSettings) {}
 
   /**
    * @param {!google.ima.AdsRenderingSettings} adsRenderingSettings
    */
   updateClientSideAdsRenderingSettings(adsRenderingSettings) {}
 
-  /**
-   * @param {!HTMLElement} adContainer
-   * @param {!shaka.net.NetworkingEngine} networkingEngine
-   * @param {!HTMLMediaElement} video
-   */
-  initMediaTailor(adContainer, networkingEngine, video) {}
-
-  /**
-   * @param {string} url
-   * @param {Object} adsParams
-   * @param {string=} backupUrl
-   * @return {!Promise.<string>}
-   */
-  requestMediaTailorStream(url, adsParams, backupUrl) {}
-
-  /**
-   * @param {string} url
-   */
-  addMediaTailorTrackingUrl(url) {}
-
-  /**
-   * @param {!HTMLElement} adContainer
-   * @param {!HTMLMediaElement} video
-   */
-  initServerSide(adContainer, video) {}
+  // IMA DAI SDK Server Side
 
   /**
    * @param {!google.ima.dai.api.StreamRequest} imaRequest
    * @param {string=} backupUrl
-   * @return {!Promise.<string>}
+   * @return {!Promise<string>}
    */
   requestServerSideStream(imaRequest, backupUrl) {}
 
@@ -208,13 +324,44 @@ shaka.extern.IAdManager = class extends EventTarget {
    */
   replaceServerSideAdTagParameters(adTagParameters) {}
 
-  /**
-   * @return {!Array.<!shaka.extern.AdCuePoint>}
-   */
-  getServerSideCuePoints() {}
+
+  // Media Tailor
 
   /**
-   * @return {!Array.<!shaka.extern.AdCuePoint>}
+   * @param {string} url
+   * @param {Object} adsParams
+   * @param {string=} backupUrl
+   * @return {!Promise<string>}
+   */
+  requestMediaTailorStream(url, adsParams, backupUrl) {}
+
+  /**
+   * @param {string} url
+   */
+  addMediaTailorTrackingUrl(url) {}
+
+  // Interstitials
+
+  /**
+   * @param {shaka.extern.AdInterstitial} interstitial
+   */
+  addCustomInterstitial(interstitial) {}
+
+  /**
+   * @param {string} url
+   * @return {!Promise}
+   */
+  addAdUrlInterstitial(url) {}
+
+  /**
+   * @return {shaka.Player}
+   */
+  getInterstitialPlayer() {}
+
+  // Utils
+
+  /**
+   * @return {!Array<!shaka.extern.AdCuePoint>}
    */
   getCuePoints() {}
 
@@ -223,11 +370,6 @@ shaka.extern.IAdManager = class extends EventTarget {
    * playing content, this will return an empty stats object.
    */
   getStats() {}
-
-  /**
-   * @param {shaka.extern.TimelineRegionInfo} region
-   */
-  onDashTimedMetadata(region) {}
 
   /**
    * Fired when the manifest is updated.
@@ -248,36 +390,27 @@ shaka.extern.IAdManager = class extends EventTarget {
   onCueMetadataChange(value) {}
 
   /**
-   * @param {!shaka.Player} basePlayer
-   * @param {!HTMLMediaElement} baseVideo
-   * @param {shaka.extern.HLSInterstitial} interstitial
-   */
-  onHLSInterstitialMetadata(basePlayer, baseVideo, interstitial) {}
-
-  /**
-   * @param {!shaka.Player} basePlayer
-   * @param {!HTMLMediaElement} baseVideo
-   * @param {shaka.extern.TimelineRegionInfo} region
-   */
-  onDASHInterstitialMetadata(basePlayer, baseVideo, region) {}
-
-  /**
-   * @param {shaka.extern.AdInterstitial} interstitial
-   */
-  addCustomInterstitial(interstitial) {}
-
-  /**
-   * @param {string} url
+   * @param {shaka.extern.HLSMetadata} metadata
    * @return {!Promise}
    */
-  addAdUrlInterstitial(url) {}
+  onHLSMetadata(metadata) {}
+
+  /**
+   * @param {shaka.extern.TimelineRegionInfo} region
+   */
+  onDASHMetadata(region) {}
+
+  /**
+   * @return {?shaka.extern.IAd}
+   */
+  getCurrentAd() {}
 };
 
 
 /**
  * A factory for creating the ad manager.
  *
- * @typedef {function():!shaka.extern.IAdManager}
+ * @typedef {function(shaka.Player):!shaka.extern.IAdManager}
  * @exportDoc
  */
 shaka.extern.IAdManager.Factory;
@@ -300,6 +433,11 @@ shaka.extern.IAd = class {
    * @return {boolean}
    */
   isClientRendering() {}
+
+  /**
+   * @return {boolean}
+   */
+  hasCustomClick() {}
 
   /**
    * @return {boolean}
@@ -415,6 +553,11 @@ shaka.extern.IAd = class {
    * @return {number}
    */
   getVastMediaWidth() {}
+
+  /**
+   * @return {string}
+   */
+  getVastAdId() {}
 
   /**
    * @return {string}

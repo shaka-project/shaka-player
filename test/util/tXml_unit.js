@@ -172,6 +172,11 @@ describe('tXml', () => {
       goog.asserts.assert(root, 'findChild should find element');
       expect(TXml.parseAttr(root, 'd', TXml.parseInt, 9)).toBe(9);
     });
+
+    it('returns default value for empty string attributes', () => {
+      const root = xml;
+      expect(TXml.parseAttr(root, 'c', TXml.parseInt, 42)).toBe(42);
+    });
   });
 
   describe('parseXmlString', () => {
@@ -203,6 +208,22 @@ describe('tXml', () => {
       ].join('\n');
       const doc = TXml.parseXmlString(xmlString, 'Document');
       expect(doc).toBeNull();
+    });
+
+    it('throws on deeply nested XML', () => {
+      // Build XML that is nested 600 levels deep, exceeding the 512 limit.
+      const depth = 600;
+      let xmlString = '<?xml version="1.0"?>';
+      for (let i = 0; i < depth; i++) {
+        xmlString += '<N>';
+      }
+      xmlString += 'deep';
+      for (let i = 0; i < depth; i++) {
+        xmlString += '</N>';
+      }
+      const expected = new Error('XML is too deeply nested');
+      expect(() => TXml.parseXmlString(xmlString, 'N'))
+          .toThrow(expected);
     });
   });
 
@@ -284,12 +305,19 @@ describe('tXml', () => {
     expect(TXml.parseDuration('P1Y1M1DT1H2M3S')).toBeGreaterThan(
         (60 * 60 * 24 * 365) + (60 * 60 * 24 * 28) + 90123 - 1);
 
+    // Supports case insensitive
+    expect(TXml.parseDuration('p1y1m1dt1h2m3s')).toBeLessThan(
+        (60 * 60 * 24 * 366) + (60 * 60 * 24 * 31) + 90123 + 1);
+    expect(TXml.parseDuration('p1y1m1dt1h2m3s')).toBeGreaterThan(
+        (60 * 60 * 24 * 365) + (60 * 60 * 24 * 28) + 90123 - 1);
+
     expect(TXml.parseDuration('PT')).toBe(0);
     expect(TXml.parseDuration('P')).toBe(0);
 
     // Error cases.
     expect(TXml.parseDuration('-PT3S')).toBeNull();
     expect(TXml.parseDuration('PT-3S')).toBeNull();
+    // cspell: disable-next-line
     expect(TXml.parseDuration('P1Sasdf')).toBeNull();
     expect(TXml.parseDuration('1H2M3S')).toBeNull();
     expect(TXml.parseDuration('123')).toBeNull();
@@ -518,31 +546,6 @@ describe('tXml', () => {
       {name: 'S', id: null, position: null,
         t: null, n: 42, attribute: null},
     ]);
-  });
-
-  it('txmlNodeToDomElement', () => {
-    const node = {
-      tagName: 'Event',
-      parent: null,
-      attributes: {
-        'presentationTime': '0',
-      },
-      children: [
-        {
-          tagName: 'scte35:Signal',
-          parent: null,
-          attributes: {},
-          children: [],
-        },
-      ],
-    };
-    node.children[0].parent = node;
-
-    const element = TXml.txmlNodeToDomElement(node);
-    expect(element.tagName).toBe('Event');
-    expect(element.getAttribute('presentationTime')).toBe('0');
-    const signal = element.firstElementChild;
-    expect(signal.tagName).toBe('scte35:Signal');
   });
 
   it('cloneNode', () => {

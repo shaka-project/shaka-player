@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
-# Copyright 2018 Google LLC
+# Copyright 2016 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# cspell:words Merin haryalye alasse
 
 """Generates Javascript to load compile-time localization data.
 
@@ -38,7 +40,14 @@ import shakaBuildHelpers
 
 _INDENTATION = '  '
 
-# These are Google's "Tier 1" languages as of April 2019.
+# These were Google's "Tier 1" languages as of April 2019.  Google-internal
+# language tiers have changed since, but to avoid expanding the UI library's
+# default size, we will not plan to update these defaults.  These are estimated
+# to cover around 5 billion speakers, or about 60% of the world's population as
+# of 2026.  There are many more translations available, and you can save space
+# in the bundle by removing translations you don't need.  You should definitely
+# consider using the `--locales` argument to the build scripts to customize
+# this to your intended audience.
 DEFAULT_LOCALES = [
     'ar',
     'de',

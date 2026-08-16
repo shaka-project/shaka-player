@@ -12,6 +12,8 @@ goog.require('shaka.log');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.FakeEvent');
+goog.require('shaka.util.Iterables');
 goog.requireType('shaka.ui.Controls');
 
 
@@ -34,7 +36,7 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
     /** @private {HTMLElement} */
     this.controlsContainer_ = this.controls.getControlsContainer();
 
-    /** @private {!Array.<shaka.extern.IUIElement>} */
+    /** @private {!Array<shaka.extern.IUIElement>} */
     this.children_ = [];
 
     /** @private {!HTMLElement} */
@@ -42,26 +44,81 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
     this.contextMenu_.classList.add('shaka-no-propagation');
     this.contextMenu_.classList.add('shaka-context-menu');
     this.contextMenu_.classList.add('shaka-hidden');
+    this.contextMenu_.setAttribute('role', 'menu');
 
     this.controlsContainer_.appendChild(this.contextMenu_);
 
     this.eventManager.listen(this.controlsContainer_, 'contextmenu', (e) => {
-      if (this.contextMenu_.classList.contains('shaka-hidden')) {
-        e.preventDefault();
+      if (this.controls.anySettingsMenusAreOpen()) {
+        this.controls.hideSettingsMenus();
+      }
+      // Force to close any submenu.
+      this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
 
-        const controlsLocation =
-            this.controlsContainer_.getBoundingClientRect();
-        this.contextMenu_.style.left = `${e.clientX - controlsLocation.left}px`;
-        this.contextMenu_.style.top = `${e.clientY - controlsLocation.top}px`;
+      const isDisplayed =
+          (element) => element.classList.contains('shaka-hidden') == false;
+      const Iterables = shaka.util.Iterables;
+      if (!Iterables.some(this.contextMenu_.childNodes, isDisplayed)) {
+        return;
+      }
 
-        shaka.ui.Utils.setDisplay(this.contextMenu_, true);
+      e.preventDefault();
+
+      const controlsRect = this.controlsContainer_.getBoundingClientRect();
+
+      const clickX = e.clientX;
+      const clickY = e.clientY;
+
+      const middleX = controlsRect.left + controlsRect.width / 2;
+      const openLeftwards = clickX > middleX;
+
+      if (openLeftwards) {
+        this.contextMenu_.style.left = 'auto';
+        this.contextMenu_.style.right = `${controlsRect.right - clickX}px`;
       } else {
-        shaka.ui.Utils.setDisplay(this.contextMenu_, false);
+        this.contextMenu_.style.left = `${clickX - controlsRect.left}px`;
+        this.contextMenu_.style.right = 'auto';
+      }
+
+      const middleY = controlsRect.top + controlsRect.height / 2;
+      const openUpwards = clickY > middleY;
+
+      let availableHeight;
+      if (openUpwards) {
+        this.contextMenu_.style.bottom = `${controlsRect.bottom - clickY}px`;
+        this.contextMenu_.style.top = 'auto';
+        availableHeight = clickY - controlsRect.top;
+      } else {
+        this.contextMenu_.style.bottom = 'auto';
+        this.contextMenu_.style.top = `${clickY - controlsRect.top}px`;
+        availableHeight = controlsRect.bottom - clickY;
+      }
+
+      if (availableHeight > 0) {
+        this.contextMenu_.style.maxHeight = `${availableHeight}px`;
+      }
+
+      shaka.ui.Utils.setDisplay(this.contextMenu_, true);
+    });
+
+    this.eventManager.listen(this.contextMenu_, 'click', () => {
+      const isSubMenuDisplayed = (element) => {
+        return !element.classList.contains('shaka-hidden') &&
+            element.classList.contains('shaka-sub-menu');
+      };
+      const Iterables = shaka.util.Iterables;
+      if (!Iterables.some(this.contextMenu_.childNodes, isSubMenuDisplayed)) {
+        this.closeMenu();
       }
     });
 
-    this.eventManager.listen(window, 'click', () => {
-      shaka.ui.Utils.setDisplay(this.contextMenu_, false);
+    // Close the context menu on any left-click outside the controls container
+    this.eventManager.listen(document, 'click', (e) => {
+      if (this.controlsContainer_ &&
+          !this.contextMenu_.classList.contains('shaka-hidden') &&
+          !this.controlsContainer_.contains(/** @type {Node} */ (e.target))) {
+        this.closeMenu();
+      }
     });
 
     this.createChildren_();
@@ -77,6 +134,14 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
 
     this.children_ = [];
     super.release();
+  }
+
+  /**
+   * @export
+   */
+  closeMenu() {
+    shaka.ui.Utils.setDisplay(this.contextMenu_, false);
+    this.controls.hideTextStylePreview();
   }
 
   /**
@@ -105,5 +170,5 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
   }
 };
 
-/** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
+/** @private {!Map<string, !shaka.extern.IUIElement.Factory>} */
 shaka.ui.ContextMenu.elementNamesToFactories_ = new Map();

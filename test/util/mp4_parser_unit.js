@@ -58,7 +58,7 @@ describe('Mp4Parser', () => {
     boxWithSampleDescription = new Uint8Array([
       0x00, 0x00, 0x00, 0x24, // size
       0x62, 0x30, 0x30, 0x33, // type
-      0x00, 0x00, 0x00, 0x02, // number of chidren
+      0x00, 0x00, 0x00, 0x02, // number of children
       0x00, 0x00, 0x00, 0x0C, // child [0] size
       0x62, 0x30, 0x33, 0x32, // child [0] type
       0x00, 0x11, 0x22, 0x33, // child [0] payload
@@ -70,7 +70,7 @@ describe('Mp4Parser', () => {
     partialBoxWithSampleDescription = new Uint8Array([
       0x00, 0x00, 0x00, 0x24, // size
       0x62, 0x30, 0x30, 0x33, // type
-      0x00, 0x00, 0x00, 0x02, // number of chidren
+      0x00, 0x00, 0x00, 0x02, // number of children
       0x00, 0x00, 0x00, 0x0C, // child [0] size
       0x62, 0x30, 0x33, 0x32, // child [0] type
       0x00, 0x11, 0x22, 0x33,  // child [0] payload
@@ -231,7 +231,7 @@ describe('Mp4Parser', () => {
           .box('b001', shaka.util.Mp4Parser.allData(
               (data) => {
                 payload = data;
-              })).parse(boxData);
+              }, /* clone= */ false)).parse(boxData);
 
       expect(payload.length).toBe(4);
       expect(payload[0]).toBe(0x00);

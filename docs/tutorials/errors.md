@@ -21,7 +21,7 @@ const player = new shaka.Player();
 await player.attach(video);
 
 // handle errors that occur after load
-player.addEventListener('error', (event) = handleError(event.detail));
+player.addEventListener('error', (event) => handleError(event.detail));
 
 // there are two options for catching errors that occur during load
 
@@ -73,15 +73,8 @@ const vodManifestNotFoundHandler = (event /* shaka.net.NetworkingEngine.RetryEve
       data[1] === 404 &&
       data[4] === shaka.net.NetworkingEngine.RequestType.MANIFEST
     ) {
-      // Throwing inside a retry callback will immediately stop retries
-      throw error;
-
-      // A proprietary error code can also be thrown
-      // throw new shaka.util.Error(
-      //   shaka.util.Error.Severity.CRITICAL,
-      //   shaka.util.Error.Category.NETWORK,
-      //   'RECOGNIZABLE_ERROR_MESSAGE'
-      // );
+      // preventDefault inside a retry callback will immediately stop retries
+      event.preventDefault();
     }
   }
 };

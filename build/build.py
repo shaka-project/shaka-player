@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2016 Google LLC
 #
@@ -28,8 +28,8 @@ by the given file.  So "-@networking" will remove all the networking plugins,
 and "-@ui" will remove the UI.
 
 The core library is always included so does not have to be listed.  The default
-is to use the name 'ui'; if no commands are given, it will build the complete
-build, including the UI.
+is to use the name 'experimental'; if no commands are given, it will build the
+complete build, including the UI.
 
 Examples:
   # Equivalent to +@complete
@@ -42,10 +42,15 @@ Examples:
 """
 
 import argparse
+import hashlib
+import json
 import logging
 import os
 import re
 import shutil
+import sys
+
+from contextlib import contextmanager
 
 import compiler
 import generateLocalizations
@@ -56,10 +61,6 @@ shaka_version = shakaBuildHelpers.calculate_version()
 
 common_closure_opts = [
     '--jscomp_error=*',
-
-    # Turn off complaints like:
-    #   "Private property foo_ is never modified, use the @const annotation"
-    '--jscomp_off=jsdocMissingConst',
 
     # Turn off complaints like:
     #   "Object is a reference type with no nullability modifier that is
@@ -191,6 +192,13 @@ class Build(object):
         return True
     return False
 
+  def has_transmuxer_proxy(self):
+    """Returns True if the transmuxer proxy is in the build."""
+    for path in self.include:
+      if path.endswith('transmuxer_proxy.js'):
+        return True
+    return False
+
   def generate_localizations(self, locales, force):
     localizations = compiler.GenerateLocalizations(locales)
     localizations.generate(force)
@@ -264,7 +272,63 @@ class Build(object):
 
     return True
 
-  def build_library(self, name, langout, locales, force, is_debug, skip_ts):
+  def build_worker_bundle(self, langout, force, is_debug):
+    """Compiles the transmuxer worker bundle.
+
+    Returns True on success; False on failure.
+    """
+    worker_build = Build()
+    if not worker_build.parse_build(['+@transmuxer-worker'], os.getcwd()):
+      return False
+    worker_build.add_closure()
+    if not worker_build.add_core():
+      return False
+
+    build_name = 'shaka-player.transmuxer-worker'
+    if is_debug:
+      build_name += '.debug'
+    closure = compiler.ClosureCompiler(worker_build.include, build_name)
+    closure.add_wrapper = False
+    closure.add_source_map = False
+
+    closure_opts = common_closure_opts + common_closure_defines
+    closure_opts += ['--language_out', langout]
+    if is_debug:
+      closure_opts += debug_closure_opts + debug_closure_defines
+    else:
+      closure_opts += release_closure_opts + release_closure_defines
+
+    closure_opts += [
+        '--dependency_mode=PRUNE',
+        '--entry_point=goog:shaka.transmuxer.TransmuxerWorker',
+        # Each transmuxer plugin registers itself at load time (side effect),
+        # so we must list them as entry points too.
+        '--entry_point=goog:shaka.transmuxer.AacTransmuxer',
+        '--entry_point=goog:shaka.transmuxer.Ac3Transmuxer',
+        '--entry_point=goog:shaka.transmuxer.Ec3Transmuxer',
+        '--entry_point=goog:shaka.transmuxer.LocTransmuxer',
+        '--entry_point=goog:shaka.transmuxer.Mp3Transmuxer',
+        '--entry_point=goog:shaka.transmuxer.MpegTsTransmuxer',
+        '--entry_point=goog:shaka.transmuxer.TsTransmuxer',
+
+        # Every device plugin self-registers at load time (side effect). The
+        # shaka.device.AllDevices aggregator requires them all, so a single entry
+        # point keeps them under PRUNE and DeviceFactory.getDevice() works in the
+        # worker.
+        '--entry_point=goog:shaka.device.AllDevices',
+    ]
+
+    # Suppress type errors caused by dependency pruning; the main build
+    # already validates all types.
+    closure_opts += [
+        '--jscomp_off=checkTypes',
+        '--jscomp_off=unknownDefines',
+    ]
+
+    return closure.compile(closure_opts, force)
+
+  def build_library(self, name, langout, locales, force, is_debug, skip_ts,
+      build_worker):
     """Builds Shaka Player using the files in |self.include|.
 
     Args:
@@ -274,6 +338,7 @@ class Build(object):
       force: True to rebuild, False to ignore if no changes are detected.
       is_debug: True to compile for debugging, false for release.
       skip_ts: True to skip generation of TypeScript definitions.
+      build_worker: True to build the standalone transmuxer worker if needed.
 
     Returns:
       True on success; False on failure.
@@ -287,6 +352,11 @@ class Build(object):
       # dummy cast proxy.
       if not self.has_cast():
         self.include.add(os.path.abspath('conditional/dummy_cast_proxy.js'))
+
+    if build_worker and self.has_transmuxer_proxy():
+      logging.info('Compiling transmuxer worker bundle...')
+      if not self.build_worker_bundle(langout, force, is_debug):
+        return False
 
     if is_debug:
       name += '.debug'
@@ -371,7 +441,7 @@ def main(args):
       '--name',
       help='Set the name of the build. Uses "ui" if not given.',
       type=str,
-      default='ui')
+      default='experimental')
 
   parser.add_argument(
       '--langout',
@@ -384,12 +454,23 @@ def main(args):
     help='Skips generation of TypeScript definition files (.d.ts).',
     action='store_true')
 
+  parser.add_argument(
+    '--worker',
+    help='Build only the standalone transmuxer worker script.',
+    action='store_true')
+
+  parser.add_argument(
+    '--skip-worker',
+    help='Do not build the standalone transmuxer worker alongside the library.',
+    action='store_true')
+
   parsed_args, commands = parser.parse_known_args(args)
 
   # Make the dist/ folder, ignore errors.
   base = shakaBuildHelpers.get_source_base()
+  dist_path = os.path.join(base, 'dist')
   try:
-    os.mkdir(os.path.join(base, 'dist'))
+    os.mkdir(dist_path)
   except OSError:
     pass
 
@@ -409,16 +490,128 @@ def main(args):
   if not custom_build.parse_build(commands, os.getcwd()):
     return 1
 
+  # Global shared state file; parallel processes will serialize access via locks.
+  hash_file_path = os.path.join(dist_path, 'build_state.json')
+
+  def compute_build_hash(include, exclude, commands, mode, locales, skip_ts):
+    state = {
+      'include': sorted(include),
+      'exclude': sorted(exclude),
+      'commands': commands,
+      'mode': mode,
+      'locales': locales,
+      'skip_ts': skip_ts,
+      'langout': parsed_args.langout,
+    }
+    state_json = json.dumps(state, sort_keys=True)
+    return hashlib.sha256(state_json.encode('utf-8')).hexdigest()
+
+  current_hash = compute_build_hash(
+    custom_build.include,
+    custom_build.exclude,
+    commands,
+    parsed_args.mode,
+    parsed_args.locales,
+    parsed_args.skip_ts
+  )
+
+  build_key = f"{parsed_args.name}_{parsed_args.mode}"
+
+  force = parsed_args.force
+
+  # --- Cross‑platform file lock helpers (defined inline to keep changes local) ---
+  if os.name == "posix":
+    import fcntl
+
+    @contextmanager
+    def locked_file_rw(path, create=False):
+      """Open file for read/write and acquire an exclusive advisory lock (POSIX)."""
+      mode = 'r+' if os.path.isfile(path) or not create else 'w+'
+      with open(path, mode) as f:
+        # Acquire exclusive lock on the entire file.
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+        try:
+          yield f
+        finally:
+          fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+  else:
+    import msvcrt
+
+    @contextmanager
+    def locked_file_rw(path, create=False):
+      """Open file for read/write and acquire an exclusive lock (Windows).
+      This uses msvcrt.locking over the first byte as a process‑wide mutex.
+      """
+      mode = 'r+' if os.path.isfile(path) or not create else 'w+'
+      with open(path, mode) as f:
+        # Always lock the first byte as a mutex region.
+        f.seek(0, os.SEEK_SET)
+        msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
+        try:
+          yield f
+        finally:
+          f.seek(0, os.SEEK_SET)
+          msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+
+  # --- Safe read of the global state under lock (if the file exists) ---
+  previous_state = {}
+  if os.path.isfile(hash_file_path):
+    try:
+      with locked_file_rw(hash_file_path):
+        # Re-opened with lock: parse safely
+        with open(hash_file_path, 'r') as f:
+          try:
+            previous_state = json.load(f)
+          except json.JSONDecodeError:
+            logging.warning("Detected a corrupted build_state.json; continuing with empty state.")
+            previous_state = {}
+    except OSError as e:
+      logging.warning("Could not lock/read build_state.json (%s); proceeding with empty state.", e)
+      previous_state = {}
+
+  previous_hash = previous_state.get(build_key)
+  if previous_hash != current_hash:
+    logging.info('Build parameters changed for "%s"; forcing rebuild.', parsed_args.name)
+    force = True
+
   name = parsed_args.name
   langout = parsed_args.langout
   locales = parsed_args.locales
-  force = parsed_args.force
   is_debug = parsed_args.mode == 'debug'
   skip_ts = parsed_args.skip_ts
 
-  if not custom_build.build_library(name, langout, locales, force, is_debug,
-      skip_ts):
+  if parsed_args.worker:
+    if not custom_build.build_worker_bundle(langout, force, is_debug):
+      return 1
+  elif not custom_build.build_library(name, langout, locales, force, is_debug,
+      skip_ts, not parsed_args.skip_worker):
     return 1
+
+  # Persist (merge) the updated state under lock so we don't clobber parallel updates.
+  # Use create=True so the file is created if it didn't exist.
+  try:
+    with locked_file_rw(hash_file_path, create=True) as f:
+      # Read current on-disk state (may have been updated by other processes)
+      try:
+        f.seek(0, os.SEEK_SET)
+        on_disk = json.load(f)
+      except json.JSONDecodeError:
+        on_disk = {}
+      except Exception:
+        on_disk = {}
+      # Merge and write back atomically under the same lock
+      on_disk[build_key] = current_hash
+      f.seek(0, os.SEEK_SET)
+      f.truncate()
+      json.dump(on_disk, f, indent=2, sort_keys=True)
+      f.flush()
+      try:
+        os.fsync(f.fileno())
+      except Exception:
+        # fsync may be unavailable on some platforms; ignore safely.
+        pass
+  except OSError as e:
+    logging.warning("Failed to persist build_state.json safely: %s", e)
 
   return 0
 

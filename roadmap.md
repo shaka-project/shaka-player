@@ -11,21 +11,98 @@ so the exact milestone for future features is not pre-determined.
 Candidate features for future release cycles:
  - Background fetch for offline storage
    https://github.com/shaka-project/shaka-player/issues/879
- - A method to stitch together clips
-   https://github.com/shaka-project/shaka-player/issues/764
- - Predict next segment in DASH SegmentTimeline
-   https://github.com/shaka-project/shaka-player/issues/898
- - Smaller, more modular binary
- - CMCD v2
 
-v5.0
- - Conversion to Typescript
+v6.0
+ - Conversion to Typescript (Smaller, more modular binary)
 
-v4.13 - 2025 Q1
- - Time ID3, emsg, and metadata events to the presentation timeline
-   https://github.com/shaka-project/shaka-player/issues/7556
+v5.2 - 2026 Q4
+ - TBD
 
 =====
+
+v5.2 - 2026 Q3
+ - Metadata extraction support for `src=` playback
+   https://github.com/shaka-project/shaka-player/issues/10112
+ - Transmuxing moved to a worker thread (performance & main-thread improvements)
+   https://github.com/shaka-project/shaka-player/issues/9914
+ - HLS: Disable sequence mode by default
+   https://github.com/shaka-project/shaka-player/issues/10325
+ - Support ClearKey playback in Safari through WebCrypto
+   https://github.com/shaka-project/shaka-player/issues/10180
+ - DASH: Resolve Linked Periods via ImportedMPD (DASH 6th ed.)
+   https://github.com/shaka-project/shaka-player/issues/10221
+ - DASH: Unified URL parameter handling (urlparam:2016 / urlparam:2025)
+   https://github.com/shaka-project/shaka-player/issues/10282
+ - Queue: M3U playlist loading support
+   https://github.com/shaka-project/shaka-player/issues/10115
+ - UI: Modern CSS theme support using CSS custom properties
+   https://github.com/shaka-project/shaka-player/issues/10152
+ - UI: VR improvements, including fisheye projection for Apple Immersive Video
+   https://github.com/shaka-project/shaka-player/issues/10310
+
+v5.1 - 2026 Q2
+ - DASH: JSON manifest support (experimental build)
+ - ABR: Improved ABR with dropped frame monitoring
+   https://github.com/shaka-project/shaka-player/issues/745
+ - UI: Chapter images
+ - UI: Volume adjustment via mouse wheel
+ - Expanded platform support (TiVo OS, Titan OS)
+
+v5.0 - 2026 Q1
+ - Add automatic subtitles with translations (Experimental and disabled by default)
+   https://github.com/shaka-project/shaka-player/issues/9110
+ - Change dvvC box to free box for Dolby Vision workarounds
+   https://github.com/shaka-project/shaka-player/issues/9101
+ - Allow request filters to be called multiple times
+   https://github.com/shaka-project/shaka-player/issues/9129
+ - Unify text track selection and visibility by allowing null to disable text
+   https://github.com/shaka-project/shaka-player/issues/9048
+ - Support tracking events on VAST and VMAP without IMA
+ - DASH: SegmentTimeline@Pattern
+   https://github.com/shaka-project/shaka-player/pull/9669
+ - Implement MediaKeySessionClosedReason handling
+   https://github.com/shaka-project/shaka-player/issues/3446
+ - HLS: AES-256-GCM support
+ - Media Over QUIC + CMSF/MSF (experimental build)
+ - Modernization of the UI, more configs and minor style adjustments
+ - Remove MSS support
+
+v4.16 - 2025 Q3
+ - CMCDv2
+   https://github.com/shaka-project/shaka-player/issues/8660
+ - HDR detection in Tizen and WebOS
+   https://github.com/shaka-project/shaka-player/issues/8441
+ - DASH: Add support for certificate acquisition URL
+   https://github.com/shaka-project/shaka-player/issues/8823
+ - UI: Replace Material Design Icon font with SVG
+   https://github.com/shaka-project/shaka-player/issues/2467
+
+v4.15 - 2025 Q2
+ - Modernization of the UI
+   https://github.com/shaka-project/shaka-player/issues/8406
+ - Ability to pass in a Date object for playback start time
+   https://github.com/shaka-project/shaka-player/issues/8402
+ - New API for video: `getVideoTracks` and `selectVideoTrack`
+ - New NativeTextDisplayer to allow selecting subtitles via native API and controls
+ - UI: Support thumbnails while casting
+ - Transfer side-loaded text/thumbnail/chapter tracks when casting
+ - New API: Queue Manager
+
+v4.14 - 2025 Q1
+ - Time ID3, emsg, and metadata events to the presentation timeline
+   https://github.com/shaka-project/shaka-player/issues/7556
+ - New API for audio: `getAudioTracks` and `selectAudioTrack`
+   https://github.com/shaka-project/shaka-player/issues/3544
+ - DASH: LCEVC Dual track support
+
+v4.13 - 2025 Q1
+ - WisePlay DRM support
+ - Support for multiple robustness levels in drm
+ - Clearkey download support
+ - Stop setting playbackRate to 0 to control buffering state when streaming.rebufferingGoal = 0
+   https://github.com/shaka-project/shaka-player/issues/7602
+ - Use MSE clearLiveSeekableRange and setLiveSeekableRange when available
+   https://github.com/shaka-project/shaka-player/issues/3153
 
 v4.12 - 2024 Q4
  - Performance improvements

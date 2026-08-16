@@ -9,9 +9,9 @@ goog.provide('shaka.ui.Element');
 
 goog.require('shaka.ads.Utils');
 goog.require('shaka.util.EventManager');
+goog.require('shaka.ui.Localization');
 goog.requireType('shaka.Player');
 goog.requireType('shaka.ui.Controls');
-goog.requireType('shaka.ui.Localization');
 
 
 /**
@@ -65,23 +65,58 @@ shaka.ui.Element = class {
      * @protected {shaka.extern.IAdManager}
      * @exportInterface
      */
-    this.adManager = this.player.getAdManager();
+    this.adManager = this.controls.getAdManager();
 
     /**
      * @protected {?shaka.extern.IAd}
      * @exportInterface
      */
-    this.ad = controls.getAd();
+    this.ad = this.adManager.getCurrentAd();
 
     const AD_STARTED = shaka.ads.Utils.AD_STARTED;
-    this.eventManager.listen(this.adManager, AD_STARTED, (e) => {
-      this.ad = (/** @type {!Object} */ (e))['ad'];
+    this.eventManager.listen(this.adManager, AD_STARTED, () => {
+      this.ad = this.adManager.getCurrentAd();
     });
 
     const AD_STOPPED = shaka.ads.Utils.AD_STOPPED;
     this.eventManager.listen(this.adManager, AD_STOPPED, () => {
       this.ad = null;
     });
+
+    if (this.localization) {
+      this.eventManager.listenMulti(
+          this.localization,
+          [
+            shaka.ui.Localization.LOCALE_UPDATED,
+            shaka.ui.Localization.LOCALE_CHANGED,
+          ], () => {
+            this.updateLocalizedStrings();
+          });
+    }
+
+    /**
+     * @protected {boolean}
+     * @exportInterface
+     */
+    this.isSubMenu = this.parent.classList.contains('shaka-overflow-menu') ||
+        this.parent.classList.contains('shaka-context-menu');
+
+    /**
+     * @protected {boolean}
+     * @exportInterface
+     */
+    this.isSubMenuOpened = false;
+
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.isSubMenuOpened = true;
+        this.checkAvailability();
+      });
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.isSubMenuOpened = false;
+        this.checkAvailability();
+      });
+    }
   }
 
   /**
@@ -100,4 +135,10 @@ shaka.ui.Element = class {
     this.adManager = null;
     this.ad = null;
   }
+
+  /** @override */
+  updateLocalizedStrings() {}
+
+  /** @override */
+  checkAvailability() {}
 };

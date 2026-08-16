@@ -1,0 +1,79 @@
+[
+  {
+    "chapter": 1,
+    "start-time": 0.0,
+    "duration": 102.0,
+    "titles": [
+      {
+        "language": "und",
+        "title": "Opening credits"
+      }
+    ]
+  },
+  {
+    "chapter": 2,
+    "start-time": 102.0,
+    "duration": 182.0,
+    "titles": [
+      {
+        "language": "und",
+        "title": "A dangerous quest"
+      }
+    ]
+  },
+  {
+    "chapter": 3,
+    "start-time": 284.0,
+    "duration": 66.0,
+    "titles": [
+      {
+        "language": "und",
+        "title": "The attack"
+      }
+    ]
+  },
+  {
+    "chapter": 4,
+    "start-time": 350.0,
+    "duration": 154.0,
+    "titles": [
+      {
+        "language": "und",
+        "title": "In pursuit"
+      }
+    ]
+  },
+  {
+    "chapter": 5,
+    "start-time": 504.0,
+    "duration": 109.0,
+    "titles": [
+      {
+        "language": "und",
+        "title": "Cave Fight"
+      }
+    ]
+  },
+  {
+    "chapter": 6,
+    "start-time": 613.0,
+    "duration": 131.0,
+    "titles": [
+      {
+        "language": "und",
+        "title": "Eye to eye"
+      }
+    ]
+  },
+  {
+    "chapter": 7,
+    "start-time": 744.0,
+    "duration": 144.0,
+    "titles": [
+      {
+        "language": "und",
+        "title": "Ending Credits"
+      }
+    ]
+  }
+]

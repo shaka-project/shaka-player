@@ -20,12 +20,12 @@ msdk.device = {};
 
 
 /**
- * @return {!Promise.<{resolution: string}>}
+ * @return {!Promise<{resolution: string}>}
  */
 msdk.device.getDisplayInfo = function() {};
 
 
 /**
- * @return {!Promise.<{resolution: string}>}
+ * @return {!Promise<{resolution: string}>}
  */
 msdk.device.getDisplayInfoImmediate = function() {};

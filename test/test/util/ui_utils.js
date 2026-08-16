@@ -10,7 +10,7 @@ shaka.test.UiUtils = class {
    * @param {!HTMLMediaElement} video
    * @param {!Object=} config
    * @param {?HTMLCanvasElement=} canvas
-   * @return {!Promise.<!shaka.ui.Overlay>}
+   * @return {!Promise<!shaka.ui.Overlay>}
    */
   static async createUIThroughAPI(videoContainer, video, config, canvas) {
     const player = new shaka.Player();
@@ -27,8 +27,8 @@ shaka.test.UiUtils = class {
 
 
   /**
-   * @param {!Array.<!Element>} containers
-   * @param {!Array.<!Element>} videos
+   * @param {!Array<!Element>} containers
+   * @param {!Array<!Element>} videos
    * @suppress {visibility}
    */
   static async createUIThroughDOMAutoSetup(containers, videos) {
@@ -174,8 +174,8 @@ shaka.test.UiUtils = class {
     // Some platforms have issues with audio-only playbacks on muted video
     // elements. Don't mute them.
     // Fuchsia reference: https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/platform/media/web_media_player_impl.cc;l=3535;drc=d23075f3
-    if (!shaka.util.Platform.isTizen() &&
-        !shaka.util.Platform.isFuchsiaCastDevice()) {
+    if (deviceDetected.getDeviceName() !== 'Tizen' &&
+        deviceDetected.getDeviceName() !== 'Chromecast with Fuchsia') {
       video.muted = true;
     }
     video.width = 600;

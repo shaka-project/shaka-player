@@ -229,7 +229,7 @@ describe('DataViewReader', () => {
     it('detects when reading bytes', () => {
       bigEndianReader.skip(8);
       runTest(() => {
-        bigEndianReader.readBytes(1);
+        bigEndianReader.readBytes(1, /* clone= */ false);
       });
     });
 

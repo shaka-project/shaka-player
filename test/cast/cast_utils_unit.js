@@ -15,27 +15,25 @@ describe('CastUtils', () => {
     const ignoredMembers = [
       'constructor',  // JavaScript added field
       'getAdManager',  // Handled specially
+      'getQueueManager',  // Handled specially
       'getSharedConfiguration',  // Handled specially
       'getNetworkingEngine',  // Handled specially
       'getDrmEngine',  // Handled specially
       'getMediaElement',  // Handled specially
-      'setMaxHardwareResolution',
+      'getTextDisplayer',  // Internal UI hook, not proxied.
       'destroy',  // Should use CastProxy.destroy instead
-      'getAllThumbnails', // Too large to proxy.
       'drmInfo',  // Too large to proxy
       'getManifest', // Too large to proxy
       'getManifestParserFactory',  // Would not serialize.
       'setVideoContainer',
+      'getVideoContainer',
       'getActiveSessionsMetadata',
       'releaseAllMutexes', // Very specific to the inner workings of the player.
       'detachAndSavePreload',
       'unloadAndSavePreload',
       'preload',
       'destroyAllPreloads',
-      'getNonDefaultConfiguration',
       'addFont',
-      'getFetchedPlaybackInfo',
-      'isRemotePlayback',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
@@ -48,9 +46,10 @@ describe('CastUtils', () => {
 
     const castMembers = CastUtils.PlayerVoidMethods
         .concat(CastUtils.PlayerPromiseMethods)
-        .concat(Object.keys(CastUtils.PlayerGetterMethods))
-        .concat(Object.keys(CastUtils.LargePlayerGetterMethods))
-        .concat(Object.keys(CastUtils.PlayerGetterMethodsThatRequireLive));
+        .concat(Array.from(CastUtils.PlayerGetterMethods.keys()))
+        .concat(Array.from(CastUtils.LargePlayerGetterMethods.keys()))
+        .concat(Array.from(
+            CastUtils.PlayerGetterMethodsThatRequireLive.keys()));
     // eslint-disable-next-line no-restricted-syntax
     const allPlayerMembers = Object.getOwnPropertyNames(shaka.Player.prototype);
     expect(
@@ -66,6 +65,72 @@ describe('CastUtils', () => {
     expect(castMembers.filter((name) => !playerMembers.includes(name)))
         .toEqual([]);
     expect(playerMembers.filter((name) => !castMembers.includes(name)))
+        .toEqual([]);
+  });
+
+  it('includes every AdManager member', () => {
+    const ignoredMembers = [
+      'constructor', // JavaScript added field
+      'release', // Handled by Player
+      'onAssetUnload', // Handled by Player
+      'setContainers',
+      'onManifestUpdated', // Handled by Player
+      'onHlsTimedMetadata', // Handled by Player
+      'onCueMetadataChange', // Handled by Player
+      'onHLSMetadata', // Handled by Player
+      'onDASHMetadata', // Handled by Player
+      'getInterstitialPlayer',
+      'getCurrentAd',
+    ];
+
+    const castMembers = CastUtils.AdManagerVoidMethods
+        .concat(CastUtils.AdManagerPromiseMethods)
+        .concat(Array.from(CastUtils.LargeAdManagerGetterMethods.keys()));
+
+    const allAdMembers =
+        // eslint-disable-next-line no-restricted-syntax
+        Object.getOwnPropertyNames(shaka.ads.AdManager.prototype);
+    expect(
+        ignoredMembers.filter((member) => !allAdMembers.includes(member)))
+        .toEqual([]);
+    const adMembers = allAdMembers.filter((name) => {
+      // Private members end with _.
+      return !ignoredMembers.includes(name) && !name.endsWith('_');
+    });
+
+    // To make debugging easier, don't check that they are equal; instead check
+    // that neither has any extra entries.
+    expect(castMembers.filter((name) => !adMembers.includes(name)))
+        .toEqual([]);
+    expect(adMembers.filter((name) => !castMembers.includes(name)))
+        .toEqual([]);
+  });
+
+  it('includes every Ad member', () => {
+    const ignoredMembers = [
+      'constructor', // JavaScript added field
+      'release', // Handled by AdManager
+    ];
+
+    const castMembers = CastUtils.CurrentAdVoidMethods
+        .concat(Array.from(CastUtils.CurrentAdGetterMethods.keys()));
+
+    const allAdMembers =
+        // eslint-disable-next-line no-restricted-syntax
+        Object.getOwnPropertyNames(shaka.ads.AbstractAd.prototype);
+    expect(
+        ignoredMembers.filter((member) => !allAdMembers.includes(member)))
+        .toEqual([]);
+    const adMembers = allAdMembers.filter((name) => {
+      // Private members end with _.
+      return !ignoredMembers.includes(name) && !name.endsWith('_');
+    });
+
+    // To make debugging easier, don't check that they are equal; instead check
+    // that neither has any extra entries.
+    expect(castMembers.filter((name) => !adMembers.includes(name)))
+        .toEqual([]);
+    expect(adMembers.filter((name) => !castMembers.includes(name)))
         .toEqual([]);
   });
 
@@ -221,19 +286,20 @@ describe('CastUtils', () => {
         function onError() {
           fail('Error code ' + (video.error ? video.error.code : 0));
         }
-
+        const config =
+            shaka.util.PlayerConfiguration.createDefault().mediaSource;
         mediaSourceEngine = new shaka.media.MediaSourceEngine(
             video,
             new shaka.test.FakeTextDisplayer(),
             {
               getKeySystem: () => null,
               onMetadata: () => {},
+              onEmsg: () => {},
               onEvent: () => {},
               onManifestUpdate: () => {},
-            });
-        const config =
-            shaka.util.PlayerConfiguration.createDefault().mediaSource;
-        mediaSourceEngine.configure(config);
+              getDrmInfo: () => null,
+            },
+            config);
 
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
         const initObject = new Map();

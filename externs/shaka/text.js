@@ -38,19 +38,12 @@ shaka.extern.TextParser = class {
    *    for each cue.
    * @param {?(string|undefined)} uri
    *    The media uri.
-   * @param {!Array.<string>} images
-   * @return {!Array.<!shaka.text.Cue>}
+   * @param {!Array<string>} images
+   * @return {!Array<!shaka.text.Cue>}
    *
    * @exportDoc
    */
   parseMedia(data, timeContext, uri, images) {}
-
-  /**
-   * Notifies the stream if the manifest is in sequence mode or not.
-   *
-   * @param {boolean} sequenceMode
-   */
-  setSequenceMode(sequenceMode) {}
 
   /**
    * Notifies the manifest type.
@@ -68,7 +61,8 @@ shaka.extern.TextParser = class {
  *   periodStart: number,
  *   segmentStart: number,
  *   segmentEnd: number,
- *   vttOffset: number
+ *   vttOffset: number,
+ *   isMpegTs: boolean,
  * }}
  *
  * @property {number} periodStart
@@ -80,6 +74,10 @@ shaka.extern.TextParser = class {
  * @property {number} vttOffset
  *     The start time relative to either segment or period start depending
  *     on <code>segmentRelativeVttTiming</code> configuration.
+ * @property {boolean} isMpegTs
+ *     True if the media container type is MPEG-TS (not fMP4)
+ *     needed to know if we should use rollover wrapping when
+ *     calculating offset for webvtt cues in hls streams
  *
  * @exportDoc
  */
@@ -117,16 +115,19 @@ shaka.extern.TextParserPlugin;
  * <p>
  * This should only change whether it is displaying the cues through the
  * <code>setTextVisibility</code> function; the app should not change the text
- * visibility outside the top-level Player methods.  If you really want to
- * control text visibility outside the Player methods, you must set the
- * <code>streaming.alwaysStreamText</code> Player configuration value to
- * <code>true</code>.
+ * visibility outside the top-level Player methods.
  *
  * @interface
  * @extends {shaka.util.IDestroyable}
  * @exportDoc
  */
 shaka.extern.TextDisplayer = class {
+  /**
+   * @param {shaka.Player} player
+   * @exportDoc
+   */
+  constructor(player) {}
+
   /**
    * @override
    * @exportDoc
@@ -143,7 +144,7 @@ shaka.extern.TextDisplayer = class {
   /**
    * Append given text cues to the list of cues to be displayed.
    *
-   * @param {!Array.<!shaka.text.Cue>} cues
+   * @param {!Array<!shaka.text.Cue>} cues
    *    Text cues to be appended.
    *
    * @exportDoc
@@ -198,7 +199,7 @@ shaka.extern.TextDisplayer = class {
 /**
  * A factory for creating a TextDisplayer.
  *
- * @typedef {function():!shaka.extern.TextDisplayer}
+ * @typedef {function(!shaka.Player):!shaka.extern.TextDisplayer}
  * @exportDoc
  */
 shaka.extern.TextDisplayer.Factory;

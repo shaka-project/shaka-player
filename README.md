@@ -1,7 +1,13 @@
-# ![Shaka Player](docs/shaka-player-logo.png)
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/logos/shaka-player-logo-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="docs/logos/shaka-player-logo-light.png">
+    <img alt="Shaka Player Logo" src="docs/logos/shaka-player-logo-light.png">
+  </picture>
+</h1>
 
 Shaka Player is an open-source JavaScript library for adaptive media.  It plays
-adaptive media formats (such as [DASH][], [HLS][] and [MSS][]) in a browser,
+adaptive media formats (such as [DASH][] and [HLS][]) in a browser,
 without using plugins or Flash.  Instead, Shaka Player uses the open web
 standards [MediaSource Extensions][] and [Encrypted Media Extensions][].
 
@@ -18,11 +24,10 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 
 [DASH]: http://dashif.org/
 [HLS]: https://developer.apple.com/streaming/
-[MSS]: https://learn.microsoft.com/en-us/iis/media/smooth-streaming/smooth-streaming-transport-protocol
 [MediaSource Extensions]: https://www.w3.org/TR/media-source/
 [Encrypted Media Extensions]: https://www.w3.org/TR/encrypted-media/
 [IndexedDB]: https://www.w3.org/TR/IndexedDB-2/
-[offline storage and playback]: https://shaka-player-demo.appspot.com/docs/api/tutorial-offline.html
+[offline storage and playback]: https://shaka-project.github.io/shaka-player/docs/api/tutorial-offline.html
 
 
 ## Maintained branches
@@ -35,24 +40,25 @@ for the up-to-date list of maintained branches of Shaka Player.
 
 |Browser       |Windows   |Mac      |Linux    |Android  |iOS >= 9  |iOS >= 17.1|iPadOS >= 13|ChromeOS|Other|
 |:------------:|:--------:|:-------:|:-------:|:-------:|:--------:|:---------:|:----------:|:------:|:---:|
-|Chrome¹       |**Y**     |**Y**    |**Y**    |**Y**    |**Native**|**Native** |**Native**  |**Y**   | -   |
-|Firefox¹      |**Y**     |**Y**    |**Y**    |untested⁵|**Native**|**Native** |**Native**  | -      | -   |
-|Edge¹         |**Y**     | -       | -       | -       | -        | -         | -          | -      | -   |
+|Chrome        |**Y**     |**Y**    |**Y**    |**Y**    |**Native**|**Native** |**Native**  |**Y**   | -   |
+|Firefox       |**Y**     |**Y**    |**Y**    |untested⁵|**Native**|**Native** |**Native**  | -      | -   |
+|Edge          |**Y**     | -       | -       | -       | -        | -         | -          | -      | -   |
 |Edge Chromium |**Y**     |**Y**    |**Y**    |untested⁵|**Native**|**Native** |**Native**  | -      | -   |
 |IE            | N        | -       | -       | -       | -        | -         | -          | -      | -   |
-|Safari¹       | -        |**Y**    | -       | -       |**Native**|**Y**      |**Y**       | -      | -   |
-|Opera¹        |**Y**     |**Y**    |**Y**    |untested⁵|**Native**| -         | -          | -      | -   |
-|Chromecast².  | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
+|Safari        | -        |**Y**    | -       | -       |**Native**|**Y**      |**Y**       | -      | -   |
+|Opera         |**Y**     |**Y**    |**Y**    |untested⁵|**Native**| -         | -          | -      | -   |
+|Chromecast²   | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Tizen TV³     | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |WebOS⁶        | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Hisense⁷      | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
+|Vizio⁷        | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Xbox One      | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Playstation 4⁷| -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 |Playstation 5⁷| -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
+|Titan OS⁷     | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
+|TiVo OS⁷      | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
 
 NOTES:
- - ¹: On macOS, only Safari 9+ is supported.  On iOS, only iOS 9+ is
-   supported.  Older versions will be rejected.
  - ²: The latest stable Chromecast firmware is tested. Both sender and receiver
    can be implemented with Shaka Player.
  - ³: Tizen 2017 model is actively tested and supported by the Shaka Player
@@ -81,12 +87,11 @@ NOTES for iOS and iPadOS:
 |:----:|:-------------:|:---:|:---:|:-------------------:|
 |DASH  |**Y**          |**Y**| -   |**Y**                |
 |HLS   |**Y**          |**Y**|**Y**| -                   |
-|MSS   |**Y**          | -   | -   | -                   |
 
 You can also create a [manifest parser plugin][] to support custom manifest
 formats.
 
-[manifest parser plugin]: https://shaka-player-demo.appspot.com/docs/api/tutorial-manifest-parser.html
+[manifest parser plugin]: https://shaka-project.github.io/shaka-player/docs/api/tutorial-manifest-parser.html
 
 
 ## DASH features
@@ -134,9 +139,9 @@ HLS features supported:
  - MPEG-2 TS support
  - WebVTT and TTML
  - CEA-608/708 captions
- - Encrypted content with PlayReady and Widevine
- - Encrypted content with FairPlay (Safari on macOS and iOS 9+ only)
- - AES-128, AES-256 and AES-256-CTR support on browsers with Web Crypto API support
+ - Encrypted content with PlayReady, Widevine and WisePlay
+ - Encrypted content with FairPlay (Safari on macOS and iOS only)
+ - AES-128, AES-256, AES-256-CTR and AES-256-GCM support on browsers with Web Crypto API support
  - SAMPLE-AES and SAMPLE-AES-CTR (identity) support on browsers with ClearKey support
  - Key rotation
  - Raw AAC, MP3, AC-3 and EC-3 (without an MP4 container)
@@ -144,6 +149,7 @@ HLS features supported:
  - #EXT-X-IMAGE-STREAM-INF for thumbnails
  - Interstitials
  - Container change during the playback (eg: MP4 to TS, or AAC to TS)
+ - Chapters (`#EXT-X-SESSION-DATA` tag with the ID `com.apple.hls.chapters`)
 
 HLS features **not** supported:
  - X-SNAP attribute in interstitials
@@ -180,6 +186,7 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 - `#EXT-X-DISCONTINUITY-SEQUENCE=<n>`
 - `#EXT-X-BYTERANGE=<n>[@<o>]`
 - `#EXT-X-MAP:<attribute-list>`
+- `#EXT-X-I-FRAMES-ONLY` I-frame only playlists (clipped MP4 fragments are repaired)
 - `#EXT-X-KEY:<attribute-list>` (`KEYFORMAT="identity",METHOD=SAMPLE-AES` is only supports with MP4 segments)
 - `#EXT-X-PROGRAM-DATE-TIME:<attribute-list>`
 - `#EXT-X-START:TIME-OFFSET=<n>`
@@ -195,6 +202,25 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 
 </details>
 
+## MOQT Streaming Format (MSF) (Experimental)
+
+Features supported:
+ - Media over QUIC Transport [draft-14](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/14/) and [draft-16](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/16/)
+ - MSF [draft-1](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/01/) and CMSF [draft-1](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/01/)
+ - Audio, Video and Text
+ - ABR
+ - DRM support for Widevine, PlayReady, FairPlay and ClearKey, using the CMSF ContentProtection
+ - MP4 / CMAF support
+ - LoC [draft-2](https://datatracker.ietf.org/doc/draft-ietf-moq-loc/02/) support
+ - Live
+ - For browsers that support WebTransport certificate fingerprints (e.g., Chrome), you can use self-signed certificates without installing them.
+
+Features **not** supported:
+ - VOD
+ - MOQT Streaming Format catalog updates
+
+Note: This module is experimental and is only included in the experimental build.
+
 
 ## MPEG-5 Part2 LCEVC Support
 
@@ -203,7 +229,7 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
  - MPEG-5 Part2 LCEVC decoding support (decoding provided by [lcevc_dec.js][], must be
    separately included)
 
- - Integration documentation : [docs](docs/design/lcevc-integration.md)
+ - Integration documentation : [docs](docs/design/current/lcevc-integration.md)
 
  - More on [MPEG-5 Part2 LCEVC][]
 
@@ -211,37 +237,45 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 [MPEG-5 Part2 LCEVC]: https://www.lcevc.org
 
 
-## MSS features
+## HEVC software fallback
 
-MSS features supported:
- - VOD
- - AAC and H.264
- - Encrypted content (PlayReady)
- - TTML/DFXP
- - Only supported with [codem-isoboxer][]
+**Only supported on browsers with Media Source Extensions SourceBuffer support
+and WebCodecs**
 
-MSS features **not** supported:
- - Live
+ - HEVC (H.265) playback on browsers without native HEVC decoding support,
+   such as Firefox or Chrome on Linux (transcoding to H.264 provided by
+   [@hevcjs/shaka-plugin][], must be separately included)
 
-[codem-isoboxer]: https://github.com/Dash-Industry-Forum/codem-isoboxer
+ - Live demo : [hevcjs.dev/demo/shaka.html][]
+
+ - More on [hevc.js][]
+
+[@hevcjs/shaka-plugin]: https://www.npmjs.com/package/@hevcjs/shaka-plugin
+[hevcjs.dev/demo/shaka.html]: https://www.hevcjs.dev/demo/shaka.html
+[hevc.js]: https://www.hevcjs.dev
+
 
 ## DRM support matrix
 
-|Browser       |Widevine  |PlayReady|FairPlay |ClearKey⁶ |
-|:------------:|:--------:|:-------:|:-------:|:--------:|
-|Chrome¹       |**Y**     | -       | -       |**Y**     |
-|Firefox²      |**Y**     | -       | -       |**Y**     |
-|Edge³         | -        |**Y**    | -       | -        |
-|Edge Chromium |**Y**     |**Y**    | -       |**Y**     |
-|Safari        | -        | -       |**Y**    | -        |
-|Opera         |**Y**     | -       | -       |**Y**     |
-|Chromecast    |**Y**     |**Y**    | -       |**Y**     |
-|Tizen TV      |**Y**     |**Y**    | -       |**Y**     |
-|WebOS⁷        |untested⁷ |untested⁷| -       |untested⁷ |
-|Hisense⁷      |untested⁷ |untested⁷| -       |untested⁷ |
-|Xbox One      | -        |**Y**    | -       | -        |
-|Playstation 4⁷| -        |untested⁷| -       |untested⁷ |
-|Playstation 5⁷| -        |untested⁷| -       |untested⁷ |
+|Browser       |Widevine  |PlayReady|FairPlay |WisePlay |ClearKey⁶ |
+|:------------:|:--------:|:-------:|:-------:|:-------:|:--------:|
+|Chrome¹       |**Y**     | -       | -       | -       |**Y**     |
+|Firefox²      |**Y**     | -       | -       | -       |**Y**     |
+|Edge³         | -        |**Y**    | -       | -       | -        |
+|Edge Chromium |**Y**     |**Y**    | -       | -       |**Y**     |
+|Safari        | -        | -       |**Y**    | -       | -        |
+|Opera         |**Y**     | -       | -       | -       |**Y**     |
+|Chromecast    |**Y**     |**Y**    | -       | -       |**Y**     |
+|Tizen TV      |**Y**     |**Y**    | -       | -       |**Y**     |
+|WebOS⁷        |untested⁷ |untested⁷| -       | -       |untested⁷ |
+|Hisense⁷      |untested⁷ |untested⁷| -       | -       |untested⁷ |
+|Vizio⁷        |untested⁷ |untested⁷| -       | -       |untested⁷ |
+|Xbox One      | -        |**Y**    | -       | -       | -        |
+|Playstation 4⁷| -        |untested⁷| -       | -       |untested⁷ |
+|Playstation 5⁷| -        |untested⁷| -       | -       |untested⁷ |
+|Huawei⁷       | -        | -       | -       |untested⁷|untested⁷ |
+|Titan OS⁷     |untested⁷ |untested⁷| -       | -       |untested⁷ |
+|TiVo OS⁷      |untested⁷ |untested⁷| -       | -       |untested⁷ |
 
 Other DRM systems should work out of the box if they are interoperable and
 compliant to the EME spec.
@@ -257,11 +291,10 @@ NOTES:
  - ⁷: These are expected to work, but are community-supported and untested by
    us.
 
-|Manifest  |Widevine  |PlayReady|FairPlay |ClearKey  |
-|:--------:|:--------:|:-------:|:-------:|:--------:|
-|DASH      |**Y**     |**Y**    | -       |**Y**     |
-|HLS       |**Y**     |**Y**    |**Y** ¹  | -        |
-|MSS       | -        |**Y**    | -       | -        |
+|Manifest  |Widevine  |PlayReady|FairPlay |WisePlay |ClearKey  |
+|:--------:|:--------:|:-------:|:-------:|:-------:|:--------:|
+|DASH      |**Y**     |**Y**    |**Y**    |**Y**    |**Y**     |
+|HLS       |**Y**     |**Y**    |**Y** ¹  |**Y**    |**Y**     |
 
 NOTES:
  - ¹: By default, FairPlay is handled using Apple's native HLS player, when on
@@ -277,7 +310,6 @@ Shaka Player supports:
     - Can parse "sidx" box for DASH's SegmentBase@indexRange and
       SegmentTemplate@index
     - Can find and parse "tfdt" box to find segment start time in HLS
-    - For MSS, [codem-isoboxer][] v0.3.7+ is required
   - WebM
     - Depends on browser support for the container via MediaSource
     - Can parse [cueing data][] elements for DASH's SegmentBase@indexRange and
@@ -308,19 +340,13 @@ Shaka Player supports:
       (depends on browser support via MediaSource).
   - SubRip (SRT)
     - UTF-8 encoding only
-  - LyRiCs (LRC)
-    - UTF-8 encoding only
-  - SubStation Alpha (SSA, ASS)
-    - UTF-8 encoding only
-  - SubViewer (SBV)
-    - UTF-8 encoding only
 
 Subtitles are rendered by the browser by default. Applications can create a
 [text display plugin][] for customer rendering to go beyond browser-supported
 attributes.
 
 [cueing data]: https://www.webmproject.org/docs/container/#cueing-data
-[text display plugin]: https://nightly-dot-shaka-player-demo.appspot.com/docs/api/shaka.extern.TextDisplayer.html
+[text display plugin]: https://shaka-project.github.io/shaka-player/docs/api/shaka.extern.TextDisplayer.html
 <!-- TODO: replace with a link to a TextDisplayer tutorial -->
 
 
@@ -362,7 +388,8 @@ Shaka Player supports:
 - HLS interstitials
 - DASH Media Presentation Insertion (MPD alternate)
 - Custom Interstitials
-- Basic support of VAST and VMAP without IMA (playback without tracking)
+- Basic support of VAST and VMAP without IMA
+- SVTA2053-2: Ad Creative Signaling in DASH and HLS
 
 
 ## Content Steering support
@@ -387,27 +414,35 @@ Shaka Player supports VR when:
 
 VR modes supported:
 - Equirectangular projection with 360 degrees of horizontal field of view.
+- Half equirectangular projection with 180 degrees of horizontal field of view.
 - Cubemap projection with 360 degrees of horizontal field of view.
-
+- Fisheye projection, used for regular fisheye content, parametric immersive
+  (`prim`) content, and Apple Immersive Video (`aiv`).
 
 NOTES:
   - VR is only supported for clear streams or HLS-AES stream. DRM prevents
     access to the video pixels for transformation.
 
 
+## Builds
+
+Shaka currently provides the following versions:
+- Complete build with UI + Experimental features (`shaka-player.experimental.js`)
+- Complete build with UI (`shaka-player.ui.js`)
+- Complete build without UI (`shaka-player.compiled.js`)
+- DASH build without UI, Cast and Offline (`shaka-player.dash.js`)
+- HLS build without UI, Cast and Offline (`shaka-player.hls.js`)
+
+
 ## Documentation & Important Links ##
 
- * [Demo](https://shaka-player-demo.appspot.com)([sources](demo/))
- * [Nightly Demo](https://nightly-dot-shaka-player-demo.appspot.com)
- * [Demo index](https://index-dot-shaka-player-demo.appspot.com)
- * [API documentation](https://shaka-player-demo.appspot.com/docs/api/index.html)
- * [Tutorials](https://shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html)
+ * [Demo](https://shaka-project.github.io/shaka-player-release/)([sources](demo/))
+ * [Nightly Demo](https://shaka-project.github.io/shaka-player/)
+ * [API documentation](https://shaka-project.github.io/shaka-player/docs/api/index.html)
+ * [Tutorials](https://shaka-project.github.io/shaka-player/docs/api/tutorial-welcome.html)
  * [Hosted builds on Google Hosted Libraries](https://developers.google.com/speed/libraries/#shaka-player)
  * [Hosted builds on jsDelivr](https://www.jsdelivr.com/package/npm/shaka-player)
  * [Development roadmap](roadmap.md)
- * [Announcement list](https://groups.google.com/forum/#!forum/shaka-player-users)
-     ([join](docs/announcement-list-join-group.png) for infrequent
-      announcements and surveys)
  * Subscribe to releases by following
      [instructions from this blog](https://www.jessesquires.com/blog/2020/07/30/github-tip-watching-releases/)
 
@@ -455,3 +490,21 @@ Shaka + Angular integration:
 
 If you have published Shaka Integration code/tutorials, please feel free to submit PRs
 to add them to this list, we will gladly approve!
+
+## Maintained by ##
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/logos/ateme-logo-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/logos/ateme-logo-light.png">
+  <img alt="Ateme" src="docs/logos/ateme-logo-light.png" height="55">
+</picture>
+&nbsp;&nbsp;
+<picture>
+  <img alt="Google" src="docs/logos/google.png" height="55">
+</picture>
+&nbsp;&nbsp;
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/logos/paramout-logo-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/logos/paramout-logo-light.svg">
+  <img alt="Paramount" src="docs/logos/paramout-logo-light.svg" height="55">
+</picture>

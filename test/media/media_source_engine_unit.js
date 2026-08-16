@@ -55,11 +55,9 @@ describe('MediaSourceEngine', () => {
   const originalIsSupported =
       shaka.transmuxer.TransmuxerEngine.isSupported;
 
-  // Jasmine Spies don't handle toHaveBeenCalledWith well with objects, so use
-  // some numbers instead.
-  const buffer = /** @type {!ArrayBuffer} */ (/** @type {?} */ (1));
-  const buffer2 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (2));
-  const buffer3 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (3));
+  const buffer = new Uint8Array([0x01]);
+  const buffer2 = new Uint8Array([0x02]);
+  const buffer3 = new Uint8Array([0x03]);
 
   const makeFakeStream = (mimeType) => {
     const segmentIndex = {
@@ -125,6 +123,8 @@ describe('MediaSourceEngine', () => {
   /** @type {!jasmine.Spy} */
   let requiresEncryptionInfoInAllInitSegmentsSpy;
   /** @type {!jasmine.Spy} */
+  let requiresEC3InitSegments;
+  /** @type {!jasmine.Spy} */
   let fakeEncryptionSpy;
 
   /** @type {!shaka.media.MediaSourceEngine} */
@@ -165,6 +165,10 @@ describe('MediaSourceEngine', () => {
     videoSourceBuffer = createMockSourceBuffer();
     mockMediaSource = createMockMediaSource();
     mockMediaSource.addSourceBuffer.and.callFake((mimeType) => {
+      if (mockMediaSource.readyState !== 'open') {
+        // https://w3c.github.io/media-source/#addsourcebuffer-method
+        throw new Error('InvalidStateError');
+      }
       const type = mimeType.split('/')[0];
       const buffer = type == 'audio' ? audioSourceBuffer : videoSourceBuffer;
 
@@ -200,17 +204,21 @@ describe('MediaSourceEngine', () => {
     createMediaSourceSpy = jasmine.createSpy('createMediaSource');
     createMediaSourceSpy.and.callFake((p) => {
       p.resolve();
+      mockMediaSource.readyState = 'open';
       return mockMediaSource;
     });
     // eslint-disable-next-line no-restricted-syntax
     shaka.media.MediaSourceEngine.prototype.createMediaSource =
         Util.spyFunc(createMediaSourceSpy);
 
-    requiresEncryptionInfoInAllInitSegmentsSpy = spyOn(shaka.util.Platform,
+    requiresEncryptionInfoInAllInitSegmentsSpy = spyOn(deviceDetected,
         'requiresEncryptionInfoInAllInitSegments').and.returnValue(false);
 
+    requiresEC3InitSegments = spyOn(deviceDetected,
+        'requiresEC3InitSegments').and.returnValue(false);
+
     fakeEncryptionSpy = spyOn(shaka.media.ContentWorkarounds, 'fakeEncryption')
-        .and.callFake((data) => data + 100);
+        .and.callFake((stream, data) => data + 100);
 
     // MediaSourceEngine uses video to:
     //  - set src attribute
@@ -241,20 +249,28 @@ describe('MediaSourceEngine', () => {
     video = /** @type {HTMLMediaElement} */(mockVideo);
     mockClosedCaptionParser = new shaka.test.FakeClosedCaptionParser();
     mockTextDisplayer = new shaka.test.FakeTextDisplayer();
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    // FakeTransmuxer is not in the worker bundle; prevent worker creation so
+    // transmux calls fall back to the main-thread inner transmuxer.
+    spyOn(shaka.transmuxer.TransmuxerProxy, 'getOrCreateWorker_')
+        .and.returnValue(null);
+
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
         mockTextDisplayer,
         {
           getKeySystem: () => null,
           onMetadata: () => {},
+          onEmsg: () => {},
           onEvent: () => {},
           onManifestUpdate: () => {},
-        });
+          getDrmInfo: () => null,
+        },
+        config);
     mediaSourceEngine.getCaptionParser = () => {
-      return mockClosedCaptionParser;
+      return /** @type {!shaka.media.ClosedCaptionParser} */(
+        mockClosedCaptionParser);
     };
-    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
-    mediaSourceEngine.configure(config);
   });
 
   afterEach(() => {
@@ -315,6 +331,7 @@ describe('MediaSourceEngine', () => {
       window.ManagedMediaSource = originalManagedMediaSource;
       window.URL.revokeObjectURL = originalRevokeObjectURL;
     });
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
 
     it('creates a MediaSource object and sets video.src', () => {
       mediaSourceEngine = new shaka.media.MediaSourceEngine(
@@ -323,9 +340,12 @@ describe('MediaSourceEngine', () => {
           {
             getKeySystem: () => null,
             onMetadata: () => {},
+            onEmsg: () => {},
             onEvent: () => {},
             onManifestUpdate: () => {},
-          });
+            getDrmInfo: () => null,
+          },
+          config);
 
       expect(createMediaSourceSpy).toHaveBeenCalled();
       expect(createObjectURLSpy).toHaveBeenCalled();
@@ -340,6 +360,7 @@ describe('MediaSourceEngine', () => {
           onSourceOpenListener = callback;
         }
       });
+      const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
 
       mediaSourceEngine = new shaka.media.MediaSourceEngine(
           video,
@@ -347,9 +368,12 @@ describe('MediaSourceEngine', () => {
           {
             getKeySystem: () => null,
             onMetadata: () => {},
+            onEmsg: () => {},
             onEvent: () => {},
             onManifestUpdate: () => {},
-          });
+            getDrmInfo: () => null,
+          },
+          config);
 
       if (window.ManagedMediaSource) {
         expect(mockMediaSource.addEventListener).toHaveBeenCalledTimes(3);
@@ -400,12 +424,63 @@ describe('MediaSourceEngine', () => {
       expect(shaka.text.TextEngine).not.toHaveBeenCalled();
     });
 
+    it('creates SourceBuffers when MediaSource readyState is closed',
+        async () => {
+          const initObject = new Map();
+          initObject.set(ContentType.AUDIO, fakeAudioStream);
+          initObject.set(ContentType.VIDEO, fakeVideoStream);
+
+          await mediaSourceEngine.open();
+
+          mockMediaSource.readyState = 'closed';
+          await expectAsync(
+              mediaSourceEngine.init(initObject, false)).not.toBeRejected();
+        });
+
+    it('creates SourceBuffers when MediaSource readyState is ended',
+        async () => {
+          const initObject = new Map();
+          initObject.set(ContentType.AUDIO, fakeAudioStream);
+          initObject.set(ContentType.VIDEO, fakeVideoStream);
+
+          await mediaSourceEngine.open();
+
+          mockMediaSource.readyState = 'ended';
+          await expectAsync(
+              mediaSourceEngine.init(initObject, false)).not.toBeRejected();
+        });
+
     it('creates TextEngines for text types', async () => {
       const initObject = new Map();
       initObject.set(ContentType.TEXT, fakeTextStream);
       await mediaSourceEngine.init(initObject, false);
       expect(mockMediaSource.addSourceBuffer).not.toHaveBeenCalled();
       expect(shaka.text.TextEngine).toHaveBeenCalled();
+    });
+
+    it('always wraps transmuxer in TransmuxerProxy', async () => {
+      const proxySpy = spyOn(shaka.transmuxer, 'TransmuxerProxy')
+          .and.callThrough();
+
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeTransportStream);
+      await mediaSourceEngine.init(initObject, false);
+      expect(proxySpy).toHaveBeenCalled();
+    });
+
+    it('passes transmuxWorkerUrl to TransmuxerProxy', async () => {
+      const proxySpy = spyOn(shaka.transmuxer, 'TransmuxerProxy')
+          .and.callThrough();
+      const config =
+          shaka.util.PlayerConfiguration.createDefault().mediaSource;
+      config.transmuxWorkerUrl = 'https://example.com/worker.js';
+      mediaSourceEngine.configure(config);
+
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeTransportStream);
+      await mediaSourceEngine.init(initObject, false);
+      expect(proxySpy).toHaveBeenCalledOnceWith(
+          mockTransmuxer, 'https://example.com/worker.js');
     });
   });
 
@@ -513,6 +588,7 @@ describe('MediaSourceEngine', () => {
 
   describe('appendBuffer', () => {
     beforeEach(async () => {
+      requiresEC3InitSegments.and.returnValue(false);
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
       const initObject = new Map();
@@ -567,6 +643,91 @@ describe('MediaSourceEngine', () => {
       await p;
     });
 
+    it('invokes modifyPreselectionSegmentCallback for Preselection streams',
+        async () => {
+          const stream =
+              shaka.test.StreamingEngineUtil.createMockAudioStream(9);
+          stream.preselection = {id: '10', tag: '1'};
+
+          /** @type {!jasmine.Spy} */
+          const modifySpy =
+              jasmine.createSpy('modifyPreselectionSegmentCallback');
+          modifySpy.and.callFake((preselectionSegmentInfo) => {
+            // Return a copy so the assertion below sees the original data
+            // that was passed in.
+            return Object.assign({}, preselectionSegmentInfo, {data: buffer2});
+          });
+
+          const config =
+              shaka.util.PlayerConfiguration.createDefault().mediaSource;
+          config.modifyPreselectionSegmentCallback =
+              shaka.test.Util.spyFunc(modifySpy);
+          mediaSourceEngine.configure(config);
+
+          const p = mediaSourceEngine.appendBuffer(
+              ContentType.AUDIO, buffer, null, stream,
+              /* hasClosedCaptions= */ false);
+
+          expect(modifySpy).toHaveBeenCalledWith(jasmine.objectContaining({
+            data: buffer,
+            preselection: {id: '10', tag: '1'},
+            contentType: ContentType.AUDIO,
+            isInitSegment: true,
+          }));
+          expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer2);
+          audioSourceBuffer.updateend();
+          await p;
+        });
+
+    it('appends Preselection stream data unmodified by default', async () => {
+      const stream =
+          shaka.test.StreamingEngineUtil.createMockAudioStream(9);
+      stream.preselection = {id: '10', tag: '1'};
+
+      const p = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, stream,
+          /* hasClosedCaptions= */ false);
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      audioSourceBuffer.updateend();
+      await p;
+    });
+
+    it('returns parsed media timestamp', async () => {
+      const reference = dummyReference(7, 10);
+      spyOn(mediaSourceEngine, 'getTimestampAndDispatchMetadata')
+          .and.returnValue({
+            timestamp: 5,
+            metadata: [],
+          });
+
+      const p = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, reference, fakeStream,
+          /* hasClosedCaptions= */ false);
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      audioSourceBuffer.updateend();
+
+      const appendBufferInfo = await p;
+      expect(appendBufferInfo.mediaTimestamp).toBe(5);
+    });
+
+    it('returns null media timestamp when none is parsed', async () => {
+      const reference = dummyReference(7, 10);
+      spyOn(mediaSourceEngine, 'getTimestampAndDispatchMetadata')
+          .and.returnValue({
+            timestamp: null,
+            metadata: [],
+          });
+
+      const p = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, reference, fakeStream,
+          /* hasClosedCaptions= */ false);
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      audioSourceBuffer.updateend();
+
+      const appendBufferInfo = await p;
+      expect(appendBufferInfo.mediaTimestamp).toBeNull();
+    });
+
     it('rejects promise when operation throws', async () => {
       const reference = dummyReference(0, 1000);
       audioSourceBuffer.appendBuffer.and.throwError('fail!');
@@ -576,7 +737,7 @@ describe('MediaSourceEngine', () => {
           shaka.util.Error.Category.MEDIA,
           shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW,
           jasmine.objectContaining({message: 'fail!'}),
-          {code: 5, message: 'something failed'},
+          jasmine.objectContaining({code: 5, message: 'something failed'}),
           reference.getUris()[0]));
       await expectAsync(
           mediaSourceEngine.appendBuffer(
@@ -743,7 +904,19 @@ describe('MediaSourceEngine', () => {
           ContentType.TEXT, data, reference, fakeStream,
           /* hasClosedCaptions= */ false);
       expect(mockTextEngine.appendBuffer).toHaveBeenCalledWith(
-          data, 0, 10, 'foo://bar');
+          data, 0, 10, 'foo://bar', -1);
+    });
+
+    it('forwards to TextEngine HLS discontinuity sequence', async () => {
+      const data = new ArrayBuffer(0);
+      expect(mockTextEngine.appendBuffer).not.toHaveBeenCalled();
+      const reference = dummyReference(0, 10);
+      reference.discontinuitySequence = 1;
+      await mediaSourceEngine.appendBuffer(
+          ContentType.TEXT, data, reference, fakeStream,
+          /* hasClosedCaptions= */ false);
+      expect(mockTextEngine.appendBuffer).toHaveBeenCalledWith(
+          data, 0, 10, 'foo://bar', 1);
     });
 
     it('appends transmuxed data', async () => {
@@ -811,6 +984,59 @@ describe('MediaSourceEngine', () => {
       expect(mockTextEngine.storeAndAppendClosedCaptions).toHaveBeenCalled();
     });
 
+    it('passed continuity timeline to caption parser', async () => {
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+
+      mockClosedCaptionParser.parseFromSpy.and.callFake((data) => {
+        return ['foo', 'bar'];
+      });
+
+      await mediaSourceEngine.init(initObject, false);
+
+      // Initialize the closed caption parser.
+      let appendInit = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ true, /* seeked= */ false,
+          /* adaptation= */ false, /* isChunkedData= */ false,
+          /* fromSplit= */ false, /* continuityTimeline= */ 0);
+      // In MediaSourceEngine, appendBuffer() is async and Promise-based, but
+      // at the browser level, it's event-based.
+      // MediaSourceEngine waits for the 'updateend' event from the
+      // SourceBuffer, and uses that to resolve the appendBuffer Promise.
+      // Here, we must trigger the event on the fake/mock SourceBuffer before
+      // waiting on the appendBuffer Promise.
+      videoSourceBuffer.updateend();
+      await appendInit;
+
+      expect(mockClosedCaptionParser.initSpy)
+          .toHaveBeenCalledWith(buffer, false, 0);
+
+      // new init segment
+      appendInit = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ true, /* seeked= */ false,
+          /* adaptation= */ false, /* isChunkedData= */ false,
+          /* fromSplit= */ false, /* continuityTimeline= */ 1);
+      videoSourceBuffer.updateend();
+      await appendInit;
+
+      expect(mockClosedCaptionParser.initSpy)
+          .toHaveBeenCalledWith(buffer, false, 1);
+
+      // new init segment
+      appendInit = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ true, /* seeked= */ false,
+          /* adaptation= */ true, /* isChunkedData= */ false,
+          /* fromSplit= */ false, /* continuityTimeline= */ 1);
+      videoSourceBuffer.updateend();
+      await appendInit;
+
+      expect(mockClosedCaptionParser.initSpy)
+          .toHaveBeenCalledWith(buffer, true, 1);
+    });
+
     it('sets timestampOffset on adaptations in sequence mode', async () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeVideoStream);
@@ -854,6 +1080,40 @@ describe('MediaSourceEngine', () => {
       expect(audioSourceBuffer.remove).toHaveBeenCalledWith(1, 5);
     });
 
+    it('caption parser is not updated on audio remove', async () => {
+      // init caption parser
+      const appendInit = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ true, /* seeked= */ false,
+          /* adaptation= */ false, /* isChunkedData= */ false,
+          /* fromSplit= */ false, /* continuityTimeline= */ 0);
+      videoSourceBuffer.updateend();
+      await appendInit;
+
+      const p = mediaSourceEngine.remove(ContentType.AUDIO, 1, 5, [0]);
+      audioSourceBuffer.updateend();
+
+      await p;
+      expect(mockClosedCaptionParser.removeSpy).not.toHaveBeenCalledWith([0]);
+    });
+
+    it('caption parser is updated on video remove', async () => {
+      // init caption parser
+      const appendInit = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ true, /* seeked= */ false,
+          /* adaptation= */ false, /* isChunkedData= */ false,
+          /* fromSplit= */ false, /* continuityTimeline= */ 0);
+      videoSourceBuffer.updateend();
+      await appendInit;
+
+      const p = mediaSourceEngine.remove(ContentType.VIDEO, 1, 5, [0]);
+      videoSourceBuffer.updateend();
+
+      await p;
+      expect(mockClosedCaptionParser.removeSpy).toHaveBeenCalledWith([0]);
+    });
+
     it('rejects promise when operation throws', async () => {
       audioSourceBuffer.remove.and.throwError('fail!');
       mockVideo.error = {code: 5};
@@ -863,7 +1123,7 @@ describe('MediaSourceEngine', () => {
           shaka.util.Error.Category.MEDIA,
           shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW,
           jasmine.objectContaining({message: 'fail!'}),
-          {code: 5},
+          jasmine.objectContaining({code: 5}),
           null));
       await expectAsync(mediaSourceEngine.remove(ContentType.AUDIO, 1, 5))
           .toBeRejectedWith(expected);
@@ -1001,11 +1261,11 @@ describe('MediaSourceEngine', () => {
       // Since the fix was to remove the implicit seek, this behavior would then
       // be removed from the mock, which would render the test useless.
 
-      // An integration test involving both StreamingEngine and MediaSourcEngine
-      // would also be problematic.  The bug involved a race, so it would be
-      // difficult to reproduce the necessary timing.  And if we succeeded, it
-      // would be tough to detect that we were definitely in a seek loop, since
-      // nothing was mocked.
+      // An integration test involving both StreamingEngine
+      // and MediaSourceEngine would also be problematic.  The bug involved
+      // a race, so it would be difficult to reproduce the necessary timing.
+      // And if we succeeded, it would be tough to detect that we were
+      // definitely in a seek loop, since nothing was mocked.
 
       // So the best option seems to be to enforce that clear() does not result
       // in a seek.  This can be done here, in a unit test on MediaSourceEngine.
@@ -1124,7 +1384,7 @@ describe('MediaSourceEngine', () => {
       await expectAsync(p1).toBeRejected();
       expect(mockMediaSource.endOfStream).toHaveBeenCalled();
       await Util.shortDelay();
-      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       audioSourceBuffer.updateend();
     });
   });
@@ -1264,7 +1524,11 @@ describe('MediaSourceEngine', () => {
     initObject.set(ContentType.VIDEO, fakeVideoStream);
     initObject.set(ContentType.AUDIO, fakeAudioStream);
 
-    /** @suppress {visibility} */
+    /**
+     * @param {!Map<shaka.util.ManifestParserUtils.ContentType,
+     *              shaka.extern.Stream>} initObject
+     * @suppress {visibility}
+     */
     async function resetMSE(initObject) {
       await mediaSourceEngine.reset_(initObject);
     }
@@ -1449,7 +1713,9 @@ describe('MediaSourceEngine', () => {
 
       audioSourceBuffer.updateend();
       await expectAsync(p1).toBeResolved();
-      await expectAsync(p2).toBeRejected();
+      // Note: Canceling a blocking operation means doing nothing more about
+      // the operation.
+      await expectAsync(p2).toBeResolved();
       await d;
     });
 
@@ -1465,7 +1731,7 @@ describe('MediaSourceEngine', () => {
     });
 
     it('destroys text engines', async () => {
-      mediaSourceEngine.reinitText('text/vtt', false, false);
+      mediaSourceEngine.reinitText('text/vtt', false);
 
       await mediaSourceEngine.destroy();
       expect(mockTextEngine).toBeTruthy();

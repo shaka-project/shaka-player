@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:ignore Rldmlu ZSBQU ZSBGY Gxhe SBQU Rpcm Rlci Fpcn Xkgb UFJP Zlcn
+
 // Test DRM-related parsing.
 describe('DashParser ContentProtection', () => {
   const Dash = shaka.test.Dash;
@@ -26,9 +28,10 @@ describe('DashParser ContentProtection', () => {
     netEngine.setDefaultText(manifestText);
     const dashParser = new shaka.dash.DashParser();
 
-    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.dash.ignoreDrmInfo = ignoreDrmInfo || false;
-    dashParser.configure(config);
+    const config = shaka.util.PlayerConfiguration.createDefault();
+    const manifestConfig = config.manifest;
+    manifestConfig.ignoreDrmInfo = ignoreDrmInfo || false;
+    dashParser.configure(manifestConfig);
 
     const playerInterface = {
       networkingEngine: netEngine,
@@ -40,8 +43,6 @@ describe('DashParser ContentProtection', () => {
       onEvent: fail,
       onError: fail,
       isLowLatencyMode: () => false,
-      isAutoLowLatencyMode: () => false,
-      enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
@@ -49,6 +50,8 @@ describe('DashParser ContentProtection', () => {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => config.streaming.retryParameters,
+      onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
 
     const actual = await dashParser.start(
@@ -86,9 +89,9 @@ describe('DashParser ContentProtection', () => {
    * Build a simple manifest with ContentProtection lines inserted into the
    * AdaptationSet and each Representation.
    *
-   * @param {!Array.<string>} adaptationSetLines
-   * @param {!Array.<string>} representation1Lines
-   * @param {!Array.<string>} representation2Lines
+   * @param {!Array<string>} adaptationSetLines
+   * @param {!Array<string>} representation1Lines
+   * @param {!Array<string>} representation2Lines
    * @return {string}
    */
   function buildManifestText(
@@ -121,8 +124,8 @@ describe('DashParser ContentProtection', () => {
   /**
    * Build an expected manifest which checks DRM-related fields.
    *
-   * @param {!Array.<!Object>} drmInfos A list of DrmInfo-like objects.
-   * @param {!Array.<string>=} keyIds The key IDs to attach to each variant.
+   * @param {!Array<!Object>} drmInfos A list of DrmInfo-like objects.
+   * @param {!Array<string>=} keyIds The key IDs to attach to each variant.
    *   Will default to the keyIds from the first drmInfo object.
    * @return {Object} A Manifest-like object.
    */
@@ -160,13 +163,21 @@ describe('DashParser ContentProtection', () => {
    * init data.
    *
    * @param {string} keySystem
-   * @param {!Array.<string>=} keyIds
-   * @param {!Array.<shaka.extern.InitDataOverride>=} initData
+   * @param {!Array<string>=} keyIds
+   * @param {!Array<shaka.extern.InitDataOverride>=} initData
    * @param {string=} encryptionScheme
    * @return {Object} A DrmInfo-like object.
    */
   function buildDrmInfo(keySystem, keyIds = [], initData = [],
       encryptionScheme = 'cenc') {
+    if (!initData.length && shaka.drm.DrmUtils.isFairPlayKeySystem(keySystem)) {
+      initData.push({
+        initDataType: 'sinf',
+        initData: new Uint8Array(0),
+        keyId: keyIds[0] || null,
+      });
+    }
+
     return jasmine.objectContaining({
       keySystem,
       encryptionScheme,
@@ -179,9 +190,9 @@ describe('DashParser ContentProtection', () => {
    * Build an expected InitDataOverride based on base-64-encoded PSSHs and
    * optional key IDs.
    *
-   * @param {!Array.<string>} base64Psshs
-   * @param {!Array.<string>=} keyIds
-   * @return {!Array.<shaka.extern.InitDataOverride>}
+   * @param {!Array<string>} base64Psshs
+   * @param {!Array<string>=} keyIds
+   * @return {!Array<shaka.extern.InitDataOverride>}
    */
   function buildInitData(base64Psshs, keyIds = []) {
     return base64Psshs.map((base64, index) => {
@@ -204,8 +215,8 @@ describe('DashParser ContentProtection', () => {
   describe('maps standard scheme IDs', () => {
     /**
      * @param {string} name A name for the test
-     * @param {!Array.<string>} uuids DRM scheme UUIDs
-     * @param {!Array.<string>} keySystems expected key system IDs
+     * @param {!Array<string>} uuids DRM scheme UUIDs
+     * @param {!Array<string>} keySystems expected key system IDs
      */
     function testKeySystemMappings(name, uuids, keySystems) {
       it(name, async () => {
@@ -411,7 +422,7 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.apple.fps'),
     ]);
     const expected = buildExpectedManifest(
-        /** @type {!Array.<shaka.extern.DrmInfo>} */(drmInfos),
+        /** @type {!Array<shaka.extern.DrmInfo>} */(drmInfos),
         [],  // key IDs
     );
     await testDashParser(source, expected);
@@ -431,7 +442,7 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.apple.fps', [], [], 'cbcs'),
     ]);
     const expected = buildExpectedManifest(
-        /** @type {!Array.<shaka.extern.DrmInfo>} */(drmInfos),
+        /** @type {!Array<shaka.extern.DrmInfo>} */(drmInfos),
         [],  // key IDs
     );
     await testDashParser(source, expected);
@@ -461,7 +472,7 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.apple.fps'),
     ]);
     const expected = buildExpectedManifest(
-        /** @type {!Array.<shaka.extern.DrmInfo>} */(drmInfos),
+        /** @type {!Array<shaka.extern.DrmInfo>} */(drmInfos),
         []);  // key IDs
     await testDashParser(source, expected, /* ignoreDrmInfo= */ true);
   });
@@ -496,6 +507,7 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.microsoft.playready', keyIds),
       buildDrmInfo('com.microsoft.playready', keyIds),
       buildDrmInfo('com.apple.fps', keyIds),
+      buildDrmInfo('com.huawei.wiseplay', keyIds),
     ], variantKeyIds);
     await testDashParser(source, expected, /* ignoreDrmInfo= */ true);
   });
@@ -1005,7 +1017,7 @@ describe('DashParser ContentProtection', () => {
         // record count
         1,
         // type
-        ContentProtection.PLAYREADY_RECORD_TYPES.RIGHTS_MANAGEMENT,
+        shaka.drm.PlayReady.PLAYREADY_RECORD_TYPES.RIGHTS_MANAGEMENT,
         // record size (in num bytes)
         laurl.length * 2,
         // value
@@ -1021,6 +1033,109 @@ describe('DashParser ContentProtection', () => {
         strToXml([
           '<test xmlns:mspr="urn:microsoft:playready">',
           '  <mspr:pro>' + encodedPrObject + '</mspr:pro>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getPlayReadyLicenseUrl(input);
+      expect(actual).toBe('www.example.com');
+    });
+
+    it('pssh version 0', () => {
+      const laurl = [
+        '<WRMHEADER>',
+        '  <DATA>',
+        '    <LA_URL>www.example.com</LA_URL>',
+        '  </DATA>',
+        '</WRMHEADER>',
+      ].join('\n');
+      const laurlCodes = laurl.split('').map((c) => {
+        return c.charCodeAt();
+      });
+      const prBytes = new Uint16Array([
+        // pr object size (in num bytes).
+        // + 10 for PRO size, count, and type
+        laurl.length * 2 + 10, 0,
+        // record count
+        1,
+        // type
+        shaka.drm.PlayReady.PLAYREADY_RECORD_TYPES.RIGHTS_MANAGEMENT,
+        // record size (in num bytes)
+        laurl.length * 2,
+        // value
+      ].concat(laurlCodes));
+      const encodedPrObject = shaka.util.Uint8ArrayUtils.toBase64(prBytes);
+      const data = shaka.util.Uint8ArrayUtils.fromBase64(encodedPrObject);
+      // PlayReady SystemID
+      const systemId = new Uint8Array([
+        0x9a, 0x04, 0xf0, 0x79, 0x98, 0x40, 0x42, 0x86,
+        0xab, 0x92, 0xe6, 0x5b, 0xe0, 0x88, 0x5f, 0x95,
+      ]);
+      const keyIds = new Set();
+      const psshVersion = 0;
+      const pssh =
+          shaka.util.Pssh.createPssh(data, systemId, keyIds, psshVersion);
+      const psshBase64 = shaka.util.Uint8ArrayUtils.toBase64(pssh);
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        encryptionScheme: null,
+        node:
+        strToXml([
+          '<test xmlns:cenc="urn:mpeg:cenc:2013">',
+          '  <cenc:pssh>' + psshBase64 + '</cenc:pssh>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getPlayReadyLicenseUrl(input);
+      expect(actual).toBe('www.example.com');
+    });
+
+    it('pssh version 1', () => {
+      const laurl = [
+        '<WRMHEADER>',
+        '  <DATA>',
+        '    <LA_URL>www.example.com</LA_URL>',
+        '  </DATA>',
+        '</WRMHEADER>',
+      ].join('\n');
+      const laurlCodes = laurl.split('').map((c) => {
+        return c.charCodeAt();
+      });
+      const prBytes = new Uint16Array([
+        // pr object size (in num bytes).
+        // + 10 for PRO size, count, and type
+        laurl.length * 2 + 10, 0,
+        // record count
+        1,
+        // type
+        shaka.drm.PlayReady.PLAYREADY_RECORD_TYPES.RIGHTS_MANAGEMENT,
+        // record size (in num bytes)
+        laurl.length * 2,
+        // value
+      ].concat(laurlCodes));
+      const encodedPrObject = shaka.util.Uint8ArrayUtils.toBase64(prBytes);
+      const data = shaka.util.Uint8ArrayUtils.fromBase64(encodedPrObject);
+      // PlayReady SystemID
+      const systemId = new Uint8Array([
+        0x9a, 0x04, 0xf0, 0x79, 0x98, 0x40, 0x42, 0x86,
+        0xab, 0x92, 0xe6, 0x5b, 0xe0, 0x88, 0x5f, 0x95,
+      ]);
+      const keyIds = new Set();
+      keyIds.add('575e49ee6270de247bb5f814a98a6b2b');
+      const psshVersion = 1;
+      const pssh =
+          shaka.util.Pssh.createPssh(data, systemId, keyIds, psshVersion);
+      const psshBase64 = shaka.util.Uint8ArrayUtils.toBase64(pssh);
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        encryptionScheme: null,
+        node:
+        strToXml([
+          '<test xmlns:cenc="urn:mpeg:cenc:2013">',
+          '  <cenc:pssh>' + psshBase64 + '</cenc:pssh>',
           '</test>',
         ].join('\n')),
       };
@@ -1115,6 +1230,52 @@ describe('DashParser ContentProtection', () => {
         node: strToXml('<test></test>'),
       };
       const actual = ContentProtection.getFairPlayLicenseUrl(input);
+      expect(actual).toBe('');
+    });
+  });
+
+  describe('getServerCertificateUri', () => {
+    it('valid dashif:Certurl node', () => {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        encryptionScheme: null,
+        node: strToXml([
+          '<test xmlns:dashif="https://dashif.org/CPS">',
+          '  <dashif:Certurl>www.example.com</dashif:Certurl>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getServerCertificateUri(input);
+      expect(actual).toBe('www.example.com');
+    });
+
+    it('dashif:Certurl without license url', () => {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        encryptionScheme: null,
+        node: strToXml([
+          '<test xmlns:dashif="https://dashif.org/CPS">',
+          '  <dashif:Certurl></dashif:Certurl>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getServerCertificateUri(input);
+      expect(actual).toBe('');
+    });
+
+    it('no dashif:Certurl node', () => {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        encryptionScheme: null,
+        node: strToXml('<test></test>'),
+      };
+      const actual = ContentProtection.getServerCertificateUri(input);
       expect(actual).toBe('');
     });
   });

@@ -310,7 +310,7 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
         'WEBVTT\n',
         '\n',
         '00:00:00.000 --> 00:00:05.000\n',
-        // eslint-disable-next-line no-tabs
+        // eslint-disable-next-line @stylistic/no-tabs
         'A A  A   A	A		A\n',
       ].join(''));
 
@@ -510,9 +510,10 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       segmentStart: 0,
       segmentEnd: 100,
       vttOffset: 0,
+      isMpegTs: false,
     };
     const textParser = new shaka.text.VttTextParser();
-    const cues = textParser.parseMedia(data, time);
+    const cues = textParser.parseMedia(data, time, null, []);
     helper.textDisplayer.append(cues);
   }
 });

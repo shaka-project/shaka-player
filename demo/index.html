@@ -24,9 +24,7 @@
 
     <title>Shaka Player Demo</title>
 
-    <link rel="preconnect" href="https://shaka-player-demo.appspot.com">
     <link rel="preconnect" href="https://www.gstatic.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="preconnect" href="https://storage.googleapis.com">
 
     <link rel="manifest" href="app_manifest.json">
@@ -35,9 +33,6 @@
     <link rel="stylesheet" href="../dist/demo.css">
     <link rel="stylesheet" href="../dist/controls.css">
 
-    <script defer src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
-    <!-- MSS support is enabled by including this: -->
-    <script defer src="../node_modules/codem-isoboxer/dist/iso_boxer.min.js"></script>
     <!-- MPEG-5 Part2 LCEVC support is enabled by including this: -->
     <script defer src="../node_modules/lcevc_dec.js/dist/lcevc_dec.min.js"></script>
     <!-- MDL is enabled by including this: -->
@@ -61,14 +56,14 @@
 
     <script>
 COMPILED_JS = [
-  // The compiled library, with UI.
-  '../dist/shaka-player.ui.js',
+  // The compiled library, with all features + experimental.
+  '../dist/shaka-player.experimental.js',
   // The compiled demo.
   '../dist/demo.compiled.js',
 ];
 COMPILED_DEBUG_JS = [
-  // The compiled library, with UI, debug mode.
-  '../dist/shaka-player.ui.debug.js',
+  // The compiled library, with all features + experimental, debug mode.
+  '../dist/shaka-player.experimental.debug.js',
   // The compiled demo.
   '../dist/demo.compiled.debug.js',
 ];
@@ -78,8 +73,6 @@ UNCOMPILED_JS = [
   '../dist/deps.js',
   // This is required for goog.asserts.
   '../lib/debug/asserts.js',
-  // Compiled into Shaka Player, but outside of the Closure deps system.
-  '../node_modules/eme-encryption-scheme-polyfill/index.js',
   // This file contains goog.require calls for all exported library classes.
   '../shaka-player.uncompiled.js',
   // Enable less, the CSS pre-processor.
@@ -116,7 +109,7 @@ UNCOMPILED_JS = [
         <div id="hamburger-menu-title" class="mdl-layout-title">
           <div>Shaka Player Demo Config</div>
           <div class="mdl-layout-spacer"></div>
-          <button id="drawer-close-button" class="mdl-button mdl-js-button mdl-button--icon should-disable-on-fail"><i class="material-icons-round">close</i></button>
+          <button id="drawer-close-button" class="mdl-button mdl-js-button mdl-button--icon should-disable-on-fail"><svg class="demo-icon" viewBox="0 -960 960 960" aria-hidden="true"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg></button>
         </div>
         <nav class="mdl-navigation" id="hamburger-menu-contents">
         </nav>

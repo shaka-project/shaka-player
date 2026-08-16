@@ -24,55 +24,74 @@
  * SOFTWARE.
  */
 
-@material-icons-width: 32px;
-
-.translateX(@percent) {
-  -webkit-transform: translateX(percentage(@percent));
-  -moz-transform: translateX(percentage(@percent));
-  -ms-transform: translateX(percentage(@percent));
-  -o-transform: translateX(percentage(@percent));
-  transform: translateX(percentage(@percent));
-}
-
 /* .shaka-tooltips-on enables the tooltips and is only added to the
  * control panel when the 'enableTooltips' option is set to true */
 .shaka-tooltips-on {
   overflow: visible;
 
-  & > [class*="shaka-tooltip"] {
+  & > .shaka-tooltip,
+  & > .shaka-tooltip-status {
     position: relative;
 
     /* The :after pseudo-element contains the tooltip */
-    &:hover:after, &:focus-visible:after, &:active:after {
+    &:hover:after,
+    &:focus-visible:after,
+    &:active:after {
       content: attr(aria-label);
 
-      /* Override .material-icons-round text styling */
-      font-family: Roboto, sans-serif, TengwarTelcontar;
-      line-height: calc(@material-icons-width / 2);
+      line-height: 1.2;
       white-space: nowrap;
-      font-size: 13px;
+      font-size: var(--shaka-font-size);
 
       /* Styling */
-      background: rgba(35 35 35 / 90%);
-      color: white;
-      border-radius: 3px;
-      padding: 5px 10px;
+      background: var(--shaka-bg);
+      color: var(--shaka-font-color);
+      border-radius: 2px;
+      padding: 2px 10px;
 
       /* Positioning */
       position: absolute;
-      bottom: calc(@material-icons-width + 5px);
+      bottom: calc(var(--shaka-icon-size) + 14px);
 
       /* Left attribute is set to half of the width of the parent button */
-      left: calc(@material-icons-width / 2);
+      left: calc(var(--shaka-icon-size) / 2);
 
       /* The tooltip is also translated 50% to appear centered */
-      .translateX(-0.5);
+      transform: translateX(-50%);
+
+      @media (prefers-reduced-transparency) {
+        background-color: var(--shaka-bg-90);
+      }
+    }
+  }
+
+  // If the seekbar is missing, this is positioned lower.
+  &.shaka-tooltips-bottom {
+    & > .shaka-tooltip {
+      &:hover:after,
+      &:focus-visible:after,
+      &:active:after {
+        bottom: calc(var(--shaka-icon-size) / 2 * -1);
+      }
+    }
+  }
+
+  // If the seekbar is missing, this is positioned lower.
+  &.shaka-tooltips-low-position {
+    & > .shaka-tooltip {
+      &:hover:after,
+      &:focus-visible:after,
+      &:active:after {
+        bottom: var(--shaka-icon-size);
+      }
     }
   }
 
   /* Adds an additional attribute for the status in .shaka-tooltip-status */
   & > .shaka-tooltip-status {
-    &:hover:after, &:focus-visible:after, &:active:after {
+    &:hover:after,
+    &:focus-visible:after,
+    &:active:after {
       content: attr(aria-label) " (" attr(shaka-status) ")";
     }
   }
@@ -80,18 +99,22 @@
   /* The first tooltip of the panel is not centered on top of the button
    * but rather aligned with the left border of the control panel */
   button:first-child {
-    &:hover:after, &:focus-visible:after, &:active:after {
+    &:hover:after,
+    &:focus-visible:after,
+    &:active:after {
       left: 0;
-      .translateX(0);
+      transform: translateX(0);
     }
   }
 
   /* The last tooltip of the panel is not centered on top of the button
    * but rather aligned with the right border of the control panel */
   button:last-child {
-    &:hover:after, &:focus-visible:after,&:active:after {
-      left: @material-icons-width;
-      .translateX(-1);
+    &:hover:after,
+    &:focus-visible:after,
+    &:active:after {
+      left: var(--shaka-icon-size);
+      transform: translateX(-100%);
     }
   }
 }

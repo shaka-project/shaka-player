@@ -6,7 +6,7 @@
 
 /**
  * @fileoverview Defines simple mocks for library types.
- * @suppress {checkTypes} Suppress errors about missmatches between the
+ * @suppress {checkTypes} Suppress errors about mismatches between the
  *   definition and the interface.  This allows us to have the members be
  *   |jasmine.Spy|.  BE CAREFUL IN THIS FILE.
  */
@@ -21,7 +21,7 @@ shaka.test.FakeAbrManager = class {
     /** @type {number} */
     this.chooseIndex = 0;
 
-    /** @type {!Array.<shaka.extern.Variant>} */
+    /** @type {!Array<shaka.extern.Variant>} */
     this.variants = [];
 
     /** @type {shaka.extern.AbrManager.SwitchCallback} */
@@ -45,6 +45,9 @@ shaka.test.FakeAbrManager = class {
     this.disable = jasmine.createSpy('disable');
 
     /** @type {!jasmine.Spy} */
+    this.trySuggestStreams = jasmine.createSpy('trySuggestStreams');
+
+    /** @type {!jasmine.Spy} */
     this.segmentDownloaded = jasmine.createSpy('segmentDownloaded');
 
     /** @type {!jasmine.Spy} */
@@ -62,6 +65,12 @@ shaka.test.FakeAbrManager = class {
 
     /** @type {!jasmine.Spy} */
     this.playbackRateChanged = jasmine.createSpy('playbackRateChanged');
+
+    /** @type {!jasmine.Spy} */
+    this.setMediaElement = jasmine.createSpy('setMediaElement');
+
+    /** @type {!jasmine.Spy} */
+    this.setCmsdManager = jasmine.createSpy('setCmsdManager');
 
     /** @type {!jasmine.Spy} */
     this.configure = jasmine.createSpy('configure');
@@ -156,10 +165,10 @@ shaka.test.FakeManifestParser = class {
 shaka.test.FakeVideo = class {
   /** @param {number=} currentTime */
   constructor(currentTime) {
-    /** @const {!Object.<string, !Function>} */
+    /** @const {!Object<string, !Function>} */
     this.on = {};  // event listeners
 
-    /** @type {!Array.<!TextTrack>} */
+    /** @type {!Array<!TextTrack>} */
     this.textTracks = [];
 
     // In a real video element, textTracks is an event target.
@@ -192,6 +201,10 @@ shaka.test.FakeVideo = class {
     this.offsetHeight = 1000;
     /** @private {!Array<!Element>} */
     this.children_ = [];
+    this.ownerDocument = {
+      // We just need to fake createElement for tracks.
+      createElement: (tagName) => new shaka.test.FakeTrackElement(),
+    };
 
     /** @type {!jasmine.Spy} */
     this.addTextTrack =
@@ -240,7 +253,36 @@ shaka.test.FakeVideo = class {
     this.appendChild =
       jasmine.createSpy('appendChild').and.callFake((element) => {
         this.children_.push(element);
+        if (element.tagName === 'TRACK') {
+          element.parentNode = this;
+          this.textTracks.push(element.track);
+
+          const trackEvent = new shaka.util.FakeEvent(
+              'addtrack',
+              {track: element.track},
+          );
+          this.textTracksEventTarget.dispatchEvent(trackEvent);
+        }
       });
+
+    this.removeChild = jasmine.createSpy('removeChild').and.callFake(
+        (element) => {
+          const idx = this.children_.indexOf(element);
+          expect(idx).not.toBeLessThan(0);
+          this.children_.splice(idx, 1);
+          if (element.tagName === 'TRACK') {
+            element.parentNode = null;
+            const idx = this.textTracks.indexOf(element.track);
+            expect(idx).not.toBeLessThan(0);
+            this.textTracks.splice(idx, 1);
+            const trackEvent = new shaka.util.FakeEvent(
+                'removetrack',
+                {track: element.track},
+            );
+            this.textTracksEventTarget.dispatchEvent(trackEvent);
+          }
+        },
+    );
 
     /** @type {!jasmine.Spy} */
     this.getElementsByTagName =
@@ -251,10 +293,42 @@ shaka.test.FakeVideo = class {
   }
 };
 
+shaka.test.FakeTrackElement = class {
+  constructor() {
+    /** @type {string} */
+    this.tagName = 'TRACK';
+
+    /** @type {string} */
+    this.kind = 'subtitles';
+
+    /** @type {string} */
+    this.label = 'Fake Track';
+
+    /** @type {string} */
+    this.language = 'en';
+
+    /** @type {?shaka.test.FakeVideo} */
+    this.parentNode = null;
+
+    /** @type {!jasmine.Spy} */
+    this.track = new shaka.test.FakeTextTrack();
+
+    /** @const {!Object<string, !Function>} */
+    this.on = {};  // event listeners
+
+    /** @type {!jasmine.Spy} */
+    this.remove = jasmine.createSpy('remove').and.callFake(() => {
+      if (this.parentNode) {
+        this.parentNode.removeChild(this);
+      }
+    });
+  }
+};
+
 /**
  * Creates a fake buffered ranges object.
  *
- * @param {!Array.<{start: number, end: number}>} ranges
+ * @param {!Array<{start: number, end: number}>} ranges
  * @return {!TimeRanges}
  */
 function createFakeBuffered(ranges) {
@@ -304,6 +378,10 @@ shaka.test.FakePresentationTimeline = class {
         jasmine.createSpy('getPresentationStartTime');
 
     /** @type {!jasmine.Spy} */
+    this.getInitialProgramDateTime =
+        jasmine.createSpy('getInitialProgramDateTime');
+
+    /** @type {!jasmine.Spy} */
     this.setClockOffset = jasmine.createSpy('setClockOffset');
 
     /** @type {!jasmine.Spy} */
@@ -318,6 +396,9 @@ shaka.test.FakePresentationTimeline = class {
 
     /** @type {!jasmine.Spy} */
     this.isLive = jasmine.createSpy('isLive');
+
+    /** @type {!jasmine.Spy} */
+    this.isDynamic = jasmine.createSpy('isDynamic');
 
     /** @type {!jasmine.Spy} */
     this.isInProgress = jasmine.createSpy('isInProgress');
@@ -402,7 +483,7 @@ shaka.test.FakeTextTrack = class {
     // "extend" TextTrack, so it won't let us assign to cues here.  But we
     // must, because this fake is a from-scratch implementation of the API.
     // This cast-hack works around the issue.
-    /** @type {!Array.<TextTrackCue>} */
+    /** @type {!Array<TextTrackCue>} */
     const cues = [];
     (/** @type {?} */(this))['cues'] = cues;
 
@@ -425,7 +506,6 @@ shaka.test.FakeTextTrack = class {
  * provide behaviours for the underlying spies. If no behaviour is provided all
  * calls to the parser will act as NO-OPs.
  *
- * @implements {shaka.media.IClosedCaptionParser}
  * @final
  */
 shaka.test.FakeClosedCaptionParser = class {
@@ -436,11 +516,13 @@ shaka.test.FakeClosedCaptionParser = class {
     this.parseFromSpy = jasmine.createSpy('parseFrom');
     /** @type {!jasmine.Spy} */
     this.resetSpy = jasmine.createSpy('reset');
+    /** @type {!jasmine.Spy} */
+    this.removeSpy = jasmine.createSpy('remove');
   }
 
   /** @override */
-  init() {
-    return shaka.test.Util.invokeSpy(this.initSpy);
+  init(...args) {
+    return shaka.test.Util.invokeSpy(this.initSpy, ...args);
   }
 
   /** @override */
@@ -451,6 +533,11 @@ shaka.test.FakeClosedCaptionParser = class {
   /** @override */
   reset() {
     return shaka.test.Util.invokeSpy(this.resetSpy);
+  }
+
+  /** @override */
+  remove(continuityTimelines) {
+    return shaka.test.Util.invokeSpy(this.removeSpy, continuityTimelines);
   }
 };
 
@@ -498,15 +585,17 @@ shaka.test.FakeSegmentIndex = class {
 
     /** @type {!jasmine.Spy} */
     this.getIteratorForTime = jasmine.createSpy('getIteratorForTime')
-        .and.callFake((time) => {
+        .and.callFake((time, allowNonIndependent = false, reverse = false) => {
+          let step = reverse ? -1 : 1;
           let nextPosition = this.find(time);
           if (nextPosition == null) {
-            nextPosition = this.getNumReferences();
+            nextPosition = reverse ? -1 : this.getNumReferences();
           }
 
           return {
             next: () => {
-              const value = this.get(nextPosition++);
+              const value = this.get(nextPosition);
+              nextPosition += step;
               return {
                 value,
                 done: !value,
@@ -514,7 +603,7 @@ shaka.test.FakeSegmentIndex = class {
             },
 
             current: () => {
-              return this.get(nextPosition - 1);
+              return this.get(nextPosition - step);
             },
 
             currentPosition: () => {
@@ -523,10 +612,14 @@ shaka.test.FakeSegmentIndex = class {
 
             seek: (time) => {
               nextPosition = this.find(time);
-              return this.get(nextPosition++);
+              const value = this.get(nextPosition);
+              nextPosition += step;
+              return value;
             },
 
-            setReverse: () => {},
+            setReverse: (newReverse) => {
+              step = newReverse ? -1 : 1;
+            },
 
             resetToLastIndependent: () => {},
           };

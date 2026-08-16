@@ -14,6 +14,7 @@
  *    name: string,
  *    parser: !shaka.util.Mp4Parser,
  *    partialOkay: boolean,
+ *    stopOnPartial: boolean,
  *    start: number,
  *    size: number,
  *    version: ?number,
@@ -33,6 +34,8 @@
  *   child box, we can sometimes find it without enough data to find all child
  *   boxes. This property allows the partialOkay flag from parse() to be
  *   propagated through methods like children().
+ * @property {boolean} stopOnPartial
+ *   If true, stop reading if an incomplete box is detected.
  * @property {number} start
  *   The start of this box (before the header) in the original buffer. This
  *   start position is the absolute position.

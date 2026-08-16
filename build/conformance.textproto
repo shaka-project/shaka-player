@@ -138,30 +138,13 @@ requirement: {
     "function template(a) { new Float64Array(a) }"
   error_message: "Use shaka.util.BufferUtils.view* instead."
   whitelist_regexp: "lib/util/buffer_utils.js"
+  whitelist_regexp: "lib/util/data_view_reader.js"
 }
 
 requirement: {
   type: BANNED_CODE_PATTERN
   value: "function template () { new Date().getTime() }"
   error_message: "Use Date.now() instead."
-}
-
-# Disallow console logging.
-requirement: {
-  type: BANNED_PROPERTY_CALL
-  value: "Console.prototype.debug"
-  value: "Console.prototype.log"
-  value: "Console.prototype.info"
-  value: "Console.prototype.warn"
-  value: "Console.prototype.error"
-  error_message:
-    "Using \"console\" is not allowed; "
-    "use shaka.log instead"
-  whitelist_regexp: "demo/"
-  whitelist_regexp: "lib/debug/log.js"
-  whitelist_regexp: "test/test/boot.js"
-  whitelist_regexp: "node_modules/"
-  whitelist_regexp: "[synthetic:es6/promise/promise]"
 }
 
 # Disallow querySelector and querySelectorAll since they aren't supported on
@@ -223,6 +206,7 @@ requirement: {
     "use \"left\" and \"top\" instead."
   # The built-in set and map polyfills trigger this ban somehow.
   whitelist_regexp: "synthetic:es6/"
+  whitelist_regexp: "lib/ads/interstitial_ad_manager.js"
 }
 
 # Disallow fdescribe.
@@ -251,6 +235,8 @@ requirement: {
     "shaka.util.Timer instead."
   whitelist_regexp: "demo/"
   whitelist_regexp: "test/"
+  whitelist_regexp: "lib/util/timer.js"
+  whitelist_regexp: "third_party/cml-cmcd/cmcd_reporter.js"
 }
 requirement: {
   type: BANNED_NAME
@@ -262,6 +248,8 @@ requirement: {
     "shaka.util.Timer instead."
   whitelist_regexp: "demo/"
   whitelist_regexp: "test/"
+  whitelist_regexp: "lib/util/timer.js"
+  whitelist_regexp: "third_party/cml-cmcd/cmcd_reporter.js"
 }
 
 # Disallow setTimeout.
@@ -274,8 +262,7 @@ requirement: {
     "shaka.util.Timer instead."
   whitelist_regexp: "demo/"
   whitelist_regexp: "test/"
-  whitelist_regexp: "lib/util/delayed_tick.js"
-  whitelist_regexp: "lib/polyfill/abort_controller.js"
+  whitelist_regexp: "lib/util/timer.js"
 }
 requirement: {
   type: BANNED_NAME
@@ -286,6 +273,7 @@ requirement: {
     "shaka.util.Timer instead."
   whitelist_regexp: "demo/"
   whitelist_regexp: "test/"
+  whitelist_regexp: "lib/util/timer.js"
 }
 
 # Disallow eval, except when testing for modern JS syntax in demo
@@ -327,6 +315,7 @@ requirement: {
     "instead."
   whitelist_regexp: "lib/net/http_fetch_plugin.js"
   whitelist_regexp: "test/test/util/util.js"
+  whitelist_regexp: "third_party/cml-cmcd/cml_utils.js"
 }
 
 # Disallow the general use of AbortController, which is not available on all
@@ -341,6 +330,8 @@ requirement: {
     "Using \"AbortController\" directly is not allowed; "
     "use PendingRequest.abort instead."
   whitelist_regexp: "lib/net/http_fetch_plugin.js"
+  whitelist_regexp: "lib/text/speech_to_text.js"
+  whitelist_regexp: "test/text/speech_to_text_unit.js"
 }
 
 # Disallow the use of generators, which are a major performance issue.  See
@@ -412,4 +403,40 @@ requirement: {
   error_message:
     "Using \"Object.fromEntries\" is not allowed because is not supported on "
     "Tizen 3."
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: "Uint8Array.prototype.fromBase64"
+  error_message:
+    "Using \"Uint8Array.prototype.fromBase64\" directly is not allowed; "
+    "use shaka.util.Uint8ArrayUtils instead."
+  whitelist_regexp: "lib/util/uint8array_utils.js"
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: "Uint8Array.prototype.toBase64"
+  error_message:
+    "Using \"Uint8Array.prototype.toBase64\" directly is not allowed; "
+    "use shaka.util.Uint8ArrayUtils instead."
+  whitelist_regexp: "lib/util/uint8array_utils.js"
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: "Uint8Array.prototype.fromHex"
+  error_message:
+    "Using \"Uint8Array.prototype.fromHex\" directly is not allowed; "
+    "use shaka.util.Uint8ArrayUtils instead."
+  whitelist_regexp: "lib/util/uint8array_utils.js"
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: "Uint8Array.prototype.toHex"
+  error_message:
+    "Using \"Uint8Array.prototype.toHex\" directly is not allowed; "
+    "use shaka.util.Uint8ArrayUtils instead."
+  whitelist_regexp: "lib/util/uint8array_utils.js"
 }

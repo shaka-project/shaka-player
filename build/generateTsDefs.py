@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2016 Google LLC
 #
@@ -67,6 +67,11 @@ def GenerateTsDefs(inputs, output):
   # "Promise | null | undefined" doesn't work in TypeScript.  We need to use
   # "Promise | void" instead.
   contents = contents.replace(b'| null | undefined', b'| void')
+  # Fix chained 'extends' syntax like 'extends A extends B' to 'extends A, B'
+  contents = re.sub(
+      br'extends\s+([^\s]+)\s+extends\s+([^\s]+)',
+      br'extends \1, \2',
+      contents, flags=re.MULTILINE)
   # shaka.util.Error extends Error and implements shaka.extern.Error, but this
   # confuses TypeScript when both are called "Error" in context of the namespace
   # declaration for "shaka.util".  Therefore we need to declare this
@@ -74,7 +79,7 @@ def GenerateTsDefs(inputs, output):
   global_error_def = b'declare class GlobalError extends Error {}\n\n'
   contents = global_error_def + contents
   # There are some types that implement multiple interfaces, such as IReleasable
-  # and Iteratable.  Also, there are tools used inside Google that (for some
+  # and Iterable.  Also, there are tools used inside Google that (for some
   # reason) want to convert TS defs _BACK_ into Closure Compiler externs.  When
   # that happens, these multiple implementors generate externs with broken
   # @implements annotations.  Since this team can't control that process or
@@ -102,6 +107,7 @@ def GenerateTsDefs(inputs, output):
     f.write(license_header)
     f.write(b'\n')
     f.write(contents)
+    f.write(b'\nexport default shaka;\n')
 
 
 def CreateParser():

@@ -17,3 +17,15 @@ var PalmSystem = {};
 
 /** @type {string} */
 PalmSystem.deviceInfo;
+
+
+/** @constructor */
+function PalmServiceBridge() {}
+
+
+/** @type {?Function} */
+PalmServiceBridge.prototype.onservicecallback;
+
+
+/** @type {Function} */
+PalmServiceBridge.prototype.call = function() {};

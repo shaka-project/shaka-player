@@ -7,11 +7,11 @@
 /**
  * A fake DrmEngine.
  *
- * @extends {shaka.media.DrmEngine}
+ * @extends {shaka.drm.DrmEngine}
  */
 shaka.test.FakeDrmEngine = class {
   constructor() {
-    /** @private {!Array.<string>} */
+    /** @private {!Array<string>} */
     this.offlineSessions_ = [];
     /** @private {?shaka.extern.DrmInfo} */
     this.drmInfo_ = null;
@@ -45,6 +45,10 @@ shaka.test.FakeDrmEngine = class {
       const num = 1 + this.offlineSessions_.length;
       this.offlineSessions_.push('session-' + num);
     });
+
+    /** @type {!jasmine.Spy} */
+    this.waitForActiveRequests = jasmine.createSpy('waitForActiveRequests');
+    this.waitForActiveRequests.and.returnValue(Promise.resolve());
 
     /** @type {!jasmine.Spy} */
     this.getExpiration = jasmine.createSpy('getExpiration');
@@ -94,7 +98,7 @@ shaka.test.FakeDrmEngine = class {
   }
 
   /**
-   * @param {!Array.<string>} sessions
+   * @param {!Array<string>} sessions
    */
   setSessionIds(sessions) {
     // Copy the values to break the reference to the input value.

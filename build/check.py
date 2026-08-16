@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2016 Google LLC
 #
@@ -17,7 +17,7 @@
 """This is used to validate that the library is correct.
 
 This checks:
- * All files in lib/ appear when compiling +@complete
+ * All files in lib/ appear in +@complete or another standalone build type
  * Runs a compiler pass over the test code to check for type errors
  * Run the linter to check for style violations.
 """
@@ -48,7 +48,11 @@ def complete_build_files():
   # Normally we don't need to include @core, but because we look at the build
   # object directly, we need to include it here.  When using main(), it will
   # call addCore which will ensure core is included.
-  if not complete.parse_build(['+@complete', '+@core'], os.getcwd()):
+  #
+  # Standalone build types are included here so their entry points are covered
+  # by the "all files are in a build" invariant without bloating +@complete.
+  if not complete.parse_build(
+      ['+@complete', '+@core', '+@transmuxer-worker'], os.getcwd()):
     logging.error('Error parsing complete build')
     return False
   return complete.include
@@ -56,19 +60,18 @@ def complete_build_files():
 def get_lint_files():
   """Returns the absolute paths to all the files to run the linter over."""
   base = shakaBuildHelpers.get_source_base()
-  get = shakaBuildHelpers.get_all_js_files
-  main_sources = (
-      get('lib') +
+  main_sources = [
+      os.path.join(base, 'lib'),
       # TODO: get third_party/closure-uri in compliance and then lint it.
       # get('third_party') +
-      get('ui') +
-      get('externs') +
-      get('test') +
-      get('demo') +
-      get('build'))
-  main_sources.remove(os.path.join(base, 'build', 'wrapper.template.js'))
+      os.path.join(base, 'ui'),
+      os.path.join(base, 'externs'),
+      os.path.join(base, 'test'),
+      os.path.join(base, 'demo'),
+      os.path.join(base, 'build'),
+  ]
   tool_sources = [
-      os.path.join(base, '.eslintrc.js'),
+      os.path.join(base, 'eslint.config.mjs'),
       os.path.join(base, 'docs', 'jsdoc-plugin.js'),
       os.path.join(base, 'karma.conf.js'),
   ]
@@ -82,7 +85,7 @@ def check_js_lint(args):
   logging.info('Linting JavaScript...')
 
   base = shakaBuildHelpers.get_source_base()
-  config_path = os.path.join(base, '.eslintrc.js')
+  config_path = os.path.join(base, 'eslint.config.mjs')
 
   linter = compiler.Linter(get_lint_files(), config_path)
   return linter.lint(fix=args.fix, force=args.force)
@@ -121,7 +124,7 @@ def check_html_lint(args):
 
 @_Check('complete')
 def check_complete(_):
-  """Checks whether the 'complete' build references every file.
+  """Checks whether the build type definitions reference every file.
 
   This is used by the build script to ensure that every file is included in at
   least one build type.
@@ -150,114 +153,29 @@ def check_complete(_):
     return False
   return True
 
-
 @_Check('spelling')
 def check_spelling(_):
-  """Checks that source files don't have any common misspellings."""
-  logging.info('Checking for common misspellings...')
-
-  complete_build = complete_build_files()
-  if not complete_build:
-    return False
-
   base = shakaBuildHelpers.get_source_base()
-  complete_build.update(shakaBuildHelpers.get_all_js_files('test'))
-  complete_build.update(shakaBuildHelpers.get_all_js_files('demo'))
-  complete_build.update(shakaBuildHelpers.get_all_js_files('externs'))
-  complete_build.update(shakaBuildHelpers.get_all_files(
-      os.path.join(base, 'build'), re.compile(r'.*\.(js|py)$')))
-
-  with shakaBuildHelpers.open_file(
-      os.path.join(base, 'build', 'misspellings.txt')) as f:
-    misspellings = ast.literal_eval(f.read())
-  has_error = False
-  for path in complete_build:
-    with shakaBuildHelpers.open_file(path) as f:
-      for i, line in enumerate(f):
-        for regex, replace_pattern in misspellings.items():
-          for match in re.finditer(regex, line):
-            repl = match.expand(replace_pattern).lower()
-            if match.group(0).lower() == repl:
-              continue  # No-op suggestion
-
-            if not has_error:
-              logging.error('The following file(s) have misspellings:')
-            logging.error(
-                '  %s:%d:%d: Did you mean %r?' %
-                (os.path.relpath(path, base), i + 1, match.start() + 1, repl))
-            has_error = True
-
-  return not has_error
-
-
-@_Check('eslint_disable')
-def check_eslint_disable(_):
-  """Checks that source files correctly use "eslint-disable".
-
-  - Rules are disabled/enabled in nested blocks.
-  - Rules are not disabled multiple times.
-  - Rules are enabled again by the end of the file.
-
-  Returns:
-    True on success, False on failure.
-  """
-  logging.info('Checking correct usage of eslint-disable...')
-
-  complete_build = complete_build_files()
-  if not complete_build:
+  config_path = os.path.join(base, 'cspell.config.yaml')
+  lint_files = get_lint_files()
+  py_match = re.compile(r'.*\.py$')
+  py_files = shakaBuildHelpers.get_all_files(
+        os.path.join(base, 'build'), py_match)
+  md_match = re.compile(r'.*\.md$')
+  md_files = shakaBuildHelpers.get_all_files(
+        os.path.join(base, 'docs'), md_match)
+  cspell = shakaBuildHelpers.get_node_binary('cspell')
+  cmd_line = cspell + ['--config=' + config_path] + ['--no-progress']
+  logging.info('Checking for spelling mistakes in js files...')
+  if shakaBuildHelpers.execute_get_code(cmd_line + lint_files) != 0:
     return False
-
-  base = shakaBuildHelpers.get_source_base()
-  complete_build.update(shakaBuildHelpers.get_all_js_files('test'))
-  complete_build.update(shakaBuildHelpers.get_all_js_files('demo'))
-
-  has_error = False
-  for path in complete_build:
-    # The stack of rules that are disabled.
-    disabled = []
-
-    with shakaBuildHelpers.open_file(path, 'r') as f:
-      rel_path = os.path.relpath(path, base)
-      for i, line in enumerate(f):
-        match = re.match(r'^\s*/\* eslint-(disable|enable) ([\w-]*) \*/$', line)
-        if match:
-          if match.group(1) == 'disable':
-            # |line| disables a rule; validate it isn't already disabled.
-            if match.group(2) in disabled:
-              logging.error('%s:%d Rule %r already disabled',
-                            rel_path, i + 1, match.group(2))
-              has_error = True
-            else:
-              disabled.append(match.group(2))
-          else:
-            # |line| enabled a rule; validate it's already disabled and it's
-            # enabled in the correct order.
-            if not disabled or match.group(2) not in disabled:
-              logging.error("%s:%d Rule %r isn't disabled",
-                            rel_path, i + 1, match.group(2))
-              has_error = True
-            elif disabled[-1] != match.group(2):
-              logging.error('%s:%d Rule %r enabled out of order',
-                            rel_path, i + 1, match.group(2))
-              has_error = True
-              disabled = [x for x in disabled if x != match.group(2)]
-            else:
-              disabled = disabled[:-1]
-        else:
-          # |line| is not a normal eslint-disable or eslint-enable line.  Verify
-          # we don't have this text elsewhere where eslint will ignore it.
-          if re.search(r'eslint-(disable|enable)(?!-(next-)?line)', line):
-            logging.error('%s:%d Invalid eslint-disable',
-                          rel_path, i + 1)
-            has_error = True
-
-      for rule in disabled:
-        logging.error('%s:%d Rule %r still disabled at end of file',
-                      rel_path, i + 1, rule)
-        has_error = True
-
-  return not has_error
-
+  logging.info('Checking for spelling mistakes in md files...')
+  if shakaBuildHelpers.execute_get_code(cmd_line + md_files) != 0:
+    return False
+  logging.info('Checking for spelling mistakes in py files...')
+  if shakaBuildHelpers.execute_get_code(cmd_line + py_files) != 0:
+    return False
+  return True
 
 @_Check('test_type')
 def check_tests(args):
@@ -276,6 +194,24 @@ def check_tests(args):
   closure_base_js = shakaBuildHelpers.get_closure_base_js_path()
   get = shakaBuildHelpers.get_all_js_files
 
+  localizations = compiler.GenerateLocalizations(None)
+  localizations.generate(args.force)
+
+  # Generate a standalone externs file with the shaka namespace typedef, so the
+  # tests can refer to the whole library namespace in a type-safe way without a
+  # hand-maintained typedef.  We use the complete build's sources (plus the
+  # generated localizations they depend on) so the typedef covers every
+  # top-level namespace that the tests might reference.  This is done before the
+  # test and externs files are added below, since those are not part of the
+  # library namespace.
+  node_modules_path = os.path.join(base, 'node_modules')
+  namespace_sources = [f for f in complete_build if node_modules_path not in f]
+  namespace_sources.append(localizations.output)
+  namespace_externs = compiler.NamespaceExternGenerator(
+      namespace_sources, 'shaka-namespace')
+  if not namespace_externs.generate(args.force):
+    return False
+
   files = complete_build
   files.update(set(
       get('externs') +
@@ -283,10 +219,8 @@ def check_tests(args):
       [closure_base_js]))
   files.add(os.path.join(base, 'demo', 'common', 'asset.js'))
   files.add(os.path.join(base, 'demo', 'common', 'assets.js'))
-
-  localizations = compiler.GenerateLocalizations(None)
-  localizations.generate(args.force)
   files.add(localizations.output)
+  files.add(namespace_externs.output)
 
   closure_opts = build.common_closure_opts + build.common_closure_defines
   closure_opts += build.debug_closure_opts + build.debug_closure_defines

@@ -63,6 +63,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-raw-aac/manifest.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -76,12 +78,19 @@ describe('Transmuxer Player', () => {
     });
 
     it('raw MP3', async () => {
-      if (!await Util.isTypeSupported('audio/mp4; codecs="mp3"')) {
-        pending('Codec MP3 in MP4 is not supported by the platform.');
+      if (!await Util.isTypeSupported('audio/mp4; codecs="mp3"') &&
+        !await Util.isTypeSupported('audio/mpeg')) {
+        pending('Codec MP3 is not supported by the platform.');
+      }
+      // This tests is flaky in some Tizen devices, so we need omit it for now.
+      if (deviceDetected.getDeviceName() === 'Tizen') {
+        pending('Disabled on Tizen.');
       }
       await player.load('/base/test/test/assets/hls-raw-mp3/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -102,6 +111,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-raw-ac3/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -122,6 +133,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-raw-ec3/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -138,6 +151,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-raw-aac/index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -154,6 +169,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-aac/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -172,12 +189,14 @@ describe('Transmuxer Player', () => {
         pending('Codec MP3 is not supported by the platform.');
       }
       // This tests is flaky in some Tizen devices, so we need omit it for now.
-      if (shaka.util.Platform.isTizen()) {
-        return;
+      if (deviceDetected.getDeviceName() === 'Tizen') {
+        pending('Disabled on Tizen.');
       }
       await player.load('/base/test/test/assets/hls-ts-mp3/manifest.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -198,6 +217,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-ac3/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -218,6 +239,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-ec3/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(0);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -236,6 +259,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-h264/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(0);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -248,6 +273,19 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
+    it('H.264 in TS with b-frames', async () => {
+      await player.load('/base/test/test/assets/hls-ts-b-frames/index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(0);
+      expect(player.getVideoTracks().length).toBe(1);
+
+      // Play for 30 seconds, but stop early if the video ends.
+      await waiter.waitForEndOrTimeout(video, 30);
+
+      await player.unload();
+    });
+
     it('H.265 in TS', async () => {
       if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L123.B0"',
           /* width= */ 640, /* height= */ 360)) {
@@ -256,6 +294,8 @@ describe('Transmuxer Player', () => {
       await player.load('/base/test/test/assets/hls-ts-h265/hevc.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(0);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -271,10 +311,12 @@ describe('Transmuxer Player', () => {
 
   describe('for muxed content', () => {
     it('H.264+AAC in TS', async () => {
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -288,10 +330,11 @@ describe('Transmuxer Player', () => {
     });
 
     it('H.264+AAC in TS with rollover', async () => {
-      // eslint-disable-next-line max-len
       await player.load('/base/test/test/assets/hls-ts-rollover/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -309,23 +352,56 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
+    it('H.264+AAC with AAC sample with overflow aac samples', async () => {
+      // eslint-disable-next-line @stylistic/max-len
+      await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264-with-overflow-samples/media.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for e seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 3, 45);
+
+      await player.unload();
+    });
+
+    it('H.264+AAC with AAC sample with overflow nalus', async () => {
+      // eslint-disable-next-line @stylistic/max-len
+      await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264-with-overflow-nalus/media.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for e seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 3, 45);
+
+      await player.unload();
+    });
+
     it('H.265+AAC in TS', async () => {
       if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L123.B0"',
           /* width= */ 720, /* height= */ 1280)) {
         pending('Codec H.265 is not supported by the platform.');
       }
-      if (shaka.util.Platform.isChromecast()) {
-        // FIXME: Test disabled on Chromecast.  Now that our test environment
-        // can do full support checks on Chromecast, including resolution, this
-        // 720x1280 vertical video is over the limit for a 1080p screen.  This
-        // fails on any Chromecast with H.265 support.
-        pending('Disabled on Chromecast.');
-      }
 
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-aac-h265/media.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -339,14 +415,21 @@ describe('Transmuxer Player', () => {
     });
 
     it('H.264+MP3 in TS', async () => {
-      if (!await Util.isTypeSupported('audio/mp4; codecs="mp3"')) {
-        pending('Codec MP3 in MP4 is not supported by the platform.');
+      if (!await Util.isTypeSupported('audio/mp4; codecs="mp3"') &&
+        !await Util.isTypeSupported('audio/mpeg')) {
+        pending('Codec MP3 is not supported by the platform.');
+      }
+      // This tests is flaky in some Tizen devices, so we need omit it for now.
+      if (deviceDetected.getDeviceName() === 'Tizen') {
+        pending('Disabled on Tizen.');
       }
 
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-mp3-h264/index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -359,20 +442,21 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
-    // TODO: Fix the transmuxer for segments that do not start with a keyframe
-    // https://github.com/shaka-project/shaka-player/issues/7462
-    xit('H.264+AC3 in TS', async () => {
+    it('H.264+AC3 in TS', async () => {
       if (!await Util.isTypeSupported('audio/mp4; codecs="ac-3"')) {
         pending('Codec AC-3 is not supported by the platform.');
       }
-      if (shaka.util.Platform.isTizen()) {
-        pending('Muxed AC-3 codec is not supported by the platform.');
+      // This tests is flaky in some Tizen devices, so we need omit it for now.
+      if (deviceDetected.getDeviceName() === 'Tizen') {
+        pending('Disabled on Tizen.');
       }
 
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-ac3-h264/media.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -389,14 +473,13 @@ describe('Transmuxer Player', () => {
       if (!await Util.isTypeSupported('audio/mp4; codecs="ec-3"')) {
         pending('Codec EC-3 is not supported by the platform.');
       }
-      if (shaka.util.Platform.isTizen()) {
-        pending('Muxed AC-3 codec is not supported by the platform.');
-      }
 
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-ec3-h264/prog_index.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -414,10 +497,12 @@ describe('Transmuxer Player', () => {
         pending('Codec opus is not supported by the platform.');
       }
 
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-opus-h264/playlist.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -426,6 +511,29 @@ describe('Transmuxer Player', () => {
       // Play for 12 seconds, but stop early if the video ends.  If it takes
       // longer than 45 seconds, fail the test.
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 12, 45);
+
+      await player.unload();
+    });
+
+    it('H.264+Opus in TS with 60ms (2880-sample) Opus packets', async () => {
+      if (!await Util.isTypeSupported('audio/mp4; codecs="opus"')) {
+        pending('Codec opus is not supported by the platform.');
+      }
+
+      // eslint-disable-next-line @stylistic/max-len
+      await player.load('/base/test/test/assets/hls-ts-muxed-opus-h264-2880/playlist.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getVideoTracks().length).toBe(1);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 5 seconds, but stop early if the video ends.  If it takes
+      // longer than 15 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 15);
 
       await player.unload();
     });

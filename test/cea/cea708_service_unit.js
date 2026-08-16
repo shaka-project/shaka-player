@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:ignore testtest toasttesttest toasttest
+
 describe('Cea708Service', () => {
   const CeaUtils = shaka.test.CeaUtils;
 
@@ -25,6 +27,10 @@ describe('Cea708Service', () => {
     0x98, 0x38, 0x00, 0x00, 0x1f, 0x1f, 0x00,
   ];
 
+  const defineWindow2 = [
+    0x99, 0x38, 0x00, 0x00, 0x1f, 0x1f, 0x00,
+  ];
+
   /** @type {number} */
   const startTime = 1;
 
@@ -42,6 +48,7 @@ describe('Cea708Service', () => {
 
   /** @type {number} */
   const windowId = 0;
+  const windowId2 = 1;
 
   /** @type {number} */
   const rowCount = 16;
@@ -57,6 +64,7 @@ describe('Cea708Service', () => {
    * and converts it into a CEA-708 DTVCC Packet.
    * @param {!Array<number>} bytes
    * @param {number} pts
+   * @return {!shaka.cea.DtvccPacket}
    */
   const createCea708PacketFromBytes = (bytes, pts) => {
     const cea708Bytes = bytes.map((code, i) => {
@@ -75,18 +83,19 @@ describe('Cea708Service', () => {
    * and returns all the captions inside of them, using the service to decode.
    * @param {!shaka.cea.Cea708Service} service
    * @param {...!shaka.cea.DtvccPacket} packets
+   * @return {!Array<shaka.extern.ICaptionDecoder.ClosedCaption>}
    */
   const getCaptionsFromPackets = (service, ...packets) => {
-    const captions = [];
+    const allCaptions = [];
     for (const packet of packets) {
       while (packet.hasMoreData()) {
-        const caption = service.handleCea708ControlCode(packet);
-        if (caption) {
-          captions.push(caption);
+        const captions = service.handleCea708ControlCode(packet);
+        if (captions) {
+          allCaptions.push(...captions);
         }
       }
     }
-    return captions;
+    return allCaptions;
   };
 
   beforeEach(() => {
@@ -104,6 +113,62 @@ describe('Cea708Service', () => {
     const packet2 = createCea708PacketFromBytes(hideWindow, endTime);
 
     const text = 'test';
+    const topLevelCue = CeaUtils.createWindowedCue(startTime, endTime, '',
+        serviceNumber, windowId, rowCount, colCount, anchorId);
+    topLevelCue.nestedCues = [
+      CeaUtils.createDefaultCue(startTime, endTime, /* payload= */ text),
+    ];
+
+    const expectedCaptions = [
+      {
+        stream,
+        cue: topLevelCue,
+      },
+    ];
+
+    const captions = getCaptionsFromPackets(service, packet1, packet2);
+    expect(captions).toEqual(expectedCaptions);
+  });
+
+  it('decodes multibyte unstyled caption text (Korean)', () => {
+    const controlCodes = [
+      ...defineWindow,
+      // Series of C0 control codes that add multi-byte text.
+      0x18, 0xb9, 0xd9, 0x18, 0xb7, 0xce, // 맙, 럎
+    ];
+
+    const packet1 = createCea708PacketFromBytes(controlCodes, startTime);
+    const packet2 = createCea708PacketFromBytes(hideWindow, endTime);
+
+    const text = '맙럎';
+    const topLevelCue = CeaUtils.createWindowedCue(startTime, endTime, '',
+        serviceNumber, windowId, rowCount, colCount, anchorId);
+    topLevelCue.nestedCues = [
+      CeaUtils.createDefaultCue(startTime, endTime, /* payload= */ text),
+    ];
+
+    const expectedCaptions = [
+      {
+        stream,
+        cue: topLevelCue,
+      },
+    ];
+
+    const captions = getCaptionsFromPackets(service, packet1, packet2);
+    expect(captions).toEqual(expectedCaptions);
+  });
+
+  it('decodes multibyte unstyled caption text (Polish)', () => {
+    const controlCodes = [
+      ...defineWindow,
+      // Series of C0 control codes that add multi-byte text.
+      0x18, 0x01, 0x7c, 0xF3, 0x18, 0x01, 0x42, 0x18, 0x01, 0x07, // ż, ó, ł, ć
+    ];
+
+    const packet1 = createCea708PacketFromBytes(controlCodes, startTime);
+    const packet2 = createCea708PacketFromBytes(hideWindow, endTime);
+
+    const text = 'żółć'; // cspell:ignore żółć
     const topLevelCue = CeaUtils.createWindowedCue(startTime, endTime, '',
         serviceNumber, windowId, rowCount, colCount, anchorId);
     topLevelCue.nestedCues = [
@@ -605,6 +670,11 @@ describe('Cea708Service', () => {
       0x74, 0x65, 0x73, 0x74, // t, e, s, t
     ];
 
+    const textControlCodes2 = [
+      // Series of G0 control codes that add text.
+      0x74, 0x6F, 0x61, 0x73, 0x74, // t, o, a, s, t
+    ];
+
     // These commands affect ALL windows, per the 0xff bitmap.
     const toggleWindow = [0x8b, 0xff];
     const displayWindow = [0x89, 0xff];
@@ -661,6 +731,116 @@ describe('Cea708Service', () => {
 
       const captions = getCaptionsFromPackets(
           service, packet1, packet2, packet3, packet4, packet5, packet6);
+      expect(captions).toEqual(expectedCaptions);
+    });
+
+    it('if more than one window, ' +
+      'delete should extract cues on all windows', () => {
+      // Define a visible window, and add some text
+      const packet1a = createCea708PacketFromBytes(defineWindow, time1);
+      const packet1b = createCea708PacketFromBytes(textControlCodes, time1);
+      const packet1c = createCea708PacketFromBytes(textControlCodes, time2);
+
+      // Define a second visible window, and add some text
+      const packet2a = createCea708PacketFromBytes(defineWindow2, time1);
+      const packet2b = createCea708PacketFromBytes(textControlCodes2, time1);
+      const packet3a = createCea708PacketFromBytes(textControlCodes, time2);
+
+      // Delete all the windows.
+      // This should force the first window to emit 'testtest' and the second
+      // to emit 'toasttesttest'.
+      const packet4 = createCea708PacketFromBytes(deleteWindow, time2);
+
+      const text1 = 'testtest';
+      const text2 = 'toasttest';
+      const topLevelCue1 = CeaUtils.createWindowedCue(
+          /* startTime= */ time1, /* endTime= */ time2, '',
+          serviceNumber, windowId, rowCount, colCount, anchorId,
+      );
+      topLevelCue1.nestedCues = [
+        CeaUtils.createDefaultCue(
+            /* startTime= */ time1, /* endTime= */ time2, /* payload= */ text1),
+      ];
+
+      const topLevelCue2 = CeaUtils.createWindowedCue(
+          /* startTime= */ time1, /* endTime= */ time2, '',
+          serviceNumber, windowId2, rowCount, colCount, anchorId,
+      );
+      topLevelCue2.nestedCues = [
+        CeaUtils.createDefaultCue(
+            /* startTime= */ time1, /* endTime= */ time2, /* payload= */ text2),
+      ];
+
+      const expectedCaptions = [
+        {
+          stream,
+          cue: topLevelCue1,
+        },
+
+        {
+          stream,
+          cue: topLevelCue2,
+        },
+      ];
+
+      const captions = getCaptionsFromPackets(
+          service, packet1a, packet1b, packet1c, packet2a, packet2b,
+          packet3a, packet4);
+      expect(captions).toEqual(expectedCaptions);
+    });
+
+    it('if more than one window, ' +
+      'clear should extract cues on all windows', () => {
+      // Define a visible window, and add some text
+      const packet1a = createCea708PacketFromBytes(defineWindow, time1);
+      const packet1b = createCea708PacketFromBytes(textControlCodes, time1);
+      const packet1c = createCea708PacketFromBytes(textControlCodes, time2);
+
+      // Define a second visible window, and add some text
+      const packet2a = createCea708PacketFromBytes(defineWindow2, time1);
+      const packet2b = createCea708PacketFromBytes(textControlCodes2, time1);
+      const packet3a = createCea708PacketFromBytes(textControlCodes, time2);
+
+      // Delete all the windows.
+      // This should force the first window to emit 'testtest' and the second
+      // to emit 'toasttesttest'.
+      const packet4 = createCea708PacketFromBytes(clearWindow, time2);
+
+      const text1 = 'testtest';
+      const text2 = 'toasttest';
+      const topLevelCue1 = CeaUtils.createWindowedCue(
+          /* startTime= */ time1, /* endTime= */ time2, '',
+          serviceNumber, windowId, rowCount, colCount, anchorId,
+      );
+      topLevelCue1.nestedCues = [
+        CeaUtils.createDefaultCue(
+            /* startTime= */ time1, /* endTime= */ time2, /* payload= */ text1),
+      ];
+
+      const topLevelCue2 = CeaUtils.createWindowedCue(
+          /* startTime= */ time1, /* endTime= */ time2, '',
+          serviceNumber, windowId2, rowCount, colCount, anchorId,
+      );
+      topLevelCue2.nestedCues = [
+        CeaUtils.createDefaultCue(
+            /* startTime= */ time1, /* endTime= */ time2, /* payload= */ text2),
+      ];
+
+      const expectedCaptions = [
+        {
+          stream,
+          cue: topLevelCue1,
+        },
+
+        {
+          stream,
+          cue: topLevelCue2,
+        },
+      ];
+
+      const captions = getCaptionsFromPackets(
+          service, packet1a, packet1b, packet1c, packet2a, packet2b,
+          packet3a, packet4);
       expect(captions).toEqual(expectedCaptions);
     });
 

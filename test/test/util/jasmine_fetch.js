@@ -32,8 +32,11 @@ jasmine.Fetch = class {
     /** @type {!Response} */
     jasmine.Fetch.container_.latestResponse;
 
-    window.Headers = /** @type {function (new:Headers,
-          (!Array<!Array<string>>|Headers|Object<string,string>)=)} */(
+    window.Headers =
+    /**
+     * @type {function (new:Headers,
+     *     (!Array<!Array<string>>|Headers|Object<string,string>)=)}
+     */(
         jasmine.Fetch.Headers);
 
     window.AbortController = /** @type {function (new:AbortController)} */
@@ -68,7 +71,7 @@ jasmine.Fetch = class {
   /**
    * @param {string} url
    * @param {RequestInit} init
-   * @return {!Promise.<!Response>}
+   * @return {!Promise<!Response>}
    * @private
    */
   static impl_(url, init) {
@@ -268,6 +271,9 @@ jasmine.Fetch.Headers = class {
    * @param {string} value
    */
   append(name, value) {
+    if ([...value].some((c) => c.charCodeAt(0) > 255)) {
+      throw new Error('Invalid character in header value');
+    }
     // Normalize name before setting.
     const normalized = name.toLowerCase();
     this.contents[normalized] = value;

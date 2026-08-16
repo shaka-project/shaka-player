@@ -45,7 +45,7 @@ const NETWORK_TIMEOUT = 2;
  * An array of resources that MUST be cached to make the application
  * available offline.
  *
- * @const {!Array.<string>}
+ * @const {!Array<string>}
  */
 const CRITICAL_RESOURCES = [
   '.',  // This resolves to the page.
@@ -54,7 +54,7 @@ const CRITICAL_RESOURCES = [
   'shaka_logo_trans.png',
 
   'load.js',
-  '../dist/shaka-player.ui.js',
+  '../dist/shaka-player.experimental.js',
   '../dist/demo.compiled.js',
   '../dist/controls.css',
   '../dist/demo.css',
@@ -73,6 +73,7 @@ const CRITICAL_RESOURCES = [
   '../node_modules/popper.js/dist/umd/popper.min.js',
 
   // PWA compatibility for iOS:
+  // cspell: disable-next-line
   '../node_modules/pwacompat/pwacompat.min.js',
 ].map(resolveRelativeUrl);
 
@@ -84,16 +85,13 @@ const CRITICAL_RESOURCES = [
  * flag and be cached as "opaque" resources.  This is critical for the cast
  * sender SDK below.
  *
- * @const {!Array.<string>}
+ * @const {!Array<string>}
  */
 const OPTIONAL_RESOURCES = [
   // Optional graphics.  Without these, the site won't be broken.
   'favicon.ico',
-  'https://shaka-player-demo.appspot.com/assets/poster.jpg',
-  'https://shaka-player-demo.appspot.com/assets/audioOnly.gif',
-
-  // The codem-isoboxer library for MSS support.
-  '../node_modules/codem-isoboxer/dist/iso_boxer.min.js',
+  'poster.png',
+  'poster-audio.gif',
 
   // The cast sender SDK.
   'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
@@ -109,7 +107,7 @@ const OPTIONAL_RESOURCES = [
  * and SHOULD be served from cache first without waiting for updated versions
  * from the network.
  *
- * @const {!Array.<string>}
+ * @const {!Array<string>}
  */
 const CACHEABLE_URL_PREFIXES = [
   // Translations should be cached.  We don't know which ones the user will
@@ -266,7 +264,7 @@ function onFetch(event) {
  * the cache, or both, and return the appropriate version of the resource.
  *
  * @param {!Request} request
- * @return {!Promise.<!Response>}
+ * @return {!Promise<!Response>}
  */
 async function fetchCacheableResource(request) {
   const cache = await caches.open(CACHE_NAME);
@@ -305,7 +303,7 @@ async function fetchCacheableResource(request) {
  *
  * @param {!Cache} cache
  * @param {!Request} request
- * @return {!Promise.<!Response>}
+ * @return {!Promise<!Response>}
  */
 async function fetchAndCache(cache, request) {
   const response = await fetch(request);
@@ -325,8 +323,8 @@ async function fetchAndCache(cache, request) {
  * |asyncProcess| is still allowed to complete.
  *
  * @param {number} seconds
- * @param {!Promise.<T>} asyncProcess
- * @return {!Promise.<T>}
+ * @param {!Promise<T>} asyncProcess
+ * @return {!Promise<T>}
  * @template T
  */
 function timeout(seconds, asyncProcess) {

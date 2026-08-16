@@ -58,11 +58,37 @@ playback will hang when you get to the encrypted part of the stream (10 seconds
 in).
 
 To authenticate to this endpoint, we must send a special header.  You can add
-arbitrary headers to Shaka's requests through a request filter callback.
+arbitrary headers to Shaka's requests through a request filter callback or
+using a custom config:
+
+Configure the headers before calling `player.load()`:
+
+<!--cSpell:disable -->
+```js
+player.configure({
+  drm: {
+    servers: {
+      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/header_auth'
+    },
+    advanced: {
+      'com.widevine.alpha': {
+        'headers': {
+          // This is the specific header name and value the server wants:
+          'CWIP-Auth-Header': 'VGhpc0lzQVRlc3QK',
+        }
+      }
+    }
+  }
+});
+```
+<!--cSpell:enable -->
+
+
 Register the filter before calling `player.load()`:
 
+<!--cSpell:disable -->
 ```js
-  player.getNetworkingEngine().registerRequestFilter(function(type, request, context) {
+  player.getNetworkingEngine().registerRequestFilter((type, request, context) => {
     // Only add headers to license requests:
     if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
       // This is the specific header name and value the server wants:
@@ -70,6 +96,7 @@ Register the filter before calling `player.load()`:
     }
   });
 ```
+<!--cSpell:enable -->
 
 Load the page again, and the license request will succeed.  Although we are
 using a fixed value for the purposes of this tutorial, your application can
@@ -91,8 +118,9 @@ try to use it without setting the parameter, you will see `Error code 6007`
 
 We can use a request filter to modify the URL and add the required parameter:
 
+<!--cSpell:disable -->
 ```js
-  player.getNetworkingEngine().registerRequestFilter(function(type, request, context) {
+  player.getNetworkingEngine().registerRequestFilter((type, request, context) => {
     // Only add headers to license requests:
     if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
       // This is the specific parameter name and value the server wants:
@@ -103,6 +131,7 @@ We can use a request filter to modify the URL and add the required parameter:
     }
   });
 ```
+<!--cSpell:enable -->
 
 Load the page again, and the license request will succeed.
 
@@ -125,6 +154,7 @@ the JavaScript application.  So to set the required cookie value, point your
 browser to the server's [set\_cookie][] page.
 
 Open the JavaScript console and check the value of `document.cookie` to confirm
+<!--cSpell:disable-next-line -->
 that you have the cookie. You should see `"CWIP-Auth-Cookie=VGhpc0lzQVRlc3QK"`.
 
 Now load the Shaka page again, and ... we still get error code 6007.  What
@@ -140,7 +170,7 @@ Our `cookie_auth` endpoint sends back headers that allow credentialed requests,
 so we set a flag in our request filter to send credentials cross-site:
 
 ```js
-  player.getNetworkingEngine().registerRequestFilter(function(type, request, context) {
+  player.getNetworkingEngine().registerRequestFilter((type, request, context) => {
     if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
       request.allowCrossSiteCredentials = true;
     }
@@ -205,7 +235,7 @@ const authToken = null;
 Now change the request filter:
 
 ```js
-  player.getNetworkingEngine().registerRequestFilter(function(type, request, context) {
+  player.getNetworkingEngine().registerRequestFilter((type, request, context) => {
     // Only add headers to license requests:
     if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) return;
 
@@ -224,7 +254,7 @@ Now change the request filter:
     };
     const requestType = shaka.net.NetworkingEngine.RequestType.APP;
     return player.getNetworkingEngine().request(requestType, authRequest)
-        .promise.then(function(response) {
+        .promise.then((response) => {
           // This endpoint responds with the value we should use in the header.
           authToken = shaka.util.StringUtils.fromUTF8(response.data);
           console.log('Received auth token', authToken);
@@ -238,11 +268,54 @@ Load the page again.  The license request will be delayed, an additional request
 will be made for the auth token, and then the license request will continue.
 You should see these messages in the JavaScript console:
 
+<!--cSpell:disable -->
 ```html
 Need auth token.
 Received auth token VGhpc0lzQVRlc3QK
 License request can now continue.
 ```
+<!--cSpell:enable -->
 
 If you need them, you can also create asynchronous response filters in the same
 way.
+
+### Error handling
+
+In some scenarios, it is possible that the credentials used to authenticate have
+expired. The request filter is called on every request attempt since v5.0, so
+you can update the credentials if needed. See the example below.
+
+<!--cSpell:disable -->
+```js
+  let authToken = await getAuthToken(); // Token we get from an external service
+  // Flag we will use to signal do we need to update credentials
+  let lastLicenseRequestFailed = false;
+
+  player.getNetworkingEngine().addEventListener('retry', (event /* shaka.net.NetworkingEngine.RetryEvent */) => {
+    const code = event.error.code;
+    const data = event.error.data;
+
+    if (code === shaka.util.Error.Code.BAD_HTTP_STATUS) {
+      if (
+        Array.isArray(data) &&
+        // 401 = HTTP Unauthorized
+        data[1] === 401 &&
+        data[4] === shaka.net.NetworkingEngine.RequestType.LICENSE
+      ) {
+        // If we have unauthorized error it looks like we will have to update our credentials.
+        lastLicenseRequestFailed = true;
+      }
+    }
+  });
+  player.getNetworkingEngine().registerRequestFilter(async (type, request, context) => {
+    if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
+      if (lastLicenseRequestFailed && request.attempt > 0) {
+        // Fetch new credentials
+        authToken = await getAuthToken();
+      }
+      lastLicenseRequestFailed = false;
+      request.headers['CWIP-Auth-Header'] = authToken;
+    }
+  });
+```
+<!--cSpell:enable -->

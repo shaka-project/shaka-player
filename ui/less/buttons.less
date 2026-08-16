@@ -6,66 +6,12 @@
 
 /* The main buttons in the UI controls. */
 
-@play-button-size-percentage: 15%;
-
 .disabled-button() {
   /* Set the background and the color, otherwise it might be overwritten by
    * the css styles in demo. */
   background-color: transparent;
-  color: white;
+  color: var(--shaka-font-color);
   cursor: default;
-}
-
-/* The giant play button, which sits inside .shaka-player-button-container. */
-.shaka-play-button {
-  /* Set width & height in a round-about way.  By using padding, we can keep
-   * a 1:1 aspect ratio and size the button relative to the container width.
-   *
-   * Since padding is applied equally to top, bottom, left, and right, only use
-   * half of the intended percentage for each.
-   *
-   * Based on tips from https://stackoverflow.com/a/12925343 */
-  box-sizing: border-box;
-  padding: calc(@play-button-size-percentage / 2);
-  width: 0;
-  height: 0;
-
-  /* To be properly positioned in the center, this should have no margin.
-   * This might have been set for buttons generally by the app or user-agent. */
-  margin: 0;
-
-  /* This makes the button a circle. */
-  border-radius: 50%;
-
-  /* A small drop shadow below the button. */
-  box-shadow: rgba(0 0 0 / 10%) 0 0 20px 0;
-
-  /* No border. */
-  border: none;
-
-  /* The play arrow is a picture. It is treated a background image.
-   * The following settings ensure it shows only once and in the
-   * center of the button. */
-  background-size: 50%;
-  background-repeat: no-repeat;
-  background-position: center center;
-
-  /* A background color behind the play arrow. */
-  background-color: rgba(255 255 255 / 90%);
-
-  .show-when-controls-shown();
-
-  /* Actual icon images for the two states this could be in.
-   * These will be inlined as data URIs when compiled, and so do not need to be
-   * deployed separately from the compiled CSS.
-   * Note that these URIs should relative to ui/controls.less, not this file. */
-  &[icon="play"] {
-    background-image: data-uri("images/play_arrow.svg");
-  }
-
-  &[icon="pause"] {
-    background-image: data-uri("images/pause.svg");
-  }
 }
 
 /* This button contains the current time and duration of the video.
@@ -73,13 +19,29 @@
  * edge. Otherwise, the button is disabled.
  */
 .shaka-current-time {
-  font-size: 14px;
-  color: white;
+  font-size: var(--shaka-font-size);
+  color: var(--shaka-font-color);
   cursor: pointer;
+  width: auto;
+  padding: 0 5px;
 
   &[disabled] {
     .disabled-button();
   }
+}
+
+.shaka-content-title {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+
+  font-size: var(--shaka-title-size);
+  color: var(--shaka-font-color);
+  width: auto;
+  padding: 0 5px;
+
+  /* This shadow allows good visibility with any type of background. */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 80%), 0 2px 6px rgba(0, 0, 0, 60%);
 }
 
 /* Use a consistent outline focus style across browsers. */
@@ -107,7 +69,7 @@
   }
 }
 
-.shaka-fast-foward-container,
+.shaka-fast-forward-container,
 .shaka-rewind-container {
   height: 100%;
   width: 100%;
@@ -126,11 +88,8 @@
   /* No border. */
   border: none;
 
-  /* Setting text color to white */
-  color: rgb(255 255 255);
-
-  /* Setting background color to black so white text can be seen clearly */
-  background-color: rgb(0 0 0 / 50%);
+  color: var(--shaka-font-color);
+  background-color: var(--shaka-bg);
 
   cursor: default;
   font-size: 20px;
@@ -142,7 +101,7 @@
   .unselectable();
 }
 
-.shaka-fast-foward-container {
+.shaka-fast-forward-container {
   border-radius: 40% 0  0 40%;
 }
 
@@ -153,6 +112,5 @@
 /* This class is instead of material-icon-round
  * because the font-size of 24 doesn't look good */
 .shaka-forward-rewind-container-icon {
-  font-family: "Material Icons Round";
-  font-size: 34px;
+  font-size: 32px;
 }

@@ -93,7 +93,7 @@ cast.receiver.CastReceiverManager = class {
    */
   getCastMessageBus(namespace, messageType) {}
 
-  /** @return {Array.<string>} */
+  /** @return {Array<string>} */
   getSenders() {}
 
   start() {}
@@ -268,7 +268,7 @@ chrome.cast.Session = class {
 chrome.cast.SessionRequest = class {
   /**
    * @param {string} appId
-   * @param {Array.<Object>} capabilities
+   * @param {Array<Object>} capabilities
    * @param {?number} timeout
    * @param {boolean} androidReceiverCompatible
    * @param {Object} credentialsData

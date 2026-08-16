@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('CastProxy', () => {
+/** @return {boolean} */
+const castProxySupport =
+    () => typeof Proxy != 'undefined';
+filterDescribe('CastProxy', castProxySupport, () => {
   const CastProxy = shaka.cast.CastProxy;
   const FakeEvent = shaka.util.FakeEvent;
   const Util = shaka.test.Util;
@@ -23,7 +26,13 @@ describe('CastProxy', () => {
   /** @type {shaka.cast.CastProxy} */
   let proxy;
 
+  const originalWindowChrome = window.chrome;
+
   beforeEach(() => {
+    window['chrome'] = originalWindowChrome || {};
+    spyOn(deviceDetected, 'getDeviceType').and
+        .returnValue(shaka.device.IDevice.DeviceType.DESKTOP);
+
     mockCastSenderConstructor = jasmine.createSpy('CastSender constructor');
     mockCastSenderConstructor.and.callFake(createMockCastSender);
     shaka.cast.CastSender = Util.spyFunc(mockCastSenderConstructor);
@@ -42,6 +51,7 @@ describe('CastProxy', () => {
     } finally {
       shaka.cast.CastSender = originalCastSender;
     }
+    window['chrome'] = originalWindowChrome;
   });
 
   describe('constructor', () => {
@@ -115,9 +125,9 @@ describe('CastProxy', () => {
 
   describe('cast', () => {
     it('unloads the local player after casting is complete', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
-      mockSender.cast.and.returnValue(p);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
+      mockSender.cast.and.returnValue(p.promise);
 
       proxy.cast();
       await shaka.test.Util.shortDelay();
@@ -311,7 +321,6 @@ describe('CastProxy', () => {
         // Local values that will be ignored:
         const fakeConfig = {key: 'value'};
         mockPlayer.getConfiguration.and.returnValue(fakeConfig);
-        mockPlayer.isTextTrackVisible.and.returnValue(false);
 
         // Set up the sender in casting mode:
         mockSender.isCasting.and.returnValue(true);
@@ -321,7 +330,6 @@ describe('CastProxy', () => {
         const fakeConfig2 = {key2: 'value2'};
         const cache = {player: {
           getConfiguration: fakeConfig2,
-          isTextTrackVisible: true,
           trickPlay: jasmine.createSpy('trickPlay'),
         }};
         mockSender.get.and.callFake((targetName, property) => {
@@ -337,7 +345,6 @@ describe('CastProxy', () => {
         });
 
         expect(proxy.getPlayer().getConfiguration()).toEqual(fakeConfig2);
-        expect(proxy.getPlayer().isTextTrackVisible()).toBe(true);
 
         // Call a method:
         expect(mockPlayer.trickPlay).not.toHaveBeenCalled();
@@ -350,7 +357,6 @@ describe('CastProxy', () => {
       it('returns local values when we have no remote values yet', () => {
         const fakeConfig = {key: 'value'};
         mockPlayer.getConfiguration.and.returnValue(fakeConfig);
-        mockPlayer.isTextTrackVisible.and.returnValue(true);
 
         // Set up the sender in casting mode, but without any remote values:
         mockSender.isCasting.and.returnValue(true);
@@ -366,7 +372,6 @@ describe('CastProxy', () => {
 
         // Without remote values, we should still return the local ones.
         expect(proxy.getPlayer().getConfiguration()).toEqual(fakeConfig);
-        expect(proxy.getPlayer().isTextTrackVisible()).toBe(true);
 
         // Call a method:
         expect(mockPlayer.trickPlay).not.toHaveBeenCalled();
@@ -399,7 +404,7 @@ describe('CastProxy', () => {
         expect(proxyListener).not.toHaveBeenCalled();
         const fakeEvent = new FakeEvent(
             'buffering', (new Map()).set('detail', 8675309));
-        mockPlayer.listeners['buffering'](fakeEvent);
+        mockPlayer.listeners[shaka.util.FakeEventTarget.ALL_EVENTS](fakeEvent);
         expect(proxyListener).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'buffering',
           detail: 8675309,
@@ -418,7 +423,7 @@ describe('CastProxy', () => {
         expect(proxyListener).not.toHaveBeenCalled();
         const fakeEvent = new FakeEvent(
             'buffering', (new Map()).set('detail', 8675309));
-        mockPlayer.listeners['buffering'](fakeEvent);
+        mockPlayer.listeners[shaka.util.FakeEventTarget.ALL_EVENTS](fakeEvent);
         expect(proxyListener).not.toHaveBeenCalled();
       });
     });
@@ -489,7 +494,7 @@ describe('CastProxy', () => {
         },
         player: {
           getConfiguration: {key: 'value'},
-          isTextTrackVisisble: true,
+          getNonDefaultConfiguration: {key: 'value'},
         },
       };
       mockSender.get.and.callFake((targetName, property) => {
@@ -504,7 +509,6 @@ describe('CastProxy', () => {
     it('transfers remote state back to local objects', async () => {
       // Nothing has been set yet:
       expect(mockPlayer.configure).not.toHaveBeenCalled();
-      expect(mockPlayer.setTextTrackVisibility).not.toHaveBeenCalled();
       expect(mockVideo.loop).toBe(false);
       expect(mockVideo.playbackRate).toBe(1);
 
@@ -513,16 +517,13 @@ describe('CastProxy', () => {
 
       // Initial Player state first:
       expect(mockPlayer.configure).toHaveBeenCalledWith(
-          cache.player.getConfiguration);
+          cache.player.getNonDefaultConfiguration);
       // Nothing else yet:
-      expect(mockPlayer.setTextTrackVisibility).not.toHaveBeenCalled();
       expect(mockVideo.loop).toBe(false);
       expect(mockVideo.playbackRate).toBe(1);
 
       // The rest is done async:
       await shaka.test.Util.shortDelay();
-      expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
-          cache.player.isTextTrackVisible);
       expect(mockVideo.loop).toBe(cache.video.loop);
       expect(mockVideo.playbackRate).toBe(cache.video.playbackRate);
     });
@@ -575,8 +576,6 @@ describe('CastProxy', () => {
       expect(mockVideo.play).not.toHaveBeenCalled();
 
       // State was still transferred, though:
-      expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
-          cache.player.isTextTrackVisible);
       expect(mockVideo.loop).toBe(cache.video.loop);
       expect(mockVideo.playbackRate).toBe(cache.video.playbackRate);
     });
@@ -668,11 +667,13 @@ describe('CastProxy', () => {
       getNetworkingEngine: jasmine.createSpy('getNetworkingEngine'),
       getAssetUri: jasmine.createSpy('getAssetUri'),
       getConfiguration: jasmine.createSpy('getConfiguration'),
+      getNonDefaultConfiguration:
+          jasmine.createSpy('getNonDefaultConfiguration'),
       configure: jasmine.createSpy('configure'),
-      isTextTrackVisible: jasmine.createSpy('isTextTrackVisible'),
-      setTextTrackVisibility: jasmine.createSpy('setTextTrackVisibility'),
+      selectTextTrack: jasmine.createSpy('selectTextTrack'),
       trickPlay: jasmine.createSpy('trickPlay'),
       destroy: jasmine.createSpy('destroy'),
+      getAdManager: () => null,
       addEventListener: (eventName, listener) => {
         player.listeners[eventName] = listener;
       },

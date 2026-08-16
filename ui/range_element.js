@@ -30,10 +30,12 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
-   * @param {!Array.<string>} containerClassNames
-   * @param {!Array.<string>} barClassNames
+   * @param {!Array<string>} containerClassNames
+   * @param {!Array<string>} barClassNames
+   * @param {boolean=} enableWheel
    */
-  constructor(parent, controls, containerClassNames, barClassNames) {
+  constructor(parent, controls, containerClassNames, barClassNames,
+      enableWheel = false) {
     super(parent, controls);
 
     /**
@@ -48,6 +50,9 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     /** @private {boolean} */
     this.isChanging_ = false;
 
+    /** @private {boolean} */
+    this.isMouseChanging_ = false;
+
     /** @protected {!HTMLInputElement} */
     this.bar =
       /** @type {!HTMLInputElement} */ (document.createElement('input'));
@@ -61,73 +66,113 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     this.bar.classList.add('shaka-range-element');
     this.bar.classList.add(...barClassNames);
     this.bar.type = 'range';
-    // TODO(#2027): step=any causes keyboard nav problems on IE 11.
     this.bar.step = 'any';
     this.bar.min = '0';
     this.bar.max = '1';
     this.bar.value = '0';
+    this.bar.disabled = !this.controls.isOpaque();
 
     this.container.appendChild(this.bar);
     this.parent.appendChild(this.container);
 
-    this.eventManager.listen(this.bar, 'mousedown', (e) => {
-      if (this.controls.isOpaque()) {
-        this.isChanging_ = true;
-        this.onChangeStart();
-      }
-      e.stopPropagation();
+    this.showingUITimer_ = new shaka.util.Timer(() => {
+      this.bar.disabled = false;
     });
 
-    this.eventManager.listen(this.bar, 'touchstart', (e) => {
-      if (this.controls.isOpaque()) {
+    this.eventManager.listen(this.controls, 'showingui', () => {
+      this.showingUITimer_.tickAfter(/* seconds= */ 0);
+    });
+
+    this.eventManager.listen(this.controls, 'hidingui', () => {
+      this.showingUITimer_.stop();
+      this.bar.disabled = true;
+    });
+
+    this.eventManager.listen(this.bar, 'mousedown', (e) => {
+      if (!this.bar.disabled) {
+        // Prevent native range update to use getValueFromPosition()
+        // consistently with the hover preview.
+        e.preventDefault();
+        this.bar.focus();
         this.isChanging_ = true;
-        this.setBarValueForTouch_(e);
+        this.isMouseChanging_ = true;
+        this.setBarValueForMouse_(e);
         this.onChangeStart();
+        this.onChange();
+        e.stopPropagation();
       }
-      e.stopPropagation();
+    });
+
+    this.eventManager.listen(document, 'mousemove', (e) => {
+      if (this.isMouseChanging_) {
+        this.setBarValueForMouse_(e);
+        this.onChange();
+      }
+    });
+
+    this.eventManager.listen(document, 'mouseup', (e) => {
+      if (this.isMouseChanging_) {
+        this.isMouseChanging_ = false;
+        if (this.isChanging_) {
+          this.isChanging_ = false;
+          this.setBarValueForMouse_(e);
+          this.onChangeEnd();
+        }
+      }
     });
 
     this.eventManager.listen(this.bar, 'input', () => {
       this.onChange();
     });
 
-    this.eventManager.listen(this.bar, 'touchmove', (e) => {
-      if (this.isChanging_) {
-        this.setBarValueForTouch_(e);
-        this.onChange();
-      }
-      e.stopPropagation();
-    });
+    if (navigator.maxTouchPoints > 0) {
+      this.eventManager.listen(this.bar, 'touchstart', (e) => {
+        if (!this.bar.disabled) {
+          this.isChanging_ = true;
+          this.setBarValueForTouch_(e);
+          this.onChangeStart();
+          // Apply the new value right away, mirroring the mousedown handler.
+          // This makes a single tap seek to the touched position for controls
+          // that act on onChange (e.g. volume and playback-rate sliders),
+          // instead of requiring the user to drag the thumb.
+          this.onChange();
+          e.stopPropagation();
+        }
+      });
 
-    this.eventManager.listen(this.bar, 'touchend', (e) => {
-      if (this.isChanging_) {
-        this.isChanging_ = false;
-        this.setBarValueForTouch_(e);
-        this.onChangeEnd();
-      }
-      e.stopPropagation();
-    });
+      this.eventManager.listen(this.bar, 'touchmove', (e) => {
+        if (this.isChanging_) {
+          this.setBarValueForTouch_(e);
+          this.onChange();
+          e.stopPropagation();
+        }
+      });
 
-    this.eventManager.listen(this.bar, 'touchcancel', (e) => {
-      if (this.isChanging_) {
-        this.isChanging_ = false;
-        this.setBarValueForTouch_(e);
-        this.onChangeEnd();
-      }
-      e.stopPropagation();
-    });
+      this.eventManager.listenMulti(this.bar, ['touchend', 'touchcancel'],
+          (e) => {
+            if (this.isChanging_) {
+              this.isChanging_ = false;
+              this.setBarValueForTouch_(e);
+              this.onChangeEnd();
+              e.stopPropagation();
+            }
+          });
+    }
 
     this.eventManager.listen(this.bar, 'mouseup', (e) => {
       if (this.isChanging_) {
         this.isChanging_ = false;
+        this.isMouseChanging_ = false;
+        this.setBarValueForMouse_(e);
         this.onChangeEnd();
+        e.stopPropagation();
       }
-      e.stopPropagation();
     });
 
     this.eventManager.listen(this.bar, 'blur', () => {
       if (this.isChanging_) {
         this.isChanging_ = false;
+        this.isMouseChanging_ = false;
         this.onChangeEnd();
       }
     });
@@ -136,6 +181,12 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
       e.preventDefault();
       e.stopPropagation();
     });
+
+    if (enableWheel) {
+      this.eventManager.listen(this.container, 'wheel', (event) => {
+        this.onWheel_(/** @type {!WheelEvent} */ (event));
+      });
+    }
   }
 
   /** @override */
@@ -155,6 +206,38 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   setRange(min, max) {
     this.bar.min = min;
     this.bar.max = max;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  setStep(step) {
+    this.bar.step = step;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getMin() {
+    return parseFloat(this.bar.min);
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getMax() {
+    return parseFloat(this.bar.max);
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  setBackground(background) {
+    this.container.style.background = background;
   }
 
   /**
@@ -232,6 +315,55 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   }
 
   /**
+   * Converts an X position within the element into a range input value.
+   * @param {number} clientX
+   * @return {number}
+   */
+  getValueFromPosition(clientX) {
+    // Get the bounding rectangle of the range input element
+    const rect = this.bar.getBoundingClientRect();
+
+    // Parse the min, max attributes from the input element
+    const min = parseFloat(this.bar.min);
+    const max = parseFloat(this.bar.max);
+    const step = parseFloat(this.bar.step) || 1;
+
+    // Define the effective range of the thumb movement
+    // 12 is the value of @thumb-size in range_elements.less. Note: for
+    // everything to work, this value has to be synchronized.
+    const thumbWidth = 12;
+    const minX = rect.left + thumbWidth / 2;
+    const maxX = rect.right - thumbWidth / 2;
+
+    // Clamp the touch X position to stay within the thumb's movement range
+    const clampedX = Math.max(minX, Math.min(maxX, clientX));
+
+    // Calculate the percentage of the track that the clamped X represents
+    const percent = (clampedX - minX) / (maxX - minX);
+
+    // Convert the percentage into a value within the input's range
+    let value = min + percent * (max - min);
+
+    // Round the value to the nearest step
+    value = Math.round((value - min) / step) * step + min;
+
+    // Ensure the value stays within the min and max bounds
+    value = Math.min(max, Math.max(min, value));
+
+    return value;
+  }
+
+  /**
+   * Synchronize the mouse position with the range value.
+   * @param {Event} event
+   * @private
+   */
+  setBarValueForMouse_(event) {
+    this.bar.value = this.getValueFromPosition(
+        /** @type {MouseEvent} */ (event).clientX);
+  }
+
+  /**
    * Synchronize the touch position with the range value.
    * Comes in handy on iOS, where users have to grab the handle in order
    * to start seeking.
@@ -242,28 +374,35 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     event.preventDefault();
 
     const changedTouch = /** @type {TouchEvent} */ (event).changedTouches[0];
-    const rect = this.bar.getBoundingClientRect();
-    const min = parseFloat(this.bar.min);
-    const max = parseFloat(this.bar.max);
 
-    // Calculate the range value based on the touch position.
+    this.bar.value = this.getValueFromPosition(changedTouch.clientX);
+  }
 
-    // Pixels from the left of the range element
-    const touchPosition = changedTouch.clientX - rect.left;
-
-    // Pixels per unit value of the range element.
-    const scale = (max - min) / rect.width;
-
-    // Touch position in units, which may be outside the allowed range.
-    let value = min + scale * touchPosition;
-
-    // Keep value within bounds.
-    if (value < min) {
-      value = min;
-    } else if (value > max) {
-      value = max;
+  /**
+   * Handle mouse wheel input to control the range value.
+   * @param {!WheelEvent} event
+   * @private
+   */
+  onWheel_(event) {
+    // Ignore browser zoom gestures
+    if (event.ctrlKey || event.metaKey) {
+      return;
     }
 
-    this.bar.value = value;
+    event.preventDefault();
+
+    const min = parseFloat(this.bar.min);
+    const max = parseFloat(this.bar.max);
+    const step = parseFloat(this.bar.step) || 1;
+
+    let newValue = this.getValue() + (event.deltaY > 0 ? -step : step);
+
+    // Clamp value between min and max
+    newValue = Math.max(min, Math.min(max, newValue));
+
+    this.setValue(newValue);
+
+    // Apply the change immediately
+    this.onChange();
   }
 };

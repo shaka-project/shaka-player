@@ -1,6 +1,6 @@
 /*! @license
  * Shaka Player
- * Copyright 2023 Google LLC
+ * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -14,7 +14,7 @@
  *   packetLength: number,
  *   pts: ?number,
  *   dts: ?number,
- *   nalus: !Array.<!shaka.extern.VideoNalu>
+ *   nalus: !Array<!shaka.extern.VideoNalu>
  * }}
  *
  * @summary MPEG_PES.
@@ -22,9 +22,30 @@
  * @property {number} packetLength
  * @property {?number} pts
  * @property {?number} dts
- * @property {!Array.<!shaka.extern.VideoNalu>} nalus
+ * @property {!Array<!shaka.extern.VideoNalu>} nalus
  */
 shaka.extern.MPEG_PES;
+
+
+/**
+ * @typedef {{
+ *   data: !Uint8Array,
+ *   frame: boolean,
+ *   isKeyframe: boolean,
+ *   pts: ?number,
+ *   dts: ?number,
+ *   nalus: !Array<!shaka.extern.VideoNalu>
+ * }}
+ *
+ * @summary VideoSample.
+ * @property {!Uint8Array} data
+ * @property {boolean} frame
+ * @property {boolean} isKeyframe
+ * @property {?number} pts
+ * @property {?number} dts
+ * @property {!Array<!shaka.extern.VideoNalu>} nalus
+ */
+shaka.extern.VideoSample;
 
 
 /**

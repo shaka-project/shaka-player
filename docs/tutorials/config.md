@@ -74,7 +74,6 @@ player.getConfiguration();
        durationBackoff: 1
        failureCallback: Function
        ignoreTextStreamFailures: false
-       alwaysStreamText: false
        rebufferingGoal: 0
        retryParameters: Object
        startAtSegmentBoundary: false
@@ -122,7 +121,8 @@ buffering settings) while some will not have any effect until the next call to
 
 #### Low latency streaming
 
-With `.streaming.lowLatencyMode` set to true,
+With `.streaming.lowLatencyMode` set to true and the manifest is Low Latency,
+Shaka uses a Low Latency config:
 `.streaming.inaccurateManifestTolerance` is set to 0 by default,
 `.streaming.segmentPrefetchLimit` is set to 2 by default,
 `.streaming.updateIntervalSeconds` is set to 0.1 by default,
@@ -134,11 +134,10 @@ With `.streaming.lowLatencyMode` set to true,
 
 To customize the values of inaccurateManifestTolerance, rebufferingGoal,
 segmentPrefetchLimit, updateIntervalSeconds and baseDelay with low latency
-mode, you can set the fields in the same or subsequent call to configure().
+mode, you can set the fields in the call to configurationForLowLatency().
 ```js
-player.configure({
+player.configurationForLowLatency({
   streaming: {
-    lowLatencyMode: true,
     inaccurateManifestTolerance: 0,
     segmentPrefetchLimit: 2,
     updateIntervalSeconds: 0.1,

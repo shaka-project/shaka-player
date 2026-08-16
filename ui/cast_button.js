@@ -11,8 +11,8 @@ goog.require('shaka.cast.CastProxy');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -44,15 +44,14 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     this.castButton_.classList.add('shaka-tooltip');
     this.castButton_.ariaPressed = 'false';
 
-    /** @private {!HTMLElement} */
-    this.castIcon_ = shaka.util.Dom.createHTMLElement('i');
-    this.castIcon_.classList.add('material-icons-round');
-    this.castIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.CAST;
-    this.castButton_.appendChild(this.castIcon_);
+    /** @private {!shaka.ui.Icon} */
+    this.castIcon_ = new shaka.ui.Icon(this.castButton_,
+        shaka.ui.Enums.MaterialDesignSVGIcons['CAST']);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
     label.classList.add('shaka-overflow-menu-only');
+    label.classList.add('shaka-simple-overflow-button-label-inline');
     this.castNameSpan_ = shaka.util.Dom.createHTMLElement('span');
     label.appendChild(this.castNameSpan_);
 
@@ -65,22 +64,15 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     this.parent.appendChild(this.castButton_);
 
     // Setup strings in the correct language
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
 
     // Setup button display and state according to the current cast status
     this.onCastStatusChange_();
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateLocalizedStrings_();
-        });
-
     this.eventManager.listen(this.castButton_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       this.onCastClick_();
     });
 
@@ -112,26 +104,23 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
 
   /**
    * @private
+   *
+   * Updates icon and aria state. Delegates visibility to checkAvailability()
+   * so that the submenu state is always factored in from a single place.
    */
   onCastStatusChange_() {
-    const canCast = this.castProxy_.canCast() && this.controls.isCastAllowed();
     const isCasting = this.castProxy_.isCasting();
-    const materialDesignIcons = shaka.ui.Enums.MaterialDesignIcons;
-    shaka.ui.Utils.setDisplay(this.castButton_, canCast);
-    this.castIcon_.textContent = isCasting ?
-                                   materialDesignIcons.EXIT_CAST :
-                                   materialDesignIcons.CAST;
+    const Icons = shaka.ui.Enums.MaterialDesignSVGIcons;
 
-    // Aria-pressed set to true when casting, set to false otherwise.
+    this.castIcon_.use(isCasting ? Icons['EXIT_CAST'] : Icons['CAST']);
+
+    const canCast = this.castProxy_.canCast() && this.controls.isCastAllowed();
     if (canCast) {
-      if (isCasting) {
-        this.castButton_.ariaPressed = 'true';
-      } else {
-        this.castButton_.ariaPressed = 'false';
-      }
+      this.castButton_.ariaPressed = isCasting ? 'true' : 'false';
     }
 
     this.setCurrentCastSelection_();
+    this.checkAvailability();
   }
 
 
@@ -148,20 +137,24 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     }
   }
 
-
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.castButton_.ariaLabel = this.localization.resolve(LocIds.CAST);
-    this.castNameSpan_.textContent =
-        this.localization.resolve(LocIds.CAST);
+    const label = this.localization.resolve(LocIds.CAST);
+    this.castButton_.ariaLabel = label;
+    this.castNameSpan_.textContent = label;
 
     // If we're not casting, string "not casting" will be displayed,
     // which needs localization.
     this.setCurrentCastSelection_();
+  }
+
+  /** @override */
+  checkAvailability() {
+    const canCast = this.castProxy_.canCast() && this.controls.isCastAllowed();
+    shaka.ui.Utils.setDisplay(
+        this.castButton_, canCast && !this.isSubMenuOpened);
   }
 };
 

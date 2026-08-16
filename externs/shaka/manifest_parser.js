@@ -61,7 +61,7 @@ shaka.extern.ManifestParser = class {
    * @param {shaka.extern.ManifestParser.PlayerInterface} playerInterface
    *    The player interface contains the callbacks and members that the parser
    *    can use to communicate with the player and outside world.
-   * @return {!Promise.<shaka.extern.Manifest>}
+   * @return {!Promise<shaka.extern.Manifest>}
    * @exportDoc
    */
   start(uri, playerInterface) {}
@@ -132,16 +132,16 @@ shaka.extern.ManifestParser = class {
  *   onEvent: function(!Event),
  *   onError: function(!shaka.util.Error),
  *   isLowLatencyMode: function():boolean,
- *   isAutoLowLatencyMode: function():boolean,
- *   enableLowLatencyMode: function(),
  *   updateDuration: function(),
  *   newDrmInfo: function(shaka.extern.Stream),
  *   onManifestUpdated: function(),
  *   getBandwidthEstimate: function():number,
  *   onMetadata: function(string, number, ?number,
- *                        !Array.<shaka.extern.MetadataFrame>),
+ *                        !Array<shaka.extern.MetadataFrame>):!Promise,
  *   disableStream: function(!shaka.extern.Stream),
- *   addFont: function(string, string)
+ *   addFont: function(string, string),
+ *   getStreamingRetryParameters: function():!shaka.extern.RetryParameters,
+ *   onSegmentReceived: function(number, number),
  * }}
  *
  * @description
@@ -167,10 +167,6 @@ shaka.extern.ManifestParser = class {
  *   Should be called when an error occurs.
  * @property {function():boolean} isLowLatencyMode
  *   Return true if low latency streaming mode is enabled.
- * @property {function():boolean} isAutoLowLatencyMode
- *   Return true if auto low latency streaming mode is enabled.
- * @property {function()} enableLowLatencyMode
- *   Enable low latency streaming mode.
  * @property {function()} updateDuration
  *   Update the presentation duration based on PresentationTimeline.
  * @property {function(shaka.extern.Stream)} newDrmInfo
@@ -181,13 +177,19 @@ shaka.extern.ManifestParser = class {
  * @property {function():number} getBandwidthEstimate
  *   Get the estimated bandwidth in bits per second.
  * @property {function(string, number, ?number,
- *                     !Array.<shaka.extern.MetadataFrame>)} onMetadata
+ *                     !Array<shaka.extern.MetadataFrame>):!Promise} onMetadata
  *   Called when an metadata is found in the manifest.
  * @property {function(!shaka.extern.Stream)} disableStream
  *   Called to temporarily disable a stream i.e. disabling all variant
  *   containing said stream.
  * @property {function(string, string)} addFont
  *   Called when a new font needs to be added.
+ * @property {function():
+ *            !shaka.extern.RetryParameters} getStreamingRetryParameters
+ *   Return RetryParameters for streaming.
+ * @property {function(number, number)} onSegmentReceived
+ *   Called by manifest parser, to provide to the ABR estimator gets a bandwidth
+ *   sample when the manifest parser doesn't use the Network Engine.
  * @exportDoc
  */
 shaka.extern.ManifestParser.PlayerInterface;

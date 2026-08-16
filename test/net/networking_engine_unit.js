@@ -45,6 +45,9 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
     onProgress = jasmine.createSpy('onProgressUpdated');
     networkingEngine = new shaka.net.NetworkingEngine(Util.spyFunc(onProgress));
+    const defaultConfig =
+        shaka.util.PlayerConfiguration.createDefault().networking;
+    networkingEngine.configure(defaultConfig);
     resolveScheme = makeResolveScheme('resolve scheme');
     rejectScheme = jasmine.createSpy('reject scheme').and.callFake(() =>
       shaka.util.AbortableOperation.failed(error));
@@ -63,6 +66,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   afterEach(() => {
     shaka.net.NetworkingEngine.unregisterScheme('resolve');
     shaka.net.NetworkingEngine.unregisterScheme('reject');
+    networkingEngine.destroy();
   });
 
   afterAll(() => {
@@ -82,6 +86,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         stallTimeout: 0,
         connectionTimeout: 0,
       });
+      expect(request.attempt).toBe(0);
       rejectScheme.and.callFake(() => {
         if (rejectScheme.calls.count() == 1) {
           return shaka.util.AbortableOperation.failed(error);
@@ -91,6 +96,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       });
       await networkingEngine.request(requestType, request).promise;
       expect(rejectScheme).toHaveBeenCalledTimes(2);
+      expect(request.attempt).toBe(1);
     });
 
     it('will retry twice', async () => {
@@ -140,6 +146,31 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       await expectAsync(networkingEngine.request(requestType, request).promise)
           .toBeRejectedWith(expected);
       expect(rejectScheme).toHaveBeenCalledTimes(3);
+    });
+
+    it('allow abort retry', async () => {
+      const request = createRequest('reject://foo', {
+        maxAttempts: 2,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      });
+      rejectScheme.and.callFake(() => {
+        if (rejectScheme.calls.count() == 1) {
+          return shaka.util.AbortableOperation.failed(error);
+        } else {
+          return shaka.util.AbortableOperation.completed(createResponse());
+        }
+      });
+      networkingEngine.addEventListener('retry', (event) => {
+        event.preventDefault();
+      });
+      await expectAsync(networkingEngine.request(requestType, request).promise)
+          .toBeRejected();
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
     });
 
     describe('backoff', () => {
@@ -228,6 +259,89 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       });
       request.uris = ['reject://foo', 'resolve://foo'];
       await networkingEngine.request(requestType, request).promise;
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
+      expect(resolveScheme).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not leak CommonAccessToken to fallback hosts', async () => {
+      const tokenHeaderName = networkingEngine.config_
+          .commonAccessTokenHeaderName;
+
+      resolveScheme.and.callFake(() => {
+        const response = createResponse();
+        response.uri = 'resolve://trusted.example/segment1';
+        response.headers[tokenHeaderName] = 'token-abc';
+        return shaka.util.AbortableOperation.completed(response);
+      });
+      await networkingEngine
+          .request(
+              requestType, createRequest('resolve://trusted.example/segment1'))
+          .promise;
+
+      resolveScheme.calls.reset();
+      rejectScheme.and.callFake((uri, request) => {
+        expect(request.headers[tokenHeaderName]).toBe('token-abc');
+        return shaka.util.AbortableOperation.failed(error);
+      });
+      resolveScheme.and.callFake((uri, request) => {
+        expect(uri).toBe('resolve://attacker.example/segment2');
+        expect(request.headers[tokenHeaderName]).toBeUndefined();
+        return shaka.util.AbortableOperation.completed(createResponse());
+      });
+
+      const request = createRequest('', {
+        maxAttempts: 2,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      });
+      request.uris = [
+        'reject://trusted.example/segment2',
+        'resolve://attacker.example/segment2',
+      ];
+      await networkingEngine.request(requestType, request).promise;
+
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
+      expect(resolveScheme).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not leak request filter headers to fallback hosts', async () => {
+      networkingEngine.registerRequestFilter((type, request) => {
+        const index = request.attempt % request.uris.length;
+        const domain = shaka.util.URL.getDomain(request.uris[index]);
+        if (domain == 'trusted.example') {
+          request.headers['Authorization'] = 'Bearer token-abc';
+        }
+      });
+
+      rejectScheme.and.callFake((uri, request) => {
+        expect(request.headers['Authorization']).toBe('Bearer token-abc');
+        return shaka.util.AbortableOperation.failed(error);
+      });
+      resolveScheme.and.callFake((uri, request) => {
+        expect(uri).toBe('resolve://attacker.example/segment');
+        expect(request.headers['Authorization']).toBeUndefined();
+        return shaka.util.AbortableOperation.completed(createResponse());
+      });
+
+      const request = createRequest('', {
+        maxAttempts: 2,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      });
+      request.uris = [
+        'reject://trusted.example/segment',
+        'resolve://attacker.example/segment',
+      ];
+      await networkingEngine.request(requestType, request).promise;
+
       expect(rejectScheme).toHaveBeenCalledTimes(1);
       expect(resolveScheme).toHaveBeenCalledTimes(1);
     });
@@ -448,12 +562,12 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       const responseFilter = jasmine.createSpy('response filter');
       networkingEngine.registerResponseFilter(Util.spyFunc(responseFilter));
 
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
-      /** @type {!shaka.util.PublicPromise} */
-      const p2 = new shaka.util.PublicPromise();
-      filter.and.returnValue(p);
-      responseFilter.and.returnValue(p2);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p2 = Promise.withResolvers();
+      filter.and.returnValue(p.promise);
+      responseFilter.and.returnValue(p2.promise);
       const request = createRequest('resolve://foo');
       /** @type {!shaka.test.StatusPromise} */
       const r = new StatusPromise(
@@ -520,10 +634,10 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     });
 
     it('can modify requests asynchronously', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
       filter.and.callFake(async (type, request) => {
-        await p;
+        await p.promise;
         request.uris = ['resolve://foo'];
         request.allowCrossSiteCredentials = true;
       });
@@ -596,6 +710,30 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     it('causes no errors to remove an unused filter', () => {
       const unusedFilter = jasmine.createSpy('unused filter');
       networkingEngine.unregisterRequestFilter(Util.spyFunc(unusedFilter));
+    });
+
+    it('called several times on retry', async () => {
+      const request = createRequest('reject://foo', {
+        maxAttempts: 2,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      });
+      expect(request.attempt).toBe(0);
+      rejectScheme.and.callFake(() => {
+        if (rejectScheme.calls.count() == 1) {
+          return shaka.util.AbortableOperation.failed(error);
+        } else {
+          return shaka.util.AbortableOperation.completed(createResponse());
+        }
+      });
+      await networkingEngine.request(requestType, request).promise;
+      expect(rejectScheme).toHaveBeenCalledTimes(2);
+      expect(request.attempt).toBe(1);
+      expect(filter).toHaveBeenCalledTimes(2);
     });
   });  // describe('request filter')
 
@@ -694,10 +832,10 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     });
 
     it('can modify responses asynchronously', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
       filter.and.callFake(async (type, response) => {
-        await p;
+        await p.promise;
         expect(response.headers).toBeTruthy();
         response.headers['DATE'] = 'CAT';
         response.data = new ArrayBuffer(5);
@@ -745,10 +883,10 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   describe('destroy', () => {
     it('waits for all operations to complete', async () => {
       const request = createRequest('resolve://foo');
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
       resolveScheme.and.returnValue(
-          shaka.util.AbortableOperation.notAbortable(p));
+          shaka.util.AbortableOperation.notAbortable(p.promise));
 
       /** @type {!shaka.test.StatusPromise} */
       const r1 = new StatusPromise(
@@ -781,9 +919,9 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     it('causes requests to reject if called while filtering', async () => {
       const filter = jasmine.createSpy('request filter');
       networkingEngine.registerRequestFilter(Util.spyFunc(filter));
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
-      filter.and.returnValue(p);
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
+      filter.and.returnValue(p.promise);
 
       const request = createRequest('resolve://foo', {
         maxAttempts: 1,
@@ -815,10 +953,10 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
     it('resolves even when a request fails', async () => {
       const request = createRequest('reject://foo');
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
       rejectScheme.and.returnValue(
-          shaka.util.AbortableOperation.notAbortable(p));
+          shaka.util.AbortableOperation.notAbortable(p.promise));
 
       /** @type {!shaka.test.StatusPromise} */
       const r1 = new StatusPromise(
@@ -876,15 +1014,15 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         connectionTimeout: 0,
       });
 
-      /** @type {!shaka.util.PublicPromise} */
-      const p1 = new shaka.util.PublicPromise();
-      /** @type {!shaka.util.PublicPromise} */
-      const p2 = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p1 = Promise.withResolvers();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p2 = Promise.withResolvers();
       rejectScheme.and.callFake(() => {
         // Return p1 the first time, then p2 the second time.
         return (rejectScheme.calls.count() == 1) ?
-            shaka.util.AbortableOperation.notAbortable(p1) :
-            shaka.util.AbortableOperation.notAbortable(p2);
+            shaka.util.AbortableOperation.notAbortable(p1.promise) :
+            shaka.util.AbortableOperation.notAbortable(p2.promise);
       });
 
       /** @type {!shaka.test.StatusPromise} */
@@ -920,6 +1058,9 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     const onSegmentDownloaded = jasmine.createSpy('onSegmentDownloaded');
     networkingEngine =
         new shaka.net.NetworkingEngine(Util.spyFunc(onSegmentDownloaded));
+    const defaultConfig =
+        shaka.util.PlayerConfiguration.createDefault().networking;
+    networkingEngine.configure(defaultConfig);
 
     await networkingEngine.request(requestType, createRequest('resolve://foo'))
         .promise;
@@ -932,6 +1073,49 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     await networkingEngine.request(requestType, createRequest('resolve://foo'));
 
     expect(onSegmentDownloaded).not.toHaveBeenCalled();
+  });
+
+  it('infers a scheme for URIs without authority (e.g. offline:)', async () => {
+    const offlineScheme = makeResolveScheme('offline scheme');
+    shaka.net.NetworkingEngine.registerScheme('offline',
+        Util.spyFunc(offlineScheme));
+
+    fakeProtocol = 'https:';
+    await networkingEngine
+        .request(requestType, createRequest('offline:db/123'))
+        .promise;
+
+    expect(offlineScheme).toHaveBeenCalled();
+    expect(offlineScheme.calls.argsFor(0)[0]).toBe('offline:db/123');
+
+    shaka.net.NetworkingEngine.unregisterScheme('offline');
+    shaka.net.NetworkingEngine.registerScheme(
+        'offline', shaka.offline.OfflineScheme.plugin);
+  });
+
+  it('stores and reuses CommonAccessToken by host', async () => {
+    const tokenHeaderName = networkingEngine.config_
+        .commonAccessTokenHeaderName;
+
+    resolveScheme.and.callFake(() => {
+      const response = createResponse();
+      response.uri = 'resolve://example.com/segment1';
+      response.headers[tokenHeaderName] = 'token-abc';
+      return shaka.util.AbortableOperation.completed(response);
+    });
+    await networkingEngine
+        .request(requestType, createRequest('resolve://example.com/segment1'))
+        .promise;
+
+    resolveScheme.and.callFake((uri, request) => {
+      expect(request.headers[tokenHeaderName]).toBe('token-abc');
+      return shaka.util.AbortableOperation.completed(createResponse());
+    });
+    await networkingEngine
+        .request(requestType, createRequest('resolve://example.com/segment2'))
+        .promise;
+
+    expect(resolveScheme).toHaveBeenCalledTimes(2);
   });
 
   describe('\'retry\' event', () => {
@@ -1006,17 +1190,17 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     });
 
     it('interrupts request filters', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const filter1Promise = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const filter1Promise = Promise.withResolvers();
       const filter1Spy = jasmine.createSpy('filter 1')
-          .and.returnValue(filter1Promise);
+          .and.returnValue(filter1Promise.promise);
       const filter1 = Util.spyFunc(filter1Spy);
       networkingEngine.registerRequestFilter(filter1);
 
-      /** @type {!shaka.util.PublicPromise} */
-      const filter2Promise = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const filter2Promise = Promise.withResolvers();
       const filter2Spy = jasmine.createSpy('filter 2')
-          .and.returnValue(filter2Promise);
+          .and.returnValue(filter2Promise.promise);
       const filter2 = Util.spyFunc(filter2Spy);
       networkingEngine.registerRequestFilter(filter2);
 
@@ -1053,13 +1237,13 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     });
 
     it('interrupts scheme plugins', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
       const abortSpy = jasmine.createSpy('abort');
       const abort = Util.spyFunc(abortSpy);
 
       resolveScheme.and.returnValue(
-          new shaka.util.AbortableOperation(p, abort));
+          new shaka.util.AbortableOperation(p.promise, abort));
       expect(resolveScheme).not.toHaveBeenCalled();
 
       const request = createRequest('resolve://foo');
@@ -1086,16 +1270,16 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     });
 
     it('interrupts response filters', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const filter1Promise = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const filter1Promise = Promise.withResolvers();
       const filter1Spy = jasmine.createSpy('filter 1')
-          .and.returnValue(filter1Promise);
+          .and.returnValue(filter1Promise.promise);
       const filter1 = Util.spyFunc(filter1Spy);
       networkingEngine.registerResponseFilter(filter1);
 
-      const filter2Promise = new shaka.util.PublicPromise();
+      const filter2Promise = Promise.withResolvers();
       const filter2Spy = jasmine.createSpy('filter 2')
-          .and.returnValue(filter2Promise);
+          .and.returnValue(filter2Promise.promise);
       const filter2 = Util.spyFunc(filter2Spy);
       networkingEngine.registerResponseFilter(filter2);
 
@@ -1131,13 +1315,13 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     });
 
     it('is called by destroy', async () => {
-      /** @type {!shaka.util.PublicPromise} */
-      const p = new shaka.util.PublicPromise();
+      /** @type {!Promise.PromiseWithResolvers} */
+      const p = Promise.withResolvers();
       const abortSpy = jasmine.createSpy('abort');
       const abort = Util.spyFunc(abortSpy);
 
       resolveScheme.and.returnValue(
-          new shaka.util.AbortableOperation(p, abort));
+          new shaka.util.AbortableOperation(p.promise, abort));
       expect(resolveScheme).not.toHaveBeenCalled();
 
       const request = createRequest('resolve://foo');
@@ -1165,59 +1349,68 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   describe('progress events', () => {
     it('forwards progress events to caller', async () => {
       const requestLikeObject = jasmine.objectContaining({method: 'GET'});
-      /** @const {!shaka.util.PublicPromise} */
-      const delay = new shaka.util.PublicPromise();
+      /** @const {!Promise.PromiseWithResolvers} */
+      const delay = Promise.withResolvers();
       resolveScheme.and.callFake((uri, req, type, progress) => {
         progress(1, 2, 3);
 
         const p = (async () => {
           progress(4, 5, 6);
-          await delay;
+          await delay.promise;
           progress(7, 8, 9);
           return createResponse();
         })();
         return new shaka.util.AbortableOperation(p, () => {});
       });
 
+      /** @const {shaka.extern.RequestContext} */
+      const ctx = {type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD};
+
       /** @const {shaka.net.NetworkingEngine.PendingRequest} */
       const resp = networkingEngine.request(
-          requestType, createRequest('resolve://'));
+          requestType, createRequest('resolve://'), ctx);
       await Util.shortDelay();  // Allow Promises to resolve.
       expect(onProgress).toHaveBeenCalledTimes(2);
-      expect(onProgress).toHaveBeenCalledWith(1, 2, true, requestLikeObject);
-      expect(onProgress).toHaveBeenCalledWith(4, 5, true, requestLikeObject);
+      expect(onProgress).toHaveBeenCalledWith(1, 2, true, requestLikeObject,
+          ctx);
+      expect(onProgress).toHaveBeenCalledWith(4, 5, true, requestLikeObject,
+          ctx);
       onProgress.calls.reset();
 
       delay.resolve();
       await resp.promise;
       expect(onProgress).toHaveBeenCalledTimes(1);
-      expect(onProgress).toHaveBeenCalledWith(7, 8, true, requestLikeObject);
+      expect(onProgress).toHaveBeenCalledWith(7, 8, true, requestLikeObject,
+          ctx);
     });
 
     it('appends request packet number', async () => {
-      /** @const {!shaka.util.PublicPromise} */
-      const delay = new shaka.util.PublicPromise();
+      /** @const {!Promise.PromiseWithResolvers} */
+      const delay = Promise.withResolvers();
       resolveScheme.and.callFake((uri, req, type, progress) => {
         progress(1, 2, 3);
 
         const p = (async () => {
-          await delay;
+          await delay.promise;
           progress(4, 5, 6);
           return createResponse();
         })();
         return new shaka.util.AbortableOperation(p, () => {});
       });
 
+      /** @const {shaka.extern.RequestContext} */
+      const ctx = {type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD};
+
       /** @const {shaka.net.NetworkingEngine.PendingRequest} */
       const resp = networkingEngine.request(
-          requestType, createRequest('resolve://'));
+          requestType, createRequest('resolve://'), ctx);
       await Util.shortDelay();  // Allow Promises to resolve.
       expect(onProgress).toHaveBeenCalledWith(1, 2, true,
-          jasmine.objectContaining({packetNumber: 1}));
+          jasmine.objectContaining({packetNumber: 1}), ctx);
       delay.resolve();
       await resp.promise;
       expect(onProgress).toHaveBeenCalledWith(4, 5, true,
-          jasmine.objectContaining({packetNumber: 2}));
+          jasmine.objectContaining({packetNumber: 2}), ctx);
     });
 
     it('doesn\'t forward progress events for non-SEGMENT', async () => {
@@ -1234,7 +1427,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       expect(onProgress).not.toHaveBeenCalled();
     });
 
-    it('repports progress even if plugin doesn\'t report it', async () => {
+    it('reports progress even if plugin doesn\'t report it', async () => {
       const resp = networkingEngine.request(
           requestType, createRequest('resolve://'));
       await resp.promise;
@@ -1257,7 +1450,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     it('does not add range headers to requests for the whole segment', () => {
       // You had _one_ job, createSegmentRequest!
 
-      const request = shaka.util.Networking.createSegmentRequest(
+      const request = shaka.net.NetworkingUtils.createSegmentRequest(
           /* uris= */ ['/foo.mp4'],
           /* start= */ 0,
           /* end= */ null,
@@ -1275,6 +1468,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       originalUri: '',
       data: new ArrayBuffer(5),
       headers: {},
+      originalRequest: createRequest('fake'),
     };
   }
 });  // describe('NetworkingEngine')

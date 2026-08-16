@@ -1,5 +1,5 @@
 This directory contains the scripts used to build and test Shaka Player.  These
-scripts can run on any platform that supports python v2.7 and JRE 8+.
+scripts can run on any platform that supports Python v3.5 and Java 21+.
 
 * `all.py` simply runs `gendeps.py`, `check.py`, `docs.py`, and `build.py`.
   It will forward `--force` to `build.py`.

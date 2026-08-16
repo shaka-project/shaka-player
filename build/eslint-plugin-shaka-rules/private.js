@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const assert = require('assert');
+import assert from 'assert';
 
-module.exports = {
+export default {
   meta: {
     type: 'suggestion',
     docs: {

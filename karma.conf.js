@@ -12,7 +12,6 @@ const _ = require('lodash');
 const fs = require('fs');
 const glob = require('glob');
 const Jimp = require('jimp');
-const path = require('path');
 const rimraf = require('rimraf');
 const {ssim} = require('ssim.js');
 const util = require('karma/common/util');
@@ -209,16 +208,12 @@ module.exports = (config) => {
       //   Babel polyfill, required for async/await
       'node_modules/@babel/polyfill/dist/polyfill.js',
 
-      // codem-isoboxer module next
-      'node_modules/codem-isoboxer/dist/iso_boxer.min.js',
-
-      // EME encryption scheme polyfill, compiled into Shaka Player, but outside
-      // of the Closure deps system, so not in shaka-player.uncompiled.js.  This
-      // is specifically the compiled, minified, cross-browser build of it.  It
-      // is necessary to use the compiled version to avoid problems on older
-      // TVs.
-      // eslint-disable-next-line max-len
-      'node_modules/eme-encryption-scheme-polyfill/dist/eme-encryption-scheme-polyfill.js',
+      // LCEVC decoder libraries (.wasm & .js)
+      {
+        pattern: 'node_modules/lcevc_dec.js/dist/liblcevc_dpi.wasm',
+        included: false,
+      },
+      'node_modules/lcevc_dec.js/dist/lcevc_dec.min.js',
 
       // load closure base, the deps tree, and the uncompiled library
       'test/test/closure-boot.js',
@@ -239,6 +234,18 @@ module.exports = (config) => {
       // test utilities next, which fill in that namespace
       'test/test/util/*.js',
 
+      // validate_cmcd_keys.js builds Sets at module-eval time from CMCD_KEYS.
+      // CMCD_KEYS (cmcd_keys.js) is not required by the main library. Load it
+      // explicitly here, before the cml-cmcd test utilities, so the Sets are
+      // built correctly. Its transitive deps (CMCD_V1_KEYS, CMCD_REQUEST_KEYS,
+      // CMCD_RESPONSE_KEYS, CMCD_EVENT_KEYS) are already loaded by
+      // cmcd_manager.
+      'third_party/cml-cmcd/cmcd_keys.js',
+
+      // cml-cmcd test-only helpers (CmcdReportRecorder, validateCmcd, etc.)
+      // These use goog.provide so must be loaded before the integration tests.
+      'test/test/util/cml-cmcd/*.js',
+
       // bootstrapping for the test suite last; this will load the actual tests
       'test/test/boot.js',
 
@@ -254,42 +261,74 @@ module.exports = (config) => {
       {pattern: 'third_party/**/*.js', included: false},
       {pattern: 'test/**/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
+      {pattern: 'test/test/assets/clear-encrypted/*', included: false},
+      {pattern: 'test/test/assets/clear-encrypted-hls/*', included: false},
+      {pattern: 'test/test/assets/dash-event-callback/*', included: false},
+      // eslint-disable-next-line @stylistic/max-len
+      {pattern: 'test/test/assets/dash-event-callback-urlparam/*', included: false},
       {pattern: 'test/test/assets/dash-multi-codec/*', included: false},
       {pattern: 'test/test/assets/dash-multi-codec-ec3/*', included: false},
+      {pattern: 'test/test/assets/dash-multitype-variant/*', included: false},
+      {pattern: 'test/test/assets/dash-svta-2053-2/*', included: false},
       {pattern: 'test/test/assets/3675/*', included: false},
       {pattern: 'test/test/assets/7401/*', included: false},
       {pattern: 'test/test/assets/6339/*', included: false},
       {pattern: 'test/test/assets/dash-aes-128/*', included: false},
+      {pattern: 'test/test/assets/dash-audio-ac3/*', included: false},
       {pattern: 'test/test/assets/dash-clearkey/*', included: false},
       {pattern: 'test/test/assets/dash-mpd-alternate/*', included: false},
       {pattern: 'test/test/assets/dash-vr/*', included: false},
-      {pattern: 'test/test/assets/dv-p8-hevc/*', included: false},
-      {pattern: 'test/test/assets/dv-p10-av1/*', included: false},
+      {pattern: 'test/test/assets/dv-p10-1-av1/*', included: false},
+      {pattern: 'test/test/assets/dv-p10-4-av1/*', included: false},
+      {pattern: 'test/test/assets/dv-p8-1-hevc/*', included: false},
+      {pattern: 'test/test/assets/dv-p8-4-hevc/*', included: false},
       {pattern: 'test/test/assets/hls-aes-256/*', included: false},
+      {pattern: 'test/test/assets/hls-chapters/*', included: false},
+      {pattern: 'test/test/assets/hls-gap/*', included: false},
+      {pattern: 'test/test/assets/hls-iframe-only/*', included: false},
       {pattern: 'test/test/assets/hls-interstitial/*', included: false},
+      {pattern: 'test/test/assets/hls-mp4-muxed-aac-h264/*', included: false},
+      {pattern: 'test/test/assets/hls-multivideo/*', included: false},
+      {pattern: 'test/test/assets/hls-muxed-mp4-ts/*', included: false},
       {pattern: 'test/test/assets/hls-raw-aac/*', included: false},
       {pattern: 'test/test/assets/hls-raw-ac3/*', included: false},
       {pattern: 'test/test/assets/hls-raw-ec3/*', included: false},
       {pattern: 'test/test/assets/hls-raw-mp3/*', included: false},
       {pattern: 'test/test/assets/hls-sample-aes/*', included: false},
-      // eslint-disable-next-line max-len
+      {pattern: 'test/test/assets/hls-svta-2053-2/*', included: false},
+      // eslint-disable-next-line @stylistic/max-len
       {pattern: 'test/test/assets/hls-text-no-discontinuity/*', included: false},
       {pattern: 'test/test/assets/hls-text-offset/*', included: false},
       {pattern: 'test/test/assets/hls-ts-aac/*', included: false},
+      // eslint-disable-next-line @stylistic/max-len
+      {pattern: 'test/test/assets/hls-ts-audio-muxed-in-video/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ac3/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-b-frames/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ec3/*', included: false},
       {pattern: 'test/test/assets/hls-ts-h264/*', included: false},
       {pattern: 'test/test/assets/hls-ts-h265/*', included: false},
       {pattern: 'test/test/assets/hls-ts-mp3/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-aac-h264/*', included: false},
+      // eslint-disable-next-line @stylistic/max-len
+      {pattern: 'test/test/assets/hls-ts-muxed-aac-h264-with-overflow-nalus/*', included: false},
+      // eslint-disable-next-line @stylistic/max-len
+      {pattern: 'test/test/assets/hls-ts-muxed-aac-h264-with-overflow-samples/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-aac-h265/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-ac3-h264/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-mp3-h264/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-ec3-h264/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-opus-h264/*', included: false},
+      // eslint-disable-next-line @stylistic/max-len
+      {pattern: 'test/test/assets/hls-ts-muxed-opus-h264-2880/*', included: false},
       {pattern: 'test/test/assets/hls-ts-raw-aac/*', included: false},
       {pattern: 'test/test/assets/hls-ts-rollover/*', included: false},
-      {pattern: 'dist/shaka-player.ui.js', included: false},
+      {pattern: 'test/test/assets/lcevc-sei/*', included: false},
+      {pattern: 'test/test/assets/lcevc-sei-ts/*', included: false},
+      {pattern: 'test/test/assets/lcevc-dual-track/*', included: false},
+      {pattern: 'dist/shaka-player.experimental.js', included: false},
+      {pattern: 'dist/shaka-player.transmuxer-worker.js', included: false},
+      // eslint-disable-next-line @stylistic/max-len
+      {pattern: 'dist/shaka-player.transmuxer-worker.debug.js', included: false},
       {pattern: 'dist/locales.js', included: false},
       {pattern: 'demo/**/*.js', included: false},
       {pattern: 'demo/locales/en.json', included: false},
@@ -360,6 +399,12 @@ module.exports = (config) => {
 
         // Overrides the default test timeout value.
         testTimeout: settings.test_timeout,
+
+        // True if the test.py --grid_config option was used.
+        runningInLab: !!settings.grid_config,
+
+        // True if the test.py --running_in_vm option was used.
+        runningInVM: !!settings.running_in_vm,
       }],
     },
 
@@ -380,7 +425,7 @@ module.exports = (config) => {
     // Set Karma's level of logging.
     logLevel: KARMA_LOG_MAP[settings.log_level],
 
-    // Should Karma xecute tests whenever a file changes?
+    // Should Karma execute tests whenever a file changes?
     autoWatch: settings.auto_watch,
 
     // Do a single run of the tests on captured browsers and then quit.
@@ -535,8 +580,8 @@ module.exports = (config) => {
  * Resolves a list of paths using globs into a list of explicit paths.
  * Paths are all relative to the source directory.
  *
- * @param {!Array.<string>} list
- * @return {!Array.<string>}
+ * @param {!Array<string>} list
+ * @return {!Array<string>}
  */
 function resolveGlobs(list) {
   const options = {
@@ -557,7 +602,7 @@ function resolveGlobs(list) {
  * array of strings.
  *
  * @param {!Object} config
- * @return {!Array.<string>}
+ * @return {!Array<string>}
  */
 function allUsableBrowserLaunchers(config) {
   const browsers = [];
@@ -604,6 +649,7 @@ function allUsableBrowserLaunchers(config) {
       const browserPath = process.env[ENV_CMD] || DEFAULT_CMD[process.platform];
 
       if (!fs.existsSync(browserPath) &&
+          // cspell: disable-next-line
           !which.sync(browserPath, {nothrow: true})) {
         continue;
       }
@@ -638,7 +684,7 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
    * Extract URL params from the request.
    *
    * @param {express.Request} request
-   * @return {!Object.<string, string>}
+   * @return {!Object<string, string>}
    */
   function getParams(request) {
     // This can be null for manually-connected browsers.
@@ -700,7 +746,7 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
    * @param {karma.Launcher.Browser.spec} spec
    * @param {wd.remote} webDriverClient A WebDriver client, an object from the
    *   "wd" package, created by "wd.remote()".
-   * @return {!Promise.<!Buffer>} A Buffer containing a PNG screenshot
+   * @return {!Promise<!Buffer>} A Buffer containing a PNG screenshot
    */
   function getScreenshot(spec, webDriverClient) {
     return new Promise((resolve, reject) => {
@@ -731,8 +777,8 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
    * Write the diff to disk, as well.
    *
    * @param {karma.Launcher.Browser} browser
-   * @param {!Object.<string, string>} params
-   * @return {!Promise.<number>} A similarity score between 0 and 1.
+   * @param {!Object<string, string>} params
+   * @return {!Promise<number>} A similarity score between 0 and 1.
    */
   async function diffScreenshot(browser, params) {
     const webDriverClient = getWebDriverClient(browser);
@@ -935,7 +981,7 @@ WebDriverScreenshotMiddlewareFactory.$inject = ['launcher'];
  * This could have been done through a fork of Karma itself, but this plugin
  * was clearer in some ways than using a fork of a now-extinct project.
  *
- * @param {karma.Launcher} launcher
+ * @param {!Array<karma.Reporter>} reporters
  * @param {string} settingsJson
  * @return {karma.Middleware}
  */

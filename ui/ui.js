@@ -11,14 +11,16 @@ goog.provide('shaka.ui.Overlay.TrackLabelFormat');
 
 goog.require('goog.asserts');
 goog.require('shaka.Player');
+goog.require('shaka.device.DeviceFactory');
+goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
 goog.require('shaka.polyfill');
 goog.require('shaka.ui.Controls');
+goog.require('shaka.ui.Watermark');
 goog.require('shaka.util.ConfigUtils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.IDestroyable');
-goog.require('shaka.util.Platform');
 
 /**
  * @implements {shaka.util.IDestroyable}
@@ -41,6 +43,35 @@ shaka.ui.Overlay = class {
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.defaultConfig_();
 
+    // Get and configure cast app id.
+    let castAppId = '';
+
+    // Get and configure cast Android Receiver Compatibility
+    let castAndroidReceiverCompatible = false;
+
+    // Cast receiver id can be specified on either container or video.
+    // It should not be provided on both. If it was, we will use the last
+    // one we saw.
+    if (videoContainer['dataset'] &&
+        videoContainer['dataset']['shakaPlayerCastReceiverId']) {
+      const dataSet = videoContainer['dataset'];
+      castAppId = dataSet['shakaPlayerCastReceiverId'];
+      castAndroidReceiverCompatible =
+          dataSet['shakaPlayerCastAndroidReceiverCompatible'] === 'true';
+    } else if (video['dataset'] &&
+               video['dataset']['shakaPlayerCastReceiverId']) {
+      const dataSet = video['dataset'];
+      castAppId = dataSet['shakaPlayerCastReceiverId'];
+      castAndroidReceiverCompatible =
+          dataSet['shakaPlayerCastAndroidReceiverCompatible'] === 'true';
+    }
+
+    if (castAppId.length) {
+      this.config_.castReceiverAppId = castAppId;
+      this.config_.castAndroidReceiverCompatible =
+          castAndroidReceiverCompatible;
+    }
+
     // Make sure this container is discoverable and that the UI can be reached
     // through it.
     videoContainer['dataset']['shakaPlayerContainer'] = '';
@@ -55,10 +86,6 @@ shaka.ui.Overlay = class {
     this.controls_ = new shaka.ui.Controls(
         player, videoContainer, video, vrCanvas, this.config_);
 
-    // Run the initial setup so that no configure() call is required for default
-    // settings.
-    this.configure({});
-
     // If the browser's native controls are disabled, use UI TextDisplayer.
     if (!video.controls) {
       player.setVideoContainer(videoContainer);
@@ -66,16 +93,20 @@ shaka.ui.Overlay = class {
 
     videoContainer['ui'] = this;
     video['ui'] = this;
+    /** @private {shaka.ui.Watermark} */
+    this.watermark_ = null;
   }
 
 
   /**
+   * @param {boolean=} forceDisconnect If true, force the receiver app to shut
+   *   down by disconnecting.  Does nothing if not connected.
    * @override
    * @export
    */
-  async destroy() {
+  async destroy(forceDisconnect = false) {
     if (this.controls_) {
-      await this.controls_.destroy();
+      await this.controls_.destroy(forceDisconnect);
     }
     this.controls_ = null;
 
@@ -83,6 +114,7 @@ shaka.ui.Overlay = class {
       await this.player_.destroy();
     }
     this.player_ = null;
+    this.watermark_ = null;
   }
 
 
@@ -94,7 +126,34 @@ shaka.ui.Overlay = class {
    * @export
    */
   isMobile() {
-    return shaka.util.Platform.isMobile();
+    const device = shaka.device.DeviceFactory.getDevice();
+    return device.getDeviceType() == shaka.device.IDevice.DeviceType.MOBILE;
+  }
+
+
+  /**
+   * Detects if this is a Cast platform, in case you want to choose a
+   * different UI configuration on cast devices.
+   *
+   * @return {boolean}
+   * @export
+   */
+  isCast() {
+    const device = shaka.device.DeviceFactory.getDevice();
+    return device.getDeviceType() == shaka.device.IDevice.DeviceType.CAST;
+  }
+
+
+  /**
+   * Detects if this is a smart tv platform, in case you want to choose a
+   * different UI configuration on smart tv devices.
+   *
+   * @return {boolean}
+   * @export
+   */
+  isSmartTV() {
+    const device = shaka.device.DeviceFactory.getDevice();
+    return device.getDeviceType() == shaka.device.IDevice.DeviceType.TV;
   }
 
 
@@ -130,21 +189,28 @@ shaka.ui.Overlay = class {
 
     goog.asserts.assert(typeof(config) == 'object', 'Should be an object!');
 
+    const newConfig = /** @type {!shaka.extern.UIConfiguration} */(
+      Object.assign({}, this.config_));
     shaka.util.ConfigUtils.mergeConfigObjects(
-        this.config_, config, this.defaultConfig_(),
+        newConfig, config, this.defaultConfig_(),
         /* overrides= */ {}, /* path= */ '');
 
-    // If a cast receiver app id has been given, add a cast button to the UI
-    if (this.config_.castReceiverAppId &&
-        !this.config_.overflowMenuButtons.includes('cast')) {
-      this.config_.overflowMenuButtons.push('cast');
+    goog.asserts.assert(this.player_ != null, 'Should have a player!');
+
+    const diff = shaka.util.ConfigUtils.getDifferenceFromConfigObjects(
+        newConfig, this.config_);
+    if (!Object.keys(diff).length) {
+      // No changes
+      return;
     }
 
-    goog.asserts.assert(this.player_ != null, 'Should have a player!');
+    this.config_ = newConfig;
 
     this.controls_.configure(this.config_);
 
     this.controls_.dispatchEvent(new shaka.util.FakeEvent('uiupdated'));
+
+    this.setupCastSenderUrl_();
   }
 
 
@@ -169,27 +235,86 @@ shaka.ui.Overlay = class {
 
 
   /**
+   * @param {string} text
+   * @param {?shaka.ui.Watermark.Options=} options
+   * @export
+   */
+  setTextWatermark(text, options) {
+    if (text && !this.watermark_ && this.videoContainer_ && this.controls_) {
+      this.watermark_ = new shaka.ui.Watermark(
+          this.videoContainer_, this.controls_);
+    }
+    if (this.watermark_) {
+      this.watermark_.setTextWatermark(text, options);
+    }
+  }
+
+  /**
+   * @export
+   */
+  removeWatermark() {
+    if (this.watermark_) {
+      this.watermark_.removeWatermark();
+    }
+  }
+
+
+  /**
    * @return {!shaka.extern.UIConfiguration}
    * @private
    */
   defaultConfig_() {
+    const controlPanelElements = [
+      'play_pause',
+      'skip_previous',
+      'skip_next',
+      'mute_volume',
+      'time_and_duration',
+      'spacer',
+      'queue',
+    ];
+
+    if (window.chrome) {
+      controlPanelElements.push('cast');
+    }
+    // eslint-disable-next-line no-restricted-syntax
+    if ('remote' in HTMLMediaElement.prototype) {
+      controlPanelElements.push('remote');
+    }
+    controlPanelElements.push('overflow_menu');
+    controlPanelElements.push('fullscreen');
+
+    const mediaSessionActions = [
+      'pause',
+      'play',
+      'seekbackward',
+      'seekforward',
+      'seekto',
+      'stop',
+      'skipad',
+      'previoustrack',
+      'nexttrack',
+    ];
+    if ('documentPictureInPicture' in window ||
+        document.pictureInPictureEnabled) {
+      mediaSessionActions.push('enterpictureinpicture');
+    }
+
     const config = {
-      controlPanelElements: [
-        'play_pause',
-        'time_and_duration',
+      controlPanelElements,
+      topControlPanelElements: [
+        'content_title',
         'spacer',
-        'mute',
-        'volume',
-        'fullscreen',
-        'overflow_menu',
       ],
+      bigButtons: [],
       overflowMenuButtons: [
         'captions',
+        'captions-position',
         'quality',
+        'video_type',
         'language',
         'chapter',
         'picture_in_picture',
-        'cast',
         'playback_rate',
         'recenter_vr',
         'toggle_stereoscopic',
@@ -197,6 +322,7 @@ shaka.ui.Overlay = class {
       statisticsList: [
         'width',
         'height',
+        'currentCodecs',
         'corruptedFrames',
         'decodedFrames',
         'droppedFrames',
@@ -204,6 +330,7 @@ shaka.ui.Overlay = class {
         'licenseTime',
         'liveLatency',
         'loadLatency',
+        'timeToFirstFrame',
         'bufferingTime',
         'manifestTimeSeconds',
         'estimatedBandwidth',
@@ -217,28 +344,33 @@ shaka.ui.Overlay = class {
         'nonFatalErrorCount',
         'manifestPeriodCount',
         'manifestGapCount',
+        'gapsJumped',
+        'stallsDetected',
       ],
       adStatisticsList: [
         'loadTimes',
         'averageLoadTime',
         'started',
+        'overlayAds',
         'playedCompletely',
         'skipped',
         'errors',
       ],
       contextMenuElements: [
+        'captions-position',
+        'captions-size',
         'loop',
         'picture_in_picture',
+        'copy_video_frame',
         'save_video_frame',
-        'statistics',
-        'ad_statistics',
       ],
-      playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      playbackRates: [1, 1.25, 1.5, 2, 3],
+      playbackRateSliderMin: 0.5,
+      playbackRateSliderMax: 3,
       fastForwardRates: [2, 4, 8, 1],
       rewindRates: [-1, -2, -4, -8],
       addSeekBar: true,
-      addBigPlayButton: false,
-      customContextMenu: false,
+      customContextMenu: true,
       castReceiverAppId: '',
       castAndroidReceiverCompatible: false,
       clearBufferOnQualityChange: true,
@@ -248,55 +380,209 @@ shaka.ui.Overlay = class {
         buffered: 'rgba(255, 255, 255, 0.54)',
         played: 'rgb(255, 255, 255)',
         adBreaks: 'rgb(255, 204, 0)',
+        chapters: 'rgba(255, 0, 0, 0.8)',
       },
       volumeBarColors: {
         base: 'rgba(255, 255, 255, 0.54)',
         level: 'rgb(255, 255, 255)',
       },
+      playbackRateBarColors: {
+        base: 'rgba(255, 255, 255, 0.54)',
+        level: 'rgb(255, 255, 255)',
+      },
+      qualityMarks: {
+        '720': '',
+        '1080': 'HD',
+        '1440': '2K',
+        '2160': '4K',
+        '4320': '8K',
+      },
       trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
       textTrackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
       fadeDelay: 0,
+      closeMenusDelay: 2,
       doubleClickForFullscreen: true,
       singleClickForPlayAndPause: true,
       enableKeyboardPlaybackControls: true,
-      enableFullscreenOnRotation: true,
-      forceLandscapeOnFullscreen: true,
-      enableTooltips: false,
+      enableFullscreenOnRotation: false,
+      forceLandscapeOnFullscreen: false,
+      enableTooltips: true,
       keyboardSeekDistance: 5,
       keyboardLargeSeekDistance: 60,
       fullScreenElement: this.videoContainer_,
-      preferDocumentPictureInPicture: true,
       showAudioChannelCountVariants: true,
-      seekOnTaps: navigator.maxTouchPoints > 0,
+      seekOnTaps: false,
       tapSeekDistance: 10,
       refreshTickInSeconds: 0.125,
       displayInVrMode: false,
       defaultVrProjectionMode: 'equirectangular',
-      setupMediaSession: true,
-      preferVideoFullScreenInVisionOS: false,
+      preferVideoFullScreenInVisionOS: true,
       showAudioCodec: true,
+      showVideoCodec: true,
+      castSenderUrl: 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
+      enableKeyboardPlaybackControlsInWindow: false,
+      alwaysShowVolumeBar: false,
+      shortcuts: {
+        small_rewind: 'ArrowLeft',
+        small_fast_forward: 'ArrowRight',
+        large_rewind: 'PageDown',
+        large_fast_forward: 'PageUp',
+        home: 'Home',
+        end: 'End',
+        captions: 'c',
+        fullscreen: 'f',
+        mute: 'm',
+        picture_in_picture: 'p',
+        increase_video_speed: '>',
+        decrease_video_speed: '<',
+        play: 'k',
+        take_screenshot: 'u',
+        last_frame: ',',
+        next_frame: '.',
+      },
+      menuOpenUntilUserClosesIt: true,
+      allowTogglePresentationTime: true,
+      showRemainingTimeInPresentationTime: false,
+      enableVrDeviceMotion: true,
+      enableVrWheelZoom: false,
+      showUIAlways: false,
+      showUIAlwaysOnAudioOnly: true,
+      preferIntlDisplayNames: true,
+      mediaSession: {
+        enabled: true,
+        handleMetadata: true,
+        handleActions: true,
+        handlePosition: true,
+        supportedActions: mediaSessionActions,
+        allowAutoPiP: true,
+      },
+      captionsStyles: true,
+      captionsFontScaleFactors: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      documentPictureInPicture: {
+        enabled: true,
+        preferInitialWindowPlacement: false,
+        disallowReturnToOpener: false,
+      },
+      showUIOnPaused: true,
+      showMenusOnTheRight: false,
+      customTrackLabel: (defaultLabel, track, type) => '',
+      showBufferingSpinner: true,
     };
 
-    // eslint-disable-next-line no-restricted-syntax
-    if ('remote' in HTMLMediaElement.prototype) {
-      config.overflowMenuButtons.push('remote');
-    } else if (window.WebKitPlaybackTargetAvailabilityEvent) {
-      config.overflowMenuButtons.push('airplay');
+    if (goog.DEBUG) {
+      config.contextMenuElements.push('statistics');
+      config.contextMenuElements.push('ad_statistics');
     }
 
     // On mobile, by default, hide the volume slide and the small play/pause
     // button and show the big play/pause button in the center.
     // This is in line with default styles in Chrome.
     if (this.isMobile()) {
-      config.addBigPlayButton = true;
+      config.bigButtons = [
+        'skip_previous_always',
+        'play_pause_buffering',
+        'skip_next_always',
+      ];
+      config.customContextMenu = false;
+      config.singleClickForPlayAndPause = false;
+      config.seekOnTaps = true;
+      config.enableTooltips = false;
+      const device = shaka.device.DeviceFactory.getDevice();
+      config.enableFullscreenOnRotation = device.getBrowserEngine() !==
+          shaka.device.IDevice.BrowserEngine.WEBKIT;
+      config.forceLandscapeOnFullscreen = true;
+      // On mobile, keep the mute button but hide the volume slider by
+      // replacing the composite mute_volume element with a standalone mute
+      // button.
+      config.controlPanelElements = config.controlPanelElements.map(
+          (name) => name === 'mute_volume' ? 'mute' : name);
+      const filterElements = [
+        'play_pause',
+        'skip_previous',
+        'skip_next',
+      ];
       config.controlPanelElements = config.controlPanelElements.filter(
-          (name) => name != 'play_pause' && name != 'volume');
+          (name) => !filterElements.includes(name));
+      config.overflowMenuButtons = config.overflowMenuButtons.filter(
+          (name) => !filterElements.includes(name));
+      config.contextMenuElements = config.contextMenuElements.filter(
+          (name) => !filterElements.includes(name));
+    } else if (this.isCast()) {
+      config.customContextMenu = false;
+      config.fadeDelay = 3;
+      config.singleClickForPlayAndPause = false;
+      config.enableTooltips = false;
+      config.doubleClickForFullscreen = false;
+      config.controlPanelElements = [
+        'play_pause',
+        'time_and_duration',
+        'spacer',
+      ];
+    } else if (this.isSmartTV()) {
+      config.bigButtons = [
+        'play_pause_buffering',
+      ];
+      config.customContextMenu = false;
+      config.singleClickForPlayAndPause = false;
+      config.enableTooltips = false;
+      config.doubleClickForFullscreen = false;
+      // Smart TVs adjust volume with the remote, so replace the composite
+      // mute_volume element (mute button + volume slider) with a standalone
+      // mute button: keep the mute control but hide the volume slider.
+      config.controlPanelElements = config.controlPanelElements.map(
+          (name) => name === 'mute_volume' ? 'mute' : name);
+      const filterElements = [
+        'play_pause',
+        'cast',
+        'remote',
+        'save_video_frame',
+      ];
+      config.controlPanelElements = config.controlPanelElements.filter(
+          (name) => !filterElements.includes(name));
+      config.overflowMenuButtons = config.overflowMenuButtons.filter(
+          (name) => !filterElements.includes(name));
+      config.contextMenuElements = config.contextMenuElements.filter(
+          (name) => !filterElements.includes(name));
+    } else {
+      config.seekOnTaps = navigator.maxTouchPoints > 0;
     }
 
-    // Set this button here to push it at the end.
-    config.overflowMenuButtons.push('save_video_frame');
+    if (config.bigButtons.some((name) => name === 'play_pause_buffering')) {
+      config.showBufferingSpinner = false;
+    }
+
+    const device = shaka.device.DeviceFactory.getDevice();
+    if (device.getDeviceType() == shaka.device.IDevice.DeviceType.APPLE_VR) {
+      config.enableVrDeviceMotion = false;
+    }
 
     return config;
+  }
+
+  /**
+   * @private
+   */
+  setupCastSenderUrl_() {
+    const castSenderUrl = this.config_.castSenderUrl;
+    if (!castSenderUrl || !this.config_.castReceiverAppId ||
+        !window.chrome || chrome.cast || this.isSmartTV()) {
+      return;
+    }
+    let alreadyLoaded = false;
+    for (const element of document.getElementsByTagName('script')) {
+      const script = /** @type {HTMLScriptElement} **/(element);
+      if (script.src === castSenderUrl) {
+        alreadyLoaded = true;
+        break;
+      }
+    }
+    if (!alreadyLoaded) {
+      const script =
+        /** @type {HTMLScriptElement} **/(document.createElement('script'));
+      script.src = castSenderUrl;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
   }
 
   /**
@@ -362,8 +648,18 @@ shaka.ui.Overlay = class {
         const {lcevcCanvas, vrCanvas} =
             shaka.ui.Overlay.findOrMakeSpecialCanvases_(
                 container, canvases, vrCanvases);
-        shaka.ui.Overlay.setupUIandAutoLoad_(
-            container, video, lcevcCanvas, vrCanvas);
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          await shaka.ui.Overlay.setupUIandAutoLoad_(
+              container, video, lcevcCanvas, vrCanvas);
+        } catch (e) {
+          // This can fail if, for example, not every player file has loaded.
+          // Ad-block is a likely cause for this sort of failure.
+          shaka.log.error('Error setting up Shaka Player', e);
+          shaka.ui.Overlay.dispatchLoadedEvent_('shaka-ui-load-failed',
+              shaka.ui.Overlay.FailReasonCode.PLAYER_FAILED_TO_LOAD);
+          return;
+        }
       }
     } else {
       for (const container of containers) {
@@ -436,50 +732,12 @@ shaka.ui.Overlay = class {
    * @param {!Element} container
    * @param {!Element} video
    * @param {!Element} lcevcCanvas
-   * @param {!Element} vrCanvas
+   * @param {?Element} vrCanvas
    * @private
    */
   static async setupUIandAutoLoad_(container, video, lcevcCanvas, vrCanvas) {
     // Create the UI
     const player = new shaka.Player();
-    const ui = new shaka.ui.Overlay(player,
-        shaka.util.Dom.asHTMLElement(container),
-        shaka.util.Dom.asHTMLMediaElement(video),
-        shaka.util.Dom.asHTMLCanvasElement(vrCanvas));
-
-    // Attach Canvas used for LCEVC Decoding
-    player.attachCanvas(/** @type {HTMLCanvasElement} */(lcevcCanvas));
-
-    // Get and configure cast app id.
-    let castAppId = '';
-
-    // Get and configure cast Android Receiver Compatibility
-    let castAndroidReceiverCompatible = false;
-
-    // Cast receiver id can be specified on either container or video.
-    // It should not be provided on both. If it was, we will use the last
-    // one we saw.
-    if (container['dataset'] &&
-        container['dataset']['shakaPlayerCastReceiverId']) {
-      castAppId = container['dataset']['shakaPlayerCastReceiverId'];
-      castAndroidReceiverCompatible =
-          container['dataset']['shakaPlayerCastAndroidReceiverCompatible'] ===
-          'true';
-    } else if (video['dataset'] &&
-               video['dataset']['shakaPlayerCastReceiverId']) {
-      castAppId = video['dataset']['shakaPlayerCastReceiverId'];
-      castAndroidReceiverCompatible =
-        video['dataset']['shakaPlayerCastAndroidReceiverCompatible'] === 'true';
-    }
-
-    if (castAppId.length) {
-      ui.configure({castReceiverAppId: castAppId,
-        castAndroidReceiverCompatible: castAndroidReceiverCompatible});
-    }
-
-    if (shaka.util.Dom.asHTMLMediaElement(video).controls) {
-      ui.getControls().setEnabledNativeControls(true);
-    }
 
     // Get the source and load it
     // Source can be specified either on the video element:
@@ -503,6 +761,18 @@ shaka.ui.Overlay = class {
 
     await player.attach(shaka.util.Dom.asHTMLMediaElement(video));
 
+    // Attach Canvas used for LCEVC Decoding
+    player.attachCanvas(/** @type {HTMLCanvasElement} */(lcevcCanvas));
+
+    const ui = new shaka.ui.Overlay(player,
+        shaka.util.Dom.asHTMLElement(container),
+        shaka.util.Dom.asHTMLMediaElement(video),
+        vrCanvas ? shaka.util.Dom.asHTMLCanvasElement(vrCanvas) : null);
+
+    if (shaka.util.Dom.asHTMLMediaElement(video).controls) {
+      ui.getControls().setEnabledNativeControls(true);
+    }
+
     for (const url of urls) {
       try { // eslint-disable-next-line no-await-in-loop
         await ui.getControls().getPlayer().load(url);
@@ -516,9 +786,9 @@ shaka.ui.Overlay = class {
 
   /**
    * @param {!Element} container
-   * @param {!NodeList.<!Element>} canvases
-   * @param {!NodeList.<!Element>} vrCanvases
-   * @return {{lcevcCanvas: !Element, vrCanvas: !Element}}
+   * @param {!NodeList<!Element>} canvases
+   * @param {!NodeList<!Element>} vrCanvases
+   * @return {{lcevcCanvas: !Element, vrCanvas: ?Element}}
    * @private
    */
   static findOrMakeSpecialCanvases_(container, canvases, vrCanvases) {
@@ -545,11 +815,6 @@ shaka.ui.Overlay = class {
         break;
       }
     }
-    if (!vrCanvas) {
-      vrCanvas = document.createElement('canvas');
-      vrCanvas.classList.add('shaka-vr-canvas-container');
-      container.appendChild(vrCanvas);
-    }
     return {
       lcevcCanvas,
       vrCanvas,
@@ -569,6 +834,8 @@ shaka.ui.Overlay.TrackLabelFormat = {
   'ROLE': 1,
   'LANGUAGE_ROLE': 2,
   'LABEL': 3,
+  'LABEL_OR_LANGUAGE': 4,
+  'LANGUAGE_OR_LABEL': 4,
 };
 
 /**

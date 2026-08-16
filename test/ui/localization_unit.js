@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:words topa mornin merin haryalye alasse selek lanun khun
+
 describe('Localization', () => {
   const Localization = shaka.ui.Localization;
 
@@ -368,7 +370,7 @@ describe('Localization', () => {
 
           // We should be told that we are missing an entry for "hello" because
           // it was in the fallback (HALFLING) but not our preferred language
-          // (EVLISH).
+          // (ELVISH).
           expect(events.length).toBe(1);
           expect(events[0]['locales']).toEqual([ELVISH_WOODLAND]);
           expect(events[0]['missing']).toEqual(['hello']);
@@ -395,7 +397,7 @@ describe('Localization', () => {
 
           // We should be told that we are missing an entry for "Best Wishes"
           // because it was in the base (ELVISH) but not our preferred language
-          // (EVLISH_WOODLAND).
+          // (ELVISH_WOODLAND).
           expect(events.length).toBe(1);
           expect(events[0]['locales']).toEqual([ELVISH_WOODLAND]);
           expect(events[0]['missing']).toEqual(['Best Wishes']);
@@ -495,7 +497,7 @@ describe('Localization', () => {
    *
    * @param {!shaka.ui.Localization} localization
    * @param {string} eventName
-   * @param {!Array.<!shaka.util.FakeEvent>} out
+   * @param {!Array<!shaka.util.FakeEvent>} out
    */
   function collectEvents(localization, eventName, out) {
     const onEvent = (event) => {

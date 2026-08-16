@@ -9,7 +9,7 @@ shaka.test.ManifestParser = class {
    * Verifies the segment references of a stream.
    *
    * @param {?shaka.extern.Stream} stream
-   * @param {!Array.<shaka.media.SegmentReference>} references
+   * @param {!Array<shaka.media.SegmentReference>} references
    */
   static verifySegmentIndex(stream, references) {
     expect(stream).toBeTruthy();
@@ -23,13 +23,16 @@ shaka.test.ManifestParser = class {
     for (const expectedRef of references) {
       // Don't query negative times.  Query 0 instead.
       const startTime = Math.max(0, expectedRef.startTime);
-      const position = stream.segmentIndex.find(startTime);
-      expect(position).not.toBe(null);
-      const actualRef =
-          stream.segmentIndex.get(/** @type {number} */ (position));
+      // Some segment start times are before the beginning of the period.
+      // So default to 0 here if position is null.
+      const position = stream.segmentIndex.find(startTime) || 0;
+      const actualRef = stream.segmentIndex.get(position);
       // NOTE: A custom matcher for SegmentReferences is installed, so this
       // checks the URIs as well.
       expect(actualRef).toEqual(expectedRef);
+      // However, if it does fail because of URIs, you won't see them in the
+      // output without this, as well:
+      expect(actualRef.getUris()).toEqual(expectedRef.getUris());
     }
 
     // Make sure that the references stop at the end.
@@ -42,14 +45,14 @@ shaka.test.ManifestParser = class {
   /**
    * Creates a segment reference using a relative URI.
    *
-   * @param {string|Array.<string>} uri A relative URI to http://example.com
+   * @param {string | Array<string>} uri A relative URI to http://example.com
    * @param {number} start
    * @param {number} end
    * @param {string=} baseUri
    * @param {number=} startByte
    * @param {?number=} endByte
    * @param {number=} timestampOffset
-   * @param {!Array.<!shaka.media.SegmentReference>=} partialReferences
+   * @param {!Array<!shaka.media.SegmentReference>=} partialReferences
    * @param {?string=} tilesLayout
    * @param {?number=} syncTime
    * @return {!shaka.media.SegmentReference}
@@ -59,7 +62,7 @@ shaka.test.ManifestParser = class {
       partialReferences = [], tilesLayout = '', syncTime = null) {
     const getUris = () => {
       const uris = [];
-      if (uri instanceof Array) {
+      if (Array.isArray(uri)) {
         for (const url of uri) {
           if (url.length) {
             uris.push(baseUri + url);
@@ -99,6 +102,8 @@ shaka.test.ManifestParser = class {
     ref.bandwidth = /** @type {?} */(new shaka.test.AnyOrNull(Number));
     ref.codecs = /** @type {?} */(jasmine.any(String));
     ref.mimeType = /** @type {?} */(jasmine.any(String));
+    ref.segmentData = /** @type {?} */(new shaka.test.AnythingOrNull());
+    ref.removeSegmentDataOnGet = /** @type {?} */(jasmine.any(Boolean));
     return ref;
   }
 };

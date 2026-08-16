@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<!--
+  Shaka Player Demo - Version Index (Turn-down Notice)
+  Copyright 2016 Google LLC
+  SPDX-License-Identifier: Apache-2.0
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Shaka Player version index has moved</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://shaka-project.github.io">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+    <link rel="icon" href="https://shaka-project.github.io/shaka-player/demo/favicon.ico">
+    <style>
+      body {
+        font-family: Roboto, Arial, sans-serif;
+        background-color: #fff;
+        color: #000;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        line-height: 1.5;
+        position: relative;
+      }
+      body::before {
+        content: "";
+        z-index: -1;
+        position: absolute;
+        inset: 0;
+        /* Larger height compensates for lack of cropping the square logo. */
+        background-size: min(170vh, 90vw);
+        background-position: center;
+        background-repeat: no-repeat;
+        background-image: url(https://shaka-project.github.io/shaka-player/demo/app_logo_512.png);
+        opacity: 0.1;
+      }
+      .card {
+        box-sizing: border-box;
+        max-width: 40em;
+        margin: 16px;
+        padding: 16px;
+        border-radius: 2px;
+        background: white;
+        box-shadow: 0 2px 2px 0 rgba(0,0,0,.14),
+                    0 3px 1px -2px rgba(0,0,0,.2),
+                    0 1px 5px 0 rgba(0,0,0,.12);
+      }
+      h1 { font-size: 24px; font-weight: 500; margin: 0 0 0.5em; }
+      p { margin: 0.75em 0; }
+      a { color: rgb(63, 81, 181); }
+      ul { padding-left: 1.2em; }
+      li { margin: 0.4em 0; }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>We no longer host individual demo versions</h1>
+      <p>
+        Shaka Player demos and libraries used to be archived here on App Engine.
+        That archive has been retired.  To back-test a specific version, check
+        out its tag and build the demo locally.
+      </p>
+      <p>The current demos live on GitHub Pages:</p>
+      <ul>
+        <li>
+          <a href="https://shaka-project.github.io/shaka-player-release/">Latest release demo</a>
+        </li>
+        <li>
+          <a href="https://shaka-project.github.io/shaka-player/">Nightly demo</a>
+        </li>
+      </ul>
+      <p>Hosted, versioned builds of the library are available from:</p>
+      <ul>
+        <li><a href="https://developers.google.com/speed/libraries/#shaka-player">Google Hosted Libraries</a></li>
+        <li><a href="https://www.jsdelivr.com/package/npm/shaka-player">jsDelivr</a></li>
+        <li><a href="https://unpkg.com/browse/shaka-player/">UNPKG</a></li>
+        <li><a href="https://www.npmjs.com/package/shaka-player">npm</a></li>
+      </ul>
+    </main>
+  </body>
+</html>

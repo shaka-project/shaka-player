@@ -22,14 +22,6 @@ describe('HlsParser', () => {
   /** @type {!shaka.test.Waiter} */
   let waiter;
 
-  function checkClearKeySupport() {
-    const clearKeySupport = shakaSupport.drm['org.w3.clearkey'];
-    if (!clearKeySupport) {
-      return false;
-    }
-    return clearKeySupport.encryptionSchemes.includes('cenc');
-  }
-
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
@@ -44,6 +36,8 @@ describe('HlsParser', () => {
 
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
+    // Disable gapPadding, which can interfere with playback tests.
+    player.configure('streaming.gapPadding', 0);
 
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
@@ -110,14 +104,54 @@ describe('HlsParser', () => {
     await player.unload();
   });
 
-  it('supports text discontinuity', async () => {
-    player.setTextTrackVisibility(true);
+  drmIt('supports SAMPLE-AES identity streaming with Web Crypto', async () => {
+    if (!checkClearKeySupport()) {
+      pending('ClearKey is not supported');
+    }
+    spyOn(deviceDetected, 'hasWorkingClearKeySupport').and.returnValue(false);
 
+    await player.load('/base/test/test/assets/hls-sample-aes/index.m3u8');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 8 seconds, but stop early if the video ends.  If it takes
+    // longer than 30 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
+
+    await player.unload();
+  });
+
+  it('supports text discontinuity', async () => {
+    player.configure('preferredText',
+        [{
+          language: 'en',
+          role: '',
+          format: '',
+          forced: false,
+        }]);
     await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
     await video.play();
 
-    // Wait for last cue
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // All text segments are fetched while filling the buffering goal, so
+    // there is no need to play the presentation through to see every cue.
+    // This also keeps the test independent of gap-jumping behavior: this
+    // content has a small gap in the media timeline at the discontinuity,
+    // and some older WebKit versions fail to resume playback after jumping
+    // it.  Playing through gaps is covered by "supports playback with gaps".
+    const textTrack = video.textTracks[0];
+    const deadline = Date.now() + 20 * 1000;
+    while ((textTrack.cues || []).length < 3 && Date.now() < deadline) {
+      // eslint-disable-next-line no-await-in-loop
+      await shaka.test.Util.delay(0.25);
+    }
 
     const cues = video.textTracks[0].cues;
     expect(cues.length).toBe(3);
@@ -132,23 +166,244 @@ describe('HlsParser', () => {
   });
 
   it('supports text without discontinuity', async () => {
-    player.setTextTrackVisibility(true);
-
-    // eslint-disable-next-line max-len
+    player.configure('preferredText',
+        [{
+          language: 'de',
+          role: '',
+          format: '',
+          forced: false,
+        }]);
+    // eslint-disable-next-line @stylistic/max-len
     await player.load('/base/test/test/assets/hls-text-no-discontinuity/index.m3u8');
     await video.play();
 
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 30);
+    // This test sometimes fails on Tizen with missing cues if we use too
+    // small a delay here.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 3, 30);
 
     const cues = video.textTracks[0].cues;
     expect(cues.length).toBe(3);
-    expect(cues[0].startTime).toBeCloseTo(0.6, 0);
-    expect(cues[0].endTime).toBeCloseTo(2.88, 0);
-    expect(cues[1].startTime).toBeCloseTo(2.88, 0);
-    expect(cues[1].endTime).toBeCloseTo(6.36, 0);
-    expect(cues[2].startTime).toBeCloseTo(6.36, 0);
-    expect(cues[2].endTime).toBeCloseTo(10.68, 0);
+    expect(cues[0].startTime).toBeCloseTo(0, 0);
+    expect(cues[0].endTime).toBeCloseTo(1.48, 0);
+    expect(cues[1].startTime).toBeCloseTo(1.48, 0);
+    expect(cues[1].endTime).toBeCloseTo(4.96, 0);
+    expect(cues[2].startTime).toBeCloseTo(4.96, 0);
+    expect(cues[2].endTime).toBeCloseTo(9.28, 0);
 
     await player.unload();
+  });
+
+  it('allow switch between mp4 muxed and ts muxed', async () => {
+    if (!await Util.isTypeSupported(
+        'video/mp4; codecs="av01.0.31M.08"',
+        /* width= */ 1920, /* height= */ 1080)) {
+      pending('Codec AV1 is not supported by the platform.');
+    }
+    player.configure('abr.enabled', false);
+    await player.load('/base/test/test/assets/hls-muxed-mp4-ts/master.m3u8');
+    await video.play();
+
+    expect(player.getVariantTracks().length).toBe(2);
+
+    // We want to test TS --> MP4 and MP4 --> TS, that's why
+    // selectVariantTrack is called twice
+
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 30);
+
+    let nonActiveVariant = player.getVariantTracks().find((v) => !v.active);
+    goog.asserts.assert(nonActiveVariant, 'variant should be non-null!');
+    player.selectVariantTrack(nonActiveVariant, /* clearBuffer= */ true);
+
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 3, 30);
+
+    nonActiveVariant = player.getVariantTracks().find((v) => !v.active);
+    goog.asserts.assert(nonActiveVariant, 'variant should be non-null!');
+    player.selectVariantTrack(nonActiveVariant, /* clearBuffer= */ true);
+
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 30);
+
+    await player.unload();
+  });
+
+  it('supports com.apple.hls.chapters', async () => {
+    await player.load('/base/test/test/assets/hls-chapters/index.m3u8');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    expect(player.getChaptersTracks().length).toBe(1);
+
+    const chapters = await player.getChaptersAsync('und');
+
+    expect(chapters.length).toBe(7);
+
+    await player.unload();
+  });
+
+  it('supports mp4 muxed with AAC and H.264', async () => {
+    if (deviceDetected.getDeviceName() === 'Tizen' &&
+        deviceDetected.getVersion() === 3) {
+      pending('Tizen 3 currently does not support mp4 muxed content');
+    }
+    await player.load('/base/test/test/assets/hls-mp4-muxed-aac-h264/hls.m3u8');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 8 seconds, but stop early if the video ends.  If it takes
+    // longer than 30 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 8, 30);
+
+    await player.unload();
+  });
+
+  it('supports playback with gaps', async () => {
+    await player.load('/base/test/test/assets/hls-gap/playlist.m3u8');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    expect(player.getStats().manifestGapCount).toBe(2);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 15 seconds, but stop early if the video ends.  If it takes
+    // longer than 45 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+    await player.unload();
+  });
+
+  it('plays all combinations of video and audio renditions', async () => {
+    // This asset has two EXT-X-STREAM-INF tags with both AUDIO and VIDEO
+    // attributes: 2 resolutions x 3 video renditions (RED has no URI, so it
+    // is the variant's own stream) x 3 audio renditions = 18 variants.
+    player.configure('abr.enabled', false);
+    await player.load('/base/test/test/assets/hls-multivideo/master.m3u8');
+    expect(player.isLive()).toBe(false);
+
+    const variants = player.getVariantTracks();
+    expect(variants.length).toBe(18);
+
+    // Every combination must be present exactly once.
+    const combinations = variants.map((variant) => {
+      return variant.height + '-' + variant.videoLabel + '-' + variant.label;
+    });
+    expect(combinations.length).toBe(new Set(combinations).size);
+    for (const height of [720, 360]) {
+      for (const videoLabel of ['RED', 'GREEN', 'BLUE']) {
+        for (const audioLabel of
+          ['Original 128k', 'High Pitch 128k', 'Low Pitch 128k']) {
+          expect(combinations)
+              .toContain(height + '-' + videoLabel + '-' + audioLabel);
+        }
+      }
+    }
+
+    await video.play();
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play every combination from the beginning.
+    for (const variant of variants) {
+      player.selectVariantTrack(variant, /* clearBuffer= */ true);
+      video.currentTime = 0;
+      // eslint-disable-next-line no-await-in-loop
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      const active = player.getVariantTracks().find((t) => t.active);
+      expect(active.id).toBe(variant.id);
+    }
+
+    await player.unload();
+  });
+
+  it('plays muxed TS audio in video', async () => {
+    // This asset has muxed audio in the video stream (no separate audio URI
+    // for the default audio group).
+    const url =
+        '/base/test/test/assets/hls-ts-audio-muxed-in-video/master.m3u8';
+
+    await player.load(url);
+
+    // Verify that we are using the expected variant.
+    const variants = player.getVariantTracks();
+    expect(variants.length).toBeGreaterThan(0);
+
+    await video.play();
+
+    // Wait for the video to start playback.
+    await waiter.waitForMovementOrFailOnTimeout(video, 20);
+
+    // Play for a few seconds.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 40);
+  });
+
+  it('plays an EXT-X-I-FRAMES-ONLY playlist with broken segments', async () => {
+    if (deviceDetected.getDeviceName() === 'Tizen' &&
+        deviceDetected.getVersion() === 3) {
+      pending('Tizen 3 throws 3016 with this content');
+    }
+    // This asset is an I-frame only playlist whose fragments were clipped
+    // to a single I-frame via EXT-X-BYTERANGE, but whose moof/mdat still
+    // declare the whole GOP.  Without repairing them, appending fails with
+    // CHUNK_DEMUXER_ERROR_APPEND_FAILED.
+    await player.load('/base/test/test/assets/hls-iframe-only/media.m3u8');
+    await video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play into the second segment, to make sure both broken fragments were
+    // repaired and appended.  If it takes longer than 30 seconds, fail.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 3, 30);
+
+    await player.unload();
+  });
+
+  it('plays MP3 audio-only with codec metadata', async () => {
+    // This asset has mp3 audio only, with explicit codecs.
+    const url =
+        '/base/test/test/assets/hls-raw-mp3/playlist.m3u8';
+
+    await player.load(url);
+
+    // Verify that we are using the expected variant.
+    const variants = player.getVariantTracks();
+    expect(variants.length).toBeGreaterThan(0);
+
+    await video.play();
+
+    // Wait for the video to start playback.
+    await waiter.waitForMovementOrFailOnTimeout(video, 20);
+
+    // Play for a few seconds.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 40);
+  });
+
+  it('plays MP3 audio-only without codec metadata', async () => {
+    // This asset has mp3 audio only, without explicit codecs.
+    const url =
+        '/base/test/test/assets/hls-raw-mp3/playlist-no-codecs.m3u8';
+
+    await player.load(url);
+
+    // Verify that we are using the expected variant.
+    const variants = player.getVariantTracks();
+    expect(variants.length).toBeGreaterThan(0);
+
+    await video.play();
+
+    // Wait for the video to start playback.
+    await waiter.waitForMovementOrFailOnTimeout(video, 20);
+
+    // Play for a few seconds.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 40);
   });
 });

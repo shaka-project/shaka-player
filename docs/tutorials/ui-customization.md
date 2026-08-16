@@ -50,8 +50,10 @@ The following elements can be added to the UI bar using this configuration value
   form where "0:10" (ten seconds) is the number of seconds passed from the start of the presentation
   and "1:00" (one minute) is the presentation duration.
 * play_pause: adds a button that plays/pauses the video on click.
+* play_pause_buffering: adds a button that plays/pauses the video on click.
 * mute: adds a button that mutes/unmutes the video on click.
 * volume: adds a volume slider.
+* mute_volume: adds a combined mute button and volume slider in a single container.
 * fullscreen: adds a button that toggles full screen mode on click.
 * overflow_menu: adds a button that opens an overflow menu with additional settings
   buttons. It's content is also configurable.
@@ -64,13 +66,12 @@ The following elements can be added to the UI bar using this configuration value
   that support it. Button is invisible on other browsers. Note that it will use the
   [Document Picture-in-Picture API]() if supported.
 * loop: adds a button that controls if the currently selected video is played in a loop.
-* airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
-  supports AirPlay.
 * cast: adds a button that opens a Chromecast dialog. The button is visible only if there is
   at least one Chromecast device on the same network available for casting.
 * remote: adds a button that opens a Remote Playback dialog. The button is visible only if the
-  browser supports Remote Playback API.
+  browser supports Remote Playback API. This works with AirPlay and Cast.
 * quality: adds a button that controls enabling/disabling of abr and video resolution selection.
+* video_type: adds a button that controls video role selection.
 * language: adds a button that controls audio language selection.
 * playback_rate: adds a button that controls the playback rate selection.
 * captions: adds a button that controls the current text track selection (including turning it off).
@@ -79,6 +80,22 @@ The following elements can be added to the UI bar using this configuration value
 * toggle_stereoscopic: adds a button that toggle between monoscopic and stereoscopic. The button
   is visible only if playing a VR content.
 * chapter: adds a button that controls the chapter selection.
+* captions-position: adds a button that controls the position of the captions.
+  The button is visible only if the content has at least one text track.
+* captions-size: adds a button that controls the size of the captions.
+  The button is visible only if the content has at least one text track.
+* skip_next: adds a button to skip to next element in the queue. The button
+  is visible only if there is next.
+* skip_previous: adds a button to skip to previous element in the queue. The button
+  is visible only if there is previous.
+* skip_next_always: adds a button to skip to next element in the queue. The button
+  is visible only if there is more than 1 item in the queue.
+* skip_previous_always: adds a button to skip to previous element in the queue.  The button
+  is visible only if there is more than 1 item in the queue.
+* queue: adds a button that opens a menu listing all items in the playback queue.
+  Each item displays its title and, if available, a poster thumbnail. The currently
+  playing item is highlighted with a checkmark. The button is visible only if there
+  is more than 1 item in the queue with a title in its metadata.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 [Document Picture-in-Picture API]: https://developer.chrome.com/docs/web-platform/document-picture-in-picture/
 
@@ -90,16 +107,15 @@ The following buttons can be added to the overflow menu:
 * cast: adds a button that opens a Chromecast dialog. The button is visible only if there is
   at least one Chromecast device on the same network available for casting.
 * quality: adds a button that controls enabling/disabling of abr and video resolution selection.
+* video_type: adds a button that controls video role selection.
 * language: adds a button that controls audio language selection.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
   that support it. Button is invisible on other browsers. Note that it will use the 
   [Document Picture-in-Picture API]() if supported.
 * loop: adds a button that controls if the currently selected video is played in a loop.
 * playback_rate: adds a button that controls the playback rate selection.
-* airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
-  supports AirPlay.
 * remote: adds a button that opens a Remote Playback dialog. The button is visible only if the
-  browser supports Remote Playback API.
+  browser supports Remote Playback API. This works with AirPlay and Cast.
 * statistics: adds a button that displays statistics of the video.
 * recenter_vr: adds a button that recenter the VR view to the initial view. The button is visible
   only if playing a VR content.
@@ -107,8 +123,17 @@ The following buttons can be added to the overflow menu:
   is visible only if playing a VR content.
 * ad_statistics: adds a button that displays ad statistics of the video.
 * save_video_frame: adds a button to save the current video frame.
+* copy_video_frame: adds a button to copy the current video frame to the clipboard.
 * chapter: adds a button that controls the chapter selection.
 * mute: adds a button that mutes/unmutes the video on click.
+* captions-position: adds a button that controls the position of the captions.
+  The button is visible only if the content has at least one text track.
+* captions-size: adds a button that controls the size of the captions.
+  The button is visible only if the content has at least one text track.
+* queue: adds a button that opens a menu listing all items in the playback queue.
+  Each item displays its title and, if available, a poster thumbnail. The currently
+  playing item is highlighted with a checkmark. The button is visible only if there
+  is more than 1 item in the queue with a title in its metadata.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:
@@ -122,6 +147,38 @@ ui.configure(config);
 
 An important note: the 'overflow_menu' button needs to be part of the 'controlPanelElements'
 layout for the overflow menu to be available to the user.
+
+The following elements can be added as big buttons using this configuration value:
+* play_pause: adds a button that plays/pauses the video on click.
+* play_pause_buffering: adds a button that plays/pauses the video on click.
+* mute: adds a button that mutes/unmutes the video on click.
+* fullscreen: adds a button that toggles full screen mode on click.
+* rewind: adds a button that rewinds the presentation on click; that is, it starts playing
+  the presentation backwards.
+* fast_forward: adds a button that fast forwards the presentation on click; that is, it
+  starts playing the presentation at an increased speed
+* picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
+  that support it. Button is invisible on other browsers. Note that it will use the
+  [Document Picture-in-Picture API]() if supported.
+* remote: adds a button that opens a Remote Playback dialog. The button is visible only if the
+  browser supports Remote Playback API.
+* loop: adds a button that controls if the currently selected video is played in a loop.
+* skip_next: adds a button to skip to next element in the queue. The button
+  is visible only if there is next.
+* skip_previous: adds a button to skip to previous element in the queue. The button
+  is visible only if there is previous.
+* skip_next_always: adds a button to skip to next element in the queue. The button
+  is visible only if there is more than 1 item in the queue.
+* skip_previous_always: adds a button to skip to previous element in the queue.  The button
+  is visible only if there is more than 1 item in the queue.
+
+Example:
+```js
+const config = {
+  'bigButtons' : ['play_pause']
+}
+ui.configure(config);
+```
 
 #### Adding tooltips to control panel buttons
 
@@ -138,15 +195,7 @@ ui.configure(config);
 #### Replacing the default context menu
 
 A custom context menu can be added through the `customContextMenu` boolean. Additionally, the `contextMenuElements` option can be used to add elements to it.
-The following buttons can be added to the context menu:
-* statistics: adds a button that displays statistics of the video.
-* loop: adds a button that controls if the currently selected video is played in a loop.
-* picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
-  that support it. Button is invisible on other browsers. Note that it will use the 
-  [Document Picture-in-Picture API]() if supported.
-* ad_statistics: adds a button that displays ad statistics of the video.
-* save_video_frame: adds a button to save the current video frame.
-* mute: adds a button that mutes/unmutes the video on click.
+The `contextMenuElements` configuration supports the same elements as `overflowMenuButtons`. Refer to the `overflowMenuButtons` section above for the full list of supported menu items and their descriptions.
 
 Example:
 ```js
@@ -188,7 +237,7 @@ ui.configure(config);
 ```
 
 The presence of the seek bar and the big play button in the center of the video element can be
-customized with `addSeekBar` and `addBigPlayButton` booleans in the config.
+customized with `addSeekBar` boolean and `bigButtons` in the config.
 
 UI layout can be reconfigured at any point after it's been created.
 Please note that custom layouts might need CSS adjustments to look good.
@@ -298,7 +347,47 @@ uiConfig['controlPanelElements'] = ['rewind', 'fast_forward', 'skip'];
 <!-- TODO: Create a doc on best a11y practices for custom buttons and link to the
   localization docs explaining how to take advantage of our localization system. -->
 
+#### Customizing the UI with CSS variables
+
+Shaka Player UI exposes styling through CSS custom properties defined on the :root.
+
+This allows applications to easily theme the player without modifying the source CSS.
+
+##### Example
+```css
+:root {
+  /* Layout */
+  --shaka-controls-w: 98%;
+
+  /* Typography */
+  --shaka-font-family: roboto, sans-serif;
+  --shaka-font-color: white;
+  --shaka-font-size: 14px;
+
+  /* Backgrounds */
+  --shaka-bg: rgba(0, 0, 0, 0.5);
+  --shaka-bg-hover: rgba(0, 0, 0, 0.75);
+
+  /* Controls */
+  --shaka-thumb-color: white;
+  --shaka-track-color: white;
+}
+```
+
+##### Using modern vs legacy builds
+
+If you are using the modern UI build, CSS custom properties are preserved and can be overridden at runtime.
+
+If you are using the legacy UI build, CSS custom properties are processed at build time for compatibility, but the variables remain in the output CSS and include fallback values for older browsers that do not support them.
+
+##### Recommendation
+
+Use:
+- controls.modern.css → when targeting modern browsers (recommended)
+- controls.css → when supporting older browsers
+
 ####  Shaka Theme Gallery
+<!-- cspell: disable-next-line -->
 Check out the set of [pre-packaged Shaka UI themes][], created by [@lucksy][]!
 PR contributions to [the gallery repo][] are welcome.
 [@lucksy]: https://github.com/lucksy

@@ -26,3 +26,9 @@
  * @suppress {duplicate}
  */
 var DOMStringList = function() {};
+
+/**
+ * @override
+ * @return {!Iterator<string>}
+ */
+DOMStringList.prototype[Symbol.iterator] = function() {};

@@ -15,19 +15,23 @@
 shaka.test.FakeNetworkingEngine = class {
   constructor() {
     /**
-     * @private {!Map.<
+     * @private {!Map<
      *    string,
-     *    shaka.test.FakeNetworkingEngine.MockedResponse>} */
+     *    shaka.test.FakeNetworkingEngine.MockedResponse>}
+     */
     this.responseMap_ = new Map();
 
-    /** @private {!Map.<string, !Object.<string, string>>} */
+    /** @private {!Map<string, !Object<string, string>>} */
     this.headersMap_ = new Map();
 
     /** @private {?BufferSource} */
     this.defaultResponse_ = null;
 
-    /** @private {?shaka.util.PublicPromise} */
+    /** @private {?Promise.PromiseWithResolvers} */
     this.delayNextRequestPromise_ = null;
+
+    /** @type {!jasmine.Spy} */
+    this.configure = jasmine.createSpy('configure').and.stub();
 
     /** @type {!jasmine.Spy} */
     this.request = jasmine.createSpy('request')
@@ -47,14 +51,8 @@ shaka.test.FakeNetworkingEngine = class {
     this.responseFilter_ = null;
 
     /** @type {!jasmine.Spy} */
-    this.setForceHTTP = jasmine.createSpy('setForceHTTP').and.stub();
-
-    /** @type {!jasmine.Spy} */
-    this.setForceHTTPS = jasmine.createSpy('setForceHTTPS').and.stub();
-
-    /** @type {!jasmine.Spy} */
-    this.setMinBytesForProgressEvents =
-        jasmine.createSpy('setMinBytesForProgressEvents').and.stub();
+    this.clearCommonAccessTokenMap =
+        jasmine.createSpy('clearCommonAccessTokenMap').and.stub();
 
     /** @private {number} */
     this.maxUris_ = 1;
@@ -106,7 +104,7 @@ shaka.test.FakeNetworkingEngine = class {
     // abortable operation.
     const asyncOp = async () => {
       if (delay) {
-        await delay;
+        await delay.promise;
       }
 
       const result = await resultCallback(abortCheck);
@@ -134,6 +132,7 @@ shaka.test.FakeNetworkingEngine = class {
         originalUri: requestedUri,
         data: result,
         headers: headers,
+        originalRequest: request,
       };
 
       // Modify the response using the response filter, this allows the app
@@ -180,12 +179,12 @@ shaka.test.FakeNetworkingEngine = class {
   }
 
   /**
-   * Delays the next response until the returned PublicPromise resolves.
-   * @return {!shaka.util.PublicPromise}
+   * Delays the next response until the returned Promise resolves.
+   * @return {!Promise.PromiseWithResolvers}
    */
   delayNextRequest() {
     if (!this.delayNextRequestPromise_) {
-      this.delayNextRequestPromise_ = new shaka.util.PublicPromise();
+      this.delayNextRequestPromise_ = Promise.withResolvers();
     }
     return this.delayNextRequestPromise_;
   }
@@ -236,6 +235,13 @@ shaka.test.FakeNetworkingEngine = class {
    */
   setResponse(uri, callback) {
     this.responseMap_.set(uri, callback);
+    try {
+      const normalizedUri = new URL(uri).toString();
+      if (normalizedUri != uri) {
+        this.responseMap_.set(normalizedUri, callback);
+      }
+    // eslint-disable-next-line no-restricted-syntax
+    } catch (e) {}
     return this;
   }
 
@@ -266,7 +272,7 @@ shaka.test.FakeNetworkingEngine = class {
    * Sets the headers for a specific uri.
    *
    * @param {string} uri
-   * @param {!Object.<string, string>} headers
+   * @param {!Object<string, string>} headers
    * @return {!shaka.test.FakeNetworkingEngine}
    */
   setHeaders(uri, headers) {
@@ -396,6 +402,6 @@ shaka.test.FakeNetworkingEngine = class {
  * A callback that creates a response for a given URI.
  * The callback passed in to this method, "abortCheck", returns whether or not
  * the network request has been aborted, at time of call.
- * @typedef {function(function():boolean):!Promise.<BufferSource>}
+ * @typedef {function(function(): boolean): !Promise<BufferSource>}
  */
 shaka.test.FakeNetworkingEngine.MockedResponse;

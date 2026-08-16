@@ -8,15 +8,16 @@
 goog.provide('shaka.ui.SaveVideoFrameButton');
 
 goog.require('shaka.ads.Utils');
-goog.require('shaka.ui.ContextMenu');
+goog.require('shaka.cast.CastProxy');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.MediaElementEvent');
 
 
 /**
@@ -32,24 +33,22 @@ shaka.ui.SaveVideoFrameButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    const LocIds = shaka.ui.Locales.Ids;
+    /** @private {shaka.cast.CastProxy} */
+    this.castProxy_ = this.controls.getCastProxy();
+
     /** @private {!HTMLButtonElement} */
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-save.video-frame-button');
     this.button_.classList.add('shaka-tooltip');
 
-    /** @private {!HTMLElement} */
-    this.icon_ = shaka.util.Dom.createHTMLElement('i');
-    this.icon_.classList.add('material-icons-round');
-    this.icon_.textContent = shaka.ui.Enums.MaterialDesignIcons.DOWNLOAD;
-    this.button_.appendChild(this.icon_);
+    /** @private {!shaka.ui.Icon} */
+    this.icon_ = new shaka.ui.Icon(this.button_,
+        shaka.ui.Enums.MaterialDesignSVGIcons['DOWNLOAD']);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
     label.classList.add('shaka-overflow-menu-only');
     this.nameSpan_ = shaka.util.Dom.createHTMLElement('span');
-    this.nameSpan_.textContent =
-        this.localization.resolve(LocIds.DOWNLOAD_VIDEO_FRAME);
     label.appendChild(this.nameSpan_);
 
     /** @private {!HTMLElement} */
@@ -59,123 +58,66 @@ shaka.ui.SaveVideoFrameButton = class extends shaka.ui.Element {
 
     this.button_.appendChild(label);
 
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
 
     this.parent.appendChild(this.button_);
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateLocalizedStrings_();
-        });
-
     this.eventManager.listen(this.button_, 'click', () => {
-      this.onClick_();
+      this.controls.takeScreenshot();
     });
 
     const vr = this.controls.getVR();
     this.eventManager.listen(vr, 'vrstatuschanged', () => {
-      this.checkAvailability_();
+      this.checkAvailability();
     });
 
-    this.eventManager.listen(
-        this.adManager, shaka.ads.Utils.AD_STARTED, () => {
-          this.checkAvailability_();
+    this.eventManager.listenMulti(
+        this.adManager,
+        [
+          shaka.ads.Utils.AD_STARTED,
+          shaka.ads.Utils.AD_STOPPED,
+        ], () => {
+          this.checkAvailability();
         });
 
-    this.eventManager.listen(
-        this.adManager, shaka.ads.Utils.AD_STOPPED, () => {
-          this.checkAvailability_();
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'unloading',
+          'loaded',
+        ], () => {
+          this.checkAvailability();
         });
 
-    this.eventManager.listen(this.player, 'unloading', () => {
-      this.checkAvailability_();
+    this.eventManager.listenMulti(
+        this.video,
+        [
+          shaka.util.MediaElementEvent.PLAY,
+          shaka.util.MediaElementEvent.PAUSE,
+          shaka.util.MediaElementEvent.SEEKING,
+        ], () => {
+          this.checkAvailability();
+        });
+
+    this.eventManager.listen(this.controls, 'caststatuschanged', () => {
+      this.checkAvailability();
     });
 
-    this.eventManager.listen(this.player, 'loaded', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.player, 'loaded', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.video, 'play', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.video, 'pause', () => {
-      this.checkAvailability_();
-    });
-
-    this.eventManager.listen(this.video, 'seeking', () => {
-      this.checkAvailability_();
-    });
-
-    this.checkAvailability_();
+    this.checkAvailability();
   }
 
-
-  /** @private */
-  onClick_() {
-    const canvas = /** @type {!HTMLCanvasElement}*/ (
-      document.createElement('canvas'));
-    const context = /** @type {CanvasRenderingContext2D} */ (
-      canvas.getContext('2d'));
-
-    const video = /** @type {!HTMLVideoElement} */ (
-      this.controls.getLocalVideo());
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const dataURL = canvas.toDataURL('image/png');
-
-    const downloadLink = /** @type {!HTMLAnchorElement}*/ (
-      document.createElement('a'));
-    downloadLink.href = dataURL;
-    downloadLink.download =
-        'videoframe_' + video.currentTime.toFixed(3) + '.png';
-    downloadLink.click();
+  /** @override */
+  checkAvailability() {
+    shaka.ui.Utils.setDisplay(this.button_,
+        this.controls.canTakeScreenshot() && !this.isSubMenuOpened);
   }
 
-
-  /**
-   * @private
-   */
-  checkAvailability_() {
-    let available = true;
-    if (this.controls.isPlayingVR()) {
-      available = false;
-    }
-    if (this.player.drmInfo() || this.player.isAudioOnly()) {
-      available = false;
-    }
-    if (this.ad) {
-      available = false;
-    }
-    if (this.video.remote && this.video.remote.state != 'disconnected') {
-      available = false;
-    }
-    shaka.ui.Utils.setDisplay(this.button_, available);
-  }
-
-
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
-
-    this.button_.ariaLabel =
-        this.localization.resolve(LocIds.DOWNLOAD_VIDEO_FRAME);
-    this.nameSpan_.textContent =
-        this.localization.resolve(LocIds.DOWNLOAD_VIDEO_FRAME);
+    const label = this.localization.resolve(LocIds.DOWNLOAD_VIDEO_FRAME);
+    this.button_.ariaLabel = label;
+    this.nameSpan_.textContent = label;
   }
 };
 
@@ -193,7 +135,4 @@ shaka.ui.SaveVideoFrameButton.Factory = class {
 
 
 shaka.ui.OverflowMenu.registerElement(
-    'save_video_frame', new shaka.ui.SaveVideoFrameButton.Factory());
-
-shaka.ui.ContextMenu.registerElement(
     'save_video_frame', new shaka.ui.SaveVideoFrameButton.Factory());

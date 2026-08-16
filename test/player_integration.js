@@ -242,6 +242,7 @@ describe('Player', () => {
         width: jasmine.any(Number),
         height: jasmine.any(Number),
         streamBandwidth: jasmine.any(Number),
+        currentCodecs: jasmine.any(String),
 
         decodedFrames: jasmine.any(Number),
         droppedFrames: jasmine.any(Number),
@@ -253,6 +254,7 @@ describe('Player', () => {
 
         completionPercent: jasmine.any(Number),
         loadLatency: jasmine.any(Number),
+        timeToFirstFrame: jasmine.any(Number),
         manifestTimeSeconds: jasmine.any(Number),
         drmTimeSeconds: jasmine.any(Number),
         playTime: jasmine.any(Number),
@@ -305,328 +307,16 @@ describe('Player', () => {
     });
   });  // describe('getStats')
 
-  describe('setTextTrackVisibility', () => {
-    // Using mode='disabled' on TextTrack causes cues to go null, which leads
-    // to a crash in TextEngine.  This validates that we do not trigger this
-    // behavior when changing visibility of text.
-
-    it('does not cause cues to be null', async () => {
-      await player.load('test:sintel_compiled');
-      await video.play();
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
-
-      // This TextTrack was created as part of load() when we set up the
-      // TextDisplayer.
-      const textTrack = video.textTracks[0];
-      expect(textTrack).not.toBe(null);
-
-      if (textTrack) {
-        // This should not be null initially.
-        expect(textTrack.cues).not.toBe(null);
-
-        await player.setTextTrackVisibility(true);
-        // This should definitely not be null when visible.
-        expect(textTrack.cues).not.toBe(null);
-
-        await player.setTextTrackVisibility(false);
-        // This should not transition to null when invisible.
-        expect(textTrack.cues).not.toBe(null);
-      }
-    });
-
-    // Repro for https://github.com/shaka-project/shaka-player/issues/1879.
-    it('appends cues when enabled initially', async () => {
-      let cues = [];
-      /** @const {!shaka.test.FakeTextDisplayer} */
-      const displayer = new shaka.test.FakeTextDisplayer();
-      displayer.appendSpy.and.callFake((added) => {
-        cues = cues.concat(added);
-      });
-
-      player.configure('textDisplayFactory', () => displayer);
-
-      const preferredTextLanguage = 'fa';  // The same as in the content itself
-      player.configure({preferredTextLanguage: preferredTextLanguage});
-
-      await player.load('test:sintel_realistic_compiled');
-
-      // Play until a time at which the external cues would be on screen.
-      await video.play();
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 4, 20);
-
-      expect(player.isTextTrackVisible()).toBe(true);
-      expect(displayer.isTextVisible()).toBe(true);
-      expect(cues.length).toBeGreaterThan(0);
-    });
-
-    it('appends cues for external text', async () => {
-      let cues = [];
-      /** @const {!shaka.test.FakeTextDisplayer} */
-      const displayer = new shaka.test.FakeTextDisplayer();
-      displayer.appendSpy.and.callFake((added) => {
-        cues = cues.concat(added);
-      });
-
-      player.configure('textDisplayFactory', () => displayer);
-
-      await player.load('test:sintel_no_text_compiled');
-      const locationUri = new goog.Uri(location.href);
-      const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
-      const absoluteUri = locationUri.resolve(partialUri);
-      const newTrack = await player.addTextTrackAsync(
-          absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
-
-      expect(player.getTextTracks()).toEqual([newTrack]);
-
-      player.selectTextTrack(newTrack);
-      player.setTextTrackVisibility(true);
-      await waiter.waitForEvent(player, 'texttrackvisibility');
-
-      // Play until a time at which the external cues would be on screen.
-      await video.play();
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 4, 20);
-
-      expect(player.isTextTrackVisible()).toBe(true);
-      expect(displayer.isTextVisible()).toBe(true);
-      expect(cues.length).toBeGreaterThan(0);
-    });
-
-    // https://github.com/shaka-project/shaka-player/issues/2553
-    it('does not change the selected track', async () => {
-      player.configure('streaming.alwaysStreamText', false);
-      await player.load('test:forced_subs_simulation_compiled');
-
-      // In this content, both text tracks have the same language and role, and
-      // so should look identical in terms of choosing one to match a
-      // preference.  This is important to the test, so verify it first.
-      const tracks = player.getTextTracks();
-      expect(tracks[0].language).toBe(tracks[1].language);
-      expect(tracks[0].roles).toEqual(tracks[1].roles);
-
-      const getTracksActive = () => player.getTextTracks().map((t) => t.active);
-
-      // If we choose a track first, then turn on text, the track should not
-      // change.  Try this with both tracks.
-      player.setTextTrackVisibility(false);
-
-      player.selectTextTrack(tracks[0]);
-      expect(getTracksActive()).toEqual([true, false]);
-      player.setTextTrackVisibility(true);
-      expect(getTracksActive()).toEqual([true, false]);
-
-      player.setTextTrackVisibility(false);
-
-      player.selectTextTrack(tracks[1]);
-      expect(getTracksActive()).toEqual([false, true]);
-      player.setTextTrackVisibility(true);
-      expect(getTracksActive()).toEqual([false, true]);
-    });
-
-    // https://github.com/shaka-project/shaka-player/issues/4821
-    it('loads a single text stream', async () => {
-      player.configure({preferredTextLanguage: 'en'});
-      await player.load('test:sintel_no_text_compiled');
-
-      // Add preferred language text track.
-      const locationUri = new goog.Uri(location.href);
-      const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
-      const absoluteUri = locationUri.resolve(partialUri);
-      await player.addTextTrackAsync(
-          absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
-
-      // Add alternate language text track.
-      // Two text tracks with same timings but different text
-      // are necessary for test.
-      const partialUri2 =
-      new goog.Uri('/base/test/test/assets/text-clip-alt.vtt');
-      const absoluteUri2 = locationUri.resolve(partialUri2);
-      await player.addTextTrackAsync(
-          absoluteUri2.toString(), 'fr', 'subtitles', 'text/vtt');
-
-      const textTracks = player.getTextTracks();
-      expect(textTracks.length).toBe(2);
-      expect(textTracks[0].language).toBe('en');
-      expect(textTracks[1].language).toBe('fr');
-
-      // Enable text visibilty and immediately change language.
-      // Only one set of cues should be active.
-      // Cues should be of the selected language track.
-      player.setTextTrackVisibility(true);
-      player.selectTextLanguage('fr');
-      video.currentTime = 5;
-      await video.play();
-      await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-      expect(video.textTracks[0].activeCues.length).toBe(1);
-      expect(player.getTextTracks()[1].active).toBe(true);
-    });
-  });  // describe('setTextTrackVisibility')
-
-  describe('autoShowText', () => {
-    async function textMatchesAudioDoesNot() {
-      const preferredTextLanguage = 'fa';  // The same as in the content
-      player.configure({preferredTextLanguage: preferredTextLanguage});
-
-      // NOTE: This is also a regression test for #1696, in which a change to
-      // this feature broke StreamingEngine initialization.
-
-      // Now load a version of Sintel with delayed setup of video & audio
-      // streams and wait for completion.
-      await player.load('test:sintel_realistic_compiled');
-      // By this point, a MediaSource error would be thrown in a repro of bug
-      // #1696.
-
-      // Make sure the content we tested with has text tracks, that the config
-      // we used matches the text language, and that the audio language differs.
-      // These will catch any changes to the underlying content that would
-      // invalidate the test setup.
-      expect(player.getTextTracks().length).not.toBe(0);
-      const textTrack = player.getTextTracks()[0];
-      expect(textTrack.language).toBe(preferredTextLanguage);
-
-      const variantTrack = player.getVariantTracks()[0];
-      expect(variantTrack.language).not.toBe(textTrack.language);
-    }
-
-    async function textDoesNotMatch() {
-      const preferredTextLanguage = 'xx';  // Differs from the content
-      player.configure({preferredTextLanguage: preferredTextLanguage});
-
-      // Now load the content and wait for completion.
-      await player.load('test:sintel_realistic_compiled');
-
-      // Make sure the content we tested with has text tracks, that the config
-      // we used does not match the text language, and that the text and audio
-      // languages do not match each other (to keep this distinct from the next
-      // test case).  This will catch any changes to the underlying content that
-      // would invalidate the test setup.
-      expect(player.getTextTracks().length).not.toBe(0);
-      const textTrack = player.getTextTracks()[0];
-      expect(textTrack.language).not.toBe(preferredTextLanguage);
-
-      const variantTrack = player.getVariantTracks()[0];
-      expect(variantTrack.language).not.toBe(textTrack.language);
-    }
-
-    async function textAndAudioMatch() {
-      const preferredTextLanguage = 'und';  // The same as in the content
-      player.configure({preferredTextLanguage: preferredTextLanguage});
-
-      // Now load the content and wait for completion.
-      await player.load('test:sintel_compiled');
-
-      // Make sure the content we tested with has text tracks, that the config
-      // we used matches the content, and that the text and audio languages
-      // match each other.  This will catch any changes to the underlying
-      // content that would invalidate the test setup.
-      expect(player.getTextTracks().length).not.toBe(0);
-      const textTrack = player.getTextTracks()[0];
-      expect(textTrack.language).toBe(preferredTextLanguage);
-
-      const variantTrack = player.getVariantTracks()[0];
-      expect(variantTrack.language).toBe(textTrack.language);
-    }
-
-    describe('IF_SUBTITLES_MAY_BE_NEEDED', () => {
-      beforeEach(() => {
-        player.configure(
-            'autoShowText',
-            shaka.config.AutoShowText.IF_SUBTITLES_MAY_BE_NEEDED);
-      });
-
-      it('enables text if text matches and audio does not', async () => {
-        await textMatchesAudioDoesNot();
-        expect(player.isTextTrackVisible()).toBe(true);
-      });
-
-      it('disables text if text does not match', async () => {
-        await textDoesNotMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
-      });
-
-      it('disables text if both text and audio match', async () => {
-        await textAndAudioMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
-      });
-    });  // IF_SUBTITLES_MAY_BE_NEEDED
-
-    describe('IF_PREFERRED_TEXT_LANGUAGE', () => {
-      beforeEach(() => {
-        player.configure(
-            'autoShowText',
-            shaka.config.AutoShowText.IF_PREFERRED_TEXT_LANGUAGE);
-      });
-
-      it('enables text if text matches and audio does not', async () => {
-        await textMatchesAudioDoesNot();
-        expect(player.isTextTrackVisible()).toBe(true);
-      });
-
-      it('disables text if text does not match', async () => {
-        await textDoesNotMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
-      });
-
-      it('enables text if both text and audio match', async () => {
-        await textAndAudioMatch();
-        expect(player.isTextTrackVisible()).toBe(true);
-      });
-    });  // IF_PREFERRED_TEXT_LANGUAGE
-
-    describe('ALWAYS', () => {
-      beforeEach(() => {
-        player.configure('autoShowText', shaka.config.AutoShowText.ALWAYS);
-      });
-
-      it('enables text if text matches and audio does not', async () => {
-        await textMatchesAudioDoesNot();
-        expect(player.isTextTrackVisible()).toBe(true);
-      });
-
-      it('enables text if text does not match', async () => {
-        await textDoesNotMatch();
-        expect(player.isTextTrackVisible()).toBe(true);
-      });
-
-      it('enables text if both text and audio match', async () => {
-        await textAndAudioMatch();
-        expect(player.isTextTrackVisible()).toBe(true);
-      });
-    });  // ALWAYS
-
-    describe('NEVER', () => {
-      beforeEach(() => {
-        player.configure('autoShowText', shaka.config.AutoShowText.NEVER);
-      });
-
-      it('disables text if text matches and audio does not', async () => {
-        await textMatchesAudioDoesNot();
-        expect(player.isTextTrackVisible()).toBe(false);
-      });
-
-      it('disables text if text does not match', async () => {
-        await textDoesNotMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
-      });
-
-      it('disables text if both text and audio match', async () => {
-        await textAndAudioMatch();
-        expect(player.isTextTrackVisible()).toBe(false);
-      });
-    });  // NEVER
-  });  // AutoShowText
-
   describe('plays', () => {
     it('with external text tracks', async () => {
       await player.load('test:sintel_no_text_compiled');
 
       // For some reason, using path-absolute URLs (i.e. without the hostname)
       // like this doesn't work on Safari.  So manually resolve the URL.
-      const locationUri = new goog.Uri(location.href);
-      const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
-      const absoluteUri = locationUri.resolve(partialUri);
+      const absoluteUrl = new URL('/base/test/test/assets/text-clip.vtt',
+          location.href);
       const newTrack = await player.addTextTrackAsync(
-          absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
+          absoluteUrl.href, 'en', 'subtitles', 'text/vtt');
 
       expect(newTrack.language).toBe('en');
       expect(player.getTextTracks()).toEqual([newTrack]);
@@ -661,10 +351,53 @@ describe('Player', () => {
       expect(video.playbackRate).toBe(1);
     });
 
+    it('dispatch ratechange event', async () => {
+      await player.load('test:sintel_compiled');
+      await video.play();
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+
+      video.pause();
+
+      let numberOfRatechangeEvents = 0;
+      eventManager.listen(player, 'ratechange', () => {
+        numberOfRatechangeEvents++;
+      });
+
+      player.trickPlay(2);
+      expect(player.getPlaybackRate()).toBe(2);
+
+      await shaka.test.Util.shortDelay();
+
+      player.trickPlay(32);
+      expect(player.getPlaybackRate()).toBe(32);
+
+      await shaka.test.Util.shortDelay();
+
+      player.trickPlay(64);
+      expect(player.getPlaybackRate()).toBe(64);
+
+      await shaka.test.Util.shortDelay();
+
+      player.trickPlay(-1);
+      expect(player.getPlaybackRate()).toBe(-1);
+
+      await shaka.test.Util.shortDelay();
+
+      player.cancelTrickPlay();
+      expect(player.getPlaybackRate()).toBe(1);
+
+      await shaka.test.Util.shortDelay();
+
+      expect(numberOfRatechangeEvents).toBe(5);
+    });
+
     it('in sequence mode', async () => {
-      if (!shaka.util.Platform.supportsSequenceMode()) {
+      if (!deviceDetected.supportsSequenceMode()) {
         pending('Sequence mode is not supported by the platform.');
       }
+      // sequenceMode is no longer enabled by default, so opt in explicitly
+      // to exercise this code path regardless of the default.
+      player.configure('manifest.hls.sequenceMode', true);
       await player.load('test:sintel_sequence_compiled');
       expect(player.getManifest().sequenceMode).toBe(true);
 
@@ -721,11 +454,11 @@ describe('Player', () => {
         return false;
       });
       textDisplayer.destroySpy.and.returnValue(Promise.resolve());
-      player.configure('textDisplayFactory', () => textDisplayer);
+      player.configure('textDisplayFactory', (player) => textDisplayer);
 
       // Make sure the configuration was taken.
       const configuredFactory = player.getConfiguration().textDisplayFactory;
-      const configuredTextDisplayer = configuredFactory();
+      const configuredTextDisplayer = configuredFactory(player);
       expect(configuredTextDisplayer).toBe(textDisplayer);
     });
 
@@ -740,20 +473,6 @@ describe('Player', () => {
       expect(textDisplayer.destroySpy).toHaveBeenCalled();
     });
   });  // describe('TextDisplayer plugin')
-
-  describe('TextAndRoles', () => {
-    // Regression Test. Makes sure that the language and role fields have been
-    // properly exported from the player.
-    it('exports language and roles fields', async () => {
-      await player.load('test:sintel_compiled');
-      const languagesAndRoles = player.getTextLanguagesAndRoles();
-      expect(languagesAndRoles.length).toBeTruthy();
-      for (const languageAndRole of languagesAndRoles) {
-        expect(languageAndRole.language).not.toBeUndefined();
-        expect(languageAndRole.role).not.toBeUndefined();
-      }
-    });
-  });  // describe('TextAndRoles')
 
   describe('streaming event', () => {
     // Calling switch early during load() caused a failed assertion in Player
@@ -1028,7 +747,7 @@ describe('Player', () => {
 
       await player.load('test:sintel_long_compiled');
       video.pause();
-      expect(onBuffering).toHaveBeenCalledTimes(1);
+      expect(onBuffering).toHaveBeenCalledTimes(2);
       expect(onBuffering).toHaveBeenCalledWith(startBuffering);
       onBuffering.calls.reset();
 
@@ -1242,9 +961,7 @@ describe('Player', () => {
   /** Regression test for Issue #2741 */
   describe('unloading', () => {
     drmIt('unloads properly after DRM error', async () => {
-      if (!shakaSupport.drm['com.widevine.alpha'] &&
-          !shakaSupport.drm['com.microsoft.playready'] &&
-          !shakaSupport.drm['com.chromecast.playready']) {
+      if (!checkTrueDrmSupport()) {
         pending('Skipping DRM error test, only runs on Widevine and PlayReady');
       }
 
@@ -1281,17 +998,72 @@ describe('Player', () => {
     });
   });  // describe('unloading')
 
+  describe('retryLicensing', () => {
+    drmIt('retries license request after failure', async () => {
+      if (!checkWidevineSupport()) {
+        pending('Skipping retry test, only runs with real DRM');
+      }
+
+      // ! Tizen 3 has a known issue with retryLicensing.
+      if (deviceDetected.getDeviceName() === 'Tizen' &&
+          deviceDetected.getVersion() === 3) {
+        pending('Known issue: retryLicensing fails on Tizen 3');
+      }
+
+      let failureCount = 0;
+      let retryAttempted = false;
+      let firstRequestFailed = false;
+
+      // Intercept the first license request to simulate a failure.
+      player.getNetworkingEngine().registerRequestFilter((type, request) => {
+        if (type == shaka.net.NetworkingEngine.RequestType.LICENSE &&
+            !firstRequestFailed) {
+          firstRequestFailed = true;
+          request.uris = ['http://foo/invalid'];
+        }
+      });
+
+      // Handle the failure and retry with the same session metadata.
+      player.configure('drm.failureCallback', (error) => {
+        failureCount++;
+        if (failureCount === 1 && !retryAttempted) {
+          retryAttempted = true;
+          const sessionMetadata = error.data[1];
+          player.retryLicensing(sessionMetadata, 0.1);
+          error.handled = true;
+        }
+      });
+
+      player.configure('drm.servers', {
+        'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+      });
+
+      await player.load('test:sintel-enc_compiled');
+      await video.play();
+
+      const waiter = new shaka.test.Waiter(eventManager)
+          .setPlayer(player)
+          .timeoutAfter(30)
+          .failOnTimeout(true);
+      await waiter.waitForMovement(video);
+
+      expect(failureCount).toBeGreaterThan(0);
+      expect(retryAttempted).toBe(true);
+      expect(video.currentTime).toBeGreaterThan(0);
+      expect(video.readyState).toBeGreaterThan(1);
+    });
+  });
+
   describe('addChaptersTrack', () => {
     it('adds external chapters in vtt format', async () => {
       await player.load('test:sintel_no_text_compiled');
-      const locationUri = new goog.Uri(location.href);
-      const partialUri1 = new goog.Uri('/base/test/test/assets/chapters.vtt');
-      const absoluteUri1 = locationUri.resolve(partialUri1);
-      await player.addChaptersTrack(absoluteUri1.toString(), 'en');
+      const absoluteUrl = new URL('/base/test/test/assets/chapters.vtt',
+          location.href);
+      await player.addChaptersTrack(absoluteUrl.href, 'en');
 
       // Data should be available as soon as addChaptersTrack resolves.
       // See https://github.com/shaka-project/shaka-player/issues/4186
-      const chapters = player.getChapters('en');
+      const chapters = await player.getChaptersAsync('en');
       expect(chapters.length).toBe(3);
       const chapter1 = chapters[0];
       expect(chapter1.title).toBe('Chapter 1');
@@ -1306,11 +1078,11 @@ describe('Player', () => {
       expect(chapter3.startTime).toBe(10);
       expect(chapter3.endTime).toBe(20);
 
-      const partialUri2 = new goog.Uri('/base/test/test/assets/chapters2.vtt');
-      const absoluteUri2 = locationUri.resolve(partialUri2);
-      await player.addChaptersTrack(absoluteUri2.toString(), 'en');
+      const absoluteUrl2 = new URL('/base/test/test/assets/chapters2.vtt',
+          location.href);
+      await player.addChaptersTrack(absoluteUrl2.href, 'en');
 
-      const chaptersUpdated = player.getChapters('en');
+      const chaptersUpdated = await player.getChaptersAsync('en');
       expect(chaptersUpdated.length).toBe(6);
       const chapterUpdated1 = chaptersUpdated[0];
       expect(chapterUpdated1.title).toBe('Chapter 1');
@@ -1340,12 +1112,11 @@ describe('Player', () => {
 
     it('adds external chapters in srt format', async () => {
       await player.load('test:sintel_no_text_compiled');
-      const locationUri = new goog.Uri(location.href);
-      const partialUri = new goog.Uri('/base/test/test/assets/chapters.srt');
-      const absoluteUri = locationUri.resolve(partialUri);
-      await player.addChaptersTrack(absoluteUri.toString(), 'es');
+      const absoluteUrl = new URL('/base/test/test/assets/chapters.srt',
+          location.href);
+      await player.addChaptersTrack(absoluteUrl.href, 'es');
 
-      const chapters = player.getChapters('es');
+      const chapters = await player.getChaptersAsync('es');
       expect(chapters.length).toBe(3);
       const chapter1 = chapters[0];
       expect(chapter1.title).toBe('Chapter 1');
@@ -1368,7 +1139,7 @@ describe('Player', () => {
         shaka.util.Error.Category.DRM,
         shaka.util.Error.Code.NO_LICENSE_SERVER_GIVEN,
         'org.w3.clearkey'));
-    await expectAsync(player.load('test:sintel-hls-clearkey'))
+    await expectAsync(player.load('test:sintel-hls-clearkey_compiled'))
         .toBeRejectedWith(expectedError);
   });
 
@@ -1376,12 +1147,10 @@ describe('Player', () => {
     it('appends thumbnails for external thumbnails with sprites',
         async () => {
           await player.load('test:sintel_no_text_compiled');
-          const locationUri = new goog.Uri(location.href);
-          const partialUri =
-              new goog.Uri('/base/test/test/assets/thumbnails-sprites.vtt');
-          const absoluteUri = locationUri.resolve(partialUri);
-          const newTrack =
-              await player.addThumbnailsTrack(absoluteUri.toString());
+          const absoluteUrl = new URL(
+              '/base/test/test/assets/thumbnails-sprites.vtt',
+              location.href);
+          const newTrack = await player.addThumbnailsTrack(absoluteUrl.href);
 
           expect(player.getImageTracks()).toEqual([newTrack]);
 
@@ -1401,7 +1170,8 @@ describe('Player', () => {
           expect(thumbnail2.positionX).toBe(160);
           expect(thumbnail2.positionY).toBe(0);
           expect(thumbnail2.width).toBe(160);
-          const thumbnail3 = await player.getThumbnails(newTrack.id, 40);
+          const thumbnail3 =
+              await player.getThumbnails(/* trackId= */ null, 40);
           expect(thumbnail3.startTime).toBe(30);
           expect(thumbnail3.duration).toBe(30);
           expect(thumbnail3.height).toBe(90);
@@ -1411,17 +1181,17 @@ describe('Player', () => {
 
           const thumbnails = await player.getAllThumbnails(newTrack.id);
           expect(thumbnails.length).toBe(3);
+
+          const allThumbnails = await player.getAllThumbnails();
+          expect(allThumbnails.length).toBe(3);
         });
 
     it('appends thumbnails for external thumbnails without sprites',
         async () => {
           await player.load('test:sintel_no_text_compiled');
-          const locationUri = new goog.Uri(location.href);
-          const partialUri =
-              new goog.Uri('/base/test/test/assets/thumbnails.vtt');
-          const absoluteUri = locationUri.resolve(partialUri);
-          const newTrack =
-              await player.addThumbnailsTrack(absoluteUri.toString());
+          const absoluteUrl = new URL('/base/test/test/assets/thumbnails.vtt',
+              location.href);
+          const newTrack = await player.addThumbnailsTrack(absoluteUrl.href);
 
           expect(player.getImageTracks()).toEqual([newTrack]);
 
@@ -1433,13 +1203,48 @@ describe('Player', () => {
           const thumbnail2 = await player.getThumbnails(newTrack.id, 10);
           expect(thumbnail2.startTime).toBe(5);
           expect(thumbnail2.duration).toBe(25);
-          const thumbnail3 = await player.getThumbnails(newTrack.id, 40);
+          const thumbnail3 =
+              await player.getThumbnails(/* trackId= */ null, 40);
           expect(thumbnail3.startTime).toBe(30);
           expect(thumbnail3.duration).toBe(30);
 
           const thumbnails = await player.getAllThumbnails(newTrack.id);
           expect(thumbnails.length).toBe(3);
+
+          const allThumbnails = await player.getAllThumbnails();
+          expect(allThumbnails.length).toBe(3);
         });
+
+    it('handles concurrent getAllThumbnails calls', async () => {
+      await player.load('test:sintel_no_text_compiled');
+      const absoluteUrl = new URL(
+          '/base/test/test/assets/thumbnails-sprites.vtt',
+          location.href);
+      const newTrack = await player.addThumbnailsTrack(absoluteUrl.href);
+
+      // Two concurrent calls on the same track must share the
+      // createSegmentIndex call and both receive the full set without the
+      // first caller closing the segmentIndex out from under the second.
+      const [thumbnails1, thumbnails2] = await Promise.all([
+        player.getAllThumbnails(newTrack.id),
+        player.getAllThumbnails(newTrack.id),
+      ]);
+      expect(thumbnails1.length).toBe(3);
+      expect(thumbnails2.length).toBe(3);
+
+      // A subsequent call must still succeed after the concurrent pair
+      // tore down the shared pendingState.
+      const thumbnails3 = await player.getAllThumbnails(newTrack.id);
+      expect(thumbnails3.length).toBe(3);
+
+      // Default trackId must also coordinate with itself.
+      const [defaultThumbs1, defaultThumbs2] = await Promise.all([
+        player.getAllThumbnails(),
+        player.getAllThumbnails(),
+      ]);
+      expect(defaultThumbs1.length).toBe(3);
+      expect(defaultThumbs2.length).toBe(3);
+    });
   });  // describe('addThumbnailsTrack')
 
   it('preload', async () => {
@@ -1448,6 +1253,67 @@ describe('Player', () => {
     await player.load(preloadManager);
     await video.play();
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+  });
+
+  it('preload allow update audio track', async () => {
+    player.configure('preferredAudio',
+        [{
+          language: 'en',
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+          spatialAudio: false,
+        }]);
+    const preloadManager =
+        await player.preload('test:sintel_multi_lingual_multi_res_compiled');
+    await preloadManager.waitForFinish();
+    let prefetchedVariantTrack = preloadManager.getPrefetchedVariantTrack();
+    expect(prefetchedVariantTrack).not.toBeNull();
+    expect(prefetchedVariantTrack.language).toBe('en');
+
+    preloadManager.configure('preferredAudio',
+        [{
+          language: 'es',
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+          spatialAudio: false,
+        }]);
+
+    await shaka.test.Util.shortDelay();
+    prefetchedVariantTrack = preloadManager.getPrefetchedVariantTrack();
+    expect(prefetchedVariantTrack).not.toBeNull();
+    expect(prefetchedVariantTrack.language).toBe('es');
+  });
+
+  it('preload allow update text track', async () => {
+    player.configure('preferredText',
+        [{language: 'zh', role: '', format: '', forced: false}]);
+    const preloadManager =
+        await player.preload('test:sintel_multi_lingual_multi_res_compiled');
+    await preloadManager.waitForFinish();
+
+    let prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();
+    expect(prefetchedTextTrack).not.toBeNull();
+    expect(prefetchedTextTrack.language).toBe('zh');
+
+    preloadManager.configure('preferredText',
+        [{language: 'fr', role: '', format: '', forced: false}]);
+
+    await shaka.test.Util.shortDelay();
+    prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();
+    expect(prefetchedTextTrack).not.toBeNull();
+    expect(prefetchedTextTrack.language).toBe('fr');
+  });
+
+  it('should not preload a text track if none is preferred', async () => {
+    const preloadManager =
+        await player.preload('test:sintel_multi_lingual_multi_res_compiled');
+    await preloadManager.waitForFinish();
+    const prefetchedTextTrack = preloadManager.getPrefetchedTextTrack();
+    expect(prefetchedTextTrack).toBeNull();
   });
 
   it('detachAndSavePreload', async () => {

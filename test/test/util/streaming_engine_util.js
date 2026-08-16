@@ -145,13 +145,13 @@ shaka.test.StreamingEngineUtil = class {
    * PERIOD_TYPE_POSITION, e.g., "1_text_2" or "2_video_5".
    *
    * @param {!shaka.media.PresentationTimeline} presentationTimeline
-   * @param {!Array.<number>} periodStartTimes The start time of each Period.
+   * @param {!Array<number>} periodStartTimes The start time of each Period.
    * @param {number} presentationDuration
-   * @param {!Object.<string, number>} segmentDurations The duration of each
+   * @param {!Object<string, number>} segmentDurations The duration of each
    *   type of segment.
-   * @param {!Object.<string, !Array.<number>>} initSegmentRanges The byte
+   * @param {!Object<string, !Array<number>>} initSegmentRanges The byte
    *   ranges for each type of init segment.
-   * @param {!Object.<string,number>=} timestampOffsets The timestamp offset
+   * @param {!Object<string, number>=} timestampOffsets The timestamp offset
    *  for each type of segment
    * @param {shaka.extern.aesKey=} aesKey The AES-128 key to provide
    *  to streams, if desired.
@@ -232,9 +232,9 @@ shaka.test.StreamingEngineUtil = class {
      * @return {shaka.media.SegmentReference} A SegmentReference.
      */
     const get = (type, position, mimeType, codecs, altAudioVariant = false) => {
-      if (position > 50) {
-        // Terminate so it doesn't go on forever when iterating over the
-        // references.
+      if (position < 0 || position > 50) {
+        // Out of range below the first segment, or terminate so it doesn't go
+        // on forever when iterating over the references.
         return null;
       }
 
@@ -333,6 +333,7 @@ shaka.test.StreamingEngineUtil = class {
       variants: [],
       textStreams: [],
       imageStreams: [],
+      chapterStreams: [],
       sequenceMode: false,
       ignoreManifestTimestampsInSegmentsMode: false,
       type: 'UNKNOWN',
@@ -518,6 +519,7 @@ shaka.test.StreamingEngineUtil = class {
       segmentIndex: null,
       mimeType,
       codecs,
+      supplementalCodecs: '',
       bandwidth: 192000,
       type: ContentType.AUDIO,
       label: '',
@@ -540,6 +542,9 @@ shaka.test.StreamingEngineUtil = class {
       fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
           mimeType, codecs)]),
       isAudioMuxedInVideo: false,
+      baseOriginalId: null,
+      isIframe: false,
+      preselection: null,
     };
   }
 
@@ -564,6 +569,7 @@ shaka.test.StreamingEngineUtil = class {
       segmentIndex: null,
       mimeType,
       codecs,
+      supplementalCodecs: '',
       bandwidth: 5000000,
       width: 600,
       height: 400,
@@ -588,6 +594,9 @@ shaka.test.StreamingEngineUtil = class {
       fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
           mimeType, codecs)]),
       isAudioMuxedInVideo: false,
+      baseOriginalId: null,
+      isIframe: false,
+      preselection: null,
     };
   }
 
@@ -612,6 +621,7 @@ shaka.test.StreamingEngineUtil = class {
       segmentIndex: null,
       mimeType,
       codecs,
+      supplementalCodecs: '',
       kind: ManifestParserUtils.TextStreamKind.SUBTITLE,
       type: ManifestParserUtils.ContentType.TEXT,
       label: '',
@@ -634,6 +644,9 @@ shaka.test.StreamingEngineUtil = class {
       fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
           mimeType, codecs)]),
       isAudioMuxedInVideo: false,
+      baseOriginalId: null,
+      isIframe: false,
+      preselection: null,
     };
   }
 };

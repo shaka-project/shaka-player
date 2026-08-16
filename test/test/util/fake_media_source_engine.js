@@ -14,26 +14,26 @@
  */
 shaka.test.FakeMediaSourceEngine = class {
   /**
-   * @param {!Object.<string, shaka.test.FakeMediaSourceEngine.SegmentData>}
-   *   segmentData
+   * @param {!Object<string,
+   *                  shaka.test.FakeMediaSourceEngine.SegmentData>} segmentData
    * @param {number=} drift Optional drift. Defaults to 0.
    */
   constructor(segmentData, drift) {
     /**
-     * @type {!Object.<string, shaka.test.FakeMediaSourceEngine.SegmentData>}
+     * @type {!Object<string, shaka.test.FakeMediaSourceEngine.SegmentData>}
      */
     this.segmentData = segmentData;
 
-    /** @type {!Object.<string, !Array.<boolean>>} */
+    /** @type {!Object<string, !Array<boolean>>} */
     this.initSegments = {};
 
-    /** @type {!Object.<string, !Array.<boolean>>} */
+    /** @type {!Object<string, !Array<boolean>>} */
     this.segments = {};
 
     /** @private {number} */
     this.drift_ = drift || 0;
 
-    /** @private {!Object.<string, number>} */
+    /** @private {!Object<string, number>} */
     this.timestampOffsets_ = {};
 
     /** @private {number} */
@@ -62,6 +62,9 @@ shaka.test.FakeMediaSourceEngine = class {
 
     /** @type {!jasmine.Spy} */
     this.ended = jasmine.createSpy('ended').and.returnValue(false);
+
+    /** @type {!jasmine.Spy} */
+    this.closed = jasmine.createSpy('closed').and.returnValue(false);
 
     /** @type {!jasmine.Spy} */
     this.endOfStream =
@@ -109,6 +112,10 @@ shaka.test.FakeMediaSourceEngine = class {
         .and.callFake((type, time) => this.bufferedAheadOfImpl(type, time));
 
     /** @type {!jasmine.Spy} */
+    this.bufferedBehindOf = jasmine.createSpy('bufferedBehindOf')
+        .and.callFake((type, time) => this.bufferedBehindOfImpl(type, time));
+
+    /** @type {!jasmine.Spy} */
     this.setStreamProperties = jasmine.createSpy('setStreamProperties')
         .and.callFake((type, offset, end, sequenceMode) =>
           this.setStreamPropertiesImpl_(type, offset, end, sequenceMode));
@@ -121,13 +128,12 @@ shaka.test.FakeMediaSourceEngine = class {
     this.flush = jasmine.createSpy('flush').and.returnValue(Promise.resolve());
 
     /** @type {!jasmine.Spy} */
-    this.clearSelectedClosedCaptionId =
-        jasmine.createSpy('clearSelectedClosedCaptionId');
+    this.setSelectedClosedCaptionId =
+        jasmine.createSpy('setSelectedClosedCaptionId');
 
     /** @type {!jasmine.Spy} */
-    this.getTextDisplayer =
-        jasmine.createSpy('getTextDisplayer')
-            .and.returnValue(new shaka.test.FakeTextDisplayer());
+    this.clearSelectedClosedCaptionId =
+        jasmine.createSpy('clearSelectedClosedCaptionId');
 
     /** @type {!jasmine.Spy} */
     this.setSegmentRelativeVttTiming =
@@ -138,8 +144,30 @@ shaka.test.FakeMediaSourceEngine = class {
         jasmine.createSpy('updateLcevcDec').and.stub();
 
     /** @type {!jasmine.Spy} */
-    this.resync=
+    this.appendDependency =
+        jasmine.createSpy('appendDependency').and.stub();
+
+    /** @type {!jasmine.Spy} */
+    this.resync =
         jasmine.createSpy('resync').and.stub();
+
+    /** @type {!jasmine.Spy} */
+    this.setLiveSeekableRange =
+        jasmine.createSpy('setLiveSeekableRange').and.stub();
+
+    /** @type {!jasmine.Spy} */
+    this.clearLiveSeekableRange =
+        jasmine.createSpy('clearLiveSeekableRange').and.stub();
+
+    /** @type {!jasmine.Spy} */
+    this.reset =
+        jasmine.createSpy('reset').and.returnValue(Promise.resolve());
+
+    /** @type {!jasmine.Spy} */
+    this.hasSourceBufferFor =
+        jasmine.createSpy('hasSourceBufferFor').and.stub();
+
+    this.textDisplayer = new shaka.test.FakeTextDisplayer();
   }
 
   /** @override */
@@ -150,6 +178,11 @@ shaka.test.FakeMediaSourceEngine = class {
   /** @override */
   isStreamingAllowed() {
     return true;
+  }
+
+  /** @override */
+  getTextDisplayer() {
+    return this.textDisplayer;
   }
 
   /**
@@ -244,9 +277,46 @@ shaka.test.FakeMediaSourceEngine = class {
 
   /**
    * @param {string} type
+   * @param {number} end
+   * @return {number}
+   */
+  bufferedBehindOfImpl(type, end) {
+    if (!this.segments[type]) {
+      throw new Error('unexpected type');
+    }
+
+    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const hasSegment = (i) => {
+      return i >= 0 && (this.segments[type][i] ||
+          (type == ContentType.VIDEO && this.segments['trickvideo'] &&
+           this.segments['trickvideo'][i]));
+    };
+
+    // Find the last segment fully or partially before |end|.  If |end| sits
+    // exactly on a segment boundary, the segment starting at |end| is not
+    // behind us, so step back one.
+    let last = this.toIndex_(type, end);
+    if (this.toTime_(type, last) >= end) {
+      last--;
+    }
+    if (!hasSegment(last)) {
+      return 0;
+    }  // Unbuffered.
+
+    // Walk backwards to the first gap.
+    let first = last;
+    while (hasSegment(first - 1)) {
+      first--;
+    }
+
+    return end - this.toTime_(type, first);
+  }
+
+  /**
+   * @param {string} type
    * @param {!ArrayBuffer} data
    * @param {?shaka.media.SegmentReference} reference
-   * @return {!Promise}
+   * @return {!Promise<!shaka.media.MediaSourceEngine.AppendBufferInfo>}
    */
   appendBufferImpl(type, data, reference) {
     if (!this.segments[type]) {
@@ -276,7 +346,9 @@ shaka.test.FakeMediaSourceEngine = class {
       this.initSegments[type] =
           this.segmentData[type].initSegments.map((c) => false);
       this.initSegments[type][i] = true;
-      return Promise.resolve();
+      return Promise.resolve({
+        mediaTimestamp: null,
+      });
     }
 
     // Set media segment.
@@ -310,16 +382,19 @@ shaka.test.FakeMediaSourceEngine = class {
     }
 
     this.segments[type][i] = true;
-    return Promise.resolve();
+    return Promise.resolve({
+      mediaTimestamp: segmentData.segmentStartTimes[i],
+    });
   }
 
   /**
    * @param {string} type
    * @param {number} start
    * @param {number} end
+   * @param {Array<number>=} continuityTimelines
    * @return {!Promise}
    */
-  removeImpl(type, start, end) {
+  removeImpl(type, start, end, continuityTimelines) {
     if (!this.segments[type]) {
       throw new Error('unexpected type');
     }
@@ -440,18 +515,18 @@ shaka.test.FakeMediaSourceEngine = class {
 
 /**
  * @typedef {{
- *   initSegments: !Array.<!BufferSource>,
- *   segments: !Array.<!BufferSource>,
- *   segmentStartTimes: !Array.<number>,
+ *   initSegments: !Array<!BufferSource>,
+ *   segments: !Array<!BufferSource>,
+ *   segmentStartTimes: !Array<number>,
  *   segmentDuration: number,
  *   timestampOffset: number,
  * }}
  *
- * @property {!Array.<!BufferSource>} initSegments
+ * @property {!Array<!BufferSource>} initSegments
  *   The stream's initialization segments (for all periods).
- * @property {!Array.<!BufferSource>} segments
+ * @property {!Array<!BufferSource>} segments
  *   The stream's media segments (for all periods).
- * @property {!Array.<number>} segmentStartTimes
+ * @property {!Array<number>} segmentStartTimes
  *   The start time of each media segment as they would appear within a
  *   segment index. These values plus drift simulate the segments'
  *   baseMediaDecodeTime (or equivalent) values.

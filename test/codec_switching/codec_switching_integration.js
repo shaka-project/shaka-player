@@ -65,7 +65,15 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('manifest.disableVideo', true);
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
@@ -76,27 +84,25 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
 
       // Spanish is Opus WebM.
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!shaka.media.Capabilities.isChangeTypeSupported()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching('')) {
         pending('SourceBuffer.changeType is not supported');
-      }
-      if (!shaka.util.Platform.supportsSmoothCodecSwitching()) {
-        pending('SourceBuffer.changeType is not considered ' +
-          'reliable on this device');
       }
       if (!await Util.isTypeSupported('audio/webm; codecs="opus"')) {
         pending('Codec OPUS in WEBM is not supported by the platform.');
@@ -104,7 +110,15 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('manifest.disableVideo', true);
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
@@ -115,18 +129,20 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
 
       // Spanish is Opus WebM.
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
     });
   });
 
@@ -138,7 +154,15 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
 
@@ -148,27 +172,25 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
 
       // Spanish is Opus WebM.
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!shaka.media.Capabilities.isChangeTypeSupported()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching('')) {
         pending('SourceBuffer.changeType is not supported');
-      }
-      if (!shaka.util.Platform.supportsSmoothCodecSwitching()) {
-        pending('SourceBuffer.changeType is not considered ' +
-          'reliable on this device');
       }
       if (!await Util.isTypeSupported('audio/webm; codecs="opus"')) {
         pending('Codec OPUS in WEBM is not supported by the platform.');
@@ -176,7 +198,15 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 
@@ -186,18 +216,20 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
 
       // Spanish is Opus WebM.
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
     });
   });
 
@@ -209,7 +241,15 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
 
@@ -220,27 +260,25 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
 
       // Spanish is EC3.
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!shaka.media.Capabilities.isChangeTypeSupported()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching('')) {
         pending('SourceBuffer.changeType is not supported');
-      }
-      if (!shaka.util.Platform.supportsSmoothCodecSwitching()) {
-        pending('SourceBuffer.changeType is not considered ' +
-          'reliable on this device');
       }
       if (!await Util.isTypeSupported('audio/mp4; codecs="ec-3"')) {
         pending('Codec EC3 in MP4 is not supported by the platform.');
@@ -248,7 +286,15 @@ describe('Codec Switching', () => {
 
       // English is AAC MP4.
       const preferredAudioLanguage = 'en';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 
@@ -259,18 +305,20 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
 
       // Spanish is EC3.
-      player.selectAudioLanguage('es');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
     });
   });
 
@@ -282,7 +330,15 @@ describe('Codec Switching', () => {
 
       // Spanish is EC3.
       const preferredAudioLanguage = 'es';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
 
@@ -293,27 +349,25 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
 
       // English is AAC MP4.
-      player.selectAudioLanguage('en');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'en');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (!shaka.media.Capabilities.isChangeTypeSupported()) {
+      if (!deviceDetected.supportsSmoothCodecSwitching('')) {
         pending('SourceBuffer.changeType is not supported');
-      }
-      if (!shaka.util.Platform.supportsSmoothCodecSwitching()) {
-        pending('SourceBuffer.changeType is not considered ' +
-          'reliable on this device');
       }
       if (!await Util.isTypeSupported('audio/mp4; codecs="ec-3"')) {
         pending('Codec EC3 in MP4 is not supported by the platform.');
@@ -321,7 +375,15 @@ describe('Codec Switching', () => {
 
       // Spanish is EC3.
       const preferredAudioLanguage = 'es';
-      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure({
+        preferredAudio: [{
+          language: preferredAudioLanguage,
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+        }],
+      });
       player.configure('mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 
@@ -332,18 +394,20 @@ describe('Codec Switching', () => {
 
       expect(player.isLive()).toBe(false);
 
-      let variants = player.getVariantTracks();
+      let audioTracks = player.getAudioTracks();
 
-      expect(variants.length).toBe(2);
-      expect(variants.find((v) => !!v.active).language).toBe('es');
+      expect(audioTracks.length).toBe(2);
+      expect(audioTracks.find((t) => !!t.active).language).toBe('es');
 
       // English is AAC MP4.
-      player.selectAudioLanguage('en');
+      const newAudioTrack = audioTracks.find((t) => t.language == 'en');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+      player.selectAudioTrack(newAudioTrack);
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 45);
 
-      variants = player.getVariantTracks();
+      audioTracks = player.getAudioTracks();
 
-      expect(variants.find((v) => !!v.active).language).toBe('en');
+      expect(audioTracks.find((t) => !!t.active).language).toBe('en');
     });
   });
 });

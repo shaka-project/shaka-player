@@ -1,15 +1,15 @@
 /*! @license
  * Shaka Player
- * Copyright 2023 Google LLC
+ * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
 /**
-* @fileoverview Externs for LcevcDec
-* compiler.
-*
-* @externs
-*/
+ * @fileoverview Externs for LcevcDec
+ * compiler.
+ *
+ * @externs
+ */
 
 // This empty namespace is declared to check if LcevcDec libraries are loaded.
 /** @const */
@@ -18,9 +18,9 @@ var libDPIModule = {};
 var LCEVCdec = {};
 
 /**
-* LCEVC Dec constructor
-* @constructor
-*/
+ * LCEVC Dec constructor
+ * @constructor
+ */
 LCEVCdec.LCEVCdec = class {
   /**
    * @param {HTMLVideoElement} media
@@ -39,8 +39,17 @@ LCEVCdec.LCEVCdec = class {
    * @param {string} type Type of Video Buffer Data.
    * @param {number} variantId Variant that the fragment belongs to.
    * @param {number} timestampOffset Timestamp offset for appended segments
+   * @param {boolean} isMuxed Indicate if the LCEVC content is along the main.
    */
-  appendBuffer(data, type, variantId, timestampOffset) {}
+  appendBuffer(data, type, variantId, timestampOffset, isMuxed) {}
+
+  /**
+   * Flush (remove) the video buffers from the LCEVC decoder.
+   *
+   * @param {number} startTime The start time of the data to be removed.
+   * @param {number} endTime The end time of the data to be removed.
+   */
+  flushBuffer(startTime, endTime) {}
 
   /**
    * Set current variant as variantId to the LCEVC decoder
@@ -101,6 +110,25 @@ LCEVCdec.SupportObject.SupportStatus;
  * @type {string}
  */
 LCEVCdec.SupportObject.SupportError;
+
+/**
+ * Promise that resolves once the LCEVC libraries have finished loading.
+ * @type {Promise}
+ */
+LCEVCdec.ready;
+
+/**
+ * LCEVC instance for debugging and testing
+ * @type {typeof LCEVCdec.LCEVCdec}
+ */
+LCEVCdec.instance;
+
+/** @type {boolean} */
+LCEVCdec.instance.isLcevcEnabled;
+/** @type {boolean} */
+LCEVCdec.instance.firstLcevcSegmentLoaded;
+/** @type {boolean} */
+LCEVCdec.instance.lcevcDataDetected;
 
 /**
  * Typedef for the module interface.  Both LCEVCdec (new module) and LcevcDil

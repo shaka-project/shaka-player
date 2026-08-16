@@ -27,6 +27,8 @@ The support in each case would be the following:
 
 Adding FairPlay support involves a bit more work than other key systems.
 
+Note: If you are using an older version of Safari that doesn't support
+Modern EME, legacy Apple Media Keys is used by default.
 
 ## Keysystem used in EME
 
@@ -84,7 +86,7 @@ player.configure('drm.initDataTransform', (initData, initDataType, drmInfo) => {
   const skdUri = shaka.util.StringUtils.fromBytesAutoDetect(initData);
   const contentId = getMyContentId(skdUri);
   const cert = drmInfo.serverCertificate;
-  return shaka.util.FairPlayUtils.initDataTransform(initData, contentId, cert);
+  return shaka.drm.FairPlay.initDataTransform(initData, contentId, cert);
 });
 ```
 
@@ -137,11 +139,10 @@ Note: Some providers support both Modern EME and legacy Apple Media Keys.
 For integration with EZDRM the following can be used:
 
 ```js
-const FairPlayUtils = shaka.util.FairPlayUtils;
 player.getNetworkingEngine()
-    .registerRequestFilter(FairPlayUtils.ezdrmFairPlayRequest);
+    .registerRequestFilter(shaka.drm.FairPlay.ezdrmFairPlayRequest);
 player.getNetworkingEngine()
-    .registerResponseFilter(FairPlayUtils.commonFairPlayResponse);
+    .registerResponseFilter(shaka.drm.FairPlay.commonFairPlayResponse);
 ```
 
 Note: If the url of the license server has to undergo any transformation
@@ -153,8 +154,7 @@ player.getNetworkingEngine().registerRequestFilter((type, request, context) => {
     return;
   }
   const uri = request.uris[0];
-  const FairPlayUtils = shaka.util.FairPlayUtils;
-  const contentId = FairPlayUtils.defaultGetContentId(request.initData);
+  const contentId = shaka.drm.FairPlay.defaultGetContentId(request.initData);
   const newUri = uri.replace('^assetId^', contentId);
   request.uris = [newUri];
   request.headers['Content-Type'] = 'application/octet-stream'
@@ -167,13 +167,12 @@ For integration with EZDRM the following can be used:
 
 ```js
 shaka.polyfill.PatchedMediaKeysApple.install();
-const FairPlayUtils = shaka.util.FairPlayUtils;
 player.getNetworkingEngine()
-    .registerRequestFilter(FairPlayUtils.ezdrmFairPlayRequest);
+    .registerRequestFilter(shaka.drm.FairPlay.ezdrmFairPlayRequest);
 player.getNetworkingEngine()
-    .registerResponseFilter(FairPlayUtils.commonFairPlayResponse);
+    .registerResponseFilter(shaka.drm.FairPlay.commonFairPlayResponse);
 player.configure('drm.initDataTransform',
-                 FairPlayUtils.ezdrmInitDataTransform);
+                 shaka.drm.FairPlay.ezdrmInitDataTransform);
 ```
 
 Note: If the url of the license server has to undergo any transformation
@@ -185,8 +184,7 @@ player.getNetworkingEngine().registerRequestFilter((type, request, context) => {
     return;
   }
   const uri = request.uris[0];
-  const FairPlayUtils = shaka.util.FairPlayUtils;
-  const contentId = FairPlayUtils.defaultGetContentId(request.initData);
+  const contentId = shaka.drm.FairPlay.defaultGetContentId(request.initData);
   const newUri = uri.replace('^assetId^', contentId);
   request.uris = [newUri];
   request.headers['Content-Type'] = 'application/octet-stream'
@@ -199,13 +197,12 @@ For integration with Verimatrix the following can be used:
 
 ```js
 shaka.polyfill.PatchedMediaKeysApple.install();
-const FairPlayUtils = shaka.util.FairPlayUtils;
 player.getNetworkingEngine()
-    .registerRequestFilter(FairPlayUtils.verimatrixFairPlayRequest);
+    .registerRequestFilter(shaka.drm.FairPlay.verimatrixFairPlayRequest);
 player.getNetworkingEngine()
-    .registerResponseFilter(FairPlayUtils.commonFairPlayResponse);
+    .registerResponseFilter(shaka.drm.FairPlay.commonFairPlayResponse);
 player.configure('drm.initDataTransform',
-                 FairPlayUtils.verimatrixInitDataTransform);
+                 shaka.drm.FairPlay.verimatrixInitDataTransform);
 ```
 
 #### Conax (legacy Apple Media Keys)
@@ -214,13 +211,12 @@ For integration with Conax the following can be used:
 
 ```js
 shaka.polyfill.PatchedMediaKeysApple.install();
-const FairPlayUtils = shaka.util.FairPlayUtils;
 player.getNetworkingEngine()
-    .registerRequestFilter(FairPlayUtils.conaxFairPlayRequest);
+    .registerRequestFilter(shaka.drm.FairPlay.conaxFairPlayRequest);
 player.getNetworkingEngine()
-    .registerResponseFilter(FairPlayUtils.commonFairPlayResponse);
+    .registerResponseFilter(shaka.drm.FairPlay.commonFairPlayResponse);
 player.configure('drm.initDataTransform',
-                 FairPlayUtils.conaxInitDataTransform);
+                 shaka.drm.FairPlay.conaxInitDataTransform);
 ```
 
 #### ExpressPlay (legacy Apple Media Keys)
@@ -229,13 +225,12 @@ For integration with ExpressPlay the following can be used:
 
 ```js
 shaka.polyfill.PatchedMediaKeysApple.install();
-const FairPlayUtils = shaka.util.FairPlayUtils;
 player.getNetworkingEngine()
-    .registerRequestFilter(FairPlayUtils.expressplayFairPlayRequest);
+    .registerRequestFilter(shaka.drm.FairPlay.expressplayFairPlayRequest);
 player.getNetworkingEngine()
-    .registerResponseFilter(FairPlayUtils.commonFairPlayResponse);
+    .registerResponseFilter(shaka.drm.FairPlay.commonFairPlayResponse);
 player.configure('drm.initDataTransform',
-                 FairPlayUtils.expressplayInitDataTransform);
+                 shaka.drm.FairPlay.expressplayInitDataTransform);
 ```
 
 #### Nagra (legacy Apple Media Keys)
@@ -245,3 +240,30 @@ For integration with Nagra the following can be used:
 ```js
 shaka.polyfill.PatchedMediaKeysApple.install();
 ```
+
+#### Mux (legacy Apple Media Keys)
+
+For integration with Mux the following can be used:
+
+```js
+shaka.polyfill.PatchedMediaKeysApple.install();
+player.getNetworkingEngine()
+    .registerRequestFilter(shaka.drm.FairPlay.muxFairPlayRequest);
+player.getNetworkingEngine()
+    .registerResponseFilter(shaka.drm.FairPlay.commonFairPlayResponse);
+player.configure('drm.initDataTransform',
+                 shaka.drm.FairPlay.muxInitDataTransform);
+```
+
+#### Gumlet (legacy Apple Media Keys)
+
+For integration with Gumlet the following can be used:
+
+```js
+shaka.polyfill.installAll();
+player.getNetworkingEngine()
+    .registerRequestFilter(shaka.drm.FairPlay.gumletFairPlayRequest);
+player.getNetworkingEngine()
+    .registerResponseFilter(shaka.drm.FairPlay.commonFairPlayResponse);
+```
+

@@ -1,0 +1,137 @@
+/** @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* Menu container */
+
+.shaka-playback-rates {
+  min-width: 240px;
+}
+
+/* Slider section */
+
+.shaka-playback-rate-slider-section {
+  padding: 8px 0 4px;
+}
+
+.shaka-playback-rate-value {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--shaka-font-color);
+  font-variant-numeric: tabular-nums;
+  padding: 2px 0 10px;
+  margin-left: 0;
+}
+
+.shaka-playback-rate-slider-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 10px;
+}
+
+/* Step buttons (− and +) */
+
+.shaka-playback-rate-step-btn {
+  /* Reset inherited .shaka-overflow-menu button styles. */
+  min-height: unset !important;
+  padding: 0 !important;
+  flex-shrink: 0;
+
+  width: 28px;
+  height: 28px;
+  border-radius: 50% !important;
+  border: 1.5px solid var(--shaka-rate-border) !important;
+  background: transparent !important;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--shaka-font-color);
+
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    opacity 150ms ease;
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--shaka-rate-border-active) !important;
+    background: var(--shaka-rate-bg-active) !important;
+  }
+
+  .shaka-keyboard-navigation &:focus:not(:disabled) {
+    border-color: var(--shaka-rate-border-active) !important;
+    background: var(--shaka-rate-bg-active) !important;
+  }
+}
+
+.shaka-playback-rate-slider-container {
+  flex: 1;
+  background: var(--shaka-rate-slider);
+}
+
+/* Preset pill buttons */
+
+/* Horizontal strip that wraps onto extra rows when the pills don't fit.
+ * On wide screens the menu grows to hold every pill on a single line,
+ * exactly as before; extra rows only appear on narrow screens, where the
+ * menu is capped by the floating-menu max-width, so every preset stays
+ * visible instead of hiding behind a scrollbar-less horizontal scroll. */
+.shaka-playback-rate-presets {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+  padding: 6px 10px 10px;
+}
+
+.shaka-playback-rate-preset-btn {
+  /* Reset inherited .shaka-overflow-menu button styles. */
+  min-height: unset !important;
+  padding: 5px 14px !important;
+  border-radius: 20px !important;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  font-size: 13px;
+  color: var(--shaka-font-color);
+  background: var(--shaka-rate-preset-bg) !important;
+  border: 1.5px solid transparent !important;
+
+  transition: background 150ms ease, border-color 150ms ease;
+
+  &:hover {
+    background: var(--shaka-rate-preset-hover) !important;
+  }
+
+  .shaka-keyboard-navigation &:focus {
+    background: var(--shaka-rate-preset-hover) !important;
+  }
+
+  &.shaka-chosen-item {
+    background: var(--shaka-rate-preset-active) !important;
+    border-color: var(--shaka-rate-preset-border) !important;
+    font-weight: 600;
+    color: var(--shaka-font-color);
+    margin-left: 0;
+  }
+}

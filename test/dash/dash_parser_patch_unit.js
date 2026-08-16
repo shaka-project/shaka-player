@@ -31,10 +31,11 @@ describe('DashParser Patch', () => {
   let publishTime;
 
   beforeEach(() => {
+    const config = shaka.util.PlayerConfiguration.createDefault();
     publishTime = new Date(2024, 0, 1);
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = new shaka.dash.DashParser();
-    parser.configure(shaka.util.PlayerConfiguration.createDefault().manifest);
+    parser.configure(config.manifest);
     playerInterface = {
       networkingEngine: fakeNetEngine,
       filter: (manifest) => Promise.resolve(),
@@ -43,8 +44,6 @@ describe('DashParser Patch', () => {
       onEvent: fail,
       onError: fail,
       isLowLatencyMode: () => false,
-      isAutoLowLatencyMode: () => false,
-      enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
@@ -52,6 +51,8 @@ describe('DashParser Patch', () => {
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
+      getStreamingRetryParameters: () => config.streaming.retryParameters,
+      onSegmentReceived: (deltaTimeMs, numBytes) => {},
     };
     Date.now = () => publishTime.getTime() + 10;
 
@@ -61,7 +62,7 @@ describe('DashParser Patch', () => {
       `    publishTime="${publishTime.toUTCString()}"`,
       '    suggestedPresentationDelay="PT5S"',
       `    minimumUpdatePeriod="PT${updateTime}S">`,
-      `  <PatchLocation ttl="${ttl}">dummy://bar</PatchLocation>`,
+      `  <PatchLocation ttl="${ttl}">https://bar</PatchLocation>`,
       '  <Period id="1">',
       '    <AdaptationSet id="1" mimeType="video/mp4">',
       '      <Representation id="3" bandwidth="500">',
@@ -76,7 +77,7 @@ describe('DashParser Patch', () => {
       '  </Period>',
       '</MPD>',
     ].join('\n');
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    fakeNetEngine.setResponseText('https://foo', manifestText);
   });
 
   afterEach(() => {
@@ -112,21 +113,23 @@ describe('DashParser Patch', () => {
         `    originalPublishTime="${publishTime.toUTCString()}"`,
         '/>',
       ].join('\n');
-      fakeNetEngine.setResponseText('dummy://bar', patchText);
+      fakeNetEngine.setResponseText('https://bar', patchText);
 
       /** @type {!jasmine.Spy} */
       const onError = jasmine.createSpy('onError');
       playerInterface.onError = Util.spyFunc(onError);
 
-      await parser.start('dummy://foo', playerInterface);
+      await parser.start('https://foo', playerInterface);
 
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+      fakeNetEngine.expectRequest(
+          'https://foo', manifestRequest, manifestContext);
       fakeNetEngine.request.calls.reset();
 
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, patchContext);
+      fakeNetEngine.expectRequest(
+          'https://bar/', manifestRequest, patchContext);
       expect(onError).toHaveBeenCalledWith(new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.MANIFEST,
@@ -136,7 +139,8 @@ describe('DashParser Patch', () => {
 
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+      fakeNetEngine.expectRequest(
+          'https://foo', manifestRequest, manifestContext);
     });
 
     it('rolls back to regular update if publishTime mismatches', async () => {
@@ -146,21 +150,23 @@ describe('DashParser Patch', () => {
         `    originalPublishTime="${publishTime.toUTCString()}"`,
         '/>',
       ].join('\n');
-      fakeNetEngine.setResponseText('dummy://bar', patchText);
+      fakeNetEngine.setResponseText('https://bar', patchText);
 
       /** @type {!jasmine.Spy} */
       const onError = jasmine.createSpy('onError');
       playerInterface.onError = Util.spyFunc(onError);
 
-      await parser.start('dummy://foo', playerInterface);
+      await parser.start('https://foo', playerInterface);
 
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+      fakeNetEngine.expectRequest(
+          'https://foo', manifestRequest, manifestContext);
       fakeNetEngine.request.calls.reset();
 
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, patchContext);
+      fakeNetEngine.expectRequest(
+          'https://bar/', manifestRequest, patchContext);
       expect(onError).toHaveBeenCalledWith(new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.MANIFEST,
@@ -170,7 +176,8 @@ describe('DashParser Patch', () => {
 
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+      fakeNetEngine.expectRequest(
+          'https://foo', manifestRequest, manifestContext);
     });
 
     it('transforms from dynamic to static', async () => {
@@ -185,9 +192,9 @@ describe('DashParser Patch', () => {
         '  </add>',
         '</Patch>',
       ].join('\n');
-      fakeNetEngine.setResponseText('dummy://bar', patchText);
+      fakeNetEngine.setResponseText('https://bar', patchText);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       expect(manifest.presentationTimeline.isLive()).toBe(true);
       expect(manifest.presentationTimeline.getDuration()).toBe(Infinity);
 
@@ -208,19 +215,21 @@ describe('DashParser Patch', () => {
         `    originalPublishTime="${publishTime.toUTCString()}"`,
         '/>',
       ].join('\n');
-      fakeNetEngine.setResponseText('dummy://bar', patchText);
+      fakeNetEngine.setResponseText('https://bar', patchText);
     });
 
     it('uses PatchLocation', async () => {
-      await parser.start('dummy://foo', playerInterface);
+      await parser.start('https://foo', playerInterface);
 
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+      fakeNetEngine.expectRequest(
+          'https://foo', manifestRequest, manifestContext);
       fakeNetEngine.request.calls.reset();
 
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, patchContext);
+      fakeNetEngine.expectRequest(
+          'https://bar/', manifestRequest, patchContext);
     });
 
     it('does not use PatchLocation if publishTime is not defined', async () => {
@@ -229,7 +238,7 @@ describe('DashParser Patch', () => {
         '    availabilityStartTime="1970-01-01T00:00:00Z"',
         '    suggestedPresentationDelay="PT5S"',
         `    minimumUpdatePeriod="PT${updateTime}S">`,
-        `  <PatchLocation ttl="${ttl}">dummy://bar</PatchLocation>`,
+        `  <PatchLocation ttl="${ttl}">https://bar</PatchLocation>`,
         '  <Period id="1">',
         '    <AdaptationSet id="1" mimeType="video/mp4">',
         '      <Representation id="3" bandwidth="500">',
@@ -244,68 +253,68 @@ describe('DashParser Patch', () => {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      fakeNetEngine.setResponseText('https://foo', manifestText);
 
-      await parser.start('dummy://foo', playerInterface);
+      await parser.start('https://foo', playerInterface);
 
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+      fakeNetEngine.expectRequest('https://foo', manifestRequest, manifestContext);
       fakeNetEngine.request.calls.reset();
 
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
-      fakeNetEngine.expectNoRequest('dummy://bar', manifestRequest, patchContext);
+      fakeNetEngine.expectRequest('https://foo', manifestRequest, manifestContext);
+      fakeNetEngine.expectNoRequest('https://bar', manifestRequest, patchContext);
     });
 
     it('does not use PatchLocation if it expired', async () => {
-      await parser.start('dummy://foo', playerInterface);
+      await parser.start('https://foo', playerInterface);
 
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+      fakeNetEngine.expectRequest('https://foo', manifestRequest, manifestContext);
       fakeNetEngine.request.calls.reset();
 
       // Make current time exceed Patch's TTL.
       Date.now = () => publishTime.getTime() + (ttl * 2) * 1000;
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
-      fakeNetEngine.expectNoRequest('dummy://bar', manifestRequest, patchContext);
+      fakeNetEngine.expectRequest('https://foo', manifestRequest, manifestContext);
+      fakeNetEngine.expectNoRequest('https://bar', manifestRequest, patchContext);
     });
 
     it('replaces PatchLocation with new URL', async () => {
-      await parser.start('dummy://foo', playerInterface);
+      await parser.start('https://foo', playerInterface);
 
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+      fakeNetEngine.expectRequest('https://foo', manifestRequest, manifestContext);
       fakeNetEngine.request.calls.reset();
 
       const patchText = [
         `<Patch mpdId="${mpdId}"`,
         `    originalPublishTime="${publishTime.toUTCString()}">`,
         '  <replace sel="/MPD/PatchLocation[1]">',
-        `    <PatchLocation ttl="${ttl}">dummy://bar2</PatchLocation>`,
+        `    <PatchLocation ttl="${ttl}">https://bar2</PatchLocation>`,
         '  </replace>',
         '</Patch>',
       ].join('\n');
-      fakeNetEngine.setResponseText('dummy://bar', patchText);
+      fakeNetEngine.setResponseText('https://bar', patchText);
 
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, patchContext);
+      fakeNetEngine.expectRequest('https://bar/', manifestRequest, patchContext);
       fakeNetEngine.request.calls.reset();
 
-      fakeNetEngine.setResponseText('dummy://bar2', patchText);
+      fakeNetEngine.setResponseText('https://bar2', patchText);
       // Another request should be made to new URI.
       await updateManifest();
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-      fakeNetEngine.expectRequest('dummy://bar2', manifestRequest, patchContext);
+      fakeNetEngine.expectRequest('https://bar2/', manifestRequest, patchContext);
     });
   });
 
   describe('Period', () => {
     it('adds new period as an MPD child', async () => {
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       expect(manifest.periodCount).toBe(1);
       const stream = manifest.variants[0].video;
       const patchText = [
@@ -322,7 +331,7 @@ describe('DashParser Patch', () => {
         '  </add>',
         '</Patch>',
       ].join('\n');
-      fakeNetEngine.setResponseText('dummy://bar', patchText);
+      fakeNetEngine.setResponseText('https://bar', patchText);
 
       await stream.createSegmentIndex();
 
@@ -336,7 +345,7 @@ describe('DashParser Patch', () => {
     });
 
     it('adds new period as a Period successor', async () => {
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       expect(manifest.periodCount).toBe(1);
       const stream = manifest.variants[0].video;
       const patchText = [
@@ -353,7 +362,7 @@ describe('DashParser Patch', () => {
         '  </add>',
         '</Patch>',
       ].join('\n');
-      fakeNetEngine.setResponseText('dummy://bar', patchText);
+      fakeNetEngine.setResponseText('https://bar', patchText);
 
       await stream.createSegmentIndex();
 
@@ -385,9 +394,9 @@ describe('DashParser Patch', () => {
         '  </add>',
         '</Patch>',
       ].join('\n');
-      fakeNetEngine.setResponseText('dummy://bar', patchText);
+      fakeNetEngine.setResponseText('https://bar', patchText);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const stream = manifest.variants[0].video;
       expect(stream).toBeTruthy();
       await stream.createSegmentIndex();
@@ -420,9 +429,9 @@ describe('DashParser Patch', () => {
         '  </add>',
         '</Patch>',
       ].join('\n');
-      fakeNetEngine.setResponseText('dummy://bar', patchText);
+      fakeNetEngine.setResponseText('https://bar', patchText);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const stream = manifest.variants[0].video;
       expect(stream).toBeTruthy();
       await stream.createSegmentIndex();
@@ -455,9 +464,9 @@ describe('DashParser Patch', () => {
         '  </add>',
         '</Patch>',
       ].join('\n');
-      fakeNetEngine.setResponseText('dummy://bar', patchText);
+      fakeNetEngine.setResponseText('https://bar', patchText);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const stream = manifest.variants[0].video;
       expect(stream).toBeTruthy();
       await stream.createSegmentIndex();
@@ -528,9 +537,9 @@ describe('DashParser Patch', () => {
         '</Patch>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://bar', patchText);
+      fakeNetEngine.setResponseText('https://bar', patchText);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const stream = manifest.variants[0].video;
       expect(stream).toBeTruthy();
       await stream.createSegmentIndex();
@@ -544,7 +553,7 @@ describe('DashParser Patch', () => {
         ManifestParser.makeReference('s2.mp4', 1, 4, originalUri),
       ]);
 
-      fakeNetEngine.setResponseText('dummy://bar', patchText2);
+      fakeNetEngine.setResponseText('https://bar', patchText2);
       await updateManifest();
       ManifestParser.verifySegmentIndex(stream, [
         ManifestParser.makeReference('s1.mp4', 0, 1, originalUri),
@@ -552,7 +561,7 @@ describe('DashParser Patch', () => {
         ManifestParser.makeReference('s3.mp4', 4, 7, originalUri),
       ]);
 
-      fakeNetEngine.setResponseText('dummy://bar', patchText3);
+      fakeNetEngine.setResponseText('https://bar', patchText3);
       await updateManifest();
       ManifestParser.verifySegmentIndex(stream, [
         ManifestParser.makeReference('s1.mp4', 0, 1, originalUri),
@@ -616,9 +625,9 @@ describe('DashParser Patch', () => {
         '</Patch>',
       ].join('\n');
 
-      fakeNetEngine.setResponseText('dummy://bar', patchText);
+      fakeNetEngine.setResponseText('https://bar', patchText);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       const stream = manifest.variants[0].video;
       expect(stream).toBeTruthy();
       await stream.createSegmentIndex();
@@ -632,7 +641,7 @@ describe('DashParser Patch', () => {
         ManifestParser.makeReference('s2.mp4', 1, 4, originalUri),
       ]);
 
-      fakeNetEngine.setResponseText('dummy://bar', patchText2);
+      fakeNetEngine.setResponseText('https://bar', patchText2);
       await updateManifest();
       ManifestParser.verifySegmentIndex(stream, [
         ManifestParser.makeReference('s1.mp4', 0, 1, originalUri),
@@ -640,7 +649,7 @@ describe('DashParser Patch', () => {
         ManifestParser.makeReference('s3.mp4', 4, 7, originalUri),
       ]);
 
-      fakeNetEngine.setResponseText('dummy://bar', patchText3);
+      fakeNetEngine.setResponseText('https://bar', patchText3);
       await updateManifest();
       ManifestParser.verifySegmentIndex(stream, [
         ManifestParser.makeReference('s1.mp4', 0, 1, originalUri),
@@ -657,7 +666,7 @@ describe('DashParser Patch', () => {
         `    publishTime="${publishTime.toUTCString()}"`,
         '    suggestedPresentationDelay="PT5S"',
         `    minimumUpdatePeriod="PT${updateTime}S">`,
-        `  <PatchLocation ttl="${ttl}">dummy://bar</PatchLocation>`,
+        `  <PatchLocation ttl="${ttl}">https://bar</PatchLocation>`,
         '  <Period id="1">',
         '    <AdaptationSet id="1" mimeType="video/mp4">',
         '      <SegmentTemplate media="s$Number$.mp4">',
@@ -691,10 +700,10 @@ describe('DashParser Patch', () => {
         '  </add>',
         '</Patch>',
       ].join('\n');
-      fakeNetEngine.setResponseText('dummy://foo', manifestText);
-      fakeNetEngine.setResponseText('dummy://bar', patchText);
+      fakeNetEngine.setResponseText('https://foo', manifestText);
+      fakeNetEngine.setResponseText('https://bar', patchText);
 
-      const manifest = await parser.start('dummy://foo', playerInterface);
+      const manifest = await parser.start('https://foo', playerInterface);
       expect(manifest.variants.length).toBe(2);
       for (const variant of manifest.variants) {
         const stream = variant.video;

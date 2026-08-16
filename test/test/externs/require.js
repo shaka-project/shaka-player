@@ -11,7 +11,7 @@
 
 
 /**
- * @param {!Array.<string>|string} moduleNames
+ * @param {!Array<string> | string} moduleNames
  * @param {Function=} callback
  * @param {Function=} onError
  */

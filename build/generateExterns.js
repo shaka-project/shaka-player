@@ -36,11 +36,13 @@ if (assert.strict) {
   // The "strict" mode was added in v9.9, use that if available.
   assert = assert.strict;
 }
-const esprima = require('esprima');
+const babelParser = require('@babel/parser');
 const fs = require('fs');
 
 // The annotations we will consider "exporting" a symbol.
 const EXPORT_REGEX = /@(?:export|exportInterface|expose)\b/;
+
+const RETURN_AND_OVERRIDE_REGEX = /@(?:return|override)\b/;
 
 // TODO: revisit this when Closure Compiler supports partially-exported classes.
 let partiallyExportedClassesDetected = false;
@@ -48,9 +50,9 @@ let partiallyExportedClassesDetected = false;
 /**
  * Topological sort of general objects using a DFS approach.
  * Will add a __mark field to each object as part of the sorting process.
- * @param {!Array.<T>} list
- * @param {function(T):!Array.<T>} getDeps
- * @return {!Array.<T>}
+ * @param {!Array<T>} list
+ * @param {function(T): !Array<T>} getDeps
+ * @return {!Array<T>}
  * @template T
  * @see https://en.wikipedia.org/wiki/Topological_sorting#Depth-first_search
  */
@@ -205,8 +207,8 @@ function getLeadingBlockComment(node) {
   //   type: 'ExpressionStatement',
   //   expression: { ... },
   //   leadingComments: [
-  //     { type: 'Block', value: '* @summary blah ' },
-  //     { type: 'Block', value: '* @export ' },
+  //     { type: 'CommentBlock', value: '* @summary blah ' },
+  //     { type: 'CommentBlock', value: '* @export ' },
   //   ],
   // }
   if (!node.leadingComments || !node.leadingComments.length) {
@@ -215,14 +217,14 @@ function getLeadingBlockComment(node) {
 
   // Ignore non-block comments, since those are not jsdoc/Closure comments.
   const blockComments = node.leadingComments.filter((comment) => {
-    return comment.type == 'Block';
+    return comment.type == 'CommentBlock';
   });
   if (!blockComments.length) {
     return null;
   }
 
   // In case there are multiple (for example, a file-level comment that also
-  // preceeds the node), take the most recent one, which is closest to the node.
+  // precedes the node), take the most recent one, which is closest to the node.
   const mostRecentComment = blockComments[blockComments.length - 1];
 
   // Reconstruct the original block comment by adding back /* and */.
@@ -276,7 +278,7 @@ function getIdentifierString(node) {
 /**
  * @param {ASTNode} node A function definition node from the abstract syntax
  *   tree.
- * @return {!Array.<string>} a list of the parameter names.
+ * @return {!Array<string>} a list of the parameter names.
  */
 function getFunctionParameters(node) {
   assert(node.type == 'FunctionExpression' ||
@@ -315,7 +317,7 @@ function getFunctionParameters(node) {
  * Take the original block comment and prep it for the externs by removing
  * export annotations and blank lines.
  *
- * @param {string}
+ * @param {string} comment
  * @return {string}
  */
 function removeExportAnnotationsFromComment(comment) {
@@ -330,11 +332,64 @@ function removeExportAnnotationsFromComment(comment) {
   return comment;
 }
 
+/**
+ * @param {ASTNode} nodeBody The body node of a method node
+ * from the abstract syntax tree.
+ * @return {boolean}
+ */
+function methodContainsNonEmptyReturn(nodeBody) {
+  assert(nodeBody.body);
+
+  for (const childNode of nodeBody.body) {
+    if (childNode.type === 'ReturnStatement' && childNode.argument !== null) {
+      return true;
+    } else if (childNode.body) {
+      if (methodContainsNonEmptyReturn(childNode.body)) {
+        return true;
+      }
+    } else if (childNode.consequent) {
+      if (methodContainsNonEmptyReturn(childNode.consequent)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * When a method is missing a `@return` annotation and doesn't have a
+ * `return` statement the compiler treats it as returning `undefined` but clutz
+ * generates a return value of `any` in the TypeScript definitions.
+ * This adds `@return {void}` where necessary to fix that.
+ * Overload methods (with `@override`) inherit their return type from
+ * the interface or parent class, so get skipped by this function.
+ *
+ * @param {ASTNode} node A method node from the abstract syntax tree.
+ * @param {string} comment
+ * @return {string}
+ */
+function addMissingReturnAnnotationToComment(node, comment) {
+  if (RETURN_AND_OVERRIDE_REGEX.test(comment) || node.generator || node.async) {
+    return comment;
+  }
+
+  if (!comment || node.key.name === 'constructor') {
+    return comment;
+  }
+
+  if (!methodContainsNonEmptyReturn(node.value.body)) {
+    return comment.replace(/^(\s*)\*\//m, '$1* @return {undefined}\n$1*/');
+  }
+
+  return comment;
+}
+
 
 /**
  * Recursively find all expression statements in all block nodes.
  * @param {ASTNode} node
- * @return {!Array.<ASTNode>}
+ * @return {!Array<ASTNode>}
  */
 function getAllExpressionStatements(node) {
   assert(node.body && node.body.body);
@@ -352,7 +407,7 @@ function getAllExpressionStatements(node) {
 
 
 /**
- * @param {!Set.<string>} names A set of the names of exported nodes.
+ * @param {!Set<string>} names A set of the names of exported nodes.
  * @param {ASTNode} node An exported node from the abstract syntax tree.
  * @return {string} An extern string for this node.
  */
@@ -425,7 +480,7 @@ function createExternFromExportNode(names, node) {
  * Some classes are not exported, but contain exported members.  These need to
  * have externs generated, too.
  *
- * @param {!Set.<string>} names A set of the names of exported nodes.
+ * @param {!Set<string>} names A set of the names of exported nodes.
  * @param {ASTNode} node An exported node from the abstract syntax tree.
  * @return {string} An extern string for this node.
  */
@@ -483,6 +538,7 @@ function createExternMethod(node) {
     }
   }
   comment = removeExportAnnotationsFromComment(comment);
+  comment = addMissingReturnAnnotationToComment(node, comment);
 
   const params = getFunctionParameters(node.value);
 
@@ -490,7 +546,15 @@ function createExternMethod(node) {
   if (node.static) {
     methodString += 'static ';
   }
-  methodString += id + '(' + params.join(', ') + ') {}';
+  if (node.key.type === 'Identifier') {
+    methodString += id;
+  } else {
+    assert.equal(
+        node.key.type, 'MemberExpression',
+        'Unexpected exported member name in exported class!');
+    methodString += `[${id}]`;
+  }
+  methodString += '(' + params.join(', ') + ') {}';
   return methodString;
 }
 
@@ -498,7 +562,7 @@ function createExternMethod(node) {
 /**
  * Find the constructor of an ES6 class, if it exists.
  *
- * @param {ASTNode} className
+ * @param {ASTNode} classNode
  * @return {ASTNode}
  */
 function getClassConstructor(classNode) {
@@ -566,6 +630,11 @@ function createExternAssignment(name, node, alwaysIncludeConstructor) {
           // constructor in some situations.
           if (member.key.name == 'constructor' && alwaysIncludeConstructor) {
             // Fall through and generate externs.
+          } else if (member.key.type === 'MemberExpression' &&
+               getIdentifierString(member.key) === 'Symbol.iterator') {
+            // Symbol.iterator is needed to implement the Iterable interface for
+            // Closure Compiler, so always assume it is exported.
+            // Closure Compiler does not allow putting an explicit @export.
           } else {
             // Skip extern generation.
             continue;
@@ -715,19 +784,26 @@ function createExternsFromConstructor(className, constructorNode) {
 
 
 /**
- * @param {!Set.<string>} names A set of the names of exported nodes.
+ * @param {!Set<string>} names A set of the names of exported nodes.
  * @param {string} inputPath
  * @return {{
  *   path: string,
- *   provides: !Array.<string>,
- *   requires: !Array.<string>,
+ *   provides: !Array<string>,
+ *   requires: !Array<string>,
  *   externs: string,
  * }}
  */
 function generateExterns(names, inputPath) {
   // Load and parse the code, with comments attached to the nodes.
   const code = fs.readFileSync(inputPath, 'utf-8');
-  const program = esprima.parse(code, {attachComment: true});
+  const ast = babelParser.parse(code, {
+    sourceType: 'script',
+    attachComment: true,
+    plugins: ['estree'],
+  });
+  assert.equal(ast.type, 'File', 'Root AST must be a Babel File node');
+  const program = ast.program;
+
   assert.equal(program.type, 'Program');
 
   const body = program.body;
@@ -777,27 +853,77 @@ function generateExterns(names, inputPath) {
   };
 }
 
+/**
+ * Generate a typedef for the root shaka namespace based on exported symbols.
+ *
+ * @param {!Set<string>} names
+ * @return {string}
+ */
+function generateShakaNamespaceTypedef(names) {
+  // Collect first-level members under shaka.*
+  const members = new Map();
+
+  for (const name of names) {
+    if (!name.startsWith('shaka.')) {
+      continue;
+    }
+
+    const parts = name.split('.');
+    if (parts.length < 2) {
+      continue;
+    }
+
+    const member = parts[1];
+    if (!members.has(member)) {
+      members.set(member, `shaka.${member}`);
+    }
+  }
+
+  if (!members.size) {
+    return '';
+  }
+
+  const lines = Array.from(members.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, value]) => ` *   ${key}: typeof ${value},`);
+
+  return (
+    '/**\n' +
+    ' * @typedef {{\n' +
+    lines.join('\n') + '\n' +
+    ' * }}\n' +
+    ' * @suppress {duplicate}\n' +
+    ' */\n' +
+    'var shaka;\n\n'
+  );
+}
 
 /**
  * Generate externs from exported code.
  * Arguments: --output <EXTERNS> <INPUT> [<INPUT> ...]
  *
- * @param {!Array.<string>} args The args to this script, not counting node and
+ * @param {!Array<string>} args The args to this script, not counting node and
  *   the script name itself.
  */
 function main(args) {
   const inputPaths = [];
   let outputPath;
+  let namespaceTypedefPath;
 
   for (let i = 0; i < args.length; ++i) {
     if (args[i] == '--output') {
       outputPath = args[i + 1];
       ++i;
+    } else if (args[i] == '--namespace-typedef') {
+      namespaceTypedefPath = args[i + 1];
+      ++i;
     } else {
       inputPaths.push(args[i]);
     }
   }
-  assert(outputPath, 'You must specify output file with --output <EXTERNS>');
+  assert(outputPath || namespaceTypedefPath,
+      'You must specify an output file with --output <EXTERNS> and/or ' +
+      '--namespace-typedef <EXTERNS>');
   assert(inputPaths.length, 'You must specify at least one input file.');
 
   // Generate externs for all input paths.
@@ -854,17 +980,37 @@ function main(args) {
   // Get license header.
   const licenseHeader = fs.readFileSync(__dirname + '/license-header', 'utf-8');
 
+  // Shaka type definition
+  const shakaTypedef = generateShakaNamespaceTypedef(names);
+
   // Output generated externs, with an appropriate header.
-  fs.writeFileSync(outputPath,
-      licenseHeader +
-      '/**\n' +
-      ' * @fileoverview Generated externs.  DO NOT EDIT!\n' +
-      ' * @externs\n' +
-      ' * @suppress {duplicate} To prevent compiler errors with the\n' +
-      ' *   namespace being declared both here and by goog.provide in the\n' +
-      ' *   library.\n' +
-      ' */\n\n' +
-      namespaceDeclarations.join('') + '\n' + externs);
+  if (outputPath) {
+    fs.writeFileSync(outputPath,
+        licenseHeader +
+        '/**\n' +
+        ' * @fileoverview Generated externs.  DO NOT EDIT!\n' +
+        ' * @externs\n' +
+        ' * @suppress {constantProperty, duplicate} To prevent compiler\n' +
+        ' *   errors with the namespace being declared both here and by\n' +
+        ' *   goog.provide in the library.\n' +
+        ' */\n\n' +
+        namespaceDeclarations.join('') + '\n' + shakaTypedef + externs);
+  }
+
+  // Output a standalone externs file with only the shaka namespace typedef.
+  // Unlike the full externs above, this does not re-declare the library API, so
+  // it can be type-checked alongside the uncompiled source (e.g. in the tests)
+  // without conflicting with the goog.provide declarations.
+  if (namespaceTypedefPath) {
+    fs.writeFileSync(namespaceTypedefPath,
+        licenseHeader +
+        '/**\n' +
+        ' * @fileoverview Generated externs for the shaka namespace type.\n' +
+        ' *   DO NOT EDIT!\n' +
+        ' * @externs\n' +
+        ' */\n\n' +
+        shakaTypedef);
+  }
 }
 
 

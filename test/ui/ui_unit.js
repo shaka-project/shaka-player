@@ -176,7 +176,7 @@ describe('UI', () => {
     });
 
     describe('set up with several videos', () => {
-      /** @type {!Array.<!HTMLVideoElement>} */
+      /** @type {!Array<!HTMLVideoElement>} */
       const videos = [];
 
       beforeEach(async () => {
@@ -289,6 +289,9 @@ describe('UI', () => {
       it('stay visible if overflow menuButton is open', () => {
         const overflowMenus =
             videoContainer.getElementsByClassName('shaka-overflow-menu');
+        if (!overflowMenus.length) {
+          pending('There is no overflow menu button on this device.');
+        }
         expect(overflowMenus.length).toBe(1);
         const overflowMenu = /** @type {!HTMLElement} */ (overflowMenus[0]);
 
@@ -312,6 +315,10 @@ describe('UI', () => {
           controlPanelElements: [
             'overflow_menu',
           ],
+          customContextMenu: false,
+          documentPictureInPicture: {
+            enabled: false,
+          },
         };
         const ui = await UiUtils.createUIThroughAPI(
             videoContainer, video, config);
@@ -374,10 +381,23 @@ describe('UI', () => {
           });
 
       it('is accessible', () => {
-        for (const button of overflowMenu.childNodes) {
-          expect(/** @type {!HTMLElement} */ (button)
-              .hasAttribute('aria-label')).toBe(true);
+        for (const node of overflowMenu.childNodes) {
+          const element = /** @type {!HTMLElement} */ (node);
+          if (element.tagName.toLowerCase() == 'button') {
+            expect(element.hasAttribute('aria-label')).toBe(true);
+          }
         }
+      });
+
+      it('has correct ARIA roles', () => {
+        expect(overflowMenu.getAttribute('role')).toBe('menu');
+      });
+
+      it('has aria-haspopup and aria-expanded on menu button', () => {
+        const menuButton = videoContainer.getElementsByClassName(
+            'shaka-overflow-menu-button')[0];
+        expect(menuButton.getAttribute('aria-haspopup')).toBe('true');
+        expect(menuButton.getAttribute('aria-expanded')).toBe('false');
       });
     });
 
@@ -396,26 +416,69 @@ describe('UI', () => {
           /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
 
         UiUtils.confirmElementFound(controlsButtonPanel, 'shaka-current-time');
-        UiUtils.confirmElementFound(controlsButtonPanel, 'shaka-mute-button');
-        UiUtils.confirmElementFound(controlsButtonPanel,
-            'shaka-fullscreen-button');
-        UiUtils.confirmElementFound(controlsButtonPanel,
-            'shaka-overflow-menu-button');
 
         UiUtils.confirmElementFound(videoContainer, 'shaka-seek-bar');
 
         // The default settings vary in mobile/desktop context.
-        if (shaka.util.Platform.isMobile()) {
+        const deviceType = deviceDetected.getDeviceType();
+        if (deviceType == shaka.device.IDevice.DeviceType.MOBILE ||
+            deviceType == shaka.device.IDevice.DeviceType.TV) {
+          // Mute button
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-mute-button');
+          // Fullscreen button
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-fullscreen-button');
+          // Overflow button
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-overflow-menu-button');
+          // Big buttons
           UiUtils.confirmElementFound(videoContainer,
-              'shaka-play-button-container');
-          UiUtils.confirmElementFound(videoContainer, 'shaka-play-button');
+              'shaka-big-buttons-container');
+          // Small play button
+          UiUtils.confirmElementFound(videoContainer,
+              'shaka-play-button');
+          // Volume bar
+          UiUtils.confirmElementMissing(controlsButtonPanel,
+              'shaka-volume-bar');
+        } else if (deviceType == shaka.device.IDevice.DeviceType.CAST) {
+          // Mute button
+          UiUtils.confirmElementMissing(controlsButtonPanel,
+              'shaka-mute-button');
+          // Fullscreen button
+          UiUtils.confirmElementMissing(controlsButtonPanel,
+              'shaka-fullscreen-button');
+          // Overflow button
+          UiUtils.confirmElementMissing(controlsButtonPanel,
+              'shaka-overflow-menu-button');
+          // Big buttons
+          UiUtils.confirmElementMissing(videoContainer,
+              'shaka-big-buttons-container');
+          // Small play button
+          UiUtils.confirmElementFound(videoContainer,
+              'shaka-play-button');
+          // Volume bar
           UiUtils.confirmElementMissing(controlsButtonPanel,
               'shaka-volume-bar');
         } else {
+          // Mute button
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-mute-button');
+          // Fullscreen button
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-fullscreen-button');
+          // Overflow button
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-overflow-menu-button');
+          // Big buttons
           UiUtils.confirmElementMissing(videoContainer,
-              'shaka-play-button-container');
-          UiUtils.confirmElementMissing(videoContainer, 'shaka-play-button');
-          UiUtils.confirmElementFound(controlsButtonPanel, 'shaka-volume-bar');
+              'shaka-big-buttons-container');
+          // Small play button
+          UiUtils.confirmElementFound(videoContainer,
+              'shaka-play-button');
+          // Volume bar
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-volume-bar');
         }
       });
 
@@ -453,6 +516,39 @@ describe('UI', () => {
         confirmAriaLabel('shaka-fast-forward-button');
         confirmAriaLabel('shaka-rewind-button');
       });
+
+      it('has toolbar role', async () => {
+        await UiUtils.createUIThroughAPI(videoContainer, video);
+        const controlsButtonPanels = videoContainer.getElementsByClassName(
+            'shaka-controls-button-panel');
+        expect(controlsButtonPanels.length).toBe(1);
+        expect(controlsButtonPanels[0].getAttribute('role')).toBe('toolbar');
+      });
+
+      it('has aria-pressed on toggle buttons', async () => {
+        const config = {
+          controlPanelElements: [
+            'mute',
+            'fullscreen',
+          ],
+        };
+
+        await UiUtils.createUIThroughAPI(videoContainer, video, config);
+        const muteButton = videoContainer.getElementsByClassName(
+            'shaka-mute-button')[0];
+        const fullscreenButton = videoContainer.getElementsByClassName(
+            'shaka-fullscreen-button')[0];
+        expect(muteButton.hasAttribute('aria-pressed')).toBe(true);
+        expect(fullscreenButton.hasAttribute('aria-pressed')).toBe(true);
+      });
+
+      it('has aria-hidden on SVG icons', async () => {
+        await UiUtils.createUIThroughAPI(videoContainer, video);
+        const icons = videoContainer.getElementsByClassName('shaka-ui-icon');
+        for (const icon of icons) {
+          expect(icon.getAttribute('aria-hidden')).toBe('true');
+        }
+      });
     });
 
     describe('control panel buttons with submenus', () => {
@@ -471,6 +567,7 @@ describe('UI', () => {
             'quality',
             'language',
           ],
+          customContextMenu: false,
         };
         const ui = await UiUtils.createUIThroughAPI(
             videoContainer, video, config);
@@ -526,7 +623,276 @@ describe('UI', () => {
         languageMenuButton.click();
 
         expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
+        expect(languageMenu.classList.contains('shaka-hidden')).toBe(true);
+
+        languageMenuButton.click();
+
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
         expect(languageMenu.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('settings menus have ARIA roles', () => {
+        expect(resolutionMenu.getAttribute('role')).toBe('menu');
+        expect(languageMenu.getAttribute('role')).toBe('menu');
+      });
+
+      it('settings menu buttons have aria-haspopup and aria-expanded', () => {
+        expect(resolutionMenuButton.getAttribute('aria-haspopup'))
+            .toBe('true');
+        expect(resolutionMenuButton.getAttribute('aria-expanded'))
+            .toBe('false');
+
+        expect(languageMenuButton.getAttribute('aria-haspopup'))
+            .toBe('true');
+        expect(languageMenuButton.getAttribute('aria-expanded'))
+            .toBe('false');
+      });
+
+      it('aria-expanded updates when menu opens and closes', () => {
+        resolutionMenuButton.click();
+        expect(resolutionMenuButton.getAttribute('aria-expanded'))
+            .toBe('true');
+
+        resolutionMenuButton.click();
+        expect(resolutionMenuButton.getAttribute('aria-expanded'))
+            .toBe('false');
+      });
+    });
+
+    describe('caption style preview', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {!jasmine.Spy} */
+      let setPreviewSpy;
+      /** @type {!jasmine.Spy} */
+      let clearPreviewSpy;
+
+      afterEach(() => {
+        // Tests that don't call createUIThroughAPI won't have the
+        // data-shaka-player-container attribute set, so cleanupUI() won't
+        // remove their videoContainer. Clean it up here in that case.
+        if (!('shakaPlayerContainer' in videoContainer.dataset) &&
+            videoContainer.parentElement) {
+          videoContainer.remove();
+        }
+      });
+
+      /**
+       * @param {!HTMLElement} menu
+       * @param {string} label
+       * @return {!HTMLElement}
+       */
+      function getStyleOption(menu, label) {
+        const buttons = Array.from(
+            menu.querySelectorAll('button[role="menuitemradio"]'));
+        const button = buttons.find((button) => {
+          const span = button.querySelector('span');
+          return span && span.textContent == label;
+        });
+        expect(button).not.toBe(undefined);
+        return /** @type {!HTMLElement} */(button);
+      }
+
+      /**
+       * @return {!shaka.extern.TextDisplayerConfiguration}
+       */
+      function latestPreviewConfig() {
+        const calls = setPreviewSpy.calls;
+        expect(calls.count()).toBeGreaterThan(0);
+        return /** @type {!shaka.extern.TextDisplayerConfiguration} */(
+          calls.mostRecent().args[0]);
+      }
+
+      /**
+       * @param {?shaka.Player} player
+       */
+      function usePreviewTextDisplayer(player) {
+        expect(player).not.toBe(null);
+        const localPlayer = /** @type {!shaka.Player} */(player);
+        /** @type {?} */
+        const textDisplayer = {};
+        setPreviewSpy = textDisplayer.setTextStylePreview =
+            jasmine.createSpy('setTextStylePreview');
+        clearPreviewSpy = textDisplayer.clearTextStylePreview =
+            jasmine.createSpy('clearTextStylePreview');
+        spyOn(localPlayer, 'getTextDisplayer').and.returnValue(
+            /** @type {!shaka.extern.TextDisplayer} */(textDisplayer));
+      }
+
+      it('does not require player or displayer preview methods', () => {
+        const player = /** @type {?} */(new shaka.util.FakeEventTarget());
+        player.getConfiguration = () => {
+          return shaka.util.PlayerConfiguration.createDefault();
+        };
+        const localization = new shaka.ui.Localization('en');
+        shaka.ui.Locales.addTo(localization);
+        const preview = new shaka.ui.TextStylePreview(
+            /** @type {!shaka.Player} */(player), localization);
+
+        expect(() => {
+          preview.show();
+          preview.update({'fontScaleFactor': 2});
+          preview.reset();
+          preview.hide();
+        }).not.toThrow();
+
+        preview.release();
+      });
+
+      it('updates and reverts font size on hover', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-size',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        player.configure('textDisplayer.fontScaleFactor', 1.25);
+        controls.showUI();
+
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-text-positions');
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        button.click();
+
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.25);
+
+        const largerOption = getStyleOption(menu, '200%');
+        UiUtils.simulateEvent(largerOption, 'mouseenter');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(2);
+
+        UiUtils.simulateEvent(largerOption, 'mouseleave');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.25);
+
+        const selectedOption = getStyleOption(menu, '150%');
+        selectedOption.click();
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.5);
+
+        UiUtils.simulateEvent(selectedOption, 'mouseleave');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.5);
+
+        controls.hideSettingsMenus();
+      });
+
+      it('updates and reverts text position on focus', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-position',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const localization = controls.getLocalization();
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-text-positions');
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-position-button');
+        button.click();
+
+        expect(latestPreviewConfig().positionArea)
+            .toBe(shaka.config.PositionArea.DEFAULT);
+
+        const topLeftLabel =
+            localization.resolve(shaka.ui.Locales.Ids.TOP_LEFT);
+        const topLeftOption = getStyleOption(menu, topLeftLabel);
+        topLeftOption.dispatchEvent(new Event('focus'));
+        expect(latestPreviewConfig().positionArea)
+            .toBe(shaka.config.PositionArea.TOP_LEFT);
+
+        topLeftOption.dispatchEvent(new Event('blur'));
+        expect(latestPreviewConfig().positionArea)
+            .toBe(shaka.config.PositionArea.DEFAULT);
+      });
+
+      it('keeps a committed text size as the preview baseline', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-size',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        player.configure('textDisplayer.fontScaleFactor', 1.25);
+        controls.showUI();
+
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-text-positions');
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        button.click();
+
+        const largerOption = getStyleOption(menu, '200%');
+        UiUtils.simulateEvent(largerOption, 'mouseenter');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(2);
+
+        player.configure('textDisplayer.fontScaleFactor', 1.5);
+        expect(latestPreviewConfig().fontScaleFactor).toBe(2);
+
+        UiUtils.simulateEvent(largerOption, 'mouseleave');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.5);
+      });
+
+      it('hides the preview when a context menu closes', async () => {
+        const config = {
+          controlPanelElements: [],
+          contextMenuElements: [
+            'captions-size',
+          ],
+          customContextMenu: true,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const controlsContainer = controls.getControlsContainer();
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+
+        const captionsSizeButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        captionsSizeButton.click();
+
+        UiUtils.simulateEvent(controlsContainer, 'click');
+        expect(clearPreviewSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('hides the preview when the UI is reconfigured', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-size',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        button.click();
+
+        ui.configure('showUIAlways', true);
+        expect(clearPreviewSpy).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -588,7 +954,7 @@ describe('UI', () => {
         await player.load(
             /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
 
-        const selectVariantTrack = spyOn(player, 'selectVariantTrack');
+        const selectVideoTrack = spyOn(player, 'selectVideoTrack');
 
         // There should be at least one explicit quality button.
         const qualityButton =
@@ -596,11 +962,11 @@ describe('UI', () => {
         expect(qualityButton).toBeDefined();
 
         // Clicking this should select a track and clear the buffer.
-        expect(selectVariantTrack).not.toHaveBeenCalled();
+        expect(selectVideoTrack).not.toHaveBeenCalled();
         qualityButton.click();
 
         // The second argument is "clearBuffer", and should be true.
-        expect(selectVariantTrack).toHaveBeenCalledWith(
+        expect(selectVideoTrack).toHaveBeenCalledWith(
             jasmine.any(Object), true);
       });
 
@@ -697,6 +1063,92 @@ describe('UI', () => {
         expect(getResolutions()).toEqual(['540p']);
       });
 
+      it('uses customTrackLabel with "video" type to override resolution ' +
+          'labels', async () => {
+        const manifest = shaka.test.ManifestGenerator.generate(
+            (manifest) => {
+              manifest.addVariant(0, (variant) => {
+                variant.addVideo(1, (stream) => {
+                  stream.size(320, 240);
+                });
+              });
+              manifest.addVariant(2, (variant) => {
+                variant.addVideo(3, (stream) => {
+                  stream.size(640, 480);
+                });
+              });
+            });
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType,
+            () => new shaka.test.FakeManifestParser(manifest));
+
+        const merged = Object.assign({}, controls.getConfig(), {
+          customTrackLabel: (defaultLabel, track, type) => {
+            if (type !== 'video') {
+              return '';
+            }
+            if (track.height === 240) {
+              return 'Low';
+            }
+            if (track.height === 480) {
+              return 'High';
+            }
+            return '';
+          },
+        });
+        controls.configure(
+            /** @type {!shaka.extern.UIConfiguration} */ (merged));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+        player.configure('abr.enabled', false);
+        await updateResolutionMenu();
+
+        const labels = Array.from(videoContainer.querySelectorAll(
+            'button.explicit-resolution > span'))
+            .map((s) => s.textContent).sort();
+        expect(labels).toEqual(['High', 'Low']);
+      });
+
+      it('falls back to default label when customTrackLabel returns ' +
+          'a falsy value for video tracks', async () => {
+        const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.size(320, 240);
+            });
+          });
+          manifest.addVariant(2, (variant) => {
+            variant.addVideo(3, (stream) => {
+              stream.size(640, 480);
+            });
+          });
+        });
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType,
+            () => new shaka.test.FakeManifestParser(manifest));
+
+        const labelSpy =
+            jasmine.createSpy('customTrackLabel').and.returnValue('');
+        const merged = Object.assign({}, controls.getConfig(), {
+          customTrackLabel: labelSpy,
+        });
+        controls.configure(
+            /** @type {!shaka.extern.UIConfiguration} */ (merged));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+        player.configure('abr.enabled', false);
+        await updateResolutionMenu();
+
+        expect(labelSpy).toHaveBeenCalledWith(
+            jasmine.any(String), jasmine.any(Object), 'video');
+        const labels = Array.from(videoContainer.querySelectorAll(
+            'button.explicit-resolution > span'))
+            .map((s) => s.textContent).sort();
+        expect(labels).toEqual(['240p', '480p']);
+      });
+
       it('displays audio quality based on current stream', async () => {
         const manifest =
           shaka.test.ManifestGenerator.generate((manifest) => {
@@ -708,7 +1160,7 @@ describe('UI', () => {
             });
             manifest.addVariant(1, (variant) => {
               variant.addAudio(1);
-              variant.bandwidth = 200000;
+              variant.bandwidth = 2500000;
             });
           });
 
@@ -723,7 +1175,7 @@ describe('UI', () => {
         const qualityOptions =
             Array.from(qualityButtons).map((btn) => btn.innerText);
 
-        expect(qualityOptions).toEqual(['200 kbits/s', '100 kbits/s']);
+        expect(qualityOptions).toEqual(['2.5 Mbps', '100 Kbps']);
       });
 
       /**
@@ -744,13 +1196,237 @@ describe('UI', () => {
           if (elem instanceof shaka.ui.OverflowMenu) {
             for (const child of elem.children_) {
               if (child instanceof shaka.ui.ResolutionSelection) {
-                child.updateResolutionSelection_();
+                child.updateSelection_();
                 found = true;
               }
             }
           }
         }
         goog.asserts.assert(found, 'Unable to find resolution menu');
+      }
+
+      it('does not collapse resolutions across video languages',
+          async () => {
+            // Regression test for
+            // https://github.com/shaka-project/shaka-player/issues/10198
+            // Two video-only variants can share a role (e.g. 'sign') and
+            // resolution but differ in language (e.g. multiple
+            // sign-language video tracks). They must not be collapsed into
+            // a single entry, and only the language of the active track
+            // should be listed.
+            const manifest =
+                shaka.test.ManifestGenerator.generate((manifest) => {
+                  manifest.addVariant(0, (variant) => {
+                    variant.addVideo(1, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-US';
+                      stream.size(640, 480);
+                    });
+                  });
+                  manifest.addVariant(2, (variant) => {
+                    variant.addVideo(3, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-NL';
+                      stream.size(640, 480);
+                    });
+                  });
+                  manifest.addVariant(4, (variant) => {
+                    variant.addVideo(5, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-NL';
+                      stream.size(1280, 720);
+                    });
+                  });
+                });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
+
+            await player.load(
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+            player.configure('abr.enabled', false);
+
+            const videoTracks = player.getVideoTracks();
+            const dutch480 = videoTracks.find(
+                (t) => t.language == 'sgn-NL' && t.height == 480);
+            goog.asserts.assert(dutch480, 'Unable to find video track');
+            player.selectVideoTrack(dutch480, true);
+            await updateResolutionMenu();
+
+            const resolutionButtons = videoContainer.querySelectorAll(
+                'button.explicit-resolution > span');
+            const resolutions = Array.from(resolutionButtons)
+                .map((btn) => btn.innerText)
+                .sort();
+
+            // Only the Dutch sign-language resolutions should be listed;
+            // the American one at the same 480p must not be silently
+            // collapsed into it.
+            expect(resolutions).toEqual(['480p', '720p']);
+          });
+    });
+
+    describe('video type menu', () => {
+      /** @type {!HTMLElement} */
+      let videoTypeMenu;
+      /** @type {shaka.ui.Controls} */
+      let controls;
+
+      beforeEach(async () => {
+        const config = {
+          controlPanelElements: [
+            'overflow_menu',
+          ],
+          overflowMenuButtons: [
+            'video_type',
+          ],
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        // Force a known locale so the label assertions below are not at the
+        // mercy of the test environment's navigator.languages.
+        controls.getLocalization().changeLocale(['en']);
+
+        const videoTypeMenus =
+            videoContainer.getElementsByClassName('shaka-video-type');
+        expect(videoTypeMenus.length).toBe(1);
+        videoTypeMenu = /** @type {!HTMLElement} */ (videoTypeMenus[0]);
+      });
+
+      it('does not show a language when all video roles share it',
+          async () => {
+            const manifest =
+                shaka.test.ManifestGenerator.generate((manifest) => {
+                  manifest.addVariant(0, (variant) => {
+                    variant.addVideo(1, (stream) => {
+                      stream.roles = ['main'];
+                      stream.language = 'en';
+                    });
+                  });
+                  manifest.addVariant(2, (variant) => {
+                    variant.addVideo(3, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'en';
+                    });
+                  });
+                });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
+
+            await player.load(
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+            await updateVideoTypeMenu();
+
+            expect(getVideoTypeLabels().sort()).toEqual(
+                ['Main', 'Sign language']);
+          });
+
+      it('shows only the language when every option shares the same role',
+          async () => {
+            // Regression test for
+            // https://github.com/shaka-project/shaka-player/issues/10198
+            // When every option has the same role (e.g. two sign-language
+            // video tracks), repeating that role on every button is
+            // redundant; the language alone is what disambiguates them.
+            const manifest =
+                shaka.test.ManifestGenerator.generate((manifest) => {
+                  manifest.addVariant(0, (variant) => {
+                    variant.addVideo(1, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-US';
+                    });
+                  });
+                  manifest.addVariant(2, (variant) => {
+                    variant.addVideo(3, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-NL';
+                    });
+                  });
+                });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
+
+            await player.load(
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+            await updateVideoTypeMenu();
+
+            const labels = getVideoTypeLabels();
+            expect(labels.length).toBe(2);
+            expect(labels.some((l) => l.startsWith('Sign language'))).toBe(
+                false);
+            // The two languages must not be conflated into an identical
+            // label.
+            expect(new Set(labels).size).toBe(2);
+          });
+
+      it('keeps the role label when languages differ across roles',
+          async () => {
+            const manifest =
+                shaka.test.ManifestGenerator.generate((manifest) => {
+                  manifest.addVariant(0, (variant) => {
+                    variant.addVideo(1, (stream) => {
+                      stream.roles = ['main'];
+                      stream.language = 'en';
+                    });
+                  });
+                  manifest.addVariant(2, (variant) => {
+                    variant.addVideo(3, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-US';
+                    });
+                  });
+                  manifest.addVariant(4, (variant) => {
+                    variant.addVideo(5, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-NL';
+                    });
+                  });
+                });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
+
+            await player.load(
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+            await updateVideoTypeMenu();
+
+            const labels = getVideoTypeLabels();
+            expect(labels.length).toBe(3);
+            expect(labels.filter((l) => l.startsWith('Main (')).length)
+                .toBe(1);
+            expect(
+                labels.filter((l) => l.startsWith('Sign language (')).length)
+                .toBe(2);
+            expect(new Set(labels).size).toBe(3);
+          });
+
+      function getVideoTypeLabels() {
+        return Array.from(videoTypeMenu.querySelectorAll(
+            'button:not(.shaka-back-to-overflow-button) > span'))
+            .map((s) => s.textContent);
+      }
+
+      /**
+       * @suppress {accessControls}
+       */
+      async function updateVideoTypeMenu() {
+        await Util.shortDelay();
+        let found = false;
+        for (const elem of controls.elements_) {
+          if (elem instanceof shaka.ui.OverflowMenu) {
+            for (const child of elem.children_) {
+              if (child instanceof shaka.ui.VideoTypeSelection) {
+                child.updateVideoRoles_();
+                found = true;
+              }
+            }
+          }
+        }
+        goog.asserts.assert(found, 'Unable to find video type menu');
       }
     });
 
@@ -785,8 +1461,6 @@ describe('UI', () => {
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
         UiUtils.simulateEvent(controlsContainer, 'contextmenu');
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
-        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
-        expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
       });
 
       it('hides on click event', () => {
@@ -794,15 +1468,81 @@ describe('UI', () => {
         UiUtils.simulateEvent(controlsContainer, 'click');
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
         UiUtils.simulateEvent(controlsContainer, 'contextmenu');
-        UiUtils.simulateEvent(window, 'click');
+        UiUtils.simulateEvent(controlsContainer, 'click');
         expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
       });
 
       it('builds internal elements', () => {
         expect(contextMenu.childNodes.length).toBe(1);
 
-        expect(contextMenu.childNodes[0]['className'])
-            .toBe('shaka-statistics-button');
+        const element = /** @type {!HTMLElement} */ (contextMenu.childNodes[0]);
+        expect(element.classList.contains('shaka-statistics-button'))
+            .toBe(true);
+      });
+    });
+
+    describe('custom context menu on touch devices', () => {
+      /** @type {!HTMLElement} */
+      let controlsContainer;
+      /** @type {!HTMLElement} */
+      let contextMenu;
+      /** @type {number} */
+      let originalMaxTouchPoints;
+
+      beforeEach(async () => {
+        originalMaxTouchPoints = navigator.maxTouchPoints;
+        // The touch listeners are only wired up on touch-capable devices, so
+        // pretend to be one before the UI is created.
+        Util.setMaxTouchPoints(1);
+
+        const config = {
+          customContextMenu: true,
+          contextMenuElements: [
+            'statistics',
+          ],
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+
+        const controls = ui.getControls();
+        controlsContainer = controls.getControlsContainer();
+        // onContainerTouch ignores touches until the media has a duration and
+        // only acts while the controls are showing (opaque).
+        Object.defineProperty(video, 'duration',
+            {value: 100, configurable: true});
+        controlsContainer.setAttribute('shown', 'true');
+
+        const contextMenus =
+            videoContainer.getElementsByClassName('shaka-context-menu');
+        expect(contextMenus.length).toBe(1);
+        contextMenu = /** @type {!HTMLElement} */ (contextMenus[0]);
+      });
+
+      afterEach(() => {
+        Util.setMaxTouchPoints(originalMaxTouchPoints);
+      });
+
+      it('stays open when the long-press is released', () => {
+        // A long-press fires 'contextmenu' while the finger is down, then
+        // 'touchend' when it is released.  The menu must survive the release.
+        UiUtils.simulateEvent(controlsContainer, 'touchstart');
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
+
+        UiUtils.simulateEvent(controlsContainer, 'touchend');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('closes on a subsequent tap', () => {
+        UiUtils.simulateEvent(controlsContainer, 'touchstart');
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+        UiUtils.simulateEvent(controlsContainer, 'touchend');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
+
+        // A separate tap (its own touchstart + touchend) closes the menu.
+        UiUtils.simulateEvent(controlsContainer, 'touchstart');
+        UiUtils.simulateEvent(controlsContainer, 'touchend');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
       });
     });
 
@@ -852,22 +1592,40 @@ describe('UI', () => {
 
       it('displays all the available statistics', () => {
         const skippedStats = ['stateHistory', 'switchHistory'];
-        const nodes = statisticsContainer.childNodes;
-        // First index is close button.
-        let nodeIndex = 1;
+
+        /**
+         * Returns the stat node by label name.
+         * @param {string} name
+         * @return {?Node}
+         */
+        function getStatsElementByName(name) {
+          const nodes = statisticsContainer.childNodes;
+
+          for (const node of nodes) {
+            if (node.hasChildNodes() &&
+                node.childNodes.length >= 2 &&
+                node.childNodes[0].textContent.replace(':', '') == name) {
+              return node;
+            }
+          }
+
+          return null;
+        }
 
         for (const statistic in new shaka.util.Stats().getBlob()) {
-          if (!skippedStats.includes(statistic)) {
-            // Text content of label (without ':') is a valid statistic
-            const label = nodes[nodeIndex].childNodes[0].textContent;
-            expect(label.replace(':', '')).toBe(statistic);
-
-            // Value has been parsed and it is not the default 'NaN'
-            const value = nodes[nodeIndex].childNodes[1].textContent;
-            expect(value).not.toBe('NaN');
-
-            nodeIndex += 1;
+          if (skippedStats.includes(statistic)) {
+            continue;
           }
+
+          const node = getStatsElementByName(statistic);
+
+          expect(node).not.toBe(null);
+
+          const label = node.childNodes[0].textContent;
+          expect(label.replace(':', '')).toBe(statistic);
+
+          const value = node.childNodes[1].textContent;
+          expect(value).not.toBe('NaN');
         }
       });
 
@@ -914,6 +1672,8 @@ describe('UI', () => {
         shaka.media.ManifestParser.registerParserByMime(
             fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
 
+        player.configure('streaming.segmentPrefetchLimit', 0);
+
         await player.load(
             /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
 
@@ -959,8 +1719,20 @@ describe('UI', () => {
     const videos = container.getElementsByTagName('video');
     expect(videos.length).not.toBe(0);
 
-    UiUtils.confirmElementFound(container, 'shaka-spinner-svg');
-    UiUtils.confirmElementFound(container, 'shaka-overflow-menu');
+    const overlay = /** @type {!shaka.ui.Overlay} */(videos[0]['ui']);
+    const config = overlay.getConfiguration();
+    if (config.showBufferingSpinner) {
+      UiUtils.confirmElementFound(container, 'shaka-spinner');
+    } else {
+      UiUtils.confirmElementMissing(container, 'shaka-spinner');
+    }
+
+    const deviceType = deviceDetected.getDeviceType();
+    if (deviceType == shaka.device.IDevice.DeviceType.CAST) {
+      UiUtils.confirmElementMissing(container, 'shaka-overflow-menu');
+    } else {
+      UiUtils.confirmElementFound(container, 'shaka-overflow-menu');
+    }
     UiUtils.confirmElementFound(container, 'shaka-controls-button-panel');
   }
 });

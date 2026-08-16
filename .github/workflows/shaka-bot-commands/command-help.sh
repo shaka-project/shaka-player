@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC
+# Copyright 2016 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,4 +26,5 @@
   echo ' - `@shaka-bot test ce`: Start lab tests on CE devices only (no desktop browsers)'
   echo ' - `@shaka-bot test cast`: Start lab tests on Cast devices only'
   echo ' - `@shaka-bot test tizen`: Start lab tests on Tizen device only'
+  echo ' - `@shaka-bot test android`: Start lab tests on Android device only'
 ) | reply_from_pipe

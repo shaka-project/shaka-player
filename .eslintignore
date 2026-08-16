@@ -1,4 +1,0 @@
-# Similar to .gitignore, this lists files ignored by eslint.
-
-# This is default ignored, but we want to still lint it.
-!.eslintrc.js

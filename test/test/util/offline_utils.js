@@ -61,11 +61,13 @@ shaka.test.OfflineUtils = class {
       external: false,
       fastSwitching: false,
       isAudioMuxedInVideo: false,
+      isIframe: false,
+      preselection: null,
     };
   }
 
   /**
-   * @param {!Array.<number>} data
+   * @param {!Array<number>} data
    * @return {shaka.extern.SegmentDataDB}
    */
   static createSegmentData(data) {
@@ -75,7 +77,7 @@ shaka.test.OfflineUtils = class {
   }
 
   /**
-   * @param {!Array.<shaka.extern.SegmentDataDB>} segments
+   * @param {!Array<shaka.extern.SegmentDataDB>} segments
    * @param {shaka.extern.SegmentDataDB} expected
    */
   static expectSegmentsToContain(segments, expected) {

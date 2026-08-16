@@ -15,21 +15,27 @@
 shaka.test.FakeSegmentPrefetch = class {
   /**
    * Suppress the JSC_PRIVATE_OVERRIDE error for overriding prefetchPosTime_
+   * @param {number} prefetchLimit
+   * @param {!shaka.extern.Stream} stream
+   * @param {!Object<string,
+   *                 shaka.test.FakeMediaSourceEngine.SegmentData>} segmentData
    * @suppress {visibility}
    */
   constructor(prefetchLimit, stream, segmentData) {
     /** @private {number} */
     this.prefetchLimit_ = prefetchLimit;
 
-    /** @private {(Set.<!shaka.media.SegmentReference|
-     *      !shaka.media.InitSegmentReference>)} */
+    /**
+     * @private {(Set<!shaka.media.SegmentReference|
+     *      !shaka.media.InitSegmentReference>)}
+     */
     this.requestedReferences_ = new Set();
 
     /** @private {shaka.extern.Stream} */
     this.streamObj_ = stream;
 
     /**
-     * @private {!Object.<string, shaka.test.FakeMediaSourceEngine.SegmentData>}
+     * @private {!Object<string, shaka.test.FakeMediaSourceEngine.SegmentData>}
      */
     this.segmentData_ = segmentData;
 

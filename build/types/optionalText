@@ -1,0 +1,3 @@
+# Optional plugins related to text parsing and displaying.
+
++../../lib/text/srt_text_parser.js

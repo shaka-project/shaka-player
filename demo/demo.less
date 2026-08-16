@@ -17,22 +17,21 @@
 @drawer-width: 550px;
 
 @mdl-footer-link-color: #9e9e9e;  /* copied from MDL stylesheet */
-@mdl-button-color: rgb(63 81 181);  /* copied from MDL stylesheet */
+@mdl-button-color: rgb(63, 81, 181);  /* copied from MDL stylesheet */
 
 @progress-circle-size: 45px;
 @progress-circle-thickness: 5px;
 
-/* This class name is used by MDL, but we use a slightly different font.  So
- * here we override the font family for the MDL class.  Without this, the menu
- * on the left side of the screen has no icon. */
-.material-icons {
-  font-family: "Material Icons Round";
-}
-
-/* Conflicting styles between the icons font & the MDL buttons caused some
- * icons not to be centered in their MDL button.  This fixes it. */
-.mdl-button .material-icons {
-  line-height: 36px;
+/* The demo's icons are inline SVGs (see demo/icons.js), matching the player
+ * UI's switch away from an icon font.  The path data is painted with the
+ * inherited text color, and vertical-align centers the icon inside MDL
+ * buttons. */
+.demo-icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  fill: currentcolor;
+  vertical-align: middle;
 }
 
 /* This is a less mixin only, rather than a CSS class. MDL has an equivalent
@@ -65,30 +64,35 @@ main.mdl-layout__content {
   text-align: center;
 }
 
-.shaka-controls-button-panel > .close-button {
-  /* Move the button to the top-right. */
-  position: absolute;
-  top: 10px;
-  right: 10px;
-
+.shaka-controls-top-button-panel > .close-button {
   /* Give the button a round background, meant to look like the play button. */
-  border-radius: 50%;
   color: #000;
-  background: rgba(255 255 255 / 85%);
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 85%) 16px,
+      transparent 16px
+    );
 }
 
 html, body {
   /* Ensure everything has a consistent font. */
-  font-family: Roboto, sans-serif, TengwarTelcontar;
+  font-family: Roboto, sans-serif;
 }
 
 // This font supports the Sindarin (sjn) translation.
 @font-face {
-  font-family: TengwarTelcontar;
-  // This could be served from demo/ (uncompiled) or dist (compiled).
+  // The Tengwar Telcontar font
+  // From https://freetengwar.sourceforge.net/tengtelc.html
   src: url("../demo/TengwarTelcontar.woff2") format("woff2");
-  font-weight: normal;
-  font-style: normal;
+  // Unicode Private Use Area (PUA) used by ConScript Unicode Registry (CSUR)
+  // to represent Tengwar glyphs.  This will keep the font from being loaded
+  // for any other codepoints.
+  unicode-range: U+E000-E0FF;
+  // Fun trick to avoid hard-coding Tengwar support into the library:
+  // Add this font for these codepoint ranges in anything that uses "Roboto",
+  // without having to modify the CSS to point at another font family.
+  font-family: Roboto;
 }
 
 /* Change the default opacity of the ripple container, to get around an iOS bug.
@@ -407,9 +411,29 @@ html, body {
   padding: 0 16px;
 }
 
+/* The drawer toggle button's gear icon is an inline SVG, injected into MDL's
+ * button in setupPlayer_ (main.js) and sized by the .demo-icon rule above.
+ * Unlike other MDL icon buttons, MDL has no rule to center this button's
+ * .material-icons element, since it expects a text glyph rather than an
+ * inline SVG. Center it explicitly, the same way MDL centers its own icon
+ * buttons (e.g. .mdl-button--icon .material-icons). */
 .app-header .mdl-layout__drawer-button .material-icons {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+}
+
+.app-header .mdl-layout__drawer-button .material-icons svg {
+  /* Avoid the inline-element baseline/vertical-align quirks that come with
+   * treating this SVG as text; it should just fill its exactly-sized,
+   * already-centered parent. */
+  display: block;
+
   &:hover {
-    /* Spin the gear icon in the settings menu when hovered. */
+    /* Spin the gear icon when hovered. */
     transform: rotate(90deg);
   }
 
@@ -462,6 +486,9 @@ footer .mdl-mega-footer__link-list {
   /* Constrain to the window if necessary, so that it doesn't overflow small
    * mobile screens. */
   max-width: 100%;
+
+  /* A little vertical padding is needed to make it look balanced. */
+  padding: 1em 0;
 }
 
 /* When the drawer is open, MDL sets overflow: hidden on the main content
@@ -507,7 +534,7 @@ footer .mdl-mega-footer__link-list {
 .video-container {
   /* Fixed width, but height will expand based on video aspect ratio.
    * Does not affect fullscreen size. */
-  width: 640px;
+  width: 854px;
   margin: auto;
 
   /* Constrain to the window if necessary, so that it doesn't overflow small
@@ -588,4 +615,60 @@ footer .mdl-mega-footer__link-list {
 .wide-input .input-container-row,
 .wide-input .mdl-textfield {
   width: 100%;
+}
+
+/* Preference list entry styles */
+.pref-entry {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin: 4px 0;
+  background: #fafafa;
+}
+
+.pref-entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pref-entry-number {
+  font-weight: bold;
+  font-size: 90%;
+  color: @mdl-button-color;
+}
+
+.pref-entry-delete {
+  min-width: 24px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: @error-color;
+}
+
+.pref-entry-fields .mdl-textfield {
+  width: 160px;
+}
+
+.pref-add-container {
+  margin: 4px 0;
+  text-align: right;
+}
+
+.extra-config-textarea {
+  font-family: monospace;
+}
+
+.mdl-dialog .input-container-style-vertical {
+  .input-container-row:has(.mdl-switch) {
+    display: block;
+    width: 100%;
+  }
+
+  .mdl-switch {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    // Fill the full container width so the label text is never truncated.
+    width: 100%;
+  }
 }

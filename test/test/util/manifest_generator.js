@@ -16,7 +16,7 @@
 shaka.test.ManifestGenerator = class {
   /**
    * @param {function(!shaka.test.ManifestGenerator.Manifest)=} func
-   * @param {shakaNamespaceType=} compiledShaka
+   * @param {shaka=} compiledShaka
    * @return {shaka.extern.Manifest}
    */
   static generate(func, compiledShaka) {
@@ -71,19 +71,22 @@ shaka.test.ManifestGenerator = class {
 };
 
 shaka.test.ManifestGenerator.Manifest = class {
-  /** @param {shakaNamespaceType=} compiledShaka */
+  /** @param {shaka=} compiledShaka */
   constructor(compiledShaka) {
-    /** @private {shakaNamespaceType} */
+    /** @private {shaka} */
     this.shaka_ = compiledShaka || window['shaka'];
 
-    /** @type {!Array.<shaka.extern.Variant>} */
+    /** @type {!Array<shaka.extern.Variant>} */
     this.variants = [];
 
-    /** @type {!Array.<shaka.extern.Stream>} */
+    /** @type {!Array<shaka.extern.Stream>} */
     this.textStreams = [];
 
-    /** @type {!Array.<shaka.extern.Stream>} */
+    /** @type {!Array<shaka.extern.Stream>} */
     this.imageStreams = [];
+
+    /** @type {!Array<shaka.extern.Stream>} */
+    this.chapterStreams = [];
 
     const timeline = new this.shaka_.media.PresentationTimeline(0, 0);
     timeline.setSegmentAvailabilityDuration(Infinity);
@@ -91,7 +94,7 @@ shaka.test.ManifestGenerator.Manifest = class {
 
     /** @type {!shaka.media.PresentationTimeline} */
     this.presentationTimeline = timeline;
-    /** @type {!Array.<string>} */
+    /** @type {!Array<string>} */
     this.offlineSessionIds = [];
     /** @type {boolean} */
     this.sequenceMode = false;
@@ -290,7 +293,7 @@ shaka.test.ManifestGenerator.Variant = class {
       this.allowedByApplication = true;
       /** @type {boolean} */
       this.allowedByKeySystem = true;
-      /** @type {!Array.<MediaCapabilitiesDecodingInfo>} */
+      /** @type {!Array<MediaCapabilitiesDecodingInfo>} */
       this.decodingInfos = [];
     }
 
@@ -412,16 +415,20 @@ shaka.test.ManifestGenerator.DrmInfo = class {
     this.videoRobustness = '';
     /** @type {Uint8Array} */
     this.serverCertificate = null;
-    /** @type {!Array.<shaka.extern.InitDataOverride>} */
+    /** @type {!Array<shaka.extern.InitDataOverride>} */
     this.initData = [];
-    /** @type {Set.<string>} */
+    /** @type {Set<string>} */
     this.keyIds = new Set();
     /** @type {string} */
     this.sessionType = '';
     /** @type {string} */
     this.serverCertificateUri = '';
-    /** @type {(Set.<string>|undefined)} */
+    /** @type {(Set<string> | undefined)} */
     this.keySystemUris;
+    /** @type {(!Array<string> | undefined)} */
+    this.mediaTypes;
+    /** @type {(!Map<string, string>|undefined)} */
+    this.clearKeys;
 
     /** @type {shaka.extern.DrmInfo} */
     const foo = this;
@@ -478,10 +485,18 @@ shaka.test.ManifestGenerator.DrmInfo = class {
    * Adds a new keySystemUris to the current DRM info.
    *
    *
-   * @param {Set.<string>} keySystemUris
+   * @param {Set<string>} keySystemUris
    */
   addKeySystemUris(keySystemUris) {
     this.keySystemUris = keySystemUris;
+  }
+
+  /**
+   * Adds a new mediaTypes to the current DRM info.
+   * @param {!Array<string>=} mediaTypes
+   */
+  addMediaTypes(mediaTypes = undefined) {
+    this.mediaTypes = mediaTypes;
   }
 };
 
@@ -560,6 +575,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.mimeType = defaultMimeType;
       /** @type {string} */
       this.codecs = defaultCodecs;
+      /** @type {string} */
+      this.supplementalCodecs = '';
       /** @type {(number|undefined)} */
       this.frameRate = undefined;
       /** @type {(string|undefined)} */
@@ -574,9 +591,9 @@ shaka.test.ManifestGenerator.Stream = class {
       this.kind = undefined;
       /** @type {boolean} */
       this.encrypted = false;
-      /** @type {!Array.<shaka.extern.DrmInfo>} */
+      /** @type {!Array<shaka.extern.DrmInfo>} */
       this.drmInfos = [];
-      /** @type {!Set.<string>} */
+      /** @type {!Set<string>} */
       this.keyIds = new Set();
       /** @type {string} */
       this.language = shaka.util.LanguageUtils.normalize(lang || 'und');
@@ -588,9 +605,11 @@ shaka.test.ManifestGenerator.Stream = class {
       this.primary = false;
       /** @type {?shaka.extern.Stream} */
       this.trickModeVideo = null;
-      /** @type {Array.<string>} */
+      /** @type {?shaka.extern.Stream} */
+      this.dependencyStream = null;
+      /** @type {Array<string>} */
       this.emsgSchemeIdUris = null;
-      /** @type {!Array.<string>} */
+      /** @type {!Array<string>} */
       this.roles = [];
       /** @type {boolean} */
       this.forced = false;
@@ -600,7 +619,7 @@ shaka.test.ManifestGenerator.Stream = class {
       this.audioSamplingRate = null;
       /** @type {boolean} */
       this.spatialAudio = false;
-      /** @type {Map.<string, string>} */
+      /** @type {Map<string, string>} */
       this.closedCaptions = null;
       /** @type {(string|undefined)} */
       this.hdr = undefined;
@@ -618,8 +637,14 @@ shaka.test.ManifestGenerator.Stream = class {
       this.fastSwitching = false;
       /** @type {boolean} */
       this.isAudioMuxedInVideo = false;
+      /** @type {?string} */
+      this.baseOriginalId = null;
+      /** @type {boolean} */
+      this.isIframe = false;
+      /** @type {?shaka.extern.Preselection} */
+      this.preselection = null;
     }
-    /** @type {!Set.<string>} */
+    /** @type {!Set<string>} */
     this.fullMimeTypes = new Set([shaka.util.MimeUtils.getFullType(
         defaultMimeType, defaultCodecs)]);
 
@@ -667,6 +692,7 @@ shaka.test.ManifestGenerator.Stream = class {
    *   index and give a URI.
    * @param {number} segmentDuration
    * @param {?number=} segmentSize
+   * @return {shaka.test.ManifestGenerator.Stream}
    */
   useSegmentTemplate(template, segmentDuration, segmentSize = null) {
     goog.asserts.assert(this.manifest_,
@@ -726,7 +752,7 @@ shaka.test.ManifestGenerator.Stream = class {
   /**
    * Sets the init segment of the current stream.
    *
-   * @param {!Array.<string>} uris
+   * @param {!Array<string>} uris
    * @param {number} startByte
    * @param {?number} endByte
    * @param {null|shaka.extern.MediaQualityInfo=} mediaQuality

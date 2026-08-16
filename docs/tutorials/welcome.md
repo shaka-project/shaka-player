@@ -1,8 +1,10 @@
 # Welcome to Shaka Player
 
-Shaka Player is a JavaScript library for adaptive video streaming.
-It plays [DASH][] content without browser plugins using
-[MediaSource Extensions][] and [Encrypted Media Extensions][].
+Shaka Player is an open-source JavaScript library for adaptive media streaming.
+It plays adaptive media formats such as [DASH][] and [HLS][] in a browser without
+plugins, using the open web standards [MediaSource Extensions][] and
+[Encrypted Media Extensions][].
+It also supports [Media over QUIC][].
 
 Shaka Player is meant to be deployed after being compiled. The tools you need
 to compile the sources and documentation are included in the sources:
@@ -15,8 +17,10 @@ If you installed Shaka Player via npm, the source has been compiled and the
 externs have been generated.
 
 [DASH]: http://dashif.org/
+[HLS]: https://datatracker.ietf.org/doc/html/rfc8216
 [MediaSource Extensions]: http://w3c.github.io/media-source/
 [Encrypted Media Extensions]: https://w3c.github.io/encrypted-media/
+[Media over QUIC]: https://datatracker.ietf.org/group/moq/about/
 
 [Closure Compiler]: https://developers.google.com/closure/compiler/
 [Closure Linter]: https://developers.google.com/closure/utilities/docs/linter_howto
@@ -28,9 +32,9 @@ externs have been generated.
 You can build Shaka on Linux, Windows, or Mac.
 To get the sources and compile the library, you will need:
   * {@link https://git-scm.com/downloads Git v1.9+}
-  * {@link https://www.python.org/downloads/ Python v2.7 or v3.5+}
-  * {@link https://learn.microsoft.com/en-us/java/openjdk/download Java Runtime Environment v14+}
-  * {@link https://nodejs.org/en/download/ NodeJS v14+}
+  * {@link https://www.python.org/downloads/ Python v3.5+}
+  * {@link https://learn.microsoft.com/en-us/java/openjdk/download Java Runtime Environment v21+}
+  * {@link https://nodejs.org/en/download/ NodeJS v18+}
   * A local web server, such as {@link https://httpd.apache.org/ Apache}
     * _NOTE: A local web server is required because browsers place restrictions
       on applications from file:/// URLs._
@@ -61,7 +65,7 @@ cd shaka-player
 #### Compile the library and generate the docs
 
 ```sh
-python build/all.py
+python3 build/all.py
 ```
 
 Alternatively you can use a docker container:

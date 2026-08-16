@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// cspell:ignore customdatascheme
+
 describe('MediaSourceEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
@@ -155,6 +157,8 @@ describe('MediaSourceEngine', () => {
   /** @type {!jasmine.Spy} */
   let onMetadata;
   /** @type {!jasmine.Spy} */
+  let onEmsg;
+  /** @type {!jasmine.Spy} */
   let onEvent;
   /** @type {!jasmine.Spy} */
   let onManifestUpdate;
@@ -171,8 +175,14 @@ describe('MediaSourceEngine', () => {
     textDisplayer = new shaka.test.FakeTextDisplayer();
 
     onMetadata = jasmine.createSpy('onMetadata');
+    onEmsg = jasmine.createSpy('onEmsg');
     onEvent = jasmine.createSpy('onEvent');
     onManifestUpdate = jasmine.createSpy('onManifestUpdate');
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    // Prevent worker creation: uncompiled worker requires Closure Library
+    // which is not served by Karma.
+    spyOn(shaka.transmuxer.TransmuxerProxy, 'getOrCreateWorker_')
+        .and.returnValue(null);
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
@@ -180,11 +190,12 @@ describe('MediaSourceEngine', () => {
         {
           getKeySystem: () => null,
           onMetadata: Util.spyFunc(onMetadata),
+          onEmsg: Util.spyFunc(onEmsg),
           onEvent: Util.spyFunc(onEvent),
           onManifestUpdate: Util.spyFunc(onManifestUpdate),
-        });
-    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
-    mediaSourceEngine.configure(config);
+          getDrmInfo: () => null,
+        },
+        config);
 
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];
     expect(video.getElementsByTagName('source').length).toBe(1);
@@ -307,6 +318,7 @@ describe('MediaSourceEngine', () => {
       fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(
           streamMetadata.mimeType, streamMetadata.codecs)]),
       isAudioMuxedInVideo: false,
+      isIframe: false,
     };
   }
 
@@ -382,7 +394,7 @@ describe('MediaSourceEngine', () => {
     expect(mediaSource.duration).toBeCloseTo(30);
   });
 
-  it('does not throw if endOfStrem called more than once', async () => {
+  it('does not throw if endOfStream called more than once', async () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
     await mediaSourceEngine.init(initObject, false);
@@ -395,9 +407,9 @@ describe('MediaSourceEngine', () => {
   });
 
   it('queues operations', async () => {
-    /** @type {!Array.<number>} */
+    /** @type {!Array<number>} */
     const resolutionOrder = [];
-    /** @type {!Array.<!Promise>} */
+    /** @type {!Array<!Promise>} */
     const requests = [];
 
     function checkOrder(p) {
@@ -704,7 +716,7 @@ describe('MediaSourceEngine', () => {
 
   it('extracts ID3 metadata from AAC', async () => {
     if (!MediaSource.isTypeSupported('audio/aac') ||
-        !shaka.util.Platform.supportsSequenceMode()) {
+        !deviceDetected.supportsSequenceMode()) {
       pending('Raw AAC codec is not supported by the platform.');
     }
     metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
@@ -733,6 +745,28 @@ describe('MediaSourceEngine', () => {
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
+  });
+
+  describe('destroy', () => {
+    // Regression test for the unload regression introduced by switching the
+    // media element from a src attribute to <source> elements (commit 445b0ce).
+    // destroy() must fully unload the media element: remove any stale src
+    // attribute, remove all <source> elements, and call load().  Otherwise the
+    // element never returns to HAVE_NOTHING, and DRM teardown
+    // (setMediaKeys(null)) throws InvalidStateError, hanging playback on the
+    // next asset.
+    it('fully unloads the media element', async () => {
+      // The MSE <source> element was added by the beforeEach.  Simulate a stale
+      // src attribute left behind by a previous src= playback (e.g. an ad
+      // break) sitting alongside the <source> element.
+      expect(video.getElementsByTagName('source').length).toBe(1);
+      video.setAttribute('src', 'data:,');
+
+      await mediaSourceEngine.destroy();
+
+      expect(video.getAttribute('src')).toBeNull();
+      expect(video.getElementsByTagName('source').length).toBe(0);
+    });
   });
 
   describe('embedded emsg boxes', () => {
@@ -795,6 +829,35 @@ describe('MediaSourceEngine', () => {
       '53 68 61 6b  61 33 44 49   03 00 40 00  00 00 1b'
     ).replace(/\s/g, ''));
 
+    const emsgSegmentV0ID3WithoutDuration = Uint8ArrayUtils.fromHex((
+      // 105 bytes  emsg box     v0, flags 0
+      '00 00 00 69  65 6d 73 67  00 00 00 00' +
+
+      // scheme id uri (13 bytes) 'https://aomedia.org/emsg/ID3'
+      '68 74 74 70  73 3a 2f 2f   61 6f 6d 65  64 69 61 2e' +
+      '6f 72 67 2f  65 6d 73 67   2f 49 44 33  00' +
+
+      // value (1 byte) ''
+      '00' +
+
+      // timescale (4 bytes) 1
+      '00 00 00 01' +
+
+      // presentation time delta (4 bytes) 8
+      '00 00 00 08' +
+
+      // event duration (4 bytes) 255
+      'ff ff ff ff' +
+
+      // id (4 bytes) 51
+      '00 00 00 33' +
+
+      // message data (47 bytes)
+      '49 44 33 03  00 40 00 00   00 1b 00 00  00 06 00 00' +
+      '00 00 00 02  54 58 58 58   00 00 00 07  e0 00 03 00' +
+      '53 68 61 6b  61 33 44 49   03 00 40 00  00 00 1b'
+    ).replace(/\s/g, ''));
+
     const id3SchemeUri = 'https://aomedia.org/emsg/ID3';
 
     const emsgObj = {
@@ -821,6 +884,30 @@ describe('MediaSourceEngine', () => {
       messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74]),
     };
 
+    const emsgObjWithOffsetHls = {
+      startTime: 8,
+      endTime: 0xffff + 8,
+      schemeIdUri: 'foo:bar:customdatascheme',
+      value: '1',
+      timescale: 1,
+      presentationTimeDelta: 6,
+      eventDuration: 0xffff,
+      id: 1,
+      messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74]),
+    };
+
+    const emsgObjSegmentV0ID3WithoutDuration = {
+      startTime: 8,
+      endTime: 8,
+      schemeIdUri: 'https://aomedia.org/emsg/ID3',
+      value: '',
+      timescale: 1,
+      presentationTimeDelta: 8,
+      eventDuration: 4294967295,
+      id: 51,
+      messageData: jasmine.any(Uint8Array),
+    };
+
     const initSegmentReference = new shaka.media.InitSegmentReference(
         /* uris= */ () => [],
         /* startByte= */ 0,
@@ -838,6 +925,17 @@ describe('MediaSourceEngine', () => {
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ Infinity);
 
+    const hlsReference = new shaka.media.SegmentReference(
+        /* startTime= */ 2,
+        /* endTime= */ 3,
+        /* uris= */ () => [],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        initSegmentReference,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
+
     it('raises an event for registered embedded emsg boxes', () => {
       const videoStream =
           shaka.test.StreamingEngineUtil.createMockVideoStream(1);
@@ -850,10 +948,10 @@ describe('MediaSourceEngine', () => {
           videoStream,
           /* mimeType= */ 'video/mp4');
 
-      expect(onEvent).toHaveBeenCalledTimes(1);
+      expect(onEmsg).toHaveBeenCalledTimes(1);
 
-      const event = onEvent.calls.argsFor(0)[0];
-      expect(event.detail).toEqual(emsgObj);
+      const emsgInfo = onEmsg.calls.argsFor(0)[0];
+      expect(emsgInfo).toEqual(emsgObj);
     });
 
     it('raises an event for registered embedded v1 emsg boxes', () => {
@@ -868,10 +966,31 @@ describe('MediaSourceEngine', () => {
           videoStream,
           /* mimeType= */ 'video/mp4');
 
-      expect(onEvent).toHaveBeenCalledTimes(1);
+      expect(onEmsg).toHaveBeenCalledTimes(1);
 
-      const event = onEvent.calls.argsFor(0)[0];
-      expect(event.detail).toEqual(emsgObjWithOffset);
+      const emsgInfo = onEmsg.calls.argsFor(0)[0];
+      expect(emsgInfo).toEqual(emsgObjWithOffset);
+    });
+
+    it('uses segment reference times for embedded emsg in HLS', async () => {
+      const videoStream =
+          shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+      videoStream.emsgSchemeIdUris = [emsgObjWithOffsetHls.schemeIdUri];
+
+      await mediaSourceEngine.init(new Map(), /* sequenceMode= */ true,
+          shaka.media.ManifestParser.HLS);
+
+      mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO,
+          emsgSegmentV1,
+          hlsReference,
+          videoStream,
+          /* mimeType= */ 'video/mp4');
+
+      expect(onEmsg).toHaveBeenCalledTimes(1);
+
+      const emsgInfo = onEmsg.calls.argsFor(0)[0];
+      expect(emsgInfo).toEqual(emsgObjWithOffsetHls);
     });
 
     it('raises multiple events', () => {
@@ -886,7 +1005,7 @@ describe('MediaSourceEngine', () => {
           videoStream,
           /* mimeType= */ 'video/mp4');
 
-      expect(onEvent).toHaveBeenCalledTimes(2);
+      expect(onEmsg).toHaveBeenCalledTimes(2);
     });
 
     it('won\'t raise an event for an unregistered emsg box', () => {
@@ -900,7 +1019,7 @@ describe('MediaSourceEngine', () => {
           videoStream,
           /* mimeType= */ 'video/mp4');
 
-      expect(onEvent).not.toHaveBeenCalled();
+      expect(onEmsg).not.toHaveBeenCalled();
     });
 
     it('triggers manifest updates', () => {
@@ -915,7 +1034,7 @@ describe('MediaSourceEngine', () => {
           videoStream,
           /* mimeType= */ 'video/mp4');
 
-      expect(onEvent).not.toHaveBeenCalled();
+      expect(onEmsg).not.toHaveBeenCalled();
       expect(onManifestUpdate).toHaveBeenCalled();
     });
 
@@ -935,29 +1054,31 @@ describe('MediaSourceEngine', () => {
           videoStream,
           /* mimeType= */ 'video/mp4');
 
-      expect(onEvent).toHaveBeenCalled();
+      expect(onEmsg).toHaveBeenCalled();
       expect(onMetadata).toHaveBeenCalled();
     });
 
-    it('only triggers emsg event for ID3 if event canceled', () => {
+    // eslint-disable-next-line @stylistic/max-len
+    it('triggers both emsg event and metadata event for ID3 without duration', () => {
       const videoStream =
           shaka.test.StreamingEngineUtil.createMockVideoStream(1);
       videoStream.emsgSchemeIdUris = [id3SchemeUri];
 
       onEvent.and.callFake((emsgEvent) => {
         expect(emsgEvent.type).toBe('emsg');
-        emsgEvent.preventDefault();
       });
 
       mediaSourceEngine.getTimestampAndDispatchMetadata(
           ContentType.VIDEO,
-          emsgSegmentV0ID3,
+          emsgSegmentV0ID3WithoutDuration,
           reference,
           videoStream,
           /* mimeType= */ 'video/mp4');
 
-      expect(onEvent).toHaveBeenCalled();
-      expect(onMetadata).not.toHaveBeenCalled();
+      expect(onEmsg).toHaveBeenCalledTimes(1);
+      const emsgInfo = onEmsg.calls.argsFor(0)[0];
+      expect(emsgInfo).toEqual(emsgObjSegmentV0ID3WithoutDuration);
+      expect(onMetadata).toHaveBeenCalled();
     });
 
     it('event start matches presentation time', () => {
@@ -972,10 +1093,10 @@ describe('MediaSourceEngine', () => {
           videoStream,
           /* mimeType= */ 'video/mp4');
 
-      expect(onEvent).toHaveBeenCalledTimes(1);
+      expect(onEmsg).toHaveBeenCalledTimes(1);
 
-      const event = onEvent.calls.argsFor(0)[0];
-      expect(event.detail).toEqual(emsgObj);
+      const emsgInfo = onEmsg.calls.argsFor(0)[0];
+      expect(emsgInfo).toEqual(emsgObj);
     });
   });
 });

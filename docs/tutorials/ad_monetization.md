@@ -1,11 +1,9 @@
 # Monetization with Ads
 
 Shaka Player provides an API for serving ads to make monetization easier
-for apps. Our current API is tailored for our integration with the
-[Interactive Media Ads][] SDKs, but we plan to extend our support to
-other ad providers in v3.1+.
-Please note that the current API is likely to undergo significant
-changes as our support extends.
+for apps. Our current API supports different ads technologies, such as
+[Interactive Media Ads][], [AWS Elemental MediaTailor][]
+or DASH / HLS Interstitials.
 
 #### AWS Elemental MediaTailor Integration
 
@@ -28,13 +26,14 @@ With Shaka UI:
 const video = document.getElementById('video');
 const ui = video['ui'];
 const controls = video.ui.getControls();
+const player = controls.getPlayer();
+const adManager = player.getAdManager();
 // If you're using a non-UI build, this is the div you'll need to create
 // for your layout.
-const container = controls.getServerSideAdContainer();
-const player = controls.getPlayer();
-const netEngine = player.getNetworkingEngine();
-const adManager = player.getAdManager();
-adManager.initMediaTailor(container, netEngine, video);
+const csContainer = controls.getClientSideAdContainer();
+const ssContainer = controls.getServerSideAdContainer();
+// Note: If you are using Shaka UI this call is not necessary.
+adManager.setContainers(csContainer, ssContainer);
 ```
 
 Requesting a Client Side stream:
@@ -67,8 +66,8 @@ Shaka Player supports different types of interstitials:
  - HLS Interstitials
  - DASH Media Presentation Insertion
  - Custom Interstitials
- - VAST (playback without tracking)
- - VMAP (playback without tracking)
+ - VAST
+ - VMAP
 
 
 ##### HLS Interstitials
@@ -76,33 +75,76 @@ Shaka Player supports different types of interstitials:
 It is not necessary to do anything, Shaka Player supports it natively without
 any type of intervention.
 
+A few details worth knowing:
+
+- **Lazy asset list resolution.** When an interstitial references an asset list
+  (`X-ASSET-LIST`), Shaka Player resolves it lazily, i.e. only once playback
+  approaches the interstitial, instead of at playlist parse time. This avoids a
+  burst of concurrent ad-decision requests and keeps the decision close to
+  playback. How far ahead the asset list is resolved is controlled by the
+  `ads.interstitialPreloadAheadTime` configuration (10 seconds by default), or
+  per-interstitial by the mechanism below.
+- **Preload Date Range (RFC 8216bis Appendix F).** A
+  `CLASS="com.apple.hls.preload"` `EXT-X-DATERANGE` that targets another Date
+  Range (via `X-TARGET-ID`) advises the player how early that interstitial's
+  resources may be resolved. Shaka Player translates this into a
+  per-interstitial resolution offset.
+- **Date Range updates.** Subsequent `EXT-X-DATERANGE` tags that share the same
+  `ID` are consolidated: a later tag may add attributes that were not present
+  before, most notably `X-PLAYOUT-LIMIT`, which is commonly used to shorten an
+  interstitial and return to the main content early in live (SGAI) streams. As
+  required by the specification, attributes that already had a value are not
+  changed.
+- **Seeking into a live break.** For live streams with
+  `ads.allowStartInMiddleOfInterstitial` enabled, seeking back into an
+  interstitial that was already resolved re-requests its asset list with an
+  updated `_HLS_start_offset` reflecting the new playhead position.
+
 
 ##### DASH Media Presentation Insertion (MPD alternate)
 
 It is not necessary to do anything, Shaka Player supports it natively without
 any type of intervention.
 
+The `earliestResolutionTimeOffset` attribute of `InsertPresentation` /
+`ReplacePresentation` is honored: it controls how early (in seconds before the
+interstitial's presentation time) the alternative MPD may be resolved. When it
+is absent, the `ads.interstitialPreloadAheadTime` configuration value is used.
+
 
 ##### Custom Interstitials
+
+The interstitial object accepts an optional `resolutionTimeOffset` property
+(in seconds). It is the offset before `startTime` at which the interstitial's
+resources may be resolved and preloaded, mirroring the DASH
+`earliestResolutionTimeOffset` attribute and the HLS preload Date Range. When it
+is omitted (`undefined`) or `0`, the `ads.interstitialPreloadAheadTime`
+configuration value is used instead. All the examples below omit it for brevity.
 
 Example:
 
 ```js
-const adManager = player.getAdManager();
 const video = document.getElementById('video');
 const ui = video['ui'];
+const controls = video.ui.getControls();
+const player = controls.getPlayer();
+const adManager = player.getAdManager();
 // If you're using a non-UI build, this is the div you'll need to create
-// for your layout.  The ad manager will clear this div, when it unloads, so
-// don't pass in a div that contains non-ad elements.
-const container = video.ui.getControls().getClientSideAdContainer();
-adManager.initInterstitial(container, player, video);
+// for your layout.
+const csContainer = controls.getClientSideAdContainer();
+const ssContainer = controls.getServerSideAdContainer();
+// Note: If you are using Shaka UI this call is not necessary.
+adManager.setContainers(csContainer, ssContainer);
 adManager.addCustomInterstitial({
   id: null,
+  groupId: null,
   startTime: 10,
   endTime: null,
   uri: 'YOUR_URL',
+  mimeType: null,
   isSkippable: true,
   skipOffset: 10,
+  skipFor: null,
   canJump: false,
   resumeOffset: null,
   playoutLimit: null,
@@ -110,20 +152,44 @@ adManager.addCustomInterstitial({
   pre: false,
   post: false,
   timelineRange: false,
+  loop: false,
+  overlay: null,
+  displayOnBackground: false,
+  currentVideo: null,
+  background: null,
+  clickThroughUrl: null,
+  tracking: {
+    impression: ['YOUR_TRACKING_URL'],
+    clickTracking: ['YOUR_TRACKING_URL'],
+    start: ['YOUR_TRACKING_URL'],
+    firstQuartile: ['YOUR_TRACKING_URL'],
+    midpoint: ['YOUR_TRACKING_URL'],
+    thirdQuartile: ['YOUR_TRACKING_URL'],
+    complete: ['YOUR_TRACKING_URL'],
+    skip: ['YOUR_TRACKING_URL'],
+    error: ['YOUR_TRACKING_URL'],
+    resume: ['YOUR_TRACKING_URL'],
+    pause: ['YOUR_TRACKING_URL'],
+    mute: ['YOUR_TRACKING_URL'],
+    unmute: ['YOUR_TRACKING_URL'],
+  },
 });
 ```
 
 You can also use this with SCTE-35:
 
 ```js
-const adManager = player.getAdManager();
 const video = document.getElementById('video');
 const ui = video['ui'];
+const controls = video.ui.getControls();
+const player = controls.getPlayer();
+const adManager = player.getAdManager();
 // If you're using a non-UI build, this is the div you'll need to create
-// for your layout.  The ad manager will clear this div, when it unloads, so
-// don't pass in a div that contains non-ad elements.
-const container = video.ui.getControls().getClientSideAdContainer();
-adManager.initInterstitial(container, player, video);
+// for your layout.
+const csContainer = controls.getClientSideAdContainer();
+const ssContainer = controls.getServerSideAdContainer();
+// Note: If you are using Shaka UI this call is not necessary.
+adManager.setContainers(csContainer, ssContainer);
 player.addEventListener('timelineregionadded', (e) => {
   const event = e.detail;
   if (event.schemeIdUri != 'urn:scte:scte35:2014:xml+bin') {
@@ -131,9 +197,11 @@ player.addEventListener('timelineregionadded', (e) => {
   }
   adManager.addCustomInterstitial({
     id: event.id,
+    groupId: null,
     startTime: event.startTime,
     endTime: event.endTime,
     uri: 'YOUR_URL',
+    mimeType: null,
     isSkippable: false,
     skipOffset: null,
     skipFor: null,
@@ -144,28 +212,227 @@ player.addEventListener('timelineregionadded', (e) => {
     pre: false,
     post: false,
     timelineRange: player.isLive(), // If true, the ad will appear as a range on the timeline.
+    loop: false,
+    overlay: null,
+    displayOnBackground: false,
+    currentVideo: null,
+    background: null,
+    clickThroughUrl: null,
+    tracking: null,
   });
 });
 ```
 
 
-##### VAST/VMAP (playback without tracking)
+##### Custom Overlay Interstitials
+
+Image, video (progressive or manifest) or website overlays are supported.
+
 
 Example:
 
 ```js
-const adManager = player.getAdManager();
 const video = document.getElementById('video');
 const ui = video['ui'];
+const controls = video.ui.getControls();
+const player = controls.getPlayer();
+const adManager = player.getAdManager();
 // If you're using a non-UI build, this is the div you'll need to create
-// for your layout.  The ad manager will clear this div, when it unloads, so
-// don't pass in a div that contains non-ad elements.
-const container = video.ui.getControls().getClientSideAdContainer();
-adManager.initInterstitial(container, player, video);
-const url = 'https://pubads.g.doubleclick.net/gampad/ads?' +
-    'sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&' +
-    'impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&' +
-    'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
+// for your layout.
+const csContainer = controls.getClientSideAdContainer();
+const ssContainer = controls.getServerSideAdContainer();
+// Note: If you are using Shaka UI this call is not necessary.
+adManager.setContainers(csContainer, ssContainer);
+adManager.addCustomInterstitial({
+  id: null,
+  groupId: null,
+  startTime: 10,
+  endTime: null,
+  uri: 'YOUR_URL',
+  mimeType: null,
+  isSkippable: true,
+  skipOffset: 10,
+  skipFor: null,
+  canJump: false,
+  resumeOffset: null,
+  playoutLimit: null,
+  once: true,
+  pre: false,
+  post: false,
+  timelineRange: false,
+  loop: false,
+  overlay: { // Show interstitial in upper right quadrant
+    viewport: {
+      x: 1920, // Pixels
+      y: 1080, // Pixels
+    },
+    topLeft: {
+      x: 960, // Pixels
+      y: 0, // Pixels
+    },
+    size: {
+      x: 960, // Pixels
+      y: 540, // Pixels
+    },
+  },
+  displayOnBackground: false,
+  currentVideo: null,
+  background: null,
+  clickThroughUrl: null,
+  tracking: null,
+});
+```
+
+Example of L-Shape format ad experience:
+```js
+const video = document.getElementById('video');
+const ui = video['ui'];
+const controls = video.ui.getControls();
+const player = controls.getPlayer();
+const adManager = player.getAdManager();
+// If you're using a non-UI build, this is the div you'll need to create
+// for your layout.
+const csContainer = controls.getClientSideAdContainer();
+const ssContainer = controls.getServerSideAdContainer();
+// Note: If you are using Shaka UI this call is not necessary.
+adManager.setContainers(csContainer, ssContainer);
+adManager.addCustomInterstitial({
+  id: null,
+  groupId: null,
+  startTime: 10,
+  endTime: null,
+  uri: 'YOUR_URL',
+  mimeType: null,
+  isSkippable: true,
+  skipOffset: 10,
+  skipFor: null,
+  canJump: false,
+  resumeOffset: null,
+  playoutLimit: null,
+  once: true,
+  pre: false,
+  post: false,
+  timelineRange: false,
+  loop: false,
+  overlay: {
+    viewport: {
+      x: 1920,
+      y: 1080,
+    },
+    topLeft: {
+      x: 0,
+      y: 0,
+    },
+    size: {
+      x: 1920,
+      y: 1080,
+    },
+  },
+  displayOnBackground: true,
+  currentVideo: {
+    viewport: {
+      x: 1920,
+      y: 1080,
+    },
+    topLeft: {
+      x: 0,
+      y: 0,
+    },
+    size: {
+      x: 960,
+      y: 540,
+    },
+  },
+  background: null,
+  clickThroughUrl: null,
+  tracking: null,
+});
+```
+
+Example of double box format ad experience:
+```js
+const video = document.getElementById('video');
+const ui = video['ui'];
+const controls = video.ui.getControls();
+const player = controls.getPlayer();
+const adManager = player.getAdManager();
+// If you're using a non-UI build, this is the div you'll need to create
+// for your layout.
+const csContainer = controls.getClientSideAdContainer();
+const ssContainer = controls.getServerSideAdContainer();
+// Note: If you are using Shaka UI this call is not necessary.
+adManager.setContainers(csContainer, ssContainer);
+adManager.addCustomInterstitial({
+  id: null,
+  groupId: null,
+  startTime: 10,
+  endTime: null,
+  uri: 'YOUR_URL',
+  mimeType: null,
+  isSkippable: true,
+  skipOffset: 10,
+  skipFor: null,
+  canJump: false,
+  resumeOffset: null,
+  playoutLimit: null,
+  once: true,
+  pre: false,
+  post: false,
+  timelineRange: false,
+  loop: false,
+  overlay: {
+    viewport: {
+      x: 1920, // Pixels
+      y: 1080, // Pixels
+    },
+    topLeft: {
+      x: 960, // Pixels
+      y: 270, // Pixels
+    },
+    size: {
+      x: 960, // Pixels
+      y: 540, // Pixels
+    },
+  },
+  displayOnBackground: true,
+  currentVideo: {
+    viewport: {
+      x: 1920, // Pixels
+      y: 1080, // Pixels
+    },
+    topLeft: {
+      x: 160, // Pixels
+      y: 360, // Pixels
+    },
+    size: {
+      x: 640, // Pixels
+      y: 360, // Pixels
+    },
+  },
+  background: 'content-box radial-gradient(crimson, skyblue)',
+  clickThroughUrl: null,
+  tracking: null,
+});
+```
+
+
+##### VAST/VMAP
+
+Example:
+
+```js
+const video = document.getElementById('video');
+const ui = video['ui'];
+const controls = video.ui.getControls();
+const player = controls.getPlayer();
+const adManager = player.getAdManager();
+// If you're using a non-UI build, this is the div you'll need to create
+// for your layout.
+const csContainer = controls.getClientSideAdContainer();
+const ssContainer = controls.getServerSideAdContainer();
+// Note: If you are using Shaka UI this call is not necessary.
+adManager.setContainers(csContainer, ssContainer);
+const url = 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
 adManager.addAdUrlInterstitial(url);
 ```
 
@@ -216,14 +483,17 @@ Start by initializing the client side logic.
 With Shaka UI:
 
 ```js
-const adManager = player.getAdManager();
 const video = document.getElementById('video');
 const ui = video['ui'];
+const controls = video.ui.getControls();
+const player = controls.getPlayer();
+const adManager = player.getAdManager();
 // If you're using a non-UI build, this is the div you'll need to create
-// for your layout.  The ad manager will clear this div, when it unloads, so
-// don't pass in a div that contains non-ad elements.
-const container = video.ui.getControls().getClientSideAdContainer();
-adManager.initClientSide(container, video);
+// for your layout.
+const csContainer = controls.getClientSideAdContainer();
+const ssContainer = controls.getServerSideAdContainer();
+// Note: If you are using Shaka UI this call is not necessary.
+adManager.setContainers(csContainer, ssContainer);
 ```
 
 With the client side logic initialized, you can request ads at any time during
@@ -233,11 +503,8 @@ the presentation.
 const adsRequest = new google.ima.AdsRequest();
 // Your ad tag url should go here. We are using a sample ad tag from the
 // IMA HTML5 SDK implementation guide for this tutorial.
-adsRequest.adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?' +
-    'sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&' +
-    'impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&' +
-    'cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
-adManager.requestClientSideAds(adsRequest);
+adsRequest.adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
+adManager.requestClientSideAds(adsRequest, /** adsRenderingSettings= */ null);
 ```
 
 See: [google.ima.AdsRequest][] for details on the request object.
@@ -273,13 +540,17 @@ Start by initializing the server side logic.
 With Shaka UI:
 
 ```js
-const adManager = player.getAdManager();
 const video = document.getElementById('video');
 const ui = video['ui'];
+const controls = video.ui.getControls();
+const player = controls.getPlayer();
+const adManager = player.getAdManager();
 // If you're using a non-UI build, this is the div you'll need to create
 // for your layout.
-const container = video.ui.getControls().getServerSideAdContainer();
-adManager.initServerSide(container, video);
+const csContainer = controls.getClientSideAdContainer();
+const ssContainer = controls.getServerSideAdContainer();
+// Note: If you are using Shaka UI this call is not necessary.
+adManager.setContainers(csContainer, ssContainer);
 ```
 
 With server side logic initialized, you can request and load streams with
@@ -306,6 +577,7 @@ See [google.ima.dai.api.VODStreamRequest][] for details on the request object.
 
 Requesting a LIVE stream:
 
+<!--cSpell:disable -->
 ```js
 const streamRequest = new google.ima.dai.api.LiveStreamRequest();
 // Your stream information will go here. We are using IMA's sample stream info
@@ -314,6 +586,7 @@ streamRequest.assetKey = 'sN_IYUG8STe1ZzhIIE_ksA';
 const uri = await adManager.requestServerSideStream(streamRequest);
 player.load(uri);
 ```
+<!--cSpell:enable -->
 
 See: [google.ima.dai.api.LiveStreamRequest][] for details on the request object.
 

@@ -27,10 +27,20 @@ describe('UI', () => {
   let ui;
   /** @type {!shaka.ui.Controls} */
   let controls;
-  /** @type {shakaNamespaceType} */
+  /** @type {shaka} */
   let compiledShaka;
+  /** @type {!Array<string>|undefined} */
+  let savedLanguages;
 
   beforeAll(async () => {
+    // Force locale to en-US so that localized strings
+    // (e.g. "Unrecognized") are predictable across machines.
+    savedLanguages = navigator.languages;
+    Object.defineProperty(navigator, 'languages', {
+      get: () => ['en-US'],
+      configurable: true,
+    });
+
     cssLink = /** @type {!HTMLLinkElement} */(document.createElement('link'));
     await UiUtils.setupCSS(cssLink);
 
@@ -50,23 +60,38 @@ describe('UI', () => {
 
     // Create UI
     // Add all of the buttons we have
+    const controlPanelElements = [
+      'play_pause',
+      'skip_previous',
+      'skip_next',
+      'mute',
+      'volume',
+      'time_and_duration',
+      'spacer',
+      'overflow_menu',
+    ];
+    if (window.chrome) {
+      controlPanelElements.push('cast');
+    }
+    // eslint-disable-next-line no-restricted-syntax
+    if ('remote' in HTMLMediaElement.prototype) {
+      controlPanelElements.push('remote');
+    }
+    controlPanelElements.push('fullscreen');
     const config = {
-      controlPanelElements: [
-        'time_and_duration',
-        'mute',
-        'volume',
-        'fullscreen',
-        'overflow_menu',
-        'fast_forward',
-        'rewind',
-      ],
+      controlPanelElements: controlPanelElements,
       overflowMenuButtons: [
         'captions',
         'quality',
+        'video_type',
         'language',
+        'chapter',
         'picture_in_picture',
-        'cast',
+        'playback_rate',
+        'recenter_vr',
+        'toggle_stereoscopic',
       ],
+      preferIntlDisplayNames: false,
       // TODO: Cast receiver id to test chromecast integration
     };
 
@@ -88,8 +113,9 @@ describe('UI', () => {
     eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
     eventManager.listen(controls, 'error', Util.spyFunc(onErrorSpy));
 
-    // These tests expect text to be streaming upfront, so always stream text.
-    player.configure('streaming.alwaysStreamText', true);
+    // These tests expect a default text track to be selected.
+    player.configure('preferredText',
+        [{language: 'zh', role: '', format: '', forced: false}]);
 
     await player.load('test:sintel_multi_lingual_multi_res_compiled');
     // For this event, we ignore a timeout, since we sometimes miss this event
@@ -109,14 +135,20 @@ describe('UI', () => {
 
   afterAll(() => {
     document.head.removeChild(cssLink);
+
+    // Restore the original navigator.languages.
+    Object.defineProperty(navigator, 'languages', {
+      get: () => savedLanguages,
+      configurable: true,
+    });
   });
 
   describe('language selections', () => {
-    /** @type {!Map.<string, !HTMLElement>} */
+    /** @type {!Map<string, !HTMLElement>} */
     let languagesToButtons;
-    /** @type {!Array.<string>} */
+    /** @type {!Array<string>} */
     let langsFromContent;
-    /** @type {!Array.<!HTMLElement>} */
+    /** @type {!Array<!HTMLElement>} */
     let languageButtons;
     /** @type {!Element} */
     let languageMenu;
@@ -131,7 +163,10 @@ describe('UI', () => {
         newLanguage = 'es';
         languageMenu = shaka.util.Dom.getElementByClassName(
             'shaka-audio-languages', videoContainer);
-        setupLanguageTests(player.getAudioLanguagesAndRoles());
+        const audioTracks = player.getAudioTracks();
+        const uniqueLanguages =
+            [...new Set(audioTracks.map((track) => track.language))];
+        setupLanguageTests(uniqueLanguages);
       });
 
       it('contains all the languages', () => {
@@ -144,10 +179,18 @@ describe('UI', () => {
       });
 
       it('choosing language through API has effect on UI', async () => {
+        const selectAudioLanguage = (language) => {
+          const audioTracks = player.getAudioTracks();
+          const track = audioTracks.find((t) => t.language == language);
+          if (track) {
+            player.selectAudioTrack(track);
+          }
+        };
+
         await verifyLanguageChangeViaAPI(
             'languageselectionupdated',
             () => player.getVariantTracks(),
-            (language) => player.selectAudioLanguage(language));
+            (language) => selectAudioLanguage(language));
       });
     });  // describe('audio')
 
@@ -157,7 +200,10 @@ describe('UI', () => {
         newLanguage = 'fr';
         languageMenu = shaka.util.Dom.getElementByClassName(
             'shaka-text-languages', videoContainer);
-        setupLanguageTests(player.getTextLanguagesAndRoles());
+        const textTracks = player.getTextTracks();
+        const uniqueLanguages =
+            [...new Set(textTracks.map((track) => track.language))];
+        setupLanguageTests(uniqueLanguages);
       });
 
       it('contains all the languages', () => {
@@ -173,39 +219,58 @@ describe('UI', () => {
       it('choosing language through API has effect on UI', async () => {
         // Enable & verify the text, or else the text won't be streamed and the
         // language selection won't do anything.
-        await player.setTextTrackVisibility(true);
-        expect(player.isTextTrackVisible()).toBe(true);
+        let textTracks = player.getTextTracks();
+        player.selectTextTrack(textTracks[0]);
+        textTracks = player.getTextTracks();
+        const activeTrack = textTracks.find((t) => t.active);
+        expect(activeTrack).toBeDefined();
+
+        const selectTextLanguage = (language) => {
+          const textTracks = player.getTextTracks();
+          const track = textTracks.find((t) => t.language == language);
+          if (track) {
+            player.selectTextTrack(track);
+          }
+        };
 
         await verifyLanguageChangeViaAPI(
             'captionselectionupdated',
             () => player.getTextTracks(),
-            (language) => player.selectTextLanguage(language));
+            (language) => selectTextLanguage(language));
       });
 
       it('turning captions off through UI has effect on player', async () => {
         // Enable & verify the text.
-        await player.setTextTrackVisibility(true);
-        expect(player.isTextTrackVisible()).toBe(true);
-
+        let textTracks = player.getTextTracks();
+        player.selectTextTrack(textTracks[0]);
+        textTracks = player.getTextTracks();
+        let activeTrack = textTracks.find((t) => t.active);
+        expect(activeTrack).toBeDefined();
         // Find and click the 'Off' button
         getOffButton().click();
         // Wait for the change to take effect
-        await waiter.waitForEvent(player, 'texttrackvisibility');
+        await waiter.waitForEvent(player, 'textchanged');
 
-        expect(player.isTextTrackVisible()).toBe(false);
+        textTracks = player.getTextTracks();
+        activeTrack = textTracks.find((t) => t.active);
+        expect(activeTrack).toBeUndefined();
       });
 
       it('turning captions off through API has effect on UI', async () => {
-        // This test is invalid if the text is not initially visible, because
-        // setTextTrackVisibility() does nothing if there are no changes.
-        await player.setTextTrackVisibility(true);
-        expect(player.isTextTrackVisible()).toBe(true);
+        // This test is invalid if the text is not initially visible.
+        let textTracks = player.getTextTracks();
+        player.selectTextTrack(textTracks[0]);
+        textTracks = player.getTextTracks();
+        let activeTrack = textTracks.find((t) => t.active);
+        expect(activeTrack).toBeDefined();
 
         const p = waiter.waitForEvent(controls, 'captionselectionupdated');
 
         // Disable & verify the text.
-        await player.setTextTrackVisibility(false);
-        expect(player.isTextTrackVisible()).toBe(false);
+        player.selectTextTrack();
+        textTracks = player.getTextTracks();
+        activeTrack = textTracks.find((t) => t.active);
+        expect(activeTrack).toBeUndefined();
 
         // Wait for the change to take effect
         await p;
@@ -228,12 +293,10 @@ describe('UI', () => {
     });  // describe('caption selection')
 
     /**
-     * @param {!Array.<shaka.extern.LanguageRole>} languagesAndRoles
+     * @param {!Array<string>} langs
      */
-    function setupLanguageTests(languagesAndRoles) {
-      langsFromContent = languagesAndRoles.map((langAndRole) => {
-        return langAndRole.language;
-      });
+    function setupLanguageTests(langs) {
+      langsFromContent = langs;
 
       languageButtons = filterButtons(languageMenu.childNodes,
           ['shaka-back-to-overflow-button', 'shaka-turn-captions-off-button']);
@@ -250,7 +313,7 @@ describe('UI', () => {
      * @return {string}
      */
     function getNativeName(language) {
-      return mozilla.LanguageMapping[language].nativeName;
+      return mozilla.LanguageMapping[language];
     }
 
     /**
@@ -266,7 +329,7 @@ describe('UI', () => {
 
     /**
      * @param {string} playerEventName
-     * @param {function():!Array.<!shaka.extern.Track>} getTracks
+     * @param {function(): !Array<!shaka.extern.Track>} getTracks
      */
     async function verifyLanguageChangeViaUI(playerEventName, getTracks) {
       expect(getSelectedTrack(getTracks()).language).toBe(oldLanguage);
@@ -281,7 +344,7 @@ describe('UI', () => {
 
     /**
      * @param {string} controlsEventName
-     * @param {function():!Array.<!shaka.extern.Track>} getTracks
+     * @param {function(): !Array<!shaka.extern.Track>} getTracks
      * @param {function(string)} selectLanguage
      */
     async function verifyLanguageChangeViaAPI(
@@ -311,10 +374,153 @@ describe('UI', () => {
     }
   });  // describe('language selections')
 
+  describe('customTrackLabel', () => {
+    /**
+     * Rebuilds the UI with a custom config that includes the callback,
+     * then loads the unknown language test manifest.
+     * @param {!Object} extraConfig
+     */
+    async function setupWithConfig(extraConfig) {
+      // Destroy existing UI first
+      await UiUtils.cleanupUI();
+
+      // Create fresh video and container
+      video = shaka.test.UiUtils.createVideoElement();
+      videoContainer = shaka.util.Dom.createHTMLElement('div');
+      videoContainer.appendChild(video);
+      document.body.appendChild(videoContainer);
+
+      player = new compiledShaka.Player();
+      await player.attach(video);
+
+      const config = Object.assign({
+        controlPanelElements: ['overflow_menu'],
+        overflowMenuButtons: ['captions', 'language'],
+      }, extraConfig);
+
+      ui = new compiledShaka.ui.Overlay(player, videoContainer, video);
+      ui.configure(config);
+
+      const tempControls = ui.getControls();
+      goog.asserts.assert(tempControls != null, 'Controls are null!');
+      controls = tempControls;
+      eventManager = new shaka.util.EventManager();
+      waiter = new shaka.test.Waiter(eventManager);
+      eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
+      eventManager.listen(controls, 'error', Util.spyFunc(onErrorSpy));
+
+      await player.load('test:sintel_unknown_language_compiled');
+      await waiter.failOnTimeout(false).waitForEvent(video, 'canplay');
+      expect(video.readyState).not.toBe(0);
+      await waiter.failOnTimeout(true);
+    }
+
+    /**
+     * @param {!Element} menu
+     * @return {!Array<!HTMLElement>}
+     */
+    function getTrackButtons(menu) {
+      return filterButtons(menu.childNodes,
+          ['shaka-back-to-overflow-button', 'shaka-turn-captions-off-button']);
+    }
+
+    /**
+     * @param {!Array<!HTMLElement>} buttons
+     * @param {string} label
+     * @return {?HTMLElement}
+     */
+    function findButtonWithLabel(buttons, label) {
+      for (const button of buttons) {
+        if (button.childNodes.length > 0 &&
+            button.childNodes[0].textContent === label) {
+          return button;
+        }
+      }
+      return null;
+    }
+
+    it('overrides unrecognized audio track labels', async () => {
+      await setupWithConfig({
+        customTrackLabel: (defaultLabel, track, type) => {
+          if (track.language === 'fx') {
+            return 'Sound Effects';
+          }
+          return null;
+        },
+      });
+
+      const audioMenu = shaka.util.Dom.getElementByClassName(
+          'shaka-audio-languages', videoContainer);
+      const buttons = getTrackButtons(audioMenu);
+      expect(findButtonWithLabel(buttons, 'Sound Effects')).not.toBe(null);
+      expect(findButtonWithLabel(buttons, 'English')).not.toBe(null);
+    });
+
+    it('overrides unrecognized text track labels', async () => {
+      await setupWithConfig({
+        customTrackLabel: (defaultLabel, track, type) => {
+          if (track.language === 'fx') {
+            return 'Sound Effects';
+          }
+          return null;
+        },
+      });
+
+      const textMenu = shaka.util.Dom.getElementByClassName(
+          'shaka-text-languages', videoContainer);
+      const buttons = getTrackButtons(textMenu);
+      expect(findButtonWithLabel(buttons, 'Sound Effects')).not.toBe(null);
+      expect(findButtonWithLabel(buttons, 'English')).not.toBe(null);
+    });
+
+    it('passes null for defaultLabel of unrecognized language', async () => {
+      const labelSpy = jasmine.createSpy('customTrackLabel')
+          .and.returnValue(null);
+      await setupWithConfig({customTrackLabel: labelSpy});
+
+      // Should have been called with null for 'fx' and a string for 'en'
+      const calls = labelSpy.calls.allArgs();
+      const fxCalls = calls.filter((args) => args[1].language === 'fx');
+      const enCalls = calls.filter((args) => args[1].language === 'en');
+      expect(fxCalls.length).toBeGreaterThan(0);
+      expect(enCalls.length).toBeGreaterThan(0);
+      for (const args of fxCalls) {
+        expect(args[0]).toBe(null);
+      }
+      for (const args of enCalls) {
+        expect(args[0]).not.toBe(null);
+      }
+    });
+
+    it('passes correct type argument', async () => {
+      const labelSpy = jasmine.createSpy('customTrackLabel')
+          .and.returnValue(null);
+      await setupWithConfig({customTrackLabel: labelSpy});
+
+      const calls = labelSpy.calls.allArgs();
+      const audioCalls = calls.filter((args) => args[2] === 'audio');
+      const textCalls = calls.filter((args) => args[2] === 'text');
+      expect(audioCalls.length).toBeGreaterThan(0);
+      expect(textCalls.length).toBeGreaterThan(0);
+    });
+
+    it('falls back to Unrecognized when callback returns falsy', async () => {
+      await setupWithConfig({
+        customTrackLabel: (defaultLabel, track, type) => null,
+      });
+
+      const audioMenu = shaka.util.Dom.getElementByClassName(
+          'shaka-audio-languages', videoContainer);
+      const buttons = getTrackButtons(audioMenu);
+      const fxButton = findButtonWithLabel(buttons, 'Unrecognized (fx)');
+      expect(fxButton).not.toBeNull();
+    });
+  });  // describe('customTrackLabel')
+
   describe('resolution selection', () => {
-    /** @type {!Map.<number, !HTMLElement>} */
+    /** @type {!Map<number, !HTMLElement>} */
     let resolutionsToButtons;
-    /** @type {!Array.<!HTMLElement>} */
+    /** @type {!Array<!HTMLElement>} */
     let resolutionButtons;
     /** @type {!Element} */
     let resolutionsMenu;
@@ -322,7 +528,7 @@ describe('UI', () => {
     let oldResolution;
     /** @type {number} */
     let newResolution;
-    /** @type {!Array.<shaka.extern.Track>} */
+    /** @type {!Array<shaka.extern.Track>} */
     let tracks;
     /** @type {string} */
     let preferredLanguage;
@@ -344,8 +550,12 @@ describe('UI', () => {
       const selectedLanguage =
           getSelectedTrack(player.getVariantTracks()).language;
       if (selectedLanguage != preferredLanguage) {
-        player.selectAudioLanguage(preferredLanguage);
-        await waiter.waitForEvent(player, 'variantchanged');
+        const audioTracks = player.getAudioTracks();
+        const track = audioTracks.find((t) => t.language == preferredLanguage);
+        if (track) {
+          player.selectAudioTrack(track);
+          await waiter.waitForEvent(player, 'variantchanged');
+        }
       }
 
       resolutionsMenu = shaka.util.Dom.getElementByClassName(
@@ -438,7 +648,7 @@ describe('UI', () => {
     it('enabling ABR via API gets the Auto button selected', async () => {
       expect(player.getConfiguration().abr.enabled).toBe(false);
 
-      // Setup listener to the ui event. The event, trigerring the update
+      // Setup listener to the ui event. The event, triggering the update
       // is dispatched inside player.configure(), so we need to start
       // listening before calling it.
       const uiReady = waiter.waitForEvent(
@@ -471,7 +681,7 @@ describe('UI', () => {
      * appears in the UI
      *
      * @param {number} id
-     * @param {!Array.<!shaka.extern.Track>} tracks
+     * @param {!Array<!shaka.extern.Track>} tracks
      * @return {string}
      */
     function formatResolution(id, tracks) {
@@ -491,7 +701,7 @@ describe('UI', () => {
     }
 
     /**
-     * @param {!Array.<!shaka.extern.Track>} tracks
+     * @param {!Array<!shaka.extern.Track>} tracks
      * @param {number} height
      * @return {shaka.extern.Track}
      */
@@ -540,6 +750,7 @@ describe('UI', () => {
         getPlayer: () => player,
         getVideo: () => null,
         getAd: () => null,
+        getAdManager: () => player.getAdManager(),
       });
 
       /** @extends {shaka.ui.Element} */
@@ -548,8 +759,10 @@ describe('UI', () => {
           videoContainer, fakeControls);
       uncompiledElement.release();
 
+      /** @type {typeof shaka.ui.Element} */
+      const CompiledElement = compiledShaka.ui.Element;
       /** @extends {shaka.ui.Element} */
-      const TestElement = class extends compiledShaka.ui.Element {
+      const TestElement = class extends CompiledElement {
         /**
          * @param {!HTMLElement} parent
          * @param {!shaka.ui.Controls} controls
@@ -595,7 +808,7 @@ describe('UI', () => {
   });  // describe('UI element plugins')
 
   /**
-   * @param {!Array.<!shaka.extern.Track>} tracks
+   * @param {!Array<!shaka.extern.Track>} tracks
    * @return {!shaka.extern.Track}
    */
   function getSelectedTrack(tracks) {
@@ -607,11 +820,11 @@ describe('UI', () => {
   }
 
   /**
-    * @param {!Array.<!HTMLElement>} buttons
-    * @param {!Array.<string>|!Array.<number>} choices
-    * @param {function(string):string|function(number):string} modifier
-    * @return {!Map.<string, !HTMLElement>|!Map.<number, !HTMLElement>}
-    */
+   * @param {!Array<!HTMLElement>} buttons
+   * @param {!Array<string> | !Array<number>} choices
+   * @param {function(string):string|function(number):string} modifier
+   * @return {!Map<string, !HTMLElement> | !Map<number, !HTMLElement>}
+   */
   function mapChoicesToButtons(buttons, choices, modifier) {
     expect(buttons.length).toBe(choices.length);
 
@@ -636,8 +849,8 @@ describe('UI', () => {
    * Filter out buttons with given classes.
    *
    * @param {!NodeList} buttons
-   * @param {!Array.<string>} excludeClasses
-   * @return {!Array.<!HTMLElement>}
+   * @param {!Array<string>} excludeClasses
+   * @return {!Array<!HTMLElement>}
    */
   function filterButtons(buttons, excludeClasses) {
     return shaka.util.Iterables.filter(buttons,
@@ -656,8 +869,8 @@ describe('UI', () => {
    * Make sure elements from content match their UI representation.
    * (The order doesn't matter).
    *
-   * @param {!Array.<string>} elementsFromContent
-   * @param {!Array.<!HTMLElement>} elementsFromUI
+   * @param {!Array<string>} elementsFromContent
+   * @param {!Array<!HTMLElement>} elementsFromUI
    */
   function verifyItems(elementsFromContent, elementsFromUI) {
     for (const element of elementsFromUI) {

@@ -29,10 +29,10 @@ mediaTailor.SessionResponse;
 
 /**
  * @typedef {{
- *   avails: !Array.<mediaTailor.AdBreak>
+ *   avails: !Array<mediaTailor.AdBreak>
  * }}
  *
- * @property {!Array.<mediaTailor.AdBreak>} avails
+ * @property {!Array<mediaTailor.AdBreak>} avails
  * @exportDoc
  */
 mediaTailor.TrackingResponse;
@@ -40,17 +40,17 @@ mediaTailor.TrackingResponse;
 
 /**
  * @typedef {{
- *   adBreakTrackingEvents: !Array.<mediaTailor.TrackingEvent>,
- *   ads: !Array.<mediaTailor.Ad>,
+ *   adBreakTrackingEvents: !Array<mediaTailor.TrackingEvent>,
+ *   ads: !Array<mediaTailor.Ad>,
  *   durationInSeconds: number,
- *   nonLinearAdsList: !Array.<mediaTailor.Ad>,
+ *   nonLinearAdsList: !Array<mediaTailor.Ad>,
  *   startTimeInSeconds: number
  * }}
  *
- * @property {!Array.<mediaTailor.TrackingEvent>} adBreakTrackingEvents
- * @property {!Array.<mediaTailor.Ad>} ads
+ * @property {!Array<mediaTailor.TrackingEvent>} adBreakTrackingEvents
+ * @property {!Array<mediaTailor.Ad>} ads
  * @property {number} durationInSeconds
- * @property {!Array.<mediaTailor.Ad>} nonLinearAdsList
+ * @property {!Array<mediaTailor.Ad>} nonLinearAdsList
  * @property {number} startTimeInSeconds
  * @exportDoc
  */
@@ -68,8 +68,9 @@ mediaTailor.AdBreak;
  *   durationInSeconds: number,
  *   skipOffset: ?string,
  *   startTimeInSeconds: number,
- *   nonLinearAdList: !Array.<mediaTailor.NonLinearAd>,
- *   trackingEvents: !Array.<mediaTailor.TrackingEvent>
+ *   nonLinearAdList: !Array<mediaTailor.NonLinearAd>,
+ *   trackingEvents: !Array<mediaTailor.TrackingEvent>,
+ *   vastAdId: ?string
  * }}
  *
  * @property {string} adId
@@ -81,8 +82,9 @@ mediaTailor.AdBreak;
  * @property {number} durationInSeconds
  * @property {?string} skipOffset
  * @property {number} startTimeInSeconds
- * @property {!Array.<mediaTailor.NonLinearAd>} nonLinearAdList
- * @property {!Array.<mediaTailor.TrackingEvent>} trackingEvents
+ * @property {!Array<mediaTailor.NonLinearAd>} nonLinearAdList
+ * @property {!Array<mediaTailor.TrackingEvent>} trackingEvents
+ * @property {?string} vastAdId
  * @exportDoc
  */
 mediaTailor.Ad;
@@ -119,11 +121,11 @@ mediaTailor.NonLinearAd;
 
 /**
  * @typedef {{
- *   beaconUrls: !Array.<string>,
+ *   beaconUrls: !Array<string>,
  *   eventType: string
  * }}
  *
- * @property {!Array.<string>} beaconUrls
+ * @property {!Array<string>} beaconUrls
  * @property {string} eventType
  * @exportDoc
  */
@@ -136,10 +138,10 @@ var mediaTailorExternalResource = {};
 
 /**
  * @typedef {{
- *   apps: !Array.<mediaTailorExternalResource.App>
+ *   apps: !Array<mediaTailorExternalResource.App>
  * }}
  *
- * @property {!Array.<mediaTailorExternalResource.App>} apps
+ * @property {!Array<mediaTailorExternalResource.App>} apps
  * @exportDoc
  */
 mediaTailorExternalResource.Response;
@@ -173,10 +175,10 @@ mediaTailorExternalResource.AppPlaceholder;
 
 /**
  * @typedef {{
- *   source: !Array.<mediaTailorExternalResource.AppDataSource>
+ *   source: !Array<mediaTailorExternalResource.AppDataSource>
  * }}
  *
- * @property {!Array.<mediaTailorExternalResource.AppDataSource>} source
+ * @property {!Array<mediaTailorExternalResource.AppDataSource>} source
  * @exportDoc
  */
 mediaTailorExternalResource.AppData;

@@ -11,7 +11,6 @@ goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.LanguageUtils');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
@@ -32,13 +31,19 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
    */
   constructor(parent, controls) {
     super(parent,
-        controls, shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS);
+        controls, shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS']);
 
     this.button.classList.add('shaka-caption-button');
     this.button.classList.add('shaka-tooltip-status');
     this.menu.classList.add('shaka-text-languages');
 
-    if (this.player && this.player.isTextTrackVisible()) {
+    let hasTrack = false;
+    if (this.player) {
+      const tracks = this.player.getTextTracks() || [];
+      hasTrack = tracks.some((track) => track.active);
+    }
+
+    if (hasTrack) {
       this.button.ariaPressed = 'true';
     } else {
       this.button.ariaPressed = 'false';
@@ -46,50 +51,29 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     this.addOffOption_();
 
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateLocalizedStrings_();
-          // If captions/subtitles are off, this string needs localization.
-          // TODO: is there a more efficient way of updating just the strings
-          // we need instead of running the whole language update?
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'loading',
+          'loaded',
+          'unloading',
+          'textchanged',
+        ], () => {
+          this.onCaptionStateChange_();
           this.updateTextLanguages_();
         });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateLocalizedStrings_();
-          // If captions/subtitles are off, this string needs localization.
-          // TODO: is there a more efficient way of updating just the strings
-          // we need instead of running the whole language update?
-          this.updateTextLanguages_();
-        });
-
-    this.eventManager.listen(this.player, 'loading', () => {
-      this.onTracksChanged_();
-    });
-
-    this.eventManager.listen(this.player, 'texttrackvisibility', () => {
-      this.onCaptionStateChange_();
-      this.updateTextLanguages_();
-    });
-
-    this.eventManager.listen(this.player, 'textchanged', () => {
-      this.updateTextLanguages_();
-    });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.onTracksChanged_();
+      this.updateTextLanguages_();
     });
 
     // Initialize caption state with a fake event.
     this.onCaptionStateChange_();
 
     // Set up all the strings in the user's preferred language.
-    this.updateLocalizedStrings_();
+    this.updateLocalizedStrings();
 
     this.updateTextLanguages_();
-
-    this.onTracksChanged_();
   }
 
 
@@ -98,7 +82,9 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
    */
   addOffOption_() {
     const off = shaka.util.Dom.createButton();
-    off.ariaSelected = 'true';
+    // ARIA: single-select menu item
+    off.setAttribute('role', 'menuitemradio');
+    off.setAttribute('aria-checked', 'true');
     this.menu.appendChild(off);
 
     off.appendChild(shaka.ui.Utils.checkmarkIcon());
@@ -106,20 +92,21 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     /** @private {!HTMLElement} */
     this.captionsOffSpan_ = shaka.util.Dom.createHTMLElement('span');
 
-    this.captionsOffSpan_.classList.add('shaka-auto-span');
     off.appendChild(this.captionsOffSpan_);
   }
 
 
   /** @private */
   onCaptionStateChange_() {
-    if (this.player.isTextTrackVisible()) {
-      this.icon.textContent =
-          shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS;
+    const tracks = this.player.getTextTracks() || [];
+    const hasTrack = tracks.some((track) => track.active);
+
+    if (hasTrack) {
+      this.icon.use(shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS']);
       this.button.ariaPressed = 'true';
     } else {
-      this.icon.textContent =
-          shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS_OFF;
+      this.icon.use(
+          shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS_OFF']);
       this.button.ariaPressed = 'false';
     }
 
@@ -129,38 +116,39 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
   /** @private */
   updateTextLanguages_() {
-    const tracks = this.player.getTextTracks();
+    const tracks = this.player.getTextTracks() || [];
+    const hasTrack = tracks.some((track) => track.active);
 
-    shaka.ui.LanguageUtils.updateTracks(tracks, this.menu,
+    shaka.ui.LanguageUtils.updateTextTracks(tracks, this.menu,
         (track) => this.onTextTrackSelected_(track),
 
         // Don't mark current text language as chosen unless captions are
         // enabled
-        this.player.isTextTrackVisible(),
+        hasTrack,
         this.currentSelection,
         this.localization,
-        this.controls.getConfig().textTrackLabelFormat,
-        this.controls.getConfig().showAudioChannelCountVariants,
-        this.controls.getConfig().showAudioCodec);
+        this.controls.getConfig());
 
     // Add the Off button
     const offButton = shaka.util.Dom.createButton();
     offButton.classList.add('shaka-turn-captions-off-button');
     this.eventManager.listen(offButton, 'click', () => {
-      this.player.setTextTrackVisibility(false);
-      this.updateTextLanguages_();
+      this.player.selectTextTrack();
     });
 
     offButton.appendChild(this.captionsOffSpan_);
 
     this.menu.appendChild(offButton);
 
-    if (!this.player.isTextTrackVisible()) {
-      offButton.ariaSelected = 'true';
+    if (!hasTrack) {
+      // ARIA: single-select menu item
+      offButton.setAttribute('role', 'menuitemradio');
       offButton.appendChild(shaka.ui.Utils.checkmarkIcon());
-      this.captionsOffSpan_.classList.add('shaka-chosen-item');
+      shaka.ui.Utils.setChosenItem(offButton, this.captionsOffSpan_);
       this.currentSelection.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.OFF);
+    } else {
+      this.captionsOffSpan_.classList.remove('shaka-chosen-item');
     }
 
     this.button.setAttribute('shaka-status', this.currentSelection.textContent);
@@ -169,46 +157,52 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     this.controls.dispatchEvent(
         new shaka.util.FakeEvent('captionselectionupdated'));
+
+    shaka.ui.Utils.setDisplay(
+        this.button, tracks.length > 0 && !this.isSubMenuOpened);
   }
 
 
   /**
-   * @param {!shaka.extern.Track} track
-   * @return {!Promise}
+   * @param {!shaka.extern.TextTrack} track
    * @private
    */
-  async onTextTrackSelected_(track) {
-    // setTextTrackVisibility should be called after selectTextTrack.
-    // selectTextTrack sets a text stream, and setTextTrackVisiblity(true)
-    // will set a text stream if it isn't already set. Consequently, reversing
-    // the order of these calls makes two languages display simultaneously
-    // if captions are turned off -> on in a different language.
+  onTextTrackSelected_(track) {
     this.player.selectTextTrack(track);
-    await this.player.setTextTrackVisibility(true);
+
+    // Set text preference for when reloading the stream (e.g. casting), keep
+    // this selection.
+    this.player.configure({
+      preferredText: [{
+        language: track.language,
+        role: '',
+        format: '',
+        forced: track.forced || false,
+      }],
+    });
   }
 
-
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.button.ariaLabel = this.localization.resolve(LocIds.CAPTIONS);
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
-    this.nameSpan.textContent =
-        this.localization.resolve(LocIds.CAPTIONS);
-    this.backSpan.textContent =
-        this.localization.resolve(LocIds.CAPTIONS);
+
+    const label = this.localization.resolve(LocIds.CAPTIONS);
+    this.button.ariaLabel = label;
+    this.nameSpan.textContent = label;
+    this.backSpan.textContent = label;
     this.captionsOffSpan_.textContent =
         this.localization.resolve(LocIds.OFF);
+
+    // If captions/subtitles are off, this string needs localization.
+    // TODO: is there a more efficient way of updating just the strings
+    // we need instead of running the whole language update?
+    this.updateTextLanguages_();
   }
 
-
-  /** @private */
-  onTracksChanged_() {
-    const hasText = this.player.getTextTracks().length > 0;
-    shaka.ui.Utils.setDisplay(this.button, hasText);
+  /** @override */
+  checkAvailability() {
     this.updateTextLanguages_();
   }
 };

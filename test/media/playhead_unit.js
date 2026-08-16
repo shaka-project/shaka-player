@@ -17,7 +17,7 @@ let TimeRange;
 
 /**
  * @typedef {{
- *   buffered: !Array.<TimeRange>,
+ *   buffered: !Array<TimeRange>,
  *   start: number,
  *   waitingAt: number,
  *   expectedEndTime: number,
@@ -31,7 +31,7 @@ let TimeRange;
  * detects a stall through the StallDetector, and a 'gapjumped' event when the
  * Playhead jumps over a gap in the buffered range(s).
  *
- * @property {!Array.<TimeRange>} buffered
+ * @property {!Array<TimeRange>} buffered
  *   The buffered ranges for the test.
  * @property {number} start
  *   The time to start playing at.
@@ -48,8 +48,8 @@ let PlayingTestInfo;
 
 /**
  * @typedef {{
- *   buffered: !Array.<TimeRange>,
- *   newBuffered: (!Array.<TimeRange>|undefined),
+ *   buffered: !Array<TimeRange>,
+ *   newBuffered: (!Array<TimeRange>|undefined),
  *   start: number,
  *   seekTo: number,
  *   expectedEndTime: number,
@@ -61,9 +61,9 @@ let PlayingTestInfo;
  * to a given time, which may have different buffered ranges.  If we are in a
  * gap, Playhead should jump the gap to the expected time.
  *
- * @property {!Array.<TimeRange>} buffered
+ * @property {!Array<TimeRange>} buffered
  *   The buffered ranges for the test.
- * @property {(!Array.<TimeRange>|undefined)} newBuffered
+ * @property {(!Array<TimeRange>|undefined)} newBuffered
  *   Used in the unbuffered seek tests.  Represents the buffered ranges to
  *   use after the seek.
  * @property {number} start
@@ -101,11 +101,21 @@ describe('Playhead', () => {
   /** @type {!jasmine.Spy} */
   let onEvent;
 
+  let originalSupportsInfiniteDuration;
+  /** @type {!jasmine.Spy} */
+  let supportsInfiniteDuration;
+
   beforeAll(() => {
     jasmine.clock().install();
+
+    originalSupportsInfiniteDuration =
+        shaka.media.Capabilities.isInfiniteLiveStreamDurationSupported;
   });
 
   afterAll(() => {
+    shaka.media.Capabilities.isInfiniteLiveStreamDurationSupported =
+        originalSupportsInfiniteDuration;
+
     jasmine.clock().uninstall();
   });
 
@@ -120,6 +130,8 @@ describe('Playhead', () => {
     timeline.getSeekRangeStart.and.returnValue(5);
     timeline.getSeekRangeEnd.and.returnValue(60);
     timeline.getDuration.and.returnValue(60);
+    timeline.getInitialProgramDateTime.and.returnValue(
+        new Date(2005, 3, 2, 21, 37).getTime() / 1000.0);
 
     // These tests should not cause these methods to be invoked.
     timeline.getSegmentAvailabilityStart.and.throwError(new Error());
@@ -130,6 +142,7 @@ describe('Playhead', () => {
       variants: [],
       textStreams: [],
       imageStreams: [],
+      chapterStreams: [],
       presentationTimeline: timeline,
       offlineSessionIds: [],
       sequenceMode: false,
@@ -144,6 +157,15 @@ describe('Playhead', () => {
     };
 
     config = shaka.util.PlayerConfiguration.createDefault().streaming;
+
+    // By default, pretend we don't have support for setLiveSeekableRange,
+    // because we are frequently testing the seeking behavior of Playhead that
+    // is only enabled in this case.
+    supportsInfiniteDuration = jasmine.createSpy(
+        'isInfiniteLiveStreamDurationSupported');
+    shaka.media.Capabilities.isInfiniteLiveStreamDurationSupported =
+        shaka.test.Util.spyFunc(supportsInfiniteDuration);
+    supportsInfiniteDuration.and.returnValue(false);
   });
 
   afterEach(() => {
@@ -152,9 +174,10 @@ describe('Playhead', () => {
 
   function calculateGap(time) {
     let jumpTo = time;
-    if (shaka.util.Platform.isLegacyEdge() ||
-        shaka.util.Platform.isXboxOne() ||
-        shaka.util.Platform.isTizen()) {
+    if (deviceDetected.getBrowserEngine() ===
+        shaka.device.IDevice.BrowserEngine.EDGE ||
+        deviceDetected.getDeviceName() === 'Xbox' ||
+        deviceDetected.getDeviceName() === 'Tizen') {
       const gapPadding = shaka.util.PlayerConfiguration.createDefault()
           .streaming.gapPadding;
       jumpTo = Math.ceil((jumpTo + gapPadding) * 100) / 100;
@@ -313,6 +336,24 @@ describe('Playhead', () => {
       expect(playhead.getTime()).toBe(45);
     });
 
+    it('playback using Date for live', () => {
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+      timeline.isLive.and.returnValue(true);
+      timeline.getDuration.and.returnValue(Infinity);
+      timeline.getSeekRangeStart.and.returnValue(0);
+      timeline.getSeekRangeEnd.and.returnValue(60);
+
+      playhead = new shaka.media.MediaSourcePlayhead(
+          video,
+          manifest,
+          config,
+          /* startTime= */ new Date(2005, 3, 2, 21, 37, 20),
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      expect(playhead.getTime()).toBe(20);
+    });
+
     it('playback from segment seek range start time', () => {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
       timeline.isLive.and.returnValue(true);
@@ -334,36 +375,11 @@ describe('Playhead', () => {
       expect(playhead.getTime()).toBe(30);
     });
 
-    it('does not change currentTime if it\'s not 0', () => {
-      playhead = new shaka.media.MediaSourcePlayhead(
-          video,
-          manifest,
-          config,
-          /* startTime= */ 5,
-          Util.spyFunc(onSeek),
-          Util.spyFunc(onEvent));
-
-      playhead.ready();
-
-      expect(video.addEventListener).toHaveBeenCalledWith(
-          'loadedmetadata', jasmine.any(Function), jasmine.anything());
-
-      expect(playhead.getTime()).toBe(5);
-      expect(video.currentTime).toBe(0);
-
-      video.currentTime = 8;
-      video.readyState = HTMLMediaElement.HAVE_METADATA;
-      video.on['loadedmetadata']();
-
-      // Delay to let Playhead batch up changes to currentTime and observe.
-      jasmine.clock().tick(1000);
-      expect(video.currentTime).toBe(8);
-    });
-
     // This is important for recovering from drift.
     // See: https://github.com/shaka-project/shaka-player/issues/1105
     it('does not change once the initial position is set', () => {
       timeline.isLive.and.returnValue(true);
+      timeline.isDynamic.and.returnValue(true);
       timeline.getDuration.and.returnValue(Infinity);
       timeline.getSeekRangeStart.and.returnValue(0);
       timeline.getSeekRangeEnd.and.returnValue(60);
@@ -393,6 +409,47 @@ describe('Playhead', () => {
       expect(playhead.getTime()).toBe(60);
     });
   });  // getTime
+
+  // Regression test for https://github.com/shaka-project/shaka-player/issues/10299
+  // A codec-switch (or MSE error recovery) reload briefly drops the video's
+  // readyState back to 0. If the playhead is repositioned while that's
+  // happening, it must end up at the newly requested time once the video
+  // becomes ready again, not at the original startTime it was constructed
+  // with.
+  it('setStartTime applies the requested time if the video becomes ' +
+      'temporarily unready', () => {
+    video.readyState = HTMLMediaElement.HAVE_METADATA;
+    playhead = new shaka.media.MediaSourcePlayhead(
+        video,
+        manifest,
+        config,
+        /* startTime= */ 5,
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent));
+
+    playhead.ready();
+
+    expect(video.currentTime).toBe(5);
+
+    // Simulate normal playback progressing past the initial start time.
+    video.currentTime = 40;
+    video.on['seeking']();
+
+    // Simulate the video element becoming unready, e.g. because
+    // MediaSourceEngine reassigned video.src during a reload.
+    video.readyState = 0;
+
+    // Something (e.g. the "skip initial buffer gap" logic) asks the
+    // playhead to move to a new position while the video isn't ready yet.
+    playhead.setStartTime(42);
+
+    // Once the video becomes ready again, it should end up at the newly
+    // requested position, not the original startTime (5).
+    video.readyState = HTMLMediaElement.HAVE_METADATA;
+    video.on['loadedmetadata']();
+
+    expect(video.currentTime).toBe(42);
+  });
 
   it('clamps playhead after seeking for live', () => {
     video.readyState = HTMLMediaElement.HAVE_METADATA;
@@ -606,8 +663,57 @@ describe('Playhead', () => {
     expect(onSeek).toHaveBeenCalled();
   });  // clamps playhead after seeking for VOD
 
+  it('does not clamp playhead if setLiveSeekableRange is used', () => {
+    // This indicates support for setLiveSeekableRange, in which case we trust
+    // MediaSource to handle seek range corrections and Playhead does nothing.
+    supportsInfiniteDuration.and.returnValue(true);
+
+    video.readyState = HTMLMediaElement.HAVE_METADATA;
+
+    video.buffered = createFakeBuffered([{start: 25, end: 55}]);
+
+    timeline.isLive.and.returnValue(false);
+    timeline.getSeekRangeStart.and.returnValue(5);
+    timeline.getSafeSeekRangeStart.and.returnValue(5);
+    timeline.getSeekRangeEnd.and.returnValue(60);
+    timeline.getDuration.and.returnValue(60);
+
+    playhead = new shaka.media.MediaSourcePlayhead(
+        video,
+        manifest,
+        config,
+        /* startTime= */ 5,
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent));
+
+    setMockDate(0);
+    video.on['seeking']();
+    expect(video.currentTime).toBe(5);
+    expect(playhead.getTime()).toBe(5);
+
+    // Seek past end.
+    setMockDate(10);
+    video.currentTime = 120;
+    video.on['seeking']();
+    expect(video.currentTime).toBe(120);
+    setMockDate(20);
+    video.on['seeking']();
+    expect(video.currentTime).toBe(120);
+
+    onSeek.calls.reset();
+
+    // Seek before start.
+    setMockDate(30);
+    video.currentTime = 1;
+    video.on['seeking']();
+    expect(video.currentTime).toBe(1);
+    setMockDate(40);
+    video.on['seeking']();
+    expect(video.currentTime).toBe(1);
+  });  // does not clamp playhead if setLiveSeekableRange is used
+
   it('doesn\'t repeatedly re-seek in seeking slow platforms', () => {
-    if (!shaka.util.Platform.isSeekingSlow()) {
+    if (!deviceDetected.seekDelay()) {
       pending('No seeking slow platform');
     }
     video.readyState = HTMLMediaElement.HAVE_METADATA;
@@ -1390,7 +1496,7 @@ describe('Playhead', () => {
     }
 
     /**
-     * @param {!Array.<{start: number, end: number}>} buffers
+     * @param {!Array<{start: number, end: number}>} buffers
      * @param {number} time
      * @return {number}
      */

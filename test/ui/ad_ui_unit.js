@@ -22,7 +22,9 @@ describe('Ad UI', () => {
     // Add css file
     cssLink = /** @type {!HTMLLinkElement} */(document.createElement('link'));
     await UiUtils.setupCSS(cssLink);
-    shaka.Player.setAdManagerFactory(() => new shaka.test.FakeAdManager());
+    shaka.Player.setAdManagerFactory((player) => {
+      return new shaka.test.FakeAdManager();
+    });
   });
 
   beforeEach(async () => {
@@ -42,7 +44,9 @@ describe('Ad UI', () => {
 
   afterAll(() => {
     document.head.removeChild(cssLink);
-    shaka.Player.setAdManagerFactory(() => new shaka.ads.AdManager());
+    shaka.Player.setAdManagerFactory((player) => {
+      return new shaka.ads.AdManager(player);
+    });
   });
 
   it('is invisible if no ad is playing', () => {
@@ -208,82 +212,6 @@ describe('Ad UI', () => {
     });
   });
 
-  describe('ad counter', () => {
-    /** @type {!HTMLElement} */
-    let adCounter;
-    /** @type {!shaka.ui.Localization} */
-    let localization;
-
-    beforeEach(() => {
-      adCounter = UiUtils.getElementByClassName(
-          container, 'shaka-ad-counter-span');
-
-      localization = video['ui'].getControls().getLocalization();
-    });
-
-    it('displays correct ad time', async () => {
-      const eventManager = new shaka.util.EventManager();
-      const waiter = new shaka.test.Waiter(eventManager);
-      const p = waiter.waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
-
-      ad = new shaka.test.FakeAd(/* skipIn= */ null,
-          /* position= */ 1, /* totalAdsInPod= */ 1);
-      adManager.startAd(ad);
-      ad.setRemainingTime(5); // seconds
-
-      await p;
-
-      // Ad counter has an internal timer that fires every 0.5 sec
-      // to check the state. Give it a full second to make sure it
-      // has time to catch up to the new remaining time value.
-      await shaka.test.Util.delay(1);
-
-      const expectedTimeString = '0:05 / 0:10';
-      const LocIds = shaka.ui.Locales.Ids;
-      const raw = localization.resolve(LocIds.AD_TIME);
-      expect(adCounter.textContent).toBe(
-          raw.replace('[AD_TIME]', expectedTimeString));
-    });
-  });
-
-  describe('ad position', () => {
-    /** @type {!HTMLElement} */
-    let adPosition;
-    /** @type {!shaka.ui.Localization} */
-    let localization;
-
-    beforeEach(() => {
-      adPosition = UiUtils.getElementByClassName(
-          container, 'shaka-ad-position-span');
-
-      localization = video['ui'].getControls().getLocalization();
-    });
-
-
-    it('correctly shows "X of Y ads" for a sequence of several ads',
-        async () => {
-          const position = 2;
-          const adsInPod = 3;
-          const eventManager = new shaka.util.EventManager();
-          const waiter = new shaka.test.Waiter(eventManager);
-          const p = waiter.waitForEvent(
-              adManager, shaka.ads.Utils.AD_STARTED);
-
-          ad = new shaka.test.FakeAd(/* skipIn= */ null,
-          /* position= */ position, /* totalAdsInPod= */ adsInPod);
-          adManager.startAd(ad);
-
-          await p;
-
-          const LocIds = shaka.ui.Locales.Ids;
-          const expectedString = localization.resolve(LocIds.AD_PROGRESS)
-              .replace('[AD_ON]', String(position))
-              .replace('[NUM_ADS]', String(adsInPod));
-
-          expect(adPosition.textContent).toBe(expectedString);
-        });
-  });
-
   describe('timeline', () => {
     /** @type {!HTMLElement} */
     let seekBar;
@@ -298,7 +226,7 @@ describe('Ad UI', () => {
           container, 'shaka-ad-markers');
     });
 
-    it('dissappears when an ad is playing', async () => {
+    it('disappears when an ad is playing', async () => {
       const eventManager = new shaka.util.EventManager();
       const waiter = new shaka.test.Waiter(eventManager);
       const p = waiter.waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
@@ -327,6 +255,9 @@ describe('Ad UI', () => {
     });
 
     it('is hidden when an ad is playing', async () => {
+      if (!overflowMenuButton) {
+        pending('There is no overflow menu button on this device.');
+      }
       const eventManager = new shaka.util.EventManager();
       const waiter = new shaka.test.Waiter(eventManager);
       const p = waiter.waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
@@ -341,6 +272,9 @@ describe('Ad UI', () => {
     });
 
     it('is displayed when an ad stops playing', async () => {
+      if (!overflowMenuButton) {
+        pending('There is no overflow menu button on this device.');
+      }
       const eventManager = new shaka.util.EventManager();
       const waiter = new shaka.test.Waiter(eventManager);
       const pStart =

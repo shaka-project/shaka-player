@@ -42,3 +42,6 @@ var xfilterDescribe = function(name, cond, callback) {};
 
 /** @return {boolean} */
 var offlineSupported = function() {};
+
+/** @return {boolean} */
+var isMSFSupported = function() {};

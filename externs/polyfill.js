@@ -13,3 +13,11 @@
 
 /** @type {string} */
 window.shakaMediaKeysPolyfill;
+
+
+/** @type {boolean} */
+navigator.emeEncryptionSchemePolyfilled;
+
+
+/** @type {boolean} */
+navigator.mediaCapabilitiesEncryptionSchemePolyfilled;

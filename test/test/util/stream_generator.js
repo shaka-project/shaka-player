@@ -66,7 +66,7 @@ shaka.test.TSVodStreamGenerator = class {
      */
     this.segmentDuration_ = segmentDuration * 90000;
 
-    /** @private {!Array.<{offset: number, dts: ?number, pts: ?number}>} */
+    /** @private {!Array<{offset: number, dts: ?number, pts: ?number}>} */
     this.timestamps_ = [];
 
     /** @private {number} */
@@ -540,7 +540,7 @@ shaka.test.Mp4LiveStreamGenerator = class {
     const segmentAvailabilityStartTime = this.availabilityStartTime_ +
                                        segmentStartTime +
                                        this.segmentDuration_;
-    const segmentAvailabiltyEndTime = segmentAvailabilityStartTime +
+    const segmentAvailabilityEndTime = segmentAvailabilityStartTime +
                                     this.segmentDuration_ +
                                     this.timeShiftBufferDepth_;
 
@@ -552,11 +552,11 @@ shaka.test.Mp4LiveStreamGenerator = class {
           'wallClockTime=' + wallClockTime,
           'segmentAvailabilityStartTime=', segmentAvailabilityStartTime);
       return null;
-    } else if (wallClockTime > segmentAvailabiltyEndTime) {
+    } else if (wallClockTime > segmentAvailabilityEndTime) {
       shaka.log.debug(
-          'wallClockTime > segmentAvailabiltyEndTime',
+          'wallClockTime > segmentAvailabilityEndTime',
           'wallClockTime=' + wallClockTime,
-          'segmentAvailabiltyEndTime=' + segmentAvailabiltyEndTime);
+          'segmentAvailabilityEndTime=' + segmentAvailabilityEndTime);
       return null;
     }
 
@@ -634,7 +634,7 @@ shaka.test.StreamGenerator = class {
   static setBaseMediaDecodeTime_(
       segment, tfdtOffset, baseMediaDecodeTime, timescale) {
     goog.asserts.assert(baseMediaDecodeTime * timescale < Math.pow(2, 32),
-        'Specied baseMediaDecodeTime is too big.');
+        'Specified baseMediaDecodeTime is too big.');
 
     // This will create a copy of the given buffer.
     const buffer = shaka.util.Uint8ArrayUtils.concat(segment);
@@ -666,7 +666,7 @@ shaka.test.StreamGenerator = class {
     } else {
       shaka.log.v2('tfdt box is version 1.');
       // tfdt box version 1 supports 64-bit 'baseMediaDecodeTime' fields;
-      // however, we restrict the intput to 32 bits above.
+      // however, we restrict the input to 32 bits above.
       dataView.setUint32(pos, 0);
       dataView.setUint32(pos + 4, baseMediaDecodeTime * timescale);
     }

@@ -13,7 +13,6 @@ goog.require('ShakaDemoAssetInfo');
  * @suppress {missingProvide}
  */
 class ShakaReceiverApp {
-  /** */
   constructor() {
     /** @private {HTMLVideoElement} */
     this.video_ = null;
@@ -25,7 +24,7 @@ class ShakaReceiverApp {
     this.receiver_ = null;
 
     /** @private {Element} */
-    this.idleCard_ = null;
+    this.welcomeCard_ = null;
 
     /** @private {?number} */
     this.idleTimerId_ = null;
@@ -35,6 +34,8 @@ class ShakaReceiverApp {
    * Initialize the application.
    */
   init() {
+    this.setUpVersionStrings_();
+
     const video = document.getElementById('video');
     goog.asserts.assert(
         video instanceof HTMLVideoElement, 'Wrong element type!');
@@ -43,18 +44,6 @@ class ShakaReceiverApp {
     const ui = this.video_['ui'];
     goog.asserts.assert(
         ui instanceof shaka.ui.Overlay, 'UI not present or wrong type!');
-
-    // Make sure we don't show extra UI elements we don't need on the TV.
-    ui.configure({
-      fadeDelay: 3,
-      addBigPlayButton: false,
-      addSeekBar: true,
-      controlPanelElements: [
-        'play_pause',
-        'time_and_duration',
-        'spacer',
-      ],
-    });
 
     // We use the UI library on both sender and receiver, to get a consistent UI
     // in both contexts.  The controls, therefore, have both a proxy player
@@ -66,13 +55,24 @@ class ShakaReceiverApp {
     this.player_ = ui.getControls().getLocalPlayer();
     goog.asserts.assert(this.player_, 'Player should be available!');
 
-    this.idleCard_ = document.getElementById('idle');
+    this.welcomeCard_ = document.getElementById('welcome');
 
     this.receiver_ = new shaka.cast.CastReceiver(
         this.video_, this.player_,
         (appData) => this.appDataCallback_(appData));
+
+    ui.getControls().setCastReceiver(this.receiver_);
+
     this.receiver_.addEventListener(
         'caststatuschanged', () => this.checkIdle_());
+
+    // Delete the poster when loading new content or unloading the current one.
+    this.player_.addEventListener('loading', () => {
+      this.video_.removeAttribute('poster');
+    });
+    this.player_.addEventListener('unloading', () => {
+      this.video_.removeAttribute('poster');
+    });
 
     this.startIdleTimer_();
   }
@@ -106,20 +106,16 @@ class ShakaReceiverApp {
     // If the app is idle, show the idle card and set a timer to close the app.
     // Otherwise, hide the idle card and cancel the timer.
     if (this.receiver_.isIdle()) {
-      this.idleCard_.style.display = 'block';
+      this.welcomeCard_.style.display = 'block';
       this.startIdleTimer_();
     } else {
-      this.idleCard_.style.display = 'none';
+      this.welcomeCard_.style.display = 'none';
       this.cancelIdleTimer_();
 
       // Set a special poster for audio-only assets.
-      if (this.video_.readyState != 0 && this.player_.isAudioOnly()) {
-        this.video_.poster =
-            'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
-      } else {
-        // The cast receiver never shows the poster for assets with video
-        // streams.
-        this.video_.removeAttribute('poster');
+      if (!this.video_.poster && this.video_.readyState != 0 &&
+          this.player_.isAudioOnly()) {
+        this.video_.poster = '../poster-audio.gif';
       }
     }
   }
@@ -140,7 +136,36 @@ class ShakaReceiverApp {
       this.idleTimerId_ = null;
     }
   }
-}  // class ShakaRecevierApp
+
+  /**
+   * Sets the "version-string" divs to a version string.
+   * For example, "v2.5.4-main (uncompiled)".
+   * @private
+   */
+  setUpVersionStrings_() {
+    const version = shaka.Player.version;
+    let split = version.split('-');
+    const inParen = [];
+
+    // Separate out some special terms into parentheses after the rest of the
+    // version, to make them stand out visually.
+    for (const whitelisted of ['debug', 'uncompiled']) {
+      if (split.includes(whitelisted)) {
+        inParen.push(whitelisted);
+        split = split.filter((term) => term != whitelisted);
+      }
+    }
+
+    // Put the version into the version string div.
+    const versionStringDivs = document.getElementsByClassName('version-string');
+    for (const div of versionStringDivs) {
+      div.textContent = split.join('-');
+      if (inParen.length > 0) {
+        div.textContent += ' (' + inParen.join(', ') + ')';
+      }
+    }
+  }
+}  // class ShakaReceiverApp
 
 /**
  * @const {number}

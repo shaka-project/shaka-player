@@ -1,12 +1,26 @@
 # Shaka Player Upgrade Guide
 
 If you are upgrading from **v1 or v2**, these releases are no longer supported,
-and upgrade guides are no longer maintained.  You can use these old upgrades
-guides to upgrade in stages:
+and upgrade guides are no longer maintained.  You can still upgrade in stages
+using the following guides:
 
- - {@link https://v2-4-7-dot-shaka-player-demo.appspot.com/docs/api/tutorial-upgrade.html Upgrade to v2.4}
- - {@link https://v2-5-23-dot-shaka-player-demo.appspot.com/docs/api/tutorial-upgrade-v2-4.html Upgrade v2.4 => v2.5}
- - {@link https://v3-0-15-dot-shaka-player-demo.appspot.com/docs/api/tutorial-upgrade-v2-5.html Upgrade v2.5 => v3.0}
+## Upgrade to v2.4
+
+- [Upgrade v1 => v2](../upgrades/upgrade-v1-to-v2.md)
+- [Upgrade v2.0 => v2.4](../upgrades/upgrade-v2.0-to-v2.4.md)
+- [Upgrade v2.1 => v2.4](../upgrades/upgrade-v2.1-to-v2.4.md)
+- [Upgrade v2.2 => v2.4](../upgrades/upgrade-v2.2-to-v2.4.md)
+- [Upgrade v2.3 => v2.4](../upgrades/upgrade-v2.3-to-v2.4.md)
+
+## Upgrade v2.4 => v2.5
+
+- [Upgrade v2.3 => v2.5](../upgrades/upgrade-v2.3-to-v2.5.md)
+- [Upgrade v2.4 => v2.5](../upgrades/upgrade-v2.4-to-v2.5.md)
+
+## Upgrade v2.5 => v3.0
+
+- [Upgrade v2.4 => v3.0](../upgrades/upgrade-v2.4-to-v3.0.md)
+- [Upgrade v2.5 => v3.0](../upgrades/upgrade-v2.5-to-v3.0.md)
 
 Since v3.0, Shaka Player has been following semantic versioning.  (The
 IE11 deprecation announced before v3.0 happened in v3.1, which technically
@@ -91,14 +105,14 @@ application:
     - `IUIElement` plugins must have a `release()` method (not `destroy()`)
       (deprecated in v3.0.0)
 
-## v5.0 (unreleased)
+## v5.0
 
   - Configuration changes:
-    - `streaming.forceTransmuxTS` has been renamed to `streaming.forceTransmux`
-      (deprecated in v4.3.0)
+    - `streaming.forceTransmuxTS` has been renamed to `streaming.forceTransmux`,
+      and now also applies to AAC, MP3, AC-3, and EC-3 (deprecated in v4.3.0)
     - `manifest.dash.manifestPreprocessor` and `manifest.mss.manifestPreprocessor`
       have been replaced with `manifest.dash.manifestPreprocessorTXml` and
-      `manifest.mss.manifestPreprocessorTXml` callbacks. This new callbacks now
+      `manifest.mss.manifestPreprocessorTXml` callbacks. These new callbacks now
       accept `shaka.externs.xml.Node`. `getAttribute()` and `textContent` results
       must now be decoded if they might contain escape sequences. You can use
       `shaka.util.StringUtils.htmlUnescape` for this purpose.
@@ -116,12 +130,91 @@ application:
       `panicThreshold`. (deprecated in v4.10.0)
     - `useSafariBehaviorForLive` has been removed.
     - `parsePrftBox` has been removed.
+    - `videoRobustness` and `audioRobustness` are now only an array of strings. (deprecated in v4.13.0)
+    - `streaming.forceHTTP` has been moved to `networking.forceHTTP` (deprecated in v4.15.0)
+    - `streaming.forceHTTPS` has been moved to `networking.forceHTTPS` (deprecated in v4.15.0)
+    - `streaming.minBytesForProgressEvents` has been moved to `networking.minBytesForProgressEvents` (deprecated in v4.15.0)
+    - `manifest.dash.enableAudioGroups` has been moved to `manifest.enableAudioGroups`
+    - `preferredVariantRole` has been renamed to `preferredAudioRole` (deprecated in v4.16.0)
+    - `autoShowText` has been removed.
+    - `removeLatencyFromFirstPacketTime` has been removed.
+    - `streaming.speechToText` moved to `accessibility.speechToText`
+
+  - UI Configuration changes:
+    - `doubleClickForFullscreen` is now enabled by default for mobile.
+    - `preferDocumentPictureInPicture` has been renamed to `documentPictureInPicture.enabled`.
+    - `customContextMenu` is now enabled by default for desktop browsers.
+    - `addBigPlayButton` has been removed; use the `bigButtons` config instead.
 
   - Plugin changes:
     - `TextDisplayer` plugins must implement the `configure()` method.
-    - `TextParser` plugins must implement the `setManifestType()` and `setSequenceMode()` methods.
+    - `TextParser` plugins must implement the `setManifestType()` method.
     - `Transmuxer` plugins now has three new parameters in `transmux()` method.
+    - Removed `enableTextDisplayer` from `TextDisplayer` plugins.
+    - Replaced `SimpleTextDisplayer` with `NativeTextDisplayer`.
+    - Builtin `TextDisplayer` plugin constructors take a `shaka.Player` instance
+      as the only parameter.
 
   - Player API Changes:
     - The constructor no longer takes `mediaElement` as a parameter; use the `attach` method to attach to a media element instead. (Deprecated in v4.6)
     - The `TimelineRegionInfo.eventElement` has been replaced with `TimelineRegionInfo.eventNode` property, the new property type is `shaka.externs.xml.Node` instead of `Element`
+    - `getAudioLanguages` and `getAudioLanguagesAndRoles` have been removed; instead, use the new `getAudioTracks` API (Deprecated in v4.14)
+    - `selectAudioLanguage` has been removed; instead, use the new `selectAudioTrack` API (Deprecated in v4.14)
+    - `shaka.util.FairPlayUtils` has been moved to `shaka.drm.FairPlay` (Deprecated in v4.14)
+    - `getChapters` is replaced by `getChaptersAsync` (Deprecated in v4.15)
+    - The `setTextTrackVisibility` method has been removed, along with the previous distinction between selecting a text track and toggling its visibility. Selecting a text track automatically makes it visible, there is no separate visibility control.
+    - Apps must call `updateStartTime` instead of setting the media element's `currentTime` directly during startup.
+
+  - Ad Manager API Changes:
+    - Added `setContainers` to set the CS and SS containers.
+    - Removed `video` and `player` params on all methods.
+    - Removed `initClientSide`, `initServerSide`, `initMediaTailor` and `initInterstitial`, since those things are now auto-initialized when necessary.
+    - `onDashTimedMetadata` has been removed.
+
+  - Initial track selection:
+    - With `autoShowText` removed, the player now determines the initial text track exclusively using `preferredTextLanguage` and `preferredTextRole`.
+    - The app may choose not to pass preferences and instead rely on the tracks API (`getTextTracks`, `getAudioTracks`) along with its own business logic.
+
+  - Error API changes:
+    - `MEDIA_SOURCE_OPERATION_THREW` error now includes object with details from media element error in `error.data[1]` or string with brief explanation.
+
+  - UI:
+    - `airplay` button has been removed; use the `remote` button instead
+
+
+## v6.0
+
+  - Configuration changes:
+    - Individual preference config fields have been replaced by structured
+      preference arrays.  (Deprecated in v5.1)
+      - `preferredAudioLanguage`, `preferredAudioRole`, `preferredAudioLabel`,
+        `preferredAudioChannelCount`, and `preferSpatialAudio` have been replaced
+        by `preferredAudio`, an array of `shaka.extern.AudioPreference` objects.
+      - `preferredAudioCodecs` has been replaced by `preferredAudio` with the
+        `codec` field in each entry.
+      - `preferredTextLanguage` and `preferredTextRole` have been replaced by
+        `preferredText`, an array of `shaka.extern.TextPreference` objects.
+      - `preferredTextFormats` has been replaced by `preferredText` with the
+        `format` field in each entry.
+      - `preferForcedSubs` has been replaced by the `forced` field in
+        `preferredText` entries (e.g.
+        `player.configure('preferredText', [{language: 'en', forced: true}])`).
+      - `preferredVideoLabel`, `preferredVideoRole`, `preferredVideoHdrLevel`,
+        and `preferredVideoLayout` have been replaced by `preferredVideo`, an
+        array of `shaka.extern.VideoPreference` objects.
+      - `preferredVideoCodecs` has been replaced by `preferredVideo` with the
+        `codec` field in each entry.
+      - The new structured arrays allow specifying multiple preference sets in
+        priority order. For example:
+        ```js
+        // Old way (deprecated, still works with a warning):
+        player.configure('preferredAudioLanguage', 'ko');
+        player.configure('preferredAudioChannelCount', 6);
+
+        // New way:
+        player.configure('preferredAudio', [
+          {language: 'ko', channelCount: 6},
+          {language: 'ko'},
+          {language: 'en'},
+        ]);
+        ```

@@ -11,7 +11,7 @@
 
 /**
  * A representation of an abortable operation.  Note that these are not
- * cancelable.  Cancelation implies undoing what has been done so far,
+ * cancelable.  Cancellation implies undoing what has been done so far,
  * whereas aborting only means that further work is stopped.
  *
  * @interface
@@ -26,7 +26,7 @@ shaka.extern.IAbortableOperation = class {
      * aborted.  Aborted operations should be rejected with a shaka.util.Error
      * object using the error code OPERATION_ABORTED.
      *
-     * @const {!Promise.<T>}
+     * @const {!Promise<T>}
      * @exportDoc
      */
     this.promise;
@@ -34,7 +34,7 @@ shaka.extern.IAbortableOperation = class {
 
   /**
    * Can be called by anyone holding this object to abort the underlying
-   * operation.  This is not cancelation, and will not necessarily result in
+   * operation.  This is not cancellation, and will not necessarily result in
    * any work being undone.  abort() should return a Promise which is resolved
    * when the underlying operation has been aborted.  The returned Promise
    * should never be rejected.
@@ -49,7 +49,7 @@ shaka.extern.IAbortableOperation = class {
    * @param {function(boolean)} onFinal A callback to be invoked after the
    *   operation succeeds or fails.  The boolean argument is true
    *   if the operation succeeded and false if it failed.
-   * @return {!shaka.extern.IAbortableOperation.<T>} Returns this.
+   * @return {!shaka.extern.IAbortableOperation<T>} Returns this.
    * @exportDoc
    */
   finally(onFinal) {}

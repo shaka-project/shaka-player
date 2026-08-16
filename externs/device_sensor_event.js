@@ -13,6 +13,6 @@
 
 
 /**
- * @return {!Promise.<string>}
+ * @return {!Promise<string>}
  */
 DeviceMotionEvent.requestPermission = function() {};

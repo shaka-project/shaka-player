@@ -55,7 +55,7 @@ describe('Player', () => {
 
     // Make sure that live streams are synced against a good clock.
     player.configure('manifest.dash.clockSyncUri',
-        'https://shaka-player-demo.appspot.com/time.txt');
+        'https://time.akamai.com/?ms&iso');
 
     // Disable stall detection, which can interfere with playback tests.
     player.configure('streaming.stallEnabled', false);
@@ -95,13 +95,20 @@ describe('Player', () => {
 
       const wit = asset.focus ? fit : it;
       wit(testName, async () => {
-        const idFor = shakaAssets.identifierForKeySystem;
+        const idsFor = shakaAssets.identifiersForKeySystem;
         if (!asset.isClear() && !asset.isAes128() &&
             !asset.drm.some((keySystem) => {
-              // Demo assets use an enum here, which we look up in idFor.
+              if (shakaSupport.drm[keySystem]) {
+                return true;
+              }
+              // Demo assets use an enum here, which we look up in idsFor.
               // Command-line assets use a direct key system ID.
-              return shakaSupport.drm[idFor(keySystem)] ||
-                 shakaSupport.drm[keySystem];
+              for (const identifier of idsFor(keySystem)) {
+                if (shakaSupport.drm[identifier]) {
+                  return true;
+                }
+              }
+              return false;
             })) {
           pending('None of the required key systems are supported.');
         }
@@ -142,7 +149,7 @@ describe('Player', () => {
         // Rather than awaiting the load() method, catch any load() errors and
         // wait on the 'canplay' event.  This has the advantage that we will
         // get better logging of the media state on a timeout, since that
-        // capabilitiy is built into the waiter for media element events.
+        // capability is built into the waiter for media element events.
         const manifestUri = await getManifestUri(asset);
         player.load(manifestUri).catch(fail);
         await waiter.timeoutAfter(60).waitForEvent(video, 'canplay');
@@ -240,7 +247,7 @@ describe('Player', () => {
 
   /**
    * @param {ShakaDemoAssetInfo} asset
-   * @return {!Promise.<string>}
+   * @return {!Promise<string>}
    */
   async function getManifestUri(asset) {
     let manifestUri = asset.manifestUri;
@@ -259,11 +266,11 @@ describe('Player', () => {
 
   /**
    * @param {ShakaDemoAssetInfo} asset
-   * @return {!Promise.<string>}
+   * @return {!Promise<string>}
    */
   async function getManifestUriFromAdManager(asset) {
     try {
-      adManager.initServerSide(adContainer, video);
+      adManager.setContainers(adContainer, adContainer);
       let request;
       if (asset.imaAssetKey != null) {
         // LIVE stream
@@ -304,13 +311,11 @@ describe('Player', () => {
 
   /**
    * @param {ShakaDemoAssetInfo} asset
-   * @return {!Promise.<string>}
+   * @return {!Promise<string>}
    */
   async function getManifestUriFromMediaTailorAdManager(asset) {
     try {
-      const netEngine = player.getNetworkingEngine();
-      goog.asserts.assert(netEngine, 'There should be a net engine.');
-      adManager.initMediaTailor(adContainer, netEngine, video);
+      adManager.setContainers(adContainer, adContainer);
       goog.asserts.assert(asset.mediaTailorUrl != null,
           'Media Tailor info not be null!');
       const uri = await adManager.requestMediaTailorStream(

@@ -10,8 +10,8 @@ goog.provide('shaka.ui.RecenterVRButton');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
@@ -35,14 +35,10 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
     this.recenterVRButton_ = shaka.util.Dom.createButton();
     this.recenterVRButton_.classList.add('shaka-recenter-vr-button');
     this.recenterVRButton_.classList.add('shaka-tooltip');
-    this.recenterVRButton_.ariaPressed = 'false';
 
-    /** @private {!HTMLElement} */
-    this.recenterVRIcon_ = shaka.util.Dom.createHTMLElement('i');
-    this.recenterVRIcon_.classList.add('material-icons-round');
-    this.recenterVRIcon_.textContent =
-        shaka.ui.Enums.MaterialDesignIcons.RECENTER_VR;
-    this.recenterVRButton_.appendChild(this.recenterVRIcon_);
+    /** @private {!shaka.ui.Icon} */
+    this.recenterVRIcon_ = new shaka.ui.Icon(this.recenterVRButton_,
+        shaka.ui.Enums.MaterialDesignSVGIcons['RECENTER_VR']);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
@@ -59,51 +55,36 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
     this.parent.appendChild(this.recenterVRButton_);
 
     // Setup strings in the correct language
-    this.updateLocalizedStrings_();
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateLocalizedStrings_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateLocalizedStrings_();
-        });
+    this.updateLocalizedStrings();
 
     const vr = this.controls.getVR();
 
     this.eventManager.listen(this.recenterVRButton_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       vr.reset();
     });
 
     this.eventManager.listen(vr, 'vrstatuschanged', () => {
-      this.checkAvailability_();
+      this.checkAvailability();
     });
 
-    this.checkAvailability_();
+    this.checkAvailability();
   }
 
-
-  /**
-   * @private
-   */
-  checkAvailability_() {
+  /** @override */
+  checkAvailability() {
     shaka.ui.Utils.setDisplay(this.recenterVRButton_,
-        this.controls.isPlayingVR());
+        this.controls.isPlayingVR() && !this.isSubMenuOpened);
   }
 
-
-  /**
-   * @private
-   */
-  updateLocalizedStrings_() {
+  /** @override */
+  updateLocalizedStrings() {
     const LocIds = shaka.ui.Locales.Ids;
-
-    this.recenterVRButton_.ariaLabel =
-        this.localization.resolve(LocIds.RECENTER_VR);
-    this.recenterVRNameSpan_.textContent =
-        this.localization.resolve(LocIds.RECENTER_VR);
+    const label = this.localization.resolve(LocIds.RECENTER_VR);
+    this.recenterVRButton_.ariaLabel = label;
+    this.recenterVRNameSpan_.textContent = label;
   }
 };
 

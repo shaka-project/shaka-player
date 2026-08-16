@@ -2,7 +2,10 @@
 
 +../../lib/dash/content_protection.js
 +../../lib/dash/dash_parser.js
++../../lib/dash/ebml_parser.js
++../../lib/dash/mp4_segment_index_parser.js
 +../../lib/dash/mpd_utils.js
 +../../lib/dash/segment_base.js
 +../../lib/dash/segment_list.js
 +../../lib/dash/segment_template.js
++../../lib/dash/webm_segment_index_parser.js

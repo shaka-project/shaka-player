@@ -13,6 +13,15 @@ goog.provide('ShakaDemoAssetInfo');
 
 
 /**
+ * @param {string} key
+ * @return {boolean}
+ */
+function shakaDemoIsBlockedKey_(key) {
+  return key == '__proto__' || key == 'constructor' || key == 'prototype';
+}
+
+
+/**
  * An object that contains information about an asset.
  */
 const ShakaDemoAssetInfo = class {
@@ -40,11 +49,11 @@ const ShakaDemoAssetInfo = class {
     this.focus = false;
     /** @type {boolean} */
     this.disabled = false;
-    /** @type {!Array.<!shaka.extern.ExtraText>} */
+    /** @type {!Array<!shaka.extern.ExtraText>} */
     this.extraText = [];
-    /** @type {!Array.<string>} */
+    /** @type {!Array<string>} */
     this.extraThumbnail = [];
-    /** @type {!Array.<!shakaAssets.ExtraChapter>} */
+    /** @type {!Array<!shaka.extern.ExtraChapter>} */
     this.extraChapter = [];
     /** @type {?string} */
     this.certificateUri = null;
@@ -52,19 +61,21 @@ const ShakaDemoAssetInfo = class {
     this.description = null;
     /** @type {boolean} */
     this.isFeatured = false;
-    /** @type {!Array.<!shakaAssets.KeySystem>} */
+    /** @type {!Array<!shakaAssets.KeySystem>} */
     this.drm = [shakaAssets.KeySystem.CLEAR];
-    /** @type {!Array.<!shakaAssets.Feature>} */
+    /** @type {!Array<!shakaAssets.Feature>} */
     this.features = [shakaAssets.Feature.VOD];
-    /** @type {!Map.<string, string>} */
+    /** @type {!Map<string, string>} */
     this.licenseServers = new Map();
-    /** @type {!Map.<string, string>} */
+    /** @type {!Map<string, string>} */
+    this.offlineLicenseServers = new Map();
+    /** @type {!Map<string, string>} */
     this.licenseRequestHeaders = new Map();
     /** @type {?shaka.extern.RequestFilter} */
     this.requestFilter = null;
     /** @type {?shaka.extern.ResponseFilter} */
     this.responseFilter = null;
-    /** @type {!Map.<string, string>} */
+    /** @type {!Map<string, string>} */
     this.clearKeys = new Map(); // TODO: Setter method?
     /** @type {?Object} */
     this.extraConfig = null;
@@ -88,6 +99,14 @@ const ShakaDemoAssetInfo = class {
     this.useIMA = true;
     /** @type {?string} */
     this.mimeType = null;
+    /**
+     * When true, |manifestUri| points to an M3U/M3U8 playlist file
+     * rather than a single-stream manifest.  The demo will call
+     * QueueManager.loadFromM3uPlaylist() instead of the normal load path,
+     * and will play the first item in the playlist automatically.
+     * @type {boolean}
+     */
+    this.isPlaylist = false;
 
 
     // Preload values.
@@ -114,15 +133,6 @@ const ShakaDemoAssetInfo = class {
    */
   addDescription(description) {
     this.description = description;
-    return this;
-  }
-
-  /**
-   * @param {string} certificateUri
-   * @return {!ShakaDemoAssetInfo}
-   */
-  addCertificateUri(certificateUri) {
-    this.certificateUri = certificateUri;
     return this;
   }
 
@@ -157,6 +167,67 @@ const ShakaDemoAssetInfo = class {
     // Sort the features list, so that features are in a predictable order.
     this.features.sort(ShakaDemoAssetInfo.caseLessAlphaComparator_);
     return this;
+  }
+
+  /**
+   * @param {shakaAssets.Feature} feature
+   * @return {!ShakaDemoAssetInfo}
+   */
+  removeFeature(feature) {
+    this.features = this.features.filter((f) => f != feature);
+    // Sort the features list, so that features are in a predictable order.
+    this.features.sort(ShakaDemoAssetInfo.caseLessAlphaComparator_);
+    return this;
+  }
+
+  /**
+   * @private
+   */
+  checkAdFeature_() {
+    let isAd = false;
+    if (this.adTagUri || (this.imaVideoId && this.imaContentSrcId) ||
+      this.imaAssetKey || this.mediaTailorUrl) {
+      isAd = true;
+    }
+    if (isAd) {
+      if (!this.features.includes(shakaAssets.Feature.ADS)) {
+        this.addFeature(shakaAssets.Feature.ADS);
+      }
+    } else {
+      if (this.features.includes(shakaAssets.Feature.ADS)) {
+        this.removeFeature(shakaAssets.Feature.ADS);
+      }
+    }
+  }
+
+  /**
+   * @private
+   */
+  checkChaptersFeature_() {
+    if (this.extraChapter.length) {
+      if (!this.features.includes(shakaAssets.Feature.CHAPTERS)) {
+        this.addFeature(shakaAssets.Feature.CHAPTERS);
+      }
+    } else {
+      if (this.features.includes(shakaAssets.Feature.CHAPTERS)) {
+        this.removeFeature(shakaAssets.Feature.CHAPTERS);
+      }
+    }
+  }
+
+  /**
+   * @private
+   */
+  checkThumbnailsFeature_() {
+    if (this.extraThumbnail.length) {
+      if (!this.features.includes(shakaAssets.Feature.THUMBNAILS)) {
+        this.addFeature(shakaAssets.Feature.THUMBNAILS);
+      }
+    } else {
+      if (this.features.includes(shakaAssets.Feature.THUMBNAILS)) {
+        this.removeFeature(shakaAssets.Feature.THUMBNAILS);
+      }
+    }
   }
 
   /**
@@ -240,12 +311,29 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
+   * @return {!Map<string, string>}
+   */
+  getLicenseServers() {
+    return this.licenseServers;
+  }
+
+  /**
+   * @param {string} keySystem
+   * @param {string} licenseServer
+   * @return {!ShakaDemoAssetInfo}
+   */
+  addOfflineLicenseServer(keySystem, licenseServer) {
+    this.offlineLicenseServers.set(keySystem, licenseServer);
+    return this;
+  }
+
+  /**
    * @param {string} uri
    * @return {!ShakaDemoAssetInfo}
    */
   setAdTagUri(uri) {
-    this.adTagUri = uri;
-    this.addFeature(shakaAssets.Feature.ADS);
+    this.adTagUri = uri.trim();
+    this.checkAdFeature_();
     return this;
   }
 
@@ -254,10 +342,8 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   setIMAContentSourceId(id) {
-    this.imaContentSrcId = id;
-    if (!this.features.includes(shakaAssets.Feature.ADS)) {
-      this.addFeature(shakaAssets.Feature.ADS);
-    }
+    this.imaContentSrcId = id.trim();
+    this.checkAdFeature_();
 
     return this;
   }
@@ -267,10 +353,8 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   setIMAVideoId(id) {
-    this.imaVideoId = id;
-    if (!this.features.includes(shakaAssets.Feature.ADS)) {
-      this.addFeature(shakaAssets.Feature.ADS);
-    }
+    this.imaVideoId = id.trim();
+    this.checkAdFeature_();
 
     return this;
   }
@@ -280,10 +364,8 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   setIMAAssetKey(key) {
-    this.imaAssetKey = key;
-    if (!this.features.includes(shakaAssets.Feature.ADS)) {
-      this.addFeature(shakaAssets.Feature.ADS);
-    }
+    this.imaAssetKey = key.trim();
+    this.checkAdFeature_();
 
     return this;
   }
@@ -293,10 +375,8 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   setIMAManifestType(type) {
-    this.imaManifestType = type;
-    if (!this.features.includes(shakaAssets.Feature.ADS)) {
-      this.addFeature(shakaAssets.Feature.ADS);
-    }
+    this.imaManifestType = type.trim();
+    this.checkAdFeature_();
 
     return this;
   }
@@ -307,13 +387,18 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   setMediaTailor(url, adsParams=null) {
-    this.mediaTailorUrl = url;
+    this.mediaTailorUrl = url.trim();
     this.mediaTailorAdsParams = adsParams;
-    if (!this.features.includes(shakaAssets.Feature.ADS)) {
-      this.addFeature(shakaAssets.Feature.ADS);
-    }
+    this.checkAdFeature_();
 
     return this;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasAds() {
+    return this.features.includes(shakaAssets.Feature.ADS);
   }
 
   /**
@@ -352,15 +437,17 @@ const ShakaDemoAssetInfo = class {
    */
   addExtraThumbnail(uri) {
     this.extraThumbnail.push(uri);
+    this.checkThumbnailsFeature_();
     return this;
   }
 
   /**
-   * @param {shakaAssets.ExtraChapter} extraChapter
+   * @param {shaka.extern.ExtraChapter} extraChapter
    * @return {!ShakaDemoAssetInfo}
    */
   addExtraChapter(extraChapter) {
     this.extraChapter.push(extraChapter);
+    this.checkChaptersFeature_();
     return this;
   }
 
@@ -372,6 +459,7 @@ const ShakaDemoAssetInfo = class {
     this.extraChapter = this.extraChapter.filter((extraChapter) => {
       return extraChapter.uri != chapterUri;
     });
+    this.checkChaptersFeature_();
     return this;
   }
 
@@ -409,16 +497,18 @@ const ShakaDemoAssetInfo = class {
   /**
    * @return {!Object}
    * @override
-   *
+   * @suppress {checkTypes}
    * Suppress checkTypes warnings, so that we can access properties of this
    * object as though it were a struct.
-   * @suppress {checkTypes}
    */
   toJSON() {
     // Construct a generic object with the values of this object, but with the
     // proper formatting.
     const raw = {};
-    for (const key in this) {
+    for (const key of Object.keys(this)) {
+      if (shakaDemoIsBlockedKey_(key)) {
+        continue;
+      }
       if (key.startsWith('preload') || key.startsWith('store') ||
           key.endsWith('Callback')) {
         // These values shouldn't be saved, as they are dynamic.
@@ -431,6 +521,9 @@ const ShakaDemoAssetInfo = class {
         const replacement = {};
         replacement['__type__'] = 'map';
         for (const entry of value.entries()) {
+          if (shakaDemoIsBlockedKey_(entry[0])) {
+            continue;
+          }
           replacement[entry[0]] = entry[1];
         }
         raw[key] = replacement;
@@ -456,16 +549,6 @@ const ShakaDemoAssetInfo = class {
     networkingEngine.clearAllRequestFilters();
     networkingEngine.clearAllResponseFilters();
 
-    if (this.licenseRequestHeaders.size) {
-      /** @type {!shaka.extern.RequestFilter} */
-      const filter = (requestType, request, context) => {
-        return this.addLicenseRequestHeaders_(this.licenseRequestHeaders,
-            requestType,
-            request);
-      };
-      networkingEngine.registerRequestFilter(filter);
-    }
-
     if (this.requestFilter) {
       networkingEngine.registerRequestFilter(this.requestFilter);
     }
@@ -476,22 +559,48 @@ const ShakaDemoAssetInfo = class {
 
   /**
    * Gets the configuration object for the asset.
+   *
+   * @param {boolean=} forStorage
    * @return {!shaka.extern.PlayerConfiguration}
    */
-  getConfiguration() {
+  getConfiguration(forStorage = false) {
     const config = /** @type {shaka.extern.PlayerConfiguration} */(
-      {drm: {advanced: {}}, manifest: {dash: {}, hls: {}}});
+      {drm: {advanced: {}}, manifest: {dash: {}, hls: {}}, streaming: {}});
 
     if (this.extraConfig) {
-      for (const key in this.extraConfig) {
+      for (const key of Object.keys(this.extraConfig)) {
+        if (shakaDemoIsBlockedKey_(key)) {
+          continue;
+        }
         config[key] = this.extraConfig[key];
       }
     }
 
-    if (this.licenseServers.size) {
+    let licenseServers = this.licenseServers;
+    // PR license servers may require a different URL for offline.
+    if (forStorage && this.offlineLicenseServers.size) {
+      licenseServers = this.offlineLicenseServers;
+    }
+
+    if (licenseServers.size) {
       config.drm.servers = config.drm.servers || {};
-      this.licenseServers.forEach((value, key) => {
+      licenseServers.forEach((value, key) => {
         config.drm.servers[key] = value;
+        if (this.certificateUri || this.licenseRequestHeaders.size) {
+          if (!config.drm.advanced[key]) {
+            config.drm.advanced[key] =
+                ShakaDemoAssetInfo.defaultAdvancedDrmConfig();
+          }
+          if (this.certificateUri) {
+            config.drm.advanced[key].serverCertificateUri =
+                this.certificateUri;
+          }
+          if (this.licenseRequestHeaders.size) {
+            this.licenseRequestHeaders.forEach((headerValue, headerName) => {
+              config.drm.advanced[key].headers[headerName] = headerValue;
+            });
+          }
+        }
       });
     }
 
@@ -501,25 +610,19 @@ const ShakaDemoAssetInfo = class {
         config.drm.clearKeys[key] = value;
       });
     }
-    return config;
-  }
 
-  /**
-   * @param {!Map.<string, string>} headers
-   * @param {shaka.net.NetworkingEngine.RequestType} requestType
-   * @param {shaka.extern.Request} request
-   * @private
-   */
-  addLicenseRequestHeaders_(headers, requestType, request) {
-    if (requestType != shaka.net.NetworkingEngine.RequestType.LICENSE) {
-      return;
+    // Windows Edge only support persistent licenses with
+    // `com.microsoft.playready.recommendation` keySystem.
+    if (forStorage &&
+        navigator.userAgent.match(/Edge?\//) &&
+        navigator.platform &&
+        navigator.platform.toLowerCase().includes('win32')) {
+      config.drm.keySystemsMapping = {
+        'com.microsoft.playready': 'com.microsoft.playready.recommendation',
+      };
     }
 
-    // Add these to the existing headers.  Do not clobber them!
-    // For PlayReady, there will already be headers in the request.
-    headers.forEach((value, key) => {
-      request.headers[key] = value;
-    });
+    return config;
   }
 
   /** @return {boolean} */
@@ -543,13 +646,16 @@ const ShakaDemoAssetInfo = class {
   static fromJSON(raw) {
     // This handles the special case for Maps in toJSON.
     const parsed = {};
-    for (const key in raw) {
+    for (const key of Object.keys(raw)) {
+      if (shakaDemoIsBlockedKey_(key)) {
+        continue;
+      }
       const value = raw[key];
       if (value && typeof value == 'object' && value['__type__'] == 'map') {
         const replacement = new Map();
-        for (const key in value) {
-          if (key != '__type__') {
-            replacement.set(key, value[key]);
+        for (const mapKey of Object.keys(value)) {
+          if (mapKey != '__type__' && !shakaDemoIsBlockedKey_(mapKey)) {
+            replacement.set(mapKey, value[mapKey]);
           }
         }
         parsed[key] = replacement;
@@ -558,7 +664,9 @@ const ShakaDemoAssetInfo = class {
       }
     }
     const asset = ShakaDemoAssetInfo.makeBlankAsset();
-    Object.assign(asset, parsed);
+    for (const key of Object.keys(parsed)) {
+      /** @type {!Object} */(asset)[key] = parsed[key];
+    }
     return asset;
   }
 
@@ -573,5 +681,22 @@ const ShakaDemoAssetInfo = class {
       return ShakaDemoAssetInfo.fromJSON(dataAsJson);
     } catch (e) {}
     return null;
+  }
+
+  /**
+   * @return {!shaka.extern.AdvancedDrmConfiguration}
+   */
+  static defaultAdvancedDrmConfig() {
+    return {
+      distinctiveIdentifierRequired: false,
+      persistentStateRequired: false,
+      videoRobustness: [],
+      audioRobustness: [],
+      sessionType: '',
+      serverCertificate: new Uint8Array(0),
+      serverCertificateUri: '',
+      individualizationServer: '',
+      headers: {},
+    };
   }
 };

@@ -115,7 +115,7 @@ describe('QualityObserver', () => {
         expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality2, 20]);
       });
 
-  it('calls onQualityChange when position moves back over a quality chanage',
+  it('calls onQualityChange when position moves back over a quality change',
       () => {
         observer.addMediaQualityChange(quality1, 10);
         emptyBuffer = false;

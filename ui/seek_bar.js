@@ -9,15 +9,12 @@ goog.provide('shaka.ui.SeekBar');
 
 goog.require('shaka.ads.Utils');
 goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.ui.Constants');
+goog.require('shaka.net.NetworkingUtils');
 goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.RangeElement');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Error');
-goog.require('shaka.util.Mp4Parser');
-goog.require('shaka.util.Networking');
 goog.require('shaka.util.Timer');
 goog.requireType('shaka.ui.Controls');
 
@@ -34,6 +31,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
+    // Enable the mouse wheel so that every timestamp stays reachable:
+    // a wheel tick always seeks by exactly one second, even when the bar
+    // has fewer pixels than the content has seconds.
     super(parent, controls,
         [
           'shaka-seek-bar-container',
@@ -42,7 +42,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           'shaka-seek-bar',
           'shaka-no-propagation',
           'shaka-show-controls-on-mouse-over',
-        ]);
+        ],
+        /* enableWheel= */ true);
 
     /** @private {!HTMLElement} */
     this.adMarkerContainer_ = shaka.util.Dom.createHTMLElement('div');
@@ -52,6 +53,11 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.container.insertBefore(
         this.adMarkerContainer_, this.container.childNodes[0]);
 
+    /** @private {!HTMLElement} */
+    this.chapterMarkerContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.chapterMarkerContainer_.classList.add('shaka-chapter-markers');
+    this.container.insertBefore(
+        this.chapterMarkerContainer_, this.container.childNodes[0]);
 
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.controls.getConfig();
@@ -64,12 +70,15 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
      */
     this.seekTimer_ = new shaka.util.Timer(() => {
       let newCurrentTime = this.getValue();
-      if (!this.player.isLive()) {
+      if (!this.player.isDynamic()) {
         if (newCurrentTime == this.video.duration) {
           newCurrentTime -= 0.001;
         }
       }
       this.video.currentTime = newCurrentTime;
+      this.controls.hideContextMenus();
+      this.controls.hideSettingsMenus();
+      this.update();
     });
 
 
@@ -83,6 +92,13 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.markAdBreaks_();
     });
 
+    /** @private {shaka.util.Timer} */
+    this.chaptersTimer_ = new shaka.util.Timer(() => {
+      this.markChapters_();
+    });
+
+    /** @private {ResizeObserver} */
+    this.resizeObserver_ = null;
 
     /**
      * When user is scrubbing the seek bar - we should pause the video - see
@@ -97,25 +113,34 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     /** @private {!HTMLElement} */
     this.thumbnailContainer_ = shaka.util.Dom.createHTMLElement('div');
-    this.thumbnailContainer_.id = 'shaka-player-ui-thumbnail-container';
+    this.thumbnailContainer_.classList.add(
+        'shaka-player-ui-thumbnail-container');
+
+    /** @private {!HTMLElement} */
+    this.thumbnailImageContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.thumbnailImageContainer_.classList.add(
+        'shaka-player-ui-thumbnail-image-container');
 
     /** @private {!HTMLImageElement} */
     this.thumbnailImage_ = /** @type {!HTMLImageElement} */ (
       shaka.util.Dom.createHTMLElement('img'));
-    this.thumbnailImage_.id = 'shaka-player-ui-thumbnail-image';
+    this.thumbnailImage_.classList.add('shaka-player-ui-thumbnail-image');
     this.thumbnailImage_.draggable = false;
+    this.thumbnailImageContainer_.appendChild(this.thumbnailImage_);
+
+    /** @private {!HTMLElement} */
+    this.thumbnailTimeContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.thumbnailTimeContainer_.classList.add(
+        'shaka-player-ui-thumbnail-time-container');
 
     /** @private {!HTMLElement} */
     this.thumbnailTime_ = shaka.util.Dom.createHTMLElement('div');
-    this.thumbnailTime_.id = 'shaka-player-ui-thumbnail-time';
+    this.thumbnailTime_.classList.add('shaka-player-ui-thumbnail-time');
+    this.thumbnailTimeContainer_.appendChild(this.thumbnailTime_);
 
-    this.thumbnailContainer_.appendChild(this.thumbnailImage_);
-    this.thumbnailContainer_.appendChild(this.thumbnailTime_);
+    this.thumbnailContainer_.appendChild(this.thumbnailImageContainer_);
+    this.thumbnailContainer_.appendChild(this.thumbnailTimeContainer_);
     this.container.appendChild(this.thumbnailContainer_);
-
-    this.timeContainer_ = shaka.util.Dom.createHTMLElement('div');
-    this.timeContainer_.id = 'shaka-player-ui-time-container';
-    this.container.appendChild(this.timeContainer_);
 
     /**
      * @private {?shaka.extern.Thumbnail}
@@ -135,24 +160,30 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.isMoving_ = false;
 
     /**
+     * True if we have set video.currentTime after a seek interaction but the
+     * video element has not yet fired the 'seeked' event. During this window
+     * video.buffered still reflects the pre-seek state, so we must keep using
+     * the "during-seek" buffer-painting logic to avoid a visible white-flash.
+     *
+     * @private {boolean}
+     */
+    this.isWaitingForSeek_ = false;
+
+    /**
      * The timer is activated to hide the thumbnail.
      *
      * @private {shaka.util.Timer}
      */
     this.hideThumbnailTimer_ = new shaka.util.Timer(() => {
-      this.hideThumbnail_();
+      this.hideThumbnailTimeContainer_();
     });
 
-    /** @private {!Array.<!shaka.extern.AdCuePoint>} */
+    /** @private {!Array<!shaka.extern.AdCuePoint>} */
     this.adCuePoints_ = [];
 
-    this.eventManager.listen(this.localization,
-        shaka.ui.Localization.LOCALE_UPDATED,
-        () => this.updateAriaLabel_());
-
-    this.eventManager.listen(this.localization,
-        shaka.ui.Localization.LOCALE_CHANGED,
-        () => this.updateAriaLabel_());
+    this.eventManager.listen(this.bar, 'input', () => {
+      this.controls.hideSettingsMenus();
+    });
 
     this.eventManager.listen(
         this.adManager, shaka.ads.Utils.AD_STARTED, () => {
@@ -169,53 +200,70 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.Utils.CUEPOINTS_CHANGED, (e) => {
-          this.adCuePoints_ = (e)['cuepoints'];
+        this.adManager, shaka.ads.Utils.CUEPOINTS_CHANGED, () => {
+          this.adCuePoints_ = this.controls.getAdCuePoints();
           this.onAdCuePointsChanged_();
         });
 
     this.eventManager.listen(
         this.player, 'unloading', () => {
-          this.adCuePoints_ = [];
+          this.adCuePoints_ = this.controls.getAdCuePoints();
           this.onAdCuePointsChanged_();
           if (this.lastThumbnailPendingRequest_) {
             this.lastThumbnailPendingRequest_.abort();
             this.lastThumbnailPendingRequest_ = null;
           }
           this.lastThumbnail_ = null;
-          this.hideThumbnail_();
-          this.hideTime_();
+          this.hideThumbnailTimeContainer_();
         });
 
     this.eventManager.listen(this.bar, 'mousemove', (event) => {
-      const rect = this.bar.getBoundingClientRect();
-      const min = parseFloat(this.bar.min);
-      const max = parseFloat(this.bar.max);
-      // Pixels from the left of the range element
-      const mousePosition = event.clientX - rect.left;
-      // Pixels per unit value of the range element.
-      const scale = (max - min) / rect.width;
-      // Mouse position in units, which may be outside the allowed range.
-      const value = Math.round(min + scale * mousePosition);
-      if (!this.player.getImageTracks().length) {
-        this.hideThumbnail_();
-        this.showTime_(mousePosition, value);
+      if (this.controls.anySettingsMenusAreOpen()) {
+        this.hideThumbnailTimeContainer_();
         return;
       }
-      this.hideTime_();
-      this.showThumbnail_(mousePosition, value);
+      const value = this.getValueFromPosition(event.clientX);
+      this.showThumbnailAtValue_(value);
     });
 
     this.eventManager.listen(this.container, 'mouseleave', () => {
-      this.hideTime_();
       this.hideThumbnailTimer_.stop();
-      this.hideThumbnailTimer_.tickAfter(/* seconds= */ 0.25);
+      this.hideThumbnailTimer_.tickNow();
+    });
+
+    this.eventManager.listen(this.controls, 'chaptersupdated', () => {
+      this.markChapters_();
+      if (this.controls.getChapters().length > 0 && this.player.isDynamic()) {
+        this.chaptersTimer_.tickEvery(/* seconds= */ 0.25);
+      }
+    });
+
+    // The chapter markers are positioned in absolute pixels, so they have
+    // to be recomputed whenever the seek bar changes size (e.g. entering
+    // or leaving fullscreen).
+    // Use ResizeObserver if available, fallback to window resize event.
+    if (window.ResizeObserver) {
+      this.resizeObserver_ = new ResizeObserver(() => this.markChapters_());
+      this.resizeObserver_.observe(this.bar);
+    } else {
+      // Fallback for older browsers.
+      this.eventManager.listen(window, 'resize', () => this.markChapters_());
+    }
+
+    // When the browser finishes seeking, video.buffered is finally updated.
+    // Clear the post-seek flag and repaint so the bar reflects the real
+    // buffered state without any delay.
+    this.eventManager.listen(this.video, 'seeked', () => {
+      if (this.isWaitingForSeek_) {
+        this.isWaitingForSeek_ = false;
+        this.update();
+      }
     });
 
     // Initialize seek state and label.
     this.setValue(this.video.currentTime);
     this.update();
-    this.updateAriaLabel_();
+    this.updateLocalizedStrings();
 
     if (this.ad) {
       // There was already an ad.
@@ -225,12 +273,14 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
   /** @override */
   release() {
-    if (this.seekTimer_) {
-      this.seekTimer_.stop();
-      this.seekTimer_ = null;
-      this.adBreaksTimer_.stop();
-      this.adBreaksTimer_ = null;
-    }
+    this.seekTimer_?.stop();
+    this.seekTimer_ = null;
+    this.adBreaksTimer_?.stop();
+    this.adBreaksTimer_ = null;
+    this.chaptersTimer_?.stop();
+    this.chaptersTimer_ = null;
+    this.resizeObserver_?.disconnect();
+    this.resizeObserver_ = null;
 
     super.release();
   }
@@ -275,16 +325,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // and start the new one.
     this.seekTimer_.tickAfter(/* seconds= */ 0.125);
 
-    if (this.player.getImageTracks().length) {
-      const min = parseFloat(this.bar.min);
-      const max = parseFloat(this.bar.max);
-      const rect = this.bar.getBoundingClientRect();
-      const value = Math.round(this.getValue());
-      const scale = (max - min) / rect.width;
-      const position = (value - min) / scale;
-      this.showThumbnail_(position, value);
+    if (!this.controls.anySettingsMenusAreOpen()) {
+      this.showThumbnailAtValue_(this.getValue());
     } else {
-      this.hideThumbnail_();
+      this.hideThumbnailTimeContainer_();
     }
   }
 
@@ -298,6 +342,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // They just let go of the seek bar, so cancel the timer and manually
     // call the event so that we can respond immediately.
     this.seekTimer_.tickNow();
+
+    // video.buffered is not updated synchronously after setting
+    // video.currentTime, so keep the "during-seek" painting logic active
+    // until the 'seeked' event confirms the browser has caught up.
+    this.isWaitingForSeek_ = true;
+
     this.controls.setSeeking(false);
 
     if (this.wasPlaying_) {
@@ -313,10 +363,30 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
   /**
    * @override
-  */
+   */
   isShowing() {
     // It is showing by default, so it is hidden if shaka-hidden is in the list.
     return !this.container.classList.contains('shaka-hidden');
+  }
+
+  /**
+   * Returns the range of buffered that contains 'time', or null if it does
+   * not exist.
+   *
+   * @param {number} time
+   * @return {?{start:number, end:number}}
+   * @private
+   */
+  getBufferedRangeForTime_(time) {
+    const buffered = this.video.buffered;
+    for (let i = 0; i < buffered.length; i++) {
+      const start = buffered.start(i);
+      const end = buffered.end(i);
+      if (time >= start && time <= end) {
+        return {start, end};
+      }
+    }
+    return null;
   }
 
   /**
@@ -326,9 +396,28 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const colors = this.config_.seekBarColors;
     const currentTime = this.getValue();
     const bufferedLength = this.video.buffered.length;
-    const bufferedStart = bufferedLength ? this.video.buffered.start(0) : 0;
-    const bufferedEnd =
-        bufferedLength ? this.video.buffered.end(bufferedLength - 1) : 0;
+    let bufferedStart = 0;
+    let bufferedEnd = 0;
+
+    if (bufferedLength) {
+      if (this.controls.isSeeking() || this.isWaitingForSeek_) {
+        // While the user drags, only paint the range that actually contains
+        // the target position (if it exists).
+        const r = this.getBufferedRangeForTime_(currentTime);
+        if (r) {
+          bufferedStart = r.start;
+          bufferedEnd = r.end;
+        } else {
+          // Non-preloaded area: we do not buffered paint beyond the playhead.
+          bufferedStart = currentTime;
+          bufferedEnd = currentTime;
+        }
+      } else {
+        bufferedStart = this.video.buffered.start(0);
+        bufferedEnd = this.video.buffered.end(bufferedLength - 1);
+      }
+    }
+
 
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
@@ -339,40 +428,35 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       shaka.ui.Utils.setDisplay(this.container, false);
     } else {
       shaka.ui.Utils.setDisplay(this.container, true);
+      const clampedBufferStart = Math.max(bufferedStart, seekRange.start);
+      const clampedBufferEnd = Math.min(bufferedEnd, seekRange.end);
+      const clampedCurrentTime = Math.min(
+          Math.max(currentTime, seekRange.start),
+          seekRange.end);
 
-      if (bufferedLength == 0) {
-        this.container.style.background = colors.base;
-      } else {
-        const clampedBufferStart = Math.max(bufferedStart, seekRange.start);
-        const clampedBufferEnd = Math.min(bufferedEnd, seekRange.end);
-        const clampedCurrentTime = Math.min(
-            Math.max(currentTime, seekRange.start),
-            seekRange.end);
+      const bufferStartDistance = clampedBufferStart - seekRange.start;
+      const bufferEndDistance = clampedBufferEnd - seekRange.start;
+      const playheadDistance = clampedCurrentTime - seekRange.start;
 
-        const bufferStartDistance = clampedBufferStart - seekRange.start;
-        const bufferEndDistance = clampedBufferEnd - seekRange.start;
-        const playheadDistance = clampedCurrentTime - seekRange.start;
+      // NOTE: the fallback to zero eliminates NaN.
+      const bufferStartFraction = (bufferStartDistance / seekRangeSize) || 0;
+      const bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
+      const playheadFraction = (playheadDistance / seekRangeSize) || 0;
 
-        // NOTE: the fallback to zero eliminates NaN.
-        const bufferStartFraction = (bufferStartDistance / seekRangeSize) || 0;
-        const bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
-        const playheadFraction = (playheadDistance / seekRangeSize) || 0;
+      const unbufferedColor =
+          this.config_.showUnbufferedStart ? colors.base : colors.played;
 
-        const unbufferedColor =
-            this.config_.showUnbufferedStart ? colors.base : colors.played;
-
-        const gradient = [
-          'to right',
-          this.makeColor_(unbufferedColor, bufferStartFraction),
-          this.makeColor_(colors.played, bufferStartFraction),
-          this.makeColor_(colors.played, playheadFraction),
-          this.makeColor_(colors.buffered, playheadFraction),
-          this.makeColor_(colors.buffered, bufferEndFraction),
-          this.makeColor_(colors.base, bufferEndFraction),
-        ];
-        this.container.style.background =
-            'linear-gradient(' + gradient.join(',') + ')';
-      }
+      const gradient = [
+        'to right',
+        this.makeColor_(unbufferedColor, bufferStartFraction),
+        this.makeColor_(colors.played, bufferStartFraction),
+        this.makeColor_(colors.played, playheadFraction),
+        this.makeColor_(colors.buffered, playheadFraction),
+        this.makeColor_(colors.buffered, bufferEndFraction),
+        this.makeColor_(colors.base, bufferEndFraction),
+      ];
+      this.container.style.background =
+          'linear-gradient(' + gradient.join(',') + ')';
     }
   }
 
@@ -388,8 +472,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
-    const gradient = ['to right'];
-    let pointsAsFractions = [];
+    const rects = [];
     const adBreakColor = this.config_.seekBarColors.adBreaks;
     let postRollAd = false;
     for (const point of this.adCuePoints_) {
@@ -413,41 +496,136 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           endFrac = (endDist / seekRangeSize) || 0;
         }
 
-        pointsAsFractions.push({
-          start: startFrac,
-          end: endFrac,
+        rects.push({
+          position: (startFrac * 100) + '%',
+          width: ((endFrac - startFrac) * 100) + '%',
         });
       }
     }
 
-    pointsAsFractions = pointsAsFractions.sort((a, b) => {
-      return a.start - b.start;
-    });
-
-    for (const point of pointsAsFractions) {
-      gradient.push(this.makeColor_('transparent', point.start));
-      gradient.push(this.makeColor_(adBreakColor, point.start));
-      gradient.push(this.makeColor_(adBreakColor, point.end));
-      gradient.push(this.makeColor_('transparent', point.end));
-    }
-
     if (postRollAd) {
-      gradient.push(this.makeColor_('transparent', 0.99));
-      gradient.push(this.makeColor_(adBreakColor, 0.99));
+      rects.push({position: '99%', width: '1%'});
     }
     this.adMarkerContainer_.style.background =
-            'linear-gradient(' + gradient.join(',') + ')';
+            this.buildLayeredBackground_(rects, adBreakColor);
+  }
+
+  /**
+   * @private
+   */
+  markChapters_() {
+    const color = this.config_.seekBarColors.chapters;
+
+    const chapters = this.controls.getChapters();
+
+    if (!chapters.length || !color || color === 'transparent') {
+      this.chapterMarkerContainer_.style.background = 'transparent';
+      this.chaptersTimer_?.stop();
+      return;
+    }
+
+    const seekRange = this.player.seekRange();
+    const seekRangeSize = seekRange.end - seekRange.start;
+    const minSeekBarWindow =
+        shaka.ui.SeekBar.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_;
+    if (seekRangeSize < minSeekBarWindow) {
+      if (seekRangeSize <= 0) {
+        this.chaptersTimer_.tickAfter(/* seconds= */ 0.1);
+        return;
+      }
+      this.chapterMarkerContainer_.style.background = 'transparent';
+      this.chaptersTimer_?.stop();
+      return;
+    }
+
+    /** @type {!Set<number>} */
+    const points = new Set();
+
+    for (const chapter of chapters) {
+      if (chapter.startTime < seekRange.start ||
+          chapter.startTime > seekRange.end) {
+        continue;
+      }
+      if (chapter.startTime > seekRange.start) {
+        points.add(chapter.startTime);
+      }
+      // We use minus 1 to avoid inaccuracies
+      if (chapter.endTime && chapter.endTime < (seekRange.end - 1)) {
+        points.add(chapter.endTime);
+      }
+    }
+
+    if (!points.size) {
+      this.chapterMarkerContainer_.style.background = 'transparent';
+      this.chaptersTimer_?.stop();
+      return;
+    }
+
+    // Align each marker with the playhead thumb rather than the raw seek-bar
+    // edges. The thumb is centered within (width - thumbSize), so a naive
+    // (time / range) * 100% placement drifts away from where the thumb sits.
+    const markWidth = 2;
+    const rects = [];
+    for (const point of Array.from(points).sort((a, b) => a - b)) {
+      const pixelCenter = this.getThumbCenterPixel_(point);
+      if (pixelCenter == null) {
+        // The bar has no size yet.  Try again shortly.
+        this.chaptersTimer_.tickAfter(/* seconds= */ 0.1);
+        return;
+      }
+      rects.push({
+        position: (pixelCenter - markWidth / 2) + 'px',
+        width: markWidth + 'px',
+      });
+    }
+
+    this.chapterMarkerContainer_.style.background =
+            this.buildLayeredBackground_(rects, color);
   }
 
 
   /**
    * @param {string} color
-   * @param {number} fract
+   * @param {number} fraction
    * @return {string}
    * @private
    */
-  makeColor_(color, fract) {
-    return color + ' ' + (fract * 100) + '%';
+  makeColor_(color, fraction) {
+    return color + ' ' + (fraction * 100) + '%';
+  }
+
+  /**
+   * @param {!Array<{position: string, width: string}>} rects
+   * @param {string} color
+   * @return {string}
+   * @private
+   */
+  buildLayeredBackground_(rects, color) {
+    if (!rects.length || !color || color === 'transparent') {
+      return 'transparent';
+    }
+    return rects
+        .map(({position, width}) => {
+          if (width.endsWith('%')) {
+            // CSS background-position with percentages behaves
+            // differently than absolute pixels. To avoid shifting
+            // percentage-based markers, we use color stops.
+            const start = parseFloat(position);
+            const end = start + parseFloat(width);
+            const p1 = `transparent ${start}%`;
+            const p2 = `${color} ${start}%`;
+            const p3 = `${color} ${end}%`;
+            const p4 = `transparent ${end}%`;
+
+            return `linear-gradient(to right, ${p1}, ${p2}, ${p3}, ` +
+                   `${p4}) 0 0 / 100% 100% no-repeat`;
+          }
+
+          // Standard background positioning for absolute widths.
+          return `linear-gradient(${color}, ${color}) ` +
+                 `${position} / ${width} 100% no-repeat`;
+        })
+        .join(',');
   }
 
 
@@ -460,19 +638,18 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       const seekRange = this.player.seekRange();
       const seekRangeSize = seekRange.end - seekRange.start;
       const minSeekBarWindow =
-          shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR;
+          shaka.ui.SeekBar.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_;
       // Seek range keeps changing for live content and some of the known
       // ad breaks might not be in the seek range now, but get into
       // it later.
       // If we have a LIVE seekable content, keep checking for ad breaks
       // every second.
-      if (this.player.isLive() && seekRangeSize > minSeekBarWindow) {
+      if (this.player.isDynamic() && seekRangeSize > minSeekBarWindow) {
         this.adBreaksTimer_.tickEvery(/* seconds= */ 0.25);
       }
     };
-    if (this.player.isFullyLoaded()) {
-      action();
-    } else {
+    action();
+    if (!this.player.isFullyLoaded()) {
       this.eventManager.listenOnce(this.player, 'loaded', action);
     }
   }
@@ -488,8 +665,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
 
-    if (this.player.isLive() &&
-        (seekRangeSize < shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR ||
+    if (this.player.isDynamic() &&
+        (seekRangeSize < shaka.ui.SeekBar.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_ ||
         !isFinite(seekRangeSize))) {
       return false;
     }
@@ -497,124 +674,190 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     return this.ad == null || !this.ad.isLinear();
   }
 
-  /** @private */
-  updateAriaLabel_() {
+  /** @override */
+  updateLocalizedStrings() {
     this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.SEEK);
   }
 
-  /** @private */
-  showTime_(pixelPosition, value) {
-    const offsetTop = -10;
-    const width = this.timeContainer_.clientWidth;
-    const height = 20;
-    this.timeContainer_.style.width = 'auto';
-    this.timeContainer_.style.height = height + 'px';
-    this.timeContainer_.style.top = -(height - offsetTop) + 'px';
-    const leftPosition = Math.min(this.bar.offsetWidth - width,
-        Math.max(0, pixelPosition - (width / 2)));
-    this.timeContainer_.style.left = leftPosition + 'px';
-    this.timeContainer_.style.right = '';
-    this.timeContainer_.style.visibility = 'visible';
-    const seekRange = this.player.seekRange();
-    if (this.player.isLive()) {
-      const totalSeconds = seekRange.end - value;
-      if (totalSeconds < 1) {
-        this.timeContainer_.textContent =
-            this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
-        this.timeContainer_.style.left = '';
-        this.timeContainer_.style.right = '0px';
-      } else {
-        this.timeContainer_.textContent =
-            '-' + this.timeFormatter_(totalSeconds);
-      }
-    } else {
-      const totalSeconds = value - seekRange.start;
-      this.timeContainer_.textContent = this.timeFormatter_(totalSeconds);
+  /**
+   * Returns the offset, in pixels from the left edge of the seek bar, at
+   * which the center of the playhead thumb sits for the given value. The
+   * thumb travels within (width - thumbSize) rather than the full bar
+   * width, so this differs from a naive (value / range) * width mapping.
+   *
+   * @param {number} value
+   * @return {?number} The pixel offset, or null if the bar has no size.
+   * @private
+   */
+  getThumbCenterPixel_(value) {
+    const rect = this.bar.getBoundingClientRect();
+    const barMin = parseFloat(this.bar.min);
+    const barMax = parseFloat(this.bar.max);
+    if (rect.width <= 0 || barMax <= barMin) {
+      return null;
     }
+    const thumbSize = shaka.ui.SeekBar.THUMB_SIZE_PX_;
+    return (value - barMin) / (barMax - barMin) * (rect.width - thumbSize) +
+        thumbSize / 2;
   }
 
+  /**
+   * Snaps to a chapter start when the pointer is on the pixel that
+   * contains its marker. When the content has more seconds than the seek
+   * bar has pixels, chapter boundaries could otherwise be impossible to
+   * hover or seek to precisely.
+   *
+   * @param {number} clientX
+   * @return {number}
+   * @override
+   */
+  getValueFromPosition(clientX) {
+    const value = super.getValueFromPosition(clientX);
+    const chapters = this.controls.getChapters();
+    if (!chapters.length) {
+      return value;
+    }
+    const rect = this.bar.getBoundingClientRect();
+    const barMin = parseFloat(this.bar.min);
+    const barMax = parseFloat(this.bar.max);
+    let snappedValue = value;
+    let bestDistance = shaka.ui.SeekBar.CHAPTER_SNAP_DISTANCE_PX_;
+    for (const chapter of chapters) {
+      if (chapter.startTime < barMin || chapter.startTime > barMax) {
+        continue;
+      }
+      const pixelCenter = this.getThumbCenterPixel_(chapter.startTime);
+      if (pixelCenter == null) {
+        return value;
+      }
+      const distance = Math.abs(clientX - (rect.left + pixelCenter));
+      if (distance <= bestDistance) {
+        bestDistance = distance;
+        snappedValue = chapter.startTime;
+      }
+    }
+    return snappedValue;
+  }
+
+  /**
+   * @param {number} value
+   * @private
+   */
+  showThumbnailAtValue_(value) {
+    const position = this.getThumbCenterPixel_(value);
+    if (position == null) {
+      return;
+    }
+    this.showThumbnailAndTime_(position, value);
+  }
 
   /**
    * @private
    */
-  async showThumbnail_(pixelPosition, value) {
-    const thumbnailTrack = this.getThumbnailTrack_();
-    if (!thumbnailTrack) {
-      this.hideThumbnail_();
-      return;
-    }
+  async showThumbnailAndTime_(pixelPosition, value) {
     if (value < 0) {
       value = 0;
     }
+    let isAdValue = false;
+    if (this.adCuePoints_.length) {
+      isAdValue = this.adCuePoints_.some((cuePoint) => {
+        if (!cuePoint.end) {
+          return false;
+        }
+        return value >= cuePoint.start && value <= cuePoint.end;
+      });
+    }
+
     const seekRange = this.player.seekRange();
     const playerValue = Math.max(Math.ceil(seekRange.start),
         Math.min(Math.floor(seekRange.end), value));
-    const thumbnail =
-        await this.player.getThumbnails(thumbnailTrack.id, playerValue);
-    if (!thumbnail || !thumbnail.uris.length) {
-      this.hideThumbnail_();
-      return;
-    }
-    if (this.player.isLive()) {
+    let time;
+    if (this.player.isDynamic()) {
       const totalSeconds = seekRange.end - value;
       if (totalSeconds < 1) {
-        this.thumbnailTime_.textContent =
-            this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
+        time = this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
       } else {
-        this.thumbnailTime_.textContent =
-            '-' + this.timeFormatter_(totalSeconds);
+        time = '-' + this.timeFormatter_(totalSeconds);
       }
     } else {
-      this.thumbnailTime_.textContent = this.timeFormatter_(value);
+      time = this.timeFormatter_(value);
     }
-    const offsetTop = -10;
+    const chapter = this.getChapter_(value);
+    if (chapter) {
+      this.thumbnailTime_.textContent = time + ' · ' + chapter.title;
+    } else {
+      this.thumbnailTime_.textContent = time;
+    }
+
     const width = this.thumbnailContainer_.clientWidth;
-    let height = Math.floor(width * 9 / 16);
-    this.thumbnailContainer_.style.height = height + 'px';
-    this.thumbnailContainer_.style.top = -(height - offsetTop) + 'px';
     const leftPosition = Math.min(this.bar.offsetWidth - width,
         Math.max(0, pixelPosition - (width / 2)));
     this.thumbnailContainer_.style.left = leftPosition + 'px';
     this.thumbnailContainer_.style.visibility = 'visible';
+
+    const hasImageTracks = this.player.getImageTracks().length > 0;
+    const hasChapterThumbnails = chapter && chapter.images.length > 0;
+
+    if (isAdValue || !(hasImageTracks || hasChapterThumbnails)) {
+      this.thumbnailImageContainer_.style.display = 'none';
+      return;
+    }
+    this.thumbnailImageContainer_.style.display = '';
+
+    // Set the thumbnail height before getting the thumbnail because the
+    // operation may take some time.
+    if (!this.thumbnailImageContainer_.style.height) {
+      let aspectRatio = 16 / 9;
+      const videoTrack = this.player.getVideoTracks().find((t) => t.active);
+      if (videoTrack && videoTrack.width && videoTrack.height) {
+        aspectRatio = videoTrack.width / videoTrack.height;
+      }
+      const height = Math.floor(width / aspectRatio);
+      this.thumbnailImageContainer_.style.height = height + 'px';
+    }
+
+    let thumbnail;
+    if (hasChapterThumbnails) {
+      thumbnail = this.convertChapterToThumbnail_(chapter);
+    }
+    if (hasImageTracks) {
+      thumbnail = await this.player.getThumbnails(
+          /* trackId= */ null, playerValue) ?? thumbnail;
+    }
+    if (!thumbnail) {
+      return;
+    }
+    if (thumbnail.width < thumbnail.height) {
+      this.thumbnailContainer_.classList.add('portrait-thumbnail');
+    } else {
+      this.thumbnailContainer_.classList.remove('portrait-thumbnail');
+    }
     let uri = thumbnail.uris[0].split('#xywh=')[0];
     if (!this.lastThumbnail_ ||
         uri !== this.lastThumbnail_.uris[0].split('#xywh=')[0] ||
-        thumbnail.segment.getStartByte() !=
-            this.lastThumbnail_.segment.getStartByte() ||
-        thumbnail.segment.getEndByte() !=
-            this.lastThumbnail_.segment.getEndByte()) {
+        thumbnail.startByte != this.lastThumbnail_.startByte ||
+        thumbnail.endByte != this.lastThumbnail_.endByte) {
       this.lastThumbnail_ = thumbnail;
       if (this.lastThumbnailPendingRequest_) {
         this.lastThumbnailPendingRequest_.abort();
         this.lastThumbnailPendingRequest_ = null;
       }
-      if (thumbnailTrack.codecs == 'mjpg' || uri.startsWith('offline:')) {
+      if (thumbnail.codecs == 'mjpg' || uri.startsWith('offline:')) {
         this.thumbnailImage_.src = shaka.ui.SeekBar.Transparent_Image_;
         try {
           const requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
           const type =
               shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT;
-          const request = shaka.util.Networking.createSegmentRequest(
-              thumbnail.segment.getUris(),
-              thumbnail.segment.getStartByte(),
-              thumbnail.segment.getEndByte(),
+          const request = shaka.net.NetworkingUtils.createSegmentRequest(
+              thumbnail.uris,
+              thumbnail.startByte,
+              thumbnail.endByte,
               this.player.getConfiguration().streaming.retryParameters);
           this.lastThumbnailPendingRequest_ = this.player.getNetworkingEngine()
               .request(requestType, request, {type});
           const response = await this.lastThumbnailPendingRequest_.promise;
           this.lastThumbnailPendingRequest_ = null;
-          if (thumbnailTrack.codecs == 'mjpg') {
-            const parser = new shaka.util.Mp4Parser()
-                .box('mdat', shaka.util.Mp4Parser.allData((data) => {
-                  const blob = new Blob([data], {type: 'image/jpeg'});
-                  uri = URL.createObjectURL(blob);
-                }));
-            parser.parse(response.data, /* partialOkay= */ false);
-          } else {
-            const mimeType = thumbnailTrack.mimeType || 'image/jpeg';
-            const blob = new Blob([response.data], {type: mimeType});
-            uri = URL.createObjectURL(blob);
-          }
+          uri = shaka.ui.Utils.getUriFromThumbnailResponse(thumbnail, response);
         } catch (error) {
           if (error.code == shaka.util.Error.Code.OPERATION_ABORTED) {
             return;
@@ -623,13 +866,14 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         }
       }
       try {
-        this.thumbnailContainer_.removeChild(this.thumbnailImage_);
+        this.thumbnailImageContainer_.removeChild(this.thumbnailImage_);
       } catch (e) {
         // The image is not a child
       }
       this.thumbnailImage_ = /** @type {!HTMLImageElement} */ (
         shaka.util.Dom.createHTMLElement('img'));
-      this.thumbnailImage_.id = 'shaka-player-ui-thumbnail-image';
+      this.thumbnailImage_.alt = '';
+      this.thumbnailImage_.classList.add('shaka-player-ui-thumbnail-image');
       this.thumbnailImage_.draggable = false;
       this.thumbnailImage_.src = uri;
       this.thumbnailImage_.onload = () => {
@@ -637,10 +881,11 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           URL.revokeObjectURL(uri);
         }
       };
-      this.thumbnailContainer_.insertBefore(this.thumbnailImage_,
-          this.thumbnailContainer_.firstChild);
+      this.thumbnailImageContainer_.insertBefore(this.thumbnailImage_,
+          this.thumbnailImageContainer_.firstChild);
     }
-    const scale = width / thumbnail.width;
+    const widthImageContainer = this.thumbnailImageContainer_.clientWidth;
+    const scale = widthImageContainer / thumbnail.width;
     if (thumbnail.imageHeight) {
       this.thumbnailImage_.height = thumbnail.imageHeight;
     } else if (!thumbnail.sprite) {
@@ -653,66 +898,28 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.thumbnailImage_.style.width = '100%';
       this.thumbnailImage_.style.objectFit = 'contain';
     }
-    this.thumbnailImage_.style.left = '-' + scale * thumbnail.positionX + 'px';
-    this.thumbnailImage_.style.top = '-' + scale * thumbnail.positionY + 'px';
-    this.thumbnailImage_.style.transform = 'scale(' + scale + ')';
-    this.thumbnailImage_.style.transformOrigin = 'left top';
-    // Update container height and top
-    height = Math.floor(width * thumbnail.height / thumbnail.width);
-    this.thumbnailContainer_.style.height = height + 'px';
-    this.thumbnailContainer_.style.top = -(height - offsetTop) + 'px';
-  }
-
-
-  /**
-   * @return {?shaka.extern.Track} The thumbnail track.
-   * @private
-   */
-  getThumbnailTrack_() {
-    const imageTracks = this.player.getImageTracks();
-    if (!imageTracks.length) {
-      return null;
+    if (!isNaN(scale) && isFinite(scale)) {
+      this.thumbnailImage_.style.left =
+          '-' + scale * thumbnail.positionX + 'px';
+      this.thumbnailImage_.style.top =
+          '-' + scale * thumbnail.positionY + 'px';
+      this.thumbnailImage_.style.transform = 'scale(' + scale + ')';
+      this.thumbnailImage_.style.transformOrigin = 'left top';
     }
-    const mimeTypesPreference = [
-      'image/avif',
-      'image/webp',
-      'image/jpeg',
-      'image/png',
-      'image/svg+xml',
-    ];
-    for (const mimeType of mimeTypesPreference) {
-      const estimatedBandwidth = this.player.getStats().estimatedBandwidth;
-      const bestOptions = imageTracks.filter((track) => {
-        return track.mimeType.toLowerCase() === mimeType &&
-            track.bandwidth < estimatedBandwidth * 0.01;
-      }).sort((a, b) => {
-        return b.bandwidth - a.bandwidth;
-      });
-      if (bestOptions && bestOptions.length) {
-        return bestOptions[0];
-      }
+    // Update container height
+    const finalHeight =
+        Math.floor(widthImageContainer * thumbnail.height / thumbnail.width);
+    if (!isNaN(finalHeight) && isFinite(finalHeight)) {
+      this.thumbnailImageContainer_.style.height = finalHeight + 'px';
     }
-    const mjpgTrack = imageTracks.find((track) => {
-      return track.mimeType == 'application/mp4' && track.codecs == 'mjpg';
-    });
-    return mjpgTrack || imageTracks[0];
   }
 
 
   /**
    * @private
    */
-  hideThumbnail_() {
+  hideThumbnailTimeContainer_() {
     this.thumbnailContainer_.style.visibility = 'hidden';
-    this.thumbnailTime_.textContent = '';
-  }
-
-
-  /**
-   * @private
-   */
-  hideTime_() {
-    this.timeContainer_.style.visibility = 'hidden';
   }
 
 
@@ -721,21 +928,55 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @private
    */
   timeFormatter_(totalSeconds) {
-    const secondsNumber = Math.round(totalSeconds);
-    const hours = Math.floor(secondsNumber / 3600);
-    let minutes = Math.floor((secondsNumber - (hours * 3600)) / 60);
-    let seconds = secondsNumber - (hours * 3600) - (minutes * 60);
-    if (seconds < 10) {
-      seconds = '0' + seconds;
-    }
-    if (hours > 0) {
-      if (minutes < 10) {
-        minutes = '0' + minutes;
+    return shaka.ui.Utils.buildTimeString(totalSeconds, totalSeconds >= 3600);
+  }
+
+
+  /**
+   * @param {number} totalSeconds
+   * @return {?shaka.extern.Chapter}
+   * @private
+   */
+  getChapter_(totalSeconds) {
+    for (const chapter of this.controls.getChapters()) {
+      if (chapter.startTime <= totalSeconds &&
+          chapter.endTime > totalSeconds) {
+        return chapter;
       }
-      return hours + ':' + minutes + ':' + seconds;
-    } else {
-      return minutes + ':' + seconds;
     }
+    return null;
+  }
+
+
+  /**
+   * @param {?shaka.extern.Chapter} chapter
+   * @return {?shaka.extern.Thumbnail}
+   * @private
+   */
+  convertChapterToThumbnail_(chapter) {
+    if (!chapter || !chapter.images.length) {
+      return null;
+    }
+    const image = chapter.images[0];
+    /** @type {shaka.extern.Thumbnail} */
+    const thumbnail = {
+      segment: null,
+      imageHeight: image.height || 0,
+      imageWidth: image.width || 0,
+      height: image.height || 0,
+      positionX: 0,
+      positionY: 0,
+      startTime: chapter.startTime,
+      duration: chapter.endTime - chapter.startTime,
+      uris: [image.url],
+      startByte: 0,
+      endByte: null,
+      width: image.width || 0,
+      sprite: false,
+      mimeType: '',
+      codecs: '',
+    };
+    return thumbnail;
   }
 };
 
@@ -746,6 +987,36 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
  */
 shaka.ui.SeekBar.Transparent_Image_ =
     'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>';
+
+
+/**
+ * @const {number}
+ * @private
+ */
+shaka.ui.SeekBar.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_ = 5; // seconds
+
+
+/**
+ * The width, in pixels, of the seek bar thumb. This is the value of the
+ * "thumb-size" variable in range_elements.less. Note: for everything to
+ * work, this value has to be synchronized with the one in the stylesheet.
+ *
+ * @const {number}
+ * @private
+ */
+shaka.ui.SeekBar.THUMB_SIZE_PX_ = 12;
+
+
+/**
+ * The maximum distance, in pixels, between the pointer and a chapter
+ * start marker at which the seek bar snaps to the chapter start time.
+ * Half a pixel means that only the pixel that contains the marker snaps,
+ * so the timestamps next to a boundary stay reachable too.
+ *
+ * @const {number}
+ * @private
+ */
+shaka.ui.SeekBar.CHAPTER_SNAP_DISTANCE_PX_ = 0.5;
 
 
 /**

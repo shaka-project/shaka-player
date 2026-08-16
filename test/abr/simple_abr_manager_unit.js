@@ -13,16 +13,19 @@ describe('SimpleAbrManager', () => {
   let config;
   /** @type {!jasmine.Spy} */
   let switchCallback;
+  /** @type {!jasmine.Spy} */
+  let restrictVideoCallback;
   /** @type {!shaka.abr.SimpleAbrManager} */
   let abrManager;
   /** @type {shaka.extern.Manifest} */
   let manifest;
-  /** @type {!Array.<shaka.extern.Variant>} */
+  /** @type {!Array<shaka.extern.Variant>} */
   let variants;
 
   beforeEach(() => {
     Date.now = () => 0;
     switchCallback = jasmine.createSpy('switchCallback');
+    restrictVideoCallback = jasmine.createSpy('restrictVideoCallback');
 
     // Keep unsorted.
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -68,9 +71,10 @@ describe('SimpleAbrManager', () => {
     variants = manifest.variants;
 
     abrManager = new shaka.abr.SimpleAbrManager();
-    abrManager.init(shaka.test.Util.spyFunc(switchCallback));
+    abrManager.init(shaka.test.Util.spyFunc(switchCallback),
+        shaka.test.Util.spyFunc(restrictVideoCallback));
     abrManager.configure(config);
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
   });
 
   afterEach(() => {
@@ -91,7 +95,7 @@ describe('SimpleAbrManager', () => {
   });
 
   it('can handle empty variants', () => {
-    abrManager.setVariants([]);
+    abrManager.setVariants([], false);
     const chosen = abrManager.chooseVariant();
     expect(chosen).toBe(null);
   });
@@ -108,7 +112,7 @@ describe('SimpleAbrManager', () => {
       });
     });
 
-    abrManager.setVariants(manifest.variants);
+    abrManager.setVariants(manifest.variants, false);
     const chosen = abrManager.chooseVariant();
     expect(chosen).not.toBe(null);
     expect(chosen.audio).not.toBe(null);
@@ -127,7 +131,7 @@ describe('SimpleAbrManager', () => {
       });
     });
 
-    abrManager.setVariants(manifest.variants);
+    abrManager.setVariants(manifest.variants, false);
     const chosen = abrManager.chooseVariant();
     expect(chosen).not.toBe(null);
     expect(chosen.audio).toBe(null);
@@ -143,7 +147,7 @@ describe('SimpleAbrManager', () => {
     const description = 'picks correct Variant at ' + bandwidthKbps + ' kbps';
 
     it(description, () => {
-      abrManager.setVariants(variants);
+      abrManager.setVariants(variants, false);
       abrManager.chooseVariant();
 
       abrManager.segmentDownloaded(1000, bytesPerSecond, true);
@@ -170,7 +174,7 @@ describe('SimpleAbrManager', () => {
     const bandwidth = 5e5;
     const bytesPerSecond = sufficientBWMultiplier * bandwidth / 8.0;
 
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
     abrManager.chooseVariant();
 
     // 0 duration segment shouldn't cause us to get stuck on the lowest variant
@@ -187,7 +191,7 @@ describe('SimpleAbrManager', () => {
   it('picks lowest variant when there is insufficient bandwidth', () => {
     const bandwidth = 2e6;
 
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
     abrManager.chooseVariant();
 
     // Simulate some segments being downloaded just above the desired
@@ -213,7 +217,7 @@ describe('SimpleAbrManager', () => {
     const bandwidth = 5e5;
     const bytesPerSecond = sufficientBWMultiplier * bandwidth / 8.0;
 
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
     abrManager.chooseVariant();
 
     // Don't enable AbrManager.
@@ -227,7 +231,7 @@ describe('SimpleAbrManager', () => {
     let bandwidth = 5e5;
     let bytesPerSecond = sufficientBWMultiplier * bandwidth / 8.0;
 
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
     abrManager.chooseVariant();
 
     abrManager.segmentDownloaded(1000, bytesPerSecond, true);
@@ -270,7 +274,7 @@ describe('SimpleAbrManager', () => {
     const bandwidth = 5e5;
     const bytesPerSecond = sufficientBWMultiplier * bandwidth / 8.0;
 
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
     abrManager.chooseVariant();
 
     abrManager.segmentDownloaded(1000, bytesPerSecond, true);
@@ -287,7 +291,7 @@ describe('SimpleAbrManager', () => {
     expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object), false, 0);
   });
 
-  it('does clear the buffer on upgrade with safemargin to 4', () => {
+  it('does clear the buffer on upgrade with safeMargin to 4', () => {
     // Simulate some segments being downloaded at a high rate, to trigger an
     // upgrade.
     const bandwidth = 5e5;
@@ -298,7 +302,7 @@ describe('SimpleAbrManager', () => {
     config.safeMarginSwitch = 4;
     abrManager.configure(config);
 
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
     abrManager.chooseVariant();
 
     abrManager.segmentDownloaded(1000, bytesPerSecond, true);
@@ -325,7 +329,7 @@ describe('SimpleAbrManager', () => {
     config.defaultBandwidthEstimate = 4e6;
     abrManager.configure(config);
 
-    abrManager.setVariants(variants);
+    abrManager.setVariants(variants, false);
     abrManager.chooseVariant();
 
     abrManager.segmentDownloaded(1000, bytesPerSecond, true);
@@ -358,7 +362,7 @@ describe('SimpleAbrManager', () => {
       });
     });
 
-    abrManager.setVariants(manifest.variants);
+    abrManager.setVariants(manifest.variants, false);
     let chosen = abrManager.chooseVariant();
     expect(chosen.id).toBe(11);
 
@@ -385,7 +389,7 @@ describe('SimpleAbrManager', () => {
       });
     });
 
-    abrManager.setVariants(manifest.variants);
+    abrManager.setVariants(manifest.variants, false);
     let chosen = abrManager.chooseVariant();
     expect(chosen.id).toBe(11);
 
@@ -395,5 +399,134 @@ describe('SimpleAbrManager', () => {
 
     chosen = abrManager.chooseVariant();
     expect(chosen.id).toBe(10);
+  });
+
+  describe('dropped frame protection', /** @suppress {accessControls} */ () => {
+    /** @type {!HTMLVideoElement} */
+    let mockVideo;
+
+    beforeEach(() => {
+      mockVideo = /** @type {!HTMLVideoElement} */ (
+        document.createElement('video'));
+      Object.defineProperty(mockVideo, 'paused', {
+        get: () => false,
+        configurable: true,
+      });
+      mockVideo.getVideoPlaybackQuality = () => ({
+        droppedVideoFrames: 0,
+        totalVideoFrames: 0,
+        corruptedVideoFrames: 0,
+        creationTime: 0,
+        totalFrameDelay: 0,
+      });
+
+      config.droppedFrames = true;
+      config.advanced.droppedFramesThreshold = 0.15;
+      config.advanced.droppedFramesInterval = 2;
+      config.advanced.droppedFramesBanDuration = 30;
+      abrManager.configure(config);
+      abrManager.enable();
+      abrManager.setMediaElement(mockVideo);
+    });
+
+    /**
+     * @param {number} dropped
+     * @param {number} total
+     * @return {!VideoPlaybackQuality}
+     */
+    function makeQuality(dropped, total) {
+      return /** @type {!VideoPlaybackQuality} */ ({
+        droppedVideoFrames: dropped,
+        totalVideoFrames: total,
+        corruptedVideoFrames: 0,
+        creationTime: 0,
+        totalFrameDelay: 0,
+      });
+    }
+
+    it('calls disableStreamCallback when drop ratio exceeds threshold', () => {
+      // Establish baseline counters.
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(0, 100);
+      abrManager.checkDroppedFrames_();
+
+      // 20/100 new frames dropped = 20% > 15% threshold.
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(20, 200);
+      abrManager.checkDroppedFrames_();
+
+      expect(restrictVideoCallback).toHaveBeenCalledWith('video', 30);
+    });
+
+    it('does not call disableStreamCallback when drop ratio is below threshold',
+        () => {
+          // Establish baseline counters.
+          mockVideo.getVideoPlaybackQuality = () => makeQuality(0, 100);
+          abrManager.checkDroppedFrames_();
+
+          // 10/100 new frames dropped = 10% < 15% threshold.
+          mockVideo.getVideoPlaybackQuality = () => makeQuality(10, 200);
+          abrManager.checkDroppedFrames_();
+
+          expect(restrictVideoCallback).not.toHaveBeenCalled();
+        });
+
+    it('skips ban logic when playbackRate > 1', () => {
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(0, 100);
+      abrManager.checkDroppedFrames_();
+
+      // High drop ratio at 2x speed — ban logic should be skipped.
+      abrManager.playbackRateChanged(2);
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(50, 200);
+      abrManager.checkDroppedFrames_();
+
+      expect(restrictVideoCallback).not.toHaveBeenCalled();
+    });
+
+    it('resets counters when playbackRate > 1 and resumes to 1x', () => {
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(0, 100);
+      abrManager.checkDroppedFrames_();
+
+      // 2x speed: counters are reset to current values (50, 200).
+      abrManager.playbackRateChanged(2);
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(50, 200);
+      abrManager.checkDroppedFrames_();
+
+      // Back to 1x: 5/100 new drops = 5% < 15% threshold.
+      abrManager.playbackRateChanged(1);
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(55, 300);
+      abrManager.checkDroppedFrames_();
+
+      expect(restrictVideoCallback).not.toHaveBeenCalled();
+    });
+
+    it('skips check when paused', () => {
+      Object.defineProperty(mockVideo, 'paused', {
+        get: () => true,
+        configurable: true,
+      });
+
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(0, 100);
+      abrManager.checkDroppedFrames_();
+
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(50, 200);
+      abrManager.checkDroppedFrames_();
+
+      expect(restrictVideoCallback).not.toHaveBeenCalled();
+    });
+
+    it('does not start poller when droppedFrames config is disabled', () => {
+      config.droppedFrames = false;
+      abrManager.configure(config);
+      abrManager.setMediaElement(mockVideo);
+
+      // startDroppedFramePoller_() returns early, so no timer is created.
+      expect(abrManager.droppedFramePoller_).toBeNull();
+    });
+
+    it('skips check when totalVideoFrames is 0', () => {
+      mockVideo.getVideoPlaybackQuality = () => makeQuality(0, 0);
+      abrManager.checkDroppedFrames_();
+
+      expect(restrictVideoCallback).not.toHaveBeenCalled();
+    });
   });
 });

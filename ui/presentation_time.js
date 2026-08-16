@@ -34,10 +34,19 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
     this.setValue_('0:00');
     this.parent.appendChild(this.currentTime_);
 
+    this.showProgress_ =
+        !this.controls.getConfig().showRemainingTimeInPresentationTime;
+
     this.eventManager.listen(this.currentTime_, 'click', () => {
+      if (!this.controls.isOpaque()) {
+        return;
+      }
       // Jump to LIVE if the user clicks on the current time.
-      if (this.player.isLive()) {
+      if (this.player.isDynamic()) {
         this.video.currentTime = this.player.seekRange().end;
+      } else {
+        this.showProgress_ = !this.showProgress_;
+        this.updateTime_();
       }
     });
 
@@ -55,7 +64,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
 
     this.eventManager.listen(
         this.adManager, shaka.ads.Utils.AD_STARTED, () => {
-          shaka.ui.Utils.setDisplay(this.currentTime_, false);
+          shaka.ui.Utils.setDisplay(this.currentTime_, !this.ad.isLinear());
         });
 
     this.eventManager.listen(
@@ -64,7 +73,10 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
         });
   }
 
-  /** @private */
+  /**
+   * @param {string} value
+   * @private
+   */
   setValue_(value) {
     // To avoid constant updates to the DOM, which makes debugging more
     // difficult, only set the value if it has changed.  If we don't do this
@@ -86,7 +98,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
     if (!isFinite(seekRangeSize)) {
       this.setValue_(this.localization.resolve(shaka.ui.Locales.Ids.LIVE));
       this.currentTime_.disabled = true;
-    } else if (this.player.isLive()) {
+    } else if (this.player.isDynamic()) {
       // The amount of time we are behind the live edge.
       const behindLive = Math.floor(seekRange.end - displayTime);
       displayTime = Math.max(0, behindLive);
@@ -108,13 +120,21 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
     } else {
       const showHour = seekRangeSize >= 3600;
 
-      const currentTime = Math.max(0, displayTime - seekRange.start);
+      let currentTime = Math.max(0, displayTime - seekRange.start);
+      if (seekRangeSize) {
+        currentTime = Math.min(currentTime, seekRangeSize);
+      }
       let value = Utils.buildTimeString(currentTime, showHour);
+      if (!this.showProgress_ && seekRangeSize) {
+        const remainingTime = seekRangeSize - currentTime;
+        value = '-' + Utils.buildTimeString(remainingTime, showHour);
+      }
       if (seekRangeSize) {
         value += ' / ' + Utils.buildTimeString(seekRangeSize, showHour);
       }
       this.setValue_(value);
-      this.currentTime_.disabled = true;
+      this.currentTime_.disabled =
+          !this.controls.getConfig().allowTogglePresentationTime;
     }
   }
 
@@ -123,7 +143,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
    * @private
    */
   onTracksChanged_() {
-    if (this.player.isLive()) {
+    if (this.player.isDynamic()) {
       const ariaLabel = shaka.ui.Locales.Ids.SKIP_TO_LIVE;
       this.currentTime_.ariaLabel = this.localization.resolve(ariaLabel);
     }

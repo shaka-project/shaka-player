@@ -58,6 +58,35 @@ shaka.test.AnyOrNull = class {
   }
 };
 
+shaka.test.AnythingOrNull = class {
+  constructor() {
+    /** @type {!Object} */
+    this.anything = jasmine.anything();
+  }
+
+  /**
+   * @param {?Object} other
+   * @return {boolean}
+   * @suppress {checkTypes}
+   */
+  asymmetricMatch(other) {
+    if (other == null) {
+      return true;
+    } else {
+      return this.anything.asymmetricMatch(other);
+    }
+  }
+
+  /**
+   * @return {boolean}
+   * @suppress {checkTypes}
+   */
+  jasmineToString() {
+    return this.anything.jasmineToString()
+        .replace('jasmine.anything', 'shaka.test.AnythingOrNull');
+  }
+};
+
 shaka.test.Util = class {
   /**
    * Fakes an event loop. Each tick processes some number of instantaneous
@@ -288,7 +317,7 @@ shaka.test.Util = class {
    * Fetches the resource at the given URI.
    *
    * @param {string} uri
-   * @return {!Promise.<!ArrayBuffer>}
+   * @return {!Promise<!ArrayBuffer>}
    */
   static async fetch(uri) {
     const response = await fetch(uri);
@@ -345,12 +374,11 @@ shaka.test.Util = class {
    * @param {!string} mimetype
    * @param {?number=} width
    * @param {?number=} height
-   * @return {!Promise.<boolean>}
+   * @return {!Promise<boolean>}
    */
   static async isTypeSupported(mimetype, width, height) {
     const MimeUtils = shaka.util.MimeUtils;
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
-    const StreamUtils = shaka.util.StreamUtils;
 
     /** @type {!MediaDecodingConfiguration} */
     const mediaDecodingConfig = {
@@ -358,21 +386,25 @@ shaka.test.Util = class {
     };
     if (mimetype.startsWith('audio')) {
       const baseMimeType = MimeUtils.getBasicType(mimetype);
-      const codecs = StreamUtils.getCorrectAudioCodecs(
+      const codecs = MimeUtils.getCorrectAudioCodecs(
           MimeUtils.getCodecs(mimetype), baseMimeType);
-      if (codecs == 'ac-3' && shaka.util.Platform.isTizen()) {
-        // AC3 is flaky in some Tizen devices, so we need omit it for now.
-        return false;
-      }
       // AudioConfiguration
       mediaDecodingConfig.audio = {
         contentType: MimeUtils.getFullOrConvertedType(
             baseMimeType, codecs, ContentType.AUDIO),
       };
     } else {
-      const codecs = StreamUtils.getCorrectVideoCodecs(
+      const codecs = MimeUtils.getCorrectVideoCodecs(
           MimeUtils.getCodecs(mimetype));
       const baseMimeType = MimeUtils.getBasicType(mimetype);
+      if (codecs.startsWith('hvc1.') && deviceDetected.disableHEVCSupport()) {
+        return false;
+      }
+      // AV1 does not work in GitHub Actions.
+      if ((codecs.startsWith('av01.')|| codecs.startsWith('dav1.')) &&
+          deviceDetected.getDeviceName() === 'Apple Browser') {
+        return false;
+      }
       // VideoConfiguration
       mediaDecodingConfig.video = {
         contentType: MimeUtils.getFullOrConvertedType(
@@ -394,6 +426,39 @@ shaka.test.Util = class {
     const result =
         await navigator.mediaCapabilities.decodingInfo(mediaDecodingConfig);
     return result.supported;
+  }
+
+  /** @param {string} userAgent */
+  static setUserAgent(userAgent) {
+    shaka.test.Util.setNavigatorProperty('userAgent', userAgent);
+  }
+
+  /** @param {?Object} userAgentData */
+  static setUserAgentData(userAgentData) {
+    shaka.test.Util.setNavigatorProperty('userAgentData', userAgentData);
+  }
+
+  /** @param {string} vendor */
+  static setVendor(vendor) {
+    shaka.test.Util.setNavigatorProperty('vendor', vendor);
+  }
+
+  /** @param {string} platform */
+  static setPlatform(platform) {
+    shaka.test.Util.setNavigatorProperty('platform', platform);
+  }
+
+  /** @param {number} maxTouchPoints */
+  static setMaxTouchPoints(maxTouchPoints) {
+    shaka.test.Util.setNavigatorProperty('maxTouchPoints', maxTouchPoints);
+  }
+
+  /**
+   * @param {string} key
+   * @param {*} value
+   */
+  static setNavigatorProperty(key, value) {
+    Object.defineProperty(navigator, key, {value, configurable: true});
   }
 };
 

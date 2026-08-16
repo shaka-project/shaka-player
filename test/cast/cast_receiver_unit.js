@@ -10,7 +10,9 @@
 // only be run on Chrome and Chromecast.
 /** @return {boolean} */
 const castReceiverSupport =
-    () => shaka.util.Platform.isChrome() || shaka.util.Platform.isChromecast();
+    () => deviceDetected.getDeviceName() === 'Chrome' ||
+      deviceDetected.getDeviceName() === 'Edge' ||
+      deviceDetected.getDeviceType() === shaka.device.IDevice.DeviceType.CAST;
 filterDescribe('CastReceiver', castReceiverSupport, () => {
   const CastReceiver = shaka.cast.CastReceiver;
   const CastUtils = shaka.cast.CastUtils;
@@ -54,6 +56,8 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     mockReceiverApi = createMockReceiverApi();
     mockCanDisplayType = jasmine.createSpy('canDisplayType');
     mockCanDisplayType.and.returnValue(false);
+    spyOn(deviceDetected, 'getDeviceType').and
+        .returnValue(shaka.device.IDevice.DeviceType.CAST);
 
     // We're using quotes to access window.cast because the compiler
     // knows about lots of Cast-specific APIs we aren't mocking.  We
@@ -242,11 +246,9 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       fakeInitState = {
         manifest: null,
         startTime: null,
+        mimeType: null,
         player: {
           configure: fakeConfig,
-        },
-        playerAfterLoad: {
-          setTextTrackVisibility: true,
         },
         video: {
           loop: true,
@@ -271,14 +273,11 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       // App data next:
       expect(mockAppDataCallback).toHaveBeenCalledWith(fakeAppData);
       // Nothing else yet:
-      expect(mockPlayer.setTextTrackVisibility).not.toHaveBeenCalled();
       expect(mockVideo.loop).toBe(false);
       expect(mockVideo.playbackRate).toBe(1);
 
       // The rest is done async:
       await shaka.test.Util.shortDelay();
-      expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
-          fakeInitState.playerAfterLoad.setTextTrackVisibility);
       expect(mockVideo.loop).toBe(fakeInitState.video.loop);
       expect(mockVideo.playbackRate).toBe(fakeInitState.video.playbackRate);
     });
@@ -344,6 +343,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     it('loads the manifest', () => {
       fakeInitState.startTime = 12;
       fakeInitState.manifest = 'foo://bar';
+      fakeInitState.mimeType = 'foo';
       expect(mockPlayer.load).not.toHaveBeenCalled();
 
       fakeIncomingMessage({
@@ -352,7 +352,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
         appData: fakeAppData,
       }, mockShakaMessageBus);
 
-      expect(mockPlayer.load).toHaveBeenCalledWith('foo://bar', 12);
+      expect(mockPlayer.load).toHaveBeenCalledWith('foo://bar', 12, 'foo');
     });
 
     it('plays the video after loading', async () => {
@@ -388,8 +388,6 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       expect(mockVideo.play).not.toHaveBeenCalled();
 
       // State was still transferred, though:
-      expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
-          fakeInitState.playerAfterLoad.setTextTrackVisibility);
       expect(mockVideo.loop).toBe(fakeInitState.video.loop);
       expect(mockVideo.playbackRate).toBe(fakeInitState.video.playbackRate);
     });
@@ -524,7 +522,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     const fakeSenderId = 'senderId';
     /** @const */
     const fakeCallId = '5';
-    /** @type {!shaka.util.PublicPromise} */
+    /** @type {!Promise.PromiseWithResolvers} */
     let p;
 
     beforeEach(() => {
@@ -532,8 +530,8 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
 
       fakeConnectedSenders(1);
-      p = new shaka.util.PublicPromise();
-      mockPlayer.load.and.returnValue(p);
+      p = Promise.withResolvers();
+      mockPlayer.load.and.returnValue(p.promise);
 
       expect(mockPlayer.load).not.toHaveBeenCalled();
       fakeIncomingMessage({
@@ -591,6 +589,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
         type: 'asyncComplete',
         id: fakeCallId,
         error: jasmine.any(Object),
+        res: null,
       }]);
       if (senderChannel.messages.length) {
         const error = senderChannel.messages[0].error;
@@ -615,7 +614,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
         appData: {},
       }, mockShakaMessageBus);
 
-      // The messages will show up asychronously:
+      // The messages will show up asynchronously:
       await Util.shortDelay();
       expectMediaInfo('URI A', 1);
       mockGenericMessageBus.messages = [];
@@ -698,7 +697,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
         appData: {},
       }, mockShakaMessageBus);
 
-      // The messages will show up asychronously:
+      // The messages will show up asynchronously:
       await Util.shortDelay();
       expectMediaInfo('URI A', 1);
       mockGenericMessageBus.messages = [];
@@ -838,7 +837,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
         appData: {},
       }, mockShakaMessageBus);
 
-      // The messages will show up asychronously:
+      // The messages will show up asynchronously:
       await Util.shortDelay();
       expectMediaInfo('URI A', 1);
       mockGenericMessageBus.messages = [];
@@ -1055,6 +1054,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     const player = {
       destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
       setMaxHardwareResolution: jasmine.createSpy('setMaxHardwareResolution'),
+      getAdManager: () => null,
 
       addEventListener: (eventName, listener) => {
         player.listeners[eventName] = listener;
@@ -1070,13 +1070,13 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     for (const name of CastUtils.PlayerVoidMethods) {
       player[name] = jasmine.createSpy(name);
     }
-    for (const name in CastUtils.PlayerGetterMethods) {
+    for (const name of CastUtils.PlayerGetterMethods.keys()) {
       player[name] = jasmine.createSpy(name);
     }
-    for (const name in CastUtils.LargePlayerGetterMethods) {
+    for (const name of CastUtils.LargePlayerGetterMethods.keys()) {
       player[name] = jasmine.createSpy(name);
     }
-    for (const name in CastUtils.PlayerGetterMethodsThatRequireLive) {
+    for (const name of CastUtils.PlayerGetterMethodsThatRequireLive.keys()) {
       player[name] = jasmine.createSpy(name);
     }
     for (const name of CastUtils.PlayerPromiseMethods) {

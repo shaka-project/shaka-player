@@ -27,6 +27,10 @@ import generateLocalizations
 import shakaBuildHelpers
 
 
+_force_hint_shown = False
+_skip_messages_shown = set()
+
+
 def _canonicalize_source_files(source_files):
   """Canonicalize a set or list of source files.
 
@@ -45,6 +49,8 @@ def _get_source_path(path):
 def _must_build(output, source_files):
   """Returns True if any of the |source_files| have changed since |output| was
      built, or if |output| does not exist yet."""
+  global _force_hint_shown, _skip_messages_shown
+
   if not os.path.isfile(output):
     # Nothing built, so we should build the output.
     return True
@@ -64,13 +70,42 @@ def _must_build(output, source_files):
     if path and os.path.exists(path) and os.path.getmtime(path) > build_time:
       return True
 
-  logging.warning('No changes detected, skipping. Use --force to override.')
+  # Inform about the --force flag once (if something is skipped)
+  if not _force_hint_shown:
+    logging.warning('Detected output files that do not need to be rebuilt. Use --force to override.')
+    _force_hint_shown = True
+
+  # Log skip message once per output file
+  output_basename = os.path.basename(output)
+  if output_basename not in _skip_messages_shown:
+    logging.info('Skipping %s (already built)', output_basename)
+    _skip_messages_shown.add(output_basename)
+
+
   return False
 
 def _update_timestamp(path):
   # This creates the file if it does not exist, and updates the timestamp if it
   # does.
   open(path, 'wb').close()
+
+def _get_java_major_version():
+  obj = shakaBuildHelpers.execute_subprocess(
+      ['java', '-version'], stderr=subprocess.PIPE)
+  # This will block until the process terminates, storing stderr in a string
+  stderr = obj.communicate()[1]
+
+  first_line = stderr.decode('utf-8').split('\n')[0]
+  # Example: openjdk version "25" 2025-09-16
+  # Example: openjdk version "24.0.1" 2025-04-15
+  # Example: java version "24.0.2" 2025-07-15
+  major_version_match = re.match(r'.*"(\d+).*?".*', first_line)
+  major_version_string = major_version_match.group(1)
+
+  try:
+    return int(major_version_string)
+  except:
+    return 0
 
 
 class ClosureCompiler(object):
@@ -93,6 +128,21 @@ class ClosureCompiler(object):
     # timestamp file after compilation.
     self.timestamp_file = None
 
+    # Arguments passed to the Java interpreter before launching a jar.
+    self.java_opts = []
+
+    java_major_version = _get_java_major_version()
+    if java_major_version >= 23:
+      # Silence warnings caused by using the Closure Compiler with newer
+      # versions of Java.  See https://openjdk.org/jeps/498
+      self.java_opts.append('--sun-misc-unsafe-memory-access=allow')
+
+    jar = _get_source_path(
+        'node_modules/google-closure-compiler-java/compiler.jar')
+
+    # Full compiler command.
+    self.compiler_command = ['java'] + self.java_opts + ['-jar', jar]
+
   def compile(self, options, force=False):
     """Builds the files in |self.source_files| using the given Closure
     command-line options.
@@ -111,9 +161,6 @@ class ClosureCompiler(object):
       else:
         if not _must_build(self.compiled_js_path, self.source_files):
           return True
-
-    jar = _get_source_path(
-        'node_modules/google-closure-compiler-java/compiler.jar')
 
     output_options = []
     if self.output_compiled_bundle:
@@ -143,12 +190,27 @@ class ClosureCompiler(object):
       if self.add_wrapper:
         output_options += self._prepare_wrapper()
 
-    cmd_line = ['java', '-jar', jar] + output_options + options
-    cmd_line += self.source_files
+    # Write a temp file with the file list as quoted strings.
+    # This will be deleted only when exiting the context manager.
+    with shakaBuildHelpers.NamedTemporaryFile() as fp:
+      normal_flags = output_options + options
+      quoted_files = '\n'.join(
+          [shakaBuildHelpers.quote_argument(x) for x in self.source_files]) + '\n'
 
-    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
-      logging.error('Build failed')
-      return False
+      if os.environ.get('PRINT_ARGUMENTS'):
+        logging.info('Compiling these files:\n' + quoted_files)
+
+      fp.write(quoted_files.encode('utf8'))
+      fp.close()
+
+      # To avoid command line length limits on Windows, the list of files are
+      # read from the temp file.  We still put normal command line flags in the
+      # command line.
+      # cspell: disable-next-line
+      cmd_line = self.compiler_command + normal_flags + ['--flagfile', fp.name]
+      if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+        logging.error('Build failed')
+        return False
 
     if self.output_compiled_bundle and self.add_source_map:
       # Add a special source-mapping comment so that Chrome and Firefox can map
@@ -176,16 +238,18 @@ class ClosureCompiler(object):
     with shakaBuildHelpers.open_file(wrapper_input_path, 'r') as f:
       wrapper_code = f.read().replace('%output%', '"%output%"')
 
-    jar = _get_source_path(
-        'node_modules/google-closure-compiler-java/compiler.jar')
-    cmd_line = ['java', '-jar', jar, '-O', 'WHITESPACE_ONLY']
+    cmd_line = self.compiler_command + ['-O', 'WHITESPACE_ONLY']
 
     proc = shakaBuildHelpers.execute_subprocess(
         cmd_line, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
-    stripped_wrapper_code = proc.communicate(wrapper_code.encode('utf8'))[0]
+    stripped_wrapper_code, stderr = proc.communicate(wrapper_code.encode('utf8'))
 
     if proc.returncode != 0:
+      # Print stderr to help diagnose the failure (e.g., Java version errors)
+      if stderr:
+        stderr_text = stderr.decode('utf-8', errors='replace')
+        logging.error('Closure Compiler failed with stderr:\n%s', stderr_text)
       raise RuntimeError('Failed to strip whitespace from wrapper!')
 
     with shakaBuildHelpers.open_file(wrapper_output_path, 'w') as f:
@@ -219,6 +283,41 @@ class ExternGenerator(object):
 
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       logging.error('Externs generation failed')
+      return False
+
+    return True
+
+
+class NamespaceExternGenerator(object):
+  """Generates a standalone externs file with only the shaka namespace typedef.
+
+  Unlike ExternGenerator, this does not re-declare the library API, so the
+  output can be type-checked alongside the uncompiled source (e.g. the tests).
+  """
+
+  def __init__(self, source_files, output_name):
+    self.source_files = _canonicalize_source_files(source_files)
+    self.output = _get_source_path('dist/' + output_name + '.externs.js')
+
+  def generate(self, force=False):
+    """Generates the shaka namespace typedef for |self.source_files|.
+
+    Args:
+      force: Generate the output even if the inputs have not changed.
+
+    Returns:
+      True on success; False on failure.
+    """
+    if not force and not _must_build(self.output, self.source_files):
+      return True
+
+    extern_generator = _get_source_path('build/generateExterns.js')
+
+    cmd_line = ['node', extern_generator, '--namespace-typedef', self.output]
+    cmd_line += self.source_files
+
+    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+      logging.error('Namespace typedef generation failed')
       return False
 
     return True
@@ -263,9 +362,58 @@ class Less(object):
     self.all_source_files = _canonicalize_source_files(all_source_files)
     self.output = output
 
+    # Derive the modern output path by inserting ".modern" before the
+    # extension: e.g. "dist/controls.css" -> "dist/controls.modern.css".
+    base, ext = os.path.splitext(output)
+    self.output_modern = base + '.modern' + ext
+
+  def _run_postcss(self, input_path, output_path, plugins, browserslist):
+    """Runs PostCSS on |input_path|, writing to |output_path|.
+
+    Sets BROWSERSLIST in os.environ for the duration of the call and restores
+    the previous value (or removes the key) afterwards.  This avoids passing
+    an 'env' kwarg that execute_get_code does not support.
+
+    Args:
+      input_path: Path to the CSS file to process.
+      output_path: Path to write the processed CSS to.
+      plugins: List of --use plugin names to pass to PostCSS.
+      browserslist: Browserslist query string.
+
+    Returns:
+      True on success; False on failure.
+    """
+    postcss = shakaBuildHelpers.get_node_binary('postcss-cli', 'postcss')
+
+    plugin_flags = []
+    for plugin in plugins:
+      plugin_flags += ['--use', plugin]
+
+    cmd_line = postcss + [input_path, '-o', output_path] + plugin_flags + ['--map']
+
+    # Temporarily override BROWSERSLIST, preserving any existing value.
+    previous = os.environ.get('BROWSERSLIST')
+    os.environ['BROWSERSLIST'] = browserslist
+    try:
+      return shakaBuildHelpers.execute_get_code(cmd_line) == 0
+    finally:
+      if previous is None:
+        os.environ.pop('BROWSERSLIST', None)
+      else:
+        os.environ['BROWSERSLIST'] = previous
+
   def compile(self, force=False):
-    """Compiles the main less file in |self.main_source_file| into the
-       |self.output| css file.
+    """Compiles the main less file in |self.main_source_file| into two CSS
+       output files:
+
+       - |self.output|        — legacy build, CSS custom properties flattened
+                                via postcss-custom-properties so that it works
+                                in older browsers (chrome 38, safari 8,
+                                firefox 42).
+       - |self.output_modern| — modern build, CSS custom properties preserved,
+                                targeting the last 2 years of browsers.
+
+       Both outputs go through Autoprefixer and cssnano.
 
     Args:
       force: Generate the output even if the inputs have not changed.
@@ -273,31 +421,58 @@ class Less(object):
     Returns:
       True on success; False on failure.
     """
-    if not force and not _must_build(self.output, self.all_source_files):
+    # Rebuild if either output is stale or missing.
+    if not force and (
+        not _must_build(self.output, self.all_source_files) and
+        not _must_build(self.output_modern, self.all_source_files)):
       return True
 
+    # Step 1: compile LESS -> raw CSS (shared intermediate)
     lessc = shakaBuildHelpers.get_node_binary('less', 'lessc')
     less_options = [
-      # Enable the "clean-CSS" plugin to minify the output and strip out comments.
-      '--clean-css',
-      # Output a source map of the original CSS/less files.
       '--source-map=' + self.output + '.map',
     ]
-
     cmd_line = lessc + less_options + [self.main_source_file, self.output]
 
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       logging.error('CSS compilation failed')
       return False
 
-    # We need to prepend the license header to the compiled CSS.
+    # Duplicate the raw compiled CSS so each PostCSS pass has its own file.
+    shutil.copy2(self.output, self.output_modern)
+
+    # Step 2a: legacy build
+    #   • postcss-custom-properties  — resolve/flatten all CSS variables
+    #   • autoprefixer               — add vendor prefixes for old browsers
+    #   • cssnano                    — minify
+    if not self._run_postcss(
+        self.output, self.output,
+        ['postcss-custom-properties', 'autoprefixer', 'cssnano'],
+        'chrome 38, safari 8, firefox 42'):
+      logging.error('PostCSS legacy processing failed')
+      return False
+
+    # Step 2b: modern build
+    #   • autoprefixer  — add vendor prefixes for recent browsers only
+    #   • cssnano       — minify
+    #   (CSS custom properties are intentionally kept as-is)
+    if not self._run_postcss(
+        self.output_modern, self.output_modern,
+        ['autoprefixer', 'cssnano'],
+        'last 2 years'):
+      logging.error('PostCSS modern processing failed')
+      return False
+
+    # Step 3: prepend the license header to both outputs
     with open(_get_source_path('build/license-header'), 'rb') as f:
       license_header = f.read()
-    with open(self.output, 'rb') as f:
-      contents = f.read()
-    with open(self.output, 'wb') as f:
-      f.write(license_header)
-      f.write(contents)
+
+    for output_path in (self.output, self.output_modern):
+      with open(output_path, 'rb') as f:
+        contents = f.read()
+      with open(output_path, 'wb') as f:
+        f.write(license_header)
+        f.write(contents)
 
     return True
 
