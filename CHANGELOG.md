@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.2.6](https://github.com/shaka-project/shaka-player/compare/v5.2.5...v5.2.6) (2026-08-15)
+
+
+### Bug Fixes
+
+* Avoid re-downloading init segments on unbuffered seek ([#10428](https://github.com/shaka-project/shaka-player/issues/10428)) ([01aee9f](https://github.com/shaka-project/shaka-player/commit/01aee9f1725168313697f05f68c63941c5b157d0)), closes [#10373](https://github.com/shaka-project/shaka-player/issues/10373)
+* **Dolby Vision:** Enable Dolby Vision p8 workaround on encrypted content ([#10423](https://github.com/shaka-project/shaka-player/issues/10423)) ([12e4c49](https://github.com/shaka-project/shaka-player/commit/12e4c49307e2e7786c0396675f039d44c8948e82))
+* Fix stuck playback on multiplexed TS content ([#10431](https://github.com/shaka-project/shaka-player/issues/10431)) ([5f4f5d9](https://github.com/shaka-project/shaka-player/commit/5f4f5d943fe6c06d64c18fceb9c254f77632bdc9))
+
 ## [5.2.5](https://github.com/shaka-project/shaka-player/compare/v5.2.4...v5.2.5) (2026-08-11)
 
 
