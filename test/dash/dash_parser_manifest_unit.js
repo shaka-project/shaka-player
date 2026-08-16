@@ -213,7 +213,9 @@ describe('DashParser Manifest', () => {
             stream.mimeType = 'text/vtt';
             stream.bandwidth = 100;
             stream.kind = 'caption';
-            stream.roles = ['caption', 'main'];
+            // The Role value that set "kind" (caption) is not duplicated
+            // into roles; other Role values (main) still are.
+            stream.roles = ['main'];
           });
         }));
   });
@@ -297,7 +299,9 @@ describe('DashParser Manifest', () => {
             stream.mimeType = 'text/vtt';
             stream.bandwidth = 100;
             stream.kind = 'caption';
-            stream.roles = ['caption', 'main'];
+            // The Role value that set "kind" (caption) is not duplicated
+            // into roles; other Role values (main) still are.
+            stream.roles = ['main'];
           });
         }));
   });
@@ -2309,9 +2313,10 @@ describe('DashParser Manifest', () => {
   it('does not add an implied subtitle role when a Role already exists',
       async () => {
         // Explicit Role value="caption" overrides the default "subtitle"
-        // kind, so the implied-subtitle-role branch must not fire and
-        // `roles` should stay empty (Role elements, unlike Accessibility
-        // elements, don't themselves populate `roles`).
+        // kind, so the implied-subtitle-role branch must not fire. The
+        // Role value that set "kind" isn't duplicated into `roles`, and
+        // since there are no other Role/Accessibility values here, `roles`
+        // stays empty.
         const manifestText = [
           '<MPD minBufferTime="PT75S">',
           '  <Period id="1" duration="PT30S">',
