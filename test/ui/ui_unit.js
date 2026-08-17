@@ -1732,6 +1732,32 @@ describe('UI', () => {
       /** @type {shaka.Player} */
       let player2;
 
+      /**
+       * Waits for seek completion by listening for 'timeandseekrangeupdated'
+       * events during the triggered action.
+       *
+       * @param {!shaka.ui.Controls} controls
+       * @param {!HTMLMediaElement} video
+       * @param {function()} triggerAction
+       * @return {!Promise<number>}
+       */
+      async function waitForSeek(controls, video, triggerAction) {
+        let recordedTime = video.currentTime;
+        let eventFired = false;
+        const onUpdate = () => {
+          recordedTime = video.currentTime;
+          eventFired = true;
+        };
+        controls.addEventListener('timeandseekrangeupdated', onUpdate);
+        try {
+          triggerAction();
+        } finally {
+          controls.removeEventListener('timeandseekrangeupdated', onUpdate);
+        }
+        expect(eventFired).toBe(true);
+        return recordedTime;
+      }
+
       beforeEach(async () => {
         container1 =
           /** @type {!HTMLElement} */ (document.createElement('div'));
@@ -1745,64 +1771,102 @@ describe('UI', () => {
         video2 = shaka.test.UiUtils.createVideoElement();
         container2.appendChild(video2);
 
+        Object.defineProperty(video1, 'duration', {
+          value: 100,
+          configurable: true,
+          writable: true,
+        });
+        Object.defineProperty(video2, 'duration', {
+          value: 100,
+          configurable: true,
+          writable: true,
+        });
+
+        let currentTime1 = 0;
+        Object.defineProperty(video1, 'currentTime', {
+          get: () => currentTime1,
+          set: (val) => {
+            currentTime1 = val;
+          },
+          configurable: true,
+        });
+
+        let currentTime2 = 0;
+        Object.defineProperty(video2, 'currentTime', {
+          get: () => currentTime2,
+          set: (val) => {
+            currentTime2 = val;
+          },
+          configurable: true,
+        });
+
         ui1 = await UiUtils.createUIThroughAPI(container1, video1);
         controls1 = ui1.getControls();
         player1 = controls1.getLocalPlayer();
         spyOn(player1, 'getAssetUri').and.returnValue('fake-uri-1');
         spyOn(player1, 'seekRange').and.returnValue({start: 0, end: 100});
-        spyOn(controls1, 'getDisplayTime').and.returnValue(50);
+        controls1.seekTo(50, false);
 
         ui2 = await UiUtils.createUIThroughAPI(container2, video2);
         controls2 = ui2.getControls();
         player2 = controls2.getLocalPlayer();
         spyOn(player2, 'getAssetUri').and.returnValue('fake-uri-2');
         spyOn(player2, 'seekRange').and.returnValue({start: 0, end: 100});
-        spyOn(controls2, 'getDisplayTime').and.returnValue(50);
+        controls2.seekTo(50, false);
       });
 
-      it('handles seekbar Space and Arrow keys with preventDefault', () => {
-        const playPauseSpy = spyOn(controls1, 'playPausePresentation');
-        const seekSpy = spyOn(controls1, 'seek_');
-        const seekBar = container1.querySelector('.shaka-seek-bar');
-        expect(seekBar).toBeTruthy();
+      it('handles seekbar Space and Arrow keys with preventDefault',
+          async () => {
+            const playSpy =
+                spyOn(video1, 'play').and.returnValue(Promise.resolve());
+            const seekBar = container1.querySelector('.shaka-seek-bar');
+            expect(seekBar).toBeTruthy();
 
-        /** @type {!HTMLElement} */ (seekBar).focus();
+            /** @type {!HTMLElement} */ (seekBar).focus();
 
-        const spaceEvent = new KeyboardEvent('keydown', {
-          key: ' ',
-          bubbles: true,
-          cancelable: true,
-        });
-        const spacePreventDefaultSpy =
-            spyOn(spaceEvent, 'preventDefault').and.callThrough();
-        seekBar.dispatchEvent(spaceEvent);
+            const spaceEvent = new KeyboardEvent('keydown', {
+              key: ' ',
+              bubbles: true,
+              cancelable: true,
+            });
+            const spacePreventDefaultSpy =
+                spyOn(spaceEvent, 'preventDefault').and.callThrough();
+            seekBar.dispatchEvent(spaceEvent);
 
-        expect(playPauseSpy).toHaveBeenCalledTimes(1);
-        expect(spacePreventDefaultSpy).toHaveBeenCalled();
+            expect(playSpy).toHaveBeenCalledTimes(1);
+            expect(spacePreventDefaultSpy).toHaveBeenCalled();
 
-        const arrowLeftEvent = new KeyboardEvent('keydown', {
-          key: 'ArrowLeft',
-          bubbles: true,
-          cancelable: true,
-        });
-        const arrowLeftPreventDefaultSpy =
-            spyOn(arrowLeftEvent, 'preventDefault').and.callThrough();
-        seekBar.dispatchEvent(arrowLeftEvent);
+            controls1.seekTo(50, false);
+            const arrowLeftEvent = new KeyboardEvent('keydown', {
+              key: 'ArrowLeft',
+              bubbles: true,
+              cancelable: true,
+            });
+            const arrowLeftPreventDefaultSpy =
+                spyOn(arrowLeftEvent, 'preventDefault').and.callThrough();
+            let updatedTime = await waitForSeek(controls1, video1, () => {
+              seekBar.dispatchEvent(arrowLeftEvent);
+            });
 
-        expect(seekSpy).toHaveBeenCalledWith(45);
-        expect(arrowLeftPreventDefaultSpy).toHaveBeenCalled();
+            expect(updatedTime).toBe(45);
+            expect(video1.currentTime).toBe(45);
+            expect(arrowLeftPreventDefaultSpy).toHaveBeenCalled();
 
-        const arrowRightEvent = new KeyboardEvent('keydown', {
-          key: 'ArrowRight',
-          bubbles: true,
-          cancelable: true,
-        });
-        seekBar.dispatchEvent(arrowRightEvent);
+            controls1.seekTo(50, false);
+            const arrowRightEvent = new KeyboardEvent('keydown', {
+              key: 'ArrowRight',
+              bubbles: true,
+              cancelable: true,
+            });
+            updatedTime = await waitForSeek(controls1, video1, () => {
+              seekBar.dispatchEvent(arrowRightEvent);
+            });
 
-        expect(seekSpy).toHaveBeenCalledWith(55);
-      });
+            expect(updatedTime).toBe(55);
+            expect(video1.currentTime).toBe(55);
+          });
 
-      it('isolates fullscreen status and keys between players', () => {
+      it('isolates fullscreen status and keys between players', async () => {
         const originalFullscreenElement =
             Object.getOwnPropertyDescriptor(document, 'fullscreenElement');
 
@@ -1815,20 +1879,32 @@ describe('UI', () => {
           expect(controls1.isFullScreenEnabled()).toBe(true);
           expect(controls2.isFullScreenEnabled()).toBe(false);
 
-          const playPause1Spy = spyOn(controls1, 'playPausePresentation');
-          const playPause2Spy = spyOn(controls2, 'playPausePresentation');
-          const seek1Spy = spyOn(controls1, 'seek_');
-          const seek2Spy = spyOn(controls2, 'seek_');
+          const play1Spy =
+              spyOn(video1, 'play').and.returnValue(Promise.resolve());
+          const play2Spy =
+              spyOn(video2, 'play').and.returnValue(Promise.resolve());
+          const pause1Spy = spyOn(video1, 'pause');
+          const pause2Spy = spyOn(video2, 'pause');
+
+          controls1.seekTo(50, false);
+          controls2.seekTo(50, false);
+
+          const initialTime1 = video1.currentTime;
+          const initialTime2 = video2.currentTime;
 
           const arrowLeftEvent = new KeyboardEvent('keydown', {
             key: 'ArrowLeft',
             bubbles: true,
             cancelable: true,
           });
-          window.dispatchEvent(arrowLeftEvent);
+          const updatedTime1 = await waitForSeek(controls1, video1, () => {
+            window.dispatchEvent(arrowLeftEvent);
+          });
 
-          expect(seek1Spy).toHaveBeenCalledWith(45);
-          expect(seek2Spy).not.toHaveBeenCalled();
+          expect(updatedTime1).toBe(45);
+          expect(video1.currentTime).toBe(45);
+          expect(video1.currentTime).not.toBe(initialTime1);
+          expect(video2.currentTime).toBe(initialTime2);
 
           const spaceEvent = new KeyboardEvent('keydown', {
             key: ' ',
@@ -1837,8 +1913,11 @@ describe('UI', () => {
           });
           window.dispatchEvent(spaceEvent);
 
-          expect(playPause1Spy).toHaveBeenCalledTimes(1);
-          expect(playPause2Spy).not.toHaveBeenCalled();
+          expect(play1Spy).toHaveBeenCalledTimes(1);
+          expect(play2Spy).not.toHaveBeenCalled();
+          expect(pause1Spy).not.toHaveBeenCalled();
+          expect(pause2Spy).not.toHaveBeenCalled();
+          expect(video2.currentTime).toBe(initialTime2);
         } finally {
           if (originalFullscreenElement) {
             Object.defineProperty(
@@ -1850,11 +1929,14 @@ describe('UI', () => {
         }
       });
 
-      it('does not leak seekbar focus events to other players', () => {
+      it('does not leak seekbar focus events to other players', async () => {
         ui2.configure({enableKeyboardPlaybackControlsInWindow: true});
 
-        const seek1Spy = spyOn(controls1, 'seek_');
-        const seek2Spy = spyOn(controls2, 'seek_');
+        controls1.seekTo(50, false);
+        controls2.seekTo(50, false);
+
+        const initialTime1 = video1.currentTime;
+        const initialTime2 = video2.currentTime;
 
         const seekBar1 = container1.querySelector('.shaka-seek-bar');
         expect(seekBar1).toBeTruthy();
@@ -1865,16 +1947,30 @@ describe('UI', () => {
           bubbles: true,
           cancelable: true,
         });
-        seekBar1.dispatchEvent(arrowRightEvent);
+        const updatedTime1 = await waitForSeek(controls1, video1, () => {
+          seekBar1.dispatchEvent(arrowRightEvent);
+        });
 
-        expect(seek1Spy).toHaveBeenCalledWith(55);
-        expect(seek2Spy).not.toHaveBeenCalled();
+        expect(updatedTime1).toBe(55);
+        expect(video1.currentTime).toBe(55);
+        expect(video1.currentTime).not.toBe(initialTime1);
+        expect(video2.currentTime).toBe(initialTime2);
       });
 
       it('does not trigger shortcuts when typing in a form input', () => {
         ui1.configure({enableKeyboardPlaybackControlsInWindow: true});
-        const playPauseSpy = spyOn(controls1, 'playPausePresentation');
-        const seekSpy = spyOn(controls1, 'seek_');
+
+        const playSpy =
+            spyOn(video1, 'play').and.returnValue(Promise.resolve());
+        const pauseSpy = spyOn(video1, 'pause');
+
+        controls1.seekTo(50, false);
+        const initialTime1 = video1.currentTime;
+
+        const timeUpdateSpy = jasmine.createSpy('timeUpdateSpy');
+        const timeUpdateListener = Util.spyFunc(timeUpdateSpy);
+        controls1.addEventListener(
+            'timeandseekrangeupdated', timeUpdateListener);
 
         const input =
         /** @type {!HTMLInputElement} */ (document.createElement('input'));
@@ -1896,9 +1992,13 @@ describe('UI', () => {
         });
         window.dispatchEvent(arrowLeftEvent);
 
-        expect(playPauseSpy).not.toHaveBeenCalled();
-        expect(seekSpy).not.toHaveBeenCalled();
+        expect(playSpy).not.toHaveBeenCalled();
+        expect(pauseSpy).not.toHaveBeenCalled();
+        expect(video1.currentTime).toBe(initialTime1);
+        expect(timeUpdateSpy).not.toHaveBeenCalled();
 
+        controls1.removeEventListener(
+            'timeandseekrangeupdated', timeUpdateListener);
         document.body.removeChild(input);
       });
     });
