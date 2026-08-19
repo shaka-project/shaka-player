@@ -400,6 +400,11 @@ shaka.test.Util = class {
       if (codecs.startsWith('hvc1.') && deviceDetected.disableHEVCSupport()) {
         return false;
       }
+      // AV1 does not work in GitHub Actions.
+      if ((codecs.startsWith('av01.')|| codecs.startsWith('dav1.')) &&
+          deviceDetected.getDeviceName() === 'Apple Browser') {
+        return false;
+      }
       // VideoConfiguration
       mediaDecodingConfig.video = {
         contentType: MimeUtils.getFullOrConvertedType(

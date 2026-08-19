@@ -248,6 +248,7 @@ describe('AdaptationSet', () => {
       isAudioMuxedInVideo: false,
       baseOriginalId: null,
       isIframe: false,
+      preselection: null,
     };
   }
 });

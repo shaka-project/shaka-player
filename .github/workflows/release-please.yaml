@@ -21,9 +21,66 @@ jobs:
       pull-requests: write
 
     steps:
-      # Create/update release PR
+      # On main, we never want a *patch* release PR.  Patch releases are cut
+      # from the automatic release branches, not from main.  If release-please
+      # opened a patch-level PR on main, a maintainer could merge it by mistake.
+      #
+      # This step's ONLY job is to suppress release-please in that one case.
+      # It writes "run=false" when (and only when) it is confident the pending
+      # release on main is a patch.  The release-please step below treats
+      # anything other than "false" as "go", and this step continues on error,
+      # so any unexpected failure here leaves the output unset and lets
+      # release-please run by default.
+      - name: Decide whether to run release-please
+        id: gate
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          # Only main is ever suppressed; release branches always release.
+          if [[ "${{ github.ref_name }}" != "main" ]]; then
+            echo "On a release branch: running."
+            exit 0
+          fi
+
+          # Ask release-please itself what it *would* do, as a dry run.  Keep
+          # this version roughly in step with the release-please-action above.
+          if ! npx --yes release-please@17.10.3 release-pr \
+              --token="$GH_TOKEN" \
+              --repo-url="${{ github.repository }}" \
+              --target-branch=main \
+              --config-file=.release-please-config.json \
+              --manifest-file=.release-please-manifest.json \
+              --dry-run > dry-run.log 2>&1; then
+            echo "release-please dry-run failed: running."
+            cat dry-run.log || true
+            exit 0
+          fi
+          cat dry-run.log
+
+          # Extract the proposed version from the dry-run output.
+          NEXT=$(grep -oE '^title: .*release [0-9]+\.[0-9]+\.[0-9]+' dry-run.log \
+            | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || true)
+          echo "Proposed version: ${NEXT:-<none>}"
+          if [[ -z "$NEXT" ]]; then
+            echo "Could not find a proposed version: running."
+            exit 0
+          fi
+
+          # The one case we suppress: the third part of the version is non-zero.
+          if [[ "$NEXT" =~ \.0$ ]]; then
+            echo "Proposed version is a feature release: running."
+          else
+            echo "Proposed version is a patch release: suppressing PR on main."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Create/update release PR.  Skipped only when the gate above is confident
+      # the pending release on main would be a patch (see that step).
       - uses: googleapis/release-please-action@v4
         id: release
+        # NOTE: The gate only sets run=false, or nothing at all.  Don't change.
+        if: steps.gate.outputs.run != 'false'
         with:
           # Make sure we create the PR against the correct branch.
           target-branch: ${{ github.ref_name }}
@@ -44,7 +101,7 @@ jobs:
       is_latest: ${{ steps.compute.outputs.is_latest }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: refs/tags/${{ needs.release.outputs.tag_name }}
           persist-credentials: false
@@ -77,7 +134,7 @@ jobs:
     needs: release
     if: needs.release.outputs.release_created && needs.release.outputs.patch != '0'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Check out the origin repo, and do it at main, not the PR branch.
           ref: main
@@ -109,19 +166,19 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: refs/tags/${{ needs.release.outputs.tag_name }}
           persist-credentials: false
           # Needed to view all tags and correctly compute the latest tag.
           fetch-depth: 0
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: zulu
           java-version: 21
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           # NOTE: OIDC fails with node less than 24.
           node-version: 24
@@ -199,7 +256,7 @@ jobs:
     if: needs.compute-latest.outputs.is_latest == 'true'
     steps:
       - name: Check out source repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # Check out the source repo at the release tag.
           ref: refs/tags/${{ needs.release.outputs.tag_name }}
@@ -208,12 +265,12 @@ jobs:
           # No credentials.
           persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: zulu
           java-version: 21
@@ -262,7 +319,7 @@ jobs:
     needs: release
     if: needs.release.outputs.release_created && needs.release.outputs.patch == '0'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: refs/tags/${{ needs.release.outputs.tag_name }}
           fetch-depth: 0

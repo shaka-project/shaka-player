@@ -328,6 +328,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {?number} */
     this.lastContainerTouchEventTime_ = null;
 
+    /**
+     * Set while a long-press is opening the custom context menu, so that the
+     * touchend which ends that same long-press does not immediately close the
+     * menu.  Reset on every touchstart and consumed by the next touchend.
+     * @private {boolean}
+     */
+    this.contextMenuOpenedByTouch_ = false;
+
     /** @private {!Array<!shaka.extern.IUIElement>} */
     this.elements_ = [];
 
@@ -1008,7 +1016,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   isFullScreenEnabled() {
     if (this.shouldUseDocumentFullscreen_()) {
-      return !!document.fullscreenElement;
+      if (!document.fullscreenElement) {
+        return false;
+      }
+      return document.fullscreenElement == this.config_.fullScreenElement ||
+          Boolean(this.config_.fullScreenElement &&
+          this.config_.fullScreenElement.contains(document.fullscreenElement));
     }
     const video = /** @type {HTMLVideoElement} */(this.localVideo_);
     if (video.webkitSupportsFullscreen) {
@@ -1422,6 +1435,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.videoContainer_.setAttribute('shaka-controls', 'true');
 
     if (navigator.maxTouchPoints > 0) {
+      this.eventManager_.listen(this.controlsContainer_, 'touchstart', () => {
+        // A fresh touch starts a new gesture; forget any previous long-press
+        // that opened the context menu.
+        this.contextMenuOpenedByTouch_ = false;
+      });
+      this.eventManager_.listen(this.controlsContainer_, 'contextmenu', () => {
+        // A long-press fires 'contextmenu' while the finger is still down.
+        // Remember it so the touchend that ends the press keeps the menu open
+        // (see onContainerTouch).
+        this.contextMenuOpenedByTouch_ = true;
+      });
       this.eventManager_.listen(this.controlsContainer_, 'touchend', (e) => {
         this.onContainerTouch(e);
       });
@@ -2003,6 +2027,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
+    if (this.contextMenuOpenedByTouch_ && this.anyContextMenusAreOpen()) {
+      // This touchend ends the long-press that just opened the context menu.
+      // Keep the menu open (matching desktop right-click behavior); a
+      // subsequent tap will close it through the normal path below.
+      this.contextMenuOpenedByTouch_ = false;
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+      return;
+    }
+
     const hasLastContainerTouchEventTime =
         this.lastContainerTouchEventTime_ != null;
 
@@ -2123,12 +2158,35 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     const activeElement = document.activeElement;
-    const isVolumeBar = activeElement && activeElement.classList ?
-        activeElement.classList.contains('shaka-volume-bar') : false;
-    const isSeekBar = activeElement && activeElement.classList &&
-        activeElement.classList.contains('shaka-seek-bar');
+    if (activeElement) {
+      const tagName = activeElement.tagName.toLowerCase();
+      if (tagName == 'input' &&
+          !activeElement.classList.contains('shaka-range-element')) {
+        return;
+      }
+      const isEditable = tagName == 'textarea' || tagName == 'select' ||
+      /** @type {!HTMLElement} */ (activeElement).isContentEditable;
+      if (isEditable) {
+        return;
+      }
+    }
+
     const isFullscreen = this.isFullScreenEnabled();
-    const isControlsFocused = this.controlsContainer_.contains(activeElement);
+    const isControlsFocused = Boolean(activeElement &&
+        this.controlsContainer_.contains(activeElement));
+    const isContainerFocused = Boolean(activeElement &&
+        this.videoContainer_.contains(activeElement));
+
+    if (!isFullscreen && !isContainerFocused && activeElement &&
+        activeElement.closest &&
+        activeElement.closest('.shaka-video-container')) {
+      return;
+    }
+
+    const isVolumeBar = isControlsFocused && activeElement.classList ?
+        activeElement.classList.contains('shaka-volume-bar') : false;
+    const isSeekBar = isControlsFocused && activeElement.classList ?
+        activeElement.classList.contains('shaka-seek-bar') : false;
     const isFullscreenOrControlsInWindow = isFullscreen ||
         this.config_.enableKeyboardPlaybackControlsInWindow;
 
@@ -2191,13 +2249,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         break;
       // Jump to the beginning of the video's seek range.
       case this.config_.shortcuts.home.toLowerCase():
-        if (this.seekBar_) {
+        if (this.seekBar_ && (isSeekBar || isFullscreenOrControlsInWindow)) {
+          event.preventDefault();
           this.seek_(this.player_.seekRange().start);
         }
         break;
       // Jump to the end of the video's seek range.
       case this.config_.shortcuts.end.toLowerCase():
-        if (this.seekBar_) {
+        if (this.seekBar_ && (isSeekBar || isFullscreenOrControlsInWindow)) {
+          event.preventDefault();
           this.seek_(this.player_.seekRange().end);
         }
         break;
@@ -2256,6 +2316,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case this.config_.shortcuts.play.toLowerCase():
         if (isSeekBar ||
             (isFullscreenOrControlsInWindow && !isControlsFocused)) {
+          event.preventDefault();
           this.playPausePresentation();
         }
         break;
@@ -2281,10 +2342,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case '8':
       case '9': {
         // Jump to percentage in the video
-        if (!this.ad_) {
+        if (!this.ad_ && (isSeekBar || isFullscreenOrControlsInWindow)) {
           const seekRange = this.player_.seekRange();
           const length = seekRange.end - seekRange.start;
           if (length > 0) {
+            event.preventDefault();
             const percentage = parseInt(event.key, 10) / 10;
             this.seek_(seekRange.start + (length * percentage));
           }

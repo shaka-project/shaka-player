@@ -421,30 +421,38 @@ describe('TransmuxerProxy', () => {
       beforeEach(() => jasmine.clock().install());
       afterEach(() => jasmine.clock().uninstall());
 
-      it('rejects on timeout when worker does not respond', async () => {
+      it('falls back to main thread when worker does not respond',
+          async () => {
+            const p = transmuxer.transmux(
+                fakeData, fakeStream, null, 10, 'video');
+
+            jasmine.clock().tick(30001);
+
+            // The pending call resolves via the inner transmuxer instead of
+            // rejecting, so playback can continue.
+            const result = await p;
+            expect(mockInner.transmux).toHaveBeenCalled();
+            expect(result).toEqual(jasmine.any(Uint8Array));
+          });
+
+      it('warns via alwaysWarn on timeout', async () => {
+        spyOn(shaka.log, 'alwaysWarn');
         const p = transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
-        const assertion = expectAsync(p).toBeRejectedWith(
-            jasmine.objectContaining({
-              code: shaka.util.Error.Code.TRANSMUXING_FAILED,
-            }));
 
         jasmine.clock().tick(30001);
-        await assertion;
+        await p;
+
+        expect(shaka.log.alwaysWarn).toHaveBeenCalled();
       });
 
-      it('falls back to main thread after timeout', async () => {
+      it('continues falling back to main thread after timeout', async () => {
         const p = transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
-        const assertion = expectAsync(p).toBeRejectedWith(
-            jasmine.objectContaining({
-              code: shaka.util.Error.Code.TRANSMUXING_FAILED,
-            }));
         jasmine.clock().tick(30001);
-        await assertion;
+        await p;
 
-        // mockInner.transmux returns a resolved promise, so this does not
-        // involve setTimeout and is safe to await with the clock still running.
+        // A subsequent call should go straight to the inner transmuxer.
         await transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
-        expect(mockInner.transmux).toHaveBeenCalled();
+        expect(mockInner.transmux).toHaveBeenCalledTimes(2);
       });
     });
 
@@ -482,27 +490,31 @@ describe('TransmuxerProxy', () => {
     });
 
     describe('worker global error event', () => {
-      it('rejects the pending request', async () => {
+      it('falls back to main thread for the in-flight request', async () => {
         const p = transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
 
-        const assertion = expectAsync(p).toBeRejectedWith(
-            jasmine.objectContaining({
-              code: shaka.util.Error.Code.TRANSMUXING_FAILED,
-            }));
-
+        // The worker crashes / fails to load; its global error event fires
+        // while a transmux is in flight.
         capturedErrorHandler(new Event('error'));
-        await assertion;
-      });
 
-      it('falls back to main thread after worker error', async () => {
-        const p = transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
-        const rejection = expectAsync(p).toBeRejected();
-        capturedErrorHandler(new Event('error'));
-        await rejection;
-
-        await transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
+        // The pending call resolves via the inner transmuxer instead of
+        // rejecting, so playback can continue.
+        const result = await p;
         expect(mockInner.transmux).toHaveBeenCalled();
+        expect(result).toEqual(jasmine.any(Uint8Array));
       });
+
+      it('continues falling back to main thread after a worker error',
+          async () => {
+            const p = transmuxer.transmux(
+                fakeData, fakeStream, null, 10, 'video');
+            capturedErrorHandler(new Event('error'));
+            await p;
+
+            // A subsequent call goes straight to the inner transmuxer.
+            await transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
+            expect(mockInner.transmux).toHaveBeenCalledTimes(2);
+          });
     });
 
     it('surfaces init error with correct reqId on first transmux', async () => {

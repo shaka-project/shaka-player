@@ -13,14 +13,14 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      # "Write" to Issues to add labels, milestones, comments, etc.
+      # "Write" to Issues to add labels, post comments, lock, close, etc.
       issues: write
       # "Write" to Pull Requests for the same.
       pull-requests: write
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: shaka-project/shaka-github-tools
           persist-credentials: false

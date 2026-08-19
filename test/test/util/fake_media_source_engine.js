@@ -129,6 +129,10 @@ shaka.test.FakeMediaSourceEngine = class {
     this.flush = jasmine.createSpy('flush').and.returnValue(Promise.resolve());
 
     /** @type {!jasmine.Spy} */
+    this.setSelectedClosedCaptionId =
+        jasmine.createSpy('setSelectedClosedCaptionId');
+
+    /** @type {!jasmine.Spy} */
     this.clearSelectedClosedCaptionId =
         jasmine.createSpy('clearSelectedClosedCaptionId');
 
@@ -141,12 +145,24 @@ shaka.test.FakeMediaSourceEngine = class {
         jasmine.createSpy('updateLcevcDec').and.stub();
 
     /** @type {!jasmine.Spy} */
+    this.appendDependency =
+        jasmine.createSpy('appendDependency').and.stub();
+
+    /** @type {!jasmine.Spy} */
     this.setLiveSeekableRange =
         jasmine.createSpy('setLiveSeekableRange').and.stub();
 
     /** @type {!jasmine.Spy} */
     this.clearLiveSeekableRange =
         jasmine.createSpy('clearLiveSeekableRange').and.stub();
+
+    /** @type {!jasmine.Spy} */
+    this.reset =
+        jasmine.createSpy('reset').and.returnValue(Promise.resolve());
+
+    /** @type {!jasmine.Spy} */
+    this.hasSourceBufferFor =
+        jasmine.createSpy('hasSourceBufferFor').and.stub();
 
     this.textDisplayer = new shaka.test.FakeTextDisplayer();
   }

@@ -209,6 +209,7 @@ cssnano
 hbbtv
 Conax
 cvox
+dolbylaboratories
 expressjs
 Expressplay
 Eyevinn
@@ -223,6 +224,7 @@ Jwplayer
 Kaltura
 Livesim
 moqlivemock
+moqtail
 muxjs
 Nagra
 Playready
@@ -510,6 +512,7 @@ xyzw
 # DASH
 dashif
 fontdownload
+isobmff
 isoff
 querypart
 startnumber

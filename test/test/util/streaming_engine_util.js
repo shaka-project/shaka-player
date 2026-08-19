@@ -543,6 +543,7 @@ shaka.test.StreamingEngineUtil = class {
       isAudioMuxedInVideo: false,
       baseOriginalId: null,
       isIframe: false,
+      preselection: null,
     };
   }
 
@@ -594,6 +595,7 @@ shaka.test.StreamingEngineUtil = class {
       isAudioMuxedInVideo: false,
       baseOriginalId: null,
       isIframe: false,
+      preselection: null,
     };
   }
 
@@ -643,6 +645,7 @@ shaka.test.StreamingEngineUtil = class {
       isAudioMuxedInVideo: false,
       baseOriginalId: null,
       isIframe: false,
+      preselection: null,
     };
   }
 };

@@ -146,6 +146,7 @@ shaka.extern.ManifestDB;
  *   fastSwitching: boolean,
  *   isAudioMuxedInVideo: boolean,
  *   isIframe: boolean,
+ *   preselection: ?shaka.extern.Preselection,
  * }}
  *
  * @property {number} id
@@ -225,6 +226,8 @@ shaka.extern.ManifestDB;
  *   Indicate if the audio of this stream is muxed in the video of other stream.
  * @property {boolean} isIframe
  *   Indicate if the stream only contains I-frames (key frames).
+ * @property {?shaka.extern.Preselection} preselection
+ *   The Preselection this stream belongs to, if any.
  */
 shaka.extern.StreamDB;
 

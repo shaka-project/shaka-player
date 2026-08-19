@@ -1,8 +1,10 @@
 .shaka-player-ui-thumbnail-container {
   bottom: 15px;
+  min-width: 150px;
   pointer-events: none;
   position: absolute;
   visibility: hidden;
+  width: 15%;
   z-index: 1;
 
   // Position of child elements
@@ -12,22 +14,21 @@
   align-items: center;
   gap: 5px;
 
+  &.portrait-thumbnail {
+    min-width: 75px;
+    width: 7.5%;
+  }
+
   .shaka-player-ui-thumbnail-image-container {
     background-color: var(--shaka-bg-solid);
     border: 1px solid var(--shaka-bg-solid);
     box-shadow: 0 8px 8px 0 var(--shaka-bg);
-    min-width: 150px;
     overflow: hidden;
     position: relative;
-    width: 15%;
+    width: 100%;
 
     .shaka-player-ui-thumbnail-image {
       position: absolute;
-    }
-
-    &.portrait-thumbnail {
-      min-width: 75px;
-      width: 7.5%;
     }
   }
 

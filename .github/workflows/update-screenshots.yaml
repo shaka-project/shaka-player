@@ -35,7 +35,7 @@ jobs:
       statuses: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ needs.compute-sha.outputs.SHA }}
           persist-credentials: false
@@ -72,14 +72,14 @@ jobs:
     # the PR, and so must be untrusted!
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ needs.compute-sha.outputs.SHA }}
           fetch-depth: 0
           persist-credentials: false
 
       - name: Get artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: test/test/assets/screenshots/
           pattern: screenshots-*
@@ -133,7 +133,7 @@ jobs:
     # by an actor with permission, and the default GitHub token doesn't work.
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ needs.compute-sha.outputs.SHA }}
           fetch-depth: 0
@@ -232,7 +232,7 @@ jobs:
     # Will run on success or failure, but not if the workflow is cancelled.
     if: ${{ success() || failure() }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ needs.compute-sha.outputs.SHA }}
           persist-credentials: false

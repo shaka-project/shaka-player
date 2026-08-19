@@ -306,9 +306,16 @@ class Build(object):
         '--entry_point=goog:shaka.transmuxer.AacTransmuxer',
         '--entry_point=goog:shaka.transmuxer.Ac3Transmuxer',
         '--entry_point=goog:shaka.transmuxer.Ec3Transmuxer',
+        '--entry_point=goog:shaka.transmuxer.LocTransmuxer',
         '--entry_point=goog:shaka.transmuxer.Mp3Transmuxer',
         '--entry_point=goog:shaka.transmuxer.MpegTsTransmuxer',
         '--entry_point=goog:shaka.transmuxer.TsTransmuxer',
+
+        # Every device plugin self-registers at load time (side effect). The
+        # shaka.device.AllDevices aggregator requires them all, so a single entry
+        # point keeps them under PRUNE and DeviceFactory.getDevice() works in the
+        # worker.
+        '--entry_point=goog:shaka.device.AllDevices',
     ]
 
     # Suppress type errors caused by dependency pruning; the main build

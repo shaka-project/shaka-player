@@ -639,6 +639,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.baseOriginalId = null;
       /** @type {boolean} */
       this.isIframe = false;
+      /** @type {?shaka.extern.Preselection} */
+      this.preselection = null;
     }
     /** @type {!Set<string>} */
     this.fullMimeTypes = new Set([shaka.util.MimeUtils.getFullType(
