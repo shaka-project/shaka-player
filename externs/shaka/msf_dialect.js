@@ -95,6 +95,7 @@ shaka.extern.MsfDialect = class {
  * addressed, how a response is matched to it, or how object data is framed --
  * all of which change between drafts.
  *
+ * @extends {shaka.util.IReleasable}
  * @interface
  * @exportDoc
  */
@@ -156,13 +157,6 @@ shaka.extern.MsfSession = class {
    * @exportDoc
    */
   close(code, reason) {}
-
-  /**
-   * Releases resources without closing the transport.
-   *
-   * @exportDoc
-   */
-  release() {}
 };
 
 
