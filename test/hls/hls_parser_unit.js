@@ -786,7 +786,6 @@ describe('HlsParser', () => {
           stream.mime('audio/mpeg', 'mp4a.40.2');
         });
       });
-      manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
     });
 
