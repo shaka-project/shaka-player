@@ -237,6 +237,24 @@ Note: This module is experimental and is only included in the experimental build
 [MPEG-5 Part2 LCEVC]: https://www.lcevc.org
 
 
+## HEVC software fallback
+
+**Only supported on browsers with Media Source Extensions SourceBuffer support
+and WebCodecs**
+
+ - HEVC (H.265) playback on browsers without native HEVC decoding support,
+   such as Firefox or Chrome on Linux (transcoding to H.264 provided by
+   [@hevcjs/shaka-plugin][], must be separately included)
+
+ - Live demo : [hevcjs.dev/demo/shaka.html][]
+
+ - More on [hevc.js][]
+
+[@hevcjs/shaka-plugin]: https://www.npmjs.com/package/@hevcjs/shaka-plugin
+[hevcjs.dev/demo/shaka.html]: https://www.hevcjs.dev/demo/shaka.html
+[hevc.js]: https://www.hevcjs.dev
+
+
 ## DRM support matrix
 
 |Browser       |Widevine  |PlayReady|FairPlay |WisePlay |ClearKey⁶ |
