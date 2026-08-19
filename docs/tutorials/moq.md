@@ -209,22 +209,38 @@ Controls which MoQT draft version(s) to negotiate with the server.
 
 | Value | WebTransport protocol strings offered | Description |
 |---|---|---|
-| `shaka.config.MsfVersion.AUTO` | `moqt-16`, `moq-00` | Try draft-16 first, fall back to draft-14 (default). |
-| `shaka.config.MsfVersion.DRAFT_14` |  | Force draft-14 only. |
+| `shaka.config.MsfVersion.AUTO` | `moqt-18`, `moqt-16`, `moq-00` | Offer every supported draft, newest first (default). |
+| `shaka.config.MsfVersion.DRAFT_18` | `moqt-18` | Force draft-18 only. |
 | `shaka.config.MsfVersion.DRAFT_16` | `moqt-16` | Force draft-16 only. |
+| `shaka.config.MsfVersion.DRAFT_14` | `moq-00` | **Deprecated.** Force draft-14 only; removed in v6. |
+
+Draft-14 is deprecated and will be removed in **v6**. Selecting it, whether
+explicitly or because the server chose `moq-00` under `AUTO`, logs a deprecation
+warning. It predates the subprotocol-based version negotiation introduced in
+draft-15 and negotiates in band instead, offering a version list in
+`CLIENT_SETUP`. Move to draft-16 or draft-18 before v6.
+
+Draft-16 and draft-18 are different wire protocols rather than revisions of
+one: draft-17 replaced the variable-length integer encoding, moved the control
+plane from a single bidirectional stream to a pair of unidirectional ones, gave
+each request its own bidirectional stream, and reassigned several message type
+IDs. Shaka keeps a separate implementation of each behind a dialect, selected
+once during negotiation.
 
 ```js
 player.configure({
   manifest: {
     msf: {
-      version: shaka.config.MsfVersion.DRAFT_16,
+      version: shaka.config.MsfVersion.DRAFT_18,
     }
   }
 });
 ```
 
-The negotiated version is determined from the `protocol` property of the
-established WebTransport connection.
+The version is negotiated via the WebTransport subprotocol. Note that Shaka does
+not require the server to echo the subprotocol back: some relays accept the
+offered subprotocol while leaving `WebTransport.protocol` empty, and treating
+that as a failure would break otherwise working connections.
 
 ### `catalogPreprocessor` (function, default: identity)
 
