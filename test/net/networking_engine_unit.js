@@ -1188,6 +1188,84 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
           .toBeRejectedWith(Util.jasmineError(abortError));
     });
 
+    it('interrupts retry delays', async () => {
+      // Simulate a retry delay that never expires on its own, so we can tell
+      // whether abort() waits for it.
+      const timerStopSpy = jasmine.createSpy('timer stop');
+      deferSpy.and.callFake(() => ({stop: Util.spyFunc(timerStopSpy)}));
+
+      const request = createRequest('reject://foo', {
+        maxAttempts: 3,
+        baseDelay: 1000,
+        backoffFactor: 2,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      });
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const operation = networkingEngine.request(requestType, request);
+      /** @type {!shaka.test.StatusPromise} */
+      const r = new StatusPromise(operation.promise);
+
+      await Util.shortDelay();
+      // The first attempt failed, and we are now waiting out the retry delay.
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
+      expect(deferSpy).toHaveBeenCalledTimes(1);
+      expect(r.status).toBe('pending');
+
+      /** @type {!shaka.test.StatusPromise} */
+      const abortStatus = new StatusPromise(operation.abort());
+      await Util.shortDelay();
+
+      // abort() did not wait out the retry delay, and the delay's timer was
+      // stopped rather than left to fire later.
+      expect(abortStatus.status).toBe('resolved');
+      expect(timerStopSpy).toHaveBeenCalled();
+
+      // No further attempt was made, and the operation has been aborted.
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
+      expect(r.status).toBe('rejected');
+      await expectAsync(operation.promise)
+          .toBeRejectedWith(Util.jasmineError(abortError));
+    });
+
+    it('is called by destroy during retry delays', async () => {
+      // Simulate a retry delay that never expires on its own, so we can tell
+      // whether destroy() waits for it.
+      const timerStopSpy = jasmine.createSpy('timer stop');
+      deferSpy.and.callFake(() => ({stop: Util.spyFunc(timerStopSpy)}));
+
+      const request = createRequest('reject://foo', {
+        maxAttempts: 3,
+        baseDelay: 1000,
+        backoffFactor: 2,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      });
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const operation = networkingEngine.request(requestType, request);
+      /** @type {!shaka.test.StatusPromise} */
+      const r = new StatusPromise(operation.promise);
+
+      await Util.shortDelay();
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
+      expect(r.status).toBe('pending');
+
+      /** @type {!shaka.test.StatusPromise} */
+      const destroyStatus = new StatusPromise(networkingEngine.destroy());
+      await Util.shortDelay();
+
+      expect(destroyStatus.status).toBe('resolved');
+      expect(timerStopSpy).toHaveBeenCalled();
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
+      expect(r.status).toBe('rejected');
+      await expectAsync(operation.promise)
+          .toBeRejectedWith(Util.jasmineError(abortError));
+    });
+
     it('is called by destroy', async () => {
       /** @type {!Promise.PromiseWithResolvers} */
       const p = Promise.withResolvers();
