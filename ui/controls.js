@@ -1016,7 +1016,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   isFullScreenEnabled() {
     if (this.shouldUseDocumentFullscreen_()) {
-      return !!document.fullscreenElement;
+      if (!document.fullscreenElement) {
+        return false;
+      }
+      return document.fullscreenElement == this.config_.fullScreenElement ||
+          Boolean(this.config_.fullScreenElement &&
+          this.config_.fullScreenElement.contains(document.fullscreenElement));
     }
     const video = /** @type {HTMLVideoElement} */(this.localVideo_);
     if (video.webkitSupportsFullscreen) {
@@ -2153,12 +2158,35 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     const activeElement = document.activeElement;
-    const isVolumeBar = activeElement && activeElement.classList ?
-        activeElement.classList.contains('shaka-volume-bar') : false;
-    const isSeekBar = activeElement && activeElement.classList &&
-        activeElement.classList.contains('shaka-seek-bar');
+    if (activeElement) {
+      const tagName = activeElement.tagName.toLowerCase();
+      if (tagName == 'input' &&
+          !activeElement.classList.contains('shaka-range-element')) {
+        return;
+      }
+      const isEditable = tagName == 'textarea' || tagName == 'select' ||
+      /** @type {!HTMLElement} */ (activeElement).isContentEditable;
+      if (isEditable) {
+        return;
+      }
+    }
+
     const isFullscreen = this.isFullScreenEnabled();
-    const isControlsFocused = this.controlsContainer_.contains(activeElement);
+    const isControlsFocused = Boolean(activeElement &&
+        this.controlsContainer_.contains(activeElement));
+    const isContainerFocused = Boolean(activeElement &&
+        this.videoContainer_.contains(activeElement));
+
+    if (!isFullscreen && !isContainerFocused && activeElement &&
+        activeElement.closest &&
+        activeElement.closest('.shaka-video-container')) {
+      return;
+    }
+
+    const isVolumeBar = isControlsFocused && activeElement.classList ?
+        activeElement.classList.contains('shaka-volume-bar') : false;
+    const isSeekBar = isControlsFocused && activeElement.classList ?
+        activeElement.classList.contains('shaka-seek-bar') : false;
     const isFullscreenOrControlsInWindow = isFullscreen ||
         this.config_.enableKeyboardPlaybackControlsInWindow;
 
@@ -2221,13 +2249,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         break;
       // Jump to the beginning of the video's seek range.
       case this.config_.shortcuts.home.toLowerCase():
-        if (this.seekBar_) {
+        if (this.seekBar_ && (isSeekBar || isFullscreenOrControlsInWindow)) {
+          event.preventDefault();
           this.seek_(this.player_.seekRange().start);
         }
         break;
       // Jump to the end of the video's seek range.
       case this.config_.shortcuts.end.toLowerCase():
-        if (this.seekBar_) {
+        if (this.seekBar_ && (isSeekBar || isFullscreenOrControlsInWindow)) {
+          event.preventDefault();
           this.seek_(this.player_.seekRange().end);
         }
         break;
@@ -2286,6 +2316,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case this.config_.shortcuts.play.toLowerCase():
         if (isSeekBar ||
             (isFullscreenOrControlsInWindow && !isControlsFocused)) {
+          event.preventDefault();
           this.playPausePresentation();
         }
         break;
@@ -2311,10 +2342,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case '8':
       case '9': {
         // Jump to percentage in the video
-        if (!this.ad_) {
+        if (!this.ad_ && (isSeekBar || isFullscreenOrControlsInWindow)) {
           const seekRange = this.player_.seekRange();
           const length = seekRange.end - seekRange.start;
           if (length > 0) {
+            event.preventDefault();
             const percentage = parseInt(event.key, 10) / 10;
             this.seek_(seekRange.start + (length * percentage));
           }
