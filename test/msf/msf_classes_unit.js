@@ -2,6 +2,13 @@ filterDescribe('shaka.msf.Reader', isMSFSupported, () => {
   /** @type {!shaka.msf.Reader} */
   let reader;
 
+  /** @type {!shaka.msf.QuicVarIntCodec} */
+  let codec;
+
+  beforeEach(() => {
+    codec = new shaka.msf.QuicVarIntCodec();
+  });
+
   // Helper: create a readable stream from Uint8Array chunks
   const createTestStream = (chunks) => {
     let index = 0;
@@ -22,7 +29,7 @@ filterDescribe('shaka.msf.Reader', isMSFSupported, () => {
     }
     const buffer = new Uint8Array([]);
     const stream = createTestStream([]);
-    reader = new shaka.msf.Reader(buffer, stream);
+    reader = new shaka.msf.Reader(buffer, stream, codec);
     expect(reader.getByteLength()).toBe(0);
     expect(reader.getBuffer().length).toBe(0);
   });
@@ -32,7 +39,7 @@ filterDescribe('shaka.msf.Reader', isMSFSupported, () => {
       pending('ReadableStream is not supported by the platform.');
     }
     const stream = createTestStream([new Uint8Array([1, 2, 3, 4, 5])]);
-    reader = new shaka.msf.Reader(new Uint8Array([]), stream);
+    reader = new shaka.msf.Reader(new Uint8Array([]), stream, codec);
 
     const bytes = await reader.read(3);
     expect(bytes).toEqual(new Uint8Array([1, 2, 3]));
@@ -46,7 +53,7 @@ filterDescribe('shaka.msf.Reader', isMSFSupported, () => {
       pending('ReadableStream is not supported by the platform.');
     }
     const stream = createTestStream([new Uint8Array([0x01, 0x00])]);
-    reader = new shaka.msf.Reader(new Uint8Array([]), stream);
+    reader = new shaka.msf.Reader(new Uint8Array([]), stream, codec);
 
     expect(await reader.u8()).toBe(1);
     expect(await reader.u8Bool()).toBe(false);
@@ -57,7 +64,7 @@ filterDescribe('shaka.msf.Reader', isMSFSupported, () => {
       pending('ReadableStream is not supported by the platform.');
     }
     const stream = createTestStream([new Uint8Array([0x02, 72, 105])]);
-    reader = new shaka.msf.Reader(new Uint8Array([]), stream);
+    reader = new shaka.msf.Reader(new Uint8Array([]), stream, codec);
 
     const str = await reader.string(10);
     expect(str).toBe('Hi');
@@ -68,7 +75,7 @@ filterDescribe('shaka.msf.Reader', isMSFSupported, () => {
       pending('ReadableStream is not supported by the platform.');
     }
     const stream = createTestStream([new Uint8Array([0x02, 65, 66])]);
-    reader = new shaka.msf.Reader(new Uint8Array([]), stream);
+    reader = new shaka.msf.Reader(new Uint8Array([]), stream, codec);
 
     // Use expectAsync instead of try/catch/fail
     await expectAsync(reader.string(1)).toBeRejectedWith(
@@ -84,7 +91,7 @@ filterDescribe('shaka.msf.Reader', isMSFSupported, () => {
     const stream = createTestStream([
       new Uint8Array([0x02, 0x01, 65, 0x01, 66]),
     ]);
-    reader = new shaka.msf.Reader(new Uint8Array([]), stream);
+    reader = new shaka.msf.Reader(new Uint8Array([]), stream, codec);
 
     const tuple = await reader.tuple();
     expect(tuple).toEqual(['A', 'B']);
@@ -95,7 +102,7 @@ filterDescribe('shaka.msf.Reader', isMSFSupported, () => {
       pending('ReadableStream is not supported by the platform.');
     }
     const stream = createTestStream([new Uint8Array([1, 2])]);
-    reader = new shaka.msf.Reader(new Uint8Array([]), stream);
+    reader = new shaka.msf.Reader(new Uint8Array([]), stream, codec);
 
     expect(await reader.done()).toBe(false);
     await reader.readAll();
@@ -107,25 +114,27 @@ filterDescribe('shaka.msf.Reader', isMSFSupported, () => {
       pending('ReadableStream is not supported by the platform.');
     }
     const stream = createTestStream([new Uint8Array([1])]);
-    reader = new shaka.msf.Reader(new Uint8Array([]), stream);
+    reader = new shaka.msf.Reader(new Uint8Array([]), stream, codec);
 
     expect(() => reader.release()).not.toThrow();
 
     await expectAsync(reader.close()).toBeResolved();
   });
 
-  it('should read keyValuePairs correctly', async () => {
+  it('should read deltaKeyValuePairs correctly', async () => {
     if (!isReadableStreamSupported()) {
       pending('ReadableStream is not supported by the platform.');
     }
+    // count 2; delta 2 -> type 2 (even) value 3; delta 1 -> type 3 (odd)
+    // length 1, byte 'A'.
     const bytes = new Uint8Array([0x02, 0x02, 0x03, 0x01, 0x01, 65]);
     reader = new shaka.msf.Reader(
-        new Uint8Array([]), createTestStream([bytes]));
+        new Uint8Array([]), createTestStream([bytes]), codec);
 
-    const pairs = await reader.keyValuePairs();
+    const pairs = await reader.deltaKeyValuePairs();
     expect(pairs.length).toBe(2);
     expect(pairs[0]).toEqual({type: BigInt(2), value: BigInt(3)});
-    expect(pairs[1].type).toBe(BigInt(1));
+    expect(pairs[1].type).toBe(BigInt(3));
     expect(shaka.util.StringUtils.fromUTF8(
         /** @type {!ArrayBufferView} */ (pairs[1].value),
     )).toBe('A');
@@ -197,6 +206,12 @@ filterDescribe('shaka.msf.Receiver', isMSFSupported, () => {
         const value = buffer[offset++];
         return {value, bytesRead: 1};
       },
+      u62: () => {
+        if (offset >= buffer.length) {
+          throw new Error('unexpected end of stream');
+        }
+        return BigInt(buffer[offset++]);
+      },
       u62WithSize: () => {
         if (offset >= buffer.length) {
           throw new Error('unexpected end of stream');
@@ -209,53 +224,94 @@ filterDescribe('shaka.msf.Receiver', isMSFSupported, () => {
         offset += length;
         return result;
       },
-      getByteLength: () => offset,
+      // The real Reader reports the number of bytes still buffered, which
+      // decreases as the message is consumed.
+      getByteLength: () => buffer.length - offset,
     };
   }
 
   it('should decode a server setup with no parameters', async () => {
     const SERVER_SETUP = shaka.msf.Utils.MessageTypeId.SERVER_SETUP;
 
-    // type = SERVER, length = 1, version = 1, param count = 0
+    // Draft-16 carries no version in-band: type, length, then parameters.
     const readerValues = [
-      SERVER_SETUP, // type
+      SERVER_SETUP,     // type
       0x00, 0x01,       // message length = 1 byte
-      0x01,             // version
-      0x00,              // param count = 0
+      0x00,             // param count = 0
     ];
 
     reader = createReader(readerValues);
-    receiver =
-        new shaka.msf.Receiver(reader, shaka.msf.Utils.Version.DRAFT_14);
+    receiver = new shaka.msf.Receiver(reader);
 
     const result = await receiver.server();
-    expect(result.version).toBe(1);
     expect(result.params).toBeUndefined();
   });
 
   it('should decode server setup with numeric parameter', async () => {
     const SERVER_SETUP = shaka.msf.Utils.MessageTypeId.SERVER_SETUP;
 
-    // type = SERVER, length = 3 bytes, version = 1
-    // param count = 1, param type = 2 (even), param value = 42
     const readerValues = [
-      SERVER_SETUP, // type
+      SERVER_SETUP,     // type
       0x00, 0x03,       // message length
-      0x01,             // version
       0x01,             // param count
-      0x02,             // param type
-      0x2A,              // param value
+      0x02,             // delta type = 2 -> type 2 (even)
+      0x2A,             // param value = 42
     ];
 
     reader = createReader(readerValues);
-    receiver =
-        new shaka.msf.Receiver(reader, shaka.msf.Utils.Version.DRAFT_14);
+    receiver = new shaka.msf.Receiver(reader);
 
     const result = await receiver.server();
-    expect(result.version).toBe(1);
     expect(result.params.length).toBe(1);
     expect(result.params[0].type).toBe(BigInt(2));
     expect(result.params[0].value).toBe(BigInt(42));
+  });
+
+  it('should accumulate delta-encoded parameter types', async () => {
+    const SERVER_SETUP = shaka.msf.Utils.MessageTypeId.SERVER_SETUP;
+
+    // Types are deltas from the previous type, so 0x02 then 0x06 decodes to
+    // types 2 and 8 -- not 2 and 6.
+    const readerValues = [
+      SERVER_SETUP,     // type
+      0x00, 0x05,       // message length
+      0x02,             // param count = 2
+      0x02,             // delta type = 2 -> type 2 (even)
+      0x2A,             // param value = 42
+      0x06,             // delta type = 6 -> type 8 (even)
+      0x07,             // param value = 7
+    ];
+
+    reader = createReader(readerValues);
+    receiver = new shaka.msf.Receiver(reader);
+
+    const result = await receiver.server();
+    expect(result.params.length).toBe(2);
+    expect(result.params[0].type).toBe(BigInt(2));
+    expect(result.params[0].value).toBe(BigInt(42));
+    expect(result.params[1].type).toBe(BigInt(8));
+    expect(result.params[1].value).toBe(BigInt(7));
+  });
+
+  it('should decode an odd (byte-valued) parameter', async () => {
+    const SERVER_SETUP = shaka.msf.Utils.MessageTypeId.SERVER_SETUP;
+
+    const readerValues = [
+      SERVER_SETUP,     // type
+      0x00, 0x05,       // message length
+      0x01,             // param count = 1
+      0x03,             // delta type = 3 -> type 3 (odd)
+      0x02,             // value length = 2
+      0xde, 0xad,       // value bytes
+    ];
+
+    reader = createReader(readerValues);
+    receiver = new shaka.msf.Receiver(reader);
+
+    const result = await receiver.server();
+    expect(result.params.length).toBe(1);
+    expect(result.params[0].type).toBe(BigInt(3));
+    expect(result.params[0].value).toEqual(new Uint8Array([0xde, 0xad]));
   });
 
   it('should throw error if server type is invalid', async () => {
@@ -264,8 +320,7 @@ filterDescribe('shaka.msf.Receiver', isMSFSupported, () => {
     ];
 
     reader = createReader(readerValues);
-    receiver =
-        new shaka.msf.Receiver(reader, shaka.msf.Utils.Version.DRAFT_14);
+    receiver = new shaka.msf.Receiver(reader);
 
     await expectAsync(receiver.server()).toBeRejectedWith(
         jasmine.objectContaining({
@@ -279,6 +334,13 @@ filterDescribe('shaka.msf.Sender', isMSFSupported, () => {
   let sender;
   /** @type {!Array<!Uint8Array>} */
   let writtenChunks;
+
+  /** @type {!shaka.msf.QuicVarIntCodec} */
+  let codec;
+
+  beforeEach(() => {
+    codec = new shaka.msf.QuicVarIntCodec();
+  });
 
   function createMockWritableStream() {
     writtenChunks = [];
@@ -295,10 +357,9 @@ filterDescribe('shaka.msf.Sender', isMSFSupported, () => {
     }
     const writable = createMockWritableStream();
     const writer = new shaka.msf.Writer(writable);
-    sender = new shaka.msf.Sender(writer, shaka.msf.Utils.Version.DRAFT_14);
+    sender = new shaka.msf.Sender(writer, codec);
 
     const clientSetup = {
-      versions: [1],
       params: [
         {
           type: BigInt(2),
@@ -313,7 +374,15 @@ filterDescribe('shaka.msf.Sender', isMSFSupported, () => {
 
     await sender.client(clientSetup);
 
-    expect(writtenChunks.length).toBeGreaterThan(0);
-    expect(writtenChunks.some((chunk) => chunk.length > 0)).toBe(true);
+    expect(writtenChunks.length).toBe(1);
+    // CLIENT_SETUP, 16-bit length, then delta-encoded params: no version is
+    // carried in-band.
+    expect(writtenChunks[0]).toEqual(new Uint8Array([
+      shaka.msf.Utils.MessageTypeId.CLIENT_SETUP,
+      0x00, 0x07, // message length
+      0x02, // param count = 2
+      0x02, 0x2a, // delta type 2 -> type 2 (even), value 42
+      0x01, 0x02, 0xde, 0xad, // delta type 1 -> type 3 (odd), len 2, value
+    ]));
   });
 });

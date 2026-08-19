@@ -60,41 +60,6 @@ describe('DataViewWriter', () => {
     expect(bytes.slice(4)).toEqual(new Uint8Array([97, 98, 99])); // 'abc'
   });
 
-  it('writes and retrieves varInt53 values', () => {
-    writer.writeVarInt53(0x3f); // 1-byte
-    writer.writeVarInt53(0x1234); // 2-byte
-    writer.writeVarInt53(0x12345678); // 4-byte
-    writer.writeVarInt53(Number.MAX_SAFE_INTEGER); // 8-byte
-    expect(writer.getPosition()).toBeGreaterThan(0);
-  });
-
-  describe('varInt62', () => {
-    it('writes small values with varInt62 using varInt53 path', () => {
-      if (!isBigIntSupported()) {
-        pending('BigInt is not supported by the platform.');
-      }
-      writer.writeVarInt62(BigInt(0x1234));
-      const bytes = writer.getBytes();
-      expect(bytes.length).toBe(2);
-    });
-
-    it('throws on negative values', () => {
-      if (!isBigIntSupported()) {
-        pending('BigInt is not supported by the platform.');
-      }
-      expect(() => writer.writeVarInt62(BigInt(-1))).toThrow();
-    });
-
-    it('writes varInt53 values via varInt62 path for numbers <= 53-bit', () => {
-      if (!isBigIntSupported()) {
-        pending('BigInt is not supported by the platform.');
-      }
-      const val = Number.MAX_SAFE_INTEGER;
-      writer.writeVarInt62(BigInt(val));
-      const bytes = writer.getBytes();
-      expect(bytes.length).toBe(8);
-    });
-  });
 
   it('resets position correctly', () => {
     writer.writeUint8(1);
