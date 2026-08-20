@@ -160,6 +160,15 @@ shaka.extern.AbrManager = class {
    * @exportDoc
    */
   configure(config) {}
+
+  /**
+   * Sets the streaming engine to know the buffer information
+   *
+   * @param {shaka.media.StreamingEngine} streamingEngine
+   * @exportDoc
+   */
+  setStreamingEngine(streamingEngine) {}
+  
 };
 
 
