@@ -789,20 +789,31 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.thumbnailTime_.textContent = time;
     }
 
+    const hasImageTracks = this.player.getImageTracks().length > 0;
+    const hasChapterThumbnails = chapter && chapter.images.length > 0;
+    const showImage = !isAdValue && (hasImageTracks || hasChapterThumbnails);
+
+    // The container reserves the width of a thumbnail, but when there is no
+    // image to show, only the time is visible, centered inside that much wider
+    // box.  Make the box hug the time in that case, so that the time itself,
+    // and not the empty space around it, is what gets centered on the pointer
+    // and clamped to the edges of the bar.
+    this.thumbnailImageContainer_.style.display = showImage ? '' : 'none';
+    this.thumbnailContainer_.classList.toggle('time-only', !showImage);
+
+    // Measure at a known offset: the width of the box hugging the time
+    // depends on the space left to the right of it, and the container is
+    // still positioned for the previous value at this point.
+    this.thumbnailContainer_.style.left = '0';
     const width = this.thumbnailContainer_.clientWidth;
     const leftPosition = Math.min(this.bar.offsetWidth - width,
         Math.max(0, pixelPosition - (width / 2)));
     this.thumbnailContainer_.style.left = leftPosition + 'px';
     this.thumbnailContainer_.style.visibility = 'visible';
 
-    const hasImageTracks = this.player.getImageTracks().length > 0;
-    const hasChapterThumbnails = chapter && chapter.images.length > 0;
-
-    if (isAdValue || !(hasImageTracks || hasChapterThumbnails)) {
-      this.thumbnailImageContainer_.style.display = 'none';
+    if (!showImage) {
       return;
     }
-    this.thumbnailImageContainer_.style.display = '';
 
     // Set the thumbnail height before getting the thumbnail because the
     // operation may take some time.
