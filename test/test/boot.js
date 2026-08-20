@@ -480,10 +480,49 @@ function checkPlayReadySupport() {
  * @return {boolean}
  */
 function checkWidevineSupport() {
+  // Edge cannot get a Widevine license where its content decryption module is
+  // the one it shipped with: the device certificate is revoked, and every
+  // license request comes back 400 with "status=ACCESS_DENIED,
+  // internal_status=DRM_DEVICE_CERTIFICATE_REVOKED".
+  //
+  // The browser version alone does not decide this, because the module updates
+  // on its own schedule.  Edge 151 works in our lab, where the machines persist
+  // and have taken a module update, and fails on GitHub's images, which are
+  // rebuilt from a base image each run and so keep the module Edge shipped
+  // with.  152 is the first version expected to ship a module that is accepted
+  // without an update.
+  if (deviceDetected.getDeviceName() === 'Edge') {
+    // The version is nullable, and an Edge we cannot identify is more likely
+    // to be an old one than a new one, so treat unknown as affected.
+    const version = deviceDetected.getVersion();
+    if (version === null || version < 152) {
+      return false;
+    }
+  }
   if (shakaSupport.drm['com.widevine.alpha']) {
     return true;
   }
   return false;
+}
+
+/**
+ * Check if a named key system is supported.
+ *
+ * Prefer this to reading shakaSupport.drm directly.  A key system can be
+ * present and still be unusable, as Widevine is on Edge with a revoked device
+ * certificate, and only the checks above know about those cases.
+ *
+ * @param {string} keySystem
+ * @return {boolean}
+ */
+function checkDrmSupport(keySystem) {
+  if (keySystem === 'com.widevine.alpha') {
+    return checkWidevineSupport();
+  }
+  if (keySystem === 'com.apple.fps') {
+    return checkFairPlaySupport();
+  }
+  return !!shakaSupport.drm[keySystem];
 }
 
 /**
