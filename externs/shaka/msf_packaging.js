@@ -126,7 +126,7 @@ shaka.extern.MsfSegmenter = class {
    * rather than media and are delivered here too, because for some packagings
    * they are the signal that a Group has ended.
    *
-   * @param {!shaka.msf.Utils.MOQObject} obj
+   * @param {!shaka.extern.MsfObject} obj
    * @return {!Array<!shaka.extern.MsfSegment>}
    * @exportDoc
    */
