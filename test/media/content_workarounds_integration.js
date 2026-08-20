@@ -105,7 +105,7 @@ describe('ContentWorkarounds', () => {
       });
   for (const [keySystem, drmConfig] of keySystemsConfigs) {
     drmIt(`plays mixed clear encrypted content with ${keySystem}`, async () => {
-      if (!shakaSupport.drm[keySystem]) {
+      if (!checkDrmSupport(keySystem)) {
         pending('Needed DRM is not supported on this platform');
       }
       if (deviceDetected.getDeviceName() === 'Tizen' &&
