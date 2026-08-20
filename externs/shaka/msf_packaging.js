@@ -67,11 +67,11 @@ shaka.extern.MsfPackaging = class {
  * How a track presents itself, as derived from the catalog.
  *
  * @typedef {{
- *   basicInfo: !shaka.media.SegmentUtils.BasicInfo,
+ *   basicInfo: !shaka.extern.BasicInfo,
  *   initSegmentReference: shaka.media.InitSegmentReference,
  * }}
  *
- * @property {!shaka.media.SegmentUtils.BasicInfo} basicInfo
+ * @property {!shaka.extern.BasicInfo} basicInfo
  *   The stream's media properties. Fields left null fall back to the
  *   corresponding catalog fields.
  * @property {shaka.media.InitSegmentReference} initSegmentReference
