@@ -1031,7 +1031,7 @@ describe('Player', () => {
       });
 
       player.configure('drm.servers', {
-        'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+        'com.widevine.alpha': 'https://proxy.uat.widevine.com/proxy',
       });
 
       await player.load('test:sintel-enc_compiled');
