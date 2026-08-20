@@ -7,7 +7,8 @@
 describe('DrmEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
-  // These come from Axinom.
+  // Sintel, packaged with Shaka Streamer against Widevine's test key server,
+  // carrying both Widevine and PlayReady headers.
   const videoInitSegmentUri = '/base/test/test/assets/multidrm-video-init.mp4';
   const videoSegmentUri = '/base/test/test/assets/multidrm-video-segment.mp4';
   const audioInitSegmentUri = '/base/test/test/assets/multidrm-audio-init.mp4';
@@ -86,10 +87,20 @@ describe('DrmEngine', () => {
 
     drmEngine = new shaka.drm.DrmEngine(playerInterface);
     const config = shaka.util.PlayerConfiguration.createDefault().drm;
+    // Widevine's own test proxy issues the keys, because the content was
+    // packaged against it.  Keys are derived from the content ID.  PlayReady
+    // cannot derive anything, so its test server is told the keys outright.
+    // Audio and video carry different keys, hence two pairs.
     config.servers['com.widevine.alpha'] =
-        'https://cwip-shaka-proxy.appspot.com/specific_key?QGCoZYh4Qmecv5GuW64ecg=/DU0CDcxDMD7U96X4ipp4A';
+        'https://proxy.uat.widevine.com/proxy';
+    // cspell:disable
     config.servers['com.microsoft.playready'] =
-        'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:4060a865-8878-4267-9cbf-91ae5bae1e72,contentkey:/DU0CDcxDMD7U96X4ipp4A==,sl:150)';
+        'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=' +
+        '(kid:26093af8-68d3-5e2c-ae9f-1cd3d59932f1,' +
+        'contentkey:EWhluYzoRWVfysDE4GLf3Q==,sl:150),' +
+        '(kid:763c2f1e-d21a-521b-a1f1-bc49e9d429ac,' +
+        'contentkey:k+agIcdficUArJbWp6EKlQ==,sl:150)';
+    // cspell:enable
     config.preferredKeySystems = [
       'com.widevine.alpha',
       'com.microsoft.playready',
@@ -264,9 +275,14 @@ describe('DrmEngine', () => {
       }
       // Configure DrmEngine for ClearKey playback.
       const config = shaka.util.PlayerConfiguration.createDefault().drm;
+      // The keys Widevine's test key server derived for this content, given
+      // the content id it was packaged with.  Audio and video carry different
+      // keys, so both are needed.
       config.clearKeys = {
-        // From https://github.com/Axinom/public-test-vectors/blob/master/README.md#v10
-        '4060a865887842679cbf91ae5bae1e72': 'fc35340837310cc0fb53de97e22a69e0',
+        // Video.
+        '26093af868d35e2cae9f1cd3d59932f1': '116865b98ce845655fcac0c4e062dfdd',
+        // Audio.
+        '763c2f1ed21a521ba1f1bc49e9d429ac': '93e6a021c75f89c500ac96d6a7a10a95',
       };
       drmEngine.configure(config);
 
