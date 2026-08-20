@@ -453,63 +453,96 @@ const sintelEncryptedAudio = {
 
 /** @type {!Object<string, string>} */
 const widevineDrmServers = {
-  'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+  'com.widevine.alpha': 'https://proxy.uat.widevine.com/proxy',
 };
 
-/** @type {string} */
-const axinomMultiDrmInitData = [
+/**
+ * The Widevine header names the content id, so one license request covers
+ * every key in the asset.  The PlayReady header names a key id instead, so
+ * audio and video need their own, since they are encrypted with different
+ * keys.
+ *
+ * @type {string}
+ */
+const multiDrmVideoInitData = [
   // cspell:disable
-  'AAAAXHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAADwSEEBgqGWIeEJnnL+RrluuHnISEE',
-  'BgqGWIeEJnnL+RrluuHnISEEBgqGWIeEJnnL+RrluuHnJI49yVmwYAAAImcHNzaAAAAACa',
-  'BPB5mEBChquS5lvgiF+VAAACBgYCAAABAAEA/AE8AFcAUgBNAEgARQBBAEQARQBSACAAeA',
-  'BtAGwAbgBzAD0AIgBoAHQAdABwADoALwAvAHMAYwBoAGUAbQBhAHMALgBtAGkAYwByAG8A',
-  'cwBvAGYAdAAuAGMAbwBtAC8ARABSAE0ALwAyADAAMAA3AC8AMAAzAC8AUABsAGEAeQBSAG',
-  'UAYQBkAHkASABlAGEAZABlAHIAIgAgAHYAZQByAHMAaQBvAG4APQAiADQALgAwAC4AMAAu',
-  'ADAAIgA+ADwARABBAFQAQQA+ADwAUABSAE8AVABFAEMAVABJAE4ARgBPAD4APABLAEUAWQ',
-  'BMAEUATgA+ADEANgA8AC8ASwBFAFkATABFAE4APgA8AEEATABHAEkARAA+AEEARQBTAEMA',
-  'VABSADwALwBBAEwARwBJAEQAPgA8AC8AUABSAE8AVABFAEMAVABJAE4ARgBPAD4APABLAE',
-  'kARAA+AFoAYQBoAGcAUQBIAGkASQBaADAASwBjAHYANQBHAHUAVwA2ADQAZQBjAGcAPQA9',
-  'ADwALwBLAEkARAA+ADwAQwBIAEUAQwBLAFMAVQBNAD4AeQB4AGwARwBsAGgAZgBEACsAYQ',
-  'BjAD0APAAvAEMASABFAEMASwBTAFUATQA+ADwALwBEAEEAVABBAD4APAAvAFcAUgBNAEgA',
-  'RQBBAEQARQBSAD4A',
+  'AAAAOHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABgiEILywr21A/XOuc3p0fnI0vBI49',
+  'yVmwYAAAImcHNzaAAAAACaBPB5mEBChquS5lvgiF+VAAACBgYCAAABAAEA/AE8AFcAUgBN',
+  'AEgARQBBAEQARQBSACAAeABtAGwAbgBzAD0AIgBoAHQAdABwADoALwAvAHMAYwBoAGUAbQ',
+  'BhAHMALgBtAGkAYwByAG8AcwBvAGYAdAAuAGMAbwBtAC8ARABSAE0ALwAyADAAMAA3AC8A',
+  'MAAzAC8AUABsAGEAeQBSAGUAYQBkAHkASABlAGEAZABlAHIAIgAgAHYAZQByAHMAaQBvAG',
+  '4APQAiADQALgAwAC4AMAAuADAAIgA+ADwARABBAFQAQQA+ADwAUABSAE8AVABFAEMAVABJ',
+  'AE4ARgBPAD4APABLAEUAWQBMAEUATgA+ADEANgA8AC8ASwBFAFkATABFAE4APgA8AEEATA',
+  'BHAEkARAA+AEEARQBTAEMAVABSADwALwBBAEwARwBJAEQAPgA8AC8AUABSAE8AVABFAEMA',
+  'VABJAE4ARgBPAD4APABLAEkARAA+ACsARABvAEoASgB0AE4AbwBMAEYANgB1AG4AeAB6AF',
+  'QAMQBaAGsAeQA4AFEAPQA9ADwALwBLAEkARAA+ADwAQwBIAEUAQwBLAFMAVQBNAD4ARgBM',
+  'AFMAbAA4AGgANQBRADAAMwAwAD0APAAvAEMASABFAEMASwBTAFUATQA+ADwALwBEAEEAVA',
+  'BBAD4APAAvAFcAUgBNAEgARQBBAEQARQBSAD4A',
+  // cspell:enable
+].join('');
+
+/** @type {string} */
+const multiDrmAudioInitData = [
+  // cspell:disable
+  'AAAAOHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABgiEILywr21A/XOuc3p0fnI0vBI49',
+  'yVmwYAAAImcHNzaAAAAACaBPB5mEBChquS5lvgiF+VAAACBgYCAAABAAEA/AE8AFcAUgBN',
+  'AEgARQBBAEQARQBSACAAeABtAGwAbgBzAD0AIgBoAHQAdABwADoALwAvAHMAYwBoAGUAbQ',
+  'BhAHMALgBtAGkAYwByAG8AcwBvAGYAdAAuAGMAbwBtAC8ARABSAE0ALwAyADAAMAA3AC8A',
+  'MAAzAC8AUABsAGEAeQBSAGUAYQBkAHkASABlAGEAZABlAHIAIgAgAHYAZQByAHMAaQBvAG',
+  '4APQAiADQALgAwAC4AMAAuADAAIgA+ADwARABBAFQAQQA+ADwAUABSAE8AVABFAEMAVABJ',
+  'AE4ARgBPAD4APABLAEUAWQBMAEUATgA+ADEANgA8AC8ASwBFAFkATABFAE4APgA8AEEATA',
+  'BHAEkARAA+AEEARQBTAEMAVABSADwALwBBAEwARwBJAEQAPgA8AC8AUABSAE8AVABFAEMA',
+  'VABJAE4ARgBPAD4APABLAEkARAA+AEgAaQA4ADgAZABoAHIAUwBHADEASwBoADgAYgB4AE',
+  'oANgBkAFEAcAByAEEAPQA9ADwALwBLAEkARAA+ADwAQwBIAEUAQwBLAFMAVQBNAD4AbAA3',
+  'AE8AMABGAHYAbgBUAEYAKwBBAD0APAAvAEMASABFAEMASwBTAFUATQA+ADwALwBEAEEAVA',
+  'BBAD4APAAvAFcAUgBNAEgARQBBAEQARQBSAD4A',
   // cspell:enable
 ].join('');
 
 /** @type {AVMetadataType} */
-const axinomMultiDrmVideoSegment = {
-  // Taken from Axinom's v10 test vectors.
+const multiDrmVideoSegment = {
+  // Sintel, packaged with Shaka Streamer against Widevine's test key server.
   initSegmentUri: '/base/test/test/assets/multidrm-video-init.mp4',
-  mdhdOffset: 0x191,
+  mdhdOffset: 0x19c,
   segmentUri: '/base/test/test/assets/multidrm-video-segment.mp4',
-  tfdtOffset: 0x88,
-  segmentDuration: 4,
+  tfdtOffset: 0x8c,
+  segmentDuration: 8,
   mimeType: 'video/mp4',
-  codecs: 'avc1.64001e',
-  initData: axinomMultiDrmInitData,
+  codecs: 'avc1.4d400c',
+  initData: multiDrmVideoInitData,
 };
 
 /** @type {AVMetadataType} */
-const axinomMultiDrmAudioSegment = {
-  // Taken from Axinom's v10 test vectors.
+const multiDrmAudioSegment = {
+  // Sintel, packaged with Shaka Streamer against Widevine's test key server.
   initSegmentUri: '/base/test/test/assets/multidrm-audio-init.mp4',
-  mdhdOffset: 0x18d,
+  mdhdOffset: 0x198,
   segmentUri: '/base/test/test/assets/multidrm-audio-segment.mp4',
-  tfdtOffset: 0x88,
-  segmentDuration: 4,
+  tfdtOffset: 0x8c,
+  segmentDuration: 8,
   mimeType: 'audio/mp4',
   codecs: 'mp4a.40.2',
-  initData: axinomMultiDrmInitData,
+  initData: multiDrmAudioInitData,
 };
 
-/** @type {!Object<string, string>} */
-const axinomDrmServers = {
-  // NOTE: These are not Axinom's actual servers.  These are test servers for
-  // Widevine and PlayReady that let us specify the known key IDs and keys for
-  // Axinom's v10 test vectors.
-  'com.widevine.alpha':
-      'https://cwip-shaka-proxy.appspot.com/specific_key?QGCoZYh4Qmecv5GuW64ecg=/DU0CDcxDMD7U96X4ipp4A',
+/**
+ * Widevine's own test proxy issues the keys, because the content was packaged
+ * against it.  Keys are derived from the content ID.  PlayReady cannot derive
+ * anything, so its test server is told the keys outright.  Audio and video
+ * carry different keys, hence two pairs.
+ *
+ * @type {!Object<string, string>}
+ */
+const multiDrmServers = {
+  'com.widevine.alpha': 'https://proxy.uat.widevine.com/proxy',
+  // cspell:disable
   'com.microsoft.playready':
-      'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:4060a865-8878-4267-9cbf-91ae5bae1e72,contentkey:/DU0CDcxDMD7U96X4ipp4A==,sl:150)',
+      'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=' +
+      '(kid:26093af8-68d3-5e2c-ae9f-1cd3d59932f1,' +
+      'contentkey:EWhluYzoRWVfysDE4GLf3Q==,sl:150),' +
+      '(kid:763c2f1e-d21a-521b-a1f1-bc49e9d429ac,' +
+      'contentkey:k+agIcdficUArJbWp6EKlQ==,sl:150)',
+  // cspell:enable
 };
 
 /** @type {TextMetadataType} */
@@ -639,21 +672,21 @@ shaka.test.TestScheme.DATA = {
   },
 
   'multidrm': {
-    video: axinomMultiDrmVideoSegment,
-    audio: axinomMultiDrmAudioSegment,
+    video: multiDrmVideoSegment,
+    audio: multiDrmAudioSegment,
     text: vttSegment,
-    licenseServers: axinomDrmServers,
+    licenseServers: multiDrmServers,
     duration: 30,
   },
 
   'multidrm_no_init_data': {
-    video: inherit(axinomMultiDrmVideoSegment, {
+    video: inherit(multiDrmVideoSegment, {
       initData: undefined,
     }),
-    audio: inherit(axinomMultiDrmAudioSegment, {
+    audio: inherit(multiDrmAudioSegment, {
       initData: undefined,
     }),
-    licenseServers: axinomDrmServers,
+    licenseServers: multiDrmServers,
     duration: 30,
   },
 

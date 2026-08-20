@@ -85,7 +85,7 @@ describe('ContentWorkarounds', () => {
   const keySystemsConfigs = new Map()
       .set('com.widevine.alpha', {
         servers: {
-          'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+          'com.widevine.alpha': 'https://proxy.uat.widevine.com/proxy',
         },
       })
       .set('com.microsoft.playready', {
