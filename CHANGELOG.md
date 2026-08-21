@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.2.7](https://github.com/shaka-project/shaka-player/compare/v5.2.6...v5.2.7) (2026-08-21)
+
+
+### Bug Fixes
+
+* **Ads:** Don't enable the skip button before the ad's own media loads ([#10447](https://github.com/shaka-project/shaka-player/issues/10447)) ([1314ef6](https://github.com/shaka-project/shaka-player/commit/1314ef66d6536dd1c8300e73eb7b0a0a73c5f8c1)), closes [#10418](https://github.com/shaka-project/shaka-player/issues/10418)
+* Avoid quadratic copying of prefetched segment data ([#10448](https://github.com/shaka-project/shaka-player/issues/10448)) ([8844a03](https://github.com/shaka-project/shaka-player/commit/8844a03009af93c2bbbbc0d13b94efd63f58a461)), closes [#10446](https://github.com/shaka-project/shaka-player/issues/10446)
+* **net:** Abort pending retry delays immediately ([#10443](https://github.com/shaka-project/shaka-player/issues/10443)) ([e7cd651](https://github.com/shaka-project/shaka-player/commit/e7cd651a9097d1d231f566a3d2b7b3f065792eb5)), closes [#10413](https://github.com/shaka-project/shaka-player/issues/10413)
+* Normalize Opus codec when multiplexed ([#10464](https://github.com/shaka-project/shaka-player/issues/10464)) ([7458fe9](https://github.com/shaka-project/shaka-player/commit/7458fe907cd1a6acaccc15d0f6eef72dc7fffadd))
+* **offline:** Close the database when another connection needs it ([#10435](https://github.com/shaka-project/shaka-player/issues/10435)) ([153551e](https://github.com/shaka-project/shaka-player/commit/153551e7e1ce38e308eaefc9d24d435d6eed8a34))
+* **offline:** Don't leak an IndexedDB connection ([#10434](https://github.com/shaka-project/shaka-player/issues/10434)) ([e551ac3](https://github.com/shaka-project/shaka-player/commit/e551ac31af746384d6368d5cf99db1d7325274d7))
+* **test:** Skip Widevine tests on Edge with a revoked device certificate ([#10449](https://github.com/shaka-project/shaka-player/issues/10449)) ([69cf789](https://github.com/shaka-project/shaka-player/commit/69cf789a9d9c532138c9e58c36ea428979e4c8f8)), closes [#10442](https://github.com/shaka-project/shaka-player/issues/10442)
+* **UI:** Center the seek bar time on the pointer when there are no thumbnails ([#10457](https://github.com/shaka-project/shaka-player/issues/10457)) ([4980ba2](https://github.com/shaka-project/shaka-player/commit/4980ba248c555366be05c263bddd07ddcf181018)), closes [#10452](https://github.com/shaka-project/shaka-player/issues/10452)
+* **UI:** isolate keyboard shortcuts and fullscreen detection per player instance ([#10436](https://github.com/shaka-project/shaka-player/issues/10436)) ([025be7e](https://github.com/shaka-project/shaka-player/commit/025be7ef6e2ebbf7d6b30b9b050d087fa75cb17b)), closes [#10429](https://github.com/shaka-project/shaka-player/issues/10429)
+* **UI:** Prevent playback rate menu jitter when dragging the slider ([#10458](https://github.com/shaka-project/shaka-player/issues/10458)) ([03710af](https://github.com/shaka-project/shaka-player/commit/03710afb4c4b1270734b37e48be8e34e5be51ccd))
+* **UI:** Preview time/thumbnails when seeking with keys ([#10465](https://github.com/shaka-project/shaka-player/issues/10465)) ([478a6f5](https://github.com/shaka-project/shaka-player/commit/478a6f5d50b3c680c7157ad3683fac020a787260))
+
 ## [5.2.6](https://github.com/shaka-project/shaka-player/compare/v5.2.5...v5.2.6) (2026-08-15)
 
 
